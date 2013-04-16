@@ -39,8 +39,9 @@ namespace strus
 struct PositionIterator
 	:public PositionChunk
 {
+	PositionIterator(){}
 	virtual ~PositionIterator(){}
-	virtual bool fetch()=0;
+	virtual bool fetch(){return false;}
 
 	Position get() const
 	{

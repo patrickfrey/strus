@@ -43,10 +43,18 @@ bool UnionPositionIterator::fetch()
 
 void UnionPositionIterator::getNextChunk()
 {
-	Position p1 = m_term1->get();
-	Position p2 = m_term2->get();
-	if (p1 == 0 && !m_term1->m_eof) { m_term1->fetch(); p1 = m_term1->get();}
-	if (p2 == 0 && !m_term2->m_eof) { m_term2->fetch(); p2 = m_term2->get();}
+	Position p1 = 0;
+	Position p2 = 0;
+	if (m_term1)
+	{
+		p1 = m_term1->get();
+		if (p1 == 0 && !m_term1->m_eof) { m_term1->fetch(); p1 = m_term1->get();}
+	}
+	if (m_term2)
+	{
+		p2 = m_term2->get();
+		if (p2 == 0 && !m_term2->m_eof) { m_term2->fetch(); p2 = m_term2->get();}
+	}
 
 	while (m_posarsize < m_memblocksize)
 	{
@@ -69,7 +77,7 @@ void UnionPositionIterator::getNextChunk()
 			p2 = m_term2->get();
 		}
 	}
-	if (!m_term1->get())
+	if (m_term2 && (!m_term1 || !m_term1->get()))
 	{
 		while (m_posarsize < m_memblocksize)
 		{
@@ -79,7 +87,7 @@ void UnionPositionIterator::getNextChunk()
 			m_term2->next();
 		}
 	}
-	if (!m_term2->get())
+	if (m_term1 && (!m_term2 || !m_term2->get()))
 	{
 		while (m_posarsize < m_memblocksize)
 		{
@@ -115,12 +123,13 @@ bool IntersectionCutPositionIterator::fetch()
 
 void IntersectionCutPositionIterator::getNextChunk()
 {
+	if (!m_ths || !m_oth) return;
 	Position tp = m_ths->get();
 	Position op = m_oth->get();
-	Position np = m_cut->get();
+	Position np = m_cut?m_cut->get():0;
 	if (tp == 0 && !m_ths->m_eof) { m_ths->fetch(); tp = m_ths->get();}
 	if (op == 0 && !m_oth->m_eof) { m_oth->fetch(); op = m_oth->get();}
-	if (np == 0 && !m_cut->m_eof) { m_cut->fetch(); np = m_cut->get();}
+	if (np == 0 && m_cut && !m_cut->m_eof) { m_cut->fetch(); np = m_cut->get();}
 
 	if (m_range >= 0)
 	{
@@ -134,7 +143,6 @@ void IntersectionCutPositionIterator::getNextChunk()
 			}
 			if (op <= tp + m_rangestart + m_range)
 			{
-				np = m_cut->get();
 				while (np != 0 && np < tp + m_rangestart)
 				{
 					m_cut->next();
@@ -162,7 +170,6 @@ void IntersectionCutPositionIterator::getNextChunk()
 			}
 			if (op <= tp + m_rangestart)
 			{
-				np = m_cut->get();
 				while (np != 0 && np < tp + m_rangestart + m_range)
 				{
 					m_cut->next();

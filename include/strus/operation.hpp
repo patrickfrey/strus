@@ -47,18 +47,21 @@ public:
 		int ff;
 		int dtf;
 	};
+
 	struct ResultChunk
 	{
 		enum {Size=4096};
-		Match match[ Size];
 		int matchsize;
 		int matchpos;
+		Match match[ Size];
 	};
 
 	class Result
 	{
 	public:
-		Result( Program* program_);
+		Result( Storage* storage_, Program* program_);
+		PositionIterator* getOperand( int idx) const;
+
 		class iterator
 		{
 		public:
@@ -71,20 +74,25 @@ public:
 			ResultChunk m_chunk;
 		};
 	private:
+		Storage* m_storage;
 		Program* m_program;
-		boost::shared_ptr<PositionIterator> m_itr;
+		typedef boost::shared_ptr<PositionIterator> Operand;
+		typedef std::vector<Operand> OperandArray;
+		OperandArray m_operandar;
+		ResultChunk m_resultChunk;
 	};
 
 	struct Command
 	{
-		enum Type {Union,IntersectCut,Fetch};
+		enum Type {StorageFetch,Union,IntersectCut,SetRange};
 		Type m_type;
-		int m_operand[3];
+		int m_operandref[3];
 	};
 
 	void execute( Storage* storage);
 
 private:
+	friend class Program::Result;
 	std::string m_strings;
 	std::vector<Command> m_cmdlist;
 };
