@@ -28,9 +28,10 @@
 */
 #ifndef _STRUS_STORAGE_HPP_INCLUDED
 #define _STRUS_STORAGE_HPP_INCLUDED
-#include "position.hpp"
+#include "strus/position.hpp"
 #include <string>
 #include <map>
+#include <vector>
 #include <stdexcept>
 
 namespace strus
@@ -41,7 +42,7 @@ struct PositionChunk
 	struct StorageHandle;
 	StorageHandle* m_handle;
 
-	const Position* m_posar;
+	Position* m_posar;
 	unsigned int m_posarsize;
 	unsigned int m_posidx;
 	bool m_eof;
@@ -55,15 +56,15 @@ struct PositionChunk
 class Storage
 {
 public:
-	typedef std::map<std::string, boost::vector<DocPosition> > TermPosMap=0;
+	typedef std::map<std::string, std::vector<DocPosition> > TermPosMap;
 
-	virtual DocNum storeDocument( const std::string& docid, const TermPosMap& doc)=0;
+	virtual DocNumber storeDocument( const std::string& docid, const TermPosMap& doc)=0;
 
-	virtual std::string getDocumentId( const DocNum& docnum)=0;
-	virtual DocNum getDocumentNumber( const std::string& docid)=0;
-	virtual TermNum getTermNumber( const std::string& type, const std::string& value)=0;
+	virtual std::string getDocumentId( const DocNumber& docnum)=0;
+	virtual DocNumber getDocumentNumber( const std::string& docid)=0;
+	virtual TermNumber getTermNumber( const std::string& type, const std::string& value)=0;
 
-	virtual bool openIterator( PositionChunk& itr, const TermNum& termnum)=0;
+	virtual bool openIterator( PositionChunk& itr, const TermNumber& termnum)=0;
 	virtual bool nextIterator( PositionChunk& itr)=0;
 	virtual void closeIterator( PositionChunk& itr)=0;
 };

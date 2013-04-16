@@ -28,6 +28,7 @@
 */
 #ifndef _STRUS_STORAGE_ITERATOR_HPP_INCLUDED
 #define _STRUS_STORAGE_ITERATOR_HPP_INCLUDED
+#include "position.hpp"
 #include "storage.hpp"
 #include <string>
 #include <map>
@@ -39,7 +40,7 @@ struct PositionIterator
 	:public PositionChunk
 {
 	virtual ~PositionIterator(){}
-	virtual void fetch()=0;
+	virtual bool fetch()=0;
 
 	Position get() const
 	{
@@ -65,26 +66,25 @@ class StoragePositionIterator
 	:public PositionIterator
 {
 public:
-	StoragePositionIterator( Storage* storage_, const TermNum& termnum_);
+	StoragePositionIterator( Storage* storage_, const TermNumber& termnum_);
 
 	virtual ~StoragePositionIterator();
-	virtual void fetch();
+	virtual bool fetch();
 
 private:
 	Storage* m_storage;
-	DocNum m_docnum;
-	TermNum m_termnum;
+	TermNumber m_termnum;
 };
 
 
-class UnionPositionterator
+class UnionPositionIterator
 	:public PositionIterator
 {
 public:
 	UnionPositionIterator( PositionIterator* term1_, PositionIterator* term2_);
 
 	virtual ~UnionPositionIterator();
-	virtual void fetch();
+	virtual bool fetch();
 
 private:
 	void getNextChunk();
@@ -95,14 +95,15 @@ private:
 	std::size_t m_memblocksize;
 };
 
+
 class IntersectionCutPositionIterator
-	:public TermPosIterator
+	:public PositionIterator
 {
 public:
-	IntersectionCutPositionIterator( PositionIterator* ths, PositionIterator* oth, int range_, int rangestart_, PositionIterator* neg);
+	IntersectionCutPositionIterator( PositionIterator* ths_, PositionIterator* oth_, int rangestart_, int range_, PositionIterator* cut_);
 
 	virtual ~IntersectionCutPositionIterator();
-	virtual void fetch();
+	virtual bool fetch();
 
 private:
 	void getNextChunk();
@@ -111,8 +112,8 @@ private:
 	PositionIterator* m_ths;
 	PositionIterator* m_oth;
 	PositionIterator* m_cut;
-	int m_range;
 	int m_rangestart;
+	int m_range;
 	std::size_t m_memblocksize;
 };
 

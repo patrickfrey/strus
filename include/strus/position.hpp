@@ -52,6 +52,8 @@ namespace strus {
 	///\brief Index term number type
 	typedef int64_t Index;
 }//namespace
+#endif
+#endif
 
 namespace strus {
 
@@ -66,7 +68,7 @@ struct Encode
 {
 	static DocPosition getDocPosition( Position pos)
 	{
-		return pos & 0xFFFFffULL;
+		return pos & 0xFFFFffU;
 	}
 	static DocNumber getDocNumber( Position pos)
 	{
@@ -79,6 +81,5 @@ struct Encode
 };
 
 }//namespace
-#endif
 #endif
 

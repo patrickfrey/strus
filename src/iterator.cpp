@@ -1,22 +1,22 @@
-#include "iterator.hpp"
+#include "strus/iterator.hpp"
 #include <cstdlib>
 
 using namespace strus;
 
-StoragePositionIterator::StoragePositionIterator( Storage* storage_, const DocNum& docnum_, const TermNum& termnum_)
-	:m_storage(storage_),m_docnum(docnum_),m_termnum(termnum_)
+StoragePositionIterator::StoragePositionIterator( Storage* storage_, const TermNumber& termnum_)
+	:m_storage(storage_),m_termnum(termnum_)
 {
-	m_storage->openIterator( this, m_docnum, m_termnum);
+	m_storage->openIterator( *this, m_termnum);
 }
 
 StoragePositionIterator::~StoragePositionIterator()
 {
-	m_storage->closeIterator( this);
+	m_storage->closeIterator( *this);
 }
 
 bool StoragePositionIterator::fetch()
 {
-	return m_storage->nextIterator( this);
+	return m_storage->nextIterator( *this);
 }
 
 
@@ -92,8 +92,8 @@ void UnionPositionIterator::getNextChunk()
 }
 
 
-IntersectionCutPositionIterator::IntersectionCutPositionIterator( PositionIterator* ths, PositionIterator* oth, int range, PositionIterator* neg)
-	:m_ths(ths_),m_oth(oth_),m_range(range_),m_rangestart(rangestart_),m_neg(neg_),m_memblocksize(m_ths->m_posarsize+1)
+IntersectionCutPositionIterator::IntersectionCutPositionIterator( PositionIterator* ths_, PositionIterator* oth_, int rangestart_, int range_, PositionIterator* cut_)
+	:m_ths(ths_),m_oth(oth_),m_cut(cut_),m_rangestart(rangestart_),m_range(range_),m_memblocksize(m_ths->m_posarsize+1)
 {
 	m_posar = (Position*)std::calloc( m_memblocksize, sizeof(*m_posar));
 	if (!m_posar) throw std::bad_alloc();
@@ -117,28 +117,28 @@ void IntersectionCutPositionIterator::getNextChunk()
 {
 	Position tp = m_ths->get();
 	Position op = m_oth->get();
-	Position np = m_neg->get();
+	Position np = m_cut->get();
 	if (tp == 0 && !m_ths->m_eof) { m_ths->fetch(); tp = m_ths->get();}
 	if (op == 0 && !m_oth->m_eof) { m_oth->fetch(); op = m_oth->get();}
-	if (np == 0 && !m_neg->m_eof) { m_neg->fetch(); np = m_neg->get();}
+	if (np == 0 && !m_cut->m_eof) { m_cut->fetch(); np = m_cut->get();}
 
 	if (m_range >= 0)
 	{
 		while (m_posarsize < m_memblocksize)
 		{
-			if (op < tp + rangestart)
+			if (op < tp + m_rangestart)
 			{
 				m_oth->next();
 				op = m_oth->get();
 				continue;
 			}
-			if (op <= tp + rangestart + range)
+			if (op <= tp + m_rangestart + m_range)
 			{
-				np = m_neg->get();
-				while (np != 0 && np < tp + rangestart)
+				np = m_cut->get();
+				while (np != 0 && np < tp + m_rangestart)
 				{
-					m_neg->next();
-					np = m_neg->get();
+					m_cut->next();
+					np = m_cut->get();
 				}
 				if (np == 0 || np > op)
 				{
@@ -154,21 +154,21 @@ void IntersectionCutPositionIterator::getNextChunk()
 	{
 		while (m_posarsize < m_memblocksize)
 		{
-			if (op < tp + rangestart + range)
+			if (op < tp + m_rangestart + m_range)
 			{
 				m_oth->next();
 				op = m_oth->get();
 				continue;
 			}
-			if (op <= tp + rangestart)
+			if (op <= tp + m_rangestart)
 			{
-				np = m_neg->get();
-				while (np != 0 && np < tp + rangestart + range)
+				np = m_cut->get();
+				while (np != 0 && np < tp + m_rangestart + m_range)
 				{
-					m_neg->next();
-					np = m_neg->get();
+					m_cut->next();
+					np = m_cut->get();
 				}
-				if (np == 0 || np > tp + rangestart)
+				if (np == 0 || np > tp + m_rangestart)
 				{
 					m_posar[ m_posarsize++] = tp;
 				}
@@ -179,4 +179,6 @@ void IntersectionCutPositionIterator::getNextChunk()
 		m_eof = (op == 0 || tp == 0);
 	}
 }
+
+
 
