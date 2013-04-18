@@ -45,56 +45,52 @@ public:
 	{
 		DocNumber docnum;
 		int ff;
-		int dtf;
-	};
-
-	struct ResultChunk
-	{
-		enum {Size=4096};
-		int matchsize;
-		int matchpos;
-		Match match[ Size];
 	};
 
 	class Result
 	{
 	public:
 		Result( Storage* storage_, Program* program_);
+
+		bool getNext( Match& match);
+
+	private:
 		PositionIterator* getOperand( int idx) const;
 
-		class iterator
-		{
-		public:
-			const Match& operator*() const;
-			iterator& operator++()		{skip(); return *this;}
-
-		private:
-			iterator operator++(int)	{throw std::logic_error("postfix increment not implemented");}
-			void skip();
-			ResultChunk m_chunk;
-		};
 	private:
 		Storage* m_storage;
 		Program* m_program;
 		typedef boost::shared_ptr<PositionIterator> Operand;
 		typedef std::vector<Operand> OperandArray;
 		OperandArray m_operandar;
-		ResultChunk m_resultChunk;
 	};
 
+	void FETCH( const std::string& type, const std::string& value);
+	void UNION( int select1_, int select2_);
+	void INTERSECT( int select_, int joincond_);
+	void JOINCUT( int select_, int joincond_, int cutcond);
+	void RANGE( int rangestart_, int range_);
+
+	const char* check() const;
+
+private:
 	struct Command
 	{
 		enum Type {StorageFetch,Union,IntersectCut,SetRange};
 		Type m_type;
 		int m_operandref[3];
-	};
 
-	void execute( Storage* storage);
+		Command( const Command& o);
+		Command( Type type_, int op1=0, int op2=0, int op3=0);
+	};
+	void refarg( int arg) const;
 
 private:
 	friend class Program::Result;
-	std::string m_strings;
+	std::vector<std::string> m_strings;
 	std::vector<Command> m_cmdlist;
+	std::vector<bool> m_refargset;
+	std::size_t m_nofrefarg;
 };
 
 }//namespace

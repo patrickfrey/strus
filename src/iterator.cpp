@@ -48,12 +48,12 @@ void UnionPositionIterator::getNextChunk()
 	if (m_term1)
 	{
 		p1 = m_term1->get();
-		if (p1 == 0 && !m_term1->m_eof) { m_term1->fetch(); p1 = m_term1->get();}
+		if (p1 == 0 && !m_term1->eof()) { m_term1->fetch(); p1 = m_term1->get();}
 	}
 	if (m_term2)
 	{
 		p2 = m_term2->get();
-		if (p2 == 0 && !m_term2->m_eof) { m_term2->fetch(); p2 = m_term2->get();}
+		if (p2 == 0 && !m_term2->eof()) { m_term2->fetch(); p2 = m_term2->get();}
 	}
 
 	while (m_posarsize < m_memblocksize)
@@ -127,9 +127,9 @@ void IntersectionCutPositionIterator::getNextChunk()
 	Position tp = m_ths->get();
 	Position op = m_oth->get();
 	Position np = m_cut?m_cut->get():0;
-	if (tp == 0 && !m_ths->m_eof) { m_ths->fetch(); tp = m_ths->get();}
-	if (op == 0 && !m_oth->m_eof) { m_oth->fetch(); op = m_oth->get();}
-	if (np == 0 && m_cut && !m_cut->m_eof) { m_cut->fetch(); np = m_cut->get();}
+	if (tp == 0 && !m_ths->eof()) { m_ths->fetch(); tp = m_ths->get();}
+	if (op == 0 && !m_oth->eof()) { m_oth->fetch(); op = m_oth->get();}
+	if (np == 0 && m_cut && !m_cut->eof()) { m_cut->fetch(); np = m_cut->get();}
 
 	if (m_range >= 0)
 	{

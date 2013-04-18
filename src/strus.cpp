@@ -1,6 +1,6 @@
 #include "strus/storage.hpp"
 #include "strus/iterator.hpp"
-#include "strus/operation.hpp"
+#include "strus/program.hpp"
 #include <iostream>
 
 int main( int argc, const char* argv[])

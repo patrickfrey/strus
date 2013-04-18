@@ -37,18 +37,25 @@
 namespace strus
 {
 
-struct PositionChunk
+class Storage;
+
+class PositionChunk
 {
+public:
+	PositionChunk()
+		:m_handle(0),m_posar(0),m_posarsize(0),m_posidx(0),m_eof(true){}
+	bool eof() const	{return m_eof;}
+
+private:
+	friend class Storage;
 	struct StorageHandle;
 	StorageHandle* m_handle;
 
+public:
 	Position* m_posar;
 	unsigned int m_posarsize;
 	unsigned int m_posidx;
 	bool m_eof;
-
-	PositionChunk()
-		:m_handle(0),m_posar(0),m_posarsize(0),m_posidx(0),m_eof(true){}
 };
 
 ///\class Storage
@@ -56,11 +63,39 @@ struct PositionChunk
 class Storage
 {
 public:
-	typedef std::map<std::string, std::vector<DocPosition> > TermPosMap;
+	class Document
+	{
+	public:
+		struct Term
+		{
+			TermNumber number;
+			DocPosition position;
 
-	virtual DocNumber storeDocument( const std::string& docid, const TermPosMap& doc)=0;
+			Term( const Term& o)
+				:number(o.number),position(o.position){}
+			Term( const TermNumber& number_, const DocPosition& position_)
+				:number(number_),position(position_){}
+		};
+
+		explicit Document( const std::string& docid_)
+			:m_docid(docid_){}
+		Document( const std::string& docid_, const std::vector<Term>& termar_)
+			:m_docid(docid_),m_termar(termar_){}
+		Document( const Document& o)
+			:m_docid(o.m_docid){}
+
+		const std::vector<Term>& terms() const	{return m_termar;}
+		const std::string& docid() const	{return m_docid;}
+
+	private:
+		std::string m_docid;
+		std::vector<Term> m_termar;
+	};
+
+	virtual DocNumber storeDocument( const Document& doc)=0;
 
 	virtual std::string getDocumentId( const DocNumber& docnum)=0;
+	virtual std::size_t getDocumentSize( const DocNumber& docnum)=0;
 	virtual DocNumber getDocumentNumber( const std::string& docid)=0;
 	virtual TermNumber getTermNumber( const std::string& type, const std::string& value)=0;
 

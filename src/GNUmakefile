@@ -1,7 +1,6 @@
 TOPDIR=..
 CPP_OBJS=\
 	iterator.o \
-	storage.o \
 	operation.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include
@@ -16,6 +15,12 @@ strus: strus.o $(CPP_OBJS)
 	g++ -o $@ $(CPP_OBJS) $< $(LDFLAGS) $(LIBS)
 
 all: strus
+
+.PHONY: clean
+clean:
+	rm -f ${CPP_OBJS}
+	rm -f strus.o
+	rm -f strus
 
 
 
