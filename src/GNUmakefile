@@ -6,7 +6,7 @@ CPP_OBJS=\
 CPP_INCLUDE=-I$(TOPDIR)/include
 CXXFLAGS=-Werror -Wall -pedantic -std=c++98
 LDFLAGS=-L/usr/local/lib
-LIBS=-lkyotocabinet
+LIBS=
 
 %.o : %.cpp GNUmakefile
 	g++ -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $<

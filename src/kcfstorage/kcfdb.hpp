@@ -26,36 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_STORAGE_HPP_INCLUDED
-#define _STRUS_KCF_STORAGE_HPP_INCLUDED
+#ifndef _STRUS_KCF_STORAGE_DB_HPP_INCLUDED
+#define _STRUS_KCF_STORAGE_DB_HPP_INCLUDED
 #include "strus/storage.hpp"
-#include "kcfdb.hpp"
+#include "strus/position.hpp"
 
 namespace strus
 {
 
-///\class StorageImpl
-///\brief Implementation for the storage of IR terms with their occurrencies with kytocabinet and files for the blocks
-class StorageImpl
-	:public Storage
+///\class StorageDB
+///\brief Implementation of the storage database
+class StorageDB
 {
 public:
-	virtual DocNumber storeDocument( const Document& doc);
+	StorageDB( const std::string& name, const std::string& path);
+	explicit StorageDB( const std::string& name);
+	~StorageDB();
 
-	virtual std::string getDocumentId( const DocNumber& docnum);
-	virtual std::size_t getDocumentSize( const DocNumber& docnum);
-	virtual DocNumber getDocumentNumber( const std::string& docid);
-	virtual TermNumber getTermNumber( const std::string& type, const std::string& value);
+	void begin();
+	bool commit();
+	void rollback();
+	std::string lastError();
+	int lastErrno();
 
-	virtual bool openIterator( PositionChunk& itr, const TermNumber& termnum);
-	virtual bool nextIterator( PositionChunk& itr);
-	virtual void closeIterator( PositionChunk& itr);
+	static void create( const std::string& name, const std::string& path);
+	static void create( const std::string& name);
+
+	TermNumber findTermNumber( const std::string& type, const std::string& value) const;
+	DocNumber findDocumentNumber( const std::string& docid) const;
+
+	TermNumber insertTermNumber( const std::string& type, const std::string& value);
+	DocNumber insertDocumentNumber( const std::string& docid);
+
 private:
-	StorageDB m_db;
+	TermNumber findTermNumber( const std::string& key) const;
+	std::string getTermKey( const std::string& type, const std::string& value) const;
+
+private:
+	void clearTransaction();
+
+private:
+	enum {KCF_ERRORBASE=0x100000, SYS_ERRORBASE=0x000000};
+
+	struct Transaction
+	{
+		DocNumber docCounter;
+		std::map<std::string, DocNumber> docmap;
+		std::string errormsg;
+		int errorno;
+
+		Transaction()
+			:docCounter(0){}
+	};
+	Transaction m_transaction;
+
+	struct Impl;
+	Impl* m_impl;
 };
 
 } //namespace
 #endif
-
 
 

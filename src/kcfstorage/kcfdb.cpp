@@ -60,6 +60,14 @@ struct StorageDB::Impl
 	StorageVariables variables;
 };
 
+void StorageDB::clearTransaction()
+{
+	m_transaction.docmap.clear();
+	m_transaction.docCounter = m_impl->variables.docCounter;
+	m_transaction.errormsg.clear();
+	m_transaction.errorno = 0;
+}
+
 struct Block
 {
 	void* ar;
@@ -319,7 +327,7 @@ TermNumber StorageDB::findTermNumber( const std::string& type, const std::string
 	return findTermNumber( getTermKey( type, value));
 }
 
-DocNumber StorageDB::findDocNumber( const std::string& docid) const
+DocNumber StorageDB::findDocumentNumber( const std::string& docid) const
 {
 	std::size_t ptrsize = 0;
 	char* ptr = m_impl->dociddb.get( docid.c_str(), docid.size(), &ptrsize);
@@ -333,7 +341,7 @@ DocNumber StorageDB::findDocNumber( const std::string& docid) const
 	return rt;
 }
 
-TermNumber StorageDB::getTermNumber( const std::string& type, const std::string& value)
+TermNumber StorageDB::insertTermNumber( const std::string& type, const std::string& value)
 {
 	std::string key( getTermKey( type, value));
 	TermNumber rt = findTermNumber( key);
@@ -347,16 +355,46 @@ TermNumber StorageDB::getTermNumber( const std::string& type, const std::string&
 	return rt;
 }
 
-DocNumber StorageDB::getDocNumber( const std::string& docid)
+DocNumber StorageDB::insertDocumentNumber( const std::string& docid)
 {
-	DocNumber rt = findDocNumber( docid);
-	if (rt) return rt;
-	rt = ++m_impl->variables.docCounter;
-	if (!m_impl->dociddb.set( docid.c_str(), docid.size(), (char*)&rt, sizeof(rt)))
-	{
-		throw std::runtime_error( std::string("failed to create document id for '") + docid + "'");
-	}
+	DocNumber rt = ++m_transaction.docCounter;
+	m_transaction.docmap[ docid] = rt;
 	return rt;
 }
 
+void StorageDB::begin()
+{
+	clearTransaction();
+}
+
+bool StorageDB::commit()
+{
+	std::map<std::string, DocNumber>::const_iterator di = m_transaction.docmap.begin(), de = m_transaction.docmap.end();
+	for (; di != de; ++di)
+	{
+		if (!m_impl->dociddb.set( di->first.c_str(), di->first.size(), (char*)&di->second, sizeof(di->second)))
+		{
+			kyotocabinet::BasicDB::Error kcferr = m_impl->dociddb.error();
+			m_transaction.errormsg = std::string("failed to create document id for '") + di->first + "' (" + kcferr.message() + ")";
+			m_transaction.errorno = KCF_ERRORBASE + (int)kcferr.code();
+			return false;
+		}
+	}
+	return true;
+}
+
+void StorageDB::rollback()
+{
+	clearTransaction();
+}
+
+std::string StorageDB::lastError()
+{
+	return m_transaction.errormsg;
+}
+
+int StorageDB::lastErrno()
+{
+	return m_transaction.errorno;
+}
 
