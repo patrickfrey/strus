@@ -14,7 +14,7 @@ LIBS=-lkyotocabinet
 	g++ -c -o $@ $(SO_COMPILE_FLAGS) -DSHARED $(CXXFLAGS) $(CPP_INCLUDE) $(PATHFLAGS) $<
 
 kcfstorage.so: $(CPP_OBJS)
-	g++ -shared -o $@ $(LDFLAGS) $(LIBS) $(CPP_OBJS) $<
+	g++ -shared -o $@ $(LDFLAGS) $(LIBS) $<
 
 all: kcfstorage.so
 
