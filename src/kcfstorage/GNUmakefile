@@ -1,6 +1,9 @@
 TOPDIR=../..
 CPP_OBJS=\
-	kcfdb.o \
+	file.o \
+	blktable.o \
+	keytable.o \
+	database.o \
 	kcfstorage.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I.

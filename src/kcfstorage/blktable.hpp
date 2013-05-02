@@ -26,36 +26,62 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_STORAGE_HPP_INCLUDED
-#define _STRUS_KCF_STORAGE_HPP_INCLUDED
-#include "strus/storage.hpp"
-#include "kcfdb.hpp"
+#ifndef _STRUS_KCF_BLOCK_STORAGE_HPP_INCLUDED
+#define _STRUS_KCF_BLOCK_STORAGE_HPP_INCLUDED
+#include "strus/position.hpp"
+#include <cstdio>
+#include <string>
 
 namespace strus
 {
 
-///\class StorageImpl
-///\brief Implementation for the storage of IR terms with their occurrencies with kytocabinet and files for the blocks
-class StorageImpl
-	:public Storage
+///\class BlockStorage
+///\brief Implementation of a block map in a file
+class BlockStorage
 {
 public:
-	virtual DocNumber storeDocument( const Document& doc);
+	BlockStorage( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_=false);
+	~BlockStorage();
 
-	virtual std::string getDocumentId( const DocNumber& docnum);
-	virtual std::size_t getDocumentSize( const DocNumber& docnum);
-	virtual DocNumber getDocumentNumber( const std::string& docid);
-	virtual TermNumber getTermNumber( const std::string& type, const std::string& value);
+	static void create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_);
+	bool open();
+	void close();
+	bool reset();
 
-	virtual bool openIterator( PositionChunk& itr, const TermNumber& termnum);
-	virtual bool nextIterator( PositionChunk& itr);
-	virtual void closeIterator( PositionChunk& itr);
+	const std::string& lastError() const;
+	int lastErrno() const;
+
+	bool readBlock( Index idx, void* buf);
+	bool writeBlock( Index idx, const void* buf);
+	Index insertBlock( const void* buf);
+
+	Index lastindex() const
+	{
+		return m_lastindex;
+	}
+
 private:
-	StorageDB m_db;
+	struct ControlBlock
+	{
+		Index freelist;
+	};
+
+	bool readControlBlock( Index idx, ControlBlock& block);
+	bool writeControlBlock( Index idx, const ControlBlock& block);
+	Index appendBlock( const void* buf);
+
+private:
+	ControlBlock m_controlblock;
+	bool m_writemode;
+	std::size_t m_blocksize;
+	Index m_lastindex;
+	std::string m_filename;
+	FILE* m_filehandle;
+	std::string m_lasterror;
+	int m_lasterrno;
 };
 
 } //namespace
 #endif
-
 
 

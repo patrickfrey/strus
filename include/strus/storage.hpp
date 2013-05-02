@@ -92,12 +92,15 @@ public:
 		std::vector<Term> m_termar;
 	};
 
+	virtual ~Storage(){}
+
 	virtual DocNumber storeDocument( const Document& doc)=0;
 
 	virtual std::string getDocumentId( const DocNumber& docnum)=0;
-	virtual std::size_t getDocumentSize( const DocNumber& docnum)=0;
-	virtual DocNumber getDocumentNumber( const std::string& docid)=0;
-	virtual TermNumber getTermNumber( const std::string& type, const std::string& value)=0;
+	virtual std::pair<std::string,std::string> getTerm( const TermNumber& termnum)=0;
+
+	virtual DocNumber findDocumentNumber( const std::string& docid)=0;
+	virtual TermNumber findTermNumber( const std::string& type, const std::string& value)=0;
 
 	virtual bool openIterator( PositionChunk& itr, const TermNumber& termnum)=0;
 	virtual bool nextIterator( PositionChunk& itr)=0;

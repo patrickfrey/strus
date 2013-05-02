@@ -26,64 +26,41 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DOCNUM_HPP_INCLUDED
-#define _STRUS_DOCNUM_HPP_INCLUDED
+#ifndef _STRUS_KCF_KEY_STORAGE_HPP_INCLUDED
+#define _STRUS_KCF_KEY_STORAGE_HPP_INCLUDED
+#include "strus/position.hpp"
+#include <string>
 
-#ifdef BOOST_VERSION
-#include <boost/cstdint.hpp>
-namespace strus {
-	///\typedef Index
-	///\brief Index term number type
-	typedef boost::int64_t Index;
-}//namespace
-#else
-#ifdef _MSC_VER
-#pragma warning(disable:4290)
-#include <BaseTsd.h>
-namespace strus {
-	///\typedef Index
-	///\brief Document number type
-	typedef DWORD64 Index;
-}//namespace
-#else
-#include <stdint.h>
-namespace strus {
-	///\typedef Index
-	///\brief Index term number type
-	typedef int64_t Index;
-}//namespace
-#endif
-#endif
-
-namespace strus {
-
-typedef Index Position;
-typedef Index DocPosition;
-typedef Index DocNumber;
-typedef Index TermNumber;
-
-enum {DocPositionShift=24, MaxDocPosition=(DocPositionShift-1)};
-
-struct Encode
+namespace strus
 {
-	static DocPosition getDocPosition( Position pos)
-	{
-		return pos & 0xFFFFffU;
-	}
-	static DocNumber getDocNumber( Position pos)
-	{
-		return pos >> DocPositionShift;
-	}
-	static Position getPosition( DocNumber docnum, DocPosition docpos)
-	{
-		return (docnum << DocPositionShift) + docpos;
-	}
-	static unsigned int getErrorCode( int component, unsigned int err)
-	{
-		return (component * 0x10000 + err);
-	}
+
+///\class KeyStorage
+///\brief Implementation of the storage key table
+class KeyStorage
+{
+public:
+	KeyStorage( const std::string& type, const std::string& name, const std::string& path, bool writemode=false);
+	~KeyStorage();
+
+	static void create( const std::string& type, const std::string& name, const std::string& path);
+	bool open();
+	void close();
+
+	const std::string& lastError() const;
+	int lastErrno() const;
+
+	Index findKey( const std::string& key) const;
+	std::string getIdentifier( const Index& idx) const;
+
+	Index insertKey( const std::string& key);
+	bool removeKey( const std::string& key);
+
+private:
+	struct Impl;
+	Impl* m_impl;
 };
 
-}//namespace
+} //namespace
 #endif
+
 

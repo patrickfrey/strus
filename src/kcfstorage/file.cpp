@@ -26,64 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DOCNUM_HPP_INCLUDED
-#define _STRUS_DOCNUM_HPP_INCLUDED
+#include "file.hpp"
+#include <cstdio>
+#include <cerrno>
+#include <boost/lexical_cast.hpp>
 
-#ifdef BOOST_VERSION
-#include <boost/cstdint.hpp>
-namespace strus {
-	///\typedef Index
-	///\brief Index term number type
-	typedef boost::int64_t Index;
-}//namespace
-#else
 #ifdef _MSC_VER
-#pragma warning(disable:4290)
-#include <BaseTsd.h>
-namespace strus {
-	///\typedef Index
-	///\brief Document number type
-	typedef DWORD64 Index;
-}//namespace
+#define FILE_PATH_DELIMITER '\\'
 #else
-#include <stdint.h>
-namespace strus {
-	///\typedef Index
-	///\brief Index term number type
-	typedef int64_t Index;
-}//namespace
+#define FILE_PATH_DELIMITER '/'
 #endif
-#endif
+#define SET_DEFAULT_DBPATH(PATH)\
+static const char* default_dbpath = "" #PATH;
+SET_DEFAULT_DBPATH(STRUS_DEFAULT_DBPATH)
 
-namespace strus {
+using namespace strus;
 
-typedef Index Position;
-typedef Index DocPosition;
-typedef Index DocNumber;
-typedef Index TermNumber;
-
-enum {DocPositionShift=24, MaxDocPosition=(DocPositionShift-1)};
-
-struct Encode
+std::string strus::filepath( const std::string& path, const std::string& name, const std::string& ext)
 {
-	static DocPosition getDocPosition( Position pos)
+	std::string rt;
+	if (path.empty())
 	{
-		return pos & 0xFFFFffU;
+		rt.append( default_dbpath);
 	}
-	static DocNumber getDocNumber( Position pos)
+	else
 	{
-		return pos >> DocPositionShift;
+		rt.append( path);
 	}
-	static Position getPosition( DocNumber docnum, DocPosition docpos)
-	{
-		return (docnum << DocPositionShift) + docpos;
-	}
-	static unsigned int getErrorCode( int component, unsigned int err)
-	{
-		return (component * 0x10000 + err);
-	}
-};
+	rt.push_back( FILE_PATH_DELIMITER);
+	rt.append( name);
+	rt.push_back( '.');
+	rt.append( ext);
+	std::replace( rt.begin(), rt.end(), '/', FILE_PATH_DELIMITER);
+	return rt;
+}
 
-}//namespace
-#endif
+std::string strus::fileerror( const std::string& msg)
+{
+	return msg + "(system error code " + boost::lexical_cast<std::string>((int)errno) + ")";
+}
+
+int strus::fileerrno()
+{
+	return errno;
+}
 

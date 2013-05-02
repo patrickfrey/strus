@@ -26,65 +26,20 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_STORAGE_DB_HPP_INCLUDED
-#define _STRUS_KCF_STORAGE_DB_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_LIB_HPP_INCLUDED
 #include "strus/storage.hpp"
-#include "strus/position.hpp"
+///\brief Functions provided by a storage library
 
 namespace strus
 {
 
-///\class StorageDB
-///\brief Implementation of the storage database
-class StorageDB
-{
-public:
-	StorageDB( const std::string& name, const std::string& path);
-	explicit StorageDB( const std::string& name);
-	~StorageDB();
-
-	void begin();
-	bool commit();
-	void rollback();
-	std::string lastError();
-	int lastErrno();
-
-	static void create( const std::string& name, const std::string& path);
-	static void create( const std::string& name);
-
-	TermNumber findTermNumber( const std::string& type, const std::string& value) const;
-	DocNumber findDocumentNumber( const std::string& docid) const;
-
-	TermNumber insertTermNumber( const std::string& type, const std::string& value);
-	DocNumber insertDocumentNumber( const std::string& docid);
-
-private:
-	TermNumber findTermNumber( const std::string& key) const;
-	std::string getTermKey( const std::string& type, const std::string& value) const;
-
-private:
-	void clearTransaction();
-
-private:
-	enum {KCF_ERRORBASE=0x100000, SYS_ERRORBASE=0x000000};
-
-	struct Transaction
-	{
-		DocNumber docCounter;
-		std::map<std::string, DocNumber> docmap;
-		std::string errormsg;
-		int errorno;
-
-		Transaction()
-			:docCounter(0){}
-	};
-	Transaction m_transaction;
-
-	struct Impl;
-	Impl* m_impl;
-};
+void createStorage( const char* name, const char* path);
+Storage* allocStorage( const char* name, const char* path, bool writemode=false);
+void destroyStorage( Storage* storage);
 
 } //namespace
 #endif
+
 
 
