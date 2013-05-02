@@ -35,7 +35,7 @@
 
 using namespace strus;
 
-struct KeyStorage::Impl
+struct KeyTable::Impl
 {
 	Impl( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_)
 		:isopen(false)
@@ -72,7 +72,7 @@ struct KeyStorage::Impl
 	int lasterrno;
 };
 
-void KeyStorage::Impl::setError( const std::string& msg)
+void KeyTable::Impl::setError( const std::string& msg)
 {
 	std::string keyfilepath( filepath( path, name, type));
 	kyotocabinet::BasicDB::Error kcferr = keydb.error();
@@ -92,7 +92,7 @@ void KeyStorage::Impl::setError( const std::string& msg)
 	}
 }
 
-void KeyStorage::Impl::close()
+void KeyTable::Impl::close()
 {
 	isopen = false;
 	if (isopen)
@@ -104,16 +104,16 @@ void KeyStorage::Impl::close()
 
 static const char* g_metakey_nof_deleted = "\001\002#D";
 
-void KeyStorage::Impl::create( const std::string& type_, const std::string& name_, const std::string& path_)
+void KeyTable::Impl::create( const std::string& type_, const std::string& name_, const std::string& path_)
 {
 	kyotocabinet::IndexDB keydb_;
 	kyotocabinet::IndexDB strdb_;
 	const std::string invtype_ = type_ + "i";
-	std::string keyfilepath( filepath( path_, name_, type_));
-	std::string strfilepath( filepath( path_, name_, invtype_));
+	std::string keyfilepath( filepath( path_, name_ + "." + type_, "kch"));
+	std::string strfilepath( filepath( path_, name_ + "." + invtype_, "kch"));
 
 	//create tables:
-	if (!keydb_.open( keyfilepath, kyotocabinet::BasicDB::OCREATE))
+	if (!keydb_.open( keyfilepath, kyotocabinet::BasicDB::OWRITER | kyotocabinet::BasicDB::OCREATE | kyotocabinet::BasicDB::OTRUNCATE))
 	{
 		kyotocabinet::BasicDB::Error kcferr = keydb_.error();
 		int lasterrno_ = (int)kcferr.code();
@@ -128,7 +128,7 @@ void KeyStorage::Impl::create( const std::string& type_, const std::string& name
 		}
 		throw std::runtime_error( lasterror_);
 	}
-	if (!strdb_.open( strfilepath, kyotocabinet::BasicDB::OCREATE))
+	if (!strdb_.open( strfilepath, kyotocabinet::BasicDB::OWRITER | kyotocabinet::BasicDB::OCREATE))
 	{
 		kyotocabinet::BasicDB::Error kcferr = strdb_.error();
 		int lasterrno_ = (int)kcferr.code();
@@ -165,12 +165,13 @@ void KeyStorage::Impl::create( const std::string& type_, const std::string& name
 	}
 }
 
-bool KeyStorage::Impl::open()
+bool KeyTable::Impl::open()
 {
 	//open tables:
 	const std::string invtype = type + "i";
-	std::string keyfilepath( filepath( path, name, type));
-	std::string strfilepath( filepath( path, name, invtype));
+	std::string keyfilepath( filepath( path, name + "." + type, "kch"));
+	std::string strfilepath( filepath( path, name + "." + invtype, "kch"));
+
 	if (!keydb.open( keyfilepath, writemode?kyotocabinet::BasicDB::OWRITER:kyotocabinet::BasicDB::OREADER))
 	{
 		setError( "failed to open key table");
@@ -198,7 +199,7 @@ bool KeyStorage::Impl::open()
 	return true;
 }
 
-Index KeyStorage::Impl::findKey( const std::string& key) const
+Index KeyTable::Impl::findKey( const std::string& key) const
 {
 	std::size_t ptrsize = 0;
 	kyotocabinet::IndexDB* kdb = const_cast<kyotocabinet::IndexDB*>(&keydb);
@@ -215,7 +216,7 @@ Index KeyStorage::Impl::findKey( const std::string& key) const
 	return rt;
 }
 
-std::string KeyStorage::Impl::getIdentifier( const Index& idx) const
+std::string KeyTable::Impl::getIdentifier( const Index& idx) const
 {
 	std::size_t ptrsize = 0;
 	kyotocabinet::IndexDB* kdb = const_cast<kyotocabinet::IndexDB*>(&strdb);
@@ -226,7 +227,7 @@ std::string KeyStorage::Impl::getIdentifier( const Index& idx) const
 	return rt;
 }
 
-Index KeyStorage::Impl::insertKey( const std::string& key)
+Index KeyTable::Impl::insertKey( const std::string& key)
 {
 	if (writemode)
 	{
@@ -250,7 +251,7 @@ Index KeyStorage::Impl::insertKey( const std::string& key)
 	}
 }
 
-bool KeyStorage::Impl::removeKey( const std::string& key)
+bool KeyTable::Impl::removeKey( const std::string& key)
 {
 	if (writemode)
 	{
@@ -280,56 +281,56 @@ bool KeyStorage::Impl::removeKey( const std::string& key)
 }
 
 
-KeyStorage::KeyStorage( const std::string& type, const std::string& name, const std::string& path, bool writemode)
+KeyTable::KeyTable( const std::string& type, const std::string& name, const std::string& path, bool writemode)
 	:m_impl( new Impl( type, name, path, writemode))
 {}
 
-bool KeyStorage::open()
+bool KeyTable::open()
 {
 	return m_impl->open();
 }
 
-void KeyStorage::close()
+void KeyTable::close()
 {
 	return m_impl->close();
 }
 
-void KeyStorage::create( const std::string& type, const std::string& name, const std::string& path)
+void KeyTable::create( const std::string& type, const std::string& name, const std::string& path)
 {
 	Impl::create( type, name, path);
 }
 
-KeyStorage::~KeyStorage()
+KeyTable::~KeyTable()
 {
 	delete m_impl;
 }
 
-const std::string& KeyStorage::lastError() const
+const std::string& KeyTable::lastError() const
 {
 	return m_impl->lasterror;
 }
 
-int KeyStorage::lastErrno() const
+int KeyTable::lastErrno() const
 {
 	return m_impl->lasterrno;
 }
 
-Index KeyStorage::findKey( const std::string& key) const
+Index KeyTable::findKey( const std::string& key) const
 {
 	return m_impl->findKey( key);
 }
 
-std::string KeyStorage::getIdentifier( const Index& idx) const
+std::string KeyTable::getIdentifier( const Index& idx) const
 {
 	return m_impl->getIdentifier( idx);
 }
 
-Index KeyStorage::insertKey( const std::string& key)
+Index KeyTable::insertKey( const std::string& key)
 {
 	return m_impl->insertKey( key);
 }
 
-bool KeyStorage::removeKey( const std::string& key)
+bool KeyTable::removeKey( const std::string& key)
 {
 	return m_impl->removeKey( key);
 }

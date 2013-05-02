@@ -26,21 +26,21 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_KEY_STORAGE_HPP_INCLUDED
-#define _STRUS_KCF_KEY_STORAGE_HPP_INCLUDED
+#ifndef _STRUS_KCF_KEY_TABLE_HPP_INCLUDED
+#define _STRUS_KCF_KEY_TABLE_HPP_INCLUDED
 #include "strus/position.hpp"
 #include <string>
 
 namespace strus
 {
 
-///\class KeyStorage
+///\class KeyTable
 ///\brief Implementation of the storage key table
-class KeyStorage
+class KeyTable
 {
 public:
-	KeyStorage( const std::string& type, const std::string& name, const std::string& path, bool writemode=false);
-	~KeyStorage();
+	KeyTable( const std::string& type, const std::string& name, const std::string& path, bool writemode=false);
+	~KeyTable();
 
 	static void create( const std::string& type, const std::string& name, const std::string& path);
 	bool open();

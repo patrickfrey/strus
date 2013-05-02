@@ -42,12 +42,12 @@ enum
 
 void StorageDB::create( const std::string& name_, const std::string& path_)
 {
-	KeyStorage::create( "tetab", name_, path_);
-	KeyStorage::create( "tytab", name_, path_);
-	KeyStorage::create( "dctab", name_, path_);
-	ListStorage<DocNumber>::create( "rdlst", name_, path_);
-	BlockStorage::create( "smblk", SmallBlockSize, name_, path_);
-	BlockStorage::create( "ixblk", IndexBlockSize, name_, path_);
+	KeyTable::create( "tetab", name_, path_);
+	KeyTable::create( "tytab", name_, path_);
+	KeyTable::create( "dctab", name_, path_);
+	PersistentList<DocNumber>::create( "rdlst", name_, path_);
+	BlockTable::create( "smblk", SmallBlockSize, name_, path_);
+	BlockTable::create( "ixblk", IndexBlockSize, name_, path_);
 }
 
 StorageDB::StorageDB( const std::string& name_, const std::string& path_, bool writemode_)

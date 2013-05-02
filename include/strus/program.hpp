@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_OPERATION_HPP_INCLUDED
-#define _STRUS_OPERATION_HPP_INCLUDED
+#ifndef _STRUS_PROGRAM_HPP_INCLUDED
+#define _STRUS_PROGRAM_HPP_INCLUDED
 #include "iterator.hpp"
 #include "storage.hpp"
 #include <string>
@@ -41,6 +41,9 @@ namespace strus
 class Program
 {
 public:
+	Program();
+	Program( const Program& o);
+
 	struct Match
 	{
 		DocNumber docnum;
@@ -65,10 +68,10 @@ public:
 		OperandArray m_operandar;
 	};
 
-	void FETCH( const std::string& type, const std::string& value);
+	void FETCH( const std::string& type_, const std::string& value_);
 	void UNION( int select1_, int select2_);
 	void INTERSECT( int select_, int joincond_);
-	void JOINCUT( int select_, int joincond_, int cutcond);
+	void JOINCUT( int select_, int joincond_, int cutcond_);
 	void RANGE( int rangestart_, int range_);
 
 	const char* check() const;
@@ -83,7 +86,8 @@ private:
 		Command( const Command& o);
 		Command( Type type_, int op1=0, int op2=0, int op3=0);
 	};
-	void refarg( int arg) const;
+
+	void refarg( int arg);
 
 private:
 	friend class Program::Result;

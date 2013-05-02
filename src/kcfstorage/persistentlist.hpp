@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_LIST_STORAGE_HPP_INCLUDED
-#define _STRUS_KCF_LIST_STORAGE_HPP_INCLUDED
+#ifndef _STRUS_KCF_PERSISTENT_LIST_HPP_INCLUDED
+#define _STRUS_KCF_PERSISTENT_LIST_HPP_INCLUDED
 #include "strus/position.hpp"
 #include "blktable.hpp"
 #include <cstdio>
@@ -37,35 +37,35 @@
 namespace strus
 {
 
-///\class ListStorage
+///\class PersistentList
 ///\tparam Element
 ///\brief Implementation of a block map in a file
 template <class Element>
-class ListStorage
-	:public BlockStorage
+class PersistentList
+	:public BlockTable
 {
 public:
 	enum {NofBlockElements=127};
-	ListStorage( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
-		:BlockStorage( type_, sizeof(Block), name_, path_, writemode_)
+	PersistentList( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
+		:BlockTable( type_, sizeof(Block), name_, path_, writemode_)
 		,m_curidx(0)
 	{}
-	~ListStorage();
+	virtual ~PersistentList(){}
 
 	static void create( const std::string& type_, const std::string& name_, const std::string& path_)
 	{
-		BlockStorage::create( type_, sizeof(Block), name_, path_);
+		BlockTable::create( type_, sizeof(Block), name_, path_);
 	}
 
 	bool open()
 	{
-		if (!BlockStorage::open())
+		if (!BlockTable::open())
 		{
 			return false;
 		}
 		if (!readBlock( lastindex(), &m_cur))
 		{
-			BlockStorage::close();
+			BlockTable::close();
 			return false;
 		}
 		return true;
@@ -102,7 +102,7 @@ public:
 
 	bool reset()
 	{
-		if (!BlockStorage::reset()) return false;
+		if (!BlockTable::reset()) return false;
 		std::memset( &m_cur, 0, sizeof( m_cur));
 		m_curidx = 0;
 	}
@@ -122,7 +122,7 @@ public:
 	class const_iterator
 	{
 	public:
-		const_iterator( ListStorage* ref_)
+		const_iterator( PersistentList* ref_)
 			:m_isopen(false),m_ref(ref_),m_curidx(0),m_curpos(0)
 		{
 			readNextBlock();
@@ -178,8 +178,8 @@ public:
 
 	private:
 		bool m_isopen;
-		const ListStorage* m_ref;
-		ListStorage::Block m_cur;
+		const PersistentList* m_ref;
+		PersistentList::Block m_cur;
 		Index m_curidx;
 		std::size_t m_curpos;
 	};

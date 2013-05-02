@@ -27,20 +27,58 @@
 --------------------------------------------------------------------
 */
 #include "strus/storage.hpp"
+#include "strus/storagelib.hpp"
 #include "strus/iterator.hpp"
 #include "strus/program.hpp"
 #include <iostream>
+#include <cstring>
+
+enum Command {None,CreateStorage};
 
 int main( int argc, const char* argv[])
 {
-	if (argc <= 1)
+	const char* arg[4];
+	Command cmd = None;
+
+	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
-		std::cerr << "usage: strus <repository name>" << std::endl;
+		std::cerr << "usage: strus <cmd> ..." << std::endl;
+		std::cerr << "<cmd> = create  :create a storage" << std::endl;
+		return 0;
 	}
-	else
+	try
 	{
-		std::cerr << "using storage " << argv[1] << std::endl;
+		if (std::strcmp( argv[1], "create") == 0)
+		{
+			if (argc <= 2) throw std::runtime_error( "too few argumens for create. (strus create <repository name>)");
+
+			cmd = CreateStorage;
+			arg[0] = argv[2];
+			arg[1] = argv[3];
+		}
+		else
+		{
+			throw std::runtime_error( std::string( "unknown command '") + argv[1] + "' (expected create,..)" );
+		}
+		switch (cmd)
+		{
+			case None:
+			break;
+			case CreateStorage:
+				strus::createStorage( arg[0], arg[1]);
+			break;
+		}
+		return 0;
 	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << "ERROR " << e.what() << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "EXCEPTION " << e.what() << std::endl;
+	}
+	return -1;
 }
 
 

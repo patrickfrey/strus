@@ -36,8 +36,9 @@
 #else
 #define FILE_PATH_DELIMITER '/'
 #endif
-#define SET_DEFAULT_DBPATH(PATH)\
+#define SET_DEFAULT_DBPATH2(PATH)\
 static const char* default_dbpath = "" #PATH;
+#define SET_DEFAULT_DBPATH(PATH) SET_DEFAULT_DBPATH2(PATH)
 SET_DEFAULT_DBPATH(STRUS_DEFAULT_DBPATH)
 
 using namespace strus;
@@ -53,7 +54,10 @@ std::string strus::filepath( const std::string& path, const std::string& name, c
 	{
 		rt.append( path);
 	}
-	rt.push_back( FILE_PATH_DELIMITER);
+	if (!rt.empty() && rt.at(rt.size()-1) != FILE_PATH_DELIMITER)
+	{
+		rt.push_back( FILE_PATH_DELIMITER);
+	}
 	rt.append( name);
 	rt.push_back( '.');
 	rt.append( ext);

@@ -28,13 +28,17 @@
 */
 #include "strus/program.hpp"
 #include "strus/iterator.hpp"
+#include <cstring>
 
 using namespace strus;
 
-Program::Program::Command( const Command& o)
-	:m_type(o.m_type),m_operandref(o.m_operandref){}
+Program::Command::Command( const Program::Command& o)
+	:m_type(o.m_type)
+{
+	std::memcpy( &m_operandref, &o.m_operandref, sizeof( m_operandref));
+}
 
-Program::Program::Command( Type type_, int op1, int op2, int op3)
+Program::Command::Command( Type type_, int op1, int op2, int op3)
 	:m_type(type_)
 {
 	m_operandref[0] = op1;
@@ -53,14 +57,14 @@ Program::Program( const Program& o)
 	,m_nofrefarg(o.m_nofrefarg)
 {}
 
-void Program::FETCH( const std::string& type, const std::string& value)
+void Program::FETCH( const std::string& type_, const std::string& value_)
 {
-	m_cmdlist.push_back( Command( StorageFetch, m_strings.size(), m_strings.size()+1));
-	m_strings.push_back( type);
-	m_strings.push_back( value);
+	m_cmdlist.push_back( Command( Command::StorageFetch, m_strings.size(), m_strings.size()+1));
+	m_strings.push_back( type_);
+	m_strings.push_back( value_);
 }
 
-void Program::refarg( int arg) const
+void Program::refarg( int arg)
 {
 	while (m_refargset.size() < m_cmdlist.size())
 	{
@@ -87,21 +91,21 @@ void Program::refarg( int arg) const
 
 void Program::UNION( int select1_, int select2_)
 {
-	m_cmdlist.push_back( Command( Union, select1_, select2_));
+	m_cmdlist.push_back( Command( Command::Union, select1_, select2_));
 	refarg( select1_);
 	refarg( select2_);
 }
 
 void Program::INTERSECT( int select_, int joincond_)
 {
-	m_cmdlist.push_back( Command( IntersectCut, select_, joincond_));
+	m_cmdlist.push_back( Command( Command::IntersectCut, select_, joincond_));
 	refarg( select_);
 	refarg( joincond_);
 }
 
-void Program::JOINCUT( int select_, int joincond_, int cutcond)
+void Program::JOINCUT( int select_, int joincond_, int cutcond_)
 {
-	m_cmdlist.push_back( Command( IntersectCut, select_, joincond_, cutcond_));
+	m_cmdlist.push_back( Command( Command::IntersectCut, select_, joincond_, cutcond_));
 	refarg( select_);
 	refarg( joincond_);
 	refarg( cutcond_);
@@ -109,7 +113,7 @@ void Program::JOINCUT( int select_, int joincond_, int cutcond)
 
 void Program::RANGE( int rangestart_, int range_)
 {
-	m_cmdlist.push_back( Command( SetRange, rangestart_, range_));
+	m_cmdlist.push_back( Command( Command::SetRange, rangestart_, range_));
 }
 
 const char* Program::check() const
@@ -146,8 +150,8 @@ Program::Result::Result( Storage* storage_, Program* program_)
 	,m_program(program_)
 {
 	TermNumber termnumber;
-	const char* termtype;
-	const char* termvalue;
+	std::string termtype;
+	std::string termvalue;
 	int rangestart = 0;
 	int range = -1;
 
@@ -156,9 +160,9 @@ Program::Result::Result( Storage* storage_, Program* program_)
 	{
 		throw std::runtime_error( std::string("program check failed:") + msg);
 	}
-	if (m_program->cmdlist.empty())
+	if (m_program->m_cmdlist.empty())
 	{
-		m_operandar.push_back( Operand( new PositionIterator));
+		m_operandar.push_back( Operand( new PositionIterator()));
 		return;
 	}
 	std::vector<Command>::const_iterator ci = m_program->m_cmdlist.begin(), ce = m_program->m_cmdlist.end();
@@ -169,10 +173,17 @@ Program::Result::Result( Storage* storage_, Program* program_)
 			case Program::Command::StorageFetch:
 				termtype = m_program->m_strings[ ci->m_operandref[ 0]];
 				termvalue = m_program->m_strings[ ci->m_operandref[ 1]];
-				termnumber = m_storage->getTermNumber( termtype, termvalue);
-				m_operandar.push_back(
-					Operand( new StoragePositionIterator( m_storage, termnumber))
-				);
+				termnumber = m_storage->findTermNumber( termtype, termvalue);
+				if (termnumber)
+				{
+					m_operandar.push_back(
+						Operand( new StoragePositionIterator( m_storage, termnumber))
+					);
+				}
+				else
+				{
+					m_operandar.push_back( Operand( new PositionIterator()));
+				}
 				break;
 			break;
 			case Program::Command::Union:

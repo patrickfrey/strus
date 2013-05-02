@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_ITERATOR_HPP_INCLUDED
-#define _STRUS_STORAGE_ITERATOR_HPP_INCLUDED
+#ifndef _STRUS_ITERATOR_HPP_INCLUDED
+#define _STRUS_ITERATOR_HPP_INCLUDED
 #include "position.hpp"
 #include "storage.hpp"
 #include <string>

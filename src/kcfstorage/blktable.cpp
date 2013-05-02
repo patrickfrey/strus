@@ -28,7 +28,6 @@
 */
 #include "blktable.hpp"
 #include "file.hpp"
-#include <kcdbext.h>
 #include <cstdio>
 #include <algorithm>
 #include <cstdlib>
@@ -38,7 +37,7 @@
 using namespace strus;
 
 
-BlockStorage::BlockStorage( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_)
+BlockTable::BlockTable( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_)
 	:m_writemode(writemode_)
 	,m_blocksize(blocksize_)
 	,m_lastindex(0)
@@ -49,12 +48,12 @@ BlockStorage::BlockStorage( const std::string& type_, std::size_t blocksize_, co
 	if (m_blocksize < sizeof(m_controlblock)) throw std::logic_error("block size is too small");
 }
 
-BlockStorage::~BlockStorage()
+BlockTable::~BlockTable()
 {
 	close();
 }
 
-void BlockStorage::create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_)
+void BlockTable::create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_)
 {
 	std::string blkfilepath( filepath( path_, name_, type_));
 	if (blocksize_ < sizeof(ControlBlock)) throw std::logic_error("block size is too small");
@@ -75,7 +74,7 @@ void BlockStorage::create( const std::string& type_, std::size_t blocksize_, con
 	fclose( fh);
 }
 
-bool BlockStorage::open()
+bool BlockTable::open()
 {
 	if (m_filehandle) close();
 	const char* modestr = m_writemode?"r+":"r";
@@ -120,7 +119,7 @@ bool BlockStorage::open()
 	return true;
 }
 
-bool BlockStorage::reset()
+bool BlockTable::reset()
 {
 	close();
 	FILE* fh = ::fopen( m_filename.c_str() , "w");
@@ -145,7 +144,7 @@ bool BlockStorage::reset()
 	return true;
 }
 
-void BlockStorage::close()
+void BlockTable::close()
 {
 	if (m_filehandle)
 	{
@@ -154,17 +153,17 @@ void BlockStorage::close()
 	}
 }
 
-const std::string& BlockStorage::lastError() const
+const std::string& BlockTable::lastError() const
 {
 	return m_lasterror;
 }
 
-int BlockStorage::lastErrno() const
+int BlockTable::lastErrno() const
 {
 	return m_lasterrno;
 }
 
-bool BlockStorage::readBlock( Index idx, void* buf)
+bool BlockTable::readBlock( Index idx, void* buf)
 {
 	if (::fseek( m_filehandle, idx * m_blocksize, SEEK_SET) != 0)
 	{
@@ -181,7 +180,7 @@ bool BlockStorage::readBlock( Index idx, void* buf)
 	return true;
 }
 
-bool BlockStorage::writeBlock( Index idx, const void* buf)
+bool BlockTable::writeBlock( Index idx, const void* buf)
 {
 	if (::fseek( m_filehandle, idx * m_blocksize, SEEK_SET) != 0)
 	{
@@ -198,7 +197,7 @@ bool BlockStorage::writeBlock( Index idx, const void* buf)
 	return true;
 }
 
-Index BlockStorage::appendBlock( const void* buf)
+Index BlockTable::appendBlock( const void* buf)
 {
 	if (::fseek( m_filehandle, 0, SEEK_END) != 0)
 	{
@@ -215,7 +214,7 @@ Index BlockStorage::appendBlock( const void* buf)
 	return m_lastindex++;
 }
 
-bool BlockStorage::readControlBlock( Index idx, ControlBlock& block)
+bool BlockTable::readControlBlock( Index idx, ControlBlock& block)
 {
 	if (::fseek( m_filehandle, idx * m_blocksize, SEEK_SET) != 0)
 	{
@@ -232,7 +231,7 @@ bool BlockStorage::readControlBlock( Index idx, ControlBlock& block)
 	return true;
 }
 
-bool BlockStorage::writeControlBlock( Index idx, const ControlBlock& block)
+bool BlockTable::writeControlBlock( Index idx, const ControlBlock& block)
 {
 	if (::fseek( m_filehandle, idx * m_blocksize, SEEK_SET) != 0)
 	{
@@ -249,7 +248,7 @@ bool BlockStorage::writeControlBlock( Index idx, const ControlBlock& block)
 	return true;
 }
 
-Index BlockStorage::insertBlock( const void* buf)
+Index BlockTable::insertBlock( const void* buf)
 {
 	if (m_controlblock.freelist)
 	{

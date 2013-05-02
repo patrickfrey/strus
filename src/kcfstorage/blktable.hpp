@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_BLOCK_STORAGE_HPP_INCLUDED
-#define _STRUS_KCF_BLOCK_STORAGE_HPP_INCLUDED
+#ifndef _STRUS_KCF_BLOCK_TABLE_HPP_INCLUDED
+#define _STRUS_KCF_BLOCK_TABLE_HPP_INCLUDED
 #include "strus/position.hpp"
 #include <cstdio>
 #include <string>
@@ -35,13 +35,13 @@
 namespace strus
 {
 
-///\class BlockStorage
+///\class BlockTable
 ///\brief Implementation of a block map in a file
-class BlockStorage
+class BlockTable
 {
 public:
-	BlockStorage( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_=false);
-	~BlockStorage();
+	BlockTable( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_=false);
+	~BlockTable();
 
 	static void create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_);
 	bool open();

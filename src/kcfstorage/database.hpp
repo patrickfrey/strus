@@ -32,7 +32,7 @@
 #include "strus/position.hpp"
 #include "keytable.hpp"
 #include "blktable.hpp"
-#include "lsttable.hpp"
+#include "persistentlist.hpp"
 #include <string>
 #include <utility>
 
@@ -82,12 +82,12 @@ private:
 
 	std::string m_name;
 	std::string m_path;
-	KeyStorage m_termtable;
-	KeyStorage m_typetable;
-	KeyStorage m_docidtable;
-	ListStorage<DocNumber> m_deldocidlist;
-	BlockStorage m_smallblktable;
-	BlockStorage m_indexblktable;
+	KeyTable m_termtable;
+	KeyTable m_typetable;
+	KeyTable m_docidtable;
+	PersistentList<DocNumber> m_deldocidlist;
+	BlockTable m_smallblktable;
+	BlockTable m_indexblktable;
 };
 
 } //namespace

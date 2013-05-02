@@ -4,6 +4,9 @@
 *.o
 
 # Compiled Dynamic libraries
+*.so.0.0.0
+*.so.0.0
+*.so.0
 *.so
 *.dylib
 
