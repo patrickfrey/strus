@@ -29,6 +29,12 @@
 #include "file.hpp"
 #include <cstdio>
 #include <cerrno>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <cstring>
+#include <cerrno>
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
@@ -74,4 +80,91 @@ int strus::fileerrno()
 {
 	return errno;
 }
+
+File::File( const std::string& path_)
+	:m_fd(-1),m_path(path_),m_errno(0)
+{
+}
+
+static std::string errorstr( const std::string& path, const std::string& msg, int errno_)
+{
+	std::string rt;
+	rt.append( ::strerror( errno_));
+	rt.append( " ");
+	rt.append( msg);
+	rt.append( " '");
+	rt.append( path);
+	rt.append( "'");
+	return rt;
+}
+
+bool File::create()
+{
+	if (m_fd >= 0) ::close(m_fd);
+	m_fd = ::open( m_path.c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
+	if (m_fd < 0)
+	{
+		m_error = errorstr( m_path, "creating file", m_errno = errno);
+		return false;
+	}
+	return true;
+}
+
+bool File::open( bool write_)
+{
+	if (m_fd >= 0) ::close(m_fd);
+	int flags = (write_)?O_RDWR:O_RDONLY;
+	m_fd = ::open( m_path.c_str(), flags, 0644);
+	if (m_fd < 0)
+	{
+		const char* msg = (write_)?"opening file for writing":"opening file for reading";
+		m_error = errorstr( m_path, msg, m_errno = errno);
+		return false;
+	}
+	return true;
+}
+
+void File::close()
+{
+	if (m_fd >= 0) ::close(m_fd);
+	m_fd = -1;
+}
+
+bool File::seek( std::size_t pos_)
+{
+	if (::lseek( m_fd, pos_, SEEK_SET) < 0)
+	{
+		m_error = errorstr( m_path, "seeking file position", m_errno = errno);
+		return false;
+	}
+	return true;
+}
+
+std::size_t File::size()
+{
+	std::size_t rt = ::lseek( m_fd, 0, SEEK_END);
+	return rt;
+}
+
+bool File::write( void* buf, std::size_t bufsize)
+{
+	if (::write( m_fd, buf, bufsize) < 0)
+	{
+		m_error = errorstr( m_path, "writing file", m_errno = errno);
+		return false;
+	}
+	return true;
+}
+
+bool File::read( void* buf, std::size_t bufsize)
+{
+	if (::read( m_fd, buf, bufsize) < 0)
+	{
+		m_error = errorstr( m_path, "writing file", m_errno = errno);
+		return false;
+	}
+	return true;
+}
+
+
 

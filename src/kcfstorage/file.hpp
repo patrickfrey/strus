@@ -36,7 +36,30 @@ namespace strus
 	std::string filepath( const std::string& path, const std::string& name, const std::string& ext);
 	std::string fileerror( const std::string& msg);
 	int fileerrno();
+
+	class File
+	{
+	public:
+		File( const std::string& path_);
+		bool create();
+		bool open( bool write_=true);
+		void close();
+		std::size_t size();
+		bool seek( std::size_t pos_);
+		bool write( void* buf, std::size_t bufsize);
+		bool read( void* buf, std::size_t bufsize);
+
+		const std::string& error() const	{return m_error;}
+		int errno() const			{return m_errno;}
+
+	private:
+		int m_fd;
+		std::string m_path;
+		std::string m_error;
+		int m_errno;
+	};
 }
+
 #endif
 
 
