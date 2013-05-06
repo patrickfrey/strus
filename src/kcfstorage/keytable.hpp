@@ -43,11 +43,8 @@ public:
 	~KeyTable();
 
 	static void create( const std::string& type, const std::string& name, const std::string& path);
-	bool open();
+	void open();
 	void close();
-
-	const std::string& lastError() const;
-	int lastErrno() const;
 
 	Index findKey( const std::string& key) const;
 	std::string getIdentifier( const Index& idx) const;

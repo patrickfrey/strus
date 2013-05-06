@@ -29,7 +29,7 @@
 #ifndef _STRUS_KCF_BLOCK_TABLE_HPP_INCLUDED
 #define _STRUS_KCF_BLOCK_TABLE_HPP_INCLUDED
 #include "strus/position.hpp"
-#include <cstdio>
+#include "file.hpp"
 #include <string>
 
 namespace strus
@@ -44,21 +44,14 @@ public:
 	~BlockTable();
 
 	static void create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_);
-	bool open();
+	void open();
 	void close();
-	bool reset();
+	void reset();
 
-	const std::string& lastError() const;
-	int lastErrno() const;
-
-	bool readBlock( Index idx, void* buf);
-	bool writeBlock( Index idx, const void* buf);
+	void readBlock( Index idx, void* buf);
+	void writeBlock( Index idx, const void* buf);
 	Index insertBlock( const void* buf);
-
-	Index lastindex() const
-	{
-		return m_lastindex;
-	}
+	Index size();
 
 private:
 	struct ControlBlock
@@ -66,19 +59,15 @@ private:
 		Index freelist;
 	};
 
-	bool readControlBlock( Index idx, ControlBlock& block);
-	bool writeControlBlock( Index idx, const ControlBlock& block);
+	void readControlBlock( Index idx, ControlBlock& block);
+	void writeControlBlock( Index idx, const ControlBlock& block);
 	Index appendBlock( const void* buf);
 
 private:
 	ControlBlock m_controlblock;
 	bool m_writemode;
 	std::size_t m_blocksize;
-	Index m_lastindex;
-	std::string m_filename;
-	FILE* m_filehandle;
-	std::string m_lasterror;
-	int m_lasterrno;
+	File m_file;
 };
 
 } //namespace

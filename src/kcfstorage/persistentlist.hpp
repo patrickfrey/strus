@@ -48,8 +48,11 @@ public:
 	enum {NofBlockElements=127};
 	PersistentList( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
 		:BlockTable( type_, sizeof(Block), name_, path_, writemode_)
-		,m_curidx(0)
-	{}
+		,m_lastidx(0)
+	{
+		std::memset( &m_cur, 0, sizeof( m_cur));
+	}
+
 	virtual ~PersistentList(){}
 
 	static void create( const std::string& type_, const std::string& name_, const std::string& path_)
@@ -57,54 +60,53 @@ public:
 		BlockTable::create( type_, sizeof(Block), name_, path_);
 	}
 
-	bool open()
+	void open()
 	{
-		if (!BlockTable::open())
+		BlockTable::open();
+		std::size_t nof_blocks = BlockTable::size();
+		if (nof_blocks > 0)
 		{
-			return false;
+			m_lastidx = nof_blocks;
+			readBlock( m_lastidx, &m_cur);
 		}
-		if (!readBlock( lastindex(), &m_cur))
+		else
 		{
-			BlockTable::close();
-			return false;
+			m_lastidx = 0;
+			std::memset( &m_cur, 0, sizeof( m_cur));
 		}
-		return true;
 	}
 
 	void push_back( const Element& element)
 	{
-		if (m_curidx == 0 || m_cur.hdr.size == NofBlockElements)
+		if (m_lastidx == 0 || m_cur.hdr.size == NofBlockElements)
 		{
 			Block newblk;
 			std::memset( &newblk, 0, sizeof( newblk));
 			newblk.hdr.size = 0;
 			newblk.element[ newblk.hdr.size++] = element;
-			m_curidx = appendBlock( &newblk);
-			if (m_curidx == 0)
-			{
-				m_curidx = lastindex();
-			}
-			else
-			{
-				std::memcpy( &m_cur, &newblk, sizeof(m_cur));
-			}
+			m_lastidx = BlockTable::appendBlock( &newblk);
+			std::memcpy( &m_cur, &newblk, sizeof( m_cur));
 		}
 		else
 		{
 			m_cur.element[ m_cur.hdr.size++] = element;
-			if (!writeBlock( m_curidx, &m_cur))
+			try
+			{
+				writeBlock( m_lastidx, &m_cur);
+			}
+			catch (const std::runtime_error& e)
 			{
 				--m_cur.hdr.size;
-				throw std::runtime_error( lastError());
+				throw e;
 			}
 		}
 	}
 
-	bool reset()
+	void reset()
 	{
-		if (!BlockTable::reset()) return false;
+		BlockTable::reset();
 		std::memset( &m_cur, 0, sizeof( m_cur));
-		m_curidx = 0;
+		m_lastidx = 0;
 	}
 
 private:
@@ -122,7 +124,7 @@ public:
 	class const_iterator
 	{
 	public:
-		const_iterator( PersistentList* ref_)
+		const_iterator( const PersistentList* ref_)
 			:m_isopen(false),m_ref(ref_),m_curidx(0),m_curpos(0)
 		{
 			readNextBlock();
@@ -130,6 +132,11 @@ public:
 		const_iterator()
 			:m_isopen(false),m_ref(0),m_curidx(0),m_curpos(0)
 		{}
+		const_iterator( const const_iterator& o)
+			:m_isopen(o.m_isopen),m_ref(o.m_ref),m_curidx(o.m_curidx),m_curpos(o.m_curpos)
+		{
+			std::memcpy( &m_cur, &o.m_cur, sizeof( m_cur));
+		}
 
 		const_iterator& operator++()
 		{
@@ -155,7 +162,7 @@ public:
 			if (!o.m_ref)
 			{
 				if (!m_ref) return true;
-				return (m_curidx == m_ref->lastidx() && m_curpos == m_cur.hdr.size);
+				return (m_curidx == m_ref->m_lastidx && m_curpos == m_cur.hdr.size);
 			}
 			else if (!m_ref)
 			{
@@ -170,7 +177,7 @@ public:
 			{
 				if (!m_ref->open()) throw std::runtime_error( m_ref->lastError());
 			}
-			if (m_curidx == m_ref->lastidx()) return false;
+			if (m_curidx == m_ref->m_lastidx) return false;
 			if (!m_ref->readBlock( m_curidx+1, &m_cur)) throw std::runtime_error( m_ref->lastError());
 			m_curpos = 0;
 			++m_curidx;
@@ -183,8 +190,20 @@ public:
 		Index m_curidx;
 		std::size_t m_curpos;
 	};
+
+	const_iterator begin() const
+	{
+		return const_iterator(this);
+	}
+	const_iterator end() const
+	{
+		return const_iterator();
+	}
+
+private:
+	friend class const_iterator;
 	Block m_cur;
-	Index m_curidx;
+	Index m_lastidx;
 };
 
 } //namespace

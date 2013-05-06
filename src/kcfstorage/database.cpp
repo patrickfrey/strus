@@ -73,12 +73,12 @@ void StorageDB::close()
 
 void StorageDB::open()
 {
-	if (!m_termtable.open()) throw std::runtime_error( m_termtable.lastError());
-	if (!m_typetable.open()) throw std::runtime_error( m_typetable.lastError());
-	if (!m_docidtable.open()) throw std::runtime_error( m_docidtable.lastError());
-	if (!m_deldocidlist.open()) throw std::runtime_error( m_deldocidlist.lastError());
-	if (!m_smallblktable.open()) throw std::runtime_error( m_smallblktable.lastError());
-	if (!m_indexblktable.open()) throw std::runtime_error( m_indexblktable.lastError());
+	m_termtable.open();
+	m_typetable.open();
+	m_docidtable.open();
+	m_deldocidlist.open();
+	m_smallblktable.open();
+	m_indexblktable.open();
 }
 
 StorageDB::~StorageDB()
@@ -124,32 +124,18 @@ TermNumber StorageDB::findTermNumber( const std::string& type, const std::string
 {
 	std::string key;
 	Index typeidx = m_typetable.findKey( type);
-	if (!typeidx)
-	{
-		if (m_typetable.lastErrno())
-		{
-			throw std::runtime_error( m_typetable.lastError());
-		}
-		return 0;
-	}
+	if (!typeidx) return 0;
+
 	packIndex( key, typeidx);
 	key.append( value);
 
 	TermNumber rt = m_termtable.findKey( key);
-	if (!rt && m_termtable.lastErrno())
-	{
-		throw std::runtime_error( m_termtable.lastError());
-	}
 	return rt;
 }
 
 DocNumber StorageDB::findDocumentNumber( const std::string& docid) const
 {
 	DocNumber rt = m_docidtable.findKey( docid);
-	if (!rt && m_docidtable.lastErrno())
-	{
-		throw std::runtime_error( m_docidtable.lastError());
-	}
 	return rt;
 }
 
@@ -157,26 +143,18 @@ TermNumber StorageDB::insertTermNumber( const std::string& type, const std::stri
 {
 	std::string key;
 	Index typeidx = m_typetable.findKey( type);
-	if (!typeidx)
-	{
-		typeidx = m_typetable.insertKey( type);
-		if (!typeidx)
-		{
-			throw std::runtime_error( m_typetable.lastError());
-		}
-	}
+	if (!typeidx) typeidx = m_typetable.insertKey( type);
+
 	packIndex( key, typeidx);
 	key.append( value);
 
 	TermNumber rt = m_termtable.insertKey( key);
-	if (!rt) throw std::runtime_error( m_termtable.lastError());
 	return rt;
 }
 
 DocNumber StorageDB::insertDocumentNumber( const std::string& docid)
 {
 	DocNumber rt = m_docidtable.insertKey( docid);
-	if (!rt) throw std::runtime_error( m_docidtable.lastError());
 	return rt;
 }
 

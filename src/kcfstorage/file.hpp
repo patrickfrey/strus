@@ -34,29 +34,29 @@
 namespace strus
 {
 	std::string filepath( const std::string& path, const std::string& name, const std::string& ext);
-	std::string fileerror( const std::string& msg);
-	int fileerrno();
 
 	class File
 	{
 	public:
 		File( const std::string& path_);
-		bool create();
-		bool open( bool write_=true);
-		void close();
-		std::size_t size();
-		bool seek( std::size_t pos_);
-		bool write( void* buf, std::size_t bufsize);
-		bool read( void* buf, std::size_t bufsize);
+		virtual ~File();
 
-		const std::string& error() const	{return m_error;}
-		int errno() const			{return m_errno;}
+		void create();
+		void open( bool write_=true);
+		void close();
+		std::size_t filesize();
+		void seek( std::size_t pos_);
+		std::size_t seek_end();
+		std::size_t position();
+		void write( const void* buf, std::size_t bufsize);
+		void read( void* buf, std::size_t bufsize);
+
+		const std::string& path() const		{return m_path;}
+		bool isopen() const			{return m_fd >= 0;}
 
 	private:
 		int m_fd;
 		std::string m_path;
-		std::string m_error;
-		int m_errno;
 	};
 }
 

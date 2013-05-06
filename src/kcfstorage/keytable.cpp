@@ -50,10 +50,8 @@ struct KeyTable::Impl
 	}
 
 	void close();
-	bool open();
+	void open();
 	static void create( const std::string& type_, const std::string& name_, const std::string& path_);
-
-	void setError( const std::string& msg);
 
 	Index findKey( const std::string& key) const;
 	Index insertKey( const std::string& key);
@@ -68,38 +66,30 @@ struct KeyTable::Impl
 	Index nof_deleted;
 	kyotocabinet::IndexDB keydb;
 	kyotocabinet::IndexDB strdb;
-	std::string lasterror;
-	int lasterrno;
 };
 
-void KeyTable::Impl::setError( const std::string& msg)
+static std::string errorstr( const kyotocabinet::IndexDB& idb, const std::string& msg)
 {
-	std::string keyfilepath( filepath( path, name, type));
-	kyotocabinet::BasicDB::Error kcferr = keydb.error();
-	lasterrno = (int)kcferr.code();
-	if (!lasterrno)
-	{
-		kcferr = strdb.error();
-		lasterrno = (int)kcferr.code();
-	}
+	kyotocabinet::BasicDB::Error kcferr = idb.error();
+	int lasterrno = (int)kcferr.code();
 	if (lasterrno)
 	{
-		lasterror = msg + " (" + kcferr.message() + "), file '" + keyfilepath + "'";
+		return msg + " (" + kcferr.message() + ")";
 	}
 	else
 	{
-		lasterror = msg + ", file '" + keyfilepath + "'";
+		return msg;
 	}
 }
 
 void KeyTable::Impl::close()
 {
-	isopen = false;
 	if (isopen)
 	{
 		keydb.close();
 		strdb.close();
 	}
+	isopen = false;
 }
 
 static const char* g_metakey_nof_deleted = "\001\002#D";
@@ -115,57 +105,25 @@ void KeyTable::Impl::create( const std::string& type_, const std::string& name_,
 	//create tables:
 	if (!keydb_.open( keyfilepath, kyotocabinet::BasicDB::OWRITER | kyotocabinet::BasicDB::OCREATE | kyotocabinet::BasicDB::OTRUNCATE))
 	{
-		kyotocabinet::BasicDB::Error kcferr = keydb_.error();
-		int lasterrno_ = (int)kcferr.code();
-		std::string lasterror_;
-		if (lasterrno_)
-		{
-			lasterror_ = std::string("failed to create key table for ") + type_ + " (" + kcferr.message() + ") at '" + keyfilepath + "'";
-		}
-		else
-		{
-			lasterror_ = std::string("failed to create key table for ") + type_ + " at '" + keyfilepath + "'";
-		}
-		throw std::runtime_error( lasterror_);
+		throw std::runtime_error( errorstr( keydb_, std::string("failed to create key table for ") + type_));
 	}
 	if (!strdb_.open( strfilepath, kyotocabinet::BasicDB::OWRITER | kyotocabinet::BasicDB::OCREATE))
 	{
-		kyotocabinet::BasicDB::Error kcferr = strdb_.error();
-		int lasterrno_ = (int)kcferr.code();
-		std::string lasterror_;
-		if (lasterrno_)
-		{
-			lasterror_ = std::string("failed to create inverse key table for ") + invtype_ + " (" + kcferr.message() + ") at '" + strfilepath + "'";
-		}
-		else
-		{
-			lasterror_ = std::string("failed to create inverse key table for ") + invtype_ + " at '" + strfilepath + "'";
-		}
 		keydb_.close();
-		throw std::runtime_error( lasterror_);
+		throw std::runtime_error( errorstr( strdb_, std::string("failed to create key table for ") + invtype_));
 	}
 	//write initial meta data:
 	Index nof_deleted_ = 0;
 	if (!keydb_.set( g_metakey_nof_deleted, std::strlen(g_metakey_nof_deleted), (char*)&nof_deleted_, sizeof(nof_deleted_)))
 	{
-		kyotocabinet::BasicDB::Error kcferr = keydb_.error();
-		int lasterrno_ = (int)kcferr.code();
-		std::string lasterror_;
-		if (lasterrno_)
-		{
-			lasterror_ = std::string("failed to insert meta data in created key table for ") + type_ + " (" + kcferr.message() + ") at '" + keyfilepath + "'";
-		}
-		else
-		{
-			lasterror_ = std::string("failed to insert meta data in created key table for ") + type_ + " at '" + keyfilepath + "'";
-		}
+		std::string lasterror_ = errorstr( keydb_, std::string( "failed to insert meta data in created key table for ") + type_);
 		keydb_.close();
 		strdb_.close();
 		throw std::runtime_error( lasterror_);
 	}
 }
 
-bool KeyTable::Impl::open()
+void KeyTable::Impl::open()
 {
 	//open tables:
 	const std::string invtype = type + "i";
@@ -174,29 +132,27 @@ bool KeyTable::Impl::open()
 
 	if (!keydb.open( keyfilepath, writemode?kyotocabinet::BasicDB::OWRITER:kyotocabinet::BasicDB::OREADER))
 	{
-		setError( "failed to open key table");
-		return false;
+		throw std::runtime_error( errorstr( keydb, "failed to open key table"));
 	}
 	if (!strdb.open( keyfilepath, writemode?kyotocabinet::BasicDB::OWRITER:kyotocabinet::BasicDB::OREADER))
 	{
 		keydb.close();
-		setError( "failed to open inverse key table");
-		return false;
+		throw std::runtime_error( errorstr( strdb, "failed to open inverse key table"));
 	}
 	//read metadata:
 	std::size_t ptrsize;
 	char* ptr = keydb.get( g_metakey_nof_deleted, std::strlen(g_metakey_nof_deleted), &ptrsize);
 	if (!ptr || ptrsize != sizeof( Index))
 	{
+		std::string lasterror_ = errorstr( keydb, std::string( "corrupt key table (metadata) for ") + type);
 		keydb.close();
 		strdb.close();
 		delete [] ptr;
-		throw std::runtime_error( std::string("corrupt key table ") + type);
+		throw std::runtime_error( lasterror_);
 	}
 	std::memcpy( &nof_deleted, ptr, ptrsize);
 	delete [] ptr;
 	isopen = true;
-	return true;
 }
 
 Index KeyTable::Impl::findKey( const std::string& key) const
@@ -221,7 +177,7 @@ std::string KeyTable::Impl::getIdentifier( const Index& idx) const
 	std::size_t ptrsize = 0;
 	kyotocabinet::IndexDB* kdb = const_cast<kyotocabinet::IndexDB*>(&strdb);
 	char* ptr = kdb->get( (char*)&idx, sizeof(idx), &ptrsize);
-	if (!ptr) std::runtime_error( "identifier not found in table");
+	if (!ptr) std::runtime_error( errorstr( strdb, "identifier not found in table"));
 	std::string rt( ptr, ptrsize);
 	delete [] ptr;
 	return rt;
@@ -229,55 +185,46 @@ std::string KeyTable::Impl::getIdentifier( const Index& idx) const
 
 Index KeyTable::Impl::insertKey( const std::string& key)
 {
-	if (writemode)
+	if (!writemode) throw std::runtime_error( "cannot insert key into table. DB not opened for writing");
+	Index idx = keydb.count() + nof_deleted + 1;
+	if (!strdb.set( (char*)&idx, sizeof(idx), key.c_str(), key.size()))
 	{
-		Index idx = keydb.count() + nof_deleted + 1;
-		if (!strdb.set( (char*)&idx, sizeof(idx), key.c_str(), key.size()))
-		{
-			setError( "failed to insert (inv) into key table");
-			return 0;
-		}
-		if (!keydb.set( key.c_str(), key.size(), (char*)&idx, sizeof(idx)))
-		{
-			setError( "failed to insert into key table");
-			return 0;
-		}
-		return idx;
+		throw std::runtime_error( errorstr( strdb, "failed to insert (inv) into key table"));
 	}
-	else
+	if (!keydb.set( key.c_str(), key.size(), (char*)&idx, sizeof(idx)))
 	{
-		setError( "cannot insert into key table. DB not opened for writing");
-		return 0;
+		throw std::runtime_error( errorstr( keydb, "failed to insert into key table"));
 	}
+	return idx;
 }
 
 bool KeyTable::Impl::removeKey( const std::string& key)
 {
-	if (writemode)
-	{
-		Index idx = findKey( key);
-		if (!idx) return false;
+	if (!writemode) throw std::runtime_error( "cannot remove key from table. DB not opened for writing");
 
-		++nof_deleted;
-		if (!keydb.set( g_metakey_nof_deleted, std::strlen(g_metakey_nof_deleted), (char*)&nof_deleted, sizeof(nof_deleted)))
-		{
-			setError( "failed to delete key from key table (write meta data)");
-			--nof_deleted;
-			return false;
-		}
-		if (!keydb.remove( key.c_str(), key.size()))
-		{
-			setError( "failed to delete key from key table (write meta data)");
-			return false;
-		}
-		strdb.remove( (char*)&idx, sizeof(idx));
-		return true;
-	}
-	else
+	Index idx = findKey( key);
+	if (!idx) return false;
+
+	++nof_deleted;
+	if (!keydb.set( g_metakey_nof_deleted, std::strlen(g_metakey_nof_deleted), (char*)&nof_deleted, sizeof(nof_deleted)))
 	{
-		setError( "cannot delete key from key table. DB not opened for writing");
-		return false;
+		--nof_deleted;
+		throw std::runtime_error( errorstr( keydb, "failed to delete key from key table (write meta data)"));
 	}
+	if (!keydb.remove( key.c_str(), key.size()))
+	{
+		// ... if this fails we get a document number counter leak
+		throw std::runtime_error( errorstr( keydb, "failed to delete key from key table"));
+	}
+	try
+	{
+		strdb.remove( (char*)&idx, sizeof(idx));
+	}
+	catch (...)
+	{
+		// ... if this fails we get a leak in the 'strdb', but the operation is completed
+	}
+	return true;
 }
 
 
@@ -285,14 +232,14 @@ KeyTable::KeyTable( const std::string& type, const std::string& name, const std:
 	:m_impl( new Impl( type, name, path, writemode))
 {}
 
-bool KeyTable::open()
+void KeyTable::open()
 {
-	return m_impl->open();
+	m_impl->open();
 }
 
 void KeyTable::close()
 {
-	return m_impl->close();
+	m_impl->close();
 }
 
 void KeyTable::create( const std::string& type, const std::string& name, const std::string& path)
@@ -303,16 +250,6 @@ void KeyTable::create( const std::string& type, const std::string& name, const s
 KeyTable::~KeyTable()
 {
 	delete m_impl;
-}
-
-const std::string& KeyTable::lastError() const
-{
-	return m_impl->lasterror;
-}
-
-int KeyTable::lastErrno() const
-{
-	return m_impl->lasterrno;
 }
 
 Index KeyTable::findKey( const std::string& key) const
