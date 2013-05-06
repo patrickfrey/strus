@@ -37,173 +37,102 @@
 namespace strus
 {
 
-///\class PersistentList
-///\tparam Element
-///\brief Implementation of a block map in a file
-template <class Element>
-class PersistentList
+///\class PersistentListBase
+///\brief Base (non intrusive) implementation of a persistent list of POD types
+class PersistentListBase
 	:public BlockTable
 {
 public:
 	enum {NofBlockElements=127};
-	PersistentList( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
-		:BlockTable( type_, sizeof(Block), name_, path_, writemode_)
-		,m_lastidx(0)
-	{
-		std::memset( &m_cur, 0, sizeof( m_cur));
-	}
+	PersistentListBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_, bool writemode_=false);
 
-	virtual ~PersistentList(){}
+	virtual ~PersistentListBase();
 
-	static void create( const std::string& type_, const std::string& name_, const std::string& path_)
-	{
-		BlockTable::create( type_, sizeof(Block), name_, path_);
-	}
+	static void create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_);
 
-	void open()
-	{
-		BlockTable::open();
-		std::size_t nof_blocks = BlockTable::size();
-		if (nof_blocks > 0)
-		{
-			m_lastidx = nof_blocks;
-			readBlock( m_lastidx, &m_cur);
-		}
-		else
-		{
-			m_lastidx = 0;
-			std::memset( &m_cur, 0, sizeof( m_cur));
-		}
-	}
+	void open();
 
-	void push_back( const Element& element)
-	{
-		if (m_lastidx == 0 || m_cur.hdr.size == NofBlockElements)
-		{
-			Block newblk;
-			std::memset( &newblk, 0, sizeof( newblk));
-			newblk.hdr.size = 0;
-			newblk.element[ newblk.hdr.size++] = element;
-			m_lastidx = BlockTable::appendBlock( &newblk);
-			std::memcpy( &m_cur, &newblk, sizeof( m_cur));
-		}
-		else
-		{
-			m_cur.element[ m_cur.hdr.size++] = element;
-			try
-			{
-				writeBlock( m_lastidx, &m_cur);
-			}
-			catch (const std::runtime_error& e)
-			{
-				--m_cur.hdr.size;
-				throw e;
-			}
-		}
-	}
+	void push_back( const void* element);
 
-	void reset()
-	{
-		BlockTable::reset();
-		std::memset( &m_cur, 0, sizeof( m_cur));
-		m_lastidx = 0;
-	}
-
-private:
-	struct Block
-	{
-		union
-		{
-			std::size_t size;
-			Element _;
-		} hdr;
-		Element element[ NofBlockElements];
-	};
+	void reset();
 
 public:
-	class const_iterator
+	class iterator
 	{
 	public:
-		const_iterator( const PersistentList* ref_)
-			:m_isopen(false),m_ref(ref_),m_curidx(0),m_curpos(0)
-		{
-			readNextBlock();
-		}
-		const_iterator()
-			:m_isopen(false),m_ref(0),m_curidx(0),m_curpos(0)
-		{}
-		const_iterator( const const_iterator& o)
-			:m_isopen(o.m_isopen),m_ref(o.m_ref),m_curidx(o.m_curidx),m_curpos(o.m_curpos)
-		{
-			std::memcpy( &m_cur, &o.m_cur, sizeof( m_cur));
-		}
+		iterator( PersistentListBase* ref_);
+		iterator();
+		iterator( const iterator& o);
+		iterator& operator++();
+		const char* operator*();
 
-		const_iterator& operator++()
-		{
-			m_curpos++;
-			if (m_curpos == m_cur.hdr.size)
-			{
-				if (!readNextBlock()) throw std::runtime_error( "illegal increment");
-			}
-		}
-
-		const Element& operator*()
-		{
-			if (m_curpos == m_cur.hdr.size) throw std::runtime_error( "uninitialized memory read");
-			return m_cur[ m_curpos];
-		}
-
-		bool operator==( const const_iterator& o) const	{return isequal(o);}
-		bool operator!=( const const_iterator& o) const	{return !isequal(o);}
+		bool operator==( const iterator& o) const	{return isequal(o);}
+		bool operator!=( const iterator& o) const	{return !isequal(o);}
 
 	private:
-		bool isequal( const const_iterator& o) const
-		{
-			if (!o.m_ref)
-			{
-				if (!m_ref) return true;
-				return (m_curidx == m_ref->m_lastidx && m_curpos == m_cur.hdr.size);
-			}
-			else if (!m_ref)
-			{
-				return o.isequal( *this);
-			}
-			return (m_curidx == o.m_curidx && m_curpos == o.m_curpos);
-		}
-
-		bool readNextBlock()
-		{
-			if (!m_isopen)
-			{
-				if (!m_ref->open()) throw std::runtime_error( m_ref->lastError());
-			}
-			if (m_curidx == m_ref->m_lastidx) return false;
-			if (!m_ref->readBlock( m_curidx+1, &m_cur)) throw std::runtime_error( m_ref->lastError());
-			m_curpos = 0;
-			++m_curidx;
-		}
+		bool isequal( const iterator& o) const;
+		void readNextBlock();
 
 	private:
-		bool m_isopen;
-		const PersistentList* m_ref;
-		PersistentList::Block m_cur;
+		PersistentListBase* m_ref;
+		char* m_cur;
 		Index m_curidx;
 		std::size_t m_curpos;
+		std::size_t m_cursize;
 	};
 
-	const_iterator begin() const
+	iterator begin()
 	{
-		return const_iterator(this);
+		return iterator(this);
 	}
-	const_iterator end() const
+	iterator end()
 	{
-		return const_iterator();
+		return iterator();
 	}
 
 private:
-	friend class const_iterator;
-	Block m_cur;
+	std::size_t blocksize() const;
+
+private:
+	friend class iterator;
+	char* m_cur;
 	Index m_lastidx;
+	std::size_t m_elementsize;
+};
+
+
+///\class PersistentList
+///\tparam Element
+///\brief Implementation of a persistent list of POD types
+template <class Element>
+class PersistentList
+	:public PersistentListBase
+{
+public:
+	PersistentList( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
+		:PersistentListBase( type_, name_, path_, sizeof(Element), writemode_){}
+
+	static void create( const std::string& type_, const std::string& name_, const std::string& path_)
+		{PersistentListBase::create( type_, name_, path_, sizeof(Element));}
+
+	void push_back( const Element& element)
+		{PersistentListBase::push_back( &element);}
+
+
+	class iterator
+		:public PersistentListBase::iterator
+	{
+	public:
+		iterator( PersistentList* ref_)
+			:PersistentListBase::iterator( ref_){}
+		iterator()
+			:PersistentListBase::iterator(){}
+		iterator( const iterator& o)
+			:PersistentListBase::iterator(o){}
+
+		const Element& operator*()
+			{return *(const Element*)PersistentListBase::iterator::operator*();}
+	};
 };
 
 } //namespace

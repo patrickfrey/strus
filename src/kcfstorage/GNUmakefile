@@ -2,6 +2,7 @@ TOPDIR=../..
 CPP_OBJS=\
 	file.o \
 	blktable.o \
+	persistentlist.o \
 	keytable.o \
 	database.o \
 	kcfstorage.o
