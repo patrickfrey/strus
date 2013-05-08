@@ -27,10 +27,12 @@
 --------------------------------------------------------------------
 */
 #include "database.hpp"
+#include "encode.hpp"
 #include <cstdio>
 #include <algorithm>
 #include <cstdlib>
 #include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 
 using namespace strus;
 
@@ -45,7 +47,7 @@ void StorageDB::create( const std::string& name_, const std::string& path_)
 	KeyTable::create( "tetab", name_, path_);
 	KeyTable::create( "tytab", name_, path_);
 	KeyTable::create( "dctab", name_, path_);
-	PersistentList<DocNumber>::create( "rdlst", name_, path_);
+	PodVector<DocNumber>::create( "rdlst", name_, path_);
 	BlockTable::create( "smblk", SmallBlockSize, name_, path_);
 	BlockTable::create( "ixblk", IndexBlockSize, name_, path_);
 }
@@ -54,6 +56,7 @@ StorageDB::StorageDB( const std::string& name_, const std::string& path_, bool w
 	:m_name(name_)
 	,m_path(path_)
 	,m_termtable("tetab",name_,path_,writemode_)
+	,m_termblockmap("telst",name_,path_,writemode_)
 	,m_typetable("tytab",name_,path_,writemode_)
 	,m_docidtable("dctab",name_,path_,writemode_)
 	,m_deldocidlist("rdlst",name_,path_,writemode_)
@@ -64,6 +67,7 @@ StorageDB::StorageDB( const std::string& name_, const std::string& path_, bool w
 void StorageDB::close()
 {
 	m_termtable.close();
+	m_termblockmap.close();
 	m_typetable.close();
 	m_docidtable.close();
 	m_deldocidlist.close();
@@ -74,6 +78,7 @@ void StorageDB::close()
 void StorageDB::open()
 {
 	m_termtable.open();
+	m_termblockmap.open();
 	m_typetable.open();
 	m_docidtable.open();
 	m_deldocidlist.open();
@@ -84,40 +89,6 @@ void StorageDB::open()
 StorageDB::~StorageDB()
 {
 	close();
-}
-
-static void packIndex( std::string& buf, Index idx)
-{
-	enum {MaxChr=32};
-	unsigned char chrbuf[ MaxChr];
-	unsigned char chridx = MaxChr;
-	if (idx < 127)
-	{
-		buf.push_back( idx);
-	}
-	else
-	{
-		chrbuf[ chridx-1] = (unsigned char)((idx & 0x7F));
-		idx >>= 7;
-		while (idx > 0 && --chridx > 0)
-		{
-			chrbuf[ chridx-1] = (unsigned char)((idx & 0x7F)
-					| 0x80);
-			idx >>= 7;
-		}
-		buf.append( (char*)chrbuf+chridx, MaxChr-chridx);
-	}
-}
-
-static Index unpackIndex( std::string::const_iterator& itr, const std::string::const_iterator& end)
-{
-	Index rt = 0;
-	while (itr != end)
-	{
-		rt = (rt << 7) + (*itr & 0x7F);
-		if ((*itr & 0x80) == 0) break;
-	}
-	return rt;
 }
 
 TermNumber StorageDB::findTermNumber( const std::string& type, const std::string& value) const
@@ -133,12 +104,6 @@ TermNumber StorageDB::findTermNumber( const std::string& type, const std::string
 	return rt;
 }
 
-DocNumber StorageDB::findDocumentNumber( const std::string& docid) const
-{
-	DocNumber rt = m_docidtable.findKey( docid);
-	return rt;
-}
-
 TermNumber StorageDB::insertTermNumber( const std::string& type, const std::string& value)
 {
 	std::string key;
@@ -149,6 +114,21 @@ TermNumber StorageDB::insertTermNumber( const std::string& type, const std::stri
 	key.append( value);
 
 	TermNumber rt = m_termtable.insertKey( key);
+	if (m_termblockmap.push_back( 0)+1 != rt)
+	{
+		throw std::runtime_error( "internal data corruption (term to block map)");
+	}
+	return rt;
+}
+
+Index StorageDB::getTermBlockAddress( const TermNumber& tn)
+{
+	return m_termblockmap.get( tn);
+}
+
+DocNumber StorageDB::findDocumentNumber( const std::string& docid) const
+{
+	DocNumber rt = m_docidtable.findKey( docid);
 	return rt;
 }
 
@@ -172,6 +152,65 @@ std::pair<std::string,std::string> StorageDB::getTerm( const TermNumber& tn)
 std::string StorageDB::getDocumentId( const DocNumber& dn)
 {
 	return m_docidtable.getIdentifier( dn);
+}
+
+static boost::shared_ptr<void> allocMemBlock( unsigned int size)
+{
+	return boost::shared_ptr<void>( std::calloc( 1, size), std::free);
+}
+
+std::pair<Index,boost::shared_ptr<void> > StorageDB::allocSmallBlock()
+{
+	std::pair<Index,boost::shared_ptr<void> > rt( 0, allocMemBlock( SmallBlockSize));
+	rt.first = m_smallblktable.insertBlock( rt.second.get());
+	return rt;
+}
+
+std::pair<Index,boost::shared_ptr<void> > StorageDB::allocIndexBlock()
+{
+	std::pair<Index,boost::shared_ptr<void> > rt( 0, allocMemBlock( IndexBlockSize));
+	rt.first = m_indexblktable.insertBlock( rt.second.get());
+	return rt;
+}
+
+void StorageDB::writeSmallBlock( const Index& idx, const void* data, std::size_t start)
+{
+	if (start)
+	{
+		if (start > SmallBlockSize) throw std::logic_error( "parameter out of range");
+		m_smallblktable.partialWriteBlock( idx, start, data, SmallBlockSize - start);
+	}
+	else
+	{
+		m_smallblktable.writeBlock( idx, data);
+	}
+}
+
+void StorageDB::writeIndexBlock( const Index& idx, const void* data, std::size_t start)
+{
+	if (start)
+	{
+		if (start > IndexBlockSize) throw std::logic_error( "parameter out of range");
+		m_smallblktable.partialWriteBlock( idx, start, data, IndexBlockSize - start);
+	}
+	else
+	{
+		m_smallblktable.writeBlock( idx, data);
+	}
+}
+
+boost::shared_ptr<void> StorageDB::readSmallBlock( const Index& idx)
+{
+	boost::shared_ptr<void> rt( allocMemBlock( SmallBlockSize));
+	m_smallblktable.readBlock( idx, rt.get());
+	return rt;
+}
+
+boost::shared_ptr<void> StorageDB::readIndexBlock( const Index& idx)
+{
+	boost::shared_ptr<void> rt( allocMemBlock( IndexBlockSize));
+	m_indexblktable.readBlock( idx, rt.get());
+	return rt;
 }
 
 

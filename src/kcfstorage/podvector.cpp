@@ -26,17 +26,17 @@
 
 --------------------------------------------------------------------
 */
-#include "persistentlist.hpp"
+#include "podvector.hpp"
 #include <cstdlib>
 
 using namespace strus;
 
-std::size_t PersistentListBase::blocksize() const
+std::size_t PodVectorBase::blocksize() const
 {
 	return m_elementsize * (NofBlockElements+1);
 }
 
-PersistentListBase::PersistentListBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_, bool writemode_)
+PodVectorBase::PodVectorBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_, bool writemode_)
 	:BlockTable( type_, m_elementsize * (NofBlockElements+1), name_, path_, writemode_)
 	,m_lastidx(0)
 	,m_elementsize(elementsize_)
@@ -46,17 +46,17 @@ PersistentListBase::PersistentListBase( const std::string& type_, const std::str
 	if (!m_cur) throw std::bad_alloc();
 }
 
-PersistentListBase::~PersistentListBase()
+PodVectorBase::~PodVectorBase()
 {
 	std::free( m_cur);
 }
 
-void PersistentListBase::create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_)
+void PodVectorBase::create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_)
 {
 	BlockTable::create( type_, elementsize_ * (NofBlockElements+1), name_, path_);
 }
 
-void PersistentListBase::open()
+void PodVectorBase::open()
 {
 	BlockTable::open();
 	std::size_t nof_blocks = BlockTable::size();
@@ -72,8 +72,9 @@ void PersistentListBase::open()
 	}
 }
 
-void PersistentListBase::push_back( const void* element)
+Index PodVectorBase::push_back( const void* element)
 {
+	Index rt = 0;
 	std::size_t nn = 0;
 	std::memcpy( &nn, m_cur, sizeof(nn));
 
@@ -95,23 +96,36 @@ void PersistentListBase::push_back( const void* element)
 			std::free( newblk);
 			throw e;
 		}
+		rt = (m_lastidx-1) * NofBlockElements;
 	}
 	else
 	{
+		rt = (m_lastidx-1) * NofBlockElements + nn;
 		std::memcpy( m_cur + (m_elementsize * ++nn), element, m_elementsize);
 		BlockTable::writeBlock( m_lastidx, m_cur);
 		std::memcpy( m_cur, &nn, sizeof(nn));
 	}
+	return rt;
 }
 
-void PersistentListBase::reset()
+void PodVectorBase::set( const Index& idx, const void* element)
+{
+	BlockTable::partialWriteBlock( (idx / NofBlockElements) + 1, idx % NofBlockElements, element, m_elementsize);
+}
+
+void PodVectorBase::get( const Index& idx, void* element)
+{
+	BlockTable::partialReadBlock( (idx / NofBlockElements) + 1, idx % NofBlockElements, element, m_elementsize);
+}
+
+void PodVectorBase::reset()
 {
 	BlockTable::reset();
 	std::memset( &m_cur, 0, blocksize());
 	m_lastidx = 0;
 }
 
-PersistentListBase::iterator::iterator( PersistentListBase* ref_)
+PodVectorBase::iterator::iterator( PodVectorBase* ref_)
 	:m_ref(ref_)
 	,m_cur((char*)std::calloc(1,ref_->blocksize()))
 	,m_curidx(0)
@@ -122,11 +136,11 @@ PersistentListBase::iterator::iterator( PersistentListBase* ref_)
 	readNextBlock();
 }
 
-PersistentListBase::iterator::iterator()
+PodVectorBase::iterator::iterator()
 	:m_ref(0),m_cur(0),m_curidx(0),m_curpos(0),m_cursize(0)
 {}
 
-PersistentListBase::iterator::iterator( const iterator& o)
+PodVectorBase::iterator::iterator( const iterator& o)
 	:m_ref(o.m_ref)
 	,m_cur((char*)std::calloc(1,o.m_ref->blocksize()))
 	,m_curidx(o.m_curidx)
@@ -137,20 +151,20 @@ PersistentListBase::iterator::iterator( const iterator& o)
 	std::memcpy( m_cur, o.m_cur, m_ref->blocksize());
 }
 
-PersistentListBase::iterator& PersistentListBase::iterator::operator++()
+PodVectorBase::iterator& PodVectorBase::iterator::operator++()
 {
 	m_curpos++;
 	if (m_curpos == m_cursize) readNextBlock();
 	return *this;
 }
 
-const char* PersistentListBase::iterator::operator*()
+const char* PodVectorBase::iterator::operator*()
 {
 	if (m_curpos == m_cursize) throw std::runtime_error( "uninitialized memory read");
 	return m_cur + ((m_curpos+1) * m_ref->m_elementsize);
 }
 
-bool PersistentListBase::iterator::isequal( const iterator& o) const
+bool PodVectorBase::iterator::isequal( const iterator& o) const
 {
 	if (!o.m_ref)
 	{
@@ -164,7 +178,7 @@ bool PersistentListBase::iterator::isequal( const iterator& o) const
 	return (m_curidx == o.m_curidx && m_curpos == o.m_curpos);
 }
 
-void PersistentListBase::iterator::readNextBlock()
+void PodVectorBase::iterator::readNextBlock()
 {
 	if (m_curidx == m_ref->m_lastidx) throw std::runtime_error( "try to read over list boundaries");
 	m_ref->readBlock( m_curidx+1, &m_cur);

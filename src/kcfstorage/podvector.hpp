@@ -26,10 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_PERSISTENT_LIST_HPP_INCLUDED
-#define _STRUS_KCF_PERSISTENT_LIST_HPP_INCLUDED
+#ifndef _STRUS_KCF_POD_VECTOR_HPP_INCLUDED
+#define _STRUS_KCF_POD_VECTOR_HPP_INCLUDED
 #include "strus/position.hpp"
-#include "blktable.hpp"
+#include "blocktable.hpp"
 #include <cstdio>
 #include <string>
 #include <cstring>
@@ -37,30 +37,32 @@
 namespace strus
 {
 
-///\class PersistentListBase
+///\class PodVectorBase
 ///\brief Base (non intrusive) implementation of a persistent list of POD types
-class PersistentListBase
+class PodVectorBase
 	:public BlockTable
 {
 public:
 	enum {NofBlockElements=127};
-	PersistentListBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_, bool writemode_=false);
+	PodVectorBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_, bool writemode_=false);
 
-	virtual ~PersistentListBase();
+	virtual ~PodVectorBase();
 
 	static void create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_);
 
 	void open();
 
-	void push_back( const void* element);
+	void set( const Index& idx, const void* element);
+	void get( const Index& idx, void* element);
 
+	Index push_back( const void* element);
 	void reset();
 
 public:
 	class iterator
 	{
 	public:
-		iterator( PersistentListBase* ref_);
+		iterator( PodVectorBase* ref_);
 		iterator();
 		iterator( const iterator& o);
 		iterator& operator++();
@@ -74,7 +76,7 @@ public:
 		void readNextBlock();
 
 	private:
-		PersistentListBase* m_ref;
+		PodVectorBase* m_ref;
 		char* m_cur;
 		Index m_curidx;
 		std::size_t m_curpos;
@@ -101,37 +103,43 @@ private:
 };
 
 
-///\class PersistentList
+///\class PodVector
 ///\tparam Element
 ///\brief Implementation of a persistent list of POD types
 template <class Element>
-class PersistentList
-	:public PersistentListBase
+class PodVector
+	:public PodVectorBase
 {
 public:
-	PersistentList( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
-		:PersistentListBase( type_, name_, path_, sizeof(Element), writemode_){}
+	PodVector( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
+		:PodVectorBase( type_, name_, path_, sizeof(Element), writemode_){}
 
 	static void create( const std::string& type_, const std::string& name_, const std::string& path_)
-		{PersistentListBase::create( type_, name_, path_, sizeof(Element));}
+		{PodVectorBase::create( type_, name_, path_, sizeof(Element));}
 
-	void push_back( const Element& element)
-		{PersistentListBase::push_back( &element);}
+	Index push_back( const Element& element)
+		{return PodVectorBase::push_back( &element);}
 
+	void set( const Index& idx, const Element& element)
+		{return PodVectorBase::set( idx, &element);}
+	void get( const Index& idx, Element& element)
+		{return PodVectorBase::get( idx, &element);}
+	Element get( const Index& idx)
+		{Element rt; PodVectorBase::get( idx, &rt); return rt;}
 
 	class iterator
-		:public PersistentListBase::iterator
+		:public PodVectorBase::iterator
 	{
 	public:
-		iterator( PersistentList* ref_)
-			:PersistentListBase::iterator( ref_){}
+		iterator( PodVector* ref_)
+			:PodVectorBase::iterator( ref_){}
 		iterator()
-			:PersistentListBase::iterator(){}
+			:PodVectorBase::iterator(){}
 		iterator( const iterator& o)
-			:PersistentListBase::iterator(o){}
+			:PodVectorBase::iterator(o){}
 
 		const Element& operator*()
-			{return *(const Element*)PersistentListBase::iterator::operator*();}
+			{return *(const Element*)PodVectorBase::iterator::operator*();}
 	};
 };
 

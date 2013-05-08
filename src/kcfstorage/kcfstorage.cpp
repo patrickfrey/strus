@@ -92,6 +92,12 @@ DocNumber StorageImpl::storeDocument( const Document& doc)
 		if (mi == tmap.end()) throw std::logic_error( "internal error: corrupt term map");
 		std::sort( mi->second.begin(), mi->second.end(), compareDocPosition);
 	}
+	// pack occurrencies positions per term
+	TermMap::const_iterator mi = tmap.begin(), me = tmap.end();
+	for (; mi != me; ++mi)
+	{
+
+	}
 	return docno;
 }
 
@@ -128,7 +134,5 @@ bool StorageImpl::nextIterator( PositionChunk& /*itr*/)
 void StorageImpl::closeIterator( PositionChunk& /*itr*/)
 {
 }
-
-
 
 

@@ -1,20 +1,24 @@
 TOPDIR=../..
 CPP_OBJS=\
 	file.o \
-	blktable.o \
-	persistentlist.o \
+	encode.o \
+	blocktable.o \
+	blockcache.o \
+	podvector.o \
 	keytable.o \
 	database.o \
 	kcfstorage.o
 
 CPP_INCS=\
 	file.hpp \
-	blktable.hpp \
+	encode.hpp \
+	blocktable.hpp \
+	blockcache.hpp \
 	keytable.hpp \
 	database.hpp \
-	persistentlist.hpp
+	podvector.hpp
 
-CPP_INCLUDE=-I$(TOPDIR)/include -I.
+CPP_INCLUDE=-I/usr/local/include/ -I$(TOPDIR)/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
 PATHFLAGS=-DSTRUS_DEFAULT_DBPATH="/home/patrick/"
 SO_COMPILE_FLAGS=-fPIC

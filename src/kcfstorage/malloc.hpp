@@ -26,51 +26,14 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_BLOCK_TABLE_HPP_INCLUDED
-#define _STRUS_KCF_BLOCK_TABLE_HPP_INCLUDED
-#include "strus/position.hpp"
-#include "file.hpp"
-#include <string>
+#ifndef _STRUS_KCF_MALLOC_HPP_INCLUDED
+#define _STRUS_KCF_MALLOC_HPP_INCLUDED
+#include <cstdlib>
 
 namespace strus
 {
+	void* malloc_aligned( std::size_t size, std::size_t alignment);
+	std::size_t cachelinesize();
+}
 
-///\class BlockTable
-///\brief Implementation of a block map in a file
-class BlockTable
-{
-public:
-	BlockTable( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_=false);
-	~BlockTable();
-
-	static void create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_);
-	void open();
-	void close();
-	void reset();
-
-	void readBlock( Index idx, void* buf);
-	void writeBlock( Index idx, const void* buf);
-	Index insertBlock( const void* buf);
-	Index size();
-
-private:
-	struct ControlBlock
-	{
-		Index freelist;
-	};
-
-	void readControlBlock( Index idx, ControlBlock& block);
-	void writeControlBlock( Index idx, const ControlBlock& block);
-	Index appendBlock( const void* buf);
-
-private:
-	ControlBlock m_controlblock;
-	bool m_writemode;
-	std::size_t m_blocksize;
-	File m_file;
-};
-
-} //namespace
 #endif
-
-

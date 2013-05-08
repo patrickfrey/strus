@@ -26,15 +26,16 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_STORAGE_DB_HPP_INCLUDED
-#define _STRUS_KCF_STORAGE_DB_HPP_INCLUDED
+#ifndef _STRUS_KCF_DATABASE_HPP_INCLUDED
+#define _STRUS_KCF_DATABASE_HPP_INCLUDED
 #include "strus/storage.hpp"
 #include "strus/position.hpp"
 #include "keytable.hpp"
-#include "blktable.hpp"
-#include "persistentlist.hpp"
+#include "blocktable.hpp"
+#include "podvector.hpp"
 #include <string>
 #include <utility>
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
@@ -53,39 +54,33 @@ public:
 	static void create( const std::string& name, const std::string& path=std::string());
 
 	TermNumber findTermNumber( const std::string& type, const std::string& value) const;
-	DocNumber findDocumentNumber( const std::string& docid) const;
-
 	TermNumber insertTermNumber( const std::string& type, const std::string& value);
+
+	DocNumber findDocumentNumber( const std::string& docid) const;
 	DocNumber insertDocumentNumber( const std::string& docid);
 
 	std::pair<std::string,std::string> getTerm( const TermNumber& tn);
 	std::string getDocumentId( const DocNumber& dn);
 
-	const std::string& lastError();
-	int lastErrno();
+	Index getTermBlockAddress( const TermNumber& tn);
+
+	std::pair<Index,boost::shared_ptr<void> > allocSmallBlock();
+	std::pair<Index,boost::shared_ptr<void> > allocIndexBlock();
+
+	void writeSmallBlock( const Index& idx, const void* data, std::size_t start=0);
+	void writeIndexBlock( const Index& idx, const void* data, std::size_t start=0);
+
+	boost::shared_ptr<void> readSmallBlock( const Index& idx);
+	boost::shared_ptr<void> readIndexBlock( const Index& idx);
 
 private:
-	void clearTransaction();
-
-private:
-	struct Transaction
-	{
-		DocNumber docCounter;
-		std::map<std::string, DocNumber> docmap;
-		std::string errormsg;
-		int errorno;
-
-		Transaction()
-			:docCounter(0){}
-	};
-	Transaction m_transaction;
-
 	std::string m_name;
 	std::string m_path;
 	KeyTable m_termtable;
+	PodVector<DocNumber> m_termblockmap;
 	KeyTable m_typetable;
 	KeyTable m_docidtable;
-	PersistentList<DocNumber> m_deldocidlist;
+	PodVector<DocNumber> m_deldocidlist;
 	BlockTable m_smallblktable;
 	BlockTable m_indexblktable;
 };

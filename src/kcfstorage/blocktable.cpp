@@ -26,15 +26,13 @@
 
 --------------------------------------------------------------------
 */
-#include "blktable.hpp"
+#include "blocktable.hpp"
 #include "file.hpp"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 
-
 using namespace strus;
-
 
 BlockTable::BlockTable( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_)
 	:m_writemode(writemode_)
@@ -122,9 +120,23 @@ void BlockTable::readBlock( Index idx, void* buf)
 void BlockTable::writeBlock( Index idx, const void* buf)
 {
 	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
-
 	m_file.seek( idx * m_blocksize);
 	m_file.write( (char*)buf, m_blocksize);
+}
+
+void BlockTable::partialReadBlock( Index idx, std::size_t pos, void* buf, std::size_t bufsize)
+{
+	if (pos + bufsize > m_blocksize) throw std::runtime_error("bad arguments for partial read operation");
+	m_file.seek( idx * m_blocksize + pos);
+	m_file.read( (char*)buf, bufsize);
+}
+
+void BlockTable::partialWriteBlock( Index idx, std::size_t pos, const void* buf, std::size_t bufsize)
+{
+	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
+	if (pos + bufsize > m_blocksize) throw std::runtime_error("bad arguments for partial write operation");
+	m_file.seek( idx * m_blocksize + pos);
+	m_file.write( (char*)buf, bufsize);
 }
 
 Index BlockTable::appendBlock( const void* buf)
