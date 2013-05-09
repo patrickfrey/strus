@@ -1,4 +1,5 @@
 #include "blockcache.hpp"
+#include "malloc.hpp"
 #include <cstdlib>
 #include <boost/functional/hash.hpp>
 #include <boost/random/linear_congruential.hpp>
@@ -10,7 +11,7 @@ BlockCache::BlockCache( std::size_t nofblocks_, std::size_t blocksize_)
 	:m_ar(0)
 	,m_arsize(nofblocks_)
 	,m_hashtable(0)
-	,m_hashtablesize(nofblocks_*4)
+	,m_hashtablesize(nofblocks_*8)
 	,m_timestamp(0)
 	,m_blocksize(blocksize_)
 {
@@ -48,7 +49,7 @@ BlockCache::~BlockCache()
 	}
 }
 
-BlockMetaData* BlockCache::blockMetaData( void* block) const
+BlockCache::BlockMetaData* BlockCache::blockMetaData( void* block) const
 {
 	return (BlockMetaData*)((char*)(block) + m_blocksize);
 }
@@ -65,24 +66,40 @@ void* BlockCache::allocBlock( unsigned int id)
 
 void BlockCache::freeBlock( void* block) const
 {
-	BlockMetaData* md = blockMetaData( rt);
+	BlockMetaData* md = blockMetaData( block);
 	if (md->refcnt.fetch_sub( 1) == 1)
 	{
 		std::free( block);
 	}
 }
 
+void BlockCache::referenceBlock( void* block) const
+{
+	BlockMetaData* md = blockMetaData( block);
+	md->refcnt.fetch_add( 1);
+}
+
+// random number generator for pseudo LRU pick
 static boost::taus88 g_rndgen;
+// hash functions for blocks
+static boost::hash<unsigned int> g_hashfunc;
+
+static unsigned int hashfunc( unsigned int val)
+{
+	static int rndseed = g_rndgen();
+	return g_hashfunc( rndseed + val);
+}
 
 unsigned int BlockCache::findLRU() const
 {
 	unsigned int xx = g_rndgen();
 	unsigned int aa[5];
-	aa[0] = boost::hash( xx + m_timestamp + 0) & (m_arsize-1);
-	aa[1] = boost::hash( xx + m_timestamp + 1) & (m_arsize-1);
-	aa[2] = boost::hash( xx + m_timestamp + 2) & (m_arsize-1);
-	aa[3] = boost::hash( xx + m_timestamp + 3) & (m_arsize-1);
-	aa[4] = boost::hash( xx + m_timestamp + 4) & (m_arsize-1);
+	aa[0] = hashfunc( xx + m_timestamp + 0) & (m_arsize-1);
+	aa[1] = hashfunc( xx + m_timestamp + 1) & (m_arsize-1);
+	aa[2] = hashfunc( xx + m_timestamp + 2) & (m_arsize-1);
+	aa[3] = hashfunc( xx + m_timestamp + 3) & (m_arsize-1);
+	aa[4] = hashfunc( xx + m_timestamp + 4) & (m_arsize-1);
+
 	unsigned int min_tm = m_ar[ aa[0]].timestamp - m_timestamp;
 	unsigned int lru_idx = aa[0];
 	for (int ii=1; ii<5; ++ii)
@@ -97,22 +114,53 @@ unsigned int BlockCache::findLRU() const
 	return lru_idx;
 }
 
-void BlockCache::insertBlock( unsigned int id, void* data)
+void BlockCache::insertBlock( void* block)
 {
-	unsigned int hashval = boost::hash( id) & (m_hashtablesize-1);
-AGAIN:
-	unsigned int lru_idx = findLRU();
-	void* prevdata = m_ar[ lru_idx].data;
-	if (!m_ar[ lru_idx].data.compare_exchange_strong( olddata, data))
+	BlockCache::BlockMetaData* md = BlockCache::blockMetaData( block);
+	unsigned int hashval = hashfunc( md->id) & (m_hashtablesize-1);
+	unsigned int lru_idx;
+	unsigned int gate = 0;
+	do
 	{
-		goto AGAIN;
+		lru_idx = findLRU();
 	}
+	while (!m_ar[ lru_idx].gate.compare_exchange_strong( gate, 1));
+	// ... exclusive block reference aquisition for writer excluding all readers and writers
+
+	void* prevdata = m_ar[ lru_idx].data;
+	m_ar[ lru_idx].data = block;
+
+	m_ar[ lru_idx].gate.fetch_sub( 1);
+	m_hashtable[ hashval] = lru_idx;
 	freeBlock( prevdata);
 }
 
 void* BlockCache::getBlock( unsigned int id)
 {
-	unsigned int blockadr = boost::hash( id) & (m_hashtablesize-1);
+	unsigned int hashval = hashfunc( id) & (m_hashtablesize-1);
+	unsigned int idx = m_hashtable[ hashval];
+
+	if ((m_ar[ idx].gate.fetch_add( 2) & 1) != 0)
+	{
+		// a writer is occupying, we return and get the block in the writer context as we would load it from disk
+		m_ar[ idx].gate.fetch_sub( 2);
+		return 0;
+	}
+	// ... reader excluding writer and allowing readers
+
+	void* rt = m_ar[ idx].data;
+	referenceBlock( rt);
+	// ... 'referenceBlock' must be called before releasing the gate because otherwise the block could be freed before beeing referenced
+
+	m_ar[ idx].gate.fetch_sub( 2);
+
+	BlockMetaData* md = blockMetaData( rt);
+	if (md->id != id)
+	{
+		freeBlock( rt);	//... miss: block occupied by another
+		return 0;
+	}
+	return rt;
 }
 
 

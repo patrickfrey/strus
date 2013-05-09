@@ -45,26 +45,31 @@ public:
 	BlockCache( std::size_t nofblocks_, std::size_t blocksize_);
 	virtual ~BlockCache();
 
+	///\brief Allocate a block without inserting it
 	void* allocBlock( unsigned int id);
-	void insertBlock( void* data);
+	///\brief Dereference and eventually free a block
+	void freeBlock( void* block) const;
+	///\brief Inserting a block allocated with 'allocBlock(unsigned int)'
+	void insertBlock( void* block);
+	///\brief Get a block reference if inserted
+	///\remark block has to be freed with 'freeBlock(void*)'
 	void* getBlock( unsigned int id);
-
-	unsigned int blockId( void* data) const;
 
 private:
 	struct BlockMetaData
 	{
-		unsigned int id;
-		boost::atomic<unsigned int> refcnt;
+		unsigned int id;			//< id of this block
+		boost::atomic<unsigned int> refcnt;	//< reference counting of this block
 	};
 
 	BlockMetaData* blockMetaData( void* block) const;
-	void freeBlock( void* block) const;
+	void referenceBlock( void* block) const;
 
 	struct BlockRef
 	{
-		boost::atomic<void*> data;
-		unsigned int timestamp;
+		boost::atomic<unsigned int> gate;	//< non blocking mutual exclusion for one writer (insertBlock)/many reader (getBlock)
+		unsigned int timestamp;			//< last used counter for LRU replacement of blocks
+		void* data;				//< block data cached
 	};
 	unsigned int findLRU() const;
 
