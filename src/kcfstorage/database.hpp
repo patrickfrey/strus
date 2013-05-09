@@ -35,7 +35,6 @@
 #include "podvector.hpp"
 #include <string>
 #include <utility>
-#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
@@ -62,27 +61,27 @@ public:
 	std::pair<std::string,std::string> getTerm( const TermNumber& tn);
 	std::string getDocumentId( const DocNumber& dn);
 
-	Index getTermBlockAddress( const TermNumber& tn);
+	BlockNumber getTermBlockNumber( const TermNumber& tn);
 
-	std::pair<Index,boost::shared_ptr<void> > allocSmallBlock();
-	std::pair<Index,boost::shared_ptr<void> > allocIndexBlock();
+	BlockNumber allocSmallBlock();
+	BlockNumber allocIndexBlock();
 
-	void writeSmallBlock( const Index& idx, const void* data, std::size_t start=0);
-	void writeIndexBlock( const Index& idx, const void* data, std::size_t start=0);
+	void writeSmallBlock( const BlockNumber& idx, const void* data, std::size_t start=0);
+	void writeIndexBlock( const BlockNumber& idx, const void* data, std::size_t start=0);
 
-	boost::shared_ptr<void> readSmallBlock( const Index& idx);
-	boost::shared_ptr<void> readIndexBlock( const Index& idx);
+	void readSmallBlock( const BlockNumber& idx, void* data);
+	void readIndexBlock( const BlockNumber& idx, void* data);
 
 private:
 	std::string m_name;
 	std::string m_path;
 	KeyTable m_termtable;
-	PodVector<DocNumber> m_termblockmap;
+	PodVector<BlockNumber> m_termblockmap;
 	KeyTable m_typetable;
 	KeyTable m_docidtable;
-	PodVector<DocNumber> m_deldocidlist;
 	BlockTable m_smallblktable;
 	BlockTable m_indexblktable;
+	void* m_nulledblock;
 };
 
 } //namespace

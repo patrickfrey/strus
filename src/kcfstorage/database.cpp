@@ -59,10 +59,12 @@ StorageDB::StorageDB( const std::string& name_, const std::string& path_, bool w
 	,m_termblockmap("telst",name_,path_,writemode_)
 	,m_typetable("tytab",name_,path_,writemode_)
 	,m_docidtable("dctab",name_,path_,writemode_)
-	,m_deldocidlist("rdlst",name_,path_,writemode_)
 	,m_smallblktable("smblk",SmallBlockSize,name_,path_,writemode_)
 	,m_indexblktable("ixblk",IndexBlockSize,name_,path_,writemode_)
-{}
+{
+	m_nulledblock = std::calloc( 1, IndexBlockSize);
+	if (!m_nulledblock) throw std::bad_alloc();
+}
 
 void StorageDB::close()
 {
@@ -70,9 +72,9 @@ void StorageDB::close()
 	m_termblockmap.close();
 	m_typetable.close();
 	m_docidtable.close();
-	m_deldocidlist.close();
 	m_smallblktable.close();
 	m_indexblktable.close();
+	std::free( m_nulledblock);
 }
 
 void StorageDB::open()
@@ -81,7 +83,6 @@ void StorageDB::open()
 	m_termblockmap.open();
 	m_typetable.open();
 	m_docidtable.open();
-	m_deldocidlist.open();
 	m_smallblktable.open();
 	m_indexblktable.open();
 }
@@ -121,7 +122,7 @@ TermNumber StorageDB::insertTermNumber( const std::string& type, const std::stri
 	return rt;
 }
 
-Index StorageDB::getTermBlockAddress( const TermNumber& tn)
+BlockNumber StorageDB::getTermBlockNumber( const TermNumber& tn)
 {
 	return m_termblockmap.get( tn);
 }
@@ -154,26 +155,17 @@ std::string StorageDB::getDocumentId( const DocNumber& dn)
 	return m_docidtable.getIdentifier( dn);
 }
 
-static boost::shared_ptr<void> allocMemBlock( unsigned int size)
+BlockNumber StorageDB::allocSmallBlock()
 {
-	return boost::shared_ptr<void>( std::calloc( 1, size), std::free);
+	return m_smallblktable.insertBlock( m_nulledblock);
 }
 
-std::pair<Index,boost::shared_ptr<void> > StorageDB::allocSmallBlock()
+BlockNumber StorageDB::allocIndexBlock()
 {
-	std::pair<Index,boost::shared_ptr<void> > rt( 0, allocMemBlock( SmallBlockSize));
-	rt.first = m_smallblktable.insertBlock( rt.second.get());
-	return rt;
+	return m_indexblktable.insertBlock( m_nulledblock);
 }
 
-std::pair<Index,boost::shared_ptr<void> > StorageDB::allocIndexBlock()
-{
-	std::pair<Index,boost::shared_ptr<void> > rt( 0, allocMemBlock( IndexBlockSize));
-	rt.first = m_indexblktable.insertBlock( rt.second.get());
-	return rt;
-}
-
-void StorageDB::writeSmallBlock( const Index& idx, const void* data, std::size_t start)
+void StorageDB::writeSmallBlock( const BlockNumber& idx, const void* data, std::size_t start)
 {
 	if (start)
 	{
@@ -186,7 +178,7 @@ void StorageDB::writeSmallBlock( const Index& idx, const void* data, std::size_t
 	}
 }
 
-void StorageDB::writeIndexBlock( const Index& idx, const void* data, std::size_t start)
+void StorageDB::writeIndexBlock( const BlockNumber& idx, const void* data, std::size_t start)
 {
 	if (start)
 	{
@@ -199,18 +191,14 @@ void StorageDB::writeIndexBlock( const Index& idx, const void* data, std::size_t
 	}
 }
 
-boost::shared_ptr<void> StorageDB::readSmallBlock( const Index& idx)
+void StorageDB::readSmallBlock( const BlockNumber& idx, void* data)
 {
-	boost::shared_ptr<void> rt( allocMemBlock( SmallBlockSize));
-	m_smallblktable.readBlock( idx, rt.get());
-	return rt;
+	m_smallblktable.readBlock( idx, data);
 }
 
-boost::shared_ptr<void> StorageDB::readIndexBlock( const Index& idx)
+void StorageDB::readIndexBlock( const BlockNumber& idx, void* data)
 {
-	boost::shared_ptr<void> rt( allocMemBlock( IndexBlockSize));
-	m_indexblktable.readBlock( idx, rt.get());
-	return rt;
+	m_indexblktable.readBlock( idx, data);
 }
 
 

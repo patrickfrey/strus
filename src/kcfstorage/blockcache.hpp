@@ -28,6 +28,7 @@
 */
 #ifndef _STRUS_KCF_BLOCK_CACHE_HPP_INCLUDED
 #define _STRUS_KCF_BLOCK_CACHE_HPP_INCLUDED
+#include "strus/position.hpp"
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -42,35 +43,32 @@ namespace strus
 class BlockCache
 {
 public:
+	///\brief Constructor
+	///\param[in] nofblocks_ number of blocks cached
+	///\param[in] blocksize_ size of blocks cached (without mgt payload)
 	BlockCache( std::size_t nofblocks_, std::size_t blocksize_);
-	virtual ~BlockCache();
+
+	///\brief Destructor
+	~BlockCache();
 
 	///\brief Allocate a block without inserting it
-	void* allocBlock( unsigned int id);
+	void* allocBlock( BlockNumber id);
 	///\brief Dereference and eventually free a block
 	void freeBlock( void* block) const;
-	///\brief Inserting a block allocated with 'allocBlock(unsigned int)'
+	///\brief Inserting a block allocated with 'allocBlock(BlockNumber)'
 	void insertBlock( void* block);
 	///\brief Get a block reference if inserted
 	///\remark block has to be freed with 'freeBlock(void*)'
-	void* getBlock( unsigned int id);
+	void* getBlock( BlockNumber id);
 
 private:
-	struct BlockMetaData
-	{
-		unsigned int id;			//< id of this block
-		boost::atomic<unsigned int> refcnt;	//< reference counting of this block
-	};
+	struct BlockMetaData;
+	struct BlockRef;
 
 	BlockMetaData* blockMetaData( void* block) const;
 	void referenceBlock( void* block) const;
 
-	struct BlockRef
-	{
-		boost::atomic<unsigned int> gate;	//< non blocking mutual exclusion for one writer (insertBlock)/many reader (getBlock)
-		unsigned int timestamp;			//< last used counter for LRU replacement of blocks
-		void* data;				//< block data cached
-	};
+	///\brief Find block candidate to free with pseudo LRU pick
 	unsigned int findLRU() const;
 
 private:
@@ -80,6 +78,8 @@ private:
 	unsigned int m_hashtablesize;
 	unsigned int m_timestamp;
 	std::size_t m_blocksize;
+	boost::atomic<unsigned int> m_arpos;
+	bool m_filled;
 };
 
 }//namespace

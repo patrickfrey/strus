@@ -59,7 +59,7 @@ void BlockTable::create( const std::string& type_, std::size_t blocksize_, const
 	if (!ptr) throw std::bad_alloc();
 	try
 	{
-		file.write( ptr, blocksize_);
+		file.awrite( ptr, blocksize_);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -72,7 +72,7 @@ void BlockTable::create( const std::string& type_, std::size_t blocksize_, const
 void BlockTable::open()
 {
 	m_file.open( m_writemode);
-	std::size_t filesize = m_file.seek_end();
+	std::size_t filesize = m_file.filesize();
 
 	if (filesize % m_blocksize != 0 || filesize == 0)
 	{
@@ -91,12 +91,11 @@ void BlockTable::open()
 void BlockTable::reset()
 {
 	m_file.create();
-
 	char* ptr = (char*)std::calloc( m_blocksize, 1);
 	if (!ptr) throw std::bad_alloc();
 	try
 	{
-		m_file.write( ptr, m_blocksize);
+		m_file.awrite( ptr, m_blocksize);
 	}
 	catch (const std::runtime_error& e)
 	{
@@ -104,6 +103,8 @@ void BlockTable::reset()
 		throw e;
 	}
 	std::free( ptr);
+	m_file.close();
+	m_file.open();
 }
 
 void BlockTable::close()
@@ -113,38 +114,32 @@ void BlockTable::close()
 
 void BlockTable::readBlock( Index idx, void* buf)
 {
-	m_file.seek( idx * m_blocksize);
-	m_file.read( (char*)buf, m_blocksize);
+	m_file.pread( idx * m_blocksize, (char*)buf, m_blocksize);
 }
 
 void BlockTable::writeBlock( Index idx, const void* buf)
 {
 	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
-	m_file.seek( idx * m_blocksize);
-	m_file.write( (char*)buf, m_blocksize);
+	m_file.pwrite( idx * m_blocksize, (char*)buf, m_blocksize);
 }
 
 void BlockTable::partialReadBlock( Index idx, std::size_t pos, void* buf, std::size_t bufsize)
 {
 	if (pos + bufsize > m_blocksize) throw std::runtime_error("bad arguments for partial read operation");
-	m_file.seek( idx * m_blocksize + pos);
-	m_file.read( (char*)buf, bufsize);
+	m_file.pread( idx * m_blocksize + pos, (char*)buf, bufsize);
 }
 
 void BlockTable::partialWriteBlock( Index idx, std::size_t pos, const void* buf, std::size_t bufsize)
 {
 	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
 	if (pos + bufsize > m_blocksize) throw std::runtime_error("bad arguments for partial write operation");
-	m_file.seek( idx * m_blocksize + pos);
-	m_file.write( (char*)buf, bufsize);
+	m_file.pwrite( idx * m_blocksize + pos, (char*)buf, bufsize);
 }
 
 Index BlockTable::appendBlock( const void* buf)
 {
 	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
-
-	std::size_t pos = m_file.seek_end();
-	m_file.write( (char*)buf, m_blocksize);
+	std::size_t pos = m_file.awrite( (char*)buf, m_blocksize);
 	return (pos / m_blocksize);
 }
 
@@ -168,22 +163,18 @@ Index BlockTable::size()
 
 void BlockTable::readControlBlock( Index idx, ControlBlock& block)
 {
-	m_file.seek( idx * m_blocksize);
-	m_file.read( (char*)&block, sizeof(block));
+	m_file.pread( idx * m_blocksize, (char*)&block, sizeof(block));
 }
 
 void BlockTable::writeControlBlock( Index idx, const ControlBlock& block)
 {
 	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
-
-	m_file.seek( idx * m_blocksize);
-	m_file.write( (char*)&block, sizeof(block));
+	m_file.pwrite( idx * m_blocksize, (char*)&block, sizeof(block));
 }
 
 Index BlockTable::insertBlock( const void* buf)
 {
 	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
-
 	if (m_controlblock.freelist)
 	{
 		ControlBlock nextblock;

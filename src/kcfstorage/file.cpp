@@ -34,6 +34,7 @@
 #include <cerrno>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <boost/lexical_cast.hpp>
@@ -96,17 +97,20 @@ static std::string errorstr( const std::string& path, const std::string& msg, in
 
 void File::create()
 {
-	if (m_fd >= 0) ::close(m_fd);
+	if (m_fd >= 0) close();
+	m_locked = true;
+
 	m_fd = ::open( m_path.c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
 	if (m_fd < 0)
 	{
 		throw std::runtime_error( errorstr( m_path, "creating file", errno));
 	}
+	::flock( m_fd, LOCK_EX);
 }
 
 void File::open( bool write_)
 {
-	if (m_fd >= 0) ::close(m_fd);
+	if (m_fd >= 0) close();
 	int flags = (write_)?O_RDWR:O_RDONLY;
 	m_fd = ::open( m_path.c_str(), flags, 0644);
 	if (m_fd < 0)
@@ -118,6 +122,11 @@ void File::open( bool write_)
 
 void File::close()
 {
+	if (m_locked)
+	{
+		::lseek( m_fd, 0, SEEK_SET);
+		::flock( m_fd, LOCK_UN);
+	}
 	if (m_fd >= 0) ::close(m_fd);
 	m_fd = -1;
 }
@@ -170,7 +179,50 @@ void File::read( void* buf, std::size_t bufsize)
 {
 	if (::read( m_fd, buf, bufsize) < 0)
 	{
+		throw std::runtime_error( errorstr( m_path, "reading file", errno));
+	}
+}
+
+std::size_t File::awrite( const void* buf, std::size_t bufsize)
+{
+	int wres;
+	::ssize_t rt;
+
+	if (m_locked)
+	{
+		rt = ::lseek( m_fd, 0, SEEK_END);
+		wres = ::write( m_fd, buf, bufsize);
+	}
+	else
+	{
+		if (0 > ::flock( m_fd, LOCK_EX))
+		{
+			throw std::runtime_error( errorstr( m_path, "locking file for append", errno));
+		}
+		rt = ::lseek( m_fd, 0, SEEK_END);
+		wres = ::write( m_fd, buf, bufsize);
+		::flock( m_fd, LOCK_UN);
+	}
+	if (wres < 0)
+	{
+		throw std::runtime_error( errorstr( m_path, "appending file", errno));
+	}
+	return rt;
+}
+
+void File::pwrite( std::size_t pos, const void* buf, std::size_t bufsize)
+{
+	if (::pwrite( m_fd, buf, bufsize, pos) < 0)
+	{
 		throw std::runtime_error( errorstr( m_path, "writing file", errno));
+	}
+}
+
+void File::pread( std::size_t pos, void* buf, std::size_t bufsize)
+{
+	if (::pread( m_fd, buf, bufsize, pos) < 0)
+	{
+		throw std::runtime_error( errorstr( m_path, "reading file", errno));
 	}
 }
 

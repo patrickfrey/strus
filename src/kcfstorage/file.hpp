@@ -33,31 +33,45 @@
 
 namespace strus
 {
-	std::string filepath( const std::string& path, const std::string& name, const std::string& ext);
 
-	class File
-	{
-	public:
-		File( const std::string& path_);
-		virtual ~File();
+std::string filepath( const std::string& path, const std::string& name, const std::string& ext);
 
-		void create();
-		void open( bool write_=true);
-		void close();
-		std::size_t filesize();
-		void seek( std::size_t pos_);
-		std::size_t seek_end();
-		std::size_t position();
-		void write( const void* buf, std::size_t bufsize);
-		void read( void* buf, std::size_t bufsize);
+class File
+{
+public:
+	File( const std::string& path_);
+	virtual ~File();
 
-		const std::string& path() const		{return m_path;}
-		bool isopen() const			{return m_fd >= 0;}
+	///\brief Creates a file and opens it with an exclusive lock that is released with close
+	void create();
 
-	private:
-		int m_fd;
-		std::string m_path;
-	};
+	void open( bool write_=true);
+	void close();
+	std::size_t filesize();
+
+	void pwrite( std::size_t pos, const void* buf, std::size_t bufsize);
+	void pread( std::size_t pos, void* buf, std::size_t bufsize);
+
+	///\brief Append block to file and returns the file position of the block written
+	///\remark Uses a blocking exclusive lock on the section written
+	std::size_t awrite( const void* buf, std::size_t bufsize);
+
+	const std::string& path() const		{return m_path;}
+	bool isopen() const			{return m_fd >= 0;}
+
+private:
+	void write( const void* buf, std::size_t bufsize);
+	void read( void* buf, std::size_t bufsize);
+
+	void seek( std::size_t pos_);
+	std::size_t seek_end();
+	std::size_t position();
+
+private:
+	int m_fd;
+	bool m_locked;
+	std::string m_path;
+};
 }
 
 #endif

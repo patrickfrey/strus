@@ -30,11 +30,17 @@
 using namespace strus;
 
 struct CharLengthTab
-	:public std::map<unsigned char, unsigned char>
 {
-	void fill( unsigned char start, unsigned char end, unsigned char value)
+	char m_ar[256];
+
+	unsigned char operator[]( unsigned char ii) const
 	{
-		for (unsigned char ii=start; ii<=end; ++ii) (*this)[ii] = value;
+		return m_ar[ii];
+	}
+
+	void fill( unsigned int start, unsigned int end, unsigned char value)
+	{
+		for (unsigned int ii=start; ii<=end; ++ii) m_ar[ii] = value;
 	}
 
 	CharLengthTab()

@@ -58,9 +58,10 @@ namespace strus {
 namespace strus {
 
 typedef Index Position;
-typedef Index DocPosition;
-typedef Index DocNumber;
-typedef Index TermNumber;
+typedef unsigned int DocPosition;
+typedef unsigned int DocNumber;
+typedef unsigned int TermNumber;
+typedef unsigned int BlockNumber;
 
 enum {DocPositionShift=24, MaxDocPosition=(DocPositionShift-1)};
 
