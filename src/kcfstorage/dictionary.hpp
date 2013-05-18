@@ -26,27 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#include "malloc.hpp"
-#include <stdlib.h>
+#ifndef _STRUS_KCF_DICTIONARY_HPP_INCLUDED
+#define _STRUS_KCF_DICTIONARY_HPP_INCLUDED
+#include "strus/position.hpp"
 
-#ifdef _MSC_VER
-void* strus::malloc_aligned( std::size_t size, std::size_t alignment)
+namespace strus
 {
-	return _aligned_malloc( size, alignment);
-}
-#else
-void* strus::malloc_aligned( std::size_t size, std::size_t alignment)
+
+///\class Dictionary
+///\brief Implementation of a string to integer map
+class Dictionary
 {
-	void* rt = 0;
-	if (0!=posix_memalign( &rt, alignment, size)) return 0;
-	return rt;
-}
+public:
+	Dictionary();
+	Dictionary( const Dictionary& o);
+	~Dictionary();
+
+private:
+	void insert( const std::string& key, const Index& value);
+	Index find( const std::string& key);
+
+	struct Impl;
+	Impl* m_impl;
+};
+
+}//namespace
 #endif
-
-std::size_t strus::cachelinesize()
-{
-	//TODO
-	return 128;
-}
-
-

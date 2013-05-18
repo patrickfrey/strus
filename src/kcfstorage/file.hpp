@@ -44,6 +44,10 @@ public:
 
 	///\brief Creates a file and opens it with an exclusive lock that is released with close
 	void create();
+	static void create( const std::string& path_);
+
+	void lock();
+	void unlock();
 
 	void open( bool write_=true);
 	void close();
@@ -59,6 +63,31 @@ public:
 	const std::string& path() const		{return m_path;}
 	bool isopen() const			{return m_fd >= 0;}
 
+	class ScopedLock
+	{
+	public:
+		ScopedLock( File* file_)
+			:m_file(file_)
+		{
+			m_file->lock();
+		}
+		ScopedLock( const ScopedLock& o)
+			:m_file(o.m_file)
+		{
+			m_file->lock();
+		}
+		~ScopedLock()
+		{
+			m_file->unlock();
+		}
+	private:
+		File* m_file;
+	};
+
+	ScopedLock scopedLock()
+	{
+		return ScopedLock(this);
+	}
 private:
 	void write( const void* buf, std::size_t bufsize);
 	void read( void* buf, std::size_t bufsize);
@@ -69,9 +98,10 @@ private:
 
 private:
 	int m_fd;
-	bool m_locked;
+	int m_locked;
 	std::string m_path;
 };
+
 }
 
 #endif

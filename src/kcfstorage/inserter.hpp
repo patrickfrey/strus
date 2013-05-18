@@ -26,27 +26,18 @@
 
 --------------------------------------------------------------------
 */
-#include "malloc.hpp"
-#include <stdlib.h>
+#ifndef _STRUS_KCF_INSERTER_HPP_INCLUDED
+#define _STRUS_KCF_INSERTER_HPP_INCLUDED
+#include "strus/storage.hpp"
+#include "strus/position.hpp"
+#include "database.hpp"
+#include <string>
+#include <utility>
 
-#ifdef _MSC_VER
-void* strus::malloc_aligned( std::size_t size, std::size_t alignment)
-{
-	return _aligned_malloc( size, alignment);
-}
-#else
-void* strus::malloc_aligned( std::size_t size, std::size_t alignment)
-{
-	void* rt = 0;
-	if (0!=posix_memalign( &rt, alignment, size)) return 0;
-	return rt;
-}
+namespace strus {
+namespace inserter {
+
+	DocNumber storeDocument( StorageDB& db, const std::string& docid, const Storage::TermDocPositionMap& content);
+}}//namespace
+
 #endif
-
-std::size_t strus::cachelinesize()
-{
-	//TODO
-	return 128;
-}
-
-

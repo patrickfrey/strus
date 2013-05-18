@@ -35,6 +35,7 @@
 #include "podvector.hpp"
 #include <string>
 #include <utility>
+#include <boost/signals2/mutex.hpp>
 
 namespace strus
 {
@@ -44,11 +45,50 @@ namespace strus
 class StorageDB
 {
 public:
+	enum
+	{
+		SmallBlockSize=128,
+		IndexBlockSize=4096
+	};
+	struct IndexBlockHeader
+	{
+		char type;
+		unsigned short fillpos;
+	};
+	struct INodeBlock
+	{
+		IndexBlockHeader hdr;
+		struct Elem
+		{
+			Position pos;
+			BlockNumber bno;
+		};
+		enum
+		{
+			NofElem = ((IndexBlockSize - sizeof( IndexBlockHeader)) / sizeof(Elem)),
+			Size = ((int)NofElem * sizeof(Elem)
+		};
+		Elem ar[ NofElem];
+	};
+	struct PackBlock
+	{
+		IndexBlockHeader hdr;
+		enum
+		{
+			NofElem = ((IndexBlockSize - sizeof( IndexBlockHeader)) / sizeof(char)),
+			Size = ((int)NofElem * sizeof(char)
+		};
+		char ar[ Size];
+	};
+
 	StorageDB( const std::string& name_, const std::string& path_, bool writemode_=false);
 	virtual ~StorageDB();
 
 	void open();
 	void close();
+
+	void lock();
+	void unlock();
 
 	static void create( const std::string& name, const std::string& path=std::string());
 
@@ -61,26 +101,34 @@ public:
 	std::pair<std::string,std::string> getTerm( const TermNumber& tn);
 	std::string getDocumentId( const DocNumber& dn);
 
-	BlockNumber getTermBlockNumber( const TermNumber& tn);
+	std::pair<BlockNumber,bool> getTermBlockNumber( const TermNumber& tn);
+	void setTermBlockNumber( const TermNumber& tn, const BlockNumber& bn, bool isSmallBlock);
 
 	BlockNumber allocSmallBlock();
 	BlockNumber allocIndexBlock();
 
-	void writeSmallBlock( const BlockNumber& idx, const void* data, std::size_t start=0);
-	void writeIndexBlock( const BlockNumber& idx, const void* data, std::size_t start=0);
+	void writeSmallBlock( const BlockNumber& idx, const void* data);
+	void writeIndexBlock( const BlockNumber& idx, const void* data);
+
+	void writePartialSmallBlock( const BlockNumber& idx, const void* data, std::size_t start);
+	void writePartialIndexBlock( const BlockNumber& idx, const void* data, std::size_t start);
 
 	void readSmallBlock( const BlockNumber& idx, void* data);
 	void readIndexBlock( const BlockNumber& idx, void* data);
 
 private:
+	bool m_writemode;
 	std::string m_name;
 	std::string m_path;
 	KeyTable m_termtable;
 	PodVector<BlockNumber> m_termblockmap;
 	KeyTable m_typetable;
+	boost::mutex m_typetable_mutex;
 	KeyTable m_docidtable;
+	boost::mutex m_docidtable_mutex;
 	BlockTable m_smallblktable;
 	BlockTable m_indexblktable;
+	File m_transaction_lock;
 	void* m_nulledblock;
 };
 

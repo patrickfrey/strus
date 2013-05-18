@@ -92,7 +92,7 @@ void strus::utf8encode( std::string& buf, int chr)
 	unsigned int pp,sf;
 	for (pp=1,sf=5; pp<5; pp++,sf+=5)
 	{
-		if (chr < (unsigned int)((1<<6)<<sf)) break;
+		if ((unsigned int)chr < (unsigned int)((1<<6)<<sf)) break;
 	}
 	rt = pp+1;
 	unsigned char HB = (unsigned char)(B11111111 << (8-rt));

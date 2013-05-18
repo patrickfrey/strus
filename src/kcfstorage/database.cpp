@@ -36,12 +36,6 @@
 
 using namespace strus;
 
-enum
-{
-	SmallBlockSize=128,
-	IndexBlockSize=4096
-};
-
 void StorageDB::create( const std::string& name_, const std::string& path_)
 {
 	KeyTable::create( "tetab", name_, path_);
@@ -50,10 +44,12 @@ void StorageDB::create( const std::string& name_, const std::string& path_)
 	PodVector<DocNumber>::create( "rdlst", name_, path_);
 	BlockTable::create( "smblk", SmallBlockSize, name_, path_);
 	BlockTable::create( "ixblk", IndexBlockSize, name_, path_);
+	File::create( filepath( path_, name_, "lock"));
 }
 
 StorageDB::StorageDB( const std::string& name_, const std::string& path_, bool writemode_)
-	:m_name(name_)
+	:m_writemode(writemode_)
+	,m_name(name_)
 	,m_path(path_)
 	,m_termtable("tetab",name_,path_,writemode_)
 	,m_termblockmap("telst",name_,path_,writemode_)
@@ -61,6 +57,7 @@ StorageDB::StorageDB( const std::string& name_, const std::string& path_, bool w
 	,m_docidtable("dctab",name_,path_,writemode_)
 	,m_smallblktable("smblk",SmallBlockSize,name_,path_,writemode_)
 	,m_indexblktable("ixblk",IndexBlockSize,name_,path_,writemode_)
+	,m_transaction_lock( filepath( path_, name_, "lock"))
 {
 	m_nulledblock = std::calloc( 1, IndexBlockSize);
 	if (!m_nulledblock) throw std::bad_alloc();
@@ -74,6 +71,7 @@ void StorageDB::close()
 	m_docidtable.close();
 	m_smallblktable.close();
 	m_indexblktable.close();
+	m_transaction_lock.close();
 	std::free( m_nulledblock);
 }
 
@@ -85,6 +83,17 @@ void StorageDB::open()
 	m_docidtable.open();
 	m_smallblktable.open();
 	m_indexblktable.open();
+	m_transaction_lock.open( m_writemode);
+}
+
+void StorageDB::lock()
+{
+	m_transaction_lock.lock();
+}
+
+void StorageDB::unlock()
+{
+	m_transaction_lock.unlock();
 }
 
 StorageDB::~StorageDB()
@@ -122,9 +131,15 @@ TermNumber StorageDB::insertTermNumber( const std::string& type, const std::stri
 	return rt;
 }
 
-BlockNumber StorageDB::getTermBlockNumber( const TermNumber& tn)
+std::pair<BlockNumber,bool> StorageDB::getTermBlockNumber( const TermNumber& tn)
 {
-	return m_termblockmap.get( tn);
+	BlockNumber ib = m_termblockmap.get( tn);
+	return std::pair<BlockNumber,bool>( ib>>1, ib&1);
+}
+
+void StorageDB::setTermBlockNumber( const TermNumber& tn, const BlockNumber& bn, bool isSmallBlock)
+{
+	m_termblockmap.set( tn, (bn << 1) | (isSmallBlock?1:0));
 }
 
 DocNumber StorageDB::findDocumentNumber( const std::string& docid) const
@@ -167,28 +182,24 @@ BlockNumber StorageDB::allocIndexBlock()
 
 void StorageDB::writeSmallBlock( const BlockNumber& idx, const void* data, std::size_t start)
 {
-	if (start)
-	{
-		if (start > SmallBlockSize) throw std::logic_error( "parameter out of range");
-		m_smallblktable.partialWriteBlock( idx, start, data, SmallBlockSize - start);
-	}
-	else
-	{
-		m_smallblktable.writeBlock( idx, data);
-	}
+	m_smallblktable.writeBlock( idx, data);
+}
+
+void StorageDB::writePartialSmallBlock( const BlockNumber& idx, const void* data, std::size_t start)
+{
+	if (start > SmallBlockSize) throw std::logic_error( "parameter out of range");
+	m_smallblktable.partialWriteBlock( idx, start, data, SmallBlockSize - start);
 }
 
 void StorageDB::writeIndexBlock( const BlockNumber& idx, const void* data, std::size_t start)
 {
-	if (start)
-	{
-		if (start > IndexBlockSize) throw std::logic_error( "parameter out of range");
-		m_smallblktable.partialWriteBlock( idx, start, data, IndexBlockSize - start);
-	}
-	else
-	{
-		m_smallblktable.writeBlock( idx, data);
-	}
+	m_smallblktable.writeBlock( idx, data);
+}
+
+void StorageDB::writePartialIndexBlock( const BlockNumber& idx, const void* data, std::size_t start)
+{
+	if (start > IndexBlockSize) throw std::logic_error( "parameter out of range");
+	m_smallblktable.partialWriteBlock( idx, start, data, IndexBlockSize - start);
 }
 
 void StorageDB::readSmallBlock( const BlockNumber& idx, void* data)

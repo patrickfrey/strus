@@ -15,7 +15,7 @@ public:
 	StorageImpl( const std::string& name, const std::string& path, bool writemode=false)
 		:m_db(name,path,writemode){}
 
-	virtual DocNumber storeDocument( const Document& doc);
+	virtual DocNumber storeDocument( const std::string& docid, const TermDocPositionMap& content)=0;
 
 	virtual std::string getDocumentId( const DocNumber& docnum);
 	virtual std::pair<std::string,std::string> getTerm( const TermNumber& termnum);
@@ -57,48 +57,9 @@ static bool compareTerm( const Term& t1, const Term& t2)
 	return false;
 }
 
-static bool compareDocPosition( const DocPosition& p1, const DocPosition& p2)
+DocNumber StorageImpl::storeDocument( const std::string& docid, const TermDocPositionMap& content)
 {
-	return (p1 < p2);
-}
-
-typedef std::map<TermNumber, std::vector<DocPosition> > TermMap;
-
-DocNumber StorageImpl::storeDocument( const Document& doc)
-{
-	std::vector<Term> tar( doc.terms());
-	std::sort( tar.begin(), tar.end(), compareTerm);
-	DocNumber docno = m_db.insertDocumentNumber( doc.docid());
-
-	TermMap tmap;
-	std::map<TermNumber, bool> tmap_sort;
-	std::vector<Term>::const_iterator ti = doc.terms().begin(), te = doc.terms().end();
-
-	for (; ti != te; ++ti)
-	{
-		std::vector<DocPosition>& ref = tmap[ ti->number];
-		if (!ref.empty())
-		{
-			if (ti->position == ref.back()) continue;
-			if (ti->position < ref.back()) tmap_sort[ti->number] = true;
-		}
-		ref.push_back( ti->position);
-	}
-	// sort document positions per term
-	std::map<TermNumber, bool>::const_iterator si = tmap_sort.begin(), se = tmap_sort.end();
-	for (; si != se; ++si)
-	{
-		TermMap::iterator mi = tmap.find( si->first);
-		if (mi == tmap.end()) throw std::logic_error( "internal error: corrupt term map");
-		std::sort( mi->second.begin(), mi->second.end(), compareDocPosition);
-	}
-	// pack occurrencies positions per term
-	TermMap::const_iterator mi = tmap.begin(), me = tmap.end();
-	for (; mi != me; ++mi)
-	{
-
-	}
-	return docno;
+	return inserter::storeDocument( m_db, docid, content);
 }
 
 std::string StorageImpl::getDocumentId( const DocNumber& docnum)

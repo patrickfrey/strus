@@ -6,7 +6,7 @@ CPP_OBJS=\
 CPP_INCLUDE=-I$(TOPDIR)/include
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
 LDFLAGS=-L/usr/local/lib -L./kcfstorage
-LIBS=-lkcfstorage -lkyotocabinet
+LIBS=-lstrus_kcfstorage -lkyotocabinet
 
 all: subdirs strus
 

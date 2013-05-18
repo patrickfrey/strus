@@ -2,6 +2,8 @@ TOPDIR=../..
 CPP_OBJS=\
 	file.o \
 	encode.o \
+	malloc.o \
+	dictionary.o \
 	blocktable.o \
 	blockcache.o \
 	podvector.o \
@@ -12,6 +14,8 @@ CPP_OBJS=\
 CPP_INCS=\
 	file.hpp \
 	encode.hpp \
+	malloc.hpp \
+	dictionary.hpp \
 	blocktable.hpp \
 	blockcache.hpp \
 	keytable.hpp \
@@ -28,19 +32,19 @@ LIBS=-lkyotocabinet
 %.o : %.cpp GNUmakefile $(CPP_INCS)
 	g++ -c -o $@ $(SO_COMPILE_FLAGS) -DSHARED $(CXXFLAGS) $(CPP_INCLUDE) $(PATHFLAGS) $<
 
-libkcfstorage.so: $(CPP_OBJS) $(CPP_INCS)
-	g++ -shared -Wl,-soname,libkcfstorage.so.0 -o libkcfstorage.so.0.0.0 $(LDFLAGS) $(LIBS) $(CPP_OBJS)
-	ln -sf libkcfstorage.so.0.0.0 libkcfstorage.so.0.0
-	ln -sf libkcfstorage.so.0.0.0 libkcfstorage.so.0
-	ln -sf libkcfstorage.so.0.0.0 libkcfstorage.so
+libstrus_kcfstorage.so: $(CPP_OBJS) $(CPP_INCS)
+	g++ -shared -Wl,-soname,libstrus_kcfstorage.so.0 -o libstrus_kcfstorage.so.0.0.0 $(LDFLAGS) $(LIBS) $(CPP_OBJS)
+	ln -sf libstrus_kcfstorage.so.0.0.0 libstrstrus_kcfstorage.so.0.0
+	ln -sf libstrus_kcfstorage.so.0.0.0 libstrus_kcfstorage.so.0
+	ln -sf libstrus_kcfstorage.so.0.0.0 libstrus_kcfstorage.so
 
-all: libkcfstorage.so
+all: libstrus_kcfstorage.so
 
 .PHONY: clean
 clean:
 	rm -f ${CPP_OBJS}
-	rm -f kcfstorage.so
-	rm -f kcfstorage.so.1
-	rm -f kcfstorage.so.1.0
+	rm -f strus_kcfstorage.so
+	rm -f strus_kcfstorage.so.1
+	rm -f strus_kcfstorage.so.1.0
 
 

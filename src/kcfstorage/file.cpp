@@ -73,16 +73,6 @@ std::string strus::filepath( const std::string& path, const std::string& name, c
 	return rt;
 }
 
-File::File( const std::string& path_)
-	:m_fd(-1),m_path(path_)
-{
-}
-
-File::~File()
-{
-	close();
-}
-
 static std::string errorstr( const std::string& path, const std::string& msg, int errno_)
 {
 	std::string rt;
@@ -95,17 +85,61 @@ static std::string errorstr( const std::string& path, const std::string& msg, in
 	return rt;
 }
 
+File::File( const std::string& path_)
+	:m_fd(-1),m_path(path_)
+{
+}
+
+File::~File()
+{
+	close();
+}
+
+void File::lock()
+{
+	if (!m_locked)
+	{
+		if (0 > ::flock( m_fd, LOCK_EX))
+		{
+			throw std::runtime_error( errorstr( m_path, "locking file", errno));
+		}
+	}
+	++m_locked;
+}
+
+void File::unlock()
+{
+	if (m_locked < 1)
+	{
+		throw std::logic_error( "internal unlocking unlocked file");
+	}
+	if (m_locked == 1)
+	{
+		if (0 > ::flock( m_fd, LOCK_UN))
+		{
+			throw std::runtime_error( errorstr( m_path, "unlocking file", errno));
+		}
+	}
+	--m_locked;
+}
+
 void File::create()
 {
 	if (m_fd >= 0) close();
-	m_locked = true;
 
 	m_fd = ::open( m_path.c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
 	if (m_fd < 0)
 	{
 		throw std::runtime_error( errorstr( m_path, "creating file", errno));
 	}
-	::flock( m_fd, LOCK_EX);
+	lock();
+}
+
+void File::create( const std::string& path_)
+{
+	File file( path_);
+	file.create();
+	file.close();
 }
 
 void File::open( bool write_)
@@ -122,11 +156,7 @@ void File::open( bool write_)
 
 void File::close()
 {
-	if (m_locked)
-	{
-		::lseek( m_fd, 0, SEEK_SET);
-		::flock( m_fd, LOCK_UN);
-	}
+	if (m_locked) unlock();
 	if (m_fd >= 0) ::close(m_fd);
 	m_fd = -1;
 }
@@ -188,21 +218,11 @@ std::size_t File::awrite( const void* buf, std::size_t bufsize)
 	int wres;
 	::ssize_t rt;
 
-	if (m_locked)
-	{
-		rt = ::lseek( m_fd, 0, SEEK_END);
-		wres = ::write( m_fd, buf, bufsize);
-	}
-	else
-	{
-		if (0 > ::flock( m_fd, LOCK_EX))
-		{
-			throw std::runtime_error( errorstr( m_path, "locking file for append", errno));
-		}
-		rt = ::lseek( m_fd, 0, SEEK_END);
-		wres = ::write( m_fd, buf, bufsize);
-		::flock( m_fd, LOCK_UN);
-	}
+	lock();
+	rt = ::lseek( m_fd, 0, SEEK_END);
+	wres = ::write( m_fd, buf, bufsize);
+	unlock();
+
 	if (wres < 0)
 	{
 		throw std::runtime_error( errorstr( m_path, "appending file", errno));

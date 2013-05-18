@@ -63,38 +63,24 @@ public:
 class Storage
 {
 public:
-	class Document
-	{
-	public:
-		struct Term
-		{
-			TermNumber number;
-			DocPosition position;
-
-			Term( const Term& o)
-				:number(o.number),position(o.position){}
-			Term( const TermNumber& number_, const DocPosition& position_)
-				:number(number_),position(position_){}
-		};
-
-		explicit Document( const std::string& docid_)
-			:m_docid(docid_){}
-		Document( const std::string& docid_, const std::vector<Term>& termar_)
-			:m_docid(docid_),m_termar(termar_){}
-		Document( const Document& o)
-			:m_docid(o.m_docid){}
-
-		const std::vector<Term>& terms() const	{return m_termar;}
-		const std::string& docid() const	{return m_docid;}
-
-	private:
-		std::string m_docid;
-		std::vector<Term> m_termar;
-	};
-
 	virtual ~Storage(){}
 
-	virtual DocNumber storeDocument( const Document& doc)=0;
+	struct Term
+	{
+		std::string type;
+		std::string value;
+
+		Term(){}
+		Term( const std::string& type_, const std::string& value_)
+			:type(type_),value(value_){}
+		Term( const Term& o)
+			:type(o.type),value(o.value){}
+	};
+
+	typedef std::vector<DocPosition> DocPositionList;
+	typedef std::map<Term,DocPositionList> TermDocPositionMap;
+
+	virtual DocNumber storeDocument( const std::string& docid, const TermDocPositionMap& content)=0;
 
 	virtual std::string getDocumentId( const DocNumber& docnum)=0;
 	virtual std::pair<std::string,std::string> getTerm( const TermNumber& termnum)=0;
