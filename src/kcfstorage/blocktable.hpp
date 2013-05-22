@@ -54,6 +54,7 @@ public:
 	void partialReadBlock( Index idx, std::size_t pos, void* buf, std::size_t bufsize) const;
 	void partialWriteBlock( Index idx, std::size_t pos, const void* buf, std::size_t bufsize);
 	Index insertBlock( const void* buf);
+	Index fill( std::size_t nof_elements, const void* fillerbuf);
 	Index size() const;
 
 private:

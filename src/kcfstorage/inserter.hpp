@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_INSERTER_HPP_INCLUDED
-#define _STRUS_KCF_INSERTER_HPP_INCLUDED
+#ifndef _STRUS_FILESTORAGE_INSERTER_HPP_INCLUDED
+#define _STRUS_FILESTORAGE_INSERTER_HPP_INCLUDED
 #include "strus/storage.hpp"
 #include "strus/position.hpp"
 #include "database.hpp"

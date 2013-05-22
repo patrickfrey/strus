@@ -8,6 +8,7 @@ CPP_OBJS=\
 	blockcache.o \
 	podvector.o \
 	database.o \
+	inserter.o \
 	kcfstorage.o
 
 CPP_INCS=\
@@ -17,8 +18,9 @@ CPP_INCS=\
 	dictionary.hpp \
 	blocktable.hpp \
 	blockcache.hpp \
+	podvector.hpp \
 	database.hpp \
-	podvector.hpp
+	inserter.hpp
 
 CPP_INCLUDE=-I/usr/local/include/ -I$(TOPDIR)/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
@@ -42,7 +44,8 @@ all: libstrus_kcfstorage.so
 clean:
 	rm -f ${CPP_OBJS}
 	rm -f strus_kcfstorage.so
-	rm -f strus_kcfstorage.so.1
-	rm -f strus_kcfstorage.so.1.0
+	rm -f strus_kcfstorage.so.0
+	rm -f strus_kcfstorage.so.0.0
+	rm -f strus_kcfstorage.so.0.0.0
 
 

@@ -35,8 +35,8 @@ struct Dictionary::Impl
 {
 	Impl( const std::string& type_, const std::string& name_, const std::string& path_)
 		:m_ovlfile( filepath( path_, name_, type_ + "ovl"))
-		,m_idxvector( path_, name_, type_ + "idx")
-		,m_invvector( path_, name_, type_ + "inv"){}
+		,m_idxvector( type_ + "idx", name_, path_)
+		,m_invvector( type_ + "inv", name_, path_){}
 
 	~Impl()
 	{

@@ -5,7 +5,6 @@ Table of Contents
 -----------------
 
   Boost
-  Kyotocabinet
 
 
 Boost
@@ -15,13 +14,5 @@ Boost
 
 See '3rdparty/boost/LICENSE_1_0.txt'.
 
-
-
-Kyotocabinet
-------------
-
-kyotocabinet is distributed under GPL Version 3
-
-See '3rdparty/kyotocabinet/COPYING'.
 
 

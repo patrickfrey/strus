@@ -28,6 +28,7 @@
 */
 #include "podvector.hpp"
 #include <cstdlib>
+#include <boost/shared_ptr.hpp>
 
 using namespace strus;
 
@@ -37,7 +38,7 @@ std::size_t PodVectorBase::blocksize() const
 }
 
 PodVectorBase::PodVectorBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_)
-	:BlockTable( type_, name_, path_, m_elementsize * (NofBlockElements+1))
+	:BlockTable( type_, name_, path_, elementsize_ * (NofBlockElements+1))
 	,m_lastidx(0)
 	,m_elementsize(elementsize_)
 {
@@ -139,7 +140,19 @@ Index PodVectorBase::fill( std::size_t nof_elements, const void* fillerelement)
 {
 	Index rt;
 	std::size_t ii=0;
-	for (ii=0; ii<nof_elements; ++ii)
+	if (nof_elements > NofBlockElements)
+	{
+		void* ptr = std::malloc( nof_elements * m_elementsize);
+		if (!ptr) throw std::bad_alloc();
+		boost::shared_ptr<void> mem( ptr, std::free);
+		for (ii=0; ii<nof_elements; ++ii)
+		{
+			std::memcpy( (char*)ptr + (ii * m_elementsize), fillerelement, m_elementsize);
+		}
+		rt = BlockTable::fill( nof_elements/NofBlockElements, ptr);
+	}
+	std::size_t nn = nof_elements % NofBlockElements;
+	for (ii=0; ii<nn; ++ii)
 	{
 		rt = push_back( fillerelement);
 	}

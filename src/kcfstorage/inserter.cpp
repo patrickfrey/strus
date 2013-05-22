@@ -1,4 +1,6 @@
 #include "inserter.hpp"
+#include "encode.hpp"
+#include <algorithm>
 
 using namespace strus;
 using namespace strus::inserter;
@@ -8,7 +10,7 @@ static bool compareDocPosition( const DocPosition& p1, const DocPosition& p2)
 	return (p1 < p2);
 }
 
-DocNumber inserter::storeDocument( StorageDB& db, const std::string& docid, const Storage::TermDocPositionMap& content)
+DocNumber strus::inserter::storeDocument( StorageDB& db, const std::string& docid, const Storage::TermDocPositionMap& content)
 {
 	typedef Storage::TermDocPositionMap TermDocPositionMap;
 	typedef std::map<TermNumber,std::string> TermPackedPositionMap;
@@ -21,10 +23,10 @@ DocNumber inserter::storeDocument( StorageDB& db, const std::string& docid, cons
 	{
 		Storage::DocPositionList poslist = ci->second;
 
-		TermNumber tn = db.findTermNumber( ci->first.term.type, ci->first.term.value);
+		TermNumber tn = db.findTermNumber( ci->first.type, ci->first.value);
 		if (!tn)
 		{
-			tn = db.insertTermNumber( ci->first.term.type, ci->first.term.value);
+			tn = db.insertTermNumber( ci->first.type, ci->first.value);
 		}
 		Storage::DocPositionList::const_iterator pi = poslist.begin(), pe = poslist.end();
 		DocPosition prevpos = (pi==pe)?0:*pi;
@@ -41,19 +43,18 @@ DocNumber inserter::storeDocument( StorageDB& db, const std::string& docid, cons
 
 		std::string poslist_packed;
 		pi = poslist.begin();
-		DocPosition prevpos = 0;
+		prevpos = 0;
 		if (pi != poslist.end())
 		{
 			packIndex( poslist_packed, prevpos = *pi);
+			for (++pi; pi != poslist.end(); ++pi)
+			{
+				packIndex( poslist_packed, *pi - prevpos);
+				prevpos = *pi;
+			}
+			tpmap.insert( std::pair<TermNumber,std::string>( tn, poslist_packed));
 		}
-		for (++pi; pi != poslist.end(); ++pi)
-		{
-			packIndex( poslist_packed, *pi - prevpos);
-			prevpos = *pi;
-		}
-		tpmap.insert( std::pair<TermNumber,std::string>( tn, poslist_packed));
 	}
-	db.lock();
 	DocNumber docno = db.findDocumentNumber( docid);
 	if (docno) throw std::runtime_error( std::string("document '") + docid + "' already inserted");
 	docno = db.insertDocumentNumber( docid);
@@ -64,18 +65,20 @@ DocNumber inserter::storeDocument( StorageDB& db, const std::string& docid, cons
 	{
 		std::pair<BlockNumber,bool> ib = db.getTermBlockNumber( ti->first);
 		BlockNumber bn = ib.first;
-		bool isSmallBlock = ib.second;
-		if (!bn)
+		if (!ib.first)
 		{
 			std::string blockdata;
 			blockdata.append( docno_packed);
-			blockdata.append( poslist_packed);
+			blockdata.append( ti->second);
 			blockdata.push_back( 0);
 
 			if (blockdata.size() <= StorageDB::SmallBlockSize)
 			{
 				bn = db.allocSmallBlock();
-				writeSmallBlock( bn, blockdata.c_str(), blockdata.size());
+				char blk[ StorageDB::SmallBlockSize];
+				std::memset( blk, 0, StorageDB::SmallBlockSize);
+				std::memcpy( blk, blockdata.c_str(), blockdata.size());
+				db.writeSmallBlock( bn, blk);
 				db.setTermBlockNumber( ti->first, bn, true);
 				continue;
 			}
@@ -98,8 +101,8 @@ DocNumber inserter::storeDocument( StorageDB& db, const std::string& docid, cons
 				inodebn[bi] = db.allocIndexBlock();
 				std::memset( &inodeblock[bi], 0, sizeof( inodeblock[bi]));
 				inodeblock[bi].hdr.type = blocktype-bi;
-				block.hdr.fillpos = 1;
-				writeIndexBlock( bn, &block);
+				inodeblock[bi].hdr.fillpos = 1;
+				db.writeIndexBlock( inodebn[bi], &inodeblock[bi]);
 				db.setTermBlockNumber( ti->first, bn, false);
 				continue;
 			}
@@ -110,15 +113,13 @@ DocNumber inserter::storeDocument( StorageDB& db, const std::string& docid, cons
 				std::memset( &block, 0, sizeof( block));
 				block.hdr.type = 0;
 				block.hdr.fillpos = blockdata.size();
-				writeIndexBlock( bn, &block);
+				db.writeIndexBlock( bn, &block);
 				db.setTermBlockNumber( ti->first, bn, false);
 				continue;
 			}
 
 		}
 	}
-
-	db.unlock();
 	return docno;
 }
 

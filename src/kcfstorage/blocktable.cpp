@@ -58,6 +58,7 @@ void BlockTable::create( const std::string& type_, const std::string& name_, con
 void BlockTable::create()
 {
 	m_file.create();
+	m_writemode = true;
 
 	char* ptr = (char*)std::calloc( m_blocksize, 1);
 	if (!ptr) throw std::bad_alloc();
@@ -94,6 +95,8 @@ void BlockTable::open( bool writemode_)
 void BlockTable::reset()
 {
 	m_file.create();
+	m_writemode = true;
+
 	char* ptr = (char*)std::calloc( m_blocksize, 1);
 	if (!ptr) throw std::bad_alloc();
 	try
@@ -113,6 +116,7 @@ void BlockTable::reset()
 void BlockTable::close()
 {
 	m_file.close();
+	m_writemode = false;
 }
 
 void BlockTable::readBlock( Index idx, void* buf) const
@@ -144,6 +148,15 @@ Index BlockTable::appendBlock( const void* buf)
 	if (!m_writemode) throw std::runtime_error("illegal write operation on file opened for reading");
 	std::size_t pos = m_file.awrite( (char*)buf, m_blocksize);
 	return (pos / m_blocksize);
+}
+
+Index BlockTable::fill( std::size_t nof_elements, const void* fillerbuf)
+{
+	File::ScopedLock lck = m_file.scopedLock();
+	std::size_t ii = 0;
+	Index rt;
+	for (; ii<nof_elements; ++ii) rt = appendBlock( fillerbuf);
+	return rt;
 }
 
 Index BlockTable::size() const
