@@ -1,215 +1,292 @@
 #include "dictionary.hpp"
+#include "podvector.hpp"
 #include <cstring>
+#include <limits>
 #include <boost/cstdint.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/shared_ptr.hpp>
 
-typedef boost::int64_t Address;
-typedef boost::int64_t NodeValue;
+using namespace strus;
+static boost::hash<std::string> g_hashfunc;
 
-static NodeValue nodeValue( Address adr, unsigned char succ)
+struct Block
 {
-	return (adr << 8) + succ;
-}
+	Index next;
+	Index idx;
+	unsigned short keysize;
+	char key[1];
 
-static Address nodeAddress( NodeValue value)
-{
-	return (value >> 8);
-}
-
-static unsigned char nodeChar( NodeValue value)
-{
-	return (unsigned char)(value & 0xff);
-}
-
-
-enum NodeType
-{
-	ValueType,
-	Succ1Type,
-	Succ2Type,
-	Succ7Type,
-	Succ14Type,
-	Succ256Type
-};
-
-struct NodeValue
-{
-	Index val;
-};
-
-struct NodeSucc1
-{
-	NodeValue val;
-
-	Address getsucc( unsigned char ch)
+	Block()
 	{
-		if (nodeChar( val) == ch) return nodeAddress( val);
-		return 0;
+		std::memset( this, 0, sizeof(*this));
 	}
-
-	bool addSucc( unsigned char ch, Address aa)
+	Block( const Block& o)
 	{
-		if (val == 0)
-		{
-			val = NodeValue( aa, ch);
-			return true;
-		}
-		return false;
+		std::memcpy( this, &o, sizeof(*this));
+	}
+	std::size_t size() const
+	{
+		return (std::size_t)keysize;
 	}
 };
 
-struct NodeSucc2
-{
-	NodeValue val[2];
-
-	Address getsucc( unsigned char ch)
-	{
-		if (nodeChar( val[0]) == ch) return nodeAddress( val[0]);
-		if (nodeChar( val[1]) == ch) return nodeAddress( val[1]);
-		return 0;
-	}
-
-	bool addSucc( unsigned char ch, Address aa)
-	{
-		if (val[0] == 0)
-		{
-			val[0] = NodeValue( aa, ch);
-			return true;
-		}
-		if (val[1] == 0)
-		{
-			val[1] = NodeValue( aa, ch);
-			return true;
-		}
-		return false;
-	}
-};
-
-struct NodeSucc7
-{
-	char match[8];
-	Address adr[7];
-
-	Address getsucc( unsigned char ch)
-	{
-		//TODO use boost::SIMD operations
-		const char* cc = std::strchr( match, ch);
-		if (!cc) return false;
-		return adr[ (cc - match)];
-	}
-
-	bool addSucc( unsigned char ch, Address aa)
-	{
-		//TODO use boost::SIMD operations
-		const char* cc = std::strchr( match, '\0');
-		if (ch - match >= 7) return false;
-		adr[ ch - match] = aa;
-		return true;
-	}
-};
-
-struct NodeSucc14
-{
-	char match[16];
-	Address adr[14];
-
-	Address getsucc( unsigned char ch)
-	{
-		//TODO use boost::SIMD operations
-		const char* cc = std::strchr( match, ch);
-		if (!cc) return false;
-		return adr[ (cc - match)];
-	}
-
-	bool addSucc( unsigned char ch, Address aa)
-	{
-		//TODO use boost::SIMD operations
-		const char* cc = std::strchr( match, '\0');
-		if (ch - match >= 14) return false;
-		adr[ ch - match] = aa;
-		return true;
-	}
-};
-
-struct NodeSucc256
-{
-	Address adr[256];
-
-	Address getsucc( unsigned char ch)
-	{
-		return adr[ ch];
-	}
-
-	bool addSucc( unsigned char ch, Address aa)
-	{
-		adr[ ch] = aa;
-	}
-};
-
-
-template <class NodeType_, enum NodeClass_>
-class NodeStruct
-{
-private:
-	NodeClass_* ar;
-	std::size_t arsize;
-	std::size_t arpos;
-public:
-	!!! HIER WEITER (no freelist because of shared concurrent reader - element are freed when writing dictionary to disc)
-};
 
 struct Dictionary::Impl
 {
-	Impl(){}
-	Impl( const Impl& o){}
-	~Impl();
+	Impl( const std::string& type_, const std::string& name_, const std::string& path_)
+		:m_ovlfile( filepath( path_, name_, type_ + "ovl"))
+		,m_idxvector( path_, name_, type_ + "idx")
+		,m_invvector( path_, name_, type_ + "inv"){}
 
-	void insert( const std::string& key, const Index& value);
-	Index find( const std::string& key);
+	~Impl()
+	{
+		close();
+	}
+
+	static void create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t size_)
+	{
+		Impl impl( type_, name_, path_);
+		impl.create( size_);
+	}
+
+	void create( std::size_t size_)
+	{
+		if (size_ < 2) throw std::runtime_error( "invalid size for dictionary");
+		m_hashsize = 2;
+		while (m_hashsize < size_ && m_hashsize) m_hashsize <<= 2;
+		if (!m_hashsize) throw std::bad_alloc();
+
+		m_ovlfile.create();
+		m_idxvector.create();
+		m_invvector.create();
+
+		Block nullblock;
+		m_ovlfile.awrite( &nullblock, sizeof(nullblock));
+		m_idxvector.fill( m_hashsize, 0);
+	}
+
+	void open( bool writemode_)
+	{
+		m_ovlfile.open( writemode_);
+		m_idxvector.open( writemode_);
+		m_invvector.open( writemode_);
+		m_hashsize = m_idxvector.size();
+	}
+
+	void close()
+	{
+		if (m_hashsize)
+		{
+			m_ovlfile.close();
+			m_idxvector.close();
+			m_invvector.close();
+		}
+	}
+
+	struct BlockRefMem
+	{
+		boost::shared_ptr<void> ptr;
+		struct
+		{
+			Block blk;
+			char ar[1024];
+		} localdef;
+	};
+
+	static Block* getBlockRef( BlockRefMem& mem, std::size_t blksize)
+	{
+		Block* rt;
+		if (sizeof( mem.localdef.ar) < blksize)
+		{
+			mem.ptr = boost::shared_ptr<void>( std::calloc( 1, blksize + sizeof(Block)), std::free);
+			rt = (Block*)mem.ptr.get();
+		}
+		else
+		{
+			rt = &mem.localdef.blk;
+		}
+		return rt;
+	}
+
+	Index newkeystring( const std::string& key, const Index& idx)
+	{
+		if (key.size() >= std::numeric_limits<unsigned short>::max())
+		{
+			throw std::runtime_error( "key size too big (max key size 65535)");
+		}
+		BlockRefMem mem;
+		Block* blkptr = getBlockRef( mem, key.size());
+
+		blkptr->keysize = (unsigned short)key.size();
+		std::memcpy( blkptr->key, key.c_str(), blkptr->keysize);
+		blkptr->key[ blkptr->keysize] = '\0';
+		blkptr->next = 0;
+		blkptr->idx = idx;
+
+		return m_ovlfile.awrite( blkptr, sizeof(Block)+blkptr->keysize);
+	}
+
+	Index appendkeystring( const std::string& key, Index ovlidx, const Index& idx)
+	{
+		Block blk;
+		for (;;)
+		{
+			m_ovlfile.pread( ovlidx, &blk, sizeof(Block));
+			if (blk.next == 0)
+			{
+				blk.next = newkeystring( key, idx);
+				m_ovlfile.pwrite( ovlidx, &blk, sizeof(Block));
+				return blk.next;
+			}
+			else if (ovlidx >= blk.next)
+			{
+				throw std::runtime_error( "corrupt index");
+			}
+			ovlidx = blk.next;
+		}
+	}
+
+	Index findkeystring( const std::string& key, Index ovlidx) const
+	{
+		if (key.size() >= std::numeric_limits<unsigned short>::max())
+		{
+			return 0;
+		}
+		BlockRefMem mem;
+		Block* blkref = getBlockRef( mem, key.size());
+
+		blkref->keysize = (unsigned short)key.size();
+		std::memcpy( blkref->key, key.c_str(), blkref->keysize);
+
+		for (;;)
+		{
+			m_ovlfile.pread( ovlidx, blkref, key.size());
+			if (blkref->size() == key.size() && std::strcmp( blkref->key, key.c_str()) == 0)
+			{
+				return blkref->idx;
+			}
+			if (blkref->next != 0)
+			{
+				if (ovlidx >= blkref->next)
+				{
+					throw std::runtime_error( "corrupt index");
+				}
+				ovlidx = blkref->next;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	}
+
+	std::string getIdentifier( const Index& idx) const
+	{
+		if (!idx) throw std::runtime_error( "illegal parameter (null index)");
+		Index ovlidx = m_invvector.get( idx-1);
+
+		BlockRefMem mem;
+		std::size_t blkrefsize = 128;
+		Block* blkref = getBlockRef( mem, blkrefsize);
+		m_ovlfile.pread( ovlidx, blkref, blkrefsize);
+		if (blkref->size() > blkrefsize)
+		{
+			blkref = getBlockRef( mem, blkref->size());
+			m_ovlfile.pread( ovlidx, blkref, blkref->size());
+		}
+		return std::string( blkref->key, blkref->size());
+	}
+
+	Index find( const std::string& key) const
+	{
+		if (!m_hashsize) throw std::runtime_error( "reading from dictionary not opened");
+		std::size_t idx = g_hashfunc( key) & (m_hashsize -1);
+		Index ovlidx = m_idxvector.get( idx);
+		if (ovlidx)
+		{
+			return findkeystring( key, ovlidx);
+		}
+		else
+		{
+			return 0;
+		}
+	}
+
+	Index insert( const std::string& key)
+	{
+		if (!m_hashsize) throw std::runtime_error( "writing to dictionary not opened");
+		std::size_t idx = g_hashfunc( key) & (m_hashsize -1);
+		Index ovlidx = m_idxvector.get( idx);
+		if (ovlidx)
+		{
+			Index keyno = m_invvector.push_back( 0);
+			ovlidx = appendkeystring( key, ovlidx, keyno + 1);
+			m_invvector.set( keyno, ovlidx);
+			return keyno + 1;
+		}
+		else
+		{
+			Index keyno = m_invvector.push_back( 0);
+			ovlidx = newkeystring( key, keyno + 1);
+			m_invvector.set( keyno, ovlidx);
+			m_idxvector.set( idx, ovlidx);
+			return keyno + 1;
+		}
+	}
 
 private:
-	NodeValue* arv;
-	std::size_t sizev;
-	Index freev;
-
-	NodeSucc1* ar1;
-	std::size_t size1;
-	Index free1;
-
-	NodeSucc7* ar7;
-	std::size_t size7;
-	Index free7;
-
-	NodeSucc14* ar14;
-	std::size_t size256;
-	Index free14;
-
-	NodeSucc256* ar256;
-	std::size_t size256;
-	Index free256;
+	std::size_t m_hashsize;
+	File m_ovlfile;
+	PodVector<Index> m_idxvector;
+	PodVector<Index> m_invvector;
 };
 
-Dictionary::Dictionary()
+
+
+void Dictionary::create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t size_)
 {
-	new Impl;
+	Impl impl( type_, name_, path_);
+	impl.create( size_);
 }
 
-Dictionary::Dictionary( const Dictionary& o)
-	:m_impl(new Impl(*o.m_impl))
-{}
+Dictionary::Dictionary( const std::string& type_, const std::string& name_, const std::string& path_)
+{
+	m_impl = new Impl( type_, name_, path_);
+}
 
 Dictionary::~Dictionary()
 {
 	delete m_impl;
 }
 
-void Dictionary::insert( const std::string& key, const Index& value)
+Index Dictionary::insert( const std::string& key)
 {
-	return m_impl->insert( key, value);
+	return m_impl->insert( key);
 }
 
-Index find( const std::string& key)
+Index Dictionary::find( const std::string& key) const
 {
 	return m_impl->find( key);
+}
+
+void Dictionary::create( std::size_t size_)
+{
+	m_impl->create( size_);
+}
+
+void Dictionary::open( bool writemode_)
+{
+	m_impl->open( writemode_);
+}
+
+void Dictionary::close()
+{
+	m_impl->close();
+}
+
+std::string Dictionary::getIdentifier( const Index& idx) const
+{
+	return m_impl->getIdentifier( idx);
 }
 
 

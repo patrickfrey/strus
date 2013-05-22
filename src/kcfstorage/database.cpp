@@ -36,27 +36,26 @@
 
 using namespace strus;
 
-void StorageDB::create( const std::string& name_, const std::string& path_)
+void StorageDB::create( const std::string& name_, const std::string& path_, const Configuration& cfg)
 {
-	KeyTable::create( "tetab", name_, path_);
-	KeyTable::create( "tytab", name_, path_);
-	KeyTable::create( "dctab", name_, path_);
+	Dictionary::create( "tetab", name_, path_, cfg.expected_nof_terms);
+	Dictionary::create( "tytab", name_, path_, cfg.expected_nof_types);
+	Dictionary::create( "dctab", name_, path_, cfg.expected_nof_docs);
 	PodVector<DocNumber>::create( "rdlst", name_, path_);
-	BlockTable::create( "smblk", SmallBlockSize, name_, path_);
-	BlockTable::create( "ixblk", IndexBlockSize, name_, path_);
+	BlockTable::create( "smblk", name_, path_, SmallBlockSize);
+	BlockTable::create( "ixblk", name_, path_, IndexBlockSize);
 	File::create( filepath( path_, name_, "lock"));
 }
 
-StorageDB::StorageDB( const std::string& name_, const std::string& path_, bool writemode_)
-	:m_writemode(writemode_)
-	,m_name(name_)
+StorageDB::StorageDB( const std::string& name_, const std::string& path_)
+	:m_name(name_)
 	,m_path(path_)
-	,m_termtable("tetab",name_,path_,writemode_)
-	,m_termblockmap("telst",name_,path_,writemode_)
-	,m_typetable("tytab",name_,path_,writemode_)
-	,m_docidtable("dctab",name_,path_,writemode_)
-	,m_smallblktable("smblk",SmallBlockSize,name_,path_,writemode_)
-	,m_indexblktable("ixblk",IndexBlockSize,name_,path_,writemode_)
+	,m_termtable("tetab",name_,path_)
+	,m_termblockmap("telst",name_,path_)
+	,m_typetable("tytab",name_,path_)
+	,m_docidtable("dctab",name_,path_)
+	,m_smallblktable("smblk",name_,path_,SmallBlockSize)
+	,m_indexblktable("ixblk",name_,path_,IndexBlockSize)
 	,m_transaction_lock( filepath( path_, name_, "lock"))
 {
 	m_nulledblock = std::calloc( 1, IndexBlockSize);
@@ -75,15 +74,15 @@ void StorageDB::close()
 	std::free( m_nulledblock);
 }
 
-void StorageDB::open()
+void StorageDB::open( bool writemode_)
 {
-	m_termtable.open();
-	m_termblockmap.open();
-	m_typetable.open();
-	m_docidtable.open();
-	m_smallblktable.open();
-	m_indexblktable.open();
-	m_transaction_lock.open( m_writemode);
+	m_termtable.open( writemode_);
+	m_termblockmap.open( writemode_);
+	m_typetable.open( writemode_);
+	m_docidtable.open( writemode_);
+	m_smallblktable.open( writemode_);
+	m_indexblktable.open( writemode_);
+	m_transaction_lock.open( writemode_);
 }
 
 void StorageDB::lock()
@@ -104,26 +103,26 @@ StorageDB::~StorageDB()
 TermNumber StorageDB::findTermNumber( const std::string& type, const std::string& value) const
 {
 	std::string key;
-	Index typeidx = m_typetable.findKey( type);
+	Index typeidx = m_typetable.find( type);
 	if (!typeidx) return 0;
 
 	packIndex( key, typeidx);
 	key.append( value);
 
-	TermNumber rt = m_termtable.findKey( key);
+	TermNumber rt = m_termtable.find( key);
 	return rt;
 }
 
 TermNumber StorageDB::insertTermNumber( const std::string& type, const std::string& value)
 {
 	std::string key;
-	Index typeidx = m_typetable.findKey( type);
-	if (!typeidx) typeidx = m_typetable.insertKey( type);
+	Index typeidx = m_typetable.find( type);
+	if (!typeidx) typeidx = m_typetable.insert( type);
 
 	packIndex( key, typeidx);
 	key.append( value);
 
-	TermNumber rt = m_termtable.insertKey( key);
+	TermNumber rt = m_termtable.insert( key);
 	if (m_termblockmap.push_back( 0)+1 != rt)
 	{
 		throw std::runtime_error( "internal data corruption (term to block map)");
@@ -131,7 +130,7 @@ TermNumber StorageDB::insertTermNumber( const std::string& type, const std::stri
 	return rt;
 }
 
-std::pair<BlockNumber,bool> StorageDB::getTermBlockNumber( const TermNumber& tn)
+std::pair<BlockNumber,bool> StorageDB::getTermBlockNumber( const TermNumber& tn) const
 {
 	BlockNumber ib = m_termblockmap.get( tn);
 	return std::pair<BlockNumber,bool>( ib>>1, ib&1);
@@ -144,17 +143,17 @@ void StorageDB::setTermBlockNumber( const TermNumber& tn, const BlockNumber& bn,
 
 DocNumber StorageDB::findDocumentNumber( const std::string& docid) const
 {
-	DocNumber rt = m_docidtable.findKey( docid);
+	DocNumber rt = m_docidtable.find( docid);
 	return rt;
 }
 
 DocNumber StorageDB::insertDocumentNumber( const std::string& docid)
 {
-	DocNumber rt = m_docidtable.insertKey( docid);
+	DocNumber rt = m_docidtable.insert( docid);
 	return rt;
 }
 
-std::pair<std::string,std::string> StorageDB::getTerm( const TermNumber& tn)
+std::pair<std::string,std::string> StorageDB::getTerm( const TermNumber& tn) const
 {
 	std::pair<std::string,std::string> rt;
 	std::string key = m_termtable.getIdentifier( tn);
@@ -165,7 +164,7 @@ std::pair<std::string,std::string> StorageDB::getTerm( const TermNumber& tn)
 	return rt;
 }
 
-std::string StorageDB::getDocumentId( const DocNumber& dn)
+std::string StorageDB::getDocumentId( const DocNumber& dn) const
 {
 	return m_docidtable.getIdentifier( dn);
 }
@@ -180,7 +179,7 @@ BlockNumber StorageDB::allocIndexBlock()
 	return m_indexblktable.insertBlock( m_nulledblock);
 }
 
-void StorageDB::writeSmallBlock( const BlockNumber& idx, const void* data, std::size_t start)
+void StorageDB::writeSmallBlock( const BlockNumber& idx, const void* data)
 {
 	m_smallblktable.writeBlock( idx, data);
 }
@@ -191,7 +190,7 @@ void StorageDB::writePartialSmallBlock( const BlockNumber& idx, const void* data
 	m_smallblktable.partialWriteBlock( idx, start, data, SmallBlockSize - start);
 }
 
-void StorageDB::writeIndexBlock( const BlockNumber& idx, const void* data, std::size_t start)
+void StorageDB::writeIndexBlock( const BlockNumber& idx, const void* data)
 {
 	m_smallblktable.writeBlock( idx, data);
 }
@@ -202,12 +201,12 @@ void StorageDB::writePartialIndexBlock( const BlockNumber& idx, const void* data
 	m_smallblktable.partialWriteBlock( idx, start, data, IndexBlockSize - start);
 }
 
-void StorageDB::readSmallBlock( const BlockNumber& idx, void* data)
+void StorageDB::readSmallBlock( const BlockNumber& idx, void* data) const
 {
 	m_smallblktable.readBlock( idx, data);
 }
 
-void StorageDB::readIndexBlock( const BlockNumber& idx, void* data)
+void StorageDB::readIndexBlock( const BlockNumber& idx, void* data) const
 {
 	m_indexblktable.readBlock( idx, data);
 }

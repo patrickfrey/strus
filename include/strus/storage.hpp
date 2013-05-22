@@ -77,16 +77,20 @@ public:
 			:type(o.type),value(o.value){}
 	};
 
+	enum Mode {Read,Write};
+	virtual void open( Mode mode_)=0;
+	virtual void close()=0;
+
 	typedef std::vector<DocPosition> DocPositionList;
 	typedef std::map<Term,DocPositionList> TermDocPositionMap;
 
 	virtual DocNumber storeDocument( const std::string& docid, const TermDocPositionMap& content)=0;
 
-	virtual std::string getDocumentId( const DocNumber& docnum)=0;
-	virtual std::pair<std::string,std::string> getTerm( const TermNumber& termnum)=0;
+	virtual std::string getDocumentId( const DocNumber& docnum) const=0;
+	virtual std::pair<std::string,std::string> getTerm( const TermNumber& termnum) const=0;
 
-	virtual DocNumber findDocumentNumber( const std::string& docid)=0;
-	virtual TermNumber findTermNumber( const std::string& type, const std::string& value)=0;
+	virtual DocNumber findDocumentNumber( const std::string& docid) const=0;
+	virtual TermNumber findTermNumber( const std::string& type, const std::string& value) const=0;
 
 	virtual bool openIterator( PositionChunk& itr, const TermNumber& termnum)=0;
 	virtual bool nextIterator( PositionChunk& itr)=0;

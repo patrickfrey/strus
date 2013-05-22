@@ -40,20 +40,21 @@ namespace strus
 class BlockTable
 {
 public:
-	BlockTable( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_=false);
+	BlockTable( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t blocksize_);
 	~BlockTable();
 
-	static void create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_);
-	void open();
+	static void create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t blocksize_);
+	void create();
+	void open( bool writemode_);
 	void close();
 	void reset();
 
-	void readBlock( Index idx, void* buf);
+	void readBlock( Index idx, void* buf) const;
 	void writeBlock( Index idx, const void* buf);
-	void partialReadBlock( Index idx, std::size_t pos, void* buf, std::size_t bufsize);
+	void partialReadBlock( Index idx, std::size_t pos, void* buf, std::size_t bufsize) const;
 	void partialWriteBlock( Index idx, std::size_t pos, const void* buf, std::size_t bufsize);
 	Index insertBlock( const void* buf);
-	Index size();
+	Index size() const;
 
 private:
 	struct ControlBlock

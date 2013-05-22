@@ -7,7 +7,6 @@ CPP_OBJS=\
 	blocktable.o \
 	blockcache.o \
 	podvector.o \
-	keytable.o \
 	database.o \
 	kcfstorage.o
 
@@ -18,7 +17,6 @@ CPP_INCS=\
 	dictionary.hpp \
 	blocktable.hpp \
 	blockcache.hpp \
-	keytable.hpp \
 	database.hpp \
 	podvector.hpp
 
@@ -27,7 +25,7 @@ CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
 PATHFLAGS=-DSTRUS_DEFAULT_DBPATH="/home/patrick/"
 SO_COMPILE_FLAGS=-fPIC
 LDFLAGS=-L/usr/local/lib
-LIBS=-lkyotocabinet
+LIBS=
 
 %.o : %.cpp GNUmakefile $(CPP_INCS)
 	g++ -c -o $@ $(SO_COMPILE_FLAGS) -DSHARED $(CXXFLAGS) $(CPP_INCLUDE) $(PATHFLAGS) $<

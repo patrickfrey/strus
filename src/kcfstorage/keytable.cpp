@@ -28,7 +28,6 @@
 */
 #include "keytable.hpp"
 #include "file.hpp"
-#include <kcdbext.h>
 #include <cstdio>
 #include <algorithm>
 #include <cstdlib>

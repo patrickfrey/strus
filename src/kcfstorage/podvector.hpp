@@ -43,19 +43,23 @@ class PodVectorBase
 	:public BlockTable
 {
 public:
-	enum {NofBlockElements=127};
-	PodVectorBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_, bool writemode_=false);
+	enum {NofBlockElements=1023};
+	PodVectorBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_);
 
 	virtual ~PodVectorBase();
 
 	static void create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_);
 
-	void open();
+	void create();
+	void open( bool writemode_);
+	void close();
 
 	void set( const Index& idx, const void* element);
-	void get( const Index& idx, void* element);
+	void get( const Index& idx, void* element) const;
 
+	Index fill( std::size_t nof_elements, const void* fillerelement);
 	Index push_back( const void* element);
+	Index size() const;
 	void reset();
 
 public:
@@ -111,21 +115,22 @@ class PodVector
 	:public PodVectorBase
 {
 public:
-	PodVector( const std::string& type_, const std::string& name_, const std::string& path_, bool writemode_=false)
-		:PodVectorBase( type_, name_, path_, sizeof(Element), writemode_){}
+	PodVector( const std::string& type_, const std::string& name_, const std::string& path_)
+		:PodVectorBase( type_, name_, path_, sizeof(Element)){}
 
 	static void create( const std::string& type_, const std::string& name_, const std::string& path_)
 		{PodVectorBase::create( type_, name_, path_, sizeof(Element));}
 
-	Index push_back( const Element& element)
-		{return PodVectorBase::push_back( &element);}
+	void create()							{PodVectorBase::create();}
+	void open( bool writemode_)					{PodVectorBase::open( writemode_);}
+	void close()							{PodVectorBase::close();}
 
-	void set( const Index& idx, const Element& element)
-		{return PodVectorBase::set( idx, &element);}
-	void get( const Index& idx, Element& element)
-		{return PodVectorBase::get( idx, &element);}
-	Element get( const Index& idx)
-		{Element rt; PodVectorBase::get( idx, &rt); return rt;}
+	Index push_back( const Element& element)			{return PodVectorBase::push_back( &element);}
+	Index fill( std::size_t nof_elements, const Element& element)	{return PodVectorBase::fill( nof_elements, &element);}
+
+	void set( const Index& idx, const Element& element)		{return PodVectorBase::set( idx, &element);}
+	void get( const Index& idx, Element& element) const		{return PodVectorBase::get( idx, &element);}
+	Element get( const Index& idx) const				{Element rt; PodVectorBase::get( idx, &rt); return rt;}
 
 	class iterator
 		:public PodVectorBase::iterator
@@ -138,8 +143,7 @@ public:
 		iterator( const iterator& o)
 			:PodVectorBase::iterator(o){}
 
-		const Element& operator*()
-			{return *(const Element*)PodVectorBase::iterator::operator*();}
+		const Element& operator*()				{return *(const Element*)PodVectorBase::iterator::operator*();}
 	};
 };
 

@@ -30,7 +30,7 @@
 #define _STRUS_KCF_DATABASE_HPP_INCLUDED
 #include "strus/storage.hpp"
 #include "strus/position.hpp"
-#include "keytable.hpp"
+#include "dictionary.hpp"
 #include "blocktable.hpp"
 #include "podvector.hpp"
 #include <string>
@@ -65,8 +65,8 @@ public:
 		};
 		enum
 		{
-			NofElem = ((IndexBlockSize - sizeof( IndexBlockHeader)) / sizeof(Elem)),
-			Size = ((int)NofElem * sizeof(Elem)
+			NofElem	= ((IndexBlockSize - sizeof( IndexBlockHeader)) / sizeof(Elem)),
+			Size	= ((int)NofElem * sizeof(Elem))
 		};
 		Elem ar[ NofElem];
 	};
@@ -76,21 +76,34 @@ public:
 		enum
 		{
 			NofElem = ((IndexBlockSize - sizeof( IndexBlockHeader)) / sizeof(char)),
-			Size = ((int)NofElem * sizeof(char)
+			Size	= ((int)NofElem * sizeof(char))
 		};
 		char ar[ Size];
 	};
 
-	StorageDB( const std::string& name_, const std::string& path_, bool writemode_=false);
+	StorageDB( const std::string& name_, const std::string& path_);
 	virtual ~StorageDB();
 
-	void open();
+	void open( bool writemode_);
 	void close();
 
 	void lock();
 	void unlock();
 
-	static void create( const std::string& name, const std::string& path=std::string());
+	struct Configuration
+	{
+		std::size_t expected_nof_types;
+		std::size_t expected_nof_terms;
+		std::size_t expected_nof_docs;
+
+		Configuration()
+			:expected_nof_types(64),expected_nof_terms(1<<20),expected_nof_docs(10<<20){}
+		Configuration( const Configuration& o)
+			:expected_nof_types(o.expected_nof_types)
+			,expected_nof_terms(o.expected_nof_terms)
+			,expected_nof_docs(o.expected_nof_docs){}
+	};
+	static void create( const std::string& name, const std::string& path=std::string(), const Configuration& cfg=Configuration());
 
 	TermNumber findTermNumber( const std::string& type, const std::string& value) const;
 	TermNumber insertTermNumber( const std::string& type, const std::string& value);
@@ -98,10 +111,10 @@ public:
 	DocNumber findDocumentNumber( const std::string& docid) const;
 	DocNumber insertDocumentNumber( const std::string& docid);
 
-	std::pair<std::string,std::string> getTerm( const TermNumber& tn);
-	std::string getDocumentId( const DocNumber& dn);
+	std::pair<std::string,std::string> getTerm( const TermNumber& tn) const;
+	std::string getDocumentId( const DocNumber& dn) const;
 
-	std::pair<BlockNumber,bool> getTermBlockNumber( const TermNumber& tn);
+	std::pair<BlockNumber,bool> getTermBlockNumber( const TermNumber& tn) const;
 	void setTermBlockNumber( const TermNumber& tn, const BlockNumber& bn, bool isSmallBlock);
 
 	BlockNumber allocSmallBlock();
@@ -113,19 +126,17 @@ public:
 	void writePartialSmallBlock( const BlockNumber& idx, const void* data, std::size_t start);
 	void writePartialIndexBlock( const BlockNumber& idx, const void* data, std::size_t start);
 
-	void readSmallBlock( const BlockNumber& idx, void* data);
-	void readIndexBlock( const BlockNumber& idx, void* data);
+	void readSmallBlock( const BlockNumber& idx, void* data) const;
+	void readIndexBlock( const BlockNumber& idx, void* data) const;
 
 private:
 	bool m_writemode;
 	std::string m_name;
 	std::string m_path;
-	KeyTable m_termtable;
+	Dictionary m_termtable;
 	PodVector<BlockNumber> m_termblockmap;
-	KeyTable m_typetable;
-	boost::mutex m_typetable_mutex;
-	KeyTable m_docidtable;
-	boost::mutex m_docidtable_mutex;
+	Dictionary m_typetable;
+	Dictionary m_docidtable;
 	BlockTable m_smallblktable;
 	BlockTable m_indexblktable;
 	File m_transaction_lock;

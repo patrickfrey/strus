@@ -34,8 +34,8 @@
 
 using namespace strus;
 
-BlockTable::BlockTable( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_, bool writemode_)
-	:m_writemode(writemode_)
+BlockTable::BlockTable( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t blocksize_)
+	:m_writemode(false)
 	,m_blocksize(blocksize_)
 	,m_file( filepath( path_, name_, type_))
 {
@@ -48,30 +48,33 @@ BlockTable::~BlockTable()
 	close();
 }
 
-void BlockTable::create( const std::string& type_, std::size_t blocksize_, const std::string& name_, const std::string& path_)
+void BlockTable::create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t blocksize_)
 {
 	if (blocksize_ < sizeof(ControlBlock)) throw std::logic_error("block size is too small");
+	BlockTable tab( type_, name_, path_, blocksize_);
+	tab.create();
+}
 
-	File file( filepath( path_, name_, type_));
-	file.create();
+void BlockTable::create()
+{
+	m_file.create();
 
-	char* ptr = (char*)std::calloc( blocksize_, 1);
+	char* ptr = (char*)std::calloc( m_blocksize, 1);
 	if (!ptr) throw std::bad_alloc();
 	try
 	{
-		file.awrite( ptr, blocksize_);
+		m_file.awrite( ptr, m_blocksize);
 	}
 	catch (const std::runtime_error& e)
 	{
 		std::free( ptr);
 		throw e;
 	}
-	file.close();
 }
 
-void BlockTable::open()
+void BlockTable::open( bool writemode_)
 {
-	m_file.open( m_writemode);
+	m_file.open( m_writemode = writemode_);
 	std::size_t filesize = m_file.filesize();
 
 	if (filesize % m_blocksize != 0 || filesize == 0)
@@ -104,7 +107,7 @@ void BlockTable::reset()
 	}
 	std::free( ptr);
 	m_file.close();
-	m_file.open();
+	m_file.open( true);
 }
 
 void BlockTable::close()
@@ -112,7 +115,7 @@ void BlockTable::close()
 	m_file.close();
 }
 
-void BlockTable::readBlock( Index idx, void* buf)
+void BlockTable::readBlock( Index idx, void* buf) const
 {
 	m_file.pread( idx * m_blocksize, (char*)buf, m_blocksize);
 }
@@ -123,7 +126,7 @@ void BlockTable::writeBlock( Index idx, const void* buf)
 	m_file.pwrite( idx * m_blocksize, (char*)buf, m_blocksize);
 }
 
-void BlockTable::partialReadBlock( Index idx, std::size_t pos, void* buf, std::size_t bufsize)
+void BlockTable::partialReadBlock( Index idx, std::size_t pos, void* buf, std::size_t bufsize) const
 {
 	if (pos + bufsize > m_blocksize) throw std::runtime_error("bad arguments for partial read operation");
 	m_file.pread( idx * m_blocksize + pos, (char*)buf, bufsize);
@@ -143,15 +146,12 @@ Index BlockTable::appendBlock( const void* buf)
 	return (pos / m_blocksize);
 }
 
-Index BlockTable::size()
+Index BlockTable::size() const
 {
 	Index rt;
 	if (!m_file.isopen())
 	{
-		open();
-		rt = (m_file.filesize() / m_blocksize);
-		if (!rt) throw std::runtime_error("unknown file format (header block missing)");
-		close();
+		throw std::runtime_error("called size of block table without opening it");
 	}
 	else
 	{

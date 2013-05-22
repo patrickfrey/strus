@@ -29,6 +29,7 @@
 #ifndef _STRUS_KCF_DICTIONARY_HPP_INCLUDED
 #define _STRUS_KCF_DICTIONARY_HPP_INCLUDED
 #include "strus/position.hpp"
+#include <string>
 
 namespace strus
 {
@@ -38,14 +39,19 @@ namespace strus
 class Dictionary
 {
 public:
-	Dictionary();
-	Dictionary( const Dictionary& o);
+	static void create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t size_);
+	Dictionary( const std::string& type_, const std::string& name_, const std::string& path_);
 	~Dictionary();
 
-private:
-	void insert( const std::string& key, const Index& value);
-	Index find( const std::string& key);
+	void open( bool writemode_);
+	void close();
+	void create( std::size_t size_);
 
+	Index insert( const std::string& key);
+	Index find( const std::string& key) const;
+	std::string getIdentifier( const Index& idx) const;
+
+private:
 	struct Impl;
 	Impl* m_impl;
 };

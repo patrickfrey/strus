@@ -1,6 +1,7 @@
 #include "strus/storagelib.hpp"
 #include "strus/position.hpp"
 #include "database.hpp"
+#include "inserter.hpp"
 #include <algorithm>
 #include <stdexcept>
 
@@ -12,16 +13,19 @@ class StorageImpl
 	:public Storage
 {
 public:
-	StorageImpl( const std::string& name, const std::string& path, bool writemode=false)
-		:m_db(name,path,writemode){}
+	StorageImpl( const std::string& name, const std::string& path)
+		:m_db(name,path){}
 
-	virtual DocNumber storeDocument( const std::string& docid, const TermDocPositionMap& content)=0;
+	virtual void open( Mode mode_);
+	virtual void close();
 
-	virtual std::string getDocumentId( const DocNumber& docnum);
-	virtual std::pair<std::string,std::string> getTerm( const TermNumber& termnum);
+	virtual DocNumber storeDocument( const std::string& docid, const TermDocPositionMap& content);
 
-	virtual DocNumber findDocumentNumber( const std::string& docid);
-	virtual TermNumber findTermNumber( const std::string& type, const std::string& value);
+	virtual std::string getDocumentId( const DocNumber& docnum) const;
+	virtual std::pair<std::string,std::string> getTerm( const TermNumber& termnum) const;
+
+	virtual DocNumber findDocumentNumber( const std::string& docid) const;
+	virtual TermNumber findTermNumber( const std::string& type, const std::string& value) const;
 
 	virtual bool openIterator( PositionChunk& itr, const TermNumber& termnum);
 	virtual bool nextIterator( PositionChunk& itr);
@@ -36,9 +40,9 @@ void strus::createStorage( const char* name, const char* path)
 	StorageDB::create( name, path?path:"");
 }
 
-Storage* strus::allocStorage( const char* name, const char* path, bool writemode)
+Storage* strus::allocStorage( const char* name, const char* path)
 {
-	StorageImpl* rt = new StorageImpl( name, path, writemode);
+	StorageImpl* rt = new StorageImpl( name, path);
 	return rt;
 }
 
@@ -47,14 +51,19 @@ void strus::destroyStorage( Storage* storage)
 	delete storage;
 }
 
-
-typedef Storage::Document::Term Term;
-
-static bool compareTerm( const Term& t1, const Term& t2)
+void StorageImpl::open( Mode mode_)
 {
-	if (t1.number < t2.number) return true;
-	if (t1.position < t2.position) return true;
-	return false;
+	switch (mode_)
+	{
+		case Storage::Read: m_db.open( false); break;
+		case Storage::Write: m_db.open( true); break;
+	}
+	throw std::runtime_error( "illegal mode parameter to open storage");
+}
+
+void StorageImpl::close()
+{
+	m_db.close();
 }
 
 DocNumber StorageImpl::storeDocument( const std::string& docid, const TermDocPositionMap& content)
@@ -62,22 +71,22 @@ DocNumber StorageImpl::storeDocument( const std::string& docid, const TermDocPos
 	return inserter::storeDocument( m_db, docid, content);
 }
 
-std::string StorageImpl::getDocumentId( const DocNumber& docnum)
+std::string StorageImpl::getDocumentId( const DocNumber& docnum) const
 {
 	return m_db.getDocumentId( docnum);
 }
 
-std::pair<std::string,std::string> StorageImpl::getTerm( const TermNumber& termnum)
+std::pair<std::string,std::string> StorageImpl::getTerm( const TermNumber& termnum) const
 {
 	return m_db.getTerm( termnum);
 }
 
-DocNumber StorageImpl::findDocumentNumber( const std::string& docid)
+DocNumber StorageImpl::findDocumentNumber( const std::string& docid) const
 {
 	return m_db.findDocumentNumber( docid);
 }
 
-TermNumber StorageImpl::findTermNumber( const std::string& type, const std::string& value)
+TermNumber StorageImpl::findTermNumber( const std::string& type, const std::string& value) const
 {
 	return m_db.findTermNumber( type, value);
 }

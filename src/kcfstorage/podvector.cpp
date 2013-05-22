@@ -36,8 +36,8 @@ std::size_t PodVectorBase::blocksize() const
 	return m_elementsize * (NofBlockElements+1);
 }
 
-PodVectorBase::PodVectorBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_, bool writemode_)
-	:BlockTable( type_, m_elementsize * (NofBlockElements+1), name_, path_, writemode_)
+PodVectorBase::PodVectorBase( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_)
+	:BlockTable( type_, name_, path_, m_elementsize * (NofBlockElements+1))
 	,m_lastidx(0)
 	,m_elementsize(elementsize_)
 {
@@ -53,12 +53,22 @@ PodVectorBase::~PodVectorBase()
 
 void PodVectorBase::create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t elementsize_)
 {
-	BlockTable::create( type_, elementsize_ * (NofBlockElements+1), name_, path_);
+	BlockTable::create( type_, name_, path_, elementsize_ * (NofBlockElements+1));
 }
 
-void PodVectorBase::open()
+void PodVectorBase::create()
 {
-	BlockTable::open();
+	BlockTable::create();
+}
+
+void PodVectorBase::close()
+{
+	BlockTable::close();
+}
+
+void PodVectorBase::open( bool writemode_)
+{
+	BlockTable::open( writemode_);
 	std::size_t nof_blocks = BlockTable::size();
 	if (nof_blocks > 0)
 	{
@@ -70,6 +80,13 @@ void PodVectorBase::open()
 		m_lastidx = 0;
 		std::memset( m_cur, 0, blocksize());
 	}
+}
+
+Index PodVectorBase::size() const
+{
+	std::size_t nn = 0;
+	std::memcpy( &nn, m_cur, sizeof(nn));
+	return nn + (NofBlockElements * m_lastidx);
 }
 
 Index PodVectorBase::push_back( const void* element)
@@ -113,9 +130,20 @@ void PodVectorBase::set( const Index& idx, const void* element)
 	BlockTable::partialWriteBlock( (idx / NofBlockElements) + 1, idx % NofBlockElements, element, m_elementsize);
 }
 
-void PodVectorBase::get( const Index& idx, void* element)
+void PodVectorBase::get( const Index& idx, void* element) const
 {
 	BlockTable::partialReadBlock( (idx / NofBlockElements) + 1, idx % NofBlockElements, element, m_elementsize);
+}
+
+Index PodVectorBase::fill( std::size_t nof_elements, const void* fillerelement)
+{
+	Index rt;
+	std::size_t ii=0;
+	for (ii=0; ii<nof_elements; ++ii)
+	{
+		rt = push_back( fillerelement);
+	}
+	return rt;
 }
 
 void PodVectorBase::reset()

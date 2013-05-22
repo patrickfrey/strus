@@ -39,11 +39,11 @@ namespace strus
 class KeyTable
 {
 public:
-	KeyTable( const std::string& type, const std::string& name, const std::string& path, bool writemode=false);
+	KeyTable( const std::string& type, const std::string& name, const std::string& path);
 	~KeyTable();
 
 	static void create( const std::string& type, const std::string& name, const std::string& path);
-	void open();
+	void open( bool writemode);
 	void close();
 
 	Index findKey( const std::string& key) const;

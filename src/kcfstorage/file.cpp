@@ -161,15 +161,7 @@ void File::close()
 	m_fd = -1;
 }
 
-void File::seek( std::size_t pos_)
-{
-	if (::lseek( m_fd, pos_, SEEK_SET) < 0)
-	{
-		throw std::runtime_error( errorstr( m_path, "seeking file position", errno));
-	}
-}
-
-std::size_t File::seek_end()
+std::size_t File::filesize() const
 {
 	::ssize_t rt = ::lseek( m_fd, 0, SEEK_END);
 	if (rt < 0)
@@ -177,40 +169,6 @@ std::size_t File::seek_end()
 		throw std::runtime_error( errorstr( m_path, "seeking file position (end of file)", errno));
 	}
 	return (std::size_t)rt;
-}
-
-std::size_t File::position()
-{
-	::ssize_t rt = ::lseek( m_fd, 0, SEEK_CUR);
-	if (rt < 0)
-	{
-		throw std::runtime_error( errorstr( m_path, "evaluating current position in file", errno));
-	}
-	return (std::size_t)rt;
-}
-
-std::size_t File::filesize()
-{
-	std::size_t pos = position();
-	std::size_t rt = seek_end();
-	seek( pos);
-	return rt;
-}
-
-void File::write( const void* buf, std::size_t bufsize)
-{
-	if (::write( m_fd, buf, bufsize) < 0)
-	{
-		throw std::runtime_error( errorstr( m_path, "writing file", errno));
-	}
-}
-
-void File::read( void* buf, std::size_t bufsize)
-{
-	if (::read( m_fd, buf, bufsize) < 0)
-	{
-		throw std::runtime_error( errorstr( m_path, "reading file", errno));
-	}
 }
 
 std::size_t File::awrite( const void* buf, std::size_t bufsize)
@@ -238,7 +196,7 @@ void File::pwrite( std::size_t pos, const void* buf, std::size_t bufsize)
 	}
 }
 
-void File::pread( std::size_t pos, void* buf, std::size_t bufsize)
+void File::pread( std::size_t pos, void* buf, std::size_t bufsize) const
 {
 	if (::pread( m_fd, buf, bufsize, pos) < 0)
 	{

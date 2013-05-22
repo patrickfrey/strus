@@ -49,12 +49,12 @@ public:
 	void lock();
 	void unlock();
 
-	void open( bool write_=true);
+	void open( bool write_);
 	void close();
-	std::size_t filesize();
+	std::size_t filesize() const;
 
 	void pwrite( std::size_t pos, const void* buf, std::size_t bufsize);
-	void pread( std::size_t pos, void* buf, std::size_t bufsize);
+	void pread( std::size_t pos, void* buf, std::size_t bufsize) const;
 
 	///\brief Append block to file and returns the file position of the block written
 	///\remark Uses a blocking exclusive lock on the section written
@@ -88,13 +88,6 @@ public:
 	{
 		return ScopedLock(this);
 	}
-private:
-	void write( const void* buf, std::size_t bufsize);
-	void read( void* buf, std::size_t bufsize);
-
-	void seek( std::size_t pos_);
-	std::size_t seek_end();
-	std::size_t position();
 
 private:
 	int m_fd;
