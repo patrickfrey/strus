@@ -35,14 +35,16 @@ private:
 	StorageDB m_db;
 };
 
-void strus::createStorage( const char* name, const char* path)
+void strus::createStorage( const char* name, const char* cfg)
 {
-	StorageDB::create( name, path?path:"");
+	StorageDB::Configuration cfgstruct(cfg?cfg:"");
+	StorageDB::create( name, cfgstruct);
 }
 
-Storage* strus::allocStorage( const char* name, const char* path)
+Storage* strus::allocStorage( const char* name, const char* cfg)
 {
-	StorageImpl* rt = new StorageImpl( name, path);
+	StorageDB::Configuration cfgstruct(cfg?cfg:"");
+	StorageImpl* rt = new StorageImpl( name, cfgstruct.path);
 	return rt;
 }
 

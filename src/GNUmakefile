@@ -5,8 +5,8 @@ CPP_OBJS=\
 
 CPP_INCLUDE=-I$(TOPDIR)/include
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
-LDFLAGS=-L/usr/local/lib -L./kcfstorage
-LIBS=-lstrus_kcfstorage
+LDFLAGS=-L/usr/local/lib -L./filestorage
+LIBS=-lstrus_filestorage
 
 all: subdirs strus
 
@@ -18,11 +18,11 @@ strus: strus.o $(CPP_OBJS)
 
 .PHONY: subdirs
 subdirs:
-	cd kcfstorage; make all; cd -
+	cd filestorage; make all; cd -
 
 .PHONY: clean
 clean:
-	cd kcfstorage; make clean; cd -
+	cd filestorage; make clean; cd -
 	rm -f ${CPP_OBJS}
 	rm -f strus.o
 	rm -f strus

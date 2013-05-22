@@ -1,1 +1,1 @@
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:src/kcfstorage
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:src/filestorage

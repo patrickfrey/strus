@@ -37,7 +37,8 @@ enum Command {None,CreateStorage};
 
 int main( int argc, const char* argv[])
 {
-	const char* arg[4];
+	const char* name = 0;
+	const char* cfg = 0;
 	Command cmd = None;
 
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
@@ -50,11 +51,12 @@ int main( int argc, const char* argv[])
 	{
 		if (std::strcmp( argv[1], "create") == 0)
 		{
-			if (argc <= 2) throw std::runtime_error( "too few argumens for create. (strus create <repository name>)");
+			if (argc <= 3) throw std::runtime_error( "too few argumens for create. (strus create <repository name> [<repository config>])");
+			if (argc > 4) throw std::runtime_error( "too many argumens for create. (strus create <repository name> [<repository config>])");
 
 			cmd = CreateStorage;
-			arg[0] = argv[2];
-			arg[1] = argv[3];
+			name = argv[2];
+			cfg = (argc>=4)?argv[3]:0;
 		}
 		else
 		{
@@ -65,7 +67,7 @@ int main( int argc, const char* argv[])
 			case None:
 			break;
 			case CreateStorage:
-				strus::createStorage( arg[0], arg[1]);
+				strus::createStorage( name, cfg);
 			break;
 		}
 		return 0;

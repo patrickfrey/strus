@@ -36,15 +36,111 @@
 
 using namespace strus;
 
-void StorageDB::create( const std::string& name_, const std::string& path_, const Configuration& cfg)
+static void skipSpaces( std::string::const_iterator ci, const std::string::const_iterator& ce)
 {
-	Dictionary::create( "tetab", name_, path_, cfg.expected_nof_terms);
-	Dictionary::create( "tytab", name_, path_, cfg.expected_nof_types);
-	Dictionary::create( "dctab", name_, path_, cfg.expected_nof_docs);
-	PodVector<DocNumber>::create( "rdlst", name_, path_);
-	BlockTable::create( "smblk", name_, path_, SmallBlockSize);
-	BlockTable::create( "ixblk", name_, path_, IndexBlockSize);
-	File::create( filepath( path_, name_, "lock"));
+	for (; ci != ce && (unsigned char)*ci <= 32; ++ci);
+}
+
+static std::size_t getNumber( std::string::const_iterator& ci, const std::string::const_iterator& ce)
+{
+	std::size_t rt = 0;
+	std::size_t cnt = 0;
+	for (;ci != ce && *ci >= '0' && *ci <= '9'; ++cnt,++ci)
+	{
+		rt = rt * 10 + (*ci - '0');
+	}
+	if (cnt == 0) throw std::runtime_error( "non negative number expected as configuration value");
+	if (cnt > 17) throw std::runtime_error( "configuration value out of range");
+	return rt;
+}
+
+static std::string getIdentifier( std::string::const_iterator& ci, const std::string::const_iterator& ce)
+{
+	std::string rt;
+	for (;ci != ce && ((*ci >= 'a' && *ci <= 'z') || (*ci >= 'A' && *ci <= 'Z') || *ci == '_'); ++ci)
+	{
+		rt.push_back( *ci);
+	}
+	return rt;
+}
+
+static std::string getString( std::string::const_iterator& ci, const std::string::const_iterator& ce)
+{
+	std::string rt;
+	for (;ci != ce && (unsigned char)*ci > 32 && *ci != ';'; ++ci)
+	{
+		rt.push_back( *ci);
+	}
+	return rt;
+}
+
+static bool nextConfigToken( std::pair<std::string,std::size_t>& tok, std::string::const_iterator& ci, const std::string::const_iterator& ce)
+{
+	skipSpaces( ci, ce);
+	if (ci == ce) return false;
+	if (*ci == ';') throw std::runtime_error( "syntax error in config: superfluous separator ';' in statement");
+	for (; ci != ce && (unsigned char)*ci > 32 && *ci != '='; ++ci)
+	{
+		tok.first.push_back( *ci);
+	}
+	skipSpaces( ci, ce);
+	if (ci == ce || *ci != '=') throw std::runtime_error( "syntax error in config: '=' expected after configuration item identifier");
+	++ci;
+	skipSpaces( ci, ce);
+	if (ci == ce) throw std::runtime_error( "syntax error in config: unexpected end of statement after '='");
+	tok.second = getNumber( ci, ce);
+	skipSpaces( ci, ce);
+	if (ci != ce && *ci == ';') ++ci;
+	return true;
+}
+
+static bool getPath( std::string& pathdef, std::string::const_iterator ci, const std::string::const_iterator& ce)
+{
+	skipSpaces( ci, ce);
+	if (ci != ce && *ci == 'p')
+	{
+		std::string id = getIdentifier( ci, ce);
+		if (id != "path") throw std::runtime_error( "unknown configuration parameter");
+		skipSpaces( ci, ce);
+		if (ci == ce || *ci != '=') throw std::runtime_error( "syntax error in config: '=' expected after configuration item identifier");
+		++ci;
+		skipSpaces( ci, ce);
+		if (ci == ce) throw std::runtime_error( "syntax error in config: unexpected end of statement after '='");
+		pathdef = getString( ci, ce);
+		return true;
+	}
+	return false;
+}
+
+StorageDB::Configuration::Configuration( const std::string& src)
+	:expected_nof_types(DefaultNofTypes)
+	,expected_nof_terms(DefaultNofTerms)
+	,expected_nof_docs(DefaultNofDocs)
+{
+	std::string::const_iterator ci = src.begin(), ce = src.end();
+	std::pair<std::string,std::size_t> tok;
+	while (ci != ce)
+	{
+		if (path.empty() && getPath( path, ci, ce)) continue;
+		if (nextConfigToken( tok, ci, ce))
+		{
+			if (tok.first == "types") expected_nof_types = tok.second;
+			else if (tok.first == "docs") expected_nof_docs = tok.second;
+			else if (tok.first == "terms") expected_nof_terms = tok.second;
+			else throw std::runtime_error( std::string("unknown configuration parameter '") + tok.first + "'");
+		}
+	}
+}
+
+void StorageDB::create( const std::string& name_, const Configuration& cfg)
+{
+	Dictionary::create( "tetab", name_, cfg.path, cfg.expected_nof_terms);
+	Dictionary::create( "tytab", name_, cfg.path, cfg.expected_nof_types);
+	Dictionary::create( "dctab", name_, cfg.path, cfg.expected_nof_docs);
+	PodVector<DocNumber>::create( "rdlst", name_, cfg.path);
+	BlockTable::create( "smblk", name_, cfg.path, SmallBlockSize);
+	BlockTable::create( "ixblk", name_, cfg.path, IndexBlockSize);
+	File::create( filepath( cfg.path, name_, "lock"));
 }
 
 StorageDB::StorageDB( const std::string& name_, const std::string& path_)

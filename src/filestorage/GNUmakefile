@@ -9,7 +9,7 @@ CPP_OBJS=\
 	podvector.o \
 	database.o \
 	inserter.o \
-	kcfstorage.o
+	storage.o
 
 CPP_INCS=\
 	file.hpp \
@@ -32,20 +32,20 @@ LIBS=
 %.o : %.cpp GNUmakefile $(CPP_INCS)
 	g++ -c -o $@ $(SO_COMPILE_FLAGS) -DSHARED $(CXXFLAGS) $(CPP_INCLUDE) $(PATHFLAGS) $<
 
-libstrus_kcfstorage.so: $(CPP_OBJS) $(CPP_INCS)
-	g++ -shared -Wl,-soname,libstrus_kcfstorage.so.0 -o libstrus_kcfstorage.so.0.0.0 $(LDFLAGS) $(LIBS) $(CPP_OBJS)
-	ln -sf libstrus_kcfstorage.so.0.0.0 libstrstrus_kcfstorage.so.0.0
-	ln -sf libstrus_kcfstorage.so.0.0.0 libstrus_kcfstorage.so.0
-	ln -sf libstrus_kcfstorage.so.0.0.0 libstrus_kcfstorage.so
+libstrus_filestorage.so: $(CPP_OBJS) $(CPP_INCS)
+	g++ -shared -Wl,-soname,libstrus_filestorage.so.0 -o libstrus_filestorage.so.0.0.0 $(LDFLAGS) $(LIBS) $(CPP_OBJS)
+	ln -sf libstrus_filestorage.so.0.0.0 libstrus_filestorage.so.0.0
+	ln -sf libstrus_filestorage.so.0.0.0 libstrus_filestorage.so.0
+	ln -sf libstrus_filestorage.so.0.0.0 libstrus_filestorage.so
 
-all: libstrus_kcfstorage.so
+all: libstrus_filestorage.so
 
 .PHONY: clean
 clean:
 	rm -f ${CPP_OBJS}
-	rm -f strus_kcfstorage.so
-	rm -f strus_kcfstorage.so.0
-	rm -f strus_kcfstorage.so.0.0
-	rm -f strus_kcfstorage.so.0.0.0
+	rm -f libstrus_filestorage.so
+	rm -f libstrus_filestorage.so.0
+	rm -f libstrus_filestorage.so.0.0
+	rm -f libstrus_filestorage.so.0.0.0
 
 

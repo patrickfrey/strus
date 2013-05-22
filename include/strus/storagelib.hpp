@@ -34,8 +34,8 @@
 namespace strus
 {
 
-void createStorage( const char* name, const char* path);
-Storage* allocStorage( const char* name, const char* path);
+void createStorage( const char* name, const char* cfg);
+Storage* allocStorage( const char* name, const char* cfg);
 void destroyStorage( Storage* storage);
 
 } //namespace

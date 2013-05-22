@@ -92,18 +92,23 @@ public:
 
 	struct Configuration
 	{
+		std::string path;
 		std::size_t expected_nof_types;
 		std::size_t expected_nof_terms;
 		std::size_t expected_nof_docs;
 
+		enum {DefaultNofTypes=64, DefaultNofDocs=(1<<20), DefaultNofTerms=(1<<20)};
+		Configuration( const std::string& src);
 		Configuration()
-			:expected_nof_types(64),expected_nof_terms(1<<20),expected_nof_docs(10<<20){}
+			:expected_nof_types(DefaultNofTypes)
+			,expected_nof_terms(DefaultNofTerms)
+			,expected_nof_docs(DefaultNofDocs){}
 		Configuration( const Configuration& o)
 			:expected_nof_types(o.expected_nof_types)
 			,expected_nof_terms(o.expected_nof_terms)
 			,expected_nof_docs(o.expected_nof_docs){}
 	};
-	static void create( const std::string& name, const std::string& path=std::string(), const Configuration& cfg=Configuration());
+	static void create( const std::string& name, const Configuration& cfg);
 
 	TermNumber findTermNumber( const std::string& type, const std::string& value) const;
 	TermNumber insertTermNumber( const std::string& type, const std::string& value);
