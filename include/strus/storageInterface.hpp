@@ -26,24 +26,27 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
+#include "strus/iteratorInterface.hpp"
+#include <string>
 #include "strus/shared_ptr.hpp"
 
 namespace strus
 {
 
-class IteratorInterface
+class StorageInterface
 {
 public:
-	virtual ~IteratorInterface(){}
+	virtual ~StorageInterface(){}
 
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	virtual IteratorInterfaceR
+		termOccurrenceIterator(
+			const std::string& termtype,
+			const std::string& termid)=0;
 };
 
-typedef strus::shared_ptr<IteratorInterface> IteratorInterfaceR;
+typedef strus::shared_ptr<StorageInterface> StorageInterfaceR;
 
 }//namespace
 #endif

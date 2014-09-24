@@ -1,8 +1,8 @@
 TOPDIR=..
 CPP_OBJS=\
-	iteratorIntersect.o \
-	iteratorUnion.o \
-	iteratorCutInRange.o \
+	iterator/iteratorIntersect.o \
+	iterator/iteratorUnion.o \
+	iterator/iteratorCutInRange.o \
 	iterator.o \
 	program.o
 

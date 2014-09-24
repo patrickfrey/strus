@@ -1,4 +1,24 @@
 strus
 =====
 
-Library for merging term occurrencies in information retrieval for structured queries on unstructured text
+Library for merging term occurrencies and ranking documents in information retrieval.
+Able to evaluate structured queries on unstructured text as well as implenting classical
+information retrieval.
+Independent from storage impementation.
+
+strus defines information retrieval as evaluation of a query as evaluation of a
+program working with 3 types of interfaces:
+	* Iterators on occurrencies defined as document number plus position number
+	* Accumulators of document weights
+	* Rankers to create a sorted ranked list of the N highest weighted elements of an accumulator
+
+The program is created from a query string internally compiled to a the code of a 
+virtual machine working with these types of interfaces.
+
+The storage of terms the query evaluation is based on is implemented as interface with
+a method to create create iterators on occurrencies of terms and to create
+accumulators for document attributes.
+
+
+
+

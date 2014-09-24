@@ -1,3 +1,6 @@
-kyotocabinet:
+Library dependencies of strus:
+	- CoCo/R for C++
 
-See https://github.com/csw/kyotocabinet-java/wiki/Kyoto-Cabinet-installation
+Ubuntu:
+	sudo apt-get install coco-cpp
+

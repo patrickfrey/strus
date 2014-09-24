@@ -26,26 +26,27 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/shared_ptr.hpp"
+#ifndef _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
+#define _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
+#include "strus/queryEvalInterface.hpp"
 
 namespace strus
 {
 
-class IteratorInterface
+class QueryEvalStrus
+	:public QueryEvalInterface
 {
 public:
-	virtual ~IteratorInterface(){}
+	virtual ~QueryEvalStrus(){}
 
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	virtual std::vector<WeightedDocument>
+		evaluate(
+			const StorageInterfaceR& storage,
+			const RankerInterfaceR& ranker,
+			const std::string& query,
+			std::size_t maxNofRanks);
 };
-
-typedef strus::shared_ptr<IteratorInterface> IteratorInterfaceR;
 
 }//namespace
 #endif
-
 

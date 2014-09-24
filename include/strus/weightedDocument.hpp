@@ -26,26 +26,26 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
+#define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/shared_ptr.hpp"
 
 namespace strus
 {
 
-class IteratorInterface
+struct WeightedDocument
 {
-public:
-	virtual ~IteratorInterface(){}
+	Index docno;
+	double weight;
 
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	WeightedDocument()
+		:docno(0),weight(0.0){}
+	WeightedDocument( const WeightedDocument& o)
+		:docno(o.docno),weight(o.weight){}
+	WeightedDocument( const Index& docno_, double weight_)
+		:docno(docno_),weight(weight_){}
 };
-
-typedef strus::shared_ptr<IteratorInterface> IteratorInterfaceR;
 
 }//namespace
 #endif
-
 

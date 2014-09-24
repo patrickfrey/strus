@@ -28,12 +28,10 @@
 */
 #ifndef _STRUS_PROGRAM_HPP_INCLUDED
 #define _STRUS_PROGRAM_HPP_INCLUDED
-#include "iterator.hpp"
-#include "storage.hpp"
+#include "storageInterface.hpp"
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
@@ -44,50 +42,18 @@ public:
 	Program();
 	Program( const Program& o);
 
-	struct Match
-	{
-		DocNumber docnum;
-		int ff;
-	};
-
-	class Result
-	{
-	public:
-		Result( Storage* storage_, Program* program_);
-
-		bool getNext( Match& match);
-
-	private:
-		PositionIterator* getOperand( int idx) const;
-
-	private:
-		Storage* m_storage;
-		Program* m_program;
-		typedef boost::shared_ptr<PositionIterator> Operand;
-		typedef std::vector<Operand> OperandArray;
-		OperandArray m_operandar;
-	};
-
-	void FETCH( const std::string& type_, const std::string& value_);
-	void UNION( int select1_, int select2_);
-	void INTERSECT( int select_, int joincond_);
-	void JOINCUT( int select_, int joincond_, int cutcond_);
-	void RANGE( int rangestart_, int range_);
-
-	const char* check() const;
+	IteratorInterfaceR getIterator( const StorageInterfaceR& storage);
 
 private:
 	struct Command
 	{
-		enum Type {StorageFetch,Union,IntersectCut,SetRange};
+		enum Type {StorageFetch,Union,Intersect,CutInRange};
 		Type m_type;
 		int m_operandref[3];
 
 		Command( const Command& o);
 		Command( Type type_, int op1=0, int op2=0, int op3=0);
 	};
-
-	void refarg( int arg);
 
 private:
 	friend class Program::Result;

@@ -26,26 +26,84 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/shared_ptr.hpp"
+/// \brief For not getting a dependency to boost just because of shared_ptr, we provide a substitute implementation here
+
+#ifndef _STRUS_SHARED_PTR_HPP_INCLUDED
+#define _STRUS_SHARED_PTR_HPP_INCLUDED
+#include "strus/iteratorInterface.hpp"
+#include <string>
 
 namespace strus
 {
 
-class IteratorInterface
+template<class T>
+class shared_ptr
 {
 public:
-	virtual ~IteratorInterface(){}
+	shared_ptr()
+		:px(0), cx(0) {}
+	shared_ptr( T* s)
+		:px(s), cx(new unsigned(1)) {}
 
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-};
+	shared_ptr(const shared_ptr& o) :px(o.px), cx(o.cx)
+	{
+		if(cx) ++*cx;
+	}
 
-typedef strus::shared_ptr<IteratorInterface> IteratorInterfaceR;
+	shared_ptr& operator=(const shared_ptr& o) 
+	{
+		if (this!=&s)
+		{
+			reset();
+			px = o.px;
+			cx = o.cx;
+			if (cx) ++*cx;
+		}
+		return *this;
+	}
+
+	~shared_ptr()
+	{
+		reset();
+	}
+
+	void reset( T* s = 0) 
+	{ 
+		if (cx)
+		{
+			if(*cx==1) delete px; 
+			if(!--*cx) delete cx; 
+		} 
+		if (s)
+		{
+			px = s;
+			cx = new unsigned(1);
+		}
+		else
+		{
+			cx = 0;
+			px = 0;
+		}
+	}
+
+	T* get() const
+	{
+		return (cx)? px: 0;
+	}
+	T* operator->() const
+	{
+		return get();
+	}
+	T& operator*() const
+	{
+		return *get();
+	}
+
+private:
+	T* px;
+	unsigned* cx;
+}
 
 }//namespace
 #endif
-
 

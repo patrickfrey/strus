@@ -26,26 +26,32 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_RANKER_INTERFACE_HPP_INCLUDED
+#define _STRUS_RANKER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/accumulatorInterface.hpp"
+#include "strus/weightedDocument.hpp"
 #include "strus/shared_ptr.hpp"
+#include <vector>
+#include <cstddef>
 
 namespace strus
 {
 
-class IteratorInterface
+class RankerInterface
 {
 public:
-	virtual ~IteratorInterface(){}
+	virtual ~RankerInterface(){}
 
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	virtual std::vector<WeightedDocument>
+		calculate(
+			const AccumulatorInterfaceR& accu,
+			double minWeight,
+			std::size_t maxNofRanks)=0;
 };
 
-typedef strus::shared_ptr<IteratorInterface> IteratorInterfaceR;
+typedef strus::shared_ptr<RankerInterface> RankerInterfaceR;
 
 }//namespace
 #endif
-
 

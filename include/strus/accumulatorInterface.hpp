@@ -26,26 +26,25 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_ACCUMULATOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/shared_ptr.hpp"
 
 namespace strus
 {
 
-class IteratorInterface
+class AccumulatorInterface
 {
 public:
-	virtual ~IteratorInterface(){}
+	virtual ~AccumulatorInterface(){}
 
 	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	virtual double weight()=0;
 };
 
-typedef strus::shared_ptr<IteratorInterface> IteratorInterfaceR;
+typedef strus::shared_ptr<AccumulatorInterface> AccumulatorInterfaceR;
 
 }//namespace
 #endif
-
 

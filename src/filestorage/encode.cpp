@@ -110,24 +110,50 @@ int strus::utf8charlen( const char* itr)
 	return g_charlentable[ *itr];
 }
 
-Index strus::unpackIndex( std::string::const_iterator& itr, const std::string::const_iterator& end)
+static int unpackInt32_( std::string::const_iterator& itr, const std::string::const_iterator& end)
 {
-	char buf[8];
-	int ii;
 	int nn = g_charlentable[ *itr];
 	for (ii=0; itr != end && ii < nn; ++itr,++ii)
 	{
 		buf[ii] = *itr;
 	}
 	if (ii < nn) throw std::runtime_error( "corrupt data");
-	return (Index)utf8decode( buf);
+	int rt = utf8decode( buf);
+	if (rt > 0x7fffFFFFU) throw std::runtime_error( "corrupt data");
+	return rt;
+}
+
+Index strus::unpackIndex( std::string::const_iterator& itr, const std::string::const_iterator& end)
+{
+	char buf[8];
+	int ii;
+	if (*itr == (char)B11111111)
+	{
+		++itr;
+		Index hi = unpackInt32_( itr, end);
+		Index lo = unpackInt32_( itr, end);
+		return (hi << 31) + lo;
+	}
+	else
+	{
+		return (Index)unpackInt32_( itr, end);
+	}
 }
 
 void strus::packIndex( std::string& buf, Index idx)
 {
-	if (idx > std::numeric_limits<int>::max()) throw std::runtime_error( "index out of range");
+	if (idx > 0x7fffFFFFU)
+	{
+		buf.push_back( B11111111);
+		Index hi = index >> 31;
+		Index lo = index & 0x7fffFFFFU;
+		if (hi > 0x7fffFFFFU)
+		{
+			throw std::runtime_error( "index out of range");
+		}
+		utf8encode( buf, (int)hi);
+		utf8encode( buf, (int)lo);
+	}
 	utf8encode( buf, (int)idx);
 }
-
-
 
