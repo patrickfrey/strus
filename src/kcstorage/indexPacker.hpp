@@ -26,27 +26,17 @@
 
 --------------------------------------------------------------------
 */
-#include "malloc.hpp"
-#include <stdlib.h>
+#ifndef _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
+#define _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <string>
 
-#ifdef _MSC_VER
-void* strus::malloc_aligned( std::size_t size, std::size_t alignment)
+namespace strus
 {
-	return _aligned_malloc( size, alignment);
-}
-#else
-void* strus::malloc_aligned( std::size_t size, std::size_t alignment)
-{
-	void* rt = 0;
-	if (0!=posix_memalign( &rt, alignment, size)) return 0;
-	return rt;
-}
+void packIndex( std::string& buf, const Index& idx);
+Index unpackIndex( std::string::const_iterator& itr, const std::string::const_iterator& end);
+}//namespace
 #endif
 
-std::size_t strus::cachelinesize()
-{
-	//TODO
-	return 128;
-}
 
 

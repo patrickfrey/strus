@@ -1,5 +1,4 @@
-#include "encode.hpp"
-#include "strus/position.hpp"
+#include "indexPacker.hpp"
 #include <map>
 #include <limits>
 #include <stdexcept>
@@ -58,10 +57,10 @@ struct CharLengthTab
 
 static CharLengthTab g_charlentable;
 
-int strus::utf8decode( const char* itr)
+static unsigned int utf8decode( const char* itr)
 {
 	unsigned int charsize = g_charlentable[ *itr];
-	int res = *itr;
+	unsigned int res = (unsigned char)*itr;
 	if (res > 127)
 	{
 		unsigned int gg = charsize-2;
@@ -81,7 +80,7 @@ int strus::utf8decode( const char* itr)
 	return res;
 }
 
-void strus::utf8encode( std::string& buf, int chr)
+static void utf8encode( std::string& buf, unsigned int chr)
 {
 	unsigned int rt;
 	if (chr <= 127)
@@ -92,7 +91,7 @@ void strus::utf8encode( std::string& buf, int chr)
 	unsigned int pp,sf;
 	for (pp=1,sf=5; pp<5; pp++,sf+=5)
 	{
-		if ((unsigned int)chr < (unsigned int)((1<<6)<<sf)) break;
+		if (chr < (unsigned int)((1<<6)<<sf)) break;
 	}
 	rt = pp+1;
 	unsigned char HB = (unsigned char)(B11111111 << (8-rt));
@@ -105,28 +104,23 @@ void strus::utf8encode( std::string& buf, int chr)
 	}
 }
 
-int strus::utf8charlen( const char* itr)
+static unsigned int unpackInt32_( std::string::const_iterator& itr, const std::string::const_iterator& end)
 {
-	return g_charlentable[ *itr];
-}
-
-static int unpackInt32_( std::string::const_iterator& itr, const std::string::const_iterator& end)
-{
+	int ii;
 	int nn = g_charlentable[ *itr];
+	char buf[8];
 	for (ii=0; itr != end && ii < nn; ++itr,++ii)
 	{
 		buf[ii] = *itr;
 	}
 	if (ii < nn) throw std::runtime_error( "corrupt data");
-	int rt = utf8decode( buf);
+	unsigned int rt = utf8decode( buf);
 	if (rt > 0x7fffFFFFU) throw std::runtime_error( "corrupt data");
 	return rt;
 }
 
 Index strus::unpackIndex( std::string::const_iterator& itr, const std::string::const_iterator& end)
 {
-	char buf[8];
-	int ii;
 	if (*itr == (char)B11111111)
 	{
 		++itr;
@@ -140,20 +134,20 @@ Index strus::unpackIndex( std::string::const_iterator& itr, const std::string::c
 	}
 }
 
-void strus::packIndex( std::string& buf, Index idx)
+void strus::packIndex( std::string& buf, const Index& idx)
 {
 	if (idx > 0x7fffFFFFU)
 	{
-		buf.push_back( B11111111);
-		Index hi = index >> 31;
-		Index lo = index & 0x7fffFFFFU;
+		buf.push_back( (char)(unsigned char)B11111111);
+		Index hi = idx >> 31;
+		Index lo = idx & 0x7fffFFFFU;
 		if (hi > 0x7fffFFFFU)
 		{
 			throw std::runtime_error( "index out of range");
 		}
-		utf8encode( buf, (int)hi);
-		utf8encode( buf, (int)lo);
+		utf8encode( buf, (unsigned int)hi);
+		utf8encode( buf, (unsigned int)lo);
 	}
-	utf8encode( buf, (int)idx);
+	utf8encode( buf, (unsigned int)idx);
 }
 

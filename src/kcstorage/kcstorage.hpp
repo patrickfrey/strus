@@ -1,3 +1,6 @@
+#include "strus/storageInterface.hpp"
+#include "indexPacker.hpp"
+
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -26,18 +29,18 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_FILESTORAGE_INSERTER_HPP_INCLUDED
-#define _STRUS_FILESTORAGE_INSERTER_HPP_INCLUDED
-#include "strus/storage.hpp"
-#include "strus/position.hpp"
-#include "database.hpp"
-#include <string>
-#include <utility>
+/// \brief Exported symbols of the strus storage based on kyoto cabinet
+#ifndef _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
+#define _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
+#include "strus/storageInterface.hpp"
+#include "dll_tags.hpp"
 
 namespace strus {
-namespace inserter {
+namespace kyotocabinet {
 
-	DocNumber storeDocument( StorageDB& db, const std::string& docid, const Storage::TermDocPositionMap& content);
+DLL_PUBLIC StorageInterface* createStorageClient( const char* config);
+DLL_PUBLIC void createStorageDatabase( const char* config);
+
 }}//namespace
-
 #endif
+

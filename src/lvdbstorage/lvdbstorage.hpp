@@ -1,3 +1,6 @@
+#include "strus/storageInterface.hpp"
+#include "indexPacker.hpp"
+
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -26,35 +29,18 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_DICTIONARY_HPP_INCLUDED
-#define _STRUS_KCF_DICTIONARY_HPP_INCLUDED
-#include "strus/position.hpp"
-#include <string>
+/// \brief Exported symbols of the strus storage based on kyoto cabinet
+#ifndef _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
+#define _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
+#include "strus/storageInterface.hpp"
+#include "dll_tags.hpp"
 
-namespace strus
-{
+namespace strus {
+namespace lvdb {
 
-///\class Dictionary
-///\brief Implementation of a string to integer map
-class Dictionary
-{
-public:
-	static void create( const std::string& type_, const std::string& name_, const std::string& path_, std::size_t size_);
-	Dictionary( const std::string& type_, const std::string& name_, const std::string& path_);
-	~Dictionary();
+DLL_PUBLIC StorageInterface* createStorageClient( const char* config);
+DLL_PUBLIC void createStorageDatabase( const char* config);
 
-	void open( bool writemode_);
-	void close();
-	void create( std::size_t size_);
-
-	Index insert( const std::string& key);
-	Index find( const std::string& key) const;
-	std::string getIdentifier( const Index& idx) const;
-
-private:
-	struct Impl;
-	Impl* m_impl;
-};
-
-}//namespace
+}}//namespace
 #endif
+

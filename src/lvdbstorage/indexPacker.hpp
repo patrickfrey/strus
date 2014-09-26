@@ -26,22 +26,17 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_ENCODE_HPP_INCLUDED
-#define _STRUS_KCF_ENCODE_HPP_INCLUDED
-#include "strus/position.hpp"
+#ifndef _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
+#define _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
+#include "strus/index.hpp"
 #include <string>
 
 namespace strus
 {
-void utf8encode( std::string& buf, int chr);
-int utf8decode( const char* itr);
-int utf8charlen( const char* itr);
-
-void packIndex( std::string& buf, Index idx);
-Index unpackIndex( std::string::const_iterator& itr, const std::string::const_iterator& end);
-
-}
-
+void packIndex( std::string& buf, const Index& idx);
+Index unpackIndex( const char*& ptr, const char* end);
+}//namespace
 #endif
+
 
 

@@ -26,14 +26,3 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCF_MALLOC_HPP_INCLUDED
-#define _STRUS_KCF_MALLOC_HPP_INCLUDED
-#include <cstdlib>
-
-namespace strus
-{
-	void* malloc_aligned( std::size_t size, std::size_t alignment);
-	std::size_t cachelinesize();
-}
-
-#endif
