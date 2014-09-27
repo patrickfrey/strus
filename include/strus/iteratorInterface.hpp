@@ -29,7 +29,6 @@
 #ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/shared_ptr.hpp"
 
 namespace strus
 {
@@ -42,8 +41,6 @@ public:
 	virtual Index skipDoc( const Index& docno)=0;
 	virtual Index skipPos( const Index& firstpos)=0;
 };
-
-typedef strus::shared_ptr<IteratorInterface> IteratorInterfaceR;
 
 }//namespace
 #endif

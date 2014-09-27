@@ -2,9 +2,9 @@ COMPILER Strus
 CHARACTERS
 	letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_".
 	digit = "0123456789".
-	CR = CHR(13).
-	LF = CHR(10).
-	TAB = CHR(9).
+	CR = "\r".
+	LF = "\n".
+	TAB = "\t".
 	DQ = '"'.
 	SQ = '\''.
 	notDQ = ANY - DQ.
@@ -14,37 +14,35 @@ TOKENS
 	ident = ( ( letter ) { letter | digit } ).
 	param = '$' digit { digit }.
 	number = digit {digit}.
-	double = number '.' number.
+	fpnumber = digit {digit} '.' digit {digit}.
 	sqstring = SQ { notSQ } SQ.
 	dqstring = DQ { notDQ } DQ.
-	IGNORE cr + lf + tab
-	COMMENTS FROM "#" TO lf
+	COMMENTS FROM "--" TO "\n"
+	IGNORE CR + LF + TAB
 
 PRODUCTIONS
+	Parameter =
+	{
+		ident
+		| param
+		| sqstring
+		| dqstring
+		| fpnumber
+		| number
+	}.
+	Instruction =
+		ident
+		'('
+		Parameter
+		{ ","
+		Parameter
+		}
+		')' ';'.
 	Strus = 
 		Instruction
 		{
 		Instruction
 		}.
-	Instruction =
-		ident
-		'('
-		Paramlist
-		')' ';'.
-	Paramlist = 
-		Parameter
-		{ ","
-		Parameter
-		}.
-	Parameter =
-		{
-			ident
-			| param
-			| sqstring
-			| dqstring
-			| double
-			| number
-		}.
-END Strus
+END Strus.
 
 

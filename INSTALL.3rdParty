@@ -1,6 +1,16 @@
 Library dependencies of strus:
 	- CoCo/R for C++
+	- LevelDB
 
 Ubuntu:
 	sudo apt-get install coco-cpp
+	sudo apt-get install libleveldb-dev
 
+
+#	wget http://fallabs.com/kyotocabinet/pkg/kyotocabinet-1.2.30.tar.gz 3rdParty/
+#	cd 3rdParty/
+#	tar -xvzf kyotocabinet-1.2.30.tar.gz
+#	cd kyotocabinet-1.2.30
+#	./configure
+#	make
+#	sudo make install

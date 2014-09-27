@@ -42,8 +42,8 @@ public:
 
 	virtual std::vector<WeightedDocument>
 		evaluate(
-			const StorageInterfaceR& storage,
-			const RankerInterfaceR& ranker,
+			const StorageInterface& storage,
+			const RankerInterface& ranker,
 			const std::string& query,
 			std::size_t maxNofRanks)=0;
 };

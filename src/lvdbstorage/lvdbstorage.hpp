@@ -29,16 +29,20 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported symbols of the strus storage based on kyoto cabinet
-#ifndef _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
-#define _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
+/// \brief Exported functions of the strus storage based on LevelDB
+#ifndef _STRUS_STORAGE_LEVELDB_HPP_INCLUDED
+#define _STRUS_STORAGE_LEVELDB_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
 #include "dll_tags.hpp"
 
 namespace strus {
 namespace lvdb {
 
+/// \brief Creates an instance of the storage interface described with config
+/// \remark Because of restrictions imposed by LevelDB only one instance of a storage can be crated per storage
 DLL_PUBLIC StorageInterface* createStorageClient( const char* config);
+
+/// \brief Creates a new storage described with config in the file system
 DLL_PUBLIC void createStorageDatabase( const char* config);
 
 }}//namespace

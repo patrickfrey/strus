@@ -31,7 +31,6 @@
 #include "strus/index.hpp"
 #include "strus/accumulatorInterface.hpp"
 #include "strus/weightedDocument.hpp"
-#include "strus/shared_ptr.hpp"
 #include <vector>
 #include <cstddef>
 
@@ -49,8 +48,6 @@ public:
 			double minWeight,
 			std::size_t maxNofRanks)=0;
 };
-
-typedef strus::shared_ptr<RankerInterface> RankerInterfaceR;
 
 }//namespace
 #endif

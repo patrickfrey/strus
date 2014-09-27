@@ -30,7 +30,6 @@
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
 #include <string>
-#include "strus/shared_ptr.hpp"
 
 namespace strus
 {
@@ -38,15 +37,38 @@ namespace strus
 class StorageInterface
 {
 public:
+	class Transaction
+	{
+	public:
+		/// \brief Destructor that is doing the transaction rollback too
+		virtual ~Transaction(){}
+
+		/// \brief Add one occurrence of a term, throws on std::bad_alloc
+		virtual void addTermOccurrence(
+				const std::string& type_,
+				const std::string& id_,
+				const Index& position_)=0;
+
+		/// \brief Commit of the transaction, throws on error
+		virtual void commit()=0;
+	};
+
+public:
+	/// \brief Destructor
 	virtual ~StorageInterface(){}
 
-	virtual IteratorInterfaceR
-		termOccurrenceIterator(
+	/// \brief Create an iterator on the occurrencies of a term in the storage
+	/// \return the created iterator reference to be disposed with delete
+	virtual IteratorInterface*
+		createTermOccurrenceIterator(
 			const std::string& termtype,
 			const std::string& termid)=0;
-};
 
-typedef strus::shared_ptr<StorageInterface> StorageInterfaceR;
+	/// \brief Create an insert/update transaction for a document
+	/// \param[in] docid Document identifier (URI)
+	/// \return the created transaction reference to be disposed with delete
+	virtual Transaction* createTransaction( const std::string& docid)=0;
+};
 
 }//namespace
 #endif

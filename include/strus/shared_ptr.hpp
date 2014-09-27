@@ -32,77 +32,30 @@
 #define _STRUS_SHARED_PTR_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
 template<class T>
 class shared_ptr
+	:public boost::shared_ptr<T>
 {
 public:
 	shared_ptr()
-		:px(0), cx(0) {}
+		:boost::shared_ptr() {}
 	shared_ptr( T* s)
-		:px(s), cx(new unsigned(1)) {}
+		:boost::shared_ptr(s) {}
 
-	shared_ptr(const shared_ptr& o) :px(o.px), cx(o.cx)
-	{
-		if(cx) ++*cx;
-	}
+	shared_ptr( const shared_ptr& o)
+		:boost::shared_ptr(o) {}
 
 	shared_ptr& operator=(const shared_ptr& o) 
 	{
-		if (this!=&s)
-		{
-			reset();
-			px = o.px;
-			cx = o.cx;
-			if (cx) ++*cx;
-		}
+		boost::shared_ptr<T>::operator=(o);
 		return *this;
 	}
-
-	~shared_ptr()
-	{
-		reset();
-	}
-
-	void reset( T* s = 0) 
-	{ 
-		if (cx)
-		{
-			if(*cx==1) delete px; 
-			if(!--*cx) delete cx; 
-		} 
-		if (s)
-		{
-			px = s;
-			cx = new unsigned(1);
-		}
-		else
-		{
-			cx = 0;
-			px = 0;
-		}
-	}
-
-	T* get() const
-	{
-		return (cx)? px: 0;
-	}
-	T* operator->() const
-	{
-		return get();
-	}
-	T& operator*() const
-	{
-		return *get();
-	}
-
-private:
-	T* px;
-	unsigned* cx;
-}
+};
 
 }//namespace
 #endif

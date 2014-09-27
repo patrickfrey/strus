@@ -29,14 +29,6 @@
 #ifndef _STRUS_INDEX_HPP_INCLUDED
 #define _STRUS_INDEX_HPP_INCLUDED
 
-#ifdef BOOST_VERSION
-#include <boost/cstdint.hpp>
-namespace strus {
-	///\typedef Index
-	///\brief Index term number type
-	typedef boost::int64_t Index;
-}//namespace
-#else
 #ifdef _MSC_VER
 #pragma warning(disable:4290)
 #include <BaseTsd.h>
@@ -55,4 +47,3 @@ namespace strus {
 #endif
 #endif
 
-#endif

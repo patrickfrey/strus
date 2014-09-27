@@ -148,6 +148,9 @@ void strus::packIndex( std::string& buf, const Index& idx)
 		utf8encode( buf, (unsigned int)hi);
 		utf8encode( buf, (unsigned int)lo);
 	}
-	utf8encode( buf, (unsigned int)idx);
+	else
+	{
+		utf8encode( buf, (unsigned int)idx);
+	}
 }
 

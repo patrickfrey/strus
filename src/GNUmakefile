@@ -3,13 +3,12 @@ CPP_OBJS=\
 	iterator/iteratorIntersect.o \
 	iterator/iteratorUnion.o \
 	iterator/iteratorCutInRange.o \
-	iterator.o \
-	program.o
+	queryeval/queryEvalStrus.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
-LDFLAGS=-L/usr/local/lib -L./filestorage
-LIBS=-lstrus_filestorage
+LDFLAGS=-L/usr/local/lib -L./lvdbstorage
+LIBS=-lstrus_lvdbstorage
 
 all: subdirs strus
 
@@ -21,12 +20,10 @@ strus: strus.o $(CPP_OBJS)
 
 .PHONY: subdirs
 subdirs:
-	cd filestorage; make all; cd -
+	cd lvdbstorage; make all; cd -
 
 .PHONY: clean
 clean:
-	cd filestorage; make clean; cd -
+	cd lvdbstorage; make clean; cd -
 	rm -f ${CPP_OBJS}
-	rm -f strus.o
-	rm -f strus
 

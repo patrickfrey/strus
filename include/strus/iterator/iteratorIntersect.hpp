@@ -37,7 +37,9 @@ class IteratorIntersect
 	:public IteratorInterface
 {
 public:
-	IteratorIntersect( const IteratorInterfaceR& first_, const IteratorInterfaceR& second_);
+	typedef strus::shared_ptr<IteratorInterface> IteratorReference;
+
+	IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_);
 	virtual ~IteratorIntersect(){}
 
 	virtual Index skipDoc( const Index& docno)=0;
@@ -45,8 +47,8 @@ public:
 
 private:
 	Index m_docno;
-	IteratorInterfaceR m_first;
-	IteratorInterfaceR m_second;
+	IteratorReference m_first;
+	IteratorReference m_second;
 };
 
 }//namespace

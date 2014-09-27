@@ -37,7 +37,9 @@ class IteratorUnion
 	:public IteratorInterface
 {
 public:
-	IteratorUnion( const IteratorInterfaceR& first_, const IteratorInterfaceR& second_);
+	typedef strus::shared_ptr<IteratorInterface> IteratorReference;
+
+	IteratorUnion( const IteratorReference& first_, const IteratorReference& second_);
 	virtual ~IteratorUnion(){}
 
 	virtual Index skipDoc( const Index& docno_)=0;
@@ -45,8 +47,8 @@ public:
 
 private:
 	Index m_docno;
-	IteratorInterfaceR m_first;
-	IteratorInterfaceR m_second;
+	IteratorReference m_first;
+	IteratorReference m_second;
 	bool m_open_first;
 	bool m_open_second;
 };

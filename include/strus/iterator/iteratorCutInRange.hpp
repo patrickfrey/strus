@@ -39,13 +39,15 @@ class IteratorCutInRange
 	:public IteratorInterface
 {
 public:
+	typedef strus::shared_ptr<IteratorInterface> IteratorReference;
+
 	///\param[in] first_ Defines the positions of the set of elements defining the start of a range
 	///\param[in] second_ Defines the positions of the set of elements defining the end of a range
 	///\param[in] cut_ Defines the positions of the set of elements defining the negative condition on selected ranges. These elements must not appear in a selected range
 	///\param[in] range_ Defines the maximum position difference between the start element and the end element of a selected range
 	///\param[in] firstElemCut Negative (cut) selection starts one position after the first element
 	///\param[in] secondElemCut true: Negative (cut) selection ends one position before the last element
-	IteratorCutInRange( const IteratorInterfaceR& first_, const IteratorInterfaceR& second_, const IteratorInterfaceR& cut_, const Index& range_, bool firstElemCut_, bool secondElemCut_);
+	IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool firstElemCut_, bool secondElemCut_);
 	virtual ~IteratorCutInRange(){}
 
 	virtual Index skipDoc( const Index& docno)=0;
@@ -54,9 +56,9 @@ public:
 private:
 	Index m_docno;
 	Index m_docno_cut;
-	IteratorInterfaceR m_first;	///< first set to intersect range
-	IteratorInterfaceR m_second;	///< first set to intersect range 
-	IteratorInterfaceR m_cut;	///< iterator for elements that make a negative selection on the result if they appear in a matching range
+	IteratorReference m_first;	///< first set to intersect range
+	IteratorReference m_second;	///< first set to intersect range 
+	IteratorReference m_cut;	///< iterator for elements that make a negative selection on the result if they appear in a matching range
 	Index m_range;			///< allowe position range between first and second element
 	bool m_firstElemCut;		///< true => cut on first element position
 	bool m_secondElemCut;		///< true => cut on second element position
