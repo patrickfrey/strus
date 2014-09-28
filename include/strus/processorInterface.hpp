@@ -26,3 +26,43 @@
 
 --------------------------------------------------------------------
 */
+#ifndef _STRUS_PROCESSOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_PROCESSOR_INTERFACE_HPP_INCLUDED
+#include "strus/storageInterface.hpp"
+#include "strus/rankerInterface.hpp"
+#include "strus/accumulatorReference.hpp"
+#include "strus/iteratorReference.hpp"
+#include "strus/weightedDocument.hpp"
+
+namespace strus
+{
+
+/// \brief Defines all object instances involved in query evaluation addressable by name
+class ProcessorInterface
+{
+public:
+	virtual ~ProcessorInterface(){}
+
+	virtual RankerInterface& storage()=0;
+
+	virtual const RankerInterface& ranker()=0;
+
+	virtual IteratorReference
+		createIterator(
+			const std::string& name,
+			const std::vector<IteratorReference>& arg)=0;
+
+	virtual AccumulatorReference
+		createAccumulator(
+			const std::string& name,
+			const std::vector<AccumulatorReference>& arg)=0;
+
+	virtual AccumulatorReference
+		createAccumulator(
+			const std::string& name,
+			const IteratorReference& arg)=0;
+};
+
+}//namespace
+#endif
+

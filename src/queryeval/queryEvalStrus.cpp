@@ -33,76 +33,7 @@
 using namespace strus;
 
 namespace {
-class Program
-{
-public:
-	Program()
-		:m_minWeight(0){}
 
-	Program( const std::string& query);
-
-	Program( const Program& o)
-		:m_strings(o.m_strings)
-		,m_numberar(o.m_numberar)
-		,m_iterar(o.m_iterar)
-		,m_accuar(o.m_accuar)
-		,m_rankar(o.m_rankar)
-		,m_cmdlist(o.m_cmdlist)
-		,m_minWeight(o.m_minWeight)
-	{}
-
-	AccumulatorInterfaceR accumulator( const StorageInterfaceR& storage) const;
-
-	double minWeight()
-	{
-		return m_minWeight;
-	}
-
-private:
-	struct Command
-	{
-		enum Type {StorageFetch,Union,Intersect,CutInRange,AccuFF,AccuSum};
-		Type m_type;
-		int m_op[3];
-
-		Command()
-		{
-			std::memset( this, 0, sizeof(*this));
-		}
-
-		Command( const Command& o)
-		{
-			std::memcpy( this, &o, sizeof(*this));
-		}
-
-		Command( Type type_, int op1=0, int op2=0, int op3=0)
-			:m_type(type_)
-		{
-			m_op[0] = op0;
-			m_op[1] = op1;
-			m_op[2] = op2;
-		}
-	};
-
-private:
-	std::string m_strings;
-	std::vector<double> m_numberar;
-	std::vector<IteratorInterfaceR> m_iterar;
-	std::vector<AccumulatorInterfaceR> m_accuar;
-	std::vector<RankerInterfaceR> m_rankar;
-	std::vector<Command> m_cmdlist;
-	double m_minWeight;
-};
-
-Program::Program( const std::string& query)
-{
-	
-}
-
-AccumulatorInterfaceR Program::accumulator( const StorageInterfaceR& storage) const
-{
-	
-}
 
 }//anonymous namespace
 

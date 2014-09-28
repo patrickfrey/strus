@@ -26,17 +26,25 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
-#define _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <string>
+#ifndef _STRUS_ITERATOR_REFERENCE_HPP_INCLUDED
+#define _STRUS_ITERATOR_REFERENCE_HPP_INCLUDED
+#include "strus/iteratorInterface.hpp"
+#include "strus/shared_ptr.hpp"
 
 namespace strus
 {
-void packIndex( std::string& buf, const Index& idx);
-Index unpackIndex( std::string::const_iterator& itr, const std::string::const_iterator& end);
+
+class IteratorReference
+	:public strus::shared_ptr<IteratorInterface>
+{
+public:
+	IteratorReference( IteratorInterface* o=0)
+		:strus::shared_ptr<IteratorInterface>(o){}
+	IteratorReference( const IteratorReference& o)
+		:strus::shared_ptr<IteratorInterface>(o){}
+};
+
 }//namespace
 #endif
-
 
 

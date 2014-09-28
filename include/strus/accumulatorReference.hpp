@@ -1,6 +1,3 @@
-#include "strus/storageInterface.hpp"
-#include "indexPacker.hpp"
-
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -29,18 +26,25 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported symbols of the strus storage based on kyoto cabinet
-#ifndef _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
-#define _STRUS_STORAGE_KYOTOCABINET_HPP_INCLUDED
-#include "strus/storageInterface.hpp"
-#include "dll_tags.hpp"
+#ifndef _STRUS_ACCUMULATOR_REFERENCE_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_REFERENCE_HPP_INCLUDED
+#include "strus/accumulatorInterface.hpp"
+#include "strus/shared_ptr.hpp"
 
-namespace strus {
-namespace kyotocabinet {
+namespace strus
+{
 
-DLL_PUBLIC StorageInterface* createStorageClient( const char* config);
-DLL_PUBLIC void createStorageDatabase( const char* config);
+class AccumulatorReference
+	:public strus::shared_ptr<AccumulatorInterface>
+{
+public:
+	AccumulatorReference( AccumulatorInterface* o=0)
+		:strus::shared_ptr<AccumulatorInterface>(o){}
+	AccumulatorReference( const AccumulatorReference& o)
+		:strus::shared_ptr<AccumulatorInterface>(o){}
+};
 
-}}//namespace
+}//namespace
 #endif
+
 

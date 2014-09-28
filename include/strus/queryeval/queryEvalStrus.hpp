@@ -29,6 +29,9 @@
 #ifndef _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
+#include "strus/shared_ptr.hpp"
+#include <string>
+#include <map>
 
 namespace strus
 {
@@ -42,6 +45,7 @@ public:
 	virtual std::vector<WeightedDocument>
 		evaluate(
 			const StorageInterfaceR& storage,
+			const std::map<std::string,strus
 			const RankerInterfaceR& ranker,
 			const std::string& query,
 			std::size_t maxNofRanks);

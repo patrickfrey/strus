@@ -45,8 +45,7 @@ public:
 	virtual std::vector<WeightedDocument>
 		calculate(
 			const AccumulatorInterfaceR& accu,
-			double minWeight,
-			std::size_t maxNofRanks)=0;
+			std::size_t maxNofRanks) const=0;
 };
 
 }//namespace
