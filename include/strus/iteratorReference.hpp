@@ -29,19 +29,19 @@
 #ifndef _STRUS_ITERATOR_REFERENCE_HPP_INCLUDED
 #define _STRUS_ITERATOR_REFERENCE_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
-#include "strus/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
 class IteratorReference
-	:public strus::shared_ptr<IteratorInterface>
+	:public boost::shared_ptr<IteratorInterface>
 {
 public:
 	IteratorReference( IteratorInterface* o=0)
-		:strus::shared_ptr<IteratorInterface>(o){}
+		:boost::shared_ptr<IteratorInterface>(o){}
 	IteratorReference( const IteratorReference& o)
-		:strus::shared_ptr<IteratorInterface>(o){}
+		:boost::shared_ptr<IteratorInterface>(o){}
 };
 
 }//namespace

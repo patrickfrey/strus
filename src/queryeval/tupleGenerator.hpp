@@ -26,28 +26,58 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/queryeval/queryEvalStrus.hpp"
-#include "strus/accumulatorInterface.hpp"
-#include <cstring>
+#ifndef _STRUS_QUERY_TUPLE_GENERATOR_HPP_INCLUDED
+#define _STRUS_QUERY_TUPLE_GENERATOR_HPP_INCLUDED
+#include <string>
+#include <vector>
 
-using namespace strus;
-
-namespace {
-
-
-}//anonymous namespace
-
-std::vector<WeightedDocument>
-		QueryEvalStrus::evaluate(
-			const StorageInterfaceR& storage,
-			const RankerInterfaceR& ranker,
-			const std::string& query,
-			std::size_t maxNofRanks)
+namespace strus
 {
-	Program prg( query);
-	AccumulatorInterfaceR accu( prg.accumulator( storage));
-	return ranker.calculate( accu, prg.minWeight(), maxNofRanks);
-}
 
+class TupleGenerator
+{
+public:
+	enum Mode
+	{
+		Product,
+		Ascending,
+		Permutation
+	};
 
+	explicit TupleGenerator( Mode mode_);
+
+	void defineColumn( std::size_t max_);
+
+	bool empty()					{return m_empty;}
+
+	std::size_t column( std::size_t idx) const	{return m_columns[ idx].value;}
+	std::size_t columns() const			{return m_columns.size();}
+
+	bool next();
+
+private:
+	bool incrementIndex( std::size_t& idx, const std::size_t& maximum);
+
+	struct Column
+	{
+		Column()
+			:value(0),maximum(0){}
+		Column( const Column& o)
+			:value(o.value),maximum(o.maximum){}
+		Column( std::size_t v, std::size_t m)
+			:value(v),maximum(m){}
+
+		std::size_t value;
+		std::size_t maximum;
+	};
+
+private:
+	bool m_empty;				///< true if element generation finished (no element defined)
+	Mode m_mode;				///< type of tuple
+	std::vector<Column> m_columns;		///< column values of the tuple
+	std::vector<bool> m_occupied;		///< value defined by an element of the permutation
+};
+
+}//namespace
+#endif
 

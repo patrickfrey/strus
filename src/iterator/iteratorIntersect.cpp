@@ -26,14 +26,20 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/iteratorIntersect.hpp"
+#include "strus/iterator/iteratorIntersect.hpp"
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( const IteratorInterfaceR& first_, const IteratorInterfaceR& second_)
+IteratorIntersect::IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_)
 	:m_docno(0)
 	,m_first(first_)
 	,m_second(second_)
+{}
+
+IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
+	:m_docno(o.m_docno)
+	,m_first(o.m_first->copy())
+	,m_second(o.m_second->copy())
 {}
 
 Index IteratorIntersect::skipDoc( const Index& docno_)

@@ -29,19 +29,19 @@
 #ifndef _STRUS_ACCUMULATOR_REFERENCE_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_REFERENCE_HPP_INCLUDED
 #include "strus/accumulatorInterface.hpp"
-#include "strus/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
 class AccumulatorReference
-	:public strus::shared_ptr<AccumulatorInterface>
+	:public boost::shared_ptr<AccumulatorInterface>
 {
 public:
 	AccumulatorReference( AccumulatorInterface* o=0)
-		:strus::shared_ptr<AccumulatorInterface>(o){}
+		:boost::shared_ptr<AccumulatorInterface>(o){}
 	AccumulatorReference( const AccumulatorReference& o)
-		:strus::shared_ptr<AccumulatorInterface>(o){}
+		:boost::shared_ptr<AccumulatorInterface>(o){}
 };
 
 }//namespace

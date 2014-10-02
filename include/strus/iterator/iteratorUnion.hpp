@@ -29,6 +29,7 @@
 #ifndef _STRUS_ITERATOR_UNION_HPP_INCLUDED
 #define _STRUS_ITERATOR_UNION_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
+#include "strus/iteratorReference.hpp"
 
 namespace strus
 {
@@ -37,13 +38,16 @@ class IteratorUnion
 	:public IteratorInterface
 {
 public:
-	typedef strus::shared_ptr<IteratorInterface> IteratorReference;
-
+	IteratorUnion( const IteratorUnion& o);
 	IteratorUnion( const IteratorReference& first_, const IteratorReference& second_);
 	virtual ~IteratorUnion(){}
 
-	virtual Index skipDoc( const Index& docno_)=0;
-	virtual Index skipPos( const Index& pos_)=0;
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipPos( const Index& pos_);
+	virtual IteratorInterface* copy() const
+	{
+		return new IteratorUnion( *this);
+	}
 
 private:
 	Index m_docno;

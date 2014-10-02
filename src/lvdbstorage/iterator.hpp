@@ -26,31 +26,44 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
-#define _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
-#include "strus/queryEvalInterface.hpp"
-#include "strus/shared_ptr.hpp"
-#include <string>
-#include <map>
+#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
+#include "strus/iteratorInterface.hpp"
+#include <leveldb/db.h>
 
-namespace strus
-{
+namespace strus {
 
-class QueryEvalStrus
-	:public QueryEvalInterface
+class Iterator
+	:public IteratorInterface
 {
 public:
-	virtual ~QueryEvalStrus(){}
+	Iterator( leveldb::DB* db_, Index termtypeno, Index termidno);
+	Iterator( const Iterator& o);
 
-	virtual std::vector<WeightedDocument>
-		evaluate(
-			const StorageInterfaceR& storage,
-			const std::map<std::string,strus
-			const RankerInterfaceR& ranker,
-			const std::string& query,
-			std::size_t maxNofRanks);
+	virtual ~Iterator();
+	virtual Index skipDoc( const Index& docno);
+	virtual Index skipPos( const Index& firstpos);
+	virtual IteratorInterface* copy() const
+	{
+		return new Iterator(*this);
+	}
+
+private:
+	Index extractMatchDocno();
+	Index getNextTermDoc();
+	Index getFirstTermDoc( const Index& docno);
+
+private:
+	leveldb::DB* m_db;
+	std::string m_key;
+	std::size_t m_keysize;
+	Index m_docno;
+	leveldb::Iterator* m_itr;
+	Index m_posno;
+	const char* m_positr;
+	const char* m_posend;
 };
 
-}//namespace
+}
 #endif
 

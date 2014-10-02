@@ -29,6 +29,7 @@
 #ifndef _STRUS_ITERATOR_CUTINRANGE_HPP_INCLUDED
 #define _STRUS_ITERATOR_CUTINRANGE_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
+#include "strus/iteratorReference.hpp"
 
 namespace strus
 {
@@ -39,8 +40,6 @@ class IteratorCutInRange
 	:public IteratorInterface
 {
 public:
-	typedef strus::shared_ptr<IteratorInterface> IteratorReference;
-
 	///\param[in] first_ Defines the positions of the set of elements defining the start of a range
 	///\param[in] second_ Defines the positions of the set of elements defining the end of a range
 	///\param[in] cut_ Defines the positions of the set of elements defining the negative condition on selected ranges. These elements must not appear in a selected range
@@ -48,10 +47,15 @@ public:
 	///\param[in] firstElemCut Negative (cut) selection starts one position after the first element
 	///\param[in] secondElemCut true: Negative (cut) selection ends one position before the last element
 	IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool firstElemCut_, bool secondElemCut_);
+	IteratorCutInRange( const IteratorCutInRange& o);
 	virtual ~IteratorCutInRange(){}
 
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& pos)=0;
+	virtual Index skipDoc( const Index& docno);
+	virtual Index skipPos( const Index& pos);
+	virtual IteratorCutInRange* copy() const
+	{
+		return new IteratorCutInRange( *this);
+	}
 
 private:
 	Index m_docno;

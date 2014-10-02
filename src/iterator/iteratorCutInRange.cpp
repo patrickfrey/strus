@@ -26,11 +26,11 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/iteratorCutInRange.hpp"
+#include "strus/iterator/iteratorCutInRange.hpp"
 
 using namespace strus;
 
-IteratorCutInRange::IteratorCutInRange( const IteratorInterfaceR& first_, const IteratorInterfaceR& second_, const IteratorInterfaceR& cut_, const Index& range_, bool firstElemCut_, bool secondElemCut_)
+IteratorCutInRange::IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool firstElemCut_, bool secondElemCut_)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_first(first_)
@@ -39,6 +39,17 @@ IteratorCutInRange::IteratorCutInRange( const IteratorInterfaceR& first_, const 
 	,m_range(range_)
 	,m_firstElemCut(firstElemCut_)
 	,m_secondElemCut(secondElemCut_)
+{}
+
+IteratorCutInRange::IteratorCutInRange( const IteratorCutInRange& o)
+	:m_docno(o.m_docno)
+	,m_docno_cut(o.m_docno_cut)
+	,m_first(o.m_first->copy())
+	,m_second(o.m_second->copy())
+	,m_cut(o.m_cut->copy())
+	,m_range(o.m_range)
+	,m_firstElemCut(o.m_firstElemCut)
+	,m_secondElemCut(o.m_secondElemCut)
 {}
 
 Index IteratorCutInRange::skipDoc( const Index& docno_)

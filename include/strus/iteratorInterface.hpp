@@ -37,9 +37,9 @@ class IteratorInterface
 {
 public:
 	virtual ~IteratorInterface(){}
-
 	virtual Index skipDoc( const Index& docno)=0;
 	virtual Index skipPos( const Index& firstpos)=0;
+	virtual IteratorInterface* copy() const=0;
 };
 
 }//namespace

@@ -26,35 +26,27 @@
 
 --------------------------------------------------------------------
 */
-/// \brief For not getting a dependency to boost just because of shared_ptr, we provide a substitute implementation here
-
-#ifndef _STRUS_SHARED_PTR_HPP_INCLUDED
-#define _STRUS_SHARED_PTR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
+#ifndef _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
+#define _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
+#include "strus/queryEvalInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <map>
 
 namespace strus
 {
 
-template<class T>
-class shared_ptr
-	:public boost::shared_ptr<T>
+class QueryEval
+	:public QueryEvalInterface
 {
 public:
-	shared_ptr()
-		:boost::shared_ptr() {}
-	shared_ptr( T* s)
-		:boost::shared_ptr(s) {}
+	virtual ~QueryEval(){}
 
-	shared_ptr( const shared_ptr& o)
-		:boost::shared_ptr(o) {}
-
-	shared_ptr& operator=(const shared_ptr& o) 
-	{
-		boost::shared_ptr<T>::operator=(o);
-		return *this;
-	}
+	virtual std::vector<WeightedDocument>
+		evaluate(
+			QueryProcessorInterface& processor,
+			const std::string& querystr,
+			std::size_t maxNofRanks);
 };
 
 }//namespace

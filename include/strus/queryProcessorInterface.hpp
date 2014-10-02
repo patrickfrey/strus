@@ -26,25 +26,49 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_RANKER_INTERFACE_HPP_INCLUDED
-#define _STRUS_RANKER_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/accumulatorInterface.hpp"
+#ifndef _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
+#include "strus/storageInterface.hpp"
+#include "strus/accumulatorReference.hpp"
+#include "strus/iteratorReference.hpp"
 #include "strus/weightedDocument.hpp"
 #include <vector>
-#include <cstddef>
+#include <string>
 
 namespace strus
 {
 
-class RankerInterface
+/// \brief Defines all object instances involved in query evaluation addressable by name
+class QueryProcessorInterface
 {
 public:
-	virtual ~RankerInterface(){}
+	virtual ~QueryProcessorInterface(){}
+
+	virtual IteratorReference
+		createIterator(
+			const std::string& type,
+			const std::string& value)=0;
+
+	virtual IteratorReference
+		createIterator(
+			const std::string& name,
+			const std::vector<IteratorReference>& arg)=0;
+
+	virtual AccumulatorReference
+		createAccumulator(
+			const std::string& name,
+			const std::vector<double>& scale,
+			const std::vector<double>& weights,
+			const std::vector<AccumulatorReference>& arg)=0;
+
+	virtual AccumulatorReference
+		createOccurrenceAccumulator(
+			const std::string& name,
+			const std::vector<IteratorReference>& arg)=0;
 
 	virtual std::vector<WeightedDocument>
-		calculate(
-			const AccumulatorInterfaceR& accu,
+		getRankedDocumentList(
+			const AccumulatorReference& accu,
 			std::size_t maxNofRanks) const=0;
 };
 

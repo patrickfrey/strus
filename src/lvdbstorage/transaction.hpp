@@ -26,43 +26,42 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#include "strus/index.hpp"
+#ifndef _STRUS_LVDB_STORAGE_TRANSACTION_HPP_INCLUDED
+#define _STRUS_LVDB_STORAGE_TRANSACTION_HPP_INCLUDED
+#include "storage.hpp"
+#include <vector>
+#include <leveldb/db.h>
 
-namespace strus
+namespace strus {
+
+/// \class Transaction
+/// \brief Storage insert or update transaction
+class Transaction
+	:public StorageInterface::TransactionInterface
 {
+public:
+	Transaction( Storage* storage_, const std::string& docid_);
 
-struct WeightedDocument
-{
-	Index docno;
-	double weight;
+	virtual ~Transaction();
+	virtual void addTermOccurrence(
+			const std::string& type_,
+			const std::string& id_,
+			const Index& position_);
+	virtual void commit();
 
-	WeightedDocument()
-		:docno(0),weight(0.0){}
-	WeightedDocument( const WeightedDocument& o)
-		:docno(o.docno),weight(o.weight){}
-	WeightedDocument( const Index& docno_, double weight_)
-		:docno(docno_),weight(weight_){}
+private:
+	typedef std::pair<Index,Index> TermMapKey;
+	typedef std::map< TermMapKey, std::vector<Index> > TermMap;
+	typedef std::map< Index, std::string > InvMap;
 
-	class CompareGreater
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.weight > b.weight);
-		}
-	};
-	class CompareSmaller
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.weight < b.weight);
-		}
-	};
+private:
+	Storage* m_storage;
+	std::string m_docid;
+	TermMap m_terms;
+	InvMap m_invs;
 };
 
-}//namespace
+}
 #endif
+
 

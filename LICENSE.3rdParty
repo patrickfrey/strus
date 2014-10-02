@@ -5,25 +5,12 @@ Table of Contents
 -----------------
 
   boost
-  Kyotocabinet
-  CoCoR
   LevelDB
 
 
 boost
 -----
   http://www.boost.org/LICENSE_1_0.txt
-
-Kyotocabinet
-------------
-
-  GNU GENERAL PUBLIC LICENSE v3 (http://opensource.org/licenses/GPL-3.0)
-  or alternatively a commercial licence (http://fallabs.com/)
-
-CoCoR
------
-
-  GNU GENERAL PUBLIC LICENSE slightly extended (See http://www.ssw.uni-linz.ac.at/Coco)
 
 LevelDB
 -------

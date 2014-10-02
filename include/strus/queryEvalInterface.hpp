@@ -28,8 +28,7 @@
 */
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
-#include "strus/rankerInterface.hpp"
-#include "strus/accumulatorReference.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include "strus/iteratorReference.hpp"
 #include "strus/weightedDocument.hpp"
 #include "strus/storageInterface.hpp"
@@ -44,7 +43,7 @@ public:
 
 	virtual std::vector<WeightedDocument>
 		evaluate(
-			ProcessorInterface* processor,
+			QueryProcessorInterface& processor,
 			const std::string& query,
 			std::size_t maxNofRanks)=0;
 };

@@ -3,7 +3,9 @@ CPP_OBJS=\
 	iterator/iteratorIntersect.o \
 	iterator/iteratorUnion.o \
 	iterator/iteratorCutInRange.o \
-	queryeval/queryEvalStrus.o
+	queryeval/tupleGenerator.o \
+	queryeval/queryParser.o \
+	queryeval/queryEval.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
@@ -15,8 +17,8 @@ all: subdirs strus
 %.o : %.cpp GNUmakefile
 	g++ -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $<
 
-strus: strus.o $(CPP_OBJS)
-	g++ -o $@ $(CPP_OBJS) $< $(LDFLAGS) $(LIBS)
+strus: $(CPP_OBJS)
+	g++ -o $@ $< $(LDFLAGS) $(LIBS)
 
 .PHONY: subdirs
 subdirs:

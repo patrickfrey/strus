@@ -26,41 +26,49 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_PROCESSOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_PROCESSOR_INTERFACE_HPP_INCLUDED
-#include "strus/storageInterface.hpp"
-#include "strus/rankerInterface.hpp"
-#include "strus/accumulatorReference.hpp"
-#include "strus/iteratorReference.hpp"
-#include "strus/weightedDocument.hpp"
+#ifndef _STRUS_QUERY_KeyMap_HPP_INCLUDED
+#define _STRUS_QUERY_KeyMap_HPP_INCLUDED
+#include <string>
+#include <map>
+#include <boost/algorithm/string.hpp>
 
-namespace strus
+namespace strus {
+
+struct KeyString
+	:public std::string
 {
+	KeyString( const char* o)
+		:std::string( boost::to_upper_copy( std::string(o))){}
+	KeyString( const std::string& o)
+		:std::string( boost::to_upper_copy( o)){}
+	KeyString( const KeyString& o)
+		:std::string( o){}
+	KeyString(){}
+};
 
-/// \brief Defines all object instances involved in query evaluation addressable by name
-class ProcessorInterface
+template <typename Value>
+struct KeyMap
+	:public std::map<KeyString,Value>
 {
-public:
-	virtual ~ProcessorInterface(){}
+	typedef std::map<KeyString,Value> Parent;
 
-	virtual RankerInterface& storage()=0;
+	KeyMap(){}
+	KeyMap( const KeyMap& o)
+		:std::map<KeyString,Value>(o){}
+	KeyMap( const std::map<std::string,Value>& o)
+	{
+		std::copy( o.begin(), o.end(), std::inserter( *this, this->end()));
+	}
 
-	virtual const RankerInterface& ranker()=0;
+	void insert( const KeyString& key, const Value& value)
+	{
+		if (Parent::find( key) != this->end())
+		{
+			throw std::runtime_error( std::string( "duplicate definition of '") + key + "'");
+		}
+		Parent::operator[](key) = value;
+	}
 
-	virtual IteratorReference
-		createIterator(
-			const std::string& name,
-			const std::vector<IteratorReference>& arg)=0;
-
-	virtual AccumulatorReference
-		createAccumulator(
-			const std::string& name,
-			const std::vector<AccumulatorReference>& arg)=0;
-
-	virtual AccumulatorReference
-		createAccumulator(
-			const std::string& name,
-			const IteratorReference& arg)=0;
 };
 
 }//namespace

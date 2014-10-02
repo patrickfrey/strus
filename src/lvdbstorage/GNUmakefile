@@ -1,7 +1,10 @@
 TOPDIR=../..
 CPP_OBJS=\
 	indexPacker.o \
-	lvdbstorage.o
+	storage.o \
+	iterator.o \
+	transaction.o \
+	libstrus_lvdbstorage.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98

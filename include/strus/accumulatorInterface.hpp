@@ -38,8 +38,21 @@ class AccumulatorInterface
 public:
 	virtual ~AccumulatorInterface(){}
 
+	virtual bool nextRank( Index& docno, int& state, double& weigth)
+	{
+		// Default implementation:
+		docno = skipDoc( docno);
+		state = 0;
+		if (!docno) return 0;
+		weigth = cur_weight();
+		return docno;
+	}
+
 	virtual Index skipDoc( const Index& docno)=0;
-	virtual double weight()=0;
+	virtual double cur_weight()=0;
+
+	virtual double min_weight()=0;
+	virtual double max_weight()=0;
 };
 
 }//namespace

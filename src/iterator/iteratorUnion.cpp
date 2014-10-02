@@ -1,4 +1,4 @@
-#include "strus/iteratorUnion.hpp"
+#include "strus/iterator/iteratorUnion.hpp"
 
 using namespace strus;
 
@@ -39,12 +39,20 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 	}
 }
 
-IteratorUnion::IteratorUnion( const IteratorInterfaceR& first_, const IteratorInterfaceR& second_)
+IteratorUnion::IteratorUnion( const IteratorReference& first_, const IteratorReference& second_)
 	:m_docno(0)
 	,m_first(first_)
 	,m_second(second_)
 	,m_open_first(false)
 	,m_open_second(false)
+{}
+
+IteratorUnion::IteratorUnion( const IteratorUnion& o)
+	:m_docno(o.m_docno)
+	,m_first(o.m_first->copy())
+	,m_second(o.m_second->copy())
+	,m_open_first(o.m_open_first)
+	,m_open_second(o.m_open_second)
 {}
 
 Index IteratorUnion::skipDoc( const Index& docno_)

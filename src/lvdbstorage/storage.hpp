@@ -26,51 +26,63 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_STORAGE_HPP_INCLUDED
+#define _STRUS_LVDB_STORAGE_HPP_INCLUDED
+#include "strus/storageInterface.hpp"
 #include "strus/iteratorInterface.hpp"
-#include <string>
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
+#include <boost/thread/mutex.hpp>
 
-namespace strus
-{
+namespace strus {
 
-class StorageInterface
+class Storage
+	:public StorageInterface
 {
 public:
-	class TransactionInterface
-	{
-	public:
-		/// \brief Destructor that is doing the transaction rollback too
-		virtual ~TransactionInterface(){}
+	Storage( const char* path_);
+	virtual ~Storage();
 
-		/// \brief Add one occurrence of a term, throws on std::bad_alloc
-		virtual void addTermOccurrence(
-				const std::string& type_,
-				const std::string& id_,
-				const Index& position_)=0;
-
-		/// \brief Commit of the transaction, throws on error
-		virtual void commit()=0;
-	};
-
-public:
-	/// \brief Destructor
-	virtual ~StorageInterface(){}
-
-	/// \brief Create an iterator on the occurrencies of a term in the storage
-	/// \return the created iterator reference to be disposed with delete
 	virtual IteratorInterface*
 		createTermOccurrenceIterator(
 			const std::string& termtype,
-			const std::string& termid)=0;
+			const std::string& termid);
 
-	/// \brief Create an insert/update transaction for a document
-	/// \param[in] docid Document identifier (URI)
-	/// \return the created transaction reference to be disposed with delete
-	virtual TransactionInterface* createTransaction( const std::string& docid)=0;
+	virtual TransactionInterface*
+		createTransaction( const std::string& docid);
+
+	Index newTermNo();
+	Index newTypeNo();
+	Index newDocNo();
+
+	void writeBatch( leveldb::WriteBatch& batch);
+
+	leveldb::Iterator* newIterator();
+
+	enum KeyPrefix
+	{
+		TypeIdPrefix='t',	///< [type string]      ->  [typeno]
+		TermIdPrefix='i',	///< [term string]      ->  [termno]
+		DocIdPrefix='d',	///< [docid string]     ->  [docno]
+		LocationPrefix='o',	///< [type,term,docno]  ->  [pos incr]*
+		InversePrefix='r',	///< [docno,position]   ->  [typeno,termno]*
+		VariablePrefix='v'	///< [variable string]  ->  [index]
+	};
+
+	static std::string keyString( KeyPrefix prefix, const std::string& keyname);
+	Index keyLookUp( KeyPrefix prefix, const std::string& keyname);
+	Index keyGetOrCreate( KeyPrefix prefix, const std::string& keyname);
+
+private:
+	std::string m_path;
+	leveldb::DB* m_db;
+	Index m_next_termno;
+	Index m_next_typeno;
+	Index m_next_docno;
+	boost::mutex m_mutex;
 };
 
-}//namespace
+}
 #endif
 
 
