@@ -42,7 +42,6 @@
 
 using namespace strus;
 
-
 static const char* configGet( const char* config, const char* name)
 {
 	const char* cc = config;
@@ -56,7 +55,7 @@ static const char* configGet( const char* config, const char* name)
 	return 0;
 }
 
-DLL_PUBLIC StorageInterface* createStorageClient( const char* config)
+DLL_PUBLIC StorageInterface* lvdb::createStorageClient( const char* config)
 {
 	const char* name = configGet( config, "name");
 	if (!name)
@@ -66,7 +65,7 @@ DLL_PUBLIC StorageInterface* createStorageClient( const char* config)
 	return new Storage( name);
 }
 
-DLL_PUBLIC void createStorageDatabase( const char* config)
+DLL_PUBLIC void lvdb::createStorageDatabase( const char* config)
 {
 	const char* path = configGet( config, "path");
 	if (!path)

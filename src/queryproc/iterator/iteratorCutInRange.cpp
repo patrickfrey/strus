@@ -26,23 +26,33 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorIntersect.hpp"
+#include "queryproc/iterator/iteratorCutInRange.hpp"
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_)
+IteratorCutInRange::IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool firstElemCut_, bool secondElemCut_)
 	:m_docno(0)
+	,m_docno_cut(0)
 	,m_first(first_)
 	,m_second(second_)
+	,m_cut(cut_)
+	,m_range(range_)
+	,m_firstElemCut(firstElemCut_)
+	,m_secondElemCut(secondElemCut_)
 {}
 
-IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
+IteratorCutInRange::IteratorCutInRange( const IteratorCutInRange& o)
 	:m_docno(o.m_docno)
+	,m_docno_cut(o.m_docno_cut)
 	,m_first(o.m_first->copy())
 	,m_second(o.m_second->copy())
+	,m_cut(o.m_cut->copy())
+	,m_range(o.m_range)
+	,m_firstElemCut(o.m_firstElemCut)
+	,m_secondElemCut(o.m_secondElemCut)
 {}
 
-Index IteratorIntersect::skipDoc( const Index& docno_)
+Index IteratorCutInRange::skipDoc( const Index& docno_)
 {
 	Index docno_iter = docno_;
 
@@ -61,6 +71,7 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 			if (docno_first == docno_second)
 			{
 				m_docno = docno_first;
+				m_docno_cut = m_cut->skipDoc( docno_first);
 				return m_docno;
 			}
 		}
@@ -71,32 +82,49 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 	}
 }
 
-Index IteratorIntersect::skipPos( const Index& pos_)
+Index IteratorCutInRange::skipPos( const Index& pos_)
 {
 	Index pos_iter = pos_;
 
 	for (;;)
 	{
-		Index pos_first = m_first->skipDoc( pos_iter);
-		Index pos_second = m_second->skipDoc( pos_iter);
+		Index pos_first = m_first->skipPos( pos_iter);
+		Index pos_second = m_second->skipPos( pos_iter);
 
 		if (!pos_first || !pos_second)
 		{
 			return 0;
 		}
-		if (pos_first >= pos_second)
+		if (pos_first > pos_second)
 		{
-			if (pos_first == pos_second)
-			{
-				return pos_first;
-			}
 			pos_iter = pos_first;
+		}
+		else if (pos_first + m_range >= pos_second)
+		{
+			//... we have a match of the range
+			pos_iter = pos_first;
+			if (m_docno_cut == m_docno)
+			{
+				Index pos_cut = m_cut->skipPos( m_firstElemCut?pos_first:pos_first+1);
+				if (pos_cut <= pos_second)
+				{
+					if (!pos_cut)
+					{
+						return pos_first;
+					}
+					if (!m_secondElemCut && pos_cut == pos_second)
+					{
+						return pos_first;
+					}
+					++pos_iter;
+					continue;
+				}
+			}
 		}
 		else
 		{
-			pos_iter = pos_second;
+			pos_iter = pos_second - m_range + 1;
 		}
 	}
 }
-
 

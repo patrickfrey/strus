@@ -9,7 +9,7 @@ CPP_OBJS=\
 CPP_INCLUDE=-I$(TOPDIR)/include -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
 LDFLAGS=-L/usr/lib
-LIBS=-lleveldb
+LIBS=-lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
 
 all: libstrus_lvdbstorage.so
 

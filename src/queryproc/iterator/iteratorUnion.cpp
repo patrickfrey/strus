@@ -1,4 +1,4 @@
-#include "iterator/iteratorUnion.hpp"
+#include "queryproc/iterator/iteratorUnion.hpp"
 
 using namespace strus;
 

@@ -26,46 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#include "queryeval/queryEval.hpp"
-#include "queryproc/queryProcessor.hpp"
-#include "lvdbstorage/libstrus_lvdbstorage.hpp"
-#include <iostream>
-#include <cstring>
-#include <stdexcept>
+#ifndef _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
+#define _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
+#include "strus/queryProcessorInterface.hpp"
 
-enum Command {None,CreateStorage};
-
-int main( int argc, const char* argv[])
+namespace strus
 {
-	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
-	{
-		std::cerr << "usage: strus <cmd> ..." << std::endl;
-		std::cerr << "<cmd> = create  :create a storage" << std::endl;
-		return 0;
-	}
-	try
-	{
-		if (std::strcmp( argv[1], "create") == 0)
-		{
-			if (argc <= 3) throw std::runtime_error( "too few argumens for create. (strus create <repository config>)");
 
-			strus::lvdb::createStorageDatabase( argv[3]);
-		}
-		else
-		{
-			throw std::runtime_error( std::string( "unknown command '") + argv[1] + "' (expected create,..)" );
-		}
-		return 0;
-	}
-	catch (const std::runtime_error& e)
-	{
-		std::cerr << "ERROR " << e.what() << std::endl;
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << "EXCEPTION " << e.what() << std::endl;
-	}
-	return -1;
-}
+/// \brief Provides the objects needed for query processing
+class QueryProcessor
+	:public QueryProcessorInterface
+{
+public:
+	virtual ~QueryProcessor();
 
+	virtual IteratorReference
+		createIterator(
+			const std::string& type,
+			const std::string& value);
+
+	virtual IteratorReference
+		createIterator(
+			const std::string& name,
+			const std::vector<IteratorReference>& arg);
+
+	virtual AccumulatorReference
+		createAccumulator(
+			const std::string& name,
+			const std::vector<double>& scale,
+			const std::vector<double>& weights,
+			const std::vector<AccumulatorReference>& arg);
+
+	virtual AccumulatorReference
+		createOccurrenceAccumulator(
+			const std::string& name,
+			const std::vector<IteratorReference>& arg);
+
+	virtual std::vector<WeightedDocument>
+		getRankedDocumentList(
+			const AccumulatorReference& accu,
+			std::size_t maxNofRanks) const;
+};
+
+}//namespace
+#endif
 

@@ -1,7 +1,11 @@
 Library dependencies of strus:
-	- boost (headers only)
+	- boost (headers and -lboost_system)
 	- LevelDB
+		- libsnappy (needed by LevelDB)
 
 Ubuntu:
 	sudo apt-get install liboost-all-dev
 	sudo apt-get install libleveldb-dev
+	sudo apt-get install libsnappy-dev
+
+
