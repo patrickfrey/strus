@@ -34,14 +34,15 @@
 namespace strus
 {
 
+/// \brief Class to generate set of tuples out of sets by standard combinatoric operations
 class TupleGenerator
 {
 public:
 	enum Mode
 	{
-		Product,
-		Ascending,
-		Permutation
+		Product,		///< Product of sets: creates a set of element sequences from a squence of sets by generating any combination of the members in their order
+		Ascending,		///< Creates all ascending permutations of a certain length 
+		Permutation		///< Creates all permutations of a certain length 
 	};
 
 	explicit TupleGenerator( Mode mode_);

@@ -39,8 +39,13 @@ namespace strus
 class QueryEvalInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~QueryEvalInterface(){}
 
+	/// \brief Evaluate a query
+	/// \param[in] processor defines the operations (joins,accumulators) that can be used in the query processing
+	/// \param[in] querystr query string to process (syntax depends on implementation)
+	/// \param[in] maxNofRanks maximum number of ranks to return
 	virtual std::vector<WeightedDocument>
 		evaluate(
 			QueryProcessorInterface& processor,

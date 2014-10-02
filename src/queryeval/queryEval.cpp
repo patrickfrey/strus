@@ -39,9 +39,6 @@ struct QueryContext
 		:processor(processor_)
 	{
 		query.pushQuery( querystr);
-		expandTerms();
-		expandJoins();
-		expandAccumulators();
 	}
 
 	struct IteratorSet
@@ -63,6 +60,7 @@ struct QueryContext
 	AccumulatorMap accumap;
 	AccumulatorReference lastaccu;
 
+	/// \brief Create all basic terms defined in the query
 	void expandTerms()
 	{
 		std::vector<QueryParser::Term>::const_iterator ti = query.terms().begin(), te = query.terms().end();
@@ -74,6 +72,7 @@ struct QueryContext
 		}
 	}
 
+	/// \brief Get a specific element of an iterator set
 	IteratorReference getSetElement( unsigned int setIndex, unsigned int elemIndex)
 	{
 		IteratorSetMap::iterator si = itersetmap.find( setIndex);
@@ -94,6 +93,7 @@ struct QueryContext
 		return rt;
 	}
 
+	/// \brief Create all joins defined in the query
 	void expandJoins()
 	{
 		typedef QueryParser::JoinOperation JoinOperation;
@@ -121,6 +121,7 @@ struct QueryContext
 		}
 	}
 
+	/// \brief Create all accumulators defined in the query
 	void expandAccumulators()
 	{
 		typedef QueryParser::AccumulateOperation AccumulateOperation;
@@ -135,6 +136,8 @@ struct QueryContext
 			{
 				throw std::runtime_error( "internal: duplicate accumulator definition");
 			}
+
+			// Build accumulator arguments:
 			std::vector<AccumulatorReference> accuarg;
 			std::vector<double> weightarg;
 			std::vector<Argument>::const_iterator gi = ai->args().begin(), ge = ai->args().end();
@@ -161,6 +164,7 @@ struct QueryContext
 				}
 			}
 
+			// Create the accumulator:
 			lastaccu
 				= accumap[ ai->resultaccu()]
 				= processor->createAccumulator(
@@ -168,6 +172,7 @@ struct QueryContext
 		}
 	}
 
+	/// \brief Get the best ranks as weighted by the last accumulator in the query defined
 	std::vector<WeightedDocument> rankDocuments( std::size_t maxNofRanks)
 	{
 		std::vector<WeightedDocument> rt;
@@ -210,6 +215,9 @@ std::vector<WeightedDocument>
 			std::size_t maxNofRanks)
 {
 	QueryContext ctx( &processor, querystr);
+	ctx.expandTerms();
+	ctx.expandJoins();
+	ctx.expandAccumulators();
 	return ctx.rankDocuments( maxNofRanks);
 }
 

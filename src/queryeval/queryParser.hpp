@@ -36,6 +36,7 @@
 namespace strus
 {
 
+/// \brief Parser of a query defined as string
 class QueryParser
 {
 public:
@@ -48,6 +49,7 @@ public:
 		,m_accumulateOperations(o.m_accumulateOperations)
 	{}
 
+	/// \brief Term definition in the query
 	class Term
 	{
 	public:
@@ -68,6 +70,7 @@ public:
 		std::string m_value;					///< term value string
 	};
 
+	/// \brief Attributes of a set needed in the initial parsing phase
 	struct SetAttributes
 	{
 		SetAttributes()
@@ -99,6 +102,7 @@ public:
 
 	typedef std::vector<SetElement> SetElementList;
 
+	/// \brief Defines a join operation of term occurrence sets
 	class JoinOperation
 	{
 	public:
@@ -157,6 +161,7 @@ public:
 		SelectorSetR m_selectorset;				///< iterator reference sequences
 	};
 
+	/// \brief Defines an accumulate operation
 	class AccumulateOperation
 	{
 	public:

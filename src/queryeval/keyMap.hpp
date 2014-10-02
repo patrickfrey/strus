@@ -46,6 +46,7 @@ struct KeyString
 	KeyString(){}
 };
 
+/// \brief Case insensitive map of string to a value type defined a template argument
 template <typename Value>
 struct KeyMap
 	:public std::map<KeyString,Value>

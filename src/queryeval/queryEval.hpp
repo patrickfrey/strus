@@ -40,8 +40,13 @@ class QueryEval
 	:public QueryEvalInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~QueryEval(){}
 
+	/// \brief Evaluate a query
+	/// \param[in] processor defines the operations (joins,accumulators) that can be used in the query processing
+	/// \param[in] querystr query string to process
+	/// \param[in] maxNofRanks maximum number of ranks to return
 	virtual std::vector<WeightedDocument>
 		evaluate(
 			QueryProcessorInterface& processor,
