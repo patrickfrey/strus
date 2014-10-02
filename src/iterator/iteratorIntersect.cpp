@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/iterator/iteratorIntersect.hpp"
+#include "iterator/iteratorIntersect.hpp"
 
 using namespace strus;
 

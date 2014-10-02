@@ -1,4 +1,4 @@
-#include "strus/iterator/iteratorUnion.hpp"
+#include "iterator/iteratorUnion.hpp"
 
 using namespace strus;
 

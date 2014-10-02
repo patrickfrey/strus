@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/iterator/iteratorCutInRange.hpp"
+#include "iterator/iteratorCutInRange.hpp"
 
 using namespace strus;
 

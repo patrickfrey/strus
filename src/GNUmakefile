@@ -7,7 +7,7 @@ CPP_OBJS=\
 	queryeval/queryParser.o \
 	queryeval/queryEval.o
 
-CPP_INCLUDE=-I$(TOPDIR)/include
+CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
 LDFLAGS=-L/usr/local/lib -L./lvdbstorage
 LIBS=-lstrus_lvdbstorage
@@ -17,7 +17,7 @@ all: subdirs strus
 %.o : %.cpp GNUmakefile
 	g++ -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $<
 
-strus: $(CPP_OBJS)
+strus: $(CPP_OBJS) strus.o
 	g++ -o $@ $< $(LDFLAGS) $(LIBS)
 
 .PHONY: subdirs

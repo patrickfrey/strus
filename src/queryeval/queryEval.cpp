@@ -26,9 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/queryeval/queryEval.hpp"
-#include "strus/accumulatorInterface.hpp"
 #include "queryParser.hpp"
+#include "queryEval.hpp"
 #include <cstring>
 #include <set>
 

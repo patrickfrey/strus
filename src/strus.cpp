@@ -26,10 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/storage.hpp"
-#include "strus/storagelib.hpp"
-#include "strus/iterator.hpp"
-#include "strus/program.hpp"
+#include "queryeval/queryEval.hpp"
+#include "queryeval/queryProcessor.hpp"
 #include <iostream>
 #include <cstring>
 
