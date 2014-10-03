@@ -42,21 +42,21 @@ Transaction::Transaction( Storage* storage_, const std::string& docid_)
 
 Transaction::~Transaction()
 {
-	//... nothing done here. The document id and term or type ids 
+	//... nothing done here. The document id and term value or type strings 
 	//	created might remain inserted, even after a rollback.
 }
 
 void Transaction::addTermOccurrence(
 		const std::string& type_,
-		const std::string& id_,
+		const std::string& value_,
 		const Index& position_)
 {
 	if (position_ == 0) throw std::runtime_error( "term occurrence position must not be 0");
 
-	Index typeno = m_storage->keyGetOrCreate( Storage::TypeIdPrefix, id_);
-	Index termno = m_storage->keyGetOrCreate( Storage::TermIdPrefix, id_);
+	Index typeno = m_storage->keyGetOrCreate( Storage::TermTypePrefix, type_);
+	Index valueno = m_storage->keyGetOrCreate( Storage::TermValuePrefix, value_);
 
-	std::vector<Index>* termpos = &m_terms[ TermMapKey( typeno, termno)];
+	std::vector<Index>* termpos = &m_terms[ TermMapKey( typeno, valueno)];
 	if (termpos->size())
 	{
 		if (termpos->back() == position_)
@@ -72,7 +72,7 @@ void Transaction::addTermOccurrence(
 	{
 		std::string* encterm = &m_invs[ position_];
 		packIndex( *encterm, typeno);
-		packIndex( *encterm, termno);
+		packIndex( *encterm, valueno);
 
 		std::vector<Index>::iterator pi = termpos->begin(), pe = termpos->end();
 		for (; pi != pe; ++pi)

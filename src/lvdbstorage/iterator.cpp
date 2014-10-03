@@ -35,12 +35,12 @@
 
 using namespace strus;
 
-Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termidno)
+Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
 	:m_db(db_),m_docno(0),m_itr(0),m_posno(0),m_positr(0),m_posend(0)
 {
 	m_key.push_back( (char)Storage::LocationPrefix);
 	packIndex( m_key, termtypeno);
-	packIndex( m_key, termidno);
+	packIndex( m_key, termvalueno);
 	m_keysize = m_key.size();
 }
 

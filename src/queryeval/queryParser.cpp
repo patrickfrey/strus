@@ -166,6 +166,10 @@ static bool isAsterisk( char ch)
 {
 	return ch == '*';
 }
+static bool isDash( char ch)
+{
+	return ch == '-';
+}
 static bool isStringQuote( char ch)
 {
 	return ch == '\'' || ch == '"';
@@ -284,7 +288,7 @@ static SelectorSetR SELECTORSET( char const*& src, strus::KeyMap<QueryParser::Se
 			char const* src_bk = src;
 			std::string functionName( IDENTIFIER( src));
 	
-			if (isEqual( functionName, "prod"))
+			if (isEqual( functionName, "product"))
 			{
 				isFunction = true;
 				function = ProductFunc;
@@ -310,7 +314,7 @@ static SelectorSetR SELECTORSET( char const*& src, strus::KeyMap<QueryParser::Se
 					dim = 2;
 				}
 			}
-			else if (isEqual( functionName, "perm"))
+			else if (isEqual( functionName, "permute"))
 			{
 				isFunction = true;
 				function = PermutationFunc;
@@ -548,10 +552,10 @@ void QueryParser::defineTerm( const std::string& setname, const std::string& typ
 	m_terms.push_back( term);
 }
 
-void QueryParser::defineJoinOperation( const std::string& setname, const std::string& funcname, const JoinOperation::SelectorSetR& input)
+void QueryParser::defineJoinOperation( const std::string& setname, const std::string& funcname, const std::vector<std::string>& options, const JoinOperation::SelectorSetR& input)
 {
 	unsigned int resultsetIndex = defineSetElement( setname, SetElement::IteratorType, m_joinOperations.size());
-	JoinOperation op( resultsetIndex, funcname, input);
+	JoinOperation op( resultsetIndex, funcname, options, input);
 	m_joinOperations.push_back( op);
 }
 
@@ -584,12 +588,24 @@ void QueryParser::pushQuery( const std::string& qry)
 					if (isAlpha( *src))
 					{
 						std::string opname( IDENTIFIER( src));
+						std::vector<std::string> options;
+
+						while (isDash(*src))
+						{
+							OPERATOR( src);
+							if (!isAlnum(*src)) throw std::runtime_error( "expected option identifier after dash in term occurrence join expression");
+							options.push_back( IDENTIFIER(src));
+						}
 						if (isOpenSquareBracket( *src))
 						{
 							//... assignment of an iterator from a join operation to a set
 							OPERATOR( src);
 							SelectorSetR input = SELECTORSET( src, m_setmap);
-							defineJoinOperation( resultname, opname, input);
+							defineJoinOperation( resultname, opname, options, input);
+						}
+						else if (options.size())
+						{
+							throw std::runtime_error( std::string( "options (like -") + options.back() + ") only allowed for set selector expression");
 						}
 						else
 						{

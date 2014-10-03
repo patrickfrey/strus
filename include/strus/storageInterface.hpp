@@ -58,11 +58,13 @@ public:
 	virtual ~StorageInterface(){}
 
 	/// \brief Create an iterator on the occurrencies of a term in the storage
+	/// \param[in] termtype type name of the term
+	/// \param[in] termvalue value string of the term
 	/// \return the created iterator reference to be disposed with delete
 	virtual IteratorInterface*
 		createTermOccurrenceIterator(
 			const std::string& termtype,
-			const std::string& termid)=0;
+			const std::string& termvalue)=0;
 
 	/// \brief Create an insert/update transaction for a document
 	/// \param[in] docid Document identifier (URI)

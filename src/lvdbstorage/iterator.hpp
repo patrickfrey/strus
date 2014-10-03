@@ -37,7 +37,7 @@ class Iterator
 	:public IteratorInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termidno);
+	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
 	Iterator( const Iterator& o);
 
 	virtual ~Iterator();

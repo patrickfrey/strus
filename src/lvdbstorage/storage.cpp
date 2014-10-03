@@ -147,11 +147,11 @@ Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
 		}
 		if (status.IsNotFound())
 		{
-			if (prefix == TypeIdPrefix)
+			if (prefix == TermTypePrefix)
 			{
 				return m_next_typeno++;
 			}
-			else if (prefix == TermIdPrefix)
+			else if (prefix == TermValuePrefix)
 			{
 				return m_next_termno++;
 			}
@@ -174,8 +174,8 @@ IteratorInterface*
 		const std::string& typestr,
 		const std::string& termstr)
 {
-	Index typeno = keyLookUp( TermIdPrefix, typestr);
-	Index termno = keyLookUp( TermIdPrefix, termstr);
+	Index typeno = keyLookUp( TermTypePrefix, typestr);
+	Index termno = keyLookUp( TermValuePrefix, termstr);
 	return new Iterator( m_db, typeno, termno);
 }
 

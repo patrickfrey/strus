@@ -45,7 +45,7 @@ public:
 	virtual ~Transaction();
 	virtual void addTermOccurrence(
 			const std::string& type_,
-			const std::string& id_,
+			const std::string& value_,
 			const Index& position_);
 	virtual void commit();
 

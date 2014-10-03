@@ -61,8 +61,8 @@ public:
 
 	enum KeyPrefix
 	{
-		TypeIdPrefix='t',	///< [type string]      ->  [typeno]
-		TermIdPrefix='i',	///< [term string]      ->  [termno]
+		TermTypePrefix='t',	///< [type string]      ->  [typeno]
+		TermValuePrefix='i',	///< [term string]      ->  [termno]
 		DocIdPrefix='d',	///< [docid string]     ->  [docno]
 		LocationPrefix='o',	///< [type,term,docno]  ->  [pos incr]*
 		InversePrefix='r',	///< [docno,position]   ->  [typeno,termno]*

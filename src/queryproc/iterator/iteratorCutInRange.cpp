@@ -30,15 +30,15 @@
 
 using namespace strus;
 
-IteratorCutInRange::IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool firstElemCut_, bool secondElemCut_)
+IteratorCutInRange::IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool withFirstElemCut_, bool withLastElemCut_)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_first(first_)
 	,m_second(second_)
 	,m_cut(cut_)
 	,m_range(range_)
-	,m_firstElemCut(firstElemCut_)
-	,m_secondElemCut(secondElemCut_)
+	,m_withFirstElemCut(withFirstElemCut_)
+	,m_withLastElemCut(withLastElemCut_)
 {}
 
 IteratorCutInRange::IteratorCutInRange( const IteratorCutInRange& o)
@@ -48,8 +48,8 @@ IteratorCutInRange::IteratorCutInRange( const IteratorCutInRange& o)
 	,m_second(o.m_second->copy())
 	,m_cut(o.m_cut->copy())
 	,m_range(o.m_range)
-	,m_firstElemCut(o.m_firstElemCut)
-	,m_secondElemCut(o.m_secondElemCut)
+	,m_withFirstElemCut(o.m_withFirstElemCut)
+	,m_withLastElemCut(o.m_withLastElemCut)
 {}
 
 Index IteratorCutInRange::skipDoc( const Index& docno_)
@@ -105,14 +105,14 @@ Index IteratorCutInRange::skipPos( const Index& pos_)
 			pos_iter = pos_first;
 			if (m_docno_cut == m_docno)
 			{
-				Index pos_cut = m_cut->skipPos( m_firstElemCut?pos_first:pos_first+1);
+				Index pos_cut = m_cut->skipPos( m_withFirstElemCut?pos_first:pos_first+1);
 				if (pos_cut <= pos_second)
 				{
 					if (!pos_cut)
 					{
 						return pos_first;
 					}
-					if (!m_secondElemCut && pos_cut == pos_second)
+					if (!m_withLastElemCut && pos_cut == pos_second)
 					{
 						return pos_first;
 					}

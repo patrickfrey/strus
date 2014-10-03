@@ -29,10 +29,10 @@
 #include "queryParser.hpp"
 #include "queryEval.hpp"
 #include <cstring>
-#include <set>
 
 using namespace strus;
 
+namespace {
 struct QueryContext
 {
 	QueryContext( QueryProcessorInterface* processor_, const std::string& querystr)
@@ -116,7 +116,7 @@ struct QueryContext
 					const Selector& paramdef = joinargset.ar()[ ri+ci];
 					paramlist.push_back( getSetElement( paramdef.setIndex, paramdef.elemIndex));
 				}
-				joinresult.m_ar.push_back( processor->createIterator( ji->name(), paramlist));
+				joinresult.m_ar.push_back( processor->createIterator( ji->name(), ji->options(), paramlist));
 			}
 		}
 	}
@@ -171,42 +171,9 @@ struct QueryContext
 					ai->name(), ai->scale(), weightarg, accuarg);
 		}
 	}
-
-	/// \brief Get the best ranks as weighted by the last accumulator in the query defined
-	std::vector<WeightedDocument> rankDocuments( std::size_t maxNofRanks)
-	{
-		std::vector<WeightedDocument> rt;
-		typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
-		Ranker ranker;
-		std::size_t ranks = 0;
-
-		if (!lastaccu.get()) return rt;
-		AccumulatorInterface& accu = *lastaccu.get();
-
-		Index docno = 0;
-		int state = 0;
-		double weigth = 0.0;
-
-		while (accu.nextRank( docno, state, weigth))
-		{
-			ranker.insert( WeightedDocument( docno, weigth));
-			if (ranks >= maxNofRanks)
-			{
-				ranker.erase( ranker.begin());
-			}
-			else
-			{
-				++ranks;
-			}
-		}
-		Ranker::reverse_iterator ri=ranker.rbegin(),re=ranker.rend();
-		for (; ri != re; ++ri)
-		{
-			rt.push_back( *ri);
-		}
-		return rt;
-	}
 };
+}//namespace
+
 
 std::vector<WeightedDocument>
 		QueryEval::evaluate(
@@ -218,7 +185,7 @@ std::vector<WeightedDocument>
 	ctx.expandTerms();
 	ctx.expandJoins();
 	ctx.expandAccumulators();
-	return ctx.rankDocuments( maxNofRanks);
+	return processor.getRankedDocumentList( ctx.lastaccu, maxNofRanks);
 }
 
 

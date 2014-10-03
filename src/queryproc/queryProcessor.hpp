@@ -29,6 +29,8 @@
 #ifndef _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #include "strus/queryProcessorInterface.hpp"
+#include <vector>
+#include <string>
 
 namespace strus
 {
@@ -38,18 +40,38 @@ class QueryProcessor
 	:public QueryProcessorInterface
 {
 public:
-	virtual ~QueryProcessor();
+	/// \brief Constructor
+	explicit QueryProcessor( StorageInterface* storage_)
+		:m_storage(storage_){}
 
+	/// \brief Destructor
+	virtual ~QueryProcessor(){}
+
+	/// \brief Create an iterator on the occurrencies of a term
+	/// \param[in] type type name of the term
+	/// \param[in] value value string of the term
+	/// \return the created iterator reference object
 	virtual IteratorReference
 		createIterator(
 			const std::string& type,
 			const std::string& value);
 
+	/// \brief Create an iterator as join function on the arguments passed
+	/// \param[in] name name of the join function to execute
+	/// \param[in] options list of options describing additional parameters for the join function to execute
+	/// \param[in] arg arguments to pass to the function
+	/// \return the created iterator reference object representing the result of the function
 	virtual IteratorReference
 		createIterator(
 			const std::string& name,
+			const std::vector<std::string>& options,
 			const std::vector<IteratorReference>& arg);
 
+	/// \brief Create an accumulator as join of the accumulators passed as argument
+	/// \param[in] name name of the accumulator function to execute
+	/// \param[in] scale constant factors used in the function
+	/// \param[in] weights weights assigned to the arguments of the accumulator function
+	/// \return the created accumulator reference object representing the result of the function
 	virtual AccumulatorReference
 		createAccumulator(
 			const std::string& name,
@@ -57,15 +79,23 @@ public:
 			const std::vector<double>& weights,
 			const std::vector<AccumulatorReference>& arg);
 
+	/// \brief Create an accumulator of the feature occurrence set passed as argument
+	/// \param[in] name name of the accumulator operator to execute
 	virtual AccumulatorReference
 		createOccurrenceAccumulator(
 			const std::string& name,
 			const std::vector<IteratorReference>& arg);
 
+	/// \brief Calculate a list of the best ranked documents
+	/// \param[in] resultaccu accumulator to fetch the weighted documents from
+	/// \param[in] maxNofRanks maximum number of ranks to return
 	virtual std::vector<WeightedDocument>
 		getRankedDocumentList(
-			const AccumulatorReference& accu,
+			const AccumulatorReference& resultaccu,
 			std::size_t maxNofRanks) const;
+
+private:
+	StorageInterface* m_storage;
 };
 
 }//namespace
