@@ -31,6 +31,7 @@
 #include "indexPacker.hpp"
 #include <string>
 #include <cstring>
+#include <set>
 #include <boost/thread/mutex.hpp>
 
 using namespace strus;
@@ -46,6 +47,13 @@ Transaction::~Transaction()
 	//	created might remain inserted, even after a rollback.
 }
 
+Transaction::TermMapKey Transaction::termMapKey( const std::string& type_, const std::string& value_)
+{
+	Index typeno = m_storage->keyGetOrCreate( Storage::TermTypePrefix, type_);
+	Index valueno = m_storage->keyGetOrCreate( Storage::TermValuePrefix, value_);
+	return TermMapKey( typeno, valueno);
+}
+
 void Transaction::addTermOccurrence(
 		const std::string& type_,
 		const std::string& value_,
@@ -53,42 +61,19 @@ void Transaction::addTermOccurrence(
 {
 	if (position_ == 0) throw std::runtime_error( "term occurrence position must not be 0");
 
-	Index typeno = m_storage->keyGetOrCreate( Storage::TermTypePrefix, type_);
-	Index valueno = m_storage->keyGetOrCreate( Storage::TermValuePrefix, value_);
+	TermMapKey key( termMapKey( type_, value_));
+	m_terms[ key].pos.insert( position_);
+	InvMapValue* inv = &m_invs[ position_];
+	inv->typeno = key.first;
+	inv->value = value_;
+}
 
-	std::vector<Index>* termpos = &m_terms[ TermMapKey( typeno, valueno)];
-	if (termpos->size())
-	{
-		if (termpos->back() == position_)
-		{
-			return; // ... ignoring multiple matches
-		}
-	}
-	else if (termpos->back() < position_)
-	{
-		termpos->push_back( position_);
-	}
-	else
-	{
-		std::string* encterm = &m_invs[ position_];
-		packIndex( *encterm, typeno);
-		packIndex( *encterm, valueno);
-
-		std::vector<Index>::iterator pi = termpos->begin(), pe = termpos->end();
-		for (; pi != pe; ++pi)
-		{
-			if (*pi >= position_)
-			{
-				if (*pi > position_)
-				{
-					// ... ignoring (*pi == position_) multiple matches
-					// inserting match:
-					termpos->insert( pi, position_);
-				}
-				return;
-			}
-		}
-	}
+void Transaction::setTermWeight(
+		const std::string& type_,
+		const std::string& value_,
+		float weight_)
+{
+	m_terms[ termMapKey( type_, value_)].weight = weight_;
 }
 
 void Transaction::commit()
@@ -96,12 +81,17 @@ void Transaction::commit()
 	Index docno = m_storage->keyGetOrCreate( Storage::DocIdPrefix, m_docid);
 	leveldb::WriteBatch batch;
 
-	// Delete old document term occurrencies:
-	std::map< TermMapKey, bool > oldcontent;
+	// [1] Delete old document term occurrencies:
+	std::set<TermMapKey> oldcontent;
+
 	std::string invkey;
+	std::size_t invkeysize;
 	invkey.push_back( (char)Storage::InversePrefix);
 	packIndex( invkey, docno);
+	invkeysize = invkey.size();
 
+	//[1.1] Iterate on key prefix elements [InversePrefix, docno, typeno, *] and mark dem as deleted
+	//	Extract typeno and valueno from key [InversePrefix, docno, typeno, pos] an mark term as old content (do delete)
 	leveldb::Iterator* vi = m_storage->newIterator();
 	for (vi->Seek( invkey); vi->Valid(); vi->Next())
 	{
@@ -112,37 +102,46 @@ void Transaction::commit()
 		}
 		batch.Delete( vi->key());
 
-		const char* di = vi->value().data();
-		const char* de = di + vi->value().size();
-		while (di != de)
-		{
-			Index typeno = unpackIndex( di, de);
-			Index termno = unpackIndex( di, de);
-			oldcontent[ TermMapKey( typeno, termno)] = true;
-		}
+		const char* ki = vi->key().data() + invkeysize;
+		const char* ke = ki + vi->key().size();
+		Index typeno = unpackIndex( ki, ke);
+
+		const char* valuestr = vi->value().data();
+		std::size_t valuesize = vi->value().size();
+		Index valueno = m_storage->keyLookUp( Storage::TermValuePrefix, std::string( valuestr, valuesize));
+
+		oldcontent.insert( TermMapKey( typeno, valueno));
 	}
-	std::map< TermMapKey, bool >::const_iterator di = oldcontent.begin(), de = oldcontent.end();
+	//[1.2] Iterate on oldcontent elements built in [1.1] 
+	//	and mark them as deleted the keys [LocationPrefix, typeno, valueno, docno]
+	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)
 	{
 		std::string delkey;
 		delkey.push_back( (char)Storage::LocationPrefix);
-		packIndex( delkey, di->first.first);
-		packIndex( delkey, di->first.second);
-		packIndex( delkey, docno);
+		packIndex( delkey, di->first);		// [typeno]
+		packIndex( delkey, di->second);		// [valueno]
+		packIndex( delkey, docno);		// [docno]
+
 		batch.Delete( delkey);
 	}
 
-	// Insert the new terms:
+	//[2] Insert the new terms with key [LocationPrefix, typeno, valueno, docno]
+	//	and value (weight as 32bit float, packed encoded difference of positions):
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
 		std::string termkey;
 		std::string positions;
 		termkey.push_back( (char)Storage::LocationPrefix);
-		packIndex( termkey, ti->first.first);
-		packIndex( termkey, ti->first.second);
-		packIndex( termkey, docno);
-		std::vector<Index>::const_iterator pi = ti->second.begin(), pe = ti->second.end();
+		packIndex( termkey, ti->first.first);	// [typeno]
+		packIndex( termkey, ti->first.second);	// [valueno]
+		packIndex( termkey, docno);		// [docno]
+
+		std::set<Index>::const_iterator pi = ti->second.pos.begin(), pe = ti->second.pos.end();
+		float weight = ti->second.weight;
+		positions.append( reinterpret_cast<const char*>(&weight), sizeof(weight));
+
 		Index previous_pos = 0;
 		for (; pi != pe; ++pi)
 		{
@@ -152,19 +151,19 @@ void Transaction::commit()
 		batch.Put( termkey, positions);
 	}
 
-	// Insert the new inverted info:
+	// [3] Insert the new inverted info with key [InversePrefix, docno, typeno, pos]:
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
 		invkey.clear();
 		invkey.push_back( (char)Storage::InversePrefix);
-		packIndex( invkey, docno);
-		packIndex( invkey, ri->first);
+		packIndex( invkey, docno);		//docno
+		packIndex( invkey, ri->second.typeno);	//term typeno
+		packIndex( invkey, ri->first);		//position
 
-		batch.Put( invkey, ri->second);
+		batch.Put( invkey, ri->second.value);
 	}
-
-	// Do submit the write to the database:
+	// [4] Do submit the write to the database:
 	m_storage->writeBatch( batch);
 }
 

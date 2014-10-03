@@ -52,6 +52,7 @@ public:
 
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
+	virtual float weight() const;
 	virtual IteratorCutInRange* copy() const
 	{
 		return new IteratorCutInRange( *this);

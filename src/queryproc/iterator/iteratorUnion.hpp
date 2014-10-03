@@ -44,6 +44,9 @@ public:
 
 	virtual Index skipDoc( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
+
+	virtual float weight() const;
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorUnion( *this);

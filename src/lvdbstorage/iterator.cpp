@@ -36,7 +36,7 @@
 using namespace strus;
 
 Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
-	:m_db(db_),m_docno(0),m_itr(0),m_posno(0),m_positr(0),m_posend(0)
+	:m_db(db_),m_docno(0),m_itr(0),m_weight(0.0),m_posno(0),m_positr(0),m_posend(0)
 {
 	m_key.push_back( (char)Storage::LocationPrefix);
 	packIndex( m_key, termtypeno);
@@ -50,6 +50,7 @@ Iterator::Iterator( const Iterator& o)
 	,m_keysize(o.m_keysize)
 	,m_docno(0)
 	,m_itr(0)
+	,m_weight(o.m_weight)
 	,m_posno(0)
 	,m_positr(0)
 	,m_posend(0)
@@ -78,10 +79,10 @@ Index Iterator::skipPos( const Index& firstpos)
 	if (m_posno > firstpos)
 	{
 		m_posno = 0;
-		m_positr = m_itr->value().data();
+		m_positr = m_itr->value().data() + sizeof(float);
 		m_posend = m_positr + m_itr->value().size();
 	}
-	while (m_positr != m_posend && firstpos > m_posno)
+	while (m_positr < m_posend && firstpos > m_posno)
 	{
 		// Get the next position increment and with it the next position number:
 		Index incr = unpackIndex( m_positr, m_posend);
@@ -94,7 +95,7 @@ Index Iterator::skipPos( const Index& firstpos)
 	return m_posno;
 }
 
-Index Iterator::extractMatchDocno()
+Index Iterator::extractMatchData()
 {
 	if (m_keysize < m_itr->key().size() && 0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize))
 	{
@@ -103,7 +104,8 @@ Index Iterator::extractMatchDocno()
 		const char* ke = ki + m_itr->key().size();
 
 		m_posno = 0;
-		m_positr = m_itr->value().data();
+		std::memcpy( &m_weight, m_itr->value().data(), sizeof(float));
+		m_positr = m_itr->value().data() + sizeof(float);
 		m_posend = m_positr + m_itr->value().size();
 
 		// Return the matching document number:
@@ -114,6 +116,7 @@ Index Iterator::extractMatchDocno()
 		delete m_itr;
 		m_docno = 0;
 		m_itr = 0;
+		m_weight = 0.0;
 		m_posno = 0;
 		m_positr = 0;
 		m_posend = 0;
@@ -124,7 +127,7 @@ Index Iterator::extractMatchDocno()
 Index Iterator::getNextTermDoc()
 {
 	m_itr->Next();
-	return extractMatchDocno();
+	return extractMatchData();
 }
 
 Index Iterator::getFirstTermDoc( const Index& docno)
@@ -137,6 +140,14 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 	packIndex( m_key, docno);
 	m_itr->Seek( leveldb::Slice( m_key.c_str(), m_keysize));
 
-	return extractMatchDocno();
+	return extractMatchData();
+}
+
+unsigned int Iterator::frequency()
+{
+	if (m_itr == 0) return 0;
+	char const* pi = m_itr->value().data() + sizeof(float);
+	char const* pe = pi + m_itr->value().size();
+	return nofPackedIndices( pi, pe);
 }
 

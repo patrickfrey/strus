@@ -30,8 +30,11 @@
 #include "queryproc/iterator/iteratorIntersect.hpp"
 #include "queryproc/iterator/iteratorUnion.hpp"
 #include "queryproc/iterator/iteratorCutInRange.hpp"
+#include "queryproc/accumulator/accumulatorOperatorTemplate.hpp"
+#include "queryproc/accumulator/accumulatorOperators.hpp"
 #include <stdexcept>
 #include <set>
+#include <limits>
 
 using namespace strus;
 
@@ -156,10 +159,29 @@ AccumulatorReference QueryProcessor::createAccumulator(
 }
 
 AccumulatorReference QueryProcessor::createOccurrenceAccumulator(
-			const std::string& /*name*/,
-			const std::vector<IteratorReference>& /*arg*/)
+			const std::string& name,
+			const std::vector<IteratorReference>& arg)
 {
-	return AccumulatorReference();
+	if (isEqual( name, "weight"))
+	{
+		return AccumulatorReference( new AccumulatorOperatorSum_weight( arg));
+	}
+	else if (isEqual( name, "td"))
+	{
+		return AccumulatorReference( new AccumulatorOperatorSum_td( arg));
+	}
+	else if (isEqual( name, "tf"))
+	{
+		return AccumulatorReference( new AccumulatorOperatorSum_tf( arg));
+	}
+	else if (isEqual( name, "td1"))
+	{
+		return AccumulatorReference( new AccumulatorOperatorNormSum_td( arg));
+	}
+	else
+	{
+		throw std::runtime_error( std::string( "unknown occurrency accumulator '") + name + "'");
+	}
 }
 
 

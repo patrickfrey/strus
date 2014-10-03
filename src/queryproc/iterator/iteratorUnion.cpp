@@ -86,5 +86,11 @@ Index IteratorUnion::skipPos( const Index& pos_)
 	return selectSmallerNotNull( pos_first, pos_second);
 }
 
+float IteratorUnion::weight() const
+{
+	float w1 = m_first->weight();
+	float w2 = m_second->weight();
+	return (w1 > w2)?w1:w2;
+}
 
 

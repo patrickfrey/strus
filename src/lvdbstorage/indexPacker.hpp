@@ -35,6 +35,7 @@ namespace strus
 {
 void packIndex( std::string& buf, const Index& idx);
 Index unpackIndex( const char*& ptr, const char* end);
+unsigned int nofPackedIndices( const char* ptr, const char* end);
 }//namespace
 #endif
 

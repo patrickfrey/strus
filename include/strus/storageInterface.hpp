@@ -44,10 +44,22 @@ public:
 		virtual ~TransactionInterface(){}
 
 		/// \brief Add one occurrence of a term, throws on std::bad_alloc
+		/// \param[in] type_ type name of the term
+		/// \param[in] value_ value string of the term
+		/// \param[in] position_ position of the term in the document
 		virtual void addTermOccurrence(
 				const std::string& type_,
-				const std::string& id_,
+				const std::string& value_,
 				const Index& position_)=0;
+
+		/// \brief Define the weight of the term in the document (allows to define one single measure like tf*IDF for non positional weighting of terms)
+		/// \param[in] type_ type name of the term
+		/// \param[in] value_ value string of the term
+		/// \param[in] weight_ weight of the term in the document
+		virtual void setTermWeight(
+				const std::string& type_,
+				const std::string& value_,
+				float weight_)=0;
 
 		/// \brief Commit of the transaction, throws on error
 		virtual void commit()=0;
@@ -58,13 +70,13 @@ public:
 	virtual ~StorageInterface(){}
 
 	/// \brief Create an iterator on the occurrencies of a term in the storage
-	/// \param[in] termtype type name of the term
-	/// \param[in] termvalue value string of the term
+	/// \param[in] type type name of the term
+	/// \param[in] value value string of the term
 	/// \return the created iterator reference to be disposed with delete
 	virtual IteratorInterface*
 		createTermOccurrenceIterator(
-			const std::string& termtype,
-			const std::string& termvalue)=0;
+			const std::string& type,
+			const std::string& value)=0;
 
 	/// \brief Create an insert/update transaction for a document
 	/// \param[in] docid Document identifier (URI)

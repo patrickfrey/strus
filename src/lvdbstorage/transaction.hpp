@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_STORAGE_TRANSACTION_HPP_INCLUDED
 #include "storage.hpp"
 #include <vector>
+#include <set>
 #include <leveldb/db.h>
 
 namespace strus {
@@ -47,12 +48,39 @@ public:
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_);
+	virtual void setTermWeight(
+			const std::string& type_,
+			const std::string& value_,
+			float weight_);
 	virtual void commit();
 
 private:
 	typedef std::pair<Index,Index> TermMapKey;
-	typedef std::map< TermMapKey, std::vector<Index> > TermMap;
-	typedef std::map< Index, std::string > InvMap;
+	struct TermMapValue
+	{
+		TermMapValue()
+			:weight(1.0){}
+		TermMapValue( const TermMapValue& o)
+			:weight(o.weight),pos(o.pos){}
+
+		float weight;
+		std::set<Index> pos;
+	};
+	typedef std::map< TermMapKey, TermMapValue> TermMap;
+
+	struct InvMapValue
+	{
+		InvMapValue()
+			:typeno(0){}
+		InvMapValue( const InvMapValue& o)
+			:typeno(o.typeno),value(o.value){}
+
+		Index typeno;
+		std::string value;
+	};
+	typedef std::map<Index, InvMapValue> InvMap;
+
+	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
 
 private:
 	Storage* m_storage;

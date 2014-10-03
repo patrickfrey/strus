@@ -154,3 +154,24 @@ void strus::packIndex( std::string& buf, const Index& idx)
 	}
 }
 
+unsigned int strus::nofPackedIndices( const char* ptr, const char* end)
+{
+	unsigned int rt = 0;
+	char const* pi = ptr;
+	char const* pe = end;
+	while (pi < pe)
+	{
+		if (*pi == (char)B11111111)
+		{
+			++pi;
+			pi += g_charlentable[ *pi];
+			pi += g_charlentable[ *pi];
+		}
+		else
+		{
+			pi += g_charlentable[ *pi];
+		}
+	}
+	return rt;
+}
+

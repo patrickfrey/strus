@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "queryproc/iterator/iteratorCutInRange.hpp"
+#include <stdexcept>
 
 using namespace strus;
 
@@ -127,4 +128,10 @@ Index IteratorCutInRange::skipPos( const Index& pos_)
 		}
 	}
 }
+
+float IteratorCutInRange::weight() const
+{
+	throw std::runtime_error("internal: weight not defined for cirange");
+}
+
 

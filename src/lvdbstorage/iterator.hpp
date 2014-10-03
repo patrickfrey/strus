@@ -43,13 +43,19 @@ public:
 	virtual ~Iterator();
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& firstpos);
+	virtual float weight() const
+	{
+		return m_weight;
+	}
+	virtual unsigned int frequency();
+
 	virtual IteratorInterface* copy() const
 	{
 		return new Iterator(*this);
 	}
 
 private:
-	Index extractMatchDocno();
+	Index extractMatchData();
 	Index getNextTermDoc();
 	Index getFirstTermDoc( const Index& docno);
 
@@ -59,6 +65,7 @@ private:
 	std::size_t m_keysize;
 	Index m_docno;
 	leveldb::Iterator* m_itr;
+	float m_weight;
 	Index m_posno;
 	const char* m_positr;
 	const char* m_posend;
