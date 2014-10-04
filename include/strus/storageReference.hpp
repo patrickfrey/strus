@@ -26,33 +26,25 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
-#define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
-#include "strus/queryProcessorInterface.hpp"
-#include "strus/iteratorReference.hpp"
-#include "strus/weightedDocument.hpp"
+#ifndef _STRUS_STORAGE_REFERENCE_HPP_INCLUDED
+#define _STRUS_STORAGE_REFERENCE_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
-class QueryEvalInterface
+class StorageReference
+	:public boost::shared_ptr<StorageInterface>
 {
 public:
-	/// \brief Destructor
-	virtual ~QueryEvalInterface(){}
-
-	/// \brief Evaluate a query
-	/// \param[in] processor defines the operations (joins,accumulators) that can be used in the query processing
-	/// \param[in] querystr query string to process (syntax depends on implementation)
-	/// \param[in] maxNofRanks maximum number of ranks to return
-	virtual std::vector<WeightedDocument>
-		evaluate(
-			QueryProcessorInterface& processor,
-			const std::string& query,
-			std::size_t maxNofRanks)=0;
+	StorageReference( StorageInterface* o=0)
+		:boost::shared_ptr<StorageInterface>(o){}
+	StorageReference( const StorageReference& o)
+		:boost::shared_ptr<StorageInterface>(o){}
 };
 
 }//namespace
 #endif
+
 

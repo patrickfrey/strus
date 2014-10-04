@@ -1,6 +1,3 @@
-#include "strus/storageInterface.hpp"
-#include "indexPacker.hpp"
-
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -30,8 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "libstrus_lvdbstorage.hpp"
+#include "indexPacker.hpp"
 #include "storage.hpp"
-#include "strus/storageInterface.hpp"
 #include "dll_tags.hpp"
 #include <string>
 #include <vector>
@@ -46,13 +43,13 @@ static const char* configGet( const char* config, const char* name)
 {
 	const char* cc = config;
 	std::size_t namelen = std::strlen(name);
-	while (0!=std::strcmp( cc, name) || cc[namelen] != '=')
+	while (0!=std::memcmp( cc, name, namelen) || cc[namelen] != '=')
 	{
 		cc = std::strchr( cc, ';');
 		if (!cc) break;
 		cc = cc + 1;
 	}
-	return 0;
+	return cc?(cc+namelen+1):0;
 }
 
 DLL_PUBLIC StorageInterface* lvdb::createStorageClient( const char* config)
@@ -86,18 +83,16 @@ DLL_PUBLIC void lvdb::createStorageDatabase( const char* config)
 		status = db->Write( leveldb::WriteOptions(), &batch);
 		if (!status.ok())
 		{
+			std::string err = status.ToString();
 			(void)leveldb::DestroyDB( path, leveldb::Options());
+			delete db;
+			throw std::runtime_error( std::string( "failed to write to created storage: ") + err);
 		}
 
 	}
-	if (!status.ok())
+	else
 	{
 		std::string err = status.ToString();
-		if (!db)
-		{
-			(void)leveldb::DestroyDB( path, leveldb::Options());
-			delete db;
-		}
 		throw std::runtime_error( std::string( "failed to create storage: ") + err);
 	}
 }

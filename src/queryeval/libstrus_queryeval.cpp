@@ -26,9 +26,11 @@
 
 --------------------------------------------------------------------
 */
+#include "libstrus_queryeval.hpp"
 #include "queryParser.hpp"
-#include "queryEval.hpp"
-#include <cstring>
+#include "dll_tags.hpp"
+#include <map>
+#include <set>
 
 using namespace strus;
 
@@ -175,11 +177,11 @@ struct QueryContext
 }//namespace
 
 
-std::vector<WeightedDocument>
-		QueryEval::evaluate(
-			QueryProcessorInterface& processor,
-			const std::string& querystr,
-			std::size_t maxNofRanks)
+DLL_PUBLIC std::vector<WeightedDocument>
+	qeval::evaluateQuery(
+		QueryProcessorInterface& processor,
+		const std::string& querystr,
+		std::size_t maxNofRanks)
 {
 	QueryContext ctx( &processor, querystr);
 	ctx.expandTerms();
@@ -187,6 +189,7 @@ std::vector<WeightedDocument>
 	ctx.expandAccumulators();
 	return processor.getRankedDocumentList( ctx.lastaccu, maxNofRanks);
 }
+
 
 
 

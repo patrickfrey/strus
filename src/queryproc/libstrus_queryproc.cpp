@@ -26,21 +26,19 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus storage based on LevelDB
-#ifndef _STRUS_STORAGE_LEVELDB_HPP_INCLUDED
-#define _STRUS_STORAGE_LEVELDB_HPP_INCLUDED
-#include "strus/storageInterface.hpp"
+#include "libstrus_queryproc.hpp"
+#include "queryProcessor.hpp"
+#include "dll_tags.hpp"
+#include <map>
+#include <set>
 
-namespace strus {
-namespace lvdb {
+using namespace strus;
 
-/// \brief Creates an instance of the storage interface described with config
-/// \remark Because of restrictions imposed by LevelDB only one instance of a storage can be crated per storage
-StorageInterface* createStorageClient( const char* config);
+DLL_PUBLIC QueryProcessorInterface*
+	qproc::createQueryProcessorInterface(
+		const StorageReference& storage)
+{
+	return new QueryProcessor( storage);
+}
 
-/// \brief Creates a new storage described with config in the file system
-void createStorageDatabase( const char* config);
-
-}}//namespace
-#endif
 

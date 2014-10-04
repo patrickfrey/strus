@@ -26,34 +26,24 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
-#define _STRUS_QUERY_EVAL_STRUS_HPP_INCLUDED
-#include "strus/queryEvalInterface.hpp"
+/// \brief Exported functions of the strus query processor
+#ifndef _STRUS_QUERYPROC_HPP_INCLUDED
+#define _STRUS_QUERYPROC_HPP_INCLUDED
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/storageReference.hpp"
+#include <vector>
 #include <string>
-#include <map>
 
-namespace strus
-{
+namespace strus {
+namespace qproc {
 
-class QueryEval
-	:public QueryEvalInterface
-{
-public:
-	/// \brief Destructor
-	virtual ~QueryEval(){}
+/// \brief Create a query processor with the functions and operators needed for query evaluation
+/// \param[in] storage reference to storage
+/// \return the allocated processor
+QueryProcessorInterface*
+	createQueryProcessorInterface(
+		const StorageReference& storage);
 
-	/// \brief Evaluate a query
-	/// \param[in] processor defines the operations (joins,accumulators) that can be used in the query processing
-	/// \param[in] querystr query string to process
-	/// \param[in] maxNofRanks maximum number of ranks to return
-	virtual std::vector<WeightedDocument>
-		evaluate(
-			QueryProcessorInterface& processor,
-			const std::string& querystr,
-			std::size_t maxNofRanks);
-};
-
-}//namespace
+}}//namespace
 #endif
 

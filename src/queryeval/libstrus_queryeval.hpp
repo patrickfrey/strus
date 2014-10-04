@@ -26,20 +26,27 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus storage based on LevelDB
-#ifndef _STRUS_STORAGE_LEVELDB_HPP_INCLUDED
-#define _STRUS_STORAGE_LEVELDB_HPP_INCLUDED
-#include "strus/storageInterface.hpp"
+/// \brief Exported functions of the strus query evaluation
+#ifndef _STRUS_QUERYEVAL_HPP_INCLUDED
+#define _STRUS_QUERYEVAL_HPP_INCLUDED
+#include "strus/queryProcessorInterface.hpp"
+#include "strus/weightedDocument.hpp"
+#include <vector>
+#include <string>
 
 namespace strus {
-namespace lvdb {
+namespace qeval {
 
-/// \brief Creates an instance of the storage interface described with config
-/// \remark Because of restrictions imposed by LevelDB only one instance of a storage can be crated per storage
-StorageInterface* createStorageClient( const char* config);
-
-/// \brief Creates a new storage described with config in the file system
-void createStorageDatabase( const char* config);
+/// \brief Evaluate a query
+/// \param[in] processor functions and operators for query evaluation
+/// \param[in] query query string
+/// \param[in] maxNofRanks maximum number of ranks to return
+/// \return the matching document ranked by weight
+std::vector<WeightedDocument>
+	evaluateQuery(
+		QueryProcessorInterface& processor,
+		const std::string& querystr,
+		std::size_t maxNofRanks);
 
 }}//namespace
 #endif
