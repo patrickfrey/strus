@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "queryproc/iterator/iteratorCutInRange.hpp"
+#include "iterator/iteratorCutInRange.hpp"
 #include <stdexcept>
 
 using namespace strus;

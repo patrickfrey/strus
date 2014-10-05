@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "libstrus_queryeval.hpp"
+#include "strus/libstrus_queryeval.hpp"
 #include "queryParser.hpp"
 #include "dll_tags.hpp"
 #include <map>
@@ -178,7 +178,7 @@ struct QueryContext
 
 
 DLL_PUBLIC std::vector<WeightedDocument>
-	qeval::evaluateQuery(
+	strus::evaluateQuery(
 		QueryProcessorInterface& processor,
 		const std::string& querystr,
 		std::size_t maxNofRanks)

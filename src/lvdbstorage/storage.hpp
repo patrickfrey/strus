@@ -41,6 +41,7 @@ class Storage
 {
 public:
 	Storage( const char* path_);
+	virtual void close();
 	virtual ~Storage();
 
 	virtual IteratorInterface*
@@ -51,11 +52,16 @@ public:
 	virtual TransactionInterface*
 		createTransaction( const std::string& docid);
 
+public:
 	Index newTermNo();
+	Index curTermNo();
 	Index newTypeNo();
+	Index curTypeNo();
 	Index newDocNo();
+	Index curDocNo();
 
 	void writeBatch( leveldb::WriteBatch& batch);
+	void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value);
 
 	leveldb::Iterator* newIterator();
 

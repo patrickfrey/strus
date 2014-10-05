@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_ACCUMULATOR_OPERATORS_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_OPERATORS_HPP_INCLUDED
-#include "queryproc/accumulator/accumulatorOperatorTemplate.hpp"
+#include "accumulator/accumulatorOperatorTemplate.hpp"
 #include "strus/index.hpp"
 
 namespace strus

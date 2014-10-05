@@ -26,24 +26,46 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query processor
-#ifndef _STRUS_QUERYPROC_HPP_INCLUDED
-#define _STRUS_QUERYPROC_HPP_INCLUDED
-#include "strus/queryProcessorInterface.hpp"
-#include "strus/storageReference.hpp"
-#include <vector>
-#include <string>
+#include "strus/libstrus_storage.hpp"
+#include "strus/libstrus_queryeval.hpp"
+#include "strus/libstrus_queryproc.hpp"
+#include <iostream>
+#include <cstring>
+#include <stdexcept>
 
-namespace strus {
-namespace qproc {
+enum Command {None,CreateStorage};
 
-/// \brief Create a query processor with the functions and operators needed for query evaluation
-/// \param[in] storage reference to storage
-/// \return the allocated processor
-QueryProcessorInterface*
-	createQueryProcessorInterface(
-		const StorageReference& storage);
+int main( int argc, const char* argv[])
+{
+	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
+	{
+		std::cerr << "usage: strus <cmd> ..." << std::endl;
+		std::cerr << "<cmd> = create <config> :create a storage" << std::endl;
+		return 0;
+	}
+	try
+	{
+		if (std::strcmp( argv[1], "create") == 0)
+		{
+			if (argc < 3) throw std::runtime_error( "too few argumens for create. (strus create <repository config>)");
 
-}}//namespace
-#endif
+			strus::createStorageDatabase( argv[2]);
+		}
+		else
+		{
+			throw std::runtime_error( std::string( "unknown command '") + argv[1] + "' (expected create,..)" );
+		}
+		return 0;
+	}
+	catch (const std::runtime_error& e)
+	{
+		std::cerr << "ERROR " << e.what() << std::endl;
+	}
+	catch (const std::exception& e)
+	{
+		std::cerr << "EXCEPTION " << e.what() << std::endl;
+	}
+	return -1;
+}
+
 

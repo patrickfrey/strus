@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "queryproc/iterator/iteratorIntersect.hpp"
+#include "iterator/iteratorIntersect.hpp"
 #include <stdexcept>
 
 using namespace strus;

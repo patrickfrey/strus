@@ -16,5 +16,7 @@
 *.a
 
 # Compiled Programs
-src/strus
+src/strus/strus
+tests/randoc/createRandomTestCollection
+
 

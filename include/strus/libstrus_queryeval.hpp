@@ -26,46 +26,27 @@
 
 --------------------------------------------------------------------
 */
-#include "queryeval/queryEval.hpp"
-#include "queryproc/queryProcessor.hpp"
-#include "lvdbstorage/libstrus_lvdbstorage.hpp"
-#include <iostream>
-#include <cstring>
-#include <stdexcept>
+/// \brief Exported functions of the strus query evaluation library
+#ifndef _STRUS_QUERYEVAL_HPP_INCLUDED
+#define _STRUS_QUERYEVAL_HPP_INCLUDED
+#include "strus/queryProcessorInterface.hpp"
+#include "strus/weightedDocument.hpp"
+#include <vector>
+#include <string>
 
-enum Command {None,CreateStorage};
+namespace strus {
 
-int main( int argc, const char* argv[])
-{
-	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
-	{
-		std::cerr << "usage: strus <cmd> ..." << std::endl;
-		std::cerr << "<cmd> = create  :create a storage" << std::endl;
-		return 0;
-	}
-	try
-	{
-		if (std::strcmp( argv[1], "create") == 0)
-		{
-			if (argc <= 3) throw std::runtime_error( "too few argumens for create. (strus create <repository config>)");
+/// \brief Evaluate a query
+/// \param[in] processor functions and operators for query evaluation
+/// \param[in] query query string (syntax depending on implementation)
+/// \param[in] maxNofRanks maximum number of ranks to return
+/// \return the matching document ranked by weight
+std::vector<WeightedDocument>
+	evaluateQuery(
+		QueryProcessorInterface& processor,
+		const std::string& querystr,
+		std::size_t maxNofRanks);
 
-			strus::lvdb::createStorageDatabase( argv[3]);
-		}
-		else
-		{
-			throw std::runtime_error( std::string( "unknown command '") + argv[1] + "' (expected create,..)" );
-		}
-		return 0;
-	}
-	catch (const std::runtime_error& e)
-	{
-		std::cerr << "ERROR " << e.what() << std::endl;
-	}
-	catch (const std::exception& e)
-	{
-		std::cerr << "EXCEPTION " << e.what() << std::endl;
-	}
-	return -1;
-}
-
+}//namespace
+#endif
 

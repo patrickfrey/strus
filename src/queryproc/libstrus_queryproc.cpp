@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "libstrus_queryproc.hpp"
+#include "strus/libstrus_queryproc.hpp"
 #include "queryProcessor.hpp"
 #include "dll_tags.hpp"
 #include <map>
@@ -35,7 +35,7 @@
 using namespace strus;
 
 DLL_PUBLIC QueryProcessorInterface*
-	qproc::createQueryProcessorInterface(
+	strus::createQueryProcessorInterface(
 		const StorageReference& storage)
 {
 	return new QueryProcessor( storage);

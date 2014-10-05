@@ -67,7 +67,12 @@ public:
 
 public:
 	/// \brief Destructor
+	/// \remark Calls close but ignores errors there silently
 	virtual ~StorageInterface(){}
+
+	/// \brief Close the storage and throw on error
+	/// \remark Call this function before the destructor if you want to catch errors in the close
+	virtual void close(){};
 
 	/// \brief Create an iterator on the occurrencies of a term in the storage
 	/// \param[in] type type name of the term

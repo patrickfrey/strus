@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "queryproc/queryProcessor.hpp"
-#include "queryproc/iterator/iteratorIntersect.hpp"
-#include "queryproc/iterator/iteratorUnion.hpp"
-#include "queryproc/iterator/iteratorCutInRange.hpp"
-#include "queryproc/accumulator/accumulatorOperatorTemplate.hpp"
-#include "queryproc/accumulator/accumulatorOperators.hpp"
+#include "queryProcessor.hpp"
+#include "iterator/iteratorIntersect.hpp"
+#include "iterator/iteratorUnion.hpp"
+#include "iterator/iteratorCutInRange.hpp"
+#include "accumulator/accumulatorOperatorTemplate.hpp"
+#include "accumulator/accumulatorOperators.hpp"
 #include <stdexcept>
 #include <set>
 #include <limits>

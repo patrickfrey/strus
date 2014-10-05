@@ -29,6 +29,7 @@
 #ifndef _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/storageReference.hpp"
 #include <vector>
 #include <string>
 
@@ -41,7 +42,7 @@ class QueryProcessor
 {
 public:
 	/// \brief Constructor
-	explicit QueryProcessor( StorageInterface* storage_)
+	explicit QueryProcessor( const StorageReference& storage_)
 		:m_storage(storage_){}
 
 	/// \brief Destructor
@@ -95,7 +96,7 @@ public:
 			std::size_t maxNofRanks) const;
 
 private:
-	StorageInterface* m_storage;
+	StorageReference m_storage;
 };
 
 }//namespace

@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "libstrus_lvdbstorage.hpp"
+#include "strus/libstrus_storage.hpp"
 #include "indexPacker.hpp"
 #include "storage.hpp"
 #include "dll_tags.hpp"
@@ -52,22 +52,23 @@ static const char* configGet( const char* config, const char* name)
 	return cc?(cc+namelen+1):0;
 }
 
-DLL_PUBLIC StorageInterface* lvdb::createStorageClient( const char* config)
-{
-	const char* name = configGet( config, "name");
-	if (!name)
-	{
-		throw std::runtime_error( "no storage name defined for kcstorage");
-	}
-	return new Storage( name);
-}
 
-DLL_PUBLIC void lvdb::createStorageDatabase( const char* config)
+DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* config)
 {
 	const char* path = configGet( config, "path");
 	if (!path)
 	{
-		throw std::runtime_error( "no storage name defined for storage");
+		throw std::runtime_error( "no path defined in config for levelDB storage");
+	}
+	return new Storage( path);
+}
+
+DLL_PUBLIC void strus::createStorageDatabase( const char* config)
+{
+	const char* path = configGet( config, "path");
+	if (!path)
+	{
+		throw std::runtime_error( "no path defined in config for levelDB storage");
 	}
 	leveldb::DB* db = 0;
 	leveldb::Options options;

@@ -62,9 +62,36 @@ Storage::Storage( const char* path_)
 	}
 }
 
+void Storage::close()
+{
+	if (m_db)
+	{
+		leveldb::WriteBatch batch;
+		batchDefineVariable( batch, "TermNo", m_next_termno);
+		batchDefineVariable( batch, "TypeNo", m_next_typeno);
+		batchDefineVariable( batch, "DocNo", m_next_docno);
+	
+		leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
+		if (!status.ok())
+		{
+			throw std::runtime_error( std::string("error when flushing and closing storage") + status.ToString());
+		}
+		delete m_db;
+		m_db = 0;
+	}
+}
+
 Storage::~Storage()
 {
-	if (m_db) delete m_db;
+	try
+	{
+		close();
+	}
+	catch (...)
+	{
+		//... silently ignored. Call close directly to catch errors
+		if (m_db) delete m_db;
+	}
 }
 
 Index Storage::newTermNo()
@@ -86,8 +113,25 @@ Index Storage::newDocNo()
 
 }
 
+Index Storage::curTermNo()
+{
+	return m_next_termno;
+}
+
+Index Storage::curTypeNo()
+{
+	return m_next_typeno;
+}
+
+Index Storage::curDocNo()
+{
+	return m_next_docno;
+
+}
+
 void Storage::writeBatch( leveldb::WriteBatch& batch)
 {
+	if (!m_db) throw std::runtime_error("write on closed storage");
 	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
 	if (!status.ok())
 	{
@@ -95,12 +139,18 @@ void Storage::writeBatch( leveldb::WriteBatch& batch)
 	}
 }
 
-leveldb::Iterator* Storage::newIterator()
+void Storage::batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
 {
-	return m_db->NewIterator( leveldb::ReadOptions());
+	std::string encoded_value;
+	packIndex( encoded_value, value);
+	batch.Put( Storage::keyString( Storage::VariablePrefix, name), encoded_value);
 }
 
-
+leveldb::Iterator* Storage::newIterator()
+{
+	if (!m_db) throw std::runtime_error("open read iterator on closed storage");
+	return m_db->NewIterator( leveldb::ReadOptions());
+}
 
 std::string Storage::keyString( KeyPrefix prefix, const std::string& keyname)
 {
@@ -112,39 +162,36 @@ std::string Storage::keyString( KeyPrefix prefix, const std::string& keyname)
 
 Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname)
 {
+	if (!m_db) throw std::runtime_error("read on closed storage");
 	boost::mutex::scoped_lock( m_mutex);
 
 	std::string key = keyString( prefix, keyname);
 	leveldb::Slice constkey( key.c_str(), key.size());
 	std::string value;
 	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+	if (status.IsNotFound())
+	{
+		return 0;
+	}
 	if (!status.ok())
 	{
 		throw std::runtime_error( status.ToString());
 	}
-	if (status.IsNotFound()) return 0;
 	const char* cc = value.c_str();
 	return unpackIndex( cc, cc + value.size());
 }
 
 Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
 {
+	if (!m_db) throw std::runtime_error("read on closed storage");
 	std::string key = keyString( prefix, keyname);
 	leveldb::Slice constkey( key.c_str(), key.size());
 	std::string value;
 	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
 	if (status.IsNotFound())
 	{
 		boost::mutex::scoped_lock( m_mutex);
 		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
-		if (!status.ok())
-		{
-			throw std::runtime_error( status.ToString());
-		}
 		if (status.IsNotFound())
 		{
 			if (prefix == TermTypePrefix)
@@ -164,6 +211,14 @@ Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
 				throw std::logic_error( "internal: Cannot create index value");
 			}
 		}
+		else if (!status.ok())
+		{
+			throw std::runtime_error( status.ToString());
+		}
+	}
+	else if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
 	}
 	const char* cc = value.c_str();
 	return unpackIndex( cc, cc + value.size());

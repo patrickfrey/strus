@@ -1,7 +1,8 @@
 all:
 	cd src; make all; cd ..
-test:
-	cd src; make test; cd ..
+test: all
+	cd tests; make test; cd ..
 clean:
+	cd tests; make clean; cd ..
 	cd src; make clean; cd ..
 
