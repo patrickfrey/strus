@@ -326,6 +326,7 @@ int main( int argc, const char* argv[])
 #endif
 		}
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofFeatures << " terms, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
+		return 0;
 	}
 	catch (const std::runtime_error& e)
 	{
