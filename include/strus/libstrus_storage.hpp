@@ -40,6 +40,11 @@ StorageInterface* createStorageClient( const char* config);
 /// \brief Creates a new storage described with config in the file system
 void createStorageDatabase( const char* config);
 
+/// \brief Gets an example configuration description for the functions
+///	createStorageDatabase(const char*) and createStorageClient(const char*)
+///	for the usage printed by programs using the storage.
+const char* getStorageConfigDescription();
+
 }//namespace
 #endif
 

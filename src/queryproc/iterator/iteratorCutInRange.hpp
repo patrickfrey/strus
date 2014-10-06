@@ -29,7 +29,7 @@
 #ifndef _STRUS_ITERATOR_CUTINRANGE_HPP_INCLUDED
 #define _STRUS_ITERATOR_CUTINRANGE_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
-#include "strus/iteratorReference.hpp"
+#include "iteratorReference.hpp"
 
 namespace strus
 {
@@ -46,7 +46,7 @@ public:
 	///\param[in] range_ Defines the maximum position difference between the start element and the end element of a selected range
 	///\param[in] withFirstElemCut Negative (cut) selection starts one position after the first element
 	///\param[in] withLastElemCut true: Negative (cut) selection ends one position before the last element
-	IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool withFirstElemCut_, bool withLastElemCut_);
+	IteratorCutInRange( const IteratorReference& first_, const IteratorReference& second_, const IteratorReference& cut_, const Index& range_, bool withFirstElemRange_, bool withFirstElemCut_, bool withLastElemCut_);
 	IteratorCutInRange( const IteratorCutInRange& o);
 	virtual ~IteratorCutInRange(){}
 
@@ -65,6 +65,7 @@ private:
 	IteratorReference m_second;	///< first set to intersect range 
 	IteratorReference m_cut;	///< iterator for elements that make a negative selection on the result if they appear in a matching range
 	Index m_range;			///< allowe position range between first and second element
+	bool m_withFirstElemRange;	///< true => start matching from the start element position, false => start with the follow element
 	bool m_withFirstElemCut;	///< true => cut also on first element position
 	bool m_withLastElemCut;		///< true => cut also on last element position
 };

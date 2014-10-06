@@ -30,7 +30,7 @@
 #ifndef _STRUS_QUERYPROC_HPP_INCLUDED
 #define _STRUS_QUERYPROC_HPP_INCLUDED
 #include "strus/queryProcessorInterface.hpp"
-#include "strus/storageReference.hpp"
+#include "strus/storageInterface.hpp"
 #include <vector>
 #include <string>
 
@@ -41,7 +41,7 @@ namespace strus {
 /// \return the allocated processor
 QueryProcessorInterface*
 	createQueryProcessorInterface(
-		const StorageReference& storage);
+		StorageInterface* storage);
 
 }//namespace
 #endif

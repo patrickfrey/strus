@@ -1,24 +1,48 @@
 strus
 =====
 
-Library for merging term occurrencies and ranking documents in information retrieval.
-Able to evaluate structured queries on unstructured text as well as implenting classical
-information retrieval.
+Library for merging term occurrencies and ranking documents in information
+retrieval. Able to evaluate structured queries on unstructured text as well
+as implenting classical information retrieval.
 Independent from storage impementation.
 
-strus defines information retrieval as evaluation of a query as evaluation of a
-program working with 3 types of interfaces:
-	* Iterators on occurrencies defined as document number plus position number
-	* Accumulators of document weights
-	* Rankers to create a sorted ranked list of the N highest weighted elements of an accumulator
+strus defines information retrieval as evaluation of a query based on 3
+types of operations:
+  * Fetching and joining of occurrencies (document/position number)
+  * Accumulators of document weights
+  * Summarization as extraction of content based on the query matches
 
-The program is created from a query string internally compiled to a the code of a 
-virtual machine working with these types of interfaces.
+The architecture defines three components that are implemented as
+shared libraries with a clearly defined API. Each library can be
+replaced by an alternative implementation.
 
-The storage of terms the query evaluation is based on is implemented as interface with
-a method to create create iterators on occurrencies of terms and to create
-accumulators for document attributes.
+  |--------------------|
+  |     query eval     |  Query evaluation: Interpretes the query string
+  |                    |  and uses the operators defined in the query
+  |                    |  processor to execute the query
+  |--------------------|
+  |     query proc     |  Query processor: Defines the basic operations
+  |                    |  on occurrencies and accumulators plus the
+  |                    |  summarizers to augment the results.
+  |--------------------|
+  |     storage        |  Storage: Defines the storage where the all
+  |                    |  retrievable information is stored.
+  |                    |  Implements the retrieval of occurrencies of
+  |                    |  the atomic terms and the weighting the terms
+  |                    |  in case of statistical IR.
+  |--------------------|
 
+Each of these components has an include file that describes the interface:
+
+  #include "strus/libstrus_queryeval.hpp"
+  #include "strus/libstrus_queryproc.hpp"
+  #include "strus/libstrus_storage.hpp"
+
+And at least one implementation:
+
+  "src/queryeval/libstrus_queryeval.so"
+  "src/queryeval/libstrus_queryproc.so"
+  "src/queryeval/libstrus_lvdbstorage.so"  (storage based on LevelDB)
 
 
 

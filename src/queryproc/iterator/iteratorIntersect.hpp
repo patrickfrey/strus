@@ -29,7 +29,7 @@
 #ifndef _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #define _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
-#include "strus/iteratorReference.hpp"
+#include "iteratorReference.hpp"
 
 namespace strus
 {

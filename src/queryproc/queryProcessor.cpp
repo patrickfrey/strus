@@ -32,6 +32,8 @@
 #include "iterator/iteratorCutInRange.hpp"
 #include "accumulator/accumulatorOperatorTemplate.hpp"
 #include "accumulator/accumulatorOperators.hpp"
+#include "iteratorReference.hpp"
+#include "accumulatorReference.hpp"
 #include <stdexcept>
 #include <set>
 #include <limits>
@@ -64,52 +66,55 @@ static bool getUIntValue( unsigned int& result, const char* valuestr)
 	return !!*vi;
 }
 
-IteratorReference QueryProcessor::createIterator( 
+IteratorInterface* QueryProcessor::createIterator( 
 			const std::string& type,
 			const std::string& value)
 {
-	return IteratorReference( m_storage->createTermOccurrenceIterator( type, value));
+	return m_storage->createTermOccurrenceIterator( type, value);
 }
 
-IteratorReference QueryProcessor::createIterator(
-			const std::string& name,
-			const std::vector<std::string>& options,
-			const std::vector<IteratorReference>& arg)
+IteratorInterface*
+	createIterator(
+		const std::string& name,
+		const std::vector<std::string>& options,
+		std::size_t nofargs,
+		const IteratorInterface** args)
 {
 	if (isEqual( name, "union"))
 	{
-		if (arg.empty()) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		if (arg.size() < 2) return arg[0];
-		IteratorReference rt( new IteratorUnion( arg[0], arg[1]));
-		std::size_t ii=2,ie=arg.size();
-		for (; ii<ie; ++ie)
+		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		if (nofargs < 2) return args[0]->copy();
+		IteratorReference rt( new IteratorUnion( IteratorReference(args[0]->copy()), IteratorReference(args[1]->copy())));
+		std::size_t ii=2;
+		for (; ii<nofargs; ++ii)
 		{
-			IteratorReference join( new IteratorUnion( rt, arg[ii]));
+			IteratorReference join( new IteratorUnion( rt, IteratorReference(args[ii]->copy())));
 			rt = join;
 		}
-		return rt;
+		return rt->copy();
 	}
 	else if (isEqual( name, "intersect"))
 	{
-		if (arg.empty()) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		if (arg.size() < 2) return arg[0];
-		IteratorReference rt( new IteratorIntersect( arg[0], arg[1]));
-		std::size_t ii=2,ie=arg.size();
-		for (; ii<ie; ++ie)
+		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		if (nofargs < 2) return args[0]->copy();
+		IteratorReference rt( new IteratorIntersect( IteratorReference(args[0]->copy()), IteratorReference(args[1]->copy())));
+		std::size_t ii=2;
+		for (; ii<nofargs; ++ii)
 		{
-			IteratorReference join( new IteratorIntersect( rt, arg[ii]));
+			IteratorReference join( new IteratorIntersect( rt, IteratorReference(args[ii]->copy())));
 			rt = join;
 		}
-		return rt;
+		return rt->copy();
 	}
 	else if (isEqual( name, "cirange"))
 	{
-		if (arg.size() < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		if (arg.size() > 3) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
-		IteratorReference cut( (arg.size() > 2)?arg[2]:IteratorReference());
+		if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		if (nofargs > 3) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
+		IteratorReference cut( (nofargs > 2)?IteratorReference(args[2]->copy()):IteratorReference());
 		std::vector<std::string>::const_iterator oi = options.begin(), oe = options.end();
 		bool withFirstElemCut = false;
 		bool withLastElemCut = false;
+		bool withFirstElemRange = false;
 		unsigned int range = 1;
 
 		for (; oi != oe; ++oi)
@@ -129,6 +134,9 @@ IteratorReference QueryProcessor::createIterator(
 						}
 					}
 					break;
+				case 'a':
+					withFirstElemRange = true;
+					break;
 				case 's':
 					if (oi->size() > 1) throw std::runtime_error( std::string( "unknown option '") + *oi + "' for join function 'cirange'");
 					withFirstElemCut = true;
@@ -141,7 +149,11 @@ IteratorReference QueryProcessor::createIterator(
 					throw std::runtime_error( std::string( "unknown option '") + *oi + "' for join function 'cirange'");
 			}
 		}
-		return IteratorReference( new IteratorCutInRange( arg[0], arg[1], cut, range, withFirstElemCut, withLastElemCut));
+		return new IteratorCutInRange(
+				IteratorReference(args[0]->copy()),
+				IteratorReference(args[1]->copy()),
+				cut, range, 
+				withFirstElemRange, withFirstElemCut, withLastElemCut);
 	}
 	else
 	{
@@ -149,34 +161,49 @@ IteratorReference QueryProcessor::createIterator(
 	}
 }
 
-AccumulatorReference QueryProcessor::createAccumulator(
-			const std::string& name,
-			const std::vector<double>& scale,
-			const std::vector<double>& weights,
-			const std::vector<AccumulatorReference>& arg)
+AccumulatorInterface*
+	QueryProcessor::createAccumulator(
+		const std::string& /*name*/,
+		const std::vector<double>& /*scale*/,
+		std::size_t /*nofargs*/,
+		const WeightedAccumulator* /*arg*/)
 {
-	return AccumulatorReference();
+	return 0;
 }
 
-AccumulatorReference QueryProcessor::createOccurrenceAccumulator(
-			const std::string& name,
-			const std::vector<IteratorReference>& arg)
+static std::vector<IteratorReference>
+	copyIteratorArgs( std::size_t nofargs, const IteratorInterface** args)
+{
+	std::vector<IteratorReference> rt;
+	std::size_t ii=0;
+	for (; ii<nofargs; ++ii)
+	{
+		rt.push_back( IteratorReference( args[ii]->copy()));
+	}
+	return rt;
+}
+
+AccumulatorInterface*
+	QueryProcessor::createOccurrenceAccumulator(
+		const std::string& name,
+		std::size_t nofargs,
+		const IteratorInterface** args)
 {
 	if (isEqual( name, "weight"))
 	{
-		return AccumulatorReference( new AccumulatorOperatorSum_weight( arg));
+		return new AccumulatorOperatorSum_weight( copyIteratorArgs( nofargs, args));
 	}
 	else if (isEqual( name, "td"))
 	{
-		return AccumulatorReference( new AccumulatorOperatorSum_td( arg));
+		return new AccumulatorOperatorSum_td( copyIteratorArgs( nofargs, args));
 	}
 	else if (isEqual( name, "tf"))
 	{
-		return AccumulatorReference( new AccumulatorOperatorSum_tf( arg));
+		return new AccumulatorOperatorSum_tf( copyIteratorArgs( nofargs, args));
 	}
 	else if (isEqual( name, "td1"))
 	{
-		return AccumulatorReference( new AccumulatorOperatorNormSum_td( arg));
+		return new AccumulatorOperatorNormSum_td( copyIteratorArgs( nofargs, args));
 	}
 	else
 	{
@@ -185,17 +212,15 @@ AccumulatorReference QueryProcessor::createOccurrenceAccumulator(
 }
 
 
-std::vector<WeightedDocument> QueryProcessor::getRankedDocumentList(
-			const AccumulatorReference& resultaccu,
+std::vector<WeightedDocument>
+	QueryProcessor::getRankedDocumentList(
+			AccumulatorInterface& accu,
 			std::size_t maxNofRanks) const
 {
 	std::vector<WeightedDocument> rt;
 	typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
 	Ranker ranker;
 	std::size_t ranks = 0;
-
-	if (!resultaccu.get()) return rt;
-	AccumulatorInterface& accu = *resultaccu.get();
 
 	Index docno = 0;
 	int state = 0;

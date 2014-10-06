@@ -36,7 +36,7 @@ using namespace strus;
 
 DLL_PUBLIC QueryProcessorInterface*
 	strus::createQueryProcessorInterface(
-		const StorageReference& storage)
+		StorageInterface* storage)
 {
 	return new QueryProcessor( storage);
 }

@@ -27,7 +27,6 @@
 --------------------------------------------------------------------
 */
 #include "strus/libstrus_storage.hpp"
-#include "strus/storageReference.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -36,6 +35,7 @@
 #include <cstring>
 #include <cmath>
 #include <stdexcept>
+#include <boost/scoped_ptr.hpp>
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
@@ -241,6 +241,104 @@ struct RandomCollection
 	std::vector<RandomDoc> docar;
 };
 
+struct RandomQuery
+{
+	RandomQuery( const RandomCollection& collection)
+		:flags(0)
+	{
+	AGAIN:
+		operation = (Operation)g_random.get( 0, NofOperations);
+		std::size_t pickDocIdx = g_random.get( 0, collection.docar.size());
+		const RandomDoc& pickDoc = collection.docar[ pickDocIdx];
+
+		switch (operation)
+		{
+			case Intersect:
+			{
+				
+			}
+			case Union:
+			{
+				unsigned int nn = g_random.get( 1, 5);
+				unsigned int ii = 0;
+
+				for (; ii<nn; ++ii)
+				{
+					unsigned int pickOccIdx = g_random.get( 0, pickDoc.occurrencear.size());
+					const RandomDoc::Occurrence& pickOcc = pickDoc.occurrencear[ pickOccIdx];
+					arg.push_back( pickOcc.term);
+				}
+			}
+			case CutInRange:
+			{
+				bool withCut = g_random.get( 0, 1);
+				bool withFirstRange = g_random.get( 0, 1);
+				bool withFirstCut = g_random.get( 0, 1);
+				bool withLastCut = g_random.get( 0, 1);
+				flags |= (withFirstRange?0x1:0x0);
+				flags |= (withFirstCut?0x2:0x0);
+				flags |= (withLastCut?0x4:0x0);
+
+				unsigned int minRange = 0;
+				if (!withFirstRange) minRange++;
+				if (!withFirstCut) minRange++;
+				if (!withLastCut) minRange++;
+				if (minRange >= pickDoc.occurrencear.size())
+				{
+					goto AGAIN;
+				}
+				unsigned int pickOccIdx = g_random.get( 0, pickDoc.occurrencear.size() - minRange);
+				const RandomDoc::Occurrence& pickOcc = pickDoc.occurrencear[ pickOccIdx];
+
+				unsigned int rangeOccIdx = g_random.get( 0, pickDoc.occurrencear.size() - pickOccIdx);
+				const RandomDoc::Occurrence& rangeOcc = pickDoc.occurrencear[ rangeOccIdx];
+				if (rangeOcc.term == pickOcc.term)
+				{
+					withFirstRange = false;
+				}
+				if (pickOcc.pos + minRange > rangeOcc.pos) goto AGAIN;
+				
+				for (unsigned int ti = pickOccIdx+(withFirstRange?0:1); ti < rangeOccIdx; ++ti)
+				{
+					if (pickDoc.occurrencear[ ti].term == rangeOcc.term)
+					{
+						goto AGAIN;
+					}
+				}
+				arg.push_back( pickOcc.term);
+				arg.push_back( rangeOcc.term);
+				if (withCut)
+				{
+					unsigned int cutOccIdx = pickOccIdx + g_random.get( 0, rangeOccIdx - pickOccIdx);
+					const RandomDoc::Occurrence& cutOcc = pickDoc.occurrencear[ cutOccIdx];
+
+					arg.push_back( cutOcc.term);
+				}
+				break;
+			}
+		}
+	}
+	RandomQuery( const RandomQuery& o)
+		:operation(o.operation),arg(o.arg){}
+
+	enum Operation
+	{
+		Intersect,
+		Union,
+		CutInRange
+	};
+	enum {NofOperations=3};
+	static const char* operationName( Operation op)
+	{
+		static const char* ar[] = {"intersect","union","cirange"};
+		return ar[op];
+	}
+
+	Operation operation;
+	std::vector<unsigned int> arg;
+	unsigned int flags;
+};
+
 static unsigned int getUintValue( const char* arg)
 {
 	unsigned int rt = 0, prev = 0;
@@ -286,7 +384,7 @@ int main( int argc, const char* argv[])
 		strus::createStorageDatabase( config);
 
 		RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
-		strus::StorageReference storage( strus::createStorageClient( config));
+		boost::scoped_ptr<strus::StorageInterface> storage( strus::createStorageClient( config));
 
 		std::size_t totNofOccurrencies = 0;
 		std::size_t totNofFeatures = 0;
@@ -296,9 +394,9 @@ int main( int argc, const char* argv[])
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (; di != de; ++di,++totNofDocuments)
 		{
-			typedef boost::shared_ptr<strus::StorageInterface::TransactionInterface> TransactionReference;
+			typedef boost::scoped_ptr<strus::StorageInterface::TransactionInterface> Transaction;
 
-			TransactionReference transaction( storage->createTransaction( di->docid));
+			Transaction transaction( storage->createTransaction( di->docid));
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
 
 			for (; oi != oe; ++oi,++totNofOccurrencies)

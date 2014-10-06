@@ -98,3 +98,9 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 	}
 }
 
+DLL_PUBLIC const char* strus::getStorageConfigDescription()
+{
+	return "assignment of the LevelDB storage path as string\n(example \"path=data/testdb\")";
+}
+
+

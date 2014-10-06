@@ -27,10 +27,13 @@
 --------------------------------------------------------------------
 */
 #include "strus/libstrus_queryeval.hpp"
+#include "iteratorReference.hpp"
+#include "accumulatorReference.hpp"
 #include "queryParser.hpp"
 #include "dll_tags.hpp"
 #include <map>
 #include <set>
+#include <boost/scoped_array.hpp>
 
 using namespace strus;
 
@@ -45,13 +48,11 @@ struct QueryContext
 
 	struct IteratorSet
 	{
-		IteratorSet()
-			:m_refcnt(0){}
+		IteratorSet(){}
 		IteratorSet( const IteratorSet& o)
-			:m_ar(o.m_ar),m_refcnt(o.m_refcnt){}
+			:m_ar(o.m_ar){}
 
 		std::vector<IteratorReference> m_ar;
-		unsigned int m_refcnt;
 	};
 
 	QueryProcessorInterface* processor;
@@ -75,7 +76,7 @@ struct QueryContext
 	}
 
 	/// \brief Get a specific element of an iterator set
-	IteratorReference getSetElement( unsigned int setIndex, unsigned int elemIndex)
+	const IteratorInterface* getSetElement( unsigned int setIndex, unsigned int elemIndex)
 	{
 		IteratorSetMap::iterator si = itersetmap.find( setIndex);
 		if (si == itersetmap.end())
@@ -86,13 +87,7 @@ struct QueryContext
 		{
 			throw std::runtime_error( "internal: set element addressing error in query");
 		}
-		++si->second.m_refcnt;
-		IteratorReference rt = si->second.m_ar[ elemIndex-1];
-		if (si->second.m_refcnt > 1)
-		{
-			rt.reset( rt->copy());
-		}
-		return rt;
+		return si->second.m_ar[ elemIndex-1].get();
 	}
 
 	/// \brief Create all joins defined in the query
@@ -112,13 +107,16 @@ struct QueryContext
 			std::size_t ri = 0, re = joinargset.nofrows();
 			for (; ri < re; ri+=rowsize)
 			{
-				std::vector<IteratorReference> paramlist;
+				IteratorInterface const** paramar = new IteratorInterface const*[ rowsize];
+				boost::scoped_array<const IteratorInterface*> paramlistref( paramar);
+				paramar = paramlistref.get();
+
 				for (std::size_t ci=0; ci < rowsize; ci++)
 				{
 					const Selector& paramdef = joinargset.ar()[ ri+ci];
-					paramlist.push_back( getSetElement( paramdef.setIndex, paramdef.elemIndex));
+					paramar[ ci] = getSetElement( paramdef.setIndex, paramdef.elemIndex);
 				}
-				joinresult.m_ar.push_back( processor->createIterator( ji->name(), ji->options(), paramlist));
+				joinresult.m_ar.push_back( processor->createIterator( ji->name(), ji->options(), rowsize, paramar));
 			}
 		}
 	}
@@ -128,8 +126,7 @@ struct QueryContext
 	{
 		typedef QueryParser::AccumulateOperation AccumulateOperation;
 		typedef QueryParser::AccumulateOperation::Argument Argument;
-		typedef QueryParser::SetElementList SetElementList;
-		typedef QueryParser::SetElement SetElement;
+		typedef QueryProcessorInterface::WeightedAccumulator WeightedAccumulator;
 
 		std::vector<AccumulateOperation>::const_iterator ai = query.accumulateOperations().begin(), ae = query.accumulateOperations().end();
 		for (; ai != ae; ++ai)
@@ -141,27 +138,41 @@ struct QueryContext
 
 			// Build accumulator arguments:
 			std::vector<AccumulatorReference> accuarg;
-			std::vector<double> weightarg;
+			boost::scoped_array<WeightedAccumulator> weightedAccusRef( new WeightedAccumulator[ ai->args().size()]);
+			WeightedAccumulator* weightedAccus = weightedAccusRef.get();
+
 			std::vector<Argument>::const_iterator gi = ai->args().begin(), ge = ai->args().end();
-			for (; gi != ge; ++gi)
+			for (std::size_t gidx=0; gi != ge; ++gi,++gidx)
 			{
 				if (gi->isAccumulator())
 				{
 					AccumulatorMap::const_iterator mi = accumap.find( gi->setIndex);
 					if (mi == accumap.end()) throw std::runtime_error( "internal: could resolve accumulator");
 					accuarg.push_back( AccumulatorReference( mi->second));
-					weightarg.push_back( gi->weight);
+					weightedAccus[ gidx].weight = gi->weight;
+					weightedAccus[ gidx].accu = accuarg.back().get();
 				}
 				else
 				{
 					IteratorSetMap::const_iterator ii = itersetmap.find( gi->setIndex);
 					if (ii != itersetmap.end())
 					{
-						AccumulatorReference accu 
-							= processor->createOccurrenceAccumulator(
-								gi->itrAccuOp, ii->second.m_ar);
+						IteratorInterface const** paramar = new IteratorInterface const*[ ii->second.m_ar.size()];
+						boost::scoped_array<const IteratorInterface*> paramlistref( paramar);
+						paramar = paramlistref.get();
+						std::size_t paramarsize = ii->second.m_ar.size();
+		
+						std::vector<IteratorReference>::const_iterator ai = ii->second.m_ar.begin(), ae = ii->second.m_ar.end();
+						for (std::size_t aidx=0; ai != ae; ai++,aidx++)
+						{
+							paramar[aidx] = ai->get();
+						}
+						AccumulatorReference accu(
+							processor->createOccurrenceAccumulator(
+								gi->itrAccuOp, paramarsize, paramar));
 						accuarg.push_back( accu);
-						weightarg.push_back( gi->weight);
+						weightedAccus[ gidx].weight = gi->weight;
+						weightedAccus[ gidx].accu = accuarg.back().get();
 					}
 				}
 			}
@@ -170,7 +181,8 @@ struct QueryContext
 			lastaccu
 				= accumap[ ai->resultaccu()]
 				= processor->createAccumulator(
-					ai->name(), ai->scale(), weightarg, accuarg);
+						ai->name(), ai->scale(),
+						ai->args().size(), weightedAccus);
 		}
 	}
 };
@@ -187,7 +199,14 @@ DLL_PUBLIC std::vector<WeightedDocument>
 	ctx.expandTerms();
 	ctx.expandJoins();
 	ctx.expandAccumulators();
-	return processor.getRankedDocumentList( ctx.lastaccu, maxNofRanks);
+	if (ctx.lastaccu.get())
+	{
+		return processor.getRankedDocumentList( *ctx.lastaccu, maxNofRanks);
+	}
+	else
+	{
+		return std::vector<WeightedDocument>();
+	}
 }
 
 

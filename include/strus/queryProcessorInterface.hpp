@@ -28,9 +28,8 @@
 */
 #ifndef _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
-#include "strus/storageInterface.hpp"
-#include "strus/accumulatorReference.hpp"
-#include "strus/iteratorReference.hpp"
+#include "strus/accumulatorInterface.hpp"
+#include "strus/iteratorInterface.hpp"
 #include "strus/weightedDocument.hpp"
 #include <vector>
 #include <string>
@@ -49,7 +48,7 @@ public:
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
 	/// \return the created iterator reference object
-	virtual IteratorReference
+	virtual IteratorInterface*
 		createIterator(
 			const std::string& type,
 			const std::string& value)=0;
@@ -57,39 +56,56 @@ public:
 	/// \brief Create an iterator as join function on the arguments passed
 	/// \param[in] name name of the join function to execute
 	/// \param[in] options list of options describing additional parameters for the join function to execute
-	/// \param[in] arg arguments to pass to the function
+	/// \param[in] nofargs number of arguments to pass to the function
+	/// \param[in] args arguments to pass to the function
 	/// \return the created iterator reference object representing the result of the function
-	virtual IteratorReference
+	virtual IteratorInterface*
 		createIterator(
 			const std::string& name,
 			const std::vector<std::string>& options,
-			const std::vector<IteratorReference>& arg)=0;
+			std::size_t nofargs,
+			const IteratorInterface** args)=0;
+
+	struct WeightedAccumulator
+	{
+		double weight;
+		const AccumulatorInterface* accu;
+
+		explicit WeightedAccumulator( const AccumulatorInterface* accu_=0, double weight_=1.0)
+			:weight(weight_),accu(accu_){}
+		WeightedAccumulator( const WeightedAccumulator& o)
+			:weight(o.weight),accu(o.accu){}
+	};
 
 	/// \brief Create an accumulator as join of the accumulators passed as argument
 	/// \param[in] name name of the accumulator function to execute
 	/// \param[in] scale constant factors used in the function
-	/// \param[in] weights weights assigned to the arguments of the accumulator function
+	/// \param[in] nofargs number of accumulator references with weights
+	/// \param[in] args list of accumulator references with weights
 	/// \return the created accumulator reference object representing the result of the function
-	virtual AccumulatorReference
+	virtual AccumulatorInterface*
 		createAccumulator(
 			const std::string& name,
 			const std::vector<double>& scale,
-			const std::vector<double>& weights,
-			const std::vector<AccumulatorReference>& arg)=0;
+			std::size_t nofargs,
+			const WeightedAccumulator* arg)=0;
 
 	/// \brief Create an accumulator of the feature occurrence set passed as argument
 	/// \param[in] name name of the accumulator operator to execute
-	virtual AccumulatorReference
+	/// \param[in] nofargs number of argument iterators to pass to the function
+	/// \param[in] args argument iterators to pass to the function
+	virtual AccumulatorInterface*
 		createOccurrenceAccumulator(
 			const std::string& name,
-			const std::vector<IteratorReference>& arg)=0;
+			std::size_t nofargs,
+			const IteratorInterface** args)=0;
 
 	/// \brief Calculate a list of the best ranked documents
 	/// \param[in] accu accumulator to fetch the weighted documents from
 	/// \param[in] maxNofRanks maximum number of ranks to return
 	virtual std::vector<WeightedDocument>
 		getRankedDocumentList(
-			const AccumulatorReference& accu,
+			AccumulatorInterface& accu,
 			std::size_t maxNofRanks) const=0;
 };
 
