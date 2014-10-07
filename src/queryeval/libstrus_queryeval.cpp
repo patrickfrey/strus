@@ -107,8 +107,9 @@ struct QueryContext
 			std::size_t ri = 0, re = joinargset.nofrows();
 			for (; ri < re; ri+=rowsize)
 			{
-				IteratorInterface const** paramar = new IteratorInterface const*[ rowsize];
-				boost::scoped_array<const IteratorInterface*> paramlistref( paramar);
+				typedef const IteratorInterface* IteratorInterfacePtr;
+				IteratorInterfacePtr* paramar = new IteratorInterfacePtr[ rowsize];
+				boost::scoped_array<IteratorInterfacePtr> paramlistref( paramar);
 				paramar = paramlistref.get();
 
 				for (std::size_t ci=0; ci < rowsize; ci++)

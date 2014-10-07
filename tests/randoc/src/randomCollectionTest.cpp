@@ -27,14 +27,19 @@
 --------------------------------------------------------------------
 */
 #include "strus/libstrus_storage.hpp"
+#include "strus/libstrus_queryproc.hpp"
+#include "strus/iteratorInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include <string>
 #include <vector>
 #include <map>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include <cstring>
 #include <cmath>
 #include <stdexcept>
+#include <ctime>
 #include <boost/scoped_ptr.hpp>
 
 /// \brief Pseudo random generator 
@@ -255,7 +260,20 @@ struct RandomQuery
 		{
 			case Intersect:
 			{
-				
+				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
+				for (; pi+1 < pickDoc.occurrencear.size(); ++pi)
+				{
+					if (pickDoc.occurrencear[pi].pos == pickDoc.occurrencear[pi+1].pos)
+					{
+						arg.push_back( pickDoc.occurrencear[pi+0].term);
+						arg.push_back( pickDoc.occurrencear[pi+1].term);
+						break;
+					}
+				}
+				if (arg.empty())
+				{
+					goto AGAIN;
+				}
 			}
 			case Union:
 			{
@@ -268,6 +286,7 @@ struct RandomQuery
 					const RandomDoc::Occurrence& pickOcc = pickDoc.occurrencear[ pickOccIdx];
 					arg.push_back( pickOcc.term);
 				}
+				break;
 			}
 			case CutInRange:
 			{
@@ -287,7 +306,7 @@ struct RandomQuery
 				{
 					goto AGAIN;
 				}
-				unsigned int pickOccIdx = g_random.get( 0, pickDoc.occurrencear.size() - minRange);
+				unsigned int pickOccIdx = g_random.get( 0, pickDoc.occurrencear.size());
 				const RandomDoc::Occurrence& pickOcc = pickDoc.occurrencear[ pickOccIdx];
 
 				unsigned int rangeOccIdx = g_random.get( 0, pickDoc.occurrencear.size() - pickOccIdx);
@@ -307,6 +326,7 @@ struct RandomQuery
 				}
 				arg.push_back( pickOcc.term);
 				arg.push_back( rangeOcc.term);
+				arg.push_back( rangeOcc.pos - pickOcc.pos);
 				if (withCut)
 				{
 					unsigned int cutOccIdx = pickOccIdx + g_random.get( 0, rangeOccIdx - pickOccIdx);
@@ -321,6 +341,112 @@ struct RandomQuery
 	RandomQuery( const RandomQuery& o)
 		:operation(o.operation),arg(o.arg){}
 
+	struct Match
+	{
+		unsigned int docno;
+		unsigned int pos;
+
+		Match( const Match& o)
+			:docno(o.docno),pos(o.pos){}
+		Match( unsigned int docno_, unsigned int pos_)
+			:docno(docno_),pos(pos_){}
+	};
+
+	std::vector<Match> evaluate( const RandomCollection& collection) const
+	{
+		std::vector<Match> rt;
+		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
+		for (unsigned int docno=1; di != de; ++di,++docno)
+		{
+			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
+			for (; oi != oe; ++oi)
+			{
+				switch (operation)
+				{
+					case Intersect:
+					{
+						unsigned int term1 = arg[0];
+						unsigned int term2 = arg[1];
+						if (oi->term == term1)
+						{
+							std::vector<RandomDoc::Occurrence>::const_iterator fi = oi;
+							for (++fi; fi != oe && fi->pos == oi->pos; ++fi)
+							{
+								if (fi->term == term2)
+								{
+									rt.push_back( Match( docno, oi->pos));
+									break;
+								}
+							}
+						}
+						break;
+					}
+					case Union:
+						if (oi->term == arg[0]
+						||  oi->term == arg[1])
+						{
+							rt.push_back( Match( docno, oi->pos));
+						}
+						break;
+
+					case CutInRange:
+					{
+						unsigned int term1 = arg[0];
+						unsigned int term2 = arg[1];
+						bool withFirstRange = (flags&0x1)!=0;
+						bool withFirstCut = (flags&0x2)!=0;
+						bool withLastCut = (flags&0x4)!=0;
+						unsigned int range = arg[2];
+						unsigned int cut = (arg.size() > 3)?arg[3]:0;
+
+						if (oi->term == term1)
+						{
+							unsigned int cutPos = 0;
+							unsigned int matchPos = 0;
+							std::vector<RandomDoc::Occurrence>::const_iterator fi = oi;
+							for (++fi; fi != oe && fi->pos <= oi->pos + range; ++fi)
+							{
+								if (fi->term == cut && !cutPos)
+								{
+									if (withFirstCut || fi->pos != oi->pos)
+									{
+										cutPos = fi->pos;
+									}
+								}
+								if (fi->term == term2 && !matchPos)
+								{
+									if (withFirstRange || fi->pos != oi->pos)
+									{
+										matchPos = fi->pos;
+									}
+								}
+							}
+							if (matchPos)
+							{
+								if (!withLastCut || matchPos != cutPos)
+								{
+									rt.push_back( Match( docno, oi->pos));
+								}
+							}
+						}
+						break;
+					}
+				}
+			}
+		}
+		return rt;
+	}
+
+	bool compareMatches( const std::vector<Match>& matchar, strus::IteratorInterface* itr) const
+	{
+		std::vector<Match>::const_iterator mi = matchar.begin(), me = matchar.end();
+		for (; mi != me; ++mi)
+		{
+			
+		}
+		return true;
+	}
+
 	enum Operation
 	{
 		Intersect,
@@ -332,6 +458,10 @@ struct RandomQuery
 	{
 		static const char* ar[] = {"intersect","union","cirange"};
 		return ar[op];
+	}
+	const char* operationName() const
+	{
+		return operationName( operation);
 	}
 
 	Operation operation;
@@ -352,13 +482,24 @@ static unsigned int getUintValue( const char* arg)
 	return rt;
 }
 
+static std::string timeToString( double val_)
+{
+	unsigned int val = ::floor( val_ * 1000);
+	unsigned int val_sec = val / 1000;
+	unsigned int val_ms = val & 1000;
+	std::ostringstream val_str;
+	val_str << val_sec << "." << std::setfill('0') << std::setw(3) << val_ms;
+	return val_str.str();
+}
+
 static void printUsage( int argc, const char* argv[])
 {
-	std::cerr << "usage: " << argv[0] << " <config> <nofdocs> <maxsize> <features>" << std::endl;
-	std::cerr << "<config>	= storage description" << std::endl;
-	std::cerr << "<nofdocs>	= number of documents to insert" << std::endl;
-	std::cerr << "<maxsize>	= maximum size of a document" << std::endl;
+	std::cerr << "usage: " << argv[0] << " <config> <nofdocs> <maxsize> <features> <ops>" << std::endl;
+	std::cerr << "<config>  = storage description" << std::endl;
+	std::cerr << "<nofdocs> = number of documents to insert" << std::endl;
+	std::cerr << "<maxsize> = maximum size of a document" << std::endl;
 	std::cerr << "<features>= number of distinct features" << std::endl;
+	std::cerr << "<ops>     = number of random test query operations" << std::endl;
 }
 
 int main( int argc, const char* argv[])
@@ -368,7 +509,7 @@ int main( int argc, const char* argv[])
 		printUsage( argc, argv);
 		return 0;
 	}
-	else if (argc < 5)
+	else if (argc < 6)
 	{
 		std::cerr << "too few parameters" << std::endl;
 		printUsage( argc, argv);
@@ -380,6 +521,7 @@ int main( int argc, const char* argv[])
 		unsigned int nofDocuments = getUintValue( argv[2]);
 		unsigned int maxDocumentSize = getUintValue( argv[3]);
 		unsigned int nofFeatures = getUintValue( argv[4]);
+		unsigned int nofQueries = getUintValue( argv[5]);
 
 		strus::createStorageDatabase( config);
 
@@ -401,7 +543,7 @@ int main( int argc, const char* argv[])
 
 			for (; oi != oe; ++oi,++totNofOccurrencies)
 			{
-				TermCollection::Term& term = collection.termCollection.termar[ oi->term];
+				TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
 				transaction->addTermOccurrence( term.type, term.value, oi->pos);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "term type '" << term.type << "' value '" << term.value << " pos " << oi->pos << std::endl;
@@ -411,7 +553,7 @@ int main( int argc, const char* argv[])
 			std::map<unsigned int, float>::const_iterator wi = di->weightmap.begin(), we = di->weightmap.end();
 			for (; wi != we; ++wi,++totNofFeatures)
 			{
-				TermCollection::Term& term = collection.termCollection.termar[ wi->first];
+				TermCollection::Term& term = collection.termCollection.termar[ wi->first-1];
 				transaction->setTermWeight( term.type, term.value, wi->second);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "weigth type '" << term.type << "' value '" << term.value << " pos " << wi->second << std::endl;
@@ -424,6 +566,61 @@ int main( int argc, const char* argv[])
 #endif
 		}
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofFeatures << " terms, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
+		boost::scoped_ptr<strus::QueryProcessorInterface> queryproc(
+			strus::createQueryProcessorInterface( storage.get()));
+
+		std::vector<RandomQuery> randomQueryAr;
+		{
+			for (std::size_t qi=0; qi < nofQueries; ++qi)
+			{
+				randomQueryAr.push_back( RandomQuery( collection));
+			}
+		}
+		{
+			std::clock_t start;
+			double duration;
+		
+			start = std::clock();
+
+			std::vector<RandomQuery>::const_iterator qi = randomQueryAr.begin(), qe = randomQueryAr.end();
+			for (; qi != qe; ++qi)
+			{
+				switch (qi->operation)
+				{
+					case RandomQuery::Union:
+					case RandomQuery::Intersect:
+					{
+						unsigned int nofitr = qi->arg.size();
+						const strus::IteratorInterface* itr[ 8];
+						for (unsigned int ai=0; ai<nofitr; ++ai)
+						{
+							TermCollection::Term& term = collection.termCollection.termar[ qi->arg[ai]];
+							itr[ ai] = queryproc->createIterator( term.type, term.value);
+						}
+						std::vector<std::string> options;
+						std::string opname( qi->operationName());
+						strus::IteratorInterface* res = 
+							queryproc->createIterator(
+									opname, options, std::size_t(nofitr), &itr[0]);
+
+						if (!qi->compareMatches( qi->evaluate( collection), res))
+						{
+							throw std::runtime_error( "random query failed");
+						}
+						for (unsigned int ai=0; ai<nofitr; ++ai)
+						{
+							delete itr[ai];
+						}
+						delete res;
+						break;
+					}
+					case RandomQuery::CutInRange:
+						break;
+				}
+			}
+			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+			std::cerr << "evaluated " << nofQueries << " random queries in " << timeToString(duration) << " millieconds" << std::endl;
+		}
 		return 0;
 	}
 	catch (const std::runtime_error& e)

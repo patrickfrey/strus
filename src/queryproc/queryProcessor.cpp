@@ -66,7 +66,8 @@ static bool getUIntValue( unsigned int& result, const char* valuestr)
 	return !!*vi;
 }
 
-IteratorInterface* QueryProcessor::createIterator( 
+IteratorInterface*
+	QueryProcessor::createIterator( 
 			const std::string& type,
 			const std::string& value)
 {
@@ -74,7 +75,7 @@ IteratorInterface* QueryProcessor::createIterator(
 }
 
 IteratorInterface*
-	createIterator(
+	QueryProcessor::createIterator(
 		const std::string& name,
 		const std::vector<std::string>& options,
 		std::size_t nofargs,
