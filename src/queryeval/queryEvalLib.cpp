@@ -26,7 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/libstrus_queryeval.hpp"
+#include "strus/queryEvalLib.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include "iteratorReference.hpp"
 #include "accumulatorReference.hpp"
 #include "queryParser.hpp"

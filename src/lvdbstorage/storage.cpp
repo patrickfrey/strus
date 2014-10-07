@@ -53,7 +53,7 @@ Storage::Storage( const char* path_)
 	else
 	{
 		std::string err = status.ToString();
-		if (!m_db)
+		if (!!m_db)
 		{
 			delete m_db;
 			m_db = 0;
@@ -110,7 +110,6 @@ Index Storage::newDocNo()
 {
 	boost::mutex::scoped_lock( m_mutex);
 	return m_next_docno++;
-
 }
 
 Index Storage::curTermNo()
@@ -126,7 +125,6 @@ Index Storage::curTypeNo()
 Index Storage::curDocNo()
 {
 	return m_next_docno;
-
 }
 
 void Storage::writeBatch( leveldb::WriteBatch& batch)

@@ -15,8 +15,13 @@
 *.la
 *.a
 
+# Dependency files
+*.d
+
+# Valgring suppression files
+*.sup
+
 # Compiled Programs
 src/strus/strus
-tests/randoc/src/createRandomTestCollection
-
+tests/randoc/src/randomCollectionTest
 

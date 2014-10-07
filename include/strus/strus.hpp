@@ -26,23 +26,14 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query processor library
-#ifndef _STRUS_QUERYPROC_HPP_INCLUDED
-#define _STRUS_QUERYPROC_HPP_INCLUDED
+#ifndef _STRUS_MAIN_INCLUDE_HPP_INCLUDED
+#define _STRUS_MAIN_INCLUDE_HPP_INCLUDED
+#include "strus/accumulatorInterface.hpp"
+#include "strus/iteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
-#include <vector>
-#include <string>
-
-namespace strus {
-
-/// \brief Create a query processor with the functions and operators needed for query evaluation
-/// \param[in] storage reference to storage
-/// \return the allocated processor
-QueryProcessorInterface*
-	createQueryProcessorInterface(
-		StorageInterface* storage);
-
-}//namespace
+#include "strus/queryEvalLib.hpp"
+#include "strus/queryProcessorLib.hpp"
+#include "strus/storageLib.hpp"
 #endif
 

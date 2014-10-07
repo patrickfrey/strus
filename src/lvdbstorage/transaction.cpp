@@ -33,6 +33,7 @@
 #include <cstring>
 #include <set>
 #include <boost/thread/mutex.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
@@ -93,6 +94,8 @@ void Transaction::commit()
 	//[1.1] Iterate on key prefix elements [InversePrefix, docno, typeno, *] and mark dem as deleted
 	//	Extract typeno and valueno from key [InversePrefix, docno, typeno, pos] an mark term as old content (do delete)
 	leveldb::Iterator* vi = m_storage->newIterator();
+	boost::scoped_ptr<leveldb::Iterator> viref(vi);
+
 	for (vi->Seek( invkey); vi->Valid(); vi->Next())
 	{
 		if (invkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), invkey.c_str()))
@@ -165,5 +168,6 @@ void Transaction::commit()
 	}
 	// [4] Do submit the write to the database:
 	m_storage->writeBatch( batch);
+	batch.Clear();
 }
 

@@ -26,10 +26,13 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/libstrus_storage.hpp"
-#include "strus/libstrus_queryproc.hpp"
-#include "strus/iteratorInterface.hpp"
+#include "strus/storageLib.hpp"
+#include "strus/queryProcessorLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/queryEvalLib.hpp"
+#include "strus/iteratorInterface.hpp"
+#include "strus/accumulatorInterface.hpp"
+#include "strus/storageInterface.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -64,14 +67,21 @@ public:
 	{
 		m_value = (m_value+123) * KnuthIntegerHashFactor;
 		unsigned int iv = max_ - min_;
-		return iv?((m_value % iv) + min_):min_;
+		if (iv)
+		{
+			return (m_value % iv) + min_;
+		}
+		else
+		{
+			return min_;
+		}
 	}
 
 private:
 	unsigned int m_value;
 };
 
-Random g_random;
+static Random g_random;
 
 static const char* randomType()
 {
@@ -144,12 +154,12 @@ struct RandomDoc
 		docid_cnv << "doc" << docid_;
 		docid = docid_cnv.str();
 
-		unsigned int pos = 1;
-		while (pos <= size)
+		unsigned int posidx = 1;
+		while (posidx <= size)
 		{
-			unsigned int term = g_random.get( 1, collection.termar.size()) - 1;
-			occurrencear.push_back( Occurrence( term, pos));
-			if (g_random.get( 0, 4) > 1) pos++;
+			unsigned int termidx = g_random.get( 1, collection.termar.size());
+			occurrencear.push_back( Occurrence( termidx, posidx));
+			if (g_random.get( 0, 4) > 1) posidx++;
 		}
 	}
 
@@ -382,8 +392,11 @@ struct RandomQuery
 						break;
 					}
 					case Union:
-						if (oi->term == arg[0]
-						||  oi->term == arg[1])
+						if (arg.size() >= 1 && oi->term == arg[0])
+						{
+							rt.push_back( Match( docno, oi->pos));
+						}
+						else if (arg.size() >= 2 && oi->term == arg[1])
 						{
 							rt.push_back( Match( docno, oi->pos));
 						}
@@ -576,6 +589,7 @@ int main( int argc, const char* argv[])
 				randomQueryAr.push_back( RandomQuery( collection));
 			}
 		}
+		if (nofQueries)
 		{
 			std::clock_t start;
 			double duration;
@@ -619,7 +633,7 @@ int main( int argc, const char* argv[])
 				}
 			}
 			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-			std::cerr << "evaluated " << nofQueries << " random queries in " << timeToString(duration) << " millieconds" << std::endl;
+			std::cerr << "evaluated " << nofQueries << " random queries in " << timeToString(duration) << " milliseconds" << std::endl;
 		}
 		return 0;
 	}

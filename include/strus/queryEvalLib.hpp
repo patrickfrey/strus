@@ -26,19 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/libstrus_queryproc.hpp"
-#include "queryProcessor.hpp"
-#include "dll_tags.hpp"
-#include <map>
-#include <set>
+/// \brief Exported functions of the strus query evaluation library
+#ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
+#define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
+#include "strus/weightedDocument.hpp"
+#include <vector>
+#include <string>
 
-using namespace strus;
+namespace strus {
 
-DLL_PUBLIC QueryProcessorInterface*
-	strus::createQueryProcessorInterface(
-		StorageInterface* storage)
-{
-	return new QueryProcessor( storage);
-}
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
+/// \brief Evaluate a query
+/// \param[in] processor functions and operators for query evaluation
+/// \param[in] query query string (syntax depending on implementation)
+/// \param[in] maxNofRanks maximum number of ranks to return
+/// \return the matching document ranked by weight
+std::vector<WeightedDocument>
+	evaluateQuery(
+		QueryProcessorInterface& processor,
+		const std::string& querystr,
+		std::size_t maxNofRanks);
+
+}//namespace
+#endif
 

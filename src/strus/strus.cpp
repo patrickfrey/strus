@@ -26,9 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/libstrus_storage.hpp"
-#include "strus/libstrus_queryeval.hpp"
-#include "strus/libstrus_queryproc.hpp"
+#include "strus/storageLib.hpp"
+#include "strus/queryProcessorLib.hpp"
+#include "strus/queryEvalLib.hpp"
+#include "strus/iteratorInterface.hpp"
+#include "strus/accumulatorInterface.hpp"
+#include "strus/storageInterface.hpp"
 #include <iostream>
 #include <cstring>
 #include <stdexcept>

@@ -4,7 +4,9 @@ CPP_OBJS=\
 	iterator/iteratorUnion.o \
 	iterator/iteratorCutInRange.o \
 	queryProcessor.o \
-	libstrus_queryproc.o
+	queryProcessorLib.o
+
+HFILES= queryProcessor.hpp
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/include -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
@@ -13,13 +15,17 @@ LIBS=
 
 all: libstrus_queryproc.so
 
-%.o : %.cpp GNUmakefile
-	g++ -fPIC -fvisibility=hidden -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $<
+-include $(CPP_OBJS:.o=.d)
+
+%.o : %.cpp GNUmakefile $(HFILES)
+	g++ -fPIC -fvisibility=hidden -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
+	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 libstrus_queryproc.so: $(CPP_OBJS)
 	g++  -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:
-	rm -f ${CPP_OBJS} libstrus_queryproc.so
+	rm -f $(CPP_OBJS) $(CPP_OBJS:.o=.d) libstrus_queryproc.so
+
 

@@ -27,11 +27,13 @@
 --------------------------------------------------------------------
 */
 /// \brief Exported functions of the strus storage library
-#ifndef _STRUS_STORAGE_HPP_INCLUDED
-#define _STRUS_STORAGE_HPP_INCLUDED
-#include "strus/storageInterface.hpp"
+#ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_LIB_HPP_INCLUDED
 
 namespace strus {
+
+/// \brief Forward declaration
+class StorageInterface;
 
 /// \brief Creates an instance of the storage interface described with config
 /// \remark Because of restrictions imposed by LevelDB only one instance of a storage can be crated per storage

@@ -26,7 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/libstrus_storage.hpp"
+#include "strus/storageLib.hpp"
+#include "strus/storageInterface.hpp"
 #include "indexPacker.hpp"
 #include "storage.hpp"
 #include "dll_tags.hpp"
@@ -94,8 +95,10 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 	else
 	{
 		std::string err = status.ToString();
+		if (db) delete db;
 		throw std::runtime_error( std::string( "failed to create storage: ") + err);
 	}
+	if (db) delete db;
 }
 
 DLL_PUBLIC const char* strus::getStorageConfigDescription()

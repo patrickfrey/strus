@@ -34,6 +34,8 @@
 #include "accumulator/accumulatorOperators.hpp"
 #include "iteratorReference.hpp"
 #include "accumulatorReference.hpp"
+#include <string>
+#include <vector>
 #include <stdexcept>
 #include <set>
 #include <limits>

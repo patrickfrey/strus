@@ -9,8 +9,11 @@ LIBS=-lstrus_lvdbstorage -lstrus_queryeval -lstrus_queryproc -lleveldb -lboost_s
 
 all: strus
 
+-include $(CPP_OBJS:.o=.d)
+
 %.o : %.cpp GNUmakefile
-	g++ -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $<
+	g++ -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
+	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 strus: $(CPP_OBJS) strus.o
 	g++ -o $@ strus.o $(CPP_OBJS) $(LDFLAGS) $(LIBS)

@@ -4,7 +4,7 @@ CPP_OBJS=\
 	storage.o \
 	iterator.o \
 	transaction.o \
-	libstrus_lvdbstorage.o
+	storageLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/include -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
@@ -13,13 +13,16 @@ LIBS=-lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
 
 all: libstrus_lvdbstorage.so
 
-%.o : %.cpp GNUmakefile
-	g++ -fPIC -fvisibility=hidden -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $<
+-include $(CPP_OBJS:.o=.d)
+
+%.o : %.cpp GNUmakefile $(IFILES) $(HFILES)
+	g++ -fPIC -fvisibility=hidden -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
+	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 libstrus_lvdbstorage.so: $(CPP_OBJS)
 	g++  -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:
-	rm -f ${CPP_OBJS} libstrus_lvdbstorage.so
+	rm -f $(CPP_OBJS) $(CPP_OBJS:.o=.d) libstrus_lvdbstorage.so
 
