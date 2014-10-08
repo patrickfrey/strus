@@ -26,69 +26,18 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorIntersect.hpp"
-#include <stdexcept>
+/// \brief Helper functions shared by iterators
 
-using namespace strus;
+#ifndef _STRUS_ITERATOR_HELPERS_HPP_INCLUDED
+#define _STRUS_ITERATOR_HELPERS_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/iteratorInterface.hpp"
+#include "iteratorReference.hpp"
+#include <vector>
 
-IteratorIntersect::IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_)
-	:m_docno(0)
-	,m_first(first_)
-	,m_second(second_)
-{}
-
-IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
-	:m_docno(o.m_docno)
-	,m_first(o.m_first->copy())
-	,m_second(o.m_second->copy())
-{}
-
-Index IteratorIntersect::skipDoc( const Index& docno_)
+namespace strus
 {
-	Index docno_iter = docno_;
-
-	for (;;)
-	{
-		Index docno_first = m_first->skipDoc( docno_iter);
-		Index docno_second = m_second->skipDoc( docno_first);
-
-		if (!docno_first || !docno_second)
-		{
-			return 0;
-		}
-		if (docno_first == docno_second)
-		{
-			m_docno = docno_first;
-			return m_docno;
-		}
-		docno_iter = docno_second;
-	}
+Index getFirstAllMatchDocno( const std::vector<IteratorReference>& ar, Index docno);
 }
-
-Index IteratorIntersect::skipPos( const Index& pos_)
-{
-	Index pos_iter = pos_;
-	if (!m_docno) return 0;
-
-	for (;;)
-	{
-		Index pos_first = m_first->skipDoc( pos_iter);
-		Index pos_second = m_second->skipDoc( pos_first);
-
-		if (!pos_first || !pos_second)
-		{
-			return 0;
-		}
-		if (pos_first == pos_second)
-		{
-			return pos_first;
-		}
-		pos_iter = pos_second;
-	}
-}
-
-float IteratorIntersect::weight() const
-{
-	throw std::runtime_error("internal: weight not defined for intersection");
-}
+#endif
 

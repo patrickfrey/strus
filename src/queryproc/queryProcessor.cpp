@@ -29,7 +29,9 @@
 #include "queryProcessor.hpp"
 #include "iterator/iteratorIntersect.hpp"
 #include "iterator/iteratorUnion.hpp"
-#include "iterator/iteratorCutInRange.hpp"
+#include "iterator/iteratorDifference.hpp"
+#include "iterator/iteratorStructWithin.hpp"
+#include "iterator/iteratorStructSequence.hpp"
 #include "accumulator/accumulatorOperatorTemplate.hpp"
 #include "accumulator/accumulatorOperators.hpp"
 #include "iteratorReference.hpp"
@@ -49,24 +51,6 @@ static bool isEqual( const std::string& id, const char* idstr)
 	for (; *si && *di && ((*si|32) == (*di|32)); ++si,++di){}
 	return !*si && !*di;
 }
-static bool isDigit( char ch)
-{
-	return (ch >= '0' && ch <= '9');
-}
-static bool getUIntValue( unsigned int& result, const char* valuestr)
-{
-	unsigned int value = 0;
-	unsigned int prev = 0;
-	char const* vi = valuestr;
-	if (!*vi) return false;
-	for (; *vi >= '0' && *vi <= '9'; ++vi)
-	{
-		value = (value * 10) + (*vi - '0');
-		if (prev > value) break;
-		prev = value;
-	}
-	return !!*vi;
-}
 
 IteratorInterface*
 	QueryProcessor::createIterator( 
@@ -79,88 +63,96 @@ IteratorInterface*
 IteratorInterface*
 	QueryProcessor::createIterator(
 		const std::string& name,
-		const std::vector<std::string>& options,
+		int range,
 		std::size_t nofargs,
 		const IteratorInterface** args)
 {
 	if (isEqual( name, "union"))
 	{
+		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		if (nofargs < 2) return args[0]->copy();
-		IteratorReference rt( new IteratorUnion( IteratorReference(args[0]->copy()), IteratorReference(args[1]->copy())));
-		std::size_t ii=2;
+
+		IteratorInterface* rt = args[0]->copy();
+		std::size_t ii=1;
 		for (; ii<nofargs; ++ii)
 		{
-			IteratorReference join( new IteratorUnion( rt, IteratorReference(args[ii]->copy())));
-			rt = join;
+			rt = new IteratorUnion(
+					IteratorReference(rt),
+					IteratorReference(args[ii]->copy()));
 		}
-		return rt->copy();
+		return rt;
 	}
 	else if (isEqual( name, "intersect"))
 	{
+		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		if (nofargs < 2) return args[0]->copy();
-		IteratorReference rt( new IteratorIntersect( IteratorReference(args[0]->copy()), IteratorReference(args[1]->copy())));
-		std::size_t ii=2;
+
+		IteratorInterface* rt = args[0]->copy();
+		std::size_t ii=1;
 		for (; ii<nofargs; ++ii)
 		{
-			IteratorReference join( new IteratorIntersect( rt, IteratorReference(args[ii]->copy())));
-			rt = join;
+			rt = new IteratorIntersect(
+					IteratorReference(rt),
+					IteratorReference(args[ii]->copy()));
 		}
-		return rt->copy();
+		return rt;
 	}
-	else if (isEqual( name, "cirange"))
+	else if (isEqual( name, "diff"))
+	{
+		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
+		if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		if (nofargs > 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
+
+		return new IteratorDifference( IteratorReference(args[0]->copy()), IteratorReference(args[1]->copy()));
+	}
+	else if (isEqual( name, "sequence_struct"))
 	{
 		if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		if (nofargs > 3) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
-		IteratorReference cut( (nofargs > 2)?IteratorReference(args[2]->copy()):IteratorReference());
-		std::vector<std::string>::const_iterator oi = options.begin(), oe = options.end();
-		bool withFirstElemCut = false;
-		bool withLastElemCut = false;
-		bool withFirstElemRange = false;
-		unsigned int range = 1;
-
-		for (; oi != oe; ++oi)
+		IteratorReference structDelimiter( args[0]->copy());
+		std::vector<IteratorReference> seq;
+		for (std::size_t ai=1; ai<nofargs; ++ai)
 		{
-			switch ((*oi)[0]|32)
-			{
-				case 'd':
-					if (!getUIntValue( range, oi->c_str()+1))
-					{
-						if (oi->size() > 1 && !isDigit((*oi)[1]))
-						{
-							throw std::runtime_error( std::string( "unknown option '") + *oi + "' for join function 'cirange'");
-						}
-						else
-						{
-							throw std::runtime_error( std::string( "illegal argument for option 'd' for join function 'cirange'"));
-						}
-					}
-					break;
-				case 'a':
-					withFirstElemRange = true;
-					break;
-				case 's':
-					if (oi->size() > 1) throw std::runtime_error( std::string( "unknown option '") + *oi + "' for join function 'cirange'");
-					withFirstElemCut = true;
-					break;
-				case 'e':
-					if (oi->size() > 1) throw std::runtime_error( std::string( "unknown option '") + *oi + "' for join function 'cirange'");
-					withLastElemCut = true;
-					break;
-				default:
-					throw std::runtime_error( std::string( "unknown option '") + *oi + "' for join function 'cirange'");
-			}
+			seq.push_back( IteratorReference( args[ai]->copy()));
 		}
-		return new IteratorCutInRange(
-				IteratorReference(args[0]->copy()),
-				IteratorReference(args[1]->copy()),
-				cut, range, 
-				withFirstElemRange, withFirstElemCut, withLastElemCut);
+		return new IteratorStructSequence( seq, structDelimiter, range);
+	}
+	else if (isEqual( name, "sequence"))
+	{
+		if (nofargs < 1) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		IteratorReference empty;
+		std::vector<IteratorReference> seq;
+		for (std::size_t ai=0; ai<nofargs; ++ai)
+		{
+			seq.push_back( IteratorReference( args[ai]->copy()));
+		}
+		return new IteratorStructSequence( seq, empty, range);
+	}
+	else if (isEqual( name, "within_struct"))
+	{
+		if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		IteratorReference structDelimiter( args[0]->copy());
+		std::vector<IteratorReference> group;
+		for (std::size_t ai=1; ai<nofargs; ++ai)
+		{
+			group.push_back( IteratorReference( args[ai]->copy()));
+		}
+		
+		return new IteratorStructWithin( group, structDelimiter, range);
+	}
+	else if (isEqual( name, "within"))
+	{
+		if (nofargs < 1) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		IteratorReference empty;
+		std::vector<IteratorReference> group;
+		for (std::size_t ai=1; ai<nofargs; ++ai)
+		{
+			group.push_back( IteratorReference( args[ai]->copy()));
+		}
+		return new IteratorStructWithin( group, empty, range);
 	}
 	else
 	{
-		throw std::runtime_error( std::string( "unknown term occurrence join function '") + name + "'");
+		throw std::runtime_error( std::string( "unknown term occurrence join operator '") + name + "'");
 	}
 }
 

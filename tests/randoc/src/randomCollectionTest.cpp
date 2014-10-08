@@ -43,6 +43,8 @@
 #include <cmath>
 #include <stdexcept>
 #include <ctime>
+#include <algorithm>
+#include <limits>
 #include <boost/scoped_ptr.hpp>
 
 /// \brief Pseudo random generator 
@@ -256,10 +258,24 @@ struct RandomCollection
 	std::vector<RandomDoc> docar;
 };
 
+
+class RandomGen
+{
+public:
+	RandomGen(){}
+
+	std::size_t operator()( std::size_t i)
+	{
+		return (std::size_t)g_random.get( 0, i);
+	}
+};
+	
 struct RandomQuery
 {
+	enum {MaxNofArgs=8};
+
 	RandomQuery( const RandomCollection& collection)
-		:flags(0)
+		:range(0)
 	{
 	AGAIN:
 		operation = (Operation)g_random.get( 0, NofOperations);
@@ -270,24 +286,28 @@ struct RandomQuery
 		{
 			case Intersect:
 			{
-				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
-				for (; pi+1 < pickDoc.occurrencear.size(); ++pi)
+				unsigned int pi = g_random.get( 1, pickDoc.occurrencear.size());
+				arg.push_back( pickDoc.occurrencear[pi].term);
+
+				for (; pi+1 < pickDoc.occurrencear.size() && arg.size() < (unsigned int)MaxNofArgs; ++pi)
 				{
 					if (pickDoc.occurrencear[pi].pos == pickDoc.occurrencear[pi+1].pos)
 					{
-						arg.push_back( pickDoc.occurrencear[pi+0].term);
 						arg.push_back( pickDoc.occurrencear[pi+1].term);
+					}
+					else
+					{
 						break;
 					}
 				}
-				if (arg.empty())
+				if (arg.size() == 1)
 				{
 					goto AGAIN;
 				}
 			}
 			case Union:
 			{
-				unsigned int nn = g_random.get( 1, 5);
+				unsigned int nn = g_random.get( 1, MaxNofArgs);
 				unsigned int ii = 0;
 
 				for (; ii<nn; ++ii)
@@ -298,58 +318,89 @@ struct RandomQuery
 				}
 				break;
 			}
-			case CutInRange:
+			case Difference:
 			{
-				bool withCut = g_random.get( 0, 1);
-				bool withFirstRange = g_random.get( 0, 1);
-				bool withFirstCut = g_random.get( 0, 1);
-				bool withLastCut = g_random.get( 0, 1);
-				flags |= (withFirstRange?0x1:0x0);
-				flags |= (withFirstCut?0x2:0x0);
-				flags |= (withLastCut?0x4:0x0);
+				unsigned int pi = g_random.get( 1, pickDoc.occurrencear.size());
+				arg.push_back( pickDoc.occurrencear[pi].term);
 
-				unsigned int minRange = 0;
-				if (!withFirstRange) minRange++;
-				if (!withFirstCut) minRange++;
-				if (!withLastCut) minRange++;
-				if (minRange >= pickDoc.occurrencear.size())
+				for (; pi+1 < pickDoc.occurrencear.size(); ++pi)
+				{
+					if (pickDoc.occurrencear[pi].pos == pickDoc.occurrencear[pi+1].pos)
+					{
+						arg.push_back( pickDoc.occurrencear[pi+1].term);
+						break;
+					}
+					else
+					{
+						break;
+					}
+				}
+				if (arg.size() == 1)
 				{
 					goto AGAIN;
 				}
+			}
+			case StructWithin:
+			case Within:
+			case StructSequence:
+			case Sequence:
+			{
 				unsigned int pickOccIdx = g_random.get( 0, pickDoc.occurrencear.size());
 				const RandomDoc::Occurrence& pickOcc = pickDoc.occurrencear[ pickOccIdx];
+				arg.push_back( pickOcc.term);
 
 				unsigned int rangeOccIdx = g_random.get( 0, pickDoc.occurrencear.size() - pickOccIdx);
 				const RandomDoc::Occurrence& rangeOcc = pickDoc.occurrencear[ rangeOccIdx];
-				if (rangeOcc.term == pickOcc.term)
+
+				unsigned int prevpos = pickOcc.pos;
+				if (operation == StructSequence || operation == Sequence)
 				{
-					withFirstRange = false;
+					if (rangeOcc.pos == prevpos) goto AGAIN;
 				}
-				if (pickOcc.pos + minRange > rangeOcc.pos) goto AGAIN;
-				
-				for (unsigned int ti = pickOccIdx+(withFirstRange?0:1); ti < rangeOccIdx; ++ti)
+				for (unsigned int ti = pickOccIdx; ti < rangeOccIdx; ++ti)
 				{
-					if (pickDoc.occurrencear[ ti].term == rangeOcc.term)
+					const RandomDoc::Occurrence& midOcc = pickDoc.occurrencear[ ti];
+					if (midOcc.term == rangeOcc.term)
 					{
 						goto AGAIN;
 					}
+					if (midOcc.term != pickOcc.term)
+					{
+						if (operation == StructSequence || operation == Sequence)
+						{
+							if (midOcc.pos == prevpos) continue;
+						}
+						arg.push_back( midOcc.term);
+					}
+					prevpos = midOcc.pos;
 				}
-				arg.push_back( pickOcc.term);
 				arg.push_back( rangeOcc.term);
-				arg.push_back( rangeOcc.pos - pickOcc.pos);
-				if (withCut)
+				if (operation == StructWithin || operation == Within)
 				{
+					//... in case of within range condition without order, shuffle the elements
+					shuffleArg();
+				}
+				range = (int)rangeOcc.pos - (int)pickOcc.pos;
+
+				if (operation == StructWithin || operation == StructSequence)
+				{
+					//... in case of structure insert structure delimiter as first argument
 					unsigned int cutOccIdx = pickOccIdx + g_random.get( 0, rangeOccIdx - pickOccIdx);
 					const RandomDoc::Occurrence& cutOcc = pickDoc.occurrencear[ cutOccIdx];
-
-					arg.push_back( cutOcc.term);
+					arg.insert( arg.begin(), cutOcc.term);
 				}
 				break;
 			}
 		}
 	}
 	RandomQuery( const RandomQuery& o)
-		:operation(o.operation),arg(o.arg){}
+		:operation(o.operation),arg(o.arg),range(o.range){}
+
+	void shuffleArg()
+	{
+		RandomGen rnd;
+		std::random_shuffle( arg.begin(), arg.end(), rnd);
+	}
 
 	struct Match
 	{
@@ -362,83 +413,166 @@ struct RandomQuery
 			:docno(docno_),pos(pos_){}
 	};
 
-	std::vector<Match> evaluate( const RandomCollection& collection) const
+	std::vector<RandomDoc::Occurrence>::const_iterator
+		findTerm( std::vector<RandomDoc::Occurrence>::const_iterator oi, std::vector<RandomDoc::Occurrence>::const_iterator oe, unsigned int term, unsigned int lastpos) const
+	{
+		if (oi != oe)
+		{
+			for (++oi; oi != oe && oi->pos <= lastpos; ++oi)
+			{
+				if (oi->term == term) return oi;
+			}
+		}
+		return oe;
+	}
+
+	bool matchTerm( std::vector<RandomDoc::Occurrence>::const_iterator oi, std::vector<RandomDoc::Occurrence>::const_iterator oe, unsigned int term, unsigned int lastpos) const
+	{
+		return oe != findTerm( oi, oe, term, lastpos);
+	}
+
+	bool skipNextPosition( std::vector<RandomDoc::Occurrence>::const_iterator& oi, const std::vector<RandomDoc::Occurrence>::const_iterator& oe) const
+	{
+		if (oi == oe) return false;
+		unsigned int pos = oi->pos;
+		for (++oi; oi != oe && oi->pos == pos; ++oi){}
+		return oi != oe;
+	}
+
+	std::vector<Match> expectedMatches( const RandomCollection& collection) const
 	{
 		std::vector<Match> rt;
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (unsigned int docno=1; di != de; ++di,++docno)
 		{
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
-			for (; oi != oe; ++oi)
+			for (; oi != oe; (void)skipNextPosition(oi,oe))
 			{
 				switch (operation)
 				{
 					case Intersect:
 					{
-						unsigned int term1 = arg[0];
-						unsigned int term2 = arg[1];
-						if (oi->term == term1)
+						if (arg.empty()) continue;
+						std::vector<unsigned int>::const_iterator ai = arg.begin(), ae = arg.end();
+						for (; ai!=ae; ++ai)
 						{
-							std::vector<RandomDoc::Occurrence>::const_iterator fi = oi;
-							for (++fi; fi != oe && fi->pos == oi->pos; ++fi)
+							if (!matchTerm( oi, oe, *ai, oi->pos))
 							{
-								if (fi->term == term2)
-								{
-									rt.push_back( Match( docno, oi->pos));
-									break;
-								}
+								break;
+							}
+						}
+						if (ai == ae)
+						{
+							rt.push_back( Match( docno, oi->pos));
+						}
+						break;
+					}
+					case Difference:
+						if (arg.size() != 2) continue;
+						if (matchTerm( oi, oe, arg[0], oi->pos))
+						{
+							if (matchTerm( oi, oe, arg[1], oi->pos)) continue;
+							rt.push_back( Match( docno, oi->pos));
+						}
+					case Union:
+					{
+						if (arg.empty()) continue;
+						std::vector<unsigned int>::const_iterator ai = arg.begin(), ae = arg.end();
+						for (; ai!=ae; ++ai)
+						{
+							if (matchTerm( oi, oe, *ai, oi->pos))
+							{
+								break;
+							}
+						}
+						if (ai != ae)
+						{
+							rt.push_back( Match( docno, oi->pos));
+						}
+						break;
+					}
+					case Sequence:
+					case StructSequence:
+					{
+						if (arg.empty()) continue;
+						unsigned int delimiter_term = 0;
+						std::size_t argidx = 0;
+						unsigned int lastpos = range<0?(oi->pos-range):(oi->pos+range);
+
+						if (operation == StructSequence)
+						{
+							delimiter_term = arg[argidx++];
+							if (arg.size() == 1) continue;
+						}
+						// Try to match sequence:
+						if (!matchTerm( oi, oe, arg[argidx], oi->pos)) continue;
+
+						std::vector<RandomDoc::Occurrence>::const_iterator fi = oi;
+						(void)skipNextPosition(fi,oe);
+
+						for (++argidx; argidx < arg.size() && fi != oe && fi->pos <= lastpos; (void)skipNextPosition(fi,oe))
+						{
+							if (matchTerm( fi, oe, arg[argidx], fi->pos))
+							{
+								argidx++;
+								if (argidx == arg.size()) break;
+							}
+						}
+						// Check if matched and check the structure delimiter term
+						if (argidx == arg.size()
+						&& (!delimiter_term || matchTerm( oi, oe, delimiter_term, fi->pos)))
+						{
+							if (range >= 0)
+							{
+								rt.push_back( Match( docno, oi->pos));
+							}
+							else
+							{
+								rt.push_back( Match( docno, fi->pos));
 							}
 						}
 						break;
 					}
-					case Union:
-						if (arg.size() >= 1 && oi->term == arg[0])
-						{
-							rt.push_back( Match( docno, oi->pos));
-						}
-						else if (arg.size() >= 2 && oi->term == arg[1])
-						{
-							rt.push_back( Match( docno, oi->pos));
-						}
-						break;
-
-					case CutInRange:
+					case Within:
+					case StructWithin:
 					{
-						unsigned int term1 = arg[0];
-						unsigned int term2 = arg[1];
-						bool withFirstRange = (flags&0x1)!=0;
-						bool withFirstCut = (flags&0x2)!=0;
-						bool withLastCut = (flags&0x4)!=0;
-						unsigned int range = arg[2];
-						unsigned int cut = (arg.size() > 3)?arg[3]:0;
+						if (arg.empty()) continue;
+						unsigned int delimiter_term = 0;
+						std::size_t argidx = 0;
+						unsigned int lastpos = range<0?(oi->pos-range):(oi->pos+range);
 
-						if (oi->term == term1)
+						if (operation == StructWithin)
 						{
-							unsigned int cutPos = 0;
-							unsigned int matchPos = 0;
-							std::vector<RandomDoc::Occurrence>::const_iterator fi = oi;
-							for (++fi; fi != oe && fi->pos <= oi->pos + range; ++fi)
+							delimiter_term = arg[argidx++];
+							if (arg.size() == 1) continue;
+						}
+						std::size_t ai = argidx;
+						for (; ai<arg.size(); ++ai)
+						{
+							if (matchTerm( oi, oe, arg[ai], oi->pos)) break;
+						}
+						if (ai<arg.size())
+						{
+							unsigned int maxpos = oi->pos;
+							for (ai=argidx; ai<arg.size(); ++ai)
 							{
-								if (fi->term == cut && !cutPos)
+								std::vector<RandomDoc::Occurrence>::const_iterator
+									fi = findTerm( oi, oe, arg[ai], lastpos);
+								if (fi->pos > maxpos)
 								{
-									if (withFirstCut || fi->pos != oi->pos)
-									{
-										cutPos = fi->pos;
-									}
-								}
-								if (fi->term == term2 && !matchPos)
-								{
-									if (withFirstRange || fi->pos != oi->pos)
-									{
-										matchPos = fi->pos;
-									}
+									maxpos = fi->pos;
 								}
 							}
-							if (matchPos)
+							if (argidx == arg.size()
+							&& (!delimiter_term || matchTerm( oi, oe, delimiter_term, maxpos)))
 							{
-								if (!withLastCut || matchPos != cutPos)
+								if (range >= 0)
 								{
 									rt.push_back( Match( docno, oi->pos));
+								}
+								else
+								{
+									rt.push_back( Match( docno, maxpos));
 								}
 							}
 						}
@@ -460,16 +594,64 @@ struct RandomQuery
 		return true;
 	}
 
+	std::string tostring( const RandomCollection& collection) const
+	{
+		std::ostringstream rt;
+		rt << operationName();
+		if (range)
+		{
+			rt << " " << range;
+		}
+		for (unsigned int ai=0; ai<arg.size(); ++ai)
+		{
+			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]];
+			if (ai) rt << " ";
+			rt << term.type << " '" << term.value << "'";
+		}
+		return rt.str();
+	}
+
+	bool execute( strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
+	{
+		unsigned int nofitr = arg.size();
+		const strus::IteratorInterface* itr[ MaxNofArgs];
+		for (unsigned int ai=0; ai<nofitr; ++ai)
+		{
+			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]];
+			itr[ ai] = queryproc->createIterator( term.type, term.value);
+		}
+		std::string opname( operationName());
+		strus::IteratorInterface* res = 
+			queryproc->createIterator(
+					opname, range, std::size_t(nofitr), &itr[0]);
+
+		if (!compareMatches( expectedMatches( collection), res))
+		{
+			std::cerr << "random query failed: " << tostring( collection) << std::endl;
+			return false;
+		}
+		for (unsigned int ai=0; ai<nofitr; ++ai)
+		{
+			delete itr[ai];
+		}
+		delete res;
+		return true;
+	}
+
 	enum Operation
 	{
 		Intersect,
 		Union,
-		CutInRange
+		Difference,
+		Within,
+		StructWithin,
+		Sequence,
+		StructSequence
 	};
-	enum {NofOperations=3};
+	enum {NofOperations=7};
 	static const char* operationName( Operation op)
 	{
-		static const char* ar[] = {"intersect","union","cirange"};
+		static const char* ar[] = {"intersect","union","diff","within","within_struct","sequence","sequence_struct"};
 		return ar[op];
 	}
 	const char* operationName() const
@@ -479,7 +661,7 @@ struct RandomQuery
 
 	Operation operation;
 	std::vector<unsigned int> arg;
-	unsigned int flags;
+	int range;
 };
 
 static unsigned int getUintValue( const char* arg)
@@ -541,10 +723,12 @@ int main( int argc, const char* argv[])
 		RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
 		boost::scoped_ptr<strus::StorageInterface> storage( strus::createStorageClient( config));
 
-		std::size_t totNofOccurrencies = 0;
-		std::size_t totNofFeatures = 0;
-		std::size_t totNofDocuments = 0;
-		std::size_t totTermStringSize = 0;
+		strus::Index totNofOccurrencies = 0;
+		strus::Index totNofFeatures = 0;
+		strus::Index totNofDocuments = 0;
+		strus::Index totTermStringSize = 0;
+		unsigned int insertIntervallSize = 1000;
+		unsigned int insertIntervallCnt = 0;
 
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (; di != de; ++di,++totNofDocuments)
@@ -556,7 +740,7 @@ int main( int argc, const char* argv[])
 
 			for (; oi != oe; ++oi,++totNofOccurrencies)
 			{
-				TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
+				const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
 				transaction->addTermOccurrence( term.type, term.value, oi->pos);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "term type '" << term.type << "' value '" << term.value << " pos " << oi->pos << std::endl;
@@ -566,7 +750,7 @@ int main( int argc, const char* argv[])
 			std::map<unsigned int, float>::const_iterator wi = di->weightmap.begin(), we = di->weightmap.end();
 			for (; wi != we; ++wi,++totNofFeatures)
 			{
-				TermCollection::Term& term = collection.termCollection.termar[ wi->first-1];
+				const TermCollection::Term& term = collection.termCollection.termar[ wi->first-1];
 				transaction->setTermWeight( term.type, term.value, wi->second);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "weigth type '" << term.type << "' value '" << term.value << " pos " << wi->second << std::endl;
@@ -577,6 +761,11 @@ int main( int argc, const char* argv[])
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "inserted document '" << di->docid << "' size " << di->occurrencear.size() << std::endl;
 #endif
+			if (++insertIntervallCnt == insertIntervallSize)
+			{
+				insertIntervallCnt = 0;
+				std::cerr << "inserted " << (totNofDocuments+1) << " documents, " << totTermStringSize <<" bytes " << std::endl;
+			}
 		}
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofFeatures << " terms, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 		boost::scoped_ptr<strus::QueryProcessorInterface> queryproc(
@@ -593,47 +782,26 @@ int main( int argc, const char* argv[])
 		{
 			std::clock_t start;
 			double duration;
-		
+			unsigned int nofQueriesFailed = 0;
 			start = std::clock();
 
 			std::vector<RandomQuery>::const_iterator qi = randomQueryAr.begin(), qe = randomQueryAr.end();
 			for (; qi != qe; ++qi)
 			{
-				switch (qi->operation)
+				if (!qi->execute( queryproc.get(), collection))
 				{
-					case RandomQuery::Union:
-					case RandomQuery::Intersect:
-					{
-						unsigned int nofitr = qi->arg.size();
-						const strus::IteratorInterface* itr[ 8];
-						for (unsigned int ai=0; ai<nofitr; ++ai)
-						{
-							TermCollection::Term& term = collection.termCollection.termar[ qi->arg[ai]];
-							itr[ ai] = queryproc->createIterator( term.type, term.value);
-						}
-						std::vector<std::string> options;
-						std::string opname( qi->operationName());
-						strus::IteratorInterface* res = 
-							queryproc->createIterator(
-									opname, options, std::size_t(nofitr), &itr[0]);
-
-						if (!qi->compareMatches( qi->evaluate( collection), res))
-						{
-							throw std::runtime_error( "random query failed");
-						}
-						for (unsigned int ai=0; ai<nofitr; ++ai)
-						{
-							delete itr[ai];
-						}
-						delete res;
-						break;
-					}
-					case RandomQuery::CutInRange:
-						break;
+					++nofQueriesFailed;
 				}
 			}
 			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-			std::cerr << "evaluated " << nofQueries << " random queries in " << timeToString(duration) << " milliseconds" << std::endl;
+			if (nofQueriesFailed)
+			{
+				std::cerr << "evaluated " << nofQueries << " random queries with " << nofQueriesFailed << " queries failed" << std::endl;
+			}
+			else
+			{
+				std::cerr << "evaluated " << nofQueries << " random queries correctly in " << timeToString(duration) << " milliseconds" << std::endl;
+			}
 		}
 		return 0;
 	}

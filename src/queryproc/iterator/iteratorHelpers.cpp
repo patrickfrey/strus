@@ -26,69 +26,43 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorIntersect.hpp"
-#include <stdexcept>
+/// \brief Implementation of helper functions shared by iterators
+#include "iteratorHelpers.hpp"
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_)
-	:m_docno(0)
-	,m_first(first_)
-	,m_second(second_)
-{}
-
-IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
-	:m_docno(o.m_docno)
-	,m_first(o.m_first->copy())
-	,m_second(o.m_second->copy())
-{}
-
-Index IteratorIntersect::skipDoc( const Index& docno_)
+Index strus::getFirstAllMatchDocno( const std::vector<IteratorReference>& ar, Index docno_iter)
 {
-	Index docno_iter = docno_;
-
 	for (;;)
 	{
-		Index docno_first = m_first->skipDoc( docno_iter);
-		Index docno_second = m_second->skipDoc( docno_first);
-
-		if (!docno_first || !docno_second)
+		std::vector<IteratorReference>::const_iterator pi = ar.begin(), pe = ar.end();
+		if (pi == pe)
 		{
 			return 0;
 		}
-		if (docno_first == docno_second)
-		{
-			m_docno = docno_first;
-			return m_docno;
-		}
-		docno_iter = docno_second;
-	}
-}
-
-Index IteratorIntersect::skipPos( const Index& pos_)
-{
-	Index pos_iter = pos_;
-	if (!m_docno) return 0;
-
-	for (;;)
-	{
-		Index pos_first = m_first->skipDoc( pos_iter);
-		Index pos_second = m_second->skipDoc( pos_first);
-
-		if (!pos_first || !pos_second)
+		Index docno_first = (*pi)->skipDoc( docno_iter);
+		if (!docno_first)
 		{
 			return 0;
 		}
-		if (pos_first == pos_second)
+		for (++pi; pi != pe; ++pi)
 		{
-			return pos_first;
+			Index docno_next = (*pi)->skipDoc( docno_first);
+			if (!docno_next)
+			{
+				return 0;
+			}
+			if (docno_next != docno_first)
+			{
+				docno_iter = docno_next;
+				break;
+			}
 		}
-		pos_iter = pos_second;
+		if (pi == pi)
+		{
+			return docno_first;
+		}
 	}
 }
 
-float IteratorIntersect::weight() const
-{
-	throw std::runtime_error("internal: weight not defined for intersection");
-}
 

@@ -140,30 +140,30 @@ public:
 		JoinOperation(
 				unsigned int resultset_,
 				const std::string& name_,
-				const std::vector<std::string>& options_,
+				int range_,
 				const SelectorSetR& selectorset_)
 			:m_resultset(resultset_)
 			,m_name(name_)
-			,m_options(options_)
+			,m_range(range_)
 			,m_selectorset(selectorset_){}
 
 		JoinOperation( const JoinOperation& o)
 			:m_resultset(o.m_resultset)
 			,m_name(o.m_name)
-			,m_options(o.m_options)
+			,m_range(o.m_range)
 			,m_selectorset(o.m_selectorset){}
 
 	public:
-		unsigned int resultset() const				{return m_resultset;}
-		std::string name() const				{return m_name;}
-		const std::vector<std::string>& options() const		{return m_options;}
-		const SelectorSetR& selectorset() const			{return m_selectorset;}
+		unsigned int resultset() const			{return m_resultset;}
+		std::string name() const			{return m_name;}
+		int range() const				{return m_range;}
+		const SelectorSetR& selectorset() const		{return m_selectorset;}
 
 	private:
-		unsigned int m_resultset;				///< join operation result set index
-		std::string m_name;					///< name of operation
-		std::vector<std::string> m_options;			///< options (additonal parameters passed to the join function)
-		SelectorSetR m_selectorset;				///< iterator reference sequences
+		unsigned int m_resultset;	///< join operation result set index
+		std::string m_name;		///< name of operation
+		int m_range;			///< range for operations defined in a range (position difference)
+		SelectorSetR m_selectorset;	///< iterator reference sequences
 	};
 
 	/// \brief Defines an accumulate operation
@@ -228,7 +228,7 @@ private:
 	unsigned int defineSetElement( const std::string& setname, SetElement::Type type, std::size_t idx);
 
 	void defineTerm( const std::string& setname, const std::string& type, const std::string& value);
-	void defineJoinOperation( const std::string& setname, const std::string& funcname, const std::vector<std::string>& options, const JoinOperation::SelectorSetR& input);
+	void defineJoinOperation( const std::string& setname, const std::string& funcname, int range, const JoinOperation::SelectorSetR& input);
 	void defineAccumulateOperation( const std::string& setname, const std::string& funcname, const std::vector<double>& scale, const std::vector<AccumulateOperation::Argument>& args);
 
 private:

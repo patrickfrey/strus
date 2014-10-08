@@ -26,69 +26,56 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorIntersect.hpp"
+#include "iterator/iteratorDifference.hpp"
 #include <stdexcept>
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_)
+IteratorDifference::IteratorDifference( const IteratorReference& positive_, const IteratorReference& negative_)
 	:m_docno(0)
-	,m_first(first_)
-	,m_second(second_)
+	,m_docno_neg(0)
+	,m_positive(positive_)
+	,m_negative(negative_)
 {}
 
-IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
+IteratorDifference::IteratorDifference( const IteratorDifference& o)
 	:m_docno(o.m_docno)
-	,m_first(o.m_first->copy())
-	,m_second(o.m_second->copy())
+	,m_docno_neg(o.m_docno_neg)
+	,m_positive(o.m_positive->copy())
+	,m_negative(o.m_negative->copy())
 {}
 
-Index IteratorIntersect::skipDoc( const Index& docno_)
+Index IteratorDifference::skipDoc( const Index& docno_)
 {
-	Index docno_iter = docno_;
-
-	for (;;)
-	{
-		Index docno_first = m_first->skipDoc( docno_iter);
-		Index docno_second = m_second->skipDoc( docno_first);
-
-		if (!docno_first || !docno_second)
-		{
-			return 0;
-		}
-		if (docno_first == docno_second)
-		{
-			m_docno = docno_first;
-			return m_docno;
-		}
-		docno_iter = docno_second;
-	}
+	m_docno = m_positive->skipDoc( docno_);
+	m_docno_neg = m_negative->skipDoc( m_docno);
+	
+	return m_docno;
 }
 
-Index IteratorIntersect::skipPos( const Index& pos_)
+Index IteratorDifference::skipPos( const Index& pos_)
 {
 	Index pos_iter = pos_;
 	if (!m_docno) return 0;
 
 	for (;;)
 	{
-		Index pos_first = m_first->skipDoc( pos_iter);
-		Index pos_second = m_second->skipDoc( pos_first);
-
-		if (!pos_first || !pos_second)
+		Index pos_positive = m_positive->skipDoc( pos_iter);
+		if (m_docno_neg == m_docno)
 		{
-			return 0;
+			Index pos_negative = m_negative->skipDoc( pos_positive);
+			if (pos_negative == pos_positive)
+			{
+				pos_iter = pos_positive+1;
+				continue;
+			}
 		}
-		if (pos_first == pos_second)
-		{
-			return pos_first;
-		}
-		pos_iter = pos_second;
+		return pos_positive;
 	}
 }
 
-float IteratorIntersect::weight() const
+float IteratorDifference::weight() const
 {
-	throw std::runtime_error("internal: weight not defined for intersection");
+	throw std::runtime_error("internal: weight not defined for occurrence set difference");
 }
 

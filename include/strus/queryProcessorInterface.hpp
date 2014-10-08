@@ -55,14 +55,14 @@ public:
 
 	/// \brief Create an iterator as join function on the arguments passed
 	/// \param[in] name name of the join function to execute
-	/// \param[in] options list of options describing additional parameters for the join function to execute
+	/// \param[in] range additional parameters for describing a range or offset for the join operator to execute
 	/// \param[in] nofargs number of arguments to pass to the function
 	/// \param[in] args arguments to pass to the function
 	/// \return the created iterator reference object representing the result of the function
 	virtual IteratorInterface*
 		createIterator(
 			const std::string& name,
-			const std::vector<std::string>& options,
+			int range,
 			std::size_t nofargs,
 			const IteratorInterface** args)=0;
 

@@ -1,0 +1,9 @@
+implement RandomQuery::compareMatches( const std::vector<Match>&, strus::IteratorInterface*) const
+cirange and cigroup with more than two positive elements
+cirange operator with negative ranges
+cirange with more than positive 2 elements in range
+other option syntax (-d-5 is silly)
+options as vector of pairs
+implement final accumulator
+ciseq operator besides cirange
+

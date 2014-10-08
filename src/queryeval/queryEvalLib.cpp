@@ -118,7 +118,7 @@ struct QueryContext
 					const Selector& paramdef = joinargset.ar()[ ri+ci];
 					paramar[ ci] = getSetElement( paramdef.setIndex, paramdef.elemIndex);
 				}
-				joinresult.m_ar.push_back( processor->createIterator( ji->name(), ji->options(), rowsize, paramar));
+				joinresult.m_ar.push_back( processor->createIterator( ji->name(), ji->range(), rowsize, paramar));
 			}
 		}
 	}

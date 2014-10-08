@@ -2,7 +2,10 @@ TOPDIR=../..
 CPP_OBJS=\
 	iterator/iteratorIntersect.o \
 	iterator/iteratorUnion.o \
-	iterator/iteratorCutInRange.o \
+	iterator/iteratorDifference.o \
+	iterator/iteratorStructWithin.o \
+	iterator/iteratorStructSequence.o \
+	iterator/iteratorHelpers.o \
 	queryProcessor.o \
 	queryProcessorLib.o
 

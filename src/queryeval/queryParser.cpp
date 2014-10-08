@@ -166,10 +166,6 @@ static bool isAsterisk( char ch)
 {
 	return ch == '*';
 }
-static bool isDash( char ch)
-{
-	return ch == '-';
-}
 static bool isStringQuote( char ch)
 {
 	return ch == '\'' || ch == '"';
@@ -265,6 +261,37 @@ static char OPERATOR( char const*& src)
 	char rt = *src++;
 	skipSpaces( src);
 	return rt;
+}
+static int INTEGER( char const*& src)
+{
+	int rt = 0;
+	int prev = 0;
+	if (!*src) throw std::runtime_error("integer expected");
+	bool neg = false;
+	if (*src == '-')
+	{
+		++src;
+		neg = true;
+	}
+	if (!(*src >= '0' && *src <= '9')) throw std::runtime_error("integer expected");
+
+	for (; *src >= '0' && *src <= '9'; ++src)
+	{
+		rt = (rt * 10) + (*src - '0');
+		if (prev > rt) throw std::runtime_error("integer number out of range");
+		prev = rt;
+	}
+	if (isAlpha(*src)) throw std::runtime_error("integer expected");
+
+	skipSpaces( src);
+	if (neg)
+	{
+		return -rt;
+	}
+	else
+	{
+		return rt;
+	}
 }
 static SelectorSetR SELECTORSET( char const*& src, strus::KeyMap<QueryParser::SetAttributes>& setmap)
 {
@@ -552,10 +579,10 @@ void QueryParser::defineTerm( const std::string& setname, const std::string& typ
 	m_terms.push_back( term);
 }
 
-void QueryParser::defineJoinOperation( const std::string& setname, const std::string& funcname, const std::vector<std::string>& options, const JoinOperation::SelectorSetR& input)
+void QueryParser::defineJoinOperation( const std::string& setname, const std::string& funcname, int range, const JoinOperation::SelectorSetR& input)
 {
 	unsigned int resultsetIndex = defineSetElement( setname, SetElement::IteratorType, m_joinOperations.size());
-	JoinOperation op( resultsetIndex, funcname, options, input);
+	JoinOperation op( resultsetIndex, funcname, range, input);
 	m_joinOperations.push_back( op);
 }
 
@@ -579,6 +606,8 @@ void QueryParser::pushQuery( const std::string& qry)
 			if (isAlpha(*src))
 			{
 				std::string resultname = IDENTIFIER( src);
+				int range = 0;
+				bool rangeSet = false;
 				if (isColon(*src))
 				{
 					// PROD: IDENTIFIER<iteratorset> ':'
@@ -588,24 +617,23 @@ void QueryParser::pushQuery( const std::string& qry)
 					if (isAlpha( *src))
 					{
 						std::string opname( IDENTIFIER( src));
-						std::vector<std::string> options;
+						std::vector<std::pair<std::string,int> > options;
 
-						while (isDash(*src))
+						if (isDigit(*src))
 						{
-							OPERATOR( src);
-							if (!isAlnum(*src)) throw std::runtime_error( "expected option identifier after dash in term occurrence join expression");
-							options.push_back( IDENTIFIER(src));
+							range = INTEGER( src);
+							rangeSet = true;
 						}
 						if (isOpenSquareBracket( *src))
 						{
 							//... assignment of an iterator from a join operation to a set
 							OPERATOR( src);
 							SelectorSetR input = SELECTORSET( src, m_setmap);
-							defineJoinOperation( resultname, opname, options, input);
+							defineJoinOperation( resultname, opname, range, input);
 						}
-						else if (options.size())
+						else if (rangeSet)
 						{
-							throw std::runtime_error( std::string( "options (like -") + options.back() + ") only allowed for set selector expression");
+							throw std::runtime_error( "range definition (integer after operation name) is only allowed for set selector expressions");
 						}
 						else
 						{
