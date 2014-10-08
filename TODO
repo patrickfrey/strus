@@ -1,3 +1,2 @@
-implement RandomQuery::compareMatches( const std::vector<Match>&, strus::IteratorInterface*) const
 implement final accumulator
 

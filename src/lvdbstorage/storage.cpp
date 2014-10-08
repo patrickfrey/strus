@@ -94,39 +94,6 @@ Storage::~Storage()
 	}
 }
 
-Index Storage::newTermNo()
-{
-	boost::mutex::scoped_lock( m_mutex);
-	return m_next_termno++;
-}
-
-Index Storage::newTypeNo()
-{
-	boost::mutex::scoped_lock( m_mutex);
-	return m_next_typeno++;
-}
-
-Index Storage::newDocNo()
-{
-	boost::mutex::scoped_lock( m_mutex);
-	return m_next_docno++;
-}
-
-Index Storage::curTermNo()
-{
-	return m_next_termno;
-}
-
-Index Storage::curTypeNo()
-{
-	return m_next_typeno;
-}
-
-Index Storage::curDocNo()
-{
-	return m_next_docno;
-}
-
 void Storage::writeBatch( leveldb::WriteBatch& batch)
 {
 	if (!m_db) throw std::runtime_error("write on closed storage");
@@ -135,6 +102,20 @@ void Storage::writeBatch( leveldb::WriteBatch& batch)
 	{
 		throw std::runtime_error( status.ToString());
 	}
+}
+
+void Storage::flushNewKeys()
+{
+	boost::mutex::scoped_lock( m_mutex);
+	if (m_newKeyMap.size() == 0) return;
+
+	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &m_newKeyBatch);
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	m_newKeyBatch.Clear();
+	m_newKeyMap.clear();
 }
 
 void Storage::batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
@@ -161,7 +142,6 @@ std::string Storage::keyString( KeyPrefix prefix, const std::string& keyname)
 Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname)
 {
 	if (!m_db) throw std::runtime_error("read on closed storage");
-	boost::mutex::scoped_lock( m_mutex);
 
 	std::string key = keyString( prefix, keyname);
 	leveldb::Slice constkey( key.c_str(), key.size());
@@ -189,25 +169,36 @@ Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
 	if (status.IsNotFound())
 	{
 		boost::mutex::scoped_lock( m_mutex);
+		NewKeyMap::const_iterator ki = m_newKeyMap.find( key);
+		if (ki != m_newKeyMap.end())
+		{
+			return ki->second;
+		}
 		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
 		if (status.IsNotFound())
 		{
+			Index rt = 0;
 			if (prefix == TermTypePrefix)
 			{
-				return m_next_typeno++;
+				rt = m_next_typeno++;
 			}
 			else if (prefix == TermValuePrefix)
 			{
-				return m_next_termno++;
+				rt = m_next_termno++;
 			}
 			else if (prefix == DocIdPrefix)
 			{
-				return m_next_docno++;
+				rt = m_next_docno++;
 			}
 			else
 			{
 				throw std::logic_error( "internal: Cannot create index value");
 			}
+			std::string valuebuf;
+			packIndex( valuebuf, rt);
+			m_newKeyMap[ key] = rt;
+			m_newKeyBatch.Put( constkey, valuebuf);
+			return rt;
 		}
 		else if (!status.ok())
 		{
@@ -229,6 +220,7 @@ IteratorInterface*
 {
 	Index typeno = keyLookUp( TermTypePrefix, typestr);
 	Index termno = keyLookUp( TermValuePrefix, termstr);
+	if (!typeno || !termno) return 0;
 	return new Iterator( m_db, typeno, termno);
 }
 
@@ -236,7 +228,6 @@ StorageInterface::TransactionInterface*
 	Storage::createTransaction(
 		const std::string& docid)
 {
-	boost::mutex::scoped_lock( m_mutex);
 	return new Transaction( this, docid);
 }
 

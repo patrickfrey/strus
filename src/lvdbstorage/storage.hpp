@@ -53,15 +53,10 @@ public:
 		createTransaction( const std::string& docid);
 
 public:
-	Index newTermNo();
-	Index curTermNo();
-	Index newTypeNo();
-	Index curTypeNo();
-	Index newDocNo();
-	Index curDocNo();
-
-	void writeBatch( leveldb::WriteBatch& batch);
-	void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value);
+	void writeBatch(
+		leveldb::WriteBatch& batch);
+	void batchDefineVariable(
+		leveldb::WriteBatch& batch, const char* name, Index value);
 
 	leveldb::Iterator* newIterator();
 
@@ -78,14 +73,27 @@ public:
 	static std::string keyString( KeyPrefix prefix, const std::string& keyname);
 	Index keyLookUp( KeyPrefix prefix, const std::string& keyname);
 	Index keyGetOrCreate( KeyPrefix prefix, const std::string& keyname);
+	void flushNewKeys();
 
 private:
-	std::string m_path;
-	leveldb::DB* m_db;
-	Index m_next_termno;
-	Index m_next_typeno;
-	Index m_next_docno;
-	boost::mutex m_mutex;
+	struct stlSliceComparator
+	{
+		bool operator()(const leveldb::Slice& a, const leveldb::Slice& b) const
+		{
+			return a.compare(b) < 0;
+		}
+	};
+	typedef std::map<std::string,Index,stlSliceComparator> NewKeyMap;
+
+private:
+	std::string m_path;					///< levelDB storage path 
+	leveldb::DB* m_db;					///< levelDB handle
+	Index m_next_termno;					///< next index to assign to a new term value
+	Index m_next_typeno;					///< next index to assign to a new term type
+	Index m_next_docno;					///< next index to assign to a new document id
+	boost::mutex m_mutex;					///< mutex for mutual exclusion for the access of counters (m_next_..) and for the access of keys not defined during a running transaction
+	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined. flushed at end of every transaction
+	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
 };
 
 }

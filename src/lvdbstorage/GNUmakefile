@@ -8,6 +8,8 @@ CPP_OBJS=\
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/include -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
+MODFLAGS=-fPIC
+#-fvisibility=hidden 
 LDFLAGS=-L/usr/lib
 LIBS=-lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
 
@@ -16,7 +18,7 @@ all: libstrus_lvdbstorage.so
 -include $(CPP_OBJS:.o=.d)
 
 %.o : %.cpp GNUmakefile $(IFILES) $(HFILES)
-	g++ -fPIC -fvisibility=hidden -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
+	g++ $(MODFLAGS) -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
 	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 libstrus_lvdbstorage.so: $(CPP_OBJS)

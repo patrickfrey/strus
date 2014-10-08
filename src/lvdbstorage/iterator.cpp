@@ -80,9 +80,9 @@ Index Iterator::skipPos( const Index& firstpos)
 	{
 		m_posno = 0;
 		m_positr = m_itr->value().data() + sizeof(float);
-		m_posend = m_positr + m_itr->value().size();
+		m_posend = m_positr + m_itr->value().size() - sizeof(float);
 	}
-	while (m_positr < m_posend && firstpos > m_posno)
+	while (m_positr < m_posend && (firstpos > m_posno || !m_posno))
 	{
 		// Get the next position increment and with it the next position number:
 		Index incr = unpackIndex( m_positr, m_posend);
@@ -99,17 +99,17 @@ Index Iterator::extractMatchData()
 {
 	if (m_keysize < m_itr->key().size() && 0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize))
 	{
-		// Check if we are still on the same term:
-		const char* ki = m_itr->key().data();
-		const char* ke = ki + m_itr->key().size();
-
+		// Init the term weight and the iterators on the term occurrencies:
 		m_posno = 0;
 		std::memcpy( &m_weight, m_itr->value().data(), sizeof(float));
 		m_positr = m_itr->value().data() + sizeof(float);
-		m_posend = m_positr + m_itr->value().size();
+		m_posend = m_positr + m_itr->value().size() - sizeof(float);
 
-		// Return the matching document number:
-		return m_docno=unpackIndex( ki, ke);
+		// Extract the next matching document number from the rest of the key and return it:
+		const char* ki = m_itr->key().data() + m_keysize;
+		const char* ke = ki + m_itr->key().size();
+		m_docno = unpackIndex( ki, ke);
+		return m_docno;
 	}
 	else
 	{
@@ -138,7 +138,7 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 	}
 	m_key.resize( m_keysize);
 	packIndex( m_key, docno);
-	m_itr->Seek( leveldb::Slice( m_key.c_str(), m_keysize));
+	m_itr->Seek( leveldb::Slice( m_key.c_str(), m_key.size()));
 
 	return extractMatchData();
 }

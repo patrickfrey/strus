@@ -49,7 +49,7 @@
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 class Random
 {
@@ -71,7 +71,7 @@ public:
 		unsigned int iv = max_ - min_;
 		if (iv)
 		{
-			return (m_value % iv) + min_;
+			return ((m_value ^ (m_value >> 8)) % iv) + min_;
 		}
 		else
 		{
@@ -101,7 +101,7 @@ static std::string randomTerm( unsigned int nofFeatures)
 			 * (unsigned int)KnuthIntegerHashFactor;
 	unsigned int le = g_random.get( 1, 20);
 	unsigned int li = 0;
-	while (g_random.get( 1, 10) < 4)
+	while (g_random.get( 1, 10) < 6)
 	{
 		// ... distribution that favors shorter terms
 		le = (le / 2) + 1;
@@ -159,9 +159,9 @@ struct RandomDoc
 		unsigned int posidx = 1;
 		while (posidx <= size)
 		{
-			unsigned int termidx = g_random.get( 1, collection.termar.size());
+			unsigned int termidx = 1+g_random.get( 0, collection.termar.size());
 			occurrencear.push_back( Occurrence( termidx, posidx));
-			if (g_random.get( 0, 4) > 1) posidx++;
+			if (g_random.get( 0, 40) > 20) posidx++;
 		}
 	}
 
@@ -225,9 +225,9 @@ struct RandomCollection
 			{
 				if (++matchcount[ oi->term] == 1)
 				{
-					++termDocumentFrequencyMap[ oi->term];
+					++termDocumentFrequencyMap[ oi->term-1];
 				}
-				++termCollectionFrequencyMap[ oi->term];
+				++termCollectionFrequencyMap[ oi->term-1];
 			}
 			avgDocLen += (double)doc.occurrencear.size() / nofDocuments;
 		}
@@ -245,7 +245,7 @@ struct RandomCollection
 			for (; oi != oe; ++oi)
 			{
 				unsigned int collSize = docar.size();
-				unsigned int nofMatchingDocs = termDocumentFrequencyMap[ oi->term];
+				unsigned int nofMatchingDocs = termDocumentFrequencyMap[ oi->term-1];
 				unsigned int nofMatchesInDoc = matchcount[ oi->term];
 				unsigned int docLen = doc.occurrencear.size();
 
@@ -281,12 +281,13 @@ struct RandomQuery
 		operation = (Operation)g_random.get( 0, NofOperations);
 		std::size_t pickDocIdx = g_random.get( 0, collection.docar.size());
 		const RandomDoc& pickDoc = collection.docar[ pickDocIdx];
+		operation = Union;
 
 		switch (operation)
 		{
 			case Intersect:
 			{
-				unsigned int pi = g_random.get( 1, pickDoc.occurrencear.size());
+				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
 				arg.push_back( pickDoc.occurrencear[pi].term);
 
 				for (; pi+1 < pickDoc.occurrencear.size() && arg.size() < (unsigned int)MaxNofArgs; ++pi)
@@ -321,7 +322,7 @@ struct RandomQuery
 			}
 			case Difference:
 			{
-				unsigned int pi = g_random.get( 1, pickDoc.occurrencear.size());
+				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
 				arg.push_back( pickDoc.occurrencear[pi].term);
 
 				for (; pi+1 < pickDoc.occurrencear.size(); ++pi)
@@ -586,52 +587,68 @@ struct RandomQuery
 		return rt;
 	}
 
-	bool compareMatches( const std::vector<Match>& matchar, strus::IteratorInterface* itr) const
+	static std::vector<Match> resultMatches( strus::IteratorInterface* itr)
 	{
-		bool rt = true;
-		unsigned int docno = 0;
-		std::vector<Match>::const_iterator mi = matchar.begin(), me = matchar.end();
-		for (; mi != me; ++mi)
+		std::vector<Match> rt;
+		unsigned int docno = (unsigned int)itr->skipDoc( 0);
+		unsigned int pos = 0;
+		while (docno)
 		{
-			docno = (unsigned int)itr->skipDoc( docno);
-			while (docno && mi->docno > docno)
+			pos = (unsigned int)itr->skipPos( pos);
+			if (pos)
 			{
-				std::cerr << "unexpected match in doc " << docno << " at " << itr->skipPos( 0) << std::endl;
-				rt = false;
+				rt.push_back( Match( docno, pos));
+				++pos;
+			}
+			else
+			{
 				docno = (unsigned int)itr->skipDoc( docno+1);
-			}
-			if (docno == 0 || mi->docno < docno)
-			{
-				
-				std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
-				rt = false;
-				continue;
-			}
-			unsigned int pos = (unsigned int)itr->skipPos( 0);
-			for (; mi != me && mi->docno == docno; ++mi)
-			{
-				while (pos && mi->pos > pos)
-				{
-					std::cerr << "unexpected match in doc " << docno << " at " << pos << std::endl;
-					rt = false;
-					pos = (unsigned int)itr->skipPos( pos+1);
-				}
-				if (pos == 0 || mi->pos < pos)
-				{
-					std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
-					rt = false;
-					continue;
-				}
-				pos = (unsigned int)itr->skipPos( pos+1);
-			}
-			while (pos != 0)
-			{
-				std::cerr << "unexpected match in doc " << docno << " at " << pos << std::endl;
-				rt = false;
-				pos = (unsigned int)itr->skipPos( pos+1);
+				pos = 0;
 			}
 		}
 		return rt;
+	}
+
+	bool compareMatches( const std::vector<Match>& matchar, strus::IteratorInterface* itr) const
+	{
+		std::vector<Match> res = resultMatches( itr);
+
+		std::vector<Match>::const_iterator mi = matchar.begin(), me = matchar.end();
+		std::vector<Match>::const_iterator ri = res.begin(), re = res.end();
+		for (; mi != me && ri != re; ++mi,++ri)
+		{
+			if (mi->docno < ri->docno)
+			{
+				std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+				return false;
+			}
+			if (mi->docno > ri->docno)
+			{
+				std::cerr << "unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+				return false;
+			}
+			if (mi->pos < ri->pos)
+			{
+				std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+				return false;
+			}
+			if (mi->pos > ri->pos)
+			{
+				std::cerr << "unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+				return false;
+			}
+		}
+		if (mi != me)
+		{
+			std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+			return false;
+		}
+		if (ri != re)
+		{
+			std::cerr << "unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+			return false;
+		}
+		return true;
 	}
 
 	std::string tostring( const RandomCollection& collection) const
@@ -644,7 +661,7 @@ struct RandomQuery
 		}
 		for (unsigned int ai=0; ai<arg.size(); ++ai)
 		{
-			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]];
+			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
 			rt << " " << term.type << " '" << term.value << "'";
 		}
 		return rt.str();
@@ -656,8 +673,14 @@ struct RandomQuery
 		const strus::IteratorInterface* itr[ MaxNofArgs];
 		for (unsigned int ai=0; ai<nofitr; ++ai)
 		{
-			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]];
+			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
 			itr[ ai] = queryproc->createIterator( term.type, term.value);
+			if (!itr[ ai])
+			{
+				std::cerr << "term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
+				std::cerr << "random query failed: " << tostring( collection) << std::endl;
+				return false;
+			}
 		}
 		std::string opname( operationName());
 		strus::IteratorInterface* res = 
@@ -782,7 +805,7 @@ int main( int argc, const char* argv[])
 				const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
 				transaction->addTermOccurrence( term.type, term.value, oi->pos);
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "term type '" << term.type << "' value '" << term.value << " pos " << oi->pos << std::endl;
+				std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
 #endif
 				totTermStringSize += term.value.size();
 			}
@@ -792,7 +815,7 @@ int main( int argc, const char* argv[])
 				const TermCollection::Term& term = collection.termCollection.termar[ wi->first-1];
 				transaction->setTermWeight( term.type, term.value, wi->second);
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "weigth type '" << term.type << "' value '" << term.value << " pos " << wi->second << std::endl;
+				std::cerr << "weigth type '" << term.type << "' value '" << term.value << "' weight " << wi->second << std::endl;
 #endif
 			}
 			transaction->commit();

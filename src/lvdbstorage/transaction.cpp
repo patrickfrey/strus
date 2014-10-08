@@ -39,8 +39,7 @@ using namespace strus;
 
 Transaction::Transaction( Storage* storage_, const std::string& docid_)
 	:m_storage(storage_),m_docid(docid_)
-{
-}
+{}
 
 Transaction::~Transaction()
 {
@@ -151,6 +150,10 @@ void Transaction::commit()
 			packIndex( positions, *pi - previous_pos);
 			previous_pos = *pi;
 		}
+		/*[-]*/if (positions[ positions.size()-1] == 0x80)
+		/*[-]*/{
+		/*[-]*/	throw std::runtime_error( "SSLKSéAJD");
+		/*[-]*/}
 		batch.Put( termkey, positions);
 	}
 
@@ -168,6 +171,7 @@ void Transaction::commit()
 	}
 	// [4] Do submit the write to the database:
 	m_storage->writeBatch( batch);
+	m_storage->flushNewKeys();
 	batch.Clear();
 }
 

@@ -36,7 +36,7 @@
 namespace strus {
 
 /// \class Transaction
-/// \brief Storage insert or update transaction
+/// \brief Storage insert or replace transaction
 class Transaction
 	:public StorageInterface::TransactionInterface
 {
@@ -81,6 +81,10 @@ private:
 	typedef std::map<Index, InvMapValue> InvMap;
 
 	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
+
+private:
+	Transaction( const Transaction&){}	//non copyable
+	void operator=( const Transaction&){}	//non copyable
 
 private:
 	Storage* m_storage;
