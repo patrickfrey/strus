@@ -304,6 +304,7 @@ struct RandomQuery
 				{
 					goto AGAIN;
 				}
+				break;
 			}
 			case Union:
 			{
@@ -339,6 +340,7 @@ struct RandomQuery
 				{
 					goto AGAIN;
 				}
+				break;
 			}
 			case StructWithin:
 			case Within:
@@ -349,7 +351,7 @@ struct RandomQuery
 				const RandomDoc::Occurrence& pickOcc = pickDoc.occurrencear[ pickOccIdx];
 				arg.push_back( pickOcc.term);
 
-				unsigned int rangeOccIdx = g_random.get( 0, pickDoc.occurrencear.size() - pickOccIdx);
+				unsigned int rangeOccIdx = g_random.get( pickOccIdx, pickDoc.occurrencear.size());
 				const RandomDoc::Occurrence& rangeOcc = pickDoc.occurrencear[ rangeOccIdx];
 
 				unsigned int prevpos = pickOcc.pos;
@@ -586,12 +588,50 @@ struct RandomQuery
 
 	bool compareMatches( const std::vector<Match>& matchar, strus::IteratorInterface* itr) const
 	{
+		bool rt = true;
+		unsigned int docno = 0;
 		std::vector<Match>::const_iterator mi = matchar.begin(), me = matchar.end();
 		for (; mi != me; ++mi)
 		{
-			
+			docno = (unsigned int)itr->skipDoc( docno);
+			while (docno && mi->docno > docno)
+			{
+				std::cerr << "unexpected match in doc " << docno << " at " << itr->skipPos( 0) << std::endl;
+				rt = false;
+				docno = (unsigned int)itr->skipDoc( docno+1);
+			}
+			if (docno == 0 || mi->docno < docno)
+			{
+				
+				std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+				rt = false;
+				continue;
+			}
+			unsigned int pos = (unsigned int)itr->skipPos( 0);
+			for (; mi != me && mi->docno == docno; ++mi)
+			{
+				while (pos && mi->pos > pos)
+				{
+					std::cerr << "unexpected match in doc " << docno << " at " << pos << std::endl;
+					rt = false;
+					pos = (unsigned int)itr->skipPos( pos+1);
+				}
+				if (pos == 0 || mi->pos < pos)
+				{
+					std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+					rt = false;
+					continue;
+				}
+				pos = (unsigned int)itr->skipPos( pos+1);
+			}
+			while (pos != 0)
+			{
+				std::cerr << "unexpected match in doc " << docno << " at " << pos << std::endl;
+				rt = false;
+				pos = (unsigned int)itr->skipPos( pos+1);
+			}
 		}
-		return true;
+		return rt;
 	}
 
 	std::string tostring( const RandomCollection& collection) const
@@ -605,8 +645,7 @@ struct RandomQuery
 		for (unsigned int ai=0; ai<arg.size(); ++ai)
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]];
-			if (ai) rt << " ";
-			rt << term.type << " '" << term.value << "'";
+			rt << " " << term.type << " '" << term.value << "'";
 		}
 		return rt.str();
 	}
