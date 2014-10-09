@@ -144,7 +144,7 @@ IteratorInterface*
 		if (nofargs < 1) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
 		IteratorReference empty;
 		std::vector<IteratorReference> group;
-		for (std::size_t ai=1; ai<nofargs; ++ai)
+		for (std::size_t ai=0; ai<nofargs; ++ai)
 		{
 			group.push_back( IteratorReference( args[ai]->copy()));
 		}

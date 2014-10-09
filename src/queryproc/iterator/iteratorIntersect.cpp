@@ -72,8 +72,8 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 
 	for (;;)
 	{
-		Index pos_first = m_first->skipDoc( pos_iter);
-		Index pos_second = m_second->skipDoc( pos_first);
+		Index pos_first = m_first->skipPos( pos_iter);
+		Index pos_second = m_second->skipPos( pos_first);
 
 		if (!pos_first || !pos_second)
 		{

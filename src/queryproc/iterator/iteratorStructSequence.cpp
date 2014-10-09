@@ -78,7 +78,13 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 		std::vector<IteratorReference>::const_iterator pi = m_seq.begin(), pe = m_seq.end();
 		if (pi == pe) return 0;
 
-		max_pos = min_pos = (*pi)->skipPos( pos_iter);
+		min_pos = (*pi)->skipPos( pos_iter);
+		if (!min_pos)
+		{
+			return 0;
+		}
+		max_pos = min_pos;
+
 		for (++pi; pi != pe; ++pi)
 		{
 			max_pos = (*pi)->skipPos( max_pos+1);
@@ -97,12 +103,16 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 				Index pos_cut = m_cut->skipPos( min_pos);
 				if (pos_cut == 0 || pos_cut > max_pos)
 				{
-					return m_range>0?min_pos:max_pos;
+					return m_range>=0?min_pos:max_pos;
+				}
+				else
+				{
+					pos_iter = pos_cut + 1;
 				}
 			}
 			else
 			{
-				return m_range>0?min_pos:max_pos;
+				return m_range>=0?min_pos:max_pos;
 			}
 		}
 	}

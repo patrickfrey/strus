@@ -49,7 +49,7 @@
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 class Random
 {
@@ -67,6 +67,10 @@ public:
 
 	unsigned int get( unsigned int min_, unsigned int max_)
 	{
+		if (min_ >= max_)
+		{
+			throw std::runtime_error("illegal range passed to pseudo random number generator");
+		}
 		m_value = (m_value+123) * KnuthIntegerHashFactor;
 		unsigned int iv = max_ - min_;
 		if (iv)
@@ -119,6 +123,11 @@ struct TermCollection
 {
 	TermCollection( unsigned int nofTerms)
 	{
+		if (nofTerms < 1)
+		{
+			std::cerr << "ERROR number of distinct terms in the collection has to be at least 1" << std::endl;
+			nofTerms = 1;
+		}
 		unsigned int ii=0;
 		for (; ii<nofTerms; ++ii)
 		{
@@ -200,6 +209,11 @@ struct RandomCollection
 	RandomCollection( unsigned int nofTerms, unsigned int nofDocuments, unsigned int maxDocumentSize)
 		:termCollection(nofTerms)
 	{
+		if (maxDocumentSize < 3)
+		{
+			std::cerr << "ERROR max document size has to be at least 3" << std::endl;
+			maxDocumentSize = 3;
+		}
 		unsigned int di = 0;
 		for (; di < nofDocuments; ++di)
 		{
@@ -275,13 +289,13 @@ struct RandomQuery
 	enum {MaxNofArgs=8};
 
 	RandomQuery( const RandomCollection& collection)
-		:range(0)
 	{
 	AGAIN:
+		arg.clear();
+		range = 0;
 		operation = (Operation)g_random.get( 0, NofOperations);
 		std::size_t pickDocIdx = g_random.get( 0, collection.docar.size());
 		const RandomDoc& pickDoc = collection.docar[ pickDocIdx];
-		operation = Union;
 
 		switch (operation)
 		{
@@ -353,6 +367,15 @@ struct RandomQuery
 				arg.push_back( pickOcc.term);
 
 				unsigned int rangeOccIdx = g_random.get( pickOccIdx, pickDoc.occurrencear.size());
+				if (rangeOccIdx == pickOccIdx)
+				{
+					goto AGAIN;
+				}
+				while (rangeOccIdx-pickOccIdx > 10 && g_random.get( 0, 4) > 1)
+				{
+					//... favor small sequences
+					rangeOccIdx = ((rangeOccIdx-pickOccIdx)/2) + pickOccIdx;
+				}
 				const RandomDoc::Occurrence& rangeOcc = pickDoc.occurrencear[ rangeOccIdx];
 
 				unsigned int prevpos = pickOcc.pos;
@@ -360,7 +383,7 @@ struct RandomQuery
 				{
 					if (rangeOcc.pos == prevpos) goto AGAIN;
 				}
-				for (unsigned int ti = pickOccIdx; ti < rangeOccIdx; ++ti)
+				for (unsigned int ti = pickOccIdx; ti < rangeOccIdx && arg.size()+2 < (unsigned int)MaxNofArgs; ++ti)
 				{
 					const RandomDoc::Occurrence& midOcc = pickDoc.occurrencear[ ti];
 					if (midOcc.term == rangeOcc.term)
@@ -373,7 +396,12 @@ struct RandomQuery
 						{
 							if (midOcc.pos == prevpos) continue;
 						}
-						arg.push_back( midOcc.term);
+						unsigned int rd = rangeOccIdx-pickOccIdx;
+						if (g_random.get( 0, rd) < (3 + rd/10))
+						{
+							// ... try to add less elements in a larger sequence
+							arg.push_back( midOcc.term);
+						}
 					}
 					prevpos = midOcc.pos;
 				}
@@ -421,7 +449,7 @@ struct RandomQuery
 	{
 		if (oi != oe)
 		{
-			for (++oi; oi != oe && oi->pos <= lastpos; ++oi)
+			for (; oi != oe && oi->pos <= lastpos; ++oi)
 			{
 				if (oi->term == term) return oi;
 			}
@@ -477,6 +505,7 @@ struct RandomQuery
 							if (matchTerm( oi, oe, arg[1], oi->pos)) continue;
 							rt.push_back( Match( docno, oi->pos));
 						}
+						break;
 					case Union:
 					{
 						if (arg.empty()) continue;
@@ -523,7 +552,7 @@ struct RandomQuery
 						}
 						// Check if matched and check the structure delimiter term
 						if (argidx == arg.size()
-						&& (!delimiter_term || matchTerm( oi, oe, delimiter_term, fi->pos)))
+						&& !(delimiter_term && matchTerm( oi, oe, delimiter_term, fi->pos)))
 						{
 							if (range >= 0)
 							{
@@ -561,13 +590,14 @@ struct RandomQuery
 							{
 								std::vector<RandomDoc::Occurrence>::const_iterator
 									fi = findTerm( oi, oe, arg[ai], lastpos);
+								if (fi == oe) break;
 								if (fi->pos > maxpos)
 								{
 									maxpos = fi->pos;
 								}
 							}
-							if (argidx == arg.size()
-							&& (!delimiter_term || matchTerm( oi, oe, delimiter_term, maxpos)))
+							if (ai == arg.size()
+							&& !(delimiter_term && matchTerm( oi, oe, delimiter_term, maxpos)))
 							{
 								if (range >= 0)
 								{
@@ -619,33 +649,33 @@ struct RandomQuery
 		{
 			if (mi->docno < ri->docno)
 			{
-				std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+				std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
 				return false;
 			}
 			if (mi->docno > ri->docno)
 			{
-				std::cerr << "unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+				std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
 				return false;
 			}
 			if (mi->pos < ri->pos)
 			{
-				std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+				std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
 				return false;
 			}
 			if (mi->pos > ri->pos)
 			{
-				std::cerr << "unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+				std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
 				return false;
 			}
 		}
 		if (mi != me)
 		{
-			std::cerr << "match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
 			return false;
 		}
 		if (ri != re)
 		{
-			std::cerr << "unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
 			return false;
 		}
 		return true;
@@ -677,8 +707,8 @@ struct RandomQuery
 			itr[ ai] = queryproc->createIterator( term.type, term.value);
 			if (!itr[ ai])
 			{
-				std::cerr << "term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
-				std::cerr << "random query failed: " << tostring( collection) << std::endl;
+				std::cerr << "ERROR term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
+				std::cerr << "ERROR random query operation failed: " << tostring( collection) << std::endl;
 				return false;
 			}
 		}
@@ -687,11 +717,15 @@ struct RandomQuery
 			queryproc->createIterator(
 					opname, range, std::size_t(nofitr), &itr[0]);
 
-		if (!compareMatches( expectedMatches( collection), res))
+		std::vector<Match> matches = expectedMatches( collection);
+		if (!compareMatches( matches, res))
 		{
-			std::cerr << "random query failed: " << tostring( collection) << std::endl;
+			std::cerr << "ERROR random query operation failed: " << tostring( collection) << std::endl;
 			return false;
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "random query operation " << tostring( collection) << " " << matches.size() << " matches" << std::endl;
+#endif
 		for (unsigned int ai=0; ai<nofitr; ++ai)
 		{
 			delete itr[ai];
@@ -768,7 +802,7 @@ int main( int argc, const char* argv[])
 	}
 	else if (argc < 6)
 	{
-		std::cerr << "too few parameters" << std::endl;
+		std::cerr << "ERROR too few parameters" << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
@@ -834,11 +868,17 @@ int main( int argc, const char* argv[])
 			strus::createQueryProcessorInterface( storage.get()));
 
 		std::vector<RandomQuery> randomQueryAr;
+		if (collection.docar.size())
 		{
 			for (std::size_t qi=0; qi < nofQueries; ++qi)
 			{
 				randomQueryAr.push_back( RandomQuery( collection));
 			}
+		}
+		else if (nofQueries)
+		{
+			std::cerr << "ERROR cannot do random queries on empty collection" << std::endl;
+			nofQueries = 0;
 		}
 		if (nofQueries)
 		{
@@ -858,11 +898,11 @@ int main( int argc, const char* argv[])
 			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 			if (nofQueriesFailed)
 			{
-				std::cerr << "evaluated " << nofQueries << " random queries with " << nofQueriesFailed << " queries failed" << std::endl;
+				std::cerr << "evaluated " << nofQueries << " random query operations of which " << nofQueriesFailed << " failed" << std::endl;
 			}
 			else
 			{
-				std::cerr << "evaluated " << nofQueries << " random queries correctly in " << timeToString(duration) << " milliseconds" << std::endl;
+				std::cerr << "evaluated correctly " << nofQueries << " random query operations in " << timeToString(duration) << " seconds" << std::endl;
 			}
 		}
 		return 0;

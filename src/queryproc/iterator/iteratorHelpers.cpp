@@ -45,6 +45,7 @@ Index strus::getFirstAllMatchDocno( const std::vector<IteratorReference>& ar, In
 		{
 			return 0;
 		}
+		bool match = true;
 		for (++pi; pi != pe; ++pi)
 		{
 			Index docno_next = (*pi)->skipDoc( docno_first);
@@ -54,11 +55,12 @@ Index strus::getFirstAllMatchDocno( const std::vector<IteratorReference>& ar, In
 			}
 			if (docno_next != docno_first)
 			{
+				match = false;
 				docno_iter = docno_next;
 				break;
 			}
 		}
-		if (pi == pi)
+		if (match)
 		{
 			return docno_first;
 		}
