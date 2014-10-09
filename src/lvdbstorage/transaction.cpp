@@ -150,10 +150,6 @@ void Transaction::commit()
 			packIndex( positions, *pi - previous_pos);
 			previous_pos = *pi;
 		}
-		/*[-]*/if (positions[ positions.size()-1] == 0x80)
-		/*[-]*/{
-		/*[-]*/	throw std::runtime_error( "SSLKSéAJD");
-		/*[-]*/}
 		batch.Put( termkey, positions);
 	}
 

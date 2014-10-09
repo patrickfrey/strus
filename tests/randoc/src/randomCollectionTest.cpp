@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -45,11 +46,24 @@
 #include <ctime>
 #include <algorithm>
 #include <limits>
+#include <cstdarg>
+#include <stdint.h>
 #include <boost/scoped_ptr.hpp>
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
 #undef STRUS_LOWLEVEL_DEBUG
+
+uint32_t uint32_hash( uint32_t a)
+{
+	a += ~(a << 15);
+	a ^=  (a >> 10);
+	a +=  (a << 3);
+	a ^=  (a >> 6);
+	a += ~(a << 11);
+	a ^=  (a >> 16);
+	return a;
+}
 
 class Random
 {
@@ -62,7 +76,10 @@ public:
 		::time( &nowtime);
 		now = ::localtime( &nowtime);
 
-		m_value = ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)) * KnuthIntegerHashFactor;
+		m_value = uint32_hash( ((now->tm_year+1)
+					* (now->tm_mon+100)
+					* (now->tm_mday+1))
+			);
 	}
 
 	unsigned int get( unsigned int min_, unsigned int max_)
@@ -71,15 +88,36 @@ public:
 		{
 			throw std::runtime_error("illegal range passed to pseudo random number generator");
 		}
-		m_value = (m_value+123) * KnuthIntegerHashFactor;
+		m_value = uint32_hash( m_value + 1);
 		unsigned int iv = max_ - min_;
 		if (iv)
 		{
-			return ((m_value ^ (m_value >> 8)) % iv) + min_;
+			return (m_value % iv) + min_;
 		}
 		else
 		{
 			return min_;
+		}
+	}
+
+	unsigned int get( unsigned int min_, unsigned int max_, unsigned int psize, ...)
+	{
+		va_list ap;
+		unsigned int pidx = get( 0, psize+1);
+		if (pidx == psize)
+		{
+			return get( min_, max_);
+		}
+		else
+		{
+			unsigned int rt = min_;
+			va_start( ap, psize);
+			for (unsigned int ii = 0; ii <= pidx; ii++)
+			{
+				rt = va_arg( ap, unsigned int);
+			}
+			va_end(ap);
+			return rt;
 		}
 	}
 
@@ -89,6 +127,20 @@ private:
 
 static Random g_random;
 
+
+class StlRandomGen
+{
+public:
+	StlRandomGen(){}
+
+	std::size_t operator()( std::size_t i)
+	{
+		return (std::size_t)g_random.get( 0, i);
+	}
+};
+	
+
+
 static const char* randomType()
 {
 	enum {NofTypes=5};
@@ -96,26 +148,22 @@ static const char* randomType()
 	return ar[ g_random.get( 0, (unsigned int)NofTypes-1)];
 }
 
-static std::string randomTerm( unsigned int nofFeatures)
+static std::string randomTerm()
 {
 	std::string rt;
 	static const char* alphabet
 		= {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
-	unsigned int val = g_random.get( 0, nofFeatures)
-			 * (unsigned int)KnuthIntegerHashFactor;
-	unsigned int le = g_random.get( 1, 20);
+	unsigned int val = g_random.get( 0, std::numeric_limits<int>::max());
+	unsigned int le = g_random.get( 1, 20, 10, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
 	unsigned int li = 0;
-	while (g_random.get( 1, 10) < 6)
-	{
-		// ... distribution that favors shorter terms
-		le = (le / 2) + 1;
-	}
 	for (; li < le; ++li)
 	{
 		unsigned int pf = (li * val) >> 8;
 		unsigned int chidx = ((val^pf) % 52);
 		rt.push_back( alphabet[chidx]);
 	}
+	StlRandomGen rnd;
+	std::random_shuffle( rt.begin(), rt.end(), rnd);
 	return rt;
 }
 
@@ -128,10 +176,15 @@ struct TermCollection
 			std::cerr << "ERROR number of distinct terms in the collection has to be at least 1" << std::endl;
 			nofTerms = 1;
 		}
-		unsigned int ii=0;
-		for (; ii<nofTerms; ++ii)
+		std::set<std::string> termSet;
+		while (termSet.size() < nofTerms)
 		{
-			termar.push_back( Term( randomType(), randomTerm( nofTerms)));
+			termSet.insert( randomTerm());
+		}
+		std::set<std::string>::const_iterator ti = termSet.begin(), te = termSet.end();
+		for (; ti != te; ++ti)
+		{
+			termar.push_back( Term( randomType(), *ti));
 		}
 	}
 
@@ -147,6 +200,14 @@ struct TermCollection
 		Term( const std::string& t, const std::string& v)
 			:type(t),value(v)
 			,weight(0){}
+
+		std::string tostring() const
+		{
+			std::ostringstream rt;
+			rt << " " << type << " '" << value << "'";
+			return rt.str();
+		}
+		
 	};
 
 	std::vector<Term> termar;
@@ -217,12 +278,12 @@ struct RandomCollection
 		unsigned int di = 0;
 		for (; di < nofDocuments; ++di)
 		{
-			unsigned int docsize = g_random.get( 2, maxDocumentSize);
-			while (g_random.get( 1, 10) < 4)
-			{
-				// ... distribution that favors shorter documents
-				docsize = (docsize / 2) + 1;
-			}
+			unsigned int tiny_docsize  = g_random.get( 2, 3 + (maxDocumentSize/16)) + (maxDocumentSize/16);
+			unsigned int small_docsize = g_random.get( 2, 3 + (maxDocumentSize/8)) + (maxDocumentSize/8);
+			unsigned int med_docsize   = g_random.get( 2, 3 + (maxDocumentSize/4)) + (maxDocumentSize/4);
+			unsigned int big_docsize   = g_random.get( 2, 3 + (maxDocumentSize/2)) + (maxDocumentSize/2);
+
+			unsigned int docsize = g_random.get( 2, maxDocumentSize, 4, tiny_docsize, small_docsize, med_docsize, big_docsize);
 			docar.push_back( RandomDoc( di+1, termCollection, docsize));
 		}
 		std::vector<unsigned int> termDocumentFrequencyMap( termCollection.termar.size(), 0);
@@ -268,22 +329,27 @@ struct RandomCollection
 		}
 	}
 
+	std::string docSummary( unsigned int docno_, unsigned int pos_, unsigned int range) const
+	{
+		std::ostringstream rt;
+		const RandomDoc& doc = docar[docno_-1];
+		std::vector<RandomDoc::Occurrence>::const_iterator oi = doc.occurrencear.begin(), oe = doc.occurrencear.end();
+		for (; oi != oe; ++oi)
+		{
+			if (oi->pos+1 >= pos_ && oi->pos <= pos_ + range)
+			{
+				rt << " " << oi->pos << ": " << termCollection.termar[ oi->term-1].tostring() << " (" << oi->term << ")";
+				rt << std::endl;
+			}
+		}
+		return rt.str();
+	}
+
 	TermCollection termCollection;
 	std::vector<RandomDoc> docar;
 };
 
 
-class RandomGen
-{
-public:
-	RandomGen(){}
-
-	std::size_t operator()( std::size_t i)
-	{
-		return (std::size_t)g_random.get( 0, i);
-	}
-};
-	
 struct RandomQuery
 {
 	enum {MaxNofArgs=8};
@@ -364,59 +430,62 @@ struct RandomQuery
 			{
 				unsigned int pickOccIdx = g_random.get( 0, pickDoc.occurrencear.size());
 				const RandomDoc::Occurrence& pickOcc = pickDoc.occurrencear[ pickOccIdx];
+
+				// insert first element selected
 				arg.push_back( pickOcc.term);
 
-				unsigned int rangeOccIdx = g_random.get( pickOccIdx, pickDoc.occurrencear.size());
-				if (rangeOccIdx == pickOccIdx)
-				{
-					goto AGAIN;
-				}
-				while (rangeOccIdx-pickOccIdx > 10 && g_random.get( 0, 4) > 1)
-				{
-					//... favor small sequences
-					rangeOccIdx = ((rangeOccIdx-pickOccIdx)/2) + pickOccIdx;
-				}
-				const RandomDoc::Occurrence& rangeOcc = pickDoc.occurrencear[ rangeOccIdx];
+				unsigned int maxRange = pickDoc.occurrencear.back().pos - pickOcc.pos;
+				range = g_random.get( 0, maxRange, 8, 1, 2, 3, 5, 7, 9, 11, 13);
 
-				unsigned int prevpos = pickOcc.pos;
-				if (operation == StructSequence || operation == Sequence)
+				unsigned int maxNofPicks = MaxNofArgs-2;
+				unsigned int nofPicks = g_random.get( 1, maxNofPicks+1);
+
+				// select ordered position occurrencies in a range:
+				std::multiset<unsigned int> picks;
+				for (unsigned int ii=0; ii<nofPicks; ++ii)
 				{
-					if (rangeOcc.pos == prevpos) goto AGAIN;
+					picks.insert( g_random.get( 0, range));
 				}
-				for (unsigned int ti = pickOccIdx; ti < rangeOccIdx && arg.size()+2 < (unsigned int)MaxNofArgs; ++ti)
+				unsigned int lastOccIdx = pickOccIdx;
+
+				// insert the elements maching to the selected position occurrencies into arg
+				std::multiset<unsigned int>::const_iterator pi = picks.begin(), pe = picks.end();
+				unsigned int prevpick = 0;
+				unsigned int nextOccIdx = pickOccIdx+1;
+
+				for (; pi != pe; ++pi)
 				{
-					const RandomDoc::Occurrence& midOcc = pickDoc.occurrencear[ ti];
-					if (midOcc.term == rangeOcc.term)
+					if (operation == StructSequence || operation == Sequence)
 					{
-						goto AGAIN;
+						// ... no elements with same position in case of a strictly ordered sequence
+						if (*pi == prevpick) continue;
+						prevpick = *pi;
 					}
-					if (midOcc.term != pickOcc.term)
+					unsigned int nextPos = pickOcc.pos + *pi;
+					for (;nextOccIdx < pickDoc.occurrencear.size(); ++nextOccIdx)
 					{
-						if (operation == StructSequence || operation == Sequence)
+						if (pickDoc.occurrencear[ nextOccIdx].pos == nextPos)
 						{
-							if (midOcc.pos == prevpos) continue;
-						}
-						unsigned int rd = rangeOccIdx-pickOccIdx;
-						if (g_random.get( 0, rd) < (3 + rd/10))
-						{
-							// ... try to add less elements in a larger sequence
-							arg.push_back( midOcc.term);
+							break;
 						}
 					}
-					prevpos = midOcc.pos;
+					if (nextOccIdx == pickDoc.occurrencear.size())
+					{
+						break;
+					}
+					const RandomDoc::Occurrence& nextOcc = pickDoc.occurrencear[ nextOccIdx];
+					lastOccIdx = nextOccIdx;
+					arg.push_back( nextOcc.term);
 				}
-				arg.push_back( rangeOcc.term);
 				if (operation == StructWithin || operation == Within)
 				{
 					//... in case of within range condition without order, shuffle the elements
 					shuffleArg();
 				}
-				range = (int)rangeOcc.pos - (int)pickOcc.pos;
-
 				if (operation == StructWithin || operation == StructSequence)
 				{
 					//... in case of structure insert structure delimiter as first argument
-					unsigned int cutOccIdx = pickOccIdx + g_random.get( 0, rangeOccIdx - pickOccIdx);
+					unsigned int cutOccIdx = g_random.get( 0, lastOccIdx - pickOccIdx + 1) + pickOccIdx;
 					const RandomDoc::Occurrence& cutOcc = pickDoc.occurrencear[ cutOccIdx];
 					arg.insert( arg.begin(), cutOcc.term);
 				}
@@ -429,7 +498,7 @@ struct RandomQuery
 
 	void shuffleArg()
 	{
-		RandomGen rnd;
+		StlRandomGen rnd;
 		std::random_shuffle( arg.begin(), arg.end(), rnd);
 	}
 
@@ -639,7 +708,7 @@ struct RandomQuery
 		return rt;
 	}
 
-	bool compareMatches( const std::vector<Match>& matchar, strus::IteratorInterface* itr) const
+	bool compareMatches( const RandomCollection& collection, const std::vector<Match>& matchar, strus::IteratorInterface* itr) const
 	{
 		std::vector<Match> res = resultMatches( itr);
 
@@ -650,27 +719,37 @@ struct RandomQuery
 			if (mi->docno < ri->docno)
 			{
 				std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+				std::cerr << "summary: " << std::endl;
+				std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
 				return false;
 			}
 			if (mi->docno > ri->docno)
 			{
 				std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+				std::cerr << "summary: " << std::endl;
+				std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
 				return false;
 			}
 			if (mi->pos < ri->pos)
 			{
 				std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+				std::cerr << "summary: " << std::endl;
+				std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
 				return false;
 			}
 			if (mi->pos > ri->pos)
 			{
 				std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+				std::cerr << "summary: " << std::endl;
+				std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
 				return false;
 			}
 		}
 		if (mi != me)
 		{
 			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+			std::cerr << "summary: " << std::endl;
+			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
 			return false;
 		}
 		if (ri != re)
@@ -692,7 +771,7 @@ struct RandomQuery
 		for (unsigned int ai=0; ai<arg.size(); ++ai)
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
-			rt << " " << term.type << " '" << term.value << "'";
+			rt << " " << term.tostring() << " (" << arg[ai] << ")";
 		}
 		return rt.str();
 	}
@@ -716,9 +795,8 @@ struct RandomQuery
 		strus::IteratorInterface* res = 
 			queryproc->createIterator(
 					opname, range, std::size_t(nofitr), &itr[0]);
-
 		std::vector<Match> matches = expectedMatches( collection);
-		if (!compareMatches( matches, res))
+		if (!compareMatches( collection, matches, res))
 		{
 			std::cerr << "ERROR random query operation failed: " << tostring( collection) << std::endl;
 			return false;

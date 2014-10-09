@@ -8,22 +8,11 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 	{
 		if (idx0)
 		{
-			if (idx0 == idx1)
-			{
-				return idx0;
-			}
-			else
-			{
-				return idx0;
-			}
-		}
-		else if (idx1)
-		{
-			return idx1;
+			return idx0;
 		}
 		else
 		{
-			return 0;
+			return idx1;
 		}
 	}
 	else
@@ -32,7 +21,7 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 		{
 			return idx1;
 		}
-		else //if (idx0) ... always true, because idx0 > idx1
+		else
 		{
 			return idx0;
 		}
@@ -83,7 +72,8 @@ Index IteratorUnion::skipPos( const Index& pos_)
 	{
 		pos_second = m_second->skipPos( pos_);
 	}
-	return selectSmallerNotNull( pos_first, pos_second);
+	Index rt = selectSmallerNotNull( pos_first, pos_second);
+	return rt;
 }
 
 float IteratorUnion::weight() const

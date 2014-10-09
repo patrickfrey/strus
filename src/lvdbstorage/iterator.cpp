@@ -45,7 +45,8 @@ Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
 }
 
 Iterator::Iterator( const Iterator& o)
-	:m_db(o.m_db)
+	:IteratorInterface(o)
+	,m_db(o.m_db)
 	,m_key(o.m_key)
 	,m_keysize(o.m_keysize)
 	,m_docno(0)
