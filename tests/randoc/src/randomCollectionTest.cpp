@@ -435,7 +435,7 @@ struct RandomQuery
 				arg.push_back( pickOcc.term);
 
 				unsigned int maxRange = pickDoc.occurrencear.back().pos - pickOcc.pos;
-				range = g_random.get( 0, maxRange, 8, 1, 2, 3, 5, 7, 9, 11, 13);
+				range = g_random.get( 0, maxRange+1, 8, 1, 2, 3, 5, 7, 9, 11, 13);
 
 				unsigned int maxNofPicks = MaxNofArgs-2;
 				unsigned int nofPicks = g_random.get( 1, maxNofPicks+1);
@@ -444,7 +444,7 @@ struct RandomQuery
 				std::multiset<unsigned int> picks;
 				for (unsigned int ii=0; ii<nofPicks; ++ii)
 				{
-					picks.insert( g_random.get( 0, range));
+					picks.insert( g_random.get( 0, range+1));
 				}
 				unsigned int lastOccIdx = pickOccIdx;
 
@@ -611,17 +611,19 @@ struct RandomQuery
 						std::vector<RandomDoc::Occurrence>::const_iterator fi = oi;
 						(void)skipNextPosition(fi,oe);
 
+						unsigned int lastmatchpos = oi->pos;
 						for (++argidx; argidx < arg.size() && fi != oe && fi->pos <= lastpos; (void)skipNextPosition(fi,oe))
 						{
 							if (matchTerm( fi, oe, arg[argidx], fi->pos))
 							{
+								lastmatchpos = fi->pos;
 								argidx++;
 								if (argidx == arg.size()) break;
 							}
 						}
 						// Check if matched and check the structure delimiter term
 						if (argidx == arg.size()
-						&& !(delimiter_term && matchTerm( oi, oe, delimiter_term, fi->pos)))
+						&& !(delimiter_term && matchTerm( oi, oe, delimiter_term, lastmatchpos)))
 						{
 							if (range >= 0)
 							{
@@ -708,58 +710,6 @@ struct RandomQuery
 		return rt;
 	}
 
-	bool compareMatches( const RandomCollection& collection, const std::vector<Match>& matchar, strus::IteratorInterface* itr) const
-	{
-		std::vector<Match> res = resultMatches( itr);
-
-		std::vector<Match>::const_iterator mi = matchar.begin(), me = matchar.end();
-		std::vector<Match>::const_iterator ri = res.begin(), re = res.end();
-		for (; mi != me && ri != re; ++mi,++ri)
-		{
-			if (mi->docno < ri->docno)
-			{
-				std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
-				std::cerr << "summary: " << std::endl;
-				std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
-				return false;
-			}
-			if (mi->docno > ri->docno)
-			{
-				std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
-				std::cerr << "summary: " << std::endl;
-				std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
-				return false;
-			}
-			if (mi->pos < ri->pos)
-			{
-				std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
-				std::cerr << "summary: " << std::endl;
-				std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
-				return false;
-			}
-			if (mi->pos > ri->pos)
-			{
-				std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
-				std::cerr << "summary: " << std::endl;
-				std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
-				return false;
-			}
-		}
-		if (mi != me)
-		{
-			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
-			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
-			return false;
-		}
-		if (ri != re)
-		{
-			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
-			return false;
-		}
-		return true;
-	}
-
 	std::string tostring( const RandomCollection& collection) const
 	{
 		std::ostringstream rt;
@@ -776,7 +726,7 @@ struct RandomQuery
 		return rt.str();
 	}
 
-	bool execute( strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
+	bool execute( std::vector<Match>& result, strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
 	{
 		unsigned int nofitr = arg.size();
 		const strus::IteratorInterface* itr[ MaxNofArgs];
@@ -795,15 +745,8 @@ struct RandomQuery
 		strus::IteratorInterface* res = 
 			queryproc->createIterator(
 					opname, range, std::size_t(nofitr), &itr[0]);
-		std::vector<Match> matches = expectedMatches( collection);
-		if (!compareMatches( collection, matches, res))
-		{
-			std::cerr << "ERROR random query operation failed: " << tostring( collection) << std::endl;
-			return false;
-		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "random query operation " << tostring( collection) << " " << matches.size() << " matches" << std::endl;
-#endif
+
+		result = resultMatches( res);
 		for (unsigned int ai=0; ai<nofitr; ++ai)
 		{
 			delete itr[ai];
@@ -838,6 +781,56 @@ struct RandomQuery
 	int range;
 };
 
+static bool compareMatches( const std::vector<RandomQuery::Match>& res, const std::vector<RandomQuery::Match>& matchar, const RandomCollection& collection)
+{
+	std::vector<RandomQuery::Match>::const_iterator mi = matchar.begin(), me = matchar.end();
+	std::vector<RandomQuery::Match>::const_iterator ri = res.begin(), re = res.end();
+	for (; mi != me && ri != re; ++mi,++ri)
+	{
+		if (mi->docno < ri->docno)
+		{
+			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+			std::cerr << "summary: " << std::endl;
+			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+			return false;
+		}
+		if (mi->docno > ri->docno)
+		{
+			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+			std::cerr << "summary: " << std::endl;
+			std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
+			return false;
+		}
+		if (mi->pos < ri->pos)
+		{
+			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+			std::cerr << "summary: " << std::endl;
+			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+			return false;
+		}
+		if (mi->pos > ri->pos)
+		{
+			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+			std::cerr << "summary: " << std::endl;
+			std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
+			return false;
+		}
+	}
+	if (mi != me)
+	{
+		std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+		std::cerr << "summary: " << std::endl;
+		std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+		return false;
+	}
+	if (ri != re)
+	{
+		std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+		return false;
+	}
+	return true;
+}
+
 static unsigned int getUintValue( const char* arg)
 {
 	unsigned int rt = 0, prev = 0;
@@ -851,7 +844,7 @@ static unsigned int getUintValue( const char* arg)
 	return rt;
 }
 
-static std::string timeToString( double val_)
+static std::string doubleToString( double val_)
 {
 	unsigned int val = ::floor( val_ * 1000);
 	unsigned int val_sec = val / 1000;
@@ -964,23 +957,41 @@ int main( int argc, const char* argv[])
 			double duration;
 			unsigned int nofQueriesFailed = 0;
 			start = std::clock();
-
+			std::vector<std::vector<RandomQuery::Match> > result_matches;
 			std::vector<RandomQuery>::const_iterator qi = randomQueryAr.begin(), qe = randomQueryAr.end();
+			double arglen = 0.0;
 			for (; qi != qe; ++qi)
 			{
-				if (!qi->execute( queryproc.get(), collection))
+				result_matches.push_back( std::vector<RandomQuery::Match>());
+				if (!qi->execute( result_matches.back(), queryproc.get(), collection))
 				{
 					++nofQueriesFailed;
 				}
+				arglen /= nofQueries;
 			}
 			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-			if (nofQueriesFailed)
+			std::cerr << "evaluated " << nofQueries << " random query operations in " << doubleToString(duration) << " seconds" << std::endl;
+			std::cerr << "average query size = " << doubleToString( arglen) << std::endl;
+
+			qi = randomQueryAr.begin(), qe = randomQueryAr.end();
+			std::vector<std::vector<RandomQuery::Match> >::const_iterator ri = result_matches.begin(), re = result_matches.end();
+			for (std::size_t rcnt=0,rsum=0; ri != re && qi != qe; ++qi,++ri)
 			{
-				std::cerr << "evaluated " << nofQueries << " random query operations of which " << nofQueriesFailed << " failed" << std::endl;
-			}
-			else
-			{
-				std::cerr << "evaluated correctly " << nofQueries << " random query operations in " << timeToString(duration) << " seconds" << std::endl;
+				arglen += qi->arg.size();
+				std::vector<RandomQuery::Match> expected_matches = qi->expectedMatches( collection);
+				if (!compareMatches( *ri, expected_matches, collection))
+				{
+					std::cerr << "ERROR random query operation failed: " << qi->tostring( collection) << std::endl;
+					return false;
+				}
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cerr << "random query operation " << tostring( collection) << " " << matches.size() << " matches" << std::endl;
+#endif
+				if (++rcnt >= 100)
+				{
+					rsum += rcnt;
+					std::cerr << "verified " << rsum << " query results" << std::endl;
+				}
 			}
 		}
 		return 0;

@@ -5,7 +5,7 @@ all:
 	cd src; make all; cd ..
 
 test: all dataclean
-	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) src/randomCollectionTest "path=data/test" 100 100 50 10
+	LD_LIBRARY_PATH=$(LD_LIBRARY_PATH) src/randomCollectionTest "path=data/test" 100 100 50 100
 
 clean: dataclean
 	cd src; make clean; cd ..
