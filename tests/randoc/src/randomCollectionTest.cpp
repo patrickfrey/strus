@@ -967,7 +967,7 @@ int main( int argc, const char* argv[])
 				{
 					++nofQueriesFailed;
 				}
-				arglen += arg.size();
+				arglen += qi->arg.size();
 			}
 			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 			std::cerr << "evaluated " << nofQueries << " random query operations in " << doubleToString(duration) << " seconds" << std::endl;
@@ -976,7 +976,8 @@ int main( int argc, const char* argv[])
 
 			qi = randomQueryAr.begin(), qe = randomQueryAr.end();
 			std::vector<std::vector<RandomQuery::Match> >::const_iterator ri = result_matches.begin(), re = result_matches.end();
-			for (std::size_t rcnt=0,rsum=0; ri != re && qi != qe; ++qi,++ri)
+			std::size_t rsum = 0;
+			for (std::size_t rcnt=0; ri != re && qi != qe; ++qi,++ri)
 			{
 				arglen += qi->arg.size();
 				std::vector<RandomQuery::Match> expected_matches = qi->expectedMatches( collection);
@@ -991,9 +992,11 @@ int main( int argc, const char* argv[])
 				if (++rcnt >= 100)
 				{
 					rsum += rcnt;
-					std::cerr << "verified " << rsum << " query results" << std::endl;
+					std::cerr << ".";
 				}
 			}
+			std::cerr << std::endl;
+			std::cerr << "verified " << rsum << " query results" << std::endl;
 		}
 		return 0;
 	}
