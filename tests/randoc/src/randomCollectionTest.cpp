@@ -967,10 +967,11 @@ int main( int argc, const char* argv[])
 				{
 					++nofQueriesFailed;
 				}
-				arglen /= nofQueries;
+				arglen += arg.size();
 			}
 			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 			std::cerr << "evaluated " << nofQueries << " random query operations in " << doubleToString(duration) << " seconds" << std::endl;
+			arglen /= nofQueries;
 			std::cerr << "average query size = " << doubleToString( arglen) << std::endl;
 
 			qi = randomQueryAr.begin(), qe = randomQueryAr.end();
