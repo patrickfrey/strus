@@ -69,9 +69,9 @@ public:
 	struct WeightedAccumulator
 	{
 		double weight;
-		const AccumulatorInterface* accu;
+		AccumulatorInterface* accu;
 
-		explicit WeightedAccumulator( const AccumulatorInterface* accu_=0, double weight_=1.0)
+		explicit WeightedAccumulator( AccumulatorInterface* accu_=0, double weight_=1.0)
 			:weight(weight_),accu(accu_){}
 		WeightedAccumulator( const WeightedAccumulator& o)
 			:weight(o.weight),accu(o.accu){}
