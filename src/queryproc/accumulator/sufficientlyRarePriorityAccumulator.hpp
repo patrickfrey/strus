@@ -26,41 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_HPP_INCLUDED
+#ifndef _STRUS_SUFFICIENTLY_RARE_PRIORITY_ACCUMULATOR_HPP_INCLUDED
+#define _STRUS_SUFFICIENTLY_RARE_PRIORITY_ACCUMULATOR_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/accumulatorInterface.hpp"
+#include "accumulatorReference.hpp"
 #include "strus/iteratorInterface.hpp"
 #include "iteratorReference.hpp"
+#include <vector>
 
 namespace strus
 {
 
-class IteratorUnion
-	:public IteratorInterface
+/// \class SufficientlyRarePriorityAccumulator
+/// \brief Accumulator for ranks that priorities input accumulators returning matches that are occurring "sufficiently rare"
+class SufficientlyRarePriorityAccumulator
+	:public AccumulatorInterface
 {
 public:
-	IteratorUnion( const IteratorUnion& o);
-	IteratorUnion( const IteratorReference& first_, const IteratorReference& second_);
-	virtual ~IteratorUnion(){}
-
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
-
-	virtual float weight() const;
-
-	virtual IteratorInterface* copy() const
+	class PrioritisedIterator
 	{
-		return new IteratorUnion( *this);
-	}
+	public:
+		double priority;
+		IteratorReference itr;
+
+		explicit PrioritisedIterator( IteratorReference itr_, double priority_)
+			:priority(priority_)
+			,itr(itr_){}
+
+		void set( Index docno, Index follow_docno)
+		{
+			double ww = (follow_docno - docno);
+			priority += ww * ww;
+		}
+
+		bool operator < ( const PrioritisedIterator& o) const
+		{
+			return (priority < o.priority);
+		}
+	};
+
+	SufficientlyRarePriorityAccumulator( Index maxDocno_, const std::vector<IteratorReference>& arg_);
+	virtual ~SufficientlyRarePriorityAccumulator(){}
+
+	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
+
+	virtual Index skipDoc( const Index& docno);
+	virtual double weight();
 
 private:
-	Index m_docno;
-	IteratorReference m_first;
-	IteratorReference m_second;
-	bool m_open_first;
-	bool m_open_second;
+	void recalculatePriorityList();
+
+private:
+	std::vector<PrioritisedIterator> m_iterPrioList;
+	std::vector<PrioritisedIterator> m_nextPrioList;
+	Index m_maxDocno;
+	unsigned int m_count;
+	double m_weight;
 };
 
 }//namespace
 #endif
-
 

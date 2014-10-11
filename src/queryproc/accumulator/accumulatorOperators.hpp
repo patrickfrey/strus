@@ -3,7 +3,7 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013 Patrick Frey
+    Copyright (C) 2013,2014 Patrick Frey
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -52,19 +52,9 @@ public:
 	AccumulatorOperatorSum_td( const std::vector<IteratorReference>& arg_)
 		:AccumulatorOperatorTemplate(arg_){}
 
-	virtual double cur_weight()
+	virtual double weight()
 	{
-		return (double)m_matches.size();
-	}
-
-	virtual double min_weight()
-	{
-		return 1.0;
-	}
-
-	virtual double max_weight()
-	{
-		return (double)m_arg.size();
+		return static_cast<double>( m_matches.size());
 	}
 };
 
@@ -79,7 +69,7 @@ public:
 	AccumulatorOperatorNormSum_td( const std::vector<IteratorReference>& arg_)
 		:AccumulatorOperatorTemplate(arg_){}
 
-	virtual double cur_weight()
+	virtual double weight()
 	{
 		if (m_arg.empty())
 		{
@@ -87,25 +77,8 @@ public:
 		}
 		else
 		{
-			return (double)m_matches.size() / (double)m_arg.size();
+			return static_cast<double>(m_matches.size()) / m_arg.size();
 		}
-	}
-
-	virtual double min_weight()
-	{
-		if (m_arg.empty())
-		{
-			return 0.0;
-		}
-		else
-		{
-			return (double)1.0 / (double)m_arg.size();
-		}
-	}
-
-	virtual double max_weight()
-	{
-		return (double)1.0;
 	}
 };
 
@@ -115,7 +88,7 @@ class WeightSum
 public:
 	float operator()( IteratorInterface& itr)
 	{
-		return itr.weight();
+		return static_cast<float>( itr.weight());
 	}
 };
 
@@ -130,7 +103,7 @@ class FrequencySum
 public:
 	float operator()( IteratorInterface& itr)
 	{
-		return (float)itr.frequency();
+		return static_cast<float>( itr.frequency());
 	}
 };
 

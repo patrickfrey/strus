@@ -3,7 +3,7 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013 Patrick Frey
+    Copyright (C) 2013,2014 Patrick Frey
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -212,8 +212,9 @@ std::vector<WeightedDocument>
 			AccumulatorInterface& accu,
 			std::size_t maxNofRanks) const
 {
-	std::vector<WeightedDocument> rt;
 	typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
+
+	std::vector<WeightedDocument> rt;
 	Ranker ranker;
 	std::size_t ranks = 0;
 

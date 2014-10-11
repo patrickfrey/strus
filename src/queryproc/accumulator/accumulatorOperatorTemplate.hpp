@@ -3,7 +3,7 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013 Patrick Frey
+    Copyright (C) 2013,2014 Patrick Frey
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -49,46 +49,47 @@ public:
 		:m_arg(arg_){}
 	virtual ~AccumulatorOperatorTemplate(){}
 
-	virtual bool nextRank( Index& docno, int& state, double& weight)
+	virtual bool nextRank( Index& docno_, int& state_, double& weight_)
 	{
-		switch (state)
+		switch (state_)
 		{
 			case 0:
-				docno = getNextAllMatchesDoc( docno);
-				if (docno != 0)
+				docno_ = getNextAllMatchesDoc( docno_);
+				if (docno_ != 0)
 				{
-					weight = 0.0;
+					weight_ = 0.0;
 					std::vector<IteratorReference>::iterator ai = m_arg.begin(), ae = m_arg.end();
 					for (; ai != ae; ++ai)
 					{
-						weight += WeightingFunction()( **ai);
+						weight_ += WeightingFunction()( **ai);
 					}
 					return true;
 				}
-				docno = 0;
-				state = 1;
+				docno_ = 0;
+				state_ = 1;
 				/* no break here! */
 			case 1:
-				docno = getNextMatchingDoc( docno, false);
-				if (docno != 0)
+				docno_ = getNextMatchingDoc( docno_, false);
+				if (docno_ != 0)
 				{
-					weight = cur_weight();
+					weight_ = weight();
 					return true;
 				}
-				state = 2;
+				state_ = 2;
 				/* no break here! */
 			default:
 				return false;
 			break;
 		}
+		return false;
 	}
 
-	virtual Index skipDoc( const Index& docno)
+	virtual Index skipDoc( const Index& docno_)
 	{
-		return getNextMatchingDoc( docno, true);
+		return getNextMatchingDoc( docno_, true);
 	}
 
-	virtual double cur_weight()
+	virtual double weight()
 	{
 		double rt = 0.0;
 		std::set<std::size_t>::const_iterator mi = m_matches.begin(), me = m_matches.end();
@@ -99,32 +100,25 @@ public:
 		return rt;
 	}
 
-	virtual double min_weight()
-	{
-		return 0.0;
-	}
-
-	virtual double max_weight()
-	{
-		return std::numeric_limits<float>::max();
-	}
-
 private:
-	Index getNextMatchingDoc( const Index& docno, bool withAllMatch)
+	/// \brief Get the next (smallest document number) matching document
+	/// \param[in] docno minimum document number to search for 
+	/// \param[in] withAllMatch true => do not return matches of all documents (that were part of the set returned with getNextAllMatchesDoc(const Index&))
+	Index getNextMatchingDoc( const Index& docno_, bool withAllMatch)
 	{
 		std::size_t argidx = 0;
 		m_matches.clear();
 		std::vector<IteratorReference>::iterator ai = m_arg.begin(), ae = m_arg.end();
 		if (ai == ae) return 0;
 
-		Index min_docno = (*ai)->skipDoc( docno);
+		Index min_docno = (*ai)->skipDoc( docno_);
 		m_matches.insert( 0);
 
 		for (;;)
 		{
 			for (++ai; ai != ae; ++ai)
 			{
-				Index candidate_docno = (*ai)->skipDoc( docno);
+				Index candidate_docno = (*ai)->skipDoc( docno_);
 				if (candidate_docno == min_docno)
 				{
 					m_matches.insert( argidx);
@@ -151,10 +145,12 @@ private:
 		}
 	}
 
-	Index getNextAllMatchesDoc( const Index& docno)
+	/// \brief Get the next (smallest document number) matching document appears in all input sets of occurrencies
+	/// \param[in] docno minimum document number to search for 
+	Index getNextAllMatchesDoc( const Index& docno_)
 	{
 		if (m_arg.empty()) return 0;
-		Index rt = docno;
+		Index rt = docno_;
 		for (;;)
 		{
 			std::vector<IteratorReference>::iterator ai = m_arg.begin(), ae = m_arg.end();
@@ -177,9 +173,10 @@ private:
 		}
 		return rt;
 	}
+
 protected:
-	std::vector<IteratorReference> m_arg;
-	std::set<std::size_t> m_matches;
+	std::vector<IteratorReference> m_arg;	///< input occurrencies to scan for results
+	std::set<std::size_t> m_matches;	///< set of current matches
 };
 
 }//namespace

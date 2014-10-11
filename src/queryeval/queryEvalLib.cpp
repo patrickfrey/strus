@@ -3,7 +3,7 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013 Patrick Frey
+    Copyright (C) 2013,2014 Patrick Frey
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -55,14 +55,6 @@ struct QueryContext
 
 		std::vector<IteratorReference> m_ar;
 	};
-
-	QueryProcessorInterface* processor;
-	QueryParser query;
-	typedef std::map< unsigned int, IteratorSet> IteratorSetMap;
-	typedef std::map< unsigned int, AccumulatorReference> AccumulatorMap;
-	IteratorSetMap itersetmap;
-	AccumulatorMap accumap;
-	AccumulatorReference lastaccu;
 
 	/// \brief Create all basic terms defined in the query
 	void expandTerms()
@@ -187,6 +179,15 @@ struct QueryContext
 						ai->args().size(), weightedAccus);
 		}
 	}
+
+	typedef std::map< unsigned int, IteratorSet> IteratorSetMap;
+	typedef std::map< unsigned int, AccumulatorReference> AccumulatorMap;
+
+	QueryProcessorInterface* processor;
+	QueryParser query;
+	IteratorSetMap itersetmap;
+	AccumulatorMap accumap;
+	AccumulatorReference lastaccu;
 };
 }//namespace
 

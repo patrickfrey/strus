@@ -26,32 +26,59 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTED_SUM_ACCUMULATOR_HPP_INCLUDED
+#define _STRUS_WEIGHTED_SUM_ACCUMULATOR_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/accumulatorInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
+#include <set>
 
 namespace strus
 {
 
-class IteratorInterface
+/// \class SufficientlyRarePriorityAccumulator
+/// \brief Accumulator for ranks that priorities input accumulators returning matches that are occurring "sufficiently rare"
+class WeightedSumAccumulator
+	:public AccumulatorInterface
 {
 public:
-	virtual ~IteratorInterface(){}
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-	virtual float weight() const=0;
-
-	virtual unsigned int frequency()
+	struct SubAccumulator
+		:public QueryProcessorInterface::WeightedAccumulator
 	{
-		Index idx = 0;
-		for (;0!=(idx=skipPos( idx)); ++idx);
-		return idx;
-	}
+		SubAccumulator( const QueryProcessorInterface::WeightedAccumulator& o,
+				std::size_t order_)
+			:QueryProcessorInterface::WeightedAccumulator(o)
+			,state(0){}
+		SubAccumulator( const SubAccumulator& o)
+			:QueryProcessorInterface::WeightedAccumulator(o)
+			,state(o.state){}
 
-	virtual IteratorInterface* copy() const=0;
+		bool operator < ( const SubAccumulator& o) const
+		{
+			if (state < o.state) return true;
+			if (order < o.order) return true;
+			return false;
+		}
+
+		int state;
+		std::size_t order;
+	};
+
+	WeightedSumAccumulator(
+		std::size_t nof_accu_,
+		const QueryProcessorInterface::WeightedAccumulator* accu_);
+	virtual ~WeightedSumAccumulator(){}
+
+	virtual bool nextRank( Index& docno_, int& state_, double& weigth_);
+
+	virtual Index skipDoc( const Index& docno);
+	virtual double weight();
+
+private:
+	std::set<SubAccumulator> m_accu;
+	double m_weight;
 };
 
 }//namespace
 #endif
-
 
