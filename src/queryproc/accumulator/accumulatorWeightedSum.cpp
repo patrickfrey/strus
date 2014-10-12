@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "weightedSumAccumulator.hpp"
+#include "accumulatorWeightedSum.hpp"
 #include <limits>
 
 using namespace strus;
 
-WeightedSumAccumulator::WeightedSumAccumulator(
+AccumulatorWeightedSum::AccumulatorWeightedSum(
 		std::size_t nof_accu_,
 		const QueryProcessorInterface::WeightedAccumulator* accu_)
 	:m_weight(0.0)
@@ -39,78 +39,84 @@ WeightedSumAccumulator::WeightedSumAccumulator(
 	std::size_t ii=0;
 	for (; ii<nof_accu_; ++ii)
 	{
-		m_accu.insert( SubAccumulator( accu_[ii], ii));
+		m_accuorder.insert( SubAccumulatorIndex( ii)); 
+		m_accu.push_back( accu_[ii]);
 	}
 }
 
-bool WeightedSumAccumulator::nextRank( Index& docno_, int& state_, double& weigth_)
+bool AccumulatorWeightedSum::nextRank( Index& docno_, int& state_, double& weight_)
 {
 AGAIN:
-	std::set<SubAccumulator>::iterator ai = m_accu.begin(), ae = m_accu.end();
+	std::set<SubAccumulatorIndex>::const_iterator ai = m_accuorder.begin(), ae = m_accuorder.end();
 	if (ai == ae) return false;
-	int prev_state = ai->state;
-	if (!ai->accu->nextRank( docno_, ai->state, weigth_))
+	int next_state = ai->state;
+	WeightedAccumulator& wa = m_accu[ ai->index];
+	if (!wa.accu->nextRank( docno_, next_state, weight_))
 	{
-		if (ai->state == std::numeric_limits<int>::max())
+		if (next_state == std::numeric_limits<int>::max())
 		{
 			return false;
 		}
-		SubAccumulator firstaccu( *ai);
+		SubAccumulatorIndex firstaccu( ai->index);
 		firstaccu.state = std::numeric_limits<int>::max();
-		m_accu.erase( ai);
-		m_accu.insert( firstaccu);
+		m_accuorder.erase( ai);
+		m_accuorder.insert( firstaccu);
 		goto AGAIN;
 	}
-	bool orderChanged = (ai->state != prev_state);
-	weight_ *= ai->weight;
+	bool orderChanged = (ai->state != next_state);
+	m_weight = weight_ * wa.weight;
+	std::size_t index = ai->index;
 
 	for (++ai; ai != ae; ++ai)
 	{
-		if (ai->accu->skipDoc( docno_) == docno_)
+		wa = m_accu[ ai->index];
+		if (wa.accu->skipDoc( docno_) == docno_)
 		{
-			weight_ += ai->weight * ai->accu->weight();
+			m_weight += wa.weight * wa.accu->weight();
 		}
 	}
 	if (orderChanged)
 	{
-		SubAccumulator firstaccu( m_accu[0]);
-		m_accu.erase( m_accu->begin());
-		m_accu.insert( firstaccu);
+		SubAccumulatorIndex firstaccu( index, next_state);
+		m_accuorder.erase( m_accuorder.begin());
+		m_accuorder.insert( firstaccu);
 	}
-	m_weight = weight_;
+	weight_ = m_weight;
 	return true;
 }
 
-Index WeightedSumAccumulator::skipDoc( const Index& docno)
+Index AccumulatorWeightedSum::skipDoc( const Index& docno)
 {
-	std::set<SubAccumulator>::iterator ai = m_accu.begin(), ae = m_accu.end();
+	std::set<SubAccumulatorIndex>::const_iterator ai = m_accuorder.begin(), ae = m_accuorder.end();
 	if (ai == ae)
 	{
 		return 0;
 	}
-	Index min_docno = ai->accu->skipDoc( docno);
-	m_weight = 0.0;
+	WeightedAccumulator& wa = m_accu[ ai->index];
+	Index min_docno = wa.accu->skipDoc( docno);
+	m_weight = wa.accu->weight() * wa.weight;
 
 	for (++ai; ai != ae; ++ai)
 	{
-		Index next_docno = ai->accu->skipDoc( docno);
+		wa = m_accu[ ai->index];
+		Index next_docno = wa.accu->skipDoc( docno);
 		if (next_docno <= min_docno && next_docno != 0)
 		{
 			if (next_docno == min_docno)
 			{
-				m_weight += ai->accu->weight() * ai->weight;
+				m_weight += wa.accu->weight() * wa.weight;
 			}
 			else
 			{
 				min_docno = next_docno;
-				m_weight = ai->accu->weight() * ai->weight;
+				m_weight = wa.accu->weight() * wa.weight;
 			}
 		}
 	}
 	return min_docno;
 }
 
-double WeightedSumAccumulator::weight()
+double AccumulatorWeightedSum::weight()
 {
 	return m_weight;
 }

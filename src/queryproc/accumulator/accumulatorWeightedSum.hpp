@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTED_SUM_ACCUMULATOR_HPP_INCLUDED
-#define _STRUS_WEIGHTED_SUM_ACCUMULATOR_HPP_INCLUDED
+#ifndef _STRUS_ACCUMULATOR_WEIGHTED_SUM_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_WEIGHTED_SUM_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/accumulatorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
@@ -36,46 +36,47 @@
 namespace strus
 {
 
-/// \class SufficientlyRarePriorityAccumulator
-/// \brief Accumulator for ranks that priorities input accumulators returning matches that are occurring "sufficiently rare"
-class WeightedSumAccumulator
+/// \class AccumulatorWeightedSum
+/// \brief Accumulator of sums of weighted results
+class AccumulatorWeightedSum
 	:public AccumulatorInterface
 {
 public:
-	struct SubAccumulator
-		:public QueryProcessorInterface::WeightedAccumulator
-	{
-		SubAccumulator( const QueryProcessorInterface::WeightedAccumulator& o,
-				std::size_t order_)
-			:QueryProcessorInterface::WeightedAccumulator(o)
-			,state(0){}
-		SubAccumulator( const SubAccumulator& o)
-			:QueryProcessorInterface::WeightedAccumulator(o)
-			,state(o.state){}
+	typedef QueryProcessorInterface::WeightedAccumulator WeightedAccumulator;
 
-		bool operator < ( const SubAccumulator& o) const
+	struct SubAccumulatorIndex
+	{
+		explicit SubAccumulatorIndex( std::size_t index_, int state_=0)
+			:state(state_)
+			,index(index_){}
+		SubAccumulatorIndex( const SubAccumulatorIndex& o)
+			:state(o.state)
+			,index(o.index){}
+
+		bool operator < ( const SubAccumulatorIndex& o) const
 		{
 			if (state < o.state) return true;
-			if (order < o.order) return true;
+			if (index < o.index) return true;
 			return false;
 		}
 
 		int state;
-		std::size_t order;
+		std::size_t index;
 	};
 
-	WeightedSumAccumulator(
+	AccumulatorWeightedSum(
 		std::size_t nof_accu_,
-		const QueryProcessorInterface::WeightedAccumulator* accu_);
-	virtual ~WeightedSumAccumulator(){}
+		const WeightedAccumulator* accu_);
+	virtual ~AccumulatorWeightedSum(){}
 
-	virtual bool nextRank( Index& docno_, int& state_, double& weigth_);
+	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
 
 	virtual Index skipDoc( const Index& docno);
 	virtual double weight();
 
 private:
-	std::set<SubAccumulator> m_accu;
+	std::set<SubAccumulatorIndex> m_accuorder;
+	std::vector<WeightedAccumulator> m_accu;
 	double m_weight;
 };
 

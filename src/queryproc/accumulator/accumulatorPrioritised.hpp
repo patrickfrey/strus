@@ -26,62 +26,70 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUFFICIENTLY_RARE_PRIORITY_ACCUMULATOR_HPP_INCLUDED
-#define _STRUS_SUFFICIENTLY_RARE_PRIORITY_ACCUMULATOR_HPP_INCLUDED
+#ifndef _STRUS_ACCUMULATOR_PRIORITISED_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_PRIORITISED_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/accumulatorInterface.hpp"
 #include "accumulatorReference.hpp"
 #include "strus/iteratorInterface.hpp"
 #include "iteratorReference.hpp"
 #include <vector>
+#include <list>
+#include <set>
 
 namespace strus
 {
 
-/// \class SufficientlyRarePriorityAccumulator
-/// \brief Accumulator for ranks that priorities input accumulators returning matches that are occurring "sufficiently rare"
-class SufficientlyRarePriorityAccumulator
+/// \class AccumulatorPrioritised
+/// \brief Accumulator for ranks that prioritises input accumulators returning matches with a higher weight
+class AccumulatorPrioritised
 	:public AccumulatorInterface
 {
 public:
-	class PrioritisedIterator
+	/// \class IteratorPrioritised
+	/// \brief Iterator with priority attached
+	class IteratorPrioritised
 	{
 	public:
-		double priority;
-		IteratorReference itr;
-
-		explicit PrioritisedIterator( IteratorReference itr_, double priority_)
-			:priority(priority_)
+		explicit IteratorPrioritised( IteratorReference itr_, double weight_=0.0, bool finished_=false)
+			:finished(finished_)
+			,weight(weight_)
 			,itr(itr_){}
 
-		void set( Index docno, Index follow_docno)
+		bool operator < ( const IteratorPrioritised& o) const
 		{
-			double ww = (follow_docno - docno);
-			priority += ww * ww;
+			return finished?false:(weight < o.weight);
 		}
 
-		bool operator < ( const PrioritisedIterator& o) const
-		{
-			return (priority < o.priority);
-		}
+		bool finished;
+		double weight;
+		IteratorReference itr;
 	};
 
-	SufficientlyRarePriorityAccumulator( Index maxDocno_, const std::vector<IteratorReference>& arg_);
-	virtual ~SufficientlyRarePriorityAccumulator(){}
+	/// \brief Constructor
+	/// \param[in] maxDocno_ maximum document number in collection for selecting random matches for the initial weight calculation
+	/// \param[in] arg_ argument iterators to accumulate matches from
+	AccumulatorPrioritised( 
+		Index maxDocno_,
+		const std::vector<IteratorReference>& arg_);
+	virtual ~AccumulatorPrioritised(){}
 
 	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
 
 	virtual Index skipDoc( const Index& docno);
 	virtual double weight();
 
+
 private:
+	enum {RecalculatePrioListLoopSize=50};
+	double calcInitialWeight( const IteratorReference& itr);
 	void recalculatePriorityList();
 
 private:
-	std::vector<PrioritisedIterator> m_iterPrioList;
-	std::vector<PrioritisedIterator> m_nextPrioList;
+	std::list<IteratorPrioritised> m_iterPrioList;
+	std::set<Index> m_visited;
 	Index m_maxDocno;
-	unsigned int m_count;
+	unsigned int m_loopCount;
 	double m_weight;
 };
 

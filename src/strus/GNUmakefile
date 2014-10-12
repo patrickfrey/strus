@@ -20,6 +20,7 @@ strus: $(CPP_OBJS) strus.o
 
 .PHONY: clean
 clean:
-	rm -f ${CPP_OBJS} strus strus.o
+	rm -f ${CPP_OBJS} strus strus.o strus.d
+
 
 
