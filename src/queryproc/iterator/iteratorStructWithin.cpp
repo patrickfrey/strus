@@ -126,9 +126,4 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 	}
 }
 
-float IteratorStructWithin::weight() const
-{
-	throw std::runtime_error("internal: weight not defined for cirange");
-}
-
 

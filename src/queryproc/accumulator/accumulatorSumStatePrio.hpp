@@ -26,52 +26,60 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_ACCUMULATOR_SUM_STATE_PRIO_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_SUM_STATE_PRIO_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/accumulatorInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
+#include <set>
 
-namespace strus {
+namespace strus
+{
 
-class Iterator
-	:public IteratorInterface
+/// \class AccumulatorSumStatePrio
+/// \brief Accumulator of sums of weighted results
+class AccumulatorSumStatePrio
+	:public AccumulatorInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	Iterator( const Iterator& o);
+	typedef QueryProcessorInterface::WeightedAccumulator WeightedAccumulator;
 
-	virtual ~Iterator();
+	struct SubAccumulatorIndex
+	{
+		explicit SubAccumulatorIndex( std::size_t index_, int state_=0)
+			:state(state_)
+			,index(index_){}
+		SubAccumulatorIndex( const SubAccumulatorIndex& o)
+			:state(o.state)
+			,index(o.index){}
+
+		bool operator < ( const SubAccumulatorIndex& o) const
+		{
+			if (state < o.state) return true;
+			if (index < o.index) return true;
+			return false;
+		}
+
+		int state;
+		std::size_t index;
+	};
+
+	AccumulatorSumStatePrio(
+		std::size_t nof_accu_,
+		const WeightedAccumulator* accu_);
+	virtual ~AccumulatorSumStatePrio(){}
+
+	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
+
 	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
-
-	virtual float weight() const
-	{
-		return m_weight;
-	}
-	virtual unsigned int frequency();
-
-	virtual IteratorInterface* copy() const
-	{
-		return new Iterator(*this);
-	}
+	virtual double weight();
 
 private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
-
-private:
-	leveldb::DB* m_db;
-	std::string m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	leveldb::Iterator* m_itr;
-	float m_weight;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
+	std::set<SubAccumulatorIndex> m_accuorder;
+	std::vector<WeightedAccumulator> m_accu;
+	double m_weight;
 };
 
-}
+}//namespace
 #endif
 

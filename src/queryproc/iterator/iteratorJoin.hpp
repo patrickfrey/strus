@@ -26,52 +26,40 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
+#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
+#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
-#include <leveldb/db.h>
+#include <stdexcept>
+#include <limits>
 
-namespace strus {
+namespace strus
+{
 
-class Iterator
+/// \brief Iterator interface for join iterators with the common part implemented
+class IteratorJoin
 	:public IteratorInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	Iterator( const Iterator& o);
-
-	virtual ~Iterator();
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+	virtual ~IteratorJoin(){}
+	virtual Index skipDoc( const Index& docno)=0;
+	virtual Index skipPos( const Index& firstpos)=0;
 
 	virtual float weight() const
 	{
-		return m_weight;
+		throw std::runtime_error("internal: weight method not defined for joined iterator");
 	}
-	virtual unsigned int frequency();
-
-	virtual IteratorInterface* copy() const
+	virtual unsigned int frequency()
 	{
-		return new Iterator(*this);
+		Index idx=0;
+		unsigned int rt = 0;
+		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
+		return rt;
 	}
 
-private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
-
-private:
-	leveldb::DB* m_db;
-	std::string m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	leveldb::Iterator* m_itr;
-	float m_weight;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
+	virtual IteratorInterface* copy() const=0;
 };
 
-}
+}//namespace
 #endif
+
 

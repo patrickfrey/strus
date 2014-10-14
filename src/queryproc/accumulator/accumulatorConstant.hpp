@@ -26,52 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_ACCUMULATOR_CONSTANT_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_CONSTANT_HPP_INCLUDED
+#include "strus/accumulatorInterface.hpp"
+#include "strus/index.hpp"
+#include <limits>
+#include <vector>
 
-namespace strus {
+namespace strus
+{
 
-class Iterator
-	:public IteratorInterface
+/// \class AccumulatorConstant
+/// \brief Accumulator of a constant weight for each match
+class AccumulatorConstant
+	:public AccumulatorInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	Iterator( const Iterator& o);
+	explicit AccumulatorConstant( double weight_)
+		:m_weight(weight_){}
+	AccumulatorConstant( const AccumulatorConstant& o)
+		:m_weight(o.m_weight){}
 
-	virtual ~Iterator();
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+	virtual ~AccumulatorConstant(){}
 
-	virtual float weight() const
+	virtual AccumulatorInterface* copy() const
+	{
+		return new AccumulatorConstant( *m_arg);
+	}
+
+	virtual Index skipDoc( const Index& docno_)
+	{
+		return m_arg->skipDoc( docno_);
+	}
+
+	virtual double weight()
 	{
 		return m_weight;
 	}
-	virtual unsigned int frequency();
-
-	virtual IteratorInterface* copy() const
-	{
-		return new Iterator(*this);
-	}
 
 private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
-
-private:
-	leveldb::DB* m_db;
-	std::string m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	leveldb::Iterator* m_itr;
-	float m_weight;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
+	double m_weight;
 };
 
-}
+}//namespace
 #endif
 

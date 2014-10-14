@@ -61,6 +61,20 @@ public:
 				const std::string& value_,
 				float weight_)=0;
 
+		/// \brief Define a numeric attribute for the document
+		/// \param[in] name_ one character as name of the attribute
+		/// \param[in] value_ value of the document attribute
+		virtual void setDocumentAttribute(
+				char name_,
+				float value_);
+
+		/// \brief Define a string attribute for the document
+		/// \param[in] name_ one character as name of the attribute
+		/// \param[in] value_ value of the document attribute
+		virtual void setDocumentAttribute(
+				char name_,
+				const std::string& value_);
+
 		/// \brief Commit of the transaction, throws on error
 		virtual void commit()=0;
 	};
@@ -83,8 +97,28 @@ public:
 			const std::string& type,
 			const std::string& value)=0;
 
+	/// \brief Get the number of documents inserted into the collection
+	/// \return the number of documents
+	virtual Index nofDocumentsInserted() const=0;
+
+	/// \brief Get the highest document number used in the collection
+	/// \return the document number
+	virtual Index maxDocumentNumber() const=0;
+
+	/// \brief Get a numeric attribute assigned to a document
+	/// \param[in] docno document number
+	/// \param[in] varname variable name identifying the attribute to get
+	/// \return the attribute value
+	virtual float documentAttributeNumeric( Index docno, char varname) const=0;
+
+	/// \brief Get a string attribute value assigned to a document
+	/// \param[in] docno document number
+	/// \param[in] varname variable name identifying the attribute to get
+	/// \return the attribute value
+	virtual std::string documentAttributeString( Index docno, char varname) const=0;
+
 	/// \brief Create an insert/update transaction for a document
-	/// \param[in] docid Document identifier (URI)
+	/// \param[in] docid document identifier (URI)
 	/// \return the created transaction reference to be disposed with delete
 	virtual TransactionInterface* createTransaction( const std::string& docid)=0;
 };

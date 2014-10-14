@@ -163,7 +163,7 @@ struct QueryContext
 						}
 						AccumulatorReference accu(
 							processor->createOccurrenceAccumulator(
-								gi->itrAccuOp, paramarsize, paramar));
+								gi->itrAccuOp, gi->factors, paramarsize, paramar));
 						accuarg.push_back( accu);
 						weightedAccus[ gidx].weight = gi->weight;
 						weightedAccus[ gidx].accu = accuarg.back().get();

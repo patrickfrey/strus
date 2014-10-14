@@ -52,6 +52,15 @@ public:
 			const std::string& type_,
 			const std::string& value_,
 			float weight_);
+
+	virtual void setDocumentAttribute(
+			char name_,
+			float value_);
+
+	virtual void setDocumentAttribute(
+			char name_,
+			const std::string& value_);
+
 	virtual void commit();
 
 private:
@@ -82,6 +91,19 @@ private:
 
 	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
 
+	struct DocAttribute
+	{
+		enum Type {TypeNumber=1,TypeString=2};
+		Type type;
+		char name;
+		std::string value;
+
+		DocAttribute( Type type_, char name_, const std::string& value_)
+			:type(type_),name(name_),value(value_){}
+		DocAttribute( const DocAttribute& o)
+			:type(o.type),name(o.name),value(o.value){}
+	};
+
 private:
 	Transaction( const Transaction&){}	//non copyable
 	void operator=( const Transaction&){}	//non copyable
@@ -91,6 +113,7 @@ private:
 	std::string m_docid;
 	TermMap m_terms;
 	InvMap m_invs;
+	std::vector<DocAttribute> m_attributes;
 };
 
 }

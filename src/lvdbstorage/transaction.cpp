@@ -76,12 +76,88 @@ void Transaction::setTermWeight(
 	m_terms[ termMapKey( type_, value_)].weight = weight_;
 }
 
+void Transaction::setDocumentAttribute(
+		char name_,
+		float weight_)
+{
+	std::string value;
+	packFloat( value, weight_);
+	m_attributes.push_back( DocAttribute( DocAttribute::TypeNumber, name_, value));
+}
+
+void Transaction::setDocumentAttribute(
+		char name_,
+		const std::string& value_)
+{
+	m_attributes.push_back( DocAttribute( DocAttribute::TypeString, name_, value));
+}
+
 void Transaction::commit()
 {
 	Index docno = m_storage->keyGetOrCreate( Storage::DocIdPrefix, m_docid);
 	leveldb::WriteBatch batch;
 
-	// [1] Delete old document term occurrencies:
+	leveldb::Iterator* vi = m_storage->newIterator();
+	boost::scoped_ptr<leveldb::Iterator> viref(vi);
+
+	// [1] Delete old document attributes and insert the new ones
+	std::string weightkey;
+	std::size_t weightkeysize;
+
+	// [1.1] Delete old numeric attributes
+	weightkey.push_back( (char)Storage::DocNumAttrPrefix);
+	packIndex( weightkey, docno);
+	weightkeysize = weightkey.size();
+
+	for (vi->Seek( weightkey); vi->Valid(); vi->Next())
+	{
+		if (weightkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), weightkey.c_str()))
+		{
+			//... end of document reached
+			break;
+		}
+		batch.Delete( vi->key());
+	}
+	// [1.2] Insert new numeric attributes
+	std::vector<DocAttribute>::const_iterator wi = m_attributes.begin(), we = m_attributes.end();
+	for (; wi != we; ++wi)
+	{
+		if (wi->type == DocAttribute::TypeNumber)
+		{
+			weightkey.push_back( wi->name);
+			batch.Put( weightkey, wi->value);
+			weightkey.resize( weightkeysize);
+		}
+	}
+
+	// [1.3] Delete old textual attributes
+	weightkey.clear();
+	weightkey.push_back( (char)Storage::DocTextAttrPrefix);
+	packIndex( weightkey, docno);
+	weightkeysize = weightkey.size();
+
+	for (vi->Seek( weightkey); vi->Valid(); vi->Next())
+	{
+		if (weightkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), weightkey.c_str()))
+		{
+			//... end of document reached
+			break;
+		}
+		batch.Delete( vi->key());
+	}
+	// [1.4] Insert new textual attributes
+	std::vector<DocAttribute>::const_iterator wi = m_attributes.begin(), we = m_attributes.end();
+	for (; wi != we; ++wi)
+	{
+		if (wi->type == DocAttribute::TypeString)
+		{
+			weightkey.push_back( wi->name);
+			batch.Put( weightkey, wi->value);
+			weightkey.resize( weightkeysize);
+		}
+	}
+
+	// [2] Delete old document term occurrencies:
 	std::set<TermMapKey> oldcontent;
 
 	std::string invkey;
@@ -90,11 +166,8 @@ void Transaction::commit()
 	packIndex( invkey, docno);
 	invkeysize = invkey.size();
 
-	//[1.1] Iterate on key prefix elements [InversePrefix, docno, typeno, *] and mark dem as deleted
+	//[2.1] Iterate on key prefix elements [InversePrefix, docno, typeno, *] and mark dem as deleted
 	//	Extract typeno and valueno from key [InversePrefix, docno, typeno, pos] an mark term as old content (do delete)
-	leveldb::Iterator* vi = m_storage->newIterator();
-	boost::scoped_ptr<leveldb::Iterator> viref(vi);
-
 	for (vi->Seek( invkey); vi->Valid(); vi->Next())
 	{
 		if (invkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), invkey.c_str()))
@@ -114,7 +187,7 @@ void Transaction::commit()
 
 		oldcontent.insert( TermMapKey( typeno, valueno));
 	}
-	//[1.2] Iterate on oldcontent elements built in [1.1] 
+	//[2.2] Iterate on oldcontent elements built in [1.1] 
 	//	and mark them as deleted the keys [LocationPrefix, typeno, valueno, docno]
 	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)
@@ -128,7 +201,7 @@ void Transaction::commit()
 		batch.Delete( delkey);
 	}
 
-	//[2] Insert the new terms with key [LocationPrefix, typeno, valueno, docno]
+	//[3] Insert the new terms with key [LocationPrefix, typeno, valueno, docno]
 	//	and value (weight as 32bit float, packed encoded difference of positions):
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
@@ -153,7 +226,7 @@ void Transaction::commit()
 		batch.Put( termkey, positions);
 	}
 
-	// [3] Insert the new inverted info with key [InversePrefix, docno, typeno, pos]:
+	// [4] Insert the new inverted info with key [InversePrefix, docno, typeno, pos]:
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
@@ -165,7 +238,7 @@ void Transaction::commit()
 
 		batch.Put( invkey, ri->second.value);
 	}
-	// [4] Do submit the write to the database:
+	// [5] Do submit the write to the database:
 	m_storage->writeBatch( batch);
 	m_storage->flushNewKeys();
 	batch.Clear();

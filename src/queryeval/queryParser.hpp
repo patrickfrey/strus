@@ -173,6 +173,7 @@ public:
 		struct Argument
 		{
 			std::string itrAccuOp;		///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
+			std::vector<float> factors;	///< specifies scalar factors for an accumulator operation
 			unsigned int setIndex;		///< index of argument (accumulator or iterator set)
 			double weight;			///< weight of argument
 
@@ -180,8 +181,8 @@ public:
 				:itrAccuOp(),setIndex(0),weight(0.0){}
 			Argument( const Argument& o)
 				:itrAccuOp(o.itrAccuOp),setIndex(o.setIndex),weight(o.weight){}
-			Argument( const std::string& itrAccuOp_, unsigned int setIndex_, double weight_=1.0)
-				:itrAccuOp(itrAccuOp_),setIndex(setIndex_),weight(weight_){}
+			Argument( const std::string& itrAccuOp_, const std::vector<float>& factors_, unsigned int setIndex_, double weight_=1.0)
+				:itrAccuOp(itrAccuOp_),factors(factors_),setIndex(setIndex_),weight(weight_){}
 			explicit Argument( unsigned int setIndex_, double weight_=1.0)
 				:itrAccuOp(),setIndex(setIndex_),weight(weight_){}
 
@@ -191,29 +192,24 @@ public:
 		AccumulateOperation(
 				unsigned int resultaccu_,
 				const std::string& name_,
-				const std::vector<double>& scale_,
 				const std::vector<Argument>& args_)
 			:m_resultaccu(resultaccu_)
 			,m_name(name_)
-			,m_scale(scale_)
 			,m_args(args_){}
 
 		AccumulateOperation( const AccumulateOperation& o)
 			:m_resultaccu(o.m_resultaccu)
 			,m_name(o.m_name)
-			,m_scale(o.m_scale)
 			,m_args(o.m_args)
 		{}
 
 		unsigned int resultaccu() const				{return m_resultaccu;}
 		std::string name() const				{return m_name;}
-		const std::vector<double> scale() const			{return m_scale;}
 		const std::vector<Argument>& args() const		{return m_args;}
 
 	private:
 		unsigned int m_resultaccu;				///< accumulate operation result 
 		std::string m_name;					///< name of operation
-		std::vector<double> m_scale;				///< scaling factors depending on the function
 		std::vector<Argument> m_args;				///< list of set references with weight
 	};
 	

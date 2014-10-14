@@ -28,14 +28,14 @@
 */
 #ifndef _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #define _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
+#include "iteratorJoin.hpp"
 #include "iteratorReference.hpp"
 
 namespace strus
 {
 
 class IteratorIntersect
-	:public IteratorInterface
+	:public IteratorJoin
 {
 public:
 	IteratorIntersect( const IteratorIntersect& o);
@@ -44,8 +44,6 @@ public:
 
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
-
-	virtual float weight() const;
 
 	virtual IteratorInterface* copy() const
 	{

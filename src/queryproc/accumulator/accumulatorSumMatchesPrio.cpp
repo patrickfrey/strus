@@ -1,54 +1,11 @@
-#include "accumulator/accumulatorPrioritised.hpp"
+#include "accumulator/accumulatorSumMatchesPrio.hpp"
 #include <cstdlib>
 #include <limits>
 #include <set>
 
 using namespace strus;
 
-static Index ror(Index x, unsigned int moves)
-{
-	return (x >> moves) | (x << (sizeof(Index)*8 - moves));
-}
-
-static Index hash64shift( Index key)
-{
-	key = (~key) + (key << 21);
-	key = key ^ ror( key, 24);
-	key = (key + (key << 3)) + (key << 8); // key * 265
-	key = key ^ ror(key, 14);
-	key = (key + (key << 2)) + (key << 4); // key * 21
-	key = key ^ ror( key, 28);
-	key = key + (key << 31);
-	return key;
-}
-
-static Index randomDocumentNumber( Index maxdocno, unsigned int no)
-{
-	return hash64shift( maxdocno+no) % (maxdocno+1);
-}
-
-double AccumulatorPrioritised::calcInitialWeight( const IteratorReference& itr)
-{
-	enum {Picks=5};
-	double rt = 0.0;
-	int ii=0;
-	for (; ii<(int)Picks; ++ii)
-	{
-		Index docno = randomDocumentNumber( m_maxDocno, ii);
-		if (itr->skipDoc( docno))
-		{
-			rt += itr->weight();
-		}
-		else if (itr->skipDoc( 0))
-		{
-			rt += itr->weight();
-		}
-	}
-	rt *= (double)RecalculatePrioListLoopSize / (int)Picks;
-	return rt;
-}
-
-AccumulatorPrioritised::AccumulatorPrioritised(
+AccumulatorSumMatchesPrio::AccumulatorSumMatchesPrio(
 		Index maxDocno_,
 		const std::vector<IteratorReference>& arg_)
 	:m_maxDocno(maxDocno_)
@@ -69,7 +26,42 @@ AccumulatorPrioritised::AccumulatorPrioritised(
 	}
 }
 
-void AccumulatorPrioritised::recalculatePriorityList()
+AccumulatorSumMatchesPrio::AccumulatorSumMatchesPrio( const AccumulatorSumMatchesPrio& o)
+	:m_visited(o.m_visited)
+	,m_maxDocno(o.m_maxDocno)
+	,m_loopCount(o.m_loopCount)
+	,m_weight(o.m_weight)
+{
+	std::list<IteratorPrioritised>::const_iterator pi = m_iterPrioList.begin(), pe = m_iterPrioList.end();
+	for (; pi != pe; ++pi)
+	{
+		IteratorReference ref( pi->itr->copy());
+		m_iterPrioList.push_back( IteratorPrioritised( ref, pi->weight, pi->finished));
+	}
+}
+
+double AccumulatorSumMatchesPrio::calcInitialWeight( const IteratorReference& itr)
+{
+	enum {Picks=5};
+	double rt = 0.0;
+	int ii=0;
+	for (; ii<(int)Picks; ++ii)
+	{
+		Index docno = randomDocumentNumber( m_maxDocno, ii);
+		if (itr->skipDoc( docno))
+		{
+			rt += itr->weight();
+		}
+		else if (itr->skipDoc( 0))
+		{
+			rt += itr->weight();
+		}
+	}
+	rt *= (double)RecalculatePrioListLoopSize / (int)Picks;
+	return rt;
+}
+
+void AccumulatorSumMatchesPrio::recalculatePriorityList()
 {
 	std::list<IteratorPrioritised>::const_iterator ai = m_iterPrioList.begin(), ae = m_iterPrioList.end();
 	std::set<IteratorPrioritised> priolist;
@@ -86,7 +78,7 @@ void AccumulatorPrioritised::recalculatePriorityList()
 	}
 }
 
-bool AccumulatorPrioritised::nextRank( Index& docno_, int& state_, double& weight_)
+bool AccumulatorSumMatchesPrio::nextRank( Index& docno_, int& state_, double& weight_)
 {
 	++m_loopCount;
 	if (m_loopCount == RecalculatePrioListLoopSize)
@@ -142,7 +134,7 @@ AGAIN:
 	return true;
 }
 
-Index AccumulatorPrioritised::skipDoc( const Index& docno)
+Index AccumulatorSumMatchesPrio::skipDoc( const Index& docno)
 {
 	std::list<IteratorPrioritised>::iterator ai = m_iterPrioList.begin(), ae = m_iterPrioList.end();
 	if (ai == ae)
@@ -173,7 +165,7 @@ Index AccumulatorPrioritised::skipDoc( const Index& docno)
 	return min_docno;
 }
 
-double AccumulatorPrioritised::weight()
+double AccumulatorSumMatchesPrio::weight()
 {
 	return m_weight;
 }

@@ -49,6 +49,7 @@ Storage::Storage( const char* path_)
 		m_next_termno = keyLookUp( VariablePrefix, "TermNo");
 		m_next_typeno = keyLookUp( VariablePrefix, "TypeNo");
 		m_next_docno = keyLookUp( VariablePrefix, "DocNo");
+		m_nof_documents = keyLookUp( VariablePrefix, "NofDocs");
 	}
 	else
 	{
@@ -70,6 +71,7 @@ void Storage::close()
 		batchDefineVariable( batch, "TermNo", m_next_termno);
 		batchDefineVariable( batch, "TypeNo", m_next_typeno);
 		batchDefineVariable( batch, "DocNo", m_next_docno);
+		batchDefineVariable( batch, "NofDocs", m_nof_documents);
 	
 		leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
 		if (!status.ok())
@@ -116,6 +118,7 @@ void Storage::flushNewKeys()
 	}
 	m_newKeyBatch.Clear();
 	m_newKeyMap.clear();
+	m_nof_documents += 1;
 }
 
 void Storage::batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
@@ -230,4 +233,58 @@ StorageInterface::TransactionInterface*
 {
 	return new Transaction( this, docid);
 }
+
+Index Storage::nofDocumentsInserted() const
+{
+	return m_nof_documents;
+}
+
+Index Storage::maxDocumentNumber() const
+{
+	return m_next_docno-1;
+}
+
+std::string Storage::documentAttributeString( Index docno, char varname) const
+{
+	std::string key;
+	key.push_back( (char)Storage::DocTextAttrPrefix);
+	packIndex( key, docno);
+	key.push_back( varname);
+
+	leveldb::Slice constkey( key.c_str(), key.size());
+	std::string value;
+	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+	if (status.IsNotFound())
+	{
+		return std::string();
+	}
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	return value;
+}
+
+float Storage::documentAttributeNumeric( Index docno, char varname) const
+{
+	std::string key;
+	key.push_back( (char)Storage::DocNumAttrPrefix);
+	packIndex( key, docno);
+	key.push_back( varname);
+
+	leveldb::Slice constkey( key.c_str(), key.size());
+	std::string value;
+	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+	if (status.IsNotFound())
+	{
+		return 0.0;
+	}
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	const char* cc = value.c_str();
+	return unpackFloat( cc, cc + value.size());
+}
+
 

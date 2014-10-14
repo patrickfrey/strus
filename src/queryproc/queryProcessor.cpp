@@ -32,8 +32,10 @@
 #include "iterator/iteratorDifference.hpp"
 #include "iterator/iteratorStructWithin.hpp"
 #include "iterator/iteratorStructSequence.hpp"
-#include "accumulator/accumulatorOperatorTemplate.hpp"
-#include "accumulator/accumulatorOperators.hpp"
+#include "accumulator/accumulatorFrequency.hpp"
+#include "accumulator/accumulatorConstant.hpp"
+#include "accumulator/accumulatorWeight.hpp"
+#include "accumulator/accumulatorOkapi.hpp"
 #include "iteratorReference.hpp"
 #include "accumulatorReference.hpp"
 #include <string>
@@ -158,12 +160,21 @@ IteratorInterface*
 
 AccumulatorInterface*
 	QueryProcessor::createAccumulator(
-		const std::string& /*name*/,
-		const std::vector<double>& /*scale*/,
-		std::size_t /*nofargs*/,
-		const WeightedAccumulator* /*arg*/)
+		const std::string& name,
+		std::size_t nofargs,
+		const WeightedAccumulator* arg)
 {
-	return 0;
+	if (isEqual( name, "sumPrioMatches"))
+	{
+		return new AccumulatorPrioritised( m_storage->maxDocumentNumber())
+				virtual Index nofDocumentsInserted() const;
+			
+				virtual Index maxDocumentNumber() const;
+	}
+	else
+	{
+		throw std::runtime_error( std::string( "unknown accumulator '") + name + "'");
+	}
 }
 
 static std::vector<IteratorReference>
@@ -181,31 +192,47 @@ static std::vector<IteratorReference>
 AccumulatorInterface*
 	QueryProcessor::createOccurrenceAccumulator(
 		const std::string& name,
-		std::size_t nofargs,
-		const IteratorInterface** args)
+		const std::vector<float>& factors,
+		const IteratorInterface& arg)
 {
 	if (isEqual( name, "weight"))
 	{
-		return new AccumulatorOperatorSum_weight( copyIteratorArgs( nofargs, args));
+		if (!factors.empty()) throw std::runtime_error( std::string("unexpected scaling factors for accumulator '") + name + "'");
+		return new AccumulatorWeight( arg);
 	}
 	else if (isEqual( name, "td"))
 	{
-		return new AccumulatorOperatorSum_td( copyIteratorArgs( nofargs, args));
+		if (!factors.empty()) throw std::runtime_error( std::string("unexpected scaling factors for accumulator '") + name + "'");
+		return new AccumulatorConstant( 1.0);
 	}
 	else if (isEqual( name, "tf"))
 	{
-		return new AccumulatorOperatorSum_tf( copyIteratorArgs( nofargs, args));
+		if (!factors.empty()) throw std::runtime_error( std::string("unexpected scaling factors for accumulator '") + name + "'");
+		return new AccumulatorFrequency( arg);
 	}
 	else if (isEqual( name, "td1"))
 	{
-		return new AccumulatorOperatorNormSum_td( copyIteratorArgs( nofargs, args));
+		if (!factors.empty()) throw std::runtime_error( std::string("unexpected scaling factors for accumulator '") + name + "'");
+		return new AccumulatorConstant( 1.0 / arg.size());
+	}
+	else if (isEqual( name, "bm25"))
+	{
+		float b  = factors.size() > 0 ? factor[0]:0.75;
+		float k1 = factors.size() > 1 ? factor[1]:1.5;
+		float avgDocLength = factors.size() > 2 ? factor[2]:1000;
+
+		Index estimatedNofMatches
+			= estimateNumberOfMatches( arg, m_storage->maxDocumentNumber(),
+							m_storage->nofDocumentsInserted());
+		return new AccumulatorOkapi(
+				m_storage, arg, k1, b,
+				avgDocLength, estimatedNofMatches);
 	}
 	else
 	{
 		throw std::runtime_error( std::string( "unknown occurrency accumulator '") + name + "'");
 	}
 }
-
 
 std::vector<WeightedDocument>
 	QueryProcessor::getRankedDocumentList(

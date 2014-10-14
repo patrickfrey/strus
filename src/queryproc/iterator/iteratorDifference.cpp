@@ -74,8 +74,3 @@ Index IteratorDifference::skipPos( const Index& pos_)
 	}
 }
 
-float IteratorDifference::weight() const
-{
-	throw std::runtime_error("internal: weight not defined for occurrence set difference");
-}
-

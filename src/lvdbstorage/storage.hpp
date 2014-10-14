@@ -52,6 +52,14 @@ public:
 	virtual TransactionInterface*
 		createTransaction( const std::string& docid);
 
+	virtual Index nofDocumentsInserted() const;
+
+	virtual Index maxDocumentNumber() const;
+
+	virtual float documentAttributeNumeric( Index docno, char varname) const;
+
+	virtual std::string documentAttributeString( Index docno, char varname) const;
+
 public:
 	void writeBatch(
 		leveldb::WriteBatch& batch);
@@ -62,12 +70,14 @@ public:
 
 	enum KeyPrefix
 	{
-		TermTypePrefix='t',	///< [type string]      ->  [typeno]
-		TermValuePrefix='i',	///< [term string]      ->  [termno]
-		DocIdPrefix='d',	///< [docid string]     ->  [docno]
-		LocationPrefix='o',	///< [type,term,docno]  ->  [pos incr]*
-		InversePrefix='r',	///< [docno,position]   ->  [typeno,termno]*
-		VariablePrefix='v'	///< [variable string]  ->  [index]
+		TermTypePrefix='t',	///< [type string]             ->  [typeno]
+		TermValuePrefix='i',	///< [term string]             ->  [termno]
+		DocIdPrefix='d',	///< [docid string]            ->  [docno]
+		LocationPrefix='o',	///< [type,term,docno]         ->  [pos incr]*
+		InversePrefix='r',	///< [docno,typeno,position]   ->  [term string]*
+		VariablePrefix='v',	///< [variable string]         ->  [index]
+		DocNumAttrPrefix='w',	///< [docno,nameid]            ->  [float]
+		DocTextAttrPrefix='a'	///< [docno,nameid]            ->  [string]
 	};
 
 	static std::string keyString( KeyPrefix prefix, const std::string& keyname);
@@ -91,6 +101,7 @@ private:
 	Index m_next_termno;					///< next index to assign to a new term value
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_docno;					///< next index to assign to a new document id
+	Index m_nof_documents;					///< number of documents inserted
 	boost::mutex m_mutex;					///< mutex for mutual exclusion for the access of counters (m_next_..) and for the access of keys not defined during a running transaction
 	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined. flushed at end of every transaction
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined

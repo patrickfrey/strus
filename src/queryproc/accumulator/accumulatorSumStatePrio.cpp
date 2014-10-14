@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "accumulatorWeightedSum.hpp"
+#include "accumulatorSumStatePrio.hpp"
 #include <limits>
 
 using namespace strus;
 
-AccumulatorWeightedSum::AccumulatorWeightedSum(
+AccumulatorSumStatePrio::AccumulatorSumStatePrio(
 		std::size_t nof_accu_,
 		const QueryProcessorInterface::WeightedAccumulator* accu_)
 	:m_weight(0.0)
@@ -44,7 +44,7 @@ AccumulatorWeightedSum::AccumulatorWeightedSum(
 	}
 }
 
-bool AccumulatorWeightedSum::nextRank( Index& docno_, int& state_, double& weight_)
+bool AccumulatorSumStatePrio::nextRank( Index& docno_, int& state_, double& weight_)
 {
 AGAIN:
 	std::set<SubAccumulatorIndex>::const_iterator ai = m_accuorder.begin(), ae = m_accuorder.end();
@@ -66,6 +66,7 @@ AGAIN:
 	bool orderChanged = (ai->state != next_state);
 	m_weight = weight_ * wa.weight;
 	std::size_t index = ai->index;
+	bool allMatch = true;
 
 	for (++ai; ai != ae; ++ai)
 	{
@@ -74,18 +75,35 @@ AGAIN:
 		{
 			m_weight += wa.weight * wa.accu->weight();
 		}
+		else if (state_ == 0)
+		{
+			// .. in the initial state we skip incomplete matches
+			docno_ += 1;
+			goto AGAIN;
+		}
+		else
+		{
+			allMatch = false;
+		}
+	}
+	if (allMatch && state_ != 0)
+	{
+		// ... when not in the initial state we skip complete matches (because they were already returned)
+		docno_ += 1;
+		goto AGAIN;
 	}
 	if (orderChanged)
 	{
 		SubAccumulatorIndex firstaccu( index, next_state);
 		m_accuorder.erase( m_accuorder.begin());
 		m_accuorder.insert( firstaccu);
+		state_ = m_accuorder[0].state + 1;
 	}
 	weight_ = m_weight;
 	return true;
 }
 
-Index AccumulatorWeightedSum::skipDoc( const Index& docno)
+Index AccumulatorSumStatePrio::skipDoc( const Index& docno)
 {
 	std::set<SubAccumulatorIndex>::const_iterator ai = m_accuorder.begin(), ae = m_accuorder.end();
 	if (ai == ae)
@@ -116,7 +134,7 @@ Index AccumulatorWeightedSum::skipDoc( const Index& docno)
 	return min_docno;
 }
 
-double AccumulatorWeightedSum::weight()
+double AccumulatorSumStatePrio::weight()
 {
 	return m_weight;
 }

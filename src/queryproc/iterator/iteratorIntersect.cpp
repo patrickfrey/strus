@@ -87,8 +87,3 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 	}
 }
 
-float IteratorIntersect::weight() const
-{
-	throw std::runtime_error("internal: weight not defined for intersection");
-}
-

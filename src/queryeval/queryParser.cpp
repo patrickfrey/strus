@@ -222,11 +222,11 @@ static unsigned int UNSIGNED( char const*& src)
 	skipSpaces( src);
 	return rt;
 }
-static double DOUBLE( char const*& src)
+static float FLOAT( char const*& src)
 {
-	unsigned int digitsAllowed = 20;
-	double rt = 1.0;
-	double div = 1.0;
+	unsigned int digitsAllowed = 9;
+	float rt = 1.0;
+	float div = 1.0;
 	if (*src == '-')
 	{
 		++src;
@@ -251,7 +251,7 @@ static double DOUBLE( char const*& src)
 	}
 	if (!digitsAllowed)
 	{
-		throw std::runtime_error( "weight out of range");
+		throw std::runtime_error( "floating point number out of range");
 	}
 	skipSpaces( src);
 	return rt * div;
@@ -490,11 +490,12 @@ static std::vector<QueryParser::AccumulateOperation::Argument> ACCUARGS( char co
 		std::string opname;
 		std::string argname( IDENTIFIER( src));
 		std::size_t argid = 0;
-		double weight = 1.0;
+		std::vector<float> factors;
+		float weight = 1.0;
 
 		if (isOpenAngleBracket(*src))
 		{
-			// ACCUOP Like: ff<stemmed> 
+			// ACCUOP Like: okapi<stemmed,1.8,2,1000> 
 			OPERATOR(src);
 			if (!isAlpha( *src)) throw std::runtime_error("expected identifier (occurrence set) in angle brackets as operand of an accumulate operation");
 			std::string opname = argname;
@@ -505,12 +506,21 @@ static std::vector<QueryParser::AccumulateOperation::Argument> ACCUARGS( char co
 				si->second.referenced = true;
 				argid = si->second.id;
 			}
+			while (isComma(*src))
+			{
+				OPERATOR(src);
+				if (!isDigit(*src))
+				{
+					throw std::runtime_error("numeric scalar argument expected in accumulation operation");
+				}
+				factors.push_back( FLOAT( src));
+			}
 			if (!isCloseAngleBracket(*src)) throw std::runtime_error("expected close angle bracket to close declaration of occurrency accumulator");
 			OPERATOR(src);
 		}
 		else
 		{
-			// ACCUNAME Like: okapi
+			// Summating ACCU
 			strus::KeyMap<unsigned int>::iterator si = accumap.find( argname);
 			if (si == accumap.end()) throw std::runtime_error( std::string("no accumulator found with name '") + argname + "'");
 			argid = si->second;
@@ -520,7 +530,7 @@ static std::vector<QueryParser::AccumulateOperation::Argument> ACCUARGS( char co
 			OPERATOR( src);
 			if (isDigit( *src))
 			{
-				weight = DOUBLE( src);
+				weight = FLOAT( src);
 			}
 			else
 			{
@@ -529,7 +539,7 @@ static std::vector<QueryParser::AccumulateOperation::Argument> ACCUARGS( char co
 		}
 		if (argid != 0)
 		{
-			rt.push_back( Argument( opname, argid, weight));
+			rt.push_back( Argument( opname, factors, argid, weight));
 		}
 		if (isComma( *src))
 		{
@@ -586,12 +596,12 @@ void QueryParser::defineJoinOperation( const std::string& setname, const std::st
 	m_joinOperations.push_back( op);
 }
 
-void QueryParser::defineAccumulateOperation( const std::string& accuname, const std::string& funcname, const std::vector<double>& scale, const std::vector<AccumulateOperation::Argument>& args)
+void QueryParser::defineAccumulateOperation( const std::string& accuname, const std::string& funcname, const std::vector<AccumulateOperation::Argument>& args)
 {
 	strus::KeyMap<unsigned int>::const_iterator ai = m_accumap.find( accuname);
 	if (ai != m_accumap.end()) throw std::runtime_error( std::string( "duplicate definition of accumulator '") + accuname + "'");
 	unsigned int accuIndex = m_accumulateOperations.size()+1;
-	AccumulateOperation op( accuIndex, funcname, scale, args);
+	AccumulateOperation op( accuIndex, funcname, args);
 	m_accumulateOperations.push_back( op);
 }
 
@@ -662,23 +672,18 @@ void QueryParser::pushQuery( const std::string& qry)
 				else if (isAssign(*src))
 				{
 					// PROD: IDENTIFIER<accumulatorset> '='
-					//		IDENTIFIER<accumulatorfunc> weights
+					//		IDENTIFIER<accumulatorfunc>
 					//		'(' sets ')' ';'
 					OPERATOR( src);
 					if (isAlpha( *src))
 					{
 						std::string opname( IDENTIFIER( src));
-						std::vector<double> scale;
 	
-						while (isDigit( *src))
-						{
-							scale.push_back( DOUBLE( src));
-						}
 						if (isOpenOvalBracket( *src))
 						{
 							OPERATOR(src);
 							std::vector<AccumulateOperation::Argument> args = ACCUARGS( src, m_setmap, m_accumap);
-							defineAccumulateOperation( resultname, opname, scale, args);
+							defineAccumulateOperation( resultname, opname, args);
 						}
 						else
 						{

@@ -39,14 +39,9 @@ public:
 	virtual ~IteratorInterface(){}
 	virtual Index skipDoc( const Index& docno)=0;
 	virtual Index skipPos( const Index& firstpos)=0;
-	virtual float weight() const=0;
 
-	virtual unsigned int frequency()
-	{
-		Index idx = 0;
-		for (;0!=(idx=skipPos( idx)); ++idx);
-		return idx;
-	}
+	virtual float weight() const=0;
+	virtual unsigned int frequency()=0;
 
 	virtual IteratorInterface* copy() const=0;
 };

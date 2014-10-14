@@ -26,13 +26,13 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_PRIORITISED_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_PRIORITISED_HPP_INCLUDED
+#ifndef _STRUS_ACCUMULATOR_SUM_MATCHES_PRIO_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_SUM_MATCHES_PRIO_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/accumulatorInterface.hpp"
 #include "accumulatorReference.hpp"
 #include "strus/iteratorInterface.hpp"
-#include "iteratorReference.hpp"
+#include "accumulatorReference.hpp"
 #include <vector>
 #include <list>
 #include <set>
@@ -40,53 +40,58 @@
 namespace strus
 {
 
-/// \class AccumulatorPrioritised
-/// \brief Accumulator for ranks that prioritises input accumulators returning matches with a higher weight
-class AccumulatorPrioritised
+/// \class AccumulatorSumMatchesPrio
+/// \brief Accumulator for ranking that prioritises input accumulators returning matches with a higher weight
+class AccumulatorSumMatchesPrio
 	:public AccumulatorInterface
 {
 public:
-	/// \class IteratorPrioritised
-	/// \brief Iterator with priority attached
-	class IteratorPrioritised
+	/// \class AccumulatorWithProbabilityWeight
+	/// \brief Accumulator with a probability estimate for using it in a priority queue
+	class AccumulatorWithWeight
 	{
 	public:
-		explicit IteratorPrioritised( IteratorReference itr_, double weight_=0.0, bool finished_=false)
+		explicit AccumulatorWithWeight( AccumulatorReference itr_, double weight_=0.0, bool finished_=false)
 			:finished(finished_)
 			,weight(weight_)
 			,itr(itr_){}
 
-		bool operator < ( const IteratorPrioritised& o) const
+		bool operator < ( const AccumulatorWithWeight& o) const
 		{
 			return finished?false:(weight < o.weight);
 		}
 
-		bool finished;
 		double weight;
-		IteratorReference itr;
+		AccumulatorReference itr;
 	};
 
 	/// \brief Constructor
-	/// \param[in] maxDocno_ maximum document number in collection for selecting random matches for the initial weight calculation
 	/// \param[in] arg_ argument iterators to accumulate matches from
-	AccumulatorPrioritised( 
-		Index maxDocno_,
-		const std::vector<IteratorReference>& arg_);
-	virtual ~AccumulatorPrioritised(){}
+	AccumulatorSumMatchesPrio( 
+		std::size_t nof_accu_,
+		const WeightedAccumulator* accu_);
+
+	/// \brief Copy constructor
+	AccumulatorSumMatchesPrio( const AccumulatorSumMatchesPrio& o);
+
+	virtual ~AccumulatorSumMatchesPrio(){}
 
 	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
 
 	virtual Index skipDoc( const Index& docno);
 	virtual double weight();
 
+	virtual AccumulatorInterface* copy() const
+	{
+		return new AccumulatorSumMatchesPrio( *this);
+	}
 
 private:
-	enum {RecalculatePrioListLoopSize=50};
 	double calcInitialWeight( const IteratorReference& itr);
 	void recalculatePriorityList();
 
 private:
-	std::list<IteratorPrioritised> m_iterPrioList;
+	std::list<AccumulatorWithProbabilityWeight> m_iterPrioList;
 	std::set<Index> m_visited;
 	Index m_maxDocno;
 	unsigned int m_loopCount;

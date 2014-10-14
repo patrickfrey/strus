@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_ITERATOR_STRUCT_WITHIN_HPP_INCLUDED
 #define _STRUS_ITERATOR_STRUCT_WITHIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
+#include "iteratorJoin.hpp"
 #include "iteratorReference.hpp"
 #include <vector>
 
@@ -38,7 +38,7 @@ namespace strus
 /// \class IteratorStructWithin
 /// \brief Selects all elements that are appearing inside a defined range without overlapping with a structure delimiter element.
 class IteratorStructWithin
-	:public IteratorInterface
+	:public IteratorJoin
 {
 public:
 	/// \param[in] group_ the elements of the group
@@ -51,7 +51,7 @@ public:
 
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
-	virtual float weight() const;
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorStructWithin( *this);

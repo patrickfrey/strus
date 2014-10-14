@@ -79,26 +79,24 @@ public:
 
 	/// \brief Create an accumulator as join of the accumulators passed as argument
 	/// \param[in] name name of the accumulator function to execute
-	/// \param[in] scale constant factors used in the function
 	/// \param[in] nofargs number of accumulator references with weights
 	/// \param[in] args list of accumulator references with weights
 	/// \return the created accumulator reference object representing the result of the function
 	virtual AccumulatorInterface*
 		createAccumulator(
 			const std::string& name,
-			const std::vector<double>& scale,
 			std::size_t nofargs,
 			const WeightedAccumulator* arg)=0;
 
 	/// \brief Create an accumulator of the feature occurrence set passed as argument
 	/// \param[in] name name of the accumulator operator to execute
-	/// \param[in] nofargs number of argument iterators to pass to the function
-	/// \param[in] args argument iterators to pass to the function
+	/// \param[in] factors additional parameters for scaling the function
+	/// \param[in] arg feature occurrence iterator to pass to the function
 	virtual AccumulatorInterface*
 		createOccurrenceAccumulator(
 			const std::string& name,
-			std::size_t nofargs,
-			const IteratorInterface** args)=0;
+			const std::vector<float>& factors,
+			const IteratorInterface& arg)=0;
 
 	/// \brief Calculate a list of the best ranked documents
 	/// \param[in] accu accumulator to fetch the weighted documents from

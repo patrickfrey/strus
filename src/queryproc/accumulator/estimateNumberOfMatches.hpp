@@ -26,52 +26,18 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_ACCUMULATOR_ESTIMATE_NUMBER_OF_MATCHES_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_ESTIMATE_NUMBER_OF_MATCHES_HPP_INCLUDED
+#include "strus/accumulatorInterface.hpp"
+#include "strus/index.hpp"
 
-namespace strus {
-
-class Iterator
-	:public IteratorInterface
+namespace strus
 {
-public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	Iterator( const Iterator& o);
 
-	virtual ~Iterator();
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+double estimateNumberOfMatches( AccumulatorInterface& itr,
+				Index maxDocumentNumber,
+				Index nofDocumentsInCollection);
 
-	virtual float weight() const
-	{
-		return m_weight;
-	}
-	virtual unsigned int frequency();
-
-	virtual IteratorInterface* copy() const
-	{
-		return new Iterator(*this);
-	}
-
-private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
-
-private:
-	leveldb::DB* m_db;
-	std::string m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	leveldb::Iterator* m_itr;
-	float m_weight;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
-};
-
-}
+}//namespace
 #endif
 

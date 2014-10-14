@@ -26,52 +26,49 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_ACCUMULATOR_FREQUENCY_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_FREQUENCY_HPP_INCLUDED
+#include "strus/accumulatorInterface.hpp"
+#include "strus/index.hpp"
+#include "iteratorReference.hpp"
+#include <limits>
+#include <vector>
 
-namespace strus {
+namespace strus
+{
 
-class Iterator
-	:public IteratorInterface
+/// \class AccumulatorFrequency
+/// \brief Accumulator for the feature frequency
+class AccumulatorFrequency
+	:public AccumulatorInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	Iterator( const Iterator& o);
+	explicit AccumulatorFrequency( const IteratorInterface& itr_)
+		:m_itr(itr_.copy(),){}
+	AccumulatorFrequency( const AccumulatorFrequency& o)
+		:m_itr(o.m_itr){}
 
-	virtual ~Iterator();
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+	virtual ~AccumulatorFrequency(){}
 
-	virtual float weight() const
+	virtual AccumulatorInterface* copy() const
 	{
-		return m_weight;
+		return new AccumulatorFrequency( *m_itr);
 	}
-	virtual unsigned int frequency();
 
-	virtual IteratorInterface* copy() const
+	virtual Index skipDoc( const Index& docno_)
 	{
-		return new Iterator(*this);
+		return m_itr->skipDoc( docno_);
+	}
+
+	virtual double weight()
+	{
+		return static_cast<double>( m_itr->frequency());
 	}
 
 private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
-
-private:
-	leveldb::DB* m_db;
-	std::string m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	leveldb::Iterator* m_itr;
-	float m_weight;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
+	IteratorReference m_itr;		///< input occurrencies to scan for results
 };
 
-}
+}//namespace
 #endif
 

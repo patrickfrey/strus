@@ -166,12 +166,44 @@ unsigned int strus::nofPackedIndices( const char* ptr, const char* end)
 			++pi;
 			pi += g_charlentable[ *pi];
 			pi += g_charlentable[ *pi];
+			++rt;
 		}
 		else
 		{
 			pi += g_charlentable[ *pi];
+			++rt;
 		}
 	}
 	return rt;
 }
+
+void strus::packFloat( std::string& buf, const float& val)
+{
+	uint32_t work = *reinterpret_cast< uint32_t const* >( &val);
+	buf.push_back( (unsigned char)(unsigned int)(work >> 24));
+	buf.push_back( (unsigned char)(unsigned int)(work >> 16));
+	buf.push_back( (unsigned char)(unsigned int)(work >>  8));
+	buf.push_back( (unsigned char)(unsigned int)(work >>  0));
+}
+
+float strus::unpackFloat( const char*& ptr, const char* end)
+{
+	if (ptr + 4 > end) throw std::runtime_error("array bound read in unpack float");
+	uint32_t work;
+	work = *ptr++;
+	work <<= 8;
+	work = *ptr++;
+	work <<= 8;
+	work = *ptr++;
+	work <<= 8;
+	work = *ptr++;
+	return *reinterpret_cast< uint32_t* >( &work);
+}
+
+unsigned int strus::sizeofPackedFloat( const char*&)
+{
+	return sizeof(float);
+}
+
+
 

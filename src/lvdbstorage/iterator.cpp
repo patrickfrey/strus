@@ -80,8 +80,10 @@ Index Iterator::skipPos( const Index& firstpos)
 	if (m_posno > firstpos)
 	{
 		m_posno = 0;
-		m_positr = m_itr->value().data() + sizeof(float);
-		m_posend = m_positr + m_itr->value().size() - sizeof(float);
+		m_positr = m_itr->value().data();
+		unsigned int ofs = sizeofPackedFloat( m_positr);
+		m_positr += ofs;
+		m_posend = m_positr + m_itr->value().size() - ofs;
 	}
 	while (m_positr < m_posend && (firstpos > m_posno || !m_posno))
 	{
@@ -102,9 +104,9 @@ Index Iterator::extractMatchData()
 	{
 		// Init the term weight and the iterators on the term occurrencies:
 		m_posno = 0;
-		std::memcpy( &m_weight, m_itr->value().data(), sizeof(float));
-		m_positr = m_itr->value().data() + sizeof(float);
-		m_posend = m_positr + m_itr->value().size() - sizeof(float);
+		m_positr = m_itr->value().data();
+		m_posend = m_positr + m_itr->value().size();
+		m_weight = unpackFloat( m_positr, m_posend);
 
 		// Extract the next matching document number from the rest of the key and return it:
 		const char* ki = m_itr->key().data() + m_keysize;
@@ -147,8 +149,10 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 unsigned int Iterator::frequency()
 {
 	if (m_itr == 0) return 0;
-	char const* pi = m_itr->value().data() + sizeof(float);
-	char const* pe = pi + m_itr->value().size();
+	char const* pi = m_itr->value().data();
+	unsigned int ofs = sizeofPackedFloat( pi);
+	pi += ofs;
+	char const* pe = pi + m_itr->value().size() - ofs;
 	return nofPackedIndices( pi, pe);
 }
 

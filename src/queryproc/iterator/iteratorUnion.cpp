@@ -76,11 +76,4 @@ Index IteratorUnion::skipPos( const Index& pos_)
 	return rt;
 }
 
-float IteratorUnion::weight() const
-{
-	float w1 = m_first->weight();
-	float w2 = m_second->weight();
-	return (w1 > w2)?w1:w2;
-}
-
 

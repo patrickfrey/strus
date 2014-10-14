@@ -6,8 +6,10 @@ CPP_OBJS=\
 	iterator/iteratorStructWithin.o \
 	iterator/iteratorStructSequence.o \
 	iterator/iteratorHelpers.o \
-	accumulator/accumulatorPrioritised.o \
-	accumulator/accumulatorWeightedSum.o \
+	accumulator/estimateNumberOfMatches.o \
+	accumulator/accumulatorSumMatchesPrio.o \
+	accumulator/accumulatorSumStatePrio.o \
+	accumulator/accumulatorOkapi.o \
 	queryProcessor.o \
 	queryProcessorLib.o
 

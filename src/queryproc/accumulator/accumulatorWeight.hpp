@@ -26,58 +26,47 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_WEIGHTED_SUM_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_WEIGHTED_SUM_HPP_INCLUDED
-#include "strus/index.hpp"
+#ifndef _STRUS_ACCUMULATOR_WEIGHT_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_WEIGHT_HPP_INCLUDED
 #include "strus/accumulatorInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
-#include <set>
+#include "strus/index.hpp"
+#include "iteratorReference.hpp"
+#include <limits>
+#include <vector>
 
 namespace strus
 {
 
-/// \class AccumulatorWeightedSum
-/// \brief Accumulator of sums of weighted results
-class AccumulatorWeightedSum
+/// \class AccumulatorWeight
+/// \brief Accumulator for the feature frequency
+class AccumulatorWeight
 	:public AccumulatorInterface
 {
 public:
-	typedef QueryProcessorInterface::WeightedAccumulator WeightedAccumulator;
+	explicit AccumulatorWeight( const IteratorInterface& itr_)
+		:m_itr(itr_.copy(),){}
+	AccumulatorWeight( const AccumulatorWeight& o)
+		:m_itr(o.m_itr){}
 
-	struct SubAccumulatorIndex
+	virtual ~AccumulatorWeight(){}
+
+	virtual AccumulatorInterface* copy() const
 	{
-		explicit SubAccumulatorIndex( std::size_t index_, int state_=0)
-			:state(state_)
-			,index(index_){}
-		SubAccumulatorIndex( const SubAccumulatorIndex& o)
-			:state(o.state)
-			,index(o.index){}
+		return new AccumulatorWeight( *m_itr);
+	}
 
-		bool operator < ( const SubAccumulatorIndex& o) const
-		{
-			if (state < o.state) return true;
-			if (index < o.index) return true;
-			return false;
-		}
+	virtual Index skipDoc( const Index& docno_)
+	{
+		return m_itr->skipDoc( docno_);
+	}
 
-		int state;
-		std::size_t index;
-	};
-
-	AccumulatorWeightedSum(
-		std::size_t nof_accu_,
-		const WeightedAccumulator* accu_);
-	virtual ~AccumulatorWeightedSum(){}
-
-	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
-
-	virtual Index skipDoc( const Index& docno);
-	virtual double weight();
+	virtual double weight()
+	{
+		return m_itr->weight();
+	}
 
 private:
-	std::set<SubAccumulatorIndex> m_accuorder;
-	std::vector<WeightedAccumulator> m_accu;
-	double m_weight;
+	IteratorReference m_itr;		///< input occurrencies to scan for results
 };
 
 }//namespace

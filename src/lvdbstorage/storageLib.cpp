@@ -82,6 +82,7 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 		batch.Put( Storage::keyString( Storage::VariablePrefix, "TermNo"), "\1");
 		batch.Put( Storage::keyString( Storage::VariablePrefix, "TypeNo"), "\1");
 		batch.Put( Storage::keyString( Storage::VariablePrefix, "DocNo"), "\1");
+		batch.Put( Storage::keyString( Storage::VariablePrefix, "NofDocs"), "\0");
 		status = db->Write( leveldb::WriteOptions(), &batch);
 		if (!status.ok())
 		{

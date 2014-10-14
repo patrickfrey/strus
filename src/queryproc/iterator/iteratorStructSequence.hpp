@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_ITERATOR_STRUCT_SEQUENCE_HPP_INCLUDED
 #define _STRUS_ITERATOR_STRUCT_SEQUENCE_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
+#include "iteratorJoin.hpp"
 #include "iteratorReference.hpp"
 #include <vector>
 
@@ -38,7 +38,7 @@ namespace strus
 /// \class IteratorStructSequence
 /// \brief Selects all elements that are appearing in a strict ascending position order inside a defined range without overlapping with a delimiter element.
 class IteratorStructSequence
-	:public IteratorInterface
+	:public IteratorJoin
 {
 public:
 	/// \param[in] seq_ the elements of the sequence
@@ -51,7 +51,6 @@ public:
 
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
-	virtual float weight() const;
 
 	virtual IteratorInterface* copy() const
 	{

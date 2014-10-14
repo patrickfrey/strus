@@ -26,52 +26,52 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_ACCUMULATOR_OKAPI_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_OKAPI_HPP_INCLUDED
+#include "strus/accumulatorInterface.hpp"
+#include "strus/storageInterface.hpp"
+#include "strus/index.hpp"
+#include "iteratorReference.hpp"
+#include <vector>
 
-namespace strus {
+namespace strus
+{
 
-class Iterator
-	:public IteratorInterface
+/// \class AccumulatorOkapi (BM25)
+/// \brief Accumulator using the BM25 weighting formula
+class AccumulatorOkapi
+	:public AccumulatorInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	Iterator( const Iterator& o);
+	explicit AccumulatorOkapi(
+			const StorageInterface* storage_,
+			const IteratorInterface& itr_,
+			float b_,
+			float k1_,
+			float avgDocLength_,
+			Index estimatedNofMatches_);
 
-	virtual ~Iterator();
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+	AccumulatorOkapi( const AccumulatorOkapi& o);
 
-	virtual float weight() const
-	{
-		return m_weight;
-	}
-	virtual unsigned int frequency();
+	virtual ~AccumulatorFrequency(){}
 
-	virtual IteratorInterface* copy() const
-	{
-		return new Iterator(*this);
-	}
+	virtual AccumulatorInterface* copy() const;
 
-private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
+	virtual Index skipDoc( const Index& docno_);
+
+	virtual double weight();
 
 private:
-	leveldb::DB* m_db;
-	std::string m_key;
-	std::size_t m_keysize;
+	const StorageInterface* m_storage;
 	Index m_docno;
-	leveldb::Iterator* m_itr;
-	float m_weight;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
+	IteratorReference m_itr;		///< input occurrencies to scan for results
+	float m_b;
+	float m_k1;
+	float m_avgDocLength;
+	Index m_estimatedNofMatches;
+	double m_idf;
 };
 
-}
+}//namespace
 #endif
 

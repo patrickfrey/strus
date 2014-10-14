@@ -26,52 +26,23 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
+#define _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
-#include <leveldb/db.h>
 
-namespace strus {
+namespace strus
+{
 
-class Iterator
-	:public IteratorInterface
+class WeightingFunctionInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	Iterator( const Iterator& o);
+	virtual ~WeightingFunctionInterface(){}
 
-	virtual ~Iterator();
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+	double call( IteratorInterface& itr, double scale);
 
-	virtual float weight() const
-	{
-		return m_weight;
-	}
-	virtual unsigned int frequency();
-
-	virtual IteratorInterface* copy() const
-	{
-		return new Iterator(*this);
-	}
-
-private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
-
-private:
-	leveldb::DB* m_db;
-	std::string m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	leveldb::Iterator* m_itr;
-	float m_weight;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
+	virtual WeightingFunctionInterface* copy() const=0;
 };
 
-}
+}//namespace
 #endif
 
