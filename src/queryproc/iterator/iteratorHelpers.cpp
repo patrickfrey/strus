@@ -28,6 +28,8 @@
 */
 /// \brief Implementation of helper functions shared by iterators
 #include "iteratorHelpers.hpp"
+#include <sstream>
+#include <iostream>
 
 using namespace strus;
 
@@ -67,4 +69,10 @@ Index strus::getFirstAllMatchDocno( const std::vector<IteratorReference>& ar, In
 	}
 }
 
+void strus::encodeInteger( std::string& buf, int val)
+{
+	std::ostringstream num;
+	num << val;
+	buf.append( num.str());
+}
 

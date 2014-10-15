@@ -26,48 +26,36 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
+#include "keyMap.hpp"
+#include "parser/setDimDescription.hpp"
+#include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
-namespace strus
+namespace strus {
+namespace parser {
+
+struct WeightingFunction
 {
+	std::string function;		///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
+	std::vector<float> params;	///< specifies parametrization of the weighting function
+	unsigned int setIndex;		///< index of argument (accumulator or iterator set)
+	double factor;			///< multiplication factor of a calculated weight
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
-{
-public:
-	virtual ~IteratorJoin(){}
+	WeightingFunction()
+		:setIndex(0),factor(0.0){}
+	WeightingFunction( const WeightingFunction& o)
+		:function(o.function),params(o.params),setIndex(o.setIndex),factor(o.factor){}
+	WeightingFunction( const std::string& function_, const std::vector<float>& params_, unsigned int setIndex_, double factor_=1.0)
+		:function(function_),params(params_),setIndex(setIndex_),factor(factor_){}
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
-
-	virtual unsigned int frequency()
-	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
-	}
-
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
+	static std::vector<WeightingFunction> parseExpression(
+			char const*& src,
+			strus::KeyMap<SetDimDescription>& setmap);
 };
 
-}//namespace
+}}//namespace
 #endif
-
 

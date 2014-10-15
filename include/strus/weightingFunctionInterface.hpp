@@ -38,8 +38,12 @@ class WeightingFunctionInterface
 public:
 	virtual ~WeightingFunctionInterface(){}
 
-	double call( IteratorInterface& itr, double scale);
+	/// \brief Call the weighting function for the current element in itr
+	/// \param[in,out] occurrency iterator
+	/// \return the weight of the current element
+	virtual double call( IteratorInterface& itr)=0;
 
+	/// \brief Get a deep copy of this function
 	virtual WeightingFunctionInterface* copy() const=0;
 };
 

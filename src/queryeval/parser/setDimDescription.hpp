@@ -26,48 +26,27 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_QUERY_PARSER_SET_DIM_DESCRIPTION_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_SET_DIM_DESCRIPTION_HPP_INCLUDED
+#include <cstdlib>
 
-namespace strus
+namespace strus {
+namespace parser {
+
+/// \brief Attributes of a set needed in the initial parsing phase
+struct SetDimDescription
 {
-
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
-{
-public:
-	virtual ~IteratorJoin(){}
-
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
-
-	virtual unsigned int frequency()
-	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
-	}
-
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
+	SetDimDescription()
+		:id(0),nofElements(0),referenced(false){}
+	SetDimDescription( const SetDimDescription& o)
+		:id(o.id),nofElements(o.nofElements),referenced(o.referenced){}
+	SetDimDescription( std::size_t id_, std::size_t nofElements_)
+		:id(id_),nofElements(nofElements_),referenced(false){}
+	
+	std::size_t id;			///< internal identifier of the set
+	std::size_t nofElements;	///< number of elements in the set
+	bool referenced;		///< true, if set has been referenced
 };
 
-}//namespace
+}}//namespace
 #endif
-
-

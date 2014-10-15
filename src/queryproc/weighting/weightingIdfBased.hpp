@@ -26,48 +26,56 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_WEIGHTING_IDF_BASED_HPP_INCLUDED
+#define _STRUS_WEIGHTING_IDF_BASED_HPP_INCLUDED
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/storageInterface.hpp"
+#include "strus/index.hpp"
+#include "iteratorReference.hpp"
+#include "weighting/estimatedNumberOfMatchesMap.hpp"
+#include <vector>
 
 namespace strus
 {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
+/// \class WeightingIdfBased
+/// \brief Interface for weighting function based on IDF
+class WeightingIdfBased
+	:public WeightingFunctionInterface
 {
 public:
-	virtual ~IteratorJoin(){}
+	WeightingIdfBased(
+			const StorageInterface* storage_,
+			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
+		:m_storage(storage_)
+		,m_nofMatchesMap(nofMatchesMap_)
+		,m_idf_calculated(false)
+		,m_idf(0.0){}
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	WeightingIdfBased( const WeightingIdfBased& o)
+		:m_storage(o.m_storage)
+		,m_nofMatchesMap(o.m_nofMatchesMap)
+		,m_idf_calculated(o.m_idf_calculated)
+		,m_idf(o.m_idf){}
 
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
+	virtual ~WeightingIdfBased(){}
 
-	virtual unsigned int frequency()
-	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
-	}
+	virtual WeightingFunctionInterface* copy() const=0;
 
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
+	virtual double call( IteratorInterface& itr)=0;
 
-	virtual IteratorInterface* copy() const=0;
+protected:
+	bool idf_calculated() const			{return m_idf_calculated;}
+	double idf() const				{return m_idf;}
+	void calculateIdf( IteratorInterface& itr);
+
+private:
+	const StorageInterface* m_storage;
+	EstimatedNumberOfMatchesMapR m_nofMatchesMap;
+	bool m_idf_calculated;
+	double m_idf;
 };
 
 }//namespace
 #endif
-
 

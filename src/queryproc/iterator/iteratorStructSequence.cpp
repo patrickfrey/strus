@@ -43,14 +43,47 @@ IteratorStructSequence::IteratorStructSequence( const std::vector<IteratorRefere
 IteratorStructSequence::IteratorStructSequence( const IteratorStructSequence& o)
 	:m_docno(o.m_docno)
 	,m_docno_cut(o.m_docno_cut)
-	,m_cut(o.m_cut->copy())
 	,m_range(o.m_range)
 {
+	if (o.m_cut.get())
+	{
+		m_cut.reset( o.m_cut->copy());
+	}
 	std::vector<IteratorReference>::const_iterator pi = o.m_seq.begin(), pe = o.m_seq.end();
 	for (; pi != pe; ++pi)
 	{
 		m_seq.push_back( (*pi)->copy());
+		m_featureid.append( (*pi)->featureid());
 	}
+	if (m_cut.get())
+	{
+		m_featureid.append( m_cut->featureid());
+		m_featureid.push_back( 'C');
+	}
+	if (m_range)
+	{
+		encodeInteger( m_featureid, m_range);
+		m_featureid.push_back( 'R');
+	}
+	m_featureid.push_back( 'S');
+}
+
+std::vector<const IteratorInterface*> IteratorStructSequence::subExpressions( bool positive)
+{
+	std::vector<const IteratorInterface*> rt;
+	if (positive)
+	{
+		std::vector<IteratorReference>::const_iterator si = m_seq.begin(), se = m_seq.end();
+		for (; si != se; ++si)
+		{
+			rt.push_back( si->get());
+		}
+	}
+	else if (m_cut.get())
+	{
+		rt.push_back( m_cut.get());
+	}
+	return rt;
 }
 
 Index IteratorStructSequence::skipDoc( const Index& docno_)

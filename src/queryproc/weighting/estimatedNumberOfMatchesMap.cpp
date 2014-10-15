@@ -26,9 +26,15 @@
 
 --------------------------------------------------------------------
 */
-#include "estimateNumberOfMatches.hpp"
+#include "estimatedNumberOfMatchesMap.hpp"
 
 using namespace strus;
+
+EstimatedNumberOfMatchesMap::EstimatedNumberOfMatchesMap( const StorageInterface* storage_)
+	:m_storage(storage_)
+	,m_maxDocumentNumber( storage_->maxDocumentNumber())
+	,m_nofDocumentsInCollection( storage_->nofDocumentsInserted())
+{}
 
 static Index ror(Index x, unsigned int moves)
 {
@@ -52,15 +58,15 @@ static Index randomDocumentNumber( Index maxdocno, unsigned int no)
 	return hash64shift( maxdocno + (no * 2654435761U)) % (maxdocno+1);
 }
 
-double strus::estimateNumberOfMatches(
-		AccumulatorInterface& accu,
+static double estimateNumberOfMatches(
+		IteratorInterface& itr,
 		Index maxDocumentNumber,
 		Index nofDocumentsInCollection)
 {
 	enum {Iterations=10, LocalScans=5};
 	double diffsum = 0.0;
 
-	if (accu.skipDoc(0) == 0)
+	if (itr.skipDoc(0) == 0)
 	{
 		return 0.0;
 	}
@@ -71,10 +77,10 @@ double strus::estimateNumberOfMatches(
 		unsigned int kk = 0;
 		for (; kk<LocalScans; ++kk)
 		{
-			Index next_docno = accu.skipDoc( pick_docno);
+			Index next_docno = itr.skipDoc( pick_docno);
 			if (next_docno == 0)
 			{
-				next_docno = accu.skipDoc(0) + maxDocumentNumber;
+				next_docno = itr.skipDoc(0) + maxDocumentNumber;
 			}
 			diffsum += next_docno - pick_docno + 1;
 			if (next_docno == 0)
@@ -90,4 +96,21 @@ double strus::estimateNumberOfMatches(
 	return (double) (nofDocumentsInCollection / diffsum) * Iterations * LocalScans;
 }
 
+
+double EstimatedNumberOfMatchesMap::get( IteratorInterface& itr)
+{
+	std::map<std::string,double>::const_iterator vi = m_valmap.find( itr.featureid());
+	if (vi != m_valmap.end())
+	{
+		return vi->second;
+	}
+	else
+	{
+		double val = estimateNumberOfMatches(
+				itr, m_maxDocumentNumber,
+				m_nofDocumentsInCollection);
+		m_valmap[ itr.featureid()] = val;
+		return val;
+	}
+}
 

@@ -29,28 +29,36 @@
 #ifndef _STRUS_ACCUMULATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include <string>
+#include <vector>
 
 namespace strus
 {
+class WeightingFunctionInterface;
+class IteratorInterface;
 
 class AccumulatorInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~AccumulatorInterface(){}
 
-	virtual bool nextRank( Index& docno_, int& state_, double& weigth_)
-	{
-		// Default implementation:
-		docno_ = skipDoc( docno_);
-		state_ = 0;
-		if (!docno_) return 0;
-		weigth_ = weight();
-		return true;
-	}
+	/// \brief Add another source to accumulate result from
+	/// \remark Cannot be called anymore after the first call of 'nextRank(Index&,int&,double&)'
+	virtual void add(
+			double factor,
+			const std::string& function,
+			const std::vector<float>& parameter,
+			const IteratorInterface& iterator)=0;
 
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual double weight()=0;
+	/// \brief Get the next matching document
+	/// \param[in,out] docno_ document number
+	/// \param[in,out] state_ internal evaluation state
+	/// \param[out] weight_ calculated document weight that tries to reflect its relevance for the search
+	/// \remark The function tries to return relevant (high weight) documents as early as possible by some priorisation of evaluation order, but it cannot sort the returned ranks by weight.
+	virtual bool nextRank( Index& docno_, int& state_, double& weigth_)=0;
 
+	/// \brief Get a copy of this
 	virtual AccumulatorInterface* copy() const=0;
 };
 

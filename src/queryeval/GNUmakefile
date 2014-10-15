@@ -1,7 +1,10 @@
 TOPDIR=../..
 CPP_OBJS=\
 	queryParser.o \
-	tupleGenerator.o \
+	parser/tupleGenerator.o \
+	parser/selector.o \
+	parser/weightingFunction.o \
+	parser/lexems.o \
 	queryEvalLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/include -I/usr/include -I.

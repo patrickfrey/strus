@@ -26,49 +26,50 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_FREQUENCY_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_FREQUENCY_HPP_INCLUDED
-#include "strus/accumulatorInterface.hpp"
-#include "strus/index.hpp"
-#include "iteratorReference.hpp"
-#include <limits>
+#ifndef _STRUS_QUERY_PARSER_JOIN_OPERATION_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_JOIN_OPERATION_HPP_INCLUDED
+#include "keyMap.hpp"
+#include "parser/selector.hpp"
+#include <string>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
-namespace strus
-{
+namespace strus {
+namespace parser {
 
-/// \class AccumulatorFrequency
-/// \brief Accumulator for the feature frequency
-class AccumulatorFrequency
-	:public AccumulatorInterface
+/// \brief Defines a join operation of term occurrence sets
+class JoinOperation
 {
 public:
-	explicit AccumulatorFrequency( const IteratorInterface& itr_)
-		:m_itr(itr_.copy(),){}
-	AccumulatorFrequency( const AccumulatorFrequency& o)
-		:m_itr(o.m_itr){}
 
-	virtual ~AccumulatorFrequency(){}
+	JoinOperation(
+			unsigned int resultset_,
+			const std::string& name_,
+			int range_,
+			const SelectorSetR& selectorset_)
+		:m_resultset(resultset_)
+		,m_name(name_)
+		,m_range(range_)
+		,m_selectorset(selectorset_){}
 
-	virtual AccumulatorInterface* copy() const
-	{
-		return new AccumulatorFrequency( *m_itr);
-	}
+	JoinOperation( const JoinOperation& o)
+		:m_resultset(o.m_resultset)
+		,m_name(o.m_name)
+		,m_range(o.m_range)
+		,m_selectorset(o.m_selectorset){}
 
-	virtual Index skipDoc( const Index& docno_)
-	{
-		return m_itr->skipDoc( docno_);
-	}
-
-	virtual double weight()
-	{
-		return static_cast<double>( m_itr->frequency());
-	}
+public:
+	unsigned int resultset() const			{return m_resultset;}
+	std::string name() const			{return m_name;}
+	int range() const				{return m_range;}
+	const SelectorSetR& selectorset() const		{return m_selectorset;}
 
 private:
-	IteratorReference m_itr;		///< input occurrencies to scan for results
+	unsigned int m_resultset;	///< join operation result set index
+	std::string m_name;		///< name of operation
+	int m_range;			///< range for operations defined in a range (position difference)
+	SelectorSetR m_selectorset;	///< iterator reference sequences
 };
 
-}//namespace
+}}//namespace
 #endif
-

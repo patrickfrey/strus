@@ -6,10 +6,11 @@ CPP_OBJS=\
 	iterator/iteratorStructWithin.o \
 	iterator/iteratorStructSequence.o \
 	iterator/iteratorHelpers.o \
-	accumulator/estimateNumberOfMatches.o \
-	accumulator/accumulatorSumMatchesPrio.o \
-	accumulator/accumulatorSumStatePrio.o \
-	accumulator/accumulatorOkapi.o \
+	weighting/weightingBM25.o \
+	weighting/weightingIdfBased.o \
+	weighting/estimatedNumberOfMatchesMap.o \
+	weighting/createWeightingFunction.o \
+	accumulator/accumulatorIdfPriority.o \
 	queryProcessor.o \
 	queryProcessorLib.o
 

@@ -26,48 +26,28 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#include "weightingIdfBased.hpp"
+#include <cmath>
 
-namespace strus
+using namespace strus;
+
+void WeightingIdfBased::calculateIdf( IteratorInterface& itr)
 {
+	Index realNofMatches = itr.documentFrequency();
+	double nofMatches = realNofMatches?realNofMatches:m_nofMatchesMap->get( itr);
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
-{
-public:
-	virtual ~IteratorJoin(){}
-
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-
-	virtual float weight() const
+	double nofCollectionDocuments = m_storage->nofDocumentsInserted();
+	if (nofCollectionDocuments > nofMatches * 2)
 	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
+		m_idf = log(
+			(nofCollectionDocuments - nofMatches + 0.5)
+			/ (nofMatches + 0.5));
 	}
-
-	virtual unsigned int frequency()
+	else
 	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
+		m_idf = 0.0;
 	}
+}
 
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
-};
-
-}//namespace
-#endif
 
 

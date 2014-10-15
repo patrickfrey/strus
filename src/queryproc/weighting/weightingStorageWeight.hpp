@@ -26,48 +26,44 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_STORAGE_WEIGHT_HPP_INCLUDED
+#define _STRUS_WEIGHTING_STORAGE_WEIGHT_HPP_INCLUDED
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/index.hpp"
 #include "strus/iteratorInterface.hpp"
-#include <stdexcept>
+#include "weightingIdfBased.hpp"
 #include <limits>
+#include <vector>
 
 namespace strus
 {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
+/// \class WeightingStorageWeight
+/// \brief Accumulator for the feature frequency
+class WeightingStorageWeight
+	:public WeightingIdfBased
 {
 public:
-	virtual ~IteratorJoin(){}
+	WeightingStorageWeight(
+			const StorageInterface* storage_,
+			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
+		:WeightingIdfBased(storage_,nofMatchesMap_){}
+	WeightingStorageWeight( const WeightingStorageWeight& o)
+		:WeightingIdfBased(o){}
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	virtual ~WeightingStorageWeight(){}
 
-	virtual float weight() const
+	double call( IteratorInterface& itr)
 	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
+		return itr.weight();
 	}
 
-	virtual unsigned int frequency()
+	virtual WeightingFunctionInterface* copy() const
 	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
+		return new WeightingStorageWeight(*this);
 	}
-
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
 };
 
 }//namespace
 #endif
-
 

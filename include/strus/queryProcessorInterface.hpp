@@ -66,37 +66,12 @@ public:
 			std::size_t nofargs,
 			const IteratorInterface** args)=0;
 
-	struct WeightedAccumulator
-	{
-		double weight;
-		AccumulatorInterface* accu;
-
-		explicit WeightedAccumulator( AccumulatorInterface* accu_=0, double weight_=1.0)
-			:weight(weight_),accu(accu_){}
-		WeightedAccumulator( const WeightedAccumulator& o)
-			:weight(o.weight),accu(o.accu){}
-	};
-
-	/// \brief Create an accumulator as join of the accumulators passed as argument
-	/// \param[in] name name of the accumulator function to execute
-	/// \param[in] nofargs number of accumulator references with weights
-	/// \param[in] args list of accumulator references with weights
-	/// \return the created accumulator reference object representing the result of the function
+	/// \brief Create an accumulator for the summation of weighted term occurrencies
+	/// \param[in] name name of the accumulator (defines the priorisation of ranking)
+	/// \return the created accumulator object
 	virtual AccumulatorInterface*
 		createAccumulator(
-			const std::string& name,
-			std::size_t nofargs,
-			const WeightedAccumulator* arg)=0;
-
-	/// \brief Create an accumulator of the feature occurrence set passed as argument
-	/// \param[in] name name of the accumulator operator to execute
-	/// \param[in] factors additional parameters for scaling the function
-	/// \param[in] arg feature occurrence iterator to pass to the function
-	virtual AccumulatorInterface*
-		createOccurrenceAccumulator(
-			const std::string& name,
-			const std::vector<float>& factors,
-			const IteratorInterface& arg)=0;
+			const std::string& name)=0;
 
 	/// \brief Calculate a list of the best ranked documents
 	/// \param[in] accu accumulator to fetch the weighted documents from

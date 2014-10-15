@@ -26,48 +26,36 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_QUERY_PARSER_TERM_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_TERM_HPP_INCLUDED
+#include "keyMap.hpp"
+#include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
-namespace strus
-{
+namespace strus {
+namespace parser {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
+/// \brief Term definition in the query
+class Term
 {
 public:
-	virtual ~IteratorJoin(){}
+	Term()
+		:m_resultset(0){}
+	Term( const Term& o)
+		:m_resultset(o.m_resultset),m_type(o.m_type),m_value(o.m_value){}
+	Term( unsigned int resultset_, const std::string& type_, const std::string& value_)
+		:m_resultset(resultset_),m_type(type_),m_value(value_){}
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	unsigned int resultset() const				{return m_resultset;}
+	const std::string& type() const				{return m_type;}
+	const std::string& value() const			{return m_value;}
 
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
-
-	virtual unsigned int frequency()
-	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
-	}
-
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
+private:
+	unsigned int m_resultset;				///< set index of the term occurencies
+	std::string m_type;					///< term type string
+	std::string m_value;					///< term value string
 };
 
-}//namespace
+}}//namespace
 #endif
-
-

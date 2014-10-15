@@ -41,7 +41,22 @@ IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	:m_docno(o.m_docno)
 	,m_first(o.m_first->copy())
 	,m_second(o.m_second->copy())
-{}
+{
+	m_featureid.append( m_first->featureid());
+	m_featureid.append( m_second->featureid());
+	m_featureid.push_back( 'I');
+}
+
+std::vector<const IteratorInterface*> IteratorIntersect::subExpressions( bool positive)
+{
+	std::vector<const IteratorInterface*> rt;
+	if (positive)
+	{
+		rt.push_back( m_first.get());
+		rt.push_back( m_second.get());
+	}
+	return rt;
+}
 
 Index IteratorIntersect::skipDoc( const Index& docno_)
 {

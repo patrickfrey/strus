@@ -47,6 +47,11 @@ public:
 	IteratorStructWithin( const std::vector<IteratorReference>& group_, const IteratorReference& cut_, int range_);
 
 	IteratorStructWithin( const IteratorStructWithin& o);
+
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
 	virtual ~IteratorStructWithin(){}
 
 	virtual Index skipDoc( const Index& docno);
@@ -57,12 +62,15 @@ public:
 		return new IteratorStructWithin( *this);
 	}
 
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
+
 private:
 	Index m_docno;				///< current document number
 	Index m_docno_cut;			///< next document number after m_docno that contains a cut element
 	std::vector<IteratorReference> m_group;	///< the elements of the group
 	IteratorReference m_cut;		///< the set of elements then must not appear inside the group
 	int m_range;				///< the maximum position difference between the start element and the end element of the group
+	std::string m_featureid;		///< unique id of the feature expression
 };
 
 }//namespace

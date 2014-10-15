@@ -42,8 +42,14 @@ public:
 	IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_);
 	virtual ~IteratorIntersect(){}
 
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
+
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
 
 	virtual IteratorInterface* copy() const
 	{
@@ -54,6 +60,7 @@ private:
 	Index m_docno;
 	IteratorReference m_first;
 	IteratorReference m_second;
+	std::string m_featureid;		///< unique id of the feature expression
 };
 
 }//namespace

@@ -26,13 +26,15 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_SUM_MATCHES_PRIO_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_SUM_MATCHES_PRIO_HPP_INCLUDED
+#ifndef _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/accumulatorInterface.hpp"
-#include "accumulatorReference.hpp"
 #include "strus/iteratorInterface.hpp"
-#include "accumulatorReference.hpp"
+#include "iteratorReference.hpp"
+#include "weightingFunctionReference.hpp"
+#include "accumulatorArgument.hpp"
+#include "weighting/estimatedNumberOfMatchesMap.hpp"
 #include <vector>
 #include <list>
 #include <set>
@@ -40,62 +42,60 @@
 namespace strus
 {
 
-/// \class AccumulatorSumMatchesPrio
+/// \class AccumulatorIdfPriority
 /// \brief Accumulator for ranking that prioritises input accumulators returning matches with a higher weight
-class AccumulatorSumMatchesPrio
+class AccumulatorIdfPriority
 	:public AccumulatorInterface
 {
 public:
-	/// \class AccumulatorWithProbabilityWeight
-	/// \brief Accumulator with a probability estimate for using it in a priority queue
-	class AccumulatorWithWeight
-	{
-	public:
-		explicit AccumulatorWithWeight( AccumulatorReference itr_, double weight_=0.0, bool finished_=false)
-			:finished(finished_)
-			,weight(weight_)
-			,itr(itr_){}
-
-		bool operator < ( const AccumulatorWithWeight& o) const
-		{
-			return finished?false:(weight < o.weight);
-		}
-
-		double weight;
-		AccumulatorReference itr;
-	};
-
 	/// \brief Constructor
-	/// \param[in] arg_ argument iterators to accumulate matches from
-	AccumulatorSumMatchesPrio( 
-		std::size_t nof_accu_,
-		const WeightedAccumulator* accu_);
+	explicit AccumulatorIdfPriority( const StorageInterface* storage_);
 
 	/// \brief Copy constructor
-	AccumulatorSumMatchesPrio( const AccumulatorSumMatchesPrio& o);
+	AccumulatorIdfPriority( const AccumulatorIdfPriority& o);
 
-	virtual ~AccumulatorSumMatchesPrio(){}
+	virtual ~AccumulatorIdfPriority(){}
 
-	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
+	virtual void add(
+			double factor,
+			const std::string& function,
+			const std::vector<float>& parameter,
+			const IteratorInterface& iterator);
 
-	virtual Index skipDoc( const Index& docno);
-	virtual double weight();
+	virtual bool nextRank(
+			Index& docno_,
+			int& state_,
+			double& weight_);
 
 	virtual AccumulatorInterface* copy() const
 	{
-		return new AccumulatorSumMatchesPrio( *this);
+		return new AccumulatorIdfPriority( *this);
 	}
 
 private:
-	double calcInitialWeight( const IteratorReference& itr);
-	void recalculatePriorityList();
+	struct ArgumentRef
+	{
+		ArgumentRef( double idf_, std::size_t idx_)
+			:idx(idx_),idf(idf_){}
+		ArgumentRef( const ArgumentRef& o)
+			:idx(o.idx),idf(o.idf){}
 
-private:
-	std::list<AccumulatorWithProbabilityWeight> m_iterPrioList;
+		bool operator < ( const ArgumentRef& o) const
+		{
+			return (idf < o.idf);
+		}
+
+		std::size_t idx;
+		double idf;
+	};
+
+	const StorageInterface* m_storage;
+	EstimatedNumberOfMatchesMapR m_estimatedNumberOfMatchesMap;
+	std::vector<AccumulatorArgument> m_argumentList;
+	std::set<ArgumentRef> m_argumentOrder;
+	std::set<ArgumentRef>::const_iterator m_argumentIter;
 	std::set<Index> m_visited;
-	Index m_maxDocno;
-	unsigned int m_loopCount;
-	double m_weight;
+	bool m_started;
 };
 
 }//namespace

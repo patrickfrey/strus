@@ -26,58 +26,45 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_SUM_STATE_PRIO_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_SUM_STATE_PRIO_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_BM25_HPP_INCLUDED
+#define _STRUS_WEIGHTING_BM25_HPP_INCLUDED
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
-#include "strus/accumulatorInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
-#include <set>
+#include "iteratorReference.hpp"
+#include "weightingIdfBased.hpp"
+#include <vector>
 
 namespace strus
 {
 
-/// \class AccumulatorSumStatePrio
-/// \brief Accumulator of sums of weighted results
-class AccumulatorSumStatePrio
-	:public AccumulatorInterface
+/// \class WeightingBM25
+/// \brief Weighting function based on the BM25 formula
+class WeightingBM25
+	:public WeightingIdfBased
 {
 public:
-	typedef QueryProcessorInterface::WeightedAccumulator WeightedAccumulator;
+	explicit WeightingBM25(
+			const StorageInterface* storage_,
+			const EstimatedNumberOfMatchesMapR& nofMatchesMap_,
+			float b_,
+			float k1_,
+			float avgDocLength_);
 
-	struct SubAccumulatorIndex
-	{
-		explicit SubAccumulatorIndex( std::size_t index_, int state_=0)
-			:state(state_)
-			,index(index_){}
-		SubAccumulatorIndex( const SubAccumulatorIndex& o)
-			:state(o.state)
-			,index(o.index){}
+	WeightingBM25( const WeightingBM25& o);
 
-		bool operator < ( const SubAccumulatorIndex& o) const
-		{
-			if (state < o.state) return true;
-			if (index < o.index) return true;
-			return false;
-		}
+	virtual ~WeightingBM25(){}
 
-		int state;
-		std::size_t index;
-	};
+	virtual WeightingFunctionInterface* copy() const;
 
-	AccumulatorSumStatePrio(
-		std::size_t nof_accu_,
-		const WeightedAccumulator* accu_);
-	virtual ~AccumulatorSumStatePrio(){}
-
-	virtual bool nextRank( Index& docno_, int& state_, double& weight_);
-
-	virtual Index skipDoc( const Index& docno);
-	virtual double weight();
+	virtual double call( IteratorInterface& itr);
 
 private:
-	std::set<SubAccumulatorIndex> m_accuorder;
-	std::vector<WeightedAccumulator> m_accu;
-	double m_weight;
+	const StorageInterface* m_storage;
+	Index m_docno;
+	float m_b;
+	float m_k1;
+	float m_avgDocLength;
 };
 
 }//namespace

@@ -113,9 +113,15 @@ static unsigned int unpackInt32_( const char*& itr, const char* end)
 	{
 		buf[ii] = *itr;
 	}
-	if (ii < nn || nn == 0) throw std::runtime_error( "corrupt data");
+	if (ii < nn || nn == 0)
+	{
+		throw std::runtime_error( "corrupt data");
+	}
 	unsigned int rt = utf8decode( buf);
-	if (rt > 0x7fffFFFFU) throw std::runtime_error( "corrupt data");
+	if (rt > 0x7fffFFFFU)
+	{
+		throw std::runtime_error( "corrupt data");
+	}
 	return rt;
 }
 

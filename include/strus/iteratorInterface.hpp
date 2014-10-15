@@ -29,6 +29,8 @@
 #ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include <string>
+#include <vector>
 
 namespace strus
 {
@@ -37,12 +39,31 @@ class IteratorInterface
 {
 public:
 	virtual ~IteratorInterface(){}
+
+	/// \brief Unique id in the system for a feature expression
+	virtual const std::string& featureid() const=0;
+
+	/// \brief Return the next match with a document number higher than or equal to docno
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive)=0;
+
+	/// \brief Return the next match with a document number higher than or equal to docno
 	virtual Index skipDoc( const Index& docno)=0;
+
+	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
 	virtual Index skipPos( const Index& firstpos)=0;
 
+	/// \brief Get the storage weight of the current document reached with 'skipDoc(const Index&)'
+	/// \remark May not be defined for composed features
 	virtual float weight() const=0;
+
+	/// \brief Get the number of documents in the collection where the feature occurrs
+	/// \remark May not be defined for composed features
+	virtual Index documentFrequency()=0;
+
+	/// \brief Get the frequency of the current document reached with 'skipDoc(const Index&)'
 	virtual unsigned int frequency()=0;
 
+	/// \brief Return a copy of this iterator
 	virtual IteratorInterface* copy() const=0;
 };
 

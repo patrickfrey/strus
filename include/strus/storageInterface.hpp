@@ -66,14 +66,14 @@ public:
 		/// \param[in] value_ value of the document attribute
 		virtual void setDocumentAttribute(
 				char name_,
-				float value_);
+				float value_)=0;
 
 		/// \brief Define a string attribute for the document
 		/// \param[in] name_ one character as name of the attribute
 		/// \param[in] value_ value of the document attribute
 		virtual void setDocumentAttribute(
 				char name_,
-				const std::string& value_);
+				const std::string& value_)=0;
 
 		/// \brief Commit of the transaction, throws on error
 		virtual void commit()=0;

@@ -40,10 +40,18 @@ class IteratorUnion
 public:
 	IteratorUnion( const IteratorUnion& o);
 	IteratorUnion( const IteratorReference& first_, const IteratorReference& second_);
+
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
+
 	virtual ~IteratorUnion(){}
 
 	virtual Index skipDoc( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
+
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
 
 	virtual IteratorInterface* copy() const
 	{
@@ -56,6 +64,7 @@ private:
 	IteratorReference m_second;
 	bool m_open_first;
 	bool m_open_second;
+	std::string m_featureid;		///< unique id of the feature expression
 };
 
 }//namespace

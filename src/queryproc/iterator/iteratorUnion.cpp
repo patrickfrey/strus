@@ -2,6 +2,39 @@
 
 using namespace strus;
 
+
+IteratorUnion::IteratorUnion( const IteratorReference& first_, const IteratorReference& second_)
+	:m_docno(0)
+	,m_first(first_)
+	,m_second(second_)
+	,m_open_first(false)
+	,m_open_second(false)
+{
+	m_featureid.append( m_first->featureid());
+	m_featureid.append( m_second->featureid());
+	m_featureid.push_back( 'U');
+}
+
+IteratorUnion::IteratorUnion( const IteratorUnion& o)
+	:m_docno(o.m_docno)
+	,m_first(o.m_first->copy())
+	,m_second(o.m_second->copy())
+	,m_open_first(o.m_open_first)
+	,m_open_second(o.m_open_second)
+	,m_featureid(o.m_featureid)
+{}
+
+std::vector<const IteratorInterface*> IteratorUnion::subExpressions( bool positive)
+{
+	std::vector<const IteratorInterface*> rt;
+	if (positive)
+	{
+		rt.push_back( m_first.get());
+		rt.push_back( m_second.get());
+	}
+	return rt;
+}
+
 static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 {
 	if (idx0 <= idx1)
@@ -27,22 +60,6 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 		}
 	}
 }
-
-IteratorUnion::IteratorUnion( const IteratorReference& first_, const IteratorReference& second_)
-	:m_docno(0)
-	,m_first(first_)
-	,m_second(second_)
-	,m_open_first(false)
-	,m_open_second(false)
-{}
-
-IteratorUnion::IteratorUnion( const IteratorUnion& o)
-	:m_docno(o.m_docno)
-	,m_first(o.m_first->copy())
-	,m_second(o.m_second->copy())
-	,m_open_first(o.m_open_first)
-	,m_open_second(o.m_open_second)
-{}
 
 Index IteratorUnion::skipDoc( const Index& docno_)
 {

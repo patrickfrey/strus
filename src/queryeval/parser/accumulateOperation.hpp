@@ -26,18 +26,42 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_ESTIMATE_NUMBER_OF_MATCHES_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_ESTIMATE_NUMBER_OF_MATCHES_HPP_INCLUDED
-#include "strus/accumulatorInterface.hpp"
-#include "strus/index.hpp"
+#ifndef _STRUS_QUERY_PARSER_ACCUMULATE_OPERATION_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_ACCUMULATE_OPERATION_HPP_INCLUDED
+#include "keyMap.hpp"
+#include "weightingFunction.hpp"
+#include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
-namespace strus
+namespace strus {
+namespace parser {
+
+/// \brief Defines an accumulate operation
+class AccumulateOperation
 {
+public:
 
-double estimateNumberOfMatches( AccumulatorInterface& itr,
-				Index maxDocumentNumber,
-				Index nofDocumentsInCollection);
+	AccumulateOperation(){}
+	AccumulateOperation(
+			const std::string& name_,
+			const std::vector<WeightingFunction>& args_)
+		:m_name(name_)
+		,m_args(args_){}
 
-}//namespace
+	AccumulateOperation( const AccumulateOperation& o)
+		:m_name(o.m_name)
+		,m_args(o.m_args)
+	{}
+
+	std::string name() const				{return m_name;}
+	const std::vector<WeightingFunction>& args() const	{return m_args;}
+
+private:
+	std::string m_name;						///< name of operation
+	std::vector<WeightingFunction> m_args;				///< list of set references with weight
+};
+
+}}//namespace
 #endif
 

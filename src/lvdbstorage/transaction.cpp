@@ -89,13 +89,14 @@ void Transaction::setDocumentAttribute(
 		char name_,
 		const std::string& value_)
 {
-	m_attributes.push_back( DocAttribute( DocAttribute::TypeString, name_, value));
+	m_attributes.push_back( DocAttribute( DocAttribute::TypeString, name_, value_));
 }
 
 void Transaction::commit()
 {
 	Index docno = m_storage->keyGetOrCreate( Storage::DocIdPrefix, m_docid);
 	leveldb::WriteBatch batch;
+	bool documentFound = false;
 
 	leveldb::Iterator* vi = m_storage->newIterator();
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
@@ -116,6 +117,7 @@ void Transaction::commit()
 			//... end of document reached
 			break;
 		}
+		documentFound = true;
 		batch.Delete( vi->key());
 	}
 	// [1.2] Insert new numeric attributes
@@ -143,10 +145,11 @@ void Transaction::commit()
 			//... end of document reached
 			break;
 		}
+		documentFound = true;
 		batch.Delete( vi->key());
 	}
 	// [1.4] Insert new textual attributes
-	std::vector<DocAttribute>::const_iterator wi = m_attributes.begin(), we = m_attributes.end();
+	wi = m_attributes.begin(), we = m_attributes.end();
 	for (; wi != we; ++wi)
 	{
 		if (wi->type == DocAttribute::TypeString)
@@ -175,6 +178,7 @@ void Transaction::commit()
 			//... end of document reached
 			break;
 		}
+		documentFound = true;
 		batch.Delete( vi->key());
 
 		const char* ki = vi->key().data() + invkeysize;
@@ -198,6 +202,7 @@ void Transaction::commit()
 		packIndex( delkey, di->second);		// [valueno]
 		packIndex( delkey, docno);		// [docno]
 
+		documentFound = true;
 		batch.Delete( delkey);
 	}
 
@@ -238,6 +243,11 @@ void Transaction::commit()
 
 		batch.Put( invkey, ri->second.value);
 	}
+	if (!documentFound)
+	{
+		m_storage->incrementNofDocumentsInserted();
+	}
+
 	// [5] Do submit the write to the database:
 	m_storage->writeBatch( batch);
 	m_storage->flushNewKeys();

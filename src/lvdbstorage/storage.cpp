@@ -50,6 +50,7 @@ Storage::Storage( const char* path_)
 		m_next_typeno = keyLookUp( VariablePrefix, "TypeNo");
 		m_next_docno = keyLookUp( VariablePrefix, "DocNo");
 		m_nof_documents = keyLookUp( VariablePrefix, "NofDocs");
+		if (m_nof_documents) m_nof_documents -= 1;
 	}
 	else
 	{
@@ -71,7 +72,7 @@ void Storage::close()
 		batchDefineVariable( batch, "TermNo", m_next_termno);
 		batchDefineVariable( batch, "TypeNo", m_next_typeno);
 		batchDefineVariable( batch, "DocNo", m_next_docno);
-		batchDefineVariable( batch, "NofDocs", m_nof_documents);
+		batchDefineVariable( batch, "NofDocs", m_nof_documents+1);
 	
 		leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
 		if (!status.ok())
@@ -232,6 +233,12 @@ StorageInterface::TransactionInterface*
 		const std::string& docid)
 {
 	return new Transaction( this, docid);
+}
+
+void Storage::incrementNofDocumentsInserted()
+{
+	boost::mutex::scoped_lock( m_mutex);
+	++m_nof_documents;
 }
 
 Index Storage::nofDocumentsInserted() const

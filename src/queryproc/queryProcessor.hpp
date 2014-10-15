@@ -70,26 +70,12 @@ public:
 			std::size_t nofargs,
 			const IteratorInterface** args);
 
-	/// \brief Create an accumulator as join of the accumulators passed as argument
-	/// \param[in] name name of the accumulator function to execute
-	/// \param[in] nofargs number of accumulator references with weights
-	/// \param[in] args list of accumulator references with weights
-	/// \return the created accumulator reference object representing the result of the function
+	/// \brief Create an accumulator for the summation of weighted term occurrencies
+	/// \param[in] name name of the accumulator (defines the priorisation of ranking)
+	/// \return the created accumulator object
 	virtual AccumulatorInterface*
 		createAccumulator(
-			const std::string& name,
-			std::size_t nofargs,
-			const WeightedAccumulator* args);
-
-	/// \brief Create an accumulator of the feature occurrence set passed as argument
-	/// \param[in] name name of the accumulator operator to execute
-	/// \param[in] factors additional parameters for scaling the function
-	/// \param[in] arg feature occurrence iterator to pass to the function
-	virtual AccumulatorInterface*
-		createOccurrenceAccumulator(
-			const std::string& name,
-			const std::vector<float>& factors,
-			const IteratorInterface& arg);
+			const std::string& name);
 
 	/// \brief Calculate a list of the best ranked documents
 	/// \param[in] accu accumulator to fetch the weighted documents from

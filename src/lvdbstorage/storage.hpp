@@ -65,6 +65,7 @@ public:
 		leveldb::WriteBatch& batch);
 	void batchDefineVariable(
 		leveldb::WriteBatch& batch, const char* name, Index value);
+	void incrementNofDocumentsInserted();
 
 	leveldb::Iterator* newIterator();
 

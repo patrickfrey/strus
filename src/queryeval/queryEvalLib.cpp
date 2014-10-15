@@ -30,6 +30,7 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "iteratorReference.hpp"
 #include "accumulatorReference.hpp"
+#include "weightingFunctionReference.hpp"
 #include "queryParser.hpp"
 #include "dll_tags.hpp"
 #include <map>
@@ -37,6 +38,7 @@
 #include <boost/scoped_array.hpp>
 
 using namespace strus;
+using namespace strus::parser;
 
 namespace {
 struct QueryContext
@@ -59,7 +61,7 @@ struct QueryContext
 	/// \brief Create all basic terms defined in the query
 	void expandTerms()
 	{
-		std::vector<QueryParser::Term>::const_iterator ti = query.terms().begin(), te = query.terms().end();
+		std::vector<Term>::const_iterator ti = query.terms().begin(), te = query.terms().end();
 		for (; ti != te; ++ti)
 		{
 			IteratorReference itr( processor->createIterator( ti->type(), ti->value()));
@@ -86,10 +88,6 @@ struct QueryContext
 	/// \brief Create all joins defined in the query
 	void expandJoins()
 	{
-		typedef QueryParser::JoinOperation JoinOperation;
-		typedef QueryParser::JoinOperation::SelectorSet SelectorSet;
-		typedef QueryParser::JoinOperation::Selector Selector;
-
 		std::vector<JoinOperation>::const_iterator ji = query.joinOperations().begin(), je = query.joinOperations().end();
 		for (; ji != je; ++ji)
 		{
@@ -110,84 +108,48 @@ struct QueryContext
 					const Selector& paramdef = joinargset.ar()[ ri+ci];
 					paramar[ ci] = getSetElement( paramdef.setIndex, paramdef.elemIndex);
 				}
-				joinresult.m_ar.push_back( processor->createIterator( ji->name(), ji->range(), rowsize, paramar));
+				joinresult.m_ar.push_back(
+					processor->createIterator(
+						ji->name(), ji->range(),
+						rowsize, paramar));
 			}
 		}
 	}
 
-	/// \brief Create all accumulators defined in the query
-	void expandAccumulators()
+	/// \brief Create the accumulator if defined in the query
+	void expandAccumulator()
 	{
-		typedef QueryParser::AccumulateOperation AccumulateOperation;
-		typedef QueryParser::AccumulateOperation::Argument Argument;
-		typedef QueryProcessorInterface::WeightedAccumulator WeightedAccumulator;
-
-		std::vector<AccumulateOperation>::const_iterator ai = query.accumulateOperations().begin(), ae = query.accumulateOperations().end();
-		for (; ai != ae; ++ai)
+		if (query.accumulateOperation())
 		{
-			if (accumap.find( ai->resultaccu()) != accumap.end())
-			{
-				throw std::runtime_error( "internal: duplicate accumulator definition");
-			}
+			const AccumulateOperation* accuop = query.accumulateOperation();
+			accumulator.reset( processor->createAccumulator( accuop->name()));
 
-			// Build accumulator arguments:
-			std::vector<AccumulatorReference> accuarg;
-			boost::scoped_array<WeightedAccumulator> weightedAccusRef( new WeightedAccumulator[ ai->args().size()]);
-			WeightedAccumulator* weightedAccus = weightedAccusRef.get();
+			std::vector<WeightingFunction>::const_iterator
+				gi = accuop->args().begin(), ge = accuop->args().end();
 
-			std::vector<Argument>::const_iterator gi = ai->args().begin(), ge = ai->args().end();
 			for (std::size_t gidx=0; gi != ge; ++gi,++gidx)
 			{
-				if (gi->isAccumulator())
+				IteratorSetMap::const_iterator ii = itersetmap.find( gi->setIndex);
+				if (ii != itersetmap.end())
 				{
-					AccumulatorMap::const_iterator mi = accumap.find( gi->setIndex);
-					if (mi == accumap.end()) throw std::runtime_error( "internal: could resolve accumulator");
-					accuarg.push_back( AccumulatorReference( mi->second));
-					weightedAccus[ gidx].weight = gi->weight;
-					weightedAccus[ gidx].accu = accuarg.back().get();
-				}
-				else
-				{
-					IteratorSetMap::const_iterator ii = itersetmap.find( gi->setIndex);
-					if (ii != itersetmap.end())
+					std::vector<IteratorReference>::const_iterator ai = ii->second.m_ar.begin(), ae = ii->second.m_ar.end();
+					for (std::size_t aidx=0; ai != ae; ai++,aidx++)
 					{
-						IteratorInterface const** paramar = new IteratorInterface const*[ ii->second.m_ar.size()];
-						boost::scoped_array<const IteratorInterface*> paramlistref( paramar);
-						paramar = paramlistref.get();
-						std::size_t paramarsize = ii->second.m_ar.size();
-		
-						std::vector<IteratorReference>::const_iterator ai = ii->second.m_ar.begin(), ae = ii->second.m_ar.end();
-						for (std::size_t aidx=0; ai != ae; ai++,aidx++)
-						{
-							paramar[aidx] = ai->get();
-						}
-						AccumulatorReference accu(
-							processor->createOccurrenceAccumulator(
-								gi->itrAccuOp, gi->factors, paramarsize, paramar));
-						accuarg.push_back( accu);
-						weightedAccus[ gidx].weight = gi->weight;
-						weightedAccus[ gidx].accu = accuarg.back().get();
+						accumulator->add(
+							gi->factor, gi->function,
+							gi->params, **ai);
 					}
 				}
 			}
-
-			// Create the accumulator:
-			lastaccu
-				= accumap[ ai->resultaccu()]
-				= processor->createAccumulator(
-						ai->name(), ai->scale(),
-						ai->args().size(), weightedAccus);
 		}
 	}
 
 	typedef std::map< unsigned int, IteratorSet> IteratorSetMap;
-	typedef std::map< unsigned int, AccumulatorReference> AccumulatorMap;
 
 	QueryProcessorInterface* processor;
 	QueryParser query;
 	IteratorSetMap itersetmap;
-	AccumulatorMap accumap;
-	AccumulatorReference lastaccu;
+	AccumulatorReference accumulator;
 };
 }//namespace
 
@@ -201,10 +163,10 @@ DLL_PUBLIC std::vector<WeightedDocument>
 	QueryContext ctx( &processor, querystr);
 	ctx.expandTerms();
 	ctx.expandJoins();
-	ctx.expandAccumulators();
-	if (ctx.lastaccu.get())
+	ctx.expandAccumulator();
+	if (ctx.accumulator.get())
 	{
-		return processor.getRankedDocumentList( *ctx.lastaccu, maxNofRanks);
+		return processor.getRankedDocumentList( *ctx.accumulator, maxNofRanks);
 	}
 	else
 	{

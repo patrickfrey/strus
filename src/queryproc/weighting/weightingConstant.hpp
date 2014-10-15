@@ -26,50 +26,46 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_OKAPI_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_OKAPI_HPP_INCLUDED
-#include "strus/accumulatorInterface.hpp"
-#include "strus/storageInterface.hpp"
+#ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
+#define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
+#include "strus/weightingFunctionInterface.hpp"
 #include "strus/index.hpp"
-#include "iteratorReference.hpp"
+#include "strus/iteratorInterface.hpp"
+#include "weightingIdfBased.hpp"
+#include <limits>
 #include <vector>
 
 namespace strus
 {
 
-/// \class AccumulatorOkapi (BM25)
-/// \brief Accumulator using the BM25 weighting formula
-class AccumulatorOkapi
-	:public AccumulatorInterface
+/// \class WeightingConstant
+/// \brief Accumulator for the feature frequency
+class WeightingConstant
+	:public WeightingIdfBased
 {
 public:
-	explicit AccumulatorOkapi(
+	WeightingConstant(
+			double weight_,
 			const StorageInterface* storage_,
-			const IteratorInterface& itr_,
-			float b_,
-			float k1_,
-			float avgDocLength_,
-			Index estimatedNofMatches_);
+			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
+		:WeightingIdfBased(storage_,nofMatchesMap_),m_weight(weight_){}
+	WeightingConstant( const WeightingConstant& o)
+		:WeightingIdfBased(o),m_weight(o.m_weight){}
 
-	AccumulatorOkapi( const AccumulatorOkapi& o);
+	virtual ~WeightingConstant(){}
 
-	virtual ~AccumulatorFrequency(){}
+	double call( IteratorInterface& itr)
+	{
+		return m_weight;
+	}
 
-	virtual AccumulatorInterface* copy() const;
-
-	virtual Index skipDoc( const Index& docno_);
-
-	virtual double weight();
+	virtual WeightingFunctionInterface* copy() const
+	{
+		return new WeightingConstant( *this);
+	}
 
 private:
-	const StorageInterface* m_storage;
-	Index m_docno;
-	IteratorReference m_itr;		///< input occurrencies to scan for results
-	float m_b;
-	float m_k1;
-	float m_avgDocLength;
-	Index m_estimatedNofMatches;
-	double m_idf;
+	double m_weight;
 };
 
 }//namespace

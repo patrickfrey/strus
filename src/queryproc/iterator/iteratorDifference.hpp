@@ -42,8 +42,14 @@ public:
 	IteratorDifference( const IteratorReference& positive_, const IteratorReference& negative_);
 	virtual ~IteratorDifference(){}
 
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
+
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
 
 	virtual IteratorInterface* copy() const
 	{
@@ -55,6 +61,7 @@ private:
 	Index m_docno_neg;
 	IteratorReference m_positive;
 	IteratorReference m_negative;
+	std::string m_featureid;		///< unique id of the feature expression
 };
 
 }//namespace

@@ -26,48 +26,36 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_ACCUMULATOR_ARGUMENT_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_ARGUMENT_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "iteratorReference.hpp"
+#include "weightingFunctionReference.hpp"
+#include <vector>
+#include <list>
+#include <set>
 
 namespace strus
 {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
+class AccumulatorArgument
 {
 public:
-	virtual ~IteratorJoin(){}
+	AccumulatorArgument( double factor_, const WeightingFunctionReference& function_, const IteratorReference& itr_)
+		:factor(factor_)
+		,function(function_)
+		,itr(itr_){}
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	AccumulatorArgument( const AccumulatorArgument& o)
+		:factor(o.factor)
+		,function(o.function->copy())
+		,itr(o.itr->copy()){}
 
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
-
-	virtual unsigned int frequency()
-	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
-	}
-
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
+	double factor;
+	WeightingFunctionReference function;
+	IteratorReference itr;
 };
 
 }//namespace
 #endif
-
 

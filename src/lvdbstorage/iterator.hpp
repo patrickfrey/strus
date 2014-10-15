@@ -40,6 +40,15 @@ public:
 	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
 	Iterator( const Iterator& o);
 
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive)
+	{
+		return std::vector<const IteratorInterface*>();
+	}
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
+
 	virtual ~Iterator();
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& firstpos);
@@ -50,6 +59,11 @@ public:
 	}
 	virtual unsigned int frequency();
 
+	virtual Index documentFrequency()
+	{
+		return 0;
+	}
+	
 	virtual IteratorInterface* copy() const
 	{
 		return new Iterator(*this);
@@ -70,6 +84,7 @@ private:
 	Index m_posno;
 	const char* m_positr;
 	const char* m_posend;
+	std::string m_featureid;
 };
 
 }

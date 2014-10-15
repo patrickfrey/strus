@@ -49,8 +49,14 @@ public:
 	IteratorStructSequence( const IteratorStructSequence& o);
 	virtual ~IteratorStructSequence(){}
 
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
+
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
 
 	virtual IteratorInterface* copy() const
 	{
@@ -63,6 +69,7 @@ private:
 	std::vector<IteratorReference> m_seq;	///< the elements of the sequence
 	IteratorReference m_cut;		///< the set of elements then must not appear inside the sequence
 	int m_range;				///< the maximum position difference between the start element and the end element of the sequence
+	std::string m_featureid;		///< unique id of the feature expression
 };
 
 }//namespace

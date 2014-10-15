@@ -26,48 +26,34 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
+#ifndef _STRUS_ACCUMULATOR_ESTIMATED_NUMBER_OF_MATCHES_MAP_HPP_INCLUDED
+#define _STRUS_ACCUMULATOR_ESTIMATED_NUMBER_OF_MATCHES_MAP_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#include "strus/storageInterface.hpp"
+#include "strus/index.hpp"
+#include <map>
+#include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
+class EstimatedNumberOfMatchesMap
 {
 public:
-	virtual ~IteratorJoin(){}
+	explicit EstimatedNumberOfMatchesMap( const StorageInterface* storage_);
+	
+	double get( IteratorInterface& itr);
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
-
-	virtual unsigned int frequency()
-	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
-	}
-
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
+private:
+	const StorageInterface* m_storage;
+	std::map<std::string,double> m_valmap;
+	Index m_maxDocumentNumber;
+	Index m_nofDocumentsInCollection;
 };
+
+typedef boost::shared_ptr<EstimatedNumberOfMatchesMap> EstimatedNumberOfMatchesMapR;
 
 }//namespace
 #endif
-
 

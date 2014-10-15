@@ -42,6 +42,7 @@ Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
 	packIndex( m_key, termtypeno);
 	packIndex( m_key, termvalueno);
 	m_keysize = m_key.size();
+	m_featureid.append( m_key.c_str()+1, m_keysize-1);
 }
 
 Iterator::Iterator( const Iterator& o)
@@ -55,6 +56,7 @@ Iterator::Iterator( const Iterator& o)
 	,m_posno(0)
 	,m_positr(0)
 	,m_posend(0)
+	,m_featureid(o.m_featureid)
 {}
 
 Iterator::~Iterator()

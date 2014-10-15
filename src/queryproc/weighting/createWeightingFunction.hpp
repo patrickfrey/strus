@@ -26,48 +26,23 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_CREATE_FUNCTION_HPP_INCLUDED
+#define _STRUS_WEIGHTING_CREATE_FUNCTION_HPP_INCLUDED
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/index.hpp"
 #include "strus/iteratorInterface.hpp"
-#include <stdexcept>
+#include "weighting/estimatedNumberOfMatchesMap.hpp"
 #include <limits>
+#include <vector>
 
 namespace strus
 {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
-{
-public:
-	virtual ~IteratorJoin(){}
-
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
-
-	virtual unsigned int frequency()
-	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx)) && rt < (unsigned int)std::numeric_limits<short>::max(); ++idx,++rt);
-		return rt;
-	}
-
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
-};
+WeightingFunctionInterface* createWeightingFunction(
+		const StorageInterface* storage,
+		const EstimatedNumberOfMatchesMapR& nofMatchesMap,
+		const std::string& function,
+		const std::vector<float>& parameter);
 
 }//namespace
 #endif
-
-

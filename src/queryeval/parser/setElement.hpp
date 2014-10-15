@@ -26,48 +26,30 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_CONSTANT_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_CONSTANT_HPP_INCLUDED
-#include "strus/accumulatorInterface.hpp"
-#include "strus/index.hpp"
-#include <limits>
+#ifndef _STRUS_QUERY_PARSER_SET_ELEMENT_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_SET_ELEMENT_HPP_INCLUDED
 #include <vector>
 
-namespace strus
+namespace strus {
+namespace parser {
+
+struct SetElement
 {
+	enum Type {TermType,IteratorType};
 
-/// \class AccumulatorConstant
-/// \brief Accumulator of a constant weight for each match
-class AccumulatorConstant
-	:public AccumulatorInterface
-{
-public:
-	explicit AccumulatorConstant( double weight_)
-		:m_weight(weight_){}
-	AccumulatorConstant( const AccumulatorConstant& o)
-		:m_weight(o.m_weight){}
+	Type type;
+	std::size_t idx;
 
-	virtual ~AccumulatorConstant(){}
-
-	virtual AccumulatorInterface* copy() const
-	{
-		return new AccumulatorConstant( *m_arg);
-	}
-
-	virtual Index skipDoc( const Index& docno_)
-	{
-		return m_arg->skipDoc( docno_);
-	}
-
-	virtual double weight()
-	{
-		return m_weight;
-	}
-
-private:
-	double m_weight;
+	SetElement()
+		:type(TermType),idx(0){}
+	SetElement( const SetElement& o)
+		:type(o.type),idx(o.idx){}
+	SetElement( Type type_, std::size_t idx_)
+		:type(type_),idx(idx_){}
 };
 
-}//namespace
+typedef std::vector<SetElement> SetElementList;
+
+}}//namespace
 #endif
 

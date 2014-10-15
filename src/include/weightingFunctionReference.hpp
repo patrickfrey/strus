@@ -26,47 +26,22 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_WEIGHT_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_WEIGHT_HPP_INCLUDED
-#include "strus/accumulatorInterface.hpp"
-#include "strus/index.hpp"
-#include "iteratorReference.hpp"
-#include <limits>
-#include <vector>
+#ifndef _STRUS_WEIGHTING_FUNCTION_REFERENCE_HPP_INCLUDED
+#define _STRUS_WEIGHTING_FUNCTION_REFERENCE_HPP_INCLUDED
+#include "strus/weightingFunctionInterface.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
-/// \class AccumulatorWeight
-/// \brief Accumulator for the feature frequency
-class AccumulatorWeight
-	:public AccumulatorInterface
+class WeightingFunctionReference
+	:public boost::shared_ptr<WeightingFunctionInterface>
 {
 public:
-	explicit AccumulatorWeight( const IteratorInterface& itr_)
-		:m_itr(itr_.copy(),){}
-	AccumulatorWeight( const AccumulatorWeight& o)
-		:m_itr(o.m_itr){}
-
-	virtual ~AccumulatorWeight(){}
-
-	virtual AccumulatorInterface* copy() const
-	{
-		return new AccumulatorWeight( *m_itr);
-	}
-
-	virtual Index skipDoc( const Index& docno_)
-	{
-		return m_itr->skipDoc( docno_);
-	}
-
-	virtual double weight()
-	{
-		return m_itr->weight();
-	}
-
-private:
-	IteratorReference m_itr;		///< input occurrencies to scan for results
+	WeightingFunctionReference( WeightingFunctionInterface* o=0)
+		:boost::shared_ptr<WeightingFunctionInterface>(o){}
+	WeightingFunctionReference( const WeightingFunctionReference& o)
+		:boost::shared_ptr<WeightingFunctionInterface>(o){}
 };
 
 }//namespace

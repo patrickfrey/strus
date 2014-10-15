@@ -43,7 +43,25 @@ IteratorDifference::IteratorDifference( const IteratorDifference& o)
 	,m_docno_neg(o.m_docno_neg)
 	,m_positive(o.m_positive->copy())
 	,m_negative(o.m_negative->copy())
-{}
+{
+	m_featureid.append( m_positive->featureid());
+	m_featureid.append( m_negative->featureid());
+	m_featureid.push_back( 'N');
+}
+
+std::vector<const IteratorInterface*> IteratorDifference::subExpressions( bool positive)
+{
+	std::vector<const IteratorInterface*> rt;
+	if (positive)
+	{
+		rt.push_back( m_positive.get());
+	}
+	else
+	{
+		rt.push_back( m_negative.get());
+	}
+	return rt;
+}
 
 Index IteratorDifference::skipDoc( const Index& docno_)
 {
