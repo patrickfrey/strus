@@ -1,0 +1,34 @@
+TERM basic: stem ein
+TERM basic: stem vorgeh
+TERM basic: stem ohne
+TERM basic: stem problem
+TERM basic: stem faktor
+TERM comma  delim "C"
+TERM phrase delim "P"
+TERM sect   delim "S"
+TERM title  delim "T"
+
+JOIN struct: sequence_struct/-50  _1 (sequence/2 (_2 _3))            [product phrase [sequence 2 basic]]
+# any sequence of two terms that is also a sequence in the query in the same sentence
+
+JOIN struct: sequence_struct/-500 _1 (sequence/2 (_2 _3))            [product sect [sequence 2 basic]]
+# any sequence of two terms that is also a sequence in the query in the same paragraph
+
+JOIN struct: sequence_struct/-500 _1 (within_struct 50 (_2 _3 _4))   [product sect phrase [sequence 2 basic]]
+# any two terms in the same sentence and another element in the same paragraph
+
+JOIN struct: within_struct/50    (_1 _2 _3))                         [product phrase [sequence 2 basic]]
+# any two terms in the same sentence
+
+JOIN struct: within_struct/500   (_1 _2 _3))                         [product sect [sequence 2 basic]]
+# any two terms in the same paragraph
+
+JOIN title:  within_struct/50    (_1 _2 pred(_1)))                   [product title basic]
+# a term in the title
+
+JOIN title:  within_struct/50    (_1 sequence/2(_2 _3) pred(_1)))    [product title [product basic]]
+# any two subsequent terms in the title as in the query
+
+EVAL idfPriority ( bm15<title,1.5> * 0.3  bm25<struct,0.75,2.1,10000> )
+
+

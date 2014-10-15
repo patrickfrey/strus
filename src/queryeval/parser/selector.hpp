@@ -47,6 +47,16 @@ struct Selector
 	Selector()
 		:setIndex(0),elemIndex(0){}
 
+	bool operator < ( const Selector& o) const
+	{
+		if (setIndex < o.setIndex) return true;
+		if (setIndex == o.setIndex)
+		{
+			return (elemIndex < o.elemIndex);
+		}
+		return false;
+	}
+
 	unsigned int setIndex;
 	unsigned int elemIndex;
 };
@@ -60,8 +70,9 @@ public:
 	SelectorSet( std::size_t rowsize_)
 		:m_rowsize(rowsize_){}
 
-	void pushRow( const Selector* row)		{for (std::size_t ii=0; ii<m_rowsize; ++ii) m_ar.push_back( row[ii]);}
-	void append( const SelectorSet& o)		{if (m_rowsize != o.m_rowsize) throw std::runtime_error("joining incompatible sets (with different number of rows)"); else m_ar.insert( m_ar.end(), o.m_ar.begin(), o.m_ar.end());}
+	void pushRow( const Selector* row);
+	void pushRow( std::vector<Selector>::const_iterator row);
+	void append( const SelectorSet& o);
 
 	const std::vector<Selector>& ar() const		{return m_ar;}
 	std::size_t rowsize() const			{return m_rowsize;}
@@ -70,6 +81,7 @@ public:
 	static SelectorSetR parseAtomic(
 			char const*& src,
 			strus::KeyMap<SetDimDescription>& setmap);
+
 	static SelectorSetR parseExpression(
 			char const*& src,
 			strus::KeyMap<SetDimDescription>& setmap);

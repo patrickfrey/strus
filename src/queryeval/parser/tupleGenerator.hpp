@@ -42,6 +42,7 @@ public:
 	{
 		Product,		///< Product of sets: creates a set of element sequences from a squence of sets by generating any combination of the members in their order
 		Ascending,		///< Creates all ascending permutations of a certain length 
+		Sequence,		///< Creates all sequences of a certain length 
 		Permutation		///< Creates all permutations of a certain length 
 	};
 

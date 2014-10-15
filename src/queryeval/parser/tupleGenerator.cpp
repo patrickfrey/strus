@@ -61,40 +61,55 @@ void TupleGenerator::defineColumn( std::size_t max_)
 bool TupleGenerator::next()
 {
 	if (m_empty || !m_columns.size()) return false;
-	std::size_t colidx = m_columns.size()-1;
-
-	bool carry = incrementIndex( m_columns[ colidx].value, m_columns[ colidx].maximum);
-	if (carry)
+	if (m_mode == Sequence)
 	{
-		// Forward carry of increment:
-		for (; colidx > 0; --colidx)
+		for (std::size_t ii=0, nn=m_columns.size(); ii<nn; ++ii)
 		{
-			bool carry = incrementIndex( m_columns[ colidx-1].value, m_columns[ colidx-1].maximum);
-			if (!carry)
+			if (m_columns[ ii].value >= m_columns[ii].maximum)
 			{
-				break;
+				return false;
 			}
+			++m_columns[ ii].value;
 		}
-		if (colidx == 0)
+		return true;
+	}
+	else
+	{
+		std::size_t colidx = m_columns.size()-1;
+	
+		bool carry = incrementIndex( m_columns[ colidx].value, m_columns[ colidx].maximum);
+		if (carry)
 		{
-			// ... we have all rows
-			m_empty = true;
-			return false;
-		}
-		if (m_mode == Ascending)
-		{
-			// ... make column values ascending
-			for (colidx=1; colidx<m_columns.size(); ++colidx)
+			// Forward carry of increment:
+			for (; colidx > 0; --colidx)
 			{
-				if (m_columns[ colidx].value <= m_columns[ colidx-1].value)
+				bool carry = incrementIndex( m_columns[ colidx-1].value, m_columns[ colidx-1].maximum);
+				if (!carry)
 				{
-					if (m_columns[ colidx-1].value+1 > m_columns[ colidx].maximum)
+					break;
+				}
+			}
+			if (colidx == 0)
+			{
+				// ... we have all rows
+				m_empty = true;
+				return false;
+			}
+			if (m_mode == Ascending)
+			{
+				// ... make column values ascending
+				for (colidx=1; colidx<m_columns.size(); ++colidx)
+				{
+					if (m_columns[ colidx].value <= m_columns[ colidx-1].value)
 					{
-						// ... no row with ascending columns possible anymore
-						m_empty = true;
-						return false;
+						if (m_columns[ colidx-1].value+1 > m_columns[ colidx].maximum)
+						{
+							// ... no row with ascending columns possible anymore
+							m_empty = true;
+							return false;
+						}
+						m_columns[ colidx].value = m_columns[ colidx-1].value+1;
 					}
-					m_columns[ colidx].value = m_columns[ colidx-1].value+1;
 				}
 			}
 		}

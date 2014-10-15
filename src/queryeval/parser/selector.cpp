@@ -29,9 +29,38 @@
 #include "parser/selector.hpp"
 #include "parser/lexems.hpp"
 #include <boost/scoped_array.hpp>
+#include <set>
 
 using namespace strus;
 using namespace strus::parser;
+
+void SelectorSet::pushRow( const Selector* row)
+{
+	for (std::size_t ii=0; ii<m_rowsize; ++ii)
+	{
+		m_ar.push_back( row[ii]);
+	}
+}
+
+void SelectorSet::pushRow( std::vector<Selector>::const_iterator row)
+{
+	for (std::size_t ii=0; ii<m_rowsize; ++ii,++row)
+	{
+		m_ar.push_back( *row);
+	}
+}
+
+void SelectorSet::append( const SelectorSet& o)
+{
+	if (m_rowsize != o.m_rowsize)
+	{
+		throw std::runtime_error("joining incompatible sets (with different number of rows)");
+	}
+	else
+	{
+		m_ar.insert( m_ar.end(), o.m_ar.begin(), o.m_ar.end());
+	}
+}
 
 SelectorSetR SelectorSet::calculate(
 		TupleGenerator::Mode genmode,
@@ -110,6 +139,8 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 		ProductFunc,
 		AscendingFunc,
 		PermutationFunc,
+		SequenceFunc,
+		DistinctFunc,
 		JoinFunc
 	};
 	SelectorFunction function = ProductFunc;
@@ -134,7 +165,7 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 				}
 				else
 				{
-					dim = 1;
+					dim = 0;
 				}
 			}
 			else if (isEqual( functionName, "asc"))
@@ -147,7 +178,33 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 				}
 				else
 				{
-					dim = 2;
+					dim = 0;
+				}
+			}
+			else if (isEqual( functionName, "seq"))
+			{
+				isFunction = true;
+				function = SequenceFunc;
+				if (isDigit( *src))
+				{
+					dim = UNSIGNED( src);
+				}
+				else
+				{
+					dim = 0;
+				}
+			}
+			else if (isEqual( functionName, "distinct"))
+			{
+				isFunction = true;
+				function = DistinctFunc;
+				if (isDigit( *src))
+				{
+					throw std::runtime_error( "unexpected dimension in distinct selector");
+				}
+				else
+				{
+					dim = 0;
 				}
 			}
 			else if (isEqual( functionName, "permute"))
@@ -160,7 +217,7 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 				}
 				else
 				{
-					dim = 2;
+					dim = 0;
 				}
 			}
 			else if (isEqual( functionName, "join"))
@@ -169,11 +226,11 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 				function = JoinFunc;
 				if (isDigit( *src))
 				{
-					dim = UNSIGNED( src);
+					throw std::runtime_error( "unexpected dimension in join selector");
 				}
 				else
 				{
-					dim = 2;
+					dim = 0;
 				}
 			}
 			if (isFunction)
@@ -205,11 +262,19 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 		}
 		else if (isCloseSquareBracket(*src))
 		{
+			if (dim == 0)
+			{
+				dim = selset.size();
+			}
 			switch (function)
 			{
 				case ProductFunc:
 				{
 					if (selset.empty()) return SelectorSetR();
+					if (dim < selset.size())
+					{
+						throw std::runtime_error("dimension of product selection is too small");
+					}
 					while (dim > selset.size())
 					{
 						selset.push_back( selset.back());
@@ -223,7 +288,31 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 					{
 						selset.push_back( selset.back());
 					}
-					return SelectorSet::calculate( TupleGenerator::Ascending, selset);
+					if (dim < selset.size())
+					{
+						throw std::runtime_error("dimension of ascending selection is too small");
+					}
+					if (dim == selset.size())
+					{
+						return SelectorSet::calculate( TupleGenerator::Sequence, selset);
+					}
+					else
+					{
+						return SelectorSet::calculate( TupleGenerator::Ascending, selset);
+					}
+				}
+				case SequenceFunc:
+				{
+					if (selset.empty()) return SelectorSetR();
+					while (dim > selset.size())
+					{
+						selset.push_back( selset.back());
+					}
+					if (dim < selset.size())
+					{
+						throw std::runtime_error("dimension of sequence selection is too small");
+					}
+					return SelectorSet::calculate( TupleGenerator::Sequence, selset);
 				}
 				case PermutationFunc:
 				{
@@ -232,7 +321,37 @@ SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDi
 					{
 						selset.push_back( selset.back());
 					}
+					if (dim < selset.size())
+					{
+						throw std::runtime_error("dimension of permutation selection is too small");
+					}
 					return SelectorSet::calculate( TupleGenerator::Permutation, selset);
+				}
+				case DistinctFunc:
+				{
+					// ... select only tuples with distinct members
+					if (selset.empty()) return SelectorSetR();
+					SelectorSetR rt( new SelectorSet( selset.back()->rowsize()));
+					std::vector<SelectorSetR>::const_iterator si = selset.begin(), se = selset.end();
+					for (; si != se; ++si)
+					{
+						const std::vector<Selector>& ar = (*si)->ar();
+						std::size_t ri=0, re=(*si)->nofrows(), ce = (*si)->rowsize();
+						for (; ri < re; ri += ce)
+						{
+							std::set<Selector> dup;
+							std::size_t ci=0;
+							for (; ci < ce; ++ci)
+							{
+								dup.insert( ar[ri+ci]);
+							}
+							if (dup.size() == ce)
+							{
+								rt->pushRow( ar.begin() + ri);
+							}
+						}
+					}
+					return rt;
 				}
 				case JoinFunc:
 				{
