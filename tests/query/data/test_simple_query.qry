@@ -16,7 +16,7 @@ TERM title:  delim "T"
 # no operator at start of [..] expression forms a scalar product of the elements within
 
 # [0a] any basic term at the start of the title
-INTO title: intersect(succ(_1), _2)                                       [title basic]
+INTO title FOREACH [title basic] DO intersect(succ(_1), _2);
 
 # [0b] any basic term in the title
 INTO title FOREACH [title basic] DO within_struct[-50]( _1, succ(_1), _2);
