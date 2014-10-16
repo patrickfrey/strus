@@ -1,34 +1,59 @@
-TERM basic: stem ein
-TERM basic: stem vorgeh
-TERM basic: stem ohne
-TERM basic: stem problem
-TERM basic: stem faktor
-TERM comma  delim "C"
-TERM phrase delim "P"
-TERM sect   delim "S"
-TERM title  delim "T"
+TERM basic:  stem ein
+TERM basic:  stem vorgeh
+TERM basic:  stem ohne
+TERM basic:  stem problem
+TERM basic:  stem faktor
+TERM comma:  delim "C"
+TERM phrase: delim "P"
+TERM sect:   delim "S"
+TERM title:  delim "T"
 
-JOIN struct: sequence_struct/-50  _1 (sequence/2 (_2 _3))            [product phrase [sequence 2 basic]]
-# any sequence of two terms that is also a sequence in the query in the same sentence
+# set selector operators: 
+# (S 2) two element sequence (from the query)
+# (P 2) two element permutation (from the query)
+# (A 2) two element permutation with ascending order of elements (from the query)
+# (D) scalar product with only distinct elements in the result (sequences with duplicates are not appearing in the result)
+# no operator at start of [..] expression forms a scalar product of the elements within
 
-JOIN struct: sequence_struct/-500 _1 (sequence/2 (_2 _3))            [product sect [sequence 2 basic]]
-# any sequence of two terms that is also a sequence in the query in the same paragraph
+JOIN title: intersect(succ(_1), _2)                                       [title basic]
+# [0a] any basic term at the start of the title
+JOIN title: within_struct[-50]( _1, succ(_1), _2)                         [title basic]
+# [0b] any basic term in the title
 
-JOIN struct: sequence_struct/-500 _1 (within_struct 50 (_2 _3 _4))   [product sect phrase [sequence 2 basic]]
-# any two terms in the same sentence and another element in the same paragraph
+JOIN struct: sequence[2] (_1, _2)                                         [(S 2) basic]
+# [1a] any sequence of two terms forming also a sequence in the query
+JOIN struct: intersect( succ(_1), sequence[2](_2 _3)                      [phrase [(S 2) basic]]
+# [1b] same as [1a] but at the begin of a sentence
+JOIN title: intersect( succ(_1), sequence[2](_2 _3)                       [title [(S 2) basic]]
+# [1c] same as [1a] but at the begin of the title
+JOIN title: within_struct[-50]( _1, succ(_1), sequence[2] (_2, _3)        [title (S 2) basic]
+# [1d] same as [1a] but at the somewhere in the title
 
-JOIN struct: within_struct/50    (_1 _2 _3))                         [product phrase [sequence 2 basic]]
-# any two terms in the same sentence
+JOIN struct: within_struct[-50] (_1, _2, _3)                              [phrase [(S 2) basic]]
+# [2a] any sentence containing two terms forming a sequence in the query
+JOIN struct: intersect( succ(_1), within_struct[-50] (_1, _2, _3))        [phrase [(S 2) basic]]
+# [2b] same as [2a] but one term of the two at the begin of a sentence
 
-JOIN struct: within_struct/500   (_1 _2 _3))                         [product sect [sequence 2 basic]]
-# any two terms in the same paragraph
+JOIN struct: within_struct[-50] (_1, _2, _3)                              [phrase [(D) basic [(A 2) basic]]]
+# [3] any sentence containing any two query terms and another different term in the same paragraph
 
-JOIN title:  within_struct/50    (_1 _2 pred(_1)))                   [product title basic]
-# a term in the title
+JOIN struct: within_struct[-50] (_1, _2, _3, _4)                          [phrase [(S 3) basic]]
+# [4a] any sentence containing three terms
+JOIN struct: intersect( succ(_1), within_struct[-50] (_1, _2, _3))        [phrase [(S 2) basic]]
+# [4b] same as [4a] but one term of the three at the begin of a sentence
 
-JOIN title:  within_struct/50    (_1 sequence/2(_2 _3) pred(_1)))    [product title [product basic]]
-# any two subsequent terms in the title as in the query
+JOIN struct: within_struct[-50] (_1, _2, _3, _4)                          [title [(S 3) basic]]
+# [4c] title containing three terms
+JOIN title: intersect( succ(_1), within_struct[-50] (_1, _2, _3))         [title [(S 2) basic]]
+# [4d] same as [4c] but one term of the three at the begin of the title
 
-EVAL idfPriority ( bm15<title,1.5> * 0.3  bm25<struct,0.75,2.1,10000> )
+JOIN struct: within_struct[-500] (_1, _2, _3)                             [sect [(P 2) basic]]
+# any paragraph containing two terms
+
+JOIN struct: within_struct[-500] (_1, _2, _3, _4)                         [sect [(D 3) basic]]
+# any paragraph containing three different terms
+
+
+EVAL idfPriority ( bm15<title,1.5> * 0.3 , bm25<struct,0.75,2.1,10000> )
 
 
