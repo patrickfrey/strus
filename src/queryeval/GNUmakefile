@@ -3,9 +3,9 @@ CPP_OBJS=\
 	parser/accumulateOperation.o \
 	parser/joinFunction.o \
 	parser/selectorExpression.o \
+	parser/selectorSet.o \
 	parser/weightingFunction.o \
 	parser/tupleGenerator.o \
-	parser/selector.o \
 	parser/lexems.o \
 	queryEvalLib.o
 

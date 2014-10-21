@@ -29,6 +29,7 @@
 */
 #include "queryEval.hpp"
 #include "parser/lexems.hpp"
+#include "parser/selectorSet.hpp"
 #include "iteratorReference.hpp"
 #include <stdexcept>
 

@@ -26,31 +26,53 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_PARSER_SET_ELEMENT_HPP_INCLUDED
-#define _STRUS_QUERY_PARSER_SET_ELEMENT_HPP_INCLUDED
+#ifndef _STRUS_QUERY_PARSER_SELECTOR_SET_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_SELECTOR_SET_HPP_INCLUDED
+#include "parser/tupleGenerator.hpp"
+#include "parser/selector.hpp"
+#include "parser/selectorExpression.hpp"
+#include <string>
 #include <vector>
-
-#error DEPRECATED
+#include <boost/shared_ptr.hpp>
 
 namespace strus {
 namespace parser {
 
-struct SetElement
+class SelectorSet;
+typedef boost::shared_ptr<SelectorSet> SelectorSetR;
+		
+class SelectorSet
 {
-	enum Type {TermType,IteratorType};
+public:
+	SelectorSet( std::size_t rowsize_)
+		:m_rowsize(rowsize_){}
 
-	Type type;
-	std::size_t idx;
+	const std::vector<Selector>& ar() const		{return m_ar;}
+	std::size_t rowsize() const			{return m_rowsize;}
+	std::size_t nofrows() const			{return m_rowsize ? (m_ar.size() / m_rowsize):0;}
 
-	SetElement()
-		:type(TermType),idx(0){}
-	SetElement( const SetElement& o)
-		:type(o.type),idx(o.idx){}
-	SetElement( Type type_, std::size_t idx_)
-		:type(type_),idx(idx_){}
+	static SelectorSetR calculate(
+			int expressionidx,
+			const std::vector<parser::SelectorExpression>& expressions,
+			const std::map<int,int>& setSizeMap);
+
+private:
+	void pushRow( const Selector* row);
+	void pushRow( std::vector<Selector>::const_iterator row);
+	void append( const SelectorSet& o);
+
+	static SelectorSetR calculateJoin(
+			const std::vector<SelectorSetR> argsets);
+
+	static SelectorSetR calculateTuple(
+			TupleGenerator::Mode genmode,
+			bool distinct,
+			const std::vector<SelectorSetR> argsets);
+
+private:
+	std::vector<Selector> m_ar;			///< iterator reference sequences
+	std::size_t m_rowsize;				///< number of selector elements in a sequence
 };
-
-typedef std::vector<SetElement> SetElementList;
 
 }}//namespace
 #endif
