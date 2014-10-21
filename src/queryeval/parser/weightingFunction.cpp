@@ -28,6 +28,9 @@
 */
 #include "weightingFunction.hpp"
 #include "parser/lexems.hpp"
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 
 using namespace strus;
 using namespace strus::parser;
@@ -58,7 +61,7 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 			throw std::runtime_error("expected accumulator summand in angle brackets '<','>'");
 		}
 		parse_OPERATOR(src);
-		if (!isAlpha( *src)) throw std::runtime_error("expected identifier (occurrence set) in angle brackets as operand of an accumulate operation");
+		if (!isAlpha( *src)) throw std::runtime_error("expected identifier (feature set) in angle brackets as operand of an accumulate operation");
 
 		argid = setmap.get( parse_IDENTIFIER( src));
 
@@ -106,4 +109,33 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 	}
 	return rt;
 }
+
+
+void WeightingFunction::printExpression(
+		std::ostream& out, 
+		std::vector<WeightingFunction> args,
+		const StringIndexMap& setmap)
+{
+	out << "(";
+	std::vector<WeightingFunction>::const_iterator ai = args.begin(), ae = args.end();
+	for (int aidx=0; ai != ae; ++ai,++aidx)
+	{
+		if (aidx) out << ", ";
+		out << ai->function() << "<" << setmap.name(ai->setIndex());
+		std::vector<float>::const_iterator pi = ai->params().begin(), pe = ai->params().end();
+		for (; pi != pe; ++pi)
+		{
+			out << "," << *pi;
+		}
+		out << ">";
+		if (ai->factor() != 1.0)
+		{
+			std::ostringstream buf;
+			buf << std::fixed << std::setprecision(4) << ai->factor();
+			out << " * " << buf.str();
+		}
+	}
+	out << ")";
+}
+
 

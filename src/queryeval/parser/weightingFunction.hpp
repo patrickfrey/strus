@@ -31,28 +31,42 @@
 #include "parser/stringIndexMap.hpp"
 #include <string>
 #include <vector>
+#include <ostream>
 #include <boost/shared_ptr.hpp>
 
 namespace strus {
 namespace parser {
 
-struct WeightingFunction
+class WeightingFunction
 {
-	std::string function;		///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
-	std::vector<float> params;	///< specifies parametrization of the weighting function
-	int setIndex;			///< argument set index
-	double factor;			///< multiplication factor of a calculated weight
-
+public:
 	WeightingFunction()
-		:setIndex(0),factor(0.0){}
+		:m_setIndex(0),m_factor(0.0){}
 	WeightingFunction( const WeightingFunction& o)
-		:function(o.function),params(o.params),setIndex(o.setIndex),factor(o.factor){}
+		:m_function(o.m_function),m_params(o.m_params),m_setIndex(o.m_setIndex),m_factor(o.m_factor){}
 	WeightingFunction( const std::string& function_, const std::vector<float>& params_, unsigned int setIndex_, double factor_=1.0)
-		:function(function_),params(params_),setIndex(setIndex_),factor(factor_){}
+		:m_function(function_),m_params(params_),m_setIndex(setIndex_),m_factor(factor_){}
 
 	static std::vector<WeightingFunction> parseExpression(
 			char const*& src,
 			StringIndexMap& setmap);
+
+	static void printExpression(
+			std::ostream& out, 
+			std::vector<WeightingFunction> args,
+			const StringIndexMap& setmap);
+
+public:
+	const std::string& function() const		{return m_function;}
+	const std::vector<float>& params() const	{return m_params;}
+	int setIndex() const				{return m_setIndex;}
+	int factor() const				{return m_factor;}
+
+private:
+	std::string m_function;		///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
+	std::vector<float> m_params;	///< specifies parametrization of the weighting function
+	int m_setIndex;			///< argument set index
+	double m_factor;			///< multiplication factor of a calculated weight
 };
 
 }}//namespace

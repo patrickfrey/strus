@@ -48,12 +48,12 @@ public:
 	/// \brief Destructor
 	virtual ~QueryProcessor(){}
 
-	/// \brief Create an iterator on the occurrencies of a term
+	/// \brief Create an iterator on the occurrencies of a basic term in the collection
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
 	/// \return the created iterator reference object
 	virtual IteratorInterface*
-		createIterator(
+		createTermIterator(
 			const std::string& type,
 			const std::string& value) const;
 
@@ -64,7 +64,7 @@ public:
 	/// \param[in] args arguments to pass to the function
 	/// \return the created iterator reference object representing the result of the function
 	virtual IteratorInterface*
-		createIterator(
+		createJoinIterator(
 			const std::string& name,
 			int range,
 			std::size_t nofargs,

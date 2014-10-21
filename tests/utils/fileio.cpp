@@ -26,23 +26,39 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/queryEvalLib.hpp"
-#include "strus/queryProcessorInterface.hpp"
-#include "iteratorReference.hpp"
-#include "accumulatorReference.hpp"
-#include "weightingFunctionReference.hpp"
-#include "queryEval.hpp"
+#include "utils/fileio.hpp"
 #include "dll_tags.hpp"
-#include <map>
-#include <set>
-#include <boost/scoped_array.hpp>
+#include <cstdio>
+#include <cerrno>
 
 using namespace strus;
 
-DLL_PUBLIC QueryEvalInterface*
-	strus::createQueryEval(
-		const std::string& source)
+DLL_PUBLIC unsigned int strus::readFile( const std::string& filename, std::string& res)
 {
-	return new QueryEval( source);
+	FILE* fh = ::fopen( filename.c_str(), "rb");
+	if (!fh)
+	{
+		return errno;
+	}
+	unsigned char ch;
+	while (1 == ::fread( &ch, 1, 1, fh))
+	{
+		try
+		{
+			res.push_back( ch);
+		}
+		catch (const std::bad_alloc&)
+		{
+			::fclose( fh);
+			return 12/*ENOMEM*/;
+		}
+	}
+	if (!feof( fh))
+	{
+		unsigned int ec = ::ferror( fh);
+		::fclose( fh);
+		return ec;
+	}
+	return 0;
 }
 

@@ -54,25 +54,29 @@ int SelectorExpression::parse( char const*& src, std::vector<SelectorExpression>
 	{
 		parse_OPERATOR(src);
 		std::string funcname = parse_IDENTIFIER( src);
-		if (isEqual( funcname, "P"))
+		if (isEqual( funcname, functionIdName( PermutationFunc)))
 		{
 			expr.m_functionid = PermutationFunc;
 		}
-		else if (isEqual( funcname, "A"))
+		else if (isEqual( funcname, functionIdName( AscendingFunc)))
 		{
 			expr.m_functionid = AscendingFunc;
 		}
-		else if (isEqual( funcname, "S"))
+		else if (isEqual( funcname, functionIdName( SequenceFunc)))
 		{
 			expr.m_functionid = SequenceFunc;
 		}
-		else if (isEqual( funcname, "D"))
+		else if (isEqual( funcname, functionIdName( DistinctFunc)))
 		{
 			expr.m_functionid = DistinctFunc;
 		}
-		else if (isEqual( funcname, "J"))
+		else if (isEqual( funcname, functionIdName( JoinFunc)))
 		{
 			expr.m_functionid = JoinFunc;
+		}
+		else if (isEqual( funcname, functionIdName( ProductFunc)))
+		{
+			expr.m_functionid = ProductFunc;
 		}
 		else
 		{
@@ -112,5 +116,39 @@ int SelectorExpression::parse( char const*& src, std::vector<SelectorExpression>
 	parse_OPERATOR(src);
 	expressions.push_back( expr);
 	return expressions.size();
+}
+
+
+void SelectorExpression::print( std::ostream& out, int expridx, const std::vector<SelectorExpression>& expressions, const StringIndexMap& setindexmap)
+{
+	const SelectorExpression& expr = expressions[ expridx-1];
+	out << "[";
+	if (expr.functionid() != ProductFunc || expr.dim() >= 0)
+	{
+		out << "(" << functionIdName( expr.functionid());
+		if (expr.dim() >= 0)
+		{
+			out << " " << expr.dim();
+		}
+		out << ") ";
+	}
+	std::vector<Argument>::const_iterator ai = expr.args().begin(), ae = expr.args().end();
+	for (unsigned int aidx=0; ai != ae; ++ai,++aidx)
+	{
+		if (aidx)
+		{
+			out << ", ";
+		}
+		switch (ai->type())
+		{
+			case Argument::SetReference:
+				out << setindexmap.name( ai->idx());
+				break;
+			case Argument::SubExpression:
+				SelectorExpression::print( out, ai->idx(), expressions, setindexmap);
+				break;
+		}
+	}
+	out << "]";
 }
 

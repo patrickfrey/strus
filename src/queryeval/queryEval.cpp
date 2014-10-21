@@ -28,10 +28,15 @@
 --------------------------------------------------------------------
 */
 #include "queryEval.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include "parser/lexems.hpp"
 #include "parser/selectorSet.hpp"
 #include "iteratorReference.hpp"
+#include "accumulatorReference.hpp"
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
+#include <set>
 
 using namespace strus;
 using namespace strus::parser;
@@ -58,9 +63,9 @@ static std::string errorPosition( const char* base, const char* itr)
 	return msg.str();
 }
 
-struct Expression
+struct Statement
 {
-	Expression()
+	Statement()
 	{
 		clear();
 	}
@@ -73,17 +78,38 @@ struct Expression
 		duplicateflags = 0;
 	}
 
+	JoinOperation operation() const
+	{
+		if (duplicateflags == 0)
+		{
+			throw std::runtime_error("empty expression (unexpected ';')");
+		}
+		if (!function)
+		{
+			throw std::runtime_error("missing function (DO) in operation definition");
+		}
+		if (!selector)
+		{
+			throw std::runtime_error("missing selector (FOREACH) in operation definition");
+		}
+		if (!result)
+		{
+			throw std::runtime_error("missing result set (INTO) in operation definition");
+		}
+		return JoinOperation( result, function, selector);
+	}
+
 	unsigned int duplicateflags;
 	int result;
 	int function;
 	int selector;
 };
 
-QueryEval::QueryEval( std::string& source)
+QueryEval::QueryEval( const std::string& source)
 {
 	char const* src = source.c_str();
-	enum ExpressionKeyword {e_FOREACH, e_INTO, e_DO, e_EVAL};
-	Expression expr;
+	enum StatementKeyword {e_FOREACH, e_INTO, e_DO, e_EVAL};
+	Statement stm;
 	std::string id;
 
 	skipSpaces( src);
@@ -91,68 +117,65 @@ QueryEval::QueryEval( std::string& source)
 	{
 		while (*src)
 		{
-			if (*src == ';')
-			{
-				if (expr.duplicateflags == 0)
-				{
-					throw std::runtime_error("empty expression (unexpected ';')");
-				}
-				if (!expr.function)
-				{
-					throw std::runtime_error("missing function (DO) in operation definition");
-				}
-				if (!expr.selector)
-				{
-					throw std::runtime_error("missing selector (FOREACH) in operation definition");
-				}
-				if (!expr.result)
-				{
-					throw std::runtime_error("missing result set (INTO) in operation definition");
-				}
-				m_operations.push_back( JoinOperation( expr.result, expr.function, expr.selector));
-				expr.clear();
-				expr.duplicateflags = 0;
-			}
-			switch ((ExpressionKeyword)parse_KEYWORD( expr.duplicateflags, src, 4, "FOREACH", "INTO", "DO", "EVAL"))
+			switch ((StatementKeyword)parse_KEYWORD( stm.duplicateflags, src, 4, "FOREACH", "INTO", "DO", "EVAL"))
 			{
 				case e_FOREACH:
-					expr.selector = SelectorExpression::parse( src, m_selectors, m_setnamemap);
+					stm.selector = SelectorExpression::parse( src, m_selectors, m_setnamemap);
+					if (isSemiColon(*src))
+					{
+						parse_OPERATOR( src);
+						m_operations.push_back( stm.operation());
+						stm.clear();
+					}
 					break;
 				case e_INTO:
-					expr.result = m_setnamemap.get( parse_IDENTIFIER( src));
+					stm.result = m_setnamemap.get( parse_IDENTIFIER( src));
+					if (isSemiColon(*src))
+					{
+						parse_OPERATOR( src);
+						m_operations.push_back( stm.operation());
+						stm.clear();
+					}
 					break;
 				case e_DO:
-					expr.function = JoinFunction::parse( src, m_expressions);
+					stm.function = JoinFunction::parse( src, m_functions);
+					if (isSemiColon(*src))
+					{
+						parse_OPERATOR( src);
+						m_operations.push_back( stm.operation());
+						stm.clear();
+					}
 					break;
 				case e_EVAL:
-					if (!m_accumulateOperation.name().empty())
+					if (m_accumulateOperation.defined())
 					{
 						throw std::runtime_error("duplicate definition of accumulator in query evaluation program");
 					}
-					if (expr.duplicateflags)
+					if (0!=(stm.duplicateflags & 0x7))
 					{
 						throw std::runtime_error( "unterminated query expression (missing ';')");
 					}
 					m_accumulateOperation.parse( src, m_setnamemap);
 					skipSpaces( src);
-					if (*src != ';')
+					if (!isSemiColon(*src))
 					{
 						throw std::runtime_error( "missing semicolon ';' after EVAL expression");
 					}
 					parse_OPERATOR( src);
+					stm.clear();
 					break;
 			}
 		}
-		if (expr.duplicateflags)
+		if (stm.duplicateflags)
 		{
-			throw std::runtime_error( "unterminated query expression (missing ';') at end of query evaluation program");
+			throw std::runtime_error( "unterminated query statement (missing ';') at end of query evaluation program");
 		}
 	}
 	catch (const std::runtime_error& e)
 	{
 		throw std::runtime_error(
 			std::string( "error in query evaluation program ")
-			+ errorPosition( qry.c_str(), src)
+			+ errorPosition( source.c_str(), src)
 			+ ":" + e.what());
 	}
 }
@@ -160,13 +183,14 @@ QueryEval::QueryEval( std::string& source)
 
 class QueryStruct
 {
+public:
 	explicit QueryStruct( const StringIndexMap* setnamemap_)
 		:m_setnamemap(setnamemap_){}
 
 	void pushFeature( int termset, const IteratorReference& itr)
 	{
 		if (termset <= 0) throw std::runtime_error( "internal: term set identifier out of range");
-		while (termset > m_iteratorSets.size())
+		while ((std::size_t)termset > m_iteratorSets.size())
 		{
 			m_iteratorSets.push_back( std::vector< IteratorReference >());
 		}
@@ -179,7 +203,7 @@ class QueryStruct
 		const std::vector<IteratorReference>& iset = getFeatureSet( setIndex);
 		if (iset.size() <= elemIndex)
 		{
-			throw std::runtime_error( std::string( "referencing feature '") + getFeatureName(setIndex) + "' not defined yet completely (features have to be defined completely before referencing them in the program)");
+			throw std::runtime_error( std::string( "referencing feature '") + m_setnamemap->name( setIndex) + "' not defined yet completely (features have to be defined completely before referencing them in the program)");
 		}
 		return iset[ elemIndex].get();
 	}
@@ -192,7 +216,7 @@ class QueryStruct
 		}
 		if ((std::size_t)(unsigned int)setIndex > m_iteratorSets.size())
 		{
-			throw std::runtime_error( std::string( "referencing feature '") + getFeatureName(setIndex) + "' not defined yet (features have to be defined before referencing them in the program)");
+			throw std::runtime_error( std::string( "referencing feature '") + m_setnamemap->name( setIndex) + "' not defined yet (features have to be defined before referencing them in the program)");
 		}
 		return m_iteratorSets[ setIndex];
 	}
@@ -202,24 +226,33 @@ class QueryStruct
 		return m_setSizeMap;
 	}
 
-	const std::string getFeatureName( int setIndex) const
-	{
-		StringIndexMap::const_iterator si = m_setnamemap.begin(), se = m_setnamemap.end();
-		for (; si != se; ++si)
-		{
-			if (si->second == setIndex)
-			{
-				return si->first;
-			}
-		}
-	}
-
 private:
 	std::vector< std::vector<IteratorReference> > m_iteratorSets;
 	const StringIndexMap* m_setnamemap;
 	std::map<int,int> m_setSizeMap;
 };
 
+
+void QueryEval::print( std::ostream& out)
+{
+	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
+	for (; ji != je; ++ji)
+	{
+		out << "INTO " << m_setnamemap.name( ji->result())
+			<< " FOREACH ";
+		SelectorExpression::print( out, ji->selector(), m_selectors, m_setnamemap);
+
+		out << " DO ";
+		JoinFunction::print( out, ji->function(), m_functions);
+		out << ";" << std::endl;
+	}
+	if (m_accumulateOperation.defined())
+	{
+		out << "EVAL ";
+		m_accumulateOperation.print( out, m_setnamemap);
+		out << std::endl;
+	}
+}
 
 std::vector<WeightedDocument>
 	QueryEval::getRankedDocumentList(
@@ -279,42 +312,38 @@ std::vector<WeightedDocument>
 			if (isAlpha(*src))
 			{
 				termset = parse_IDENTIFIER( src);
-				if (!isAlpha( *src))
+				if (isStringQuote( *src))
 				{
-					throw std::runtime_error( "term type identifier expected after set identifier in the query");
+					termvalue = parse_STRING( src);
 				}
-				termtype = parse_IDENTIFIER( src);
-				if (isSemiColon( *src))
+				else if (isAlpha( *src))
 				{
-					termvalue.clear();
+					termvalue = parse_IDENTIFIER( src);
 				}
 				else
 				{
-					if (isStringQuote( *src))
-					{
-						termvalue = parse_STRING( src);
-					}
-					else if (isAlpha( *src))
-					{
-						termvalue = parse_IDENTIFIER( src);
-					}
-					else
-					{
-						throw std::runtime_error( "term value (string,identifier,number) or semicolon expected after a term type in the query");
-					}
-					if (!isSemiColon( *src))
-					{
-						throw std::runtime_error( "semicolon expected after a term declaration in the query");
-					}
+					throw std::runtime_error( "term value (string,identifier,number) after the feature group identifier");
+				}
+				if (!isColon( *src))
+				{
+					throw std::runtime_error( "colon (':') expected after term value");
+				}
+				parse_OPERATOR(src);
+				if (!isAlpha( *src))
+				{
+					throw std::runtime_error( "term type identifier expected after colon and term value");
+				}
+				termtype = parse_IDENTIFIER( src);
+				if (!isSemiColon( *src))
+				{
+					throw std::runtime_error( "semicolon expected after a feature declaration in the query");
 				}
 				StringIndexMap::const_iterator ti = m_setnamemap.find( termset);
 				if (ti == m_setnamemap.end())
 				{
 					throw std::runtime_error( std::string( "term set identifier '") + termset + "' not used in this query program");
 				}
-				termsetidx = ti->second;
-	
-				query.pushFeature( termsetidx, processor.createIterator( termtype, termvalue));
+				query.pushFeature( ti->second, processor.createTermIterator( termtype, termvalue));
 			}
 			else
 			{
@@ -327,16 +356,14 @@ std::vector<WeightedDocument>
 		throw std::runtime_error(
 			std::string( "error in query string ")
 			+ errorPosition( querystr.c_str(), src)
-			+ ":" + e.what());
+			+ ":" + err.what());
 	}
 
-	//[2] Iterate on all join operations and create the combineed features:
+	//[2] Iterate on all join operations and create the combined features:
 	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
 	for (; ji != je; ++ji)
 	{
-		const parser::JoinFunction& function = expressions()[ ji->function()];
-		const parser::SelectorExpression& selector = selectors()[ ji->selector()];
-		int result = ji->result();
+		const parser::JoinFunction& function = functions()[ ji->function()];
 
 		SelectorSetR selset(
 			SelectorSet::calculate(
@@ -356,31 +383,38 @@ std::vector<WeightedDocument>
 			for (; ci < ce; ++ci)
 			{
 				const Selector& sel = selar[ ri+ci];
-				joinargs[ ci] = query.getFeature( set.setIndex, set.elemIndex);
+				joinargs[ ci] = query.getFeature( sel.setIndex, sel.elemIndex);
 			}
 			IteratorInterface* opres =
-				processor.createIterator(
+				processor.createJoinIterator(
 					function.name(), function.range(), ro, joinargs);
 			query.pushFeature( ji->result(), opres);
 		}
 	}
 
 	//[3] Get the result accumulator and evaluate the results
-	accumulator.reset( processor->createAccumulator( m_accumulateOperation.name()));
-
-	std::vector<WeightingFunction>::const_iterator
-		gi = m_accumulateOperation.args().begin(),
-		ge = m_accumulateOperation.args().end();
-
-	for (std::size_t gidx=0; gi != ge; ++gi,++gidx)
+	if (m_accumulateOperation.defined())
 	{
-		const std::vector<IteratorReference>& feats = query.getFeatureSet( gi->setIndex);
-		std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
-		for (std::size_t aidx=0; ai != ae; ai++,aidx++)
+		AccumulatorReference accumulator( processor.createAccumulator( m_accumulateOperation.name()));
+	
+		std::vector<WeightingFunction>::const_iterator
+			gi = m_accumulateOperation.args().begin(),
+			ge = m_accumulateOperation.args().end();
+	
+		for (std::size_t gidx=0; gi != ge; ++gi,++gidx)
 		{
-			accumulator->add( gi->factor, gi->function, gi->params, **ai);
+			const std::vector<IteratorReference>& feats = query.getFeatureSet( gi->setIndex());
+			std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
+			for (std::size_t aidx=0; ai != ae; ai++,aidx++)
+			{
+				accumulator->add( gi->factor(), gi->function(), gi->params(), **ai);
+			}
 		}
+		return getRankedDocumentList( *accumulator, maxNofRanks);
 	}
-	return getRankedDocumentList( *accumulator, maxNofRanks);
+	else
+	{
+		throw std::runtime_error("no accumulator defined (EVAL), cannot evaluate ranked document list");
+	}
 }
 

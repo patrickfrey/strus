@@ -31,6 +31,7 @@
 #include "parser/stringIndexMap.hpp"
 #include <string>
 #include <vector>
+#include <ostream>
 
 namespace strus {
 namespace parser {
@@ -47,6 +48,15 @@ public:
 		DistinctFunc,
 		JoinFunc
 	};
+	static const char* functionIdName( FunctionId fid)
+	{
+		static const char* ar[] = {"X","A","P","S","D","J"};
+		return ar[ fid];
+	}
+	const char* functionIdName() const
+	{
+		return functionIdName( m_functionid);
+	}
 
 	class Argument
 	{
@@ -77,8 +87,10 @@ public:
 
 
 	static int parse( char const*& src, std::vector<SelectorExpression>& expressions, StringIndexMap& setindexmap);
+	static void print( std::ostream& out, int expridx, const std::vector<SelectorExpression>& expressions, const StringIndexMap& setindexmap);
 
 	FunctionId functionid() const			{return m_functionid;}
+	int dim() const					{return m_dim;}
 	const std::vector<Argument>& args() const	{return m_args;}
 
 private:

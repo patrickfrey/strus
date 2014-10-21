@@ -16,7 +16,7 @@ CPP_OBJS=\
 
 HFILES= queryProcessor.hpp
 
-CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/include -I/usr/include -I.
+CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
 LDFLAGS=-L/usr/lib
 LIBS=

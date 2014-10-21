@@ -95,7 +95,7 @@ unsigned int parser::parse_UNSIGNED1( char const*& src)
 float parser::parse_FLOAT( char const*& src)
 {
 	unsigned int digitsAllowed = 9;
-	float rt = 1.0;
+	float rt = 0.0;
 	float div = 1.0;
 	if (*src == '-')
 	{
@@ -188,12 +188,12 @@ static std::string keywordList( va_list argp, int nn)
 		if (ii > 0) msg << " ,";
 		msg << "'" << keyword << "'";
 	}
-	msg << " expected";
 	return msg.str();
 }
 
 int parser::parse_KEYWORD( char const*& src, unsigned int nn, ...)
 {
+	char const* src_bk = src;
 	va_list argp;
 	va_start( argp, nn);
 
@@ -203,6 +203,8 @@ int parser::parse_KEYWORD( char const*& src, unsigned int nn, ...)
 	int ii = checkKeyword( id, nn, argp);
 	if (ii < 0)
 	{
+		src = src_bk;
+		va_start( argp, nn);
 		throw std::runtime_error(
 			std::string( "unknown keyword '") + id
 			+ "', one of " + keywordList( argp, nn) + " expected");
@@ -213,6 +215,7 @@ int parser::parse_KEYWORD( char const*& src, unsigned int nn, ...)
 
 int parser::parse_KEYWORD( unsigned int& duplicateflags, char const*& src, unsigned int nn, ...)
 {
+	char const* src_bk = src;
 	va_list argp;
 	va_start( argp, nn);
 
@@ -224,6 +227,8 @@ int parser::parse_KEYWORD( unsigned int& duplicateflags, char const*& src, unsig
 	int ii = checkKeyword( id, nn, argp);
 	if (ii < 0)
 	{
+		src = src_bk;
+		va_start( argp, nn);
 		throw std::runtime_error(
 			std::string( "unknown keyword '") + id
 			+ "', one of " + keywordList( argp, nn) + " expected");

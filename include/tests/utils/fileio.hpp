@@ -26,23 +26,15 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/queryEvalLib.hpp"
-#include "strus/queryProcessorInterface.hpp"
-#include "iteratorReference.hpp"
-#include "accumulatorReference.hpp"
-#include "weightingFunctionReference.hpp"
-#include "queryEval.hpp"
-#include "dll_tags.hpp"
-#include <map>
-#include <set>
-#include <boost/scoped_array.hpp>
+#ifndef _STRUS_FILE_IO_HPP_INCLUDED
+#define _STRUS_FILE_IO_HPP_INCLUDED
+#include <string>
 
-using namespace strus;
-
-DLL_PUBLIC QueryEvalInterface*
-	strus::createQueryEval(
-		const std::string& source)
+namespace strus
 {
-	return new QueryEval( source);
+
+unsigned int readFile( const std::string& filename, std::string& res);
+
 }
+#endif
 

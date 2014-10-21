@@ -6,7 +6,7 @@ CPP_OBJS=\
 	transaction.o \
 	storageLib.o
 
-CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/include -I/usr/include -I.
+CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
 MODFLAGS=-fPIC
 #-fvisibility=hidden 

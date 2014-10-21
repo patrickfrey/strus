@@ -52,6 +52,19 @@ public:
 			return ki->second;
 		}
 	}
+
+	const std::string& name( int idx) const
+	{
+		StringIndexMap::const_iterator si = begin(), se = end();
+		for (; si != se; ++si)
+		{
+			if (si->second == idx)
+			{
+				return si->first;
+			}
+		}
+		throw std::runtime_error("internal: accessing undefined element in StringIndexMap");
+	}
 };
 
 }//namespace

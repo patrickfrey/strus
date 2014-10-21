@@ -30,6 +30,7 @@
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/weightedDocument.hpp"
+#include "strus/accumulatorInterface.hpp"
 #include "parser/joinFunction.hpp"
 #include "parser/joinOperation.hpp"
 #include "parser/selectorExpression.hpp"
@@ -47,7 +48,7 @@ public:
 	QueryEval(){}
 	QueryEval( const QueryEval& o)
 		:m_selectors(o.m_selectors)
-		,m_expressions(o.m_expressions)
+		,m_functions(o.m_functions)
 		,m_setnamemap(o.m_setnamemap)
 		,m_operations(o.m_operations)
 		,m_accumulateOperation(o.m_accumulateOperation)
@@ -61,9 +62,11 @@ public:
 			std::size_t maxNofRanks) const;
 
 	const std::vector<parser::SelectorExpression>& selectors() const	{return m_selectors;}
-	const std::vector<parser::JoinFunction>& expressions() const		{return m_expressions;}
+	const std::vector<parser::JoinFunction>& functions() const		{return m_functions;}
 	const std::vector<parser::JoinOperation>& operations() const		{return m_operations;}
 	const parser::AccumulateOperation accumulateOperation() const		{return m_accumulateOperation;}
+
+	virtual void print( std::ostream& out);
 
 private:
 	std::vector<WeightedDocument>
@@ -73,7 +76,7 @@ private:
 
 private:
 	std::vector<parser::SelectorExpression> m_selectors;
-	std::vector<parser::JoinFunction> m_expressions;
+	std::vector<parser::JoinFunction> m_functions;
 	StringIndexMap m_setnamemap;
 	std::vector<parser::JoinOperation> m_operations;
 	parser::AccumulateOperation m_accumulateOperation;

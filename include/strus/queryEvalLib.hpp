@@ -39,10 +39,11 @@ namespace strus {
 class QueryEvalInterface;
 
 /// \brief Create a program for query evaluation
+/// \param[in] evalProgramSource the source of the query evaluation procedure
 /// \return the program reference
 QueryEvalInterface*
 	createQueryEval(
-		const std::string& source);
+		const std::string& evalProgramSource);
 
 }//namespace
 #endif

@@ -26,23 +26,60 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/queryEvalLib.hpp"
-#include "strus/queryProcessorInterface.hpp"
+#ifndef _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
+#define _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
+#include "iteratorJoin.hpp"
 #include "iteratorReference.hpp"
-#include "accumulatorReference.hpp"
-#include "weightingFunctionReference.hpp"
-#include "queryEval.hpp"
-#include "dll_tags.hpp"
-#include <map>
-#include <set>
-#include <boost/scoped_array.hpp>
 
-using namespace strus;
-
-DLL_PUBLIC QueryEvalInterface*
-	strus::createQueryEval(
-		const std::string& source)
+namespace strus
 {
-	return new QueryEval( source);
-}
+
+class IteratorSucc
+	:public IteratorJoin
+{
+public:
+	IteratorSucc( const IteratorSucc& o)
+		:m_origin( o.m_origin->copy()),m_featureid(o.m_featureid){}
+	IteratorSucc( const IteratorReference& origin_)
+		:m_origin( origin_),m_featureid(origin_->featureid())
+	{
+		m_featureid.push_back('>');
+	}
+
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
+
+	virtual ~IteratorSucc(){}
+
+	virtual Index skipDoc( const Index& docno_)
+	{
+		return m_origin->skipDoc( docno_);
+	}
+
+	virtual Index skipPos( const Index& pos_)
+	{
+		Index rt = m_origin->skipPos( pos_);
+		return rt?(rt + 1):0;
+	}
+
+	virtual std::vector<const IteratorInterface*> subExpressions( bool positive)
+	{
+		return m_origin->subExpressions( positive);
+	}
+
+	virtual IteratorInterface* copy() const
+	{
+		return new IteratorSucc( *this);
+	}
+
+private:
+	IteratorReference m_origin;		///< base feature expression this is the successor of
+	std::string m_featureid;		///< unique id of the feature expression
+};
+
+}//namespace
+#endif
+
 

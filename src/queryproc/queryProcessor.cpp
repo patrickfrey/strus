@@ -27,6 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "queryProcessor.hpp"
+#include "iterator/iteratorPred.hpp"
+#include "iterator/iteratorSucc.hpp"
 #include "iterator/iteratorIntersect.hpp"
 #include "iterator/iteratorUnion.hpp"
 #include "iterator/iteratorDifference.hpp"
@@ -51,7 +53,7 @@ static bool isEqual( const std::string& id, const char* idstr)
 }
 
 IteratorInterface*
-	QueryProcessor::createIterator( 
+	QueryProcessor::createTermIterator( 
 			const std::string& type,
 			const std::string& value) const
 {
@@ -59,13 +61,29 @@ IteratorInterface*
 }
 
 IteratorInterface*
-	QueryProcessor::createIterator(
+	QueryProcessor::createJoinIterator(
 		const std::string& name,
 		int range,
 		std::size_t nofargs,
 		const IteratorInterface** args) const
 {
-	if (isEqual( name, "union"))
+	if (isEqual( name, "pred"))
+	{
+		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
+		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		if (nofargs >= 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
+
+		return new IteratorPred( args[0]->copy());
+	}
+	else if (isEqual( name, "succ"))
+	{
+		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
+		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
+		if (nofargs >= 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
+
+		return new IteratorSucc( args[0]->copy());
+	}
+	else if (isEqual( name, "union"))
 	{
 		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");

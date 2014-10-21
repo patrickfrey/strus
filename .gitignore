@@ -24,4 +24,4 @@
 # Compiled Programs
 src/strus/strus
 tests/randoc/src/randomCollectionTest
-
+tests/program/src/parseQueryEvalProgramTest

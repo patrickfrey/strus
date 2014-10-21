@@ -46,7 +46,7 @@ unsigned int JoinFunction::parse( char const*& src, std::vector<JoinFunction>& f
 	if (isOpenSquareBracket( *src))
 	{
 		parse_OPERATOR(src);
-		if (!isDigit( *src))
+		if (!isDigit( *src) && !isMinus( *src))
 		{
 			throw std::runtime_error( "integer number expected for range in square brackets '[' ']' after function name");
 		}
@@ -69,7 +69,7 @@ unsigned int JoinFunction::parse( char const*& src, std::vector<JoinFunction>& f
 		functions.push_back( func);
 		return functions.size();
 	}
-	do
+	for (;;)
 	{
 		if (*src == '_')
 		{
@@ -88,8 +88,43 @@ unsigned int JoinFunction::parse( char const*& src, std::vector<JoinFunction>& f
 			functions.push_back( func);
 			return functions.size();
 		}
+		else if (isComma( *src))
+		{
+			parse_OPERATOR(src);
+			continue;
+		}
+		else
+		{
+			throw std::runtime_error( "expected comma as function parameter separator or close oval bracket ')' to terminate function argument list");
+		}
 	}
-	while (isComma( *src));
-	throw std::runtime_error( "expected comma as function parameter separator or close oval bracket ')' to terminate function argument list");
 }
+
+
+void JoinFunction::print( std::ostream& out, int funcidx, const std::vector<JoinFunction>& functions)
+{
+	const JoinFunction& func = functions[ funcidx-1];
+	out << func.name();
+	if (func.range()) out << "[" << func.range() << "]";
+	out << "( ";
+	std::vector<Argument>::const_iterator ai = func.args().begin(), ae = func.args().end();
+	for (unsigned int aidx=0; ai != ae; ++ai,++aidx)
+	{
+		if (aidx)
+		{
+			out << ", ";
+		}
+		switch (ai->type())
+		{
+			case Argument::Variable:
+				out << "_" << ai->idx();
+				break;
+			case Argument::SubExpression:
+				JoinFunction::print( out, ai->idx(), functions);
+				break;
+		}
+	}
+	out << ")";
+}
+
 

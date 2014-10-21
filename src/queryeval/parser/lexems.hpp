@@ -44,6 +44,10 @@ static inline bool isDigit( char ch)
 {
 	return (ch <= '9' && ch >= '0');
 }
+static inline bool isMinus( char ch)
+{
+	return (ch == '-');
+}
 static inline bool isAlnum( char ch)
 {
 	return isAlpha(ch) || isDigit(ch);
@@ -74,7 +78,7 @@ static inline bool isOpenSquareBracket( char ch)
 }
 static inline bool isCloseSquareBracket( char ch)
 {
-	return ch == '[';
+	return ch == ']';
 }
 static inline bool isOpenOvalBracket( char ch)
 {
@@ -110,11 +114,18 @@ static inline void skipToEoln( char const*& src)
 }
 static inline void skipSpaces( char const*& src)
 {
-	while (isSpace( *src)) ++src;
-	if (*src == '#')
+	for (;;)
 	{
-		++src;
-		skipToEoln( src);
+		while (isSpace( *src)) ++src;
+		if (*src == '#')
+		{
+			++src;
+			skipToEoln( src);
+		}
+		else
+		{
+			break;
+		}
 	}
 }
 

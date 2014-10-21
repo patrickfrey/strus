@@ -28,11 +28,15 @@
 */
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
+#include "strus/weightedDocument.hpp"
 #include <vector>
 #include <string>
+#include <iostream>
 
 namespace strus
 {
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -42,6 +46,7 @@ public:
 	virtual ~QueryEvalInterface(){}
 
 	/// \brief Calculate a list of the best ranked documents
+	/// \param[in] processor processor that creates the items needed to process the query
 	/// \param[in] querystr query string (syntax depending on implementation)
 	/// \param[in] maxNofRanks maximum number of ranks to return
 	virtual std::vector<WeightedDocument>
@@ -49,6 +54,11 @@ public:
 			const QueryProcessorInterface& processor,
 			const std::string& querystr,
 			std::size_t maxNofRanks) const=0;
+
+	/// \brief Print the internal representation of the program to 'out'
+	/// \param[out] out stream to print the program to
+	/// \remark this method is mainly used to testing and has no other purpose
+	virtual void print( std::ostream& out)=0;
 };
 
 }//namespace

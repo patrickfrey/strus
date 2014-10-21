@@ -38,9 +38,9 @@ struct KeyString
 	:public std::string
 {
 	KeyString( const char* o)
-		:std::string( boost::to_upper_copy( std::string(o))){}
+		:std::string( boost::to_lower_copy( std::string(o))){}
 	KeyString( const std::string& o)
-		:std::string( boost::to_upper_copy( o)){}
+		:std::string( boost::to_lower_copy( o)){}
 	KeyString( const KeyString& o)
 		:std::string( o){}
 	KeyString(){}

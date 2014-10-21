@@ -31,6 +31,7 @@
 #include "keyMap.hpp"
 #include <string>
 #include <vector>
+#include <ostream>
 
 namespace strus {
 namespace parser {
@@ -65,6 +66,7 @@ public:
 
 
 	static unsigned int parse( char const*& src, std::vector<JoinFunction>& functions);
+	static void print( std::ostream& out, int funcidx, const std::vector<JoinFunction>& functions);
 
 	const std::string& name() const			{return m_name;}
 	int range() const				{return m_range;}

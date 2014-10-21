@@ -49,7 +49,7 @@ public:
 	/// \param[in] value value string of the term
 	/// \return the created iterator reference object
 	virtual IteratorInterface*
-		createIterator(
+		createTermIterator(
 			const std::string& type,
 			const std::string& value) const=0;
 
@@ -60,26 +60,18 @@ public:
 	/// \param[in] args arguments to pass to the function
 	/// \return the created iterator reference object representing the result of the function
 	virtual IteratorInterface*
-		createIterator(
+		createJoinIterator(
 			const std::string& name,
 			int range,
 			std::size_t nofargs,
 			const IteratorInterface** args) const=0;
 
 	/// \brief Create an accumulator for the summation of weighted term occurrencies
-	/// \param[in] name name of the accumulator (defines the priorisation of ranking)
+	/// \param[in] name name of the accumulator (defines for example the priorisation of ranking)
 	/// \return the created accumulator object
 	virtual AccumulatorInterface*
 		createAccumulator(
 			const std::string& name) const=0;
-
-	/// \brief Calculate a list of the best ranked documents
-	/// \param[in] accu accumulator to fetch the weighted documents from
-	/// \param[in] maxNofRanks maximum number of ranks to return
-	virtual std::vector<WeightedDocument>
-		getRankedDocumentList(
-			AccumulatorInterface& accu,
-			std::size_t maxNofRanks) const=0;
 };
 
 }//namespace

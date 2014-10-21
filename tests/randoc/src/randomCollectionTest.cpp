@@ -733,7 +733,7 @@ struct RandomQuery
 		for (unsigned int ai=0; ai<nofitr; ++ai)
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
-			itr[ ai] = queryproc->createIterator( term.type, term.value);
+			itr[ ai] = queryproc->createTermIterator( term.type, term.value);
 			if (!itr[ ai])
 			{
 				std::cerr << "ERROR term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
@@ -743,7 +743,7 @@ struct RandomQuery
 		}
 		std::string opname( operationName());
 		strus::IteratorInterface* res = 
-			queryproc->createIterator(
+			queryproc->createJoinIterator(
 					opname, range, std::size_t(nofitr), &itr[0]);
 
 		result = resultMatches( res);
@@ -874,6 +874,12 @@ int main( int argc, const char* argv[])
 	else if (argc < 6)
 	{
 		std::cerr << "ERROR too few parameters" << std::endl;
+		printUsage( argc, argv);
+		return 1;
+	}
+	else if (argc > 6)
+	{
+		std::cerr << "ERROR too many parameters" << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
