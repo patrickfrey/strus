@@ -26,24 +26,67 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query evaluation library
-#ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
-#include <vector>
+#ifndef _STRUS_QUERY_PARSER_SELECTOR_EXPRESSION_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_SELECTOR_EXPRESSION_HPP_INCLUDED
+#include "stringIndexMap.hpp"
 #include <string>
+#include <vector>
 
 namespace strus {
+namespace parser {
 
-/// \brief Forward declaration query evaluation program
-class QueryEvalInterface;
+class SelectorExpression
+{
+public:
+	enum FunctionId
+	{
+		ProductFunc,
+		AscendingFunc,
+		PermutationFunc,
+		SequenceFunc,
+		DistinctFunc,
+		JoinFunc
+	};
 
-/// \brief Create a program for query evaluation
-/// \return the program reference
-QueryEvalInterface*
-	createQueryEval(
-		const std::string& source);
+	class Argument
+	{
+	public:
+		enum Type {SetReference, SubExpression};
+		
+		Type type() const		{return m_type;}
+		unsigned int idx() const	{return m_idx;}
 
-}//namespace
+		Argument( Type type_, unsigned int idx_)
+			:m_type(type_),m_idx(idx_){}
+		Argument( const Argument& o)
+			:m_type(o.m_type),m_idx(o.m_idx){}
+
+	private:
+		Type m_type;
+		unsigned int m_idx;
+	};
+
+	SelectorExpression()
+		:m_functionid(ProductFunc)
+		,m_dim(-1){}
+
+	SelectorExpression( const SelectorExpression& o)
+		:m_functionid(o.m_functionid)
+		,m_dim(o.m_dim)
+		,m_args(o.m_args){}
+
+
+	static int parse( char const*& src, std::vector<SelectorExpression>& expressions, StringIndexMap& setindexmap);
+
+	FunctionId functionid() const			{return m_functionid;}
+	const std::vector<Argument>& args() const	{return m_args;}
+
+private:
+	FunctionId m_functionid;		///< function id
+	int m_dim;				///< dimension parameter of the function
+	std::vector<Argument> m_args;		///< function argument list
+};
+
+}}//namespace
 #endif
 

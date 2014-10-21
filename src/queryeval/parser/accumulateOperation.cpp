@@ -1,3 +1,4 @@
+
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -26,24 +27,33 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query evaluation library
-#ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
-#include <vector>
-#include <string>
+#include "parser/accumulateOperation.hpp"
+#include "parser/lexems.hpp"
+#include <stdexcept>
 
-namespace strus {
+using namespace strus;
+using namespace strus::parser;
 
-/// \brief Forward declaration query evaluation program
-class QueryEvalInterface;
+void AccumulateOperation::parse( char const*& src, StringIndexMap& setnamemap)
+{
+	if (isAlpha( *src))
+	{
+		m_name = parse_IDENTIFIER( src);
 
-/// \brief Create a program for query evaluation
-/// \return the program reference
-QueryEvalInterface*
-	createQueryEval(
-		const std::string& source);
+		if (isOpenOvalBracket( *src))
+		{
+			parse_OPERATOR(src);
+			m_args = WeightingFunction::parseExpression( src, setnamemap);
+		}
+		else
+		{
+			throw std::runtime_error( "oval brackets expected after accumulate function name");
+		}
+	}
+	else
+	{
+		throw std::runtime_error( "name of accumulator function expected after EVAL");
+	}
+}
 
-}//namespace
-#endif
 

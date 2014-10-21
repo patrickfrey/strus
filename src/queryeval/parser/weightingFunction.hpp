@@ -28,8 +28,7 @@
 */
 #ifndef _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
 #define _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
-#include "keyMap.hpp"
-#include "parser/setDimDescription.hpp"
+#include "stringIndexMap.hpp"
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -41,7 +40,7 @@ struct WeightingFunction
 {
 	std::string function;		///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
 	std::vector<float> params;	///< specifies parametrization of the weighting function
-	unsigned int setIndex;		///< index of argument (accumulator or iterator set)
+	int setIndex;			///< argument set index
 	double factor;			///< multiplication factor of a calculated weight
 
 	WeightingFunction()
@@ -53,7 +52,7 @@ struct WeightingFunction
 
 	static std::vector<WeightingFunction> parseExpression(
 			char const*& src,
-			strus::KeyMap<SetDimDescription>& setmap);
+			StringIndexMap& setmap);
 };
 
 }}//namespace

@@ -24,9 +24,9 @@ INTO title FOREACH [title basic] DO within_struct[-50]( _1, succ(_1), _2);
 # [1a2] any sequence of two terms forming also a sequence in the query
 INTO struct FOREACH [(S 2) basic] DO sequence[2] (_1, _2);
 # [1a3] any sequence of three terms forming also a sequence in the query
-INTO struct FOREACH [(S 3) basic] DO sequence[3] (_1, _2, _3);
+INTO struct FOREACH [(S 3) basic] DO sequence[5] (_1, _2, _3);
 # [1a4] any sequence of four terms forming also a sequence in the query
-INTO struct FOREACH [(S 4) basic] DO sequence[4] (_1, _2, _3, _4);
+INTO struct FOREACH [(S 4) basic] DO sequence[8] (_1, _2, _3, _4);
 
 # [1b] same as [1a2] but at the begin of a sentence
 INTO struct FOREACH [phrase [(S 2) basic]] DO intersect( succ(_1), sequence[2](_2 _3);
@@ -35,7 +35,7 @@ INTO struct FOREACH [phrase [(S 2) basic]] DO intersect( succ(_1), sequence[2](_
 INTO title FOREACH [title [(S 2) basic]] DO intersect( succ(_1), sequence[2](_2 _3);
 
 # [1d] same as [1a2] but at the somewhere in the title
-INTO title FOREACH [title (S 2) basic] DO within_struct[-50]( _1, succ(_1), sequence[2] (_2, _3);
+INTO title FOREACH [title [(S 2) basic]] DO within_struct[-50]( _1, succ(_1), sequence[2] (_2, _3);
 
 # [2a] any sentence containing in any order two terms forming a sequence in the query
 INTO struct FOREACH [phrase [(S 2) basic]] DO within_struct[-50] (_1, _2, _3);
@@ -57,13 +57,6 @@ INTO struct FOREACH [title [(S 3) basic]] DO within_struct[-50] (_1, _2, _3, _4)
 
 # [4d] same as [4c] but one term of the three at the begin of the title
 INTO title FOREACH [title [(S 2) basic]] DO intersect( succ(_1), within_struct[-50] (_1, _2, _3));
-
-# any paragraph containing two terms
-INTO struct FOREACH [sect [(P 2) basic]] DO within_struct[-500] (_1, _2, _3);
-
-# any paragraph containing three different terms
-INTO struct FOREACH [sect [(D 3) basic]] DO within_struct[-500] (_1, _2, _3, _4);
-
 
 EVAL idfPriority ( bm15<title,1.5> * 0.3 , bm25<struct,0.75,2.1,10000> )
 

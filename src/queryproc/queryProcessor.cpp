@@ -53,7 +53,7 @@ static bool isEqual( const std::string& id, const char* idstr)
 IteratorInterface*
 	QueryProcessor::createIterator( 
 			const std::string& type,
-			const std::string& value)
+			const std::string& value) const
 {
 	return m_storage->createTermOccurrenceIterator( type, value);
 }
@@ -63,7 +63,7 @@ IteratorInterface*
 		const std::string& name,
 		int range,
 		std::size_t nofargs,
-		const IteratorInterface** args)
+		const IteratorInterface** args) const
 {
 	if (isEqual( name, "union"))
 	{
@@ -154,9 +154,8 @@ IteratorInterface*
 	}
 }
 
-
 AccumulatorInterface*
-	QueryProcessor::createAccumulator( const std::string& name)
+	QueryProcessor::createAccumulator( const std::string& name) const
 {
 	if (isEqual( name, "idfPriority"))
 	{
@@ -168,40 +167,5 @@ AccumulatorInterface*
 	}
 }
 
-
-std::vector<WeightedDocument>
-	QueryProcessor::getRankedDocumentList(
-			AccumulatorInterface& accu,
-			std::size_t maxNofRanks) const
-{
-	typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
-
-	std::vector<WeightedDocument> rt;
-	Ranker ranker;
-	std::size_t ranks = 0;
-
-	Index docno = 0;
-	int state = 0;
-	double weigth = 0.0;
-
-	while (accu.nextRank( docno, state, weigth))
-	{
-		ranker.insert( WeightedDocument( docno, weigth));
-		if (ranks >= maxNofRanks)
-		{
-			ranker.erase( ranker.begin());
-		}
-		else
-		{
-			++ranks;
-		}
-	}
-	Ranker::reverse_iterator ri=ranker.rbegin(),re=ranker.rend();
-	for (; ri != re; ++ri)
-	{
-		rt.push_back( *ri);
-	}
-	return rt;
-}
 
 

@@ -39,64 +39,8 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-namespace strus {
-
-/// \brief Parser of a query defined as string
-class QueryParser
-{
-public:
-	QueryParser(){}
-	QueryParser( const QueryParser& o)
-		:m_setmap(o.m_setmap)
-		,m_setdefs(o.m_setdefs)
-		,m_terms(o.m_terms)
-		,m_joinOperations(o.m_joinOperations)
-	{
-		if (o.m_accumulateOperation.get())
-		{
-			m_accumulateOperation.reset( 
-				new parser::AccumulateOperation(
-					*o.m_accumulateOperation));
-		}
-	}
-
-	const std::vector<parser::Term>& terms() const				{return m_terms;}
-	const std::vector<parser::SetElementList>& setdefs() const		{return m_setdefs;}
-	const std::vector<parser::JoinOperation>& joinOperations() const	{return m_joinOperations;}
-	const parser::AccumulateOperation* accumulateOperation() const		{return m_accumulateOperation.get();}
-
-	void pushQuery( const std::string& qry);
-
-private:
-	unsigned int defineSetElement(
-			const std::string& setname,
-			parser::SetElement::Type type,
-			std::size_t idx);
-
-	void defineTerm(
-			const std::string& setname,
-			const std::string& type,
-			const std::string& value);
-
-	void defineJoinOperation(
-			const std::string& setname,
-			const std::string& funcname,
-			int range,
-			const parser::SelectorSetR& input);
-
-	void parseTerm( char const*& src);
-	void parseJoin( char const*& src);
-	void parseEval( char const*& src);
-
-private:
-	strus::KeyMap<parser::SetDimDescription> m_setmap;
-	std::vector<parser::SetElementList> m_setdefs;
-
-	std::vector<parser::Term> m_terms;
-	std::vector<parser::JoinOperation> m_joinOperations;
-	boost::shared_ptr<parser::AccumulateOperation> m_accumulateOperation;
-};
-
-}//namespace
+#error DEPRECATED
 #endif
+
+
 

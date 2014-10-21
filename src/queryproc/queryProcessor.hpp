@@ -55,7 +55,7 @@ public:
 	virtual IteratorInterface*
 		createIterator(
 			const std::string& type,
-			const std::string& value);
+			const std::string& value) const;
 
 	/// \brief Create an iterator as join function on the arguments passed
 	/// \param[in] name name of the join function to execute
@@ -68,22 +68,14 @@ public:
 			const std::string& name,
 			int range,
 			std::size_t nofargs,
-			const IteratorInterface** args);
+			const IteratorInterface** args) const;
 
 	/// \brief Create an accumulator for the summation of weighted term occurrencies
 	/// \param[in] name name of the accumulator (defines the priorisation of ranking)
 	/// \return the created accumulator object
 	virtual AccumulatorInterface*
 		createAccumulator(
-			const std::string& name);
-
-	/// \brief Calculate a list of the best ranked documents
-	/// \param[in] accu accumulator to fetch the weighted documents from
-	/// \param[in] maxNofRanks maximum number of ranks to return
-	virtual std::vector<WeightedDocument>
-		getRankedDocumentList(
-			AccumulatorInterface& accu,
-			std::size_t maxNofRanks) const;
+			const std::string& name) const;
 
 private:
 	StorageInterface* m_storage;

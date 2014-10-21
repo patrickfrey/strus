@@ -51,7 +51,7 @@ public:
 	virtual IteratorInterface*
 		createIterator(
 			const std::string& type,
-			const std::string& value)=0;
+			const std::string& value) const=0;
 
 	/// \brief Create an iterator as join function on the arguments passed
 	/// \param[in] name name of the join function to execute
@@ -64,14 +64,14 @@ public:
 			const std::string& name,
 			int range,
 			std::size_t nofargs,
-			const IteratorInterface** args)=0;
+			const IteratorInterface** args) const=0;
 
 	/// \brief Create an accumulator for the summation of weighted term occurrencies
 	/// \param[in] name name of the accumulator (defines the priorisation of ranking)
 	/// \return the created accumulator object
 	virtual AccumulatorInterface*
 		createAccumulator(
-			const std::string& name)=0;
+			const std::string& name) const=0;
 
 	/// \brief Calculate a list of the best ranked documents
 	/// \param[in] accu accumulator to fetch the weighted documents from

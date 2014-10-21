@@ -26,24 +26,56 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query evaluation library
-#ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
-#include <vector>
+#ifndef _STRUS_QUERY_PARSER_JOIN_FUNCTION_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_JOIN_FUNCTION_HPP_INCLUDED
+#include "keyMap.hpp"
 #include <string>
+#include <vector>
 
 namespace strus {
+namespace parser {
 
-/// \brief Forward declaration query evaluation program
-class QueryEvalInterface;
+class JoinFunction
+{
+public:
+	class Argument
+	{
+	public:
+		enum Type {Variable, SubExpression};
+		
+		Type type() const		{return m_type;}
+		unsigned int idx() const	{return m_idx;}
 
-/// \brief Create a program for query evaluation
-/// \return the program reference
-QueryEvalInterface*
-	createQueryEval(
-		const std::string& source);
+		Argument( Type type_, unsigned int idx_)
+			:m_type(type_),m_idx(idx_){}
+		Argument( const Argument& o)
+			:m_type(o.m_type),m_idx(o.m_idx){}
 
-}//namespace
+	private:
+		Type m_type;
+		unsigned int m_idx;
+	};
+
+	JoinFunction()
+		:m_range(0){}
+	JoinFunction( const JoinFunction& o)
+		:m_name(o.m_name)
+		,m_range(o.m_range)
+		,m_args(o.m_args){}
+
+
+	static unsigned int parse( char const*& src, std::vector<JoinFunction>& functions);
+
+	const std::string& name() const			{return m_name;}
+	int range() const				{return m_range;}
+	const std::vector<Argument>& args() const	{return m_args;}
+
+private:
+	std::string m_name;			///< function name
+	int m_range;				///< range
+	std::vector<Argument> m_args;		///< function argument list
+};
+
+}}//namespace
 #endif
 

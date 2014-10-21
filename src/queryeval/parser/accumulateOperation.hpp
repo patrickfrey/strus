@@ -57,6 +57,8 @@ public:
 	std::string name() const				{return m_name;}
 	const std::vector<WeightingFunction>& args() const	{return m_args;}
 
+	void parse( char const*& src, StringIndexMap& setnamemap);
+
 private:
 	std::string m_name;						///< name of operation
 	std::vector<WeightingFunction> m_args;				///< list of set references with weight

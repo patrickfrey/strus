@@ -30,6 +30,8 @@
 #define _STRUS_QUERY_PARSER_SET_DIM_DESCRIPTION_HPP_INCLUDED
 #include <cstdlib>
 
+#error DEPRECATED
+
 namespace strus {
 namespace parser {
 
@@ -37,15 +39,14 @@ namespace parser {
 struct SetDimDescription
 {
 	SetDimDescription()
-		:id(0),nofElements(0),referenced(false){}
+		:id(0),nofElements(0){}
 	SetDimDescription( const SetDimDescription& o)
-		:id(o.id),nofElements(o.nofElements),referenced(o.referenced){}
+		:id(o.id),nofElements(o.nofElements){}
 	SetDimDescription( std::size_t id_, std::size_t nofElements_)
-		:id(id_),nofElements(nofElements_),referenced(false){}
+		:id(id_),nofElements(nofElements_){}
 	
 	std::size_t id;			///< internal identifier of the set
 	std::size_t nofElements;	///< number of elements in the set
-	bool referenced;		///< true, if set has been referenced
 };
 
 }}//namespace

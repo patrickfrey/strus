@@ -41,35 +41,30 @@ namespace parser {
 class JoinOperation
 {
 public:
-
 	JoinOperation(
-			unsigned int resultset_,
-			const std::string& name_,
-			int range_,
-			const SelectorSetR& selectorset_)
-		:m_resultset(resultset_)
-		,m_name(name_)
-		,m_range(range_)
-		,m_selectorset(selectorset_){}
+			int result_,
+			int function_,
+			int selector_)
+		:m_result(result_)
+		,m_function(function_)
+		,m_selector(selector_){}
 
 	JoinOperation( const JoinOperation& o)
-		:m_resultset(o.m_resultset)
-		,m_name(o.m_name)
-		,m_range(o.m_range)
-		,m_selectorset(o.m_selectorset){}
+		:m_result(o.m_result)
+		,m_function(o.m_function)
+		,m_selector(o.m_selector){}
 
 public:
-	unsigned int resultset() const			{return m_resultset;}
-	std::string name() const			{return m_name;}
-	int range() const				{return m_range;}
-	const SelectorSetR& selectorset() const		{return m_selectorset;}
+	int result() const		{return m_result;}
+	int function() const		{return m_function;}
+	int selector() const		{return m_selector;}
 
 private:
-	unsigned int m_resultset;	///< join operation result set index
-	std::string m_name;		///< name of operation
-	int m_range;			///< range for operations defined in a range (position difference)
-	SelectorSetR m_selectorset;	///< iterator reference sequences
+	int m_result;			///< join operation result set index
+	int m_function;			///< index of function expression
+	int m_selector;			///< set of argument sequences
 };
 
 }}//namespace
 #endif
+

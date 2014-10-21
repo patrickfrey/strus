@@ -34,12 +34,12 @@ using namespace strus::parser;
 
 std::vector<WeightingFunction> WeightingFunction::parseExpression(
 		char const*& src,
-		KeyMap<SetDimDescription>& setmap)
+		StringIndexMap& setmap)
 {
 	std::vector<WeightingFunction> rt;
 	if (isCloseOvalBracket(*src))
 	{
-		OPERATOR(src);
+		parse_OPERATOR(src);
 		return rt;
 	}
 	for (;;)
@@ -48,7 +48,7 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 		{
 			throw std::runtime_error( "accumulator identifier expected");
 		}
-		std::string function( IDENTIFIER( src));
+		std::string function( parse_IDENTIFIER( src));
 		int argid = 0;
 		std::vector<float> params;
 		float factor = 1.0;
@@ -57,35 +57,29 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 		{
 			throw std::runtime_error("expected accumulator summand in angle brackets '<','>'");
 		}
-		OPERATOR(src);
+		parse_OPERATOR(src);
 		if (!isAlpha( *src)) throw std::runtime_error("expected identifier (occurrence set) in angle brackets as operand of an accumulate operation");
 
-		std::string setname( IDENTIFIER( src));
+		argid = setmap.get( parse_IDENTIFIER( src));
 
-		KeyMap<SetDimDescription>::iterator si = setmap.find( setname);
-		if (si != setmap.end())
-		{
-			si->second.referenced = true;
-			argid = si->second.id;
-		}
 		while (isComma(*src))
 		{
-			OPERATOR(src);
+			parse_OPERATOR(src);
 			if (!isDigit(*src))
 			{
 				throw std::runtime_error("numeric scalar argument expected in accumulation operation");
 			}
-			params.push_back( FLOAT( src));
+			params.push_back( parse_FLOAT( src));
 		}
 		if (!isCloseAngleBracket(*src)) throw std::runtime_error("expected close angle bracket to close declaration of occurrency accumulator");
-		OPERATOR(src);
+		parse_OPERATOR(src);
 
 		if (isAsterisk( *src))
 		{
-			OPERATOR( src);
+			parse_OPERATOR( src);
 			if (isDigit( *src))
 			{
-				factor = FLOAT( src);
+				factor = parse_FLOAT( src);
 			}
 			else
 			{
@@ -98,11 +92,11 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 		}
 		if (isComma( *src))
 		{
-			OPERATOR(src);
+			parse_OPERATOR(src);
 		}
 		else if (isCloseOvalBracket(*src))
 		{
-			OPERATOR(src);
+			parse_OPERATOR(src);
 			return rt;
 		}
 		else

@@ -104,18 +104,30 @@ static inline bool isSpace( char ch)
 {
 	return ch == ' ' || ch == '\t' || ch == '\n';
 }
+static inline void skipToEoln( char const*& src)
+{
+	while (*src && *src != '\n') ++src;
+}
 static inline void skipSpaces( char const*& src)
 {
-	while (isSpace( *src)) src++;
+	while (isSpace( *src)) ++src;
+	if (*src == '#')
+	{
+		++src;
+		skipToEoln( src);
+	}
 }
 
 bool isEqual( const std::string& id, const char* idstr);
-std::string IDENTIFIER( char const*& src);
-std::string STRING( char const*& src);
-unsigned int UNSIGNED( char const*& src);
-float FLOAT( char const*& src);
-char OPERATOR( char const*& src);
-int INTEGER( char const*& src);
+std::string parse_IDENTIFIER( char const*& src);
+std::string parse_STRING( char const*& src);
+unsigned int parse_UNSIGNED( char const*& src);
+unsigned int parse_UNSIGNED1( char const*& src);
+float parse_FLOAT( char const*& src);
+char parse_OPERATOR( char const*& src);
+int parse_INTEGER( char const*& src);
+int parse_KEYWORD( char const*& src, unsigned int nof, ...);
+int parse_KEYWORD( unsigned int& duplicateflags, char const*& src, unsigned int nof, ...);
 
 }}//namespace
 #endif

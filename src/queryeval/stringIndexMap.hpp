@@ -26,23 +26,33 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query evaluation library
-#ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
-#include <vector>
-#include <string>
+#ifndef _STRUS_QUERY_STRING_INDEX_MAP_HPP_INCLUDED
+#define _STRUS_QUERY_STRING_INDEX_MAP_HPP_INCLUDED
+#include "keyMap.hpp"
 
 namespace strus {
 
-/// \brief Forward declaration query evaluation program
-class QueryEvalInterface;
+class StringIndexMap
+	:public KeyMap<int>
+{
+public:
+	StringIndexMap(){}
 
-/// \brief Create a program for query evaluation
-/// \return the program reference
-QueryEvalInterface*
-	createQueryEval(
-		const std::string& source);
+	int get( const std::string& id)
+	{
+		KeyMap<int>::const_iterator ki = find( id);
+		if (find( id) == end())
+		{
+			int rt = size()+1;
+			operator[]( id) = rt;
+			return rt;
+		}
+		else
+		{
+			return ki->second;
+		}
+	}
+};
 
 }//namespace
 #endif

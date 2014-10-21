@@ -62,26 +62,68 @@ void SelectorSet::append( const SelectorSet& o)
 	}
 }
 
-SelectorSetR SelectorSet::calculate(
-		TupleGenerator::Mode genmode,
-		const std::vector<SelectorSetR>& selset)
+SelectorSetR SelectorSet::calculateJoin(
+		const std::vector<SelectorSetR> argsets)
 {
 	SelectorSetR rt;
+	std::vector<SelectorSetR>::const_iterator si = argsets.begin(), se = argsets.end();
+	if (si == se) return SelectorSetR();
 	std::size_t rowsize = 0;
-	std::vector<SelectorSetR>::const_iterator si = selset.begin(), se = selset.end();
 	for (; si != se; ++si)
 	{
-		if (!si->get() || (*si)->ar().size() == 0) return rt;
+		if (si->get() && (*si)->rowsize() > 0)
+		{
+			if (rowsize == 0)
+			{
+				rowsize = (*si)->rowsize();
+			}
+			else if (rowsize != (*si)->rowsize())
+			{
+				throw std::runtime_error("number of rows in selector expression do not match in join");
+			}
+		}
+	}
+	if (rowsize == 0)
+	{
+		return SelectorSetR();
+	}
+	rt.reset( new SelectorSet( rowsize));
+	si = argsets.begin();
+	for (; si != se; ++si)
+	{
+		if ((*si)->rowsize())
+		{
+			std::vector<Selector>::const_iterator ai = (*si)->ar().begin(), ae = (*si)->ar().end();
+			for (; ai != ae; ai += rowsize)
+			{
+				rt->pushRow( ai);
+			}
+		}
+	}
+	return rt;
+}
+
+SelectorSetR SelectorSet::calculateTuple(
+		TupleGenerator::Mode genmode,
+		bool distinct,
+		const std::vector<SelectorSetR> argsets)
+{
+	std::size_t rowsize = 0;
+	std::vector<SelectorSetR>::const_iterator si = argsets.begin(), se = argsets.end();
+	for (; si != se; ++si)
+	{
+		if (!si->get() || (*si)->ar().size() == 0) return SelectorSetR();
 		rowsize += (*si)->rowsize();
 	}
-	if (rowsize == 0) return rt;
+	if (rowsize == 0) return SelectorSetR();
 
-	rt.reset( new SelectorSet( rowsize));
+	SelectorSetR rt( new SelectorSet( rowsize));
+
 	boost::scoped_array<Selector> curRef( new Selector[ rowsize]);
 	Selector* cur = curRef.get();
 
 	TupleGenerator gen( genmode);
-	for (si = selset.begin(); si != se; ++si)
+	for (si = argsets.begin(); si != se; ++si)
 	{
 		gen.defineColumn( (*si)->nofrows());
 	}
@@ -91,7 +133,7 @@ SelectorSetR SelectorSet::calculate(
 		// Build product row:
 		std::size_t cntidx = 0;
 		std::size_t rowidx = 0;
-		for (si = selset.begin(); si != se; ++si,++cntidx)
+		for (si = argsets.begin(); si != se; ++si,++cntidx)
 		{
 			std::size_t ri = (*si)->rowsize() * gen.column( cntidx);
 			for (std::size_t ci=0; ci<(*si)->rowsize(); ++ci)
@@ -100,286 +142,92 @@ SelectorSetR SelectorSet::calculate(
 			}
 			rowidx += (*si)->rowsize();
 		}
-		if (rowidx != rowsize) throw std::logic_error("query parser assertion failed: rowidx != rowsize");
-		rt->pushRow( cur);
+		if (rowidx != rowsize) throw std::logic_error( "query parser assertion failed: rowidx != rowsize");
+		if (distinct)
+		{
+			std::set<Selector> dupset;
+			for (std::size_t ri=0; ri<rowsize; ++ri)
+			{
+				dupset.insert( cur[ri]);
+			}
+			if (dupset.size() == rowsize)
+			{
+				rt->pushRow( cur);
+			}
+		}
+		else
+		{
+			rt->pushRow( cur);
+		}
 	}
 	while (gen.next());
 	return rt;
 }
 
-SelectorSetR SelectorSet::parseAtomic( char const*& src, strus::KeyMap<SetDimDescription>& setmap)
+SelectorSetR SelectorSet::calculate(
+		int expressionidx,
+		const std::vector<parser::SelectorExpression>& expressions,
+		const std::map<int,int>& setSizeMap)
 {
-	std::string setname( IDENTIFIER( src));
-	strus::KeyMap<SetDimDescription>::iterator si = setmap.find( setname);
-	if (si == setmap.end())
+	SelectorSetR rt;
+	if (expressionidx <= 0 || (std::size_t)expressionidx > expressions.size())
 	{
-		return SelectorSetR();
+		throw std::runtime_error( "expression index out of range");
 	}
-	else
-	{
-		si->second.referenced = true;
+	const parser::SelectorExpression& expression = expressions[ expressionidx];
 
-		SelectorSetR elemreflist( new SelectorSet( 1));
-		std::size_t ei=0, ee=si->second.nofElements;
-		for (; ei!=ee; ++ee)
+	// [1] Build the list of arguments:
+	std::vector<SelectorSetR> argsets;
+	std::vector<SelectorExpression::Argument>::const_iterator ai = expression.args().begin(), ae = expression.args().end();
+	for (; ai != ae; ++ai)
+	{
+		SelectorSetR argsetref;
+		switch (ai->type())
 		{
-			Selector row( si->second.id, ei);
-			elemreflist->pushRow( &row);
+			case SelectorExpression::Argument::SetReference:
+			{
+				argsets.push_back( SelectorSetR( new SelectorSet(1)));
+				SelectorSet* argset = argsets.back().get();
+				std::map<int,int>::const_iterator mi = setSizeMap.find( ai->idx());
+				if (mi != setSizeMap.end())
+				{
+					int ii=0, nn=mi->second;
+					for (; ii<nn; ++ii)
+					{
+						Selector row( ai->idx(), ii);
+						argset->pushRow( &row);
+					}
+				}
+			}
+			case SelectorExpression::Argument::SubExpression:
+			{
+				argsets.push_back( calculate( ai->idx(), expressions, setSizeMap));
+			}
 		}
-		return elemreflist;
 	}
+
+	// [1] Calculate the selector operation:
+	switch (expression.functionid())
+	{
+		case SelectorExpression::ProductFunc: 
+			rt = calculateTuple( TupleGenerator::Product, false, argsets);
+			break;
+		case SelectorExpression::AscendingFunc:
+			rt = calculateTuple( TupleGenerator::Ascending, false, argsets);
+			break;
+		case SelectorExpression::PermutationFunc:
+			rt = calculateTuple( TupleGenerator::Permutation, false, argsets);
+			break;
+		case SelectorExpression::SequenceFunc:
+			rt = calculateTuple( TupleGenerator::Sequence, false, argsets);
+			break;
+		case SelectorExpression::DistinctFunc:
+			rt = calculateTuple( TupleGenerator::Product, true, argsets);
+			break;
+		case SelectorExpression::JoinFunc:
+			rt = calculateJoin( argsets);
+			break;
+	}
+	return rt;
 }
-
-
-SelectorSetR SelectorSet::parseExpression( char const*& src, strus::KeyMap<SetDimDescription>& setmap)
-{
-	skipSpaces( src);
-	enum SelectorFunction
-	{
-		ProductFunc,
-		AscendingFunc,
-		PermutationFunc,
-		SequenceFunc,
-		DistinctFunc,
-		JoinFunc
-	};
-	SelectorFunction function = ProductFunc;
-	unsigned int dim = 0;
-	std::vector<SelectorSetR> selset;
-
-	for (;;)
-	{
-		if (isAlpha( *src))
-		{
-			bool isFunction = false;
-			char const* src_bk = src;
-			std::string functionName( IDENTIFIER( src));
-	
-			if (isEqual( functionName, "product"))
-			{
-				isFunction = true;
-				function = ProductFunc;
-				if (isDigit( *src))
-				{
-					dim = UNSIGNED( src);
-				}
-				else
-				{
-					dim = 0;
-				}
-			}
-			else if (isEqual( functionName, "asc"))
-			{
-				isFunction = true;
-				function = AscendingFunc;
-				if (isDigit( *src))
-				{
-					dim = UNSIGNED( src);
-				}
-				else
-				{
-					dim = 0;
-				}
-			}
-			else if (isEqual( functionName, "seq"))
-			{
-				isFunction = true;
-				function = SequenceFunc;
-				if (isDigit( *src))
-				{
-					dim = UNSIGNED( src);
-				}
-				else
-				{
-					dim = 0;
-				}
-			}
-			else if (isEqual( functionName, "distinct"))
-			{
-				isFunction = true;
-				function = DistinctFunc;
-				if (isDigit( *src))
-				{
-					throw std::runtime_error( "unexpected dimension in distinct selector");
-				}
-				else
-				{
-					dim = 0;
-				}
-			}
-			else if (isEqual( functionName, "permute"))
-			{
-				isFunction = true;
-				function = PermutationFunc;
-				if (isDigit( *src))
-				{
-					dim = UNSIGNED( src);
-				}
-				else
-				{
-					dim = 0;
-				}
-			}
-			else if (isEqual( functionName, "join"))
-			{
-				isFunction = true;
-				function = JoinFunc;
-				if (isDigit( *src))
-				{
-					throw std::runtime_error( "unexpected dimension in join selector");
-				}
-				else
-				{
-					dim = 0;
-				}
-			}
-			if (isFunction)
-			{
-				if (isColon( *src))
-				{
-					OPERATOR( src);
-				}
-				else
-				{
-					src = src_bk;
-				}
-			}
-			else
-			{
-				if (isColon( *src))
-				{
-					throw std::runtime_error( std::string( "unknown function name '") + functionName + "'");
-				}
-				else
-				{
-					src = src_bk;
-				}
-			}
-		}
-		if (!*src)
-		{
-			throw std::runtime_error( "unexpected end of query in argument tuple set builder expression");
-		}
-		else if (isCloseSquareBracket(*src))
-		{
-			if (dim == 0)
-			{
-				dim = selset.size();
-			}
-			switch (function)
-			{
-				case ProductFunc:
-				{
-					if (selset.empty()) return SelectorSetR();
-					if (dim < selset.size())
-					{
-						throw std::runtime_error("dimension of product selection is too small");
-					}
-					while (dim > selset.size())
-					{
-						selset.push_back( selset.back());
-					}
-					return SelectorSet::calculate( TupleGenerator::Product, selset);
-				}
-				case AscendingFunc:
-				{
-					if (selset.empty()) return SelectorSetR();
-					while (dim > selset.size())
-					{
-						selset.push_back( selset.back());
-					}
-					if (dim < selset.size())
-					{
-						throw std::runtime_error("dimension of ascending selection is too small");
-					}
-					if (dim == selset.size())
-					{
-						return SelectorSet::calculate( TupleGenerator::Sequence, selset);
-					}
-					else
-					{
-						return SelectorSet::calculate( TupleGenerator::Ascending, selset);
-					}
-				}
-				case SequenceFunc:
-				{
-					if (selset.empty()) return SelectorSetR();
-					while (dim > selset.size())
-					{
-						selset.push_back( selset.back());
-					}
-					if (dim < selset.size())
-					{
-						throw std::runtime_error("dimension of sequence selection is too small");
-					}
-					return SelectorSet::calculate( TupleGenerator::Sequence, selset);
-				}
-				case PermutationFunc:
-				{
-					if (selset.empty()) return SelectorSetR();
-					while (dim > selset.size())
-					{
-						selset.push_back( selset.back());
-					}
-					if (dim < selset.size())
-					{
-						throw std::runtime_error("dimension of permutation selection is too small");
-					}
-					return SelectorSet::calculate( TupleGenerator::Permutation, selset);
-				}
-				case DistinctFunc:
-				{
-					// ... select only tuples with distinct members
-					if (selset.empty()) return SelectorSetR();
-					SelectorSetR rt( new SelectorSet( selset.back()->rowsize()));
-					std::vector<SelectorSetR>::const_iterator si = selset.begin(), se = selset.end();
-					for (; si != se; ++si)
-					{
-						const std::vector<Selector>& ar = (*si)->ar();
-						std::size_t ri=0, re=(*si)->nofrows(), ce = (*si)->rowsize();
-						for (; ri < re; ri += ce)
-						{
-							std::set<Selector> dup;
-							std::size_t ci=0;
-							for (; ci < ce; ++ci)
-							{
-								dup.insert( ar[ri+ci]);
-							}
-							if (dup.size() == ce)
-							{
-								rt->pushRow( ar.begin() + ri);
-							}
-						}
-					}
-					return rt;
-				}
-				case JoinFunc:
-				{
-					if (selset.empty()) return SelectorSetR();
-					SelectorSetR rt( new SelectorSet( selset.back()->rowsize()));
-					std::vector<SelectorSetR>::const_iterator si = selset.begin(), se = selset.end();
-					for (; si != se; ++si)
-					{
-						rt->append( **si);
-					}
-					return rt;
-				}
-			}
-		}
-		else if (isOpenSquareBracket(*src))
-		{
-			OPERATOR( src);
-			selset.push_back( parseExpression( src, setmap));
-		}
-		else if (isAlpha(*src))
-		{
-			selset.push_back( parseAtomic( src, setmap));
-		}
-		else
-		{
-			throw std::runtime_error( "set identifier or set tuple builder expression in square brackets '[' ']' expected");
-		}
-	}
-}
-
 

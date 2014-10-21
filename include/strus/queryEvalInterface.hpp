@@ -26,23 +26,30 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query evaluation library
-#ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
+#ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
+#define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #include <vector>
 #include <string>
 
-namespace strus {
+namespace strus
+{
 
-/// \brief Forward declaration query evaluation program
-class QueryEvalInterface;
+/// \brief Defines a program for evaluating a query
+class QueryEvalInterface
+{
+public:
+	/// \brief Destructor
+	virtual ~QueryEvalInterface(){}
 
-/// \brief Create a program for query evaluation
-/// \return the program reference
-QueryEvalInterface*
-	createQueryEval(
-		const std::string& source);
+	/// \brief Calculate a list of the best ranked documents
+	/// \param[in] querystr query string (syntax depending on implementation)
+	/// \param[in] maxNofRanks maximum number of ranks to return
+	virtual std::vector<WeightedDocument>
+		getRankedDocumentList(
+			const QueryProcessorInterface& processor,
+			const std::string& querystr,
+			std::size_t maxNofRanks) const=0;
+};
 
 }//namespace
 #endif

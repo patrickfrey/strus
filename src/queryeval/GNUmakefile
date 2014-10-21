@@ -1,9 +1,11 @@
 TOPDIR=../..
 CPP_OBJS=\
-	queryParser.o \
+	parser/accumulateOperation.o \
+	parser/joinFunction.o \
+	parser/selectorExpression.o \
+	parser/weightingFunction.o \
 	parser/tupleGenerator.o \
 	parser/selector.o \
-	parser/weightingFunction.o \
 	parser/lexems.o \
 	queryEvalLib.o
 

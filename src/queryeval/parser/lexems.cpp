@@ -29,6 +29,9 @@
 #include "parser/lexems.hpp"
 #include <string>
 #include <vector>
+#include <cstdarg>
+#include <sstream>
+#include <iostream>
 #include <boost/shared_ptr.hpp>
 
 using namespace strus;
@@ -42,7 +45,7 @@ bool parser::isEqual( const std::string& id, const char* idstr)
 	return !*si && !*di;
 }
 
-std::string parser::IDENTIFIER( char const*& src)
+std::string parser::parse_IDENTIFIER( char const*& src)
 {
 	std::string rt;
 	while (isAlnum( *src)) rt.push_back( *src++);
@@ -50,7 +53,7 @@ std::string parser::IDENTIFIER( char const*& src)
 	return rt;
 }
 
-std::string parser::STRING( char const*& src)
+std::string parser::parse_STRING( char const*& src)
 {
 	std::string rt;
 	char eb = *src++;
@@ -68,7 +71,7 @@ std::string parser::STRING( char const*& src)
 	return rt;
 }
 
-unsigned int parser::UNSIGNED( char const*& src)
+unsigned int parser::parse_UNSIGNED( char const*& src)
 {
 	unsigned int rt = 0;
 	while (isDigit( *src))
@@ -82,7 +85,14 @@ unsigned int parser::UNSIGNED( char const*& src)
 	return rt;
 }
 
-float parser::FLOAT( char const*& src)
+unsigned int parser::parse_UNSIGNED1( char const*& src)
+{
+	unsigned int rt = parse_UNSIGNED( src);
+	if (rt == 0) throw std::runtime_error( "positive unsigned integer expected");
+	return rt;
+}
+
+float parser::parse_FLOAT( char const*& src)
 {
 	unsigned int digitsAllowed = 9;
 	float rt = 1.0;
@@ -117,14 +127,14 @@ float parser::FLOAT( char const*& src)
 	return rt * div;
 }
 
-char parser::OPERATOR( char const*& src)
+char parser::parse_OPERATOR( char const*& src)
 {
 	char rt = *src++;
 	skipSpaces( src);
 	return rt;
 }
 
-int parser::INTEGER( char const*& src)
+int parser::parse_INTEGER( char const*& src)
 {
 	int rt = 0;
 	int prev = 0;
@@ -154,5 +164,76 @@ int parser::INTEGER( char const*& src)
 	{
 		return rt;
 	}
+}
+
+static int checkKeyword( std::string id, int nn, va_list argp)
+{
+	for (int ii=0; ii<nn; ++ii)
+	{
+		const char* keyword = va_arg( argp, const char*);
+		if (isEqual( id, keyword))
+		{
+			return ii;
+		}
+	}
+	return -1;
+}
+
+static std::string keywordList( va_list argp, int nn)
+{
+	std::ostringstream msg;
+	for (int ii=0; ii<nn; ++ii)
+	{
+		const char* keyword = va_arg( argp, const char*);
+		if (ii > 0) msg << " ,";
+		msg << "'" << keyword << "'";
+	}
+	msg << " expected";
+	return msg.str();
+}
+
+int parser::parse_KEYWORD( char const*& src, unsigned int nn, ...)
+{
+	va_list argp;
+	va_start( argp, nn);
+
+	std::string id = parse_IDENTIFIER( src);
+	va_start( argp, nn);
+
+	int ii = checkKeyword( id, nn, argp);
+	if (ii < 0)
+	{
+		throw std::runtime_error(
+			std::string( "unknown keyword '") + id
+			+ "', one of " + keywordList( argp, nn) + " expected");
+	}
+	va_end( argp);
+	return ii;
+}
+
+int parser::parse_KEYWORD( unsigned int& duplicateflags, char const*& src, unsigned int nn, ...)
+{
+	va_list argp;
+	va_start( argp, nn);
+
+	if (nn > sizeof(unsigned int)*8) throw std::logic_error("too many arguments (parse_KEYWORD)");
+
+	std::string id = parse_IDENTIFIER( src);
+	va_start( argp, nn);
+
+	int ii = checkKeyword( id, nn, argp);
+	if (ii < 0)
+	{
+		throw std::runtime_error(
+			std::string( "unknown keyword '") + id
+			+ "', one of " + keywordList( argp, nn) + " expected");
+	}
+	va_end( argp);
+	if ((duplicateflags & (1 << ii))!= 0)
+	{
+		throw std::runtime_error( std::string( "duplicate definition of '") + id + "'");
+	}
+	duplicateflags |= (1 << ii);
+	return ii;
 }
 
