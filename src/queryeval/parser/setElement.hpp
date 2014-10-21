@@ -30,6 +30,8 @@
 #define _STRUS_QUERY_PARSER_SET_ELEMENT_HPP_INCLUDED
 #include <vector>
 
+#error DEPRECATED
+
 namespace strus {
 namespace parser {
 

@@ -30,7 +30,6 @@
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/weightedDocument.hpp"
-#include "keyMap.hpp"
 #include "parser/joinFunction.hpp"
 #include "parser/joinOperation.hpp"
 #include "parser/selectorExpression.hpp"

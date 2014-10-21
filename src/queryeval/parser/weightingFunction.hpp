@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
 #define _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
-#include "stringIndexMap.hpp"
+#include "parser/stringIndexMap.hpp"
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>

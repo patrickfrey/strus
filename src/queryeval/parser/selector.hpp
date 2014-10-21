@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_QUERY_PARSER_SELECTOR_HPP_INCLUDED
 #define _STRUS_QUERY_PARSER_SELECTOR_HPP_INCLUDED
-#include "stringIndexMap.hpp"
 #include "parser/tupleGenerator.hpp"
 #include "parser/selectorExpression.hpp"
 #include <string>

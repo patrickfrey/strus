@@ -33,6 +33,8 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
+#error DEPRECATED
+
 namespace strus {
 namespace parser {
 

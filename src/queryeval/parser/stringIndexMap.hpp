@@ -26,21 +26,34 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_PARSER_HPP_INCLUDED
-#define _STRUS_QUERY_PARSER_HPP_INCLUDED
-#include "keyMap.hpp"
-#include "parser/term.hpp"
-#include "parser/selector.hpp"
-#include "parser/setElement.hpp"
-#include "parser/setDimDescription.hpp"
-#include "parser/joinOperation.hpp"
-#include "parser/accumulateOperation.hpp"
-#include <string>
-#include <vector>
-#include <boost/shared_ptr.hpp>
+#ifndef _STRUS_QUERY_STRING_INDEX_MAP_HPP_INCLUDED
+#define _STRUS_QUERY_STRING_INDEX_MAP_HPP_INCLUDED
+#include "parser/keyMap.hpp"
 
-#error DEPRECATED
+namespace strus {
+
+class StringIndexMap
+	:public KeyMap<int>
+{
+public:
+	StringIndexMap(){}
+
+	int get( const std::string& id)
+	{
+		KeyMap<int>::const_iterator ki = find( id);
+		if (find( id) == end())
+		{
+			int rt = size()+1;
+			operator[]( id) = rt;
+			return rt;
+		}
+		else
+		{
+			return ki->second;
+		}
+	}
+};
+
+}//namespace
 #endif
-
-
 
