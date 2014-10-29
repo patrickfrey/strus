@@ -90,6 +90,10 @@ DLL_PUBLIC unsigned int strus::readFile( const std::string& filename, std::strin
 		::fclose( fh);
 		return ec;
 	}
+	else
+	{
+		::fclose( fh);
+	}
 	return 0;
 }
 
@@ -111,7 +115,7 @@ DLL_PUBLIC unsigned int strus::readDir( const std::string& path, const std::stri
 			continue;
 		}
 		const char* ee = entry.c_str() + entry.size() - ext.size();
-		if (0==std::memcmp( ee, ext.c_str(), ext.size()))
+		if (entry[0] != '.' && 0==std::memcmp( ee, ext.c_str(), ext.size()))
 		{
 			res.push_back( entry );
 		}
