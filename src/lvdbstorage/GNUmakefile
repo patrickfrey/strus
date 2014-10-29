@@ -1,4 +1,6 @@
 TOPDIR=../..
+include $(TOPDIR)/variables.mk
+
 CPP_OBJS=\
 	indexPacker.o \
 	storage.o \
@@ -7,7 +9,7 @@ CPP_OBJS=\
 	storageLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
-CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
+CXXFLAGS=-g -O3 -Werror -Wall -pedantic -std=c++98
 MODFLAGS=-fPIC
 #-fvisibility=hidden 
 LDFLAGS=-L/usr/lib
@@ -27,4 +29,13 @@ libstrus_lvdbstorage.so: $(CPP_OBJS)
 .PHONY: clean
 clean:
 	rm -f $(CPP_OBJS) $(CPP_OBJS:.o=.d) libstrus_lvdbstorage.so
+
+.PHONY: install
+install:
+	@mkdir -p $(INSTALL_LIBDIR)
+	@cp libstrus_lvdbstorage.so $(INSTALL_LIBDIR)
+
+.PHONY: uninstall
+uninstall:
+	@rm $(INSTALL_LIBDIR)/libstrus_lvdbstorage.so
 

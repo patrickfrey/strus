@@ -86,7 +86,7 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 			}
 			else
 			{
-				throw std::runtime_error("floating point number expected as weight after '*'");
+				throw std::runtime_error("non negative floating point number expected as weight after '*'");
 			}
 		}
 		if (argid != 0)
@@ -116,7 +116,7 @@ void WeightingFunction::printExpression(
 		std::vector<WeightingFunction> args,
 		const StringIndexMap& setmap)
 {
-	out << "(";
+	out << "( ";
 	std::vector<WeightingFunction>::const_iterator ai = args.begin(), ae = args.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
 	{

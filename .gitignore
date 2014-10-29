@@ -21,6 +21,9 @@
 # Valgring suppression files
 *.sup
 
+# Helper scripts
+setenv.sh
+
 # Compiled Programs
 src/strus/strus
 tests/randoc/src/randomCollectionTest

@@ -1,0 +1,6 @@
+INSTALL_DIR=/usr/local/
+INSTALL_INCDIR=$(INSTALL_DIR)/include/strus/
+INSTALL_LIBDIR=$(INSTALL_DIR)/lib/strus/
+INSTALL_BINDIR=$(INSTALL_DIR)/bin
+
+

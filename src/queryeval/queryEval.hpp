@@ -66,7 +66,7 @@ public:
 	const std::vector<parser::JoinOperation>& operations() const		{return m_operations;}
 	const parser::AccumulateOperation accumulateOperation() const		{return m_accumulateOperation;}
 
-	virtual void print( std::ostream& out);
+	virtual void print( std::ostream& out) const;
 
 private:
 	std::vector<WeightedDocument>

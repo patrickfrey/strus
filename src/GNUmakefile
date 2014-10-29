@@ -18,4 +18,18 @@ clean:
 	cd queryproc; make clean; cd -
 	cd strus; make clean; cd -
 
+.PHONY: install
+install:
+	cd lvdbstorage; make install; cd -
+	cd queryeval; make install; cd -
+	cd queryproc; make install; cd -
+	cd strus; make install; cd -
+
+.PHONY: uninstall
+uninstall:
+	cd lvdbstorage; make uninstall; cd -
+	cd queryeval; make uninstall; cd -
+	cd queryproc; make uninstall; cd -
+	cd strus; make uninstall; cd -
+
 

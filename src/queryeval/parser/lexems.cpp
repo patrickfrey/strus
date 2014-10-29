@@ -32,6 +32,7 @@
 #include <cstdarg>
 #include <sstream>
 #include <iostream>
+#include <stdexcept>
 #include <boost/shared_ptr.hpp>
 
 using namespace strus;

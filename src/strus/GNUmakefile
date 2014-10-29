@@ -1,9 +1,10 @@
 TOPDIR=../..
+include $(TOPDIR)/variables.mk
 
 CPP_OBJS=
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private
-CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
+CXXFLAGS=-g -Werror -Wall -pedantic -O3 -std=c++98
 LDFLAGS=-L$(TOPDIR)/src/lvdbstorage -L$(TOPDIR)/src/queryeval -L$(TOPDIR)/src/queryproc -L/usr/lib
 LIBS=-lstrus_lvdbstorage -lstrus_queryeval -lstrus_queryproc -lleveldb -lboost_system
 
@@ -21,6 +22,15 @@ strus: $(CPP_OBJS) strus.o
 .PHONY: clean
 clean:
 	rm -f ${CPP_OBJS} strus strus.o strus.d
+
+.PHONY: install
+install:
+	@mkdir -p $(INSTALL_BINDIR)
+	@cp strus $(INSTALL_BINDIR)
+
+.PHONY: uninstall
+uninstall:
+	@rm $(INSTALL_BINDIR)/strus
 
 
 

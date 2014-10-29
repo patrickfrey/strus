@@ -28,12 +28,18 @@
 */
 #ifndef _STRUS_FILE_IO_HPP_INCLUDED
 #define _STRUS_FILE_IO_HPP_INCLUDED
+#include <vector>
 #include <string>
 
 namespace strus
 {
 
 unsigned int readFile( const std::string& filename, std::string& res);
+unsigned int writeFile( const std::string& filename, const std::string& content);
+unsigned int readDir( const std::string& path, const std::string& ext, std::vector<std::string>& res);
+bool isFile( const std::string& path);
+bool isDir( const std::string& path);
+char dirSeparator();
 
 }
 #endif

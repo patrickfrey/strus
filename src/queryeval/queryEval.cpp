@@ -233,7 +233,7 @@ private:
 };
 
 
-void QueryEval::print( std::ostream& out)
+void QueryEval::print( std::ostream& out) const
 {
 	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
 	for (; ji != je; ++ji)
@@ -250,7 +250,7 @@ void QueryEval::print( std::ostream& out)
 	{
 		out << "EVAL ";
 		m_accumulateOperation.print( out, m_setnamemap);
-		out << std::endl;
+		out << ";" << std::endl;
 	}
 }
 

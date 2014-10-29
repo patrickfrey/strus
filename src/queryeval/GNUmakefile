@@ -1,4 +1,6 @@
 TOPDIR=../..
+include $(TOPDIR)/variables.mk
+
 CPP_OBJS=\
 	parser/accumulateOperation.o \
 	parser/joinFunction.o \
@@ -11,7 +13,7 @@ CPP_OBJS=\
 	queryEvalLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
-CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
+CXXFLAGS=-g -Werror -Wall -pedantic -O3 -std=c++98
 LDFLAGS=-L/usr/lib
 LIBS=
 
@@ -29,5 +31,14 @@ libstrus_queryeval.so: $(CPP_OBJS)
 .PHONY: clean
 clean:
 	rm -f $(CPP_OBJS) $(CPP_OBJS:.o=.d) libstrus_queryeval.so
+
+.PHONY: install
+install:
+	@mkdir -p $(INSTALL_LIBDIR)
+	@cp libstrus_queryeval.so $(INSTALL_LIBDIR)
+
+.PHONY: uninstall
+uninstall:
+	@rm $(INSTALL_LIBDIR)/libstrus_queryeval.so
 
 

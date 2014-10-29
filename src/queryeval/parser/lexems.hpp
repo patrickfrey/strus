@@ -28,10 +28,7 @@
 */
 #ifndef _STRUS_QUERY_PARSER_LEXEMS_HPP_INCLUDED
 #define _STRUS_QUERY_PARSER_LEXEMS_HPP_INCLUDED
-#include "keyMap.hpp"
 #include <string>
-#include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace strus {
 namespace parser {

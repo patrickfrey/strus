@@ -58,7 +58,7 @@ public:
 	/// \brief Print the internal representation of the program to 'out'
 	/// \param[out] out stream to print the program to
 	/// \remark this method is mainly used to testing and has no other purpose
-	virtual void print( std::ostream& out)=0;
+	virtual void print( std::ostream& out) const=0;
 };
 
 }//namespace

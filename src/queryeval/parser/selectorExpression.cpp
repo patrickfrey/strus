@@ -137,7 +137,7 @@ void SelectorExpression::print( std::ostream& out, int expridx, const std::vecto
 	{
 		if (aidx)
 		{
-			out << ", ";
+			out << " ";
 		}
 		switch (ai->type())
 		{

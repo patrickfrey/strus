@@ -48,6 +48,7 @@ public:
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_);
+
 	virtual void setTermWeight(
 			const std::string& type_,
 			const std::string& value_,

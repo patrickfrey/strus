@@ -60,7 +60,7 @@ public:
 	const std::vector<WeightingFunction>& args() const	{return m_args;}
 
 	void parse( char const*& src, StringIndexMap& setnamemap);
-	void print( std::ostream& out, const StringIndexMap& setnamemap);
+	void print( std::ostream& out, const StringIndexMap& setnamemap) const;
 
 private:
 	std::string m_name;						///< name of operation

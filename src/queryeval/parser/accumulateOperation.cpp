@@ -57,7 +57,7 @@ void AccumulateOperation::parse( char const*& src, StringIndexMap& setnamemap)
 }
 
 
-void AccumulateOperation::print( std::ostream& out, const StringIndexMap& setnamemap)
+void AccumulateOperation::print( std::ostream& out, const StringIndexMap& setnamemap) const
 {
 	out << name();
 	WeightingFunction::printExpression( out, args(), setnamemap);

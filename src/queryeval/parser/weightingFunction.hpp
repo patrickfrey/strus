@@ -44,7 +44,7 @@ public:
 		:m_setIndex(0),m_factor(0.0){}
 	WeightingFunction( const WeightingFunction& o)
 		:m_function(o.m_function),m_params(o.m_params),m_setIndex(o.m_setIndex),m_factor(o.m_factor){}
-	WeightingFunction( const std::string& function_, const std::vector<float>& params_, unsigned int setIndex_, double factor_=1.0)
+	WeightingFunction( const std::string& function_, const std::vector<float>& params_, unsigned int setIndex_, float factor_)
 		:m_function(function_),m_params(params_),m_setIndex(setIndex_),m_factor(factor_){}
 
 	static std::vector<WeightingFunction> parseExpression(
@@ -60,13 +60,13 @@ public:
 	const std::string& function() const		{return m_function;}
 	const std::vector<float>& params() const	{return m_params;}
 	int setIndex() const				{return m_setIndex;}
-	int factor() const				{return m_factor;}
+	float factor() const				{return m_factor;}
 
 private:
 	std::string m_function;		///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
 	std::vector<float> m_params;	///< specifies parametrization of the weighting function
 	int m_setIndex;			///< argument set index
-	double m_factor;			///< multiplication factor of a calculated weight
+	float m_factor;			///< multiplication factor of a calculated weight
 };
 
 }}//namespace

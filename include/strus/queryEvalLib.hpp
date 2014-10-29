@@ -30,7 +30,6 @@
 #ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #include "strus/weightedDocument.hpp"
-#include <vector>
 #include <string>
 
 namespace strus {

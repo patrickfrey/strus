@@ -42,6 +42,43 @@ static void printUsage( int argc, const char* argv[])
 	std::cerr << "<program> = file with query evaluation program source" << std::endl;
 }
 
+static bool compareText( const std::string& aa, const std::string& bb)
+{
+	std::string::const_iterator ai = aa.begin(), ae = aa.end();
+	std::string::const_iterator bi = bb.begin(), be = bb.end();
+
+	while (ai != ae && bi != be)
+	{
+		if (*ai == *bi)
+		{
+			++ai;
+			++bi;
+			continue;
+		}
+		else if (*ai == '\r')
+		{
+			++ai;
+		}
+		else if (*bi == '\r')
+		{
+			++bi;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	if (ai != ae)
+	{
+		return false;
+	}
+	if (bi != be)
+	{
+		return false;
+	}
+	return true;
+}
+
 int main( int argc, const char* argv[])
 {
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
@@ -57,20 +94,88 @@ int main( int argc, const char* argv[])
 	}
 	try
 	{
-		std::string prgfile = argv[1];
-		std::string prgsource;
-		unsigned int ec = strus::readFile( prgfile, prgsource);
-		if (ec)
-		{
-			std::cerr << "ERROR could not read program file '" << prgfile << "', error " << ec << std::endl;
-			return 2;
-		}
-		strus::QueryEvalInterface* qeval = strus::createQueryEval( prgsource);
-		std::ostringstream out;
-		qeval->print( out);
+		const char* prgext = ".prg";
+		std::size_t prgextsize = std::strlen( prgext);
+		const char* outext = ".res";
+		std::size_t outextsize = std::strlen( outext);
+		const char* expext = ".exp";
+		std::size_t expextsize = std::strlen( expext);
 
-		std::string result = out.str();
-		std::cout << "result:" << std::endl << result << std::endl;
+		std::string prgpath = argv[1];
+		std::vector<std::string> prgfiles;
+		if (!strus::isDir( prgpath))
+		{
+			if (prgpath.size() < prgextsize)
+			{
+				std::cerr << "ERROR file with extension '" << prgext << "'' expected" << std::endl;
+				return 2;
+			}
+			const char* ee = prgpath.c_str() + prgpath.size() - prgextsize;
+			if (0==std::strcmp( ee, prgext))
+			{
+				prgfiles.push_back( prgpath);
+			}
+			else
+			{
+				std::cerr << "ERROR file with extension '" << prgext << "'' expected" << std::endl;
+			}
+		}
+		else
+		{
+			std::vector<std::string> prgnames;
+			unsigned int ec = strus::readDir( prgpath, prgext, prgnames);
+			if (ec)
+			{
+				std::cerr << "ERROR could not read program directory '" << prgpath << "', error " << ec << std::endl;
+				return 3;
+			}
+			std::vector<std::string>::const_iterator pi = prgnames.begin(), pe = prgnames.end();
+			for (; pi != pe; ++pi)
+			{
+				prgfiles.push_back( prgpath + strus::dirSeparator() + *pi);
+			}
+		}
+		std::vector<std::string>::const_iterator fi = prgfiles.begin(), fe = prgfiles.end();
+		for (; fi != fe; ++fi)
+		{
+			std::cerr << "executing test '" << *fi << "'" << std::endl;
+			std::string outfile
+					= std::string( fi->c_str(), fi->size() - prgextsize)
+					+ std::string( outext, outextsize);
+			std::string expfile
+					= std::string( fi->c_str(), fi->size() - prgextsize)
+					+ std::string( expext, expextsize);
+
+			std::string prgsource;
+			unsigned int ec = strus::readFile( *fi, prgsource);
+			if (ec)
+			{
+				std::cerr << "ERROR could not read program file '" << *fi << "', error " << ec << std::endl;
+				return 4;
+			}
+			std::string expstr;
+			ec = strus::readFile( expfile, expstr);
+			if (ec)
+			{
+				std::cerr << "ERROR could not read expected result file '" << expfile << "', error " << ec << std::endl;
+			}
+			boost::scoped_ptr<strus::QueryEvalInterface> qeval(
+				strus::createQueryEval( prgsource));
+			std::ostringstream out;
+			qeval->print( out);
+			std::string outstr( out.str());
+
+			if (!compareText( outstr, expstr))
+			{
+				ec = strus::writeFile( outfile, outstr);
+				if (ec)
+				{
+					std::cerr << "ERROR could not write test output to file '" << outfile << "', error " << ec << std::endl;
+				}
+				std::cerr << "ERROR expected output of test '" << *fi << "' did not match as expected" << std::endl;
+				return 5;
+			}
+		}
 		return 0;
 	}
 	catch (const std::runtime_error& e)
