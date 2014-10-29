@@ -87,10 +87,14 @@ Index Iterator::skipPos( const Index& firstpos)
 		m_positr += ofs;
 		m_posend = m_positr + m_itr->value().size() - ofs;
 	}
-	unsigned int ofs = (m_posend - m_positr) >> 3;
 	while (m_positr < m_posend && (firstpos > m_posno || !m_posno))
 	{
-		if (ofs > 6 && m_posend - m_positr > ofs)
+		unsigned int ofs = (m_posend - m_positr) >> 1;
+		if (ofs > firstpos - m_posno)
+		{
+			ofs = (firstpos - m_posno) >> 4;
+		}
+		while (ofs >= 6)
 		{
 			const char* skipitr = strus::nextPackedIndexPos( m_positr, m_positr + ofs, m_posend);
 			if (skipitr != m_posend)
@@ -101,6 +105,10 @@ Index Iterator::skipPos( const Index& firstpos)
 					m_posno = nextpos;
 					m_positr = skipitr;
 					continue;
+				}
+				else
+				{
+					ofs >>= 1;
 				}
 			}
 		}
