@@ -198,6 +198,7 @@ SelectorSetR SelectorSet::calculate(
 						argset->pushRow( &row);
 					}
 				}
+				break;
 			}
 			case SelectorExpression::Argument::SubExpression:
 			{

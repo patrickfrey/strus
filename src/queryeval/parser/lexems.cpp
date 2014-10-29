@@ -68,6 +68,7 @@ std::string parser::parse_STRING( char const*& src)
 		}
 		rt.push_back( *src++);
 	}
+	++src;
 	skipSpaces( src);
 	return rt;
 }

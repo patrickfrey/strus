@@ -117,7 +117,7 @@ QueryEval::QueryEval( const std::string& source)
 	{
 		while (*src)
 		{
-			switch ((StatementKeyword)parse_KEYWORD( stm.duplicateflags, src, 4, "FOREACH", "INTO", "DO", "EVAL","TERM"))
+			switch ((StatementKeyword)parse_KEYWORD( stm.duplicateflags, src, 5, "FOREACH", "INTO", "DO", "EVAL","TERM"))
 			{
 				case e_TERM:
 					if (0!=(stm.duplicateflags & 0x7))
@@ -411,7 +411,7 @@ std::vector<WeightedDocument>
 			StringIndexMap::const_iterator si = m_setnamemap.find( pi->set);
 			if (si != m_setnamemap.end())
 			{
-				query.pushFeature( si->second, processor.createTermIterator( ti->type, ti->value));
+				query.pushFeature( si->second, processor.createTermIterator( pi->type, pi->value));
 			}
 		}
 	}
@@ -426,29 +426,31 @@ std::vector<WeightedDocument>
 			SelectorSet::calculate(
 				ji->selector(), selectors(), query.setSizeMap()));
 
-		const std::vector<Selector>& selar = selset->ar();
-		std::size_t ri = 0, re = selar.size(), ro = selset->rowsize();
-		enum {MaxNofSelectorColumns=256};
-		if (ro > MaxNofSelectorColumns)
+		if (selset.get())
 		{
-			throw std::runtime_error("query too complex (number of rows in selection has more than 256 elements");
-		}
-		const IteratorInterface* joinargs[ MaxNofSelectorColumns];
-		for (; ri < re; ri += ro)
-		{
-			std::size_t ci = 0, ce = ro;
-			for (; ci < ce; ++ci)
+			const std::vector<Selector>& selar = selset->ar();
+			std::size_t ri = 0, re = selar.size(), ro = selset->rowsize();
+			enum {MaxNofSelectorColumns=256};
+			if (ro > MaxNofSelectorColumns)
 			{
-				const Selector& sel = selar[ ri+ci];
-				joinargs[ ci] = query.getFeature( sel.setIndex, sel.elemIndex);
+				throw std::runtime_error("query too complex (number of rows in selection has more than 256 elements");
 			}
-			IteratorInterface* opres =
-				processor.createJoinIterator(
-					function.name(), function.range(), ro, joinargs);
-			query.pushFeature( ji->result(), opres);
+			const IteratorInterface* joinargs[ MaxNofSelectorColumns];
+			for (; ri < re; ri += ro)
+			{
+				std::size_t ci = 0, ce = ro;
+				for (; ci < ce; ++ci)
+				{
+					const Selector& sel = selar[ ri+ci];
+					joinargs[ ci] = query.getFeature( sel.setIndex, sel.elemIndex);
+				}
+				IteratorInterface* opres =
+					processor.createJoinIterator(
+						function.name(), function.range(), ro, joinargs);
+				query.pushFeature( ji->result(), opres);
+			}
 		}
 	}
-
 	//[3] Get the result accumulator and evaluate the results
 	if (m_accumulateOperation.defined())
 	{

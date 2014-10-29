@@ -9,7 +9,7 @@ CPP_OBJS=\
 	storageLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
-CXXFLAGS=-g -O3 -Werror -Wall -pedantic -std=c++98
+CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 MODFLAGS=-fPIC
 #-fvisibility=hidden 
 LDFLAGS=-L/usr/lib
