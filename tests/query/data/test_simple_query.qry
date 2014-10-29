@@ -1,12 +1,5 @@
-TERM basic:  stem ein
-TERM basic:  stem vorgeh
-TERM basic:  stem ohne
-TERM basic:  stem problem
-TERM basic:  stem faktor
-TERM comma:  delim "C"
-TERM phrase: delim "P"
-TERM sect:   delim "S"
-TERM title:  delim "T"
+TERM comma    ",":punctuation;
+TERM sentence ".":punctuation;
 
 # set selector operators: 
 # (S 2) two element sequence (from the query)

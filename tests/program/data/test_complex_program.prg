@@ -1,3 +1,6 @@
+TERM comma    ",":punctuation;
+TERM sentence ".":punctuation;
+TERM title     "":title;
 
 # set selector operators: 
 # (S 2) two element sequence (from the query)

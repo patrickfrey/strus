@@ -108,7 +108,7 @@ struct Statement
 QueryEval::QueryEval( const std::string& source)
 {
 	char const* src = source.c_str();
-	enum StatementKeyword {e_FOREACH, e_INTO, e_DO, e_EVAL};
+	enum StatementKeyword {e_FOREACH, e_INTO, e_DO, e_EVAL, e_TERM};
 	Statement stm;
 	std::string id;
 
@@ -117,8 +117,54 @@ QueryEval::QueryEval( const std::string& source)
 	{
 		while (*src)
 		{
-			switch ((StatementKeyword)parse_KEYWORD( stm.duplicateflags, src, 4, "FOREACH", "INTO", "DO", "EVAL"))
+			switch ((StatementKeyword)parse_KEYWORD( stm.duplicateflags, src, 4, "FOREACH", "INTO", "DO", "EVAL","TERM"))
 			{
+				case e_TERM:
+					if (0!=(stm.duplicateflags & 0x7))
+					{
+						throw std::runtime_error( "unterminated query expression (missing ';')");
+					}
+					if (isAlpha(*src))
+					{
+						std::string termset = parse_IDENTIFIER( src);
+						std::string termvalue;
+						std::string termtype;
+
+						if (isStringQuote( *src))
+						{
+							termvalue = parse_STRING( src);
+						}
+						else if (isAlpha( *src))
+						{
+							termvalue = parse_IDENTIFIER( src);
+						}
+						else
+						{
+							throw std::runtime_error( "term value (string,identifier,number) after the feature group identifier");
+						}
+						if (!isColon( *src))
+						{
+							throw std::runtime_error( "colon (':') expected after term value");
+						}
+						parse_OPERATOR(src);
+						if (!isAlpha( *src))
+						{
+							throw std::runtime_error( "term type identifier expected after colon and term value");
+						}
+						termtype = parse_IDENTIFIER( src);
+						if (!isSemiColon( *src))
+						{
+							throw std::runtime_error( "semicolon expected after a feature declaration in the query");
+						}
+						parse_OPERATOR( src);
+						m_predefinedTerms.push_back( Query::Term( termset, termtype, termvalue));
+						stm.clear();
+					}
+					else
+					{
+						throw std::runtime_error( "feature set identifier expected as start of a term declaration in the query");
+					}
+					break;
 				case e_FOREACH:
 					stm.selector = SelectorExpression::parse( src, m_selectors, m_setnamemap);
 					if (isSemiColon(*src))
@@ -235,6 +281,11 @@ private:
 
 void QueryEval::print( std::ostream& out) const
 {
+	std::vector<Query::Term>::const_iterator ti = predefinedTerms().begin(), te = predefinedTerms().end();
+	for (; ti != te; ++ti)
+	{
+		out << "TERM " << ti->set << ": " << ti->type << " '" << ti->value << "';" << std::endl;
+	}
 	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
 	for (; ji != je; ++ji)
 	{
@@ -293,72 +344,70 @@ std::vector<WeightedDocument>
 std::vector<WeightedDocument>
 	QueryEval::getRankedDocumentList(
 		const QueryProcessorInterface& processor,
-		const std::string& querystr,
+		const Query& query_,
 		std::size_t maxNofRanks) const
 {
-	char const* src = querystr.c_str();
-	std::string termset;
-	std::string termtype;
-	std::string termvalue;
 	QueryStruct query( &m_setnamemap);
 
-	skipSpaces( src);
-
-	//[1] Parse query string and create initial feature sets:
-	try
+	//[1] Create the initial feature sets:
 	{
-		while (!*src)
+		// Process the query features (explicit join operations)
+		typedef std::pair<std::string, IteratorReference> FeatDef;
+		std::vector<FeatDef> feats;
+
+		std::vector<Query::Term>::const_iterator ti = query_.termar().begin(), te = query_.termar().end();
+		std::vector<Query::JoinOp>::const_iterator ji = query_.joinar().begin(), je = query_.joinar().end();
+
+		for (std::size_t tidx=0; ti != te; ++ti,++tidx)
 		{
-			if (isAlpha(*src))
+			feats.push_back( FeatDef( ti->set, processor.createTermIterator( ti->type, ti->value)));
+
+			for (; ji != je && ji->termcnt == tidx; ++ji)
 			{
-				termset = parse_IDENTIFIER( src);
-				if (isStringQuote( *src))
+				enum {MaxNofJoinopArguments=256};
+				if (ji->nofArgs > MaxNofJoinopArguments || ji->nofArgs > feats.size())
 				{
-					termvalue = parse_STRING( src);
+					throw std::runtime_error( "number of arguments of explicit join in query out of range");
 				}
-				else if (isAlpha( *src))
+				const IteratorInterface* joinargs[ MaxNofJoinopArguments];
+				std::size_t ii=0;
+				for (;ii < ji->nofArgs; ++ii)
 				{
-					termvalue = parse_IDENTIFIER( src);
+					joinargs[ ji->nofArgs-ii-1] = feats[ feats.size()-ii-1].second.get();
 				}
-				else
-				{
-					throw std::runtime_error( "term value (string,identifier,number) after the feature group identifier");
-				}
-				if (!isColon( *src))
-				{
-					throw std::runtime_error( "colon (':') expected after term value");
-				}
-				parse_OPERATOR(src);
-				if (!isAlpha( *src))
-				{
-					throw std::runtime_error( "term type identifier expected after colon and term value");
-				}
-				termtype = parse_IDENTIFIER( src);
-				if (!isSemiColon( *src))
-				{
-					throw std::runtime_error( "semicolon expected after a feature declaration in the query");
-				}
-				StringIndexMap::const_iterator ti = m_setnamemap.find( termset);
-				if (ti == m_setnamemap.end())
-				{
-					throw std::runtime_error( std::string( "term set identifier '") + termset + "' not used in this query program");
-				}
-				query.pushFeature( ti->second, processor.createTermIterator( termtype, termvalue));
+				IteratorReference res(
+					processor.createJoinIterator(
+						ji->opname, ji->range,
+						ji->nofArgs, joinargs));
+
+				feats.resize( feats.size() - ji->nofArgs);
+				feats.push_back( ji->set, res);
 			}
-			else
+		}
+
+		// Add add the processed query features to the initial feature set:
+		std::vector<FeatDef>::const_iterator fi = feats.begin(), fe = feats.end();
+		for (; fi != fe; ++fi)
+		{
+			StringIndexMap::const_iterator si = m_setnamemap.find( fi->first);
+			if (si == m_setnamemap.end())
 			{
-				throw std::runtime_error( "feature set identifier expected as start of a term declaration in the query");
+				throw std::runtime_error( std::string( "term set identifier '") + termset + "' not used in this query program");
+			}
+			query.pushFeature( si->second, fi->second);
+		}
+
+		// Add predefined terms to the initial feature set:
+		std::vector<Query::Term>::const_iterator pi = m_predefinedTerms.begin(), pe = m_predefinedTerms.end();
+		for (; pi != pe; ++pi)
+		{
+			StringIndexMap::const_iterator si = m_setnamemap.find( pi->set);
+			if (si != m_setnamemap.end())
+			{
+				query.pushFeature( si->second, processor.createTermIterator( ti->type, ti->value));
 			}
 		}
 	}
-	catch (const std::runtime_error& err)
-	{
-		throw std::runtime_error(
-			std::string( "error in query string ")
-			+ errorPosition( querystr.c_str(), src)
-			+ ":" + err.what());
-	}
-
 	//[2] Iterate on all join operations and create the combined features:
 	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
 	for (; ji != je; ++ji)

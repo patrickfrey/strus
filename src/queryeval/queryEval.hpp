@@ -47,7 +47,8 @@ class QueryEval
 public:
 	QueryEval(){}
 	QueryEval( const QueryEval& o)
-		:m_selectors(o.m_selectors)
+		:m_predefinedTerms(o.m_predefinedTerms)
+		,m_selectors(o.m_selectors)
 		,m_functions(o.m_functions)
 		,m_setnamemap(o.m_setnamemap)
 		,m_operations(o.m_operations)
@@ -58,9 +59,10 @@ public:
 	virtual std::vector<WeightedDocument>
 		getRankedDocumentList(
 			const QueryProcessorInterface& processor,
-			const std::string& querystr,
+			const Query& query,
 			std::size_t maxNofRanks) const;
 
+	const std::vector<Query::Term> predefinedTerms() const			{return m_predefinedTerms;}
 	const std::vector<parser::SelectorExpression>& selectors() const	{return m_selectors;}
 	const std::vector<parser::JoinFunction>& functions() const		{return m_functions;}
 	const std::vector<parser::JoinOperation>& operations() const		{return m_operations;}
@@ -75,6 +77,7 @@ private:
 			std::size_t maxNofRanks) const;
 
 private:
+	std::vector<Query::Term> m_predefinedTerms;
 	std::vector<parser::SelectorExpression> m_selectors;
 	std::vector<parser::JoinFunction> m_functions;
 	StringIndexMap m_setnamemap;
