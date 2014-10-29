@@ -90,7 +90,7 @@ Index Iterator::skipPos( const Index& firstpos)
 	unsigned int ofs = (m_posend - m_positr) >> 3;
 	while (m_positr < m_posend && (firstpos > m_posno || !m_posno))
 	{
-		if (ofs && m_posend - m_positr > ofs)
+		if (ofs > 6 && m_posend - m_positr > ofs)
 		{
 			const char* skipitr = strus::nextPackedIndexPos( m_positr, m_positr + ofs, m_posend);
 			if (skipitr != m_posend)
