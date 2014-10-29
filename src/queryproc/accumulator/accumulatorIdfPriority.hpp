@@ -94,6 +94,7 @@ private:
 	std::vector<AccumulatorArgument> m_argumentList;
 	std::set<ArgumentRef> m_argumentOrder;
 	std::set<ArgumentRef>::const_iterator m_argumentIter;
+	std::set<ArgumentRef>::const_iterator m_argumentEnd;
 	std::set<Index> m_visited;
 	bool m_started;
 };

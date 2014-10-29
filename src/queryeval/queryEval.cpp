@@ -315,6 +315,8 @@ std::vector<WeightedDocument>
 	std::vector<WeightedDocument> rt;
 	Ranker ranker;
 	std::size_t ranks = 0;
+	std::size_t maxNofRanksInspected = (maxNofRanks * 10) + 100;
+	std::size_t nofRanksInspected = 0;
 
 	Index docno = 0;
 	int state = 0;
@@ -330,6 +332,11 @@ std::vector<WeightedDocument>
 		else
 		{
 			++ranks;
+		}
+		nofRanksInspected += 1;
+		if (state > 0 && nofRanksInspected > maxNofRanksInspected)
+		{
+			break;
 		}
 	}
 	Ranker::reverse_iterator ri=ranker.rbegin(),re=ranker.rend();

@@ -76,6 +76,13 @@ bool AccumulatorIdfPriority::nextRank(
 		{
 			return false;
 		}
+		m_argumentEnd = m_argumentIter;
+		double cut_idf = m_argumentIter->idf - 1.5;
+
+		for (; m_argumentEnd != m_argumentOrder.end(); ++m_argumentEnd)
+		{
+			if (cut_idf > m_argumentEnd->idf) break;
+		}
 	}
 AGAIN:
 	const AccumulatorArgument& arg = m_argumentList[ m_argumentIter->idx];
@@ -88,7 +95,7 @@ AGAIN:
 			docno_ = 0;
 			goto AGAIN;
 		}
-		if (++m_argumentIter == m_argumentOrder.end())
+		if (++m_argumentIter == m_argumentEnd)
 		{
 			return false;
 		}
