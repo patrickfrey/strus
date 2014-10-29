@@ -42,9 +42,8 @@ int main( int argc, const char* argv[])
 {
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
-		std::cerr << "usage: strus <cmd> ..." << std::endl;
-		std::cerr << "<cmd>     = create <config> :create a storage" << std::endl;
-		std::cerr << "<config>  : ";
+		std::cerr << "usage: strusCreate <config>" << std::endl;
+		std::cerr << "<config>  : configuration string of the storage";
 		std::string indent;
 		char const* cc = strus::getStorageConfigDescription();
 		char const* ee;
@@ -64,17 +63,10 @@ int main( int argc, const char* argv[])
 	}
 	try
 	{
-		if (std::strcmp( argv[1], "create") == 0)
-		{
-			if (argc < 3) throw std::runtime_error( "too few argumens for create. (strus create <repository config>)");
+		if (argc < 2) throw std::runtime_error( "too few arguments (expected storage configuration string)");
+		if (argc > 2) throw std::runtime_error( "too many arguments for strusCreate");
 
-			strus::createStorageDatabase( argv[2]);
-		}
-		else
-		{
-			throw std::runtime_error( std::string( "unknown command '") + argv[1] + "' (expected create,..)" );
-		}
-		return 0;
+		strus::createStorageDatabase( argv[1]);
 	}
 	catch (const std::runtime_error& e)
 	{

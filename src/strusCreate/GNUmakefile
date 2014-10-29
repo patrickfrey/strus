@@ -8,7 +8,7 @@ CXXFLAGS=-g -Werror -Wall -pedantic -O3 -std=c++98
 LDFLAGS=-L$(TOPDIR)/src/lvdbstorage -L$(TOPDIR)/src/queryeval -L$(TOPDIR)/src/queryproc -L/usr/lib
 LIBS=-lstrus_lvdbstorage -lstrus_queryeval -lstrus_queryproc -lleveldb -lboost_system
 
-all: strus
+all: strusCreate
 
 -include $(CPP_OBJS:.o=.d)
 
@@ -16,21 +16,21 @@ all: strus
 	g++ -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
 	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
-strus: $(CPP_OBJS) strus.o
-	g++ -o $@ strus.o $(CPP_OBJS) $(LDFLAGS) $(LIBS)
+strusCreate: $(CPP_OBJS) strusCreate.o
+	g++ -o $@ strusCreate.o $(CPP_OBJS) $(LDFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:
-	rm -f ${CPP_OBJS} strus strus.o strus.d
+	rm -f ${CPP_OBJS} strusCreate strusCreate.o strusCreate.d
 
 .PHONY: install
 install:
 	@mkdir -p $(INSTALL_BINDIR)
-	@cp strus $(INSTALL_BINDIR)
+	@cp strusCreate $(INSTALL_BINDIR)
 
 .PHONY: uninstall
 uninstall:
-	@rm $(INSTALL_BINDIR)/strus
+	@rm $(INSTALL_BINDIR)/strusCreate
 
 
 

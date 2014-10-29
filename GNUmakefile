@@ -18,9 +18,9 @@ install:
 
 uninstall:
 	cd src; make uninstall; cd ..
-	@rmdir $(INSTALL_INCDIR)
-	@rmdir $(INSTALL_LIBDIR)
-	@rmdir $(INSTALL_BINDIR)
+	@-rmdir $(INSTALL_INCDIR)
+	@-rmdir $(INSTALL_LIBDIR)
+	@-rmdir $(INSTALL_BINDIR)
 
 
 

@@ -25,6 +25,6 @@
 setenv.sh
 
 # Compiled Programs
-src/strus/strus
+src/strusCreate/strusCreate
 tests/randoc/src/randomCollectionTest
 tests/program/src/parseQueryEvalProgramTest
