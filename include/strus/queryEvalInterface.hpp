@@ -67,7 +67,7 @@ public:
 		/// \param[in] opname_ join operation to perform
 		/// \param[in] range_ range argument of the join operation
 		/// \param[in] nofArgs_ number of arguments (top elements on the stack) 
-		void groupTerms(
+		void joinTerms(
 			const std::string& set_,
 			const std::string& opname_,
 			int range_,

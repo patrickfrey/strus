@@ -381,7 +381,7 @@ std::vector<WeightedDocument>
 						ji->nofArgs, joinargs));
 
 				feats.resize( feats.size() - ji->nofArgs);
-				feats.push_back( ji->set, res);
+				feats.push_back( FeatDef( ji->set, res));
 			}
 		}
 
@@ -392,7 +392,7 @@ std::vector<WeightedDocument>
 			StringIndexMap::const_iterator si = m_setnamemap.find( fi->first);
 			if (si == m_setnamemap.end())
 			{
-				throw std::runtime_error( std::string( "term set identifier '") + termset + "' not used in this query program");
+				throw std::runtime_error( std::string( "term set identifier '") + fi->first + "' not used in this query program");
 			}
 			query.pushFeature( si->second, fi->second);
 		}
@@ -408,6 +408,7 @@ std::vector<WeightedDocument>
 			}
 		}
 	}
+
 	//[2] Iterate on all join operations and create the combined features:
 	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
 	for (; ji != je; ++ji)
