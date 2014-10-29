@@ -222,11 +222,9 @@ void Transaction::commit()
 		float weight = ti->second.weight;
 		positions.append( reinterpret_cast<const char*>(&weight), sizeof(weight));
 
-		Index previous_pos = 0;
 		for (; pi != pe; ++pi)
 		{
-			packIndex( positions, *pi - previous_pos);
-			previous_pos = *pi;
+			packIndex( positions, *pi);
 		}
 		batch.Put( termkey, positions);
 	}

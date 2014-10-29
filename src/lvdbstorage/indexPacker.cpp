@@ -125,6 +125,26 @@ static unsigned int unpackInt32_( const char*& itr, const char* end)
 	return rt;
 }
 
+const char* strus::nextPackedIndexPos( const char* start, const char* str, const char* end)
+{
+	char const* cc = str;
+	while (((unsigned char)*cc & B11000000) == B10000000) {--cc;}
+	if (start != cc && *(cc-1) == (char)B11111111)
+	{
+		cc += g_charlentable[ *cc];
+		cc += g_charlentable[ *cc];
+	}
+	else
+	{
+		cc += g_charlentable[ *cc];
+	}
+	if (cc > end)
+	{
+		throw std::runtime_error( "corrupt data");
+	}
+	return cc;
+}
+
 Index strus::unpackIndex( const char*& itr, const char* end)
 {
 	if (*itr == (char)B11111111)
