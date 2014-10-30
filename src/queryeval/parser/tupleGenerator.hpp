@@ -45,10 +45,15 @@ public:
 		Sequence,		///< Creates all sequences of a certain length 
 		Permutation		///< Creates all permutations of a certain length 
 	};
+	static const char* modeName( Mode i)
+	{
+		static const char* ar[] = {"Product","Ascending","Sequence","Permutation"};
+		return ar[(int)i];
+	}
 
 	explicit TupleGenerator( Mode mode_);
 
-	void defineColumn( std::size_t max_);
+	void defineColumn( std::size_t nofrows_);
 
 	bool empty()					{return m_empty;}
 
@@ -57,20 +62,22 @@ public:
 
 	bool next();
 
+	std::string tostring() const;
+
 private:
-	bool incrementIndex( std::size_t& idx, const std::size_t& maximum);
+	bool incrementIndex( std::size_t& idx, const std::size_t& nofrows);
 
 	struct Column
 	{
 		Column()
-			:value(0),maximum(0){}
+			:value(0),nofrows(0){}
 		Column( const Column& o)
-			:value(o.value),maximum(o.maximum){}
+			:value(o.value),nofrows(o.nofrows){}
 		Column( std::size_t v, std::size_t m)
-			:value(v),maximum(m){}
+			:value(v),nofrows(m){}
 
 		std::size_t value;
-		std::size_t maximum;
+		std::size_t nofrows;
 	};
 
 private:

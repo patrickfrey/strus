@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <limits>
 
 namespace strus
 {
@@ -82,7 +83,14 @@ private:
 
 		bool operator < ( const ArgumentRef& o) const
 		{
-			return (idf < o.idf);
+			if (idf < o.idf) return true;
+			double diff = idf - o.idf;
+			if (diff < 0.0) diff = -diff;
+			if (diff < std::numeric_limits<double>::epsilon())
+			{
+				return idx < o.idx;
+			}
+			return false;
 		}
 
 		std::size_t idx;

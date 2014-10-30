@@ -55,7 +55,9 @@ static Index hash64shift( Index key)
 
 static Index randomDocumentNumber( Index maxdocno, unsigned int no)
 {
-	return hash64shift( maxdocno + (no * 2654435761U)) % (maxdocno+1);
+	Index rt = hash64shift( maxdocno + (no * 2654435761U));
+	if (rt < 0) rt = -rt;
+	return rt % (maxdocno+1);
 }
 
 static double estimateNumberOfMatches(

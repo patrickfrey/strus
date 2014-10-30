@@ -38,6 +38,8 @@
 #include <iostream>
 #include <set>
 
+#define STRUS_LOWLEVEL_DEBUG
+
 using namespace strus;
 using namespace strus::parser;
 
@@ -241,7 +243,10 @@ public:
 			m_iteratorSets.push_back( std::vector< IteratorReference >());
 		}
 		m_iteratorSets[ termset-1].push_back( itr);
-		m_setSizeMap[ termset] += 1;
+		if ((m_setSizeMap[ termset] += 1) > (int)QueryEval::MaxSizeFeatureSet)
+		{
+			throw std::runtime_error( std::string( "query term set '") + m_setnamemap->name( termset) + "' is getting too complex");
+		}
 	}
 
 	const IteratorInterface* getFeature( int setIndex, std::size_t elemIndex)
@@ -264,12 +269,18 @@ public:
 		{
 			throw std::runtime_error( std::string( "referencing feature '") + m_setnamemap->name( setIndex) + "' not defined yet (features have to be defined before referencing them in the program)");
 		}
-		return m_iteratorSets[ setIndex];
+		return m_iteratorSets[ setIndex-1];
 	}
 
 	const std::map<int,int> setSizeMap() const
 	{
 		return m_setSizeMap;
+	}
+
+	int setSize( int setIndex) const
+	{
+		std::map<int,int>::const_iterator gi = m_setSizeMap.find( setIndex);
+		return (gi == m_setSizeMap.end())?0:gi->second;
 	}
 
 private:
@@ -320,11 +331,11 @@ std::vector<WeightedDocument>
 
 	Index docno = 0;
 	int state = 0;
-	double weigth = 0.0;
+	double weight = 0.0;
 
-	while (accu.nextRank( docno, state, weigth))
+	while (accu.nextRank( docno, state, weight))
 	{
-		ranker.insert( WeightedDocument( docno, weigth));
+		ranker.insert( WeightedDocument( docno, weight));
 		if (ranks >= maxNofRanks)
 		{
 			ranker.erase( ranker.begin());
@@ -356,6 +367,11 @@ std::vector<WeightedDocument>
 {
 	QueryStruct query( &m_setnamemap);
 
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "Start evaluating query:" << std::endl;
+	print( std::cout);
+	std::cout << std::endl;
+#endif
 	//[1] Create the initial feature sets:
 	{
 		// Process the query features (explicit join operations)
@@ -402,6 +418,9 @@ std::vector<WeightedDocument>
 				throw std::runtime_error( std::string( "term set identifier '") + fi->first + "' not used in this query program");
 			}
 			query.pushFeature( si->second, fi->second);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "Create query feature [" << si->second << "] " << fi->first << " :" << query.setSize(si->second) << std::endl;
+#endif
 		}
 
 		// Add predefined terms to the initial feature set:
@@ -412,6 +431,9 @@ std::vector<WeightedDocument>
 			if (si != m_setnamemap.end())
 			{
 				query.pushFeature( si->second, processor.createTermIterator( pi->type, pi->value));
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cout << "create predefined feature [" << si->second << "] " << pi->set << " :" << query.setSize(si->second) << std::endl;
+#endif
 			}
 		}
 	}
@@ -420,8 +442,14 @@ std::vector<WeightedDocument>
 	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
 	for (; ji != je; ++ji)
 	{
-		const parser::JoinFunction& function = functions()[ ji->function()];
-
+		const parser::JoinFunction& function = functions()[ ji->function()-1];
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "calculate join ";
+		function.print( std::cout, ji->function(), functions());
+		std::cout << " of ";
+		SelectorExpression::print( std::cout, ji->selector(), selectors(), m_setnamemap);
+		std::cout << std::endl;
+#endif
 		SelectorSetR selset(
 			SelectorSet::calculate(
 				ji->selector(), selectors(), query.setSizeMap()));
@@ -435,6 +463,9 @@ std::vector<WeightedDocument>
 			{
 				throw std::runtime_error("query too complex (number of rows in selection has more than 256 elements");
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "create feature " << m_setnamemap.name( ji->result()) << " from " << selset->tostring() << std::endl;
+#endif
 			const IteratorInterface* joinargs[ MaxNofSelectorColumns];
 			for (; ri < re; ri += ro)
 			{
@@ -449,6 +480,9 @@ std::vector<WeightedDocument>
 						function.name(), function.range(), ro, joinargs);
 				query.pushFeature( ji->result(), opres);
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "feature " << m_setnamemap.name( ji->result()) << " has set size " << query.setSize(ji->result()) << std::endl;
+#endif
 		}
 	}
 	//[3] Get the result accumulator and evaluate the results
@@ -466,7 +500,10 @@ std::vector<WeightedDocument>
 			std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
 			for (std::size_t aidx=0; ai != ae; ai++,aidx++)
 			{
-				accumulator->add( gi->factor(), gi->function(), gi->params(), **ai);
+				if (ai->get())
+				{
+					accumulator->add( gi->factor(), gi->function(), gi->params(), **ai);
+				}
 			}
 		}
 		return getRankedDocumentList( *accumulator, maxNofRanks);

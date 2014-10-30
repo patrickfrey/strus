@@ -45,6 +45,8 @@ class QueryEval
 	:public QueryEvalInterface
 {
 public:
+	enum {MaxSizeFeatureSet=100};
+
 	QueryEval(){}
 	QueryEval( const QueryEval& o)
 		:m_predefinedTerms(o.m_predefinedTerms)
@@ -62,11 +64,11 @@ public:
 			const Query& query,
 			std::size_t maxNofRanks) const;
 
-	const std::vector<Query::Term> predefinedTerms() const			{return m_predefinedTerms;}
+	const std::vector<Query::Term>& predefinedTerms() const			{return m_predefinedTerms;}
 	const std::vector<parser::SelectorExpression>& selectors() const	{return m_selectors;}
 	const std::vector<parser::JoinFunction>& functions() const		{return m_functions;}
 	const std::vector<parser::JoinOperation>& operations() const		{return m_operations;}
-	const parser::AccumulateOperation accumulateOperation() const		{return m_accumulateOperation;}
+	const parser::AccumulateOperation& accumulateOperation() const		{return m_accumulateOperation;}
 
 	virtual void print( std::ostream& out) const;
 

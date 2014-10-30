@@ -1,4 +1,10 @@
-implement final accumulator
+feature frequency per document in storage is estimated (posinfo length + picking length of characters)
+EVAL with sets of features as arguments that are picked and filtered by idf > 0.0
+   for getting the documents matching
+-> drop allmatch
+-> drop idf cut
+get some test documents to test locally
+
 implement summarization
 SWIG bindings
 

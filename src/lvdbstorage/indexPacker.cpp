@@ -115,12 +115,12 @@ static unsigned int unpackInt32_( const char*& itr, const char* end)
 	}
 	if (ii < nn || nn == 0)
 	{
-		throw std::runtime_error( "corrupt data");
+		throw std::runtime_error( "corrupt data (unpackInt32_ 1)");
 	}
 	unsigned int rt = utf8decode( buf);
 	if (rt > 0x7fffFFFFU)
 	{
-		throw std::runtime_error( "corrupt data");
+		throw std::runtime_error( "corrupt data (unpackInt32_ 2)");
 	}
 	return rt;
 }
@@ -140,7 +140,7 @@ const char* strus::nextPackedIndexPos( const char* start, const char* str, const
 	}
 	if (cc > end)
 	{
-		throw std::runtime_error( "corrupt data");
+		throw std::runtime_error( "corrupt data (nextPackedIndexPos)");
 	}
 	return cc;
 }

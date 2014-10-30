@@ -30,9 +30,13 @@
 #include "parser/lexems.hpp"
 #include <boost/scoped_array.hpp>
 #include <set>
+#include <sstream>
+#include <iostream>
 
 using namespace strus;
 using namespace strus::parser;
+
+#undef STRUS_LOWLEVEL_DEBUG
 
 void SelectorSet::pushRow( const Selector* row)
 {
@@ -130,6 +134,9 @@ SelectorSetR SelectorSet::calculateTuple(
 
 	if (!gen.empty()) do
 	{
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "Generated tuple element: " << gen.tostring() << std::endl;
+#endif
 		// Build product row:
 		std::size_t cntidx = 0;
 		std::size_t rowidx = 0;
@@ -174,7 +181,7 @@ SelectorSetR SelectorSet::calculate(
 	{
 		throw std::runtime_error( "expression index out of range");
 	}
-	const parser::SelectorExpression& expression = expressions[ expressionidx];
+	const parser::SelectorExpression& expression = expressions[ expressionidx-1];
 
 	// [1] Build the list of arguments:
 	std::vector<SelectorSetR> argsets;
@@ -195,6 +202,9 @@ SelectorSetR SelectorSet::calculate(
 					for (; ii<nn; ++ii)
 					{
 						Selector row( ai->idx(), ii);
+#ifdef STRUS_LOWLEVEL_DEBUG
+						std::cout << "Selector push set reference (" << ai->idx() << "," << ii << ")" << std::endl;
+#endif
 						argset->pushRow( &row);
 					}
 				}
@@ -229,6 +239,39 @@ SelectorSetR SelectorSet::calculate(
 			rt = calculateJoin( argsets);
 			break;
 	}
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "Selector set calculation result: " << rt->tostring() << std::endl;
+#endif
 	return rt;
+}
+
+std::string SelectorSet::tostring() const
+{
+	std::ostringstream rt;
+	rt << "{";
+	std::vector<Selector>::const_iterator si = m_ar.begin(), se = m_ar.end();
+	for (unsigned int sidx=0; si != se; ++si,++sidx)
+	{
+		if (sidx == rowsize())
+		{
+			rt << "), (";
+			sidx = 0;
+		}
+		else if (sidx)
+		{
+			rt << ", ";
+		}
+		else
+		{
+			rt << "(";
+		}
+		rt << "[" << si->setIndex << ":" << si->elemIndex << "]";
+	}
+	if (m_ar.size())
+	{
+		rt << ")";
+	}
+	rt << "}";
+	return rt.str();
 }
 

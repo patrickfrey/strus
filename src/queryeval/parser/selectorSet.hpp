@@ -56,6 +56,8 @@ public:
 			const std::vector<parser::SelectorExpression>& expressions,
 			const std::map<int,int>& setSizeMap);
 
+	std::string tostring() const;
+
 private:
 	void pushRow( const Selector* row);
 	void pushRow( std::vector<Selector>::const_iterator row);
