@@ -57,54 +57,28 @@ public:
 
 	virtual ~AccumulatorIdfPriority(){}
 
-	virtual void add(
+	virtual void addSelector(
+			const IteratorInterface& iterator);
+	
+	virtual void addRanker(
 			double factor,
 			const std::string& function,
 			const std::vector<float>& parameter,
 			const IteratorInterface& iterator);
 
 	virtual bool nextRank(
-			Index& docno_,
-			int& state_,
-			double& weight_);
-
-	virtual AccumulatorInterface* copy() const
-	{
-		return new AccumulatorIdfPriority( *this);
-	}
+			Index& docno,
+			unsigned int& selectorState, 
+			double& weight);
 
 private:
-	struct ArgumentRef
-	{
-		ArgumentRef( double idf_, std::size_t idx_)
-			:idx(idx_),idf(idf_){}
-		ArgumentRef( const ArgumentRef& o)
-			:idx(o.idx),idf(o.idf){}
-
-		bool operator < ( const ArgumentRef& o) const
-		{
-			if (idf < o.idf) return true;
-			double diff = idf - o.idf;
-			if (diff < 0.0) diff = -diff;
-			if (diff < std::numeric_limits<double>::epsilon())
-			{
-				return idx < o.idx;
-			}
-			return false;
-		}
-
-		std::size_t idx;
-		double idf;
-	};
-
 	const StorageInterface* m_storage;
 	EstimatedNumberOfMatchesMapR m_estimatedNumberOfMatchesMap;
-	std::vector<AccumulatorArgument> m_argumentList;
-	std::set<ArgumentRef> m_argumentOrder;
-	std::set<ArgumentRef>::const_iterator m_argumentIter;
-	std::set<ArgumentRef>::const_iterator m_argumentEnd;
+	std::vector<IteratorReference> m_selectors;
+	unsigned int m_selectoridx;
+	Index m_docno;
+	std::vector<AccumulatorArgument> m_rankers;
 	std::set<Index> m_visited;
-	bool m_started;
 };
 
 }//namespace

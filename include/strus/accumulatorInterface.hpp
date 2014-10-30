@@ -44,22 +44,24 @@ public:
 	virtual ~AccumulatorInterface(){}
 
 	/// \brief Add another source to accumulate result from
-	/// \remark Cannot be called anymore after the first call of 'nextRank(Index&,int&,double&)'
-	virtual void add(
+	/// \remark Should not be called anymore after the first call of 'nextRank(Index&,double&)'
+	virtual void addRanker(
 			double factor,
 			const std::string& function,
 			const std::vector<float>& parameter,
 			const IteratorInterface& iterator)=0;
 
-	/// \brief Get the next matching document
-	/// \param[in,out] docno_ document number
-	/// \param[in,out] state_ internal evaluation state
-	/// \param[out] weight_ calculated document weight that tries to reflect its relevance for the search
-	/// \remark The function tries to return relevant (high weight) documents as early as possible by some priorisation of evaluation order, but it cannot sort the returned ranks by weight.
-	virtual bool nextRank( Index& docno_, int& state_, double& weigth_)=0;
+	/// \brief Add another set for document selection for weighting
+	/// \remark Not called anymore after the first call of 'nextRank(Index&,double&)'
+	virtual void addSelector(
+			const IteratorInterface& iterator)=0;
 
-	/// \brief Get a copy of this
-	virtual AccumulatorInterface* copy() const=0;
+	/// \brief Get the next matching document with its weight
+	/// \param[out] docno document number
+	/// \param[out] weight calculated document weight that reflects its relevance for the search
+	/// \param[out] selectorState returned index of the current selector chosen
+	/// \remark The function returns the documents in ascending order per selector set, not weighted by relevance
+	virtual bool nextRank( Index& docno, unsigned int& selectorState, double& weight)=0;
 };
 
 }//namespace

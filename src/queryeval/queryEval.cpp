@@ -65,53 +65,90 @@ static std::string errorPosition( const char* base, const char* itr)
 	return msg.str();
 }
 
-struct Statement
+
+
+void QueryEval::parseJoinOperationDef( char const* src)
 {
-	Statement()
+	int result = m_setnamemap.get( parse_IDENTIFIER( src));
+	if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "FOREACH"))
 	{
-		clear();
+		throw std::runtime_error("FOREACH expected after INTO and the destination set identifier of the join");
 	}
-
-	void clear()
+	int selector = SelectorExpression::parse( src, m_selectors, m_setnamemap);
+	if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "DO"))
 	{
-		result = 0;
-		selector = 0;
-		function = 0;
-		duplicateflags = 0;
+		throw std::runtime_error( "DO expected after FOREACH and the selector expression");
 	}
-
-	JoinOperation operation() const
+	int function = JoinFunction::parse( src, m_functions);
+	if (!isSemiColon(*src))
 	{
-		if (duplicateflags == 0)
-		{
-			throw std::runtime_error("empty expression (unexpected ';')");
-		}
-		if (!function)
-		{
-			throw std::runtime_error("missing function (DO) in operation definition");
-		}
-		if (!selector)
-		{
-			throw std::runtime_error("missing selector (FOREACH) in operation definition");
-		}
-		if (!result)
-		{
-			throw std::runtime_error("missing result set (INTO) in operation definition");
-		}
-		return JoinOperation( result, function, selector);
+		throw std::runtime_error( "semicolon expected after a feature join operation definition");
 	}
+	parse_OPERATOR( src);
+	m_operations.push_back( JoinOperation( result, function, selector));
+}
 
-	unsigned int duplicateflags;
-	int result;
-	int function;
-	int selector;
-};
+void QueryEval::parseAccumulatorDef( char const* src)
+{
+	if (m_accumulateOperation.defined())
+	{
+		throw std::runtime_error("duplicate definition of accumulator in query evaluation program");
+	}
+	m_accumulateOperation.parse( src, m_setnamemap);
+	if (!isSemiColon(*src))
+	{
+		throw std::runtime_error( "missing semicolon ';' after EVAL expression");
+	}
+	parse_OPERATOR( src);
+}
+
+void QueryEval::parseTermDef( char const* src)
+{
+	if (isAlpha(*src))
+	{
+		std::string termset = parse_IDENTIFIER( src);
+		std::string termvalue;
+		std::string termtype;
+
+		if (isStringQuote( *src))
+		{
+			termvalue = parse_STRING( src);
+		}
+		else if (isAlpha( *src))
+		{
+			termvalue = parse_IDENTIFIER( src);
+		}
+		else
+		{
+			throw std::runtime_error( "term value (string,identifier,number) after the feature group identifier");
+		}
+		if (!isColon( *src))
+		{
+			throw std::runtime_error( "colon (':') expected after term value");
+		}
+		parse_OPERATOR(src);
+		if (!isAlpha( *src))
+		{
+			throw std::runtime_error( "term type identifier expected after colon and term value");
+		}
+		termtype = parse_IDENTIFIER( src);
+		if (!isSemiColon( *src))
+		{
+			throw std::runtime_error( "semicolon expected after a feature declaration in the query");
+		}
+		parse_OPERATOR( src);
+		m_predefinedTerms.push_back( Query::Term( termset, termtype, termvalue));
+	}
+	else
+	{
+		throw std::runtime_error( "feature set identifier expected as start of a term declaration in the query");
+	}
+}
 
 QueryEval::QueryEval( const std::string& source)
 {
 	char const* src = source.c_str();
-	enum StatementKeyword {e_FOREACH, e_INTO, e_DO, e_EVAL, e_TERM};
-	Statement stm;
+	enum StatementKeyword {e_INTO, e_EVAL, e_TERM};
 	std::string id;
 
 	skipSpaces( src);
@@ -119,104 +156,18 @@ QueryEval::QueryEval( const std::string& source)
 	{
 		while (*src)
 		{
-			switch ((StatementKeyword)parse_KEYWORD( stm.duplicateflags, src, 5, "FOREACH", "INTO", "DO", "EVAL","TERM"))
+			switch ((StatementKeyword)parse_KEYWORD( src, 6, "INTO", "EVAL", "TERM"))
 			{
 				case e_TERM:
-					if (0!=(stm.duplicateflags & 0x7))
-					{
-						throw std::runtime_error( "unterminated query expression (missing ';')");
-					}
-					if (isAlpha(*src))
-					{
-						std::string termset = parse_IDENTIFIER( src);
-						std::string termvalue;
-						std::string termtype;
-
-						if (isStringQuote( *src))
-						{
-							termvalue = parse_STRING( src);
-						}
-						else if (isAlpha( *src))
-						{
-							termvalue = parse_IDENTIFIER( src);
-						}
-						else
-						{
-							throw std::runtime_error( "term value (string,identifier,number) after the feature group identifier");
-						}
-						if (!isColon( *src))
-						{
-							throw std::runtime_error( "colon (':') expected after term value");
-						}
-						parse_OPERATOR(src);
-						if (!isAlpha( *src))
-						{
-							throw std::runtime_error( "term type identifier expected after colon and term value");
-						}
-						termtype = parse_IDENTIFIER( src);
-						if (!isSemiColon( *src))
-						{
-							throw std::runtime_error( "semicolon expected after a feature declaration in the query");
-						}
-						parse_OPERATOR( src);
-						m_predefinedTerms.push_back( Query::Term( termset, termtype, termvalue));
-						stm.clear();
-					}
-					else
-					{
-						throw std::runtime_error( "feature set identifier expected as start of a term declaration in the query");
-					}
-					break;
-				case e_FOREACH:
-					stm.selector = SelectorExpression::parse( src, m_selectors, m_setnamemap);
-					if (isSemiColon(*src))
-					{
-						parse_OPERATOR( src);
-						m_operations.push_back( stm.operation());
-						stm.clear();
-					}
+					parseTermDef( src);
 					break;
 				case e_INTO:
-					stm.result = m_setnamemap.get( parse_IDENTIFIER( src));
-					if (isSemiColon(*src))
-					{
-						parse_OPERATOR( src);
-						m_operations.push_back( stm.operation());
-						stm.clear();
-					}
-					break;
-				case e_DO:
-					stm.function = JoinFunction::parse( src, m_functions);
-					if (isSemiColon(*src))
-					{
-						parse_OPERATOR( src);
-						m_operations.push_back( stm.operation());
-						stm.clear();
-					}
+					parseJoinOperationDef( src);
 					break;
 				case e_EVAL:
-					if (m_accumulateOperation.defined())
-					{
-						throw std::runtime_error("duplicate definition of accumulator in query evaluation program");
-					}
-					if (0!=(stm.duplicateflags & 0x7))
-					{
-						throw std::runtime_error( "unterminated query expression (missing ';')");
-					}
-					m_accumulateOperation.parse( src, m_setnamemap);
-					skipSpaces( src);
-					if (!isSemiColon(*src))
-					{
-						throw std::runtime_error( "missing semicolon ';' after EVAL expression");
-					}
-					parse_OPERATOR( src);
-					stm.clear();
+					parseAccumulatorDef( src);
 					break;
 			}
-		}
-		if (stm.duplicateflags)
-		{
-			throw std::runtime_error( "unterminated query statement (missing ';') at end of query evaluation program");
 		}
 	}
 	catch (const std::runtime_error& e)
@@ -330,7 +281,8 @@ std::vector<WeightedDocument>
 	std::size_t nofRanksInspected = 0;
 
 	Index docno = 0;
-	int state = 0;
+	unsigned int state = 0;
+	unsigned int prev_state = 0;
 	double weight = 0.0;
 
 	while (accu.nextRank( docno, state, weight))
@@ -345,10 +297,11 @@ std::vector<WeightedDocument>
 			++ranks;
 		}
 		nofRanksInspected += 1;
-		if (state > 0 && nofRanksInspected > maxNofRanksInspected)
+		if (state > prev_state && nofRanksInspected > maxNofRanksInspected)
 		{
 			break;
 		}
+		prev_state = state;
 	}
 	Ranker::reverse_iterator ri=ranker.rbegin(),re=ranker.rend();
 	for (; ri != re; ++ri)
@@ -502,9 +455,37 @@ std::vector<WeightedDocument>
 			{
 				if (ai->get())
 				{
-					accumulator->add( gi->factor(), gi->function(), gi->params(), **ai);
+					accumulator->addRanker( gi->factor(), gi->function(), gi->params(), **ai);
 				}
 			}
+		}
+		std::vector<int>::const_iterator
+			fi = m_accumulateOperation.featureSelectionSets().begin(),
+			fe = m_accumulateOperation.featureSelectionSets().end();
+
+		for (; fi != fe; ++fi)
+		{
+			const IteratorInterface* far[ MaxSizeFeatureSet];
+
+			const std::vector<IteratorReference>& feats = query.getFeatureSet( *fi);
+			if (feats.size() > MaxSizeFeatureSet)
+			{
+				throw std::runtime_error( "number of features in selection set is too big");
+			}
+			std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
+			std::size_t aidx = 0;
+			for (; ai != ae; ai++)
+			{
+				if (ai->get())
+				{
+					far[ aidx++] = ai->get();
+				}
+			}
+			IteratorReference selection(
+				processor.createJoinIterator( "union", 0, aidx, far));
+			//... PF:HACK: Require 'union' to exist and do an efficient set union operation
+	
+			accumulator->addSelector( *selection);
 		}
 		return getRankedDocumentList( *accumulator, maxNofRanks);
 	}

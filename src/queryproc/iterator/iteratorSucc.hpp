@@ -39,9 +39,12 @@ class IteratorSucc
 {
 public:
 	IteratorSucc( const IteratorSucc& o)
-		:m_origin( o.m_origin->copy()),m_featureid(o.m_featureid){}
-	IteratorSucc( const IteratorReference& origin_)
-		:m_origin( origin_),m_featureid(origin_->featureid())
+		:m_origin( o.m_origin->copy())
+		,m_featureid(o.m_featureid){}
+
+	IteratorSucc( const IteratorInterface* origin_)
+		:m_origin( origin_?origin_->copy():0)
+		,m_featureid( origin_->featureid())
 	{
 		m_featureid.push_back('>');
 	}

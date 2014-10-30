@@ -3,34 +3,51 @@
 using namespace strus;
 
 
-IteratorUnion::IteratorUnion( const IteratorReference& first_, const IteratorReference& second_)
+IteratorUnion::IteratorUnion( std::size_t nofargs, const IteratorInterface** args)
 	:m_docno(0)
-	,m_first(first_)
-	,m_second(second_)
-	,m_open_first(false)
-	,m_open_second(false)
 {
-	m_featureid.append( m_first->featureid());
-	m_featureid.append( m_second->featureid());
+	m_selected.reserve( nofargs);
+	m_argar.reserve( nofargs);
+	std::size_t ii=0;
+	for (; ii<nofargs; ++ii)
+	{
+		if (args[ii])
+		{
+			m_selected.push_back(false);
+			m_argar.push_back( args[ii]->copy());
+			m_featureid.append( args[ii]->featureid());
+		}
+	}
 	m_featureid.push_back( 'U');
 }
 
 IteratorUnion::IteratorUnion( const IteratorUnion& o)
 	:m_docno(o.m_docno)
-	,m_first(o.m_first->copy())
-	,m_second(o.m_second->copy())
-	,m_open_first(o.m_open_first)
-	,m_open_second(o.m_open_second)
+	,m_selected(o.m_selected)
 	,m_featureid(o.m_featureid)
-{}
+{
+	std::size_t ii=0;
+	m_argar.reserve( o.m_argar.size());
+	for (; ii<o.m_argar.size(); ++ii)
+	{
+		if (o.m_argar[ii].get())
+		{
+			m_argar.push_back( o.m_argar[ ii]->copy());
+		}
+	}
+}
 
 std::vector<const IteratorInterface*> IteratorUnion::subExpressions( bool positive)
 {
 	std::vector<const IteratorInterface*> rt;
 	if (positive)
 	{
-		rt.push_back( m_first.get());
-		rt.push_back( m_second.get());
+		rt.reserve( m_argar.size());
+		std::size_t ii=0;
+		for (; ii<m_argar.size(); ++ii)
+		{
+			rt.push_back( m_argar[ ii].get());
+		}
 	}
 	return rt;
 }
@@ -63,34 +80,35 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 
 Index IteratorUnion::skipDoc( const Index& docno_)
 {
-	Index docno_first = m_first->skipDoc( docno_);
-	Index docno_second = m_second->skipDoc( docno_);
-
-	Index rt = selectSmallerNotNull( docno_first, docno_second);
-	if (rt)
+	if (m_docno == docno_)
 	{
-		m_docno = rt;
-		m_open_first  = (docno_first == rt);
-		m_open_second = (docno_second == rt);
+		return m_docno;
 	}
-	return rt;
+	m_docno = docno_;
+	std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+	if (ai == ae) return 0;
+
+	for (int aidx=0; ai != ae; ++ai,++aidx)
+	{
+		Index candidate = (*ai)->skipDoc( docno_);
+		m_docno = selectSmallerNotNull( m_docno, candidate);
+		m_selected[ aidx] = (m_docno == candidate);
+	}
+	return m_docno;
 }
 
 Index IteratorUnion::skipPos( const Index& pos_)
 {
-	Index pos_first = 0;
-	Index pos_second = 0;
-
-	if (m_open_first)
+	std::vector<bool>::const_iterator si = m_selected.begin(), se = m_selected.end();
+	Index pos = pos_;
+	for (int aidx=0; si != se; ++si,++aidx)
 	{
-		pos_first = m_first->skipPos( pos_);
+		if (*si)
+		{
+			pos = selectSmallerNotNull( pos, m_argar[ aidx]->skipPos( pos_));
+		}
 	}
-	if (m_open_second)
-	{
-		pos_second = m_second->skipPos( pos_);
-	}
-	Index rt = selectSmallerNotNull( pos_first, pos_second);
-	return rt;
+	return pos;
 }
 
 

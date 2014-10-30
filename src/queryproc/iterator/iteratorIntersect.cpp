@@ -31,20 +31,35 @@
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_)
+IteratorIntersect::IteratorIntersect( std::size_t nofargs, const IteratorInterface** args)
 	:m_docno(0)
-	,m_first(first_)
-	,m_second(second_)
-{}
+{
+	std::size_t ii=0;
+	m_argar.reserve( nofargs);
+	for (; ii<nofargs; ++ii)
+	{
+		if (args[ii])
+		{
+			m_argar.push_back( args[ii]->copy());
+			m_featureid.append( args[ii]->featureid());
+		}
+	}
+	m_featureid.push_back( 'I');
+}
 
 IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	:m_docno(o.m_docno)
-	,m_first(o.m_first->copy())
-	,m_second(o.m_second->copy())
+	,m_featureid(o.m_featureid)
 {
-	m_featureid.append( m_first->featureid());
-	m_featureid.append( m_second->featureid());
-	m_featureid.push_back( 'I');
+	m_argar.reserve( o.m_argar.size());
+	std::size_t ii=0;
+	for (; ii<o.m_argar.size(); ++ii)
+	{
+		if (o.m_argar[ii].get())
+		{
+			m_argar.push_back( o.m_argar[ ii]->copy());
+		}
+	}
 }
 
 std::vector<const IteratorInterface*> IteratorIntersect::subExpressions( bool positive)
@@ -52,8 +67,12 @@ std::vector<const IteratorInterface*> IteratorIntersect::subExpressions( bool po
 	std::vector<const IteratorInterface*> rt;
 	if (positive)
 	{
-		rt.push_back( m_first.get());
-		rt.push_back( m_second.get());
+		rt.reserve( m_argar.size());
+		std::size_t ii=0;
+		for (; ii<m_argar.size(); ++ii)
+		{
+			rt.push_back( m_argar[ ii].get());
+		}
 	}
 	return rt;
 }
@@ -61,44 +80,64 @@ std::vector<const IteratorInterface*> IteratorIntersect::subExpressions( bool po
 Index IteratorIntersect::skipDoc( const Index& docno_)
 {
 	Index docno_iter = docno_;
-
 	for (;;)
 	{
-		Index docno_first = m_first->skipDoc( docno_iter);
-		Index docno_second = m_second->skipDoc( docno_first);
+		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		if (ai == ae) return 0;
 
-		if (!docno_first || !docno_second)
+		Index docno_next = (*ai)->skipDoc( docno_iter);
+		if (docno_next == 0)
 		{
+			m_docno = 0;
 			return 0;
 		}
-		if (docno_first == docno_second)
+		for (++ai; ai != ae; ++ai)
 		{
-			m_docno = docno_first;
+			docno_next = (*ai)->skipDoc( docno_iter);
+			if (docno_next != docno_iter)
+			{
+				if (docno_next == 0) return 0;
+				break;
+			}
+		}
+		if (ai == ae)
+		{
+			m_docno = docno_iter;
 			return m_docno;
 		}
-		docno_iter = docno_second;
+		docno_iter = docno_next;
 	}
 }
 
 Index IteratorIntersect::skipPos( const Index& pos_)
 {
-	Index pos_iter = pos_;
 	if (!m_docno) return 0;
 
+	Index pos_iter = pos_;
 	for (;;)
 	{
-		Index pos_first = m_first->skipPos( pos_iter);
-		Index pos_second = m_second->skipPos( pos_first);
+		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		if (ai == ae) return 0;
 
-		if (!pos_first || !pos_second)
+		Index pos_next = (*ai)->skipPos( pos_iter);
+		if (pos_next == 0)
 		{
 			return 0;
 		}
-		if (pos_first == pos_second)
+		for (++ai; ai != ae; ++ai)
 		{
-			return pos_first;
+			pos_next = (*ai)->skipPos( pos_iter);
+			if (pos_next != pos_iter)
+			{
+				if (pos_next == 0) return 0;
+				break;
+			}
 		}
-		pos_iter = pos_second;
+		if (ai == ae)
+		{
+			return pos_iter;
+		}
+		pos_iter = pos_next;
 	}
 }
 

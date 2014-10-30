@@ -31,22 +31,30 @@
 
 using namespace strus;
 
-IteratorDifference::IteratorDifference( const IteratorReference& positive_, const IteratorReference& negative_)
+IteratorDifference::IteratorDifference( const IteratorInterface* positive_, const IteratorInterface* negative_)
 	:m_docno(0)
 	,m_docno_neg(0)
-	,m_positive(positive_)
-	,m_negative(negative_)
-{}
+{
+	if (positive_)
+	{
+		m_positive.reset( positive_->copy());
+		m_featureid.append( positive_->featureid());
+	}
+	if (negative_)
+	{
+		m_negative.reset( negative_->copy());
+		m_featureid.append( negative_->featureid());
+	}
+	m_featureid.push_back( 'N');
+}
 
 IteratorDifference::IteratorDifference( const IteratorDifference& o)
 	:m_docno(o.m_docno)
 	,m_docno_neg(o.m_docno_neg)
-	,m_positive(o.m_positive->copy())
-	,m_negative(o.m_negative->copy())
+	,m_positive(o.m_positive.get()?o.m_positive->copy():0)
+	,m_negative(o.m_negative.get()?o.m_negative->copy():0)
+	,m_featureid(o.m_featureid)
 {
-	m_featureid.append( m_positive->featureid());
-	m_featureid.append( m_negative->featureid());
-	m_featureid.push_back( 'N');
 }
 
 std::vector<const IteratorInterface*> IteratorDifference::subExpressions( bool positive)

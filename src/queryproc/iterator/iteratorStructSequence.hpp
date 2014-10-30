@@ -41,10 +41,11 @@ class IteratorStructSequence
 	:public IteratorJoin
 {
 public:
-	/// \param[in] seq_ the elements of the sequence
-	/// \param[in] cut_ the set of elements then must not appear inside the sequence
-	/// \param[in] range_ the maximum position difference between the start element and the end element of the sequence
-	IteratorStructSequence( const std::vector<IteratorReference>& seq_, const IteratorReference& cut_, int range_);
+	/// \param[in] range_ the maximum position difference between the start element and the end element of the group
+	/// \param[in] nofargs number of elements in args
+	/// \param[in] args the elements of this join 
+	/// \param[in] cut (optional) the cut element
+	IteratorStructSequence( int range_, std::size_t nofargs, const IteratorInterface** args, const IteratorInterface* cut=0);
 
 	IteratorStructSequence( const IteratorStructSequence& o);
 	virtual ~IteratorStructSequence(){}

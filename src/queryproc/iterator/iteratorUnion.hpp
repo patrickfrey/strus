@@ -39,7 +39,7 @@ class IteratorUnion
 {
 public:
 	IteratorUnion( const IteratorUnion& o);
-	IteratorUnion( const IteratorReference& first_, const IteratorReference& second_);
+	IteratorUnion( std::size_t nofargs, const IteratorInterface** args);
 
 	virtual const std::string& featureid() const
 	{
@@ -60,10 +60,8 @@ public:
 
 private:
 	Index m_docno;
-	IteratorReference m_first;
-	IteratorReference m_second;
-	bool m_open_first;
-	bool m_open_second;
+	std::vector<IteratorReference> m_argar;
+	std::vector<bool> m_selected;
 	std::string m_featureid;		///< unique id of the feature expression
 };
 

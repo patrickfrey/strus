@@ -78,6 +78,10 @@ private:
 			AccumulatorInterface& accu,
 			std::size_t maxNofRanks) const;
 
+	void parseJoinOperationDef( char const* src);
+	void parseAccumulatorDef( char const* src);
+	void parseTermDef( char const* src);
+
 private:
 	std::vector<Query::Term> m_predefinedTerms;
 	std::vector<parser::SelectorExpression> m_selectors;

@@ -73,7 +73,7 @@ IteratorInterface*
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
 		if (nofargs >= 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
 
-		return args[0]?new IteratorPred( args[0]->copy()):0;
+		return new IteratorPred( args[0]);
 	}
 	else if (isEqual( name, "succ"))
 	{
@@ -81,47 +81,21 @@ IteratorInterface*
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
 		if (nofargs >= 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
 
-		return args[0]?new IteratorSucc( args[0]->copy()):0;
+		return new IteratorSucc( args[0]);
 	}
 	else if (isEqual( name, "union"))
 	{
 		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
 
-		IteratorInterface* rt = 0;
-		std::size_t ii=0;
-		for (; ii<nofargs; ++ii)
-		{
-			if (args[ii])
-			{
-				rt = args[0]->copy();
-				break;
-			}
-		}
-		for (; ii<nofargs; ++ii)
-		{
-			rt = new IteratorUnion(
-					IteratorReference(rt),
-					IteratorReference(args[ii]->copy()));
-		}
-		return rt;
+		return new IteratorUnion( nofargs, args);
 	}
 	else if (isEqual( name, "intersect"))
 	{
 		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
 
-		if (!args[0]) return 0;
-		IteratorInterface* rt = args[0]->copy();
-		std::size_t ii=1;
-		for (; ii<nofargs; ++ii)
-		{
-			if (!args[ii]) return 0;
-			rt = new IteratorIntersect(
-					IteratorReference(rt),
-					IteratorReference(args[ii]->copy()));
-		}
-		return rt;
+		return new IteratorIntersect( nofargs, args);
 	}
 	else if (isEqual( name, "diff"))
 	{
@@ -130,64 +104,33 @@ IteratorInterface*
 		if (nofargs > 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
 
 		if (!args[0]) return 0;
-		return new IteratorDifference( IteratorReference(args[0]->copy()), IteratorReference(args[1]->copy()));
+		if (!args[1]) return args[0]->copy();
+
+		return new IteratorDifference( args[0], args[1]);
 	}
 	else if (isEqual( name, "sequence_struct"))
 	{
 		if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		IteratorReference structDelimiter;
-		if (args[0])
-		{
-			structDelimiter.reset( args[0]->copy());
-		}
-		std::vector<IteratorReference> seq;
-		for (std::size_t ai=1; ai<nofargs; ++ai)
-		{
-			if (!args[ai]) return 0;
-			seq.push_back( IteratorReference( args[ai]->copy()));
-		}
-		return new IteratorStructSequence( seq, structDelimiter, range);
+
+		return new IteratorStructSequence( range, nofargs-1, args+1, args[0]);
 	}
 	else if (isEqual( name, "sequence"))
 	{
 		if (nofargs < 1) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		IteratorReference empty;
-		std::vector<IteratorReference> seq;
-		for (std::size_t ai=0; ai<nofargs; ++ai)
-		{
-			if (!args[ai]) return 0;
-			seq.push_back( IteratorReference( args[ai]->copy()));
-		}
-		return new IteratorStructSequence( seq, empty, range);
+		
+		return new IteratorStructSequence( range, nofargs, args);
 	}
 	else if (isEqual( name, "within_struct"))
 	{
 		if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		IteratorReference structDelimiter;
-		if (args[0])
-		{
-			structDelimiter.reset( args[0]->copy());
-		}
-		std::vector<IteratorReference> group;
-		for (std::size_t ai=1; ai<nofargs; ++ai)
-		{
-			if (!args[ai]) return 0;
-			group.push_back( IteratorReference( args[ai]->copy()));
-		}
-		
-		return new IteratorStructWithin( group, structDelimiter, range);
+
+		return new IteratorStructWithin( range, nofargs-1, args+1, args[0]);
 	}
 	else if (isEqual( name, "within"))
 	{
 		if (nofargs < 1) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-		IteratorReference empty;
-		std::vector<IteratorReference> group;
-		for (std::size_t ai=0; ai<nofargs; ++ai)
-		{
-			if (!args[ai]) return 0;
-			group.push_back( IteratorReference( args[ai]->copy()));
-		}
-		return new IteratorStructWithin( group, empty, range);
+
+		return new IteratorStructWithin( range, nofargs, args);
 	}
 	else
 	{

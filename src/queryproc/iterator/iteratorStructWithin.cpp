@@ -32,31 +32,24 @@
 
 using namespace strus;
 
-IteratorStructWithin::IteratorStructWithin( const std::vector<IteratorReference>& group_, const IteratorReference& cut_, int range_)
+IteratorStructWithin::IteratorStructWithin( int range_, std::size_t nofargs, const IteratorInterface** args, const IteratorInterface* cut)
 	:m_docno(0)
 	,m_docno_cut(0)
-	,m_group(group_)
-	,m_cut(cut_)
 	,m_range(range_)
-{}
-
-IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
-	:m_docno(o.m_docno)
-	,m_docno_cut(o.m_docno_cut)
-	,m_range(o.m_range)
 {
-	if (o.m_cut.get())
+	m_group.reserve( nofargs);
+	std::size_t ii=0;
+	for (; ii<nofargs; ++ii)
 	{
-		m_cut.reset( o.m_cut->copy());
+		if (args[ii])
+		{
+			m_group.push_back( args[ii]->copy());
+			m_featureid.append( args[ii]->featureid());
+		}
 	}
-	std::vector<IteratorReference>::const_iterator pi = o.m_group.begin(), pe = o.m_group.end();
-	for (; pi != pe; ++pi)
+	if (cut)
 	{
-		m_group.push_back( (*pi)->copy());
-		m_featureid.append( (*pi)->featureid());
-	}
-	if (m_cut.get())
-	{
+		m_cut.reset( cut->copy());
 		m_featureid.append( m_cut->featureid());
 		m_featureid.push_back( 'C');
 	}
@@ -68,11 +61,30 @@ IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
 	m_featureid.push_back( 'W');
 }
 
+IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
+	:m_docno(o.m_docno)
+	,m_docno_cut(o.m_docno_cut)
+	,m_range(o.m_range)
+	,m_featureid(o.m_featureid)
+{
+	m_group.reserve( o.m_group.size());
+	if (o.m_cut.get())
+	{
+		m_cut.reset( o.m_cut->copy());
+	}
+	std::vector<IteratorReference>::const_iterator pi = o.m_group.begin(), pe = o.m_group.end();
+	for (; pi != pe; ++pi)
+	{
+		m_group.push_back( (*pi)->copy());
+	}
+}
+
 std::vector<const IteratorInterface*> IteratorStructWithin::subExpressions( bool positive)
 {
 	std::vector<const IteratorInterface*> rt;
 	if (positive)
 	{
+		rt.reserve( m_group.size());
 		std::vector<IteratorReference>::const_iterator si = m_group.begin(), se = m_group.end();
 		for (; si != se; ++si)
 		{

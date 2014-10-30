@@ -43,28 +43,34 @@ class AccumulateOperation
 public:
 
 	AccumulateOperation(){}
+
 	AccumulateOperation(
 			const std::string& name_,
-			const std::vector<WeightingFunction>& args_)
+			const std::vector<WeightingFunction>& args_,
+			const std::vector<int>& featureSelectionSets_)
 		:m_name(name_)
-		,m_args(args_){}
+		,m_args(args_)
+		,m_featureSelectionSets(featureSelectionSets_){}
 
 	AccumulateOperation( const AccumulateOperation& o)
 		:m_name(o.m_name)
 		,m_args(o.m_args)
+		,m_featureSelectionSets(o.m_featureSelectionSets)
 	{}
 
 	bool defined() const					{return !m_name.empty();}
 
 	std::string name() const				{return m_name;}
 	const std::vector<WeightingFunction>& args() const	{return m_args;}
+	const std::vector<int>& featureSelectionSets() const	{return m_featureSelectionSets;}
 
 	void parse( char const*& src, StringIndexMap& setnamemap);
 	void print( std::ostream& out, const StringIndexMap& setnamemap) const;
 
 private:
-	std::string m_name;						///< name of operation
-	std::vector<WeightingFunction> m_args;				///< list of set references with weight
+	std::string m_name;				///< name of operation
+	std::vector<WeightingFunction> m_args;		///< list of set references with weight
+	std::vector<int> m_featureSelectionSets;	///< list of feature sets by index to be selected as matches for candidates of documents to be ranked
 };
 
 }}//namespace

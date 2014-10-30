@@ -39,7 +39,7 @@ class IteratorDifference
 {
 public:
 	IteratorDifference( const IteratorDifference& o);
-	IteratorDifference( const IteratorReference& positive_, const IteratorReference& negative_);
+	IteratorDifference( const IteratorInterface* positive_, const IteratorInterface* negative_);
 	virtual ~IteratorDifference(){}
 
 	virtual const std::string& featureid() const

@@ -39,7 +39,7 @@ class IteratorIntersect
 {
 public:
 	IteratorIntersect( const IteratorIntersect& o);
-	IteratorIntersect( const IteratorReference& first_, const IteratorReference& second_);
+	IteratorIntersect( std::size_t nofargs, const IteratorInterface** args);
 	virtual ~IteratorIntersect(){}
 
 	virtual const std::string& featureid() const
@@ -58,8 +58,7 @@ public:
 
 private:
 	Index m_docno;
-	IteratorReference m_first;
-	IteratorReference m_second;
+	std::vector<IteratorReference> m_argar;
 	std::string m_featureid;		///< unique id of the feature expression
 };
 

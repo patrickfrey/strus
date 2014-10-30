@@ -32,31 +32,24 @@
 
 using namespace strus;
 
-IteratorStructSequence::IteratorStructSequence( const std::vector<IteratorReference>& seq_, const IteratorReference& cut_, int range_)
+IteratorStructSequence::IteratorStructSequence( int range_, std::size_t nofargs, const IteratorInterface** args, const IteratorInterface* cut)
 	:m_docno(0)
 	,m_docno_cut(0)
-	,m_seq(seq_)
-	,m_cut(cut_)
 	,m_range(range_)
-{}
-
-IteratorStructSequence::IteratorStructSequence( const IteratorStructSequence& o)
-	:m_docno(o.m_docno)
-	,m_docno_cut(o.m_docno_cut)
-	,m_range(o.m_range)
 {
-	if (o.m_cut.get())
+	m_seq.reserve( nofargs);
+	std::size_t ii=0;
+	for (; ii<nofargs; ++ii)
 	{
-		m_cut.reset( o.m_cut->copy());
+		if (args[ii])
+		{
+			m_seq.push_back( args[ii]->copy());
+			m_featureid.append( args[ii]->featureid());
+		}
 	}
-	std::vector<IteratorReference>::const_iterator pi = o.m_seq.begin(), pe = o.m_seq.end();
-	for (; pi != pe; ++pi)
+	if (cut)
 	{
-		m_seq.push_back( (*pi)->copy());
-		m_featureid.append( (*pi)->featureid());
-	}
-	if (m_cut.get())
-	{
+		m_cut.reset( cut->copy());
 		m_featureid.append( m_cut->featureid());
 		m_featureid.push_back( 'C');
 	}
@@ -68,11 +61,30 @@ IteratorStructSequence::IteratorStructSequence( const IteratorStructSequence& o)
 	m_featureid.push_back( 'S');
 }
 
+IteratorStructSequence::IteratorStructSequence( const IteratorStructSequence& o)
+	:m_docno(o.m_docno)
+	,m_docno_cut(o.m_docno_cut)
+	,m_range(o.m_range)
+	,m_featureid(o.m_featureid)
+{
+	m_seq.reserve( o.m_seq.size());
+	if (o.m_cut.get())
+	{
+		m_cut.reset( o.m_cut->copy());
+	}
+	std::vector<IteratorReference>::const_iterator pi = o.m_seq.begin(), pe = o.m_seq.end();
+	for (; pi != pe; ++pi)
+	{
+		m_seq.push_back( (*pi)->copy());
+	}
+}
+
 std::vector<const IteratorInterface*> IteratorStructSequence::subExpressions( bool positive)
 {
 	std::vector<const IteratorInterface*> rt;
 	if (positive)
 	{
+		rt.reserve( m_seq.size());
 		std::vector<IteratorReference>::const_iterator si = m_seq.begin(), se = m_seq.end();
 		for (; si != se; ++si)
 		{

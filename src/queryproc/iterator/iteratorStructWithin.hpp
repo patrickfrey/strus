@@ -41,10 +41,11 @@ class IteratorStructWithin
 	:public IteratorJoin
 {
 public:
-	/// \param[in] group_ the elements of the group
-	/// \param[in] cut_ the set of element positions that must not overlap with the group
 	/// \param[in] range_ the maximum position difference between the start element and the end element of the group
-	IteratorStructWithin( const std::vector<IteratorReference>& group_, const IteratorReference& cut_, int range_);
+	/// \param[in] nofargs number of elements in args
+	/// \param[in] args the positive elements of this join
+	/// \param[in] cut (optional) the cut element
+	IteratorStructWithin( int range_, std::size_t nofargs, const IteratorInterface** args, const IteratorInterface* cut=0);
 
 	IteratorStructWithin( const IteratorStructWithin& o);
 

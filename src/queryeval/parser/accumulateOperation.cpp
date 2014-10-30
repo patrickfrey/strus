@@ -49,6 +49,25 @@ void AccumulateOperation::parse( char const*& src, StringIndexMap& setnamemap)
 		{
 			throw std::runtime_error( "oval brackets expected after accumulate function name");
 		}
+		if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "WITH"))
+		{
+			throw std::runtime_error("WITH expected with the feature set selection list to determine what should be evaluated");
+		}
+		for (;;)
+		{
+			if (!isAlpha( *src))
+			{
+				throw std::runtime_error( "expected comma ',' separated list of identifiers defining the features to select after WITH");
+			}
+			m_featureSelectionSets.push_back(
+				setnamemap.get( parse_IDENTIFIER( src)));
+
+			if (!isComma( *src))
+			{
+				break;
+			}
+			++src;
+		}
 	}
 	else
 	{
@@ -61,6 +80,13 @@ void AccumulateOperation::print( std::ostream& out, const StringIndexMap& setnam
 {
 	out << name();
 	WeightingFunction::printExpression( out, args(), setnamemap);
+	std::vector<int>::const_iterator si = m_featureSelectionSets.begin(), se = m_featureSelectionSets.end();
+	out << " WITH ";
+	for (int sidx=0; si != se; ++si,++sidx)
+	{
+		if (sidx) out << ", ";
+		out << setnamemap.name(*si);
+	}
 }
 
 
