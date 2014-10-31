@@ -42,7 +42,7 @@ class EstimatedNumberOfMatchesMap
 public:
 	explicit EstimatedNumberOfMatchesMap( const StorageInterface* storage_);
 	
-	double get( IteratorInterface& itr);
+	double getNofMatches( IteratorInterface& itr);
 
 private:
 	const StorageInterface* m_storage;

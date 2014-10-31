@@ -26,43 +26,25 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#include "strus/weightingFunctionInterface.hpp"
-#include "strus/index.hpp"
+#include "summarizerMetaData.hpp"
 #include "strus/iteratorInterface.hpp"
-#include "weightingIdfBased.hpp"
-#include <limits>
-#include <vector>
+#include "strus/storageInterface.hpp"
 
-namespace strus
+using namespace strus;
+
+
+std::vector<SummarizerInterface::SummaryElement>
+	SummarizerMetaData::getSummary(
+		const Index& docno,
+		IteratorInterface&,
+		IteratorInterface&)
 {
-
-/// \class WeightingConstant
-/// \brief Accumulator for the feature frequency
-class WeightingConstant
-	:public WeightingIdfBased
-{
-public:
-	WeightingConstant(
-			double weight_,
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
-		:WeightingIdfBased(storage_,nofMatchesMap_),m_weight(weight_){}
-	WeightingConstant( const WeightingConstant& o)
-		:WeightingIdfBased(o),m_weight(o.m_weight){}
-
-	virtual ~WeightingConstant(){}
-
-	double call( IteratorInterface& itr)
+	std::vector<SummarizerInterface::SummaryElement> rt;
+	std::string attr = m_storage->documentAttributeString( docno, m_name);
+	if (!attr.empty())
 	{
-		return m_weight;
+		rt.push_back( attr);
 	}
+}
 
-private:
-	double m_weight;
-};
-
-}//namespace
-#endif
 

@@ -26,43 +26,26 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#include "strus/weightingFunctionInterface.hpp"
-#include "strus/index.hpp"
+#ifndef _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
+#define _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
 #include "strus/iteratorInterface.hpp"
-#include "weightingIdfBased.hpp"
-#include <limits>
-#include <vector>
+#include <string>
 
 namespace strus
 {
 
-/// \class WeightingConstant
-/// \brief Accumulator for the feature frequency
-class WeightingConstant
-	:public WeightingIdfBased
+/// \brief Some global constants that document some dependencies (hacks) that did not get yet into interfaces.
+struct Constants
 {
-public:
-	WeightingConstant(
-			double weight_,
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
-		:WeightingIdfBased(storage_,nofMatchesMap_),m_weight(weight_){}
-	WeightingConstant( const WeightingConstant& o)
-		:WeightingIdfBased(o),m_weight(o.m_weight){}
-
-	virtual ~WeightingConstant(){}
-
-	double call( IteratorInterface& itr)
+	enum {
+		DOC_ATTRIBUTE_DOCID=0x23,
+		DOC_ATTRIBUTE_DOCLEN=0x40
+	};
+	static const char* operator_set_union()
 	{
-		return m_weight;
+		return "union";
 	}
-
-private:
-	double m_weight;
 };
 
 }//namespace
 #endif
-

@@ -48,7 +48,7 @@ public:
 
 	AccumulatorArgument( const AccumulatorArgument& o)
 		:factor(o.factor)
-		,function(o.function->copy())
+		,function(o.function)
 		,itr(o.itr->copy()){}
 
 	double factor;

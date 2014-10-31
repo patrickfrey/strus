@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "queryProcessor.hpp"
+#include "strus/constants.hpp"
 #include "iterator/iteratorPred.hpp"
 #include "iterator/iteratorSucc.hpp"
 #include "iterator/iteratorIntersect.hpp"
@@ -92,7 +93,7 @@ IteratorInterface*
 
 		return new IteratorSucc( args[0]);
 	}
-	else if (isEqual( name, "union"))
+	else if (isEqual( name, "union") || isEqual( name, Constants::operator_set_union()))
 	{
 		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
 		if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
@@ -151,7 +152,7 @@ IteratorInterface*
 double QueryProcessor::getEstimatedIdf(
 			IteratorInterface& itr) const
 {
-	return m_nofMatchesMap->get( itr);
+	return m_nofMatchesMap->getNofMatches( itr);
 }
 
 

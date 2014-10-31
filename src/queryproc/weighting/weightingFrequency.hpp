@@ -57,11 +57,6 @@ public:
 	{
 		return static_cast<double>( itr.frequency());
 	}
-
-	virtual WeightingFunctionInterface* copy() const
-	{
-		return new WeightingFrequency(*this);
-	}
 };
 
 }//namespace

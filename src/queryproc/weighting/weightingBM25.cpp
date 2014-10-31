@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "weightingBM25.hpp"
+#include "strus/constants.hpp"
 #include <cmath>
 
 using namespace strus;
@@ -54,11 +55,6 @@ WeightingBM25::WeightingBM25( const WeightingBM25& o)
 	,m_avgDocLength(o.m_avgDocLength)
 {}
 
-WeightingFunctionInterface* WeightingBM25::copy() const
-{
-	return new WeightingBM25(*this);
-}
-
 double WeightingBM25::call( IteratorInterface& itr)
 {
 	if (!idf_calculated())
@@ -66,7 +62,8 @@ double WeightingBM25::call( IteratorInterface& itr)
 		calculateIdf( itr);
 	}
 	double relativeDocLen
-		= (double)m_storage->documentAttributeNumeric( m_docno, 'D')
+		= (double)m_storage->documentAttributeNumeric(
+				m_docno, Constants::DOC_ATTRIBUTE_DOCLEN)
 		/ m_avgDocLength;
 
 	return idf()

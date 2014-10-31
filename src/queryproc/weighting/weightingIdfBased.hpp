@@ -61,8 +61,6 @@ public:
 
 	virtual ~WeightingIdfBased(){}
 
-	virtual WeightingFunctionInterface* copy() const=0;
-
 	virtual double call( IteratorInterface& itr)=0;
 
 protected:

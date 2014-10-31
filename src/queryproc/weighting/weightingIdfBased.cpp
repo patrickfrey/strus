@@ -34,7 +34,7 @@ using namespace strus;
 void WeightingIdfBased::calculateIdf( IteratorInterface& itr)
 {
 	Index realNofMatches = itr.documentFrequency();
-	double nofMatches = realNofMatches?realNofMatches:m_nofMatchesMap->get( itr);
+	double nofMatches = realNofMatches?realNofMatches:m_nofMatchesMap->getNofMatches( itr);
 
 	double nofCollectionDocuments = m_storage->nofDocumentsInserted();
 	if (nofCollectionDocuments > nofMatches * 2)

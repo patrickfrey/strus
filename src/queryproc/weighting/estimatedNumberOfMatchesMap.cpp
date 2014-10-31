@@ -99,7 +99,7 @@ static double estimateNumberOfMatches(
 }
 
 
-double EstimatedNumberOfMatchesMap::get( IteratorInterface& itr)
+double EstimatedNumberOfMatchesMap::getNofMatches( IteratorInterface& itr)
 {
 	std::map<std::string,double>::const_iterator vi = m_valmap.find( itr.featureid());
 	if (vi != m_valmap.end())

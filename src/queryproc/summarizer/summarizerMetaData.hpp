@@ -26,43 +26,45 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#include "strus/weightingFunctionInterface.hpp"
-#include "strus/index.hpp"
-#include "strus/iteratorInterface.hpp"
-#include "weightingIdfBased.hpp"
-#include <limits>
+#ifndef _STRUS_SUMMARIZER_METADATA_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_METADATA_HPP_INCLUDED
+#include "strus/summarizerInterface.hpp"
+#include <string>
 #include <vector>
 
 namespace strus
 {
 
-/// \class WeightingConstant
-/// \brief Accumulator for the feature frequency
-class WeightingConstant
-	:public WeightingIdfBased
+/// \brief Forward declaration
+class StorageInterface;
+
+class SummarizerMetaData
+	:public SummarizerInterface
 {
 public:
-	WeightingConstant(
-			double weight_,
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
-		:WeightingIdfBased(storage_,nofMatchesMap_),m_weight(weight_){}
-	WeightingConstant( const WeightingConstant& o)
-		:WeightingIdfBased(o),m_weight(o.m_weight){}
+	SummarizerMetaData( const StorageInterface* storage_, char name_)
+		:m_storage(storage_)
+		,m_name(name_){}
 
-	virtual ~WeightingConstant(){}
+	virtual ~SummarizerMetaData(){}
 
-	double call( IteratorInterface& itr)
-	{
-		return m_weight;
-	}
+	/// \brief Get the summarization based on term occurrencies
+	/// \param[in] docno document to get the summary from 
+	/// \param[in] itr iterator for the term occurrencies to get the summary from 
+	/// \param[in] markitr iterator for context markers related to the summary
+	/// \return the summarization elements
+	virtual std::vector<SummaryElement>
+		getSummary(
+			const Index& docno,
+			IteratorInterface& itr,
+			IteratorInterface& markitr);
 
 private:
-	double m_weight;
+	const StorageInterface* m_storage;
+	char m_name;
 };
 
 }//namespace
 #endif
+
 

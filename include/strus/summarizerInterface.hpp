@@ -26,43 +26,62 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#include "strus/weightingFunctionInterface.hpp"
+#ifndef _STRUS_SUMMARIZER_INTERFACE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/iteratorInterface.hpp"
-#include "weightingIdfBased.hpp"
-#include <limits>
+#include <string>
 #include <vector>
 
 namespace strus
 {
+/// \brief Forward declaration
+class IteratorInterface;
 
-/// \class WeightingConstant
-/// \brief Accumulator for the feature frequency
-class WeightingConstant
-	:public WeightingIdfBased
+class SummarizerInterface
 {
 public:
-	WeightingConstant(
-			double weight_,
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
-		:WeightingIdfBased(storage_,nofMatchesMap_),m_weight(weight_){}
-	WeightingConstant( const WeightingConstant& o)
-		:WeightingIdfBased(o),m_weight(o.m_weight){}
+	virtual ~SummarizerInterface(){}
 
-	virtual ~WeightingConstant(){}
-
-	double call( IteratorInterface& itr)
+	/// \brief Element of summarization
+	class SummaryElement
 	{
-		return m_weight;
-	}
+	public:
+		SummaryElement(
+				const std::string& text_,
+				Index pos_=0,
+				unsigned int length_=0)
+			:m_text(text_)
+			,m_pos(pos_)
+			,m_length(length_){}
 
-private:
-	double m_weight;
+		SummaryElement( const SummaryElement& o)
+			:m_text(o.m_text)
+			,m_pos(o.m_pos)
+			,m_length(o.m_length){}
+
+		Index pos() const			{return m_pos;}
+		unsigned int length() const		{return m_length;}
+		const std::string& text() const		{return m_text;}
+
+	private:
+		Index m_pos;
+		unsigned int m_length;
+		std::string m_text;
+	};
+
+	/// \brief Get the summarization based on term occurrencies
+	/// \param[in] docno document to get the summary from 
+	/// \param[in] itr iterator for the term occurrencies to get the summary from 
+	/// \param[in] markitr iterator for context markers related to the summary
+	/// \return the terms forming the summarization in order of occurrence
+	virtual std::vector<SummaryElement>
+		getSummary(
+			const Index& docno,
+			IteratorInterface& itr,
+			IteratorInterface& markitr)=0;
 };
 
 }//namespace
 #endif
+
 

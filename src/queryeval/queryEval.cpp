@@ -29,6 +29,7 @@
 */
 #include "queryEval.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/constants.hpp"
 #include "parser/lexems.hpp"
 #include "parser/selectorSet.hpp"
 #include "iteratorReference.hpp"
@@ -482,8 +483,8 @@ std::vector<WeightedDocument>
 				}
 			}
 			IteratorReference selection(
-				processor.createJoinIterator( "union", 0, aidx, far));
-			//... PF:HACK: Require 'union' to exist and do an efficient set union operation
+				processor.createJoinIterator(
+					Constants::operator_set_union(), 0, aidx, far));
 	
 			accumulator.addSelector( *selection);
 		}

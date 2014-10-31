@@ -37,6 +37,8 @@ namespace strus
 class StorageInterface
 {
 public:
+	/// \class TransactionInterface
+	/// \brief Transaction object for one storage insert/update transaction
 	class TransactionInterface
 	{
 	public:

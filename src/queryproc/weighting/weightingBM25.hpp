@@ -58,8 +58,6 @@ public:
 
 	virtual ~WeightingBM25(){}
 
-	virtual WeightingFunctionInterface* copy() const;
-
 	virtual double call( IteratorInterface& itr);
 
 private:

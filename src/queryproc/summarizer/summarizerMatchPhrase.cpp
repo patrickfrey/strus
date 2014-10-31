@@ -26,43 +26,41 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
-#include "strus/weightingFunctionInterface.hpp"
-#include "strus/index.hpp"
+#include "summarizerMatchPhrase.hpp"
 #include "strus/iteratorInterface.hpp"
-#include "weightingIdfBased.hpp"
-#include <limits>
-#include <vector>
+#include "strus/storageInterface.hpp"
 
-namespace strus
+using namespace strus;
+
+
+std::vector<SummarizerInterface::SummaryElement>
+	SummarizerMatchPhrase::getSummary(
+		const Index& docno,
+		IteratorInterface& itr,
+		IteratorInterface& markitr)
 {
-
-/// \class WeightingConstant
-/// \brief Accumulator for the feature frequency
-class WeightingConstant
-	:public WeightingIdfBased
-{
-public:
-	WeightingConstant(
-			double weight_,
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
-		:WeightingIdfBased(storage_,nofMatchesMap_),m_weight(weight_){}
-	WeightingConstant( const WeightingConstant& o)
-		:WeightingIdfBased(o),m_weight(o.m_weight){}
-
-	virtual ~WeightingConstant(){}
-
-	double call( IteratorInterface& itr)
+	Index pos = 0;
+	while (0!=(pos=itr.skipPos( pos+1)))
 	{
-		return m_weight;
+		if (m_maxlen >= 0)
+		{
+			Index endpos = markitr.skipPos( pos);
+			if (endpos - pos > m_maxlen)
+			{
+				endpos = pos + m_maxlen;
+			}
+			while (pos <= endpos)
+			{
+				
+			}
+			std::string phrase;
 	}
+	std::vector<SummarizerInterface::SummaryElement> rt;
+	std::string attr = m_storage->documentAttributeString( docno, m_name);
+	if (!attr.empty())
+	{
+		rt.push_back( attr);
+	}
+}
 
-private:
-	double m_weight;
-};
-
-}//namespace
-#endif
 

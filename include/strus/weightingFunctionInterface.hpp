@@ -42,9 +42,6 @@ public:
 	/// \param[in,out] occurrency iterator
 	/// \return the weight of the current element
 	virtual double call( IteratorInterface& itr)=0;
-
-	/// \brief Get a deep copy of this function
-	virtual WeightingFunctionInterface* copy() const=0;
 };
 
 }//namespace
