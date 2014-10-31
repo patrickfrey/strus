@@ -35,7 +35,7 @@
 #include "iterator/iteratorStructWithin.hpp"
 #include "iterator/iteratorStructSequence.hpp"
 #include "iteratorReference.hpp"
-#include "accumulator/accumulatorIdfPriority.hpp"
+#include "weighting/estimatedNumberOfMatchesMap.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -43,6 +43,11 @@
 #include <limits>
 
 using namespace strus;
+
+QueryProcessor::QueryProcessor( StorageInterface* storage_)
+	:m_storage(storage_)
+	,m_nofMatchesMap( new EstimatedNumberOfMatchesMap( storage_))
+{}
 
 static bool isEqual( const std::string& id, const char* idstr)
 {
@@ -138,18 +143,46 @@ IteratorInterface*
 	}
 }
 
-AccumulatorInterface*
-	QueryProcessor::createAccumulator( const std::string& name) const
+
+double QueryProcessor::getEstimatedIdf(
+			IteratorInterface& itr)
 {
-	if (isEqual( name, "idfPriority"))
+	return m_nofMatchesMap->get( itr);
+}
+
+
+WeightingFunctionInterface*
+	QueryProcessor::createWeightingFunction(
+			const std::string& name,
+			const std::vector<float>& parameter) const
+{
+	if (isEqual( function, "weight"))
 	{
-		return new AccumulatorIdfPriority( m_storage);
+		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + function + "'");
+		return new WeightingStorageWeight( storage, nofMatchesMap);
+	}
+	else if (isEqual( function, "td"))
+	{
+		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + function + "'");
+		return new WeightingConstant( 1.0, storage, nofMatchesMap);
+	}
+	else if (isEqual( function, "tf"))
+	{
+		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + function + "'");
+		return new WeightingFrequency( storage, nofMatchesMap);
+	}
+	else if (isEqual( function, "bm25"))
+	{
+		float b  = parameter.size() > 0 ? parameter[0]:0.75;
+		float k1 = parameter.size() > 1 ? parameter[1]:1.5;
+		float avgDocLength = parameter.size() > 2 ? parameter[2]:1000;
+
+		return new WeightingBM25( storage, nofMatchesMap, k1, b, avgDocLength);
 	}
 	else
 	{
-		throw std::runtime_error( std::string( "unknown accumulator '") + name + "'");
+		throw std::runtime_error( std::string( "unknown weighting function '") + function + "'");
 	}
 }
-
 
 

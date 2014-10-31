@@ -44,6 +44,7 @@ class WeightingIdfBased
 	:public WeightingFunctionInterface
 {
 public:
+	typedef boost::shared_ptr<EstimatedNumberOfMatchesMap> EstimatedNumberOfMatchesMapR;
 	WeightingIdfBased(
 			const StorageInterface* storage_,
 			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)

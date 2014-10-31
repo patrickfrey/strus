@@ -33,7 +33,9 @@
 #include "strus/index.hpp"
 #include "iteratorReference.hpp"
 #include "weightingIdfBased.hpp"
+#include "weighting/estimatedNumberOfMatchesMap.hpp"
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
@@ -44,6 +46,7 @@ class WeightingBM25
 	:public WeightingIdfBased
 {
 public:
+	typedef boost::shared_ptr<EstimatedNumberOfMatchesMap> EstimatedNumberOfMatchesMapR;
 	explicit WeightingBM25(
 			const StorageInterface* storage_,
 			const EstimatedNumberOfMatchesMapR& nofMatchesMap_,

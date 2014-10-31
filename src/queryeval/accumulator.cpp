@@ -1,5 +1,4 @@
-#include "accumulator/accumulatorIdfPriority.hpp"
-#include "weighting/createWeightingFunction.hpp"
+#include "accumulator.hpp"
 #include <cstdlib>
 #include <limits>
 #include <set>
@@ -8,29 +7,30 @@
 
 using namespace strus;
 
-AccumulatorIdfPriority::AccumulatorIdfPriority( const StorageInterface* storage_)
-	:m_storage(storage_)
-	,m_estimatedNumberOfMatchesMap(new EstimatedNumberOfMatchesMap( storage_))
+AccumulatorIdfPriority::AccumulatorIdfPriority( const QueryProcessorInterface* qproc_)
+	:m_queryprocessor(qproc_)
 	,m_selectoridx(0)
 	,m_docno(0)
 {}
 
-void AccumulatorIdfPriority::addSelector(
+void Accumulator::addSelector(
 		const IteratorInterface& iterator)
 {
-	m_selectors.push_back( iterator.copy());
+	IteratorReference itr( iterator.copy());
+	if (getEstimatedIdf( itr) > std::numeric_limits<double>::epsilon( itr))
+	{
+		m_selectors.push_back( itr);
+	}
 }
 
-void AccumulatorIdfPriority::addRanker(
+void Accumulator::addRanker(
 		double factor,
 		const std::string& function,
 		const std::vector<float>& parameter,
 		const IteratorInterface& iterator)
 {
 	WeightingFunctionReference weighting(
-		createWeightingFunction(
-			m_storage, m_estimatedNumberOfMatchesMap,
-			function, parameter));
+		m_queryprocessor->createWeightingFunction( function, parameter));
 	IteratorReference itr( iterator.copy());
 
 	m_rankers.push_back( AccumulatorArgument( factor, weighting, itr));

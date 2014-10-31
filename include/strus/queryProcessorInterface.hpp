@@ -47,7 +47,7 @@ public:
 	/// \brief Create an iterator on the occurrencies of a term
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
-	/// \return the created iterator reference object
+	/// \return the created iterator reference object (to dispose with 'delete')
 	virtual IteratorInterface*
 		createTermIterator(
 			const std::string& type,
@@ -58,7 +58,7 @@ public:
 	/// \param[in] range additional parameters for describing a range or offset for the join operator to execute
 	/// \param[in] nofargs number of arguments to pass to the function
 	/// \param[in] args arguments to pass to the function
-	/// \return the created iterator reference object representing the result of the function
+	/// \return the created iterator reference object representing the result of the function (to dispose with 'delete')
 	virtual IteratorInterface*
 		createJoinIterator(
 			const std::string& name,
@@ -66,12 +66,18 @@ public:
 			std::size_t nofargs,
 			const IteratorInterface** args) const=0;
 
-	/// \brief Create an accumulator for the summation of weighted term occurrencies
-	/// \param[in] name name of the accumulator (defines for example the priorisation of ranking)
-	/// \return the created accumulator object
-	virtual AccumulatorInterface*
-		createAccumulator(
-			const std::string& name) const=0;
+	/// \brief Get an IDF that might not be accurate, but good enough to be used as criterion for feature selection
+	/// \return the estimated IDF value
+	virtual double getEstimatedIdf(
+			IteratorInterface& itr) const=0;
+
+	/// \brief Create a weighting function for term occurrencies
+	/// \param[in] name name of the weighting function
+	/// \return the created weighting function object (to dispose with 'delete')
+	virtual WeightingFunctionInterface*
+		createWeightingFunction(
+			const std::string& name,
+			const std::vector<float>& parameter) const=0;
 };
 
 }//namespace

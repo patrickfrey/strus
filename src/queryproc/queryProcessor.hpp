@@ -32,9 +32,13 @@
 #include "storageReference.hpp"
 #include <vector>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
+
+/// \brief Forward declaration
+class EstimatedNumberOfMatchesMap;
 
 /// \brief Provides the objects needed for query processing
 class QueryProcessor
@@ -42,8 +46,7 @@ class QueryProcessor
 {
 public:
 	/// \brief Constructor
-	explicit QueryProcessor( StorageInterface* storage_)
-		:m_storage(storage_){}
+	explicit QueryProcessor( StorageInterface* storage_);
 
 	/// \brief Destructor
 	virtual ~QueryProcessor(){}
@@ -70,15 +73,23 @@ public:
 			std::size_t nofargs,
 			const IteratorInterface** args) const;
 
-	/// \brief Create an accumulator for the summation of weighted term occurrencies
-	/// \param[in] name name of the accumulator (defines the priorisation of ranking)
-	/// \return the created accumulator object
-	virtual AccumulatorInterface*
-		createAccumulator(
-			const std::string& name) const;
+	/// \brief Get an IDF that might not be accurate, but good enough to be used as criterion for feature selection
+	/// \return the estimated IDF value
+	virtual double
+		getEstimatedIdf(
+			IteratorInterface& itr);
+
+	/// \brief Create a weighting function for term occurrencies
+	/// \param[in] name name of the weighting function
+	/// \return the created weighting function object (to dispose with 'delete')
+	virtual WeightingFunctionInterface*
+		createWeightingFunction(
+			const std::string& name,
+			const std::vector<float>& parameter) const;
 
 private:
 	StorageInterface* m_storage;
+	boost::shared_ptr<EstimatedNumberOfMatchesMap> m_nofMatchesMap;
 };
 
 }//namespace

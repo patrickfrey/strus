@@ -33,15 +33,9 @@
 #include "weighting/weightingBM25.hpp"
 #include <stdexcept>
 
-using namespace strus;
+#error DEPRECATED
 
-static bool isEqual( const std::string& id, const char* idstr)
-{
-	char const* si = id.c_str();
-	char const* di = idstr;
-	for (; *si && *di && ((*si|32) == (*di|32)); ++si,++di){}
-	return !*si && !*di;
-}
+using namespace strus;
 
 WeightingFunctionInterface* strus::createWeightingFunction(
 		const StorageInterface* storage,
@@ -49,33 +43,6 @@ WeightingFunctionInterface* strus::createWeightingFunction(
 		const std::string& function,
 		const std::vector<float>& parameter)
 {
-	if (isEqual( function, "weight"))
-	{
-		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + function + "'");
-		return new WeightingStorageWeight( storage, nofMatchesMap);
-	}
-	else if (isEqual( function, "td"))
-	{
-		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + function + "'");
-		return new WeightingConstant( 1.0, storage, nofMatchesMap);
-	}
-	else if (isEqual( function, "tf"))
-	{
-		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + function + "'");
-		return new WeightingFrequency( storage, nofMatchesMap);
-	}
-	else if (isEqual( function, "bm25"))
-	{
-		float b  = parameter.size() > 0 ? parameter[0]:0.75;
-		float k1 = parameter.size() > 1 ? parameter[1]:1.5;
-		float avgDocLength = parameter.size() > 2 ? parameter[2]:1000;
-
-		return new WeightingBM25( storage, nofMatchesMap, k1, b, avgDocLength);
-	}
-	else
-	{
-		throw std::runtime_error( std::string( "unknown weighting function '") + function + "'");
-	}
 }
 
 

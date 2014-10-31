@@ -11,8 +11,6 @@ CPP_OBJS=\
 	weighting/weightingBM25.o \
 	weighting/weightingIdfBased.o \
 	weighting/estimatedNumberOfMatchesMap.o \
-	weighting/createWeightingFunction.o \
-	accumulator/accumulatorIdfPriority.o \
 	queryProcessor.o \
 	queryProcessorLib.o
 

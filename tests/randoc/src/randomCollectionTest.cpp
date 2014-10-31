@@ -998,8 +998,8 @@ int main( int argc, const char* argv[])
 #endif
 				if (++rcnt >= 100)
 				{
-					rcnt = 0;
 					rsum += rcnt;
+					rcnt = 0;
 					std::cerr << ".";
 				}
 			}

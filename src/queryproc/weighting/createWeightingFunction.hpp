@@ -35,6 +35,8 @@
 #include <limits>
 #include <vector>
 
+#error DEPRECATED
+
 namespace strus
 {
 

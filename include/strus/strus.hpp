@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_MAIN_INCLUDE_HPP_INCLUDED
 #define _STRUS_MAIN_INCLUDE_HPP_INCLUDED
-#include "strus/accumulatorInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/iteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"

@@ -29,12 +29,11 @@
 #ifndef _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/accumulatorInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include "strus/iteratorInterface.hpp"
 #include "iteratorReference.hpp"
 #include "weightingFunctionReference.hpp"
 #include "accumulatorArgument.hpp"
-#include "weighting/estimatedNumberOfMatchesMap.hpp"
 #include <vector>
 #include <list>
 #include <set>
@@ -43,37 +42,36 @@
 namespace strus
 {
 
-/// \class AccumulatorIdfPriority
-/// \brief Accumulator for ranking that prioritises input accumulators returning matches with a higher weight
+/// \class Accumulator
+/// \brief Accumulator for weights of matches
 class AccumulatorIdfPriority
 	:public AccumulatorInterface
 {
 public:
 	/// \brief Constructor
-	explicit AccumulatorIdfPriority( const StorageInterface* storage_);
+	explicit Accumulator( const QueryProcessorInterface* qproc_);
 
 	/// \brief Copy constructor
-	AccumulatorIdfPriority( const AccumulatorIdfPriority& o);
+	Accumulator( const Accumulator& o);
 
-	virtual ~AccumulatorIdfPriority(){}
+	~Accumulator(){}
 
-	virtual void addSelector(
+	void addSelector(
 			const IteratorInterface& iterator);
 	
-	virtual void addRanker(
+	void addRanker(
 			double factor,
 			const std::string& function,
 			const std::vector<float>& parameter,
 			const IteratorInterface& iterator);
 
-	virtual bool nextRank(
+	bool nextRank(
 			Index& docno,
 			unsigned int& selectorState, 
 			double& weight);
 
 private:
-	const StorageInterface* m_storage;
-	EstimatedNumberOfMatchesMapR m_estimatedNumberOfMatchesMap;
+	const QueryProcessorInterface* m_queryprocessor;
 	std::vector<IteratorReference> m_selectors;
 	unsigned int m_selectoridx;
 	Index m_docno;

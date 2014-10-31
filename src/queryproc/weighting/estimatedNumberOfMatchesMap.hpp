@@ -33,7 +33,6 @@
 #include "strus/index.hpp"
 #include <map>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
@@ -51,8 +50,6 @@ private:
 	Index m_maxDocumentNumber;
 	Index m_nofDocumentsInCollection;
 };
-
-typedef boost::shared_ptr<EstimatedNumberOfMatchesMap> EstimatedNumberOfMatchesMapR;
 
 }//namespace
 #endif
