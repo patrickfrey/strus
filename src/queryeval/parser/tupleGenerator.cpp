@@ -37,10 +37,6 @@ TupleGenerator::TupleGenerator( Mode mode_)
 
 void TupleGenerator::defineColumn( std::size_t nofrows_)
 {
-	/*[-]*/if (nofrows_ > 50)
-	{
-		std::cout << "HALLY GALLY" << std::endl;
-	}
 	m_columns.push_back( Column( 0, nofrows_));
 	if (m_mode == Ascending || m_mode == Permutation)
 	{

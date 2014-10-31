@@ -67,7 +67,7 @@ static std::string errorPosition( const char* base, const char* itr)
 
 
 
-void QueryEval::parseJoinOperationDef( char const* src)
+void QueryEval::parseJoinOperationDef( char const*& src)
 {
 	int result = m_setnamemap.get( parse_IDENTIFIER( src));
 	if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "FOREACH"))
@@ -88,7 +88,7 @@ void QueryEval::parseJoinOperationDef( char const* src)
 	m_operations.push_back( JoinOperation( result, function, selector));
 }
 
-void QueryEval::parseAccumulatorDef( char const* src)
+void QueryEval::parseAccumulatorDef( char const*& src)
 {
 	if (m_accumulateOperation.defined())
 	{
@@ -102,7 +102,7 @@ void QueryEval::parseAccumulatorDef( char const* src)
 	parse_OPERATOR( src);
 }
 
-void QueryEval::parseTermDef( char const* src)
+void QueryEval::parseTermDef( char const*& src)
 {
 	if (isAlpha(*src))
 	{
@@ -156,7 +156,7 @@ QueryEval::QueryEval( const std::string& source)
 	{
 		while (*src)
 		{
-			switch ((StatementKeyword)parse_KEYWORD( src, 6, "INTO", "EVAL", "TERM"))
+			switch ((StatementKeyword)parse_KEYWORD( src, 3, "INTO", "EVAL", "TERM"))
 			{
 				case e_TERM:
 					parseTermDef( src);

@@ -80,32 +80,64 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 
 Index IteratorUnion::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_)
+	if (m_docno == docno_ && docno_ != 0)
 	{
 		return m_docno;
 	}
 	m_docno = docno_;
 	std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 	if (ai == ae) return 0;
+	Index base = docno_?docno_:1;
+	Index minimum = 0;
 
-	for (int aidx=0; ai != ae; ++ai,++aidx)
+	int aidx=0;
+	for (; ai != ae; ++ai,++aidx)
 	{
-		Index candidate = (*ai)->skipDoc( docno_);
-		m_docno = selectSmallerNotNull( m_docno, candidate);
-		m_selected[ aidx] = (m_docno == candidate);
+		minimum = (*ai)->skipDoc( base);
+		if (minimum) break;
 	}
+	if (!minimum)
+	{
+		m_docno = 0;
+		return 0;
+	}
+	m_selected[ aidx] = true;
+
+	for (aidx++,ai++; ai != ae; ++ai,++aidx)
+	{
+		Index next = (*ai)->skipDoc( base);
+		if (next && next <= minimum)
+		{
+			m_selected[ aidx] = true;
+			if (next < minimum)
+			{
+				std::vector<bool>::iterator si = m_selected.begin(), se = m_selected.begin() + aidx;
+				for (; si != se; ++si)
+				{
+					*si = false;
+				}
+				minimum = next;
+			}
+		}
+		else
+		{
+			m_selected[ aidx] = false;
+		}
+	}
+	m_docno = minimum;
 	return m_docno;
 }
 
 Index IteratorUnion::skipPos( const Index& pos_)
 {
 	std::vector<bool>::const_iterator si = m_selected.begin(), se = m_selected.end();
-	Index pos = pos_;
+	Index pos = 0;
+	Index basepos = pos_?pos_:1;
 	for (int aidx=0; si != se; ++si,++aidx)
 	{
 		if (*si)
 		{
-			pos = selectSmallerNotNull( pos, m_argar[ aidx]->skipPos( pos_));
+			pos = selectSmallerNotNull( pos, m_argar[ aidx]->skipPos( basepos));
 		}
 	}
 	return pos;

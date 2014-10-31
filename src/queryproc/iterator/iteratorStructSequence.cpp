@@ -107,6 +107,10 @@ Index IteratorStructSequence::skipDoc( const Index& docno_)
 		{
 			m_docno_cut = m_docno;
 		}
+		else
+		{
+			m_docno_cut = 0;
+		}
 	}
 	return m_docno;
 }

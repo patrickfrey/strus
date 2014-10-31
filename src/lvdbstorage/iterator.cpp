@@ -81,7 +81,7 @@ Index Iterator::skipPos( const Index& firstpos)
 {
 	if (m_posno >= firstpos)
 	{
-		if (m_posno == firstpos)
+		if (m_posno == firstpos && firstpos != 0)
 		{
 			return m_posno;
 		}

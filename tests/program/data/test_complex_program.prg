@@ -52,7 +52,7 @@ INTO struct FOREACH [title [(S 3) basic]] DO within_struct[-50] (_1, _2, _3, _4)
 # [4d] same as [4c] but one term of the three at the begin of the title
 INTO title FOREACH [title [(S 2) basic]] DO intersect( succ(_1), within_struct[-50] (_1, _2, _3));
 
-EVAL idfPriority ( bm15<title,1.5> * 0.3 , bm25<struct,0.75,2.1,10000> );
+EVAL idfPriority ( bm15<title,1.5> * 0.3 , bm25<struct,0.75,2.1,10000> ) WITH struct;
 
 
 

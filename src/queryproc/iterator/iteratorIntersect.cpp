@@ -85,27 +85,30 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		Index docno_next = (*ai)->skipDoc( docno_iter);
-		if (docno_next == 0)
+		docno_iter = (*ai)->skipDoc( docno_iter);
+		if (docno_iter == 0)
 		{
 			m_docno = 0;
 			return 0;
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			docno_next = (*ai)->skipDoc( docno_iter);
+			Index docno_next = (*ai)->skipDoc( docno_iter);
 			if (docno_next != docno_iter)
 			{
-				if (docno_next == 0) return 0;
+				if (docno_next == 0)
+				{
+					m_docno = 0;
+					return 0;
+				}
+				docno_iter = docno_next;
 				break;
 			}
 		}
 		if (ai == ae)
 		{
-			m_docno = docno_iter;
-			return m_docno;
+			return m_docno = docno_iter;
 		}
-		docno_iter = docno_next;
 	}
 }
 
@@ -119,17 +122,18 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		Index pos_next = (*ai)->skipPos( pos_iter);
-		if (pos_next == 0)
+		pos_iter = (*ai)->skipPos( pos_iter);
+		if (pos_iter == 0)
 		{
 			return 0;
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			pos_next = (*ai)->skipPos( pos_iter);
+			Index pos_next = (*ai)->skipPos( pos_iter);
 			if (pos_next != pos_iter)
 			{
 				if (pos_next == 0) return 0;
+				pos_iter = pos_next;
 				break;
 			}
 		}
@@ -137,7 +141,6 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 		{
 			return pos_iter;
 		}
-		pos_iter = pos_next;
 	}
 }
 

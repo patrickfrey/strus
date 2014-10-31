@@ -983,7 +983,8 @@ int main( int argc, const char* argv[])
 			qi = randomQueryAr.begin(), qe = randomQueryAr.end();
 			std::vector<std::vector<RandomQuery::Match> >::const_iterator ri = result_matches.begin(), re = result_matches.end();
 			std::size_t rsum = 0;
-			for (std::size_t rcnt=0; ri != re && qi != qe; ++qi,++ri)
+			std::size_t rcnt = 0;
+			for (; ri != re && qi != qe; ++qi,++ri)
 			{
 				arglen += qi->arg.size();
 				std::vector<RandomQuery::Match> expected_matches = qi->expectedMatches( collection);
@@ -997,10 +998,12 @@ int main( int argc, const char* argv[])
 #endif
 				if (++rcnt >= 100)
 				{
+					rcnt = 0;
 					rsum += rcnt;
 					std::cerr << ".";
 				}
 			}
+			rsum += rcnt;
 			std::cerr << std::endl;
 			std::cerr << "verified " << rsum << " query results" << std::endl;
 		}
