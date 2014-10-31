@@ -52,15 +52,6 @@ public:
 				const std::string& value_,
 				const Index& position_)=0;
 
-		/// \brief Define the weight of the term in the document (allows to define one single measure like tf*IDF for non positional weighting of terms)
-		/// \param[in] type_ type name of the term
-		/// \param[in] value_ value string of the term
-		/// \param[in] weight_ weight of the term in the document
-		virtual void setTermWeight(
-				const std::string& type_,
-				const std::string& value_,
-				float weight_)=0;
-
 		/// \brief Define a numeric attribute for the document
 		/// \param[in] name_ one character as name of the attribute
 		/// \param[in] value_ value of the document attribute

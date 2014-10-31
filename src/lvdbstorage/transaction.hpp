@@ -49,11 +49,6 @@ public:
 			const std::string& value_,
 			const Index& position_);
 
-	virtual void setTermWeight(
-			const std::string& type_,
-			const std::string& value_,
-			float weight_);
-
 	virtual void setDocumentAttribute(
 			char name_,
 			float value_);
@@ -68,12 +63,10 @@ private:
 	typedef std::pair<Index,Index> TermMapKey;
 	struct TermMapValue
 	{
-		TermMapValue()
-			:weight(1.0){}
+		TermMapValue(){}
 		TermMapValue( const TermMapValue& o)
-			:weight(o.weight),pos(o.pos){}
+			:pos(o.pos){}
 
-		float weight;
 		std::set<Index> pos;
 	};
 	typedef std::map< TermMapKey, TermMapValue> TermMap;

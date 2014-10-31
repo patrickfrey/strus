@@ -68,20 +68,12 @@ void Transaction::addTermOccurrence(
 	inv->value = value_;
 }
 
-void Transaction::setTermWeight(
-		const std::string& type_,
-		const std::string& value_,
-		float weight_)
-{
-	m_terms[ termMapKey( type_, value_)].weight = weight_;
-}
-
 void Transaction::setDocumentAttribute(
 		char name_,
-		float weight_)
+		float value_)
 {
 	std::string value;
-	packFloat( value, weight_);
+	packFloat( value, value_);
 	m_attributes.push_back( DocAttribute( DocAttribute::TypeNumber, name_, value));
 }
 
@@ -102,17 +94,17 @@ void Transaction::commit()
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
 
 	// [1] Delete old document attributes and insert the new ones
-	std::string weightkey;
-	std::size_t weightkeysize;
+	std::string docattribkey;
+	std::size_t docattribkeysize;
 
 	// [1.1] Delete old numeric attributes
-	weightkey.push_back( (char)Storage::DocNumAttrPrefix);
-	packIndex( weightkey, docno);
-	weightkeysize = weightkey.size();
+	docattribkey.push_back( (char)Storage::DocNumAttrPrefix);
+	packIndex( docattribkey, docno);
+	docattribkeysize = docattribkey.size();
 
-	for (vi->Seek( weightkey); vi->Valid(); vi->Next())
+	for (vi->Seek( docattribkey); vi->Valid(); vi->Next())
 	{
-		if (weightkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), weightkey.c_str()))
+		if (docattribkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), docattribkey.c_str()))
 		{
 			//... end of document reached
 			break;
@@ -126,21 +118,21 @@ void Transaction::commit()
 	{
 		if (wi->type == DocAttribute::TypeNumber)
 		{
-			weightkey.push_back( wi->name);
-			batch.Put( weightkey, wi->value);
-			weightkey.resize( weightkeysize);
+			docattribkey.push_back( wi->name);
+			batch.Put( docattribkey, wi->value);
+			docattribkey.resize( docattribkeysize);
 		}
 	}
 
 	// [1.3] Delete old textual attributes
-	weightkey.clear();
-	weightkey.push_back( (char)Storage::DocTextAttrPrefix);
-	packIndex( weightkey, docno);
-	weightkeysize = weightkey.size();
+	docattribkey.clear();
+	docattribkey.push_back( (char)Storage::DocTextAttrPrefix);
+	packIndex( docattribkey, docno);
+	docattribkeysize = docattribkey.size();
 
-	for (vi->Seek( weightkey); vi->Valid(); vi->Next())
+	for (vi->Seek( docattribkey); vi->Valid(); vi->Next())
 	{
-		if (weightkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), weightkey.c_str()))
+		if (docattribkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), docattribkey.c_str()))
 		{
 			//... end of document reached
 			break;
@@ -154,9 +146,9 @@ void Transaction::commit()
 	{
 		if (wi->type == DocAttribute::TypeString)
 		{
-			weightkey.push_back( wi->name);
-			batch.Put( weightkey, wi->value);
-			weightkey.resize( weightkeysize);
+			docattribkey.push_back( wi->name);
+			batch.Put( docattribkey, wi->value);
+			docattribkey.resize( docattribkeysize);
 		}
 	}
 
@@ -218,10 +210,9 @@ void Transaction::commit()
 		packIndex( termkey, ti->first.second);	// [valueno]
 		packIndex( termkey, docno);		// [docno]
 
+		packIndex( positions, ti->second.pos.size());
+		// ... first element is the ff in the document
 		std::set<Index>::const_iterator pi = ti->second.pos.begin(), pe = ti->second.pos.end();
-		float weight = ti->second.weight;
-		positions.append( reinterpret_cast<const char*>(&weight), sizeof(weight));
-
 		for (; pi != pe; ++pi)
 		{
 			packIndex( positions, *pi);

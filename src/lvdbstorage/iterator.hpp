@@ -53,11 +53,10 @@ public:
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& firstpos);
 
-	virtual float weight() const
+	virtual unsigned int frequency()
 	{
-		return m_weight;
+		return m_frequency;
 	}
-	virtual unsigned int frequency();
 
 	virtual Index documentFrequency()
 	{
@@ -80,7 +79,7 @@ private:
 	std::size_t m_keysize;
 	Index m_docno;
 	leveldb::Iterator* m_itr;
-	float m_weight;
+	unsigned int m_frequency;
 	Index m_posno;
 	const char* m_positr;
 	const char* m_posend;

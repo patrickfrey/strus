@@ -920,15 +920,6 @@ int main( int argc, const char* argv[])
 #endif
 				totTermStringSize += term.value.size();
 			}
-			std::map<unsigned int, float>::const_iterator wi = di->weightmap.begin(), we = di->weightmap.end();
-			for (; wi != we; ++wi,++totNofFeatures)
-			{
-				const TermCollection::Term& term = collection.termCollection.termar[ wi->first-1];
-				transaction->setTermWeight( term.type, term.value, wi->second);
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "weigth type '" << term.type << "' value '" << term.value << "' weight " << wi->second << std::endl;
-#endif
-			}
 			transaction->commit();
 
 #ifdef STRUS_LOWLEVEL_DEBUG

@@ -46,11 +46,6 @@ public:
 	virtual Index skipDoc( const Index& docno)=0;
 	virtual Index skipPos( const Index& firstpos)=0;
 
-	virtual float weight() const
-	{
-		throw std::runtime_error("internal: weight method not defined for joined iterator");
-	}
-
 	virtual unsigned int frequency()
 	{
 		Index idx=0;

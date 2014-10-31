@@ -160,6 +160,26 @@ Index strus::unpackIndex( const char*& itr, const char* end)
 	}
 }
 
+const char* strus::skipIndex( const char* ptr, const char* end)
+{
+	char const* rt = ptr;
+	if (*rt == (char)B11111111)
+	{
+		++rt;
+		rt += g_charlentable[ *rt];
+		rt += g_charlentable[ *rt];
+	}
+	else
+	{
+		rt += g_charlentable[ *rt];
+	}
+	if (rt > end)
+	{
+		throw std::runtime_error( "corrupt data (skipIndex)");
+	}
+	return rt;
+}
+
 void strus::packIndex( std::string& buf, const Index& idx)
 {
 	if (idx > 0x7fffFFFFU)

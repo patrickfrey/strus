@@ -36,7 +36,7 @@
 using namespace strus;
 
 Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
-	:m_db(db_),m_docno(0),m_itr(0),m_weight(0.0),m_posno(0),m_positr(0),m_posend(0)
+	:m_db(db_),m_docno(0),m_itr(0),m_frequency(0),m_posno(0),m_positr(0),m_posend(0)
 {
 	m_key.push_back( (char)Storage::LocationPrefix);
 	packIndex( m_key, termtypeno);
@@ -52,7 +52,7 @@ Iterator::Iterator( const Iterator& o)
 	,m_keysize(o.m_keysize)
 	,m_docno(0)
 	,m_itr(0)
-	,m_weight(o.m_weight)
+	,m_frequency(o.m_frequency)
 	,m_posno(0)
 	,m_positr(0)
 	,m_posend(0)
@@ -87,9 +87,8 @@ Index Iterator::skipPos( const Index& firstpos)
 		}
 		m_posno = 0;
 		m_positr = m_itr->value().data();
-		unsigned int ofs = sizeofPackedFloat( m_positr);
-		m_positr += ofs;
-		m_posend = m_positr + m_itr->value().size() - ofs;
+		m_posend = m_positr + m_itr->value().size();
+		m_positr = skipIndex( m_positr, m_posend); //... skip ff
 	}
 	unsigned int ofs = (m_posend - m_positr) >> 1;
 	if (ofs > firstpos - m_posno)
@@ -146,7 +145,7 @@ Index Iterator::extractMatchData()
 		m_posno = 0;
 		m_positr = m_itr->value().data();
 		m_posend = m_positr + m_itr->value().size();
-		m_weight = unpackFloat( m_positr, m_posend);
+		m_frequency = (unsigned int)unpackIndex( m_positr, m_posend);
 
 		// Extract the next matching document number from the rest of the key and return it:
 		const char* ki = m_itr->key().data() + m_keysize;
@@ -159,7 +158,7 @@ Index Iterator::extractMatchData()
 		delete m_itr;
 		m_docno = 0;
 		m_itr = 0;
-		m_weight = 0.0;
+		m_frequency = 0;
 		m_posno = 0;
 		m_positr = 0;
 		m_posend = 0;
@@ -186,13 +185,4 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 	return extractMatchData();
 }
 
-unsigned int Iterator::frequency()
-{
-	if (m_itr == 0) return 0;
-	char const* pi = m_itr->value().data();
-	unsigned int ofs = sizeofPackedFloat( pi);
-	pi += ofs;
-	char const* pe = pi + m_itr->value().size() - ofs;
-	return nofPackedIndices( pi, pe);
-}
 

@@ -106,7 +106,6 @@ void WeightingFunction::printExpression(
 		std::vector<WeightingFunction> args,
 		const StringIndexMap& setmap)
 {
-	out << "( ";
 	std::vector<WeightingFunction>::const_iterator ai = args.begin(), ae = args.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
 	{
@@ -125,7 +124,6 @@ void WeightingFunction::printExpression(
 			out << " * " << buf.str();
 		}
 	}
-	out << ")";
 }
 
 

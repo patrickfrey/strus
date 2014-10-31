@@ -52,10 +52,6 @@ public:
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
 	virtual Index skipPos( const Index& firstpos)=0;
 
-	/// \brief Get the storage weight of the current document reached with 'skipDoc(const Index&)'
-	/// \remark May not be defined for composed features
-	virtual float weight() const=0;
-
 	/// \brief Get the number of documents in the collection where the feature occurrs
 	/// \remark May not be defined for composed features
 	virtual Index documentFrequency()=0;
