@@ -29,7 +29,6 @@
 #include "strus/queryEvalLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "iteratorReference.hpp"
-#include "accumulatorReference.hpp"
 #include "weightingFunctionReference.hpp"
 #include "queryEval.hpp"
 #include "dll_tags.hpp"

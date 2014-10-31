@@ -77,7 +77,7 @@ public:
 	/// \return the estimated IDF value
 	virtual double
 		getEstimatedIdf(
-			IteratorInterface& itr);
+			IteratorInterface& itr) const;
 
 	/// \brief Create a weighting function for term occurrencies
 	/// \param[in] name name of the weighting function

@@ -44,8 +44,7 @@ namespace strus
 
 /// \class Accumulator
 /// \brief Accumulator for weights of matches
-class AccumulatorIdfPriority
-	:public AccumulatorInterface
+class Accumulator
 {
 public:
 	/// \brief Constructor

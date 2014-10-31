@@ -36,49 +36,31 @@ using namespace strus::parser;
 
 void AccumulateOperation::parse( char const*& src, StringIndexMap& setnamemap)
 {
-	if (isAlpha( *src))
+	m_args = WeightingFunction::parseExpression( src, setnamemap);
+	if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "WITH"))
 	{
-		m_name = parse_IDENTIFIER( src);
-
-		if (isOpenOvalBracket( *src))
-		{
-			parse_OPERATOR(src);
-			m_args = WeightingFunction::parseExpression( src, setnamemap);
-		}
-		else
-		{
-			throw std::runtime_error( "oval brackets expected after accumulate function name");
-		}
-		if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "WITH"))
-		{
-			throw std::runtime_error("WITH expected with the feature set selection list to determine what should be evaluated");
-		}
-		for (;;)
-		{
-			if (!isAlpha( *src))
-			{
-				throw std::runtime_error( "expected comma ',' separated list of identifiers defining the features to select after WITH");
-			}
-			m_featureSelectionSets.push_back(
-				setnamemap.get( parse_IDENTIFIER( src)));
-
-			if (!isComma( *src))
-			{
-				break;
-			}
-			++src;
-		}
+		throw std::runtime_error("WITH expected with the feature set selection list to determine what should be evaluated");
 	}
-	else
+	for (;;)
 	{
-		throw std::runtime_error( "name of accumulator function expected after EVAL");
+		if (!isAlpha( *src))
+		{
+			throw std::runtime_error( "expected comma ',' separated list of identifiers defining the features to select after WITH");
+		}
+		m_featureSelectionSets.push_back(
+			setnamemap.get( parse_IDENTIFIER( src)));
+
+		if (!isComma( *src))
+		{
+			break;
+		}
+		++src;
 	}
 }
 
 
 void AccumulateOperation::print( std::ostream& out, const StringIndexMap& setnamemap) const
 {
-	out << name();
 	WeightingFunction::printExpression( out, args(), setnamemap);
 	std::vector<int>::const_iterator si = m_featureSelectionSets.begin(), se = m_featureSelectionSets.end();
 	out << " WITH ";

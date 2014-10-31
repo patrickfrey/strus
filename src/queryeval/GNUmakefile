@@ -9,7 +9,6 @@ CPP_OBJS=\
 	parser/weightingFunction.o \
 	parser/tupleGenerator.o \
 	parser/lexems.o \
-	accumulatorArgument.o \
 	accumulator.o \
 	queryEval.o \
 	queryEvalLib.o

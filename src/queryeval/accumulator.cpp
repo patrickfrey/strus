@@ -7,7 +7,7 @@
 
 using namespace strus;
 
-AccumulatorIdfPriority::AccumulatorIdfPriority( const QueryProcessorInterface* qproc_)
+Accumulator::Accumulator( const QueryProcessorInterface* qproc_)
 	:m_queryprocessor(qproc_)
 	,m_selectoridx(0)
 	,m_docno(0)
@@ -17,7 +17,8 @@ void Accumulator::addSelector(
 		const IteratorInterface& iterator)
 {
 	IteratorReference itr( iterator.copy());
-	if (getEstimatedIdf( itr) > std::numeric_limits<double>::epsilon( itr))
+	if (m_queryprocessor->getEstimatedIdf( *itr)
+		> std::numeric_limits<double>::epsilon())
 	{
 		m_selectors.push_back( itr);
 	}
@@ -37,7 +38,7 @@ void Accumulator::addRanker(
 }
 
 
-bool AccumulatorIdfPriority::nextRank(
+bool Accumulator::nextRank(
 		Index& docno,
 		unsigned int& selectorState,
 		double& weight)

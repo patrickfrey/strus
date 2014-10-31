@@ -40,11 +40,6 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 		StringIndexMap& setmap)
 {
 	std::vector<WeightingFunction> rt;
-	if (isCloseOvalBracket(*src))
-	{
-		parse_OPERATOR(src);
-		return rt;
-	}
 	for (;;)
 	{
 		if (!isAlpha( *src))
@@ -97,14 +92,9 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 		{
 			parse_OPERATOR(src);
 		}
-		else if (isCloseOvalBracket(*src))
-		{
-			parse_OPERATOR(src);
-			return rt;
-		}
 		else
 		{
-			throw std::runtime_error("comma ',' as argument separator or close oval bracket ')' to terminate argument list expected");
+			break;
 		}
 	}
 	return rt;

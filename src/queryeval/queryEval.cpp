@@ -32,7 +32,7 @@
 #include "parser/lexems.hpp"
 #include "parser/selectorSet.hpp"
 #include "iteratorReference.hpp"
-#include "accumulatorReference.hpp"
+#include "accumulator.hpp"
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
@@ -269,7 +269,7 @@ void QueryEval::print( std::ostream& out) const
 
 std::vector<WeightedDocument>
 	QueryEval::getRankedDocumentList(
-			AccumulatorInterface& accu,
+			Accumulator& accu,
 			std::size_t maxNofRanks) const
 {
 	typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
@@ -441,7 +441,7 @@ std::vector<WeightedDocument>
 	//[3] Get the result accumulator and evaluate the results
 	if (m_accumulateOperation.defined())
 	{
-		AccumulatorReference accumulator( processor.createAccumulator( m_accumulateOperation.name()));
+		Accumulator accumulator( &processor);
 	
 		std::vector<WeightingFunction>::const_iterator
 			gi = m_accumulateOperation.args().begin(),
@@ -455,7 +455,7 @@ std::vector<WeightedDocument>
 			{
 				if (ai->get())
 				{
-					accumulator->addRanker( gi->factor(), gi->function(), gi->params(), **ai);
+					accumulator.addRanker( gi->factor(), gi->function(), gi->params(), **ai);
 				}
 			}
 		}
@@ -485,9 +485,9 @@ std::vector<WeightedDocument>
 				processor.createJoinIterator( "union", 0, aidx, far));
 			//... PF:HACK: Require 'union' to exist and do an efficient set union operation
 	
-			accumulator->addSelector( *selection);
+			accumulator.addSelector( *selection);
 		}
-		return getRankedDocumentList( *accumulator, maxNofRanks);
+		return getRankedDocumentList( accumulator, maxNofRanks);
 	}
 	else
 	{

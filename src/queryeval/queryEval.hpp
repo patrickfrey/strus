@@ -30,7 +30,6 @@
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/weightedDocument.hpp"
-#include "strus/accumulatorInterface.hpp"
 #include "parser/joinFunction.hpp"
 #include "parser/joinOperation.hpp"
 #include "parser/selectorExpression.hpp"
@@ -39,6 +38,9 @@
 #include <vector>
 
 namespace strus {
+
+/// \brief Forward declaration
+class Accumulator;
 
 /// \brief Query evaluation program representation
 class QueryEval
@@ -75,7 +77,7 @@ public:
 private:
 	std::vector<WeightedDocument>
 		getRankedDocumentList(
-			AccumulatorInterface& accu,
+			Accumulator& accu,
 			std::size_t maxNofRanks) const;
 
 	void parseJoinOperationDef( char const*& src);
