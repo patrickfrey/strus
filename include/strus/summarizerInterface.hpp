@@ -36,7 +36,11 @@ namespace strus
 {
 /// \brief Forward declaration
 class IteratorInterface;
+/// \brief Forward declaration
+class ForwardIndexViewerInterface;
 
+
+/// \brief Interface for implementing summarization (additional info about the matches in the result ranklist of a retrieval query)
 class SummarizerInterface
 {
 public:
@@ -64,16 +68,16 @@ public:
 		const std::string& text() const		{return m_text;}
 
 	private:
+		std::string m_text;
 		Index m_pos;
 		unsigned int m_length;
-		std::string m_text;
 	};
 
 	/// \brief Get the summarization based on term occurrencies
-	/// \param[in] docno document to get the summary from 
+	/// \param[in] docno document to get the summary from or 0, if the summary should be global
 	/// \param[in] itr iterator for the term occurrencies to get the summary from 
 	/// \param[in] markitr iterator for context markers related to the summary
-	/// \return the terms forming the summarization in order of occurrence
+	/// \return the summarization elements
 	virtual std::vector<SummaryElement>
 		getSummary(
 			const Index& docno,

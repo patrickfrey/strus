@@ -37,6 +37,11 @@ namespace strus
 
 /// \brief Forward declaration
 class StorageInterface;
+/// \brief Forward declaration
+class ForwardIndexViewerInterface;
+/// \brief Forward declaration
+class IteratorInterface;
+
 
 class SummarizerMetaData
 	:public SummarizerInterface
@@ -49,7 +54,7 @@ public:
 	virtual ~SummarizerMetaData(){}
 
 	/// \brief Get the summarization based on term occurrencies
-	/// \param[in] docno document to get the summary from 
+	/// \param[in] docno document to get the summary from or 0, if the summary should be global
 	/// \param[in] itr iterator for the term occurrencies to get the summary from 
 	/// \param[in] markitr iterator for context markers related to the summary
 	/// \return the summarization elements

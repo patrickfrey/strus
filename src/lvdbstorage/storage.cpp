@@ -26,9 +26,12 @@
 
 --------------------------------------------------------------------
 */
+#include "strus/iteratorInterface.hpp"
+#include "strus/forwardIndexViewerInterface.hpp"
 #include "storage.hpp"
 #include "iterator.hpp"
 #include "transaction.hpp"
+#include "forwardIndexViewer.hpp"
 #include "indexPacker.hpp"
 #include <string>
 #include <vector>
@@ -226,6 +229,13 @@ IteratorInterface*
 	Index termno = keyLookUp( TermValuePrefix, termstr);
 	if (!typeno || !termno) return 0;
 	return new Iterator( m_db, typeno, termno);
+}
+
+ForwardIndexViewerInterface*
+	Storage::createForwardIndexViewer(
+		const std::string& type)
+{
+	return new ForwardIndexViewer( this, m_db, type);
 }
 
 StorageInterface::TransactionInterface*

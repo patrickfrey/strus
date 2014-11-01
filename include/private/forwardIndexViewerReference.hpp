@@ -26,50 +26,22 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
-#include <string>
-#include <vector>
+#ifndef _STRUS_FORWARD_INDEX_VIEWER_REFERENCE_HPP_INCLUDED
+#define _STRUS_FORWARD_INDEX_VIEWER_REFERENCE_HPP_INCLUDED
+#include "strus/forwardIndexInterface.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
-/// \brief Forward declaration
-class StorageInterface;
-/// \brief Forward declaration
-class ForwardIndexViewerInterface;
-/// \brief Forward declaration
-class IteratorInterface;
-
-
-class SummarizerMatchPhrase
-	:public SummarizerInterface
+class ForwardIndexViewerReference
+	:public boost::shared_ptr<ForwardIndexViewerInterface>
 {
 public:
-	SummarizerMatchPhrase(
-		StorageInterface* storage_,
-		const std::string& termtype_,
-		int maxlen_);
-
-	virtual ~SummarizerMatchPhrase();
-
-	/// \brief Get the summarization based on term occurrencies
-	/// \param[in] docno document to get the summary from or 0, if the summary should be global
-	/// \param[in] itr iterator for the term occurrencies to get the summary from 
-	/// \param[in] markitr iterator for context markers related to the summary
-	/// \return the summarization elements
-	virtual std::vector<SummaryElement>
-		getSummary(
-			const Index& docno,
-			IteratorInterface& itr,
-			IteratorInterface& markitr);
-
-private:
-	StorageInterface* m_storage;
-	ForwardIndexViewerInterface* m_forwardindex;
-	std::string m_termtype;
-	int m_maxlen;
+	ForwardIndexViewerReference( ForwardIndexViewerInterface* o=0)
+		:boost::shared_ptr<ForwardIndexViewerInterface>(o){}
+	ForwardIndexViewerReference( const ForwardIndexViewerReference& o)
+		:boost::shared_ptr<ForwardIndexViewerInterface>(o){}
 };
 
 }//namespace

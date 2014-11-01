@@ -28,12 +28,19 @@
 */
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
 #include <string>
+#include "strus/index.hpp"
 
 namespace strus
 {
 
+/// \brief Forward declaration
+class IteratorInterface;
+/// \brief Forward declaration
+class ForwardIndexViewerInterface;
+
+
+/// \brief Interface of a strus IR storage
 class StorageInterface
 {
 public:
@@ -89,6 +96,13 @@ public:
 		createTermOccurrenceIterator(
 			const std::string& type,
 			const std::string& value)=0;
+
+	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
+	/// \param[in] type type name of the term to be inspected
+	/// \return the created viewer reference to be disposed with delete
+	virtual ForwardIndexViewerInterface*
+		createForwardIndexViewer(
+			const std::string& type)=0;
 
 	/// \brief Get the number of documents inserted into the collection
 	/// \return the number of documents

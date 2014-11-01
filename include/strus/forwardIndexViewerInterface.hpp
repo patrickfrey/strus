@@ -26,50 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
+#ifndef _STRUS_FORWARD_INDEX_VIEWER_INTERFACE_HPP_INCLUDED
+#define _STRUS_FORWARD_INDEX_VIEWER_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
 #include <string>
 #include <vector>
 
 namespace strus
 {
 
-/// \brief Forward declaration
-class StorageInterface;
-/// \brief Forward declaration
-class ForwardIndexViewerInterface;
-/// \brief Forward declaration
-class IteratorInterface;
-
-
-class SummarizerMatchPhrase
-	:public SummarizerInterface
+/// \brief Interface for the index that maps for a term type a document number and position to the token in the inverted index (used for extracting the items from the documents inserted)
+class ForwardIndexViewerInterface
 {
 public:
-	SummarizerMatchPhrase(
-		StorageInterface* storage_,
-		const std::string& termtype_,
-		int maxlen_);
+	virtual ~ForwardIndexViewerInterface(){}
 
-	virtual ~SummarizerMatchPhrase();
+	/// \brief Define the document of the items inspected
+	virtual void initDoc( const Index& docno_)=0;
 
-	/// \brief Get the summarization based on term occurrencies
-	/// \param[in] docno document to get the summary from or 0, if the summary should be global
-	/// \param[in] itr iterator for the term occurrencies to get the summary from 
-	/// \param[in] markitr iterator for context markers related to the summary
-	/// \return the summarization elements
-	virtual std::vector<SummaryElement>
-		getSummary(
-			const Index& docno,
-			IteratorInterface& itr,
-			IteratorInterface& markitr);
+	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
+	virtual Index skipPos( const Index& firstpos)=0;
 
-private:
-	StorageInterface* m_storage;
-	ForwardIndexViewerInterface* m_forwardindex;
-	std::string m_termtype;
-	int m_maxlen;
+	/// \brief Fetch the item at the current position (defined by initType(const std::string&) and initDoc( const Index&))
+	virtual std::string fetch()=0;
 };
 
 }//namespace

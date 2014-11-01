@@ -29,13 +29,19 @@
 #ifndef _STRUS_LVDB_STORAGE_HPP_INCLUDED
 #define _STRUS_LVDB_STORAGE_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
-#include "strus/iteratorInterface.hpp"
+#include "strus/index.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
 
 namespace strus {
 
+/// \brief Forward declaration
+class IteratorInterface;
+/// \brief Forward declaration
+class ForwardIndexViewerInterface;
+
+/// \brief Strus IR storage implementation based on LevelDB
 class Storage
 	:public StorageInterface
 {
@@ -48,6 +54,10 @@ public:
 		createTermOccurrenceIterator(
 			const std::string& termtype,
 			const std::string& termid);
+
+	virtual ForwardIndexViewerInterface*
+		createForwardIndexViewer(
+			const std::string& type);
 
 	virtual TransactionInterface*
 		createTransaction( const std::string& docid);
