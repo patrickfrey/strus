@@ -74,13 +74,17 @@ public:
 	};
 
 	/// \brief Get the summarization based on term occurrencies
-	/// \param[in] docno document to get the summary from or 0, if the summary should be global
-	/// \param[in] itr iterator for the term occurrencies to get the summary from 
+	/// \param[in,out] res where to append the summarization result
+	/// \param[in] docno document to get the summary element from or 0, if the summary should be global
+	/// \param[in] pos position tp get the summary element from element or 0, if the summary should be for the whole document
+	/// \param[in] itr iterator for the term occurrencies where to get the summary from
 	/// \param[in] markitr iterator for context markers related to the summary
 	/// \return the summarization elements
-	virtual std::vector<SummaryElement>
+	virtual bool
 		getSummary(
+			std::vector<SummaryElement>& res,
 			const Index& docno,
+			const Index& pos,
 			IteratorInterface& itr,
 			IteratorInterface& markitr)=0;
 };

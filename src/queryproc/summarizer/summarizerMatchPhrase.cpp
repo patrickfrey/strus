@@ -46,36 +46,39 @@ SummarizerMatchPhrase::~SummarizerMatchPhrase()
 }
 
 
-static void getSummary_(
+static bool getSummary_(
 		std::vector<SummarizerInterface::SummaryElement>& res,
 		const Index& docno,
+		const Index& pos,
 		IteratorInterface& itr,
 		IteratorInterface& markitr,
 		ForwardIndexViewerInterface& forwardindex,
 		int maxlen)
 {
+	bool rt = false;
 	if (itr.skipDoc( docno) == docno)
 	{
 		forwardindex.initDoc( docno);
 
-		Index pos = 0;
-		while (0!=(pos=itr.skipPos( pos+1)))
+		Index curpos = itr.skipPos( pos);
+		for (;;)
 		{
 			if (maxlen >= 0)
 			{
 				unsigned int length = 0;
-				Index endpos = markitr.skipPos( pos);
+				Index endpos = markitr.skipPos( curpos);
 				const char* trailer = "";
-				if (endpos - pos > maxlen)
+				if (endpos - curpos > maxlen)
 				{
 					trailer = " ...";
-					endpos = pos + maxlen;
+					endpos = curpos + maxlen;
 				}
 				std::string phrase;
-				for (;pos <= endpos; ++pos)
+				Index pp = curpos;
+				for (;pp <= endpos; ++pp)
 				{
-					pos = forwardindex.skipPos(pos);
-					if (pos)
+					pp = forwardindex.skipPos(pp);
+					if (pp)
 					{
 						if (!phrase.empty()) phrase.push_back(' ');
 						phrase.append( forwardindex.fetch());
@@ -87,16 +90,17 @@ static void getSummary_(
 					}
 				}
 				phrase.append( trailer);
-				res.push_back( SummarizerInterface::SummaryElement( phrase, pos, length));
+				res.push_back( SummarizerInterface::SummaryElement( phrase, curpos, length));
+				rt = true;
 			}
 			else
 			{
 				int absolute_maxlen = -maxlen;
 				unsigned int length = 0;
-				Index rangepos = (pos > absolute_maxlen) ? (pos-absolute_maxlen):1;
+				Index rangepos = (curpos > absolute_maxlen) ? (curpos-absolute_maxlen):1;
 				Index prevpos = markitr.skipPos( rangepos);
 				std::string phrase;
-				if (!prevpos || prevpos > pos)
+				if (!prevpos || prevpos > curpos)
 				{
 					prevpos = rangepos;
 					if (rangepos > 1)
@@ -107,10 +111,10 @@ static void getSummary_(
 				else for (;;)
 				{
 					Index midpos = markitr.skipPos( prevpos+1);
-					if (!midpos || midpos > pos) break;
+					if (!midpos || midpos > curpos) break;
 					prevpos = midpos;
 				}
-				for (;prevpos <= pos; ++prevpos)
+				for (;prevpos <= curpos; ++prevpos)
 				{
 					prevpos = forwardindex.skipPos(prevpos);
 					if (prevpos)
@@ -124,33 +128,44 @@ static void getSummary_(
 						break;
 					}
 				}
-				res.push_back( SummarizerInterface::SummaryElement( phrase, pos, length));
+				res.push_back( SummarizerInterface::SummaryElement( phrase, curpos, length));
+				rt = true;
+			}
+			if (pos)
+			{
+				break;
+			}
+			else
+			{
+				curpos = itr.skipPos( curpos+1);
 			}
 		}
 	}
+	return rt;
 }
 
-
-std::vector<SummarizerInterface::SummaryElement>
+bool
 	SummarizerMatchPhrase::getSummary(
+		std::vector<SummarizerInterface::SummaryElement>& res,
 		const Index& docno,
+		const Index& pos,
 		IteratorInterface& itr,
 		IteratorInterface& markitr)
 {
-	std::vector<SummaryElement> rt;
 	if (docno)
 	{
-		getSummary_( rt, docno, itr, markitr, *m_forwardindex, m_maxlen);
+		return getSummary_( res, docno, pos, itr, markitr, *m_forwardindex, m_maxlen);
 	}
 	else
 	{
 		Index dn = 0;
+		bool rt = false;
 		while (0!=(dn=itr.skipDoc( dn+1)))
 		{
-			getSummary_( rt, dn, itr, markitr, *m_forwardindex, m_maxlen);
+			rt |= getSummary_( res, dn, pos, itr, markitr, *m_forwardindex, m_maxlen);
 		}
+		return rt;
 	}
-	return rt;
 }
 
 
