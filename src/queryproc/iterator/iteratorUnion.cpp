@@ -37,9 +37,9 @@ IteratorUnion::IteratorUnion( const IteratorUnion& o)
 	}
 }
 
-std::vector<const IteratorInterface*> IteratorUnion::subExpressions( bool positive)
+std::vector<IteratorInterface*> IteratorUnion::subExpressions( bool positive)
 {
-	std::vector<const IteratorInterface*> rt;
+	std::vector<IteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_argar.size());

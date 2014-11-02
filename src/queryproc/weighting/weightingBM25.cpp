@@ -66,7 +66,7 @@ double WeightingBM25::call( IteratorInterface& itr)
 				m_docno, Constants::DOC_ATTRIBUTE_DOCLEN)
 		/ m_avgDocLength;
 
-	return idf()
+	return idf_corrected()
 		* ((double)itr.frequency() * (m_k1 + 1.0))
 		/ ((double)itr.frequency() + m_k1 * (1.0 - m_b + m_b * relativeDocLen));
 }

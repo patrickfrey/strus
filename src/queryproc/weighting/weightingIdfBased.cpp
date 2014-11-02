@@ -34,18 +34,44 @@ using namespace strus;
 void WeightingIdfBased::calculateIdf( IteratorInterface& itr)
 {
 	Index realNofMatches = itr.documentFrequency();
-	double nofMatches = realNofMatches?realNofMatches:m_nofMatchesMap->getNofMatches( itr);
+	double nofMatches = realNofMatches
+				?realNofMatches
+				:m_nofMatchesMap->getNofMatches( itr);
 
+	std::vector<IteratorInterface*> subexpr = itr.subExpressions( true);
+	std::vector<IteratorInterface*>::const_iterator ei = subexpr.begin(), ee = subexpr.end();
+	double subexpr_minNofMatches = nofMatches;
+	for (; ei != ee; ++ei)
+	{
+		Index se_realNofMatches = (*ei)->documentFrequency();
+		double se_nofMatches = se_realNofMatches
+					?se_realNofMatches
+					:m_nofMatchesMap->getNofMatches( **ei);
+		if (se_nofMatches < subexpr_minNofMatches)
+		{
+			subexpr_minNofMatches = se_nofMatches;
+		}
+	}
 	double nofCollectionDocuments = m_storage->nofDocumentsInserted();
 	if (nofCollectionDocuments > nofMatches * 2)
 	{
-		m_idf = log(
-			(nofCollectionDocuments - nofMatches + 0.5)
-			/ (nofMatches + 0.5));
+		m_idf =
+			log(
+				(nofCollectionDocuments - nofMatches + 0.5)
+				/ (nofMatches + 0.5));
+		m_min_idf_subexpressions =
+			log(
+				(nofCollectionDocuments - subexpr_minNofMatches + 0.5)
+				/ (subexpr_minNofMatches + 0.5));
+		m_idf_corrected =
+			(m_idf > m_min_idf_subexpressions)
+				?(m_idf - m_min_idf_subexpressions)
+				:0.0;
 	}
 	else
 	{
 		m_idf = 0.0;
+		m_idf_corrected = 0.0;
 	}
 }
 

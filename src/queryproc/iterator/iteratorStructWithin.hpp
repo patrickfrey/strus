@@ -63,7 +63,7 @@ public:
 		return new IteratorStructWithin( *this);
 	}
 
-	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
 private:
 	Index m_docno;				///< current document number

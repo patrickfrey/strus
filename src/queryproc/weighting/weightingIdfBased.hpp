@@ -51,7 +51,9 @@ public:
 		:m_storage(storage_)
 		,m_nofMatchesMap(nofMatchesMap_)
 		,m_idf_calculated(false)
-		,m_idf(0.0){}
+		,m_idf(0.0)
+		,m_idf_corrected(0.0)
+		,m_min_idf_subexpressions(0.0){}
 
 	WeightingIdfBased( const WeightingIdfBased& o)
 		:m_storage(o.m_storage)
@@ -66,6 +68,7 @@ public:
 protected:
 	bool idf_calculated() const			{return m_idf_calculated;}
 	double idf() const				{return m_idf;}
+	double idf_corrected() const			{return m_idf_corrected;}
 	void calculateIdf( IteratorInterface& itr);
 
 private:
@@ -73,6 +76,8 @@ private:
 	EstimatedNumberOfMatchesMapR m_nofMatchesMap;
 	bool m_idf_calculated;
 	double m_idf;
+	double m_idf_corrected;
+	double m_min_idf_subexpressions;
 };
 
 }//namespace

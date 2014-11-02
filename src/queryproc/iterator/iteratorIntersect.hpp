@@ -49,7 +49,7 @@ public:
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
 
-	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
 	virtual IteratorInterface* copy() const
 	{

@@ -50,7 +50,7 @@ public:
 	SummarizerMatchPhrase(
 		StorageInterface* storage_,
 		const std::string& termtype_,
-		int maxlen_);
+		unsigned int maxlen_);
 
 	virtual ~SummarizerMatchPhrase();
 

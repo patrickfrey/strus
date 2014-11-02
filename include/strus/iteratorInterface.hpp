@@ -44,7 +44,7 @@ public:
 	virtual const std::string& featureid() const=0;
 
 	/// \brief Return the next match with a document number higher than or equal to docno
-	virtual std::vector<const IteratorInterface*> subExpressions( bool positive)=0;
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive)=0;
 
 	/// \brief Return the next match with a document number higher than or equal to docno
 	virtual Index skipDoc( const Index& docno)=0;

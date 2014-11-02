@@ -79,9 +79,9 @@ IteratorStructSequence::IteratorStructSequence( const IteratorStructSequence& o)
 	}
 }
 
-std::vector<const IteratorInterface*> IteratorStructSequence::subExpressions( bool positive)
+std::vector<IteratorInterface*> IteratorStructSequence::subExpressions( bool positive)
 {
-	std::vector<const IteratorInterface*> rt;
+	std::vector<IteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_seq.size());

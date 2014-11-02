@@ -33,7 +33,10 @@
 
 using namespace strus;
 
-SummarizerMatchPhrase::SummarizerMatchPhrase( StorageInterface* storage_, const std::string& termtype_, int maxlen_)
+SummarizerMatchPhrase::SummarizerMatchPhrase(
+		StorageInterface* storage_,
+		const std::string& termtype_,
+		unsigned int maxlen_)
 	:m_storage(storage_)
 	,m_forwardindex( storage_->createForwardIndexViewer( termtype_))
 	,m_termtype(termtype_)
@@ -45,6 +48,75 @@ SummarizerMatchPhrase::~SummarizerMatchPhrase()
 	if (m_forwardindex) delete m_forwardindex;
 }
 
+static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface& markitr, bool& found)
+{
+	found = true;
+	Index rangepos = (curpos > maxlen) ? (curpos-maxlen):1;
+	Index prevpos = markitr.skipPos( rangepos);
+	if (!prevpos || prevpos > curpos)
+	{
+		prevpos = rangepos;
+		if (rangepos > 1)
+		{
+			found = false;
+		}
+	}
+	else for (;;)
+	{
+		Index midpos = markitr.skipPos( prevpos+1);
+		if (!midpos || midpos > curpos) break;
+		prevpos = midpos;
+	}
+	return prevpos;
+	
+}
+
+static Index getEndPos( Index curpos, unsigned int maxlen, IteratorInterface& markitr, bool& found)
+{
+	found = true;
+	Index endpos = markitr.skipPos( curpos);
+	if (endpos - curpos > maxlen)
+	{
+		found = false;
+		endpos = curpos + maxlen;
+	}
+	return endpos;
+}
+
+static SummarizerInterface::SummaryElement
+	summaryElement(
+		const Index& curpos,
+		IteratorInterface& markitr,
+		ForwardIndexViewerInterface& forwardindex,
+		unsigned int maxlen)
+{
+	bool start_found = true;
+	Index startpos = getStartPos( curpos, maxlen, markitr, start_found);
+	bool end_found = true;
+	Index endpos = getEndPos( curpos, maxlen, markitr, end_found);
+
+	unsigned int length = 0;
+	std::string phrase;
+	if (!start_found) phrase.append( "...");
+
+	Index pp = startpos;
+	for (;pp <= endpos; ++pp)
+	{
+		pp = forwardindex.skipPos(pp);
+		if (pp)
+		{
+			if (!phrase.empty()) phrase.push_back(' ');
+			phrase.append( forwardindex.fetch());
+			++length;
+		}
+		else
+		{
+			break;
+		}
+	}
+	if (!end_found) phrase.append( "...");
+	return SummarizerInterface::SummaryElement( phrase, curpos, length);
+}
 
 static bool getSummary_(
 		std::vector<SummarizerInterface::SummaryElement>& res,
@@ -53,91 +125,33 @@ static bool getSummary_(
 		IteratorInterface& itr,
 		IteratorInterface& markitr,
 		ForwardIndexViewerInterface& forwardindex,
-		int maxlen)
+		unsigned int maxlen)
 {
 	bool rt = false;
 	if (itr.skipDoc( docno) == docno)
 	{
 		forwardindex.initDoc( docno);
-
 		Index curpos = itr.skipPos( pos);
-		for (;;)
+
+		if (pos)
 		{
-			if (maxlen >= 0)
+			if (curpos)
 			{
-				unsigned int length = 0;
-				Index endpos = markitr.skipPos( curpos);
-				const char* trailer = "";
-				if (endpos - curpos > maxlen)
-				{
-					trailer = " ...";
-					endpos = curpos + maxlen;
-				}
-				std::string phrase;
-				Index pp = curpos;
-				for (;pp <= endpos; ++pp)
-				{
-					pp = forwardindex.skipPos(pp);
-					if (pp)
-					{
-						if (!phrase.empty()) phrase.push_back(' ');
-						phrase.append( forwardindex.fetch());
-						++length;
-					}
-					else
-					{
-						break;
-					}
-				}
-				phrase.append( trailer);
-				res.push_back( SummarizerInterface::SummaryElement( phrase, curpos, length));
+				res.push_back(
+					summaryElement( 
+						curpos, markitr,
+						forwardindex, maxlen));
 				rt = true;
 			}
-			else
+		}
+		else
+		{
+			for (; curpos; curpos = itr.skipPos( pos+1))
 			{
-				int absolute_maxlen = -maxlen;
-				unsigned int length = 0;
-				Index rangepos = (curpos > absolute_maxlen) ? (curpos-absolute_maxlen):1;
-				Index prevpos = markitr.skipPos( rangepos);
-				std::string phrase;
-				if (!prevpos || prevpos > curpos)
-				{
-					prevpos = rangepos;
-					if (rangepos > 1)
-					{
-						phrase.append( "...");
-					}
-				}
-				else for (;;)
-				{
-					Index midpos = markitr.skipPos( prevpos+1);
-					if (!midpos || midpos > curpos) break;
-					prevpos = midpos;
-				}
-				for (;prevpos <= curpos; ++prevpos)
-				{
-					prevpos = forwardindex.skipPos(prevpos);
-					if (prevpos)
-					{
-						if (!phrase.empty()) phrase.push_back(' ');
-						phrase.append( forwardindex.fetch());
-						++length;
-					}
-					else
-					{
-						break;
-					}
-				}
-				res.push_back( SummarizerInterface::SummaryElement( phrase, curpos, length));
-				rt = true;
-			}
-			if (pos)
-			{
-				break;
-			}
-			else
-			{
-				curpos = itr.skipPos( curpos+1);
+				res.push_back(
+					summaryElement( 
+						curpos, markitr,
+						forwardindex, maxlen));
 			}
 		}
 	}

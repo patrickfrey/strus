@@ -62,9 +62,9 @@ IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	}
 }
 
-std::vector<const IteratorInterface*> IteratorIntersect::subExpressions( bool positive)
+std::vector<IteratorInterface*> IteratorIntersect::subExpressions( bool positive)
 {
-	std::vector<const IteratorInterface*> rt;
+	std::vector<IteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_argar.size());

@@ -67,7 +67,7 @@ public:
 		return rt?(rt + 1):0;
 	}
 
-	virtual std::vector<const IteratorInterface*> subExpressions( bool positive)
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
 	{
 		return m_origin->subExpressions( positive);
 	}

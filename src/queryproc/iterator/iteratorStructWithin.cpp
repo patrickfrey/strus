@@ -79,9 +79,9 @@ IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
 	}
 }
 
-std::vector<const IteratorInterface*> IteratorStructWithin::subExpressions( bool positive)
+std::vector<IteratorInterface*> IteratorStructWithin::subExpressions( bool positive)
 {
-	std::vector<const IteratorInterface*> rt;
+	std::vector<IteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_group.size());

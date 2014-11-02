@@ -51,7 +51,7 @@ public:
 	virtual Index skipDoc( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
 
-	virtual std::vector<const IteratorInterface*> subExpressions( bool positive);
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
 	virtual IteratorInterface* copy() const
 	{

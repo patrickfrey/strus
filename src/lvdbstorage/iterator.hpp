@@ -40,9 +40,9 @@ public:
 	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
 	Iterator( const Iterator& o);
 
-	virtual std::vector<const IteratorInterface*> subExpressions( bool positive)
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
 	{
-		return std::vector<const IteratorInterface*>();
+		return std::vector<IteratorInterface*>();
 	}
 	virtual const std::string& featureid() const
 	{
