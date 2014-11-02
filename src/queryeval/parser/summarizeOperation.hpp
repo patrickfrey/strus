@@ -26,52 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <vector>
+#ifndef _STRUS_QUERY_PARSER_SUMMARIZE_OPERATION_HPP_INCLUDED
+#define _STRUS_QUERY_PARSER_SUMMARIZE_OPERATION_HPP_INCLUDED
+#include "parser/stringIndexMap.hpp"
 #include <string>
-#include <utility>
+#include <vector>
 
-namespace strus
-{
+namespace strus {
+namespace parser {
 
-class WeightedDocument
+/// \brief Defines a summarizer for adding attributes to matches
+class SummarizeOperation
 {
 public:
-	WeightedDocument()
-		:m_docno(0),m_weight(0.0){}
-	WeightedDocument( const WeightedDocument& o)
-		:m_docno(o.m_docno),m_weight(o.m_weight){}
-	WeightedDocument( const Index& docno_, double weight_)
-		:m_docno(docno_),m_weight(weight_){}
+	SummarizeOperation(){}
 
-	Index docno() const					{return m_docno;}
-	double weight() const					{return m_weight;}
+	SummarizeOperation(
+			const std::string& resultAttribute_,
+			const std::string& summarizerName_,
+			const std::string& type_,
+			const std::vector<float>& parameter_,
+			const std::vector<int>& featureSet_);
 
-	class CompareGreater
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight > b.m_weight);
-		}
-	};
+	SummarizeOperation( const SummarizeOperation& o);
 
-	class CompareSmaller
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight < b.m_weight);
-		}
-	};
+	void parse( char const*& src, StringIndexMap& setnamemap);
+	void print( std::ostream& out, const StringIndexMap& setnamemap) const;
+
+public:
+	std::string resultAttribute() const		{return m_resultAttribute;}
+	std::string summarizerName() const		{return m_summarizerName;}
+	std::string type() const			{return m_type;}
+	const std::vector<float>& parameter() const	{return m_parameter;}
+	const std::vector<int>& featureset() const	{return m_featureSet;}
 
 private:
-	Index m_docno;
-	double m_weight;
+	std::string m_resultAttribute;
+	std::string m_summarizerName;
+	std::string m_type;
+	std::vector<float> m_parameter;
+	std::vector<int> m_featureSet;
 };
 
-}//namespace
+}}//namespace
 #endif
 

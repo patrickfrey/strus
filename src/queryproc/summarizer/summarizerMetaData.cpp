@@ -32,36 +32,14 @@
 
 using namespace strus;
 
-bool
-	SummarizerMetaData::getSummary(
-		std::vector<SummarizerInterface::SummaryElement>& res,
-		const Index& docno,
-		const Index&,
-		IteratorInterface& itr,
-		IteratorInterface&)
+std::vector<std::string>
+	SummarizerMetaData::getSummary( const Index& docno)
 {
-	bool rt = false;
-	if (docno)
+	std::vector<std::string> rt;
+	std::string attr = m_storage->documentAttributeString( docno, m_name);
+	if (!attr.empty())
 	{
-		std::string attr = m_storage->documentAttributeString( docno, m_name);
-		if (!attr.empty())
-		{
-			res.push_back( attr);
-			rt = true;
-		}
-	}
-	else
-	{
-		Index dn = 0;
-		while (0!=(dn=itr.skipDoc( dn+1)))
-		{
-			std::string attr = m_storage->documentAttributeString( dn, m_name);
-			if (!attr.empty())
-			{
-				res.push_back( attr);
-				rt = true;
-			}
-		}
+		rt.push_back( attr);
 	}
 	return rt;
 }

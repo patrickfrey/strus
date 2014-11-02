@@ -28,6 +28,7 @@
 */
 #include "queryProcessor.hpp"
 #include "strus/constants.hpp"
+#include "strus/storageInterface.hpp"
 #include "iterator/iteratorPred.hpp"
 #include "iterator/iteratorSucc.hpp"
 #include "iterator/iteratorIntersect.hpp"
@@ -41,6 +42,8 @@
 #include "weighting/weightingFrequency.hpp"
 #include "weighting/weightingBM25.hpp"
 #include "weighting/weightingIdfBased.hpp"
+#include "summarizer/summarizerMetaData.hpp"
+#include "summarizer/summarizerMatchPhrase.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -61,6 +64,7 @@ static bool isEqual( const std::string& id, const char* idstr)
 	for (; *si && *di && ((*si|32) == (*di|32)); ++si,++di){}
 	return !*si && !*di;
 }
+
 
 IteratorInterface*
 	QueryProcessor::createTermIterator( 
@@ -193,4 +197,46 @@ WeightingFunctionInterface*
 	}
 }
 
+
+SummarizerInterface*
+	QueryProcessor::createSummarizer(
+		const std::string& name,
+		const std::string& type,
+		const std::vector<float>& parameter,
+		std::size_t nofitrs,
+		const IteratorInterface** itrs) const
+{
+	if (isEqual( name, "metadata"))
+	{
+		if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
+		if (nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
+		if (type.size() != 1) throw std::runtime_error( std::string( "only one ASCII alphanumeric character allowed as parameter metadata name for summarizer '") + name + "'");
+		return new SummarizerMetaData( m_storage, type[0]);
+	}
+	else if (isEqual( name, "matchphrase"))
+	{
+		unsigned int maxlen = 30;
+		unsigned int summarizelen = 100;
+		if (parameter.size() > 0)
+		{
+			summarizelen = (unsigned int)parameter[0];
+		}
+		if (nofitrs < 2)
+		{
+			return 0;
+		}
+		if (parameter.size() > 2) throw std::runtime_error( std::string("too many scalar arguments for summarizer '") + name + "'");
+		if (parameter.size() == 2)
+		{
+			maxlen = (unsigned int)( parameter[1]);
+		}
+		return new SummarizerMatchPhrase(
+				m_storage, type, maxlen, summarizelen, 
+				nofitrs-1, itrs, itrs[0]);
+	}
+	else
+	{
+		throw std::runtime_error( std::string( "unknown summarizer '") + name + "'");
+	}
+}
 

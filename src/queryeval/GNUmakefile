@@ -6,6 +6,7 @@ CPP_OBJS=\
 	parser/joinFunction.o \
 	parser/selectorExpression.o \
 	parser/selectorSet.o \
+	parser/summarizeOperation.o \
 	parser/weightingFunction.o \
 	parser/tupleGenerator.o \
 	parser/lexems.o \

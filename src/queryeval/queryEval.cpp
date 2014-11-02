@@ -103,6 +103,18 @@ void QueryEval::parseAccumulatorDef( char const*& src)
 	parse_OPERATOR( src);
 }
 
+void QueryEval::parseSummarizeDef( char const*& src)
+{
+	parser::SummarizeOperation summarizer;
+	summarizer.parse( src, m_setnamemap);
+	if (!isSemiColon(*src))
+	{
+		throw std::runtime_error( "missing semicolon ';' after SUMMARIZE expression");
+	}
+	parse_OPERATOR( src);
+	m_summarizers.push_back( summarizer);
+}
+
 void QueryEval::parseTermDef( char const*& src)
 {
 	if (isAlpha(*src))
@@ -149,7 +161,7 @@ void QueryEval::parseTermDef( char const*& src)
 QueryEval::QueryEval( const std::string& source)
 {
 	char const* src = source.c_str();
-	enum StatementKeyword {e_INTO, e_EVAL, e_TERM};
+	enum StatementKeyword {e_INTO, e_EVAL, e_TERM, e_SUMMARIZE};
 	std::string id;
 
 	skipSpaces( src);
@@ -157,7 +169,7 @@ QueryEval::QueryEval( const std::string& source)
 	{
 		while (*src)
 		{
-			switch ((StatementKeyword)parse_KEYWORD( src, 3, "INTO", "EVAL", "TERM"))
+			switch ((StatementKeyword)parse_KEYWORD( src, 4, "INTO", "EVAL", "TERM", "SUMMARIZE"))
 			{
 				case e_TERM:
 					parseTermDef( src);
@@ -167,6 +179,9 @@ QueryEval::QueryEval( const std::string& source)
 					break;
 				case e_EVAL:
 					parseAccumulatorDef( src);
+					break;
+				case e_SUMMARIZE:
+					parseSummarizeDef( src);
 					break;
 			}
 		}
@@ -224,6 +239,30 @@ public:
 		return m_iteratorSets[ setIndex-1];
 	}
 
+	IteratorReference getFeatureSetUnion( const QueryProcessorInterface& processor, int setIndex)
+	{
+		const IteratorInterface* far[ (int)QueryEval::MaxSizeFeatureSet];
+
+		const std::vector<IteratorReference>& feats = getFeatureSet( setIndex);
+		if (feats.size() > (int)QueryEval::MaxSizeFeatureSet)
+		{
+			throw std::runtime_error( "number of features in selection set is too big");
+		}
+		std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
+		std::size_t aidx = 0;
+		for (; ai != ae; ai++)
+		{
+			if (ai->get())
+			{
+				far[ aidx++] = ai->get();
+			}
+		}
+		IteratorReference rt(
+			processor.createJoinIterator(
+				Constants::operator_set_union(), 0, aidx, far));
+		return rt;
+	}
+
 	const std::map<int,int> setSizeMap() const
 	{
 		return m_setSizeMap;
@@ -266,20 +305,29 @@ void QueryEval::print( std::ostream& out) const
 		m_accumulateOperation.print( out, m_setnamemap);
 		out << ";" << std::endl;
 	}
+	std::vector<parser::SummarizeOperation>::const_iterator si = m_summarizers.begin(), se = m_summarizers.end();
+	for (; si != se; ++si)
+	{
+		out << "SUMMARIZE ";
+		si->print( out, m_setnamemap);
+		out << ";" << std::endl;
+	}
 }
 
-std::vector<WeightedDocument>
+
+std::vector<ResultDocument>
 	QueryEval::getRankedDocumentList(
 			Accumulator& accu,
+			const std::vector<SummarizerDef>& summarizers,
+			std::size_t firstRank,
 			std::size_t maxNofRanks) const
 {
 	typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
 
-	std::vector<WeightedDocument> rt;
+	std::vector<ResultDocument> rt;
 	Ranker ranker;
 	std::size_t ranks = 0;
-	std::size_t maxNofRanksInspected = (maxNofRanks * 10) + 100;
-	std::size_t nofRanksInspected = 0;
+	std::size_t lastRank = maxNofRanks + firstRank;
 
 	Index docno = 0;
 	unsigned int state = 0;
@@ -289,7 +337,7 @@ std::vector<WeightedDocument>
 	while (accu.nextRank( docno, state, weight))
 	{
 		ranker.insert( WeightedDocument( docno, weight));
-		if (ranks >= maxNofRanks)
+		if (ranks >= lastRank)
 		{
 			ranker.erase( ranker.begin());
 		}
@@ -297,26 +345,44 @@ std::vector<WeightedDocument>
 		{
 			++ranks;
 		}
-		nofRanksInspected += 1;
-		if (state > prev_state && nofRanksInspected > maxNofRanksInspected)
+		if (state > prev_state && ranks >= lastRank)
 		{
 			break;
 		}
 		prev_state = state;
 	}
 	Ranker::reverse_iterator ri=ranker.rbegin(),re=ranker.rend();
-	for (; ri != re; ++ri)
+	for (std::size_t ridx=0; ri != re; ++ri,++ridx)
 	{
-		rt.push_back( *ri);
+		if (ridx >= firstRank)
+		{
+			std::vector<ResultDocument::Attribute> attr;
+			std::vector<SummarizerDef>::const_iterator
+				si = summarizers.begin(), se = summarizers.end();
+			for (; si != se; ++si)
+			{
+				std::vector<std::string> summary = si->second->getSummary( ri->docno());
+				std::vector<std::string>::const_iterator
+					ci = summary.begin(), ce = summary.end();
+				for (; ci != ce; ++ci)
+				{
+					attr.push_back(
+						ResultDocument::Attribute(
+							si->first, *ce));
+				}
+			}
+			rt.push_back( ResultDocument( *ri, attr));
+		}
 	}
 	return rt;
 }
 
 
-std::vector<WeightedDocument>
+std::vector<ResultDocument>
 	QueryEval::getRankedDocumentList(
 		const QueryProcessorInterface& processor,
 		const Query& query_,
+		std::size_t fromRank,
 		std::size_t maxNofRanks) const
 {
 	QueryStruct query( &m_setnamemap);
@@ -442,6 +508,7 @@ std::vector<WeightedDocument>
 	//[3] Get the result accumulator and evaluate the results
 	if (m_accumulateOperation.defined())
 	{
+		// Create the accumulator:
 		Accumulator accumulator( &processor);
 	
 		std::vector<WeightingFunction>::const_iterator
@@ -466,29 +533,38 @@ std::vector<WeightedDocument>
 
 		for (; fi != fe; ++fi)
 		{
-			const IteratorInterface* far[ MaxSizeFeatureSet];
-
-			const std::vector<IteratorReference>& feats = query.getFeatureSet( *fi);
-			if (feats.size() > MaxSizeFeatureSet)
-			{
-				throw std::runtime_error( "number of features in selection set is too big");
-			}
-			std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
-			std::size_t aidx = 0;
-			for (; ai != ae; ai++)
-			{
-				if (ai->get())
-				{
-					far[ aidx++] = ai->get();
-				}
-			}
-			IteratorReference selection(
-				processor.createJoinIterator(
-					Constants::operator_set_union(), 0, aidx, far));
-	
+			IteratorReference selection( query.getFeatureSetUnion( processor, *fi));
 			accumulator.addSelector( *selection);
 		}
-		return getRankedDocumentList( accumulator, maxNofRanks);
+		// Get the summarizers:
+		std::vector<SummarizerDef> summarizerdefs;
+		std::vector<parser::SummarizeOperation>::const_iterator
+			si = m_summarizers.begin(), se = m_summarizers.end();
+		for (; si != se; ++si)
+		{
+			std::vector<IteratorReference> far_ref;
+			const IteratorInterface* far[ MaxSizeFeatureSet];
+			if (si->featureset().size() > MaxSizeFeatureSet)
+			{
+				throw std::runtime_error( "set of features in summarizer definition is too complex");
+			}
+			std::vector<int>::const_iterator ai = si->featureset().begin(), ae = si->featureset().end();
+			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
+			{
+				far_ref.push_back( query.getFeatureSetUnion( processor, *ai));
+				far[ aidx++] = far_ref.back().get();
+			}
+			summarizerdefs.push_back(
+				SummarizerDef(
+					si->resultAttribute(),
+					processor.createSummarizer(
+						si->summarizerName(), si->type(),
+						si->parameter(), far_ref.size(), far)));
+		}
+		// Calculate and return the ranklist:
+		return getRankedDocumentList(
+				accumulator, summarizerdefs,
+				fromRank, maxNofRanks);
 	}
 	else
 	{

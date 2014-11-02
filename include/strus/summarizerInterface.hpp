@@ -46,47 +46,10 @@ class SummarizerInterface
 public:
 	virtual ~SummarizerInterface(){}
 
-	/// \brief Element of summarization
-	class SummaryElement
-	{
-	public:
-		SummaryElement(
-				const std::string& text_,
-				Index pos_=0,
-				unsigned int length_=0)
-			:m_text(text_)
-			,m_pos(pos_)
-			,m_length(length_){}
-
-		SummaryElement( const SummaryElement& o)
-			:m_text(o.m_text)
-			,m_pos(o.m_pos)
-			,m_length(o.m_length){}
-
-		Index pos() const			{return m_pos;}
-		unsigned int length() const		{return m_length;}
-		const std::string& text() const		{return m_text;}
-
-	private:
-		std::string m_text;
-		Index m_pos;
-		unsigned int m_length;
-	};
-
-	/// \brief Get the summarization based on term occurrencies
-	/// \param[in,out] res where to append the summarization result
-	/// \param[in] docno document to get the summary element from or 0, if the summary should be global
-	/// \param[in] pos position tp get the summary element from element or 0, if the summary should be for the whole document
-	/// \param[in] itr iterator for the term occurrencies where to get the summary from
-	/// \param[in] markitr iterator for context markers related to the summary
+	/// \brief Get some summarization elements
+	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
-	virtual bool
-		getSummary(
-			std::vector<SummaryElement>& res,
-			const Index& docno,
-			const Index& pos,
-			IteratorInterface& itr,
-			IteratorInterface& markitr)=0;
+	virtual std::vector<std::string> getSummary( const Index& docno)=0;
 };
 
 }//namespace

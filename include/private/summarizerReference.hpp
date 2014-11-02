@@ -26,52 +26,25 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <vector>
-#include <string>
-#include <utility>
+#ifndef _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
+#include "strus/summarizerInterface.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
-class WeightedDocument
+class SummarizerReference
+	:public boost::shared_ptr<SummarizerInterface>
 {
 public:
-	WeightedDocument()
-		:m_docno(0),m_weight(0.0){}
-	WeightedDocument( const WeightedDocument& o)
-		:m_docno(o.m_docno),m_weight(o.m_weight){}
-	WeightedDocument( const Index& docno_, double weight_)
-		:m_docno(docno_),m_weight(weight_){}
-
-	Index docno() const					{return m_docno;}
-	double weight() const					{return m_weight;}
-
-	class CompareGreater
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight > b.m_weight);
-		}
-	};
-
-	class CompareSmaller
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight < b.m_weight);
-		}
-	};
-
-private:
-	Index m_docno;
-	double m_weight;
+	SummarizerReference( SummarizerInterface* o=0)
+		:boost::shared_ptr<SummarizerInterface>(o){}
+	SummarizerReference( const SummarizerReference& o)
+		:boost::shared_ptr<SummarizerInterface>(o){}
 };
 
 }//namespace
 #endif
+
 

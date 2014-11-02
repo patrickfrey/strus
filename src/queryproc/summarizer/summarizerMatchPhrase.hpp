@@ -29,6 +29,7 @@
 #ifndef _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
 #include "strus/summarizerInterface.hpp"
+#include "private/iteratorReference.hpp"
 #include <string>
 #include <vector>
 
@@ -47,33 +48,37 @@ class SummarizerMatchPhrase
 	:public SummarizerInterface
 {
 public:
+	/// \param[in] storage_ storage to use
+	/// \param[in] termtype_ type of the tokens to build the summary with
+	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
+	/// \param[in] summarylen_ maximum lenght of the whole summary
+	/// \param[in] nofitrs_ number of argument iterators
+	/// \param[in] itrs_ argument iterators
+	/// \param[in] phrasestruct_ structure iterator to recognize end of phrases
 	SummarizerMatchPhrase(
 		StorageInterface* storage_,
 		const std::string& termtype_,
-		unsigned int maxlen_);
+		unsigned int maxlen_,
+		unsigned int summarylen_,
+		std::size_t nofitrs_,
+		const IteratorInterface** itrs_,
+		const IteratorInterface* phrasestruct_);
 
 	virtual ~SummarizerMatchPhrase();
 
-	/// \brief Get the summarization based on term occurrencies
-	/// \param[in,out] res where to append the summarization result
-	/// \param[in] docno document to get the summary element from or 0, if the summary should be global
-	/// \param[in] pos position tp get the summary element from element or 0, if the summary should be for the whole document
-	/// \param[in] itr iterator for the term occurrencies where to get the summary from
-	/// \param[in] markitr iterator for context markers related to the summary
+	/// \brief Get some summarization elements
+	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
-	virtual bool
-		getSummary(
-			std::vector<SummaryElement>& res,
-			const Index& docno,
-			const Index& pos,
-			IteratorInterface& itr,
-			IteratorInterface& markitr);
+	virtual std::vector<std::string> getSummary( const Index& docno);
 
 private:
 	StorageInterface* m_storage;
 	ForwardIndexViewerInterface* m_forwardindex;
 	std::string m_termtype;
-	int m_maxlen;
+	unsigned int m_maxlen;
+	unsigned int m_summarylen;
+	std::vector<IteratorReference> m_itr;
+	IteratorReference m_phrasestruct;
 };
 
 }//namespace

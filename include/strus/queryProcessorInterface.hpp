@@ -28,14 +28,19 @@
 */
 #ifndef _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
-#include "strus/accumulatorInterface.hpp"
-#include "strus/iteratorInterface.hpp"
 #include "strus/weightedDocument.hpp"
 #include <vector>
 #include <string>
 
 namespace strus
 {
+/// \brief Forward declaration
+class IteratorInterface;
+/// \brief Forward declaration
+class WeightingFunctionInterface;
+/// \brief Forward declaration
+class SummarizerInterface;
+
 
 /// \brief Defines all object instances involved in query evaluation addressable by name
 class QueryProcessorInterface
@@ -68,16 +73,33 @@ public:
 
 	/// \brief Get an IDF that might not be accurate, but good enough to be used as criterion for feature selection
 	/// \return the estimated IDF value
-	virtual double getEstimatedIdf(
+	virtual double
+		getEstimatedIdf(
 			IteratorInterface& itr) const=0;
 
 	/// \brief Create a weighting function for term occurrencies
 	/// \param[in] name name of the weighting function
+	/// \param[in] parameter scaling arguments for the function
 	/// \return the created weighting function object (to dispose with 'delete')
 	virtual WeightingFunctionInterface*
 		createWeightingFunction(
 			const std::string& name,
 			const std::vector<float>& parameter) const=0;
+
+	/// \brief Create a summarizer for adding attributes to matches
+	/// \param[in] name name of the summarizer
+	/// \param[in] type term type or attribute name (depends on implementation)
+	/// \param[in] parameter scalar arguments for the summarizer
+	/// \param[in] nofitrs number of feature iterators this summarizer is based on
+	/// \param[in] itrs feature iterators for this summarizer 
+	/// \return the created summarizer object (to dispose with 'delete')
+	virtual SummarizerInterface*
+		createSummarizer(
+			const std::string& name,
+			const std::string& type,
+			const std::vector<float>& parameter,
+			std::size_t nofitrs,
+			const IteratorInterface** itrs) const=0;
 };
 
 }//namespace

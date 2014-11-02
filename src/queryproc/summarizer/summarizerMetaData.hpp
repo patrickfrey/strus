@@ -47,26 +47,18 @@ class SummarizerMetaData
 	:public SummarizerInterface
 {
 public:
+	/// \param[in] storage_ storage to use
+	/// \param[in] name_ metadata identifier
 	SummarizerMetaData( const StorageInterface* storage_, char name_)
 		:m_storage(storage_)
 		,m_name(name_){}
 
 	virtual ~SummarizerMetaData(){}
 
-	/// \brief Get the summarization based on term occurrencies
-	/// \param[in,out] res where to append the summarization result
-	/// \param[in] docno document to get the summary element from or 0, if the summary should be global
-	/// \param[in] pos position tp get the summary element from element or 0, if the summary should be for the whole document
-	/// \param[in] itr iterator for the term occurrencies where to get the summary from
-	/// \param[in] markitr iterator for context markers related to the summary
+	/// \brief Get some summarization elements
+	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
-	virtual bool
-		getSummary(
-			std::vector<SummaryElement>& res,
-			const Index& docno,
-			const Index& pos,
-			IteratorInterface& itr,
-			IteratorInterface& markitr);
+	virtual std::vector<std::string> getSummary( const Index& docno);
 
 private:
 	const StorageInterface* m_storage;

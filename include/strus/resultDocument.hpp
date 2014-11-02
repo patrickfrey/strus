@@ -26,9 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
+#ifndef _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
+#define _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/weightedDocument.hpp"
 #include <vector>
 #include <string>
 #include <utility>
@@ -36,40 +37,38 @@
 namespace strus
 {
 
-class WeightedDocument
+class ResultDocument
+	:public WeightedDocument
 {
 public:
-	WeightedDocument()
-		:m_docno(0),m_weight(0.0){}
-	WeightedDocument( const WeightedDocument& o)
-		:m_docno(o.m_docno),m_weight(o.m_weight){}
-	WeightedDocument( const Index& docno_, double weight_)
-		:m_docno(docno_),m_weight(weight_){}
-
-	Index docno() const					{return m_docno;}
-	double weight() const					{return m_weight;}
-
-	class CompareGreater
+	class Attribute
 	{
 	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight > b.m_weight);
-		}
+		Attribute( const std::string& name_, const std::string& value_)
+			:m_name(name_),m_value(value_){}
+		Attribute( const Attribute& o)
+			:m_name(o.m_name),m_value(o.m_value){}
+
+		const std::string& name() const			{return m_name;}
+		const std::string& value() const		{return m_value;}
+
+	private:
+		std::string m_name;
+		std::string m_value;
 	};
 
-	class CompareSmaller
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight < b.m_weight);
-		}
-	};
+	ResultDocument(){}
+	ResultDocument( const ResultDocument& o)
+		:WeightedDocument(o),m_attributes(o.m_attributes){}
+	ResultDocument( const WeightedDocument& o, const std::vector<Attribute>& a)
+		:WeightedDocument(o),m_attributes(a){}
+	ResultDocument( const Index& docno_, double weight_, const std::vector<Attribute>& attributes_)
+		:WeightedDocument(docno_,weight_),m_attributes(attributes_){}
+
+	const std::vector<Attribute>& attributes() const	{return m_attributes;}
 
 private:
-	Index m_docno;
-	double m_weight;
+	std::vector<Attribute> m_attributes;
 };
 
 }//namespace

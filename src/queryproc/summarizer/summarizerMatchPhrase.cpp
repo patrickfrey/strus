@@ -36,23 +36,40 @@ using namespace strus;
 SummarizerMatchPhrase::SummarizerMatchPhrase(
 		StorageInterface* storage_,
 		const std::string& termtype_,
-		unsigned int maxlen_)
+		unsigned int maxlen_,
+		unsigned int summarylen_,
+		std::size_t nofitrs_,
+		const IteratorInterface** itrs_,
+		const IteratorInterface* phrasestruct_)
 	:m_storage(storage_)
 	,m_forwardindex( storage_->createForwardIndexViewer( termtype_))
 	,m_termtype(termtype_)
 	,m_maxlen(maxlen_)
-{}
+	,m_summarylen(summarylen_)
+{
+	for (std::size_t ii=0; ii<nofitrs_; ++ii)
+	{
+		if (itrs_[ii])
+		{
+			m_itr.push_back( itrs_[ii]->copy());
+		}
+	}
+	if (phrasestruct_)
+	{
+		m_phrasestruct.reset( phrasestruct_->copy());
+	}
+}
 
 SummarizerMatchPhrase::~SummarizerMatchPhrase()
 {
 	if (m_forwardindex) delete m_forwardindex;
 }
 
-static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface& markitr, bool& found)
+static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface* phrasestruct, bool& found)
 {
 	found = true;
 	Index rangepos = (curpos > maxlen) ? (curpos-maxlen):1;
-	Index prevpos = markitr.skipPos( rangepos);
+	Index prevpos = phrasestruct?phrasestruct->skipPos( rangepos):0;
 	if (!prevpos || prevpos > curpos)
 	{
 		prevpos = rangepos;
@@ -61,9 +78,9 @@ static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface& 
 			found = false;
 		}
 	}
-	else for (;;)
+	else if (phrasestruct) for (;;)
 	{
-		Index midpos = markitr.skipPos( prevpos+1);
+		Index midpos = phrasestruct->skipPos( prevpos+1);
 		if (!midpos || midpos > curpos) break;
 		prevpos = midpos;
 	}
@@ -71,11 +88,11 @@ static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface& 
 	
 }
 
-static Index getEndPos( Index curpos, unsigned int maxlen, IteratorInterface& markitr, bool& found)
+static Index getEndPos( Index curpos, unsigned int maxlen, IteratorInterface* phrasestruct, bool& found)
 {
 	found = true;
-	Index endpos = markitr.skipPos( curpos);
-	if (endpos - curpos > maxlen)
+	Index endpos = phrasestruct?phrasestruct->skipPos( curpos):0;
+	if (!endpos || endpos - curpos > maxlen)
 	{
 		found = false;
 		endpos = curpos + maxlen;
@@ -83,19 +100,20 @@ static Index getEndPos( Index curpos, unsigned int maxlen, IteratorInterface& ma
 	return endpos;
 }
 
-static SummarizerInterface::SummaryElement
+static std::string
 	summaryElement(
 		const Index& curpos,
-		IteratorInterface& markitr,
+		IteratorInterface* phrasestruct,
 		ForwardIndexViewerInterface& forwardindex,
-		unsigned int maxlen)
+		unsigned int maxlen,
+		unsigned int& length)
 {
 	bool start_found = true;
-	Index startpos = getStartPos( curpos, maxlen, markitr, start_found);
+	Index startpos = getStartPos( curpos, maxlen, phrasestruct, start_found);
 	bool end_found = true;
-	Index endpos = getEndPos( curpos, maxlen, markitr, end_found);
+	Index endpos = getEndPos( curpos, maxlen, phrasestruct, end_found);
 
-	unsigned int length = 0;
+	length = 0;
 	std::string phrase;
 	if (!start_found) phrase.append( "...");
 
@@ -115,71 +133,57 @@ static SummarizerInterface::SummaryElement
 		}
 	}
 	if (!end_found) phrase.append( "...");
-	return SummarizerInterface::SummaryElement( phrase, curpos, length);
+	return phrase;
 }
 
-static bool getSummary_(
-		std::vector<SummarizerInterface::SummaryElement>& res,
+static void getSummary_(
+		std::vector<std::string>& res,
 		const Index& docno,
-		const Index& pos,
-		IteratorInterface& itr,
-		IteratorInterface& markitr,
+		const std::vector<IteratorReference>& itr,
+		const IteratorReference& phrasestruct,
 		ForwardIndexViewerInterface& forwardindex,
-		unsigned int maxlen)
+		unsigned int maxlen,
+		unsigned int maxsummarylen)
 {
-	bool rt = false;
-	if (itr.skipDoc( docno) == docno)
-	{
-		forwardindex.initDoc( docno);
-		Index curpos = itr.skipPos( pos);
+	forwardindex.initDoc( docno);
+	Index curpos = 0;
 
-		if (pos)
+	std::vector<IteratorReference>::const_iterator
+		ii = itr.begin(), ie = itr.end();
+	unsigned int summarylen = 0;
+
+	for (; ii != ie && summarylen < maxsummarylen; ++ii)
+	{
+		if (*ii && docno==(*ii)->skipDoc( docno))
 		{
-			if (curpos)
+			while (0!=(curpos=(*ii)->skipPos( curpos)))
 			{
+				unsigned int length = 0;
 				res.push_back(
 					summaryElement( 
-						curpos, markitr,
-						forwardindex, maxlen));
-				rt = true;
-			}
-		}
-		else
-		{
-			for (; curpos; curpos = itr.skipPos( pos+1))
-			{
-				res.push_back(
-					summaryElement( 
-						curpos, markitr,
-						forwardindex, maxlen));
+						curpos, phrasestruct.get(),
+						forwardindex, maxlen, length));
+				summarylen += length;
+				curpos += length + 1;
+	
+				if (summarylen >= maxsummarylen)
+				{
+					break;
+				}
 			}
 		}
 	}
-	return rt;
 }
 
-bool
-	SummarizerMatchPhrase::getSummary(
-		std::vector<SummarizerInterface::SummaryElement>& res,
-		const Index& docno,
-		const Index& pos,
-		IteratorInterface& itr,
-		IteratorInterface& markitr)
+
+std::vector<std::string>
+	SummarizerMatchPhrase::getSummary( const Index& docno)
 {
-	if (docno)
-	{
-		return getSummary_( res, docno, pos, itr, markitr, *m_forwardindex, m_maxlen);
-	}
-	else
-	{
-		Index dn = 0;
-		bool rt = false;
-		while (0!=(dn=itr.skipDoc( dn+1)))
-		{
-			rt |= getSummary_( res, dn, pos, itr, markitr, *m_forwardindex, m_maxlen);
-		}
-		return rt;
-	}
+	std::vector<std::string> rt;
+	getSummary_(
+		rt, docno, m_itr, m_phrasestruct,
+		*m_forwardindex, m_maxlen, m_summarylen);
+	return rt;
 }
 
 

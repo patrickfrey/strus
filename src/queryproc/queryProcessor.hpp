@@ -36,9 +36,11 @@
 
 namespace strus
 {
-
+/// \brief Forward declaration
+class StorageInterface;
 /// \brief Forward declaration
 class EstimatedNumberOfMatchesMap;
+
 
 /// \brief Provides the objects needed for query processing
 class QueryProcessor
@@ -51,21 +53,11 @@ public:
 	/// \brief Destructor
 	virtual ~QueryProcessor(){}
 
-	/// \brief Create an iterator on the occurrencies of a basic term in the collection
-	/// \param[in] type type name of the term
-	/// \param[in] value value string of the term
-	/// \return the created iterator reference object
 	virtual IteratorInterface*
 		createTermIterator(
 			const std::string& type,
 			const std::string& value) const;
 
-	/// \brief Create an iterator as join function on the arguments passed
-	/// \param[in] name name of the join function to execute
-	/// \param[in] range additional parameters for describing a range or offset for the join operator to execute
-	/// \param[in] nofargs number of arguments to pass to the function
-	/// \param[in] args arguments to pass to the function
-	/// \return the created iterator reference object representing the result of the function
 	virtual IteratorInterface*
 		createJoinIterator(
 			const std::string& name,
@@ -73,20 +65,22 @@ public:
 			std::size_t nofargs,
 			const IteratorInterface** args) const;
 
-	/// \brief Get an IDF that might not be accurate, but good enough to be used as criterion for feature selection
-	/// \return the estimated IDF value
 	virtual double
 		getEstimatedIdf(
 			IteratorInterface& itr) const;
 
-	/// \brief Create a weighting function for term occurrencies
-	/// \param[in] name name of the weighting function
-	/// \return the created weighting function object (to dispose with 'delete')
 	virtual WeightingFunctionInterface*
 		createWeightingFunction(
 			const std::string& name,
 			const std::vector<float>& parameter) const;
 
+	virtual SummarizerInterface*
+		createSummarizer(
+			const std::string& name,
+			const std::string& type,
+			const std::vector<float>& parameter,
+			std::size_t nofitrs,
+			const IteratorInterface** itrs) const;
 private:
 	StorageInterface* m_storage;
 	boost::shared_ptr<EstimatedNumberOfMatchesMap> m_nofMatchesMap;

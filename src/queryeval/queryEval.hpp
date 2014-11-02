@@ -30,10 +30,12 @@
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/weightedDocument.hpp"
+#include "private/summarizerReference.hpp"
 #include "parser/joinFunction.hpp"
 #include "parser/joinOperation.hpp"
 #include "parser/selectorExpression.hpp"
 #include "parser/accumulateOperation.hpp"
+#include "parser/summarizeOperation.hpp"
 #include <string>
 #include <vector>
 
@@ -57,13 +59,15 @@ public:
 		,m_setnamemap(o.m_setnamemap)
 		,m_operations(o.m_operations)
 		,m_accumulateOperation(o.m_accumulateOperation)
+		,m_summarizers(o.m_summarizers)
 	{}
 	QueryEval( const std::string& source);
 
-	virtual std::vector<WeightedDocument>
+	virtual std::vector<ResultDocument>
 		getRankedDocumentList(
 			const QueryProcessorInterface& processor,
 			const Query& query,
+			std::size_t fromRank,
 			std::size_t maxNofRanks) const;
 
 	const std::vector<Query::Term>& predefinedTerms() const			{return m_predefinedTerms;}
@@ -71,18 +75,23 @@ public:
 	const std::vector<parser::JoinFunction>& functions() const		{return m_functions;}
 	const std::vector<parser::JoinOperation>& operations() const		{return m_operations;}
 	const parser::AccumulateOperation& accumulateOperation() const		{return m_accumulateOperation;}
+	const std::vector<parser::SummarizeOperation>& summarizers() const	{return m_summarizers;}
 
 	virtual void print( std::ostream& out) const;
 
 private:
-	std::vector<WeightedDocument>
+	typedef std::pair<std::string,SummarizerReference> SummarizerDef;
+	std::vector<ResultDocument>
 		getRankedDocumentList(
 			Accumulator& accu,
+			const std::vector<SummarizerDef>& summarizers,
+			std::size_t firstRank,
 			std::size_t maxNofRanks) const;
 
 	void parseJoinOperationDef( char const*& src);
 	void parseAccumulatorDef( char const*& src);
 	void parseTermDef( char const*& src);
+	void parseSummarizeDef( char const*& src);
 
 private:
 	std::vector<Query::Term> m_predefinedTerms;
@@ -91,6 +100,7 @@ private:
 	StringIndexMap m_setnamemap;
 	std::vector<parser::JoinOperation> m_operations;
 	parser::AccumulateOperation m_accumulateOperation;
+	std::vector<parser::SummarizeOperation> m_summarizers;
 };
 
 }//namespace

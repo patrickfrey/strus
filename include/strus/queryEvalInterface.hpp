@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
+#include "strus/resultDocument.hpp"
 #include "strus/index.hpp"
 #include <vector>
 #include <string>
@@ -121,11 +121,13 @@ public:
 	/// \brief Calculate a list of the best ranked documents
 	/// \param[in] processor processor that creates the items needed to process the query
 	/// \param[in] querystr query string (syntax depending on implementation)
+	/// \param[in] fromRank lowest rank to return
 	/// \param[in] maxNofRanks maximum number of ranks to return
-	virtual std::vector<WeightedDocument>
+	virtual std::vector<ResultDocument>
 		getRankedDocumentList(
 			const QueryProcessorInterface& processor,
 			const Query& query,
+			std::size_t fromRank,
 			std::size_t maxNofRanks) const=0;
 
 	/// \brief Print the internal representation of the program to 'out'
