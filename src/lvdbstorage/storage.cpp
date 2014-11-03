@@ -357,13 +357,13 @@ void Storage::flushDfs()
 		}
 		else
 		{
+			if (!status.ok())
+			{
+				throw std::runtime_error( status.ToString());
+			}
 			char const* cc = value.c_str();
 			char const* ee = value.c_str() + value.size();
 			df = mi->second + unpackIndex( cc, ee);
-		}
-		if (!status.ok())
-		{
-			throw std::runtime_error( status.ToString());
 		}
 		value.resize(0);
 		packIndex( value, df);

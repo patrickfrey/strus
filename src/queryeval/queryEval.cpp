@@ -239,7 +239,7 @@ public:
 		return m_iteratorSets[ setIndex-1];
 	}
 
-	static bool isRelevantSelectionFeature( const StorageInterface& storage, IteratorInterface& itr) const
+	static bool isRelevantSelectionFeature( const StorageInterface& storage, IteratorInterface& itr)
 	{
 		float nofMatches = itr.documentFrequency();
 		float nofCollectionDocuments = storage.nofDocumentsInserted();
