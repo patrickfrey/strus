@@ -71,12 +71,6 @@ public:
 			std::size_t nofargs,
 			const IteratorInterface** args) const=0;
 
-	/// \brief Get an IDF that might not be accurate, but good enough to be used as criterion for feature selection
-	/// \return the estimated IDF value
-	virtual double
-		getEstimatedIdf(
-			IteratorInterface& itr) const=0;
-
 	/// \brief Create a weighting function for term occurrencies
 	/// \param[in] name name of the weighting function
 	/// \param[in] parameter scaling arguments for the function

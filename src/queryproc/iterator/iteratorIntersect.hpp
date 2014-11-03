@@ -56,10 +56,13 @@ public:
 		return new IteratorIntersect( *this);
 	}
 
+	virtual Index documentFrequency();
+
 private:
 	Index m_docno;
 	std::vector<IteratorReference> m_argar;
 	std::string m_featureid;		///< unique id of the feature expression
+	Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
 };
 
 }//namespace

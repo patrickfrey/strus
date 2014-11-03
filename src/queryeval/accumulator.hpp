@@ -29,7 +29,6 @@
 #ifndef _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/queryProcessorInterface.hpp"
 #include "strus/iteratorInterface.hpp"
 #include "iteratorReference.hpp"
 #include "weightingFunctionReference.hpp"
@@ -41,6 +40,10 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class StorageInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 /// \class Accumulator
 /// \brief Accumulator for weights of matches
@@ -48,10 +51,7 @@ class Accumulator
 {
 public:
 	/// \brief Constructor
-	explicit Accumulator( const QueryProcessorInterface* qproc_);
-
-	/// \brief Copy constructor
-	Accumulator( const Accumulator& o);
+	Accumulator( const QueryProcessorInterface* qproc_);
 
 	~Accumulator(){}
 
@@ -59,7 +59,7 @@ public:
 			const IteratorInterface& iterator);
 	
 	void addRanker(
-			double factor,
+			float factor,
 			const std::string& function,
 			const std::vector<float>& parameter,
 			const IteratorInterface& iterator);
@@ -67,7 +67,10 @@ public:
 	bool nextRank(
 			Index& docno,
 			unsigned int& selectorState, 
-			double& weight);
+			float& weight);
+
+private:
+	bool isRelevantSelectionFeature( IteratorInterface& itr) const;
 
 private:
 	const QueryProcessorInterface* m_queryprocessor;

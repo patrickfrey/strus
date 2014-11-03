@@ -70,6 +70,9 @@ public:
 
 	virtual std::string documentAttributeString( Index docno, char varname) const;
 
+	virtual void incrementDf( Index typeno, Index termno);
+	virtual void decrementDf( Index typeno, Index termno);
+
 public:
 	void writeBatch(
 		leveldb::WriteBatch& batch);
@@ -88,13 +91,16 @@ public:
 		InversePrefix='r',	///< [docno,typeno,position]   ->  [term string]*
 		VariablePrefix='v',	///< [variable string]         ->  [index]
 		DocNumAttrPrefix='w',	///< [docno,nameid]            ->  [float]
-		DocTextAttrPrefix='a'	///< [docno,nameid]            ->  [string]
+		DocTextAttrPrefix='a',	///< [docno,nameid]            ->  [string]
+		DocFrequencyPrefix='f'	///< [type,term]               ->  [index]
 	};
 
 	static std::string keyString( KeyPrefix prefix, const std::string& keyname);
 	Index keyLookUp( KeyPrefix prefix, const std::string& keyname);
 	Index keyGetOrCreate( KeyPrefix prefix, const std::string& keyname);
+	Index keyLookUp( const std::string& keystr);
 	void flushNewKeys();
+	void flushDfs();
 
 private:
 	struct stlSliceComparator
@@ -106,6 +112,9 @@ private:
 	};
 	typedef std::map<std::string,Index,stlSliceComparator> NewKeyMap;
 
+	typedef std::pair<Index,Index> DfKey;
+	typedef std::map<DfKey, Index> DfMap;
+
 private:
 	std::string m_path;					///< levelDB storage path 
 	leveldb::DB* m_db;					///< levelDB handle
@@ -116,6 +125,7 @@ private:
 	boost::mutex m_mutex;					///< mutex for mutual exclusion for the access of counters (m_next_..) and for the access of keys not defined during a running transaction
 	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined. flushed at end of every transaction
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
+	DfMap m_dfMap;						///< temporary map for the document frequency of new inserted features
 };
 
 }

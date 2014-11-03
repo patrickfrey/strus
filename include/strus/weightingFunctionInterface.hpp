@@ -41,7 +41,7 @@ public:
 	/// \brief Call the weighting function for the current element in itr
 	/// \param[in,out] occurrency iterator
 	/// \return the weight of the current element
-	virtual double call( IteratorInterface& itr)=0;
+	virtual float call( IteratorInterface& itr)=0;
 };
 
 }//namespace

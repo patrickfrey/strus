@@ -53,6 +53,8 @@ public:
 
 	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
+	virtual Index documentFrequency();
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorUnion( *this);
@@ -63,6 +65,7 @@ private:
 	std::vector<IteratorReference> m_argar;
 	std::vector<bool> m_selected;
 	std::string m_featureid;		///< unique id of the feature expression
+	Index m_documentFrequency;		///< document frequency (of the most frequent subexpression)
 };
 
 }//namespace

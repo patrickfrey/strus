@@ -32,7 +32,7 @@
 using namespace strus;
 
 IteratorIntersect::IteratorIntersect( std::size_t nofargs, const IteratorInterface** args)
-	:m_docno(0)
+	:m_docno(0),m_documentFrequency(-1)
 {
 	std::size_t ii=0;
 	m_argar.reserve( nofargs);
@@ -41,6 +41,7 @@ IteratorIntersect::IteratorIntersect( std::size_t nofargs, const IteratorInterfa
 		if (args[ii])
 		{
 			m_argar.push_back( args[ii]->copy());
+			if (ii) m_featureid.push_back('=');
 			m_featureid.append( args[ii]->featureid());
 		}
 	}
@@ -50,6 +51,7 @@ IteratorIntersect::IteratorIntersect( std::size_t nofargs, const IteratorInterfa
 IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	:m_docno(o.m_docno)
 	,m_featureid(o.m_featureid)
+	,m_documentFrequency(o.m_documentFrequency)
 {
 	m_argar.reserve( o.m_argar.size());
 	std::size_t ii=0;
@@ -142,5 +144,24 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 			return pos_iter;
 		}
 	}
+}
+
+Index IteratorIntersect::documentFrequency()
+{
+	if (m_documentFrequency < 0)
+	{
+		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		if (ai == ae) return 0;
+		m_documentFrequency = (*ai)->documentFrequency();
+		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
+		{
+			Index df = (*ai)->documentFrequency();
+			if (df < m_documentFrequency)
+			{
+				m_documentFrequency = df;
+			}
+		}
+	}
+	return m_documentFrequency;
 }
 

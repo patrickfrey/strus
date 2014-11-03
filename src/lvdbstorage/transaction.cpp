@@ -196,6 +196,8 @@ void Transaction::commit()
 
 		documentFound = true;
 		batch.Delete( delkey);
+
+		m_storage->decrementDf( di->first, di->second);
 	}
 
 	//[3] Insert the new terms with key [LocationPrefix, typeno, valueno, docno]
@@ -218,6 +220,8 @@ void Transaction::commit()
 			packIndex( positions, *pi);
 		}
 		batch.Put( termkey, positions);
+
+		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
 
 	// [4] Insert the new inverted info with key [InversePrefix, docno, typeno, pos]:
@@ -240,6 +244,7 @@ void Transaction::commit()
 	// [5] Do submit the write to the database:
 	m_storage->writeBatch( batch);
 	m_storage->flushNewKeys();
+	m_storage->flushDfs();
 	batch.Clear();
 }
 

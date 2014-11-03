@@ -251,16 +251,16 @@ struct RandomDoc
 	std::map<unsigned int, float> weightmap;
 };
 
-static float tfIdf( unsigned int collSize, unsigned int nofMatchingDocs, unsigned int nofMatchesInDoc, unsigned int docLen, double avgDocLen)
+static float tfIdf( unsigned int collSize, unsigned int nofMatchingDocs, unsigned int nofMatchesInDoc, unsigned int docLen, float avgDocLen)
 {
 	// Use tf from Okapi but IDF not, because we do not want to have negative weights
-	const double k1 = 1.5; //.... [1.2,2.0]
-	const double b = 0.75; // fix
+	const float k1 = 1.5; //.... [1.2,2.0]
+	const float b = 0.75; // fix
 
-	double IDF = ::log( collSize / (nofMatchingDocs + 1.0));
-	double tf = ((double)nofMatchesInDoc * (k1 + 1.0))
-		/ ((double)nofMatchesInDoc 
-			+ (k1 * (1.0 - b + ((b * (double)docLen) / avgDocLen)))
+	float IDF = ::log( collSize / (nofMatchingDocs + 1.0));
+	float tf = ((float)nofMatchesInDoc * (k1 + 1.0))
+		/ ((float)nofMatchesInDoc 
+			+ (k1 * (1.0 - b + ((b * (float)docLen) / avgDocLen)))
 		);
 	return (float)(tf * IDF);
 }
@@ -288,7 +288,7 @@ struct RandomCollection
 		}
 		std::vector<unsigned int> termDocumentFrequencyMap( termCollection.termar.size(), 0);
 		std::vector<unsigned int> termCollectionFrequencyMap( termCollection.termar.size(), 0);
-		double avgDocLen = 0.0;
+		float avgDocLen = 0.0;
 		
 		for (unsigned int di=0; di < docar.size(); ++di)
 		{
@@ -304,7 +304,7 @@ struct RandomCollection
 				}
 				++termCollectionFrequencyMap[ oi->term-1];
 			}
-			avgDocLen += (double)doc.occurrencear.size() / nofDocuments;
+			avgDocLen += (float)doc.occurrencear.size() / nofDocuments;
 		}
 		for (unsigned int di=0; di < docar.size(); ++di)
 		{

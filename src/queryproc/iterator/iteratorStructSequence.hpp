@@ -59,6 +59,8 @@ public:
 
 	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
+	virtual Index documentFrequency();
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorStructSequence( *this);
@@ -71,6 +73,7 @@ private:
 	IteratorReference m_cut;		///< the set of elements then must not appear inside the sequence
 	int m_range;				///< the maximum position difference between the start element and the end element of the sequence
 	std::string m_featureid;		///< unique id of the feature expression
+	Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
 };
 
 }//namespace

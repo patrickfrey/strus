@@ -45,17 +45,16 @@ class WeightingFrequency
 {
 public:
 	WeightingFrequency(
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
-		:WeightingIdfBased(storage_,nofMatchesMap_){}
+			const StorageInterface* storage_)
+		:WeightingIdfBased(storage_){}
 	WeightingFrequency( const WeightingFrequency& o)
 		:WeightingIdfBased(o){}
 
 	virtual ~WeightingFrequency(){}
 
-	virtual double call( IteratorInterface& itr)
+	virtual float call( IteratorInterface& itr)
 	{
-		return static_cast<double>( itr.frequency());
+		return static_cast<float>( itr.frequency());
 	}
 };
 

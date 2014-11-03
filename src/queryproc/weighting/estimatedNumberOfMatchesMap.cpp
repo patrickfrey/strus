@@ -28,6 +28,8 @@
 */
 #include "estimatedNumberOfMatchesMap.hpp"
 
+#error DEPRECATED 
+
 using namespace strus;
 
 EstimatedNumberOfMatchesMap::EstimatedNumberOfMatchesMap( const StorageInterface* storage_)
@@ -60,13 +62,13 @@ static Index randomDocumentNumber( Index maxdocno, unsigned int no)
 	return rt % (maxdocno+1);
 }
 
-static double estimateNumberOfMatches(
+static float estimateNumberOfMatches(
 		IteratorInterface& itr,
 		Index maxDocumentNumber,
 		Index nofDocumentsInCollection)
 {
 	enum {Iterations=10, LocalScans=5};
-	double diffsum = 0.0;
+	float diffsum = 0.0;
 
 	if (itr.skipDoc(0) == 0)
 	{
@@ -95,20 +97,20 @@ static double estimateNumberOfMatches(
 			}
 		}
 	}
-	return (double) (nofDocumentsInCollection / diffsum) * Iterations * LocalScans;
+	return (float) (nofDocumentsInCollection / diffsum) * Iterations * LocalScans;
 }
 
 
-double EstimatedNumberOfMatchesMap::getNofMatches( IteratorInterface& itr)
+float EstimatedNumberOfMatchesMap::getNofMatches( IteratorInterface& itr)
 {
-	std::map<std::string,double>::const_iterator vi = m_valmap.find( itr.featureid());
+	std::map<std::string,float>::const_iterator vi = m_valmap.find( itr.featureid());
 	if (vi != m_valmap.end())
 	{
 		return vi->second;
 	}
 	else
 	{
-		double val = estimateNumberOfMatches(
+		float val = estimateNumberOfMatches(
 				itr, m_maxDocumentNumber,
 				m_nofDocumentsInCollection);
 		m_valmap[ itr.featureid()] = val;

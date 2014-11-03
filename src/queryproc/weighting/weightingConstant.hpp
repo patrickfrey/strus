@@ -45,22 +45,21 @@ class WeightingConstant
 {
 public:
 	WeightingConstant(
-			double weight_,
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
-		:WeightingIdfBased(storage_,nofMatchesMap_),m_weight(weight_){}
+			float weight_,
+			const StorageInterface* storage_)
+		:WeightingIdfBased(storage_),m_weight(weight_){}
 	WeightingConstant( const WeightingConstant& o)
 		:WeightingIdfBased(o),m_weight(o.m_weight){}
 
 	virtual ~WeightingConstant(){}
 
-	double call( IteratorInterface& itr)
+	float call( IteratorInterface& itr)
 	{
 		return m_weight;
 	}
 
 private:
-	double m_weight;
+	float m_weight;
 };
 
 }//namespace

@@ -26,49 +26,61 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
+#ifndef _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
+#include "strus/iteratorInterface.hpp"
 
-using namespace strus;
+namespace strus {
 
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	float b_,
-	float k1_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_docno(0)
-		,m_b(b_)
-		,m_k1(k1_)
-		,m_avgDocLength(avgDocLength_)
-{}
-
-WeightingBM25::WeightingBM25( const WeightingBM25& o)
-	:WeightingIdfBased(o)
-	,m_storage(o.m_storage)
-	,m_docno(o.m_docno)
-	,m_b(o.m_b)
-	,m_k1(o.m_k1)
-	,m_avgDocLength(o.m_avgDocLength)
-{}
-
-float WeightingBM25::call( IteratorInterface& itr)
+/// \brief Iterator representing an empty set
+class NullIterator
+	:public IteratorInterface
 {
-	if (!idf_calculated())
+public:
+	NullIterator( Index termtypeno, Index termvalueno, const char* termstr);
+
+	NullIterator( const NullIterator& o)
+		:m_featureid(o.m_featureid){}
+
+	virtual ~NullIterator(){}
+
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
 	{
-		calculateIdf( itr);
+		return std::vector<IteratorInterface*>();
 	}
-	float relativeDocLen
-		= (float)m_storage->documentAttributeNumeric(
-				m_docno, Constants::DOC_ATTRIBUTE_DOCLEN)
-		/ m_avgDocLength;
+	virtual const std::string& featureid() const
+	{
+		return m_featureid;
+	}
 
-	return idf()
-		* ((float)itr.frequency() * (m_k1 + 1.0))
-		/ ((float)itr.frequency() + m_k1 * (1.0 - m_b + m_b * relativeDocLen));
+	virtual Index skipDoc( const Index&)
+	{
+		return 0;
+	}
+
+	virtual Index skipPos( const Index&)
+	{
+		return 0;
+	}
+
+	virtual unsigned int frequency()
+	{
+		return 0;
+	}
+
+	virtual Index documentFrequency()
+	{
+		return 0;
+	}
+	
+	virtual IteratorInterface* copy() const
+	{
+		return new NullIterator(*this);
+	}
+
+private:
+	std::string m_featureid;
+};
+
 }
-
-
-
+#endif

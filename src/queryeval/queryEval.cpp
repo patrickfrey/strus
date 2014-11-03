@@ -1,4 +1,3 @@
-
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -29,6 +28,7 @@
 */
 #include "queryEval.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/storageInterface.hpp"
 #include "strus/constants.hpp"
 #include "parser/lexems.hpp"
 #include "parser/selectorSet.hpp"
@@ -39,7 +39,7 @@
 #include <iostream>
 #include <set>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 using namespace strus::parser;
@@ -226,7 +226,7 @@ public:
 		return iset[ elemIndex].get();
 	}
 
-	const std::vector<IteratorReference>& getFeatureSet( int setIndex)
+	const std::vector<IteratorReference>& getFeatureSet( int setIndex) const
 	{
 		if (setIndex <= 0)
 		{
@@ -239,11 +239,27 @@ public:
 		return m_iteratorSets[ setIndex-1];
 	}
 
-	IteratorReference getFeatureSetUnion( const QueryProcessorInterface& processor, int setIndex)
+	static bool isRelevantSelectionFeature( const StorageInterface& storage, IteratorInterface& itr) const
+	{
+		float nofMatches = itr.documentFrequency();
+		float nofCollectionDocuments = storage.nofDocumentsInserted();
+	
+		if (nofCollectionDocuments > nofMatches * 2)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	IteratorReference getRelevantFeatureSetUnion( const StorageInterface& storage, const QueryProcessorInterface& processor, int setIndex)
 	{
 		const IteratorInterface* far[ (int)QueryEval::MaxSizeFeatureSet];
 
-		const std::vector<IteratorReference>& feats = getFeatureSet( setIndex);
+		if (setIndex <= 0 || (std::size_t)(unsigned int)setIndex > m_iteratorSets.size())
+		{
+			throw std::runtime_error( "internal: feature address out of range");
+		}
+		std::vector<IteratorReference>& feats = m_iteratorSets[ setIndex-1];
 		if (feats.size() > (int)QueryEval::MaxSizeFeatureSet)
 		{
 			throw std::runtime_error( "number of features in selection set is too big");
@@ -252,7 +268,7 @@ public:
 		std::size_t aidx = 0;
 		for (; ai != ae; ai++)
 		{
-			if (ai->get())
+			if (ai->get() && isRelevantSelectionFeature( storage, **ai))
 			{
 				far[ aidx++] = ai->get();
 			}
@@ -272,6 +288,22 @@ public:
 	{
 		std::map<int,int>::const_iterator gi = m_setSizeMap.find( setIndex);
 		return (gi == m_setSizeMap.end())?0:gi->second;
+	}
+
+	void printFeatures( std::ostream& out)
+	{
+		std::vector< std::vector<IteratorReference> >::const_iterator vi = m_iteratorSets.begin(), ve = m_iteratorSets.end();
+		for (int vidx=0; vi != ve; ++vi,++vidx)
+		{
+			std::vector<IteratorReference>::const_iterator fi = vi->begin(), fe = vi->end();
+			for (; fi != fe; ++fi)
+			{
+				if (fi->get())
+				{
+					out << "[" << vidx << "] '" << (*fi)->featureid() << "'" << std::endl;
+				}
+			}
+		}
 	}
 
 private:
@@ -332,7 +364,7 @@ std::vector<ResultDocument>
 	Index docno = 0;
 	unsigned int state = 0;
 	unsigned int prev_state = 0;
-	double weight = 0.0;
+	float weight = 0.0;
 
 	while (accu.nextRank( docno, state, weight))
 	{
@@ -377,9 +409,9 @@ std::vector<ResultDocument>
 	return rt;
 }
 
-
 std::vector<ResultDocument>
 	QueryEval::getRankedDocumentList(
+		const StorageInterface& storage,
 		const QueryProcessorInterface& processor,
 		const Query& query_,
 		std::size_t fromRank,
@@ -505,12 +537,15 @@ std::vector<ResultDocument>
 #endif
 		}
 	}
+	std::cout << "query features:" << std::endl;
+	/*[-]*/query.printFeatures( std::cout);
+	
 	//[3] Get the result accumulator and evaluate the results
 	if (m_accumulateOperation.defined())
 	{
 		// Create the accumulator:
 		Accumulator accumulator( &processor);
-	
+
 		std::vector<WeightingFunction>::const_iterator
 			gi = m_accumulateOperation.args().begin(),
 			ge = m_accumulateOperation.args().end();
@@ -533,7 +568,7 @@ std::vector<ResultDocument>
 
 		for (; fi != fe; ++fi)
 		{
-			IteratorReference selection( query.getFeatureSetUnion( processor, *fi));
+			IteratorReference selection( query.getRelevantFeatureSetUnion( storage, processor, *fi));
 			accumulator.addSelector( *selection);
 		}
 		// Get the summarizers:
@@ -551,7 +586,7 @@ std::vector<ResultDocument>
 			std::vector<int>::const_iterator ai = si->featureset().begin(), ae = si->featureset().end();
 			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
 			{
-				far_ref.push_back( query.getFeatureSetUnion( processor, *ai));
+				far_ref.push_back( query.getRelevantFeatureSetUnion( storage, processor, *ai));
 				far[ aidx++] = far_ref.back().get();
 			}
 			summarizerdefs.push_back(

@@ -10,15 +10,13 @@ CPP_OBJS=\
 	iterator/iteratorHelpers.o \
 	weighting/weightingBM25.o \
 	weighting/weightingIdfBased.o \
-	weighting/estimatedNumberOfMatchesMap.o \
 	summarizer/summarizerMatchPhrase.o \
 	summarizer/summarizerMetaData.o \
 	queryProcessor.o \
 	queryProcessorLib.o
 
 HFILES= queryProcessor.hpp
-
-CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
+CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I$(TOPDIR)/3rdParty/fastapprox/include/ -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 LDFLAGS=-L/usr/lib
 LIBS=

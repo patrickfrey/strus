@@ -62,7 +62,7 @@ public:
 		:WeightedDocument(o),m_attributes(o.m_attributes){}
 	ResultDocument( const WeightedDocument& o, const std::vector<Attribute>& a)
 		:WeightedDocument(o),m_attributes(a){}
-	ResultDocument( const Index& docno_, double weight_, const std::vector<Attribute>& attributes_)
+	ResultDocument( const Index& docno_, float weight_, const std::vector<Attribute>& attributes_)
 		:WeightedDocument(docno_,weight_),m_attributes(attributes_){}
 
 	const std::vector<Attribute>& attributes() const	{return m_attributes;}

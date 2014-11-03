@@ -30,6 +30,7 @@
 #include "strus/forwardIndexViewerInterface.hpp"
 #include "storage.hpp"
 #include "iterator.hpp"
+#include "nullIterator.hpp"
 #include "transaction.hpp"
 #include "forwardIndexViewer.hpp"
 #include "indexPacker.hpp"
@@ -71,6 +72,8 @@ void Storage::close()
 {
 	if (m_db)
 	{
+		flushDfs();
+
 		leveldb::WriteBatch batch;
 		batchDefineVariable( batch, "TermNo", m_next_termno);
 		batchDefineVariable( batch, "TypeNo", m_next_typeno);
@@ -146,13 +149,11 @@ std::string Storage::keyString( KeyPrefix prefix, const std::string& keyname)
 	return rt;
 }
 
-Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname)
+Index Storage::keyLookUp( const std::string& keystr)
 {
 	if (!m_db) throw std::runtime_error("read on closed storage");
-
-	std::string key = keyString( prefix, keyname);
-	leveldb::Slice constkey( key.c_str(), key.size());
 	std::string value;
+	leveldb::Slice constkey( keystr.c_str(), keystr.size());
 	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
 	if (status.IsNotFound())
 	{
@@ -164,6 +165,13 @@ Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname)
 	}
 	const char* cc = value.c_str();
 	return unpackIndex( cc, cc + value.size());
+}
+
+Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname)
+{
+
+	std::string key = keyString( prefix, keyname);
+	return keyLookUp( key);
 }
 
 Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
@@ -227,8 +235,11 @@ IteratorInterface*
 {
 	Index typeno = keyLookUp( TermTypePrefix, typestr);
 	Index termno = keyLookUp( TermValuePrefix, termstr);
-	if (!typeno || !termno) return 0;
-	return new Iterator( m_db, typeno, termno);
+	if (!typeno || !termno)
+	{
+		return new NullIterator( typeno, termno, termstr.c_str());
+	}
+	return new Iterator( m_db, typeno, termno, termstr.c_str());
 }
 
 ForwardIndexViewerInterface*
@@ -304,4 +315,62 @@ float Storage::documentAttributeNumeric( Index docno, char varname) const
 	return unpackFloat( cc, cc + value.size());
 }
 
+
+void Storage::incrementDf( Index typeno, Index termno)
+{
+	boost::mutex::scoped_lock( m_mutex);
+	DfKey key( typeno, termno);
+	m_dfMap[ key] += 1;
+}
+
+void Storage::decrementDf( Index typeno, Index termno)
+{
+	boost::mutex::scoped_lock( m_mutex);
+	std::pair<Index,Index> key( typeno, termno);
+	m_dfMap[ key] -= 1;
+}
+
+void Storage::flushDfs()
+{
+	if (!m_db)
+	{
+		throw std::runtime_error( "no storage defined (flush dfs)");
+	}
+	boost::mutex::scoped_lock( m_mutex);
+	std::map<DfKey,Index>::const_iterator mi = m_dfMap.begin(), me = m_dfMap.end();
+	leveldb::WriteBatch batch;
+
+	for (; mi != me; ++mi)
+	{
+		std::string keystr;
+		keystr.push_back( DocFrequencyPrefix);
+		packIndex( keystr, mi->first.first);
+		packIndex( keystr, mi->first.second);
+
+		leveldb::Slice constkey( keystr.c_str(), keystr.size());
+		std::string value;
+		Index df;
+		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+		if (status.IsNotFound() || value.empty())
+		{
+			df = mi->second;
+		}
+		else
+		{
+			char const* cc = value.c_str();
+			char const* ee = value.c_str() + value.size();
+			df = mi->second + unpackIndex( cc, ee);
+		}
+		if (!status.ok())
+		{
+			throw std::runtime_error( status.ToString());
+		}
+		value.resize(0);
+		packIndex( value, df);
+
+		batch.Put( constkey, value);
+	}
+	writeBatch( batch);
+	m_dfMap.clear();
+}
 

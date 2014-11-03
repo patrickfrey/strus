@@ -38,6 +38,8 @@ namespace strus
 {
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class StorageInterface;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -119,12 +121,14 @@ public:
 	virtual ~QueryEvalInterface(){}
 
 	/// \brief Calculate a list of the best ranked documents
+	/// \param[in] storage storage to retrieve the features from
 	/// \param[in] processor processor that creates the items needed to process the query
 	/// \param[in] querystr query string (syntax depending on implementation)
 	/// \param[in] fromRank lowest rank to return
 	/// \param[in] maxNofRanks maximum number of ranks to return
 	virtual std::vector<ResultDocument>
 		getRankedDocumentList(
+			const StorageInterface& storage,
 			const QueryProcessorInterface& processor,
 			const Query& query,
 			std::size_t fromRank,

@@ -1,4 +1,6 @@
 #include "accumulator.hpp"
+#include "strus/queryProcessorInterface.hpp"
+#include "strus/storageInterface.hpp"
 #include <cstdlib>
 #include <limits>
 #include <set>
@@ -17,15 +19,11 @@ void Accumulator::addSelector(
 		const IteratorInterface& iterator)
 {
 	IteratorReference itr( iterator.copy());
-	if (m_queryprocessor->getEstimatedIdf( *itr)
-		> std::numeric_limits<double>::epsilon())
-	{
-		m_selectors.push_back( itr);
-	}
+	m_selectors.push_back( itr);
 }
 
 void Accumulator::addRanker(
-		double factor,
+		float factor,
 		const std::string& function,
 		const std::vector<float>& parameter,
 		const IteratorInterface& iterator)
@@ -41,7 +39,7 @@ void Accumulator::addRanker(
 bool Accumulator::nextRank(
 		Index& docno,
 		unsigned int& selectorState,
-		double& weight)
+		float& weight)
 {
 	// For all selectors:
 	while (m_selectoridx < m_selectors.size())

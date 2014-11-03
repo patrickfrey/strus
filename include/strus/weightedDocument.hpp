@@ -43,11 +43,11 @@ public:
 		:m_docno(0),m_weight(0.0){}
 	WeightedDocument( const WeightedDocument& o)
 		:m_docno(o.m_docno),m_weight(o.m_weight){}
-	WeightedDocument( const Index& docno_, double weight_)
+	WeightedDocument( const Index& docno_, float weight_)
 		:m_docno(docno_),m_weight(weight_){}
 
 	Index docno() const					{return m_docno;}
-	double weight() const					{return m_weight;}
+	float weight() const					{return m_weight;}
 
 	class CompareGreater
 	{
@@ -69,7 +69,7 @@ public:
 
 private:
 	Index m_docno;
-	double m_weight;
+	float m_weight;
 };
 
 }//namespace

@@ -54,10 +54,7 @@ public:
 		return rt;
 	}
 
-	virtual Index documentFrequency()
-	{
-		return 0;
-	}
+	virtual Index documentFrequency()=0;
 
 	virtual IteratorInterface* copy() const=0;
 };

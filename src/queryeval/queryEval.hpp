@@ -65,6 +65,7 @@ public:
 
 	virtual std::vector<ResultDocument>
 		getRankedDocumentList(
+			const StorageInterface& storage,
 			const QueryProcessorInterface& processor,
 			const Query& query,
 			std::size_t fromRank,

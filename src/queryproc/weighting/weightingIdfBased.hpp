@@ -32,7 +32,6 @@
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
 #include "iteratorReference.hpp"
-#include "weighting/estimatedNumberOfMatchesMap.hpp"
 #include <vector>
 
 namespace strus
@@ -44,40 +43,30 @@ class WeightingIdfBased
 	:public WeightingFunctionInterface
 {
 public:
-	typedef boost::shared_ptr<EstimatedNumberOfMatchesMap> EstimatedNumberOfMatchesMapR;
 	WeightingIdfBased(
-			const StorageInterface* storage_,
-			const EstimatedNumberOfMatchesMapR& nofMatchesMap_)
+			const StorageInterface* storage_)
 		:m_storage(storage_)
-		,m_nofMatchesMap(nofMatchesMap_)
-		,m_idf_calculated(false)
 		,m_idf(0.0)
-		,m_idf_corrected(0.0)
-		,m_min_idf_subexpressions(0.0){}
+		,m_idf_calculated(false){}
 
 	WeightingIdfBased( const WeightingIdfBased& o)
 		:m_storage(o.m_storage)
-		,m_nofMatchesMap(o.m_nofMatchesMap)
-		,m_idf_calculated(o.m_idf_calculated)
-		,m_idf(o.m_idf){}
+		,m_idf(o.m_idf)
+		,m_idf_calculated(o.m_idf_calculated){}
 
 	virtual ~WeightingIdfBased(){}
 
-	virtual double call( IteratorInterface& itr)=0;
+	virtual float call( IteratorInterface& itr)=0;
 
 protected:
 	bool idf_calculated() const			{return m_idf_calculated;}
-	double idf() const				{return m_idf;}
-	double idf_corrected() const			{return m_idf_corrected;}
+	float idf() const				{return m_idf;}
 	void calculateIdf( IteratorInterface& itr);
 
 private:
 	const StorageInterface* m_storage;
-	EstimatedNumberOfMatchesMapR m_nofMatchesMap;
+	float m_idf;
 	bool m_idf_calculated;
-	double m_idf;
-	double m_idf_corrected;
-	double m_min_idf_subexpressions;
 };
 
 }//namespace

@@ -32,17 +32,32 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <sstream>
+#include <iostream>
 
 using namespace strus;
 
-Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
-	:m_db(db_),m_docno(0),m_itr(0),m_frequency(0),m_posno(0),m_positr(0),m_posend(0)
+#define STRUS_LOWLEVEL_DEBUG
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
+#else
+Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
+#endif
+	:m_db(db_),m_docno(0),m_documentFrequency(-1),m_itr(0),m_frequency(0),m_posno(0),m_positr(0),m_posend(0)
 {
 	m_key.push_back( (char)Storage::LocationPrefix);
 	packIndex( m_key, termtypeno);
 	packIndex( m_key, termvalueno);
 	m_keysize = m_key.size();
+#ifdef STRUS_LOWLEVEL_DEBUG
+	m_featureid.append( termstr);
+	m_featureid.push_back(':');
+	m_featureid.push_back( (char)(termtypeno/10) + '0');
+	m_featureid.push_back( (char)(termtypeno%10) + '0');
+#else
 	m_featureid.append( m_key.c_str()+1, m_keysize-1);
+#endif
 }
 
 Iterator::Iterator( const Iterator& o)
@@ -51,6 +66,7 @@ Iterator::Iterator( const Iterator& o)
 	,m_key(o.m_key)
 	,m_keysize(o.m_keysize)
 	,m_docno(0)
+	,m_documentFrequency(o.m_documentFrequency)
 	,m_itr(0)
 	,m_frequency(o.m_frequency)
 	,m_posno(0)
@@ -185,4 +201,27 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 	return extractMatchData();
 }
 
+Index Iterator::documentFrequency()
+{
+	if (m_documentFrequency < 0)
+	{
+		std::string key = m_key;
+		key.resize( m_keysize);
+		key[0] = (char)Storage::DocFrequencyPrefix;
+		leveldb::Slice constkey( key.c_str(), key.size());
+		std::string value;
+		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+		if (status.IsNotFound())
+		{
+			return 0;
+		}
+		if (!status.ok())
+		{
+			throw std::runtime_error( status.ToString());
+		}
+		const char* cc = value.c_str();
+		m_documentFrequency = unpackIndex( cc, cc + value.size());
+	}
+	return m_documentFrequency;
+}
 

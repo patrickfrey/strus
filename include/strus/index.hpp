@@ -35,7 +35,7 @@
 namespace strus {
 	///\typedef Index
 	///\brief Document number type
-	typedef DWORD64 Index;
+	typedef INT64 Index;
 }//namespace
 #else
 #include <stdint.h>

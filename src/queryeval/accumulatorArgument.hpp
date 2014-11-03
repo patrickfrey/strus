@@ -41,7 +41,7 @@ namespace strus
 class AccumulatorArgument
 {
 public:
-	AccumulatorArgument( double factor_, const WeightingFunctionReference& function_, const IteratorReference& itr_)
+	AccumulatorArgument( float factor_, const WeightingFunctionReference& function_, const IteratorReference& itr_)
 		:factor(factor_)
 		,function(function_)
 		,itr(itr_){}
@@ -51,7 +51,7 @@ public:
 		,function(o.function)
 		,itr(o.itr->copy()){}
 
-	double factor;
+	float factor;
 	WeightingFunctionReference function;
 	IteratorReference itr;
 };

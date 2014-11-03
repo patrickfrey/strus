@@ -26,49 +26,25 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
+#include "nullIterator.hpp"
 
 using namespace strus;
 
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	float b_,
-	float k1_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_docno(0)
-		,m_b(b_)
-		,m_k1(k1_)
-		,m_avgDocLength(avgDocLength_)
-{}
+#define STRUS_LOWLEVEL_DEBUG
 
-WeightingBM25::WeightingBM25( const WeightingBM25& o)
-	:WeightingIdfBased(o)
-	,m_storage(o.m_storage)
-	,m_docno(o.m_docno)
-	,m_b(o.m_b)
-	,m_k1(o.m_k1)
-	,m_avgDocLength(o.m_avgDocLength)
-{}
-
-float WeightingBM25::call( IteratorInterface& itr)
+#ifdef STRUS_LOWLEVEL_DEBUG
+NullIterator::NullIterator( Index termtypeno, Index termvalueno, const char* termstr)
+#else
+NullIterator::NullIterator( Index termtypeno, Index termvalueno, const char*)
+#endif
 {
-	if (!idf_calculated())
-	{
-		calculateIdf( itr);
-	}
-	float relativeDocLen
-		= (float)m_storage->documentAttributeNumeric(
-				m_docno, Constants::DOC_ATTRIBUTE_DOCLEN)
-		/ m_avgDocLength;
-
-	return idf()
-		* ((float)itr.frequency() * (m_k1 + 1.0))
-		/ ((float)itr.frequency() + m_k1 * (1.0 - m_b + m_b * relativeDocLen));
+#ifdef STRUS_LOWLEVEL_DEBUG
+	m_featureid.append( termstr);
+	m_featureid.push_back('?');
+	m_featureid.push_back( (char)(termtypeno/10) + '0');
+	m_featureid.push_back( (char)(termtypeno%10) + '0');
+#else
+	m_featureid.append( m_key.c_str()+1, m_keysize-1);
+#endif
 }
-
-
 

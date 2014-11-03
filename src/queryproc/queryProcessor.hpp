@@ -38,8 +38,6 @@ namespace strus
 {
 /// \brief Forward declaration
 class StorageInterface;
-/// \brief Forward declaration
-class EstimatedNumberOfMatchesMap;
 
 
 /// \brief Provides the objects needed for query processing
@@ -65,10 +63,6 @@ public:
 			std::size_t nofargs,
 			const IteratorInterface** args) const;
 
-	virtual double
-		getEstimatedIdf(
-			IteratorInterface& itr) const;
-
 	virtual WeightingFunctionInterface*
 		createWeightingFunction(
 			const std::string& name,
@@ -81,9 +75,9 @@ public:
 			const std::vector<float>& parameter,
 			std::size_t nofitrs,
 			const IteratorInterface** itrs) const;
+
 private:
 	StorageInterface* m_storage;
-	boost::shared_ptr<EstimatedNumberOfMatchesMap> m_nofMatchesMap;
 };
 
 }//namespace

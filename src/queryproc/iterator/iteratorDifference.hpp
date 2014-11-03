@@ -55,6 +55,10 @@ public:
 	{
 		return new IteratorDifference( *this);
 	}
+	virtual Index documentFrequency()
+	{
+		return m_positive.get()?m_positive->documentFrequency():0;
+	}
 
 private:
 	Index m_docno;

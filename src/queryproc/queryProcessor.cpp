@@ -37,7 +37,6 @@
 #include "iterator/iteratorStructWithin.hpp"
 #include "iterator/iteratorStructSequence.hpp"
 #include "iteratorReference.hpp"
-#include "weighting/estimatedNumberOfMatchesMap.hpp"
 #include "weighting/weightingConstant.hpp"
 #include "weighting/weightingFrequency.hpp"
 #include "weighting/weightingBM25.hpp"
@@ -49,12 +48,14 @@
 #include <stdexcept>
 #include <set>
 #include <limits>
+#include <iostream>
 
 using namespace strus;
 
+#define STRUS_LOWLEVEL_DEBUG
+
 QueryProcessor::QueryProcessor( StorageInterface* storage_)
 	:m_storage(storage_)
-	,m_nofMatchesMap( new EstimatedNumberOfMatchesMap( storage_))
 {}
 
 static bool isEqual( const std::string& id, const char* idstr)
@@ -71,8 +72,35 @@ IteratorInterface*
 			const std::string& type,
 			const std::string& value) const
 {
-	return m_storage->createTermOccurrenceIterator( type, value);
+	IteratorInterface* rt = m_storage->createTermOccurrenceIterator( type, value);
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cerr << "create term " << value << ":" << type << " (" << rt->featureid() << ")" << std::endl;
+#endif
+	return rt;
 }
+
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+static void logFeatureCreation( const std::string& name, int range, std::size_t nofargs, const IteratorInterface** args)
+{
+	std::cerr << "create feature " << name << "[" << range << "] ";
+	for (std::size_t ii=0; ii<nofargs; ++ii)
+	{
+		if (ii) std::cerr << ", ";
+		if (args[ii])
+		{
+			std::cerr << args[ii]->featureid();
+		}
+		else
+		{
+			std::cerr << "NULL";
+		}
+	}
+	std::cerr << std::endl;
+}
+#else
+#define logFeatureCreation( name, range, nofargs, args)
+#endif
 
 IteratorInterface*
 	QueryProcessor::createJoinIterator(
@@ -81,6 +109,7 @@ IteratorInterface*
 		std::size_t nofargs,
 		const IteratorInterface** args) const
 {
+	logFeatureCreation( name, range, nofargs, args);
 	if (isEqual( name, "pred"))
 	{
 		if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
@@ -153,13 +182,6 @@ IteratorInterface*
 }
 
 
-double QueryProcessor::getEstimatedIdf(
-			IteratorInterface& itr) const
-{
-	return m_nofMatchesMap->getNofMatches( itr);
-}
-
-
 WeightingFunctionInterface*
 	QueryProcessor::createWeightingFunction(
 			const std::string& name,
@@ -168,12 +190,12 @@ WeightingFunctionInterface*
 	if (isEqual( name, "td"))
 	{
 		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + name + "'");
-		return new WeightingConstant( 1.0, m_storage, m_nofMatchesMap);
+		return new WeightingConstant( 1.0, m_storage);
 	}
 	else if (isEqual( name, "tf"))
 	{
 		if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + name + "'");
-		return new WeightingFrequency( m_storage, m_nofMatchesMap);
+		return new WeightingFrequency( m_storage);
 	}
 	else if (isEqual( name, "bm25"))
 	{
@@ -181,7 +203,7 @@ WeightingFunctionInterface*
 		float k1 = parameter.size() > 1 ? parameter[1]:1.5;
 		float avgDocLength = parameter.size() > 2 ? parameter[2]:1000;
 
-		return new WeightingBM25( m_storage, m_nofMatchesMap, k1, b, avgDocLength);
+		return new WeightingBM25( m_storage, k1, b, avgDocLength);
 	}
 	else if (isEqual( name, "bm15"))
 	{
@@ -189,7 +211,7 @@ WeightingFunctionInterface*
 		float k1 = parameter.size() > 0 ? parameter[0]:1.5;
 		float avgDocLength = parameter.size() > 1 ? parameter[1]:1000;
 
-		return new WeightingBM25( m_storage, m_nofMatchesMap, k1, b, avgDocLength);
+		return new WeightingBM25( m_storage, k1, b, avgDocLength);
 	}
 	else
 	{

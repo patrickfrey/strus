@@ -36,6 +36,7 @@ IteratorStructSequence::IteratorStructSequence( int range_, std::size_t nofargs,
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_range(range_)
+	,m_documentFrequency(-1)
 {
 	m_seq.reserve( nofargs);
 	std::size_t ii=0;
@@ -44,12 +45,14 @@ IteratorStructSequence::IteratorStructSequence( int range_, std::size_t nofargs,
 		if (args[ii])
 		{
 			m_seq.push_back( args[ii]->copy());
+			if (ii) m_featureid.push_back('=');
 			m_featureid.append( args[ii]->featureid());
 		}
 	}
 	if (cut)
 	{
 		m_cut.reset( cut->copy());
+		if (nofargs) m_featureid.push_back('=');
 		m_featureid.append( m_cut->featureid());
 		m_featureid.push_back( 'C');
 	}
@@ -66,6 +69,7 @@ IteratorStructSequence::IteratorStructSequence( const IteratorStructSequence& o)
 	,m_docno_cut(o.m_docno_cut)
 	,m_range(o.m_range)
 	,m_featureid(o.m_featureid)
+	,m_documentFrequency(o.m_documentFrequency)
 {
 	m_seq.reserve( o.m_seq.size());
 	if (o.m_cut.get())
@@ -165,6 +169,25 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 			}
 		}
 	}
+}
+
+Index IteratorStructSequence::documentFrequency()
+{
+	if (m_documentFrequency < 0)
+	{
+		std::vector<IteratorReference>::const_iterator ai = m_seq.begin(), ae = m_seq.end();
+		if (ai == ae) return 0;
+		m_documentFrequency = (*ai)->documentFrequency();
+		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
+		{
+			Index df = (*ai)->documentFrequency();
+			if (df < m_documentFrequency)
+			{
+				m_documentFrequency = df;
+			}
+		}
+	}
+	return m_documentFrequency;
 }
 
 

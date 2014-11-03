@@ -5,6 +5,7 @@ CPP_OBJS=\
 	indexPacker.o \
 	storage.o \
 	iterator.o \
+	nullIterator.o \
 	forwardIndexViewer.o \
 	transaction.o \
 	storageLib.o

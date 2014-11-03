@@ -34,6 +34,7 @@
 #include <map>
 #include <string>
 
+#error DEPRECATED 
 namespace strus
 {
 
@@ -42,11 +43,11 @@ class EstimatedNumberOfMatchesMap
 public:
 	explicit EstimatedNumberOfMatchesMap( const StorageInterface* storage_);
 	
-	double getNofMatches( IteratorInterface& itr);
+	float getNofMatches( IteratorInterface& itr);
 
 private:
 	const StorageInterface* m_storage;
-	std::map<std::string,double> m_valmap;
+	std::map<std::string,float> m_valmap;
 	Index m_maxDocumentNumber;
 	Index m_nofDocumentsInCollection;
 };
