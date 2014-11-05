@@ -166,7 +166,7 @@ static void getSummary_(
 				unsigned int length = 0;
 				res.push_back(
 					summaryElement( 
-						curpos, phrasestruct.get(),
+						nextpos, phrasestruct.get(),
 						forwardindex, maxlen, length));
 				summarylen += length;
 				curpos = nextpos + length + 1;

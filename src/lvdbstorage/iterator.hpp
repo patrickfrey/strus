@@ -66,6 +66,11 @@ public:
 		return m_docno;
 	}
 
+	virtual Index posno() const
+	{
+		return m_posno;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new Iterator(*this);

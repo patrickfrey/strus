@@ -26,54 +26,46 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
-#include "iteratorJoin.hpp"
-#include "iteratorReference.hpp"
+#ifndef _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
+#include "strus/summarizerInterface.hpp"
+#include "private/iteratorReference.hpp"
+#include <string>
+#include <vector>
+#include <iostream>
+#include <sstream>
 
 namespace strus
 {
 
-class IteratorIntersect
-	:public IteratorJoin
+/// \brief Forward declaration
+class StorageInterface;
+/// \brief Forward declaration
+class IteratorInterface;
+
+
+class SummarizerListMatches
+	:public SummarizerInterface
 {
 public:
-	IteratorIntersect( const IteratorIntersect& o);
-	IteratorIntersect( std::size_t nofargs, const IteratorInterface** args);
-	virtual ~IteratorIntersect(){}
+	/// \param[in] storage_ storage to use
+	/// \param[in] nofitrs_ number of argument iterators
+	/// \param[in] itrs_ argument iterators
+	SummarizerListMatches(
+		StorageInterface* storage_,
+		std::size_t nofitrs_,
+		const IteratorInterface** itrs_);
 
-	virtual const std::string& featureid() const
-	{
-		return m_featureid;
-	}
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& pos);
+	virtual ~SummarizerListMatches();
 
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
-
-	virtual Index documentFrequency();
-
-	virtual Index docno() const
-	{
-		return m_docno;
-	}
-
-	virtual Index posno() const
-	{
-		return m_posno;
-	}
-
-	virtual IteratorInterface* copy() const
-	{
-		return new IteratorIntersect( *this);
-	}
+	/// \brief Get some summarization elements
+	/// \param[in] docno document to get the summary element from
+	/// \return the summarization elements
+	virtual std::vector<std::string> getSummary( const Index& docno);
 
 private:
-	Index m_docno;
-	Index m_posno;				///< current position
-	std::vector<IteratorReference> m_argar;
-	std::string m_featureid;		///< unique id of the feature expression
-	Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
+	StorageInterface* m_storage;
+	std::vector<IteratorReference> m_itr;
 };
 
 }//namespace

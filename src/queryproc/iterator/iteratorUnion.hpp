@@ -60,6 +60,11 @@ public:
 		return m_docno;
 	}
 
+	virtual Index posno() const
+	{
+		return m_posno;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorUnion( *this);
@@ -67,6 +72,7 @@ public:
 
 private:
 	Index m_docno;
+	Index m_posno;				///< current position
 	std::vector<IteratorReference> m_argar;
 	std::vector<bool> m_selected;
 	std::string m_featureid;		///< unique id of the feature expression

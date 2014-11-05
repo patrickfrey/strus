@@ -32,7 +32,9 @@
 using namespace strus;
 
 IteratorIntersect::IteratorIntersect( std::size_t nofargs, const IteratorInterface** args)
-	:m_docno(0),m_documentFrequency(-1)
+	:m_docno(0)
+	,m_posno(0)
+	,m_documentFrequency(-1)
 {
 	std::size_t ii=0;
 	m_argar.reserve( nofargs);
@@ -50,6 +52,7 @@ IteratorIntersect::IteratorIntersect( std::size_t nofargs, const IteratorInterfa
 
 IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	:m_docno(o.m_docno)
+	,m_posno(o.m_posno)
 	,m_featureid(o.m_featureid)
 	,m_documentFrequency(o.m_documentFrequency)
 {
@@ -118,32 +121,32 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 
 Index IteratorIntersect::skipPos( const Index& pos_)
 {
-	if (!m_docno) return 0;
+	if (!m_docno) return m_posno=0;
 
 	Index pos_iter = pos_;
 	for (;;)
 	{
 		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
+		if (ai == ae) return m_posno=0;
 
 		pos_iter = (*ai)->skipPos( pos_iter);
 		if (pos_iter == 0)
 		{
-			return 0;
+			return m_posno=0;
 		}
 		for (++ai; ai != ae; ++ai)
 		{
 			Index pos_next = (*ai)->skipPos( pos_iter);
 			if (pos_next != pos_iter)
 			{
-				if (pos_next == 0) return 0;
+				if (pos_next == 0) return m_posno=0;
 				pos_iter = pos_next;
 				break;
 			}
 		}
 		if (ai == ae)
 		{
-			return pos_iter;
+			return m_posno=pos_iter;
 		}
 	}
 }

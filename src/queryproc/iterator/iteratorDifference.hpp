@@ -61,6 +61,11 @@ public:
 		return m_positive.get()?m_positive->docno():0;
 	}
 
+	virtual Index posno() const
+	{
+		return m_positive.get()?m_positive->posno():0;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorDifference( *this);

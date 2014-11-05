@@ -44,6 +44,7 @@
 #include "summarizer/summarizerDocid.hpp"
 #include "summarizer/summarizerMetaData.hpp"
 #include "summarizer/summarizerMatchPhrase.hpp"
+#include "summarizer/summarizerListMatches.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -253,7 +254,7 @@ SummarizerInterface*
 		{
 			summarizelen = maxlen = (unsigned int)parameter[0];
 		}
-		if (nofitrs < 2)
+		if (!nofitrs)
 		{
 			return 0;
 		}
@@ -265,6 +266,14 @@ SummarizerInterface*
 		return new SummarizerMatchPhrase(
 				m_storage, type, maxlen, summarizelen, 
 				nofitrs, itrs, structitr);
+	}
+	else if (isEqual( name, "listmatches"))
+	{
+		if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
+		if (structitr) throw std::runtime_error( std::string( "no structure feature set expected (SUMMARIZE ... IN) for summarizer '") + name + "'");
+		if (!type.empty()) throw std::runtime_error( std::string( "unexpected parameter for summarizer '") + name + "'");
+		if (!nofitrs) return 0;
+		return new SummarizerListMatches( m_storage, nofitrs, itrs);
 	}
 	else
 	{

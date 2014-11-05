@@ -62,6 +62,9 @@ public:
 	/// \brief Get the current document number
 	virtual Index docno() const=0;
 
+	/// \brief Get the current position number
+	virtual Index posno() const=0;
+
 	/// \brief Return a copy of this iterator
 	virtual IteratorInterface* copy() const=0;
 };

@@ -77,6 +77,11 @@ public:
 	{
 		return 0;
 	}
+
+	virtual Index posno() const
+	{
+		return 0;
+	}
 	
 	virtual IteratorInterface* copy() const
 	{

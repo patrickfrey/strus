@@ -67,6 +67,11 @@ public:
 		return m_docno;
 	}
 
+	virtual Index posno() const
+	{
+		return m_posno;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorStructWithin( *this);
@@ -75,6 +80,7 @@ public:
 private:
 	Index m_docno;				///< current document number
 	Index m_docno_cut;			///< next document number after m_docno that contains a cut element
+	Index m_posno;				///< current position
 	std::vector<IteratorReference> m_group;	///< the elements of the group
 	IteratorReference m_cut;		///< the set of elements then must not appear inside the group
 	int m_range;				///< the maximum position difference between the start element and the end element of the group

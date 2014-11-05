@@ -35,6 +35,7 @@ using namespace strus;
 IteratorStructWithin::IteratorStructWithin( int range_, std::size_t nofargs, const IteratorInterface** args, const IteratorInterface* cut)
 	:m_docno(0)
 	,m_docno_cut(0)
+	,m_posno(0)
 	,m_range(range_)
 	,m_documentFrequency(-1)
 {
@@ -67,6 +68,7 @@ IteratorStructWithin::IteratorStructWithin( int range_, std::size_t nofargs, con
 IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
 	:m_docno(o.m_docno)
 	,m_docno_cut(o.m_docno_cut)
+	,m_posno(o.m_posno)
 	,m_range(o.m_range)
 	,m_featureid(o.m_featureid)
 	,m_documentFrequency(o.m_documentFrequency)
@@ -131,19 +133,19 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 	for (;;)
 	{
 		std::vector<IteratorReference>::const_iterator pi = m_group.begin(), pe = m_group.end();
-		if (pi == pe) return 0;
+		if (pi == pe) return m_posno=0;
 
 		min_pos = (*pi)->skipPos( pos_iter);
 		if (!min_pos)
 		{
-			return 0;
+			return m_posno=0;
 		}
 		max_pos = min_pos;
 
 		for (++pi; pi != pe; ++pi)
 		{
 			Index pos_next = (*pi)->skipPos( pos_iter);
-			if (!pos_next) return 0;
+			if (!pos_next) return m_posno=0;
 
 			if (min_pos > pos_next)
 			{
@@ -166,7 +168,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 				Index pos_cut = m_cut->skipPos( min_pos);
 				if (pos_cut == 0 || pos_cut > max_pos)
 				{
-					return m_range>=0?min_pos:max_pos;
+					return m_posno==(m_range>=0?min_pos:max_pos);
 				}
 				else
 				{
@@ -175,7 +177,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 			}
 			else
 			{
-				return m_range>=0?min_pos:max_pos;
+				return m_posno=(m_range>=0?min_pos:max_pos);
 			}
 		}
 	}
