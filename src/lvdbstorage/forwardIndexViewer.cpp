@@ -96,6 +96,7 @@ void ForwardIndexViewer::initDoc( const Index& docno_)
 	if (m_docno != docno_)
 	{
 		m_docno = docno_;
+		m_keylevel = 0;
 		buildKey(2);
 	}
 }
@@ -116,6 +117,7 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 			throw std::runtime_error( "cannot seek position without document number defined");
 		}
 		m_pos = firstpos_;
+		m_keylevel = 1;
 		buildKey(3);
 		m_itr->Seek( leveldb::Slice( m_key.c_str(), m_key.size()));
 

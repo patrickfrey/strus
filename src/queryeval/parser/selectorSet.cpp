@@ -36,7 +36,7 @@
 using namespace strus;
 using namespace strus::parser;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 void SelectorSet::pushRow( const Selector* row)
 {

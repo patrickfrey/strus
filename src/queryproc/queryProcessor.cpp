@@ -226,25 +226,27 @@ SummarizerInterface*
 		const std::string& name,
 		const std::string& type,
 		const std::vector<float>& parameter,
+		const IteratorInterface* structitr,
 		std::size_t nofitrs,
 		const IteratorInterface** itrs) const
 {
 	if (isEqual( name, "metadata"))
 	{
 		if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
-		if (nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
+		if (structitr || nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
 		if (type.size() != 1) throw std::runtime_error( std::string( "only one ASCII alphanumeric character allowed as parameter metadata name for summarizer '") + name + "'");
 		return new SummarizerMetaData( m_storage, type[0]);
 	}
 	else if (isEqual( name, "docid"))
 	{
 		if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
-		if (nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
+		if (structitr || nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
 		if (!type.empty()) throw std::runtime_error( std::string( "unexpected parameter for summarizer '") + name + "'");
 		return new SummarizerDocid( m_storage);
 	}
 	else if (isEqual( name, "matchphrase"))
 	{
+		if (!structitr) throw std::runtime_error( std::string("no structure feature set defined (SUMMARIZE ... IN) but needed for summarizer '") + name + "'");
 		unsigned int maxlen = 30;
 		unsigned int summarizelen = 100;
 		if (parameter.size() > 0)
@@ -262,7 +264,7 @@ SummarizerInterface*
 		}
 		return new SummarizerMatchPhrase(
 				m_storage, type, maxlen, summarizelen, 
-				nofitrs-1, itrs, itrs[0]);
+				nofitrs, itrs, structitr);
 	}
 	else
 	{

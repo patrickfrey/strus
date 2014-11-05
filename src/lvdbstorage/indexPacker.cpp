@@ -1,6 +1,7 @@
 #include "indexPacker.hpp"
 #include <map>
 #include <limits>
+#include <cmath>
 #include <stdexcept>
 
 #define B11111111 0xFF
@@ -57,10 +58,10 @@ struct CharLengthTab
 
 static CharLengthTab g_charlentable;
 
-static unsigned int utf8decode( const char* itr)
+static uint32_t utf8decode( const char* itr)
 {
 	unsigned int charsize = g_charlentable[ *itr];
-	unsigned int res = (unsigned char)*itr;
+	uint32_t res = (unsigned char)*itr;
 	if (res > 127)
 	{
 		unsigned int gg = charsize-2;
@@ -80,7 +81,7 @@ static unsigned int utf8decode( const char* itr)
 	return res;
 }
 
-static void utf8encode( std::string& buf, unsigned int chr)
+static void utf8encode( std::string& buf, uint32_t chr)
 {
 	unsigned int rt;
 	if (chr <= 127)
@@ -104,7 +105,7 @@ static void utf8encode( std::string& buf, unsigned int chr)
 	}
 }
 
-static unsigned int unpackInt32_( const char*& itr, const char* end)
+static uint32_t unpackInt32_( const char*& itr, const char* end)
 {
 	int ii;
 	int nn = g_charlentable[ *itr];
@@ -117,7 +118,7 @@ static unsigned int unpackInt32_( const char*& itr, const char* end)
 	{
 		throw std::runtime_error( "corrupt data (unpackInt32_ 1)");
 	}
-	unsigned int rt = utf8decode( buf);
+	uint32_t rt = utf8decode( buf);
 	if (rt > 0x7fffFFFFU)
 	{
 		throw std::runtime_error( "corrupt data (unpackInt32_ 2)");
@@ -191,12 +192,12 @@ void strus::packIndex( std::string& buf, const Index& idx)
 		{
 			throw std::runtime_error( "index out of range");
 		}
-		utf8encode( buf, (unsigned int)hi);
-		utf8encode( buf, (unsigned int)lo);
+		utf8encode( buf, (uint32_t)hi);
+		utf8encode( buf, (uint32_t)lo);
 	}
 	else
 	{
-		utf8encode( buf, (unsigned int)idx);
+		utf8encode( buf, (uint32_t)idx);
 	}
 }
 
@@ -225,30 +226,41 @@ unsigned int strus::nofPackedIndices( const char* ptr, const char* end)
 
 void strus::packFloat( std::string& buf, const float& val)
 {
-	uint32_t work = *reinterpret_cast< uint32_t const* >( &val);
-	buf.push_back( (unsigned char)(unsigned int)(work >> 24));
-	buf.push_back( (unsigned char)(unsigned int)(work >> 16));
-	buf.push_back( (unsigned char)(unsigned int)(work >>  8));
-	buf.push_back( (unsigned char)(unsigned int)(work >>  0));
+	union 
+	{
+		uint32_t bits;
+		float val;
+	} m;
+	m.val = val;
+	uint32_t sign = (m.bits >> 31) << 23;
+	uint32_t exponent = (m.bits & 0x7f800000) >> 23;
+	uint32_t mantissa = (m.bits & 0x007fffff) | sign;
+
+	utf8encode( buf, exponent);
+	utf8encode( buf, mantissa);
 }
 
 float strus::unpackFloat( const char*& ptr, const char* end)
 {
-	if (ptr + 4 > end) throw std::runtime_error("array bound read in unpack float");
-	uint32_t work;
-	work = (unsigned char)*ptr++;
-	work <<= 8;
-	work += *ptr++;
-	work <<= 8;
-	work += *ptr++;
-	work <<= 8;
-	work += *ptr++;
-	return *reinterpret_cast< float* >( &work);
+	union 
+	{
+		uint32_t bits;
+		float val;
+	} m;
+	uint32_t exponent = unpackInt32_( ptr, end);
+	uint32_t mantissa = unpackInt32_( ptr, end);
+	m.bits = ((mantissa & (1<<23)) << 8)
+		|((mantissa & 0x007fffff))
+		|((exponent << 23));
+	return m.val;
 }
 
-unsigned int strus::sizeofPackedFloat( const char*&)
+unsigned int strus::sizeofPackedFloat( const char*& ptr)
 {
-	return sizeof(float);
+	char const* cc = ptr;
+	cc += g_charlentable[ *cc];
+	cc += g_charlentable[ *cc];
+	return (cc-ptr);
 }
 
 

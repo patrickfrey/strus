@@ -9,7 +9,7 @@
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 Accumulator::Accumulator( const QueryProcessorInterface* qproc_)
 	:m_queryprocessor(qproc_)

@@ -39,14 +39,16 @@ namespace parser {
 class SummarizeOperation
 {
 public:
-	SummarizeOperation(){}
+	SummarizeOperation()
+		:m_structSet(0){}
 
 	SummarizeOperation(
-			const std::string& resultAttribute_,
-			const std::string& summarizerName_,
-			const std::string& type_,
-			const std::vector<float>& parameter_,
-			const std::vector<int>& featureSet_);
+		const std::string& resultAttribute_,
+		const std::string& summarizerName_,
+		const std::string& type_,
+		const std::vector<float>& parameter_,
+		const std::vector<int>& featureSet_,
+		int structSet_);
 
 	SummarizeOperation( const SummarizeOperation& o);
 
@@ -59,6 +61,7 @@ public:
 	std::string type() const			{return m_type;}
 	const std::vector<float>& parameter() const	{return m_parameter;}
 	const std::vector<int>& featureset() const	{return m_featureSet;}
+	int structset() const				{return m_structSet;}
 
 private:
 	std::string m_resultAttribute;
@@ -66,6 +69,7 @@ private:
 	std::string m_type;
 	std::vector<float> m_parameter;
 	std::vector<int> m_featureSet;
+	int m_structSet;
 };
 
 }}//namespace

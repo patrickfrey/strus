@@ -29,3 +29,4 @@ src/strusCreate/strusCreate
 src/strusInspect/strusInspect
 tests/randoc/src/randomCollectionTest
 tests/program/src/parseQueryEvalProgramTest
+tests/functions/src/functions

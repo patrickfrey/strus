@@ -118,16 +118,12 @@ static std::string
 	if (!start_found) phrase.append( "...");
 
 	Index pp = startpos;
-	for (;pp <= endpos; ++pp)
+	for (;pp < endpos; ++pp)
 	{
 		pp = forwardindex.skipPos(pp);
 		if (pp)
 		{
 			if (!phrase.empty()) phrase.push_back(' ');
-			if (curpos == pp)
-			{
-				phrase.append("@@");
-			}
 			phrase.append( forwardindex.fetch());
 			++length;
 		}
@@ -150,17 +146,22 @@ static void getSummary_(
 		unsigned int maxsummarylen)
 {
 	forwardindex.initDoc( docno);
+	if (phrasestruct)
+	{
+		phrasestruct->skipDoc( docno);
+	}
 	Index curpos = 0;
+	Index nextpos = 0;
 
 	std::vector<IteratorReference>::const_iterator
 		ii = itr.begin(), ie = itr.end();
 	unsigned int summarylen = 0;
 
-	for (; ii != ie && summarylen < maxsummarylen; ++ii)
+	for (int iidx=0; ii != ie && summarylen < maxsummarylen; ++ii,++iidx)
 	{
 		if (*ii && docno==(*ii)->skipDoc( docno))
 		{
-			while (0!=(curpos=(*ii)->skipPos( curpos)))
+			while (0!=(nextpos=(*ii)->skipPos( curpos)))
 			{
 				unsigned int length = 0;
 				res.push_back(
@@ -168,7 +169,7 @@ static void getSummary_(
 						curpos, phrasestruct.get(),
 						forwardindex, maxlen, length));
 				summarylen += length;
-				curpos += length + 1;
+				curpos = nextpos + length + 1;
 	
 				if (summarylen >= maxsummarylen)
 				{

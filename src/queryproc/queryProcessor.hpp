@@ -73,6 +73,7 @@ public:
 			const std::string& name,
 			const std::string& type,
 			const std::vector<float>& parameter,
+			const IteratorInterface* structitr,
 			std::size_t nofitrs,
 			const IteratorInterface** itrs) const;
 

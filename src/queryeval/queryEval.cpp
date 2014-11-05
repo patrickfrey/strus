@@ -251,7 +251,7 @@ public:
 		return false;
 	}
 
-	IteratorReference getRelevantFeatureSetUnion( const StorageInterface& storage, const QueryProcessorInterface& processor, int setIndex)
+	IteratorReference getFeatureSetUnion( const StorageInterface& storage, const QueryProcessorInterface& processor, int setIndex, bool relevantOnly)
 	{
 		const IteratorInterface* far[ (int)QueryEval::MaxSizeFeatureSet];
 
@@ -268,7 +268,7 @@ public:
 		std::size_t aidx = 0;
 		for (; ai != ae; ai++)
 		{
-			if (ai->get() && isRelevantSelectionFeature( storage, **ai))
+			if (ai->get() && (!relevantOnly || isRelevantSelectionFeature( storage, **ai)))
 			{
 				far[ aidx++] = ai->get();
 			}
@@ -400,10 +400,6 @@ std::vector<ResultDocument>
 				si = summarizers.begin(), se = summarizers.end();
 			for (; si != se; ++si)
 			{
-				/*[-]*/if (!si->second.get())
-				/*[-]*/{
-				/*[-]*/	std::cout << "HALLY GALLY" << (int)(si - summarizers.begin()) << std::endl;
-				/*[-]*/}
 				std::vector<std::string> summary = si->second->getSummary( ri->docno());
 				std::vector<std::string>::const_iterator
 					ci = summary.begin(), ce = summary.end();
@@ -548,9 +544,11 @@ std::vector<ResultDocument>
 #endif
 		}
 	}
+#ifdef STRUS_LOWLEVEL_DEBUG
 	std::cout << "query features:" << std::endl;
-	/*[-]*/query.printFeatures( std::cout);
-	
+	query.printFeatures( std::cout);
+#endif
+
 	//[3] Get the result accumulator and evaluate the results
 	if (m_accumulateOperation.defined())
 	{
@@ -579,7 +577,7 @@ std::vector<ResultDocument>
 
 		for (; fi != fe; ++fi)
 		{
-			IteratorReference selection( query.getRelevantFeatureSetUnion( storage, processor, *fi));
+			IteratorReference selection( query.getFeatureSetUnion( storage, processor, *fi, true));
 			if (selection.get()) accumulator.addSelector( *selection);
 		}
 		// Get the summarizers:
@@ -597,16 +595,23 @@ std::vector<ResultDocument>
 			std::vector<int>::const_iterator ai = si->featureset().begin(), ae = si->featureset().end();
 			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
 			{
-				IteratorReference sumfeat( query.getRelevantFeatureSetUnion( storage, processor, *ai));
+				IteratorReference sumfeat( query.getFeatureSetUnion( storage, processor, *ai, true));
 				far_ref.push_back( sumfeat); 
-				far[ aidx++] = far_ref.back().get();
+				far[ aidx] = far_ref.back().get();
+			}
+			IteratorReference structfeat;
+			if (si->structset())
+			{
+				structfeat = query.getFeatureSetUnion(
+					storage, processor, si->structset(), false);
 			}
 			summarizerdefs.push_back(
 				SummarizerDef(
 					si->resultAttribute(),
 					processor.createSummarizer(
 						si->summarizerName(), si->type(),
-						si->parameter(), far_ref.size(), far)));
+						si->parameter(), structfeat.get(),
+						far_ref.size(), far)));
 		}
 		// Calculate and return the ranklist:
 		return getRankedDocumentList(

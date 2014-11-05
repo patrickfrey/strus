@@ -37,19 +37,22 @@ SummarizeOperation::SummarizeOperation(
 			const std::string& summarizerName_,
 			const std::string& type_,
 			const std::vector<float>& parameter_,
-			const std::vector<int>& featureSet_)
+			const std::vector<int>& featureSet_,
+			int structSet_)
 		:m_resultAttribute(resultAttribute_)
 		,m_summarizerName(summarizerName_)
 		,m_type(type_)
 		,m_parameter(parameter_)
-		,m_featureSet(featureSet_){}
+		,m_featureSet(featureSet_)
+		,m_structSet(structSet_){}
 
 SummarizeOperation::SummarizeOperation( const SummarizeOperation& o)
 		:m_resultAttribute(o.m_resultAttribute)
 		,m_summarizerName(o.m_summarizerName)
 		,m_type(o.m_type)
 		,m_parameter(o.m_parameter)
-		,m_featureSet(o.m_featureSet){}
+		,m_featureSet(o.m_featureSet)
+		,m_structSet(o.m_structSet){}
 
 
 void SummarizeOperation::parse( char const*& src, StringIndexMap& setnamemap)
@@ -107,28 +110,47 @@ void SummarizeOperation::parse( char const*& src, StringIndexMap& setnamemap)
 		}
 		parse_OPERATOR( src);
 	}
-	if (isAlpha( *src))
+	bool isDefinedFROM = false;
+	bool isDefinedIN = false;
+	while (isAlpha( *src))
 	{
-		if (!isEqual( parse_IDENTIFIER( src), "FROM"))
+		std::string keyword = parse_IDENTIFIER( src);
+		if (isEqual( keyword, "FROM"))
 		{
-			throw std::runtime_error("expected FROM and a feature set list or end of SUMMARIZE declaration");
+			if (isDefinedFROM) throw std::runtime_error("duplicate definition of FROM in SUMMARIZER declaration");
+			isDefinedFROM = true;
+			for(;;)
+			{
+				if (!isAlpha( *src))
+				{
+					throw std::runtime_error( "expected comma separated list of identifiers (feature set list) after FROM in a SUMMARIZE definition");
+				}
+				m_featureSet.push_back(
+					setnamemap.get( parse_IDENTIFIER( src)));
+				if (isComma(*src))
+				{
+					parse_OPERATOR( src);
+				}
+				else
+				{
+					break;
+				}
+			}
 		}
-		for(;;)
+		else if (isEqual( keyword, "IN"))
 		{
+			if (isDefinedIN) throw std::runtime_error("duplicate definition of IN in SUMMARIZER declaration");
+			isDefinedIN = true;
+
 			if (!isAlpha( *src))
 			{
-				throw std::runtime_error( "expected comma separated list of identifiers as feature set list in a SUMMARIZE definition");
+				throw std::runtime_error( "expected identifier (structure feature set) after IN in a SUMMARIZE definition");
 			}
-			m_featureSet.push_back(
-				setnamemap.get( parse_IDENTIFIER( src)));
-			if (isComma(*src))
-			{
-				parse_OPERATOR( src);
-			}
-			else
-			{
-				break;
-			}
+			m_structSet = setnamemap.get( parse_IDENTIFIER( src));
+		}
+		else
+		{
+			throw std::runtime_error("expected IN and a feature set or FROM and a feature set list or end of SUMMARIZE declaration");
 		}
 	}
 }

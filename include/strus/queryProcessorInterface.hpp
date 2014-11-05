@@ -84,6 +84,7 @@ public:
 	/// \param[in] name name of the summarizer
 	/// \param[in] type term type or attribute name (depends on implementation)
 	/// \param[in] parameter scalar arguments for the summarizer
+	/// \param[in] structitr iterator representing the structure delimiter elements for summarization
 	/// \param[in] nofitrs number of feature iterators this summarizer is based on
 	/// \param[in] itrs feature iterators for this summarizer 
 	/// \return the created summarizer object (to dispose with 'delete')
@@ -92,6 +93,7 @@ public:
 			const std::string& name,
 			const std::string& type,
 			const std::vector<float>& parameter,
+			const IteratorInterface* structitr,
 			std::size_t nofitrs,
 			const IteratorInterface** itrs) const=0;
 };
