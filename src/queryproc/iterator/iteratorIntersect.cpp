@@ -81,6 +81,8 @@ std::vector<IteratorInterface*> IteratorIntersect::subExpressions( bool positive
 
 Index IteratorIntersect::skipDoc( const Index& docno_)
 {
+	if (m_docno == docno_ && m_docno) return m_docno;
+
 	Index docno_iter = docno_;
 	for (;;)
 	{

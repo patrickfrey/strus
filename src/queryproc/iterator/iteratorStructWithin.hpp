@@ -55,17 +55,22 @@ public:
 	}
 	virtual ~IteratorStructWithin(){}
 
+	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
+
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
 
 	virtual Index documentFrequency();
 
+	virtual Index docno() const
+	{
+		return m_docno;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorStructWithin( *this);
 	}
-
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
 private:
 	Index m_docno;				///< current document number

@@ -9,6 +9,8 @@
 
 using namespace strus;
 
+#define STRUS_LOWLEVEL_DEBUG
+
 Accumulator::Accumulator( const QueryProcessorInterface* qproc_)
 	:m_queryprocessor(qproc_)
 	,m_selectoridx(0)
@@ -68,8 +70,19 @@ bool Accumulator::nextRank(
 		{
 			if (docno == ai->itr->skipDoc( docno))
 			{
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cerr << "MATCHES " << docno << ":";
+				for (Index pp=ai->itr->skipPos(0); pp != 0; pp=ai->itr->skipPos(pp+1))
+				{
+					std::cerr << ' ' << pp;
+				}
+				std::cerr << std::endl;
+#endif
 				weight += ai->function->call( *ai->itr) * ai->factor;
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "WEIGHT = " << weight << std::endl;
+#endif
 		}
 		return true;
 	}

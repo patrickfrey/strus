@@ -71,17 +71,22 @@ private:
 	};
 	typedef std::map< TermMapKey, TermMapValue> TermMap;
 
-	struct InvMapValue
+	struct InvMapKey
 	{
-		InvMapValue()
-			:typeno(0){}
-		InvMapValue( const InvMapValue& o)
-			:typeno(o.typeno),value(o.value){}
+		InvMapKey( const Index& t, const Index& p)
+			:typeno(t),pos(p){}
+		InvMapKey( const InvMapKey& o)
+			:typeno(o.typeno),pos(o.pos){}
+
+		bool operator<( const InvMapKey& o) const
+		{
+			return (typeno < o.typeno || (typeno == o.typeno && pos < o.pos));
+		}
 
 		Index typeno;
-		std::string value;
+		Index pos;
 	};
-	typedef std::map<Index, InvMapValue> InvMap;
+	typedef std::map<InvMapKey, std::string> InvMap;
 
 	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
 

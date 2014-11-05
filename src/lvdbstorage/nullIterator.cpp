@@ -27,10 +27,11 @@
 --------------------------------------------------------------------
 */
 #include "nullIterator.hpp"
+#include "indexPacker.hpp"
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 NullIterator::NullIterator( Index termtypeno, Index termvalueno, const char* termstr)
@@ -44,7 +45,8 @@ NullIterator::NullIterator( Index termtypeno, Index termvalueno, const char*)
 	m_featureid.push_back( (char)(termtypeno/10) + '0');
 	m_featureid.push_back( (char)(termtypeno%10) + '0');
 #else
-	m_featureid.append( m_key.c_str()+1, m_keysize-1);
+	packIndex( m_featureid, termtypeno);
+	packIndex( m_featureid, termvalueno);
 #endif
 }
 

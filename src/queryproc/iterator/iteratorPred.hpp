@@ -77,6 +77,11 @@ public:
 		return m_origin.get()?m_origin->documentFrequency():0;
 	}
 
+	virtual Index docno() const
+	{
+		return m_origin.get()?m_origin->docno():0;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorPred( *this);

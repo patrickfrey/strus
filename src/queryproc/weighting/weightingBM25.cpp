@@ -34,23 +34,21 @@ using namespace strus;
 
 WeightingBM25::WeightingBM25(
 	const StorageInterface* storage_,
-	float b_,
 	float k1_,
+	float b_,
 	float avgDocLength_)
 		:WeightingIdfBased(storage_)
 		,m_storage(storage_)
-		,m_docno(0)
-		,m_b(b_)
 		,m_k1(k1_)
+		,m_b(b_)
 		,m_avgDocLength(avgDocLength_)
 {}
 
 WeightingBM25::WeightingBM25( const WeightingBM25& o)
 	:WeightingIdfBased(o)
 	,m_storage(o.m_storage)
-	,m_docno(o.m_docno)
-	,m_b(o.m_b)
 	,m_k1(o.m_k1)
+	,m_b(o.m_b)
 	,m_avgDocLength(o.m_avgDocLength)
 {}
 
@@ -61,13 +59,21 @@ float WeightingBM25::call( IteratorInterface& itr)
 		calculateIdf( itr);
 	}
 	float relativeDocLen
-		= (float)m_storage->documentAttributeNumeric(
-				m_docno, Constants::DOC_ATTRIBUTE_DOCLEN)
+		= ((float)m_storage->documentAttributeNumeric(
+				itr.docno(), Constants::DOC_ATTRIBUTE_DOCLEN)+1)
 		/ m_avgDocLength;
 
-	return idf()
-		* ((float)itr.frequency() * (m_k1 + 1.0))
-		/ ((float)itr.frequency() + m_k1 * (1.0 - m_b + m_b * relativeDocLen));
+	float ff = itr.frequency();
+	if (ff == 0.0)
+	{
+		return 0.0;
+	}
+	else
+	{
+		return idf()
+			* (ff * (m_k1 + 1.0))
+			/ (ff + m_k1 * (1.0 - m_b + m_b * relativeDocLen));
+	}
 }
 
 

@@ -36,7 +36,7 @@
 using namespace strus;
 using namespace strus::parser;
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 void SelectorSet::pushRow( const Selector* row)
 {
@@ -240,7 +240,7 @@ SelectorSetR SelectorSet::calculate(
 			break;
 	}
 #ifdef STRUS_LOWLEVEL_DEBUG
-	std::cout << "Selector set calculation result: " << rt->tostring() << std::endl;
+	std::cout << "Selector set calculation result: " << (rt.get()?rt->tostring():std::string("EMPTY")) << std::endl;
 #endif
 	return rt;
 }

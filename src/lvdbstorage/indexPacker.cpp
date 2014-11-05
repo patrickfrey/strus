@@ -236,14 +236,14 @@ float strus::unpackFloat( const char*& ptr, const char* end)
 {
 	if (ptr + 4 > end) throw std::runtime_error("array bound read in unpack float");
 	uint32_t work;
-	work = *ptr++;
+	work = (unsigned char)*ptr++;
 	work <<= 8;
-	work = *ptr++;
+	work += *ptr++;
 	work <<= 8;
-	work = *ptr++;
+	work += *ptr++;
 	work <<= 8;
-	work = *ptr++;
-	return *reinterpret_cast< uint32_t* >( &work);
+	work += *ptr++;
+	return *reinterpret_cast< float* >( &work);
 }
 
 unsigned int strus::sizeofPackedFloat( const char*&)

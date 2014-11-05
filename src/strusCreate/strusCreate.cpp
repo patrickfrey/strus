@@ -36,8 +36,6 @@
 #include <cstring>
 #include <stdexcept>
 
-enum Command {None,CreateStorage};
-
 int main( int argc, const char* argv[])
 {
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)

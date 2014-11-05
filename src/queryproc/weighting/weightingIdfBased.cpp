@@ -44,9 +44,13 @@ void WeightingIdfBased::calculateIdf( IteratorInterface& itr)
 				(nofCollectionDocuments - nofMatches + 0.5)
 				/ (nofMatches + 0.5));
 	}
-	else
+	else if (nofCollectionDocuments > 100)
 	{
 		m_idf = 0.0;
+	}
+	else
+	{
+		m_idf = 0.1;
 	}
 	m_idf_calculated = true;
 }

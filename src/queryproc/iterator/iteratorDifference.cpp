@@ -73,9 +73,9 @@ std::vector<IteratorInterface*> IteratorDifference::subExpressions( bool positiv
 
 Index IteratorDifference::skipDoc( const Index& docno_)
 {
+	if (!m_positive.get()) return 0;
 	m_docno = m_positive->skipDoc( docno_);
-	m_docno_neg = m_negative->skipDoc( m_docno);
-	
+	m_docno_neg = m_positive.get()?m_negative->skipDoc( m_docno):0;
 	return m_docno;
 }
 

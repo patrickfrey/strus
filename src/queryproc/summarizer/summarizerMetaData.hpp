@@ -37,10 +37,6 @@ namespace strus
 
 /// \brief Forward declaration
 class StorageInterface;
-/// \brief Forward declaration
-class ForwardIndexViewerInterface;
-/// \brief Forward declaration
-class IteratorInterface;
 
 
 class SummarizerMetaData

@@ -112,6 +112,10 @@ public:
 	/// \return the document number
 	virtual Index maxDocumentNumber() const=0;
 
+	/// \brief Get the internal document number
+	/// \param[in] docid document id of the document inserted
+	virtual Index documentNumber( const std::string& docid) const=0;
+
 	/// \brief Get a numeric attribute assigned to a document
 	/// \param[in] docno document number
 	/// \param[in] varname variable name identifying the attribute to get

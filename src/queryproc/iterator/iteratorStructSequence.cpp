@@ -104,6 +104,8 @@ std::vector<IteratorInterface*> IteratorStructSequence::subExpressions( bool pos
 
 Index IteratorStructSequence::skipDoc( const Index& docno_)
 {
+	if (m_docno == docno_ && m_docno) return m_docno;
+
 	m_docno = getFirstAllMatchDocno( m_seq, docno_);
 	if (m_docno)
 	{

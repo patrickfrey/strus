@@ -149,7 +149,7 @@ std::string Storage::keyString( KeyPrefix prefix, const std::string& keyname)
 	return rt;
 }
 
-Index Storage::keyLookUp( const std::string& keystr)
+Index Storage::keyLookUp( const std::string& keystr) const
 {
 	if (!m_db) throw std::runtime_error("read on closed storage");
 	std::string value;
@@ -167,7 +167,7 @@ Index Storage::keyLookUp( const std::string& keystr)
 	return unpackIndex( cc, cc + value.size());
 }
 
-Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname)
+Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname) const
 {
 
 	std::string key = keyString( prefix, keyname);
@@ -272,6 +272,11 @@ Index Storage::maxDocumentNumber() const
 	return m_next_docno-1;
 }
 
+Index Storage::documentNumber( const std::string& docid) const
+{
+	return keyLookUp( Storage::DocIdPrefix, docid);
+}
+
 std::string Storage::documentAttributeString( Index docno, char varname) const
 {
 	std::string key;
@@ -303,6 +308,7 @@ float Storage::documentAttributeNumeric( Index docno, char varname) const
 	leveldb::Slice constkey( key.c_str(), key.size());
 	std::string value;
 	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+
 	if (status.IsNotFound())
 	{
 		return 0.0;

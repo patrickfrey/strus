@@ -47,8 +47,8 @@ class WeightingBM25
 public:
 	explicit WeightingBM25(
 			const StorageInterface* storage_,
-			float b_,
 			float k1_,
+			float b_,
 			float avgDocLength_);
 
 	WeightingBM25( const WeightingBM25& o);
@@ -59,9 +59,8 @@ public:
 
 private:
 	const StorageInterface* m_storage;
-	Index m_docno;
-	float m_b;
 	float m_k1;
+	float m_b;
 	float m_avgDocLength;
 };
 

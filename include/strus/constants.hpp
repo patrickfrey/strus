@@ -38,8 +38,8 @@ namespace strus
 struct Constants
 {
 	enum {
-		DOC_ATTRIBUTE_DOCID=0x23,
-		DOC_ATTRIBUTE_DOCLEN=0x40
+		DOC_ATTRIBUTE_DOCID=0x40,
+		DOC_ATTRIBUTE_DOCLEN=0x23
 	};
 	static const char* operator_set_union()
 	{

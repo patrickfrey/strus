@@ -51,12 +51,17 @@ public:
 
 	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
+	virtual Index documentFrequency();
+
+	virtual Index docno() const
+	{
+		return m_docno;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorIntersect( *this);
 	}
-
-	virtual Index documentFrequency();
 
 private:
 	Index m_docno;

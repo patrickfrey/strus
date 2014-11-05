@@ -66,6 +66,8 @@ public:
 
 	virtual Index maxDocumentNumber() const;
 
+	virtual Index documentNumber( const std::string& docid) const;
+	
 	virtual float documentAttributeNumeric( Index docno, char varname) const;
 
 	virtual std::string documentAttributeString( Index docno, char varname) const;
@@ -87,7 +89,7 @@ public:
 		TermTypePrefix='t',	///< [type string]             ->  [typeno]
 		TermValuePrefix='i',	///< [term string]             ->  [termno]
 		DocIdPrefix='d',	///< [docid string]            ->  [docno]
-		LocationPrefix='o',	///< [type,term,docno]         ->  [pos incr]*
+		LocationPrefix='o',	///< [type,term,docno]         ->  [pos]*
 		InversePrefix='r',	///< [docno,typeno,position]   ->  [term string]*
 		VariablePrefix='v',	///< [variable string]         ->  [index]
 		DocNumAttrPrefix='w',	///< [docno,nameid]            ->  [float]
@@ -96,9 +98,9 @@ public:
 	};
 
 	static std::string keyString( KeyPrefix prefix, const std::string& keyname);
-	Index keyLookUp( KeyPrefix prefix, const std::string& keyname);
+	Index keyLookUp( KeyPrefix prefix, const std::string& keyname) const;
 	Index keyGetOrCreate( KeyPrefix prefix, const std::string& keyname);
-	Index keyLookUp( const std::string& keystr);
+	Index keyLookUp( const std::string& keystr) const;
 	void flushNewKeys();
 	void flushDfs();
 

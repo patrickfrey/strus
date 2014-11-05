@@ -78,7 +78,7 @@ static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface* 
 			found = false;
 		}
 	}
-	else if (phrasestruct) for (;;)
+	if (phrasestruct) for (;;)
 	{
 		Index midpos = phrasestruct->skipPos( prevpos+1);
 		if (!midpos || midpos > curpos) break;
@@ -124,6 +124,10 @@ static std::string
 		if (pp)
 		{
 			if (!phrase.empty()) phrase.push_back(' ');
+			if (curpos == pp)
+			{
+				phrase.append("@@");
+			}
 			phrase.append( forwardindex.fetch());
 			++length;
 		}

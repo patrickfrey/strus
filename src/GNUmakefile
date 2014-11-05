@@ -10,6 +10,7 @@ subdirs:
 	cd queryeval; make all; cd -
 	cd queryproc; make all; cd -
 	cd strusCreate; make all; cd -
+	cd strusInspect; make all; cd -
 
 .PHONY: clean
 clean:
@@ -17,6 +18,7 @@ clean:
 	cd queryeval; make clean; cd -
 	cd queryproc; make clean; cd -
 	cd strusCreate; make clean; cd -
+	cd strusInspect; make clean; cd -
 
 .PHONY: install
 install:
@@ -24,6 +26,7 @@ install:
 	cd queryeval; make install; cd -
 	cd queryproc; make install; cd -
 	cd strusCreate; make install; cd -
+	cd strusInspect; make install; cd -
 
 .PHONY: uninstall
 uninstall:
@@ -31,5 +34,6 @@ uninstall:
 	cd queryeval; make uninstall; cd -
 	cd queryproc; make uninstall; cd -
 	cd strusCreate; make uninstall; cd -
+	cd strusInspect; make uninstall; cd -
 
 

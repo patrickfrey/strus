@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_FORWARD_INDEX_VIEWER_REFERENCE_HPP_INCLUDED
 #define _STRUS_FORWARD_INDEX_VIEWER_REFERENCE_HPP_INCLUDED
-#include "strus/forwardIndexInterface.hpp"
+#include "strus/forwardIndexViewerInterface.hpp"
 #include <boost/shared_ptr.hpp>
 
 namespace strus

@@ -73,6 +73,11 @@ public:
 		return 0;
 	}
 	
+	virtual Index docno() const
+	{
+		return 0;
+	}
+	
 	virtual IteratorInterface* copy() const
 	{
 		return new NullIterator(*this);

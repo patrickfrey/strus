@@ -244,7 +244,7 @@ public:
 		float nofMatches = itr.documentFrequency();
 		float nofCollectionDocuments = storage.nofDocumentsInserted();
 	
-		if (nofCollectionDocuments > nofMatches * 2)
+		if (nofCollectionDocuments < 50 || nofCollectionDocuments > nofMatches * 2)
 		{
 			return true;
 		}
@@ -273,10 +273,17 @@ public:
 				far[ aidx++] = ai->get();
 			}
 		}
-		IteratorReference rt(
-			processor.createJoinIterator(
-				Constants::operator_set_union(), 0, aidx, far));
-		return rt;
+		if (aidx)
+		{
+			IteratorReference rt(
+				processor.createJoinIterator(
+					Constants::operator_set_union(), 0, aidx, far));
+			return rt;
+		}
+		else
+		{
+			return IteratorReference();
+		}
 	}
 
 	const std::map<int,int> setSizeMap() const
@@ -393,6 +400,10 @@ std::vector<ResultDocument>
 				si = summarizers.begin(), se = summarizers.end();
 			for (; si != se; ++si)
 			{
+				/*[-]*/if (!si->second.get())
+				/*[-]*/{
+				/*[-]*/	std::cout << "HALLY GALLY" << (int)(si - summarizers.begin()) << std::endl;
+				/*[-]*/}
 				std::vector<std::string> summary = si->second->getSummary( ri->docno());
 				std::vector<std::string>::const_iterator
 					ci = summary.begin(), ce = summary.end();
@@ -400,7 +411,7 @@ std::vector<ResultDocument>
 				{
 					attr.push_back(
 						ResultDocument::Attribute(
-							si->first, *ce));
+							si->first, *ci));
 				}
 			}
 			rt.push_back( ResultDocument( *ri, attr));
@@ -569,7 +580,7 @@ std::vector<ResultDocument>
 		for (; fi != fe; ++fi)
 		{
 			IteratorReference selection( query.getRelevantFeatureSetUnion( storage, processor, *fi));
-			accumulator.addSelector( *selection);
+			if (selection.get()) accumulator.addSelector( *selection);
 		}
 		// Get the summarizers:
 		std::vector<SummarizerDef> summarizerdefs;
@@ -586,7 +597,8 @@ std::vector<ResultDocument>
 			std::vector<int>::const_iterator ai = si->featureset().begin(), ae = si->featureset().end();
 			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
 			{
-				far_ref.push_back( query.getRelevantFeatureSetUnion( storage, processor, *ai));
+				IteratorReference sumfeat( query.getRelevantFeatureSetUnion( storage, processor, *ai));
+				far_ref.push_back( sumfeat); 
 				far[ aidx++] = far_ref.back().get();
 			}
 			summarizerdefs.push_back(

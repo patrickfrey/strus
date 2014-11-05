@@ -55,6 +55,11 @@ public:
 
 	virtual Index documentFrequency();
 
+	virtual Index docno() const
+	{
+		return m_docno;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorUnion( *this);

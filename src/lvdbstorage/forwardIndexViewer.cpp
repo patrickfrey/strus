@@ -62,6 +62,7 @@ void ForwardIndexViewer::buildKey( int level)
 			break;
 		case 1:
 			m_key.resize(0);
+			m_key.push_back( Storage::InversePrefix);
 			packIndex( m_key, m_docno);
 			m_keysize_docno = m_key.size();
 			m_keysize_typeno = 0;
@@ -78,6 +79,7 @@ void ForwardIndexViewer::buildKey( int level)
 			if (m_keylevel < 2) buildKey(2);
 			m_key.resize( m_keysize_typeno);
 			packIndex( m_key, m_pos);
+			m_keylevel = 3;
 			break;
 		default:
 			throw std::logic_error("assertion failed in forward index viewer: key level corrupted");
@@ -93,6 +95,7 @@ void ForwardIndexViewer::initDoc( const Index& docno_)
 	}
 	if (m_docno != docno_)
 	{
+		m_docno = docno_;
 		buildKey(2);
 	}
 }
@@ -104,8 +107,10 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 	{
 		m_itr = m_db->NewIterator( leveldb::ReadOptions());
 	}
-	if (m_keylevel < 3)
+#if 0
+	if (m_keylevel < 3 || (m_pos + 1) != firstpos_ || m_pos == 0)
 	{
+#endif
 		if (!m_docno)
 		{
 			throw std::runtime_error( "cannot seek position without document number defined");
@@ -113,30 +118,49 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 		m_pos = firstpos_;
 		buildKey(3);
 		m_itr->Seek( leveldb::Slice( m_key.c_str(), m_key.size()));
-	}
-	else
-	{
-		if (m_pos == firstpos_ +1)
+
+		if (m_keysize_typeno < m_itr->key().size()
+		&&  0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize_typeno))
 		{
-			m_itr->Next();
+			// ... docno and typeno match, so we extract the current 
+			//	position from the rest of the key and set it:
+			const char* ki = m_itr->key().data() + m_keysize_typeno;
+			const char* ke = ki + m_itr->key().size() - m_keysize_typeno;
+			return (m_pos = unpackIndex( ki, ke));
 		}
 		else
 		{
-			m_itr->Seek( leveldb::Slice( m_key.c_str(), m_key.size()));
+			return m_pos = 0;
 		}
-	}
-	if (m_keysize_typeno < m_itr->key().size()
-	&&  0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize_typeno))
-	{
-		// Extract the current position from the rest of the key and set it:
-		const char* ki = m_itr->key().data() + m_keysize_typeno;
-		const char* ke = ki + m_itr->key().size();
-		return (m_pos = unpackIndex( ki, ke));
+#if 0
 	}
 	else
 	{
-		return m_pos = 0;
+		for (;;)
+		{
+			m_itr->Next();
+			if (m_keysize_docno < m_itr->key().size()
+			&&  0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize_docno))
+			{
+				// ... docno still matches
+				if (m_keysize_typeno < m_itr->key().size()
+				&&  0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize_typeno))
+				{
+					// ... typeno matches, so we got the next item
+					//	and we can set the current (as next) position:
+					const char* ki = m_itr->key().data() + m_keysize_typeno;
+					const char* ke = ki + m_itr->key().size() - m_keysize_typeno;
+					return (m_pos = unpackIndex( ki, ke));
+				}
+			}
+			else
+			{
+				// ... we reached the end of document
+				return m_pos = 0;
+			}
+		}
 	}
+#endif
 }
 
 

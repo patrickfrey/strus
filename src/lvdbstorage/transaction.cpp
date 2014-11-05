@@ -37,6 +37,8 @@
 
 using namespace strus;
 
+#undef STRUS_LOWLEVEL_DEBUG
+
 Transaction::Transaction( Storage* storage_, const std::string& docid_)
 	:m_storage(storage_),m_docid(docid_)
 {}
@@ -63,9 +65,7 @@ void Transaction::addTermOccurrence(
 
 	TermMapKey key( termMapKey( type_, value_));
 	m_terms[ key].pos.insert( position_);
-	InvMapValue* inv = &m_invs[ position_];
-	inv->typeno = key.first;
-	inv->value = value_;
+	m_invs[ InvMapKey( key.first, position_)] = value_;
 }
 
 void Transaction::setDocumentAttribute(
@@ -110,6 +110,9 @@ void Transaction::commit()
 			break;
 		}
 		documentFound = true;
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "DELETE ATTR [" << vi->key().ToString() << "]" << std::endl;
+#endif
 		batch.Delete( vi->key());
 	}
 	// [1.2] Insert new numeric attributes
@@ -118,8 +121,12 @@ void Transaction::commit()
 	{
 		if (wi->type == DocAttribute::TypeNumber)
 		{
+			docattribkey.resize( docattribkeysize);
 			docattribkey.push_back( wi->name);
 			batch.Put( docattribkey, wi->value);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "PUT ATTR [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
+#endif
 			docattribkey.resize( docattribkeysize);
 		}
 	}
@@ -138,6 +145,9 @@ void Transaction::commit()
 			break;
 		}
 		documentFound = true;
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "DELETE META [" << vi->key().ToString() << "]" << std::endl;
+#endif
 		batch.Delete( vi->key());
 	}
 	// [1.4] Insert new textual attributes
@@ -146,7 +156,11 @@ void Transaction::commit()
 	{
 		if (wi->type == DocAttribute::TypeString)
 		{
+			docattribkey.resize( docattribkeysize);
 			docattribkey.push_back( wi->name);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "PUT META [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
+#endif
 			batch.Put( docattribkey, wi->value);
 			docattribkey.resize( docattribkeysize);
 		}
@@ -171,6 +185,9 @@ void Transaction::commit()
 			break;
 		}
 		documentFound = true;
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "DELETE INV [" << vi->key().ToString() << "]" << std::endl;
+#endif
 		batch.Delete( vi->key());
 
 		const char* ki = vi->key().data() + invkeysize;
@@ -195,6 +212,9 @@ void Transaction::commit()
 		packIndex( delkey, docno);		// [docno]
 
 		documentFound = true;
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "DELETE TERMS [" << delkey << "]" << std::endl;
+#endif
 		batch.Delete( delkey);
 
 		m_storage->decrementDf( di->first, di->second);
@@ -219,6 +239,9 @@ void Transaction::commit()
 		{
 			packIndex( positions, *pi);
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "PUT TERMS [" << termkey << "]" << "= [" << positions << "]" << std::endl;
+#endif
 		batch.Put( termkey, positions);
 
 		m_storage->incrementDf( ti->first.first, ti->first.second);
@@ -231,10 +254,13 @@ void Transaction::commit()
 		invkey.clear();
 		invkey.push_back( (char)Storage::InversePrefix);
 		packIndex( invkey, docno);		//docno
-		packIndex( invkey, ri->second.typeno);	//term typeno
-		packIndex( invkey, ri->first);		//position
+		packIndex( invkey, ri->first.typeno);	//term typeno
+		packIndex( invkey, ri->first.pos);	//position
 
-		batch.Put( invkey, ri->second.value);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "PUT INV [" << invkey << "]" << "= [" << ri->second.value << "]" << std::endl;
+#endif
+		batch.Put( invkey, ri->second);
 	}
 	if (!documentFound)
 	{

@@ -41,6 +41,7 @@
 #include "weighting/weightingFrequency.hpp"
 #include "weighting/weightingBM25.hpp"
 #include "weighting/weightingIdfBased.hpp"
+#include "summarizer/summarizerDocid.hpp"
 #include "summarizer/summarizerMetaData.hpp"
 #include "summarizer/summarizerMatchPhrase.hpp"
 #include <string>
@@ -52,7 +53,7 @@
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 QueryProcessor::QueryProcessor( StorageInterface* storage_)
 	:m_storage(storage_)
@@ -235,13 +236,20 @@ SummarizerInterface*
 		if (type.size() != 1) throw std::runtime_error( std::string( "only one ASCII alphanumeric character allowed as parameter metadata name for summarizer '") + name + "'");
 		return new SummarizerMetaData( m_storage, type[0]);
 	}
+	else if (isEqual( name, "docid"))
+	{
+		if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
+		if (nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
+		if (!type.empty()) throw std::runtime_error( std::string( "unexpected parameter for summarizer '") + name + "'");
+		return new SummarizerDocid( m_storage);
+	}
 	else if (isEqual( name, "matchphrase"))
 	{
 		unsigned int maxlen = 30;
 		unsigned int summarizelen = 100;
 		if (parameter.size() > 0)
 		{
-			summarizelen = (unsigned int)parameter[0];
+			summarizelen = maxlen = (unsigned int)parameter[0];
 		}
 		if (nofitrs < 2)
 		{
@@ -250,7 +258,7 @@ SummarizerInterface*
 		if (parameter.size() > 2) throw std::runtime_error( std::string("too many scalar arguments for summarizer '") + name + "'");
 		if (parameter.size() == 2)
 		{
-			maxlen = (unsigned int)( parameter[1]);
+			summarizelen = (unsigned int)( parameter[1]);
 		}
 		return new SummarizerMatchPhrase(
 				m_storage, type, maxlen, summarizelen, 

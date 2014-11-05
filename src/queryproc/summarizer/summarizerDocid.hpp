@@ -26,44 +26,28 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#ifndef _STRUS_SUMMARIZER_DOCID_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_DOCID_HPP_INCLUDED
+#include "summarizer/summarizerMetaData.hpp"
+#include "strus/constants.hpp"
 #include <string>
 #include <vector>
 
 namespace strus
 {
 
-class IteratorInterface
+/// \brief Forward declaration
+class StorageInterface;
+
+
+class SummarizerDocid
+	:public SummarizerMetaData
 {
 public:
-	virtual ~IteratorInterface(){}
-
-	/// \brief Unique id in the system for a feature expression
-	virtual const std::string& featureid() const=0;
-
-	/// \brief Return the next match with a document number higher than or equal to docno
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive)=0;
-
-	/// \brief Return the next match with a document number higher than or equal to docno
-	virtual Index skipDoc( const Index& docno)=0;
-
-	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
-	virtual Index skipPos( const Index& firstpos)=0;
-
-	/// \brief Get the number of documents in the collection where the feature occurrs
-	/// \remark May not be defined for composed features
-	virtual Index documentFrequency()=0;
-
-	/// \brief Get the frequency of the current document reached with 'skipDoc(const Index&)'
-	virtual unsigned int frequency()=0;
-
-	/// \brief Get the current document number
-	virtual Index docno() const=0;
-
-	/// \brief Return a copy of this iterator
-	virtual IteratorInterface* copy() const=0;
+	/// \param[in] storage_ storage to use
+	/// \param[in] name_ metadata identifier
+	SummarizerDocid( const StorageInterface* storage_)
+		:SummarizerMetaData(storage_,Constants::DOC_ATTRIBUTE_DOCID){}
 };
 
 }//namespace

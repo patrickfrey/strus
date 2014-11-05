@@ -51,13 +51,19 @@ public:
 
 	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
 
-	virtual IteratorInterface* copy() const
-	{
-		return new IteratorDifference( *this);
-	}
 	virtual Index documentFrequency()
 	{
 		return m_positive.get()?m_positive->documentFrequency():0;
+	}
+
+	virtual Index docno() const
+	{
+		return m_positive.get()?m_positive->docno():0;
+	}
+
+	virtual IteratorInterface* copy() const
+	{
+		return new IteratorDifference( *this);
 	}
 
 private:

@@ -5,6 +5,7 @@ using namespace strus;
 
 IteratorUnion::IteratorUnion( std::size_t nofargs, const IteratorInterface** args)
 	:m_docno(0)
+	,m_documentFrequency(-1)
 {
 	m_selected.reserve( nofargs);
 	m_argar.reserve( nofargs);
@@ -26,6 +27,7 @@ IteratorUnion::IteratorUnion( const IteratorUnion& o)
 	:m_docno(o.m_docno)
 	,m_selected(o.m_selected)
 	,m_featureid(o.m_featureid)
+	,m_documentFrequency(o.m_documentFrequency)
 {
 	std::size_t ii=0;
 	m_argar.reserve( o.m_argar.size());
@@ -81,7 +83,7 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 
 Index IteratorUnion::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && docno_ != 0)
+	if (m_docno == docno_ && docno_)
 	{
 		return m_docno;
 	}
