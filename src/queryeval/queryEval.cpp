@@ -255,9 +255,13 @@ public:
 	{
 		const IteratorInterface* far[ (int)QueryEval::MaxSizeFeatureSet];
 
+		if (setIndex <= 0)
+		{
+			throw std::runtime_error( "internal: feature address is NULL");
+		}
 		if (setIndex <= 0 || (std::size_t)(unsigned int)setIndex > m_iteratorSets.size())
 		{
-			throw std::runtime_error( "internal: feature address out of range");
+			throw std::runtime_error( std::string( "feature '") + m_setnamemap->name(setIndex) + "' is undefined");
 		}
 		std::vector<IteratorReference>& feats = m_iteratorSets[ setIndex-1];
 		if (feats.size() > (int)QueryEval::MaxSizeFeatureSet)
