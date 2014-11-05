@@ -24,7 +24,7 @@ all: libstrus_queryeval.so
 -include $(CPP_OBJS:.o=.d)
 
 %.o : %.cpp GNUmakefile $(HFILES)
-	g++ -fPIC -fvisibility=hidden -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
+	g++ -fPIC $(VISIBILITY) -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
 	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 libstrus_queryeval.so: $(CPP_OBJS)

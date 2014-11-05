@@ -12,8 +12,7 @@ CPP_OBJS=\
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
 CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
-MODFLAGS=-fPIC
-#-fvisibility=hidden 
+MODFLAGS=-fPIC $(VISIBILITY)
 LDFLAGS=-L/usr/lib
 LIBS=-lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
 
