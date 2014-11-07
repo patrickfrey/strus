@@ -81,7 +81,8 @@ static uint32_t utf8decode( const char* itr)
 	return res;
 }
 
-static void utf8encode( std::string& buf, uint32_t chr)
+template <class BUFFER>
+static void utf8encode( BUFFER& buf, uint32_t chr)
 {
 	unsigned int rt;
 	if (chr <= 127)
@@ -181,7 +182,8 @@ const char* strus::skipIndex( const char* ptr, const char* end)
 	return rt;
 }
 
-void strus::packIndex( std::string& buf, const Index& idx)
+template <class BUFFER>
+static void packIndex_( BUFFER& buf, const Index& idx)
 {
 	if (idx > 0x7fffFFFFU)
 	{
@@ -199,6 +201,34 @@ void strus::packIndex( std::string& buf, const Index& idx)
 	{
 		utf8encode( buf, (uint32_t)idx);
 	}
+}
+
+void strus::packIndex( std::string& buf, const Index& idx)
+{
+	packIndex_( buf, idx);
+}
+
+struct StaticBuffer
+{
+	StaticBuffer( char* buf_, std::size_t size_, std::size_t maxsize_)
+		:buf(buf_),size(size_),maxsize(maxsize_){}
+
+	void push_back( char chr)
+	{
+		if (size >= maxsize) throw std::runtime_error("static buffer too small");
+		buf[ size++] = chr;
+	}
+
+	char* buf;
+	std::size_t size;
+	std::size_t maxsize;
+};
+
+void strus::packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
+{
+	StaticBuffer bufstruct( buf, size, maxsize);
+	packIndex_( bufstruct, idx);
+	size = bufstruct.size;
 }
 
 unsigned int strus::nofPackedIndices( const char* ptr, const char* end)

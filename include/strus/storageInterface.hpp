@@ -38,7 +38,8 @@ namespace strus
 class IteratorInterface;
 /// \brief Forward declaration
 class ForwardIndexViewerInterface;
-
+/// \brief Forward declaration
+class MetaDataReaderInterface;
 
 /// \brief Interface of a strus IR storage
 class StorageInterface
@@ -64,14 +65,14 @@ public:
 		/// \brief Define a numeric attribute for the document
 		/// \param[in] name_ one character as name of the attribute
 		/// \param[in] value_ value of the document attribute
-		virtual void setDocumentAttribute(
+		virtual void setMetaData(
 				char name_,
 				float value_)=0;
 
 		/// \brief Define a string attribute for the document
 		/// \param[in] name_ one character as name of the attribute
 		/// \param[in] value_ value of the document attribute
-		virtual void setDocumentAttribute(
+		virtual void setAttribute(
 				char name_,
 				const std::string& value_)=0;
 
@@ -116,17 +117,16 @@ public:
 	/// \param[in] docid document id of the document inserted
 	virtual Index documentNumber( const std::string& docid) const=0;
 
-	/// \brief Get a numeric attribute assigned to a document
-	/// \param[in] docno document number
-	/// \param[in] varname variable name identifying the attribute to get
-	/// \return the attribute value
-	virtual float documentAttributeNumeric( Index docno, char varname) const=0;
+	/// \brief Get an interface for reading document metadata
+	/// \param[in] varname variable name identifying the metadata attribute
+	/// \return the metadata reader interface
+	virtual MetaDataReaderInterface* createMetaDataReader( char varname) const=0;
 
 	/// \brief Get a string attribute value assigned to a document
 	/// \param[in] docno document number
 	/// \param[in] varname variable name identifying the attribute to get
 	/// \return the attribute value
-	virtual std::string documentAttributeString( Index docno, char varname) const=0;
+	virtual std::string documentAttribute( Index docno, char varname) const=0;
 
 	/// \brief Create an insert/update transaction for a document
 	/// \param[in] docid document identifier (URI)

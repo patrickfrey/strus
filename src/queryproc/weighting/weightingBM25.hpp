@@ -53,15 +53,17 @@ public:
 
 	WeightingBM25( const WeightingBM25& o);
 
-	virtual ~WeightingBM25(){}
+	virtual ~WeightingBM25();
 
 	virtual float call( IteratorInterface& itr);
 
 private:
 	const StorageInterface* m_storage;
+	MetaDataReaderInterface* m_doclenReader;
 	float m_k1;
 	float m_b;
 	float m_avgDocLength;
+	Index m_docno;
 };
 
 }//namespace

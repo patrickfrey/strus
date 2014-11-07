@@ -36,7 +36,7 @@ std::vector<std::string>
 	SummarizerMetaData::getSummary( const Index& docno)
 {
 	std::vector<std::string> rt;
-	std::string attr = m_storage->documentAttributeString( docno, m_name);
+	std::string attr = m_storage->documentAttribute( docno, m_name);
 	if (!attr.empty())
 	{
 		rt.push_back( attr);

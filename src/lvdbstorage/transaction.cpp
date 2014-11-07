@@ -28,6 +28,7 @@
 */
 #include "storage.hpp"
 #include "transaction.hpp"
+#include "databaseKey.hpp"
 #include "indexPacker.hpp"
 #include <string>
 #include <cstring>
@@ -51,8 +52,8 @@ Transaction::~Transaction()
 
 Transaction::TermMapKey Transaction::termMapKey( const std::string& type_, const std::string& value_)
 {
-	Index typeno = m_storage->keyGetOrCreate( Storage::TermTypePrefix, type_);
-	Index valueno = m_storage->keyGetOrCreate( Storage::TermValuePrefix, value_);
+	Index typeno = m_storage->keyGetOrCreate( DatabaseKey::TermTypePrefix, type_);
+	Index valueno = m_storage->keyGetOrCreate( DatabaseKey::TermValuePrefix, value_);
 	return TermMapKey( typeno, valueno);
 }
 
@@ -68,118 +69,82 @@ void Transaction::addTermOccurrence(
 	m_invs[ InvMapKey( key.first, position_)] = value_;
 }
 
-void Transaction::setDocumentAttribute(
+void Transaction::setMetaData(
 		char name_,
 		float value_)
 {
-	std::string value;
-	packFloat( value, value_);
-	m_attributes.push_back( DocAttribute( DocAttribute::TypeNumber, name_, value));
+	m_metadata.push_back( DocMetaData( name_, value_));
 }
 
-void Transaction::setDocumentAttribute(
+void Transaction::setAttribute(
 		char name_,
 		const std::string& value_)
 {
-	m_attributes.push_back( DocAttribute( DocAttribute::TypeString, name_, value_));
+	m_attributes.push_back( DocAttribute( name_, value_));
 }
 
 void Transaction::commit()
 {
-	Index docno = m_storage->keyGetOrCreate( Storage::DocIdPrefix, m_docid);
+	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid);
 	leveldb::WriteBatch batch;
 	bool documentFound = false;
 
 	leveldb::Iterator* vi = m_storage->newIterator();
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
 
-	// [1] Delete old document attributes and insert the new ones
-	std::string docattribkey;
-	std::size_t docattribkeysize;
-
-	// [1.1] Delete old numeric attributes
-	docattribkey.push_back( (char)Storage::DocNumAttrPrefix);
-	packIndex( docattribkey, docno);
-	docattribkeysize = docattribkey.size();
-
-	for (vi->Seek( docattribkey); vi->Valid(); vi->Next())
+	// [1] Define new metadata
+	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
+	for (; wi != we; ++wi)
 	{
-		if (docattribkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), docattribkey.c_str()))
+		m_storage->defineMetaData( docno, wi->name, wi->value);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
+#endif
+	}
+
+	// [1.3] Delete old attributes
+	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno);
+	std::size_t docattribkeysize = docattribkey.size();
+
+	for (vi->Seek( leveldb::Slice( docattribkey.ptr(), docattribkeysize));
+		vi->Valid(); vi->Next())
+	{
+		if (docattribkeysize > vi->key().size() || 0!=std::memcmp( vi->key().data(), (char*)docattribkey.ptr(), docattribkeysize))
 		{
 			//... end of document reached
 			break;
 		}
 		documentFound = true;
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE ATTR [" << vi->key().ToString() << "]" << std::endl;
+		std::cerr << "DELETE ATTRIBUTE [" << vi->key().ToString() << "]" << std::endl;
 #endif
 		batch.Delete( vi->key());
 	}
-	// [1.2] Insert new numeric attributes
-	std::vector<DocAttribute>::const_iterator wi = m_attributes.begin(), we = m_attributes.end();
-	for (; wi != we; ++wi)
+	// [1.4] Insert new attributes
+	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
+	for (; ai != ae; ++ai)
 	{
-		if (wi->type == DocAttribute::TypeNumber)
-		{
-			docattribkey.resize( docattribkeysize);
-			docattribkey.push_back( wi->name);
-			batch.Put( docattribkey, wi->value);
+		docattribkey.resize( docattribkeysize);
+		docattribkey.addPrefix( ai->name);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "PUT ATTR [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
+		std::cerr << "PUT ATTRIBUTE [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
 #endif
-			docattribkey.resize( docattribkeysize);
-		}
-	}
-
-	// [1.3] Delete old textual attributes
-	docattribkey.clear();
-	docattribkey.push_back( (char)Storage::DocTextAttrPrefix);
-	packIndex( docattribkey, docno);
-	docattribkeysize = docattribkey.size();
-
-	for (vi->Seek( docattribkey); vi->Valid(); vi->Next())
-	{
-		if (docattribkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), docattribkey.c_str()))
-		{
-			//... end of document reached
-			break;
-		}
-		documentFound = true;
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE META [" << vi->key().ToString() << "]" << std::endl;
-#endif
-		batch.Delete( vi->key());
-	}
-	// [1.4] Insert new textual attributes
-	wi = m_attributes.begin(), we = m_attributes.end();
-	for (; wi != we; ++wi)
-	{
-		if (wi->type == DocAttribute::TypeString)
-		{
-			docattribkey.resize( docattribkeysize);
-			docattribkey.push_back( wi->name);
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "PUT META [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
-#endif
-			batch.Put( docattribkey, wi->value);
-			docattribkey.resize( docattribkeysize);
-		}
+		leveldb::Slice keyslice( docattribkey.ptr(), docattribkey.size());
+		batch.Put( keyslice, ai->value);
 	}
 
 	// [2] Delete old document term occurrencies:
 	std::set<TermMapKey> oldcontent;
 
-	std::string invkey;
-	std::size_t invkeysize;
-	invkey.push_back( (char)Storage::InversePrefix);
-	packIndex( invkey, docno);
-	invkeysize = invkey.size();
+	DatabaseKey invkey( (char)DatabaseKey::InversePrefix, docno);
+	std::size_t invkeysize = invkey.size();
+	leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
 
 	//[2.1] Iterate on key prefix elements [InversePrefix, docno, typeno, *] and mark dem as deleted
 	//	Extract typeno and valueno from key [InversePrefix, docno, typeno, pos] an mark term as old content (do delete)
-	for (vi->Seek( invkey); vi->Valid(); vi->Next())
+	for (vi->Seek( invkeyslice); vi->Valid(); vi->Next())
 	{
-		if (invkey.size() > vi->key().size() || 0!=std::strcmp( vi->key().data(), invkey.c_str()))
+		if (invkeysize > vi->key().size() || 0!=std::memcmp( vi->key().data(), invkey.ptr(), invkeysize))
 		{
 			//... end of document reached
 			break;
@@ -196,26 +161,26 @@ void Transaction::commit()
 
 		const char* valuestr = vi->value().data();
 		std::size_t valuesize = vi->value().size();
-		Index valueno = m_storage->keyLookUp( Storage::TermValuePrefix, std::string( valuestr, valuesize));
+		Index valueno = m_storage->keyLookUp( DatabaseKey::TermValuePrefix, std::string( valuestr, valuesize));
 
 		oldcontent.insert( TermMapKey( typeno, valueno));
 	}
+
 	//[2.2] Iterate on oldcontent elements built in [1.1] 
 	//	and mark them as deleted the keys [LocationPrefix, typeno, valueno, docno]
 	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)
 	{
-		std::string delkey;
-		delkey.push_back( (char)Storage::LocationPrefix);
-		packIndex( delkey, di->first);		// [typeno]
-		packIndex( delkey, di->second);		// [valueno]
-		packIndex( delkey, docno);		// [docno]
+		DatabaseKey delkey( (char)DatabaseKey::LocationPrefix);
+		delkey.addElem( di->first);		// [typeno]
+		delkey.addElem( di->second);		// [valueno]
+		delkey.addElem( docno);			// [docno]
 
 		documentFound = true;
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "DELETE TERMS [" << delkey << "]" << std::endl;
 #endif
-		batch.Delete( delkey);
+		batch.Delete( leveldb::Slice( delkey.ptr(), delkey.size()));
 
 		m_storage->decrementDf( di->first, di->second);
 	}
@@ -225,12 +190,11 @@ void Transaction::commit()
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
-		std::string termkey;
+		DatabaseKey termkey( (char)DatabaseKey::LocationPrefix);
 		std::string positions;
-		termkey.push_back( (char)Storage::LocationPrefix);
-		packIndex( termkey, ti->first.first);	// [typeno]
-		packIndex( termkey, ti->first.second);	// [valueno]
-		packIndex( termkey, docno);		// [docno]
+		termkey.addElem( ti->first.first);	// [typeno]
+		termkey.addElem( ti->first.second);	// [valueno]
+		termkey.addElem( docno);		// [docno]
 
 		packIndex( positions, ti->second.pos.size());
 		// ... first element is the ff in the document
@@ -242,7 +206,7 @@ void Transaction::commit()
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "PUT TERMS [" << termkey << "]" << "= [" << positions << "]" << std::endl;
 #endif
-		batch.Put( termkey, positions);
+		batch.Put( leveldb::Slice( termkey.ptr(), termkey.size()), positions);
 
 		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
@@ -251,16 +215,16 @@ void Transaction::commit()
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
-		invkey.clear();
-		invkey.push_back( (char)Storage::InversePrefix);
-		packIndex( invkey, docno);		//docno
-		packIndex( invkey, ri->first.typeno);	//term typeno
-		packIndex( invkey, ri->first.pos);	//position
+		DatabaseKey invkey( (char)DatabaseKey::InversePrefix, docno);
+		invkey.addElem( ri->first.typeno);	// [typeno]
+		invkey.addElem( ri->first.pos);		// [position]
+
+		leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "PUT INV [" << invkey << "]" << "= [" << ri->second.value << "]" << std::endl;
 #endif
-		batch.Put( invkey, ri->second);
+		batch.Put( invkeyslice, ri->second);
 	}
 	if (!documentFound)
 	{
@@ -269,8 +233,7 @@ void Transaction::commit()
 
 	// [5] Do submit the write to the database:
 	m_storage->writeBatch( batch);
-	m_storage->flushNewKeys();
-	m_storage->flushDfs();
+	m_storage->checkFlush();
 	batch.Clear();
 }
 

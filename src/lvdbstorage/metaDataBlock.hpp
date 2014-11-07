@@ -26,78 +26,46 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include "databaseKey.hpp"
+#ifndef _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
+#include "strus/index.hpp"
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 namespace strus {
-/// \brief Forward declaration
-class MetaDataReader;
 
-class Iterator
-	:public IteratorInterface
+class MetaDataBlock
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr);
-	Iterator( const Iterator& o);
+	MetaDataBlock( leveldb::DB* db_, Index blockno_, char varname_);
+	MetaDataBlock( const MetaDataBlock& o);
 
-	virtual ~Iterator();
+	virtual ~MetaDataBlock(){}
 
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
-	{
-		return std::vector<IteratorInterface*>();
-	}
-	virtual const std::string& featureid() const
-	{
-		return m_featureid;
-	}
+	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
+	static Index blockno( Index docno)			{return docno>>MetaDataBlockShift;}
+	Index blockno() const					{return m_blockno;}
 
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+	void setValue( Index docno, float value);
+	float getValue( Index docno) const;
 
-	virtual unsigned int frequency()
-	{
-		return m_frequency;
-	}
+	void addToBatch( leveldb::WriteBatch& batch);
 
-	virtual Index documentFrequency();
-
-	virtual Index docno() const
-	{
-		return m_docno;
-	}
-
-	virtual Index posno() const
-	{
-		return m_posno;
-	}
-
-	virtual IteratorInterface* copy() const
-	{
-		return new Iterator(*this);
-	}
+public:
+	enum {
+		MetaDataBlockSize=1024,
+		MetaDataBlockMask=1023,
+		MetaDataBlockShift=10
+	};
 
 private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
+	void readBlockFromDB();
 
 private:
 	leveldb::DB* m_db;
-	Index m_termtypeno;
-	Index m_termvalueno;
-	DatabaseKey m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	Index m_documentFrequency;
-	leveldb::Iterator* m_itr;
-	unsigned int m_frequency;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
-	std::string m_featureid;
+	Index m_blockno;
+	char m_varname;
+	float m_blk[ MetaDataBlockSize];
 };
 
 }

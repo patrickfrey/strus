@@ -29,6 +29,7 @@
 #ifndef _STRUS_FORWARD_INDEX_HPP_INCLUDED
 #define _STRUS_FORWARD_INDEX_HPP_INCLUDED
 #include "strus/forwardIndexViewerInterface.hpp"
+#include "databaseKey.hpp"
 #include "storage.hpp"
 #include <string>
 #include <leveldb/db.h>
@@ -68,7 +69,7 @@ private:
 	Index m_docno;
 	Index m_typeno;
 	Index m_pos;
-	std::string m_key;
+	DatabaseKey m_key;
 	int m_keylevel;
 	std::size_t m_keysize_docno;
 	std::size_t m_keysize_typeno;

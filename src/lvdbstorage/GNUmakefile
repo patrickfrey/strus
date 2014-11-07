@@ -3,6 +3,9 @@ include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
 	indexPacker.o \
+	databaseKey.o \
+	metaDataBlock.o \
+	metaDataReader.o \
 	storage.o \
 	iterator.o \
 	nullIterator.o \

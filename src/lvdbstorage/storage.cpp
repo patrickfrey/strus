@@ -32,28 +32,34 @@
 #include "iterator.hpp"
 #include "nullIterator.hpp"
 #include "transaction.hpp"
+#include "databaseKey.hpp"
 #include "forwardIndexViewer.hpp"
 #include "indexPacker.hpp"
+#include "metaDataReader.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
 #include <boost/thread/mutex.hpp>
+#include <leveldb/cache.h>
 
 using namespace strus;
 
-Storage::Storage( const char* path_)
-	:m_path(path_),m_db(0)
+Storage::Storage( const char* path_, unsigned int cachesize_k)
+	:m_path(path_),m_db(0),m_flushCnt(0)
 {
-	leveldb::Options options;
-	options.create_if_missing = false;
-
-	leveldb::Status status = leveldb::DB::Open(options, path_, &m_db);
+	m_dboptions.create_if_missing = false;
+	if (cachesize_k)
+	{
+		if (cachesize_k * 1024 < cachesize_k) throw std::runtime_error("size of cache out of range");
+		m_dboptions.block_cache = leveldb::NewLRUCache( cachesize_k * 1024);
+	}
+	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_, &m_db);
 	if (status.ok())
 	{
-		m_next_termno = keyLookUp( VariablePrefix, "TermNo");
-		m_next_typeno = keyLookUp( VariablePrefix, "TypeNo");
-		m_next_docno = keyLookUp( VariablePrefix, "DocNo");
-		m_nof_documents = keyLookUp( VariablePrefix, "NofDocs");
+		m_next_termno = keyLookUp( DatabaseKey::VariablePrefix, "TermNo");
+		m_next_typeno = keyLookUp( DatabaseKey::VariablePrefix, "TypeNo");
+		m_next_docno = keyLookUp( DatabaseKey::VariablePrefix, "DocNo");
+		m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
 		if (m_nof_documents) m_nof_documents -= 1;
 	}
 	else
@@ -72,7 +78,7 @@ void Storage::close()
 {
 	if (m_db)
 	{
-		flushDfs();
+		flush();
 
 		leveldb::WriteBatch batch;
 		batchDefineVariable( batch, "TermNo", m_next_termno);
@@ -90,6 +96,22 @@ void Storage::close()
 	}
 }
 
+void Storage::checkFlush()
+{
+	if (++m_flushCnt == 100)
+	{
+		flush();
+		m_flushCnt = 0;
+	}
+}
+
+void Storage::flush()
+{
+	flushNewKeys();
+	flushDfs();
+	flushMetaData();
+}
+
 Storage::~Storage()
 {
 	try
@@ -100,6 +122,7 @@ Storage::~Storage()
 	{
 		//... silently ignored. Call close directly to catch errors
 		if (m_db) delete m_db;
+		if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 	}
 }
 
@@ -132,7 +155,7 @@ void Storage::batchDefineVariable( leveldb::WriteBatch& batch, const char* name,
 {
 	std::string encoded_value;
 	packIndex( encoded_value, value);
-	batch.Put( Storage::keyString( Storage::VariablePrefix, name), encoded_value);
+	batch.Put( Storage::keyString( DatabaseKey::VariablePrefix, name), encoded_value);
 }
 
 leveldb::Iterator* Storage::newIterator()
@@ -141,7 +164,7 @@ leveldb::Iterator* Storage::newIterator()
 	return m_db->NewIterator( leveldb::ReadOptions());
 }
 
-std::string Storage::keyString( KeyPrefix prefix, const std::string& keyname)
+std::string Storage::keyString( DatabaseKey::KeyPrefix prefix, const std::string& keyname)
 {
 	std::string rt;
 	rt.push_back( (char)prefix);
@@ -153,8 +176,8 @@ Index Storage::keyLookUp( const std::string& keystr) const
 {
 	if (!m_db) throw std::runtime_error("read on closed storage");
 	std::string value;
-	leveldb::Slice constkey( keystr.c_str(), keystr.size());
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
 	if (status.IsNotFound())
 	{
 		return 0;
@@ -167,20 +190,20 @@ Index Storage::keyLookUp( const std::string& keystr) const
 	return unpackIndex( cc, cc + value.size());
 }
 
-Index Storage::keyLookUp( KeyPrefix prefix, const std::string& keyname) const
+Index Storage::keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyname) const
 {
 
 	std::string key = keyString( prefix, keyname);
 	return keyLookUp( key);
 }
 
-Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
+Index Storage::keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname)
 {
 	if (!m_db) throw std::runtime_error("read on closed storage");
 	std::string key = keyString( prefix, keyname);
-	leveldb::Slice constkey( key.c_str(), key.size());
+	leveldb::Slice keyslice( key.c_str(), key.size());
 	std::string value;
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
 	if (status.IsNotFound())
 	{
 		boost::mutex::scoped_lock( m_mutex);
@@ -189,19 +212,19 @@ Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
 		{
 			return ki->second;
 		}
-		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
 		if (status.IsNotFound())
 		{
 			Index rt = 0;
-			if (prefix == TermTypePrefix)
+			if (prefix == DatabaseKey::TermTypePrefix)
 			{
 				rt = m_next_typeno++;
 			}
-			else if (prefix == TermValuePrefix)
+			else if (prefix == DatabaseKey::TermValuePrefix)
 			{
 				rt = m_next_termno++;
 			}
-			else if (prefix == DocIdPrefix)
+			else if (prefix == DatabaseKey::DocIdPrefix)
 			{
 				rt = m_next_docno++;
 			}
@@ -212,7 +235,7 @@ Index Storage::keyGetOrCreate( KeyPrefix prefix, const std::string& keyname)
 			std::string valuebuf;
 			packIndex( valuebuf, rt);
 			m_newKeyMap[ key] = rt;
-			m_newKeyBatch.Put( constkey, valuebuf);
+			m_newKeyBatch.Put( keyslice, valuebuf);
 			return rt;
 		}
 		else if (!status.ok())
@@ -233,8 +256,8 @@ IteratorInterface*
 		const std::string& typestr,
 		const std::string& termstr)
 {
-	Index typeno = keyLookUp( TermTypePrefix, typestr);
-	Index termno = keyLookUp( TermValuePrefix, termstr);
+	Index typeno = keyLookUp( DatabaseKey::TermTypePrefix, typestr);
+	Index termno = keyLookUp( DatabaseKey::TermValuePrefix, termstr);
 	if (!typeno || !termno)
 	{
 		return new NullIterator( typeno, termno, termstr.c_str());
@@ -274,19 +297,15 @@ Index Storage::maxDocumentNumber() const
 
 Index Storage::documentNumber( const std::string& docid) const
 {
-	return keyLookUp( Storage::DocIdPrefix, docid);
+	return keyLookUp( DatabaseKey::DocIdPrefix, docid);
 }
 
-std::string Storage::documentAttributeString( Index docno, char varname) const
+std::string Storage::documentAttribute( Index docno, char varname) const
 {
-	std::string key;
-	key.push_back( (char)Storage::DocTextAttrPrefix);
-	packIndex( key, docno);
-	key.push_back( varname);
-
-	leveldb::Slice constkey( key.c_str(), key.size());
+	DatabaseKey key( (char)DatabaseKey::DocAttributePrefix, docno, varname);
+	leveldb::Slice keyslice( key.ptr(), key.size());
 	std::string value;
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
 	if (status.IsNotFound())
 	{
 		return std::string();
@@ -298,29 +317,38 @@ std::string Storage::documentAttributeString( Index docno, char varname) const
 	return value;
 }
 
-float Storage::documentAttributeNumeric( Index docno, char varname) const
+void Storage::defineMetaData( Index docno, char varname, float value)
 {
-	std::string key;
-	key.push_back( (char)Storage::DocNumAttrPrefix);
-	packIndex( key, docno);
-	key.push_back( varname);
-
-	leveldb::Slice constkey( key.c_str(), key.size());
-	std::string value;
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
-
-	if (status.IsNotFound())
+	Index blockno = MetaDataBlock::blockno( docno);
+	MetaDataKey key( varname, blockno);
+	boost::mutex::scoped_lock( m_mutex_metaDataBlockMap);
+	MetaDataBlockMap::const_iterator mi = m_metaDataBlockMap.find( key);
+	if (mi == m_metaDataBlockMap.end())
 	{
-		return 0.0;
+		MetaDataBlockReference& block = m_metaDataBlockMap[ key];
+		block.reset( new MetaDataBlock( m_db, blockno, varname));
+		block->setValue( docno, value);
 	}
-	if (!status.ok())
+	else
 	{
-		throw std::runtime_error( status.ToString());
+		mi->second->setValue( docno, value);
 	}
-	const char* cc = value.c_str();
-	return unpackFloat( cc, cc + value.size());
 }
 
+void Storage::flushMetaData()
+{
+	leveldb::WriteBatch batch;
+	boost::mutex::scoped_lock( m_mutex_metaDataBlockMap);
+	MetaDataBlockMap::const_iterator
+		mi = m_metaDataBlockMap.begin(),
+		me = m_metaDataBlockMap.end();
+	for (; mi != me; ++mi)
+	{
+		mi->second->addToBatch( batch);
+	}
+	writeBatch( batch);
+	m_metaDataBlockMap.clear();
+}
 
 void Storage::incrementDf( Index typeno, Index termno)
 {
@@ -349,14 +377,14 @@ void Storage::flushDfs()
 	for (; mi != me; ++mi)
 	{
 		std::string keystr;
-		keystr.push_back( DocFrequencyPrefix);
+		keystr.push_back( DatabaseKey::DocFrequencyPrefix);
 		packIndex( keystr, mi->first.first);
 		packIndex( keystr, mi->first.second);
 
-		leveldb::Slice constkey( keystr.c_str(), keystr.size());
-		std::string value;
+		leveldb::Slice keyslice( keystr.c_str(), keystr.size());
 		Index df;
-		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+		std::string value;
+		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
 		if (status.IsNotFound() || value.empty())
 		{
 			df = mi->second;
@@ -371,12 +399,21 @@ void Storage::flushDfs()
 			char const* ee = value.c_str() + value.size();
 			df = mi->second + unpackIndex( cc, ee);
 		}
-		value.resize(0);
-		packIndex( value, df);
+		enum {MaxValueSize = sizeof(Index)*4};
+		char valuebuf[ MaxValueSize];
+		std::size_t valuepos = 0;
+		packIndex( valuebuf, valuepos, MaxValueSize, df);
+		leveldb::Slice valueslice( valuebuf, valuepos);
 
-		batch.Put( constkey, value);
+		batch.Put( keyslice, valueslice);
 	}
 	writeBatch( batch);
 	m_dfMap.clear();
 }
+
+MetaDataReaderInterface* Storage::createMetaDataReader( char varname) const
+{
+	return new MetaDataReader( m_db, varname);
+}
+
 

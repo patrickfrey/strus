@@ -26,26 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
-#define _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <string>
+#include "metaDataReader.hpp"
+#include "metaDataBlock.hpp"
+#include "databaseKey.hpp"
+#include <stdexcept>
 
-namespace strus
+using namespace strus;
+
+MetaDataReader::MetaDataReader( leveldb::DB* db_, char varname_)
+	:m_db(db_)
+	,m_itr(db_->NewIterator( leveldb::ReadOptions()))
+	,m_varname(varname_)
+	,m_key( (char)DatabaseKey::DocMetaDataPrefix, varname_)
+	,m_blockno(0)
+	,m_blk(0)
+{}
+
+MetaDataReader::~MetaDataReader()
 {
-void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx);
-void packIndex( std::string& buf, const Index& idx);
-Index unpackIndex( const char*& ptr, const char* end);
-const char* skipIndex( const char* ptr, const char* end);
-unsigned int nofPackedIndices( const char* ptr, const char* end);
-const char* nextPackedIndexPos( const char* start, const char* str, const char* end);
+	delete m_itr;
+}
 
-void packFloat( std::string& buf, const float& val);
-float unpackFloat( const char*& ptr, const char* end);
-unsigned int sizeofPackedFloat( const char*& ptr);
+float MetaDataReader::readValue( const Index& docno_)
+{
+	Index blockno_ = MetaDataBlock::blockno( docno_);
+	std::size_t index_ = MetaDataBlock::index( docno_);
 
-}//namespace
-#endif
+	if (m_blockno == blockno_)
+	{
+		return m_blk[ index_];
+	}
+	else if (m_blockno +1 == blockno_)
+	{
+		m_blockno = blockno_;
+		m_itr->Next();
+	}
+	else
+	{
+		m_blockno = blockno_;
+		m_key.resize( 2);
+		m_key.addElem( m_blockno);
+		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
+	}
+	m_blk = reinterpret_cast<const float*>( m_itr->value().data());
+	// ... memory is aligned to word length
+	if (m_itr->value().size() != MetaDataBlock::MetaDataBlockSize)
+	{
+		m_blk = 0;
+		m_blockno = 0;
+		throw std::runtime_error( "internal: corrupt metadata block");
+	}
+	Index nextBlockno = m_key.elem(2);
+	if (m_blockno != nextBlockno)
+	{
+		m_blockno = nextBlockno;
+		return 0.0;
+	}
+	return m_blk[ index_];
+}
+
 
 
 

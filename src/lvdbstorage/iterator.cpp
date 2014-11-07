@@ -44,11 +44,20 @@ Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const
 #else
 Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
-	:m_db(db_),m_docno(0),m_documentFrequency(-1),m_itr(0),m_frequency(0),m_posno(0),m_positr(0),m_posend(0)
+	:m_db(db_)
+	,m_termtypeno(termtypeno)
+	,m_termvalueno(termvalueno)
+	,m_key( (char)DatabaseKey::LocationPrefix, termtypeno, termvalueno)
+	,m_keysize(1)
+	,m_docno(0)
+	,m_documentFrequency(-1)
+	,m_itr(0)
+	,m_frequency(0)
+	,m_posno(0)
+	,m_positr(0)
+	,m_posend(0)
 {
-	m_key.push_back( (char)Storage::LocationPrefix);
-	packIndex( m_key, termtypeno);
-	packIndex( m_key, termvalueno);
+	m_featureid.reserve( 16);
 	m_keysize = m_key.size();
 #ifdef STRUS_LOWLEVEL_DEBUG
 	m_featureid.append( termstr);
@@ -56,13 +65,15 @@ Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const
 	m_featureid.push_back( (char)(termtypeno/10) + '0');
 	m_featureid.push_back( (char)(termtypeno%10) + '0');
 #else
-	m_featureid.append( m_key.c_str()+1, m_keysize-1);
+	m_featureid.append( m_key.ptr()+1, m_keysize-1);
 #endif
 }
 
 Iterator::Iterator( const Iterator& o)
 	:IteratorInterface(o)
 	,m_db(o.m_db)
+	,m_termtypeno(o.m_termtypeno)
+	,m_termvalueno(o.m_termvalueno)
 	,m_key(o.m_key)
 	,m_keysize(o.m_keysize)
 	,m_docno(0)
@@ -155,7 +166,7 @@ Index Iterator::skipPos( const Index& firstpos)
 
 Index Iterator::extractMatchData()
 {
-	if (m_keysize < m_itr->key().size() && 0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize))
+	if (m_keysize < m_itr->key().size() && 0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
 	{
 		// Init the term weight and the iterators on the term occurrencies:
 		m_posno = 0;
@@ -195,8 +206,8 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 		m_itr = m_db->NewIterator( leveldb::ReadOptions());
 	}
 	m_key.resize( m_keysize);
-	packIndex( m_key, docno);
-	m_itr->Seek( leveldb::Slice( m_key.c_str(), m_key.size()));
+	m_key.addElem( docno);
+	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
 
 	return extractMatchData();
 }
@@ -205,12 +216,10 @@ Index Iterator::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::string key = m_key;
-		key.resize( m_keysize);
-		key[0] = (char)Storage::DocFrequencyPrefix;
-		leveldb::Slice constkey( key.c_str(), key.size());
+		DatabaseKey key( (char)DatabaseKey::DocFrequencyPrefix, m_termtypeno, m_termvalueno);
+		leveldb::Slice keyslice( key.ptr(), key.size());
 		std::string value;
-		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
+		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
 		if (status.IsNotFound())
 		{
 			return 0;

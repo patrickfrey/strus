@@ -49,11 +49,11 @@ public:
 			const std::string& value_,
 			const Index& position_);
 
-	virtual void setDocumentAttribute(
+	virtual void setMetaData(
 			char name_,
 			float value_);
 
-	virtual void setDocumentAttribute(
+	virtual void setAttribute(
 			char name_,
 			const std::string& value_);
 
@@ -92,15 +92,24 @@ private:
 
 	struct DocAttribute
 	{
-		enum Type {TypeNumber=1,TypeString=2};
-		Type type;
 		char name;
 		std::string value;
 
-		DocAttribute( Type type_, char name_, const std::string& value_)
-			:type(type_),name(name_),value(value_){}
+		DocAttribute( char name_, const std::string& value_)
+			:name(name_),value(value_){}
 		DocAttribute( const DocAttribute& o)
-			:type(o.type),name(o.name),value(o.value){}
+			:name(o.name),value(o.value){}
+	};
+
+	struct DocMetaData
+	{
+		char name;
+		float value;
+
+		DocMetaData( char name_, float value_)
+			:name(name_),value(value_){}
+		DocMetaData( const DocMetaData& o)
+			:name(o.name),value(o.value){}
 	};
 
 private:
@@ -113,6 +122,7 @@ private:
 	TermMap m_terms;
 	InvMap m_invs;
 	std::vector<DocAttribute> m_attributes;
+	std::vector<DocMetaData> m_metadata;
 };
 
 }

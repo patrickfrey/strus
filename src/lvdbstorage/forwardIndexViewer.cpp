@@ -62,8 +62,8 @@ void ForwardIndexViewer::buildKey( int level)
 			break;
 		case 1:
 			m_key.resize(0);
-			m_key.push_back( Storage::InversePrefix);
-			packIndex( m_key, m_docno);
+			m_key.addPrefix( DatabaseKey::InversePrefix);
+			m_key.addElem( m_docno);
 			m_keysize_docno = m_key.size();
 			m_keysize_typeno = 0;
 			m_keylevel = 1;
@@ -71,14 +71,14 @@ void ForwardIndexViewer::buildKey( int level)
 		case 2:
 			if (m_keylevel < 1) buildKey(1);
 			m_key.resize( m_keysize_docno);
-			packIndex( m_key, m_typeno);
+			m_key.addElem( m_typeno);
 			m_keysize_typeno = m_key.size();
 			m_keylevel = 2;
 			break;
 		case 3:
 			if (m_keylevel < 2) buildKey(2);
 			m_key.resize( m_keysize_typeno);
-			packIndex( m_key, m_pos);
+			m_key.addElem( m_pos);
 			m_keylevel = 3;
 			break;
 		default:
@@ -91,7 +91,7 @@ void ForwardIndexViewer::initDoc( const Index& docno_)
 {
 	if (!m_typeno)
 	{
-		m_typeno = m_storage->keyLookUp( Storage::TermTypePrefix, m_type);
+		m_typeno = m_storage->keyLookUp( DatabaseKey::TermTypePrefix, m_type);
 	}
 	if (m_docno != docno_)
 	{
@@ -119,10 +119,10 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 		m_pos = firstpos_;
 		m_keylevel = 1;
 		buildKey(3);
-		m_itr->Seek( leveldb::Slice( m_key.c_str(), m_key.size()));
+		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
 
 		if (m_keysize_typeno < m_itr->key().size()
-		&&  0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize_typeno))
+		&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize_typeno))
 		{
 			// ... docno and typeno match, so we extract the current 
 			//	position from the rest of the key and set it:
@@ -135,6 +135,7 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 			return m_pos = 0;
 		}
 #if 0
+/*[-] TODO */
 	}
 	else
 	{

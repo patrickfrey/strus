@@ -26,78 +26,31 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
+#ifndef _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "databaseKey.hpp"
 #include <leveldb/db.h>
 
 namespace strus {
-/// \brief Forward declaration
-class MetaDataReader;
 
-class Iterator
-	:public IteratorInterface
+class MetaDataReader
+	:public MetaDataReaderInterface
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr);
-	Iterator( const Iterator& o);
+	explicit MetaDataReader( leveldb::DB* db_, char varname_);
+	virtual ~MetaDataReader();
 
-	virtual ~Iterator();
-
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
-	{
-		return std::vector<IteratorInterface*>();
-	}
-	virtual const std::string& featureid() const
-	{
-		return m_featureid;
-	}
-
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
-
-	virtual unsigned int frequency()
-	{
-		return m_frequency;
-	}
-
-	virtual Index documentFrequency();
-
-	virtual Index docno() const
-	{
-		return m_docno;
-	}
-
-	virtual Index posno() const
-	{
-		return m_posno;
-	}
-
-	virtual IteratorInterface* copy() const
-	{
-		return new Iterator(*this);
-	}
-
-private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
+	virtual float readValue( const Index& docno_);
 
 private:
 	leveldb::DB* m_db;
-	Index m_termtypeno;
-	Index m_termvalueno;
-	DatabaseKey m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	Index m_documentFrequency;
 	leveldb::Iterator* m_itr;
-	unsigned int m_frequency;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
-	std::string m_featureid;
+	char m_varname;
+	DatabaseKey m_key;
+	Index m_blockno;
+	const float* m_blk;
 };
 
 }

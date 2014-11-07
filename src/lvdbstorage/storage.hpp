@@ -30,9 +30,12 @@
 #define _STRUS_LVDB_STORAGE_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
+#include "databaseKey.hpp"
+#include "metaDataBlock.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace strus {
 
@@ -46,7 +49,9 @@ class Storage
 	:public StorageInterface
 {
 public:
-	Storage( const char* path_);
+	/// \param[in] path of the storage
+	/// \param[in] cachesize_k number of K LRU cache for nodes
+	Storage( const char* path_, unsigned int cachesize_k);
 	virtual void close();
 	virtual ~Storage();
 
@@ -62,20 +67,22 @@ public:
 	virtual TransactionInterface*
 		createTransaction( const std::string& docid);
 
+	virtual MetaDataReaderInterface* createMetaDataReader( char varname) const;
+
 	virtual Index nofDocumentsInserted() const;
 
 	virtual Index maxDocumentNumber() const;
 
 	virtual Index documentNumber( const std::string& docid) const;
-	
-	virtual float documentAttributeNumeric( Index docno, char varname) const;
 
-	virtual std::string documentAttributeString( Index docno, char varname) const;
+	virtual std::string documentAttribute( Index docno, char varname) const;
 
 	virtual void incrementDf( Index typeno, Index termno);
 	virtual void decrementDf( Index typeno, Index termno);
 
 public:
+	void defineMetaData( Index docno, char varname, float value);
+
 	void writeBatch(
 		leveldb::WriteBatch& batch);
 	void batchDefineVariable(
@@ -84,27 +91,19 @@ public:
 
 	leveldb::Iterator* newIterator();
 
-	enum KeyPrefix
-	{
-		TermTypePrefix='t',	///< [type string]             ->  [typeno]
-		TermValuePrefix='i',	///< [term string]             ->  [termno]
-		DocIdPrefix='d',	///< [docid string]            ->  [docno]
-		LocationPrefix='o',	///< [type,term,docno]         ->  [pos]*
-		InversePrefix='r',	///< [docno,typeno,position]   ->  [term string]*
-		VariablePrefix='v',	///< [variable string]         ->  [index]
-		DocNumAttrPrefix='w',	///< [docno,nameid]            ->  [float]
-		DocTextAttrPrefix='a',	///< [docno,nameid]            ->  [string]
-		DocFrequencyPrefix='f'	///< [type,term]               ->  [index]
-	};
-
-	static std::string keyString( KeyPrefix prefix, const std::string& keyname);
-	Index keyLookUp( KeyPrefix prefix, const std::string& keyname) const;
-	Index keyGetOrCreate( KeyPrefix prefix, const std::string& keyname);
+	static std::string keyString( DatabaseKey::KeyPrefix prefix, const std::string& keyname);
+	Index keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyname) const;
+	Index keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname);
 	Index keyLookUp( const std::string& keystr) const;
-	void flushNewKeys();
-	void flushDfs();
+
+	void checkFlush();
+	void flush();
 
 private:
+	void flushNewKeys();
+	void flushDfs();
+	void flushMetaData();
+
 	struct stlSliceComparator
 	{
 		bool operator()(const leveldb::Slice& a, const leveldb::Slice& b) const
@@ -117,9 +116,14 @@ private:
 	typedef std::pair<Index,Index> DfKey;
 	typedef std::map<DfKey, Index> DfMap;
 
+	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
+	typedef std::pair<char,Index> MetaDataKey;
+	typedef std::map<MetaDataKey, MetaDataBlockReference> MetaDataBlockMap;
+
 private:
 	std::string m_path;					///< levelDB storage path 
 	leveldb::DB* m_db;					///< levelDB handle
+	leveldb::Options m_dboptions;				///< options for levelDB
 	Index m_next_termno;					///< next index to assign to a new term value
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_docno;					///< next index to assign to a new document id
@@ -128,6 +132,9 @@ private:
 	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined. flushed at end of every transaction
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
 	DfMap m_dfMap;						///< temporary map for the document frequency of new inserted features
+	MetaDataBlockMap m_metaDataBlockMap;			///< map of meta data blocks for writing
+	boost::mutex m_mutex_metaDataBlockMap;			///< mutual exclusion for access on the meta data map for writing
+	Index m_flushCnt;
 };
 
 }
