@@ -28,6 +28,7 @@
 */
 #include "strus/storageLib.hpp"
 #include "strus/iteratorInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "strus/index.hpp"
 #include "private/iteratorReference.hpp"
 #include "private/storageReference.hpp"
@@ -37,6 +38,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <boost/lexical_cast.hpp>
+#include <boost/scoped_ptr.hpp>
 
 static strus::Index stringToIndex( const char* value)
 {
@@ -95,7 +97,7 @@ static void inspectFeatureFrequency( strus::StorageInterface& storage, const cha
 	std::cout << (*itr).frequency() << std::endl;
 }
 
-static void inspectDocMetadata( const strus::StorageInterface& storage, const char** key, int size)
+static void inspectDocAttribute( const strus::StorageInterface& storage, const char** key, int size)
 {
 	if (size > 2) throw std::runtime_error( "too many arguments");
 	if (size < 2) throw std::runtime_error( "too few arguments");
@@ -105,7 +107,23 @@ static void inspectDocMetadata( const strus::StorageInterface& storage, const ch
 			?stringToIndex( key[1])
 			:storage.documentNumber( key[1]);
 
-	std::cout << storage.documentAttributeString( docno, key[0][0]) << std::endl;
+	std::cout << storage.documentAttribute( docno, key[0][0]) << std::endl;
+}
+
+static void inspectDocMetaData( const strus::StorageInterface& storage, const char** key, int size)
+{
+	if (size > 2) throw std::runtime_error( "too many arguments");
+	if (size < 2) throw std::runtime_error( "too few arguments");
+	if (std::strlen(key[0]) != 1) throw std::runtime_error( "single character for document metadata id expected");
+
+	strus::Index docno = isIndex(key[1])
+			?stringToIndex( key[1])
+			:storage.documentNumber( key[1]);
+
+	boost::scoped_ptr<strus::MetaDataReaderInterface> reader(
+		storage.createMetaDataReader( key[0][1]));
+
+	std::cout << reader->readValue( docno) << std::endl;
 }
 
 static void inspectContent( strus::StorageInterface& storage, const char** key, int size)
@@ -192,7 +210,11 @@ int main( int argc, const char* argv[])
 		}
 		else if (0==std::strcmp( argv[2], "meta"))
 		{
-			inspectDocMetadata( *storage, argv+3, argc-3);
+			inspectDocMetaData( *storage, argv+3, argc-3);
+		}
+		else if (0==std::strcmp( argv[2], "attrib"))
+		{
+			inspectDocAttribute( *storage, argv+3, argc-3);
 		}
 		else if (0==std::strcmp( argv[2], "content"))
 		{

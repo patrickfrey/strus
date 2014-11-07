@@ -3,7 +3,6 @@
 #include "strus/storageInterface.hpp"
 #include <cstdlib>
 #include <limits>
-#include <set>
 #include <stdexcept>
 #include <cmath>
 
@@ -11,10 +10,14 @@ using namespace strus;
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-Accumulator::Accumulator( const QueryProcessorInterface* qproc_)
+Accumulator::Accumulator(
+		const QueryProcessorInterface* qproc_,
+		std::size_t maxNofRanks_)
 	:m_queryprocessor(qproc_)
 	,m_selectoridx(0)
 	,m_docno(0)
+	,m_maxNofRanks(maxNofRanks_)
+	,m_called(false)
 {}
 
 void Accumulator::addSelector(
@@ -43,6 +46,28 @@ bool Accumulator::nextRank(
 		unsigned int& selectorState,
 		float& weight)
 {
+	if (!m_called)
+	{
+		std::vector<IteratorReference>::const_iterator
+			si = m_selectors.begin(), 
+			se = m_selectors.end();
+		std::size_t nofSelElems = 0;
+		for (; si != se; ++si)
+		{
+			Index df = (*si)->documentFrequency();
+			if (df > (std::numeric_limits<std::size_t>::max()))
+			{
+				throw std::runtime_error( "query to unspecific (df gets out of range)");
+			}
+			if (df > (Index)nofSelElems)
+			{
+				nofSelElems = (std::size_t)df;
+				if (nofSelElems > m_maxNofRanks) break;
+			}
+		}
+		m_visited.reserve( nofSelElems);
+		m_called = true;
+	}
 	// For all selectors:
 	while (m_selectoridx < m_selectors.size())
 	{

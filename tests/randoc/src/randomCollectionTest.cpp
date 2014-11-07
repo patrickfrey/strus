@@ -656,16 +656,29 @@ struct RandomQuery
 						}
 						if (ai<arg.size())
 						{
+							std::vector<unsigned int> poset;	// .. linear search because sets are small
+
 							unsigned int maxpos = oi->pos;
 							for (ai=argidx; ai<arg.size(); ++ai)
 							{
 								std::vector<RandomDoc::Occurrence>::const_iterator
 									fi = findTerm( oi, oe, arg[ai], lastpos);
+								for (;;)
+								{
+									if (fi == oe) break;
+									if (std::find( poset.begin(), poset.end(), fi->pos)==poset.end())
+									{
+										// ... only items at distinct positions are allowed
+										break;
+									}
+									fi = findTerm( fi+1, oe, arg[ai], lastpos);
+								}
 								if (fi == oe) break;
 								if (fi->pos > maxpos)
 								{
 									maxpos = fi->pos;
 								}
+								poset.push_back( fi->pos);
 							}
 							if (ai == arg.size()
 							&& !(delimiter_term && matchTerm( oi, oe, delimiter_term, maxpos)))
@@ -931,6 +944,8 @@ int main( int argc, const char* argv[])
 				std::cerr << "inserted " << (totNofDocuments+1) << " documents, " << totTermStringSize <<" bytes " << std::endl;
 			}
 		}
+		storage->flush();
+
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofFeatures << " terms, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 		boost::scoped_ptr<strus::QueryProcessorInterface> queryproc(
 			strus::createQueryProcessorInterface( storage.get()));

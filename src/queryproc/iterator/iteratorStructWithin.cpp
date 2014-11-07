@@ -29,6 +29,8 @@
 #include "iterator/iteratorStructWithin.hpp"
 #include "iterator/iteratorHelpers.hpp"
 #include <stdexcept>
+#include <vector>
+#include <algorithm>
 
 using namespace strus;
 
@@ -141,11 +143,26 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 			return m_posno=0;
 		}
 		max_pos = min_pos;
+		std::vector<Index> poset;	// .. linear search because sets are small
+		poset.reserve( m_group.size());
+		poset.push_back( min_pos);
+		std::size_t pidx = 0;
 
-		for (++pi; pi != pe; ++pi)
+		for (++pi; pi != pe; ++pi,++pidx)
 		{
 			Index pos_next = (*pi)->skipPos( pos_iter);
-			if (!pos_next) return m_posno=0;
+			for (;;)
+			{
+				if (!pos_next) return m_posno=0;
+
+				if (std::find( poset.begin(), poset.end(), pos_next)==poset.end())
+				{
+					// ... only items at distinct positions are allowed
+					break;
+				}
+				pos_next = (*pi)->skipPos( pos_next +1);
+			}
+			poset.push_back( pos_next);
 
 			if (min_pos > pos_next)
 			{
@@ -168,7 +185,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 				Index pos_cut = m_cut->skipPos( min_pos);
 				if (pos_cut == 0 || pos_cut > max_pos)
 				{
-					return m_posno==(m_range>=0?min_pos:max_pos);
+					return m_posno=(m_range>=0?min_pos:max_pos);
 				}
 				else
 				{

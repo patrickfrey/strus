@@ -35,8 +35,8 @@
 #include "accumulatorArgument.hpp"
 #include <vector>
 #include <list>
-#include <set>
 #include <limits>
+#include <boost/unordered_set.hpp>
 
 namespace strus
 {
@@ -51,7 +51,9 @@ class Accumulator
 {
 public:
 	/// \brief Constructor
-	Accumulator( const QueryProcessorInterface* qproc_);
+	Accumulator(
+			const QueryProcessorInterface* qproc_,
+			std::size_t maxNofRanks_);
 
 	~Accumulator(){}
 
@@ -78,7 +80,9 @@ private:
 	unsigned int m_selectoridx;
 	Index m_docno;
 	std::vector<AccumulatorArgument> m_rankers;
-	std::set<Index> m_visited;
+	boost::unordered_set<Index> m_visited;
+	std::size_t m_maxNofRanks;
+	bool m_called;
 };
 
 }//namespace

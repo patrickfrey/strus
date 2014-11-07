@@ -98,6 +98,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 	int aidx=0;
 	for (; ai != ae; ++ai,++aidx)
 	{
+		m_selected[ aidx] = false;
 		minimum = (*ai)->skipDoc( base);
 		if (minimum) break;
 	}

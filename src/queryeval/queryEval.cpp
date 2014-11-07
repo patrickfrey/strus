@@ -557,7 +557,7 @@ std::vector<ResultDocument>
 	if (m_accumulateOperation.defined())
 	{
 		// Create the accumulator:
-		Accumulator accumulator( &processor);
+		Accumulator accumulator( &processor, maxNofRanks);
 
 		std::vector<WeightingFunction>::const_iterator
 			gi = m_accumulateOperation.args().begin(),

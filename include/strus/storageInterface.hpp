@@ -132,6 +132,9 @@ public:
 	/// \param[in] docid document identifier (URI)
 	/// \return the created transaction reference to be disposed with delete
 	virtual TransactionInterface* createTransaction( const std::string& docid)=0;
+
+	/// \brief Forces flushing of all contents presistently to the repository
+	virtual void flush()=0;
 };
 
 }//namespace
