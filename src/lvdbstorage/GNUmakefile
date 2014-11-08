@@ -13,7 +13,7 @@ CPP_OBJS=\
 	transaction.o \
 	storageLib.o
 
-CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I/usr/include -I.
+CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I.
 CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 MODFLAGS=-fPIC $(VISIBILITY)
 LDFLAGS=-L/usr/lib
@@ -24,11 +24,11 @@ all: libstrus_lvdbstorage.so
 -include $(CPP_OBJS:.o=.d)
 
 %.o : %.cpp GNUmakefile $(IFILES) $(HFILES)
-	g++ $(MODFLAGS) -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
-	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
+	$(CXX) $(MODFLAGS) -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
+	$(CXX) -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 libstrus_lvdbstorage.so: $(CPP_OBJS)
-	g++  -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
+	$(CXX)  -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:

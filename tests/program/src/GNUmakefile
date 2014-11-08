@@ -13,11 +13,11 @@ all: parseQueryEvalProgramTest
 -include $(CPP_OBJS:.o=.d)
 
 %.o : %.cpp GNUmakefile
-	g++ -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
-	g++ -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
+	$(CXX) -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
+	$(CXX) -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 parseQueryEvalProgramTest: $(CPP_OBJS)
-	g++ -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
 
 .PHONY: clean
 clean:

@@ -31,7 +31,6 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/queryEvalLib.hpp"
 #include "strus/iteratorInterface.hpp"
-#include "strus/accumulatorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include <string>
 #include <vector>
