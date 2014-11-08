@@ -57,7 +57,7 @@ public:
 	};
 private:
 	enum {
-		MetaDataBlockMask=1023,
+		MetaDataBlockMask=((int)MetaDataBlockSize-1),
 		MetaDataBlockShift=10
 	};
 	void readBlockFromDB();

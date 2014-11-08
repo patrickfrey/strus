@@ -70,7 +70,7 @@ void MetaDataBlock::readBlockFromDB()
 
 	leveldb::Slice constkey( key.ptr(), key.size());
 	std::string value;
-	value.reserve( sizeof(m_blk));
+	value.reserve( sizeof(m_blk)+1);
 	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
 
 	if (status.IsNotFound())

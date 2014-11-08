@@ -70,7 +70,8 @@ float MetaDataReader::readValue( const Index& docno_)
 	}
 	m_blk = reinterpret_cast<const float*>( m_itr->value().data());
 	// ... memory is aligned to word length
-	if (m_itr->value().size() != MetaDataBlock::MetaDataBlockSize * sizeof(float))
+	unsigned int valuesize = m_itr->value().size();
+	if (valuesize != MetaDataBlock::MetaDataBlockSize * sizeof(float))
 	{
 		m_blk = 0;
 		m_blockno = 0;
