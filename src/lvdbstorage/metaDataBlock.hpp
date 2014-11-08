@@ -51,9 +51,12 @@ public:
 
 	void addToBatch( leveldb::WriteBatch& batch);
 
+public:
+	enum {
+		MetaDataBlockSize=1024
+	};
 private:
 	enum {
-		MetaDataBlockSize=1024,
 		MetaDataBlockMask=1023,
 		MetaDataBlockShift=10
 	};
