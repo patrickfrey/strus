@@ -55,7 +55,7 @@ bool Accumulator::nextRank(
 		for (; si != se; ++si)
 		{
 			Index df = (*si)->documentFrequency();
-			if (df > (std::numeric_limits<std::size_t>::max()))
+			if (df > (Index)(std::numeric_limits<std::size_t>::max()))
 			{
 				throw std::runtime_error( "query to unspecific (df gets out of range)");
 			}
