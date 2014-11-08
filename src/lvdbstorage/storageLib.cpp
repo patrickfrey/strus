@@ -34,30 +34,62 @@
 #include "dll_tags.hpp"
 #include <string>
 #include <vector>
+#include <map>
 #include <cstring>
 #include <boost/thread/mutex.hpp>
+#include <boost/algorithm/string.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
 using namespace strus;
 
-static const char* configGet( const char* config, const char* name)
+namespace {
+class CaseInsensitiveKey
+	:public std::string
 {
-	const char* cc = config;
-	std::size_t namelen = std::strlen(name);
-	while (0!=std::memcmp( cc, name, namelen) || cc[namelen] != '=')
-	{
-		cc = std::strchr( cc, ';');
-		if (!cc) break;
-		cc = cc + 1;
-	}
-	return cc?(cc+namelen+1):0;
-}
+public:
+	CaseInsensitiveKey(){}
+	CaseInsensitiveKey( const std::string& o)
+		:std::string( boost::algorithm::to_lower_copy( o)){}
+	CaseInsensitiveKey( const CaseInsensitiveKey& o)
+		:std::string( o){}
+};
 
-static unsigned int nofK( const char* numstr)
+class ConfigMap
+	:public std::map<CaseInsensitiveKey,std::string>
+{
+public:
+	ConfigMap( const char* config);
+};
+
+ConfigMap::ConfigMap( const char* config)
+{
+	char const* cc = config;
+	while (*cc)
+	{
+		std::string key;
+		while ((*cc|32) >= 'a' && (*cc|32) <= 'z')
+		{
+			key.push_back( *cc++);
+		}
+		if (*cc != '=')
+		{
+			throw std::runtime_error( "'=' expected after item identifier in config string");
+		}
+		++cc;
+		const char* ee = std::strchr( cc, ';');
+		if (!ee) ee = std::strchr( cc, '\0');
+		(*this)[ key] = std::string( cc,ee-cc);
+		cc = (*ee)?(ee+1):ee;
+	}
+}
+}//namespace
+
+
+static unsigned int nofK( const std::string& numstr)
 {
 	Index rt = 0;
-	char const* cc = numstr;
+	char const* cc = numstr.c_str();
 	for (;*cc; ++cc)
 	{
 		if (*cc >= '0' && *cc <= '9')
@@ -93,24 +125,54 @@ static unsigned int nofK( const char* numstr)
 
 DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* config)
 {
-	const char* path = configGet( config, "path");
-	if (!path)
+	std::string path;
+	unsigned int cachesize_k = 0;
+
+	ConfigMap configMap( config);
+	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();
+	for (; ci != ce; ++ci)
+	{
+		if (ci->first == "path")
+		{
+			path = ci->second;
+		}
+		else if (ci->first == "cache")
+		{
+			cachesize_k = nofK( ci->second);
+		}
+		else
+		{
+			throw std::runtime_error( std::string( "unknown configuration option '") + ci->first +"'");
+		}
+	}
+	if (path.empty())
 	{
 		throw std::runtime_error( "no path defined in config for levelDB storage");
 	}
-	unsigned int cachesize_k = 0;
-	const char* cache = configGet( config, "cache");
-	if (cache)
-	{
-		cachesize_k = nofK( cache);
-	}
-	return new Storage( path, cachesize_k);
+	return new Storage( path.c_str(), cachesize_k);
 }
+
 
 DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 {
-	const char* path = configGet( config, "path");
-	if (!path)
+	std::string path;
+	ConfigMap configMap( config);
+	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();
+	for (; ci != ce; ++ci)
+	{
+		if (ci->first == "path")
+		{
+			path = ci->second;
+		}
+		else if (ci->first == "cache")
+		{
+		}
+		else
+		{
+			throw std::runtime_error( std::string( "unknown configuration option '") + ci->first +"'");
+		}
+	}
+	if (path.empty())
 	{
 		throw std::runtime_error( "no path defined in config for levelDB storage");
 	}

@@ -44,7 +44,7 @@
 
 using namespace strus;
 
-Storage::Storage( const char* path_, unsigned int cachesize_k)
+Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	:m_path(path_),m_db(0),m_flushCnt(0)
 {
 	m_dboptions.create_if_missing = false;

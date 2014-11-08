@@ -51,7 +51,7 @@ class Storage
 public:
 	/// \param[in] path of the storage
 	/// \param[in] cachesize_k number of K LRU cache for nodes
-	Storage( const char* path_, unsigned int cachesize_k);
+	Storage( const std::string& path_, unsigned int cachesize_k);
 	virtual void close();
 	virtual ~Storage();
 

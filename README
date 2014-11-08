@@ -8,22 +8,22 @@ Independent from storage impementation.
 
 strus defines information retrieval as evaluation of a query based on 3
 types of operations:
-  * Fetching and joining of occurrencies (document/position number)
-  * Accumulators of document weights
+  * Fetching and joining of feature occurrencies (document/position number)
+  * Weighting of documents based on the feature occurrencies
   * Summarization as extraction of content based on the query matches
 
 The architecture defines three components that are implemented as
-shared libraries with a clearly defined API. Each library can be
-replaced by an alternative implementation.
+shared libraries. Each library could possibly be replaced by an alternative
+implementation.
 
   |--------------------|
   |     query eval     |  Query evaluation: Interpretes the query string
   |                    |  and uses the operators defined in the query
   |                    |  processor to execute the query
   |--------------------|
-  |     query proc     |  Query processor: Defines the basic operations
-  |                    |  on occurrencies and accumulators plus the
-  |                    |  summarizers to augment the results.
+  |     query proc     |  Query processor: Defines the set operations
+  |                    |  on feature occurrencies, the weighting functions
+  |                    |  and the summarizers to augment the results.
   |--------------------|
   |     storage        |  Storage: Defines the storage where the all
   |                    |  retrievable information is stored.
@@ -32,17 +32,13 @@ replaced by an alternative implementation.
   |                    |  in case of statistical IR.
   |--------------------|
 
-Each of these components has an include file that describes the interface:
 
-  #include "strus/libstrus_queryeval.hpp"
-  #include "strus/libstrus_queryproc.hpp"
-  #include "strus/libstrus_storage.hpp"
-
-And at least one implementation:
-
-  "src/queryeval/libstrus_queryeval.so"
-  "src/queryeval/libstrus_queryproc.so"
-  "src/queryeval/libstrus_lvdbstorage.so"  (storage based on LevelDB)
+For using it you have to include "strus/strus.hpp"
 
 
+And link against at the libraries:
+
+  "libstrus_queryeval.so"
+  "libstrus_queryproc.so"
+  "libstrus_lvdbstorage.so"  (storage based on LevelDB)
 
