@@ -52,11 +52,11 @@ float MetaDataReader::readValue( const Index& docno_)
 	Index blockno_ = MetaDataBlock::blockno( docno_);
 	std::size_t index_ = MetaDataBlock::index( docno_);
 
-	if (m_blockno == blockno_)
+	if (m_blockno == blockno_ && m_blk)
 	{
 		return m_blk[ index_];
 	}
-	else if (m_blockno +1 == blockno_)
+	else if (m_blockno +1 == blockno_ && m_blk)
 	{
 		m_blockno = blockno_;
 		m_itr->Next();

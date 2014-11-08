@@ -43,7 +43,7 @@ public:
 	virtual ~MetaDataBlock(){}
 
 	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
-	static Index blockno( Index docno)			{return docno>>MetaDataBlockShift;}
+	static Index blockno( Index docno)			{return (docno>>MetaDataBlockShift)+1;}
 	Index blockno() const					{return m_blockno;}
 
 	void setValue( Index docno, float value);
@@ -51,14 +51,12 @@ public:
 
 	void addToBatch( leveldb::WriteBatch& batch);
 
-public:
+private:
 	enum {
 		MetaDataBlockSize=1024,
 		MetaDataBlockMask=1023,
 		MetaDataBlockShift=10
 	};
-
-private:
 	void readBlockFromDB();
 
 private:

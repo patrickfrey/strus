@@ -61,7 +61,7 @@ float MetaDataBlock::getValue( Index docno) const
 	{
 		throw std::runtime_error( "internal: illegal read access on block (wrong block number)");
 	}
-	return m_blk[ docno & MetaDataBlockMask];
+	return m_blk[ index(docno)];
 }
 
 void MetaDataBlock::readBlockFromDB()
