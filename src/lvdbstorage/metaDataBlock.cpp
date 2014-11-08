@@ -36,14 +36,14 @@ using namespace strus;
 MetaDataBlock::MetaDataBlock( leveldb::DB* db_, Index blockno_, char varname_)
 	:m_db(db_),m_blockno(blockno_),m_varname(varname_)
 {
-	std::memset( m_blk, 0, MetaDataBlockSize);
+	std::memset( m_blk, 0, sizeof(m_blk));
 	readBlockFromDB();
 }
 
 MetaDataBlock::MetaDataBlock( const MetaDataBlock& o)
 	:m_db(o.m_db),m_blockno(o.m_blockno),m_varname(o.m_varname)
 {
-	std::memcpy( m_blk, o.m_blk, MetaDataBlockSize);
+	std::memcpy( m_blk, o.m_blk, sizeof(m_blk));
 }
 
 void MetaDataBlock::setValue( Index docno, float value)
