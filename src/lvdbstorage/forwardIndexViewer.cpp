@@ -106,12 +106,12 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 {
 	if (!m_itr)
 	{
-		m_itr = m_db->NewIterator( leveldb::ReadOptions());
+		leveldb::ReadOptions options;
+		options.fill_cache = false;
+		m_itr = m_db->NewIterator( options);
 	}
-#if 0
 	if (m_keylevel < 3 || (m_pos + 1) != firstpos_ || m_pos == 0)
 	{
-#endif
 		if (!m_docno)
 		{
 			throw std::runtime_error( "cannot seek position without document number defined");
@@ -134,8 +134,6 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 		{
 			return m_pos = 0;
 		}
-#if 0
-/*[-] TODO */
 	}
 	else
 	{
@@ -143,17 +141,22 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 		{
 			m_itr->Next();
 			if (m_keysize_docno < m_itr->key().size()
-			&&  0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize_docno))
+			&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize_docno))
 			{
 				// ... docno still matches
 				if (m_keysize_typeno < m_itr->key().size()
-				&&  0==std::memcmp( m_key.c_str(), m_itr->key().data(), m_keysize_typeno))
+				&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize_typeno))
 				{
 					// ... typeno matches, so we got the next item
 					//	and we can set the current (as next) position:
 					const char* ki = m_itr->key().data() + m_keysize_typeno;
 					const char* ke = ki + m_itr->key().size() - m_keysize_typeno;
 					return (m_pos = unpackIndex( ki, ke));
+				}
+				else
+				{
+					// ... typeno does not match, so we check the next entry
+					continue;
 				}
 			}
 			else
@@ -163,7 +166,6 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 			}
 		}
 	}
-#endif
 }
 
 

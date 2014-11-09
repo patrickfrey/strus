@@ -36,12 +36,16 @@ using namespace strus;
 
 MetaDataReader::MetaDataReader( leveldb::DB* db_, char varname_)
 	:m_db(db_)
-	,m_itr(db_->NewIterator( leveldb::ReadOptions()))
+	,m_itr(0)
 	,m_varname(varname_)
 	,m_key( (char)DatabaseKey::DocMetaDataPrefix, varname_)
 	,m_blockno(0)
 	,m_blk(0)
-{}
+{
+	leveldb::ReadOptions options;
+	options.fill_cache = true;
+	m_itr = db_->NewIterator( options);
+}
 
 MetaDataReader::~MetaDataReader()
 {

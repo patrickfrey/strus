@@ -203,7 +203,9 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 {
 	if (!m_itr)
 	{
-		m_itr = m_db->NewIterator( leveldb::ReadOptions());
+		leveldb::ReadOptions options;
+		options.fill_cache = true;
+		m_itr = m_db->NewIterator( options);
 	}
 	m_key.resize( m_keysize);
 	m_key.addElem( docno);
