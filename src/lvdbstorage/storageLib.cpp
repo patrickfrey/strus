@@ -178,6 +178,8 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 	}
 	leveldb::DB* db = 0;
 	leveldb::Options options;
+	// Compression reduces size of index by 25% and has about 10% better performance
+	// m_dboptions.compression = leveldb::kNoCompression;
 	options.create_if_missing = true;
 	options.error_if_exists = true;
 	leveldb::Status status = leveldb::DB::Open( options, path, &db);

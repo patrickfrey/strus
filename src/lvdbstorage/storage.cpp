@@ -47,6 +47,8 @@ using namespace strus;
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	:m_path(path_),m_db(0),m_flushCnt(0)
 {
+	// Compression reduces size of index by 25% and has about 10% better performance
+	// m_dboptions.compression = leveldb::kNoCompression;
 	m_dboptions.create_if_missing = false;
 	if (cachesize_k)
 	{
