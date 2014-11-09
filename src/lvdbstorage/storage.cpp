@@ -91,6 +91,7 @@ void Storage::close()
 		{
 			throw std::runtime_error( std::string("error when flushing and closing storage") + status.ToString());
 		}
+		batch.Clear();
 		delete m_db;
 		m_db = 0;
 	}
@@ -110,6 +111,7 @@ void Storage::flush()
 	flushNewKeys();
 	flushDfs();
 	flushMetaData();
+	flushIndex();
 }
 
 Storage::~Storage()
@@ -126,14 +128,16 @@ Storage::~Storage()
 	}
 }
 
-void Storage::writeBatch( leveldb::WriteBatch& batch)
+void Storage::writeIndex(const leveldb::Slice& key, const leveldb::Slice& value)
 {
-	if (!m_db) throw std::runtime_error("write on closed storage");
-	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
+	boost::mutex::scoped_lock( m_indexBatch_mutex);
+	m_indexBatch.Put( key, value);
+}
+
+void Storage::deleteIndex(const leveldb::Slice& key)
+{
+	boost::mutex::scoped_lock( m_indexBatch_mutex);
+	m_indexBatch.Delete( key);
 }
 
 void Storage::flushNewKeys()
@@ -335,8 +339,23 @@ void Storage::defineMetaData( Index docno, char varname, float value)
 	}
 }
 
+void Storage::flushIndex()
+{
+	boost::mutex::scoped_lock( m_indexBatch_mutex);
+	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &m_indexBatch);
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	m_indexBatch.Clear();
+}
+
 void Storage::flushMetaData()
 {
+	if (!m_db)
+	{
+		throw std::runtime_error( "no storage defined (flush metadata)");
+	}
 	leveldb::WriteBatch batch;
 	boost::mutex::scoped_lock( m_mutex_metaDataBlockMap);
 	MetaDataBlockMap::const_iterator
@@ -346,7 +365,12 @@ void Storage::flushMetaData()
 	{
 		mi->second->addToBatch( batch);
 	}
-	writeBatch( batch);
+	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	batch.Clear();
 	m_metaDataBlockMap.clear();
 }
 
@@ -407,7 +431,12 @@ void Storage::flushDfs()
 
 		batch.Put( keyslice, valueslice);
 	}
-	writeBatch( batch);
+	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	batch.Clear();
 	m_dfMap.clear();
 }
 

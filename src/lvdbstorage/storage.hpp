@@ -83,10 +83,9 @@ public:
 public:
 	void defineMetaData( Index docno, char varname, float value);
 
-	void writeBatch(
-		leveldb::WriteBatch& batch);
-	void batchDefineVariable(
-		leveldb::WriteBatch& batch, const char* name, Index value);
+	void writeIndex( const leveldb::Slice& key, const leveldb::Slice& value);
+	void deleteIndex( const leveldb::Slice& key);
+
 	void incrementNofDocumentsInserted();
 
 	leveldb::Iterator* newIterator();
@@ -100,9 +99,12 @@ public:
 	void flush();
 
 private:
+	void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value);
+
 	void flushNewKeys();
 	void flushDfs();
 	void flushMetaData();
+	void flushIndex();
 
 	struct stlSliceComparator
 	{
@@ -129,7 +131,9 @@ private:
 	Index m_next_docno;					///< next index to assign to a new document id
 	Index m_nof_documents;					///< number of documents inserted
 	boost::mutex m_mutex;					///< mutex for mutual exclusion for the access of counters (m_next_..) and for the access of keys not defined during a running transaction
-	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined. flushed at end of every transaction
+	leveldb::WriteBatch m_indexBatch;			///< batch for key/values written by transactions
+	boost::mutex m_indexBatch_mutex;			///< mutex for mutual exclusion for writing to the index
+	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined.
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
 	DfMap m_dfMap;						///< temporary map for the document frequency of new inserted features
 	MetaDataBlockMap m_metaDataBlockMap;			///< map of meta data blocks for writing

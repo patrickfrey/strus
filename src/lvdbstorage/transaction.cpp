@@ -86,7 +86,6 @@ void Transaction::setAttribute(
 void Transaction::commit()
 {
 	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid);
-	leveldb::WriteBatch batch;
 	bool documentFound = false;
 
 	leveldb::Iterator* vi = m_storage->newIterator();
@@ -118,7 +117,7 @@ void Transaction::commit()
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "DELETE ATTRIBUTE [" << vi->key().ToString() << "]" << std::endl;
 #endif
-		batch.Delete( vi->key());
+		m_storage->deleteIndex( vi->key());
 	}
 	// [1.4] Insert new attributes
 	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
@@ -130,7 +129,7 @@ void Transaction::commit()
 		std::cerr << "PUT ATTRIBUTE [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
 #endif
 		leveldb::Slice keyslice( docattribkey.ptr(), docattribkey.size());
-		batch.Put( keyslice, ai->value);
+		m_storage->writeIndex( keyslice, ai->value);
 	}
 
 	// [2] Delete old document term occurrencies:
@@ -153,7 +152,7 @@ void Transaction::commit()
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "DELETE INV [" << vi->key().ToString() << "]" << std::endl;
 #endif
-		batch.Delete( vi->key());
+		m_storage->deleteIndex( vi->key());
 
 		const char* ki = vi->key().data() + invkeysize;
 		const char* ke = ki + vi->key().size();
@@ -180,7 +179,7 @@ void Transaction::commit()
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "DELETE TERMS [" << delkey << "]" << std::endl;
 #endif
-		batch.Delete( leveldb::Slice( delkey.ptr(), delkey.size()));
+		m_storage->deleteIndex( leveldb::Slice( delkey.ptr(), delkey.size()));
 
 		m_storage->decrementDf( di->first, di->second);
 	}
@@ -206,8 +205,7 @@ void Transaction::commit()
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "PUT TERMS [" << termkey << "]" << "= [" << positions << "]" << std::endl;
 #endif
-		batch.Put( leveldb::Slice( termkey.ptr(), termkey.size()), positions);
-
+		m_storage->writeIndex( leveldb::Slice( termkey.ptr(), termkey.size()), positions);
 		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
 
@@ -224,7 +222,7 @@ void Transaction::commit()
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "PUT INV [" << invkey << "]" << "= [" << ri->second.value << "]" << std::endl;
 #endif
-		batch.Put( invkeyslice, ri->second);
+		m_storage->writeIndex( invkeyslice, ri->second);
 	}
 	if (!documentFound)
 	{
@@ -232,8 +230,6 @@ void Transaction::commit()
 	}
 
 	// [5] Do submit the write to the database:
-	m_storage->writeBatch( batch);
 	m_storage->checkFlush();
-	batch.Clear();
 }
 
