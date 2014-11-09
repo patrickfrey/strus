@@ -54,8 +54,8 @@ public:
 		return m_featureid;
 	}
 
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& firstpos);
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipPos( const Index& firstpos_);
 
 	virtual unsigned int frequency()
 	{
@@ -91,6 +91,7 @@ private:
 	DatabaseKey m_key;
 	std::size_t m_keysize;
 	Index m_docno;
+	Index m_lastdocno;
 	Index m_documentFrequency;
 	leveldb::Iterator* m_itr;
 	unsigned int m_frequency;

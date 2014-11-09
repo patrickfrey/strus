@@ -50,6 +50,7 @@ Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const
 	,m_key( (char)DatabaseKey::InvertedIndexPrefix, termtypeno, termvalueno)
 	,m_keysize(1)
 	,m_docno(0)
+	,m_lastdocno(0)
 	,m_documentFrequency(-1)
 	,m_itr(0)
 	,m_frequency(0)
@@ -77,6 +78,7 @@ Iterator::Iterator( const Iterator& o)
 	,m_key(o.m_key)
 	,m_keysize(o.m_keysize)
 	,m_docno(0)
+	,m_lastdocno(0)
 	,m_documentFrequency(o.m_documentFrequency)
 	,m_itr(0)
 	,m_frequency(o.m_frequency)
@@ -92,23 +94,34 @@ Iterator::~Iterator()
 }
 
 
-Index Iterator::skipDoc( const Index& docno)
+Index Iterator::skipDoc( const Index& docno_)
 {
-	if (m_itr && m_docno +1 == docno)
+	if (m_docno)
+	{
+		if (m_docno == docno_)
+		{
+			return m_docno;
+		}
+		if (m_lastdocno <= docno_ && m_docno >= docno_)
+		{
+			return m_docno;
+		}
+	}
+	if (m_itr && m_docno +1 == docno_)
 	{
 		return getNextTermDoc();
 	}
 	else
 	{
-		return getFirstTermDoc( docno);
+		return getFirstTermDoc( docno_);
 	}
 }
 
-Index Iterator::skipPos( const Index& firstpos)
+Index Iterator::skipPos( const Index& firstpos_)
 {
-	if (m_posno >= firstpos)
+	if (m_posno >= firstpos_)
 	{
-		if (m_posno == firstpos && firstpos != 0)
+		if (m_posno == firstpos_ && firstpos_ != 0)
 		{
 			return m_posno;
 		}
@@ -118,9 +131,9 @@ Index Iterator::skipPos( const Index& firstpos)
 		m_positr = skipIndex( m_positr, m_posend); //... skip ff
 	}
 	unsigned int ofs = (m_posend - m_positr) >> 1;
-	if (ofs > firstpos - m_posno)
+	if (ofs > firstpos_ - m_posno)
 	{
-		ofs = (firstpos - m_posno) >> 4;
+		ofs = (firstpos_ - m_posno) >> 4;
 	}
 	while (ofs >= 6)
 	{
@@ -128,20 +141,20 @@ Index Iterator::skipPos( const Index& firstpos)
 		if (skipitr != m_posend)
 		{
 			Index nextpos = unpackIndex( skipitr, m_posend);
-			if (nextpos <= firstpos)
+			if (nextpos <= firstpos_)
 			{
 				m_posno = nextpos;
 				m_positr = skipitr;
-				if (nextpos == firstpos)
+				if (nextpos == firstpos_)
 				{
 					return m_posno;
 				}
 				else
 				{
 					ofs = (m_posend - m_positr) >> 1;
-					if (ofs > firstpos - m_posno)
+					if (ofs > firstpos_ - m_posno)
 					{
-						ofs = (firstpos - m_posno) >> 4;
+						ofs = (firstpos_ - m_posno) >> 4;
 					}
 					continue;
 				}
@@ -152,12 +165,12 @@ Index Iterator::skipPos( const Index& firstpos)
 			}
 		}
 	}
-	while (m_positr < m_posend && (firstpos > m_posno || !m_posno))
+	while (m_positr < m_posend && (firstpos_ > m_posno || !m_posno))
 	{
 		// Get the next position:
 		m_posno = unpackIndex( m_positr, m_posend);
 	}
-	if (firstpos > m_posno)
+	if (firstpos_ > m_posno)
 	{
 		return 0;
 	}
