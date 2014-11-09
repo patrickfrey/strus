@@ -293,5 +293,21 @@ unsigned int strus::sizeofPackedFloat( const char*& ptr)
 	return (cc-ptr);
 }
 
+bool strus::checkStringUtf8( const char* ptr, std::size_t size)
+{
+	std::size_t ii = 0;
+	std::size_t len = 0;
+	for (; ii<size; ii += len)
+	{
+		len = g_charlentable[ ptr[ii]];
+		if (ii + len > size || len == 0 || len == 8) return false;
+		std::size_t kk = 1;
+		for (; kk<len; ++kk)
+		{
+			if ((ptr[ii+kk] & B11000000) != B10000000) return false;
+		}
+	}
+	return true;
+}
 
 

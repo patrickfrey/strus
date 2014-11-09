@@ -47,7 +47,7 @@ Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const
 	:m_db(db_)
 	,m_termtypeno(termtypeno)
 	,m_termvalueno(termvalueno)
-	,m_key( (char)DatabaseKey::LocationPrefix, termtypeno, termvalueno)
+	,m_key( (char)DatabaseKey::InvertedIndexPrefix, termtypeno, termvalueno)
 	,m_keysize(1)
 	,m_docno(0)
 	,m_documentFrequency(-1)

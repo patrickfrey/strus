@@ -41,13 +41,29 @@ public:
 		TermTypePrefix='t',	///< [type string]             ->  [typeno]
 		TermValuePrefix='i',	///< [term string]             ->  [termno]
 		DocIdPrefix='d',	///< [docid string]            ->  [docno]
-		LocationPrefix='o',	///< [type,term,docno]         ->  [pos]*
-		InversePrefix='r',	///< [docno,typeno,position]   ->  [term string]*
+		InvertedIndexPrefix='o',///< [type,term,docno]         ->  [pos]*
+		ForwardIndexPrefix='r',	///< [docno,typeno,position]   ->  [term string]*
 		VariablePrefix='v',	///< [variable string]         ->  [index]
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
-		DocFrequencyPrefix='f'	///< [type,term]               ->  [index]
+		DocFrequencyPrefix='f'	///< [typeno,termno]           ->  [index]
 	};
+	static const char* keyPrefixName( KeyPrefix i)
+	{
+		switch (i)
+		{
+			case TermTypePrefix: return "term type";
+			case TermValuePrefix: return "term value";
+			case DocIdPrefix: return "docid";
+			case InvertedIndexPrefix: return "inverted index";
+			case ForwardIndexPrefix: return "forward index";
+			case VariablePrefix: return "global variable";
+			case DocMetaDataPrefix: return "metadata";
+			case DocAttributePrefix: return "document attribute";
+			case DocFrequencyPrefix: return "term document frequency";
+		}
+		return 0;
+	}
 
 public:
 	explicit DatabaseKey( char prefix=0);

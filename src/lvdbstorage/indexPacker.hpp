@@ -44,6 +44,8 @@ void packFloat( std::string& buf, const float& val);
 float unpackFloat( const char*& ptr, const char* end);
 unsigned int sizeofPackedFloat( const char*& ptr);
 
+bool checkStringUtf8( const char* ptr, std::size_t size);
+
 }//namespace
 #endif
 

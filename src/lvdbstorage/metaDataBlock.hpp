@@ -53,12 +53,12 @@ public:
 
 public:
 	enum {
-		MetaDataBlockSize=1024
+		MetaDataBlockSize=64
 	};
 private:
 	enum {
 		MetaDataBlockMask=((int)MetaDataBlockSize-1),
-		MetaDataBlockShift=10
+		MetaDataBlockShift=6
 	};
 	void readBlockFromDB();
 

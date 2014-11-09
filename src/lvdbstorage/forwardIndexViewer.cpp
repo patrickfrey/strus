@@ -62,7 +62,7 @@ void ForwardIndexViewer::buildKey( int level)
 			break;
 		case 1:
 			m_key.resize(0);
-			m_key.addPrefix( DatabaseKey::InversePrefix);
+			m_key.addPrefix( DatabaseKey::ForwardIndexPrefix);
 			m_key.addElem( m_docno);
 			m_keysize_docno = m_key.size();
 			m_keysize_typeno = 0;

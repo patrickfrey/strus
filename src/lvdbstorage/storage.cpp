@@ -70,7 +70,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			delete m_db;
 			m_db = 0;
 		}
-		throw std::runtime_error( std::string( "failed to create storage: ") + err);
+		throw std::runtime_error( std::string( "failed to open storage: ") + err);
 	}
 }
 
@@ -98,7 +98,7 @@ void Storage::close()
 
 void Storage::checkFlush()
 {
-	if (++m_flushCnt == 100)
+	if (++m_flushCnt == 1000)
 	{
 		flush();
 		m_flushCnt = 0;
@@ -378,8 +378,8 @@ void Storage::flushDfs()
 	{
 		std::string keystr;
 		keystr.push_back( DatabaseKey::DocFrequencyPrefix);
-		packIndex( keystr, mi->first.first);
-		packIndex( keystr, mi->first.second);
+		packIndex( keystr, mi->first.first);	// ... [typeno]
+		packIndex( keystr, mi->first.second);	// ... [valueno]
 
 		leveldb::Slice keyslice( keystr.c_str(), keystr.size());
 		Index df;

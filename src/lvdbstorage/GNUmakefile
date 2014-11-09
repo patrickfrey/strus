@@ -19,7 +19,7 @@ MODFLAGS=-fPIC $(VISIBILITY)
 LDFLAGS=-L/usr/lib
 LIBS=-lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
 
-all: libstrus_lvdbstorage.so
+all: libstrus_lvdbstorage.so strusCheckStorage
 
 -include $(CPP_OBJS:.o=.d)
 
@@ -28,7 +28,10 @@ all: libstrus_lvdbstorage.so
 	$(CXX) -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
 libstrus_lvdbstorage.so: $(CPP_OBJS)
-	$(CXX)  -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
+	$(CXX) -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
+
+strusCheckStorage: $(CPP_OBJS) strusCheckStorage.o
+	$(CXX) -o $@ strusCheckStorage.o $(CPP_OBJS) $(LDFLAGS) $(LIBS) -lboost_system
 
 .PHONY: clean
 clean:
@@ -38,8 +41,10 @@ clean:
 install:
 	@mkdir -p $(INSTALL_LIBDIR)
 	@cp libstrus_lvdbstorage.so $(INSTALL_LIBDIR)
+	@cp strusCheckStorage $(INSTALL_BINDIR)
 
 .PHONY: uninstall
 uninstall:
 	@rm $(INSTALL_LIBDIR)/libstrus_lvdbstorage.so
+	@rm $(INSTALL_BINDIR)/strusCheckStorage
 

@@ -136,12 +136,12 @@ void Transaction::commit()
 	// [2] Delete old document term occurrencies:
 	std::set<TermMapKey> oldcontent;
 
-	DatabaseKey invkey( (char)DatabaseKey::InversePrefix, docno);
+	DatabaseKey invkey( (char)DatabaseKey::ForwardIndexPrefix, docno);
 	std::size_t invkeysize = invkey.size();
 	leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
 
-	//[2.1] Iterate on key prefix elements [InversePrefix, docno, typeno, *] and mark dem as deleted
-	//	Extract typeno and valueno from key [InversePrefix, docno, typeno, pos] an mark term as old content (do delete)
+	//[2.1] Iterate on key prefix elements [ForwardIndexPrefix, docno, typeno, *] and mark dem as deleted
+	//	Extract typeno and valueno from key [ForwardIndexPrefix, docno, typeno, pos] an mark term as old content (do delete)
 	for (vi->Seek( invkeyslice); vi->Valid(); vi->Next())
 	{
 		if (invkeysize > vi->key().size() || 0!=std::memcmp( vi->key().data(), invkey.ptr(), invkeysize))
@@ -167,11 +167,11 @@ void Transaction::commit()
 	}
 
 	//[2.2] Iterate on oldcontent elements built in [1.1] 
-	//	and mark them as deleted the keys [LocationPrefix, typeno, valueno, docno]
+	//	and mark them as deleted the keys [InvertedIndexPrefix, typeno, valueno, docno]
 	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)
 	{
-		DatabaseKey delkey( (char)DatabaseKey::LocationPrefix);
+		DatabaseKey delkey( (char)DatabaseKey::InvertedIndexPrefix);
 		delkey.addElem( di->first);		// [typeno]
 		delkey.addElem( di->second);		// [valueno]
 		delkey.addElem( docno);			// [docno]
@@ -185,12 +185,12 @@ void Transaction::commit()
 		m_storage->decrementDf( di->first, di->second);
 	}
 
-	//[3] Insert the new terms with key [LocationPrefix, typeno, valueno, docno]
+	//[3] Insert the new terms with key [InvertedIndexPrefix, typeno, valueno, docno]
 	//	and value (weight as 32bit float, packed encoded difference of positions):
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
-		DatabaseKey termkey( (char)DatabaseKey::LocationPrefix);
+		DatabaseKey termkey( (char)DatabaseKey::InvertedIndexPrefix);
 		std::string positions;
 		termkey.addElem( ti->first.first);	// [typeno]
 		termkey.addElem( ti->first.second);	// [valueno]
@@ -211,11 +211,11 @@ void Transaction::commit()
 		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
 
-	// [4] Insert the new inverted info with key [InversePrefix, docno, typeno, pos]:
+	// [4] Insert the new inverted info with key [ForwardIndexPrefix, docno, typeno, pos]:
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
-		DatabaseKey invkey( (char)DatabaseKey::InversePrefix, docno);
+		DatabaseKey invkey( (char)DatabaseKey::ForwardIndexPrefix, docno);
 		invkey.addElem( ri->first.typeno);	// [typeno]
 		invkey.addElem( ri->first.pos);		// [position]
 

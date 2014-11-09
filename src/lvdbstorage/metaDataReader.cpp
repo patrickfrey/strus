@@ -30,6 +30,7 @@
 #include "metaDataBlock.hpp"
 #include "databaseKey.hpp"
 #include <stdexcept>
+#include <cstring>
 
 using namespace strus;
 
@@ -56,7 +57,7 @@ float MetaDataReader::readValue( const Index& docno_)
 	{
 		return m_blk[ index_];
 	}
-	else if (m_blockno +1 == blockno_ && m_blk)
+	else if (m_blockno +1 == blockno_ && m_blockno)
 	{
 		m_blockno = blockno_;
 		m_itr->Next();
@@ -67,6 +68,12 @@ float MetaDataReader::readValue( const Index& docno_)
 		m_key.resize( 2);
 		m_key.addElem( m_blockno);
 		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
+	}
+	if (2 < m_itr->key().size() || 0!=std::memcmp( m_key.ptr(), m_itr->key().data(), 2))
+	{
+		m_blk = 0;
+		m_blockno = 0;
+		return 0.0;
 	}
 	m_blk = reinterpret_cast<const float*>( m_itr->value().data());
 	// ... memory is aligned to word length
