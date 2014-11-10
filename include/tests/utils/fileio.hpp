@@ -35,6 +35,7 @@ namespace strus
 {
 
 unsigned int readFile( const std::string& filename, std::string& res);
+unsigned int readStdin( std::string& res);
 unsigned int writeFile( const std::string& filename, const std::string& content);
 unsigned int readDir( const std::string& path, const std::string& ext, std::vector<std::string>& res);
 bool isFile( const std::string& path);
