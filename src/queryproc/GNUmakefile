@@ -4,6 +4,7 @@ include $(TOPDIR)/variables.mk
 CPP_OBJS=\
 	iterator/iteratorIntersect.o \
 	iterator/iteratorUnion.o \
+	iterator/iteratorUnionWeighted.o \
 	iterator/iteratorDifference.o \
 	iterator/iteratorStructWithin.o \
 	iterator/iteratorStructSequence.o \

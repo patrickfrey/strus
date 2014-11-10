@@ -3,22 +3,22 @@
 using namespace strus;
 
 
-IteratorUnion::IteratorUnion( std::size_t nofargs, const IteratorInterface** args)
+IteratorUnion::IteratorUnion( std::size_t nofargs_, const IteratorInterface** args_)
 	:m_docno(0)
 	,m_posno(0)
 	,m_documentFrequency(-1)
 {
-	m_selected.reserve( nofargs);
-	m_argar.reserve( nofargs);
+	m_selected.reserve( nofargs_);
+	m_argar.reserve( nofargs_);
 	std::size_t ii=0;
-	for (; ii<nofargs; ++ii)
+	for (; ii<nofargs_; ++ii)
 	{
-		if (args[ii])
+		if (args_[ii])
 		{
 			m_selected.push_back(false);
-			m_argar.push_back( args[ii]->copy());
+			m_argar.push_back( args_[ii]->copy());
 			if (ii) m_featureid.push_back('=');
-			m_featureid.append( args[ii]->featureid());
+			m_featureid.append( args_[ii]->featureid());
 		}
 	}
 	m_featureid.push_back( 'U');

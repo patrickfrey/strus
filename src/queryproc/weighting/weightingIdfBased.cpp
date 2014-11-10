@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "weightingIdfBased.hpp"
-#include "fastapprox/fastlog.h"
+//[+]#include "fastapprox/fastlog.h"
 #include <cmath>
 
 using namespace strus;
@@ -40,7 +40,7 @@ void WeightingIdfBased::calculateIdf( IteratorInterface& itr)
 	if (nofCollectionDocuments > nofMatches * 2)
 	{
 		m_idf =
-			fastlog(
+			logf(
 				(nofCollectionDocuments - nofMatches + 0.5)
 				/ (nofMatches + 0.5));
 	}

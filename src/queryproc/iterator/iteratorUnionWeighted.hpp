@@ -26,44 +26,37 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
+#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
+#include "iteratorUnion.hpp"
+#include "iteratorReference.hpp"
+#include <map>
 
 namespace strus
 {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
+class IteratorUnionWeighted
+	:public IteratorUnion
 {
 public:
-	virtual ~IteratorJoin(){}
+	IteratorUnionWeighted( const IteratorUnionWeighted& o);
+	IteratorUnionWeighted( std::size_t nofargs, const IteratorInterface** args);
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
+	virtual ~IteratorUnionWeighted(){}
 
-	virtual unsigned int frequency()
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipPos( const Index& pos_);
+
+	virtual float weight() const;
+
+	virtual IteratorInterface* copy() const
 	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx))
-			&& rt < (unsigned int)std::numeric_limits<short>::max();
-				++idx,++rt){}
-		return rt;
+		return new IteratorUnionWeighted( *this);
 	}
 
-	virtual Index documentFrequency()=0;
-
-	virtual float weight() const
-	{
-		return 1.0;
-	}
-
-	virtual IteratorInterface* copy() const=0;
+private:
+	std::map<Index,float> m_weightmap;
+	std::map<Index,float>::const_iterator m_weightitr;
 };
 
 }//namespace

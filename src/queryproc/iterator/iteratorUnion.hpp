@@ -39,7 +39,7 @@ class IteratorUnion
 {
 public:
 	IteratorUnion( const IteratorUnion& o);
-	IteratorUnion( std::size_t nofargs, const IteratorInterface** args);
+	IteratorUnion( std::size_t nofargs_, const IteratorInterface** args_);
 
 	virtual const std::string& featureid() const
 	{
@@ -68,6 +68,20 @@ public:
 	virtual IteratorInterface* copy() const
 	{
 		return new IteratorUnion( *this);
+	}
+
+protected:
+	bool selected( unsigned int idx)
+	{
+		return m_selected[idx];
+	}
+	IteratorInterface* arg( unsigned int idx) const
+	{
+		return m_argar[ idx].get();
+	}
+	unsigned int nofargs() const
+	{
+		return m_argar.size();
 	}
 
 private:

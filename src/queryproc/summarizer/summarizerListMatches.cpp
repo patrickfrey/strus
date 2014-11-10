@@ -81,7 +81,7 @@ std::vector<std::string>
 	for (; ii != ie; ++ii)
 	{
 		std::vector<IteratorInterface*> subexpr = (*ii)->subExpressions( true);
-		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( docno) != 0)
+		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
 		{
 			rt.push_back( getMatches( **ii, subexpr));
 		}

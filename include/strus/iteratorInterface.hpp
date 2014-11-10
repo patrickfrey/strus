@@ -65,6 +65,9 @@ public:
 	/// \brief Get the current position number
 	virtual Index posno() const=0;
 
+	/// \brief Get the the weight of the current position
+	virtual float weight() const=0;
+
 	/// \brief Return a copy of this iterator
 	virtual IteratorInterface* copy() const=0;
 };

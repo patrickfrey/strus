@@ -1,5 +1,5 @@
+posinfo optional
 Group id in analyzer term and group operator in query eval program (making an join operation with all elements of one group)
 In query eval program join operation arguments _3* for all input arguments bigger than index 3
 SWIG bindings
-
 

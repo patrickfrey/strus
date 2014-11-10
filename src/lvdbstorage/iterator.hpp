@@ -74,6 +74,11 @@ public:
 		return m_posno;
 	}
 
+	virtual float weight() const
+	{
+		return 1.0;
+	}
+
 	virtual IteratorInterface* copy() const
 	{
 		return new Iterator(*this);

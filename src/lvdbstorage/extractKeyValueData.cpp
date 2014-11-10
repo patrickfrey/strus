@@ -81,6 +81,10 @@ static std::string escapestr( const char* str, std::size_t size)
 			{
 				rt.append( "\\t");
 			}
+			else if (str[ii] == '\\') 
+			{
+				rt.append( "\\\\");
+			}
 			else
 			{
 				rt.push_back( str[ii]);
