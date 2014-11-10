@@ -73,7 +73,7 @@ static std::string keystring( const leveldb::Slice& key)
 	return rt;
 }
 
-static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& value)
+static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const leveldb::Slice& value)
 {
 	try
 	{
@@ -81,47 +81,56 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 		{
 			case strus::DatabaseKey::TermTypePrefix:
 			{
-				strus::TermTypeData( key, value);
+				strus::TermTypeData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::TermValuePrefix:
 			{
-				strus::TermValueData( key, value);
+				strus::TermValueData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::DocIdPrefix:
 			{
-				strus::DocIdData( key, value);
+				strus::DocIdData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::InvertedIndexPrefix:
 			{
-				strus::InvertedIndexData( key, value);
+				strus::InvertedIndexData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::ForwardIndexPrefix:
 			{
-				strus::ForwardIndexData( key, value);
+				strus::ForwardIndexData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::VariablePrefix:
 			{
-				strus::VariableData( key, value);
+				strus::VariableData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::DocMetaDataPrefix:
 			{
-				strus::DocMetaDataData( key, value);
+				strus::DocMetaDataData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::DocAttributePrefix:
 			{
-				strus::DocAttributeData( key, value);
+				strus::DocAttributeData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::DocFrequencyPrefix:
 			{
-				strus::DocFrequencyData( key, value);
+				strus::DocFrequencyData data( key, value);
+				data.print( out);
 				break;
 			}
 		}
@@ -132,7 +141,7 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 	}
 }
 
-static void checkDB( leveldb::DB* db)
+static void dumpDB( std::ostream& out, leveldb::DB* db)
 {
 	unsigned int cnt = 0;
 	char prevkeytype = 0;
@@ -154,37 +163,28 @@ static void checkDB( leveldb::DB* db)
 		{
 			if (prevkeytype)
 			{
-				std::cerr << "... checked " << cnt << " entries" << std::endl;
+				std::cerr << "... dumped " << cnt << " entries" << std::endl;
 				cnt = 0;
 			}
-			std::cerr << "checking entries of type '"
+			std::cerr << "dumping entries of type '"
 					<< strus::DatabaseKey::keyPrefixName(
 						  (strus::DatabaseKey::KeyPrefix)key.data()[0])
 					<< "':"
 					<< std::endl;
 			prevkeytype = key.data()[0];
 		}
-		checkKeyValue( key, itr->value());
+		dumpKeyValue( out, key, itr->value());
 		++cnt;
 	};
-	std::cerr << "... checked " << cnt << " entries" << std::endl;
+	std::cerr << "... dumped " << cnt << " entries" << std::endl;
 	cnt = 0;
-
-	if (g_nofErrors)
-	{
-		std::cerr << "FAILED." << g_nofErrors << " found in storage index" << std::endl;
-	}
-	else
-	{
-		std::cerr << "OK. No errors found in storage index" << std::endl;
-	}
 }
 
 int main( int argc, const char* argv[])
 {
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
-		std::cerr << "usage: strusCheckStorage <config>" << std::endl;
+		std::cerr << "usage: strusCheck <config>" << std::endl;
 		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
 
 		strus::printIndentMultilineString( std::cerr, 12, strus::getStorageConfigDescription());
@@ -193,7 +193,7 @@ int main( int argc, const char* argv[])
 	try
 	{
 		if (argc < 2) throw std::runtime_error( "too few arguments (expected storage configuration string)");
-		if (argc > 2) throw std::runtime_error( "too many arguments for strusCheckStorage");
+		if (argc > 2) throw std::runtime_error( "too many arguments for strusDumpStorage");
 
 		leveldb::DB* db;
 
@@ -211,7 +211,7 @@ int main( int argc, const char* argv[])
 		leveldb::Status status = leveldb::DB::Open( dboptions, std::string( path, pathend-path), &db);
 		if (status.ok())
 		{
-			checkDB( db);
+			dumpDB( std::cout, db);
 		}
 		else
 		{

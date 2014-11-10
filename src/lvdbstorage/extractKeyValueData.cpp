@@ -58,6 +58,8 @@ TermTypeData::TermTypeData( const leveldb::Slice& key, const leveldb::Slice& val
 static std::string escapestr( const char* str, std::size_t size)
 {
 	std::string rt;
+	rt.reserve( 128);
+
 	std::size_t ii=0;
 	for (; ii<size; ++ii)
 	{
@@ -79,6 +81,14 @@ static std::string escapestr( const char* str, std::size_t size)
 			{
 				rt.append( "\\t");
 			}
+			else
+			{
+				rt.push_back( str[ii]);
+			}
+		}
+		else
+		{
+			rt.push_back( str[ii]);
 		}
 	}
 	return rt;
