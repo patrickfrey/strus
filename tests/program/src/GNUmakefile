@@ -5,8 +5,8 @@ CPP_OBJS=\
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src -I$(TOPDIR)/include/tests -I$(TOPDIR)/include/private
 CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
-LDFLAGS=-L$(TOPDIR)/src/lvdbstorage -L$(TOPDIR)/src/queryeval -L$(TOPDIR)/src/queryproc -L$(TOPDIR)/tests/utils -L/usr/lib
-LIBS=-lstrus_lvdbstorage -lstrus_queryeval -lstrus_queryproc -lstrus_testutils -lleveldb -lboost_system
+LDFLAGS=-L$(TOPDIR)/src/lvdbstorage -L$(TOPDIR)/src/queryeval -L$(TOPDIR)/src/queryproc -L$(TOPDIR)/src/utils -L/usr/lib
+LIBS=-lstrus_lvdbstorage -lstrus_queryeval -lstrus_queryproc -lstrus_utils -lleveldb -lboost_system
 
 all: parseQueryEvalProgramTest
 

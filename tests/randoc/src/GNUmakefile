@@ -1,12 +1,13 @@
 TOPDIR=../../..
+include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
 	randomCollectionTest.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src -I$(TOPDIR)/include/private -I$(TOPDIR)/include/tests
 CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
-LDFLAGS=-L$(TOPDIR)/src/lvdbstorage -L$(TOPDIR)/src/queryeval -L$(TOPDIR)/src/queryproc -L/usr/lib
-LIBS=-lstrus_lvdbstorage -lstrus_queryeval -lstrus_queryproc -lleveldb -lboost_system
+LDFLAGS=-L$(TOPDIR)/src/lvdbstorage -L$(TOPDIR)/src/queryeval -L$(TOPDIR)/src/queryproc -L$(TOPDIR)/src/utils -L/usr/lib
+LIBS=-lstrus_lvdbstorage -lstrus_queryeval -lstrus_queryproc -lstrus_utils -lleveldb -lboost_system
 
 all: randomCollectionTest
 

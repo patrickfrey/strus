@@ -32,6 +32,8 @@
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
 #include "metaDataBlock.hpp"
+#include "extractKeyValueData.hpp"
+#include "strus/utils/cmdLineOpt.hpp"
 #include <iostream>
 #include <cstring>
 #include <stdexcept>
@@ -73,184 +75,53 @@ static std::string keystring( const leveldb::Slice& key)
 
 static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
 	try
 	{
 		switch (key.data()[0])
 		{
 			case strus::DatabaseKey::TermTypePrefix:
 			{
-				if (!strus::checkStringUtf8( ki, ke-ki))
-				{
-					logError( "key of term type is not a valid UTF8 string");
-					break;
-				}
-				(void)strus::unpackIndex( vi, ve);/*[typeno]*/
-				if (vi != ve)
-				{
-					logError( "unexpected extra bytes at end of term type number");
-					break;
-				}
+				strus::TermTypeData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::TermValuePrefix:
 			{
-				if (!strus::checkStringUtf8( ki, ke-ki))
-				{
-					logError( "key of term value is not a valid UTF8 string");
-					break;
-				}
-				(void)strus::unpackIndex( vi, ve);/*[valueno]*/
-				if (vi != ve)
-				{
-					logError( "unexpected extra bytes at end of term value number");
-					break;
-				}
+				strus::TermValueData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::DocIdPrefix:
 			{
-				if (!strus::checkStringUtf8( ki, ke-ki))
-				{
-					logError( "key of doc id is not a valid UTF8 string");
-					break;
-				}
-				(void)strus::unpackIndex( vi, ve);/*[docno]*/
-				if (vi != ve)
-				{
-					logError( "unexpected extra bytes at end of document number");
-					break;
-				}
+				strus::DocIdData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::InvertedIndexPrefix:
 			{
-				(void)strus::unpackIndex( ki, ke);/*[typeno]*/
-				(void)strus::unpackIndex( ki, ke);/*[valueno]*/
-				(void)strus::unpackIndex( ki, ke);/*[docno]*/
-				if (ki != ke)
-				{
-					logError( "unexpected extra bytes at end of term index key");
-					break;
-				}
-				strus::Index ff = strus::unpackIndex( vi, ve);
-				strus::Index prevpos = 0;
-				strus::Index poscnt = 0;
-				while (vi != ve)
-				{
-					strus::Index pos = strus::unpackIndex( vi, ve);
-					if (prevpos >= pos)
-					{
-						logError( "positions not ascending in location index");
-						break;
-					}
-					prevpos = pos;
-					++poscnt;
-				}
-				if (ff != poscnt)
-				{
-					logError( "ff does not match to count of positions");
-					break;
-				}
+				strus::InvertedIndexData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::ForwardIndexPrefix:
 			{
-				(void)strus::unpackIndex( ki, ke);/*[docno]*/
-				(void)strus::unpackIndex( ki, ke);/*[typeno]*/
-				(void)strus::unpackIndex( ki, ke);/*[pos]*/
-				if (ki != ke)
-				{
-					logError( "unexpected extra bytes at end of forward index key");
-					break;
-				}
-				if (!strus::checkStringUtf8( vi, ve-vi))
-				{
-					logError( "value in addressed by forward index is not a valied UTF-8 string");
-					break;
-				}
+				strus::ForwardIndexData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::VariablePrefix:
 			{
-				if (!strus::checkStringUtf8( ki, ke-ki))
-				{
-					logError( "illegal UTF8 string as key of global variable");
-					break;
-				}
-				(void)strus::unpackIndex( vi, ve);/*[valueno]*/
-				if (vi != ve)
-				{
-					logError( "unexpected extra bytes at end of variable value");
-					break;
-				}
+				strus::VariableData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::DocMetaDataPrefix:
 			{
-				if (ki == ke)
-				{
-					logError( "unexpected end of metadata key");
-					break;
-				}
-				char varname = *ki++;
-				if (varname < 32 || varname > 127)
-				{
-					logError( "variable name in metadata key out of range");
-					break;
-				}
-				(void)strus::unpackIndex( ki, ke);/*[blockno]*/
-				if (ki != ke)
-				{
-					logError( "unexpected extra bytes at end of metadata key");
-					break;
-				}
-				if ((ve - vi) != (strus::MetaDataBlock::MetaDataBlockSize*sizeof(float)))
-				{
-					logError( "corrupt meta data block (unexpected size of meta data block)", (unsigned int)(ve - vi));
-					break;
-				}
+				strus::DocMetaDataData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::DocAttributePrefix:
 			{
-				(void)strus::unpackIndex( ki, ke);/*[docno]*/
-				if (ki == ke)
-				{
-					logError( "unexpected end of document attribute key");
-					break;
-				}
-				char varname = *ki++;
-				if (varname < 32 || varname > 127)
-				{
-					logError( "variable name in document attribute key out of range");
-					break;
-				}
-				if (!strus::checkStringUtf8( vi, ve-vi))
-				{
-					logError( "value in document attribute value is not a valid UTF-8 string");
-					break;
-				}
+				strus::DocAttributeData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::DocFrequencyPrefix:
 			{
-				(void)strus::unpackIndex( ki, ke);/*[typeno]*/
-				(void)strus::unpackIndex( ki, ke);/*[valueno]*/
-				if (ki != ke)
-				{
-					logError( "unexpected extra bytes at end of term document frequency key");
-					break;
-				}
-				(void)strus::unpackIndex( vi, ve);/*[df]*/
-				if (vi != ve)
-				{
-					logError( "unexpected extra bytes at end of df value");
-					break;
-				}
+				strus::DocFrequencyData( key, value);
 				break;
 			}
 		}
@@ -314,22 +185,9 @@ int main( int argc, const char* argv[])
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		std::cerr << "usage: strusCheck <config>" << std::endl;
-		std::cerr << "<config>  : configuration string of the storage";
-		std::string indent;
-		char const* cc = strus::getStorageConfigDescription();
-		char const* ee;
-		do
-		{
-			ee = std::strchr( cc,'\n');
-			std::string line = ee?std::string( cc, ee-cc):std::string( cc);
-			std::cerr << indent << line << std::endl;
-			cc = ee + 1;
-			if (indent.empty())
-			{
-				indent = std::string( 12, ' ');
-			}
-		}
-		while (ee);
+		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
+
+		strus::printIndentMultilineString( std::cerr, 12, strus::getStorageConfigDescription());
 		return 0;
 	}
 	try

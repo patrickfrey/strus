@@ -39,10 +39,10 @@ public:
 	enum KeyPrefix
 	{
 		TermTypePrefix='t',	///< [type string]             ->  [typeno]
-		TermValuePrefix='i',	///< [term string]             ->  [termno]
+		TermValuePrefix='i',	///< [term string]             ->  [valueno]
 		DocIdPrefix='d',	///< [docid string]            ->  [docno]
-		InvertedIndexPrefix='o',///< [type,term,docno]         ->  [pos]*
-		ForwardIndexPrefix='r',	///< [docno,typeno,position]   ->  [term string]*
+		InvertedIndexPrefix='o',///< [typeno,termno,docno]     ->  [ff][pos]*
+		ForwardIndexPrefix='r',	///< [docno,typeno,position]   ->  [string]*
 		VariablePrefix='v',	///< [variable string]         ->  [index]
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]

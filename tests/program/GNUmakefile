@@ -1,5 +1,5 @@
 TOPDIR=../..
-LD_LIBRARY_PATH=$(TOPDIR)/tests/utils:$(TOPDIR)/src/lvdbstorage:$(TOPDIR)/src/queryproc:$(TOPDIR)/src/queryeval
+LD_LIBRARY_PATH=$(TOPDIR)/src/utils:$(TOPDIR)/src/lvdbstorage:$(TOPDIR)/src/queryproc:$(TOPDIR)/src/queryeval
 
 all:
 	cd src; make all; cd ..

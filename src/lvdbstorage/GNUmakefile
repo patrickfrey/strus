@@ -13,15 +13,19 @@ CPP_OBJS=\
 	transaction.o \
 	storageLib.o
 
+PRG_OBJS=\
+	extractKeyValueData.o
+
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I.
 CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 MODFLAGS=-fPIC $(VISIBILITY)
-LDFLAGS=-L/usr/lib
-LIBS=-lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
+LDFLAGS=-L/usr/lib -L$(TOPDIR)/src/utils
+LIBS=-lstrus_utils -lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
 
 all: libstrus_lvdbstorage.so strusCheckStorage
 
 -include $(CPP_OBJS:.o=.d)
+-include $(PRG_OBJS:.o=.d)
 
 %.o : %.cpp GNUmakefile $(IFILES) $(HFILES)
 	$(CXX) $(MODFLAGS) -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
@@ -30,8 +34,8 @@ all: libstrus_lvdbstorage.so strusCheckStorage
 libstrus_lvdbstorage.so: $(CPP_OBJS)
 	$(CXX) -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
 
-strusCheckStorage: $(CPP_OBJS) strusCheckStorage.o
-	$(CXX) -o $@ strusCheckStorage.o $(CPP_OBJS) $(LDFLAGS) $(LIBS) -lboost_system
+strusCheckStorage: $(CPP_OBJS) $(PRG_OBJS) strusCheckStorage.o
+	$(CXX) -o $@ strusCheckStorage.o $(PRG_OBJS) $(CPP_OBJS) $(LDFLAGS) $(LIBS) -lboost_system
 
 .PHONY: clean
 clean:
