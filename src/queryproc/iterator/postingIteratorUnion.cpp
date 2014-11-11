@@ -1,9 +1,9 @@
-#include "iterator/iteratorUnion.hpp"
+#include "iterator/postingIteratorUnion.hpp"
 
 using namespace strus;
 
 
-IteratorUnion::IteratorUnion( std::size_t nofargs_, const IteratorInterface** args_)
+IteratorUnion::IteratorUnion( std::size_t nofargs_, const PostingIteratorInterface** args_)
 	:m_docno(0)
 	,m_posno(0)
 	,m_documentFrequency(-1)
@@ -42,9 +42,10 @@ IteratorUnion::IteratorUnion( const IteratorUnion& o)
 	}
 }
 
-std::vector<IteratorInterface*> IteratorUnion::subExpressions( bool positive)
+std::vector<PostingIteratorInterface*>
+	IteratorUnion::subExpressions( bool positive)
 {
-	std::vector<IteratorInterface*> rt;
+	std::vector<PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_argar.size());
@@ -90,7 +91,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 		return m_docno;
 	}
 	m_docno = docno_;
-	std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+	std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 	if (ai == ae) return 0;
 	Index base = docno_?docno_:1;
 	Index minimum = 0;
@@ -153,7 +154,7 @@ Index IteratorUnion::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<IteratorReference>::const_iterator
+		std::vector<PostingIteratorReference>::const_iterator
 			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 		m_documentFrequency = (*ai)->documentFrequency();

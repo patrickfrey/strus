@@ -29,7 +29,7 @@
 #ifndef _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
 #include "strus/summarizerInterface.hpp"
-#include "private/iteratorReference.hpp"
+#include "private/postingIteratorReference.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -41,7 +41,7 @@ namespace strus
 /// \brief Forward declaration
 class StorageInterface;
 /// \brief Forward declaration
-class IteratorInterface;
+class PostingIteratorInterface;
 
 
 class SummarizerListMatches
@@ -54,7 +54,7 @@ public:
 	SummarizerListMatches(
 		StorageInterface* storage_,
 		std::size_t nofitrs_,
-		const IteratorInterface** itrs_);
+		const PostingIteratorInterface** itrs_);
 
 	virtual ~SummarizerListMatches();
 
@@ -65,7 +65,7 @@ public:
 
 private:
 	StorageInterface* m_storage;
-	std::vector<IteratorReference> m_itr;
+	std::vector<PostingIteratorReference> m_itr;
 };
 
 }//namespace

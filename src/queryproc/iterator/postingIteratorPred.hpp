@@ -28,8 +28,8 @@
 */
 #ifndef _STRUS_ITERATOR_PREDECCESSOR_HPP_INCLUDED
 #define _STRUS_ITERATOR_PREDECCESSOR_HPP_INCLUDED
-#include "iteratorJoin.hpp"
-#include "iteratorReference.hpp"
+#include "iterator/postingIteratorJoin.hpp"
+#include "postingIteratorReference.hpp"
 
 namespace strus
 {
@@ -42,7 +42,7 @@ public:
 		:m_origin( o.m_origin->copy())
 		,m_featureid(o.m_featureid){}
 
-	IteratorPred( const IteratorInterface* origin_)
+	IteratorPred( const PostingIteratorInterface* origin_)
 		:m_origin( origin_?origin_->copy():0)
 		,m_featureid(origin_->featureid())
 	{
@@ -67,7 +67,8 @@ public:
 		return rt?(rt - 1):0;
 	}
 
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
+	virtual std::vector<PostingIteratorInterface*>
+			subExpressions( bool positive)
 	{
 		return m_origin->subExpressions( positive);
 	}
@@ -87,13 +88,13 @@ public:
 		return m_origin.get()?m_origin->posno():0;
 	}
 
-	virtual IteratorInterface* copy() const
+	virtual PostingIteratorInterface* copy() const
 	{
 		return new IteratorPred( *this);
 	}
 
 private:
-	IteratorReference m_origin;		///< base feature expression this is the successor of
+	PostingIteratorReference m_origin;		///< base feature expression this is the successor of
 	std::string m_featureid;		///< unique id of the feature expression
 };
 

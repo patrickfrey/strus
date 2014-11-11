@@ -29,8 +29,8 @@
 #ifndef _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/iteratorInterface.hpp"
-#include "iteratorReference.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "postingIteratorReference.hpp"
 #include "weightingFunctionReference.hpp"
 #include "accumulatorArgument.hpp"
 #include <vector>
@@ -58,13 +58,13 @@ public:
 	~Accumulator(){}
 
 	void addSelector(
-			const IteratorInterface& iterator);
+			const PostingIteratorInterface& iterator);
 	
 	void addRanker(
 			float factor,
 			const std::string& function,
 			const std::vector<float>& parameter,
-			const IteratorInterface& iterator);
+			const PostingIteratorInterface& iterator);
 
 	bool nextRank(
 			Index& docno,
@@ -72,11 +72,11 @@ public:
 			float& weight);
 
 private:
-	bool isRelevantSelectionFeature( IteratorInterface& itr) const;
+	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
 
 private:
 	const QueryProcessorInterface* m_queryprocessor;
-	std::vector<IteratorReference> m_selectors;
+	std::vector<PostingIteratorReference> m_selectors;
 	unsigned int m_selectoridx;
 	Index m_docno;
 	std::vector<AccumulatorArgument> m_rankers;

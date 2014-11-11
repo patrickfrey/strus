@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 
 namespace strus
 {
@@ -41,7 +41,7 @@ public:
 	/// \brief Call the weighting function for the current element in itr
 	/// \param[in,out] occurrency iterator
 	/// \return the weight of the current element
-	virtual float call( IteratorInterface& itr)=0;
+	virtual float call( PostingIteratorInterface& itr)=0;
 };
 
 }//namespace

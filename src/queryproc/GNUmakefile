@@ -2,13 +2,13 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
-	iterator/iteratorIntersect.o \
-	iterator/iteratorUnion.o \
-	iterator/iteratorUnionWeighted.o \
-	iterator/iteratorDifference.o \
-	iterator/iteratorStructWithin.o \
-	iterator/iteratorStructSequence.o \
-	iterator/iteratorHelpers.o \
+	iterator/postingIteratorIntersect.o \
+	iterator/postingIteratorUnion.o \
+	iterator/postingIteratorUnionWeighted.o \
+	iterator/postingIteratorDifference.o \
+	iterator/postingIteratorStructWithin.o \
+	iterator/postingIteratorStructSequence.o \
+	iterator/postingIteratorHelpers.o \
 	weighting/weightingBM25.o \
 	weighting/weightingIdfBased.o \
 	summarizer/summarizerMatchPhrase.o \

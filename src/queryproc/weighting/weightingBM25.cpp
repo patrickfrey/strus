@@ -62,7 +62,7 @@ WeightingBM25::~WeightingBM25()
 	delete m_doclenReader;
 }
 
-float WeightingBM25::call( IteratorInterface& itr)
+float WeightingBM25::call( PostingIteratorInterface& itr)
 {
 	if (!idf_calculated())
 	{

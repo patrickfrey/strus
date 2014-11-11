@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorDifference.hpp"
+#include "iterator/postingIteratorDifference.hpp"
 #include <stdexcept>
 
 using namespace strus;
 
-IteratorDifference::IteratorDifference( const IteratorInterface* positive_, const IteratorInterface* negative_)
+IteratorDifference::IteratorDifference( const PostingIteratorInterface* positive_, const PostingIteratorInterface* negative_)
 	:m_docno(0)
 	,m_docno_neg(0)
 {
@@ -57,9 +57,9 @@ IteratorDifference::IteratorDifference( const IteratorDifference& o)
 {
 }
 
-std::vector<IteratorInterface*> IteratorDifference::subExpressions( bool positive)
+std::vector<PostingIteratorInterface*> IteratorDifference::subExpressions( bool positive)
 {
-	std::vector<IteratorInterface*> rt;
+	std::vector<PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.push_back( m_positive.get());

@@ -29,7 +29,7 @@
 #ifndef _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
 #include "strus/summarizerInterface.hpp"
-#include "private/iteratorReference.hpp"
+#include "private/postingIteratorReference.hpp"
 #include <string>
 #include <vector>
 
@@ -39,9 +39,9 @@ namespace strus
 /// \brief Forward declaration
 class StorageInterface;
 /// \brief Forward declaration
-class ForwardIndexViewerInterface;
+class ForwardIteratorInterface;
 /// \brief Forward declaration
-class IteratorInterface;
+class PostingIteratorInterface;
 
 
 class SummarizerMatchPhrase
@@ -61,8 +61,8 @@ public:
 		unsigned int maxlen_,
 		unsigned int summarylen_,
 		std::size_t nofitrs_,
-		const IteratorInterface** itrs_,
-		const IteratorInterface* phrasestruct_);
+		const PostingIteratorInterface** itrs_,
+		const PostingIteratorInterface* phrasestruct_);
 
 	virtual ~SummarizerMatchPhrase();
 
@@ -73,12 +73,12 @@ public:
 
 private:
 	StorageInterface* m_storage;
-	ForwardIndexViewerInterface* m_forwardindex;
+	ForwardIteratorInterface* m_forwardindex;
 	std::string m_termtype;
 	unsigned int m_maxlen;
 	unsigned int m_summarylen;
-	std::vector<IteratorReference> m_itr;
-	IteratorReference m_phrasestruct;
+	std::vector<PostingIteratorReference> m_itr;
+	PostingIteratorReference m_phrasestruct;
 };
 
 }//namespace

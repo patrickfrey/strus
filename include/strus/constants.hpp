@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
 #define _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
 #include <string>
 
 namespace strus

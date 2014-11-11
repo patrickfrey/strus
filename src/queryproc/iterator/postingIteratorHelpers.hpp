@@ -26,53 +26,23 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of helper functions shared by iterators
-#include "iteratorHelpers.hpp"
-#include <sstream>
-#include <iostream>
+/// \brief Helper functions shared by iterators
 
-using namespace strus;
+#ifndef _STRUS_ITERATOR_HELPERS_HPP_INCLUDED
+#define _STRUS_ITERATOR_HELPERS_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "postingIteratorReference.hpp"
+#include <vector>
 
-Index strus::getFirstAllMatchDocno( const std::vector<IteratorReference>& ar, Index docno_iter)
+namespace strus
 {
-	for (;;)
-	{
-		std::vector<IteratorReference>::const_iterator pi = ar.begin(), pe = ar.end();
-		if (pi == pe)
-		{
-			return 0;
-		}
-		Index docno_first = (*pi)->skipDoc( docno_iter);
-		if (!docno_first)
-		{
-			return 0;
-		}
-		bool match = true;
-		for (++pi; pi != pe; ++pi)
-		{
-			Index docno_next = (*pi)->skipDoc( docno_first);
-			if (!docno_next)
-			{
-				return 0;
-			}
-			if (docno_next != docno_first)
-			{
-				match = false;
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (match)
-		{
-			return docno_first;
-		}
-	}
-}
 
-void strus::encodeInteger( std::string& buf, int val)
-{
-	std::ostringstream num;
-	num << val;
-	buf.append( num.str());
+Index getFirstAllMatchDocno(
+		const std::vector<PostingIteratorReference>& ar,
+		Index docno);
+
+void encodeInteger( std::string& buf, int val);
 }
+#endif
 

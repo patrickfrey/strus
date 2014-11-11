@@ -1,10 +1,10 @@
-#include "iterator/iteratorUnionWeighted.hpp"
+#include "iterator/postingIteratorUnionWeighted.hpp"
 #include <utility>
 
 using namespace strus;
 
 
-IteratorUnionWeighted::IteratorUnionWeighted( std::size_t nofargs, const IteratorInterface** args)
+IteratorUnionWeighted::IteratorUnionWeighted( std::size_t nofargs, const PostingIteratorInterface** args)
 	:IteratorUnion( nofargs, args)
 {
 	m_weightitr = m_weightmap.end();

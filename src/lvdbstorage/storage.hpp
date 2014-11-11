@@ -40,9 +40,9 @@
 namespace strus {
 
 /// \brief Forward declaration
-class IteratorInterface;
+class PostingIteratorInterface;
 /// \brief Forward declaration
-class ForwardIndexViewerInterface;
+class ForwardIteratorInterface;
 
 /// \brief Strus IR storage implementation based on LevelDB
 class Storage
@@ -55,17 +55,17 @@ public:
 	virtual void close();
 	virtual ~Storage();
 
-	virtual IteratorInterface*
-		createTermOccurrenceIterator(
+	virtual PostingIteratorInterface*
+		createTermPostingIterator(
 			const std::string& termtype,
 			const std::string& termid);
 
-	virtual ForwardIndexViewerInterface*
-		createForwardIndexViewer(
+	virtual ForwardIteratorInterface*
+		createForwardIterator(
 			const std::string& type);
 
-	virtual TransactionInterface*
-		createTransaction( const std::string& docid);
+	virtual InserterInterface*
+		createInserter( const std::string& docid);
 
 	virtual MetaDataReaderInterface* createMetaDataReader( char varname) const;
 
@@ -130,8 +130,8 @@ private:
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_docno;					///< next index to assign to a new document id
 	Index m_nof_documents;					///< number of documents inserted
-	boost::mutex m_mutex;					///< mutex for mutual exclusion for the access of counters (m_next_..) and for the access of keys not defined during a running transaction
-	leveldb::WriteBatch m_indexBatch;			///< batch for key/values written by transactions
+	boost::mutex m_mutex;					///< mutex for mutual exclusion for the access of counters (m_next_..) and for the access of keys not defined during a running insertion procedure
+	leveldb::WriteBatch m_indexBatch;			///< batch for key/values written by inserters
 	boost::mutex m_indexBatch_mutex;			///< mutex for mutual exclusion for writing to the index
 	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined.
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined

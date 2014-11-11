@@ -26,75 +26,54 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
-#define _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
-#include "iteratorJoin.hpp"
-#include "iteratorReference.hpp"
+#ifndef _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
+#define _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
+#include "iterator/postingIteratorJoin.hpp"
+#include "postingIteratorReference.hpp"
 
 namespace strus
 {
 
-class IteratorSucc
+class IteratorIntersect
 	:public IteratorJoin
 {
 public:
-	IteratorSucc( const IteratorSucc& o)
-		:m_origin( o.m_origin->copy())
-		,m_featureid(o.m_featureid){}
-
-	IteratorSucc( const IteratorInterface* origin_)
-		:m_origin( origin_?origin_->copy():0)
-		,m_featureid( origin_->featureid())
-	{
-		m_featureid.push_back('>');
-	}
+	IteratorIntersect( const IteratorIntersect& o);
+	IteratorIntersect( std::size_t nofargs, const PostingIteratorInterface** args);
+	virtual ~IteratorIntersect(){}
 
 	virtual const std::string& featureid() const
 	{
 		return m_featureid;
 	}
+	virtual Index skipDoc( const Index& docno);
+	virtual Index skipPos( const Index& pos);
 
-	virtual ~IteratorSucc(){}
+	virtual std::vector<PostingIteratorInterface*> subExpressions( bool positive);
 
-	virtual Index skipDoc( const Index& docno_)
-	{
-		return m_origin->skipDoc( docno_);
-	}
-
-	virtual Index skipPos( const Index& pos_)
-	{
-		Index rt = m_origin->skipPos( pos_);
-		return rt?(rt + 1):0;
-	}
-
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
-	{
-		return m_origin->subExpressions( positive);
-	}
-
-	virtual Index documentFrequency()
-	{
-		return m_origin.get()?m_origin->documentFrequency():0;
-	}
+	virtual Index documentFrequency();
 
 	virtual Index docno() const
 	{
-		return m_origin.get()?m_origin->docno():0;
+		return m_docno;
 	}
 
 	virtual Index posno() const
 	{
-		return m_origin.get()?m_origin->posno():0;
+		return m_posno;
 	}
 
-	virtual IteratorInterface* copy() const
+	virtual PostingIteratorInterface* copy() const
 	{
-		return new IteratorSucc( *this);
+		return new IteratorIntersect( *this);
 	}
 
 private:
-	IteratorReference m_origin;		///< base feature expression this is the successor of
+	Index m_docno;
+	Index m_posno;				///< current position
+	std::vector<PostingIteratorReference> m_argar;
 	std::string m_featureid;		///< unique id of the feature expression
+	Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
 };
 
 }//namespace

@@ -26,56 +26,53 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_FORWARD_INDEX_HPP_INCLUDED
-#define _STRUS_FORWARD_INDEX_HPP_INCLUDED
-#include "strus/forwardIndexViewerInterface.hpp"
-#include "databaseKey.hpp"
-#include "storage.hpp"
-#include <string>
-#include <leveldb/db.h>
+/// \brief Implementation of helper functions shared by iterators
+#include "iterator/postingIteratorHelpers.hpp"
+#include <sstream>
+#include <iostream>
 
-namespace strus
+using namespace strus;
+
+Index strus::getFirstAllMatchDocno( const std::vector<PostingIteratorReference>& ar, Index docno_iter)
 {
+	for (;;)
+	{
+		std::vector<PostingIteratorReference>::const_iterator pi = ar.begin(), pe = ar.end();
+		if (pi == pe)
+		{
+			return 0;
+		}
+		Index docno_first = (*pi)->skipDoc( docno_iter);
+		if (!docno_first)
+		{
+			return 0;
+		}
+		bool match = true;
+		for (++pi; pi != pe; ++pi)
+		{
+			Index docno_next = (*pi)->skipDoc( docno_first);
+			if (!docno_next)
+			{
+				return 0;
+			}
+			if (docno_next != docno_first)
+			{
+				match = false;
+				docno_iter = docno_next;
+				break;
+			}
+		}
+		if (match)
+		{
+			return docno_first;
+		}
+	}
+}
 
-/// \brief Forward index for the index based on LevelDB
-class ForwardIndexViewer
-	:public ForwardIndexViewerInterface
+void strus::encodeInteger( std::string& buf, int val)
 {
-public:
-	ForwardIndexViewer(
-		Storage* storage_,
-		leveldb::DB* db_,
-		const std::string& type_);
-
-	virtual ~ForwardIndexViewer();
-
-	/// \brief Define the document of the items inspected
-	virtual void initDoc( const Index& docno_);
-
-	/// \brief Return the next matching position higher than or equal to firstpos in the current document.
-	virtual Index skipPos( const Index& firstpos_);
-
-	/// \brief Fetch the item at the current position (defined by initType(const std::string&) and initDoc( const Index&))
-	virtual std::string fetch();
-
-private:
-	void buildKey( int level);
-
-private:
-	Storage* m_storage;
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	std::string m_type;
-	Index m_docno;
-	Index m_typeno;
-	Index m_pos;
-	DatabaseKey m_key;
-	int m_keylevel;
-	std::size_t m_keysize_docno;
-	std::size_t m_keysize_typeno;
-};
-
-}//namespace
-#endif
-
+	std::ostringstream num;
+	num << val;
+	buf.append( num.str());
+}
 

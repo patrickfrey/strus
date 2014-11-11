@@ -30,7 +30,7 @@
 #include "strus/queryProcessorLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/queryEvalLib.hpp"
-#include "strus/iteratorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include <string>
 #include <vector>
@@ -700,7 +700,7 @@ struct RandomQuery
 		return rt;
 	}
 
-	static std::vector<Match> resultMatches( strus::IteratorInterface* itr)
+	static std::vector<Match> resultMatches( strus::PostingIteratorInterface* itr)
 	{
 		std::vector<Match> rt;
 		unsigned int docno = (unsigned int)itr->skipDoc( 0);
@@ -741,11 +741,11 @@ struct RandomQuery
 	bool execute( std::vector<Match>& result, strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
 	{
 		unsigned int nofitr = arg.size();
-		const strus::IteratorInterface* itr[ MaxNofArgs];
+		const strus::PostingIteratorInterface* itr[ MaxNofArgs];
 		for (unsigned int ai=0; ai<nofitr; ++ai)
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
-			itr[ ai] = queryproc->createTermIterator( term.type, term.value);
+			itr[ ai] = queryproc->createTermPostingIterator( term.type, term.value);
 			if (!itr[ ai])
 			{
 				std::cerr << "ERROR term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
@@ -754,8 +754,8 @@ struct RandomQuery
 			}
 		}
 		std::string opname( operationName());
-		strus::IteratorInterface* res = 
-			queryproc->createJoinIterator(
+		strus::PostingIteratorInterface* res = 
+			queryproc->createJoinPostingIterator(
 					opname, range, std::size_t(nofitr), &itr[0]);
 
 		result = resultMatches( res);

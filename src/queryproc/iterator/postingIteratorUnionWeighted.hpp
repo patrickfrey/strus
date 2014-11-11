@@ -26,29 +26,37 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_FORWARD_INDEX_VIEWER_INTERFACE_HPP_INCLUDED
-#define _STRUS_FORWARD_INDEX_VIEWER_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <string>
-#include <vector>
+#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
+#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
+#include "iterator/postingIteratorUnion.hpp"
+#include "postingIteratorReference.hpp"
+#include <map>
 
 namespace strus
 {
 
-/// \brief Interface for the index that maps for a term type a document number and position to the token in the inverted index (used for extracting the items from the documents inserted)
-class ForwardIndexViewerInterface
+class IteratorUnionWeighted
+	:public IteratorUnion
 {
 public:
-	virtual ~ForwardIndexViewerInterface(){}
+	IteratorUnionWeighted( const IteratorUnionWeighted& o);
+	IteratorUnionWeighted( std::size_t nofargs, const PostingIteratorInterface** args);
 
-	/// \brief Define the document of the items inspected
-	virtual void initDoc( const Index& docno_)=0;
+	virtual ~IteratorUnionWeighted(){}
 
-	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
-	virtual Index skipPos( const Index& firstpos)=0;
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipPos( const Index& pos_);
 
-	/// \brief Fetch the item at the current position (defined by initType(const std::string&) and initDoc( const Index&))
-	virtual std::string fetch()=0;
+	virtual float weight() const;
+
+	virtual PostingIteratorInterface* copy() const
+	{
+		return new IteratorUnionWeighted( *this);
+	}
+
+private:
+	std::map<Index,float> m_weightmap;
+	std::map<Index,float>::const_iterator m_weightitr;
 };
 
 }//namespace

@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_ITERATOR_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_POSTING_ITERATOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_POSTING_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <string>
 #include <vector>
@@ -35,16 +35,16 @@
 namespace strus
 {
 
-class IteratorInterface
+class PostingIteratorInterface
 {
 public:
-	virtual ~IteratorInterface(){}
+	virtual ~PostingIteratorInterface(){}
 
 	/// \brief Unique id in the system for a feature expression
 	virtual const std::string& featureid() const=0;
 
 	/// \brief Return the next match with a document number higher than or equal to docno
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive)=0;
+	virtual std::vector<PostingIteratorInterface*> subExpressions( bool positive)=0;
 
 	/// \brief Return the next match with a document number higher than or equal to docno
 	virtual Index skipDoc( const Index& docno)=0;
@@ -68,8 +68,8 @@ public:
 	/// \brief Get the the weight of the current position
 	virtual float weight() const=0;
 
-	/// \brief Return a copy of this iterator
-	virtual IteratorInterface* copy() const=0;
+	/// \brief Return a copy of this posting iterator
+	virtual PostingIteratorInterface* copy() const=0;
 };
 
 }//namespace

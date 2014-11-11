@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-void WeightingIdfBased::calculateIdf( IteratorInterface& itr)
+void WeightingIdfBased::calculateIdf( PostingIteratorInterface& itr)
 {
 	float nofMatches = itr.documentFrequency();
 	float nofCollectionDocuments = m_storage->nofDocumentsInserted();

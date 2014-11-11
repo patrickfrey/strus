@@ -27,8 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "summarizerListMatches.hpp"
-#include "strus/iteratorInterface.hpp"
-#include "strus/forwardIndexViewerInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include <set>
 
@@ -37,7 +37,7 @@ using namespace strus;
 SummarizerListMatches::SummarizerListMatches(
 		StorageInterface* storage_,
 		std::size_t nofitrs_,
-		const IteratorInterface** itrs_)
+		const PostingIteratorInterface** itrs_)
 	:m_storage(storage_)
 {
 	for (std::size_t ii=0; ii<nofitrs_; ++ii)
@@ -53,12 +53,12 @@ SummarizerListMatches::~SummarizerListMatches()
 {}
 
 static std::string getMatches(
-	IteratorInterface& itr,
-	const std::vector<IteratorInterface*>& subexpr)
+	PostingIteratorInterface& itr,
+	const std::vector<PostingIteratorInterface*>& subexpr)
 {
 	std::ostringstream rt;
 	std::set<Index> mposet;
-	std::vector<IteratorInterface*>::const_iterator si = subexpr.begin(), se = subexpr.end();
+	std::vector<PostingIteratorInterface*>::const_iterator si = subexpr.begin(), se = subexpr.end();
 	for (; si != se; ++si)
 	{
 		mposet.insert( (*si)->posno());
@@ -77,10 +77,12 @@ std::vector<std::string>
 	SummarizerListMatches::getSummary( const Index& docno)
 {
 	std::vector<std::string> rt;
-	std::vector<IteratorReference>::const_iterator ii = m_itr.begin(), ie = m_itr.end();
+	std::vector<PostingIteratorReference>::const_iterator
+		ii = m_itr.begin(), ie = m_itr.end();
 	for (; ii != ie; ++ii)
 	{
-		std::vector<IteratorInterface*> subexpr = (*ii)->subExpressions( true);
+		std::vector<PostingIteratorInterface*>
+			subexpr = (*ii)->subExpressions( true);
 		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
 		{
 			rt.push_back( getMatches( **ii, subexpr));

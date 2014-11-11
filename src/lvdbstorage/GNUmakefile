@@ -7,10 +7,10 @@ CPP_OBJS=\
 	metaDataBlock.o \
 	metaDataReader.o \
 	storage.o \
-	iterator.o \
+	postingIterator.o \
 	nullIterator.o \
-	forwardIndexViewer.o \
-	transaction.o \
+	forwardIterator.o \
+	inserter.o \
 	storageLib.o
 
 PRG_OBJS=\
@@ -42,7 +42,12 @@ strusDumpStorage: $(CPP_OBJS) $(PRG_OBJS) strusDumpStorage.o
 
 .PHONY: clean
 clean:
-	rm -f $(CPP_OBJS) $(CPP_OBJS:.o=.d) libstrus_lvdbstorage.so
+	@rm -f $(CPP_OBJS) $(CPP_OBJS:.o=.d)
+	@rm -f $(PRG_OBJS) $(PRG_OBJS:.o=.d)
+	@rm -f libstrus_lvdbstorage.so
+	@rm -f strusCheckStorage strusDumpStorage
+	@rm -f strusCheckStorage.o strusDumpStorage.o
+	@rm -f strusCheckStorage.d strusDumpStorage.d
 
 .PHONY: install
 install:

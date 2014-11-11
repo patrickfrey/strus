@@ -26,14 +26,14 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/iteratorInterface.hpp"
-#include "strus/forwardIndexViewerInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/forwardIteratorInterface.hpp"
 #include "storage.hpp"
-#include "iterator.hpp"
+#include "postingIterator.hpp"
 #include "nullIterator.hpp"
-#include "transaction.hpp"
+#include "inserter.hpp"
 #include "databaseKey.hpp"
-#include "forwardIndexViewer.hpp"
+#include "forwardIterator.hpp"
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
 #include <string>
@@ -257,8 +257,8 @@ Index Storage::keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string&
 	return unpackIndex( cc, cc + value.size());
 }
 
-IteratorInterface*
-	Storage::createTermOccurrenceIterator(
+PostingIteratorInterface*
+	Storage::createTermPostingIterator(
 		const std::string& typestr,
 		const std::string& termstr)
 {
@@ -268,21 +268,21 @@ IteratorInterface*
 	{
 		return new NullIterator( typeno, termno, termstr.c_str());
 	}
-	return new Iterator( m_db, typeno, termno, termstr.c_str());
+	return new PostingIterator( m_db, typeno, termno, termstr.c_str());
 }
 
-ForwardIndexViewerInterface*
-	Storage::createForwardIndexViewer(
+ForwardIteratorInterface*
+	Storage::createForwardIterator(
 		const std::string& type)
 {
-	return new ForwardIndexViewer( this, m_db, type);
+	return new ForwardIterator( this, m_db, type);
 }
 
-StorageInterface::TransactionInterface*
-	Storage::createTransaction(
+StorageInterface::InserterInterface*
+	Storage::createInserter(
 		const std::string& docid)
 {
-	return new Transaction( this, docid);
+	return new Inserter( this, docid);
 }
 
 void Storage::incrementNofDocumentsInserted()

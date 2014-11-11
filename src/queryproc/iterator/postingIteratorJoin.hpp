@@ -26,22 +26,44 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_REFERENCE_HPP_INCLUDED
-#define _STRUS_ITERATOR_REFERENCE_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <boost/shared_ptr.hpp>
+#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
+#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
+#include <stdexcept>
+#include <limits>
 
 namespace strus
 {
 
-class IteratorReference
-	:public boost::shared_ptr<IteratorInterface>
+/// \brief Iterator interface for join iterators with the common part implemented
+class IteratorJoin
+	:public PostingIteratorInterface
 {
 public:
-	IteratorReference( IteratorInterface* o=0)
-		:boost::shared_ptr<IteratorInterface>(o){}
-	IteratorReference( const IteratorReference& o)
-		:boost::shared_ptr<IteratorInterface>(o){}
+	virtual ~IteratorJoin(){}
+
+	virtual const std::string& featureid() const=0;
+	virtual Index skipDoc( const Index& docno)=0;
+	virtual Index skipPos( const Index& firstpos)=0;
+
+	virtual unsigned int frequency()
+	{
+		Index idx=0;
+		unsigned int rt = 0;
+		for (;0!=(idx=skipPos( idx))
+			&& rt < (unsigned int)std::numeric_limits<short>::max();
+				++idx,++rt){}
+		return rt;
+	}
+
+	virtual Index documentFrequency()=0;
+
+	virtual float weight() const
+	{
+		return 0.0;
+	}
+
+	virtual PostingIteratorInterface* copy() const=0;
 };
 
 }//namespace

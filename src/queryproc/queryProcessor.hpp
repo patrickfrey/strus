@@ -51,17 +51,17 @@ public:
 	/// \brief Destructor
 	virtual ~QueryProcessor(){}
 
-	virtual IteratorInterface*
-		createTermIterator(
+	virtual PostingIteratorInterface*
+		createTermPostingIterator(
 			const std::string& type,
 			const std::string& value) const;
 
-	virtual IteratorInterface*
-		createJoinIterator(
+	virtual PostingIteratorInterface*
+		createJoinPostingIterator(
 			const std::string& name,
 			int range,
 			std::size_t nofargs,
-			const IteratorInterface** args) const;
+			const PostingIteratorInterface** args) const;
 
 	virtual WeightingFunctionInterface*
 		createWeightingFunction(
@@ -73,9 +73,9 @@ public:
 			const std::string& name,
 			const std::string& type,
 			const std::vector<float>& parameter,
-			const IteratorInterface* structitr,
+			const PostingIteratorInterface* structitr,
 			std::size_t nofitrs,
-			const IteratorInterface** itrs) const;
+			const PostingIteratorInterface** itrs) const;
 
 private:
 	StorageInterface* m_storage;

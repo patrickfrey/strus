@@ -63,7 +63,7 @@ static Index randomDocumentNumber( Index maxdocno, unsigned int no)
 }
 
 static float estimateNumberOfMatches(
-		IteratorInterface& itr,
+		PostingIteratorInterface& itr,
 		Index maxDocumentNumber,
 		Index nofDocumentsInCollection)
 {
@@ -101,7 +101,7 @@ static float estimateNumberOfMatches(
 }
 
 
-float EstimatedNumberOfMatchesMap::getNofMatches( IteratorInterface& itr)
+float EstimatedNumberOfMatchesMap::getNofMatches( PostingIteratorInterface& itr)
 {
 	std::map<std::string,float>::const_iterator vi = m_valmap.find( itr.featureid());
 	if (vi != m_valmap.end())

@@ -26,57 +26,22 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_DIFFERENCE_HPP_INCLUDED
-#define _STRUS_ITERATOR_DIFFERENCE_HPP_INCLUDED
-#include "iteratorJoin.hpp"
-#include "iteratorReference.hpp"
+#ifndef _STRUS_POSTING_ITERATOR_REFERENCE_HPP_INCLUDED
+#define _STRUS_POSTING_ITERATOR_REFERENCE_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
 
-class IteratorDifference
-	:public IteratorJoin
+class PostingIteratorReference
+	:public boost::shared_ptr<PostingIteratorInterface>
 {
 public:
-	IteratorDifference( const IteratorDifference& o);
-	IteratorDifference( const IteratorInterface* positive_, const IteratorInterface* negative_);
-	virtual ~IteratorDifference(){}
-
-	virtual const std::string& featureid() const
-	{
-		return m_featureid;
-	}
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipPos( const Index& pos);
-
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
-
-	virtual Index documentFrequency()
-	{
-		return m_positive.get()?m_positive->documentFrequency():0;
-	}
-
-	virtual Index docno() const
-	{
-		return m_positive.get()?m_positive->docno():0;
-	}
-
-	virtual Index posno() const
-	{
-		return m_positive.get()?m_positive->posno():0;
-	}
-
-	virtual IteratorInterface* copy() const
-	{
-		return new IteratorDifference( *this);
-	}
-
-private:
-	Index m_docno;
-	Index m_docno_neg;
-	IteratorReference m_positive;
-	IteratorReference m_negative;
-	std::string m_featureid;		///< unique id of the feature expression
+	PostingIteratorReference( PostingIteratorInterface* o=0)
+		:boost::shared_ptr<PostingIteratorInterface>(o){}
+	PostingIteratorReference( const PostingIteratorReference& o)
+		:boost::shared_ptr<PostingIteratorInterface>(o){}
 };
 
 }//namespace

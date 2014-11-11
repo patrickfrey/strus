@@ -32,7 +32,7 @@
 #include "strus/constants.hpp"
 #include "parser/lexems.hpp"
 #include "parser/selectorSet.hpp"
-#include "iteratorReference.hpp"
+#include "postingIteratorReference.hpp"
 #include "accumulator.hpp"
 #include <stdexcept>
 #include <sstream>
@@ -202,12 +202,12 @@ public:
 	explicit QueryStruct( const StringIndexMap* setnamemap_)
 		:m_setnamemap(setnamemap_){}
 
-	void pushFeature( int termset, const IteratorReference& itr)
+	void pushFeature( int termset, const PostingIteratorReference& itr)
 	{
 		if (termset <= 0) throw std::runtime_error( "internal: term set identifier out of range");
 		while ((std::size_t)termset > m_iteratorSets.size())
 		{
-			m_iteratorSets.push_back( std::vector< IteratorReference >());
+			m_iteratorSets.push_back( std::vector< PostingIteratorReference >());
 		}
 		m_iteratorSets[ termset-1].push_back( itr);
 		if ((m_setSizeMap[ termset] += 1) > (int)QueryEval::MaxSizeFeatureSet)
@@ -216,9 +216,9 @@ public:
 		}
 	}
 
-	const IteratorInterface* getFeature( int setIndex, std::size_t elemIndex)
+	const PostingIteratorInterface* getFeature( int setIndex, std::size_t elemIndex)
 	{
-		const std::vector<IteratorReference>& iset = getFeatureSet( setIndex);
+		const std::vector<PostingIteratorReference>& iset = getFeatureSet( setIndex);
 		if (iset.size() <= elemIndex)
 		{
 			throw std::runtime_error( std::string( "referencing feature '") + m_setnamemap->name( setIndex) + "' not defined yet completely (features have to be defined completely before referencing them in the program)");
@@ -226,7 +226,7 @@ public:
 		return iset[ elemIndex].get();
 	}
 
-	const std::vector<IteratorReference>& getFeatureSet( int setIndex) const
+	const std::vector<PostingIteratorReference>& getFeatureSet( int setIndex) const
 	{
 		if (setIndex <= 0)
 		{
@@ -239,7 +239,7 @@ public:
 		return m_iteratorSets[ setIndex-1];
 	}
 
-	static bool isRelevantSelectionFeature( const StorageInterface& storage, IteratorInterface& itr)
+	static bool isRelevantSelectionFeature( const StorageInterface& storage, PostingIteratorInterface& itr)
 	{
 		float nofMatches = itr.documentFrequency();
 		float nofCollectionDocuments = storage.nofDocumentsInserted();
@@ -251,9 +251,9 @@ public:
 		return false;
 	}
 
-	IteratorReference getFeatureSetUnion( const StorageInterface& storage, const QueryProcessorInterface& processor, int setIndex, bool relevantOnly)
+	PostingIteratorReference getFeatureSetUnion( const StorageInterface& storage, const QueryProcessorInterface& processor, int setIndex, bool relevantOnly)
 	{
-		const IteratorInterface* far[ (int)QueryEval::MaxSizeFeatureSet];
+		const PostingIteratorInterface* far[ (int)QueryEval::MaxSizeFeatureSet];
 
 		if (setIndex <= 0)
 		{
@@ -263,12 +263,12 @@ public:
 		{
 			throw std::runtime_error( std::string( "feature '") + m_setnamemap->name(setIndex) + "' is undefined");
 		}
-		std::vector<IteratorReference>& feats = m_iteratorSets[ setIndex-1];
+		std::vector<PostingIteratorReference>& feats = m_iteratorSets[ setIndex-1];
 		if (feats.size() > (int)QueryEval::MaxSizeFeatureSet)
 		{
 			throw std::runtime_error( "number of features in selection set is too big");
 		}
-		std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
+		std::vector<PostingIteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
 		std::size_t aidx = 0;
 		for (; ai != ae; ai++)
 		{
@@ -279,14 +279,14 @@ public:
 		}
 		if (aidx)
 		{
-			IteratorReference rt(
-				processor.createJoinIterator(
+			PostingIteratorReference rt(
+				processor.createJoinPostingIterator(
 					Constants::operator_set_union(), 0, aidx, far));
 			return rt;
 		}
 		else
 		{
-			return IteratorReference();
+			return PostingIteratorReference();
 		}
 	}
 
@@ -303,10 +303,11 @@ public:
 
 	void printFeatures( std::ostream& out)
 	{
-		std::vector< std::vector<IteratorReference> >::const_iterator vi = m_iteratorSets.begin(), ve = m_iteratorSets.end();
+		std::vector< std::vector<PostingIteratorReference> >::const_iterator
+			vi = m_iteratorSets.begin(), ve = m_iteratorSets.end();
 		for (int vidx=0; vi != ve; ++vi,++vidx)
 		{
-			std::vector<IteratorReference>::const_iterator fi = vi->begin(), fe = vi->end();
+			std::vector<PostingIteratorReference>::const_iterator fi = vi->begin(), fe = vi->end();
 			for (; fi != fe; ++fi)
 			{
 				if (fi->get())
@@ -318,7 +319,7 @@ public:
 	}
 
 private:
-	std::vector< std::vector<IteratorReference> > m_iteratorSets;
+	std::vector< std::vector<PostingIteratorReference> > m_iteratorSets;
 	const StringIndexMap* m_setnamemap;
 	std::map<int,int> m_setSizeMap;
 };
@@ -438,7 +439,7 @@ std::vector<ResultDocument>
 	//[1] Create the initial feature sets:
 	{
 		// Process the query features (explicit join operations)
-		typedef std::pair<std::string, IteratorReference> FeatDef;
+		typedef std::pair<std::string, PostingIteratorReference> FeatDef;
 		std::vector<FeatDef> feats;
 
 		std::vector<Query::Term>::const_iterator ti = query_.termar().begin(), te = query_.termar().end();
@@ -446,7 +447,7 @@ std::vector<ResultDocument>
 
 		for (std::size_t tidx=0; ti != te; ++ti,++tidx)
 		{
-			feats.push_back( FeatDef( ti->set, processor.createTermIterator( ti->type, ti->value)));
+			feats.push_back( FeatDef( ti->set, processor.createTermPostingIterator( ti->type, ti->value)));
 
 			for (; ji != je && ji->termcnt == tidx; ++ji)
 			{
@@ -455,14 +456,14 @@ std::vector<ResultDocument>
 				{
 					throw std::runtime_error( "number of arguments of explicit join in query out of range");
 				}
-				const IteratorInterface* joinargs[ MaxNofJoinopArguments];
+				const PostingIteratorInterface* joinargs[ MaxNofJoinopArguments];
 				std::size_t ii=0;
 				for (;ii < ji->nofArgs; ++ii)
 				{
 					joinargs[ ji->nofArgs-ii-1] = feats[ feats.size()-ii-1].second.get();
 				}
-				IteratorReference res(
-					processor.createJoinIterator(
+				PostingIteratorReference res(
+					processor.createJoinPostingIterator(
 						ji->opname, ji->range,
 						ji->nofArgs, joinargs));
 
@@ -493,7 +494,7 @@ std::vector<ResultDocument>
 			StringIndexMap::const_iterator si = m_setnamemap.find( pi->set);
 			if (si != m_setnamemap.end())
 			{
-				query.pushFeature( si->second, processor.createTermIterator( pi->type, pi->value));
+				query.pushFeature( si->second, processor.createTermPostingIterator( pi->type, pi->value));
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cout << "create predefined feature [" << si->second << "] " << pi->set << " :" << query.setSize(si->second) << std::endl;
 #endif
@@ -529,7 +530,7 @@ std::vector<ResultDocument>
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "create feature " << m_setnamemap.name( ji->result()) << " from " << selset->tostring() << std::endl;
 #endif
-			const IteratorInterface* joinargs[ MaxNofSelectorColumns];
+			const PostingIteratorInterface* joinargs[ MaxNofSelectorColumns];
 			for (; ri < re; ri += ro)
 			{
 				std::size_t ci = 0, ce = ro;
@@ -538,8 +539,8 @@ std::vector<ResultDocument>
 					const Selector& sel = selar[ ri+ci];
 					joinargs[ ci] = query.getFeature( sel.setIndex, sel.elemIndex);
 				}
-				IteratorInterface* opres =
-					processor.createJoinIterator(
+				PostingIteratorInterface* opres =
+					processor.createJoinPostingIterator(
 						function.name(), function.range(), ro, joinargs);
 				query.pushFeature( ji->result(), opres);
 			}
@@ -565,8 +566,9 @@ std::vector<ResultDocument>
 	
 		for (std::size_t gidx=0; gi != ge; ++gi,++gidx)
 		{
-			const std::vector<IteratorReference>& feats = query.getFeatureSet( gi->setIndex());
-			std::vector<IteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
+			const std::vector<PostingIteratorReference>& feats
+				= query.getFeatureSet( gi->setIndex());
+			std::vector<PostingIteratorReference>::const_iterator ai = feats.begin(), ae = feats.end();
 			for (std::size_t aidx=0; ai != ae; ai++,aidx++)
 			{
 				if (ai->get())
@@ -581,7 +583,7 @@ std::vector<ResultDocument>
 
 		for (; fi != fe; ++fi)
 		{
-			IteratorReference selection( query.getFeatureSetUnion( storage, processor, *fi, true));
+			PostingIteratorReference selection( query.getFeatureSetUnion( storage, processor, *fi, true));
 			if (selection.get()) accumulator.addSelector( *selection);
 		}
 		// Get the summarizers:
@@ -590,8 +592,8 @@ std::vector<ResultDocument>
 			si = m_summarizers.begin(), se = m_summarizers.end();
 		for (; si != se; ++si)
 		{
-			std::vector<IteratorReference> far_ref;
-			const IteratorInterface* far[ MaxSizeFeatureSet];
+			std::vector<PostingIteratorReference> far_ref;
+			const PostingIteratorInterface* far[ MaxSizeFeatureSet];
 			if (si->featureset().size() > MaxSizeFeatureSet)
 			{
 				throw std::runtime_error( "set of features in summarizer definition is too complex");
@@ -599,11 +601,11 @@ std::vector<ResultDocument>
 			std::vector<int>::const_iterator ai = si->featureset().begin(), ae = si->featureset().end();
 			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
 			{
-				IteratorReference sumfeat( query.getFeatureSetUnion( storage, processor, *ai, true));
+				PostingIteratorReference sumfeat( query.getFeatureSetUnion( storage, processor, *ai, true));
 				far_ref.push_back( sumfeat); 
 				far[ aidx] = far_ref.back().get();
 			}
-			IteratorReference structfeat;
+			PostingIteratorReference structfeat;
 			if (si->structset())
 			{
 				structfeat = query.getFeatureSetUnion(

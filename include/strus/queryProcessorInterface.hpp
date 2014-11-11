@@ -35,7 +35,7 @@
 namespace strus
 {
 /// \brief Forward declaration
-class IteratorInterface;
+class PostingIteratorInterface;
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 /// \brief Forward declaration
@@ -53,8 +53,8 @@ public:
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
 	/// \return the created iterator reference object (to dispose with 'delete')
-	virtual IteratorInterface*
-		createTermIterator(
+	virtual PostingIteratorInterface*
+		createTermPostingIterator(
 			const std::string& type,
 			const std::string& value) const=0;
 
@@ -64,12 +64,12 @@ public:
 	/// \param[in] nofargs number of arguments to pass to the function
 	/// \param[in] args arguments to pass to the function
 	/// \return the created iterator reference object representing the result of the function (to dispose with 'delete')
-	virtual IteratorInterface*
-		createJoinIterator(
+	virtual PostingIteratorInterface*
+		createJoinPostingIterator(
 			const std::string& name,
 			int range,
 			std::size_t nofargs,
-			const IteratorInterface** args) const=0;
+			const PostingIteratorInterface** args) const=0;
 
 	/// \brief Create a weighting function for term occurrencies
 	/// \param[in] name name of the weighting function
@@ -93,9 +93,9 @@ public:
 			const std::string& name,
 			const std::string& type,
 			const std::vector<float>& parameter,
-			const IteratorInterface* structitr,
+			const PostingIteratorInterface* structitr,
 			std::size_t nofitrs,
-			const IteratorInterface** itrs) const=0;
+			const PostingIteratorInterface** itrs) const=0;
 };
 
 }//namespace

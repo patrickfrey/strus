@@ -26,37 +26,53 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#include "iteratorUnion.hpp"
-#include "iteratorReference.hpp"
-#include <map>
+#ifndef _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
+#define _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
+#include "strus/forwardIteratorInterface.hpp"
+#include "databaseKey.hpp"
+#include "storage.hpp"
+#include <string>
+#include <leveldb/db.h>
 
 namespace strus
 {
 
-class IteratorUnionWeighted
-	:public IteratorUnion
+/// \brief Forward index for the index based on LevelDB
+class ForwardIterator
+	:public ForwardIteratorInterface
 {
 public:
-	IteratorUnionWeighted( const IteratorUnionWeighted& o);
-	IteratorUnionWeighted( std::size_t nofargs, const IteratorInterface** args);
+	ForwardIterator(
+		Storage* storage_,
+		leveldb::DB* db_,
+		const std::string& type_);
 
-	virtual ~IteratorUnionWeighted(){}
+	virtual ~ForwardIterator();
 
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
+	/// \brief Define the document of the items inspected
+	virtual void initDoc( const Index& docno_);
 
-	virtual float weight() const;
+	/// \brief Return the next matching position higher than or equal to firstpos in the current document.
+	virtual Index skipPos( const Index& firstpos_);
 
-	virtual IteratorInterface* copy() const
-	{
-		return new IteratorUnionWeighted( *this);
-	}
+	/// \brief Fetch the item at the current position (defined by initType(const std::string&) and initDoc( const Index&))
+	virtual std::string fetch();
 
 private:
-	std::map<Index,float> m_weightmap;
-	std::map<Index,float>::const_iterator m_weightitr;
+	void buildKey( int level);
+
+private:
+	Storage* m_storage;
+	leveldb::DB* m_db;
+	leveldb::Iterator* m_itr;
+	std::string m_type;
+	Index m_docno;
+	Index m_typeno;
+	Index m_pos;
+	DatabaseKey m_key;
+	int m_keylevel;
+	std::size_t m_keysize_docno;
+	std::size_t m_keysize_typeno;
 };
 
 }//namespace

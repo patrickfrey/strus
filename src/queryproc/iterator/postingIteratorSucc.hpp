@@ -26,77 +26,79 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
-#include "strus/postingIteratorInterface.hpp"
+#ifndef _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
+#define _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
+#include "iterator/postingIteratorJoin.hpp"
+#include "postingIteratorReference.hpp"
 
-namespace strus {
+namespace strus
+{
 
-/// \brief Iterator representing an empty set
-class NullIterator
-	:public PostingIteratorInterface
+class IteratorSucc
+	:public IteratorJoin
 {
 public:
-	NullIterator( Index termtypeno, Index termvalueno, const char* termstr);
+	IteratorSucc( const IteratorSucc& o)
+		:m_origin( o.m_origin->copy())
+		,m_featureid(o.m_featureid){}
 
-	NullIterator( const NullIterator& o)
-		:m_featureid(o.m_featureid){}
-
-	virtual ~NullIterator(){}
-
-	virtual std::vector<PostingIteratorInterface*>
-			subExpressions( bool positive)
+	IteratorSucc( const PostingIteratorInterface* origin_)
+		:m_origin( origin_?origin_->copy():0)
+		,m_featureid( origin_->featureid())
 	{
-		return std::vector<PostingIteratorInterface*>();
+		m_featureid.push_back('>');
 	}
+
 	virtual const std::string& featureid() const
 	{
 		return m_featureid;
 	}
 
-	virtual Index skipDoc( const Index&)
+	virtual ~IteratorSucc(){}
+
+	virtual Index skipDoc( const Index& docno_)
 	{
-		return 0;
+		return m_origin->skipDoc( docno_);
 	}
 
-	virtual Index skipPos( const Index&)
+	virtual Index skipPos( const Index& pos_)
 	{
-		return 0;
+		Index rt = m_origin->skipPos( pos_);
+		return rt?(rt + 1):0;
 	}
 
-	virtual unsigned int frequency()
+	virtual std::vector<PostingIteratorInterface*>
+			subExpressions( bool positive)
 	{
-		return 0;
+		return m_origin->subExpressions( positive);
 	}
 
 	virtual Index documentFrequency()
 	{
-		return 0;
+		return m_origin.get()?m_origin->documentFrequency():0;
 	}
-	
+
 	virtual Index docno() const
 	{
-		return 0;
+		return m_origin.get()?m_origin->docno():0;
 	}
 
 	virtual Index posno() const
 	{
-		return 0;
+		return m_origin.get()?m_origin->posno():0;
 	}
 
-	virtual float weight() const
-	{
-		return 0.0;
-	}
-	
 	virtual PostingIteratorInterface* copy() const
 	{
-		return new NullIterator(*this);
+		return new IteratorSucc( *this);
 	}
 
 private:
-	std::string m_featureid;
+	PostingIteratorReference m_origin;	///< base feature expression this is the successor of
+	std::string m_featureid;		///< unique id of the feature expression
 };
 
-}
+}//namespace
 #endif
+
+

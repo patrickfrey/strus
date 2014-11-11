@@ -26,13 +26,13 @@
 
 --------------------------------------------------------------------
 */
-#include "forwardIndexViewer.hpp"
+#include "forwardIterator.hpp"
 #include "storage.hpp"
 #include "indexPacker.hpp"
 
 using namespace strus;
 
-ForwardIndexViewer::ForwardIndexViewer( Storage* storage_, leveldb::DB* db_, const std::string& type_)
+ForwardIterator::ForwardIterator( Storage* storage_, leveldb::DB* db_, const std::string& type_)
 	:m_storage(storage_)
 	,m_db(db_)
 	,m_itr(0)
@@ -45,12 +45,12 @@ ForwardIndexViewer::ForwardIndexViewer( Storage* storage_, leveldb::DB* db_, con
 	,m_keysize_typeno(0)
 {}
 
-ForwardIndexViewer::~ForwardIndexViewer()
+ForwardIterator::~ForwardIterator()
 {
 	if (m_itr) delete m_itr;
 }
 
-void ForwardIndexViewer::buildKey( int level)
+void ForwardIterator::buildKey( int level)
 {
 	switch (level)
 	{
@@ -87,7 +87,7 @@ void ForwardIndexViewer::buildKey( int level)
 }
 
 
-void ForwardIndexViewer::initDoc( const Index& docno_)
+void ForwardIterator::initDoc( const Index& docno_)
 {
 	if (!m_typeno)
 	{
@@ -102,7 +102,7 @@ void ForwardIndexViewer::initDoc( const Index& docno_)
 }
 
 
-Index ForwardIndexViewer::skipPos( const Index& firstpos_)
+Index ForwardIterator::skipPos( const Index& firstpos_)
 {
 	if (!m_itr)
 	{
@@ -169,7 +169,7 @@ Index ForwardIndexViewer::skipPos( const Index& firstpos_)
 }
 
 
-std::string ForwardIndexViewer::fetch()
+std::string ForwardIterator::fetch()
 {
 	if (m_keylevel < 3)
 	{

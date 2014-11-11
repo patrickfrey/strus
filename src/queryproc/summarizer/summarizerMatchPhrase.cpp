@@ -27,8 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "summarizerMatchPhrase.hpp"
-#include "strus/iteratorInterface.hpp"
-#include "strus/forwardIndexViewerInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
 
 using namespace strus;
@@ -39,10 +39,10 @@ SummarizerMatchPhrase::SummarizerMatchPhrase(
 		unsigned int maxlen_,
 		unsigned int summarylen_,
 		std::size_t nofitrs_,
-		const IteratorInterface** itrs_,
-		const IteratorInterface* phrasestruct_)
+		const PostingIteratorInterface** itrs_,
+		const PostingIteratorInterface* phrasestruct_)
 	:m_storage(storage_)
-	,m_forwardindex( storage_->createForwardIndexViewer( termtype_))
+	,m_forwardindex( storage_->createForwardIterator( termtype_))
 	,m_termtype(termtype_)
 	,m_maxlen(maxlen_)
 	,m_summarylen(summarylen_)
@@ -65,7 +65,7 @@ SummarizerMatchPhrase::~SummarizerMatchPhrase()
 	if (m_forwardindex) delete m_forwardindex;
 }
 
-static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface* phrasestruct, bool& found)
+static Index getStartPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
 {
 	found = true;
 	Index rangepos = (curpos > maxlen) ? (curpos-maxlen):1;
@@ -88,7 +88,7 @@ static Index getStartPos( Index curpos, unsigned int maxlen, IteratorInterface* 
 	
 }
 
-static Index getEndPos( Index curpos, unsigned int maxlen, IteratorInterface* phrasestruct, bool& found)
+static Index getEndPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
 {
 	found = true;
 	Index endpos = phrasestruct?phrasestruct->skipPos( curpos):0;
@@ -103,8 +103,8 @@ static Index getEndPos( Index curpos, unsigned int maxlen, IteratorInterface* ph
 static std::string
 	summaryElement(
 		const Index& curpos,
-		IteratorInterface* phrasestruct,
-		ForwardIndexViewerInterface& forwardindex,
+		PostingIteratorInterface* phrasestruct,
+		ForwardIteratorInterface& forwardindex,
 		unsigned int maxlen,
 		unsigned int& length)
 {
@@ -139,9 +139,9 @@ static std::string
 static void getSummary_(
 		std::vector<std::string>& res,
 		const Index& docno,
-		const std::vector<IteratorReference>& itr,
-		const IteratorReference& phrasestruct,
-		ForwardIndexViewerInterface& forwardindex,
+		const std::vector<PostingIteratorReference>& itr,
+		const PostingIteratorReference& phrasestruct,
+		ForwardIteratorInterface& forwardindex,
 		unsigned int maxlen,
 		unsigned int maxsummarylen)
 {
@@ -153,7 +153,7 @@ static void getSummary_(
 	Index curpos = 0;
 	Index nextpos = 0;
 
-	std::vector<IteratorReference>::const_iterator
+	std::vector<PostingIteratorReference>::const_iterator
 		ii = itr.begin(), ie = itr.end();
 	unsigned int summarylen = 0;
 

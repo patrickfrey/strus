@@ -30,7 +30,7 @@
 #define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/index.hpp"
-#include "strus/iteratorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "weightingIdfBased.hpp"
 #include <limits>
 #include <vector>
@@ -53,7 +53,7 @@ public:
 
 	virtual ~WeightingConstant(){}
 
-	float call( IteratorInterface& itr)
+	float call( PostingIteratorInterface& itr)
 	{
 		return m_weight;
 	}

@@ -31,7 +31,7 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
-#include "iteratorReference.hpp"
+#include "postingIteratorReference.hpp"
 #include <vector>
 
 namespace strus
@@ -56,12 +56,12 @@ public:
 
 	virtual ~WeightingIdfBased(){}
 
-	virtual float call( IteratorInterface& itr)=0;
+	virtual float call( PostingIteratorInterface& itr)=0;
 
 protected:
 	bool idf_calculated() const			{return m_idf_calculated;}
 	float idf() const				{return m_idf;}
-	void calculateIdf( IteratorInterface& itr);
+	void calculateIdf( PostingIteratorInterface& itr);
 
 private:
 	const StorageInterface* m_storage;

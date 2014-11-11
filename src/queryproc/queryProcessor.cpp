@@ -29,14 +29,14 @@
 #include "queryProcessor.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageInterface.hpp"
-#include "iterator/iteratorPred.hpp"
-#include "iterator/iteratorSucc.hpp"
-#include "iterator/iteratorIntersect.hpp"
-#include "iterator/iteratorUnion.hpp"
-#include "iterator/iteratorDifference.hpp"
-#include "iterator/iteratorStructWithin.hpp"
-#include "iterator/iteratorStructSequence.hpp"
-#include "iteratorReference.hpp"
+#include "iterator/postingIteratorPred.hpp"
+#include "iterator/postingIteratorSucc.hpp"
+#include "iterator/postingIteratorIntersect.hpp"
+#include "iterator/postingIteratorUnion.hpp"
+#include "iterator/postingIteratorDifference.hpp"
+#include "iterator/postingIteratorStructWithin.hpp"
+#include "iterator/postingIteratorStructSequence.hpp"
+#include "postingIteratorReference.hpp"
 #include "weighting/weightingConstant.hpp"
 #include "weighting/weightingFrequency.hpp"
 #include "weighting/weightingBM25.hpp"
@@ -69,12 +69,12 @@ static bool isEqual( const std::string& id, const char* idstr)
 }
 
 
-IteratorInterface*
-	QueryProcessor::createTermIterator( 
+PostingIteratorInterface*
+	QueryProcessor::createTermPostingIterator( 
 			const std::string& type,
 			const std::string& value) const
 {
-	IteratorInterface* rt = m_storage->createTermOccurrenceIterator( type, value);
+	PostingIteratorInterface* rt = m_storage->createTermPostingIterator( type, value);
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::cerr << "create term " << value << ":" << type << " (" << rt->featureid() << ")" << std::endl;
 #endif
@@ -83,7 +83,7 @@ IteratorInterface*
 
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-static void logFeatureCreation( const std::string& name, int range, std::size_t nofargs, const IteratorInterface** args)
+static void logFeatureCreation( const std::string& name, int range, std::size_t nofargs, const PostingIteratorInterface** args)
 {
 	std::cerr << "create feature " << name << "[" << range << "] ";
 	for (std::size_t ii=0; ii<nofargs; ++ii)
@@ -104,12 +104,12 @@ static void logFeatureCreation( const std::string& name, int range, std::size_t 
 #define logFeatureCreation( name, range, nofargs, args)
 #endif
 
-IteratorInterface*
-	QueryProcessor::createJoinIterator(
+PostingIteratorInterface*
+	QueryProcessor::createJoinPostingIterator(
 		const std::string& name,
 		int range,
 		std::size_t nofargs,
-		const IteratorInterface** args) const
+		const PostingIteratorInterface** args) const
 {
 	logFeatureCreation( name, range, nofargs, args);
 	if (isEqual( name, "pred"))
@@ -227,9 +227,9 @@ SummarizerInterface*
 		const std::string& name,
 		const std::string& type,
 		const std::vector<float>& parameter,
-		const IteratorInterface* structitr,
+		const PostingIteratorInterface* structitr,
 		std::size_t nofitrs,
-		const IteratorInterface** itrs) const
+		const PostingIteratorInterface** itrs) const
 {
 	if (isEqual( name, "metadata"))
 	{

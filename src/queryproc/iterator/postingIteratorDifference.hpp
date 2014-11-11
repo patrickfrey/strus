@@ -26,44 +26,57 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#define _STRUS_ITERATOR_JOIN_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_ITERATOR_DIFFERENCE_HPP_INCLUDED
+#define _STRUS_ITERATOR_DIFFERENCE_HPP_INCLUDED
+#include "iterator/postingIteratorJoin.hpp"
+#include "postingIteratorReference.hpp"
 
 namespace strus
 {
 
-/// \brief Iterator interface for join iterators with the common part implemented
-class IteratorJoin
-	:public IteratorInterface
+class IteratorDifference
+	:public IteratorJoin
 {
 public:
-	virtual ~IteratorJoin(){}
+	IteratorDifference( const IteratorDifference& o);
+	IteratorDifference( const PostingIteratorInterface* positive_, const PostingIteratorInterface* negative_);
+	virtual ~IteratorDifference(){}
 
-	virtual const std::string& featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-
-	virtual unsigned int frequency()
+	virtual const std::string& featureid() const
 	{
-		Index idx=0;
-		unsigned int rt = 0;
-		for (;0!=(idx=skipPos( idx))
-			&& rt < (unsigned int)std::numeric_limits<short>::max();
-				++idx,++rt){}
-		return rt;
+		return m_featureid;
+	}
+	virtual Index skipDoc( const Index& docno);
+	virtual Index skipPos( const Index& pos);
+
+	virtual std::vector<PostingIteratorInterface*> subExpressions( bool positive);
+
+	virtual Index documentFrequency()
+	{
+		return m_positive.get()?m_positive->documentFrequency():0;
 	}
 
-	virtual Index documentFrequency()=0;
-
-	virtual float weight() const
+	virtual Index docno() const
 	{
-		return 1.0;
+		return m_positive.get()?m_positive->docno():0;
 	}
 
-	virtual IteratorInterface* copy() const=0;
+	virtual Index posno() const
+	{
+		return m_positive.get()?m_positive->posno():0;
+	}
+
+	virtual PostingIteratorInterface* copy() const
+	{
+		return new IteratorDifference( *this);
+	}
+
+private:
+	Index m_docno;
+	Index m_docno_neg;
+	PostingIteratorReference m_positive;
+	PostingIteratorReference m_negative;
+	std::string m_featureid;		///< unique id of the feature expression
 };
 
 }//namespace

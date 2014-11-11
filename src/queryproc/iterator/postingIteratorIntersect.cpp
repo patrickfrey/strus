@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorIntersect.hpp"
+#include "iterator/postingIteratorIntersect.hpp"
 #include <stdexcept>
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( std::size_t nofargs, const IteratorInterface** args)
+IteratorIntersect::IteratorIntersect( std::size_t nofargs, const PostingIteratorInterface** args)
 	:m_docno(0)
 	,m_posno(0)
 	,m_documentFrequency(-1)
@@ -67,9 +67,10 @@ IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	}
 }
 
-std::vector<IteratorInterface*> IteratorIntersect::subExpressions( bool positive)
+std::vector<PostingIteratorInterface*>
+	IteratorIntersect::subExpressions( bool positive)
 {
-	std::vector<IteratorInterface*> rt;
+	std::vector<PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_argar.size());
@@ -89,7 +90,7 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 	Index docno_iter = docno_;
 	for (;;)
 	{
-		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
 		docno_iter = (*ai)->skipDoc( docno_iter);
@@ -126,7 +127,7 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 	Index pos_iter = pos_;
 	for (;;)
 	{
-		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return m_posno=0;
 
 		pos_iter = (*ai)->skipPos( pos_iter);
@@ -155,7 +156,7 @@ Index IteratorIntersect::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<IteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 		m_documentFrequency = (*ai)->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)

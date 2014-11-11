@@ -28,7 +28,7 @@
 */
 #include "strus/queryEvalLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "iteratorReference.hpp"
+#include "postingIteratorReference.hpp"
 #include "weightingFunctionReference.hpp"
 #include "queryEval.hpp"
 #include "dll_tags.hpp"

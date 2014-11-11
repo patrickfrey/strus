@@ -35,9 +35,9 @@
 namespace strus
 {
 /// \brief Forward declaration
-class IteratorInterface;
+class PostingIteratorInterface;
 /// \brief Forward declaration
-class ForwardIndexViewerInterface;
+class ForwardIteratorInterface;
 
 
 /// \brief Interface for implementing summarization (additional info about the matches in the result ranklist of a retrieval query)

@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "storage.hpp"
-#include "transaction.hpp"
+#include "inserter.hpp"
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
 #include <string>
@@ -40,24 +40,24 @@ using namespace strus;
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-Transaction::Transaction( Storage* storage_, const std::string& docid_)
+Inserter::Inserter( Storage* storage_, const std::string& docid_)
 	:m_storage(storage_),m_docid(docid_)
 {}
 
-Transaction::~Transaction()
+Inserter::~Inserter()
 {
 	//... nothing done here. The document id and term value or type strings 
 	//	created might remain inserted, even after a rollback.
 }
 
-Transaction::TermMapKey Transaction::termMapKey( const std::string& type_, const std::string& value_)
+Inserter::TermMapKey Inserter::termMapKey( const std::string& type_, const std::string& value_)
 {
 	Index typeno = m_storage->keyGetOrCreate( DatabaseKey::TermTypePrefix, type_);
 	Index valueno = m_storage->keyGetOrCreate( DatabaseKey::TermValuePrefix, value_);
 	return TermMapKey( typeno, valueno);
 }
 
-void Transaction::addTermOccurrence(
+void Inserter::addTermOccurrence(
 		const std::string& type_,
 		const std::string& value_,
 		const Index& position_)
@@ -69,21 +69,21 @@ void Transaction::addTermOccurrence(
 	m_invs[ InvMapKey( key.first, position_)] = value_;
 }
 
-void Transaction::setMetaData(
+void Inserter::setMetaData(
 		char name_,
 		float value_)
 {
 	m_metadata.push_back( DocMetaData( name_, value_));
 }
 
-void Transaction::setAttribute(
+void Inserter::setAttribute(
 		char name_,
 		const std::string& value_)
 {
 	m_attributes.push_back( DocAttribute( name_, value_));
 }
 
-void Transaction::commit()
+void Inserter::done()
 {
 	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid);
 	bool documentFound = false;

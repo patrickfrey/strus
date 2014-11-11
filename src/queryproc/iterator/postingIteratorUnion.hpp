@@ -26,41 +26,33 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
-#include "databaseKey.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_ITERATOR_UNION_HPP_INCLUDED
+#define _STRUS_ITERATOR_UNION_HPP_INCLUDED
+#include "iterator/postingIteratorJoin.hpp"
+#include "postingIteratorReference.hpp"
 
-namespace strus {
-/// \brief Forward declaration
-class MetaDataReader;
+namespace strus
+{
 
-class Iterator
-	:public IteratorInterface
+class IteratorUnion
+	:public IteratorJoin
 {
 public:
-	Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr);
-	Iterator( const Iterator& o);
+	IteratorUnion( const IteratorUnion& o);
+	IteratorUnion( std::size_t nofargs_, const PostingIteratorInterface** args_);
 
-	virtual ~Iterator();
-
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive)
-	{
-		return std::vector<IteratorInterface*>();
-	}
 	virtual const std::string& featureid() const
 	{
 		return m_featureid;
 	}
 
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& firstpos_);
+	virtual ~IteratorUnion(){}
 
-	virtual unsigned int frequency()
-	{
-		return m_frequency;
-	}
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipPos( const Index& pos_);
+
+	virtual std::vector<PostingIteratorInterface*>
+			subExpressions( bool positive);
 
 	virtual Index documentFrequency();
 
@@ -74,38 +66,35 @@ public:
 		return m_posno;
 	}
 
-	virtual float weight() const
+	virtual PostingIteratorInterface* copy() const
 	{
-		return 1.0;
+		return new IteratorUnion( *this);
 	}
 
-	virtual IteratorInterface* copy() const
+protected:
+	bool selected( unsigned int idx)
 	{
-		return new Iterator(*this);
+		return m_selected[idx];
+	}
+	PostingIteratorInterface* arg( unsigned int idx) const
+	{
+		return m_argar[ idx].get();
+	}
+	unsigned int nofargs() const
+	{
+		return m_argar.size();
 	}
 
 private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
-
-private:
-	leveldb::DB* m_db;
-	Index m_termtypeno;
-	Index m_termvalueno;
-	DatabaseKey m_key;
-	std::size_t m_keysize;
 	Index m_docno;
-	Index m_lastdocno;
-	Index m_documentFrequency;
-	leveldb::Iterator* m_itr;
-	unsigned int m_frequency;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
-	std::string m_featureid;
+	Index m_posno;					///< current position
+	std::vector<PostingIteratorReference> m_argar;	///< union arguments
+	std::vector<bool> m_selected;			///< parallel array to arguments that specifies if the current document matches the argument
+	std::string m_featureid;			///< unique id of the feature expression
+	Index m_documentFrequency;			///< document frequency (of the most frequent subexpression)
 };
 
-}
+}//namespace
 #endif
+
 

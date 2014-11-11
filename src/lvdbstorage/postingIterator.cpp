@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator.hpp"
+#include "postingIterator.hpp"
 #include "storage.hpp"
 #include "indexPacker.hpp"
 #include <string>
@@ -40,9 +40,9 @@ using namespace strus;
 #define STRUS_LOWLEVEL_DEBUG
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
+PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
 #else
-Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
+PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
 	:m_db(db_)
 	,m_termtypeno(termtypeno)
@@ -70,8 +70,8 @@ Iterator::Iterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const
 #endif
 }
 
-Iterator::Iterator( const Iterator& o)
-	:IteratorInterface(o)
+PostingIterator::PostingIterator( const PostingIterator& o)
+	:PostingIteratorInterface(o)
 	,m_db(o.m_db)
 	,m_termtypeno(o.m_termtypeno)
 	,m_termvalueno(o.m_termvalueno)
@@ -88,13 +88,13 @@ Iterator::Iterator( const Iterator& o)
 	,m_featureid(o.m_featureid)
 {}
 
-Iterator::~Iterator()
+PostingIterator::~PostingIterator()
 {
 	if (m_itr) delete m_itr;
 }
 
 
-Index Iterator::skipDoc( const Index& docno_)
+Index PostingIterator::skipDoc( const Index& docno_)
 {
 	if (m_docno)
 	{
@@ -117,7 +117,7 @@ Index Iterator::skipDoc( const Index& docno_)
 	}
 }
 
-Index Iterator::skipPos( const Index& firstpos_)
+Index PostingIterator::skipPos( const Index& firstpos_)
 {
 	if (m_posno >= firstpos_)
 	{
@@ -177,7 +177,7 @@ Index Iterator::skipPos( const Index& firstpos_)
 	return m_posno;
 }
 
-Index Iterator::extractMatchData()
+Index PostingIterator::extractMatchData()
 {
 	if (m_keysize < m_itr->key().size() && 0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
 	{
@@ -206,13 +206,13 @@ Index Iterator::extractMatchData()
 	}
 }
 
-Index Iterator::getNextTermDoc()
+Index PostingIterator::getNextTermDoc()
 {
 	m_itr->Next();
 	return extractMatchData();
 }
 
-Index Iterator::getFirstTermDoc( const Index& docno)
+Index PostingIterator::getFirstTermDoc( const Index& docno)
 {
 	if (!m_itr)
 	{
@@ -227,7 +227,7 @@ Index Iterator::getFirstTermDoc( const Index& docno)
 	return extractMatchData();
 }
 
-Index Iterator::documentFrequency()
+Index PostingIterator::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{

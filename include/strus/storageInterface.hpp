@@ -35,9 +35,9 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class IteratorInterface;
+class PostingIteratorInterface;
 /// \brief Forward declaration
-class ForwardIndexViewerInterface;
+class ForwardIteratorInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 
@@ -45,13 +45,13 @@ class MetaDataReaderInterface;
 class StorageInterface
 {
 public:
-	/// \class TransactionInterface
-	/// \brief Transaction object for one storage insert/update transaction
-	class TransactionInterface
+	/// \class InserterInterface
+	/// \brief Object to declare all items for one insert/update of a document in the storage
+	class InserterInterface
 	{
 	public:
-		/// \brief Destructor that is doing the transaction rollback too
-		virtual ~TransactionInterface(){}
+		/// \brief Destructor that is the doing the rollback too, if done() was not called before
+		virtual ~InserterInterface(){}
 
 		/// \brief Add one occurrence of a term, throws on std::bad_alloc
 		/// \param[in] type_ type name of the term
@@ -62,7 +62,8 @@ public:
 				const std::string& value_,
 				const Index& position_)=0;
 
-		/// \brief Define a numeric attribute for the document
+		/// \brief Define a numeric attribute for the document with fast access for query evaluation
+		/// \note Meta data used for query restrictions are declared here
 		/// \param[in] name_ one character as name of the attribute
 		/// \param[in] value_ value of the document attribute
 		virtual void setMetaData(
@@ -76,8 +77,8 @@ public:
 				char name_,
 				const std::string& value_)=0;
 
-		/// \brief Commit of the transaction, throws on error
-		virtual void commit()=0;
+		/// \brief Write the contents defined to the storage
+		virtual void done()=0;
 	};
 
 public:
@@ -93,16 +94,16 @@ public:
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
 	/// \return the created iterator reference to be disposed with delete
-	virtual IteratorInterface*
-		createTermOccurrenceIterator(
+	virtual PostingIteratorInterface*
+		createTermPostingIterator(
 			const std::string& type,
 			const std::string& value)=0;
 
 	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
 	/// \param[in] type type name of the term to be inspected
 	/// \return the created viewer reference to be disposed with delete
-	virtual ForwardIndexViewerInterface*
-		createForwardIndexViewer(
+	virtual ForwardIteratorInterface*
+		createForwardIterator(
 			const std::string& type)=0;
 
 	/// \brief Get the number of documents inserted into the collection
@@ -128,12 +129,12 @@ public:
 	/// \return the attribute value
 	virtual std::string documentAttribute( Index docno, char varname) const=0;
 
-	/// \brief Create an insert/update transaction for a document
+	/// \brief Create an object for the declaration of one insert/update of a document
 	/// \param[in] docid document identifier (URI)
-	/// \return the created transaction reference to be disposed with delete
-	virtual TransactionInterface* createTransaction( const std::string& docid)=0;
+	/// \return the created inserter reference to be disposed with delete
+	virtual InserterInterface* createInserter( const std::string& docid)=0;
 
-	/// \brief Forces flushing of all contents presistently to the repository
+	/// \brief Forces flushing of all contents inserted persistently to the repository
 	virtual void flush()=0;
 };
 

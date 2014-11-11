@@ -29,7 +29,7 @@
 #ifndef _STRUS_ACCUMULATOR_ARGUMENT_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_ARGUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "iteratorReference.hpp"
+#include "postingIteratorReference.hpp"
 #include "weightingFunctionReference.hpp"
 #include <vector>
 #include <list>
@@ -41,7 +41,10 @@ namespace strus
 class AccumulatorArgument
 {
 public:
-	AccumulatorArgument( float factor_, const WeightingFunctionReference& function_, const IteratorReference& itr_)
+	AccumulatorArgument(
+			float factor_,
+			const WeightingFunctionReference& function_,
+			const PostingIteratorReference& itr_)
 		:factor(factor_)
 		,function(function_)
 		,itr(itr_){}
@@ -53,7 +56,7 @@ public:
 
 	float factor;
 	WeightingFunctionReference function;
-	IteratorReference itr;
+	PostingIteratorReference itr;
 };
 
 }//namespace

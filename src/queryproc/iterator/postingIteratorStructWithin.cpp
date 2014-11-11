@@ -26,15 +26,15 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorStructWithin.hpp"
-#include "iterator/iteratorHelpers.hpp"
+#include "iterator/postingIteratorStructWithin.hpp"
+#include "iterator/postingIteratorHelpers.hpp"
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
 
 using namespace strus;
 
-IteratorStructWithin::IteratorStructWithin( int range_, std::size_t nofargs, const IteratorInterface** args, const IteratorInterface* cut)
+IteratorStructWithin::IteratorStructWithin( int range_, std::size_t nofargs, const PostingIteratorInterface** args, const PostingIteratorInterface* cut)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
@@ -80,20 +80,21 @@ IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
 	{
 		m_cut.reset( o.m_cut->copy());
 	}
-	std::vector<IteratorReference>::const_iterator pi = o.m_group.begin(), pe = o.m_group.end();
+	std::vector<PostingIteratorReference>::const_iterator pi = o.m_group.begin(), pe = o.m_group.end();
 	for (; pi != pe; ++pi)
 	{
 		m_group.push_back( (*pi)->copy());
 	}
 }
 
-std::vector<IteratorInterface*> IteratorStructWithin::subExpressions( bool positive)
+std::vector<PostingIteratorInterface*>
+	IteratorStructWithin::subExpressions( bool positive)
 {
-	std::vector<IteratorInterface*> rt;
+	std::vector<PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_group.size());
-		std::vector<IteratorReference>::const_iterator si = m_group.begin(), se = m_group.end();
+		std::vector<PostingIteratorReference>::const_iterator si = m_group.begin(), se = m_group.end();
 		for (; si != se; ++si)
 		{
 			rt.push_back( si->get());
@@ -134,7 +135,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 
 	for (;;)
 	{
-		std::vector<IteratorReference>::const_iterator pi = m_group.begin(), pe = m_group.end();
+		std::vector<PostingIteratorReference>::const_iterator pi = m_group.begin(), pe = m_group.end();
 		if (pi == pe) return m_posno=0;
 
 		min_pos = (*pi)->skipPos( pos_iter);
@@ -204,7 +205,7 @@ Index IteratorStructWithin::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<IteratorReference>::const_iterator ai = m_group.begin(), ae = m_group.end();
+		std::vector<PostingIteratorReference>::const_iterator ai = m_group.begin(), ae = m_group.end();
 		if (ai == ae) return 0;
 		m_documentFrequency = (*ai)->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)

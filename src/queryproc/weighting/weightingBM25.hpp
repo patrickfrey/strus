@@ -31,7 +31,7 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
-#include "iteratorReference.hpp"
+#include "postingIteratorReference.hpp"
 #include "weightingIdfBased.hpp"
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -55,7 +55,7 @@ public:
 
 	virtual ~WeightingBM25();
 
-	virtual float call( IteratorInterface& itr);
+	virtual float call( PostingIteratorInterface& itr);
 
 private:
 	const StorageInterface* m_storage;

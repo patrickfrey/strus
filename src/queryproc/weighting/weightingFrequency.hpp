@@ -30,7 +30,7 @@
 #define _STRUS_WEIGHTING_FREQUENCY_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/index.hpp"
-#include "strus/iteratorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "weightingIdfBased.hpp"
 #include <limits>
 #include <vector>
@@ -52,7 +52,7 @@ public:
 
 	virtual ~WeightingFrequency(){}
 
-	virtual float call( IteratorInterface& itr)
+	virtual float call( PostingIteratorInterface& itr)
 	{
 		return static_cast<float>( itr.frequency());
 	}

@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "summarizerMetaData.hpp"
-#include "strus/iteratorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
 
 using namespace strus;

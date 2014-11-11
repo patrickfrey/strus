@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_ACCUMULATOR_ESTIMATED_NUMBER_OF_MATCHES_MAP_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_ESTIMATED_NUMBER_OF_MATCHES_MAP_HPP_INCLUDED
-#include "strus/iteratorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
 #include <map>
@@ -43,7 +43,7 @@ class EstimatedNumberOfMatchesMap
 public:
 	explicit EstimatedNumberOfMatchesMap( const StorageInterface* storage_);
 	
-	float getNofMatches( IteratorInterface& itr);
+	float getNofMatches( PostingIteratorInterface& itr);
 
 private:
 	const StorageInterface* m_storage;

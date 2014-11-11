@@ -26,71 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_HPP_INCLUDED
-#include "iteratorJoin.hpp"
-#include "iteratorReference.hpp"
+#ifndef _STRUS_FORWARD_INDEX_ITERATOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_FORWARD_INDEX_ITERATOR_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <string>
+#include <vector>
 
 namespace strus
 {
 
-class IteratorUnion
-	:public IteratorJoin
+/// \brief Iterator on the forward index mapping occurrencies to the terms inserted
+class ForwardIteratorInterface
 {
 public:
-	IteratorUnion( const IteratorUnion& o);
-	IteratorUnion( std::size_t nofargs_, const IteratorInterface** args_);
+	virtual ~ForwardIteratorInterface(){}
 
-	virtual const std::string& featureid() const
-	{
-		return m_featureid;
-	}
+	/// \brief Define the document of the items inspected
+	virtual void initDoc( const Index& docno_)=0;
 
-	virtual ~IteratorUnion(){}
+	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
+	virtual Index skipPos( const Index& firstpos)=0;
 
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
-
-	virtual std::vector<IteratorInterface*> subExpressions( bool positive);
-
-	virtual Index documentFrequency();
-
-	virtual Index docno() const
-	{
-		return m_docno;
-	}
-
-	virtual Index posno() const
-	{
-		return m_posno;
-	}
-
-	virtual IteratorInterface* copy() const
-	{
-		return new IteratorUnion( *this);
-	}
-
-protected:
-	bool selected( unsigned int idx)
-	{
-		return m_selected[idx];
-	}
-	IteratorInterface* arg( unsigned int idx) const
-	{
-		return m_argar[ idx].get();
-	}
-	unsigned int nofargs() const
-	{
-		return m_argar.size();
-	}
-
-private:
-	Index m_docno;
-	Index m_posno;				///< current position
-	std::vector<IteratorReference> m_argar;
-	std::vector<bool> m_selected;
-	std::string m_featureid;		///< unique id of the feature expression
-	Index m_documentFrequency;		///< document frequency (of the most frequent subexpression)
+	/// \brief Fetch the item at the current position (defined by initType(const std::string&) and initDoc( const Index&))
+	virtual std::string fetch()=0;
 };
 
 }//namespace

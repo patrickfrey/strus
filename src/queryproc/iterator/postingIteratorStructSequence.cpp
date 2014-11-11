@@ -26,13 +26,13 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/iteratorStructSequence.hpp"
-#include "iterator/iteratorHelpers.hpp"
+#include "iterator/postingIteratorStructSequence.hpp"
+#include "iterator/postingIteratorHelpers.hpp"
 #include <stdexcept>
 
 using namespace strus;
 
-IteratorStructSequence::IteratorStructSequence( int range_, std::size_t nofargs, const IteratorInterface** args, const IteratorInterface* cut)
+IteratorStructSequence::IteratorStructSequence( int range_, std::size_t nofargs, const PostingIteratorInterface** args, const PostingIteratorInterface* cut)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
@@ -78,20 +78,21 @@ IteratorStructSequence::IteratorStructSequence( const IteratorStructSequence& o)
 	{
 		m_cut.reset( o.m_cut->copy());
 	}
-	std::vector<IteratorReference>::const_iterator pi = o.m_seq.begin(), pe = o.m_seq.end();
+	std::vector<PostingIteratorReference>::const_iterator pi = o.m_seq.begin(), pe = o.m_seq.end();
 	for (; pi != pe; ++pi)
 	{
 		m_seq.push_back( (*pi)->copy());
 	}
 }
 
-std::vector<IteratorInterface*> IteratorStructSequence::subExpressions( bool positive)
+std::vector<PostingIteratorInterface*>
+	IteratorStructSequence::subExpressions( bool positive)
 {
-	std::vector<IteratorInterface*> rt;
+	std::vector<PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_seq.size());
-		std::vector<IteratorReference>::const_iterator si = m_seq.begin(), se = m_seq.end();
+		std::vector<PostingIteratorReference>::const_iterator si = m_seq.begin(), se = m_seq.end();
 		for (; si != se; ++si)
 		{
 			rt.push_back( si->get());
@@ -132,7 +133,7 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 
 	for (;;)
 	{
-		std::vector<IteratorReference>::const_iterator pi = m_seq.begin(), pe = m_seq.end();
+		std::vector<PostingIteratorReference>::const_iterator pi = m_seq.begin(), pe = m_seq.end();
 		if (pi == pe) return m_posno=0;
 
 		min_pos = (*pi)->skipPos( pos_iter);
@@ -179,7 +180,7 @@ Index IteratorStructSequence::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<IteratorReference>::const_iterator ai = m_seq.begin(), ae = m_seq.end();
+		std::vector<PostingIteratorReference>::const_iterator ai = m_seq.begin(), ae = m_seq.end();
 		if (ai == ae) return 0;
 		m_documentFrequency = (*ai)->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)

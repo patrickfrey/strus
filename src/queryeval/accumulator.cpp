@@ -21,9 +21,9 @@ Accumulator::Accumulator(
 {}
 
 void Accumulator::addSelector(
-		const IteratorInterface& iterator)
+		const PostingIteratorInterface& iterator)
 {
-	IteratorReference itr( iterator.copy());
+	PostingIteratorReference itr( iterator.copy());
 	m_selectors.push_back( itr);
 }
 
@@ -31,11 +31,11 @@ void Accumulator::addRanker(
 		float factor,
 		const std::string& function,
 		const std::vector<float>& parameter,
-		const IteratorInterface& iterator)
+		const PostingIteratorInterface& iterator)
 {
 	WeightingFunctionReference weighting(
 		m_queryprocessor->createWeightingFunction( function, parameter));
-	IteratorReference itr( iterator.copy());
+	PostingIteratorReference itr( iterator.copy());
 
 	m_rankers.push_back( AccumulatorArgument( factor, weighting, itr));
 }
@@ -48,7 +48,7 @@ bool Accumulator::nextRank(
 {
 	if (!m_called)
 	{
-		std::vector<IteratorReference>::const_iterator
+		std::vector<PostingIteratorReference>::const_iterator
 			si = m_selectors.begin(), 
 			se = m_selectors.end();
 		std::size_t nofSelElems = 0;

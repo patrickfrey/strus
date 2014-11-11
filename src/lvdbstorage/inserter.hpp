@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_STORAGE_TRANSACTION_HPP_INCLUDED
-#define _STRUS_LVDB_STORAGE_TRANSACTION_HPP_INCLUDED
+#ifndef _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
+#define _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
 #include "storage.hpp"
 #include <vector>
 #include <set>
@@ -35,15 +35,14 @@
 
 namespace strus {
 
-/// \class Transaction
-/// \brief Storage insert or replace transaction
-class Transaction
-	:public StorageInterface::TransactionInterface
+/// \class Inserter
+class Inserter
+	:public StorageInterface::InserterInterface
 {
 public:
-	Transaction( Storage* storage_, const std::string& docid_);
+	Inserter( Storage* storage_, const std::string& docid_);
 
-	virtual ~Transaction();
+	virtual ~Inserter();
 	virtual void addTermOccurrence(
 			const std::string& type_,
 			const std::string& value_,
@@ -57,7 +56,7 @@ public:
 			char name_,
 			const std::string& value_);
 
-	virtual void commit();
+	virtual void done();
 
 private:
 	typedef std::pair<Index,Index> TermMapKey;
@@ -113,8 +112,8 @@ private:
 	};
 
 private:
-	Transaction( const Transaction&){}	//non copyable
-	void operator=( const Transaction&){}	//non copyable
+	Inserter( const Inserter&){}	//non copyable
+	void operator=( const Inserter&){}	//non copyable
 
 private:
 	Storage* m_storage;
