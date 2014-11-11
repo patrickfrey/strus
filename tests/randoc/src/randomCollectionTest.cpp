@@ -918,21 +918,21 @@ int main( int argc, const char* argv[])
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (; di != de; ++di,++totNofDocuments)
 		{
-			typedef boost::scoped_ptr<strus::StorageInterface::TransactionInterface> Transaction;
+			typedef boost::scoped_ptr<strus::StorageInterface::InserterInterface> Inserter;
 
-			Transaction transaction( storage->createTransaction( di->docid));
+			Inserter inserter( storage->createInserter( di->docid));
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
 
 			for (; oi != oe; ++oi,++totNofOccurrencies)
 			{
 				const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
-				transaction->addTermOccurrence( term.type, term.value, oi->pos);
+				inserter->addTermOccurrence( term.type, term.value, oi->pos);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
 #endif
 				totTermStringSize += term.value.size();
 			}
-			transaction->commit();
+			inserter->done();
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "inserted document '" << di->docid << "' size " << di->occurrencear.size() << std::endl;
