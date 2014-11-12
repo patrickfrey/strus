@@ -29,7 +29,6 @@
 #include "docnoBlockMap.hpp"
 #include "databaseKey.hpp"
 #include "docnoBlockReader.hpp"
-#include <boost/scoped_ptr.hpp>
 #include <leveldb/write_batch.h>
 
 using namespace strus;
@@ -103,8 +102,8 @@ void DocnoBlockMap::writeMergeBlock(
 
 	// Merge the old block with the found entries
 	// into the new block:
-	const DocnoBlock::Element* di = blk->ar();
-	const DocnoBlock::Element* de = blk->ar() + blk->size();
+	const DocnoBlock::Element* di = blk->data();
+	const DocnoBlock::Element* de = blk->data() + blk->size();
 
 	while (ei != ee && ei->first <= blk->back().docno() && di != de)
 	{
@@ -183,7 +182,7 @@ void DocnoBlockMap::flush()
 					mi->first.value, blk->back().docno());
 				while (newblksize < blk->size())
 				{
-					newblk[ newblksize] = blk->ar()[ newblksize];
+					newblk[ newblksize] = blk->data()[ newblksize];
 					++newblksize;
 				}
 			}

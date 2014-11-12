@@ -29,7 +29,6 @@
 #ifndef _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
 #define _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "databaseKey.hpp"
 #include "docnoBlock.hpp"
 #include <cstdlib>
 #include <boost/shared_ptr.hpp>

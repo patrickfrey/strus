@@ -45,7 +45,7 @@
 using namespace strus;
 
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
-	:m_path(path_),m_db(0),m_flushCnt(0)
+	:m_path(path_),m_db(0),m_metaDataBlockMap(0),m_flushCnt(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
@@ -63,6 +63,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 		m_next_docno = keyLookUp( DatabaseKey::VariablePrefix, "DocNo");
 		m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
 		if (m_nof_documents) m_nof_documents -= 1;
+		m_metaDataBlockMap = new MetaDataBlockMap( m_db);
 	}
 	else
 	{
@@ -125,9 +126,10 @@ Storage::~Storage()
 	catch (...)
 	{
 		//... silently ignored. Call close directly to catch errors
-		if (m_db) delete m_db;
-		if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 	}
+	if (m_metaDataBlockMap) delete m_metaDataBlockMap;
+	if (m_db) delete m_db;
+	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
 
 void Storage::writeIndex(const leveldb::Slice& key, const leveldb::Slice& value)
@@ -325,20 +327,12 @@ std::string Storage::documentAttribute( Index docno, char varname) const
 
 void Storage::defineMetaData( Index docno, char varname, float value)
 {
-	Index blockno = MetaDataBlock::blockno( docno);
-	MetaDataKey key( varname, blockno);
-	boost::mutex::scoped_lock( m_mutex_metaDataBlockMap);
-	MetaDataBlockMap::const_iterator mi = m_metaDataBlockMap.find( key);
-	if (mi == m_metaDataBlockMap.end())
-	{
-		MetaDataBlockReference& block = m_metaDataBlockMap[ key];
-		block.reset( new MetaDataBlock( m_db, blockno, varname));
-		block->setValue( docno, value);
-	}
-	else
-	{
-		mi->second->setValue( docno, value);
-	}
+	m_metaDataBlockMap->defineMetaData( docno, varname, value);
+}
+
+void Storage::flushMetaData()
+{
+	m_metaDataBlockMap->flush();
 }
 
 void Storage::flushIndex()
@@ -350,30 +344,6 @@ void Storage::flushIndex()
 		throw std::runtime_error( status.ToString());
 	}
 	m_indexBatch.Clear();
-}
-
-void Storage::flushMetaData()
-{
-	if (!m_db)
-	{
-		throw std::runtime_error( "no storage defined (flush metadata)");
-	}
-	leveldb::WriteBatch batch;
-	boost::mutex::scoped_lock( m_mutex_metaDataBlockMap);
-	MetaDataBlockMap::const_iterator
-		mi = m_metaDataBlockMap.begin(),
-		me = m_metaDataBlockMap.end();
-	for (; mi != me; ++mi)
-	{
-		mi->second->addToBatch( batch);
-	}
-	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	batch.Clear();
-	m_metaDataBlockMap.clear();
 }
 
 void Storage::incrementDf( Index typeno, Index termno)

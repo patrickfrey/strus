@@ -26,47 +26,38 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
+#ifndef _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include <utility>
+#include "metaDataBlock.hpp"
+#include <cstdlib>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
+#include <leveldb/db.h>
 
 namespace strus {
 
-class MetaDataBlock
+class MetaDataBlockMap
 {
 public:
-	MetaDataBlock( Index blockno_, char varname_);
-	MetaDataBlock( Index blockno_, char varname_,
-			const float* blk_, std::size_t blksize_);
-	MetaDataBlock( const MetaDataBlock& o);
+	MetaDataBlockMap( leveldb::DB* db_)
+		:m_db(db_){}
 
-	virtual ~MetaDataBlock(){}
+	void defineMetaData( Index docno, char varname, float value);
 
-	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
-	static Index blockno( Index docno)			{return (docno>>MetaDataBlockShift)+1;}
+	void flush();
 
-	Index blockno() const					{return m_blockno;}
-	char varname() const					{return m_varname;}
-	const float* data() const				{return m_blk;}
-
-	void setValue( Index docno, float value);
-	float getValue( Index docno) const;
-
-public:
-	enum {
-		MetaDataBlockSize=64
-	};
-private:
-	enum {
-		MetaDataBlockMask=((int)MetaDataBlockSize-1),
-		MetaDataBlockShift=6
-	};
+	MetaDataBlock* readMetaDataBlockFromDB( Index blockno, char varname);
 
 private:
-	Index m_blockno;
-	char m_varname;
-	float m_blk[ MetaDataBlockSize];
+	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
+	typedef std::pair<char,Index> MetaDataKey;
+	typedef std::map<MetaDataKey, MetaDataBlockReference> Map;
+
+private:
+	leveldb::DB* m_db;
+	boost::mutex m_mutex;
+	Map m_map;
 };
 
 }

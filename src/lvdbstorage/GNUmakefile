@@ -7,6 +7,7 @@ CPP_OBJS=\
 	databaseKey.o \
 	metaDataBlock.o \
 	metaDataReader.o \
+	metaDataBlockMap.o \
 	storage.o \
 	docnoBlock.o \
 	docnoBlockReader.o \

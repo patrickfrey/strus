@@ -79,7 +79,7 @@ public:
 	{
 		return m_arsize;
 	}
-	const Element* ar() const
+	const Element* data() const
 	{
 		return m_ar;
 	}

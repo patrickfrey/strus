@@ -33,15 +33,22 @@
 
 using namespace strus;
 
-MetaDataBlock::MetaDataBlock( leveldb::DB* db_, Index blockno_, char varname_)
-	:m_db(db_),m_blockno(blockno_),m_varname(varname_)
+MetaDataBlock::MetaDataBlock( Index blockno_, char varname_)
+	:m_blockno(blockno_),m_varname(varname_)
 {
 	std::memset( m_blk, 0, sizeof(m_blk));
-	readBlockFromDB();
+}
+
+MetaDataBlock::MetaDataBlock( Index blockno_, char varname_, 
+				const float* blk_, std::size_t blksize_)
+	:m_blockno(blockno_),m_varname(varname_)
+{
+	if (blksize_ != MetaDataBlockSize) throw std::runtime_error( "meta data block size mismatch");
+	std::memcpy( m_blk, blk_, sizeof(m_blk));
 }
 
 MetaDataBlock::MetaDataBlock( const MetaDataBlock& o)
-	:m_db(o.m_db),m_blockno(o.m_blockno),m_varname(o.m_varname)
+	:m_blockno(o.m_blockno),m_varname(o.m_varname)
 {
 	std::memcpy( m_blk, o.m_blk, sizeof(m_blk));
 }
@@ -63,45 +70,6 @@ float MetaDataBlock::getValue( Index docno) const
 	}
 	return m_blk[ index(docno)];
 }
-
-void MetaDataBlock::readBlockFromDB()
-{
-	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, m_varname, m_blockno);
-
-	leveldb::Slice constkey( key.ptr(), key.size());
-	std::string value;
-	value.reserve( sizeof(m_blk)+1);
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
-
-	if (status.IsNotFound())
-	{
-		std::memset( m_blk, 0, sizeof(m_blk));
-		return;
-	}
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	if (value.size() != sizeof(m_blk))
-	{
-		throw std::runtime_error( "internal: size of metadata block on disk does not match");
-	}
-	std::memcpy( m_blk, value.c_str(), value.size());
-	if (value.size() < sizeof(m_blk))
-	{
-		std::memset( m_blk + value.size(), 0, sizeof(m_blk) - value.size());
-	}
-}
-
-void MetaDataBlock::addToBatch( leveldb::WriteBatch& batch)
-{
-	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, m_varname, m_blockno);
-
-	leveldb::Slice keyslice( key.ptr(), key.size());
-	leveldb::Slice valueslice( (const char*)m_blk, sizeof(m_blk));
-	batch.Put( keyslice, valueslice);
-}
-
 
 
 

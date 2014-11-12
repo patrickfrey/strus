@@ -32,6 +32,7 @@
 #include "strus/index.hpp"
 #include "databaseKey.hpp"
 #include "metaDataBlock.hpp"
+#include "metaDataBlockMap.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -121,10 +122,6 @@ private:
 	typedef std::pair<Index,Index> DfKey;
 	typedef std::map<DfKey, Index> DfMap;
 
-	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
-	typedef std::pair<char,Index> MetaDataKey;
-	typedef std::map<MetaDataKey, MetaDataBlockReference> MetaDataBlockMap;
-
 private:
 	std::string m_path;					///< levelDB storage path 
 	leveldb::DB* m_db;					///< levelDB handle
@@ -139,8 +136,7 @@ private:
 	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined.
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
 	DfMap m_dfMap;						///< temporary map for the document frequency of new inserted features
-	MetaDataBlockMap m_metaDataBlockMap;			///< map of meta data blocks for writing
-	boost::mutex m_mutex_metaDataBlockMap;			///< mutual exclusion for access on the meta data map for writing
+	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
 	Index m_flushCnt;
 };
 
