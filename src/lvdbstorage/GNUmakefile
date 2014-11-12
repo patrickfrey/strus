@@ -2,11 +2,15 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
+	floatConversions.o \
 	indexPacker.o \
 	databaseKey.o \
 	metaDataBlock.o \
 	metaDataReader.o \
 	storage.o \
+	docnoBlock.o \
+	docnoBlockReader.o \
+	docnoIterator.o \
 	postingIterator.o \
 	nullIterator.o \
 	forwardIterator.o \

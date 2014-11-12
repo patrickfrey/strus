@@ -70,6 +70,15 @@ DatabaseKey::DatabaseKey( char prefix, const Index& idx, const Index& idx2)
 	addElem( idx2);
 }
 
+DatabaseKey::DatabaseKey( char prefix, const Index& idx, const Index& idx2, const Index& idx3)
+{
+	m_buf[ 0] = prefix;
+	m_size = 1;
+	addElem( idx);
+	addElem( idx2);
+	addElem( idx3);
+}
+
 DatabaseKey::DatabaseKey( const DatabaseKey& o)
 	:m_size(o.m_size)
 {
@@ -81,12 +90,12 @@ void DatabaseKey::addElem( const Index& index)
 	packIndex( m_buf, m_size, MaxKeySize, index);
 }
 
-Index DatabaseKey::elem( std::size_t pos) const
-{
-	if (pos >= m_size) throw std::runtime_error("internal: illegal element access in key");
-	const char* pp = m_buf + pos;
-	return unpackIndex( pp, m_buf + m_size);
-}
+//[-]Index DatabaseKey::elem( std::size_t pos) const
+//[-]{
+//[-]	if (pos >= m_size) throw std::runtime_error("internal: illegal element access in key");
+//[-]	const char* pp = m_buf + pos;
+//[-]	return unpackIndex( pp, m_buf + m_size);
+//[-]}
 
 void DatabaseKey::addPrefix( char prefix)
 {

@@ -124,6 +124,11 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 				strus::DocFrequencyData( key, value);
 				break;
 			}
+			case strus::DatabaseKey::DocnoBlockPrefix:
+			{
+				strus::DocnoBlockData( key, value);
+				break;
+			}
 		}
 	}
 	catch (const std::runtime_error& err)

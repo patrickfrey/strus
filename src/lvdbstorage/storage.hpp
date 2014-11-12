@@ -56,18 +56,19 @@ public:
 	virtual ~Storage();
 
 	virtual PostingIteratorInterface*
-		createTermPostingIterator(
-			const std::string& termtype,
-			const std::string& termid);
+			createTermPostingIterator(
+				const std::string& termtype,
+				const std::string& termid);
 
 	virtual ForwardIteratorInterface*
-		createForwardIterator(
-			const std::string& type);
+			createForwardIterator(
+				const std::string& type);
 
 	virtual InserterInterface*
-		createInserter( const std::string& docid);
+			createInserter( const std::string& docid);
 
-	virtual MetaDataReaderInterface* createMetaDataReader( char varname) const;
+	virtual MetaDataReaderInterface*
+			createMetaDataReader( char varname) const;
 
 	virtual Index nofDocumentsInserted() const;
 

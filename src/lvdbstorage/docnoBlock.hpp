@@ -26,31 +26,78 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
+#ifndef _STRUS_LVDB_DOCNO_BLOCK_HPP_INCLUDED
+#define _STRUS_LVDB_DOCNO_BLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/metaDataReaderInterface.hpp"
 #include "databaseKey.hpp"
+#include "floatConversions.hpp"
+#include <stdint.h>
 #include <leveldb/db.h>
 
 namespace strus {
 
-class MetaDataReader
-	:public MetaDataReaderInterface
+class DocnoBlock
 {
 public:
-	MetaDataReader( leveldb::DB* db_, char varname_);
-	virtual ~MetaDataReader();
+	class Element
+	{
+	public:
+		Element( Index docno_, unsigned int ff_, float weight_);
+		Element( const Element& o);
 
-	virtual float readValue( const Index& docno_);
+		float weight() const;
+
+		unsigned int ff() const
+		{
+			return m_ff;
+		}
+
+		Index docno() const
+		{
+			return m_docno;
+		}
+
+	private:
+		enum {Max_ff=0xffFF};
+		uint32_t m_docno;
+		uint16_t m_ff;
+		strus::float16_t m_weight;	///< IEEE 754 half-precision binary floating-point format: binary16
+	};
+
+public:
+	DocnoBlock();
+	DocnoBlock( const Element* ar_, std::size_t arsize_);
+	DocnoBlock( const DocnoBlock& o);
+
+	bool empty() const
+	{
+		return !m_ar;
+	}
+
+	std::size_t size() const
+	{
+		return m_arsize;
+	}
+
+	const Element& back() const
+	{
+		return m_ar[ m_arsize-1];
+	}
+
+	const Element* find( const Index& docno_) const;
+	const Element* upper_bound( const Index& docno_) const;
+
+	void clear()
+	{
+		m_ar = 0;
+		m_arsize = 0;
+	}
+
+	void init( const Element* ar_, std::size_t arsize_);
 
 private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	char m_varname;
-	DatabaseKey m_key;
-	Index m_blockno;
-	const float* m_blk;
+	const Element* m_ar;
+	std::size_t m_arsize;
 };
 
 }

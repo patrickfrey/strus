@@ -133,6 +133,12 @@ static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const le
 				data.print( out);
 				break;
 			}
+			case strus::DatabaseKey::DocnoBlockPrefix:
+			{
+				strus::DocnoBlockData data( key, value);
+				data.print( out);
+				break;
+			}
 		}
 	}
 	catch (const std::runtime_error& err)

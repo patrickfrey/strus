@@ -46,7 +46,8 @@ public:
 		VariablePrefix='v',	///< [variable string]         ->  [index]
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
-		DocFrequencyPrefix='f'	///< [typeno,termno]           ->  [index]
+		DocFrequencyPrefix='f',	///< [typeno,termno]           ->  [index]
+		DocnoBlockPrefix='b'	///< [typeno,termno,docno]     ->  [index,ff,weight]*
 	};
 	static const char* keyPrefixName( KeyPrefix i)
 	{
@@ -61,6 +62,7 @@ public:
 			case DocMetaDataPrefix: return "metadata";
 			case DocAttributePrefix: return "document attribute";
 			case DocFrequencyPrefix: return "term document frequency";
+			case DocnoBlockPrefix: return "docno posting block";
 		}
 		return 0;
 	}
@@ -71,6 +73,7 @@ public:
 	DatabaseKey( char prefix, char prefix2, const Index& idx);
 	DatabaseKey( char prefix, const Index& idx, char prefix2);
 	DatabaseKey( char prefix, const Index& idx, const Index& idx2);
+	DatabaseKey( char prefix, const Index& idx, const Index& idx2, const Index& idx3);
 	DatabaseKey( const DatabaseKey& o);
 
 	void addElem( const Index& index);
@@ -81,7 +84,7 @@ public:
 	const char* ptr() const			{return m_buf;}
 	std::size_t size() const		{return m_size;}
 
-	Index elem( std::size_t pos) const;
+	//[-] Index elem( std::size_t pos) const;
 
 private:
 	enum {MaxKeySize=64};

@@ -29,6 +29,7 @@
 #include "metaDataReader.hpp"
 #include "metaDataBlock.hpp"
 #include "databaseKey.hpp"
+#include "indexPacker.hpp"
 #include <stdexcept>
 #include <cstring>
 
@@ -73,7 +74,9 @@ float MetaDataReader::readValue( const Index& docno_)
 		m_key.addElem( m_blockno);
 		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
 	}
-	if (2 > m_itr->key().size() || 0!=std::memcmp( m_key.ptr(), m_itr->key().data(), 2))
+	if (m_itr->Valid()
+	&&  (2 > m_itr->key().size()
+		|| 0!=std::memcmp( m_key.ptr(), m_itr->key().data(), 2)))
 	{
 		m_blk = 0;
 		m_blockno = 0;
@@ -88,7 +91,10 @@ float MetaDataReader::readValue( const Index& docno_)
 		m_blockno = 0;
 		throw std::runtime_error( "internal: corrupt metadata block");
 	}
-	Index nextBlockno = m_key.elem(2);
+	char const* ki = m_key.ptr()+2;
+	char const* ke = m_key.ptr()+m_key.size();
+
+	Index nextBlockno = unpackIndex( ki, ke);
 	if (m_blockno != nextBlockno)
 	{
 		m_blockno = nextBlockno;

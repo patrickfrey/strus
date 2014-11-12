@@ -37,7 +37,7 @@
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
@@ -179,7 +179,9 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 
 Index PostingIterator::extractMatchData()
 {
-	if (m_keysize < m_itr->key().size() && 0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
+	if (m_itr->Valid()
+	&& m_keysize < m_itr->key().size()
+	&& 0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
 	{
 		// Init the term weight and the iterators on the term occurrencies:
 		m_posno = 0;

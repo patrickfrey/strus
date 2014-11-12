@@ -26,33 +26,20 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
+#ifndef _STRUS_LVDB_FLOAT_CONVERSIONS_HPP_INCLUDED
+#define _STRUS_LVDB_FLOAT_CONVERSIONS_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/metaDataReaderInterface.hpp"
-#include "databaseKey.hpp"
-#include <leveldb/db.h>
+#include <string>
+#include <cstdlib>
 
-namespace strus {
-
-class MetaDataReader
-	:public MetaDataReaderInterface
+namespace strus
 {
-public:
-	MetaDataReader( leveldb::DB* db_, char varname_);
-	virtual ~MetaDataReader();
 
-	virtual float readValue( const Index& docno_);
+typedef uint16_t float16_t;
 
-private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	char m_varname;
-	DatabaseKey m_key;
-	Index m_blockno;
-	const float* m_blk;
-};
+float16_t floatSingleToHalfPrecision( float in);
+float floatHalfToSinglePrecision( float16_t in);
 
-}
+}//namespace
 #endif
 

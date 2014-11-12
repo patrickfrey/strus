@@ -121,7 +121,8 @@ Index ForwardIterator::skipPos( const Index& firstpos_)
 		buildKey(3);
 		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
 
-		if (m_keysize_typeno < m_itr->key().size()
+		if (m_itr->Valid()
+		&& m_keysize_typeno < m_itr->key().size()
 		&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize_typeno))
 		{
 			// ... docno and typeno match, so we extract the current 

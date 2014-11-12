@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
-#define _STRUS_KCSTORAGE_ENCODE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_STORAGE_ENCODE_HPP_INCLUDED
+#define _STRUS_LVDB_STORAGE_ENCODE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <string>
 

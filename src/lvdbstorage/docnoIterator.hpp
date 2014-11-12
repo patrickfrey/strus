@@ -26,31 +26,49 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/metaDataReaderInterface.hpp"
+#ifndef _STRUS_LVDB_DOCNO_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_DOCNO_ITERATOR_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
 #include "databaseKey.hpp"
+#include "docnoBlockReader.hpp"
+#include "floatConversions.hpp"
+#include <cstdlib>
+#include <stdexcept>
+#include <limits>
 #include <leveldb/db.h>
 
 namespace strus {
 
-class MetaDataReader
-	:public MetaDataReaderInterface
+class DocnoIterator
 {
 public:
-	MetaDataReader( leveldb::DB* db_, char varname_);
-	virtual ~MetaDataReader();
+	DocnoIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
+		:m_blockReader( db_, termtypeno, termvalueno),m_curelem(0){}
+	DocnoIterator( const DocnoIterator& o)
+		:m_blockReader(o.m_blockReader),m_curelem(0){}
 
-	virtual float readValue( const Index& docno_);
+	~DocnoIterator(){}
+
+	Index skipDoc( const Index& docno_);
+
+	unsigned int frequency()
+	{
+		if (m_curelem) return m_curelem->ff();
+	}
+
+	Index docno() const
+	{
+		if (m_curelem) return m_curelem->docno();
+	}
+
+	float weight() const
+	{
+		if (m_curelem) return m_curelem->weight();
+	}
 
 private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	char m_varname;
-	DatabaseKey m_key;
-	Index m_blockno;
-	const float* m_blk;
+	DocnoBlockReader m_blockReader;
+	const DocnoBlock::Element* m_curelem;
 };
 
 }

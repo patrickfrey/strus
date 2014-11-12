@@ -26,31 +26,31 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
+#ifndef _STRUS_LVDB_METADATA_DOCNOBLOCK_READER_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_DOCNOBLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/metaDataReaderInterface.hpp"
+#include "docnoBlock.hpp"
 #include "databaseKey.hpp"
 #include <leveldb/db.h>
 
 namespace strus {
 
-class MetaDataReader
-	:public MetaDataReaderInterface
+class DocnoBlockReader
 {
 public:
-	MetaDataReader( leveldb::DB* db_, char varname_);
-	virtual ~MetaDataReader();
+	DocnoBlockReader( leveldb::DB* db_, Index typeno_, Index termno_);
+	DocnoBlockReader( const DocnoBlockReader& o);
+	~DocnoBlockReader();
 
-	virtual float readValue( const Index& docno_);
+	const DocnoBlock* readBlock( const Index& docno_);
 
 private:
 	leveldb::DB* m_db;
 	leveldb::Iterator* m_itr;
-	char m_varname;
 	DatabaseKey m_key;
-	Index m_blockno;
-	const float* m_blk;
+	std::size_t m_keysize;
+	Index m_last_docno;
+	DocnoBlock m_docnoBlock;
 };
 
 }

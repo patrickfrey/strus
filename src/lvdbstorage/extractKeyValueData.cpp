@@ -369,3 +369,43 @@ void DocFrequencyData::print( std::ostream& out)
 }
 
 
+DocnoBlockData::DocnoBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
+	termno = strus::unpackIndex( ki, ke);/*[termno]*/
+	Index docno = strus::unpackIndex( ki, ke);/*[docno]*/
+
+	blk = reinterpret_cast<const DocnoBlock::Element*>(vi);
+	blksize = (ve-vi)/sizeof(DocnoBlock::Element);
+	if (blksize == 0)
+	{
+		throw std::runtime_error( "docno block is empty");
+	}
+	if (blksize * sizeof(DocnoBlock::Element) != (std::size_t)(ve-vi))
+	{
+		throw std::runtime_error( "docno block size is not dividable by docno block element size");
+	}
+	if (blk[blksize-1].docno() != docno)
+	{
+		throw std::runtime_error( "last docno block element does not match to key");
+	}
+}
+
+void DocnoBlockData::print( std::ostream& out)
+{
+	std::size_t ii=0;
+	out << (char)DatabaseKey::DocnoBlockPrefix;
+	out << ' ' << typeno << ' ' << termno;
+	for (; ii<blksize; ++ii)
+	{
+		out << ' ' << blk[ii].docno() << ',' << blk[ii].ff() << ',' << blk[ii].weight();
+	}
+	out << std::endl;
+}
+
+

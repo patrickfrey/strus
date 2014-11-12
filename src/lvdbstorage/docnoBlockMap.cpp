@@ -26,33 +26,21 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/metaDataReaderInterface.hpp"
-#include "databaseKey.hpp"
-#include <leveldb/db.h>
+#include "docnoBlockMap.hpp"
 
-namespace strus {
+using namespace strus;
 
-class MetaDataReader
-	:public MetaDataReaderInterface
+void DocnoBlockMap::defineDocnoPosting(
+		const Index& termtype,
+		const Index& termvalue,
+		const Index& docno,
+		unsigned int ff,
+		float weight)
 {
-public:
-	MetaDataReader( leveldb::DB* db_, char varname_);
-	virtual ~MetaDataReader();
-
-	virtual float readValue( const Index& docno_);
-
-private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	char m_varname;
-	DatabaseKey m_key;
-	Index m_blockno;
-	const float* m_blk;
-};
-
 }
-#endif
+
+void DocnoBlockMap::flush()
+{
+}
+
 

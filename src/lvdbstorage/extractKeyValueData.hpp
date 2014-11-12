@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
 #define _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
 #include "databaseKey.hpp"
+#include "docnoBlock.hpp"
 #include "strus/index.hpp"
 #include <utility>
 #include <leveldb/db.h>
@@ -141,6 +142,17 @@ struct DocFrequencyData
 	void print( std::ostream& out);
 };
 
+struct DocnoBlockData
+{
+	Index typeno;
+	Index termno;
+	const DocnoBlock::Element* blk;
+	std::size_t blksize;
+
+	DocnoBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+
+	void print( std::ostream& out);
+};
 }//namespace
 #endif
 
