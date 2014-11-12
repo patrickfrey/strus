@@ -29,13 +29,13 @@
 #ifndef _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
 #define _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/weightedDocument.hpp"
+#include "strus/queryeval/weightedDocument.hpp"
 #include <vector>
 #include <string>
 #include <utility>
 
-namespace strus
-{
+namespace strus {
+namespace queryeval {
 
 class ResultDocument
 	:public WeightedDocument
@@ -71,6 +71,6 @@ private:
 	std::vector<Attribute> m_attributes;
 };
 
-}//namespace
+}}//namespace
 #endif
 

@@ -32,8 +32,9 @@
 #include <string>
 #include <utility>
 
-namespace strus
-{
+namespace strus {
+namespace queryeval {
+
 /// \brief Defines a strus query
 class Query
 {
@@ -106,6 +107,6 @@ private:
 	std::vector<JoinOp> m_joinar;
 };
 
-}//namespace
+}}//namespace
 #endif
 

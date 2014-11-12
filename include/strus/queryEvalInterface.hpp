@@ -28,8 +28,8 @@
 */
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
-#include "strus/resultDocument.hpp"
-#include "strus/query.hpp"
+#include "strus/queryeval/resultDocument.hpp"
+#include "strus/queryeval/query.hpp"
 #include "strus/index.hpp"
 #include <vector>
 #include <string>
@@ -55,11 +55,11 @@ public:
 	/// \param[in] querystr query string (syntax depending on implementation)
 	/// \param[in] fromRank lowest rank to return
 	/// \param[in] maxNofRanks maximum number of ranks to return
-	virtual std::vector<ResultDocument>
+	virtual std::vector<queryeval::ResultDocument>
 		getRankedDocumentList(
 			const StorageInterface& storage,
 			const QueryProcessorInterface& processor,
-			const Query& query,
+			const queryeval::Query& query,
 			std::size_t fromRank,
 			std::size_t maxNofRanks) const=0;
 

@@ -150,7 +150,7 @@ void QueryEval::parseTermDef( char const*& src)
 			throw std::runtime_error( "semicolon expected after a feature declaration in the query");
 		}
 		parse_OPERATOR( src);
-		m_predefinedTerms.push_back( Query::Term( termset, termtype, termvalue));
+		m_predefinedTerms.push_back( queryeval::Query::Term( termset, termtype, termvalue));
 	}
 	else
 	{
@@ -327,7 +327,7 @@ private:
 
 void QueryEval::print( std::ostream& out) const
 {
-	std::vector<Query::Term>::const_iterator ti = predefinedTerms().begin(), te = predefinedTerms().end();
+	std::vector<queryeval::Query::Term>::const_iterator ti = predefinedTerms().begin(), te = predefinedTerms().end();
 	for (; ti != te; ++ti)
 	{
 		out << "TERM " << ti->set << ": " << ti->type << " '" << ti->value << "';" << std::endl;
@@ -359,7 +359,7 @@ void QueryEval::print( std::ostream& out) const
 }
 
 
-std::vector<ResultDocument>
+std::vector<queryeval::ResultDocument>
 	QueryEval::getRankedDocumentList(
 			Accumulator& accu,
 			const std::vector<SummarizerDef>& summarizers,
@@ -368,7 +368,7 @@ std::vector<ResultDocument>
 {
 	typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
 
-	std::vector<ResultDocument> rt;
+	std::vector<queryeval::ResultDocument> rt;
 	Ranker ranker;
 	std::size_t ranks = 0;
 	std::size_t lastRank = maxNofRanks + firstRank;
@@ -400,7 +400,7 @@ std::vector<ResultDocument>
 	{
 		if (ridx >= firstRank)
 		{
-			std::vector<ResultDocument::Attribute> attr;
+			std::vector<queryeval::ResultDocument::Attribute> attr;
 			std::vector<SummarizerDef>::const_iterator
 				si = summarizers.begin(), se = summarizers.end();
 			for (; si != se; ++si)
@@ -411,21 +411,21 @@ std::vector<ResultDocument>
 				for (; ci != ce; ++ci)
 				{
 					attr.push_back(
-						ResultDocument::Attribute(
+						queryeval::ResultDocument::Attribute(
 							si->first, *ci));
 				}
 			}
-			rt.push_back( ResultDocument( *ri, attr));
+			rt.push_back( queryeval::ResultDocument( *ri, attr));
 		}
 	}
 	return rt;
 }
 
-std::vector<ResultDocument>
+std::vector<queryeval::ResultDocument>
 	QueryEval::getRankedDocumentList(
 		const StorageInterface& storage,
 		const QueryProcessorInterface& processor,
-		const Query& query_,
+		const queryeval::Query& query_,
 		std::size_t fromRank,
 		std::size_t maxNofRanks) const
 {
@@ -442,8 +442,8 @@ std::vector<ResultDocument>
 		typedef std::pair<std::string, PostingIteratorReference> FeatDef;
 		std::vector<FeatDef> feats;
 
-		std::vector<Query::Term>::const_iterator ti = query_.termar().begin(), te = query_.termar().end();
-		std::vector<Query::JoinOp>::const_iterator ji = query_.joinar().begin(), je = query_.joinar().end();
+		std::vector<queryeval::Query::Term>::const_iterator ti = query_.termar().begin(), te = query_.termar().end();
+		std::vector<queryeval::Query::JoinOp>::const_iterator ji = query_.joinar().begin(), je = query_.joinar().end();
 
 		for (std::size_t tidx=0; ti != te; ++ti,++tidx)
 		{
@@ -488,7 +488,7 @@ std::vector<ResultDocument>
 		}
 
 		// Add predefined terms to the initial feature set:
-		std::vector<Query::Term>::const_iterator pi = m_predefinedTerms.begin(), pe = m_predefinedTerms.end();
+		std::vector<queryeval::Query::Term>::const_iterator pi = m_predefinedTerms.begin(), pe = m_predefinedTerms.end();
 		for (; pi != pe; ++pi)
 		{
 			StringIndexMap::const_iterator si = m_setnamemap.find( pi->set);

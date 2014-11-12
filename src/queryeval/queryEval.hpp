@@ -63,15 +63,15 @@ public:
 	{}
 	QueryEval( const std::string& source);
 
-	virtual std::vector<ResultDocument>
+	virtual std::vector<queryeval::ResultDocument>
 		getRankedDocumentList(
 			const StorageInterface& storage,
 			const QueryProcessorInterface& processor,
-			const Query& query,
+			const queryeval::Query& query,
 			std::size_t fromRank,
 			std::size_t maxNofRanks) const;
 
-	const std::vector<Query::Term>& predefinedTerms() const			{return m_predefinedTerms;}
+	const std::vector<queryeval::Query::Term>& predefinedTerms() const	{return m_predefinedTerms;}
 	const std::vector<parser::SelectorExpression>& selectors() const	{return m_selectors;}
 	const std::vector<parser::JoinFunction>& functions() const		{return m_functions;}
 	const std::vector<parser::JoinOperation>& operations() const		{return m_operations;}
@@ -82,7 +82,7 @@ public:
 
 private:
 	typedef std::pair<std::string,SummarizerReference> SummarizerDef;
-	std::vector<ResultDocument>
+	std::vector<queryeval::ResultDocument>
 		getRankedDocumentList(
 			Accumulator& accu,
 			const std::vector<SummarizerDef>& summarizers,
@@ -95,7 +95,7 @@ private:
 	void parseSummarizeDef( char const*& src);
 
 private:
-	std::vector<Query::Term> m_predefinedTerms;
+	std::vector<queryeval::Query::Term> m_predefinedTerms;
 	std::vector<parser::SelectorExpression> m_selectors;
 	std::vector<parser::JoinFunction> m_functions;
 	StringIndexMap m_setnamemap;
