@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
 #include <vector>
 #include <string>
 

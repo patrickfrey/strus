@@ -29,7 +29,6 @@
 /// \brief Exported functions of the strus query evaluation library
 #ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
-#include "strus/weightedDocument.hpp"
 #include <string>
 
 namespace strus {
