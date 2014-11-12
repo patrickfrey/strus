@@ -43,6 +43,8 @@ namespace strus {
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
+/// \brief Forward declaration
+class StorageInserterInterface;
 
 /// \brief Strus IR storage implementation based on LevelDB
 class Storage
@@ -64,7 +66,7 @@ public:
 			createForwardIterator(
 				const std::string& type);
 
-	virtual InserterInterface*
+	virtual StorageInserterInterface*
 			createInserter( const std::string& docid);
 
 	virtual MetaDataReaderInterface*

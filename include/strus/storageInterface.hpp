@@ -40,47 +40,12 @@ class PostingIteratorInterface;
 class ForwardIteratorInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
+/// \brief Forward declaration
+class StorageInserterInterface;
 
 /// \brief Interface of a strus IR storage
 class StorageInterface
 {
-public:
-	/// \class InserterInterface
-	/// \brief Object to declare all items for one insert/update of a document in the storage
-	class InserterInterface
-	{
-	public:
-		/// \brief Destructor that is the doing the rollback too, if done() was not called before
-		virtual ~InserterInterface(){}
-
-		/// \brief Add one occurrence of a term, throws on std::bad_alloc
-		/// \param[in] type_ type name of the term
-		/// \param[in] value_ value string of the term
-		/// \param[in] position_ position of the term in the document
-		virtual void addTermOccurrence(
-				const std::string& type_,
-				const std::string& value_,
-				const Index& position_)=0;
-
-		/// \brief Define a numeric attribute for the document with fast access for query evaluation
-		/// \note Meta data used for query restrictions are declared here
-		/// \param[in] name_ one character as name of the attribute
-		/// \param[in] value_ value of the document attribute
-		virtual void setMetaData(
-				char name_,
-				float value_)=0;
-
-		/// \brief Define a string attribute for the document
-		/// \param[in] name_ one character as name of the attribute
-		/// \param[in] value_ value of the document attribute
-		virtual void setAttribute(
-				char name_,
-				const std::string& value_)=0;
-
-		/// \brief Write the contents defined to the storage
-		virtual void done()=0;
-	};
-
 public:
 	/// \brief Destructor
 	/// \remark Calls close but ignores errors there silently
@@ -132,7 +97,7 @@ public:
 	/// \brief Create an object for the declaration of one insert/update of a document
 	/// \param[in] docid document identifier (URI)
 	/// \return the created inserter reference to be disposed with delete
-	virtual InserterInterface* createInserter( const std::string& docid)=0;
+	virtual StorageInserterInterface* createInserter( const std::string& docid)=0;
 
 	/// \brief Forces flushing of all contents inserted persistently to the repository
 	virtual void flush()=0;

@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
+#include "storageInserter.hpp"
 #include "storage.hpp"
-#include "inserter.hpp"
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
 #include <string>
@@ -40,24 +40,24 @@ using namespace strus;
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-Inserter::Inserter( Storage* storage_, const std::string& docid_)
+StorageInserter::StorageInserter( Storage* storage_, const std::string& docid_)
 	:m_storage(storage_),m_docid(docid_)
 {}
 
-Inserter::~Inserter()
+StorageInserter::~StorageInserter()
 {
 	//... nothing done here. The document id and term value or type strings 
 	//	created might remain inserted, even after a rollback.
 }
 
-Inserter::TermMapKey Inserter::termMapKey( const std::string& type_, const std::string& value_)
+StorageInserter::TermMapKey StorageInserter::termMapKey( const std::string& type_, const std::string& value_)
 {
 	Index typeno = m_storage->keyGetOrCreate( DatabaseKey::TermTypePrefix, type_);
 	Index valueno = m_storage->keyGetOrCreate( DatabaseKey::TermValuePrefix, value_);
 	return TermMapKey( typeno, valueno);
 }
 
-void Inserter::addTermOccurrence(
+void StorageInserter::addTermOccurrence(
 		const std::string& type_,
 		const std::string& value_,
 		const Index& position_)
@@ -69,21 +69,21 @@ void Inserter::addTermOccurrence(
 	m_invs[ InvMapKey( key.first, position_)] = value_;
 }
 
-void Inserter::setMetaData(
+void StorageInserter::setMetaData(
 		char name_,
 		float value_)
 {
 	m_metadata.push_back( DocMetaData( name_, value_));
 }
 
-void Inserter::setAttribute(
+void StorageInserter::setAttribute(
 		char name_,
 		const std::string& value_)
 {
 	m_attributes.push_back( DocAttribute( name_, value_));
 }
 
-void Inserter::done()
+void StorageInserter::done()
 {
 	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid);
 	bool documentFound = false;

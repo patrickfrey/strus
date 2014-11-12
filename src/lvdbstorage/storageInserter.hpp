@@ -28,21 +28,24 @@
 */
 #ifndef _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
 #define _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
-#include "storage.hpp"
+#include "strus/storageInserterInterface.hpp"
 #include <vector>
+#include <string>
 #include <set>
-#include <leveldb/db.h>
+#include <map>
 
 namespace strus {
+/// \brief Forward declaration
+class Storage;
 
-/// \class Inserter
-class Inserter
-	:public StorageInterface::InserterInterface
+/// \class StorageInserter
+class StorageInserter
+	:public StorageInserterInterface
 {
 public:
-	Inserter( Storage* storage_, const std::string& docid_);
+	StorageInserter( Storage* storage_, const std::string& docid_);
 
-	virtual ~Inserter();
+	virtual ~StorageInserter();
 	virtual void addTermOccurrence(
 			const std::string& type_,
 			const std::string& value_,
@@ -112,8 +115,8 @@ private:
 	};
 
 private:
-	Inserter( const Inserter&){}	//non copyable
-	void operator=( const Inserter&){}	//non copyable
+	StorageInserter( const StorageInserter&){}	//non copyable
+	void operator=( const StorageInserter&){}	//non copyable
 
 private:
 	Storage* m_storage;

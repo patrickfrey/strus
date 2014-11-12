@@ -14,7 +14,7 @@ CPP_OBJS=\
 	postingIterator.o \
 	nullIterator.o \
 	forwardIterator.o \
-	inserter.o \
+	storageInserter.o \
 	storageLib.o
 
 PRG_OBJS=\

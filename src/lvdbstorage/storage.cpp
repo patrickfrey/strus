@@ -29,9 +29,9 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "storage.hpp"
+#include "storageInserter.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
-#include "inserter.hpp"
 #include "databaseKey.hpp"
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
@@ -278,11 +278,11 @@ ForwardIteratorInterface*
 	return new ForwardIterator( this, m_db, type);
 }
 
-StorageInterface::InserterInterface*
+StorageInserterInterface*
 	Storage::createInserter(
 		const std::string& docid)
 {
-	return new Inserter( this, docid);
+	return new StorageInserter( this, docid);
 }
 
 void Storage::incrementNofDocumentsInserted()

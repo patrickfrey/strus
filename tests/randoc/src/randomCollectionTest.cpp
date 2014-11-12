@@ -32,6 +32,7 @@
 #include "strus/queryEvalLib.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
+#include "strus/storageInserterInterface.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -918,9 +919,9 @@ int main( int argc, const char* argv[])
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (; di != de; ++di,++totNofDocuments)
 		{
-			typedef boost::scoped_ptr<strus::StorageInterface::InserterInterface> Inserter;
+			typedef boost::scoped_ptr<strus::StorageInserterInterface> StorageInserter;
 
-			Inserter inserter( storage->createInserter( di->docid));
+			StorageInserter inserter( storage->createInserter( di->docid));
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
 
 			for (; oi != oe; ++oi,++totNofOccurrencies)
