@@ -366,7 +366,7 @@ std::vector<queryeval::ResultDocument>
 			std::size_t firstRank,
 			std::size_t maxNofRanks) const
 {
-	typedef std::multiset<WeightedDocument,WeightedDocument::CompareSmaller> Ranker;
+	typedef std::multiset<queryeval::WeightedDocument,queryeval::WeightedDocument::CompareSmaller> Ranker;
 
 	std::vector<queryeval::ResultDocument> rt;
 	Ranker ranker;
@@ -380,7 +380,7 @@ std::vector<queryeval::ResultDocument>
 
 	while (accu.nextRank( docno, state, weight))
 	{
-		ranker.insert( WeightedDocument( docno, weight));
+		ranker.insert( queryeval::WeightedDocument( docno, weight));
 		if (ranks >= lastRank)
 		{
 			ranker.erase( ranker.begin());

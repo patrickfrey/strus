@@ -56,16 +56,8 @@ public:
 	void flush();
 
 private:
-	typedef boost::shared_array<DocnoBlock::Element> ElementArray;
-	struct TermDocnoBlockMap
-	{
-		std::map<Index,ElementArray> m_map;
-		std::vector<DocnoBlock::Element> m_ar;
+	typedef std::map<Index,DocnoBlock::Element> ElementMap;
 
-		TermDocnoBlockMap(){}
-		TermDocnoBlockMap( const TermDocnoBlockMap& o)
-			:m_map(o.m_map),m_ar(o.m_ar){}
-	};
 	struct Term
 	{
 		Index type;
@@ -84,11 +76,20 @@ private:
 		}
 	};
 
+	void writeMergeBlock(
+		leveldb::WriteBatch& batch,
+		ElementMap::const_iterator& ei,
+		const ElementMap::const_iterator& ee,
+		const DocnoBlock* blk);
+
+private:
+	typedef std::map<Term,ElementMap> Map;
+
 private:
 	leveldb::DB* m_db;
 	leveldb::Iterator* m_itr;
 	boost::mutex m_mutex;
-	std::map<Term,TermDocnoBlockMap> m_map;
+	Map m_map;
 };
 
 }

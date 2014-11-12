@@ -42,6 +42,7 @@ public:
 	class Element
 	{
 	public:
+		Element() :m_docno(0),m_ff(0),m_weight(0.0){}
 		Element( Index docno_, unsigned int ff_, float weight_);
 		Element( const Element& o);
 
@@ -77,6 +78,10 @@ public:
 	std::size_t size() const
 	{
 		return m_arsize;
+	}
+	const Element* ar() const
+	{
+		return m_ar;
 	}
 
 	const Element& back() const

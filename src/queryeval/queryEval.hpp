@@ -29,7 +29,7 @@
 #ifndef _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
-#include "strus/weightedDocument.hpp"
+#include "strus/queryeval/resultDocument.hpp"
 #include "private/summarizerReference.hpp"
 #include "parser/joinFunction.hpp"
 #include "parser/joinOperation.hpp"

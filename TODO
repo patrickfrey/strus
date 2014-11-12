@@ -1,3 +1,4 @@
+implement deleteDocument
 summarization with help of weighted union iterator
 posinfo optional
 Group id in analyzer term and group operator in query eval program (making an join operation with all elements of one group)

@@ -43,6 +43,10 @@ public:
 	~DocnoBlockReader();
 
 	const DocnoBlock* readBlock( const Index& docno_);
+	const DocnoBlock* readLastBlock();
+
+private:
+	bool extractData();
 
 private:
 	leveldb::DB* m_db;

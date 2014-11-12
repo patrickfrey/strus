@@ -57,6 +57,31 @@ DocnoBlockReader::~DocnoBlockReader()
 	if (m_itr) delete m_itr;
 }
 
+bool DocnoBlockReader::extractData()
+{
+	if (m_itr->Valid()
+	&&  m_keysize <= m_itr->key().size()
+	&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
+	{
+		const char* vi = m_itr->value().data();
+		const char* ve = vi + m_itr->value().size();
+		const DocnoBlock::Element* ar
+			= reinterpret_cast<const DocnoBlock::Element*>( vi);
+		std::size_t arsize = (ve-vi)/sizeof(DocnoBlock::Element);
+		if (!arsize || arsize*sizeof(DocnoBlock::Element) != (std::size_t)(ve-vi))
+		{
+			throw std::runtime_error( "corrupt docno block");
+		}
+		m_docnoBlock.init( ar, arsize);
+		return true;
+	}
+	else
+	{
+		m_docnoBlock.clear();
+		return false;
+	}
+}
+
 const DocnoBlock* DocnoBlockReader::readBlock( const Index& docno_)
 {
 	if (!m_docnoBlock.empty())
@@ -90,28 +115,40 @@ const DocnoBlock* DocnoBlockReader::readBlock( const Index& docno_)
 		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
 	}
 	m_last_docno = docno_;
-
-	if (m_itr->Valid()
-	&&  m_keysize <= m_itr->key().size()
-	&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
+	if (extractData())
 	{
-		const char* vi = m_itr->value().data();
-		const char* ve = vi + m_itr->value().size();
-		const DocnoBlock::Element* ar
-			= reinterpret_cast<const DocnoBlock::Element*>( vi);
-		std::size_t arsize = (ve-vi)/sizeof(DocnoBlock::Element);
-		if (!arsize || arsize*sizeof(DocnoBlock::Element) != (std::size_t)(ve-vi))
-		{
-			throw std::runtime_error( "corrupt docno block");
-		}
-		m_docnoBlock.init( ar, arsize);
 		return &m_docnoBlock;
 	}
 	else
 	{
-		m_docnoBlock.clear();
 		return 0;
 	}
 }
 
+const DocnoBlock* DocnoBlockReader::readLastBlock()
+{
+	if (!m_itr)
+	{
+		leveldb::ReadOptions options;
+		options.fill_cache = true;
+		m_itr = m_db->NewIterator( options);
+	}
+	m_key.resize( m_keysize);
+	m_key.addPrefix( (char)0xff);
+	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
+	if (!m_itr->Valid())
+	{
+		m_itr->SeekToLast();
+		if (!m_itr->Valid()) return 0;
+		m_itr->Prev();
+	}
+	if (extractData())
+	{
+		return &m_docnoBlock;
+	}
+	else
+	{
+		return 0;
+	}
+}
 
