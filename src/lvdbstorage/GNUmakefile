@@ -10,6 +10,7 @@ CPP_OBJS=\
 	storage.o \
 	docnoBlock.o \
 	docnoBlockReader.o \
+	docnoBlockMap.o \
 	docnoIterator.o \
 	postingIterator.o \
 	nullIterator.o \

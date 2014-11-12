@@ -28,7 +28,9 @@
 */
 #include "docnoBlockMap.hpp"
 #include "databaseKey.hpp"
+#include "docnoBlockReader.hpp"
 #include <boost/scoped_ptr.hpp>
+#include <leveldb/write_batch.h>
 
 using namespace strus;
 
@@ -55,71 +57,95 @@ void DocnoBlockMap::defineDocnoPosting(
 	}
 }
 
+void DocnoBlockMap::writeBlock(
+	leveldb::WriteBatch& batch,
+	const Index& typeno,
+	const Index& valueno,
+	const DocnoBlock::Element* blkptr,
+	std::size_t blksize)
+{
+	Index docno = blkptr[ blksize-1].docno();
+
+	DatabaseKey key( (char)DatabaseKey::DocnoBlockPrefix,
+			 typeno, valueno, docno);
+	
+	leveldb::Slice keyslice( key.ptr(), key.size());
+	leveldb::Slice valueslice(
+		(const char*)blkptr, blksize*sizeof(*blkptr));
+
+	batch.Put( keyslice, valueslice);
+}
+
+void DocnoBlockMap::deleteBlock(
+	leveldb::WriteBatch& batch,
+	const Index& typeno,
+	const Index& valueno,
+	const Index& docno)
+{
+	DatabaseKey key( (char)DatabaseKey::DocnoBlockPrefix,
+			 typeno, valueno, docno);
+	
+	leveldb::Slice keyslice( key.ptr(), key.size());
+	batch.Delete( keyslice);
+}
+
 void DocnoBlockMap::writeMergeBlock(
 		leveldb::WriteBatch& batch,
+		const Index& typeno,
+		const Index& valueno,
 		ElementMap::const_iterator& ei,
 		const ElementMap::const_iterator& ee,
 		const DocnoBlock* blk)
 {
-	Index docno = blk->back().docno();
-
-	ElementMap::const_iterator cnt_ei = ei;
-	// Count the entries to be merged into 'blk':
-	std::size_t nofmrg = 0;
-	for (; cnt_ei != ee; ++cnt_ei)
-	{
-		if (cnt_ei->first > blk->back().docno()) break;
-		++nofmrg;
-	}
-
 	// Create the new block to replace the old:
 	std::size_t newblksize = 0;
-	DocnoBlock::Element* newblk
-		= new DocnoBlock::Element[ blk->size() + nofmrg];
-	boost::scoped_ptr<DocnoBlock::Element> newblk_ref(newblk);
+	DocnoBlock::Element newblk[ BlockSize*2];
 
 	// Merge the old block with the found entries
 	// into the new block:
-	const DocnoBlock::Element*
-		di = blk->ar(),
-		de = blk->ar() + blk->size();
-	for (std::size_t mrgcnt; di != de && mrgcnt < nofmrg;)
+	const DocnoBlock::Element* di = blk->ar();
+	const DocnoBlock::Element* de = blk->ar() + blk->size();
+
+	while (ei != ee && ei->first <= blk->back().docno() && di != de)
 	{
-		if (di->docno() == ei->docno())
+		if (di->docno() == ei->first)
 		{
 			//... overwrite old with new definition
-			newblk[ newblksize++] = *ei;
+			newblk[ newblksize++] = ei->second;
 			++di;
 			++ei;
-			--mrgcnt;
 		}
-		else if (di->docno() < ei->docno())
+		else if (di->docno() < ei->first)
 		{
 			newblk[ newblksize++] = *di;
 			++di;
 		}
 		else
 		{
-			newblk[ newblksize++] = *ei;
+			newblk[ newblksize++] = ei->second;
 			++ei;
-			--mrgcnt;
+		}
+		if (newblksize == BlockSize*2)
+		{
+			writeBlock( batch, typeno, valueno, newblk, BlockSize);
+			std::memmove( newblk, newblk + BlockSize,
+					BlockSize * sizeof(DocnoBlock::Element));
+			newblksize = BlockSize;
 		}
 	}
 	for (; di != de; ++di)
 	{
 		newblk[ newblksize++] = *di;
+		if (newblksize == BlockSize*2)
+		{
+			writeBlock( batch, typeno, valueno, newblk, BlockSize);
+			std::memmove( newblk, newblk + BlockSize,
+					BlockSize * sizeof(DocnoBlock::Element));
+			newblksize = BlockSize;
+		}
 	}
 	// Write the block to the batch:
-	DatabaseKey key(
-		(char)DatabaseKey::DocnoBlockPrefix,
-		mi->first.type, mi->first.value, docno);
-	
-	leveldb::Slice keyslice( key.ptr(), key.size());
-	leveldb::Slice valueslice(
-		(const char*)newblk,
-		newblksize*sizeof(*newblk));
-
-	batch.Put( keyslice, valueslice);
+	writeBlock( batch, typeno, valueno, newblk, newblksize);
 }
 
 void DocnoBlockMap::flush()
@@ -139,14 +165,54 @@ void DocnoBlockMap::flush()
 
 		while (!!(blk=blkreader.readBlock( ei->first)))
 		{
-			writeMergeBlock( batch, ei, ee, blk);
+			writeMergeBlock(
+				batch, mi->first.type, mi->first.value,
+				ei, ee, blk);	
 		}
-		blk = blkreader->readLastBlock();
+		std::size_t newblksize = 0;
+		DocnoBlock::Element newblk[ BlockSize];
+
+		// Join new elements with last block to a block with size BlockSize:
+		blk = blkreader.readLastBlock();
 		if (blk)
 		{
-			if ()
+			if (blk->size() < BlockSize)
+			{
+				deleteBlock(
+					batch, mi->first.type,
+					mi->first.value, blk->back().docno());
+				while (newblksize < blk->size())
+				{
+					newblk[ newblksize] = blk->ar()[ newblksize];
+					++newblksize;
+				}
+			}
+		}
+		// Write rest elements to new blocks:
+		while (ei != ee)
+		{
+			for (;newblksize < BlockSize && ei != ee; ++ei,++newblksize)
+			{
+				newblk[ newblksize] = ei->second;
+			}
+			writeBlock( batch, mi->first.type, mi->first.value,
+					newblk, newblksize);
+			newblksize = 0;
+		}
+		if (newblksize)
+		{
+			writeBlock( batch, mi->first.type, mi->first.value,
+					newblk, newblksize);
 		}
 	}
+
+	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	batch.Clear();
+	m_map.clear();
 }
 
 

@@ -68,22 +68,38 @@ private:
 		Term( const Term& o)
 			:type(o.type),value(o.value){}
 
-		bool operator < (const Term& a, const Term& b) const
+		bool operator < (const Term& o) const
 		{
-			if (a.type < b.type) return true;
-			if (a.type > b.type) return false;
-			return a.value < b.value;
+			if (type < o.type) return true;
+			if (type > o.type) return false;
+			return value < o.value;
 		}
 	};
 
+	void writeBlock(
+		leveldb::WriteBatch& batch,
+		const Index& typeno,
+		const Index& valueno,
+		const DocnoBlock::Element* blkptr,
+		std::size_t blksize);
+
+	void deleteBlock(
+		leveldb::WriteBatch& batch,
+		const Index& typeno,
+		const Index& valueno,
+		const Index& docno);
+
 	void writeMergeBlock(
 		leveldb::WriteBatch& batch,
+		const Index& typeno,
+		const Index& valueno,
 		ElementMap::const_iterator& ei,
 		const ElementMap::const_iterator& ee,
 		const DocnoBlock* blk);
 
 private:
 	typedef std::map<Term,ElementMap> Map;
+	enum {BlockSize=128};
 
 private:
 	leveldb::DB* m_db;
