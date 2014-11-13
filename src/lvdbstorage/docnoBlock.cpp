@@ -57,17 +57,20 @@ void DocnoBlock::init( const Element* ar_, std::size_t arsize_)
 const DocnoBlock::Element* DocnoBlock::upper_bound( const Index& docno_) const
 {
 	std::size_t first=0,last=m_arsize;
+	std::size_t mid = first + ((first + last) >> 4);
+
 	while (first+4 < last)
 	{
-		std::size_t mid = (first + last) >> 1;
 		Index dn = m_ar[ mid].docno();
 		if (dn < docno_)
 		{
 			first = mid+1;
+			mid = (first + last) >> 1;
 		}
 		else if (dn > docno_)
 		{
 			last = mid+1;
+			mid = (first + last) >> 1;
 		}
 		else
 		{

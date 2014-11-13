@@ -112,8 +112,8 @@ Index PostingIterator::skipDoc( const Index& docno_)
 	{
 		m_lastdocno = docno_;
 		m_docno = dn;
-		return dn;
 	}
+	return dn;
 #if 0
 	if (m_itr && m_docno +1 == docno_)
 	{
