@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
+#include "docnoIterator.hpp"
 #include "databaseKey.hpp"
 #include <leveldb/db.h>
 
@@ -59,7 +60,7 @@ public:
 
 	virtual unsigned int frequency()
 	{
-		return m_frequency;
+		return m_docnoitr.frequency();
 	}
 
 	virtual Index documentFrequency();
@@ -90,6 +91,7 @@ private:
 	Index getFirstTermDoc( const Index& docno);
 
 private:
+	DocnoIterator m_docnoitr;
 	leveldb::DB* m_db;
 	Index m_termtypeno;
 	Index m_termvalueno;
@@ -99,7 +101,6 @@ private:
 	Index m_lastdocno;
 	Index m_documentFrequency;
 	leveldb::Iterator* m_itr;
-	unsigned int m_frequency;
 	Index m_posno;
 	const char* m_positr;
 	const char* m_posend;

@@ -33,6 +33,8 @@
 #include "databaseKey.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataBlockMap.hpp"
+#include "docnoBlock.hpp"
+#include "docnoBlockMap.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -87,6 +89,14 @@ public:
 public:
 	void defineMetaData( Index docno, char varname, float value);
 
+	void defineDocnoPosting(
+		const Index& termtype, const Index& termvalue,
+		const Index& docno, unsigned int ff, float weight);
+
+	void deleteDocnoPosting(
+		const Index& termtype, const Index& termvalue,
+		const Index& docno);
+
 	void writeIndex( const leveldb::Slice& key, const leveldb::Slice& value);
 	void deleteIndex( const leveldb::Slice& key);
 
@@ -108,6 +118,7 @@ private:
 	void flushNewKeys();
 	void flushDfs();
 	void flushMetaData();
+	void flushDocnoMap();
 	void flushIndex();
 
 	struct stlSliceComparator
@@ -137,6 +148,7 @@ private:
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
 	DfMap m_dfMap;						///< temporary map for the document frequency of new inserted features
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
+	DocnoBlockMap* m_docnoBlockMap;				///< map of docno postings for writing
 	Index m_flushCnt;
 };
 

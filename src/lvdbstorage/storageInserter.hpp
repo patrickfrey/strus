@@ -49,7 +49,8 @@ public:
 	virtual void addTermOccurrence(
 			const std::string& type_,
 			const std::string& value_,
-			const Index& position_);
+			const Index& position_,
+			float weight_);
 
 	virtual void setMetaData(
 			char name_,
@@ -65,11 +66,13 @@ private:
 	typedef std::pair<Index,Index> TermMapKey;
 	struct TermMapValue
 	{
-		TermMapValue(){}
+		TermMapValue()
+			:weight(0.0){}
 		TermMapValue( const TermMapValue& o)
-			:pos(o.pos){}
+			:pos(o.pos),weight(o.weight){}
 
 		std::set<Index> pos;
+		float weight;
 	};
 	typedef std::map< TermMapKey, TermMapValue> TermMap;
 

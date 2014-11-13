@@ -46,10 +46,12 @@ public:
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document
+	/// \param[in] weight_ additional weight of the term at this position in the document
 	virtual void addTermOccurrence(
 			const std::string& type_,
 			const std::string& value_,
-			const Index& position_)=0;
+			const Index& position_,
+			float weight_)=0;
 
 	/// \brief Define a numeric attribute for the document with fast access for query evaluation
 	/// \note Meta data used for query restrictions are declared here

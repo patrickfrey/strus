@@ -56,6 +56,14 @@ void DocnoBlockMap::defineDocnoPosting(
 	}
 }
 
+void DocnoBlockMap::deleteDocnoPosting(
+	const Index& termtype,
+	const Index& termvalue,
+	const Index& docno)
+{
+	defineDocnoPosting( termtype, termvalue, docno, 0, 0.0);
+}
+
 void DocnoBlockMap::writeBlock(
 	leveldb::WriteBatch& batch,
 	const Index& typeno,
@@ -109,8 +117,15 @@ void DocnoBlockMap::writeMergeBlock(
 	{
 		if (di->docno() == ei->first)
 		{
-			//... overwrite old with new definition
-			newblk[ newblksize++] = ei->second;
+			if (ei->second.ff())
+			{
+				//... overwrite old with new definition
+				newblk[ newblksize++] = ei->second;
+			}
+			else
+			{
+				//... ff==0 means delete old definition
+			}
 			++di;
 			++ei;
 		}
@@ -121,7 +136,10 @@ void DocnoBlockMap::writeMergeBlock(
 		}
 		else
 		{
-			newblk[ newblksize++] = ei->second;
+			if (ei->second.ff())
+			{
+				newblk[ newblksize++] = ei->second;
+			}
 			++ei;
 		}
 		if (newblksize == BlockSize*2)

@@ -52,6 +52,11 @@ public:
 		unsigned int ff,
 		float weight);
 
+	void deleteDocnoPosting(
+		const Index& termtype,
+		const Index& termvalue,
+		const Index& docno);
+	
 	void flush();
 
 private:

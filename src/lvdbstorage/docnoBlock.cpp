@@ -41,12 +41,12 @@ DocnoBlock::DocnoBlock()
 DocnoBlock::DocnoBlock( const Element* ar_, std::size_t arsize_)
 	:m_ar(ar_)
 	,m_arsize(arsize_)
-{
-}
+{}
 
 DocnoBlock::DocnoBlock( const DocnoBlock& o)
 	:m_ar(o.m_ar)
-	,m_arsize(o.m_arsize){}
+	,m_arsize(o.m_arsize)
+{}
 
 void DocnoBlock::init( const Element* ar_, std::size_t arsize_)
 {
@@ -57,7 +57,7 @@ void DocnoBlock::init( const Element* ar_, std::size_t arsize_)
 const DocnoBlock::Element* DocnoBlock::upper_bound( const Index& docno_) const
 {
 	std::size_t first=0,last=m_arsize;
-	while (first+3 < last)
+	while (first+4 < last)
 	{
 		std::size_t mid = (first + last) >> 1;
 		Index dn = m_ar[ mid].docno();
@@ -67,7 +67,7 @@ const DocnoBlock::Element* DocnoBlock::upper_bound( const Index& docno_) const
 		}
 		else if (dn > docno_)
 		{
-			last = mid;
+			last = mid+1;
 		}
 		else
 		{

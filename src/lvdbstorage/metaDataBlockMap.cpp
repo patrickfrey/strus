@@ -42,9 +42,9 @@ void MetaDataBlockMap::defineMetaData( Index docno, char varname, float value)
 	Map::const_iterator mi = m_map.find( key);
 	if (mi == m_map.end())
 	{
+		MetaDataBlock* blk = readMetaDataBlockFromDB( blockno, varname);
 		MetaDataBlockReference& block = m_map[ key];
-
-		block.reset( readMetaDataBlockFromDB( blockno, varname));
+		block.reset( blk);
 		block->setValue( docno, value);
 	}
 	else
@@ -61,6 +61,8 @@ void MetaDataBlockMap::flush()
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
+		if (!mi->second.get()) continue;
+
 		DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix,
 				 mi->second->varname(), mi->second->blockno());
 
@@ -96,7 +98,7 @@ MetaDataBlock* MetaDataBlockMap::readMetaDataBlockFromDB( Index blockno, char va
 	{
 		throw std::runtime_error( status.ToString());
 	}
-	if (value.size() != sizeof(MetaDataBlock::MetaDataBlockSize) * sizeof(float))
+	if (value.size() != MetaDataBlock::MetaDataBlockSize * sizeof(float))
 	{
 		throw std::runtime_error( "internal: size of metadata block on disk does not match");
 	}

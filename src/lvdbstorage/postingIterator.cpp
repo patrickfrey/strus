@@ -44,7 +44,8 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 #else
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
-	:m_db(db_)
+	:m_docnoitr(m_db,termtypeno,termvalueno)
+	,m_db(db_)
 	,m_termtypeno(termtypeno)
 	,m_termvalueno(termvalueno)
 	,m_key( (char)DatabaseKey::InvertedIndexPrefix, termtypeno, termvalueno)
@@ -53,7 +54,6 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 	,m_lastdocno(0)
 	,m_documentFrequency(-1)
 	,m_itr(0)
-	,m_frequency(0)
 	,m_posno(0)
 	,m_positr(0)
 	,m_posend(0)
@@ -72,6 +72,7 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 
 PostingIterator::PostingIterator( const PostingIterator& o)
 	:PostingIteratorInterface(o)
+	,m_docnoitr(o.m_db,o.m_termtypeno,o.m_termvalueno)
 	,m_db(o.m_db)
 	,m_termtypeno(o.m_termtypeno)
 	,m_termvalueno(o.m_termvalueno)
@@ -81,7 +82,6 @@ PostingIterator::PostingIterator( const PostingIterator& o)
 	,m_lastdocno(0)
 	,m_documentFrequency(o.m_documentFrequency)
 	,m_itr(0)
-	,m_frequency(o.m_frequency)
 	,m_posno(0)
 	,m_positr(0)
 	,m_posend(0)
@@ -107,6 +107,14 @@ Index PostingIterator::skipDoc( const Index& docno_)
 			return m_docno;
 		}
 	}
+	Index dn = m_docnoitr.skipDoc( docno_);
+	if (dn)
+	{
+		m_lastdocno = docno_;
+		m_docno = dn;
+		return dn;
+	}
+#if 0
 	if (m_itr && m_docno +1 == docno_)
 	{
 		return getNextTermDoc();
@@ -115,10 +123,14 @@ Index PostingIterator::skipDoc( const Index& docno_)
 	{
 		return getFirstTermDoc( docno_);
 	}
+#endif
 }
 
 Index PostingIterator::skipPos( const Index& firstpos_)
 {
+#if 1
+	if (!getFirstTermDoc( m_docno)) return 0;
+#endif
 	if (m_posno >= firstpos_)
 	{
 		if (m_posno == firstpos_ && firstpos_ != 0)
@@ -187,7 +199,7 @@ Index PostingIterator::extractMatchData()
 		m_posno = 0;
 		m_positr = m_itr->value().data();
 		m_posend = m_positr + m_itr->value().size();
-		m_frequency = (unsigned int)unpackIndex( m_positr, m_posend);
+		(void)unpackIndex( m_positr, m_posend);/*ff*/
 
 		// Extract the next matching document number from the rest of the key and return it:
 		const char* ki = m_itr->key().data() + m_keysize;
@@ -200,7 +212,6 @@ Index PostingIterator::extractMatchData()
 		delete m_itr;
 		m_docno = 0;
 		m_itr = 0;
-		m_frequency = 0;
 		m_posno = 0;
 		m_positr = 0;
 		m_posend = 0;

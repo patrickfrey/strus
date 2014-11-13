@@ -60,12 +60,15 @@ StorageInserter::TermMapKey StorageInserter::termMapKey( const std::string& type
 void StorageInserter::addTermOccurrence(
 		const std::string& type_,
 		const std::string& value_,
-		const Index& position_)
+		const Index& position_,
+		float weight_)
 {
 	if (position_ == 0) throw std::runtime_error( "term occurrence position must not be 0");
 
 	TermMapKey key( termMapKey( type_, value_));
-	m_terms[ key].pos.insert( position_);
+	TermMapValue& ref = m_terms[ key];
+	ref.pos.insert( position_);
+	ref.weight += weight_;
 	m_invs[ InvMapKey( key.first, position_)] = value_;
 }
 
@@ -207,6 +210,11 @@ void StorageInserter::done()
 #endif
 		m_storage->writeIndex( leveldb::Slice( termkey.ptr(), termkey.size()), positions);
 		m_storage->incrementDf( ti->first.first, ti->first.second);
+
+		m_storage->defineDocnoPosting(
+				ti->first.first, ti->first.second,
+				docno, ti->second.pos.size(),
+				ti->second.weight);
 	}
 
 	// [4] Insert the new inverted info with key [ForwardIndexPrefix, docno, typeno, pos]:

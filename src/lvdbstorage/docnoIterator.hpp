@@ -53,17 +53,17 @@ public:
 
 	unsigned int frequency()
 	{
-		if (m_curelem) return m_curelem->ff();
+		return m_curelem?m_curelem->ff():0;
 	}
 
 	Index docno() const
 	{
-		if (m_curelem) return m_curelem->docno();
+		return m_curelem?m_curelem->docno():0;
 	}
 
 	float weight() const
 	{
-		if (m_curelem) return m_curelem->weight();
+		return m_curelem?m_curelem->weight():0.0;
 	}
 
 private:

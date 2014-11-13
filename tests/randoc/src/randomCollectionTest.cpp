@@ -927,7 +927,7 @@ int main( int argc, const char* argv[])
 			for (; oi != oe; ++oi,++totNofOccurrencies)
 			{
 				const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
-				inserter->addTermOccurrence( term.type, term.value, oi->pos);
+				inserter->addTermOccurrence( term.type, term.value, oi->pos, 0.0);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
 #endif

@@ -36,6 +36,7 @@
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
+#include "docnoBlockReader.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -45,7 +46,7 @@
 using namespace strus;
 
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
-	:m_path(path_),m_db(0),m_metaDataBlockMap(0),m_flushCnt(0)
+	:m_path(path_),m_db(0),m_metaDataBlockMap(0),m_docnoBlockMap(0),m_flushCnt(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
@@ -64,6 +65,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 		m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
 		if (m_nof_documents) m_nof_documents -= 1;
 		m_metaDataBlockMap = new MetaDataBlockMap( m_db);
+		m_docnoBlockMap = new DocnoBlockMap( m_db);
 	}
 	else
 	{
@@ -114,6 +116,7 @@ void Storage::flush()
 	flushNewKeys();
 	flushDfs();
 	flushMetaData();
+	flushDocnoMap();
 	flushIndex();
 }
 
@@ -128,6 +131,7 @@ Storage::~Storage()
 		//... silently ignored. Call close directly to catch errors
 	}
 	if (m_metaDataBlockMap) delete m_metaDataBlockMap;
+	if (m_docnoBlockMap) delete m_docnoBlockMap;
 	if (m_db) delete m_db;
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
@@ -333,6 +337,26 @@ void Storage::defineMetaData( Index docno, char varname, float value)
 void Storage::flushMetaData()
 {
 	m_metaDataBlockMap->flush();
+}
+
+void Storage::defineDocnoPosting(
+	const Index& termtype, const Index& termvalue,
+	const Index& docno, unsigned int ff, float weight)
+{
+	m_docnoBlockMap->defineDocnoPosting(
+		termtype, termvalue, docno, ff, weight);
+}
+
+void Storage::deleteDocnoPosting(
+	const Index& termtype, const Index& termvalue,
+	const Index& docno)
+{
+	m_docnoBlockMap->deleteDocnoPosting( termtype, termvalue, docno);
+}
+
+void Storage::flushDocnoMap()
+{
+	m_docnoBlockMap->flush();
 }
 
 void Storage::flushIndex()
