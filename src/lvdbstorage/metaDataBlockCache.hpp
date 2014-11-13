@@ -26,20 +26,71 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
-#define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "metaDataBlock.hpp"
+#include <utility>
+#include <stdexcept>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace strus {
 
-/// \class MetaDataReaderInterface
-/// \brief Interface for reading document metadata
-class MetaDataReaderInterface
+class MetaDataBlockCache
 {
 public:
-	virtual ~MetaDataReaderInterface(){}
+	MetaDataBlockCache( leveldb::DB* db_);
 
-	virtual float readValue( const Index& docno_)=0;
+	~MetaDataBlockCache(){}
+
+	void resetBlock( Index blockno_, char varname_);
+
+	float getValue( Index docno_, char varname_);
+
+private:
+	enum {
+		VarnameMin=33,
+		VarnameMax=127,
+		VarnameDim=(VarnameMax-VarnameMin+1)
+	};
+
+	std::size_t aridx( char varname)
+	{
+		unsigned char rt = (unsigned char)varname-VarnameMin;
+		if (rt > (unsigned char)VarnameDim)
+		{
+			throw std::runtime_error("internal: metadata variable out of range");
+		}
+		return (std::size_t)rt;
+	}
+
+private:
+	struct BlockRef
+	{
+		boost::shared_ptr<MetaDataBlock> ref;
+		boost::mutex mutex;
+
+		BlockRef(){}
+	};
+
+	struct BlockArray
+	{
+		boost::shared_array<BlockRef> ar;
+		std::size_t arsize;
+
+		BlockArray()
+			:arsize(0){}
+
+		void resize( std::size_t nofBlocks_);
+
+		MetaDataBlockRef& operator[]( std::size_t idx);
+		MetaDataBlockRef operator[]( std::size_t idx) const;
+	};
+
+private:
+	leveldb::DB* m_db;
+	BockArray m_ar[VarnameMax-VarnameMin+1];
 };
 
 }

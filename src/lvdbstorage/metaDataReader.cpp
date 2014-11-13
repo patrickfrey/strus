@@ -29,80 +29,34 @@
 #include "metaDataReader.hpp"
 #include "metaDataBlock.hpp"
 #include "databaseKey.hpp"
-#include "indexPacker.hpp"
 #include <stdexcept>
 #include <cstring>
 
 using namespace strus;
 
-MetaDataReader::MetaDataReader( leveldb::DB* db_, char varname_)
-	:m_db(db_)
-	,m_itr(0)
-	,m_varname(varname_)
-	,m_key( (char)DatabaseKey::DocMetaDataPrefix, varname_)
-	,m_blockno(0)
-	,m_blk(0)
+MetaDataBlock* MetaDataReader::readBlockFromDB( leveldb::DB* db, Index blockno, char varname)
 {
-	leveldb::ReadOptions options;
-	options.fill_cache = true;
-	m_itr = db_->NewIterator( options);
+	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, varname, blockno);
+	leveldb::Slice constkey( key.ptr(), key.size());
+	std::string value;
+	value.reserve( MetaDataBlock::MetaDataBlockSize*sizeof(float));
+	leveldb::Status status = db->Get( leveldb::ReadOptions(), constkey, &value);
+
+	if (status.IsNotFound())
+	{
+		return new MetaDataBlock( blockno);
+	}
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	if (value.size() != MetaDataBlock::MetaDataBlockSize * sizeof(float))
+	{
+		throw std::runtime_error( "internal: size of metadata block on disk does not match");
+	}
+	const float* blk = reinterpret_cast<const float*>( value.c_str());
+	return new MetaDataBlock( blockno, blk, MetaDataBlock::MetaDataBlockSize);
 }
-
-MetaDataReader::~MetaDataReader()
-{
-	delete m_itr;
-}
-
-float MetaDataReader::readValue( const Index& docno_)
-{
-	Index blockno_ = MetaDataBlock::blockno( docno_);
-	std::size_t index_ = MetaDataBlock::index( docno_);
-
-	if (m_blockno == blockno_ && m_blk)
-	{
-		return m_blk[ index_];
-	}
-	else if (m_blockno +1 == blockno_ && m_blockno)
-	{
-		m_blockno = blockno_;
-		m_itr->Next();
-	}
-	else
-	{
-		m_blockno = blockno_;
-		m_key.resize( 2);
-		m_key.addElem( m_blockno);
-		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
-	}
-	if (m_itr->Valid()
-	&&  (2 > m_itr->key().size()
-		|| 0!=std::memcmp( m_key.ptr(), m_itr->key().data(), 2)))
-	{
-		m_blk = 0;
-		m_blockno = 0;
-		return 0.0;
-	}
-	m_blk = reinterpret_cast<const float*>( m_itr->value().data());
-	// ... memory is aligned to word length
-	unsigned int valuesize = m_itr->value().size();
-	if (valuesize != MetaDataBlock::MetaDataBlockSize * sizeof(float))
-	{
-		m_blk = 0;
-		m_blockno = 0;
-		throw std::runtime_error( "internal: corrupt metadata block");
-	}
-	char const* ki = m_key.ptr()+2;
-	char const* ke = m_key.ptr()+m_key.size();
-
-	Index nextBlockno = unpackIndex( ki, ke);
-	if (m_blockno != nextBlockno)
-	{
-		m_blockno = nextBlockno;
-		return 0.0;
-	}
-	return m_blk[ index_];
-}
-
 
 
 

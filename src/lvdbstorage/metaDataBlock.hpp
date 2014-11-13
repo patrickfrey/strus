@@ -36,18 +36,18 @@ namespace strus {
 class MetaDataBlock
 {
 public:
-	MetaDataBlock( Index blockno_, char varname_);
-	MetaDataBlock( Index blockno_, char varname_,
+	MetaDataBlock( Index blockno_);
+	MetaDataBlock( Index blockno_,
 			const float* blk_, std::size_t blksize_);
+
 	MetaDataBlock( const MetaDataBlock& o);
 
-	virtual ~MetaDataBlock(){}
+	~MetaDataBlock(){}
 
 	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
 	static Index blockno( Index docno)			{return (docno>>MetaDataBlockShift)+1;}
 
 	Index blockno() const					{return m_blockno;}
-	char varname() const					{return m_varname;}
 	const float* data() const				{return m_blk;}
 
 	void setValue( Index docno, float value);
@@ -55,17 +55,16 @@ public:
 
 public:
 	enum {
-		MetaDataBlockSize=64
+		MetaDataBlockSize=256
 	};
 private:
 	enum {
 		MetaDataBlockMask=((int)MetaDataBlockSize-1),
-		MetaDataBlockShift=6
+		MetaDataBlockShift=8
 	};
 
 private:
 	Index m_blockno;
-	char m_varname;
 	float m_blk[ MetaDataBlockSize];
 };
 

@@ -59,7 +59,6 @@ public:
 
 private:
 	const StorageInterface* m_storage;
-	MetaDataReaderInterface* m_doclenReader;
 	float m_k1;
 	float m_b;
 	float m_avgDocLength;

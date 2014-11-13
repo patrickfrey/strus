@@ -72,8 +72,7 @@ public:
 	virtual StorageInserterInterface*
 			createInserter( const std::string& docid);
 
-	virtual MetaDataReaderInterface*
-			createMetaDataReader( char varname) const;
+	virtual float documentMetaData( Index docno, char varname) const;
 
 	virtual Index nofDocumentsInserted() const;
 
@@ -148,6 +147,7 @@ private:
 	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
 	DfMap m_dfMap;						///< temporary map for the document frequency of new inserted features
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
+	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	DocnoBlockMap* m_docnoBlockMap;				///< map of docno postings for writing
 	Index m_flushCnt;
 };

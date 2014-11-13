@@ -46,7 +46,7 @@
 using namespace strus;
 
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
-	:m_path(path_),m_db(0),m_metaDataBlockMap(0),m_docnoBlockMap(0),m_flushCnt(0)
+	:m_path(path_),m_db(0),m_metaDataBlockMap(0),m_metaDataBlockCache(0),m_docnoBlockMap(0),m_flushCnt(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
@@ -64,12 +64,34 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 		m_next_docno = keyLookUp( DatabaseKey::VariablePrefix, "DocNo");
 		m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
 		if (m_nof_documents) m_nof_documents -= 1;
-		m_metaDataBlockMap = new MetaDataBlockMap( m_db);
-		m_docnoBlockMap = new DocnoBlockMap( m_db);
+		try
+		{
+			m_metaDataBlockCache = new MetaDataBlockCache( m_db);
+			m_metaDataBlockMap = new MetaDataBlockMap( m_db, m_metaDataBlockCache);
+			m_docnoBlockMap = new DocnoBlockMap( m_db);
+		}
+		catch (const std::bad_alloc&)
+		{
+			if (m_metaDataBlockMap) delete m_metaDataBlockMap;
+			m_metaDataBlockMap = 0;
+			if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
+			m_metaDataBlockCache = 0;
+			if (m_docnoBlockMap) delete m_docnoBlockMap;
+			m_docnoBlockMap = 0;
+			if (m_db) delete m_db;
+			m_db = 0;
+			if (m_dboptions.block_cache) delete m_dboptions.block_cache;
+			m_dboptions.block_cache = 0;
+		}
 	}
 	else
 	{
 		std::string err = status.ToString();
+		if (!!m_dboptions.block_cache)
+		{
+			if (m_dboptions.block_cache) delete m_dboptions.block_cache;
+			m_dboptions.block_cache = 0;
+		}
 		if (!!m_db)
 		{
 			delete m_db;
@@ -131,6 +153,7 @@ Storage::~Storage()
 		//... silently ignored. Call close directly to catch errors
 	}
 	if (m_metaDataBlockMap) delete m_metaDataBlockMap;
+	if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
 	if (m_docnoBlockMap) delete m_docnoBlockMap;
 	if (m_db) delete m_db;
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
@@ -329,6 +352,12 @@ std::string Storage::documentAttribute( Index docno, char varname) const
 	return value;
 }
 
+
+virtual float Storage::documentMetaData( Index docno, char varname) const
+{
+	return m_metaDataBlockMap->documentMetaData( docno, varname);
+}
+
 void Storage::defineMetaData( Index docno, char varname, float value)
 {
 	m_metaDataBlockMap->defineMetaData( docno, varname, value);
@@ -436,9 +465,5 @@ void Storage::flushDfs()
 	m_dfMap.clear();
 }
 
-MetaDataReaderInterface* Storage::createMetaDataReader( char varname) const
-{
-	return new MetaDataReader( m_db, varname);
-}
 
 

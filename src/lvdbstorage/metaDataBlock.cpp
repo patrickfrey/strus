@@ -33,22 +33,22 @@
 
 using namespace strus;
 
-MetaDataBlock::MetaDataBlock( Index blockno_, char varname_)
-	:m_blockno(blockno_),m_varname(varname_)
+MetaDataBlock::MetaDataBlock( Index blockno_)
+	:m_blockno(blockno_)
 {
 	std::memset( m_blk, 0, sizeof(m_blk));
 }
 
-MetaDataBlock::MetaDataBlock( Index blockno_, char varname_, 
+MetaDataBlock::MetaDataBlock( Index blockno_,
 				const float* blk_, std::size_t blksize_)
-	:m_blockno(blockno_),m_varname(varname_)
+	:m_blockno(blockno_)
 {
 	if (blksize_ != MetaDataBlockSize) throw std::runtime_error( "meta data block size mismatch");
 	std::memcpy( m_blk, blk_, sizeof(m_blk));
 }
 
 MetaDataBlock::MetaDataBlock( const MetaDataBlock& o)
-	:m_blockno(o.m_blockno),m_varname(o.m_varname)
+	:m_blockno(o.m_blockno)
 {
 	std::memcpy( m_blk, o.m_blk, sizeof(m_blk));
 }

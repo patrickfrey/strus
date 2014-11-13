@@ -27,8 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "metaDataBlockMap.hpp"
+#include "metaDataReader.hpp"
 #include "databaseKey.hpp"
-#include "docnoBlockReader.hpp"
 #include <leveldb/write_batch.h>
 #include <cstring>
 
@@ -42,7 +42,7 @@ void MetaDataBlockMap::defineMetaData( Index docno, char varname, float value)
 	Map::const_iterator mi = m_map.find( key);
 	if (mi == m_map.end())
 	{
-		MetaDataBlock* blk = readMetaDataBlockFromDB( blockno, varname);
+		MetaDataBlock* blk = MetaDataReader::readBlockFromDB( blockno, varname);
 		MetaDataBlockReference& block = m_map[ key];
 		block.reset( blk);
 		block->setValue( docno, value);
@@ -64,7 +64,7 @@ void MetaDataBlockMap::flush()
 		if (!mi->second.get()) continue;
 
 		DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix,
-				 mi->second->varname(), mi->second->blockno());
+				 mi->first.first, mi->second->blockno());
 
 		leveldb::Slice keyslice( key.ptr(), key.size());
 		leveldb::Slice valueslice(
@@ -78,31 +78,16 @@ void MetaDataBlockMap::flush()
 		throw std::runtime_error( status.ToString());
 	}
 	batch.Clear();
+	mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
+	{
+		/// NOTE: It cannot be guaranteed here that metadata is correct for
+		/// the moment of update/delete ! But it is quaranted that a 
+		/// reload occurs in insert.
+		m_cache->resetBlock( mi->second->blockno(), mi->first.first);
+	}
 	m_map.clear();
 }
 
 
-MetaDataBlock* MetaDataBlockMap::readMetaDataBlockFromDB( Index blockno, char varname)
-{
-	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, varname, blockno);
-	leveldb::Slice constkey( key.ptr(), key.size());
-	std::string value;
-	value.reserve( MetaDataBlock::MetaDataBlockSize*sizeof(float));
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), constkey, &value);
-
-	if (status.IsNotFound())
-	{
-		return new MetaDataBlock( blockno, varname);
-	}
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	if (value.size() != MetaDataBlock::MetaDataBlockSize * sizeof(float))
-	{
-		throw std::runtime_error( "internal: size of metadata block on disk does not match");
-	}
-	const float* blk = reinterpret_cast<const float*>( value.c_str());
-	return new MetaDataBlock( blockno, varname, blk, MetaDataBlock::MetaDataBlockSize);
-}
 
