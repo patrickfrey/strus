@@ -40,7 +40,6 @@ WeightingBM25::WeightingBM25(
 	float avgDocLength_)
 		:WeightingIdfBased(storage_)
 		,m_storage(storage_)
-		,m_doclenReader( storage_->createMetaDataReader( Constants::DOC_ATTRIBUTE_DOCLEN))
 		,m_k1(k1_)
 		,m_b(b_)
 		,m_avgDocLength(avgDocLength_)
@@ -58,9 +57,7 @@ WeightingBM25::WeightingBM25( const WeightingBM25& o)
 {}
 
 WeightingBM25::~WeightingBM25()
-{
-	delete m_doclenReader;
-}
+{}
 
 float WeightingBM25::call( PostingIteratorInterface& itr)
 {
@@ -69,7 +66,8 @@ float WeightingBM25::call( PostingIteratorInterface& itr)
 		calculateIdf( itr);
 	}
 	m_docno = itr.docno();
-	float rel_doclen = (m_doclenReader->readValue( m_docno)+1) / m_avgDocLength;
+	float doclen = m_storage->documentMetaData( m_docno, Constants::DOC_ATTRIBUTE_DOCLEN);
+	float rel_doclen = (doclen+1) / m_avgDocLength;
 	float ff = itr.frequency();
 	if (ff == 0.0)
 	{
