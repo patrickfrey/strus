@@ -31,9 +31,11 @@
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include <cstdlib>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 namespace strus {
 /// \brief Forward declaration
@@ -43,12 +45,13 @@ class MetaDataBlockCache;
 class MetaDataBlockMap
 {
 public:
-	MetaDataBlockMap( leveldb::DB* db_, MetaDataBlockCache* cache_)
-		:m_db(db_),m_cache(cache_){}
+	MetaDataBlockMap( leveldb::DB* db_)
+		:m_db(db_){}
 
-	void defineMetaData( Index docno, char varname, float value);
+	void defineMetaData(
+		Index docno, char varname, float value);
 
-	void flush();
+	void getWriteBatch( leveldb::WriteBatch& batch, MetaDataBlockCache& cache);
 
 private:
 	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
@@ -56,7 +59,6 @@ private:
 	typedef std::map<MetaDataKey, MetaDataBlockReference> Map;
 
 private:
-	MetaDataBlockCache* m_cache;
 	leveldb::DB* m_db;
 	boost::mutex m_mutex;
 	Map m_map;

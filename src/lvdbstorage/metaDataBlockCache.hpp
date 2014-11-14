@@ -32,8 +32,12 @@
 #include "metaDataBlock.hpp"
 #include <utility>
 #include <stdexcept>
+#include <cstdlib>
+#include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 #include <boost/thread/mutex.hpp>
+#include <leveldb/db.h>
 
 namespace strus {
 
@@ -44,11 +48,24 @@ public:
 
 	~MetaDataBlockCache(){}
 
-	void resetBlock( Index blockno_, char varname_);
+	float getValue( Index docno, char varname);
 
-	float getValue( Index docno_, char varname_);
+	void declareVoid( unsigned int blockno, char varname);
+	void refresh();
 
 private:
+	struct VoidRef
+	{
+		unsigned int blockno;
+		char varname;
+
+		VoidRef() :blockno(0),varname(0){}
+		VoidRef( const VoidRef& o) :blockno(o.blockno),varname(o.varname){}
+		VoidRef( unsigned int blockno_, char varname_) :blockno(blockno_),varname(varname_){}
+	};
+
+	void resetBlock( unsigned int blockno, char varname);
+
 	enum {
 		VarnameMin=33,
 		VarnameMax=127,
@@ -66,31 +83,69 @@ private:
 	}
 
 private:
+	enum {
+		NodeSize=1024,							///< size of one node in the cache
+		MaxBlockno=(NodeSize*NodeSize),					///< hardcode limit of maximum document block number
+		MaxDocno=(NodeSize*NodeSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
+	};
+
 	struct BlockRef
 	{
-		boost::shared_ptr<MetaDataBlock> ref;
 		boost::mutex mutex;
+		boost::shared_ptr<MetaDataBlock> ref;
 
 		BlockRef(){}
 	};
 
-	struct BlockArray
+	template <class NodeType>
+	struct NodeArray
 	{
-		boost::shared_array<BlockRef> ar;
-		std::size_t arsize;
+		enum {NofNodesPerMutex=16};
+		boost::shared_ptr<NodeType> ar[ NodeSize];
+		boost::mutex mutex[ NodeSize / NofNodesPerMutex];
 
-		BlockArray()
-			:arsize(0){}
+		NodeArray(){}
 
-		void resize( std::size_t nofBlocks_);
+		boost::shared_ptr<NodeType> operator[]( std::size_t index) const
+		{
+			if (index > NodeSize) throw std::logic_error("array bound read (MetaDataBlockCache::NodeArray)");
+			return ar[ index];
+		}
 
-		MetaDataBlockRef& operator[]( std::size_t idx);
-		MetaDataBlockRef operator[]( std::size_t idx) const;
+		struct Reference
+		{
+			Reference( boost::mutex* mutex, boost::shared_ptr<NodeType>* ref)
+			{
+				mutex->lock();
+			}
+			~Reference()
+			{
+				mutex->unlock();
+			}
+
+			boost::shared_ptr<NodeType>& content()
+			{
+				return *ref;
+			}
+
+		private:
+			boost::mutex* mutex;
+			boost::shared_ptr<NodeType>* ref;
+		};
+
+		Reference access( std::size_t index)
+		{
+			if (index > NodeSize) throw std::logic_error("array bound read (MetaDataBlockCache::NodeArray)");
+			return Reference( &mutex[ index / NofNodesPerMutex], ar + index);
+		}
 	};
+	typedef NodeArray<MetaDataBlock> BlockArray;
+	typedef NodeArray<BlockArray> BlockNodeArray;
 
 private:
 	leveldb::DB* m_db;
-	BockArray m_ar[VarnameMax-VarnameMin+1];
+	boost::shared_ptr<BlockNodeArray> m_ar[VarnameDim];
+	std::vector<VoidRef> m_voidar;
 };
 
 }

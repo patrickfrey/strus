@@ -33,7 +33,6 @@
 #include <string>
 #include <cstring>
 #include <set>
-#include <boost/thread/mutex.hpp>
 #include <boost/scoped_ptr.hpp>
 
 using namespace strus;
@@ -239,5 +238,6 @@ void StorageInserter::done()
 
 	// [5] Do submit the write to the database:
 	m_storage->checkFlush();
+	m_storage->releaseInserter();
 }
 

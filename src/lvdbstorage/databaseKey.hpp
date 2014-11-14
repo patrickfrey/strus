@@ -69,6 +69,7 @@ public:
 
 public:
 	explicit DatabaseKey( char prefix=0);
+	DatabaseKey( char prefix, const char* variable);
 	DatabaseKey( char prefix, const Index& idx);
 	DatabaseKey( char prefix, char prefix2, const Index& idx);
 	DatabaseKey( char prefix, const Index& idx, char prefix2);
@@ -83,8 +84,6 @@ public:
 
 	const char* ptr() const			{return m_buf;}
 	std::size_t size() const		{return m_size;}
-
-	//[-] Index elem( std::size_t pos) const;
 
 private:
 	enum {MaxKeySize=64};

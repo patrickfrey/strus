@@ -34,6 +34,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 namespace strus {
 
@@ -57,7 +58,7 @@ public:
 		const Index& termvalue,
 		const Index& docno);
 	
-	void flush();
+	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
 	typedef std::map<Index,DocnoBlock::Element> ElementMap;

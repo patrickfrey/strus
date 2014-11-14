@@ -33,8 +33,11 @@
 #include "databaseKey.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataBlockMap.hpp"
+#include "metaDataBlockCache.hpp"
 #include "docnoBlock.hpp"
 #include "docnoBlockMap.hpp"
+#include "documentFrequencyMap.hpp"
+#include "globalKeyMap.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -82,10 +85,12 @@ public:
 
 	virtual std::string documentAttribute( Index docno, char varname) const;
 
-	virtual void incrementDf( Index typeno, Index termno);
-	virtual void decrementDf( Index typeno, Index termno);
-
 public:
+	void incrementDf( Index typeno, Index termno);
+	void decrementDf( Index typeno, Index termno);
+
+	enum {NofDocumentsInsertedBeforeAutoCommit=4096};
+
 	void defineMetaData( Index docno, char varname, float value);
 
 	void defineDocnoPosting(
@@ -103,34 +108,18 @@ public:
 
 	leveldb::Iterator* newIterator();
 
-	static std::string keyString( DatabaseKey::KeyPrefix prefix, const std::string& keyname);
 	Index keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyname) const;
 	Index keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname);
-	Index keyLookUp( const std::string& keystr) const;
 
 	void checkFlush();
 	void flush();
+	void releaseInserter();
 
 private:
+	void writeInserterBatch();
+	void aquireInserter();
+
 	void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value);
-
-	void flushNewKeys();
-	void flushDfs();
-	void flushMetaData();
-	void flushDocnoMap();
-	void flushIndex();
-
-	struct stlSliceComparator
-	{
-		bool operator()(const leveldb::Slice& a, const leveldb::Slice& b) const
-		{
-			return a.compare(b) < 0;
-		}
-	};
-	typedef std::map<std::string,Index,stlSliceComparator> NewKeyMap;
-
-	typedef std::pair<Index,Index> DfKey;
-	typedef std::map<DfKey, Index> DfMap;
 
 private:
 	std::string m_path;					///< levelDB storage path 
@@ -140,16 +129,19 @@ private:
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_docno;					///< next index to assign to a new document id
 	Index m_nof_documents;					///< number of documents inserted
-	boost::mutex m_mutex;					///< mutex for mutual exclusion for the access of counters (m_next_..) and for the access of keys not defined during a running insertion procedure
-	leveldb::WriteBatch m_indexBatch;			///< batch for key/values written by inserters
-	boost::mutex m_indexBatch_mutex;			///< mutex for mutual exclusion for writing to the index
-	leveldb::WriteBatch m_newKeyBatch;			///< batch for new keys defined.
-	NewKeyMap m_newKeyMap;					///< temporary map for the new keys defined
-	DfMap m_dfMap;						///< temporary map for the document frequency of new inserted features
+	boost::mutex m_nof_documents_mutex;			///< mutual exclusion for accessing m_nof_documents
+
+	leveldb::WriteBatch m_inserter_batch;
+
+	DocumentFrequencyMap* m_dfMap;				///< temporary map for the document frequency of new inserted features
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	DocnoBlockMap* m_docnoBlockMap;				///< map of docno postings for writing
-	Index m_flushCnt;
+	GlobalKeyMap* m_globalKeyMap;				///< map of globals in the storage (term numbers, document numbers, etc.)
+
+	boost::mutex m_nofInserterCnt_mutex;			///< mutual exclusion for aquiring inserter
+	unsigned int m_nofInserterCnt;				///< counter of inserters
+	Index m_flushCnt;					///< counter to do a commit after some inserts
 };
 
 }

@@ -46,7 +46,7 @@
 using namespace strus;
 
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
-	:m_path(path_),m_db(0),m_metaDataBlockMap(0),m_metaDataBlockCache(0),m_docnoBlockMap(0),m_flushCnt(0)
+	:m_path(path_),m_db(0),m_dfMap(0),m_metaDataBlockMap(0),m_metaDataBlockCache(0),m_docnoBlockMap(0),m_flushCnt(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
@@ -63,21 +63,27 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 		m_next_typeno = keyLookUp( DatabaseKey::VariablePrefix, "TypeNo");
 		m_next_docno = keyLookUp( DatabaseKey::VariablePrefix, "DocNo");
 		m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
-		if (m_nof_documents) m_nof_documents -= 1;
 		try
 		{
+			m_dfMap = new DocumentFrequencyMap( m_db);
 			m_metaDataBlockCache = new MetaDataBlockCache( m_db);
-			m_metaDataBlockMap = new MetaDataBlockMap( m_db, m_metaDataBlockCache);
+			m_metaDataBlockMap = new MetaDataBlockMap( m_db);
 			m_docnoBlockMap = new DocnoBlockMap( m_db);
+			m_globalKeyMap = new GlobalKeyMap( m_db);
 		}
 		catch (const std::bad_alloc&)
 		{
+			
+			if (m_dfMap) delete m_metaDataBlockMap;
+			m_dfMap = 0;
 			if (m_metaDataBlockMap) delete m_metaDataBlockMap;
 			m_metaDataBlockMap = 0;
 			if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
 			m_metaDataBlockCache = 0;
 			if (m_docnoBlockMap) delete m_docnoBlockMap;
 			m_docnoBlockMap = 0;
+			if (m_globalKeyMap) delete m_globalKeyMap;
+			m_globalKeyMap = 0;
 			if (m_db) delete m_db;
 			m_db = 0;
 			if (m_dboptions.block_cache) delete m_dboptions.block_cache;
@@ -101,24 +107,39 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	}
 }
 
+void Storage::writeInserterBatch()
+{
+	m_dfMap->getWriteBatch( m_inserter_batch);
+	m_metaDataBlockMap->getWriteBatch( m_inserter_batch, *m_metaDataBlockCache);
+	m_docnoBlockMap->getWriteBatch( m_inserter_batch);
+	m_globalKeyMap->getWriteBatch( m_inserter_batch);
+
+	leveldb::WriteOptions options;
+	options.sync = true;
+	leveldb::Status status = m_db->Write( options, &m_inserter_batch);
+	if (!status.ok())
+	{
+		throw std::runtime_error( std::string( "error when writing inserter batch: ") + status.ToString());
+	}
+	m_inserter_batch.Clear();
+	m_metaDataBlockCache->refresh();
+}
+
 void Storage::close()
 {
+	boost::mutex::scoped_lock( m_nofInserterCnt_mutex);
+	if (m_nofInserterCnt)
+	{
+		throw std::runtime_error("cannot close storage with an inserter alive");
+	}
 	if (m_db)
 	{
-		flush();
-
-		leveldb::WriteBatch batch;
-		batchDefineVariable( batch, "TermNo", m_next_termno);
-		batchDefineVariable( batch, "TypeNo", m_next_typeno);
-		batchDefineVariable( batch, "DocNo", m_next_docno);
-		batchDefineVariable( batch, "NofDocs", m_nof_documents+1);
+		batchDefineVariable( m_inserter_batch, "TermNo", m_next_termno);
+		batchDefineVariable( m_inserter_batch, "TypeNo", m_next_typeno);
+		batchDefineVariable( m_inserter_batch, "DocNo", m_next_docno);
+		batchDefineVariable( m_inserter_batch, "NofDocs", m_nof_documents);
+		writeInserterBatch();
 	
-		leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
-		if (!status.ok())
-		{
-			throw std::runtime_error( std::string("error when flushing and closing storage") + status.ToString());
-		}
-		batch.Clear();
 		delete m_db;
 		m_db = 0;
 	}
@@ -126,20 +147,16 @@ void Storage::close()
 
 void Storage::checkFlush()
 {
-	if (++m_flushCnt == 1000)
+	if (++m_flushCnt == NofDocumentsInsertedBeforeAutoCommit)
 	{
 		flush();
-		m_flushCnt = 0;
 	}
 }
 
 void Storage::flush()
 {
-	flushNewKeys();
-	flushDfs();
-	flushMetaData();
-	flushDocnoMap();
-	flushIndex();
+	writeInserterBatch();
+	m_flushCnt = 0;
 }
 
 Storage::~Storage()
@@ -152,45 +169,32 @@ Storage::~Storage()
 	{
 		//... silently ignored. Call close directly to catch errors
 	}
-	if (m_metaDataBlockMap) delete m_metaDataBlockMap;
-	if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
-	if (m_docnoBlockMap) delete m_docnoBlockMap;
-	if (m_db) delete m_db;
+	delete m_metaDataBlockMap;
+	delete m_metaDataBlockMap;
+	delete m_metaDataBlockCache; 
+	delete m_docnoBlockMap;
+	delete m_globalKeyMap;
+	delete m_db;
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
 
 void Storage::writeIndex(const leveldb::Slice& key, const leveldb::Slice& value)
 {
-	boost::mutex::scoped_lock( m_indexBatch_mutex);
-	m_indexBatch.Put( key, value);
+	m_inserter_batch.Put( key, value);
 }
 
 void Storage::deleteIndex(const leveldb::Slice& key)
 {
-	boost::mutex::scoped_lock( m_indexBatch_mutex);
-	m_indexBatch.Delete( key);
-}
-
-void Storage::flushNewKeys()
-{
-	boost::mutex::scoped_lock( m_mutex);
-	if (m_newKeyMap.size() == 0) return;
-
-	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &m_newKeyBatch);
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	m_newKeyBatch.Clear();
-	m_newKeyMap.clear();
-	m_nof_documents += 1;
+	m_inserter_batch.Delete( key);
 }
 
 void Storage::batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
 {
-	std::string encoded_value;
-	packIndex( encoded_value, value);
-	batch.Put( Storage::keyString( DatabaseKey::VariablePrefix, name), encoded_value);
+	DatabaseKey key( DatabaseKey::VariablePrefix, name);
+	std::string valstr;
+	packIndex( valstr, value);
+	batch.Put( leveldb::Slice( key.ptr(), key.size()),
+			leveldb::Slice( valstr.c_str(), valstr.size()));
 }
 
 leveldb::Iterator* Storage::newIterator()
@@ -199,91 +203,31 @@ leveldb::Iterator* Storage::newIterator()
 	return m_db->NewIterator( leveldb::ReadOptions());
 }
 
-std::string Storage::keyString( DatabaseKey::KeyPrefix prefix, const std::string& keyname)
-{
-	std::string rt;
-	rt.push_back( (char)prefix);
-	rt.append( keyname);
-	return rt;
-}
-
-Index Storage::keyLookUp( const std::string& keystr) const
-{
-	if (!m_db) throw std::runtime_error("read on closed storage");
-	std::string value;
-	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
-	if (status.IsNotFound())
-	{
-		return 0;
-	}
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	const char* cc = value.c_str();
-	return unpackIndex( cc, cc + value.size());
-}
-
 Index Storage::keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyname) const
 {
-
-	std::string key = keyString( prefix, keyname);
-	return keyLookUp( key);
+	return m_globalKeyMap->lookUp( prefix, keyname);
 }
 
 Index Storage::keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname)
 {
-	if (!m_db) throw std::runtime_error("read on closed storage");
-	std::string key = keyString( prefix, keyname);
-	leveldb::Slice keyslice( key.c_str(), key.size());
-	std::string value;
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
-	if (status.IsNotFound())
+	Index* counter = 0;
+	if (prefix == DatabaseKey::TermTypePrefix)
 	{
-		boost::mutex::scoped_lock( m_mutex);
-		NewKeyMap::const_iterator ki = m_newKeyMap.find( key);
-		if (ki != m_newKeyMap.end())
-		{
-			return ki->second;
-		}
-		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
-		if (status.IsNotFound())
-		{
-			Index rt = 0;
-			if (prefix == DatabaseKey::TermTypePrefix)
-			{
-				rt = m_next_typeno++;
-			}
-			else if (prefix == DatabaseKey::TermValuePrefix)
-			{
-				rt = m_next_termno++;
-			}
-			else if (prefix == DatabaseKey::DocIdPrefix)
-			{
-				rt = m_next_docno++;
-			}
-			else
-			{
-				throw std::logic_error( "internal: Cannot create index value");
-			}
-			std::string valuebuf;
-			packIndex( valuebuf, rt);
-			m_newKeyMap[ key] = rt;
-			m_newKeyBatch.Put( keyslice, valuebuf);
-			return rt;
-		}
-		else if (!status.ok())
-		{
-			throw std::runtime_error( status.ToString());
-		}
+		counter = &m_next_typeno;
 	}
-	else if (!status.ok())
+	else if (prefix == DatabaseKey::TermValuePrefix)
 	{
-		throw std::runtime_error( status.ToString());
+		counter = &m_next_termno;
 	}
-	const char* cc = value.c_str();
-	return unpackIndex( cc, cc + value.size());
+	else if (prefix == DatabaseKey::DocIdPrefix)
+	{
+		counter = &m_next_docno;
+	}
+	else
+	{
+		throw std::logic_error( "internal: unknown prefix for string key of global variable");
+	}
+	return m_globalKeyMap->getOrCreate( prefix, keyname, *counter);
 }
 
 PostingIteratorInterface*
@@ -311,12 +255,26 @@ StorageInserterInterface*
 	Storage::createInserter(
 		const std::string& docid)
 {
+	aquireInserter();
 	return new StorageInserter( this, docid);
+}
+
+void Storage::aquireInserter()
+{
+	boost::mutex::scoped_lock( m_nofInserterCnt_mutex);
+	if (m_nofInserterCnt) throw std::runtime_error( "only one concurrent inserter allowed on this storage");
+	++m_nofInserterCnt;
+}
+
+void Storage::releaseInserter()
+{
+	boost::mutex::scoped_lock( m_nofInserterCnt_mutex);
+	--m_nofInserterCnt;
 }
 
 void Storage::incrementNofDocumentsInserted()
 {
-	boost::mutex::scoped_lock( m_mutex);
+	boost::mutex::scoped_lock( m_nof_documents_mutex);
 	++m_nof_documents;
 }
 
@@ -332,7 +290,7 @@ Index Storage::maxDocumentNumber() const
 
 Index Storage::documentNumber( const std::string& docid) const
 {
-	return keyLookUp( DatabaseKey::DocIdPrefix, docid);
+	return m_globalKeyMap->lookUp( DatabaseKey::DocIdPrefix, docid);
 }
 
 std::string Storage::documentAttribute( Index docno, char varname) const
@@ -353,19 +311,14 @@ std::string Storage::documentAttribute( Index docno, char varname) const
 }
 
 
-virtual float Storage::documentMetaData( Index docno, char varname) const
+float Storage::documentMetaData( Index docno, char varname) const
 {
-	return m_metaDataBlockMap->documentMetaData( docno, varname);
+	return m_metaDataBlockCache->getValue( docno, varname);
 }
 
 void Storage::defineMetaData( Index docno, char varname, float value)
 {
 	m_metaDataBlockMap->defineMetaData( docno, varname, value);
-}
-
-void Storage::flushMetaData()
-{
-	m_metaDataBlockMap->flush();
 }
 
 void Storage::defineDocnoPosting(
@@ -383,87 +336,16 @@ void Storage::deleteDocnoPosting(
 	m_docnoBlockMap->deleteDocnoPosting( termtype, termvalue, docno);
 }
 
-void Storage::flushDocnoMap()
-{
-	m_docnoBlockMap->flush();
-}
-
-void Storage::flushIndex()
-{
-	boost::mutex::scoped_lock( m_indexBatch_mutex);
-	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &m_indexBatch);
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	m_indexBatch.Clear();
-}
-
 void Storage::incrementDf( Index typeno, Index termno)
 {
-	boost::mutex::scoped_lock( m_mutex);
-	DfKey key( typeno, termno);
-	m_dfMap[ key] += 1;
+	m_dfMap->increment( typeno, termno);
 }
 
 void Storage::decrementDf( Index typeno, Index termno)
 {
-	boost::mutex::scoped_lock( m_mutex);
-	std::pair<Index,Index> key( typeno, termno);
-	m_dfMap[ key] -= 1;
+	m_dfMap->decrement( typeno, termno);
 }
 
-void Storage::flushDfs()
-{
-	if (!m_db)
-	{
-		throw std::runtime_error( "no storage defined (flush dfs)");
-	}
-	boost::mutex::scoped_lock( m_mutex);
-	std::map<DfKey,Index>::const_iterator mi = m_dfMap.begin(), me = m_dfMap.end();
-	leveldb::WriteBatch batch;
-
-	for (; mi != me; ++mi)
-	{
-		std::string keystr;
-		keystr.push_back( DatabaseKey::DocFrequencyPrefix);
-		packIndex( keystr, mi->first.first);	// ... [typeno]
-		packIndex( keystr, mi->first.second);	// ... [valueno]
-
-		leveldb::Slice keyslice( keystr.c_str(), keystr.size());
-		Index df;
-		std::string value;
-		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
-		if (status.IsNotFound() || value.empty())
-		{
-			df = mi->second;
-		}
-		else
-		{
-			if (!status.ok())
-			{
-				throw std::runtime_error( status.ToString());
-			}
-			char const* cc = value.c_str();
-			char const* ee = value.c_str() + value.size();
-			df = mi->second + unpackIndex( cc, ee);
-		}
-		enum {MaxValueSize = sizeof(Index)*4};
-		char valuebuf[ MaxValueSize];
-		std::size_t valuepos = 0;
-		packIndex( valuebuf, valuepos, MaxValueSize, df);
-		leveldb::Slice valueslice( valuebuf, valuepos);
-
-		batch.Put( keyslice, valueslice);
-	}
-	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	batch.Clear();
-	m_dfMap.clear();
-}
 
 
 

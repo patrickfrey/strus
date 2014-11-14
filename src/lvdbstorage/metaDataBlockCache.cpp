@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "metaDataBlockCache.hpp"
+#include "metaDataReader.hpp"
 
 using namespace strus;
 
@@ -34,66 +35,72 @@ MetaDataBlockCache::MetaDataBlockCache( leveldb::DB* db_)
 	:m_db(db_)
 {}
 
-void MetaDataBlockCache::BlockArray::resize( std::size_t nofBlocks_)
+void MetaDataBlockCache::declareVoid( unsigned int blockno, char varname)
 {
-	boost::shared_array<MetaDataBlockCache::BlockRef>
-		new_ar( new MetaDataBlockCache::BlockRef[ nofBlocks_]);
-	std::size_t ii=0;
-	std::size_t nn=(nofBlocks_ < arsize)?nofBlocks_:arsize;
-	std::size_t varidx = aridx(varname_);
-	for (;ii<nn;++ii)
-	{
-		new_ar[ii] = ar[varidx][ii];
-	}
-	arsize = nofBlocks_;
-	ar = new_ar;
+	m_voidar.push_back( VoidRef( blockno, varname));
 }
 
-MetaDataBlockRef MetaDataBlockCache::BlockArray::operator[]( std::size_t idx) const
+void MetaDataBlockCache::refresh()
 {
-	if (idx >= arsize)
+	std::vector<VoidRef>::const_iterator vi = m_voidar.begin(), ve = m_voidar.end();
+	for (; vi != ve; ++vi)
 	{
-		return MetaDataBlockRef();
-	}
-	return ar.get()[ idx];
-}
-
-MetaDataBlockRef& MetaDataBlockCache::BlockArray::operator[]( std::size_t idx)
-{
-	if (idx >= arsize)
-	{
-		resize( idx + 1000);
-	}
-	return ar.get()[ idx];
-}
-
-void MetaDataBlockCache::resetBlock( Index docno_, char varname_)
-{
-	std::size_t bn = (std::size_t)(docno_ / MetaDataBlock::MetaDataBlockSize);
-	if (bn < m_arsize)
-	{
-		m_ar[ aridx(varname_)][ bn].ref.reset();
+		resetBlock( vi->blockno, vi->varname);
 	}
 }
 
-float MetaDataBlockCache::getValue( Index docno_, char varname_)
+void MetaDataBlockCache::resetBlock( unsigned int blockno, char varname)
 {
-	MetaDataBlockRef blkref;
-	std::size_t bn = (std::size_t)(docno_ / MetaDataBlock::MetaDataBlockSize);
-	if (bn < m_arsize)
+	if (blockno > MaxBlockno || blockno <= 0) throw std::runtime_error("block number out of range (MetaDataBlockCache)");
+	std::size_t blkidx = blockno-1;
+	std::size_t idx_level2 = blkidx % NodeSize;
+	std::size_t idx_level1 = blkidx / NodeSize;
+
+	boost::shared_ptr<BlockNodeArray> ar1 = m_ar[ aridx(varname)];
+	if (!ar1.get()) return;
+	
+	// Level 1:
+	boost::shared_ptr<BlockArray> ar2 = (*ar1)[ idx_level1];
+	if (!ar2.get()) return;
+
+	// Level 2:
+	ar2->access( idx_level2).content().reset();
+}
+
+
+float MetaDataBlockCache::getValue( Index docno, char varname)
+{
+	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
+	std::size_t docidx     = (std::size_t)(docno -1);
+	std::size_t blkidx     = docidx % MetaDataBlock::MetaDataBlockSize;
+	std::size_t idx_level2 = blkidx % NodeSize;
+	std::size_t idx_level1 = blkidx / NodeSize;
+
+	// The fact that the reference counting of shared_ptr is
+	// thread safe is used to implement some kind of RCU:
+	boost::shared_ptr<BlockNodeArray> ar1 = m_ar[ aridx(varname)];
+	while (!ar1.get())
 	{
-		blkref = m_ar[ aridx(varname_)][ bn];
+		m_ar[ aridx(varname)].reset( new BlockNodeArray());
+		ar1 = m_ar[ aridx(varname)];
 	}
+	
+	// Level 1:
+	boost::shared_ptr<BlockArray> ar2 = (*ar1)[ idx_level1];
+	while (!ar2.get())
+	{
+		ar1->access( idx_level1).content().reset( new BlockArray());
+		ar2 = ar1->ar[ idx_level1];
+	}
+
+	// Level 2:
+	boost::shared_ptr<MetaDataBlock> blkref = (*ar2)[ idx_level2];
 	if (!blkref.get())
 	{
-		BlockRef& ref = m_ar[ aridx(varname_)][ bn].ref;
-		boost::mutex::scoped_lock( ref.mutex);
-		ref.reset( MetaDataReader::readBlockFromDB( 
-				m_db, MetaDataBlock::blockno( docno_), m_varname));
-		blkref = ref.ref;
+		blkref.reset( MetaDataReader::readBlockFromDB( 
+				m_db, MetaDataBlock::blockno( docno), varname));
+		ar2->access( idx_level2).content() = blkref;
 	}
-	return blkref->getValue( docno_);
+	return blkref->getValue( docno);
 }
-
-
 

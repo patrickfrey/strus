@@ -26,55 +26,67 @@
 
 --------------------------------------------------------------------
 */
-#include "metaDataBlockMap.hpp"
-#include "metaDataBlockCache.hpp"
-#include "metaDataReader.hpp"
+#include "documentFrequencyMap.hpp"
 #include "databaseKey.hpp"
-#include <leveldb/write_batch.h>
-#include <cstring>
+#include "indexPacker.hpp"
+#include <cstdlib>
 
 using namespace strus;
 
-void MetaDataBlockMap::defineMetaData( Index docno, char varname, float value)
+void DocumentFrequencyMap::increment( Index typeno, Index termno)
 {
-	unsigned int blockno = MetaDataBlock::blockno( docno);
-	MetaDataKey key( varname, blockno);
 	boost::mutex::scoped_lock( m_mutex);
-	Map::const_iterator mi = m_map.find( key);
-	if (mi == m_map.end())
-	{
-		MetaDataBlock* blk = MetaDataReader::readBlockFromDB( m_db, blockno, varname);
-		MetaDataBlockReference& block = m_map[ key];
-		block.reset( blk);
-		block->setValue( docno, value);
-	}
-	else
-	{
-		mi->second->setValue( docno, value);
-	}
+	Key key( typeno, termno);
+	m_map[ key] += 1;
 }
 
-void MetaDataBlockMap::getWriteBatch(
-	leveldb::WriteBatch& batch,
-	MetaDataBlockCache& cache)
+void DocumentFrequencyMap::decrement( Index typeno, Index termno)
+{
+	boost::mutex::scoped_lock( m_mutex);
+	Key key( typeno, termno);
+	m_map[ key] -= 1;
+}
+
+void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
 	boost::mutex::scoped_lock( m_mutex);
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+
 	for (; mi != me; ++mi)
 	{
-		if (!mi->second.get()) continue;
-		cache.declareVoid( mi->second->blockno(), mi->first.first);
+		std::string keystr;
+		keystr.push_back( DatabaseKey::DocFrequencyPrefix);
+		packIndex( keystr, mi->first.first);	// ... [typeno]
+		packIndex( keystr, mi->first.second);	// ... [valueno]
 
-		DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix,
-				 mi->first.first, mi->second->blockno());
+		leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+		Index df;
+		std::string value;
+		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
+		if (status.IsNotFound() || value.empty())
+		{
+			df = mi->second;
+		}
+		else
+		{
+			if (!status.ok())
+			{
+				throw std::runtime_error( status.ToString());
+			}
+			char const* cc = value.c_str();
+			char const* ee = value.c_str() + value.size();
+			df = mi->second + unpackIndex( cc, ee);
+		}
+		enum {MaxValueSize = sizeof(Index)*4};
+		char valuebuf[ MaxValueSize];
+		std::size_t valuepos = 0;
+		packIndex( valuebuf, valuepos, MaxValueSize, df);
+		leveldb::Slice valueslice( valuebuf, valuepos);
 
-		leveldb::Slice keyslice( key.ptr(), key.size());
-		leveldb::Slice valueslice(
-			(const char*)mi->second->data(),
-			MetaDataBlock::MetaDataBlockSize*sizeof(float));
 		batch.Put( keyslice, valueslice);
 	}
 	m_map.clear();
 }
+
 
 

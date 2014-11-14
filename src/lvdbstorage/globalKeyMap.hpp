@@ -26,49 +26,40 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
+#ifndef _STRUS_LVDB_GLOBAL_KEY_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_GLOBAL_KEY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include <utility>
+#include "databaseKey.hpp"
+#include <cstdlib>
+#include <boost/thread/mutex.hpp>
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 namespace strus {
 
-class MetaDataBlock
+class GlobalKeyMap
 {
 public:
-	MetaDataBlock( unsigned int blockno_);
-	MetaDataBlock( unsigned int blockno_,
-			const float* blk_, std::size_t blksize_);
+	GlobalKeyMap( leveldb::DB* db_)
+		:m_db(db_){}
+	GlobalKeyMap( const GlobalKeyMap& o)
+		:m_db(o.m_db),m_map(o.m_map){}
 
-	MetaDataBlock( const MetaDataBlock& o);
+	Index lookUp( DatabaseKey::KeyPrefix prefix, const std::string& keystr) const;
+	Index getOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname, Index& valuecnt);
 
-	~MetaDataBlock(){}
-
-	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
-	static Index blockno( Index docno)			{return (docno>>MetaDataBlockShift)+1;}
-
-	Index blockno() const					{return m_blockno;}
-	const float* data() const				{return m_blk;}
-
-	void setValue( Index docno, float value);
-	float getValue( Index docno) const;
-
-public:
-	enum {
-		/// \remark This value limits the maximum docno possible to (MetaDataBlockCache::NodeSize^2 * MetaDataBlockSize)
-		MetaDataBlockSize=256		///< size of one meta data block
-	};
-private:
-	enum {
-		MetaDataBlockMask=((int)MetaDataBlockSize-1),
-		MetaDataBlockShift=8
-	};
+	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	unsigned int m_blockno;
-	float m_blk[ MetaDataBlockSize];
+	typedef std::map<std::string,Index> Map;
+
+private:
+	leveldb::DB* m_db;
+	boost::mutex m_mutex;
+	Map m_map;
 };
 
-}
+}//namespace
 #endif
+
 

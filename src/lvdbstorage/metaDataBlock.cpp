@@ -33,13 +33,13 @@
 
 using namespace strus;
 
-MetaDataBlock::MetaDataBlock( Index blockno_)
+MetaDataBlock::MetaDataBlock( unsigned int blockno_)
 	:m_blockno(blockno_)
 {
 	std::memset( m_blk, 0, sizeof(m_blk));
 }
 
-MetaDataBlock::MetaDataBlock( Index blockno_,
+MetaDataBlock::MetaDataBlock( unsigned int blockno_,
 				const float* blk_, std::size_t blksize_)
 	:m_blockno(blockno_)
 {

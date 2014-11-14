@@ -165,10 +165,9 @@ void DocnoBlockMap::writeMergeBlock(
 	writeBlock( batch, typeno, valueno, newblk, newblksize);
 }
 
-void DocnoBlockMap::flush()
-{
-	leveldb::WriteBatch batch;
 
+void DocnoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
+{
 	boost::mutex::scoped_lock( m_mutex);
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
@@ -222,13 +221,6 @@ void DocnoBlockMap::flush()
 					newblk, newblksize);
 		}
 	}
-
-	leveldb::Status status = m_db->Write( leveldb::WriteOptions(), &batch);
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	batch.Clear();
 	m_map.clear();
 }
 

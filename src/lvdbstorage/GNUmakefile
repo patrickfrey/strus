@@ -8,6 +8,9 @@ CPP_OBJS=\
 	metaDataBlock.o \
 	metaDataReader.o \
 	metaDataBlockMap.o \
+	metaDataBlockCache.o \
+	globalKeyMap.o \
+	documentFrequencyMap.o \
 	storage.o \
 	docnoBlock.o \
 	docnoBlockReader.o \

@@ -122,6 +122,16 @@ static unsigned int nofK( const std::string& numstr)
 	return (unsigned int)((rt + 1023)/1024);
 }
 
+static void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
+{
+	DatabaseKey key( DatabaseKey::VariablePrefix, name);
+	std::string valstr;
+	packIndex( valstr, value);
+	batch.Put( leveldb::Slice( key.ptr(), key.size()),
+			leveldb::Slice( valstr.c_str(), valstr.size()));
+}
+
+
 
 DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* config)
 {
@@ -186,10 +196,10 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 	if (status.ok())
 	{
 		leveldb::WriteBatch batch;
-		batch.Put( Storage::keyString( DatabaseKey::VariablePrefix, "TermNo"), "\1");
-		batch.Put( Storage::keyString( DatabaseKey::VariablePrefix, "TypeNo"), "\1");
-		batch.Put( Storage::keyString( DatabaseKey::VariablePrefix, "DocNo"), "\1");
-		batch.Put( Storage::keyString( DatabaseKey::VariablePrefix, "NofDocs"), "\1");
+		batchDefineVariable( batch, "TermNo", 1);
+		batchDefineVariable( batch, "TypeNo", 1);
+		batchDefineVariable( batch, "DocNo", 1);
+		batchDefineVariable( batch, "NofDocs", 0);
 
 		status = db->Write( leveldb::WriteOptions(), &batch);
 		if (!status.ok())
