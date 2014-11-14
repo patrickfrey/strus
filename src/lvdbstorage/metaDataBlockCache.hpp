@@ -86,12 +86,12 @@ private:
 	enum {
 		NodeSize=1024,							///< size of one node in the cache
 		MaxBlockno=(NodeSize*NodeSize),					///< hardcode limit of maximum document block number
-		MaxDocno=(NodeSize*NodeSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
+		MaxDocno=(NodeSize*NodeSize*MetaDataBlock::MetaDataBlockSize),	///< hardcode limit of maximum document number
+		NofMutexLevel1=256
 	};
 
 	struct BlockRef
 	{
-		boost::mutex mutex;
 		boost::shared_ptr<MetaDataBlock> ref;
 
 		BlockRef(){}
@@ -100,43 +100,20 @@ private:
 	template <class NodeType>
 	struct NodeArray
 	{
-		enum {NofNodesPerMutex=16};
 		boost::shared_ptr<NodeType> ar[ NodeSize];
-		boost::mutex mutex[ NodeSize / NofNodesPerMutex];
 
 		NodeArray(){}
 
-		boost::shared_ptr<NodeType> operator[]( std::size_t index) const
+		const boost::shared_ptr<NodeType>& operator[]( std::size_t index) const
 		{
 			if (index > NodeSize) throw std::logic_error("array bound read (MetaDataBlockCache::NodeArray)");
 			return ar[ index];
 		}
 
-		struct Reference
-		{
-			Reference( boost::mutex* mutex, boost::shared_ptr<NodeType>* ref)
-			{
-				mutex->lock();
-			}
-			~Reference()
-			{
-				mutex->unlock();
-			}
-
-			boost::shared_ptr<NodeType>& content()
-			{
-				return *ref;
-			}
-
-		private:
-			boost::mutex* mutex;
-			boost::shared_ptr<NodeType>* ref;
-		};
-
-		Reference access( std::size_t index)
+		boost::shared_ptr<NodeType>& operator[]( std::size_t index)
 		{
 			if (index > NodeSize) throw std::logic_error("array bound read (MetaDataBlockCache::NodeArray)");
-			return Reference( &mutex[ index / NofNodesPerMutex], ar + index);
+			return ar[ index];
 		}
 	};
 	typedef NodeArray<MetaDataBlock> BlockArray;
@@ -146,6 +123,7 @@ private:
 	leveldb::DB* m_db;
 	boost::shared_ptr<BlockNodeArray> m_ar[VarnameDim];
 	std::vector<VoidRef> m_voidar;
+	boost::mutex m_mutex_level1[ NofMutexLevel1];
 };
 
 }

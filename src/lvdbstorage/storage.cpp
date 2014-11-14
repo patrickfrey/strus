@@ -46,7 +46,19 @@
 using namespace strus;
 
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
-	:m_path(path_),m_db(0),m_dfMap(0),m_metaDataBlockMap(0),m_metaDataBlockCache(0),m_docnoBlockMap(0),m_flushCnt(0)
+	:m_path(path_)
+	,m_db(0)
+	,m_next_termno(0)
+	,m_next_typeno(0)
+	,m_next_docno(0)
+	,m_nof_documents(0)
+	,m_dfMap(0)
+	,m_metaDataBlockMap(0)
+	,m_metaDataBlockCache(0)
+	,m_docnoBlockMap(0)
+	,m_globalKeyMap(0)
+	,m_nofInserterCnt(0)
+	,m_flushCnt(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
@@ -59,17 +71,18 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_, &m_db);
 	if (status.ok())
 	{
-		m_next_termno = keyLookUp( DatabaseKey::VariablePrefix, "TermNo");
-		m_next_typeno = keyLookUp( DatabaseKey::VariablePrefix, "TypeNo");
-		m_next_docno = keyLookUp( DatabaseKey::VariablePrefix, "DocNo");
-		m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
 		try
 		{
+			m_globalKeyMap = new GlobalKeyMap( m_db);
 			m_dfMap = new DocumentFrequencyMap( m_db);
 			m_metaDataBlockCache = new MetaDataBlockCache( m_db);
 			m_metaDataBlockMap = new MetaDataBlockMap( m_db);
 			m_docnoBlockMap = new DocnoBlockMap( m_db);
-			m_globalKeyMap = new GlobalKeyMap( m_db);
+
+			m_next_termno = keyLookUp( DatabaseKey::VariablePrefix, "TermNo");
+			m_next_typeno = keyLookUp( DatabaseKey::VariablePrefix, "TypeNo");
+			m_next_docno = keyLookUp( DatabaseKey::VariablePrefix, "DocNo");
+			m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
 		}
 		catch (const std::bad_alloc&)
 		{

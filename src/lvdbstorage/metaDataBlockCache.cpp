@@ -28,8 +28,17 @@
 */
 #include "metaDataBlockCache.hpp"
 #include "metaDataReader.hpp"
+#include <stdint.h>
 
 using namespace strus;
+
+static uint32_t hashint( uint32_t a)
+{
+	a = a ^ (a>>4);
+	a = (a^0xdeadbeef) + (a<<5);
+	a = a ^ (a>>11);
+	return a;
+}
 
 MetaDataBlockCache::MetaDataBlockCache( leveldb::DB* db_)
 	:m_db(db_)
@@ -64,7 +73,7 @@ void MetaDataBlockCache::resetBlock( unsigned int blockno, char varname)
 	if (!ar2.get()) return;
 
 	// Level 2:
-	ar2->access( idx_level2).content().reset();
+	(*ar2)[ idx_level2].reset();
 }
 
 
@@ -87,10 +96,26 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	
 	// Level 1:
 	boost::shared_ptr<BlockArray> ar2 = (*ar1)[ idx_level1];
-	while (!ar2.get())
+	if (!ar2.get())
 	{
-		ar1->access( idx_level1).content().reset( new BlockArray());
-		ar2 = ar1->ar[ idx_level1];
+		unsigned int midx = hashint( idx_level1) % NofMutexLevel1;
+		m_mutex_level1[ midx].lock();
+
+		try
+		{
+			ar2 = (*ar1)[ idx_level1];
+			if (!ar2.get())
+			{
+				(*ar1)[ idx_level1].reset( new BlockArray());
+				ar2 = (*ar1)[ idx_level1];
+			}
+		}
+		catch (const std::bad_alloc&)
+		{
+			m_mutex_level1[ midx].unlock();
+			throw std::bad_alloc();
+		}
+		m_mutex_level1[ midx].unlock();
 	}
 
 	// Level 2:
@@ -99,7 +124,8 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	{
 		blkref.reset( MetaDataReader::readBlockFromDB( 
 				m_db, MetaDataBlock::blockno( docno), varname));
-		ar2->access( idx_level2).content() = blkref;
+
+		(*ar2)[ idx_level2] = blkref;
 	}
 	return blkref->getValue( docno);
 }
