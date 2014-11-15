@@ -135,6 +135,8 @@ void Storage::writeInserterBatch()
 		throw std::runtime_error( std::string( "error when writing inserter batch: ") + status.ToString());
 	}
 	m_inserter_batch.Clear();
+
+	// Refresh all entries touched by the inserts/updates written
 	m_metaDataBlockCache->refresh();
 }
 
@@ -182,7 +184,7 @@ Storage::~Storage()
 	{
 		//... silently ignored. Call close directly to catch errors
 	}
-	delete m_metaDataBlockMap;
+	delete m_dfMap;
 	delete m_metaDataBlockMap;
 	delete m_metaDataBlockCache; 
 	delete m_docnoBlockMap;

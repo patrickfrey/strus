@@ -95,7 +95,7 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	}
 	
 	// Level 1:
-	boost::shared_ptr<BlockArray> ar2 = (*ar1)[ idx_level1];
+	boost::shared_ptr<BlockArray>& ar2 = (*ar1)[ idx_level1];
 	if (!ar2.get())
 	{
 		unsigned int midx = hashint( idx_level1) % NofMutexLevel1;
@@ -119,13 +119,11 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	}
 
 	// Level 2:
-	boost::shared_ptr<MetaDataBlock> blkref = (*ar2)[ idx_level2];
+	boost::shared_ptr<MetaDataBlock>& blkref = (*ar2)[ idx_level2];
 	if (!blkref.get())
 	{
 		blkref.reset( MetaDataReader::readBlockFromDB( 
 				m_db, MetaDataBlock::blockno( docno), varname));
-
-		(*ar2)[ idx_level2] = blkref;
 	}
 	return blkref->getValue( docno);
 }

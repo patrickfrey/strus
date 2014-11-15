@@ -26,39 +26,38 @@
 
 --------------------------------------------------------------------
 */
-#include "docnoBlockReader.hpp"
-#include "indexPacker.hpp"
+#include "posinfoBlockReader.hpp"
 #include <cstring>
 #include <stdexcept>
 
 using namespace strus;
 
-DocnoBlockReader::DocnoBlockReader( const DocnoBlockReader& o)
+PosinfoBlockReader::PosinfoBlockReader( const PosinfoBlockReader& o)
 	:m_db(o.m_db)
 	,m_itr(0)
 	,m_key(o.m_key)
 	,m_keysize(o.m_keysize)
 	,m_last_docno(o.m_last_docno)
-	,m_docnoBlock(o.m_docnoBlock)
+	,m_posinfoBlock(o.m_posinfoBlock)
 {
 }
 
-DocnoBlockReader::DocnoBlockReader( leveldb::DB* db_, const Index& typeno_, const Index& termno_)
+PosinfoBlockReader::PosinfoBlockReader( leveldb::DB* db_, const Index& docno_)
 	:m_db(db_)
 	,m_itr(0)
-	,m_key( (char)DatabaseKey::DocnoBlockPrefix, typeno_, termno_)
+	,m_key( (char)DatabaseKey::DocnoBlockPrefix, docno_)
 	,m_keysize(0)
 	,m_last_docno(0)
 {
 	m_keysize = m_key.size();
 }
 
-DocnoBlockReader::~DocnoBlockReader()
+PosinfoBlockReader::~PosinfoBlockReader()
 {
 	if (m_itr) delete m_itr;
 }
 
-bool DocnoBlockReader::extractData()
+bool PosinfoBlockReader::extractData()
 {
 	if (m_itr->Valid()
 	&&  m_keysize <= m_itr->key().size()
@@ -66,21 +65,15 @@ bool DocnoBlockReader::extractData()
 	{
 		const char* vi = m_itr->value().data();
 		const char* ve = vi + m_itr->value().size();
+		
 		const DocnoBlock::Element* ar
 			= reinterpret_cast<const DocnoBlock::Element*>( vi);
 		std::size_t arsize = (ve-vi)/sizeof(DocnoBlock::Element);
 		if (!arsize || arsize*sizeof(DocnoBlock::Element) != (std::size_t)(ve-vi))
 		{
-			throw std::runtime_error( "internal: corrupt docno block");
+			throw std::runtime_error( "corrupt docno block");
 		}
 		m_docnoBlock.init( ar, arsize);
-
-		const char* ki = m_itr->key().data();
-		const char* ke = vi + m_itr->key().size();
-		if (unpackIndex( ke, ke) != m_docnoBlock.back().docno())
-		{
-			throw std::runtime_error( "internal: illegal key defined for docno block");
-		}
 		return true;
 	}
 	else
@@ -90,7 +83,7 @@ bool DocnoBlockReader::extractData()
 	}
 }
 
-const DocnoBlock* DocnoBlockReader::readBlock( const Index& docno_)
+const DocnoBlock* PosinfoBlockReader::readBlock( const Index& docno_)
 {
 	if (!m_docnoBlock.empty())
 	{
@@ -133,7 +126,7 @@ const DocnoBlock* DocnoBlockReader::readBlock( const Index& docno_)
 	}
 }
 
-const DocnoBlock* DocnoBlockReader::readLastBlock()
+const DocnoBlock* PosinfoBlockReader::readLastBlock()
 {
 	if (!m_itr)
 	{

@@ -39,7 +39,7 @@ Index IteratorUnionWeighted::skipDoc( const Index& docno_)
 
 Index IteratorUnionWeighted::skipPos( const Index& pos_)
 {
-	m_weightitr = m_weightmap.upper_bound( pos_);
+	m_weightitr = m_weightmap.upper_bound( pos_-1);
 	if (m_weightitr == m_weightmap.end()) return 0;
 	return m_weightitr->second;
 }

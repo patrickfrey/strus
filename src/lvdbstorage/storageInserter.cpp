@@ -167,7 +167,7 @@ void StorageInserter::done()
 		oldcontent.insert( TermMapKey( typeno, valueno));
 	}
 
-	//[2.2] Iterate on oldcontent elements built in [1.1] 
+	//[2.2] Iterate on 'oldcontent' elements built in [1.1] 
 	//	and mark them as deleted the keys [InvertedIndexPrefix, typeno, valueno, docno]
 	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)

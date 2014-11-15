@@ -126,13 +126,14 @@ private:
 	std::string m_path;					///< levelDB storage path 
 	leveldb::DB* m_db;					///< levelDB handle
 	leveldb::Options m_dboptions;				///< options for levelDB
+
 	Index m_next_termno;					///< next index to assign to a new term value
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_docno;					///< next index to assign to a new document id
 	Index m_nof_documents;					///< number of documents inserted
 	boost::mutex m_nof_documents_mutex;			///< mutual exclusion for accessing m_nof_documents
 
-	leveldb::WriteBatch m_inserter_batch;
+	leveldb::WriteBatch m_inserter_batch;			///< batch used for an insert chunk written to disk with 'flush()', resp. 'writeInserterBatch()'
 
 	DocumentFrequencyMap* m_dfMap;				///< temporary map for the document frequency of new inserted features
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing

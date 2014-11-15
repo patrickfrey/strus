@@ -27,7 +27,6 @@
 --------------------------------------------------------------------
 */
 #include "docnoBlock.hpp"
-#include "databaseKey.hpp"
 #include <cstdlib>
 #include <stdexcept>
 #include <limits>
@@ -47,12 +46,6 @@ DocnoBlock::DocnoBlock( const DocnoBlock& o)
 	:m_ar(o.m_ar)
 	,m_arsize(o.m_arsize)
 {}
-
-void DocnoBlock::init( const Element* ar_, std::size_t arsize_)
-{
-	m_ar = ar_;
-	m_arsize = arsize_;
-}
 
 const DocnoBlock::Element* DocnoBlock::upper_bound( const Index& docno_) const
 {

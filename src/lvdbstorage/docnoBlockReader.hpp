@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_DOCNOBLOCK_READER_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_DOCNOBLOCK_READER_HPP_INCLUDED
+#ifndef _STRUS_LVDB_DOCNO_BLOCK_READER_HPP_INCLUDED
+#define _STRUS_LVDB_DOCNO_BLOCK_READER_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "docnoBlock.hpp"
 #include "databaseKey.hpp"
@@ -38,7 +38,7 @@ namespace strus {
 class DocnoBlockReader
 {
 public:
-	DocnoBlockReader( leveldb::DB* db_, Index typeno_, Index termno_);
+	DocnoBlockReader( leveldb::DB* db_, const Index& typeno_, const Index& termno_);
 	DocnoBlockReader( const DocnoBlockReader& o);
 	~DocnoBlockReader();
 

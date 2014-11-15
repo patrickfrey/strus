@@ -26,84 +26,57 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "docnoBlock.hpp"
-#include <cstdlib>
+#include "posinfoBlock.hpp"
+#include <vector>
+#include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
 namespace strus {
 
-class DocnoBlockMap
+class PosinfoBlockMap
 {
 public:
-	DocnoBlockMap( leveldb::DB* db_)
+	PosinfoBlockMap( leveldb::DB* db_)
 		:m_db(db_),m_itr(0){}
-	DocnoBlockMap( const DocnoBlockMap& o)
+	PosinfoBlockMap( const PosinfoBlockMap& o)
 		:m_db(o.m_db),m_itr(0),m_map(o.m_map){}
 
-	void defineDocnoPosting(
-		const Index& termtype,
-		const Index& termvalue,
+	void definePosinfo(
 		const Index& docno,
-		unsigned int ff,
-		float weight);
+		const std::vector<Index>& pos);
 
-	void deleteDocnoPosting(
-		const Index& termtype,
-		const Index& termvalue,
+	void deletePosinfo(
 		const Index& docno);
 	
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	typedef std::map<Index,DocnoBlock::Element> ElementMap;
-
-	struct Term
-	{
-		Index type;
-		Index value;
-
-		Term( const Index& t, const Index& v)
-			:type(t),value(v){}
-		Term( const Term& o)
-			:type(o.type),value(o.value){}
-
-		bool operator < (const Term& o) const
-		{
-			if (type < o.type) return true;
-			if (type > o.type) return false;
-			return value < o.value;
-		}
-	};
+	typedef std::map<Index,std::vector<Index> > Map;
 
 	void writeBlock(
 		leveldb::WriteBatch& batch,
-		const Index& typeno,
-		const Index& valueno,
-		const DocnoBlock::Element* blkptr,
-		std::size_t blksize);
+		const Index& docno,
+		const PosinfoBlock& blk);
 
 	void deleteBlock(
 		leveldb::WriteBatch& batch,
-		const Index& typeno,
-		const Index& valueno,
 		const Index& docno);
 
 	void writeMergeBlock(
 		leveldb::WriteBatch& batch,
 		const Index& typeno,
 		const Index& valueno,
-		ElementMap::const_iterator& ei,
-		const ElementMap::const_iterator& ee,
-		const DocnoBlock* blk);
+		Map::const_iterator& ei,
+		const Map::const_iterator& ee,
+		const PosinfoBlock& blk);
 
 private:
-	typedef std::map<Term,ElementMap> Map;
-	enum {BlockSize=128};
+	enum {BlockSize=1024};
 
 private:
 	leveldb::DB* m_db;

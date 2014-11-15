@@ -26,87 +26,40 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCNO_BLOCK_HPP_INCLUDED
-#define _STRUS_LVDB_DOCNO_BLOCK_HPP_INCLUDED
+#ifndef _STRUS_LVDB_POSINFO_BLOCK_READER_HPP_INCLUDED
+#define _STRUS_LVDB_POSINFO_BLOCK_READER_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "floatConversions.hpp"
-#include <stdint.h>
+#include "posinfoBlock.hpp"
+#include "databaseKey.hpp"
 #include <leveldb/db.h>
 
 namespace strus {
 
-class DocnoBlock
+class PosinfoBlockReader
 {
 public:
-	class Element
+	PosinfoBlockReader( leveldb::DB* db_, const Index& docno_);
+	PosinfoBlockReader( const PosinfoBlockReader& o);
+	~PosinfoBlockReader();
+
+	const PosinfoBlock* curBlock() const
 	{
-	public:
-		Element() :m_docno(0),m_ff(0),m_weight(0.0){}
-		Element( Index docno_, unsigned int ff_, float weight_);
-		Element( const Element& o);
-
-		float weight() const;
-
-		unsigned int ff() const
-		{
-			return m_ff;
-		}
-
-		Index docno() const
-		{
-			return m_docno;
-		}
-
-	private:
-		enum {Max_ff=0xffFF};
-		uint32_t m_docno;
-		uint16_t m_ff;
-		strus::float16_t m_weight;	///< IEEE 754 half-precision binary floating-point format: binary16
-	};
-
-public:
-	DocnoBlock();
-	DocnoBlock( const Element* ar_, std::size_t arsize_);
-	DocnoBlock( const DocnoBlock& o);
-
-	bool empty() const
-	{
-		return !m_ar;
+		return &m_docnoBlock;
 	}
 
-	std::size_t size() const
-	{
-		return m_arsize;
-	}
+	const PosinfoBlock* readBlock( const Index& docno_);
+	const PosinfoBlock* readLastBlock();
 
-	const Element* data() const
-	{
-		return m_ar;
-	}
-
-	const Element& back() const
-	{
-		return m_ar[ m_arsize-1];
-	}
-
-	const Element* find( const Index& docno_) const;
-	const Element* upper_bound( const Index& docno_) const;
-
-	void clear()
-	{
-		m_ar = 0;
-		m_arsize = 0;
-	}
-
-	void init( const Element* ar_, std::size_t arsize_)
-	{
-		m_ar = ar_;
-		m_arsize = arsize_;
-	}
-	
 private:
-	const Element* m_ar;
-	std::size_t m_arsize;
+	bool extractData();
+
+private:
+	leveldb::DB* m_db;
+	leveldb::Iterator* m_itr;
+	DatabaseKey m_key;
+	std::size_t m_keysize;
+	Index m_last_docno;
+	PosinfoBlock m_posinfoBlock;
 };
 
 }
