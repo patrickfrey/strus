@@ -77,7 +77,7 @@ bool DocnoBlockReader::extractData()
 
 		const char* ki = m_itr->key().data();
 		const char* ke = vi + m_itr->key().size();
-		if (unpackIndex( ke, ke) != m_docnoBlock.back().docno())
+		if (unpackIndex( ki, ke) != m_docnoBlock.back().docno())
 		{
 			throw std::runtime_error( "internal: illegal key defined for docno block");
 		}
