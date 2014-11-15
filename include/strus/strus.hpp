@@ -37,6 +37,5 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageInserterInterface.hpp"
-#include "strus/metaDataReaderInterface.hpp"
 #endif
 

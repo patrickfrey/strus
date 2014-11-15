@@ -28,7 +28,6 @@
 */
 #include "weightingBM25.hpp"
 #include "strus/constants.hpp"
-#include "strus/metaDataReaderInterface.hpp"
 #include <cmath>
 
 using namespace strus;
