@@ -139,6 +139,9 @@ static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const le
 				data.print( out);
 				break;
 			}
+			case strus::DatabaseKey::PosinfoBlockPrefix:
+				throw std::logic_error("NOT IMPLEMENTED YET (PosinfoBlock)");
+			break;
 		}
 	}
 	catch (const std::runtime_error& err)
