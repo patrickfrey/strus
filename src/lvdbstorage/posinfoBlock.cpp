@@ -31,6 +31,19 @@
 
 using namespace strus;
 
+void PosinfoBlock::Element::init(
+	const Index& docno_,
+	const std::vector<Index>& pos,
+	std::string& buffer)
+{
+	std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
+	for (; pi != pe; ++pi)
+	{
+		packIndex( buffer, *pi);
+	}
+	init( docno_, buffer.c_str(), buffer.size());
+}
+
 Index PosinfoBlock::Element::skipPos( const Index& pos_)
 {
 	if (m_posno >= firstpos_)
@@ -158,5 +171,42 @@ const Element* PosinfoBlock::find( const Index& docno_) const
 	const Element* rt = upper_bound( docno_);
 	return (rt && rt->docno() == docno_)?rt:0;
 }
+
+std::vector<Element> PosinfoBlock::getElements() const
+{
+	std::vector<Element> rt;
+	char const* vi = m_blkptr;
+	const char* ve = m_blkend;
+	while (vi != ve)
+	{
+		Index reldocno = unpackIndex( vi, ve);
+		char const* end = std::memchr( vi, 0xFF, ve-vi);
+		if (!end) end = ve;
+		rt.push_back( Element( docno()-reldocno, vi, end-vi));
+	}
+}
+
+void PosinfoBlock::init( std::vector<Element>& elem, std::string& buffer)
+{
+	std::vector<Element>::const_iterator ei = elem.begin(), ee=elem.end();
+	std::size_t bufsize = 0;
+	char tmpbuffer[32];
+	if (ei != ee)
+	{
+		buffer.resize(0);
+		for (int eidx=0; ei != em; ++ei,++eidx)
+		{
+			if (eidx) buffer.push_back( (char)0xff);
+			packIndex( buffer, elem.back().docno() - ei->docno());
+			buffer.append( ei->ptr(), ei->size());
+		}
+		init( elem.back().docno(), buffer.c_str(), buffer.size());
+	}
+	else
+	{
+		clear();
+	}
+}
+
 
 

@@ -42,10 +42,10 @@ PosinfoBlockReader::PosinfoBlockReader( const PosinfoBlockReader& o)
 {
 }
 
-PosinfoBlockReader::PosinfoBlockReader( leveldb::DB* db_, const Index& docno_)
+PosinfoBlockReader::PosinfoBlockReader( leveldb::DB* db_, const Index& typeno_, const Index& termno_)
 	:m_db(db_)
 	,m_itr(0)
-	,m_key( (char)DatabaseKey::DocnoBlockPrefix, docno_)
+	,m_key( (char)DatabaseKey::PosinfoBlockPrefix, typeno_, termno_)
 	,m_keysize(0)
 	,m_last_docno(0)
 {
@@ -63,36 +63,33 @@ bool PosinfoBlockReader::extractData()
 	&&  m_keysize <= m_itr->key().size()
 	&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
 	{
+		const char* ki = m_itr->key().data();
+		const char* ke = vi + m_itr->key().size();
+		Index docno = unpackIndex( ki, ke);
+
 		const char* vi = m_itr->value().data();
-		const char* ve = vi + m_itr->value().size();
-		
-		const DocnoBlock::Element* ar
-			= reinterpret_cast<const DocnoBlock::Element*>( vi);
-		std::size_t arsize = (ve-vi)/sizeof(DocnoBlock::Element);
-		if (!arsize || arsize*sizeof(DocnoBlock::Element) != (std::size_t)(ve-vi))
-		{
-			throw std::runtime_error( "corrupt docno block");
-		}
-		m_docnoBlock.init( ar, arsize);
+		std::size_t vsize = m_itr->value().size();
+
+		m_posinfoBlock.init( docno, vi, vsize);
 		return true;
 	}
 	else
 	{
-		m_docnoBlock.clear();
+		m_posinfoBlock.clear();
 		return false;
 	}
 }
 
-const DocnoBlock* PosinfoBlockReader::readBlock( const Index& docno_)
+const PosinfoBlock* PosinfoBlockReader::readBlock( const Index& docno_)
 {
-	if (!m_docnoBlock.empty())
+	if (!m_posinfoBlock.empty())
 	{
 		if (docno_ >= m_last_docno
-		&&  docno_ <= m_docnoBlock.back().docno())
+		&&  docno_ <= m_posinfoBlock.docno())
 		{
-			return &m_docnoBlock;
+			return &m_posinfoBlock;
 		}
-		else if (docno_ == m_docnoBlock.back().docno()+1)
+		else if (docno_ == m_posinfoBlock.docno()+1)
 		{
 			m_itr->Next();
 		}
@@ -118,7 +115,7 @@ const DocnoBlock* PosinfoBlockReader::readBlock( const Index& docno_)
 	m_last_docno = docno_;
 	if (extractData())
 	{
-		return &m_docnoBlock;
+		return &m_posinfoBlock;
 	}
 	else
 	{
@@ -145,7 +142,7 @@ const DocnoBlock* PosinfoBlockReader::readLastBlock()
 	}
 	if (extractData())
 	{
-		return &m_docnoBlock;
+		return &m_posinfoBlock;
 	}
 	else
 	{

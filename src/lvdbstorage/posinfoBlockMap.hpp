@@ -47,24 +47,53 @@ public:
 		:m_db(o.m_db),m_itr(0),m_map(o.m_map){}
 
 	void definePosinfo(
+		const Index& typeno,
+		const Index& termno,
 		const Index& docno,
 		const std::vector<Index>& pos);
 
 	void deletePosinfo(
+		const Index& typeno,
+		const Index& termno,
 		const Index& docno);
 	
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	typedef std::map<Index,std::vector<Index> > Map;
+	struct TermDoc
+	{
+		Index type;
+		Index value;
+		Index docno;
+
+		TermDoc( const Index& t, const Index& v, const Index& d)
+			:type(t),value(v),docno(d){}
+		TermDoc( const TermDoc& o)
+			:type(o.type),value(o.value),docno(o.docno){}
+
+		bool operator < (const TermDoc& o) const
+		{
+			if (type < o.type) return true;
+			if (type > o.type) return false;
+			if (value < o.value) return true;
+			if (value > o.value) return false;
+			return docno < o.docno;
+		}
+	};
+	typedef std::vector<Index> Posinfo;
+	typedef std::map<TermDoc,Posinfo> Map;	///< map docno to pos[]
 
 	void writeBlock(
 		leveldb::WriteBatch& batch,
+		const Index& typeno,
+		const Index& termno,
 		const Index& docno,
 		const PosinfoBlock& blk);
 
 	void deleteBlock(
 		leveldb::WriteBatch& batch,
+		const Index& typeno,
+		const Index& termno,
 		const Index& docno);
 
 	void writeMergeBlock(

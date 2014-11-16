@@ -64,10 +64,25 @@ public:
 			return m_docno;
 		}
 
+		std::size_t() const
+		{
+			return m_end - m_ptr;
+		}
+
 		const char* end() const
 		{
 			return m_end;
 		}
+
+		const char* ptr() const
+		{
+			return m_ptr;
+		}
+
+		void init(
+			const Index& docno_,
+			const std::vector<Index>& pos,
+			std::string& buffer);
 
 		void init( const Index& docno_, const char* ptr_, std::size_t size_)
 		{
@@ -98,12 +113,41 @@ public:
 	const Element* find( const Index& docno_) const;
 	const Element* upper_bound( const Index& docno_) const;
 
+	std::vector<Element> getElements( const Index& blockDocno) const;
+
+	void init( std::vector<Element>& elem, std::string& buffer);
+
 	void init( const Index& docno_, const char* ptr_, std::size_t size_)
 	{
 		m_docno = docno_;
 		m_blkptr = ptr_;
 		m_blkend = ptr_+size_;
 		m_blkitr = ptr_;
+	}
+
+	bool empty() const
+	{
+		return !m_blkptr;
+	}
+
+	void clear()
+	{
+		init( 0, 0, 0);
+	}
+
+	Index docno() const
+	{
+		return m_docno;
+	}
+
+	const char* ptr() const
+	{
+		return m_blkptr;
+	}
+
+	const std::size_t size() const
+	{
+		return m_blkend - m_blkptr;
 	}
 
 private:

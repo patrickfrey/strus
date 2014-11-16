@@ -47,7 +47,8 @@ public:
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
 		DocFrequencyPrefix='f',	///< [typeno,termno]           ->  [index]
-		DocnoBlockPrefix='b'	///< [typeno,termno,docno]     ->  [index,ff,weight]*
+		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
+		PosinfoBlockPrefix='p'	///< [typeno,termno,docno]     ->  [pos]*
 	};
 	static const char* keyPrefixName( KeyPrefix i)
 	{
@@ -63,6 +64,7 @@ public:
 			case DocAttributePrefix: return "document attribute";
 			case DocFrequencyPrefix: return "term document frequency";
 			case DocnoBlockPrefix: return "docno posting block";
+			case PosinfoBlockPrefix: return "posinfo posting block";
 		}
 		return 0;
 	}

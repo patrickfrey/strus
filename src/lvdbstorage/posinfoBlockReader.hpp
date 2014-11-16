@@ -38,7 +38,11 @@ namespace strus {
 class PosinfoBlockReader
 {
 public:
-	PosinfoBlockReader( leveldb::DB* db_, const Index& docno_);
+	PosinfoBlockReader(
+		leveldb::DB* db_,
+		const Index& typeno_,
+		const Index& termno_);
+
 	PosinfoBlockReader( const PosinfoBlockReader& o);
 	~PosinfoBlockReader();
 

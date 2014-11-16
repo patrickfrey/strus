@@ -64,6 +64,13 @@ bool DocnoBlockReader::extractData()
 	&&  m_keysize <= m_itr->key().size()
 	&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
 	{
+		const char* ki = m_itr->key().data();
+		const char* ke = ki + m_itr->key().size();
+		if (unpackIndex( ki, ke) != m_docnoBlock.back().docno())
+		{
+			throw std::runtime_error( "internal: illegal key defined for docno block");
+		}
+
 		const char* vi = m_itr->value().data();
 		const char* ve = vi + m_itr->value().size();
 		const DocnoBlock::Element* ar
@@ -74,13 +81,6 @@ bool DocnoBlockReader::extractData()
 			throw std::runtime_error( "internal: corrupt docno block");
 		}
 		m_docnoBlock.init( ar, arsize);
-
-		const char* ki = m_itr->key().data();
-		const char* ke = vi + m_itr->key().size();
-		if (unpackIndex( ki, ke) != m_docnoBlock.back().docno())
-		{
-			throw std::runtime_error( "internal: illegal key defined for docno block");
-		}
 		return true;
 	}
 	else

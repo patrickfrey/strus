@@ -33,33 +33,48 @@
 using namespace strus;
 
 void PosinfoBlockMap::definePosinfo(
-		const Index& docno,
-		const std::vector<Index>& pos)
+	const Index& typeno,
+	const Index& termno,
+	const Index& docno,
+	const std::vector<Index>& pos)
 {
 	boost::mutex::scoped_lock( m_mutex);
-	m_map[ docno] = pos;
+	m_map[ TermDoc( typeno, termno, docno)] = pos;
 }
 
 void PosinfoBlockMap::deletePosinfo(
-		const Index& docno)
+	const Index& typeno,
+	const Index& termno,
+	const Index& docno)
 {
 	boost::mutex::scoped_lock( m_mutex);
-	m_map[ docno].clear();
+	m_map[ TermDoc( typeno, termno, docno)].clear();
 }
 
 void PosinfoBlockMap::writeBlock(
 	leveldb::WriteBatch& batch,
+	const Index& typeno,
+	const Index& termno,
 	const Index& docno,
 	const PosinfoBlock& blk)
 {
-	
+	DatabaseKey key( (char)DatabaseKey::PosinfoBlockPrefix, typeno, termno, docno);
+	leveldb::Slice keyslice( key.ptr(), key.size());
+	leveldb::Slice valueslice( blk.ptr(), blk.size());
+
+	batch.Put( keyslice, valueslice);
 }
 
 void PosinfoBlockMap::deleteBlock(
 	leveldb::WriteBatch& batch,
+	const Index& typeno,
+	const Index& termno,
 	const Index& docno)
 {
-	
+	DatabaseKey key( (char)DatabaseKey::PosinfoBlockPrefix, typeno, termno, docno);
+
+	leveldb::Slice keyslice( key.ptr(), key.size());
+	batch.Delete( keyslice);
 }
 
 void PosinfoBlockMap::writeMergeBlock(
@@ -79,53 +94,92 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		std::vector<Index>::const_iterator
-			ei = mi->second.begin(),
-			ee = mi->second.end();
-
-		DocnoBlockReader blkreader( m_db, mi->first.type, mi->first.value);
-		const DocnoBlock* blk;
-
-		while (!!(blk=blkreader.readBlock( ei->first)))
+		Map::const_iterator mn = mi;
+		Index cur_type = mn->first.type;
+		Index cur_value = mn->first.value;
+		for (++mn; mn != me; ++mn)
 		{
-			writeMergeBlock(
-				batch, mi->first.type, mi->first.value,
-				ei, ee, blk);	
-		}
-		std::size_t newblksize = 0;
-		DocnoBlock::Element newblk[ BlockSize];
-
-		// Join new elements with last block to a block with size BlockSize:
-		blk = blkreader.readLastBlock();
-		if (blk)
-		{
-			if (blk->size() < BlockSize)
+			if (cur_type != mn->first.type && cur_value != mn->first.value)
 			{
-				deleteBlock(
-					batch, mi->first.type,
-					mi->first.value, blk->back().docno());
-				while (newblksize < blk->size())
+				break;
+			}
+		}
+		PosinfoBlockReader blkreader( m_db, mi->first.type, mi->first.value);
+		const PosinfoBlock* blk;
+
+		while (mi != mn && 0!=(blk=blkreader.readBlock( mi->first.docno)))
+		{
+			std::vector<std::string> buffer;
+			std::vector<PosinfoBlock::Element> elems = blk->getElements();
+			std::vector<PosinfoBlock::Element> merge;
+
+			std::vector<PosinfoBlock::Element>::const_iterator
+				ei = elems.begin(), ee = elems.end();
+			while (ei != ee)
+			{
+				if (mi != mn && mi->first <= ei->docno())
 				{
-					newblk[ newblksize] = blk->data()[ newblksize];
-					++newblksize;
+					if (!mi->second.empty())
+					{
+						PosinfoBlock::Element newelem;
+						buffer.push_back( std::string());
+						newelem.init( mi->first, mi->second, buffer.back());
+						merge.push_back( newelem);
+					}
+					if (mi->first == ei->docno())
+					{
+						++ei;
+					}
+					++mi;
+				}
+				else
+				{
+					merge.push_back( *ei);
+					++ei;
 				}
 			}
+			PosinfoBlock newblk;
+			std::string blkbuffer;
+			newblk.init( merge, blkbuffer);
+			writeBlock( batch, cur_type, cur_value, newblk.docno(), newblk);
 		}
-		// Write rest elements to new blocks:
-		while (ei != ee)
+		if (mi != mn)
 		{
-			for (;newblksize < BlockSize && ei != ee; ++ei,++newblksize)
+			std::vector<std::string> buffer;
+			std::vector<PosinfoBlock::Element> newblk;
+	
+			// Join new elements with last block to a block with size BlockSize:
+			blk = blkreader.readLastBlock();
+			if (blk)
 			{
-				newblk[ newblksize] = ei->second;
+				if (blk->size() < BlockSize)
+				{
+					deleteBlock(
+						batch, mi->first.type,
+						mi->first.value, blk->back().docno());
+					while (newblksize < blk->size())
+					{
+						newblk[ newblksize] = blk->data()[ newblksize];
+						++newblksize;
+					}
+				}
 			}
-			writeBlock( batch, mi->first.type, mi->first.value,
-					newblk, newblksize);
-			newblksize = 0;
-		}
-		if (newblksize)
-		{
-			writeBlock( batch, mi->first.type, mi->first.value,
-					newblk, newblksize);
+			// Write rest elements to new blocks:
+			while (ei != ee)
+			{
+				for (;newblksize < BlockSize && ei != ee; ++ei,++newblksize)
+				{
+					newblk[ newblksize] = ei->second;
+				}
+				writeBlock( batch, mi->first.type, mi->first.value,
+						newblk, newblksize);
+				newblksize = 0;
+			}
+			if (newblksize)
+			{
+				writeBlock( batch, mi->first.type, mi->first.value,
+						newblk, newblksize);
+			}
 		}
 	}
 	m_map.clear();
