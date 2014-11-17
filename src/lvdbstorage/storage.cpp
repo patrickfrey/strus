@@ -36,7 +36,7 @@
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
-#include "docnoBlockReader.hpp"
+#include "blockStorage.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -56,6 +56,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_metaDataBlockMap(0)
 	,m_metaDataBlockCache(0)
 	,m_docnoBlockMap(0)
+	,m_posinfoBlockMap(0)
 	,m_globalKeyMap(0)
 	,m_nofInserterCnt(0)
 	,m_flushCnt(0)
@@ -78,6 +79,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_metaDataBlockCache = new MetaDataBlockCache( m_db);
 			m_metaDataBlockMap = new MetaDataBlockMap( m_db);
 			m_docnoBlockMap = new DocnoBlockMap( m_db);
+			m_posinfoBlockMap = new PosinfoBlockMap( m_db);
 
 			m_next_termno = keyLookUp( DatabaseKey::VariablePrefix, "TermNo");
 			m_next_typeno = keyLookUp( DatabaseKey::VariablePrefix, "TypeNo");
@@ -95,6 +97,8 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_metaDataBlockCache = 0;
 			if (m_docnoBlockMap) delete m_docnoBlockMap;
 			m_docnoBlockMap = 0;
+			if (m_posinfoBlockMap) delete m_posinfoBlockMap;
+			m_posinfoBlockMap = 0;
 			if (m_globalKeyMap) delete m_globalKeyMap;
 			m_globalKeyMap = 0;
 			if (m_db) delete m_db;
@@ -125,6 +129,7 @@ void Storage::writeInserterBatch()
 	m_dfMap->getWriteBatch( m_inserter_batch);
 	m_metaDataBlockMap->getWriteBatch( m_inserter_batch, *m_metaDataBlockCache);
 	m_docnoBlockMap->getWriteBatch( m_inserter_batch);
+	m_posinfoBlockMap->getWriteBatch( m_inserter_batch);
 	m_globalKeyMap->getWriteBatch( m_inserter_batch);
 
 	leveldb::WriteOptions options;
@@ -350,6 +355,22 @@ void Storage::deleteDocnoPosting(
 {
 	m_docnoBlockMap->deleteDocnoPosting( termtype, termvalue, docno);
 }
+
+void Storage::definePosinfoPosting(
+	const Index& termtype, const Index& termvalue,
+	const Index& docno, const std::vector<Index>& posinfo)
+{
+	m_posinfoBlockMap->definePosinfoPosting(
+		termtype, termvalue, docno, posinfo);
+}
+
+void Storage::deletePosinfoPosting(
+	const Index& termtype, const Index& termvalue,
+	const Index& docno)
+{
+	m_posinfoBlockMap->deletePosinfoPosting( termtype, termvalue, docno);
+}
+
 
 void Storage::incrementDf( Index typeno, Index termno)
 {

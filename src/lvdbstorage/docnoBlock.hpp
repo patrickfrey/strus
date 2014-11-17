@@ -30,83 +30,88 @@
 #define _STRUS_LVDB_DOCNO_BLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "floatConversions.hpp"
+#include "fixedSizeRecordBlock.hpp"
+#include "dataBlock.hpp"
+#include "databaseKey.hpp"
 #include <stdint.h>
-#include <leveldb/db.h>
 
 namespace strus {
 
-class DocnoBlock
+class DocnoBlockElement
 {
 public:
-	class Element
+	DocnoBlockElement() :m_docno(0),m_ff(0),m_weight(0.0){}
+	DocnoBlockElement( Index docno_, unsigned int ff_, float weight_);
+	DocnoBlockElement( const DocnoBlockElement& o);
+
+	float weight() const;
+
+	unsigned int ff() const
 	{
-	public:
-		Element() :m_docno(0),m_ff(0),m_weight(0.0){}
-		Element( Index docno_, unsigned int ff_, float weight_);
-		Element( const Element& o);
+		return m_ff;
+	}
 
-		float weight() const;
-
-		unsigned int ff() const
-		{
-			return m_ff;
-		}
-
-		Index docno() const
-		{
-			return m_docno;
-		}
-
-	private:
-		enum {Max_ff=0xffFF};
-		uint32_t m_docno;
-		uint16_t m_ff;
-		strus::float16_t m_weight;	///< IEEE 754 half-precision binary floating-point format: binary16
-	};
-
-public:
-	DocnoBlock();
-	DocnoBlock( const Element* ar_, std::size_t arsize_);
-	DocnoBlock( const DocnoBlock& o);
+	Index docno() const
+	{
+		return m_docno;
+	}
 
 	bool empty() const
 	{
-		return !m_ar;
+		return !m_ff;
 	}
 
-	std::size_t size() const
-	{
-		return m_arsize;
-	}
-
-	const Element* data() const
-	{
-		return m_ar;
-	}
-
-	const Element& back() const
-	{
-		return m_ar[ m_arsize-1];
-	}
-
-	const Element* find( const Index& docno_) const;
-	const Element* upper_bound( const Index& docno_) const;
-
-	void clear()
-	{
-		m_ar = 0;
-		m_arsize = 0;
-	}
-
-	void init( const Element* ar_, std::size_t arsize_)
-	{
-		m_ar = ar_;
-		m_arsize = arsize_;
-	}
-	
 private:
-	const Element* m_ar;
-	std::size_t m_arsize;
+	enum {Max_ff=0xffFF};
+	uint32_t m_docno;
+	uint16_t m_ff;
+	strus::float16_t m_weight;	///< IEEE 754 half-precision binary floating-point format: binary16
+};
+
+class DocnoBlock
+	:public FixedSizeRecordBlock<DocnoBlockElement>
+{
+public:
+	enum {
+		BlockType=DatabaseKey::DocnoBlockPrefix,
+		NofBlockElements=128
+	};
+	static DatabaseKey databaseKey( const Index& typeno, const Index& termno)
+	{
+		return DatabaseKey( (char)BlockType, typeno, termno);
+	}
+
+public:
+	DocnoBlock()
+		:FixedSizeRecordBlock( (char)BlockType){}
+	DocnoBlock( const DocnoBlockElement* ar_, std::size_t arsize_)
+		:FixedSizeRecordBlock( (char)BlockType, ar_, arsize_){}
+	DocnoBlock( const DocnoBlock& o)
+		:FixedSizeRecordBlock( o){}
+
+	const_iterator find( const Index& docno_, const_iterator lowerbound) const;
+	const_iterator upper_bound( const Index& docno_, const_iterator lowerbound) const;
+
+	bool full() const
+	{
+		return nofElements() >= NofBlockElements;
+	}
+	void append( const Index& docno_, const DocnoBlockElement& elem)
+	{
+		if (elem.docno() != docno_) throw std::logic_error( "docno block element docid does not match");
+		push_back( elem);
+	}
+	/// \brief Check if the address 'docno_', if it exists, is in this block.
+	bool isThisBlockAddress( const Index& docno_) const
+	{
+		return (docno_ <= id() && docno_ > first().docno());
+	}
+	/// \brief Check if the address 'docno_', if it exists, is in the following block we can get with 'leveldb::Iterator::Next()' or not
+	bool isFollowBlockAddress( const Index& docno_) const
+	{
+		return (docno_ > id() && docno_ < id() + NofBlockElements);
+	}
+	static DocnoBlock merge( const DocnoBlock& newblk, const DocnoBlock& oldblk);
 };
 
 }

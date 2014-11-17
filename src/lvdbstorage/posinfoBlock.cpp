@@ -27,186 +27,259 @@
 --------------------------------------------------------------------
 */
 #include "posinfoBlock.hpp"
+#include "indexPacker.hpp"
 #include <cstring>
+#include <string.h>
 
 using namespace strus;
 
-void PosinfoBlock::Element::init(
-	const Index& docno_,
-	const std::vector<Index>& pos,
-	std::string& buffer)
+enum {EndPosinfoMarker=(char)0xFE};
+
+Index PosinfoBlock::docno_at( const char* ref) const
 {
+	char const* rr = ref;
+	if (rr == charend()) return 0;
+	return id() - (unpackIndex( rr, charend()) - 1);
+}
+
+std::vector<Index> PosinfoBlock::positions_at( const char* itr) const
+{
+	std::vector<Index> rt;
+	char const* pi = skipIndex( itr, charend());	//... skip docno
+	const char* pe = charend();
+	while (pi != pe && *pi != EndPosinfoMarker)
+	{
+		rt.push_back( unpackIndex( pi, pe));
+	}
+	return rt;
+}
+
+const char* PosinfoBlock::end_at( const char* itr) const
+{
+	char const* pi = skipIndex( itr, charend());	//... skip docno
+	const char* pe = charend();
+	while (pi != pe && *pi != EndPosinfoMarker)
+	{
+		++pi;
+	}
+	return pi;
+}
+
+bool PosinfoBlock::empty_at( const char* itr) const
+{
+	char const* pi = skipIndex( itr, charend());	//... skip docno
+	return (pi != charend() || *pi == EndPosinfoMarker);
+}
+
+const char* PosinfoBlock::nextDoc( const char* ref) const
+{
+	if (ref == charend()) return 0;
+	char const* rt = (const char*)std::memchr( ref, EndPosinfoMarker, charend()-ref);
+	return (rt)?(rt+1):charend();
+}
+
+const char* PosinfoBlock::prevDoc( const char* ref) const
+{
+	if (ref == charptr()) return 0;
+	char const* rt = (const char*)::memrchr( charptr(), EndPosinfoMarker, ref-charptr());
+	return (rt)?(rt+1):charptr();
+}
+
+void PosinfoBlock::append( const Index& docno, const std::vector<Index>& pos)
+{
+	char const* pp = prevDoc( charend());
+	if (pp && docno_at( pp) > docno)
+	{
+		throw std::runtime_error( "posinfo not added in ascending docno order");
+	}
+	if (id() < docno)
+	{
+		throw std::runtime_error( "internal: upper bound of docno in posinfo block not set (setId)");
+	}
+	std::string blk;
+	if (size()) blk.push_back( EndPosinfoMarker);
+	packIndex( blk, id() - docno + 1);
 	std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
 	for (; pi != pe; ++pi)
 	{
-		packIndex( buffer, *pi);
+		packIndex( blk, *pi);
 	}
-	init( docno_, buffer.c_str(), buffer.size());
+	DataBlock::append( blk.c_str(), blk.size());
 }
 
-Index PosinfoBlock::Element::skipPos( const Index& pos_)
+void PosinfoBlock::appendPositionsBlock( const char* start, const char* end)
 {
-	if (m_posno >= firstpos_)
+	char ch = EndPosinfoMarker;
+	if (size()) DataBlock::append( (const void*)&ch, 1);
+	DataBlock::append( (const void*)start, end-start);
+}
+
+
+PosinfoBlock::PositionIterator::PositionIterator( const char* start_, const char* end_)
+	:m_itr(start_),m_next(start_),m_end(end_)
+{
+	m_curpos = (start_ == end_)?0:unpackIndex( m_next, m_end);
+}
+
+void PosinfoBlock::PositionIterator::skip()
+{
+	m_itr = m_next;
+	m_curpos = (m_next == m_end)?0:unpackIndex( m_next, m_end);
+}
+
+void PosinfoBlock::PositionIterator::init( const char* start_, const char* end_)
+{
+	m_itr = start_;
+	m_next = start_;
+	m_end = end_;
+	m_curpos = (start_ == end_)?0:unpackIndex( m_next, m_end);
+}
+
+PosinfoBlock::PositionIterator PosinfoBlock::positionIterator_at( const char* itr) const
+{
+	if (itr == charend()) return PositionIterator();
+	char const* pi = skipIndex( itr, charend());	//... skip docno
+	if (pi == charend()) return PositionIterator( charend(),charend());
+	char const* pe = nextDoc(pi);
+	return PositionIterator( pi, pe);
+}
+
+const char* PosinfoBlock::upper_bound( const Index& docno_, const char* lowerbound) const
+{
+	if (!lowerbound || lowerbound == charend()) return charend();
+	char const* last = charend();
+	char const* first = lowerbound;
+	Index dn = docno_at( first);
+	if (dn >= docno_) return first;
+
+	unsigned int ofs = 128;
+	while (last - first > ofs)
 	{
-		if (m_posno == firstpos_ && firstpos_ != 0)
+		char const* fwdpos = nextDoc( lowerbound + (ofs>>1));
+		if (!fwdpos)
 		{
-			return m_posno;
+			ofs >>= 2;
+			if (ofs < 16) break;
 		}
-		m_posno = 0;
-		m_itr = m_ptr;
-	}
-	unsigned int ofs = (m_end - m_itr) >> 1;
-	if (ofs > firstpos_ - m_posno)
-	{
-		ofs = (firstpos_ - m_posno) >> 4;
-	}
-	while (ofs >= 6)
-	{
-		const char* skipitr = strus::nextPackedIndexPos( m_itr, m_itr + ofs, m_end);
-		if (skipitr != m_end)
+		else if ((dn=docno_at(fwdpos)) >= docno_)
 		{
-			Index nextpos = unpackIndex( skipitr, m_end);
-			if (nextpos <= firstpos_)
+			if (dn == docno_) return fwdpos;
+			ofs >>= 2;
+			if (ofs < 16) break;
+		}
+		else
+		{
+			first = fwdpos;
+		}
+	}
+	while (first != last)
+	{
+		Index dn = docno_at( first);
+		if (dn >= docno_) return first;
+	}
+	return 0;
+}
+
+const char* PosinfoBlock::find( const Index& docno_, const char* lowerbound) const
+{
+	const char* rt = upper_bound( docno_, lowerbound);
+	return (docno_ == docno_at( rt))?rt:0;
+}
+
+void PosinfoBlock::setId( const Index& id_)
+{
+	char const* pp = prevDoc( charend());
+	Index maxDocno = docno_at( pp);
+	
+	if (maxDocno > id_) throw std::runtime_error( "internal: cannot set posinfo block id to a smaller value than the highest docno inserted");
+	if (id() != id_)
+	{
+		if (empty())
+		{
+			DataBlock::setId( id_);
+		}
+		else
+		{
+			// Rewrite document references (first element in variable size record):
+			std::string content;
+			Index id_diff = id_ - id();
+			char const* bi = begin();
+			const char* be = end();
+			while (bi != be)
 			{
-				m_posno = nextpos;
-				m_itr = skipitr;
-				if (nextpos == firstpos_)
+				packIndex( content, unpackIndex( bi, be) + id_diff);
+				while (bi != be && *bi != EndPosinfoMarker)
 				{
-					return m_posno;
+					packIndex( content, unpackIndex( bi, be));
 				}
-				else
+				if (bi != be)
 				{
-					ofs = (m_end - m_itr) >> 1;
-					if (ofs > firstpos_ - m_posno)
-					{
-						ofs = (firstpos_ - m_posno) >> 4;
-					}
-					continue;
+					content.push_back( EndPosinfoMarker);
+					++bi;
 				}
 			}
-			else
-			{
-				ofs /= 2;
-			}
+			init( id_, content.c_str(), content.size(), content.size());
 		}
 	}
-	while (m_itr < m_posend && (firstpos_ > m_posno || !m_posno))
-	{
-		// Get the next position:
-		m_posno = unpackIndex( m_itr, m_end);
-	}
-	if (firstpos_ > m_posno)
-	{
-		return 0;
-	}
-	return m_posno;
 }
 
-bool PosinfoBlock::loadElement()
+PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock& oldblk)
 {
-	if (m_blkitr == m_blkptr || *(m_blkitr-1) == 0xFF)
-	{
-		char const* end = std::memchr( m_blkitr, 0xFF, m_blkend-m_blkitr);
-		if (!end) end = m_blkend;
+	PosinfoBlock rt;
+	char const* newi = newblk.begin();
+	char const* oldi = oldblk.begin();
+	Index newdn = newblk.docno_at( newi);
+	Index olddn = newblk.docno_at( oldi);
 
-		Index reldocno = unpackIndex( m_blkitr, end);
-		m_elem.init( docno_ - reldocno, m_blkitr, end-m_blkitr);
-	}
-	else
+	while (newdn && olddn)
 	{
-		throw std::logic_error( "illegal block element reference (PosinfoBlock::loadElement())");
-	}
-}
-
-const Element* PosinfoBlock::upper_bound( const Index& docno_) const
-{
-	if (m_elem.empty())
-	{
-		char const* last = m_blkend;
-		char const* first = m_blkptr;
-		char const* mid = m_blkptr + ((m_blkend - m_blkptr) >> 4);
-
-		while (first+8 < last)
+		if (newdn <= olddn)
 		{
-			mid = std::memrchr( mid, 0xFF, mid-first);
-			if (mid)
+			if (!newblk.empty_at( newi))
 			{
-				++mid;
+				//... append only if not empty (empty => delete)
+				rt.appendPositionsBlock( newi, newblk.end_at( newi));
 			}
-			else
+			if (newdn == olddn)
 			{
-				mid = first;
+				//... defined twice -> prefer new entry and ignore old
+				oldi = oldblk.nextDoc( oldi);
+				olddn = newblk.docno_at( oldi);
 			}
-			m_blkitr = mid;
-			loadElement();
-
-			if (m_elem.docno() > docno_)
-			{
-				last = m_elem.end();
-			}
-			else if (m_elem.docno() < docno_)
-			{
-				first = m_elem.end();
-			}
-			else
-			{
-				return docno_;
-			}
+			newi = newblk.nextDoc( newi);
+			newdn = newblk.docno_at( newi);
 		}
-		while (first < last)
+		else
 		{
-			m_blkitr = first;
-			loadElement();
-			if (m_elem.docno() >= docno_)
+			if (!oldblk.empty_at( oldi))
 			{
-				return m_elem.docno();
+				//... append only if not empty (empty => delete)
+				rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
 			}
+			oldi = oldblk.nextDoc( oldi);
+			olddn = newblk.docno_at( oldi);
 		}
-		return 0;
 	}
-}
-
-const Element* PosinfoBlock::find( const Index& docno_) const
-{
-	const Element* rt = upper_bound( docno_);
-	return (rt && rt->docno() == docno_)?rt:0;
-}
-
-std::vector<Element> PosinfoBlock::getElements() const
-{
-	std::vector<Element> rt;
-	char const* vi = m_blkptr;
-	const char* ve = m_blkend;
-	while (vi != ve)
+	while (newdn)
 	{
-		Index reldocno = unpackIndex( vi, ve);
-		char const* end = std::memchr( vi, 0xFF, ve-vi);
-		if (!end) end = ve;
-		rt.push_back( Element( docno()-reldocno, vi, end-vi));
-	}
-}
-
-void PosinfoBlock::init( std::vector<Element>& elem, std::string& buffer)
-{
-	std::vector<Element>::const_iterator ei = elem.begin(), ee=elem.end();
-	std::size_t bufsize = 0;
-	char tmpbuffer[32];
-	if (ei != ee)
-	{
-		buffer.resize(0);
-		for (int eidx=0; ei != em; ++ei,++eidx)
+		if (!newblk.empty_at( newi))
 		{
-			if (eidx) buffer.push_back( (char)0xff);
-			packIndex( buffer, elem.back().docno() - ei->docno());
-			buffer.append( ei->ptr(), ei->size());
+			//... append only if not empty (empty => delete)
+			rt.appendPositionsBlock( newi, newblk.end_at( newi));
 		}
-		init( elem.back().docno(), buffer.c_str(), buffer.size());
+		newi = newblk.nextDoc( newi);
+		newdn = newblk.docno_at( newi);
 	}
-	else
+	while (olddn)
 	{
-		clear();
+		if (!oldblk.empty_at( oldi))
+		{
+			//... append only if not empty (empty => delete)
+			rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
+		}
+		oldi = oldblk.nextDoc( oldi);
+		olddn = newblk.docno_at( oldi);
 	}
+	return rt;
 }
-
-
 

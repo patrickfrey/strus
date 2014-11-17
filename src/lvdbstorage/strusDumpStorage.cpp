@@ -97,12 +97,6 @@ static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const le
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::InvertedIndexPrefix:
-			{
-				strus::InvertedIndexData data( key, value);
-				data.print( out);
-				break;
-			}
 			case strus::DatabaseKey::ForwardIndexPrefix:
 			{
 				strus::ForwardIndexData data( key, value);
@@ -140,8 +134,11 @@ static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const le
 				break;
 			}
 			case strus::DatabaseKey::PosinfoBlockPrefix:
-				throw std::logic_error("NOT IMPLEMENTED YET (PosinfoBlock)");
-			break;
+			{
+				strus::PosinfoBlockData data( key, value);
+				data.print( out);
+				break;
+			}
 		}
 	}
 	catch (const std::runtime_error& err)

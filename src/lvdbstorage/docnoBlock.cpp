@@ -34,27 +34,36 @@
 
 using namespace strus;
 
-DocnoBlock::DocnoBlock()
-	:m_ar(0),m_arsize(0){}
-
-DocnoBlock::DocnoBlock( const Element* ar_, std::size_t arsize_)
-	:m_ar(ar_)
-	,m_arsize(arsize_)
-{}
-
-DocnoBlock::DocnoBlock( const DocnoBlock& o)
-	:m_ar(o.m_ar)
-	,m_arsize(o.m_arsize)
-{}
-
-const DocnoBlock::Element* DocnoBlock::upper_bound( const Index& docno_) const
+DocnoBlockElement::DocnoBlockElement( Index docno_, unsigned int ff_, float weight_)
+	:m_docno((uint32_t)docno_)
+	,m_ff(ff_>Max_ff?Max_ff:ff_)
+	,m_weight(floatSingleToHalfPrecision(weight_))
 {
-	std::size_t first=0,last=m_arsize;
+	if (docno_ > std::numeric_limits<uint32_t>::max()) 
+	{
+		throw std::runtime_error( "document number out of range");
+	}
+}
+
+DocnoBlockElement::DocnoBlockElement( const DocnoBlockElement& o)
+	:m_docno(o.m_docno)
+	,m_ff(o.m_ff)
+	,m_weight(o.m_weight){}
+
+float DocnoBlockElement::weight() const
+{
+	return floatHalfToSinglePrecision( m_weight);
+}
+
+
+DocnoBlock::const_iterator DocnoBlock::upper_bound( const Index& docno_, const_iterator lowerbound) const
+{
+	std::size_t first=lowerbound-begin(),last=nofElements();
 	std::size_t mid = first + ((first + last) >> 4);
 
 	while (first+4 < last)
 	{
-		Index dn = m_ar[ mid].docno();
+		Index dn = ptr()[ mid].docno();
 		if (dn < docno_)
 		{
 			first = mid+1;
@@ -67,47 +76,72 @@ const DocnoBlock::Element* DocnoBlock::upper_bound( const Index& docno_) const
 		}
 		else
 		{
-			return m_ar + mid;
+			return const_iterator( ptr() + mid);
 		}
 	}
 	for (;first < last; ++first)
 	{
-		if (m_ar[ first].docno() >= docno_)
+		if (ptr()[ first].docno() >= docno_)
 		{
-			return m_ar + first;
+			return const_iterator( ptr() + first);
 		}
 	}
-	return 0;
+	return end();
 }
 
-const DocnoBlock::Element* DocnoBlock::find( const Index& docno_) const
+DocnoBlock::const_iterator DocnoBlock::find( const Index& docno_, const_iterator lowerbound) const
 {
-	const Element* rt = upper_bound( docno_);
-	if (rt && rt->docno() == docno_) return rt;
-	return 0;
+	const_iterator rt = upper_bound( docno_, lowerbound);
+	if (rt != end() && rt->docno() == docno_) return rt;
+	return end();
 }
 
 
-DocnoBlock::Element::Element( Index docno_, unsigned int ff_, float weight_)
-	:m_docno((uint32_t)docno_)
-	,m_ff(ff_>Max_ff?Max_ff:ff_)
-	,m_weight(floatSingleToHalfPrecision(weight_))
+DocnoBlock DocnoBlock::merge( const DocnoBlock& newblk, const DocnoBlock& oldblk)
 {
-	if (docno_ > std::numeric_limits<uint32_t>::max()) 
+	DocnoBlock rt;
+	DocnoBlock::const_iterator ai = newblk.begin(), ae = newblk.end();
+	DocnoBlock::const_iterator bi = oldblk.begin(), be = oldblk.end();
+	while (ai != ae && bi != be)
 	{
-		throw std::runtime_error( "document number out of range");
+		if (ai->docno() <= bi->docno())
+		{
+			if (!ai->empty())
+			{
+				rt.push_back( *ai);
+			}
+			if (ai->docno() == bi->docno())
+			{
+				//... defined twice -> prefer new entry and ignore old
+				++bi;
+			}
+			++ai;
+		}
+		else
+		{
+			rt.push_back( *bi);
+			++bi;
+		}
 	}
+	while (ai != ae)
+	{
+		if (!ai->empty())
+		{
+			rt.push_back( *ai);
+		}
+		++ai;
+	}
+	while (bi != be)
+	{
+		if (!bi->empty())
+		{
+			rt.push_back( *bi);
+		}
+		++bi;
+	}
+	return rt;
 }
 
-DocnoBlock::Element::Element( const Element& o)
-	:m_docno(o.m_docno)
-	,m_ff(o.m_ff)
-	,m_weight(o.m_weight){}
-
-float DocnoBlock::Element::weight() const
-{
-	return floatHalfToSinglePrecision( m_weight);
-}
 
 
 

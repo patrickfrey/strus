@@ -35,8 +35,6 @@
 #include <cstdlib>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
 
 namespace strus {
@@ -86,8 +84,7 @@ private:
 	enum {
 		NodeSize=1024,							///< size of one node in the cache
 		MaxBlockno=(NodeSize*NodeSize),					///< hardcode limit of maximum document block number
-		MaxDocno=(NodeSize*NodeSize*MetaDataBlock::MetaDataBlockSize),	///< hardcode limit of maximum document number
-		NofMutexLevel1=256
+		MaxDocno=(NodeSize*NodeSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
 	};
 
 	struct BlockRef
@@ -123,7 +120,6 @@ private:
 	leveldb::DB* m_db;
 	boost::shared_ptr<BlockNodeArray> m_ar[VarnameDim];
 	std::vector<VoidRef> m_voidar;
-	boost::mutex m_mutex_level1[ NofMutexLevel1];
 };
 
 }

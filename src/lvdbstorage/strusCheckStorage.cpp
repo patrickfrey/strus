@@ -94,11 +94,6 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 				strus::DocIdData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::InvertedIndexPrefix:
-			{
-				strus::InvertedIndexData( key, value);
-				break;
-			}
 			case strus::DatabaseKey::ForwardIndexPrefix:
 			{
 				strus::ForwardIndexData( key, value);
@@ -127,6 +122,11 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 			case strus::DatabaseKey::DocnoBlockPrefix:
 			{
 				strus::DocnoBlockData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::PosinfoBlockPrefix:
+			{
+				strus::PosinfoBlockData data( key, value);
 				break;
 			}
 		}

@@ -102,13 +102,6 @@ void DatabaseKey::addElem( const Index& index)
 	packIndex( m_buf, m_size, MaxKeySize, index);
 }
 
-//[-]Index DatabaseKey::elem( std::size_t pos) const
-//[-]{
-//[-]	if (pos >= m_size) throw std::runtime_error("internal: illegal element access in key");
-//[-]	const char* pp = m_buf + pos;
-//[-]	return unpackIndex( pp, m_buf + m_size);
-//[-]}
-
 void DatabaseKey::addPrefix( char prefix)
 {
 	if (m_size == MaxKeySize) throw std::runtime_error("static buffer overflow");
@@ -121,4 +114,12 @@ void DatabaseKey::resize( std::size_t n)
 	m_size = n;
 }
 
+bool DatabaseKey::operator < (const DatabaseKey& o) const
+{
+	std::size_t cmplen = (m_size < o.m_size)?m_size:o.m_size;
+	int cmpres = std::memcmp( m_buf, o.m_buf, cmplen);
+	if (cmpres<0) return true;
+	if (cmpres>0) return false;
+	return m_size < o.m_size;
+}
 

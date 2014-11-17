@@ -157,66 +157,6 @@ void DocIdData::print( std::ostream& out)
 }
 
 
-InvertedIndexData::InvertedIndexData( const leveldb::Slice& key, const leveldb::Slice& value)
-{
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
-
-	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
-	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
-	docno = strus::unpackIndex( ki, ke);/*[docno]*/
-	if (ki != ke)
-	{
-		throw std::runtime_error( "unexpected extra bytes at end of term index key");
-	}
-	ff = strus::unpackIndex( vi, ve);
-	posar = new unsigned int[ ff];
-	strus::Index prevpos = 0;
-	strus::Index poscnt = 0;
-
-	while (vi != ve)
-	{
-		strus::Index pos = strus::unpackIndex( vi, ve);
-		if (pos > (strus::Index)std::numeric_limits<unsigned int>::max())
-		{
-			delete [] posar;
-			throw std::runtime_error( "position out of range");
-		}
-		if (prevpos >= pos)
-		{
-			delete [] posar;
-			throw std::runtime_error( "positions not ascending in location index");
-		}
-		if (poscnt > ff)
-		{
-			delete [] posar;
-			throw std::runtime_error( "ff does not match to count of positions");
-		}
-		posar[ poscnt++] = (unsigned int)(prevpos = pos);
-	}
-	if (ff != poscnt)
-	{
-		delete [] posar;
-		throw std::runtime_error( "ff does not match to count of positions");
-	}
-}
-
-InvertedIndexData::~InvertedIndexData()
-{
-	if (posar) delete [] posar;
-}
-
-void InvertedIndexData::print( std::ostream& out)
-{
-	out << (char)DatabaseKey::InvertedIndexPrefix << ' ' << typeno << ' ' << valueno << ' ' << docno << ' ' << ff << ' ';
-	unsigned int ii = 0;
-	if (ff) out << posar[0];
-	for (++ii; ii<ff; ++ii) out << ' ' << posar[ii];
-	out << std::endl;
-}
-
 
 ForwardIndexData::ForwardIndexData( const leveldb::Slice& key, const leveldb::Slice& value)
 {
@@ -239,7 +179,6 @@ ForwardIndexData::ForwardIndexData( const leveldb::Slice& key, const leveldb::Sl
 		throw std::runtime_error( "value in addressed by forward index is not a valied UTF-8 string");
 	}
 }
-
 
 void ForwardIndexData::print( std::ostream& out)
 {
@@ -380,13 +319,13 @@ DocnoBlockData::DocnoBlockData( const leveldb::Slice& key, const leveldb::Slice&
 	termno = strus::unpackIndex( ki, ke);/*[termno]*/
 	Index docno = strus::unpackIndex( ki, ke);/*[docno]*/
 
-	blk = reinterpret_cast<const DocnoBlock::Element*>(vi);
-	blksize = (ve-vi)/sizeof(DocnoBlock::Element);
+	blk = reinterpret_cast<const DocnoBlockElement*>(vi);
+	blksize = (ve-vi)/sizeof(DocnoBlockElement);
 	if (blksize == 0)
 	{
 		throw std::runtime_error( "docno block is empty");
 	}
-	if (blksize * sizeof(DocnoBlock::Element) != (std::size_t)(ve-vi))
+	if (blksize * sizeof(DocnoBlockElement) != (std::size_t)(ve-vi))
 	{
 		throw std::runtime_error( "docno block size is not dividable by docno block element size");
 	}
@@ -408,4 +347,62 @@ void DocnoBlockData::print( std::ostream& out)
 	out << std::endl;
 }
 
+
+PosinfoBlockData::PosinfoBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
+	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
+	Index docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( "unexpected extra bytes at end of term index key");
+	}
+	PosinfoBlock blk( docno, vi, ve-vi);
+	char const* itr = blk.begin();
+	char const* end = blk.end();
+
+	while (itr != end)
+	{
+		Index docno_elem = blk.docno_at( itr);
+		if (docno_elem > docno)
+		{
+			throw std::runtime_error( "posinfo element docno bigger than upper bound docno");
+		}
+		if (posinfo.size() && docno_elem <= posinfo.back().docno)
+		{
+			throw std::runtime_error( "elements in posinfo array of docno not not strictly ascending");
+		}
+		posinfo.push_back( PosinfoPosting( docno_elem, blk.positions_at( itr)));
+		std::vector<Index>::const_iterator pi = posinfo.back().pos.begin(), pe = posinfo.back().pos.end();
+		for (Index prevpos=0; pi != pe; ++pi)
+		{
+			if (prevpos >= *pi)
+			{
+				throw std::runtime_error( "position elements in posinfo array not strictly ascending");
+			}
+		}
+	}
+}
+
+void PosinfoBlockData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::PosinfoBlockPrefix << ' ' << typeno << ' ' << valueno << ' ' << posinfo.size();
+	std::vector<PosinfoPosting>::const_iterator itr = posinfo.begin(), end = posinfo.end();
+	for (; itr != end; ++itr)
+	{
+		out << ' ' << itr->docno << ':';
+		std::vector<Index>::const_iterator pi = itr->pos.begin(), pe = itr->pos.end();
+		for (int pidx=0; pi != pe; ++pi,++pidx)
+		{
+			if (pidx) out << ',';
+			out << *pi;
+		}
+	}
+	out << std::endl;
+}
 

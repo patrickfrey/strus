@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "docnoBlock.hpp"
+#include "blockMap.hpp"
 #include <cstdlib>
 #include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
@@ -38,78 +39,40 @@
 namespace strus {
 
 class DocnoBlockMap
+	:public BlockMap<DocnoBlock,DocnoBlockElement>
 {
 public:
+	typedef BlockMap<DocnoBlock,DocnoBlockElement> Parent;
+
+public:
 	DocnoBlockMap( leveldb::DB* db_)
-		:m_db(db_),m_itr(0){}
+		:BlockMap<DocnoBlock,DocnoBlockElement>(db_){}
 	DocnoBlockMap( const DocnoBlockMap& o)
-		:m_db(o.m_db),m_itr(0),m_map(o.m_map){}
+		:BlockMap<DocnoBlock,DocnoBlockElement>(o){}
 
 	void defineDocnoPosting(
 		const Index& termtype,
 		const Index& termvalue,
 		const Index& docno,
 		unsigned int ff,
-		float weight);
+		float weight)
+	{
+		Parent::defineElement( DocnoBlock::databaseKey( termtype, termvalue), docno, DocnoBlockElement( docno, ff, weight));
+	}
 
 	void deleteDocnoPosting(
 		const Index& termtype,
 		const Index& termvalue,
-		const Index& docno);
-	
-	void getWriteBatch( leveldb::WriteBatch& batch);
-
-private:
-	typedef std::map<Index,DocnoBlock::Element> ElementMap;
-
-	struct Term
+		const Index& docno)
 	{
-		Index type;
-		Index value;
+		Parent::deleteElement( DocnoBlock::databaseKey( termtype, termvalue), docno);
+	}
 
-		Term( const Index& t, const Index& v)
-			:type(t),value(v){}
-		Term( const Term& o)
-			:type(o.type),value(o.value){}
-
-		bool operator < (const Term& o) const
-		{
-			if (type < o.type) return true;
-			if (type > o.type) return false;
-			return value < o.value;
-		}
-	};
-
-	void writeBlock(
-		leveldb::WriteBatch& batch,
-		const Index& typeno,
-		const Index& valueno,
-		const DocnoBlock::Element* blkptr,
-		std::size_t blksize);
-
-	void deleteBlock(
-		leveldb::WriteBatch& batch,
-		const Index& typeno,
-		const Index& valueno,
-		const Index& docno);
-
-	void writeMergeBlock(
-		leveldb::WriteBatch& batch,
-		const Index& typeno,
-		const Index& valueno,
-		ElementMap::const_iterator& ei,
-		const ElementMap::const_iterator& ee,
-		const DocnoBlock* blk);
-
-private:
-	typedef std::map<Term,ElementMap> Map;
-	enum {BlockSize=128};
-
-private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	boost::mutex m_mutex;
-	Map m_map;
+	void getWriteBatch( leveldb::WriteBatch& batch)
+	{
+		Parent::getWriteBatch( batch);
+	}
+	
 };
 
 }

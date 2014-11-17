@@ -32,14 +32,6 @@
 
 using namespace strus;
 
-static uint32_t hashint( uint32_t a)
-{
-	a = a ^ (a>>4);
-	a = (a^0xdeadbeef) + (a<<5);
-	a = a ^ (a>>11);
-	return a;
-}
-
 MetaDataBlockCache::MetaDataBlockCache( leveldb::DB* db_)
 	:m_db(db_)
 {}
@@ -96,26 +88,14 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	
 	// Level 1:
 	boost::shared_ptr<BlockArray>& ar2 = (*ar1)[ idx_level1];
-	if (!ar2.get())
+	while (!ar2.get())
 	{
-		unsigned int midx = hashint( idx_level1) % NofMutexLevel1;
-		m_mutex_level1[ midx].lock();
-
-		try
+		ar2 = (*ar1)[ idx_level1];
+		if (!ar2.get())
 		{
+			(*ar1)[ idx_level1].reset( new BlockArray());
 			ar2 = (*ar1)[ idx_level1];
-			if (!ar2.get())
-			{
-				(*ar1)[ idx_level1].reset( new BlockArray());
-				ar2 = (*ar1)[ idx_level1];
-			}
 		}
-		catch (const std::bad_alloc&)
-		{
-			m_mutex_level1[ midx].unlock();
-			throw std::bad_alloc();
-		}
-		m_mutex_level1[ midx].unlock();
 	}
 
 	// Level 2:

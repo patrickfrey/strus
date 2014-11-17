@@ -26,40 +26,49 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCNO_BLOCK_READER_HPP_INCLUDED
-#define _STRUS_LVDB_DOCNO_BLOCK_READER_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "docnoBlock.hpp"
+#ifndef _STRUS_LVDB_DOCNO_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_DOCNO_ITERATOR_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
 #include "databaseKey.hpp"
+#include "blockStorage.hpp"
+#include "floatConversions.hpp"
+#include <cstdlib>
+#include <stdexcept>
+#include <limits>
 #include <leveldb/db.h>
 
 namespace strus {
 
-class DocnoBlockReader
+class DocnoIterator
 {
 public:
-	DocnoBlockReader( leveldb::DB* db_, const Index& typeno_, const Index& termno_);
-	DocnoBlockReader( const DocnoBlockReader& o);
-	~DocnoBlockReader();
+	DocnoIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
+		:m_blockReader( db_, DocnoBlock::databaseKey( termtypeno, termvalueno), true){}
+	DocnoIterator( const DocnoIterator& o)
+		:m_blockReader(o.m_blockReader){}
 
-	const DocnoBlock* curBlock() const
+	~DocnoIterator(){}
+
+	Index skipDoc( const Index& docno_);
+
+	unsigned int frequency()
 	{
-		return &m_docnoBlock;
+		return m_curelem.initialized()?m_curelem->ff():0;
 	}
 
-	const DocnoBlock* readBlock( const Index& docno_);
-	const DocnoBlock* readLastBlock();
+	Index docno() const
+	{
+		return m_curelem.initialized()?m_curelem->docno():0;
+	}
+
+	float weight() const
+	{
+		return m_curelem.initialized()?m_curelem->weight():0.0;
+	}
 
 private:
-	bool extractData();
-
-private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	DatabaseKey m_key;
-	std::size_t m_keysize;
-	Index m_last_docno;
-	DocnoBlock m_docnoBlock;
+	BlockStorage<DocnoBlock> m_blockReader;
+	DocnoBlock::const_iterator m_curelem;
 };
 
 }

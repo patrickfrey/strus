@@ -26,46 +26,46 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_POSINFO_BLOCK_READER_HPP_INCLUDED
-#define _STRUS_LVDB_POSINFO_BLOCK_READER_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "posinfoBlock.hpp"
-#include "databaseKey.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
+#define _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
+#include "dataBlockStorage.hpp"
 
 namespace strus {
 
-class PosinfoBlockReader
+/// \class BlockStorage
+template <class BlockType>
+class BlockStorage
+	:public DataBlockStorage
 {
 public:
-	PosinfoBlockReader(
-		leveldb::DB* db_,
-		const Index& typeno_,
-		const Index& termno_);
+	BlockStorage( leveldb::DB* db_, const DatabaseKey& dbkey_, bool useLruCache_)
+		:DataBlockStorage( db_, dbkey_, useLruCache_){}
+	BlockStorage( const BlockStorage& o)
+		:DataBlockStorage(o){}
 
-	PosinfoBlockReader( const PosinfoBlockReader& o);
-	~PosinfoBlockReader();
+	~BlockStorage(){}
 
-	const PosinfoBlock* curBlock() const
+	const BlockType* curblock() const
 	{
-		return &m_docnoBlock;
+		return DataBlock::upcast<BlockType>( DataBlockStorage::curblock());
 	}
 
-	const PosinfoBlock* readBlock( const Index& docno_);
-	const PosinfoBlock* readLastBlock();
+	const BlockType* load( const Index& id_)
+	{
+		return DataBlock::upcast<BlockType>( DataBlockStorage::load( id_));
+	}
 
-private:
-	bool extractData();
+	const BlockType* loadNext()
+	{
+		return DataBlock::upcast<BlockType>( DataBlockStorage::loadNext());
+	}
 
-private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	DatabaseKey m_key;
-	std::size_t m_keysize;
-	Index m_last_docno;
-	PosinfoBlock m_posinfoBlock;
+	const BlockType* loadLast()
+	{
+		return DataBlock::upcast<BlockType>( DataBlockStorage::loadLast());
+	}
 };
 
-}
+} //namespace
 #endif
 

@@ -5,6 +5,10 @@ CPP_OBJS=\
 	floatConversions.o \
 	indexPacker.o \
 	databaseKey.o \
+	dataBlock.o \
+	dataBlockStorage.o \
+	docnoBlock.o \
+	posinfoBlock.o \
 	metaDataBlock.o \
 	metaDataReader.o \
 	metaDataBlockMap.o \
@@ -12,10 +16,6 @@ CPP_OBJS=\
 	globalKeyMap.o \
 	documentFrequencyMap.o \
 	storage.o \
-	docnoBlock.o \
-	docnoBlockReader.o \
-	docnoBlockMap.o \
-	docnoIterator.o \
 	postingIterator.o \
 	nullIterator.o \
 	forwardIterator.o \

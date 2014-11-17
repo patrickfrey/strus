@@ -32,7 +32,18 @@ using namespace strus;
 
 Index DocnoIterator::skipDoc( const Index& docno_)
 {
-	const DocnoBlock* blk = m_blockReader.readBlock( docno_);
+	if (m_curelem.initialized())
+	{
+		if (docno_ == m_curelem.docno())
+		{
+			return m_docno;
+		}
+		if (m_lastdocno <= docno_ && m_curelem.docno() >= docno_)
+		{
+			return m_curelem.docno();
+		}
+	}
+	const DocnoBlock* blk = m_blockReader.load( docno_);
 	if (blk)
 	{
 		m_curelem = blk->upper_bound( docno_);

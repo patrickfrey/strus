@@ -1,0 +1,93 @@
+/*
+---------------------------------------------------------------------
+    The C++ library strus implements basic operations to build
+    a search engine for structured search on unstructured data.
+
+    Copyright (C) 2013,2014 Patrick Frey
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+--------------------------------------------------------------------
+
+	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
+	For documentation see 'http://patrickfrey.github.com/strus'
+
+--------------------------------------------------------------------
+*/
+#ifndef _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
+#define _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "databaseKey.hpp"
+#include <cstdlib>
+#include <stdexcept>
+
+namespace strus {
+
+/// \class DataBlock
+class DataBlock
+{
+public:
+	explicit DataBlock( char type_)
+		:m_type(type_),m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
+	{}
+	DataBlock( char type_, const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+		:m_type(type_),m_allocsize(0)
+	{
+		init( id_, ptr_, size_, allocated_?size_:0);
+	}
+	DataBlock( const DataBlock& o)
+		:m_type(o.m_type),m_allocsize(0)
+	{
+		init( o.m_id, o.m_ptr, o.m_size, o.m_allocsize);
+	}
+	virtual ~DataBlock()
+	{
+		if (m_allocsize) std::free( m_ptr);
+	}
+
+	void clear()			{m_size=0;}
+	bool empty() const		{return !m_size;}
+	char blocktype() const		{return m_type;}
+	Index id() const		{return m_id;}
+	void setId( const Index& id_)	{m_id = id_;}
+	std::size_t size() const	{return m_size;}
+	const void* end() const		{return m_ptr + m_size;}
+	const void* ptr() const		{return m_ptr;}
+	const char* charptr() const	{return (const char*)m_ptr;}
+	const char* charend() const	{return (const char*)m_ptr + m_size;}
+
+	void init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_=0);
+
+	void append( const void* data, std::size_t datasize);
+
+	template <class Derivation>
+	static const Derivation* upcast( const DataBlock* o)
+	{
+		if (!o) return 0;
+		if (o->blocktype() != Derivation::BlockType) throw std::logic_error("invalid data block cast");
+		return reinterpret_cast<const Derivation*>(o);
+	}
+
+private:
+	char m_type;
+	Index m_id;
+	char* m_ptr;
+	std::size_t m_size;
+	std::size_t m_allocsize;
+};
+
+} //namespace
+#endif
+

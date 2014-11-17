@@ -26,51 +26,54 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "posinfoBlock.hpp"
-#include "blockMap.hpp"
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
+#include "dataBlock.hpp"
+#include <cstring>
 
-namespace strus {
+using namespace strus;
 
-class PosinfoBlockMap
-	:protected BlockMap<PosinfoBlock,PosinfoBlockElement>
+void DataBlock::init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_)
 {
-public:
-	PosinfoBlockMap( leveldb::DB* db_)
-		:BlockMap<PosinfoBlock,PosinfoBlockElement>(db_){}
-	PosinfoBlockMap( const PosinfoBlockMap& o)
-		:BlockMap<PosinfoBlock,PosinfoBlockElement>(o){}
-
-	void definePosinfoPosting(
-		const Index& typeno,
-		const Index& termno,
-		const Index& docno,
-		const std::vector<Index>& pos)
+	if (m_allocsize)
 	{
-		defineElement( PosinfoBlock::databaseKey( typeno, termno), docno, pos);
+		std::free( m_ptr);
 	}
-
-	void deletePosinfoPosting(
-		const Index& typeno,
-		const Index& termno,
-		const Index& docno)
+	if (allocsize_)
 	{
-		deleteElement( PosinfoBlock::databaseKey( typeno, termno), docno);
+		m_allocsize = ((allocsize_ >> 10)+1) << 10;
+		m_ptr = (char*)std::malloc( m_allocsize);
+		if (!m_ptr) throw std::bad_alloc();
+		std::memcpy( m_ptr, ptr_, size_);
 	}
-	
-	void getWriteBatch( leveldb::WriteBatch& batch)
+	else
 	{
-		BlockMap<PosinfoBlock,PosinfoBlockElement>::getWriteBatch( batch);
+		m_ptr = static_cast<char*>(const_cast<void*>( ptr_));
+		m_allocsize = 0;
 	}
-};
-
+	m_size = size_;
+	m_id = id_;
 }
-#endif
+
+void DataBlock::append( const void* data, std::size_t datasize)
+{
+	if (datasize + m_size > m_allocsize)
+	{
+		std::size_t mm = (((datasize +m_size) >> 10)+1) << 10;
+		char* mp;
+		if (m_allocsize)
+		{
+			mp = (char*)std::realloc( m_ptr, mm);
+		}
+		else
+		{
+			mp = (char*)std::malloc( mm);
+			if (mp) std::memcpy( mp, m_ptr, m_size);
+		}
+		if (!mp) throw std::bad_alloc();
+		m_allocsize = mm;
+		m_ptr = mp;
+	}
+	std::memcpy( m_ptr+m_size, data, datasize);
+	m_size += datasize;
+}
+
 

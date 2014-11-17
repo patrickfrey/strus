@@ -44,200 +44,204 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 #else
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
-	:m_docnoitr(m_db,termtypeno,termvalueno)
-	,m_db(db_)
+	:m_db(db_)
+	,m_docnoStorage( db_, DocnoBlock::databaseKey( termtypeno, termvalueno), true)
+	,m_docnoBlk(0)
+	,m_docnoItr()
+	,m_posinfoStorage( db_, PosinfoBlock::databaseKey( termtypeno, termvalueno), true)
+	,m_posinfoBlk(0)
+	,m_posinfoItr(0)
+	,m_last_docno(0)
+	,m_last_pos(0)
+	,m_docno(0)
 	,m_termtypeno(termtypeno)
 	,m_termvalueno(termvalueno)
-	,m_key( (char)DatabaseKey::InvertedIndexPrefix, termtypeno, termvalueno)
-	,m_keysize(1)
-	,m_docno(0)
-	,m_lastdocno(0)
-	,m_documentFrequency(-1)
-	,m_itr(0)
-	,m_posno(0)
-	,m_positr(0)
-	,m_posend(0)
+	,m_documentFrequency(0)
 {
 	m_featureid.reserve( 16);
-	m_keysize = m_key.size();
 #ifdef STRUS_LOWLEVEL_DEBUG
 	m_featureid.append( termstr);
 	m_featureid.push_back(':');
 	m_featureid.push_back( (char)(termtypeno/10) + '0');
 	m_featureid.push_back( (char)(termtypeno%10) + '0');
 #else
-	m_featureid.append( m_key.ptr()+1, m_keysize-1);
+	packIndex( m_featureid, termtypeno);
+	packIndex( m_featureid, termvalueno);
 #endif
 }
 
 PostingIterator::PostingIterator( const PostingIterator& o)
 	:PostingIteratorInterface(o)
-	,m_docnoitr(o.m_db,o.m_termtypeno,o.m_termvalueno)
 	,m_db(o.m_db)
+	,m_docnoStorage( o.m_docnoStorage)
+	,m_docnoBlk(0)
+	,m_docnoItr()
+	,m_posinfoStorage( o.m_posinfoStorage)
+	,m_posinfoBlk(0)
+	,m_posinfoItr(0)
+	,m_last_docno(0)
+	,m_last_pos(0)
+	,m_docno(0)
 	,m_termtypeno(o.m_termtypeno)
 	,m_termvalueno(o.m_termvalueno)
-	,m_key(o.m_key)
-	,m_keysize(o.m_keysize)
-	,m_docno(0)
-	,m_lastdocno(0)
 	,m_documentFrequency(o.m_documentFrequency)
-	,m_itr(0)
-	,m_posno(0)
-	,m_positr(0)
-	,m_posend(0)
 	,m_featureid(o.m_featureid)
 {}
 
-PostingIterator::~PostingIterator()
+Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 {
-	if (m_itr) delete m_itr;
+	if (!m_docnoBlk)
+	{
+		// [A] No block loaded yet
+		m_docnoBlk = m_docnoStorage.load( docno_);
+		if (!m_docnoBlk) return 0;
+		m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
+	}
+	else
+	{
+		if (m_docnoBlk->isThisBlockAddress( docno_))
+		{
+			// [B] Answer in same block as for the last query
+			if (m_docnoItr == m_docnoBlk->end() || docno_ < m_docnoItr->docno())
+			{
+				m_docnoItr = m_docnoBlk->begin();
+			}
+			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoItr);
+		}
+		else if (m_docnoBlk->isFollowBlockAddress( docno_))
+		{
+			// [C] Answer cannot be in another block than the follow block
+			m_docnoBlk = m_docnoStorage.loadNext();
+			if (!m_docnoBlk) return 0;
+			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
+		}
+		else
+		{
+			// [D] Answer is in a 'far away block'
+			m_docnoBlk = m_docnoStorage.load( docno_);
+			if (!m_docnoBlk) return 0;
+			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
+		}
+	}
+	if (m_docnoItr == m_docnoBlk->end()) return 0;
+	return m_docnoItr->docno();
 }
 
+Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
+{
+	if (!m_posinfoBlk)
+	{
+		// [A] No block loaded yet
+		m_posinfoBlk = m_posinfoStorage.load( docno_);
+		if (!m_posinfoBlk) return 0;
+		m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
+	}
+	else
+	{
+		if (m_posinfoBlk->isThisBlockAddress( docno_))
+		{
+			// [B] Answer in same block as for the last query
+			if (docno_ < m_posinfoBlk->docno_at( m_posinfoItr))
+			{
+				m_posinfoItr = m_posinfoBlk->begin();
+			}
+			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoItr);
+		}
+		else if (m_posinfoBlk->isFollowBlockAddress( docno_))
+		{
+			// [C] Answer cannot be in another block than the follow block
+			m_posinfoBlk = m_posinfoStorage.loadNext();
+			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
+		}
+		else
+		{
+			// [D] Answer is in a 'far away block'
+			m_posinfoBlk = m_posinfoStorage.load( docno_);
+			if (!m_posinfoBlk) return 0;
+			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
+		}
+	}
+	if (!m_posinfoItr || m_posinfoItr == m_posinfoBlk->end()) return 0;
+	return m_posinfoBlk->docno_at( m_posinfoItr);
+}
 
 Index PostingIterator::skipDoc( const Index& docno_)
 {
 	if (m_docno)
 	{
-		if (m_docno == docno_)
+		if (docno_ == m_docno)
 		{
+			// [A] same as the current position
 			return m_docno;
 		}
-		if (m_lastdocno <= docno_ && m_docno >= docno_)
+		if (m_last_docno <= docno_ && m_docno > docno_)
 		{
+			// [B] same response as for the last query
 			return m_docno;
 		}
 	}
-	Index dn = m_docnoitr.skipDoc( docno_);
-	if (dn)
+	if (m_posinfoBlk)
 	{
-		m_lastdocno = docno_;
-		m_docno = dn;
-	}
-	return dn;
-#if 0
-	if (m_itr && m_docno +1 == docno_)
-	{
-		return getNextTermDoc();
-	}
-	else
-	{
-		return getFirstTermDoc( docno_);
-	}
-#endif
-}
-
-Index PostingIterator::skipPos( const Index& firstpos_)
-{
-#if 1
-	if (!getFirstTermDoc( m_docno)) return 0;
-#endif
-	if (m_posno >= firstpos_)
-	{
-		if (m_posno == firstpos_ && firstpos_ != 0)
-		{
-			return m_posno;
-		}
-		m_posno = 0;
-		m_positr = m_itr->value().data();
-		m_posend = m_positr + m_itr->value().size();
-		m_positr = skipIndex( m_positr, m_posend); //... skip ff
-	}
-	unsigned int ofs = (m_posend - m_positr) >> 1;
-	if (ofs > firstpos_ - m_posno)
-	{
-		ofs = (firstpos_ - m_posno) >> 4;
-	}
-	while (ofs >= 6)
-	{
-		const char* skipitr = strus::nextPackedIndexPos( m_positr, m_positr + ofs, m_posend);
-		if (skipitr != m_posend)
-		{
-			Index nextpos = unpackIndex( skipitr, m_posend);
-			if (nextpos <= firstpos_)
-			{
-				m_posno = nextpos;
-				m_positr = skipitr;
-				if (nextpos == firstpos_)
-				{
-					return m_posno;
-				}
-				else
-				{
-					ofs = (m_posend - m_positr) >> 1;
-					if (ofs > firstpos_ - m_posno)
-					{
-						ofs = (firstpos_ - m_posno) >> 4;
-					}
-					continue;
-				}
-			}
-			else
-			{
-				ofs >>= 1;
-			}
-		}
-	}
-	while (m_positr < m_posend && (firstpos_ > m_posno || !m_posno))
-	{
-		// Get the next position:
-		m_posno = unpackIndex( m_positr, m_posend);
-	}
-	if (firstpos_ > m_posno)
-	{
-		return 0;
-	}
-	return m_posno;
-}
-
-Index PostingIterator::extractMatchData()
-{
-	if (m_itr->Valid()
-	&& m_keysize < m_itr->key().size()
-	&& 0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
-	{
-		// Init the term weight and the iterators on the term occurrencies:
-		m_posno = 0;
-		m_positr = m_itr->value().data();
-		m_posend = m_positr + m_itr->value().size();
-		(void)unpackIndex( m_positr, m_posend);/*ff*/
-
-		// Extract the next matching document number from the rest of the key and return it:
-		const char* ki = m_itr->key().data() + m_keysize;
-		const char* ke = ki + m_itr->key().size();
-		m_docno = unpackIndex( ki, ke);
+		m_docno = skipDocPosinfoBlock( docno_);
+		m_last_docno = docno_;
+		m_last_pos = 0;
 		return m_docno;
 	}
 	else
 	{
-		delete m_itr;
-		m_docno = 0;
-		m_itr = 0;
-		m_posno = 0;
-		m_positr = 0;
-		m_posend = 0;
-		return 0;
+		m_docno = skipDocDocnoBlock( docno_);
+		m_last_docno = docno_;
+		return m_docno;
 	}
 }
 
-Index PostingIterator::getNextTermDoc()
+Index PostingIterator::skipPos( const Index& firstpos_)
 {
-	m_itr->Next();
-	return extractMatchData();
-}
-
-Index PostingIterator::getFirstTermDoc( const Index& docno)
-{
-	if (!m_itr)
+	if (!m_posinfoItr)
 	{
-		leveldb::ReadOptions options;
-		options.fill_cache = true;
-		m_itr = m_db->NewIterator( options);
+		if (!m_docno) return 0;
+		if (m_docno != skipDocPosinfoBlock( m_docno))
+		{
+			throw std::runtime_error( "position information not available (do insert with position information for this type of query)");
+		}
 	}
-	m_key.resize( m_keysize);
-	m_key.addElem( docno);
-	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
+	if (!m_positionItr.initialized() || m_positionItr.eof())
+	{
+		m_positionItr = m_posinfoBlk->positionIterator_at( m_posinfoItr);
+	}
+	else if (*m_positionItr > firstpos_)
+	{
+		if (firstpos_ >= m_last_pos)
+		{
+			return *m_positionItr;
+		}
+		m_positionItr = m_posinfoBlk->positionIterator_at( m_posinfoItr);
+	}
+	while (!m_positionItr.eof() && firstpos_ > *m_positionItr)
+	{
+		++m_positionItr;
+	}
+	m_last_pos = firstpos_;
+	if (!m_positionItr.eof())
+	{
+		return *m_positionItr;
+	}
+	return 0;
+}
 
-	return extractMatchData();
+unsigned int PostingIterator::frequency()
+{
+	if (m_posinfoItr)
+	{
+		unsigned int ff = 0;
+		m_positionItr = m_posinfoBlk->positionIterator_at( m_posinfoItr);
+		while (!m_positionItr.eof()) {++m_positionItr;++ff;}
+		return ff;
+	}
+	else
+	{
+		return m_docnoItr.initialized()?m_docnoItr->ff():0;
+	}
 }
 
 Index PostingIterator::documentFrequency()
@@ -247,7 +251,9 @@ Index PostingIterator::documentFrequency()
 		DatabaseKey key( (char)DatabaseKey::DocFrequencyPrefix, m_termtypeno, m_termvalueno);
 		leveldb::Slice keyslice( key.ptr(), key.size());
 		std::string value;
-		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
+		leveldb::ReadOptions options;
+		options.fill_cache = false;
+		leveldb::Status status = m_db->Get( options, keyslice, &value);
 		if (status.IsNotFound())
 		{
 			return 0;

@@ -29,7 +29,9 @@
 #ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
-#include "docnoIterator.hpp"
+#include "docnoBlock.hpp"
+#include "posinfoBlock.hpp"
+#include "blockStorage.hpp"
 #include "databaseKey.hpp"
 #include <leveldb/db.h>
 
@@ -44,7 +46,7 @@ public:
 	PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr);
 	PostingIterator( const PostingIterator& o);
 
-	virtual ~PostingIterator();
+	virtual ~PostingIterator(){}
 
 	virtual std::vector<PostingIteratorInterface*> subExpressions( bool positive)
 	{
@@ -58,10 +60,7 @@ public:
 	virtual Index skipDoc( const Index& docno_);
 	virtual Index skipPos( const Index& firstpos_);
 
-	virtual unsigned int frequency()
-	{
-		return m_docnoitr.frequency();
-	}
+	virtual unsigned int frequency();
 
 	virtual Index documentFrequency();
 
@@ -72,7 +71,11 @@ public:
 
 	virtual Index posno() const
 	{
-		return m_posno;
+		if (m_positionItr.initialized() && !m_positionItr.eof())
+		{
+			return *m_positionItr;
+		}
+		return 0;
 	}
 
 	virtual float weight() const
@@ -86,24 +89,27 @@ public:
 	}
 
 private:
-	Index extractMatchData();
-	Index getNextTermDoc();
-	Index getFirstTermDoc( const Index& docno);
+	Index skipDocPosinfoBlock( const Index& docno_);
+	Index skipDocDocnoBlock( const Index& docno_);
 
 private:
-	DocnoIterator m_docnoitr;
 	leveldb::DB* m_db;
+
+	BlockStorage<DocnoBlock> m_docnoStorage;
+	const DocnoBlock* m_docnoBlk;
+	DocnoBlock::const_iterator m_docnoItr;
+
+	BlockStorage<PosinfoBlock> m_posinfoStorage;
+	const PosinfoBlock* m_posinfoBlk;
+	char const* m_posinfoItr;
+	PosinfoBlock::PositionIterator m_positionItr;
+
+	Index m_last_docno;
+	Index m_last_pos;
+	Index m_docno;
 	Index m_termtypeno;
 	Index m_termvalueno;
-	DatabaseKey m_key;
-	std::size_t m_keysize;
-	Index m_docno;
-	Index m_lastdocno;
 	Index m_documentFrequency;
-	leveldb::Iterator* m_itr;
-	Index m_posno;
-	const char* m_positr;
-	const char* m_posend;
 	std::string m_featureid;
 };
 

@@ -71,6 +71,7 @@ private:
 		TermMapValue( const TermMapValue& o)
 			:pos(o.pos),weight(o.weight){}
 
+
 		std::set<Index> pos;
 		float weight;
 	};

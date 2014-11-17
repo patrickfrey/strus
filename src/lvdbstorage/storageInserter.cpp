@@ -172,17 +172,12 @@ void StorageInserter::done()
 	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)
 	{
-		DatabaseKey delkey( (char)DatabaseKey::InvertedIndexPrefix);
-		delkey.addElem( di->first);		// [typeno]
-		delkey.addElem( di->second);		// [valueno]
-		delkey.addElem( docno);			// [docno]
-
+		m_storage->deleteDocnoPosting( di->first, di->second, docno);
+		m_storage->deletePosinfoPosting( di->first, di->second, docno);
 		documentFound = true;
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE TERMS [" << delkey << "]" << std::endl;
+		std::cerr << "DELETE TERMS [" << di->first << " " << di->second << " " << docno << "]" << std::endl;
 #endif
-		m_storage->deleteIndex( leveldb::Slice( delkey.ptr(), delkey.size()));
-
 		m_storage->decrementDf( di->first, di->second);
 	}
 
@@ -191,29 +186,17 @@ void StorageInserter::done()
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
-		DatabaseKey termkey( (char)DatabaseKey::InvertedIndexPrefix);
-		std::string positions;
-		termkey.addElem( ti->first.first);	// [typeno]
-		termkey.addElem( ti->first.second);	// [valueno]
-		termkey.addElem( docno);		// [docno]
-
-		packIndex( positions, ti->second.pos.size());
-		// ... first element is the ff in the document
-		std::set<Index>::const_iterator pi = ti->second.pos.begin(), pe = ti->second.pos.end();
-		for (; pi != pe; ++pi)
-		{
-			packIndex( positions, *pi);
-		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "PUT TERMS [" << termkey << "]" << "= [" << positions << "]" << std::endl;
+		std::cerr << "PUT TERMS [" << ti->first.first << " " << ti->first.second << " " << docno << "]" << std::endl;
 #endif
-		m_storage->writeIndex( leveldb::Slice( termkey.ptr(), termkey.size()), positions);
-		m_storage->incrementDf( ti->first.first, ti->first.second);
-
+		std::vector<Index> pos;
+		pos.insert( pos.end(), ti->second.pos.begin(), ti->second.pos.end());
+		m_storage->definePosinfoPosting(
+				ti->first.first, ti->first.second, docno, pos);
 		m_storage->defineDocnoPosting(
 				ti->first.first, ti->first.second,
-				docno, ti->second.pos.size(),
-				ti->second.weight);
+				docno, ti->second.pos.size(), ti->second.weight);
+		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
 
 	// [4] Insert the new inverted info with key [ForwardIndexPrefix, docno, typeno, pos]:

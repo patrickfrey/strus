@@ -28,137 +28,111 @@
 */
 #ifndef _STRUS_LVDB_POSINFO_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_POSINFO_BLOCK_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "dataBlock.hpp"
+#include "databaseKey.hpp"
 #include <leveldb/db.h>
 #include <stdint.h>
+#include <vector>
 
 namespace strus {
 
+typedef std::vector<Index> PosinfoBlockElement;
+
 /// \class PosinfoBlock
-/// \brief Block of term occurrence positions of some documents
-/// \note A posinfo block is a sequence of variable length elements 
-///	starting with the relative document number (offset to subract
-///	from the upper_bound document number of the block) followed by
-///	encoded position numbers and ending with the byte 0xFF
+/// \brief Block of term occurrence positions
 class PosinfoBlock
+	:public DataBlock
 {
 public:
-	class Element
-	{
-	public:
-		Element() :m_ptr(0),m_itr(0),m_end(0),m_docno(0),m_posno(0){}
-		Element( const Index& docno_, const char* ptr_, std::size_t size_)
-			:m_ptr(ptr_),m_itr(ptr_),m_end(ptr_+size_),m_docno((uint32_t)docno_),m_posno(0){}
-		Element( const Element& o)
-			:m_ptr(o.m_ptr),m_itr(o.m_itr),m_end(o.m_end),m_docno(o.m_docno),m_posno(o.m_posno){}
-
-		bool empty() const
-		{
-			return !m_ptr;
-		}
-
-		Index skipPos( const Index& pos_);
-
-		Index docno() const
-		{
-			return m_docno;
-		}
-
-		std::size_t() const
-		{
-			return m_end - m_ptr;
-		}
-
-		const char* end() const
-		{
-			return m_end;
-		}
-
-		const char* ptr() const
-		{
-			return m_ptr;
-		}
-
-		void init(
-			const Index& docno_,
-			const std::vector<Index>& pos,
-			std::string& buffer);
-
-		void init( const Index& docno_, const char* ptr_, std::size_t size_)
-		{
-			m_ptr = ptr_;
-			m_itr = ptr_;
-			m_end = ptr_+size_;
-			m_docno = (uint32_t)docno_;
-			m_posno = 0;
-		}
-
-	private:
-		const char* m_ptr;
-		const char* m_itr;
-		const char* m_end;
-		uint32_t m_docno;
-		uint32_t m_posno;
+	enum {
+		BlockType=DatabaseKey::PosinfoBlockPrefix,
+		MaxBlockSize=1024
 	};
+	static DatabaseKey databaseKey( const Index& typeno, const Index& termno)
+	{
+		return DatabaseKey( (char)BlockType, typeno, termno);
+	}
 
 public:
-	PosinfoBlock()
-		:m_docno(0),m_blkptr(0),m_blkend(0),m_blkitr(0){}
+	explicit PosinfoBlock()
+		:DataBlock( (char)BlockType){}
 	PosinfoBlock( const PosinfoBlock& o)
-		:m_docno(o.m_docno),m_blkptr(o.m_blkptr),m_blkend(o.m_blkend),m_blkitr(o.m_blkitr),m_elem(o.m_elem){}
+		:DataBlock(o){}
+	PosinfoBlock( const Index& id_, const void* ptr_, std::size_t size_)
+		:DataBlock( (char)BlockType, id_, ptr_, size_){}
 
-	PosinfoBlock( const Index& docno_, const char* ptr_, std::size_t size_)
-		:m_docno(docno_),m_blkptr(ptr_),m_blkend(ptr_+size_),m_blkitr(ptr_){}
+	void setId( const Index& id_);
+	Index docno_at( const char* ref) const;
+	std::vector<Index> positions_at( const char* itr) const;
+	bool empty_at( const char* itr) const;
+	const char* end_at( const char* itr) const;
 
-	const Element* find( const Index& docno_) const;
-	const Element* upper_bound( const Index& docno_) const;
-
-	std::vector<Element> getElements( const Index& blockDocno) const;
-
-	void init( std::vector<Element>& elem, std::string& buffer);
-
-	void init( const Index& docno_, const char* ptr_, std::size_t size_)
+	const char* begin() const
 	{
-		m_docno = docno_;
-		m_blkptr = ptr_;
-		m_blkend = ptr_+size_;
-		m_blkitr = ptr_;
+		return charptr();
+	}
+	const char* end() const
+	{
+		return charend();
 	}
 
-	bool empty() const
+	const char* nextDoc( const char* ref) const;
+	const char* prevDoc( const char* ref) const;
+
+	const char* find( const Index& docno_, const char* lowerbound) const;
+	const char* upper_bound( const Index& docno_, const char* lowerbound) const;
+
+	bool full() const
 	{
-		return !m_blkptr;
+		return size() >= MaxBlockSize;
+	}
+	bool isThisBlockAddress( const Index& docno_) const
+	{
+		return (docno_ <= id() && docno_ > docno_at( begin()));
+	}
+	/// \brief Check if the address 'docno_', if it exists, is in the following block we can get with 'leveldb::Iterator::Next()' or not
+	bool isFollowBlockAddress( const Index& docno_) const
+	{
+		return (docno_ > id() && docno_ < id() + (MaxBlockSize/3)/* 3 ~ one byte docno,one byte pos,one byte 0xFF*/);
 	}
 
-	void clear()
+	void append( const Index& docno, const std::vector<Index>& pos);
+	void appendPositionsBlock( const char* start, const char* end);
+
+	static PosinfoBlock merge( const PosinfoBlock& newblk, const PosinfoBlock& oldblk);
+
+	class PositionIterator
 	{
-		init( 0, 0, 0);
-	}
+	public:
+		PositionIterator()
+			:m_itr(0),m_next(0),m_end(0),m_curpos(0){}
+		PositionIterator( const char* start_, const char* end_);
 
-	Index docno() const
-	{
-		return m_docno;
-	}
+		PositionIterator( const PositionIterator& o)
+			:m_itr(o.m_itr),m_next(o.m_next),m_end(o.m_end),m_curpos(o.m_curpos){}
 
-	const char* ptr() const
-	{
-		return m_blkptr;
-	}
+		PositionIterator& operator++()				{skip(); return *this;}
+		PositionIterator operator++(int)			{PositionIterator rt( m_itr, m_end); skip(); return rt;}
 
-	const std::size_t size() const
-	{
-		return m_blkend - m_blkptr;
-	}
+		const Index& operator*() const				{return m_curpos;}
 
-private:
-	void loadElement();
+		bool eof() const					{return m_itr==m_end;}
 
-private:
-	Index m_docno;
-	const char* m_blkptr;
-	const char* m_blkend;
-	char const* m_blkitr;
-	Element m_elem;
+		bool initialized() const				{return !!m_itr;}
+
+		void init( const char* start_, const char* end_);
+		void clear()						{init(0,0);}
+
+	private:
+		void skip();
+
+		char const* m_itr;
+		char const* m_next;
+		const char* m_end;
+		Index m_curpos;
+	};
+
+	PositionIterator positionIterator_at( const char* itr) const;
 };
 
 }

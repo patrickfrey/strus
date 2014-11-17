@@ -41,7 +41,6 @@ public:
 		TermTypePrefix='t',	///< [type string]             ->  [typeno]
 		TermValuePrefix='i',	///< [term string]             ->  [valueno]
 		DocIdPrefix='d',	///< [docid string]            ->  [docno]
-		InvertedIndexPrefix='o',///< [typeno,termno,docno]     ->  [ff][pos]*
 		ForwardIndexPrefix='r',	///< [docno,typeno,position]   ->  [string]*
 		VariablePrefix='v',	///< [variable string]         ->  [index]
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
@@ -57,7 +56,6 @@ public:
 			case TermTypePrefix: return "term type";
 			case TermValuePrefix: return "term value";
 			case DocIdPrefix: return "docid";
-			case InvertedIndexPrefix: return "inverted index";
 			case ForwardIndexPrefix: return "forward index";
 			case VariablePrefix: return "global variable";
 			case DocMetaDataPrefix: return "metadata";
@@ -82,10 +80,13 @@ public:
 	void addElem( const Index& index);
 	void addPrefix( char prefix);
 
+	char prefix() const			{return m_size?m_buf[0]:0;}
 	void resize( std::size_t n);
 
 	const char* ptr() const			{return m_buf;}
 	std::size_t size() const		{return m_size;}
+
+	bool operator < (const DatabaseKey& o) const;
 
 private:
 	enum {MaxKeySize=64};

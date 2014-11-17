@@ -26,51 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCNO_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_DOCNO_ITERATOR_HPP_INCLUDED
-#include "strus/postingIteratorInterface.hpp"
-#include "databaseKey.hpp"
-#include "docnoBlockReader.hpp"
-#include "floatConversions.hpp"
-#include <cstdlib>
-#include <stdexcept>
-#include <limits>
+#ifndef _STRUS_LVDB_DATA_BLOCK_STORAGE_HPP_INCLUDED
+#define _STRUS_LVDB_DATA_BLOCK_STORAGE_HPP_INCLUDED
+#include "dataBlock.hpp"
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
+#include <cstdlib>
 
 namespace strus {
 
-class DocnoIterator
+/// \class DataBlockStorage
+class DataBlockStorage
 {
 public:
-	DocnoIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
-		:m_blockReader( db_, termtypeno, termvalueno),m_curelem(0){}
-	DocnoIterator( const DocnoIterator& o)
-		:m_blockReader(o.m_blockReader),m_curelem(0){}
-
-	~DocnoIterator(){}
-
-	Index skipDoc( const Index& docno_);
-
-	unsigned int frequency()
+	DataBlockStorage( leveldb::DB* db_, const DatabaseKey& key_, bool useLruCache_)
+		:m_db(db_)
+		,m_itr(0)
+		,m_key(key_)
+		,m_keysize(key_.size())
+		,m_curblock(key_.prefix())
 	{
-		return m_curelem?m_curelem->ff():0;
+		m_readOptions.fill_cache = useLruCache_;
+	}
+	DataBlockStorage( const DataBlockStorage& o)
+		:m_db(o.m_db)
+		,m_itr(0)
+		,m_readOptions(o.m_readOptions)
+		,m_key(o.m_key)
+		,m_keysize(o.m_keysize)
+		,m_curblock(o.m_curblock){}
+	
+	virtual ~DataBlockStorage()
+	{
+		if (m_itr) delete m_itr;
 	}
 
-	Index docno() const
+	const DataBlock* curblock() const
 	{
-		return m_curelem?m_curelem->docno():0;
+		return &m_curblock;
 	}
 
-	float weight() const
-	{
-		return m_curelem?m_curelem->weight():0.0;
-	}
+	const DataBlock* load( const Index& id);
+	const DataBlock* loadLast();
+	const DataBlock* loadNext();
+
+	void store( const DataBlock& block, leveldb::WriteBatch& batch);
+	void dispose( const Index& id, leveldb::WriteBatch& batch);
 
 private:
-	DocnoBlockReader m_blockReader;
-	const DocnoBlock::Element* m_curelem;
+	const DataBlock* extractData();
+
+private:
+	leveldb::DB* m_db;
+	leveldb::Iterator* m_itr;
+	leveldb::ReadOptions m_readOptions;
+	DatabaseKey m_key;
+	std::size_t m_keysize;
+	DataBlock m_curblock;
 };
 
-}
+} //namespace
 #endif
 

@@ -36,6 +36,8 @@
 #include "metaDataBlockCache.hpp"
 #include "docnoBlock.hpp"
 #include "docnoBlockMap.hpp"
+#include "posinfoBlock.hpp"
+#include "posinfoBlockMap.hpp"
 #include "documentFrequencyMap.hpp"
 #include "globalKeyMap.hpp"
 #include <leveldb/db.h>
@@ -102,6 +104,14 @@ public:
 		const Index& termtype, const Index& termvalue,
 		const Index& docno);
 
+	void definePosinfoPosting(
+		const Index& termtype, const Index& termvalue,
+		const Index& docno, const std::vector<Index>& posinfo);
+
+	void deletePosinfoPosting(
+		const Index& termtype, const Index& termvalue,
+		const Index& docno);
+
 	void writeIndex( const leveldb::Slice& key, const leveldb::Slice& value);
 	void deleteIndex( const leveldb::Slice& key);
 
@@ -139,6 +149,7 @@ private:
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	DocnoBlockMap* m_docnoBlockMap;				///< map of docno postings for writing
+	PosinfoBlockMap* m_posinfoBlockMap;			///< map of posinfo postings for writing
 	GlobalKeyMap* m_globalKeyMap;				///< map of globals in the storage (term numbers, document numbers, etc.)
 
 	boost::mutex m_nofInserterCnt_mutex;			///< mutual exclusion for aquiring inserter

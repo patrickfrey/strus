@@ -22,9 +22,9 @@ install:
 uninstall:
 	cd src; make uninstall; cd ..
 	@-rm $(INSTALL_INCDIR)/constants.hpp
-	@-rm $(INSTALL_INCDIR)/forwardIndexViewerInterface.hpp
+	@-rm $(INSTALL_INCDIR)/forwardIteratorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/index.hpp
-	@-rm $(INSTALL_INCDIR)/iteratorInterface.hpp
+	@-rm $(INSTALL_INCDIR)/postingIteratorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/metaDataReaderInterface.hpp
 	@-rm $(INSTALL_INCDIR)/queryeval/query.hpp
 	@-rm $(INSTALL_INCDIR)/queryeval/resultDocument.hpp
@@ -34,6 +34,7 @@ uninstall:
 	@-rm $(INSTALL_INCDIR)/queryProcessorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/queryProcessorLib.hpp
 	@-rm $(INSTALL_INCDIR)/storageInterface.hpp
+	@-rm $(INSTALL_INCDIR)/storageInserterInterface.hpp
 	@-rm $(INSTALL_INCDIR)/storageLib.hpp
 	@-rm $(INSTALL_INCDIR)/strus.hpp
 	@-rm $(INSTALL_INCDIR)/summarizerInterface.hpp
