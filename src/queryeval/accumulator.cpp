@@ -12,11 +12,14 @@ using namespace strus;
 
 Accumulator::Accumulator(
 		const QueryProcessorInterface* qproc_,
-		std::size_t maxNofRanks_)
+		std::size_t maxNofRanks_,
+		std::size_t maxDocumentNumber_)
 	:m_queryprocessor(qproc_)
 	,m_selectoridx(0)
 	,m_docno(0)
+	,m_visited(maxDocumentNumber_)
 	,m_maxNofRanks(maxNofRanks_)
+	,m_maxDocumentNumber(maxDocumentNumber_)
 	,m_called(false)
 {}
 
@@ -61,7 +64,6 @@ bool Accumulator::nextRank(
 				if (nofSelElems > m_maxNofRanks) break;
 			}
 		}
-		m_visited.reserve( nofSelElems);
 		m_called = true;
 	}
 	// For all selectors:
@@ -74,13 +76,16 @@ bool Accumulator::nextRank(
 			++m_selectoridx;
 			continue;
 		}
-		if (m_visited.find( m_docno) != m_visited.end())
+		// Test if it already has been visited:
+		if (m_docno > m_maxDocumentNumber || m_visited.test( m_docno-1))
 		{
+			// ... documents with docno bigger than m_maxDocumentNumber 
+			//	were just inserted and are not respected in this query.
 			continue;
 		}
+		m_visited[ m_docno-1] = true;
 
-		// Mark it as visited:
-		m_visited.insert( docno = m_docno);
+		docno = m_docno;
 		selectorState = m_selectoridx+1;
 		weight = 0.0;
 
@@ -89,10 +94,10 @@ bool Accumulator::nextRank(
 
 		for (; ai != ae; ++ai)
 		{
-			if (docno == ai->itr->skipDoc( docno))
+			if (m_docno == ai->itr->skipDoc( m_docno))
 			{
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "MATCHES " << docno << ":";
+				std::cerr << "MATCHES " << m_docno << ":";
 				for (Index pp=ai->itr->skipPos(0); pp != 0; pp=ai->itr->skipPos(pp+1))
 				{
 					std::cerr << ' ' << pp;

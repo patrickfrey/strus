@@ -54,6 +54,16 @@ public:
 		return (const Element*)DataBlock::ptr();
 	}
 
+	const Element* begin() const
+	{
+		return (const Element*)DataBlock::ptr();
+	}
+
+	const Element* end() const
+	{
+		return (const Element*)DataBlock::ptr() + nofElements();
+	}
+
 	void init( const Element* ar_, std::size_t arsize_)
 	{
 		DataBlock::init( arsize_?ar_[arsize_-1].docno():0, ar_, arsize_*sizeof(*ar_));
@@ -74,38 +84,14 @@ public:
 		return ptr()[ 0];
 	}
 
-	class const_iterator
+	const Element& operator[]( std::size_t idx) const
 	{
-	public:
-		explicit const_iterator( const Element* ar_=0)
-			:m_itr(ar_){}
-		const_iterator( const const_iterator& o)
-			:m_itr(o.m_itr){}
-
-		const_iterator& operator++()				{++m_itr; return *this;}
-		const_iterator operator++(int)				{const_iterator rt=m_itr; ++m_itr; return rt;}
-		const Element& operator*() const			{return *m_itr;}
-		const Element* operator->() const			{return m_itr;}
-		std::size_t operator-( const const_iterator& o)	const	{return m_itr-o.m_itr;}
-
-		bool operator==( const const_iterator& o)		{return m_itr==o.m_itr;}
-		bool operator!=( const const_iterator& o)		{return m_itr!=o.m_itr;}
-
-		bool initialized() const				{return !!m_itr;}
-		void clear()						{m_itr = 0;}
-
-	private:
-		Element const* m_itr;
-	};
-
-	const_iterator begin() const
-	{
-		return const_iterator( ptr());
+		return ptr()[ idx];
 	}
 
-	const_iterator end() const
+	Element& operator[]( std::size_t idx)
 	{
-		return const_iterator( ptr()+nofElements());
+		return ptr()[ idx];
 	}
 };
 

@@ -56,9 +56,9 @@ float DocnoBlockElement::weight() const
 }
 
 
-DocnoBlock::const_iterator DocnoBlock::upper_bound( const Index& docno_, const_iterator lowerbound) const
+const DocnoBlockElement* DocnoBlock::upper_bound( const Index& docno_, const DocnoBlockElement* lowerbound) const
 {
-	std::size_t first=lowerbound-begin(),last=nofElements();
+	std::size_t first = lowerbound-begin(), last = nofElements();
 	std::size_t mid = first + ((last - first) >> 4);
 
 	while (first+4 < last)
@@ -76,32 +76,33 @@ DocnoBlock::const_iterator DocnoBlock::upper_bound( const Index& docno_, const_i
 		}
 		else
 		{
-			return const_iterator( ptr() + mid);
+			return ptr() + mid;
 		}
 	}
 	for (;first < last; ++first)
 	{
 		if (ptr()[ first].docno() >= docno_)
 		{
-			return const_iterator( ptr() + first);
+			return ptr() + first;
 		}
 	}
-	return end();
+	return 0;
 }
 
-DocnoBlock::const_iterator DocnoBlock::find( const Index& docno_, const_iterator lowerbound) const
+const DocnoBlockElement* DocnoBlock::find( const Index& docno_, const DocnoBlockElement* lowerbound) const
 {
-	const_iterator rt = upper_bound( docno_, lowerbound);
-	if (rt != end() && rt->docno() == docno_) return rt;
-	return end();
+	const DocnoBlockElement* rt = upper_bound( docno_, lowerbound);
+	if (rt && rt->docno() == docno_) return rt;
+	return 0;
 }
-
 
 DocnoBlock DocnoBlock::merge( const DocnoBlock& newblk, const DocnoBlock& oldblk)
 {
 	DocnoBlock rt;
-	DocnoBlock::const_iterator ai = newblk.begin(), ae = newblk.end();
-	DocnoBlock::const_iterator bi = oldblk.begin(), be = oldblk.end();
+	const DocnoBlockElement* ai = newblk.begin();
+	const DocnoBlockElement* ae = newblk.end();
+	const DocnoBlockElement* bi = oldblk.begin();
+	const DocnoBlockElement* be = oldblk.end();
 	while (ai != ae && bi != be)
 	{
 		if (ai->docno() <= bi->docno())

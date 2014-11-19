@@ -48,7 +48,7 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 	:m_db(db_)
 	,m_docnoStorage( db_, DocnoBlock::databaseKey( termtypeno, termvalueno), true)
 	,m_docnoBlk(0)
-	,m_docnoItr()
+	,m_docnoItr(0)
 	,m_posinfoStorage( db_, PosinfoBlock::databaseKey( termtypeno, termvalueno), true)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
@@ -56,7 +56,7 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 	,m_docno(0)
 	,m_termtypeno(termtypeno)
 	,m_termvalueno(termvalueno)
-	,m_documentFrequency(0)
+	,m_documentFrequency(-1)
 {
 	m_featureid.reserve( 16);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -75,7 +75,7 @@ PostingIterator::PostingIterator( const PostingIterator& o)
 	,m_db(o.m_db)
 	,m_docnoStorage( o.m_docnoStorage)
 	,m_docnoBlk(0)
-	,m_docnoItr()
+	,m_docnoItr(0)
 	,m_posinfoStorage( o.m_posinfoStorage)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
@@ -95,7 +95,7 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 		m_docnoBlk = m_docnoStorage.load( docno_);
 		if (!m_docnoBlk)
 		{
-			m_docnoItr.clear();
+			m_docnoItr = 0;
 			return 0;
 		}
 		m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
@@ -105,9 +105,9 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 		if (m_docnoBlk->isThisBlockAddress( docno_))
 		{
 			// [B] Answer in same block as for the last query
-			if (m_docnoItr == m_docnoBlk->end() || docno_ < m_docnoItr->docno())
+			if (!m_docnoItr || docno_ < m_docnoItr->docno())
 			{
-				m_docnoItr = m_docnoBlk->begin();
+				m_docnoItr = m_docnoBlk->ptr();
 			}
 			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoItr);
 		}
@@ -131,7 +131,7 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 						else
 						{
 							Statistics::increment( Statistics::DocnoBlockReadBlockRandomMiss);
-							m_docnoItr.clear();
+							m_docnoItr = 0;
 							return 0;
 						}
 					}
@@ -139,7 +139,7 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 				else
 				{
 					Statistics::increment( Statistics::DocnoBlockReadBlockFollowMiss);
-					m_docnoItr.clear();
+					m_docnoItr = 0;
 					return 0;
 				}
 			}
@@ -154,7 +154,7 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 			if (!m_docnoBlk)
 			{
 				Statistics::increment( Statistics::DocnoBlockReadBlockRandomMiss);
-				m_docnoItr.clear();
+				m_docnoItr = 0;
 				return 0;
 			}
 			else
@@ -164,7 +164,7 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 			}
 		}
 	}
-	if (m_docnoItr == m_docnoBlk->end()) return 0;
+	if (!m_docnoItr) return 0;
 	return m_docnoItr->docno();
 }
 
@@ -312,7 +312,7 @@ unsigned int PostingIterator::frequency()
 	}
 	else
 	{
-		return m_docnoItr.initialized()?m_docnoItr->ff():0;
+		return m_docnoItr?m_docnoItr->ff():0;
 	}
 }
 

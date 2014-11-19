@@ -36,7 +36,7 @@
 #include <vector>
 #include <list>
 #include <limits>
-#include <boost/unordered_set.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 namespace strus
 {
@@ -53,9 +53,11 @@ public:
 	/// \brief Constructor
 	Accumulator(
 			const QueryProcessorInterface* qproc_,
-			std::size_t maxNofRanks_);
+			std::size_t maxNofRanks_,
+			std::size_t maxDocumentNumber_);
 
-	~Accumulator(){}
+	~Accumulator()
+	{}
 
 	void addSelector(
 			const PostingIteratorInterface& iterator);
@@ -80,8 +82,9 @@ private:
 	unsigned int m_selectoridx;
 	Index m_docno;
 	std::vector<AccumulatorArgument> m_rankers;
-	boost::unordered_set<Index> m_visited;
+	boost::dynamic_bitset<> m_visited;
 	std::size_t m_maxNofRanks;
+	Index m_maxDocumentNumber;
 	bool m_called;
 };
 

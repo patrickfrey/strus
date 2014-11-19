@@ -97,7 +97,7 @@ private:
 
 	BlockStorage<DocnoBlock> m_docnoStorage;
 	const DocnoBlock* m_docnoBlk;
-	DocnoBlock::const_iterator m_docnoItr;
+	const DocnoBlockElement* m_docnoItr;
 
 	BlockStorage<PosinfoBlock> m_posinfoStorage;
 	const PosinfoBlock* m_posinfoBlk;

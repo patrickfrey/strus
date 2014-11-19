@@ -558,7 +558,7 @@ std::vector<queryeval::ResultDocument>
 	if (m_accumulateOperation.defined())
 	{
 		// Create the accumulator:
-		Accumulator accumulator( &processor, maxNofRanks);
+		Accumulator accumulator( &processor, maxNofRanks, storage.maxDocumentNumber());
 
 		std::vector<WeightingFunction>::const_iterator
 			gi = m_accumulateOperation.args().begin(),

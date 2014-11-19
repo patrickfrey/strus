@@ -89,8 +89,8 @@ public:
 	DocnoBlock( const DocnoBlock& o)
 		:FixedSizeRecordBlock( o){}
 
-	const_iterator find( const Index& docno_, const_iterator lowerbound) const;
-	const_iterator upper_bound( const Index& docno_, const_iterator lowerbound) const;
+	const DocnoBlockElement* find( const Index& docno_, const DocnoBlockElement* lowerbound) const;
+	const DocnoBlockElement* upper_bound( const Index& docno_, const DocnoBlockElement* lowerbound) const;
 
 	bool full() const
 	{
