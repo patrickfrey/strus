@@ -90,10 +90,10 @@ const DataBlock* DataBlockStorage::loadLast()
 	if (!m_itr->Valid())
 	{
 		m_itr->SeekToLast();
-		if (!m_itr->Valid()) return false;
+		if (!m_itr->Valid()) return 0;
 		m_itr->Prev();
 	}
-	if (!m_itr->Valid()) return false;
+	if (!m_itr->Valid()) return 0;
 
 	return extractData();
 }
