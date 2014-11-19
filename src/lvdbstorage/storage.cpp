@@ -37,6 +37,7 @@
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
 #include "blockStorage.hpp"
+#include "statistics.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -382,6 +383,16 @@ void Storage::decrementDf( Index typeno, Index termno)
 	m_dfMap->decrement( typeno, termno);
 }
 
+std::vector<StatCounterValue> Storage::getStatistics() const
+{
+	std::vector<StatCounterValue> rt;
+	Statistics::const_iterator si = Statistics::begin(), se = Statistics::end();
+	for (; si != se; ++si)
+	{
+		rt.push_back( StatCounterValue( si.typeName(), si.value()));
+	}
+	return rt;
+}
 
 
 

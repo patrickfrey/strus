@@ -40,6 +40,11 @@ float strus::floatHalfToSinglePrecision( float16_t val)
 	uint32_t t1;
 	uint32_t t2;
 	uint32_t t3;
+	union
+	{
+		uint32_t intval;
+		float floatval;
+	} rt;
 
 	uint16_t in = *(uint16_t*)&val;
 	t1 = in & 0x7fff;			// Non-sign bits
@@ -55,22 +60,27 @@ float strus::floatHalfToSinglePrecision( float16_t val)
 
 	t1 |= t2;				// Re-insert sign bit
 
-	float rt;
-	*((uint32_t*)&rt) = t1;
-	return rt;
+	rt.intval = t1;
+	return rt.floatval;
 }
 
 
 float16_t strus::floatSingleToHalfPrecision( float in)
 {
-	uint32_t inu = *(uint32_t*)&in;
+	union
+	{
+		uint32_t intval;
+		float floatval;
+	} param;
+	param.floatval = in;
+
 	uint32_t t1;
 	uint32_t t2;
 	uint32_t t3;
 
-	t1 = inu & 0x7fffffff;			// Non-sign bits
-	t2 = inu & 0x80000000;			// Sign bit
-	t3 = inu & 0x7f800000;			// Exponent
+	t1 = param.intval & 0x7fffffff;		// Non-sign bits
+	t2 = param.intval & 0x80000000;		// Sign bit
+	t3 = param.intval & 0x7f800000;		// Exponent
 
 	t1 >>= 13;				// Align mantissa on MSB
 	t2 >>= 16;				// Shift sign bit into position
@@ -83,8 +93,7 @@ float16_t strus::floatSingleToHalfPrecision( float in)
 
 	t1 |= t2;				// Re-insert sign bit
 
-	float16_t rt;
-	*((uint16_t*)&rt) = (uint16_t)t1;
+	float16_t rt = (uint16_t)t1;
 	return rt;
 }
 

@@ -28,6 +28,7 @@
 */
 #include "metaDataBlockCache.hpp"
 #include "metaDataReader.hpp"
+#include "statistics.hpp"
 #include <stdint.h>
 
 using namespace strus;
@@ -73,37 +74,47 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 {
 	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
 	std::size_t docidx     = (std::size_t)(docno -1);
-	std::size_t blkidx     = docidx % MetaDataBlock::MetaDataBlockSize;
+	std::size_t blkidx     = docidx / MetaDataBlock::MetaDataBlockSize;
 	std::size_t idx_level2 = blkidx % NodeSize;
 	std::size_t idx_level1 = blkidx / NodeSize;
+	std::size_t misscnt = 0;
 
 	// The fact that the reference counting of shared_ptr is
 	// thread safe is used to implement some kind of RCU:
 	boost::shared_ptr<BlockNodeArray> ar1 = m_ar[ aridx(varname)];
 	while (!ar1.get())
 	{
+		++misscnt;
 		m_ar[ aridx(varname)].reset( new BlockNodeArray());
 		ar1 = m_ar[ aridx(varname)];
 	}
 	
 	// Level 1:
-	boost::shared_ptr<BlockArray>& ar2 = (*ar1)[ idx_level1];
+	boost::shared_ptr<BlockArray> ar2 = (*ar1)[ idx_level1];
 	while (!ar2.get())
 	{
+		++misscnt;
+		(*ar1)[ idx_level1].reset( new BlockArray());
 		ar2 = (*ar1)[ idx_level1];
-		if (!ar2.get())
-		{
-			(*ar1)[ idx_level1].reset( new BlockArray());
-			ar2 = (*ar1)[ idx_level1];
-		}
 	}
 
 	// Level 2:
-	boost::shared_ptr<MetaDataBlock>& blkref = (*ar2)[ idx_level2];
-	if (!blkref.get())
+	boost::shared_ptr<MetaDataBlock> blkref = (*ar2)[ idx_level2];
+	while (!blkref.get())
 	{
-		blkref.reset( MetaDataReader::readBlockFromDB( 
+		++misscnt;
+		(*ar2)[ blkidx].reset( 
+			MetaDataReader::readBlockFromDB( 
 				m_db, MetaDataBlock::blockno( docno), varname));
+		blkref = (*ar2)[ blkidx];
+	}
+	if (misscnt)
+	{
+		Statistics::increment( Statistics::MetaDataCacheMiss);
+	}
+	else
+	{
+		Statistics::increment( Statistics::MetaDataCacheHit);
 	}
 	return blkref->getValue( docno);
 }

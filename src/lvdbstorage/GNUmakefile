@@ -2,6 +2,7 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
+	statistics.o \
 	floatConversions.o \
 	indexPacker.o \
 	databaseKey.o \

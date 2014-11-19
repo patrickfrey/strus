@@ -59,7 +59,7 @@ float DocnoBlockElement::weight() const
 DocnoBlock::const_iterator DocnoBlock::upper_bound( const Index& docno_, const_iterator lowerbound) const
 {
 	std::size_t first=lowerbound-begin(),last=nofElements();
-	std::size_t mid = first + ((first + last) >> 4);
+	std::size_t mid = first + ((last - first) >> 4);
 
 	while (first+4 < last)
 	{

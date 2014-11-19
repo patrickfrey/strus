@@ -37,6 +37,8 @@ void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& 
 void packIndex( std::string& buf, const Index& idx);
 Index unpackIndex( const char*& ptr, const char* end);
 const char* skipIndex( const char* ptr, const char* end);
+const char* findIndexAsc( const char* ptr, const char* end, uint32_t needle);
+const char* findIndexDesc( const char* ptr, const char* end, uint32_t needle);
 unsigned int nofPackedIndices( const char* ptr, const char* end);
 const char* nextPackedIndexPos( const char* start, const char* str, const char* end);
 

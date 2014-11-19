@@ -26,49 +26,32 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_STATISTICS_COUNTER_VALUE_HPP_INCLUDED
+#define _STRUS_STORAGE_STATISTICS_COUNTER_VALUE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include <utility>
 
-namespace strus {
+namespace strus
+{
 
-class MetaDataBlock
+/// \class StatCounterValue
+/// \brief Value of statistics provided by the storage
+class StatCounterValue
 {
 public:
-	MetaDataBlock( unsigned int blockno_);
-	MetaDataBlock( unsigned int blockno_,
-			const float* blk_, std::size_t blksize_);
+	StatCounterValue( const char* name_, unsigned int value_)
+		:m_name(name_),m_value(value_){}
+	StatCounterValue( const StatCounterValue& o)
+		:m_name(o.m_name),m_value(o.m_value){}
 
-	MetaDataBlock( const MetaDataBlock& o);
-
-	~MetaDataBlock(){}
-
-	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
-	static Index blockno( Index docno)			{return ((docno-1)>>MetaDataBlockShift)+1;}
-
-	Index blockno() const					{return m_blockno;}
-	const float* data() const				{return m_blk;}
-
-	void setValue( Index docno, float value);
-	float getValue( Index docno) const;
-
-public:
-	enum {
-		/// \remark This value limits the maximum docno possible to (MetaDataBlockCache::NodeSize^2 * MetaDataBlockSize)
-		MetaDataBlockSize=256		///< size of one meta data block
-	};
-private:
-	enum {
-		MetaDataBlockMask=((int)MetaDataBlockSize-1),
-		MetaDataBlockShift=8
-	};
+	const char* name() const		{return m_name;}
+	unsigned int value() const		{return m_value;}
 
 private:
-	unsigned int m_blockno;
-	float m_blk[ MetaDataBlockSize];
+	const char* m_name;
+	unsigned int m_value;
 };
 
-}
+}//namespace
 #endif
+
 

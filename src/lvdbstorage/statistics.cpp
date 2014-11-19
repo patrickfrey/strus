@@ -26,49 +26,27 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <utility>
+#include "statistics.hpp"
+#include <boost/atomic.hpp>
 
-namespace strus {
+using namespace strus;
 
-class MetaDataBlock
+#ifdef _STRUS_ENABLE_STATISTICS
+static boost::atomic<Statistics::ValueType> g_counters[ Statistics::NofTypes];
+
+void Statistics::increment( Type idx)
 {
-public:
-	MetaDataBlock( unsigned int blockno_);
-	MetaDataBlock( unsigned int blockno_,
-			const float* blk_, std::size_t blksize_);
+	g_counters[ idx].fetch_add( 1, boost::memory_order_relaxed);
+}
 
-	MetaDataBlock( const MetaDataBlock& o);
-
-	~MetaDataBlock(){}
-
-	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
-	static Index blockno( Index docno)			{return ((docno-1)>>MetaDataBlockShift)+1;}
-
-	Index blockno() const					{return m_blockno;}
-	const float* data() const				{return m_blk;}
-
-	void setValue( Index docno, float value);
-	float getValue( Index docno) const;
-
-public:
-	enum {
-		/// \remark This value limits the maximum docno possible to (MetaDataBlockCache::NodeSize^2 * MetaDataBlockSize)
-		MetaDataBlockSize=256		///< size of one meta data block
-	};
-private:
-	enum {
-		MetaDataBlockMask=((int)MetaDataBlockSize-1),
-		MetaDataBlockShift=8
-	};
-
-private:
-	unsigned int m_blockno;
-	float m_blk[ MetaDataBlockSize];
-};
-
+Statistics::ValueType Statistics::value( Type idx)
+{
+	return g_counters[ idx].load( boost::memory_order_relaxed);
 }
 #endif
+
+
+
+
+
 

@@ -141,7 +141,7 @@ void StorageInserter::done()
 	std::size_t invkeysize = invkey.size();
 	leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
 
-	//[2.1] Iterate on key prefix elements [ForwardIndexPrefix, docno, typeno, *] and mark dem as deleted
+	//[2.1] Iterate on key prefix elements [ForwardIndexPrefix, docno, typeno, *] and mark them as deleted
 	//	Extract typeno and valueno from key [ForwardIndexPrefix, docno, typeno, pos] an mark term as old content (do delete)
 	for (vi->Seek( invkeyslice); vi->Valid(); vi->Next())
 	{
@@ -168,7 +168,7 @@ void StorageInserter::done()
 	}
 
 	//[2.2] Iterate on 'oldcontent' elements built in [1.1] 
-	//	and mark them as deleted the keys [InvertedIndexPrefix, typeno, valueno, docno]
+	//	and mark delete the postings
 	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)
 	{
@@ -181,8 +181,7 @@ void StorageInserter::done()
 		m_storage->decrementDf( di->first, di->second);
 	}
 
-	//[3] Insert the new terms with key [InvertedIndexPrefix, typeno, valueno, docno]
-	//	and value (weight as 32bit float, packed encoded difference of positions):
+	//[3] Insert the new postings:
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
@@ -199,7 +198,7 @@ void StorageInserter::done()
 		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
 
-	// [4] Insert the new inverted info with key [ForwardIndexPrefix, docno, typeno, pos]:
+	// [4] Insert the new forward index elements:
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{

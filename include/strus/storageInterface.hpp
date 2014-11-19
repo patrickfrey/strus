@@ -29,7 +29,9 @@
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #include <string>
+#include <vector>
 #include "strus/index.hpp"
+#include "strus/statCounterValue.hpp"
 
 namespace strus
 {
@@ -100,6 +102,9 @@ public:
 
 	/// \brief Forces flushing of all contents inserted persistently to the repository
 	virtual void flush()=0;
+
+	/// \brief Get some statistics (counters) of the storage
+	virtual std::vector<StatCounterValue> getStatistics() const=0;
 };
 
 }//namespace

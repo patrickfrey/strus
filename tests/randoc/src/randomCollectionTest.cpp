@@ -127,7 +127,6 @@ private:
 
 static Random g_random;
 
-
 class StlRandomGen
 {
 public:
@@ -910,7 +909,6 @@ int main( int argc, const char* argv[])
 		boost::scoped_ptr<strus::StorageInterface> storage( strus::createStorageClient( config));
 
 		strus::Index totNofOccurrencies = 0;
-		strus::Index totNofFeatures = 0;
 		strus::Index totNofDocuments = 0;
 		strus::Index totTermStringSize = 0;
 		unsigned int insertIntervallSize = 1000;
@@ -946,7 +944,7 @@ int main( int argc, const char* argv[])
 		}
 		storage->flush();
 
-		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofFeatures << " terms, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
+		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 		boost::scoped_ptr<strus::QueryProcessorInterface> queryproc(
 			strus::createQueryProcessorInterface( storage.get()));
 

@@ -88,6 +88,8 @@ public:
 
 	virtual std::string documentAttribute( Index docno, char varname) const;
 
+	virtual std::vector<StatCounterValue> getStatistics() const;
+
 public:
 	void incrementDf( Index typeno, Index termno);
 	void decrementDf( Index typeno, Index termno);

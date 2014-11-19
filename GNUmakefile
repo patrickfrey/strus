@@ -22,6 +22,7 @@ install:
 uninstall:
 	cd src; make uninstall; cd ..
 	@-rm $(INSTALL_INCDIR)/constants.hpp
+	@-rm $(INSTALL_INCDIR)/statCounterValue.hpp
 	@-rm $(INSTALL_INCDIR)/forwardIteratorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/index.hpp
 	@-rm $(INSTALL_INCDIR)/postingIteratorInterface.hpp

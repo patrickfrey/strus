@@ -208,7 +208,7 @@ VariableData::VariableData( const leveldb::Slice& key, const leveldb::Slice& val
 
 void VariableData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::VariablePrefix << ' ' << valueno << ' ' << escapestr( varnamestr, varnamesize) << std::endl;
+	out << (char)DatabaseKey::VariablePrefix << ' ' << escapestr( varnamestr, varnamesize) << ' ' << valueno << std::endl;
 }
 
 
@@ -386,6 +386,7 @@ PosinfoBlockData::PosinfoBlockData( const leveldb::Slice& key, const leveldb::Sl
 				throw std::runtime_error( "position elements in posinfo array not strictly ascending");
 			}
 		}
+		itr = blk.nextDoc( itr);
 	}
 }
 

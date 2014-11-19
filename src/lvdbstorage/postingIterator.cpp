@@ -28,6 +28,7 @@
 */
 #include "postingIterator.hpp"
 #include "storage.hpp"
+#include "statistics.hpp"
 #include "indexPacker.hpp"
 #include <string>
 #include <vector>
@@ -37,7 +38,7 @@
 
 using namespace strus;
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
@@ -52,7 +53,6 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
 	,m_last_docno(0)
-	,m_last_pos(0)
 	,m_docno(0)
 	,m_termtypeno(termtypeno)
 	,m_termvalueno(termvalueno)
@@ -80,7 +80,6 @@ PostingIterator::PostingIterator( const PostingIterator& o)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
 	,m_last_docno(0)
-	,m_last_pos(0)
 	,m_docno(0)
 	,m_termtypeno(o.m_termtypeno)
 	,m_termvalueno(o.m_termvalueno)
@@ -94,7 +93,11 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 	{
 		// [A] No block loaded yet
 		m_docnoBlk = m_docnoStorage.load( docno_);
-		if (!m_docnoBlk) return 0;
+		if (!m_docnoBlk)
+		{
+			m_docnoItr.clear();
+			return 0;
+		}
 		m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
 	}
 	else
@@ -110,17 +113,55 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 		}
 		else if (m_docnoBlk->isFollowBlockAddress( docno_))
 		{
-			// [C] Answer cannot be in another block than the follow block
-			m_docnoBlk = m_docnoStorage.loadNext();
-			if (!m_docnoBlk) return 0;
+			// [C] Try to get answer from a follow block
+			do
+			{
+				m_docnoBlk = m_docnoStorage.loadNext();
+				if (m_docnoBlk)
+				{
+					Statistics::increment( Statistics::DocnoBlockReadBlockFollow);
+
+					if (!m_docnoBlk->isFollowBlockAddress( docno_))
+					{	
+						m_docnoBlk = m_docnoStorage.load( docno_);
+						if (m_docnoBlk)
+						{
+							Statistics::increment( Statistics::DocnoBlockReadBlockRandom);
+						}
+						else
+						{
+							Statistics::increment( Statistics::DocnoBlockReadBlockRandomMiss);
+							m_docnoItr.clear();
+							return 0;
+						}
+					}
+				}
+				else
+				{
+					Statistics::increment( Statistics::DocnoBlockReadBlockFollowMiss);
+					m_docnoItr.clear();
+					return 0;
+				}
+			}
+			while (m_docnoBlk->id() < docno_);
+
 			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
 		}
 		else
 		{
 			// [D] Answer is in a 'far away block'
 			m_docnoBlk = m_docnoStorage.load( docno_);
-			if (!m_docnoBlk) return 0;
-			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
+			if (!m_docnoBlk)
+			{
+				Statistics::increment( Statistics::DocnoBlockReadBlockRandomMiss);
+				m_docnoItr.clear();
+				return 0;
+			}
+			else
+			{
+				Statistics::increment( Statistics::DocnoBlockReadBlockRandom);
+				m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
+			}
 		}
 	}
 	if (m_docnoItr == m_docnoBlk->end()) return 0;
@@ -129,12 +170,20 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 
 Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
 {
+	m_positionScanner.clear();
 	if (!m_posinfoBlk)
 	{
 		// [A] No block loaded yet
 		m_posinfoBlk = m_posinfoStorage.load( docno_);
-		if (!m_posinfoBlk) return 0;
-		m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
+		if (!m_posinfoBlk)
+		{
+			m_posinfoItr = 0;
+			return 0;
+		}
+		else
+		{
+			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
+		}
 	}
 	else
 	{
@@ -145,20 +194,62 @@ Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
 			{
 				m_posinfoItr = m_posinfoBlk->begin();
 			}
-			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoItr);
+			else
+			{
+				m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoItr);
+			}
 		}
 		else if (m_posinfoBlk->isFollowBlockAddress( docno_))
 		{
-			// [C] Answer cannot be in another block than the follow block
-			m_posinfoBlk = m_posinfoStorage.loadNext();
+			// [C] Try to get answer from a follow block
+			do
+			{
+				m_posinfoBlk = m_posinfoStorage.loadNext();
+				if (m_posinfoBlk)
+				{
+					Statistics::increment( Statistics::PosinfoBlockReadBlockFollow);
+
+					if (!m_posinfoBlk->isFollowBlockAddress( docno_))
+					{
+						m_posinfoBlk = m_posinfoStorage.load( docno_);
+						if (m_posinfoBlk)
+						{
+							Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
+						}
+						else
+						{
+							Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
+							m_posinfoItr = 0;
+							return 0;
+						}
+					}
+				}
+				else
+				{
+					Statistics::increment( Statistics::PosinfoBlockReadBlockFollowMiss);
+					m_posinfoItr = 0;
+					return 0;
+				}
+			}
+			while (m_posinfoBlk->id() < docno_);
+
 			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
 		}
 		else
 		{
-			// [D] Answer is in a 'far away block'
+			// [D] Answer is in a 'far away' block
 			m_posinfoBlk = m_posinfoStorage.load( docno_);
-			if (!m_posinfoBlk) return 0;
-			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
+			if (!m_posinfoBlk)
+			{
+				Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
+				m_posinfoItr = 0;
+				return 0;
+			}
+			else
+			{
+				Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
+				m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
+			}
 		}
 	}
 	if (!m_posinfoItr || m_posinfoItr == m_posinfoBlk->end()) return 0;
@@ -184,11 +275,11 @@ Index PostingIterator::skipDoc( const Index& docno_)
 	{
 		m_docno = skipDocPosinfoBlock( docno_);
 		m_last_docno = docno_;
-		m_last_pos = 0;
 		return m_docno;
 	}
 	else
 	{
+		m_positionScanner.clear();
 		m_docno = skipDocDocnoBlock( docno_);
 		m_last_docno = docno_;
 		return m_docno;
@@ -205,38 +296,19 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 			throw std::runtime_error( "position information not available (do insert with position information for this type of query)");
 		}
 	}
-	if (!m_positionItr.initialized() || m_positionItr.eof())
+	if (!m_positionScanner.initialized())
 	{
-		m_positionItr = m_posinfoBlk->positionIterator_at( m_posinfoItr);
+		m_positionScanner = m_posinfoBlk->positionScanner_at( m_posinfoItr);
+		if (!m_positionScanner.initialized()) return 0;
 	}
-	else if (*m_positionItr > firstpos_)
-	{
-		if (firstpos_ >= m_last_pos)
-		{
-			return *m_positionItr;
-		}
-		m_positionItr = m_posinfoBlk->positionIterator_at( m_posinfoItr);
-	}
-	while (!m_positionItr.eof() && firstpos_ > *m_positionItr)
-	{
-		++m_positionItr;
-	}
-	m_last_pos = firstpos_;
-	if (!m_positionItr.eof())
-	{
-		return *m_positionItr;
-	}
-	return 0;
+	return m_positionScanner.skip( firstpos_);
 }
 
 unsigned int PostingIterator::frequency()
 {
 	if (m_posinfoItr)
 	{
-		unsigned int ff = 0;
-		m_positionItr = m_posinfoBlk->positionIterator_at( m_posinfoItr);
-		while (!m_positionItr.eof()) {++m_positionItr;++ff;}
-		return ff;
+		return m_posinfoBlk->frequency_at( m_posinfoItr);
 	}
 	else
 	{

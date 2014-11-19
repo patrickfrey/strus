@@ -87,6 +87,7 @@ Index IteratorDifference::skipPos( const Index& pos_)
 	for (;;)
 	{
 		Index pos_positive = m_positive->skipPos( pos_iter);
+		if (!pos_positive) return 0;
 		if (m_docno_neg == m_docno)
 		{
 			Index pos_negative = m_negative->skipPos( pos_positive);

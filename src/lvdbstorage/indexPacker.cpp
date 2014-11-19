@@ -30,6 +30,7 @@
 #include <map>
 #include <limits>
 #include <cmath>
+#include <cstring>
 #include <stdexcept>
 
 #define B11111111 0xFF
@@ -238,19 +239,62 @@ void strus::packIndex( std::string& buf, const Index& idx)
 
 struct StaticBuffer
 {
-	StaticBuffer( char* buf_, std::size_t size_, std::size_t maxsize_)
+	StaticBuffer( unsigned char* buf_, std::size_t size_, std::size_t maxsize_)
 		:buf(buf_),size(size_),maxsize(maxsize_){}
+	StaticBuffer( char* buf_, std::size_t size_, std::size_t maxsize_)
+		:buf((unsigned char*)buf_),size(size_),maxsize(maxsize_){}
 
 	void push_back( char chr)
 	{
-		if (size >= maxsize) throw std::runtime_error("static buffer too small");
+		if (size >= maxsize)
+		{
+			throw std::runtime_error("static buffer too small");
+		}
 		buf[ size++] = chr;
 	}
 
-	char* buf;
+	unsigned char* buf;
 	std::size_t size;
 	std::size_t maxsize;
 };
+
+const char* strus::findIndexAsc( const char* ptr, const char* end, uint32_t needle)
+{
+	unsigned char needlebuf[16];
+	StaticBuffer bufstruct( needlebuf, 0, sizeof(needlebuf));
+	utf8encode( bufstruct, needle);
+
+	unsigned char const* pi = (const unsigned char*)ptr;
+	const unsigned char* pe = (const unsigned char*)end;
+	while (pi < pe && *pi < needlebuf[0])
+	{
+		pi += g_charlentable[ *pi];
+	}
+	while (pi < pe && std::memcmp( pi, needlebuf, bufstruct.size) < 0)
+	{
+		pi += g_charlentable[ *pi];
+	}
+	return (pi == pe)?0:(const char*)pi;
+}
+
+const char* strus::findIndexDesc( const char* ptr, const char* end, uint32_t needle)
+{
+	unsigned char needlebuf[16];
+	StaticBuffer bufstruct( needlebuf, 0, sizeof(needlebuf));
+	utf8encode( bufstruct, needle);
+
+	unsigned char const* pi = (const unsigned char*)ptr;
+	const unsigned char* pe = (const unsigned char*)end;
+	while (pi < pe && *pi > needlebuf[0])
+	{
+		pi += g_charlentable[ *pi];
+	}
+	while (pi < pe && std::memcmp( pi, needlebuf, bufstruct.size) > 0)
+	{
+		pi += g_charlentable[ *pi];
+	}
+	return (pi == pe)?0:(const char*)pi;
+}
 
 void strus::packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
 {
@@ -337,5 +381,4 @@ bool strus::checkStringUtf8( const char* ptr, std::size_t size)
 	}
 	return true;
 }
-
 

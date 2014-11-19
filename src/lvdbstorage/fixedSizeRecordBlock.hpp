@@ -92,6 +92,7 @@ public:
 		bool operator!=( const const_iterator& o)		{return m_itr!=o.m_itr;}
 
 		bool initialized() const				{return !!m_itr;}
+		void clear()						{m_itr = 0;}
 
 	private:
 		Element const* m_itr;

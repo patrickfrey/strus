@@ -71,9 +71,9 @@ public:
 
 	virtual Index posno() const
 	{
-		if (m_positionItr.initialized() && !m_positionItr.eof())
+		if (m_positionScanner.initialized())
 		{
-			return *m_positionItr;
+			return m_positionScanner.curpos();
 		}
 		return 0;
 	}
@@ -102,10 +102,9 @@ private:
 	BlockStorage<PosinfoBlock> m_posinfoStorage;
 	const PosinfoBlock* m_posinfoBlk;
 	char const* m_posinfoItr;
-	PosinfoBlock::PositionIterator m_positionItr;
+	PosinfoBlock::PositionScanner m_positionScanner;
 
 	Index m_last_docno;
-	Index m_last_pos;
 	Index m_docno;
 	Index m_termtypeno;
 	Index m_termvalueno;

@@ -137,6 +137,7 @@ public:
 					newblk.setId( blkid);
 					blkstorage.store( newblk, batch);
 					newblk.clear();
+					newblk.setId( mi->second.rbegin()->first);
 				}
 				newblk.append( ei->first, ei->second);
 				blkid = ei->first;

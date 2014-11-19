@@ -76,6 +76,7 @@ public:
 		return charend();
 	}
 
+	const char* endOfDoc( const char* ref) const;
 	const char* nextDoc( const char* ref) const;
 	const char* prevDoc( const char* ref) const;
 
@@ -93,7 +94,8 @@ public:
 	/// \brief Check if the address 'docno_', if it exists, is in the following block we can get with 'leveldb::Iterator::Next()' or not
 	bool isFollowBlockAddress( const Index& docno_) const
 	{
-		return (docno_ > id() && docno_ < id() + (MaxBlockSize/3)/* 3 ~ one byte docno,one byte pos,one byte 0xFF*/);
+		Index diff = id() - docno_at( begin());
+		return (docno_ > id()) && (docno_ < id() + (diff>>1));
 	}
 
 	void append( const Index& docno, const std::vector<Index>& pos);
@@ -101,38 +103,43 @@ public:
 
 	static PosinfoBlock merge( const PosinfoBlock& newblk, const PosinfoBlock& oldblk);
 
-	class PositionIterator
+	class PositionScanner
 	{
 	public:
-		PositionIterator()
-			:m_itr(0),m_next(0),m_end(0),m_curpos(0){}
-		PositionIterator( const char* start_, const char* end_);
-
-		PositionIterator( const PositionIterator& o)
-			:m_itr(o.m_itr),m_next(o.m_next),m_end(o.m_end),m_curpos(o.m_curpos){}
-
-		PositionIterator& operator++()				{skip(); return *this;}
-		PositionIterator operator++(int)			{PositionIterator rt( m_itr, m_end); skip(); return rt;}
-
-		const Index& operator*() const				{return m_curpos;}
-
-		bool eof() const					{return m_itr==m_end;}
+		PositionScanner()
+			:m_start(0),m_end(0),m_itr(0),m_curpos(0),m_lastpos(0){}
+		PositionScanner( const char* start_, const char* end_)
+			:m_start(start_),m_end(end_),m_itr(start_),m_curpos(0),m_lastpos(0){}
+		PositionScanner( const PositionScanner& o)
+			:m_start(o.m_start),m_end(o.m_end),m_itr(o.m_itr),m_curpos(o.m_curpos),m_lastpos(o.m_lastpos){}
 
 		bool initialized() const				{return !!m_itr;}
 
-		void init( const char* start_, const char* end_);
+		void init( const char* start_, const char* end_)
+		{
+			m_itr = start_;
+			m_start = start_;
+			m_end = end_;
+			m_curpos = 0;
+			m_lastpos = 0;
+		}
+
 		void clear()						{init(0,0);}
 
-	private:
-		void skip();
+		Index curpos() const					{return m_curpos;}
+		Index skip( const Index& pos);
 
-		char const* m_itr;
-		char const* m_next;
+	private:
+		const char* m_start;
 		const char* m_end;
+		char const* m_itr;
 		Index m_curpos;
+		Index m_lastpos;
 	};
 
-	PositionIterator positionIterator_at( const char* itr) const;
+	PositionScanner positionScanner_at( const char* itr) const;
+	unsigned int frequency_at( const char* itr) const;
+	
 };
 
 }

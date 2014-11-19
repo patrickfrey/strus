@@ -29,6 +29,7 @@
 #include "posinfoBlock.hpp"
 #include "indexPacker.hpp"
 #include <cstring>
+#include <limits>
 #include <string.h>
 
 using namespace strus;
@@ -69,6 +70,13 @@ bool PosinfoBlock::empty_at( const char* itr) const
 {
 	char const* pi = skipIndex( itr, charend());	//... skip docno
 	return (pi != charend() || *pi == EndPosinfoMarker);
+}
+
+const char* PosinfoBlock::endOfDoc( const char* ref) const
+{
+	if (ref == charend()) return 0;
+	char const* rt = (const char*)std::memchr( ref, EndPosinfoMarker, charend()-ref);
+	return rt?rt:charend();
 }
 
 const char* PosinfoBlock::nextDoc( const char* ref) const
@@ -114,69 +122,79 @@ void PosinfoBlock::appendPositionsBlock( const char* start, const char* end)
 	DataBlock::append( (const void*)start, end-start);
 }
 
-
-PosinfoBlock::PositionIterator::PositionIterator( const char* start_, const char* end_)
-	:m_itr(start_),m_next(start_),m_end(end_)
+Index PosinfoBlock::PositionScanner::skip( const Index& pos)
 {
-	m_curpos = (start_ == end_)?0:unpackIndex( m_next, m_end);
+	if (pos > std::numeric_limits<int32_t>::max())
+	{
+		throw std::runtime_error("search position out of range");
+	}
+	if (m_curpos)
+	{
+		if (pos == m_curpos)
+		{
+			return m_curpos;
+		}
+		else if (pos < m_curpos)
+		{
+			if (m_lastpos <= pos) return m_curpos;
+			m_itr = findIndexAsc( m_start, m_end, (uint32_t)pos);
+		}
+		else
+		{
+			m_itr = findIndexAsc( m_itr, m_end, (uint32_t)pos);
+		}
+	}
+	else
+	{
+		m_itr = findIndexAsc( m_start, m_end, (uint32_t)pos);
+	}
+	if (m_itr)
+	{
+		char const* pp = m_itr;
+		m_lastpos = pos;
+		return (m_curpos = unpackIndex( pp, m_end));
+	}
+	return 0;
 }
 
-void PosinfoBlock::PositionIterator::skip()
+PosinfoBlock::PositionScanner PosinfoBlock::positionScanner_at( const char* itr) const
 {
-	m_itr = m_next;
-	m_curpos = (m_next == m_end)?0:unpackIndex( m_next, m_end);
-}
-
-void PosinfoBlock::PositionIterator::init( const char* start_, const char* end_)
-{
-	m_itr = start_;
-	m_next = start_;
-	m_end = end_;
-	m_curpos = (start_ == end_)?0:unpackIndex( m_next, m_end);
-}
-
-PosinfoBlock::PositionIterator PosinfoBlock::positionIterator_at( const char* itr) const
-{
-	if (itr == charend()) return PositionIterator();
+	if (itr == charend()) return PositionScanner();
 	char const* pi = skipIndex( itr, charend());	//... skip docno
-	if (pi == charend()) return PositionIterator( charend(),charend());
-	char const* pe = nextDoc(pi);
-	return PositionIterator( pi, pe);
+	if (pi == charend()) return PositionScanner( charend(),charend());
+	return PositionScanner( pi, endOfDoc( pi));
+}
+
+unsigned int PosinfoBlock::frequency_at( const char* itr) const
+{
+	char const* pi = skipIndex( itr, charend());	//... skip docno
+	if (pi == charend()) return 0;
+	return nofPackedIndices( pi, endOfDoc( pi));
 }
 
 const char* PosinfoBlock::upper_bound( const Index& docno_, const char* lowerbound) const
 {
 	if (!lowerbound || lowerbound == charend()) return charend();
-	char const* last = charend();
-	char const* first = lowerbound;
-	Index dn = docno_at( first);
-	if (dn >= docno_) return first;
+	const char* last = charend();
+	char const* first = lowerbound - 1;
 
-	unsigned int ofs = 128;
-	while (last - first > ofs)
+	if (id() < docno_)
 	{
-		char const* fwdpos = nextDoc( lowerbound + (ofs>>1));
-		if (!fwdpos)
-		{
-			ofs >>= 2;
-			if (ofs < 16) break;
-		}
-		else if ((dn=docno_at(fwdpos)) >= docno_)
-		{
-			if (dn == docno_) return fwdpos;
-			ofs >>= 2;
-			if (ofs < 16) break;
-		}
-		else
-		{
-			first = fwdpos;
-		}
+		throw std::logic_error("called PosinfoBlock::upper_bound with wrong block");
 	}
-	while (first != last)
+	char needle[ 32];
+	std::size_t needlesize = 0;
+	packIndex( needle, needlesize, sizeof(needle), id() - (docno_ - 1));
+	do
 	{
-		Index dn = docno_at( first);
-		if (dn >= docno_) return first;
+		++first;
+		if (std::memcmp( needle, first, needlesize) >= 0)
+		{
+			return first;
+		}
+		first = (const char*)std::memchr( first, EndPosinfoMarker, last-first);
 	}
+	while (first);
 	return 0;
 }
 
@@ -188,17 +206,17 @@ const char* PosinfoBlock::find( const Index& docno_, const char* lowerbound) con
 
 void PosinfoBlock::setId( const Index& id_)
 {
-	char const* pp = prevDoc( charend());
-	Index maxDocno = docno_at( pp);
-	
-	if (maxDocno > id_) throw std::runtime_error( "internal: cannot set posinfo block id to a smaller value than the highest docno inserted");
-	if (id() != id_)
+	if (empty())
 	{
-		if (empty())
-		{
-			DataBlock::setId( id_);
-		}
-		else
+		DataBlock::setId( id_);
+	}
+	else
+	{
+		char const* pp = prevDoc( charend());
+		Index maxDocno = docno_at( pp);
+		
+		if (maxDocno > id_) throw std::runtime_error( "internal: cannot set posinfo block id to a smaller value than the highest docno inserted");
+		if (id() != id_)
 		{
 			// Rewrite document references (first element in variable size record):
 			std::string content;
@@ -228,26 +246,26 @@ PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock
 	PosinfoBlock rt;
 	char const* newi = newblk.begin();
 	char const* oldi = oldblk.begin();
-	Index newdn = newblk.docno_at( newi);
-	Index olddn = newblk.docno_at( oldi);
+	Index newx = newblk.docno_at( newi);
+	Index oldx = newblk.docno_at( oldi);
 
-	while (newdn && olddn)
+	while (newx && oldx)
 	{
-		if (newdn <= olddn)
+		if (newx <= oldx)
 		{
 			if (!newblk.empty_at( newi))
 			{
 				//... append only if not empty (empty => delete)
 				rt.appendPositionsBlock( newi, newblk.end_at( newi));
 			}
-			if (newdn == olddn)
+			if (newx == oldx)
 			{
 				//... defined twice -> prefer new entry and ignore old
 				oldi = oldblk.nextDoc( oldi);
-				olddn = newblk.docno_at( oldi);
+				oldx = newblk.docno_at( oldi);
 			}
 			newi = newblk.nextDoc( newi);
-			newdn = newblk.docno_at( newi);
+			newx = newblk.docno_at( newi);
 		}
 		else
 		{
@@ -257,10 +275,10 @@ PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock
 				rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
 			}
 			oldi = oldblk.nextDoc( oldi);
-			olddn = newblk.docno_at( oldi);
+			oldx = newblk.docno_at( oldi);
 		}
 	}
-	while (newdn)
+	while (newx)
 	{
 		if (!newblk.empty_at( newi))
 		{
@@ -268,9 +286,9 @@ PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock
 			rt.appendPositionsBlock( newi, newblk.end_at( newi));
 		}
 		newi = newblk.nextDoc( newi);
-		newdn = newblk.docno_at( newi);
+		newx = newblk.docno_at( newi);
 	}
-	while (olddn)
+	while (oldx)
 	{
 		if (!oldblk.empty_at( oldi))
 		{
@@ -278,7 +296,7 @@ PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock
 			rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
 		}
 		oldi = oldblk.nextDoc( oldi);
-		olddn = newblk.docno_at( oldi);
+		oldx = newblk.docno_at( oldi);
 	}
 	return rt;
 }
