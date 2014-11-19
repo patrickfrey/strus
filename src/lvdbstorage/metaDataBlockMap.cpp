@@ -35,6 +35,32 @@
 
 using namespace strus;
 
+void MetaDataBlockMap::deleteMetaData( Index docno)
+{
+	if (!m_itr)
+	{
+		m_itr = m_db->NewIterator( leveldb::ReadOptions());
+	}
+	unsigned int blockno = MetaDataBlock::blockno( docno);
+	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, blockno);
+
+	m_itr->Seek( leveldb::Slice( key.ptr(), key.size()));
+	if (!m_itr->Valid()) return;
+
+	while (m_itr->Valid()
+	&&  key.size() <= m_itr->key().size()
+	&&  0==std::memcmp( key.ptr(), m_itr->key().data(), key.size()))
+	{
+		char const* ki = m_itr->key().data() + key.size();
+		const char* ke = ki + m_itr->key().size() - key.size();
+		if (ki+1 != ke) throw std::runtime_error( "corrupt data in storage (illegal meta data key)");
+		char varname = *ki;
+
+		defineMetaData( docno, varname, 0.0);
+		m_itr->Next();
+	}
+}
+
 void MetaDataBlockMap::defineMetaData( Index docno, char varname, float value)
 {
 	unsigned int blockno = MetaDataBlock::blockno( docno);
@@ -66,7 +92,7 @@ void MetaDataBlockMap::getWriteBatch(
 		cache.declareVoid( mi->second->blockno(), mi->first.first);
 
 		DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix,
-				 mi->first.first, mi->second->blockno());
+				 mi->second->blockno(), mi->first.first);
 
 		leveldb::Slice keyslice( key.ptr(), key.size());
 		leveldb::Slice valueslice(

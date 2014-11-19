@@ -36,7 +36,7 @@ using namespace strus;
 
 MetaDataBlock* MetaDataReader::readBlockFromDB( leveldb::DB* db, Index blockno, char varname)
 {
-	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, varname, blockno);
+	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, blockno, varname);
 	leveldb::Slice constkey( key.ptr(), key.size());
 	std::string value;
 	value.reserve( MetaDataBlock::MetaDataBlockSize*sizeof(float));

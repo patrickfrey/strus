@@ -28,11 +28,14 @@
 */
 #include "lvdbstorage/indexPacker.hpp"
 #include "lvdbstorage/indexPacker.cpp"
+#include "lvdbstorage/floatConversions.hpp"
+#include "lvdbstorage/floatConversions.cpp"
 #include <stdexcept>
 #include <iostream>
 #include <cstdlib>
+#include <limits>
 
-void testFloatPacking( unsigned int times)
+static void testFloatPacking( unsigned int times)
 {
 	unsigned int tt=0;
 	for (; tt<times; ++tt)
@@ -57,11 +60,39 @@ void testFloatPacking( unsigned int times)
 	std::cerr << "tested float packing " << times << " times with success" << std::endl;
 }
 
+
+static void spFloatConversionTest( float in)
+{
+	float16_t res = strus::floatSingleToHalfPrecision( in);
+	float test = strus::floatHalfToSinglePrecision( res);
+	float diff = in - test;
+	float epsilon = 4.88e-04;
+	// half precision float epsilon is 4.88e-04 
+	//	according http://en.wikipedia.org/wiki/Machine_epsilon
+	if (diff*diff > epsilon)
+	{
+		throw std::runtime_error("float conversion failed");
+	}
+	std::cerr << "tested float single/half precision for " << in << " (error " << diff << ")" << std::endl;
+}
+
+static void testSinglePrecisionFloatConversions()
+{
+	spFloatConversionTest( 3.1);
+	spFloatConversionTest( 27);
+	spFloatConversionTest( 1.9);
+	spFloatConversionTest( 2.1);
+	spFloatConversionTest( 21.1);
+	spFloatConversionTest( -8.1);
+	spFloatConversionTest( -0.1);
+}
+
 int main( int, const char**)
 {
 	try
 	{
 		testFloatPacking( 100);
+		testSinglePrecisionFloatConversions();
 		return 0;
 	}
 	catch (const std::exception& err)

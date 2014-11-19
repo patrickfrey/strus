@@ -87,20 +87,24 @@ public:
 	/// \param[in] docno document number
 	/// \param[in] varname variable name identifying the metadata attribute
 	/// \return the metadata element
-	virtual float documentMetaData( Index docno, char varname) const=0;
+	virtual float documentMetaData( const Index& docno, char varname) const=0;
 
 	/// \brief Get a string attribute value assigned to a document
 	/// \param[in] docno document number
 	/// \param[in] varname variable name identifying the attribute to get
 	/// \return the attribute value
-	virtual std::string documentAttribute( Index docno, char varname) const=0;
+	virtual std::string documentAttribute( const Index& docno, char varname) const=0;
 
 	/// \brief Create an object for the declaration of one insert/update of a document
 	/// \param[in] docid document identifier (URI)
 	/// \return the created inserter reference to be disposed with delete
 	virtual StorageInserterInterface* createInserter( const std::string& docid)=0;
 
-	/// \brief Forces flushing of all contents inserted persistently to the repository
+	/// \brief Removes a document from the storage
+	/// \param[in] docid document identifier (URI)
+	virtual void deleteDocument( const std::string& docid)=0;
+
+	/// \brief Forces flushing of all contents inserted/deleted persistently to the repository
 	virtual void flush()=0;
 
 	/// \brief Get some statistics (counters) of the storage

@@ -46,10 +46,10 @@ class MetaDataBlockMap
 {
 public:
 	MetaDataBlockMap( leveldb::DB* db_)
-		:m_db(db_){}
+		:m_db(db_),m_itr(0){}
 
-	void defineMetaData(
-		Index docno, char varname, float value);
+	void defineMetaData( Index docno, char varname, float value);
+	void deleteMetaData( Index docno);
 
 	void getWriteBatch( leveldb::WriteBatch& batch, MetaDataBlockCache& cache);
 
@@ -60,6 +60,7 @@ private:
 
 private:
 	leveldb::DB* m_db;
+	leveldb::Iterator* m_itr;
 	boost::mutex m_mutex;
 	Map m_map;
 };

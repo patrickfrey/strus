@@ -87,13 +87,14 @@ void StorageInserter::setAttribute(
 
 void StorageInserter::done()
 {
+	bool documentFound = 0!=m_storage->keyLookUp( DatabaseKey::DocIdPrefix, m_docid);
 	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid);
-	bool documentFound = false;
 
 	leveldb::Iterator* vi = m_storage->newIterator();
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
 
-	// [1] Define new metadata
+	//[1] Delete old and define new metadata
+	m_storage->deleteMetaData( docno);
 	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
 	for (; wi != we; ++wi)
 	{
@@ -102,86 +103,23 @@ void StorageInserter::done()
 		std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
 #endif
 	}
+	//[2] Delete old and insert new attributes
+	m_storage->deleteAttributes( docno);
 
-	// [1.3] Delete old attributes
-	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno);
-	std::size_t docattribkeysize = docattribkey.size();
-
-	for (vi->Seek( leveldb::Slice( docattribkey.ptr(), docattribkeysize));
-		vi->Valid(); vi->Next())
-	{
-		if (docattribkeysize > vi->key().size() || 0!=std::memcmp( vi->key().data(), (char*)docattribkey.ptr(), docattribkeysize))
-		{
-			//... end of document reached
-			break;
-		}
-		documentFound = true;
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE ATTRIBUTE [" << vi->key().ToString() << "]" << std::endl;
-#endif
-		m_storage->deleteIndex( vi->key());
-	}
-	// [1.4] Insert new attributes
 	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
 	for (; ai != ae; ++ai)
 	{
-		docattribkey.resize( docattribkeysize);
-		docattribkey.addPrefix( ai->name);
+		DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno, ai->name);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "PUT ATTRIBUTE [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
 #endif
 		leveldb::Slice keyslice( docattribkey.ptr(), docattribkey.size());
-		m_storage->writeIndex( keyslice, ai->value);
+		m_storage->writeKeyValue( keyslice, ai->value);
 	}
 
-	// [2] Delete old document term occurrencies:
-	std::set<TermMapKey> oldcontent;
+	//[3] Delete old and insert new index elements (forward index and inverted index):
+	m_storage->deleteIndex( docno);
 
-	DatabaseKey invkey( (char)DatabaseKey::ForwardIndexPrefix, docno);
-	std::size_t invkeysize = invkey.size();
-	leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
-
-	//[2.1] Iterate on key prefix elements [ForwardIndexPrefix, docno, typeno, *] and mark them as deleted
-	//	Extract typeno and valueno from key [ForwardIndexPrefix, docno, typeno, pos] an mark term as old content (do delete)
-	for (vi->Seek( invkeyslice); vi->Valid(); vi->Next())
-	{
-		if (invkeysize > vi->key().size() || 0!=std::memcmp( vi->key().data(), invkey.ptr(), invkeysize))
-		{
-			//... end of document reached
-			break;
-		}
-		documentFound = true;
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE INV [" << vi->key().ToString() << "]" << std::endl;
-#endif
-		m_storage->deleteIndex( vi->key());
-
-		const char* ki = vi->key().data() + invkeysize;
-		const char* ke = ki + vi->key().size();
-		Index typeno = unpackIndex( ki, ke);
-
-		const char* valuestr = vi->value().data();
-		std::size_t valuesize = vi->value().size();
-		Index valueno = m_storage->keyLookUp( DatabaseKey::TermValuePrefix, std::string( valuestr, valuesize));
-
-		oldcontent.insert( TermMapKey( typeno, valueno));
-	}
-
-	//[2.2] Iterate on 'oldcontent' elements built in [1.1] 
-	//	and mark delete the postings
-	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
-	for (; di != de; ++di)
-	{
-		m_storage->deleteDocnoPosting( di->first, di->second, docno);
-		m_storage->deletePosinfoPosting( di->first, di->second, docno);
-		documentFound = true;
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE TERMS [" << di->first << " " << di->second << " " << docno << "]" << std::endl;
-#endif
-		m_storage->decrementDf( di->first, di->second);
-	}
-
-	//[3] Insert the new postings:
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
@@ -198,7 +136,6 @@ void StorageInserter::done()
 		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
 
-	// [4] Insert the new forward index elements:
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
@@ -211,7 +148,7 @@ void StorageInserter::done()
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "PUT INV [" << invkey << "]" << "= [" << ri->second.value << "]" << std::endl;
 #endif
-		m_storage->writeIndex( invkeyslice, ri->second);
+		m_storage->writeKeyValue( invkeyslice, ri->second);
 	}
 	if (!documentFound)
 	{

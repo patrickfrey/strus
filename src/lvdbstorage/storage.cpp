@@ -42,6 +42,7 @@
 #include <vector>
 #include <cstring>
 #include <boost/thread/mutex.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <leveldb/cache.h>
 
 using namespace strus;
@@ -199,12 +200,12 @@ Storage::~Storage()
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
 
-void Storage::writeIndex(const leveldb::Slice& key, const leveldb::Slice& value)
+void Storage::writeKeyValue( const leveldb::Slice& key, const leveldb::Slice& value)
 {
 	m_inserter_batch.Put( key, value);
 }
 
-void Storage::deleteIndex(const leveldb::Slice& key)
+void Storage::deleteKey(const leveldb::Slice& key)
 {
 	m_inserter_batch.Delete( key);
 }
@@ -299,6 +300,12 @@ void Storage::incrementNofDocumentsInserted()
 	++m_nof_documents;
 }
 
+void Storage::decrementNofDocumentsInserted()
+{
+	boost::mutex::scoped_lock( m_nof_documents_mutex);
+	--m_nof_documents;
+}
+
 Index Storage::nofDocumentsInserted() const
 {
 	return m_nof_documents;
@@ -314,7 +321,7 @@ Index Storage::documentNumber( const std::string& docid) const
 	return m_globalKeyMap->lookUp( DatabaseKey::DocIdPrefix, docid);
 }
 
-std::string Storage::documentAttribute( Index docno, char varname) const
+std::string Storage::documentAttribute( const Index& docno, char varname) const
 {
 	DatabaseKey key( (char)DatabaseKey::DocAttributePrefix, docno, varname);
 	leveldb::Slice keyslice( key.ptr(), key.size());
@@ -332,14 +339,19 @@ std::string Storage::documentAttribute( Index docno, char varname) const
 }
 
 
-float Storage::documentMetaData( Index docno, char varname) const
+float Storage::documentMetaData( const Index& docno, char varname) const
 {
 	return m_metaDataBlockCache->getValue( docno, varname);
 }
 
-void Storage::defineMetaData( Index docno, char varname, float value)
+void Storage::defineMetaData( const Index& docno, char varname, float value)
 {
 	m_metaDataBlockMap->defineMetaData( docno, varname, value);
+}
+
+void Storage::deleteMetaData( const Index& docno)
+{
+	m_metaDataBlockMap->deleteMetaData( docno);
 }
 
 void Storage::defineDocnoPosting(
@@ -373,12 +385,12 @@ void Storage::deletePosinfoPosting(
 }
 
 
-void Storage::incrementDf( Index typeno, Index termno)
+void Storage::incrementDf( const Index& typeno, const Index& termno)
 {
 	m_dfMap->increment( typeno, termno);
 }
 
-void Storage::decrementDf( Index typeno, Index termno)
+void Storage::decrementDf( const Index& typeno, const Index& termno)
 {
 	m_dfMap->decrement( typeno, termno);
 }
@@ -394,5 +406,99 @@ std::vector<StatCounterValue> Storage::getStatistics() const
 	return rt;
 }
 
+void Storage::deleteAttributes( const Index& docno)
+{
+	leveldb::Iterator* vi = newIterator();
+	boost::scoped_ptr<leveldb::Iterator> viref(vi);
+
+	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno);
+	for (vi->Seek( leveldb::Slice( docattribkey.ptr(), docattribkey.size()));
+		vi->Valid(); vi->Next())
+	{
+		if (docattribkey.size() > vi->key().size()
+		||  0!=std::memcmp( vi->key().data(), (char*)docattribkey.ptr(), docattribkey.size()))
+		{
+			//... end of document reached
+			break;
+		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "DELETE ATTRIBUTE [" << vi->key().ToString() << "]" << std::endl;
+#endif
+		deleteKey( vi->key());
+	}
+}
+
+void Storage::deleteIndex( const Index& docno)
+{
+	typedef std::pair<Index,Index> TermMapKey;
+	std::set<TermMapKey> oldcontent;
+
+	DatabaseKey invkey( (char)DatabaseKey::ForwardIndexPrefix, docno);
+	std::size_t invkeysize = invkey.size();
+	leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
+
+	leveldb::Iterator* vi = newIterator();
+	boost::scoped_ptr<leveldb::Iterator> viref(vi);
+
+	//[1] Iterate on key prefix elements [ForwardIndexPrefix, docno, typeno, *] and mark them as deleted
+	//	Extract typeno and valueno from key [ForwardIndexPrefix, docno, typeno, pos] an mark term as old content (do delete)
+	for (vi->Seek( invkeyslice); vi->Valid(); vi->Next())
+	{
+		if (invkeysize > vi->key().size() || 0!=std::memcmp( vi->key().data(), invkey.ptr(), invkeysize))
+		{
+			//... end of document reached
+			break;
+		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "DELETE INV [" << vi->key().ToString() << "]" << std::endl;
+#endif
+		deleteKey( vi->key());
+
+		const char* ki = vi->key().data() + invkeysize;
+		const char* ke = ki + vi->key().size();
+		Index typeno = unpackIndex( ki, ke);
+
+		const char* valuestr = vi->value().data();
+		std::size_t valuesize = vi->value().size();
+		Index valueno = keyLookUp( DatabaseKey::TermValuePrefix, std::string( valuestr, valuesize));
+
+		oldcontent.insert( TermMapKey( typeno, valueno));
+	}
+
+	//[2] Iterate on 'oldcontent' elements built in [1.1] 
+	//	and mark delete the postings
+	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
+	for (; di != de; ++di)
+	{
+		deleteDocnoPosting( di->first, di->second, docno);
+		deletePosinfoPosting( di->first, di->second, docno);
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "DELETE TERMS [" << di->first << " " << di->second << " " << docno << "]" << std::endl;
+#endif
+		decrementDf( di->first, di->second);
+	}
+}
+
+void Storage::deleteDocument( const std::string& docid)
+{
+	Index docno = m_globalKeyMap->lookUp( DatabaseKey::DocIdPrefix, docid);
+	if (docno == 0) return;
+
+	//[1] Delete metadata:
+	deleteMetaData( docno);
+
+	//[2] Delete attributes:
+	deleteAttributes( docno);
+	
+	//[3] Delete index elements (forward index and inverted index):
+	deleteIndex( docno);
+
+	//[4] Decrement the total number of documents inserted:
+	decrementNofDocumentsInserted();
+
+	//[5] Do submit the write to the database:
+	checkFlush();
+}
 
 

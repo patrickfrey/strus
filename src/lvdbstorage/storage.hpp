@@ -78,7 +78,9 @@ public:
 	virtual StorageInserterInterface*
 			createInserter( const std::string& docid);
 
-	virtual float documentMetaData( Index docno, char varname) const;
+	virtual void deleteDocument( const std::string& docid);
+
+	virtual float documentMetaData( const Index& docno, char varname) const;
 
 	virtual Index nofDocumentsInserted() const;
 
@@ -86,17 +88,21 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
-	virtual std::string documentAttribute( Index docno, char varname) const;
+	virtual std::string documentAttribute( const Index& docno, char varname) const;
 
 	virtual std::vector<StatCounterValue> getStatistics() const;
 
 public:
-	void incrementDf( Index typeno, Index termno);
-	void decrementDf( Index typeno, Index termno);
+	void incrementDf( const Index& typeno, const Index& termno);
+	void decrementDf( const Index& typeno, const Index& termno);
 
 	enum {NofDocumentsInsertedBeforeAutoCommit=4096};
 
-	void defineMetaData( Index docno, char varname, float value);
+	void defineMetaData( const Index& docno, char varname, float value);
+	void deleteMetaData( const Index& docno);
+
+	void deleteAttributes( const Index& docno);
+	void deleteIndex( const Index& docno);
 
 	void defineDocnoPosting(
 		const Index& termtype, const Index& termvalue,
@@ -114,10 +120,11 @@ public:
 		const Index& termtype, const Index& termvalue,
 		const Index& docno);
 
-	void writeIndex( const leveldb::Slice& key, const leveldb::Slice& value);
-	void deleteIndex( const leveldb::Slice& key);
+	void writeKeyValue( const leveldb::Slice& key, const leveldb::Slice& value);
+	void deleteKey( const leveldb::Slice& key);
 
 	void incrementNofDocumentsInserted();
+	void decrementNofDocumentsInserted();
 
 	leveldb::Iterator* newIterator();
 
