@@ -223,12 +223,16 @@ DocMetaDataData::DocMetaDataData( const leveldb::Slice& key, const leveldb::Slic
 	{
 		throw std::runtime_error( "unexpected end of metadata key");
 	}
+	blockno = strus::unpackIndex( ki, ke);/*[blockno]*/
+	if (ki == ke)
+	{
+		throw std::runtime_error( "unexpected end of metadata key");
+	}
 	name = *ki++;
 	if (name < 32 || name > 127)
 	{
 		throw std::runtime_error( "variable name in metadata key out of range");
 	}
-	blockno = strus::unpackIndex( ki, ke);/*[blockno]*/
 	if (ki != ke)
 	{
 		throw std::runtime_error( "unexpected extra bytes at end of metadata key");
