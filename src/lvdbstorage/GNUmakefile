@@ -21,6 +21,7 @@ CPP_OBJS=\
 	nullIterator.o \
 	forwardIterator.o \
 	storageInserter.o \
+	storageConfig.o \
 	storageLib.o
 
 PRG_OBJS=\

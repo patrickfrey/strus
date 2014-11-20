@@ -26,33 +26,35 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus storage library
-#ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
-#define _STRUS_STORAGE_LIB_HPP_INCLUDED
+#ifndef _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
+#define _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
+#include <string>
 
 namespace strus {
 
-/// \brief Forward declaration
-class StorageInterface;
+class StorageConfig
+{
+public:
+	explicit StorageConfig( const char* source);
 
-/// \brief Creates an instance of the storage interface described with config
-/// \param[in] configsource Configuration source string of the config (not a filename !)
-/// \remark Because of restrictions imposed by LevelDB only one instance of a storage can be crated per storage
-StorageInterface* createStorageClient( const char* configsource);
+	const std::string& path() const
+	{
+		return m_path;
+	}
 
-/// \brief Creates a new storage described with config in the file system
-/// \param[in] configsource Configuration source string of the config (not a filename !)
-void createStorageDatabase( const char* configsource);
+	unsigned int cachesize_kb() const
+	{
+		return m_cachesize_kb;
+	}
 
-/// \brief Destroys an existing storage described with config in the file system
-/// \param[in] configsource Configuration string of the config (not a filename !)
-void destroyStorageDatabase( const char* configsource);
+	static const char* getDescription();
 
-/// \brief Gets an example configuration description (source string as used by the functions here)
-///	createStorageDatabase(const char*) and createStorageClient(const char*)
-///	for the usage printed by programs using the storage.
-const char* getStorageConfigDescription();
-
+private:
+	std::string m_path;
+	unsigned int m_cachesize_kb;
+};
 }//namespace
 #endif
+
+
 

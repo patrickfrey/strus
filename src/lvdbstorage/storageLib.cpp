@@ -28,6 +28,7 @@
 */
 #include "strus/storageLib.hpp"
 #include "strus/storageInterface.hpp"
+#include "storageConfig.hpp"
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
 #include "storage.hpp"
@@ -43,85 +44,6 @@
 
 using namespace strus;
 
-namespace {
-class CaseInsensitiveKey
-	:public std::string
-{
-public:
-	CaseInsensitiveKey(){}
-	CaseInsensitiveKey( const std::string& o)
-		:std::string( boost::algorithm::to_lower_copy( o)){}
-	CaseInsensitiveKey( const CaseInsensitiveKey& o)
-		:std::string( o){}
-};
-
-class ConfigMap
-	:public std::map<CaseInsensitiveKey,std::string>
-{
-public:
-	ConfigMap( const char* config);
-};
-
-ConfigMap::ConfigMap( const char* config)
-{
-	char const* cc = config;
-	while (*cc)
-	{
-		std::string key;
-		while ((*cc|32) >= 'a' && (*cc|32) <= 'z')
-		{
-			key.push_back( *cc++);
-		}
-		if (*cc != '=')
-		{
-			throw std::runtime_error( "'=' expected after item identifier in config string");
-		}
-		++cc;
-		const char* ee = std::strchr( cc, ';');
-		if (!ee) ee = std::strchr( cc, '\0');
-		(*this)[ key] = std::string( cc,ee-cc);
-		cc = (*ee)?(ee+1):ee;
-	}
-}
-}//namespace
-
-
-static unsigned int nofK( const std::string& numstr)
-{
-	Index rt = 0;
-	char const* cc = numstr.c_str();
-	for (;*cc; ++cc)
-	{
-		if (*cc >= '0' && *cc <= '9')
-		{
-			rt = (rt * 10) + (*cc - '0');
-		}
-		else if (*cc == 'K' || *cc == 'k')
-		{
-			rt = rt * 1024;
-			++cc;
-			break;
-		}
-		else if (*cc == 'M' || *cc == 'm')
-		{
-			rt = rt * 1024 * 1024;
-			++cc;
-			break;
-		}
-		else if (*cc == 'G' || *cc == 'g')
-		{
-			rt = rt * 1024 * 1024 * 1024;
-			++cc;
-			break;
-		}
-	}
-	if (!cc)
-	{
-		throw std::runtime_error( std::string( "not a number (with optional 'K' or 'M' or 'G' suffix) for configuration option 'cache': '") + numstr + "'");
-	}
-	return (unsigned int)((rt + 1023)/1024);
-}
-
 static void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
 {
 	DatabaseKey key( DatabaseKey::VariablePrefix, name);
@@ -133,66 +55,25 @@ static void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, I
 
 
 
-DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* config)
+DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsource)
 {
-	std::string path;
-	unsigned int cachesize_k = 0;
-
-	ConfigMap configMap( config);
-	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();
-	for (; ci != ce; ++ci)
-	{
-		if (ci->first == "path")
-		{
-			path = ci->second;
-		}
-		else if (ci->first == "cache")
-		{
-			cachesize_k = nofK( ci->second);
-		}
-		else
-		{
-			throw std::runtime_error( std::string( "unknown configuration option '") + ci->first +"'");
-		}
-	}
-	if (path.empty())
-	{
-		throw std::runtime_error( "no path defined in config for levelDB storage");
-	}
-	return new Storage( path.c_str(), cachesize_k);
+	StorageConfig config( configsource);
+	return new Storage( config.path().c_str(), config.cachesize_kb());
 }
 
 
-DLL_PUBLIC void strus::createStorageDatabase( const char* config)
+DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 {
-	std::string path;
-	ConfigMap configMap( config);
-	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();
-	for (; ci != ce; ++ci)
-	{
-		if (ci->first == "path")
-		{
-			path = ci->second;
-		}
-		else if (ci->first == "cache")
-		{
-		}
-		else
-		{
-			throw std::runtime_error( std::string( "unknown configuration option '") + ci->first +"'");
-		}
-	}
-	if (path.empty())
-	{
-		throw std::runtime_error( "no path defined in config for levelDB storage");
-	}
+	StorageConfig config( configsource);
+
 	leveldb::DB* db = 0;
 	leveldb::Options options;
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
 	options.create_if_missing = true;
 	options.error_if_exists = true;
-	leveldb::Status status = leveldb::DB::Open( options, path, &db);
+
+	leveldb::Status status = leveldb::DB::Open( options, config.path(), &db);
 	if (status.ok())
 	{
 		leveldb::WriteBatch batch;
@@ -205,7 +86,7 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 		if (!status.ok())
 		{
 			std::string err = status.ToString();
-			(void)leveldb::DestroyDB( path, leveldb::Options());
+			(void)leveldb::DestroyDB( config.path(), leveldb::Options());
 			delete db;
 			throw std::runtime_error( std::string( "failed to write to created storage: ") + err);
 		}
@@ -219,6 +100,20 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* config)
 	}
 	if (db) delete db;
 }
+
+
+DLL_PUBLIC void strus::destroyStorageDatabase( const char* configsource)
+{
+	StorageConfig config( configsource);
+	leveldb::Options options;
+	leveldb::Status status = leveldb::DestroyDB( config.path(), options);
+	if (!status.ok())
+	{
+		std::string err = status.ToString();
+		throw std::runtime_error( std::string( "failed to remove storage: ") + err);
+	}
+}
+
 
 DLL_PUBLIC const char* strus::getStorageConfigDescription()
 {
