@@ -34,10 +34,10 @@
 #include "parser/selectorSet.hpp"
 #include "postingIteratorReference.hpp"
 #include "accumulator.hpp"
+#include "ranker.hpp"
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
-#include <set>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -366,12 +366,8 @@ std::vector<queryeval::ResultDocument>
 			std::size_t firstRank,
 			std::size_t maxNofRanks) const
 {
-	typedef std::multiset<queryeval::WeightedDocument,queryeval::WeightedDocument::CompareSmaller> Ranker;
-
 	std::vector<queryeval::ResultDocument> rt;
-	Ranker ranker;
-	std::size_t ranks = 0;
-	std::size_t lastRank = maxNofRanks + firstRank;
+	Ranker ranker( maxNofRanks);
 
 	Index docno = 0;
 	unsigned int state = 0;
@@ -381,42 +377,34 @@ std::vector<queryeval::ResultDocument>
 	while (accu.nextRank( docno, state, weight))
 	{
 		ranker.insert( queryeval::WeightedDocument( docno, weight));
-		if (ranks >= lastRank)
-		{
-			ranker.erase( ranker.begin());
-		}
-		else
-		{
-			++ranks;
-		}
-		if (state > prev_state && ranks >= lastRank)
+		if (state > prev_state && ranker.nofRanks() >= maxNofRanks)
 		{
 			break;
 		}
 		prev_state = state;
 	}
-	Ranker::reverse_iterator ri=ranker.rbegin(),re=ranker.rend();
-	for (std::size_t ridx=0; ri != re; ++ri,++ridx)
+	std::vector<queryeval::WeightedDocument> resultlist = ranker.result( firstRank);
+	std::vector<queryeval::WeightedDocument>::const_iterator
+		ri=resultlist.begin(),re=resultlist.end();
+
+	for (; ri != re; ++ri)
 	{
-		if (ridx >= firstRank)
+		std::vector<queryeval::ResultDocument::Attribute> attr;
+		std::vector<SummarizerDef>::const_iterator
+			si = summarizers.begin(), se = summarizers.end();
+		for (; si != se; ++si)
 		{
-			std::vector<queryeval::ResultDocument::Attribute> attr;
-			std::vector<SummarizerDef>::const_iterator
-				si = summarizers.begin(), se = summarizers.end();
-			for (; si != se; ++si)
+			std::vector<std::string> summary = si->second->getSummary( ri->docno());
+			std::vector<std::string>::const_iterator
+				ci = summary.begin(), ce = summary.end();
+			for (; ci != ce; ++ci)
 			{
-				std::vector<std::string> summary = si->second->getSummary( ri->docno());
-				std::vector<std::string>::const_iterator
-					ci = summary.begin(), ce = summary.end();
-				for (; ci != ce; ++ci)
-				{
-					attr.push_back(
-						queryeval::ResultDocument::Attribute(
-							si->first, *ci));
-				}
+				attr.push_back(
+					queryeval::ResultDocument::Attribute(
+						si->first, *ci));
 			}
-			rt.push_back( queryeval::ResultDocument( *ri, attr));
 		}
+		rt.push_back( queryeval::ResultDocument( *ri, attr));
 	}
 	return rt;
 }

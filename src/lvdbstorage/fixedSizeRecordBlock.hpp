@@ -43,6 +43,11 @@ public:
 		:DataBlock( blocktype_, arsize_?ar_[arsize_-1].docno():0, (const void*)ar_, arsize_*sizeof(*ar_)){}
 	FixedSizeRecordBlock( const FixedSizeRecordBlock& o)
 		:DataBlock( o){}
+	FixedSizeRecordBlock& operator=( const FixedSizeRecordBlock& o)
+	{
+		DataBlock::operator =(o);
+		return *this;
+	}
 
 	std::size_t nofElements() const
 	{

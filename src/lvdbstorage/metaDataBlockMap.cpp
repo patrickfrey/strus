@@ -35,6 +35,14 @@
 
 using namespace strus;
 
+MetaDataBlockMap::~MetaDataBlockMap()
+{
+	if (m_itr)
+	{
+		delete m_itr;
+	}
+}
+
 void MetaDataBlockMap::deleteMetaData( Index docno)
 {
 	if (!m_itr)

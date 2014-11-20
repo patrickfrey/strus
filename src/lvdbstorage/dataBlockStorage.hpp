@@ -58,7 +58,10 @@ public:
 	
 	virtual ~DataBlockStorage()
 	{
-		if (m_itr) delete m_itr;
+		if (m_itr)
+		{
+			delete m_itr;
+		}
 	}
 
 	const DataBlock* curblock() const

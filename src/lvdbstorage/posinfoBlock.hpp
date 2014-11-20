@@ -61,6 +61,12 @@ public:
 	PosinfoBlock( const Index& id_, const void* ptr_, std::size_t size_)
 		:DataBlock( (char)BlockType, id_, ptr_, size_){}
 
+	PosinfoBlock& operator=( const PosinfoBlock& o)
+	{
+		DataBlock::operator =(o);
+		return *this;
+	}
+
 	void setId( const Index& id_);
 	Index docno_at( const char* ref) const;
 	std::vector<Index> positions_at( const char* itr) const;

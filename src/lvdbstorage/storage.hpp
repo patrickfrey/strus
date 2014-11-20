@@ -96,7 +96,7 @@ public:
 	void incrementDf( const Index& typeno, const Index& termno);
 	void decrementDf( const Index& typeno, const Index& termno);
 
-	enum {NofDocumentsInsertedBeforeAutoCommit=4096};
+	enum {NofDocumentsInsertedBeforeAutoCommit=1024};
 
 	void defineMetaData( const Index& docno, char varname, float value);
 	void deleteMetaData( const Index& docno);
@@ -129,7 +129,7 @@ public:
 	leveldb::Iterator* newIterator();
 
 	Index keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyname) const;
-	Index keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname);
+	Index keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname, bool& isnew);
 
 	void checkFlush();
 	void flush();

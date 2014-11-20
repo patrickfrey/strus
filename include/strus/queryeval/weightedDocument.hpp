@@ -49,23 +49,10 @@ public:
 	Index docno() const					{return m_docno;}
 	float weight() const					{return m_weight;}
 
-	class CompareGreater
+	bool operator < ( const WeightedDocument& o) const
 	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight > b.m_weight);
-		}
-	};
-
-	class CompareSmaller
-	{
-	public:
-		bool operator()( const WeightedDocument& a, const WeightedDocument& b) const
-		{
-			return (a.m_weight < b.m_weight);
-		}
-	};
+		return (m_weight < o.m_weight);
+	}
 
 private:
 	Index m_docno;

@@ -83,66 +83,71 @@ public:
 			typename ElementMap::const_iterator
 				ei = mi->second.begin(),
 				ee = mi->second.end();
-	
+
+			if (ei == ee) continue;
+			Index lastInsertBlockId = mi->second.rbegin()->first;
+
 			BlockStorage<BlockType> blkstorage( m_db, mi->first, false);
 			const BlockType* blk;
 			BlockType newblk;
 	
 			// [1] Merge new elements with existing upper bound blocks:
-			while (0!=(blk=blkstorage.load( ei->first)))
+			while (ei != ee && 0!=(blk=blkstorage.load( ei->first)))
 			{
-				newblk.clear();
-				Index blkid = blk->id();
-				newblk.setId( blkid);
-				for (; ei != ee && ei->first <= blkid; ++ei)
+				BlockType elemblk;
+				elemblk.setId( blk->id());
+
+				for (; ei != ee && ei->first <= blk->id(); ++ei)
 				{
-					newblk.append( ei->first, ei->second);
+					elemblk.append( ei->first, ei->second);
 				}
-				if (0 != blkstorage.loadNext())
+				newblk = BlockType::merge( elemblk, *blk);
+				if (blkstorage.loadNext())
 				{
 					// ... is not the last block, so we store it
-					blkstorage.store( BlockType::merge( newblk, *blk), batch);
+					blkstorage.store( newblk, batch);
 					newblk.clear();
 				}
 				else
 				{
-					blkstorage.dispose( blkid, batch);
+					blkstorage.dispose( elemblk.id(), batch);
+					break;
 				}
 			}
-			if (!newblk.empty())
+			if (newblk.empty())
 			{
-				// [2.1] 'newblk' is already the last block merged with new elements
-			}
-			else
-			{
-				// [2.2] Fill first new block with elements of last 
+				// Fill first new block with elements of last 
 				// block and dispose the last block:
 				if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
 				{
-					newblk.clear();
-					newblk = *blk;
+					newblk.initcopy( *blk);
 					blkstorage.dispose( blk->id(), batch);
 				}
 			}
-			// [3] Write the new blocks:
-			Index blkid = (ei==ee)?newblk.id():ei->first;
-			if (ei != ee)
+			// [2] Write the new blocks that could not be merged into existing ones:
+			Index blkid;
+			if (ei == ee)
 			{
-				newblk.setId( mi->second.rbegin()->first);
+				blkid = newblk.id();
 			}
-			for (; ei != ee; ++ei)
+			else
 			{
-				if (newblk.full())
-				{
-					newblk.setId( blkid);
-					blkstorage.store( newblk, batch);
-					newblk.clear();
-					newblk.setId( mi->second.rbegin()->first);
-				}
-				newblk.append( ei->first, ei->second);
 				blkid = ei->first;
+				newblk.setId( lastInsertBlockId);
+
+				for (; ei != ee; ++ei)
+				{
+					if (newblk.full())
+					{
+						newblk.setId( blkid);
+						blkstorage.store( newblk, batch);
+						newblk.clear();
+						newblk.setId( lastInsertBlockId);
+					}
+					newblk.append( ei->first, ei->second);
+					blkid = ei->first;
+				}
 			}
-			// [4] Write the new last (incomplete) block, if not empty:
 			if (!newblk.empty())
 			{
 				newblk.setId( blkid);

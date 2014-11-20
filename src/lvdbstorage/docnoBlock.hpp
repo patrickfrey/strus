@@ -89,6 +89,12 @@ public:
 	DocnoBlock( const DocnoBlock& o)
 		:FixedSizeRecordBlock( o){}
 
+	DocnoBlock& operator=( const DocnoBlock& o)
+	{
+		FixedSizeRecordBlock::operator =(o);
+		return *this;
+	}
+
 	const DocnoBlockElement* find( const Index& docno_, const DocnoBlockElement* lowerbound) const;
 	const DocnoBlockElement* upper_bound( const Index& docno_, const DocnoBlockElement* lowerbound) const;
 

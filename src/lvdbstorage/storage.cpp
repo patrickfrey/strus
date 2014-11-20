@@ -161,9 +161,6 @@ void Storage::close()
 		batchDefineVariable( m_inserter_batch, "DocNo", m_next_docno);
 		batchDefineVariable( m_inserter_batch, "NofDocs", m_nof_documents);
 		writeInserterBatch();
-	
-		delete m_db;
-		m_db = 0;
 	}
 }
 
@@ -191,11 +188,12 @@ Storage::~Storage()
 	{
 		//... silently ignored. Call close directly to catch errors
 	}
-	delete m_dfMap;
-	delete m_metaDataBlockMap;
-	delete m_metaDataBlockCache; 
-	delete m_docnoBlockMap;
 	delete m_globalKeyMap;
+	delete m_dfMap;
+	delete m_metaDataBlockCache; 
+	delete m_metaDataBlockMap;
+	delete m_docnoBlockMap;
+	delete m_posinfoBlockMap;
 	delete m_db;
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
@@ -230,7 +228,7 @@ Index Storage::keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyn
 	return m_globalKeyMap->lookUp( prefix, keyname);
 }
 
-Index Storage::keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname)
+Index Storage::keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname, bool& isnew)
 {
 	Index* counter = 0;
 	if (prefix == DatabaseKey::TermTypePrefix)
@@ -249,7 +247,10 @@ Index Storage::keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string&
 	{
 		throw std::logic_error( "internal: unknown prefix for string key of global variable");
 	}
-	return m_globalKeyMap->getOrCreate( prefix, keyname, *counter);
+	Index oldCounter = *counter;
+	Index rt = m_globalKeyMap->getOrCreate( prefix, keyname, *counter);
+	isnew = (oldCounter < *counter);
+	return rt;
 }
 
 PostingIteratorInterface*

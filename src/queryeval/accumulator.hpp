@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
-#define _STRUS_ACCUMULATOR_IDF_PRIORITY_HPP_INCLUDED
+#ifndef _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
+#define _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "postingIteratorReference.hpp"

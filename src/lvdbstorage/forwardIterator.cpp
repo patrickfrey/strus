@@ -47,7 +47,10 @@ ForwardIterator::ForwardIterator( Storage* storage_, leveldb::DB* db_, const std
 
 ForwardIterator::~ForwardIterator()
 {
-	if (m_itr) delete m_itr;
+	if (m_itr)
+	{
+		delete m_itr;
+	}
 }
 
 void ForwardIterator::buildKey( int level)

@@ -75,6 +75,7 @@ bool PosinfoBlock::empty_at( const char* itr) const
 const char* PosinfoBlock::endOfDoc( const char* ref) const
 {
 	if (ref == charend()) return 0;
+	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- endOfDoc");
 	char const* rt = (const char*)std::memchr( ref, EndPosinfoMarker, charend()-ref);
 	return rt?rt:charend();
 }
@@ -82,6 +83,7 @@ const char* PosinfoBlock::endOfDoc( const char* ref) const
 const char* PosinfoBlock::nextDoc( const char* ref) const
 {
 	if (ref == charend()) return 0;
+	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- nextDoc");
 	char const* rt = (const char*)std::memchr( ref, EndPosinfoMarker, charend()-ref);
 	return (rt)?(rt+1):charend();
 }
@@ -89,6 +91,7 @@ const char* PosinfoBlock::nextDoc( const char* ref) const
 const char* PosinfoBlock::prevDoc( const char* ref) const
 {
 	if (ref == charptr()) return 0;
+	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- prevDoc");
 	char const* rt = (const char*)::memrchr( charptr(), EndPosinfoMarker, ref-charptr());
 	return (rt)?(rt+1):charptr();
 }

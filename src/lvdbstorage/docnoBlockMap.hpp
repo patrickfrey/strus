@@ -32,7 +32,6 @@
 #include "docnoBlock.hpp"
 #include "blockMap.hpp"
 #include <cstdlib>
-#include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 

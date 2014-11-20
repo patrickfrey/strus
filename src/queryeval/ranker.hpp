@@ -26,48 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_QUERYEVAL_RANKER_HPP_INCLUDED
+#define _STRUS_QUERYEVAL_RANKER_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
+#include "strus/queryeval/weightedDocument.hpp"
+#include "localStructAllocator.hpp"
+#include <set>
 
-namespace strus {
-/// \brief Forward declaration
-class MetaDataBlockCache;
+namespace strus
+{
 
-
-class MetaDataBlockMap
+/// \class Ranker
+/// \brief Data structure to keep the N best ranked documents in sorted order
+class Ranker
 {
 public:
-	MetaDataBlockMap( leveldb::DB* db_)
-		:m_db(db_),m_itr(0){}
-	MetaDataBlockMap( const MetaDataBlockMap& o)
-		:m_db(o.m_db),m_itr(0),m_map(o.m_map){}
-	~MetaDataBlockMap();
+	/// \brief Constructor
+	Ranker( std::size_t maxNofRanks_)
+		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0){}
+	~Ranker(){}
 
-	void defineMetaData( Index docno, char varname, float value);
-	void deleteMetaData( Index docno);
+	void insert( const queryeval::WeightedDocument& doc)
+	{
+		m_rankset.insert( doc);
+		if (m_maxNofRanks < ++m_nofRanks)
+		{
+			m_rankset.erase( m_rankset.begin());
+		}
+	}
 
-	void getWriteBatch( leveldb::WriteBatch& batch, MetaDataBlockCache& cache);
+	std::vector<queryeval::WeightedDocument> result( std::size_t firstRank) const
+	{
+		std::vector<queryeval::WeightedDocument> rt;
+		RankSet::reverse_iterator ri=m_rankset.rbegin(),re=m_rankset.rend();
+		for (std::size_t ridx=0; ri != re; ++ri,++ridx)
+		{
+			if (ridx >= firstRank) break;
+		}
+		for (; ri != re; ++ri)
+		{
+			rt.push_back( *ri);
+		}
+		return rt;
+	}
+
+	std::size_t nofRanks() const
+	{
+		return m_nofRanks;
+	}
 
 private:
-	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
-	typedef std::pair<char,Index> MetaDataKey;
-	typedef std::map<MetaDataKey, MetaDataBlockReference> Map;
-
-private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	boost::mutex m_mutex;
-	Map m_map;
+	typedef std::multiset<
+			queryeval::WeightedDocument,
+			std::less<queryeval::WeightedDocument>,
+			LocalStructAllocator<queryeval::WeightedDocument> > RankSet;
+	RankSet m_rankset;
+	std::size_t m_maxNofRanks;
+	std::size_t m_nofRanks;
 };
 
-}
+}//namespace
 #endif
 

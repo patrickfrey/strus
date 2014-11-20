@@ -51,8 +51,9 @@ StorageInserter::~StorageInserter()
 
 StorageInserter::TermMapKey StorageInserter::termMapKey( const std::string& type_, const std::string& value_)
 {
-	Index typeno = m_storage->keyGetOrCreate( DatabaseKey::TermTypePrefix, type_);
-	Index valueno = m_storage->keyGetOrCreate( DatabaseKey::TermValuePrefix, value_);
+	bool isNew;
+	Index typeno = m_storage->keyGetOrCreate( DatabaseKey::TermTypePrefix, type_, isNew);
+	Index valueno = m_storage->keyGetOrCreate( DatabaseKey::TermValuePrefix, value_, isNew);
 	return TermMapKey( typeno, valueno);
 }
 
@@ -87,8 +88,8 @@ void StorageInserter::setAttribute(
 
 void StorageInserter::done()
 {
-	bool documentFound = 0!=m_storage->keyLookUp( DatabaseKey::DocIdPrefix, m_docid);
-	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid);
+	bool documentIsNew = false;
+	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid, documentIsNew);
 
 	leveldb::Iterator* vi = m_storage->newIterator();
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
@@ -150,7 +151,7 @@ void StorageInserter::done()
 #endif
 		m_storage->writeKeyValue( invkeyslice, ri->second);
 	}
-	if (!documentFound)
+	if (documentIsNew)
 	{
 		m_storage->incrementNofDocumentsInserted();
 	}

@@ -32,8 +32,6 @@
 #include "posinfoBlock.hpp"
 #include "blockMap.hpp"
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 

@@ -184,6 +184,7 @@ static void dumpDB( std::ostream& out, leveldb::DB* db)
 	};
 	std::cerr << "... dumped " << cnt << " entries" << std::endl;
 	cnt = 0;
+	delete itr;
 }
 
 int main( int argc, const char* argv[])

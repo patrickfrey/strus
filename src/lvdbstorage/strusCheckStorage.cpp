@@ -183,6 +183,7 @@ static void checkDB( leveldb::DB* db)
 	{
 		std::cerr << "OK. No errors found in storage index" << std::endl;
 	}
+	delete itr;
 }
 
 int main( int argc, const char* argv[])
