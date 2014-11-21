@@ -53,20 +53,14 @@ void MetaDataBlockCache::refresh()
 
 void MetaDataBlockCache::resetBlock( unsigned int blockno, char varname)
 {
-	if (blockno > MaxBlockno || blockno <= 0) throw std::runtime_error("block number out of range (MetaDataBlockCache)");
+	if (blockno > CacheSize || blockno <= 0) throw std::runtime_error("block number out of range (MetaDataBlockCache)");
 	std::size_t blkidx = blockno-1;
-	std::size_t idx_level2 = blkidx % NodeSize;
-	std::size_t idx_level1 = blkidx / NodeSize;
 
-	boost::shared_ptr<BlockNodeArray> ar1 = m_ar[ aridx(varname)];
-	if (!ar1.get()) return;
+	boost::shared_ptr<CacheStruct> cache = m_ar[ aridx(varname)];
+	if (!cache.get()) return;
 	
-	// Level 1:
-	boost::shared_ptr<BlockArray> ar2 = (*ar1)[ idx_level1];
-	if (!ar2.get()) return;
-
 	// Level 2:
-	(*ar2)[ idx_level2].reset();
+	(*cache)[ blkidx].reset();
 }
 
 
@@ -75,38 +69,26 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
 	std::size_t docidx     = (std::size_t)(docno -1);
 	std::size_t blkidx     = docidx / MetaDataBlock::MetaDataBlockSize;
-	std::size_t idx_level2 = blkidx % NodeSize;
-	std::size_t idx_level1 = blkidx / NodeSize;
 	std::size_t misscnt = 0;
 
 	// The fact that the reference counting of shared_ptr is
 	// thread safe is used to implement some kind of RCU:
-	boost::shared_ptr<BlockNodeArray> ar1 = m_ar[ aridx(varname)];
-	while (!ar1.get())
+	boost::shared_ptr<CacheStruct> cache = m_ar[ aridx(varname)];
+	while (!cache.get())
 	{
 		++misscnt;
-		m_ar[ aridx(varname)].reset( new BlockNodeArray());
-		ar1 = m_ar[ aridx(varname)];
+		m_ar[ aridx(varname)].reset( new CacheStruct());
+		cache = m_ar[ aridx(varname)];
 	}
 	
-	// Level 1:
-	boost::shared_ptr<BlockArray> ar2 = (*ar1)[ idx_level1];
-	while (!ar2.get())
-	{
-		++misscnt;
-		(*ar1)[ idx_level1].reset( new BlockArray());
-		ar2 = (*ar1)[ idx_level1];
-	}
-
-	// Level 2:
-	boost::shared_ptr<MetaDataBlock> blkref = (*ar2)[ idx_level2];
+	boost::shared_ptr<MetaDataBlock> blkref = (*cache)[ blkidx];
 	while (!blkref.get())
 	{
 		++misscnt;
-		(*ar2)[ blkidx].reset( 
+		(*cache)[ blkidx].reset( 
 			MetaDataReader::readBlockFromDB( 
 				m_db, MetaDataBlock::blockno( docno), varname));
-		blkref = (*ar2)[ blkidx];
+		blkref = (*cache)[ blkidx];
 	}
 	if (misscnt)
 	{

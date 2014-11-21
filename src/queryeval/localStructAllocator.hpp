@@ -52,9 +52,9 @@ public:
 
 	pointer allocate( size_type n, const void *hint=0)
 	{
-		if (n != sizeof(StructType))
+		if (n != 1)
 		{
-			throw std::logic_error("illegal use of allocator (sizeof struct) calling allocate");
+			throw std::logic_error( "illegal use of allocator, only on item can be allocated at once");
 		}
 		StructType* rt = m_freelist.pop();
 		if (!rt) return m_blkalloc.alloc();
@@ -63,9 +63,9 @@ public:
 
 	void deallocate( pointer p, size_type n)
 	{
-		if (n != sizeof(StructType))
+		if (n != 1)
 		{
-			throw std::logic_error("illegal use of allocator (sizeof struct) calling deallocate");
+			throw std::logic_error( "illegal use of allocator, only on item can be deallocated at once");
 		}
 		m_freelist.push( p);
 	}

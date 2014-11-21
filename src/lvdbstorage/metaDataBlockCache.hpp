@@ -82,9 +82,8 @@ private:
 
 private:
 	enum {
-		NodeSize=1024,							///< size of one node in the cache
-		MaxBlockno=(NodeSize*NodeSize),					///< hardcode limit of maximum document block number
-		MaxDocno=(NodeSize*NodeSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
+		CacheSize=(1024*1024),					///< size of the cache in blocks
+		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
 	};
 
 	struct BlockRef
@@ -94,31 +93,28 @@ private:
 		BlockRef(){}
 	};
 
-	template <class NodeType>
-	struct NodeArray
+	struct CacheStruct
 	{
-		boost::shared_ptr<NodeType> ar[ NodeSize];
+		boost::shared_ptr<MetaDataBlock> ar[ CacheSize];
 
-		NodeArray(){}
+		CacheStruct(){}
 
-		const boost::shared_ptr<NodeType>& operator[]( std::size_t index) const
+		const boost::shared_ptr<MetaDataBlock>& operator[]( std::size_t index) const
 		{
-			if (index > NodeSize) throw std::logic_error("array bound read (MetaDataBlockCache::NodeArray)");
+			if (index > CacheSize) throw std::logic_error("array bound read (MetaDataBlockCache::CacheStruct)");
 			return ar[ index];
 		}
 
-		boost::shared_ptr<NodeType>& operator[]( std::size_t index)
+		boost::shared_ptr<MetaDataBlock>& operator[]( std::size_t index)
 		{
-			if (index > NodeSize) throw std::logic_error("array bound read (MetaDataBlockCache::NodeArray)");
+			if (index > CacheSize) throw std::logic_error("array bound write (MetaDataBlockCache::CacheStruct)");
 			return ar[ index];
 		}
 	};
-	typedef NodeArray<MetaDataBlock> BlockArray;
-	typedef NodeArray<BlockArray> BlockNodeArray;
 
 private:
 	leveldb::DB* m_db;
-	boost::shared_ptr<BlockNodeArray> m_ar[VarnameDim];
+	boost::shared_ptr<CacheStruct> m_ar[VarnameDim];
 	std::vector<VoidRef> m_voidar;
 };
 
