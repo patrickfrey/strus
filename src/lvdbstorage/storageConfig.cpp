@@ -115,6 +115,7 @@ static unsigned int nofK( const std::string& numstr)
 
 
 StorageConfig::StorageConfig( const char* source)
+	:m_cachesize_kb(0)
 {
 	ConfigMap configMap( source);
 	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();

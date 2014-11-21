@@ -95,6 +95,10 @@ private:
 	{
 		FreeList()
 			:m_ar(0),m_size(0),m_allocsize(0){}
+		~FreeList()
+		{
+			if (m_ar) std::free( m_ar);
+		}
 
 		void push( StructType* ptr)
 		{

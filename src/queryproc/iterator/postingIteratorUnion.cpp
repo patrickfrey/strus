@@ -6,16 +6,19 @@ using namespace strus;
 IteratorUnion::IteratorUnion( std::size_t nofargs_, const PostingIteratorInterface** args_)
 	:m_docno(0)
 	,m_posno(0)
+	,m_selected(0)
 	,m_documentFrequency(-1)
 {
-	m_selected.reserve( nofargs_);
+	if (nofargs_ > 64)
+	{
+		throw std::runtime_error( "number of arguments of union out of range (> 64)");
+	}
 	m_argar.reserve( nofargs_);
 	std::size_t ii=0;
 	for (; ii<nofargs_; ++ii)
 	{
 		if (args_[ii])
 		{
-			m_selected.push_back(false);
 			m_argar.push_back( args_[ii]->copy());
 			if (ii) m_featureid.push_back('=');
 			m_featureid.append( args_[ii]->featureid());
@@ -96,10 +99,10 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 	Index base = docno_?docno_:1;
 	Index minimum = 0;
 
+	clearSelected();
 	int aidx=0;
 	for (; ai != ae; ++ai,++aidx)
 	{
-		m_selected[ aidx] = false;
 		minimum = (*ai)->skipDoc( base);
 		if (minimum) break;
 	}
@@ -108,27 +111,19 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 		m_docno = 0;
 		return 0;
 	}
-	m_selected[ aidx] = true;
+	setSelected( aidx);
 
 	for (aidx++,ai++; ai != ae; ++ai,++aidx)
 	{
 		Index next = (*ai)->skipDoc( base);
 		if (next && next <= minimum)
 		{
-			m_selected[ aidx] = true;
 			if (next < minimum)
 			{
-				std::vector<bool>::iterator si = m_selected.begin(), se = m_selected.begin() + aidx;
-				for (; si != se; ++si)
-				{
-					*si = false;
-				}
+				clearSelected();
 				minimum = next;
 			}
-		}
-		else
-		{
-			m_selected[ aidx] = false;
+			setSelected( aidx);
 		}
 	}
 	m_docno = minimum;
@@ -137,15 +132,12 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 
 Index IteratorUnion::skipPos( const Index& pos_)
 {
-	std::vector<bool>::const_iterator si = m_selected.begin(), se = m_selected.end();
+	selected_iterator si = selected_begin(), se = selected_end();
 	Index pos = 0;
 	Index basepos = pos_?pos_:1;
-	for (int aidx=0; si != se; ++si,++aidx)
+	for (; si != se; ++si)
 	{
-		if (*si)
-		{
-			pos = selectSmallerNotNull( pos, m_argar[ aidx]->skipPos( basepos));
-		}
+		pos = selectSmallerNotNull( pos, (*si)->skipPos( basepos));
 	}
 	return m_posno=pos;
 }

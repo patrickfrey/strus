@@ -30,6 +30,7 @@
 #define _STRUS_ITERATOR_UNION_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
 #include "postingIteratorReference.hpp"
+#include "bitOperations.hpp"
 
 namespace strus
 {
@@ -72,24 +73,79 @@ public:
 	}
 
 protected:
-	bool selected( unsigned int idx)
+	class selected_iterator
 	{
-		return m_selected[idx];
+	public:
+		selected_iterator( uint64_t set_, const std::vector<PostingIteratorReference>& argar_)
+			:m_ar(&argar_),m_set(set_),m_idx(0)
+		{
+			skip();
+		}
+		selected_iterator( const selected_iterator& o)
+			:m_ar(o.m_ar),m_set(o.m_set),m_idx(o.m_idx){}
+		selected_iterator()
+			:m_ar(0),m_set(0),m_idx(0){}
+
+		selected_iterator& operator++()				{skip(); return *this;}
+		selected_iterator operator++(int)			{selected_iterator rt(*this); skip(); return rt;}
+
+		bool operator==( const selected_iterator& o) const	{return m_set==o.m_set && m_idx==o.m_idx;}
+		bool operator!=( const selected_iterator& o) const	{return m_set!=o.m_set || m_idx!=o.m_idx;}
+
+		const PostingIteratorReference& operator*() const	{return (*m_ar)[ m_idx-1];}
+		const PostingIteratorReference* operator->() const	{return &(*m_ar)[ m_idx-1];}
+
+	private:
+		void skip()
+		{
+			m_idx = BitOperations::bitScanForward( m_set);
+			if (m_idx)
+			{
+				m_set -= (uint64_t)1<<(m_idx-1);
+			}
+		}
+
+	private:
+		const std::vector<PostingIteratorReference>* m_ar;
+		uint64_t m_set;
+		std::size_t m_idx;
+	};
+
+	selected_iterator selected_begin() const
+	{
+		return selected_iterator( m_selected, m_argar);
 	}
+
+	selected_iterator selected_end() const
+	{
+		return selected_iterator();
+	}
+
 	PostingIteratorInterface* arg( unsigned int idx) const
 	{
 		return m_argar[ idx].get();
 	}
+
 	unsigned int nofargs() const
 	{
 		return m_argar.size();
 	}
 
 private:
+	void setSelected( unsigned int idx)
+	{
+		m_selected |= ((uint64_t)1 << idx);
+	}
+	void clearSelected()
+	{
+		m_selected = 0;
+	}
+
+private:
 	Index m_docno;
 	Index m_posno;					///< current position
 	std::vector<PostingIteratorReference> m_argar;	///< union arguments
-	std::vector<bool> m_selected;			///< parallel array to arguments that specifies if the current document matches the argument
+	uint64_t m_selected;				///< set pf bits parallel to arguments that specifies the current document matches of the arguments
 	std::string m_featureid;			///< unique id of the feature expression
 	Index m_documentFrequency;			///< document frequency (of the most frequent subexpression)
 };

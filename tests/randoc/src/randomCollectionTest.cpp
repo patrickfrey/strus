@@ -903,6 +903,11 @@ int main( int argc, const char* argv[])
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
+		try
+		{
+			strus::destroyStorageDatabase( config);
+		}
+		catch(...){}
 		strus::createStorageDatabase( config);
 
 		RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);

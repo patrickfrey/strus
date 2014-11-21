@@ -50,22 +50,40 @@ void MetaDataBlockMap::deleteMetaData( Index docno)
 		m_itr = m_db->NewIterator( leveldb::ReadOptions());
 	}
 	unsigned int blockno = MetaDataBlock::blockno( docno);
-	DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, blockno);
-
-	m_itr->Seek( leveldb::Slice( key.ptr(), key.size()));
-	if (!m_itr->Valid()) return;
-
-	while (m_itr->Valid()
-	&&  key.size() <= m_itr->key().size()
-	&&  0==std::memcmp( key.ptr(), m_itr->key().data(), key.size()))
+	std::map<unsigned int,std::string>::const_iterator mi = m_metadataNameMap.find( blockno);
+	if (mi != m_metadataNameMap.end())
 	{
-		char const* ki = m_itr->key().data() + key.size();
-		const char* ke = ki + m_itr->key().size() - key.size();
-		if (ki+1 != ke) throw std::runtime_error( "corrupt data in storage (illegal meta data key)");
-		char varname = *ki;
-
-		defineMetaData( docno, varname, 0.0);
-		m_itr->Next();
+		std::string::const_iterator ni = mi->second.begin(), ne = mi->second.end();
+		for (; ni != ne; ++ni)
+		{
+			defineMetaData( docno, *ni, 0.0);
+		}
+	}
+	else
+	{
+		DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, blockno);
+		std::string varnamelist;
+	
+		m_itr->Seek( leveldb::Slice( key.ptr(), key.size()));
+		if (!m_itr->Valid())
+		{
+			m_metadataNameMap[ blockno] = std::string();
+			return;
+		}
+		while (m_itr->Valid()
+		&&  key.size() <= m_itr->key().size()
+		&&  0==std::memcmp( key.ptr(), m_itr->key().data(), key.size()))
+		{
+			char const* ki = m_itr->key().data() + key.size();
+			const char* ke = ki + m_itr->key().size() - key.size();
+			if (ki+1 != ke) throw std::runtime_error( "corrupt data in storage (illegal meta data key)");
+			char varname = *ki;
+	
+			defineMetaData( docno, varname, 0.0);
+			varnamelist.push_back( varname);
+			m_itr->Next();
+		}
+		m_metadataNameMap[ blockno] = varnamelist;
 	}
 }
 

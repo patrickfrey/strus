@@ -26,49 +26,44 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_LVDB_BIT_OPERATIONS_HPP_INCLUDED
+#define _STRUS_LVDB_BIT_OPERATIONS_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "metaDataBlock.hpp"
 #include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
-/// \brief Forward declaration
-class MetaDataBlockCache;
 
-
-class MetaDataBlockMap
+struct BitOperations
 {
-public:
-	MetaDataBlockMap( leveldb::DB* db_)
-		:m_db(db_),m_itr(0){}
-	MetaDataBlockMap( const MetaDataBlockMap& o)
-		:m_db(o.m_db),m_itr(0),m_map(o.m_map){}
-	~MetaDataBlockMap();
-
-	void defineMetaData( Index docno, char varname, float value);
-	void deleteMetaData( Index docno);
-
-	void getWriteBatch( leveldb::WriteBatch& batch, MetaDataBlockCache& cache);
-
-private:
-	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
-	typedef std::pair<char,Index> MetaDataKey;
-	typedef std::map<MetaDataKey, MetaDataBlockReference> Map;
-
-private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	boost::mutex m_mutex;
-	Map m_map;
-	std::map<unsigned int,std::string> m_metadataNameMap;
-};
-
-}
+	static inline unsigned int bitScanForward( const uint32_t& idx)
+	{
+#ifdef __x86_64__
+		unsigned int result; 
+		if (!idx) return 0;
+		asm(" bsf %1, %0 \n" : "=r"(result) : "r"(idx) ); 
+		return result+1;
+#else
+		unsigned int ii = 1;
+		uint32_t mask = (1<<31);
+		for (;ii<=32 && 0==(idx & mask); ++ii,mask>>=1){}
+		return ii;
 #endif
+	}
 
+	static inline unsigned int bitScanForward( const uint64_t& idx)
+	{
+#ifdef __x86_64__
+		uint64_t result; 
+		if (!idx) return 0;
+		asm(" bsfq %1, %0 \n" : "=r"(result) : "r"(idx) ); 
+		return (unsigned int)(result+1);
+#else
+		unsigned int ii = 1;
+		uint64_t mask = ((uint64_t)1<<63);
+		for (;ii<=32 && 0==(idx & mask); ++ii,mask>>=1){}
+		return ii;
+#endif
+	}
+};
+}//namespace
+#endif
