@@ -373,6 +373,7 @@ PosinfoBlockData::PosinfoBlockData( const leveldb::Slice& key, const leveldb::Sl
 	while (itr != end)
 	{
 		Index docno_elem = blk.docno_at( itr);
+		Index ff = blk.frequency_at( itr);
 		if (docno_elem > docno)
 		{
 			throw std::runtime_error( "posinfo element docno bigger than upper bound docno");
@@ -382,6 +383,10 @@ PosinfoBlockData::PosinfoBlockData( const leveldb::Slice& key, const leveldb::Sl
 			throw std::runtime_error( "elements in posinfo array of docno not not strictly ascending");
 		}
 		posinfo.push_back( PosinfoPosting( docno_elem, blk.positions_at( itr)));
+		if (ff != posinfo.back().pos.size() && posinfo.back().pos.size() != 0)
+		{
+			throw std::runtime_error( "ff does not match to length of position array");
+		}
 		std::vector<Index>::const_iterator pi = posinfo.back().pos.begin(), pe = posinfo.back().pos.end();
 		for (Index prevpos=0; pi != pe; ++pi)
 		{

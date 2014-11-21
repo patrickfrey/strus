@@ -69,14 +69,12 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
 	std::size_t docidx     = (std::size_t)(docno -1);
 	std::size_t blkidx     = docidx / MetaDataBlock::MetaDataBlockSize;
-	std::size_t misscnt = 0;
 
 	// The fact that the reference counting of shared_ptr is
 	// thread safe is used to implement some kind of RCU:
 	boost::shared_ptr<CacheStruct> cache = m_ar[ aridx(varname)];
 	while (!cache.get())
 	{
-		++misscnt;
 		m_ar[ aridx(varname)].reset( new CacheStruct());
 		cache = m_ar[ aridx(varname)];
 	}
@@ -84,19 +82,11 @@ float MetaDataBlockCache::getValue( Index docno, char varname)
 	boost::shared_ptr<MetaDataBlock> blkref = (*cache)[ blkidx];
 	while (!blkref.get())
 	{
-		++misscnt;
+		Statistics::increment( Statistics::MetaDataCacheMiss);
 		(*cache)[ blkidx].reset( 
 			MetaDataReader::readBlockFromDB( 
 				m_db, MetaDataBlock::blockno( docno), varname));
 		blkref = (*cache)[ blkidx];
-	}
-	if (misscnt)
-	{
-		Statistics::increment( Statistics::MetaDataCacheMiss);
-	}
-	else
-	{
-		Statistics::increment( Statistics::MetaDataCacheHit);
 	}
 	return blkref->getValue( docno);
 }

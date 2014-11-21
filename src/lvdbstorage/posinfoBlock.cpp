@@ -43,10 +43,17 @@ Index PosinfoBlock::docno_at( const char* ref) const
 	return id() - (unpackIndex( rr, charend()) - 1);
 }
 
+unsigned int PosinfoBlock::frequency_at( const char* itr) const
+{
+	char const* pi = skipIndex( itr, charend());	//... skip docno
+	return (*pi == EndPosinfoMarker)?0:unpackIndex( pi, charend());
+}
+
 std::vector<Index> PosinfoBlock::positions_at( const char* itr) const
 {
 	std::vector<Index> rt;
 	char const* pi = skipIndex( itr, charend());	//... skip docno
+	pi = skipIndex( pi, charend());			//... skip ff
 	const char* pe = charend();
 	while (pi != pe && *pi != EndPosinfoMarker)
 	{
@@ -57,13 +64,8 @@ std::vector<Index> PosinfoBlock::positions_at( const char* itr) const
 
 const char* PosinfoBlock::end_at( const char* itr) const
 {
-	char const* pi = skipIndex( itr, charend());	//... skip docno
-	const char* pe = charend();
-	while (pi != pe && *pi != EndPosinfoMarker)
-	{
-		++pi;
-	}
-	return pi;
+	const char* ee = (const char*)std::memchr( itr, EndPosinfoMarker, charend()-itr);
+	return ee?ee:charend();
 }
 
 bool PosinfoBlock::empty_at( const char* itr) const
@@ -109,11 +111,12 @@ void PosinfoBlock::append( const Index& docno, const std::vector<Index>& pos)
 	}
 	std::string blk;
 	if (size()) blk.push_back( EndPosinfoMarker);
-	packIndex( blk, id() - docno + 1);
+	packIndex( blk, id() - docno + 1);	//... relative docno
+	packIndex( blk, pos.size());		//... feature frequency (ff)
 	std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
 	for (; pi != pe; ++pi)
 	{
-		packIndex( blk, *pi);
+		packIndex( blk, *pi);		// ... [] pos
 	}
 	DataBlock::append( blk.c_str(), blk.size());
 }
@@ -164,15 +167,9 @@ PosinfoBlock::PositionScanner PosinfoBlock::positionScanner_at( const char* itr)
 {
 	if (itr == charend()) return PositionScanner();
 	char const* pi = skipIndex( itr, charend());	//... skip docno
+	pi = skipIndex( pi, charend());			//... skip ff
 	if (pi == charend()) return PositionScanner( charend(),charend());
 	return PositionScanner( pi, endOfDoc( pi));
-}
-
-unsigned int PosinfoBlock::frequency_at( const char* itr) const
-{
-	char const* pi = skipIndex( itr, charend());	//... skip docno
-	if (pi == charend()) return 0;
-	return nofPackedIndices( pi, endOfDoc( pi));
 }
 
 const char* PosinfoBlock::upper_bound( const Index& docno_, const char* lowerbound) const
@@ -226,6 +223,7 @@ void PosinfoBlock::setId( const Index& id_)
 			Index id_diff = id_ - id();
 			char const* bi = begin();
 			const char* be = end();
+			
 			while (bi != be)
 			{
 				packIndex( content, unpackIndex( bi, be) + id_diff);

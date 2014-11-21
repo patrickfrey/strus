@@ -417,6 +417,10 @@ std::vector<queryeval::ResultDocument>
 		std::size_t fromRank,
 		std::size_t maxNofRanks) const
 {
+	if (fromRank >= maxNofRanks)
+	{
+		return std::vector<queryeval::ResultDocument>();
+	}
 	QueryStruct query( &m_setnamemap);
 
 #ifdef STRUS_LOWLEVEL_DEBUG

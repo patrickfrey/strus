@@ -32,6 +32,7 @@
 #include "strus/queryeval/weightedDocument.hpp"
 #include "localStructAllocator.hpp"
 #include <set>
+#include <cstring>
 
 namespace strus
 {
@@ -43,31 +44,35 @@ class Ranker
 public:
 	/// \brief Constructor
 	Ranker( std::size_t maxNofRanks_)
-		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0){}
+		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0)
+	{
+		if (maxNofRanks_ == 0) throw std::runtime_error( "illegal value for max number of ranks");
+		std::memset( m_brute_index, 0, sizeof( m_brute_index));
+	}
 	~Ranker(){}
 
 	void insert( const queryeval::WeightedDocument& doc)
 	{
-		m_rankset.insert( doc);
-		if (m_maxNofRanks < ++m_nofRanks)
+		if (m_maxNofRanks < MaxIndexSize)
 		{
-			m_rankset.erase( m_rankset.begin());
+			bruteInsert( doc);
+		}
+		else
+		{
+			multisetInsert( doc);
 		}
 	}
 
 	std::vector<queryeval::WeightedDocument> result( std::size_t firstRank) const
 	{
-		std::vector<queryeval::WeightedDocument> rt;
-		RankSet::reverse_iterator ri=m_rankset.rbegin(),re=m_rankset.rend();
-		for (std::size_t ridx=0; ri != re; ++ri,++ridx)
+		if (m_maxNofRanks < MaxIndexSize)
 		{
-			if (ridx >= firstRank) break;
+			return bruteResult( firstRank);
 		}
-		for (; ri != re; ++ri)
+		else
 		{
-			rt.push_back( *ri);
+			return multisetResult( firstRank);
 		}
-		return rt;
 	}
 
 	std::size_t nofRanks() const
@@ -76,11 +81,103 @@ public:
 	}
 
 private:
+	void multisetInsert( const queryeval::WeightedDocument& doc)
+	{
+		m_rankset.insert( doc);
+		if (m_maxNofRanks < ++m_nofRanks)
+		{
+			m_rankset.erase( m_rankset.begin());
+		}
+	}
+
+	std::vector<queryeval::WeightedDocument> multisetResult( std::size_t firstRank) const
+	{
+		std::vector<queryeval::WeightedDocument> rt;
+		RankSet::reverse_iterator ri=m_rankset.rbegin(),re=m_rankset.rend();
+		std::size_t ridx = 0;
+		for (; ri != re; ++ri,++ridx)
+		{
+			if (ridx >= firstRank) break;
+		}
+		for (; ri != re && ridx < m_nofRanks; ++ri,++ridx)
+		{
+			if (ridx > m_nofRanks) break;
+			rt.push_back( *ri);
+		}
+		return rt;
+	}
+
+	void bruteInsert_at( std::size_t idx, const queryeval::WeightedDocument& doc)
+	{
+		std::size_t docix = m_nofRanks >= m_maxNofRanks ? m_brute_index[ idx] : m_nofRanks;
+		std::memmove( m_brute_index+idx+1, m_brute_index+idx, MaxIndexSize-idx-1);
+		m_brute_index[ idx] = docix;
+		m_brute_ar[ docix] = doc;
+	}
+
+	void bruteInsert( const queryeval::WeightedDocument& doc)
+	{
+		if (!m_nofRanks)
+		{
+			m_brute_ar[ m_brute_index[ 0] = 0] = doc;
+		}
+		else
+		{
+			std::size_t first = 0;
+			std::size_t last = m_nofRanks > m_maxNofRanks ? m_maxNofRanks:m_nofRanks;
+			std::size_t mid = last-1;
+
+			while (last - first > 2)
+			{
+				if (doc > m_brute_ar[ m_brute_index[ mid]])
+				{
+					last = mid;
+					mid = (first + mid) >> 1;
+				}
+				else if (doc < m_brute_ar[ m_brute_index[ mid]])
+				{
+					first = mid+1;
+					mid = (last + mid) >> 1;
+				}
+				else
+				{
+					bruteInsert_at( mid, doc);
+					++m_nofRanks;
+					return;
+				}
+			}
+			for (; first < last; ++first)
+			{
+				if (doc > m_brute_ar[ m_brute_index[ first]])
+				{
+					bruteInsert_at( first, doc);
+				}
+			}
+		}
+		++m_nofRanks;
+	}
+
+	std::vector<queryeval::WeightedDocument> bruteResult( std::size_t firstRank) const
+	{
+		std::vector<queryeval::WeightedDocument> rt;
+		std::size_t limit = m_nofRanks > m_maxNofRanks ? m_maxNofRanks:m_nofRanks;
+		for (std::size_t ridx=firstRank; ridx<limit; ++ridx)
+		{
+			rt.push_back( m_brute_ar[ m_brute_index[ ridx]]);
+		}
+		return rt;
+	}
+
+private:
 	typedef std::multiset<
 			queryeval::WeightedDocument,
 			std::less<queryeval::WeightedDocument>,
 			LocalStructAllocator<queryeval::WeightedDocument> > RankSet;
 	RankSet m_rankset;
+	enum {MaxIndexSize=128};
+
+	unsigned char m_brute_index[ MaxIndexSize];
+	queryeval::WeightedDocument m_brute_ar[ MaxIndexSize];
 	std::size_t m_maxNofRanks;
 	std::size_t m_nofRanks;
 };

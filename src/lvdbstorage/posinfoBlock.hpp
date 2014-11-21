@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_POSINFO_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
+#include "indexPacker.hpp"
 #include <leveldb/db.h>
 #include <stdint.h>
 #include <vector>
@@ -70,6 +71,7 @@ public:
 	void setId( const Index& id_);
 	Index docno_at( const char* ref) const;
 	std::vector<Index> positions_at( const char* itr) const;
+	unsigned int frequency_at( const char* itr) const;
 	bool empty_at( const char* itr) const;
 	const char* end_at( const char* itr) const;
 
@@ -144,8 +146,6 @@ public:
 	};
 
 	PositionScanner positionScanner_at( const char* itr) const;
-	unsigned int frequency_at( const char* itr) const;
-	
 };
 
 }

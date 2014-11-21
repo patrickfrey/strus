@@ -53,6 +53,10 @@ public:
 	{
 		return (m_weight < o.m_weight);
 	}
+	bool operator > ( const WeightedDocument& o) const
+	{
+		return (m_weight > o.m_weight);
+	}
 
 private:
 	Index m_docno;
