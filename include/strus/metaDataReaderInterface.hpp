@@ -26,48 +26,28 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
+#ifndef _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
+#define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
-#include <utility>
-#include <stdexcept>
-#include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <leveldb/db.h>
 
-namespace strus {
+namespace strus
+{
 
-class MetaDataBlockCache
+/// \brief Interface for accessing meta data from a strus storage
+class MetaDataReaderInterface
 {
 public:
-	MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_);
+	typedef int ElementHandle;
 
-	~MetaDataBlockCache(){}
+	/// \brief Destructor
+	virtual ~MetaDataReaderInterface(){}
 
-	const MetaDataRecord get( Index docno);
+	virtual ElementHandle elementHandle( const std::string& name) const=0;
 
-	void declareVoid( unsigned int blockno);
-	void refresh();
-
-private:
-	void resetBlock( unsigned int blockno);
-
-private:
-	enum {
-		CacheSize=(1024*1024),					///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
-	};
-
-private:
-	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
-	std::vector<unsigned int> m_voidar;
+	virtual float getValueFloat( const ElementHandle& element, const Index& docno)=0;
+	virtual int getValueInt( const ElementHandle& element, const Index& docno)=0;
+	virtual unsigned int getValueUInt( const ElementHandle& element, const Index& docno)=0;
 };
-
-}
+}//namespace
 #endif
 

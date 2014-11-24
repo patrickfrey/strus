@@ -30,23 +30,21 @@
 #define _STRUS_LVDB_GLOBAL_KEY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "databaseKey.hpp"
+#include "keyValueStorage.hpp"
 #include <cstdlib>
 #include <boost/thread/mutex.hpp>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
 
 class GlobalKeyMap
 {
 public:
-	GlobalKeyMap( leveldb::DB* db_)
-		:m_db(db_){}
-	GlobalKeyMap( const GlobalKeyMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+	GlobalKeyMap( leveldb::DB* db_, DatabaseKey::KeyPrefix prefix_)
+		:m_storage( db_, prefix_, false){}
 
-	Index lookUp( DatabaseKey::KeyPrefix prefix, const std::string& keystr) const;
-	Index getOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname, Index& valuecnt);
+	Index lookUp( const std::string& name);
+	Index getOrCreate( const std::string& name, Index& valuecnt);
+	void store( const std::string& name, const Index& value);
 
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
@@ -54,7 +52,8 @@ private:
 	typedef std::map<std::string,Index> Map;
 
 private:
-	leveldb::DB* m_db;
+	KeyValueStorage m_storage;
+	DatabaseKey::KeyPrefix m_prefix;
 	boost::mutex m_mutex;
 	Map m_map;
 };

@@ -27,66 +27,47 @@
 --------------------------------------------------------------------
 */
 #include "globalKeyMap.hpp"
+#include "keyValueStorage.hpp"
 #include "indexPacker.hpp"
 
 using namespace strus;
 
-Index GlobalKeyMap::lookUp( DatabaseKey::KeyPrefix prefix, const std::string& key) const
+Index GlobalKeyMap::lookUp( const std::string& name)
 {
-	std::string keystr;
-	std::string value;
-	keystr.push_back( (char)prefix);
-	keystr.append( key);
+	const KeyValueStorage::Value* value = m_storage.load( KeyValueStorage::Key( name));
+	if (!value) return 0;
+	char const* vi = value->ptr();
+	char const* ve = vi + value->size();
 
-	leveldb::ReadOptions options;
-	options.fill_cache = false;
-
-	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
-	leveldb::Status status = m_db->Get( options, keyslice, &value);
-	if (status.IsNotFound())
-	{
-		return 0;
-	}
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	const char* cc = value.c_str();
-	return unpackIndex( cc, cc + value.size());
+	return unpackIndex( vi, ve);
 }
 
-Index GlobalKeyMap::getOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& key, Index& valuecnt)
+Index GlobalKeyMap::getOrCreate( const std::string& name, Index& valuecnt)
 {
-	std::string keystr;
-	std::string value;
-	keystr.push_back( (char)prefix);
-	keystr.append( key);
+	const KeyValueStorage::Value* value = m_storage.load( KeyValueStorage::Key( name));
+	if (value)
+	{
+		char const* vi = value->ptr();
+		char const* ve = vi + value->size();
 
-	leveldb::ReadOptions options;
-	options.fill_cache = false;
-
-	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
-	leveldb::Status status = m_db->Get( options, keyslice, &value);
-
-	if (status.IsNotFound())
+		return unpackIndex( vi, ve);
+	}
+	else
 	{
 		boost::mutex::scoped_lock( m_mutex);
-		Map::const_iterator ki = m_map.find( keystr);
+		Map::const_iterator ki = m_map.find( name);
 		if (ki != m_map.end())
 		{
 			return ki->second;
 		}
-		return m_map[ keystr] = valuecnt++;
+		return m_map[ name] = valuecnt++;
 	}
-	else if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	else
-	{
-		const char* cc = value.c_str();
-		return unpackIndex( cc, cc + value.size());
-	}
+}
+
+void GlobalKeyMap::store( const std::string& name, const Index& value)
+{
+	boost::mutex::scoped_lock( m_mutex);
+	m_map[ name] = value;
 }
 
 void GlobalKeyMap::getWriteBatch( leveldb::WriteBatch& batch)
@@ -95,11 +76,9 @@ void GlobalKeyMap::getWriteBatch( leveldb::WriteBatch& batch)
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		leveldb::Slice keyslice( mi->first.c_str(), mi->first.size());
 		std::string valuestr;
 		packIndex( valuestr, mi->second);
-		leveldb::Slice valueslice( valuestr.c_str(), valuestr.size());
-		batch.Put( keyslice, valueslice);
+		m_storage.store( mi->first, valuestr, batch);
 	}
 	m_map.clear();
 }

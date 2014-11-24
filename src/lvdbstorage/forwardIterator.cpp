@@ -94,7 +94,7 @@ void ForwardIterator::initDoc( const Index& docno_)
 {
 	if (!m_typeno)
 	{
-		m_typeno = m_storage->keyLookUp( DatabaseKey::TermTypePrefix, m_type);
+		m_typeno = m_storage->getTermType( m_type);
 	}
 	if (m_docno != docno_)
 	{

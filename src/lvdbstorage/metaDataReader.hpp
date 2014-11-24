@@ -26,21 +26,62 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_READER_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "databaseKey.hpp"
-#include <leveldb/db.h>
+#ifndef _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/metaDataReaderInterface.hpp"
+#include "metaDataRecord.hpp"
+#include "metaDataDescription.hpp"
+#include "metaDataElement.hpp"
 
-namespace strus {
-/// \brief Forward Declaration
-class MetaDataBlock;
-
-struct MetaDataReader
+namespace strus
 {
-	static MetaDataBlock* readBlockFromDB( leveldb::DB* db, Index blockno, char varname);
+
+/// \brief Implementation of the MetaDataInterface
+class MetaDataReader
+	:public MetaDataReaderInterface
+{
+public:
+	MetaDataReader( MetaDataBlockCache* cache_,
+			const MetaDataDescription* description_)
+		:m_cache(cache_),m_description(description_),m_current(description_,0),m_docno(0){}
+
+	virtual ElementHandle elementHandle( const std::string& name) const
+	{
+		return m_description->getHandle( name);
+	}
+
+	virtual float getValueFloat( const ElementHandle& element, const Index& docno)
+	{
+		if (docno != m_docno)
+		{
+			m_current = m_cache->get( m_docno=docno);
+		}
+		return m_current.getValueFloat( m_description->get( element));
+	}
+
+	virtual int getValueInt( const ElementHandle& element, const Index& docno)
+	{
+		if (docno != m_docno)
+		{
+			m_current = m_cache->get( m_docno=docno);
+		}
+		return m_current.getValueInt( m_description->get( element));
+	}
+
+	virtual unsigned int getValueUInt( const ElementHandle& element, const Index& docno)
+	{
+		if (docno != m_docno)
+		{
+			m_current = m_cache->get( m_docno=docno);
+		}
+		return m_current.getValueUInt( m_description->get( element));
+	}
+
+private:
+	MetaDataBlockCache* m_cache;
+	const MetaDataDescription* m_description;
+	MetaDataRecord m_current;
+	Index m_docno;
 };
-
-}
+}//namespace
 #endif
-

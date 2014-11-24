@@ -53,19 +53,38 @@ public:
 			const Index& position_,
 			float weight_)=0;
 
-	/// \brief Define a numeric attribute for the document with fast access for query evaluation
-	/// \note Meta data used for query restrictions are declared here
-	/// \param[in] name_ one character as name of the attribute
-	/// \param[in] value_ value of the document attribute
+	/// \brief Define a numeric attribute of type floating point for the document with fast access for query evaluation
+	/// \note Meta data are used for query restrictions and for document weights in query result ranking
+	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
+	/// \param[in] name_ name of the existing meta data element
+	/// \param[in] value_ value of the element
 	virtual void setMetaData(
-			char name_,
+			const std::string& name_,
 			float value_)=0;
 
+	/// \brief Define a numeric attribute of type signed integer for the document with fast access for query evaluation
+	/// \note Meta data are used for query restrictions and for document weights in query result ranking
+	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
+	/// \param[in] name_ name of the existing meta data element
+	/// \param[in] value_ value of the element
+	virtual void setMetaData(
+			const std::string& name_,
+			int value_)=0;
+
+	/// \brief Define a numeric attribute of type unsigned integer for the document with fast access for query evaluation
+	/// \note Meta data are used for query restrictions and for document weights in query result ranking
+	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
+	/// \param[in] name_ name of the existing meta data element
+	/// \param[in] value_ value of the element
+	virtual void setMetaData(
+			const std::string& name_,
+			unsigned int value_)=0;
+
 	/// \brief Define a string attribute for the document
-	/// \param[in] name_ one character as name of the attribute
+	/// \param[in] name_ name of the attribute
 	/// \param[in] value_ value of the document attribute
 	virtual void setAttribute(
-			char name_,
+			const std::string& name_,
 			const std::string& value_)=0;
 
 	/// \brief Write the contents defined to the storage

@@ -35,7 +35,6 @@
 #include "databaseKey.hpp"
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
-#include "metaDataReader.hpp"
 #include "blockStorage.hpp"
 #include "statistics.hpp"
 #include <string>
@@ -53,13 +52,17 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_next_termno(0)
 	,m_next_typeno(0)
 	,m_next_docno(0)
+	,m_next_attributeno(0)
 	,m_nof_documents(0)
 	,m_dfMap(0)
 	,m_metaDataBlockMap(0)
 	,m_metaDataBlockCache(0)
 	,m_docnoBlockMap(0)
 	,m_posinfoBlockMap(0)
-	,m_globalKeyMap(0)
+	,m_termTypeMap(0)
+	,m_termValueMap(0)
+	,m_docIdMap(0)
+	,m_variableMap(0)
 	,m_nofInserterCnt(0)
 	,m_flushCnt(0)
 {
@@ -76,21 +79,26 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	{
 		try
 		{
-			m_globalKeyMap = new GlobalKeyMap( m_db);
+			m_metadescr.load( m_db);
+			m_termTypeMap = new GlobalKeyMap( m_db, DatabaseKey::TermTypePrefix);
+			m_termValueMap = new GlobalKeyMap( m_db, DatabaseKey::TermValuePrefix);
+			m_docIdMap = new GlobalKeyMap( m_db, DatabaseKey::DocIdPrefix);
+			m_variableMap = new GlobalKeyMap( m_db, DatabaseKey::VariablePrefix);
+			m_attributeNameMap = new GlobalKeyMap( m_db, DatabaseKey::AttributeKeyPrefix);
 			m_dfMap = new DocumentFrequencyMap( m_db);
-			m_metaDataBlockCache = new MetaDataBlockCache( m_db);
-			m_metaDataBlockMap = new MetaDataBlockMap( m_db);
+			m_metaDataBlockCache = new MetaDataBlockCache( m_db, m_metadescr);
+			m_metaDataBlockMap = new MetaDataBlockMap( m_db, m_metadescr);
 			m_docnoBlockMap = new DocnoBlockMap( m_db);
 			m_posinfoBlockMap = new PosinfoBlockMap( m_db);
 
-			m_next_termno = keyLookUp( DatabaseKey::VariablePrefix, "TermNo");
-			m_next_typeno = keyLookUp( DatabaseKey::VariablePrefix, "TypeNo");
-			m_next_docno = keyLookUp( DatabaseKey::VariablePrefix, "DocNo");
-			m_nof_documents = keyLookUp( DatabaseKey::VariablePrefix, "NofDocs");
+			m_next_termno = m_variableMap->lookUp( "TermNo");
+			m_next_typeno = m_variableMap->lookUp( "TypeNo");
+			m_next_docno = m_variableMap->lookUp( "DocNo");
+			m_next_attributeno = m_variableMap->lookUp( "AttributeNo");
+			m_nof_documents = m_variableMap->lookUp( "NofDocs");
 		}
 		catch (const std::bad_alloc&)
 		{
-			
 			if (m_dfMap) delete m_metaDataBlockMap;
 			m_dfMap = 0;
 			if (m_metaDataBlockMap) delete m_metaDataBlockMap;
@@ -101,8 +109,16 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_docnoBlockMap = 0;
 			if (m_posinfoBlockMap) delete m_posinfoBlockMap;
 			m_posinfoBlockMap = 0;
-			if (m_globalKeyMap) delete m_globalKeyMap;
-			m_globalKeyMap = 0;
+			if (m_termTypeMap) delete m_termTypeMap;
+			m_termTypeMap = 0;
+			if (m_termValueMap) delete m_termValueMap;
+			m_termValueMap = 0;
+			if (m_docIdMap) delete m_docIdMap;
+			m_docIdMap = 0;
+			if (m_variableMap) delete m_variableMap;
+			m_variableMap = 0;
+			if (m_attributeNameMap) delete m_attributeNameMap;
+			m_attributeNameMap = 0;
 			if (m_db) delete m_db;
 			m_db = 0;
 			if (m_dboptions.block_cache) delete m_dboptions.block_cache;
@@ -128,11 +144,21 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 
 void Storage::writeInserterBatch()
 {
+	m_variableMap->store( "TermNo", m_next_termno);
+	m_variableMap->store( "TypeNo", m_next_typeno);
+	m_variableMap->store( "DocNo", m_next_docno);
+	m_variableMap->store( "AttributeNo", m_next_attributeno);
+	m_variableMap->store( "NofDocs", m_nof_documents);
+
 	m_dfMap->getWriteBatch( m_inserter_batch);
 	m_metaDataBlockMap->getWriteBatch( m_inserter_batch, *m_metaDataBlockCache);
 	m_docnoBlockMap->getWriteBatch( m_inserter_batch);
 	m_posinfoBlockMap->getWriteBatch( m_inserter_batch);
-	m_globalKeyMap->getWriteBatch( m_inserter_batch);
+	m_termTypeMap->getWriteBatch( m_inserter_batch);
+	m_termValueMap->getWriteBatch( m_inserter_batch);
+	m_docIdMap->getWriteBatch( m_inserter_batch);
+	m_variableMap->getWriteBatch( m_inserter_batch);
+	m_attributeNameMap->getWriteBatch( m_inserter_batch);
 
 	leveldb::WriteOptions options;
 	options.sync = true;
@@ -156,10 +182,6 @@ void Storage::close()
 	}
 	if (m_db)
 	{
-		batchDefineVariable( m_inserter_batch, "TermNo", m_next_termno);
-		batchDefineVariable( m_inserter_batch, "TypeNo", m_next_typeno);
-		batchDefineVariable( m_inserter_batch, "DocNo", m_next_docno);
-		batchDefineVariable( m_inserter_batch, "NofDocs", m_nof_documents);
 		writeInserterBatch();
 	}
 }
@@ -188,12 +210,18 @@ Storage::~Storage()
 	{
 		//... silently ignored. Call close directly to catch errors
 	}
-	delete m_globalKeyMap;
-	delete m_dfMap;
 	delete m_metaDataBlockCache; 
+
+	delete m_dfMap;
 	delete m_metaDataBlockMap;
 	delete m_docnoBlockMap;
 	delete m_posinfoBlockMap;
+	delete m_termTypeMap;
+	delete m_termValueMap;
+	delete m_docIdMap;
+	delete m_variableMap;
+	delete m_attributeNameMap;
+
 	delete m_db;
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
@@ -208,49 +236,53 @@ void Storage::deleteKey(const leveldb::Slice& key)
 	m_inserter_batch.Delete( key);
 }
 
-void Storage::batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
-{
-	DatabaseKey key( DatabaseKey::VariablePrefix, name);
-	std::string valstr;
-	packIndex( valstr, value);
-	batch.Put( leveldb::Slice( key.ptr(), key.size()),
-			leveldb::Slice( valstr.c_str(), valstr.size()));
-}
-
 leveldb::Iterator* Storage::newIterator()
 {
 	if (!m_db) throw std::runtime_error("open read iterator on closed storage");
 	return m_db->NewIterator( leveldb::ReadOptions());
 }
 
-Index Storage::keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyname) const
+Index Storage::getTermValue( const std::string& name) const
 {
-	return m_globalKeyMap->lookUp( prefix, keyname);
+	return m_termValueMap->lookUp( name);
 }
 
-Index Storage::keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname, bool& isnew)
+Index Storage::getTermType( const std::string& name) const
 {
-	Index* counter = 0;
-	if (prefix == DatabaseKey::TermTypePrefix)
-	{
-		counter = &m_next_typeno;
-	}
-	else if (prefix == DatabaseKey::TermValuePrefix)
-	{
-		counter = &m_next_termno;
-	}
-	else if (prefix == DatabaseKey::DocIdPrefix)
-	{
-		counter = &m_next_docno;
-	}
-	else
-	{
-		throw std::logic_error( "internal: unknown prefix for string key of global variable");
-	}
-	Index oldCounter = *counter;
-	Index rt = m_globalKeyMap->getOrCreate( prefix, keyname, *counter);
-	isnew = (oldCounter < *counter);
+	return m_termTypeMap->lookUp( name);
+}
+
+Index Storage::getDocno( const std::string& name) const
+{
+	return m_docIdMap->lookUp( name);
+}
+
+Index Storage::getAttribute( const std::string& name) const
+{
+	return m_attributeNameMap->lookUp( name);
+}
+
+Index Storage::getOrCreateTermValue( const std::string& name)
+{
+	return m_termValueMap->getOrCreate( name, m_next_termno);
+}
+
+Index Storage::getOrCreateTermType( const std::string& name)
+{
+	return m_termTypeMap->getOrCreate( name, m_next_typeno);
+}
+
+Index Storage::getOrCreateDocno( const std::string& name, bool& isNew)
+{
+	Index oldCounter = m_next_docno;
+	Index rt = m_docIdMap->getOrCreate( name, m_next_docno);
+	isNew = (oldCounter < m_next_docno);
 	return rt;
+}
+
+Index Storage::getOrCreateAttribute( const std::string& name)
+{
+	return m_attributeNameMap->getOrCreate( name, m_next_attributeno);
 }
 
 PostingIteratorInterface*
@@ -258,8 +290,8 @@ PostingIteratorInterface*
 		const std::string& typestr,
 		const std::string& termstr)
 {
-	Index typeno = keyLookUp( DatabaseKey::TermTypePrefix, typestr);
-	Index termno = keyLookUp( DatabaseKey::TermValuePrefix, termstr);
+	Index typeno = m_termTypeMap->lookUp( typestr);
+	Index termno = m_termValueMap->lookUp( termstr);
 	if (!typeno || !termno)
 	{
 		return new NullIterator( typeno, termno, termstr.c_str());
@@ -319,7 +351,7 @@ Index Storage::maxDocumentNumber() const
 
 Index Storage::documentNumber( const std::string& docid) const
 {
-	return m_globalKeyMap->lookUp( DatabaseKey::DocIdPrefix, docid);
+	return m_docIdMap->lookUp( docid);
 }
 
 std::string Storage::documentAttribute( const Index& docno, char varname) const
@@ -339,13 +371,22 @@ std::string Storage::documentAttribute( const Index& docno, char varname) const
 	return value;
 }
 
-
-float Storage::documentMetaData( const Index& docno, char varname) const
+MetaDataReaderInterface* Storage::createMetaDataReader() const
 {
-	return m_metaDataBlockCache->getValue( docno, varname);
+	return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
 }
 
-void Storage::defineMetaData( const Index& docno, char varname, float value)
+void Storage::defineMetaData( const Index& docno, const std::string& varname, float value)
+{
+	m_metaDataBlockMap->defineMetaData( docno, varname, value);
+}
+
+void Storage::defineMetaData( const Index& docno, const std::string& varname, int value)
+{
+	m_metaDataBlockMap->defineMetaData( docno, varname, value);
+}
+
+void Storage::defineMetaData( const Index& docno, const std::string& varname, unsigned int value)
 {
 	m_metaDataBlockMap->defineMetaData( docno, varname, value);
 }
@@ -461,7 +502,7 @@ void Storage::deleteIndex( const Index& docno)
 
 		const char* valuestr = vi->value().data();
 		std::size_t valuesize = vi->value().size();
-		Index valueno = keyLookUp( DatabaseKey::TermValuePrefix, std::string( valuestr, valuesize));
+		Index valueno = m_termValueMap->lookUp( std::string( valuestr, valuesize));
 
 		oldcontent.insert( TermMapKey( typeno, valueno));
 	}
@@ -483,7 +524,7 @@ void Storage::deleteIndex( const Index& docno)
 
 void Storage::deleteDocument( const std::string& docid)
 {
-	Index docno = m_globalKeyMap->lookUp( DatabaseKey::DocIdPrefix, docid);
+	Index docno = m_docIdMap->lookUp( docid);
 	if (docno == 0) return;
 
 	//[1] Delete metadata:

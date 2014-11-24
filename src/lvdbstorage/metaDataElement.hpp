@@ -26,48 +26,64 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_METADATA_ELEMENT_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_ELEMENT_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
 #include <utility>
-#include <stdexcept>
-#include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <leveldb/db.h>
+#include <string>
 
 namespace strus {
 
-class MetaDataBlockCache
+/// \brief Forward declaration
+class MetaDataDescription;
+
+class MetaDataElement
 {
 public:
-	MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_);
+	enum Type {Int8,UInt8,Int16,UInt16,Int32,UInt32,Float16,Float32};
+	enum {NofTypes=Float32};
 
-	~MetaDataBlockCache(){}
+public:
+	MetaDataElement( Type type_, std::size_t ofs_)
+		:m_type(type_),m_ofs((unsigned char)ofs_){}
 
-	const MetaDataRecord get( Index docno);
+	MetaDataElement( const MetaDataElement& o)
+		:m_type(o.m_type),m_ofs(o.m_ofs){}
 
-	void declareVoid( unsigned int blockno);
-	void refresh();
+
+	static unsigned int size( Type t)
+	{
+		static std::size_t ar[] = {1,1,2,2,4,4,2,4};
+		return ar[t];
+	}
+	unsigned int size() const
+	{
+		return size(m_type);
+	}
+	static const char* typeName( Type t)
+	{
+		static const char* ar[] = {"Int8","UInt8","Int16","UInt16","Int32","UInt32","Float16","Float32"};
+		return ar[t];
+	}
+	static Type typeFromName( const std::string& namestr);
+
+	const char* typeName() const
+	{
+		return typeName(m_type);
+	}
+	unsigned int ofs() const
+	{
+		return m_ofs;
+	}
+
+	Type type() const			{return m_type;}
 
 private:
-	void resetBlock( unsigned int blockno);
-
-private:
-	enum {
-		CacheSize=(1024*1024),					///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
-	};
-
-private:
-	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
-	std::vector<unsigned int> m_voidar;
+	friend class MetaDataDescription;
+	Type m_type;
+	unsigned char m_ofs;
 };
 
-}
+}//namespace
 #endif
 

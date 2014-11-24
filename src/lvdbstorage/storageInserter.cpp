@@ -51,9 +51,8 @@ StorageInserter::~StorageInserter()
 
 StorageInserter::TermMapKey StorageInserter::termMapKey( const std::string& type_, const std::string& value_)
 {
-	bool isNew;
-	Index typeno = m_storage->keyGetOrCreate( DatabaseKey::TermTypePrefix, type_, isNew);
-	Index valueno = m_storage->keyGetOrCreate( DatabaseKey::TermValuePrefix, value_, isNew);
+	Index typeno = m_storage->getOrCreateTermType( type_);
+	Index valueno = m_storage->getOrCreateTermValue( value_);
 	return TermMapKey( typeno, valueno);
 }
 
@@ -76,11 +75,31 @@ void StorageInserter::setMetaData(
 		char name_,
 		float value_)
 {
-	m_metadata.push_back( DocMetaData( name_, value_));
+}
+
+void StorageInserter::setMetaData(
+		const std::string& name_,
+		float value_)
+{
+	m_metadata_float.push_back( DocMetaData<float>( name_, value_));
+}
+
+void StorageInserter::setMetaData(
+		const std::string& name_,
+		int value_)
+{
+	m_metadata_int.push_back( DocMetaData<int>( name_, value_));
+}
+
+void StorageInserter::setMetaData(
+		const std::string& name_,
+		unsigned int value_)
+{
+	m_metadata_uint.push_back( DocMetaData<unsigned int>( name_, value_));
 }
 
 void StorageInserter::setAttribute(
-		char name_,
+		const std::string& name_,
 		const std::string& value_)
 {
 	m_attributes.push_back( DocAttribute( name_, value_));
@@ -89,19 +108,41 @@ void StorageInserter::setAttribute(
 void StorageInserter::done()
 {
 	bool documentIsNew = false;
-	Index docno = m_storage->keyGetOrCreate( DatabaseKey::DocIdPrefix, m_docid, documentIsNew);
+	Index docno = m_storage->getOrCreateDocno( m_docid, documentIsNew);
 
 	leveldb::Iterator* vi = m_storage->newIterator();
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
 
 	//[1] Delete old and define new metadata
 	m_storage->deleteMetaData( docno);
-	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
-	for (; wi != we; ++wi)
 	{
-		m_storage->defineMetaData( docno, wi->name, wi->value);
+		std::vector<DocMetaData<float> >::const_iterator wi = m_metadata_float.begin(), we = m_metadata_float.end();
+		for (; wi != we; ++wi)
+		{
+			m_storage->defineMetaData( docno, wi->name, wi->value);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
+			std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
+#endif
+		}
+	}
+	{
+		std::vector<DocMetaData<int> >::const_iterator wi = m_metadata_int.begin(), we = m_metadata_int.end();
+		for (; wi != we; ++wi)
+		{
+			m_storage->defineMetaData( docno, wi->name, wi->value);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
+		}
+#endif
+	}
+	{
+		std::vector<DocMetaData<unsigned int> >::const_iterator wi = m_metadata_uint.begin(), we = m_metadata_uint.end();
+		for (; wi != we; ++wi)
+		{
+			m_storage->defineMetaData( docno, wi->name, wi->value);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
+		}
 #endif
 	}
 	//[2] Delete old and insert new attributes
@@ -110,7 +151,8 @@ void StorageInserter::done()
 	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
 	for (; ai != ae; ++ai)
 	{
-		DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno, ai->name);
+		Index attribno = m_storage->getAttribute( ai->name);
+		DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno, attribno);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "PUT ATTRIBUTE [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
 #endif

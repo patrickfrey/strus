@@ -7,11 +7,14 @@ CPP_OBJS=\
 	indexPacker.o \
 	databaseKey.o \
 	dataBlock.o \
+	keyValueStorage.o \
 	dataBlockStorage.o \
 	docnoBlock.o \
 	posinfoBlock.o \
+	metaDataElement.o \
+	metaDataDescription.o \
+	metaDataRecord.o \
 	metaDataBlock.o \
-	metaDataReader.o \
 	metaDataBlockMap.o \
 	metaDataBlockCache.o \
 	globalKeyMap.o \

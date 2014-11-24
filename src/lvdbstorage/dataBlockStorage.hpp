@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_DATA_BLOCK_STORAGE_HPP_INCLUDED
 #define _STRUS_LVDB_DATA_BLOCK_STORAGE_HPP_INCLUDED
 #include "dataBlock.hpp"
+#include "databaseKey.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <cstdlib>

@@ -42,6 +42,11 @@ public:
 		return m_path;
 	}
 
+	const std::string& metadata() const
+	{
+		return m_metadata;
+	}
+
 	unsigned int cachesize_kb() const
 	{
 		return m_cachesize_kb;
@@ -51,6 +56,7 @@ public:
 
 private:
 	std::string m_path;
+	std::string m_metadata;
 	unsigned int m_cachesize_kb;
 };
 }//namespace

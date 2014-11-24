@@ -26,46 +26,52 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_METADATA_RECORD_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_RECORD_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
+#include "metaDataDescription.hpp"
+#include "metaDataElement.hpp"
 #include <utility>
-#include <stdexcept>
-#include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <leveldb/db.h>
+#include <cstring>
 
 namespace strus {
 
-class MetaDataBlockCache
+class MetaDataRecord
 {
 public:
-	MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_);
+	MetaDataRecord( const MetaDataDescription* description_, void* ptr_)
+		:m_descr(description_),m_ptr(ptr_){}
 
-	~MetaDataBlockCache(){}
+	void setValueInt( const MetaDataElement* elem, int32_t value_);
+	void setValueUInt( const MetaDataElement* elem, uint32_t value_);
+	void setValueFloat( const MetaDataElement* elem, float value_);
 
-	const MetaDataRecord get( Index docno);
+	int getValueInt( const MetaDataElement* elem) const;
+	unsigned int getValueUInt( const MetaDataElement* elem) const;
+	float getValueFloat( const MetaDataElement* elem) const;
 
-	void declareVoid( unsigned int blockno);
-	void refresh();
+	void clearValue( const MetaDataElement* elem);
+
+	void clear()
+	{
+		std::memset( m_ptr, 0, m_descr->bytesize());
+	}
+
+	void copy( const void* optr)
+	{
+		std::memcpy( m_ptr, optr, m_descr->bytesize());
+	}
+
+	static void translateBlock(
+			const MetaDataDescription& dest,
+			void* blkdest,
+			const MetaDataDescription& src,
+			const void* blksrc,
+			std::size_t nofelem);
 
 private:
-	void resetBlock( unsigned int blockno);
-
-private:
-	enum {
-		CacheSize=(1024*1024),					///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
-	};
-
-private:
-	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
-	std::vector<unsigned int> m_voidar;
+	const MetaDataDescription* m_descr;
+	void* m_ptr;
 };
 
 }

@@ -44,20 +44,13 @@
 
 using namespace strus;
 
-static void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value)
-{
-	DatabaseKey key( DatabaseKey::VariablePrefix, name);
-	std::string valstr;
-	packIndex( valstr, value);
-	batch.Put( leveldb::Slice( key.ptr(), key.size()),
-			leveldb::Slice( valstr.c_str(), valstr.size()));
-}
-
-
-
 DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsource)
 {
 	StorageConfig config( configsource);
+	if (config.metadata().size())
+	{
+		throw std::runtime_error( "meta data definitions only allowed when creating a storage");
+	}
 	return new Storage( config.path().c_str(), config.cachesize_kb());
 }
 
@@ -76,11 +69,17 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 	leveldb::Status status = leveldb::DB::Open( options, config.path(), &db);
 	if (status.ok())
 	{
+		GlobalKeyMap variableMap( m_db, DatabaseKey::VariablePrefix);
+		variableMap.store( "TermNo", 1);
+		variableMap.store( "TypeNo", 1);
+		variableMap.store( "DocNo", 1);
+		variableMap.store( "AttributeNo", 1);
+		variableMap.store( "NofDocs", 0);
+
 		leveldb::WriteBatch batch;
-		batchDefineVariable( batch, "TermNo", 1);
-		batchDefineVariable( batch, "TypeNo", 1);
-		batchDefineVariable( batch, "DocNo", 1);
-		batchDefineVariable( batch, "NofDocs", 0);
+		variableMap.getWriteBatch( batch);
+		MetaDataRecord::Description md( config.metadata());
+		md.store( batch);
 
 		status = db->Write( leveldb::WriteOptions(), &batch);
 		if (!status.ok())
@@ -117,7 +116,7 @@ DLL_PUBLIC void strus::destroyStorageDatabase( const char* configsource)
 
 DLL_PUBLIC const char* strus::getStorageConfigDescription()
 {
-	return "assignment of the LevelDB storage path as string\n(example \"path=data/testdb\")";
+	return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB (only client)>\nmetadata=<comma separated list of meta data definitions (only createStorage)>";
 }
 
 

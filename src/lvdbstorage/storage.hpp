@@ -32,8 +32,10 @@
 #include "strus/index.hpp"
 #include "databaseKey.hpp"
 #include "metaDataBlock.hpp"
+#include "metaDataRecord.hpp"
 #include "metaDataBlockMap.hpp"
 #include "metaDataBlockCache.hpp"
+#include "metaDataReader.hpp"
 #include "docnoBlock.hpp"
 #include "docnoBlockMap.hpp"
 #include "posinfoBlock.hpp"
@@ -80,7 +82,7 @@ public:
 
 	virtual void deleteDocument( const std::string& docid);
 
-	virtual float documentMetaData( const Index& docno, char varname) const;
+	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
 	virtual Index nofDocumentsInserted() const;
 
@@ -98,7 +100,9 @@ public:
 
 	enum {NofDocumentsInsertedBeforeAutoCommit=1024};
 
-	void defineMetaData( const Index& docno, char varname, float value);
+	void defineMetaData( const Index& docno, const std::string& varname, float value);
+	void defineMetaData( const Index& docno, const std::string& varname, int value);
+	void defineMetaData( const Index& docno, const std::string& varname, unsigned int value);
 	void deleteMetaData( const Index& docno);
 
 	void deleteAttributes( const Index& docno);
@@ -128,8 +132,15 @@ public:
 
 	leveldb::Iterator* newIterator();
 
-	Index keyLookUp( DatabaseKey::KeyPrefix prefix, const std::string& keyname) const;
-	Index keyGetOrCreate( DatabaseKey::KeyPrefix prefix, const std::string& keyname, bool& isnew);
+	Index getTermValue( const std::string& name) const;
+	Index getTermType( const std::string& name) const;
+	Index getDocno( const std::string& name) const;
+	Index getAttribute( const std::string& name) const;
+
+	Index getOrCreateTermValue( const std::string& name);
+	Index getOrCreateTermType( const std::string& name);
+	Index getOrCreateAttribute( const std::string& name);
+	Index getOrCreateDocno( const std::string& name, bool& isNew);
 
 	void checkFlush();
 	void flush();
@@ -139,8 +150,6 @@ private:
 	void writeInserterBatch();
 	void aquireInserter();
 
-	void batchDefineVariable( leveldb::WriteBatch& batch, const char* name, Index value);
-
 private:
 	std::string m_path;					///< levelDB storage path 
 	leveldb::DB* m_db;					///< levelDB handle
@@ -149,17 +158,23 @@ private:
 	Index m_next_termno;					///< next index to assign to a new term value
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_docno;					///< next index to assign to a new document id
+	Index m_next_attributeno;				///< next index to assign to a new attribute name
 	Index m_nof_documents;					///< number of documents inserted
 	boost::mutex m_nof_documents_mutex;			///< mutual exclusion for accessing m_nof_documents
 
 	leveldb::WriteBatch m_inserter_batch;			///< batch used for an insert chunk written to disk with 'flush()', resp. 'writeInserterBatch()'
 
+	MetaDataDescription m_metadescr;			///< description of the meta data
 	DocumentFrequencyMap* m_dfMap;				///< temporary map for the document frequency of new inserted features
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	DocnoBlockMap* m_docnoBlockMap;				///< map of docno postings for writing
 	PosinfoBlockMap* m_posinfoBlockMap;			///< map of posinfo postings for writing
-	GlobalKeyMap* m_globalKeyMap;				///< map of globals in the storage (term numbers, document numbers, etc.)
+	GlobalKeyMap* m_termTypeMap;				///< map of term types
+	GlobalKeyMap* m_termValueMap;				///< map of term values
+	GlobalKeyMap* m_docIdMap;				///< map of document ids
+	GlobalKeyMap* m_variableMap;				///< map of global variables (counters)
+	GlobalKeyMap* m_attributeNameMap;			///< map of document attribute names
 
 	boost::mutex m_nofInserterCnt_mutex;			///< mutual exclusion for aquiring inserter
 	unsigned int m_nofInserterCnt;				///< counter of inserters

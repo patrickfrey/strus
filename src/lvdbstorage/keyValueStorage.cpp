@@ -26,48 +26,51 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
-#include <utility>
-#include <stdexcept>
-#include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <leveldb/db.h>
+#include "keyValueStorage.hpp"
 
-namespace strus {
+using namespace strus;
 
-class MetaDataBlockCache
+const KeyValueStorage::Value* KeyValueStorage::load( const Key& key)
 {
-public:
-	MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_);
+	std::string keystr;
+	keystr.push_back( m_keyprefix);
+	keystr.append( key.str());
 
-	~MetaDataBlockCache(){}
-
-	const MetaDataRecord get( Index docno);
-
-	void declareVoid( unsigned int blockno);
-	void refresh();
-
-private:
-	void resetBlock( unsigned int blockno);
-
-private:
-	enum {
-		CacheSize=(1024*1024),					///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
-	};
-
-private:
-	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
-	std::vector<unsigned int> m_voidar;
-};
-
+	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+	leveldb::Status status = m_db->Get( m_readOptions, keyslice, &m_curvaluestr);
+	if (status.IsNotFound())
+	{
+		return 0;
+	}
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	m_curvalue.init( m_curvaluestr.c_str(), m_curvaluestr.size());
+	return &m_curvalue;
 }
-#endif
+
+void KeyValueStorage::store( const Key& key, const Value& value, leveldb::WriteBatch& batch)
+{
+	std::string keystr;
+	keystr.push_back( m_keyprefix);
+	keystr.append( key.str());
+
+	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+	leveldb::Slice valueslice( value.ptr(), value.size());
+
+	batch.Put( keyslice, valueslice);
+}
+
+void KeyValueStorage::dispose( const Key& key, leveldb::WriteBatch& batch)
+{
+	std::string keystr;
+	keystr.push_back( m_keyprefix);
+	keystr.append( key.str());
+
+	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+
+	batch.Delete( keyslice);
+}
+
 

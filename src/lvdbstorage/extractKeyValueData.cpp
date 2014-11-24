@@ -267,10 +267,10 @@ DocAttributeData::DocAttributeData( const leveldb::Slice& key, const leveldb::Sl
 	{
 		throw std::runtime_error( "unexpected end of document attribute key");
 	}
-	name = *ki++;
-	if (name < 32 || name > 127)
+	name = strus::unpackIndex( ki, ke); /*[name = termno]*/
+	if (ki != ke)
 	{
-		throw std::runtime_error( "variable name in document attribute key out of range");
+		throw std::runtime_error( "extra character at end of document attribute key");
 	}
 	valuestr = vi;
 	valuesize = ve-vi;
@@ -373,7 +373,7 @@ PosinfoBlockData::PosinfoBlockData( const leveldb::Slice& key, const leveldb::Sl
 	while (itr != end)
 	{
 		Index docno_elem = blk.docno_at( itr);
-		Index ff = blk.frequency_at( itr);
+		std::size_t ff = (std::size_t)blk.frequency_at( itr);
 		if (docno_elem > docno)
 		{
 			throw std::runtime_error( "posinfo element docno bigger than upper bound docno");

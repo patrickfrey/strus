@@ -53,11 +53,19 @@ public:
 			float weight_);
 
 	virtual void setMetaData(
-			char name_,
+			const std::string& name_,
 			float value_);
 
+	virtual void setMetaData(
+			const std::string& name_,
+			int value_);
+
+	virtual void setMetaData(
+			const std::string& name_,
+			unsigned int value_);
+
 	virtual void setAttribute(
-			char name_,
+			const std::string& name_,
 			const std::string& value_);
 
 	virtual void done();
@@ -98,21 +106,22 @@ private:
 
 	struct DocAttribute
 	{
-		char name;
+		std::string name;
 		std::string value;
 
-		DocAttribute( char name_, const std::string& value_)
+		DocAttribute( const std::string& name_, const std::string& value_)
 			:name(name_),value(value_){}
 		DocAttribute( const DocAttribute& o)
 			:name(o.name),value(o.value){}
 	};
 
+	template <typename ValueType>
 	struct DocMetaData
 	{
-		char name;
-		float value;
+		std::string name;
+		ValueType value;
 
-		DocMetaData( char name_, float value_)
+		DocMetaData( const std::string& name_, ValueType value_)
 			:name(name_),value(value_){}
 		DocMetaData( const DocMetaData& o)
 			:name(o.name),value(o.value){}
@@ -128,7 +137,9 @@ private:
 	TermMap m_terms;
 	InvMap m_invs;
 	std::vector<DocAttribute> m_attributes;
-	std::vector<DocMetaData> m_metadata;
+	std::vector<DocMetaData<int> > m_metadata_int;
+	std::vector<DocMetaData<unsigned int> > m_metadata_uint;
+	std::vector<DocMetaData<float> > m_metadata_float;
 };
 
 }

@@ -27,67 +27,58 @@
 --------------------------------------------------------------------
 */
 #include "metaDataBlockCache.hpp"
-#include "metaDataReader.hpp"
 #include "statistics.hpp"
+#include "keyValueStorage.hpp"
 #include <stdint.h>
 
 using namespace strus;
 
-MetaDataBlockCache::MetaDataBlockCache( leveldb::DB* db_)
-	:m_db(db_)
+MetaDataBlockCache::MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_)
+	:m_db(db_),m_descr(descr_)
 {}
 
-void MetaDataBlockCache::declareVoid( unsigned int blockno, char varname)
+void MetaDataBlockCache::declareVoid( unsigned int blockno)
 {
-	m_voidar.push_back( VoidRef( blockno, varname));
+	m_voidar.push_back( blockno);
 }
 
 void MetaDataBlockCache::refresh()
 {
-	std::vector<VoidRef>::const_iterator vi = m_voidar.begin(), ve = m_voidar.end();
+	std::vector<unsigned int>::const_iterator vi = m_voidar.begin(), ve = m_voidar.end();
 	for (; vi != ve; ++vi)
 	{
-		resetBlock( vi->blockno, vi->varname);
+		resetBlock( *vi);
 	}
 }
 
-void MetaDataBlockCache::resetBlock( unsigned int blockno, char varname)
+void MetaDataBlockCache::resetBlock( unsigned int blockno)
 {
 	if (blockno > CacheSize || blockno <= 0) throw std::runtime_error("block number out of range (MetaDataBlockCache)");
 	std::size_t blkidx = blockno-1;
 
-	boost::shared_ptr<CacheStruct> cache = m_ar[ aridx(varname)];
-	if (!cache.get()) return;
-	
-	// Level 2:
-	(*cache)[ blkidx].reset();
+	m_ar[ blkidx].reset();
 }
 
 
-float MetaDataBlockCache::getValue( Index docno, char varname)
+const MetaDataRecord MetaDataBlockCache::get( Index docno)
 {
 	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
 	std::size_t docidx     = (std::size_t)(docno -1);
 	std::size_t blkidx     = docidx / MetaDataBlock::MetaDataBlockSize;
+	std::size_t blockno    = blkidx+1;
 
 	// The fact that the reference counting of shared_ptr is
 	// thread safe is used to implement some kind of RCU:
-	boost::shared_ptr<CacheStruct> cache = m_ar[ aridx(varname)];
-	while (!cache.get())
-	{
-		m_ar[ aridx(varname)].reset( new CacheStruct());
-		cache = m_ar[ aridx(varname)];
-	}
-	
-	boost::shared_ptr<MetaDataBlock> blkref = (*cache)[ blkidx];
+	boost::shared_ptr<MetaDataBlock> blkref = m_ar[ blkidx];
 	while (!blkref.get())
 	{
 		Statistics::increment( Statistics::MetaDataCacheMiss);
-		(*cache)[ blkidx].reset( 
-			MetaDataReader::readBlockFromDB( 
-				m_db, MetaDataBlock::blockno( docno), varname));
-		blkref = (*cache)[ blkidx];
+
+		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
+		const KeyValueStorage::Value* mv = storage.load( KeyValueStorage::Key( blockno));
+		m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+		blkref = m_ar[ blkidx];
 	}
-	return blkref->getValue( docno);
+	return (*blkref)[ MetaDataBlock::index( docno)];
 }
 

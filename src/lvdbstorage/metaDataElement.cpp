@@ -26,48 +26,23 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
-#include <utility>
+#include "metaDataElement.hpp"
 #include <stdexcept>
-#include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <leveldb/db.h>
+#include <boost/algorithm/string.hpp>
 
-namespace strus {
+using namespace strus;
 
-class MetaDataBlockCache
+MetaDataElement::Type MetaDataElement::typeFromName( const std::string& namestr)
 {
-public:
-	MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_);
-
-	~MetaDataBlockCache(){}
-
-	const MetaDataRecord get( Index docno);
-
-	void declareVoid( unsigned int blockno);
-	void refresh();
-
-private:
-	void resetBlock( unsigned int blockno);
-
-private:
-	enum {
-		CacheSize=(1024*1024),					///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
-	};
-
-private:
-	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
-	std::vector<unsigned int> m_voidar;
-};
-
+	unsigned int ti = 0, te = NofTypes;
+	for (; ti<te; ++ti)
+	{
+		if (boost::iequals( namestr, typeName( (Type)ti)))
+		{
+			return (Type)ti;
+		}
+	}
+	throw std::runtime_error( std::string( "unknown meta data element type '") + namestr + "'");
 }
-#endif
+
 

@@ -26,48 +26,58 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_METADATA_DESCRIPTION_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_DESCRIPTION_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
+#include "metaDataElement.hpp"
 #include <utility>
-#include <stdexcept>
-#include <cstdlib>
+#include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include <map>
+#include <stdexcept>
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 namespace strus {
 
-class MetaDataBlockCache
+class MetaDataDescription
 {
 public:
-	MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_);
+	MetaDataDescription();
+	MetaDataDescription( const std::string& str);
+	MetaDataDescription( const MetaDataDescription& o);
 
-	~MetaDataBlockCache(){}
+	MetaDataDescription& operator=( const MetaDataDescription& o);
 
-	const MetaDataRecord get( Index docno);
+	std::string tostring() const;
 
-	void declareVoid( unsigned int blockno);
-	void refresh();
+	std::size_t bytesize() const
+	{
+		return ((m_bytesize+3)>>2)<<2;	//... aligned to 4 bytes
+	}
+
+	bool defined( const std::string& name_);
+	void add( MetaDataElement::Type type_, const std::string& name_);
+
+	const MetaDataElement* get( int handle) const
+	{
+		if ((std::size_t)handle >= m_ar.size()) throw std::logic_error("array bound read in MetaDataDescription::get()");
+		return &m_ar[ handle];
+	}
+	int getHandle( const std::string& name_) const;
+
+	void load( leveldb::DB* db);
+	void store( leveldb::WriteBatch& batch);
+
+	typedef std::vector< std::pair< const MetaDataElement*, const MetaDataElement*> > TranslationMap;
+	TranslationMap getTranslationMap( const MetaDataDescription& o) const;
 
 private:
-	void resetBlock( unsigned int blockno);
-
-private:
-	enum {
-		CacheSize=(1024*1024),					///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
-	};
-
-private:
-	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
-	std::vector<unsigned int> m_voidar;
+	std::size_t m_bytesize;
+	std::vector<MetaDataElement> m_ar;
+	std::map<std::string,std::size_t> m_namemap;
 };
 
-}
+}//namespace
 #endif
 

@@ -126,6 +126,10 @@ StorageConfig::StorageConfig( const char* source)
 		{
 			m_path = ci->second;
 		}
+		else if (ci->first == "metadata")
+		{
+			m_metadata = ci->second;
+		}
 		else if (ci->first == "cache")
 		{
 			m_cachesize_kb = nofK( ci->second);

@@ -28,7 +28,7 @@
 */
 #include "metaDataBlockMap.hpp"
 #include "metaDataBlockCache.hpp"
-#include "metaDataReader.hpp"
+#include "keyValueStorage.hpp"
 #include "databaseKey.hpp"
 #include <leveldb/write_batch.h>
 #include <cstring>
@@ -49,82 +49,64 @@ void MetaDataBlockMap::deleteMetaData( Index docno)
 	{
 		m_itr = m_db->NewIterator( leveldb::ReadOptions());
 	}
+	getRecord( docno).clear();
+}
+
+void MetaDataBlockMap::deleteMetaData( Index docno, const std::string& varname)
+{
+	getRecord( docno).clearValue( m_descr.get( m_descr.getHandle( varname)));
+}
+
+MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
+{
 	unsigned int blockno = MetaDataBlock::blockno( docno);
-	std::map<unsigned int,std::string>::const_iterator mi = m_metadataNameMap.find( blockno);
-	if (mi != m_metadataNameMap.end())
+	boost::mutex::scoped_lock( m_mutex);
+	Map::const_iterator mi = m_map.find( blockno);
+	if (mi == m_map.end())
 	{
-		std::string::const_iterator ni = mi->second.begin(), ne = mi->second.end();
-		for (; ni != ne; ++ni)
-		{
-			defineMetaData( docno, *ni, 0.0);
-		}
+		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
+		const KeyValueStorage::Value* mv = storage.load( KeyValueStorage::Key( blockno));
+		MetaDataBlockReference& block = m_map[ blockno];
+		block.reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+		return (*block)[ MetaDataBlock::index( docno)];
 	}
 	else
 	{
-		DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix, blockno);
-		std::string varnamelist;
-	
-		m_itr->Seek( leveldb::Slice( key.ptr(), key.size()));
-		if (!m_itr->Valid())
-		{
-			m_metadataNameMap[ blockno] = std::string();
-			return;
-		}
-		while (m_itr->Valid()
-		&&  key.size() <= m_itr->key().size()
-		&&  0==std::memcmp( key.ptr(), m_itr->key().data(), key.size()))
-		{
-			char const* ki = m_itr->key().data() + key.size();
-			const char* ke = ki + m_itr->key().size() - key.size();
-			if (ki+1 != ke) throw std::runtime_error( "corrupt data in storage (illegal meta data key)");
-			char varname = *ki;
-	
-			defineMetaData( docno, varname, 0.0);
-			varnamelist.push_back( varname);
-			m_itr->Next();
-		}
-		m_metadataNameMap[ blockno] = varnamelist;
+		return (*mi->second)[ MetaDataBlock::index( docno)];
 	}
 }
 
-void MetaDataBlockMap::defineMetaData( Index docno, char varname, float value)
+void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, float value)
 {
-	unsigned int blockno = MetaDataBlock::blockno( docno);
-	MetaDataKey key( varname, blockno);
-	boost::mutex::scoped_lock( m_mutex);
-	Map::const_iterator mi = m_map.find( key);
-	if (mi == m_map.end())
-	{
-		MetaDataBlock* blk = MetaDataReader::readBlockFromDB( m_db, blockno, varname);
-		MetaDataBlockReference& block = m_map[ key];
-		block.reset( blk);
-		block->setValue( docno, value);
-	}
-	else
-	{
-		mi->second->setValue( docno, value);
-	}
+	getRecord( docno).setValueFloat( m_descr.get( m_descr.getHandle( varname)), value);
+}
+
+void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, int value)
+{
+	getRecord( docno).setValueInt( m_descr.get( m_descr.getHandle( varname)), value);
+}
+
+void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, unsigned int value)
+{
+	getRecord( docno).setValueUInt( m_descr.get( m_descr.getHandle( varname)), value);
 }
 
 void MetaDataBlockMap::getWriteBatch(
 	leveldb::WriteBatch& batch,
 	MetaDataBlockCache& cache)
 {
+	KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
+
 	boost::mutex::scoped_lock( m_mutex);
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
 		if (!mi->second.get()) continue;
-		cache.declareVoid( mi->second->blockno(), mi->first.first);
+		cache.declareVoid( mi->second->blockno());
 
-		DatabaseKey key( (char)DatabaseKey::DocMetaDataPrefix,
-				 mi->second->blockno(), mi->first.first);
-
-		leveldb::Slice keyslice( key.ptr(), key.size());
-		leveldb::Slice valueslice(
-			(const char*)mi->second->data(),
-			MetaDataBlock::MetaDataBlockSize*sizeof(float));
-		batch.Put( keyslice, valueslice);
+		storage.store( KeyValueStorage::Key( mi->second->blockno()),
+				KeyValueStorage::Value( mi->second->charptr(), mi->second->bytesize()),
+				batch);
 	}
 	m_map.clear();
 }

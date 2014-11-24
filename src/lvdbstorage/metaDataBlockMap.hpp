@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
+#include "metaDataRecord.hpp"
 #include <cstdlib>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -45,28 +46,33 @@ class MetaDataBlockCache;
 class MetaDataBlockMap
 {
 public:
-	MetaDataBlockMap( leveldb::DB* db_)
-		:m_db(db_),m_itr(0){}
+	MetaDataBlockMap( leveldb::DB* db_, const MetaDataDescription& descr_)
+		:m_db(db_),m_descr(descr_),m_itr(0){}
 	MetaDataBlockMap( const MetaDataBlockMap& o)
 		:m_db(o.m_db),m_itr(0),m_map(o.m_map){}
 	~MetaDataBlockMap();
 
-	void defineMetaData( Index docno, char varname, float value);
+	void defineMetaData( Index docno, const std::string& varname, float value);
+	void defineMetaData( Index docno, const std::string& varname, int value);
+	void defineMetaData( Index docno, const std::string& varname, unsigned int value);
 	void deleteMetaData( Index docno);
+	void deleteMetaData( Index docno, const std::string& varname);
 
 	void getWriteBatch( leveldb::WriteBatch& batch, MetaDataBlockCache& cache);
 
 private:
+	MetaDataRecord getRecord( Index docno);
+
+private:
 	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
-	typedef std::pair<char,Index> MetaDataKey;
-	typedef std::map<MetaDataKey, MetaDataBlockReference> Map;
+	typedef std::map<unsigned int, MetaDataBlockReference> Map;
 
 private:
 	leveldb::DB* m_db;
+	MetaDataDescription m_descr;
 	leveldb::Iterator* m_itr;
 	boost::mutex m_mutex;
 	Map m_map;
-	std::map<unsigned int,std::string> m_metadataNameMap;
 };
 
 }

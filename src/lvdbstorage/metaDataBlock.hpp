@@ -29,34 +29,41 @@
 #ifndef _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "metaDataRecord.hpp"
+#include "metaDataDescription.hpp"
 #include <utility>
+#include <cstdlib>
 
 namespace strus {
 
 class MetaDataBlock
 {
 public:
-	MetaDataBlock( unsigned int blockno_);
-	MetaDataBlock( unsigned int blockno_,
-			const float* blk_, std::size_t blksize_);
+	MetaDataBlock( const MetaDataDescription* descr_, unsigned int blockno_);
+	MetaDataBlock( const MetaDataDescription* descr_, 
+			unsigned int blockno_,
+			const char* blk_,
+			std::size_t blksize_);
 
 	MetaDataBlock( const MetaDataBlock& o);
 
-	~MetaDataBlock(){}
+	~MetaDataBlock();
 
-	static std::size_t index( Index docno)			{return docno & MetaDataBlockMask;}
-	static Index blockno( Index docno)			{return ((docno-1)>>MetaDataBlockShift)+1;}
+	static std::size_t index( const Index& docno)			{return (docno-1) & MetaDataBlockMask;}
+	static Index blockno( const Index& docno)			{return ((docno-1)>>MetaDataBlockShift)+1;}
 
-	Index blockno() const					{return m_blockno;}
-	const float* data() const				{return m_blk;}
+	Index blockno() const						{return m_blockno;}
 
-	void setValue( Index docno, float value);
-	float getValue( Index docno) const;
+	const MetaDataRecord operator[]( std::size_t idx) const;
+
+	const void* ptr() const						{return m_ptr;}
+	const char* charptr() const					{return (const char*)m_ptr;}
+	std::size_t bytesize() const					{return m_descr->bytesize() * MetaDataBlockSize;}
 
 public:
 	enum {
-		/// \remark This value limits the maximum docno possible to (MetaDataBlockCache::NodeSize^2 * MetaDataBlockSize)
-		MetaDataBlockSize=256		///< size of one meta data block
+		/// \remark This value limits the maximum docno possible to (MetaDataBlockCache::CacheSize * MetaDataBlockSize)
+		MetaDataBlockSize=256		///< number of records in one meta data block
 	};
 private:
 	enum {
@@ -65,8 +72,9 @@ private:
 	};
 
 private:
+	const MetaDataDescription* m_descr;
 	unsigned int m_blockno;
-	float m_blk[ MetaDataBlockSize];
+	void* m_ptr;
 };
 
 }

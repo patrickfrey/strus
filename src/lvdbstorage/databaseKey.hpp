@@ -47,7 +47,8 @@ public:
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
 		DocFrequencyPrefix='f',	///< [typeno,termno]           ->  [index]
 		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
-		PosinfoBlockPrefix='p'	///< [typeno,termno,docno]     ->  [pos]*
+		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
+		AttributeKeyPrefix='A'	///< [attribute string]        ->  [index]
 	};
 	static const char* keyPrefixName( KeyPrefix i)
 	{
@@ -77,6 +78,7 @@ public:
 	DatabaseKey( char prefix, const Index& idx, const Index& idx2, const Index& idx3);
 	DatabaseKey( const DatabaseKey& o);
 
+	void addElem( const std::string& var);
 	void addElem( const Index& index);
 	void addPrefix( char prefix);
 

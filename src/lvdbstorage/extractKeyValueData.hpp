@@ -110,7 +110,7 @@ struct DocMetaDataData
 struct DocAttributeData
 {
 	Index docno;
-	char name;
+	Index name;
 	const char* valuestr;
 	unsigned int valuesize;
 

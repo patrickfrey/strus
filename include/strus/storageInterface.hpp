@@ -42,6 +42,8 @@ class PostingIteratorInterface;
 class ForwardIteratorInterface;
 /// \brief Forward declaration
 class StorageInserterInterface;
+/// \brief Forward declaration
+class MetaDataReaderInterface;
 
 /// \brief Interface of a strus IR storage
 class StorageInterface
@@ -83,11 +85,10 @@ public:
 	/// \param[in] docid document id of the document inserted
 	virtual Index documentNumber( const std::string& docid) const=0;
 
-	/// \brief Get an element of document metadata
-	/// \param[in] docno document number
+	/// \brief Create an interface to access an item of document metadata
 	/// \param[in] varname variable name identifying the metadata attribute
-	/// \return the metadata element
-	virtual float documentMetaData( const Index& docno, char varname) const=0;
+	/// \return the interface to access the metadata addressed addressed by varname
+	virtual MetaDataReaderInterface* createMetaDataReader() const=0;
 
 	/// \brief Get a string attribute value assigned to a document
 	/// \param[in] docno document number

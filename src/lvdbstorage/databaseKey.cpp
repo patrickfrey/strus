@@ -44,7 +44,7 @@ DatabaseKey::DatabaseKey( char prefix, const char* var)
 	std::size_t varlen = std::strlen( var);
 	if (varlen >= MaxKeySize-1)
 	{
-		throw std::runtime_error("database variable key out of range");
+		throw std::runtime_error( std::string( "database variable key out of range '") + var + "'");
 	}
 	m_buf[ 0] = prefix;
 	std::memcpy( m_buf+1, var, varlen);
@@ -100,6 +100,16 @@ DatabaseKey::DatabaseKey( const DatabaseKey& o)
 void DatabaseKey::addElem( const Index& index)
 {
 	packIndex( m_buf, m_size, MaxKeySize, index);
+}
+
+void DatabaseKey::addElem( const std::string& var)
+{
+	if (m_size + var.size() >= MaxKeySize-1)
+	{
+		throw std::runtime_error( std::string( "database key exceeds maximum size allowed: '") + var + "'");
+	}
+	std::memcpy( m_buf+m_size, var.c_str(), var.size());
+	m_size += var.size();
 }
 
 void DatabaseKey::addPrefix( char prefix)
