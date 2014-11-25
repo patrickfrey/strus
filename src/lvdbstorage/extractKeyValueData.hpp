@@ -33,7 +33,6 @@
 #include "metaDataBlock.hpp"
 #include "docnoBlock.hpp"
 #include "posinfoBlock.hpp"
-#include "variant.hpp"
 #include "strus/index.hpp"
 #include <utility>
 #include <vector>

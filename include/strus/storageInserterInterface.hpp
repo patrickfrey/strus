@@ -30,6 +30,7 @@
 #define _STRUS_STORAGE_INSERTER_INTERFACE_HPP_INCLUDED
 #include <string>
 #include "strus/index.hpp"
+#include "strus/arithmeticVariant.hpp"
 
 namespace strus
 {
@@ -53,32 +54,14 @@ public:
 			const Index& position_,
 			float weight_)=0;
 
-	/// \brief Define a numeric attribute of type floating point for the document with fast access for query evaluation
+	/// \brief Define a numeric attribute for the document with fast access for query evaluation
 	/// \note Meta data are used for query restrictions and for document weights in query result ranking
 	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
 	/// \param[in] name_ name of the existing meta data element
 	/// \param[in] value_ value of the element
 	virtual void setMetaData(
 			const std::string& name_,
-			float value_)=0;
-
-	/// \brief Define a numeric attribute of type signed integer for the document with fast access for query evaluation
-	/// \note Meta data are used for query restrictions and for document weights in query result ranking
-	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
-	/// \param[in] name_ name of the existing meta data element
-	/// \param[in] value_ value of the element
-	virtual void setMetaData(
-			const std::string& name_,
-			int value_)=0;
-
-	/// \brief Define a numeric attribute of type unsigned integer for the document with fast access for query evaluation
-	/// \note Meta data are used for query restrictions and for document weights in query result ranking
-	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
-	/// \param[in] name_ name of the existing meta data element
-	/// \param[in] value_ value of the element
-	virtual void setMetaData(
-			const std::string& name_,
-			unsigned int value_)=0;
+			const ArithmeticVariant& value_)=0;
 
 	/// \brief Define a string attribute for the document
 	/// \param[in] name_ name of the attribute

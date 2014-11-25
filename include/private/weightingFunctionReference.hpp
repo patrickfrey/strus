@@ -29,19 +29,26 @@
 #ifndef _STRUS_WEIGHTING_FUNCTION_REFERENCE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FUNCTION_REFERENCE_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
-#include <boost/shared_ptr.hpp>
+#include "localReference.hpp"
 
 namespace strus
 {
 
 class WeightingFunctionReference
-	:public boost::shared_ptr<WeightingFunctionInterface>
+	:public LocalReference<WeightingFunctionInterface>
 {
 public:
-	WeightingFunctionReference( WeightingFunctionInterface* o=0)
-		:boost::shared_ptr<WeightingFunctionInterface>(o){}
-	WeightingFunctionReference( const WeightingFunctionReference& o)
-		:boost::shared_ptr<WeightingFunctionInterface>(o){}
+	WeightingFunctionReference()
+		:LocalReference<WeightingFunctionInterface>(){}
+	WeightingFunctionReference( WeightingFunctionInterface* o)
+		:LocalReference<WeightingFunctionInterface>(o){}
+};
+
+class WeightingFunctionReferenceArray
+	:public LocalReferenceArray<WeightingFunctionInterface>
+{
+public:
+	WeightingFunctionReferenceArray(){}
 };
 
 }//namespace

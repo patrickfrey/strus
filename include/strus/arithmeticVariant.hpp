@@ -26,42 +26,47 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_VARIANT_TYPE_HPP_INCLUDED
-#define _STRUS_LVDB_VARIANT_TYPE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
+#define _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
 
 namespace strus {
 
-struct Variant
+struct ArithmeticVariant
 {
-	Variant( int value)
+	ArithmeticVariant( int value)
 	{
 		variant.Int = value;
 		type = Int;
 	}
 
-	Variant( unsigned int value)
+	ArithmeticVariant( unsigned int value)
 	{
 		variant.UInt = value;
 		type = UInt;
 	}
 
-	Variant( float value)
+	ArithmeticVariant( float value)
 	{
 		variant.Float = value;
 		type = Float;
 	}
 
-	Variant()
+	ArithmeticVariant()
 	{
 		std::memset( this, 0, sizeof(*this));
 	}
 
-	Variant( const Variant& o)
+	ArithmeticVariant( const ArithmeticVariant& o)
 	{
 		std::memcpy( this, &o, sizeof(*this));
+	}
+
+	bool defined() const
+	{
+		return type != Null;
 	}
 
 	template <typename TYPE>
@@ -104,7 +109,7 @@ struct Variant
 	} variant;
 };
 
-std::ostream& operator<< (std::ostream& out, const Variant& v);
+std::ostream& operator<< (std::ostream& out, const ArithmeticVariant& v);
 
 }//namespace
 #endif

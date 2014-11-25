@@ -31,16 +31,13 @@
 #include "parser/tupleGenerator.hpp"
 #include "parser/selector.hpp"
 #include "parser/selectorExpression.hpp"
+#include "localReference.hpp"
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 namespace strus {
 namespace parser {
 
-class SelectorSet;
-typedef boost::shared_ptr<SelectorSet> SelectorSetR;
-		
 class SelectorSet
 {
 public:
@@ -51,7 +48,7 @@ public:
 	std::size_t rowsize() const			{return m_rowsize;}
 	std::size_t nofrows() const			{return m_rowsize ? (m_ar.size() / m_rowsize):0;}
 
-	static SelectorSetR calculate(
+	static SelectorSet* calculate(
 			int expressionidx,
 			const std::vector<parser::SelectorExpression>& expressions,
 			const std::map<int,int>& setSizeMap);
@@ -63,13 +60,13 @@ private:
 	void pushRow( std::vector<Selector>::const_iterator row);
 	void append( const SelectorSet& o);
 
-	static SelectorSetR calculateJoin(
-			const std::vector<SelectorSetR> argsets);
+	static SelectorSet* calculateJoin(
+			const LocalReferenceArray<SelectorSet>& argsets);
 
-	static SelectorSetR calculateTuple(
+	static SelectorSet* calculateTuple(
 			TupleGenerator::Mode genmode,
 			bool distinct,
-			const std::vector<SelectorSetR> argsets);
+			const LocalReferenceArray<SelectorSet>& argsets);
 
 private:
 	std::vector<Selector> m_ar;			///< iterator reference sequences

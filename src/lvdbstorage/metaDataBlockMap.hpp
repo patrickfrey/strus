@@ -31,7 +31,7 @@
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
-#include "variant.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include <cstdlib>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -53,7 +53,7 @@ public:
 		:m_db(o.m_db),m_map(o.m_map){}
 	~MetaDataBlockMap();
 
-	void defineMetaData( Index docno, const std::string& varname, const Variant& value);
+	void defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value);
 	void deleteMetaData( Index docno);
 	void deleteMetaData( Index docno, const std::string& varname);
 

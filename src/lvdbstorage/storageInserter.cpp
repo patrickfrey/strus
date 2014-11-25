@@ -71,21 +71,7 @@ void StorageInserter::addTermOccurrence(
 
 void StorageInserter::setMetaData(
 		const std::string& name_,
-		float value_)
-{
-	m_metadata.push_back( DocMetaData( name_, value_));
-}
-
-void StorageInserter::setMetaData(
-		const std::string& name_,
-		int value_)
-{
-	m_metadata.push_back( DocMetaData( name_, value_));
-}
-
-void StorageInserter::setMetaData(
-		const std::string& name_,
-		unsigned int value_)
+		const ArithmeticVariant& value_)
 {
 	m_metadata.push_back( DocMetaData( name_, value_));
 }

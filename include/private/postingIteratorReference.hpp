@@ -29,19 +29,26 @@
 #ifndef _STRUS_POSTING_ITERATOR_REFERENCE_HPP_INCLUDED
 #define _STRUS_POSTING_ITERATOR_REFERENCE_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
-#include <boost/shared_ptr.hpp>
+#include "localReference.hpp"
 
 namespace strus
 {
 
 class PostingIteratorReference
-	:public boost::shared_ptr<PostingIteratorInterface>
+	:public LocalReference<PostingIteratorInterface>
 {
 public:
-	PostingIteratorReference( PostingIteratorInterface* o=0)
-		:boost::shared_ptr<PostingIteratorInterface>(o){}
-	PostingIteratorReference( const PostingIteratorReference& o)
-		:boost::shared_ptr<PostingIteratorInterface>(o){}
+	PostingIteratorReference()
+		:LocalReference<PostingIteratorInterface>(){}
+	PostingIteratorReference( PostingIteratorInterface* o)
+		:LocalReference<PostingIteratorInterface>(o){}
+};
+
+class PostingIteratorReferenceArray
+	:public LocalReferenceArray<PostingIteratorInterface>
+{
+public:
+	PostingIteratorReferenceArray(){}
 };
 
 }//namespace

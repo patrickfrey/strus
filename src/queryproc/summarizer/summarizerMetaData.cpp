@@ -28,8 +28,9 @@
 */
 #include "summarizerMetaData.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/metadataReaderInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
+#include "strus/arithmeticVariant.hpp"
 
 using namespace strus;
 
@@ -43,10 +44,10 @@ std::vector<std::string>
 {
 	std::vector<std::string> rt;
 	m_metadata->skipDoc( docno);
-	std::string attr = m_metadata->getValue( m_attrib);
-	if (!attr.empty()) 
+	ArithmeticVariant value = m_metadata->getValue( m_attrib);
+	if (value.defined()) 
 	{
-		rt.push_back( attr);
+		rt.push_back( value.tostring());
 	}
 	return rt;
 }

@@ -30,7 +30,7 @@
 #define _STRUS_LVDB_STORAGE_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
-#include "variant.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "databaseKey.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
@@ -46,7 +46,6 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace strus {
 
@@ -106,7 +105,7 @@ public:
 
 	enum {NofDocumentsInsertedBeforeAutoCommit=1024};
 
-	void defineMetaData( const Index& docno, const std::string& varname, const Variant& value);
+	void defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value);
 	void deleteMetaData( const Index& docno);
 
 	void defineAttribute( const Index& docno, const std::string& varname, const std::string& value);

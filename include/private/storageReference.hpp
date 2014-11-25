@@ -29,19 +29,26 @@
 #ifndef _STRUS_STORAGE_REFERENCE_HPP_INCLUDED
 #define _STRUS_STORAGE_REFERENCE_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
-#include <boost/shared_ptr.hpp>
+#include "localReference.hpp"
 
 namespace strus
 {
 
 class StorageReference
-	:public boost::shared_ptr<StorageInterface>
+	:public LocalReference<StorageInterface>
 {
 public:
-	StorageReference( StorageInterface* o=0)
-		:boost::shared_ptr<StorageInterface>(o){}
-	StorageReference( const StorageReference& o)
-		:boost::shared_ptr<StorageInterface>(o){}
+	StorageReference()
+		:LocalReference<StorageInterface>(){}
+	StorageReference( StorageInterface* o)
+		:LocalReference<StorageInterface>(o){}
+};
+
+class StorageReferenceArray
+	:public LocalReferenceArray<StorageInterface>
+{
+public:
+	StorageReferenceArray(){}
 };
 
 }//namespace

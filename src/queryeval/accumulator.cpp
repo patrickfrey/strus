@@ -37,10 +37,11 @@ void Accumulator::addRanker(
 		const PostingIteratorInterface& iterator)
 {
 	WeightingFunctionReference weighting(
-		m_queryprocessor->createWeightingFunction( function, parameter, m_metadata));
+		m_queryprocessor->createWeightingFunction(
+			function, parameter, m_metadata));
 	PostingIteratorReference itr( iterator.copy());
 
-	m_rankers.push_back( AccumulatorArgument( factor, weighting, itr));
+	m_rankers.push_back( AccumulatorArgument( factor, weighting.detach(), itr.detach()));
 }
 
 

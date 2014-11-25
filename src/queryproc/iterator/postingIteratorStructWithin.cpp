@@ -41,7 +41,6 @@ IteratorStructWithin::IteratorStructWithin( int range_, std::size_t nofargs, con
 	,m_range(range_)
 	,m_documentFrequency(-1)
 {
-	m_group.reserve( nofargs);
 	std::size_t ii=0;
 	for (; ii<nofargs; ++ii)
 	{
@@ -75,15 +74,14 @@ IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
 	,m_featureid(o.m_featureid)
 	,m_documentFrequency(o.m_documentFrequency)
 {
-	m_group.reserve( o.m_group.size());
 	if (o.m_cut.get())
 	{
 		m_cut.reset( o.m_cut->copy());
 	}
-	std::vector<PostingIteratorReference>::const_iterator pi = o.m_group.begin(), pe = o.m_group.end();
+	PostingIteratorReferenceArray::const_iterator pi = o.m_group.begin(), pe = o.m_group.end();
 	for (; pi != pe; ++pi)
 	{
-		m_group.push_back( (*pi)->copy());
+		m_group.push_back( pi->copy());
 	}
 }
 
@@ -93,11 +91,10 @@ std::vector<PostingIteratorInterface*>
 	std::vector<PostingIteratorInterface*> rt;
 	if (positive)
 	{
-		rt.reserve( m_group.size());
-		std::vector<PostingIteratorReference>::const_iterator si = m_group.begin(), se = m_group.end();
+		PostingIteratorReferenceArray::iterator si = m_group.begin(), se = m_group.end();
 		for (; si != se; ++si)
 		{
-			rt.push_back( si->get());
+			rt.push_back( &*si);
 		}
 	}
 	else if (m_cut.get())
@@ -135,10 +132,10 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 
 	for (;;)
 	{
-		std::vector<PostingIteratorReference>::const_iterator pi = m_group.begin(), pe = m_group.end();
+		PostingIteratorReferenceArray::iterator pi = m_group.begin(), pe = m_group.end();
 		if (pi == pe) return m_posno=0;
 
-		min_pos = (*pi)->skipPos( pos_iter);
+		min_pos = pi->skipPos( pos_iter);
 		if (!min_pos)
 		{
 			return m_posno=0;
@@ -151,7 +148,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 
 		for (++pi; pi != pe; ++pi,++pidx)
 		{
-			Index pos_next = (*pi)->skipPos( pos_iter);
+			Index pos_next = pi->skipPos( pos_iter);
 			for (;;)
 			{
 				if (!pos_next) return m_posno=0;
@@ -161,7 +158,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 					// ... only items at distinct positions are allowed
 					break;
 				}
-				pos_next = (*pi)->skipPos( pos_next +1);
+				pos_next = pi->skipPos( pos_next +1);
 			}
 			poset.push_back( pos_next);
 
@@ -205,12 +202,12 @@ Index IteratorStructWithin::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<PostingIteratorReference>::const_iterator ai = m_group.begin(), ae = m_group.end();
+		PostingIteratorReferenceArray::iterator ai = m_group.begin(), ae = m_group.end();
 		if (ai == ae) return 0;
-		m_documentFrequency = (*ai)->documentFrequency();
+		m_documentFrequency = ai->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
 		{
-			Index df = (*ai)->documentFrequency();
+			Index df = ai->documentFrequency();
 			if (df < m_documentFrequency)
 			{
 				m_documentFrequency = df;

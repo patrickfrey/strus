@@ -30,6 +30,8 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/constants.hpp"
+#include "strus/attributeReaderInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "parser/lexems.hpp"
 #include "parser/selectorSet.hpp"
 #include "postingIteratorReference.hpp"
@@ -426,12 +428,9 @@ std::vector<queryeval::ResultDocument>
 
 	boost::scoped_ptr<AttributeReaderInterface>
 		attributeReader( storage.createAttributeReader());
+	boost::scoped_ptr<MetaDataReaderInterface>
+		metaDataReader( storage.createMetaDataReader());
 
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cout << "Start evaluating query:" << std::endl;
-	print( std::cout);
-	std::cout << std::endl;
-#endif
 	//[1] Create the initial feature sets:
 	{
 		// Process the query features (explicit join operations)
@@ -478,9 +477,6 @@ std::vector<queryeval::ResultDocument>
 				throw std::runtime_error( std::string( "term set identifier '") + fi->first + "' not used in this query program");
 			}
 			query.pushFeature( si->second, fi->second);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "Create query feature [" << si->second << "] " << fi->first << " :" << query.setSize(si->second) << std::endl;
-#endif
 		}
 
 		// Add predefined terms to the initial feature set:
@@ -491,9 +487,6 @@ std::vector<queryeval::ResultDocument>
 			if (si != m_setnamemap.end())
 			{
 				query.pushFeature( si->second, processor.createTermPostingIterator( pi->type, pi->value));
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "create predefined feature [" << si->second << "] " << pi->set << " :" << query.setSize(si->second) << std::endl;
-#endif
 			}
 		}
 	}
@@ -503,14 +496,7 @@ std::vector<queryeval::ResultDocument>
 	for (; ji != je; ++ji)
 	{
 		const parser::JoinFunction& function = functions()[ ji->function()-1];
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "calculate join ";
-		function.print( std::cout, ji->function(), functions());
-		std::cout << " of ";
-		SelectorExpression::print( std::cout, ji->selector(), selectors(), m_setnamemap);
-		std::cout << std::endl;
-#endif
-		SelectorSetR selset(
+		boost::scoped_ptr<SelectorSet> selset(
 			SelectorSet::calculate(
 				ji->selector(), selectors(), query.setSizeMap()));
 
@@ -523,9 +509,6 @@ std::vector<queryeval::ResultDocument>
 			{
 				throw std::runtime_error("query too complex (number of rows in selection has more than 256 elements");
 			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "create feature " << m_setnamemap.name( ji->result()) << " from " << selset->tostring() << std::endl;
-#endif
 			const PostingIteratorInterface* joinargs[ MaxNofSelectorColumns];
 			for (; ri < re; ri += ro)
 			{
@@ -540,9 +523,6 @@ std::vector<queryeval::ResultDocument>
 						function.name(), function.range(), ro, joinargs);
 				query.pushFeature( ji->result(), opres);
 			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "feature " << m_setnamemap.name( ji->result()) << " has set size " << query.setSize(ji->result()) << std::endl;
-#endif
 		}
 	}
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -554,7 +534,9 @@ std::vector<queryeval::ResultDocument>
 	if (m_accumulateOperation.defined())
 	{
 		// Create the accumulator:
-		Accumulator accumulator( &processor, maxNofRanks, storage.maxDocumentNumber(), attributeReader.get());
+		Accumulator accumulator( 
+				&processor, metaDataReader.get(),
+				maxNofRanks, storage.maxDocumentNumber());
 
 		std::vector<WeightingFunction>::const_iterator
 			gi = m_accumulateOperation.args().begin(),
@@ -613,7 +595,9 @@ std::vector<queryeval::ResultDocument>
 					processor.createSummarizer(
 						si->summarizerName(), si->type(),
 						si->parameter(), structfeat.get(),
-						far_ref.size(), far)));
+						far_ref.size(), far,
+						metaDataReader.get(),
+						attributeReader.get())));
 		}
 		// Calculate and return the ranklist:
 		return getRankedDocumentList(

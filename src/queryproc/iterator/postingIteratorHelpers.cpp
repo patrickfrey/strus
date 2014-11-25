@@ -33,16 +33,16 @@
 
 using namespace strus;
 
-Index strus::getFirstAllMatchDocno( const std::vector<PostingIteratorReference>& ar, Index docno_iter)
+Index strus::getFirstAllMatchDocno( PostingIteratorReferenceArray& ar, Index docno_iter)
 {
 	for (;;)
 	{
-		std::vector<PostingIteratorReference>::const_iterator pi = ar.begin(), pe = ar.end();
+		PostingIteratorReferenceArray::iterator pi = ar.begin(), pe = ar.end();
 		if (pi == pe)
 		{
 			return 0;
 		}
-		Index docno_first = (*pi)->skipDoc( docno_iter);
+		Index docno_first = pi->skipDoc( docno_iter);
 		if (!docno_first)
 		{
 			return 0;
@@ -50,7 +50,7 @@ Index strus::getFirstAllMatchDocno( const std::vector<PostingIteratorReference>&
 		bool match = true;
 		for (++pi; pi != pe; ++pi)
 		{
-			Index docno_next = (*pi)->skipDoc( docno_first);
+			Index docno_next = pi->skipDoc( docno_first);
 			if (!docno_next)
 			{
 				return 0;

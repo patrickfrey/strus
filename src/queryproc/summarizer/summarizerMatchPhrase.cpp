@@ -139,29 +139,28 @@ static std::string
 static void getSummary_(
 		std::vector<std::string>& res,
 		const Index& docno,
-		const std::vector<PostingIteratorReference>& itr,
-		const PostingIteratorReference& phrasestruct,
+		PostingIteratorReferenceArray& itr,
+		PostingIteratorReference& phrasestruct,
 		ForwardIteratorInterface& forwardindex,
 		unsigned int maxlen,
 		unsigned int maxsummarylen)
 {
 	forwardindex.initDoc( docno);
-	if (phrasestruct)
+	if (phrasestruct.get())
 	{
 		phrasestruct->skipDoc( docno);
 	}
 	Index curpos = 0;
 	Index nextpos = 0;
 
-	std::vector<PostingIteratorReference>::const_iterator
-		ii = itr.begin(), ie = itr.end();
+	PostingIteratorReferenceArray::iterator ii = itr.begin(), ie = itr.end();
 	unsigned int summarylen = 0;
 
 	for (int iidx=0; ii != ie && summarylen < maxsummarylen; ++ii,++iidx)
 	{
-		if (*ii && docno==(*ii)->skipDoc( docno))
+		if (docno==ii->skipDoc( docno))
 		{
-			while (0!=(nextpos=(*ii)->skipPos( curpos)))
+			while (0!=(nextpos=ii->skipPos( curpos)))
 			{
 				unsigned int length = 0;
 				res.push_back(

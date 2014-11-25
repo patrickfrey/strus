@@ -29,19 +29,26 @@
 #ifndef _STRUS_FORWARD_INDEX_VIEWER_REFERENCE_HPP_INCLUDED
 #define _STRUS_FORWARD_INDEX_VIEWER_REFERENCE_HPP_INCLUDED
 #include "strus/forwardIteratorInterface.hpp"
-#include <boost/shared_ptr.hpp>
+#include "localReference.hpp"
 
 namespace strus
 {
 
 class ForwardIteratorReference
-	:public boost::shared_ptr<ForwardIteratorInterface>
+	:public LocalReference<ForwardIteratorInterface>
 {
 public:
-	ForwardIteratorReference( ForwardIteratorInterface* o=0)
-		:boost::shared_ptr<ForwardIteratorInterface>(o){}
-	ForwardIteratorReference( const ForwardIteratorReference& o)
-		:boost::shared_ptr<ForwardIteratorInterface>(o){}
+	ForwardIteratorReference()
+		:LocalReference<ForwardIteratorInterface>(){}
+	ForwardIteratorReference( ForwardIteratorInterface* o)
+		:LocalReference<ForwardIteratorInterface>(o){}
+};
+
+class ForwardIteratorReferenceArray
+	:public LocalReferenceArray<ForwardIteratorInterface>
+{
+public:
+	ForwardIteratorReferenceArray(){}
 };
 
 }//namespace

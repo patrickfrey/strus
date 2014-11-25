@@ -71,7 +71,7 @@ public:
 private:
 	Index m_docno;
 	Index m_posno;				///< current position
-	std::vector<PostingIteratorReference> m_argar;
+	PostingIteratorReferenceArray m_argar;	///< arguments
 	std::string m_featureid;		///< unique id of the feature expression
 	Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
 };

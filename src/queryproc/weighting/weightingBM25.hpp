@@ -35,7 +35,6 @@
 #include "postingIteratorReference.hpp"
 #include "weightingIdfBased.hpp"
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 namespace strus
 {

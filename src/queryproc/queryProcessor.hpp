@@ -32,7 +32,6 @@
 #include "storageReference.hpp"
 #include <vector>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 namespace strus
 {
@@ -77,7 +76,8 @@ public:
 			const PostingIteratorInterface* structitr,
 			std::size_t nofitrs,
 			const PostingIteratorInterface** itrs,
-			const AttributeReaderInterface* attreader) const;
+			MetaDataReaderInterface* metadata,
+			AttributeReaderInterface* attreader) const;
 
 private:
 	StorageInterface* m_storage;

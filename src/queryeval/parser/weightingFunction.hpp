@@ -32,7 +32,6 @@
 #include <string>
 #include <vector>
 #include <ostream>
-#include <boost/shared_ptr.hpp>
 
 namespace strus {
 namespace parser {

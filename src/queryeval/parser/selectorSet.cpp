@@ -66,22 +66,22 @@ void SelectorSet::append( const SelectorSet& o)
 	}
 }
 
-SelectorSetR SelectorSet::calculateJoin(
-		const std::vector<SelectorSetR> argsets)
+SelectorSet* SelectorSet::calculateJoin(
+		const LocalReferenceArray<SelectorSet>& argsets)
 {
-	SelectorSetR rt;
-	std::vector<SelectorSetR>::const_iterator si = argsets.begin(), se = argsets.end();
-	if (si == se) return SelectorSetR();
+	LocalReference<SelectorSet> rt;
+	LocalReferenceArray<SelectorSet>::const_iterator si = argsets.begin(), se = argsets.end();
+	if (si == se) return 0;
 	std::size_t rowsize = 0;
 	for (; si != se; ++si)
 	{
-		if (si->get() && (*si)->rowsize() > 0)
+		if (si->rowsize() > 0)
 		{
 			if (rowsize == 0)
 			{
-				rowsize = (*si)->rowsize();
+				rowsize = si->rowsize();
 			}
-			else if (rowsize != (*si)->rowsize())
+			else if (rowsize != si->rowsize())
 			{
 				throw std::runtime_error("number of rows in selector expression do not match in join");
 			}
@@ -89,39 +89,41 @@ SelectorSetR SelectorSet::calculateJoin(
 	}
 	if (rowsize == 0)
 	{
-		return SelectorSetR();
+		return 0;
 	}
 	rt.reset( new SelectorSet( rowsize));
 	si = argsets.begin();
 	for (; si != se; ++si)
 	{
-		if ((*si)->rowsize())
+		if (si->rowsize())
 		{
-			std::vector<Selector>::const_iterator ai = (*si)->ar().begin(), ae = (*si)->ar().end();
+			std::vector<Selector>::const_iterator
+				ai = si->ar().begin(), ae = si->ar().end();
 			for (; ai != ae; ai += rowsize)
 			{
 				rt->pushRow( ai);
 			}
 		}
 	}
-	return rt;
+	return rt.detach();
 }
 
-SelectorSetR SelectorSet::calculateTuple(
+SelectorSet* SelectorSet::calculateTuple(
 		TupleGenerator::Mode genmode,
 		bool distinct,
-		const std::vector<SelectorSetR> argsets)
+		const LocalReferenceArray<SelectorSet>& argsets)
 {
 	std::size_t rowsize = 0;
-	std::vector<SelectorSetR>::const_iterator si = argsets.begin(), se = argsets.end();
+	LocalReferenceArray<SelectorSet>::const_iterator
+		si = argsets.begin(), se = argsets.end();
 	for (; si != se; ++si)
 	{
-		if (!si->get() || (*si)->ar().size() == 0) return SelectorSetR();
-		rowsize += (*si)->rowsize();
+		if (si->ar().size() == 0) return 0;
+		rowsize += si->rowsize();
 	}
-	if (rowsize == 0) return SelectorSetR();
+	if (rowsize == 0) return 0;
 
-	SelectorSetR rt( new SelectorSet( rowsize));
+	LocalReference<SelectorSet> rt( new SelectorSet( rowsize));
 
 	boost::scoped_array<Selector> curRef( new Selector[ rowsize]);
 	Selector* cur = curRef.get();
@@ -129,7 +131,7 @@ SelectorSetR SelectorSet::calculateTuple(
 	TupleGenerator gen( genmode);
 	for (si = argsets.begin(); si != se; ++si)
 	{
-		gen.defineColumn( (*si)->nofrows());
+		gen.defineColumn( si->nofrows());
 	}
 
 	if (!gen.empty()) do
@@ -142,12 +144,12 @@ SelectorSetR SelectorSet::calculateTuple(
 		std::size_t rowidx = 0;
 		for (si = argsets.begin(); si != se; ++si,++cntidx)
 		{
-			std::size_t ri = (*si)->rowsize() * gen.column( cntidx);
-			for (std::size_t ci=0; ci<(*si)->rowsize(); ++ci)
+			std::size_t ri = si->rowsize() * gen.column( cntidx);
+			for (std::size_t ci=0; ci<si->rowsize(); ++ci)
 			{
-				cur[ rowidx + ci] = (*si)->ar()[ ri + ci];
+				cur[ rowidx + ci] = si->ar()[ ri + ci];
 			}
-			rowidx += (*si)->rowsize();
+			rowidx += si->rowsize();
 		}
 		if (rowidx != rowsize) throw std::logic_error( "query parser assertion failed: rowidx != rowsize");
 		if (distinct)
@@ -168,15 +170,15 @@ SelectorSetR SelectorSet::calculateTuple(
 		}
 	}
 	while (gen.next());
-	return rt;
+	return rt.detach();
 }
 
-SelectorSetR SelectorSet::calculate(
+SelectorSet* SelectorSet::calculate(
 		int expressionidx,
 		const std::vector<parser::SelectorExpression>& expressions,
 		const std::map<int,int>& setSizeMap)
 {
-	SelectorSetR rt;
+	LocalReference<SelectorSet> rt;
 	if (expressionidx <= 0 || (std::size_t)expressionidx > expressions.size())
 	{
 		throw std::runtime_error( "expression index out of range");
@@ -184,17 +186,16 @@ SelectorSetR SelectorSet::calculate(
 	const parser::SelectorExpression& expression = expressions[ expressionidx-1];
 
 	// [1] Build the list of arguments:
-	std::vector<SelectorSetR> argsets;
+	LocalReferenceArray<SelectorSet> argsets;
 	std::vector<SelectorExpression::Argument>::const_iterator ai = expression.args().begin(), ae = expression.args().end();
 	for (; ai != ae; ++ai)
 	{
-		SelectorSetR argsetref;
 		switch (ai->type())
 		{
 			case SelectorExpression::Argument::SetReference:
 			{
-				argsets.push_back( SelectorSetR( new SelectorSet(1)));
-				SelectorSet* argset = argsets.back().get();
+				argsets.push_back( new SelectorSet(1));
+				SelectorSet& argset = argsets.back();
 				std::map<int,int>::const_iterator mi = setSizeMap.find( ai->idx());
 				if (mi != setSizeMap.end())
 				{
@@ -205,14 +206,20 @@ SelectorSetR SelectorSet::calculate(
 #ifdef STRUS_LOWLEVEL_DEBUG
 						std::cout << "Selector push set reference (" << ai->idx() << "," << ii << ")" << std::endl;
 #endif
-						argset->pushRow( &row);
+						argset.pushRow( &row);
 					}
 				}
 				break;
 			}
 			case SelectorExpression::Argument::SubExpression:
 			{
-				argsets.push_back( calculate( ai->idx(), expressions, setSizeMap));
+				SelectorSet* subresult
+					= calculate( ai->idx(), expressions, setSizeMap);
+				if (!subresult)
+				{
+					return 0;
+				}
+				argsets.push_back( subresult);
 			}
 		}
 	}
@@ -242,7 +249,7 @@ SelectorSetR SelectorSet::calculate(
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::cout << "Selector set calculation result: " << (rt.get()?rt->tostring():std::string("EMPTY")) << std::endl;
 #endif
-	return rt;
+	return rt.detach();
 }
 
 std::string SelectorSet::tostring() const

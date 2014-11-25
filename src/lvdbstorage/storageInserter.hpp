@@ -29,7 +29,7 @@
 #ifndef _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
 #define _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
 #include "strus/storageInserterInterface.hpp"
-#include "variant.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -55,15 +55,7 @@ public:
 
 	virtual void setMetaData(
 			const std::string& name_,
-			float value_);
-
-	virtual void setMetaData(
-			const std::string& name_,
-			int value_);
-
-	virtual void setMetaData(
-			const std::string& name_,
-			unsigned int value_);
+			const ArithmeticVariant& value_);
 
 	virtual void setAttribute(
 			const std::string& name_,
@@ -119,9 +111,9 @@ private:
 	struct DocMetaData
 	{
 		std::string name;
-		Variant value;
+		ArithmeticVariant value;
 
-		DocMetaData( const std::string& name_, const Variant& value_)
+		DocMetaData( const std::string& name_, const ArithmeticVariant& value_)
 			:name(name_),value(value_){}
 		DocMetaData( const DocMetaData& o)
 			:name(o.name),value(o.value){}

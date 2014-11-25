@@ -76,7 +76,7 @@ protected:
 	class selected_iterator
 	{
 	public:
-		selected_iterator( uint64_t set_, const std::vector<PostingIteratorReference>& argar_)
+		selected_iterator( uint64_t set_, PostingIteratorReferenceArray& argar_)
 			:m_ar(&argar_),m_set(set_),m_idx(0)
 		{
 			skip();
@@ -92,8 +92,8 @@ protected:
 		bool operator==( const selected_iterator& o) const	{return m_set==o.m_set && m_idx==o.m_idx;}
 		bool operator!=( const selected_iterator& o) const	{return m_set!=o.m_set || m_idx!=o.m_idx;}
 
-		const PostingIteratorReference& operator*() const	{return (*m_ar)[ m_idx-1];}
-		const PostingIteratorReference* operator->() const	{return &(*m_ar)[ m_idx-1];}
+		PostingIteratorInterface& operator*() const		{return (*m_ar)[ m_idx-1];}
+		PostingIteratorInterface* operator->() const		{return &(*m_ar)[ m_idx-1];}
 
 	private:
 		void skip()
@@ -106,24 +106,28 @@ protected:
 		}
 
 	private:
-		const std::vector<PostingIteratorReference>* m_ar;
+		PostingIteratorReferenceArray* m_ar;
 		uint64_t m_set;
 		std::size_t m_idx;
 	};
 
-	selected_iterator selected_begin() const
+	selected_iterator selected_begin()
 	{
 		return selected_iterator( m_selected, m_argar);
 	}
 
-	selected_iterator selected_end() const
+	selected_iterator selected_end()
 	{
 		return selected_iterator();
 	}
 
-	PostingIteratorInterface* arg( unsigned int idx) const
+	const PostingIteratorInterface* arg( unsigned int idx) const
 	{
-		return m_argar[ idx].get();
+		return &m_argar[ idx];
+	}
+	PostingIteratorInterface* arg( unsigned int idx)
+	{
+		return &m_argar[ idx];
 	}
 
 	unsigned int nofargs() const
@@ -143,11 +147,11 @@ private:
 
 private:
 	Index m_docno;
-	Index m_posno;					///< current position
-	std::vector<PostingIteratorReference> m_argar;	///< union arguments
-	uint64_t m_selected;				///< set pf bits parallel to arguments that specifies the current document matches of the arguments
-	std::string m_featureid;			///< unique id of the feature expression
-	Index m_documentFrequency;			///< document frequency (of the most frequent subexpression)
+	Index m_posno;				///< current position
+	PostingIteratorReferenceArray m_argar;	///< union arguments
+	uint64_t m_selected;			///< set pf bits parallel to arguments that specifies the current document matches of the arguments
+	std::string m_featureid;		///< unique id of the feature expression
+	Index m_documentFrequency;		///< document frequency (of the most frequent subexpression)
 };
 
 }//namespace

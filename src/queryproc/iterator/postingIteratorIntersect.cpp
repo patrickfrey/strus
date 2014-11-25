@@ -37,7 +37,6 @@ IteratorIntersect::IteratorIntersect( std::size_t nofargs, const PostingIterator
 	,m_documentFrequency(-1)
 {
 	std::size_t ii=0;
-	m_argar.reserve( nofargs);
 	for (; ii<nofargs; ++ii)
 	{
 		if (args[ii])
@@ -56,14 +55,10 @@ IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	,m_featureid(o.m_featureid)
 	,m_documentFrequency(o.m_documentFrequency)
 {
-	m_argar.reserve( o.m_argar.size());
 	std::size_t ii=0;
 	for (; ii<o.m_argar.size(); ++ii)
 	{
-		if (o.m_argar[ii].get())
-		{
-			m_argar.push_back( o.m_argar[ ii]->copy());
-		}
+		m_argar.push_back( o.m_argar[ ii].copy());
 	}
 }
 
@@ -77,7 +72,7 @@ std::vector<PostingIteratorInterface*>
 		std::size_t ii=0;
 		for (; ii<m_argar.size(); ++ii)
 		{
-			rt.push_back( m_argar[ ii].get());
+			rt.push_back( &m_argar[ ii]);
 		}
 	}
 	return rt;
@@ -90,10 +85,10 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 	Index docno_iter = docno_;
 	for (;;)
 	{
-		std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		PostingIteratorReferenceArray::iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		docno_iter = (*ai)->skipDoc( docno_iter);
+		docno_iter = ai->skipDoc( docno_iter);
 		if (docno_iter == 0)
 		{
 			m_docno = 0;
@@ -101,7 +96,7 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			Index docno_next = (*ai)->skipDoc( docno_iter);
+			Index docno_next = ai->skipDoc( docno_iter);
 			if (docno_next != docno_iter)
 			{
 				if (docno_next == 0)
@@ -127,17 +122,17 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 	Index pos_iter = pos_;
 	for (;;)
 	{
-		std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		PostingIteratorReferenceArray::iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return m_posno=0;
 
-		pos_iter = (*ai)->skipPos( pos_iter);
+		pos_iter = ai->skipPos( pos_iter);
 		if (pos_iter == 0)
 		{
 			return m_posno=0;
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			Index pos_next = (*ai)->skipPos( pos_iter);
+			Index pos_next = ai->skipPos( pos_iter);
 			if (pos_next != pos_iter)
 			{
 				if (pos_next == 0) return m_posno=0;
@@ -156,12 +151,12 @@ Index IteratorIntersect::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+		PostingIteratorReferenceArray::iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
-		m_documentFrequency = (*ai)->documentFrequency();
+		m_documentFrequency = ai->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
 		{
-			Index df = (*ai)->documentFrequency();
+			Index df = ai->documentFrequency();
 			if (df < m_documentFrequency)
 			{
 				m_documentFrequency = df;

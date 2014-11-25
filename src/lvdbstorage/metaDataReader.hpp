@@ -58,19 +58,9 @@ public:
 		}
 	}
 
-	virtual float getValueFloat( const ElementHandle& element) const
+	virtual ArithmeticVariant getValue( const ElementHandle& element) const
 	{
-		return m_current.getValueFloat( m_description->get( element));
-	}
-
-	virtual int getValueInt( const ElementHandle& element) const
-	{
-		return m_current.getValueInt( m_description->get( element));
-	}
-
-	virtual unsigned int getValueUInt( const ElementHandle& element) const
-	{
-		return m_current.getValueUInt( m_description->get( element));
+		return m_current.getValue( m_description->get( element));
 	}
 
 private:

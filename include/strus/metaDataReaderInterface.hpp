@@ -29,6 +29,7 @@
 #ifndef _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/arithmeticVariant.hpp"
 
 namespace strus
 {
@@ -45,9 +46,7 @@ public:
 	virtual ElementHandle elementHandle( const std::string& name) const=0;
 	virtual void skipDoc( const Index& docno)=0;
 
-	virtual float getValueFloat( const ElementHandle& element) const=0;
-	virtual int getValueInt( const ElementHandle& element) const=0;
-	virtual unsigned int getValueUInt( const ElementHandle& element) const=0;
+	virtual ArithmeticVariant getValue( const ElementHandle& element) const=0;
 };
 }//namespace
 #endif

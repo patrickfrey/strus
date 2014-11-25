@@ -29,19 +29,26 @@
 #ifndef _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
 #include "strus/summarizerInterface.hpp"
-#include <boost/shared_ptr.hpp>
+#include "localReference.hpp"
 
 namespace strus
 {
 
 class SummarizerReference
-	:public boost::shared_ptr<SummarizerInterface>
+	:public LocalReference<SummarizerInterface>
 {
 public:
-	SummarizerReference( SummarizerInterface* o=0)
-		:boost::shared_ptr<SummarizerInterface>(o){}
-	SummarizerReference( const SummarizerReference& o)
-		:boost::shared_ptr<SummarizerInterface>(o){}
+	SummarizerReference()
+		:LocalReference<SummarizerInterface>(){}
+	SummarizerReference( SummarizerInterface* o)
+		:LocalReference<SummarizerInterface>(o){}
+};
+
+class SummarizerReferenceArray
+	:public LocalReferenceArray<SummarizerInterface>
+{
+public:
+	SummarizerReferenceArray(){}
 };
 
 }//namespace

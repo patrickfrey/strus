@@ -41,8 +41,8 @@
 #include "weighting/weightingFrequency.hpp"
 #include "weighting/weightingBM25.hpp"
 #include "weighting/weightingIdfBased.hpp"
-#include "summarizer/summarizerDocid.hpp"
 #include "summarizer/summarizerMetaData.hpp"
+#include "summarizer/summarizerAttribute.hpp"
 #include "summarizer/summarizerMatchPhrase.hpp"
 #include "summarizer/summarizerListMatches.hpp"
 #include <string>
@@ -194,7 +194,8 @@ PostingIteratorInterface*
 WeightingFunctionInterface*
 	QueryProcessor::createWeightingFunction(
 			const std::string& name,
-			const std::vector<float>& parameter) const
+			const std::vector<float>& parameter,
+			const MetaDataReaderInterface* metadata) const
 {
 	try
 	{
@@ -214,7 +215,7 @@ WeightingFunctionInterface*
 			float k1 = parameter.size() > 1 ? parameter[1]:1.5;
 			float avgDocLength = parameter.size() > 2 ? parameter[2]:1000;
 	
-			return new WeightingBM25( m_storage, k1, b, avgDocLength);
+			return new WeightingBM25( m_storage, metadata, k1, b, avgDocLength);
 		}
 		else if (isEqual( name, "bm15"))
 		{
@@ -222,7 +223,7 @@ WeightingFunctionInterface*
 			float k1 = parameter.size() > 0 ? parameter[0]:1.5;
 			float avgDocLength = parameter.size() > 1 ? parameter[1]:1000;
 	
-			return new WeightingBM25( m_storage, k1, b, avgDocLength);
+			return new WeightingBM25( m_storage, metadata, k1, b, avgDocLength);
 		}
 		else
 		{
@@ -244,16 +245,22 @@ SummarizerInterface*
 		const PostingIteratorInterface* structitr,
 		std::size_t nofitrs,
 		const PostingIteratorInterface** itrs,
-		const AttributeReaderInterface* attreader) const
+		MetaDataReaderInterface* metadata,
+		AttributeReaderInterface* attreader) const
 {
 	try
 	{
-		if (isEqual( name, "attribute"))
+		if (isEqual( name, "metadata"))
 		{
 			if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
 			if (structitr || nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
-			if (type.size() != 1) throw std::runtime_error( std::string( "only one ASCII alphanumeric character allowed as parameter metadata name for summarizer '") + name + "'");
-			return new SummarizerAttribute( m_storage, type[0]);
+			return new SummarizerMetaData( metadata, type);
+		}
+		else if (isEqual( name, "attribute"))
+		{
+			if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
+			if (structitr || nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
+			return new SummarizerAttribute( attreader, type);
 		}
 		else if (isEqual( name, "matchphrase"))
 		{

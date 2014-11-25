@@ -116,14 +116,14 @@ void MetaDataRecord::setValueFloat( const MetaDataElement* elem, float value_)
 	setValue_( *m_descr, m_ptr, elem, value_);
 }
 
-void MetaDataRecord::setValue( const MetaDataElement* elem, const Variant& value_)
+void MetaDataRecord::setValue( const MetaDataElement* elem, const ArithmeticVariant& value_)
 {
 	switch (value_.type)
 	{
-		case Variant::Null:   clearValue( elem); break;
-		case Variant::Int:    setValueInt( elem, value_); break;
-		case Variant::UInt:   setValueUInt( elem, value_); break;
-		case Variant::Float:  setValueFloat( elem, value_); break;
+		case ArithmeticVariant::Null:   clearValue( elem); break;
+		case ArithmeticVariant::Int:    setValueInt( elem, value_); break;
+		case ArithmeticVariant::UInt:   setValueUInt( elem, value_); break;
+		case ArithmeticVariant::Float:  setValueFloat( elem, value_); break;
 	}
 }
 
@@ -142,35 +142,35 @@ float MetaDataRecord::getValueFloat( const MetaDataElement* elem) const
 	return getValue_<float>( *m_descr, m_ptr, elem);
 }
 
-Variant MetaDataRecord::getValue( const MetaDataElement* elem) const
+ArithmeticVariant MetaDataRecord::getValue( const MetaDataElement* elem) const
 {
 	switch (elem->type())
 	{
 		case MetaDataElement::Int8:
-			return Variant( *(int8_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( *(int8_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt8:
-			return Variant( *(uint8_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( *(uint8_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Int16:
-			return Variant( *(int16_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( *(int16_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt16:
-			return Variant( *(uint16_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( *(uint16_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Int32:
-			return Variant( *(int32_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( *(int32_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt32:
-			return Variant( *(uint32_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( *(uint32_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Float16:
-			return Variant( floatHalfToSinglePrecision( *(float16_t*)((const char*)m_ptr + elem->ofs())));
+			return ArithmeticVariant( floatHalfToSinglePrecision( *(float16_t*)((const char*)m_ptr + elem->ofs())));
 
 		case MetaDataElement::Float32:
-			return Variant( *(float*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( *(float*)((const char*)m_ptr + elem->ofs()));
 	}
-	return Variant();
+	return ArithmeticVariant();
 }
 
 void MetaDataRecord::clearValue( const MetaDataElement* elem)

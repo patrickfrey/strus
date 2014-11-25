@@ -43,8 +43,8 @@ class AccumulatorArgument
 public:
 	AccumulatorArgument(
 			float factor_,
-			const WeightingFunctionReference& function_,
-			const PostingIteratorReference& itr_)
+			WeightingFunctionInterface* function_,
+			PostingIteratorInterface* itr_)
 		:factor(factor_)
 		,function(function_)
 		,itr(itr_){}

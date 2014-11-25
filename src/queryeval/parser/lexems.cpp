@@ -33,7 +33,6 @@
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
-#include <boost/shared_ptr.hpp>
 
 using namespace strus;
 using namespace strus::parser;

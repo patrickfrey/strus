@@ -77,7 +77,7 @@ private:
 	std::string m_termtype;
 	unsigned int m_maxlen;
 	unsigned int m_summarylen;
-	std::vector<PostingIteratorReference> m_itr;
+	PostingIteratorReferenceArray m_itr;
 	PostingIteratorReference m_phrasestruct;
 };
 

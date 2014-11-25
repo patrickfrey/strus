@@ -59,7 +59,14 @@ MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
 		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
 		const KeyValueStorage::Value* mv = storage.load( KeyValueStorage::Key( blockno));
 		MetaDataBlockReference& block = m_map[ blockno];
-		block.reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+		if (mv)
+		{
+			block.reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+		}
+		else
+		{
+			block.reset( new MetaDataBlock( &m_descr, blockno));
+		}
 		return (*block)[ MetaDataBlock::index( docno)];
 	}
 	else
@@ -68,20 +75,20 @@ MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
 	}
 }
 
-void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, const Variant& value)
+void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value)
 {
 	switch (value.type)
 	{
-		case Variant::Null:
+		case ArithmeticVariant::Null:
 			deleteMetaData( docno, varname);
 			break;
-		case Variant::Int:
+		case ArithmeticVariant::Int:
 			getRecord( docno).setValueInt( m_descr.get( m_descr.getHandle( varname)), value);
 			break;
-		case Variant::UInt:
+		case ArithmeticVariant::UInt:
 			getRecord( docno).setValueUInt( m_descr.get( m_descr.getHandle( varname)), value);
 			break;
-		case Variant::Float:
+		case ArithmeticVariant::Float:
 			getRecord( docno).setValueFloat( m_descr.get( m_descr.getHandle( varname)), value);
 			break;
 	}

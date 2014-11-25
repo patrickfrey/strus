@@ -13,7 +13,6 @@ IteratorUnion::IteratorUnion( std::size_t nofargs_, const PostingIteratorInterfa
 	{
 		throw std::runtime_error( "number of arguments of union out of range (> 64)");
 	}
-	m_argar.reserve( nofargs_);
 	std::size_t ii=0;
 	for (; ii<nofargs_; ++ii)
 	{
@@ -35,13 +34,9 @@ IteratorUnion::IteratorUnion( const IteratorUnion& o)
 	,m_documentFrequency(o.m_documentFrequency)
 {
 	std::size_t ii=0;
-	m_argar.reserve( o.m_argar.size());
 	for (; ii<o.m_argar.size(); ++ii)
 	{
-		if (o.m_argar[ii].get())
-		{
-			m_argar.push_back( o.m_argar[ ii]->copy());
-		}
+		m_argar.push_back( o.m_argar[ ii].copy());
 	}
 }
 
@@ -55,7 +50,7 @@ std::vector<PostingIteratorInterface*>
 		std::size_t ii=0;
 		for (; ii<m_argar.size(); ++ii)
 		{
-			rt.push_back( m_argar[ ii].get());
+			rt.push_back( &m_argar[ ii]);
 		}
 	}
 	return rt;
@@ -94,7 +89,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 		return m_docno;
 	}
 	m_docno = docno_;
-	std::vector<PostingIteratorReference>::const_iterator ai = m_argar.begin(), ae = m_argar.end();
+	PostingIteratorReferenceArray::iterator ai = m_argar.begin(), ae = m_argar.end();
 	if (ai == ae) return 0;
 	Index base = docno_?docno_:1;
 	Index minimum = 0;
@@ -103,7 +98,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 	int aidx=0;
 	for (; ai != ae; ++ai,++aidx)
 	{
-		minimum = (*ai)->skipDoc( base);
+		minimum = ai->skipDoc( base);
 		if (minimum) break;
 	}
 	if (!minimum)
@@ -115,7 +110,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 
 	for (aidx++,ai++; ai != ae; ++ai,++aidx)
 	{
-		Index next = (*ai)->skipDoc( base);
+		Index next = ai->skipDoc( base);
 		if (next && next <= minimum)
 		{
 			if (next < minimum)
@@ -137,7 +132,7 @@ Index IteratorUnion::skipPos( const Index& pos_)
 	Index basepos = pos_?pos_:1;
 	for (; si != se; ++si)
 	{
-		pos = selectSmallerNotNull( pos, (*si)->skipPos( basepos));
+		pos = selectSmallerNotNull( pos, si->skipPos( basepos));
 	}
 	return m_posno=pos;
 }
@@ -146,13 +141,13 @@ Index IteratorUnion::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<PostingIteratorReference>::const_iterator
+		PostingIteratorReferenceArray::iterator
 			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
-		m_documentFrequency = (*ai)->documentFrequency();
+		m_documentFrequency = ai->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
 		{
-			Index df = (*ai)->documentFrequency();
+			Index df = ai->documentFrequency();
 			if (df > m_documentFrequency)
 			{
 				m_documentFrequency = df;

@@ -359,7 +359,7 @@ MetaDataReaderInterface* Storage::createMetaDataReader() const
 	return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
 }
 
-void Storage::defineMetaData( const Index& docno, const std::string& varname, const Variant& value)
+void Storage::defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value)
 {
 	m_metaDataBlockMap->defineMetaData( docno, varname, value);
 }

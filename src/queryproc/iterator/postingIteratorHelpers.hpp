@@ -39,7 +39,7 @@ namespace strus
 {
 
 Index getFirstAllMatchDocno(
-		const std::vector<PostingIteratorReference>& ar,
+		PostingIteratorReferenceArray& ar,
 		Index docno);
 
 void encodeInteger( std::string& buf, int val);

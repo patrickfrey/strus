@@ -26,12 +26,13 @@
 
 --------------------------------------------------------------------
 */
-#include "variant.hpp"
+#include "strus/arithmeticVariant.hpp"
+#include "dll_tags.hpp"
 #include <sstream>
 
 using namespace strus;
 
-void Variant::print( std::ostream& out) const
+DLL_PUBLIC void ArithmeticVariant::print( std::ostream& out) const
 {
 	switch (type)
 	{
@@ -42,14 +43,14 @@ void Variant::print( std::ostream& out) const
 	}
 }
 
-std::string Variant::tostring() const
+DLL_PUBLIC std::string ArithmeticVariant::tostring() const
 {
 	std::ostringstream out;
 	print( out);
 	return out.str();
 }
 
-std::ostream& strus::operator<< (std::ostream& out, const Variant& v)
+DLL_PUBLIC std::ostream& strus::operator<< (std::ostream& out, const ArithmeticVariant& v)
 {
 	v.print( out);
 	return out;

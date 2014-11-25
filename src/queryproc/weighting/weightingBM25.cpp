@@ -66,7 +66,7 @@ float WeightingBM25::call( PostingIteratorInterface& itr)
 	}
 	else if (m_b)
 	{
-		float doclen = m_metadata->getValueFloat( m_docno);
+		float doclen = m_metadata->getValue( m_docno);
 		float rel_doclen = (doclen+1) / m_avgDocLength;
 		return idf()
 			* (ff * (m_k1 + 1.0))

@@ -29,6 +29,7 @@
 #include "extractKeyValueData.hpp"
 #include "indexPacker.hpp"
 #include "metaDataBlock.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <limits>
@@ -249,7 +250,7 @@ void DocMetaDataData::print( std::ostream& out)
 		for (; colidx<colend; ++colidx)
 		{
 			if (colidx) out << ',';
-			Variant value = record.getValue( descr->get( colidx));
+			ArithmeticVariant value = record.getValue( descr->get( colidx));
 			out << value;
 		}
 	}
