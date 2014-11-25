@@ -37,18 +37,10 @@ using namespace strus;
 
 MetaDataBlockMap::~MetaDataBlockMap()
 {
-	if (m_itr)
-	{
-		delete m_itr;
-	}
 }
 
 void MetaDataBlockMap::deleteMetaData( Index docno)
 {
-	if (!m_itr)
-	{
-		m_itr = m_db->NewIterator( leveldb::ReadOptions());
-	}
 	getRecord( docno).clear();
 }
 
@@ -76,19 +68,23 @@ MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
 	}
 }
 
-void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, float value)
+void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, const Variant& value)
 {
-	getRecord( docno).setValueFloat( m_descr.get( m_descr.getHandle( varname)), value);
-}
-
-void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, int value)
-{
-	getRecord( docno).setValueInt( m_descr.get( m_descr.getHandle( varname)), value);
-}
-
-void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, unsigned int value)
-{
-	getRecord( docno).setValueUInt( m_descr.get( m_descr.getHandle( varname)), value);
+	switch (value.type)
+	{
+		case Variant::Null:
+			deleteMetaData( docno, varname);
+			break;
+		case Variant::Int:
+			getRecord( docno).setValueInt( m_descr.get( m_descr.getHandle( varname)), value);
+			break;
+		case Variant::UInt:
+			getRecord( docno).setValueUInt( m_descr.get( m_descr.getHandle( varname)), value);
+			break;
+		case Variant::Float:
+			getRecord( docno).setValueFloat( m_descr.get( m_descr.getHandle( varname)), value);
+			break;
+	}
 }
 
 void MetaDataBlockMap::getWriteBatch(

@@ -29,11 +29,15 @@
 #ifndef _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
 #define _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
 #include "databaseKey.hpp"
+#include "metaDataDescription.hpp"
+#include "metaDataBlock.hpp"
 #include "docnoBlock.hpp"
 #include "posinfoBlock.hpp"
+#include "variant.hpp"
 #include "strus/index.hpp"
 #include <utility>
 #include <vector>
+#include <string>
 #include <leveldb/db.h>
 
 namespace strus {
@@ -98,11 +102,11 @@ struct VariableData
 struct DocMetaDataData
 {
 	Index blockno;
-	char name;
-	const float* blk;
-	unsigned int blksize;
+	std::vector<std::string> colnames;
+	const MetaDataDescription* descr;
+	MetaDataBlock block;
 
-	DocMetaDataData( const leveldb::Slice& key, const leveldb::Slice& value);
+	DocMetaDataData( const MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -110,7 +114,7 @@ struct DocMetaDataData
 struct DocAttributeData
 {
 	Index docno;
-	Index name;
+	Index attribno;
 	const char* valuestr;
 	unsigned int valuesize;
 
@@ -163,6 +167,27 @@ struct PosinfoBlockData
 
 	void print( std::ostream& out);
 };
+
+struct AttributeKeyData
+{
+	const char* varnamestr;
+	std::size_t varnamesize;
+	Index valueno;
+
+	AttributeKeyData( const leveldb::Slice& key, const leveldb::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct MetaDataDescrData
+{
+	MetaDataDescription descr;
+
+	MetaDataDescrData( const leveldb::Slice& key, const leveldb::Slice& value);
+	void print( std::ostream& out);
+};
+
+
 }//namespace
 #endif
 

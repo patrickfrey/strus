@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_DATABASE_KEY_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <utility>
+#include <string>
 
 namespace strus {
 
@@ -48,7 +49,8 @@ public:
 		DocFrequencyPrefix='f',	///< [typeno,termno]           ->  [index]
 		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
-		AttributeKeyPrefix='A'	///< [attribute string]        ->  [index]
+		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
+		MetaDataDescrPrefix='M'	///< []                        ->  [string]
 	};
 	static const char* keyPrefixName( KeyPrefix i)
 	{
@@ -64,6 +66,8 @@ public:
 			case DocFrequencyPrefix: return "term document frequency";
 			case DocnoBlockPrefix: return "docno posting block";
 			case PosinfoBlockPrefix: return "posinfo posting block";
+			case AttributeKeyPrefix: return "document attribute name";
+			case MetaDataDescrPrefix: return "meta data description";
 		}
 		return 0;
 	}

@@ -28,16 +28,23 @@
 */
 #include "summarizerMetaData.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/metadataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 
 using namespace strus;
+
+SummarizerMetaData::SummarizerMetaData( MetaDataReaderInterface* metadata_, const std::string& name_)
+	:m_metadata(metadata_)
+	,m_attrib(metadata_->elementHandle( name_))
+{}
 
 std::vector<std::string>
 	SummarizerMetaData::getSummary( const Index& docno)
 {
 	std::vector<std::string> rt;
-	std::string attr = m_storage->documentAttribute( docno, m_name);
-	if (!attr.empty())
+	m_metadata->skipDoc( docno);
+	std::string attr = m_metadata->getValue( m_attrib);
+	if (!attr.empty()) 
 	{
 		rt.push_back( attr);
 	}

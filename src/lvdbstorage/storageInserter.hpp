@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
 #define _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
 #include "strus/storageInserterInterface.hpp"
+#include "variant.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -115,13 +116,12 @@ private:
 			:name(o.name),value(o.value){}
 	};
 
-	template <typename ValueType>
 	struct DocMetaData
 	{
 		std::string name;
-		ValueType value;
+		Variant value;
 
-		DocMetaData( const std::string& name_, ValueType value_)
+		DocMetaData( const std::string& name_, const Variant& value_)
 			:name(name_),value(value_){}
 		DocMetaData( const DocMetaData& o)
 			:name(o.name),value(o.value){}
@@ -137,9 +137,7 @@ private:
 	TermMap m_terms;
 	InvMap m_invs;
 	std::vector<DocAttribute> m_attributes;
-	std::vector<DocMetaData<int> > m_metadata_int;
-	std::vector<DocMetaData<unsigned int> > m_metadata_uint;
-	std::vector<DocMetaData<float> > m_metadata_float;
+	std::vector<DocMetaData> m_metadata;
 };
 
 }

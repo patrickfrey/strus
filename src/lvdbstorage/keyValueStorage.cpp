@@ -27,6 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "keyValueStorage.hpp"
+#include <boost/scoped_ptr.hpp>
+#include <cstring>
 
 using namespace strus;
 
@@ -73,4 +75,90 @@ void KeyValueStorage::dispose( const Key& key, leveldb::WriteBatch& batch)
 	batch.Delete( keyslice);
 }
 
+template <class Action>
+void doForeach( leveldb::DB* db, strus::DatabaseKey::KeyPrefix keyprefix, const KeyValueStorage::Key& key, Action& action)
+{
+	leveldb::Iterator* vi = db->NewIterator( leveldb::ReadOptions());
+	boost::scoped_ptr<leveldb::Iterator> viref(vi);
+
+	std::string keystr;
+	keystr.push_back( (char)keyprefix);
+	keystr.append( key.str());
+
+	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+
+	for (vi->Seek( keyslice); vi->Valid(); vi->Next())
+	{
+		if (keystr.size() > vi->key().size()
+		||  0!=std::memcmp( vi->key().data(), keystr.c_str(), keystr.size()))
+		{
+			//... end of document reached
+			break;
+		}
+		action( vi->key(), vi->value());
+	}
+}
+
+struct DeleteNodeAction
+{
+	DeleteNodeAction( leveldb::WriteBatch& batch_)
+		:batch(&batch_){}
+	DeleteNodeAction( const DeleteNodeAction& o)
+		:batch(o.batch){}
+
+	void operator()( const leveldb::Slice& keyslice, const leveldb::Slice&)
+	{
+		batch->Delete( keyslice);
+	}
+
+private:
+	leveldb::WriteBatch* batch;
+};
+
+void KeyValueStorage::disposeSubnodes( const Key& key, leveldb::WriteBatch& batch)
+{
+	DeleteNodeAction action( batch);
+	doForeach<DeleteNodeAction>( m_db, m_keyprefix, key, action);
+}
+
+struct BuildMapAction
+{
+	BuildMapAction( std::map<std::string,std::string>& map_, bool inv_)
+		:map(&map_),inv(inv_){}
+	BuildMapAction( const BuildMapAction& o)
+		:map(o.map),inv(o.inv){}
+
+	void operator()( const leveldb::Slice& keyslice, const leveldb::Slice& valueslice)
+	{
+		if (inv)
+		{
+			(*map)[ valueslice.ToString()] = keyslice.ToString();
+		}
+		else
+		{
+			(*map)[ keyslice.ToString()] = valueslice.ToString();
+		}
+	}
+
+private:
+	std::map<std::string,std::string>* map;
+	bool inv;
+};
+
+
+std::map<std::string,std::string> KeyValueStorage::getMap( const Key& key)
+{
+	std::map<std::string,std::string> rt;
+	BuildMapAction action( rt, false);
+	doForeach( m_db, m_keyprefix, key, action);
+	return rt;
+}
+
+std::map<std::string,std::string> KeyValueStorage::getInvMap( const Key& key)
+{
+	std::map<std::string,std::string> rt;
+	BuildMapAction action( rt, true);
+	doForeach( m_db, m_keyprefix, key, action);
+	return rt;
+}
 

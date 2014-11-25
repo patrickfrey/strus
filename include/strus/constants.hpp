@@ -36,10 +36,14 @@ namespace strus
 /// \brief Some global constants that document some dependencies (hacks) that did not get yet into interfaces.
 struct Constants
 {
-	enum {
-		DOC_ATTRIBUTE_DOCID=0x40,
-		DOC_ATTRIBUTE_DOCLEN=0x23
-	};
+	static const char* attribute_docid()
+	{
+		return "docid";
+	}
+	static const char* metadata_doclen()
+	{
+		return "doclen";
+	}
 	static const char* operator_set_union()
 	{
 		return "union";

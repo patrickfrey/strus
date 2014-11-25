@@ -38,6 +38,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <boost/scoped_ptr.hpp>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -423,6 +424,9 @@ std::vector<queryeval::ResultDocument>
 	}
 	QueryStruct query( &m_setnamemap);
 
+	boost::scoped_ptr<AttributeReaderInterface>
+		attributeReader( storage.createAttributeReader());
+
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::cout << "Start evaluating query:" << std::endl;
 	print( std::cout);
@@ -550,7 +554,7 @@ std::vector<queryeval::ResultDocument>
 	if (m_accumulateOperation.defined())
 	{
 		// Create the accumulator:
-		Accumulator accumulator( &processor, maxNofRanks, storage.maxDocumentNumber());
+		Accumulator accumulator( &processor, maxNofRanks, storage.maxDocumentNumber(), attributeReader.get());
 
 		std::vector<WeightingFunction>::const_iterator
 			gi = m_accumulateOperation.args().begin(),

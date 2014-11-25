@@ -43,10 +43,11 @@ public:
 	virtual ~MetaDataReaderInterface(){}
 
 	virtual ElementHandle elementHandle( const std::string& name) const=0;
+	virtual void skipDoc( const Index& docno)=0;
 
-	virtual float getValueFloat( const ElementHandle& element, const Index& docno)=0;
-	virtual int getValueInt( const ElementHandle& element, const Index& docno)=0;
-	virtual unsigned int getValueUInt( const ElementHandle& element, const Index& docno)=0;
+	virtual float getValueFloat( const ElementHandle& element) const=0;
+	virtual int getValueInt( const ElementHandle& element) const=0;
+	virtual unsigned int getValueUInt( const ElementHandle& element) const=0;
 };
 }//namespace
 #endif

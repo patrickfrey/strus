@@ -34,6 +34,7 @@
 #include <leveldb/write_batch.h>
 #include <cstdlib>
 #include <string>
+#include <map>
 #include <stdexcept>
 
 namespace strus {
@@ -125,6 +126,10 @@ public:
 
 	void store( const Key& key, const Value& value, leveldb::WriteBatch& batch);
 	void dispose( const Key& key, leveldb::WriteBatch& batch);
+	void disposeSubnodes( const Key& key, leveldb::WriteBatch& batch);
+
+	std::map<std::string,std::string> getMap( const Key& key=Key());
+	std::map<std::string,std::string> getInvMap( const Key& key=Key());
 
 private:
 	leveldb::DB* m_db;

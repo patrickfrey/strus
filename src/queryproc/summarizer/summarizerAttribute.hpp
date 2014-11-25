@@ -26,10 +26,9 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_DOCID_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_DOCID_HPP_INCLUDED
-#include "summarizer/summarizerMetaData.hpp"
-#include "strus/constants.hpp"
+#ifndef _STRUS_SUMMARIZER_ATTRIBUTE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_ATTRIBUTE_HPP_INCLUDED
+#include "strus/summarizerInterface.hpp"
 #include <string>
 #include <vector>
 
@@ -38,16 +37,28 @@ namespace strus
 
 /// \brief Forward declaration
 class StorageInterface;
+/// \brief Forward declaration
+class AttributeReaderInterface;
 
 
-class SummarizerDocid
-	:public SummarizerMetaData
+class SummarizerAttribute
+	:public SummarizerInterface
 {
 public:
-	/// \param[in] storage_ storage to use
-	/// \param[in] name_ metadata identifier
-	SummarizerDocid( const StorageInterface* storage_)
-		:SummarizerMetaData(storage_,Constants::DOC_ATTRIBUTE_DOCID){}
+	/// \param[in] attribreader_ reader for document attributes
+	/// \param[in] name_ attribute identifier
+	SummarizerAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
+
+	virtual ~SummarizerAttribute(){}
+
+	/// \brief Get some summarization elements
+	/// \param[in] docno document to get the summary element from
+	/// \return the summarization elements
+	virtual std::vector<std::string> getSummary( const Index& docno);
+
+private:
+	AttributeReaderInterface* m_attribreader;
+	int m_attrib;
 };
 
 }//namespace

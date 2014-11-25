@@ -29,6 +29,7 @@
 #ifndef _STRUS_WEIGHTING_BM25_HPP_INCLUDED
 #define _STRUS_WEIGHTING_BM25_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
 #include "postingIteratorReference.hpp"
@@ -47,11 +48,10 @@ class WeightingBM25
 public:
 	explicit WeightingBM25(
 			const StorageInterface* storage_,
+			const MetaDataReaderInterface* metadata_,
 			float k1_,
 			float b_,
 			float avgDocLength_);
-
-	WeightingBM25( const WeightingBM25& o);
 
 	virtual ~WeightingBM25();
 
@@ -59,6 +59,8 @@ public:
 
 private:
 	const StorageInterface* m_storage;
+	const MetaDataReaderInterface* m_metadata;
+	const MetaDataReaderInterface::ElementHandle m_metadata_doclen;
 	float m_k1;
 	float m_b;
 	float m_avgDocLength;

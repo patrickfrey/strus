@@ -1,5 +1,6 @@
 #include "accumulator.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include <cstdlib>
 #include <limits>
@@ -8,19 +9,18 @@
 
 using namespace strus;
 
-#undef STRUS_LOWLEVEL_DEBUG
-
 Accumulator::Accumulator(
 		const QueryProcessorInterface* qproc_,
+		MetaDataReaderInterface* metadata_,
 		std::size_t maxNofRanks_,
 		std::size_t maxDocumentNumber_)
 	:m_queryprocessor(qproc_)
+	,m_metadata(metadata_)
 	,m_selectoridx(0)
 	,m_docno(0)
 	,m_visited(maxDocumentNumber_)
 	,m_maxNofRanks(maxNofRanks_)
 	,m_maxDocumentNumber(maxDocumentNumber_)
-	,m_called(false)
 {}
 
 void Accumulator::addSelector(
@@ -37,7 +37,7 @@ void Accumulator::addRanker(
 		const PostingIteratorInterface& iterator)
 {
 	WeightingFunctionReference weighting(
-		m_queryprocessor->createWeightingFunction( function, parameter));
+		m_queryprocessor->createWeightingFunction( function, parameter, m_metadata));
 	PostingIteratorReference itr( iterator.copy());
 
 	m_rankers.push_back( AccumulatorArgument( factor, weighting, itr));
@@ -49,23 +49,6 @@ bool Accumulator::nextRank(
 		unsigned int& selectorState,
 		float& weight)
 {
-	if (!m_called)
-	{
-		std::vector<PostingIteratorReference>::const_iterator
-			si = m_selectors.begin(), 
-			se = m_selectors.end();
-		std::size_t nofSelElems = 0;
-		for (; si != se; ++si)
-		{
-			Index df = (*si)->documentFrequency();
-			if (df > (Index)nofSelElems)
-			{
-				nofSelElems = (std::size_t)df;
-				if (nofSelElems > m_maxNofRanks) break;
-			}
-		}
-		m_called = true;
-	}
 	// For all selectors:
 	while (m_selectoridx < m_selectors.size())
 	{
@@ -85,6 +68,8 @@ bool Accumulator::nextRank(
 		}
 		m_visited[ m_docno-1] = true;
 
+		m_metadata->skipDoc( m_docno);
+
 		docno = m_docno;
 		selectorState = m_selectoridx+1;
 		weight = 0.0;
@@ -96,19 +81,8 @@ bool Accumulator::nextRank(
 		{
 			if (m_docno == ai->itr->skipDoc( m_docno))
 			{
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "MATCHES " << m_docno << ":";
-				for (Index pp=ai->itr->skipPos(0); pp != 0; pp=ai->itr->skipPos(pp+1))
-				{
-					std::cerr << ' ' << pp;
-				}
-				std::cerr << std::endl;
-#endif
 				weight += ai->function->call( *ai->itr) * ai->factor;
 			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "WEIGHT = " << weight << std::endl;
-#endif
 		}
 		return true;
 	}

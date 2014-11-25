@@ -44,12 +44,18 @@ class MetaDataDescription
 {
 public:
 	MetaDataDescription();
+	MetaDataDescription( leveldb::DB* db);
 	MetaDataDescription( const std::string& str);
 	MetaDataDescription( const MetaDataDescription& o);
 
 	MetaDataDescription& operator=( const MetaDataDescription& o);
 
 	std::string tostring() const;
+
+	std::size_t nofElements() const
+	{
+		return m_ar.size();
+	}
 
 	std::size_t bytesize() const
 	{
@@ -71,6 +77,8 @@ public:
 
 	typedef std::vector< std::pair< const MetaDataElement*, const MetaDataElement*> > TranslationMap;
 	TranslationMap getTranslationMap( const MetaDataDescription& o) const;
+
+	std::vector<std::string> columns() const;
 
 private:
 	std::size_t m_bytesize;

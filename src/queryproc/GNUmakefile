@@ -13,6 +13,7 @@ CPP_OBJS=\
 	weighting/weightingIdfBased.o \
 	summarizer/summarizerMatchPhrase.o \
 	summarizer/summarizerListMatches.o \
+	summarizer/summarizerAttribute.o \
 	summarizer/summarizerMetaData.o \
 	queryProcessor.o \
 	queryProcessorLib.o

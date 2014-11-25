@@ -69,7 +69,7 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 	leveldb::Status status = leveldb::DB::Open( options, config.path(), &db);
 	if (status.ok())
 	{
-		GlobalKeyMap variableMap( m_db, DatabaseKey::VariablePrefix);
+		GlobalKeyMap variableMap( db, DatabaseKey::VariablePrefix);
 		variableMap.store( "TermNo", 1);
 		variableMap.store( "TypeNo", 1);
 		variableMap.store( "DocNo", 1);
@@ -78,7 +78,7 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 
 		leveldb::WriteBatch batch;
 		variableMap.getWriteBatch( batch);
-		MetaDataRecord::Description md( config.metadata());
+		MetaDataDescription md( config.metadata());
 		md.store( batch);
 
 		status = db->Write( leveldb::WriteOptions(), &batch);

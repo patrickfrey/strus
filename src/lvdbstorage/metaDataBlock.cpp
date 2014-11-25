@@ -33,8 +33,13 @@
 
 using namespace strus;
 
+MetaDataBlock::MetaDataBlock()
+	:m_descr(0),m_blockno(0),m_ptr(0)
+{
+}
+
 MetaDataBlock::MetaDataBlock( const MetaDataDescription* descr_, unsigned int blockno_)
-	:m_descr(descr_),m_blockno(blockno_),m_ptr( std::calloc( MetaDataBlockSize, descr_->bytesize()))
+	:m_descr(descr_),m_blockno(blockno_),m_ptr( std::calloc( BlockSize, descr_->bytesize()))
 {
 	if (!m_ptr) throw std::bad_alloc();
 }
@@ -43,28 +48,47 @@ MetaDataBlock::MetaDataBlock( const MetaDataDescription* descr_,
 				unsigned int blockno_,
 				const char* blk_,
 				std::size_t blksize_)
-	:m_descr(descr_),m_blockno(blockno_),m_ptr( std::malloc( MetaDataBlockSize * descr_->bytesize()))
+	:m_descr(descr_),m_blockno(blockno_),m_ptr(0)
 {
-	std::size_t blkbytesize = m_descr->bytesize() * MetaDataBlockSize;
+	std::size_t blkbytesize = m_descr->bytesize() * BlockSize;
 	if (blksize_ != blkbytesize) throw std::runtime_error( "meta data block size mismatch");
+	m_ptr = std::malloc( BlockSize * descr_->bytesize());
+	if (!m_ptr) throw std::bad_alloc();
 	std::memcpy( m_ptr, blk_, blkbytesize);
 }
 
 MetaDataBlock::MetaDataBlock( const MetaDataBlock& o)
-	:m_descr(o.m_descr),m_blockno(o.m_blockno),m_ptr( std::malloc( MetaDataBlockSize * o.m_descr->bytesize()))
+	:m_descr(o.m_descr),m_blockno(o.m_blockno),m_ptr(0)
 {
-	std::size_t blkbytesize = m_descr->bytesize() * MetaDataBlockSize;
+	std::size_t blkbytesize = m_descr->bytesize() * BlockSize;
+	m_ptr = std::malloc( BlockSize * o.m_descr->bytesize());
+	if (!m_ptr) throw std::bad_alloc();
 	std::memcpy( m_ptr, o.m_ptr, blkbytesize);
 }
 
 MetaDataBlock::~MetaDataBlock()
 {
-	std::free( m_ptr);
+	if (m_ptr) std::free( m_ptr);
+}
+
+void MetaDataBlock::init( const MetaDataDescription* descr_, 
+				unsigned int blockno_,
+				const char* blk_,
+				std::size_t blksize_)
+{
+	std::size_t blkbytesize = descr_->bytesize() * BlockSize;
+	if (blksize_ != blkbytesize) throw std::runtime_error( "meta data block size mismatch");
+	void* mem = std::malloc( BlockSize * descr_->bytesize());
+	if (!mem) throw std::bad_alloc();
+	m_descr = descr_;
+	m_blockno = blockno_;
+	m_ptr = mem;
+	std::memcpy( m_ptr, blk_, blkbytesize);
 }
 
 const MetaDataRecord MetaDataBlock::operator[]( std::size_t idx) const
 {
-	if (idx >= MetaDataBlockSize) throw std::logic_error( "array bound read in meta data block");
+	if (idx >= BlockSize) throw std::logic_error( "array bound read in meta data block");
 	void* recaddr = (char*)m_ptr + (idx * m_descr->bytesize());
 	return MetaDataRecord( m_descr, recaddr);
 }

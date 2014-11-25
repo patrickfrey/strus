@@ -37,6 +37,7 @@
 #include "indexPacker.hpp"
 #include "blockStorage.hpp"
 #include "statistics.hpp"
+#include "attributeReader.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -52,7 +53,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_next_termno(0)
 	,m_next_typeno(0)
 	,m_next_docno(0)
-	,m_next_attributeno(0)
+	,m_next_attribno(0)
 	,m_nof_documents(0)
 	,m_dfMap(0)
 	,m_metaDataBlockMap(0)
@@ -94,7 +95,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_next_termno = m_variableMap->lookUp( "TermNo");
 			m_next_typeno = m_variableMap->lookUp( "TypeNo");
 			m_next_docno = m_variableMap->lookUp( "DocNo");
-			m_next_attributeno = m_variableMap->lookUp( "AttributeNo");
+			m_next_attribno = m_variableMap->lookUp( "AttribNo");
 			m_nof_documents = m_variableMap->lookUp( "NofDocs");
 		}
 		catch (const std::bad_alloc&)
@@ -147,7 +148,7 @@ void Storage::writeInserterBatch()
 	m_variableMap->store( "TermNo", m_next_termno);
 	m_variableMap->store( "TypeNo", m_next_typeno);
 	m_variableMap->store( "DocNo", m_next_docno);
-	m_variableMap->store( "AttributeNo", m_next_attributeno);
+	m_variableMap->store( "AttribNo", m_next_attribno);
 	m_variableMap->store( "NofDocs", m_nof_documents);
 
 	m_dfMap->getWriteBatch( m_inserter_batch);
@@ -236,12 +237,6 @@ void Storage::deleteKey(const leveldb::Slice& key)
 	m_inserter_batch.Delete( key);
 }
 
-leveldb::Iterator* Storage::newIterator()
-{
-	if (!m_db) throw std::runtime_error("open read iterator on closed storage");
-	return m_db->NewIterator( leveldb::ReadOptions());
-}
-
 Index Storage::getTermValue( const std::string& name) const
 {
 	return m_termValueMap->lookUp( name);
@@ -282,7 +277,7 @@ Index Storage::getOrCreateDocno( const std::string& name, bool& isNew)
 
 Index Storage::getOrCreateAttribute( const std::string& name)
 {
-	return m_attributeNameMap->getOrCreate( name, m_next_attributeno);
+	return m_attributeNameMap->getOrCreate( name, m_next_attribno);
 }
 
 PostingIteratorInterface*
@@ -354,21 +349,9 @@ Index Storage::documentNumber( const std::string& docid) const
 	return m_docIdMap->lookUp( docid);
 }
 
-std::string Storage::documentAttribute( const Index& docno, char varname) const
+AttributeReaderInterface* Storage::createAttributeReader() const
 {
-	DatabaseKey key( (char)DatabaseKey::DocAttributePrefix, docno, varname);
-	leveldb::Slice keyslice( key.ptr(), key.size());
-	std::string value;
-	leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
-	if (status.IsNotFound())
-	{
-		return std::string();
-	}
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	return value;
+	return new AttributeReader( this, m_db);
 }
 
 MetaDataReaderInterface* Storage::createMetaDataReader() const
@@ -376,17 +359,7 @@ MetaDataReaderInterface* Storage::createMetaDataReader() const
 	return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
 }
 
-void Storage::defineMetaData( const Index& docno, const std::string& varname, float value)
-{
-	m_metaDataBlockMap->defineMetaData( docno, varname, value);
-}
-
-void Storage::defineMetaData( const Index& docno, const std::string& varname, int value)
-{
-	m_metaDataBlockMap->defineMetaData( docno, varname, value);
-}
-
-void Storage::defineMetaData( const Index& docno, const std::string& varname, unsigned int value)
+void Storage::defineMetaData( const Index& docno, const std::string& varname, const Variant& value)
 {
 	m_metaDataBlockMap->defineMetaData( docno, varname, value);
 }
@@ -450,24 +423,17 @@ std::vector<StatCounterValue> Storage::getStatistics() const
 
 void Storage::deleteAttributes( const Index& docno)
 {
-	leveldb::Iterator* vi = newIterator();
-	boost::scoped_ptr<leveldb::Iterator> viref(vi);
+	KeyValueStorage attribstorage( m_db, DatabaseKey::DocAttributePrefix, false);
+	attribstorage.disposeSubnodes( KeyValueStorage::Key( docno), m_inserter_batch);
+}
 
-	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno);
-	for (vi->Seek( leveldb::Slice( docattribkey.ptr(), docattribkey.size()));
-		vi->Valid(); vi->Next())
-	{
-		if (docattribkey.size() > vi->key().size()
-		||  0!=std::memcmp( vi->key().data(), (char*)docattribkey.ptr(), docattribkey.size()))
-		{
-			//... end of document reached
-			break;
-		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE ATTRIBUTE [" << vi->key().ToString() << "]" << std::endl;
-#endif
-		deleteKey( vi->key());
-	}
+void Storage::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
+{
+	Index attribno = getOrCreateAttribute( varname);
+	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno, attribno);
+
+	leveldb::Slice keyslice( docattribkey.ptr(), docattribkey.size());
+	writeKeyValue( keyslice, value);
 }
 
 void Storage::deleteIndex( const Index& docno)
@@ -479,7 +445,7 @@ void Storage::deleteIndex( const Index& docno)
 	std::size_t invkeysize = invkey.size();
 	leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
 
-	leveldb::Iterator* vi = newIterator();
+	leveldb::Iterator* vi = m_db->NewIterator( leveldb::ReadOptions());
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
 
 	//[1] Iterate on key prefix elements [ForwardIndexPrefix, docno, typeno, *] and mark them as deleted
@@ -491,9 +457,6 @@ void Storage::deleteIndex( const Index& docno)
 			//... end of document reached
 			break;
 		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE INV [" << vi->key().ToString() << "]" << std::endl;
-#endif
 		deleteKey( vi->key());
 
 		const char* ki = vi->key().data() + invkeysize;
@@ -507,17 +470,13 @@ void Storage::deleteIndex( const Index& docno)
 		oldcontent.insert( TermMapKey( typeno, valueno));
 	}
 
-	//[2] Iterate on 'oldcontent' elements built in [1.1] 
-	//	and mark delete the postings
+	//[2] Iterate on 'oldcontent' elements built and delete the postings
 	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
 	for (; di != de; ++di)
 	{
 		deleteDocnoPosting( di->first, di->second, docno);
 		deletePosinfoPosting( di->first, di->second, docno);
 
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "DELETE TERMS [" << di->first << " " << di->second << " " << docno << "]" << std::endl;
-#endif
 		decrementDf( di->first, di->second);
 	}
 }

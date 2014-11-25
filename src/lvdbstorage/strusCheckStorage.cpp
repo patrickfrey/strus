@@ -31,6 +31,7 @@
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
+#include "metaDataDescription.hpp"
 #include "metaDataBlock.hpp"
 #include "extractKeyValueData.hpp"
 #include "strus/utils/cmdLineOpt.hpp"
@@ -73,7 +74,7 @@ static std::string keystring( const leveldb::Slice& key)
 	return rt;
 }
 
-static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& value)
+static void checkKeyValue( const strus::MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value)
 {
 	try
 	{
@@ -106,7 +107,7 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 			}
 			case strus::DatabaseKey::DocMetaDataPrefix:
 			{
-				strus::DocMetaDataData( key, value);
+				strus::DocMetaDataData( metadescr, key, value);
 				break;
 			}
 			case strus::DatabaseKey::DocAttributePrefix:
@@ -129,6 +130,17 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 				strus::PosinfoBlockData data( key, value);
 				break;
 			}
+			case strus::DatabaseKey::MetaDataDescrPrefix:
+			{
+				
+				strus::MetaDataDescrData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::AttributeKeyPrefix:
+			{
+				strus::AttributeKeyData( key, value);
+				break;
+			}
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -139,6 +151,8 @@ static void checkKeyValue( const leveldb::Slice& key, const leveldb::Slice& valu
 
 static void checkDB( leveldb::DB* db)
 {
+	strus::MetaDataDescription metadescr( db);
+
 	unsigned int cnt = 0;
 	char prevkeytype = 0;
 	leveldb::Iterator* itr = db->NewIterator( leveldb::ReadOptions());
@@ -169,7 +183,7 @@ static void checkDB( leveldb::DB* db)
 					<< std::endl;
 			prevkeytype = key.data()[0];
 		}
-		checkKeyValue( key, itr->value());
+		checkKeyValue( &metadescr, key, itr->value());
 		++cnt;
 	};
 	std::cerr << "... checked " << cnt << " entries" << std::endl;

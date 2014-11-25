@@ -39,6 +39,8 @@ class PostingIteratorInterface;
 class WeightingFunctionInterface;
 /// \brief Forward declaration
 class SummarizerInterface;
+/// \brief Forward declaration
+class MetaDataReaderInterface;
 
 
 /// \brief Defines all object instances involved in query evaluation addressable by name
@@ -73,11 +75,13 @@ public:
 	/// \brief Create a weighting function for term occurrencies
 	/// \param[in] name name of the weighting function
 	/// \param[in] parameter scaling arguments for the function
+	/// \param[in] metadata reader for document meta data
 	/// \return the created weighting function object (to dispose with 'delete')
 	virtual WeightingFunctionInterface*
 		createWeightingFunction(
 			const std::string& name,
-			const std::vector<float>& parameter) const=0;
+			const std::vector<float>& parameter,
+			const MetaDataReaderInterface* metadata) const=0;
 
 	/// \brief Create a summarizer for adding attributes to matches
 	/// \param[in] name name of the summarizer
@@ -86,6 +90,7 @@ public:
 	/// \param[in] structitr iterator representing the structure delimiter elements for summarization
 	/// \param[in] nofitrs number of feature iterators this summarizer is based on
 	/// \param[in] itrs feature iterators for this summarizer 
+	/// \param[in] metadata reader for document meta data
 	/// \return the created summarizer object (to dispose with 'delete')
 	virtual SummarizerInterface*
 		createSummarizer(
@@ -94,7 +99,8 @@ public:
 			const std::vector<float>& parameter,
 			const PostingIteratorInterface* structitr,
 			std::size_t nofitrs,
-			const PostingIteratorInterface** itrs) const=0;
+			const PostingIteratorInterface** itrs,
+			const AttributeReaderInterface* attreader) const=0;
 };
 
 }//namespace

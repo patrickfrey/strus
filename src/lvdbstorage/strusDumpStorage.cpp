@@ -32,6 +32,7 @@
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
 #include "metaDataBlock.hpp"
+#include "metaDataDescription.hpp"
 #include "extractKeyValueData.hpp"
 #include "strus/utils/cmdLineOpt.hpp"
 #include <iostream>
@@ -73,7 +74,7 @@ static std::string keystring( const leveldb::Slice& key)
 	return rt;
 }
 
-static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const leveldb::Slice& value)
+static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value)
 {
 	try
 	{
@@ -111,7 +112,7 @@ static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const le
 			}
 			case strus::DatabaseKey::DocMetaDataPrefix:
 			{
-				strus::DocMetaDataData data( key, value);
+				strus::DocMetaDataData data( metadescr, key, value);
 				data.print( out);
 				break;
 			}
@@ -139,6 +140,19 @@ static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const le
 				data.print( out);
 				break;
 			}
+			case strus::DatabaseKey::MetaDataDescrPrefix:
+			{
+				
+				strus::MetaDataDescrData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::AttributeKeyPrefix:
+			{
+				strus::AttributeKeyData data( key, value);
+				data.print( out);
+				break;
+			}
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -149,6 +163,8 @@ static void dumpKeyValue( std::ostream& out, const leveldb::Slice& key, const le
 
 static void dumpDB( std::ostream& out, leveldb::DB* db)
 {
+	strus::MetaDataDescription metadescr( db);
+
 	unsigned int cnt = 0;
 	char prevkeytype = 0;
 	leveldb::Iterator* itr = db->NewIterator( leveldb::ReadOptions());
@@ -179,7 +195,7 @@ static void dumpDB( std::ostream& out, leveldb::DB* db)
 					<< std::endl;
 			prevkeytype = key.data()[0];
 		}
-		dumpKeyValue( out, key, itr->value());
+		dumpKeyValue( out, &metadescr, key, itr->value());
 		++cnt;
 	};
 	std::cerr << "... dumped " << cnt << " entries" << std::endl;

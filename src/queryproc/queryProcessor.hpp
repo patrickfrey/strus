@@ -66,7 +66,8 @@ public:
 	virtual WeightingFunctionInterface*
 		createWeightingFunction(
 			const std::string& name,
-			const std::vector<float>& parameter) const;
+			const std::vector<float>& parameter,
+			const MetaDataReaderInterface* metadata) const;
 
 	virtual SummarizerInterface*
 		createSummarizer(
@@ -75,7 +76,8 @@ public:
 			const std::vector<float>& parameter,
 			const PostingIteratorInterface* structitr,
 			std::size_t nofitrs,
-			const PostingIteratorInterface** itrs) const;
+			const PostingIteratorInterface** itrs,
+			const AttributeReaderInterface* attreader) const;
 
 private:
 	StorageInterface* m_storage;

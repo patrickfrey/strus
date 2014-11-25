@@ -53,6 +53,7 @@ public:
 	/// \brief Constructor
 	Accumulator(
 			const QueryProcessorInterface* qproc_,
+			MetaDataReaderInterface* metadata_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_);
 
@@ -78,6 +79,7 @@ private:
 
 private:
 	const QueryProcessorInterface* m_queryprocessor;
+	MetaDataReaderInterface* m_metadata;
 	std::vector<PostingIteratorReference> m_selectors;
 	unsigned int m_selectoridx;
 	Index m_docno;
@@ -85,7 +87,6 @@ private:
 	boost::dynamic_bitset<> m_visited;
 	std::size_t m_maxNofRanks;
 	Index m_maxDocumentNumber;
-	bool m_called;
 };
 
 }//namespace

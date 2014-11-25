@@ -47,8 +47,6 @@ public:
 	WeightingFrequency(
 			const StorageInterface* storage_)
 		:WeightingIdfBased(storage_){}
-	WeightingFrequency( const WeightingFrequency& o)
-		:WeightingIdfBased(o){}
 
 	virtual ~WeightingFrequency(){}
 

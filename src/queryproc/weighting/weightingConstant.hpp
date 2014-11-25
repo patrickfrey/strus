@@ -48,12 +48,10 @@ public:
 			float weight_,
 			const StorageInterface* storage_)
 		:WeightingIdfBased(storage_),m_weight(weight_){}
-	WeightingConstant( const WeightingConstant& o)
-		:WeightingIdfBased(o),m_weight(o.m_weight){}
 
 	virtual ~WeightingConstant(){}
 
-	float call( PostingIteratorInterface& itr)
+	virtual float call( PostingIteratorInterface& itr)
 	{
 		return m_weight;
 	}

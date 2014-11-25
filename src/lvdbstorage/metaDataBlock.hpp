@@ -39,6 +39,7 @@ namespace strus {
 class MetaDataBlock
 {
 public:
+	MetaDataBlock();
 	MetaDataBlock( const MetaDataDescription* descr_, unsigned int blockno_);
 	MetaDataBlock( const MetaDataDescription* descr_, 
 			unsigned int blockno_,
@@ -49,8 +50,13 @@ public:
 
 	~MetaDataBlock();
 
-	static std::size_t index( const Index& docno)			{return (docno-1) & MetaDataBlockMask;}
-	static Index blockno( const Index& docno)			{return ((docno-1)>>MetaDataBlockShift)+1;}
+	void init( const MetaDataDescription* descr_, 
+			unsigned int blockno_,
+			const char* blk_,
+			std::size_t blksize_);
+
+	static std::size_t index( const Index& docno)			{return (docno-1) & BlockMask;}
+	static Index blockno( const Index& docno)			{return ((docno-1)>>BlockShift)+1;}
 
 	Index blockno() const						{return m_blockno;}
 
@@ -58,17 +64,17 @@ public:
 
 	const void* ptr() const						{return m_ptr;}
 	const char* charptr() const					{return (const char*)m_ptr;}
-	std::size_t bytesize() const					{return m_descr->bytesize() * MetaDataBlockSize;}
+	std::size_t bytesize() const					{return m_descr->bytesize() * BlockSize;}
 
 public:
 	enum {
 		/// \remark This value limits the maximum docno possible to (MetaDataBlockCache::CacheSize * MetaDataBlockSize)
-		MetaDataBlockSize=256		///< number of records in one meta data block
+		BlockSize=256		///< number of records in one meta data block
 	};
 private:
 	enum {
-		MetaDataBlockMask=((int)MetaDataBlockSize-1),
-		MetaDataBlockShift=8
+		BlockMask=((int)BlockSize-1),
+		BlockShift=8
 	};
 
 private:

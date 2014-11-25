@@ -64,7 +64,7 @@ const MetaDataRecord MetaDataBlockCache::get( Index docno)
 {
 	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
 	std::size_t docidx     = (std::size_t)(docno -1);
-	std::size_t blkidx     = docidx / MetaDataBlock::MetaDataBlockSize;
+	std::size_t blkidx     = docidx / MetaDataBlock::BlockSize;
 	std::size_t blockno    = blkidx+1;
 
 	// The fact that the reference counting of shared_ptr is

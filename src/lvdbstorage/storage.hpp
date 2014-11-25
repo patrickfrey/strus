@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_STORAGE_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
+#include "variant.hpp"
 #include "databaseKey.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
@@ -55,6 +56,11 @@ class PostingIteratorInterface;
 class ForwardIteratorInterface;
 /// \brief Forward declaration
 class StorageInserterInterface;
+/// \brief Forward declaration
+class AttributeReaderInterface;
+/// \brief Forward declaration
+class MetaDataReaderInterface;
+
 
 /// \brief Strus IR storage implementation based on LevelDB
 class Storage
@@ -84,13 +90,13 @@ public:
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
+	virtual AttributeReaderInterface* createAttributeReader() const;
+
 	virtual Index nofDocumentsInserted() const;
 
 	virtual Index maxDocumentNumber() const;
 
 	virtual Index documentNumber( const std::string& docid) const;
-
-	virtual std::string documentAttribute( const Index& docno, char varname) const;
 
 	virtual std::vector<StatCounterValue> getStatistics() const;
 
@@ -100,12 +106,12 @@ public:
 
 	enum {NofDocumentsInsertedBeforeAutoCommit=1024};
 
-	void defineMetaData( const Index& docno, const std::string& varname, float value);
-	void defineMetaData( const Index& docno, const std::string& varname, int value);
-	void defineMetaData( const Index& docno, const std::string& varname, unsigned int value);
+	void defineMetaData( const Index& docno, const std::string& varname, const Variant& value);
 	void deleteMetaData( const Index& docno);
 
+	void defineAttribute( const Index& docno, const std::string& varname, const std::string& value);
 	void deleteAttributes( const Index& docno);
+
 	void deleteIndex( const Index& docno);
 
 	void defineDocnoPosting(
@@ -129,8 +135,6 @@ public:
 
 	void incrementNofDocumentsInserted();
 	void decrementNofDocumentsInserted();
-
-	leveldb::Iterator* newIterator();
 
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
@@ -158,7 +162,7 @@ private:
 	Index m_next_termno;					///< next index to assign to a new term value
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_docno;					///< next index to assign to a new document id
-	Index m_next_attributeno;				///< next index to assign to a new attribute name
+	Index m_next_attribno;					///< next index to assign to a new attribute name
 	Index m_nof_documents;					///< number of documents inserted
 	boost::mutex m_nof_documents_mutex;			///< mutual exclusion for accessing m_nof_documents
 

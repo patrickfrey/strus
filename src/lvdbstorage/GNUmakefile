@@ -2,6 +2,7 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
+	variant.o \
 	statistics.o \
 	floatConversions.o \
 	indexPacker.o \
@@ -11,6 +12,7 @@ CPP_OBJS=\
 	dataBlockStorage.o \
 	docnoBlock.o \
 	posinfoBlock.o \
+	attributeReader.o \
 	metaDataElement.o \
 	metaDataDescription.o \
 	metaDataRecord.o \

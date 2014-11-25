@@ -50,30 +50,26 @@ public:
 		return m_description->getHandle( name);
 	}
 
-	virtual float getValueFloat( const ElementHandle& element, const Index& docno)
+	virtual void skipDoc( const Index& docno)
 	{
 		if (docno != m_docno)
 		{
 			m_current = m_cache->get( m_docno=docno);
 		}
+	}
+
+	virtual float getValueFloat( const ElementHandle& element) const
+	{
 		return m_current.getValueFloat( m_description->get( element));
 	}
 
-	virtual int getValueInt( const ElementHandle& element, const Index& docno)
+	virtual int getValueInt( const ElementHandle& element) const
 	{
-		if (docno != m_docno)
-		{
-			m_current = m_cache->get( m_docno=docno);
-		}
 		return m_current.getValueInt( m_description->get( element));
 	}
 
-	virtual unsigned int getValueUInt( const ElementHandle& element, const Index& docno)
+	virtual unsigned int getValueUInt( const ElementHandle& element) const
 	{
-		if (docno != m_docno)
-		{
-			m_current = m_cache->get( m_docno=docno);
-		}
 		return m_current.getValueUInt( m_description->get( element));
 	}
 

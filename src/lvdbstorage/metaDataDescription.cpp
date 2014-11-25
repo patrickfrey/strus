@@ -34,8 +34,13 @@
 using namespace strus;
 
 MetaDataDescription::MetaDataDescription()
+	:m_bytesize(0)
+{}
+
+MetaDataDescription::MetaDataDescription( leveldb::DB* db)
+	:m_bytesize(0)
 {
-	m_bytesize = 0;
+	load( db);
 }
 
 MetaDataDescription::MetaDataDescription( const MetaDataDescription& o)
@@ -178,15 +183,15 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 
 void MetaDataDescription::load( leveldb::DB* db)
 {
-	KeyValueStorage mdstorage( db, DatabaseKey::VariablePrefix, false);
-	const KeyValueStorage::Value* mdptr = mdstorage.load( KeyValueStorage::Key("MetaDataDescription"));
+	KeyValueStorage mdstorage( db, DatabaseKey::MetaDataDescrPrefix, false);
+	const KeyValueStorage::Value* mdptr = mdstorage.load( KeyValueStorage::Key());
 	*this = MetaDataDescription( std::string( mdptr->ptr(), mdptr->size()));
 }
 
 void MetaDataDescription::store( leveldb::WriteBatch& batch)
 {
-	KeyValueStorage mdstorage( 0, DatabaseKey::VariablePrefix, false);
-	mdstorage.store( KeyValueStorage::Key("MetaDataDescription"), tostring(), batch);
+	KeyValueStorage mdstorage( 0, DatabaseKey::MetaDataDescrPrefix, false);
+	mdstorage.store( KeyValueStorage::Key(), tostring(), batch);
 }
 
 MetaDataDescription::TranslationMap
@@ -208,4 +213,23 @@ MetaDataDescription::TranslationMap
 	return rt;
 }
 
+std::vector<std::string> MetaDataDescription::columns() const
+{
+	std::vector<std::string> rt;
+	std::map<std::string,std::size_t>::const_iterator
+		ni = m_namemap.begin(), ne = m_namemap.end();
+	std::size_t cidx=0,cend=m_namemap.size();
+	for (;cidx < cend; ++cidx)
+	{
+		for (; ni != ne; ++ni)
+		{
+			if (ni->second == cidx)
+			{
+				rt.push_back( ni->first);
+				break;
+			}
+		}
+	}
+	return rt;
+}
 

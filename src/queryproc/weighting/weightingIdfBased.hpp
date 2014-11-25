@@ -49,11 +49,6 @@ public:
 		,m_idf(0.0)
 		,m_idf_calculated(false){}
 
-	WeightingIdfBased( const WeightingIdfBased& o)
-		:m_storage(o.m_storage)
-		,m_idf(o.m_idf)
-		,m_idf_calculated(o.m_idf_calculated){}
-
 	virtual ~WeightingIdfBased(){}
 
 	virtual float call( PostingIteratorInterface& itr)=0;

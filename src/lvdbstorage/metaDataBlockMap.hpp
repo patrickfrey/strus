@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
+#include "variant.hpp"
 #include <cstdlib>
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -47,14 +48,12 @@ class MetaDataBlockMap
 {
 public:
 	MetaDataBlockMap( leveldb::DB* db_, const MetaDataDescription& descr_)
-		:m_db(db_),m_descr(descr_),m_itr(0){}
+		:m_db(db_),m_descr(descr_){}
 	MetaDataBlockMap( const MetaDataBlockMap& o)
-		:m_db(o.m_db),m_itr(0),m_map(o.m_map){}
+		:m_db(o.m_db),m_map(o.m_map){}
 	~MetaDataBlockMap();
 
-	void defineMetaData( Index docno, const std::string& varname, float value);
-	void defineMetaData( Index docno, const std::string& varname, int value);
-	void defineMetaData( Index docno, const std::string& varname, unsigned int value);
+	void defineMetaData( Index docno, const std::string& varname, const Variant& value);
 	void deleteMetaData( Index docno);
 	void deleteMetaData( Index docno, const std::string& varname);
 
@@ -70,7 +69,6 @@ private:
 private:
 	leveldb::DB* m_db;
 	MetaDataDescription m_descr;
-	leveldb::Iterator* m_itr;
 	boost::mutex m_mutex;
 	Map m_map;
 };

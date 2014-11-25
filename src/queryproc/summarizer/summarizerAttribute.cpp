@@ -26,59 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
+#include "summarizerAttribute.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/attributeReaderInterface.hpp"
+#include "strus/storageInterface.hpp"
 
 using namespace strus;
 
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	const MetaDataReaderInterface* metadata_,
-	float k1_,
-	float b_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_metadata(metadata_)
-		,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-		,m_k1(k1_)
-		,m_b(b_)
-		,m_avgDocLength(avgDocLength_)
-		,m_docno(0)
-		
+SummarizerAttribute::SummarizerAttribute( AttributeReaderInterface* attribreader_, const std::string& name_)
+	:m_attribreader(attribreader_)
+	,m_attrib(attribreader_->elementHandle( name_))
 {}
 
-WeightingBM25::~WeightingBM25()
-{}
-
-float WeightingBM25::call( PostingIteratorInterface& itr)
+std::vector<std::string>
+	SummarizerAttribute::getSummary( const Index& docno)
 {
-	if (!idf_calculated())
+	std::vector<std::string> rt;
+	m_attribreader->skipDoc( docno);
+	std::string attr = m_attribreader->getValue( m_attrib);
+	if (!attr.empty()) 
 	{
-		calculateIdf( itr);
+		rt.push_back( attr);
 	}
-	m_docno = itr.docno();
-	float ff = itr.frequency();
-	if (ff == 0.0)
-	{
-		return 0.0;
-	}
-	else if (m_b)
-	{
-		float doclen = m_metadata->getValueFloat( m_docno);
-		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
-	}
-	else
-	{
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * 1.0);
-	}
+	return rt;
 }
-
 
 

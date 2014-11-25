@@ -27,6 +27,7 @@ uninstall:
 	@-rm $(INSTALL_INCDIR)/index.hpp
 	@-rm $(INSTALL_INCDIR)/postingIteratorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/metaDataReaderInterface.hpp
+	@-rm $(INSTALL_INCDIR)/attributeReaderInterface.hpp
 	@-rm $(INSTALL_INCDIR)/queryeval/query.hpp
 	@-rm $(INSTALL_INCDIR)/queryeval/resultDocument.hpp
 	@-rm $(INSTALL_INCDIR)/queryeval/weightedDocument.hpp

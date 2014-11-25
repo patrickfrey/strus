@@ -83,4 +83,44 @@ void GlobalKeyMap::getWriteBatch( leveldb::WriteBatch& batch)
 	m_map.clear();
 }
 
+GlobalKeyMap::Map GlobalKeyMap::getMap()
+{
+	std::map<std::string,std::string> smap = m_storage.getMap();
+	Map rt;
+	std::map<std::string,std::string>::const_iterator si = smap.begin(), se = smap.end();
+	for (; si != se; ++si)
+	{
+		char const* vi = si->second.c_str();
+		const char* ve = vi + si->second.size();
+		rt[ si->first] = unpackIndex( vi, ve);
+	}
+	boost::mutex::scoped_lock( m_mutex);
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
+	{
+		rt[ mi->first] = mi->second;
+	}
+	return rt;
+}
+
+GlobalKeyMap::InvMap GlobalKeyMap::getInvMap()
+{
+	std::map<std::string,std::string> smap = m_storage.getMap();
+	InvMap rt;
+	std::map<std::string,std::string>::const_iterator si = smap.begin(), se = smap.end();
+	for (; si != se; ++si)
+	{
+		char const* vi = si->second.c_str();
+		const char* ve = vi + si->second.size();
+		rt[ unpackIndex( vi, ve)] = si->first;
+	}
+	boost::mutex::scoped_lock( m_mutex);
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
+	{
+		rt[ mi->second] = mi->first;
+	}
+	return rt;
+}
+
 

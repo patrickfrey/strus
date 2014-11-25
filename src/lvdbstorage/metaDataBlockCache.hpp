@@ -57,8 +57,8 @@ private:
 
 private:
 	enum {
-		CacheSize=(1024*1024),					///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::MetaDataBlockSize)	///< hardcode limit of maximum document number
+		CacheSize=(1024*1024),				///< size of the cache in blocks
+		MaxDocno=(CacheSize*MetaDataBlock::BlockSize)	///< hardcode limit of maximum document number
 	};
 
 private:

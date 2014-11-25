@@ -26,59 +26,28 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
+#ifndef _STRUS_ATTRIBUTE_READER_INTERFACE_HPP_INCLUDED
+#define _STRUS_ATTRIBUTE_READER_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <string>
 
-using namespace strus;
-
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	const MetaDataReaderInterface* metadata_,
-	float k1_,
-	float b_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_metadata(metadata_)
-		,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-		,m_k1(k1_)
-		,m_b(b_)
-		,m_avgDocLength(avgDocLength_)
-		,m_docno(0)
-		
-{}
-
-WeightingBM25::~WeightingBM25()
-{}
-
-float WeightingBM25::call( PostingIteratorInterface& itr)
+namespace strus
 {
-	if (!idf_calculated())
-	{
-		calculateIdf( itr);
-	}
-	m_docno = itr.docno();
-	float ff = itr.frequency();
-	if (ff == 0.0)
-	{
-		return 0.0;
-	}
-	else if (m_b)
-	{
-		float doclen = m_metadata->getValueFloat( m_docno);
-		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
-	}
-	else
-	{
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * 1.0);
-	}
-}
 
+/// \brief Interface for accessing document attributes from a strus storage
+class AttributeReaderInterface
+{
+public:
+	typedef int ElementHandle;
 
+	/// \brief Destructor
+	virtual ~AttributeReaderInterface(){}
+
+	virtual ElementHandle elementHandle( const std::string& name) const=0;
+	virtual void skipDoc( const Index& docno)=0;
+
+	virtual std::string getValue( const ElementHandle& element) const=0;
+};
+}//namespace
+#endif
 

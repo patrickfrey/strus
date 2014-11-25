@@ -36,18 +36,16 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class StorageInterface;
+class MetaDataReaderInterface;
 
 
 class SummarizerMetaData
 	:public SummarizerInterface
 {
 public:
-	/// \param[in] storage_ storage to use
+	/// \param[in] metadata_ reader for meta data
 	/// \param[in] name_ metadata identifier
-	SummarizerMetaData( const StorageInterface* storage_, char name_)
-		:m_storage(storage_)
-		,m_name(name_){}
+	SummarizerMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
 
 	virtual ~SummarizerMetaData(){}
 
@@ -57,8 +55,8 @@ public:
 	virtual std::vector<std::string> getSummary( const Index& docno);
 
 private:
-	const StorageInterface* m_storage;
-	char m_name;
+	MetaDataReaderInterface* m_metadata;
+	int m_attrib;
 };
 
 }//namespace

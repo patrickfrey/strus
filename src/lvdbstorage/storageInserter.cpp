@@ -37,8 +37,6 @@
 
 using namespace strus;
 
-#undef STRUS_LOWLEVEL_DEBUG
-
 StorageInserter::StorageInserter( Storage* storage_, const std::string& docid_)
 	:m_storage(storage_),m_docid(docid_)
 {}
@@ -72,30 +70,24 @@ void StorageInserter::addTermOccurrence(
 }
 
 void StorageInserter::setMetaData(
-		char name_,
-		float value_)
-{
-}
-
-void StorageInserter::setMetaData(
 		const std::string& name_,
 		float value_)
 {
-	m_metadata_float.push_back( DocMetaData<float>( name_, value_));
+	m_metadata.push_back( DocMetaData( name_, value_));
 }
 
 void StorageInserter::setMetaData(
 		const std::string& name_,
 		int value_)
 {
-	m_metadata_int.push_back( DocMetaData<int>( name_, value_));
+	m_metadata.push_back( DocMetaData( name_, value_));
 }
 
 void StorageInserter::setMetaData(
 		const std::string& name_,
 		unsigned int value_)
 {
-	m_metadata_uint.push_back( DocMetaData<unsigned int>( name_, value_));
+	m_metadata.push_back( DocMetaData( name_, value_));
 }
 
 void StorageInserter::setAttribute(
@@ -110,54 +102,20 @@ void StorageInserter::done()
 	bool documentIsNew = false;
 	Index docno = m_storage->getOrCreateDocno( m_docid, documentIsNew);
 
-	leveldb::Iterator* vi = m_storage->newIterator();
-	boost::scoped_ptr<leveldb::Iterator> viref(vi);
-
 	//[1] Delete old and define new metadata
 	m_storage->deleteMetaData( docno);
+	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
+	for (; wi != we; ++wi)
 	{
-		std::vector<DocMetaData<float> >::const_iterator wi = m_metadata_float.begin(), we = m_metadata_float.end();
-		for (; wi != we; ++wi)
-		{
-			m_storage->defineMetaData( docno, wi->name, wi->value);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
-#endif
-		}
+		m_storage->defineMetaData( docno, wi->name, wi->value);
 	}
-	{
-		std::vector<DocMetaData<int> >::const_iterator wi = m_metadata_int.begin(), we = m_metadata_int.end();
-		for (; wi != we; ++wi)
-		{
-			m_storage->defineMetaData( docno, wi->name, wi->value);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
-		}
-#endif
-	}
-	{
-		std::vector<DocMetaData<unsigned int> >::const_iterator wi = m_metadata_uint.begin(), we = m_metadata_uint.end();
-		for (; wi != we; ++wi)
-		{
-			m_storage->defineMetaData( docno, wi->name, wi->value);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "PUT METADATA [" << docno << ":" << wi->name << "]" << "= [" << wi->value << "]" << std::endl;
-		}
-#endif
-	}
+
 	//[2] Delete old and insert new attributes
 	m_storage->deleteAttributes( docno);
-
 	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
 	for (; ai != ae; ++ai)
 	{
-		Index attribno = m_storage->getAttribute( ai->name);
-		DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno, attribno);
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "PUT ATTRIBUTE [" << docattribkey << "]" << "= [" << wi->value << "]" << std::endl;
-#endif
-		leveldb::Slice keyslice( docattribkey.ptr(), docattribkey.size());
-		m_storage->writeKeyValue( keyslice, ai->value);
+		m_storage->defineAttribute( docno, ai->name, ai->value);
 	}
 
 	//[3] Delete old and insert new index elements (forward index and inverted index):
@@ -166,9 +124,6 @@ void StorageInserter::done()
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "PUT TERMS [" << ti->first.first << " " << ti->first.second << " " << docno << "]" << std::endl;
-#endif
 		std::vector<Index> pos;
 		pos.insert( pos.end(), ti->second.pos.begin(), ti->second.pos.end());
 		m_storage->definePosinfoPosting(
@@ -188,9 +143,6 @@ void StorageInserter::done()
 
 		leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
 
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "PUT INV [" << invkey << "]" << "= [" << ri->second.value << "]" << std::endl;
-#endif
 		m_storage->writeKeyValue( invkeyslice, ri->second);
 	}
 	if (documentIsNew)

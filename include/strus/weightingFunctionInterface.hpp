@@ -32,6 +32,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class MetaDataReaderInterface;
 
 class WeightingFunctionInterface
 {

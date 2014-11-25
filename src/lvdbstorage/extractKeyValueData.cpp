@@ -212,7 +212,7 @@ void VariableData::print( std::ostream& out)
 }
 
 
-DocMetaDataData::DocMetaDataData( const leveldb::Slice& key, const leveldb::Slice& value)
+DocMetaDataData::DocMetaDataData( const MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value)
 {
 	char const* ki = key.data()+1;
 	char const* ke = key.data()+key.size();
@@ -228,30 +228,31 @@ DocMetaDataData::DocMetaDataData( const leveldb::Slice& key, const leveldb::Slic
 	{
 		throw std::runtime_error( "unexpected end of metadata key");
 	}
-	name = *ki++;
-	if (name < 32 || name > 127)
-	{
-		throw std::runtime_error( "variable name in metadata key out of range");
-	}
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of metadata key");
+		throw std::runtime_error( "unexpected extra bytes at end of metadata block key");
 	}
-	blk = reinterpret_cast<const float*>(vi);
-	blksize = (ve - vi) / sizeof(float);
-	if (blksize != (strus::MetaDataBlock::MetaDataBlockSize))
-	{
-		throw std::runtime_error( "corrupt meta data block (unexpected size of meta data block)");
-	}
+	block.init( metadescr, blockno, vi, ve-vi);
+	descr = metadescr;
 }
 
 void DocMetaDataData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::DocMetaDataPrefix << ' ' << name << ' ' << blockno;
+	out << (char)DatabaseKey::DocMetaDataPrefix << ' ' << blockno;
 	unsigned int ii = 0;
-	out << blk[0];
-	for (++ii; ii<blksize; ++ii) out << ' ' << blk[ii];
-	out << std::endl;
+	for (; ii<MetaDataBlock::BlockSize; ++ii)
+	{
+		if (ii) out << ' ';
+		MetaDataRecord record = block[ ii];
+
+		unsigned int colidx = 0, colend = 0;
+		for (; colidx<colend; ++colidx)
+		{
+			if (colidx) out << ',';
+			Variant value = record.getValue( descr->get( colidx));
+			out << value;
+		}
+	}
 }
 
 
@@ -267,7 +268,7 @@ DocAttributeData::DocAttributeData( const leveldb::Slice& key, const leveldb::Sl
 	{
 		throw std::runtime_error( "unexpected end of document attribute key");
 	}
-	name = strus::unpackIndex( ki, ke); /*[name = termno]*/
+	attribno = strus::unpackIndex( ki, ke); /*[attribno]*/
 	if (ki != ke)
 	{
 		throw std::runtime_error( "extra character at end of document attribute key");
@@ -282,7 +283,7 @@ DocAttributeData::DocAttributeData( const leveldb::Slice& key, const leveldb::Sl
 
 void DocAttributeData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::DocAttributePrefix << ' ' << name << ' ' << docno << ' ' << escapestr( valuestr, valuesize) << std::endl;
+	out << (char)DatabaseKey::DocAttributePrefix << ' ' << attribno << ' ' << docno << ' ' << escapestr( valuestr, valuesize) << std::endl;
 }
 
 
@@ -415,4 +416,51 @@ void PosinfoBlockData::print( std::ostream& out)
 	}
 	out << std::endl;
 }
+
+
+AttributeKeyData::AttributeKeyData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	varnamestr = ki;
+	varnamesize = ke-ki;
+	if (!strus::checkStringUtf8( ki, ke-ki))
+	{
+		throw std::runtime_error( "illegal UTF8 string as attribute key");
+	}
+	valueno = strus::unpackIndex( vi, ve);/*[value]*/
+	if (vi != ve)
+	{
+		throw std::runtime_error( "unexpected extra bytes at end of attribute number");
+	}
+}
+
+void AttributeKeyData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::AttributeKeyPrefix << ' ' << escapestr( varnamestr, varnamesize) << ' ' << valueno << std::endl;
+}
+
+
+MetaDataDescrData::MetaDataDescrData( const leveldb::Slice& key, const leveldb::Slice& value)
+	:descr( value.data())
+{
+	if (key.size() != 1) std::runtime_error( "illegal (not empty) key for meta data description");
+}
+
+
+void MetaDataDescrData::print( std::ostream& out)
+{
+	std::vector<std::string> cols = descr.columns();
+	std::vector<std::string>::const_iterator
+		ci = cols.begin(), ce = cols.end();
+	for (std::size_t cidx=0; ci != ce; ++ci,++cidx)
+	{
+		if (cidx) out << ' ';
+		out << *ci;
+	}
+}
+
 

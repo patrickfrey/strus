@@ -26,59 +26,16 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
+#include "attributeReader.hpp"
+#include "keyValueStorage.hpp"
 
 using namespace strus;
 
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	const MetaDataReaderInterface* metadata_,
-	float k1_,
-	float b_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_metadata(metadata_)
-		,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-		,m_k1(k1_)
-		,m_b(b_)
-		,m_avgDocLength(avgDocLength_)
-		,m_docno(0)
-		
-{}
-
-WeightingBM25::~WeightingBM25()
-{}
-
-float WeightingBM25::call( PostingIteratorInterface& itr)
+std::string AttributeReader::getValue( const ElementHandle& element) const
 {
-	if (!idf_calculated())
-	{
-		calculateIdf( itr);
-	}
-	m_docno = itr.docno();
-	float ff = itr.frequency();
-	if (ff == 0.0)
-	{
-		return 0.0;
-	}
-	else if (m_b)
-	{
-		float doclen = m_metadata->getValueFloat( m_docno);
-		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
-	}
-	else
-	{
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * 1.0);
-	}
+	KeyValueStorage kvs( m_db, DatabaseKey::DocAttributePrefix, false);
+	const KeyValueStorage::Value* val = kvs.load( KeyValueStorage::Key( m_docno, (Index)element));
+	return std::string( val->ptr(), val->size());
 }
-
 
 

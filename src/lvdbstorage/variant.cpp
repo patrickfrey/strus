@@ -26,59 +26,32 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
+#include "variant.hpp"
+#include <sstream>
 
 using namespace strus;
 
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	const MetaDataReaderInterface* metadata_,
-	float k1_,
-	float b_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_metadata(metadata_)
-		,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-		,m_k1(k1_)
-		,m_b(b_)
-		,m_avgDocLength(avgDocLength_)
-		,m_docno(0)
-		
-{}
-
-WeightingBM25::~WeightingBM25()
-{}
-
-float WeightingBM25::call( PostingIteratorInterface& itr)
+void Variant::print( std::ostream& out) const
 {
-	if (!idf_calculated())
+	switch (type)
 	{
-		calculateIdf( itr);
-	}
-	m_docno = itr.docno();
-	float ff = itr.frequency();
-	if (ff == 0.0)
-	{
-		return 0.0;
-	}
-	else if (m_b)
-	{
-		float doclen = m_metadata->getValueFloat( m_docno);
-		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
-	}
-	else
-	{
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * 1.0);
+		case Null: break;
+		case Int: out << variant.Int; break;
+		case UInt: out << variant.UInt; break;
+		case Float: out << variant.Float; break;
 	}
 }
 
+std::string Variant::tostring() const
+{
+	std::ostringstream out;
+	print( out);
+	return out.str();
+}
 
+std::ostream& strus::operator<< (std::ostream& out, const Variant& v)
+{
+	v.print( out);
+	return out;
+}
 

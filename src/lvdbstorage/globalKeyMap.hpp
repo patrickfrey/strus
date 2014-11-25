@@ -48,8 +48,12 @@ public:
 
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
-private:
+public:
 	typedef std::map<std::string,Index> Map;
+	typedef std::map<Index,std::string> InvMap;
+
+	Map getMap();
+	InvMap getInvMap();
 
 private:
 	KeyValueStorage m_storage;

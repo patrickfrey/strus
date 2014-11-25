@@ -26,59 +26,85 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
+#ifndef _STRUS_LVDB_VARIANT_TYPE_HPP_INCLUDED
+#define _STRUS_LVDB_VARIANT_TYPE_HPP_INCLUDED
+#include <cstring>
+#include <stdexcept>
+#include <iostream>
 
-using namespace strus;
+namespace strus {
 
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	const MetaDataReaderInterface* metadata_,
-	float k1_,
-	float b_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_metadata(metadata_)
-		,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-		,m_k1(k1_)
-		,m_b(b_)
-		,m_avgDocLength(avgDocLength_)
-		,m_docno(0)
-		
-{}
-
-WeightingBM25::~WeightingBM25()
-{}
-
-float WeightingBM25::call( PostingIteratorInterface& itr)
+struct Variant
 {
-	if (!idf_calculated())
+	Variant( int value)
 	{
-		calculateIdf( itr);
+		variant.Int = value;
+		type = Int;
 	}
-	m_docno = itr.docno();
-	float ff = itr.frequency();
-	if (ff == 0.0)
-	{
-		return 0.0;
-	}
-	else if (m_b)
-	{
-		float doclen = m_metadata->getValueFloat( m_docno);
-		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
-	}
-	else
-	{
-		return idf()
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * 1.0);
-	}
-}
 
+	Variant( unsigned int value)
+	{
+		variant.UInt = value;
+		type = UInt;
+	}
 
+	Variant( float value)
+	{
+		variant.Float = value;
+		type = Float;
+	}
 
+	Variant()
+	{
+		std::memset( this, 0, sizeof(*this));
+	}
+
+	Variant( const Variant& o)
+	{
+		std::memcpy( this, &o, sizeof(*this));
+	}
+
+	template <typename TYPE>
+	TYPE cast() const
+	{
+		switch (type)
+		{
+			case Null: throw std::logic_error( "illegal cast of NULL");
+			case Int: return (TYPE)variant.Int;
+			case UInt: return (TYPE)variant.UInt;
+			case Float: return (TYPE)variant.Float;
+		}
+		throw std::logic_error( "illegal value of variant");
+	}
+
+	operator float() const
+	{
+		return cast<float>();
+	}
+	operator int() const
+	{
+		return cast<int>();
+	}
+	operator unsigned int() const
+	{
+		return cast<unsigned int>();
+	}
+
+	void print( std::ostream& out) const;
+
+	std::string tostring() const;
+
+	enum Type {Null,Int,UInt,Float};
+	Type type;
+	union
+	{
+		int Int;
+		unsigned int UInt;
+		float Float;
+	} variant;
+};
+
+std::ostream& operator<< (std::ostream& out, const Variant& v);
+
+}//namespace
+#endif
