@@ -35,15 +35,10 @@
 using namespace strus;
 
 DocnoBlockElement::DocnoBlockElement( Index docno_, unsigned int ff_, float weight_)
-	:m_docno((uint32_t)docno_)
+	:m_docno(docno_)
 	,m_ff(ff_>Max_ff?Max_ff:ff_)
 	,m_weight(floatSingleToHalfPrecision(weight_))
-{
-	if (docno_ > std::numeric_limits<uint32_t>::max()) 
-	{
-		throw std::runtime_error( "document number out of range");
-	}
-}
+{}
 
 DocnoBlockElement::DocnoBlockElement( const DocnoBlockElement& o)
 	:m_docno(o.m_docno)

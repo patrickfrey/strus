@@ -37,14 +37,12 @@ void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& 
 void packIndex( std::string& buf, const Index& idx);
 Index unpackIndex( const char*& ptr, const char* end);
 const char* skipIndex( const char* ptr, const char* end);
-const char* findIndexAsc( const char* ptr, const char* end, uint32_t needle);
-const char* findIndexDesc( const char* ptr, const char* end, uint32_t needle);
+const char* findIndexAsc( const char* ptr, const char* end, const Index& needle);
+const char* findIndexDesc( const char* ptr, const char* end, const Index& needle);
+const char* findStructIndexAsc( const char* ptr, const char* end, unsigned char delim, const Index& needle);
+const char* findStructIndexDesc( const char* ptr, const char* end, unsigned char delim, const Index& needle);
 unsigned int nofPackedIndices( const char* ptr, const char* end);
 const char* nextPackedIndexPos( const char* start, const char* str, const char* end);
-
-void packFloat( std::string& buf, const float& val);
-float unpackFloat( const char*& ptr, const char* end);
-unsigned int sizeofPackedFloat( const char*& ptr);
 
 bool checkStringUtf8( const char* ptr, std::size_t size);
 

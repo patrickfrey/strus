@@ -34,7 +34,7 @@ using namespace strus;
 
 Index GlobalKeyMap::lookUp( const std::string& name)
 {
-	const KeyValueStorage::Value* value = m_storage.load( KeyValueStorage::Key( name));
+	const KeyValueStorage::Value* value = m_storage.load( name);
 	if (!value) return 0;
 	char const* vi = value->ptr();
 	char const* ve = vi + value->size();
@@ -44,7 +44,7 @@ Index GlobalKeyMap::lookUp( const std::string& name)
 
 Index GlobalKeyMap::getOrCreate( const std::string& name, Index& valuecnt)
 {
-	const KeyValueStorage::Value* value = m_storage.load( KeyValueStorage::Key( name));
+	const KeyValueStorage::Value* value = m_storage.load( name);
 	if (value)
 	{
 		char const* vi = value->ptr();

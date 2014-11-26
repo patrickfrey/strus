@@ -31,6 +31,7 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "databaseKey.hpp"
 #include "storage.hpp"
+#include "forwardIndexBlock.hpp"
 #include <string>
 #include <leveldb/db.h>
 
@@ -50,29 +51,24 @@ public:
 	virtual ~ForwardIterator();
 
 	/// \brief Define the document of the items inspected
-	virtual void initDoc( const Index& docno_);
+	virtual void skipDoc( const Index& docno_);
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document.
 	virtual Index skipPos( const Index& firstpos_);
 
-	/// \brief Fetch the item at the current position (defined by initType(const std::string&) and initDoc( const Index&))
+	/// \brief Fetch the item at the current position
 	virtual std::string fetch();
 
 private:
-	void buildKey( int level);
-
-private:
-	Storage* m_storage;
 	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	std::string m_type;
+	BlockStorage<ForwardIndexBlock>* m_forwardBlockStorage;
+	const ForwardIndexBlock* m_curblock;
+	Index m_curblock_firstpos;
+	Index m_curblock_lastpos;
+	char const* m_blockitr;
 	Index m_docno;
 	Index m_typeno;
-	Index m_pos;
-	DatabaseKey m_key;
-	int m_keylevel;
-	std::size_t m_keysize_docno;
-	std::size_t m_keysize_typeno;
+	Index m_curpos;
 };
 
 }//namespace

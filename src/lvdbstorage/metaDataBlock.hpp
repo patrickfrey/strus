@@ -40,9 +40,9 @@ class MetaDataBlock
 {
 public:
 	MetaDataBlock();
-	MetaDataBlock( const MetaDataDescription* descr_, unsigned int blockno_);
+	MetaDataBlock( const MetaDataDescription* descr_, const Index& blockno_);
 	MetaDataBlock( const MetaDataDescription* descr_, 
-			unsigned int blockno_,
+			const Index& blockno_,
 			const char* blk_,
 			std::size_t blksize_);
 
@@ -51,7 +51,7 @@ public:
 	~MetaDataBlock();
 
 	void init( const MetaDataDescription* descr_, 
-			unsigned int blockno_,
+			const Index& blockno_,
 			const char* blk_,
 			std::size_t blksize_);
 
@@ -79,7 +79,7 @@ private:
 
 private:
 	const MetaDataDescription* m_descr;
-	unsigned int m_blockno;
+	Index m_blockno;
 	void* m_ptr;
 };
 

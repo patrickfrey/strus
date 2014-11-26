@@ -46,10 +46,10 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
 	:m_db(db_)
-	,m_docnoStorage( db_, DocnoBlock::databaseKey( termtypeno, termvalueno), true)
+	,m_docnoStorage( db_, BlockKey( termtypeno, termvalueno), true)
 	,m_docnoBlk(0)
 	,m_docnoItr(0)
-	,m_posinfoStorage( db_, PosinfoBlock::databaseKey( termtypeno, termvalueno), true)
+	,m_posinfoStorage( db_, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
 	,m_last_docno(0)
@@ -320,22 +320,14 @@ Index PostingIterator::documentFrequency()
 {
 	if (m_documentFrequency < 0)
 	{
-		DatabaseKey key( (char)DatabaseKey::DocFrequencyPrefix, m_termtypeno, m_termvalueno);
-		leveldb::Slice keyslice( key.ptr(), key.size());
-		std::string value;
-		leveldb::ReadOptions options;
-		options.fill_cache = false;
-		leveldb::Status status = m_db->Get( options, keyslice, &value);
-		if (status.IsNotFound())
-		{
-			return 0;
-		}
-		if (!status.ok())
-		{
-			throw std::runtime_error( status.ToString());
-		}
-		const char* cc = value.c_str();
-		m_documentFrequency = unpackIndex( cc, cc + value.size());
+		KeyValueStorage dfstorage(
+			m_db, DatabaseKey::DocFrequencyPrefix, false);
+		const KeyValueStorage::Value* dfpacked
+			= dfstorage.load( BlockKey( m_termtypeno, m_termvalueno));
+
+		if (!dfpacked) return 0;
+		char const* cc = dfpacked->ptr();
+		m_documentFrequency = unpackIndex( cc, cc + dfpacked->size());
 	}
 	return m_documentFrequency;
 }

@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_DATABASE_KEY_HPP_INCLUDED
 #define _STRUS_LVDB_DATABASE_KEY_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "blockKey.hpp"
 #include <utility>
 #include <string>
 
@@ -42,7 +43,7 @@ public:
 		TermTypePrefix='t',	///< [type string]             ->  [typeno]
 		TermValuePrefix='i',	///< [term string]             ->  [valueno]
 		DocIdPrefix='d',	///< [docid string]            ->  [docno]
-		ForwardIndexPrefix='r',	///< [docno,typeno,position]   ->  [string]*
+		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		VariablePrefix='v',	///< [variable string]         ->  [index]
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
@@ -73,26 +74,22 @@ public:
 	}
 
 public:
-	explicit DatabaseKey( char prefix=0);
-	DatabaseKey( char prefix, const char* variable);
+	explicit DatabaseKey( char prefix);
 	DatabaseKey( char prefix, const Index& idx);
-	DatabaseKey( char prefix, char prefix2, const Index& idx);
-	DatabaseKey( char prefix, const Index& idx, char prefix2);
-	DatabaseKey( char prefix, const Index& idx, const Index& idx2);
-	DatabaseKey( char prefix, const Index& idx, const Index& idx2, const Index& idx3);
+	DatabaseKey( char prefix, const BlockKey& key, const Index& elemidx=0);
+	DatabaseKey( char prefix, const std::string& varname);
 	DatabaseKey( const DatabaseKey& o);
 
-	void addElem( const std::string& var);
-	void addElem( const Index& index);
-	void addPrefix( char prefix);
-
 	char prefix() const			{return m_size?m_buf[0]:0;}
-	void resize( std::size_t n);
 
 	const char* ptr() const			{return m_buf;}
 	std::size_t size() const		{return m_size;}
 
-	bool operator < (const DatabaseKey& o) const;
+public:
+	void addElem( const std::string& var);
+	void addElem( const Index& index);
+	void addPrefix( char prefix);
+	void resize( std::size_t n);
 
 private:
 	enum {MaxKeySize=64};

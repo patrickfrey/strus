@@ -424,13 +424,13 @@ std::vector<StatCounterValue> Storage::getStatistics() const
 void Storage::deleteAttributes( const Index& docno)
 {
 	KeyValueStorage attribstorage( m_db, DatabaseKey::DocAttributePrefix, false);
-	attribstorage.disposeSubnodes( KeyValueStorage::Key( docno), m_inserter_batch);
+	attribstorage.disposeSubnodes( BlockKey( docno), m_inserter_batch);
 }
 
 void Storage::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
 {
 	Index attribno = getOrCreateAttribute( varname);
-	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, docno, attribno);
+	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, BlockKey( docno, attribno));
 
 	leveldb::Slice keyslice( docattribkey.ptr(), docattribkey.size());
 	writeKeyValue( keyslice, value);

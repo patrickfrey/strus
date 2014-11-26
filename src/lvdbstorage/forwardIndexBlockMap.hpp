@@ -26,24 +26,52 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_INDEX_HPP_INCLUDED
-#define _STRUS_INDEX_HPP_INCLUDED
+#ifndef _STRUS_LVDB_FORWARD_INDEX_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_FORWARD_INDEX_BLOCK_MAP_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "forwardIndexBlock.hpp"
+#include "blockMap.hpp"
+#include "blockKey.hpp"
+#include <vector>
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
-#ifdef _MSC_VER
-#pragma warning(disable:4290)
-#include <BaseTsd.h>
 namespace strus {
-	///\typedef Index
-	///\brief Document number type
-	typedef INT32 Index;
-}//namespace
-#else
-#include <stdint.h>
-namespace strus {
-	///\typedef Index
-	///\brief Index term number type
-	typedef int32_t Index;
-}//namespace
-#endif
+
+typedef std::vector<std::string> ForwardIndexBlockElement;
+
+class ForwardIndexBlockMap
+	:protected BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>
+{
+public:
+	ForwardIndexBlockMap( leveldb::DB* db_)
+		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>(db_){}
+	ForwardIndexBlockMap( const ForwardIndexBlockMap& o)
+		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>(o){}
+
+	void defineForwardIndexItem(
+		const Index& typeno,
+		const Index& docno,
+		const Index& pos,
+		const std::string& termstring)
+	{
+		defineElement( BlockKey( typeno, docno), pos, termstring);
+	}
+
+	void deleteForwardIndexItem(
+		const Index& typeno,
+		const Index& docno,
+		const Index& pos)
+	{
+		deleteElement( BlockKey( typeno, docno), pos);
+	}
+
+	void getWriteBatch( leveldb::WriteBatch& batch)
+	{
+		getWriteBatchReplace( batch);
+	}
+};
+
+}
 #endif
 

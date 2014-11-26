@@ -84,7 +84,7 @@ public:
 	static const Derivation* upcast( const DataBlock* o)
 	{
 		if (!o) return 0;
-		if (o->blocktype() != Derivation::BlockType) throw std::logic_error("invalid data block cast");
+		if (o->blocktype() != Derivation::DatabaseKeyPrefix) throw std::logic_error("invalid data block cast");
 		return reinterpret_cast<const Derivation*>(o);
 	}
 

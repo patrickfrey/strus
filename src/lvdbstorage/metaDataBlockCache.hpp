@@ -47,13 +47,13 @@ public:
 
 	~MetaDataBlockCache(){}
 
-	const MetaDataRecord get( Index docno);
+	const MetaDataRecord get( const Index& docno);
 
-	void declareVoid( unsigned int blockno);
+	void declareVoid( const Index& blockno);
 	void refresh();
 
 private:
-	void resetBlock( unsigned int blockno);
+	void resetBlock( const Index& blockno);
 
 private:
 	enum {

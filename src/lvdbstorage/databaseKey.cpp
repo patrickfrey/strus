@@ -35,20 +35,30 @@ using namespace strus;
 
 DatabaseKey::DatabaseKey( char prefix)
 {
-	m_buf[ 0] = prefix;
+	m_buf[ 0] = (char)prefix;
 	m_size = 1;
 }
 
-DatabaseKey::DatabaseKey( char prefix, const char* var)
+DatabaseKey::DatabaseKey( char prefix, const std::string& varname)
 {
-	std::size_t varlen = std::strlen( var);
-	if (varlen >= MaxKeySize-1)
+	if (varname.size() >= MaxKeySize-1)
 	{
-		throw std::runtime_error( std::string( "database variable key out of range '") + var + "'");
+		throw std::runtime_error( std::string( "database variable key out of range '") + varname + "'");
 	}
 	m_buf[ 0] = prefix;
-	std::memcpy( m_buf+1, var, varlen);
-	m_size = varlen+1;
+	std::memcpy( m_buf+1, varname.c_str(), varname.size());
+	m_size = varname.size()+1;
+}
+
+DatabaseKey::DatabaseKey( char prefix, const BlockKey& blkkey, const Index& elemidx)
+{
+	m_buf[ 0] = (char)prefix;
+	m_size = 1;
+	Index elem1 = blkkey.elem(1);
+	Index elem2 = blkkey.elem(2);
+	if (elem1) addElem( elem1);
+	if (elem2) addElem( elem2);
+	if (elemidx) addElem( elemidx);
 }
 
 DatabaseKey::DatabaseKey( char prefix, const Index& idx)
@@ -56,39 +66,6 @@ DatabaseKey::DatabaseKey( char prefix, const Index& idx)
 	m_buf[ 0] = prefix;
 	m_size = 1;
 	addElem( idx);
-}
-
-DatabaseKey::DatabaseKey( char prefix, char prefix2, const Index& idx)
-{
-	m_buf[ 0] = prefix;
-	m_buf[ 1] = prefix2;
-	m_size = 2;
-	addElem( idx);
-}
-
-DatabaseKey::DatabaseKey( char prefix, const Index& idx, char prefix2)
-{
-	m_buf[ 0] = prefix;
-	m_size = 1;
-	addElem( idx);
-	addPrefix( prefix2);
-}
-
-DatabaseKey::DatabaseKey( char prefix, const Index& idx, const Index& idx2)
-{
-	m_buf[ 0] = prefix;
-	m_size = 1;
-	addElem( idx);
-	addElem( idx2);
-}
-
-DatabaseKey::DatabaseKey( char prefix, const Index& idx, const Index& idx2, const Index& idx3)
-{
-	m_buf[ 0] = prefix;
-	m_size = 1;
-	addElem( idx);
-	addElem( idx2);
-	addElem( idx3);
 }
 
 DatabaseKey::DatabaseKey( const DatabaseKey& o)
@@ -124,12 +101,4 @@ void DatabaseKey::resize( std::size_t n)
 	m_size = n;
 }
 
-bool DatabaseKey::operator < (const DatabaseKey& o) const
-{
-	std::size_t cmplen = (m_size < o.m_size)?m_size:o.m_size;
-	int cmpres = std::memcmp( m_buf, o.m_buf, cmplen);
-	if (cmpres<0) return true;
-	if (cmpres>0) return false;
-	return m_size < o.m_size;
-}
 

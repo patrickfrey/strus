@@ -185,14 +185,14 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 void MetaDataDescription::load( leveldb::DB* db)
 {
 	KeyValueStorage mdstorage( db, DatabaseKey::MetaDataDescrPrefix, false);
-	const KeyValueStorage::Value* mdptr = mdstorage.load( KeyValueStorage::Key());
+	const KeyValueStorage::Value* mdptr = mdstorage.load( BlockKey());
 	*this = MetaDataDescription( std::string( mdptr->ptr(), mdptr->size()));
 }
 
 void MetaDataDescription::store( leveldb::WriteBatch& batch)
 {
 	KeyValueStorage mdstorage( 0, DatabaseKey::MetaDataDescrPrefix, false);
-	mdstorage.store( KeyValueStorage::Key(), tostring(), batch);
+	mdstorage.store( BlockKey(), tostring(), batch);
 }
 
 MetaDataDescription::TranslationMap

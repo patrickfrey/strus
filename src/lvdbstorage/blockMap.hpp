@@ -32,6 +32,7 @@
 #include "dataBlock.hpp"
 #include "blockStorage.hpp"
 #include "databaseKey.hpp"
+#include "blockKey.hpp"
 #include <cstdlib>
 #include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
@@ -49,17 +50,17 @@ public:
 		:m_db(o.m_db),m_map(o.m_map){}
 
 	void defineElement(
-		const DatabaseKey& dbkey,
+		const BlockKey& dbkey,
 		const Index& elemid,
 		const BlockElement& elem)
 	{
 		boost::mutex::scoped_lock( m_mutex);
-		typename Map::iterator mi = m_map.find( dbkey);
+		typename Map::iterator mi = m_map.find( dbkey.index());
 		if (mi == m_map.end())
 		{
 			ElementMap em;
 			em[ elemid] = elem;
-			m_map[ dbkey] = em;
+			m_map[ dbkey.index()] = em;
 		}
 		else
 		{
@@ -68,13 +69,13 @@ public:
 	}
 
 	void deleteElement(
-		const DatabaseKey& dbkey,
+		const BlockKey& dbkey,
 		const Index& elemid)
 	{
 		defineElement( dbkey, elemid, BlockElement());
 	}
 
-	void getWriteBatch( leveldb::WriteBatch& batch)
+	void getWriteBatchMerge( leveldb::WriteBatch& batch)
 	{
 		boost::mutex::scoped_lock( m_mutex);
 		typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
@@ -87,79 +88,130 @@ public:
 			if (ei == ee) continue;
 			Index lastInsertBlockId = mi->second.rbegin()->first;
 
-			BlockStorage<BlockType> blkstorage( m_db, mi->first, false);
+			BlockStorage<BlockType> blkstorage( m_db, BlockKey(mi->first), false);
+			BlockType newblk;
+
+			// [1] Merge new elements with existing upper bound blocks:
+			mergeNewElements( blkstorage, ei, ee, newblk, batch);
+
+			// [2] Write the new blocks that could not be merged into existing ones:
+			newblk.setId( lastInsertBlockId);
+			insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
+		}
+		m_map.clear();
+	}
+
+	void getWriteBatchReplace( leveldb::WriteBatch& batch)
+	{
+		boost::mutex::scoped_lock( m_mutex);
+		typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
+		for (; mi != me; ++mi)
+		{
+			typename ElementMap::const_iterator
+				ei = mi->second.begin(),
+				ee = mi->second.end();
+
+			if (ei == ee) continue;
+			Index lastInsertBlockId = mi->second.rbegin()->first;
+
+			BlockStorage<BlockType> blkstorage( m_db, BlockKey(mi->first), false);
 			const BlockType* blk;
 			BlockType newblk;
-	
-			// [1] Merge new elements with existing upper bound blocks:
-			while (ei != ee && 0!=(blk=blkstorage.load( ei->first)))
-			{
-				BlockType elemblk;
-				elemblk.setId( blk->id());
 
-				for (; ei != ee && ei->first <= blk->id(); ++ei)
-				{
-					elemblk.append( ei->first, ei->second);
-				}
-				newblk = BlockType::merge( elemblk, *blk);
-				if (blkstorage.loadNext())
-				{
-					// ... is not the last block, so we store it
-					blkstorage.store( newblk, batch);
-					newblk.clear();
-				}
-				else
-				{
-					blkstorage.dispose( elemblk.id(), batch);
-					break;
-				}
-			}
-			if (newblk.empty())
+			// [1] Delete all old blocks with the database key as prefix address:
+			for (blk = blkstorage.load( 0);
+				blk != 0; blk = blkstorage.loadNext())
 			{
-				// Fill first new block with elements of last 
-				// block and dispose the last block:
-				if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
-				{
-					newblk.initcopy( *blk);
-					blkstorage.dispose( blk->id(), batch);
-				}
+				blkstorage.dispose( blk->id(), batch);
 			}
-			// [2] Write the new blocks that could not be merged into existing ones:
-			Index blkid;
-			if (ei == ee)
-			{
-				blkid = newblk.id();
-			}
-			else
-			{
-				blkid = ei->first;
-				newblk.setId( lastInsertBlockId);
-
-				for (; ei != ee; ++ei)
-				{
-					if (newblk.full())
-					{
-						newblk.setId( blkid);
-						blkstorage.store( newblk, batch);
-						newblk.clear();
-						newblk.setId( lastInsertBlockId);
-					}
-					newblk.append( ei->first, ei->second);
-					blkid = ei->first;
-				}
-			}
-			if (!newblk.empty())
-			{
-				newblk.setId( blkid);
-				blkstorage.store( newblk, batch);
-			}
+			// [2] Write the new blocks:
+			insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
+			
 		}
 		m_map.clear();
 	}
 
 private:
 	typedef std::map<Index,BlockElement> ElementMap;
-	typedef std::map<DatabaseKey,ElementMap> Map;
+	typedef std::map<BlockKeyIndex,ElementMap> Map;
+
+private:
+	void insertNewElements( BlockStorage<BlockType>& blkstorage,
+				typename ElementMap::const_iterator& ei,
+				const typename ElementMap::const_iterator& ee,
+				BlockType& newblk,
+				const Index& lastInsertBlockId,
+				leveldb::WriteBatch& batch)
+	{
+		Index blkid = newblk.id();
+		for (; ei != ee; ++ei)
+		{
+			if (newblk.full())
+			{
+				newblk.setId( blkid);
+				blkstorage.store( newblk, batch);
+				newblk.clear();
+				newblk.setId( lastInsertBlockId);
+			}
+			newblk.append( ei->first, ei->second);
+			blkid = ei->first;
+		}
+		if (!newblk.empty())
+		{
+			newblk.setId( blkid);
+			blkstorage.store( newblk, batch);
+		}
+	}
+
+	void mergeNewElements( BlockStorage<BlockType>& blkstorage,
+				typename ElementMap::const_iterator& ei,
+				const typename ElementMap::const_iterator& ee,
+				BlockType& newblk,
+				leveldb::WriteBatch& batch)
+	{
+		const BlockType* blk;
+		while (ei != ee && 0!=(blk=blkstorage.load( ei->first)))
+		{
+			BlockType elemblk;
+			elemblk.setId( blk->id());
+
+			for (; ei != ee && ei->first <= blk->id(); ++ei)
+			{
+				elemblk.append( ei->first, ei->second);
+			}
+			newblk = BlockType::merge( elemblk, *blk);
+			if (blkstorage.loadNext())
+			{
+				// ... is not the last block, so we store it
+				blkstorage.store( newblk, batch);
+				newblk.clear();
+			}
+			else
+			{
+				if (newblk.full())
+				{
+					// ... it is the last block, but full
+					blkstorage.store( newblk, batch);
+					newblk.clear();
+				}
+				else
+				{
+					blkstorage.dispose( elemblk.id(), batch);
+				}
+				break;
+			}
+		}
+		if (newblk.empty())
+		{
+			// Fill first new block with elements of last 
+			// block and dispose the last block:
+			if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
+			{
+				newblk.initcopy( *blk);
+				blkstorage.dispose( blk->id(), batch);
+			}
+		}
+	}
 
 private:
 	leveldb::DB* m_db;

@@ -63,7 +63,7 @@ public:
 
 private:
 	enum {Max_ff=0xffFF};
-	uint32_t m_docno;
+	Index m_docno;
 	uint16_t m_ff;
 	strus::float16_t m_weight;	///< IEEE 754 half-precision binary floating-point format: binary16
 };
@@ -73,19 +73,15 @@ class DocnoBlock
 {
 public:
 	enum {
-		BlockType=DatabaseKey::DocnoBlockPrefix,
+		DatabaseKeyPrefix=DatabaseKey::DocnoBlockPrefix,
 		NofBlockElements=128
 	};
-	static DatabaseKey databaseKey( const Index& typeno, const Index& termno)
-	{
-		return DatabaseKey( (char)BlockType, typeno, termno);
-	}
 
 public:
 	DocnoBlock()
-		:FixedSizeRecordBlock( (char)BlockType){}
+		:FixedSizeRecordBlock( (char)DatabaseKeyPrefix){}
 	DocnoBlock( const DocnoBlockElement* ar_, std::size_t arsize_)
-		:FixedSizeRecordBlock( (char)BlockType, ar_, arsize_){}
+		:FixedSizeRecordBlock( (char)DatabaseKeyPrefix, ar_, arsize_){}
 	DocnoBlock( const DocnoBlock& o)
 		:FixedSizeRecordBlock( o){}
 

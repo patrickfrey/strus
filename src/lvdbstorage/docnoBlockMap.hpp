@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "docnoBlock.hpp"
+#include "blockKey.hpp"
 #include "blockMap.hpp"
 #include <cstdlib>
 #include <leveldb/db.h>
@@ -56,7 +57,7 @@ public:
 		unsigned int ff,
 		float weight)
 	{
-		Parent::defineElement( DocnoBlock::databaseKey( termtype, termvalue), docno, DocnoBlockElement( docno, ff, weight));
+		defineElement( BlockKey( termtype, termvalue), docno, DocnoBlockElement( docno, ff, weight));
 	}
 
 	void deleteDocnoPosting(
@@ -64,12 +65,12 @@ public:
 		const Index& termvalue,
 		const Index& docno)
 	{
-		Parent::deleteElement( DocnoBlock::databaseKey( termtype, termvalue), docno);
+		deleteElement( BlockKey( termtype, termvalue), docno);
 	}
 
 	void getWriteBatch( leveldb::WriteBatch& batch)
 	{
-		Parent::getWriteBatch( batch);
+		getWriteBatchMerge( batch);
 	}
 	
 };

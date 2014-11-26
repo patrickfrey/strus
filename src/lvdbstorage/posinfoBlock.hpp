@@ -30,14 +30,9 @@
 #define _STRUS_LVDB_POSINFO_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
-#include "indexPacker.hpp"
-#include <leveldb/db.h>
-#include <stdint.h>
 #include <vector>
 
 namespace strus {
-
-typedef std::vector<Index> PosinfoBlockElement;
 
 /// \class PosinfoBlock
 /// \brief Block of term occurrence positions
@@ -46,21 +41,17 @@ class PosinfoBlock
 {
 public:
 	enum {
-		BlockType=DatabaseKey::PosinfoBlockPrefix,
+		DatabaseKeyPrefix=DatabaseKey::PosinfoBlockPrefix,
 		MaxBlockSize=1024
 	};
-	static DatabaseKey databaseKey( const Index& typeno, const Index& termno)
-	{
-		return DatabaseKey( (char)BlockType, typeno, termno);
-	}
 
 public:
 	explicit PosinfoBlock()
-		:DataBlock( (char)BlockType){}
+		:DataBlock( (char)DatabaseKeyPrefix){}
 	PosinfoBlock( const PosinfoBlock& o)
 		:DataBlock(o){}
 	PosinfoBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( (char)BlockType, id_, ptr_, size_){}
+		:DataBlock( (char)DatabaseKeyPrefix, id_, ptr_, size_){}
 
 	PosinfoBlock& operator=( const PosinfoBlock& o)
 	{
@@ -88,6 +79,9 @@ public:
 	const char* nextDoc( const char* ref) const;
 	const char* prevDoc( const char* ref) const;
 
+	Index relativeIndexFromDocno( const Index& docno_) const {return id()-docno_+1;}
+	Index docnoFromRelativeIndex( const Index& dcidx_) const {return id()-dcidx_+1;}
+
 	const char* find( const Index& docno_, const char* lowerbound) const;
 	const char* upper_bound( const Index& docno_, const char* lowerbound) const;
 
@@ -99,11 +93,11 @@ public:
 	{
 		return (docno_ <= id() && docno_ > docno_at( begin()));
 	}
-	/// \brief Check if the address 'docno_', if it exists, is in the following block we can get with 'leveldb::Iterator::Next()' or not
+	/// \brief Check if the address 'docno_', if it exists, probably is in the following block we can get with 'leveldb::Iterator::Next()' or not
 	bool isFollowBlockAddress( const Index& docno_) const
 	{
 		Index diff = id() - docno_at( begin());
-		return (docno_ > id()) && (docno_ < id() + (diff>>1));
+		return (docno_ > id()) && (docno_ < id() + diff - (diff>>4));
 	}
 
 	void append( const Index& docno, const std::vector<Index>& pos);

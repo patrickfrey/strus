@@ -87,10 +87,10 @@ struct CharLengthTab
 
 static CharLengthTab g_charlentable;
 
-static uint32_t utf8decode( const char* itr)
+static int32_t utf8decode( const char* itr)
 {
 	unsigned int charsize = g_charlentable[ *itr];
-	uint32_t res = (unsigned char)*itr;
+	int32_t res = (unsigned char)*itr;
 	if (res > 127)
 	{
 		unsigned int gg = charsize-2;
@@ -111,8 +111,12 @@ static uint32_t utf8decode( const char* itr)
 }
 
 template <class BUFFER>
-static void utf8encode( BUFFER& buf, uint32_t chr)
+static void utf8encode( BUFFER& buf, int32_t chr)
 {
+	if (chr<0)
+	{
+		throw std::runtime_error( "Illegal unicode character");
+	}
 	unsigned int rt;
 	if (chr <= 127)
 	{
@@ -135,7 +139,7 @@ static void utf8encode( BUFFER& buf, uint32_t chr)
 	}
 }
 
-static uint32_t unpackInt32_( const char*& itr, const char* end)
+static int32_t unpackInt32_( const char*& itr, const char* end)
 {
 	int ii;
 	int nn = g_charlentable[ *itr];
@@ -148,8 +152,8 @@ static uint32_t unpackInt32_( const char*& itr, const char* end)
 	{
 		throw std::runtime_error( "corrupt data (unpackInt32_ 1)");
 	}
-	uint32_t rt = utf8decode( buf);
-	if (rt > 0x7fffFFFFU)
+	int32_t rt = utf8decode( buf);
+	if (rt < 0)
 	{
 		throw std::runtime_error( "corrupt data (unpackInt32_ 2)");
 	}
@@ -160,10 +164,9 @@ const char* strus::nextPackedIndexPos( const char* start, const char* str, const
 {
 	char const* cc = str;
 	while (((unsigned char)*cc & B11000000) == B10000000) {--cc;}
-	if (start != cc && *(cc-1) == (char)B11111111)
+	if (start == cc)
 	{
-		cc += g_charlentable[ *cc];
-		cc += g_charlentable[ *cc];
+		throw std::runtime_error( "corrupt data (nextPackedIndexPos 1)");
 	}
 	else
 	{
@@ -171,39 +174,24 @@ const char* strus::nextPackedIndexPos( const char* start, const char* str, const
 	}
 	if (cc > end)
 	{
-		throw std::runtime_error( "corrupt data (nextPackedIndexPos)");
+		throw std::runtime_error( "corrupt data (nextPackedIndexPos 2)");
 	}
 	return cc;
 }
 
 Index strus::unpackIndex( const char*& itr, const char* end)
 {
-	if (*itr == (char)B11111111)
-	{
-		++itr;
-		Index hi = unpackInt32_( itr, end);
-		Index lo = unpackInt32_( itr, end);
-		return (hi << 31) + lo;
-	}
-	else
-	{
-		return (Index)unpackInt32_( itr, end);
-	}
+	return (Index)unpackInt32_( itr, end);
 }
 
 const char* strus::skipIndex( const char* ptr, const char* end)
 {
 	char const* rt = ptr;
-	if (*rt == (char)B11111111)
+	if (ptr == end)
 	{
-		++rt;
-		rt += g_charlentable[ *rt];
-		rt += g_charlentable[ *rt];
+		throw std::runtime_error( "corrupt data (skipIndex)");
 	}
-	else
-	{
-		rt += g_charlentable[ *rt];
-	}
+	rt += g_charlentable[ *rt];
 	if (rt > end)
 	{
 		throw std::runtime_error( "corrupt data (skipIndex)");
@@ -214,22 +202,11 @@ const char* strus::skipIndex( const char* ptr, const char* end)
 template <class BUFFER>
 static void packIndex_( BUFFER& buf, const Index& idx)
 {
-	if (idx > 0x7fffFFFFU)
+	if (idx <= 0)
 	{
-		buf.push_back( (char)(unsigned char)B11111111);
-		Index hi = idx >> 31;
-		Index lo = idx & 0x7fffFFFFU;
-		if (hi > 0x7fffFFFFU)
-		{
-			throw std::runtime_error( "index out of range");
-		}
-		utf8encode( buf, (uint32_t)hi);
-		utf8encode( buf, (uint32_t)lo);
+		throw std::runtime_error( "index out of range (packIndex_)");
 	}
-	else
-	{
-		utf8encode( buf, (uint32_t)idx);
-	}
+	utf8encode( buf, (int32_t)idx);
 }
 
 void strus::packIndex( std::string& buf, const Index& idx)
@@ -258,42 +235,93 @@ struct StaticBuffer
 	std::size_t maxsize;
 };
 
-const char* strus::findIndexAsc( const char* ptr, const char* end, uint32_t needle)
+struct SkipChar
+{
+	bool operator()( char const*& pi, const char* pe, char)
+	{
+		pi += g_charlentable[ *pi];
+		return pi==pe;
+	}
+};
+
+struct SkipStruct
+{
+	bool operator()( char const*& pi, const char* pe, char delim)
+	{
+		pi = (char const*)std::memchr( pi, delim, pe-pi);
+		if (!pi)
+		{
+			pi = pe;
+			return false;
+		}
+		else
+		{
+			++pi;
+			return true;
+		}
+	}
+};
+
+struct CompareAsc
+{
+	bool operator()( const char* ptr, unsigned char needle0)
+	{
+		return (unsigned char)*ptr < needle0;
+	}
+	bool operator()( const char* ptr, unsigned const char* needle, std::size_t size)
+	{
+		return std::memcmp( ptr, needle, size) < 0;
+	}
+};
+
+struct CompareDesc
+{
+	bool operator()( const char* ptr, unsigned char needle0)
+	{
+		return (unsigned char)*ptr > needle0;
+	}
+	bool operator()( const char* ptr, unsigned const char* needle, std::size_t size)
+	{
+		return std::memcmp( ptr, needle, size) > 0;
+	}
+};
+
+template <class SkipElem, class Comparator>
+static const char* findIndex( const char* ptr, const char* end, Index needle, char delim)
 {
 	unsigned char needlebuf[16];
 	StaticBuffer bufstruct( needlebuf, 0, sizeof(needlebuf));
 	utf8encode( bufstruct, needle);
 
-	unsigned char const* pi = (const unsigned char*)ptr;
-	const unsigned char* pe = (const unsigned char*)end;
-	while (pi < pe && *pi < needlebuf[0])
-	{
-		pi += g_charlentable[ *pi];
-	}
-	while (pi < pe && std::memcmp( pi, needlebuf, bufstruct.size) < 0)
-	{
-		pi += g_charlentable[ *pi];
-	}
+	char const* pi = ptr;
+	const char* pe = end;
+	if (pi == pe) return 0;
+	while (Comparator()( pi, needlebuf[0])
+		&& SkipElem()( pi, pe, delim)){}
+	if (pi == pe) return 0;
+	while (Comparator()( pi, needlebuf, bufstruct.size)
+		&& SkipElem()( pi, pe, delim)){}
 	return (pi == pe)?0:(const char*)pi;
 }
 
-const char* strus::findIndexDesc( const char* ptr, const char* end, uint32_t needle)
+const char* strus::findIndexAsc( const char* ptr, const char* end, const Index& needle)
 {
-	unsigned char needlebuf[16];
-	StaticBuffer bufstruct( needlebuf, 0, sizeof(needlebuf));
-	utf8encode( bufstruct, needle);
+	return findIndex<SkipChar,CompareAsc>( ptr, end, needle, 0);
+}
 
-	unsigned char const* pi = (const unsigned char*)ptr;
-	const unsigned char* pe = (const unsigned char*)end;
-	while (pi < pe && *pi > needlebuf[0])
-	{
-		pi += g_charlentable[ *pi];
-	}
-	while (pi < pe && std::memcmp( pi, needlebuf, bufstruct.size) > 0)
-	{
-		pi += g_charlentable[ *pi];
-	}
-	return (pi == pe)?0:(const char*)pi;
+const char* strus::findIndexDesc( const char* ptr, const char* end, const Index& needle)
+{
+	return findIndex<SkipChar,CompareDesc>( ptr, end, needle, 0);
+}
+
+const char* strus::findStructIndexAsc( const char* ptr, const char* end, unsigned char delim, const Index& needle)
+{
+	return findIndex<SkipStruct,CompareAsc>( ptr, end, needle, delim);
+}
+const char* strus::findStructIndexDesc( const char* ptr, const char* end, unsigned char delim, const Index& needle)
+
+{
+	return findIndex<SkipStruct,CompareDesc>( ptr, end, needle, delim);
 }
 
 void strus::packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
@@ -307,62 +335,13 @@ unsigned int strus::nofPackedIndices( const char* ptr, const char* end)
 {
 	unsigned int rt = 0;
 	char const* pi = ptr;
-	char const* pe = end;
+	const char* pe = end;
 	while (pi < pe)
 	{
-		if (*pi == (char)B11111111)
-		{
-			++pi;
-			pi += g_charlentable[ *pi];
-			pi += g_charlentable[ *pi];
-			++rt;
-		}
-		else
-		{
-			pi += g_charlentable[ *pi];
-			++rt;
-		}
+		pi += g_charlentable[ *pi];
+		++rt;
 	}
 	return rt;
-}
-
-void strus::packFloat( std::string& buf, const float& val)
-{
-	union 
-	{
-		uint32_t bits;
-		float val;
-	} m;
-	m.val = val;
-	uint32_t sign = (m.bits >> 31) << 23;
-	uint32_t exponent = (m.bits & 0x7f800000) >> 23;
-	uint32_t mantissa = (m.bits & 0x007fffff) | sign;
-
-	utf8encode( buf, exponent);
-	utf8encode( buf, mantissa);
-}
-
-float strus::unpackFloat( const char*& ptr, const char* end)
-{
-	union 
-	{
-		uint32_t bits;
-		float val;
-	} m;
-	uint32_t exponent = unpackInt32_( ptr, end);
-	uint32_t mantissa = unpackInt32_( ptr, end);
-	m.bits = ((mantissa & (1<<23)) << 8)
-		|((mantissa & 0x007fffff))
-		|((exponent << 23));
-	return m.val;
-}
-
-unsigned int strus::sizeofPackedFloat( const char*& ptr)
-{
-	char const* cc = ptr;
-	cc += g_charlentable[ *cc];
-	cc += g_charlentable[ *cc];
-	return (cc-ptr);
 }
 
 bool strus::checkStringUtf8( const char* ptr, std::size_t size)

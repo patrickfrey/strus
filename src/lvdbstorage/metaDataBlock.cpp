@@ -38,14 +38,14 @@ MetaDataBlock::MetaDataBlock()
 {
 }
 
-MetaDataBlock::MetaDataBlock( const MetaDataDescription* descr_, unsigned int blockno_)
+MetaDataBlock::MetaDataBlock( const MetaDataDescription* descr_, const Index& blockno_)
 	:m_descr(descr_),m_blockno(blockno_),m_ptr( std::calloc( BlockSize, descr_->bytesize()))
 {
 	if (!m_ptr) throw std::bad_alloc();
 }
 
 MetaDataBlock::MetaDataBlock( const MetaDataDescription* descr_, 
-				unsigned int blockno_,
+				const Index& blockno_,
 				const char* blk_,
 				std::size_t blksize_)
 	:m_descr(descr_),m_blockno(blockno_),m_ptr(0)
@@ -72,7 +72,7 @@ MetaDataBlock::~MetaDataBlock()
 }
 
 void MetaDataBlock::init( const MetaDataDescription* descr_, 
-				unsigned int blockno_,
+				const Index& blockno_,
 				const char* blk_,
 				std::size_t blksize_)
 {

@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_KEY_VALUE_STORAGE_HPP_INCLUDED
 #define _STRUS_LVDB_KEY_VALUE_STORAGE_HPP_INCLUDED
 #include "databaseKey.hpp"
+#include "blockKey.hpp"
 #include "indexPacker.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
@@ -43,39 +44,6 @@ namespace strus {
 class KeyValueStorage
 {
 public:
-	class Key
-	{
-	public:
-		Key()
-		{}
-
-		Key( const Index& id1_)
-		{
-			packIndex( m_keystr, id1_);
-		}
-
-		Key( const Index& id1_, const Index& id2_)
-		{
-			packIndex( m_keystr, id1_);
-			packIndex( m_keystr, id2_);
-		}
-
-		Key( const std::string& o)
-			:m_keystr( o){}
-
-		Key( const Key& o)
-			:m_keystr(o.m_keystr){}
-
-		std::string str() const
-		{
-			return m_keystr;
-		}
-
-	private:
-		friend class KeyValueStorage;
-		std::string m_keystr;
-	};
-
 	class Value
 	{
 	public:
@@ -124,14 +92,26 @@ public:
 	virtual ~KeyValueStorage()
 	{}
 
-	const Value* load( const Key& key);
+	const Value* load( const std::string& key);
+	const Value* load( const BlockKey& key, const Index& subnode=0);
 
-	void store( const Key& key, const Value& value, leveldb::WriteBatch& batch);
-	void dispose( const Key& key, leveldb::WriteBatch& batch);
-	void disposeSubnodes( const Key& key, leveldb::WriteBatch& batch);
+	void store( const std::string& key, const Value& value, leveldb::WriteBatch& batch);
+	void store( const BlockKey& key, const Index& subnode, const Value& value, leveldb::WriteBatch& batch);
+	void store( const BlockKey& key, const Value& value, leveldb::WriteBatch& batch);
 
-	std::map<std::string,std::string> getMap( const Key& key=Key());
-	std::map<std::string,std::string> getInvMap( const Key& key=Key());
+	void dispose( const std::string& key, leveldb::WriteBatch& batch);
+	void dispose( const BlockKey& key, const Index& subnode, leveldb::WriteBatch& batch);
+	void dispose( const BlockKey& key, leveldb::WriteBatch& batch);
+
+	void disposeSubnodes( const BlockKey& key, leveldb::WriteBatch& batch);
+
+	std::map<std::string,std::string> getMap();
+	std::map<std::string,std::string> getInvMap();
+
+private:
+	const Value* loadValue( const char* keystr, const std::size_t& keysize);
+	void storeValue( const char* keystr, const std::size_t& keysize, const Value& value, leveldb::WriteBatch& batch);
+	void disposeValue( const char* keystr, const std::size_t& keysize, leveldb::WriteBatch& batch);
 
 private:
 	leveldb::DB* m_db;

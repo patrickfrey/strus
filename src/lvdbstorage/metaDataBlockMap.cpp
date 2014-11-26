@@ -51,13 +51,13 @@ void MetaDataBlockMap::deleteMetaData( Index docno, const std::string& varname)
 
 MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
 {
-	unsigned int blockno = MetaDataBlock::blockno( docno);
+	Index blockno = MetaDataBlock::blockno( docno);
 	boost::mutex::scoped_lock( m_mutex);
 	Map::const_iterator mi = m_map.find( blockno);
 	if (mi == m_map.end())
 	{
 		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
-		const KeyValueStorage::Value* mv = storage.load( KeyValueStorage::Key( blockno));
+		const KeyValueStorage::Value* mv = storage.load( BlockKey( blockno));
 		MetaDataBlockReference& block = m_map[ blockno];
 		if (mv)
 		{
@@ -107,7 +107,7 @@ void MetaDataBlockMap::getWriteBatch(
 		if (!mi->second.get()) continue;
 		cache.declareVoid( mi->second->blockno());
 
-		storage.store( KeyValueStorage::Key( mi->second->blockno()),
+		storage.store( BlockKey( mi->second->blockno()),
 				KeyValueStorage::Value( mi->second->charptr(), mi->second->bytesize()),
 				batch);
 	}

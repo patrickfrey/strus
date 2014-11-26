@@ -32,13 +32,9 @@
 
 using namespace strus;
 
-const KeyValueStorage::Value* KeyValueStorage::load( const Key& key)
+const KeyValueStorage::Value* KeyValueStorage::loadValue( const char* keystr, const std::size_t& keysize)
 {
-	std::string keystr;
-	keystr.push_back( m_keyprefix);
-	keystr.append( key.str());
-
-	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+	leveldb::Slice keyslice( keystr, keysize);
 	leveldb::Status status = m_db->Get( m_readOptions, keyslice, &m_curvaluestr);
 	if (status.IsNotFound())
 	{
@@ -52,45 +48,88 @@ const KeyValueStorage::Value* KeyValueStorage::load( const Key& key)
 	return &m_curvalue;
 }
 
-void KeyValueStorage::store( const Key& key, const Value& value, leveldb::WriteBatch& batch)
+void KeyValueStorage::storeValue( const char* keystr, const std::size_t& keysize, const Value& value, leveldb::WriteBatch& batch)
 {
-	std::string keystr;
-	keystr.push_back( m_keyprefix);
-	keystr.append( key.str());
-
-	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
+	leveldb::Slice keyslice( keystr, keysize);
 	leveldb::Slice valueslice( value.ptr(), value.size());
 
 	batch.Put( keyslice, valueslice);
 }
 
-void KeyValueStorage::dispose( const Key& key, leveldb::WriteBatch& batch)
+void KeyValueStorage::disposeValue( const char* keystr, const std::size_t& keysize, leveldb::WriteBatch& batch)
 {
-	std::string keystr;
-	keystr.push_back( m_keyprefix);
-	keystr.append( key.str());
-
-	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
-
+	leveldb::Slice keyslice( keystr, keysize);
 	batch.Delete( keyslice);
 }
 
+const KeyValueStorage::Value* KeyValueStorage::load( const std::string& key)
+{
+	std::string keystr;
+	keystr.push_back( m_keyprefix);
+	keystr.append( key);
+
+	return loadValue( key.c_str(), key.size());
+}
+
+const KeyValueStorage::Value* KeyValueStorage::load( const BlockKey& key, const Index& subnode)
+{
+	DatabaseKey dbkey( m_keyprefix, key, subnode);
+	return loadValue( dbkey.ptr(), dbkey.size());
+}
+
+
+void KeyValueStorage::store( const std::string& key, const Value& value, leveldb::WriteBatch& batch)
+{
+	std::string keystr;
+	keystr.push_back( m_keyprefix);
+	keystr.append( key);
+
+	storeValue( keystr.c_str(), keystr.size(), value, batch);
+}
+
+void KeyValueStorage::store( const BlockKey& key, const Index& subnode, const Value& value, leveldb::WriteBatch& batch)
+{
+	DatabaseKey dbkey( m_keyprefix, key, subnode);
+	return storeValue( dbkey.ptr(), dbkey.size(), value, batch);
+}
+
+void KeyValueStorage::store( const BlockKey& key, const Value& value, leveldb::WriteBatch& batch)
+{
+	DatabaseKey dbkey( m_keyprefix, key);
+	return storeValue( dbkey.ptr(), dbkey.size(), value, batch);
+}
+
+void KeyValueStorage::dispose( const std::string& key, leveldb::WriteBatch& batch)
+{
+	std::string keystr;
+	keystr.push_back( m_keyprefix);
+	keystr.append( key);
+
+	disposeValue( keystr.c_str(), keystr.size(), batch);
+}
+
+void KeyValueStorage::dispose( const BlockKey& key, const Index& subnode, leveldb::WriteBatch& batch)
+{
+	DatabaseKey dbkey( m_keyprefix, key, subnode);
+	return disposeValue( dbkey.ptr(), dbkey.size(), batch);
+}
+
+void KeyValueStorage::dispose( const BlockKey& key, leveldb::WriteBatch& batch)
+{
+	DatabaseKey dbkey( m_keyprefix, key);
+	return disposeValue( dbkey.ptr(), dbkey.size(), batch);
+}
+
 template <class Action>
-void doForeach( leveldb::DB* db, strus::DatabaseKey::KeyPrefix keyprefix, const KeyValueStorage::Key& key, Action& action)
+static void doForeach( leveldb::DB* db, const leveldb::Slice& keyslice, Action& action)
 {
 	leveldb::Iterator* vi = db->NewIterator( leveldb::ReadOptions());
 	boost::scoped_ptr<leveldb::Iterator> viref(vi);
 
-	std::string keystr;
-	keystr.push_back( (char)keyprefix);
-	keystr.append( key.str());
-
-	leveldb::Slice keyslice( keystr.c_str(), keystr.size());
-
 	for (vi->Seek( keyslice); vi->Valid(); vi->Next())
 	{
-		if (keystr.size() > vi->key().size()
-		||  0!=std::memcmp( vi->key().data(), keystr.c_str(), keystr.size()))
+		if (keyslice.size() > vi->key().size()
+		||  0!=std::memcmp( vi->key().data(), keyslice.data(), keyslice.size()))
 		{
 			//... end of document reached
 			break;
@@ -115,10 +154,13 @@ private:
 	leveldb::WriteBatch* batch;
 };
 
-void KeyValueStorage::disposeSubnodes( const Key& key, leveldb::WriteBatch& batch)
+void KeyValueStorage::disposeSubnodes( const BlockKey& key, leveldb::WriteBatch& batch)
 {
+	DatabaseKey dbkey( m_keyprefix, key);
+	leveldb::Slice keyslice( dbkey.ptr(), dbkey.size());
+
 	DeleteNodeAction action( batch);
-	doForeach<DeleteNodeAction>( m_db, m_keyprefix, key, action);
+	doForeach<DeleteNodeAction>( m_db, keyslice, action);
 }
 
 struct BuildMapAction
@@ -130,13 +172,15 @@ struct BuildMapAction
 
 	void operator()( const leveldb::Slice& keyslice, const leveldb::Slice& valueslice)
 	{
+		std::string keystr( keyslice.data()+1, keyslice.size()-1);
+		std::string valuestr( valueslice.data(), valueslice.size());
 		if (inv)
 		{
-			(*map)[ valueslice.ToString()] = keyslice.ToString();
+			(*map)[ valuestr] = keystr;
 		}
 		else
 		{
-			(*map)[ keyslice.ToString()] = valueslice.ToString();
+			(*map)[ keystr] = valuestr;
 		}
 	}
 
@@ -146,19 +190,24 @@ private:
 };
 
 
-std::map<std::string,std::string> KeyValueStorage::getMap( const Key& key)
+std::map<std::string,std::string> KeyValueStorage::getMap()
 {
+	leveldb::Slice keyslice( (const char*)&m_keyprefix, 1);
+
 	std::map<std::string,std::string> rt;
 	BuildMapAction action( rt, false);
-	doForeach( m_db, m_keyprefix, key, action);
+	doForeach( m_db, keyslice, action);
 	return rt;
 }
 
-std::map<std::string,std::string> KeyValueStorage::getInvMap( const Key& key)
+std::map<std::string,std::string> KeyValueStorage::getInvMap()
 {
+	leveldb::Slice keyslice( (const char*)&m_keyprefix, 1);
+
 	std::map<std::string,std::string> rt;
 	BuildMapAction action( rt, true);
-	doForeach( m_db, m_keyprefix, key, action);
+	doForeach( m_db, keyslice, action);
 	return rt;
 }
+
 

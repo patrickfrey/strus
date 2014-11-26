@@ -42,7 +42,7 @@ public:
 	virtual ~ForwardIteratorInterface(){}
 
 	/// \brief Define the document of the items inspected
-	virtual void initDoc( const Index& docno_)=0;
+	virtual void skipDoc( const Index& docno_)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
 	virtual Index skipPos( const Index& firstpos)=0;

@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
 #define _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
 #include "dataBlockStorage.hpp"
+#include "blockKey.hpp"
 
 namespace strus {
 
@@ -38,8 +39,8 @@ class BlockStorage
 	:public DataBlockStorage
 {
 public:
-	BlockStorage( leveldb::DB* db_, const DatabaseKey& dbkey_, bool useLruCache_)
-		:DataBlockStorage( db_, dbkey_, useLruCache_){}
+	BlockStorage( leveldb::DB* db_, const BlockKey& dbkey_, bool useLruCache_)
+		:DataBlockStorage( db_, DatabaseKey( BlockType::DatabaseKeyPrefix, dbkey_), useLruCache_){}
 	BlockStorage( const BlockStorage& o)
 		:DataBlockStorage(o){}
 

@@ -31,15 +31,21 @@
 #include "strus/index.hpp"
 #include "posinfoBlock.hpp"
 #include "blockMap.hpp"
+#include "blockKey.hpp"
 #include <vector>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
 namespace strus {
 
+typedef std::vector<Index> PosinfoBlockElement;
+
 class PosinfoBlockMap
 	:protected BlockMap<PosinfoBlock,PosinfoBlockElement>
 {
+public:
+	typedef BlockMap<PosinfoBlock,PosinfoBlockElement> Parent;
+
 public:
 	PosinfoBlockMap( leveldb::DB* db_)
 		:BlockMap<PosinfoBlock,PosinfoBlockElement>(db_){}
@@ -52,7 +58,7 @@ public:
 		const Index& docno,
 		const std::vector<Index>& pos)
 	{
-		defineElement( PosinfoBlock::databaseKey( typeno, termno), docno, pos);
+		defineElement( BlockKey( typeno, termno), docno, pos);
 	}
 
 	void deletePosinfoPosting(
@@ -60,12 +66,12 @@ public:
 		const Index& termno,
 		const Index& docno)
 	{
-		deleteElement( PosinfoBlock::databaseKey( typeno, termno), docno);
+		deleteElement( BlockKey( typeno, termno), docno);
 	}
 	
 	void getWriteBatch( leveldb::WriteBatch& batch)
 	{
-		BlockMap<PosinfoBlock,PosinfoBlockElement>::getWriteBatch( batch);
+		getWriteBatchMerge( batch);
 	}
 };
 

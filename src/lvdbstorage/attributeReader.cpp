@@ -34,7 +34,7 @@ using namespace strus;
 std::string AttributeReader::getValue( const ElementHandle& element) const
 {
 	KeyValueStorage kvs( m_db, DatabaseKey::DocAttributePrefix, false);
-	const KeyValueStorage::Value* val = kvs.load( KeyValueStorage::Key( m_docno, (Index)element));
+	const KeyValueStorage::Value* val = kvs.load( BlockKey( m_docno), (Index)element);
 	return std::string( val->ptr(), val->size());
 }
 

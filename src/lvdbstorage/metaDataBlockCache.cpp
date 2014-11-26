@@ -37,7 +37,7 @@ MetaDataBlockCache::MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescript
 	:m_db(db_),m_descr(descr_)
 {}
 
-void MetaDataBlockCache::declareVoid( unsigned int blockno)
+void MetaDataBlockCache::declareVoid( const Index& blockno)
 {
 	m_voidar.push_back( blockno);
 }
@@ -51,7 +51,7 @@ void MetaDataBlockCache::refresh()
 	}
 }
 
-void MetaDataBlockCache::resetBlock( unsigned int blockno)
+void MetaDataBlockCache::resetBlock( const Index& blockno)
 {
 	if (blockno > CacheSize || blockno <= 0) throw std::runtime_error("block number out of range (MetaDataBlockCache)");
 	std::size_t blkidx = blockno-1;
@@ -60,12 +60,12 @@ void MetaDataBlockCache::resetBlock( unsigned int blockno)
 }
 
 
-const MetaDataRecord MetaDataBlockCache::get( Index docno)
+const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 {
 	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
 	std::size_t docidx     = (std::size_t)(docno -1);
 	std::size_t blkidx     = docidx / MetaDataBlock::BlockSize;
-	std::size_t blockno    = blkidx+1;
+	Index blockno          = blkidx+1;
 
 	// The fact that the reference counting of shared_ptr is
 	// thread safe is used to implement some kind of RCU:
@@ -75,7 +75,7 @@ const MetaDataRecord MetaDataBlockCache::get( Index docno)
 		Statistics::increment( Statistics::MetaDataCacheMiss);
 
 		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
-		const KeyValueStorage::Value* mv = storage.load( KeyValueStorage::Key( blockno));
+		const KeyValueStorage::Value* mv = storage.load( BlockKey( blockno));
 		m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
 		blkref = m_ar[ blkidx];
 	}

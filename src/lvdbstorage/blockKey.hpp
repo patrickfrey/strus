@@ -26,8 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_INDEX_HPP_INCLUDED
-#define _STRUS_INDEX_HPP_INCLUDED
+#ifndef _STRUS_LVDB_BLOCK_KEY_HPP_INCLUDED
+#define _STRUS_LVDB_BLOCK_KEY_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <stdexcept>
 
 #ifdef _MSC_VER
 #pragma warning(disable:4290)
@@ -35,15 +37,77 @@
 namespace strus {
 	///\typedef Index
 	///\brief Document number type
-	typedef INT32 Index;
+	typedef INT64 BlockKeyIndex;
 }//namespace
 #else
 #include <stdint.h>
 namespace strus {
 	///\typedef Index
 	///\brief Index term number type
-	typedef int32_t Index;
+	typedef int64_t BlockKeyIndex;
 }//namespace
 #endif
-#endif
 
+namespace strus
+{
+
+class BlockKey
+{
+public:
+	BlockKey( const Index& idx1, const Index& idx2)
+	{
+		if (idx1 <= 0 || idx2 <= 0) throw std::logic_error("using illegal block key");
+		m_index = idx1;
+		m_index <<= 32;
+		m_index += idx2;
+	}
+	explicit BlockKey( const Index& idx)
+	{
+		if (idx <= 0) throw std::logic_error("using illegal block key");
+		m_index = idx;
+	}
+	BlockKey()
+		:m_index(0){}
+
+	explicit BlockKey( const BlockKeyIndex& idx)
+	{
+		if (idx <= 0) throw std::logic_error("using illegal block key");
+		m_index = idx;
+	}
+
+	Index elem( const std::size_t& idx) const
+	{
+		Index rt;
+		if (idx == 1)
+		{
+			rt = (Index)( m_index >> 32);
+			if (!rt) return (Index)m_index;
+			return rt;
+		}
+		else if (idx == 2)
+		{
+			if ((m_index >> 32) > 0)
+			{
+				return (Index)(m_index & 0xffFFffFF);
+			}
+			else
+			{
+				return 0;
+			}
+		}
+		else
+		{
+			throw std::logic_error("illegal block key element access");
+		}
+	}
+
+	BlockKeyIndex index() const
+	{
+		return m_index;
+	}
+
+private:
+	BlockKeyIndex m_index;
+};
+}//namespace
+#endif

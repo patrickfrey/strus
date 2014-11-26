@@ -33,153 +33,87 @@
 using namespace strus;
 
 ForwardIterator::ForwardIterator( Storage* storage_, leveldb::DB* db_, const std::string& type_)
-	:m_storage(storage_)
-	,m_db(db_)
-	,m_itr(0)
-	,m_type(type_)
+	:m_db(db_)
+	,m_forwardBlockStorage(0)
+	,m_curblock(0)
+	,m_blockitr(0)
 	,m_docno(0)
-	,m_typeno(0)
-	,m_pos(0)
-	,m_keylevel(0)
-	,m_keysize_docno(0)
-	,m_keysize_typeno(0)
+	,m_typeno(storage_->getTermType( type_))
+	,m_curpos(0)
 {}
 
 ForwardIterator::~ForwardIterator()
 {
-	if (m_itr)
-	{
-		delete m_itr;
-	}
+	if (m_forwardBlockStorage) delete m_forwardBlockStorage;
 }
 
-void ForwardIterator::buildKey( int level)
+void ForwardIterator::skipDoc( const Index& docno_)
 {
-	switch (level)
+	if (m_docno != docno_ || !m_forwardBlockStorage)
 	{
-		case 0:
-			m_key.resize(0);
-			m_keysize_docno = 0;
-			m_keysize_typeno = 0;
-			m_keylevel = 0;
-			break;
-		case 1:
-			m_key.resize(0);
-			m_key.addPrefix( DatabaseKey::ForwardIndexPrefix);
-			m_key.addElem( m_docno);
-			m_keysize_docno = m_key.size();
-			m_keysize_typeno = 0;
-			m_keylevel = 1;
-			break;
-		case 2:
-			if (m_keylevel < 1) buildKey(1);
-			m_key.resize( m_keysize_docno);
-			m_key.addElem( m_typeno);
-			m_keysize_typeno = m_key.size();
-			m_keylevel = 2;
-			break;
-		case 3:
-			if (m_keylevel < 2) buildKey(2);
-			m_key.resize( m_keysize_typeno);
-			m_key.addElem( m_pos);
-			m_keylevel = 3;
-			break;
-		default:
-			throw std::logic_error("assertion failed in forward index viewer: key level corrupted");
-	}
-}
-
-
-void ForwardIterator::initDoc( const Index& docno_)
-{
-	if (!m_typeno)
-	{
-		m_typeno = m_storage->getTermType( m_type);
-	}
-	if (m_docno != docno_)
-	{
+		if (m_forwardBlockStorage) delete m_forwardBlockStorage;
+		m_forwardBlockStorage = 0;
+		m_forwardBlockStorage
+			= new BlockStorage<ForwardIndexBlock>( 
+				m_db, BlockKey( m_typeno, m_docno), false);
 		m_docno = docno_;
-		m_keylevel = 0;
-		buildKey(2);
+		m_curblock = 0;
+		m_curblock_lastpos = 0;
+		m_curblock_firstpos = 0;
+		m_blockitr = 0;
+		m_curpos = 0;
 	}
 }
-
 
 Index ForwardIterator::skipPos( const Index& firstpos_)
 {
-	if (!m_itr)
+	if (!m_forwardBlockStorage || !m_docno) return 0;
+	if (!m_curblock || firstpos_ < m_curblock_firstpos || firstpos_ > m_curblock_lastpos)
 	{
-		leveldb::ReadOptions options;
-		options.fill_cache = false;
-		m_itr = m_db->NewIterator( options);
-	}
-	if (m_keylevel < 3 || (m_pos + 1) != firstpos_ || m_pos == 0)
-	{
-		if (!m_docno)
+		m_curblock = m_forwardBlockStorage->load( firstpos_);
+		if (!m_curblock)
 		{
-			throw std::runtime_error( "cannot seek position without document number defined");
-		}
-		m_pos = firstpos_;
-		m_keylevel = 1;
-		buildKey(3);
-		m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
-
-		if (m_itr->Valid()
-		&& m_keysize_typeno < m_itr->key().size()
-		&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize_typeno))
-		{
-			// ... docno and typeno match, so we extract the current 
-			//	position from the rest of the key and set it:
-			const char* ki = m_itr->key().data() + m_keysize_typeno;
-			const char* ke = ki + m_itr->key().size() - m_keysize_typeno;
-			return (m_pos = unpackIndex( ki, ke));
+			m_curblock_lastpos = 0;
+			m_curblock_firstpos = 0;
+			m_blockitr = 0;
+			m_curpos = 0;
+			return 0;
 		}
 		else
 		{
-			return m_pos = 0;
+			m_curblock_lastpos = m_curblock->id();
+			m_curblock_firstpos = m_curblock->position_at( m_curblock->charptr());
+			m_blockitr = m_curblock->charptr();
+			m_curpos = m_curblock_firstpos;
+			if (m_curpos >= firstpos_)
+			{
+				return m_curpos;
+			}
 		}
+	}
+	else if (m_curpos > firstpos_ || m_curpos == 0 || !m_blockitr)
+	{
+		m_curpos = m_curblock_firstpos;
+		m_blockitr = m_curblock->charptr();
+	}
+	if (0!=(m_blockitr = m_curblock->upper_bound( firstpos_, m_blockitr)))
+	{
+		m_curpos = m_curblock->position_at( m_blockitr);
 	}
 	else
 	{
-		for (;;)
-		{
-			m_itr->Next();
-			if (m_keysize_docno < m_itr->key().size()
-			&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize_docno))
-			{
-				// ... docno still matches
-				if (m_keysize_typeno < m_itr->key().size()
-				&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize_typeno))
-				{
-					// ... typeno matches, so we got the next item
-					//	and we can set the current (as next) position:
-					const char* ki = m_itr->key().data() + m_keysize_typeno;
-					const char* ke = ki + m_itr->key().size() - m_keysize_typeno;
-					return (m_pos = unpackIndex( ki, ke));
-				}
-				else
-				{
-					// ... typeno does not match, so we check the next entry
-					continue;
-				}
-			}
-			else
-			{
-				// ... we reached the end of document
-				return m_pos = 0;
-			}
-		}
+		m_curpos = 0;
 	}
+	return m_curpos;
 }
-
 
 std::string ForwardIterator::fetch()
 {
-	if (m_keylevel < 3)
+	if (!m_blockitr || !m_curblock)
 	{
-		throw std::runtime_error("internal: try to fetch item from forward index with document, term type or position undefined");
+		throw std::runtime_error("internal: forward iterator fetch called without a term selected");
 	}
-	return std::string( m_itr->value().data(), m_itr->value().size());
+	return std::string( m_curblock->value_at( m_blockitr));
 }
 
 

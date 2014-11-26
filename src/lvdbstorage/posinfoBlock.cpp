@@ -41,7 +41,7 @@ Index PosinfoBlock::docno_at( const char* ref) const
 	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- docno_at");
 	char const* rr = ref;
 	if (rr == charend()) return 0;
-	return id() - (unpackIndex( rr, charend()) - 1);
+	return docnoFromRelativeIndex( unpackIndex( rr, charend()));
 }
 
 unsigned int PosinfoBlock::frequency_at( const char* itr) const
@@ -118,8 +118,8 @@ void PosinfoBlock::append( const Index& docno, const std::vector<Index>& pos)
 	}
 	std::string blk;
 	if (size()) blk.push_back( EndPosinfoMarker);
-	packIndex( blk, id() - docno + 1);	//... relative docno
-	packIndex( blk, pos.size());		//... feature frequency (ff)
+	packIndex( blk, relativeIndexFromDocno( docno));	//... relative docno
+	packIndex( blk, pos.size());				//... feature frequency (ff)
 	std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
 	for (; pi != pe; ++pi)
 	{
@@ -181,28 +181,14 @@ PosinfoBlock::PositionScanner PosinfoBlock::positionScanner_at( const char* itr)
 
 const char* PosinfoBlock::upper_bound( const Index& docno_, const char* lowerbound) const
 {
-	if (!lowerbound || lowerbound == charend()) return charend();
-	const char* last = charend();
-	char const* first = lowerbound - 1;
+	if (!lowerbound || lowerbound == charend()) return 0;
 
-	if (id() < docno_)
-	{
-		throw std::logic_error("called PosinfoBlock::upper_bound with wrong block");
-	}
-	char needle[ 32];
-	std::size_t needlesize = 0;
-	packIndex( needle, needlesize, sizeof(needle), id() - (docno_ - 1));
-	do
-	{
-		++first;
-		if (std::memcmp( needle, first, needlesize) >= 0)
-		{
-			return first;
-		}
-		first = (const char*)std::memchr( first, EndPosinfoMarker, last-first);
-	}
-	while (first);
-	return 0;
+	if (id() < docno_) throw std::logic_error("called PosinfoBlock::upper_bound with wrong block");
+
+	const char* rt = findStructIndexDesc(
+				lowerbound, charend(), EndPosinfoMarker,
+				relativeIndexFromDocno( docno_));
+	return rt;
 }
 
 const char* PosinfoBlock::find( const Index& docno_, const char* lowerbound) const
@@ -234,15 +220,9 @@ void PosinfoBlock::setId( const Index& id_)
 			while (bi != be)
 			{
 				packIndex( content, unpackIndex( bi, be) + id_diff);
-				while (bi != be && *bi != EndPosinfoMarker)
-				{
-					packIndex( content, unpackIndex( bi, be));
-				}
-				if (bi != be)
-				{
-					content.push_back( EndPosinfoMarker);
-					++bi;
-				}
+				const char* blkstart = bi;
+				const char* bi = nextDoc( bi);
+				content.append( blkstart, bi - blkstart);
 			}
 			init( id_, content.c_str(), content.size(), content.size());
 		}

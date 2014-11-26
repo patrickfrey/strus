@@ -28,5 +28,6 @@ setenv.sh
 tests/randoc/src/randomCollectionTest
 tests/program/src/parseQueryEvalProgramTest
 tests/functions/src/functions
+tests/posinfoBlock/src/testPosinfoBlock
 src/lvdbstorage/strusCheckStorage
 src/lvdbstorage/strusDumpStorage
