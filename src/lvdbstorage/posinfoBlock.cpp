@@ -38,6 +38,7 @@ enum {EndPosinfoMarker=(char)0xFE};
 
 Index PosinfoBlock::docno_at( const char* ref) const
 {
+	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- docno_at");
 	char const* rr = ref;
 	if (rr == charend()) return 0;
 	return id() - (unpackIndex( rr, charend()) - 1);
@@ -45,13 +46,17 @@ Index PosinfoBlock::docno_at( const char* ref) const
 
 unsigned int PosinfoBlock::frequency_at( const char* itr) const
 {
+	if (itr < charptr() || itr > charend()) throw std::logic_error("illegal posinfo block access -- frequency_at");
+	if (itr == charend()) return 0;
 	char const* pi = skipIndex( itr, charend());	//... skip docno
 	return (*pi == EndPosinfoMarker)?0:unpackIndex( pi, charend());
 }
 
 std::vector<Index> PosinfoBlock::positions_at( const char* itr) const
 {
+	if (itr < charptr() || itr > charend()) throw std::logic_error("illegal posinfo block access -- positions_at");
 	std::vector<Index> rt;
+	if (itr == charend()) return rt;
 	char const* pi = skipIndex( itr, charend());	//... skip docno
 	pi = skipIndex( pi, charend());			//... skip ff
 	const char* pe = charend();
@@ -64,12 +69,14 @@ std::vector<Index> PosinfoBlock::positions_at( const char* itr) const
 
 const char* PosinfoBlock::end_at( const char* itr) const
 {
+	if (itr < charptr() || itr > charend()) throw std::logic_error("illegal posinfo block access -- end_at");
 	const char* ee = (const char*)std::memchr( itr, EndPosinfoMarker, charend()-itr);
 	return ee?ee:charend();
 }
 
 bool PosinfoBlock::empty_at( const char* itr) const
 {
+	if (itr < charptr() || itr > charend()) throw std::logic_error("illegal posinfo block access -- empty_at");
 	char const* pi = skipIndex( itr, charend());	//... skip docno
 	return (pi != charend() || *pi == EndPosinfoMarker);
 }
@@ -94,8 +101,8 @@ const char* PosinfoBlock::prevDoc( const char* ref) const
 {
 	if (ref == charptr()) return 0;
 	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- prevDoc");
-	char const* rt = (const char*)::memrchr( charptr(), EndPosinfoMarker, ref-charptr());
-	return (rt)?(rt+1):charptr();
+	char const* rt = (const char*)::memrchr( charptr(), EndPosinfoMarker, ref-charptr()-1);
+	return (rt >= charptr())?(rt+1):charptr();
 }
 
 void PosinfoBlock::append( const Index& docno, const std::vector<Index>& pos)

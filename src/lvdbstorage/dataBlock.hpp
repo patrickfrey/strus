@@ -44,26 +44,22 @@ public:
 	{}
 
 	DataBlock( char type_, const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
-		:m_type(type_),m_allocsize(0)
+		:m_type(type_),m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{
 		init( id_, ptr_, size_, allocated_?size_:0);
 	}
 
 	DataBlock( const DataBlock& o)
-		:m_type(o.m_type),m_allocsize(0)
+		:m_type(o.m_type),m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{
 		init( o.m_id, o.m_ptr, o.m_size, o.m_allocsize);
 	}
 
-	virtual ~DataBlock()
-	{
-		if (m_allocsize) std::free( m_ptr);
-	}
+	virtual ~DataBlock();
 
 	DataBlock& operator=( const DataBlock& o)
 	{
 		m_type = o.m_type;
-		m_allocsize = 0;
 		init( o.m_id, o.m_ptr, o.m_size, o.m_allocsize);
 		return *this;
 	}

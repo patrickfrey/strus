@@ -28,25 +28,36 @@
 */
 #include "dataBlock.hpp"
 #include <cstring>
+#include <stdexcept>
+#include <map>
+#include <iostream>
 
 using namespace strus;
 
+#define BLOCK_ALLOC_SIZE(minNofBytes)  (((((minNofBytes) + 1024-1) / 1024)) * 1024)
+
+DataBlock::~DataBlock()
+{
+	if (m_allocsize) std::free( m_ptr);
+}
+
 void DataBlock::init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_)
 {
-	if (m_allocsize)
-	{
-		std::free( m_ptr);
-	}
 	if (allocsize_)
 	{
-		std::size_t mm = ((allocsize_ >> 10)+1) << 10;
-		m_ptr = (char*)std::malloc( mm);
-		if (!m_ptr) throw std::bad_alloc();
+		std::size_t mm = BLOCK_ALLOC_SIZE( size_);
+		void* newptr = std::malloc( mm);
+		if (!newptr) throw std::bad_alloc();
+		std::memcpy( newptr, ptr_, size_);
+		if (m_allocsize) std::free( m_ptr);
+
+		m_ptr = (char*)newptr;
 		m_allocsize = mm;
-		std::memcpy( m_ptr, ptr_, size_);
 	}
 	else
 	{
+		if (m_allocsize) std::free( m_ptr);
+
 		m_ptr = static_cast<char*>(const_cast<void*>( ptr_));
 		m_allocsize = 0;
 	}
@@ -57,25 +68,14 @@ void DataBlock::init( const Index& id_, const void* ptr_, std::size_t size_, std
 void DataBlock::initcopy( const DataBlock& o)
 {
 	if (m_type != o.m_type) throw std::logic_error( "block type mismatch in initcopy");
-	std::size_t mm = ((o.m_size >> 10)+1) << 10;
-	void* newptr = std::malloc( mm);
-	if (!newptr) throw std::bad_alloc();
-	std::memcpy( newptr, m_ptr, m_size);
-	if (m_allocsize)
-	{
-		std::free( m_ptr);
-	}
-	m_ptr = (char*)newptr;
-	m_allocsize = mm;
-	m_size = o.m_size;
-	m_id = o.m_id;
+	init( o.m_id, o.m_ptr, o.m_size, o.m_size /*force copy*/);
 }
 
 void DataBlock::append( const void* data, std::size_t datasize)
 {
 	if (datasize + m_size > m_allocsize)
 	{
-		std::size_t mm = (((datasize +m_size) >> 10)+1) << 10;
+		std::size_t mm = BLOCK_ALLOC_SIZE( datasize + m_size);
 		char* mp;
 		if (m_allocsize)
 		{
@@ -84,7 +84,7 @@ void DataBlock::append( const void* data, std::size_t datasize)
 		}
 		else
 		{
-			mp = (char*)std::malloc( mm);
+			mp = (char*)std::calloc( mm, 1);
 			if (!mp) throw std::bad_alloc();
 			std::memcpy( mp, m_ptr, m_size);
 		}

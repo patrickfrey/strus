@@ -94,7 +94,7 @@ public:
 	virtual ~LocalReferenceArray()
 	{
 		clear();
-		delete m_ar;
+		if (m_ar) std::free( m_ar);
 	}
 
 	const TYPE& operator[]( std::size_t idx) const
@@ -124,10 +124,10 @@ public:
 	{
 		if (m_size == m_allocsize)
 		{
-			std::size_t mm = m_allocsize + MemIncrement;
+			std::size_t mm = m_allocsize + (MemIncrement * sizeof(*m_ar));
 			void* mem = std::realloc( m_ar, mm);
 			if (!mem) throw std::bad_alloc();
-			m_allocsize = mm;
+			m_allocsize += mm;
 			m_ar = (TYPE**)mem;
 		}
 		m_ar[ m_size++] = obj;

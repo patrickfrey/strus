@@ -70,6 +70,7 @@ static bool isAlnumIdentifier( const std::string& str)
 }
 
 MetaDataDescription::MetaDataDescription( const std::string& str)
+	:m_bytesize(0)
 {
 	char const* si = str.c_str();
 	const char* se = str.c_str() + str.size();

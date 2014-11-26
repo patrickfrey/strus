@@ -110,6 +110,7 @@ public:
 		:m_db(db_)
 		,m_keyprefix(keyprefix_)
 		,m_curvaluestr()
+		,m_curvalue()
 	{
 		m_readOptions.fill_cache = useLruCache_;
 	}
@@ -117,7 +118,8 @@ public:
 		:m_db(o.m_db)
 		,m_readOptions(o.m_readOptions)
 		,m_keyprefix(o.m_keyprefix)
-		,m_curvaluestr(o.m_curvaluestr){}
+		,m_curvaluestr(o.m_curvaluestr)
+		,m_curvalue(){}
 	
 	virtual ~KeyValueStorage()
 	{}
