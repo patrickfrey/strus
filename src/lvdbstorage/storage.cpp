@@ -56,6 +56,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
 	,m_dfMap(0)
+	,m_attributeMap(0)
 	,m_metaDataBlockMap(0)
 	,m_metaDataBlockCache(0)
 	,m_docnoBlockMap(0)
@@ -88,8 +89,9 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_variableMap = new GlobalKeyMap( m_db, DatabaseKey::VariablePrefix);
 			m_attributeNameMap = new GlobalKeyMap( m_db, DatabaseKey::AttributeKeyPrefix);
 			m_dfMap = new DocumentFrequencyMap( m_db);
-			m_metaDataBlockCache = new MetaDataBlockCache( m_db, m_metadescr);
+			m_attributeMap = new AttributeMap( m_db);
 			m_metaDataBlockMap = new MetaDataBlockMap( m_db, m_metadescr);
+			m_metaDataBlockCache = new MetaDataBlockCache( m_db, m_metadescr);
 			m_docnoBlockMap = new DocnoBlockMap( m_db);
 			m_posinfoBlockMap = new PosinfoBlockMap( m_db);
 			m_forwardIndexBlockMap = new ForwardIndexBlockMap( m_db);
@@ -104,6 +106,8 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 		{
 			if (m_dfMap) delete m_metaDataBlockMap;
 			m_dfMap = 0;
+			if (m_attributeMap) delete m_attributeMap;
+			m_attributeMap = 0;
 			if (m_metaDataBlockMap) delete m_metaDataBlockMap;
 			m_metaDataBlockMap = 0;
 			if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
@@ -158,6 +162,7 @@ void Storage::writeInserterBatch()
 	m_variableMap->store( "NofDocs", m_nof_documents);
 
 	m_dfMap->getWriteBatch( m_inserter_batch);
+	m_attributeMap->getWriteBatch( m_inserter_batch);
 	m_metaDataBlockMap->getWriteBatch( m_inserter_batch, *m_metaDataBlockCache);
 
 	m_docnoBlockMap->getWriteBatch( m_inserter_batch);
@@ -223,6 +228,7 @@ Storage::~Storage()
 	delete m_metaDataBlockCache; 
 
 	delete m_dfMap;
+	delete m_attributeMap;
 	delete m_metaDataBlockMap;
 
 	delete m_docnoBlockMap;
@@ -259,7 +265,7 @@ Index Storage::getDocno( const std::string& name) const
 	return m_docIdMap->lookUp( name);
 }
 
-Index Storage::getAttribute( const std::string& name) const
+Index Storage::getAttributeName( const std::string& name) const
 {
 	return m_attributeNameMap->lookUp( name);
 }
@@ -282,7 +288,7 @@ Index Storage::getOrCreateDocno( const std::string& name, bool& isNew)
 	return rt;
 }
 
-Index Storage::getOrCreateAttribute( const std::string& name)
+Index Storage::getOrCreateAttributeName( const std::string& name)
 {
 	return m_attributeNameMap->getOrCreate( name, m_next_attribno);
 }
@@ -371,10 +377,33 @@ void Storage::defineMetaData( const Index& docno, const std::string& varname, co
 	m_metaDataBlockMap->defineMetaData( docno, varname, value);
 }
 
+void Storage::deleteMetaData( const Index& docno, const std::string& varname)
+{
+	m_metaDataBlockMap->deleteMetaData( docno, varname);
+}
+
 void Storage::deleteMetaData( const Index& docno)
 {
 	m_metaDataBlockMap->deleteMetaData( docno);
 }
+
+void Storage::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
+{
+	Index varno = getOrCreateAttributeName( varname);
+	m_attributeMap->defineAttribute( docno, varno, value);
+}
+
+void Storage::deleteAttribute( const Index& docno, const std::string& varname)
+{
+	Index varno = getOrCreateAttributeName( varname);
+	m_attributeMap->deleteAttribute( docno, varno);
+}
+
+void Storage::deleteAttributes( const Index& docno)
+{
+	m_attributeMap->deleteAttributes( docno);
+}
+
 
 void Storage::defineDocnoPosting(
 	const Index& termtype, const Index& termvalue,
@@ -442,21 +471,6 @@ std::vector<StatCounterValue> Storage::getStatistics() const
 		rt.push_back( StatCounterValue( si.typeName(), si.value()));
 	}
 	return rt;
-}
-
-void Storage::deleteAttributes( const Index& docno)
-{
-	KeyValueStorage attribstorage( m_db, DatabaseKey::DocAttributePrefix, false);
-	attribstorage.disposeSubnodes( BlockKey( docno), m_inserter_batch);
-}
-
-void Storage::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
-{
-	Index attribno = getOrCreateAttribute( varname);
-	DatabaseKey key( (char)DatabaseKey::DocAttributePrefix, BlockKey( docno, attribno));
-
-	leveldb::Slice keyslice( key.ptr(), key.size());
-	m_inserter_batch.Put( keyslice, value);
 }
 
 

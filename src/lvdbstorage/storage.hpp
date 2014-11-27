@@ -37,6 +37,7 @@
 #include "metaDataBlockMap.hpp"
 #include "metaDataBlockCache.hpp"
 #include "metaDataReader.hpp"
+#include "attributeMap.hpp"
 #include "docnoBlock.hpp"
 #include "docnoBlockMap.hpp"
 #include "posinfoBlock.hpp"
@@ -108,9 +109,11 @@ public:
 	enum {NofDocumentsInsertedBeforeAutoCommit=1024};
 
 	void defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value);
+	void deleteMetaData( const Index& docno, const std::string& varname);
 	void deleteMetaData( const Index& docno);
 
 	void defineAttribute( const Index& docno, const std::string& varname, const std::string& value);
+	void deleteAttribute( const Index& docno, const std::string& varname);
 	void deleteAttributes( const Index& docno);
 
 	void deleteIndex( const Index& docno);
@@ -147,11 +150,11 @@ public:
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
-	Index getAttribute( const std::string& name) const;
+	Index getAttributeName( const std::string& name) const;
 
 	Index getOrCreateTermValue( const std::string& name);
 	Index getOrCreateTermType( const std::string& name);
-	Index getOrCreateAttribute( const std::string& name);
+	Index getOrCreateAttributeName( const std::string& name);
 	Index getOrCreateDocno( const std::string& name, bool& isNew);
 
 	void checkFlush();
@@ -179,6 +182,7 @@ private:
 	MetaDataDescription m_metadescr;			///< description of the meta data
 
 	DocumentFrequencyMap* m_dfMap;				///< temporary map for the document frequency of new inserted features
+	AttributeMap* m_attributeMap;				///< map of document attributes for writing
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 

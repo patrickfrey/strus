@@ -56,14 +56,20 @@ class BlockKey
 public:
 	BlockKey( const Index& idx1, const Index& idx2)
 	{
-		if (idx1 <= 0 || idx2 <= 0) throw std::logic_error("using illegal block key");
+		if (idx1 <= 0 || idx2 <= 0)
+		{
+			throw std::logic_error("using illegal block key");
+		}
 		m_index = idx1;
 		m_index <<= 32;
 		m_index += idx2;
 	}
 	explicit BlockKey( const Index& idx)
 	{
-		if (idx <= 0) throw std::logic_error("using illegal block key");
+		if (idx <= 0)
+		{
+			throw std::logic_error("using illegal block key");
+		}
 		m_index = idx;
 	}
 	BlockKey()
@@ -71,7 +77,10 @@ public:
 
 	explicit BlockKey( const BlockKeyIndex& idx)
 	{
-		if (idx <= 0) throw std::logic_error("using illegal block key");
+		if (idx <= 0)
+		{
+			throw std::logic_error("using illegal block key");
+		}
 		m_index = idx;
 	}
 

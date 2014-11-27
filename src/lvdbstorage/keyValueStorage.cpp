@@ -68,7 +68,7 @@ const KeyValueStorage::Value* KeyValueStorage::load( const std::string& key)
 	keystr.push_back( m_keyprefix);
 	keystr.append( key);
 
-	return loadValue( key.c_str(), key.size());
+	return loadValue( keystr.c_str(), keystr.size());
 }
 
 const KeyValueStorage::Value* KeyValueStorage::load( const BlockKey& key, const Index& subnode)

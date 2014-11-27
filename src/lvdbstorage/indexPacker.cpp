@@ -202,7 +202,7 @@ const char* strus::skipIndex( const char* ptr, const char* end)
 template <class BUFFER>
 static void packIndex_( BUFFER& buf, const Index& idx)
 {
-	if (idx <= 0)
+	if (idx < 0)
 	{
 		throw std::runtime_error( "index out of range (packIndex_)");
 	}
@@ -240,7 +240,7 @@ struct SkipChar
 	bool operator()( char const*& pi, const char* pe, char)
 	{
 		pi += g_charlentable[ *pi];
-		return pi==pe;
+		return pi!=pe;
 	}
 };
 
@@ -295,12 +295,15 @@ static const char* findIndex( const char* ptr, const char* end, Index needle, ch
 
 	char const* pi = ptr;
 	const char* pe = end;
-	if (pi == pe) return 0;
-	while (Comparator()( pi, needlebuf[0])
+
+	while (pi != pe
+		&& Comparator()( pi, needlebuf[0])
 		&& SkipElem()( pi, pe, delim)){}
-	if (pi == pe) return 0;
-	while (Comparator()( pi, needlebuf, bufstruct.size)
+
+	while (pi != pe
+		&& Comparator()( pi, needlebuf, bufstruct.size)
 		&& SkipElem()( pi, pe, delim)){}
+
 	return (pi == pe)?0:(const char*)pi;
 }
 

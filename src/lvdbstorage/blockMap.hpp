@@ -95,7 +95,6 @@ public:
 			mergeNewElements( blkstorage, ei, ee, newblk, batch);
 
 			// [2] Write the new blocks that could not be merged into existing ones:
-			newblk.setId( lastInsertBlockId);
 			insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
 		}
 		m_map.clear();
@@ -126,7 +125,6 @@ public:
 			}
 			// [2] Write the new blocks:
 			insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
-			
 		}
 		m_map.clear();
 	}
@@ -165,6 +163,7 @@ private:
 				const Index& lastInsertBlockId,
 				leveldb::WriteBatch& batch)
 	{
+		newblk.setId( lastInsertBlockId);
 		Index blkid = newblk.id();
 		for (; ei != ee; ++ei)
 		{

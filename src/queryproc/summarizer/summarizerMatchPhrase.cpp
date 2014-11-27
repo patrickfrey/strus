@@ -68,7 +68,7 @@ SummarizerMatchPhrase::~SummarizerMatchPhrase()
 static Index getStartPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
 {
 	found = true;
-	Index rangepos = (curpos > maxlen) ? (curpos-maxlen):1;
+	Index rangepos = ((unsigned int)curpos > maxlen) ? ((unsigned int)curpos-maxlen):1;
 	Index prevpos = phrasestruct?phrasestruct->skipPos( rangepos):0;
 	if (!prevpos || prevpos > curpos)
 	{
@@ -92,7 +92,7 @@ static Index getEndPos( Index curpos, unsigned int maxlen, PostingIteratorInterf
 {
 	found = true;
 	Index endpos = phrasestruct?phrasestruct->skipPos( curpos):0;
-	if (!endpos || endpos - curpos > maxlen)
+	if (!endpos || endpos - curpos > (Index)maxlen)
 	{
 		found = false;
 		endpos = curpos + maxlen;
@@ -145,7 +145,7 @@ static void getSummary_(
 		unsigned int maxlen,
 		unsigned int maxsummarylen)
 {
-	forwardindex.initDoc( docno);
+	forwardindex.skipDoc( docno);
 	if (phrasestruct.get())
 	{
 		phrasestruct->skipDoc( docno);

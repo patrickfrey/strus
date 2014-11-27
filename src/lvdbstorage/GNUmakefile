@@ -13,13 +13,14 @@ CPP_OBJS=\
 	docnoBlock.o \
 	posinfoBlock.o \
 	forwardIndexBlock.o \
-	attributeReader.o \
 	metaDataElement.o \
 	metaDataDescription.o \
 	metaDataRecord.o \
 	metaDataBlock.o \
 	metaDataBlockMap.o \
 	metaDataBlockCache.o \
+	attributeReader.o \
+	attributeMap.o \
 	globalKeyMap.o \
 	documentFrequencyMap.o \
 	storage.o \

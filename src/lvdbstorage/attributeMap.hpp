@@ -26,42 +26,42 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
+#ifndef _STRUS_LVDB_ATTRIBUTE_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_ATTRIBUTE_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/attributeReaderInterface.hpp"
-#include "storage.hpp"
-#include <string>
+#include "blockKey.hpp"
+#include <vector>
+#include <map>
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
+#include <boost/thread/mutex.hpp>
 
-namespace strus
-{
+namespace strus {
 
-/// \brief Interface for accessing document attributes from a strus storage
-class AttributeReader
-	:public AttributeReaderInterface
+class AttributeMap
 {
 public:
-	AttributeReader( const Storage* storage_, leveldb::DB* db_)
-		:m_storage(storage_),m_db(db_),m_docno(0){}
-		
-	virtual ElementHandle elementHandle( const std::string& name) const
-	{
-		return m_storage->getAttributeName( name);
-	}
-	virtual void skipDoc( const Index& docno)
-	{
-		m_docno = docno;
-	}
+	explicit AttributeMap( leveldb::DB* db_)
+		:m_db(db_){}
+	~AttributeMap(){}
 
-	virtual std::string getValue( const ElementHandle& element) const;
+	void defineAttribute( const Index& docno, const Index& varno, const std::string& value);
+	void deleteAttributes( const Index& docno);
+	void deleteAttribute( const Index& docno, const Index& varno);
+
+	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	const Storage* m_storage;
+	typedef std::map<BlockKeyIndex, std::string> Map;
+	typedef std::vector<BlockKeyIndex> DeleteList;
+
+private:
 	leveldb::DB* m_db;
-	Index m_docno;
+	boost::mutex m_mutex;
+	Map m_map;
+	DeleteList m_deletes;
 };
 
-}//namespace
+}
 #endif
 

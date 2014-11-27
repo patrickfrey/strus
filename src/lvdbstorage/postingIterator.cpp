@@ -301,7 +301,12 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 		m_positionScanner = m_posinfoBlk->positionScanner_at( m_posinfoItr);
 		if (!m_positionScanner.initialized()) return 0;
 	}
-	return m_positionScanner.skip( firstpos_);
+	Index rt = m_positionScanner.skip( firstpos_);
+	if (rt < firstpos_ && rt != 0)
+	{
+		throw std::logic_error("CRAZY posinfo iterator");
+	}
+	return rt;
 }
 
 unsigned int PostingIterator::frequency()
