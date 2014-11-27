@@ -221,7 +221,7 @@ void PosinfoBlock::setId( const Index& id_)
 			{
 				packIndex( content, unpackIndex( bi, be) + id_diff);
 				const char* blkstart = bi;
-				const char* bi = nextDoc( bi);
+				bi = nextDoc( bi);
 				content.append( blkstart, bi - blkstart);
 			}
 			init( id_, content.c_str(), content.size(), content.size());
