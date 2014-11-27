@@ -41,6 +41,8 @@
 #include "docnoBlockMap.hpp"
 #include "posinfoBlock.hpp"
 #include "posinfoBlockMap.hpp"
+#include "forwardIndexBlock.hpp"
+#include "forwardIndexBlockMap.hpp"
 #include "documentFrequencyMap.hpp"
 #include "globalKeyMap.hpp"
 #include <leveldb/db.h>
@@ -129,11 +131,18 @@ public:
 		const Index& termtype, const Index& termvalue,
 		const Index& docno);
 
-	void writeKeyValue( const leveldb::Slice& key, const leveldb::Slice& value);
-	void deleteKey( const leveldb::Slice& key);
+	void defineForwardIndexTerm(
+		const Index& typeno, const Index& docno,
+		const Index& pos, const std::string& termstring);
+
+	void deleteForwardIndexTerm(
+		const Index& typeno, const Index& docno,
+		const Index& pos);
 
 	void incrementNofDocumentsInserted();
 	void decrementNofDocumentsInserted();
+
+	Index maxTermValueNumber() const;
 
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
@@ -168,11 +177,15 @@ private:
 	leveldb::WriteBatch m_inserter_batch;			///< batch used for an insert chunk written to disk with 'flush()', resp. 'writeInserterBatch()'
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
+
 	DocumentFrequencyMap* m_dfMap;				///< temporary map for the document frequency of new inserted features
 	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
+
 	DocnoBlockMap* m_docnoBlockMap;				///< map of docno postings for writing
 	PosinfoBlockMap* m_posinfoBlockMap;			///< map of posinfo postings for writing
+	ForwardIndexBlockMap* m_forwardIndexBlockMap;		///< map of forward index for writing
+
 	GlobalKeyMap* m_termTypeMap;				///< map of term types
 	GlobalKeyMap* m_termValueMap;				///< map of term values
 	GlobalKeyMap* m_docIdMap;				///< map of document ids

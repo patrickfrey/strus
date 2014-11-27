@@ -60,6 +60,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_metaDataBlockCache(0)
 	,m_docnoBlockMap(0)
 	,m_posinfoBlockMap(0)
+	,m_forwardIndexBlockMap(0)
 	,m_termTypeMap(0)
 	,m_termValueMap(0)
 	,m_docIdMap(0)
@@ -91,6 +92,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_metaDataBlockMap = new MetaDataBlockMap( m_db, m_metadescr);
 			m_docnoBlockMap = new DocnoBlockMap( m_db);
 			m_posinfoBlockMap = new PosinfoBlockMap( m_db);
+			m_forwardIndexBlockMap = new ForwardIndexBlockMap( m_db);
 
 			m_next_termno = m_variableMap->lookUp( "TermNo");
 			m_next_typeno = m_variableMap->lookUp( "TypeNo");
@@ -106,10 +108,14 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_metaDataBlockMap = 0;
 			if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
 			m_metaDataBlockCache = 0;
+
 			if (m_docnoBlockMap) delete m_docnoBlockMap;
 			m_docnoBlockMap = 0;
 			if (m_posinfoBlockMap) delete m_posinfoBlockMap;
 			m_posinfoBlockMap = 0;
+			if (m_forwardIndexBlockMap) delete m_forwardIndexBlockMap;
+			m_forwardIndexBlockMap = 0;
+
 			if (m_termTypeMap) delete m_termTypeMap;
 			m_termTypeMap = 0;
 			if (m_termValueMap) delete m_termValueMap;
@@ -153,8 +159,11 @@ void Storage::writeInserterBatch()
 
 	m_dfMap->getWriteBatch( m_inserter_batch);
 	m_metaDataBlockMap->getWriteBatch( m_inserter_batch, *m_metaDataBlockCache);
+
 	m_docnoBlockMap->getWriteBatch( m_inserter_batch);
 	m_posinfoBlockMap->getWriteBatch( m_inserter_batch);
+	m_forwardIndexBlockMap->getWriteBatch( m_inserter_batch);
+
 	m_termTypeMap->getWriteBatch( m_inserter_batch);
 	m_termValueMap->getWriteBatch( m_inserter_batch);
 	m_docIdMap->getWriteBatch( m_inserter_batch);
@@ -215,8 +224,11 @@ Storage::~Storage()
 
 	delete m_dfMap;
 	delete m_metaDataBlockMap;
+
 	delete m_docnoBlockMap;
 	delete m_posinfoBlockMap;
+	delete m_forwardIndexBlockMap;
+
 	delete m_termTypeMap;
 	delete m_termValueMap;
 	delete m_docIdMap;
@@ -227,14 +239,9 @@ Storage::~Storage()
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
 
-void Storage::writeKeyValue( const leveldb::Slice& key, const leveldb::Slice& value)
+Index Storage::maxTermValueNumber() const
 {
-	m_inserter_batch.Put( key, value);
-}
-
-void Storage::deleteKey(const leveldb::Slice& key)
-{
-	m_inserter_batch.Delete( key);
+	return m_next_termno-1;
 }
 
 Index Storage::getTermValue( const std::string& name) const
@@ -399,6 +406,22 @@ void Storage::deletePosinfoPosting(
 	m_posinfoBlockMap->deletePosinfoPosting( termtype, termvalue, docno);
 }
 
+void Storage::defineForwardIndexTerm(
+	const Index& typeno,
+	const Index& docno,
+	const Index& pos,
+	const std::string& termstring)
+{
+	m_forwardIndexBlockMap->defineForwardIndexTerm( typeno, docno, pos, termstring);
+}
+
+void Storage::deleteForwardIndexTerm(
+	const Index& typeno,
+	const Index& docno,
+	const Index& pos)
+{
+	m_forwardIndexBlockMap->deleteForwardIndexTerm( typeno, docno, pos);
+}
 
 void Storage::incrementDf( const Index& typeno, const Index& termno)
 {
@@ -430,54 +453,52 @@ void Storage::deleteAttributes( const Index& docno)
 void Storage::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
 {
 	Index attribno = getOrCreateAttribute( varname);
-	DatabaseKey docattribkey( (char)DatabaseKey::DocAttributePrefix, BlockKey( docno, attribno));
+	DatabaseKey key( (char)DatabaseKey::DocAttributePrefix, BlockKey( docno, attribno));
 
-	leveldb::Slice keyslice( docattribkey.ptr(), docattribkey.size());
-	writeKeyValue( keyslice, value);
+	leveldb::Slice keyslice( key.ptr(), key.size());
+	m_inserter_batch.Put( keyslice, value);
 }
+
+
+class TermnoMap
+{
+public:
+	TermnoMap( Storage* storage_)
+		:m_storage(storage_){}
+
+	Index operator()( const std::string& value)
+	{
+		return m_storage->getOrCreateTermValue( value);
+	}
+
+private:
+	Storage* m_storage;
+};
 
 void Storage::deleteIndex( const Index& docno)
 {
 	typedef std::pair<Index,Index> TermMapKey;
 	std::set<TermMapKey> oldcontent;
 
-	DatabaseKey invkey( (char)DatabaseKey::ForwardIndexPrefix, docno);
-	std::size_t invkeysize = invkey.size();
-	leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
+	KeyValueStorage fwstorage( m_db, DatabaseKey::ForwardIndexPrefix, false);
+	TermnoMap termnoMap( this);
 
-	leveldb::Iterator* vi = m_db->NewIterator( leveldb::ReadOptions());
-	boost::scoped_ptr<leveldb::Iterator> viref(vi);
-
-	//[1] Iterate on key prefix elements [ForwardIndexPrefix, docno, typeno, *] and mark them as deleted
-	//	Extract typeno and valueno from key [ForwardIndexPrefix, docno, typeno, pos] an mark term as old content (do delete)
-	for (vi->Seek( invkeyslice); vi->Valid(); vi->Next())
+	Index ti = 1, te = maxTermValueNumber();
+	for (; ti <= te; ++ti)
 	{
-		if (invkeysize > vi->key().size() || 0!=std::memcmp( vi->key().data(), invkey.ptr(), invkeysize))
+		std::map<Index,Index> countmap
+			= m_forwardIndexBlockMap->getTermOccurrencies(
+				ti, docno, termnoMap);
+		std::map<Index,Index>::const_iterator
+			ci = countmap.begin(), ce = countmap.end();
+		for (; ci != ce; ++ci)
 		{
-			//... end of document reached
-			break;
+			deleteDocnoPosting( ti, ci->first, docno);
+			deletePosinfoPosting( ti, ci->first, docno);
+	
+			decrementDf( ti, ci->first);
 		}
-		deleteKey( vi->key());
-
-		const char* ki = vi->key().data() + invkeysize;
-		const char* ke = ki + vi->key().size();
-		Index typeno = unpackIndex( ki, ke);
-
-		const char* valuestr = vi->value().data();
-		std::size_t valuesize = vi->value().size();
-		Index valueno = m_termValueMap->lookUp( std::string( valuestr, valuesize));
-
-		oldcontent.insert( TermMapKey( typeno, valueno));
-	}
-
-	//[2] Iterate on 'oldcontent' elements built and delete the postings
-	std::set<TermMapKey>::const_iterator di = oldcontent.begin(), de = oldcontent.end();
-	for (; di != de; ++di)
-	{
-		deleteDocnoPosting( di->first, di->second, docno);
-		deletePosinfoPosting( di->first, di->second, docno);
-
-		decrementDf( di->first, di->second);
+		fwstorage.disposeSubnodes( BlockKey( ti, docno), m_inserter_batch);
 	}
 }
 

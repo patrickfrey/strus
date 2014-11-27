@@ -88,25 +88,31 @@ void StorageInserter::done()
 	bool documentIsNew = false;
 	Index docno = m_storage->getOrCreateDocno( m_docid, documentIsNew);
 
-	//[1] Delete old and define new metadata
-	m_storage->deleteMetaData( docno);
-	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
-	for (; wi != we; ++wi)
+	if (documentIsNew)
 	{
-		m_storage->defineMetaData( docno, wi->name, wi->value);
+		m_storage->incrementNofDocumentsInserted();
 	}
-
-	//[2] Delete old and insert new attributes
-	m_storage->deleteAttributes( docno);
-	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
-	for (; ai != ae; ++ai)
+	else
 	{
-		m_storage->defineAttribute( docno, ai->name, ai->value);
+		//[1] Delete old and define new metadata
+		m_storage->deleteMetaData( docno);
+		std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
+		for (; wi != we; ++wi)
+		{
+			m_storage->defineMetaData( docno, wi->name, wi->value);
+		}
+	
+		//[2] Delete old and insert new attributes
+		m_storage->deleteAttributes( docno);
+		std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
+		for (; ai != ae; ++ai)
+		{
+			m_storage->defineAttribute( docno, ai->name, ai->value);
+		}
+	
+		//[3] Delete old and insert new index elements (forward index and inverted index):
+		m_storage->deleteIndex( docno);
 	}
-
-	//[3] Delete old and insert new index elements (forward index and inverted index):
-	m_storage->deleteIndex( docno);
-
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
@@ -119,21 +125,11 @@ void StorageInserter::done()
 				docno, ti->second.pos.size(), ti->second.weight);
 		m_storage->incrementDf( ti->first.first, ti->first.second);
 	}
-
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
-		DatabaseKey invkey( (char)DatabaseKey::ForwardIndexPrefix, docno);
-		invkey.addElem( ri->first.typeno);	// [typeno]
-		invkey.addElem( ri->first.pos);		// [position]
-
-		leveldb::Slice invkeyslice( invkey.ptr(), invkey.size());
-
-		m_storage->writeKeyValue( invkeyslice, ri->second);
-	}
-	if (documentIsNew)
-	{
-		m_storage->incrementNofDocumentsInserted();
+		m_storage->defineForwardIndexTerm(
+			ri->first.typeno, docno, ri->first.pos, ri->second);
 	}
 
 	// [5] Do submit the write to the database:

@@ -87,6 +87,37 @@ public:
 	}
 
 	void append( const Index& pos, const std::string& item);
+
+
+	class const_iterator
+	{
+	public:
+		const_iterator( const ForwardIndexBlock* blk_, const char* ref_)
+			:m_blk(blk_),m_ref(ref_){}
+		const_iterator( const const_iterator& o)
+			:m_blk(o.m_blk),m_ref(o.m_ref){}
+
+		const char* operator*() const			{return m_blk->value_at( m_ref);}
+
+		const_iterator& operator++()			{m_ref = m_blk->nextItem( m_ref); return *this;}
+		const_iterator operator++(int)			{const_iterator rt(m_blk,m_ref); m_ref = m_blk->nextItem( m_ref); return rt;}
+
+		bool operator==( const const_iterator& o) const	{return m_ref == o.m_ref;}
+		bool operator!=( const const_iterator& o) const	{return m_ref != o.m_ref;}
+
+	private:
+		const ForwardIndexBlock* m_blk;
+		char const* m_ref;
+	};
+
+	const_iterator begin() const
+	{
+		return const_iterator( this, charptr());
+	}
+	const_iterator end() const
+	{
+		return const_iterator( this, charend());
+	}
 };
 
 }

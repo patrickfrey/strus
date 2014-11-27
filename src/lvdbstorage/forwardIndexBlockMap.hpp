@@ -38,7 +38,7 @@
 
 namespace strus {
 
-typedef std::vector<std::string> ForwardIndexBlockElement;
+typedef std::string ForwardIndexBlockElement;
 
 class ForwardIndexBlockMap
 	:protected BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>
@@ -49,7 +49,7 @@ public:
 	ForwardIndexBlockMap( const ForwardIndexBlockMap& o)
 		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>(o){}
 
-	void defineForwardIndexItem(
+	void defineForwardIndexTerm(
 		const Index& typeno,
 		const Index& docno,
 		const Index& pos,
@@ -58,7 +58,7 @@ public:
 		defineElement( BlockKey( typeno, docno), pos, termstring);
 	}
 
-	void deleteForwardIndexItem(
+	void deleteForwardIndexTerm(
 		const Index& typeno,
 		const Index& docno,
 		const Index& pos)
@@ -69,6 +69,18 @@ public:
 	void getWriteBatch( leveldb::WriteBatch& batch)
 	{
 		getWriteBatchReplace( batch);
+	}
+
+	template <class TermnoMap>
+	std::map<Index,Index> getTermOccurrencies(
+		const Index& typeno,
+		const Index& docno,
+		TermnoMap& elementmap)
+	{
+		std::map<Index,Index> rt;
+		getElementOccurrencies<TermnoMap, Index>(
+			rt, BlockKey( typeno, docno), elementmap);
+		return rt;
 	}
 };
 

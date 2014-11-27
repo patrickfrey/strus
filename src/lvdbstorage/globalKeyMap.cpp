@@ -44,49 +44,56 @@ Index GlobalKeyMap::lookUp( const std::string& name)
 
 Index GlobalKeyMap::getOrCreate( const std::string& name, Index& valuecnt)
 {
+	boost::mutex::scoped_lock( m_mutex);
+	ValueMap::const_iterator ki = m_map.find( name);
+	if (ki != m_map.end())
+	{
+		return ki->second.counter;
+	}
 	const KeyValueStorage::Value* value = m_storage.load( name);
 	if (value)
 	{
 		char const* vi = value->ptr();
 		char const* ve = vi + value->size();
 
-		return unpackIndex( vi, ve);
+		Index rt = unpackIndex( vi, ve);
+		m_map[ name] = Value( rt, true);
+		return rt;
 	}
 	else
 	{
-		boost::mutex::scoped_lock( m_mutex);
-		Map::const_iterator ki = m_map.find( name);
-		if (ki != m_map.end())
-		{
-			return ki->second;
-		}
-		return m_map[ name] = valuecnt++;
+		Index rt = valuecnt++;
+		m_map[ name] = Value( rt, false);
+		return rt;
 	}
 }
 
 void GlobalKeyMap::store( const std::string& name, const Index& value)
 {
 	boost::mutex::scoped_lock( m_mutex);
-	m_map[ name] = value;
+	m_map[ name] = Value( value, false);
 }
 
 void GlobalKeyMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
 	boost::mutex::scoped_lock( m_mutex);
-	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	ValueMap::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		std::string valuestr;
-		packIndex( valuestr, mi->second);
-		m_storage.store( mi->first, valuestr, batch);
+		if (!mi->second.known)
+		{
+			std::string valuestr;
+			packIndex( valuestr, mi->second.counter);
+			m_storage.store( mi->first, valuestr, batch);
+		}
 	}
 	m_map.clear();
 }
 
-GlobalKeyMap::Map GlobalKeyMap::getMap()
+std::map<std::string,Index> GlobalKeyMap::getMap()
 {
 	std::map<std::string,std::string> smap = m_storage.getMap();
-	Map rt;
+	std::map<std::string,Index> rt;
 	std::map<std::string,std::string>::const_iterator si = smap.begin(), se = smap.end();
 	for (; si != se; ++si)
 	{
@@ -95,18 +102,18 @@ GlobalKeyMap::Map GlobalKeyMap::getMap()
 		rt[ si->first] = unpackIndex( vi, ve);
 	}
 	boost::mutex::scoped_lock( m_mutex);
-	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	ValueMap::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		rt[ mi->first] = mi->second;
+		rt[ mi->first] = mi->second.counter;
 	}
 	return rt;
 }
 
-GlobalKeyMap::InvMap GlobalKeyMap::getInvMap()
+std::map<Index,std::string> GlobalKeyMap::getInvMap()
 {
 	std::map<std::string,std::string> smap = m_storage.getMap();
-	InvMap rt;
+	std::map<Index,std::string> rt;
 	std::map<std::string,std::string>::const_iterator si = smap.begin(), se = smap.end();
 	for (; si != se; ++si)
 	{
@@ -115,10 +122,10 @@ GlobalKeyMap::InvMap GlobalKeyMap::getInvMap()
 		rt[ unpackIndex( vi, ve)] = si->first;
 	}
 	boost::mutex::scoped_lock( m_mutex);
-	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	ValueMap::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		rt[ mi->second] = mi->first;
+		rt[ mi->second.counter] = mi->first;
 	}
 	return rt;
 }

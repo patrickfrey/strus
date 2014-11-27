@@ -40,17 +40,20 @@ class DatabaseKey
 public:
 	enum KeyPrefix
 	{
-		TermTypePrefix='t',	///< [type string]             ->  [typeno]
-		TermValuePrefix='i',	///< [term string]             ->  [valueno]
-		DocIdPrefix='d',	///< [docid string]            ->  [docno]
+		TermTypePrefix='T',	///< [type string]             ->  [typeno]
+		TermValuePrefix='I',	///< [term string]             ->  [valueno]
+		DocIdPrefix='D',	///< [docid string]            ->  [docno]
+		VariablePrefix='V',	///< [variable string]         ->  [index]
+		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
+
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
-		VariablePrefix='v',	///< [variable string]         ->  [index]
+		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
+		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
+
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
 		DocFrequencyPrefix='f',	///< [typeno,termno]           ->  [index]
-		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
-		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
-		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
+
 		MetaDataDescrPrefix='M'	///< []                        ->  [string]
 	};
 	static const char* keyPrefixName( KeyPrefix i)
@@ -60,14 +63,17 @@ public:
 			case TermTypePrefix: return "term type";
 			case TermValuePrefix: return "term value";
 			case DocIdPrefix: return "docid";
-			case ForwardIndexPrefix: return "forward index";
 			case VariablePrefix: return "global variable";
+			case AttributeKeyPrefix: return "document attribute name";
+
+			case ForwardIndexPrefix: return "forward index";
+			case DocnoBlockPrefix: return "docno posting block";
+			case PosinfoBlockPrefix: return "posinfo posting block";
+
 			case DocMetaDataPrefix: return "metadata";
 			case DocAttributePrefix: return "document attribute";
 			case DocFrequencyPrefix: return "term document frequency";
-			case DocnoBlockPrefix: return "docno posting block";
-			case PosinfoBlockPrefix: return "posinfo posting block";
-			case AttributeKeyPrefix: return "document attribute name";
+
 			case MetaDataDescrPrefix: return "meta data description";
 		}
 		return 0;

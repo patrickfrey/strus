@@ -48,18 +48,30 @@ public:
 
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
-public:
-	typedef std::map<std::string,Index> Map;
-	typedef std::map<Index,std::string> InvMap;
+	std::map<std::string,Index> getMap();
+	std::map<Index,std::string> getInvMap();
 
-	Map getMap();
-	InvMap getInvMap();
+private:
+	struct Value
+	{
+		Index counter;
+		bool known;
+
+		Value( Index counter_, bool known_)
+			:counter(counter_),known(known_){}
+		Value( const Value& o)
+			:counter(o.counter),known(o.known){}
+		Value()
+			:counter(0),known(false){}
+	};
+
+	typedef std::map<std::string,Value> ValueMap;
 
 private:
 	KeyValueStorage m_storage;
 	DatabaseKey::KeyPrefix m_prefix;
 	boost::mutex m_mutex;
-	Map m_map;
+	ValueMap m_map;
 };
 
 }//namespace

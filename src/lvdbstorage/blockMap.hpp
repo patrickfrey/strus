@@ -131,6 +131,28 @@ public:
 		m_map.clear();
 	}
 
+	template <class ElementMap, class Element>
+	void getElementOccurrencies(
+		std::map<Element,Index>& result,
+		const BlockKey& dbkey,
+		ElementMap& map)
+	{
+		BlockStorage<BlockType> blkstorage( m_db, dbkey, false);
+
+		const BlockType* blk;
+		Index blkidx = 0;
+		while (0!=(blk=blkstorage.load( blkidx)))
+		{
+			blkidx = blk->id()+1;
+			typename BlockType::const_iterator bi = blk->begin(), be = blk->end();
+
+			for (; bi != be; ++bi)
+			{
+				result[ map( *bi)] += 1;
+			}
+		}
+	}
+
 private:
 	typedef std::map<Index,BlockElement> ElementMap;
 	typedef std::map<BlockKeyIndex,ElementMap> Map;
