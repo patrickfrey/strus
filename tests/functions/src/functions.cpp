@@ -35,32 +35,6 @@
 #include <cstdlib>
 #include <limits>
 
-static void testFloatPacking( unsigned int times)
-{
-	unsigned int tt=0;
-	for (; tt<times; ++tt)
-	{
-		float rnd = static_cast <float> (rand() % (1 << (rand() % 18)))
-				+ (static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
-		std::cerr << "test packing of '" << rnd << "'" << std::endl;
-		std::string buf;
-		strus::packFloat( buf, rnd);
-		const char* itr = buf.c_str();
-		const char* end = buf.c_str() + buf.size();
-		float res = strus::unpackFloat( itr, end);
-		if (res != rnd)
-		{
-			throw std::runtime_error( "unpacked float result not equal");
-		}
-		if (end != itr)
-		{
-			throw std::runtime_error( "iterator after unpack float not equal");
-		}
-	}
-	std::cerr << "tested float packing " << times << " times with success" << std::endl;
-}
-
-
 static void spFloatConversionTest( float in)
 {
 	float16_t res = strus::floatSingleToHalfPrecision( in);
@@ -91,7 +65,6 @@ int main( int, const char**)
 {
 	try
 	{
-		testFloatPacking( 100);
 		testSinglePrecisionFloatConversions();
 		return 0;
 	}
