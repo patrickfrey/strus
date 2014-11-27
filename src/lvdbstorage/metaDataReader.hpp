@@ -45,7 +45,7 @@ public:
 			const MetaDataDescription* description_)
 		:m_cache(cache_),m_description(description_),m_current(description_,0),m_docno(0){}
 
-	virtual ElementHandle elementHandle( const std::string& name) const
+	virtual Index elementHandle( const std::string& name) const
 	{
 		return m_description->getHandle( name);
 	}
@@ -58,9 +58,9 @@ public:
 		}
 	}
 
-	virtual ArithmeticVariant getValue( const ElementHandle& element) const
+	virtual ArithmeticVariant getValue( const Index& elementHandle_) const
 	{
-		return m_current.getValue( m_description->get( element));
+		return m_current.getValue( m_description->get( elementHandle_));
 	}
 
 private:

@@ -38,15 +38,13 @@ namespace strus
 class MetaDataReaderInterface
 {
 public:
-	typedef int ElementHandle;
-
 	/// \brief Destructor
 	virtual ~MetaDataReaderInterface(){}
 
-	virtual ElementHandle elementHandle( const std::string& name) const=0;
+	virtual Index elementHandle( const std::string& name) const=0;
 	virtual void skipDoc( const Index& docno)=0;
 
-	virtual ArithmeticVariant getValue( const ElementHandle& element) const=0;
+	virtual ArithmeticVariant getValue( const Index& elementHandle_) const=0;
 };
 }//namespace
 #endif

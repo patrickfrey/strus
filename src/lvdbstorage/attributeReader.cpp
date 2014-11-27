@@ -31,10 +31,10 @@
 
 using namespace strus;
 
-std::string AttributeReader::getValue( const ElementHandle& element) const
+std::string AttributeReader::getValue( const Index& elementHandle_) const
 {
 	KeyValueStorage kvs( m_db, DatabaseKey::DocAttributePrefix, false);
-	const KeyValueStorage::Value* val = kvs.load( BlockKey( m_docno), (Index)element);
+	const KeyValueStorage::Value* val = kvs.load( BlockKey( m_docno), elementHandle_);
 	return std::string( val->ptr(), val->size());
 }
 
