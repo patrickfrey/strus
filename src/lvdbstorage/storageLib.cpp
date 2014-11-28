@@ -73,7 +73,7 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 		variableMap.store( "TermNo", 1);
 		variableMap.store( "TypeNo", 1);
 		variableMap.store( "DocNo", 1);
-		variableMap.store( "AttributeNo", 1);
+		variableMap.store( "AttribNo", 1);
 		variableMap.store( "NofDocs", 0);
 
 		leveldb::WriteBatch batch;

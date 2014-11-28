@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_FORWARD_INDEX_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
+/*[-]*/#include <iostream>
 
 namespace strus {
 
@@ -99,11 +100,16 @@ public:
 
 		const char* operator*() const			{return m_blk->value_at( m_ref);}
 
-		const_iterator& operator++()			{m_ref = m_blk->nextItem( m_ref); return *this;}
-		const_iterator operator++(int)			{const_iterator rt(m_blk,m_ref); m_ref = m_blk->nextItem( m_ref); return rt;}
+		const_iterator& operator++()			{HERE_AM_I(); m_ref = m_blk->nextItem( m_ref); return *this;}
+		const_iterator operator++(int)			{HERE_AM_I(); const_iterator rt(m_blk,m_ref); m_ref = m_blk->nextItem( m_ref); return rt;}
 
 		bool operator==( const const_iterator& o) const	{return m_ref == o.m_ref;}
 		bool operator!=( const const_iterator& o) const	{return m_ref != o.m_ref;}
+
+		/*[-]*/void HERE_AM_I() const
+		/*[-]*/{
+			/*[-]*/	std::cout << "visit token position " << m_blk->position_at(m_ref) << " value " << m_blk->value_at(m_ref) << std::endl;
+		/*[-]*/}
 
 	private:
 		const ForwardIndexBlock* m_blk;

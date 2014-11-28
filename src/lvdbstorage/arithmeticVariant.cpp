@@ -29,8 +29,46 @@
 #include "strus/arithmeticVariant.hpp"
 #include "dll_tags.hpp"
 #include <sstream>
+#include <boost/lexical_cast.hpp>
 
 using namespace strus;
+
+DLL_PUBLIC ArithmeticVariant::ArithmeticVariant( const std::string& valueAsString)
+{
+	if (valueAsString.empty())
+	{
+		throw std::runtime_error("empty string cannot be converted to arithmetic variant");
+	}
+	bool sign = (valueAsString[0] == '-');
+	bool fraction = (0!=std::strchr( valueAsString.c_str(), '.')
+			||0!=std::strchr( valueAsString.c_str(), 'E'));
+	const char* typeName;
+	try
+	{
+		if (fraction)
+		{
+			typeName = "floating point number";
+			variant.Float = boost::lexical_cast<float>( valueAsString);
+			type = Float;
+		}
+		else if (sign)
+		{
+			typeName = "integer";
+			variant.Int = boost::lexical_cast<int>( valueAsString);
+			type = Int;
+		}
+		else
+		{
+			typeName = "unsigned integer";
+			variant.UInt = boost::lexical_cast<unsigned int>( valueAsString);
+			type = UInt;
+		}
+	}
+	catch (const boost::bad_lexical_cast& err)
+	{
+		throw std::runtime_error( std::string( "cannot convert string to arithmetic variant value, error when trying to convert to ") + typeName + ": " + err.what());
+	}
+}
 
 DLL_PUBLIC void ArithmeticVariant::print( std::ostream& out) const
 {

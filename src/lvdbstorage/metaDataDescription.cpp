@@ -142,6 +142,11 @@ int MetaDataDescription::getHandle( const std::string& name_) const
 	return (int)ni->second;
 }
 
+bool MetaDataDescription::hasElement( const std::string& name_) const
+{
+	return m_namemap.find( boost::algorithm::to_lower_copy( name_)) != m_namemap.end();
+}
+
 bool MetaDataDescription::defined( const std::string& name_)
 {
 	return m_namemap.find( boost::algorithm::to_lower_copy( name_)) != m_namemap.end();

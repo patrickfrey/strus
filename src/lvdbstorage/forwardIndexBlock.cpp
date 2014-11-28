@@ -29,6 +29,7 @@
 #include "forwardIndexBlock.hpp"
 #include "indexPacker.hpp"
 #include <cstring>
+/*[-]*/ #include <iostream>
 
 using namespace strus;
 
@@ -83,10 +84,12 @@ const char* ForwardIndexBlock::find( const Index& pos_, const char* lowerbound) 
 
 void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 {
+	/*[-]*/ std::cout << "Block append forward index pos " << pos << " item " << item << std::endl;
+
 	char const* pp = prevItem( charend());
-	if (pp && position_at( pp) > pos)
+	if (pp && position_at( pp) >= pos)
 	{
-		throw std::runtime_error( "forward index items not added in ascending position order");
+		throw std::runtime_error( "forward index items not added in strictly ascending position order");
 	}
 	if (id() < pos)
 	{

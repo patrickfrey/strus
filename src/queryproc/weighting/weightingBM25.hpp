@@ -59,7 +59,7 @@ public:
 private:
 	const StorageInterface* m_storage;
 	const MetaDataReaderInterface* m_metadata;
-	const MetaDataReaderInterface::ElementHandle m_metadata_doclen;
+	const Index m_metadata_doclen;
 	float m_k1;
 	float m_b;
 	float m_avgDocLength;

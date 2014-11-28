@@ -36,6 +36,8 @@ namespace strus {
 
 struct ArithmeticVariant
 {
+	explicit ArithmeticVariant( const std::string& valueAsString);
+
 	ArithmeticVariant( int value)
 	{
 		variant.Int = value;

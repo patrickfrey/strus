@@ -71,6 +71,7 @@ public:
 		return &m_ar[ handle];
 	}
 	int getHandle( const std::string& name_) const;
+	bool hasElement( const std::string& name_) const;
 
 	void load( leveldb::DB* db);
 	void store( leveldb::WriteBatch& batch);

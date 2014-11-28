@@ -41,6 +41,7 @@ public:
 	/// \brief Destructor
 	virtual ~MetaDataReaderInterface(){}
 
+	virtual bool hasElement( const std::string& name_) const=0;
 	virtual Index elementHandle( const std::string& name) const=0;
 	virtual void skipDoc( const Index& docno)=0;
 

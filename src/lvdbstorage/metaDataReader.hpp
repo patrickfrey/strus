@@ -50,6 +50,11 @@ public:
 		return m_description->getHandle( name);
 	}
 
+	virtual bool hasElement( const std::string& name) const
+	{
+		return m_description->hasElement( name);
+	}
+
 	virtual void skipDoc( const Index& docno)
 	{
 		if (docno != m_docno)

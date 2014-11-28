@@ -106,7 +106,7 @@ public:
 	void incrementDf( const Index& typeno, const Index& termno);
 	void decrementDf( const Index& typeno, const Index& termno);
 
-	enum {NofDocumentsInsertedBeforeAutoCommit=1024};
+	enum {NofDocumentsInsertedBeforeAutoCommit=(1<<14)};
 
 	void defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value);
 	void deleteMetaData( const Index& docno, const std::string& varname);
