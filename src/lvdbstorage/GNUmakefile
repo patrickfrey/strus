@@ -27,7 +27,8 @@ CPP_OBJS=\
 	postingIterator.o \
 	nullIterator.o \
 	forwardIterator.o \
-	storageInserter.o \
+	storageDocument.o \
+	storageTransaction.o \
 	storageConfig.o \
 	storageLib.o
 

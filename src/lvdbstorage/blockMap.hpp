@@ -34,7 +34,6 @@
 #include "databaseKey.hpp"
 #include "blockKey.hpp"
 #include <cstdlib>
-#include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
@@ -54,7 +53,6 @@ public:
 		const Index& elemid,
 		const BlockElement& elem)
 	{
-		boost::mutex::scoped_lock( m_mutex);
 		typename Map::iterator mi = m_map.find( dbkey.index());
 		if (mi == m_map.end())
 		{
@@ -77,7 +75,6 @@ public:
 
 	void getWriteBatchMerge( leveldb::WriteBatch& batch)
 	{
-		boost::mutex::scoped_lock( m_mutex);
 		typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
 		for (; mi != me; ++mi)
 		{
@@ -102,7 +99,6 @@ public:
 
 	void getWriteBatchReplace( leveldb::WriteBatch& batch)
 	{
-		boost::mutex::scoped_lock( m_mutex);
 		typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
 		for (; mi != me; ++mi)
 		{
@@ -236,7 +232,6 @@ private:
 
 private:
 	leveldb::DB* m_db;
-	boost::mutex m_mutex;
 	Map m_map;
 };
 

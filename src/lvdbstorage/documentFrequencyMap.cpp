@@ -35,21 +35,18 @@ using namespace strus;
 
 void DocumentFrequencyMap::increment( Index typeno, Index termno)
 {
-	boost::mutex::scoped_lock( m_mutex);
 	Key key( typeno, termno);
 	m_map[ key] += 1;
 }
 
 void DocumentFrequencyMap::decrement( Index typeno, Index termno)
 {
-	boost::mutex::scoped_lock( m_mutex);
 	Key key( typeno, termno);
 	m_map[ key] -= 1;
 }
 
 void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
-	boost::mutex::scoped_lock( m_mutex);
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 
 	for (; mi != me; ++mi)

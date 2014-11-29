@@ -84,7 +84,7 @@ const char* ForwardIndexBlock::find( const Index& pos_, const char* lowerbound) 
 
 void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 {
-	/*[-]*/ std::cout << "Block append forward index pos " << pos << " item " << item << std::endl;
+	//[-] std::cout << "Block append forward index pos " << pos << " item " << item << std::endl;
 
 	char const* pp = prevItem( charend());
 	if (pp && position_at( pp) >= pos)

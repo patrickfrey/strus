@@ -56,7 +56,7 @@ public:
 		const Index& pos,
 		const std::string& termstring)
 	{
-		/*[-]*/ std::cout << "Forward index term typeno "  << typeno << " docno " << docno << " pos " << pos << " value " << termstring << std::endl;
+		//[-] std::cout << "Forward index term typeno "  << typeno << " docno " << docno << " pos " << pos << " value " << termstring << std::endl;
 		defineElement( BlockKey( typeno, docno), pos, termstring);
 	}
 

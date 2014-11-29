@@ -32,7 +32,8 @@
 #include "strus/queryEvalLib.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
-#include "strus/storageInserterInterface.hpp"
+#include "strus/storageTransactionInterface.hpp"
+#include "strus/storageDocumentInterface.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -919,24 +920,27 @@ int main( int argc, const char* argv[])
 		unsigned int insertIntervallSize = 1000;
 		unsigned int insertIntervallCnt = 0;
 
+		typedef boost::scoped_ptr<strus::StorageTransactionInterface> StorageTransaction;
+		StorageTransaction transaction( storage->createTransaction());
+
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (; di != de; ++di,++totNofDocuments)
 		{
-			typedef boost::scoped_ptr<strus::StorageInserterInterface> StorageInserter;
+			typedef boost::scoped_ptr<strus::StorageDocumentInterface> StorageDocument;
 
-			StorageInserter inserter( storage->createInserter( di->docid));
+			StorageDocument doc( transaction->createDocument( di->docid));
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
 
 			for (; oi != oe; ++oi,++totNofOccurrencies)
 			{
 				const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
-				inserter->addTermOccurrence( term.type, term.value, oi->pos, 0.0);
+				doc->addTermOccurrence( term.type, term.value, oi->pos, 0.0);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
 #endif
 				totTermStringSize += term.value.size();
 			}
-			inserter->done();
+			doc->done();
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "inserted document '" << di->docid << "' size " << di->occurrencear.size() << std::endl;
@@ -947,7 +951,7 @@ int main( int argc, const char* argv[])
 				std::cerr << "inserted " << (totNofDocuments+1) << " documents, " << totTermStringSize <<" bytes " << std::endl;
 			}
 		}
-		storage->flush();
+		transaction->commit();
 
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 		boost::scoped_ptr<strus::QueryProcessorInterface> queryproc(

@@ -32,24 +32,43 @@
 #include "databaseKey.hpp"
 #include "keyValueStorage.hpp"
 #include <cstdlib>
-#include <boost/thread/mutex.hpp>
 
 namespace strus {
 
 class GlobalKeyMap
 {
 public:
-	GlobalKeyMap( leveldb::DB* db_, DatabaseKey::KeyPrefix prefix_)
-		:m_storage( db_, prefix_, false){}
+	class AllocatorInterface
+	{
+	public:
+		virtual ~AllocatorInterface(){}
+		virtual Index alloc( const std::string& name, bool& isNew)=0;
+	};
+
+	GlobalKeyMap( leveldb::DB* db_, DatabaseKey::KeyPrefix prefix_,
+			AllocatorInterface* allocator_)
+		:m_storage( db_, prefix_, false)
+		,m_allocator(allocator_)
+	{}
+	~GlobalKeyMap()
+	{
+		delete m_allocator;
+	}
 
 	Index lookUp( const std::string& name);
-	Index getOrCreate( const std::string& name, Index& valuecnt);
+	Index getOrCreate( const std::string& name, bool& isnew);
 	void store( const std::string& name, const Index& value);
 
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 	std::map<std::string,Index> getMap();
 	std::map<Index,std::string> getInvMap();
+
+private:
+	Index allocValue( const std::string& name, bool& isNew)
+	{
+		return m_allocator->alloc( name, isNew);
+	}
 
 private:
 	struct Value
@@ -70,8 +89,8 @@ private:
 private:
 	KeyValueStorage m_storage;
 	DatabaseKey::KeyPrefix m_prefix;
-	boost::mutex m_mutex;
 	ValueMap m_map;
+	AllocatorInterface* m_allocator;
 };
 
 }//namespace

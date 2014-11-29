@@ -31,21 +31,8 @@
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include "databaseKey.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
-#include "metaDataBlockMap.hpp"
 #include "metaDataBlockCache.hpp"
-#include "metaDataReader.hpp"
-#include "attributeMap.hpp"
-#include "docnoBlock.hpp"
-#include "docnoBlockMap.hpp"
-#include "posinfoBlock.hpp"
-#include "posinfoBlockMap.hpp"
-#include "forwardIndexBlock.hpp"
-#include "forwardIndexBlockMap.hpp"
-#include "documentFrequencyMap.hpp"
-#include "globalKeyMap.hpp"
+#include "databaseKey.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -57,7 +44,7 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
-class StorageInserterInterface;
+class StorageTransactionInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
 /// \brief Forward declaration
@@ -85,10 +72,10 @@ public:
 			createForwardIterator(
 				const std::string& type);
 
-	virtual StorageInserterInterface*
-			createInserter( const std::string& docid);
+	virtual StorageTransactionInterface*
+			createTransaction();
 
-	virtual void deleteDocument( const std::string& docid);
+	virtual Index allocDocnoRange( std::size_t nofDocuments);
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
@@ -102,103 +89,87 @@ public:
 
 	virtual std::vector<StatCounterValue> getStatistics() const;
 
-public:
-	void incrementDf( const Index& typeno, const Index& termno);
-	void decrementDf( const Index& typeno, const Index& termno);
-
-	enum {NofDocumentsInsertedBeforeAutoCommit=(1<<14)};
-
-	void defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value);
-	void deleteMetaData( const Index& docno, const std::string& varname);
-	void deleteMetaData( const Index& docno);
-
-	void defineAttribute( const Index& docno, const std::string& varname, const std::string& value);
-	void deleteAttribute( const Index& docno, const std::string& varname);
-	void deleteAttributes( const Index& docno);
-
-	void deleteIndex( const Index& docno);
-
-	void defineDocnoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno, unsigned int ff, float weight);
-
-	void deleteDocnoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno);
-
-	void definePosinfoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno, const std::vector<Index>& posinfo);
-
-	void deletePosinfoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno);
-
-	void defineForwardIndexTerm(
-		const Index& typeno, const Index& docno,
-		const Index& pos, const std::string& termstring);
-
-	void deleteForwardIndexTerm(
-		const Index& typeno, const Index& docno,
-		const Index& pos);
-
-	void incrementNofDocumentsInserted();
-	void decrementNofDocumentsInserted();
-
-	Index maxTermValueNumber() const;
-
+public:/*QueryEval*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
 	Index getAttributeName( const std::string& name) const;
 
-	Index getOrCreateTermValue( const std::string& name);
-	Index getOrCreateTermType( const std::string& name);
-	Index getOrCreateAttributeName( const std::string& name);
-	Index getOrCreateDocno( const std::string& name, bool& isNew);
+public:/*StorageTransaction*/
+	void releaseTransaction( const std::vector<Index>& refreshList);
 
-	void checkFlush();
-	void flush();
-	void releaseInserter();
+	void declareNofDocumentsInserted( int value);
+	Index nofAttributeTypes();
+
+	Index allocTermno( const std::string& name, bool& isNew);
+	Index allocTypeno( const std::string& name, bool& isNew);
+	Index allocDocno( const std::string& name, bool& isNew);
+	Index allocAttribno( const std::string& name, bool& isNew);
+
+	friend class TransactionLock;
+	class TransactionLock
+	{
+	public:
+		TransactionLock( Storage* storage_)
+			:m_mutex(&storage_->m_transaction_mutex)
+		{
+			m_mutex->lock();
+		}
+		~TransactionLock()
+		{
+			m_mutex->unlock();
+		}
+
+	private:
+		boost::mutex* m_mutex;
+	};
 
 private:
-	void writeInserterBatch();
-	void aquireInserter();
+	Index allocGlobalCounter(
+			const std::string& name_,
+			Index& next_,
+			std::map<std::string,Index> map_,
+			bool& isNew_);
+
+	Index loadIndexValue(
+		const DatabaseKey::KeyPrefix type,
+		const std::string& name) const;
+
+	void loadVariables();
+	void storeVariables();
 
 private:
 	std::string m_path;					///< levelDB storage path 
 	leveldb::DB* m_db;					///< levelDB handle
 	leveldb::Options m_dboptions;				///< options for levelDB
 
-	Index m_next_termno;					///< next index to assign to a new term value
+	boost::mutex m_typeno_mutex;				///< mutual exclusion for accessing m_typeno_map
 	Index m_next_typeno;					///< next index to assign to a new term type
-	Index m_next_docno;					///< next index to assign to a new document id
-	Index m_next_attribno;					///< next index to assign to a new attribute name
-	Index m_nof_documents;					///< number of documents inserted
-	boost::mutex m_nof_documents_mutex;			///< mutual exclusion for accessing m_nof_documents
+	std::map<std::string,Index> m_typeno_map;		///< global map of term types
 
-	leveldb::WriteBatch m_inserter_batch;			///< batch used for an insert chunk written to disk with 'flush()', resp. 'writeInserterBatch()'
+	boost::mutex m_termno_mutex;				///< mutual exclusion for accessing m_termno_map
+	Index m_next_termno;					///< next index to assign to a new term value
+	std::map<std::string,Index> m_termno_map;		///< global map of term values
+
+	boost::mutex m_docno_mutex;				///< mutual exclusion for accessing m_docno_map
+	Index m_next_docno;					///< next index to assign to a new document id
+	std::map<std::string,Index> m_docno_map;		///< global map of document ids
+
+	boost::mutex m_attribno_mutex;				///< mutual exclusion for accessing m_attribno_map
+	Index m_next_attribno;					///< next index to assign to a new attribute name
+	std::map<std::string,Index> m_attribno_map;		///< global map of document attribute names
+
+	boost::mutex m_counter_mutex;				///< mutual exclusion for accessing other global counters
+	Index m_nof_documents;					///< number of documents inserted
+	Index m_transactionCnt;
+
+	leveldb::WriteBatch m_global_counter_batch;		///< batch for counter updates
+	boost::mutex m_global_counter_mutex;			///< mutual exclusion for accessing global counters
+
+	boost::mutex m_transaction_mutex;			///< mutual exclusion for the critical part of a transaction
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
-
-	DocumentFrequencyMap* m_dfMap;				///< temporary map for the document frequency of new inserted features
-	AttributeMap* m_attributeMap;				///< map of document attributes for writing
-	MetaDataBlockMap* m_metaDataBlockMap;			///< map of meta data blocks for writing
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
-
-	DocnoBlockMap* m_docnoBlockMap;				///< map of docno postings for writing
-	PosinfoBlockMap* m_posinfoBlockMap;			///< map of posinfo postings for writing
-	ForwardIndexBlockMap* m_forwardIndexBlockMap;		///< map of forward index for writing
-
-	GlobalKeyMap* m_termTypeMap;				///< map of term types
-	GlobalKeyMap* m_termValueMap;				///< map of term values
-	GlobalKeyMap* m_docIdMap;				///< map of document ids
-	GlobalKeyMap* m_variableMap;				///< map of global variables (counters)
-	GlobalKeyMap* m_attributeNameMap;			///< map of document attribute names
-
-	boost::mutex m_nofInserterCnt_mutex;			///< mutual exclusion for aquiring inserter
-	unsigned int m_nofInserterCnt;				///< counter of inserters
-	Index m_flushCnt;					///< counter to do a commit after some inserts
 };
 
 }

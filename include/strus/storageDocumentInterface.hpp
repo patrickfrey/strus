@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_INSERTER_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_INSERTER_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
 #include <string>
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
@@ -35,13 +35,13 @@
 namespace strus
 {
 
-/// \class StorageInserterInterface
+/// \class StorageDocumentInterface
 /// \brief Object to declare all items for one insert/update of a document in the storage
-class StorageInserterInterface
+class StorageDocumentInterface
 {
 public:
-	/// \brief Destructor that is the doing the rollback too, if done() was not called before
-	virtual ~StorageInserterInterface(){}
+	/// \brief Destructor
+	virtual ~StorageDocumentInterface(){}
 
 	/// \brief Add one occurrence of a term, throws on std::bad_alloc
 	/// \param[in] type_ type name of the term
@@ -70,7 +70,7 @@ public:
 			const std::string& name_,
 			const std::string& value_)=0;
 
-	/// \brief Write the contents defined to the storage
+	/// \brief Write the contents defined to the transaction
 	virtual void done()=0;
 };
 

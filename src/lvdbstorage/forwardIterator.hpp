@@ -31,6 +31,7 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "databaseKey.hpp"
 #include "storage.hpp"
+#include "blockStorage.hpp"
 #include "forwardIndexBlock.hpp"
 #include <string>
 #include <leveldb/db.h>

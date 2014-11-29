@@ -30,6 +30,7 @@
 #include "storage.hpp"
 #include "statistics.hpp"
 #include "indexPacker.hpp"
+#include "keyValueStorage.hpp"
 #include <string>
 #include <vector>
 #include <cstring>

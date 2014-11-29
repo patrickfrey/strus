@@ -29,6 +29,7 @@
 #ifndef _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/metaDataReaderInterface.hpp"
+#include "metaDataBlockCache.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataDescription.hpp"
 #include "metaDataElement.hpp"

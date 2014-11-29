@@ -108,7 +108,7 @@ public:
 
 		/*[-]*/void HERE_AM_I() const
 		/*[-]*/{
-			/*[-]*/	std::cout << "visit token position " << m_blk->position_at(m_ref) << " value " << m_blk->value_at(m_ref) << std::endl;
+			//[-]	std::cout << "visit token position " << m_blk->position_at(m_ref) << " value " << m_blk->value_at(m_ref) << std::endl;
 		/*[-]*/}
 
 	private:

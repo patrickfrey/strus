@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "storageInserter.hpp"
+#include "storageDocument.hpp"
 #include "storage.hpp"
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
@@ -37,24 +37,28 @@
 
 using namespace strus;
 
-StorageInserter::StorageInserter( Storage* storage_, const std::string& docid_)
-	:m_storage(storage_),m_docid(docid_)
+StorageDocument::StorageDocument(
+		StorageTransaction* transaction_,
+		const std::string& docid_,
+		const Index& docno_,
+		bool isNew_)
+	:m_transaction(transaction_)
+	,m_docid(docid_)
+	,m_docno(docno_)
+	,m_isNew(isNew_)
 {}
 
-StorageInserter::~StorageInserter()
-{
-	//... nothing done here. The document id and term value or type strings 
-	//	created might remain inserted, even after a rollback.
-}
+StorageDocument::~StorageDocument()
+{}
 
-StorageInserter::TermMapKey StorageInserter::termMapKey( const std::string& type_, const std::string& value_)
+StorageDocument::TermMapKey StorageDocument::termMapKey( const std::string& type_, const std::string& value_)
 {
-	Index typeno = m_storage->getOrCreateTermType( type_);
-	Index valueno = m_storage->getOrCreateTermValue( value_);
+	Index typeno = m_transaction->getOrCreateTermType( type_);
+	Index valueno = m_transaction->getOrCreateTermValue( value_);
 	return TermMapKey( typeno, valueno);
 }
 
-void StorageInserter::addTermOccurrence(
+void StorageDocument::addTermOccurrence(
 		const std::string& type_,
 		const std::string& value_,
 		const Index& position_,
@@ -69,71 +73,62 @@ void StorageInserter::addTermOccurrence(
 	m_invs[ InvMapKey( key.first, position_)] = value_;
 }
 
-void StorageInserter::setMetaData(
+void StorageDocument::setMetaData(
 		const std::string& name_,
 		const ArithmeticVariant& value_)
 {
 	m_metadata.push_back( DocMetaData( name_, value_));
 }
 
-void StorageInserter::setAttribute(
+void StorageDocument::setAttribute(
 		const std::string& name_,
 		const std::string& value_)
 {
 	m_attributes.push_back( DocAttribute( name_, value_));
 }
 
-void StorageInserter::done()
+void StorageDocument::done()
 {
-	bool documentIsNew = false;
-	Index docno = m_storage->getOrCreateDocno( m_docid, documentIsNew);
-
-	if (documentIsNew)
-	{
-		m_storage->incrementNofDocumentsInserted();
-	}
-	else
+	if (!m_isNew)
 	{
 		//[1] Delete old and define new metadata
-		m_storage->deleteMetaData( docno);
+		m_transaction->deleteMetaData( m_docno);
 		std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
 		for (; wi != we; ++wi)
 		{
-			m_storage->defineMetaData( docno, wi->name, wi->value);
+			m_transaction->defineMetaData( m_docno, wi->name, wi->value);
 		}
 	
 		//[2] Delete old and insert new attributes
-		m_storage->deleteAttributes( docno);
+		m_transaction->deleteAttributes( m_docno);
 		std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
 		for (; ai != ae; ++ai)
 		{
-			m_storage->defineAttribute( docno, ai->name, ai->value);
+			m_transaction->defineAttribute( m_docno, ai->name, ai->value);
 		}
 	
 		//[3] Delete old and insert new index elements (forward index and inverted index):
-		m_storage->deleteIndex( docno);
+		m_transaction->deleteIndex( m_docno);
 	}
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
+		//[4] Insert inverted index
 		std::vector<Index> pos;
 		pos.insert( pos.end(), ti->second.pos.begin(), ti->second.pos.end());
-		m_storage->definePosinfoPosting(
-				ti->first.first, ti->first.second, docno, pos);
-		m_storage->defineDocnoPosting(
+		m_transaction->definePosinfoPosting(
+				ti->first.first, ti->first.second, m_docno, pos);
+		m_transaction->defineDocnoPosting(
 				ti->first.first, ti->first.second,
-				docno, ti->second.pos.size(), ti->second.weight);
-		m_storage->incrementDf( ti->first.first, ti->first.second);
+				m_docno, ti->second.pos.size(), ti->second.weight);
+		m_transaction->incrementDf( ti->first.first, ti->first.second);
 	}
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
-		m_storage->defineForwardIndexTerm(
-			ri->first.typeno, docno, ri->first.pos, ri->second);
+		//[5] Insert forward index
+		m_transaction->defineForwardIndexTerm(
+			ri->first.typeno, m_docno, ri->first.pos, ri->second);
 	}
-
-	// [5] Do submit the write to the database:
-	m_storage->checkFlush();
-	m_storage->releaseInserter();
 }
 

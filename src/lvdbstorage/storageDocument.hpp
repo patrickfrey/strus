@@ -26,10 +26,11 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
-#define _STRUS_LVDB_STORAGE_INSERTER_HPP_INCLUDED
-#include "strus/storageInserterInterface.hpp"
+#ifndef _STRUS_LVDB_DOCUMENT_HPP_INCLUDED
+#define _STRUS_LVDB_DOCUMENT_HPP_INCLUDED
+#include "strus/storageDocumentInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "storageTransaction.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -40,13 +41,17 @@ namespace strus {
 class Storage;
 
 /// \class StorageInserter
-class StorageInserter
-	:public StorageInserterInterface
+class StorageDocument
+	:public StorageDocumentInterface
 {
 public:
-	StorageInserter( Storage* storage_, const std::string& docid_);
+	StorageDocument(
+		StorageTransaction* transaction_,
+		const std::string& docid_,
+		const Index& docno_,
+		bool isNew_);
 
-	virtual ~StorageInserter();
+	virtual ~StorageDocument();
 	virtual void addTermOccurrence(
 			const std::string& type_,
 			const std::string& value_,
@@ -63,7 +68,7 @@ public:
 
 	virtual void done();
 
-private:
+public:
 	typedef std::pair<Index,Index> TermMapKey;
 	struct TermMapValue
 	{
@@ -119,13 +124,22 @@ private:
 			:name(o.name),value(o.value){}
 	};
 
-private:
-	StorageInserter( const StorageInserter&){}	//non copyable
-	void operator=( const StorageInserter&){}	//non copyable
+	const std::string& docid() const			{return m_docid;}
+	const Index& docno() const				{return m_docno;}
+	const TermMap& terms() const				{return m_terms;}
+	const InvMap& invs() const				{return m_invs;}
+	const std::vector<DocAttribute>& attributes() const	{return m_attributes;}
+	const std::vector<DocMetaData>& metadata() const	{return m_metadata;}
 
 private:
-	Storage* m_storage;
+	StorageDocument( const StorageDocument&){}	//non copyable
+	void operator=( const StorageDocument&){}	//non copyable
+
+private:
+	StorageTransaction* m_transaction;
 	std::string m_docid;
+	Index m_docno;
+	bool m_isNew;
 	TermMap m_terms;
 	InvMap m_invs;
 	std::vector<DocAttribute> m_attributes;

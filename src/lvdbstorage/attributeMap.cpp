@@ -34,14 +34,12 @@ using namespace strus;
 
 void AttributeMap::defineAttribute( const Index& docno, const Index& varno, const std::string& value)
 {
-	boost::mutex::scoped_lock( m_mutex);
 	BlockKey key( docno, varno);
 	m_map[ key.index()] = value;
 }
 
 void AttributeMap::deleteAttributes( const Index& docno)
 {
-	boost::mutex::scoped_lock( m_mutex);
 	BlockKey key( docno, 1);
 	Map::iterator mi = m_map.upper_bound( key.index()-1), me = m_map.end();
 	Map::iterator rangeStart = mi;
@@ -62,7 +60,6 @@ void AttributeMap::deleteAttributes( const Index& docno)
 
 void AttributeMap::deleteAttribute( const Index& docno, const Index& varno)
 {
-	boost::mutex::scoped_lock( m_mutex);
 	BlockKey key( docno, varno);
 	Map::iterator mi = m_map.find( key.index());
 	if (mi != m_map.end())
@@ -76,8 +73,6 @@ void AttributeMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
 	KeyValueStorage attrstorage( m_db, DatabaseKey::DocAttributePrefix, false);
 
-	boost::mutex::scoped_lock( m_mutex);
-	
 	DeleteList::const_iterator di = m_deletes.begin(), de = m_deletes.end();
 	for (; di != de; ++di)
 	{

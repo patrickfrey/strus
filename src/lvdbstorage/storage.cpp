@@ -29,7 +29,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "storage.hpp"
-#include "storageInserter.hpp"
+#include "storageTransaction.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseKey.hpp"
@@ -38,6 +38,7 @@
 #include "blockStorage.hpp"
 #include "statistics.hpp"
 #include "attributeReader.hpp"
+#include "globalKeyMap.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -50,24 +51,12 @@ using namespace strus;
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	:m_path(path_)
 	,m_db(0)
-	,m_next_termno(0)
 	,m_next_typeno(0)
+	,m_next_termno(0)
 	,m_next_docno(0)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
-	,m_dfMap(0)
-	,m_attributeMap(0)
-	,m_metaDataBlockMap(0)
 	,m_metaDataBlockCache(0)
-	,m_docnoBlockMap(0)
-	,m_posinfoBlockMap(0)
-	,m_forwardIndexBlockMap(0)
-	,m_termTypeMap(0)
-	,m_termValueMap(0)
-	,m_docIdMap(0)
-	,m_variableMap(0)
-	,m_nofInserterCnt(0)
-	,m_flushCnt(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
@@ -83,54 +72,14 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 		try
 		{
 			m_metadescr.load( m_db);
-			m_termTypeMap = new GlobalKeyMap( m_db, DatabaseKey::TermTypePrefix);
-			m_termValueMap = new GlobalKeyMap( m_db, DatabaseKey::TermValuePrefix);
-			m_docIdMap = new GlobalKeyMap( m_db, DatabaseKey::DocIdPrefix);
-			m_variableMap = new GlobalKeyMap( m_db, DatabaseKey::VariablePrefix);
-			m_attributeNameMap = new GlobalKeyMap( m_db, DatabaseKey::AttributeKeyPrefix);
-			m_dfMap = new DocumentFrequencyMap( m_db);
-			m_attributeMap = new AttributeMap( m_db);
-			m_metaDataBlockMap = new MetaDataBlockMap( m_db, m_metadescr);
 			m_metaDataBlockCache = new MetaDataBlockCache( m_db, m_metadescr);
-			m_docnoBlockMap = new DocnoBlockMap( m_db);
-			m_posinfoBlockMap = new PosinfoBlockMap( m_db);
-			m_forwardIndexBlockMap = new ForwardIndexBlockMap( m_db);
 
-			m_next_termno = m_variableMap->lookUp( "TermNo");
-			m_next_typeno = m_variableMap->lookUp( "TypeNo");
-			m_next_docno = m_variableMap->lookUp( "DocNo");
-			m_next_attribno = m_variableMap->lookUp( "AttribNo");
-			m_nof_documents = m_variableMap->lookUp( "NofDocs");
+			loadVariables();
 		}
 		catch (const std::bad_alloc&)
 		{
-			if (m_dfMap) delete m_metaDataBlockMap;
-			m_dfMap = 0;
-			if (m_attributeMap) delete m_attributeMap;
-			m_attributeMap = 0;
-			if (m_metaDataBlockMap) delete m_metaDataBlockMap;
-			m_metaDataBlockMap = 0;
 			if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
 			m_metaDataBlockCache = 0;
-
-			if (m_docnoBlockMap) delete m_docnoBlockMap;
-			m_docnoBlockMap = 0;
-			if (m_posinfoBlockMap) delete m_posinfoBlockMap;
-			m_posinfoBlockMap = 0;
-			if (m_forwardIndexBlockMap) delete m_forwardIndexBlockMap;
-			m_forwardIndexBlockMap = 0;
-
-			if (m_termTypeMap) delete m_termTypeMap;
-			m_termTypeMap = 0;
-			if (m_termValueMap) delete m_termValueMap;
-			m_termValueMap = 0;
-			if (m_docIdMap) delete m_docIdMap;
-			m_docIdMap = 0;
-			if (m_variableMap) delete m_variableMap;
-			m_variableMap = 0;
-			if (m_attributeNameMap) delete m_attributeNameMap;
-			m_attributeNameMap = 0;
-			if (m_db) delete m_db;
 			m_db = 0;
 			if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 			m_dboptions.block_cache = 0;
@@ -153,70 +102,117 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	}
 }
 
-void Storage::writeInserterBatch()
+void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 {
-	m_variableMap->store( "TermNo", m_next_termno);
-	m_variableMap->store( "TypeNo", m_next_typeno);
-	m_variableMap->store( "DocNo", m_next_docno);
-	m_variableMap->store( "AttribNo", m_next_attribno);
-	m_variableMap->store( "NofDocs", m_nof_documents);
+	// Refresh all entries touched by the inserts/updates written
+	std::vector<Index>::const_iterator ri = refreshList.begin(), re = refreshList.end();
+	for (; ri != re; ++ri)
+	{
+		m_metaDataBlockCache->declareVoid( *ri);
+	}
+	m_metaDataBlockCache->refresh();
 
-	m_dfMap->getWriteBatch( m_inserter_batch);
-	m_attributeMap->getWriteBatch( m_inserter_batch);
-	m_metaDataBlockMap->getWriteBatch( m_inserter_batch, *m_metaDataBlockCache);
+	storeVariables();
+	boost::mutex::scoped_lock( m_global_counter_mutex);
+	if (--m_transactionCnt == 0)
+	{
+		m_typeno_map.clear();
+		m_termno_map.clear();
+		m_docno_map.clear();
+		m_attribno_map.clear();
+	}
+}
 
-	m_docnoBlockMap->getWriteBatch( m_inserter_batch);
-	m_posinfoBlockMap->getWriteBatch( m_inserter_batch);
-	m_forwardIndexBlockMap->getWriteBatch( m_inserter_batch);
+void Storage::loadVariables()
+{
+	boost::mutex::scoped_lock( m_global_counter_mutex);
+	GlobalKeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
+	m_next_termno = variableMap.lookUp( "TermNo");
+	m_next_typeno = variableMap.lookUp( "TypeNo");
+	m_next_docno = variableMap.lookUp( "DocNo");
+	m_next_attribno = variableMap.lookUp( "AttribNo");
+	m_nof_documents = variableMap.lookUp( "NofDocs");
+}
 
-	m_termTypeMap->getWriteBatch( m_inserter_batch);
-	m_termValueMap->getWriteBatch( m_inserter_batch);
-	m_docIdMap->getWriteBatch( m_inserter_batch);
-	m_variableMap->getWriteBatch( m_inserter_batch);
-	m_attributeNameMap->getWriteBatch( m_inserter_batch);
+void Storage::storeVariables()
+{
+	boost::mutex::scoped_lock( m_global_counter_mutex);
+	GlobalKeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
+	variableMap.store( "TermNo", m_next_termno);
+	variableMap.store( "TypeNo", m_next_typeno);
+	variableMap.store( "DocNo", m_next_docno);
+	variableMap.store( "AttribNo", m_next_attribno);
+	variableMap.store( "NofDocs", m_nof_documents);
 
+	variableMap.getWriteBatch( m_global_counter_batch);
 	leveldb::WriteOptions options;
 	options.sync = true;
-	leveldb::Status status = m_db->Write( options, &m_inserter_batch);
+	leveldb::Status status = m_db->Write( options, &m_global_counter_batch);
+	m_global_counter_batch.Clear();
 	if (!status.ok())
 	{
-		throw std::runtime_error( std::string( "error when writing inserter batch: ") + status.ToString());
+		throw std::runtime_error( std::string( "error when writing global counter batch: ") + status.ToString());
 	}
-	m_inserter_batch.Clear();
+}
 
-	// Refresh all entries touched by the inserts/updates written
-	m_metaDataBlockCache->refresh();
+Index Storage::allocGlobalCounter(
+		const std::string& name_,
+		Index& next_,
+		std::map<std::string,Index> map_,
+		bool& isNew_)
+{
+	std::map<std::string,Index>::iterator ki = map_.lower_bound( name_);
+	if (ki == map_.end())
+	{
+		isNew_ = true;
+		map_.insert( ki, std::pair<std::string,Index>( name_, next_));
+		return next_++;
+	}
+	else
+	{
+		isNew_ = false;
+		return ki->second;
+	}
+}
+
+Index Storage::allocTermno( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_termno_mutex);
+	return allocGlobalCounter( name, m_next_termno, m_termno_map, isNew);
+}
+
+Index Storage::allocTypeno( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_typeno_mutex);
+	return allocGlobalCounter( name, m_next_typeno, m_typeno_map, isNew);
+}
+
+Index Storage::allocDocno( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_docno_mutex);
+	return allocGlobalCounter( name, m_next_docno, m_docno_map, isNew);
+}
+
+Index Storage::allocAttribno( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_attribno_mutex);
+	return allocGlobalCounter( name, m_next_attribno, m_attribno_map, isNew);
 }
 
 void Storage::close()
 {
-	boost::mutex::scoped_lock( m_nofInserterCnt_mutex);
-	if (m_nofInserterCnt)
-	{
-		throw std::runtime_error("cannot close storage with an inserter alive");
-	}
-	if (m_db)
-	{
-		writeInserterBatch();
-	}
-}
+	storeVariables();
 
-void Storage::checkFlush()
-{
-	if (++m_flushCnt == NofDocumentsInsertedBeforeAutoCommit)
+	boost::mutex::scoped_lock( m_global_counter_mutex);
+	if (m_transactionCnt)
 	{
-		flush();
+		throw std::runtime_error("cannot close storage with an alive transactions");
 	}
-}
-
-void Storage::flush()
-{
-	writeInserterBatch();
-	m_flushCnt = 0;
 }
 
 Storage::~Storage()
 {
+	m_global_counter_batch.Clear();
 	try
 	{
 		close();
@@ -225,72 +221,40 @@ Storage::~Storage()
 	{
 		//... silently ignored. Call close directly to catch errors
 	}
-	delete m_metaDataBlockCache; 
-
-	delete m_dfMap;
-	delete m_attributeMap;
-	delete m_metaDataBlockMap;
-
-	delete m_docnoBlockMap;
-	delete m_posinfoBlockMap;
-	delete m_forwardIndexBlockMap;
-
-	delete m_termTypeMap;
-	delete m_termValueMap;
-	delete m_docIdMap;
-	delete m_variableMap;
-	delete m_attributeNameMap;
-
+	delete m_metaDataBlockCache;
 	delete m_db;
 	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
 }
 
-Index Storage::maxTermValueNumber() const
+Index Storage::loadIndexValue(
+	const DatabaseKey::KeyPrefix type,
+	const std::string& name) const
 {
-	return m_next_termno-1;
+	KeyValueStorage termstor( m_db, type, false);
+	const KeyValueStorage::Value* val = termstor.load( name);
+	if (!val) return 0;
+	char const* vi = val->ptr();
+	return unpackIndex( vi, vi+val->size());
 }
 
 Index Storage::getTermValue( const std::string& name) const
 {
-	return m_termValueMap->lookUp( name);
+	return loadIndexValue( DatabaseKey::TermValuePrefix, name);
 }
 
 Index Storage::getTermType( const std::string& name) const
 {
-	return m_termTypeMap->lookUp( name);
+	return loadIndexValue( DatabaseKey::TermTypePrefix, name);
 }
 
 Index Storage::getDocno( const std::string& name) const
 {
-	return m_docIdMap->lookUp( name);
+	return loadIndexValue( DatabaseKey::DocIdPrefix, name);
 }
 
 Index Storage::getAttributeName( const std::string& name) const
 {
-	return m_attributeNameMap->lookUp( name);
-}
-
-Index Storage::getOrCreateTermValue( const std::string& name)
-{
-	return m_termValueMap->getOrCreate( name, m_next_termno);
-}
-
-Index Storage::getOrCreateTermType( const std::string& name)
-{
-	return m_termTypeMap->getOrCreate( name, m_next_typeno);
-}
-
-Index Storage::getOrCreateDocno( const std::string& name, bool& isNew)
-{
-	Index oldCounter = m_next_docno;
-	Index rt = m_docIdMap->getOrCreate( name, m_next_docno);
-	isNew = (oldCounter < m_next_docno);
-	return rt;
-}
-
-Index Storage::getOrCreateAttributeName( const std::string& name)
-{
-	return m_attributeNameMap->getOrCreate( name, m_next_attribno);
+	return loadIndexValue( DatabaseKey::AttributeKeyPrefix, name);
 }
 
 PostingIteratorInterface*
@@ -298,8 +262,8 @@ PostingIteratorInterface*
 		const std::string& typestr,
 		const std::string& termstr)
 {
-	Index typeno = m_termTypeMap->lookUp( typestr);
-	Index termno = m_termValueMap->lookUp( termstr);
+	Index typeno = getTermType( typestr);
+	Index termno = getTermValue( termstr);
 	if (!typeno || !termno)
 	{
 		return new NullIterator( typeno, termno, termstr.c_str());
@@ -314,37 +278,31 @@ ForwardIteratorInterface*
 	return new ForwardIterator( this, m_db, type);
 }
 
-StorageInserterInterface*
-	Storage::createInserter(
-		const std::string& docid)
+StorageTransactionInterface*
+	Storage::createTransaction()
 {
-	aquireInserter();
-	return new StorageInserter( this, docid);
+	boost::mutex::scoped_lock( m_global_counter_mutex);
+	++m_transactionCnt;
+	return new StorageTransaction( this, m_db, &m_metadescr);
 }
 
-void Storage::aquireInserter()
+Index Storage::allocDocnoRange( std::size_t nofDocuments)
 {
-	boost::mutex::scoped_lock( m_nofInserterCnt_mutex);
-	if (m_nofInserterCnt) throw std::runtime_error( "only one concurrent inserter allowed on this storage");
-	++m_nofInserterCnt;
+	boost::mutex::scoped_lock( m_docno_mutex);
+	Index rt = m_next_docno;
+	m_next_docno += nofDocuments;
+	return rt;
 }
 
-void Storage::releaseInserter()
+void Storage::declareNofDocumentsInserted( int value)
 {
-	boost::mutex::scoped_lock( m_nofInserterCnt_mutex);
-	--m_nofInserterCnt;
+	boost::mutex::scoped_lock( m_global_counter_mutex);
+	m_nof_documents += value;
 }
 
-void Storage::incrementNofDocumentsInserted()
+Index Storage::nofAttributeTypes()
 {
-	boost::mutex::scoped_lock( m_nof_documents_mutex);
-	++m_nof_documents;
-}
-
-void Storage::decrementNofDocumentsInserted()
-{
-	boost::mutex::scoped_lock( m_nof_documents_mutex);
-	--m_nof_documents;
+	return m_next_termno -1;
 }
 
 Index Storage::nofDocumentsInserted() const
@@ -359,7 +317,7 @@ Index Storage::maxDocumentNumber() const
 
 Index Storage::documentNumber( const std::string& docid) const
 {
-	return m_docIdMap->lookUp( docid);
+	return getDocno( docid);
 }
 
 AttributeReaderInterface* Storage::createAttributeReader() const
@@ -372,96 +330,6 @@ MetaDataReaderInterface* Storage::createMetaDataReader() const
 	return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
 }
 
-void Storage::defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value)
-{
-	m_metaDataBlockMap->defineMetaData( docno, varname, value);
-}
-
-void Storage::deleteMetaData( const Index& docno, const std::string& varname)
-{
-	m_metaDataBlockMap->deleteMetaData( docno, varname);
-}
-
-void Storage::deleteMetaData( const Index& docno)
-{
-	m_metaDataBlockMap->deleteMetaData( docno);
-}
-
-void Storage::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
-{
-	Index varno = getOrCreateAttributeName( varname);
-	m_attributeMap->defineAttribute( docno, varno, value);
-}
-
-void Storage::deleteAttribute( const Index& docno, const std::string& varname)
-{
-	Index varno = getOrCreateAttributeName( varname);
-	m_attributeMap->deleteAttribute( docno, varno);
-}
-
-void Storage::deleteAttributes( const Index& docno)
-{
-	m_attributeMap->deleteAttributes( docno);
-}
-
-
-void Storage::defineDocnoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno, unsigned int ff, float weight)
-{
-	m_docnoBlockMap->defineDocnoPosting(
-		termtype, termvalue, docno, ff, weight);
-}
-
-void Storage::deleteDocnoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno)
-{
-	m_docnoBlockMap->deleteDocnoPosting( termtype, termvalue, docno);
-}
-
-void Storage::definePosinfoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno, const std::vector<Index>& posinfo)
-{
-	m_posinfoBlockMap->definePosinfoPosting(
-		termtype, termvalue, docno, posinfo);
-}
-
-void Storage::deletePosinfoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno)
-{
-	m_posinfoBlockMap->deletePosinfoPosting( termtype, termvalue, docno);
-}
-
-void Storage::defineForwardIndexTerm(
-	const Index& typeno,
-	const Index& docno,
-	const Index& pos,
-	const std::string& termstring)
-{
-	m_forwardIndexBlockMap->defineForwardIndexTerm( typeno, docno, pos, termstring);
-}
-
-void Storage::deleteForwardIndexTerm(
-	const Index& typeno,
-	const Index& docno,
-	const Index& pos)
-{
-	m_forwardIndexBlockMap->deleteForwardIndexTerm( typeno, docno, pos);
-}
-
-void Storage::incrementDf( const Index& typeno, const Index& termno)
-{
-	m_dfMap->increment( typeno, termno);
-}
-
-void Storage::decrementDf( const Index& typeno, const Index& termno)
-{
-	m_dfMap->decrement( typeno, termno);
-}
-
 std::vector<StatCounterValue> Storage::getStatistics() const
 {
 	std::vector<StatCounterValue> rt;
@@ -471,70 +339,6 @@ std::vector<StatCounterValue> Storage::getStatistics() const
 		rt.push_back( StatCounterValue( si.typeName(), si.value()));
 	}
 	return rt;
-}
-
-
-class TermnoMap
-{
-public:
-	TermnoMap( Storage* storage_)
-		:m_storage(storage_){}
-
-	Index operator()( const std::string& value)
-	{
-		return m_storage->getOrCreateTermValue( value);
-	}
-
-private:
-	Storage* m_storage;
-};
-
-void Storage::deleteIndex( const Index& docno)
-{
-	typedef std::pair<Index,Index> TermMapKey;
-	std::set<TermMapKey> oldcontent;
-
-	KeyValueStorage fwstorage( m_db, DatabaseKey::ForwardIndexPrefix, false);
-	TermnoMap termnoMap( this);
-
-	Index ti = 1, te = maxTermValueNumber();
-	for (; ti <= te; ++ti)
-	{
-		std::map<Index,Index> countmap
-			= m_forwardIndexBlockMap->getTermOccurrencies(
-				ti, docno, termnoMap);
-		std::map<Index,Index>::const_iterator
-			ci = countmap.begin(), ce = countmap.end();
-		for (; ci != ce; ++ci)
-		{
-			deleteDocnoPosting( ti, ci->first, docno);
-			deletePosinfoPosting( ti, ci->first, docno);
-	
-			decrementDf( ti, ci->first);
-		}
-		fwstorage.disposeSubnodes( BlockKey( ti, docno), m_inserter_batch);
-	}
-}
-
-void Storage::deleteDocument( const std::string& docid)
-{
-	Index docno = m_docIdMap->lookUp( docid);
-	if (docno == 0) return;
-
-	//[1] Delete metadata:
-	deleteMetaData( docno);
-
-	//[2] Delete attributes:
-	deleteAttributes( docno);
-	
-	//[3] Delete index elements (forward index and inverted index):
-	deleteIndex( docno);
-
-	//[4] Decrement the total number of documents inserted:
-	decrementNofDocumentsInserted();
-
-	//[5] Do submit the write to the database:
-	checkFlush();
 }
 
 

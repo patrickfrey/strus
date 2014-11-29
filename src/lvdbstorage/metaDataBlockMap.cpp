@@ -46,13 +46,12 @@ void MetaDataBlockMap::deleteMetaData( Index docno)
 
 void MetaDataBlockMap::deleteMetaData( Index docno, const std::string& varname)
 {
-	getRecord( docno).clearValue( m_descr.get( m_descr.getHandle( varname)));
+	getRecord( docno).clearValue( m_descr->get( m_descr->getHandle( varname)));
 }
 
 MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
 {
 	Index blockno = MetaDataBlock::blockno( docno);
-	boost::mutex::scoped_lock( m_mutex);
 	Map::const_iterator mi = m_map.find( blockno);
 	if (mi == m_map.end())
 	{
@@ -61,11 +60,11 @@ MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
 		MetaDataBlockReference& block = m_map[ blockno];
 		if (mv)
 		{
-			block.reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+			block.reset( new MetaDataBlock( m_descr, blockno, mv->ptr(), mv->size()));
 		}
 		else
 		{
-			block.reset( new MetaDataBlock( &m_descr, blockno));
+			block.reset( new MetaDataBlock( m_descr, blockno));
 		}
 		return (*block)[ MetaDataBlock::index( docno)];
 	}
@@ -83,29 +82,28 @@ void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, 
 			deleteMetaData( docno, varname);
 			break;
 		case ArithmeticVariant::Int:
-			getRecord( docno).setValueInt( m_descr.get( m_descr.getHandle( varname)), value);
+			getRecord( docno).setValueInt( m_descr->get( m_descr->getHandle( varname)), value);
 			break;
 		case ArithmeticVariant::UInt:
-			getRecord( docno).setValueUInt( m_descr.get( m_descr.getHandle( varname)), value);
+			getRecord( docno).setValueUInt( m_descr->get( m_descr->getHandle( varname)), value);
 			break;
 		case ArithmeticVariant::Float:
-			getRecord( docno).setValueFloat( m_descr.get( m_descr.getHandle( varname)), value);
+			getRecord( docno).setValueFloat( m_descr->get( m_descr->getHandle( varname)), value);
 			break;
 	}
 }
 
 void MetaDataBlockMap::getWriteBatch(
 	leveldb::WriteBatch& batch,
-	MetaDataBlockCache& cache)
+	std::vector<Index>& cacheRefreshList)
 {
 	KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
 
-	boost::mutex::scoped_lock( m_mutex);
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
 		if (!mi->second.get()) continue;
-		cache.declareVoid( mi->second->blockno());
+		cacheRefreshList.push_back( mi->second->blockno());
 
 		storage.store( BlockKey( mi->second->blockno()),
 				KeyValueStorage::Value( mi->second->charptr(), mi->second->bytesize()),

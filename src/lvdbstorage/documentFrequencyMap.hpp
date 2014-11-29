@@ -30,7 +30,7 @@
 #define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <cstdlib>
-#include <boost/thread/mutex.hpp>
+#include <map>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
@@ -55,7 +55,6 @@ private:
 
 private:
 	leveldb::DB* m_db;
-	boost::mutex m_mutex;
 	Map m_map;
 };
 

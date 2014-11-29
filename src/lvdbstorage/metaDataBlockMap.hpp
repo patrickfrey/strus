@@ -35,7 +35,6 @@
 #include <cstdlib>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
@@ -47,7 +46,7 @@ class MetaDataBlockCache;
 class MetaDataBlockMap
 {
 public:
-	MetaDataBlockMap( leveldb::DB* db_, const MetaDataDescription& descr_)
+	MetaDataBlockMap( leveldb::DB* db_, const MetaDataDescription* descr_)
 		:m_db(db_),m_descr(descr_){}
 	MetaDataBlockMap( const MetaDataBlockMap& o)
 		:m_db(o.m_db),m_map(o.m_map){}
@@ -57,7 +56,7 @@ public:
 	void deleteMetaData( Index docno);
 	void deleteMetaData( Index docno, const std::string& varname);
 
-	void getWriteBatch( leveldb::WriteBatch& batch, MetaDataBlockCache& cache);
+	void getWriteBatch( leveldb::WriteBatch& batch, std::vector<Index>& cacheRefreshList);
 
 private:
 	MetaDataRecord getRecord( Index docno);
@@ -68,8 +67,7 @@ private:
 
 private:
 	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::mutex m_mutex;
+	const MetaDataDescription* m_descr;
 	Map m_map;
 };
 

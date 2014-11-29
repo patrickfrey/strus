@@ -34,7 +34,6 @@
 #include <map>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-#include <boost/thread/mutex.hpp>
 
 namespace strus {
 
@@ -57,11 +56,10 @@ private:
 
 private:
 	leveldb::DB* m_db;
-	boost::mutex m_mutex;
 	Map m_map;
 	DeleteList m_deletes;
 };
 
-}
+}//namespace
 #endif
 

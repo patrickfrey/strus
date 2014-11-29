@@ -41,7 +41,7 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
-class StorageInserterInterface;
+class StorageTransactionInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
@@ -96,17 +96,15 @@ public:
 	/// \return the interface to access document attributes
 	virtual AttributeReaderInterface* createAttributeReader() const=0;
 
-	/// \brief Create an object for the declaration of one insert/update of a document
+	/// \brief Allocate a range of document numbers to be used for documents known to be new in transactions
+	/// \param[in] nofDocuments number of document numbers to allocate
+	/// \return the first document number of the allocated range
+	virtual Index allocDocnoRange( std::size_t nofDocuments)=0;
+
+	/// \brief Create an insert/update transaction object
 	/// \param[in] docid document identifier (URI)
 	/// \return the created inserter reference to be disposed with delete
-	virtual StorageInserterInterface* createInserter( const std::string& docid)=0;
-
-	/// \brief Removes a document from the storage
-	/// \param[in] docid document identifier (URI)
-	virtual void deleteDocument( const std::string& docid)=0;
-
-	/// \brief Forces flushing of all contents inserted/deleted persistently to the repository
-	virtual void flush()=0;
+	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Get some statistics (counters) of the storage
 	virtual std::vector<StatCounterValue> getStatistics() const=0;
