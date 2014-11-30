@@ -103,6 +103,10 @@ void DataBlockStorage::store(
 	leveldb::WriteBatch& batch)
 {
 	m_key.resize( m_keysize);
+	if (!block.id())
+	{
+		throw std::runtime_error("trying to store data block with id NULL");
+	}
 	m_key.addElem( block.id());
 
 	leveldb::Slice keyslice( m_key.ptr(), m_key.size());

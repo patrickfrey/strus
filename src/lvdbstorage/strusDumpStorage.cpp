@@ -210,7 +210,7 @@ int main( int argc, const char* argv[])
 		std::cerr << "usage: strusCheck <config>" << std::endl;
 		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
 
-		strus::printIndentMultilineString( std::cerr, 12, strus::getStorageConfigDescription());
+		strus::printIndentMultilineString( std::cerr, 12, strus::getStorageConfigDescription( strus::CmdCreateStorageClient));
 		return 0;
 	}
 	try

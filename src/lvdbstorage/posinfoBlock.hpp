@@ -34,6 +34,10 @@
 
 namespace strus {
 
+typedef std::vector<Index> PosinfoBlockElement;
+
+std::ostream& operator<< (std::ostream& out, const PosinfoBlockElement& e);
+
 /// \class PosinfoBlock
 /// \brief Block of term occurrence positions
 class PosinfoBlock

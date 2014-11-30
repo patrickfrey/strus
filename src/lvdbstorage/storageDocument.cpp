@@ -89,27 +89,25 @@ void StorageDocument::setAttribute(
 
 void StorageDocument::done()
 {
-	if (!m_isNew)
+	//[1] Delete old and define new metadata
+	m_transaction->deleteMetaData( m_docno);
+	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
+	for (; wi != we; ++wi)
 	{
-		//[1] Delete old and define new metadata
-		m_transaction->deleteMetaData( m_docno);
-		std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
-		for (; wi != we; ++wi)
-		{
-			m_transaction->defineMetaData( m_docno, wi->name, wi->value);
-		}
-	
-		//[2] Delete old and insert new attributes
-		m_transaction->deleteAttributes( m_docno);
-		std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
-		for (; ai != ae; ++ai)
-		{
-			m_transaction->defineAttribute( m_docno, ai->name, ai->value);
-		}
-	
-		//[3] Delete old and insert new index elements (forward index and inverted index):
-		m_transaction->deleteIndex( m_docno);
+		m_transaction->defineMetaData( m_docno, wi->name, wi->value);
 	}
+
+	//[2] Delete old and insert new attributes
+	m_transaction->deleteAttributes( m_docno);
+	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
+	for (; ai != ae; ++ai)
+	{
+		m_transaction->defineAttribute( m_docno, ai->name, ai->value);
+	}
+
+	//[3] Delete old and insert new index elements (forward index and inverted index):
+	m_transaction->deleteIndex( m_docno);
+
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{

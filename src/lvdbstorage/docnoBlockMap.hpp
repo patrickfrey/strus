@@ -65,7 +65,7 @@ public:
 		const Index& termvalue,
 		const Index& docno)
 	{
-		deleteElement( BlockKey( termtype, termvalue), docno);
+		defineElement( BlockKey( termtype, termvalue), docno, DocnoBlockElement( docno, 0, 0.0));
 	}
 
 	void getWriteBatch( leveldb::WriteBatch& batch)

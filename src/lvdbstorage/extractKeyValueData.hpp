@@ -79,8 +79,19 @@ struct ForwardIndexData
 	Index docno;
 	Index typeno;
 	Index pos;
-	const char* valuestr;
-	std::size_t valuesize;
+
+	struct Element
+	{
+		Index pos;
+		std::string value;
+
+		Element() :pos(0){}
+		Element( const Element& o)
+			:pos(o.pos),value(o.value){}
+		Element( const Index& pos_, const std::string& value_)
+			:pos(pos_),value(value_){}
+	};
+	std::vector<Element> elements;
 
 	ForwardIndexData( const leveldb::Slice& key, const leveldb::Slice& value);
 

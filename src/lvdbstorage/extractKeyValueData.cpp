@@ -29,6 +29,7 @@
 #include "extractKeyValueData.hpp"
 #include "indexPacker.hpp"
 #include "metaDataBlock.hpp"
+#include "forwardIndexBlock.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -60,13 +61,14 @@ static std::string escapestr( const char* str, std::size_t size)
 {
 	std::string rt;
 	rt.reserve( 128);
+	rt.push_back('"');
 
 	std::size_t ii=0;
 	for (; ii<size; ++ii)
 	{
 		if (str[ii] < 32)
 		{
-			if (str[ii] == '\n') 
+			if (str[ii] == '\n')
 			{
 				rt.append( "\\n");
 			}
@@ -82,20 +84,25 @@ static std::string escapestr( const char* str, std::size_t size)
 			{
 				rt.append( "\\t");
 			}
-			else if (str[ii] == '\\') 
-			{
-				rt.append( "\\\\");
-			}
 			else
 			{
 				rt.push_back( str[ii]);
 			}
+		}
+		else if (str[ii] == '\"') 
+		{
+			rt.append( "\\\"");
+		}
+		else if (str[ii] == '\\') 
+		{
+			rt.append( "\\\\");
 		}
 		else
 		{
 			rt.push_back( str[ii]);
 		}
 	}
+	rt.push_back('"');
 	return rt;
 }
 
@@ -173,17 +180,43 @@ ForwardIndexData::ForwardIndexData( const leveldb::Slice& key, const leveldb::Sl
 	{
 		throw std::runtime_error( "unexpected extra bytes at end of forward index key");
 	}
-	valuestr = vi;
-	valuesize = ve-vi;
-	if (!strus::checkStringUtf8( vi, ve-vi))
+	ForwardIndexBlock blk( pos, vi, ve-vi);
+	const char* bi = blk.charptr();
+	const char* be = blk.charend();
+	Index prevpos = 0;
+	for (; bi != be; bi = blk.nextItem( bi))
 	{
-		throw std::runtime_error( "value in addressed by forward index is not a valied UTF-8 string");
+		std::string value( blk.value_at( bi));
+		if (!strus::checkStringUtf8( value.c_str(), value.size()))
+		{
+			throw std::runtime_error( "value in addressed by forward index is not a valid UTF-8 string");
+		}
+		Index curpos = blk.position_at(bi);
+		if (curpos <= prevpos)
+		{
+			throw std::runtime_error( "positions in forward index are not in strictly ascending order");
+		}
+		if (curpos > pos)
+		{
+			throw std::runtime_error( "position found in forward index that is bigger than the block id");
+		}
+		elements.push_back( Element( curpos, value));
 	}
 }
 
 void ForwardIndexData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::ForwardIndexPrefix << ' ' << docno << ' ' << typeno << ' ' << pos << ' ' << escapestr( valuestr, valuesize) << std::endl;
+	out << (char)DatabaseKey::ForwardIndexPrefix << ' ' << docno << ' ' << typeno << ' ' << pos;
+	std::vector<ForwardIndexData::Element>::const_iterator
+		ei = elements.begin(), ee = elements.end();
+
+	for (; ei != ee; ++ei)
+	{
+		out << ' ' << ei->pos
+			<< ' '
+			<< escapestr( ei->value.c_str(), ei->value.size());
+	}
+	out << std::endl;
 }
 
 
@@ -225,10 +258,6 @@ DocMetaDataData::DocMetaDataData( const MetaDataDescription* metadescr, const le
 		throw std::runtime_error( "unexpected end of metadata key");
 	}
 	blockno = strus::unpackIndex( ki, ke);/*[blockno]*/
-	if (ki == ke)
-	{
-		throw std::runtime_error( "unexpected end of metadata key");
-	}
 	if (ki != ke)
 	{
 		throw std::runtime_error( "unexpected extra bytes at end of metadata block key");
@@ -254,6 +283,7 @@ void DocMetaDataData::print( std::ostream& out)
 			out << value;
 		}
 	}
+	out << std::endl;
 }
 
 

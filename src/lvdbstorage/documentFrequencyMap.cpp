@@ -63,6 +63,7 @@ void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)
 		if (status.IsNotFound() || value.empty())
 		{
 			df = mi->second;
+			if (df < 0) throw std::runtime_error("internal: decrementing document frequency of an undefined term");
 		}
 		else
 		{
@@ -73,6 +74,7 @@ void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)
 			char const* cc = value.c_str();
 			char const* ee = value.c_str() + value.size();
 			df = mi->second + unpackIndex( cc, ee);
+			if (df < 0) throw std::runtime_error("internal: document frequency got negative");
 		}
 		enum {MaxValueSize = sizeof(Index)*4};
 		char valuebuf[ MaxValueSize];

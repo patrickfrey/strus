@@ -35,7 +35,6 @@
 #include <vector>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-/*[-]*/#include <iostream>
 
 namespace strus {
 
@@ -56,7 +55,6 @@ public:
 		const Index& pos,
 		const std::string& termstring)
 	{
-		//[-] std::cout << "Forward index term typeno "  << typeno << " docno " << docno << " pos " << pos << " value " << termstring << std::endl;
 		defineElement( BlockKey( typeno, docno), pos, termstring);
 	}
 

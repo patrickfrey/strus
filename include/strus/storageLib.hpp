@@ -48,10 +48,17 @@ void createStorageDatabase( const char* configsource);
 /// \param[in] configsource Configuration string of the config (not a filename !)
 void destroyStorageDatabase( const char* configsource);
 
+/// \brief Selection of command types for the storage config description
+enum StorageConfigDescriptionType
+{
+	CmdCreateStorageClient=0x1,	///< Config description for createStorageClient(const char*)
+	CmdCreateStorageDatabase=0x2	///< Config description for createStorageDatabase(const char*)
+};
+
 /// \brief Gets an example configuration description (source string as used by the functions here)
 ///	createStorageDatabase(const char*) and createStorageClient(const char*)
 ///	for the usage printed by programs using the storage.
-const char* getStorageConfigDescription();
+const char* getStorageConfigDescription( StorageConfigDescriptionType type);
 
 }//namespace
 #endif

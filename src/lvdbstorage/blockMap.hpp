@@ -133,13 +133,13 @@ public:
 	{
 		BlockStorage<BlockType> blkstorage( m_db, dbkey, false);
 
-		const BlockType* blk;
 		Index blkidx = 0;
-		while (0!=(blk=blkstorage.load( blkidx)))
+		const BlockType* blk = blkstorage.load( blkidx);
+
+		for (; blk; blk = blkstorage.load( blkidx))
 		{
 			blkidx = blk->id()+1;
 			typename BlockType::const_iterator bi = blk->begin(), be = blk->end();
-
 			for (; bi != be; ++bi)
 			{
 				result[ map( *bi)] += 1;
@@ -159,7 +159,10 @@ private:
 				const Index& lastInsertBlockId,
 				leveldb::WriteBatch& batch)
 	{
-		newblk.setId( lastInsertBlockId);
+		if (newblk.id() < lastInsertBlockId)
+		{
+			newblk.setId( lastInsertBlockId);
+		}
 		Index blkid = newblk.id();
 		for (; ei != ee; ++ei)
 		{

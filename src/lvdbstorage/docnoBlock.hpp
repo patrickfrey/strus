@@ -33,6 +33,7 @@
 #include "fixedSizeRecordBlock.hpp"
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
+#include <iostream>
 #include <stdint.h>
 
 namespace strus {
@@ -68,6 +69,9 @@ private:
 	strus::float16_t m_weight;	///< IEEE 754 half-precision binary floating-point format: binary16
 };
 
+std::ostream& operator<< (std::ostream& out, const DocnoBlockElement& e);
+
+
 class DocnoBlock
 	:public FixedSizeRecordBlock<DocnoBlockElement>
 {
@@ -100,6 +104,7 @@ public:
 	}
 	void append( const Index& docno_, const DocnoBlockElement& elem)
 	{
+		if (docno_ == 0) throw std::logic_error( "inserting docno NULL in docno block");
 		if (elem.docno() != docno_) throw std::logic_error( "docno block element docid does not match");
 		push_back( elem);
 	}

@@ -50,6 +50,12 @@ float DocnoBlockElement::weight() const
 	return floatHalfToSinglePrecision( m_weight);
 }
 
+std::ostream& strus::operator<< (std::ostream& out, const DocnoBlockElement& e)
+{
+	out << "docno=" << e.docno() << ",ff=" << e.ff() << ",weight=" << e.weight();
+	return out;
+}
+
 
 const DocnoBlockElement* DocnoBlock::upper_bound( const Index& docno_, const DocnoBlockElement* lowerbound) const
 {
@@ -94,6 +100,9 @@ const DocnoBlockElement* DocnoBlock::find( const Index& docno_, const DocnoBlock
 DocnoBlock DocnoBlock::merge( const DocnoBlock& newblk, const DocnoBlock& oldblk)
 {
 	DocnoBlock rt;
+	Index blkid = (oldblk.id() > newblk.id())?oldblk.id():newblk.id();
+	rt.setId( blkid);
+
 	const DocnoBlockElement* ai = newblk.begin();
 	const DocnoBlockElement* ae = newblk.end();
 	const DocnoBlockElement* bi = oldblk.begin();

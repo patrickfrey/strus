@@ -29,7 +29,6 @@
 #include "forwardIndexBlock.hpp"
 #include "indexPacker.hpp"
 #include <cstring>
-/*[-]*/ #include <iostream>
 
 using namespace strus;
 
@@ -42,10 +41,13 @@ Index ForwardIndexBlock::position_at( const char* ref) const
 	return positionFromRelativeIndex( unpackIndex( ri, charend()));
 }
 
-const char* ForwardIndexBlock::value_at( const char* ref) const
+std::string ForwardIndexBlock::value_at( const char* ref) const
 {
 	if (ref == charend()) return 0;
-	return skipIndex( ref, charend());
+	const char* namestart = skipIndex( ref, charend());
+	const char* nameend = (const char*)std::memchr( ref, EndItemMarker, charend()-namestart);
+	if (!nameend) nameend = charend();
+	return std::string( namestart, nameend);
 }
 
 const char* ForwardIndexBlock::nextItem( const char* ref) const
@@ -84,8 +86,6 @@ const char* ForwardIndexBlock::find( const Index& pos_, const char* lowerbound) 
 
 void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 {
-	//[-] std::cout << "Block append forward index pos " << pos << " item " << item << std::endl;
-
 	char const* pp = prevItem( charend());
 	if (pp && position_at( pp) >= pos)
 	{

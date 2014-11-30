@@ -33,12 +33,11 @@
 #include "blockMap.hpp"
 #include "blockKey.hpp"
 #include <vector>
+#include <iostream>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
 namespace strus {
-
-typedef std::vector<Index> PosinfoBlockElement;
 
 class PosinfoBlockMap
 	:protected BlockMap<PosinfoBlock,PosinfoBlockElement>

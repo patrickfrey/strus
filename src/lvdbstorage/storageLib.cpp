@@ -114,9 +114,17 @@ DLL_PUBLIC void strus::destroyStorageDatabase( const char* configsource)
 }
 
 
-DLL_PUBLIC const char* strus::getStorageConfigDescription()
+DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescriptionType type)
 {
-	return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB (only client)>\nmetadata=<comma separated list of meta data definitions (only createStorage)>";
+	switch (type)
+	{
+		case CmdCreateStorageClient:
+			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>";
+
+		case CmdCreateStorageDatabase:
+			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nmetadata=<comma separated list of meta data def>";
+	}
+	return 0;
 }
 
 

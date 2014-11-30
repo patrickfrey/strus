@@ -30,15 +30,30 @@
 #include "indexPacker.hpp"
 #include <cstring>
 #include <limits>
+#include <iostream>
 #include <string.h>
 
 using namespace strus;
 
 enum {EndPosinfoMarker=(char)0xFE};
 
+std::ostream& strus::operator<< (std::ostream& out, const PosinfoBlockElement& e)
+{
+	std::vector<Index>::const_iterator pi = e.begin(), pe = e.end();
+	for (int pidx=0; pi != pe; ++pi,++pidx)
+	{
+		if (pidx) out << ",";
+		out << *pi;
+	}
+	return out;
+}
+
 Index PosinfoBlock::docno_at( const char* ref) const
 {
-	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- docno_at");
+	if (ref < charptr() || ref > charend())
+	{
+		throw std::logic_error("illegal posinfo block access -- docno_at");
+	}
 	char const* rr = ref;
 	if (rr == charend()) return 0;
 	return docnoFromRelativeIndex( unpackIndex( rr, charend()));
@@ -78,7 +93,7 @@ bool PosinfoBlock::empty_at( const char* itr) const
 {
 	if (itr < charptr() || itr > charend()) throw std::logic_error("illegal posinfo block access -- empty_at");
 	char const* pi = skipIndex( itr, charend());	//... skip docno
-	return (pi != charend() || *pi == EndPosinfoMarker);
+	return (pi == charend() || *pi == EndPosinfoMarker);
 }
 
 const char* PosinfoBlock::endOfDoc( const char* ref) const
@@ -207,8 +222,10 @@ void PosinfoBlock::setId( const Index& id_)
 	{
 		char const* pp = prevDoc( charend());
 		Index maxDocno = docno_at( pp);
-		
-		if (maxDocno > id_) throw std::runtime_error( "internal: cannot set posinfo block id to a smaller value than the highest docno inserted");
+		if (maxDocno > id_)
+		{
+			throw std::runtime_error( "internal: cannot set posinfo block id to a smaller value than the highest docno inserted");
+		}
 		if (id() != id_)
 		{
 			// Rewrite document references (first element in variable size record):
@@ -232,10 +249,13 @@ void PosinfoBlock::setId( const Index& id_)
 PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock& oldblk)
 {
 	PosinfoBlock rt;
+	Index blkid = (oldblk.id() > newblk.id())?oldblk.id():newblk.id();
+	rt.setId( blkid);
+
 	char const* newi = newblk.begin();
 	char const* oldi = oldblk.begin();
 	Index newx = newblk.docno_at( newi);
-	Index oldx = newblk.docno_at( oldi);
+	Index oldx = oldblk.docno_at( oldi);
 
 	while (newx && oldx)
 	{
@@ -250,7 +270,7 @@ PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock
 			{
 				//... defined twice -> prefer new entry and ignore old
 				oldi = oldblk.nextDoc( oldi);
-				oldx = newblk.docno_at( oldi);
+				oldx = oldblk.docno_at( oldi);
 			}
 			newi = newblk.nextDoc( newi);
 			newx = newblk.docno_at( newi);
@@ -263,7 +283,7 @@ PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock
 				rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
 			}
 			oldi = oldblk.nextDoc( oldi);
-			oldx = newblk.docno_at( oldi);
+			oldx = oldblk.docno_at( oldi);
 		}
 	}
 	while (newx)
@@ -284,7 +304,7 @@ PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock
 			rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
 		}
 		oldi = oldblk.nextDoc( oldi);
-		oldx = newblk.docno_at( oldi);
+		oldx = oldblk.docno_at( oldi);
 	}
 	return rt;
 }

@@ -56,6 +56,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_next_docno(0)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
+	,m_transactionCnt(0)
 	,m_metaDataBlockCache(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
