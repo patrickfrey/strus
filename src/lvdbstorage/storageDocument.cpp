@@ -89,25 +89,30 @@ void StorageDocument::setAttribute(
 
 void StorageDocument::done()
 {
-	//[1] Delete old and define new metadata
-	m_transaction->deleteMetaData( m_docno);
+	if (!m_isNew)
+	{
+		//[1.1] Delete old metadata:
+		m_transaction->deleteMetaData( m_docno);
+		//[1.2] Delete old attributes:
+		m_transaction->deleteAttributes( m_docno);
+		//[1.3] Delete old index elements (forward index and inverted index):
+		m_transaction->deleteIndex( m_docno);
+	}
+	//[2.1] Define new metadata:
 	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
 	for (; wi != we; ++wi)
 	{
 		m_transaction->defineMetaData( m_docno, wi->name, wi->value);
 	}
 
-	//[2] Delete old and insert new attributes
-	m_transaction->deleteAttributes( m_docno);
+	//[2.2] Insert new attributes:
 	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
 	for (; ai != ae; ++ai)
 	{
 		m_transaction->defineAttribute( m_docno, ai->name, ai->value);
 	}
 
-	//[3] Delete old and insert new index elements (forward index and inverted index):
-	m_transaction->deleteIndex( m_docno);
-
+	//[2.3] Insert new index elements (forward index and inverted index):
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
