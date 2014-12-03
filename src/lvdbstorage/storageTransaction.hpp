@@ -42,7 +42,8 @@
 #include "forwardIndexBlock.hpp"
 #include "forwardIndexBlockMap.hpp"
 #include "documentFrequencyMap.hpp"
-#include "globalKeyMap.hpp"
+#include "keyMap.hpp"
+#include "keyAllocatorInterface.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -75,8 +76,12 @@ public:
 			const std::string& docid_,
 			const Index& docno=0);
 
-	void commit();
-	void rollback();
+	/// \brief Declare that no more items are deleted or added (helps to free resources)
+	virtual void done();
+	/// \brief Transaction commit
+	virtual void commit();
+	/// \brief Transaction rollback (automatically called with the destructor)
+	virtual void rollback();
 
 public:/*Document*/
 	Index getOrCreateTermValue( const std::string& name);
@@ -136,12 +141,13 @@ private:
 	PosinfoBlockMap m_posinfoBlockMap;			///< map of posinfo postings for writing
 	ForwardIndexBlockMap m_forwardIndexBlockMap;		///< map of forward index for writing
 
-	GlobalKeyMap m_termTypeMap;				///< map of term types
-	GlobalKeyMap m_termValueMap;				///< map of term values
-	GlobalKeyMap m_docIdMap;				///< map of document ids
-	GlobalKeyMap m_attributeNameMap;			///< map of document attribute names
+	KeyMap m_termTypeMap;					///< map of term types
+	KeyMap m_termValueMap;					///< map of term values
+	KeyMap m_docIdMap;					///< map of document ids
+	KeyMap m_attributeNameMap;				///< map of document attribute names
 
 	int m_nof_documents;					///< total adjustment for the number of documents added minus number of documents deleted
+	bool m_done;						///< true, if the transaction is complete (no more items can be added or deleted)
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
 };

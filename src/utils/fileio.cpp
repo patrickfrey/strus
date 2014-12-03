@@ -35,6 +35,8 @@
 #include <vector>
 #include <string>
 #include <cstring>
+#include <algorithm>
+#include <functional>
 
 using namespace strus;
 
@@ -129,7 +131,7 @@ DLL_PUBLIC unsigned int strus::readDir( const std::string& path, const std::stri
 	{
 		return errno;
 	}
-
+	std::size_t prevsize = res.size();
 	while (!!(ent = ::readdir(dir)))
 	{
 		std::string entry( ent->d_name);
@@ -148,6 +150,7 @@ DLL_PUBLIC unsigned int strus::readDir( const std::string& path, const std::stri
 	{
 		return err;
 	}
+	std::sort( res.begin()+prevsize, res.end(), std::greater<std::string>());
 	return 0;
 }
 

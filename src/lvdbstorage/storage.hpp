@@ -33,6 +33,8 @@
 #include "strus/arithmeticVariant.hpp"
 #include "metaDataBlockCache.hpp"
 #include "databaseKey.hpp"
+#include "keyAllocator.hpp"
+#include "keyAllocatorPool.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -101,6 +103,11 @@ public:/*StorageTransaction*/
 	void declareNofDocumentsInserted( int value);
 	Index nofAttributeTypes();
 
+	KeyAllocatorInterface* createTypenoAllocator();
+	KeyAllocatorInterface* createTermnoAllocator();
+	KeyAllocatorInterface* createDocnoAllocator();
+	KeyAllocatorInterface* createAttribnoAllocator();
+	
 	Index allocTermno( const std::string& name, bool& isNew);
 	Index allocTypeno( const std::string& name, bool& isNew);
 	Index allocDocno( const std::string& name, bool& isNew);
@@ -125,12 +132,6 @@ public:/*StorageTransaction*/
 	};
 
 private:
-	Index allocGlobalCounter(
-			const std::string& name_,
-			Index& next_,
-			std::map<std::string,Index> map_,
-			bool& isNew_);
-
 	Index loadIndexValue(
 		const DatabaseKey::KeyPrefix type,
 		const std::string& name) const;
@@ -143,23 +144,18 @@ private:
 	leveldb::DB* m_db;					///< levelDB handle
 	leveldb::Options m_dboptions;				///< options for levelDB
 
-	boost::mutex m_typeno_mutex;				///< mutual exclusion for accessing m_typeno_map
 	Index m_next_typeno;					///< next index to assign to a new term type
-	std::map<std::string,Index> m_typeno_map;		///< global map of term types
+	KeyAllocatorPool m_typeno_allocator_pool;		///< global map of term types
 
-	boost::mutex m_termno_mutex;				///< mutual exclusion for accessing m_termno_map
 	Index m_next_termno;					///< next index to assign to a new term value
-	std::map<std::string,Index> m_termno_map;		///< global map of term values
+	KeyAllocatorPool m_termno_allocator_pool;		///< global map of term values
 
-	boost::mutex m_docno_mutex;				///< mutual exclusion for accessing m_docno_map
 	Index m_next_docno;					///< next index to assign to a new document id
-	std::map<std::string,Index> m_docno_map;		///< global map of document ids
+	KeyAllocatorPool m_docno_allocator_pool;		///< global map of document ids
 
-	boost::mutex m_attribno_mutex;				///< mutual exclusion for accessing m_attribno_map
 	Index m_next_attribno;					///< next index to assign to a new attribute name
-	std::map<std::string,Index> m_attribno_map;		///< global map of document attribute names
+	KeyAllocatorPool m_attribno_allocator_pool;		///< global map of document attribute names
 
-	boost::mutex m_counter_mutex;				///< mutual exclusion for accessing other global counters
 	Index m_nof_documents;					///< number of documents inserted
 	Index m_transactionCnt;
 

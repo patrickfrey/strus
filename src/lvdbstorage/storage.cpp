@@ -38,7 +38,8 @@
 #include "blockStorage.hpp"
 #include "statistics.hpp"
 #include "attributeReader.hpp"
-#include "globalKeyMap.hpp"
+#include "keyMap.hpp"
+#include "keyAllocator.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -48,13 +49,19 @@
 
 using namespace strus;
 
+enum {ExpectedTransactionSize = (1<<14)};
+
 Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	:m_path(path_)
 	,m_db(0)
 	,m_next_typeno(0)
+	,m_typeno_allocator_pool( &m_next_typeno, ExpectedTransactionSize)
 	,m_next_termno(0)
+	,m_termno_allocator_pool( &m_next_termno, ExpectedTransactionSize)
 	,m_next_docno(0)
+	,m_docno_allocator_pool( &m_next_docno, ExpectedTransactionSize)
 	,m_next_attribno(0)
+	,m_attribno_allocator_pool( &m_next_attribno, ExpectedTransactionSize)
 	,m_nof_documents(0)
 	,m_transactionCnt(0)
 	,m_metaDataBlockCache(0)
@@ -114,20 +121,15 @@ void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 	m_metaDataBlockCache->refresh();
 
 	storeVariables();
+
 	boost::mutex::scoped_lock( m_global_counter_mutex);
-	if (--m_transactionCnt == 0)
-	{
-		m_typeno_map.clear();
-		m_termno_map.clear();
-		m_docno_map.clear();
-		m_attribno_map.clear();
-	}
+	--m_transactionCnt;
 }
 
 void Storage::loadVariables()
 {
 	boost::mutex::scoped_lock( m_global_counter_mutex);
-	GlobalKeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
+	KeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
 	m_next_termno = variableMap.lookUp( "TermNo");
 	m_next_typeno = variableMap.lookUp( "TypeNo");
 	m_next_docno = variableMap.lookUp( "DocNo");
@@ -138,7 +140,7 @@ void Storage::loadVariables()
 void Storage::storeVariables()
 {
 	boost::mutex::scoped_lock( m_global_counter_mutex);
-	GlobalKeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
+	KeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
 	variableMap.store( "TermNo", m_next_termno);
 	variableMap.store( "TypeNo", m_next_typeno);
 	variableMap.store( "DocNo", m_next_docno);
@@ -154,50 +156,6 @@ void Storage::storeVariables()
 	{
 		throw std::runtime_error( std::string( "error when writing global counter batch: ") + status.ToString());
 	}
-}
-
-Index Storage::allocGlobalCounter(
-		const std::string& name_,
-		Index& next_,
-		std::map<std::string,Index> map_,
-		bool& isNew_)
-{
-	std::map<std::string,Index>::iterator ki = map_.lower_bound( name_);
-	if (ki == map_.end())
-	{
-		isNew_ = true;
-		map_.insert( ki, std::pair<std::string,Index>( name_, next_));
-		return next_++;
-	}
-	else
-	{
-		isNew_ = false;
-		return ki->second;
-	}
-}
-
-Index Storage::allocTermno( const std::string& name, bool& isNew)
-{
-	boost::mutex::scoped_lock( m_termno_mutex);
-	return allocGlobalCounter( name, m_next_termno, m_termno_map, isNew);
-}
-
-Index Storage::allocTypeno( const std::string& name, bool& isNew)
-{
-	boost::mutex::scoped_lock( m_typeno_mutex);
-	return allocGlobalCounter( name, m_next_typeno, m_typeno_map, isNew);
-}
-
-Index Storage::allocDocno( const std::string& name, bool& isNew)
-{
-	boost::mutex::scoped_lock( m_docno_mutex);
-	return allocGlobalCounter( name, m_next_docno, m_docno_map, isNew);
-}
-
-Index Storage::allocAttribno( const std::string& name, bool& isNew)
-{
-	boost::mutex::scoped_lock( m_attribno_mutex);
-	return allocGlobalCounter( name, m_next_attribno, m_attribno_map, isNew);
 }
 
 void Storage::close()
@@ -282,23 +240,42 @@ ForwardIteratorInterface*
 StorageTransactionInterface*
 	Storage::createTransaction()
 {
-	boost::mutex::scoped_lock( m_global_counter_mutex);
-	++m_transactionCnt;
+	{
+		boost::mutex::scoped_lock( m_global_counter_mutex);
+		++m_transactionCnt;
+	}
 	return new StorageTransaction( this, m_db, &m_metadescr);
 }
 
 Index Storage::allocDocnoRange( std::size_t nofDocuments)
 {
-	boost::mutex::scoped_lock( m_docno_mutex);
-	Index rt = m_next_docno;
-	m_next_docno += nofDocuments;
-	return rt;
+	return m_docno_allocator_pool.allocRange( nofDocuments);
 }
 
 void Storage::declareNofDocumentsInserted( int value)
 {
 	boost::mutex::scoped_lock( m_global_counter_mutex);
 	m_nof_documents += value;
+}
+
+KeyAllocatorInterface* Storage::createTypenoAllocator()
+{
+	return new KeyAllocator( &m_typeno_allocator_pool);
+}
+
+KeyAllocatorInterface* Storage::createTermnoAllocator()
+{
+	return new KeyAllocator( &m_termno_allocator_pool);
+}
+
+KeyAllocatorInterface* Storage::createDocnoAllocator()
+{
+	return new KeyAllocator( &m_docno_allocator_pool);
+}
+
+KeyAllocatorInterface* Storage::createAttribnoAllocator()
+{
+	return new KeyAllocator( &m_attribno_allocator_pool);
 }
 
 Index Storage::nofAttributeTypes()

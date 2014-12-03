@@ -22,6 +22,7 @@ install:
 uninstall:
 	cd src; make uninstall; cd ..
 	@-rm $(INSTALL_INCDIR)/constants.hpp
+	@-rm $(INSTALL_INCDIR)/arithmeticVariant.hpp
 	@-rm $(INSTALL_INCDIR)/statCounterValue.hpp
 	@-rm $(INSTALL_INCDIR)/forwardIteratorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/index.hpp
@@ -36,7 +37,8 @@ uninstall:
 	@-rm $(INSTALL_INCDIR)/queryProcessorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/queryProcessorLib.hpp
 	@-rm $(INSTALL_INCDIR)/storageInterface.hpp
-	@-rm $(INSTALL_INCDIR)/storageInserterInterface.hpp
+	@-rm $(INSTALL_INCDIR)/storageTransactionInterface.hpp
+	@-rm $(INSTALL_INCDIR)/storageDocumentInterface.hpp
 	@-rm $(INSTALL_INCDIR)/storageLib.hpp
 	@-rm $(INSTALL_INCDIR)/strus.hpp
 	@-rm $(INSTALL_INCDIR)/summarizerInterface.hpp

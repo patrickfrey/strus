@@ -26,74 +26,45 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_GLOBAL_KEY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_GLOBAL_KEY_MAP_HPP_INCLUDED
+#ifndef _STRUS_LVDB_KEY_ALLOCATOR_POOL_HPP_INCLUDED
+#define _STRUS_LVDB_KEY_ALLOCATOR_POOL_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "databaseKey.hpp"
-#include "keyValueStorage.hpp"
+#include "keyAllocatorInterface.hpp"
+#include "sparsehash/sparse_hash_map"		//... google sparsehash library
+#include <string>
+#include <map>
 #include <cstdlib>
+#include <boost/thread/mutex.hpp>
 
 namespace strus {
 
-class GlobalKeyMap
+class KeyAllocatorPool
 {
 public:
-	class AllocatorInterface
-	{
-	public:
-		virtual ~AllocatorInterface(){}
-		virtual Index alloc( const std::string& name, bool& isNew)=0;
-	};
+	typedef unsigned int Handle;
 
-	GlobalKeyMap( leveldb::DB* db_, DatabaseKey::KeyPrefix prefix_,
-			AllocatorInterface* allocator_)
-		:m_storage( db_, prefix_, false)
-		,m_allocator(allocator_)
-	{}
-	~GlobalKeyMap()
-	{
-		delete m_allocator;
-	}
+public:
+	KeyAllocatorPool( Index* globalCounter_, const Index& expectedSize)
+		:m_occupied(0),m_globalCounter(globalCounter_){}
+	~KeyAllocatorPool(){}
 
-	Index lookUp( const std::string& name);
-	Index getOrCreate( const std::string& name, bool& isnew);
-	void store( const std::string& name, const Index& value);
+	Handle createHandle();
+	void releaseHandle( Handle hnd);
 
-	void getWriteBatch( leveldb::WriteBatch& batch);
+	Index alloc( Handle hnd, const std::string& name, bool& isNew);
 
-	std::map<std::string,Index> getMap();
-	std::map<Index,std::string> getInvMap();
+	Index allocRange( std::size_t size);
 
 private:
-	Index allocValue( const std::string& name, bool& isNew)
-	{
-		return m_allocator->alloc( name, isNew);
-	}
+	typedef google::sparse_hash_map<std::string,Index> KeyMap;
 
 private:
-	struct Value
-	{
-		Index counter;
-		bool known;
-
-		Value( Index counter_, bool known_)
-			:counter(counter_),known(known_){}
-		Value( const Value& o)
-			:counter(o.counter),known(o.known){}
-		Value()
-			:counter(0),known(false){}
-	};
-
-	typedef std::map<std::string,Value> ValueMap;
-
-private:
-	KeyValueStorage m_storage;
-	DatabaseKey::KeyPrefix m_prefix;
-	ValueMap m_map;
-	AllocatorInterface* m_allocator;
+	boost::mutex m_mutex;
+	KeyMap m_keymaps[64];
+	uint64_t m_occupied;
+	Index* m_globalCounter;
 };
 
 }//namespace
 #endif
-
 

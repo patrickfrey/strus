@@ -30,7 +30,7 @@
 #include "strus/storageInterface.hpp"
 #include "storageConfig.hpp"
 #include "databaseKey.hpp"
-#include "globalKeyMap.hpp"
+#include "keyMap.hpp"
 #include "indexPacker.hpp"
 #include "storage.hpp"
 #include "dll_tags.hpp"
@@ -69,7 +69,7 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 	leveldb::Status status = leveldb::DB::Open( options, config.path(), &db);
 	if (status.ok())
 	{
-		GlobalKeyMap variableMap( db, DatabaseKey::VariablePrefix, 0);
+		KeyMap variableMap( db, DatabaseKey::VariablePrefix, 0);
 		variableMap.store( "TermNo", 1);
 		variableMap.store( "TypeNo", 1);
 		variableMap.store( "DocNo", 1);

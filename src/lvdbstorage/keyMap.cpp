@@ -26,13 +26,13 @@
 
 --------------------------------------------------------------------
 */
-#include "globalKeyMap.hpp"
+#include "keyMap.hpp"
 #include "keyValueStorage.hpp"
 #include "indexPacker.hpp"
 
 using namespace strus;
 
-Index GlobalKeyMap::lookUp( const std::string& name)
+Index KeyMap::lookUp( const std::string& name)
 {
 	const KeyValueStorage::Value* value = m_storage.load( name);
 	if (!value) return 0;
@@ -42,7 +42,7 @@ Index GlobalKeyMap::lookUp( const std::string& name)
 	return unpackIndex( vi, ve);
 }
 
-Index GlobalKeyMap::getOrCreate( const std::string& name, bool& isnew)
+Index KeyMap::getOrCreate( const std::string& name, bool& isnew)
 {
 	ValueMap::const_iterator ki = m_map.find( name);
 	if (ki != m_map.end())
@@ -70,12 +70,12 @@ Index GlobalKeyMap::getOrCreate( const std::string& name, bool& isnew)
 	}
 }
 
-void GlobalKeyMap::store( const std::string& name, const Index& value)
+void KeyMap::store( const std::string& name, const Index& value)
 {
 	m_map[ name] = Value( value, false);
 }
 
-void GlobalKeyMap::getWriteBatch( leveldb::WriteBatch& batch)
+void KeyMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
 	ValueMap::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
@@ -90,7 +90,7 @@ void GlobalKeyMap::getWriteBatch( leveldb::WriteBatch& batch)
 	m_map.clear();
 }
 
-std::map<std::string,Index> GlobalKeyMap::getMap()
+std::map<std::string,Index> KeyMap::getMap()
 {
 	std::map<std::string,std::string> smap = m_storage.getMap();
 	std::map<std::string,Index> rt;
@@ -109,7 +109,7 @@ std::map<std::string,Index> GlobalKeyMap::getMap()
 	return rt;
 }
 
-std::map<Index,std::string> GlobalKeyMap::getInvMap()
+std::map<Index,std::string> KeyMap::getInvMap()
 {
 	std::map<std::string,std::string> smap = m_storage.getMap();
 	std::map<Index,std::string> rt;

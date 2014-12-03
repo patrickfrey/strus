@@ -38,7 +38,7 @@
 using namespace strus;
 
 class GlobalKeyAllocator
-	:public GlobalKeyMap::AllocatorInterface
+	:public KeyAllocatorInterface
 {
 public:
 	typedef Index (Storage::*AllocFunction)( const std::string& name, bool& isNew);
@@ -67,11 +67,12 @@ StorageTransaction::StorageTransaction(
 	,m_docnoBlockMap(db_)
 	,m_posinfoBlockMap(db_)
 	,m_forwardIndexBlockMap(db_)
-	,m_termTypeMap(db_,DatabaseKey::TermTypePrefix, new GlobalKeyAllocator( storage_, &Storage::allocTypeno))
-	,m_termValueMap(db_,DatabaseKey::TermValuePrefix, new GlobalKeyAllocator( storage_, &Storage::allocTermno))
-	,m_docIdMap(db_,DatabaseKey::DocIdPrefix, new GlobalKeyAllocator( storage_, &Storage::allocDocno))
-	,m_attributeNameMap(db_,DatabaseKey::AttributeKeyPrefix, new GlobalKeyAllocator( storage_, &Storage::allocAttribno))
+	,m_termTypeMap(db_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
+	,m_termValueMap(db_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator())
+	,m_docIdMap(db_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
+	,m_attributeNameMap(db_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())
 	,m_nof_documents(0)
+	,m_done(false)
 	,m_commit(false)
 	,m_rollback(false)
 {}
@@ -237,6 +238,10 @@ void StorageTransaction::deleteIndex( const Index& docno)
 
 void StorageTransaction::deleteDocument( const std::string& docid)
 {
+	if (m_done)
+	{
+		throw std::runtime_error( "called transaction deleteDocument after 'done' has been called");
+	}
 	Index docno = m_docIdMap.lookUp( docid);
 	if (docno == 0) return;
 
@@ -257,6 +262,10 @@ StorageDocumentInterface*
 		const std::string& docid,
 		const Index& docno)
 {
+	if (m_done)
+	{
+		throw std::runtime_error( "called transaction createDocument after 'done' has been called");
+	}
 	if (docno)
 	{
 		m_nof_documents += 1;
@@ -272,6 +281,15 @@ StorageDocumentInterface*
 }
 
 
+void StorageTransaction::done()
+{
+	m_termTypeMap.done();
+	m_termValueMap.done();
+	m_docIdMap.done();
+	m_attributeNameMap.done();
+	m_done = true;
+}
+
 void StorageTransaction::commit()
 {
 	if (m_commit) throw std::runtime_error( "called transaction commit twice");
@@ -282,7 +300,7 @@ void StorageTransaction::commit()
 		std::vector<Index> refreshList;
 		m_attributeMap.getWriteBatch( m_batch);
 		m_metaDataBlockMap.getWriteBatch( m_batch, refreshList);
-		
+
 		m_docnoBlockMap.getWriteBatch( m_batch);
 		m_posinfoBlockMap.getWriteBatch( m_batch);
 		m_forwardIndexBlockMap.getWriteBatch( m_batch);

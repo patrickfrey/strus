@@ -57,6 +57,9 @@ public:
 	virtual void deleteDocument(
 			const std::string& docid)=0;
 
+	/// \brief Declare that no more items are deleted or added (helps to free resources)
+	virtual void done()=0;
+
 	/// \brief Write the documents created to the storage
 	virtual void commit()=0;
 

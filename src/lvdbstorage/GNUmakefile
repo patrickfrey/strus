@@ -21,7 +21,9 @@ CPP_OBJS=\
 	metaDataBlockCache.o \
 	attributeReader.o \
 	attributeMap.o \
-	globalKeyMap.o \
+	keyAllocator.o \
+	keyAllocatorPool.o \
+	keyMap.o \
 	documentFrequencyMap.o \
 	storage.o \
 	postingIterator.o \
@@ -35,7 +37,12 @@ CPP_OBJS=\
 PRG_OBJS=\
 	extractKeyValueData.o
 
-CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I.
+CPP_INCLUDE=\
+	-I$(TOPDIR)/include \
+	-I$(TOPDIR)/include/private \
+	-I. \
+	-I$(TOPDIR)/3rdParty/sparsehash-2.0.2/src
+
 CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 MODFLAGS=-fPIC $(VISIBILITY)
 LDFLAGS=-L/usr/lib -L$(TOPDIR)/src/utils
@@ -77,6 +84,7 @@ install:
  
 .PHONY: uninstall
 uninstall:
-	@rm $(INSTALL_LIBDIR)/libstrus_lvdbstorage.so
-	@rm $(INSTALL_BINDIR)/strusCheckStorage
+	@rm -f $(INSTALL_LIBDIR)/libstrus_lvdbstorage.so
+	@rm -f $(INSTALL_BINDIR)/strusCheckStorage
+	@rm -f $(INSTALL_BINDIR)/strusDumpStorage
 
