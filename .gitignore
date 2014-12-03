@@ -29,5 +29,6 @@ tests/randoc/src/randomCollectionTest
 tests/program/src/parseQueryEvalProgramTest
 tests/functions/src/functions
 tests/posinfoBlock/src/testPosinfoBlock
+tests/varSizeNodeTree/src/testVarSizeNodeTree
 src/lvdbstorage/strusCheckStorage
 src/lvdbstorage/strusDumpStorage

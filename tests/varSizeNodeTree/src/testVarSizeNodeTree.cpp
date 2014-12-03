@@ -30,6 +30,8 @@
 #include <stdexcept>
 #include <iostream>
 #include <cstdlib>
+#include <map>
+#include <string>
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
 
@@ -50,9 +52,9 @@ static std::string randomKey( unsigned int maxlen)
 int main( int, const char**)
 {
 	try
-	{
-		std::map<std::string,VarSizeNodeTree::Value> testmap;
-		VarSizeNodeTree origmap;
+	{	typedef std::map<std::string,strus::VarSizeNodeTree::NodeData> TestMap;
+		TestMap testmap;
+		strus::VarSizeNodeTree origmap;
 
 		std::size_t ii=0, nofInserts=10000;
 		for (; ii<nofInserts; ++ii)
@@ -61,7 +63,37 @@ int main( int, const char**)
 			origmap.set( key.c_str(), ii+1);
 			testmap[ key] = ii+1;
 		}
-		
+		strus::VarSizeNodeTree::const_iterator
+			oi = origmap.begin(), oe = origmap.end();
+
+		std::size_t oidx = 0;
+		for (; oi != oe; ++oi,++oidx)
+		{
+			TestMap::const_iterator ti = testmap.find( oi.key());
+			if (ti == testmap.end())
+			{
+				throw std::runtime_error( std::string( "non existing key '") + oi.key() + "' found in variable size node tree");
+			}
+			else if (ti->second != oi.data())
+			{
+				throw std::runtime_error( std::string( "inserted key '") + oi.key() + "' has not the expected value");
+			}
+		}
+		if (oidx != nofInserts)
+		{
+			throw std::runtime_error( "number of inserts in variable size node tree does not match");
+		}
+		TestMap::const_iterator
+			ti = testmap.begin(), te = testmap.end();
+
+		for (; ti != te; ++ti)
+		{
+			strus::VarSizeNodeTree::NodeData val;
+			if (!origmap.find( ti->first.c_str(), val))
+			{
+				throw std::runtime_error( std::string( "inserted key '") + ti->first + "' disapeared in variable size node tree");
+			}
+		}
 	}
 	catch (const std::exception& err)
 	{

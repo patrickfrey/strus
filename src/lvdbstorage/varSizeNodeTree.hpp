@@ -31,58 +31,88 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <utility>
+#include <vector>
+#include <cstring>
+#include <stdint.h>
 
 namespace strus {
 
 class VarSizeNodeTree
 {
 public:
-	typedef uint32_t Value;
+	typedef uint32_t NodeData;
+	typedef uint32_t NodeAddress;
+	typedef uint32_t NodeIndex;
 
+public:
 	VarSizeNodeTree()
 		:m_rootaddr(0){}
 
-	bool set( const char* key, const Data& data)
+	void set( const char* key, const NodeData& data)
 	{
+		if (!m_rootaddr)
+		{
+			m_rootaddr = nodeAddress( NodeClass::Node1, m_block1.allocNode());
+		}
 		NodeAddress addr = m_rootaddr;
-		if (!addr) return 0;
-		char const* ki = key;
+		unsigned char const* ki = (const unsigned char*)key;
 		for (; *ki; ++ki)
 		{
 			NodeAddress next = successorNodeAddress( addr, *ki);
 			if (!next)
 			{
 				addTail( addr, ki, data);
+				return;
+			}
+			else if (nodeClassId( next) == NodeClass::NodeData)
+			{
+				NodeIndex idx = m_block4.allocNode();
+				NodeAddress newaddr = nodeAddress( NodeClass::Node4, idx);
+				if (!addNode( newaddr, 0xFF, next))
+				{
+					throw std::logic_error("illegal state (empty addNode4 returns false)");
+				}
+				unlinkNode( addr, *ki);
+				if (!addNode( addr, *ki, newaddr))
+				{
+					throw std::logic_error("illegal state (addNode after unlink returns false)");
+				}
+				addr = newaddr;
 			}
 			else
 			{
 				addr = next;
 			}
 		}
+		addTail( addr, ki, data);
 	}
 
-	Value get( const char* key) const
+	bool find( const char* key, NodeData& val) const
 	{
 		NodeAddress addr = m_rootaddr;
-		if (!addr) return 0;
-		char const* ki = key;
+		if (!addr) return false;
+		unsigned char const* ki = (const unsigned char*)key;
 		for (; *ki; ++ki)
 		{
 			addr = successorNodeAddress( addr, *ki);
-			if (!addr) return 0;
+			if (!addr) return false;
 		}
 		if (nodeClassId(addr) == NodeClass::NodeData)
 		{
-			return m_datablock[ nodeIndex( addr)];
+			val = m_datablock[ nodeIndex( addr)];
+			return true;
 		}
 		else
 		{
 			addr = successorNodeAddress( addr, 0xFF);
+			if (!addr) return false;
+
 			if (nodeClassId(addr) != NodeClass::NodeData)
 			{
 				throw std::runtime_error( "currupt data (non UTF-8 string inserted)");
 			}
-			return m_datablock[ nodeIndex( addr)];
+			val = m_datablock[ nodeIndex( addr)];
+			return true;
 		}
 	}
 
@@ -92,6 +122,11 @@ public:
 		const_iterator()
 			:m_tree(0)
 		{}
+		const_iterator( const const_iterator& o)
+			:m_tree(o.m_tree)
+			,m_stack(o.m_stack)
+			,m_key(o.m_key)
+			,m_data(o.m_data){}
 
 		const_iterator( const VarSizeNodeTree* tree_, NodeAddress rootaddr)
 			:m_tree(tree_)
@@ -101,54 +136,71 @@ public:
 		}
 
 		const std::string& key() const				{return m_key;}
-		const Value& value() const				{return m_value;}
+		const NodeData& data() const				{return m_data;}
 
 		bool operator==( const const_iterator& o) const		{return isequal(o);}
 		bool operator!=( const const_iterator& o) const		{return !isequal(o);}
 
+		const_iterator& operator++()				{skip(); return *this;}
+		const_iterator operator++(int)				{const_iterator rt(*this); skip(); return rt;}
+
 	private:
+		void extractData()
+		{
+			std::vector<StackElement>::const_iterator
+				si = m_stack.begin(), se = m_stack.end();
+			for (; si != se; ++si)
+			{
+				if (si->m_chr) m_key.push_back( si->m_chr);
+			}
+			NodeIndex dataidx = nodeIndex( m_stack.back().m_addr);
+			m_data = m_tree->m_datablock[ dataidx];
+		}
+
+		void skipNode()
+		{
+			char lexem;
+			NodeAddress follow;
+			if (m_tree->getFollowNode( 
+					m_stack.back().m_addr,
+					m_stack.back().m_itr,
+					lexem, follow))
+			{
+				char chr = lexem==0xFF?0:lexem;
+				m_stack.push_back( StackElement( follow, 0, chr));
+			}
+			else for (;;)
+			{
+				m_stack.pop_back();
+				if (m_stack.empty()) return;
+				if (m_tree->getNextNode( 
+						m_stack.back().m_addr,
+						m_stack.back().m_itr))
+				{
+					break;
+				}
+			}
+		}
+
 		void skip()
 		{
 			if (m_stack.empty()) return;
 			m_key.clear();
-			m_value = 0;
+			m_data = 0;
 
 			for (;;)
 			{
 				NodeAddress addr = m_stack.back().m_addr;
-				if (addr == NodeClass::NodeData && m_stack.back().m_itr==0)
+				if (nodeClassId(addr) == NodeClass::NodeData
+				&&  m_stack.back().m_itr == 0)
 				{
-					std::vector<StackElement>::const_iterator
-						si = m_stack.begin(), se = m_stack.end();
-					for (; si != se; ++si)
-					{
-						if (*si) m_key.push_back( *si);
-					}
-					m_value = m_tree->m_datablock[
-						nodeIndex( m_stack.back().m_addr)];
+					extractData();
 					m_stack.back().m_itr = 1;
 					return;
 				}
 				else
 				{
-					std::size_t itr = m_stack.back().m_itr;
-					char lexem;
-					NodeAddress follow;
-					if (getFollowNode( addr, itr, lexem, follow))
-					{
-						char chr = lexem==0xFF?0:lexem;
-						m_stack.push_back( follow, 0, chr);
-					}
-					else for (;;)
-					{
-						m_stack.pop_back();
-						if (m_stack.empty()) return;
-						if (getNextNode( addr,
-							m_stack.back().m_itr))
-						{
-							break;
-						}
-					}
+					skipNode();
 				}
 			}
 		}
@@ -175,15 +227,15 @@ public:
 			std::size_t m_itr;
 			char m_chr;
 
-			StackElement( NodeAddress adr_, std::size_t itr_, char chr_=0)
-				:m_chr(0),m_addr(addr_),m_itr(itr_),m_chr(chr_){}
+			StackElement( NodeAddress addr_, std::size_t itr_, char chr_=0)
+				:m_addr(addr_),m_itr(itr_),m_chr(chr_){}
 			StackElement( const StackElement& o)
 				:m_addr(o.m_addr),m_itr(o.m_itr),m_chr(o.m_chr){}
 		};
 		const VarSizeNodeTree* m_tree;
 		std::vector<StackElement> m_stack;
 		std::string m_key;
-		NodeData::UnitType m_value;
+		NodeData m_data;
 	};
 
 	const_iterator begin() const
@@ -192,20 +244,31 @@ public:
 	}
 	const_iterator end() const
 	{
-		return const_iterator( this, m_rootaddr);
+		return const_iterator();
+	}
+
+	void clear()
+	{
+		m_datablock.clear();
+		m_block1.clear();
+		m_block2.clear();
+		m_block4.clear();
+		m_block8.clear();
+		m_block16.clear();
+		m_block256.clear();
+		m_rootaddr = 0;
 	}
 
 private:
-	typedef uint32_t NodeAddress;
-	typedef uint32_t NodeIndex;
-
 	struct NodeClass
 	{
 		enum Id
 		{
 			NodeData,
 			Node1,
+			Node2,
 			Node4,
+			Node8,
 			Node16,
 			Node256
 		};
@@ -217,31 +280,28 @@ private:
 	};
 	static inline NodeClass::Id nodeClassId( const NodeAddress& addr)
 	{
-		return (addr >> NodeClass::Shift) & NodeClass::Mask;
+		return (NodeClass::Id)(((unsigned int)addr >> (unsigned int)NodeClass::Shift) & (unsigned int)NodeClass::Mask);
 	}
 	static inline NodeIndex nodeIndex( const NodeAddress& addr)
 	{
-		return addr & ((1<<NodeClass::Shift)-1);
+		return addr & (NodeAddress)((1<<(unsigned int)NodeClass::Shift)-1);
 	}
 	static inline NodeAddress nodeAddress( NodeClass::Id classid, const NodeIndex& idx)
 	{
-		return idx | ((NodeAddress)classid << NodeClass::Shift); 
+		return idx | ((NodeAddress)classid << (unsigned int)NodeClass::Shift); 
 	}
-
-	struct NodeData
-	{
-		typedef uint32_t UnitType;
-	};
 
 	class NodeIteratorData
 	{
 	public:
 		NodeIteratorData( const NodeIteratorData& o)
 			:m_lexem(o.m_lexem),m_address(o.m_address){}
+		NodeIteratorData( unsigned char lexem_, const NodeAddress& address_)
+			:m_lexem(lexem_),m_address(address_){}
 
 		void init( unsigned char lexem_, const NodeAddress& address_)
 		{
-			m_lexem = successor_;
+			m_lexem = lexem_;
 			m_address = address_;
 		}
 
@@ -269,36 +329,54 @@ private:
 
 		typedef uint32_t UnitType;
 
-		static inline unsigned char lexem( const UnitType& unit)
+		static unsigned char lexem( const UnitType& unit)
 		{
 			return (unit >> LexemShift) & LexemMask;
 		}
 
-		static inline NodeAddress successor( const UnitType& unit, unsigned char chr)
+		static NodeAddress address( const UnitType& unit)
 		{
-			return (lexem( unit) == chr)?(unit&AddressMask):0;
+			return unit & AddressMask;
 		}
 
-		static bool addNode( UnitType& node, unsigned char lexem, const NodeAddress& addr)
+		static NodeAddress successor( const UnitType& unit, unsigned char chr)
+		{
+			return (lexem( unit) == chr)?address(unit):0;
+		}
+
+		static void unlink( UnitType& unit, unsigned char chr)
+		{
+			if (lexem( unit) == chr)
+			{
+				unit = 0;
+			}
+		}
+
+		static bool addNode( UnitType& unit, unsigned char lexem_, const NodeAddress& addr_)
 		{
 			if (lexem( unit) != 0) return false;
-			if ((addr & (LexemMask << LexemShift)) != 0) return false;
-			node = addr | ((UnitType)lexem << LexemShift);
+			if ((addr_ & (LexemMask << LexemShift)) != 0) return false;
+			unit = addr_ | ((UnitType)lexem_ << LexemShift);
 			return true;
 		}
 
 		class Iterator
-			:NodeIteratorData
+			:public NodeIteratorData
 		{
+		public:
 			Iterator( const Iterator& o)
 				:NodeIteratorData(o){}
 			Iterator( const UnitType& unit)
-				:NodeIteratorData(lexem(unit),unit&AddressMask){}
+				:NodeIteratorData(
+					Node1::lexem(unit),
+					Node1::address(unit)){}
 			Iterator( const UnitType* unitref, std::size_t idx_)
-				:NodeIteratorData(idx_?0:lexem(*unitref),idx_?0:(*unitref&AddressMask)){}
+				:NodeIteratorData(
+					idx_?0:Node1::lexem(*unitref),
+					idx_?0:Node1::address(*unitref)){}
 
 			Iterator& operator++()		{init(0,0); return *this;}
-			Iterator operator++(int)	{Iterator rt(unit); init(0,0); return rt;}
+			Iterator operator++(int)	{Iterator rt(*this); init(0,0); return rt;}
 		};
 	};
 
@@ -331,26 +409,42 @@ private:
 
 		static inline NodeAddress successor( const UnitType& unit, unsigned char chr)
 		{
-			const char* nn = std::memchr( succ, chr, sizeof(succ));
+			const unsigned char* nn = (const unsigned char*)std::memchr( unit.succ, chr, sizeof(unit.succ));
 			if (!nn) return 0;
-			unsigned int ofs = (nn-succ)*3;
+			unsigned int ofs = (nn-unit.succ)*3;
 
-			NodeAddress rt = unpackAddress3( node + ofs);
+			return unpackAddress3( unit.node + ofs);
 		}
 
-		static bool addNode( UnitType& node, unsigned char lexem, const NodeAddress& addr)
+		static bool addNode( UnitType& unit, unsigned char lexem, const NodeAddress& addr)
 		{
 			std::size_t ofs = 0;
-			for (; ofs < NN && succ[ofs]; ++ofs){}
+			for (; ofs < NN && unit.succ[ofs]; ++ofs){}
 			if (ofs == NN) return false;
-			succ[ ofs] = lexem;
-			packAddress3( node+(ofs*3), addr);
+			unit.succ[ ofs] = lexem;
+			packAddress3( unit.node+(ofs*3), addr);
 			return true;
 		}
 
-		class Iterator
-			:NodeIteratorData
+		static void unlink( UnitType& unit, unsigned char chr)
 		{
+			std::size_t ofs = 0;
+			for (; ofs < NN && unit.succ[ofs] && unit.succ[ofs] != chr; ++ofs){}
+			if (ofs == NN || unit.succ[ofs] == 0) return;
+			unsigned char* si = unit.succ + ofs;
+			unsigned char* se = unit.succ + NN;
+			std::memmove( si, si+1, se-si-1);
+			unit.succ[ NN -1] = 0;
+			unsigned char* ni = unit.node+(ofs*3);
+			unsigned char* ne = unit.node+(NN*3);
+			std::memmove( ni, ni+3, ne-ni-3);
+			std::memset( ne-3, 0, 3);
+		}
+
+		class Iterator
+			:public NodeIteratorData
+		{
+		public:
 			Iterator( const Iterator& o)
 				:NodeIteratorData(o),m_unitref(o.m_unitref),m_itr(o.m_itr){}
 			explicit Iterator( const UnitType& unit)
@@ -371,7 +465,7 @@ private:
 		private:
 			void extractData()
 			{
-				NodexAddr aa = unpackAddress3( m_unitref->node+m_itr*3);
+				NodeAddress aa = unpackAddress3( m_unitref->node+m_itr*3);
 				init( m_unitref->succ[m_itr], aa);
 			}
 
@@ -394,11 +488,43 @@ private:
 		};
 	};
 
+	struct Node2
+		:public NodeN<2>
+	{
+		enum {
+			ThisNodeClass = NodeClass::Node2
+		};
+
+		static inline NodeAddress successor( const UnitType& unit, unsigned char chr)
+		{
+			if (unit.succ[0] == chr)
+			{
+				return unpackAddress3( unit.node + 0);
+			}
+			else if (unit.succ[1] == chr)
+			{
+				return unpackAddress3( unit.node + 3);
+			}
+			else
+			{
+				return 0;
+			}
+		}
+	};
+
 	struct Node4
 		:public NodeN<4>
 	{
 		enum {
 			ThisNodeClass = NodeClass::Node4
+		};
+	};
+
+	struct Node8
+		:public NodeN<8>
+	{
+		enum {
+			ThisNodeClass = NodeClass::Node8
 		};
 	};
 
@@ -425,19 +551,26 @@ private:
 		static inline NodeAddress successor( const UnitType& unit, unsigned char chr)
 		{
 			unsigned int ofs = chr*3;
-			NodeAddress rt = unpackAddress3( node + ofs);
+			return unpackAddress3( unit.node + ofs);
 		}
 
-		static bool addNode( UnitType& node, unsigned char lexem, const NodeAddress& addr)
+		static void unlink( UnitType& unit, unsigned char chr)
+		{
+			unsigned int ofs = chr*3;
+			std::memset( unit.node+ofs, 0, 3);
+		}
+
+		static bool addNode( UnitType& unit, unsigned char lexem, const NodeAddress& addr)
 		{
 			std::size_t ofs = lexem;
-			packAddress3( node+(ofs*3), addr);
+			packAddress3( unit.node+(ofs*3), addr);
 			return true;
 		}
 
 		class Iterator
-			:NodeIteratorData
+			:public NodeIteratorData
 		{
+		public:
 			Iterator( const Iterator& o)
 				:NodeIteratorData(o)
 				,m_unitref(o.m_unitref)
@@ -478,7 +611,7 @@ private:
 		private:
 			void extractData()
 			{
-				NodexAddr aa = unpackAddress3( m_unitref->node + m_itr*3);
+				NodeAddress aa = unpackAddress3( m_unitref->node + m_itr*3);
 				init( m_itr, aa);
 			}
 
@@ -518,7 +651,7 @@ private:
 	class Block
 	{
 	public:
-		typedef typename NODETYPE NodeType;
+		typedef NODETYPE NodeType;
 
 	public:
 		Block()
@@ -542,9 +675,9 @@ private:
 			{
 				unsigned int mm = m_allocsize?(m_allocsize * 4):16;
 				if (mm < m_allocsize) throw std::bad_alloc();
-				NodeType::UnitType* newar
-					= (NodeType::UnitType*)std::realloc(
-						m_ar, mm * sizeof( NodeType::UnitType));
+				typename NodeType::UnitType* newar
+					= (typename NodeType::UnitType*)std::realloc(
+						m_ar, mm * sizeof( typename NodeType::UnitType));
 				if (!newar) throw std::bad_alloc();
 				m_ar = newar;
 				m_allocsize = mm;
@@ -564,7 +697,7 @@ private:
 			m_freelist = idx+1;
 		}
 
-		void checkAddress( const NodeAddress& addr)
+		void checkAddress( const NodeAddress& addr) const
 		{
 			if ((int)((addr >> NodeClass::Shift) & NodeClass::Mask)
 			!=  (int)NodeType::ThisNodeClass)
@@ -572,26 +705,26 @@ private:
 				throw std::logic_error( "accessing block with illegal node address");
 			}
 		}
-		void checkAccess( const NodeIndex& idx)
+		void checkAccess( const std::size_t& idx) const
 		{
 			if (idx >= m_size) throw std::logic_error( "accessing block with node index out of range");
 		}
 
-		NodeType::Iterator nodeIterator( const NodeAddress& addr)
+		typename NodeType::Iterator nodeIterator( const NodeAddress& addr)
 		{
 			checkAddress( addr);
 			NodeIndex idx = nodeIndex( addr);
 			checkAccess( idx);
-			return NodeType::Iterator( m_ar[ idx]);
+			return typename NodeType::Iterator( m_ar[ idx]);
 		}
 
-		NodeType::UnitType& operator[]( std::size_t idx)
+		typename NodeType::UnitType& operator[]( std::size_t idx)
 		{
 			checkAccess( idx);
 			return m_ar[ idx];
 		}
 
-		const NodeType::UnitType& operator[]( std::size_t idx) const
+		const typename NodeType::UnitType& operator[]( std::size_t idx) const
 		{
 			checkAccess( idx);
 			return m_ar[ idx];
@@ -604,19 +737,18 @@ private:
 		}
 
 	private:
-		NodeType::UnitType* m_ar;
+		typename NodeType::UnitType* m_ar;
 		std::size_t m_size;
 		std::size_t m_allocsize;
 		uint32_t m_freelist;
 	};
 
 	template <class DestNodeType, class SourceNodeType>
-	NodeAddress moveBlock( Block<DestNodeType>& dstblk, Block<SourceNodeType>& srcblk, NodeAddress srcadr)
+	NodeAddress moveBlock( Block<DestNodeType>& dstblk, Block<SourceNodeType>& srcblk, NodeAddress srcaddr)
 	{
 		NodeIndex dstidx = dstblk.allocNode();
-		NodeAddress dstadr = nodeAddress( DestNodeType::ThisNodeClass, dstidx);
-		SourceNodeType::Iterator srcitr = srcblk.nodeIterator( srcaddr);
-		NodeType::UnitType& dstunit = dstblk[ dstidx];
+		typename SourceNodeType::Iterator srcitr = srcblk.nodeIterator( srcaddr);
+		typename DestNodeType::UnitType& dstunit = dstblk[ dstidx];
 		for (; !srcitr.end(); ++srcitr)
 		{
 			if (!DestNodeType::addNode(
@@ -625,11 +757,12 @@ private:
 				throw std::runtime_error( "destination node does not have the capacity of the source node");
 			}
 		}
-		NodeIndex srcidx = nodeIndex( srcadr);
+		NodeIndex srcidx = nodeIndex( srcaddr);
 		srcblk.releaseNode( srcidx);
+		return nodeAddress( (NodeClass::Id)DestNodeType::ThisNodeClass, dstidx);
 	}
 
-	NodeAddress successorNodeAddress( const NodeAddress& addr, unsigned char lexem)
+	NodeAddress successorNodeAddress( const NodeAddress& addr, unsigned char lexem) const
 	{
 		NodeClass::Id classid = nodeClassId(addr);
 		NodeIndex idx = nodeIndex( addr);
@@ -639,13 +772,18 @@ private:
 				return 0;
 			case NodeClass::Node1:
 				return Node1::successor( m_block1[ idx], lexem);
+			case NodeClass::Node2:
+				return Node2::successor( m_block2[ idx], lexem);
 			case NodeClass::Node4:
 				return Node4::successor( m_block4[ idx], lexem);
+			case NodeClass::Node8:
+				return Node8::successor( m_block8[ idx], lexem);
 			case NodeClass::Node16:
 				return Node16::successor( m_block16[ idx], lexem);
 			case NodeClass::Node256:
 				return Node256::successor( m_block256[ idx], lexem);
 		}
+		throw std::logic_error("called successor node address on unknown block type");
 	}
 
 	bool addNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow)
@@ -658,12 +796,40 @@ private:
 				return false;
 			case NodeClass::Node1:
 				return Node1::addNode( m_block1[ idx], lexem, follow);
+			case NodeClass::Node2:
+				return Node2::addNode( m_block2[ idx], lexem, follow);
 			case NodeClass::Node4:
 				return Node4::addNode( m_block4[ idx], lexem, follow);
+			case NodeClass::Node8:
+				return Node8::addNode( m_block8[ idx], lexem, follow);
 			case NodeClass::Node16:
 				return Node16::addNode( m_block16[ idx], lexem, follow);
 			case NodeClass::Node256:
 				return Node256::addNode( m_block256[ idx], lexem, follow);
+		}
+		throw std::logic_error("called add node on unknown block type");
+	}
+
+	void unlinkNode( const NodeAddress& addr, unsigned char lexem)
+	{
+		NodeClass::Id classid = nodeClassId( addr);
+		NodeIndex idx = nodeIndex( addr);
+		switch (classid)
+		{
+			case NodeClass::NodeData:
+				return;
+			case NodeClass::Node1:
+				Node1::unlink( m_block1[ idx], lexem);
+			case NodeClass::Node2:
+				Node2::unlink( m_block2[ idx], lexem);
+			case NodeClass::Node4:
+				Node4::unlink( m_block4[ idx], lexem);
+			case NodeClass::Node8:
+				Node8::unlink( m_block8[ idx], lexem);
+			case NodeClass::Node16:
+				Node16::unlink( m_block16[ idx], lexem);
+			case NodeClass::Node256:
+				Node256::unlink( m_block256[ idx], lexem);
 		}
 	}
 
@@ -680,34 +846,46 @@ private:
 			}
 			case NodeClass::Node1:
 				return moveBlock( m_block4, m_block1, addr);
+			case NodeClass::Node2:
+				return moveBlock( m_block4, m_block2, addr);
 			case NodeClass::Node4:
-				return moveBlock( m_block16, m_block4, addr);
+				return moveBlock( m_block8, m_block4, addr);
+			case NodeClass::Node8:
+				return moveBlock( m_block16, m_block8, addr);
 			case NodeClass::Node16:
 				return moveBlock( m_block256, m_block16, addr);
 			case NodeClass::Node256:
 				throw std::logic_error("called expand block on block with nodes having maximum capacity");
 		}
+		throw std::logic_error("called expand block on unknown block type");
 	}
 
-	NodeAddress addTail( const NodeAddress& addr, const char* tail, const NodeData::UnitType& data)
+	void addTail( const NodeAddress& addr, const unsigned char* tail, const NodeData& data)
 	{
 		if (!*tail)
 		{
 			NodeIndex idx = m_datablock.size();
-			followaddr = nodeAddress( NodeClass::NodeData, idx);
+			NodeAddress followaddr = nodeAddress( NodeClass::NodeData, idx);
 			m_datablock.push_back( data);
-			addNode( addr, 0xFF, followaddr);
+			if (!addNode( addr, 0xFF, followaddr))
+			{
+				NodeAddress aa = expandNode( addr);
+				if (!addNode( aa, 0xFF, followaddr))
+				{
+					throw std::logic_error("add node failed after expand node");
+				}
+			}
 		}
 		else
 		{
-			char const* ti = tail;
+			unsigned char const* ti = tail;
 			NodeAddress aa = addr;
 			for (;ti[1]; ++ti)
 			{
-				idx = m_block1.allocNode( false);
+				NodeIndex idx = m_block1.allocNode( false);
 				// ... do not use free list for tail blocks to put
 				//	them close to each other in memory
-				followaddr = nodeAddress( NodeClass::Node1, idx);
+				NodeAddress followaddr = nodeAddress( NodeClass::Node1, idx);
 				if (!addNode( aa, *ti, followaddr))
 				{
 					aa = expandNode( aa);
@@ -719,15 +897,22 @@ private:
 				aa = followaddr;
 			}
 			NodeIndex idx = m_datablock.size();
-			followaddr = nodeAddress( NodeClass::NodeData, idx);
+			NodeAddress followaddr = nodeAddress( NodeClass::NodeData, idx);
 			m_datablock.push_back( data);
-			addNode( addr, *ti, followaddr);
+			if (!addNode( addr, *ti, followaddr))
+			{
+				aa = expandNode( addr);
+				if (!addNode( aa, *ti, followaddr))
+				{
+					throw std::logic_error("add node failed after expand node");
+				}
+			}
 		}
 	}
 
-	bool getFollowNode( const NodeAddress& addr, std::size_t idx, char& lexem, NodeAddress& follow)
+	bool getFollowNode( const NodeAddress& addr, std::size_t itridx, char& lexem, NodeAddress& follow) const
 	{
-		NodeIndex idx = nodeIndex( addr);
+		NodeIndex addridx = nodeIndex( addr);
 	
 		switch (nodeClassId( addr))
 		{
@@ -737,42 +922,59 @@ private:
 			}
 			case NodeClass::Node1:
 			{
-				if (idx >= 1) return false;
-				Node1::Iterator itr( m_block1[ idx]);
-				lexem = itr->lexem();
-				follow = itr->address();
+				if (itridx >= 1) return false;
+				Node1::Iterator itr( &m_block1[ addridx], itridx);
+				lexem = itr.lexem();
+				follow = itr.address();
+				return true;
+			}
+			case NodeClass::Node2:
+			{
+				if (itridx >= 2) return false;
+				Node2::Iterator itr( &m_block2[ addridx], itridx);
+				lexem = itr.lexem();
+				follow = itr.address();
 				return true;
 			}
 			case NodeClass::Node4:
 			{
-				if (idx >= 4) return false;
-				Node4::Iterator itr( m_block4[ idx]);
-				lexem = itr->lexem();
-				follow = itr->address();
+				if (itridx >= 4) return false;
+				Node4::Iterator itr( &m_block4[ addridx], itridx);
+				lexem = itr.lexem();
+				follow = itr.address();
+				return true;
+			}
+			case NodeClass::Node8:
+			{
+				if (itridx >= 8) return false;
+				Node8::Iterator itr( &m_block8[ addridx], itridx);
+				lexem = itr.lexem();
+				follow = itr.address();
 				return true;
 			}
 			case NodeClass::Node16:
 			{
-				if (idx >= 16) return false;
-				Node16::Iterator itr( m_block16[ idx]);
-				lexem = itr->lexem();
-				follow = itr->address();
+				if (itridx >= 16) return false;
+				Node16::Iterator itr( &m_block16[ addridx], itridx);
+				lexem = itr.lexem();
+				follow = itr.address();
 				return true;
 			}
 			case NodeClass::Node256:
 			{
-				if (idx >= 256) return false;
-				Node256::Iterator itr( m_block256[ idx]);
-				lexem = itr->lexem();
-				follow = itr->address();
+				if (itridx >= 256) return false;
+				Node256::Iterator itr( &m_block256[ addridx], itridx);
+				lexem = itr.lexem();
+				follow = itr.address();
 				return true;
 			}
 		}
+		throw std::logic_error("called get follow node on unknown block type");
 	}
 
-	bool getNextNode( const NodeAddress& addr, std::size_t& idx)
+	bool getNextNode( const NodeAddress& addr, std::size_t& itridx) const
 	{
-		NodeIndex idx = nodeIndex( addr);
+		NodeIndex addridx = nodeIndex( addr);
 	
 		switch (nodeClassId( addr))
 		{
@@ -784,35 +986,51 @@ private:
 			{
 				return false;
 			}
+			case NodeClass::Node2:
+			{
+				if (itridx >= 1) return false;
+				++itridx;
+				Node2::Iterator itr( &m_block2[ addridx], itridx);
+				return (itr.lexem()!=0);
+			}
 			case NodeClass::Node4:
 			{
-				if (idx >= 3) return false;
-				++idx;
-				Node4::Iterator itr( m_block4[ idx]);
-				return (itr->lexem()!=0);
+				if (itridx >= 3) return false;
+				++itridx;
+				Node4::Iterator itr( &m_block4[ addridx], itridx);
+				return (itr.lexem()!=0);
+			}
+			case NodeClass::Node8:
+			{
+				if (itridx >= 7) return false;
+				++itridx;
+				Node8::Iterator itr( &m_block8[ addridx], itridx);
+				return (itr.lexem()!=0);
 			}
 			case NodeClass::Node16:
 			{
-				if (idx >= 15) return false;
-				++idx;
-				Node16::Iterator itr( m_block16[ idx]);
-				return (itr->lexem()!=0);
+				if (itridx >= 15) return false;
+				++itridx;
+				Node16::Iterator itr( &m_block16[ addridx], itridx);
+				return (itr.lexem()!=0);
 			}
 			case NodeClass::Node256:
 			{
-				if (idx >= 255) return false;
-				++idx;
-				Node256::Iterator itr( m_block256[ idx]);
-				itr.skip();
-				return (itr->lexem()!=0);
+				if (itridx >= 255) return false;
+				Node256::Iterator itr( &m_block256[ addridx], itridx);
+				++itr;
+				return (itr.lexem()!=0);
 			}
 		}
+		throw std::logic_error("called get next node on unknown block type");
 	}
 
 private:
-	std::vector<NodeData::UnitType> m_datablock;
+	std::vector<NodeData> m_datablock;
 	Block<Node1> m_block1;
+	Block<Node2> m_block2;
 	Block<Node4> m_block4;
+	Block<Node8> m_block8;
 	Block<Node16> m_block16;
 	Block<Node256> m_block256;
 	NodeAddress m_rootaddr;

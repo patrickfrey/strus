@@ -1,4 +1,4 @@
-term type value key maps preferable in memory while inserting
+replace bit scan forward with POSIX functions ffs(resp. ffsll) (string.h)
 analyzer capable of assigning weights for classical IR
 summarization with help of weighted union iterator
 posinfo optional "posinfo=no" switch

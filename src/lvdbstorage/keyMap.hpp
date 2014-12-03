@@ -37,8 +37,6 @@
 
 namespace strus {
 
-VAR SIZE NODE TREE
-
 class KeyMap
 {
 public:

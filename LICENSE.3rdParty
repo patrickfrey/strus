@@ -7,7 +7,6 @@ Table of Contents
   boost
   LevelDB
   fastapprox
-  sparsehash
 
 boost
 -----
@@ -15,10 +14,6 @@ boost
 
 LevelDB
 -------
-   New BSD License
-
-sparsehash (code.google.com)
-----------------------------
    New BSD License
 
 fastapprox (code.google.com)
