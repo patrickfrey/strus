@@ -57,6 +57,7 @@ public:
 		}
 		NodeAddress addr = m_rootaddr;
 		NodeAddress prev_addr = 0;
+		unsigned char prev_chr = 0;
 
 		unsigned char const* ki = (const unsigned char*)key;
 		for (; *ki; ++ki)
@@ -66,12 +67,12 @@ public:
 			{
 				if (m_rootaddr == addr)
 				{
-					addTail( 0, addr, ki, data);
+					addTail( 0, 0, addr, ki, data);
 					m_rootaddr = addr;
 				}
 				else
 				{
-					addTail( prev_addr, addr, ki, data);
+					addTail( prev_addr, prev_chr, addr, ki, data);
 				}
 				return;
 			}
@@ -92,22 +93,25 @@ public:
 				{
 					m_rootaddr = newaddr;
 				}
+				prev_addr = addr;
+				prev_chr = *ki;
 				addr = newaddr;
 			}
 			else
 			{
 				prev_addr = addr;
+				prev_chr = *ki;
 				addr = next;
 			}
 		}
 		if (m_rootaddr == addr)
 		{
-			addTail( 0, addr, ki, data);
+			addTail( 0, 0, addr, ki, data);
 			m_rootaddr = addr;
 		}
 		else
 		{
-			addTail( prev_addr, addr, ki, data);
+			addTail( prev_addr, prev_chr, addr, ki, data);
 		}
 	}
 
@@ -372,7 +376,7 @@ private:
 		{
 			m_lexem = lexem_;
 			m_address = address_;
-			m_idx = 0;
+			m_idx = idx_;
 		}
 
 		bool end() const			{return m_lexem==0;}
@@ -437,8 +441,11 @@ private:
 			return true;
 		}
 
-		static void patchNodeAddress( UnitType& unit, const NodeAddress& oldaddr, const NodeAddress& newaddr)
+		static void patchNodeAddress(
+				UnitType& unit, unsigned char chr,
+				const NodeAddress& oldaddr, const NodeAddress& newaddr)
 		{
+			if (lexem( unit) != chr) throw std::logic_error( "illegal patch operation (lexem does not match)");
 			if (address( unit) != oldaddr) throw std::logic_error( "illegal patch operation (previous address does not match)");
 			unit = newaddr | (lexem(unit) << LexemShift);
 		}
@@ -518,18 +525,16 @@ private:
 			return true;
 		}
 
-		static void patchNodeAddress( UnitType& unit, const NodeAddress& oldaddr, const NodeAddress& newaddr)
+		static void patchNodeAddress(
+				UnitType& unit, unsigned char chr,
+				const NodeAddress& oldaddr, const NodeAddress& newaddr)
 		{
-			unsigned char buf[3];
-			packAddress3( buf, oldaddr);
-			std::size_t sofs = 0;
-			std::size_t nofs = 0;
-			for (; sofs < NN; ++sofs,nofs+=3)
-			{
-				if (std::memcmp( buf, unit.node+nofs, 3) == 0) break;
-			}
-			if (sofs == NN) std::logic_error( "illegal patch address operation (old address not found)");
-			packAddress3( unit.node + nofs, newaddr);
+			const unsigned char* nn = (const unsigned char*)std::memchr( unit.succ, chr, sizeof(unit.succ));
+			if (!nn) throw std::logic_error( "illegal patch address operation (lexem not found)");
+			unsigned int ofs = (nn-unit.succ)*3;
+			NodeAddress oa = unpackAddress3( unit.node + ofs);
+			if (oa != oldaddr) throw std::logic_error( "illegal patch address operation (old address does not match)");
+			packAddress3( unit.node + ofs, newaddr);
 		}
 
 		static void unlink( UnitType& unit, unsigned char chr)
@@ -545,6 +550,12 @@ private:
 			unsigned char* ne = unit.node+(NN*3);
 			std::memmove( ni, ni+3, ne-ni-3);
 			std::memset( ne-3, 0, 3);
+		}
+
+		static void copy( typename NodeN<NN>::UnitType& dst, const typename NodeN<NN/2>::UnitType& src)
+		{
+			std::memcpy( dst.node, src.node, (NN/2)*3);
+			std::memcpy( dst.succ, src.succ, (NN/2));
 		}
 
 		class Iterator
@@ -613,6 +624,12 @@ private:
 				return 0;
 			}
 		}
+
+		static void copy( Node2::UnitType& dst, const Node1::UnitType& src)
+		{
+			packAddress3( dst.node, Node1::address( src));
+			dst.succ[ 0] = Node1::lexem( src);
+		}
 	};
 
 	struct Node4
@@ -671,18 +688,23 @@ private:
 			return true;
 		}
 
-		static void patchNodeAddress( UnitType& unit, const NodeAddress& oldaddr, const NodeAddress& newaddr)
+		static void patchNodeAddress(
+				UnitType& unit, unsigned char chr,
+				const NodeAddress& oldaddr, const NodeAddress& newaddr)
 		{
-			unsigned char buf[3];
-			packAddress3( buf, oldaddr);
-			std::size_t sofs = 0;
-			std::size_t nofs = 0;
-			for (; sofs < 256; ++sofs,nofs+=3)
+			std::size_t ofs = chr;
+			NodeAddress oa = unpackAddress3( unit.node + ofs*3);
+			if (oa != oldaddr) throw std::logic_error( "illegal patch address operation (old address not found)");
+			packAddress3( unit.node + ofs*3, newaddr);
+		}
+
+		static void copy( Node256::UnitType& dst, const Node16::UnitType& src)
+		{
+			std::size_t si = 0;
+			for (; si < 16 && src.succ[si]; ++si)
 			{
-				if (std::memcmp( buf, unit.node+nofs, 3) == 0) break;
+				std::memcpy( dst.node + src.succ[si]*3, src.node + si*3, 3);
 			}
-			if (sofs == 256) std::logic_error( "illegal patch address operation (old address not found)");
-			packAddress3( unit.node + nofs, newaddr);
 		}
 
 		class Iterator
@@ -869,18 +891,8 @@ private:
 	NodeAddress moveBlock( Block<DestNodeType>& dstblk, Block<SourceNodeType>& srcblk, NodeAddress srcaddr)
 	{
 		NodeIndex dstidx = dstblk.allocNode();
-		typename SourceNodeType::Iterator srcitr = srcblk.nodeIterator( srcaddr);
-		typename DestNodeType::UnitType& dstunit = dstblk[ dstidx];
-		for (; !srcitr.end(); ++srcitr)
-		{
-			if (!DestNodeType::addNode(
-				dstunit, srcitr.lexem(), srcitr.address()))
-			{
-				throw std::runtime_error( "destination node does not have the capacity of the source node");
-			}
-		}
 		NodeIndex srcidx = nodeIndex( srcaddr);
-		srcblk.releaseNode( srcidx);
+		DestNodeType::copy( dstblk[ dstidx], srcblk[ srcidx]);
 		return nodeAddress( (NodeClass::Id)DestNodeType::ThisNodeClass, dstidx);
 	}
 
@@ -934,7 +946,9 @@ private:
 		throw std::logic_error("called add node on unknown block type");
 	}
 
-	void patchNodeAddress( const NodeAddress& addr, const NodeAddress& oldaddr, const NodeAddress& newaddr)
+	void patchNodeAddress( const NodeAddress& addr, unsigned char chr,
+				const NodeAddress& oldaddr,
+				const NodeAddress& newaddr)
 	{
 		NodeClass::Id classid = nodeClassId( addr);
 		NodeIndex idx = nodeIndex( addr);
@@ -943,30 +957,38 @@ private:
 			case NodeClass::NodeData:
 				throw std::logic_error("called patch node address on data block type");
 			case NodeClass::Node1:
-				Node1::patchNodeAddress( m_block1[ idx], oldaddr, newaddr);
+				Node1::patchNodeAddress( m_block1[ idx], chr, oldaddr, newaddr);
+				return;
 			case NodeClass::Node2:
-				Node2::patchNodeAddress( m_block2[ idx], oldaddr, newaddr);
+				Node2::patchNodeAddress( m_block2[ idx], chr, oldaddr, newaddr);
+				return;
 			case NodeClass::Node4:
-				Node4::patchNodeAddress( m_block4[ idx], oldaddr, newaddr);
+				Node4::patchNodeAddress( m_block4[ idx], chr, oldaddr, newaddr);
+				return;
 			case NodeClass::Node8:
-				Node8::patchNodeAddress( m_block8[ idx], oldaddr, newaddr);
+				Node8::patchNodeAddress( m_block8[ idx], chr, oldaddr, newaddr);
+				return;
 			case NodeClass::Node16:
-				Node16::patchNodeAddress( m_block16[ idx], oldaddr, newaddr);
+				Node16::patchNodeAddress( m_block16[ idx], chr, oldaddr, newaddr);
+				return;
 			case NodeClass::Node256:
-				Node256::patchNodeAddress( m_block256[ idx], oldaddr, newaddr);
+				Node256::patchNodeAddress( m_block256[ idx], chr, oldaddr, newaddr);
+				return;
 		}
 		throw std::logic_error("called patch node address on unknown block type");
 	}
 
 	/// \brief Add a node and eventually replace it with an expanded node, if the capacity is too small to hold the new successor node
-	void addNodeExpand( const NodeAddress& parentaddr, NodeAddress& addr, unsigned char lexem, const NodeAddress& followaddr)
+	void addNodeExpand( const NodeAddress& parentaddr,
+				unsigned char parentchr, NodeAddress& addr,
+				unsigned char lexem, const NodeAddress& followaddr)
 	{
 		if (!addNode( addr, lexem, followaddr))
 		{
 			NodeAddress newaddr = expandNode( addr);
 			if (parentaddr)
 			{
-				patchNodeAddress( parentaddr, addr, newaddr);
+				patchNodeAddress( parentaddr, parentchr, addr, newaddr);
 			}
 			addr = newaddr;
 			if (!addNode( addr, lexem, followaddr))
@@ -1032,7 +1054,9 @@ private:
 		throw std::logic_error("called expand block on unknown block type");
 	}
 
-	void addTail( const NodeAddress& parentaddr, NodeAddress& addr, const unsigned char* tail, const NodeData& data)
+	void addTail( const NodeAddress& parentaddr, unsigned char parentchr,
+			NodeAddress& addr, const unsigned char* tail, 
+			const NodeData& data)
 	{
 		if (!*tail)
 		{
@@ -1040,11 +1064,12 @@ private:
 			NodeAddress followaddr = nodeAddress( NodeClass::NodeData, idx);
 			m_datablock.push_back( data);
 			
-			addNodeExpand( parentaddr, addr, 0xFF, followaddr);
+			addNodeExpand( parentaddr, parentchr, addr, 0xFF, followaddr);
 		}
 		else
 		{
 			NodeIndex aa = addr, prev_aa = parentaddr;
+			unsigned char prev_chr = parentchr;
 			unsigned char const* ti = tail;
 			for (;ti[1]; ++ti)
 			{
@@ -1055,13 +1080,14 @@ private:
 
 				if (aa == addr)
 				{
-					addNodeExpand( prev_aa, aa, *ti, followaddr);
+					addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
 					addr = aa;
 				}
 				else
 				{
-					addNodeExpand( prev_aa, aa, *ti, followaddr);
+					addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
 				}
+				prev_chr = ti[1];
 				prev_aa = aa;
 				aa = followaddr;
 			}
@@ -1071,12 +1097,12 @@ private:
 
 			if (aa == addr)
 			{
-				addNodeExpand( prev_aa, aa, *ti, followaddr);
+				addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
 				addr = aa;
 			}
 			else
 			{
-				addNodeExpand( prev_aa, aa, *ti, followaddr);
+				addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
 			}
 		}
 	}
