@@ -56,7 +56,13 @@ int main( int, const char**)
 		TestMap testmap;
 		strus::VarSizeNodeTree origmap;
 
-		std::size_t ii=0, nofInserts=10000;
+		
+		origmap.set( "bla", 77);
+		origmap.set( "bar", 17);
+		std::cout << "PRINT TREE BLA" << std::endl;
+		origmap.print( std::cout);
+
+		std::size_t ii=0, nofInserts=1;
 		for (; ii<nofInserts; ++ii)
 		{
 			std::string key = randomKey( 32);
