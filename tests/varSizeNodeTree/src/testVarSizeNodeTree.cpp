@@ -38,6 +38,7 @@
 #include <ctime>
 #include <cmath>
 #include <iomanip>
+#include <boost/lexical_cast.hpp>
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
 
@@ -65,15 +66,31 @@ static std::string randomKey( unsigned int maxlen)
 	return rt;
 }
 
-int main( int, const char**)
+int main( int argc, const char** argv)
 {
 	try
-	{	typedef std::map<std::string,strus::VarSizeNodeTree::NodeData> TestMap;
+	{
+		if (argc < 3)
+		{
+			throw std::runtime_error( "missing arguments <nof inserts> <nof queries>");
+		}
+		unsigned int nofInserts;
+		unsigned int nofQueries;
+		try
+		{
+			nofInserts = boost::lexical_cast<unsigned int>( argv[1]);
+			nofQueries = boost::lexical_cast<unsigned int>( argv[2]);
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error( std::string("bad values for arguments <nof inserts> <nof queries> (2 non negative integers expected): ") + e.what());
+		}
+		typedef std::map<std::string,strus::VarSizeNodeTree::NodeData> TestMap;
 		TestMap testmap;
 		strus::VarSizeNodeTree origmap;
 		std::vector<std::string> keyar;
 
-		std::size_t ii=0, nofInserts=500000;
+		std::size_t ii = 0;
 		for (; ii<nofInserts; ++ii)
 		{
 			std::string key;
@@ -108,7 +125,6 @@ int main( int, const char**)
 		std::cerr << "inserted " << nofInserts << " keys in variable size node tree in " << doubleToString(duration) << " seconds" << std::endl;
 
 		start = std::clock();
-		std::size_t nofQueries=10000000;
 		for (ii=0; ii<nofQueries; ++ii)
 		{
 			unsigned int keyidx = RANDINT(0,nofInserts);
@@ -172,6 +188,7 @@ int main( int, const char**)
 			throw std::runtime_error( std::string( "number of inserts in variable size node tree does not match (") + dt.str() + ")");
 		}
 		std::cerr << "checked inserted content in maps. OK" << std::endl;
+		return 0;
 	}
 	catch (const std::exception& err)
 	{

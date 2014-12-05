@@ -1,10 +1,11 @@
 TOPDIR=../../..
+include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
 	testVarSizeNodeTree.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/lvdbstorage -I$(TOPDIR)/include/private
-CXXFLAGS=-g -Werror -Wall -pedantic -std=c++98
+CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 LDFLAGS=
 LIBS=
 
