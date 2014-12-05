@@ -814,7 +814,7 @@ private:
 			}
 			if (m_size == m_allocsize)
 			{
-				unsigned int mm = m_allocsize?(m_allocsize * 4):16;
+				unsigned int mm = m_allocsize?(m_allocsize * 2):16;
 				if (mm < m_allocsize) throw std::bad_alloc();
 				typename NodeType::UnitType* newar
 					= (typename NodeType::UnitType*)std::realloc(
