@@ -30,7 +30,7 @@
 #define _STRUS_LVDB_KEY_ALLOCATOR_POOL_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "keyAllocatorInterface.hpp"
-#include "sparsehash/sparse_hash_map"		//... google sparsehash library
+#include <map>
 #include <string>
 #include <map>
 #include <cstdlib>
@@ -56,7 +56,7 @@ public:
 	Index allocRange( std::size_t size);
 
 private:
-	typedef google::sparse_hash_map<std::string,Index> KeyMap;
+	typedef std::map<std::string,Index> KeyMap;
 
 private:
 	boost::mutex m_mutex;

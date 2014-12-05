@@ -47,7 +47,6 @@ KeyAllocatorPool::Handle KeyAllocatorPool::createHandle()
 void KeyAllocatorPool::releaseHandle( Handle hnd)
 {
 	boost::mutex::scoped_lock( m_mutex);
-	m_keymaps[ hnd-1].resize(0);
 	m_keymaps[ hnd-1].clear();
 	if (!(m_occupied & (1 << (hnd-1))))
 	{

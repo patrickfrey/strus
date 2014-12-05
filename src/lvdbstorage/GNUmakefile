@@ -3,6 +3,7 @@ include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
 	arithmeticVariant.o \
+	varSizeNodeTree.o \
 	statistics.o \
 	floatConversions.o \
 	indexPacker.o \
