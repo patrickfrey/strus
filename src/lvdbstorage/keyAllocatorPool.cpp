@@ -74,14 +74,11 @@ Index KeyAllocatorPool::alloc( Handle hnd, const std::string& name, bool& isNew)
 	std::size_t hh = nextHandle( itr);
 	for (; hh; hh=nextHandle( itr))
 	{
-		KeyMap::const_iterator ki = m_keymaps[ hh-1].find( name);
-		if (ki != m_keymaps[ hh-1].end())
+		if (hh == hnd) continue;
+		KeyMap::NodeData data;
+		if (m_keymaps[ hh-1].find( name.c_str(), data))
 		{
-			if (hh == hnd)
-			{
-				throw std::logic_error( "inconsistency in key allocator pool maps. Handle found where not expected");
-			}
-			return ki->second;
+			return data;
 		}
 	}
 	Index rt = *m_globalCounter;
@@ -90,7 +87,7 @@ Index KeyAllocatorPool::alloc( Handle hnd, const std::string& name, bool& isNew)
 	{
 		throw std::runtime_error( "alloc range of index failed (too many items allocated)");
 	}
-	m_keymaps[ hnd-1][ name] = rt;
+	m_keymaps[ hnd-1].set( name.c_str(), rt);
 	return rt;
 }
 

@@ -107,11 +107,6 @@ public:/*StorageTransaction*/
 	KeyAllocatorInterface* createTermnoAllocator();
 	KeyAllocatorInterface* createDocnoAllocator();
 	KeyAllocatorInterface* createAttribnoAllocator();
-	
-	Index allocTermno( const std::string& name, bool& isNew);
-	Index allocTypeno( const std::string& name, bool& isNew);
-	Index allocDocno( const std::string& name, bool& isNew);
-	Index allocAttribno( const std::string& name, bool& isNew);
 
 	friend class TransactionLock;
 	class TransactionLock

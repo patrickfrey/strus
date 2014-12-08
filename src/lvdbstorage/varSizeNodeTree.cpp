@@ -247,7 +247,8 @@ void VarSizeNodeTree::const_iterator::printState( std::ostream& out) const
 
 void VarSizeNodeTree::clear()
 {
-	m_datablock.resize( 1);
+	m_datablock.clear();
+	m_datablock.push_back( 0);
 	//... address 0 is reserved for NULL
 	m_block1.clear();
 	m_block2.clear();
@@ -255,6 +256,19 @@ void VarSizeNodeTree::clear()
 	m_block8.clear();
 	m_block16.clear();
 	m_block256.clear();
+	m_rootaddr = 0;
+}
+
+void VarSizeNodeTree::reset()
+{
+	m_datablock.resize( 1);
+	//... address 0 is reserved for NULL
+	m_block1.reset();
+	m_block2.reset();
+	m_block4.reset();
+	m_block8.reset();
+	m_block16.reset();
+	m_block256.reset();
 	m_rootaddr = 0;
 }
 

@@ -32,6 +32,8 @@
 
 using namespace strus;
 
+enum {FlagUnknown=0, FlagKnown=(1U<<31), MaskKnown=(1U<<31)-1};
+
 Index KeyMap::lookUp( const std::string& name)
 {
 	const KeyValueStorage::Value* value = m_storage.load( name);
@@ -44,11 +46,11 @@ Index KeyMap::lookUp( const std::string& name)
 
 Index KeyMap::getOrCreate( const std::string& name, bool& isnew)
 {
-	ValueMap::const_iterator ki = m_map.find( name);
-	if (ki != m_map.end())
+	VarSizeNodeTree::NodeData data;
+	if (m_map.find( name.c_str(), data))
 	{
 		isnew = false;
-		return ki->second.counter;
+		return data & MaskKnown;
 	}
 	const KeyValueStorage::Value* value = m_storage.load( name);
 	if (value)
@@ -58,33 +60,33 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isnew)
 
 		isnew = false;
 		Index rt = unpackIndex( vi, ve);
-		m_map[ name] = Value( rt, true);
+		m_map.set( name.c_str(), rt | FlagKnown);
 		return rt;
 	}
 	else
 	{
 		isnew = true;
 		Index rt = allocValue( name, isnew);
-		m_map[ name] = Value( rt, false);
+		m_map.set( name.c_str(), rt | FlagUnknown);
 		return rt;
 	}
 }
 
 void KeyMap::store( const std::string& name, const Index& value)
 {
-	m_map[ name] = Value( value, false);
+	m_map.set( name.c_str(), value | FlagUnknown);
 }
 
 void KeyMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
-	ValueMap::const_iterator mi = m_map.begin(), me = m_map.end();
+	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		if (!mi->second.known)
+		if (0 == (mi.data() & FlagKnown))
 		{
 			std::string valuestr;
-			packIndex( valuestr, mi->second.counter);
-			m_storage.store( mi->first, valuestr, batch);
+			packIndex( valuestr, mi.data() & MaskKnown);
+			m_storage.store( mi.key(), valuestr, batch);
 		}
 	}
 	m_map.clear();
@@ -101,10 +103,10 @@ std::map<std::string,Index> KeyMap::getMap()
 		const char* ve = vi + si->second.size();
 		rt[ si->first] = unpackIndex( vi, ve);
 	}
-	ValueMap::const_iterator mi = m_map.begin(), me = m_map.end();
+	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		rt[ mi->first] = mi->second.counter;
+		rt[ mi.key()] = mi.data() & MaskKnown;
 	}
 	return rt;
 }
@@ -120,10 +122,10 @@ std::map<Index,std::string> KeyMap::getInvMap()
 		const char* ve = vi + si->second.size();
 		rt[ unpackIndex( vi, ve)] = si->first;
 	}
-	ValueMap::const_iterator mi = m_map.begin(), me = m_map.end();
+	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		rt[ mi->second.counter] = mi->first;
+		rt[ mi.data() & MaskKnown] = mi.key();
 	}
 	return rt;
 }

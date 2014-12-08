@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_KEY_ALLOCATOR_POOL_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "keyAllocatorInterface.hpp"
+#include "varSizeNodeTree.hpp"
 #include <map>
 #include <string>
 #include <map>
@@ -56,11 +57,11 @@ public:
 	Index allocRange( std::size_t size);
 
 private:
-	typedef std::map<std::string,Index> KeyMap;
+	typedef VarSizeNodeTree KeyMap;
 
 private:
 	boost::mutex m_mutex;
-	KeyMap m_keymaps[64];
+	VarSizeNodeTree m_keymaps[64];
 	uint64_t m_occupied;
 	Index* m_globalCounter;
 };

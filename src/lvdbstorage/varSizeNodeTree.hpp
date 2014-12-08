@@ -117,6 +117,7 @@ public:
 	}
 
 	void clear();
+	void reset();
 
 private:
 	struct NodeClass
@@ -607,6 +608,17 @@ private:
 
 		void clear()
 		{
+			if (m_ar)
+			{				std::free( m_ar);
+				m_ar = 0;
+			}
+			m_size = 0;
+			m_allocsize = 0;
+			m_freelist = 0;
+		}
+
+		void reset()
+		{
 			m_size = 0;
 			m_freelist = 0;
 		}
@@ -624,6 +636,7 @@ private:
 		NodeIndex dstidx = dstblk.allocNode();
 		NodeIndex srcidx = nodeIndex( srcaddr);
 		DestNodeType::copy( dstblk[ dstidx], srcblk[ srcidx]);
+		srcblk.releaseNode( srcidx);
 		return nodeAddress( (NodeClass::Id)DestNodeType::ThisNodeClass, dstidx);
 	}
 

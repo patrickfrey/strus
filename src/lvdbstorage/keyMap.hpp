@@ -32,6 +32,7 @@
 #include "databaseKey.hpp"
 #include "keyValueStorage.hpp"
 #include "keyAllocatorInterface.hpp"
+#include "varSizeNodeTree.hpp"
 #include <cstdlib>
 #include <string>
 
@@ -84,12 +85,10 @@ private:
 			:counter(0),known(false){}
 	};
 
-	typedef std::map<std::string,Value> ValueMap;
-
 private:
 	KeyValueStorage m_storage;
 	DatabaseKey::KeyPrefix m_prefix;
-	ValueMap m_map;
+	VarSizeNodeTree m_map;
 	KeyAllocatorInterface* m_allocator;
 };
 
