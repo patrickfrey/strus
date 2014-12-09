@@ -99,6 +99,10 @@ public:
 	void store( const BlockKey& key, const Index& subnode, const Value& value, leveldb::WriteBatch& batch);
 	void store( const BlockKey& key, const Value& value, leveldb::WriteBatch& batch);
 
+	void storeIm( const std::string& key, const Value& value);
+	void storeIm( const BlockKey& key, const Index& subnode, const Value& value);
+	void storeIm( const BlockKey& key, const Value& value);
+
 	void dispose( const std::string& key, leveldb::WriteBatch& batch);
 	void dispose( const BlockKey& key, const Index& subnode, leveldb::WriteBatch& batch);
 	void dispose( const BlockKey& key, leveldb::WriteBatch& batch);
@@ -111,6 +115,7 @@ public:
 private:
 	const Value* loadValue( const char* keystr, const std::size_t& keysize);
 	void storeValue( const char* keystr, const std::size_t& keysize, const Value& value, leveldb::WriteBatch& batch);
+	void storeValueIm( const char* keystr, const std::size_t& keysize, const Value& value);
 	void disposeValue( const char* keystr, const std::size_t& keysize, leveldb::WriteBatch& batch);
 
 private:

@@ -40,7 +40,7 @@ namespace strus {
 /// \brief Forward declaration
 class Storage;
 
-/// \class StorageInserter
+/// \class StorageDocument
 class StorageDocument
 	:public StorageDocumentInterface
 {

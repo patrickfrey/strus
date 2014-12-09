@@ -32,8 +32,6 @@
 
 using namespace strus;
 
-enum {FlagUnknown=0, FlagKnown=(1U<<31), MaskKnown=(1U<<31)-1};
-
 Index KeyMap::lookUp( const std::string& name)
 {
 	const KeyValueStorage::Value* value = m_storage.load( name);
@@ -44,13 +42,12 @@ Index KeyMap::lookUp( const std::string& name)
 	return unpackIndex( vi, ve);
 }
 
-Index KeyMap::getOrCreate( const std::string& name, bool& isnew)
+Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 {
 	VarSizeNodeTree::NodeData data;
 	if (m_map.find( name.c_str(), data))
 	{
-		isnew = false;
-		return data & MaskKnown;
+		return data;
 	}
 	const KeyValueStorage::Value* value = m_storage.load( name);
 	if (value)
@@ -58,35 +55,50 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isnew)
 		char const* vi = value->ptr();
 		char const* ve = vi + value->size();
 
-		isnew = false;
 		Index rt = unpackIndex( vi, ve);
-		m_map.set( name.c_str(), rt | FlagKnown);
+		store( name, rt);
+		isNew = false;
 		return rt;
+	}
+	else if (m_allocator->immediate())
+	{
+		return m_allocator->getOrCreate( name, isNew);
 	}
 	else
 	{
-		isnew = true;
-		Index rt = allocValue( name, isnew);
-		m_map.set( name.c_str(), rt | FlagUnknown);
+		Index rt = ++m_unknownHandleCount;
+		if (rt >= UnknownValueHandleStart)
+		{
+			throw std::runtime_error( "too many elements in keymap");
+		}
+		store( name, rt + UnknownValueHandleStart);
 		return rt;
 	}
 }
 
 void KeyMap::store( const std::string& name, const Index& value)
 {
-	m_map.set( name.c_str(), value | FlagUnknown);
+	m_map.set( name.c_str(), value);
 }
 
-void KeyMap::getWriteBatch( leveldb::WriteBatch& batch)
+void KeyMap::getWriteBatch(
+		std::map<Index,Index>& rewriteUnknownMap,
+		leveldb::WriteBatch& batch)
 {
 	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		if (0 == (mi.data() & FlagKnown))
+		if (mi.data() > UnknownValueHandleStart)
 		{
-			std::string valuestr;
-			packIndex( valuestr, mi.data() & MaskKnown);
-			m_storage.store( mi.key(), valuestr, batch);
+			Index idx = lookUp( mi.key());
+			if (!idx)
+			{
+				std::string valuestr;
+				idx = m_allocator->alloc();
+				packIndex( valuestr, idx);
+				m_storage.store( mi.key(), valuestr, batch);
+			}
+			rewriteUnknownMap[ mi.data()] = idx;
 		}
 	}
 	m_map.clear();
@@ -106,7 +118,11 @@ std::map<std::string,Index> KeyMap::getMap()
 	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		rt[ mi.key()] = mi.data() & MaskKnown;
+		if (mi.data() > UnknownValueHandleStart)
+		{
+			throw std::logic_error( "cannot call get inv map on incomplete map");
+		}
+		rt[ mi.key()] = mi.data();
 	}
 	return rt;
 }
@@ -125,7 +141,11 @@ std::map<Index,std::string> KeyMap::getInvMap()
 	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		rt[ mi.data() & MaskKnown] = mi.key();
+		if (mi.data() > UnknownValueHandleStart)
+		{
+			throw std::logic_error( "cannot call get inv map on incomplete map");
+		}
+		rt[ mi.data()] = mi.key();
 	}
 	return rt;
 }

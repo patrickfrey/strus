@@ -56,6 +56,16 @@ void KeyValueStorage::storeValue( const char* keystr, const std::size_t& keysize
 	batch.Put( keyslice, valueslice);
 }
 
+void KeyValueStorage::storeValueIm( const char* keystr, const std::size_t& keysize, const Value& value)
+{
+	leveldb::Slice keyslice( keystr, keysize);
+	leveldb::Slice valueslice( value.ptr(), value.size());
+
+	leveldb::WriteOptions options;
+	options.sync = true;
+	m_db->Put( options, keyslice, valueslice);
+}
+
 void KeyValueStorage::disposeValue( const char* keystr, const std::size_t& keysize, leveldb::WriteBatch& batch)
 {
 	leveldb::Slice keyslice( keystr, keysize);
@@ -97,6 +107,27 @@ void KeyValueStorage::store( const BlockKey& key, const Value& value, leveldb::W
 {
 	DatabaseKey dbkey( m_keyprefix, key);
 	return storeValue( dbkey.ptr(), dbkey.size(), value, batch);
+}
+
+void KeyValueStorage::storeIm( const std::string& key, const Value& value)
+{
+	std::string keystr;
+	keystr.push_back( m_keyprefix);
+	keystr.append( key);
+
+	storeValueIm( keystr.c_str(), keystr.size(), value);
+}
+
+void KeyValueStorage::storeIm( const BlockKey& key, const Index& subnode, const Value& value)
+{
+	DatabaseKey dbkey( m_keyprefix, key, subnode);
+	return storeValueIm( dbkey.ptr(), dbkey.size(), value);
+}
+
+void KeyValueStorage::storeIm( const BlockKey& key, const Value& value)
+{
+	DatabaseKey dbkey( m_keyprefix, key);
+	return storeValueIm( dbkey.ptr(), dbkey.size(), value);
 }
 
 void KeyValueStorage::dispose( const std::string& key, leveldb::WriteBatch& batch)

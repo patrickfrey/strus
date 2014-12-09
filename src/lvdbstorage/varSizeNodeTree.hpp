@@ -282,6 +282,14 @@ private:
 			return true;
 		}
 
+		static bool replaceNode( UnitType& unit, unsigned char lexem_, const NodeAddress& addr_)
+		{
+			if (lexem( unit) != 0) return false;
+			if ((addr_ & (LexemMask << LexemShift)) != lexem_) return false;
+			unit = (addr_ & AddressMask) | ((UnitType)lexem_ << LexemShift);
+			return true;
+		}
+
 		static void patchNodeAddress(
 				UnitType& unit, unsigned char chr,
 				const NodeAddress& oldaddr, const NodeAddress& newaddr)
@@ -358,6 +366,16 @@ private:
 			if (ofs == NN) return false;
 			unit.succ[ ofs] = lexem;
 			packAddress3( unit.node+(ofs*3), addr);
+			return true;
+		}
+
+		static bool replaceNode( UnitType& unit, unsigned char lexem_, const NodeAddress& addr_)
+		{
+			std::size_t ofs = 0;
+			for (; ofs < NN && unit.succ[ofs] != lexem_; ++ofs){}
+			if (ofs == NN) return false;
+			unit.succ[ ofs] = lexem_;
+			packAddress3( unit.node+(ofs*3), addr_);
 			return true;
 		}
 
@@ -505,6 +523,13 @@ private:
 			return true;
 		}
 
+		static bool replaceNode( UnitType& unit, unsigned char lexem, const NodeAddress& addr)
+		{
+			std::size_t ofs = lexem;
+			packAddress3( unit.node+(ofs*3), addr);
+			return true;
+		}
+
 		static void patchNodeAddress(
 				UnitType& unit, unsigned char chr,
 				const NodeAddress& oldaddr, const NodeAddress& newaddr)
@@ -645,6 +670,8 @@ private:
 	/// \brief Try to add a new successor node to a node
 	/// \return false, if the capacity of the parent node is too small
 	bool addNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow);
+
+	bool replaceNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow);
 
 	void patchNodeAddress( const NodeAddress& addr, unsigned char chr,
 				const NodeAddress& oldaddr,

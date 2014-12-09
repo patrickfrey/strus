@@ -69,15 +69,15 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 	leveldb::Status status = leveldb::DB::Open( options, config.path(), &db);
 	if (status.ok())
 	{
-		KeyMap variableMap( db, DatabaseKey::VariablePrefix, 0);
-		variableMap.store( "TermNo", 1);
-		variableMap.store( "TypeNo", 1);
-		variableMap.store( "DocNo", 1);
-		variableMap.store( "AttribNo", 1);
-		variableMap.store( "NofDocs", 0);
-
 		leveldb::WriteBatch batch;
-		variableMap.getWriteBatch( batch);
+		KeyValueStorage varstor( db, DatabaseKey::VariablePrefix, false);
+	
+		varstor.store( "TermNo", std::string("\1"), batch);
+		varstor.store( "TypeNo", std::string("\1"), batch);
+		varstor.store( "DocNo", std::string("\1"), batch);
+		varstor.store( "AttribNo", std::string("\1"), batch);
+		varstor.store( "NofDocs", std::string("\0",1), batch);
+
 		MetaDataDescription md( config.metadata());
 		md.store( batch);
 

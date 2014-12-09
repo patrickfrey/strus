@@ -37,24 +37,6 @@
 
 using namespace strus;
 
-class GlobalKeyAllocator
-	:public KeyAllocatorInterface
-{
-public:
-	typedef Index (Storage::*AllocFunction)( const std::string& name, bool& isNew);
-
-	GlobalKeyAllocator( Storage* storage_, AllocFunction allocFunc)
-		:m_storage(storage_),m_allocFunc(allocFunc){}
-
-	virtual Index alloc( const std::string& name, bool& isNew)
-	{
-		return (m_storage->*m_allocFunc)( name, isNew);
-	}
-private:
-	Storage* m_storage;
-	AllocFunction m_allocFunc;
-};
-
 StorageTransaction::StorageTransaction(
 		Storage* storage_, leveldb::DB* db_,
 		const MetaDataDescription* metadescr_)
@@ -72,7 +54,6 @@ StorageTransaction::StorageTransaction(
 	,m_docIdMap(db_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
 	,m_attributeNameMap(db_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())
 	,m_nof_documents(0)
-	,m_done(false)
 	,m_commit(false)
 	,m_rollback(false)
 {}
@@ -80,6 +61,11 @@ StorageTransaction::StorageTransaction(
 StorageTransaction::~StorageTransaction()
 {
 	if (!m_rollback && !m_commit) rollback();
+}
+
+Index StorageTransaction::lookUpTermValue( const std::string& name)
+{
+	return m_termValueMap.lookUp( name);
 }
 
 Index StorageTransaction::getOrCreateTermValue( const std::string& name)
@@ -202,7 +188,7 @@ public:
 
 	Index operator()( const std::string& value)
 	{
-		return m_transaction->getOrCreateTermValue( value);
+		return m_transaction->lookUpTermValue( value);
 	}
 
 private:
@@ -238,10 +224,6 @@ void StorageTransaction::deleteIndex( const Index& docno)
 
 void StorageTransaction::deleteDocument( const std::string& docid)
 {
-	if (m_done)
-	{
-		throw std::runtime_error( "called transaction deleteDocument after 'done' has been called");
-	}
 	Index docno = m_docIdMap.lookUp( docid);
 	if (docno == 0) return;
 
@@ -262,10 +244,6 @@ StorageDocumentInterface*
 		const std::string& docid,
 		const Index& docno)
 {
-	if (m_done)
-	{
-		throw std::runtime_error( "called transaction createDocument after 'done' has been called");
-	}
 	if (docno)
 	{
 		m_nof_documents += 1;
@@ -280,23 +258,24 @@ StorageDocumentInterface*
 	}
 }
 
-
-void StorageTransaction::done()
-{
-	m_termTypeMap.done();
-	m_termValueMap.done();
-	m_docIdMap.done();
-	m_attributeNameMap.done();
-	m_done = true;
-}
-
 void StorageTransaction::commit()
 {
-	if (m_commit) throw std::runtime_error( "called transaction commit twice");
-	if (m_rollback) throw std::runtime_error( "called transaction commit after rollback");
-
+	if (m_commit)
+	{
+		throw std::runtime_error( "called transaction commit twice");
+	}
+	if (m_rollback)
+	{
+		throw std::runtime_error( "called transaction commit after rollback");
+	}
 	Storage::TransactionLock transactionLock( m_storage);
 	{
+		std::map<Index,Index> termnoUnknownMap;
+		m_termValueMap.getWriteBatch( termnoUnknownMap, m_batch);
+
+		m_docnoBlockMap.renameNewTermNumbers( termnoUnknownMap);
+		m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
+
 		std::vector<Index> refreshList;
 		m_attributeMap.getWriteBatch( m_batch);
 		m_metaDataBlockMap.getWriteBatch( m_batch, refreshList);
@@ -305,10 +284,6 @@ void StorageTransaction::commit()
 		m_posinfoBlockMap.getWriteBatch( m_batch);
 		m_forwardIndexBlockMap.getWriteBatch( m_batch);
 		
-		m_termTypeMap.getWriteBatch( m_batch);
-		m_termValueMap.getWriteBatch( m_batch);
-		m_docIdMap.getWriteBatch( m_batch);
-		m_attributeNameMap.getWriteBatch( m_batch);
 		m_dfMap.getWriteBatch( m_batch);
 
 		leveldb::WriteOptions options;
@@ -328,9 +303,14 @@ void StorageTransaction::commit()
 
 void StorageTransaction::rollback()
 {
-	if (m_rollback) throw std::runtime_error( "called transaction rollback twice");
-	if (m_commit) throw std::runtime_error( "called transaction rollback after commit");
-
+	if (m_rollback)
+	{
+		throw std::runtime_error( "called transaction rollback twice");
+	}
+	if (m_commit)
+	{
+		throw std::runtime_error( "called transaction rollback after commit");
+	}
 	std::vector<Index> refreshList;
 	m_storage->releaseTransaction( refreshList);
 	m_batch.Clear();

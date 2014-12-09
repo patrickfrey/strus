@@ -65,6 +65,12 @@ void VarSizeNodeTree::set( const char* key, const NodeData& data)
 		}
 		else if (nodeClassId( next) == NodeClass::NodeData)
 		{
+			if (*(ki)+1 == '\0')
+			{
+				NodeIndex idx = nodeIndex( next);
+				m_datablock[ idx] = data;
+				return;
+			}
 			NodeIndex idx = m_block2.allocNode();
 			NodeAddress newaddr = nodeAddress( NodeClass::Node2, idx);
 			if (!addNode( newaddr, 0xFF, next))
@@ -201,7 +207,8 @@ void VarSizeNodeTree::const_iterator::skip()
 		if (m_stack.empty()) return;
 
 		NodeAddress addr = m_stack.back().m_addr;
-		if (nodeClassId(addr) == NodeClass::NodeData
+		if (addr
+		&&  nodeClassId(addr) == NodeClass::NodeData
 		&&  m_stack.back().m_itr == 0)
 		{
 			extractData();
@@ -320,6 +327,30 @@ bool VarSizeNodeTree::addNode( const NodeAddress& addr, unsigned char lexem, con
 	throw std::logic_error("called add node on unknown block type");
 }
 
+bool VarSizeNodeTree::replaceNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow)
+{
+	NodeClass::Id classid = nodeClassId( addr);
+	NodeIndex idx = nodeIndex( addr);
+	switch (classid)
+	{
+		case NodeClass::NodeData:
+			return false;
+		case NodeClass::Node1:
+			return Node1::replaceNode( m_block1[ idx], lexem, follow);
+		case NodeClass::Node2:
+			return Node2::replaceNode( m_block2[ idx], lexem, follow);
+		case NodeClass::Node4:
+			return Node4::replaceNode( m_block4[ idx], lexem, follow);
+		case NodeClass::Node8:
+			return Node8::replaceNode( m_block8[ idx], lexem, follow);
+		case NodeClass::Node16:
+			return Node16::replaceNode( m_block16[ idx], lexem, follow);
+		case NodeClass::Node256:
+			return Node256::replaceNode( m_block256[ idx], lexem, follow);
+	}
+	throw std::logic_error("called replace node on unknown block type");
+}
+
 void VarSizeNodeTree::patchNodeAddress( const NodeAddress& addr, unsigned char chr,
 					const NodeAddress& oldaddr,
 					const NodeAddress& newaddr)
@@ -433,11 +464,25 @@ void VarSizeNodeTree::addTail( const NodeAddress& parentaddr, unsigned char pare
 {
 	if (!*tail)
 	{
-		NodeIndex idx = m_datablock.size();
-		NodeAddress followaddr = nodeAddress( NodeClass::NodeData, idx);
-		m_datablock.push_back( data);
 		
-		addNodeExpand( parentaddr, parentchr, addr, 0xFF, followaddr);
+		NodeAddress next = successorNodeAddress( addr, 0xFF);
+		if (next)
+		{
+			NodeIndex idx = nodeIndex( next);
+			if (nodeClassId( next) != NodeClass::NodeData)
+			{
+				throw std::runtime_error("internal: data node expected for successor of 0xFF");
+			}
+			m_datablock[ idx] = data;
+		}
+		else
+		{
+			NodeIndex idx = m_datablock.size();
+			NodeAddress followaddr = nodeAddress( NodeClass::NodeData, idx);
+			m_datablock.push_back( data);
+			addNodeExpand( parentaddr, parentchr, addr, 0xFF, followaddr);
+		}
+		
 	}
 	else
 	{

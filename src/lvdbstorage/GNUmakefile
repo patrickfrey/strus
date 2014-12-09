@@ -22,8 +22,6 @@ CPP_OBJS=\
 	metaDataBlockCache.o \
 	attributeReader.o \
 	attributeMap.o \
-	keyAllocator.o \
-	keyAllocatorPool.o \
 	keyMap.o \
 	documentFrequencyMap.o \
 	storage.o \
@@ -31,6 +29,7 @@ CPP_OBJS=\
 	nullIterator.o \
 	forwardIterator.o \
 	storageDocument.o \
+	storageDocumentChecker.o \
 	storageTransaction.o \
 	storageConfig.o \
 	storageLib.o

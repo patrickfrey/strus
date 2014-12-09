@@ -147,6 +147,26 @@ public:
 		}
 	}
 
+	template <class Renamer>
+	void renameKeys( Renamer& renamer)
+	{
+		typename Map::iterator mi = m_map.begin(), me = m_map.end();
+		while (mi != me)
+		{
+			if (renamer.isCandidate( mi->first))
+			{
+				BlockKeyIndex newkey = renamer.map( mi->first);
+				ElementMap& newelem = m_map[ newkey];
+				newelem.swap( mi->second);
+				m_map.erase( mi++);
+			}
+			else
+			{
+				++mi;
+			}
+		}
+	}
+
 private:
 	typedef std::map<Index,BlockElement> ElementMap;
 	typedef std::map<BlockKeyIndex,ElementMap> Map;

@@ -26,24 +26,22 @@
 
 --------------------------------------------------------------------
 */
-#include "keyAllocator.hpp"
-#include "keyAllocatorPool.hpp"
+#ifndef _STRUS_LVDB_KEY_STORAGE_INTERFACE_HPP_INCLUDED
+#define _STRUS_LVDB_KEY_STORAGE_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "databaseKey.hpp"
+#include "keyValueStorage.hpp"
+#include <string>
 
-using namespace strus;
+namespace strus {
 
-KeyAllocator::KeyAllocator( KeyAllocatorPool* pool_)
-	:m_pool(pool_),m_handle(pool_->createHandle())
-{}
-
-Index KeyAllocator::alloc( const std::string& name, bool& isNew)
+class KeyStorageInterface
 {
-	return m_pool->alloc( m_handle, name, isNew);
-}
+public:
+	virtual ~KeyStorageInterface(){}
+	virtual Index getOrCreate( const std::string& name, bool& isNew)=0;
+};
 
-void KeyAllocator::done()
-{
-	if (m_handle) m_pool->releaseHandle( m_handle);
-	m_handle = 0;
-}
-
+}//namespace
+#endif
 

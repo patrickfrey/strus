@@ -26,63 +26,18 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "databaseKey.hpp"
-#include "keyValueStorage.hpp"
-#include "keyAllocatorInterface.hpp"
-#include "keyStorageInterface.hpp"
-#include "varSizeNodeTree.hpp"
-#include <cstdlib>
-#include <string>
+#include "keyAllocator.hpp"
+#include "keyAllocatorPool.hpp"
+#include <stdexcept>
 
-namespace strus {
+using namespace strus;
 
-class KeyMap
+Index KeyAllocator::alloc()
 {
-public:
-	KeyMap( leveldb::DB* db_, DatabaseKey::KeyPrefix prefix_,
-			KeyAllocatorInterface* allocator_)
-		:m_storage( db_, prefix_, false)
-		,m_unknownHandleCount(0)
-		,m_allocator(allocator_)
-	{}
-	~KeyMap()
+	if (++*m_index <= 0)
 	{
-		delete m_allocator;
+		throw std::runtime_error( std::string("no more handles left in allocator for '") + m_name + "'");
 	}
-
-	Index lookUp( const std::string& name);
-	Index getOrCreate( const std::string& name, bool& isNew);
-	void store( const std::string& name, const Index& value);
-
-	void getWriteBatch(
-		std::map<Index,Index>& rewriteUnknownMap,
-		leveldb::WriteBatch& batch);
-
-	static bool isUnknown( const Index& value)
-	{
-		return value > UnknownValueHandleStart;
-	}
-
-	std::map<std::string,Index> getMap();
-	std::map<Index,std::string> getInvMap();
-
-private:
-	enum {
-		UnknownValueHandleStart=(1<<30)
-	};
-
-private:
-	KeyValueStorage m_storage;
-	DatabaseKey::KeyPrefix m_prefix;
-	VarSizeNodeTree m_map;
-	Index m_unknownHandleCount;
-	KeyAllocatorInterface* m_allocator;
-};
-
-}//namespace
-#endif
-
+	return ++(*m_index);
+}
 

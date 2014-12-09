@@ -68,6 +68,40 @@ public:
 		deleteElement( BlockKey( typeno, termno), docno);
 	}
 	
+	class TermnoRenamer
+	{
+	public:
+		TermnoRenamer( const std::map<Index,Index>* termnomap_)
+			:m_termnomap(termnomap_)
+		{}
+
+		bool isCandidate( const BlockKeyIndex& keyidx) const
+		{
+			BlockKey key( keyidx);
+			return (KeyMap::isUnknown( key.elem(2)));
+		}
+		BlockKeyIndex map( const BlockKeyIndex& keyidx) const
+		{
+			BlockKey oldkey( keyidx);
+			std::map<Index,Index>::const_iterator mi = m_termnomap->find( oldkey.elem(2));
+			if (mi == m_termnomap->end())
+			{
+				throw std::runtime_error( "internal: term value undefined (term number map)");
+			}
+			BlockKey newkey( oldkey.elem(1), mi->second);
+			return newkey.index();
+		}
+
+	private:
+		const std::map<Index,Index>* m_termnomap;
+	};
+
+	void renameNewTermNumbers( const std::map<Index,Index>& renamemap)
+	{
+		TermnoRenamer renamer( &renamemap);
+		renameKeys( renamer);
+	}
+
 	void getWriteBatch( leveldb::WriteBatch& batch)
 	{
 		getWriteBatchMerge( batch);

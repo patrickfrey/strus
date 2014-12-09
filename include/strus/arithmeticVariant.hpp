@@ -31,6 +31,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
+#include <limits>
 
 namespace strus {
 
@@ -95,6 +96,35 @@ struct ArithmeticVariant
 	operator unsigned int() const
 	{
 		return cast<unsigned int>();
+	}
+
+	bool operator == (const ArithmeticVariant& o) const
+	{
+		return isequal(o);
+	}
+	bool operator != (const ArithmeticVariant& o) const
+	{
+		return !isequal(o);
+	}
+
+	bool isequal( const ArithmeticVariant& o) const
+	{
+		if (type == o.type)
+		{
+			switch (type)
+			{
+				case Null: return true;
+				case Int: return variant.Int == o.variant.Int;
+				case UInt: return variant.UInt == o.variant.UInt;
+				case Float:
+				{
+					float xx = variant.Float - o.variant.Float;
+					if (xx < 0) xx = -xx;
+					return xx <= std::numeric_limits<float>::epsilon();
+				}
+			}
+		}
+		return false;
 	}
 
 	void print( std::ostream& out) const;

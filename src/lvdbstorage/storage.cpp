@@ -39,7 +39,7 @@
 #include "statistics.hpp"
 #include "attributeReader.hpp"
 #include "keyMap.hpp"
-#include "keyAllocator.hpp"
+#include "keyAllocatorInterface.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -55,13 +55,9 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	:m_path(path_)
 	,m_db(0)
 	,m_next_typeno(0)
-	,m_typeno_allocator_pool( &m_next_typeno, ExpectedTransactionSize)
 	,m_next_termno(0)
-	,m_termno_allocator_pool( &m_next_termno, ExpectedTransactionSize)
 	,m_next_docno(0)
-	,m_docno_allocator_pool( &m_next_docno, ExpectedTransactionSize)
 	,m_next_attribno(0)
-	,m_attribno_allocator_pool( &m_next_attribno, ExpectedTransactionSize)
 	,m_nof_documents(0)
 	,m_transactionCnt(0)
 	,m_metaDataBlockCache(0)
@@ -122,13 +118,12 @@ void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 
 	storeVariables();
 
-	boost::mutex::scoped_lock( m_global_counter_mutex);
+	boost::mutex::scoped_lock( m_transactionCnt_mutex);
 	--m_transactionCnt;
 }
 
 void Storage::loadVariables()
 {
-	boost::mutex::scoped_lock( m_global_counter_mutex);
 	KeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
 	m_next_termno = variableMap.lookUp( "TermNo");
 	m_next_typeno = variableMap.lookUp( "TypeNo");
@@ -139,19 +134,33 @@ void Storage::loadVariables()
 
 void Storage::storeVariables()
 {
-	boost::mutex::scoped_lock( m_global_counter_mutex);
-	KeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
-	variableMap.store( "TermNo", m_next_termno);
-	variableMap.store( "TypeNo", m_next_typeno);
-	variableMap.store( "DocNo", m_next_docno);
-	variableMap.store( "AttribNo", m_next_attribno);
-	variableMap.store( "NofDocs", m_nof_documents);
-
-	variableMap.getWriteBatch( m_global_counter_batch);
+	leveldb::WriteBatch batch;
+	KeyValueStorage varstor( m_db, DatabaseKey::VariablePrefix, false);
+	{
+		std::string termnoval;
+		packIndex( termnoval, m_next_termno);
+		varstor.store( "TermNo", termnoval, batch);
+	}{
+		std::string typenoval;
+		packIndex( typenoval, m_next_typeno);
+		varstor.store( "TypeNo", typenoval, batch);
+	}{
+		std::string docnoval;
+		packIndex( docnoval, m_next_docno);
+		varstor.store( "DocNo", docnoval, batch);
+	}{
+		std::string attribnoval;
+		packIndex( attribnoval, m_next_attribno);
+		varstor.store( "AttribNo", attribnoval, batch);
+	}{
+		std::string nofdocsval;
+		packIndex( nofdocsval, m_nof_documents);
+		varstor.store( "NofDocs", nofdocsval, batch);
+	}
 	leveldb::WriteOptions options;
 	options.sync = true;
-	leveldb::Status status = m_db->Write( options, &m_global_counter_batch);
-	m_global_counter_batch.Clear();
+	leveldb::Status status = m_db->Write( options, &batch);
+	batch.Clear();
 	if (!status.ok())
 	{
 		throw std::runtime_error( std::string( "error when writing global counter batch: ") + status.ToString());
@@ -162,7 +171,7 @@ void Storage::close()
 {
 	storeVariables();
 
-	boost::mutex::scoped_lock( m_global_counter_mutex);
+	boost::mutex::scoped_lock( m_transactionCnt_mutex);
 	if (m_transactionCnt)
 	{
 		throw std::runtime_error("cannot close storage with an alive transactions");
@@ -171,7 +180,6 @@ void Storage::close()
 
 Storage::~Storage()
 {
-	m_global_counter_batch.Clear();
 	try
 	{
 		close();
@@ -241,7 +249,7 @@ StorageTransactionInterface*
 	Storage::createTransaction()
 {
 	{
-		boost::mutex::scoped_lock( m_global_counter_mutex);
+		boost::mutex::scoped_lock( m_transactionCnt_mutex);
 		++m_transactionCnt;
 	}
 	return new StorageTransaction( this, m_db, &m_metadescr);
@@ -249,33 +257,161 @@ StorageTransactionInterface*
 
 Index Storage::allocDocnoRange( std::size_t nofDocuments)
 {
-	return m_docno_allocator_pool.allocRange( nofDocuments);
+	boost::mutex::scoped_lock( m_mutex_docno);
+	Index rt = m_next_docno;
+	m_next_docno += nofDocuments;
+	if (m_next_docno <= rt) throw std::runtime_error( "docno allocation error");
+	return rt;
 }
 
 void Storage::declareNofDocumentsInserted( int value)
 {
-	boost::mutex::scoped_lock( m_global_counter_mutex);
+	boost::mutex::scoped_lock( m_nof_documents_mutex);
 	m_nof_documents += value;
 }
 
+class TypenoAllocator
+	:public KeyAllocatorInterface
+{
+public:
+	TypenoAllocator( Storage* storage_)
+		:KeyAllocatorInterface(true),m_storage(storage_){}
+	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	{
+		return m_storage->allocTypenoIm( name, isNew);
+	}
+	virtual Index alloc()
+	{
+		throw std::logic_error("cannot use typeno allocator for non immediate alloc");
+	}
+
+private:
+	Storage* m_storage;
+};
+
+class DocnoAllocator
+	:public KeyAllocatorInterface
+{
+public:
+	DocnoAllocator( Storage* storage_)
+		:KeyAllocatorInterface(true),m_storage(storage_){}
+	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	{
+		return m_storage->allocDocnoIm( name, isNew);
+	}
+	virtual Index alloc()
+	{
+		throw std::logic_error("cannot use docno allocator for non immediate alloc");
+	}
+private:
+	Storage* m_storage;
+};
+
+class AttribnoAllocator
+	:public KeyAllocatorInterface
+{
+public:
+	AttribnoAllocator( Storage* storage_)
+		:KeyAllocatorInterface(true),m_storage(storage_){}
+	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	{
+		return m_storage->allocAttribnoIm( name, isNew);
+	}
+	virtual Index alloc()
+	{
+		throw std::logic_error("cannot use attribno allocator for non immediate alloc");
+	}
+private:
+	Storage* m_storage;
+};
+
+class TermnoAllocator
+	:public KeyAllocatorInterface
+{
+public:
+	TermnoAllocator( Storage* storage_)
+		:KeyAllocatorInterface(false),m_storage(storage_){}
+
+	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	{
+		throw std::logic_error("cannot use termno allocator for immediate alloc");
+	}
+	virtual Index alloc()
+	{
+		return m_storage->allocTermno();
+	}
+private:
+	Storage* m_storage;
+};
+
+
 KeyAllocatorInterface* Storage::createTypenoAllocator()
 {
-	return new KeyAllocator( &m_typeno_allocator_pool);
-}
-
-KeyAllocatorInterface* Storage::createTermnoAllocator()
-{
-	return new KeyAllocator( &m_termno_allocator_pool);
+	return new TypenoAllocator( this);
 }
 
 KeyAllocatorInterface* Storage::createDocnoAllocator()
 {
-	return new KeyAllocator( &m_docno_allocator_pool);
+	return new DocnoAllocator( this);
 }
 
 KeyAllocatorInterface* Storage::createAttribnoAllocator()
 {
-	return new KeyAllocator( &m_attribno_allocator_pool);
+	return new AttribnoAllocator( this);
+}
+
+KeyAllocatorInterface* Storage::createTermnoAllocator()
+{
+	return new TermnoAllocator( this);
+}
+
+Index Storage::allocTermno()
+{
+	boost::mutex::scoped_lock( m_mutex_termno);
+	return m_next_termno++;
+}
+
+Index Storage::allocTypenoIm( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_mutex_typeno);
+	return allocNameIm( DatabaseKey::TermTypePrefix, m_next_typeno, name, isNew);
+}
+
+Index Storage::allocDocnoIm( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_mutex_docno);
+	return allocNameIm( DatabaseKey::DocIdPrefix, m_next_docno, name, isNew);
+}
+
+Index Storage::allocAttribnoIm( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_mutex_attribno);
+	return allocNameIm( DatabaseKey::AttributeKeyPrefix, m_next_attribno, name, isNew);
+}
+
+Index Storage::allocNameIm(
+	DatabaseKey::KeyPrefix prefix,
+	Index& counter,
+	const std::string& name,
+	bool& isNew)
+{
+	Index rt;
+	KeyValueStorage stor( m_db, prefix, true);
+	const KeyValueStorage::Value* val = stor.load( name);
+	if (!val)
+	{
+		std::string indexval;
+		packIndex( indexval, rt = counter++);
+		stor.storeIm( name, indexval);
+		isNew = true;
+	}
+	else
+	{
+		char const* vi = val->ptr();
+		rt = unpackIndex( vi, vi+val->size());
+		isNew = false;
+	}
+	return rt;
 }
 
 Index Storage::nofAttributeTypes()

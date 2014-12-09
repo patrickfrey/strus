@@ -41,18 +41,15 @@ class KeyAllocator
 	:public KeyAllocatorInterface
 {
 public:
-	KeyAllocator( KeyAllocatorPool* pool_);
-	~KeyAllocator()
-	{
-		done();
-	}
+	KeyAllocator( Index* index_, const char* name_)
+		:m_index(index_),m_name(name_){}
 
+	virtual Index alloc();
 	virtual Index alloc( const std::string& name, bool& isNew);
-	void done();
 
 private:
-	KeyAllocatorPool* m_pool;
-	unsigned int m_handle;
+	Index* m_index;
+	const char* m_name;
 };
 }//namespace
 #endif

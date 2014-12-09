@@ -33,8 +33,6 @@
 #include "strus/arithmeticVariant.hpp"
 #include "metaDataBlockCache.hpp"
 #include "databaseKey.hpp"
-#include "keyAllocator.hpp"
-#include "keyAllocatorPool.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -51,7 +49,8 @@ class StorageTransactionInterface;
 class AttributeReaderInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
-
+/// \brief Forward declaration
+class KeyAllocatorInterface;
 
 /// \brief Strus IR storage implementation based on LevelDB
 class Storage
@@ -104,9 +103,14 @@ public:/*StorageTransaction*/
 	Index nofAttributeTypes();
 
 	KeyAllocatorInterface* createTypenoAllocator();
-	KeyAllocatorInterface* createTermnoAllocator();
 	KeyAllocatorInterface* createDocnoAllocator();
 	KeyAllocatorInterface* createAttribnoAllocator();
+	KeyAllocatorInterface* createTermnoAllocator();
+
+	Index allocTermno();
+	Index allocTypenoIm( const std::string& name, bool& isNew);///< immediate allocation of a term type
+	Index allocDocnoIm( const std::string& name, bool& isNew); ///< immediate allocation of a doc number
+	Index allocAttribnoIm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
 
 	friend class TransactionLock;
 	class TransactionLock
@@ -140,22 +144,24 @@ private:
 	leveldb::Options m_dboptions;				///< options for levelDB
 
 	Index m_next_typeno;					///< next index to assign to a new term type
-	KeyAllocatorPool m_typeno_allocator_pool;		///< global map of term types
-
 	Index m_next_termno;					///< next index to assign to a new term value
-	KeyAllocatorPool m_termno_allocator_pool;		///< global map of term values
-
 	Index m_next_docno;					///< next index to assign to a new document id
-	KeyAllocatorPool m_docno_allocator_pool;		///< global map of document ids
-
 	Index m_next_attribno;					///< next index to assign to a new attribute name
-	KeyAllocatorPool m_attribno_allocator_pool;		///< global map of document attribute names
+	boost::mutex m_mutex_typeno;
+	boost::mutex m_mutex_termno;
+	boost::mutex m_mutex_docno;
+	boost::mutex m_mutex_attribno;
+
+	Index allocNameIm(
+		DatabaseKey::KeyPrefix prefix,
+		Index& counter,
+		const std::string& name, bool& isNew);
 
 	Index m_nof_documents;					///< number of documents inserted
-	Index m_transactionCnt;
+	boost::mutex m_nof_documents_mutex;
 
-	leveldb::WriteBatch m_global_counter_batch;		///< batch for counter updates
-	boost::mutex m_global_counter_mutex;			///< mutual exclusion for accessing global counters
+	Index m_transactionCnt;
+	boost::mutex m_transactionCnt_mutex;			///< mutual exclusion for accessing global counters
 
 	boost::mutex m_transaction_mutex;			///< mutual exclusion for the critical part of a transaction
 

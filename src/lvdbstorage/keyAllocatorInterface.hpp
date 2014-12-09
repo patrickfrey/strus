@@ -38,9 +38,17 @@ namespace strus {
 class KeyAllocatorInterface
 {
 public:
+	KeyAllocatorInterface( bool immediate_)
+		:m_immediate(immediate_){}
+
 	virtual ~KeyAllocatorInterface(){}
-	virtual Index alloc( const std::string& name, bool& isNew)=0;
-	virtual void done()=0;
+	virtual Index alloc()=0;
+	virtual Index getOrCreate( const std::string& name, bool& isNew)=0;
+
+	/// \brief Defines what interface is provided true->getOrCreate, false->alloc
+	bool immediate() const {return m_immediate;}
+private:
+	bool m_immediate;
 };
 
 }//namespace

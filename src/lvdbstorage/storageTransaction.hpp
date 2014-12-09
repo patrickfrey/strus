@@ -76,8 +76,6 @@ public:
 			const std::string& docid_,
 			const Index& docno=0);
 
-	/// \brief Declare that no more items are deleted or added (helps to free resources)
-	virtual void done();
 	/// \brief Transaction commit
 	virtual void commit();
 	/// \brief Transaction rollback (automatically called with the destructor)
@@ -88,6 +86,7 @@ public:/*Document*/
 	Index getOrCreateTermType( const std::string& name);
 	Index getOrCreateAttributeName( const std::string& name);
 	Index getOrCreateDocno( const std::string& name, bool& isNew);
+	Index lookUpTermValue( const std::string& name);
 
 	void incrementDf( const Index& typeno, const Index& termno);
 	void decrementDf( const Index& typeno, const Index& termno);
@@ -147,7 +146,6 @@ private:
 	KeyMap m_attributeNameMap;				///< map of document attribute names
 
 	int m_nof_documents;					///< total adjustment for the number of documents added minus number of documents deleted
-	bool m_done;						///< true, if the transaction is complete (no more items can be added or deleted)
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
 };
