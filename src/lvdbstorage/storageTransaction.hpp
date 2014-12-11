@@ -145,6 +145,7 @@ private:
 	KeyMap m_docIdMap;					///< map of document ids
 	KeyMap m_attributeNameMap;				///< map of document attribute names
 
+	std::map<std::string,Index> m_newDocidMap;		///< map of new document identifiers (docid's allocated in ranges that must be written in the commit, because the were not written immediately)
 	int m_nof_documents;					///< total adjustment for the number of documents added minus number of documents deleted
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back

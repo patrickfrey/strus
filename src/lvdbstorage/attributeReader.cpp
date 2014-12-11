@@ -28,13 +28,25 @@
 */
 #include "attributeReader.hpp"
 #include "keyValueStorage.hpp"
+#include <stdexcept>
 
 using namespace strus;
+
+Index AttributeReader::elementHandle( const std::string& name) const
+{
+	Index rt = m_storage->getAttributeName( name);
+	if (!rt)
+	{
+		throw std::runtime_error( std::string( "attribute with name '") + name + "' is not defined");
+	}
+	return rt;
+}
 
 std::string AttributeReader::getValue( const Index& elementHandle_) const
 {
 	KeyValueStorage kvs( m_db, DatabaseKey::DocAttributePrefix, false);
 	const KeyValueStorage::Value* val = kvs.load( BlockKey( m_docno), elementHandle_);
+	if (!val) return std::string();
 	return std::string( val->ptr(), val->size());
 }
 

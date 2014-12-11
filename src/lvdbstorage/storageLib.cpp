@@ -123,6 +123,9 @@ DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescript
 
 		case CmdCreateStorageDatabase:
 			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nmetadata=<comma separated list of meta data def>";
+
+		case CmdDestroyStorageDatabase:
+			return "assignment:\npath=<LevelDB storage path>";
 	}
 	return 0;
 }

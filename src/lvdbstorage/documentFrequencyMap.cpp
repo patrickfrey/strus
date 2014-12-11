@@ -28,6 +28,7 @@
 */
 #include "documentFrequencyMap.hpp"
 #include "databaseKey.hpp"
+#include "keyMap.hpp"
 #include "indexPacker.hpp"
 #include <cstdlib>
 
@@ -43,6 +44,29 @@ void DocumentFrequencyMap::decrement( Index typeno, Index termno)
 {
 	Key key( typeno, termno);
 	m_map[ key] -= 1;
+}
+
+void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
+{
+	typename Map::iterator mi = m_map.begin(), me = m_map.end();
+	while (mi != me)
+	{
+		if (KeyMap::isUnknown( mi->first.second))
+		{
+			std::map<Index,Index>::const_iterator ri = renamemap.find( mi->first.second);
+			if (ri == renamemap.end())
+			{
+				throw std::runtime_error( "internal: term value undefined (term number map for df)");
+			}
+			Key newkey( mi->first.first, ri->second);
+			m_map[ newkey] = mi->second;
+			m_map.erase( mi++);
+		}
+		else
+		{
+			++mi;
+		}
+	}
 }
 
 void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)

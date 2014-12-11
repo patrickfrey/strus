@@ -34,6 +34,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <iostream>
 
 namespace strus {
 /// \brief Forward declaration
@@ -46,7 +47,8 @@ class StorageDocumentChecker
 public:
 	StorageDocumentChecker(
 		Storage* storage_,
-		const std::string& docid_);
+		const std::string& docid_,
+		const std::string& logfile_);
 
 	virtual ~StorageDocumentChecker();
 
@@ -65,6 +67,9 @@ public:
 			const std::string& value_);
 
 	virtual void done();
+
+private:
+	void doCheck( std::ostream& logout);
 
 private:
 	StorageDocumentChecker( const StorageDocumentChecker&){}//non copyable
@@ -110,6 +115,7 @@ private:
 	AttributeMap m_attributeMap;
 	std::string m_docid;
 	Index m_docno;
+	std::string m_logfile;
 };
 
 }

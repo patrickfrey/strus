@@ -153,6 +153,8 @@ public:
 		typename Map::iterator mi = m_map.begin(), me = m_map.end();
 		while (mi != me)
 		{
+			BlockKey dbkey( mi->first);
+
 			if (renamer.isCandidate( mi->first))
 			{
 				BlockKeyIndex newkey = renamer.map( mi->first);

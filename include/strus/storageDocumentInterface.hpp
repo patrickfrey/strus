@@ -43,7 +43,7 @@ public:
 	/// \brief Destructor
 	virtual ~StorageDocumentInterface(){}
 
-	/// \brief Add one occurrence of a term, throws on std::bad_alloc
+	/// \brief Add one occurrence of a term
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document
@@ -54,7 +54,7 @@ public:
 			const Index& position_,
 			float weight_)=0;
 
-	/// \brief Define a numeric attribute for the document with fast access for query evaluation
+	/// \brief Define a meta data element of the document
 	/// \note Meta data are used for query restrictions and for document weights in query result ranking
 	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
 	/// \param[in] name_ name of the existing meta data element
@@ -63,14 +63,14 @@ public:
 			const std::string& name_,
 			const ArithmeticVariant& value_)=0;
 
-	/// \brief Define a string attribute for the document
+	/// \brief Define a string attribute of the document
 	/// \param[in] name_ name of the attribute
 	/// \param[in] value_ value of the document attribute
 	virtual void setAttribute(
 			const std::string& name_,
 			const std::string& value_)=0;
 
-	/// \brief Write the contents defined to the transaction
+	/// \brief Closing the document definition
 	virtual void done()=0;
 };
 

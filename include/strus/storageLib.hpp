@@ -52,7 +52,8 @@ void destroyStorageDatabase( const char* configsource);
 enum StorageConfigDescriptionType
 {
 	CmdCreateStorageClient=0x1,	///< Config description for createStorageClient(const char*)
-	CmdCreateStorageDatabase=0x2	///< Config description for createStorageDatabase(const char*)
+	CmdCreateStorageDatabase=0x2,	///< Config description for createStorageDatabase(const char*)
+	CmdDestroyStorageDatabase=0x4	///< Config description for destroyStorageDatabase(const char*)
 };
 
 /// \brief Gets an example configuration description (source string as used by the functions here)

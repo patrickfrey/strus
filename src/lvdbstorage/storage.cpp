@@ -30,6 +30,7 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "storage.hpp"
 #include "storageTransaction.hpp"
+#include "storageDocumentChecker.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseKey.hpp"
@@ -255,6 +256,14 @@ StorageTransactionInterface*
 	return new StorageTransaction( this, m_db, &m_metadescr);
 }
 
+StorageDocumentInterface* 
+	Storage::createDocumentChecker(
+		const std::string& docid,
+		const std::string& logfilename)
+{
+	return new StorageDocumentChecker( this, docid, logfilename);
+}
+
 Index Storage::allocDocnoRange( std::size_t nofDocuments)
 {
 	boost::mutex::scoped_lock( m_mutex_docno);
@@ -431,7 +440,9 @@ Index Storage::maxDocumentNumber() const
 
 Index Storage::documentNumber( const std::string& docid) const
 {
-	return getDocno( docid);
+	Index rt = getDocno( docid);
+	if (!rt) throw std::runtime_error( std::string( "document with id '") + docid + "' is not defined in index");
+	return rt;
 }
 
 AttributeReaderInterface* Storage::createAttributeReader() const

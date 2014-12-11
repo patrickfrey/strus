@@ -38,15 +38,18 @@
 #include <boost/scoped_ptr.hpp>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 using namespace strus;
 
 StorageDocumentChecker::StorageDocumentChecker(
 		Storage* storage_,
-		const std::string& docid_)
+		const std::string& docid_,
+		const std::string& logfile_)
 	:m_storage(storage_)
 	,m_docid(docid_)
 	,m_docno(storage_->documentNumber( docid_))
+	,m_logfile(logfile_)
 {
 }
 
@@ -89,92 +92,128 @@ void StorageDocumentChecker::setAttribute(
 	m_attributeMap[ name_] = value_;
 }
 
-void StorageDocumentChecker::done()
+static void logError(
+		std::ostream& logout, const std::string& docid,
+		const std::string& type, const std::string& term,
+		const std::string& msg)
 {
-	try
+	logout << "error checking document '" << docid + "', ";
+	logout << "term '" << type << "' value '" << term << "': ";
+	logout << msg << std::endl;
+}
+
+static void logError(
+		std::ostream& logout, const std::string& docid,
+		const std::string& msg)
+{
+	logout << "error checking document '" << docid + "': ";
+	logout << msg << std::endl;
+}
+
+void StorageDocumentChecker::doCheck( std::ostream& logout)
+{
+	TermMap::const_iterator ti = m_termMap.begin(), te = m_termMap.end();
+	for (; ti != te; ++ti)
 	{
-		TermMap::const_iterator ti = m_termMap.begin(), te = m_termMap.end();
-		for (; ti != te; ++ti) try
+		boost::scoped_ptr<PostingIteratorInterface> pitr(
+			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
+		boost::scoped_ptr<ForwardIteratorInterface> fitr(
+			m_storage->createForwardIterator( ti->first.type));
+
+		std::set<Index>::const_iterator
+			pi = ti->second.poset.begin(), pe = ti->second.poset.end();
+
+		if (m_docno != pitr->skipDoc( m_docno))
 		{
-			boost::scoped_ptr<PostingIteratorInterface> pitr(
-				m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
-			boost::scoped_ptr<ForwardIteratorInterface> fitr(
-				m_storage->createForwardIterator( ti->first.type));
-	
-			std::set<Index>::reverse_iterator
-				pi = ti->second.poset.rbegin(), pe = ti->second.poset.rend();
-	
-			if (m_docno != pitr->skipDoc( m_docno))
-			{
-				throw std::runtime_error( "term not found in inverted index");
-			}
-			fitr->skipDoc( m_docno);
-			Index pos = 0;
-	
-			for (; pi != pe; ++pi)
-			{
-				Index ppos = pitr->skipPos( pos);
-				if (*pi != ppos)
-				{
-					std::ostringstream msg;
-					msg << *pi << " != " << ppos;
-					throw std::runtime_error( std::string( "inverted index position does not match: ") + msg.str());
-				}
-				Index fpos = fitr->skipPos( pos);
-				if (*pi != fpos)
-				{
-					std::ostringstream msg;
-					msg << *pi << " != " << fpos;
-					throw std::runtime_error( std::string( "forward index position does not match: ") + msg.str());
-				}
-				std::string fval = fitr->fetch();
-				if (ti->first.value != fval)
-				{
-					throw std::runtime_error( std::string( "forward index element does not match: '") + ti->first.value + "' != '" + fval + "'");
-				}
-				pos = *pi + 1;
-			}
+			logError( logout, m_docid, ti->first.type, ti->first.value,
+				"term not found in inverted index");
+			continue;
 		}
-		catch (const std::runtime_error& err)
+		fitr->skipDoc( m_docno);
+		Index pos = 0;
+
+		for (; pi != pe; ++pi)
 		{
-			throw std::runtime_error( std::string( "checking term '") + ti->first.type + " '" + ti->first.value + "': " + err.what());
-		}
-
-		boost::scoped_ptr<MetaDataReaderInterface> metadata(
-			m_storage->createMetaDataReader());
-
-		MetaDataMap::const_iterator mi = m_metaDataMap.begin(), me = m_metaDataMap.end();
-		for (; mi != me; ++mi)
-		{
-			Index hnd = metadata->elementHandle( mi->first);
-			metadata->skipDoc( m_docno);
-
-			ArithmeticVariant val = metadata->getValue( hnd);
-			if (val != mi->second)
+			Index ppos = pitr->skipPos( pos);
+			if (*pi != ppos)
 			{
-				throw std::runtime_error( std::string( "document metadata does not match: '") + mi->second.tostring() + "' != '" + val.tostring() + "'");
+				std::ostringstream msg;
+				msg << *pi << " != " << ppos;
+
+				logError( logout, m_docid,
+					ti->first.type, ti->first.value,
+					std::string( "inverted index position does not match: ") + msg.str());
+				break;
 			}
-		}
-
-		boost::scoped_ptr<AttributeReaderInterface> attributes(
-			m_storage->createAttributeReader());
-	
-		AttributeMap::const_iterator ai = m_attributeMap.begin(), ae = m_attributeMap.end();
-		for (; ai != ae; ++ai)
-		{
-			Index hnd = attributes->elementHandle( ai->first);
-			attributes->skipDoc( m_docno);
-
-			std::string val = attributes->getValue( hnd);
-			if (val != ai->second)
+			Index fpos = fitr->skipPos( ppos);
+			if (ppos != fpos)
 			{
-				throw std::runtime_error( std::string( "document attribute does not match: '") + ai->second + "' != '" + val + "'");
+				std::ostringstream msg;
+				msg << ppos << " != " << fpos;
+
+				logError( logout, m_docid,
+					ti->first.type, ti->first.value,
+					std::string( "forward index position does not match: ") + msg.str());
+				break;
 			}
+			std::string fval = fitr->fetch();
+			if (ti->first.value != fval)
+			{
+				logError( logout, m_docid,
+					ti->first.type, ti->first.value,
+					std::string( "forward index element does not match: '") + fval + "'");
+			}
+			pos = *pi + 1;
 		}
 	}
-	catch (const std::runtime_error& err)
+
+	boost::scoped_ptr<MetaDataReaderInterface> metadata(
+		m_storage->createMetaDataReader());
+
+	MetaDataMap::const_iterator mi = m_metaDataMap.begin(), me = m_metaDataMap.end();
+	for (; mi != me; ++mi)
 	{
-		throw std::runtime_error( std::string( "error checking document '") + m_docid + "': " + err.what());
+		Index hnd = metadata->elementHandle( mi->first);
+		metadata->skipDoc( m_docno);
+
+		ArithmeticVariant val = metadata->getValue( hnd);
+		if (val != mi->second)
+		{
+			logError( logout, m_docid,
+				std::string( "document metadata does not match: '") + mi->second.tostring() + "' != '" + val.tostring() + "'");
+		}
+	}
+
+	boost::scoped_ptr<AttributeReaderInterface> attributes(
+		m_storage->createAttributeReader());
+
+	AttributeMap::const_iterator ai = m_attributeMap.begin(), ae = m_attributeMap.end();
+	for (; ai != ae; ++ai)
+	{
+		Index hnd = attributes->elementHandle( ai->first);
+		attributes->skipDoc( m_docno);
+
+		std::string val = attributes->getValue( hnd);
+		if (val != ai->second)
+		{
+			logError( logout, m_docid,
+				std::string( "document attribute does not match: '") + ai->second + "' != '" + val + "'");
+		}
+	}
+}
+
+void StorageDocumentChecker::done()
+{
+	if (m_logfile == "-")
+	{
+		doCheck( std::cout);
+	}
+	else
+	{
+		std::ofstream logfileout;
+		logfileout.open( m_logfile.c_str(), std::ios_base::app);
+		doCheck( logfileout);
+		logfileout.close();
 	}
 }
 

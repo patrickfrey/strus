@@ -150,7 +150,7 @@ DLL_PUBLIC unsigned int strus::readDir( const std::string& path, const std::stri
 	{
 		return err;
 	}
-	std::sort( res.begin()+prevsize, res.end(), std::greater<std::string>());
+	std::sort( res.begin()+prevsize, res.end(), std::less<std::string>());
 	return 0;
 }
 

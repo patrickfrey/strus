@@ -207,7 +207,7 @@ int main( int argc, const char* argv[])
 {
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
-		std::cerr << "usage: strusCheck <config>" << std::endl;
+		std::cerr << "usage: strusDumpStorage <config>" << std::endl;
 		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
 
 		strus::printIndentMultilineString( std::cerr, 12, strus::getStorageConfigDescription( strus::CmdCreateStorageClient));

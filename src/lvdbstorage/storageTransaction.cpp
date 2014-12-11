@@ -247,6 +247,7 @@ StorageDocumentInterface*
 	if (docno)
 	{
 		m_nof_documents += 1;
+		m_newDocidMap[ docid] = docno;
 		return new StorageDocument( this, docid, docno, true);
 	}
 	else
@@ -283,8 +284,18 @@ void StorageTransaction::commit()
 		m_docnoBlockMap.getWriteBatch( m_batch);
 		m_posinfoBlockMap.getWriteBatch( m_batch);
 		m_forwardIndexBlockMap.getWriteBatch( m_batch);
-		
+
+		m_dfMap.renameNewTermNumbers( termnoUnknownMap);
 		m_dfMap.getWriteBatch( m_batch);
+
+		KeyValueStorage docidstor( m_db, DatabaseKey::DocIdPrefix, false);
+		std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
+		for (; di != de; ++di)
+		{
+			std::string docnostr;
+			packIndex( docnostr, di->second);
+			docidstor.store( di->first, docnostr, m_batch);
+		}
 
 		leveldb::WriteOptions options;
 		options.sync = true;

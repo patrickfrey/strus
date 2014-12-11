@@ -47,6 +47,8 @@ public:
 	void increment( Index typeno, Index termno);
 	void decrement( Index typeno, Index termno);
 
+	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
+
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:

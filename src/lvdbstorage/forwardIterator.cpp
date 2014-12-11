@@ -55,7 +55,7 @@ void ForwardIterator::skipDoc( const Index& docno_)
 		m_forwardBlockStorage = 0;
 		m_forwardBlockStorage
 			= new BlockStorage<ForwardIndexBlock>( 
-				m_db, BlockKey( m_typeno, m_docno), false);
+				m_db, BlockKey( m_typeno, docno_), false);
 		m_docno = docno_;
 		m_curblock = 0;
 		m_curblock_lastpos = 0;

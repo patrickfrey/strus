@@ -91,14 +91,7 @@ void AttributeMap::getWriteBatch( leveldb::WriteBatch& batch)
 	for (; mi != me; ++mi)
 	{
 		BlockKey key( mi->first);
-		if (!key.elem(2))
-		{
-			attrstorage.disposeSubnodes( key, batch);
-		}
-		else
-		{
-			attrstorage.dispose( key, batch);
-		}
+		attrstorage.store( key, mi->second, batch);
 	}
 	m_map.clear();
 }

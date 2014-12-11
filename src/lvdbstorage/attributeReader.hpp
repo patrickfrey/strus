@@ -45,10 +45,8 @@ public:
 	AttributeReader( const Storage* storage_, leveldb::DB* db_)
 		:m_storage(storage_),m_db(db_),m_docno(0){}
 		
-	virtual Index elementHandle( const std::string& name) const
-	{
-		return m_storage->getAttributeName( name);
-	}
+	virtual Index elementHandle( const std::string& name) const;
+
 	virtual void skipDoc( const Index& docno)
 	{
 		m_docno = docno;

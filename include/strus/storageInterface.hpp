@@ -43,6 +43,8 @@ class ForwardIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
+class StorageDocumentInterface;
+/// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
@@ -105,6 +107,14 @@ public:
 	/// \param[in] docid document identifier (URI)
 	/// \return the created inserter reference to be disposed with delete
 	virtual StorageTransactionInterface* createTransaction()=0;
+
+	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
+	/// \param[in] docid identifier (URI) of the document to check
+	/// \param[in] logfilename Where to log checking failures ("-" for stdout)
+	/// \return the created document reference to be disposed with delete
+	virtual StorageDocumentInterface* createDocumentChecker(
+			const std::string& docid,
+			const std::string& logfilename)=0;
 
 	/// \brief Get some statistics (counters) of the storage
 	virtual std::vector<StatCounterValue> getStatistics() const=0;

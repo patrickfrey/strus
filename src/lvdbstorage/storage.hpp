@@ -46,6 +46,8 @@ class ForwardIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
+class StorageDocumentInterface;
+/// \brief Forward declaration
 class AttributeReaderInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
@@ -73,9 +75,13 @@ public:
 			createForwardIterator(
 				const std::string& type);
 
-	virtual StorageTransactionInterface*
-			createTransaction();
+	virtual StorageTransactionInterface* createTransaction();
 
+	virtual StorageDocumentInterface* 
+			createDocumentChecker(
+				const std::string& docid,
+				const std::string& logfilename);
+	
 	virtual Index allocDocnoRange( std::size_t nofDocuments);
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;

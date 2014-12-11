@@ -72,7 +72,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 			throw std::runtime_error( "too many elements in keymap");
 		}
 		store( name, rt + UnknownValueHandleStart);
-		return rt;
+		return rt + UnknownValueHandleStart;
 	}
 }
 
