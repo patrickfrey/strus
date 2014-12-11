@@ -158,7 +158,7 @@ public:
 public:
 	PosinfoBlockElementMap(){}
 	PosinfoBlockElementMap( const PosinfoBlockElementMap& o)
-		:m_map(o.m_map){}
+		:m_map(o.m_map),m_strings(o.m_strings){}
 
 	void define( const Index& idx, const PosinfoBlockElement& elem);
 
@@ -179,7 +179,7 @@ public:
 	public:
 		IteratorElement()
 			:m_docno(0),m_ptr(0){}
-		IteratorElement( const Index& docno_, const char* ptr_, std::size_t size_)
+		IteratorElement( const Index& docno_, const char* ptr_)
 			:m_docno(docno_),m_ptr(ptr_){}
 		IteratorElement( const IteratorElement& o)
 			:m_docno(o.m_docno),m_ptr(o.m_ptr){}
