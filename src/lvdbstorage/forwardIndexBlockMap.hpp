@@ -33,21 +33,24 @@
 #include "blockMap.hpp"
 #include "blockKey.hpp"
 #include <vector>
+#include <map>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
 namespace strus {
 
-typedef std::string ForwardIndexBlockElement;
 
 class ForwardIndexBlockMap
-	:protected BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>
+	:protected BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap>
 {
 public:
+	typedef BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap> Parent;
+
+public:
 	ForwardIndexBlockMap( leveldb::DB* db_)
-		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>(db_){}
+		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap>(db_){}
 	ForwardIndexBlockMap( const ForwardIndexBlockMap& o)
-		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElement>(o){}
+		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap>(o){}
 
 	void defineForwardIndexTerm(
 		const Index& typeno,

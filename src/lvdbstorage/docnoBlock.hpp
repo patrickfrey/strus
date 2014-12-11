@@ -34,6 +34,7 @@
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
 #include <iostream>
+#include <map>
 #include <stdint.h>
 
 namespace strus {
@@ -70,6 +71,75 @@ private:
 };
 
 std::ostream& operator<< (std::ostream& out, const DocnoBlockElement& e);
+
+
+class DocnoBlockElementMap
+	:public std::map<Index,DocnoBlockElement>
+{
+public:
+	DocnoBlockElementMap(){}
+	DocnoBlockElementMap( const DocnoBlockElementMap& o)
+		:std::map<Index,DocnoBlockElement>(o){}
+
+	void define( const Index& idx, const DocnoBlockElement& elem)
+	{
+		std::map<Index,DocnoBlockElement>::operator[]( idx) = elem;
+	}
+	Index lastInsertBlockId() const
+	{
+		return rbegin()->first;
+	}
+
+	class IteratorElement
+	{
+	public:
+		explicit IteratorElement( const std::map<Index,DocnoBlockElement>::const_iterator& itr_)
+			:m_itr(itr_){}
+		IteratorElement& operator=( const std::map<Index,DocnoBlockElement>::const_iterator& itr_)
+		{
+			m_itr = itr_;
+			return *this;
+		}
+
+		const Index& key() const		{return m_itr->first;}
+		const DocnoBlockElement& value() const	{return m_itr->second;}
+
+	private:
+		std::map<Index,DocnoBlockElement>::const_iterator m_itr;
+	};
+
+	class const_iterator
+	{
+	public:
+		const_iterator( const const_iterator& o)
+			:m_itr(o.m_itr),m_elem(o.m_itr){}
+
+		explicit const_iterator( const std::map<Index,DocnoBlockElement>::const_iterator& itr_)
+			:m_itr(itr_),m_elem(itr_){}
+
+		bool operator==( const const_iterator& o) const	{return m_itr==o.m_itr;}
+		bool operator!=( const const_iterator& o) const	{return m_itr!=o.m_itr;}
+
+		const_iterator& operator++()			{++m_itr; m_elem = m_itr; return *this;}
+		const_iterator operator++(int)			{const_iterator rt(*this); ++m_itr; m_elem = m_itr; return rt;}
+
+		const IteratorElement& operator*() const	{return m_elem;}
+		const IteratorElement* operator->() const	{return &m_elem;}
+
+	private:
+		std::map<Index,DocnoBlockElement>::const_iterator m_itr;
+		IteratorElement m_elem;
+	};
+
+	const_iterator begin() const
+	{
+		return const_iterator( std::map<Index,DocnoBlockElement>::begin());
+	}
+	const_iterator end() const
+	{
+		return const_iterator( std::map<Index,DocnoBlockElement>::end());
+	}
+};
 
 
 class DocnoBlock

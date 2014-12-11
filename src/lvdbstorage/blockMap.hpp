@@ -39,7 +39,7 @@
 
 namespace strus {
 
-template <class BlockType, class BlockElement>
+template <class BlockType, class BlockElementMap>
 class BlockMap
 {
 public:
@@ -51,18 +51,18 @@ public:
 	void defineElement(
 		const BlockKey& dbkey,
 		const Index& elemid,
-		const BlockElement& elem)
+		const typename BlockElementMap::mapped_type& elem)
 	{
 		typename Map::iterator mi = m_map.find( dbkey.index());
 		if (mi == m_map.end())
 		{
-			ElementMap em;
-			em[ elemid] = elem;
+			BlockElementMap em;
+			em.define( elemid, elem);
 			m_map[ dbkey.index()] = em;
 		}
 		else
 		{
-			mi->second[ elemid] = elem;
+			mi->second.define( elemid, elem);
 		}
 	}
 
@@ -70,7 +70,7 @@ public:
 		const BlockKey& dbkey,
 		const Index& elemid)
 	{
-		defineElement( dbkey, elemid, BlockElement());
+		defineElement( dbkey, elemid, typename BlockElementMap::mapped_type());
 	}
 
 	void getWriteBatchMerge( leveldb::WriteBatch& batch)
@@ -78,12 +78,12 @@ public:
 		typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
 		for (; mi != me; ++mi)
 		{
-			typename ElementMap::const_iterator
+			typename BlockElementMap::const_iterator
 				ei = mi->second.begin(),
 				ee = mi->second.end();
 
 			if (ei == ee) continue;
-			Index lastInsertBlockId = mi->second.rbegin()->first;
+			Index lastInsertBlockId = mi->second.lastInsertBlockId();
 
 			BlockStorage<BlockType> blkstorage( m_db, BlockKey(mi->first), false);
 			BlockType newblk;
@@ -102,12 +102,12 @@ public:
 		typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
 		for (; mi != me; ++mi)
 		{
-			typename ElementMap::const_iterator
+			typename BlockElementMap::const_iterator
 				ei = mi->second.begin(),
 				ee = mi->second.end();
 
 			if (ei == ee) continue;
-			Index lastInsertBlockId = mi->second.rbegin()->first;
+			Index lastInsertBlockId = mi->second.lastInsertBlockId();
 
 			BlockStorage<BlockType> blkstorage( m_db, BlockKey(mi->first), false);
 			const BlockType* blk;
@@ -158,7 +158,7 @@ public:
 			if (renamer.isCandidate( mi->first))
 			{
 				BlockKeyIndex newkey = renamer.map( mi->first);
-				ElementMap& newelem = m_map[ newkey];
+				BlockElementMap& newelem = m_map[ newkey];
 				newelem.swap( mi->second);
 				m_map.erase( mi++);
 			}
@@ -170,13 +170,12 @@ public:
 	}
 
 private:
-	typedef std::map<Index,BlockElement> ElementMap;
-	typedef std::map<BlockKeyIndex,ElementMap> Map;
+	typedef std::map<BlockKeyIndex,BlockElementMap> Map;
 
 private:
 	void insertNewElements( BlockStorage<BlockType>& blkstorage,
-				typename ElementMap::const_iterator& ei,
-				const typename ElementMap::const_iterator& ee,
+				typename BlockElementMap::const_iterator& ei,
+				const typename BlockElementMap::const_iterator& ee,
 				BlockType& newblk,
 				const Index& lastInsertBlockId,
 				leveldb::WriteBatch& batch)
@@ -195,8 +194,8 @@ private:
 				newblk.clear();
 				newblk.setId( lastInsertBlockId);
 			}
-			newblk.append( ei->first, ei->second);
-			blkid = ei->first;
+			newblk.append( ei->key(), ei->value());
+			blkid = ei->key();
 		}
 		if (!newblk.empty())
 		{
@@ -206,20 +205,20 @@ private:
 	}
 
 	void mergeNewElements( BlockStorage<BlockType>& blkstorage,
-				typename ElementMap::const_iterator& ei,
-				const typename ElementMap::const_iterator& ee,
+				typename BlockElementMap::const_iterator& ei,
+				const typename BlockElementMap::const_iterator& ee,
 				BlockType& newblk,
 				leveldb::WriteBatch& batch)
 	{
 		const BlockType* blk;
-		while (ei != ee && 0!=(blk=blkstorage.load( ei->first)))
+		while (ei != ee && 0!=(blk=blkstorage.load( ei->key())))
 		{
 			BlockType elemblk;
 			elemblk.setId( blk->id());
 
-			for (; ei != ee && ei->first <= blk->id(); ++ei)
+			for (; ei != ee && ei->key() <= blk->id(); ++ei)
 			{
-				elemblk.append( ei->first, ei->second);
+				elemblk.append( ei->key(), ei->value());
 			}
 			newblk = BlockType::merge( elemblk, *blk);
 			if (blkstorage.loadNext())

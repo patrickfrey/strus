@@ -40,16 +40,16 @@
 namespace strus {
 
 class DocnoBlockMap
-	:public BlockMap<DocnoBlock,DocnoBlockElement>
+	:public BlockMap<DocnoBlock,DocnoBlockElementMap>
 {
 public:
-	typedef BlockMap<DocnoBlock,DocnoBlockElement> Parent;
+	typedef BlockMap<DocnoBlock,DocnoBlockElementMap> Parent;
 
 public:
 	DocnoBlockMap( leveldb::DB* db_)
-		:BlockMap<DocnoBlock,DocnoBlockElement>(db_){}
+		:BlockMap<DocnoBlock,DocnoBlockElementMap>(db_){}
 	DocnoBlockMap( const DocnoBlockMap& o)
-		:BlockMap<DocnoBlock,DocnoBlockElement>(o){}
+		:BlockMap<DocnoBlock,DocnoBlockElementMap>(o){}
 
 	void defineDocnoPosting(
 		const Index& termtype,

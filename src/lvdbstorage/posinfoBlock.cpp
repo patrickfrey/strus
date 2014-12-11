@@ -120,6 +120,29 @@ const char* PosinfoBlock::prevDoc( const char* ref) const
 	return (rt >= charptr())?(rt+1):charptr();
 }
 
+PosinfoBlockElementMap::const_iterator::const_iterator( const PosinfoBlockElementMap* map_, bool start)
+	:m_map_itr(start?map_->map_begin():map_->map_end())
+	,m_strings_ref(map_->strings_ptr())
+{
+	if (m_map_itr != map_->map_end())
+	{
+		m_elem.init( m_map_itr->first, m_strings_ref);
+	}
+}
+
+void PosinfoBlockElementMap::define( const Index& idx, const PosinfoBlockElement& pos)
+{
+	m_map[ idx] = m_strings.size();
+
+	packIndex( m_strings, pos.size());
+	PosinfoBlockElement::const_iterator pi = pos.begin(), pe = pos.end();
+	for (; pi != pe; ++pi)
+	{
+		packIndex( m_strings, *pi);
+	}
+	m_strings.push_back( '\0');
+}
+
 void PosinfoBlock::append( const Index& docno, const std::vector<Index>& pos)
 {
 	char const* pp = prevDoc( charend());
@@ -143,10 +166,28 @@ void PosinfoBlock::append( const Index& docno, const std::vector<Index>& pos)
 	DataBlock::append( blk.c_str(), blk.size());
 }
 
+void PosinfoBlock::append( const Index& docno, const char* posinfo)
+{
+	if (size())
+	{
+		char ch = EndPosinfoMarker;
+		DataBlock::append( (const void*)&ch, 1);
+	}
+	char buf[ 16];
+	std::size_t bpos = 0;
+	packIndex( buf, bpos, sizeof(buf), relativeIndexFromDocno( docno));
+
+	DataBlock::append( buf, bpos);
+	DataBlock::append( (const void*)posinfo, std::strlen(posinfo));
+}
+
 void PosinfoBlock::appendPositionsBlock( const char* start, const char* end)
 {
-	char ch = EndPosinfoMarker;
-	if (size()) DataBlock::append( (const void*)&ch, 1);
+	if (size())
+	{
+		char ch = EndPosinfoMarker;
+		DataBlock::append( (const void*)&ch, 1);
+	}
 	DataBlock::append( (const void*)start, end-start);
 }
 

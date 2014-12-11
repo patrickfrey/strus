@@ -40,16 +40,16 @@
 namespace strus {
 
 class PosinfoBlockMap
-	:protected BlockMap<PosinfoBlock,PosinfoBlockElement>
+	:protected BlockMap<PosinfoBlock,PosinfoBlockElementMap>
 {
 public:
-	typedef BlockMap<PosinfoBlock,PosinfoBlockElement> Parent;
+	typedef BlockMap<PosinfoBlock,PosinfoBlockElementMap> Parent;
 
 public:
 	PosinfoBlockMap( leveldb::DB* db_)
-		:BlockMap<PosinfoBlock,PosinfoBlockElement>(db_){}
+		:BlockMap<PosinfoBlock,PosinfoBlockElementMap>(db_){}
 	PosinfoBlockMap( const PosinfoBlockMap& o)
-		:BlockMap<PosinfoBlock,PosinfoBlockElement>(o){}
+		:BlockMap<PosinfoBlock,PosinfoBlockElementMap>(o){}
 
 	void definePosinfoPosting(
 		const Index& typeno,
