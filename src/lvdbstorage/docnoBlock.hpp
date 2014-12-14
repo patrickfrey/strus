@@ -153,15 +153,15 @@ public:
 
 public:
 	DocnoBlock()
-		:FixedSizeRecordBlock( (char)DatabaseKeyPrefix){}
+		:FixedSizeRecordBlock<DocnoBlockElement>( (char)DatabaseKeyPrefix){}
 	DocnoBlock( const DocnoBlockElement* ar_, std::size_t arsize_)
-		:FixedSizeRecordBlock( (char)DatabaseKeyPrefix, ar_, arsize_){}
+		:FixedSizeRecordBlock<DocnoBlockElement>( (char)DatabaseKeyPrefix, ar_, arsize_){}
 	DocnoBlock( const DocnoBlock& o)
-		:FixedSizeRecordBlock( o){}
+		:FixedSizeRecordBlock<DocnoBlockElement>( o){}
 
 	DocnoBlock& operator=( const DocnoBlock& o)
 	{
-		FixedSizeRecordBlock::operator =(o);
+		FixedSizeRecordBlock<DocnoBlockElement>::operator =(o);
 		return *this;
 	}
 

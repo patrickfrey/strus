@@ -45,10 +45,14 @@ public:
 		DocIdPrefix='D',	///< [docid string]            ->  [docno]
 		VariablePrefix='V',	///< [variable string]         ->  [index]
 		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
+		UserNamePrefix='U',	///< [name string]             ->  [userno]
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
+
+		UserBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
+		DoclistBlockPrefix='d',	///< [typeno,termno,docno]     ->  [bit]*
 
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
@@ -65,10 +69,13 @@ public:
 			case DocIdPrefix: return "docid";
 			case VariablePrefix: return "global variable";
 			case AttributeKeyPrefix: return "document attribute name";
+			case UserNamePrefix: return "user id";
 
 			case ForwardIndexPrefix: return "forward index";
 			case DocnoBlockPrefix: return "docno posting block";
 			case PosinfoBlockPrefix: return "posinfo posting block";
+			case UserBlockPrefix: return "user ACL block";
+			case DoclistBlockPrefix: return "doc posting block";
 
 			case DocMetaDataPrefix: return "metadata";
 			case DocAttributePrefix: return "document attribute";

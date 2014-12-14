@@ -77,16 +77,6 @@ public:
 	{
 		return size() >= MaxBlockSize;
 	}
-	bool isThisBlockAddress( const Index& pos_) const
-	{
-		return (pos_ <= id() && pos_ > position_at( charptr()));
-	}
-	/// \brief Check if the address 'pos_', if it exists, probably is in the following block we can get with 'leveldb::Iterator::Next()' or not
-	bool isFollowBlockAddress( const Index& pos_) const
-	{
-		Index diff = id() - position_at( charptr());
-		return (pos_ > id()) && (pos_ < id() + diff - (diff >> 4));
-	}
 
 	void append( const Index& pos, const std::string& item);
 

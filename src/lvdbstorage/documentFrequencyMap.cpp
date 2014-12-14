@@ -48,7 +48,7 @@ void DocumentFrequencyMap::decrement( Index typeno, Index termno)
 
 void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
 {
-	typename Map::iterator mi = m_map.begin(), me = m_map.end();
+	Map::iterator mi = m_map.begin(), me = m_map.end();
 	while (mi != me)
 	{
 		if (KeyMap::isUnknown( mi->first.second))

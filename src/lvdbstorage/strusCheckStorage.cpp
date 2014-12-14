@@ -115,6 +115,11 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 				strus::DocAttributeData( key, value);
 				break;
 			}
+			case strus::UserNamePrefix:
+			{
+				std::cerr << "NOT IMPLEMENTED YET";
+				break;
+			}
 			case strus::DatabaseKey::DocFrequencyPrefix:
 			{
 				strus::DocFrequencyData( key, value);
@@ -128,6 +133,16 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 			case strus::DatabaseKey::PosinfoBlockPrefix:
 			{
 				strus::PosinfoBlockData data( key, value);
+				break;
+			}
+			case strus::UserBlockPrefix:
+			{
+				std::cerr << "NOT IMPLEMENTED YET";
+				break;
+			}
+			case strus::DoclistBlockPrefix:
+			{
+				std::cerr << "NOT IMPLEMENTED YET";
 				break;
 			}
 			case strus::DatabaseKey::MetaDataDescrPrefix:
