@@ -122,7 +122,7 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 				data.print( out);
 				break;
 			}
-			case strus::UserNamePrefix:
+			case strus::DatabaseKey::UserNamePrefix:
 			{
 				std::cerr << "NOT IMPLEMENTED YET";
 				break;
@@ -145,12 +145,12 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 				data.print( out);
 				break;
 			}
-			case strus::UserBlockPrefix:
+			case strus::DatabaseKey::UserBlockPrefix:
 			{
 				std::cerr << "NOT IMPLEMENTED YET";
 				break;
 			}
-			case strus::DoclistBlockPrefix:
+			case strus::DatabaseKey::DoclistBlockPrefix:
 			{
 				std::cerr << "NOT IMPLEMENTED YET";
 				break;
