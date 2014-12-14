@@ -28,7 +28,7 @@ Index IteratorUnionWeighted::skipDoc( const Index& docno_)
 	{
 		Index idx = 0;
 		for (;0!=(idx=skipPos( idx))
-			&& rt < (unsigned int)std::numeric_limits<short>::max(); ++idx)
+			&& rt < (Index)std::numeric_limits<short>::max(); ++idx)
 		{
 			m_weightmap[ idx] += 1.0f/se;
 		}

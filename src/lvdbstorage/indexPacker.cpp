@@ -117,16 +117,16 @@ static void utf8encode( BUFFER& buf, int32_t chr)
 	{
 		throw std::runtime_error( "Illegal unicode character");
 	}
-	unsigned int rt;
+	uint32_t rt;
 	if (chr <= 127)
 	{
 		buf.push_back( (char)(unsigned char)chr);
 		return;
 	}
-	unsigned int pp,sf;
+	uint32_t pp,sf;
 	for (pp=1,sf=5; pp<5; pp++,sf+=5)
 	{
-		if (chr < (unsigned int)((1<<6)<<sf)) break;
+		if ((uint32_t)chr < (uint32_t)((1<<6)<<sf)) break;
 	}
 	rt = pp+1;
 	unsigned char HB = (unsigned char)(B11111111 << (8-rt));
