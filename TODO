@@ -1,5 +1,4 @@
-replace bit scan forward with POSIX functions ffs(resp. ffsll) (string.h)
-analyzer capable of assigning weights for classical IR
+memory allocation, use local allocators to avoid memory fragmentation
 summarization with help of weighted union iterator
 posinfo optional "posinfo=no" switch
 Group id in analyzer term and group operator in query eval program (making an join operation with all elements of one group)

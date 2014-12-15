@@ -47,6 +47,7 @@ public:
 	{
 		std::size_t ii = idx/(8*sizeof(m_ar[0]));
 		std::size_t bb = idx%(8*sizeof(m_ar[0]));
+		if (ii >= m_size) throw std::logic_error("array bound read (BitField)");
 		return 0!=(m_ar[ ii] & (1<<bb));
 	}
 
@@ -54,6 +55,7 @@ public:
 	{
 		std::size_t ii = idx/(8*sizeof(m_ar[0]));
 		std::size_t bb = idx%(8*sizeof(m_ar[0]));
+		if (ii >= m_size) throw std::logic_error("array bound write (BitField)");
 		if (value)
 		{
 			m_ar[ ii] |= (1<<bb);
@@ -68,6 +70,7 @@ public:
 	{
 		std::size_t ii = idx/(8*sizeof(m_ar[0]));
 		std::size_t bb = idx%(8*sizeof(m_ar[0]));
+		if (ii >= m_size) throw std::logic_error("array bound read (BitField)");
 		unsigned long val = m_ar[ ii] & ~(1<<bb);
 		std::size_t pp = ffsl( val);
 		while (!pp && ++ii<m_size)

@@ -40,45 +40,161 @@ public:
 		:m_ar(0),m_size(0){}
 	RangeField( const RangeField& o)
 		:m_ar(o.m_ar),m_size(o.m_size){}
-	RangeField( void* ar_, std::size_t bitsize_)
-		:m_ar((unsigned long*)ar_),m_size(bitsize_/(8*sizeof(m_ar[0]))){}
+	RangeField( void* ar_, std::size_t bytesize_)
+		:m_ar((Index*)ar_),m_size(bytesize_/(sizeof(m_ar[0]))){}
 
-	bool operator[]( std::size_t idx) const
+	Index upper_bound( const Index& idx)
 	{
-		std::size_t ii = idx/(8*sizeof(m_ar[0]));
-		std::size_t bb = idx%(8*sizeof(m_ar[0]));
-		return 0!=(m_ar[ ii] & (1<<bb));
+		std::size_t itr = 0;
+		return upper_bound( idx, itr);
 	}
 
-	void set( std::size_t idx, bool value=true)
+	Index upper_bound( const Index& idx, std::size_t& itr)
 	{
-		std::size_t ii = idx/(8*sizeof(m_ar[0]));
-		std::size_t bb = idx%(8*sizeof(m_ar[0]));
-		if (value)
+		if (get_upper_bound_idx( itr, idx, itr))
 		{
-			m_ar[ ii] |= (1<<bb);
+			Index start = rangeStart( itr);
+			Index end = rangeEnd( itr);
+			if (start >= itr)
+			{
+				return start;
+			}
+			return itr;
 		}
 		else
 		{
-			m_ar[ ii] &= ~(1<<bb);
+			return 0;
 		}
 	}
 
-	std::size_t next( std::size_t idx)
+	static std::size_t packRange( Index* dest, Index from_, Index to_)
 	{
-		std::size_t ii = idx/(8*sizeof(m_ar[0]));
-		std::size_t bb = idx%(8*sizeof(m_ar[0]));
-		unsigned long val = m_ar[ ii] & ~(1<<bb);
-		std::size_t pp = ffsl( val);
-		while (!pp && ++ii<m_size)
+		if (to_ - from_ == 0)
 		{
-			pp = ffsl( m_ar[ii]);
+			dest[0] = from_;
+			return sizeof( Index);
 		}
-		return (ii<m_size) ? (ii * (8*sizeof(m_ar[0])) + pp):0;
+		else if (to_ - from_ > 1)
+		{
+			dest[0] = to_;
+			dest[1] = from_ - to_;
+			return sizeof( Index);
+		}
+		else
+		{
+			throw std::logic_error( "illegal range (RangeField::packRange)");
+		}
+	}
+
+	bool getTopRange( Index& from_, Index& to_)
+	{
+		if (m_size == 0) return false;
+		from_ = m_ar[ m_size-1];
+		if (from_ < 0)
+		{
+			to_ = m_ar[ m_size-2];
+			from_ = to_ + from_;
+		}
+		return true;
+	}
+
+	bool incrTopRange()
+	{
+		if (m_size < 2) return false;
+		if (m_ar[ m_size-1] > 0) throw std::logic_error("invalid operation (rangeField::incrTopRange)");
+		m_ar[ m_size-1] -= 1;
+		m_ar[ m_size-2] += 1;
+		return true;
 	}
 
 private:
-	unsigned long* m_ar;
+	bool get_upper_bound_idx( std::size_t& res, const Index& idx, std::size_t hint=0)
+	{
+		if (hint >= m_size || m_ar[hint] < 0 || m_ar[hint] > idx)
+		{
+			if (!m_size) return false;
+			hint = 0;
+		}
+		std::size_t first = 0, last = m_size-1, mid = hint;
+		if (rangeEnd(last) < idx)
+		{
+			return false;
+		}
+		if (rangeStart(first) >= idx)
+		{
+			res = first;
+			return true;
+		}
+		Index last_start = rangeStart( last);
+		Index first_end = rangeEnd( first);
+		Index mid_start = rangeStart( mid);
+		Index mid_end = rangeEnd( mid);
+		do
+		{
+			if (mid_start > idx)
+			{
+				last = mid;
+				last_start = mid_start;
+			}
+			else
+			{
+				if (mid_end >= idx)
+				{
+					res = mid;
+					return true;
+				}
+				first_end = mid_end;
+				first = mid;
+			}
+			mid = (last + first) /2;
+			mid_start = rangeStart( mid);
+			mid_end = rangeEnd( mid);
+		}
+		while (last - first > 4);
+
+		while (first <= last && rangeEnd(first) < idx)
+		{
+			++first;
+			if (first < m_size && m_ar[ first] < 0) ++first;
+		}
+		if (m_ar[first] < 0)
+		{
+			--first;
+		}
+		res = first;
+		return true;
+	}
+
+
+private:
+	Index rangeStart( const std::size_t& idx)
+	{
+		Index rt = m_ar[ idx];
+		if (rt < 0)
+		{
+			rt += m_ar[ idx-1];
+		}
+		else
+		{
+			if (idx+1 < m_size && m_ar[ idx+1] < 0)
+			{
+				rt += m_ar[ idx+1];
+			}
+		}
+		return rt;
+	}
+	Index rangeEnd( const std::size_t& idx)
+	{
+		Index rt = m_ar[ idx];
+		if (rt < 0)
+		{
+			rt = m_ar[ idx-1];
+		}
+		return rt;
+	}
+
+private:
+	Index* m_ar;
 	std::size_t m_size;
 };
 
