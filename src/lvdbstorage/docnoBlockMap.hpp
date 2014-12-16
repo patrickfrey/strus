@@ -31,7 +31,7 @@
 #include "strus/index.hpp"
 #include "docnoBlock.hpp"
 #include "blockKey.hpp"
-#include "blockMap.hpp"
+#include "blockStorage.hpp"
 #include "keyMap.hpp"
 #include <cstdlib>
 #include <leveldb/db.h>
@@ -40,74 +40,51 @@
 namespace strus {
 
 class DocnoBlockMap
-	:public BlockMap<DocnoBlock,DocnoBlockElementMap>
 {
 public:
-	typedef BlockMap<DocnoBlock,DocnoBlockElementMap> Parent;
-
-public:
 	DocnoBlockMap( leveldb::DB* db_)
-		:BlockMap<DocnoBlock,DocnoBlockElementMap>(db_){}
+		:m_db(db_){}
 	DocnoBlockMap( const DocnoBlockMap& o)
-		:BlockMap<DocnoBlock,DocnoBlockElementMap>(o){}
+		:m_db(o.m_db),m_map(o.m_map){}
 
 	void defineDocnoPosting(
 		const Index& termtype,
 		const Index& termvalue,
 		const Index& docno,
 		unsigned int ff,
-		float weight)
-	{
-		defineElement( BlockKey( termtype, termvalue), docno, DocnoBlockElement( docno, ff, weight));
-	}
+		float weight);
 
 	void deleteDocnoPosting(
 		const Index& termtype,
 		const Index& termvalue,
-		const Index& docno)
-	{
-		defineElement( BlockKey( termtype, termvalue), docno, DocnoBlockElement( docno, 0, 0.0));
-	}
+		const Index& docno);
 
-	class TermnoRenamer
-	{
-	public:
-		TermnoRenamer( const std::map<Index,Index>* termnomap_)
-			:m_termnomap(termnomap_)
-		{}
+	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
-		bool isCandidate( const BlockKeyIndex& keyidx) const
-		{
-			BlockKey key( keyidx);
-			return (KeyMap::isUnknown( key.elem(2)));
-		}
-		BlockKeyIndex map( const BlockKeyIndex& keyidx) const
-		{
-			BlockKey oldkey( keyidx);
-			std::map<Index,Index>::const_iterator mi = m_termnomap->find( oldkey.elem(2));
-			if (mi == m_termnomap->end())
-			{
-				throw std::runtime_error( "internal: term value undefined (term number map)");
-			}
-			BlockKey newkey( oldkey.elem(1), mi->second);
-			return newkey.index();
-		}
-
-	private:
-		const std::map<Index,Index>* m_termnomap;
-	};
-
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap)
-	{
-		TermnoRenamer renamer( &renamemap);
-		renameKeys( renamer);
-	}
-
-	void getWriteBatch( leveldb::WriteBatch& batch)
-	{
-		getWriteBatchMerge( batch);
-	}
+	void getWriteBatch( leveldb::WriteBatch& batch);
 	
+private:
+	void insertNewElements(
+			BlockStorage<DocnoBlock>& blkstorage,
+			DocnoBlockElementMap::const_iterator& ei,
+			const DocnoBlockElementMap::const_iterator& ee,
+			DocnoBlock& newblk,
+			const Index& lastInsertBlockId,
+			leveldb::WriteBatch& batch);
+
+	void mergeNewElements(
+			BlockStorage<DocnoBlock>& blkstorage,
+			DocnoBlockElementMap::const_iterator& ei,
+			const typename DocnoBlockElementMap::const_iterator& ee,
+			DocnoBlock& newblk,
+			leveldb::WriteBatch& batch);
+	
+private:
+	typedef std::map<BlockKeyIndex,DocnoBlockElementMap> Map;
+
+private:
+	leveldb::DB* m_db;
+	Map m_map;
 };
 
 }

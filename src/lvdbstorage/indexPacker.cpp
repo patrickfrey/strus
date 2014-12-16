@@ -56,6 +56,8 @@
 #define B11111011 (B11111000|B00000011)
 #define B11111101 (B11111100|B00000001)
 
+#define RANGE_DELIM ((char)0xFE)
+
 using namespace strus;
 
 struct CharLengthTab
@@ -160,23 +162,45 @@ static int32_t unpackInt32_( const char*& itr, const char* end)
 	return rt;
 }
 
-const char* strus::nextPackedIndexPos( const char* start, const char* str, const char* end)
+const char* strus::nextPackedIndexPos( const char* end, const char* str)
+{
+	char const* cc = str;
+	while (cc < end && ((unsigned char)*cc & B11000000) == B10000000) {++cc;}
+	return cc;
+}
+
+const char* strus::nextPackedRangePos( const char* end, const char* str)
+{
+	char const* rt = nextPackedIndexPos( end, str);
+	if (rt == end) return rt;
+	if (*(rt) == RANGE_DELIM)
+	{
+		return nextPackedIndexPos( end, rt+1);
+	}
+	return rt;
+}
+
+const char* strus::prevPackedIndexPos( const char* start, const char* str)
 {
 	char const* cc = str;
 	while (((unsigned char)*cc & B11000000) == B10000000) {--cc;}
-	if (start == cc)
+	if (start >= cc)
 	{
+		if (start == cc && ((unsigned char)*cc & B11000000) != B10000000) return cc;
 		throw std::runtime_error( "corrupt data (nextPackedIndexPos 1)");
 	}
-	else
-	{
-		cc += g_charlentable[ *cc];
-	}
-	if (cc > end)
-	{
-		throw std::runtime_error( "corrupt data (nextPackedIndexPos 2)");
-	}
 	return cc;
+}
+
+const char* strus::prevPackedRangePos( const char* start, const char* str)
+{
+	char const* rt = prevPackedIndexPos( start, str);
+	if (rt == start) return rt;
+	if (*(rt-1) == RANGE_DELIM)
+	{
+		return prevPackedIndexPos( start, rt-2);
+	}
+	return rt;
 }
 
 Index strus::unpackIndex( const char*& itr, const char* end)
@@ -199,19 +223,15 @@ const char* strus::skipIndex( const char* ptr, const char* end)
 	return rt;
 }
 
-template <class BUFFER>
-static void packIndex_( BUFFER& buf, const Index& idx)
+const char* strus::skipRange( const char* ptr, const char* end)
 {
-	if (idx < 0)
+	char const* rt = skipIndex( ptr, end);
+	if (rt == end) return end;
+	if (*rt == RANGE_DELIM)
 	{
-		throw std::runtime_error( "index out of range (packIndex_)");
+		return skipIndex( rt+1, end);
 	}
-	utf8encode( buf, (int32_t)idx);
-}
-
-void strus::packIndex( std::string& buf, const Index& idx)
-{
-	packIndex_( buf, idx);
+	return rt;
 }
 
 struct StaticBuffer
@@ -234,6 +254,66 @@ struct StaticBuffer
 	std::size_t size;
 	std::size_t maxsize;
 };
+
+template <class BUFFER>
+static void packIndex_( BUFFER& buf, const Index& idx)
+{
+	if (idx < 0)
+	{
+		throw std::runtime_error( "index out of range (packIndex_)");
+	}
+	utf8encode( buf, (int32_t)idx);
+}
+
+template <class BUFFER>
+static void packRange_( BUFFER& buf, const Index& idx, const Index& rangesize)
+{
+	packIndex_( buf, idx);
+	if (rangesize)
+	{
+		buf.push_back( RANGE_DELIM);
+		packIndex_( buf, rangesize);
+	}
+}
+
+void strus::packIndex( std::string& buf, const Index& idx)
+{
+	packIndex_( buf, idx);
+}
+
+void strus::packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
+{
+	StaticBuffer bufstruct( buf, size, maxsize);
+	packIndex_( bufstruct, idx);
+	size = bufstruct.size;
+}
+
+void strus::packRange( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx, const Index& rangesize)
+{
+	StaticBuffer bufstruct( buf, size, maxsize);
+	packRange_( bufstruct, idx, rangesize);
+	size = bufstruct.size;
+}
+
+void strus::packRange( std::string& buf, const Index& idx, const Index& rangesize)
+{
+	packRange_( buf, idx, rangesize);
+}
+
+Index strus::unpackRange( const char*& ptr, const char* end, Index& rangesize)
+{
+	Index rt = unpackIndex( ptr, end);
+	if (ptr < end && ptr[0] == RANGE_DELIM)
+	{
+		rangesize = unpackIndex( ptr, end);
+	}
+	else
+	{
+		rangesize = 0;
+	}
+	return rt;
+}
+
 
 struct SkipChar
 {
@@ -259,6 +339,23 @@ struct SkipStruct
 			++pi;
 			return true;
 		}
+	}
+};
+
+struct SkipRange
+{
+	bool operator()( char const*& pi, const char* pe, char delim)
+	{
+		pi += g_charlentable[ *pi];
+		if (pi==pe) return false;
+
+		if (*pi == delim)
+		{
+			++pi;
+			pi += g_charlentable[ *pi];
+			return pi!=pe;
+		}
+		return true;
 	}
 };
 
@@ -322,16 +419,17 @@ const char* strus::findStructIndexAsc( const char* ptr, const char* end, unsigne
 	return findIndex<SkipStruct,CompareAsc>( ptr, end, needle, delim);
 }
 const char* strus::findStructIndexDesc( const char* ptr, const char* end, unsigned char delim, const Index& needle)
-
 {
 	return findIndex<SkipStruct,CompareDesc>( ptr, end, needle, delim);
 }
 
-void strus::packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
+const char* strus::findRangeIndexAsc( const char* ptr, const char* end, const Index& needle)
 {
-	StaticBuffer bufstruct( buf, size, maxsize);
-	packIndex_( bufstruct, idx);
-	size = bufstruct.size;
+	return findIndex<SkipRange,CompareAsc>( ptr, end, needle, RANGE_DELIM);
+}
+const char* strus::findRangeIndexDesc( const char* ptr, const char* end, const Index& needle)
+{
+	return findIndex<SkipRange,CompareDesc>( ptr, end, needle, RANGE_DELIM);
 }
 
 unsigned int strus::nofPackedIndices( const char* ptr, const char* end)

@@ -27,50 +27,105 @@
 --------------------------------------------------------------------
 */
 #include "booleanBlock.hpp"
+#include "indexPacker.hpp"
 #include <limits>
 
 using namespace strus;
 
-bool BooleanBlock::append( const Index& elemno, const Index&)
+const char* BooleanBlock::find( const Index& docno_, const char* lowerbound) const
 {
-	switch (m_class)
+	const char* itr = upper_bound( docno_, lowerbound);
+	if (!itr) return 0;
+	Index from_;
+	Index to_;
+	getRange( itr, from_, to_);
+	return (from_ <= docno_ && to_ >= docno_)?itr:0;
+}
+
+const char* BooleanBlock::upper_bound( const Index& docno_, const char* lowerbound) const
+{
+	if (!lowerbound || lowerbound == charend()) return 0;
+	if (id() < docno_) throw std::logic_error("called BooleanBlock::upper_bound with wrong block");
+	return findRangeIndexDesc( lowerbound, charend(), relativeIndexFromElemno( docno_));
+}
+
+bool BooleanBlock::getRange( const char* itr, Index& from_, Index& to_) const
+{
+	if (itr == charend()) return false;
+	Index rangesize;
+	Index top = unpackRange( itr, charend(), rangesize);
+	to_ = elemnoFromRelativeIndex( top);
+	from_ = to_ - rangesize;
+	return true;
+}
+
+bool BooleanBlock::getLastRange( std::size_t& at_, Index& from_, Index& to_) const
+{
+	if (size() == 0) return false;
+
+	char const* pr = prevPackedRangePos( charptr(), charend()-1);
+	at_ = pr - charptr();
+
+	return getRange( pr, from_, to_);
+}
+
+void BooleanBlock::defineElement( const Index& elemno)
+{
+	defineRange( elemno, 0);
+}
+
+void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
+{
+	std::size_t at_;
+	Index from_;
+	Index to_;
+	char buf[64];
+	std::size_t bufpos = 0;
+
+	if (getLastRange( at_, from_, to_))
 	{
-		case BitField:
+		if (elemno < from_)
 		{
-			break;
+			throw std::logic_error( "ranges not appended in order in boolean block");
 		}
-		case RangeField16:
+		if (elemno <= to_ + 1)
 		{
-			int16_t range[2];
-			if (m_rangeField16.getTopRange( range[0], range[1]))
+			//... overlapping ranges => join them
+			if (to_ < elemno + rangesize)
 			{
+				to_ = elemno + rangesize;
+				resize( at_);
+				packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( from_), to_);
+				append( buf, bufpos);
 			}
 			else
 			{
-				Index elemidx = relativeIndexFromElemno( elemno);
-				if (elemidx > std::numeric_limits<int16_t>::max())
-				{
-					return false;
-				}
-				int16_t range[2];
-				m_rangeField16.packRange( range, )
+				//... new range inside old one
 			}
-			break;
 		}
-		case RangeField32:
+		else
 		{
-			break;
+			//... not overlapping with last range => add new
+			packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno), rangesize);
+			append( buf, bufpos);
 		}
+	}
+	else
+	{
+		//... first range => add new
+		packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno), rangesize);
+		append( buf, bufpos);
 	}
 }
 
 BooleanBlock BooleanBlock::merge( const BooleanBlock& newblk, const BooleanBlock& oldblk)
 {
-	
+	if (newblk.blocktype() != oldblk.blocktype()) throw std::logic_error("merging blocks of different types");
+	BooleanBlock rt( newblk.blocktype());
+
+//	char const* ni = newblk.charptr();
+//	char const* ne = newblk.charend();
+//	char const* oi = oldblk.charptr();
+//	char const* oe = oldblk.charend();
 }
 
-private:
-BlockImplClass m_class;
-BitField m_bitField;
-RangeField<signed short> m_rangeField16;
-RangeField<int32_t> m_rangeField32;

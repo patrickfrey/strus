@@ -30,8 +30,8 @@
 #define _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "posinfoBlock.hpp"
-#include "blockMap.hpp"
 #include "blockKey.hpp"
+#include "blockStorage.hpp"
 #include <vector>
 #include <iostream>
 #include <leveldb/db.h>
@@ -40,72 +40,50 @@
 namespace strus {
 
 class PosinfoBlockMap
-	:protected BlockMap<PosinfoBlock,PosinfoBlockElementMap>
 {
 public:
-	typedef BlockMap<PosinfoBlock,PosinfoBlockElementMap> Parent;
-
-public:
 	PosinfoBlockMap( leveldb::DB* db_)
-		:BlockMap<PosinfoBlock,PosinfoBlockElementMap>(db_){}
+		:m_db(db_){}
 	PosinfoBlockMap( const PosinfoBlockMap& o)
-		:BlockMap<PosinfoBlock,PosinfoBlockElementMap>(o){}
+		:m_db(o.m_db),m_map(o.m_map){}
 
 	void definePosinfoPosting(
 		const Index& typeno,
 		const Index& termno,
 		const Index& docno,
-		const std::vector<Index>& pos)
-	{
-		defineElement( BlockKey( typeno, termno), docno, pos);
-	}
+		const std::vector<Index>& pos);
 
 	void deletePosinfoPosting(
 		const Index& typeno,
 		const Index& termno,
-		const Index& docno)
-	{
-		deleteElement( BlockKey( typeno, termno), docno);
-	}
-	
-	class TermnoRenamer
-	{
-	public:
-		TermnoRenamer( const std::map<Index,Index>* termnomap_)
-			:m_termnomap(termnomap_)
-		{}
+		const Index& docno);
 
-		bool isCandidate( const BlockKeyIndex& keyidx) const
-		{
-			BlockKey key( keyidx);
-			return (KeyMap::isUnknown( key.elem(2)));
-		}
-		BlockKeyIndex map( const BlockKeyIndex& keyidx) const
-		{
-			BlockKey oldkey( keyidx);
-			std::map<Index,Index>::const_iterator mi = m_termnomap->find( oldkey.elem(2));
-			if (mi == m_termnomap->end())
-			{
-				throw std::runtime_error( "internal: term value undefined (term number map)");
-			}
-			BlockKey newkey( oldkey.elem(1), mi->second);
-			return newkey.index();
-		}
+	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
-	private:
-		const std::map<Index,Index>* m_termnomap;
-	};
+	void getWriteBatch( leveldb::WriteBatch& batch);
 
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap)
-	{
-		TermnoRenamer renamer( &renamemap);
-		renameKeys( renamer);
-	}
+private:
+	void insertNewElements(
+			BlockStorage<PosinfoBlock>& blkstorage,
+			PosinfoBlockElementMap::const_iterator& ei,
+			const PosinfoBlockElementMap::const_iterator& ee,
+			PosinfoBlock& newblk,
+			const Index& lastInsertBlockId,
+			leveldb::WriteBatch& batch);
 
-	void getWriteBatch( leveldb::WriteBatch& batch)
-	{
-		getWriteBatchMerge( batch);
-	}
+	void mergeNewElements(
+			BlockStorage<PosinfoBlock>& blkstorage,
+			PosinfoBlockElementMap::const_iterator& ei,
+			const typename PosinfoBlockElementMap::const_iterator& ee,
+			PosinfoBlock& newblk,
+			leveldb::WriteBatch& batch);
+
+private:
+	typedef std::map<BlockKeyIndex,PosinfoBlockElementMap> Map;
+
+private:
+	leveldb::DB* m_db;
+	Map m_map;
 };
 
 }

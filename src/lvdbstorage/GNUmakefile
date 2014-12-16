@@ -12,8 +12,12 @@ CPP_OBJS=\
 	keyValueStorage.o \
 	dataBlockStorage.o \
 	docnoBlock.o \
+	docnoBlockMap.o \
 	posinfoBlock.o \
+	posinfoBlockMap.o \
 	forwardIndexBlock.o \
+	forwardIndexBlockMap.o \
+	booleanBlock.o \
 	metaDataElement.o \
 	metaDataDescription.o \
 	metaDataRecord.o \

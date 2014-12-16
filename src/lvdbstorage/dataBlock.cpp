@@ -71,27 +71,42 @@ void DataBlock::initcopy( const DataBlock& o)
 	init( o.m_id, o.m_ptr, o.m_size, o.m_size /*force copy*/);
 }
 
+void DataBlock::expand( std::size_t datasize)
+{
+	std::size_t mm = BLOCK_ALLOC_SIZE( datasize + m_size);
+	char* mp;
+	if (m_allocsize)
+	{
+		mp = (char*)std::realloc( m_ptr, mm);
+		if (!mp) throw std::bad_alloc();
+	}
+	else
+	{
+		mp = (char*)std::calloc( mm, 1);
+		if (!mp) throw std::bad_alloc();
+		std::memcpy( mp, m_ptr, m_size);
+	}
+	m_allocsize = mm;
+	m_ptr = mp;
+}
+
 void DataBlock::append( const void* data, std::size_t datasize)
 {
 	if (datasize + m_size > m_allocsize)
 	{
-		std::size_t mm = BLOCK_ALLOC_SIZE( datasize + m_size);
-		char* mp;
-		if (m_allocsize)
-		{
-			mp = (char*)std::realloc( m_ptr, mm);
-			if (!mp) throw std::bad_alloc();
-		}
-		else
-		{
-			mp = (char*)std::calloc( mm, 1);
-			if (!mp) throw std::bad_alloc();
-			std::memcpy( mp, m_ptr, m_size);
-		}
-		m_allocsize = mm;
-		m_ptr = mp;
+		expand( datasize);
 	}
 	std::memcpy( m_ptr+m_size, data, datasize);
+	m_size += datasize;
+}
+
+void DataBlock::fill( char ch, std::size_t datasize)
+{
+	if (datasize + m_size > m_allocsize)
+	{
+		expand( datasize);
+	}
+	std::memset( m_ptr+m_size, ch, datasize);
 	m_size += datasize;
 }
 

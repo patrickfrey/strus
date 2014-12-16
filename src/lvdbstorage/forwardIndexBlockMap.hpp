@@ -30,8 +30,8 @@
 #define _STRUS_LVDB_FORWARD_INDEX_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "forwardIndexBlock.hpp"
-#include "blockMap.hpp"
 #include "blockKey.hpp"
+#include "blockStorage.hpp"
 #include <vector>
 #include <map>
 #include <leveldb/db.h>
@@ -39,40 +39,26 @@
 
 namespace strus {
 
-
 class ForwardIndexBlockMap
-	:protected BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap>
 {
 public:
-	typedef BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap> Parent;
-
-public:
 	ForwardIndexBlockMap( leveldb::DB* db_)
-		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap>(db_){}
+		:m_db(db_){}
 	ForwardIndexBlockMap( const ForwardIndexBlockMap& o)
-		:BlockMap<ForwardIndexBlock,ForwardIndexBlockElementMap>(o){}
+		:m_db(o.m_db),m_map(o.m_map){}
 
 	void defineForwardIndexTerm(
 		const Index& typeno,
 		const Index& docno,
 		const Index& pos,
-		const std::string& termstring)
-	{
-		defineElement( BlockKey( typeno, docno), pos, termstring);
-	}
+		const std::string& termstring);
 
 	void deleteForwardIndexTerm(
 		const Index& typeno,
 		const Index& docno,
-		const Index& pos)
-	{
-		deleteElement( BlockKey( typeno, docno), pos);
-	}
+		const Index& pos);
 
-	void getWriteBatch( leveldb::WriteBatch& batch)
-	{
-		getWriteBatchReplace( batch);
-	}
+	void getWriteBatch( leveldb::WriteBatch& batch);
 
 	template <class TermnoMap>
 	std::map<Index,Index> getTermOccurrencies(
@@ -81,10 +67,48 @@ public:
 		TermnoMap& elementmap)
 	{
 		std::map<Index,Index> rt;
-		getElementOccurrencies<TermnoMap, Index>(
+		getElementOccurrencies<TermnoMap>(
 			rt, BlockKey( typeno, docno), elementmap);
 		return rt;
 	}
+
+private:
+	template <class TermnoMap>
+	void getElementOccurrencies(
+		std::map<Index,Index>& result,
+		const BlockKey& dbkey,
+		TermnoMap& map)
+	{
+		BlockStorage<ForwardIndexBlock> blkstorage( m_db, dbkey, false);
+
+		Index blkidx = 0;
+		const ForwardIndexBlock* blk = blkstorage.load( blkidx);
+
+		for (; blk; blk = blkstorage.load( blkidx))
+		{
+			blkidx = blk->id()+1;
+			ForwardIndexBlock::const_iterator bi = blk->begin(), be = blk->end();
+			for (; bi != be; ++bi)
+			{
+				result[ map( *bi)] += 1;
+			}
+		}
+	}
+
+	void insertNewElements(
+			BlockStorage<ForwardIndexBlock>& blkstorage,
+			ForwardIndexBlockElementMap::const_iterator& ei,
+			const ForwardIndexBlockElementMap::const_iterator& ee,
+			ForwardIndexBlock& newblk,
+			const Index& lastInsertBlockId,
+			leveldb::WriteBatch& batch);
+	
+private:
+	typedef std::map<BlockKeyIndex,ForwardIndexBlockElementMap> Map;
+
+private:
+	leveldb::DB* m_db;
+	Map m_map;
 };
 
 }

@@ -28,6 +28,7 @@
 */
 #ifndef _STRUS_LVDB_STATISTICS_HPP_INCLUDED
 #define _STRUS_LVDB_STATISTICS_HPP_INCLUDED
+#include <stdint.h>
 #include <boost/atomic.hpp>
 #include <iostream>
 

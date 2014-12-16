@@ -79,6 +79,29 @@ public:
 	void initcopy( const DataBlock& o);
 
 	void append( const void* data, std::size_t datasize);
+	void fill( char ch, std::size_t datasize);
+
+	void setByte( std::size_t idx, unsigned char elem)
+	{
+		if (idx >= m_size) throw std::logic_error("array bound write (DataBlock::setByte)");
+		m_ptr[ idx] = elem;
+	}
+	void unionByte( std::size_t idx, unsigned char elem)
+	{
+		if (idx >= m_size) throw std::logic_error("array bound write (DataBlock::setByte)");
+		m_ptr[ idx] |= elem;
+	}
+	void resize( std::size_t newsize_)
+	{
+		if (newsize_ > m_size)
+		{
+			fill( '\0', newsize_ - m_size);
+		}
+		else
+		{
+			m_size = newsize_;
+		}
+	}
 
 	template <class Derivation>
 	static const Derivation* upcast( const DataBlock* o)
@@ -87,6 +110,9 @@ public:
 		if (o->blocktype() != Derivation::DatabaseKeyPrefix) throw std::logic_error("invalid data block cast");
 		return reinterpret_cast<const Derivation*>(o);
 	}
+
+private:
+	void expand( std::size_t datasize);
 
 private:
 	char m_type;

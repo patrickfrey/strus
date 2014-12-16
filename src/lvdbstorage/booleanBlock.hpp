@@ -30,8 +30,6 @@
 #define _STRUS_LVDB_BOOLEAN_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
-#include "bitField.hpp"
-#include "rangeField.hpp"
 #include <vector>
 #include <map>
 
@@ -46,40 +44,25 @@ public:
 	enum {
 		MaxBlockSize=1024
 	};
-	enum BlockImplClass
-	{
-		BitField,
-		RangeField16,
-		RangeField32
-	};
 
 public:
-	explicit BooleanBlock( char dbkeyprefix)
+	BooleanBlock( char dbkeyprefix)
 		:DataBlock( dbkeyprefix)
-		,m_class(BitField){}
+	{}
 
 	BooleanBlock( const BooleanBlock& o)
 		:DataBlock(o)
-		,m_class(o.m_class)
-		,m_bitField(o.m_bitField)
-		,m_rangeField16(o.m_rangeField16)
-		,m_rangeField32(o.m_rangeField32){}
+	{}
 
-	BooleanBlock( const Index& id_, const void* ptr_, std::size_t size_)
+	BooleanBlock( char dbkeyprefix, const Index& id_, const void* ptr_, std::size_t size_)
 		:DataBlock( dbkeyprefix, id_, ptr_, size_)
-		,m_class(size_?(BlockImplClass)*(int32_t*)ptr_:BitField)
-		,m_bitField( (const char*)ptr_ + sizeof(int32_t), size_?(size_ - sizeof(int32_t)):0)
-		,m_rangeField16( (const char*)ptr_ + sizeof(int32_t), size_?(size_ - sizeof(int32_t)):0)
-		,m_rangeField32( (const char*)ptr_ + sizeof(int32_t), size_?(size_ - sizeof(int32_t)):0){}
+	{}
 
 	BooleanBlock& operator=( const BooleanBlock& o)
 	{
 		DataBlock::operator =(o);
 		return *this;
 	}
-	Index relativeIndexFromElemno( const Index& elemno_) const	{return id()-elemno_+1;}
-	Index elemnoFromRelativeIndex( const Index& eidx_) const	{return id()-eidx_+1;}
-
 	const char* find( const Index& docno_, const char* lowerbound) const;
 	const char* upper_bound( const Index& docno_, const char* lowerbound) const;
 
@@ -88,15 +71,18 @@ public:
 		return size() >= MaxBlockSize;
 	}
 
-	void append( const Index& elem, const Index&);
+	void defineElement( const Index& elemno);
+	void defineRange( const Index& elemno, const Index& rangesize);
 
 	static BooleanBlock merge( const BooleanBlock& newblk, const BooleanBlock& oldblk);
 
 private:
-	BlockImplClass m_class;
-	BitField m_bitField;
-	RangeField<signed short> m_rangeField16;
-	RangeField<int32_t> m_rangeField32;
+	bool getRange( const char* itr, Index& from_, Index& to_) const;
+	bool getLastRange( std::size_t& at_, Index& from_, Index& to_) const;
+
+private:
+	Index relativeIndexFromElemno( const Index& elemno_) const	{return id()-elemno_+1;}
+	Index elemnoFromRelativeIndex( const Index& eidx_) const	{return id()-eidx_+1;}
 };
 
 
