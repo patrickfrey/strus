@@ -57,6 +57,11 @@ public:
 	virtual void deleteDocument(
 			const std::string& docid)=0;
 
+	/// \brief Declare the access rights of a user to any document to be removed from the storage within this transaction
+	/// \param[in] username user name
+	virtual void deleteUserAccessRights(
+			const std::string& username)=0;
+
 	/// \brief Write the documents created to the storage
 	virtual void commit()=0;
 

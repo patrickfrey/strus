@@ -28,6 +28,7 @@
 */
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
+#include "strus/docnoIteratorInterface.hpp"
 #include "storage.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
@@ -258,6 +259,49 @@ ForwardIteratorInterface*
 {
 	return new ForwardIterator( this, m_db, type);
 }
+
+class InvertedAclIterator
+	:public DocnoIteratorInterface
+	,public IndexSetIterator
+	
+{
+public:
+	InvertedAclIterator( leveldb::DB* db_, const Index& userno_)
+		:IndexSetIterator( db_, DatabaseKey::UserAclBlockPrefix, userno_){}
+
+	virtual Index skipDoc( const Index& docno_)
+	{
+		return skip(docno_);
+	}
+};
+
+class UnknownUserInvertedAclIterator
+	:public DocnoIteratorInterface
+{
+public:
+	UnknownUserInvertedAclIterator(){}
+	virtual Index skipDoc( const Index&)	{return 0;}
+};
+
+DocnoIteratorInterface*
+	Storage::createInvertedAclIterator(
+		const std::string& username)
+{
+	if (!withAcl())
+	{
+		return 0;
+	}
+	Index userno = getUserno( username);
+	if (userno == 0)
+	{
+		return new UnknownUserInvertedAclIterator();
+	}
+	else
+	{
+		return new InvertedAclIterator( m_db, userno);
+	}
+}
+
 
 StorageTransactionInterface*
 	Storage::createTransaction()

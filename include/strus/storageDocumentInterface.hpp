@@ -70,6 +70,15 @@ public:
 			const std::string& name_,
 			const std::string& value_)=0;
 
+	/// \brief Allow a user to access the document
+	/// \param[in] username_ name of the user to allow access
+	/// \remark The access is only retriected for search, not for the admin interfaces for inspecting, deleting and updating a document
+	/// \remark The access control is a very primitive implementation and just designed as filter in the search index. You should not rely on this mechanism alone.
+	/// \note Adding no user means that nobody can search for the document if access control is enabled
+	/// \note The storage has to be created with "acl=yes" for enabling access control
+	virtual void setUserAccessRights(
+			const std::string& username_)=0;
+
 	/// \brief Closing the document definition
 	virtual void done()=0;
 };

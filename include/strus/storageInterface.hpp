@@ -41,6 +41,8 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
+class DocnoIteratorInterface;
+/// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
 class StorageDocumentInterface;
@@ -76,6 +78,14 @@ public:
 	virtual ForwardIteratorInterface*
 		createForwardIterator(
 			const std::string& type)=0;
+
+	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see
+	/// \param[in] username name of the user
+	/// \return the iterator on the documents or NULL, if there is no access control enabled
+	/// \note The storage has to be created access control enabled
+	virtual DocnoIteratorInterface*
+		createInvertedAclIterator(
+			const std::string& username)=0;
 
 	/// \brief Get the number of documents inserted into the collection
 	/// \return the number of documents
