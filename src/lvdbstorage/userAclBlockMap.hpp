@@ -26,47 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
-#define _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
-#include <string>
+#ifndef _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "booleanBlock.hpp"
+#include "blockKey.hpp"
+#include "blockStorage.hpp"
+#include <cstdlib>
+#include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 namespace strus {
 
-class StorageConfig
+class UserAclBlockMap
 {
 public:
-	explicit StorageConfig( const char* source);
+	explicit UserAclBlockMap( leveldb::DB* db_)
+		:m_db(db_){}
+	UserAclBlockMap( const UserAclBlockMap& o)
+		:m_db(o.m_db),m_map(o.m_map){}
 
-	const std::string& path() const
-	{
-		return m_path;
-	}
+	void definePosting(
+		const Index& userno,
+		const Index& docno);
 
-	bool acl() const
-	{
-		return m_acl;
-	}
+	void deletePosting(
+		const Index& userno,
+		const Index& docno);
 
-	const std::string& metadata() const
-	{
-		return m_metadata;
-	}
-
-	unsigned int cachesize_kb() const
-	{
-		return m_cachesize_kb;
-	}
-
-	static const char* getDescription();
+	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	std::string m_path;
-	std::string m_metadata;
-	bool m_acl;
-	unsigned int m_cachesize_kb;
+	void insertNewElements(
+			BlockStorage<BooleanBlock>& blkstorage,
+			BooleanBlockElementMap::const_iterator& ei,
+			const BooleanBlockElementMap::const_iterator& ee,
+			BooleanBlock& newblk,
+			const Index& lastInsertBlockId,
+			leveldb::WriteBatch& batch);
+
+	void mergeNewElements(
+			BlockStorage<BooleanBlock>& blkstorage,
+			BooleanBlockElementMap::const_iterator& ei,
+			const typename BooleanBlockElementMap::const_iterator& ee,
+			BooleanBlock& newblk,
+			leveldb::WriteBatch& batch);
+
+	void markSetElement(
+		const Index& userno,
+		const Index& docno,
+		bool isMember);
+
+private:
+	typedef std::map<Index,BooleanBlockElementMap> Map;
+
+private:
+	leveldb::DB* m_db;
+	Map m_map;
 };
-}//namespace
+
+}
 #endif
-
-
 

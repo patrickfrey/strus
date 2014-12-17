@@ -58,6 +58,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_docno(0)
+	,m_next_userno(0)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
 	,m_transactionCnt(0)
@@ -129,6 +130,7 @@ void Storage::loadVariables()
 	m_next_termno = variableMap.lookUp( "TermNo");
 	m_next_typeno = variableMap.lookUp( "TypeNo");
 	m_next_docno = variableMap.lookUp( "DocNo");
+	m_next_userno = variableMap.lookUp( "UserNo");
 	m_next_attribno = variableMap.lookUp( "AttribNo");
 	m_nof_documents = variableMap.lookUp( "NofDocs");
 }
@@ -149,6 +151,12 @@ void Storage::storeVariables()
 		std::string docnoval;
 		packIndex( docnoval, m_next_docno);
 		varstor.store( "DocNo", docnoval, batch);
+	}
+	if (withAcl())
+	{
+		std::string usernoval;
+		packIndex( usernoval, m_next_userno);
+		varstor.store( "UserNo", usernoval, batch);
 	}{
 		std::string attribnoval;
 		packIndex( attribnoval, m_next_attribno);
@@ -218,6 +226,11 @@ Index Storage::getTermType( const std::string& name) const
 Index Storage::getDocno( const std::string& name) const
 {
 	return loadIndexValue( DatabaseKey::DocIdPrefix, name);
+}
+
+Index Storage::getUserno( const std::string& name) const
+{
+	return loadIndexValue( DatabaseKey::UserNamePrefix, name);
 }
 
 Index Storage::getAttributeName( const std::string& name) const
@@ -316,6 +329,28 @@ private:
 	Storage* m_storage;
 };
 
+class UsernoAllocator
+	:public KeyAllocatorInterface
+{
+public:
+	UsernoAllocator( Storage* storage_)
+		:KeyAllocatorInterface(true),m_storage(storage_){}
+	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	{
+		if (!m_storage->withAcl())
+		{
+			throw std::runtime_error( "storage configured without ACL. No users can be created");
+		}
+		return m_storage->allocUsernoIm( name, isNew);
+	}
+	virtual Index alloc()
+	{
+		throw std::logic_error("cannot use docno allocator for non immediate alloc");
+	}
+private:
+	Storage* m_storage;
+};
+
 class AttribnoAllocator
 	:public KeyAllocatorInterface
 {
@@ -364,6 +399,11 @@ KeyAllocatorInterface* Storage::createDocnoAllocator()
 	return new DocnoAllocator( this);
 }
 
+KeyAllocatorInterface* Storage::createUsernoAllocator()
+{
+	return new UsernoAllocator( this);
+}
+
 KeyAllocatorInterface* Storage::createAttribnoAllocator()
 {
 	return new AttribnoAllocator( this);
@@ -372,6 +412,11 @@ KeyAllocatorInterface* Storage::createAttribnoAllocator()
 KeyAllocatorInterface* Storage::createTermnoAllocator()
 {
 	return new TermnoAllocator( this);
+}
+
+bool Storage::withAcl() const
+{
+	return m_next_userno != 0;
 }
 
 Index Storage::allocTermno()
@@ -390,6 +435,12 @@ Index Storage::allocDocnoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock( m_mutex_docno);
 	return allocNameIm( DatabaseKey::DocIdPrefix, m_next_docno, name, isNew);
+}
+
+Index Storage::allocUsernoIm( const std::string& name, bool& isNew)
+{
+	boost::mutex::scoped_lock( m_mutex_userno);
+	return allocNameIm( DatabaseKey::UserNamePrefix, m_next_userno, name, isNew);
 }
 
 Index Storage::allocAttribnoIm( const std::string& name, bool& isNew)
@@ -442,6 +493,13 @@ Index Storage::documentNumber( const std::string& docid) const
 {
 	Index rt = getDocno( docid);
 	if (!rt) throw std::runtime_error( std::string( "document with id '") + docid + "' is not defined in index");
+	return rt;
+}
+
+Index Storage::userId( const std::string& username) const
+{
+	Index rt = getUserno( username);
+	if (!rt) throw std::runtime_error( std::string( "user with id '") + username + "' is not defined in index");
 	return rt;
 }
 

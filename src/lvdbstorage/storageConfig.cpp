@@ -111,11 +111,27 @@ static unsigned int nofK( const std::string& numstr)
 	}
 	return (unsigned int)((rt + 1023)/1024);
 }
+
+static bool yesNo( const char* cfgname, const std::string& str)
+{
+	std::string lostr = boost::algorithm::to_lower_copy( str);
+	if (lostr == "y") return true;
+	if (lostr == "n") return false;
+	if (lostr == "t") return true;
+	if (lostr == "f") return false;
+	if (lostr == "yes") return true;
+	if (lostr == "no") return false;
+	if (lostr == "true") return true;
+	if (lostr == "false") return false;
+	if (lostr == "1") return true;
+	if (lostr == "0") return false;
+	throw std::runtime_error( std::string("value for configuration option '") + cfgname + "' is not a boolean (yes/no or true/false)");
+}
+
 }//namespace
 
-
 StorageConfig::StorageConfig( const char* source)
-	:m_cachesize_kb(0)
+	:m_acl(false),m_cachesize_kb(0)
 {
 	ConfigMap configMap( source);
 	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();
@@ -129,6 +145,10 @@ StorageConfig::StorageConfig( const char* source)
 		else if (ci->first == "metadata")
 		{
 			m_metadata = ci->second;
+		}
+		else if (ci->first == "acl")
+		{
+			m_acl = yesNo( "acl", ci->second);
 		}
 		else if (ci->first == "cache")
 		{

@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_BOOLEAN_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_BOOLEAN_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_LVDB_DOCLIST_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_DOCLIST_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "booleanBlock.hpp"
 #include "blockKey.hpp"
@@ -38,28 +38,28 @@
 
 namespace strus {
 
-class BooleanBlockMap
+class DocListBlockMap
 {
 public:
-	BooleanBlockMap( leveldb::DB* db_, DatabaseKey::KeyPrefix dbkeyprefix_)
-		:m_db(db_),m_dbkeyprefix(dbkeyprefix_){}
-	BooleanBlockMap( const BooleanBlockMap& o)
-		:m_db(o.m_db),m_dbkeyprefix(o.m_dbkeyprefix),m_map(o.m_map){}
+	explicit DocListBlockMap( leveldb::DB* db_)
+		:m_db(db_){}
+	DocListBlockMap( const DocListBlockMap& o)
+		:m_db(o.m_db),m_map(o.m_map){}
 
-	void defineSetElement(
+	void definePosting(
 		const Index& termtype,
 		const Index& termvalue,
-		const Index& elemno);
+		const Index& docno);
 
-	void deleteSetElement(
+	void deletePosting(
 		const Index& termtype,
 		const Index& termvalue,
-		const Index& elemno);
+		const Index& docno);
 
 	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
 	void getWriteBatch( leveldb::WriteBatch& batch);
-	
+
 private:
 	void insertNewElements(
 			BlockStorage<BooleanBlock>& blkstorage,
@@ -79,7 +79,7 @@ private:
 	void markSetElement(
 		const Index& termtype,
 		const Index& termvalue,
-		const Index& elemno,
+		const Index& docno,
 		bool isMember);
 
 private:
@@ -87,7 +87,6 @@ private:
 
 private:
 	leveldb::DB* m_db;
-	DatabaseKey::KeyPrefix m_dbkeyprefix;
 	Map m_map;
 };
 

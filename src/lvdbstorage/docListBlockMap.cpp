@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "booleanBlockMap.hpp"
+#include "docListBlockMap.hpp"
 #include "keyMap.hpp"
 
 using namespace strus;
 
-void BooleanBlockMap::markSetElement(
+void DocListBlockMap::markSetElement(
 	const Index& termtype,
 	const Index& termvalue,
 	const Index& elemno,
@@ -50,7 +50,7 @@ void BooleanBlockMap::markSetElement(
 	}
 }
 
-void BooleanBlockMap::defineSetElement(
+void DocListBlockMap::definePosting(
 	const Index& termtype,
 	const Index& termvalue,
 	const Index& elemno)
@@ -58,7 +58,7 @@ void BooleanBlockMap::defineSetElement(
 	markSetElement( termtype, termvalue, elemno, true);
 }
 
-void BooleanBlockMap::deleteSetElement(
+void DocListBlockMap::deletePosting(
 	const Index& termtype,
 	const Index& termvalue,
 	const Index& elemno)
@@ -66,7 +66,7 @@ void BooleanBlockMap::deleteSetElement(
 	markSetElement( termtype, termvalue, elemno, false);
 }
 
-void BooleanBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
+void DocListBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
 {
 	typename Map::iterator mi = m_map.begin(), me = m_map.end();
 	while (mi != me)
@@ -78,7 +78,7 @@ void BooleanBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 			std::map<Index,Index>::const_iterator ri = renamemap.find( dbkey.elem(2));
 			if (ri == renamemap.end())
 			{
-				throw std::runtime_error( "internal: term value undefined (boolean map)");
+				throw std::runtime_error( "internal: term value undefined (doclist block map)");
 			}
 			BlockKey newkey( dbkey.elem(1), ri->second);
 
@@ -93,7 +93,7 @@ void BooleanBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 	}
 }
 
-void BooleanBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
+void DocListBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
 	typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
@@ -106,9 +106,9 @@ void BooleanBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		Index lastInsertBlockId = mi->second.lastInsertBlockId();
 
 		BlockStorage<BooleanBlock> blkstorage(
-				m_db, m_dbkeyprefix,
+				m_db, DatabaseKey::DocListBlockPrefix,
 				BlockKey(mi->first), false);
-		BooleanBlock newblk( (char)m_dbkeyprefix);
+		BooleanBlock newblk( (char)DatabaseKey::DocListBlockPrefix);
 
 		// [1] Merge new elements with existing upper bound blocks:
 		mergeNewElements( blkstorage, ei, ee, newblk, batch);
@@ -119,7 +119,7 @@ void BooleanBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 	m_map.clear();
 }
 	
-void BooleanBlockMap::insertNewElements(
+void DocListBlockMap::insertNewElements(
 		BlockStorage<BooleanBlock>& blkstorage,
 		BooleanBlockElementMap::const_iterator& ei,
 		const BooleanBlockElementMap::const_iterator& ee,
@@ -154,7 +154,7 @@ void BooleanBlockMap::insertNewElements(
 	}
 }
 
-void BooleanBlockMap::mergeNewElements(
+void DocListBlockMap::mergeNewElements(
 		BlockStorage<BooleanBlock>& blkstorage,
 		BooleanBlockElementMap::const_iterator& ei,
 		const BooleanBlockElementMap::const_iterator& ee,

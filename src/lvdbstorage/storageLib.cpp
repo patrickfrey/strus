@@ -75,6 +75,10 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 		varstor.store( "TermNo", std::string("\1"), batch);
 		varstor.store( "TypeNo", std::string("\1"), batch);
 		varstor.store( "DocNo", std::string("\1"), batch);
+		if (config.acl())
+		{
+			varstor.store( "UserNo", std::string("\1"), batch);
+		}
 		varstor.store( "AttribNo", std::string("\1"), batch);
 		varstor.store( "NofDocs", std::string("\0",1), batch);
 
@@ -122,7 +126,7 @@ DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescript
 			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>";
 
 		case CmdCreateStorageDatabase:
-			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nmetadata=<comma separated list of meta data def>";
+			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nacl=<yes/no, yes if users with different access rights exist>\nmetadata=<comma separated list of meta data def>";
 
 		case CmdDestroyStorageDatabase:
 			return "assignment:\npath=<LevelDB storage path>";

@@ -135,12 +135,12 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 				strus::PosinfoBlockData data( key, value);
 				break;
 			}
-			case strus::DatabaseKey::UserBlockPrefix:
+			case strus::DatabaseKey::UserAclBlockPrefix:
 			{
 				std::cerr << "NOT IMPLEMENTED YET";
 				break;
 			}
-			case strus::DatabaseKey::DoclistBlockPrefix:
+			case strus::DatabaseKey::DocListBlockPrefix:
 			{
 				std::cerr << "NOT IMPLEMENTED YET";
 				break;

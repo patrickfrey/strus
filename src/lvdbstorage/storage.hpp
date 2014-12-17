@@ -94,12 +94,15 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
+	Index userId( const std::string& username) const;
+
 	virtual std::vector<StatCounterValue> getStatistics() const;
 
 public:/*QueryEval*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
+	Index getUserno( const std::string& name) const;
 	Index getAttributeName( const std::string& name) const;
 
 public:/*StorageTransaction*/
@@ -110,12 +113,16 @@ public:/*StorageTransaction*/
 
 	KeyAllocatorInterface* createTypenoAllocator();
 	KeyAllocatorInterface* createDocnoAllocator();
+	KeyAllocatorInterface* createUsernoAllocator();
 	KeyAllocatorInterface* createAttribnoAllocator();
 	KeyAllocatorInterface* createTermnoAllocator();
+
+	bool withAcl() const;
 
 	Index allocTermno();
 	Index allocTypenoIm( const std::string& name, bool& isNew);///< immediate allocation of a term type
 	Index allocDocnoIm( const std::string& name, bool& isNew); ///< immediate allocation of a doc number
+	Index allocUsernoIm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
 	Index allocAttribnoIm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
 
 	friend class TransactionLock;
@@ -152,10 +159,12 @@ private:
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_termno;					///< next index to assign to a new term value
 	Index m_next_docno;					///< next index to assign to a new document id
+	Index m_next_userno;					///< next index to assign to a new user id
 	Index m_next_attribno;					///< next index to assign to a new attribute name
 	boost::mutex m_mutex_typeno;
 	boost::mutex m_mutex_termno;
 	boost::mutex m_mutex_docno;
+	boost::mutex m_mutex_userno;
 	boost::mutex m_mutex_attribno;
 
 	Index allocNameIm(

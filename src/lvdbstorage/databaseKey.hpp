@@ -51,8 +51,8 @@ public:
 		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
 
-		UserlistBlockPrefix='u',///< [userno,docno]            ->  [bit]*
-		DoclistBlockPrefix='d',	///< [typeno,termno,docno]     ->  [bit]*
+		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
+		DocListBlockPrefix='d',	///< [typeno,termno,docno]     ->  [bit]*
 
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
@@ -74,8 +74,8 @@ public:
 			case ForwardIndexPrefix: return "forward index";
 			case DocnoBlockPrefix: return "docno posting block";
 			case PosinfoBlockPrefix: return "posinfo posting block";
-			case UserBlockPrefix: return "user ACL block";
-			case DoclistBlockPrefix: return "doc posting block";
+			case UserAclBlockPrefix: return "user ACL block";
+			case DocListBlockPrefix: return "doc posting block";
 
 			case DocMetaDataPrefix: return "metadata";
 			case DocAttributePrefix: return "document attribute";
