@@ -38,7 +38,8 @@ const char* BooleanBlock::find( const Index& docno_, const char* lowerbound) con
 	if (!itr) return 0;
 	Index from_;
 	Index to_;
-	getRange( itr, from_, to_);
+	char const* ii = itr;
+	if (!getNextRange( ii, from_, to_)) return 0;
 	return (from_ <= docno_ && to_ >= docno_)?itr:0;
 }
 
@@ -49,7 +50,7 @@ const char* BooleanBlock::upper_bound( const Index& docno_, const char* lowerbou
 	return findRangeIndexDesc( lowerbound, charend(), relativeIndexFromElemno( docno_));
 }
 
-bool BooleanBlock::getRange( const char* itr, Index& from_, Index& to_) const
+bool BooleanBlock::getNextRange( char const*& itr, Index& from_, Index& to_) const
 {
 	if (itr == charend()) return false;
 	Index rangesize;
@@ -66,12 +67,83 @@ bool BooleanBlock::getLastRange( std::size_t& at_, Index& from_, Index& to_) con
 	char const* pr = prevPackedRangePos( charptr(), charend()-1);
 	at_ = pr - charptr();
 
-	return getRange( pr, from_, to_);
+	return getNextRange( pr, from_, to_);
 }
 
 void BooleanBlock::defineElement( const Index& elemno)
 {
 	defineRange( elemno, 0);
+}
+
+
+bool BooleanBlock::joinRange( Index& from_, Index& to_, const Index& from2_, const Index& to2_)
+{
+	if (from_ <= from2_)
+	{
+		if (to_ >= from2_)
+		{
+			if (to_ <= to2_)
+			{
+				//... case [from_][from2_][to_][to2_]
+				to_ = to2_;
+				return true;
+			}
+			else
+			{
+				//... case [from_][from2_][to2_][to_]
+				// => first range covers 2nd => nothing to do
+				return true;
+			}
+		}
+		else
+		{
+			//...[from_][to_][from2_][to2_]
+			if (to_+1 == from2_)
+			{
+				to_ = to2_;
+				return true;
+			}
+			else
+			{
+				//...[from_][to_] ... [from2_][to2_] not joinable to one
+				return false;
+			}
+		}
+	}
+	else
+	{
+		//...[from2_][from_] => swap szenario
+		if (to2_ >= from_)
+		{
+			if (to2_ <= to_)
+			{
+				//... case [from2_][from_][to2_][to_]
+				from_ = from2_;
+				return true;
+			}
+			else
+			{
+				//... case [from2_][from_][to_][to2_]
+				from_ = from2_;
+				to_ = to2_;
+				return true;
+			}
+		}
+		else
+		{
+			//...[from2_][to2_][from_][to_]
+			if (to2_+1 == from_)
+			{
+				from_ = from2_;
+				return true;
+			}
+			else
+			{
+				//...[from2_][to2_] ... [from_][to_] not joinable to one
+				return false;
+			}
+		}
+	}
 }
 
 void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
@@ -118,14 +190,82 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 	}
 }
 
-BooleanBlock BooleanBlock::merge( const BooleanBlock& newblk, const BooleanBlock& oldblk)
-{
-	if (newblk.blocktype() != oldblk.blocktype()) throw std::logic_error("merging blocks of different types");
-	BooleanBlock rt( newblk.blocktype());
 
-//	char const* ni = newblk.charptr();
-//	char const* ne = newblk.charend();
-//	char const* oi = oldblk.charptr();
-//	char const* oe = oldblk.charend();
+BooleanBlock BooleanBlockElementMap::merge( const_iterator ei, const const_iterator& ee, const BooleanBlock& oldblk)
+{
+	BooleanBlock rt( oldblk.blocktype());
+	rt.setId( oldblk.id());
+
+	char const* old_itr = oldblk.charptr();
+	Index old_from;
+	Index old_to;
+	bool old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+
+	while (ei != ee && old_haselem)
+	{
+		if (ei->second)
+		{
+			if (BooleanBlock::joinRange( old_from, old_to, ei->first, ei->first))
+			{
+				++ei;
+			}
+			else
+			{
+				if (ei->first < old_from)
+				{
+					rt.defineElement( ei->first);
+					++ei;
+				}
+				else
+				{
+					rt.defineRange( old_from, old_to - old_from);
+					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+				}
+			}
+		}
+		else
+		{
+			//... delete element
+			if (old_from <= ei->first)
+			{
+				if (old_to >= ei->first)
+				{
+					// .... that is inside the current range
+					if (old_from < ei->first)
+					{
+						rt.defineRange( old_from, ei->first - old_from - 1);
+					}
+					old_from = ei->first + 1;
+					++ei;
+				}
+				else
+				{
+					// .... that does not touch the old block
+					rt.defineRange( old_from, old_to - old_from);
+					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+				}
+			}
+			else
+			{
+				//... delete undefined element => ignore
+				++ei;
+			}
+		}
+	}
+	while (ei != ee)
+	{
+		if (ei->second)
+		{
+			rt.defineElement( ei->first);
+		}
+		++ei;
+	}
+	while (old_haselem)
+	{
+		rt.defineRange( old_from, old_to - old_from);
+		old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+	}
+	return rt;
 }
+
 

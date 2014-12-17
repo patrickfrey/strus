@@ -74,17 +74,26 @@ public:
 	void defineElement( const Index& elemno);
 	void defineRange( const Index& elemno, const Index& rangesize);
 
-	static BooleanBlock merge( const BooleanBlock& newblk, const BooleanBlock& oldblk);
-
-private:
-	bool getRange( const char* itr, Index& from_, Index& to_) const;
+	bool getNextRange( char const*& itr, Index& from_, Index& to_) const;
 	bool getLastRange( std::size_t& at_, Index& from_, Index& to_) const;
+	static bool joinRange( Index& from_, Index& to_, const Index& addfrom_, const Index& addto_);
 
 private:
 	Index relativeIndexFromElemno( const Index& elemno_) const	{return id()-elemno_+1;}
 	Index elemnoFromRelativeIndex( const Index& eidx_) const	{return id()-eidx_+1;}
 };
 
+
+class BooleanBlockElementMap
+	:public std::map<Index,bool>
+{
+public:
+	BooleanBlockElementMap(){}
+	BooleanBlockElementMap( const BooleanBlockElementMap& o)
+		:std::map<Index,bool>(o){}
+
+	static BooleanBlock merge( const_iterator ei, const const_iterator& ee, const BooleanBlock& oldblk);
+};
 
 }//namespace
 #endif

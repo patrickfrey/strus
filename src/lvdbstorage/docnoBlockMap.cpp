@@ -132,8 +132,8 @@ void DocnoBlockMap::insertNewElements(
 			newblk.clear();
 			newblk.setId( lastInsertBlockId);
 		}
-		newblk.append( ei->key(), ei->value());
-		blkid = ei->key();
+		newblk.append( ei->docno(), ei->value());
+		blkid = ei->docno();
 	}
 	if (!newblk.empty())
 	{
@@ -150,16 +150,12 @@ void DocnoBlockMap::mergeNewElements(
 		leveldb::WriteBatch& batch)
 {
 	const DocnoBlock* blk;
-	while (ei != ee && 0!=(blk=blkstorage.load( ei->key())))
+	while (ei != ee && 0!=(blk=blkstorage.load( ei->docno())))
 	{
-		DocnoBlock elemblk;
-		elemblk.setId( blk->id());
+		DocnoBlockElementMap::const_iterator newblk_start = ei;
+		for (; ei != ee && ei->docno() <= blk->id(); ++ei){}
 
-		for (; ei != ee && ei->key() <= blk->id(); ++ei)
-		{
-			elemblk.append( ei->key(), ei->value());
-		}
-		newblk = DocnoBlock::merge( elemblk, *blk);
+		newblk = DocnoBlockElementMap::merge( newblk_start, ei, *blk);
 		if (blkstorage.loadNext())
 		{
 			// ... is not the last block, so we store it
@@ -176,7 +172,7 @@ void DocnoBlockMap::mergeNewElements(
 			}
 			else
 			{
-				blkstorage.dispose( elemblk.id(), batch);
+				blkstorage.dispose( newblk.id(), batch);
 			}
 			break;
 		}
@@ -185,12 +181,11 @@ void DocnoBlockMap::mergeNewElements(
 	{
 		// Fill first new block with elements of last 
 		// block and dispose the last block:
-		if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
+		if (ei != ee && 0!=(blk=blkstorage.loadLast()))
 		{
 			newblk.initcopy( *blk);
 			blkstorage.dispose( blk->id(), batch);
 		}
 	}
 }
-	
 

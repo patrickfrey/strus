@@ -97,52 +97,49 @@ const DocnoBlockElement* DocnoBlock::find( const Index& docno_, const DocnoBlock
 	return 0;
 }
 
-DocnoBlock DocnoBlock::merge( const DocnoBlock& newblk, const DocnoBlock& oldblk)
+DocnoBlock DocnoBlockElementMap::merge( const_iterator ei, const const_iterator& ee, const DocnoBlock& oldblk)
 {
 	DocnoBlock rt;
-	Index blkid = (oldblk.id() > newblk.id())?oldblk.id():newblk.id();
-	rt.setId( blkid);
+	rt.setId( oldblk.id());
 
-	const DocnoBlockElement* ai = newblk.begin();
-	const DocnoBlockElement* ae = newblk.end();
-	const DocnoBlockElement* bi = oldblk.begin();
-	const DocnoBlockElement* be = oldblk.end();
-	while (ai != ae && bi != be)
+	const DocnoBlockElement* old_itr = oldblk.begin();
+	const DocnoBlockElement* old_end = oldblk.end();
+	while (ei != ee && old_itr != old_end)
 	{
-		if (ai->docno() <= bi->docno())
+		if (ei->docno() <= old_itr->docno())
 		{
-			if (!ai->empty())
+			if (!ei->value().empty())
 			{
-				rt.push_back( *ai);
+				rt.push_back( ei->value());
 			}
-			if (ai->docno() == bi->docno())
+			if (ei->docno() == old_itr->docno())
 			{
 				//... defined twice -> prefer new entry and ignore old
-				++bi;
+				++old_itr;
 			}
-			++ai;
+			++ei;
 		}
 		else
 		{
-			rt.push_back( *bi);
-			++bi;
+			rt.push_back( *old_itr);
+			++old_itr;
 		}
 	}
-	while (ai != ae)
+	while (ei != ee)
 	{
-		if (!ai->empty())
+		if (!ei->value().empty())
 		{
-			rt.push_back( *ai);
+			rt.push_back( ei->value());
 		}
-		++ai;
+		++ei;
 	}
-	while (bi != be)
+	while (old_itr != old_end)
 	{
-		if (!bi->empty())
+		if (!old_itr->empty())
 		{
-			rt.push_back( *bi);
+			rt.push_back( *old_itr);
 		}
-		++bi;
+		++old_itr;
 	}
 	return rt;
 }

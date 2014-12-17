@@ -105,8 +105,6 @@ public:
 	void append( const Index& docno, const char* posinfo);
 	void appendPositionsBlock( const char* start, const char* end);
 
-	static PosinfoBlock merge( const PosinfoBlock& newblk, const PosinfoBlock& oldblk);
-
 	class PositionScanner
 	{
 	public:
@@ -153,9 +151,6 @@ std::ostream& operator<< (std::ostream& out, const PosinfoBlockElement& e);
 class PosinfoBlockElementMap
 {
 public:
-	typedef PosinfoBlockElement mapped_type;
-
-public:
 	PosinfoBlockElementMap(){}
 	PosinfoBlockElementMap( const PosinfoBlockElementMap& o)
 		:m_map(o.m_map),m_strings(o.m_strings){}
@@ -190,12 +185,12 @@ public:
 			m_ptr = ptr_;
 		}
 
-		const Index& key() const
+		const Index& docno() const
 		{
 			return m_docno;
 		}
 
-		const char* value() const
+		const char* ptr() const
 		{
 			return m_ptr;
 		}
@@ -250,6 +245,8 @@ public:
 	{
 		return m_strings.c_str();
 	}
+
+	static PosinfoBlock merge( const_iterator ei, const const_iterator& ee, const PosinfoBlock& oldblk);
 
 private:
 	std::map<Index,std::size_t> m_map;

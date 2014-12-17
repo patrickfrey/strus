@@ -287,65 +287,61 @@ void PosinfoBlock::setId( const Index& id_)
 	}
 }
 
-PosinfoBlock PosinfoBlock::merge( const PosinfoBlock& newblk, const PosinfoBlock& oldblk)
+PosinfoBlock PosinfoBlockElementMap::merge( 
+		const_iterator ei, const const_iterator& ee, const PosinfoBlock& oldblk)
 {
 	PosinfoBlock rt;
-	Index blkid = (oldblk.id() > newblk.id())?oldblk.id():newblk.id();
-	rt.setId( blkid);
+	rt.setId( oldblk.id());
 
-	char const* newi = newblk.begin();
-	char const* oldi = oldblk.begin();
-	Index newx = newblk.docno_at( newi);
-	Index oldx = oldblk.docno_at( oldi);
+	char const* old_blkptr = oldblk.begin();
+	Index old_docno = oldblk.docno_at( old_blkptr);
 
-	while (newx && oldx)
+	while (ei != ee && old_docno)
 	{
-		if (newx <= oldx)
+		if (ei->docno() <= old_docno)
 		{
-			if (!newblk.empty_at( newi))
+			if (*ei->ptr())
 			{
 				//... append only if not empty (empty => delete)
-				rt.appendPositionsBlock( newi, newblk.end_at( newi));
+				rt.append( ei->docno(), ei->ptr());
 			}
-			if (newx == oldx)
+			if (ei->docno() == old_docno)
 			{
 				//... defined twice -> prefer new entry and ignore old
-				oldi = oldblk.nextDoc( oldi);
-				oldx = oldblk.docno_at( oldi);
+				old_blkptr = oldblk.nextDoc( old_blkptr);
+				old_docno = oldblk.docno_at( old_blkptr);
 			}
-			newi = newblk.nextDoc( newi);
-			newx = newblk.docno_at( newi);
+			++ei;
 		}
 		else
 		{
-			if (!oldblk.empty_at( oldi))
+			if (!oldblk.empty_at( old_blkptr))
 			{
 				//... append only if not empty (empty => delete)
-				rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
+				rt.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
 			}
-			oldi = oldblk.nextDoc( oldi);
-			oldx = oldblk.docno_at( oldi);
+			old_blkptr = oldblk.nextDoc( old_blkptr);
+			old_docno = oldblk.docno_at( old_blkptr);
 		}
 	}
-	while (newx)
+	while (ei != ee)
 	{
-		if (!newblk.empty_at( newi))
+		if (*ei->ptr())
 		{
 			//... append only if not empty (empty => delete)
-			rt.appendPositionsBlock( newi, newblk.end_at( newi));
+			rt.append( ei->docno(), ei->ptr());
 		}
-		newi = newblk.nextDoc( newi);
-		newx = newblk.docno_at( newi);
+		++ei;
 	}
-	while (oldx)
+	while (old_docno)
 	{
-		if (!oldblk.empty_at( oldi))
+		if (!oldblk.empty_at( old_blkptr))
 		{
 			//... append only if not empty (empty => delete)
-			rt.appendPositionsBlock( oldi, oldblk.end_at( oldi));
+			rt.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
 		}
-		oldi = oldblk.nextDoc( oldi);
-		oldx = oldblk.docno_at( oldi);
+		old_blkptr = oldblk.nextDoc( old_blkptr);
+		old_docno = oldblk.docno_at( old_blkptr);
 	}
 	return rt;
 }

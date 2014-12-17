@@ -74,7 +74,7 @@ private:
 	void mergeNewElements(
 			BlockStorage<PosinfoBlock>& blkstorage,
 			PosinfoBlockElementMap::const_iterator& ei,
-			const typename PosinfoBlockElementMap::const_iterator& ee,
+			const PosinfoBlockElementMap::const_iterator& ee,
 			PosinfoBlock& newblk,
 			leveldb::WriteBatch& batch);
 

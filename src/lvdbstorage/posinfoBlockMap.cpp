@@ -131,8 +131,8 @@ void PosinfoBlockMap::insertNewElements(
 			newblk.clear();
 			newblk.setId( lastInsertBlockId);
 		}
-		newblk.append( ei->key(), ei->value());
-		blkid = ei->key();
+		newblk.append( ei->docno(), ei->ptr());
+		blkid = ei->docno();
 	}
 	if (!newblk.empty())
 	{
@@ -144,21 +144,17 @@ void PosinfoBlockMap::insertNewElements(
 void PosinfoBlockMap::mergeNewElements(
 		BlockStorage<PosinfoBlock>& blkstorage,
 		PosinfoBlockElementMap::const_iterator& ei,
-		const typename PosinfoBlockElementMap::const_iterator& ee,
+		const PosinfoBlockElementMap::const_iterator& ee,
 		PosinfoBlock& newblk,
 		leveldb::WriteBatch& batch)
 {
 	const PosinfoBlock* blk;
-	while (ei != ee && 0!=(blk=blkstorage.load( ei->key())))
+	while (ei != ee && 0!=(blk=blkstorage.load( ei->docno())))
 	{
-		PosinfoBlock elemblk;
-		elemblk.setId( blk->id());
+		PosinfoBlockElementMap::const_iterator newblk_start = ei;
+		for (; ei != ee && ei->docno() <= blk->id(); ++ei){}
 
-		for (; ei != ee && ei->key() <= blk->id(); ++ei)
-		{
-			elemblk.append( ei->key(), ei->value());
-		}
-		newblk = PosinfoBlock::merge( elemblk, *blk);
+		newblk = PosinfoBlockElementMap::merge( newblk_start, ei, *blk);
 		if (blkstorage.loadNext())
 		{
 			// ... is not the last block, so we store it
@@ -175,7 +171,7 @@ void PosinfoBlockMap::mergeNewElements(
 			}
 			else
 			{
-				blkstorage.dispose( elemblk.id(), batch);
+				blkstorage.dispose( newblk.id(), batch);
 			}
 			break;
 		}
