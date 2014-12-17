@@ -37,6 +37,9 @@
 #include "attributeMap.hpp"
 #include "docnoBlock.hpp"
 #include "docnoBlockMap.hpp"
+#include "booleanBlock.hpp"
+#include "docListBlockMap.hpp"
+#include "userAclBlockMap.hpp"
 #include "posinfoBlock.hpp"
 #include "posinfoBlockMap.hpp"
 #include "forwardIndexBlock.hpp"
@@ -71,6 +74,9 @@ public:
 	virtual void deleteDocument(
 		const std::string& docid);
 
+	virtual void deleteUserAccessRights(
+			const std::string& username);
+
 	virtual StorageDocumentInterface*
 		createDocument(
 			const std::string& docid_,
@@ -86,6 +92,7 @@ public:/*Document*/
 	Index getOrCreateTermType( const std::string& name);
 	Index getOrCreateAttributeName( const std::string& name);
 	Index getOrCreateDocno( const std::string& name, bool& isNew);
+	Index getOrCreateUserno( const std::string& name, bool& isNew);
 	Index lookUpTermValue( const std::string& name);
 
 	void incrementDf( const Index& typeno, const Index& termno);
@@ -98,6 +105,9 @@ public:/*Document*/
 	void defineAttribute( const Index& docno, const std::string& varname, const std::string& value);
 	void deleteAttribute( const Index& docno, const std::string& varname);
 	void deleteAttributes( const Index& docno);
+
+	void defineAcl( const Index& userno, const Index& docno);
+	void deleteAcl( const Index& docno);
 
 	void deleteIndex( const Index& docno);
 
@@ -125,6 +135,12 @@ public:/*Document*/
 		const Index& typeno, const Index& docno,
 		const Index& pos);
 
+	void defineUserAccess(
+		const Index& userno, const Index& docno);
+
+	void deleteUserAccess(
+		const Index& userno, const Index& docno);
+
 private:
 	Storage* m_storage;					///< Storage to call refresh after commit or rollback
 	leveldb::DB* m_db;					///< levelDB handle
@@ -139,10 +155,13 @@ private:
 	DocnoBlockMap m_docnoBlockMap;				///< map of docno postings for writing
 	PosinfoBlockMap m_posinfoBlockMap;			///< map of posinfo postings for writing
 	ForwardIndexBlockMap m_forwardIndexBlockMap;		///< map of forward index for writing
+	DocListBlockMap m_docListBlockMap;			///< map of docno sets for writing
+	UserAclBlockMap m_userAclBlockMap;			///< map of user rights for writing (forward and inverted)
 
 	KeyMap m_termTypeMap;					///< map of term types
 	KeyMap m_termValueMap;					///< map of term values
 	KeyMap m_docIdMap;					///< map of document ids
+	KeyMap m_userIdMap;					///< map of user ids
 	KeyMap m_attributeNameMap;				///< map of document attribute names
 
 	std::map<std::string,Index> m_newDocidMap;		///< map of new document identifiers (docid's allocated in ranges that must be written in the commit, because the were not written immediately)

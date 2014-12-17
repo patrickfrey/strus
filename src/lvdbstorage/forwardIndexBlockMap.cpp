@@ -60,10 +60,10 @@ void ForwardIndexBlockMap::deleteForwardIndexTerm(
 
 void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
-	typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		typename ForwardIndexBlockElementMap::const_iterator
+		ForwardIndexBlockElementMap::const_iterator
 			ei = mi->second.begin(),
 			ee = mi->second.end();
 

@@ -31,6 +31,7 @@
 #include "storageTransaction.hpp"
 #include "storageDocument.hpp"
 #include "storage.hpp"
+#include "indexSetIterator.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
@@ -112,6 +113,7 @@ static void logError(
 
 void StorageDocumentChecker::doCheck( std::ostream& logout)
 {
+	//[1] Check term index:
 	TermMap::const_iterator ti = m_termMap.begin(), te = m_termMap.end();
 	for (; ti != te; ++ti)
 	{
@@ -167,6 +169,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		}
 	}
 
+	//[2] Check meta data:
 	boost::scoped_ptr<MetaDataReaderInterface> metadata(
 		m_storage->createMetaDataReader());
 
@@ -184,6 +187,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		}
 	}
 
+	//[3] Check attributes:
 	boost::scoped_ptr<AttributeReaderInterface> attributes(
 		m_storage->createAttributeReader());
 
@@ -200,6 +204,32 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 				std::string( "document attribute does not match: '") + ai->second + "' != '" + val + "'");
 		}
 	}
+
+	//[4] Check access rights:
+	std::vector<std::string>::const_iterator ui = m_userlist.begin(), ue = m_userlist.end();
+	IndexSetIterator aclitr = m_storage->getAclIterator( m_docno);
+	for (; ui != ue; ++ui)
+	{
+		Index userno = m_storage->getUserno( *ui);
+		if (!userno)
+		{
+			logError( logout, m_docid, "document user rights do not match (undefined username)");
+		}
+		IndexSetIterator invaclitr = m_storage->getUserAclIterator( userno);
+		if (m_docno != invaclitr.skip( m_docno))
+		{
+			logError( logout, m_docid, "document user rights do not match (document not found in inverted ACL)");
+		}
+		if (userno != aclitr.skip( userno))
+		{
+			logError( logout, m_docid, "document user rights do not match (user not found in ACL)");
+		}
+	}
+}
+
+void StorageDocumentChecker::setUserAccessRights( const std::string& username)
+{
+	m_userlist.push_back( username);
 }
 
 void StorageDocumentChecker::done()

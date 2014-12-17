@@ -87,6 +87,13 @@ void StorageDocument::setAttribute(
 	m_attributes.push_back( DocAttribute( name_, value_));
 }
 
+void StorageDocument::setUserAccessRights(
+		const std::string& username_)
+{
+	bool isNew;
+	m_userlist.push_back( m_transaction->getOrCreateUserno( username_, isNew));
+}
+
 void StorageDocument::done()
 {
 	if (!m_isNew)
@@ -97,6 +104,8 @@ void StorageDocument::done()
 		m_transaction->deleteAttributes( m_docno);
 		//[1.3] Delete old index elements (forward index and inverted index):
 		m_transaction->deleteIndex( m_docno);
+		//[1.4] Delete old user access rights:
+		m_transaction->deleteAcl( m_docno);
 	}
 	//[2.1] Define new metadata:
 	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
@@ -116,7 +125,7 @@ void StorageDocument::done()
 	TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
-		//[4] Insert inverted index
+		//[2.3.1] Insert inverted index
 		std::vector<Index> pos;
 		pos.insert( pos.end(), ti->second.pos.begin(), ti->second.pos.end());
 		m_transaction->definePosinfoPosting(
@@ -129,9 +138,16 @@ void StorageDocument::done()
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
-		//[5] Insert forward index
+		//[2.3.2] Insert forward index
 		m_transaction->defineForwardIndexTerm(
 			ri->first.typeno, m_docno, ri->first.pos, ri->second);
+	}
+
+	//[2.4] Insert new document access rights:
+	std::vector<Index>::const_iterator ui = m_userlist.begin(), ue = m_userlist.end();
+	for (; ui != ue; ++ui)
+	{
+		m_transaction->defineUserAccess( *ui, m_docno);
 	}
 }
 

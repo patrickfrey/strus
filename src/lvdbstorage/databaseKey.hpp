@@ -52,6 +52,7 @@ public:
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
+		AclBlockPrefix='w',	///< [docno,userno]            ->  [bit]*
 		DocListBlockPrefix='d',	///< [typeno,termno,docno]     ->  [bit]*
 
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
@@ -75,6 +76,7 @@ public:
 			case DocnoBlockPrefix: return "docno posting block";
 			case PosinfoBlockPrefix: return "posinfo posting block";
 			case UserAclBlockPrefix: return "user ACL block";
+			case AclBlockPrefix: return "inverted ACL block";
 			case DocListBlockPrefix: return "doc posting block";
 
 			case DocMetaDataPrefix: return "metadata";

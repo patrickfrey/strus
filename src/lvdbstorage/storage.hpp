@@ -33,6 +33,7 @@
 #include "strus/arithmeticVariant.hpp"
 #include "metaDataBlockCache.hpp"
 #include "databaseKey.hpp"
+#include "indexSetIterator.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -142,6 +143,10 @@ public:/*StorageTransaction*/
 	private:
 		boost::mutex* m_mutex;
 	};
+
+public:/*StorageDocumentChecker*/
+	IndexSetIterator getAclIterator( const Index& docno);
+	IndexSetIterator getUserAclIterator( const Index& userno);
 
 private:
 	Index loadIndexValue(

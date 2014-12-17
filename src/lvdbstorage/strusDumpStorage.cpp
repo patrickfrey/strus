@@ -150,6 +150,11 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 				std::cerr << "NOT IMPLEMENTED YET";
 				break;
 			}
+			case strus::DatabaseKey::AclBlockPrefix:
+			{
+				std::cerr << "NOT IMPLEMENTED YET";
+				break;
+			}
 			case strus::DatabaseKey::DocListBlockPrefix:
 			{
 				std::cerr << "NOT IMPLEMENTED YET";

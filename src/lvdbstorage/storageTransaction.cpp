@@ -49,9 +49,12 @@ StorageTransaction::StorageTransaction(
 	,m_docnoBlockMap(db_)
 	,m_posinfoBlockMap(db_)
 	,m_forwardIndexBlockMap(db_)
+	,m_docListBlockMap(db_)
+	,m_userAclBlockMap(db_)
 	,m_termTypeMap(db_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
 	,m_termValueMap(db_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator())
 	,m_docIdMap(db_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
+	,m_userIdMap(db_,DatabaseKey::UserNamePrefix, storage_->createUsernoAllocator())
 	,m_attributeNameMap(db_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())
 	,m_nof_documents(0)
 	,m_commit(false)
@@ -83,6 +86,11 @@ Index StorageTransaction::getOrCreateTermType( const std::string& name)
 Index StorageTransaction::getOrCreateDocno( const std::string& name, bool& isNew)
 {
 	return m_docIdMap.getOrCreate( name, isNew);
+}
+
+Index StorageTransaction::getOrCreateUserno( const std::string& name, bool& isNew)
+{
+	return m_userIdMap.getOrCreate( name, isNew);
 }
 
 Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
@@ -133,12 +141,23 @@ void StorageTransaction::deleteAttributes( const Index& docno)
 	m_attributeMap.deleteAttributes( docno);
 }
 
+void StorageTransaction::defineAcl( const Index& userno, const Index& docno)
+{
+	m_userAclBlockMap.defineUserAccess( userno, docno);
+}
+
+void StorageTransaction::deleteAcl( const Index& docno)
+{
+	m_userAclBlockMap.deleteDocumentAccess( docno);
+}
+
 void StorageTransaction::defineDocnoPosting(
 	const Index& termtype, const Index& termvalue,
 	const Index& docno, unsigned int ff, float weight)
 {
 	m_docnoBlockMap.defineDocnoPosting(
 		termtype, termvalue, docno, ff, weight);
+	m_docListBlockMap.definePosting( termtype, termvalue, docno);
 }
 
 void StorageTransaction::deleteDocnoPosting(
@@ -146,6 +165,7 @@ void StorageTransaction::deleteDocnoPosting(
 	const Index& docno)
 {
 	m_docnoBlockMap.deleteDocnoPosting( termtype, termvalue, docno);
+	m_docListBlockMap.deletePosting( termtype, termvalue, docno);
 }
 
 void StorageTransaction::definePosinfoPosting(
@@ -160,7 +180,8 @@ void StorageTransaction::deletePosinfoPosting(
 	const Index& termtype, const Index& termvalue,
 	const Index& docno)
 {
-	m_posinfoBlockMap.deletePosinfoPosting( termtype, termvalue, docno);
+	m_posinfoBlockMap.deletePosinfoPosting(
+		termtype, termvalue, docno);
 }
 
 void StorageTransaction::defineForwardIndexTerm(
@@ -179,6 +200,21 @@ void StorageTransaction::deleteForwardIndexTerm(
 {
 	m_forwardIndexBlockMap.deleteForwardIndexTerm( typeno, docno, pos);
 }
+
+void StorageTransaction::defineUserAccess(
+	const Index& userno,
+	const Index& docno)
+{
+	m_userAclBlockMap.defineUserAccess( userno, docno);
+}
+
+void StorageTransaction::deleteUserAccess(
+	const Index& userno,
+	const Index& docno)
+{
+	m_userAclBlockMap.deleteUserAccess( userno, docno);
+}
+
 
 class TermnoMap
 {
@@ -220,6 +256,15 @@ void StorageTransaction::deleteIndex( const Index& docno)
 		}
 		fwstorage.disposeSubnodes( BlockKey( ti, docno), m_batch);
 	}
+}
+
+void StorageTransaction::deleteUserAccessRights(
+	const std::string& username)
+{
+	Index userno = m_userIdMap.lookUp( username);
+	if (userno == 0) return;
+
+	m_userAclBlockMap.deleteUserAccess( userno);
 }
 
 void StorageTransaction::deleteDocument( const std::string& docid)
@@ -284,6 +329,9 @@ void StorageTransaction::commit()
 		m_docnoBlockMap.getWriteBatch( m_batch);
 		m_posinfoBlockMap.getWriteBatch( m_batch);
 		m_forwardIndexBlockMap.getWriteBatch( m_batch);
+
+		m_docListBlockMap.getWriteBatch( m_batch);
+		m_userAclBlockMap.getWriteBatch( m_batch);
 
 		m_dfMap.renameNewTermNumbers( termnoUnknownMap);
 		m_dfMap.getWriteBatch( m_batch);

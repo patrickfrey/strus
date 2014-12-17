@@ -44,14 +44,20 @@ public:
 	explicit UserAclBlockMap( leveldb::DB* db_)
 		:m_db(db_){}
 	UserAclBlockMap( const UserAclBlockMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+		:m_db(o.m_db),m_usrmap(o.m_usrmap),m_aclmap(o.m_aclmap){}
 
-	void definePosting(
+	void defineUserAccess(
 		const Index& userno,
 		const Index& docno);
 
-	void deletePosting(
+	void deleteUserAccess(
 		const Index& userno,
+		const Index& docno);
+
+	void deleteUserAccess(
+		const Index& userno);
+
+	void deleteDocumentAccess(
 		const Index& docno);
 
 	void getWriteBatch( leveldb::WriteBatch& batch);
@@ -82,7 +88,10 @@ private:
 
 private:
 	leveldb::DB* m_db;
-	Map m_map;
+	Map m_usrmap;
+	Map m_aclmap;
+	std::vector<Index> m_usr_deletes;
+	std::vector<Index> m_acl_deletes;
 };
 
 }

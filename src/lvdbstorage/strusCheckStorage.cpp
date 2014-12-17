@@ -140,6 +140,11 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 				std::cerr << "NOT IMPLEMENTED YET";
 				break;
 			}
+			case strus::DatabaseKey::AclBlockPrefix:
+			{
+				std::cerr << "NOT IMPLEMENTED YET";
+				break;
+			}
 			case strus::DatabaseKey::DocListBlockPrefix:
 			{
 				std::cerr << "NOT IMPLEMENTED YET";

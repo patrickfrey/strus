@@ -32,22 +32,22 @@
 
 using namespace strus;
 
-const char* BooleanBlock::find( const Index& docno_, const char* lowerbound) const
+const char* BooleanBlock::find( const Index& elemno_, const char* lowerbound) const
 {
-	const char* itr = upper_bound( docno_, lowerbound);
+	const char* itr = upper_bound( elemno_, lowerbound);
 	if (!itr) return 0;
 	Index from_;
 	Index to_;
 	char const* ii = itr;
 	if (!getNextRange( ii, from_, to_)) return 0;
-	return (from_ <= docno_ && to_ >= docno_)?itr:0;
+	return (from_ <= elemno_ && to_ >= elemno_)?itr:0;
 }
 
-const char* BooleanBlock::upper_bound( const Index& docno_, const char* lowerbound) const
+const char* BooleanBlock::upper_bound( const Index& elemno_, const char* lowerbound) const
 {
 	if (!lowerbound || lowerbound == charend()) return 0;
-	if (id() < docno_) throw std::logic_error("called BooleanBlock::upper_bound with wrong block");
-	return findRangeIndexDesc( lowerbound, charend(), relativeIndexFromElemno( docno_));
+	if (id() < elemno_) throw std::logic_error("called BooleanBlock::upper_bound with wrong block");
+	return findRangeIndexDesc( lowerbound, charend(), relativeIndexFromElemno( elemno_));
 }
 
 bool BooleanBlock::getNextRange( char const*& itr, Index& from_, Index& to_) const

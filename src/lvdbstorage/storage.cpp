@@ -474,6 +474,16 @@ Index Storage::allocNameIm(
 	return rt;
 }
 
+IndexSetIterator Storage::getAclIterator( const Index& docno)
+{
+	return IndexSetIterator( m_db, DatabaseKey::AclBlockPrefix, docno);
+}
+
+IndexSetIterator Storage::getUserAclIterator( const Index& userno)
+{
+	return IndexSetIterator( m_db, DatabaseKey::UserAclBlockPrefix, userno);
+}
+
 Index Storage::nofAttributeTypes()
 {
 	return m_next_termno -1;

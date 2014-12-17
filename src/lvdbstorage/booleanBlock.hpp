@@ -63,8 +63,8 @@ public:
 		DataBlock::operator =(o);
 		return *this;
 	}
-	const char* find( const Index& docno_, const char* lowerbound) const;
-	const char* upper_bound( const Index& docno_, const char* lowerbound) const;
+	const char* find( const Index& elemno_, const char* lowerbound) const;
+	const char* upper_bound( const Index& elemno_, const char* lowerbound) const;
 
 	bool full() const
 	{
@@ -93,10 +93,10 @@ public:
 		return (elemno_ <= id() && elemno_ >= firstIndex());
 	}
 
-	/// \brief Check if the address 'docno_', if it exists, is most likely in the following block we can get with 'leveldb::Iterator::Next()'
-	bool isFollowBlockAddress( const Index& docno_) const
+	/// \brief Check if the address 'elemno_', if it exists, is most likely in the following block we can get with 'leveldb::Iterator::Next()'
+	bool isFollowBlockAddress( const Index& elemno_) const
 	{
-		return (docno_ > id() && docno_ < id() + id() - firstIndex());
+		return (elemno_ > id() && elemno_ < id() + id() - firstIndex());
 	}
 
 private:

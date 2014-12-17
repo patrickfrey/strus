@@ -62,7 +62,7 @@ void DocnoBlockMap::deleteDocnoPosting(
 
 void DocnoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
 {
-	typename Map::iterator mi = m_map.begin(), me = m_map.end();
+	Map::iterator mi = m_map.begin(), me = m_map.end();
 	while (mi != me)
 	{
 		BlockKey dbkey( mi->first);
@@ -89,7 +89,7 @@ void DocnoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap
 
 void DocnoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
-	typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
 		DocnoBlockElementMap::const_iterator
@@ -148,7 +148,7 @@ void DocnoBlockMap::insertNewElements(
 void DocnoBlockMap::mergeNewElements(
 		BlockStorage<DocnoBlock>& blkstorage,
 		DocnoBlockElementMap::const_iterator& ei,
-		const typename DocnoBlockElementMap::const_iterator& ee,
+		const DocnoBlockElementMap::const_iterator& ee,
 		DocnoBlock& newblk,
 		leveldb::WriteBatch& batch)
 {

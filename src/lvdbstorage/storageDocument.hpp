@@ -66,6 +66,9 @@ public:
 			const std::string& name_,
 			const std::string& value_);
 
+	virtual void setUserAccessRights(
+			const std::string& username_);
+
 	virtual void done();
 
 public:
@@ -130,6 +133,7 @@ public:
 	const InvMap& invs() const				{return m_invs;}
 	const std::vector<DocAttribute>& attributes() const	{return m_attributes;}
 	const std::vector<DocMetaData>& metadata() const	{return m_metadata;}
+	const std::vector<Index>& userlist() const		{return m_userlist;}
 
 private:
 	StorageDocument( const StorageDocument&){}	//non copyable
@@ -144,6 +148,7 @@ private:
 	InvMap m_invs;
 	std::vector<DocAttribute> m_attributes;
 	std::vector<DocMetaData> m_metadata;
+	std::vector<Index> m_userlist;
 };
 
 }

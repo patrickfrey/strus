@@ -122,7 +122,7 @@ Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
 				{
 					Statistics::increment( Statistics::DocnoBlockReadBlockFollow);
 
-					if (!m_docnoBlk->isFollowBlockAddress( docno_))
+					if (m_docnoBlk->id() < docno_ && !m_docnoBlk->isFollowBlockAddress( docno_))
 					{	
 						m_docnoBlk = m_docnoStorage.load( docno_);
 						if (m_docnoBlk)
@@ -210,7 +210,7 @@ Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
 				{
 					Statistics::increment( Statistics::PosinfoBlockReadBlockFollow);
 
-					if (!m_posinfoBlk->isFollowBlockAddress( docno_))
+					if (m_posinfoBlk->id() < docno_ && !m_posinfoBlk->isFollowBlockAddress( docno_))
 					{
 						m_posinfoBlk = m_posinfoStorage.load( docno_);
 						if (m_posinfoBlk)

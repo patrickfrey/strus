@@ -36,34 +36,112 @@ void UserAclBlockMap::markSetElement(
 	const Index& elemno,
 	bool isMember)
 {
-	Map::iterator mi = m_map.find( userno);
-	if (mi == m_map.end())
+	Map::iterator mi = m_usrmap.find( userno);
+	if (mi == m_usrmap.end())
 	{
-		m_map[ userno][ elemno] = isMember;
+		m_usrmap[ userno][ elemno] = isMember;
 	}
 	else
 	{
 		mi->second[ elemno] = isMember;
 	}
+
+	mi = m_aclmap.find( elemno);
+	if (mi == m_aclmap.end())
+	{
+		m_aclmap[ elemno][ userno] = isMember;
+	}
+	else
+	{
+		mi->second[ userno] = isMember;
+	}
 }
 
-void UserAclBlockMap::definePosting(
+void UserAclBlockMap::defineUserAccess(
 	const Index& userno,
 	const Index& elemno)
 {
 	markSetElement( userno, elemno, true);
 }
 
-void UserAclBlockMap::deletePosting(
+void UserAclBlockMap::deleteUserAccess(
 	const Index& userno,
 	const Index& elemno)
 {
 	markSetElement( userno, elemno, false);
 }
 
+void UserAclBlockMap::deleteUserAccess(
+	const Index& userno)
+{
+	Map::iterator mi = m_usrmap.find( userno);
+	if (mi != m_usrmap.end())
+	{
+		throw std::runtime_error("cannot delete user access after defining it for the same user in a transaction");
+	}
+	m_usr_deletes.push_back( userno);
+}
+
+void UserAclBlockMap::deleteDocumentAccess(
+	const Index& docno)
+{
+	Map::iterator mi = m_aclmap.find( docno);
+	if (mi != m_aclmap.end())
+	{
+		throw std::runtime_error("cannot define document access after defining it for the same document in a transaction");
+	}
+	m_acl_deletes.push_back( docno);
+}
+
+static void resetAllBooleanBlockElementsFromStorage(
+	BooleanBlockElementMap& mapelem,
+	BlockStorage<BooleanBlock>& storage)
+{
+	const BooleanBlock* blk;
+	Index blkidx=0;
+	while (0!=(blk=storage.load( blkidx)))
+	{
+		char const* blkitr = blk->charptr();
+		Index from_;
+		Index to_;
+		while (blk->getNextRange( blkitr, from_, to_))
+		{
+			for (; from_<=to_; ++from_)
+			{
+				mapelem[ from_]; // reset to false, only if it does not exist
+			}
+		}
+		blkidx = blk->id()+1;
+	}
+}
+
 void UserAclBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
-	typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	std::vector<Index>::const_iterator di = m_usr_deletes.begin(), de = m_usr_deletes.end();
+	for (; di != de; ++di)
+	{
+		BooleanBlockElementMap& usrmapelem = m_usrmap[ *di];
+
+		BlockStorage<BooleanBlock> usrstorage(
+				m_db, DatabaseKey::UserAclBlockPrefix,
+				BlockKey(*di), false);
+
+		resetAllBooleanBlockElementsFromStorage( usrmapelem, usrstorage);
+	}
+
+	std::vector<Index>::const_iterator ai = m_acl_deletes.begin(), ae = m_acl_deletes.end();
+	for (; ai != ae; ++ai)
+	{
+		BooleanBlockElementMap& aclmapelem = m_usrmap[ *ai];
+
+		BlockStorage<BooleanBlock> aclstorage(
+				m_db, DatabaseKey::AclBlockPrefix,
+				BlockKey(*ai), false);
+
+		resetAllBooleanBlockElementsFromStorage( aclmapelem, aclstorage);
+	}
+
+	Map::const_iterator mi = m_usrmap.begin(), me = m_usrmap.end();
 	for (; mi != me; ++mi)
 	{
 		BooleanBlockElementMap::const_iterator
@@ -84,7 +162,30 @@ void UserAclBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		// [2] Write the new blocks that could not be merged into existing ones:
 		insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
 	}
-	m_map.clear();
+
+	mi = m_aclmap.begin(), me = m_aclmap.end();
+	for (; mi != me; ++mi)
+	{
+		BooleanBlockElementMap::const_iterator
+			ei = mi->second.begin(),
+			ee = mi->second.end();
+
+		if (ei == ee) continue;
+		Index lastInsertBlockId = mi->second.lastInsertBlockId();
+
+		BlockStorage<BooleanBlock> blkstorage(
+				m_db, DatabaseKey::AclBlockPrefix,
+				BlockKey(mi->first), false);
+		BooleanBlock newblk( (char)DatabaseKey::AclBlockPrefix);
+
+		// [1] Merge new elements with existing upper bound blocks:
+		mergeNewElements( blkstorage, ei, ee, newblk, batch);
+
+		// [2] Write the new blocks that could not be merged into existing ones:
+		insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
+	}
+	m_usrmap.clear();
+	m_aclmap.clear();
 }
 	
 void UserAclBlockMap::insertNewElements(

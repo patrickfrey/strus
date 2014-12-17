@@ -66,6 +66,8 @@ public:
 			const std::string& name_,
 			const std::string& value_);
 
+	virtual void setUserAccessRights( const std::string& username);
+
 	virtual void done();
 
 private:
@@ -113,6 +115,7 @@ private:
 	TermMap m_termMap;
 	MetaDataMap m_metaDataMap;
 	AttributeMap m_attributeMap;
+	std::vector<std::string> m_userlist;
 	std::string m_docid;
 	Index m_docno;
 	std::string m_logfile;
