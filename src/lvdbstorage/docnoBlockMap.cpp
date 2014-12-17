@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "docnoBlockMap.hpp"
+#include "keyMap.hpp"
 
 using namespace strus;
 
@@ -98,7 +99,9 @@ void DocnoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		if (ei == ee) continue;
 		Index lastInsertBlockId = mi->second.lastInsertBlockId();
 
-		BlockStorage<DocnoBlock> blkstorage( m_db, BlockKey(mi->first), false);
+		BlockStorage<DocnoBlock> blkstorage(
+				m_db, DatabaseKey::DocnoBlockPrefix,
+				BlockKey(mi->first), false);
 		DocnoBlock newblk;
 
 		// [1] Merge new elements with existing upper bound blocks:

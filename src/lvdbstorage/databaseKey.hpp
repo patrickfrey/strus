@@ -51,7 +51,7 @@ public:
 		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
 
-		UserBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
+		UserlistBlockPrefix='u',///< [userno,docno]            ->  [bit]*
 		DoclistBlockPrefix='d',	///< [typeno,termno,docno]     ->  [bit]*
 
 		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*

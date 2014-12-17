@@ -205,6 +205,7 @@ BooleanBlock BooleanBlockElementMap::merge( const_iterator ei, const const_itera
 	{
 		if (ei->second)
 		{
+			//... define element
 			if (BooleanBlock::joinRange( old_from, old_to, ei->first, ei->first))
 			{
 				++ei;

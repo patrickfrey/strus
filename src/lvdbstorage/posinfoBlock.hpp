@@ -42,17 +42,16 @@ class PosinfoBlock
 {
 public:
 	enum {
-		DatabaseKeyPrefix=DatabaseKey::PosinfoBlockPrefix,
 		MaxBlockSize=1024
 	};
 
 public:
 	explicit PosinfoBlock()
-		:DataBlock( (char)DatabaseKeyPrefix){}
+		:DataBlock( (char)DatabaseKey::PosinfoBlockPrefix){}
 	PosinfoBlock( const PosinfoBlock& o)
 		:DataBlock(o){}
 	PosinfoBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( (char)DatabaseKeyPrefix, id_, ptr_, size_){}
+		:DataBlock( (char)DatabaseKey::PosinfoBlockPrefix, id_, ptr_, size_){}
 
 	PosinfoBlock& operator=( const PosinfoBlock& o)
 	{

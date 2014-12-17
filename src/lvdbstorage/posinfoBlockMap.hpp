@@ -42,7 +42,7 @@ namespace strus {
 class PosinfoBlockMap
 {
 public:
-	PosinfoBlockMap( leveldb::DB* db_)
+	explicit PosinfoBlockMap( leveldb::DB* db_)
 		:m_db(db_){}
 	PosinfoBlockMap( const PosinfoBlockMap& o)
 		:m_db(o.m_db),m_map(o.m_map){}

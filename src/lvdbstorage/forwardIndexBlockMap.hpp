@@ -42,7 +42,7 @@ namespace strus {
 class ForwardIndexBlockMap
 {
 public:
-	ForwardIndexBlockMap( leveldb::DB* db_)
+	explicit ForwardIndexBlockMap( leveldb::DB* db_)
 		:m_db(db_){}
 	ForwardIndexBlockMap( const ForwardIndexBlockMap& o)
 		:m_db(o.m_db),m_map(o.m_map){}
@@ -79,7 +79,8 @@ private:
 		const BlockKey& dbkey,
 		TermnoMap& map)
 	{
-		BlockStorage<ForwardIndexBlock> blkstorage( m_db, dbkey, false);
+		BlockStorage<ForwardIndexBlock> blkstorage(
+			m_db, DatabaseKey::ForwardIndexPrefix, dbkey, false);
 
 		Index blkidx = 0;
 		const ForwardIndexBlock* blk = blkstorage.load( blkidx);

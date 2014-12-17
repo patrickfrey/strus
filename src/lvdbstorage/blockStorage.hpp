@@ -39,8 +39,8 @@ class BlockStorage
 	:public DataBlockStorage
 {
 public:
-	BlockStorage( leveldb::DB* db_, const BlockKey& dbkey_, bool useLruCache_)
-		:DataBlockStorage( db_, DatabaseKey( BlockType::DatabaseKeyPrefix, dbkey_), useLruCache_){}
+	BlockStorage( leveldb::DB* db_, DatabaseKey::KeyPrefix dbkeyprefix_, const BlockKey& dbkey_, bool useLruCache_)
+		:DataBlockStorage( db_, DatabaseKey( dbkeyprefix_, dbkey_), useLruCache_){}
 	BlockStorage( const BlockStorage& o)
 		:DataBlockStorage(o){}
 

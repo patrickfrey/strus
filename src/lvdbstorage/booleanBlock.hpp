@@ -78,6 +78,27 @@ public:
 	bool getLastRange( std::size_t& at_, Index& from_, Index& to_) const;
 	static bool joinRange( Index& from_, Index& to_, const Index& addfrom_, const Index& addto_);
 
+	Index firstIndex() const
+	{
+		Index from_;
+		Index to_;
+		char const* itr = charptr();
+		if (!getNextRange( itr, from_, to_)) return 0;
+		return from_;
+	}
+
+	/// \brief Check if the address 'elemno_', if it exists, is in this block.
+	bool isThisBlockAddress( const Index& elemno_) const
+	{
+		return (elemno_ <= id() && elemno_ >= firstIndex());
+	}
+
+	/// \brief Check if the address 'docno_', if it exists, is most likely in the following block we can get with 'leveldb::Iterator::Next()'
+	bool isFollowBlockAddress( const Index& docno_) const
+	{
+		return (docno_ > id() && docno_ < id() + id() - firstIndex());
+	}
+
 private:
 	Index relativeIndexFromElemno( const Index& elemno_) const	{return id()-elemno_+1;}
 	Index elemnoFromRelativeIndex( const Index& eidx_) const	{return id()-eidx_+1;}
@@ -91,6 +112,11 @@ public:
 	BooleanBlockElementMap(){}
 	BooleanBlockElementMap( const BooleanBlockElementMap& o)
 		:std::map<Index,bool>(o){}
+
+	Index lastInsertBlockId() const
+	{
+		return rbegin()->first;
+	}
 
 	static BooleanBlock merge( const_iterator ei, const const_iterator& ee, const BooleanBlock& oldblk);
 };

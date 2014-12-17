@@ -42,17 +42,16 @@ class ForwardIndexBlock
 {
 public:
 	enum {
-		DatabaseKeyPrefix=DatabaseKey::ForwardIndexPrefix,
 		MaxBlockSize=1024
 	};
 
 public:
 	explicit ForwardIndexBlock()
-		:DataBlock( (char)DatabaseKeyPrefix){}
+		:DataBlock( (char)DatabaseKey::ForwardIndexPrefix){}
 	ForwardIndexBlock( const ForwardIndexBlock& o)
 		:DataBlock(o){}
 	ForwardIndexBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( (char)DatabaseKeyPrefix, id_, ptr_, size_){}
+		:DataBlock( (char)DatabaseKey::ForwardIndexPrefix, id_, ptr_, size_){}
 
 	ForwardIndexBlock& operator=( const ForwardIndexBlock& o)
 	{

@@ -47,10 +47,10 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
 	:m_db(db_)
-	,m_docnoStorage( db_, BlockKey( termtypeno, termvalueno), true)
+	,m_docnoStorage( db_, DatabaseKey::DocnoBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_docnoBlk(0)
 	,m_docnoItr(0)
-	,m_posinfoStorage( db_, BlockKey( termtypeno, termvalueno), true)
+	,m_posinfoStorage( db_, DatabaseKey::PosinfoBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
 	,m_last_docno(0)

@@ -70,7 +70,9 @@ void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		if (ei == ee) continue;
 		Index lastInsertBlockId = mi->second.lastInsertBlockId();
 
-		BlockStorage<ForwardIndexBlock> blkstorage( m_db, BlockKey(mi->first), false);
+		BlockStorage<ForwardIndexBlock> blkstorage(
+				m_db, DatabaseKey::ForwardIndexPrefix,
+				BlockKey(mi->first), false);
 		const ForwardIndexBlock* blk;
 		ForwardIndexBlock newblk;
 

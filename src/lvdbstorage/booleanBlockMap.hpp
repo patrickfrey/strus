@@ -26,10 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCNO_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_LVDB_BOOLEAN_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_BOOLEAN_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "docnoBlock.hpp"
+#include "booleanBlock.hpp"
 #include "blockKey.hpp"
 #include "blockStorage.hpp"
 #include <cstdlib>
@@ -38,25 +38,23 @@
 
 namespace strus {
 
-class DocnoBlockMap
+class BooleanBlockMap
 {
 public:
-	explicit DocnoBlockMap( leveldb::DB* db_)
-		:m_db(db_){}
-	DocnoBlockMap( const DocnoBlockMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+	BooleanBlockMap( leveldb::DB* db_, DatabaseKey::KeyPrefix dbkeyprefix_)
+		:m_db(db_),m_dbkeyprefix(dbkeyprefix_){}
+	BooleanBlockMap( const BooleanBlockMap& o)
+		:m_db(o.m_db),m_dbkeyprefix(o.m_dbkeyprefix),m_map(o.m_map){}
 
-	void defineDocnoPosting(
+	void defineSetElement(
 		const Index& termtype,
 		const Index& termvalue,
-		const Index& docno,
-		unsigned int ff,
-		float weight);
+		const Index& elemno);
 
-	void deleteDocnoPosting(
+	void deleteSetElement(
 		const Index& termtype,
 		const Index& termvalue,
-		const Index& docno);
+		const Index& elemno);
 
 	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
@@ -64,25 +62,32 @@ public:
 	
 private:
 	void insertNewElements(
-			BlockStorage<DocnoBlock>& blkstorage,
-			DocnoBlockElementMap::const_iterator& ei,
-			const DocnoBlockElementMap::const_iterator& ee,
-			DocnoBlock& newblk,
+			BlockStorage<BooleanBlock>& blkstorage,
+			BooleanBlockElementMap::const_iterator& ei,
+			const BooleanBlockElementMap::const_iterator& ee,
+			BooleanBlock& newblk,
 			const Index& lastInsertBlockId,
 			leveldb::WriteBatch& batch);
 
 	void mergeNewElements(
-			BlockStorage<DocnoBlock>& blkstorage,
-			DocnoBlockElementMap::const_iterator& ei,
-			const typename DocnoBlockElementMap::const_iterator& ee,
-			DocnoBlock& newblk,
+			BlockStorage<BooleanBlock>& blkstorage,
+			BooleanBlockElementMap::const_iterator& ei,
+			const typename BooleanBlockElementMap::const_iterator& ee,
+			BooleanBlock& newblk,
 			leveldb::WriteBatch& batch);
-	
+
+	void markSetElement(
+		const Index& termtype,
+		const Index& termvalue,
+		const Index& elemno,
+		bool isMember);
+
 private:
-	typedef std::map<BlockKeyIndex,DocnoBlockElementMap> Map;
+	typedef std::map<BlockKeyIndex,BooleanBlockElementMap> Map;
 
 private:
 	leveldb::DB* m_db;
+	DatabaseKey::KeyPrefix m_dbkeyprefix;
 	Map m_map;
 };
 

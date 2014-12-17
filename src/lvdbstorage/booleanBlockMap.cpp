@@ -26,39 +26,47 @@
 
 --------------------------------------------------------------------
 */
-#include "posinfoBlockMap.hpp"
+#include "booleanBlockMap.hpp"
 #include "keyMap.hpp"
 
 using namespace strus;
 
-void PosinfoBlockMap::definePosinfoPosting(
+void BooleanBlockMap::markSetElement(
 	const Index& termtype,
 	const Index& termvalue,
-	const Index& docno,
-	const std::vector<Index>& pos)
+	const Index& elemno,
+	bool isMember)
 {
 	BlockKey dbkey( termtype, termvalue);
 
 	Map::iterator mi = m_map.find( dbkey.index());
 	if (mi == m_map.end())
 	{
-		m_map[ dbkey.index()].define( docno, pos);
+		m_map[ dbkey.index()][ elemno] = isMember;
 	}
 	else
 	{
-		mi->second.define( docno, pos);
+		mi->second[ elemno] = isMember;
 	}
 }
 
-void PosinfoBlockMap::deletePosinfoPosting(
+void BooleanBlockMap::defineSetElement(
 	const Index& termtype,
 	const Index& termvalue,
-	const Index& docno)
+	const Index& elemno)
 {
-	definePosinfoPosting( termtype, termvalue, docno, std::vector<Index>());
+	markSetElement( termtype, termvalue, elemno, true);
 }
 
-void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
+void BooleanBlockMap::deleteSetElement(
+	const Index& termtype,
+	const Index& termvalue,
+	const Index& elemno)
+{
+	markSetElement( termtype, termvalue, elemno, false);
+}
+
+void BooleanBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
 {
 	typename Map::iterator mi = m_map.begin(), me = m_map.end();
 	while (mi != me)
@@ -70,11 +78,11 @@ void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 			std::map<Index,Index>::const_iterator ri = renamemap.find( dbkey.elem(2));
 			if (ri == renamemap.end())
 			{
-				throw std::runtime_error( "internal: term value undefined (posinfo map)");
+				throw std::runtime_error( "internal: term value undefined (boolean map)");
 			}
 			BlockKey newkey( dbkey.elem(1), ri->second);
 
-			PosinfoBlockElementMap& newelem = m_map[ newkey.index()];
+			BooleanBlockElementMap& newelem = m_map[ newkey.index()];
 			newelem.swap( mi->second);
 			m_map.erase( mi++);
 		}
@@ -85,22 +93,22 @@ void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 	}
 }
 
-void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
+void BooleanBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
 	typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		PosinfoBlockElementMap::const_iterator
+		BooleanBlockElementMap::const_iterator
 			ei = mi->second.begin(),
 			ee = mi->second.end();
 
 		if (ei == ee) continue;
 		Index lastInsertBlockId = mi->second.lastInsertBlockId();
 
-		BlockStorage<PosinfoBlock> blkstorage(
-				m_db, DatabaseKey::PosinfoBlockPrefix,
+		BlockStorage<BooleanBlock> blkstorage(
+				m_db, m_dbkeyprefix,
 				BlockKey(mi->first), false);
-		PosinfoBlock newblk;
+		BooleanBlock newblk( (char)m_dbkeyprefix);
 
 		// [1] Merge new elements with existing upper bound blocks:
 		mergeNewElements( blkstorage, ei, ee, newblk, batch);
@@ -111,11 +119,11 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 	m_map.clear();
 }
 	
-void PosinfoBlockMap::insertNewElements(
-		BlockStorage<PosinfoBlock>& blkstorage,
-		PosinfoBlockElementMap::const_iterator& ei,
-		const PosinfoBlockElementMap::const_iterator& ee,
-		PosinfoBlock& newblk,
+void BooleanBlockMap::insertNewElements(
+		BlockStorage<BooleanBlock>& blkstorage,
+		BooleanBlockElementMap::const_iterator& ei,
+		const BooleanBlockElementMap::const_iterator& ee,
+		BooleanBlock& newblk,
 		const Index& lastInsertBlockId,
 		leveldb::WriteBatch& batch)
 {
@@ -133,8 +141,11 @@ void PosinfoBlockMap::insertNewElements(
 			newblk.clear();
 			newblk.setId( lastInsertBlockId);
 		}
-		newblk.append( ei->docno(), ei->ptr());
-		blkid = ei->docno();
+		if (ei->second)
+		{
+			newblk.defineElement( ei->first);
+		}
+		blkid = ei->first;
 	}
 	if (!newblk.empty())
 	{
@@ -143,20 +154,20 @@ void PosinfoBlockMap::insertNewElements(
 	}
 }
 
-void PosinfoBlockMap::mergeNewElements(
-		BlockStorage<PosinfoBlock>& blkstorage,
-		PosinfoBlockElementMap::const_iterator& ei,
-		const PosinfoBlockElementMap::const_iterator& ee,
-		PosinfoBlock& newblk,
+void BooleanBlockMap::mergeNewElements(
+		BlockStorage<BooleanBlock>& blkstorage,
+		BooleanBlockElementMap::const_iterator& ei,
+		const BooleanBlockElementMap::const_iterator& ee,
+		BooleanBlock& newblk,
 		leveldb::WriteBatch& batch)
 {
-	const PosinfoBlock* blk;
-	while (ei != ee && 0!=(blk=blkstorage.load( ei->docno())))
+	const BooleanBlock* blk;
+	while (ei != ee && 0!=(blk=blkstorage.load( ei->first)))
 	{
-		PosinfoBlockElementMap::const_iterator newblk_start = ei;
-		for (; ei != ee && ei->docno() <= blk->id(); ++ei){}
+		BooleanBlockElementMap::const_iterator newblk_start = ei;
+		for (; ei != ee && ei->first <= blk->id(); ++ei){}
 
-		newblk = PosinfoBlockElementMap::merge( newblk_start, ei, *blk);
+		newblk = BooleanBlockElementMap::merge( newblk_start, ei, *blk);
 		if (blkstorage.loadNext())
 		{
 			// ... is not the last block, so we store it

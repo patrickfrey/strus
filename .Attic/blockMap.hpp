@@ -37,7 +37,6 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
-#error DEPRECATED
 namespace strus {
 
 template <class BlockType, class BlockElementMap>

@@ -79,15 +79,14 @@ class DocnoBlock
 {
 public:
 	enum {
-		DatabaseKeyPrefix=DatabaseKey::DocnoBlockPrefix,
 		NofBlockElements=128
 	};
 
 public:
 	DocnoBlock()
-		:FixedSizeRecordBlock<DocnoBlockElement>( (char)DatabaseKeyPrefix){}
+		:FixedSizeRecordBlock<DocnoBlockElement>( (char)DatabaseKey::DocnoBlockPrefix){}
 	DocnoBlock( const DocnoBlockElement* ar_, std::size_t arsize_)
-		:FixedSizeRecordBlock<DocnoBlockElement>( (char)DatabaseKeyPrefix, ar_, arsize_){}
+		:FixedSizeRecordBlock<DocnoBlockElement>( (char)DatabaseKey::DocnoBlockPrefix, ar_, arsize_){}
 	DocnoBlock( const DocnoBlock& o)
 		:FixedSizeRecordBlock<DocnoBlockElement>( o){}
 
