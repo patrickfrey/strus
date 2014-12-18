@@ -416,6 +416,7 @@ std::vector<queryeval::ResultDocument>
 	QueryEval::getRankedDocumentList(
 		const StorageInterface& storage,
 		const QueryProcessorInterface& processor,
+		const std::string& username,
 		const queryeval::Query& query_,
 		std::size_t fromRank,
 		std::size_t maxNofRanks) const
@@ -599,6 +600,13 @@ std::vector<queryeval::ResultDocument>
 						metaDataReader.get(),
 						attributeReader.get())));
 		}
+		// Set the user restrictions (inverted ACL of user passed):
+		DocnoIteratorInterface* invAcl = storage.createInvertedAclIterator( username);
+		if (invAcl)
+		{
+			accumulator.addRestrictionSet( invAcl);
+		}
+
 		// Calculate and return the ranklist:
 		return getRankedDocumentList(
 				accumulator, summarizerdefs,

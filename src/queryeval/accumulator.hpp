@@ -62,12 +62,15 @@ public:
 
 	void addSelector(
 			const PostingIteratorInterface& iterator);
-	
+
 	void addRanker(
 			float factor,
 			const std::string& function,
 			const std::vector<float>& parameter,
 			const PostingIteratorInterface& iterator);
+
+	void addRestrictionSet(
+			DocnoIteratorInterface* iterator);
 
 	bool nextRank(
 			Index& docno,
@@ -80,7 +83,8 @@ private:
 private:
 	const QueryProcessorInterface* m_queryprocessor;
 	MetaDataReaderInterface* m_metadata;
-	std::vector<PostingIteratorReference> m_selectors;
+	PostingIteratorReferenceArray m_selectors;
+	DocnoIteratorReferenceArray m_restrictionSets;
 	unsigned int m_selectoridx;
 	Index m_docno;
 	std::vector<AccumulatorArgument> m_rankers;

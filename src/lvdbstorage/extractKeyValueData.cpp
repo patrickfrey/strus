@@ -30,6 +30,7 @@
 #include "indexPacker.hpp"
 #include "metaDataBlock.hpp"
 #include "forwardIndexBlock.hpp"
+#include "booleanBlock.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -162,6 +163,32 @@ DocIdData::DocIdData( const leveldb::Slice& key, const leveldb::Slice& value)
 void DocIdData::print( std::ostream& out)
 {
 	out << (char)DatabaseKey::DocIdPrefix << ' ' << docno << ' ' << escapestr( docidstr, docidsize) << std::endl;
+}
+
+
+UserNameData::UserNameData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	usernamestr = ki;
+	usernamesize = ke-ki;
+	if (!strus::checkStringUtf8( ki, ke-ki))
+	{
+		throw std::runtime_error( "key of doc id is not a valid UTF8 string");
+	}
+	userno = strus::unpackIndex( vi, ve);/*[userno]*/
+	if (vi != ve)
+	{
+		throw std::runtime_error( "unexpected extra bytes at end of user number");
+	}
+}
+
+void UserNameData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::UserNamePrefix << ' ' << userno << ' ' << escapestr( usernamestr, usernamesize) << std::endl;
 }
 
 
@@ -393,7 +420,7 @@ PosinfoBlockData::PosinfoBlockData( const leveldb::Slice& key, const leveldb::Sl
 
 	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
 	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
-	Index docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
 		throw std::runtime_error( "unexpected extra bytes at end of term index key");
@@ -445,6 +472,125 @@ void PosinfoBlockData::print( std::ostream& out)
 			out << *pi;
 		}
 	}
+	out << std::endl;
+}
+
+
+static std::vector<std::pair<Index,Index> > getRangeListFromBooleanBlock(
+		DatabaseKey::KeyPrefix prefix, const Index& id, char const* vi, const char* ve)
+{
+	std::vector<std::pair<Index,Index> > rt;
+	BooleanBlock blk( prefix, id, vi, ve-vi);
+	char const* itr = blk.charptr();
+
+	Index rangemin;
+	Index rangemax;
+	Index prevmax = 0;
+	while (blk.getNextRange( itr, rangemin, rangemax))
+	{
+		if (rangemin > rangemax)
+		{
+			throw std::runtime_error( "illegal range in boolean block (min > max)");
+		}
+		if (rangemax > id)
+		{
+			throw std::runtime_error( "illegal range in boolean block (max > blockId)");
+		}
+		if (rangemin <= prevmax)
+		{
+			throw std::runtime_error( "illegal range in boolean block (not strictly ascending or unjoined overlapping ranges)");
+		}
+		prevmax = rangemax;
+		rt.push_back( std::pair<Index,Index>( rangemin, rangemax));
+	}
+	return rt;
+}
+
+static void printRangeList( std::ostream& out, const std::vector<std::pair<Index,Index> >& rangelist)
+{
+	std::vector<std::pair<Index,Index> >::const_iterator itr = rangelist.begin(), end = rangelist.end();
+	for (; itr != end; ++itr)
+	{
+		if (itr->first == itr->second)
+		{
+			out << ' ' << itr->first;
+		}
+		else
+		{
+			out << ' ' << itr->first << ".." << itr->second;
+		}
+	}
+}
+
+DocListBlockData::DocListBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
+	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( "unexpected extra bytes at end of term index key");
+	}
+	docrangelist = getRangeListFromBooleanBlock( DatabaseKey::DocListBlockPrefix, docno, vi, ve);
+}
+
+void DocListBlockData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::DocListBlockPrefix << ' ' << typeno << ' ' << valueno;
+	printRangeList( out, docrangelist);
+	out << std::endl;
+}
+
+
+UserAclBlockData::UserAclBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	userno = strus::unpackIndex( ki, ke);/*[userno]*/
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( "unexpected extra bytes at end of user index key");
+	}
+	docrangelist = getRangeListFromBooleanBlock( DatabaseKey::UserAclBlockPrefix, docno, vi, ve);
+}
+
+void UserAclBlockData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::UserAclBlockPrefix << ' ' << userno;
+	printRangeList( out, docrangelist);
+	out << std::endl;
+}
+
+
+AclBlockData::AclBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	userno = strus::unpackIndex( ki, ke);/*[userno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( "unexpected extra bytes at end of docno index key");
+	}
+	userrangelist = getRangeListFromBooleanBlock( DatabaseKey::AclBlockPrefix, userno, vi, ve);
+}
+
+void AclBlockData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::AclBlockPrefix << ' ' << docno;
+	printRangeList( out, userrangelist);
 	out << std::endl;
 }
 

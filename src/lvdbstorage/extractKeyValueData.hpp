@@ -74,6 +74,17 @@ struct DocIdData
 	void print( std::ostream& out);
 };
 
+struct UserNameData
+{
+	const char* usernamestr;
+	std::size_t usernamesize;
+	Index userno;
+
+	UserNameData( const leveldb::Slice& key, const leveldb::Slice& value);
+
+	void print( std::ostream& out);
+};
+
 struct ForwardIndexData
 {
 	Index docno;
@@ -160,6 +171,8 @@ struct PosinfoBlockData
 {
 	Index typeno;
 	Index valueno;
+	Index docno;
+
 	struct PosinfoPosting
 	{
 		Index docno;
@@ -174,6 +187,46 @@ struct PosinfoBlockData
 	std::vector<PosinfoPosting> posinfo;
 
 	PosinfoBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct DocListBlockData
+{
+	Index typeno;
+	Index valueno;
+	Index docno;
+
+	typedef std::pair<Index,Index> Range;
+	std::vector<Range> docrangelist;
+
+	DocListBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct UserAclBlockData
+{
+	Index userno;
+	Index docno;
+
+	typedef std::pair<Index,Index> Range;
+	std::vector<Range> docrangelist;
+
+	UserAclBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct AclBlockData
+{
+	Index docno;
+	Index userno;
+
+	typedef std::pair<Index,Index> Range;
+	std::vector<Range> userrangelist;
+
+	AclBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
 
 	void print( std::ostream& out);
 };

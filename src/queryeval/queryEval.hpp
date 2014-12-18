@@ -67,6 +67,7 @@ public:
 		getRankedDocumentList(
 			const StorageInterface& storage,
 			const QueryProcessorInterface& processor,
+			const std::string& username,
 			const queryeval::Query& query,
 			std::size_t fromRank,
 			std::size_t maxNofRanks) const;

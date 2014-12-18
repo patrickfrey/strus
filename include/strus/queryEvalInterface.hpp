@@ -52,13 +52,15 @@ public:
 	/// \brief Calculate a list of the best ranked documents
 	/// \param[in] storage storage to retrieve the features from
 	/// \param[in] processor processor that creates the items needed to process the query
-	/// \param[in] querystr query string (syntax depending on implementation)
+	/// \param[in] username user name of the client
+	/// \param[in] query query to process
 	/// \param[in] fromRank lowest rank to return
 	/// \param[in] maxNofRanks maximum number of ranks to return
 	virtual std::vector<queryeval::ResultDocument>
 		getRankedDocumentList(
 			const StorageInterface& storage,
 			const QueryProcessorInterface& processor,
+			const std::string& username,
 			const queryeval::Query& query,
 			std::size_t fromRank,
 			std::size_t maxNofRanks) const=0;

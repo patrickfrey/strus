@@ -26,8 +26,13 @@ Accumulator::Accumulator(
 void Accumulator::addSelector(
 		const PostingIteratorInterface& iterator)
 {
-	PostingIteratorReference itr( iterator.copy());
-	m_selectors.push_back( itr);
+	m_selectors.push_back( iterator.copy());
+}
+
+void Accumulator::addRestrictionSet(
+		DocnoIteratorInterface* iterator)
+{
+	m_restrictionSets.push_back( iterator);
 }
 
 void Accumulator::addRanker(
@@ -68,7 +73,30 @@ bool Accumulator::nextRank(
 			continue;
 		}
 		m_visited[ m_docno-1] = true;
-
+		if (m_restrictionSets.size())
+		{
+			// Apply restrictions defined by document sets
+			DocnoIteratorReferenceArray::iterator ri = m_restrictionSets.begin(), re = m_restrictionSets.end();
+			for (; ri != re; ++ri)
+			{
+				Index dn = ri->skipDoc( m_docno);
+				if (dn != m_docno)
+				{
+					if (!dn)
+					{
+						m_docno = 0;
+						++m_selectoridx;
+						break;
+					}
+					else
+					{
+						m_docno = dn -1;
+						break;
+					}
+				}
+			}
+			if (ri != re) continue;
+		}
 		m_metadata->skipDoc( m_docno);
 
 		docno = m_docno;

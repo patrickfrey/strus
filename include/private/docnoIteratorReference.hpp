@@ -26,23 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DOCNO_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_DOCNO_ITERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#ifndef _STRUS_DOCNO_ITERATOR_REFERENCE_HPP_INCLUDED
+#define _STRUS_DOCNO_ITERATOR_REFERENCE_HPP_INCLUDED
+#include "strus/docnoIteratorInterface.hpp"
+#include "localReference.hpp"
 
 namespace strus
 {
 
-class DocnoIteratorInterface
+class DocnoIteratorReference
+	:public LocalReference<DocnoIteratorInterface>
 {
 public:
-	virtual ~DocnoIteratorInterface(){}
+	DocnoIteratorReference()
+		:LocalReference<DocnoIteratorInterface>(){}
+	DocnoIteratorReference( DocnoIteratorInterface* o)
+		:LocalReference<DocnoIteratorInterface>(o){}
+};
 
-	/// \brief Return the next element with a document number higher than or equal to docno
-	virtual Index skipDoc( const Index& docno)=0;
-
-	/// \brief Return a copy of this posting iterator
-	virtual DocnoIteratorInterface* copy() const=0;
+class DocnoIteratorReferenceArray
+	:public LocalReferenceArray<DocnoIteratorInterface>
+{
+public:
+	DocnoIteratorReferenceArray(){}
 };
 
 }//namespace
