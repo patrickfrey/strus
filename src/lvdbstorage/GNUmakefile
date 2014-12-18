@@ -18,7 +18,8 @@ CPP_OBJS=\
 	forwardIndexBlock.o \
 	forwardIndexBlockMap.o \
 	booleanBlock.o \
-	booleanBlockMap.o \
+	docListBlockMap.o \
+	userAclBlockMap.o \
 	metaDataElement.o \
 	metaDataDescription.o \
 	metaDataRecord.o \
@@ -31,6 +32,7 @@ CPP_OBJS=\
 	documentFrequencyMap.o \
 	storage.o \
 	postingIterator.o \
+	indexSetIterator.o \
 	nullIterator.o \
 	forwardIterator.o \
 	storageDocument.o \
