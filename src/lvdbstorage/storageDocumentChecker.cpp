@@ -44,7 +44,7 @@
 using namespace strus;
 
 StorageDocumentChecker::StorageDocumentChecker(
-		Storage* storage_,
+		const Storage* storage_,
 		const std::string& docid_,
 		const std::string& logfile_)
 	:m_storage(storage_)

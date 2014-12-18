@@ -72,22 +72,22 @@ public:
 	virtual PostingIteratorInterface*
 			createTermPostingIterator(
 				const std::string& termtype,
-				const std::string& termid);
+				const std::string& termid) const;
 
 	virtual ForwardIteratorInterface*
 			createForwardIterator(
-				const std::string& type);
+				const std::string& type) const;
 
 	virtual DocnoIteratorInterface*
-		createInvertedAclIterator(
-			const std::string& username);
-
+			createInvertedAclIterator(
+				const std::string& username) const;
+	
 	virtual StorageTransactionInterface* createTransaction();
 
 	virtual StorageDocumentInterface* 
 			createDocumentChecker(
 				const std::string& docid,
-				const std::string& logfilename);
+				const std::string& logfilename) const;
 	
 	virtual Index allocDocnoRange( std::size_t nofDocuments);
 
@@ -151,8 +151,8 @@ public:/*StorageTransaction*/
 	};
 
 public:/*StorageDocumentChecker*/
-	IndexSetIterator getAclIterator( const Index& docno);
-	IndexSetIterator getUserAclIterator( const Index& userno);
+	IndexSetIterator getAclIterator( const Index& docno) const;
+	IndexSetIterator getUserAclIterator( const Index& userno) const;
 
 private:
 	Index loadIndexValue(

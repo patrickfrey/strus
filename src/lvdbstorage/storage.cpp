@@ -242,7 +242,7 @@ Index Storage::getAttributeName( const std::string& name) const
 PostingIteratorInterface*
 	Storage::createTermPostingIterator(
 		const std::string& typestr,
-		const std::string& termstr)
+		const std::string& termstr) const
 {
 	Index typeno = getTermType( typestr);
 	Index termno = getTermValue( termstr);
@@ -255,7 +255,7 @@ PostingIteratorInterface*
 
 ForwardIteratorInterface*
 	Storage::createForwardIterator(
-		const std::string& type)
+		const std::string& type) const
 {
 	return new ForwardIterator( this, m_db, type);
 }
@@ -296,7 +296,7 @@ public:
 
 DocnoIteratorInterface*
 	Storage::createInvertedAclIterator(
-		const std::string& username)
+		const std::string& username) const
 {
 	if (!withAcl())
 	{
@@ -327,7 +327,7 @@ StorageTransactionInterface*
 StorageDocumentInterface* 
 	Storage::createDocumentChecker(
 		const std::string& docid,
-		const std::string& logfilename)
+		const std::string& logfilename) const
 {
 	return new StorageDocumentChecker( this, docid, logfilename);
 }
@@ -529,12 +529,12 @@ Index Storage::allocNameIm(
 	return rt;
 }
 
-IndexSetIterator Storage::getAclIterator( const Index& docno)
+IndexSetIterator Storage::getAclIterator( const Index& docno) const
 {
 	return IndexSetIterator( m_db, DatabaseKey::AclBlockPrefix, docno);
 }
 
-IndexSetIterator Storage::getUserAclIterator( const Index& userno)
+IndexSetIterator Storage::getUserAclIterator( const Index& userno) const
 {
 	return IndexSetIterator( m_db, DatabaseKey::UserAclBlockPrefix, userno);
 }

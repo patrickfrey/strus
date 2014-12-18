@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-ForwardIterator::ForwardIterator( Storage* storage_, leveldb::DB* db_, const std::string& type_)
+ForwardIterator::ForwardIterator( const Storage* storage_, leveldb::DB* db_, const std::string& type_)
 	:m_db(db_)
 	,m_forwardBlockStorage(0)
 	,m_curblock(0)

@@ -45,7 +45,7 @@ class ForwardIterator
 {
 public:
 	ForwardIterator(
-		Storage* storage_,
+		const Storage* storage_,
 		leveldb::DB* db_,
 		const std::string& type_);
 

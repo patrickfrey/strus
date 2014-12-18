@@ -2,6 +2,7 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
+#include "strus/docnoIteratorInterface.hpp"
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -59,7 +60,7 @@ bool Accumulator::nextRank(
 	while (m_selectoridx < m_selectors.size())
 	{
 		// Select candidate document:
-		m_docno = m_selectors[ m_selectoridx]->skipDoc( m_docno+1);
+		m_docno = m_selectors[ m_selectoridx].skipDoc( m_docno+1);
 		if (!m_docno)
 		{
 			++m_selectoridx;

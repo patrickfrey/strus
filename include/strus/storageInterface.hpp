@@ -70,14 +70,14 @@ public:
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
 			const std::string& type,
-			const std::string& value)=0;
+			const std::string& value) const=0;
 
 	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
 	/// \param[in] type type name of the term to be inspected
 	/// \return the created viewer reference to be disposed with delete
 	virtual ForwardIteratorInterface*
 		createForwardIterator(
-			const std::string& type)=0;
+			const std::string& type) const=0;
 
 	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see
 	/// \param[in] username name of the user
@@ -85,7 +85,7 @@ public:
 	/// \note The storage has to be created access control enabled
 	virtual DocnoIteratorInterface*
 		createInvertedAclIterator(
-			const std::string& username)=0;
+			const std::string& username) const=0;
 
 	/// \brief Get the number of documents inserted into the collection
 	/// \return the number of documents
@@ -124,7 +124,7 @@ public:
 	/// \return the created document reference to be disposed with delete
 	virtual StorageDocumentInterface* createDocumentChecker(
 			const std::string& docid,
-			const std::string& logfilename)=0;
+			const std::string& logfilename) const=0;
 
 	/// \brief Get some statistics (counters) of the storage
 	virtual std::vector<StatCounterValue> getStatistics() const=0;

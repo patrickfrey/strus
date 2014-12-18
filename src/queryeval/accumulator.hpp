@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "postingIteratorReference.hpp"
+#include "docnoIteratorReference.hpp"
 #include "weightingFunctionReference.hpp"
 #include "accumulatorArgument.hpp"
 #include <vector>

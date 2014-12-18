@@ -46,7 +46,7 @@ class StorageDocumentChecker
 {
 public:
 	StorageDocumentChecker(
-		Storage* storage_,
+		const Storage* storage_,
 		const std::string& docid_,
 		const std::string& logfile_);
 
@@ -111,7 +111,7 @@ private:
 	typedef std::map<std::string,std::string> AttributeMap;
 
 private:
-	Storage* m_storage;
+	const Storage* m_storage;
 	TermMap m_termMap;
 	MetaDataMap m_metaDataMap;
 	AttributeMap m_attributeMap;
