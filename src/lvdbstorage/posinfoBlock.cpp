@@ -134,11 +134,14 @@ void PosinfoBlockElementMap::define( const Index& idx, const PosinfoBlockElement
 {
 	m_map[ idx] = m_strings.size();
 
-	packIndex( m_strings, pos.size());
-	PosinfoBlockElement::const_iterator pi = pos.begin(), pe = pos.end();
-	for (; pi != pe; ++pi)
+	if (pos.size())
 	{
-		packIndex( m_strings, *pi);
+		packIndex( m_strings, pos.size());
+		PosinfoBlockElement::const_iterator pi = pos.begin(), pe = pos.end();
+		for (; pi != pe; ++pi)
+		{
+			packIndex( m_strings, *pi);
+		}
 	}
 	m_strings.push_back( '\0');
 }

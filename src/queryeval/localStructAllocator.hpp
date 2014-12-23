@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <memory>
+#include <stdexcept>
 #include <cstdlib>
 
 namespace strus
@@ -86,7 +87,7 @@ public:
 	~LocalStructAllocator() {}
 
 private:
-	enum {BlockSize=32};
+	enum {BlockSize=128};
 	struct Block
 	{
 		StructType ar[ BlockSize];
@@ -160,6 +161,7 @@ private:
 		std::size_t m_blkidx;
 	};
 
+private:
 	BlockAllocator m_blkalloc;
 	FreeList m_freelist;
 };

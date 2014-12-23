@@ -99,6 +99,23 @@ public:
 		return (elemno_ > id() && elemno_ < id() + id() - firstIndex());
 	}
 
+	struct MergeRange
+	{
+		Index from;
+		Index to;
+		bool isMember;
+
+		MergeRange( const Index& from_, const Index to_, bool isMember_)
+			:from(from_),to(to_),isMember(isMember_){}
+		MergeRange( const MergeRange& o)
+			:from(o.from),to(o.to),isMember(o.isMember){}
+	};
+
+	static BooleanBlock merge( 
+			std::vector<MergeRange>::const_iterator ei,
+			const std::vector<MergeRange>::const_iterator& ee,
+			const BooleanBlock& oldblk);
+
 private:
 	Index relativeIndexFromElemno( const Index& elemno_) const	{return id()-elemno_+1;}
 	Index elemnoFromRelativeIndex( const Index& eidx_) const	{return id()-eidx_+1;}

@@ -190,6 +190,115 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 	}
 }
 
+BooleanBlock BooleanBlock::merge( 
+		std::vector<MergeRange>::const_iterator ei,
+		const std::vector<MergeRange>::const_iterator& ee,
+		const BooleanBlock& oldblk)
+{
+	BooleanBlock rt( oldblk.blocktype());
+	rt.setId( oldblk.id());
+
+	char const* old_itr = oldblk.charptr();
+	Index old_from;
+	Index old_to;
+	bool old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+
+	while (ei != ee && old_haselem)
+	{
+		if (ei->isMember)
+		{
+			//... define element
+			if (BooleanBlock::joinRange( old_from, old_to, ei->from, ei->to))
+			{
+				++ei;
+			}
+			else
+			{
+				if (ei->from < old_from)
+				{
+					rt.defineRange( ei->from, ei->to);
+					++ei;
+				}
+				else
+				{
+					rt.defineRange( old_from, old_to - old_from);
+					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+				}
+			}
+		}
+		else
+		{
+			//... delete element
+			if (old_from <= ei->from)
+			{
+				// => case [old.from][new.from]
+				if (old_to >= ei->from)
+				{
+					// .... that is inside the current range
+					// => case [old.from][new.from][old.to]
+					if (old_from < ei->from)
+					{
+						// => case [old.from][new.from][old.to]
+						rt.defineRange( old_from, ei->from - old_from - 1);
+					}
+					if (old_to > ei->to)
+					{
+						// => case [old.from][new.from][new.to][old.to]
+						old_from = ei->to + 1;
+						++ei;
+					}
+					else
+					{
+						old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+						++ei;
+					}
+				}
+				else
+				{
+					// .... that does not touch the old block
+					// => case [old.from][old.to][new.from]
+					rt.defineRange( old_from, old_to - old_from);
+					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+				}
+			}
+			else if (ei->to >= old_from)
+			{
+				// => case [new.from][old.from][new.to]
+				if (ei->to >= old_to)
+				{
+					// => case [new.from][old.from][old.to][new.to]
+					//... deleted elements are covering old range completely
+					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+				}
+				else
+				{
+					// => case [new.from][old.from][new.to][old.to]
+					old_from = ei->to + 1;
+				}
+			}
+			else
+			{
+				//... delete undefined element => ignore
+				++ei;
+			}
+		}
+	}
+	while (ei != ee)
+	{
+		if (ei->isMember)
+		{
+			rt.defineRange( ei->from, ei->to);
+		}
+		++ei;
+	}
+	while (old_haselem)
+	{
+		rt.defineRange( old_from, old_to - old_from);
+		old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+	}
+	return rt;
+}
+
 
 BooleanBlock BooleanBlockElementMap::merge( const_iterator ei, const const_iterator& ee, const BooleanBlock& oldblk)
 {

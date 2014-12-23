@@ -47,7 +47,7 @@ public:
 		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0)
 	{
 		if (maxNofRanks_ == 0) throw std::runtime_error( "illegal value for max number of ranks");
-		std::memset( m_brute_index, 0, sizeof( m_brute_index));
+		for (std::size_t ii=0; ii<m_maxNofRanks; ++ii) m_brute_index[ii] = ii;
 	}
 	~Ranker(){}
 
@@ -109,8 +109,8 @@ private:
 
 	void bruteInsert_at( std::size_t idx, const queryeval::WeightedDocument& doc)
 	{
-		std::size_t docix = m_nofRanks >= m_maxNofRanks ? m_brute_index[ idx] : m_nofRanks;
-		std::memmove( m_brute_index+idx+1, m_brute_index+idx, MaxIndexSize-idx-1);
+		std::size_t docix = m_brute_index[ m_maxNofRanks-1];
+		std::memmove( m_brute_index+idx+1, m_brute_index+idx, m_maxNofRanks-idx-1);
 		m_brute_index[ idx] = docix;
 		m_brute_ar[ docix] = doc;
 	}
@@ -151,7 +151,12 @@ private:
 				if (doc > m_brute_ar[ m_brute_index[ first]])
 				{
 					bruteInsert_at( first, doc);
+					break;
 				}
+			}
+			if (first == last && last < m_maxNofRanks)
+			{
+				bruteInsert_at( last, doc);
 			}
 		}
 		++m_nofRanks;

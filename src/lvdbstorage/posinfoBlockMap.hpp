@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "posinfoBlock.hpp"
+#include "booleanBlock.hpp"
 #include "blockKey.hpp"
 #include "blockStorage.hpp"
 #include <vector>
@@ -63,21 +64,42 @@ public:
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	void insertNewElements(
+	static void defineDocnoRangeElement(
+			std::vector<BooleanBlock::MergeRange>& docrangear,
+			const Index& docno,
+			bool isMember);
+
+	void insertNewPosElements(
 			BlockStorage<PosinfoBlock>& blkstorage,
 			PosinfoBlockElementMap::const_iterator& ei,
 			const PosinfoBlockElementMap::const_iterator& ee,
-			PosinfoBlock& newblk,
+			PosinfoBlock& newposblk,
+			const Index& lastInsertBlockId,
+			std::vector<BooleanBlock::MergeRange>& docrangear,
+			leveldb::WriteBatch& batch);
+
+	void mergeNewPosElements(
+			BlockStorage<PosinfoBlock>& blkstorage,
+			PosinfoBlockElementMap::const_iterator& ei,
+			const PosinfoBlockElementMap::const_iterator& ee,
+			PosinfoBlock& newposblk,
+			std::vector<BooleanBlock::MergeRange>& docrangear,
+			leveldb::WriteBatch& batch);
+
+	void insertNewDocElements(
+			BlockStorage<BooleanBlock>& blkstorage,
+			std::vector<BooleanBlock::MergeRange>::iterator& ei,
+			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
+			BooleanBlock& newdocblk,
 			const Index& lastInsertBlockId,
 			leveldb::WriteBatch& batch);
 
-	void mergeNewElements(
-			BlockStorage<PosinfoBlock>& blkstorage,
-			PosinfoBlockElementMap::const_iterator& ei,
-			const PosinfoBlockElementMap::const_iterator& ee,
-			PosinfoBlock& newblk,
+	void mergeNewDocElements(
+			BlockStorage<BooleanBlock>& blkstorage,
+			std::vector<BooleanBlock::MergeRange>::iterator& ei,
+			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
+			BooleanBlock& newdocblk,
 			leveldb::WriteBatch& batch);
-
 private:
 	typedef std::map<BlockKeyIndex,PosinfoBlockElementMap> Map;
 

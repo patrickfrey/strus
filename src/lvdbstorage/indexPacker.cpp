@@ -305,6 +305,7 @@ Index strus::unpackRange( const char*& ptr, const char* end, Index& rangesize)
 	Index rt = unpackIndex( ptr, end);
 	if (ptr < end && ptr[0] == RANGE_DELIM)
 	{
+		++ptr;
 		rangesize = unpackIndex( ptr, end);
 	}
 	else

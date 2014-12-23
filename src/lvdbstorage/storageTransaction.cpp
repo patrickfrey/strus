@@ -49,7 +49,6 @@ StorageTransaction::StorageTransaction(
 	,m_docnoBlockMap(db_)
 	,m_posinfoBlockMap(db_)
 	,m_forwardIndexBlockMap(db_)
-	,m_docListBlockMap(db_)
 	,m_userAclBlockMap(db_)
 	,m_termTypeMap(db_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
 	,m_termValueMap(db_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator())
@@ -157,7 +156,6 @@ void StorageTransaction::defineDocnoPosting(
 {
 	m_docnoBlockMap.defineDocnoPosting(
 		termtype, termvalue, docno, ff, weight);
-	m_docListBlockMap.definePosting( termtype, termvalue, docno);
 }
 
 void StorageTransaction::deleteDocnoPosting(
@@ -165,7 +163,6 @@ void StorageTransaction::deleteDocnoPosting(
 	const Index& docno)
 {
 	m_docnoBlockMap.deleteDocnoPosting( termtype, termvalue, docno);
-	m_docListBlockMap.deletePosting( termtype, termvalue, docno);
 }
 
 void StorageTransaction::definePosinfoPosting(
@@ -330,7 +327,6 @@ void StorageTransaction::commit()
 		m_posinfoBlockMap.getWriteBatch( m_batch);
 		m_forwardIndexBlockMap.getWriteBatch( m_batch);
 
-		m_docListBlockMap.getWriteBatch( m_batch);
 		m_userAclBlockMap.getWriteBatch( m_batch);
 
 		m_dfMap.renameNewTermNumbers( termnoUnknownMap);

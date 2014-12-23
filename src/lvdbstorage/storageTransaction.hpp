@@ -38,7 +38,6 @@
 #include "docnoBlock.hpp"
 #include "docnoBlockMap.hpp"
 #include "booleanBlock.hpp"
-#include "docListBlockMap.hpp"
 #include "userAclBlockMap.hpp"
 #include "posinfoBlock.hpp"
 #include "posinfoBlockMap.hpp"
@@ -155,7 +154,6 @@ private:
 	DocnoBlockMap m_docnoBlockMap;				///< map of docno postings for writing
 	PosinfoBlockMap m_posinfoBlockMap;			///< map of posinfo postings for writing
 	ForwardIndexBlockMap m_forwardIndexBlockMap;		///< map of forward index for writing
-	DocListBlockMap m_docListBlockMap;			///< map of docno sets for writing
 	UserAclBlockMap m_userAclBlockMap;			///< map of user rights for writing (forward and inverted)
 
 	KeyMap m_termTypeMap;					///< map of term types

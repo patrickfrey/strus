@@ -100,94 +100,248 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		BlockStorage<PosinfoBlock> blkstorage(
 				m_db, DatabaseKey::PosinfoBlockPrefix,
 				BlockKey(mi->first), false);
-		PosinfoBlock newblk;
+		PosinfoBlock newposblk;
+		std::vector<BooleanBlock::MergeRange> docrangear;
 
 		// [1] Merge new elements with existing upper bound blocks:
-		mergeNewElements( blkstorage, ei, ee, newblk, batch);
+		mergeNewPosElements( blkstorage, ei, ee, newposblk, docrangear, batch);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
+		insertNewPosElements( blkstorage, ei, ee, newposblk, lastInsertBlockId, docrangear, batch);
+
+		BlockStorage<BooleanBlock> docnostorage(
+				m_db, DatabaseKey::DocListBlockPrefix,
+				BlockKey(mi->first), false);
+		BooleanBlock newdocblk( DatabaseKey::DocListBlockPrefix);
+
+		std::vector<BooleanBlock::MergeRange>::iterator
+			di = docrangear.begin(),
+			de = docrangear.end();
+		lastInsertBlockId = docrangear.back().to;
+
+		// [3] Merge new docno boolean block elements
+		mergeNewDocElements( docnostorage, di, de, newdocblk, batch);
+
+		// [4] Merge new docno boolean block elements
+		insertNewDocElements( docnostorage, di, de, newdocblk, lastInsertBlockId, batch);
 	}
 	m_map.clear();
 }
-	
-void PosinfoBlockMap::insertNewElements(
-		BlockStorage<PosinfoBlock>& blkstorage,
-		PosinfoBlockElementMap::const_iterator& ei,
-		const PosinfoBlockElementMap::const_iterator& ee,
-		PosinfoBlock& newblk,
-		const Index& lastInsertBlockId,
-		leveldb::WriteBatch& batch)
+
+void PosinfoBlockMap::defineDocnoRangeElement( 
+		std::vector<BooleanBlock::MergeRange>& docrangear,
+		const Index& docno,
+		bool isMember)
 {
-	if (newblk.id() < lastInsertBlockId)
+	if (docrangear.empty())
 	{
-		newblk.setId( lastInsertBlockId);
+		docrangear.push_back( BooleanBlock::MergeRange( docno, docno, isMember));
 	}
-	Index blkid = newblk.id();
-	for (; ei != ee; ++ei)
+	else
 	{
-		if (newblk.full())
+		if (docrangear.back().isMember == isMember && docrangear.back().to+1 == docno)
 		{
-			newblk.setId( blkid);
-			blkstorage.store( newblk, batch);
-			newblk.clear();
-			newblk.setId( lastInsertBlockId);
+			docrangear.back().to += 1;
 		}
-		newblk.append( ei->docno(), ei->ptr());
-		blkid = ei->docno();
-	}
-	if (!newblk.empty())
-	{
-		newblk.setId( blkid);
-		blkstorage.store( newblk, batch);
+		else
+		{
+			docrangear.push_back( BooleanBlock::MergeRange( docno, docno, isMember));
+		}
 	}
 }
 
-void PosinfoBlockMap::mergeNewElements(
+void PosinfoBlockMap::insertNewPosElements(
 		BlockStorage<PosinfoBlock>& blkstorage,
 		PosinfoBlockElementMap::const_iterator& ei,
 		const PosinfoBlockElementMap::const_iterator& ee,
-		PosinfoBlock& newblk,
+		PosinfoBlock& newposblk,
+		const Index& lastInsertBlockId,
+		std::vector<BooleanBlock::MergeRange>& docrangear,
+		leveldb::WriteBatch& batch)
+{
+	if (newposblk.id() < lastInsertBlockId)
+	{
+		newposblk.setId( lastInsertBlockId);
+	}
+	Index blkid = newposblk.id();
+	for (; ei != ee; ++ei)
+	{
+		// Define docno list block elements (BooleanBlock):
+		defineDocnoRangeElement( docrangear, ei->docno(), (*ei->ptr())?true:false);
+
+		// Define posinfo block elements (PosinfoBlock):
+		if (newposblk.full())
+		{
+			newposblk.setId( blkid);
+			blkstorage.store( newposblk, batch);
+			newposblk.clear();
+			newposblk.setId( lastInsertBlockId);
+		}
+		newposblk.append( ei->docno(), ei->ptr());
+		blkid = ei->docno();
+	}
+	if (!newposblk.empty())
+	{
+		newposblk.setId( blkid);
+		blkstorage.store( newposblk, batch);
+	}
+}
+
+void PosinfoBlockMap::mergeNewPosElements(
+		BlockStorage<PosinfoBlock>& blkstorage,
+		PosinfoBlockElementMap::const_iterator& ei,
+		const PosinfoBlockElementMap::const_iterator& ee,
+		PosinfoBlock& newposblk,
+		std::vector<BooleanBlock::MergeRange>& docrangear,
 		leveldb::WriteBatch& batch)
 {
 	const PosinfoBlock* blk;
 	while (ei != ee && 0!=(blk=blkstorage.load( ei->docno())))
 	{
-		PosinfoBlockElementMap::const_iterator newblk_start = ei;
-		for (; ei != ee && ei->docno() <= blk->id(); ++ei){}
+		// Merge posinfo block elements (PosinfoBlock):
+		PosinfoBlockElementMap::const_iterator newposblk_start = ei;
+		for (; ei != ee && ei->docno() <= blk->id(); ++ei)
+		{
+			// Define docno list block elements (BooleanBlock):
+			defineDocnoRangeElement( docrangear, ei->docno(), (*ei->ptr())?true:false);
+		}
 
-		newblk = PosinfoBlockElementMap::merge( newblk_start, ei, *blk);
+		newposblk = PosinfoBlockElementMap::merge( newposblk_start, ei, *blk);
 		if (blkstorage.loadNext())
 		{
 			// ... is not the last block, so we store it
-			blkstorage.store( newblk, batch);
-			newblk.clear();
+			blkstorage.store( newposblk, batch);
+			newposblk.clear();
 		}
 		else
 		{
-			if (newblk.full())
+			if (newposblk.full())
 			{
 				// ... it is the last block, but full
-				blkstorage.store( newblk, batch);
-				newblk.clear();
+				blkstorage.store( newposblk, batch);
+				newposblk.clear();
 			}
 			else
 			{
-				blkstorage.dispose( newblk.id(), batch);
+				blkstorage.dispose( newposblk.id(), batch);
 			}
 			break;
 		}
 	}
-	if (newblk.empty())
+	if (newposblk.empty())
 	{
 		// Fill first new block with elements of last 
 		// block and dispose the last block:
 		if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
 		{
-			newblk.initcopy( *blk);
+			newposblk.initcopy( *blk);
 			blkstorage.dispose( blk->id(), batch);
 		}
 	}
 }
 	
+
+void PosinfoBlockMap::insertNewDocElements(
+		BlockStorage<BooleanBlock>& blkstorage,
+		std::vector<BooleanBlock::MergeRange>::iterator& ei,
+		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
+		BooleanBlock& newdocblk,
+		const Index& lastInsertBlockId,
+		leveldb::WriteBatch& batch)
+{
+	if (newdocblk.id() < lastInsertBlockId)
+	{
+		newdocblk.setId( lastInsertBlockId);
+	}
+	Index blkid = newdocblk.id();
+	for (; ei != ee; ++ei)
+	{
+		// Define posinfo block elements (PosinfoBlock):
+		if (newdocblk.full())
+		{
+			newdocblk.setId( blkid);
+			blkstorage.store( newdocblk, batch);
+			newdocblk.clear();
+			newdocblk.setId( lastInsertBlockId);
+		}
+		if (ei->isMember)
+		{
+			newdocblk.defineRange( ei->from, ei->to - ei->from);
+		}
+		blkid = ei->to;
+	}
+	if (!newdocblk.empty())
+	{
+		newdocblk.setId( blkid);
+		blkstorage.store( newdocblk, batch);
+	}
+}
+
+void PosinfoBlockMap::mergeNewDocElements(
+		BlockStorage<BooleanBlock>& blkstorage,
+		std::vector<BooleanBlock::MergeRange>::iterator& ei,
+		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
+		BooleanBlock& newdocblk,
+		leveldb::WriteBatch& batch)
+{
+	const BooleanBlock* blk;
+	while (ei != ee && 0!=(blk=blkstorage.load( ei->from)))
+	{
+		// Merge posinfo block elements (PosinfoBlock):
+		Index splitStart = 0;
+		Index splitEnd = 0;
+
+		std::vector<BooleanBlock::MergeRange>::iterator newdocblk_start = ei;
+		for (; ei != ee && ei->from <= blk->id(); ++ei)
+		{
+			if (ei->to > blk->id())
+			{
+				// ... last element is overlapping block borders, so we split it
+				splitStart = blk->id()+1;
+				splitEnd = ei->to; 
+				ei->to = blk->id();
+			}
+		}
+
+		newdocblk = BooleanBlock::merge( newdocblk_start, ei, *blk);
+		if (splitStart)
+		{
+			// ... last element is overlapping block borders, no we assign the second half of it to the block
+			--ei;
+			ei->from = splitStart;
+			ei->to = splitEnd;
+		}
+		if (blkstorage.loadNext())
+		{
+			// ... is not the last block, so we store it
+			blkstorage.store( newdocblk, batch);
+			newdocblk.clear();
+		}
+		else
+		{
+			if (newdocblk.full())
+			{
+				// ... it is the last block, but full
+				blkstorage.store( newdocblk, batch);
+				newdocblk.clear();
+			}
+			else
+			{
+				blkstorage.dispose( newdocblk.id(), batch);
+			}
+			break;
+		}
+	}
+	if (newdocblk.empty())
+	{
+		// Fill first new block with elements of last 
+		// block and dispose the last block:
+		if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
+		{
+			newdocblk.initcopy( *blk);
+			blkstorage.dispose( blk->id(), batch);
+		}
+	}
+}
+
 
