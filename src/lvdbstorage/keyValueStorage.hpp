@@ -36,6 +36,7 @@
 #include <cstdlib>
 #include <string>
 #include <map>
+#include <cstring>
 #include <stdexcept>
 
 namespace strus {
@@ -51,6 +52,8 @@ public:
 			:m_ptr(str.c_str()),m_size(str.size()){}
 		Value( const char* ptr_, std::size_t size_)
 			:m_ptr(ptr_),m_size(size_){}
+		Value( const char* ptr_)
+			:m_ptr(ptr_),m_size(std::strlen(ptr_)){}
 		Value( const Value& o)
 			:m_ptr(o.m_ptr),m_size(o.m_size){}
 		Value()

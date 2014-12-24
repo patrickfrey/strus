@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_ATTRIBUTE_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "blockKey.hpp"
+#include "localStructAllocator.hpp"
 #include <vector>
 #include <map>
 #include <leveldb/db.h>
@@ -41,7 +42,11 @@ class AttributeMap
 {
 public:
 	explicit AttributeMap( leveldb::DB* db_)
-		:m_db(db_){}
+		:m_db(db_)
+	{
+		m_strings.push_back( '\0');
+	}
+
 	~AttributeMap(){}
 
 	void defineAttribute( const Index& docno, const Index& varno, const std::string& value);
@@ -51,12 +56,15 @@ public:
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	typedef std::map<BlockKeyIndex, std::string> Map;
+	typedef LocalStructAllocator<std::pair<BlockKeyIndex,std::size_t> > MapAllocator;
+	typedef std::less<BlockKeyIndex> MapCompare;
+	typedef std::map<BlockKeyIndex,std::size_t,MapCompare,MapAllocator> Map;
 	typedef std::vector<BlockKeyIndex> DeleteList;
 
 private:
 	leveldb::DB* m_db;
 	Map m_map;
+	std::string m_strings;
 	DeleteList m_deletes;
 };
 

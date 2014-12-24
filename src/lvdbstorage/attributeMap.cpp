@@ -35,7 +35,9 @@ using namespace strus;
 void AttributeMap::defineAttribute( const Index& docno, const Index& varno, const std::string& value)
 {
 	BlockKey key( docno, varno);
-	m_map[ key.index()] = value;
+	m_map[ key.index()] = m_strings.size();
+	m_strings.append( value);
+	m_strings.push_back( '\0');
 }
 
 void AttributeMap::deleteAttributes( const Index& docno)
@@ -91,7 +93,7 @@ void AttributeMap::getWriteBatch( leveldb::WriteBatch& batch)
 	for (; mi != me; ++mi)
 	{
 		BlockKey key( mi->first);
-		attrstorage.store( key, mi->second, batch);
+		attrstorage.store( key, KeyValueStorage::Value( m_strings.c_str() + mi->second), batch);
 	}
 	m_map.clear();
 }
