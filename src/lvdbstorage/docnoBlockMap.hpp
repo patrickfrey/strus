@@ -32,6 +32,7 @@
 #include "docnoBlock.hpp"
 #include "blockKey.hpp"
 #include "blockStorage.hpp"
+#include "localStructAllocator.hpp"
 #include <cstdlib>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
@@ -79,7 +80,9 @@ private:
 			leveldb::WriteBatch& batch);
 	
 private:
-	typedef std::map<BlockKeyIndex,DocnoBlockElementMap> Map;
+	typedef LocalStructAllocator<std::pair<BlockKeyIndex,DocnoBlockElementMap> > MapAllocator;
+	typedef std::less<BlockKeyIndex> MapCompare;
+	typedef std::map<BlockKeyIndex,DocnoBlockElementMap,MapCompare,MapAllocator> Map;
 
 private:
 	leveldb::DB* m_db;

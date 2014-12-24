@@ -121,23 +121,6 @@ private:
 	Index elemnoFromRelativeIndex( const Index& eidx_) const	{return id()-eidx_+1;}
 };
 
-
-class BooleanBlockElementMap
-	:public std::map<Index,bool>
-{
-public:
-	BooleanBlockElementMap(){}
-	BooleanBlockElementMap( const BooleanBlockElementMap& o)
-		:std::map<Index,bool>(o){}
-
-	Index lastInsertBlockId() const
-	{
-		return rbegin()->first;
-	}
-
-	static BooleanBlock merge( const_iterator ei, const const_iterator& ee, const BooleanBlock& oldblk);
-};
-
 }//namespace
 #endif
 

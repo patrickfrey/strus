@@ -73,8 +73,12 @@ void DataBlock::initcopy( const DataBlock& o)
 
 void DataBlock::expand( std::size_t datasize)
 {
-	std::size_t mm = BLOCK_ALLOC_SIZE( datasize + m_size);
+	std::size_t aa = datasize + m_size;
+	std::size_t mm = 1024;
+	while (mm <= aa && mm != 0) mm *= 2;
+	if (!mm) throw std::bad_alloc();
 	char* mp;
+
 	if (m_allocsize)
 	{
 		mp = (char*)std::realloc( m_ptr, mm);

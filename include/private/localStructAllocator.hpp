@@ -55,7 +55,7 @@ public:
 	{
 		if (n != 1)
 		{
-			throw std::logic_error( "illegal use of allocator, only on item can be allocated at once");
+			throw std::logic_error( "illegal use of allocator, only one item can be allocated at once");
 		}
 		StructType* rt = m_freelist.pop();
 		if (!rt) return m_blkalloc.alloc();
@@ -105,10 +105,12 @@ private:
 		{
 			if (m_size == m_allocsize)
 			{
-				void* na = std::realloc( m_ar, (m_allocsize + 1024) * sizeof(StructType*));
+				std::size_t mm = m_allocsize?(m_allocsize*2):1024;
+				if (mm < m_allocsize) throw std::bad_alloc();
+				void* na = std::realloc( m_ar, mm * sizeof(StructType*));
 				if (!na) throw std::bad_alloc();
 				m_ar = (StructType**)na;
-				m_allocsize += 1024;
+				m_allocsize = mm;
 			}
 			m_ar[ m_size++] = ptr;
 		}
@@ -143,10 +145,12 @@ private:
 			{
 				if (m_size == m_allocsize)
 				{
-					void* na = std::realloc( m_ar, (m_allocsize + 256) * sizeof(Block*));
+					std::size_t mm = m_allocsize?(m_allocsize*2):1024;
+					if (mm * sizeof(Block*) < m_allocsize) throw std::bad_alloc();
+					void* na = std::realloc( m_ar, mm * sizeof(Block*));
 					if (!na) throw std::bad_alloc();
 					m_ar = (Block**)na;
-					m_allocsize += 256;
+					m_allocsize = mm;
 				}
 				void* mem = std::malloc( sizeof( Block));
 				if (!mem) throw std::bad_alloc();

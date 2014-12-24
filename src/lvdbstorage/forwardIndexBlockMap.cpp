@@ -42,20 +42,30 @@ void ForwardIndexBlockMap::defineForwardIndexTerm(
 	Map::iterator mi = m_map.find( dbkey.index());
 	if (mi == m_map.end())
 	{
-		m_map[ dbkey.index()].define( pos, termstring);
+		m_blockar.push_back( BlockListElem( ForwardIndexBlock(), 0));
+		m_blockar.back().first.setId( MaxBlockId);
+		m_blockar.back().first.append( pos, termstring);
+		m_map[ dbkey.index()] = m_blockar.size()-1;
 	}
 	else
 	{
-		mi->second.define( pos, termstring);
-	}
-}
+		BlockListElem& elem = m_blockar[ mi->second];
+		if (elem.first.full())
+		{
+			Index lastpos = elem.first.position_at( elem.first.prevItem( elem.first.charend()));
+			elem.first.setId( lastpos);
+			std::size_t nextblock = mi->second;
+			mi->second = m_blockar.size();
 
-void ForwardIndexBlockMap::deleteForwardIndexTerm(
-	const Index& typeno,
-	const Index& docno,
-	const Index& pos)
-{
-	defineForwardIndexTerm( typeno, docno, pos, std::string());
+			m_blockar.push_back( BlockListElem( ForwardIndexBlock(), nextblock));
+			m_blockar.back().first.setId( MaxBlockId);
+			m_blockar.back().first.append( pos, termstring);
+		}
+		else
+		{
+			elem.first.append( pos, termstring);
+		}
+	}
 }
 
 void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
@@ -63,18 +73,21 @@ void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		ForwardIndexBlockElementMap::const_iterator
-			ei = mi->second.begin(),
-			ee = mi->second.end();
+		std::vector<ForwardIndexBlock*> blklist;
 
-		if (ei == ee) continue;
-		Index lastInsertBlockId = mi->second.lastInsertBlockId();
+		std::size_t blkidx = mi->second;
+		do
+		{
+			BlockListElem& elem = m_blockar[ blkidx];
+			blklist.push_back(&elem.first);
+			blkidx = elem.second;
+		}
+		while (blkidx);
 
 		BlockStorage<ForwardIndexBlock> blkstorage(
 				m_db, DatabaseKey::ForwardIndexPrefix,
 				BlockKey(mi->first), false);
 		const ForwardIndexBlock* blk;
-		ForwardIndexBlock newblk;
 
 		// [1] Delete all old blocks with the database key as prefix address:
 		for (blk = blkstorage.load( 0);
@@ -82,40 +95,19 @@ void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		{
 			blkstorage.dispose( blk->id(), batch);
 		}
+
 		// [2] Write the new blocks:
-		insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
+		std::vector<ForwardIndexBlock*>::const_iterator bi = blklist.begin(), be = blklist.end();
+		for (; bi != be; ++bi)
+		{
+			if ((*bi)->id() == MaxBlockId)
+			{
+				Index lastpos = (*bi)->position_at( (*bi)->prevItem( (*bi)->charend()));
+				(*bi)->setId( lastpos);
+				blkstorage.store( **bi, batch);
+			}
+		}
 	}
 	m_map.clear();
 }
 
-void ForwardIndexBlockMap::insertNewElements(
-		BlockStorage<ForwardIndexBlock>& blkstorage,
-		ForwardIndexBlockElementMap::const_iterator& ei,
-		const ForwardIndexBlockElementMap::const_iterator& ee,
-		ForwardIndexBlock& newblk,
-		const Index& lastInsertBlockId,
-		leveldb::WriteBatch& batch)
-{
-	if (newblk.id() < lastInsertBlockId)
-	{
-		newblk.setId( lastInsertBlockId);
-	}
-	Index blkid = newblk.id();
-	for (; ei != ee; ++ei)
-	{
-		if (newblk.full())
-		{
-			newblk.setId( blkid);
-			blkstorage.store( newblk, batch);
-			newblk.clear();
-			newblk.setId( lastInsertBlockId);
-		}
-		newblk.append( ei->key(), ei->value());
-		blkid = ei->key();
-	}
-	if (!newblk.empty())
-	{
-		newblk.setId( blkid);
-		blkstorage.store( newblk, batch);
-	}
-}

@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_FORWARD_INDEX_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
+#include "localStructAllocator.hpp"
 #include <string>
 #include <map>
 
@@ -79,7 +80,6 @@ public:
 
 	void append( const Index& pos, const std::string& item);
 
-
 	class const_iterator
 	{
 	public:
@@ -109,113 +109,6 @@ public:
 	{
 		return const_iterator( this, charend());
 	}
-};
-
-
-typedef std::string ForwardIndexBlockElement;
-
-class ForwardIndexBlockElementMap
-{
-public:
-	typedef ForwardIndexBlockElement mapped_type;
-
-public:
-	ForwardIndexBlockElementMap(){}
-	ForwardIndexBlockElementMap( const ForwardIndexBlockElementMap& o)
-		:m_map(o.m_map),m_strings(o.m_strings){}
-
-	void define( const Index& idx, const ForwardIndexBlockElement& elem);
-
-	Index lastInsertBlockId() const
-	{
-		return m_map.rbegin()->first;
-	}
-
-	void swap( ForwardIndexBlockElementMap& o)
-	{
-		m_map.swap( o.m_map);
-		m_strings.swap( o.m_strings);
-	}
-
-	class IteratorElement
-	{
-	public:
-		IteratorElement()
-			:m_docno(0),m_ptr(0){}
-		IteratorElement( const Index& docno_, const char* ptr_)
-			:m_docno(docno_),m_ptr(ptr_){}
-		IteratorElement( const IteratorElement& o)
-			:m_docno(o.m_docno),m_ptr(o.m_ptr){}
-
-		void init( const Index& docno_, const char* ptr_)
-		{
-			m_docno = docno_;
-			m_ptr = ptr_;
-		}
-
-		const Index& key() const
-		{
-			return m_docno;
-		}
-
-		const char* value() const
-		{
-			return m_ptr;
-		}
-
-	private:
-		Index m_docno;
-		const char* m_ptr;
-	};
-
-	class const_iterator
-	{
-	public:
-		const_iterator( const const_iterator& o)
-			:m_elem(o.m_elem),m_map_itr(o.m_map_itr),m_strings_ref(o.m_strings_ref){}
-
-		const_iterator( const ForwardIndexBlockElementMap* map_, bool start);
-
-		bool operator==( const const_iterator& o) const	{return m_map_itr==o.m_map_itr;}
-		bool operator!=( const const_iterator& o) const	{return m_map_itr!=o.m_map_itr;}
-
-		const_iterator& operator++()			{++m_map_itr; m_elem.init( m_map_itr->first, m_strings_ref + m_map_itr->second); return *this;}
-		const_iterator operator++(int)			{const_iterator rt(*this); ++m_map_itr; m_elem.init( m_map_itr->first, m_strings_ref + m_map_itr->second); return rt;}
-
-		const IteratorElement& operator*() const	{return m_elem;}
-		const IteratorElement* operator->() const	{return &m_elem;}
-
-	private:
-		IteratorElement m_elem;
-		std::map<Index,std::size_t>::const_iterator m_map_itr;
-		const char* m_strings_ref;
-	};
-
-	const_iterator begin() const
-	{
-		return const_iterator( this, true);
-	}
-	const_iterator end() const
-	{
-		return const_iterator( this, false);
-	}
-
-	std::map<Index,std::size_t>::const_iterator map_begin() const
-	{
-		return m_map.begin();
-	}
-	std::map<Index,std::size_t>::const_iterator map_end() const
-	{
-		return m_map.end();
-	}
-	const char* strings_ptr() const
-	{
-		return m_strings.c_str();
-	}
-
-private:
-	std::map<Index,std::size_t> m_map;
-	std::string m_strings;
 };
 
 }

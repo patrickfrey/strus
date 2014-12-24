@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_KeyMap_HPP_INCLUDED
-#define _STRUS_QUERY_KeyMap_HPP_INCLUDED
+#ifndef _STRUS_QUERY_KEYMAP_HPP_INCLUDED
+#define _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #include <string>
 #include <map>
 #include <boost/algorithm/string.hpp>

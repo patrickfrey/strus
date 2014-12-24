@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "userAclBlockMap.hpp"
+#include "booleanBlockMap.hpp"
 #include "keyMap.hpp"
 
 using namespace strus;
@@ -36,24 +37,24 @@ void UserAclBlockMap::markSetElement(
 	const Index& elemno,
 	bool isMember)
 {
-	Map::iterator mi = m_usrmap.find( userno);
+	Map::iterator mi = m_usrmap.find( MapKey( userno, elemno));
 	if (mi == m_usrmap.end())
 	{
-		m_usrmap[ userno][ elemno] = isMember;
+		m_usrmap[ MapKey( userno, elemno)] = isMember;
 	}
 	else
 	{
-		mi->second[ elemno] = isMember;
+		mi->second = isMember;
 	}
 
-	mi = m_aclmap.find( elemno);
+	mi = m_aclmap.find( MapKey( elemno, userno));
 	if (mi == m_aclmap.end())
 	{
-		m_aclmap[ elemno][ userno] = isMember;
+		m_aclmap[ MapKey( elemno, userno)] = isMember;
 	}
 	else
 	{
-		mi->second[ userno] = isMember;
+		mi->second = isMember;
 	}
 }
 
@@ -74,27 +75,34 @@ void UserAclBlockMap::deleteUserAccess(
 void UserAclBlockMap::deleteUserAccess(
 	const Index& userno)
 {
-	Map::iterator mi = m_usrmap.find( userno);
-	if (mi != m_usrmap.end())
+	Map::iterator mi = m_usrmap.upper_bound( MapKey( userno, 0));
+	if (mi == m_usrmap.end() || mi->first.first == userno)
+	{
+		m_usr_deletes.push_back( userno);
+	}
+	else
 	{
 		throw std::runtime_error("cannot delete user access after defining it for the same user in a transaction");
 	}
-	m_usr_deletes.push_back( userno);
 }
 
 void UserAclBlockMap::deleteDocumentAccess(
 	const Index& docno)
 {
-	Map::iterator mi = m_aclmap.find( docno);
-	if (mi != m_aclmap.end())
+	Map::iterator mi = m_aclmap.upper_bound( MapKey( docno, 0));
+	if (mi == m_aclmap.end() || mi->first.first == docno)
+	{
+		m_acl_deletes.push_back( docno);
+	}
+	else
 	{
 		throw std::runtime_error("cannot define document access after defining it for the same document in a transaction");
 	}
-	m_acl_deletes.push_back( docno);
 }
 
 static void resetAllBooleanBlockElementsFromStorage(
-	BooleanBlockElementMap& mapelem,
+	UserAclBlockMap::Map& map,
+	const Index& idx,
 	BlockStorage<BooleanBlock>& storage)
 {
 	const BooleanBlock* blk;
@@ -108,166 +116,110 @@ static void resetAllBooleanBlockElementsFromStorage(
 		{
 			for (; from_<=to_; ++from_)
 			{
-				mapelem[ from_]; // reset to false, only if it does not exist
+				map[ UserAclBlockMap::MapKey( idx, from_)]; // reset to false, only if it does not exist
 			}
 		}
 		blkidx = blk->id()+1;
 	}
 }
 
+static void defineRangeElement( 
+		std::vector<BooleanBlock::MergeRange>& docrangear,
+		const Index& docno,
+		bool isMember)
+{
+	if (docrangear.empty())
+	{
+		docrangear.push_back( BooleanBlock::MergeRange( docno, docno, isMember));
+	}
+	else
+	{
+		if (docrangear.back().isMember == isMember && docrangear.back().to+1 == docno)
+		{
+			docrangear.back().to += 1;
+		}
+		else
+		{
+			docrangear.push_back( BooleanBlock::MergeRange( docno, docno, isMember));
+		}
+	}
+}
+
+
 void UserAclBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
 	std::vector<Index>::const_iterator di = m_usr_deletes.begin(), de = m_usr_deletes.end();
 	for (; di != de; ++di)
 	{
-		BooleanBlockElementMap& usrmapelem = m_usrmap[ *di];
-
 		BlockStorage<BooleanBlock> usrstorage(
 				m_db, DatabaseKey::UserAclBlockPrefix,
 				BlockKey(*di), false);
 
-		resetAllBooleanBlockElementsFromStorage( usrmapelem, usrstorage);
+		resetAllBooleanBlockElementsFromStorage( m_usrmap, *di, usrstorage);
 	}
 
 	std::vector<Index>::const_iterator ai = m_acl_deletes.begin(), ae = m_acl_deletes.end();
 	for (; ai != ae; ++ai)
 	{
-		BooleanBlockElementMap& aclmapelem = m_usrmap[ *ai];
-
 		BlockStorage<BooleanBlock> aclstorage(
 				m_db, DatabaseKey::AclBlockPrefix,
 				BlockKey(*ai), false);
 
-		resetAllBooleanBlockElementsFromStorage( aclmapelem, aclstorage);
+		resetAllBooleanBlockElementsFromStorage( m_aclmap, *ai, aclstorage);
 	}
 
 	Map::const_iterator mi = m_usrmap.begin(), me = m_usrmap.end();
-	for (; mi != me; ++mi)
+	while (mi != me)
 	{
-		BooleanBlockElementMap::const_iterator
-			ei = mi->second.begin(),
-			ee = mi->second.end();
+		std::vector<BooleanBlock::MergeRange> rangear;
+		Map::const_iterator start = mi;
+		for (; mi != me && mi->first.second != start->first.second; ++mi)
+		{
+			defineRangeElement( rangear, mi->first.second, mi->second);
+		}
 
-		if (ei == ee) continue;
-		Index lastInsertBlockId = mi->second.lastInsertBlockId();
+		Index lastInsertBlockId = rangear.back().to;
 
 		BlockStorage<BooleanBlock> blkstorage(
 				m_db, DatabaseKey::UserAclBlockPrefix,
-				BlockKey(mi->first), false);
+				BlockKey(start->first.first), false);
 		BooleanBlock newblk( (char)DatabaseKey::UserAclBlockPrefix);
 
+		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
+
 		// [1] Merge new elements with existing upper bound blocks:
-		mergeNewElements( blkstorage, ei, ee, newblk, batch);
+		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, batch);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
+		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, batch);
 	}
 
 	mi = m_aclmap.begin(), me = m_aclmap.end();
-	for (; mi != me; ++mi)
+	while (mi != me)
 	{
-		BooleanBlockElementMap::const_iterator
-			ei = mi->second.begin(),
-			ee = mi->second.end();
-
-		if (ei == ee) continue;
-		Index lastInsertBlockId = mi->second.lastInsertBlockId();
+		std::vector<BooleanBlock::MergeRange> rangear;
+		Map::const_iterator start = mi;
+		for (; mi != me && mi->first.second != start->first.second; ++mi)
+		{
+			defineRangeElement( rangear, mi->first.second, mi->second);
+		}
+		Index lastInsertBlockId = rangear.back().to;
 
 		BlockStorage<BooleanBlock> blkstorage(
 				m_db, DatabaseKey::AclBlockPrefix,
-				BlockKey(mi->first), false);
+				BlockKey(start->first.first), false);
 		BooleanBlock newblk( (char)DatabaseKey::AclBlockPrefix);
 
+		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
+
 		// [1] Merge new elements with existing upper bound blocks:
-		mergeNewElements( blkstorage, ei, ee, newblk, batch);
+		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, batch);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		insertNewElements( blkstorage, ei, ee, newblk, lastInsertBlockId, batch);
+		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, batch);
 	}
 	m_usrmap.clear();
 	m_aclmap.clear();
 }
-	
-void UserAclBlockMap::insertNewElements(
-		BlockStorage<BooleanBlock>& blkstorage,
-		BooleanBlockElementMap::const_iterator& ei,
-		const BooleanBlockElementMap::const_iterator& ee,
-		BooleanBlock& newblk,
-		const Index& lastInsertBlockId,
-		leveldb::WriteBatch& batch)
-{
-	if (newblk.id() < lastInsertBlockId)
-	{
-		newblk.setId( lastInsertBlockId);
-	}
-	Index blkid = newblk.id();
-	for (; ei != ee; ++ei)
-	{
-		if (newblk.full())
-		{
-			newblk.setId( blkid);
-			blkstorage.store( newblk, batch);
-			newblk.clear();
-			newblk.setId( lastInsertBlockId);
-		}
-		if (ei->second)
-		{
-			newblk.defineElement( ei->first);
-		}
-		blkid = ei->first;
-	}
-	if (!newblk.empty())
-	{
-		newblk.setId( blkid);
-		blkstorage.store( newblk, batch);
-	}
-}
 
-void UserAclBlockMap::mergeNewElements(
-		BlockStorage<BooleanBlock>& blkstorage,
-		BooleanBlockElementMap::const_iterator& ei,
-		const BooleanBlockElementMap::const_iterator& ee,
-		BooleanBlock& newblk,
-		leveldb::WriteBatch& batch)
-{
-	const BooleanBlock* blk;
-	while (ei != ee && 0!=(blk=blkstorage.load( ei->first)))
-	{
-		BooleanBlockElementMap::const_iterator newblk_start = ei;
-		for (; ei != ee && ei->first <= blk->id(); ++ei){}
-
-		newblk = BooleanBlockElementMap::merge( newblk_start, ei, *blk);
-		if (blkstorage.loadNext())
-		{
-			// ... is not the last block, so we store it
-			blkstorage.store( newblk, batch);
-			newblk.clear();
-		}
-		else
-		{
-			if (newblk.full())
-			{
-				// ... it is the last block, but full
-				blkstorage.store( newblk, batch);
-				newblk.clear();
-			}
-			else
-			{
-				blkstorage.dispose( newblk.id(), batch);
-			}
-			break;
-		}
-	}
-	if (newblk.empty())
-	{
-		// Fill first new block with elements of last 
-		// block and dispose the last block:
-		if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
-		{
-			newblk.initcopy( *blk);
-			blkstorage.dispose( blk->id(), batch);
-		}
-	}
-}
-	
 

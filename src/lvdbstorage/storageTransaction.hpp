@@ -130,10 +130,6 @@ public:/*Document*/
 		const Index& typeno, const Index& docno,
 		const Index& pos, const std::string& termstring);
 
-	void deleteForwardIndexTerm(
-		const Index& typeno, const Index& docno,
-		const Index& pos);
-
 	void defineUserAccess(
 		const Index& userno, const Index& docno);
 

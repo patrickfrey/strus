@@ -84,23 +84,6 @@ const char* ForwardIndexBlock::find( const Index& pos_, const char* lowerbound) 
 	return (pos_ == position_at( rt))?rt:0;
 }
 
-ForwardIndexBlockElementMap::const_iterator::const_iterator( const ForwardIndexBlockElementMap* map_, bool start)
-	:m_map_itr(start?map_->map_begin():map_->map_end())
-	,m_strings_ref(map_->strings_ptr())
-{
-	if (m_map_itr != map_->map_end())
-	{
-		m_elem.init( m_map_itr->first, m_strings_ref);
-	}
-}
-
-void ForwardIndexBlockElementMap::define( const Index& idx, const ForwardIndexBlockElement& elem)
-{
-	m_map[ idx] = m_strings.size();
-	m_strings.append( elem);
-	m_strings.push_back( '\0');
-}
-
 void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 {
 	char const* pp = prevItem( charend());
@@ -122,6 +105,7 @@ void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 
 void ForwardIndexBlock::setId( const Index& id_)
 {
+	if (id() == id_) return;
 	if (empty())
 	{
 		DataBlock::setId( id_);
@@ -145,6 +129,7 @@ void ForwardIndexBlock::setId( const Index& id_)
 				packIndex( content, unpackIndex( bi, be) + id_diff);
 				const char* blkstart = bi;
 				bi = nextItem( bi);
+				if (!bi) break;
 				content.append( blkstart, bi - blkstart);
 			}
 			init( id_, content.c_str(), content.size(), content.size());

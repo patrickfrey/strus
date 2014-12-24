@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
 #define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "localStructAllocator.hpp"
 #include <cstdlib>
 #include <map>
 #include <leveldb/db.h>
@@ -53,7 +54,9 @@ public:
 
 private:
 	typedef std::pair<Index,Index> Key;
-	typedef std::map<Key,int> Map;
+	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
+	typedef std::less<Key> MapCompare;
+	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
 
 private:
 	leveldb::DB* m_db;

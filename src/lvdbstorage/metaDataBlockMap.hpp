@@ -58,6 +58,8 @@ public:
 
 	void getWriteBatch( leveldb::WriteBatch& batch, std::vector<Index>& cacheRefreshList);
 
+	//[+]!!!! FIX THIS ONE: Metadata blocks should not be loaded with defineMetaData/deleteMetaData, but in the transaction commit
+
 private:
 	MetaDataRecord getRecord( Index docno);
 

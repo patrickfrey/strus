@@ -33,6 +33,7 @@
 #include "booleanBlock.hpp"
 #include "blockKey.hpp"
 #include "blockStorage.hpp"
+#include "localStructAllocator.hpp"
 #include <vector>
 #include <iostream>
 #include <leveldb/db.h>
@@ -86,22 +87,10 @@ private:
 			std::vector<BooleanBlock::MergeRange>& docrangear,
 			leveldb::WriteBatch& batch);
 
-	void insertNewDocElements(
-			BlockStorage<BooleanBlock>& blkstorage,
-			std::vector<BooleanBlock::MergeRange>::iterator& ei,
-			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
-			BooleanBlock& newdocblk,
-			const Index& lastInsertBlockId,
-			leveldb::WriteBatch& batch);
-
-	void mergeNewDocElements(
-			BlockStorage<BooleanBlock>& blkstorage,
-			std::vector<BooleanBlock::MergeRange>::iterator& ei,
-			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
-			BooleanBlock& newdocblk,
-			leveldb::WriteBatch& batch);
 private:
-	typedef std::map<BlockKeyIndex,PosinfoBlockElementMap> Map;
+	typedef LocalStructAllocator<std::pair<BlockKeyIndex,PosinfoBlockElementMap> > MapAllocator;
+	typedef std::less<BlockKeyIndex> MapCompare;
+	typedef std::map<BlockKeyIndex,PosinfoBlockElementMap,MapCompare,MapAllocator> Map;
 
 private:
 	leveldb::DB* m_db;

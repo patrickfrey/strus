@@ -32,6 +32,7 @@
 #include "forwardIndexBlock.hpp"
 #include "blockKey.hpp"
 #include "blockStorage.hpp"
+#include "localStructAllocator.hpp"
 #include <vector>
 #include <map>
 #include <leveldb/db.h>
@@ -53,12 +54,8 @@ public:
 		const Index& pos,
 		const std::string& termstring);
 
-	void deleteForwardIndexTerm(
-		const Index& typeno,
-		const Index& docno,
-		const Index& pos);
-
 	void getWriteBatch( leveldb::WriteBatch& batch);
+
 
 	template <class TermnoMap>
 	std::map<Index,Index> getTermOccurrencies(
@@ -96,19 +93,18 @@ private:
 		}
 	}
 
-	void insertNewElements(
-			BlockStorage<ForwardIndexBlock>& blkstorage,
-			ForwardIndexBlockElementMap::const_iterator& ei,
-			const ForwardIndexBlockElementMap::const_iterator& ee,
-			ForwardIndexBlock& newblk,
-			const Index& lastInsertBlockId,
-			leveldb::WriteBatch& batch);
-	
 private:
-	typedef std::map<BlockKeyIndex,ForwardIndexBlockElementMap> Map;
+	typedef std::pair<ForwardIndexBlock,std::size_t> BlockListElem;
+	typedef std::vector<BlockListElem> BlockList;
+
+	typedef LocalStructAllocator<std::pair<BlockKeyIndex,std::size_t> > MapAllocator;
+	typedef std::less<BlockKeyIndex> MapCompare;
+	typedef std::map<BlockKeyIndex,std::size_t,MapCompare,MapAllocator> Map;
 
 private:
+	enum {MaxBlockId=1<<30};
 	leveldb::DB* m_db;
+	BlockList m_blockar;
 	Map m_map;
 };
 

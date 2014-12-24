@@ -190,14 +190,6 @@ void StorageTransaction::defineForwardIndexTerm(
 	m_forwardIndexBlockMap.defineForwardIndexTerm( typeno, docno, pos, termstring);
 }
 
-void StorageTransaction::deleteForwardIndexTerm(
-	const Index& typeno,
-	const Index& docno,
-	const Index& pos)
-{
-	m_forwardIndexBlockMap.deleteForwardIndexTerm( typeno, docno, pos);
-}
-
 void StorageTransaction::defineUserAccess(
 	const Index& userno,
 	const Index& docno)

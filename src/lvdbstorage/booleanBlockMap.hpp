@@ -26,63 +26,38 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_LVDB_BOOLEAN_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_BOOLEAN_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "booleanBlock.hpp"
-#include "localStructAllocator.hpp"
-#include "blockKey.hpp"
 #include "blockStorage.hpp"
-#include <cstdlib>
-#include <leveldb/db.h>
+#include <vector>
 #include <leveldb/write_batch.h>
 
 namespace strus {
 
-class UserAclBlockMap
+/// \class BooleanBlockMap
+/// \brief Methods for merging and inserting boolean blocks
+class BooleanBlockMap
 {
 public:
-	explicit UserAclBlockMap( leveldb::DB* db_)
-		:m_db(db_){}
-	UserAclBlockMap( const UserAclBlockMap& o)
-		:m_db(o.m_db),m_usrmap(o.m_usrmap),m_aclmap(o.m_aclmap){}
+	static void insertNewElements(
+			BlockStorage<BooleanBlock>& blkstorage,
+			std::vector<BooleanBlock::MergeRange>::iterator& ei,
+			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
+			BooleanBlock& newblk,
+			const Index& lastInsertBlockId,
+			leveldb::WriteBatch& batch);
 
-	void defineUserAccess(
-		const Index& userno,
-		const Index& docno);
-
-	void deleteUserAccess(
-		const Index& userno,
-		const Index& docno);
-
-	void deleteUserAccess(
-		const Index& userno);
-
-	void deleteDocumentAccess(
-		const Index& docno);
-
-	void getWriteBatch( leveldb::WriteBatch& batch);
-
-private:
-	void markSetElement(
-		const Index& userno,
-		const Index& docno,
-		bool isMember);
-
-public:
-	typedef std::pair<Index,Index> MapKey;
-	typedef LocalStructAllocator<std::pair<MapKey,bool> > MapAllocator;
-	typedef std::less<MapKey> MapCompare;
-	typedef std::map<MapKey,bool,MapCompare,MapAllocator> Map;
-
-private:
-	leveldb::DB* m_db;
-	Map m_usrmap;
-	Map m_aclmap;
-	std::vector<Index> m_usr_deletes;
-	std::vector<Index> m_acl_deletes;
+	static void mergeNewElements(
+			BlockStorage<BooleanBlock>& blkstorage,
+			std::vector<BooleanBlock::MergeRange>::iterator& ei,
+			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
+			BooleanBlock& newblk,
+			leveldb::WriteBatch& batch);
 };
 
-}
+}//namespace
 #endif
+
 

@@ -18,6 +18,7 @@ CPP_OBJS=\
 	forwardIndexBlock.o \
 	forwardIndexBlockMap.o \
 	booleanBlock.o \
+	booleanBlockMap.o \
 	userAclBlockMap.o \
 	metaDataElement.o \
 	metaDataDescription.o \
