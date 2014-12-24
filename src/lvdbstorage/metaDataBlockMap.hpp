@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
+#include "localStructAllocator.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <cstdlib>
 #include <vector>
@@ -49,7 +50,7 @@ public:
 	MetaDataBlockMap( leveldb::DB* db_, const MetaDataDescription* descr_)
 		:m_db(db_),m_descr(descr_){}
 	MetaDataBlockMap( const MetaDataBlockMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+		:m_db(o.m_db),m_descr(o.m_descr),m_map(o.m_map){}
 	~MetaDataBlockMap();
 
 	void defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value);
@@ -58,14 +59,14 @@ public:
 
 	void getWriteBatch( leveldb::WriteBatch& batch, std::vector<Index>& cacheRefreshList);
 
-	//[+]!!!! FIX THIS ONE: Metadata blocks should not be loaded with defineMetaData/deleteMetaData, but in the transaction commit
-
 private:
 	MetaDataRecord getRecord( Index docno);
 
 private:
-	typedef boost::shared_ptr<MetaDataBlock> MetaDataBlockReference;
-	typedef std::map<unsigned int, MetaDataBlockReference> Map;
+	typedef std::pair<Index,Index> MetaDataKey;
+	typedef LocalStructAllocator<std::pair<MetaDataKey,ArithmeticVariant> > MapAllocator;
+	typedef std::less<MetaDataKey> MapCompare;
+	typedef std::map<MetaDataKey,ArithmeticVariant,MapCompare,MapAllocator> Map;
 
 private:
 	leveldb::DB* m_db;

@@ -28,10 +28,11 @@
 */
 #include "metaDataBlockMap.hpp"
 #include "metaDataBlockCache.hpp"
-#include "keyValueStorage.hpp"
-#include "databaseKey.hpp"
+#include "dataBlock.hpp"
+#include "dataBlockStorage.hpp"
 #include <leveldb/write_batch.h>
 #include <cstring>
+#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
@@ -41,75 +42,76 @@ MetaDataBlockMap::~MetaDataBlockMap()
 
 void MetaDataBlockMap::deleteMetaData( Index docno)
 {
-	getRecord( docno).clear();
+	std::size_t ii=0, nn=m_descr->nofElements();
+	for (; ii<nn; ++ii)
+	{
+		MetaDataKey key( docno, ii);
+		m_map[ key] = ArithmeticVariant();
+	}
 }
 
 void MetaDataBlockMap::deleteMetaData( Index docno, const std::string& varname)
 {
-	getRecord( docno).clearValue( m_descr->get( m_descr->getHandle( varname)));
-}
-
-MetaDataRecord MetaDataBlockMap::getRecord( Index docno)
-{
-	Index blockno = MetaDataBlock::blockno( docno);
-	Map::const_iterator mi = m_map.find( blockno);
-	if (mi == m_map.end())
-	{
-		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
-		const KeyValueStorage::Value* mv = storage.load( BlockKey( blockno));
-		MetaDataBlockReference& block = m_map[ blockno];
-		if (mv)
-		{
-			block.reset( new MetaDataBlock( m_descr, blockno, mv->ptr(), mv->size()));
-		}
-		else
-		{
-			block.reset( new MetaDataBlock( m_descr, blockno));
-		}
-		return (*block)[ MetaDataBlock::index( docno)];
-	}
-	else
-	{
-		return (*mi->second)[ MetaDataBlock::index( docno)];
-	}
+	MetaDataKey key( docno, m_descr->getHandle( varname));
+	m_map[ key] = ArithmeticVariant();
 }
 
 void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value)
 {
-	switch (value.type)
-	{
-		case ArithmeticVariant::Null:
-			deleteMetaData( docno, varname);
-			break;
-		case ArithmeticVariant::Int:
-			getRecord( docno).setValueInt( m_descr->get( m_descr->getHandle( varname)), value);
-			break;
-		case ArithmeticVariant::UInt:
-			getRecord( docno).setValueUInt( m_descr->get( m_descr->getHandle( varname)), value);
-			break;
-		case ArithmeticVariant::Float:
-			getRecord( docno).setValueFloat( m_descr->get( m_descr->getHandle( varname)), value);
-			break;
-	}
+	MetaDataKey key( docno, m_descr->getHandle( varname));
+	m_map[ key] = value;
 }
 
-void MetaDataBlockMap::getWriteBatch(
-	leveldb::WriteBatch& batch,
-	std::vector<Index>& cacheRefreshList)
+void MetaDataBlockMap::getWriteBatch( leveldb::WriteBatch& batch, std::vector<Index>& cacheRefreshList)
 {
-	KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
-
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	Index blockno = 0;
+	boost::scoped_ptr<MetaDataBlock> blk;
+	DataBlockStorage storage( m_db, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
+
 	for (; mi != me; ++mi)
 	{
-		if (!mi->second.get()) continue;
-		cacheRefreshList.push_back( mi->second->blockno());
+		Index docno = mi->first.first;
+		Index elemhandle = mi->first.second;
 
-		storage.store( BlockKey( mi->second->blockno()),
-				KeyValueStorage::Value( mi->second->charptr(), mi->second->bytesize()),
-				batch);
+		Index bn = MetaDataBlock::blockno( docno);
+		if (bn != blockno)
+		{
+			if (blk.get())
+			{
+				storage.store( 
+					DataBlock( DatabaseKey::DocMetaDataPrefix,
+							blockno, blk->charptr(), blk->bytesize()), batch);
+			}
+			const DataBlock* mv;
+			if (bn == blockno + 1 && blockno != 0)
+			{
+				mv = storage.loadNext();
+			}
+			else
+			{
+				mv = storage.load( bn);
+			}
+			blockno = bn;
+
+			if (mv && mv->id() == blockno)
+			{
+				blk.reset( new MetaDataBlock( m_descr, blockno, mv->charptr(), mv->size()));
+				cacheRefreshList.push_back( blockno);
+			}
+			else
+			{
+				blk.reset( new MetaDataBlock( m_descr, blockno));
+			}
+		}
+		const MetaDataElement* elem = m_descr->get( elemhandle);
+		MetaDataRecord record = (*blk)[ MetaDataBlock::index( docno)];
+		record.setValue( elem, mi->second);
 	}
-	m_map.clear();
+	if (blk.get())
+	{
+		storage.store( 
+			DataBlock( DatabaseKey::DocMetaDataPrefix,
+					blockno, blk->charptr(), blk->bytesize()), batch);
+	}
 }
-
-
