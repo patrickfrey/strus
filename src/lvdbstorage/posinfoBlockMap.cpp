@@ -29,8 +29,28 @@
 #include "posinfoBlockMap.hpp"
 #include "booleanBlockMap.hpp"
 #include "keyMap.hpp"
+#include "indexPacker.hpp"
 
 using namespace strus;
+
+PosinfoBlockMap::PosinfoBlockMap( leveldb::DB* db_)
+	:m_db(db_),m_lastkey(0)
+{
+	m_strings.push_back( '\0');
+}
+
+PosinfoBlockMap::PosinfoBlockMap( const PosinfoBlockMap& o)
+	:m_db(o.m_db),m_map(o.m_map),m_elements(o.m_elements),m_strings(o.m_strings),m_lastkey(o.m_lastkey)
+{}
+
+void PosinfoBlockMap::clear()
+{
+	m_map.clear();
+	m_elements.clear();
+	m_strings.clear();
+	m_strings.push_back('\0');
+	m_lastkey = 0;
+}
 
 void PosinfoBlockMap::definePosinfoPosting(
 	const Index& termtype,
@@ -38,16 +58,31 @@ void PosinfoBlockMap::definePosinfoPosting(
 	const Index& docno,
 	const std::vector<Index>& pos)
 {
-	BlockKey dbkey( termtype, termvalue);
-
-	Map::iterator mi = m_map.find( dbkey.index());
+	BlockKeyIndex key = BlockKey( termtype, termvalue).index();
+	Map::const_iterator mi = m_map.find( key);
 	if (mi == m_map.end())
 	{
-		m_map[ dbkey.index()].define( docno, pos);
+		if (m_elements.size()) m_elements.push_back( Element( 0, 0));
+
+		m_map[ key] = m_elements.size();
+		m_lastkey = key;
 	}
 	else
 	{
-		mi->second.define( docno, pos);
+		if (m_lastkey != key || (m_elements.size() && docno < m_elements.back().docno))
+		{
+			throw std::runtime_error( "internal: posinfo postings not added grouped by term in ascending docno order");
+		}
+	}
+	m_elements.push_back( Element( docno, pos.size()?m_strings.size():0));
+	if (pos.size())
+	{
+		std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
+		for (; pi != pe; ++pi)
+		{
+			packIndex( m_strings, *pi);
+		}
+		m_strings.push_back( '\0');
 	}
 }
 
@@ -64,19 +99,17 @@ void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 	typename Map::iterator mi = m_map.begin(), me = m_map.end();
 	while (mi != me)
 	{
-		BlockKey dbkey( mi->first);
-
-		if (KeyMap::isUnknown( dbkey.elem(2)))
+		Index termno = BlockKey(mi->first).elem(2);
+		if (KeyMap::isUnknown( termno))
 		{
-			std::map<Index,Index>::const_iterator ri = renamemap.find( dbkey.elem(2));
+			std::map<Index,Index>::const_iterator ri = renamemap.find( termno);
 			if (ri == renamemap.end())
 			{
 				throw std::runtime_error( "internal: term value undefined (posinfo map)");
 			}
-			BlockKey newkey( dbkey.elem(1), ri->second);
+			BlockKey newkey( BlockKey(mi->first).elem(1), ri->second);
 
-			PosinfoBlockElementMap& newelem = m_map[ newkey.index()];
-			newelem.swap( mi->second);
+			m_map[ newkey.index()] = mi->second;
 			m_map.erase( mi++);
 		}
 		else
@@ -91,16 +124,18 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 	typename Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		PosinfoBlockElementMap::const_iterator
-			ei = mi->second.begin(),
-			ee = mi->second.end();
+		std::vector<Element>::const_iterator
+			ei = m_elements.begin() + mi->second,
+			ee = m_elements.end();
+		std::vector<Element>::const_iterator estart = ei;
+		for (; ei != ee && ei->docno; ++ei){}
 
-		if (ei == ee) continue;
-		Index lastInsertBlockId = mi->second.lastInsertBlockId();
+		std::vector<Element>::const_iterator lasti = ei;
+		Index lastInsertBlockId = (--lasti)->docno;
 
 		BlockStorage<PosinfoBlock> blkstorage(
 				m_db, DatabaseKey::PosinfoBlockPrefix,
-				BlockKey(mi->first), false);
+				BlockKey( mi->first), false);
 		PosinfoBlock newposblk;
 		std::vector<BooleanBlock::MergeRange> docrangear;
 
@@ -112,7 +147,7 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 
 		BlockStorage<BooleanBlock> docnostorage(
 				m_db, DatabaseKey::DocListBlockPrefix,
-				BlockKey(mi->first), false);
+				BlockKey( mi->first), false);
 		BooleanBlock newdocblk( DatabaseKey::DocListBlockPrefix);
 
 		std::vector<BooleanBlock::MergeRange>::iterator
@@ -126,10 +161,10 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		// [4] Merge new docno boolean block elements
 		BooleanBlockMap::insertNewElements( docnostorage, di, de, newdocblk, lastInsertBlockId, batch);
 	}
-	m_map.clear();
+	clear();
 }
 
-void PosinfoBlockMap::defineDocnoRangeElement( 
+void PosinfoBlockMap::defineDocnoRangeElement(
 		std::vector<BooleanBlock::MergeRange>& docrangear,
 		const Index& docno,
 		bool isMember)
@@ -153,8 +188,8 @@ void PosinfoBlockMap::defineDocnoRangeElement(
 
 void PosinfoBlockMap::insertNewPosElements(
 		BlockStorage<PosinfoBlock>& blkstorage,
-		PosinfoBlockElementMap::const_iterator& ei,
-		const PosinfoBlockElementMap::const_iterator& ee,
+		std::vector<Element>::const_iterator& ei,
+		const std::vector<Element>::const_iterator& ee,
 		PosinfoBlock& newposblk,
 		const Index& lastInsertBlockId,
 		std::vector<BooleanBlock::MergeRange>& docrangear,
@@ -168,7 +203,7 @@ void PosinfoBlockMap::insertNewPosElements(
 	for (; ei != ee; ++ei)
 	{
 		// Define docno list block elements (BooleanBlock):
-		defineDocnoRangeElement( docrangear, ei->docno(), (*ei->ptr())?true:false);
+		defineDocnoRangeElement( docrangear, ei->docno, ei->posinfoidx?true:false);
 
 		// Define posinfo block elements (PosinfoBlock):
 		if (newposblk.full())
@@ -178,8 +213,8 @@ void PosinfoBlockMap::insertNewPosElements(
 			newposblk.clear();
 			newposblk.setId( lastInsertBlockId);
 		}
-		newposblk.append( ei->docno(), ei->ptr());
-		blkid = ei->docno();
+		newposblk.append( ei->docno, m_strings.c_str() + ei->posinfoidx);
+		blkid = ei->docno;
 	}
 	if (!newposblk.empty())
 	{
@@ -190,24 +225,24 @@ void PosinfoBlockMap::insertNewPosElements(
 
 void PosinfoBlockMap::mergeNewPosElements(
 		BlockStorage<PosinfoBlock>& blkstorage,
-		PosinfoBlockElementMap::const_iterator& ei,
-		const PosinfoBlockElementMap::const_iterator& ee,
+		std::vector<Element>::const_iterator& ei,
+		const std::vector<Element>::const_iterator& ee,
 		PosinfoBlock& newposblk,
 		std::vector<BooleanBlock::MergeRange>& docrangear,
 		leveldb::WriteBatch& batch)
 {
 	const PosinfoBlock* blk;
-	while (ei != ee && 0!=(blk=blkstorage.load( ei->docno())))
+	while (ei != ee && 0!=(blk=blkstorage.load( ei->docno)))
 	{
 		// Merge posinfo block elements (PosinfoBlock):
-		PosinfoBlockElementMap::const_iterator newposblk_start = ei;
-		for (; ei != ee && ei->docno() <= blk->id(); ++ei)
+		std::vector<Element>::const_iterator newposblk_start = ei;
+		for (; ei != ee && ei->docno <= blk->id(); ++ei)
 		{
 			// Define docno list block elements (BooleanBlock):
-			defineDocnoRangeElement( docrangear, ei->docno(), (*ei->ptr())?true:false);
+			defineDocnoRangeElement( docrangear, ei->docno, ei->posinfoidx?true:false);
 		}
 
-		newposblk = PosinfoBlockElementMap::merge( newposblk_start, ei, *blk);
+		newposblk = mergePosBlock( newposblk_start, ei, *blk);
 		if (blkstorage.loadNext())
 		{
 			// ... is not the last block, so we store it
@@ -240,7 +275,66 @@ void PosinfoBlockMap::mergeNewPosElements(
 		}
 	}
 }
-	
 
+PosinfoBlock PosinfoBlockMap::mergePosBlock( 
+		std::vector<Element>::const_iterator ei,
+		const std::vector<Element>::const_iterator& ee,
+		const PosinfoBlock& oldblk)
+{
+	PosinfoBlock rt;
+	rt.setId( oldblk.id());
+
+	char const* old_blkptr = oldblk.begin();
+	Index old_docno = oldblk.docno_at( old_blkptr);
+
+	while (ei != ee && old_docno)
+	{
+		if (ei->docno <= old_docno)
+		{
+			if (ei->posinfoidx)
+			{
+				//... append only if not empty (empty => delete)
+				rt.append( ei->docno, m_strings.c_str() + ei->posinfoidx);
+			}
+			if (ei->docno == old_docno)
+			{
+				//... defined twice -> prefer new entry and ignore old
+				old_blkptr = oldblk.nextDoc( old_blkptr);
+				old_docno = oldblk.docno_at( old_blkptr);
+			}
+			++ei;
+		}
+		else
+		{
+			if (!oldblk.empty_at( old_blkptr))
+			{
+				//... append only if not empty (empty => delete)
+				rt.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
+			}
+			old_blkptr = oldblk.nextDoc( old_blkptr);
+			old_docno = oldblk.docno_at( old_blkptr);
+		}
+	}
+	while (ei != ee)
+	{
+		if (ei->posinfoidx)
+		{
+			//... append only if not empty (empty => delete)
+			rt.append( ei->docno, m_strings.c_str() + ei->posinfoidx);
+		}
+		++ei;
+	}
+	while (old_docno)
+	{
+		if (!oldblk.empty_at( old_blkptr))
+		{
+			//... append only if not empty (empty => delete)
+			rt.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
+		}
+		old_blkptr = oldblk.nextDoc( old_blkptr);
+		old_docno = oldblk.docno_at( old_blkptr);
+	}
+	return rt;
+}
 
 

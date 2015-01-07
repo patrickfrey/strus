@@ -37,17 +37,6 @@ using namespace strus;
 
 enum {EndPosinfoMarker=(char)0xFE};
 
-std::ostream& strus::operator<< (std::ostream& out, const PosinfoBlockElement& e)
-{
-	std::vector<Index>::const_iterator pi = e.begin(), pe = e.end();
-	for (int pidx=0; pi != pe; ++pi,++pidx)
-	{
-		if (pidx) out << ",";
-		out << *pi;
-	}
-	return out;
-}
-
 Index PosinfoBlock::docno_at( const char* ref) const
 {
 	if (ref < charptr() || ref > charend())
@@ -118,32 +107,6 @@ const char* PosinfoBlock::prevDoc( const char* ref) const
 	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal posinfo block access -- prevDoc");
 	char const* rt = (const char*)::memrchr( charptr(), EndPosinfoMarker, ref-charptr()-1);
 	return (rt >= charptr())?(rt+1):charptr();
-}
-
-PosinfoBlockElementMap::const_iterator::const_iterator( const PosinfoBlockElementMap* map_, bool start)
-	:m_map_itr(start?map_->map_begin():map_->map_end())
-	,m_strings_ref(map_->strings_ptr())
-{
-	if (m_map_itr != map_->map_end())
-	{
-		m_elem.init( m_map_itr->first, m_strings_ref);
-	}
-}
-
-void PosinfoBlockElementMap::define( const Index& idx, const PosinfoBlockElement& pos)
-{
-	m_map[ idx] = m_strings.size();
-
-	if (pos.size())
-	{
-		packIndex( m_strings, pos.size());
-		PosinfoBlockElement::const_iterator pi = pos.begin(), pe = pos.end();
-		for (; pi != pe; ++pi)
-		{
-			packIndex( m_strings, *pi);
-		}
-	}
-	m_strings.push_back( '\0');
 }
 
 void PosinfoBlock::append( const Index& docno, const std::vector<Index>& pos)
@@ -288,64 +251,5 @@ void PosinfoBlock::setId( const Index& id_)
 			init( id_, content.c_str(), content.size(), content.size());
 		}
 	}
-}
-
-PosinfoBlock PosinfoBlockElementMap::merge( 
-		const_iterator ei, const const_iterator& ee, const PosinfoBlock& oldblk)
-{
-	PosinfoBlock rt;
-	rt.setId( oldblk.id());
-
-	char const* old_blkptr = oldblk.begin();
-	Index old_docno = oldblk.docno_at( old_blkptr);
-
-	while (ei != ee && old_docno)
-	{
-		if (ei->docno() <= old_docno)
-		{
-			if (*ei->ptr())
-			{
-				//... append only if not empty (empty => delete)
-				rt.append( ei->docno(), ei->ptr());
-			}
-			if (ei->docno() == old_docno)
-			{
-				//... defined twice -> prefer new entry and ignore old
-				old_blkptr = oldblk.nextDoc( old_blkptr);
-				old_docno = oldblk.docno_at( old_blkptr);
-			}
-			++ei;
-		}
-		else
-		{
-			if (!oldblk.empty_at( old_blkptr))
-			{
-				//... append only if not empty (empty => delete)
-				rt.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
-			}
-			old_blkptr = oldblk.nextDoc( old_blkptr);
-			old_docno = oldblk.docno_at( old_blkptr);
-		}
-	}
-	while (ei != ee)
-	{
-		if (*ei->ptr())
-		{
-			//... append only if not empty (empty => delete)
-			rt.append( ei->docno(), ei->ptr());
-		}
-		++ei;
-	}
-	while (old_docno)
-	{
-		if (!oldblk.empty_at( old_blkptr))
-		{
-			//... append only if not empty (empty => delete)
-			rt.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
-		}
-		old_blkptr = oldblk.nextDoc( old_blkptr);
-		old_docno = oldblk.docno_at( old_blkptr);
-	}
-	return rt;
 }
 

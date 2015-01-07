@@ -44,10 +44,8 @@ namespace strus {
 class PosinfoBlockMap
 {
 public:
-	explicit PosinfoBlockMap( leveldb::DB* db_)
-		:m_db(db_){}
-	PosinfoBlockMap( const PosinfoBlockMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+	explicit PosinfoBlockMap( leveldb::DB* db_);
+	PosinfoBlockMap( const PosinfoBlockMap& o);
 
 	void definePosinfoPosting(
 		const Index& typeno,
@@ -65,6 +63,22 @@ public:
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
+	struct Element
+	{
+		Index docno;
+		std::size_t posinfoidx;
+
+		Element( const Element& o)
+			:docno(o.docno),posinfoidx(o.posinfoidx){}
+		Element( const Index& docno_, const std::size_t& posinfoidx_)
+			:docno(docno_),posinfoidx(posinfoidx_){}
+	};
+
+	typedef LocalStructAllocator<std::pair<BlockKeyIndex,std::size_t> > MapAllocator;
+	typedef std::less<BlockKeyIndex> MapCompare;
+	typedef std::map<BlockKeyIndex,std::size_t,MapCompare,MapAllocator> Map;
+
+private:
 	static void defineDocnoRangeElement(
 			std::vector<BooleanBlock::MergeRange>& docrangear,
 			const Index& docno,
@@ -72,8 +86,8 @@ private:
 
 	void insertNewPosElements(
 			BlockStorage<PosinfoBlock>& blkstorage,
-			PosinfoBlockElementMap::const_iterator& ei,
-			const PosinfoBlockElementMap::const_iterator& ee,
+			std::vector<Element>::const_iterator& ei,
+			const std::vector<Element>::const_iterator& ee,
 			PosinfoBlock& newposblk,
 			const Index& lastInsertBlockId,
 			std::vector<BooleanBlock::MergeRange>& docrangear,
@@ -81,20 +95,25 @@ private:
 
 	void mergeNewPosElements(
 			BlockStorage<PosinfoBlock>& blkstorage,
-			PosinfoBlockElementMap::const_iterator& ei,
-			const PosinfoBlockElementMap::const_iterator& ee,
+			std::vector<Element>::const_iterator& ei,
+			const std::vector<Element>::const_iterator& ee,
 			PosinfoBlock& newposblk,
 			std::vector<BooleanBlock::MergeRange>& docrangear,
 			leveldb::WriteBatch& batch);
 
-private:
-	typedef LocalStructAllocator<std::pair<BlockKeyIndex,PosinfoBlockElementMap> > MapAllocator;
-	typedef std::less<BlockKeyIndex> MapCompare;
-	typedef std::map<BlockKeyIndex,PosinfoBlockElementMap,MapCompare,MapAllocator> Map;
+	PosinfoBlock mergePosBlock(
+			std::vector<Element>::const_iterator ei,
+			const std::vector<Element>::const_iterator& ee,
+			const PosinfoBlock& oldblk);
+
+	void clear();
 
 private:
 	leveldb::DB* m_db;
 	Map m_map;
+	std::vector<Element> m_elements;
+	std::string m_strings;
+	BlockKeyIndex m_lastkey;
 };
 
 }
