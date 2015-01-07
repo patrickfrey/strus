@@ -140,10 +140,10 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		std::vector<BooleanBlock::MergeRange> docrangear;
 
 		// [1] Merge new elements with existing upper bound blocks:
-		mergeNewPosElements( blkstorage, ei, ee, newposblk, docrangear, batch);
+		mergeNewPosElements( blkstorage, estart, ei, newposblk, docrangear, batch);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		insertNewPosElements( blkstorage, ei, ee, newposblk, lastInsertBlockId, docrangear, batch);
+		insertNewPosElements( blkstorage, estart, ei, newposblk, lastInsertBlockId, docrangear, batch);
 
 		BlockStorage<BooleanBlock> docnostorage(
 				m_db, DatabaseKey::DocListBlockPrefix,
