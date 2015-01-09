@@ -58,6 +58,11 @@ public:
 			const Index& position_,
 			float weight_);
 
+	virtual void addForwardIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_);
+
 	virtual void setMetaData(
 			const std::string& name_,
 			const ArithmeticVariant& value_);
@@ -95,6 +100,24 @@ private:
 		std::string value;
 	};
 
+	struct InvKey
+	{
+		InvKey( const std::string& type_, const Index& pos_)
+			:type(type_),pos(pos_){}
+		InvKey( const InvKey& o)
+			:type(o.type),pos(o.pos){}
+
+		bool operator <( const InvKey& o) const
+		{
+			if (type < o.type) return true;
+			if (type > o.type) return false;
+			return (pos < o.pos);
+		}
+
+		std::string type;
+		Index pos;
+	};
+
 	struct TermAttributes
 	{
 		explicit TermAttributes( float weight_=0.0)
@@ -107,12 +130,14 @@ private:
 	};
 
 	typedef std::map<Term,TermAttributes> TermMap;
+	typedef std::map<InvKey,std::string> InvTermMap;
 	typedef std::map<std::string,ArithmeticVariant> MetaDataMap;
 	typedef std::map<std::string,std::string> AttributeMap;
 
 private:
 	const Storage* m_storage;
 	TermMap m_termMap;
+	InvTermMap m_invTermMap;
 	MetaDataMap m_metaDataMap;
 	AttributeMap m_attributeMap;
 	std::vector<std::string> m_userlist;

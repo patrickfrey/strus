@@ -44,9 +44,14 @@ class ForwardIndexBlockMap
 {
 public:
 	explicit ForwardIndexBlockMap( leveldb::DB* db_)
-		:m_db(db_){}
+		:m_db(db_),m_docno(0),m_maxtype(0){}
 	ForwardIndexBlockMap( const ForwardIndexBlockMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+		:m_db(o.m_db)
+		,m_map(o.m_map)
+		,m_curblockmap(o.m_curblockmap)
+		,m_docno(o.m_docno)
+		,m_maxtype(o.m_maxtype)
+		,m_deletes(o.m_deletes){}
 
 	void defineForwardIndexTerm(
 		const Index& typeno,
@@ -54,58 +59,50 @@ public:
 		const Index& pos,
 		const std::string& termstring);
 
+	void closeForwardIndexDocument( const Index& docno);
+
+	void deleteDocument( const Index& docno);
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
-
-	template <class TermnoMap>
-	std::map<Index,Index> getTermOccurrencies(
-		const Index& typeno,
-		const Index& docno,
-		TermnoMap& elementmap)
-	{
-		std::map<Index,Index> rt;
-		getElementOccurrencies<TermnoMap>(
-			rt, BlockKey( typeno, docno), elementmap);
-		return rt;
-	}
-
 private:
-	template <class TermnoMap>
-	void getElementOccurrencies(
-		std::map<Index,Index>& result,
-		const BlockKey& dbkey,
-		TermnoMap& map)
+	struct MapKey
 	{
-		BlockStorage<ForwardIndexBlock> blkstorage(
-			m_db, DatabaseKey::ForwardIndexPrefix, dbkey, false);
+		BlockKeyIndex termkey;
+		Index maxpos;
 
-		Index blkidx = 0;
-		const ForwardIndexBlock* blk = blkstorage.load( blkidx);
+		MapKey( const MapKey& o)
+			:termkey(o.termkey),maxpos(o.maxpos){}
+		MapKey( const Index& typeno_, const Index& docno_, const std::size_t& maxpos_)
+			:termkey(BlockKey(typeno_,docno_).index()),maxpos(maxpos_){}
 
-		for (; blk; blk = blkstorage.load( blkidx))
+		bool operator < (const MapKey& o) const
 		{
-			blkidx = blk->id()+1;
-			ForwardIndexBlock::const_iterator bi = blk->begin(), be = blk->end();
-			for (; bi != be; ++bi)
-			{
-				result[ map( *bi)] += 1;
-			}
+			if (termkey < o.termkey) return true;
+			if (termkey > o.termkey) return false;
+			return maxpos < o.maxpos;
 		}
-	}
+	};
+
+	typedef LocalStructAllocator<std::pair<MapKey,ForwardIndexBlock> > MapAllocator;
+	typedef std::less<MapKey> MapCompare;
+	typedef std::map<MapKey,ForwardIndexBlock,MapCompare,MapAllocator> Map;
+
+	typedef std::pair<Index,std::string> CurblockElem;
+	typedef std::vector<CurblockElem> CurblockElemList;
+	typedef LocalStructAllocator<std::pair<Index,CurblockElemList> > CurblockMapAllocator;
+	typedef std::map<Index,CurblockElemList,std::less<Index>,CurblockMapAllocator> CurblockMap;
 
 private:
-	typedef std::pair<ForwardIndexBlock,std::size_t> BlockListElem;
-	typedef std::vector<BlockListElem> BlockList;
-
-	typedef LocalStructAllocator<std::pair<BlockKeyIndex,std::size_t> > MapAllocator;
-	typedef std::less<BlockKeyIndex> MapCompare;
-	typedef std::map<BlockKeyIndex,std::size_t,MapCompare,MapAllocator> Map;
+	void closeCurblock( const Index& typeno, CurblockElemList& blk);
+	void closeCurblocks();
 
 private:
-	enum {MaxBlockId=1<<30};
 	leveldb::DB* m_db;
-	BlockList m_blockar;
 	Map m_map;
+	CurblockMap m_curblockmap;
+	Index m_docno;
+	Index m_maxtype;
+	std::vector<Index> m_deletes;
 };
 
 }

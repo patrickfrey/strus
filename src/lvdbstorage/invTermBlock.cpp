@@ -26,44 +26,38 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "localStructAllocator.hpp"
-#include <cstdlib>
-#include <map>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
+#include "invTermBlock.hpp"
+#include "indexPacker.hpp"
 
-namespace strus {
+using namespace strus;
 
-class DocumentFrequencyMap
+InvTermBlock::Element InvTermBlock::element_at( const char* itr) const
 {
-public:
-	DocumentFrequencyMap( leveldb::DB* db_)
-		:m_db(db_){}
-	DocumentFrequencyMap( const DocumentFrequencyMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+	InvTermBlock::Element rt;
+	if (itr == charend()) return rt;
+	char const* ri = itr;
+	rt.typeno = unpackIndex( ri, charend());
+	rt.termno = unpackIndex( ri, charend());
+	rt.df = unpackIndex( ri, charend());
+	return rt;
+}
 
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
+const char* InvTermBlock::next( const char* ref) const
+{
+	if (ref == charend()) return 0;
+	char const* ri = ref;
+	ri = skipIndex( ri, charend());
+	ri = skipIndex( ri, charend());
+	ri = skipIndex( ri, charend());
+	return ri;
+}
 
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
-
-	void getWriteBatch( leveldb::WriteBatch& batch);
-
-private:
-	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
-	typedef std::less<Key> MapCompare;
-	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
-
-private:
-	leveldb::DB* m_db;
-	Map m_map;
-};
-
-}//namespace
-#endif
-
+void InvTermBlock::append( const Index& typeno, const Index& termno, const Index& df)
+{
+	std::string elem;
+	packIndex( elem, typeno);
+	packIndex( elem, termno);
+	packIndex( elem, df);
+	DataBlock::append( elem.c_str(), elem.size());
+}
 

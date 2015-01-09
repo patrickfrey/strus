@@ -132,7 +132,12 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 			}
 			case strus::DatabaseKey::PosinfoBlockPrefix:
 			{
-				strus::PosinfoBlockData data( key, value);
+				strus::PosinfoBlockData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::InverseTermIndex:
+			{
+				strus::InverseTermData( key, value);
 				break;
 			}
 			case strus::DatabaseKey::UserAclBlockPrefix:

@@ -31,62 +31,121 @@
 
 using namespace strus;
 
+void ForwardIndexBlockMap::closeCurblock( const Index& typeno, CurblockElemList& elemlist)
+{
+	if (elemlist.empty()) return;
+	Index lastpos = elemlist.back().first;
+
+	MapKey key( typeno, m_docno, lastpos);
+
+	ForwardIndexBlock& blk = m_map[ key];
+	blk.setId( lastpos);
+
+	CurblockElemList::const_iterator ei = elemlist.begin(), ee = elemlist.end();
+	for (; ei != ee; ++ei)
+	{
+		blk.append( ei->first, ei->second);
+	}
+	elemlist.clear();
+}
+
+void ForwardIndexBlockMap::closeCurblocks()
+{
+	CurblockMap::iterator bi = m_curblockmap.begin(), be = m_curblockmap.end();
+	for (; bi != be; ++bi)
+	{
+		closeCurblock( bi->first, bi->second);
+	}
+}
+
+void ForwardIndexBlockMap::closeForwardIndexDocument( const Index& docno)
+{
+	closeCurblocks();
+	if (m_docno != docno)
+	{
+		throw std::runtime_error( "forward document operations not grouped by document");
+	}
+}
+
 void ForwardIndexBlockMap::defineForwardIndexTerm(
 	const Index& typeno,
 	const Index& docno,
 	const Index& pos,
 	const std::string& termstring)
 {
-	BlockKey dbkey( typeno, docno);
-
-	Map::iterator mi = m_map.find( dbkey.index());
-	if (mi == m_map.end())
+	if (m_maxtype < typeno)
 	{
-		m_blockar.push_back( BlockListElem( ForwardIndexBlock(), 0));
-		m_blockar.back().first.setId( MaxBlockId);
-		m_blockar.back().first.append( pos, termstring);
-		m_map[ dbkey.index()] = m_blockar.size()-1;
+		m_maxtype = typeno;
 	}
-	else
+	if (m_docno != 0 && m_docno != docno)
 	{
-		BlockListElem& elem = m_blockar[ mi->second];
-		if (elem.first.full())
-		{
-			Index lastpos = elem.first.position_at( elem.first.prevItem( elem.first.charend()));
-			elem.first.setId( lastpos);
-			std::size_t nextblock = mi->second;
-			mi->second = m_blockar.size();
+		closeCurblocks();
+	}
+	m_docno = docno;
 
-			m_blockar.push_back( BlockListElem( ForwardIndexBlock(), nextblock));
-			m_blockar.back().first.setId( MaxBlockId);
-			m_blockar.back().first.append( pos, termstring);
-		}
-		else
+	CurblockMap::iterator bi = m_curblockmap.find( typeno);
+	if (bi == m_curblockmap.end())
+	{
+		m_curblockmap[ typeno] = CurblockElemList();
+		bi = m_curblockmap.find( typeno);
+	}
+
+	if (bi->second.size() > ForwardIndexBlock::MaxBlockTokens)
+	{
+		closeCurblock( typeno, bi->second);
+	}
+	bi->second.push_back( CurblockElem( pos, termstring));
+}
+
+void ForwardIndexBlockMap::deleteDocument( const Index& docno)
+{
+	if (docno == m_docno)
+	{
+		m_curblockmap.clear();
+		m_docno = 0;
+	}
+	Index ti = 0, te = m_maxtype;
+	for (; ti != te; ++ti)
+	{
+		BlockKeyIndex termkey = BlockKey( ti, m_docno).index();
+		MapKey key( ti, m_docno, 0);
+
+		Map::iterator fi = m_map.upper_bound( key);
+		while (fi != m_map.end() && fi->first.termkey == termkey)
 		{
-			elem.first.append( pos, termstring);
+			m_map.erase( fi++);
 		}
 	}
+	m_deletes.push_back( docno);
 }
 
 void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 {
-	Map::const_iterator mi = m_map.begin(), me = m_map.end();
-	for (; mi != me; ++mi)
-	{
-		std::vector<ForwardIndexBlock*> blklist;
+	closeCurblocks();
 
-		std::size_t blkidx = mi->second;
-		do
+	// [1] Get deletes:
+	KeyValueStorage fwstorage( m_db, DatabaseKey::ForwardIndexPrefix, false);
+	std::vector<Index>::const_iterator di = m_deletes.begin(), de = m_deletes.end();
+	for (; di != de; ++di)
+	{
+		Index ti = 0, te = m_maxtype;
+		for (; ti != te; ++ti)
 		{
-			BlockListElem& elem = m_blockar[ blkidx];
-			blklist.push_back(&elem.first);
-			blkidx = elem.second;
+			fwstorage.disposeSubnodes( BlockKey( ti, *di), batch);
 		}
-		while (blkidx);
+	}
+
+	// [2] Get inserts:
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	while (mi != me)
+	{
+		Map::const_iterator ei = mi, ee = mi;
+		for (; ee != me && ee->first.termkey == mi->first.termkey; ++ee){}
+		mi = ee;
 
 		BlockStorage<ForwardIndexBlock> blkstorage(
 				m_db, DatabaseKey::ForwardIndexPrefix,
-				BlockKey(mi->first), false);
+				BlockKey(ei->first.termkey), false);
 		const ForwardIndexBlock* blk;
 
 		// [1] Delete all old blocks with the database key as prefix address:
@@ -97,17 +156,15 @@ void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		}
 
 		// [2] Write the new blocks:
-		std::vector<ForwardIndexBlock*>::const_iterator bi = blklist.begin(), be = blklist.end();
-		for (; bi != be; ++bi)
+		for (; ei != ee; ++ei)
 		{
-			if ((*bi)->id() == MaxBlockId)
-			{
-				Index lastpos = (*bi)->position_at( (*bi)->prevItem( (*bi)->charend()));
-				(*bi)->setId( lastpos);
-				blkstorage.store( **bi, batch);
-			}
+			blkstorage.store( ei->second, batch);
 		}
 	}
+	// [3] clear maps:
 	m_map.clear();
+	m_curblockmap.clear();
+	m_docno = 0;
+	m_deletes.clear();
 }
 

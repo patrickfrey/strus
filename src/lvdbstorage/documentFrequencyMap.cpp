@@ -34,16 +34,16 @@
 
 using namespace strus;
 
-void DocumentFrequencyMap::increment( Index typeno, Index termno)
+void DocumentFrequencyMap::increment( Index typeno, Index termno, Index count)
 {
 	Key key( typeno, termno);
-	m_map[ key] += 1;
+	m_map[ key] += count;
 }
 
-void DocumentFrequencyMap::decrement( Index typeno, Index termno)
+void DocumentFrequencyMap::decrement( Index typeno, Index termno, Index count)
 {
 	Key key( typeno, termno);
-	m_map[ key] -= 1;
+	m_map[ key] -= count;
 }
 
 void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
@@ -75,6 +75,8 @@ void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)
 
 	for (; mi != me; ++mi)
 	{
+		if (mi->second == 0) continue;
+
 		std::string keystr;
 		keystr.push_back( DatabaseKey::DocFrequencyPrefix);
 		packIndex( keystr, mi->first.first);	// ... [typeno]

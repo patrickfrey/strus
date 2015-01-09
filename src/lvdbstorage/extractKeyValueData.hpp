@@ -33,6 +33,7 @@
 #include "metaDataBlock.hpp"
 #include "docnoBlock.hpp"
 #include "posinfoBlock.hpp"
+#include "invTermBlock.hpp"
 #include "strus/index.hpp"
 #include <utility>
 #include <vector>
@@ -201,6 +202,18 @@ struct DocListBlockData
 	std::vector<Range> docrangelist;
 
 	DocListBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct InverseTermData
+{
+	typedef InvTermBlock::Element InvTerm;
+
+	Index docno;
+	std::vector<InvTerm> terms;
+
+	InverseTermData( const leveldb::Slice& key, const leveldb::Slice& value);
 
 	void print( std::ostream& out);
 };

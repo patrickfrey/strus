@@ -70,6 +70,14 @@ void StorageDocument::addTermOccurrence(
 	TermMapValue& ref = m_terms[ key];
 	ref.pos.insert( position_);
 	ref.weight += weight_;
+}
+
+void StorageDocument::addForwardIndexTerm(
+		const std::string& type_,
+		const std::string& value_,
+		const Index& position_)
+{
+	TermMapKey key( termMapKey( type_, value_));
 	m_invs[ InvMapKey( key.first, position_)] = value_;
 }
 
@@ -133,7 +141,6 @@ void StorageDocument::done()
 		m_transaction->defineDocnoPosting(
 				ti->first.first, ti->first.second,
 				m_docno, ti->second.pos.size(), ti->second.weight);
-		m_transaction->incrementDf( ti->first.first, ti->first.second);
 	}
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
@@ -142,12 +149,19 @@ void StorageDocument::done()
 		m_transaction->defineForwardIndexTerm(
 			ri->first.typeno, m_docno, ri->first.pos, ri->second);
 	}
+	m_transaction->closeForwardIndexDocument( m_docno);
 
 	//[2.4] Insert new document access rights:
 	std::vector<Index>::const_iterator ui = m_userlist.begin(), ue = m_userlist.end();
 	for (; ui != ue; ++ui)
 	{
-		m_transaction->defineUserAccess( *ui, m_docno);
+		m_transaction->defineAcl( *ui, m_docno);
 	}
+
+	m_terms.clear();
+	m_invs.clear();
+	m_attributes.clear();
+	m_metadata.clear();
+	m_userlist.clear();
 }
 

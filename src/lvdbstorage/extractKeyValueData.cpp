@@ -200,8 +200,8 @@ ForwardIndexData::ForwardIndexData( const leveldb::Slice& key, const leveldb::Sl
 	char const* vi = value.data();
 	char const* ve = value.data()+value.size();
 
-	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	pos = strus::unpackIndex( ki, ke);/*[pos]*/
 	if (ki != ke)
 	{
@@ -233,7 +233,7 @@ ForwardIndexData::ForwardIndexData( const leveldb::Slice& key, const leveldb::Sl
 
 void ForwardIndexData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::ForwardIndexPrefix << ' ' << docno << ' ' << typeno << ' ' << pos;
+	out << (char)DatabaseKey::ForwardIndexPrefix << ' ' << typeno << ' ' << docno << ' ' << pos;
 	std::vector<ForwardIndexData::Element>::const_iterator
 		ei = elements.begin(), ee = elements.end();
 
@@ -543,6 +543,43 @@ void DocListBlockData::print( std::ostream& out)
 {
 	out << (char)DatabaseKey::DocListBlockPrefix << ' ' << typeno << ' ' << valueno;
 	printRangeList( out, docrangelist);
+	out << std::endl;
+}
+
+
+typedef InvTermBlock::Element InvTerm;
+std::vector<InvTerm> terms;
+
+InverseTermData::InverseTermData( const leveldb::Slice& key, const leveldb::Slice& value)
+{
+	char const* ki = key.data()+1;
+	char const* ke = key.data()+key.size();
+	char const* vi = value.data();
+	char const* ve = value.data()+value.size();
+
+	docno = strus::unpackIndex( ki, ke);/*[docno]*/
+	if (ki != ke)
+	{
+		throw std::runtime_error( "unexpected extra bytes at end of inverse term index key");
+	}
+
+	InvTermBlock block( docno, vi, ve-vi);
+	char const* ii = block.begin();
+	const char* ie = block.end();
+	for (; ii != ie; ii=block.next(ii))
+	{
+		terms.push_back( block.element_at( ii));
+	}
+}
+
+void InverseTermData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::InverseTermIndex << ' ' << docno;
+	std::vector<InvTerm>::const_iterator ti = terms.begin(), te = terms.end();
+	for (; ti != te; ++ti)
+	{
+		out << ' ' << ti->typeno << ',' << ti->termno << ',' << ti->df;
+	}
 	out << std::endl;
 }
 

@@ -78,6 +78,14 @@ void StorageDocumentChecker::addTermOccurrence(
 	attributes->weight += weight_;
 }
 
+void StorageDocumentChecker::addForwardIndexTerm(
+		const std::string& type_,
+		const std::string& value_,
+		const Index& position_)
+{
+	m_invTermMap[ InvKey( type_, position_)] = value_;
+}
+
 void StorageDocumentChecker::setMetaData(
 		const std::string& name_,
 		const ArithmeticVariant& value_)
@@ -119,11 +127,6 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	{
 		boost::scoped_ptr<PostingIteratorInterface> pitr(
 			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
-		boost::scoped_ptr<ForwardIteratorInterface> fitr(
-			m_storage->createForwardIterator( ti->first.type));
-
-		std::set<Index>::const_iterator
-			pi = ti->second.poset.begin(), pe = ti->second.poset.end();
 
 		if (m_docno != pitr->skipDoc( m_docno))
 		{
@@ -131,10 +134,11 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 				"term not found in inverted index");
 			continue;
 		}
-		fitr->skipDoc( m_docno);
 		Index pos = 0;
 
-		for (; pi != pe; ++pi)
+		std::set<Index>::const_iterator
+			pi = ti->second.poset.begin(), pe = ti->second.poset.end();
+		for (pi=ti->second.poset.begin(); pi != pe; ++pi)
 		{
 			Index ppos = pitr->skipPos( pos);
 			if (*pi != ppos)
@@ -144,32 +148,42 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 
 				logError( logout, m_docid,
 					ti->first.type, ti->first.value,
-					std::string( "inverted index position does not match: ") + msg.str());
+					std::string( "term inverted index position does not match: ") + msg.str());
 				break;
-			}
-			Index fpos = fitr->skipPos( ppos);
-			if (ppos != fpos)
-			{
-				std::ostringstream msg;
-				msg << ppos << " != " << fpos;
-
-				logError( logout, m_docid,
-					ti->first.type, ti->first.value,
-					std::string( "forward index position does not match: ") + msg.str());
-				break;
-			}
-			std::string fval = fitr->fetch();
-			if (ti->first.value != fval)
-			{
-				logError( logout, m_docid,
-					ti->first.type, ti->first.value,
-					std::string( "forward index element does not match: '") + fval + "'");
 			}
 			pos = *pi + 1;
 		}
 	}
 
-	//[2] Check meta data:
+	//[2] Check forward index:
+	InvTermMap::const_iterator vi = m_invTermMap.begin(), ve = m_invTermMap.end();
+	for (; vi != ve; ++vi)
+	{
+		boost::scoped_ptr<ForwardIteratorInterface> fitr(
+			m_storage->createForwardIterator( vi->first.type));
+
+		fitr->skipDoc( m_docno);
+		Index fpos = fitr->skipPos( vi->first.pos);
+		if (vi->first.pos != fpos)
+		{
+			std::ostringstream msg;
+			msg << vi->first.pos << " != " << fpos;
+
+			logError( logout, m_docid,
+				std::string( "forward index position for type ") + vi->first.type + " does not match: " + msg.str());
+			break;
+		}
+		std::string fval = fitr->fetch();
+		if (vi->second != fval)
+		{
+			std::ostringstream msg;
+			msg << vi->first.pos;
+			logError( logout, m_docid,
+				std::string( "forward index element for type ") + vi->first.type + " at position " + msg.str() + " does not match: '" + fval + "' != '" + vi->second + "'");
+		}
+	}
+
+	//[3] Check meta data:
 	boost::scoped_ptr<MetaDataReaderInterface> metadata(
 		m_storage->createMetaDataReader());
 
@@ -187,7 +201,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		}
 	}
 
-	//[3] Check attributes:
+	//[4] Check attributes:
 	boost::scoped_ptr<AttributeReaderInterface> attributes(
 		m_storage->createAttributeReader());
 
@@ -205,7 +219,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		}
 	}
 
-	//[4] Check access rights:
+	//[5] Check access rights:
 	std::vector<std::string>::const_iterator ui = m_userlist.begin(), ue = m_userlist.end();
 	IndexSetIterator aclitr = m_storage->getAclIterator( m_docno);
 	for (; ui != ue; ++ui)

@@ -167,7 +167,7 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 			{
 				to_ = elemno + rangesize;
 				resize( at_);
-				packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( from_), to_);
+				packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( to_), to_ - from_);
 				append( buf, bufpos);
 			}
 			else
@@ -178,14 +178,14 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 		else
 		{
 			//... not overlapping with last range => add new
-			packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno), rangesize);
+			packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno + rangesize), rangesize);
 			append( buf, bufpos);
 		}
 	}
 	else
 	{
 		//... first range => add new
-		packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno), rangesize);
+		packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno + rangesize), rangesize);
 		append( buf, bufpos);
 	}
 }

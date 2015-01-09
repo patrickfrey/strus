@@ -43,7 +43,7 @@ class ForwardIndexBlock
 {
 public:
 	enum {
-		MaxBlockSize=1024
+		MaxBlockTokens=128
 	};
 
 public:
@@ -72,11 +72,6 @@ public:
 
 	const char* find( const Index& pos_, const char* lowerbound) const;
 	const char* upper_bound( const Index& pos_, const char* lowerbound) const;
-
-	bool full() const
-	{
-		return size() >= MaxBlockSize;
-	}
 
 	void append( const Index& pos, const std::string& item);
 

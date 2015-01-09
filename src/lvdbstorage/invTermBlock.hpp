@@ -26,44 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "localStructAllocator.hpp"
-#include <cstdlib>
+#ifndef _STRUS_LVDB_INVTERM_BLOCK_HPP_INCLUDED
+#define _STRUS_LVDB_INVTERM_BLOCK_HPP_INCLUDED
+#include "dataBlock.hpp"
+#include "databaseKey.hpp"
+#include <vector>
 #include <map>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
 
-class DocumentFrequencyMap
+/// \class InvTermBlock
+/// \brief Block of inverse term occurrencies
+class InvTermBlock
+	:public DataBlock
 {
 public:
-	DocumentFrequencyMap( leveldb::DB* db_)
-		:m_db(db_){}
-	DocumentFrequencyMap( const DocumentFrequencyMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+	struct Element
+	{
+		Index typeno;
+		Index termno;
+		Index df;
 
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
+		Element()
+			:typeno(0),termno(0),df(0){}
+		Element( const Element& o)
+			:typeno(o.typeno),termno(o.termno),df(o.df){}
+		Element( const Index& typeno_, const Index& termno_, const Index& df_)
+			:typeno(typeno_),termno(termno_),df(df_){}
+	};
 
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
+public:
+	explicit InvTermBlock()
+		:DataBlock( (char)DatabaseKey::InverseTermIndex){}
+	InvTermBlock( const InvTermBlock& o)
+		:DataBlock(o){}
+	InvTermBlock( const Index& id_, const void* ptr_, std::size_t size_)
+		:DataBlock( (char)DatabaseKey::InverseTermIndex, id_, ptr_, size_){}
 
-	void getWriteBatch( leveldb::WriteBatch& batch);
+	InvTermBlock& operator=( const InvTermBlock& o)
+	{
+		DataBlock::operator =(o);
+		return *this;
+	}
 
-private:
-	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
-	typedef std::less<Key> MapCompare;
-	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
+	Element element_at( const char* itr) const;
 
-private:
-	leveldb::DB* m_db;
-	Map m_map;
+	const char* begin() const
+	{
+		return charptr();
+	}
+	const char* end() const
+	{
+		return charend();
+	}
+
+	const char* next( const char* ref) const;
+
+	void append( const Index& typeno, const Index& termno, const Index& df);
 };
 
 }//namespace
 #endif
-
 

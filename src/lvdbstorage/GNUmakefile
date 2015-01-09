@@ -13,6 +13,7 @@ CPP_OBJS=\
 	dataBlockStorage.o \
 	docnoBlock.o \
 	docnoBlockMap.o \
+	invTermBlock.o \
 	posinfoBlock.o \
 	posinfoBlockMap.o \
 	forwardIndexBlock.o \

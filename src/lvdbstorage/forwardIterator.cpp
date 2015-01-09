@@ -40,7 +40,9 @@ ForwardIterator::ForwardIterator( const Storage* storage_, leveldb::DB* db_, con
 	,m_docno(0)
 	,m_typeno(storage_->getTermType( type_))
 	,m_curpos(0)
-{}
+{
+	if (m_typeno == 0) throw std::runtime_error( std::string("unknown term type name '") + type_ + "'");
+}
 
 ForwardIterator::~ForwardIterator()
 {

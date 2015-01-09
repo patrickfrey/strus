@@ -50,6 +50,7 @@ public:
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
+		InverseTermIndex='i',	///< [docno]                   ->  [typeno,termno,df]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
 		AclBlockPrefix='w',	///< [docno,userno]            ->  [bit]*
@@ -75,6 +76,7 @@ public:
 			case ForwardIndexPrefix: return "forward index";
 			case DocnoBlockPrefix: return "docno posting block";
 			case PosinfoBlockPrefix: return "posinfo posting block";
+			case InverseTermIndex: return "inverse terminfo block";
 			case UserAclBlockPrefix: return "user ACL block";
 			case AclBlockPrefix: return "inverted ACL block";
 			case DocListBlockPrefix: return "doc posting block";

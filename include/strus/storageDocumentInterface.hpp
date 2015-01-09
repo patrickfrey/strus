@@ -48,15 +48,26 @@ public:
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document
 	/// \param[in] weight_ additional weight of the term at this position in the document
+	/// \remark Weights accumulated for each type,value,position tuple
 	virtual void addTermOccurrence(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_,
 			float weight_)=0;
 
-	/// \brief Define a meta data element of the document
+	/// \brief Add one term to the forward index for summarization
+	/// \param[in] type_ type name of the term
+	/// \param[in] value_ value string of the term
+	/// \param[in] position_ position of the term in the document
+	/// \remark Only one type,value pair allowed at one position
+	virtual void addForwardIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_)=0;
+
+	/// \brief Define a meta data element of the document by name
 	/// \note Meta data are used for query restrictions and for document weights in query result ranking
-	/// \remark Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
+	/// \note Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
 	/// \param[in] name_ name of the existing meta data element
 	/// \param[in] value_ value of the element
 	virtual void setMetaData(
@@ -64,6 +75,7 @@ public:
 			const ArithmeticVariant& value_)=0;
 
 	/// \brief Define a string attribute of the document
+	/// \note Attributes are used for summarization in a query result
 	/// \param[in] name_ name of the attribute
 	/// \param[in] value_ value of the document attribute
 	virtual void setAttribute(

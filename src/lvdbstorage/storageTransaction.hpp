@@ -71,7 +71,7 @@ public:
 	~StorageTransaction();
 
 	virtual void deleteDocument(
-		const std::string& docid);
+			const std::string& docid);
 
 	virtual void deleteUserAccessRights(
 			const std::string& username);
@@ -94,9 +94,6 @@ public:/*Document*/
 	Index getOrCreateUserno( const std::string& name, bool& isNew);
 	Index lookUpTermValue( const std::string& name);
 
-	void incrementDf( const Index& typeno, const Index& termno);
-	void decrementDf( const Index& typeno, const Index& termno);
-
 	void defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value);
 	void deleteMetaData( const Index& docno, const std::string& varname);
 	void deleteMetaData( const Index& docno);
@@ -106,6 +103,7 @@ public:/*Document*/
 	void deleteAttributes( const Index& docno);
 
 	void defineAcl( const Index& userno, const Index& docno);
+	void deleteAcl( const Index& userno, const Index& docno);
 	void deleteAcl( const Index& docno);
 
 	void deleteIndex( const Index& docno);
@@ -122,19 +120,11 @@ public:/*Document*/
 		const Index& termtype, const Index& termvalue,
 		const Index& docno, const std::vector<Index>& posinfo);
 
-	void deletePosinfoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno);
-
 	void defineForwardIndexTerm(
 		const Index& typeno, const Index& docno,
 		const Index& pos, const std::string& termstring);
 
-	void defineUserAccess(
-		const Index& userno, const Index& docno);
-
-	void deleteUserAccess(
-		const Index& userno, const Index& docno);
+	void closeForwardIndexDocument( const Index& docno);
 
 private:
 	Storage* m_storage;					///< Storage to call refresh after commit or rollback
@@ -142,8 +132,6 @@ private:
 	leveldb::Options m_dboptions;				///< options for levelDB
 	const MetaDataDescription* m_metadescr;			///< description of metadata
 
-	leveldb::WriteBatch m_batch;				///< batch used for the transaction
-	DocumentFrequencyMap m_dfMap;				///< temporary map for the document frequency of new inserted features
 	AttributeMap m_attributeMap;				///< map of document attributes for writing
 	MetaDataBlockMap m_metaDataBlockMap;			///< map of meta data blocks for writing
 

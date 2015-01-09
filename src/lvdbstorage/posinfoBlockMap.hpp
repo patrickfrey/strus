@@ -31,6 +31,8 @@
 #include "strus/index.hpp"
 #include "posinfoBlock.hpp"
 #include "booleanBlock.hpp"
+#include "invTermBlock.hpp"
+#include "documentFrequencyMap.hpp"
 #include "blockKey.hpp"
 #include "blockStorage.hpp"
 #include "localStructAllocator.hpp"
@@ -53,30 +55,42 @@ public:
 		const Index& docno,
 		const std::vector<Index>& pos);
 
-	void deletePosinfoPosting(
-		const Index& typeno,
-		const Index& termno,
-		const Index& docno);
+	void deleteIndex( const Index& docno);
 
 	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
 	void getWriteBatch( leveldb::WriteBatch& batch);
 
 private:
-	struct Element
+	struct MapKey
 	{
+		BlockKeyIndex termkey;
 		Index docno;
-		std::size_t posinfoidx;
 
-		Element( const Element& o)
-			:docno(o.docno),posinfoidx(o.posinfoidx){}
-		Element( const Index& docno_, const std::size_t& posinfoidx_)
-			:docno(docno_),posinfoidx(posinfoidx_){}
+		MapKey( const MapKey& o)
+			:termkey(o.termkey),docno(o.docno){}
+		MapKey( const BlockKeyIndex& termkey_, const std::size_t& docno_)
+			:termkey(termkey_),docno(docno_){}
+		MapKey( const Index& typeno_, const Index& termno_, const std::size_t& docno_)
+			:termkey(BlockKey(typeno_,termno_).index()),docno(docno_){}
+
+		bool operator < (const MapKey& o) const
+		{
+			if (termkey < o.termkey) return true;
+			if (termkey > o.termkey) return false;
+			return docno < o.docno;
+		}
 	};
 
-	typedef LocalStructAllocator<std::pair<BlockKeyIndex,std::size_t> > MapAllocator;
-	typedef std::less<BlockKeyIndex> MapCompare;
-	typedef std::map<BlockKeyIndex,std::size_t,MapCompare,MapAllocator> Map;
+	typedef LocalStructAllocator<std::pair<MapKey,std::size_t> > MapAllocator;
+	typedef std::less<MapKey> MapCompare;
+	typedef std::map<MapKey,std::size_t,MapCompare,MapAllocator> Map;
+
+	typedef InvTermBlock::Element InvTerm;
+	typedef std::vector<InvTerm> InvTermList;
+	typedef LocalStructAllocator<std::pair<Index,std::size_t> > InvTermMapAllocator;
+	typedef std::less<Index> InvTermMapCompare;
+	typedef std::map<Index,std::size_t,InvTermMapCompare,InvTermMapAllocator> InvTermMap;
 
 private:
 	static void defineDocnoRangeElement(
@@ -86,8 +100,8 @@ private:
 
 	void insertNewPosElements(
 			BlockStorage<PosinfoBlock>& blkstorage,
-			std::vector<Element>::const_iterator& ei,
-			const std::vector<Element>::const_iterator& ee,
+			Map::const_iterator& ei,
+			const Map::const_iterator& ee,
 			PosinfoBlock& newposblk,
 			const Index& lastInsertBlockId,
 			std::vector<BooleanBlock::MergeRange>& docrangear,
@@ -95,25 +109,28 @@ private:
 
 	void mergeNewPosElements(
 			BlockStorage<PosinfoBlock>& blkstorage,
-			std::vector<Element>::const_iterator& ei,
-			const std::vector<Element>::const_iterator& ee,
+			Map::const_iterator& ei,
+			const Map::const_iterator& ee,
 			PosinfoBlock& newposblk,
 			std::vector<BooleanBlock::MergeRange>& docrangear,
 			leveldb::WriteBatch& batch);
 
 	PosinfoBlock mergePosBlock(
-			std::vector<Element>::const_iterator ei,
-			const std::vector<Element>::const_iterator& ee,
+			Map::const_iterator ei,
+			const Map::const_iterator& ee,
 			const PosinfoBlock& oldblk);
 
 	void clear();
 
 private:
+	DocumentFrequencyMap m_dfmap;
 	leveldb::DB* m_db;
 	Map m_map;
-	std::vector<Element> m_elements;
 	std::string m_strings;
-	BlockKeyIndex m_lastkey;
+	InvTermMap m_invtermmap;
+	InvTermList m_invterms;
+	Index m_docno;
+	std::vector<Index> m_deletes;
 };
 
 }

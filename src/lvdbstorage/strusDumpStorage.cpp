@@ -164,6 +164,12 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 				data.print( out);
 				break;
 			}
+			case strus::DatabaseKey::InverseTermIndex:
+			{
+				strus::InverseTermData data( key, value);
+				data.print( out);
+				break;
+			}
 			case strus::DatabaseKey::MetaDataDescrPrefix:
 			{
 				strus::MetaDataDescrData data( key, value);

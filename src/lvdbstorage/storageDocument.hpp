@@ -45,30 +45,44 @@ class StorageDocument
 	:public StorageDocumentInterface
 {
 public:
+	/// \brief Constructor
 	StorageDocument(
 		StorageTransaction* transaction_,
 		const std::string& docid_,
 		const Index& docno_,
 		bool isNew_);
 
+	/// \brief Destructor
 	virtual ~StorageDocument();
+
+	/// \brief Implementation of StorageDocumentInterface::addTermOccurrence( const std::string&, const std::string&, const Index&);
 	virtual void addTermOccurrence(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_,
 			float weight_);
 
+	/// \brief Implementation of StorageDocumentInterface::addForwardIndexTerm( const std::string&, const std::string&, const Index&);
+	virtual void addForwardIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_);
+
+	/// \brief Implementation of StorageDocumentInterface::setMetaData( const std::string&, const ArithmeticVariant&);
 	virtual void setMetaData(
 			const std::string& name_,
 			const ArithmeticVariant& value_);
 
+	/// \brief Implementation of StorageDocumentInterface::setAttribute( const std::string&, const std::string&);
 	virtual void setAttribute(
 			const std::string& name_,
 			const std::string& value_);
 
+	/// \brief Implementation of StorageDocumentInterface::setUserAccessRights( const std::string&);
 	virtual void setUserAccessRights(
 			const std::string& username_);
 
+	/// \brief Implementation of StorageDocumentInterface::done();
 	virtual void done();
 
 public:

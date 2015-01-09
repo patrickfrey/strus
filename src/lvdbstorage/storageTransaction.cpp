@@ -43,7 +43,6 @@ StorageTransaction::StorageTransaction(
 	:m_storage(storage_)
 	,m_db(db_)
 	,m_metadescr(metadescr_)
-	,m_dfMap(db_)
 	,m_attributeMap(db_)
 	,m_metaDataBlockMap(db_,metadescr_)
 	,m_docnoBlockMap(db_)
@@ -98,16 +97,6 @@ Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 	return m_attributeNameMap.getOrCreate( name, isNew);
 }
 
-void StorageTransaction::incrementDf( const Index& typeno, const Index& termno)
-{
-	m_dfMap.increment( typeno, termno);
-}
-
-void StorageTransaction::decrementDf( const Index& typeno, const Index& termno)
-{
-	m_dfMap.decrement( typeno, termno);
-}
-
 void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value)
 {
 	m_metaDataBlockMap.defineMetaData( docno, varname, value);
@@ -145,6 +134,11 @@ void StorageTransaction::defineAcl( const Index& userno, const Index& docno)
 	m_userAclBlockMap.defineUserAccess( userno, docno);
 }
 
+void StorageTransaction::deleteAcl( const Index& userno, const Index& docno)
+{
+	m_userAclBlockMap.deleteUserAccess( userno, docno);
+}
+
 void StorageTransaction::deleteAcl( const Index& docno)
 {
 	m_userAclBlockMap.deleteDocumentAccess( docno);
@@ -173,14 +167,6 @@ void StorageTransaction::definePosinfoPosting(
 		termtype, termvalue, docno, posinfo);
 }
 
-void StorageTransaction::deletePosinfoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno)
-{
-	m_posinfoBlockMap.deletePosinfoPosting(
-		termtype, termvalue, docno);
-}
-
 void StorageTransaction::defineForwardIndexTerm(
 	const Index& typeno,
 	const Index& docno,
@@ -190,19 +176,11 @@ void StorageTransaction::defineForwardIndexTerm(
 	m_forwardIndexBlockMap.defineForwardIndexTerm( typeno, docno, pos, termstring);
 }
 
-void StorageTransaction::defineUserAccess(
-	const Index& userno,
-	const Index& docno)
+void StorageTransaction::closeForwardIndexDocument( const Index& docno)
 {
-	m_userAclBlockMap.defineUserAccess( userno, docno);
+	m_forwardIndexBlockMap.closeForwardIndexDocument( docno);
 }
 
-void StorageTransaction::deleteUserAccess(
-	const Index& userno,
-	const Index& docno)
-{
-	m_userAclBlockMap.deleteUserAccess( userno, docno);
-}
 
 
 class TermnoMap
@@ -222,38 +200,18 @@ private:
 
 void StorageTransaction::deleteIndex( const Index& docno)
 {
-	typedef std::pair<Index,Index> TermMapKey;
-	std::set<TermMapKey> oldcontent;
-
-	KeyValueStorage fwstorage( m_db, DatabaseKey::ForwardIndexPrefix, false);
-	TermnoMap termnoMap( this);
-
-	Index ti = 1, te = m_storage->nofAttributeTypes();
-	for (; ti <= te; ++ti)
-	{
-		std::map<Index,Index> countmap
-			= m_forwardIndexBlockMap.getTermOccurrencies(
-				ti, docno, termnoMap);
-		std::map<Index,Index>::const_iterator
-			ci = countmap.begin(), ce = countmap.end();
-		for (; ci != ce; ++ci)
-		{
-			deleteDocnoPosting( ti, ci->first, docno);
-			deletePosinfoPosting( ti, ci->first, docno);
-	
-			decrementDf( ti, ci->first);
-		}
-		fwstorage.disposeSubnodes( BlockKey( ti, docno), m_batch);
-	}
+	m_posinfoBlockMap.deleteIndex( docno);
+	m_forwardIndexBlockMap.deleteDocument( docno);
 }
 
 void StorageTransaction::deleteUserAccessRights(
 	const std::string& username)
 {
 	Index userno = m_userIdMap.lookUp( username);
-	if (userno == 0) return;
-
-	m_userAclBlockMap.deleteUserAccess( userno);
+	if (userno != 0)
+	{
+		m_userAclBlockMap.deleteUserAccess( userno);
+	}
 }
 
 void StorageTransaction::deleteDocument( const std::string& docid)
@@ -269,6 +227,9 @@ void StorageTransaction::deleteDocument( const std::string& docid)
 	
 	//[3] Delete index elements (forward index and inverted index):
 	deleteIndex( docno);
+
+	//[3] Delete ACL elements:
+	deleteAcl( docno);
 
 	m_nof_documents -= 1;
 }
@@ -303,26 +264,25 @@ void StorageTransaction::commit()
 	{
 		throw std::runtime_error( "called transaction commit after rollback");
 	}
+	leveldb::WriteBatch batch;	//... batch used for the transaction
+
 	Storage::TransactionLock transactionLock( m_storage);
 	{
 		std::map<Index,Index> termnoUnknownMap;
-		m_termValueMap.getWriteBatch( termnoUnknownMap, m_batch);
+		m_termValueMap.getWriteBatch( termnoUnknownMap, batch);
 
 		m_docnoBlockMap.renameNewTermNumbers( termnoUnknownMap);
 		m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
 
 		std::vector<Index> refreshList;
-		m_attributeMap.getWriteBatch( m_batch);
-		m_metaDataBlockMap.getWriteBatch( m_batch, refreshList);
+		m_attributeMap.getWriteBatch( batch);
+		m_metaDataBlockMap.getWriteBatch( batch, refreshList);
 
-		m_docnoBlockMap.getWriteBatch( m_batch);
-		m_posinfoBlockMap.getWriteBatch( m_batch);
-		m_forwardIndexBlockMap.getWriteBatch( m_batch);
+		m_docnoBlockMap.getWriteBatch( batch);
+		m_posinfoBlockMap.getWriteBatch( batch);
+		m_forwardIndexBlockMap.getWriteBatch( batch);
 
-		m_userAclBlockMap.getWriteBatch( m_batch);
-
-		m_dfMap.renameNewTermNumbers( termnoUnknownMap);
-		m_dfMap.getWriteBatch( m_batch);
+		m_userAclBlockMap.getWriteBatch( batch);
 
 		KeyValueStorage docidstor( m_db, DatabaseKey::DocIdPrefix, false);
 		std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
@@ -330,12 +290,12 @@ void StorageTransaction::commit()
 		{
 			std::string docnostr;
 			packIndex( docnostr, di->second);
-			docidstor.store( di->first, docnostr, m_batch);
+			docidstor.store( di->first, docnostr, batch);
 		}
 
 		leveldb::WriteOptions options;
 		options.sync = true;
-		leveldb::Status status = m_db->Write( options, &m_batch);
+		leveldb::Status status = m_db->Write( options, &batch);
 		if (!status.ok())
 		{
 			throw std::runtime_error( std::string( "error in commit when writing transaction batch: ") + status.ToString());
@@ -343,7 +303,7 @@ void StorageTransaction::commit()
 		m_storage->declareNofDocumentsInserted( m_nof_documents);
 		m_storage->releaseTransaction( refreshList);
 	}
-	m_batch.Clear();
+	batch.Clear();
 	m_commit = true;
 	m_nof_documents = 0;
 }
@@ -360,7 +320,6 @@ void StorageTransaction::rollback()
 	}
 	std::vector<Index> refreshList;
 	m_storage->releaseTransaction( refreshList);
-	m_batch.Clear();
 	m_rollback = true;
 }
 
