@@ -58,7 +58,7 @@ StorageDocumentChecker::~StorageDocumentChecker()
 {
 }
 
-void StorageDocumentChecker::addTermOccurrence(
+void StorageDocumentChecker::addSearchIndexTerm(
 		const std::string& type_,
 		const std::string& value_,
 		const Index& position_,

@@ -63,6 +63,7 @@ public:
 		init( o.m_id, o.m_ptr, o.m_size, o.m_allocsize);
 		return *this;
 	}
+	void swap( DataBlock& o);
 
 	void clear()			{m_size=0;}
 	bool empty() const		{return !m_size;}

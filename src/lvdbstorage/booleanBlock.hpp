@@ -63,6 +63,12 @@ public:
 		DataBlock::operator =(o);
 		return *this;
 	}
+	void setId( const Index& id_);
+	void swap( BooleanBlock& o)
+	{
+		DataBlock::swap( o);
+	}
+	
 	const char* find( const Index& elemno_, const char* lowerbound) const;
 	const char* upper_bound( const Index& elemno_, const char* lowerbound) const;
 
@@ -115,6 +121,8 @@ public:
 			std::vector<MergeRange>::const_iterator ei,
 			const std::vector<MergeRange>::const_iterator& ee,
 			const BooleanBlock& oldblk);
+
+	void check() const;
 
 private:
 	Index relativeIndexFromElemno( const Index& elemno_) const	{return id()-elemno_+1;}

@@ -58,7 +58,7 @@ StorageDocument::TermMapKey StorageDocument::termMapKey( const std::string& type
 	return TermMapKey( typeno, valueno);
 }
 
-void StorageDocument::addTermOccurrence(
+void StorageDocument::addSearchIndexTerm(
 		const std::string& type_,
 		const std::string& value_,
 		const Index& position_,

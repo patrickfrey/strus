@@ -55,8 +55,8 @@ public:
 	/// \brief Destructor
 	virtual ~StorageDocument();
 
-	/// \brief Implementation of StorageDocumentInterface::addTermOccurrence( const std::string&, const std::string&, const Index&);
-	virtual void addTermOccurrence(
+	/// \brief Implementation of StorageDocumentInterface::addSearchIndexTerm( const std::string&, const std::string&, const Index&);
+	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_,

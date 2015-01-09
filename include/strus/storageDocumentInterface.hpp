@@ -43,19 +43,19 @@ public:
 	/// \brief Destructor
 	virtual ~StorageDocumentInterface(){}
 
-	/// \brief Add one occurrence of a term
+	/// \brief Add one occurrence of a term in the document for retrieval
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document
 	/// \param[in] weight_ additional weight of the term at this position in the document
 	/// \remark Weights accumulated for each type,value,position tuple
-	virtual void addTermOccurrence(
+	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_,
 			float weight_)=0;
 
-	/// \brief Add one term to the forward index for summarization
+	/// \brief Add one occurrence of a term to the forward index for summarization of the document
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document

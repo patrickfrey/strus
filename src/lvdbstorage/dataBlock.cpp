@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <map>
 #include <iostream>
+#include <algorithm>
 
 using namespace strus;
 
@@ -69,6 +70,15 @@ void DataBlock::initcopy( const DataBlock& o)
 {
 	if (m_type != o.m_type) throw std::logic_error( "block type mismatch in initcopy");
 	init( o.m_id, o.m_ptr, o.m_size, o.m_size /*force copy*/);
+}
+
+void DataBlock::swap( DataBlock& o)
+{
+	std::swap( m_type, o.m_type);
+	std::swap( m_id, o.m_id);
+	std::swap( m_ptr, o.m_ptr);
+	std::swap( m_size, o.m_size);
+	std::swap( m_allocsize, o.m_allocsize);
 }
 
 void DataBlock::expand( std::size_t datasize)

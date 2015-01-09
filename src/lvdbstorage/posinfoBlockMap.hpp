@@ -69,8 +69,6 @@ private:
 
 		MapKey( const MapKey& o)
 			:termkey(o.termkey),docno(o.docno){}
-		MapKey( const BlockKeyIndex& termkey_, const std::size_t& docno_)
-			:termkey(termkey_),docno(docno_){}
 		MapKey( const Index& typeno_, const Index& termno_, const std::size_t& docno_)
 			:termkey(BlockKey(typeno_,termno_).index()),docno(docno_){}
 

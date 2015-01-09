@@ -30,6 +30,8 @@
 #include "booleanBlockMap.hpp"
 #include "keyMap.hpp"
 #include "indexPacker.hpp"
+#include <sstream>
+#include <iostream>
 
 using namespace strus;
 
@@ -68,8 +70,13 @@ void PosinfoBlockMap::definePosinfoPosting(
 	const std::vector<Index>& pos)
 {
 	if (pos.empty()) return;
-
-	MapKey key = MapKey( termtype, termvalue, docno);
+	if (termtype == 0 || termvalue == 0)
+	{
+		std::ostringstream arg;
+		arg << '(' << termtype << ',' << termvalue << ',' << docno << ')';
+		throw std::runtime_error( std::string("internal: calling definePosinfoPosting with illegal arguments: ") + arg.str());
+	}
+	MapKey key( termtype, termvalue, docno);
 	Map::const_iterator mi = m_map.find( key);
 
 	if (mi == m_map.end() || mi->second == 0)
@@ -123,7 +130,7 @@ void PosinfoBlockMap::deleteIndex( const Index& docno)
 		InvTermList::const_iterator li = m_invterms.begin() + vi->second, le = m_invterms.end();
 		for (; li != le && li->typeno; ++li)
 		{
-			MapKey key = MapKey( li->typeno, li->termno, docno);
+			MapKey key( li->typeno, li->termno, docno);
 			Map::iterator mi = m_map.find( key);
 			if (mi != m_map.end())
 			{
@@ -150,7 +157,6 @@ void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 				throw std::runtime_error( "internal: term value undefined (posinfo map)");
 			}
 			MapKey newkey( BlockKey(mi->first.termkey).elem(1), ri->second, mi->first.docno);
-
 			m_map[ newkey] = mi->second;
 			m_map.erase( mi++);
 		}
@@ -196,7 +202,7 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 			{
 				InvTerm it = invblk->element_at( ei);
 
-				MapKey key = MapKey( it.typeno, it.termno, *di);
+				MapKey key( it.typeno, it.termno, *di);
 				m_map[ key] = 0;
 
 				m_dfmap.decrement( it.typeno, it.termno, it.df);
@@ -236,7 +242,7 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		Map::const_iterator lasti = ee;
 		Index lastInsertBlockId = (--lasti)->first.docno;
 
-		BlockKey blkkey( mi->first.termkey);
+		BlockKey blkkey( ei->first.termkey);
 		BlockStorage<PosinfoBlock> blkstorage(
 				m_db, DatabaseKey::PosinfoBlockPrefix, blkkey, false);
 		PosinfoBlock newposblk;

@@ -60,6 +60,10 @@ public:
 	}
 
 	void setId( const Index& id_);
+	void swap( PosinfoBlock& o)
+	{
+		DataBlock::swap( o);
+	}
 	Index docno_at( const char* ref) const;
 	std::vector<Index> positions_at( const char* itr) const;
 	unsigned int frequency_at( const char* itr) const;

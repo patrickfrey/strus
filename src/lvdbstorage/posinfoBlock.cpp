@@ -221,6 +221,7 @@ const char* PosinfoBlock::find( const Index& docno_, const char* lowerbound) con
 
 void PosinfoBlock::setId( const Index& id_)
 {
+	if (id_ == id()) return;
 	if (empty())
 	{
 		DataBlock::setId( id_);

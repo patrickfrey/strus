@@ -52,7 +52,7 @@ public:
 
 	virtual ~StorageDocumentChecker();
 
-	virtual void addTermOccurrence(
+	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_,

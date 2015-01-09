@@ -486,8 +486,17 @@ static std::vector<std::pair<Index,Index> > getRangeListFromBooleanBlock(
 	Index rangemin;
 	Index rangemax;
 	Index prevmax = 0;
+
 	while (blk.getNextRange( itr, rangemin, rangemax))
 	{
+		if (rangemax <= 0)
+		{
+			throw std::runtime_error( "illegal range in boolean block (negative or zero maximum)");
+		}
+		if (rangemin <= 0)
+		{
+			throw std::runtime_error( "illegal range in boolean block (negative or zero minimum)");
+		}
 		if (rangemin > rangemax)
 		{
 			throw std::runtime_error( "illegal range in boolean block (min > max)");

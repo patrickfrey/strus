@@ -299,5 +299,48 @@ BooleanBlock BooleanBlock::merge(
 	return rt;
 }
 
+void BooleanBlock::check() const
+{
+	char const* itr = charptr();
 
+	Index rangemin;
+	Index rangemax;
+	Index prevmax = 0;
 
+	while (getNextRange( itr, rangemin, rangemax))
+	{
+		if (rangemin <= 0 || rangemax <= 0 || rangemin > rangemax || rangemax > id() || rangemin <= prevmax)
+		{
+			throw std::runtime_error( "internal: created illegal boolean block");
+		}
+	}
+}
+
+void BooleanBlock::setId( const Index& id_)
+{
+	if (id_ == id()) return;
+	if (empty())
+	{
+		DataBlock::setId( id_);
+	}
+	else
+	{
+		BooleanBlock res( blocktype());
+		res.setId( id_);
+
+		char const* itr = charptr();
+	
+		Index rangemin;
+		Index rangemax;
+	
+		while (getNextRange( itr, rangemin, rangemax))
+		{
+			if (rangemin > id_ || rangemax < rangemin)
+			{
+				throw std::runtime_error( "internal: created illegal boolean block with setId()");
+			}
+			res.defineRange( rangemin, rangemax - rangemin);
+		}
+		swap( res);
+	}
+}
