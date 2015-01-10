@@ -34,7 +34,7 @@ using namespace strus;
 
 KeyAllocatorPool::Handle KeyAllocatorPool::createHandle()
 {
-	boost::mutex::scoped_lock( m_mutex);
+	boost::mutex::scoped_lock lock( m_mutex);
 	Handle rt = BitOperations::bitScanForward( 0xffffFFFFffffFFFFUL ^ m_occupied);
 	if (!rt)
 	{
@@ -46,7 +46,7 @@ KeyAllocatorPool::Handle KeyAllocatorPool::createHandle()
 
 void KeyAllocatorPool::releaseHandle( Handle hnd)
 {
-	boost::mutex::scoped_lock( m_mutex);
+	boost::mutex::scoped_lock lock( m_mutex);
 	m_keymaps[ hnd-1].clear();
 	if (!(m_occupied & (1 << (hnd-1))))
 	{
@@ -69,7 +69,7 @@ Index KeyAllocatorPool::alloc( Handle hnd, const std::string& name, bool& isNew)
 {
 	if (!hnd) throw std::runtime_error( "using invalid key alloc pool handle (NULL)");
 
-	boost::mutex::scoped_lock( m_mutex);
+	boost::mutex::scoped_lock lock( m_mutex);
 	uint64_t itr = m_occupied;
 	std::size_t hh = nextHandle( itr);
 	for (; hh; hh=nextHandle( itr))
@@ -93,7 +93,7 @@ Index KeyAllocatorPool::alloc( Handle hnd, const std::string& name, bool& isNew)
 
 Index KeyAllocatorPool::allocRange( std::size_t size)
 {
-	boost::mutex::scoped_lock( m_mutex);
+	boost::mutex::scoped_lock lock( m_mutex);
 	if (*m_globalCounter >= (Index)(std::numeric_limits<Index>::max() - size))
 	{
 		throw std::runtime_error( "alloc range of index failed (too many items allocated)");

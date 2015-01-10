@@ -121,7 +121,7 @@ void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 
 	storeVariables();
 
-	boost::mutex::scoped_lock( m_transactionCnt_mutex);
+	boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
 	--m_transactionCnt;
 }
 
@@ -181,7 +181,7 @@ void Storage::close()
 {
 	storeVariables();
 
-	boost::mutex::scoped_lock( m_transactionCnt_mutex);
+	boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
 	if (m_transactionCnt)
 	{
 		throw std::runtime_error("cannot close storage with an alive transactions");
@@ -318,7 +318,7 @@ StorageTransactionInterface*
 	Storage::createTransaction()
 {
 	{
-		boost::mutex::scoped_lock( m_transactionCnt_mutex);
+		boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
 		++m_transactionCnt;
 	}
 	return new StorageTransaction( this, m_db, &m_metadescr);
@@ -334,7 +334,7 @@ StorageDocumentInterface*
 
 Index Storage::allocDocnoRange( std::size_t nofDocuments)
 {
-	boost::mutex::scoped_lock( m_mutex_docno);
+	boost::mutex::scoped_lock lock( m_mutex_docno);
 	Index rt = m_next_docno;
 	m_next_docno += nofDocuments;
 	if (m_next_docno <= rt) throw std::runtime_error( "docno allocation error");
@@ -343,7 +343,7 @@ Index Storage::allocDocnoRange( std::size_t nofDocuments)
 
 void Storage::declareNofDocumentsInserted( int value)
 {
-	boost::mutex::scoped_lock( m_nof_documents_mutex);
+	boost::mutex::scoped_lock lock( m_nof_documents_mutex);
 	m_nof_documents += value;
 }
 
@@ -476,31 +476,31 @@ bool Storage::withAcl() const
 
 Index Storage::allocTermno()
 {
-	boost::mutex::scoped_lock( m_mutex_termno);
+	boost::mutex::scoped_lock lock( m_mutex_termno);
 	return m_next_termno++;
 }
 
 Index Storage::allocTypenoIm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock( m_mutex_typeno);
+	boost::mutex::scoped_lock lock( m_mutex_typeno);
 	return allocNameIm( DatabaseKey::TermTypePrefix, m_next_typeno, name, isNew);
 }
 
 Index Storage::allocDocnoIm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock( m_mutex_docno);
+	boost::mutex::scoped_lock lock( m_mutex_docno);
 	return allocNameIm( DatabaseKey::DocIdPrefix, m_next_docno, name, isNew);
 }
 
 Index Storage::allocUsernoIm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock( m_mutex_userno);
+	boost::mutex::scoped_lock lock( m_mutex_userno);
 	return allocNameIm( DatabaseKey::UserNamePrefix, m_next_userno, name, isNew);
 }
 
 Index Storage::allocAttribnoIm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock( m_mutex_attribno);
+	boost::mutex::scoped_lock lock( m_mutex_attribno);
 	return allocNameIm( DatabaseKey::AttributeKeyPrefix, m_next_attribno, name, isNew);
 }
 

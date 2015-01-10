@@ -203,7 +203,8 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 				InvTerm it = invblk->element_at( ei);
 
 				MapKey key( it.typeno, it.termno, *di);
-				m_map[ key] = 0;
+				m_map[ key];	//... construct member (default 0) if it does not exist
+						// <=> mark as deleted, if not member of set of inserts
 
 				m_dfmap.decrement( it.typeno, it.termno, it.df);
 			}
