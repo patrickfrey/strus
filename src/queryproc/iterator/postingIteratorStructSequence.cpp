@@ -145,7 +145,7 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 
 			if (max_pos - min_pos > rangenum)
 			{
-				pos_iter = min_pos+1;
+				pos_iter = max_pos - rangenum;
 				break;
 			}
 		}

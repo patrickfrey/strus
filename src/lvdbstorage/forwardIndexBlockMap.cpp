@@ -104,7 +104,7 @@ void ForwardIndexBlockMap::deleteDocument( const Index& docno)
 		m_curblockmap.clear();
 		m_docno = 0;
 	}
-	Index ti = 0, te = m_maxtype;
+	Index ti = 1, te = m_maxtype+1;
 	for (; ti != te; ++ti)
 	{
 		BlockKeyIndex termkey = BlockKey( ti, m_docno).index();
@@ -128,7 +128,7 @@ void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 	std::vector<Index>::const_iterator di = m_deletes.begin(), de = m_deletes.end();
 	for (; di != de; ++di)
 	{
-		Index ti = 0, te = m_maxtype;
+		Index ti = 1, te = m_maxtype+1;
 		for (; ti != te; ++ti)
 		{
 			fwstorage.disposeSubnodes( BlockKey( ti, *di), batch);

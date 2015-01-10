@@ -198,7 +198,7 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		{
 			char const* ei = invblk->begin();
 			const char* ee = invblk->end();
-			while (ei != ee)
+			for (;ei != ee; ei = invblk->next( ei))
 			{
 				InvTerm it = invblk->element_at( ei);
 

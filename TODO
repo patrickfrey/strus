@@ -1,6 +1,4 @@
-memory allocation, use local allocators to avoid memory fragmentation
 summarization with help of weighted union iterator
-posinfo optional "posinfo=no" switch
 Group id in analyzer term and group operator in query eval program (making an join operation with all elements of one group)
 In query eval program join operation arguments _3* for all input arguments bigger than index 3
 SWIG bindings
