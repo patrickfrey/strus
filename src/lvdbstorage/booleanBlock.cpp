@@ -199,8 +199,8 @@ BooleanBlock BooleanBlock::merge(
 	rt.setId( oldblk.id());
 
 	char const* old_itr = oldblk.charptr();
-	Index old_from;
-	Index old_to;
+	Index old_from = 0;
+	Index old_to = 0;
 	bool old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
 
 	while (ei != ee && old_haselem)
