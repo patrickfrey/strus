@@ -39,7 +39,8 @@ using namespace strus;
 
 StorageTransaction::StorageTransaction(
 		Storage* storage_, leveldb::DB* db_,
-		const MetaDataDescription* metadescr_)
+		const MetaDataDescription* metadescr_,
+		const VarSizeNodeTree* termnomap_)
 	:m_storage(storage_)
 	,m_db(db_)
 	,m_metadescr(metadescr_)
@@ -50,7 +51,7 @@ StorageTransaction::StorageTransaction(
 	,m_forwardIndexBlockMap(db_)
 	,m_userAclBlockMap(db_)
 	,m_termTypeMap(db_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
-	,m_termValueMap(db_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator())
+	,m_termValueMap(db_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator(),termnomap_)
 	,m_docIdMap(db_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
 	,m_userIdMap(db_,DatabaseKey::UserNamePrefix, storage_->createUsernoAllocator())
 	,m_attributeNameMap(db_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())
@@ -181,22 +182,6 @@ void StorageTransaction::closeForwardIndexDocument( const Index& docno)
 	m_forwardIndexBlockMap.closeForwardIndexDocument( docno);
 }
 
-
-
-class TermnoMap
-{
-public:
-	TermnoMap( StorageTransaction* transaction_)
-		:m_transaction(transaction_){}
-
-	Index operator()( const std::string& value)
-	{
-		return m_transaction->lookUpTermValue( value);
-	}
-
-private:
-	StorageTransaction* m_transaction;
-};
 
 void StorageTransaction::deleteIndex( const Index& docno)
 {

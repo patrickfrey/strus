@@ -38,11 +38,60 @@
 #include <vector>
 #include <map>
 #include <cstring>
+#include <cstdio>
+#include <cerrno>
 #include <boost/algorithm/string.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
 using namespace strus;
+
+static std::string loadFile( const std::string& filename)
+{
+	std::string rt;
+	int errcode = 0;
+
+	FILE* fh = ::fopen( filename.c_str(), "rb");
+	if (!fh)
+	{
+		errcode = errno;
+		goto FILEERROR;
+	}
+	unsigned int nn;
+	enum {bufsize=(1<<12)};
+	char buf[ bufsize];
+
+	while (!!(nn=::fread( buf, 1, bufsize, fh)))
+	{
+		try
+		{
+			rt.append( buf, nn);
+		}
+		catch (const std::bad_alloc&)
+		{
+			errcode = 12/*ENOMEM*/;
+			goto FILEERROR;
+		}
+	}
+	if (!feof( fh))
+	{
+		errcode = ::ferror( fh);
+		goto FILEERROR;
+	}
+	else
+	{
+		::fclose( fh);
+	}
+	return rt;
+FILEERROR:
+	{
+		std::ostringstream errstr;
+		errstr << errcode;
+		if (fh) ::fclose( fh);
+		throw std::runtime_error( std::string( "could not read file '") + filename + "': (errno " + errstr.str() + ")");
+	}
+}
+
 
 DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsource)
 {
@@ -51,7 +100,15 @@ DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsourc
 	{
 		throw std::runtime_error( "meta data definitions only allowed when creating a storage");
 	}
-	return new Storage( config.path().c_str(), config.cachesize_kb());
+	if (config.termkeys().size())
+	{
+		std::string termkeysrc = loadFile( config.termkeys());
+		return new Storage( config.path().c_str(), config.cachesize_kb(), termkeysrc.c_str());
+	}
+	else
+	{
+		return new Storage( config.path().c_str(), config.cachesize_kb());
+	}
 }
 
 
@@ -123,7 +180,7 @@ DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescript
 	switch (type)
 	{
 		case CmdCreateStorageClient:
-			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>";
+			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ntermkeys=<optional path to file with the most frequent terms to cache>";
 
 		case CmdCreateStorageDatabase:
 			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nacl=<yes/no, yes if users with different access rights exist>\nmetadata=<comma separated list of meta data def>";

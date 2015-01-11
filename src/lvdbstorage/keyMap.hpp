@@ -42,9 +42,12 @@ namespace strus {
 class KeyMap
 {
 public:
-	KeyMap( leveldb::DB* db_, DatabaseKey::KeyPrefix prefix_,
-			KeyAllocatorInterface* allocator_)
+	KeyMap( leveldb::DB* db_,
+			DatabaseKey::KeyPrefix prefix_,
+			KeyAllocatorInterface* allocator_,
+			const VarSizeNodeTree* globalmap_=0)
 		:m_storage( db_, prefix_, false)
+		,m_globalmap(globalmap_)
 		,m_unknownHandleCount(0)
 		,m_allocator(allocator_)
 	{}
@@ -76,8 +79,8 @@ private:
 
 private:
 	KeyValueStorage m_storage;
-	DatabaseKey::KeyPrefix m_prefix;
 	VarSizeNodeTree m_map;
+	const VarSizeNodeTree* m_globalmap;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
 };

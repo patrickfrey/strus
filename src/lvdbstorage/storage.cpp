@@ -53,7 +53,31 @@ using namespace strus;
 
 enum {ExpectedTransactionSize = (1<<14)};
 
-Storage::Storage( const std::string& path_, unsigned int cachesize_k)
+void Storage::cleanup()
+{
+	if (m_metaDataBlockCache)
+	{
+		delete m_metaDataBlockCache; 
+		m_metaDataBlockCache = 0;
+	}
+	if (m_db)
+	{
+		delete m_db;
+		m_db = 0;
+	}
+	if (m_dboptions.block_cache)
+	{
+		delete m_dboptions.block_cache;
+		m_dboptions.block_cache = 0;
+	}
+	if (m_termno_map)
+	{
+		delete m_termno_map;
+		m_termno_map = 0;
+	}
+}
+
+Storage::Storage( const std::string& path_, unsigned int cachesize_k, const char* termnomap_source)
 	:m_path(path_)
 	,m_db(0)
 	,m_next_typeno(0)
@@ -64,6 +88,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 	,m_nof_documents(0)
 	,m_transactionCnt(0)
 	,m_metaDataBlockCache(0)
+	,m_termno_map(0)
 {
 	// Compression reduces size of index by 25% and has about 10% better performance
 	// m_dboptions.compression = leveldb::kNoCompression;
@@ -82,29 +107,23 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k)
 			m_metaDataBlockCache = new MetaDataBlockCache( m_db, m_metadescr);
 
 			loadVariables();
+			if (termnomap_source) loadTermnoMap( termnomap_source);
 		}
-		catch (const std::bad_alloc&)
+		catch (const std::bad_alloc& err)
 		{
-			if (m_metaDataBlockCache) delete m_metaDataBlockCache; 
-			m_metaDataBlockCache = 0;
-			m_db = 0;
-			if (m_dboptions.block_cache) delete m_dboptions.block_cache;
-			m_dboptions.block_cache = 0;
+			cleanup();
+			throw err;
+		}
+		catch (const std::runtime_error& err)
+		{
+			cleanup();
+			throw err;
 		}
 	}
 	else
 	{
 		std::string err = status.ToString();
-		if (!!m_dboptions.block_cache)
-		{
-			if (m_dboptions.block_cache) delete m_dboptions.block_cache;
-			m_dboptions.block_cache = 0;
-		}
-		if (!!m_db)
-		{
-			delete m_db;
-			m_db = 0;
-		}
+		cleanup();
 		throw std::runtime_error( std::string( "failed to open storage: ") + err);
 	}
 }
@@ -198,9 +217,7 @@ Storage::~Storage()
 	{
 		//... silently ignored. Call close directly to catch errors
 	}
-	delete m_metaDataBlockCache;
-	delete m_db;
-	if (m_dboptions.block_cache) delete m_dboptions.block_cache;
+	cleanup();
 }
 
 Index Storage::loadIndexValue(
@@ -216,6 +233,11 @@ Index Storage::loadIndexValue(
 
 Index Storage::getTermValue( const std::string& name) const
 {
+	if (m_termno_map)
+	{
+		VarSizeNodeTree::NodeData cached_termno;
+		if (m_termno_map->find( name.c_str(), cached_termno)) return cached_termno;
+	}
 	return loadIndexValue( DatabaseKey::TermValuePrefix, name);
 }
 
@@ -321,7 +343,7 @@ StorageTransactionInterface*
 		boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
 		++m_transactionCnt;
 	}
-	return new StorageTransaction( this, m_db, &m_metadescr);
+	return new StorageTransaction( this, m_db, &m_metadescr, m_termno_map);
 }
 
 StorageDocumentInterface* 
@@ -589,4 +611,53 @@ std::vector<StatCounterValue> Storage::getStatistics() const
 	return rt;
 }
 
+void Storage::loadTermnoMap( const char* termnomap_source)
+{
+	leveldb::WriteBatch batch;
+	KeyValueStorage termnostor( m_db, DatabaseKey::TermValuePrefix, false);
+
+	m_termno_map = new VarSizeNodeTree();
+	try
+	{
+		unsigned char const* si = (const unsigned char*)termnomap_source;
+		std::string name;
+
+		while (*si)
+		{
+			name.resize(0);
+			for (; *si != '\n' && *si != '\r' && *si; ++si)
+			{
+				name.push_back( *si);
+			}
+			if (*si == '\r') ++si;
+			if (*si == '\n') ++si;
+
+			VarSizeNodeTree::NodeData dupkey;
+			if (m_termno_map->find( name.c_str(), dupkey)) continue;
+
+			Index termno = loadIndexValue( DatabaseKey::TermValuePrefix, name);
+			if (!termno)
+			{
+				termno = allocTermno();
+				std::string termnostr;
+				packIndex( termnostr, termno);
+				termnostor.store( name, termnostr, batch);
+			}
+			m_termno_map->set( name.c_str(), termno);
+		}
+		leveldb::WriteOptions options;
+		options.sync = true;
+		leveldb::Status status = m_db->Write( options, &batch);
+		batch.Clear();
+
+		if (!status.ok())
+		{
+			throw std::runtime_error( std::string( "error writing leveldb database batch: ") + status.ToString());
+		}
+	}
+	catch (const std::runtime_error& err)
+	{
+		throw std::runtime_error( std::string("failed to build termno map: ") + err.what());
+	}
+}
 

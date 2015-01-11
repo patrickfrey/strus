@@ -133,6 +133,9 @@ static bool yesNo( const char* cfgname, const std::string& str)
 StorageConfig::StorageConfig( const char* source)
 	:m_acl(false),m_cachesize_kb(0)
 {
+	bool cache_defined = false;
+	bool acl_defined = false;
+
 	ConfigMap configMap( source);
 	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();
 
@@ -140,19 +143,33 @@ StorageConfig::StorageConfig( const char* source)
 	{
 		if (ci->first == "path")
 		{
+			if (m_path.size()) throw std::runtime_error( "duplicate definition of 'path' in storage config");
 			m_path = ci->second;
+			if (m_path.empty()) throw std::runtime_error( "empty definition of 'path' in storage config");
 		}
 		else if (ci->first == "metadata")
 		{
+			if (m_metadata.size()) throw std::runtime_error( "duplicate definition of 'metadata' in storage config");
 			m_metadata = ci->second;
+			if (m_metadata.empty()) throw std::runtime_error( "empty definition of 'metadata' in storage config");
+		}
+		else if (ci->first == "termkeys")
+		{
+			if (m_termkeys.size()) throw std::runtime_error( "duplicate definition of 'termkeys' in storage config");
+			m_termkeys = ci->second;
+			if (m_termkeys.empty()) throw std::runtime_error( "empty definition of 'termkeys' in storage config");
 		}
 		else if (ci->first == "acl")
 		{
+			if (acl_defined) throw std::runtime_error( "duplicate definition of 'acl' in storage config");
 			m_acl = yesNo( "acl", ci->second);
+			acl_defined = true;
 		}
 		else if (ci->first == "cache")
 		{
+			if (cache_defined) throw std::runtime_error( "duplicate definition of 'cache' in storage config");
 			m_cachesize_kb = nofK( ci->second);
+			cache_defined = true;
 		}
 		else
 		{

@@ -45,8 +45,14 @@ Index KeyMap::lookUp( const std::string& name)
 Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 {
 	VarSizeNodeTree::NodeData data;
+	if (m_globalmap && m_globalmap->find( name.c_str(), data))
+	{
+		isNew = false;
+		return data;
+	}
 	if (m_map.find( name.c_str(), data))
 	{
+		isNew = false;
 		return data;
 	}
 	const KeyValueStorage::Value* value = m_storage.load( name);

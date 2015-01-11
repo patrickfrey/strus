@@ -66,7 +66,8 @@ public:
 	StorageTransaction( 
 		Storage* storage_,
 		leveldb::DB* db_,
-		const MetaDataDescription* metadescr_);
+		const MetaDataDescription* metadescr_,
+		const VarSizeNodeTree* termnomap_);
 
 	~StorageTransaction();
 

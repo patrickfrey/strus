@@ -34,6 +34,7 @@
 #include "metaDataBlockCache.hpp"
 #include "databaseKey.hpp"
 #include "indexSetIterator.hpp"
+#include "varSizeNodeTree.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
@@ -64,7 +65,7 @@ class Storage
 public:
 	/// \param[in] path of the storage
 	/// \param[in] cachesize_k number of K LRU cache for nodes
-	Storage( const std::string& path_, unsigned int cachesize_k);
+	Storage( const std::string& path_, unsigned int cachesize_k, const char* termnomap_source=0);
 	virtual ~Storage();
 
 	virtual void close();
@@ -155,6 +156,8 @@ public:/*StorageDocumentChecker*/
 	IndexSetIterator getUserAclIterator( const Index& userno) const;
 
 private:
+	void cleanup();
+	void loadTermnoMap( const char* termnomap_source);
 	Index loadIndexValue(
 		const DatabaseKey::KeyPrefix type,
 		const std::string& name) const;
@@ -193,6 +196,7 @@ private:
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
+	VarSizeNodeTree* m_termno_map;				///< map of the most important (most frequent) terms, if specified
 };
 
 }
