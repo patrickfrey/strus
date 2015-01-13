@@ -208,6 +208,12 @@ void StorageAlterMetaDataTable::deleteElement(
 	m_metadescr_resets.push_back( boost::algorithm::to_lower_copy( name));
 }
 
+void StorageAlterMetaDataTable::clearElement(
+		const std::string& name)
+{
+	m_metadescr_resets.push_back( boost::algorithm::to_lower_copy( name));
+}
+
 void StorageAlterMetaDataTable::addElement(
 		const std::string& name,
 		const std::string& datatype)

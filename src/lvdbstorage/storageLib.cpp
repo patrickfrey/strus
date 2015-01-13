@@ -193,7 +193,7 @@ DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescript
 }
 
 
-DLL_PUBLIC StorageAlterMetaDataTableInterface* createAlterMetaDataTable( const char* configsource)
+DLL_PUBLIC StorageAlterMetaDataTableInterface* strus::createAlterMetaDataTable( const char* configsource)
 {
 	StorageConfig config( configsource);
 	return new StorageAlterMetaDataTable( config.path().c_str());

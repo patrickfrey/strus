@@ -62,6 +62,10 @@ public:
 			const std::string& name,
 			const std::string& datatype);
 
+	virtual void addElement(
+			const std::string& name,
+			const std::string& datatype);
+
 	virtual void renameElement(
 			const std::string& oldname,
 			const std::string& name);
@@ -69,9 +73,8 @@ public:
 	virtual void deleteElement(
 			const std::string& name);
 
-	virtual void addElement(
-			const std::string& name,
-			const std::string& datatype);
+	void clearElement(
+			const std::string& name);
 
 	/// \brief Transaction commit
 	virtual void commit();
