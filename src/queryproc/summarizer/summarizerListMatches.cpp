@@ -54,11 +54,11 @@ SummarizerListMatches::~SummarizerListMatches()
 
 static std::string getMatches(
 	PostingIteratorInterface& itr,
-	const std::vector<PostingIteratorInterface*>& subexpr)
+	const std::vector<const PostingIteratorInterface*>& subexpr)
 {
 	std::ostringstream rt;
 	std::set<Index> mposet;
-	std::vector<PostingIteratorInterface*>::const_iterator si = subexpr.begin(), se = subexpr.end();
+	std::vector<const PostingIteratorInterface*>::const_iterator si = subexpr.begin(), se = subexpr.end();
 	for (; si != se; ++si)
 	{
 		mposet.insert( (*si)->posno());
@@ -81,7 +81,7 @@ std::vector<std::string>
 		ii = m_itr.begin(), ie = m_itr.end();
 	for (; ii != ie; ++ii)
 	{
-		std::vector<PostingIteratorInterface*>
+		std::vector<const PostingIteratorInterface*>
 			subexpr = (*ii)->subExpressions( true);
 		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
 		{

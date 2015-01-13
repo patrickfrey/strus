@@ -182,7 +182,7 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 			++ni->second;
 		}
 	}
-	m_namemap[ name_] = eidx;
+	m_namemap[ boost::algorithm::to_lower_copy( name_)] = eidx;
 	m_bytesize += MetaDataElement::size( type_);
 	m_ar.insert( ei, MetaDataElement( type_, ofs));
 }
@@ -201,7 +201,9 @@ void MetaDataDescription::store( leveldb::WriteBatch& batch)
 }
 
 MetaDataDescription::TranslationMap
-	MetaDataDescription::getTranslationMap( const MetaDataDescription& o) const
+	MetaDataDescription::getTranslationMap(
+		const MetaDataDescription& o,
+		const std::vector<std::string>& resets) const
 {
 	TranslationMap rt;
 	std::map<std::string,std::size_t>::const_iterator
@@ -212,8 +214,14 @@ MetaDataDescription::TranslationMap
 			ti = m_namemap.find( ni->first);
 		if (ti != m_namemap.end())
 		{
-			rt.push_back( std::pair< const MetaDataElement*, const MetaDataElement*>(
+			std::vector<std::string>::const_iterator
+				ri = resets.begin(), re = resets.end();
+			for (; ri != re && !boost::algorithm::iequals( *ri, ti->first); ++ri){}
+			if (ri == re)
+			{
+				rt.push_back( TranslationElement(
 					&m_ar[ ti->second], &o.m_ar[ ni->second]));
+			}
 		}
 	}
 	return rt;
@@ -237,5 +245,24 @@ std::vector<std::string> MetaDataDescription::columns() const
 		}
 	}
 	return rt;
+}
+
+void MetaDataDescription::renameElement( const std::string& oldname, const std::string& newname)
+{
+	std::map<std::string,std::size_t> newnamemap;
+	std::map<std::string,std::size_t>::iterator
+		ni = m_namemap.begin(), ne = m_namemap.end();
+	for (; ni != ne; ++ni)
+	{
+		if (boost::algorithm::iequals( oldname, ni->first))
+		{
+			newnamemap[ boost::algorithm::to_lower_copy( newname)] = ni->second;
+		}
+		else
+		{
+			newnamemap[ ni->first] = ni->second;
+		}
+	}
+	m_namemap = newnamemap;
 }
 

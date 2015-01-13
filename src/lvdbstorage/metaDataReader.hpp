@@ -69,6 +69,23 @@ public:
 		return m_current.getValue( m_description->get( elementHandle_));
 	}
 
+	virtual const char* getType( const Index& elementHandle_) const
+	{
+		return m_description->get( elementHandle_)->typeName();
+	}
+
+	virtual std::vector<std::string> elements() const
+	{
+		std::vector<std::string> rt;
+		MetaDataDescription::const_iterator
+			mi = m_description->begin(), me = m_description->end();
+		for (; mi != me; ++mi)
+		{
+			rt.push_back( mi.name());
+		}
+		return rt;
+	}
+
 private:
 	MetaDataBlockCache* m_cache;
 	const MetaDataDescription* m_description;

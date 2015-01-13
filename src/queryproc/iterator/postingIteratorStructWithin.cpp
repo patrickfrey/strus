@@ -85,13 +85,13 @@ IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
 	}
 }
 
-std::vector<PostingIteratorInterface*>
-	IteratorStructWithin::subExpressions( bool positive)
+std::vector<const PostingIteratorInterface*>
+	IteratorStructWithin::subExpressions( bool positive) const
 {
-	std::vector<PostingIteratorInterface*> rt;
+	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
-		PostingIteratorReferenceArray::iterator si = m_group.begin(), se = m_group.end();
+		PostingIteratorReferenceArray::const_iterator si = m_group.begin(), se = m_group.end();
 		for (; si != se; ++si)
 		{
 			rt.push_back( &*si);
@@ -198,11 +198,11 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 	}
 }
 
-Index IteratorStructWithin::documentFrequency()
+Index IteratorStructWithin::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		PostingIteratorReferenceArray::iterator ai = m_group.begin(), ae = m_group.end();
+		PostingIteratorReferenceArray::const_iterator ai = m_group.begin(), ae = m_group.end();
 		if (ai == ae) return 0;
 		m_documentFrequency = ai->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)

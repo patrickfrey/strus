@@ -115,3 +115,38 @@ void MetaDataBlockMap::getWriteBatch( leveldb::WriteBatch& batch, std::vector<In
 					blockno, blk->charptr(), blk->bytesize()), batch);
 	}
 }
+
+
+void MetaDataBlockMap::rewriteMetaData(
+		const MetaDataDescription::TranslationMap& trmap,
+		const MetaDataDescription& newDescr,
+		leveldb::WriteBatch& batch)
+{
+	DataBlockStorage storage( m_db, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
+	const DataBlock* blk = storage.loadFirst();
+
+	for (; blk != 0; blk = storage.loadNext())
+	{
+		MetaDataBlock oldblk( m_descr, blk->id(), blk->charptr(), blk->size());
+
+		std::size_t newblk_bytesize = MetaDataBlock::BlockSize * newDescr.bytesize();
+		char* newblk_data = (char*)std::calloc( MetaDataBlock::BlockSize, newDescr.bytesize());
+
+		try
+		{
+			MetaDataRecord::translateBlock(
+					trmap, newDescr, newblk_data,
+					*m_descr, blk->ptr(), MetaDataBlock::BlockSize);
+		}
+		catch (const std::runtime_error& err)
+		{
+			std::free( newblk_data);
+			throw err;
+		}
+		DataBlock newblk( DatabaseKey::DocMetaDataPrefix, blk->id(), newblk_data, newblk_bytesize);
+		storage.store( newblk, batch);
+	}
+}
+
+
+

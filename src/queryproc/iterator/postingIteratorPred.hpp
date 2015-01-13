@@ -67,13 +67,13 @@ public:
 		return rt?(rt - 1):0;
 	}
 
-	virtual std::vector<PostingIteratorInterface*>
-			subExpressions( bool positive)
+	virtual std::vector<const PostingIteratorInterface*>
+			subExpressions( bool positive) const
 	{
 		return m_origin->subExpressions( positive);
 	}
 
-	virtual Index documentFrequency()
+	virtual Index documentFrequency() const
 	{
 		return m_origin.get()?m_origin->documentFrequency():0;
 	}

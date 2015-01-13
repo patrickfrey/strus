@@ -44,10 +44,10 @@ public:
 
 	virtual ~NullIterator(){}
 
-	virtual std::vector<PostingIteratorInterface*>
-			subExpressions( bool positive)
+	virtual std::vector<const PostingIteratorInterface*>
+			subExpressions( bool positive) const
 	{
-		return std::vector<PostingIteratorInterface*>();
+		return std::vector<const PostingIteratorInterface*>();
 	}
 	virtual const std::string& featureid() const
 	{
@@ -69,7 +69,7 @@ public:
 		return 0;
 	}
 
-	virtual Index documentFrequency()
+	virtual Index documentFrequency() const
 	{
 		return 0;
 	}

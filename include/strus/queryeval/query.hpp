@@ -35,11 +35,13 @@
 namespace strus {
 namespace queryeval {
 
-/// \brief Defines a strus query
+/// \brief Defines a strus retrieval query
 class Query
 {
 public:
+	///\brief Default constructor
 	Query(){}
+	///\brief Copy constructor
 	Query( const Query& o)
 		:m_termar(o.m_termar){}
 
@@ -70,17 +72,22 @@ public:
 	}
 
 public:
+	///\brief Structure representing a single search term in the query
 	struct Term
 	{
+		///\brief Copy constructor
 		Term( const Term& o)
 			:set(o.set),type(o.type),value(o.value){}
+		///\brief Constructor
 		Term( const std::string& s, const std::string& t, const std::string& v)
 			:set(s),type(t),value(v){}
 
-		std::string set;
-		std::string type;
-		std::string value;
+		std::string set;	///< feature set the term is assigned to
+		std::string type;	///< term type name
+		std::string value;	///< term value
 	};
+
+	///\brief Structure representing a join operation in the query
 	struct JoinOp
 	{
 		JoinOp( const JoinOp& o)
@@ -92,19 +99,22 @@ public:
 		JoinOp( std::size_t c, const std::string& s, const std::string& o, int r, std::size_t n)
 			:termcnt(c),set(s),opname(o),range(r),nofArgs(n){}
 
-		std::size_t termcnt;
-		std::string set;
-		std::string opname;
-		int range;
-		std::size_t nofArgs;
+		std::size_t termcnt;	///< size of single term array serving as time stamp, when the join operation is applied
+		std::string set;	///< feature set the join feature result is assigned to
+		std::string opname;	///< name of the operation
+		int range;		///< range argument of the operation
+		std::size_t nofArgs;	///< number of arguments (top elements of the current feature stack)
 	};
 
+	///\brief Get the single terms defined in the query
 	const std::vector<Term>& termar() const		{return m_termar;}
+
+	///\brief Get the joined features defined in the query
 	const std::vector<JoinOp>& joinar() const	{return m_joinar;}
 
 private:
-	std::vector<Term> m_termar;
-	std::vector<JoinOp> m_joinar;
+	std::vector<Term> m_termar;	///< array of single terms
+	std::vector<JoinOp> m_joinar;	///< array of joined features
 };
 
 }}//namespace

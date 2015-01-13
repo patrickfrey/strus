@@ -34,6 +34,8 @@ namespace strus {
 
 /// \brief Forward declaration
 class StorageInterface;
+/// \brief Forward declaration
+class StorageAlterMetaDataTableInterface;
 
 /// \brief Creates an instance of the storage interface described with config
 /// \param[in] configsource Configuration source string of the config (not a filename !)
@@ -47,6 +49,11 @@ void createStorageDatabase( const char* configsource);
 /// \brief Destroys an existing storage described with config in the file system
 /// \param[in] configsource Configuration string of the config (not a filename !)
 void destroyStorageDatabase( const char* configsource);
+
+/// \brief Create an interface to alter the meta data table structure
+/// \param[in] configsource Configuration source string of the config (not a filename !)
+/// \return the created reference to be disposed with delete by the caller
+StorageAlterMetaDataTableInterface* createAlterMetaDataTable( const char* configsource);
 
 /// \brief Selection of command types for the storage config description
 enum StorageConfigDescriptionType

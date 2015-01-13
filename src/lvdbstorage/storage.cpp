@@ -45,6 +45,7 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <boost/algorithm/string.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <leveldb/cache.h>
@@ -203,7 +204,7 @@ void Storage::close()
 	boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
 	if (m_transactionCnt)
 	{
-		throw std::runtime_error("cannot close storage with an alive transactions");
+		throw std::runtime_error("cannot close storage with transactions alive");
 	}
 }
 
@@ -243,7 +244,7 @@ Index Storage::getTermValue( const std::string& name) const
 
 Index Storage::getTermType( const std::string& name) const
 {
-	return loadIndexValue( DatabaseKey::TermTypePrefix, name);
+	return loadIndexValue( DatabaseKey::TermTypePrefix, boost::algorithm::to_lower_copy( name));
 }
 
 Index Storage::getDocno( const std::string& name) const
@@ -258,7 +259,7 @@ Index Storage::getUserno( const std::string& name) const
 
 Index Storage::getAttributeName( const std::string& name) const
 {
-	return loadIndexValue( DatabaseKey::AttributeKeyPrefix, name);
+	return loadIndexValue( DatabaseKey::AttributeKeyPrefix, boost::algorithm::to_lower_copy( name));
 }
 
 PostingIteratorInterface*

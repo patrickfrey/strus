@@ -82,14 +82,15 @@ public:
 	virtual DocnoIteratorInterface*
 			createInvertedAclIterator(
 				const std::string& username) const;
-	
-	virtual StorageTransactionInterface* createTransaction();
+
+	virtual StorageTransactionInterface*
+			createTransaction();
 
 	virtual StorageDocumentInterface* 
 			createDocumentChecker(
 				const std::string& docid,
 				const std::string& logfilename) const;
-	
+
 	virtual Index allocDocnoRange( std::size_t nofDocuments);
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;

@@ -52,10 +52,10 @@ public:
 	virtual Index skipDoc( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
 
-	virtual std::vector<PostingIteratorInterface*>
-			subExpressions( bool positive);
+	virtual std::vector<const PostingIteratorInterface*>
+			subExpressions( bool positive) const;
 
-	virtual Index documentFrequency();
+	virtual Index documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -151,7 +151,7 @@ private:
 	PostingIteratorReferenceArray m_argar;	///< union arguments
 	uint64_t m_selected;			///< set pf bits parallel to arguments that specifies the current document matches of the arguments
 	std::string m_featureid;		///< unique id of the feature expression
-	Index m_documentFrequency;		///< document frequency (of the most frequent subexpression)
+	mutable Index m_documentFrequency;	///< document frequency (of the most frequent subexpression)
 };
 
 }//namespace

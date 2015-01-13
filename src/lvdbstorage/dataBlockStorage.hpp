@@ -72,6 +72,7 @@ public:
 
 	const DataBlock* load( const Index& id);
 	const DataBlock* loadLast();
+	const DataBlock* loadFirst();
 	const DataBlock* loadNext();
 
 	void store( const DataBlock& block, leveldb::WriteBatch& batch);

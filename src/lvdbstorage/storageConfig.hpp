@@ -43,9 +43,9 @@ public:
 	}
 
 	/// \brief File with line separated list of terms to cache (insert or query)
-	const std::string& termkeys() const
+	const std::string& cachedterms() const
 	{
-		return m_termkeys;
+		return m_cachedterms;
 	}
 
 	bool acl() const
@@ -68,7 +68,7 @@ public:
 private:
 	std::string m_path;
 	std::string m_metadata;
-	std::string m_termkeys;
+	std::string m_cachedterms;
 	bool m_acl;
 	unsigned int m_cachesize_kb;
 };

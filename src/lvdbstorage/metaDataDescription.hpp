@@ -40,6 +40,7 @@
 
 namespace strus {
 
+/// \brief Description of a meta data record structure
 class MetaDataDescription
 {
 public:
@@ -59,7 +60,7 @@ public:
 
 	std::size_t bytesize() const
 	{
-		return ((m_bytesize+3)>>2)<<2;	//... aligned to 4 bytes
+		return m_bytesize?(((m_bytesize+3)>>2)<<2):1;	//... aligned to 4 bytes or 1 if empty
 	}
 
 	bool defined( const std::string& name_);
@@ -76,15 +77,56 @@ public:
 	void load( leveldb::DB* db);
 	void store( leveldb::WriteBatch& batch);
 
-	typedef std::vector< std::pair< const MetaDataElement*, const MetaDataElement*> > TranslationMap;
-	TranslationMap getTranslationMap( const MetaDataDescription& o) const;
+	struct TranslationElement
+	{
+		const MetaDataElement* dst;
+		const MetaDataElement* src;
+
+		TranslationElement( const TranslationElement& o)
+			:dst(o.dst),src(o.src){}
+		TranslationElement( const MetaDataElement* dst_, const MetaDataElement* src_)
+			:dst(dst_),src(src_){}
+	};
+
+	typedef std::vector<TranslationElement> TranslationMap;
+	TranslationMap getTranslationMap(
+			const MetaDataDescription& o,
+			const std::vector<std::string>& resets) const;
 
 	std::vector<std::string> columns() const;
 
+	/// \brief Alter the table description by renaming one element
+	/// \param[in] oldname old name of the element
+	/// \param[in] newname new name of the element
+	void renameElement( const std::string& oldname, const std::string& newname);
+
+	class const_iterator
+	{
+	public:
+		const_iterator( const MetaDataDescription* descr_, std::map<std::string,std::size_t>::const_iterator itr_)
+			:m_descr(descr_),m_itr(itr_){}
+
+		const_iterator& operator++()				{++m_itr; return *this;}
+		const_iterator operator++(int)				{const_iterator rt(m_descr,m_itr); ++m_itr; return rt;}
+
+		bool operator==( const const_iterator& o) const		{return m_itr==o.m_itr;}
+		bool operator!=( const const_iterator& o) const		{return m_itr!=o.m_itr;}
+
+		const std::string& name() const				{return m_itr->first;}
+		const MetaDataElement& element() const			{return *m_descr->get( m_itr->second);}
+
+	private:
+		const MetaDataDescription* m_descr;
+		std::map<std::string,std::size_t>::const_iterator m_itr;
+	};
+
+	const_iterator begin() const					{return const_iterator( this, m_namemap.begin());}
+	const_iterator end() const					{return const_iterator( this, m_namemap.end());}
+
 private:
-	std::size_t m_bytesize;
-	std::vector<MetaDataElement> m_ar;
-	std::map<std::string,std::size_t> m_namemap;
+	std::size_t m_bytesize;					///< sizeof in bytes of the meta data record
+	std::vector<MetaDataElement> m_ar;			///< array of elements
+	std::map<std::string,std::size_t> m_namemap;		///< map of names to elements (index in m_ar)
 };
 
 }//namespace

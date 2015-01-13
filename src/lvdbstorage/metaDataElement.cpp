@@ -42,7 +42,7 @@ MetaDataElement::Type MetaDataElement::typeFromName( const std::string& namestr)
 			return (Type)ti;
 		}
 	}
-	throw std::runtime_error( std::string( "unknown meta data element type '") + namestr + "'");
+	throw std::runtime_error( std::string( "unknown meta data element type name '") + namestr + "'");
 }
 
 

@@ -34,6 +34,7 @@
 #include <string>
 #include <set>
 #include <map>
+#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -79,7 +80,7 @@ Index StorageTransaction::getOrCreateTermValue( const std::string& name)
 Index StorageTransaction::getOrCreateTermType( const std::string& name)
 {
 	bool isNew;
-	return m_termTypeMap.getOrCreate( name, isNew);
+	return m_termTypeMap.getOrCreate( boost::algorithm::to_lower_copy( name), isNew);
 }
 
 Index StorageTransaction::getOrCreateDocno( const std::string& name, bool& isNew)
@@ -95,7 +96,7 @@ Index StorageTransaction::getOrCreateUserno( const std::string& name, bool& isNe
 Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 {
 	bool isNew;
-	return m_attributeNameMap.getOrCreate( name, isNew);
+	return m_attributeNameMap.getOrCreate( boost::algorithm::to_lower_copy( name), isNew);
 }
 
 void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value)

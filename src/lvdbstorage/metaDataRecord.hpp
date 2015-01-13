@@ -66,6 +66,7 @@ public:
 	}
 
 	static void translateBlock(
+			const MetaDataDescription::TranslationMap& translationMap,
 			const MetaDataDescription& dest,
 			void* blkdest,
 			const MetaDataDescription& src,

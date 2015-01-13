@@ -39,6 +39,7 @@ CPP_OBJS=\
 	storageDocument.o \
 	storageDocumentChecker.o \
 	storageTransaction.o \
+	storageAlterMetaDataTable.o \
 	storageConfig.o \
 	storageLib.o
 

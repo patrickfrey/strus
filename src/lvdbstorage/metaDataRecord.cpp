@@ -179,25 +179,24 @@ void MetaDataRecord::clearValue( const MetaDataElement* elem)
 }
 
 void MetaDataRecord::translateBlock(
+		const MetaDataDescription::TranslationMap& translationMap,
 		const MetaDataDescription& dest,
 		void* blkdest,
 		const MetaDataDescription& src,
 		const void* blksrc,
 		std::size_t nofelem)
 {
-	MetaDataDescription::TranslationMap translationMap = dest.getTranslationMap( src);
-
 	std::memset( blkdest, 0, nofelem * dest.bytesize());
 	MetaDataDescription::TranslationMap::const_iterator
 		ti = translationMap.begin(),
 		te = translationMap.end();
 	for (; ti != te; ++ti)
 	{
-		if (ti->first->type() == ti->second->type())
+		if (ti->dst->type() == ti->src->type())
 		{
-			std::size_t elemsize = ti->first->size();
-			std::size_t destofs = ti->first->ofs();
-			std::size_t srcofs = ti->second->ofs();
+			std::size_t elemsize = ti->dst->size();
+			std::size_t destofs = ti->dst->ofs();
+			std::size_t srcofs = ti->src->ofs();
 
 			char* destrec = (char*)blkdest;
 			char const* srcrec = (const char*)blksrc;
@@ -219,29 +218,29 @@ void MetaDataRecord::translateBlock(
 				MetaDataRecord sr( &src, const_cast<char*>(srcrec));
 				MetaDataRecord dr( &src, destrec);
 
-				switch (ti->second->type())
+				switch (ti->src->type())
 				{
 					case MetaDataElement::Int8:
 					case MetaDataElement::UInt8:
 					case MetaDataElement::Int16:
 					{
-						int val = sr.getValueInt( ti->second);
-						dr.setValueInt( ti->first, val);
+						int val = sr.getValueInt( ti->src);
+						dr.setValueInt( ti->dst, val);
 						break;
 					}
 					case MetaDataElement::UInt16:
 					case MetaDataElement::Int32:
 					case MetaDataElement::UInt32:
 					{
-						unsigned int val = sr.getValueUInt( ti->second);
-						dr.setValueUInt( ti->first, val);
+						unsigned int val = sr.getValueUInt( ti->src);
+						dr.setValueUInt( ti->dst, val);
 						break;
 					}
 					case MetaDataElement::Float16:
 					case MetaDataElement::Float32:
 					{
-						float val = sr.getValueFloat( ti->second);
-						dr.setValueUInt( ti->first, val);
+						float val = sr.getValueFloat( ti->src);
+						dr.setValueUInt( ti->dst, val);
 						break;
 					}
 				}

@@ -26,47 +26,54 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
 #include <string>
-#include "strus/storageDocumentInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 
 namespace strus
 {
 
-/// \class StorageTransactionInterface
-/// \brief Object to declare all items for one insert/update of a document in the storage
-class StorageTransactionInterface
+/// \class StorageAlterMetaDataTableInterface
+/// \brief Object to declare changes in the meta data table structure of the storage
+class StorageAlterMetaDataTableInterface
 {
 public:
 	/// \brief Destructor that is the doing the rollback too, if commit() was not called before
-	virtual ~StorageTransactionInterface(){}
+	virtual ~StorageAlterMetaDataTableInterface(){}
 
-	/// \brief Create one document to be inserted/updated within this transaction
-	/// \param[in] docid_ identifier of the document
-	/// \param[in] docno_ document number of the document
-	/// \remark If the document number (second argument) is defined by the client, then the server is not called for a document number (no synchronization needed) and documents close to each other can get adjacent document numbers even if the transaction is done in parallel with another.
-	/// \return the document object
-	virtual StorageDocumentInterface*
-		createDocument(
-			const std::string& docid_,
-			const Index& docno=0)=0;
+	/// \brief Declare a meta data element to be changed
+	/// \param[in] oldname previous name of the element
+	/// \param[in] name new name of the element
+	/// \param[in] datatype new type of the element
+	virtual void alterElement(
+			const std::string& oldname,
+			const std::string& name,
+			const std::string& datatype)=0;
 
-	/// \brief Declare a document to be removed from the storage within this transaction
-	/// \param[in] docid document identifier (URI)
-	virtual void deleteDocument(
-			const std::string& docid)=0;
+	/// \brief Declare a meta data element to be renamed
+	/// \param[in] oldname previous name of the element
+	/// \param[in] name new name of the element
+	virtual void renameElement(
+			const std::string& oldname,
+			const std::string& name)=0;
 
-	/// \brief Declare the access rights of a user to any document to be removed from the storage within this transaction
-	/// \param[in] username user name
-	virtual void deleteUserAccessRights(
-			const std::string& username)=0;
+	/// \brief Declare a meta data element to be deleted
+	/// \param[in] name name of the element to delete
+	virtual void deleteElement(
+			const std::string& name)=0;
 
-	/// \brief Write the documents created to the storage
+	/// \brief Declare a new meta data element
+	/// \param[in] name name of the element to add
+	/// \param[in] datatype type of the element to add
+	virtual void addElement(
+			const std::string& name,
+			const std::string& datatype)=0;
+
+	/// \brief Write the changes of the meta data table structure to the storage
 	virtual void commit()=0;
 
-	/// \brief Rollback of the transaction, no changes made
+	/// \brief Rollback of the meta data table changes, no changes made
 	virtual void rollback()=0;
 };
 

@@ -40,10 +40,10 @@ IteratorUnion::IteratorUnion( const IteratorUnion& o)
 	}
 }
 
-std::vector<PostingIteratorInterface*>
-	IteratorUnion::subExpressions( bool positive)
+std::vector<const PostingIteratorInterface*>
+	IteratorUnion::subExpressions( bool positive) const
 {
-	std::vector<PostingIteratorInterface*> rt;
+	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_argar.size());
@@ -137,11 +137,11 @@ Index IteratorUnion::skipPos( const Index& pos_)
 	return m_posno=pos;
 }
 
-Index IteratorUnion::documentFrequency()
+Index IteratorUnion::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		PostingIteratorReferenceArray::iterator
+		PostingIteratorReferenceArray::const_iterator
 			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 		m_documentFrequency = ai->documentFrequency();

@@ -57,9 +57,9 @@ IteratorDifference::IteratorDifference( const IteratorDifference& o)
 {
 }
 
-std::vector<PostingIteratorInterface*> IteratorDifference::subExpressions( bool positive)
+std::vector<const PostingIteratorInterface*> IteratorDifference::subExpressions( bool positive) const
 {
-	std::vector<PostingIteratorInterface*> rt;
+	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.push_back( m_positive.get());

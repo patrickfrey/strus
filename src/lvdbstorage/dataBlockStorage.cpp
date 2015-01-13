@@ -66,6 +66,19 @@ const DataBlock* DataBlockStorage::load( const Index& id)
 	return extractData();
 }
 
+const DataBlock* DataBlockStorage::loadFirst()
+{
+	if (!m_itr)
+	{
+		m_itr = m_db->NewIterator( m_readOptions);
+	}
+	m_key.resize( m_keysize);
+	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
+	if (!m_itr->Valid()) return 0;
+
+	return extractData();
+}
+
 const DataBlock* DataBlockStorage::loadNext()
 {
 	if (!m_itr)

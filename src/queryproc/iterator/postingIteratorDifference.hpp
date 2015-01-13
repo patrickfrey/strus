@@ -49,9 +49,10 @@ public:
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
 
-	virtual std::vector<PostingIteratorInterface*> subExpressions( bool positive);
+	virtual std::vector<const PostingIteratorInterface*>
+			subExpressions( bool positive) const;
 
-	virtual Index documentFrequency()
+	virtual Index documentFrequency() const
 	{
 		return m_positive.get()?m_positive->documentFrequency():0;
 	}

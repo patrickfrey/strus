@@ -56,7 +56,7 @@ public:
 		return rt;
 	}
 
-	virtual Index documentFrequency()=0;
+	virtual Index documentFrequency() const=0;
 
 	virtual float weight() const
 	{

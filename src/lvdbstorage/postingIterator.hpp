@@ -48,9 +48,9 @@ public:
 
 	virtual ~PostingIterator(){}
 
-	virtual std::vector<PostingIteratorInterface*> subExpressions( bool positive)
+	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const
 	{
-		return std::vector<PostingIteratorInterface*>();
+		return std::vector<const PostingIteratorInterface*>();
 	}
 	virtual const std::string& featureid() const
 	{
@@ -62,7 +62,7 @@ public:
 
 	virtual unsigned int frequency();
 
-	virtual Index documentFrequency();
+	virtual Index documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -108,7 +108,7 @@ private:
 	Index m_docno;
 	Index m_termtypeno;
 	Index m_termvalueno;
-	Index m_documentFrequency;
+	mutable Index m_documentFrequency;
 	std::string m_featureid;
 };
 

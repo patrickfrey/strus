@@ -66,7 +66,7 @@ public:
 	/// \brief Create an iterator on the occurrencies of a term in the storage
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
-	/// \return the created iterator reference to be disposed with delete
+	/// \return the created iterator reference to be disposed with delete by the caller
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
 			const std::string& type,
@@ -81,7 +81,7 @@ public:
 
 	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see
 	/// \param[in] username name of the user
-	/// \return the iterator on the documents or NULL, if there is no access control enabled
+	/// \return the iterator on the documents to be disposed with delete by the caller or NULL, if there is no access control enabled
 	/// \note The storage has to be created access control enabled
 	virtual DocnoIteratorInterface*
 		createInvertedAclIterator(
@@ -101,11 +101,11 @@ public:
 
 	/// \brief Create an interface to access items of document metadata
 	/// \param[in] varname variable name identifying the metadata attribute
-	/// \return the interface to access document metadata
+	/// \return the interface to access document metadata to be disposed with delete by the caller
 	virtual MetaDataReaderInterface* createMetaDataReader() const=0;
 
 	/// \brief Create an interface to access attributes attached to documents for representation
-	/// \return the interface to access document attributes
+	/// \return the interface to access document attributes to be disposed with delete by the caller
 	virtual AttributeReaderInterface* createAttributeReader() const=0;
 
 	/// \brief Allocate a range of document numbers to be used for documents known to be new in transactions
@@ -115,7 +115,7 @@ public:
 
 	/// \brief Create an insert/update transaction object
 	/// \param[in] docid document identifier (URI)
-	/// \return the created inserter reference to be disposed with delete
+	/// \return the created inserter reference to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.

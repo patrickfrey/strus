@@ -28,6 +28,7 @@
 */
 #include "strus/storageLib.hpp"
 #include "strus/storageInterface.hpp"
+#include "storageAlterMetaDataTable.hpp"
 #include "storageConfig.hpp"
 #include "databaseKey.hpp"
 #include "keyMap.hpp"
@@ -100,10 +101,10 @@ DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsourc
 	{
 		throw std::runtime_error( "meta data definitions only allowed when creating a storage");
 	}
-	if (config.termkeys().size())
+	if (config.cachedterms().size())
 	{
-		std::string termkeysrc = loadFile( config.termkeys());
-		return new Storage( config.path().c_str(), config.cachesize_kb(), termkeysrc.c_str());
+		std::string cachedtermsrc = loadFile( config.cachedterms());
+		return new Storage( config.path().c_str(), config.cachesize_kb(), cachedtermsrc.c_str());
 	}
 	else
 	{
@@ -180,7 +181,7 @@ DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescript
 	switch (type)
 	{
 		case CmdCreateStorageClient:
-			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ntermkeys=<optional path to file with the most frequent terms to cache>";
+			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncachedterms=<optional path to file with the most frequent terms to cache>";
 
 		case CmdCreateStorageDatabase:
 			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nacl=<yes/no, yes if users with different access rights exist>\nmetadata=<comma separated list of meta data def>";
@@ -189,6 +190,13 @@ DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescript
 			return "assignment:\npath=<LevelDB storage path>";
 	}
 	return 0;
+}
+
+
+DLL_PUBLIC StorageAlterMetaDataTableInterface* createAlterMetaDataTable( const char* configsource)
+{
+	StorageConfig config( configsource);
+	return new StorageAlterMetaDataTable( config.path().c_str());
 }
 
 

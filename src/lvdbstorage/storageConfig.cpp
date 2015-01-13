@@ -153,11 +153,11 @@ StorageConfig::StorageConfig( const char* source)
 			m_metadata = ci->second;
 			if (m_metadata.empty()) throw std::runtime_error( "empty definition of 'metadata' in storage config");
 		}
-		else if (ci->first == "termkeys")
+		else if (ci->first == "cachedterms")
 		{
-			if (m_termkeys.size()) throw std::runtime_error( "duplicate definition of 'termkeys' in storage config");
-			m_termkeys = ci->second;
-			if (m_termkeys.empty()) throw std::runtime_error( "empty definition of 'termkeys' in storage config");
+			if (m_cachedterms.size()) throw std::runtime_error( "duplicate definition of 'cachedterms' in storage config");
+			m_cachedterms = ci->second;
+			if (m_cachedterms.empty()) throw std::runtime_error( "empty definition of 'cachedterms' in storage config");
 		}
 		else if (ci->first == "acl")
 		{

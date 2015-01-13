@@ -40,21 +40,21 @@ class PostingIteratorInterface
 public:
 	virtual ~PostingIteratorInterface(){}
 
-	/// \brief Unique id in the system for a feature expression
-	virtual const std::string& featureid() const=0;
-
-	/// \brief Return the next match with a document number higher than or equal to docno
-	virtual std::vector<PostingIteratorInterface*> subExpressions( bool positive)=0;
-
 	/// \brief Return the next match with a document number higher than or equal to docno
 	virtual Index skipDoc( const Index& docno)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
 	virtual Index skipPos( const Index& firstpos)=0;
 
+	/// \brief Unique id in the system for a feature expression
+	virtual const std::string& featureid() const=0;
+
+	/// \brief Return the next match with a document number higher than or equal to docno
+	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const=0;
+
 	/// \brief Get the number of documents in the collection where the feature occurrs
 	/// \remark May not be defined for composed features
-	virtual Index documentFrequency()=0;
+	virtual Index documentFrequency() const=0;
 
 	/// \brief Get the frequency of the current document reached with 'skipDoc(const Index&)'
 	virtual unsigned int frequency()=0;

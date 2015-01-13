@@ -322,7 +322,7 @@ unsigned int PostingIterator::frequency()
 	}
 }
 
-Index PostingIterator::documentFrequency()
+Index PostingIterator::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

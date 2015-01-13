@@ -142,6 +142,16 @@ public:
 		m_size = 0;
 	}
 
+	void resize( std::size_t newsize)
+	{
+		if (newsize > m_size) throw std::runtime_error( "internal: illegal resize on LocalReferenceArray");
+
+		for (; m_size > newsize; --m_size)
+		{
+			delete m_ar[ m_size-1];
+		}
+	}
+
 	std::size_t size() const
 	{
 		return m_size;

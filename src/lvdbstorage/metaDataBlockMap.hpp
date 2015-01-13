@@ -58,6 +58,10 @@ public:
 	void deleteMetaData( Index docno, const std::string& varname);
 
 	void getWriteBatch( leveldb::WriteBatch& batch, std::vector<Index>& cacheRefreshList);
+	void rewriteMetaData(
+			const MetaDataDescription::TranslationMap& trmap,
+			const MetaDataDescription& newDescr,
+			leveldb::WriteBatch& batch);
 
 private:
 	MetaDataRecord getRecord( Index docno);

@@ -62,10 +62,10 @@ IteratorIntersect::IteratorIntersect( const IteratorIntersect& o)
 	}
 }
 
-std::vector<PostingIteratorInterface*>
-	IteratorIntersect::subExpressions( bool positive)
+std::vector<const PostingIteratorInterface*>
+	IteratorIntersect::subExpressions( bool positive) const
 {
-	std::vector<PostingIteratorInterface*> rt;
+	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
 		rt.reserve( m_argar.size());
@@ -147,11 +147,11 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 	}
 }
 
-Index IteratorIntersect::documentFrequency()
+Index IteratorIntersect::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		PostingIteratorReferenceArray::iterator ai = m_argar.begin(), ae = m_argar.end();
+		PostingIteratorReferenceArray::const_iterator ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 		m_documentFrequency = ai->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
