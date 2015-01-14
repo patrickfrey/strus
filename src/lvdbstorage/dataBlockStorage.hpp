@@ -70,6 +70,11 @@ public:
 		return &m_curblock;
 	}
 
+	bool hasIterator() const
+	{
+		return m_itr != 0;
+	}
+
 	const DataBlock* load( const Index& id);
 	const DataBlock* loadLast();
 	const DataBlock* loadFirst();
@@ -80,6 +85,11 @@ public:
 
 private:
 	const DataBlock* extractData();
+	void closeIterator()
+	{
+		delete m_itr;
+		m_itr = 0;
+	}
 
 private:
 	leveldb::DB* m_db;

@@ -78,7 +78,6 @@ StorageAlterMetaDataTable::~StorageAlterMetaDataTable()
 	delete m_db;
 }
 
-
 void StorageAlterMetaDataTable::commit()
 {
 	if (m_commit)
@@ -98,6 +97,7 @@ void StorageAlterMetaDataTable::commit()
 	MetaDataBlockMap blockmap( m_db, &m_metadescr_old);
 	
 	blockmap.rewriteMetaData( trmap, m_metadescr_new, batch);
+	m_metadescr_new.store( batch);
 
 	leveldb::WriteOptions options;
 	options.sync = true;

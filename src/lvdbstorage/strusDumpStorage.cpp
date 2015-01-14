@@ -39,6 +39,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <leveldb/db.h>
+#include <boost/algorithm/string.hpp>
 
 static unsigned int g_nofErrors = 0;
 
@@ -182,6 +183,11 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 				data.print( out);
 				break;
 			}
+			default:
+			{
+				logError( "illegal data base prefix", key.data()[0]);
+				break;
+			}
 		}
 	}
 	catch (const std::runtime_error& err)
@@ -205,11 +211,6 @@ static void dumpDB( std::ostream& out, leveldb::DB* db)
 			logError( "found empty key in storage");
 			continue;
 		}
-		switch (key.data()[0])
-		{
-			logError( "illegal data base prefix", key.data()[0]);
-			continue;
-		}
 		if (prevkeytype != key.data()[0])
 		{
 			if (prevkeytype)
@@ -218,10 +219,10 @@ static void dumpDB( std::ostream& out, leveldb::DB* db)
 				cnt = 0;
 			}
 			std::cerr << "dumping entries of type '"
-					<< strus::DatabaseKey::keyPrefixName(
-						  (strus::DatabaseKey::KeyPrefix)key.data()[0])
-					<< "':"
-					<< std::endl;
+				<< strus::DatabaseKey::keyPrefixName(
+					  (strus::DatabaseKey::KeyPrefix)key.data()[0])
+				<< "':"
+				<< std::endl;
 			prevkeytype = key.data()[0];
 		}
 		dumpKeyValue( out, &metadescr, key, itr->value());
@@ -232,21 +233,96 @@ static void dumpDB( std::ostream& out, leveldb::DB* db)
 	delete itr;
 }
 
+
+static void dumpDB( std::ostream& out, leveldb::DB* db, char keyprefix)
+{
+	if (!keyprefix)
+	{
+		dumpDB( out, db);
+		return;
+	}
+	strus::MetaDataDescription metadescr( db);
+
+	unsigned int cnt = 0;
+	leveldb::Iterator* itr = db->NewIterator( leveldb::ReadOptions());
+
+	for (itr->Seek( leveldb::Slice( &keyprefix, 1)); itr->Valid(); itr->Next())
+	{
+		leveldb::Slice key = itr->key();
+		if (keyprefix != key.data()[0]) break;
+
+		dumpKeyValue( out, &metadescr, key, itr->value());
+		++cnt;
+	};
+	std::cerr << "... dumped " << cnt << " entries" << std::endl;
+	cnt = 0;
+	delete itr;
+}
+
+
+static char getDatabaseKeyPrefix( const char* name)
+{
+	if (boost::algorithm::iequals( name, "termtype")) return (char)strus::DatabaseKey::TermTypePrefix;
+	if (boost::algorithm::iequals( name, "termvalue")) return (char)strus::DatabaseKey::TermValuePrefix;
+	if (boost::algorithm::iequals( name, "docid")) return (char)strus::DatabaseKey::DocIdPrefix;
+	if (boost::algorithm::iequals( name, "variable")) return (char)strus::DatabaseKey::VariablePrefix;
+	if (boost::algorithm::iequals( name, "attrname")) return (char)strus::DatabaseKey::AttributeKeyPrefix;
+	if (boost::algorithm::iequals( name, "username")) return (char)strus::DatabaseKey::UserNamePrefix;
+	if (boost::algorithm::iequals( name, "forward")) return (char)strus::DatabaseKey::ForwardIndexPrefix;
+	if (boost::algorithm::iequals( name, "docno")) return (char)strus::DatabaseKey::DocnoBlockPrefix;
+	if (boost::algorithm::iequals( name, "posinfo")) return (char)strus::DatabaseKey::PosinfoBlockPrefix;
+	if (boost::algorithm::iequals( name, "invterm")) return (char)strus::DatabaseKey::InverseTermIndex;
+	if (boost::algorithm::iequals( name, "useracl")) return (char)strus::DatabaseKey::UserAclBlockPrefix;
+	if (boost::algorithm::iequals( name, "docacl")) return (char)strus::DatabaseKey::AclBlockPrefix;
+	if (boost::algorithm::iequals( name, "doclist")) return (char)strus::DatabaseKey::DocListBlockPrefix;
+	if (boost::algorithm::iequals( name, "metadata")) return (char)strus::DatabaseKey::DocMetaDataPrefix;
+	if (boost::algorithm::iequals( name, "docattr")) return (char)strus::DatabaseKey::DocAttributePrefix;
+	if (boost::algorithm::iequals( name, "df")) return (char)strus::DatabaseKey::DocFrequencyPrefix;
+	if (boost::algorithm::iequals( name, "metatable")) return (char)strus::DatabaseKey::MetaDataDescrPrefix;
+	throw std::runtime_error( std::string("unknown database key type '") + name + "'");
+}
+
+
 int main( int argc, const char* argv[])
 {
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
-		std::cerr << "usage: strusDumpStorage <config>" << std::endl;
+		std::cerr << "usage: strusDumpStorage <config> [ <what> ]" << std::endl;
 		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
 
-		strus::printIndentMultilineString( std::cerr, 12, strus::getStorageConfigDescription( strus::CmdCreateStorageClient));
+		strus::printIndentMultilineString(
+				std::cerr, 12,
+				strus::getStorageConfigDescription( strus::CmdCreateStorageClient));
+		std::cerr << "<what>    : optional name of entries to dump:" << std::endl;
+		std::cerr << "            termtype  :term type definitions" << std::endl;
+		std::cerr << "            termvalue :term value definitions" << std::endl;
+		std::cerr << "            docid     :document identifier definitions" << std::endl;
+		std::cerr << "            variable  :variable definitions" << std::endl;
+		std::cerr << "            attrname  :attribute name definitions" << std::endl;
+		std::cerr << "            username  :user name definitions" << std::endl;
+		std::cerr << "            forward   :forward index blocks" << std::endl;
+		std::cerr << "            docno     :document statistic blocks" << std::endl;
+		std::cerr << "            posinfo   :posinfo index blocks" << std::endl;
+		std::cerr << "            invterm   :inverse term index blocks" << std::endl;
+		std::cerr << "            useracl   :user ACL index blocks" << std::endl;
+		std::cerr << "            docacl    :document ACL index blocks" << std::endl;
+		std::cerr << "            doclist   :term document index blocks" << std::endl;
+		std::cerr << "            metadata  :meta data blocks" << std::endl;
+		std::cerr << "            docattr   :document attributes" << std::endl;
+		std::cerr << "            df        :term document frequency definitions" << std::endl;
+		std::cerr << "            metatable :meta data element descriptions" << std::endl;
 		return 0;
 	}
 	try
 	{
 		if (argc < 2) throw std::runtime_error( "too few arguments (expected storage configuration string)");
-		if (argc > 2) throw std::runtime_error( "too many arguments for strusDumpStorage");
+		if (argc > 3) throw std::runtime_error( "too many arguments for strusDumpStorage");
 
+		char keyprefix = 0;
+		if (argc == 3)
+		{
+			keyprefix = getDatabaseKeyPrefix( argv[2]);
+		}
 		leveldb::DB* db;
 
 		const char* config = std::strstr( argv[1], "path=");
@@ -263,7 +339,7 @@ int main( int argc, const char* argv[])
 		leveldb::Status status = leveldb::DB::Open( dboptions, std::string( path, pathend-path), &db);
 		if (status.ok())
 		{
-			dumpDB( std::cout, db);
+			dumpDB( std::cout, db, keyprefix);
 		}
 		else
 		{

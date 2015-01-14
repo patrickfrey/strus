@@ -84,7 +84,7 @@ void MetaDataBlockMap::getWriteBatch( leveldb::WriteBatch& batch, std::vector<In
 							blockno, blk->charptr(), blk->bytesize()), batch);
 			}
 			const DataBlock* mv;
-			if (bn == blockno + 1 && blockno != 0)
+			if (bn == blockno + 1 && blockno != 0 && storage.hasIterator())
 			{
 				mv = storage.loadNext();
 			}

@@ -296,18 +296,21 @@ DocMetaDataData::DocMetaDataData( const MetaDataDescription* metadescr, const le
 void DocMetaDataData::print( std::ostream& out)
 {
 	out << (char)DatabaseKey::DocMetaDataPrefix << ' ' << blockno;
-	unsigned int ii = 0;
-	for (; ii<MetaDataBlock::BlockSize; ++ii)
+	if (descr->nofElements())
 	{
-		if (ii) out << ' ';
-		MetaDataRecord record = block[ ii];
-
-		unsigned int colidx = 0, colend = 0;
-		for (; colidx<colend; ++colidx)
+		unsigned int ii = 0;
+		for (; ii<MetaDataBlock::BlockSize; ++ii)
 		{
-			if (colidx) out << ',';
-			ArithmeticVariant value = record.getValue( descr->get( colidx));
-			out << value;
+			out << ' ';
+			MetaDataRecord record = block[ ii];
+	
+			unsigned int colidx = 0, colend = descr->nofElements();
+			for (; colidx<colend; ++colidx)
+			{
+				if (colidx) out << ',';
+				ArithmeticVariant value = record.getValue( descr->get( colidx));
+				out << value;
+			}
 		}
 	}
 	out << std::endl;
@@ -676,14 +679,13 @@ MetaDataDescrData::MetaDataDescrData( const leveldb::Slice& key, const leveldb::
 
 void MetaDataDescrData::print( std::ostream& out)
 {
-	std::vector<std::string> cols = descr.columns();
-	std::vector<std::string>::const_iterator
-		ci = cols.begin(), ce = cols.end();
-	for (std::size_t cidx=0; ci != ce; ++ci,++cidx)
+	out << (char)DatabaseKey::MetaDataDescrPrefix;
+	MetaDataDescription::const_iterator di = descr.begin(), de = descr.end();
+	for (int didx=0; di != de; ++di,++didx)
 	{
-		if (cidx) out << ' ';
-		out << *ci;
+		if (didx) out << ',';
+		out << ' ' << di.name() << ' ' << di.element().typeName();
 	}
+	out << std::endl;
 }
-
 

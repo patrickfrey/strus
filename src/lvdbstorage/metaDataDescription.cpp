@@ -80,6 +80,7 @@ MetaDataDescription::MetaDataDescription( const std::string& str)
 		const char* sn = (const char*)std::memchr( si, ' ', se-si);
 		if (!sn) throw std::runtime_error( "invalid meta data description string");
 		std::string varName( si, sn-si);
+		si = sn;
 		skipSpaces( si, se);
 		sn = (const char*)std::memchr( si, ',', se-si);
 		std::string typeName;

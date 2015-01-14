@@ -65,8 +65,9 @@ static inline void setValue_( const MetaDataDescription& descr, void* ptr, const
 		case MetaDataElement::Float32:
 			*(float*)((char*)ptr + elem->ofs()) = (float)value;
 			break;
+		default:
+			throw std::logic_error( "unknown meta data type");
 	}
-	throw std::logic_error( "unknown meta data type");
 }
 
 template <typename ValueType>

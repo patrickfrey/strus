@@ -48,6 +48,7 @@ const DataBlock* DataBlockStorage::extractData()
 	}
 	else
 	{
+		closeIterator();
 		return 0;
 	}
 }
@@ -61,8 +62,6 @@ const DataBlock* DataBlockStorage::load( const Index& id)
 	m_key.resize( m_keysize);
 	m_key.addElem( id);
 	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
-	if (!m_itr->Valid()) return 0;
-
 	return extractData();
 }
 
@@ -74,8 +73,6 @@ const DataBlock* DataBlockStorage::loadFirst()
 	}
 	m_key.resize( m_keysize);
 	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
-	if (!m_itr->Valid()) return 0;
-
 	return extractData();
 }
 
@@ -86,8 +83,6 @@ const DataBlock* DataBlockStorage::loadNext()
 		throw std::logic_error("called DataBlockStorage::loadNext without iterator defined");
 	}
 	m_itr->Next();
-	if (!m_itr->Valid()) return 0;
-
 	return extractData();
 }
 
@@ -103,11 +98,13 @@ const DataBlock* DataBlockStorage::loadLast()
 	if (!m_itr->Valid())
 	{
 		m_itr->SeekToLast();
-		if (!m_itr->Valid()) return 0;
+		if (!m_itr->Valid())
+		{
+			closeIterator();
+			return 0;
+		}
 		m_itr->Prev();
 	}
-	if (!m_itr->Valid()) return 0;
-
 	return extractData();
 }
 
