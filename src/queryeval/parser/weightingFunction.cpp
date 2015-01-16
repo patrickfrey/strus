@@ -32,6 +32,8 @@
 #include <iostream>
 #include <iomanip>
 
+#error DEPRECATED
+
 using namespace strus;
 using namespace strus::parser;
 
@@ -44,7 +46,7 @@ std::vector<WeightingFunction> WeightingFunction::parseExpression(
 	{
 		if (!isAlpha( *src))
 		{
-			throw std::runtime_error( "accumulator identifier expected");
+			throw std::runtime_error( "weighting function identifier expected");
 		}
 		std::string function( parse_IDENTIFIER( src));
 		int argid = 0;

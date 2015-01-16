@@ -28,7 +28,8 @@
 */
 #ifndef _STRUS_SUMMARIZER_METADATA_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_METADATA_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerClosureInterface.hpp"
 #include <string>
 #include <vector>
 
@@ -39,24 +40,53 @@ namespace strus
 class MetaDataReaderInterface;
 
 
-class SummarizerMetaData
-	:public SummarizerInterface
+/// \brief Interface for the summarization context (of a SummarizationFunction)
+class SummarizerClosureMetaData
+	:public SummarizerClosureInterface
 {
 public:
-	/// \param[in] metadata_ reader for meta data
-	/// \param[in] name_ metadata identifier
-	SummarizerMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
+	SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
+	virtual ~SummarizerClosureMetaData(){}
 
-	virtual ~SummarizerMetaData(){}
-
-	/// \brief Get some summarization elements
-	/// \param[in] docno document to get the summary element from
-	/// \return the summarization elements
 	virtual std::vector<std::string> getSummary( const Index& docno);
 
 private:
 	MetaDataReaderInterface* m_metadata;
 	int m_attrib;
+};
+
+
+class SummarizerFunctionMetaData
+	:public SummarizerFunctionInterface
+{
+public:
+	SummarizerFunctionMetaData(){}
+
+	virtual ~SummarizerFunctionMetaData(){}
+
+	virtual const char* name() const
+	{
+		return "metadata";
+	}
+
+	virtual const char** parameterNames() const
+	{
+		static const char* ar[] = {0};
+		return ar;
+	}
+
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageInterface*,
+			const std::string& elementname_,
+			PostingIteratorInterface* structitr_,
+			std::size_t nofitrs_,
+			PostingIteratorInterface**,
+			MetaDataReaderInterface* metadata_,
+			const std::vector<ArithmeticVariant>&) const
+	{
+		if (nofitrs_ || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'metadata'");
+		return new SummarizerClosureMetaData( metadata_, elementname_);
+	}
 };
 
 }//namespace

@@ -29,7 +29,7 @@
 #ifndef _STRUS_ITERATOR_PREDECCESSOR_HPP_INCLUDED
 #define _STRUS_ITERATOR_PREDECCESSOR_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
-#include "postingIteratorReference.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 
 namespace strus
 {
@@ -38,12 +38,8 @@ class IteratorPred
 	:public IteratorJoin
 {
 public:
-	IteratorPred( const IteratorPred& o)
-		:m_origin( o.m_origin->copy())
-		,m_featureid(o.m_featureid){}
-
-	IteratorPred( const PostingIteratorInterface* origin_)
-		:m_origin( origin_?origin_->copy():0)
+	IteratorPred( PostingIteratorInterface* origin_)
+		:m_origin( origin_)
 		,m_featureid(origin_->featureid())
 	{
 		m_featureid.push_back('<');
@@ -54,7 +50,10 @@ public:
 		return m_featureid;
 	}
 
-	virtual ~IteratorPred(){}
+	virtual ~IteratorPred()
+	{
+		delete m_origin;
+	}
 
 	virtual Index skipDoc( const Index& docno_)
 	{
@@ -75,17 +74,17 @@ public:
 
 	virtual Index documentFrequency() const
 	{
-		return m_origin.get()?m_origin->documentFrequency():0;
+		return m_origin->documentFrequency();
 	}
 
 	virtual Index docno() const
 	{
-		return m_origin.get()?m_origin->docno():0;
+		return m_origin->docno();
 	}
 
 	virtual Index posno() const
 	{
-		return m_origin.get()?m_origin->posno():0;
+		return m_origin->posno();
 	}
 
 	virtual PostingIteratorInterface* copy() const
@@ -94,8 +93,28 @@ public:
 	}
 
 private:
-	PostingIteratorReference m_origin;		///< base feature expression this is the successor of
+	PostingIteratorInterface* m_origin;	///< base feature expression this is the successor of
 	std::string m_featureid;		///< unique id of the feature expression
+};
+
+
+class PostingJoinPred
+	:public PostingJoinOperatorInterface
+{
+public:
+	virtual ~PostingJoinPred(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range) const
+	{
+		if (range != 0) throw std::runtime_error( "no range argument expected");
+		if (nofitrs_ < 1) throw std::runtime_error( "too few arguments");
+		if (nofitrs_ > 1) throw std::runtime_error( "too many arguments");
+
+		return new IteratorPred( itrs_[0]);
+	}
 };
 
 }//namespace

@@ -32,6 +32,7 @@
 #include "storageReference.hpp"
 #include <vector>
 #include <string>
+#include <map>
 
 namespace strus
 {
@@ -55,32 +56,38 @@ public:
 			const std::string& type,
 			const std::string& value) const;
 
-	virtual PostingIteratorInterface*
-		createJoinPostingIterator(
-			const std::string& name,
-			int range,
-			std::size_t nofargs,
-			const PostingIteratorInterface** args) const;
+	virtual void
+		definePostingJoinOperator(
+			const char* name,
+			const PostingJoinOperatorInterface* op);
 
-	virtual WeightingFunctionInterface*
-		createWeightingFunction(
-			const std::string& name,
-			const std::vector<float>& parameter,
-			const MetaDataReaderInterface* metadata) const;
+	virtual const PostingJoinOperatorInterface*
+		getPostingJoinOperator(
+			const std::string& name) const;
 
-	virtual SummarizerInterface*
-		createSummarizer(
-			const std::string& name,
-			const std::string& type,
-			const std::vector<float>& parameter,
-			const PostingIteratorInterface* structitr,
-			std::size_t nofitrs,
-			const PostingIteratorInterface** itrs,
-			MetaDataReaderInterface* metadata,
-			AttributeReaderInterface* attreader) const;
+	virtual void
+		defineWeightingFunction(
+			const char* name,
+			const WeightingFunctionInterface* func);
+
+	virtual const WeightingFunctionInterface*
+		getWeightingFunction(
+			const std::string& name) const;
+
+	virtual void
+		defineSummarizerFunction(
+			const char* name,
+			const SummarizerFunctionInterface* sumfunc);
+	
+	virtual const SummarizerFunctionInterface*
+		getSummarizerFunction(
+			const std::string& name) const;
 
 private:
 	StorageInterface* m_storage;
+	std::map<std::string,const SummarizerFunctionInterface*> m_summarizers;
+	std::map<std::string,const WeightingFunctionInterface*> m_weighters;
+	std::map<std::string,const PostingJoinOperatorInterface*> m_joiners;
 };
 
 }//namespace

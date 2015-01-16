@@ -26,34 +26,19 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#include "iterator/postingIteratorUnion.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
-#include <map>
+#ifndef _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
+#define _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
+#include "strus/arithmeticVariant.hpp"
+#include "parser/keyMap.hpp"
+#include <string>
+#include <vector>
 
 namespace strus
 {
+	std::vector<ArithmeticVariant>
+		mapFunctionParameters(
+			const char** paramNames,
+			const KeyMap<ArithmeticVariant>& paramDefs);
+}
 
-class IteratorUnionWeighted
-	:public IteratorUnion
-{
-public:
-	IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args);
-
-	virtual ~IteratorUnionWeighted(){}
-
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
-
-	float positionWeight() const;
-
-private:
-	std::map<Index,float> m_weightmap;
-	std::map<Index,float>::const_iterator m_weightitr;
-};
-
-}//namespace
 #endif
-
-

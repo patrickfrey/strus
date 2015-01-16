@@ -40,9 +40,6 @@ public:
 
 	/// \brief Return the next element with a document number higher than or equal to docno
 	virtual Index skipDoc( const Index& docno)=0;
-
-	/// \brief Return a copy of this posting iterator
-	virtual DocnoIteratorInterface* copy() const=0;
 };
 
 }//namespace

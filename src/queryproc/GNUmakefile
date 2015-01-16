@@ -10,7 +10,6 @@ CPP_OBJS=\
 	iterator/postingIteratorStructSequence.o \
 	iterator/postingIteratorHelpers.o \
 	weighting/weightingBM25.o \
-	weighting/weightingIdfBased.o \
 	summarizer/summarizerMatchPhrase.o \
 	summarizer/summarizerListMatches.o \
 	summarizer/summarizerAttribute.o \

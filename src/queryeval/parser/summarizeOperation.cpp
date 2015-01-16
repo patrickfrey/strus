@@ -32,6 +32,8 @@
 using namespace strus;
 using namespace strus::parser;
 
+#error DEPRECATED
+
 SummarizeOperation::SummarizeOperation(
 			const std::string& resultAttribute_,
 			const std::string& summarizerName_,

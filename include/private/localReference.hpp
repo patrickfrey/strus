@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_REFERENCE_HPP_INCLUDED
 #define _STRUS_REFERENCE_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
 #include <stdexcept>
 #include <cstdlib>
 

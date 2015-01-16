@@ -29,6 +29,7 @@
 #ifndef _STRUS_ITERATOR_UNION_HPP_INCLUDED
 #define _STRUS_ITERATOR_UNION_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 #include "postingIteratorReference.hpp"
 #include "bitOperations.hpp"
 
@@ -39,15 +40,13 @@ class IteratorUnion
 	:public IteratorJoin
 {
 public:
-	IteratorUnion( const IteratorUnion& o);
-	IteratorUnion( std::size_t nofargs_, const PostingIteratorInterface** args_);
+	IteratorUnion( std::size_t nofargs_, PostingIteratorInterface** args_);
+	virtual ~IteratorUnion();
 
 	virtual const std::string& featureid() const
 	{
 		return m_featureid;
 	}
-
-	virtual ~IteratorUnion(){}
 
 	virtual Index skipDoc( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
@@ -67,17 +66,12 @@ public:
 		return m_posno;
 	}
 
-	virtual PostingIteratorInterface* copy() const
-	{
-		return new IteratorUnion( *this);
-	}
-
 protected:
 	class selected_iterator
 	{
 	public:
-		selected_iterator( uint64_t set_, PostingIteratorReferenceArray& argar_)
-			:m_ar(&argar_),m_set(set_),m_idx(0)
+		selected_iterator( uint64_t set_, PostingIteratorInterface** argar_)
+			:m_ar(argar_),m_set(set_),m_idx(0)
 		{
 			skip();
 		}
@@ -92,8 +86,8 @@ protected:
 		bool operator==( const selected_iterator& o) const	{return m_set==o.m_set && m_idx==o.m_idx;}
 		bool operator!=( const selected_iterator& o) const	{return m_set!=o.m_set || m_idx!=o.m_idx;}
 
-		PostingIteratorInterface& operator*() const		{return (*m_ar)[ m_idx-1];}
-		PostingIteratorInterface* operator->() const		{return &(*m_ar)[ m_idx-1];}
+		PostingIteratorInterface& operator*() const		{return *m_ar[ m_idx-1];}
+		PostingIteratorInterface* operator->() const		{return  m_ar[ m_idx-1];}
 
 	private:
 		void skip()
@@ -106,7 +100,7 @@ protected:
 		}
 
 	private:
-		PostingIteratorReferenceArray* m_ar;
+		PostingIteratorInterface** m_ar;
 		uint64_t m_set;
 		std::size_t m_idx;
 	};
@@ -121,18 +115,20 @@ protected:
 		return selected_iterator();
 	}
 
+protected:
 	const PostingIteratorInterface* arg( unsigned int idx) const
 	{
-		return &m_argar[ idx];
+		return m_argar[ idx];
 	}
+
 	PostingIteratorInterface* arg( unsigned int idx)
 	{
-		return &m_argar[ idx];
+		return m_argar[ idx];
 	}
 
 	unsigned int nofargs() const
 	{
-		return m_argar.size();
+		return m_argarsize;
 	}
 
 private:
@@ -148,10 +144,30 @@ private:
 private:
 	Index m_docno;
 	Index m_posno;				///< current position
-	PostingIteratorReferenceArray m_argar;	///< union arguments
+	std::size_t m_argarsize;		///< nof arguments
+	PostingIteratorInterface** m_argar;	///< arguments
 	uint64_t m_selected;			///< set pf bits parallel to arguments that specifies the current document matches of the arguments
 	std::string m_featureid;		///< unique id of the feature expression
 	mutable Index m_documentFrequency;	///< document frequency (of the most frequent subexpression)
+};
+
+
+class PostingJoinUnion
+	:public PostingJoinOperatorInterface
+{
+public:
+	virtual ~PostingJoinUnion(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range) const
+	{
+		if (range != 0) throw std::runtime_error( "no range argument expected for union join");
+		if (nofitrs_ == 0) throw std::runtime_error( "too few arguments for union join");
+
+		return new IteratorUnion( nofitrs_, itrs_);
+	}
 };
 
 }//namespace

@@ -33,14 +33,21 @@
 
 namespace strus {
 
-/// \brief Forward declaration query evaluation program
+/// \brief Forward declaration
 class QueryEvalInterface;
+/// \brief Forward declaration
+class StorageInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 /// \brief Create a program for query evaluation
+/// \param[in] storage reference to storage
+/// \param[in] processor reference to query processor
 /// \param[in] evalProgramSource the source of the query evaluation procedure
 /// \return the program reference
 QueryEvalInterface*
 	createQueryEval(
+		const QueryProcessorInterface* processor,
 		const std::string& evalProgramSource);
 
 }//namespace

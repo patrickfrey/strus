@@ -36,6 +36,8 @@
 namespace strus {
 namespace parser {
 
+#error DEPRECATED
+
 /// \brief Defines an accumulate operation
 class AccumulateOperation
 {

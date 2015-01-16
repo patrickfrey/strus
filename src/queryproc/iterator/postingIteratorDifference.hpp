@@ -29,7 +29,7 @@
 #ifndef _STRUS_ITERATOR_DIFFERENCE_HPP_INCLUDED
 #define _STRUS_ITERATOR_DIFFERENCE_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
-#include "postingIteratorReference.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 
 namespace strus
 {
@@ -38,9 +38,8 @@ class IteratorDifference
 	:public IteratorJoin
 {
 public:
-	IteratorDifference( const IteratorDifference& o);
-	IteratorDifference( const PostingIteratorInterface* positive_, const PostingIteratorInterface* negative_);
-	virtual ~IteratorDifference(){}
+	IteratorDifference( PostingIteratorInterface* positive_, PostingIteratorInterface* negative_);
+	virtual ~IteratorDifference();
 
 	virtual const std::string& featureid() const
 	{
@@ -54,30 +53,45 @@ public:
 
 	virtual Index documentFrequency() const
 	{
-		return m_positive.get()?m_positive->documentFrequency():0;
+		return m_positive->documentFrequency();
 	}
 
 	virtual Index docno() const
 	{
-		return m_positive.get()?m_positive->docno():0;
+		return m_positive->docno();
 	}
 
 	virtual Index posno() const
 	{
-		return m_positive.get()?m_positive->posno():0;
-	}
-
-	virtual PostingIteratorInterface* copy() const
-	{
-		return new IteratorDifference( *this);
+		return m_positive->posno();
 	}
 
 private:
 	Index m_docno;
 	Index m_docno_neg;
-	PostingIteratorReference m_positive;
-	PostingIteratorReference m_negative;
+	PostingIteratorInterface* m_positive;
+	PostingIteratorInterface* m_negative;
 	std::string m_featureid;		///< unique id of the feature expression
+};
+
+
+class PostingJoinDifference
+	:public PostingJoinOperatorInterface
+{
+public:
+	virtual ~PostingJoinDifference(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range) const
+	{
+		if (range != 0) throw std::runtime_error( "no range argument expected");
+		if (nofitrs_ < 2) throw std::runtime_error( "too few arguments");
+		if (nofitrs_ > 2) throw std::runtime_error( "too many arguments");
+
+		return new IteratorDifference( itrs_[0], itrs_[1]);
+	}
 };
 
 }//namespace

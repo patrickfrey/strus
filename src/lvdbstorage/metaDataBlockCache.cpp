@@ -76,7 +76,14 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 
 		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
 		const KeyValueStorage::Value* mv = storage.load( BlockKey( blockno));
-		m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+		if (mv)
+		{
+			m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+		}
+		else
+		{
+			m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno));
+		}
 		blkref = m_ar[ blkidx];
 	}
 	return (*blkref)[ MetaDataBlock::index( docno)];

@@ -26,33 +26,28 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_INTERFACE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_CLOSURE_INTERFACE_HPP_INCLUDED
+#define _STRUS_WEIGHTING_CLOSURE_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include <string>
-#include <vector>
 
 namespace strus
 {
 /// \brief Forward declaration
-class PostingIteratorInterface;
+class MetaDataReaderInterface;
 /// \brief Forward declaration
-class ForwardIteratorInterface;
+class PostingIteratorInterface;
 
-
-/// \brief Interface for implementing summarization (additional info about the matches in the result ranklist of a retrieval query)
-class SummarizerInterface
+class WeightingClosureInterface
 {
 public:
-	virtual ~SummarizerInterface(){}
+	virtual ~WeightingClosureInterface(){}
 
-	/// \brief Get some summarization elements
-	/// \param[in] docno document to get the summary element from
-	/// \return the summarization elements
-	virtual std::vector<std::string> getSummary( const Index& docno)=0;
+	/// \brief Call the weighting function for a document
+	/// \param[in] docno document number
+	/// \return the calculated weight of the document
+	virtual float call( const Index& docno)=0;
 };
 
 }//namespace
 #endif
-
 

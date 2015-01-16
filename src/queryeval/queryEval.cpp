@@ -27,20 +27,24 @@
 --------------------------------------------------------------------
 */
 #include "queryEval.hpp"
+#include "query.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
 #include "parser/lexems.hpp"
-#include "parser/selectorSet.hpp"
-#include "postingIteratorReference.hpp"
-#include "accumulator.hpp"
-#include "ranker.hpp"
+#include "parser/keyMap.hpp"
+#include "parser/mapFunctionParameters.hpp"
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 #include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -69,60 +73,11 @@ static std::string errorPosition( const char* base, const char* itr)
 	return msg.str();
 }
 
-
-
-void QueryEval::parseJoinOperationDef( char const*& src)
-{
-	int result = m_setnamemap.get( parse_IDENTIFIER( src));
-	if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "FOREACH"))
-	{
-		throw std::runtime_error("FOREACH expected after INTO and the destination set identifier of the join");
-	}
-	int selector = SelectorExpression::parse( src, m_selectors, m_setnamemap);
-	if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "DO"))
-	{
-		throw std::runtime_error( "DO expected after FOREACH and the selector expression");
-	}
-	int function = JoinFunction::parse( src, m_functions);
-	if (!isSemiColon(*src))
-	{
-		throw std::runtime_error( "semicolon expected after a feature join operation definition");
-	}
-	parse_OPERATOR( src);
-	m_operations.push_back( JoinOperation( result, function, selector));
-}
-
-void QueryEval::parseAccumulatorDef( char const*& src)
-{
-	if (m_accumulateOperation.defined())
-	{
-		throw std::runtime_error("duplicate definition of accumulator in query evaluation program");
-	}
-	m_accumulateOperation.parse( src, m_setnamemap);
-	if (!isSemiColon(*src))
-	{
-		throw std::runtime_error( "missing semicolon ';' after EVAL expression");
-	}
-	parse_OPERATOR( src);
-}
-
-void QueryEval::parseSummarizeDef( char const*& src)
-{
-	parser::SummarizeOperation summarizer;
-	summarizer.parse( src, m_setnamemap);
-	if (!isSemiColon(*src))
-	{
-		throw std::runtime_error( "missing semicolon ';' after SUMMARIZE expression");
-	}
-	parse_OPERATOR( src);
-	m_summarizers.push_back( summarizer);
-}
-
 void QueryEval::parseTermDef( char const*& src)
 {
 	if (isAlpha(*src))
 	{
-		std::string termset = parse_IDENTIFIER( src);
+		std::string termset = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
 		std::string termvalue;
 		std::string termtype;
 
@@ -147,13 +102,8 @@ void QueryEval::parseTermDef( char const*& src)
 		{
 			throw std::runtime_error( "term type identifier expected after colon and term value");
 		}
-		termtype = parse_IDENTIFIER( src);
-		if (!isSemiColon( *src))
-		{
-			throw std::runtime_error( "semicolon expected after a feature declaration in the query");
-		}
-		parse_OPERATOR( src);
-		m_predefinedTerms.push_back( queryeval::Query::Term( termset, termtype, termvalue));
+		termtype = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
+		m_predefinedTerms.push_back( TermDef( termset, termtype, termvalue));
 	}
 	else
 	{
@@ -161,10 +111,250 @@ void QueryEval::parseTermDef( char const*& src)
 	}
 }
 
-QueryEval::QueryEval( const std::string& source)
+
+static std::vector<ArithmeticVariant> parseParameters( const char** paramNames, char const*& src)
+{
+	KeyMap<ArithmeticVariant> paramDefs;
+	while (*src)
+	{
+		if (!isAlpha( *src))
+		{
+			throw std::runtime_error( "list of comma separated identifier value assignments expected as function parameters");
+		}
+		std::string paramName = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
+		if (!isAssign( *src))
+		{
+			throw std::runtime_error( "equal '=' expected after function parameter name");
+		}
+		parse_OPERATOR(src);
+		if (!isDigit( *src) && !isMinus(*src))
+		{
+			throw std::runtime_error( "numeric value expected as function argument value");
+		}
+		bool isNegative = false;
+		char const* cc = src;
+		if (isMinus(*src))
+		{
+			isNegative = true;
+			++cc;
+		}
+		if (!isDigit(*cc))
+		{
+			throw std::runtime_error("numeric scalar value expected as function argument value");
+		}
+		for (; *cc && isDigit( *cc); ++cc){}
+		if (*cc == '.')
+		{
+			paramDefs[ paramName] = parse_FLOAT( src);
+		}
+		else if (isNegative)
+		{
+			paramDefs[ paramName] = parse_INTEGER( src);
+		}
+		else
+		{
+			paramDefs[ paramName] = parse_UNSIGNED( src);
+		}
+		if (!isComma(*src))
+		{
+			break;
+		}
+		parse_OPERATOR(src);
+	}
+	return mapFunctionParameters( paramNames, paramDefs);
+}
+
+static std::vector<std::string> parseIdentifierList( char const*& src)
+{
+	std::vector<std::string> rt;
+	for (;;)
+	{
+		if (!isAlnum( *src))
+		{
+			throw std::runtime_error( "feature set identifier expected");
+		}
+		rt.push_back( boost::algorithm::to_lower_copy( parse_IDENTIFIER( src)));
+		if (isComma( *src))
+		{
+			parse_OPERATOR(src);
+		}
+		else
+		{
+			break;
+		}
+	}
+	return rt;
+}
+
+void QueryEval::parseWeightingFunctionDef( char const*& src)
+{
+	if (m_weightingFunction.function)
+	{
+		throw std::runtime_error( "more than one weighting function defined");
+	}
+	if (!isAlpha( *src))
+	{
+		throw std::runtime_error( "weighting function identifier expected");
+	}
+	m_weightingFunction.functionName = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
+	m_weightingFunction.function
+		= m_processor->getWeightingFunction(
+			m_weightingFunction.functionName);
+	for (;;)
+	{
+		if (isOpenSquareBracket( *src))
+		{
+			if (!m_weightingFunction.selectorSets.empty())
+			{
+				throw std::runtime_error("duplicate definion of selected features in weighting function definition");
+			}
+			parse_OPERATOR(src);
+			m_weightingFunction.selectorSets = parseIdentifierList( src);
+			if (!isCloseSquareBracket( *src))
+			{
+				throw std::runtime_error( "comma ',' or close oval bracket ']' expected as separator or terminator of the selected feature set declaration for the weighting function");
+			}
+			parse_OPERATOR(src);
+		}
+		else if (isOpenAngleBracket(*src))
+		{
+			if (!m_weightingFunction.parameters.empty())
+			{
+				throw std::runtime_error("duplicate definion of arguments in weighting function definition");
+			}
+			parse_OPERATOR(src);
+			m_weightingFunction.parameters
+				= parseParameters( m_weightingFunction.function->parameterNames(), src);
+			if (!isCloseAngleBracket(*src))
+			{
+				throw std::runtime_error( "expected comma ',' as separator or close angle bracket '>' to close parameter list of weighting function");
+			}
+			parse_OPERATOR(src);
+		}
+		else if (isOpenOvalBracket( *src))
+		{
+			if (!m_weightingFunction.weightingSets.empty())
+			{
+				throw std::runtime_error("duplicate definion of the weighted features in the weighting function definition");
+			}
+			parse_OPERATOR(src);
+			m_weightingFunction.weightingSets = parseIdentifierList( src);
+			if (!isCloseOvalBracket( *src))
+			{
+				throw std::runtime_error( "comma ',' or close oval bracket ')' expected as separator or terminator of the feature set declaration for the weighting function");
+			}
+			parse_OPERATOR(src);
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
+
+void QueryEval::parseSummarizeDef( char const*& src)
+{
+	const SummarizerFunctionInterface* function;
+	std::string functionName;
+	std::vector<ArithmeticVariant> parameters;
+	std::string resultAttribute;
+	std::string contentType;
+	std::string structSet;
+	std::vector<std::string> featureSet;
+
+	if (!isAlpha( *src))
+	{
+		throw std::runtime_error( "name of result attribute expected after SUMMARIZE");
+	}
+	resultAttribute = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
+	if (!isAssign(*src))
+	{
+		throw std::runtime_error( "assignment operator '=' expected after the name of result attribute in summarizer definition");
+	}
+	parse_OPERATOR( src);
+	if (!isAlpha( *src))
+	{
+		throw std::runtime_error( "name of summarizer expected after assignment in summarizer definition");
+	}
+	functionName = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
+	function = m_processor->getSummarizerFunction( functionName);
+
+	for (;;)
+	{
+		if (isOpenSquareBracket( *src))
+		{
+			if (!contentType.empty())
+			{
+				throw std::runtime_error("duplicate definion of feature selected in summarizer definition");
+			}
+			parse_OPERATOR( src);
+			contentType = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
+			if (!isCloseSquareBracket( *src))
+			{
+				throw std::runtime_error( "expected only one identifier inside in square brackets '[' ']' in summarizer definition");
+			}
+			parse_OPERATOR( src);
+		}
+		else if (isOpenAngleBracket( *src))
+		{
+			if (!parameters.empty())
+			{
+				throw std::runtime_error("duplicate definion of function arguments in summarizer definition");
+			}
+			parse_OPERATOR( src);
+			parameters = parseParameters( function->parameterNames(), src);
+			if (!isCloseAngleBracket( *src))
+			{
+				throw std::runtime_error( "expected comma ',' as separator or close angle bracket '>' to close parameter list of summarize function");
+			}
+			parse_OPERATOR( src);
+		}
+		else if (isOpenOvalBracket( *src))
+		{
+			if (!featureSet.empty())
+			{
+				throw std::runtime_error("duplicate definion of matching features in summarizer definition");
+			}
+			parse_OPERATOR( src);
+			char const* cc = src;
+			structSet = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
+			if (isColon( *src))
+			{
+				parse_OPERATOR( src);
+			}
+			else
+			{
+				src = cc;
+				structSet.clear();
+			}
+			featureSet = parseIdentifierList( src);
+			if (!isCloseOvalBracket( *src))
+			{
+				throw std::runtime_error("comma ',' as separator or close oval bracket ')' expected as separator in list of match features in a summarizer definition");
+			}
+			parse_OPERATOR( src);
+		}
+		else
+		{
+			break;
+		}
+	}
+	m_summarizers.push_back(
+		SummarizerDef(
+			function, functionName, parameters, resultAttribute,
+			contentType, structSet, featureSet));
+}
+
+
+void QueryEval::parseJoinOperationDef( char const*& )
+{
+}
+
+void QueryEval::loadProgram( const std::string& source)
 {
 	char const* src = source.c_str();
-	enum StatementKeyword {e_INTO, e_EVAL, e_TERM, e_SUMMARIZE};
+	enum StatementKeyword {e_EVAL, e_JOIN, e_TERM, e_SUMMARIZE};
 	std::string id;
 
 	skipSpaces( src);
@@ -172,20 +362,27 @@ QueryEval::QueryEval( const std::string& source)
 	{
 		while (*src)
 		{
-			switch ((StatementKeyword)parse_KEYWORD( src, 4, "INTO", "EVAL", "TERM", "SUMMARIZE"))
+			switch ((StatementKeyword)parse_KEYWORD( src, 4, "EVAL", "JOIN", "TERM", "SUMMARIZE"))
 			{
 				case e_TERM:
 					parseTermDef( src);
 					break;
-				case e_INTO:
-					parseJoinOperationDef( src);
-					break;
+				case e_JOIN:
+					throw std::runtime_error("JOIN not implemented yet");
 				case e_EVAL:
-					parseAccumulatorDef( src);
+					parseWeightingFunctionDef( src);
 					break;
 				case e_SUMMARIZE:
 					parseSummarizeDef( src);
 					break;
+			}
+			if (*src)
+			{
+				if (!isSemiColon(*src))
+				{
+					throw std::runtime_error("semicolon expected as delimiter of query eval program instructions");
+				}
+				parse_OPERATOR( src);
 			}
 		}
 	}
@@ -198,437 +395,105 @@ QueryEval::QueryEval( const std::string& source)
 	}
 }
 
-
-class QueryStruct
+QueryEval::QueryEval(
+		const QueryProcessorInterface* processor_,
+		const std::string& source)
+	:m_processor(processor_)
 {
-private:
-	QueryStruct( const QueryStruct&){}	//... non copyable
-	void operator=(const QueryStruct&){}	//... non copyable
-
-public:
-	explicit QueryStruct( const StringIndexMap* setnamemap_)
-		:m_setnamemap(setnamemap_){}
-
-	void pushFeature( int termset, const PostingIteratorInterface* itr)
-	{
-		if (termset <= 0) throw std::runtime_error( "internal: term set identifier out of range");
-		while ((std::size_t)termset > m_iteratorSets.size())
-		{
-			m_iteratorSets.push_back( std::vector< const PostingIteratorInterface*>());
-		}
-		m_iteratorSets[ termset-1].push_back( itr);
-		if ((m_setSizeMap[ termset] += 1) > (int)QueryEval::MaxSizeFeatureSet)
-		{
-			throw std::runtime_error( std::string( "query term set '") + m_setnamemap->name( termset) + "' is getting too complex");
-		}
-	}
-
-	const PostingIteratorInterface* getFeature( int setIndex, std::size_t elemIndex)
-	{
-		const std::vector<const PostingIteratorInterface*>& iset = getFeatureSet( setIndex);
-		if (iset.size() <= elemIndex)
-		{
-			throw std::runtime_error( std::string( "referencing feature '") + m_setnamemap->name( setIndex) + "' not defined yet completely (features have to be defined completely before referencing them in the program)");
-		}
-		return iset[ elemIndex];
-	}
-
-	const std::vector<const PostingIteratorInterface*>& getFeatureSet( int setIndex) const
-	{
-		if (setIndex <= 0)
-		{
-			throw std::runtime_error( "internal: feature address out of range");
-		}
-		if ((std::size_t)(unsigned int)setIndex > m_iteratorSets.size())
-		{
-			throw std::runtime_error( std::string( "referencing feature '") + m_setnamemap->name( setIndex) + "' not defined yet (features have to be defined before referencing them in the program)");
-		}
-		return m_iteratorSets[ setIndex-1];
-	}
-
-	static bool isRelevantSelectionFeature( const StorageInterface& storage, const PostingIteratorInterface& itr)
-	{
-		float nofMatches = itr.documentFrequency();
-		float nofCollectionDocuments = storage.nofDocumentsInserted();
-	
-		if (nofCollectionDocuments < 50 || nofCollectionDocuments > nofMatches * 2)
-		{
-			return true;
-		}
-		return false;
-	}
-
-	PostingIteratorInterface* createFeatureSetUnion( const StorageInterface& storage, const QueryProcessorInterface& processor, int setIndex, bool relevantOnly)
-	{
-		const PostingIteratorInterface* far[ (int)QueryEval::MaxSizeFeatureSet];
-
-		if (setIndex <= 0)
-		{
-			throw std::runtime_error( "internal: feature address is NULL");
-		}
-		if (setIndex <= 0 || (std::size_t)(unsigned int)setIndex > m_iteratorSets.size())
-		{
-			throw std::runtime_error( std::string( "feature '") + m_setnamemap->name(setIndex) + "' is undefined");
-		}
-		std::vector<const PostingIteratorInterface*>& feats = m_iteratorSets[ setIndex-1];
-		if (feats.size() > (int)QueryEval::MaxSizeFeatureSet)
-		{
-			throw std::runtime_error( "number of features in selection set is too big");
-		}
-		std::vector<const PostingIteratorInterface*>::const_iterator ai = feats.begin(), ae = feats.end();
-		std::size_t aidx = 0;
-		for (; ai != ae; ai++)
-		{
-			if ((!relevantOnly || isRelevantSelectionFeature( storage, **ai)))
-			{
-				far[ aidx++] = *ai;
-			}
-		}
-		if (aidx)
-		{
-			return processor.createJoinPostingIterator(
-					Constants::operator_set_union(), 0, aidx, far);
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
-	const std::map<int,int> setSizeMap() const
-	{
-		return m_setSizeMap;
-	}
-
-	int setSize( int setIndex) const
-	{
-		std::map<int,int>::const_iterator gi = m_setSizeMap.find( setIndex);
-		return (gi == m_setSizeMap.end())?0:gi->second;
-	}
-
-	void printFeatures( std::ostream& out)
-	{
-		std::vector< std::vector<const PostingIteratorInterface*> >::const_iterator
-			vi = m_iteratorSets.begin(), ve = m_iteratorSets.end();
-		for (int vidx=0; vi != ve; ++vi,++vidx)
-		{
-			std::vector<const PostingIteratorInterface*>::const_iterator fi = vi->begin(), fe = vi->end();
-			for (; fi != fe; ++fi)
-			{
-				if (*fi)
-				{
-					out << "[" << vidx << "] '" << (*fi)->featureid() << "'" << std::endl;
-				}
-			}
-		}
-	}
-
-private:
-	std::vector< std::vector<const PostingIteratorInterface*> > m_iteratorSets;
-	const StringIndexMap* m_setnamemap;
-	std::map<int,int> m_setSizeMap;
-};
+	loadProgram( source);
+}
 
 
 void QueryEval::print( std::ostream& out) const
 {
-	std::vector<queryeval::Query::Term>::const_iterator ti = predefinedTerms().begin(), te = predefinedTerms().end();
+	std::vector<TermDef>::const_iterator ti = m_predefinedTerms.begin(), te = m_predefinedTerms.end();
 	for (; ti != te; ++ti)
 	{
 		out << "TERM " << ti->set << ": " << ti->type << " '" << ti->value << "';" << std::endl;
 	}
-	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
-	for (; ji != je; ++ji)
-	{
-		out << "INTO " << m_setnamemap.name( ji->result())
-			<< " FOREACH ";
-		SelectorExpression::print( out, ji->selector(), m_selectors, m_setnamemap);
-
-		out << " DO ";
-		JoinFunction::print( out, ji->function(), m_functions);
-		out << ";" << std::endl;
-	}
-	if (m_accumulateOperation.defined())
+	if (m_weightingFunction.function)
 	{
 		out << "EVAL ";
-		m_accumulateOperation.print( out, m_setnamemap);
+		out << " " << m_weightingFunction.functionName;
+		if (m_weightingFunction.parameters.size())
+		{
+			out << "<";
+			std::size_t ai = 0, ae = m_weightingFunction.parameters.size();
+			for(; ai != ae; ++ai)
+			{
+				if (ai) out << ", ";
+				out << m_weightingFunction.function->parameterNames()[ai]
+					<< "=" << m_weightingFunction.parameters[ai];
+			}
+			out << ">";
+		}
+		if (m_weightingFunction.selectorSets.size())
+		{
+			out << "[";
+			std::size_t si = 0, se = m_weightingFunction.selectorSets.size();
+			for(; si != se; ++si)
+			{
+				if (si) out << ", ";
+				out << m_weightingFunction.selectorSets[si];
+			}
+			out << "]";
+		}
+		if (m_weightingFunction.weightingSets.size())
+		{
+			out << "(";
+			std::size_t wi = 0, we = m_weightingFunction.weightingSets.size();
+			for(; wi != we; ++wi)
+			{
+				if (wi) out << ", ";
+				out << m_weightingFunction.weightingSets[wi];
+			}
+			out << ")";
+		}
 		out << ";" << std::endl;
 	}
-	std::vector<parser::SummarizeOperation>::const_iterator si = m_summarizers.begin(), se = m_summarizers.end();
+	std::vector<SummarizerDef>::const_iterator
+		si = m_summarizers.begin(), se = m_summarizers.end();
 	for (; si != se; ++si)
 	{
 		out << "SUMMARIZE ";
-		si->print( out, m_setnamemap);
+		out << si->resultAttribute << " = " << si->functionName;
+		if (si->parameters.size())
+		{
+			out << "<";
+			std::size_t ai = 0, ae = si->parameters.size();
+			for(; ai != ae; ++ai)
+			{
+				if (ai) out << ", ";
+				out << si->function->parameterNames()[ai] << "=" << si->parameters[ai];
+			}
+			out << ">";
+		}
+		if (!si->contentType.empty())
+		{
+			out << "[" << si->contentType << "]";
+		}
+		if (si->featureSet.size() || si->structSet.size())
+		{
+			out << "(";
+			if (!si->structSet.empty())
+			{
+				out << si->structSet << ":";
+			}
+			std::size_t fi = 0, fe = si->featureSet.size();
+			for(; fi != fe; ++fi)
+			{
+				if (fi) out << ", ";
+				out << si->featureSet[fi];
+			}
+			out << ")";
+		}
 		out << ";" << std::endl;
 	}
 }
 
 
-std::vector<queryeval::ResultDocument>
-	QueryEval::getRankedDocumentList(
-			Accumulator& accu,
-			const std::vector<SummarizerDef>& summarizers,
-			std::size_t firstRank,
-			std::size_t maxNofRanks) const
+QueryInterface* QueryEval::createQuery() const
 {
-	std::vector<queryeval::ResultDocument> rt;
-	Ranker ranker( maxNofRanks);
-
-	Index docno = 0;
-	unsigned int state = 0;
-	unsigned int prev_state = 0;
-	float weight = 0.0;
-
-	while (accu.nextRank( docno, state, weight))
-	{
-		ranker.insert( queryeval::WeightedDocument( docno, weight));
-		if (state > prev_state && ranker.nofRanks() >= maxNofRanks)
-		{
-			break;
-		}
-		prev_state = state;
-	}
-	std::vector<queryeval::WeightedDocument> resultlist = ranker.result( firstRank);
-	std::vector<queryeval::WeightedDocument>::const_iterator
-		ri=resultlist.begin(),re=resultlist.end();
-
-	for (; ri != re; ++ri)
-	{
-		std::vector<queryeval::ResultDocument::Attribute> attr;
-		std::vector<SummarizerDef>::const_iterator
-			si = summarizers.begin(), se = summarizers.end();
-		for (; si != se; ++si)
-		{
-			std::vector<std::string> summary = si->second->getSummary( ri->docno());
-			std::vector<std::string>::const_iterator
-				ci = summary.begin(), ce = summary.end();
-			for (; ci != ce; ++ci)
-			{
-				attr.push_back(
-					queryeval::ResultDocument::Attribute(
-						si->first, *ci));
-			}
-		}
-		rt.push_back( queryeval::ResultDocument( *ri, attr));
-	}
-	return rt;
-}
-
-std::vector<queryeval::ResultDocument>
-	QueryEval::getRankedDocumentList(
-		const StorageInterface& storage,
-		const QueryProcessorInterface& processor,
-		const std::string& username,
-		const queryeval::Query& query_,
-		std::size_t fromRank,
-		std::size_t maxNofRanks) const
-{
-	if (fromRank >= maxNofRanks)
-	{
-		return std::vector<queryeval::ResultDocument>();
-	}
-	QueryStruct query( &m_setnamemap);
-
-	typedef PostingIteratorReferenceArray FeatList;
-	FeatList featObjs;
-
-	boost::scoped_ptr<AttributeReaderInterface>
-		attributeReader( storage.createAttributeReader());
-	boost::scoped_ptr<MetaDataReaderInterface>
-		metaDataReader( storage.createMetaDataReader());
-
-	//[1] Create the initial feature sets:
-	{
-		// Process the query features (explicit join operations)
-		typedef std::pair<std::string, const PostingIteratorInterface*> FeatDef;
-		std::vector<FeatDef> feats;
-
-		std::vector<queryeval::Query::Term>::const_iterator ti = query_.termar().begin(), te = query_.termar().end();
-		std::vector<queryeval::Query::JoinOp>::const_iterator ji = query_.joinar().begin(), je = query_.joinar().end();
-
-		for (std::size_t tidx=0; ti != te; ++ti,++tidx)
-		{
-			featObjs.push_back( processor.createTermPostingIterator( ti->type, ti->value));
-			feats.push_back( FeatDef( ti->set, &featObjs.back()));
-
-			for (; ji != je && ji->termcnt == tidx; ++ji)
-			{
-				enum {MaxNofJoinopArguments=256};
-				if (ji->nofArgs > MaxNofJoinopArguments || ji->nofArgs > feats.size())
-				{
-					throw std::runtime_error( "number of arguments of explicit join in query out of range");
-				}
-				const PostingIteratorInterface* joinargs[ MaxNofJoinopArguments];
-				std::size_t ii=0;
-				for (;ii < ji->nofArgs; ++ii)
-				{
-					joinargs[ ji->nofArgs-ii-1] = feats[ feats.size()-ii-1].second;
-				}
-				PostingIteratorReference res(
-					processor.createJoinPostingIterator(
-						ji->opname, ji->range, ji->nofArgs, joinargs));
-
-				std::size_t newNofFeats = feats.size() - ji->nofArgs;
-				feats.resize( newNofFeats);
-				featObjs.resize( newNofFeats);
-
-				featObjs.push_back( res.detach());
-				feats.push_back( FeatDef( ji->set, &featObjs.back()));
-			}
-		}
-
-		// Add add the processed query features to the initial feature set:
-		std::vector<FeatDef>::const_iterator fi = feats.begin(), fe = feats.end();
-		for (; fi != fe; ++fi)
-		{
-			StringIndexMap::const_iterator si = m_setnamemap.find( fi->first);
-			if (si == m_setnamemap.end())
-			{
-				throw std::runtime_error( std::string( "term set identifier '") + fi->first + "' not used in this query program");
-			}
-			query.pushFeature( si->second, fi->second);
-		}
-
-		// Add predefined terms to the initial feature set:
-		std::vector<queryeval::Query::Term>::const_iterator pi = m_predefinedTerms.begin(), pe = m_predefinedTerms.end();
-		for (; pi != pe; ++pi)
-		{
-			StringIndexMap::const_iterator si = m_setnamemap.find( pi->set);
-			if (si != m_setnamemap.end())
-			{
-				featObjs.push_back( processor.createTermPostingIterator( pi->type, pi->value));
-				query.pushFeature( si->second, &featObjs.back());
-			}
-		}
-	}
-
-	//[2] Iterate on all join operations and create the combined features:
-	std::vector<parser::JoinOperation>::const_iterator ji = m_operations.begin(), je = m_operations.end();
-	for (; ji != je; ++ji)
-	{
-		const parser::JoinFunction& function = functions()[ ji->function()-1];
-		boost::scoped_ptr<SelectorSet> selset(
-			SelectorSet::calculate(
-				ji->selector(), selectors(), query.setSizeMap()));
-
-		if (selset.get())
-		{
-			const std::vector<Selector>& selar = selset->ar();
-			std::size_t ri = 0, re = selar.size(), ro = selset->rowsize();
-			enum {MaxNofSelectorColumns=256};
-			if (ro > MaxNofSelectorColumns)
-			{
-				throw std::runtime_error("query too complex (number of rows in selection has more than 256 elements");
-			}
-			const PostingIteratorInterface* joinargs[ MaxNofSelectorColumns];
-			for (; ri < re; ri += ro)
-			{
-				std::size_t ci = 0, ce = ro;
-				for (; ci < ce; ++ci)
-				{
-					const Selector& sel = selar[ ri+ci];
-					joinargs[ ci] = query.getFeature( sel.setIndex, sel.elemIndex);
-				}
-				featObjs.push_back( 
-					processor.createJoinPostingIterator(
-						function.name(), function.range(), ro, joinargs));
-				query.pushFeature( ji->result(), &featObjs.back());
-			}
-		}
-	}
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cout << "query features:" << std::endl;
-	query.printFeatures( std::cout);
-#endif
-
-	//[3] Get the result accumulator and evaluate the results
-	if (m_accumulateOperation.defined())
-	{
-		// Create the accumulator:
-		Accumulator accumulator( 
-				&processor, metaDataReader.get(),
-				maxNofRanks, storage.maxDocumentNumber());
-
-		std::vector<WeightingFunction>::const_iterator
-			gi = m_accumulateOperation.args().begin(),
-			ge = m_accumulateOperation.args().end();
-	
-		for (std::size_t gidx=0; gi != ge; ++gi,++gidx)
-		{
-			const std::vector<const PostingIteratorInterface*>& feats
-				= query.getFeatureSet( gi->setIndex());
-			std::vector<const PostingIteratorInterface*>::const_iterator ai = feats.begin(), ae = feats.end();
-			for (std::size_t aidx=0; ai != ae; ai++,aidx++)
-			{
-				if (*ai)
-				{
-					accumulator.addRanker( gi->factor(), gi->function(), gi->params(), **ai);
-				}
-			}
-		}
-		std::vector<int>::const_iterator
-			fi = m_accumulateOperation.featureSelectionSets().begin(),
-			fe = m_accumulateOperation.featureSelectionSets().end();
-
-		for (; fi != fe; ++fi)
-		{
-			PostingIteratorReference selection( query.createFeatureSetUnion( storage, processor, *fi, true));
-			if (selection.get()) accumulator.addSelector( *selection);
-		}
-		// Get the summarizers:
-		std::vector<SummarizerDef> summarizerdefs;
-		std::vector<parser::SummarizeOperation>::const_iterator
-			si = m_summarizers.begin(), se = m_summarizers.end();
-		for (; si != se; ++si)
-		{
-			std::vector<PostingIteratorReference> far_ref;
-			const PostingIteratorInterface* far[ MaxSizeFeatureSet];
-			if (si->featureset().size() > MaxSizeFeatureSet)
-			{
-				throw std::runtime_error( "set of features in summarizer definition is too complex");
-			}
-			std::vector<int>::const_iterator
-				ai = si->featureset().begin(),
-				ae = si->featureset().end();
-
-			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
-			{
-				PostingIteratorReference sumfeat(
-					query.createFeatureSetUnion( storage, processor, *ai, true));
-				far_ref.push_back( sumfeat); 
-				far[ aidx] = far_ref.back().get();
-			}
-			PostingIteratorReference structfeat;
-			if (si->structset())
-			{
-				structfeat.reset( query.createFeatureSetUnion(
-					storage, processor, si->structset(), false));
-			}
-			summarizerdefs.push_back(
-				SummarizerDef(
-					si->resultAttribute(),
-					processor.createSummarizer(
-						si->summarizerName(), si->type(),
-						si->parameter(), structfeat.get(),
-						far_ref.size(), far,
-						metaDataReader.get(),
-						attributeReader.get())));
-		}
-		// Set the user restrictions (inverted ACL of user passed):
-		DocnoIteratorInterface* invAcl = storage.createInvertedAclIterator( username);
-		if (invAcl)
-		{
-			accumulator.addRestrictionSet( invAcl);
-		}
-
-		// Calculate and return the ranklist:
-		return getRankedDocumentList(
-				accumulator, summarizerdefs,
-				fromRank, maxNofRanks);
-	}
-	else
-	{
-		throw std::runtime_error("no accumulator defined (EVAL), cannot evaluate ranked document list");
-	}
+	return new Query( this, m_processor);
 }
 

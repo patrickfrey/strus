@@ -28,8 +28,7 @@
 */
 #include "strus/queryEvalLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "postingIteratorReference.hpp"
-#include "weightingFunctionReference.hpp"
+#include "strus/storageInterface.hpp"
 #include "queryEval.hpp"
 #include "dll_tags.hpp"
 #include <map>
@@ -40,8 +39,9 @@ using namespace strus;
 
 DLL_PUBLIC QueryEvalInterface*
 	strus::createQueryEval(
+		const QueryProcessorInterface* processor,
 		const std::string& source)
 {
-	return new QueryEval( source);
+	return new QueryEval( processor, source);
 }
 

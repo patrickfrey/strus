@@ -71,6 +71,12 @@ public:
 		if ((std::size_t)handle >= m_ar.size()) throw std::logic_error("array bound read in MetaDataDescription::get()");
 		return &m_ar[ handle];
 	}
+	const char* getName( int handle) const
+	{
+		std::map<std::string,std::size_t>::const_iterator ni = m_namemap.begin(), ne = m_namemap.end();
+		for (; ni != ne && (int)ni->second != handle; ++ni){}
+		return (ni == ne)?0:ni->first.c_str();
+	}
 	int getHandle( const std::string& name_) const;
 	bool hasElement( const std::string& name_) const;
 
@@ -103,25 +109,25 @@ public:
 	class const_iterator
 	{
 	public:
-		const_iterator( const MetaDataDescription* descr_, std::map<std::string,std::size_t>::const_iterator itr_)
-			:m_descr(descr_),m_itr(itr_){}
+		explicit const_iterator( const MetaDataDescription* descr_, int handle_)
+			:m_descr(descr_),m_handle(handle_){}
 
-		const_iterator& operator++()				{++m_itr; return *this;}
-		const_iterator operator++(int)				{const_iterator rt(m_descr,m_itr); ++m_itr; return rt;}
+		const_iterator& operator++()				{++m_handle; return *this;}
+		const_iterator operator++(int)				{const_iterator rt(m_descr,m_handle); ++m_handle; return rt;}
 
-		bool operator==( const const_iterator& o) const		{return m_itr==o.m_itr;}
-		bool operator!=( const const_iterator& o) const		{return m_itr!=o.m_itr;}
+		bool operator==( const const_iterator& o) const		{return m_handle==o.m_handle;}
+		bool operator!=( const const_iterator& o) const		{return m_handle!=o.m_handle;}
 
-		const std::string& name() const				{return m_itr->first;}
-		const MetaDataElement& element() const			{return *m_descr->get( m_itr->second);}
+		const char* name() const				{return m_descr->getName( m_handle);}
+		const MetaDataElement& element() const			{return *m_descr->get( m_handle);}
 
 	private:
 		const MetaDataDescription* m_descr;
-		std::map<std::string,std::size_t>::const_iterator m_itr;
+		int m_handle;
 	};
 
-	const_iterator begin() const					{return const_iterator( this, m_namemap.begin());}
-	const_iterator end() const					{return const_iterator( this, m_namemap.end());}
+	const_iterator begin() const					{return const_iterator( this, 0);}
+	const_iterator end() const					{return const_iterator( this, nofElements());}
 
 private:
 	std::size_t m_bytesize;					///< sizeof in bytes of the meta data record

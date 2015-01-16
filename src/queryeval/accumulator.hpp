@@ -29,15 +29,14 @@
 #ifndef _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/postingIteratorInterface.hpp"
-#include "postingIteratorReference.hpp"
-#include "docnoIteratorReference.hpp"
-#include "weightingFunctionReference.hpp"
-#include "accumulatorArgument.hpp"
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/arithmeticVariant.hpp"
+#include "weightingClosureReference.hpp"
 #include <vector>
 #include <list>
 #include <limits>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace strus
 {
@@ -45,6 +44,16 @@ namespace strus
 class StorageInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class PostingIteratorInterface;
+/// \brief Forward declaration
+class MetaDataReaderInterface;
+/// \brief Forward declaration
+class WeightingFunctionInterface;
+/// \brief Forward declaration
+class MetaDataReaderInterface;
+/// \brief Forward declaration
+class DocnoIteratorInterface;
 
 /// \class Accumulator
 /// \brief Accumulator for weights of matches
@@ -53,42 +62,45 @@ class Accumulator
 public:
 	/// \brief Constructor
 	Accumulator(
-			const QueryProcessorInterface* qproc_,
+			const StorageInterface* storage_,
+			const WeightingFunctionInterface* function_,
+			const std::vector<ArithmeticVariant> parameter_,
 			MetaDataReaderInterface* metadata_,
 			std::size_t maxNofRanks_,
-			std::size_t maxDocumentNumber_);
-
-	~Accumulator()
+			std::size_t maxDocumentNumber_)
+		:m_storage(storage_)
+		,m_function(function_)
+		,m_parameter(parameter_)
+		,m_metadata(metadata_)
+		,m_selectoridx(0)
+		,m_docno(0)
+		,m_maxNofRanks(maxNofRanks_)
+		,m_maxDocumentNumber(maxDocumentNumber_)
 	{}
 
-	void addSelector(
-			const PostingIteratorInterface& iterator);
+	~Accumulator(){}
 
-	void addRanker(
-			float factor,
-			const std::string& function,
-			const std::vector<float>& parameter,
-			const PostingIteratorInterface& iterator);
+	void addSelector( PostingIteratorInterface* iterator);
 
-	void addRestrictionSet(
-			DocnoIteratorInterface* iterator);
+	void addFeature( PostingIteratorInterface* iterator);
 
-	bool nextRank(
-			Index& docno,
-			unsigned int& selectorState, 
-			float& weight);
+	void addRestrictionSet( DocnoIteratorInterface* iterator);
+
+	bool nextRank( Index& docno, unsigned int& selectorState, float& weight);
 
 private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
 
 private:
-	const QueryProcessorInterface* m_queryprocessor;
+	const StorageInterface* m_storage;
+	const WeightingFunctionInterface* m_function;
+	std::vector<ArithmeticVariant> m_parameter;
 	MetaDataReaderInterface* m_metadata;
-	PostingIteratorReferenceArray m_selectors;
-	DocnoIteratorReferenceArray m_restrictionSets;
+	WeightingClosureReferenceArray m_functionClosures;
+	std::vector<PostingIteratorInterface*> m_selectorPostings;
+	std::vector<DocnoIteratorInterface*> m_restrictionSets;
 	unsigned int m_selectoridx;
 	Index m_docno;
-	std::vector<AccumulatorArgument> m_rankers;
 	boost::dynamic_bitset<> m_visited;
 	std::size_t m_maxNofRanks;
 	Index m_maxDocumentNumber;

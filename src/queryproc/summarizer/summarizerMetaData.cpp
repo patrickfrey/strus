@@ -34,13 +34,13 @@
 
 using namespace strus;
 
-SummarizerMetaData::SummarizerMetaData( MetaDataReaderInterface* metadata_, const std::string& name_)
+SummarizerClosureMetaData::SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_)
 	:m_metadata(metadata_)
 	,m_attrib(metadata_->elementHandle( name_))
 {}
 
 std::vector<std::string>
-	SummarizerMetaData::getSummary( const Index& docno)
+	SummarizerClosureMetaData::getSummary( const Index& docno)
 {
 	std::vector<std::string> rt;
 	m_metadata->skipDoc( docno);

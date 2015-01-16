@@ -57,13 +57,6 @@ public:
 	}
 
 	virtual Index documentFrequency() const=0;
-
-	virtual float weight() const
-	{
-		return 0.0;
-	}
-
-	virtual PostingIteratorInterface* copy() const=0;
 };
 
 }//namespace

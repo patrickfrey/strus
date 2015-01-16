@@ -29,41 +29,74 @@
 #ifndef _STRUS_WEIGHTING_BM25_HPP_INCLUDED
 #define _STRUS_WEIGHTING_BM25_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingClosureInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
 #include "postingIteratorReference.hpp"
-#include "weightingIdfBased.hpp"
 #include <vector>
 
 namespace strus
 {
 
-/// \class WeightingBM25
+/// \brief Forward declaration
+class WeightingFunctionBM25;
+
+
+/// \class WeightingClosureBM25
 /// \brief Weighting function based on the BM25 formula
-class WeightingBM25
-	:public WeightingIdfBased
+class WeightingClosureBM25
+	:public WeightingClosureInterface
 {
 public:
-	explicit WeightingBM25(
-			const StorageInterface* storage_,
-			const MetaDataReaderInterface* metadata_,
-			float k1_,
-			float b_,
-			float avgDocLength_);
+	WeightingClosureBM25(
+		const StorageInterface* storage,
+		PostingIteratorInterface* itr_,
+		MetaDataReaderInterface* metadata_,
+		float k1_,
+		float b_,
+		float avgDocLength_);
 
-	virtual ~WeightingBM25();
-
-	virtual float call( PostingIteratorInterface& itr);
+	virtual float call( const Index& docno);
 
 private:
-	const StorageInterface* m_storage;
-	const MetaDataReaderInterface* m_metadata;
-	const Index m_metadata_doclen;
 	float m_k1;
 	float m_b;
 	float m_avgDocLength;
-	Index m_docno;
+	PostingIteratorInterface* m_itr;
+	MetaDataReaderInterface* m_metadata;
+	int m_metadata_doclen;
+	float m_idf;
+};
+
+/// \class WeightingFunctionBM25
+/// \brief Weighting function based on the BM25 formula
+class WeightingFunctionBM25
+	:public WeightingFunctionInterface
+{
+public:
+	explicit WeightingFunctionBM25(){}
+
+	virtual ~WeightingFunctionBM25(){}
+
+	virtual const char** parameterNames() const
+	{
+		static const char* ar[] = {"k1","b","avgdoclen",0};
+		return ar;
+	}
+
+	virtual WeightingClosureInterface* createClosure(
+			const StorageInterface* storage_,
+			PostingIteratorInterface* itr,
+			MetaDataReaderInterface* metadata,
+			const std::vector<ArithmeticVariant>& parameters) const
+	{
+		float b  = parameters[0].defined()?(float)parameters[0]:0.75;
+		float k1 = parameters[1].defined()?(float)parameters[1]:1.5;
+		float al = parameters[2].defined()?(float)parameters[2]:1000;
+
+		return new WeightingClosureBM25( storage_, itr, metadata, b, k1, al);
+	}
 };
 
 }//namespace

@@ -31,57 +31,62 @@
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
+#include <cstdlib>
 
 using namespace strus;
 
-IteratorStructWithin::IteratorStructWithin( int range_, std::size_t nofargs, const PostingIteratorInterface** args, const PostingIteratorInterface* cut)
+IteratorStructWithin::~IteratorStructWithin()
+{
+	std::size_t ii=0;
+	for (; ii<m_argarsize; ++ii)
+	{
+		delete m_argar[ii];
+	}
+	std::free( m_argar);
+	if (m_cut) delete m_cut;
+}
+
+IteratorStructWithin::IteratorStructWithin(
+		int range_,
+		std::size_t nofargs,
+		PostingIteratorInterface** args,
+		PostingIteratorInterface* cut)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
+	,m_argarsize(nofargs)
 	,m_range(range_)
 	,m_documentFrequency(-1)
 {
-	std::size_t ii=0;
-	for (; ii<nofargs; ++ii)
+	m_argar = (PostingIteratorInterface**)malloc( nofargs * sizeof(m_argar[0]));
+	if (!m_argar) throw std::bad_alloc();
+	try
 	{
-		if (args[ii])
+		std::size_t ii=0;
+		for (; ii<nofargs; ++ii)
 		{
-			m_group.push_back( args[ii]->copy());
+			m_argar[ii] = args[ii];
 			if (ii) m_featureid.push_back('=');
 			m_featureid.append( args[ii]->featureid());
 		}
+		m_cut = cut;
+		if (cut)
+		{
+			if (nofargs) m_featureid.push_back('=');
+			m_featureid.append( m_cut->featureid());
+			m_featureid.push_back( 'C');
+		}
+		if (m_range)
+		{
+			encodeInteger( m_featureid, m_range);
+			m_featureid.push_back( 'R');
+		}
+		m_featureid.push_back( 'W');
 	}
-	if (cut)
+	catch (const std::bad_alloc&)
 	{
-		m_cut.reset( cut->copy());
-		if (nofargs) m_featureid.push_back('=');
-		m_featureid.append( m_cut->featureid());
-		m_featureid.push_back( 'C');
-	}
-	if (m_range)
-	{
-		encodeInteger( m_featureid, m_range);
-		m_featureid.push_back( 'R');
-	}
-	m_featureid.push_back( 'W');
-}
-
-IteratorStructWithin::IteratorStructWithin( const IteratorStructWithin& o)
-	:m_docno(o.m_docno)
-	,m_docno_cut(o.m_docno_cut)
-	,m_posno(o.m_posno)
-	,m_range(o.m_range)
-	,m_featureid(o.m_featureid)
-	,m_documentFrequency(o.m_documentFrequency)
-{
-	if (o.m_cut.get())
-	{
-		m_cut.reset( o.m_cut->copy());
-	}
-	PostingIteratorReferenceArray::const_iterator pi = o.m_group.begin(), pe = o.m_group.end();
-	for (; pi != pe; ++pi)
-	{
-		m_group.push_back( pi->copy());
+		std::free( m_argar);
+		throw std::bad_alloc();
 	}
 }
 
@@ -91,15 +96,15 @@ std::vector<const PostingIteratorInterface*>
 	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
-		PostingIteratorReferenceArray::const_iterator si = m_group.begin(), se = m_group.end();
-		for (; si != se; ++si)
+		std::size_t ii=0;
+		for (; ii<m_argarsize; ++ii)
 		{
-			rt.push_back( &*si);
+			rt.push_back( m_argar[ii]);
 		}
 	}
-	else if (m_cut.get())
+	else if (m_cut)
 	{
-		rt.push_back( m_cut.get());
+		rt.push_back( m_cut);
 	}
 	return rt;
 }
@@ -108,10 +113,10 @@ Index IteratorStructWithin::skipDoc( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
 
-	m_docno = getFirstAllMatchDocno( m_group, docno_);
+	m_docno = getFirstAllMatchDocno( m_argarsize, m_argar, docno_);
 	if (m_docno)
 	{
-		if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
+		if (m_cut && m_cut->skipDoc( m_docno) == m_docno)
 		{
 			m_docno_cut = m_docno;
 		}
@@ -132,23 +137,22 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 
 	for (;;)
 	{
-		PostingIteratorReferenceArray::iterator pi = m_group.begin(), pe = m_group.end();
-		if (pi == pe) return m_posno=0;
+		std::size_t ai = 0, ae = m_argarsize;
+		if (ai == ae) return 0;
 
-		min_pos = pi->skipPos( pos_iter);
+		min_pos = m_argar[ai]->skipPos( pos_iter);
 		if (!min_pos)
 		{
 			return m_posno=0;
 		}
 		max_pos = min_pos;
 		std::vector<Index> poset;	// .. linear search because sets are small
-		poset.reserve( m_group.size());
+		poset.reserve( m_argarsize);
 		poset.push_back( min_pos);
-		std::size_t pidx = 0;
 
-		for (++pi; pi != pe; ++pi,++pidx)
+		for (++ai; ai != ae; ++ai)
 		{
-			Index pos_next = pi->skipPos( pos_iter);
+			Index pos_next = m_argar[ai]->skipPos( pos_iter);
 			for (;;)
 			{
 				if (!pos_next) return m_posno=0;
@@ -158,7 +162,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 					// ... only items at distinct positions are allowed
 					break;
 				}
-				pos_next = pi->skipPos( pos_next +1);
+				pos_next = m_argar[ai]->skipPos( pos_next +1);
 			}
 			poset.push_back( pos_next);
 
@@ -176,7 +180,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 				break;
 			}
 		}
-		if (pi == pe)
+		if (ai == ae)
 		{
 			if (m_docno_cut == m_docno)
 			{
@@ -202,12 +206,13 @@ Index IteratorStructWithin::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		PostingIteratorReferenceArray::const_iterator ai = m_group.begin(), ae = m_group.end();
+		std::size_t ai = 0, ae = m_argarsize;
 		if (ai == ae) return 0;
-		m_documentFrequency = ai->documentFrequency();
+
+		m_documentFrequency = m_argar[ai]->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
 		{
-			Index df = ai->documentFrequency();
+			Index df = m_argar[ai]->documentFrequency();
 			if (df < m_documentFrequency)
 			{
 				m_documentFrequency = df;

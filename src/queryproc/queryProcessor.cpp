@@ -40,7 +40,6 @@
 #include "weighting/weightingConstant.hpp"
 #include "weighting/weightingFrequency.hpp"
 #include "weighting/weightingBM25.hpp"
-#include "weighting/weightingIdfBased.hpp"
 #include "summarizer/summarizerMetaData.hpp"
 #include "summarizer/summarizerAttribute.hpp"
 #include "summarizer/summarizerMatchPhrase.hpp"
@@ -51,23 +50,53 @@
 #include <set>
 #include <limits>
 #include <iostream>
+#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
-#undef STRUS_LOWLEVEL_DEBUG
+// Predefined functions:
+static const WeightingFunctionBM25 weightingBM25;
+static const WeightingFunctionTermFrequency weightingTF;
+static const WeightingFunctionConstant weightingTD;
+
+static const SummarizerFunctionMetaData summarizerMetaData;
+static const SummarizerFunctionMatchPhrase summarizerMatchPhrase;
+static const SummarizerFunctionListMatches summarizerListMatches;
+static const SummarizerFunctionAttribute summarizerAttribute;
+
+static const PostingJoinWithin joinWithin;
+static const PostingJoinStructWithin joinWithinStruct;
+static const PostingJoinSequence joinSequence;
+static const PostingJoinStructSequence joinSequenceStruct;
+static const PostingJoinDifference joinDiff;
+static const PostingJoinIntersect joinIntersect;
+static const PostingJoinUnion joinUnion;
+static const PostingJoinSucc joinSucc;
+static const PostingJoinPred joinPred;
+
 
 QueryProcessor::QueryProcessor( StorageInterface* storage_)
 	:m_storage(storage_)
-{}
-
-static bool isEqual( const std::string& id, const char* idstr)
 {
-	char const* si = id.c_str();
-	char const* di = idstr;
-	for (; *si && *di && ((*si|32) == (*di|32)); ++si,++di){}
-	return !*si && !*di;
-}
+	definePostingJoinOperator( "within", &joinWithin);
+	definePostingJoinOperator( "within_struct", &joinWithinStruct);
+	definePostingJoinOperator( "sequence", &joinSequence);
+	definePostingJoinOperator( "sequence_struct", &joinSequenceStruct);
+	definePostingJoinOperator( "diff", &joinDiff);
+	definePostingJoinOperator( "intersect", &joinIntersect);
+	definePostingJoinOperator( "union", &joinUnion);
+	definePostingJoinOperator( "succ", &joinSucc);
+	definePostingJoinOperator( "pred", &joinPred);
 
+	defineWeightingFunction( "BM25", &weightingBM25);
+	defineWeightingFunction( "TF", &weightingTF);
+	defineWeightingFunction( "TD", &weightingTD);
+
+	defineSummarizerFunction( "metadata", &summarizerMetaData);
+	defineSummarizerFunction( "matchphrase", &summarizerMatchPhrase);
+	defineSummarizerFunction( "matchpos", &summarizerListMatches);
+	defineSummarizerFunction( "attribute", &summarizerAttribute);
+}
 
 PostingIteratorInterface*
 	QueryProcessor::createTermPostingIterator( 
@@ -82,224 +111,62 @@ PostingIteratorInterface*
 }
 
 
-#ifdef STRUS_LOWLEVEL_DEBUG
-static void logFeatureCreation( const std::string& name, int range, std::size_t nofargs, const PostingIteratorInterface** args)
+void QueryProcessor::definePostingJoinOperator(
+		const char* name,
+		const PostingJoinOperatorInterface* op)
 {
-	std::cerr << "create feature " << name << "[" << range << "] ";
-	for (std::size_t ii=0; ii<nofargs; ++ii)
-	{
-		if (ii) std::cerr << ", ";
-		if (args[ii])
-		{
-			std::cerr << args[ii]->featureid();
-		}
-		else
-		{
-			std::cerr << "NULL";
-		}
-	}
-	std::cerr << std::endl;
+	m_joiners[ boost::algorithm::to_lower_copy( std::string(name))] = op;
 }
-#else
-#define logFeatureCreation( name, range, nofargs, args)
-#endif
 
-PostingIteratorInterface*
-	QueryProcessor::createJoinPostingIterator(
-		const std::string& name,
-		int range,
-		std::size_t nofargs,
-		const PostingIteratorInterface** args) const
+const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
+		const std::string& name) const
 {
-	try
+	std::map<std::string,const PostingJoinOperatorInterface*>::const_iterator 
+		ji = m_joiners.find( boost::algorithm::to_lower_copy( name));
+	if (ji == m_joiners.end())
 	{
-		logFeatureCreation( name, range, nofargs, args);
-		if (isEqual( name, "pred"))
-		{
-			if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
-			if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-			if (nofargs >= 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
-	
-			return new IteratorPred( args[0]);
-		}
-		else if (isEqual( name, "succ"))
-		{
-			if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
-			if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-			if (nofargs >= 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
-	
-			return new IteratorSucc( args[0]);
-		}
-		else if (isEqual( name, "union") || isEqual( name, Constants::operator_set_union()))
-		{
-			if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
-			if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-	
-			return new IteratorUnion( nofargs, args);
-		}
-		else if (isEqual( name, "intersect"))
-		{
-			if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
-			if (nofargs == 0) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-	
-			return new IteratorIntersect( nofargs, args);
-		}
-		else if (isEqual( name, "diff"))
-		{
-			if (range != 0) throw std::runtime_error( std::string( "no range argument expected for '") + name + "'");
-			if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-			if (nofargs > 2) throw std::runtime_error( std::string( "too many arguments for '") + name + "'");
-	
-			if (!args[0]) return 0;
-			if (!args[1]) return args[0]->copy();
-	
-			return new IteratorDifference( args[0], args[1]);
-		}
-		else if (isEqual( name, "sequence_struct"))
-		{
-			if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-	
-			return new IteratorStructSequence( range, nofargs-1, args+1, args[0]);
-		}
-		else if (isEqual( name, "sequence"))
-		{
-			if (nofargs < 1) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-			
-			return new IteratorStructSequence( range, nofargs, args);
-		}
-		else if (isEqual( name, "within_struct"))
-		{
-			if (nofargs < 2) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-	
-			return new IteratorStructWithin( range, nofargs-1, args+1, args[0]);
-		}
-		else if (isEqual( name, "within"))
-		{
-			if (nofargs < 1) throw std::runtime_error( std::string( "too few arguments for '") + name + "'");
-	
-			return new IteratorStructWithin( range, nofargs, args);
-		}
-		else
-		{
-			throw std::runtime_error( "unknown join operator name");
-		}
+		throw std::runtime_error( std::string( "posting set join operator not defined: '") + name + "'");
 	}
-	catch (const std::runtime_error& err)
+	return ji->second;
+}
+
+void QueryProcessor::defineWeightingFunction(
+		const char* name,
+		const WeightingFunctionInterface* func)
+{
+	m_weighters[ boost::algorithm::to_lower_copy( std::string(name))] = func;
+}
+
+const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
+		const std::string& name) const
+{
+	std::map<std::string,const WeightingFunctionInterface*>::const_iterator 
+		wi = m_weighters.find( boost::algorithm::to_lower_copy( std::string(name)));
+	if (wi == m_weighters.end())
 	{
-		throw std::runtime_error( std::string("failed to create join operator '") + name + "': " + err.what());
+		throw std::runtime_error( std::string( "weighting function not defined: '") + name + "'");
 	}
+	return wi->second;
+}
+
+void QueryProcessor::defineSummarizerFunction(
+		const char* name,
+		const SummarizerFunctionInterface* sumfunc)
+{
+	m_summarizers[ boost::algorithm::to_lower_copy( std::string(name))] = sumfunc;
+}
+
+const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
+		const std::string& name) const
+{
+	std::map<std::string,const SummarizerFunctionInterface*>::const_iterator 
+		si = m_summarizers.find( boost::algorithm::to_lower_copy( std::string(name)));
+	if (si == m_summarizers.end())
+	{
+		throw std::runtime_error( std::string( "summarization function not defined: '") + name + "'");
+	}
+	return si->second;
 }
 
 
-WeightingFunctionInterface*
-	QueryProcessor::createWeightingFunction(
-			const std::string& name,
-			const std::vector<float>& parameter,
-			const MetaDataReaderInterface* metadata) const
-{
-	try
-	{
-		if (isEqual( name, "td"))
-		{
-			if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + name + "'");
-			return new WeightingConstant( 1.0, m_storage);
-		}
-		else if (isEqual( name, "tf"))
-		{
-			if (!parameter.empty()) throw std::runtime_error( std::string("unexpected scaling parameter for accumulator '") + name + "'");
-			return new WeightingFrequency( m_storage);
-		}
-		else if (isEqual( name, "bm25"))
-		{
-			float b  = parameter.size() > 0 ? parameter[0]:0.75;
-			float k1 = parameter.size() > 1 ? parameter[1]:1.5;
-			float avgDocLength = parameter.size() > 2 ? parameter[2]:1000;
-	
-			return new WeightingBM25( m_storage, metadata, k1, b, avgDocLength);
-		}
-		else if (isEqual( name, "bm15"))
-		{
-			float b  = 0;
-			float k1 = parameter.size() > 0 ? parameter[0]:1.5;
-			float avgDocLength = parameter.size() > 1 ? parameter[1]:1000;
-	
-			return new WeightingBM25( m_storage, metadata, k1, b, avgDocLength);
-		}
-		else
-		{
-			throw std::runtime_error( "unknown weighting function");
-		}
-	}
-	catch (const std::runtime_error& err)
-	{
-		throw std::runtime_error( std::string("failed to create weighting method '") + name + "': " + err.what());
-	}
-}
-
-
-SummarizerInterface*
-	QueryProcessor::createSummarizer(
-		const std::string& name,
-		const std::string& type,
-		const std::vector<float>& parameter,
-		const PostingIteratorInterface* structitr,
-		std::size_t nofitrs,
-		const PostingIteratorInterface** itrs,
-		MetaDataReaderInterface* metadata,
-		AttributeReaderInterface* attreader) const
-{
-	try
-	{
-		if (isEqual( name, "metadata"))
-		{
-			if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
-			if (structitr || nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
-			return new SummarizerMetaData( metadata, type);
-		}
-		else if (isEqual( name, "attribute"))
-		{
-			if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
-			if (structitr || nofitrs > 0) throw std::runtime_error( std::string("no feature sets as arguments expected for summarizer '") + name + "'");
-			return new SummarizerAttribute( attreader, type);
-		}
-		else if (isEqual( name, "matchphrase"))
-		{
-			if (!structitr) throw std::runtime_error( std::string("no structure feature set defined (SUMMARIZE ... IN) but needed for summarizer '") + name + "'");
-			unsigned int maxlen = 30;
-			unsigned int summarizelen = 100;
-			if (parameter.size() > 0)
-			{
-				summarizelen = maxlen = (unsigned int)parameter[0];
-			}
-			if (!nofitrs)
-			{
-				return 0;
-			}
-			if (parameter.size() > 2) throw std::runtime_error( std::string("too many scalar arguments for summarizer '") + name + "'");
-			if (parameter.size() == 2)
-			{
-				summarizelen = (unsigned int)( parameter[1]);
-			}
-			return new SummarizerMatchPhrase(
-					m_storage, type, maxlen, summarizelen, 
-					nofitrs, itrs, structitr);
-		}
-		else if (isEqual( name, "listmatches"))
-		{
-			if (parameter.size() > 0) throw std::runtime_error( std::string("no scalar arguments expected for summarizer '") + name + "'");
-			if (structitr) throw std::runtime_error( std::string( "no structure feature set expected (SUMMARIZE ... IN) for summarizer '") + name + "'");
-			if (!type.empty()) throw std::runtime_error( std::string( "unexpected parameter for summarizer '") + name + "'");
-			if (!nofitrs) return 0;
-			return new SummarizerListMatches( m_storage, nofitrs, itrs);
-		}
-		else
-		{
-			throw std::runtime_error( "unknown summarizer");
-		}
-	}
-	catch (const std::runtime_error& err)
-	{
-		throw std::runtime_error( std::string("failed to create summarizer '") + name + "': " + err.what());
-	}
-}
 

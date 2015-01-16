@@ -29,31 +29,64 @@
 #ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingClosureInterface.hpp"
 #include "strus/index.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "weightingIdfBased.hpp"
 #include <limits>
 #include <vector>
 
 namespace strus
 {
 
-/// \class WeightingConstant
-/// \brief Accumulator for the feature frequency
-class WeightingConstant
-	:public WeightingIdfBased
+/// \brief Forward declaration
+class WeightingFunctionConstant;
+
+
+/// \class WeightingClosureConstant
+/// \brief Weighting function based on the FF formula
+class WeightingClosureConstant
+	:public WeightingClosureInterface
 {
 public:
-	WeightingConstant(
-			float weight_,
-			const StorageInterface* storage_)
-		:WeightingIdfBased(storage_),m_weight(weight_){}
+	WeightingClosureConstant(
+			PostingIteratorInterface* itr_,
+			float weight_)
+		:m_itr(itr_),m_weight(weight_){}
 
-	virtual ~WeightingConstant(){}
-
-	virtual float call( PostingIteratorInterface& itr)
+	virtual float call( const Index& docno)
 	{
-		return m_weight;
+		return docno==m_itr->skipDoc(docno)?(m_weight * m_itr->weight()):(float)0.0;
+	}
+
+private:
+	PostingIteratorInterface* m_itr;
+	float m_weight;
+};
+
+
+/// \class WeightingFunctionConstant
+/// \brief Weighting function that simply returns the ff (feature frequency in the document)
+class WeightingFunctionConstant
+	:public WeightingFunctionInterface
+{
+public:
+	explicit WeightingFunctionConstant(){}
+	virtual ~WeightingFunctionConstant(){}
+
+	virtual const char** parameterNames() const
+	{
+		static const char* ar[] = {"weight",0};
+		return ar;
+	}
+
+	virtual WeightingClosureInterface* createClosure(
+			const StorageInterface*,
+			PostingIteratorInterface* itr_,
+			MetaDataReaderInterface*,
+			const std::vector<ArithmeticVariant>& parameters) const
+	{
+		return new WeightingClosureConstant( itr_, parameters[0].defined()?(float)parameters[0]:(float)1.0);
 	}
 
 private:

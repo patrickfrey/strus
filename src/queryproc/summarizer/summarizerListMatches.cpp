@@ -31,26 +31,39 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include <set>
+#include <cstdlib>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 
-SummarizerListMatches::SummarizerListMatches(
-		StorageInterface* storage_,
-		std::size_t nofitrs_,
-		const PostingIteratorInterface** itrs_)
+SummarizerClosureListMatches::SummarizerClosureListMatches(
+		const StorageInterface* storage_,
+		std::size_t nofitr_,
+		PostingIteratorInterface** itr_)
 	:m_storage(storage_)
+	,m_nofitr(nofitr_)
 {
-	for (std::size_t ii=0; ii<nofitrs_; ++ii)
+	m_itr = (PostingIteratorInterface**)std::malloc( nofitr_ * sizeof(itr_[0]));
+	if (!m_itr) throw std::bad_alloc();
+	try
 	{
-		if (itrs_[ii])
+		for (std::size_t ii=0; ii<nofitr_; ++ii)
 		{
-			m_itr.push_back( itrs_[ii]->copy());
+			m_itr[ii] = itr_[ii];
 		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		std::free( m_itr);
+		throw std::bad_alloc();
 	}
 }
 
-SummarizerListMatches::~SummarizerListMatches()
-{}
+SummarizerClosureListMatches::~SummarizerClosureListMatches()
+{
+	std::free( m_itr);
+}
 
 static std::string getMatches(
 	PostingIteratorInterface& itr,
@@ -74,18 +87,18 @@ static std::string getMatches(
 }
 
 std::vector<std::string>
-	SummarizerListMatches::getSummary( const Index& docno)
+	SummarizerClosureListMatches::getSummary( const Index& docno)
 {
 	std::vector<std::string> rt;
-	std::vector<PostingIteratorReference>::const_iterator
-		ii = m_itr.begin(), ie = m_itr.end();
+	std::size_t ii = 0, ie = m_nofitr;
+
 	for (; ii != ie; ++ii)
 	{
 		std::vector<const PostingIteratorInterface*>
-			subexpr = (*ii)->subExpressions( true);
-		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
+			subexpr = m_itr[ii]->subExpressions( true);
+		if (m_itr[ii]->skipDoc( docno) != 0 && m_itr[ii]->skipPos( 0) != 0)
 		{
-			rt.push_back( getMatches( **ii, subexpr));
+			rt.push_back( getMatches( *m_itr[ii], subexpr));
 		}
 	}
 	return rt;

@@ -1,8 +1,11 @@
 #include "accumulator.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/docnoIteratorInterface.hpp"
+#include "strus/weightingClosureInterface.hpp"
+#include "parser/mapFunctionParameters.hpp"
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -10,24 +13,18 @@
 
 using namespace strus;
 
-Accumulator::Accumulator(
-		const QueryProcessorInterface* qproc_,
-		MetaDataReaderInterface* metadata_,
-		std::size_t maxNofRanks_,
-		std::size_t maxDocumentNumber_)
-	:m_queryprocessor(qproc_)
-	,m_metadata(metadata_)
-	,m_selectoridx(0)
-	,m_docno(0)
-	,m_visited(maxDocumentNumber_)
-	,m_maxNofRanks(maxNofRanks_)
-	,m_maxDocumentNumber(maxDocumentNumber_)
-{}
-
 void Accumulator::addSelector(
-		const PostingIteratorInterface& iterator)
+		PostingIteratorInterface* iterator)
 {
-	m_selectors.push_back( iterator.copy());
+	m_selectorPostings.push_back( iterator);
+}
+
+void Accumulator::addFeature(
+		PostingIteratorInterface* iterator)
+{
+	m_functionClosures.push_back( 
+		m_function->createClosure( 
+			m_storage, iterator, m_metadata, m_parameter));
 }
 
 void Accumulator::addRestrictionSet(
@@ -36,31 +33,16 @@ void Accumulator::addRestrictionSet(
 	m_restrictionSets.push_back( iterator);
 }
 
-void Accumulator::addRanker(
-		float factor,
-		const std::string& function,
-		const std::vector<float>& parameter,
-		const PostingIteratorInterface& iterator)
-{
-	WeightingFunctionReference weighting(
-		m_queryprocessor->createWeightingFunction(
-			function, parameter, m_metadata));
-	PostingIteratorReference itr( iterator.copy());
-
-	m_rankers.push_back( AccumulatorArgument( factor, weighting.detach(), itr.detach()));
-}
-
-
 bool Accumulator::nextRank(
 		Index& docno,
 		unsigned int& selectorState,
 		float& weight)
 {
 	// For all selectors:
-	while (m_selectoridx < m_selectors.size())
+	while (m_selectoridx < m_selectorPostings.size())
 	{
 		// Select candidate document:
-		m_docno = m_selectors[ m_selectoridx].skipDoc( m_docno+1);
+		m_docno = m_selectorPostings[ m_selectoridx]->skipDoc( m_docno+1);
 		if (!m_docno)
 		{
 			++m_selectoridx;
@@ -77,10 +59,11 @@ bool Accumulator::nextRank(
 		if (m_restrictionSets.size())
 		{
 			// Apply restrictions defined by document sets
-			DocnoIteratorReferenceArray::iterator ri = m_restrictionSets.begin(), re = m_restrictionSets.end();
+			std::vector<DocnoIteratorInterface*>::const_iterator
+				ri = m_restrictionSets.begin(), re = m_restrictionSets.end();
 			for (; ri != re; ++ri)
 			{
-				Index dn = ri->skipDoc( m_docno);
+				Index dn = (*ri)->skipDoc( m_docno);
 				if (dn != m_docno)
 				{
 					if (!dn)
@@ -104,15 +87,12 @@ bool Accumulator::nextRank(
 		selectorState = m_selectoridx+1;
 		weight = 0.0;
 
-		// Add a weight for every ranker that has a match:
-		std::vector<AccumulatorArgument>::iterator ai = m_rankers.begin(), ae = m_rankers.end();
-
+		// Add a weight for every accumulator summand that has a match:
+		WeightingClosureReferenceArray::iterator
+			ai = m_functionClosures.begin(), ae = m_functionClosures.end();
 		for (; ai != ae; ++ai)
 		{
-			if (m_docno == ai->itr->skipDoc( m_docno))
-			{
-				weight += ai->function->call( *ai->itr) * ai->factor;
-			}
+			weight += ai->call( m_docno);
 		}
 		return true;
 	}

@@ -4,20 +4,11 @@
 using namespace strus;
 
 
-IteratorUnionWeighted::IteratorUnionWeighted( std::size_t nofargs, const PostingIteratorInterface** args)
+IteratorUnionWeighted::IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args)
 	:IteratorUnion( nofargs, args)
 {
 	m_weightitr = m_weightmap.end();
 }
-
-
-IteratorUnionWeighted::IteratorUnionWeighted( const IteratorUnionWeighted& o)
-	:IteratorUnion(o)
-	,m_weightmap(o.m_weightmap)
-{
-	m_weightitr = m_weightmap.find( o.posno());
-}
-
 
 Index IteratorUnionWeighted::skipDoc( const Index& docno_)
 {
@@ -36,7 +27,6 @@ Index IteratorUnionWeighted::skipDoc( const Index& docno_)
 	return rt;
 }
 
-
 Index IteratorUnionWeighted::skipPos( const Index& pos_)
 {
 	m_weightitr = m_weightmap.upper_bound( pos_-1);
@@ -44,7 +34,7 @@ Index IteratorUnionWeighted::skipPos( const Index& pos_)
 	return m_weightitr->second;
 }
 
-float IteratorUnionWeighted::weight() const
+float IteratorUnionWeighted::positionWeight() const
 {
 	if (m_weightitr == m_weightmap.end()) return 0.0;
 	return m_weightitr->second;

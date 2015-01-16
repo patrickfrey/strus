@@ -28,7 +28,8 @@
 */
 #ifndef _STRUS_SUMMARIZER_ATTRIBUTE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_ATTRIBUTE_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
+#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
 #include <string>
 #include <vector>
 
@@ -41,15 +42,15 @@ class StorageInterface;
 class AttributeReaderInterface;
 
 
-class SummarizerAttribute
-	:public SummarizerInterface
+class SummarizerClosureAttribute
+	:public SummarizerClosureInterface
 {
 public:
 	/// \param[in] attribreader_ reader for document attributes
 	/// \param[in] name_ attribute identifier
-	SummarizerAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
+	SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
 
-	virtual ~SummarizerAttribute(){}
+	virtual ~SummarizerClosureAttribute();
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from
@@ -60,6 +61,37 @@ private:
 	AttributeReaderInterface* m_attribreader;
 	int m_attrib;
 };
+
+
+class SummarizerFunctionAttribute
+	:public SummarizerFunctionInterface
+{
+public:
+	SummarizerFunctionAttribute(){}
+
+	virtual ~SummarizerFunctionAttribute(){}
+
+	virtual const char* name() const
+	{
+		return "attribute";
+	}
+
+	virtual const char** parameterNames() const
+	{
+		static const char* ar[] = {0};
+		return ar;
+	}
+
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageInterface* storage_,
+			const std::string& elementname_,
+			PostingIteratorInterface* structitr_,
+			std::size_t nofitrs_,
+			PostingIteratorInterface**,
+			MetaDataReaderInterface*,
+			const std::vector<ArithmeticVariant>&) const;
+};
+
 
 }//namespace
 #endif

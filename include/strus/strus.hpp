@@ -28,14 +28,5 @@
 */
 #ifndef _STRUS_MAIN_INCLUDE_HPP_INCLUDED
 #define _STRUS_MAIN_INCLUDE_HPP_INCLUDED
-#include "strus/queryEvalLib.hpp"
-#include "strus/queryProcessorLib.hpp"
-#include "strus/storageLib.hpp"
-#include "strus/queryEvalInterface.hpp"
-#include "strus/weightingFunctionInterface.hpp"
-#include "strus/postingIteratorInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
-#include "strus/storageInterface.hpp"
-#include "strus/storageInserterInterface.hpp"
 #endif
 

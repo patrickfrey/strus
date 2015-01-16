@@ -26,34 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#include "iterator/postingIteratorUnion.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
+#ifndef _STRUS_CASE_INSENSITIVE_STRING_MAP_HPP_INCLUDED
+#define _STRUS_CASE_INSENSITIVE_STRING_MAP_HPP_INCLUDED
+#include <string>
 #include <map>
+#include <boost/algorithm/string.hpp>
+
+#error DEPRECATED
 
 namespace strus
 {
 
-class IteratorUnionWeighted
-	:public IteratorUnion
+/// \class cistring
+/// \brief Constructor for implementing implicit type reductions in key maps that store the key as upper case string.
+struct cistring
+	:public std::string
 {
-public:
-	IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args);
+	cistring( const char* o)
+		:std::string( boost::to_lower_copy( std::string(o))){}
+	cistring( const std::string& o)
+		:std::string( boost::to_lower_copy( o)){}
+	cistring( const cistring& o)
+		:std::string( o){}
+	cistring(){}
+};
 
-	virtual ~IteratorUnionWeighted(){}
+/// \class cistringmap
+/// \brief Map with case insensitive strings as keys
+template <typename ValueType>
+struct cistringmap
+	:public std::map<cistring,ValueType>
+{
+	typedef std::map<cistring,ValueType> Parent;
 
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
-
-	float positionWeight() const;
-
-private:
-	std::map<Index,float> m_weightmap;
-	std::map<Index,float>::const_iterator m_weightitr;
+	cistringmap(){}
+	cistringmap( const cistringmap& o)
+		:std::map<cistring,ValueType>(o){}
+	cistringmap( const std::map<std::string,ValueType>& o)
+	{
+		std::copy( o.begin(), o.end(), std::inserter( *this, this->end()));
+	}
 };
 
 }//namespace
 #endif
-
 

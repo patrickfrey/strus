@@ -29,7 +29,7 @@
 #ifndef _STRUS_ITERATOR_STRUCT_WITHIN_HPP_INCLUDED
 #define _STRUS_ITERATOR_STRUCT_WITHIN_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
-#include "postingIteratorReference.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 #include <vector>
 
 namespace strus
@@ -45,11 +45,9 @@ public:
 	/// \param[in] nofargs number of elements in args
 	/// \param[in] args the positive elements of this join
 	/// \param[in] cut (optional) the cut element
-	IteratorStructWithin( int range_, std::size_t nofargs, const PostingIteratorInterface** args, const PostingIteratorInterface* cut=0);
+	IteratorStructWithin( int range_, std::size_t nofargs, PostingIteratorInterface** args, PostingIteratorInterface* cut=0);
 
-	/// \brief Cioy constructor
-	IteratorStructWithin( const IteratorStructWithin& o);
-	virtual ~IteratorStructWithin(){}
+	virtual ~IteratorStructWithin();
 
 	virtual const std::string& featureid() const
 	{
@@ -83,11 +81,49 @@ private:
 	Index m_docno;					///< current document number
 	Index m_docno_cut;				///< next document number after m_docno that contains a cut element
 	Index m_posno;					///< current position
-	PostingIteratorReferenceArray m_group;		///< the elements of the group
-	PostingIteratorReference m_cut;			///< the set of elements then must not appear inside the group
+	std::size_t m_argarsize;			///< nof arguments
+	PostingIteratorInterface** m_argar;		///< arguments
+	PostingIteratorInterface* m_cut;		///< the set of elements then must not appear inside the group
 	int m_range;					///< the maximum position difference between the start element and the end element of the group
 	std::string m_featureid;			///< unique id of the feature expression
 	mutable Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
+};
+
+
+
+
+class PostingJoinStructWithin
+	:public PostingJoinOperatorInterface
+{
+public:
+	virtual ~PostingJoinStructWithin(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range_) const
+	{
+		if (nofitrs_ < 2) throw std::runtime_error( "too few arguments");
+
+		return new IteratorStructWithin( range_, nofitrs_-1, itrs_+1, itrs_[0]);
+	}
+};
+
+class PostingJoinWithin
+	:public PostingJoinOperatorInterface
+{
+public:
+	virtual ~PostingJoinWithin(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range_) const
+	{
+		if (nofitrs_ < 1) throw std::runtime_error( "too few arguments");
+
+		return new IteratorStructWithin( range_, nofitrs_, itrs_);
+	}
 };
 
 }//namespace

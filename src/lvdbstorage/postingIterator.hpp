@@ -78,11 +78,6 @@ public:
 		return 0;
 	}
 
-	virtual float weight() const
-	{
-		return 0.0;
-	}
-
 	virtual PostingIteratorInterface* copy() const
 	{
 		return new PostingIterator(*this);

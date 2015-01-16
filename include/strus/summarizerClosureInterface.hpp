@@ -26,44 +26,28 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_IDF_BASED_HPP_INCLUDED
-#define _STRUS_WEIGHTING_IDF_BASED_HPP_INCLUDED
-#include "strus/weightingFunctionInterface.hpp"
-#include "strus/storageInterface.hpp"
+#ifndef _STRUS_SUMMARIZER_CLOSURE_INTERFACE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_CLOSURE_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "postingIteratorReference.hpp"
+#include <string>
 #include <vector>
 
 namespace strus
 {
 
-/// \class WeightingIdfBased
-/// \brief Interface for weighting function based on IDF
-class WeightingIdfBased
-	:public WeightingFunctionInterface
+/// \brief Interface for the summarization context (of a SummarizationFunction)
+class SummarizerClosureInterface
 {
 public:
-	WeightingIdfBased(
-			const StorageInterface* storage_)
-		:m_storage(storage_)
-		,m_idf(0.0)
-		,m_idf_calculated(false){}
+	virtual ~SummarizerClosureInterface(){}
 
-	virtual ~WeightingIdfBased(){}
-
-	virtual float call( PostingIteratorInterface& itr)=0;
-
-protected:
-	bool idf_calculated() const			{return m_idf_calculated;}
-	float idf() const				{return m_idf;}
-	void calculateIdf( PostingIteratorInterface& itr);
-
-private:
-	const StorageInterface* m_storage;
-	float m_idf;
-	bool m_idf_calculated;
+	/// \brief Get some summarization elements
+	/// \param[in] docno document to get the summary element from
+	/// \return the summarization elements
+	virtual std::vector<std::string> getSummary( const Index& docno)=0;
 };
 
 }//namespace
 #endif
+
 

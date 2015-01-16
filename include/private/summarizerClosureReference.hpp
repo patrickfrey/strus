@@ -26,34 +26,32 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingIdfBased.hpp"
-//[+]#include "fastapprox/fastlog.h"
-#include <cmath>
+#ifndef _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
+#include "strus/summarizerClosureInterface.hpp"
+#include "localReference.hpp"
 
-using namespace strus;
-
-void WeightingIdfBased::calculateIdf( PostingIteratorInterface& itr)
+namespace strus
 {
-	float nofMatches = itr.documentFrequency();
-	float nofCollectionDocuments = m_storage->nofDocumentsInserted();
 
-	if (nofCollectionDocuments > nofMatches * 2)
-	{
-		m_idf =
-			logf(
-				(nofCollectionDocuments - nofMatches + 0.5)
-				/ (nofMatches + 0.5));
-	}
-	else if (nofCollectionDocuments > 100)
-	{
-		m_idf = 0.0;
-	}
-	else
-	{
-		m_idf = 0.1;
-	}
-	m_idf_calculated = true;
-}
+class SummarizerClosureReference
+	:public LocalReference<SummarizerClosureInterface>
+{
+public:
+	SummarizerClosureReference()
+		:LocalReference<SummarizerClosureInterface>(){}
+	SummarizerClosureReference( SummarizerClosureInterface* o)
+		:LocalReference<SummarizerClosureInterface>(o){}
+};
 
+class SummarizerClosureReferenceArray
+	:public LocalReferenceArray<SummarizerClosureInterface>
+{
+public:
+	SummarizerClosureReferenceArray(){}
+};
+
+}//namespace
+#endif
 
 

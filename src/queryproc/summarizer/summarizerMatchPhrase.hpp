@@ -26,10 +26,11 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_MATCHPHRASE_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
-#include "private/postingIteratorReference.hpp"
+#ifndef _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
+#include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerClosureInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include <string>
 #include <vector>
 
@@ -44,8 +45,8 @@ class ForwardIteratorInterface;
 class PostingIteratorInterface;
 
 
-class SummarizerMatchPhrase
-	:public SummarizerInterface
+class SummarizerClosureMatchPhrase
+	:public SummarizerClosureInterface
 {
 public:
 	/// \param[in] storage_ storage to use
@@ -55,16 +56,16 @@ public:
 	/// \param[in] nofitrs_ number of argument iterators
 	/// \param[in] itrs_ argument iterators
 	/// \param[in] phrasestruct_ structure iterator to recognize end of phrases
-	SummarizerMatchPhrase(
-		StorageInterface* storage_,
-		const std::string& termtype_,
-		unsigned int maxlen_,
-		unsigned int summarylen_,
-		std::size_t nofitrs_,
-		const PostingIteratorInterface** itrs_,
-		const PostingIteratorInterface* phrasestruct_);
+	SummarizerClosureMatchPhrase(
+			const StorageInterface* storage_,
+			const std::string& termtype_,
+			unsigned int maxlen_,
+			unsigned int summarylen_,
+			std::size_t nofitr_,
+			PostingIteratorInterface** itrs_,
+			PostingIteratorInterface* phrasestruct_);
 
-	virtual ~SummarizerMatchPhrase();
+	virtual ~SummarizerClosureMatchPhrase();
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from
@@ -72,13 +73,52 @@ public:
 	virtual std::vector<std::string> getSummary( const Index& docno);
 
 private:
-	StorageInterface* m_storage;
+	const StorageInterface* m_storage;
 	ForwardIteratorInterface* m_forwardindex;
 	std::string m_termtype;
 	unsigned int m_maxlen;
 	unsigned int m_summarylen;
-	PostingIteratorReferenceArray m_itr;
-	PostingIteratorReference m_phrasestruct;
+	std::size_t m_nofitr;
+	PostingIteratorInterface** m_itr;
+	PostingIteratorInterface* m_phrasestruct;
+};
+
+
+class SummarizerFunctionMatchPhrase
+	:public SummarizerFunctionInterface
+{
+public:
+	SummarizerFunctionMatchPhrase(){}
+
+	virtual ~SummarizerFunctionMatchPhrase(){}
+
+	virtual const char* name() const
+	{
+		return "matchphrase";
+	}
+
+	virtual const char** parameterNames() const
+	{
+		static const char* ar[] = {"phraselen","sumlen",0};
+		return ar;
+	}
+
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageInterface* storage_,
+			const std::string& elementname_,
+			PostingIteratorInterface* structitr_,
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			MetaDataReaderInterface*,
+			const std::vector<ArithmeticVariant>& parameters) const
+	{
+		if (nofitrs_ || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'matchphrase'");
+		return new SummarizerClosureMatchPhrase( 
+				storage_, elementname_,
+				parameters[0].defined()?(unsigned int)parameters[0]:30,
+				parameters[1].defined()?(unsigned int)parameters[1]:50,
+				nofitrs_, itrs_, structitr_);
+	}
 };
 
 }//namespace

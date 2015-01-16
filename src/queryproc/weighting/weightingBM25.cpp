@@ -32,49 +32,60 @@
 
 using namespace strus;
 
-WeightingBM25::WeightingBM25(
-	const StorageInterface* storage_,
-	const MetaDataReaderInterface* metadata_,
-	float k1_,
-	float b_,
-	float avgDocLength_)
-		:WeightingIdfBased(storage_)
-		,m_storage(storage_)
-		,m_metadata(metadata_)
-		,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-		,m_k1(k1_)
-		,m_b(b_)
-		,m_avgDocLength(avgDocLength_)
-		,m_docno(0)
-		
-{}
-
-WeightingBM25::~WeightingBM25()
-{}
-
-float WeightingBM25::call( PostingIteratorInterface& itr)
+WeightingClosureBM25::WeightingClosureBM25(
+		const StorageInterface* storage,
+		PostingIteratorInterface* itr_,
+		MetaDataReaderInterface* metadata_,
+		float k1_,
+		float b_,
+		float avgDocLength_)
+	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_),m_itr(itr_),m_metadata(metadata_)
+	,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
+	,m_idf(0.0)
 {
-	if (!idf_calculated())
+	float nofMatches = m_itr->documentFrequency();
+	float nofCollectionDocuments = storage->nofDocumentsInserted();
+
+	if (nofCollectionDocuments > nofMatches * 2)
 	{
-		calculateIdf( itr);
+		m_idf =
+			logf(
+				(nofCollectionDocuments - nofMatches + 0.5)
+				/ (nofMatches + 0.5));
 	}
-	m_docno = itr.docno();
-	float ff = itr.frequency();
+	else if (nofCollectionDocuments > 100)
+	{
+		m_idf = 0.0;
+	}
+	else
+	{
+		m_idf = 0.01;
+	}
+}
+
+
+float WeightingClosureBM25::call( const Index& docno)
+{
+	if (m_itr->skipDoc( docno) != docno) return 0.0;
+
+	m_metadata->skipDoc( docno);
+
+	float ff = m_itr->frequency() * m_itr->weight();
 	if (ff == 0.0)
 	{
 		return 0.0;
 	}
 	else if (m_b)
 	{
-		float doclen = m_metadata->getValue( m_docno);
+		float doclen = m_metadata->getValue( m_metadata_doclen);
 		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return idf()
+		return m_idf
 			* (ff * (m_k1 + 1.0))
 			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
 	}
 	else
 	{
-		return idf()
+		return m_idf
 			* (ff * (m_k1 + 1.0))
 			/ (ff + m_k1 * 1.0);
 	}

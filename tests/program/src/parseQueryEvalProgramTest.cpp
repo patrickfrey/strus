@@ -29,6 +29,8 @@
 #include "strus/utils/fileio.hpp"
 #include "strus/queryEvalLib.hpp"
 #include "strus/queryEvalInterface.hpp"
+#include "strus/queryProcessorLib.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include <string>
 #include <sstream>
 #include <vector>
@@ -159,8 +161,11 @@ int main( int argc, const char* argv[])
 			{
 				std::cerr << "ERROR could not read expected result file '" << expfile << "', error " << ec << std::endl;
 			}
+			boost::scoped_ptr<strus::QueryProcessorInterface> qproc(
+				strus::createQueryProcessorInterface( 0));
+
 			boost::scoped_ptr<strus::QueryEvalInterface> qeval(
-				strus::createQueryEval( prgsource));
+				strus::createQueryEval( qproc.get(), prgsource));
 			std::ostringstream out;
 			qeval->print( out);
 			std::string outstr( out.str());

@@ -26,34 +26,38 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#include "iterator/postingIteratorUnion.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
-#include <map>
+#ifndef _STRUS_QUERY_INTERFACE_HPP_INCLUDED
+#define _STRUS_QUERY_INTERFACE_HPP_INCLUDED
+#include <string>
+#include <vector>
+#include <utility>
+#include <iostream>
+#include "strus/queryeval/resultDocument.hpp"
 
-namespace strus
-{
+namespace strus {
 
-class IteratorUnionWeighted
-	:public IteratorUnion
+/// \brief Forward declaration
+class StorageInterface;
+
+/// \brief Defines a strus retrieval query as tree
+class QueryInterface
 {
 public:
-	IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args);
+	virtual ~QueryInterface(){}
 
-	virtual ~IteratorUnionWeighted(){}
+	virtual void print( std::ostream& out)=0;
 
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
+	virtual void pushTerm( const std::string& type_, const std::string& value_)=0;
+	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_)=0;
+	virtual void defineFeature( const std::string& set_, float weight_=1.0)=0;
 
-	float positionWeight() const;
+	virtual void setMaxNofRanks( std::size_t maxNofRanks_)=0;
+	virtual void setMinRank( std::size_t minRank_)=0;
+	virtual void setUserName( const std::string& username_)=0;
 
-private:
-	std::map<Index,float> m_weightmap;
-	std::map<Index,float>::const_iterator m_weightitr;
+	virtual std::vector<queryeval::ResultDocument> evaluate(
+			const StorageInterface* storage)=0;
 };
 
 }//namespace
 #endif
-
-

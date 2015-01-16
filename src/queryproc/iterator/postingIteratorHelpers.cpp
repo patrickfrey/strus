@@ -33,24 +33,23 @@
 
 using namespace strus;
 
-Index strus::getFirstAllMatchDocno( PostingIteratorReferenceArray& ar, Index docno_iter)
+Index strus::getFirstAllMatchDocno(
+		std::size_t arsize, PostingIteratorInterface** ar, Index docno_iter)
 {
 	for (;;)
 	{
-		PostingIteratorReferenceArray::iterator pi = ar.begin(), pe = ar.end();
-		if (pi == pe)
-		{
-			return 0;
-		}
-		Index docno_first = pi->skipDoc( docno_iter);
+		std::size_t ai = 0, ae = arsize;
+		if (ai == ae) return 0;
+		
+		Index docno_first = ar[ai]->skipDoc( docno_iter);
 		if (!docno_first)
 		{
 			return 0;
 		}
 		bool match = true;
-		for (++pi; pi != pe; ++pi)
+		for (++ai; ai != ae; ++ai)
 		{
-			Index docno_next = pi->skipDoc( docno_first);
+			Index docno_next = ar[ai]->skipDoc( docno_first);
 			if (!docno_next)
 			{
 				return 0;

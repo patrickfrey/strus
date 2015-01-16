@@ -26,34 +26,42 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#include "iterator/postingIteratorUnion.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
-#include <map>
+#include "mapFunctionParameters.hpp"
+#include <boost/algorithm/string.hpp>
 
-namespace strus
+using namespace strus;
+
+std::vector<ArithmeticVariant>
+	strus::mapFunctionParameters(
+		const char** paramNames,
+		const KeyMap<ArithmeticVariant>& paramDefs)
 {
+	char const** pi = paramNames;
+	char const** pe = pi;
 
-class IteratorUnionWeighted
-	:public IteratorUnion
-{
-public:
-	IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args);
-
-	virtual ~IteratorUnionWeighted(){}
-
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
-
-	float positionWeight() const;
-
-private:
-	std::map<Index,float> m_weightmap;
-	std::map<Index,float>::const_iterator m_weightitr;
-};
-
-}//namespace
-#endif
-
+	std::vector<ArithmeticVariant> rt;
+	for (; *pe; ++pe)
+	{
+		rt.push_back( ArithmeticVariant());
+	}
+	KeyMap<ArithmeticVariant>::const_iterator
+		ai = paramDefs.begin(), ae = paramDefs.end();
+	for (; ai != ae; ++ai)
+	{
+		pi = paramNames;
+		for (int pidx=0; pi != pe; ++pi,++pidx)
+		{
+			if (boost::algorithm::iequals( ai->first, *pi))
+			{
+				rt[ pidx] = ai->second;
+				break;
+			}
+		}
+		if (pi == pe)
+		{
+			throw std::runtime_error( std::string("unknown argument name '") + ai->first + "'");
+		}
+	}
+	return rt;
+}
 

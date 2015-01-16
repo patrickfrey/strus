@@ -30,6 +30,8 @@
 #define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include <vector>
+#include <string>
 
 namespace strus
 {
@@ -51,8 +53,9 @@ public:
 	/// \return return the element handle
 	virtual Index elementHandle( const std::string& name) const=0;
 
-	/// \brief Skip to the next document number equal or bigger than 'docno'
+	/// \brief Skip to the document number equal to 'docno'
 	/// \param[in] docno document number
+	/// \remark an initialized record is created for the document if the meta data block for this document does not exist yet
 	virtual void skipDoc( const Index& docno)=0;
 
 	/// \brief Get the value a table element

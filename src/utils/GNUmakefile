@@ -2,6 +2,7 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
+	arithmeticVariant.o \
 	fileio.o \
 	cmdLineOpt.o
 

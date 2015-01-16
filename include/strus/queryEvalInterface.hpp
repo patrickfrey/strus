@@ -29,7 +29,6 @@
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #include "strus/queryeval/resultDocument.hpp"
-#include "strus/queryeval/query.hpp"
 #include "strus/index.hpp"
 #include <vector>
 #include <string>
@@ -38,9 +37,7 @@
 namespace strus
 {
 /// \brief Forward declaration
-class QueryProcessorInterface;
-/// \brief Forward declaration
-class StorageInterface;
+class QueryInterface;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -49,25 +46,11 @@ public:
 	/// \brief Destructor
 	virtual ~QueryEvalInterface(){}
 
-	/// \brief Calculate a list of the best ranked documents
-	/// \param[in] storage storage to retrieve the features from
-	/// \param[in] processor processor that creates the items needed to process the query
-	/// \param[in] username user name of the client
-	/// \param[in] query query to process
-	/// \param[in] fromRank lowest rank to return
-	/// \param[in] maxNofRanks maximum number of ranks to return
-	virtual std::vector<queryeval::ResultDocument>
-		getRankedDocumentList(
-			const StorageInterface& storage,
-			const QueryProcessorInterface& processor,
-			const std::string& username,
-			const queryeval::Query& query,
-			std::size_t fromRank,
-			std::size_t maxNofRanks) const=0;
+	/// \brief Create a new query
+	virtual QueryInterface* createQuery() const=0;
 
-	/// \brief Print the internal representation of the program to 'out'
+	/// \brief Print the internal representation of this query program to 'out'
 	/// \param[out] out stream to print the program to
-	/// \remark this method is mainly used to testing and has no other purpose
 	virtual void print( std::ostream& out) const=0;
 };
 

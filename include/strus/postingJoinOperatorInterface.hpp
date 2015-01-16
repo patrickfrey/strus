@@ -26,29 +26,30 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_REFERENCE_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
-#include "localReference.hpp"
+#ifndef _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <string>
 
 namespace strus
 {
+/// \brief Forward declaration
+class PostingIteratorInterface;
 
-class SummarizerReference
-	:public LocalReference<SummarizerInterface>
+/// \brief Interface for creating iterators on joined sets of postings
+class PostingJoinOperatorInterface
 {
 public:
-	SummarizerReference()
-		:LocalReference<SummarizerInterface>(){}
-	SummarizerReference( SummarizerInterface* o)
-		:LocalReference<SummarizerInterface>(o){}
-};
+	virtual ~PostingJoinOperatorInterface(){}
 
-class SummarizerReferenceArray
-	:public LocalReferenceArray<SummarizerInterface>
-{
-public:
-	SummarizerReferenceArray(){}
+	/// \brief Create an iterator on the join operator result (set of postings)
+	/// \param[in] nofitrs_ number of elements in 'itrs_'
+	/// \param[in] itrs_ argument posting iterators of the join operation (ownership of elements passed to created object)
+	/// \return the iterator on the resulting set of postings
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range) const=0;
 };
 
 }//namespace

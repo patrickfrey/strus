@@ -32,14 +32,14 @@
 #define _STRUS_ITERATOR_HELPERS_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "postingIteratorReference.hpp"
 #include <vector>
 
 namespace strus
 {
 
 Index getFirstAllMatchDocno(
-		PostingIteratorReferenceArray& ar,
+		std::size_t arsize,
+		PostingIteratorInterface** ar,
 		Index docno);
 
 void encodeInteger( std::string& buf, int val);

@@ -28,12 +28,11 @@
 */
 #ifndef _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
-#include "strus/summarizerInterface.hpp"
-#include "private/postingIteratorReference.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerClosureInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include <string>
 #include <vector>
-#include <iostream>
-#include <sstream>
 
 namespace strus
 {
@@ -44,19 +43,19 @@ class StorageInterface;
 class PostingIteratorInterface;
 
 
-class SummarizerListMatches
-	:public SummarizerInterface
+class SummarizerClosureListMatches
+	:public SummarizerClosureInterface
 {
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] nofitrs_ number of argument iterators
 	/// \param[in] itrs_ argument iterators
-	SummarizerListMatches(
-		StorageInterface* storage_,
+	SummarizerClosureListMatches(
+		const StorageInterface* storage_,
 		std::size_t nofitrs_,
-		const PostingIteratorInterface** itrs_);
+		PostingIteratorInterface** itrs_);
 
-	virtual ~SummarizerListMatches();
+	virtual ~SummarizerClosureListMatches();
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from
@@ -64,9 +63,45 @@ public:
 	virtual std::vector<std::string> getSummary( const Index& docno);
 
 private:
-	StorageInterface* m_storage;
-	std::vector<PostingIteratorReference> m_itr;
+	const StorageInterface* m_storage;
+	std::size_t m_nofitr;
+	PostingIteratorInterface** m_itr;
 };
+
+
+class SummarizerFunctionListMatches
+	:public SummarizerFunctionInterface
+{
+public:
+	SummarizerFunctionListMatches(){}
+
+	virtual ~SummarizerFunctionListMatches(){}
+
+	virtual const char* name() const
+	{
+		return "matchpos";
+	}
+
+	virtual const char** parameterNames() const
+	{
+		static const char* ar[] = {0};
+		return ar;
+	}
+	
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageInterface* storage_,
+			const std::string&,
+			PostingIteratorInterface* structitr_,
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			MetaDataReaderInterface*,
+			const std::vector<ArithmeticVariant>&) const
+	{
+		if (structitr_) throw std::runtime_error( "no structural argument expected for summarizer 'matchpositions'");
+		return new SummarizerClosureListMatches( storage_, nofitrs_, itrs_);
+	}
+};
+
 
 }//namespace
 #endif

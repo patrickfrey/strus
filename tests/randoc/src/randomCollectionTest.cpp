@@ -30,6 +30,7 @@
 #include "strus/queryProcessorLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/queryEvalLib.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
@@ -138,7 +139,6 @@ public:
 		return (std::size_t)g_random.get( 0, i);
 	}
 };
-	
 
 
 static const char* randomType()
@@ -742,7 +742,7 @@ struct RandomQuery
 	bool execute( std::vector<Match>& result, strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
 	{
 		unsigned int nofitr = arg.size();
-		const strus::PostingIteratorInterface* itr[ MaxNofArgs];
+		strus::PostingIteratorInterface* itr[ MaxNofArgs];
 		for (unsigned int ai=0; ai<nofitr; ++ai)
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
@@ -755,15 +755,12 @@ struct RandomQuery
 			}
 		}
 		std::string opname( operationName());
+		const strus::PostingJoinOperatorInterface* joinop =
+			queryproc->getPostingJoinOperator( opname);
 		strus::PostingIteratorInterface* res = 
-			queryproc->createJoinPostingIterator(
-					opname, range, std::size_t(nofitr), &itr[0]);
+			joinop->createResultIterator( (std::size_t)nofitr, itr, range);
 
 		result = resultMatches( res);
-		for (unsigned int ai=0; ai<nofitr; ++ai)
-		{
-			delete itr[ai];
-		}
 		delete res;
 		return true;
 	}

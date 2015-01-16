@@ -27,19 +27,24 @@
 --------------------------------------------------------------------
 */
 #include "summarizerAttribute.hpp"
-#include "strus/postingIteratorInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 
 using namespace strus;
 
-SummarizerAttribute::SummarizerAttribute( AttributeReaderInterface* attribreader_, const std::string& name_)
+SummarizerClosureAttribute::SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const std::string& name_)
 	:m_attribreader(attribreader_)
 	,m_attrib(attribreader_->elementHandle( name_))
 {}
 
+SummarizerClosureAttribute::~SummarizerClosureAttribute()
+{
+	delete m_attribreader;
+}
+
+
 std::vector<std::string>
-	SummarizerAttribute::getSummary( const Index& docno)
+	SummarizerClosureAttribute::getSummary( const Index& docno)
 {
 	std::vector<std::string> rt;
 	m_attribreader->skipDoc( docno);
@@ -49,6 +54,20 @@ std::vector<std::string>
 		rt.push_back( attr);
 	}
 	return rt;
+}
+
+
+SummarizerClosureInterface* SummarizerFunctionAttribute::createClosure(
+		const StorageInterface* storage_,
+		const std::string& elementname_,
+		PostingIteratorInterface* structitr_,
+		std::size_t nofitrs_,
+		PostingIteratorInterface**,
+		MetaDataReaderInterface*,
+		const std::vector<ArithmeticVariant>&) const
+{
+	if (nofitrs_ || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'attribute'");
+	return new SummarizerClosureAttribute( storage_->createAttributeReader(), elementname_);
 }
 
 

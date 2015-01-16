@@ -1,11 +1,13 @@
 #include "iterator/postingIteratorUnion.hpp"
+#include <cstdlib>
 
 using namespace strus;
 
 
-IteratorUnion::IteratorUnion( std::size_t nofargs_, const PostingIteratorInterface** args_)
+IteratorUnion::IteratorUnion( std::size_t nofargs_, PostingIteratorInterface** args_)
 	:m_docno(0)
 	,m_posno(0)
+	,m_argarsize(nofargs_)
 	,m_selected(0)
 	,m_documentFrequency(-1)
 {
@@ -13,31 +15,34 @@ IteratorUnion::IteratorUnion( std::size_t nofargs_, const PostingIteratorInterfa
 	{
 		throw std::runtime_error( "number of arguments of union out of range (> 64)");
 	}
-	std::size_t ii=0;
-	for (; ii<nofargs_; ++ii)
+	m_argar = (PostingIteratorInterface**)malloc( nofargs_ * sizeof(m_argar[0]));
+	if (!m_argar) throw std::bad_alloc();
+	try
 	{
-		if (args_[ii])
+		std::size_t ii=0;
+		for (; ii<nofargs_; ++ii)
 		{
-			m_argar.push_back( args_[ii]->copy());
+			m_argar[ii] = args_[ii];
 			if (ii) m_featureid.push_back('=');
 			m_featureid.append( args_[ii]->featureid());
 		}
+		m_featureid.push_back( 'U');
 	}
-	m_featureid.push_back( 'U');
+	catch (const std::bad_alloc&)
+	{
+		std::free( m_argar);
+		throw std::bad_alloc();
+	}
 }
 
-IteratorUnion::IteratorUnion( const IteratorUnion& o)
-	:m_docno(o.m_docno)
-	,m_posno(o.m_posno)
-	,m_selected(o.m_selected)
-	,m_featureid(o.m_featureid)
-	,m_documentFrequency(o.m_documentFrequency)
+IteratorUnion::~IteratorUnion()
 {
 	std::size_t ii=0;
-	for (; ii<o.m_argar.size(); ++ii)
+	for (; ii<m_argarsize; ++ii)
 	{
-		m_argar.push_back( o.m_argar[ ii].copy());
+		delete m_argar[ii];
 	}
+	std::free( m_argar);
 }
 
 std::vector<const PostingIteratorInterface*>
@@ -46,11 +51,11 @@ std::vector<const PostingIteratorInterface*>
 	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
-		rt.reserve( m_argar.size());
+		rt.reserve( m_argarsize);
 		std::size_t ii=0;
-		for (; ii<m_argar.size(); ++ii)
+		for (; ii<m_argarsize; ++ii)
 		{
-			rt.push_back( &m_argar[ ii]);
+			rt.push_back( m_argar[ ii]);
 		}
 	}
 	return rt;
@@ -89,7 +94,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 		return m_docno;
 	}
 	m_docno = docno_;
-	PostingIteratorReferenceArray::iterator ai = m_argar.begin(), ae = m_argar.end();
+	std::size_t ai = 0, ae = m_argarsize;
 	if (ai == ae) return 0;
 	Index base = docno_?docno_:1;
 	Index minimum = 0;
@@ -98,7 +103,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 	int aidx=0;
 	for (; ai != ae; ++ai,++aidx)
 	{
-		minimum = ai->skipDoc( base);
+		minimum = m_argar[ ai]->skipDoc( base);
 		if (minimum) break;
 	}
 	if (!minimum)
@@ -110,7 +115,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 
 	for (aidx++,ai++; ai != ae; ++ai,++aidx)
 	{
-		Index next = ai->skipDoc( base);
+		Index next = m_argar[ ai]->skipDoc( base);
 		if (next && next <= minimum)
 		{
 			if (next < minimum)
@@ -141,13 +146,12 @@ Index IteratorUnion::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		PostingIteratorReferenceArray::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
+		std::size_t ai = 0, ae = m_argarsize;
 		if (ai == ae) return 0;
-		m_documentFrequency = ai->documentFrequency();
+		m_documentFrequency = m_argar[ ai]->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
 		{
-			Index df = ai->documentFrequency();
+			Index df = m_argar[ ai]->documentFrequency();
 			if (df > m_documentFrequency)
 			{
 				m_documentFrequency = df;

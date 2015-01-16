@@ -32,6 +32,8 @@
 #include <string>
 #include <utility>
 
+#error DEPRECATED
+
 namespace strus {
 namespace queryeval {
 

@@ -26,34 +26,31 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#include "iterator/postingIteratorUnion.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
-#include <map>
+#ifndef _STRUS_WEIGHTING_CLOSURE_REFERENCE_HPP_INCLUDED
+#define _STRUS_WEIGHTING_CLOSURE_REFERENCE_HPP_INCLUDED
+#include "strus/weightingClosureInterface.hpp"
+#include "localReference.hpp"
 
 namespace strus
 {
 
-class IteratorUnionWeighted
-	:public IteratorUnion
+class WeightingClosureReference
+	:public LocalReference<WeightingClosureInterface>
 {
 public:
-	IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args);
+	WeightingClosureReference()
+		:LocalReference<WeightingClosureInterface>(){}
+	WeightingClosureReference( WeightingClosureInterface* o)
+		:LocalReference<WeightingClosureInterface>(o){}
+};
 
-	virtual ~IteratorUnionWeighted(){}
-
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
-
-	float positionWeight() const;
-
-private:
-	std::map<Index,float> m_weightmap;
-	std::map<Index,float>::const_iterator m_weightitr;
+class WeightingClosureReferenceArray
+	:public LocalReferenceArray<WeightingClosureInterface>
+{
+public:
+	WeightingClosureReferenceArray(){}
 };
 
 }//namespace
 #endif
-
 

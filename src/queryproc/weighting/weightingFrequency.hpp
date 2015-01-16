@@ -26,33 +26,64 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_FREQUENCY_HPP_INCLUDED
-#define _STRUS_WEIGHTING_FREQUENCY_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
+#define _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingClosureInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "weightingIdfBased.hpp"
 #include <limits>
 #include <vector>
 
 namespace strus
 {
 
-/// \class WeightingFrequency
-/// \brief Accumulator for the feature frequency
-class WeightingFrequency
-	:public WeightingIdfBased
+/// \brief Forward declaration
+class WeightingFunctionTermFrequency;
+
+
+/// \class WeightingClosureTermFrequency
+/// \brief Weighting function based on the TermFrequency formula
+class WeightingClosureTermFrequency
+	:public WeightingClosureInterface
 {
 public:
-	WeightingFrequency(
-			const StorageInterface* storage_)
-		:WeightingIdfBased(storage_){}
+	WeightingClosureTermFrequency(
+			PostingIteratorInterface* itr_)
+		:m_itr(itr_){}
 
-	virtual ~WeightingFrequency(){}
-
-	virtual float call( PostingIteratorInterface& itr)
+	virtual float call( const Index& docno)
 	{
-		return static_cast<float>( itr.frequency());
+		return (docno==m_itr->skipDoc( docno)?(m_itr->frequency() * m_itr->weight()):(float)0.0);
+	}
+
+private:
+	PostingIteratorInterface* m_itr;
+};
+
+
+/// \class WeightingFunctionTermFrequency
+/// \brief Weighting function that simply returns the term frequency in the document
+class WeightingFunctionTermFrequency
+	:public WeightingFunctionInterface
+{
+public:
+	WeightingFunctionTermFrequency(){}
+	virtual ~WeightingFunctionTermFrequency(){}
+
+	virtual const char** parameterNames() const
+	{
+		static const char* ar[] = {0};
+		return ar;
+	}
+
+	virtual WeightingClosureInterface* createClosure(
+			const StorageInterface*,
+			PostingIteratorInterface* itr,
+			MetaDataReaderInterface*,
+			const std::vector<ArithmeticVariant>&) const
+	{
+		return new WeightingClosureTermFrequency( itr);
 	}
 };
 

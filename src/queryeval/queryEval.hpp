@@ -30,79 +30,132 @@
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/queryeval/resultDocument.hpp"
-#include "private/summarizerReference.hpp"
-#include "parser/joinFunction.hpp"
-#include "parser/joinOperation.hpp"
-#include "parser/selectorExpression.hpp"
-#include "parser/accumulateOperation.hpp"
-#include "parser/summarizeOperation.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include <string>
 #include <vector>
 
 namespace strus {
 
 /// \brief Forward declaration
-class Accumulator;
+class SummarizerFunctionInterface;
+/// \brief Forward declaration
+class StorageInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
+/// \brief Forward declaration
+class WeightingFunctionInterface;
+/// \brief Forward declaration
+class SummarizerFunctionInterface;
 
 /// \brief Query evaluation program representation
 class QueryEval
 	:public QueryEvalInterface
 {
 public:
+	struct TermDef
+	{
+		TermDef( const TermDef& o)
+			:set(o.set),type(o.type),value(o.value){}
+		TermDef( const std::string& s, const std::string& t, const std::string& v)
+			:set(s),type(t),value(v){}
+
+		std::string set;	///< term set name
+		std::string type;	///< term type name
+		std::string value;	///< term value
+	};
+
+	struct WeightingFunctionDef
+	{
+		WeightingFunctionDef()
+			:function(0),functionName(),parameters(),weightingSets(),selectorSets(){}
+		WeightingFunctionDef( const WeightingFunctionDef& o)
+			:function(o.function),functionName(o.functionName),parameters(o.parameters),weightingSets(o.weightingSets),selectorSets(o.selectorSets){}
+		WeightingFunctionDef(
+				const WeightingFunctionInterface* function_,
+				const std::string& functionName_,
+				const std::vector<ArithmeticVariant>& parameters_,
+				const std::vector<std::string>& weightingSets_,
+				const std::vector<std::string>& selectorSets_)
+			:function(function_),functionName(functionName_),parameters(parameters_),weightingSets(weightingSets_),selectorSets(selectorSets_){}
+
+		const WeightingFunctionInterface* function;	///< function used for weighting
+		std::string functionName;			///< name of the function used for weighting
+		std::vector<ArithmeticVariant> parameters;	///< weighting function parameters
+		std::vector<std::string> weightingSets;		///< posting sets that are used for weighting
+		std::vector<std::string> selectorSets;		///< posting sets selecting the documents to match
+	};
+
+	struct SummarizerDef
+	{
+		SummarizerDef( 
+				const SummarizerFunctionInterface* function_,
+				const std::string& functionName_,
+				const std::vector<ArithmeticVariant>& parameters_,
+				const std::string& resultAttribute_,
+				const std::string& contentType_,
+				const std::string& structSet_,
+				const std::vector<std::string>& featureSet_)
+			:function(function_)
+			,functionName(functionName_)
+			,parameters(parameters_)
+			,resultAttribute(resultAttribute_)
+			,contentType(contentType_)
+			,structSet(structSet_)
+			,featureSet(featureSet_){}
+
+		SummarizerDef( const SummarizerDef& o)
+			:function(o.function)
+			,functionName(o.functionName)
+			,parameters(o.parameters)
+			,resultAttribute(o.resultAttribute)
+			,contentType(o.contentType)
+			,structSet(o.structSet)
+			,featureSet(o.featureSet){}
+
+		const SummarizerFunctionInterface* function;	///< summarization function
+		std::string functionName;			///< name of the summarization function
+		std::vector<ArithmeticVariant> parameters;	///< summarization function parameters
+		std::string resultAttribute;			///< name of the result attribute the summarization is returned as
+		std::string contentType;			///< content type to extract from the forward indes as result of summarization
+		std::string structSet;				///< set of structure elements
+		std::vector<std::string> featureSet;		///< set of features to seek for matches for summarization
+	};
+
+private:
+	void parseWeightingFunctionDef( char const*& src);
+	void parseTermDef( char const*& src);
+	void parseSummarizeDef( char const*& src);
+	void parseJoinOperationDef( char const*& src);
+	void loadProgram( const std::string& source);
+
+public:
 	enum {MaxSizeFeatureSet=100};
 
-	QueryEval(){}
+	explicit QueryEval( const QueryProcessorInterface* processor_)
+		:m_processor(processor_){}
+
 	QueryEval( const QueryEval& o)
-		:m_predefinedTerms(o.m_predefinedTerms)
-		,m_selectors(o.m_selectors)
-		,m_functions(o.m_functions)
-		,m_setnamemap(o.m_setnamemap)
-		,m_operations(o.m_operations)
-		,m_accumulateOperation(o.m_accumulateOperation)
+		:m_processor(o.m_processor)
+		,m_weightingFunction(o.m_weightingFunction)
 		,m_summarizers(o.m_summarizers)
+		,m_predefinedTerms(o.m_predefinedTerms)
 	{}
-	QueryEval( const std::string& source);
+	QueryEval( const QueryProcessorInterface* processor_, const std::string& source);
 
-	virtual std::vector<queryeval::ResultDocument>
-		getRankedDocumentList(
-			const StorageInterface& storage,
-			const QueryProcessorInterface& processor,
-			const std::string& username,
-			const queryeval::Query& query,
-			std::size_t fromRank,
-			std::size_t maxNofRanks) const;
+	virtual QueryInterface* createQuery() const;
 
-	const std::vector<queryeval::Query::Term>& predefinedTerms() const	{return m_predefinedTerms;}
-	const std::vector<parser::SelectorExpression>& selectors() const	{return m_selectors;}
-	const std::vector<parser::JoinFunction>& functions() const		{return m_functions;}
-	const std::vector<parser::JoinOperation>& operations() const		{return m_operations;}
-	const parser::AccumulateOperation& accumulateOperation() const		{return m_accumulateOperation;}
-	const std::vector<parser::SummarizeOperation>& summarizers() const	{return m_summarizers;}
+	const std::vector<TermDef>& predefinedTerms() const		{return m_predefinedTerms;}
+	const std::vector<SummarizerDef>& summarizers() const		{return m_summarizers;}
+	const WeightingFunctionDef& weightingFunction() const		{return m_weightingFunction;}
 
 	virtual void print( std::ostream& out) const;
 
 private:
-	typedef std::pair<std::string,SummarizerReference> SummarizerDef;
-	std::vector<queryeval::ResultDocument>
-		getRankedDocumentList(
-			Accumulator& accu,
-			const std::vector<SummarizerDef>& summarizers,
-			std::size_t firstRank,
-			std::size_t maxNofRanks) const;
+	const QueryProcessorInterface* m_processor;
 
-	void parseJoinOperationDef( char const*& src);
-	void parseAccumulatorDef( char const*& src);
-	void parseTermDef( char const*& src);
-	void parseSummarizeDef( char const*& src);
-
-private:
-	std::vector<queryeval::Query::Term> m_predefinedTerms;
-	std::vector<parser::SelectorExpression> m_selectors;
-	std::vector<parser::JoinFunction> m_functions;
-	StringIndexMap m_setnamemap;
-	std::vector<parser::JoinOperation> m_operations;
-	parser::AccumulateOperation m_accumulateOperation;
-	std::vector<parser::SummarizeOperation> m_summarizers;
+	WeightingFunctionDef m_weightingFunction;
+	std::vector<SummarizerDef> m_summarizers;
+	std::vector<TermDef> m_predefinedTerms;
 };
 
 }//namespace

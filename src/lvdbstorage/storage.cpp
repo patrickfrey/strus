@@ -291,16 +291,11 @@ class InvertedAclIterator
 public:
 	InvertedAclIterator( leveldb::DB* db_, const Index& userno_)
 		:IndexSetIterator( db_, DatabaseKey::UserAclBlockPrefix, userno_){}
-	InvertedAclIterator( const InvertedAclIterator& o)
-		:IndexSetIterator(o){}
+	virtual ~InvertedAclIterator(){}
 
 	virtual Index skipDoc( const Index& docno_)
 	{
 		return skip(docno_);
-	}
-	virtual DocnoIteratorInterface* copy() const
-	{
-		return new InvertedAclIterator(*this);
 	}
 };
 

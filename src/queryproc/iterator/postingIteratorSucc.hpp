@@ -29,7 +29,7 @@
 #ifndef _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
 #define _STRUS_ITERATOR_SUCCESSOR_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
-#include "postingIteratorReference.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 
 namespace strus
 {
@@ -38,18 +38,17 @@ class IteratorSucc
 	:public IteratorJoin
 {
 public:
-	IteratorSucc( const IteratorSucc& o)
-		:m_origin( o.m_origin->copy())
-		,m_featureid(o.m_featureid){}
-
-	IteratorSucc( const PostingIteratorInterface* origin_)
-		:m_origin( origin_?origin_->copy():0)
+	IteratorSucc( PostingIteratorInterface* origin_)
+		:m_origin( origin_)
 		,m_featureid( origin_->featureid())
 	{
 		m_featureid.push_back('>');
 	}
 
-	virtual ~IteratorSucc(){}
+	virtual ~IteratorSucc()
+	{
+		delete m_origin;
+	}
 
 	virtual const std::string& featureid() const
 	{
@@ -75,27 +74,48 @@ public:
 
 	virtual Index documentFrequency() const
 	{
-		return m_origin.get()?m_origin->documentFrequency():0;
+		return m_origin->documentFrequency();
 	}
 
 	virtual Index docno() const
 	{
-		return m_origin.get()?m_origin->docno():0;
+		return m_origin->docno();
 	}
 
 	virtual Index posno() const
 	{
-		return m_origin.get()?m_origin->posno():0;
-	}
-
-	virtual PostingIteratorInterface* copy() const
-	{
-		return new IteratorSucc( *this);
+		return m_origin->posno();
 	}
 
 private:
-	PostingIteratorReference m_origin;	///< base feature expression this is the successor of
+	PostingIteratorInterface* m_origin;	///< base feature expression this is the successor of
 	std::string m_featureid;		///< unique id of the feature expression
+};
+
+
+
+class PostingJoinSucc
+	:public PostingJoinOperatorInterface
+{
+public:
+	virtual ~PostingJoinSucc(){}
+
+	virtual const char* name()
+	{
+		return "succ";
+	}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range) const
+	{
+		if (range != 0) throw std::runtime_error( "no range argument expected");
+		if (nofitrs_ < 1) throw std::runtime_error( "too few arguments");
+		if (nofitrs_ > 1) throw std::runtime_error( "too many arguments");
+
+		return new IteratorSucc( itrs_[0]);
+	}
 };
 
 }//namespace

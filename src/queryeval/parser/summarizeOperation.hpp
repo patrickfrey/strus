@@ -35,6 +35,8 @@
 namespace strus {
 namespace parser {
 
+#error DEPRECATED
+
 /// \brief Defines a summarizer for adding attributes to matches
 class SummarizeOperation
 {

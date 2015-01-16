@@ -29,7 +29,7 @@
 #ifndef _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #define _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
-#include "postingIteratorReference.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 
 namespace strus
 {
@@ -38,9 +38,8 @@ class IteratorIntersect
 	:public IteratorJoin
 {
 public:
-	IteratorIntersect( const IteratorIntersect& o);
-	IteratorIntersect( std::size_t nofargs, const PostingIteratorInterface** args);
-	virtual ~IteratorIntersect(){}
+	IteratorIntersect( std::size_t nofargs, PostingIteratorInterface** args);
+	virtual ~IteratorIntersect();
 
 	virtual const std::string& featureid() const
 	{
@@ -63,17 +62,32 @@ public:
 		return m_posno;
 	}
 
-	virtual PostingIteratorInterface* copy() const
-	{
-		return new IteratorIntersect( *this);
-	}
-
 private:
 	Index m_docno;
 	Index m_posno;				///< current position
-	PostingIteratorReferenceArray m_argar;	///< arguments
+	std::size_t m_argarsize;		///< nof arguments
+	PostingIteratorInterface** m_argar;	///< arguments
 	std::string m_featureid;		///< unique id of the feature expression
 	mutable Index m_documentFrequency;	///< document frequency (of the rarest subexpression)
+};
+
+
+class PostingJoinIntersect
+	:public PostingJoinOperatorInterface
+{
+public:
+	virtual ~PostingJoinIntersect(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			int range) const
+	{
+		if (range != 0) throw std::runtime_error( "no range argument expected");
+		if (nofitrs_ == 0) throw std::runtime_error( "too few arguments");
+
+		return new IteratorIntersect( nofitrs_, itrs_);
+	}
 };
 
 }//namespace

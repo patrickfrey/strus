@@ -36,9 +36,11 @@ namespace strus
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
+class PostingJoinOperatorInterface;
+/// \brief Forward declaration
 class WeightingFunctionInterface;
 /// \brief Forward declaration
-class SummarizerInterface;
+class SummarizerFunctionInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
@@ -60,50 +62,50 @@ public:
 			const std::string& type,
 			const std::string& value) const=0;
 
-	/// \brief Create an iterator as join function on the arguments passed
-	/// \param[in] name name of the join function to execute
-	/// \param[in] range additional parameters for describing a range or offset for the join operator to execute
-	/// \param[in] nofargs number of arguments to pass to the function
-	/// \param[in] args arguments to pass to the function
-	/// \return the created iterator reference object representing the result of the function (to dispose with 'delete')
-	virtual PostingIteratorInterface*
-		createJoinPostingIterator(
-			const std::string& name,
-			int range,
-			std::size_t nofargs,
-			const PostingIteratorInterface** args) const=0;
+	/// \brief Define a new posting set join operation
+	/// \param[in] name the name of the function
+	/// \param[in] func the function reference
+	virtual void
+		definePostingJoinOperator(
+			const char* name,
+			const PostingJoinOperatorInterface* op)=0;
 
-	/// \brief Create a weighting function for term occurrencies
+	/// \brief Get a join function reference defined by 'name'
+	/// \param[in] name name of the join function to get
+	/// \return the join function object reference
+	virtual const PostingJoinOperatorInterface*
+		getPostingJoinOperator(
+			const std::string& name) const=0;
+
+	/// \brief Define a new weighting function
+	/// \param[in] name the name of the function
+	/// \param[in] func the function to define
+	virtual void
+		defineWeightingFunction(
+			const char* name,
+			const WeightingFunctionInterface* func)=0;
+
+	/// \brief Get a weighting function reference by name
 	/// \param[in] name name of the weighting function
-	/// \param[in] parameter scaling arguments for the function
-	/// \param[in] metadata interface to read for document meta data
-	/// \return the created weighting function object (to dispose with 'delete')
-	virtual WeightingFunctionInterface*
-		createWeightingFunction(
-			const std::string& name,
-			const std::vector<float>& parameter,
-			const MetaDataReaderInterface* metadata) const=0;
+	/// \return the weighting function object reference
+	virtual const WeightingFunctionInterface*
+		getWeightingFunction(
+			const std::string& name) const=0;
 
-	/// \brief Create a summarizer for adding attributes to matches
-	/// \param[in] name name of the summarizer
-	/// \param[in] type term type or attribute name (depends on implementation)
-	/// \param[in] parameter scalar arguments for the summarizer
-	/// \param[in] structitr iterator representing the structure delimiter elements for summarization
-	/// \param[in] nofitrs number of feature iterators this summarizer is based on
-	/// \param[in] itrs feature iterators for this summarizer 
-	/// \param[in] metadata interface to read document meta data
-	/// \param[in] attreader interface to read document attributes
-	/// \return the created summarizer object (to dispose with 'delete')
-	virtual SummarizerInterface*
-		createSummarizer(
-			const std::string& name,
-			const std::string& type,
-			const std::vector<float>& parameter,
-			const PostingIteratorInterface* structitr,
-			std::size_t nofitrs,
-			const PostingIteratorInterface** itrs,
-			MetaDataReaderInterface* metadata,
-			AttributeReaderInterface* attreader) const=0;
+	/// \brief Define a new summarization function
+	/// \param[in] name name of the summarization function
+	/// \param[in] the summarization function object reference
+	virtual void
+		defineSummarizerFunction(
+			const char* name,
+			const SummarizerFunctionInterface* sumfunc)=0;
+
+	/// \brief Get a summarization function reference by name
+	/// \param[in] name name of the summarization function
+	/// \return the summarization function object reference
+	virtual const SummarizerFunctionInterface*
+		getSummarizerFunction(
+			const std::string& name) const=0;
 };
 
 }//namespace

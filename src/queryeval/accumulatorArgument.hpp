@@ -29,12 +29,12 @@
 #ifndef _STRUS_ACCUMULATOR_ARGUMENT_HPP_INCLUDED
 #define _STRUS_ACCUMULATOR_ARGUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "postingIteratorReference.hpp"
-#include "weightingFunctionReference.hpp"
+#include "strus/weightingClosureInterface.hpp"
 #include <vector>
 #include <list>
 #include <set>
 
+#error DEPRECATED
 namespace strus
 {
 
@@ -43,20 +43,16 @@ class AccumulatorArgument
 public:
 	AccumulatorArgument(
 			float factor_,
-			WeightingFunctionInterface* function_,
-			PostingIteratorInterface* itr_)
+			WeightingClosureInterface* closure_)
 		:factor(factor_)
-		,function(function_)
-		,itr(itr_){}
+		,closure(closure_){}
 
 	AccumulatorArgument( const AccumulatorArgument& o)
 		:factor(o.factor)
-		,function(o.function)
-		,itr(o.itr->copy()){}
+		,closure(o.closure){}
 
 	float factor;
-	WeightingFunctionReference function;
-	PostingIteratorReference itr;
+	WeightingClosureInterface* closure;
 };
 
 }//namespace

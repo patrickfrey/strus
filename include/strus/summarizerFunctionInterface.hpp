@@ -26,44 +26,61 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
-#define _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/arithmeticVariant.hpp"
+#include <string>
 #include <vector>
 
 namespace strus
 {
 /// \brief Forward declaration
-class MetaDataReaderInterface;
+class StorageInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
-class WeightingClosureInterface;
+class ForwardIteratorInterface;
 /// \brief Forward declaration
-class ArithmeticVariant;
+class MetaDataReaderInterface;
 /// \brief Forward declaration
-class StorageInterface;
+class SummarizerClosureInterface;
 
-class WeightingFunctionInterface
+
+/// \brief Interface for summarization (additional info about the matches in the result ranklist of a retrieval query)
+class SummarizerFunctionInterface
 {
 public:
-	virtual ~WeightingFunctionInterface(){}
+	virtual ~SummarizerFunctionInterface(){}
+
+	/// \brief Get the name of the function
+	/// \return the name of the function
+	virtual const char* name() const=0;
 
 	/// \brief Get the parameter names of the function in the order they should be passed
 	/// \return the NULL terminated list of parameter names
 	virtual const char** parameterNames() const=0;
 
-	/// \brief Create a closure for this weighting function on a posting iterator reference and a meta data reader reference
-	/// \param[in] storage_ storage reference for some statistics (like the document collection frequency)
-	/// \param[in] itr term occurrency iterator reference
-	/// \param[in] metadata meta data interface
+	/// \brief Create a closure for this summarization function on a posting iterator reference and a meta data reader reference with an optional posting iterator describing a structure context
+	/// \param[in] storage_ storage interface for getting info (like for example document attributes)
+	/// \param[in] elementname_ name of element to select for summarization
+	/// \param[in] structitr_ posting iterator describing the structural context of summarization (like for example sentence delimiters)
+	/// \param[in] nofitrs_ number of elements in 'itrs_'
+	/// \param[in] itrs_ reference to posting iterators that are subject of summarization
+	/// \param[in] metadata_ meta data interface
+	/// \param[in] parameters_ additional parameters for summarization
 	/// \return the closure with some global statistics calculated only once
-	virtual WeightingClosureInterface* createClosure(
+	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			PostingIteratorInterface* itr,
-			MetaDataReaderInterface* metadata,
-			const std::vector<ArithmeticVariant>& parameters) const=0;
+			const std::string& elementname_,
+			PostingIteratorInterface* structitr_,
+			std::size_t nofitrs_,
+			PostingIteratorInterface** itrs_,
+			MetaDataReaderInterface* metadata_,
+			const std::vector<ArithmeticVariant>& parameters_) const=0;
 };
 
 }//namespace
 #endif
+
 

@@ -29,9 +29,12 @@
 #ifndef _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
 #define _STRUS_QUERY_PARSER_WEIGHTING_FUNCTION_HPP_INCLUDED
 #include "parser/stringIndexMap.hpp"
+#include "parser/keyMap.hpp"
 #include <string>
 #include <vector>
 #include <ostream>
+
+#error DEPRECATED
 
 namespace strus {
 namespace parser {
@@ -56,16 +59,16 @@ public:
 			const StringIndexMap& setmap);
 
 public:
-	const std::string& function() const		{return m_function;}
-	const std::vector<float>& params() const	{return m_params;}
-	int setIndex() const				{return m_setIndex;}
-	float factor() const				{return m_factor;}
+	const std::string& function() const				{return m_function;}
+	const KeyMap<ArithmeticVariant>& params() const			{return m_params;}
+	int setIndex() const						{return m_setIndex;}
+	float factor() const						{return m_factor;}
 
 private:
-	std::string m_function;		///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
-	std::vector<float> m_params;	///< specifies parametrization of the weighting function
-	int m_setIndex;			///< argument set index
-	float m_factor;			///< multiplication factor of a calculated weight
+	std::string m_function;					///< specifies operation on iterator to create an accumulator. if empty then argument references an accumulator directly
+	KeyMap<ArithmeticVariant> m_params;			///< specifies parametrization of the weighting function
+	int m_setIndex;						///< argument set index
+	float m_factor;						///< multiplication factor of a calculated weight
 };
 
 }}//namespace

@@ -31,30 +31,21 @@
 
 using namespace strus;
 
-IteratorDifference::IteratorDifference( const PostingIteratorInterface* positive_, const PostingIteratorInterface* negative_)
+IteratorDifference::IteratorDifference( PostingIteratorInterface* positive_, PostingIteratorInterface* negative_)
 	:m_docno(0)
 	,m_docno_neg(0)
+	,m_positive( positive_)
+	,m_negative( negative_)
 {
-	if (positive_)
-	{
-		m_positive.reset( positive_->copy());
-		m_featureid.append( positive_->featureid());
-	}
-	if (negative_)
-	{
-		m_negative.reset( negative_->copy());
-		m_featureid.append( negative_->featureid());
-	}
+	m_featureid.append( positive_->featureid());
+	m_featureid.append( negative_->featureid());
 	m_featureid.push_back( 'N');
 }
 
-IteratorDifference::IteratorDifference( const IteratorDifference& o)
-	:m_docno(o.m_docno)
-	,m_docno_neg(o.m_docno_neg)
-	,m_positive(o.m_positive.get()?o.m_positive->copy():0)
-	,m_negative(o.m_negative.get()?o.m_negative->copy():0)
-	,m_featureid(o.m_featureid)
+IteratorDifference::~IteratorDifference()
 {
+	delete m_positive;
+	delete m_negative;
 }
 
 std::vector<const PostingIteratorInterface*> IteratorDifference::subExpressions( bool positive) const
@@ -62,20 +53,19 @@ std::vector<const PostingIteratorInterface*> IteratorDifference::subExpressions(
 	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
-		rt.push_back( m_positive.get());
+		rt.push_back( m_positive);
 	}
 	else
 	{
-		rt.push_back( m_negative.get());
+		rt.push_back( m_negative);
 	}
 	return rt;
 }
 
 Index IteratorDifference::skipDoc( const Index& docno_)
 {
-	if (!m_positive.get()) return 0;
 	m_docno = m_positive->skipDoc( docno_);
-	m_docno_neg = m_positive.get()?m_negative->skipDoc( m_docno):0;
+	m_docno_neg = m_negative->skipDoc( m_docno);
 	return m_docno;
 }
 
