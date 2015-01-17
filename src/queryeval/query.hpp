@@ -69,7 +69,7 @@ public:
 	virtual void setMinRank( std::size_t maxNofRanks_);
 	virtual void setUserName( const std::string& username_);
 
-	virtual std::vector<queryeval::ResultDocument>
+	virtual std::vector<ResultDocument>
 		evaluate( const StorageInterface* storage);
 
 public:

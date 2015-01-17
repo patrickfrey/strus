@@ -28,7 +28,7 @@
 */
 #include "ranker.hpp"
 #include "strus/index.hpp"
-#include "strus/queryeval/weightedDocument.hpp"
+#include "strus/weightedDocument.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -58,10 +58,10 @@ static std::string doubleToString( double val_)
 	return val_str.str();
 }
 
-static strus::queryeval::WeightedDocument randomWeightedDocument()
+static strus::WeightedDocument randomWeightedDocument()
 {
 	float weight = (float)RANDINT(0,10000) / RANDINT(1,10000);
-	return strus::queryeval::WeightedDocument( ++g_docnum, weight);
+	return strus::WeightedDocument( ++g_docnum, weight);
 }
 
 int main( int , const char** )
@@ -71,16 +71,16 @@ int main( int , const char** )
 		enum {MaxNofRanks=10,NofWeightedDocs=10000000};
 		strus::Ranker ranker( MaxNofRanks);
 		typedef std::multiset<
-				strus::queryeval::WeightedDocument,
-				std::less<strus::queryeval::WeightedDocument>,
-				strus::LocalStructAllocator<strus::queryeval::WeightedDocument> > RankSet;
+				strus::WeightedDocument,
+				std::less<strus::WeightedDocument>,
+				strus::LocalStructAllocator<strus::WeightedDocument> > RankSet;
 		RankSet test_set;
 
-		std::vector<strus::queryeval::WeightedDocument> test_docs;
+		std::vector<strus::WeightedDocument> test_docs;
 
 		for (std::size_t ii=0; ii<NofWeightedDocs; ++ii)
 		{
-			strus::queryeval::WeightedDocument wd( randomWeightedDocument());
+			strus::WeightedDocument wd( randomWeightedDocument());
 			test_docs.push_back( wd);
 		}
 
@@ -97,8 +97,8 @@ int main( int , const char** )
 				test_set.erase( test_set.begin());
 			}
 		}
-		std::vector<strus::queryeval::WeightedDocument> testlist;
-		std::set<strus::queryeval::WeightedDocument>::reverse_iterator si = test_set.rbegin(), se = test_set.rend();
+		std::vector<strus::WeightedDocument> testlist;
+		std::set<strus::WeightedDocument>::reverse_iterator si = test_set.rbegin(), se = test_set.rend();
 		for (int sidx=0; si != se && sidx < MaxNofRanks; ++si,++sidx)
 		{
 			testlist.push_back( *si);
@@ -113,13 +113,13 @@ int main( int , const char** )
 		{
 			ranker.insert( test_docs[ii]);
 		}
-		std::vector<strus::queryeval::WeightedDocument> ranklist = ranker.result( 0);
+		std::vector<strus::WeightedDocument> ranklist = ranker.result( 0);
 		duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 		std::cerr << "ranker ranking of " << (int)NofWeightedDocs << " documents in " << doubleToString(duration) << " seconds" << std::endl;
 
 		// Check results:
-		std::vector<strus::queryeval::WeightedDocument>::const_iterator ri = ranklist.begin(), re = ranklist.end();
-		std::vector<strus::queryeval::WeightedDocument>::const_iterator ti = testlist.begin(), te = testlist.end();
+		std::vector<strus::WeightedDocument>::const_iterator ri = ranklist.begin(), re = ranklist.end();
+		std::vector<strus::WeightedDocument>::const_iterator ti = testlist.begin(), te = testlist.end();
 
 		int ridx=0;
 

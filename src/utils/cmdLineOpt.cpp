@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "dll_tags.hpp"
-#include "strus/utils/cmdLineOpt.hpp"
+#include "strus/cmdLineOpt.hpp"
 #include <iostream>
 #include <string>
 #include <cstring>
