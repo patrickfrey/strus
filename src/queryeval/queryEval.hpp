@@ -29,7 +29,7 @@
 #ifndef _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
-#include "strus/queryeval/resultDocument.hpp"
+#include "strus/resultDocument.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <string>
 #include <vector>

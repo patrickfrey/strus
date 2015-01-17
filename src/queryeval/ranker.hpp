@@ -29,7 +29,7 @@
 #ifndef _STRUS_QUERYEVAL_RANKER_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_RANKER_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/queryeval/weightedDocument.hpp"
+#include "strus/weightedDocument.hpp"
 #include "localStructAllocator.hpp"
 #include <set>
 #include <cstring>
@@ -51,7 +51,7 @@ public:
 	}
 	~Ranker(){}
 
-	void insert( const queryeval::WeightedDocument& doc)
+	void insert( const WeightedDocument& doc)
 	{
 		if (m_maxNofRanks < MaxIndexSize)
 		{
@@ -63,7 +63,7 @@ public:
 		}
 	}
 
-	std::vector<queryeval::WeightedDocument> result( std::size_t firstRank) const
+	std::vector<WeightedDocument> result( std::size_t firstRank) const
 	{
 		if (m_maxNofRanks < MaxIndexSize)
 		{
@@ -81,7 +81,7 @@ public:
 	}
 
 private:
-	void multisetInsert( const queryeval::WeightedDocument& doc)
+	void multisetInsert( const WeightedDocument& doc)
 	{
 		m_rankset.insert( doc);
 		if (m_maxNofRanks < ++m_nofRanks)
@@ -90,9 +90,9 @@ private:
 		}
 	}
 
-	std::vector<queryeval::WeightedDocument> multisetResult( std::size_t firstRank) const
+	std::vector<WeightedDocument> multisetResult( std::size_t firstRank) const
 	{
-		std::vector<queryeval::WeightedDocument> rt;
+		std::vector<WeightedDocument> rt;
 		RankSet::reverse_iterator ri=m_rankset.rbegin(),re=m_rankset.rend();
 		std::size_t ridx = 0;
 		for (; ri != re; ++ri,++ridx)
@@ -107,7 +107,7 @@ private:
 		return rt;
 	}
 
-	void bruteInsert_at( std::size_t idx, const queryeval::WeightedDocument& doc)
+	void bruteInsert_at( std::size_t idx, const WeightedDocument& doc)
 	{
 		std::size_t docix = m_brute_index[ m_maxNofRanks-1];
 		std::memmove( m_brute_index+idx+1, m_brute_index+idx, m_maxNofRanks-idx-1);
@@ -115,7 +115,7 @@ private:
 		m_brute_ar[ docix] = doc;
 	}
 
-	void bruteInsert( const queryeval::WeightedDocument& doc)
+	void bruteInsert( const WeightedDocument& doc)
 	{
 		if (!m_nofRanks)
 		{
@@ -162,9 +162,9 @@ private:
 		++m_nofRanks;
 	}
 
-	std::vector<queryeval::WeightedDocument> bruteResult( std::size_t firstRank) const
+	std::vector<WeightedDocument> bruteResult( std::size_t firstRank) const
 	{
-		std::vector<queryeval::WeightedDocument> rt;
+		std::vector<WeightedDocument> rt;
 		std::size_t limit = m_nofRanks > m_maxNofRanks ? m_maxNofRanks:m_nofRanks;
 		for (std::size_t ridx=firstRank; ridx<limit; ++ridx)
 		{
@@ -175,14 +175,14 @@ private:
 
 private:
 	typedef std::multiset<
-			queryeval::WeightedDocument,
-			std::less<queryeval::WeightedDocument>,
-			LocalStructAllocator<queryeval::WeightedDocument> > RankSet;
+			WeightedDocument,
+			std::less<WeightedDocument>,
+			LocalStructAllocator<WeightedDocument> > RankSet;
 	RankSet m_rankset;
 	enum {MaxIndexSize=128};
 
 	unsigned char m_brute_index[ MaxIndexSize];
-	queryeval::WeightedDocument m_brute_ar[ MaxIndexSize];
+	WeightedDocument m_brute_ar[ MaxIndexSize];
 	std::size_t m_maxNofRanks;
 	std::size_t m_nofRanks;
 };

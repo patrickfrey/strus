@@ -217,12 +217,12 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 	return rt;
 }
 
-std::vector<queryeval::ResultDocument> Query::evaluate( const StorageInterface* storage)
+std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 {
 	// [0] Check initial conditions:
 	if (m_minRank >= m_maxNofRanks)
 	{
-		return std::vector<queryeval::ResultDocument>();
+		return std::vector<ResultDocument>();
 	}
 	if (!m_queryEval->weightingFunction().function)
 	{
@@ -374,7 +374,7 @@ std::vector<queryeval::ResultDocument> Query::evaluate( const StorageInterface* 
 	}
 
 	// [6] Do the Ranking and build the result:
-	std::vector<queryeval::ResultDocument> rt;
+	std::vector<ResultDocument> rt;
 	Ranker ranker( m_maxNofRanks);
 
 	Index docno = 0;
@@ -384,21 +384,21 @@ std::vector<queryeval::ResultDocument> Query::evaluate( const StorageInterface* 
 
 	while (accumulator.nextRank( docno, state, weight))
 	{
-		ranker.insert( queryeval::WeightedDocument( docno, weight));
+		ranker.insert( WeightedDocument( docno, weight));
 		if (state > prev_state && ranker.nofRanks() >= m_maxNofRanks)
 		{
 			break;
 		}
 		prev_state = state;
 	}
-	std::vector<queryeval::WeightedDocument>
+	std::vector<WeightedDocument>
 		resultlist = ranker.result( m_minRank);
-	std::vector<queryeval::WeightedDocument>::const_iterator
+	std::vector<WeightedDocument>::const_iterator
 		ri=resultlist.begin(),re=resultlist.end();
 
 	for (; ri != re; ++ri)
 	{
-		std::vector<queryeval::ResultDocument::Attribute> attr;
+		std::vector<ResultDocument::Attribute> attr;
 		SummarizerClosureReferenceArray::iterator
 			si = summarizers.begin(), se = summarizers.end();
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
@@ -409,11 +409,11 @@ std::vector<queryeval::ResultDocument> Query::evaluate( const StorageInterface* 
 			for (; ci != ce; ++ci)
 			{
 				attr.push_back(
-					queryeval::ResultDocument::Attribute(
+					ResultDocument::Attribute(
 						m_queryEval->summarizers()[sidx].resultAttribute, *ci));
 			}
 		}
-		rt.push_back( queryeval::ResultDocument( *ri, attr));
+		rt.push_back( ResultDocument( *ri, attr));
 	}
 	return rt;
 }

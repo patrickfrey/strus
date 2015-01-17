@@ -34,7 +34,7 @@
 #include "metaDataBlock.hpp"
 #include "metaDataDescription.hpp"
 #include "extractKeyValueData.hpp"
-#include "strus/utils/cmdLineOpt.hpp"
+#include "strus/cmdLineOpt.hpp"
 #include <iostream>
 #include <cstring>
 #include <stdexcept>

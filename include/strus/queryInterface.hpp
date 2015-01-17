@@ -32,7 +32,7 @@
 #include <vector>
 #include <utility>
 #include <iostream>
-#include "strus/queryeval/resultDocument.hpp"
+#include "strus/resultDocument.hpp"
 
 namespace strus {
 
@@ -55,7 +55,7 @@ public:
 	virtual void setMinRank( std::size_t minRank_)=0;
 	virtual void setUserName( const std::string& username_)=0;
 
-	virtual std::vector<queryeval::ResultDocument> evaluate(
+	virtual std::vector<ResultDocument> evaluate(
 			const StorageInterface* storage)=0;
 };
 

@@ -34,7 +34,6 @@
 #include <utility>
 
 namespace strus {
-namespace queryeval {
 
 class WeightedDocument
 {
@@ -63,6 +62,6 @@ private:
 	float m_weight;
 };
 
-}}//namespace
+}//namespace
 #endif
 
