@@ -290,7 +290,7 @@ class InvertedAclIterator
 {
 public:
 	InvertedAclIterator( leveldb::DB* db_, const Index& userno_)
-		:IndexSetIterator( db_, DatabaseKey::UserAclBlockPrefix, userno_){}
+		:IndexSetIterator( db_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_)){}
 	virtual ~InvertedAclIterator(){}
 
 	virtual Index skipDoc( const Index& docno_)
@@ -549,12 +549,12 @@ Index Storage::allocNameIm(
 
 IndexSetIterator Storage::getAclIterator( const Index& docno) const
 {
-	return IndexSetIterator( m_db, DatabaseKey::AclBlockPrefix, docno);
+	return IndexSetIterator( m_db, DatabaseKey::AclBlockPrefix, BlockKey(docno));
 }
 
 IndexSetIterator Storage::getUserAclIterator( const Index& userno) const
 {
-	return IndexSetIterator( m_db, DatabaseKey::UserAclBlockPrefix, userno);
+	return IndexSetIterator( m_db, DatabaseKey::UserAclBlockPrefix, BlockKey(userno));
 }
 
 Index Storage::nofAttributeTypes()

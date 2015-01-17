@@ -48,7 +48,6 @@ public:
 		UserNamePrefix='U',	///< [name string]             ->  [userno]
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
-		DocnoBlockPrefix='b',	///< [typeno,termno,docno]     ->  [index,ff,weight]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
 		InverseTermIndex='i',	///< [docno]                   ->  [typeno,termno,df]*
 
@@ -74,7 +73,6 @@ public:
 			case UserNamePrefix: return "user id";
 
 			case ForwardIndexPrefix: return "forward index";
-			case DocnoBlockPrefix: return "docno posting block";
 			case PosinfoBlockPrefix: return "posinfo posting block";
 			case InverseTermIndex: return "inverse terminfo block";
 			case UserAclBlockPrefix: return "user ACL block";

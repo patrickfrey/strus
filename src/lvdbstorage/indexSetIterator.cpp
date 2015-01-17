@@ -30,8 +30,8 @@
 
 using namespace strus;
 
-IndexSetIterator::IndexSetIterator( leveldb::DB* db_, DatabaseKey::KeyPrefix dbprefix_, Index key_)
-	:m_elemStorage( db_, dbprefix_, BlockKey(key_), true)
+IndexSetIterator::IndexSetIterator( leveldb::DB* db_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_)
+	:m_elemStorage( db_, dbprefix_, key_, true)
 	,m_elemBlk(0)
 	,m_elemItr(0)
 	,m_elemno(0)
@@ -56,7 +56,27 @@ bool IndexSetIterator::loadBlock( const Index& elemno_)
 		{
 			if (m_elemItr)
 			{
-				m_elemItr = m_elemBlk->upper_bound( elemno_, m_elemItr);
+				Index from_,to_;
+				char const* eitr = m_elemItr;
+				if (!m_elemBlk->getNextRange( eitr, from_, to_))
+				{
+					m_elemItr = m_elemBlk->upper_bound( elemno_, m_elemBlk->charptr());
+				}
+				else if (elemno_ < from_)
+				{
+					m_elemItr = m_elemBlk->upper_bound( elemno_, m_elemBlk->charptr());
+				}
+				else if (elemno_ > to_)
+				{
+					m_elemItr = m_elemBlk->upper_bound( elemno_, m_elemItr);
+				}
+				else
+				{
+					m_range_from = from_;
+					m_range_to = to_;
+					m_elemItr = eitr;
+					return true;
+				}
 			}
 			else
 			{

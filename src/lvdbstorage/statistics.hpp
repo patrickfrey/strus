@@ -43,10 +43,6 @@ struct Statistics
 	enum Type
 	{
 		MetaDataCacheMiss,
-		DocnoBlockReadBlockRandom,
-		DocnoBlockReadBlockRandomMiss,
-		DocnoBlockReadBlockFollow,
-		DocnoBlockReadBlockFollowMiss,
 		PosinfoBlockReadBlockRandom,
 		PosinfoBlockReadBlockRandomMiss,
 		PosinfoBlockReadBlockFollow,
@@ -58,10 +54,6 @@ struct Statistics
 	{
 		static const char* ar[NofTypes] = {
 			"MetaDataCacheMiss",
-			"DocnoBlockReadBlockRandom",
-			"DocnoBlockReadBlockRandomMiss",
-			"DocnoBlockReadBlockFollow",
-			"DocnoBlockReadBlockFollowMiss",
 			"PosinfoBlockReadBlockRandom",
 			"PosinfoBlockReadBlockRandomMiss",
 			"PosinfoBlockReadBlockFollow",

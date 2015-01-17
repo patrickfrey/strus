@@ -135,12 +135,6 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::DocnoBlockPrefix:
-			{
-				strus::DocnoBlockData data( key, value);
-				data.print( out);
-				break;
-			}
 			case strus::DatabaseKey::PosinfoBlockPrefix:
 			{
 				strus::PosinfoBlockData data( key, value);
@@ -269,7 +263,6 @@ static char getDatabaseKeyPrefix( const char* name)
 	if (boost::algorithm::iequals( name, "attrname")) return (char)strus::DatabaseKey::AttributeKeyPrefix;
 	if (boost::algorithm::iequals( name, "username")) return (char)strus::DatabaseKey::UserNamePrefix;
 	if (boost::algorithm::iequals( name, "forward")) return (char)strus::DatabaseKey::ForwardIndexPrefix;
-	if (boost::algorithm::iequals( name, "docno")) return (char)strus::DatabaseKey::DocnoBlockPrefix;
 	if (boost::algorithm::iequals( name, "posinfo")) return (char)strus::DatabaseKey::PosinfoBlockPrefix;
 	if (boost::algorithm::iequals( name, "invterm")) return (char)strus::DatabaseKey::InverseTermIndex;
 	if (boost::algorithm::iequals( name, "useracl")) return (char)strus::DatabaseKey::UserAclBlockPrefix;

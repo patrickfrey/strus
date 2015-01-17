@@ -47,13 +47,10 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
 	:m_db(db_)
-	,m_docnoStorage( db_, DatabaseKey::DocnoBlockPrefix, BlockKey( termtypeno, termvalueno), true)
-	,m_docnoBlk(0)
-	,m_docnoItr(0)
+	,m_docnoIterator(db_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno))
 	,m_posinfoStorage( db_, DatabaseKey::PosinfoBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
-	,m_last_docno(0)
 	,m_docno(0)
 	,m_termtypeno(termtypeno)
 	,m_termvalueno(termvalueno)
@@ -74,13 +71,10 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 PostingIterator::PostingIterator( const PostingIterator& o)
 	:PostingIteratorInterface(o)
 	,m_db(o.m_db)
-	,m_docnoStorage( o.m_docnoStorage)
-	,m_docnoBlk(0)
-	,m_docnoItr(0)
+	,m_docnoIterator(o.m_docnoIterator)
 	,m_posinfoStorage( o.m_posinfoStorage)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
-	,m_last_docno(0)
 	,m_docno(0)
 	,m_termtypeno(o.m_termtypeno)
 	,m_termvalueno(o.m_termvalueno)
@@ -88,85 +82,10 @@ PostingIterator::PostingIterator( const PostingIterator& o)
 	,m_featureid(o.m_featureid)
 {}
 
-Index PostingIterator::skipDocDocnoBlock( const Index& docno_)
+Index PostingIterator::skipDocDocListBlock( const Index& docno_)
 {
-	if (!m_docnoBlk)
-	{
-		// [A] No block loaded yet
-		m_docnoBlk = m_docnoStorage.load( docno_);
-		if (!m_docnoBlk)
-		{
-			m_docnoItr = 0;
-			return 0;
-		}
-		m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
-	}
-	else
-	{
-		if (m_docnoBlk->isThisBlockAddress( docno_))
-		{
-			// [B] Answer in same block as for the last query
-			if (!m_docnoItr || docno_ < m_docnoItr->docno())
-			{
-				m_docnoItr = m_docnoBlk->ptr();
-			}
-			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoItr);
-		}
-		else if (m_docnoBlk->isFollowBlockAddress( docno_))
-		{
-			// [C] Try to get answer from a follow block
-			do
-			{
-				m_docnoBlk = m_docnoStorage.loadNext();
-				if (m_docnoBlk)
-				{
-					Statistics::increment( Statistics::DocnoBlockReadBlockFollow);
-
-					if (m_docnoBlk->id() < docno_ && !m_docnoBlk->isFollowBlockAddress( docno_))
-					{	
-						m_docnoBlk = m_docnoStorage.load( docno_);
-						if (m_docnoBlk)
-						{
-							Statistics::increment( Statistics::DocnoBlockReadBlockRandom);
-						}
-						else
-						{
-							Statistics::increment( Statistics::DocnoBlockReadBlockRandomMiss);
-							m_docnoItr = 0;
-							return 0;
-						}
-					}
-				}
-				else
-				{
-					Statistics::increment( Statistics::DocnoBlockReadBlockFollowMiss);
-					m_docnoItr = 0;
-					return 0;
-				}
-			}
-			while (m_docnoBlk->id() < docno_);
-
-			m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
-		}
-		else
-		{
-			// [D] Answer is in a 'far away block'
-			m_docnoBlk = m_docnoStorage.load( docno_);
-			if (!m_docnoBlk)
-			{
-				Statistics::increment( Statistics::DocnoBlockReadBlockRandomMiss);
-				m_docnoItr = 0;
-				return 0;
-			}
-			else
-			{
-				Statistics::increment( Statistics::DocnoBlockReadBlockRandom);
-				m_docnoItr = m_docnoBlk->upper_bound( docno_, m_docnoBlk->begin());
-			}
-		}
-	}
-	if (!m_docnoItr) return 0;
-	return m_docnoItr->docno();
+	m_docnoIterator.skip( docno_);
+	return m_docnoIterator.elemno();
 }
 
 Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
@@ -259,32 +178,16 @@ Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
 
 Index PostingIterator::skipDoc( const Index& docno_)
 {
-	if (m_docno)
-	{
-		if (docno_ == m_docno)
-		{
-			// [A] same as the current position
-			return m_docno;
-		}
-		if (m_last_docno <= docno_ && m_docno > docno_)
-		{
-			// [B] same response as for the last query
-			return m_docno;
-		}
-	}
 	if (m_posinfoBlk)
 	{
 		m_docno = skipDocPosinfoBlock( docno_);
-		m_last_docno = docno_;
-		return m_docno;
 	}
 	else
 	{
+		m_docno = m_docnoIterator.skip( docno_);
 		m_positionScanner.clear();
-		m_docno = skipDocDocnoBlock( docno_);
-		m_last_docno = docno_;
-		return m_docno;
 	}
+	return m_docno;
 }
 
 Index PostingIterator::skipPos( const Index& firstpos_)
@@ -305,21 +208,22 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 	Index rt = m_positionScanner.skip( firstpos_);
 	if (rt < firstpos_ && rt != 0)
 	{
-		throw std::logic_error("CRAZY posinfo iterator");
+		throw std::runtime_error( "internal: corrupt index (posinfo block)");
 	}
 	return rt;
 }
 
 unsigned int PostingIterator::frequency()
 {
-	if (m_posinfoItr)
+	if (!m_posinfoItr)
 	{
-		return m_posinfoBlk->frequency_at( m_posinfoItr);
+		if (!m_docno) return 0;
+		if (m_docno != skipDocPosinfoBlock( m_docno))
+		{
+			throw std::runtime_error( "position information not available (do insert with position information for this type of query)");
+		}
 	}
-	else
-	{
-		return m_docnoItr?m_docnoItr->ff():0;
-	}
+	return m_posinfoBlk->frequency_at( m_posinfoItr);
 }
 
 Index PostingIterator::documentFrequency() const

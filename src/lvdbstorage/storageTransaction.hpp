@@ -35,8 +35,6 @@
 #include "metaDataBlockMap.hpp"
 #include "metaDataReader.hpp"
 #include "attributeMap.hpp"
-#include "docnoBlock.hpp"
-#include "docnoBlockMap.hpp"
 #include "booleanBlock.hpp"
 #include "userAclBlockMap.hpp"
 #include "posinfoBlock.hpp"
@@ -109,14 +107,6 @@ public:/*Document*/
 
 	void deleteIndex( const Index& docno);
 
-	void defineDocnoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno, unsigned int ff, float weight);
-
-	void deleteDocnoPosting(
-		const Index& termtype, const Index& termvalue,
-		const Index& docno);
-
 	void definePosinfoPosting(
 		const Index& termtype, const Index& termvalue,
 		const Index& docno, const std::vector<Index>& posinfo);
@@ -136,7 +126,6 @@ private:
 	AttributeMap m_attributeMap;				///< map of document attributes for writing
 	MetaDataBlockMap m_metaDataBlockMap;			///< map of meta data blocks for writing
 
-	DocnoBlockMap m_docnoBlockMap;				///< map of docno postings for writing
 	PosinfoBlockMap m_posinfoBlockMap;			///< map of posinfo postings for writing
 	ForwardIndexBlockMap m_forwardIndexBlockMap;		///< map of forward index for writing
 	UserAclBlockMap m_userAclBlockMap;			///< map of user rights for writing (forward and inverted)

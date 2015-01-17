@@ -31,7 +31,6 @@
 #include "databaseKey.hpp"
 #include "metaDataDescription.hpp"
 #include "metaDataBlock.hpp"
-#include "docnoBlock.hpp"
 #include "posinfoBlock.hpp"
 #include "invTermBlock.hpp"
 #include "strus/index.hpp"
@@ -152,18 +151,6 @@ struct DocFrequencyData
 	Index df;
 
 	DocFrequencyData( const leveldb::Slice& key, const leveldb::Slice& value);
-
-	void print( std::ostream& out);
-};
-
-struct DocnoBlockData
-{
-	Index typeno;
-	Index termno;
-	const DocnoBlockElement* blk;
-	std::size_t blksize;
-
-	DocnoBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
 
 	void print( std::ostream& out);
 };

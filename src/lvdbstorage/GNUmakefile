@@ -10,8 +10,6 @@ CPP_OBJS=\
 	dataBlock.o \
 	keyValueStorage.o \
 	dataBlockStorage.o \
-	docnoBlock.o \
-	docnoBlockMap.o \
 	invTermBlock.o \
 	posinfoBlock.o \
 	posinfoBlockMap.o \

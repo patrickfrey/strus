@@ -89,9 +89,8 @@ struct CharLengthTab
 
 static CharLengthTab g_charlentable;
 
-static int32_t utf8decode( const char* itr)
+static int32_t utf8decode( const char* itr, unsigned int charsize)
 {
-	unsigned int charsize = g_charlentable[ *itr];
 	int32_t res = (unsigned char)*itr;
 	if (res > 127)
 	{
@@ -143,18 +142,12 @@ static void utf8encode( BUFFER& buf, int32_t chr)
 
 static int32_t unpackInt32_( const char*& itr, const char* end)
 {
-	int ii;
-	int nn = g_charlentable[ *itr];
-	char buf[8];
-	for (ii=0; itr != end && ii < nn; ++itr,++ii)
-	{
-		buf[ii] = *itr;
-	}
-	if (ii < nn || nn == 0)
+	int charlen = g_charlentable[ *itr];
+	if (end - itr < charlen)
 	{
 		throw std::runtime_error( "corrupt data (unpackInt32_ 1)");
 	}
-	int32_t rt = utf8decode( buf);
+	int32_t rt = utf8decode( itr, charlen);
 	if (rt < 0)
 	{
 		throw std::runtime_error( "corrupt data (unpackInt32_ 2)");

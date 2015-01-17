@@ -38,11 +38,12 @@ namespace strus {
 class IndexSetIterator
 {
 public:
-	IndexSetIterator( leveldb::DB* db_, DatabaseKey::KeyPrefix dbprefix_, Index key_);
+	IndexSetIterator( leveldb::DB* db_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_);
 	IndexSetIterator( const IndexSetIterator& o);
 	~IndexSetIterator(){}
 
 	Index skip( const Index& elemno_);
+	Index elemno() const			{return m_elemno;}
 
 private:
 	bool loadBlock( const Index& elemno_);

@@ -125,11 +125,6 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 				strus::DocFrequencyData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::DocnoBlockPrefix:
-			{
-				strus::DocnoBlockData( key, value);
-				break;
-			}
 			case strus::DatabaseKey::PosinfoBlockPrefix:
 			{
 				strus::PosinfoBlockData( key, value);

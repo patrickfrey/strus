@@ -29,8 +29,8 @@
 #ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
-#include "docnoBlock.hpp"
 #include "posinfoBlock.hpp"
+#include "indexSetIterator.hpp"
 #include "blockStorage.hpp"
 #include "databaseKey.hpp"
 #include <leveldb/db.h>
@@ -85,21 +85,17 @@ public:
 
 private:
 	Index skipDocPosinfoBlock( const Index& docno_);
-	Index skipDocDocnoBlock( const Index& docno_);
+	Index skipDocDocListBlock( const Index& docno_);
 
 private:
 	leveldb::DB* m_db;
 
-	BlockStorage<DocnoBlock> m_docnoStorage;
-	const DocnoBlock* m_docnoBlk;
-	const DocnoBlockElement* m_docnoItr;
-
+	IndexSetIterator m_docnoIterator;
 	BlockStorage<PosinfoBlock> m_posinfoStorage;
 	const PosinfoBlock* m_posinfoBlk;
 	char const* m_posinfoItr;
 	PosinfoBlock::PositionScanner m_positionScanner;
 
-	Index m_last_docno;
 	Index m_docno;
 	Index m_termtypeno;
 	Index m_termvalueno;

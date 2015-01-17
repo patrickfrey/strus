@@ -47,7 +47,6 @@ StorageTransaction::StorageTransaction(
 	,m_metadescr(metadescr_)
 	,m_attributeMap(db_)
 	,m_metaDataBlockMap(db_,metadescr_)
-	,m_docnoBlockMap(db_)
 	,m_posinfoBlockMap(db_)
 	,m_forwardIndexBlockMap(db_)
 	,m_userAclBlockMap(db_)
@@ -146,21 +145,6 @@ void StorageTransaction::deleteAcl( const Index& docno)
 	m_userAclBlockMap.deleteDocumentAccess( docno);
 }
 
-void StorageTransaction::defineDocnoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno, unsigned int ff, float weight)
-{
-	m_docnoBlockMap.defineDocnoPosting(
-		termtype, termvalue, docno, ff, weight);
-}
-
-void StorageTransaction::deleteDocnoPosting(
-	const Index& termtype, const Index& termvalue,
-	const Index& docno)
-{
-	m_docnoBlockMap.deleteDocnoPosting( termtype, termvalue, docno);
-}
-
 void StorageTransaction::definePosinfoPosting(
 	const Index& termtype, const Index& termvalue,
 	const Index& docno, const std::vector<Index>& posinfo)
@@ -257,14 +241,12 @@ void StorageTransaction::commit()
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, batch);
 
-		m_docnoBlockMap.renameNewTermNumbers( termnoUnknownMap);
 		m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
 
 		std::vector<Index> refreshList;
 		m_attributeMap.getWriteBatch( batch);
 		m_metaDataBlockMap.getWriteBatch( batch, refreshList);
 
-		m_docnoBlockMap.getWriteBatch( batch);
 		m_posinfoBlockMap.getWriteBatch( batch);
 		m_forwardIndexBlockMap.getWriteBatch( batch);
 

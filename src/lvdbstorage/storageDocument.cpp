@@ -138,9 +138,6 @@ void StorageDocument::done()
 		pos.insert( pos.end(), ti->second.pos.begin(), ti->second.pos.end());
 		m_transaction->definePosinfoPosting(
 				ti->first.first, ti->first.second, m_docno, pos);
-		m_transaction->defineDocnoPosting(
-				ti->first.first, ti->first.second,
-				m_docno, ti->second.pos.size(), ti->second.weight);
 	}
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
