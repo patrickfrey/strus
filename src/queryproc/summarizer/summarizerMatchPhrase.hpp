@@ -112,7 +112,6 @@ public:
 			MetaDataReaderInterface*,
 			const std::vector<ArithmeticVariant>& parameters) const
 	{
-		if (nofitrs_ || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'matchphrase'");
 		return new SummarizerClosureMatchPhrase( 
 				storage_, elementname_,
 				parameters[0].defined()?(unsigned int)parameters[0]:30,

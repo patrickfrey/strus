@@ -119,11 +119,14 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent)
 	std::string indentstr( indent*2, ' ');
 	switch (nodeType( adr))
 	{
-		case NullNode: out << indentstr << "NULL" << std::endl;
+		case NullNode:
+			out << indentstr << "NULL" << std::endl;
+			break;
 		case TermNode:
 		{
 			const Term& term = m_terms[ nodeIndex( adr)];
 			out << "term " << term.type << " '" << term.value << "'" << std::endl;
+			break;
 		}
 		case ExpressionNode:
 		{
@@ -136,6 +139,7 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent)
 			{
 				printNode( out, *ni, indent+1);
 			}
+			break;
 		}
 	}
 }
@@ -350,7 +354,7 @@ std::vector<queryeval::ResultDocument> Query::evaluate( const StorageInterface* 
 			fi = m_features.begin(), fe = m_features.end();
 			for (; fi != fe; ++fi)
 			{
-				if (zi->structSet == fi->set)
+				if (*ti == fi->set)
 				{
 					allSummarizerPostings.push_back(
 						createNodePostingIterator( fi->node));
@@ -406,7 +410,7 @@ std::vector<queryeval::ResultDocument> Query::evaluate( const StorageInterface* 
 			{
 				attr.push_back(
 					queryeval::ResultDocument::Attribute(
-						m_queryEval->summarizers()[sidx].functionName, *ci));
+						m_queryEval->summarizers()[sidx].resultAttribute, *ci));
 			}
 		}
 		rt.push_back( queryeval::ResultDocument( *ri, attr));

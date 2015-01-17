@@ -74,6 +74,7 @@ public:
 		,m_metadata(metadata_)
 		,m_selectoridx(0)
 		,m_docno(0)
+		,m_visited(maxDocumentNumber_)
 		,m_maxNofRanks(maxNofRanks_)
 		,m_maxDocumentNumber(maxDocumentNumber_)
 	{}

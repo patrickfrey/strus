@@ -87,11 +87,11 @@ public:
 		createInvertedAclIterator(
 			const std::string& username) const=0;
 
-	/// \brief Get the number of documents inserted into the collection
+	/// \brief Get the number of documents inserted
 	/// \return the number of documents
 	virtual Index nofDocumentsInserted() const=0;
 
-	/// \brief Get the highest document number used in the collection
+	/// \brief Get the highest document number used
 	/// \return the document number
 	virtual Index maxDocumentNumber() const=0;
 

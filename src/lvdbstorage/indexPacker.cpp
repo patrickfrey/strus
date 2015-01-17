@@ -362,25 +362,23 @@ struct SkipRange
 
 struct CompareAsc
 {
-	bool operator()( const char* ptr, unsigned char needle0)
+	bool operator()( const unsigned char* ptr, const unsigned char* needle, std::size_t size)
 	{
-		return (unsigned char)*ptr < needle0;
-	}
-	bool operator()( const char* ptr, unsigned const char* needle, std::size_t size)
-	{
-		return std::memcmp( ptr, needle, size) < 0;
+		//return std::memcmp( ptr, needle, size) < 0;
+		std::size_t ii = 0;
+		for (; ii < size && ptr[ii] == needle[ii]; ++ii){}
+		return ii < size && ptr[ii] < needle[ii];
 	}
 };
 
 struct CompareDesc
 {
-	bool operator()( const char* ptr, unsigned char needle0)
+	bool operator()( const unsigned char* ptr, const unsigned char* needle, std::size_t size)
 	{
-		return (unsigned char)*ptr > needle0;
-	}
-	bool operator()( const char* ptr, unsigned const char* needle, std::size_t size)
-	{
-		return std::memcmp( ptr, needle, size) > 0;
+		//return (std::memcmp( ptr, needle, size) > 0);
+		std::size_t ii = 0;
+		for (; ii < size && ptr[ii] == needle[ii]; ++ii){}
+		return ii < size && ptr[ii] > needle[ii];
 	}
 };
 
@@ -395,11 +393,7 @@ static const char* findIndex( const char* ptr, const char* end, Index needle, ch
 	const char* pe = end;
 
 	while (pi != pe
-		&& Comparator()( pi, needlebuf[0])
-		&& SkipElem()( pi, pe, delim)){}
-
-	while (pi != pe
-		&& Comparator()( pi, needlebuf, bufstruct.size)
+		&& Comparator()( (const unsigned char*)pi, needlebuf, bufstruct.size)
 		&& SkipElem()( pi, pe, delim)){}
 
 	return (pi == pe)?0:(const char*)pi;

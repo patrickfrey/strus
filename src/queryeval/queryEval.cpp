@@ -250,6 +250,10 @@ void QueryEval::parseWeightingFunctionDef( char const*& src)
 			break;
 		}
 	}
+	if (m_weightingFunction.selectorSets.empty())
+	{
+		m_weightingFunction.selectorSets = m_weightingFunction.weightingSets;
+	}
 }
 
 
