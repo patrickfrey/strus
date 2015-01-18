@@ -36,6 +36,7 @@ namespace strus {
 	///\typedef Index
 	///\brief Document number type
 	typedef INT32 Index;
+	typedef QWORD GlobalCounter;
 }//namespace
 #else
 #include <stdint.h>
@@ -43,6 +44,7 @@ namespace strus {
 	///\typedef Index
 	///\brief Index term number type
 	typedef int32_t Index;
+	typedef uint64_t GlobalCounter;
 }//namespace
 #endif
 #endif

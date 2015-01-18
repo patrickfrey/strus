@@ -87,15 +87,15 @@ public:
 		createInvertedAclIterator(
 			const std::string& username) const=0;
 
-	/// \brief Get the number of documents inserted
+	/// \brief Get the number of documents inserted in this stogage
 	/// \return the number of documents
 	virtual Index nofDocumentsInserted() const=0;
 
-	/// \brief Get the highest document number used
+	/// \brief Get the highest document number used in this stogage
 	/// \return the document number
 	virtual Index maxDocumentNumber() const=0;
 
-	/// \brief Get the internal document number
+	/// \brief Get the local internal document number
 	/// \param[in] docid document id of the document inserted
 	virtual Index documentNumber( const std::string& docid) const=0;
 

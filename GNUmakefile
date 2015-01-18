@@ -13,6 +13,7 @@ clean:
 
 install:
 	cd src; make install; cd ..
+	@-mkdir $(INSTALL_INCDIR)
 	@cp include/strus/*.hpp $(INSTALL_INCDIR)
 
 uninstall:

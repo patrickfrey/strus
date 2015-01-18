@@ -1,4 +1,3 @@
-
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -27,50 +26,26 @@
 
 --------------------------------------------------------------------
 */
-#include "parser/accumulateOperation.hpp"
-#include "parser/lexems.hpp"
-#include <stdexcept>
+#ifndef _STRUS_PEER_STORAGE_INTERFACE_HPP_INCLUDED
+#define _STRUS_PEER_STORAGE_INTERFACE_HPP_INCLUDED
+#include <string>
 
-#error DEPRECATED
-
-using namespace strus;
-using namespace strus::parser;
-
-void AccumulateOperation::parse( char const*& src, StringIndexMap& setnamemap)
+namespace strus
 {
-	m_args = WeightingFunction::parseExpression( src, setnamemap);
-	if (!isAlpha( *src) || !isEqual( parse_IDENTIFIER( src), "WITH"))
-	{
-		throw std::runtime_error("WITH expected with the feature set selection list to determine what should be evaluated");
-	}
-	for (;;)
-	{
-		if (!isAlpha( *src))
-		{
-			throw std::runtime_error( "expected comma ',' separated list of identifiers defining the features to select after WITH");
-		}
-		m_featureSelectionSets.push_back(
-			setnamemap.get( parse_IDENTIFIER( src)));
 
-		if (!isComma( *src))
-		{
-			break;
-		}
-		++src;
-	}
-}
+class PeerStorageTransactionInterface;
 
-
-void AccumulateOperation::print( std::ostream& out, const StringIndexMap& setnamemap) const
+/// \brief Interface used by the storage to distribute statistics needed for document ranking to other peers in a cluster of storages
+class PeerStorageInterface
 {
-	WeightingFunction::printExpression( out, args(), setnamemap);
-	std::vector<int>::const_iterator si = m_featureSelectionSets.begin(), se = m_featureSelectionSets.end();
-	out << " WITH ";
-	for (int sidx=0; si != se; ++si,++sidx)
-	{
-		if (sidx) out << ", ";
-		out << setnamemap.name(*si);
-	}
-}
+public:
+	/// \brief Destructor
+	virtual ~PeerStorageInterface(){}
 
+	/// \brief Creates a new transaction object
+	/// \return return the transaction object (with ownership - to be disposed with 'delete')
+	virtual PeerStorageTransactionInterface* createTransaction()=0;
+};
+}//namespace
+#endif
 

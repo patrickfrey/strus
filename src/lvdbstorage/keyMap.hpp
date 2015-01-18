@@ -69,9 +69,6 @@ public:
 		return value > UnknownValueHandleStart;
 	}
 
-	std::map<std::string,Index> getMap();
-	std::map<Index,std::string> getInvMap();
-
 private:
 	enum {
 		UnknownValueHandleStart=(1<<30)

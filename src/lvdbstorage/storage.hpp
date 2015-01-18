@@ -188,6 +188,7 @@ private:
 		const std::string& name, bool& isNew);
 
 	Index m_nof_documents;					///< number of documents inserted
+	GlobalCounter m_global_nof_documents;			///< global number of documents inserted
 	boost::mutex m_nof_documents_mutex;
 
 	Index m_transactionCnt;

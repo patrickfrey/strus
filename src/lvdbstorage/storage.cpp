@@ -87,6 +87,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k, const char
 	,m_next_userno(0)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
+	,m_global_nof_documents(0)
 	,m_transactionCnt(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
@@ -363,6 +364,7 @@ void Storage::declareNofDocumentsInserted( int value)
 {
 	boost::mutex::scoped_lock lock( m_nof_documents_mutex);
 	m_nof_documents += value;
+	m_global_nof_documents += value;
 }
 
 class TypenoAllocator

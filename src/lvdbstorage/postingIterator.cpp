@@ -39,7 +39,7 @@
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
@@ -114,10 +114,7 @@ Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
 			{
 				m_posinfoItr = m_posinfoBlk->begin();
 			}
-			else
-			{
-				m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoItr);
-			}
+			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoItr);
 		}
 		else if (m_posinfoBlk->isFollowBlockAddress( docno_))
 		{
@@ -178,6 +175,8 @@ Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
 
 Index PostingIterator::skipDoc( const Index& docno_)
 {
+	if (m_docno && m_docno == docno_) return m_docno;
+
 	if (m_posinfoBlk)
 	{
 		m_docno = skipDocPosinfoBlock( docno_);

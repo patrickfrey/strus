@@ -89,7 +89,7 @@ struct CharLengthTab
 
 static CharLengthTab g_charlentable;
 
-static int32_t utf8decode( const char* itr, unsigned int charsize)
+static inline int32_t utf8decode( const char* itr, unsigned int charsize)
 {
 	int32_t res = (unsigned char)*itr;
 	if (res > 127)
@@ -112,7 +112,7 @@ static int32_t utf8decode( const char* itr, unsigned int charsize)
 }
 
 template <class BUFFER>
-static void utf8encode( BUFFER& buf, int32_t chr)
+static inline void utf8encode( BUFFER& buf, int32_t chr)
 {
 	if (chr<0)
 	{
@@ -140,7 +140,7 @@ static void utf8encode( BUFFER& buf, int32_t chr)
 	}
 }
 
-static int32_t unpackInt32_( const char*& itr, const char* end)
+static inline int32_t unpackInt32_( const char*& itr, const char* end)
 {
 	int charlen = g_charlentable[ *itr];
 	if (end - itr < charlen)
@@ -152,6 +152,7 @@ static int32_t unpackInt32_( const char*& itr, const char* end)
 	{
 		throw std::runtime_error( "corrupt data (unpackInt32_ 2)");
 	}
+	itr += charlen;
 	return rt;
 }
 
@@ -249,7 +250,7 @@ struct StaticBuffer
 };
 
 template <class BUFFER>
-static void packIndex_( BUFFER& buf, const Index& idx)
+static inline void packIndex_( BUFFER& buf, const Index& idx)
 {
 	if (idx < 0)
 	{
@@ -259,7 +260,7 @@ static void packIndex_( BUFFER& buf, const Index& idx)
 }
 
 template <class BUFFER>
-static void packRange_( BUFFER& buf, const Index& idx, const Index& rangesize)
+static inline void packRange_( BUFFER& buf, const Index& idx, const Index& rangesize)
 {
 	packIndex_( buf, idx);
 	if (rangesize)
@@ -338,7 +339,7 @@ struct SkipStruct
 
 struct SkipRange
 {
-	bool operator()( char const*& pi, const char* pe, char delim)
+	inline bool operator()( char const*& pi, const char* pe, char delim)
 	{
 		pi += g_charlentable[ *pi];
 		if (pi==pe) return false;
@@ -355,7 +356,7 @@ struct SkipRange
 
 struct CompareAsc
 {
-	bool operator()( const unsigned char* ptr, const unsigned char* needle, std::size_t size)
+	inline bool operator()( const unsigned char* ptr, const unsigned char* needle, std::size_t size)
 	{
 		//return std::memcmp( ptr, needle, size) < 0;
 		std::size_t ii = 0;
@@ -366,7 +367,7 @@ struct CompareAsc
 
 struct CompareDesc
 {
-	bool operator()( const unsigned char* ptr, const unsigned char* needle, std::size_t size)
+	inline bool operator()( const unsigned char* ptr, const unsigned char* needle, std::size_t size)
 	{
 		//return (std::memcmp( ptr, needle, size) > 0);
 		std::size_t ii = 0;
@@ -448,5 +449,30 @@ bool strus::checkStringUtf8( const char* ptr, std::size_t size)
 		}
 	}
 	return true;
+}
+
+void strus::packGlobalCounter( char* buf, std::size_t& size, std::size_t maxsize, const GlobalCounter& cnt)
+{
+	if (cnt >> 62 != 0) throw std::runtime_error( "counter out of range (packGlobalCounter)");
+	Index hi = (Index)(cnt >> 31);
+	Index lo = (cnt & (0x7fffFFFFUL));
+	packIndex( buf, size, maxsize, hi);
+	packIndex( buf, size, maxsize, lo);
+}
+
+void strus::packGlobalCounter( std::string& buf, const GlobalCounter& cnt)
+{
+	if (cnt >> 62 != 0) throw std::runtime_error( "counter out of range (packGlobalCounter)");
+	Index hi = (Index)(cnt >> 31);
+	Index lo = (cnt & (0x7fffFFFFUL));
+	packIndex( buf, hi);
+	packIndex( buf, lo);
+}
+
+GlobalCounter strus::unpackGlobalCounter( const char*& ptr, const char* end)
+{
+	Index hi = unpackIndex( ptr, end);
+	Index lo = unpackIndex( ptr, end);
+	return ((GlobalCounter)hi << 31) | (GlobalCounter)lo;
 }
 

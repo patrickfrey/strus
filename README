@@ -1,10 +1,11 @@
 strus
 =====
 
-Library for merging term occurrencies and ranking documents in information
-retrieval. Able to evaluate structured queries on unstructured text as well
+Library for building a search engine for information retrieval. 
+Able to evaluate structured queries on unstructured text as well
 as implenting classical information retrieval.
-Independent from storage impementation.
+Independent from storage impementation. Current storage implementation
+is based on LevelDB.
 
 strus defines information retrieval as evaluation of a query based on 3
 types of operations:
@@ -12,9 +13,7 @@ types of operations:
   * Weighting of documents based on the feature occurrencies
   * Summarization as extraction of content based on the query matches
 
-The architecture defines three components that are implemented as
-shared libraries. Each library could possibly be replaced by an alternative
-implementation.
+The architecture defines three components that are implemented as libraries.
 
   |--------------------|
   |     query eval     |  Query evaluation: Interpretes the query string

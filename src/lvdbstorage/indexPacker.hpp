@@ -36,6 +36,9 @@ namespace strus
 void packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx);
 void packIndex( std::string& buf, const Index& idx);
 Index unpackIndex( const char*& ptr, const char* end);
+void packGlobalCounter( char* buf, std::size_t& size, std::size_t maxsize, const GlobalCounter& cnt);
+void packGlobalCounter( std::string& buf, const GlobalCounter& cnt);
+GlobalCounter unpackGlobalCounter( const char*& ptr, const char* end);
 const char* skipIndex( const char* ptr, const char* end);
 
 void packRange( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx, const Index& rangesize);
