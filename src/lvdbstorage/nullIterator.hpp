@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
 #define _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
+#include <string>
 
 namespace strus {
 

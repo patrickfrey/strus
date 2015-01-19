@@ -33,6 +33,7 @@
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <vector>
+#include <string>
 
 namespace strus
 {
