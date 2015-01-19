@@ -36,6 +36,7 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
 #include <boost/scoped_ptr.hpp>
 #include <iostream>
 #include <sstream>
@@ -197,7 +198,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		if (val != mi->second)
 		{
 			logError( logout, m_docid,
-				std::string( "document metadata does not match: '") + mi->second.tostring() + "' != '" + val.tostring() + "'");
+				std::string( "document metadata does not match: '") + arithmeticVariantToString( mi->second) + "' != '" + arithmeticVariantToString(val) + "'");
 		}
 	}
 

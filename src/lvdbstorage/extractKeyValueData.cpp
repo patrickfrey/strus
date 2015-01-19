@@ -32,6 +32,7 @@
 #include "forwardIndexBlock.hpp"
 #include "booleanBlock.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <limits>

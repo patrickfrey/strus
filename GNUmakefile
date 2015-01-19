@@ -13,17 +13,18 @@ clean:
 
 install:
 	cd src; make install; cd ..
-	@-mkdir $(INSTALL_INCDIR)
+	@-mkdir -p $(INSTALL_INCDIR)/private
+	@cp include/strus/private/*.hpp $(INSTALL_INCDIR)/private/
 	@cp include/strus/*.hpp $(INSTALL_INCDIR)
 
 uninstall:
 	cd src; make uninstall; cd ..
 	@-rm $(INSTALL_INCDIR)/arithmeticVariant.hpp
 	@-rm $(INSTALL_INCDIR)/attributeReaderInterface.hpp
-	@-rm $(INSTALL_INCDIR)/cmdLineOpt.hpp
+	@-rm $(INSTALL_INCDIR)/private/cmdLineOpt.hpp
 	@-rm $(INSTALL_INCDIR)/constants.hpp
 	@-rm $(INSTALL_INCDIR)/docnoIteratorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/fileio.hpp
+	@-rm $(INSTALL_INCDIR)/private/fileio.hpp
 	@-rm $(INSTALL_INCDIR)/forwardIteratorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/index.hpp
 	@-rm $(INSTALL_INCDIR)/metaDataReaderInterface.hpp
@@ -46,6 +47,7 @@ uninstall:
 	@-rm $(INSTALL_INCDIR)/weightedDocument.hpp
 	@-rm $(INSTALL_INCDIR)/weightingClosureInterface.hpp
 	@-rm $(INSTALL_INCDIR)/weightingFunctionInterface.hpp
+	@-rm $(INSTALL_INCDIR)/storage.hpp
 	@-rmdir $(INSTALL_INCDIR)
 	@-rmdir $(INSTALL_BINDIR)
 	@-rmdir $(INSTALL_LIBDIR)

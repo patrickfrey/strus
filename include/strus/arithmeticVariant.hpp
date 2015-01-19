@@ -37,8 +37,6 @@ namespace strus {
 
 struct ArithmeticVariant
 {
-	explicit ArithmeticVariant( const std::string& valueAsString);
-
 	ArithmeticVariant( int value)
 	{
 		variant.Int = value;
@@ -127,10 +125,6 @@ struct ArithmeticVariant
 		return false;
 	}
 
-	void print( std::ostream& out) const;
-
-	std::string tostring() const;
-
 	enum Type {Null,Int,UInt,Float};
 	Type type;
 	union
@@ -140,8 +134,6 @@ struct ArithmeticVariant
 		float Float;
 	} variant;
 };
-
-std::ostream& operator<< (std::ostream& out, const ArithmeticVariant& v);
 
 }//namespace
 #endif

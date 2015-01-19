@@ -36,6 +36,7 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
 #include "parser/lexems.hpp"
 #include "parser/keyMap.hpp"
 #include "parser/mapFunctionParameters.hpp"

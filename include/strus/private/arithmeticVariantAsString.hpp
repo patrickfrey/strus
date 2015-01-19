@@ -26,31 +26,18 @@
 
 --------------------------------------------------------------------
 */
-#include "summarizerMetaData.hpp"
-#include "strus/postingIteratorInterface.hpp"
-#include "strus/metaDataReaderInterface.hpp"
-#include "strus/storageInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
+#ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_AS_STRING_HPP_INCLUDED
+#define _STRUS_LVDB_ARITHMETIC_VARIANT_AS_STRING_HPP_INCLUDED
+#include <string>
+#include <iostream>
 #include "strus/arithmeticVariant.hpp"
 
-using namespace strus;
+namespace strus {
 
-SummarizerClosureMetaData::SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_)
-	:m_metadata(metadata_)
-	,m_attrib(metadata_->elementHandle( name_))
-{}
+ArithmeticVariant arithmeticVariantFromString( const std::string& valueAsString);
+std::string arithmeticVariantToString( const ArithmeticVariant& value);
 
-std::vector<std::string>
-	SummarizerClosureMetaData::getSummary( const Index& docno)
-{
-	std::vector<std::string> rt;
-	m_metadata->skipDoc( docno);
-	ArithmeticVariant value = m_metadata->getValue( m_attrib);
-	if (value.defined()) 
-	{
-		rt.push_back( arithmeticVariantToString( value));
-	}
-	return rt;
+std::ostream& operator<< (std::ostream& out, const ArithmeticVariant& v);
+
 }
-
-
+#endif

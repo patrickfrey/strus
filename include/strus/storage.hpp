@@ -26,31 +26,35 @@
 
 --------------------------------------------------------------------
 */
-#include "summarizerMetaData.hpp"
-#include "strus/postingIteratorInterface.hpp"
-#include "strus/metaDataReaderInterface.hpp"
-#include "strus/storageInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
+#ifndef _STRUS_STORAGE_MAIN_INCLUDE_HPP_INCLUDED
+#define _STRUS_STORAGE_MAIN_INCLUDE_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
-
-using namespace strus;
-
-SummarizerClosureMetaData::SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_)
-	:m_metadata(metadata_)
-	,m_attrib(metadata_->elementHandle( name_))
-{}
-
-std::vector<std::string>
-	SummarizerClosureMetaData::getSummary( const Index& docno)
-{
-	std::vector<std::string> rt;
-	m_metadata->skipDoc( docno);
-	ArithmeticVariant value = m_metadata->getValue( m_attrib);
-	if (value.defined()) 
-	{
-		rt.push_back( arithmeticVariantToString( value));
-	}
-	return rt;
-}
-
+#include "strus/attributeReaderInterface.hpp"
+#include "strus/constants.hpp"
+#include "strus/docnoIteratorInterface.hpp"
+#include "strus/forwardIteratorInterface.hpp"
+#include "strus/index.hpp"
+#include "strus/metaDataReaderInterface.hpp"
+#include "strus/peerStorageInterface.hpp"
+#include "strus/peerStorageTransactionInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/queryEvalInterface.hpp"
+#include "strus/queryEvalLib.hpp"
+#include "strus/queryInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
+#include "strus/queryProcessorLib.hpp"
+#include "strus/resultDocument.hpp"
+#include "strus/statCounterValue.hpp"
+#include "strus/storageAlterMetaDataTableInterface.hpp"
+#include "strus/storageDocumentInterface.hpp"
+#include "strus/storageInterface.hpp"
+#include "strus/storageLib.hpp"
+#include "strus/storageTransactionInterface.hpp"
+#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+#include "strus/weightedDocument.hpp"
+#include "strus/weightingClosureInterface.hpp"
+#include "strus/weightingFunctionInterface.hpp"
+#endif
 

@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/fileio.hpp"
+#include "strus/private/fileio.hpp"
 #include "strus/queryEvalLib.hpp"
 #include "strus/queryEvalInterface.hpp"
 #include "strus/queryProcessorLib.hpp"
