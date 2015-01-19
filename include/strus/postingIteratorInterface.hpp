@@ -49,14 +49,14 @@ public:
 	/// \brief Unique id in the system for a feature expression
 	virtual const char* featureid() const=0;
 
-	/// \brief Return the next match with a document number higher than or equal to docno
+	/// \brief Return the list of subexpressions of the iterator
 	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const=0;
 
-	/// \brief Get the number of documents in the collection where the feature occurrs
-	/// \remark May not be defined for composed features
+	/// \brief Get the number of documents where the feature occurrs
+	/// \remark May not be defined exactly for composed features. In this case a substitute value should be returned, calculated from the df's of the sub expressions
 	virtual Index documentFrequency() const=0;
 
-	/// \brief Get the frequency of the current document reached with 'skipDoc(const Index&)'
+	/// \brief Get the frequency of the feature in the current document
 	virtual unsigned int frequency()=0;
 
 	/// \brief Get the current document number
