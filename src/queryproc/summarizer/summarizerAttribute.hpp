@@ -48,7 +48,7 @@ class SummarizerClosureAttribute
 public:
 	/// \param[in] attribreader_ reader for document attributes
 	/// \param[in] name_ attribute identifier
-	SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
+	SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const char* name_);
 
 	virtual ~SummarizerClosureAttribute();
 
@@ -84,7 +84,7 @@ public:
 
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const std::string& elementname_,
+			const char* elementname_,
 			PostingIteratorInterface* structitr_,
 			std::size_t nofitrs_,
 			PostingIteratorInterface**,

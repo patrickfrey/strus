@@ -29,7 +29,6 @@
 #ifndef _STRUS_POSTING_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_POSTING_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include <string>
 #include <vector>
 
 namespace strus
@@ -48,7 +47,7 @@ public:
 	virtual Index skipPos( const Index& firstpos)=0;
 
 	/// \brief Unique id in the system for a feature expression
-	virtual const std::string& featureid() const=0;
+	virtual const char* featureid() const=0;
 
 	/// \brief Return the next match with a document number higher than or equal to docno
 	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const=0;

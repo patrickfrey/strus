@@ -50,9 +50,9 @@ public:
 		delete m_origin;
 	}
 
-	virtual const std::string& featureid() const
+	virtual const char* featureid() const
 	{
-		return m_featureid;
+		return m_featureid.c_str();
 	}
 
 	virtual Index skipDoc( const Index& docno_)

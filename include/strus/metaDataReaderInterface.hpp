@@ -30,8 +30,6 @@
 #define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include <vector>
-#include <string>
 
 namespace strus
 {
@@ -46,12 +44,18 @@ public:
 	/// \brief Find out if there exists a meta data table element with the specified name
 	/// \param[in] name name of the element to check
 	/// \return return true, if the element exists
-	virtual bool hasElement( const std::string& name_) const=0;
+	virtual bool hasElement( const char* name_) const=0;
 
 	/// \brief Get the handle for a table element addressed by name
 	/// \param[in] name name of the element
 	/// \return return the element handle
-	virtual Index elementHandle( const std::string& name) const=0;
+	/// \remark Element handles are numbered from 0 to N-1, where N is what nofElements() returns
+	virtual Index elementHandle( const char* name) const=0;
+
+	/// \brief Get the number of columns in the meta data table
+	/// \return return number of columns
+	/// \remark Element handles are numbered from 0 to N-1, where N is what nofElements() returns
+	virtual Index nofElements() const=0;
 
 	/// \brief Skip to the document number equal to 'docno'
 	/// \param[in] docno document number
@@ -68,9 +72,10 @@ public:
 	/// \return return the table element type name string
 	virtual const char* getType( const Index& elementHandle_) const=0;
 
-	/// \brief Get all meta data table elements by name
-	/// \return list of meta data table element names
-	virtual std::vector<std::string> elements() const=0;
+	/// \brief Get the name of a table element
+	/// \param[in] elementHandle_ the handle for the element
+	/// \return return the table element name
+	virtual const char* getName( const Index& elementHandle_) const=0;
 };
 }//namespace
 #endif

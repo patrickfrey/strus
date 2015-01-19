@@ -49,9 +49,9 @@ public:
 
 	virtual ~IteratorStructWithin();
 
-	virtual const std::string& featureid() const
+	virtual const char* featureid() const
 	{
-		return m_featureid;
+		return m_featureid.c_str();
 	}
 
 	virtual std::vector<const PostingIteratorInterface*>

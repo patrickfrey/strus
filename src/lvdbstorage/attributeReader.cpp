@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-Index AttributeReader::elementHandle( const std::string& name) const
+Index AttributeReader::elementHandle( const char* name) const
 {
 	Index rt = m_storage->getAttributeName( name);
 	if (!rt)
@@ -46,7 +46,7 @@ std::string AttributeReader::getValue( const Index& elementHandle_) const
 {
 	KeyValueStorage kvs( m_db, DatabaseKey::DocAttributePrefix, false);
 	const KeyValueStorage::Value* val = kvs.load( BlockKey( m_docno), elementHandle_);
-	if (!val) return std::string();
+	if (!val) return 0;
 	return std::string( val->ptr(), val->size());
 }
 

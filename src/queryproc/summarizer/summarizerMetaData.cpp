@@ -35,7 +35,7 @@
 
 using namespace strus;
 
-SummarizerClosureMetaData::SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_)
+SummarizerClosureMetaData::SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const char* name_)
 	:m_metadata(metadata_)
 	,m_attrib(metadata_->elementHandle( name_))
 {}

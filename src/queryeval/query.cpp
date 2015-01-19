@@ -368,7 +368,7 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 		}
 		summarizers.push_back(
 			zi->function->createClosure(
-				storage, zi->contentType, summarizerStructitr,
+				storage, zi->contentType.c_str(), summarizerStructitr,
 				summarizerPostingIdx, summarizerPostings,
 				metaDataReader.get(), zi->parameters));
 	}

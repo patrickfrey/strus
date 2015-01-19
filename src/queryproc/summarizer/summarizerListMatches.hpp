@@ -90,7 +90,7 @@ public:
 	
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const std::string&,
+			const char*,
 			PostingIteratorInterface* structitr_,
 			std::size_t nofitrs_,
 			PostingIteratorInterface** itrs_,

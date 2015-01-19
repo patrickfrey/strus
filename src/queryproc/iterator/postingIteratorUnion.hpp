@@ -43,9 +43,9 @@ public:
 	IteratorUnion( std::size_t nofargs_, PostingIteratorInterface** args_);
 	virtual ~IteratorUnion();
 
-	virtual const std::string& featureid() const
+	virtual const char* featureid() const
 	{
-		return m_featureid;
+		return m_featureid.c_str();
 	}
 
 	virtual Index skipDoc( const Index& docno_);

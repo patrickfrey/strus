@@ -31,8 +31,8 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include <string>
 #include <vector>
+#include <string>
 
 namespace strus
 {
@@ -58,7 +58,7 @@ public:
 	/// \param[in] phrasestruct_ structure iterator to recognize end of phrases
 	SummarizerClosureMatchPhrase(
 			const StorageInterface* storage_,
-			const std::string& termtype_,
+			const char* termtype_,
 			unsigned int maxlen_,
 			unsigned int summarylen_,
 			std::size_t nofitr_,
@@ -105,7 +105,7 @@ public:
 
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const std::string& elementname_,
+			const char* elementname_,
 			PostingIteratorInterface* structitr_,
 			std::size_t nofitrs_,
 			PostingIteratorInterface** itrs_,

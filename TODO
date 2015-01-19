@@ -1,3 +1,7 @@
+no exceptions across library borders, return error as string (error struct as argument)
+no STL types across library borders
+status as return value as in LevelDB
+reference object for each interface returned with destructor and '->' operator
 summarization with help of weighted union iterator
 Group id in analyzer term and group operator in query eval program (making an join operation with all elements of one group)
 In query eval program join operation arguments _3* for all input arguments bigger than index 3

@@ -45,7 +45,7 @@ class SummarizerClosureMetaData
 	:public SummarizerClosureInterface
 {
 public:
-	SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
+	SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const char* name_);
 	virtual ~SummarizerClosureMetaData(){}
 
 	virtual std::vector<std::string> getSummary( const Index& docno);
@@ -77,7 +77,7 @@ public:
 
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface*,
-			const std::string& elementname_,
+			const char* elementname_,
 			PostingIteratorInterface* structitr_,
 			std::size_t nofitrs_,
 			PostingIteratorInterface**,

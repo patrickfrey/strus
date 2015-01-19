@@ -42,7 +42,7 @@ class IteratorJoin
 public:
 	virtual ~IteratorJoin(){}
 
-	virtual const std::string& featureid() const=0;
+	virtual const char* featureid() const=0;
 	virtual Index skipDoc( const Index& docno)=0;
 	virtual Index skipPos( const Index& firstpos)=0;
 

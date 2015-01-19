@@ -30,7 +30,6 @@
 #define _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include <string>
 #include <vector>
 
 namespace strus
@@ -72,7 +71,7 @@ public:
 	/// \return the closure with some global statistics calculated only once
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const std::string& elementname_,
+			const char* elementname_,
 			PostingIteratorInterface* structitr_,
 			std::size_t nofitrs_,
 			PostingIteratorInterface** itrs_,

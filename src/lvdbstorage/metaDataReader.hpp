@@ -46,12 +46,12 @@ public:
 			const MetaDataDescription* description_)
 		:m_cache(cache_),m_description(description_),m_current(description_,0),m_docno(0){}
 
-	virtual Index elementHandle( const std::string& name) const
+	virtual Index elementHandle( const char* name) const
 	{
 		return m_description->getHandle( name);
 	}
 
-	virtual bool hasElement( const std::string& name) const
+	virtual bool hasElement( const char* name) const
 	{
 		return m_description->hasElement( name);
 	}
@@ -74,16 +74,14 @@ public:
 		return m_description->get( elementHandle_)->typeName();
 	}
 
-	virtual std::vector<std::string> elements() const
+	virtual const char* getName( const Index& elementHandle_) const
 	{
-		std::vector<std::string> rt;
-		MetaDataDescription::const_iterator
-			mi = m_description->begin(), me = m_description->end();
-		for (; mi != me; ++mi)
-		{
-			rt.push_back( mi.name());
-		}
-		return rt;
+		return m_description->getName( elementHandle_);
+	}
+
+	virtual Index nofElements() const
+	{
+		return (Index)m_description->nofElements();
 	}
 
 private:

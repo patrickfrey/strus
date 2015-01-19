@@ -53,8 +53,8 @@ public:
 	/// \param[in] increment positive or negative (decrement) value of the local change of the document frequency
 	/// \note throws if the send was not successful (the transport layer must guarantee that this change will be delivered, if the send operation was successful)
 	virtual void populateDocumentFrequencyChange(
-			const std::string& termtype,
-			const std::string& termvalue,
+			const char* termtype,
+			const char* termvalue,
 			int increment) const=0;
 
 	

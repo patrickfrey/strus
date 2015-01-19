@@ -36,7 +36,7 @@ using namespace strus;
 
 SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 		const StorageInterface* storage_,
-		const std::string& termtype_,
+		const char* termtype_,
 		unsigned int maxlen_,
 		unsigned int summarylen_,
 		std::size_t nofitr_,

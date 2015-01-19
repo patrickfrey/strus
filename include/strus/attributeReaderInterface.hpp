@@ -41,7 +41,7 @@ public:
 	/// \brief Destructor
 	virtual ~AttributeReaderInterface(){}
 
-	virtual Index elementHandle( const std::string& name) const=0;
+	virtual Index elementHandle( const char* name) const=0;
 	virtual void skipDoc( const Index& docno)=0;
 
 	virtual std::string getValue( const Index& elementHandle_) const=0;

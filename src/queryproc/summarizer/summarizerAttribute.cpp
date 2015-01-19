@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-SummarizerClosureAttribute::SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const std::string& name_)
+SummarizerClosureAttribute::SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const char* name_)
 	:m_attribreader(attribreader_)
 	,m_attrib(attribreader_->elementHandle( name_))
 {}
@@ -59,7 +59,7 @@ std::vector<std::string>
 
 SummarizerClosureInterface* SummarizerFunctionAttribute::createClosure(
 		const StorageInterface* storage_,
-		const std::string& elementname_,
+		const char* elementname_,
 		PostingIteratorInterface* structitr_,
 		std::size_t nofitrs_,
 		PostingIteratorInterface**,

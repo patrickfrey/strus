@@ -191,7 +191,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	MetaDataMap::const_iterator mi = m_metaDataMap.begin(), me = m_metaDataMap.end();
 	for (; mi != me; ++mi)
 	{
-		Index hnd = metadata->elementHandle( mi->first);
+		Index hnd = metadata->elementHandle( mi->first.c_str());
 		metadata->skipDoc( m_docno);
 
 		ArithmeticVariant val = metadata->getValue( hnd);
@@ -209,7 +209,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	AttributeMap::const_iterator ai = m_attributeMap.begin(), ae = m_attributeMap.end();
 	for (; ai != ae; ++ai)
 	{
-		Index hnd = attributes->elementHandle( ai->first);
+		Index hnd = attributes->elementHandle( ai->first.c_str());
 		attributes->skipDoc( m_docno);
 
 		std::string val = attributes->getValue( hnd);

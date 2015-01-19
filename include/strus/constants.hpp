@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
 #define _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
-#include <string>
 
 namespace strus
 {
