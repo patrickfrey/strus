@@ -31,7 +31,9 @@
 
 using namespace strus;
 
-IteratorDifference::IteratorDifference( PostingIteratorInterface* positive_, PostingIteratorInterface* negative_)
+IteratorDifference::IteratorDifference(
+		const Reference<PostingIteratorInterface>& positive_,
+		const Reference<PostingIteratorInterface>& negative_)
 	:m_docno(0)
 	,m_docno_neg(0)
 	,m_positive( positive_)
@@ -43,21 +45,18 @@ IteratorDifference::IteratorDifference( PostingIteratorInterface* positive_, Pos
 }
 
 IteratorDifference::~IteratorDifference()
-{
-	delete m_positive;
-	delete m_negative;
-}
+{}
 
 std::vector<const PostingIteratorInterface*> IteratorDifference::subExpressions( bool positive) const
 {
 	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
-		rt.push_back( m_positive);
+		rt.push_back( m_positive.get());
 	}
 	else
 	{
-		rt.push_back( m_negative);
+		rt.push_back( m_negative.get());
 	}
 	return rt;
 }

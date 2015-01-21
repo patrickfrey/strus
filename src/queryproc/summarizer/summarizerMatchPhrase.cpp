@@ -39,38 +39,20 @@ SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 		const char* termtype_,
 		unsigned int maxlen_,
 		unsigned int summarylen_,
-		std::size_t nofitr_,
-		PostingIteratorInterface** itr_,
+		const std::vector<PostingIteratorInterface*>& itr_,
 		PostingIteratorInterface* phrasestruct_)
 	:m_storage(storage_)
 	,m_forwardindex(storage_->createForwardIterator( termtype_))
 	,m_termtype(termtype_)
 	,m_maxlen(maxlen_)
 	,m_summarylen(summarylen_)
-	,m_nofitr(nofitr_)
+	,m_itr(itr_)
+	,m_phrasestruct(phrasestruct_)
 {
-	m_itr = (PostingIteratorInterface**)std::malloc( nofitr_ * sizeof(itr_[0]));
-	if (!m_itr) throw std::bad_alloc();
-	try
-	{
-		for (std::size_t ii=0; ii<nofitr_; ++ii)
-		{
-			m_itr[ii] = itr_[ii];
-		}
-		m_phrasestruct = phrasestruct_;
-	}
-	catch (const std::bad_alloc&)
-	{
-		std::free( m_itr);
-		throw std::bad_alloc();
-	}
 }
 
 SummarizerClosureMatchPhrase::~SummarizerClosureMatchPhrase()
-{
-	std::free( m_itr);
-	delete m_forwardindex;
-}
+{}
 
 static Index getStartPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
 {
@@ -146,8 +128,7 @@ static std::string
 static void getSummary_(
 		std::vector<std::string>& res,
 		const Index& docno,
-		std::size_t nofitr,
-		PostingIteratorInterface** itr,
+		std::vector<PostingIteratorInterface*> itr,
 		PostingIteratorInterface* phrasestruct,
 		ForwardIteratorInterface& forwardindex,
 		unsigned int maxlen,
@@ -161,14 +142,15 @@ static void getSummary_(
 	Index curpos = 0;
 	Index nextpos = 0;
 
-	std::size_t ii = 0, ie = nofitr;
+	std::vector<PostingIteratorInterface*>::const_iterator
+		ii = itr.begin(), ie = itr.end();
 	unsigned int summarylen = 0;
 
 	for (; ii != ie && summarylen < maxsummarylen; ++ii)
 	{
-		if (docno==itr[ii]->skipDoc( docno))
+		if (docno==(*ii)->skipDoc( docno))
 		{
-			while (0!=(nextpos=itr[ii]->skipPos( curpos)))
+			while (0!=(nextpos=(*ii)->skipPos( curpos)))
 			{
 				unsigned int length = 0;
 				res.push_back(
@@ -193,8 +175,8 @@ std::vector<std::string>
 {
 	std::vector<std::string> rt;
 	getSummary_(
-		rt, docno, m_nofitr, m_itr, m_phrasestruct,
-		*m_forwardindex, m_maxlen, m_summarylen);
+		rt, docno, m_itr, m_phrasestruct,
+		*m_forwardindex.get(), m_maxlen, m_summarylen);
 	return rt;
 }
 

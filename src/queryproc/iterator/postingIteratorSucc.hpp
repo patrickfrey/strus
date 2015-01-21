@@ -38,7 +38,7 @@ class IteratorSucc
 	:public IteratorJoin
 {
 public:
-	IteratorSucc( PostingIteratorInterface* origin_)
+	IteratorSucc( const Reference< PostingIteratorInterface>& origin_)
 		:m_origin( origin_)
 		,m_featureid( origin_->featureid())
 	{
@@ -46,9 +46,7 @@ public:
 	}
 
 	virtual ~IteratorSucc()
-	{
-		delete m_origin;
-	}
+	{}
 
 	virtual const char* featureid() const
 	{
@@ -88,8 +86,8 @@ public:
 	}
 
 private:
-	PostingIteratorInterface* m_origin;	///< base feature expression this is the successor of
-	std::string m_featureid;		///< unique id of the feature expression
+	Reference<PostingIteratorInterface> m_origin;	///< base feature expression this is the successor of
+	std::string m_featureid;			///< unique id of the feature expression
 };
 
 
@@ -106,15 +104,14 @@ public:
 	}
 
 	virtual PostingIteratorInterface* createResultIterator(
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range) const
 	{
 		if (range != 0) throw std::runtime_error( "no range argument expected");
-		if (nofitrs_ < 1) throw std::runtime_error( "too few arguments");
-		if (nofitrs_ > 1) throw std::runtime_error( "too many arguments");
+		if (argitr.size() < 1) throw std::runtime_error( "too few arguments");
+		if (argitr.size() > 1) throw std::runtime_error( "too many arguments");
 
-		return new IteratorSucc( itrs_[0]);
+		return new IteratorSucc( argitr[0]);
 	}
 };
 

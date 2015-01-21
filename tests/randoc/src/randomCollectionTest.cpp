@@ -26,6 +26,7 @@
 
 --------------------------------------------------------------------
 */
+#include "strus/reference.hpp"
 #include "strus/storageLib.hpp"
 #include "strus/queryProcessorLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
@@ -742,23 +743,25 @@ struct RandomQuery
 	bool execute( std::vector<Match>& result, strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
 	{
 		unsigned int nofitr = arg.size();
-		strus::PostingIteratorInterface* itr[ MaxNofArgs];
+		std::vector<strus::Reference<strus::PostingIteratorInterface> > itrar;
 		for (unsigned int ai=0; ai<nofitr; ++ai)
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
-			itr[ ai] = queryproc->createTermPostingIterator( term.type, term.value);
-			if (!itr[ ai])
+			strus::Reference<strus::PostingIteratorInterface> itr(
+				queryproc->createTermPostingIterator( term.type, term.value));
+			if (!itr.get())
 			{
 				std::cerr << "ERROR term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
 				std::cerr << "ERROR random query operation failed: " << tostring( collection) << std::endl;
 				return false;
 			}
+			itrar.push_back( itr);
 		}
 		std::string opname( operationName());
 		const strus::PostingJoinOperatorInterface* joinop =
 			queryproc->getPostingJoinOperator( opname);
 		strus::PostingIteratorInterface* res = 
-			joinop->createResultIterator( (std::size_t)nofitr, itr, range);
+			joinop->createResultIterator( itrar, range);
 
 		result = resultMatches( res);
 		delete res;

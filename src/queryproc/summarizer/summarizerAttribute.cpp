@@ -61,12 +61,11 @@ SummarizerClosureInterface* SummarizerFunctionAttribute::createClosure(
 		const StorageInterface* storage_,
 		const char* elementname_,
 		PostingIteratorInterface* structitr_,
-		std::size_t nofitrs_,
-		PostingIteratorInterface**,
+		const std::vector<PostingIteratorInterface*>& itrs_,
 		MetaDataReaderInterface*,
 		const std::vector<ArithmeticVariant>&) const
 {
-	if (nofitrs_ || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'attribute'");
+	if (itrs_.size() || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'attribute'");
 	return new SummarizerClosureAttribute( storage_->createAttributeReader(), elementname_);
 }
 

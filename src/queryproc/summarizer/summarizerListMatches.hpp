@@ -52,8 +52,7 @@ public:
 	/// \param[in] itrs_ argument iterators
 	SummarizerClosureListMatches(
 		const StorageInterface* storage_,
-		std::size_t nofitrs_,
-		PostingIteratorInterface** itrs_);
+		const std::vector<PostingIteratorInterface*>& itrs_);
 
 	virtual ~SummarizerClosureListMatches();
 
@@ -64,8 +63,7 @@ public:
 
 private:
 	const StorageInterface* m_storage;
-	std::size_t m_nofitr;
-	PostingIteratorInterface** m_itr;
+	std::vector<PostingIteratorInterface*> m_itrs;
 };
 
 
@@ -92,13 +90,12 @@ public:
 			const StorageInterface* storage_,
 			const char*,
 			PostingIteratorInterface* structitr_,
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<PostingIteratorInterface*>& itrs_,
 			MetaDataReaderInterface*,
 			const std::vector<ArithmeticVariant>&) const
 	{
 		if (structitr_) throw std::runtime_error( "no structural argument expected for summarizer 'matchpositions'");
-		return new SummarizerClosureListMatches( storage_, nofitrs_, itrs_);
+		return new SummarizerClosureListMatches( storage_, itrs_);
 	}
 };
 

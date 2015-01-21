@@ -2,19 +2,15 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
-	parser/mapFunctionParameters.o \
-	parser/joinFunction.o \
-	parser/selectorExpression.o \
-	parser/selectorSet.o \
-	parser/tupleGenerator.o \
-	parser/lexems.o \
+	mapFunctionParameters.o \
+	lexems.o \
 	accumulator.o \
 	query.o \
 	queryEval.o \
 	queryEvalLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I.
-CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
+CXXFLAGS=-g -Wfatal-errors -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 LDFLAGS=-L/usr/lib -L../utils
 LIBS=-lstrus_utils
 

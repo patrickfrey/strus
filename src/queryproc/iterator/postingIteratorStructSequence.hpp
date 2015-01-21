@@ -42,10 +42,12 @@ class IteratorStructSequence
 {
 public:
 	/// \param[in] range_ the maximum position difference between the start element and the end element of the group
-	/// \param[in] nofargs number of elements in args
 	/// \param[in] args the elements of this join 
-	/// \param[in] cut (optional) the cut element
-	IteratorStructSequence( int range_, std::size_t nofargs, PostingIteratorInterface** args, PostingIteratorInterface* cut=0);
+	/// \param[in] with_cut true, if the first element of args is the cut element
+	IteratorStructSequence(
+			int range_, 
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
+			bool with_cut);
 
 	virtual ~IteratorStructSequence();
 
@@ -77,15 +79,14 @@ public:
 	}
 
 private:
-	Index m_docno;				///< current document number
-	Index m_docno_cut;			///< next document number after m_docno that contains a cut element
-	Index m_posno;				///< current position
-	std::size_t m_argarsize;		///< nof arguments
-	PostingIteratorInterface** m_argar;	///< arguments
-	PostingIteratorInterface* m_cut;	///< the set of elements then must not appear inside the sequence
-	int m_range;				///< the maximum position difference between the start element and the end element of the sequence
-	std::string m_featureid;		///< unique id of the feature expression
-	mutable Index m_documentFrequency;	///< document frequency (of the rarest subexpression)
+	Index m_docno;							///< current document number
+	Index m_docno_cut;						///< next document number after m_docno that contains a cut element
+	Index m_posno;							///< current position
+	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
+	Reference<PostingIteratorInterface> m_cut;			///< the set of elements then must not appear inside the group
+	int m_range;							///< the maximum position difference between the start element and the end element of the sequence
+	std::string m_featureid;					///< unique id of the feature expression
+	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
 };
 
 
@@ -96,13 +97,12 @@ public:
 	virtual ~PostingJoinStructSequence(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range_) const
 	{
-		if (nofitrs_ < 2) throw std::runtime_error( "too few arguments");
+		if (argitr.size() < 2) throw std::runtime_error( "too few arguments");
 
-		return new IteratorStructSequence( range_, nofitrs_-1, itrs_+1, itrs_[0]);
+		return new IteratorStructSequence( range_, argitr, true);
 	}
 };
 
@@ -113,13 +113,12 @@ public:
 	virtual ~PostingJoinSequence(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range_) const
 	{
-		if (nofitrs_ < 1) throw std::runtime_error( "too few arguments");
+		if (argitr.size() < 1) throw std::runtime_error( "too few arguments");
 
-		return new IteratorStructSequence( range_, nofitrs_, itrs_);
+		return new IteratorStructSequence( range_, argitr, false);
 	}
 };
 

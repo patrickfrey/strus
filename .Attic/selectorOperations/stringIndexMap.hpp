@@ -26,32 +26,47 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DOCNO_ITERATOR_REFERENCE_HPP_INCLUDED
-#define _STRUS_DOCNO_ITERATOR_REFERENCE_HPP_INCLUDED
-#include "strus/docnoIteratorInterface.hpp"
-#include "localReference.hpp"
+#ifndef _STRUS_QUERY_STRING_INDEX_MAP_HPP_INCLUDED
+#define _STRUS_QUERY_STRING_INDEX_MAP_HPP_INCLUDED
+#include "keyMap.hpp"
 
-namespace strus
-{
+namespace strus {
 
-class DocnoIteratorReference
-	:public LocalReference<DocnoIteratorInterface>
+class StringIndexMap
+	:public KeyMap<int>
 {
 public:
-	DocnoIteratorReference()
-		:LocalReference<DocnoIteratorInterface>(){}
-	DocnoIteratorReference( DocnoIteratorInterface* o)
-		:LocalReference<DocnoIteratorInterface>(o){}
-};
+	StringIndexMap(){}
 
-class DocnoIteratorReferenceArray
-	:public LocalReferenceArray<DocnoIteratorInterface>
-{
-public:
-	DocnoIteratorReferenceArray(){}
+	int get( const std::string& id)
+	{
+		KeyMap<int>::const_iterator ki = find( id);
+		if (find( id) == end())
+		{
+			int rt = size()+1;
+			operator[]( id) = rt;
+			return rt;
+		}
+		else
+		{
+			return ki->second;
+		}
+	}
+
+	const std::string& name( int idx) const
+	{
+		StringIndexMap::const_iterator si = begin(), se = end();
+		for (; si != se; ++si)
+		{
+			if (si->second == idx)
+			{
+				return si->first;
+			}
+		}
+		throw std::runtime_error("internal: accessing undefined element in StringIndexMap");
+	}
 };
 
 }//namespace
 #endif
-
 

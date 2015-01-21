@@ -36,11 +36,12 @@
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "summarizerClosureReference.hpp"
-#include "postingIteratorReference.hpp"
-#include "docnoIteratorReference.hpp"
-#include "parser/keyMap.hpp"
+#include "strus/summarizerClosureInterface.hpp"
+#include "strus/docnoIteratorInterface.hpp"
+#include "strus/reference.hpp"
+#include "keyMap.hpp"
 #include <vector>
 #include <string>
 #include <utility>
@@ -169,11 +170,10 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 	{
 		throw std::runtime_error( "number of arguments of feature join expression in query out of range");
 	}
-	PostingIteratorInterface* joinargs[ MaxNofJoinopArguments];
+	std::vector<Reference<PostingIteratorInterface> > joinargs;
 	std::vector<NodeAddress>::const_iterator
 		ni = expr.subnodes.begin(), ne = expr.subnodes.end();
-	std::size_t nidx = 0;
-	for (; ni != ne; ++ni,++nidx)
+	for (; ni != ne; ++ni)
 	{
 		switch (nodeType( *ni))
 		{
@@ -181,18 +181,18 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
-				joinargs[nidx] = m_processor->createTermPostingIterator(
-							term.type, term.value);
+				joinargs.push_back( m_processor->createTermPostingIterator(
+							term.type, term.value));
 				break;
 			}
 			case ExpressionNode:
-				joinargs[nidx] = createExpressionPostingIterator(
-							m_expressions[ *ni]);
+				joinargs.push_back( createExpressionPostingIterator(
+							m_expressions[ *ni]));
 				break;
 
 		}
 	}
-	return join->createResultIterator( nidx, joinargs, expr.range);
+	return join->createResultIterator( joinargs, expr.range);
 }
 
 
@@ -245,19 +245,16 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 		metaDataReader( storage->createMetaDataReader());
 
 	// [3] Create the posting sets of the query features:
-	PostingIteratorReferenceArray postings;
+	std::vector<Reference<PostingIteratorInterface> > postings;
 	std::map<NodeAddress,std::size_t> featurePostingsMap;
 
 	fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
-		PostingIteratorInterface* postingsElem
-			= createNodePostingIterator( fi->node, fi->weight);
-		if (postingsElem)
-		{
-			postings.push_back( postingsElem);
-			featurePostingsMap[ fi->node] = postings.size()-1;
-		}
+		Reference<PostingIteratorInterface> postingsElem(
+			createNodePostingIterator( fi->node, fi->weight));
+		postings.push_back( postingsElem);
+		featurePostingsMap[ fi->node] = postings.size()-1;
 	}
 
 	// [4] Create the accumulator:
@@ -279,7 +276,8 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 		{
 			if (*si == fi->set)
 			{
-				accumulator.addSelector( &postings[ featurePostingsMap.find( fi->node)->second]);
+				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
+				accumulator.addSelector( postings[ pidx].get());
 			}
 		}
 	}
@@ -294,12 +292,13 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 		{
 			if (*wi == fi->set)
 			{
-				accumulator.addFeature( &postings[ featurePostingsMap.find( fi->node)->second]);
+				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
+				accumulator.addFeature( postings[ pidx].get());
 			}
 		}
 	}
 	// [4.3] Define the user restrictions (inverted ACL of user passed):
-	DocnoIteratorReference invAcl(
+	Reference<DocnoIteratorInterface> invAcl(
 		storage->createInvertedAclIterator( m_username));
 	if (invAcl.get())
 	{
@@ -307,8 +306,8 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 	}
 
 	// [5] Get the summarizers:
-	SummarizerClosureReferenceArray summarizers;
-	PostingIteratorReferenceArray allSummarizerPostings;
+	std::vector<Reference<SummarizerClosureInterface> > summarizers;
+	std::vector<Reference<PostingIteratorInterface> > allSummarizerPostings;
 
 	std::vector<QueryEval::SummarizerDef>::const_iterator
 		zi = m_queryEval->summarizers().begin(),
@@ -316,9 +315,7 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 	for (; zi != ze; ++zi)
 	{
 		PostingIteratorInterface* summarizerStructitr = 0;
-		enum {MaxNofJoinopArguments=256};
-		PostingIteratorInterface* summarizerPostings[ MaxNofJoinopArguments];
-		std::size_t summarizerPostingIdx = 0;
+		std::vector<PostingIteratorInterface*> summarizerPostings;
 
 		// [5.1] Get the summarizer structure feature:
 		std::vector<NodeAddress> struct_nodes;
@@ -343,7 +340,7 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 				allSummarizerPostings.push_back(
 					createExpressionPostingIterator( expr));
 			}
-			summarizerStructitr = &allSummarizerPostings.back();
+			summarizerStructitr = allSummarizerPostings.back().get();
 		}
 
 		// [5.2] Get the summarizer matching features:
@@ -358,19 +355,15 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 				{
 					allSummarizerPostings.push_back(
 						createNodePostingIterator( fi->node));
-					summarizerPostings[ summarizerPostingIdx++] = &allSummarizerPostings.back();
-					if (summarizerPostingIdx == MaxNofJoinopArguments)
-					{
-						throw std::runtime_error("too many features defined for summarizer");
-					}
+					summarizerPostings.push_back(
+						allSummarizerPostings.back().get());
 				}
 			}
 		}
 		summarizers.push_back(
 			zi->function->createClosure(
 				storage, zi->contentType.c_str(), summarizerStructitr,
-				summarizerPostingIdx, summarizerPostings,
-				metaDataReader.get(), zi->parameters));
+				summarizerPostings, metaDataReader.get(), zi->parameters));
 	}
 
 	// [6] Do the Ranking and build the result:
@@ -399,11 +392,11 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 	for (; ri != re; ++ri)
 	{
 		std::vector<ResultDocument::Attribute> attr;
-		SummarizerClosureReferenceArray::iterator
+		std::vector<Reference<SummarizerClosureInterface> >::iterator
 			si = summarizers.begin(), se = summarizers.end();
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
-			std::vector<std::string> summary = si->getSummary( ri->docno());
+			std::vector<std::string> summary = (*si)->getSummary( ri->docno());
 			std::vector<std::string>::const_iterator
 				ci = summary.begin(), ce = summary.end();
 			for (; ci != ce; ++ci)

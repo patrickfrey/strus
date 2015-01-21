@@ -29,7 +29,6 @@
 #ifndef _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #include "strus/queryProcessorInterface.hpp"
-#include "storageReference.hpp"
 #include <vector>
 #include <string>
 #include <map>

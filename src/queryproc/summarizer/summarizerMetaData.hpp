@@ -79,12 +79,11 @@ public:
 			const StorageInterface*,
 			const char* elementname_,
 			PostingIteratorInterface* structitr_,
-			std::size_t nofitrs_,
-			PostingIteratorInterface**,
+			const std::vector<PostingIteratorInterface*>& itrs_,
 			MetaDataReaderInterface* metadata_,
 			const std::vector<ArithmeticVariant>&) const
 	{
-		if (nofitrs_ || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'metadata'");
+		if (itrs_.size() || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'metadata'");
 		return new SummarizerClosureMetaData( metadata_, elementname_);
 	}
 };

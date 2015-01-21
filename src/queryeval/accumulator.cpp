@@ -1,11 +1,11 @@
 #include "accumulator.hpp"
+#include "mapFunctionParameters.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/docnoIteratorInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
-#include "parser/mapFunctionParameters.hpp"
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -88,11 +88,11 @@ bool Accumulator::nextRank(
 		weight = 0.0;
 
 		// Add a weight for every accumulator summand that has a match:
-		WeightingClosureReferenceArray::iterator
+		std::vector<Reference< WeightingClosureInterface> >::iterator
 			ai = m_functionClosures.begin(), ae = m_functionClosures.end();
 		for (; ai != ae; ++ai)
 		{
-			weight += ai->call( m_docno);
+			weight += (*ai)->call( m_docno);
 		}
 		return true;
 	}

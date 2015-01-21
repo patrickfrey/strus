@@ -32,41 +32,24 @@
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( std::size_t nofargs, PostingIteratorInterface** args)
+IteratorIntersect::IteratorIntersect( const std::vector<Reference< PostingIteratorInterface> >& args)
 	:m_docno(0)
 	,m_posno(0)
-	,m_argarsize(nofargs)
+	,m_argar(args)
 	,m_documentFrequency(-1)
 {
-	m_argar = (PostingIteratorInterface**)malloc( nofargs * sizeof(m_argar[0]));
-	if (!m_argar) throw std::bad_alloc();
-	try
+	std::vector<Reference< PostingIteratorInterface> >::const_iterator
+		ai = m_argar.begin(), ae = m_argar.end();
+	for (int aidx=0; ai != ae; ++ai,++aidx)
 	{
-		std::size_t ii=0;
-		for (; ii<nofargs; ++ii)
-		{
-			m_argar[ii] = args[ii];
-			if (ii) m_featureid.push_back('=');
-			m_featureid.append( args[ii]->featureid());
-		}
-		m_featureid.push_back( 'I');
+		if (aidx) m_featureid.push_back('=');
+		m_featureid.append( (*ai)->featureid());
 	}
-	catch (const std::bad_alloc&)
-	{
-		std::free( m_argar);
-		throw std::bad_alloc();
-	}
+	m_featureid.push_back( 'I');
 }
 
 IteratorIntersect::~IteratorIntersect()
-{
-	std::size_t ii=0;
-	for (; ii<m_argarsize; ++ii)
-	{
-		delete m_argar[ii];
-	}
-	std::free( m_argar);
-}
+{}
 
 std::vector<const PostingIteratorInterface*>
 	IteratorIntersect::subExpressions( bool positive) const
@@ -74,11 +57,12 @@ std::vector<const PostingIteratorInterface*>
 	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
-		rt.reserve( m_argarsize);
-		std::size_t ii=0;
-		for (; ii<m_argarsize; ++ii)
+		rt.reserve( m_argar.size());
+		std::vector<Reference< PostingIteratorInterface> >::const_iterator
+			ai = m_argar.begin(), ae = m_argar.end();
+		for (; ai != ae; ++ai)
 		{
-			rt.push_back( m_argar[ ii]);
+			rt.push_back( ai->get());
 		}
 	}
 	return rt;
@@ -91,10 +75,11 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 	Index docno_iter = docno_;
 	for (;;)
 	{
-		std::size_t ai = 0, ae = m_argarsize;
+		std::vector<Reference< PostingIteratorInterface> >::iterator
+			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		docno_iter = m_argar[ai]->skipDoc( docno_iter);
+		docno_iter = (*ai)->skipDoc( docno_iter);
 		if (docno_iter == 0)
 		{
 			m_docno = 0;
@@ -102,7 +87,7 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			Index docno_next = m_argar[ai]->skipDoc( docno_iter);
+			Index docno_next = (*ai)->skipDoc( docno_iter);
 			if (docno_next != docno_iter)
 			{
 				if (docno_next == 0)
@@ -128,17 +113,18 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 	Index pos_iter = pos_;
 	for (;;)
 	{
-		std::size_t ai = 0, ae = m_argarsize;
+		std::vector<Reference< PostingIteratorInterface> >::iterator
+			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		pos_iter = m_argar[ai]->skipPos( pos_iter);
+		pos_iter = (*ai)->skipPos( pos_iter);
 		if (pos_iter == 0)
 		{
 			return m_posno=0;
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			Index pos_next = m_argar[ai]->skipPos( pos_iter);
+			Index pos_next = (*ai)->skipPos( pos_iter);
 			if (pos_next != pos_iter)
 			{
 				if (pos_next == 0) return m_posno=0;
@@ -157,13 +143,14 @@ Index IteratorIntersect::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::size_t ai = 0, ae = m_argarsize;
+		std::vector<Reference< PostingIteratorInterface> >::const_iterator
+			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		m_documentFrequency = m_argar[ai]->documentFrequency();
+		m_documentFrequency = (*ai)->documentFrequency();
 		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
 		{
-			Index df = m_argar[ai]->documentFrequency();
+			Index df = (*ai)->documentFrequency();
 			if (df < m_documentFrequency)
 			{
 				m_documentFrequency = df;

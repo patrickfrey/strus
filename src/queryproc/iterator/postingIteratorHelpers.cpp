@@ -34,14 +34,16 @@
 using namespace strus;
 
 Index strus::getFirstAllMatchDocno(
-		std::size_t arsize, PostingIteratorInterface** ar, Index docno_iter)
+		std::vector<Reference< PostingIteratorInterface> >& args,
+		Index docno_iter)
 {
 	for (;;)
 	{
-		std::size_t ai = 0, ae = arsize;
+		std::vector<Reference< PostingIteratorInterface> >::iterator
+			ai = args.begin(), ae = args.end();
 		if (ai == ae) return 0;
 		
-		Index docno_first = ar[ai]->skipDoc( docno_iter);
+		Index docno_first = (*ai)->skipDoc( docno_iter);
 		if (!docno_first)
 		{
 			return 0;
@@ -49,7 +51,7 @@ Index strus::getFirstAllMatchDocno(
 		bool match = true;
 		for (++ai; ai != ae; ++ai)
 		{
-			Index docno_next = ar[ai]->skipDoc( docno_first);
+			Index docno_next = (*ai)->skipDoc( docno_first);
 			if (!docno_next)
 			{
 				return 0;

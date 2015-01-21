@@ -36,22 +36,28 @@ namespace strus
 {
 
 /// \brief Reference for passing objects accross library borders.
+/// \note Similar to boost::shared_ptr but without atomic (thread safe) reference counting
 template <class Object>
 class Reference
 {
-private:
-	static void destroy( Object* obj_)
-	{
-		delete obj_;
-	}
-
 public:
 	Reference()
-		:m_free(0),m_obj(0),m_refcnt(newRefCnt(0)){}
+		:m_obj(0),m_refcnt(newRefCnt(0)){}
 	Reference( Object* obj_)
-		:m_free(&destroy),m_obj(obj_),m_refcnt(newRefCnt(1)){}
+		:m_obj(0),m_refcnt(0)
+	{
+		try
+		{
+			m_refcnt = newRefCnt(1);
+			m_obj = obj_;
+		}
+		catch (const std::bad_alloc&)
+		{
+			delete m_obj;
+		}
+	}
 	Reference( const Reference& o)
-		:m_free(o.m_free),m_obj(o.m_obj),m_refcnt(o.m_refcnt){++*m_refcnt;}
+		:m_obj(o.m_obj),m_refcnt(o.m_refcnt){++*m_refcnt;}
 
 	~Reference()
 	{
@@ -60,7 +66,6 @@ public:
 
 	Reference& operator = (const Reference& o)
 	{
-		m_free = o.m_free;
 		m_obj = o.m_obj;
 		m_refcnt = o.m_refcnt;
 		++*m_refcnt;
@@ -71,7 +76,7 @@ public:
 	{
 		if (*m_refcnt == 1)
 		{
-			freeRef();
+			delete m_obj;
 		}
 		else
 		{
@@ -79,7 +84,6 @@ public:
 			freeRef();
 			m_refcnt = rc;
 		}
-		m_free = &destroy;
 		m_obj = obj_;
 	}
 
@@ -101,11 +105,14 @@ private:
 	}
 	void freeRef()
 	{
-		if (--*m_refcnt == 0 && m_free)(*m_free)( m_obj);
+		if (--*m_refcnt == 0)
+		{
+			delete m_obj;
+			std::free( m_refcnt);
+		}
 	}
 
 private:
-	void (*m_free)( Object* ptr_);
 	Object* m_obj;
 	mutable int* m_refcnt;
 };

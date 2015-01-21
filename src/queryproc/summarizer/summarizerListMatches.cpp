@@ -39,31 +39,13 @@ using namespace strus;
 
 SummarizerClosureListMatches::SummarizerClosureListMatches(
 		const StorageInterface* storage_,
-		std::size_t nofitr_,
-		PostingIteratorInterface** itr_)
+		const std::vector<PostingIteratorInterface*>& itrs_)
 	:m_storage(storage_)
-	,m_nofitr(nofitr_)
-{
-	m_itr = (PostingIteratorInterface**)std::malloc( nofitr_ * sizeof(itr_[0]));
-	if (!m_itr) throw std::bad_alloc();
-	try
-	{
-		for (std::size_t ii=0; ii<nofitr_; ++ii)
-		{
-			m_itr[ii] = itr_[ii];
-		}
-	}
-	catch (const std::bad_alloc&)
-	{
-		std::free( m_itr);
-		throw std::bad_alloc();
-	}
-}
+	,m_itrs(itrs_)
+{}
 
 SummarizerClosureListMatches::~SummarizerClosureListMatches()
-{
-	std::free( m_itr);
-}
+{}
 
 static std::string getMatches(
 	PostingIteratorInterface& itr,
@@ -90,15 +72,16 @@ std::vector<std::string>
 	SummarizerClosureListMatches::getSummary( const Index& docno)
 {
 	std::vector<std::string> rt;
-	std::size_t ii = 0, ie = m_nofitr;
+	std::vector<PostingIteratorInterface*>::const_iterator
+		ii = m_itrs.begin(), ie = m_itrs.end();
 
 	for (; ii != ie; ++ii)
 	{
 		std::vector<const PostingIteratorInterface*>
-			subexpr = m_itr[ii]->subExpressions( true);
-		if (m_itr[ii]->skipDoc( docno) != 0 && m_itr[ii]->skipPos( 0) != 0)
+			subexpr = (*ii)->subExpressions( true);
+		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
 		{
-			rt.push_back( getMatches( *m_itr[ii], subexpr));
+			rt.push_back( getMatches( **ii, subexpr));
 		}
 	}
 	return rt;

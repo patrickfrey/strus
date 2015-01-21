@@ -33,7 +33,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
-#include "postingIteratorReference.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include <vector>
 
 namespace strus

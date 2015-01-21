@@ -64,8 +64,7 @@ public:
 	/// \param[in] storage_ storage interface for getting info (like for example document attributes)
 	/// \param[in] elementname_ name of element to select for summarization
 	/// \param[in] structitr_ posting iterator describing the structural context of summarization (like for example sentence delimiters)
-	/// \param[in] nofitrs_ number of elements in 'itrs_'
-	/// \param[in] itrs_ reference to posting iterators that are subject of summarization
+	/// \param[in] itrs_ references to posting iterators that are subject of summarization
 	/// \param[in] metadata_ meta data interface
 	/// \param[in] parameters_ additional parameters for summarization
 	/// \return the closure with some global statistics calculated only once
@@ -73,8 +72,7 @@ public:
 			const StorageInterface* storage_,
 			const char* elementname_,
 			PostingIteratorInterface* structitr_,
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<PostingIteratorInterface*>& itrs_,
 			MetaDataReaderInterface* metadata_,
 			const std::vector<ArithmeticVariant>& parameters_) const=0;
 };

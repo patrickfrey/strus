@@ -28,6 +28,9 @@
 */
 #include "queryEval.hpp"
 #include "query.hpp"
+#include "lexems.hpp"
+#include "keyMap.hpp"
+#include "mapFunctionParameters.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/constants.hpp"
@@ -37,9 +40,6 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include "parser/lexems.hpp"
-#include "parser/keyMap.hpp"
-#include "parser/mapFunctionParameters.hpp"
 #include <stdexcept>
 #include <sstream>
 #include <iostream>

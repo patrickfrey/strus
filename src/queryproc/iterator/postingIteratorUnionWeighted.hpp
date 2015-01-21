@@ -39,7 +39,7 @@ class IteratorUnionWeighted
 	:public IteratorUnion
 {
 public:
-	IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args);
+	IteratorUnionWeighted( const std::vector<Reference< PostingIteratorInterface> >& args);
 
 	virtual ~IteratorUnionWeighted(){}
 

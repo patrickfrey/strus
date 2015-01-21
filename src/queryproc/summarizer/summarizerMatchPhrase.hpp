@@ -31,6 +31,7 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/reference.hpp"
 #include <vector>
 #include <string>
 
@@ -53,7 +54,6 @@ public:
 	/// \param[in] termtype_ type of the tokens to build the summary with
 	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
 	/// \param[in] summarylen_ maximum lenght of the whole summary
-	/// \param[in] nofitrs_ number of argument iterators
 	/// \param[in] itrs_ argument iterators
 	/// \param[in] phrasestruct_ structure iterator to recognize end of phrases
 	SummarizerClosureMatchPhrase(
@@ -61,8 +61,7 @@ public:
 			const char* termtype_,
 			unsigned int maxlen_,
 			unsigned int summarylen_,
-			std::size_t nofitr_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<PostingIteratorInterface*>& itrs_,
 			PostingIteratorInterface* phrasestruct_);
 
 	virtual ~SummarizerClosureMatchPhrase();
@@ -74,12 +73,11 @@ public:
 
 private:
 	const StorageInterface* m_storage;
-	ForwardIteratorInterface* m_forwardindex;
+	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_termtype;
 	unsigned int m_maxlen;
 	unsigned int m_summarylen;
-	std::size_t m_nofitr;
-	PostingIteratorInterface** m_itr;
+	std::vector<PostingIteratorInterface*> m_itr;
 	PostingIteratorInterface* m_phrasestruct;
 };
 
@@ -107,8 +105,7 @@ public:
 			const StorageInterface* storage_,
 			const char* elementname_,
 			PostingIteratorInterface* structitr_,
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<PostingIteratorInterface*>& itrs_,
 			MetaDataReaderInterface*,
 			const std::vector<ArithmeticVariant>& parameters) const
 	{
@@ -116,7 +113,7 @@ public:
 				storage_, elementname_,
 				parameters[0].defined()?(unsigned int)parameters[0]:30,
 				parameters[1].defined()?(unsigned int)parameters[1]:50,
-				nofitrs_, itrs_, structitr_);
+				itrs_, structitr_);
 	}
 };
 

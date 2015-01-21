@@ -4,8 +4,8 @@
 using namespace strus;
 
 
-IteratorUnionWeighted::IteratorUnionWeighted( std::size_t nofargs, PostingIteratorInterface** args)
-	:IteratorUnion( nofargs, args)
+IteratorUnionWeighted::IteratorUnionWeighted( const std::vector<Reference< PostingIteratorInterface> >& args)
+	:IteratorUnion( args)
 {
 	m_weightitr = m_weightmap.end();
 }

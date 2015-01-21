@@ -38,7 +38,9 @@ class IteratorDifference
 	:public IteratorJoin
 {
 public:
-	IteratorDifference( PostingIteratorInterface* positive_, PostingIteratorInterface* negative_);
+	IteratorDifference(
+			const Reference<PostingIteratorInterface>& positive_,
+			const Reference<PostingIteratorInterface>& negative_);
 	virtual ~IteratorDifference();
 
 	virtual const char* featureid() const
@@ -69,8 +71,8 @@ public:
 private:
 	Index m_docno;
 	Index m_docno_neg;
-	PostingIteratorInterface* m_positive;
-	PostingIteratorInterface* m_negative;
+	Reference<PostingIteratorInterface> m_positive;
+	Reference<PostingIteratorInterface> m_negative;
 	std::string m_featureid;		///< unique id of the feature expression
 };
 
@@ -82,15 +84,14 @@ public:
 	virtual ~PostingJoinDifference(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<Reference<PostingIteratorInterface> >& argitr,
 			int range) const
 	{
 		if (range != 0) throw std::runtime_error( "no range argument expected");
-		if (nofitrs_ < 2) throw std::runtime_error( "too few arguments");
-		if (nofitrs_ > 2) throw std::runtime_error( "too many arguments");
+		if (argitr.size() < 2) throw std::runtime_error( "too few arguments");
+		if (argitr.size() > 2) throw std::runtime_error( "too many arguments");
 
-		return new IteratorDifference( itrs_[0], itrs_[1]);
+		return new IteratorDifference( argitr[0], argitr[1]);
 	}
 };
 

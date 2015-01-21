@@ -30,8 +30,10 @@
 #define _STRUS_ITERATOR_UNION_HPP_INCLUDED
 #include "iterator/postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
-#include "postingIteratorReference.hpp"
+#include "strus/reference.hpp"
+#include "strus/postingIteratorInterface.hpp"
 #include "bitOperations.hpp"
+#include <vector>
 
 namespace strus
 {
@@ -40,7 +42,7 @@ class IteratorUnion
 	:public IteratorJoin
 {
 public:
-	IteratorUnion( std::size_t nofargs_, PostingIteratorInterface** args_);
+	IteratorUnion( const std::vector<Reference< PostingIteratorInterface> >& args_);
 	virtual ~IteratorUnion();
 
 	virtual const char* featureid() const
@@ -70,15 +72,13 @@ protected:
 	class selected_iterator
 	{
 	public:
-		selected_iterator( uint64_t set_, PostingIteratorInterface** argar_)
-			:m_ar(argar_),m_set(set_),m_idx(0)
+		selected_iterator( uint64_t set_, std::vector<Reference<PostingIteratorInterface> >::iterator aitr_)
+			:m_aitr(aitr_),m_set(set_),m_idx(0)
 		{
 			skip();
 		}
 		selected_iterator( const selected_iterator& o)
-			:m_ar(o.m_ar),m_set(o.m_set),m_idx(o.m_idx){}
-		selected_iterator()
-			:m_ar(0),m_set(0),m_idx(0){}
+			:m_aitr(o.m_aitr),m_set(o.m_set),m_idx(o.m_idx){}
 
 		selected_iterator& operator++()				{skip(); return *this;}
 		selected_iterator operator++(int)			{selected_iterator rt(*this); skip(); return rt;}
@@ -86,8 +86,8 @@ protected:
 		bool operator==( const selected_iterator& o) const	{return m_set==o.m_set && m_idx==o.m_idx;}
 		bool operator!=( const selected_iterator& o) const	{return m_set!=o.m_set || m_idx!=o.m_idx;}
 
-		PostingIteratorInterface& operator*() const		{return *m_ar[ m_idx-1];}
-		PostingIteratorInterface* operator->() const		{return  m_ar[ m_idx-1];}
+		PostingIteratorInterface& operator*() const		{return *(m_aitr+m_idx-1)->get();}
+		PostingIteratorInterface* operator->() const		{return (m_aitr+m_idx-1)->get();}
 
 	private:
 		void skip()
@@ -100,35 +100,35 @@ protected:
 		}
 
 	private:
-		PostingIteratorInterface** m_ar;
+		std::vector<Reference<PostingIteratorInterface> >::iterator m_aitr;
 		uint64_t m_set;
 		std::size_t m_idx;
 	};
 
 	selected_iterator selected_begin()
 	{
-		return selected_iterator( m_selected, m_argar);
+		return selected_iterator( m_selected, m_argar.begin());
 	}
 
 	selected_iterator selected_end()
 	{
-		return selected_iterator();
+		return selected_iterator( 0, m_argar.begin());
 	}
 
 protected:
 	const PostingIteratorInterface* arg( unsigned int idx) const
 	{
-		return m_argar[ idx];
+		return m_argar[ idx].get();
 	}
 
 	PostingIteratorInterface* arg( unsigned int idx)
 	{
-		return m_argar[ idx];
+		return m_argar[ idx].get();
 	}
 
 	unsigned int nofargs() const
 	{
-		return m_argarsize;
+		return m_argar.size();
 	}
 
 private:
@@ -143,12 +143,11 @@ private:
 
 private:
 	Index m_docno;
-	Index m_posno;				///< current position
-	std::size_t m_argarsize;		///< nof arguments
-	PostingIteratorInterface** m_argar;	///< arguments
-	uint64_t m_selected;			///< set pf bits parallel to arguments that specifies the current document matches of the arguments
-	std::string m_featureid;		///< unique id of the feature expression
-	mutable Index m_documentFrequency;	///< document frequency (of the most frequent subexpression)
+	Index m_posno;							///< current position
+	std::vector<Reference<PostingIteratorInterface> > m_argar;	///< arguments
+	uint64_t m_selected;						///< set pf bits parallel to arguments that specifies the current document matches of the arguments
+	std::string m_featureid;					///< unique id of the feature expression
+	mutable Index m_documentFrequency;				///< document frequency (of the most frequent subexpression)
 };
 
 
@@ -159,14 +158,13 @@ public:
 	virtual ~PostingJoinUnion(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<Reference<PostingIteratorInterface> >& itrs,
 			int range) const
 	{
 		if (range != 0) throw std::runtime_error( "no range argument expected for union join");
-		if (nofitrs_ == 0) throw std::runtime_error( "too few arguments for union join");
+		if (itrs.size() == 0) throw std::runtime_error( "too few arguments for union join");
 
-		return new IteratorUnion( nofitrs_, itrs_);
+		return new IteratorUnion( itrs);
 	}
 };
 

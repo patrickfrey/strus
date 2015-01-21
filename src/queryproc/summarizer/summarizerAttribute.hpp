@@ -86,8 +86,7 @@ public:
 			const StorageInterface* storage_,
 			const char* elementname_,
 			PostingIteratorInterface* structitr_,
-			std::size_t nofitrs_,
-			PostingIteratorInterface**,
+			const std::vector<PostingIteratorInterface*>& itrs_,
 			MetaDataReaderInterface*,
 			const std::vector<ArithmeticVariant>&) const;
 };

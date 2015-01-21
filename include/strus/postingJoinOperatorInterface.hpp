@@ -29,6 +29,7 @@
 #ifndef _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/reference.hpp"
 #include <string>
 
 namespace strus
@@ -43,12 +44,11 @@ public:
 	virtual ~PostingJoinOperatorInterface(){}
 
 	/// \brief Create an iterator on the join operator result (set of postings)
-	/// \param[in] nofitrs_ number of elements in 'itrs_'
-	/// \param[in] itrs_ argument posting iterators of the join operation (ownership of elements passed to created object)
+	/// \param[in] argitrs argument posting iterators of the join operation
+	/// \param[in] range range of the operation
 	/// \return the iterator on the resulting set of postings
 	virtual PostingIteratorInterface* createResultIterator(
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<Reference<PostingIteratorInterface> >& argitrs,
 			int range) const=0;
 };
 

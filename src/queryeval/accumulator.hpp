@@ -29,9 +29,10 @@
 #ifndef _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/reference.hpp"
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingClosureInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include "weightingClosureReference.hpp"
 #include <vector>
 #include <list>
 #include <limits>
@@ -97,7 +98,7 @@ private:
 	const WeightingFunctionInterface* m_function;
 	std::vector<ArithmeticVariant> m_parameter;
 	MetaDataReaderInterface* m_metadata;
-	WeightingClosureReferenceArray m_functionClosures;
+	std::vector<Reference< WeightingClosureInterface> > m_functionClosures;
 	std::vector<PostingIteratorInterface*> m_selectorPostings;
 	std::vector<DocnoIteratorInterface*> m_restrictionSets;
 	unsigned int m_selectoridx;

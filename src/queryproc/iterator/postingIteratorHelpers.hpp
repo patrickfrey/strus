@@ -31,6 +31,7 @@
 #ifndef _STRUS_ITERATOR_HELPERS_HPP_INCLUDED
 #define _STRUS_ITERATOR_HELPERS_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <vector>
 #include <string>
@@ -39,8 +40,7 @@ namespace strus
 {
 
 Index getFirstAllMatchDocno(
-		std::size_t arsize,
-		PostingIteratorInterface** ar,
+		std::vector<Reference< PostingIteratorInterface> >& args,
 		Index docno);
 
 void encodeInteger( std::string& buf, int val);

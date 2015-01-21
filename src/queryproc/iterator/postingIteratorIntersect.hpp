@@ -38,7 +38,7 @@ class IteratorIntersect
 	:public IteratorJoin
 {
 public:
-	IteratorIntersect( std::size_t nofargs, PostingIteratorInterface** args);
+	IteratorIntersect( const std::vector<Reference< PostingIteratorInterface> >& args);
 	virtual ~IteratorIntersect();
 
 	virtual const char* featureid() const
@@ -64,11 +64,10 @@ public:
 
 private:
 	Index m_docno;
-	Index m_posno;				///< current position
-	std::size_t m_argarsize;		///< nof arguments
-	PostingIteratorInterface** m_argar;	///< arguments
-	std::string m_featureid;		///< unique id of the feature expression
-	mutable Index m_documentFrequency;	///< document frequency (of the rarest subexpression)
+	Index m_posno;							///< current position
+	std::vector<Reference< PostingIteratorInterface> > m_argar;
+	std::string m_featureid;					///< unique id of the feature expression
+	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
 };
 
 
@@ -79,14 +78,13 @@ public:
 	virtual ~PostingJoinIntersect(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
-			std::size_t nofitrs_,
-			PostingIteratorInterface** itrs_,
+			const std::vector<Reference<PostingIteratorInterface> >& itrs,
 			int range) const
 	{
 		if (range != 0) throw std::runtime_error( "no range argument expected");
-		if (nofitrs_ == 0) throw std::runtime_error( "too few arguments");
+		if (itrs.size() == 0) throw std::runtime_error( "too few arguments");
 
-		return new IteratorIntersect( nofitrs_, itrs_);
+		return new IteratorIntersect( itrs);
 	}
 };
 

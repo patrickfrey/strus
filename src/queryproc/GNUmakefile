@@ -19,7 +19,7 @@ CPP_OBJS=\
 
 HFILES= queryProcessor.hpp
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I$(TOPDIR)/3rdParty/fastapprox/include/ -I.
-CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
+CXXFLAGS=-g -Wfatal-errors -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 LDFLAGS=-L/usr/lib
 LIBS=
 

@@ -26,31 +26,19 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_FUNCTION_REFERENCE_HPP_INCLUDED
-#define _STRUS_WEIGHTING_FUNCTION_REFERENCE_HPP_INCLUDED
-#include "strus/weightingFunctionInterface.hpp"
-#include "localReference.hpp"
+#ifndef _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
+#define _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
+#include "strus/arithmeticVariant.hpp"
+#include "keyMap.hpp"
+#include <string>
+#include <vector>
 
 namespace strus
 {
+	std::vector<ArithmeticVariant>
+		mapFunctionParameters(
+			const char** paramNames,
+			const KeyMap<ArithmeticVariant>& paramDefs);
+}
 
-class WeightingFunctionReference
-	:public LocalReference<WeightingFunctionInterface>
-{
-public:
-	WeightingFunctionReference()
-		:LocalReference<WeightingFunctionInterface>(){}
-	WeightingFunctionReference( WeightingFunctionInterface* o)
-		:LocalReference<WeightingFunctionInterface>(o){}
-};
-
-class WeightingFunctionReferenceArray
-	:public LocalReferenceArray<WeightingFunctionInterface>
-{
-public:
-	WeightingFunctionReferenceArray(){}
-};
-
-}//namespace
 #endif
-

@@ -49,7 +49,7 @@ CPP_INCLUDE=\
 	-I. \
 	-I$(TOPDIR)/3rdParty/sparsehash-2.0.2/src
 
-CXXFLAGS=-g -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
+CXXFLAGS=-g -Wfatal-errors -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98
 MODFLAGS=-fPIC $(VISIBILITY)
 LDFLAGS=-L/usr/lib -L$(TOPDIR)/src/utils
 LIBS=-lstrus_utils -lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
