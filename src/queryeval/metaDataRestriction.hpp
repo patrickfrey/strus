@@ -86,7 +86,7 @@ struct MetaDataRestriction
 		,operand(operand_)
 		,newGroup(newGroup_){}
 
-	bool match( MetaDataReaderInterface* md);
+	bool match( MetaDataReaderInterface* md) const;
 
 	CompareFunction func;
 	Index elementHandle;

@@ -29,6 +29,7 @@
 #include "metaDataRestriction.hpp"
 #include <boost/algorithm/string.hpp>
 #include <limits>
+#include <stdexcept>
 
 using namespace strus;
 
@@ -156,9 +157,9 @@ bool MetaDataRestriction::compareFunctionGreaterEqualUInt( const ArithmeticVaria
 	return (unsigned int)op1 >= (unsigned int)op2;
 }
 
-CompareFunction MetaDataRestriction::getCompareFunction( const char* type, QueryInterface::CompareOperator cmpop)
+MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( const char* type, QueryInterface::CompareOperator cmpop)
 {
-	if (iequals( type, "float16"))
+	if (boost::algorithm::iequals( type, "float16"))
 	{
 		switch (cmpop)
 		{
@@ -173,8 +174,9 @@ CompareFunction MetaDataRestriction::getCompareFunction( const char* type, Query
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat16;
 		}
+		throw std::logic_error("unknown meta data compare function");
 	}
-	else if (iequals( type, "float32"))
+	else if (boost::algorithm::iequals( type, "float32"))
 	{
 		switch (cmpop)
 		{
@@ -189,8 +191,9 @@ CompareFunction MetaDataRestriction::getCompareFunction( const char* type, Query
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat32;
 		}
+		throw std::logic_error("unknown meta data compare function");
 	}
-	else if (istarts_with( type, "int"))
+	else if (boost::algorithm::istarts_with( type, "int"))
 	{
 		switch (cmpop)
 		{
@@ -205,8 +208,9 @@ CompareFunction MetaDataRestriction::getCompareFunction( const char* type, Query
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualInt;
 		}
+		throw std::logic_error("unknown meta data compare function");
 	}
-	else if (istarts_with( type, "uint"))
+	else if (boost::algorithm::istarts_with( type, "uint"))
 	{
 		switch (cmpop)
 		{
@@ -221,6 +225,7 @@ CompareFunction MetaDataRestriction::getCompareFunction( const char* type, Query
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualUInt;
 		}
+		throw std::logic_error("unknown meta data compare function");
 	}
 	else
 	{
@@ -228,7 +233,7 @@ CompareFunction MetaDataRestriction::getCompareFunction( const char* type, Query
 	}
 }
 
-bool MetaDataRestriction::match( MetaDataReaderInterface* md)
+bool MetaDataRestriction::match( MetaDataReaderInterface* md) const
 {
 	return func( md->getValue( elementHandle), operand);
 }

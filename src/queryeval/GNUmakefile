@@ -5,6 +5,7 @@ CPP_OBJS=\
 	mapFunctionParameters.o \
 	lexems.o \
 	accumulator.o \
+	metaDataRestriction.o \
 	query.o \
 	queryEval.o \
 	queryEvalLib.o
