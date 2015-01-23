@@ -51,7 +51,7 @@ IteratorStructWithin::IteratorStructWithin(
 	if (with_cut)
 	{
 		m_argar.insert( m_argar.end(), args.begin()+1, args.end());
-		m_cut = m_argar[0];
+		m_cut = args[0];
 	}
 	else
 	{
