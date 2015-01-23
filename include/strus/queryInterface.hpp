@@ -33,6 +33,7 @@
 #include <utility>
 #include <iostream>
 #include "strus/resultDocument.hpp"
+#include "strus/arithmeticVariant.hpp"
 
 namespace strus {
 
@@ -45,18 +46,56 @@ class QueryInterface
 public:
 	virtual ~QueryInterface(){}
 
+	/// \brief Print the contents of this query in readable form
 	virtual void print( std::ostream& out)=0;
 
+	/// \brief Push a term to the query stack
+	/// \param[in] type_ term type
+	/// \param[in] value_ term value
 	virtual void pushTerm( const std::string& type_, const std::string& value_)=0;
+	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
+	///	removing the argument elements.
+	/// \param[in] opname_ name of the expression join operator
+	/// \param[in] argc number of expression arguments
+	/// \param[in] range_ range of the expression
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_)=0;
+	/// \brief Define the topmost element of the stack as feature, removing it from the stack
+	/// \param[in] set_ name of the set of the new feature created
+	/// \param[in] weight_ weight of the feature for the weighting function in query evaluation 
 	virtual void defineFeature( const std::string& set_, float weight_=1.0)=0;
 
+	/// \brief Comparison operator for restrictions
+	enum CompareOperator
+	{
+		CompareLess,
+		CompareLessEqual,
+		CompareEqual,
+		CompareGreater,
+		CompareGreaterEqual
+	};
+	/// \brief Define a restriction on documents base on a condition on the meta data
+	/// \param[in] opr condition compare operator
+	/// \param[in] name name of meta data element to check
+	/// \param[in] operand constant number to check against
+	/// \param[in] newGroup true, if the conditional opens a new group of elements joined with a logical "OR" 
+	///			false, if the conditional belongs to the last group of elements joined with a logical "OR".
+	///		Different groups are joined with a logical "AND" to form the meta data restriction expression
+	virtual void defineMetaDataRestriction(
+			CompareOperator opr, const char* name,
+			const ArithmeticVariant& operand, bool newGroup=true)=0;
+
+	/// \brief Set the maximum number of ranks to evaluate
+	/// \param[in] maxNofRanks_ maximum number of ranks
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_)=0;
+	/// \brief Set the minimum rank number to return
+	/// \param[in] minRank_ the minimum rank number
 	virtual void setMinRank( std::size_t minRank_)=0;
+	/// \brief Set the name of the user of the query for ACL restrictions
+	/// \param[in] username_ user of the query
 	virtual void setUserName( const std::string& username_)=0;
 
-	virtual std::vector<ResultDocument> evaluate(
-			const StorageInterface* storage)=0;
+	/// \brief Evaluate the query
+	virtual std::vector<ResultDocument> evaluate()=0;
 };
 
 }//namespace

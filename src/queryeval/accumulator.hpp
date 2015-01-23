@@ -33,6 +33,7 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "metaDataRestriction.hpp"
 #include <vector>
 #include <list>
 #include <limits>
@@ -67,12 +68,14 @@ public:
 			const WeightingFunctionInterface* function_,
 			const std::vector<ArithmeticVariant> parameter_,
 			MetaDataReaderInterface* metadata_,
+			const std::vector<MetaDataRestriction>& metaDataRestrictionSets_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
 		,m_function(function_)
 		,m_parameter(parameter_)
 		,m_metadata(metadata_)
+		,m_metaDataRestrictionSets(metaDataRestrictionSets_)
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
@@ -98,6 +101,8 @@ private:
 	const WeightingFunctionInterface* m_function;
 	std::vector<ArithmeticVariant> m_parameter;
 	MetaDataReaderInterface* m_metadata;
+	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
+
 	std::vector<Reference< WeightingClosureInterface> > m_functionClosures;
 	std::vector<PostingIteratorInterface*> m_selectorPostings;
 	std::vector<DocnoIteratorInterface*> m_restrictionSets;

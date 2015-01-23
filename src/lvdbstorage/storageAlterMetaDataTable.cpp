@@ -164,7 +164,7 @@ void StorageAlterMetaDataTable::alterElement(
 		const std::string& name,
 		const std::string& datatype)
 {
-	MetaDataElement::Type type = MetaDataElement::typeFromName( datatype);
+	MetaDataElement::Type type = MetaDataElement::typeFromName( datatype.c_str());
 
 	m_metadescr_old.renameElement( oldname, name);
 	m_metadescr_new.renameElement( oldname, name);
@@ -218,7 +218,7 @@ void StorageAlterMetaDataTable::addElement(
 		const std::string& name,
 		const std::string& datatype)
 {
-	MetaDataElement::Type type = MetaDataElement::typeFromName( datatype);
+	MetaDataElement::Type type = MetaDataElement::typeFromName( datatype.c_str());
 	m_metadescr_new.add( type, name);
 }
 

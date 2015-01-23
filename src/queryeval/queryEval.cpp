@@ -352,14 +352,10 @@ void QueryEval::parseSummarizeDef( char const*& src)
 }
 
 
-void QueryEval::parseJoinOperationDef( char const*& )
-{
-}
-
 void QueryEval::loadProgram( const std::string& source)
 {
 	char const* src = source.c_str();
-	enum StatementKeyword {e_EVAL, e_JOIN, e_TERM, e_SUMMARIZE};
+	enum StatementKeyword {e_EVAL, e_TERM, e_SUMMARIZE};
 	std::string id;
 
 	skipSpaces( src);
@@ -367,13 +363,11 @@ void QueryEval::loadProgram( const std::string& source)
 	{
 		while (*src)
 		{
-			switch ((StatementKeyword)parse_KEYWORD( src, 4, "EVAL", "JOIN", "TERM", "SUMMARIZE"))
+			switch ((StatementKeyword)parse_KEYWORD( src, 3, "EVAL", "TERM", "SUMMARIZE"))
 			{
 				case e_TERM:
 					parseTermDef( src);
 					break;
-				case e_JOIN:
-					throw std::runtime_error("JOIN not implemented yet");
 				case e_EVAL:
 					parseWeightingFunctionDef( src);
 					break;
@@ -497,8 +491,8 @@ void QueryEval::print( std::ostream& out) const
 }
 
 
-QueryInterface* QueryEval::createQuery() const
+QueryInterface* QueryEval::createQuery( const StorageInterface* storage) const
 {
-	return new Query( this, m_processor);
+	return new Query( this, storage, m_processor);
 }
 

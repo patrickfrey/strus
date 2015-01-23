@@ -36,6 +36,8 @@ namespace strus
 {
 /// \brief Forward declaration
 class QueryInterface;
+/// \brief Forward declaration
+class StorageInterface;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -45,7 +47,8 @@ public:
 	virtual ~QueryEvalInterface(){}
 
 	/// \brief Create a new query
-	virtual QueryInterface* createQuery() const=0;
+	/// \param[in] storage storage to run the query on
+	virtual QueryInterface* createQuery( const StorageInterface* storage) const=0;
 
 	/// \brief Print the internal representation of this query program to 'out'
 	/// \param[out] out stream to print the program to

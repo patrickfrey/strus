@@ -56,9 +56,16 @@ bool Accumulator::nextRank(
 			continue;
 		}
 		m_visited[ m_docno-1] = true;
+
+		// Check meta data restrictions:
+		m_metadata->skipDoc( m_docno);
+		if (!matchesMetaDataRestriction( m_metaDataRestrictionSets, m_metadata))
+		{
+			continue;
+		}
+		// Check restrictions defined by document sets (like user access rights):
 		if (m_restrictionSets.size())
 		{
-			// Apply restrictions defined by document sets
 			std::vector<DocnoIteratorInterface*>::const_iterator
 				ri = m_restrictionSets.begin(), re = m_restrictionSets.end();
 			for (; ri != re; ++ri)
@@ -81,8 +88,6 @@ bool Accumulator::nextRank(
 			}
 			if (ri != re) continue;
 		}
-		m_metadata->skipDoc( m_docno);
-
 		docno = m_docno;
 		selectorState = m_selectoridx+1;
 		weight = 0.0;

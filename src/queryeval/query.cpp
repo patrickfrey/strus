@@ -49,8 +49,11 @@
 using namespace strus;
 
 ///\brief Constructor
-Query::Query( const QueryEval* queryEval_, const QueryProcessorInterface* processor_)
-	:m_queryEval(queryEval_),m_processor(processor_)
+Query::Query( const QueryEval* queryEval_, const StorageInterface* storage_, const QueryProcessorInterface* processor_)
+	:m_queryEval(queryEval_)
+	,m_storage(storage_)
+	,m_processor(processor_)
+	,m_metaDataReader(storage_->createMetaDataReader())
 {
 	std::vector<QueryEval::TermDef>::const_iterator
 		ti = m_queryEval->predefinedTerms().begin(),
@@ -102,6 +105,17 @@ void Query::defineFeature( const std::string& set_, float weight_)
 {
 	m_features.push_back( Feature( set_, m_stack.back(), weight_));
 	m_stack.pop_back();
+}
+
+void Query::defineMetaDataRestriction(
+		CompareOperator opr, const char* name,
+		const ArithmeticVariant& operand, bool newGroup)
+{
+	Index hnd = m_metaDataReader->elementHandle( name);
+	const char* typeName = m_metaDataReader->getType( hnd);
+	MetaDataRestriction::CompareFunction
+		cmpf = MetaDataRestriction::getCompareFunction( typeName, opr);
+	m_restrictions.push_back( MetaDataRestriction( cmpf, hnd, operand, newGroup));
 }
 
 void Query::print( std::ostream& out)
@@ -217,7 +231,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 	return rt;
 }
 
-std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
+std::vector<ResultDocument> Query::evaluate()
 {
 	// [0] Check initial conditions:
 	if (m_minRank >= m_maxNofRanks)
@@ -240,9 +254,7 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 
 	// [2] Define structures needed for query evaluation:
 	boost::scoped_ptr<AttributeReaderInterface>
-		attributeReader( storage->createAttributeReader());
-	boost::scoped_ptr<MetaDataReaderInterface>
-		metaDataReader( storage->createMetaDataReader());
+		attributeReader( m_storage->createAttributeReader());
 
 	// [3] Create the posting sets of the query features:
 	std::vector<Reference<PostingIteratorInterface> > postings;
@@ -259,11 +271,11 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 
 	// [4] Create the accumulator:
 	Accumulator accumulator(
-		storage,
+		m_storage,
 		m_queryEval->weightingFunction().function, 
 		m_queryEval->weightingFunction().parameters,
-		metaDataReader.get(),
-		m_maxNofRanks, storage->maxDocumentNumber());
+		m_metaDataReader.get(), m_restrictions,
+		m_maxNofRanks, m_storage->maxDocumentNumber());
 
 	// [4.1] Add document selection postings:
 	std::vector<std::string>::const_iterator
@@ -299,7 +311,7 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 	}
 	// [4.3] Define the user restrictions (inverted ACL of user passed):
 	Reference<DocnoIteratorInterface> invAcl(
-		storage->createInvertedAclIterator( m_username));
+		m_storage->createInvertedAclIterator( m_username));
 	if (invAcl.get())
 	{
 		accumulator.addRestrictionSet( invAcl.get());
@@ -362,8 +374,8 @@ std::vector<ResultDocument> Query::evaluate( const StorageInterface* storage)
 		}
 		summarizers.push_back(
 			zi->function->createClosure(
-				storage, zi->contentType.c_str(), summarizerStructitr,
-				summarizerPostings, metaDataReader.get(), zi->parameters));
+				m_storage, zi->contentType.c_str(), summarizerStructitr,
+				summarizerPostings, m_metaDataReader.get(), zi->parameters));
 	}
 
 	// [6] Do the Ranking and build the result:

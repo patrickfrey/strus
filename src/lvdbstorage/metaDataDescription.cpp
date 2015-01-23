@@ -95,7 +95,7 @@ MetaDataDescription::MetaDataDescription( const std::string& str)
 			si = sn + 1;
 			skipSpaces( si, se);
 		}
-		add( MetaDataElement::typeFromName( typeName), varName);
+		add( MetaDataElement::typeFromName( typeName.c_str()), varName);
 	}
 }
 

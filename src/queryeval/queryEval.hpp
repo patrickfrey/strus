@@ -125,7 +125,6 @@ private:
 	void parseWeightingFunctionDef( char const*& src);
 	void parseTermDef( char const*& src);
 	void parseSummarizeDef( char const*& src);
-	void parseJoinOperationDef( char const*& src);
 	void loadProgram( const std::string& source);
 
 public:
@@ -142,7 +141,7 @@ public:
 	{}
 	QueryEval( const QueryProcessorInterface* processor_, const std::string& source);
 
-	virtual QueryInterface* createQuery() const;
+	virtual QueryInterface* createQuery( const StorageInterface* storage) const;
 
 	const std::vector<TermDef>& predefinedTerms() const		{return m_predefinedTerms;}
 	const std::vector<SummarizerDef>& summarizers() const		{return m_summarizers;}

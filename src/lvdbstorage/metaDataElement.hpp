@@ -65,7 +65,7 @@ public:
 		static const char* ar[] = {"Int8","UInt8","Int16","UInt16","Int32","UInt32","Float16","Float32"};
 		return ar[t];
 	}
-	static Type typeFromName( const std::string& namestr);
+	static Type typeFromName( const char* namestr);
 
 	const char* typeName() const
 	{

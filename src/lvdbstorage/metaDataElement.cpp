@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-MetaDataElement::Type MetaDataElement::typeFromName( const std::string& namestr)
+MetaDataElement::Type MetaDataElement::typeFromName( const char* namestr)
 {
 	unsigned int ti = 0, te = NofTypes;
 	for (; ti<te; ++ti)

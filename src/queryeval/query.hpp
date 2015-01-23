@@ -29,6 +29,8 @@
 #ifndef _STRUS_QUERY_HPP_INCLUDED
 #define _STRUS_QUERY_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
+#include "strus/reference.hpp"
+#include "metaDataRestriction.hpp"
 #include <vector>
 #include <string>
 #include <utility>
@@ -52,7 +54,7 @@ class Query
 {
 public:
 	///\brief Constructor
-	Query( const QueryEval* queryEval_, const QueryProcessorInterface* processor_);
+	Query( const QueryEval* queryEval_, const StorageInterface* storage_, const QueryProcessorInterface* processor_);
 
 	///\brief Copy constructor
 	Query( const Query& o);
@@ -65,12 +67,15 @@ public:
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 
+	virtual void defineMetaDataRestriction(
+			CompareOperator opr, const char* name,
+			const ArithmeticVariant& operand, bool newGroup=true);
+
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_);
 	virtual void setMinRank( std::size_t maxNofRanks_);
 	virtual void setUserName( const std::string& username_);
 
-	virtual std::vector<ResultDocument>
-		evaluate( const StorageInterface* storage);
+	virtual std::vector<ResultDocument> evaluate();
 
 public:
 	typedef int NodeAddress;
@@ -150,11 +155,14 @@ private:
 
 private:
 	const QueryEval* m_queryEval;
+	const StorageInterface* m_storage;
 	const QueryProcessorInterface* m_processor;
+	Reference<MetaDataReaderInterface> m_metaDataReader;
 	std::vector<Term> m_terms;
 	std::vector<Expression> m_expressions;
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
+	std::vector<MetaDataRestriction> m_restrictions;
 	std::size_t m_maxNofRanks;
 	std::size_t m_minRank;
 	std::string m_username;
