@@ -84,6 +84,7 @@ std::vector<const PostingIteratorInterface*>
 	std::vector<const PostingIteratorInterface*> rt;
 	if (positive)
 	{
+		rt.reserve( m_argar.size());
 		std::vector<Reference< PostingIteratorInterface> >::const_iterator
 			ai = m_argar.begin(), ae = m_argar.end();
 		for (; ai != ae; ++ai)
