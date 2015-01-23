@@ -43,7 +43,6 @@ IteratorStructSequence::IteratorStructSequence(
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
-	,m_argar(args)
 	,m_range(range_)
 	,m_documentFrequency(-1)
 {
