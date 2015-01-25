@@ -1,7 +1,8 @@
+interface queryeval program 
+interface analyzer program
 backup interface
 implement use of peer storage interface and global statistics
 query language
 summarization with help of weighted union iterator
-Group id in analyzer term and group operator in query eval program (making an join operation with all elements of one group)
-In query eval program join operation arguments _3* for all input arguments bigger than index 3
+storage database interface
 SWIG bindings

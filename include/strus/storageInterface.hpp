@@ -41,7 +41,7 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
-class DocnoIteratorInterface;
+class InvAclIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
@@ -83,8 +83,8 @@ public:
 	/// \param[in] username name of the user
 	/// \return the iterator on the documents to be disposed with delete by the caller or NULL, if there is no access control enabled
 	/// \note The storage has to be created access control enabled
-	virtual DocnoIteratorInterface*
-		createInvertedAclIterator(
+	virtual InvAclIteratorInterface*
+		createInvAclIterator(
 			const std::string& username) const=0;
 
 	/// \brief Get the number of documents inserted in this stogage

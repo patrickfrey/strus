@@ -55,7 +55,7 @@ class WeightingFunctionInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
-class DocnoIteratorInterface;
+class InvAclIteratorInterface;
 
 /// \class Accumulator
 /// \brief Accumulator for weights of matches
@@ -89,7 +89,9 @@ public:
 
 	void addFeature( PostingIteratorInterface* iterator);
 
-	void addRestrictionSet( DocnoIteratorInterface* iterator);
+	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression);
+
+	void addAclRestriction( InvAclIteratorInterface* iterator);
 
 	bool nextRank( Index& docno, unsigned int& selectorState, float& weight);
 
@@ -104,19 +106,20 @@ private:
 	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
 
 	std::vector<Reference< WeightingClosureInterface> > m_functionClosures;
-	struct SelectorPosting
+	struct SelectorPostings
 	{
 		bool isExpression;
 		PostingIteratorInterface* postings;
 
-		SelectorPosting( bool isExpression_, PostingIteratorInterface* postings_)
+		SelectorPostings( bool isExpression_, PostingIteratorInterface* postings_)
 			:isExpression(isExpression_),postings(postings_){}
-		SelectorPosting( const SelectorPosting& o)
+		SelectorPostings( const SelectorPostings& o)
 			:isExpression(o.isExpression),postings(o.postings){}
 	};
 
-	std::vector<SelectorPosting> m_selectorPostings;
-	std::vector<DocnoIteratorInterface*> m_restrictionSets;
+	std::vector<SelectorPostings> m_selectorPostings;
+	std::vector<SelectorPostings> m_featureRestrictions;
+	std::vector<InvAclIteratorInterface*> m_aclRestrictions;
 	unsigned int m_selectoridx;
 	Index m_docno;
 	boost::dynamic_bitset<> m_visited;

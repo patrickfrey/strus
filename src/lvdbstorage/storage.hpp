@@ -46,7 +46,7 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
-class DocnoIteratorInterface;
+class InvAclIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
@@ -79,8 +79,8 @@ public:
 			createForwardIterator(
 				const std::string& type) const;
 
-	virtual DocnoIteratorInterface*
-			createInvertedAclIterator(
+	virtual InvAclIteratorInterface*
+			createInvAclIterator(
 				const std::string& username) const;
 
 	virtual StorageTransactionInterface*

@@ -26,17 +26,18 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DOCNO_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_DOCNO_ITERATOR_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_INVERTED_ACL_ITERATOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_INVERTED_ACL_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 
 namespace strus
 {
 
-class DocnoIteratorInterface
+/// \brief Iterator of sets of documents used to implement access restrictions
+class InvAclIteratorInterface
 {
 public:
-	virtual ~DocnoIteratorInterface(){}
+	virtual ~InvAclIteratorInterface(){}
 
 	/// \brief Return the next element with a document number higher than or equal to docno
 	virtual Index skipDoc( const Index& docno)=0;

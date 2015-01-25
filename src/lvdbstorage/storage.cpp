@@ -28,7 +28,7 @@
 */
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
-#include "strus/docnoIteratorInterface.hpp"
+#include "strus/invAclIteratorInterface.hpp"
 #include "storage.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
@@ -285,7 +285,7 @@ ForwardIteratorInterface*
 }
 
 class InvertedAclIterator
-	:public DocnoIteratorInterface
+	:public InvAclIteratorInterface
 	,public IndexSetIterator
 	
 {
@@ -301,20 +301,15 @@ public:
 };
 
 class UnknownUserInvertedAclIterator
-	:public DocnoIteratorInterface
+	:public InvAclIteratorInterface
 {
 public:
 	UnknownUserInvertedAclIterator(){}
 	virtual Index skipDoc( const Index&)	{return 0;}
-
-	virtual DocnoIteratorInterface* copy() const
-	{
-		return new UnknownUserInvertedAclIterator();
-	}
 };
 
-DocnoIteratorInterface*
-	Storage::createInvertedAclIterator(
+InvAclIteratorInterface*
+	Storage::createInvAclIterator(
 		const std::string& username) const
 {
 	if (!withAcl())

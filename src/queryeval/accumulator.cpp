@@ -4,7 +4,7 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageInterface.hpp"
-#include "strus/docnoIteratorInterface.hpp"
+#include "strus/invAclIteratorInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include <cstdlib>
 #include <limits>
@@ -16,7 +16,12 @@ using namespace strus;
 void Accumulator::addSelector(
 		PostingIteratorInterface* iterator, bool isExpression)
 {
-	m_selectorPostings.push_back( SelectorPosting( isExpression, iterator));
+	m_selectorPostings.push_back( SelectorPostings( isExpression, iterator));
+}
+
+void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression)
+{
+	m_featureRestrictions.push_back( SelectorPostings( isExpression, iterator));
 }
 
 void Accumulator::addFeature(
@@ -27,10 +32,10 @@ void Accumulator::addFeature(
 			m_storage, iterator, m_metadata, m_parameter));
 }
 
-void Accumulator::addRestrictionSet(
-		DocnoIteratorInterface* iterator)
+void Accumulator::addAclRestriction(
+		InvAclIteratorInterface* iterator)
 {
-	m_restrictionSets.push_back( iterator);
+	m_aclRestrictions.push_back( iterator);
 }
 
 bool Accumulator::nextRank(
@@ -39,7 +44,7 @@ bool Accumulator::nextRank(
 		float& weight)
 {
 	// For all selectors:
-	std::vector<SelectorPosting>::const_iterator
+	std::vector<SelectorPostings>::const_iterator
 		si = m_selectorPostings.begin() + m_selectoridx,
 		se = m_selectorPostings.end();
 	while (si != se)
@@ -60,6 +65,7 @@ bool Accumulator::nextRank(
 				continue;
 			}
 		}
+
 		// Test if it already has been visited:
 		if (m_docno > m_maxDocumentNumber || m_visited.test( m_docno-1))
 		{
@@ -75,11 +81,12 @@ bool Accumulator::nextRank(
 		{
 			continue;
 		}
-		// Check restrictions defined by document sets (like user access rights):
-		if (m_restrictionSets.size())
+
+		// Check ACL restrictions:
+		if (m_aclRestrictions.size())
 		{
-			std::vector<DocnoIteratorInterface*>::const_iterator
-				ri = m_restrictionSets.begin(), re = m_restrictionSets.end();
+			std::vector<InvAclIteratorInterface*>::const_iterator
+				ri = m_aclRestrictions.begin(), re = m_aclRestrictions.end();
 			for (; ri != re; ++ri)
 			{
 				Index dn = (*ri)->skipDoc( m_docno);
@@ -100,6 +107,28 @@ bool Accumulator::nextRank(
 			}
 			if (ri != re) continue;
 		}
+
+		// Check feature restrictions:
+		std::vector<SelectorPostings>::const_iterator
+			ri = m_featureRestrictions.begin(),
+			re = m_featureRestrictions.end();
+		for (; ri != re; ++ri)
+		{
+			if (m_docno != ri->postings->skipDoc( m_docno))
+			{
+				break;
+			}
+			if (ri->isExpression)
+			{
+				if (!ri->postings->skipPos(0))
+				{
+					break;
+				}
+			}
+		}
+		if (ri != re) continue;
+
+		// Init result:
 		docno = m_docno;
 		selectorState = m_selectoridx+1;
 		weight = 0.0;

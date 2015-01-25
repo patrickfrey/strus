@@ -31,7 +31,7 @@
 #include "strus/arithmeticVariant.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/constants.hpp"
-#include "strus/docnoIteratorInterface.hpp"
+#include "strus/invAclIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/metaDataReaderInterface.hpp"

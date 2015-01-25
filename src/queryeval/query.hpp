@@ -54,7 +54,10 @@ class Query
 {
 public:
 	///\brief Constructor
-	Query( const QueryEval* queryEval_, const StorageInterface* storage_, const QueryProcessorInterface* processor_);
+	Query(
+			const QueryEval* queryEval_,
+			const StorageInterface* storage_,
+			const QueryProcessorInterface* processor_);
 
 	///\brief Copy constructor
 	Query( const Query& o);
@@ -70,6 +73,8 @@ public:
 	virtual void defineMetaDataRestriction(
 			CompareOperator opr, const char* name,
 			const ArithmeticVariant& operand, bool newGroup=true);
+
+	virtual void defineFeatureRestriction( const std::string& set_);
 
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_);
 	virtual void setMinRank( std::size_t maxNofRanks_);
@@ -162,7 +167,8 @@ private:
 	std::vector<Expression> m_expressions;
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
-	std::vector<MetaDataRestriction> m_restrictions;
+	std::vector<MetaDataRestriction> m_metaDataRestrictions;
+	std::vector<std::string> m_featureRestrictions;
 	std::size_t m_maxNofRanks;
 	std::size_t m_minRank;
 	std::string m_username;

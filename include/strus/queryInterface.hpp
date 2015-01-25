@@ -53,12 +53,14 @@ public:
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
 	virtual void pushTerm( const std::string& type_, const std::string& value_)=0;
+
 	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
 	///	removing the argument elements.
 	/// \param[in] opname_ name of the expression join operator
 	/// \param[in] argc number of expression arguments
 	/// \param[in] range_ range of the expression
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_)=0;
+
 	/// \brief Define the topmost element of the stack as feature, removing it from the stack
 	/// \param[in] set_ name of the set of the new feature created
 	/// \param[in] weight_ weight of the feature for the weighting function in query evaluation 
@@ -86,6 +88,10 @@ public:
 	virtual void defineMetaDataRestriction(
 			CompareOperator opr, const char* name,
 			const ArithmeticVariant& operand, bool newGroup=true)=0;
+
+	/// \brief Define a restriction on documents that contain a feature of a certain feature set
+	/// \param[in] set_ name of the set of the restriction feature
+	virtual void defineFeatureRestriction( const std::string& set_)=0;
 
 	/// \brief Set the maximum number of ranks to evaluate
 	/// \param[in] maxNofRanks_ maximum number of ranks

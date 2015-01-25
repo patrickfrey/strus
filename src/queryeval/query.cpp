@@ -39,12 +39,13 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerClosureInterface.hpp"
-#include "strus/docnoIteratorInterface.hpp"
+#include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "keyMap.hpp"
 #include <vector>
 #include <string>
 #include <utility>
+#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -103,7 +104,7 @@ void Query::pushExpression( const std::string& opname_, std::size_t argc, int ra
 
 void Query::defineFeature( const std::string& set_, float weight_)
 {
-	m_features.push_back( Feature( set_, m_stack.back(), weight_));
+	m_features.push_back( Feature( boost::algorithm::to_lower_copy(set_), m_stack.back(), weight_));
 	m_stack.pop_back();
 }
 
@@ -113,7 +114,12 @@ void Query::defineMetaDataRestriction(
 {
 	Index hnd = m_metaDataReader->elementHandle( name);
 	const char* typeName = m_metaDataReader->getType( hnd);
-	m_restrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
+	m_metaDataRestrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
+}
+
+void Query::defineFeatureRestriction( const std::string& set_)
+{
+	m_featureRestrictions.push_back( boost::algorithm::to_lower_copy( set_));
 }
 
 void Query::print( std::ostream& out)
@@ -231,7 +237,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 
 std::vector<ResultDocument> Query::evaluate()
 {
-	// [0] Check initial conditions:
+	// [1] Check initial conditions:
 	if (m_minRank >= m_maxNofRanks)
 	{
 		return std::vector<ResultDocument>();
@@ -239,15 +245,6 @@ std::vector<ResultDocument> Query::evaluate()
 	if (!m_queryEval->weightingFunction().function)
 	{
 		throw std::runtime_error("cannot evaluate query, no weighting function defined");
-	}
-
-	// [1] Register feature names in a map:
-	KeyMap<std::vector<NodeAddress> > setnamemap;
-	std::vector<Feature>::const_iterator
-		fi = m_features.begin(), fe = m_features.end();
-	for (; fi != fe; ++fi)
-	{
-		setnamemap[ fi->set].push_back( fi->node);
 	}
 
 	// [2] Define structures needed for query evaluation:
@@ -272,7 +269,7 @@ std::vector<ResultDocument> Query::evaluate()
 		m_storage,
 		m_queryEval->weightingFunction().function, 
 		m_queryEval->weightingFunction().parameters,
-		m_metaDataReader.get(), m_restrictions,
+		m_metaDataReader.get(), m_metaDataRestrictions,
 		m_maxNofRanks, m_storage->maxDocumentNumber());
 
 	// [4.1] Add document selection postings:
@@ -309,12 +306,28 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [4.3] Define the user restrictions (inverted ACL of user passed):
-	Reference<DocnoIteratorInterface> invAcl(
-		m_storage->createInvertedAclIterator( m_username));
+	// [4.3] Define the user ACL restrictions:
+	Reference<InvAclIteratorInterface> invAcl(
+		m_storage->createInvAclIterator( m_username));
 	if (invAcl.get())
 	{
-		accumulator.addRestrictionSet( invAcl.get());
+		accumulator.addAclRestriction( invAcl.get());
+	}
+	// [4.4] Define the feature restrictions:
+	std::vector<std::string>::const_iterator
+		xi = m_featureRestrictions.begin(), xe = m_featureRestrictions.end();
+	for (; xi != xe; ++xi)
+	{
+		fi = m_features.begin(), fe = m_features.end();
+		for (; fi != fe; ++fi)
+		{
+			if (*xi == fi->set)
+			{
+				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
+				accumulator.addFeatureRestriction(
+					postings[ pidx].get(), nodeType( fi->node) == ExpressionNode);
+			}
+		}
 	}
 
 	// [5] Get the summarizers:
