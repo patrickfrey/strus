@@ -14,9 +14,9 @@
 using namespace strus;
 
 void Accumulator::addSelector(
-		PostingIteratorInterface* iterator)
+		PostingIteratorInterface* iterator, bool isExpression)
 {
-	m_selectorPostings.push_back( iterator);
+	m_selectorPostings.push_back( SelectorPosting( isExpression, iterator));
 }
 
 void Accumulator::addFeature(
@@ -39,14 +39,26 @@ bool Accumulator::nextRank(
 		float& weight)
 {
 	// For all selectors:
-	while (m_selectoridx < m_selectorPostings.size())
+	std::vector<SelectorPosting>::const_iterator
+		si = m_selectorPostings.begin() + m_selectoridx,
+		se = m_selectorPostings.end();
+	while (si != se)
 	{
+		
 		// Select candidate document:
-		m_docno = m_selectorPostings[ m_selectoridx]->skipDoc( m_docno+1);
+		m_docno = si->postings->skipDoc( m_docno+1);
 		if (!m_docno)
 		{
+			++si;
 			++m_selectoridx;
 			continue;
+		}
+		if (si->isExpression)
+		{
+			if (!si->postings->skipPos(0))
+			{
+				continue;
+			}
 		}
 		// Test if it already has been visited:
 		if (m_docno > m_maxDocumentNumber || m_visited.test( m_docno-1))

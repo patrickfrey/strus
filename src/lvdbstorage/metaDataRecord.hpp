@@ -34,6 +34,7 @@
 #include "metaDataElement.hpp"
 #include <utility>
 #include <cstring>
+#include <iostream>
 
 namespace strus {
 
@@ -72,6 +73,8 @@ public:
 			const MetaDataDescription& src,
 			const void* blksrc,
 			std::size_t nofelem);
+
+	void print( std::ostream& out) const;
 
 private:
 	const MetaDataDescription* m_descr;

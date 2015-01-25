@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "metaDataRecord.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
 #include "floatConversions.hpp"
 #include "indexPacker.hpp"
 #include <utility>
@@ -249,4 +250,19 @@ void MetaDataRecord::translateBlock(
 		}
 	}
 }
+
+void MetaDataRecord::print( std::ostream& out) const
+{
+	std::size_t ei=0, ee=m_descr->nofElements();
+	for (; ei != ee; ++ei)
+	{
+		const MetaDataElement* elem = m_descr->get( ei);
+		out << "[" << ei << "] " 
+			<< m_descr->getName( ei) << " "
+			<< elem->typeName()
+			<< " '" << getValue( elem) << "'"
+			<< std::endl;
+	}
+}
+
 

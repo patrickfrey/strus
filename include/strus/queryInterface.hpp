@@ -70,9 +70,12 @@ public:
 		CompareLess,
 		CompareLessEqual,
 		CompareEqual,
+		CompareNotEqual,
 		CompareGreater,
 		CompareGreaterEqual
 	};
+	enum {NofCompareOperators=((int)CompareGreaterEqual+1)};
+
 	/// \brief Define a restriction on documents base on a condition on the meta data
 	/// \param[in] opr condition compare operator
 	/// \param[in] name name of meta data element to check

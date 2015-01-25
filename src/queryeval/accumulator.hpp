@@ -85,7 +85,7 @@ public:
 
 	~Accumulator(){}
 
-	void addSelector( PostingIteratorInterface* iterator);
+	void addSelector( PostingIteratorInterface* iterator, bool isExpression);
 
 	void addFeature( PostingIteratorInterface* iterator);
 
@@ -104,7 +104,18 @@ private:
 	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
 
 	std::vector<Reference< WeightingClosureInterface> > m_functionClosures;
-	std::vector<PostingIteratorInterface*> m_selectorPostings;
+	struct SelectorPosting
+	{
+		bool isExpression;
+		PostingIteratorInterface* postings;
+
+		SelectorPosting( bool isExpression_, PostingIteratorInterface* postings_)
+			:isExpression(isExpression_),postings(postings_){}
+		SelectorPosting( const SelectorPosting& o)
+			:isExpression(o.isExpression),postings(o.postings){}
+	};
+
+	std::vector<SelectorPosting> m_selectorPostings;
 	std::vector<DocnoIteratorInterface*> m_restrictionSets;
 	unsigned int m_selectoridx;
 	Index m_docno;

@@ -113,9 +113,7 @@ void Query::defineMetaDataRestriction(
 {
 	Index hnd = m_metaDataReader->elementHandle( name);
 	const char* typeName = m_metaDataReader->getType( hnd);
-	MetaDataRestriction::CompareFunction
-		cmpf = MetaDataRestriction::getCompareFunction( typeName, opr);
-	m_restrictions.push_back( MetaDataRestriction( cmpf, hnd, operand, newGroup));
+	m_restrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
 }
 
 void Query::print( std::ostream& out)
@@ -289,14 +287,16 @@ std::vector<ResultDocument> Query::evaluate()
 			if (*si == fi->set)
 			{
 				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
-				accumulator.addSelector( postings[ pidx].get());
+				accumulator.addSelector(
+					postings[ pidx].get(),
+					nodeType(fi->node) == ExpressionNode);
 			}
 		}
 	}
 	// [4.2] Add features for weighting:
 	std::vector<std::string>::const_iterator
-		wi = m_queryEval->weightingFunction().selectorSets.begin(),
-		we = m_queryEval->weightingFunction().selectorSets.end();
+		wi = m_queryEval->weightingFunction().weightingSets.begin(),
+		we = m_queryEval->weightingFunction().weightingSets.end();
 	for (; wi != we; ++wi)
 	{
 		fi = m_features.begin(), fe = m_features.end();

@@ -30,6 +30,7 @@ tests/program/src/parseQueryEvalProgramTest
 tests/functions/src/functions
 tests/posinfoBlock/src/testPosinfoBlock
 tests/varSizeNodeTree/src/testVarSizeNodeTree
+tests/metaDataRestrictions/src/testMetaDataRestrictions
 tests/ranker/src/testRanker
 src/lvdbstorage/strusCheckStorage
 src/lvdbstorage/strusDumpStorage

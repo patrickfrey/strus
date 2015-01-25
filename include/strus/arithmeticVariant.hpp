@@ -125,6 +125,33 @@ struct ArithmeticVariant
 		return false;
 	}
 
+	ArithmeticVariant& operator=( int value)
+	{
+		variant.Int = value;
+		type = Int;
+		return *this;
+	}
+
+	ArithmeticVariant& operator=( unsigned int value)
+	{
+		variant.UInt = value;
+		type = UInt;
+		return *this;
+	}
+
+	ArithmeticVariant& operator=( float value)
+	{
+		variant.Float = value;
+		type = Float;
+		return *this;
+	}
+
+	ArithmeticVariant& operator=( const ArithmeticVariant& o)
+	{
+		std::memcpy( this, &o, sizeof(*this));
+		return *this;
+	}
+
 	enum Type {Null,Int,UInt,Float};
 	Type type;
 	union

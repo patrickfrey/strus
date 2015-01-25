@@ -40,7 +40,8 @@ public:
 	PostingIteratorInterface() :m_weight(1.0){}
 	virtual ~PostingIteratorInterface(){}
 
-	/// \brief Return the next match with a document number higher than or equal to docno
+	/// \brief Return the next match candidate with a document number higher than or equal to docno
+	/// \note Candidate means that the document may not match in case of an expression. You have to call ff() or skipPos( const Index&) to decide if the candidate document contains a match. But if 0 is returned you can be sure that there is no match.
 	virtual Index skipDoc( const Index& docno)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.

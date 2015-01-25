@@ -30,8 +30,10 @@
 #define _STRUS_METADATA_RESTRICTION_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
 #include <vector>
 #include <utility>
+#include <iostream>
 
 namespace strus {
 
@@ -39,21 +41,25 @@ struct MetaDataRestriction
 {
 	typedef bool (*CompareFunction)( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
+	static bool compareFunctionNotEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionGreaterFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionGreaterEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
+	static bool compareFunctionNotEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionGreaterFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionGreaterEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
+	static bool compareFunctionNotEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionGreaterInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionGreaterEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
+	static bool compareFunctionNotEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionLessEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 	static bool compareFunctionGreaterUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
@@ -62,32 +68,27 @@ struct MetaDataRestriction
 	static CompareFunction getCompareFunction( const char* type, QueryInterface::CompareOperator cmpop);
 	
 	MetaDataRestriction( const MetaDataRestriction& o)
-		:func(o.func)
+		:cmpoperator(o.cmpoperator)
+		,func(o.func)
 		,elementHandle(o.elementHandle)
 		,operand(o.operand)
 		,newGroup(o.newGroup){}
 	MetaDataRestriction(
-			CompareFunction func_,
-			const Index& elementHandle_,
-			const ArithmeticVariant& operand_,
-			bool newGroup_)
-		:func(func_)
-		,elementHandle(elementHandle_)
-		,operand(operand_)
-		,newGroup(newGroup_){}
-	MetaDataRestriction(
 			const char* type_,
-			QueryInterface::CompareOperator cmpop_,
+			QueryInterface::CompareOperator cmpoperator_,
 			const Index& elementHandle_,
 			const ArithmeticVariant& operand_,
 			bool newGroup_)
-		:func(getCompareFunction(type_,cmpop_))
+		:cmpoperator(cmpoperator_)
+		,func(getCompareFunction(type_,cmpoperator_))
 		,elementHandle(elementHandle_)
 		,operand(operand_)
 		,newGroup(newGroup_){}
 
+	void print( std::ostream& out) const;
 	bool match( MetaDataReaderInterface* md) const;
 
+	QueryInterface::CompareOperator cmpoperator;
 	CompareFunction func;
 	Index elementHandle;
 	ArithmeticVariant operand;

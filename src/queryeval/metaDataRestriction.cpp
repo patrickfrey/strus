@@ -42,6 +42,11 @@ bool MetaDataRestriction::compareFunctionEqualFloat32( const ArithmeticVariant& 
 	return (val1 + EPSILON_FLOAT32 >= val2 && val1 <= val2 + EPSILON_FLOAT32);
 }
 
+bool MetaDataRestriction::compareFunctionNotEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+{
+	return !compareFunctionEqualFloat32( op1, op2);
+}
+
 bool MetaDataRestriction::compareFunctionLessFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
 	float val1 = op1;
@@ -79,6 +84,11 @@ bool MetaDataRestriction::compareFunctionEqualFloat16( const ArithmeticVariant& 
 	return (val1 + EPSILON_FLOAT16 >= val2 && val1 <= val2 + EPSILON_FLOAT16);
 }
 
+bool MetaDataRestriction::compareFunctionNotEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+{
+	return !compareFunctionEqualFloat16( op1, op2);
+}
+
 bool MetaDataRestriction::compareFunctionLessFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
 	float val1 = op1;
@@ -109,7 +119,12 @@ bool MetaDataRestriction::compareFunctionGreaterEqualFloat16( const ArithmeticVa
 
 bool MetaDataRestriction::compareFunctionEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	return (int)op1 == (int)op1;
+	return (int)op1 == (int)op2;
+}
+
+bool MetaDataRestriction::compareFunctionNotEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+{
+	return !compareFunctionEqualInt( op1, op2);
 }
 
 bool MetaDataRestriction::compareFunctionLessInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
@@ -135,6 +150,11 @@ bool MetaDataRestriction::compareFunctionGreaterEqualInt( const ArithmeticVarian
 bool MetaDataRestriction::compareFunctionEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
 	return (unsigned int)op1 == (unsigned int)op2;
+}
+
+bool MetaDataRestriction::compareFunctionNotEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+{
+	return !compareFunctionEqualUInt( op1, op2);
 }
 
 bool MetaDataRestriction::compareFunctionLessUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
@@ -169,6 +189,8 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 				return &compareFunctionLessEqualFloat16;
 			case QueryInterface::CompareEqual:
 				return &compareFunctionEqualFloat16;
+			case QueryInterface::CompareNotEqual:
+				return &compareFunctionNotEqualFloat16;
 			case QueryInterface::CompareGreater:
 				return &compareFunctionGreaterFloat16;
 			case QueryInterface::CompareGreaterEqual:
@@ -186,6 +208,8 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 				return &compareFunctionLessEqualFloat32;
 			case QueryInterface::CompareEqual:
 				return &compareFunctionEqualFloat32;
+			case QueryInterface::CompareNotEqual:
+				return &compareFunctionNotEqualFloat32;
 			case QueryInterface::CompareGreater:
 				return &compareFunctionGreaterFloat32;
 			case QueryInterface::CompareGreaterEqual:
@@ -203,6 +227,8 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 				return &compareFunctionLessEqualInt;
 			case QueryInterface::CompareEqual:
 				return &compareFunctionEqualInt;
+			case QueryInterface::CompareNotEqual:
+				return &compareFunctionNotEqualInt;
 			case QueryInterface::CompareGreater:
 				return &compareFunctionGreaterInt;
 			case QueryInterface::CompareGreaterEqual:
@@ -220,6 +246,8 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 				return &compareFunctionLessEqualUInt;
 			case QueryInterface::CompareEqual:
 				return &compareFunctionEqualUInt;
+			case QueryInterface::CompareNotEqual:
+				return &compareFunctionNotEqualUInt;
 			case QueryInterface::CompareGreater:
 				return &compareFunctionGreaterUInt;
 			case QueryInterface::CompareGreaterEqual:
@@ -236,6 +264,18 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 bool MetaDataRestriction::match( MetaDataReaderInterface* md) const
 {
 	return func( md->getValue( elementHandle), operand);
+}
+
+
+static const char* compareOperatorName( QueryInterface::CompareOperator op)
+{
+	static const char* ar[] = {"Less", "LessEqual", "Equal", "NotEqual", "CompareGreater", "CompareGreaterEqual"};
+	return ar[op];
+}
+
+void MetaDataRestriction::print( std::ostream& out) const
+{
+	out << (newGroup?"=>":"  ") << compareOperatorName(cmpoperator) << " " << elementHandle << " " << operand << std::endl;
 }
 
 bool strus::matchesMetaDataRestriction(
