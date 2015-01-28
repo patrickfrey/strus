@@ -78,7 +78,7 @@ void Storage::cleanup()
 	}
 }
 
-Storage::Storage( const std::string& path_, unsigned int cachesize_k, const char* termnomap_source)
+Storage::Storage( const std::string& path_, unsigned int cachesize_k, bool compression, const char* termnomap_source)
 	:m_path(path_)
 	,m_db(0)
 	,m_next_typeno(0)
@@ -99,6 +99,10 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k, const char
 	{
 		if (cachesize_k * 1024 < cachesize_k) throw std::runtime_error("size of cache out of range");
 		m_dboptions.block_cache = leveldb::NewLRUCache( cachesize_k * 1024);
+	}
+	if (!compression)
+	{
+		m_dboptions.compression = leveldb::kNoCompression;
 	}
 	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_, &m_db);
 	if (status.ok())

@@ -106,7 +106,7 @@ static inline std::size_t utf8encode( char* buf, int32_t chr)
 	{
 		*buf++ = (char)(unsigned char) (((chr >> shf) & B00111111) | B10000000);
 	}
-	return ii;
+	return ii+1;
 }
 
 static inline int32_t unpackInt32_( const char*& itr, const char* end)
@@ -199,17 +199,30 @@ const char* strus::skipRange( const char* ptr, const char* end)
 
 static inline std::size_t packIndex_( char* buf, const Index& idx)
 {
-	return utf8encode( buf, (int32_t)idx);
+	/*[-]*/char const* itr = buf;
+	Index rt = utf8encode( buf, (int32_t)idx);
+	/*[-]*/if (unpackIndex( itr, itr+rt) != idx)
+	/*[-]*/{
+	/*[-]*/	throw std::runtime_error( "HALLY GALLY");
+	/*[-]*/}
+	return rt;
 }
 
 static inline std::size_t packRange_( char* buf, const Index& idx, const Index& rangesize)
 {
+	/*[-]*/char const* itr = buf + size;
+	/*[-]*/std::size_t oldsize = size;
 	std::size_t rt = packIndex_( buf, idx);
 	if (rangesize)
 	{
 		buf[ rt++] = RANGE_DELIM;
 		rt += packIndex_( buf+rt, rangesize);
 	}
+	/*[-]*/Index rangesize_;
+	/*[-]*/if (unpackRange_( itr, itr+rt, rangesize_) != idx || rangesize != rangesize_)
+	/*[-]*/{
+	/*[-]*/	throw std::runtime_error( "HALLY GALLY (2)");
+	/*[-]*/}
 	return rt;
 }
 

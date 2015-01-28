@@ -30,11 +30,27 @@
 #define _STRUS_LVDB_BIT_OPERATIONS_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <cstdlib>
+#include <cstring>
 
 namespace strus {
 
 struct BitOperations
 {
+	static inline unsigned int bitScanReverse( const uint32_t& idx)
+	{
+#ifdef __x86_64__
+		unsigned int result; 
+		if (!idx) return 0;
+		asm(" bsr %1, %0 \n" : "=r"(result) : "r"(idx) ); 
+		return result+1;
+#else
+		unsigned int ii = 1;
+		uint32_t mask = (1<<31);
+		for (;ii<=32 && 0==(idx & mask); ++ii,mask>>=1){}
+		return ii;
+#endif
+	}
+
 	static inline unsigned int bitScanForward( const uint32_t& idx)
 	{
 #ifdef __x86_64__
@@ -43,10 +59,7 @@ struct BitOperations
 		asm(" bsf %1, %0 \n" : "=r"(result) : "r"(idx) ); 
 		return result+1;
 #else
-		unsigned int ii = 1;
-		uint32_t mask = (1<<31);
-		for (;ii<=32 && 0==(idx & mask); ++ii,mask>>=1){}
-		return ii;
+		return ffs( idx);
 #endif
 	}
 
@@ -58,10 +71,7 @@ struct BitOperations
 		asm(" bsfq %1, %0 \n" : "=r"(result) : "r"(idx) ); 
 		return (unsigned int)(result+1);
 #else
-		unsigned int ii = 1;
-		uint64_t mask = ((uint64_t)1<<63);
-		for (;ii<=32 && 0==(idx & mask); ++ii,mask>>=1){}
-		return ii;
+		return ffsl( idx);
 #endif
 	}
 };

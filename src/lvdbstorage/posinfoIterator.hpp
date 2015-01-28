@@ -26,60 +26,47 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
-#define _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
-#include <string>
+#ifndef _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
+#include "posinfoBlock.hpp"
+#include "blockStorage.hpp"
+#include <leveldb/db.h>
 
 namespace strus {
 
-class StorageConfig
+class PosinfoIterator
 {
 public:
-	explicit StorageConfig( const char* source);
+	PosinfoIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
+	~PosinfoIterator(){}
 
-	const std::string& path() const
-	{
-		return m_path;
-	}
+	Index skipDoc( const Index& docno_);
+	Index skipPos( const Index& firstpos_);
 
-	/// \brief File with line separated list of terms to cache (insert or query)
-	const std::string& cachedterms() const
-	{
-		return m_cachedterms;
-	}
+	Index docno() const					{return m_docno;}
+	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
 
-	bool acl() const
-	{
-		return m_acl;
-	}
-
-	bool compression() const
-	{
-		return m_compression;
-	}
-
-	const std::string& metadata() const
-	{
-		return m_metadata;
-	}
-
-	unsigned int cachesize_kb() const
-	{
-		return m_cachesize_kb;
-	}
-
-	static const char* getDescription();
+	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
+	Index documentFrequency() const;
+	unsigned int frequency();
 
 private:
-	std::string m_path;
-	std::string m_metadata;
-	std::string m_cachedterms;
-	bool m_acl;
-	unsigned int m_cachesize_kb;
-	bool m_compression;
+	bool loadBlock( const Index& elemno_);
+
+private:
+	leveldb::DB* m_db;
+	BlockStorage<PosinfoBlock> m_posinfoStorage;
+	const PosinfoBlock* m_posinfoBlk;
+	char const* m_posinfoItr;
+	PosinfoBlock::PositionScanner m_positionScanner;
+	Index m_termtypeno;
+	Index m_termvalueno;
+	Index m_docno;
+	Index m_docno_start;
+	Index m_docno_end;
+	mutable Index m_documentFrequency;
 };
-}//namespace
+
+}
 #endif
-
-
 

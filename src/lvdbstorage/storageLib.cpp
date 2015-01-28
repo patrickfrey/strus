@@ -104,11 +104,11 @@ DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsourc
 	if (config.cachedterms().size())
 	{
 		std::string cachedtermsrc = loadFile( config.cachedterms());
-		return new Storage( config.path().c_str(), config.cachesize_kb(), cachedtermsrc.c_str());
+		return new Storage( config.path().c_str(), config.cachesize_kb(), config.compression(), cachedtermsrc.c_str());
 	}
 	else
 	{
-		return new Storage( config.path().c_str(), config.cachesize_kb());
+		return new Storage( config.path().c_str(), config.cachesize_kb(), config.compression());
 	}
 }
 
@@ -124,6 +124,10 @@ DLL_PUBLIC void strus::createStorageDatabase( const char* configsource)
 	options.create_if_missing = true;
 	options.error_if_exists = true;
 
+	if (!config.compression())
+	{
+		options.compression = leveldb::kNoCompression;
+	}
 	leveldb::Status status = leveldb::DB::Open( options, config.path(), &db);
 	if (status.ok())
 	{

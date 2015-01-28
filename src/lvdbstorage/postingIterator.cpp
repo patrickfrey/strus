@@ -28,9 +28,7 @@
 */
 #include "postingIterator.hpp"
 #include "storage.hpp"
-#include "statistics.hpp"
 #include "indexPacker.hpp"
-#include "keyValueStorage.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -40,21 +38,16 @@
 using namespace strus;
 
 #undef STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
 #else
 PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
 #endif
-	:m_db(db_)
-	,m_docnoIterator(db_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno))
-	,m_posinfoStorage( db_, DatabaseKey::PosinfoBlockPrefix, BlockKey( termtypeno, termvalueno), true)
-	,m_posinfoBlk(0)
-	,m_posinfoItr(0)
+	:m_docnoIterator(db_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno))
+	,m_posinfoIterator( db_, termtypeno, termvalueno)
 	,m_docno(0)
-	,m_termtypeno(termtypeno)
-	,m_termvalueno(termvalueno)
-	,m_documentFrequency(-1)
 {
 	m_featureid.reserve( 16);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -68,176 +61,41 @@ PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index term
 #endif
 }
 
-PostingIterator::PostingIterator( const PostingIterator& o)
-	:PostingIteratorInterface(o)
-	,m_db(o.m_db)
-	,m_docnoIterator(o.m_docnoIterator)
-	,m_posinfoStorage( o.m_posinfoStorage)
-	,m_posinfoBlk(0)
-	,m_posinfoItr(0)
-	,m_docno(0)
-	,m_termtypeno(o.m_termtypeno)
-	,m_termvalueno(o.m_termvalueno)
-	,m_documentFrequency(o.m_documentFrequency)
-	,m_featureid(o.m_featureid)
-{}
-
-Index PostingIterator::skipDocDocListBlock( const Index& docno_)
-{
-	m_docnoIterator.skip( docno_);
-	return m_docnoIterator.elemno();
-}
-
-Index PostingIterator::skipDocPosinfoBlock( const Index& docno_)
-{
-	m_positionScanner.clear();
-	if (!m_posinfoBlk)
-	{
-		// [A] No block loaded yet
-		m_posinfoBlk = m_posinfoStorage.load( docno_);
-		if (!m_posinfoBlk)
-		{
-			m_posinfoItr = 0;
-			return 0;
-		}
-		else
-		{
-			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
-		}
-	}
-	else
-	{
-		if (m_posinfoBlk->isThisBlockAddress( docno_))
-		{
-			// [B] Answer in same block as for the last query
-			if (docno_ < m_posinfoBlk->docno_at( m_posinfoItr))
-			{
-				m_posinfoItr = m_posinfoBlk->begin();
-			}
-			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoItr);
-		}
-		else if (m_posinfoBlk->isFollowBlockAddress( docno_))
-		{
-			// [C] Try to get answer from a follow block
-			do
-			{
-				m_posinfoBlk = m_posinfoStorage.loadNext();
-				if (m_posinfoBlk)
-				{
-					Statistics::increment( Statistics::PosinfoBlockReadBlockFollow);
-
-					if (m_posinfoBlk->id() < docno_ && !m_posinfoBlk->isFollowBlockAddress( docno_))
-					{
-						m_posinfoBlk = m_posinfoStorage.load( docno_);
-						if (m_posinfoBlk)
-						{
-							Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
-						}
-						else
-						{
-							Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
-							m_posinfoItr = 0;
-							return 0;
-						}
-					}
-				}
-				else
-				{
-					Statistics::increment( Statistics::PosinfoBlockReadBlockFollowMiss);
-					m_posinfoItr = 0;
-					return 0;
-				}
-			}
-			while (m_posinfoBlk->id() < docno_);
-
-			m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
-		}
-		else
-		{
-			// [D] Answer is in a 'far away' block
-			m_posinfoBlk = m_posinfoStorage.load( docno_);
-			if (!m_posinfoBlk)
-			{
-				Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
-				m_posinfoItr = 0;
-				return 0;
-			}
-			else
-			{
-				Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
-				m_posinfoItr = m_posinfoBlk->upper_bound( docno_, m_posinfoBlk->begin());
-			}
-		}
-	}
-	if (!m_posinfoItr || m_posinfoItr == m_posinfoBlk->end()) return 0;
-	return m_posinfoBlk->docno_at( m_posinfoItr);
-}
-
 Index PostingIterator::skipDoc( const Index& docno_)
 {
 	if (m_docno && m_docno == docno_) return m_docno;
 
-	if (m_posinfoBlk)
+	if (m_posinfoIterator.isCloseCandidate( docno_))
 	{
-		m_docno = skipDocPosinfoBlock( docno_);
+		m_docno = m_posinfoIterator.skipDoc( docno_);
+#ifdef STRUS_LOWLEVEL_CHECK
+		if (m_docno != m_docnoIterator.skip( m_docno))
+		{
+			throw std::runtime_error( "corrupt index -- without posinfo");
+		}
+#endif
 	}
 	else
 	{
 		m_docno = m_docnoIterator.skip( docno_);
-		m_positionScanner.clear();
 	}
 	return m_docno;
 }
 
 Index PostingIterator::skipPos( const Index& firstpos_)
 {
-	if (!m_posinfoItr)
-	{
-		if (!m_docno) return 0;
-		if (m_docno != skipDocPosinfoBlock( m_docno))
-		{
-			throw std::runtime_error( "position information not available (do insert with position information for this type of query)");
-		}
-	}
-	if (!m_positionScanner.initialized())
-	{
-		m_positionScanner = m_posinfoBlk->positionScanner_at( m_posinfoItr);
-		if (!m_positionScanner.initialized()) return 0;
-	}
-	Index rt = m_positionScanner.skip( firstpos_);
-	if (rt < firstpos_ && rt != 0)
-	{
-		throw std::runtime_error( "internal: corrupt index (posinfo block)");
-	}
-	return rt;
+	m_posinfoIterator.skipDoc( m_docno);
+	return m_posinfoIterator.skipPos( firstpos_);
 }
 
 unsigned int PostingIterator::frequency()
 {
-	if (!m_posinfoItr)
-	{
-		if (!m_docno) return 0;
-		if (m_docno != skipDocPosinfoBlock( m_docno))
-		{
-			throw std::runtime_error( "position information not available (do insert with position information for this type of query)");
-		}
-	}
-	return m_posinfoBlk->frequency_at( m_posinfoItr);
+	m_posinfoIterator.skipDoc( m_docno);
+	return m_posinfoIterator.frequency();
 }
 
 Index PostingIterator::documentFrequency() const
 {
-	if (m_documentFrequency < 0)
-	{
-		KeyValueStorage dfstorage(
-			m_db, DatabaseKey::DocFrequencyPrefix, false);
-		const KeyValueStorage::Value* dfpacked
-			= dfstorage.load( BlockKey( m_termtypeno, m_termvalueno));
-
-		if (!dfpacked) return 0;
-		char const* cc = dfpacked->ptr();
-		m_documentFrequency = unpackIndex( cc, cc + dfpacked->size());
-	}
-	return m_documentFrequency;
+	return m_posinfoIterator.documentFrequency();
 }
 

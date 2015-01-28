@@ -14,9 +14,9 @@
 using namespace strus;
 
 void Accumulator::addSelector(
-		PostingIteratorInterface* iterator, bool isExpression)
+		PostingIteratorInterface* iterator, int setindex, bool isExpression)
 {
-	m_selectorPostings.push_back( SelectorPostings( isExpression, iterator));
+	m_selectorPostings.push_back( SelectorPostings( isExpression, setindex, iterator));
 }
 
 void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression)
@@ -49,7 +49,6 @@ bool Accumulator::nextRank(
 		se = m_selectorPostings.end();
 	while (si != se)
 	{
-		
 		// Select candidate document:
 		m_docno = si->postings->skipDoc( m_docno+1);
 		if (!m_docno)
@@ -130,7 +129,7 @@ bool Accumulator::nextRank(
 
 		// Init result:
 		docno = m_docno;
-		selectorState = m_selectoridx+1;
+		selectorState = m_selectorPostings[ m_selectoridx].setindex;
 		weight = 0.0;
 
 		// Add a weight for every accumulator summand that has a match:

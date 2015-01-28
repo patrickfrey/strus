@@ -255,7 +255,8 @@ std::vector<ResultDocument> Query::evaluate()
 	std::vector<Reference<PostingIteratorInterface> > postings;
 	std::map<NodeAddress,std::size_t> featurePostingsMap;
 
-	fi = m_features.begin(), fe = m_features.end();
+	std::vector<Feature>::const_iterator
+		fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
 		Reference<PostingIteratorInterface> postingsElem(
@@ -276,7 +277,7 @@ std::vector<ResultDocument> Query::evaluate()
 	std::vector<std::string>::const_iterator
 		si = m_queryEval->weightingFunction().selectorSets.begin(),
 		se = m_queryEval->weightingFunction().selectorSets.end();
-	for (; si != se; ++si)
+	for (int sidx=0; si != se; ++si,++sidx)
 	{
 		fi = m_features.begin(), fe = m_features.end();
 		for (; fi != fe; ++fi)
@@ -286,7 +287,7 @@ std::vector<ResultDocument> Query::evaluate()
 				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
 				accumulator.addSelector(
 					postings[ pidx].get(),
-					nodeType(fi->node) == ExpressionNode);
+					sidx, nodeType( fi->node) == ExpressionNode);
 			}
 		}
 	}

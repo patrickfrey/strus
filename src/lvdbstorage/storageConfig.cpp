@@ -131,10 +131,11 @@ static bool yesNo( const char* cfgname, const std::string& str)
 }//namespace
 
 StorageConfig::StorageConfig( const char* source)
-	:m_acl(false),m_cachesize_kb(0)
+	:m_acl(false),m_cachesize_kb(0),m_compression(true)
 {
 	bool cache_defined = false;
 	bool acl_defined = false;
+	bool compression_defined = false;
 
 	ConfigMap configMap( source);
 	ConfigMap::const_iterator ci = configMap.begin(), ce = configMap.end();
@@ -164,6 +165,12 @@ StorageConfig::StorageConfig( const char* source)
 			if (acl_defined) throw std::runtime_error( "duplicate definition of 'acl' in storage config");
 			m_acl = yesNo( "acl", ci->second);
 			acl_defined = true;
+		}
+		else if (ci->first == "compression")
+		{
+			if (compression_defined) throw std::runtime_error( "duplicate definition of 'acl' in storage config");
+			m_compression = yesNo( "compression", ci->second);
+			compression_defined = true;
 		}
 		else if (ci->first == "cache")
 		{

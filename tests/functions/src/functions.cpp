@@ -30,10 +30,16 @@
 #include "lvdbstorage/indexPacker.cpp"
 #include "lvdbstorage/floatConversions.hpp"
 #include "lvdbstorage/floatConversions.cpp"
+#include "lvdbstorage/indexPacker.hpp"
+#include "private/bitOperations.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <cstdlib>
 #include <limits>
+#include <cstdlib>
+
+#define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
+
 
 static void spFloatConversionTest( float in)
 {

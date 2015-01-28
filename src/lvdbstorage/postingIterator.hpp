@@ -29,7 +29,7 @@
 #ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
-#include "posinfoBlock.hpp"
+#include "posinfoIterator.hpp"
 #include "indexSetIterator.hpp"
 #include "blockStorage.hpp"
 #include "databaseKey.hpp"
@@ -44,7 +44,6 @@ class PostingIterator
 {
 public:
 	PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr);
-	PostingIterator( const PostingIterator& o);
 
 	virtual ~PostingIterator(){}
 
@@ -71,35 +70,14 @@ public:
 
 	virtual Index posno() const
 	{
-		if (m_positionScanner.initialized())
-		{
-			return m_positionScanner.curpos();
-		}
-		return 0;
-	}
-
-	virtual PostingIteratorInterface* copy() const
-	{
-		return new PostingIterator(*this);
+		return m_posinfoIterator.posno();
 	}
 
 private:
-	Index skipDocPosinfoBlock( const Index& docno_);
-	Index skipDocDocListBlock( const Index& docno_);
-
-private:
-	leveldb::DB* m_db;
-
 	IndexSetIterator m_docnoIterator;
-	BlockStorage<PosinfoBlock> m_posinfoStorage;
-	const PosinfoBlock* m_posinfoBlk;
-	char const* m_posinfoItr;
-	PosinfoBlock::PositionScanner m_positionScanner;
+	PosinfoIterator m_posinfoIterator;
 
 	Index m_docno;
-	Index m_termtypeno;
-	Index m_termvalueno;
-	mutable Index m_documentFrequency;
 	std::string m_featureid;
 };
 

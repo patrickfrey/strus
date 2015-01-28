@@ -1,3 +1,6 @@
+check how expensive it is to calculate combined df's of features (number of documents, where all expression features occurr)
+near operator
+document AND operator for selections
 interface queryeval program 
 interface analyzer program
 backup interface

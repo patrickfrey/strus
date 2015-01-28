@@ -85,7 +85,7 @@ public:
 
 	~Accumulator(){}
 
-	void addSelector( PostingIteratorInterface* iterator, bool isExpression);
+	void addSelector( PostingIteratorInterface* iterator, int setindex, bool isExpression);
 
 	void addFeature( PostingIteratorInterface* iterator);
 
@@ -109,12 +109,15 @@ private:
 	struct SelectorPostings
 	{
 		bool isExpression;
+		int setindex;
 		PostingIteratorInterface* postings;
 
+		SelectorPostings( bool isExpression_, int setindex_, PostingIteratorInterface* postings_)
+			:isExpression(isExpression_),setindex(setindex_),postings(postings_){}
 		SelectorPostings( bool isExpression_, PostingIteratorInterface* postings_)
-			:isExpression(isExpression_),postings(postings_){}
+			:isExpression(isExpression_),setindex(0),postings(postings_){}
 		SelectorPostings( const SelectorPostings& o)
-			:isExpression(o.isExpression),postings(o.postings){}
+			:isExpression(o.isExpression),setindex(o.setindex),postings(o.postings){}
 	};
 
 	std::vector<SelectorPostings> m_selectorPostings;
