@@ -185,10 +185,10 @@ DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescript
 	switch (type)
 	{
 		case CmdCreateStorageClient:
-			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncachedterms=<file with list of terms to cache>";
+			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncachedterms=<file with list of terms to cache>;compression=<yes/no>";
 
 		case CmdCreateStorageDatabase:
-			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nacl=<yes/no, yes if users with different access rights exist>\nmetadata=<comma separated list of meta data def>";
+			return "semicolon separated list of assignments:\npath=<LevelDB storage path>\nacl=<yes/no, yes if users with different access rights exist>\nmetadata=<comma separated list of meta data def>;compression=<yes/no>";
 
 		case CmdDestroyStorageDatabase:
 			return "assignment:\npath=<LevelDB storage path>";
