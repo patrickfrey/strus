@@ -63,7 +63,11 @@ void KeyValueStorage::storeValueIm( const char* keystr, const std::size_t& keysi
 
 	leveldb::WriteOptions options;
 	options.sync = true;
-	m_db->Put( options, keyslice, valueslice);
+	leveldb::Status status = m_db->Put( options, keyslice, valueslice);
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
 }
 
 void KeyValueStorage::disposeValue( const char* keystr, const std::size_t& keysize, leveldb::WriteBatch& batch)

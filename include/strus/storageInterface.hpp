@@ -56,7 +56,7 @@ class StorageInterface
 {
 public:
 	/// \brief Destructor
-	/// \remark Calls close but ignores errors there silently
+	/// \remark Should call call 'close()' but ignore errors there silently
 	virtual ~StorageInterface(){}
 
 	/// \brief Close the storage and throw on error
@@ -114,14 +114,13 @@ public:
 	virtual Index allocDocnoRange( std::size_t nofDocuments)=0;
 
 	/// \brief Create an insert/update transaction object
-	/// \param[in] docid document identifier (URI)
-	/// \return the created inserter reference to be disposed with delete by the caller
+	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check
 	/// \param[in] logfilename Where to log checking failures ("-" for stdout)
-	/// \return the created document reference to be disposed with delete
+	/// \return the created document interface to be disposed with delete by the caller
 	virtual StorageDocumentInterface* createDocumentChecker(
 			const std::string& docid,
 			const std::string& logfilename) const=0;

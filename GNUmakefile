@@ -20,11 +20,12 @@ install:
 uninstall:
 	cd src; make uninstall; cd ..
 	@-rm $(INSTALL_INCDIR)/arithmeticVariant.hpp
-	@-rm $(INSTALL_INCDIR)/attributeReaderInterface.hpp
+	@-rm $(INSTALL_INCDIR)/private/arithmeticVariantAsString.hpp
 	@-rm $(INSTALL_INCDIR)/private/cmdLineOpt.hpp
+	@-rm $(INSTALL_INCDIR)/private/fileio.hpp
+	@-rm $(INSTALL_INCDIR)/attributeReaderInterface.hpp
 	@-rm $(INSTALL_INCDIR)/constants.hpp
 	@-rm $(INSTALL_INCDIR)/docnoIteratorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/private/fileio.hpp
 	@-rm $(INSTALL_INCDIR)/forwardIteratorInterface.hpp
 	@-rm $(INSTALL_INCDIR)/index.hpp
 	@-rm $(INSTALL_INCDIR)/metaDataReaderInterface.hpp
@@ -48,6 +49,11 @@ uninstall:
 	@-rm $(INSTALL_INCDIR)/weightingClosureInterface.hpp
 	@-rm $(INSTALL_INCDIR)/weightingFunctionInterface.hpp
 	@-rm $(INSTALL_INCDIR)/storage.hpp
+	@-rm $(INSTALL_INCDIR)/invAclIteratorInterface.hpp
+	@-rm $(INSTALL_INCDIR)/peerStorageTransactionInterface.hpp
+	@-rm $(INSTALL_INCDIR)/peerStorageInterface.hpp
+	@-rm $(INSTALL_INCDIR)/reference.hpp
+	@-rmdir $(INSTALL_INCDIR)/private
 	@-rmdir $(INSTALL_INCDIR)
 	@-rmdir $(INSTALL_BINDIR)
 	@-rmdir $(INSTALL_LIBDIR)

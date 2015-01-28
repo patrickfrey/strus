@@ -47,8 +47,7 @@ PRG_OBJS=\
 CPP_INCLUDE=\
 	-I$(TOPDIR)/include \
 	-I$(TOPDIR)/include/private \
-	-I. \
-	-I$(TOPDIR)/3rdParty/sparsehash-2.0.2/src
+	-I.
 
 CXXFLAGS=-g -Wfatal-errors -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98 -msse4.2
 MODFLAGS=-fPIC $(VISIBILITY)

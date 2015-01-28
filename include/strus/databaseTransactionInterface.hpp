@@ -26,45 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_DATABASE_TRANSACTION_INTERFACE_HPP_INCLUDED
+#define _STRUS_DATABASE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include <string>
-#include "strus/storageDocumentInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
 
 namespace strus
 {
+/// \brief Forward declaration
+class DatabaseCursorInterface;
 
-/// \class StorageTransactionInterface
-/// \brief Object to declare all items for one insert/update of a document in the storage
-class StorageTransactionInterface
+/// \brief Interface for transactions for writing on the strus key value storage database
+class DatabaseTransactionInterface
 {
 public:
 	/// \brief Destructor
 	/// \remark Expected to do an implicit rollback, if neither 'commit()' or 'rollback' was called
-	virtual ~StorageTransactionInterface(){}
+	virtual ~DatabaseTransactionInterface(){}
 
-	/// \brief Create one document to be inserted/updated within this transaction
-	/// \param[in] docid_ identifier of the document
-	/// \param[in] docno_ document number of the document
-	/// \remark If the document number (second argument) is defined by the client, then the server is not called for a document number (no synchronization needed) and documents close to each other can get adjacent document numbers even if the transaction is done in parallel with another.
-	/// \return the document object
-	virtual StorageDocumentInterface*
-		createDocument(
-			const std::string& docid_,
-			const Index& docno=0)=0;
+	/// \brief Get an interface for reading values in the context of this transaction
+	/// \param[in] useCache Hint for reader to cache visited key/value elements or blocks
+	/// \return the created cursor interface to be disposed with delete by the caller
+	virtual DatabaseCursorInterface* createCursor( bool useCache) const=0;
 
-	/// \brief Declare a document to be removed from the storage within this transaction
-	/// \param[in] docid document identifier (URI)
-	virtual void deleteDocument(
-			const std::string& docid)=0;
+	/// \brief Define a key/value pair to be written to the database as part of this transaction
+	/// \param[in] key pointer to the key to write
+	/// \param[in] keysize size of 'key' in bytes
+	/// \param[in] value pointer to the value to write
+	/// \param[in] valuesize size of 'value' in bytes
+	/// \note Will replace existing duplicate entry in the database (not issuing an error)
+	virtual void write(
+			const char* key,
+			std::size_t keysize,
+			const char* value,
+			std::size_t valuesize)=0;
 
-	/// \brief Declare the access rights of a user to any document to be removed from the storage within this transaction
-	/// \param[in] username user name
-	virtual void deleteUserAccessRights(
-			const std::string& username)=0;
+	/// \brief Define a key to be deleted in the database as part of this transaction
+	/// \param[in] key pointer to the key to delete
+	/// \param[in] keysize size of 'key' in bytes
+	virtual void remove(
+			const char* key,
+			std::size_t keysize)=0;
 
-	/// \brief Insert all documents and executes all commands defined in the transaction or none if one operation fails
+	/// \brief Executes all commands defined in the transaction or none if one operation fails
 	virtual void commit()=0;
 
 	/// \brief Rollback of the transaction, no changes made

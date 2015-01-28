@@ -50,7 +50,6 @@
 #include <map>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-#include <boost/thread/mutex.hpp>
 
 namespace strus {
 /// \brief Forward declaration

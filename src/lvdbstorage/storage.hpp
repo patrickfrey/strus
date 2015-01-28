@@ -36,7 +36,6 @@
 #include "indexSetIterator.hpp"
 #include "varSizeNodeTree.hpp"
 #include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 #include <boost/thread/mutex.hpp>
 
 namespace strus {

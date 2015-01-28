@@ -92,8 +92,6 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k, bool compr
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
 {
-	// Compression reduces size of index by 25% and has about 10% better performance
-	// m_dboptions.compression = leveldb::kNoCompression;
 	m_dboptions.create_if_missing = false;
 	if (cachesize_k)
 	{
@@ -102,6 +100,7 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k, bool compr
 	}
 	if (!compression)
 	{
+		// Compression reduces size of index by 25% and has about 10% better performance
 		m_dboptions.compression = leveldb::kNoCompression;
 	}
 	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_, &m_db);
