@@ -31,11 +31,12 @@
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/databaseCursorInterface.hpp"
+#include "strus/reference.hpp"
 #include "metaDataBlockCache.hpp"
 #include "databaseKey.hpp"
 #include "indexSetIterator.hpp"
 #include "varSizeNodeTree.hpp"
-#include <leveldb/db.h>
 #include <boost/thread/mutex.hpp>
 
 namespace strus {
@@ -56,15 +57,17 @@ class AttributeReaderInterface;
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class KeyAllocatorInterface;
+/// \brief Forward declaration
+class DatabaseInterface;
 
-/// \brief Strus IR storage implementation based on LevelDB
+/// \brief Implementation of the StorageInterface
 class Storage
 	:public StorageInterface
 {
 public:
-	/// \param[in] path of the storage
-	/// \param[in] cachesize_k number of K LRU cache for nodes
-	Storage( const std::string& path_, unsigned int cachesize_k, bool compression, const char* termnomap_source=0);
+	/// \param[in] database reference to key value store database used by this storage
+	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
+	explicit Storage( DatabaseInterface* database_, const char* termnomap_source=0);
 	virtual ~Storage();
 
 	virtual void close();
@@ -166,15 +169,13 @@ private:
 	void storeVariables();
 
 private:
-	std::string m_path;					///< levelDB storage path 
-	leveldb::DB* m_db;					///< levelDB handle
-	leveldb::Options m_dboptions;				///< options for levelDB
-
+	DatabaseInterface* m_database;				///< reference to key value store database
 	Index m_next_typeno;					///< next index to assign to a new term type
 	Index m_next_termno;					///< next index to assign to a new term value
 	Index m_next_docno;					///< next index to assign to a new document id
 	Index m_next_userno;					///< next index to assign to a new user id
 	Index m_next_attribno;					///< next index to assign to a new attribute name
+
 	boost::mutex m_mutex_typeno;
 	boost::mutex m_mutex_termno;
 	boost::mutex m_mutex_docno;

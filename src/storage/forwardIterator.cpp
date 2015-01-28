@@ -29,11 +29,13 @@
 #include "forwardIterator.hpp"
 #include "storage.hpp"
 #include "indexPacker.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;
 
-ForwardIterator::ForwardIterator( const Storage* storage_, leveldb::DB* db_, const std::string& type_)
-	:m_db(db_)
+ForwardIterator::ForwardIterator( const Storage* storage_, DatabaseInterface* database_, const std::string& type_)
+	:m_database(database_)
 	,m_forwardBlockStorage(0)
 	,m_curblock(0)
 	,m_blockitr(0)
@@ -57,7 +59,7 @@ void ForwardIterator::skipDoc( const Index& docno_)
 		m_forwardBlockStorage = 0;
 		m_forwardBlockStorage
 			= new BlockStorage<ForwardIndexBlock>( 
-				m_db, DatabaseKey::ForwardIndexPrefix,
+				m_database, DatabaseKey::ForwardIndexPrefix,
 				BlockKey( m_typeno, docno_), false);
 		m_docno = docno_;
 		m_curblock = 0;

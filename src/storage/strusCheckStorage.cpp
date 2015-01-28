@@ -27,6 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "strus/storageLib.hpp"
+#include "strus/databaseLib.hpp"
+#include "strus/databaseLib.hpp"
 #include "storage.hpp"
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
@@ -225,8 +227,16 @@ int main( int argc, const char* argv[])
 	{
 		std::cerr << "usage: strusCheckStorage <config>" << std::endl;
 		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
+		std::cerr << "            semicolon ';' separated list of assignments:" << std::endl;
 
-		strus::printIndentMultilineString( std::cerr, 12, strus::getStorageConfigDescription( strus::CmdCreateStorageClient));
+		strus::printIndentMultilineString(
+					std::cerr,
+					12, strus::getDatabaseConfigDescription(
+						strus::CmdCreateDatabaseClient));
+		strus::printIndentMultilineString(
+					std::cerr, 12, 
+					strus::getStorageConfigDescription(
+						strus::CmdCreateStorageClient));
 		return 0;
 	}
 	try

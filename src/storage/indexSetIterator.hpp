@@ -35,10 +35,13 @@
 
 namespace strus {
 
+/// \brief Forward declaration
+class DatabaseInterface;
+
 class IndexSetIterator
 {
 public:
-	IndexSetIterator( leveldb::DB* db_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_);
+	IndexSetIterator( DatabaseInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_);
 	IndexSetIterator( const IndexSetIterator& o);
 	~IndexSetIterator(){}
 

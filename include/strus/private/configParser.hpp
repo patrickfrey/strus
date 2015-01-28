@@ -26,63 +26,17 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "databaseKey.hpp"
-#include "keyValueStorage.hpp"
-#include "keyAllocatorInterface.hpp"
-#include "keyStorageInterface.hpp"
-#include "varSizeNodeTree.hpp"
-#include <cstdlib>
+#ifndef _STRUS_CONFIG_PARSER_HPP_INCLUDED
+#define _STRUS_CONFIG_PARSER_HPP_INCLUDED
 #include <string>
 
 namespace strus {
 
-class KeyMap
-{
-public:
-	KeyMap( leveldb::DB* db_,
-			DatabaseKey::KeyPrefix prefix_,
-			KeyAllocatorInterface* allocator_,
-			const VarSizeNodeTree* globalmap_=0)
-		:m_storage( db_, prefix_, false)
-		,m_globalmap(globalmap_)
-		,m_unknownHandleCount(0)
-		,m_allocator(allocator_)
-	{}
-	~KeyMap()
-	{
-		delete m_allocator;
-	}
-
-	Index lookUp( const std::string& name);
-	Index getOrCreate( const std::string& name, bool& isNew);
-	void store( const std::string& name, const Index& value);
-
-	void getWriteBatch(
-		std::map<Index,Index>& rewriteUnknownMap,
-		leveldb::WriteBatch& batch);
-
-	static bool isUnknown( const Index& value)
-	{
-		return value > UnknownValueHandleStart;
-	}
-
-private:
-	enum {
-		UnknownValueHandleStart=(1<<30)
-	};
-
-private:
-	KeyValueStorage m_storage;
-	VarSizeNodeTree m_map;
-	const VarSizeNodeTree* m_globalmap;
-	Index m_unknownHandleCount;
-	KeyAllocatorInterface* m_allocator;
-};
+bool extractStringFromConfigString( std::string& val, std::string& config, const char* key);
+bool extractBooleanFromConfigString( bool& val, std::string& config, const char* key);
+bool extractUIntFromConfigString( unsigned int& val, std::string& config, const char* key);
+bool removeKeysFromConfigString( std::string& config, const char** keys);
 
 }//namespace
 #endif
-
 

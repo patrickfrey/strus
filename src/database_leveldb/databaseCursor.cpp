@@ -68,19 +68,19 @@ void DatabaseCursor::initDomain( const char* domainkey, std::size_t domainkeysiz
 	m_domainkey[ domainkeysize] = (char)0xFF;
 }
 
-const char* DatabaseCursor::getCurrentKey() const
+DatabaseCursorInterface::Slice DatabaseCursor::getCurrentKey() const
 {
 	if (checkDomain())
 	{
-		return m_itr->key().data();
+		return Slice( m_itr->key().data(), m_itr->key().size());
 	}
 	else
 	{
-		return 0;
+		return Slice();
 	}
 }
 
-const char* DatabaseCursor::seekUpperBound(
+DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBound(
 		const char* key,
 		std::size_t keysize,
 		std::size_t domainkeysize)
@@ -90,7 +90,7 @@ const char* DatabaseCursor::seekUpperBound(
 	return getCurrentKey();
 }
 
-const char* DatabaseCursor::seekFirst(
+DatabaseCursorInterface::Slice DatabaseCursor::seekFirst(
 		const char* domainkey,
 		std::size_t domainkeysize)
 {
@@ -99,7 +99,7 @@ const char* DatabaseCursor::seekFirst(
 	return getCurrentKey();
 }
 
-const char* DatabaseCursor::seekLast(
+DatabaseCursorInterface::Slice DatabaseCursor::seekLast(
 		const char* domainkey,
 		std::size_t domainkeysize)
 {
@@ -116,61 +116,65 @@ const char* DatabaseCursor::seekLast(
 	return getCurrentKey();
 }
 
-const char* DatabaseCursor::seekNext()
+DatabaseCursorInterface::Slice DatabaseCursor::seekNext()
 {
 	if (m_itr->Valid())
 	{
 		m_itr->Next();
 		return getCurrentKey();
 	}
-	return 0;
+	return Slice();
 }
 
-const char* DatabaseCursor::seekPrev()
+DatabaseCursorInterface::Slice DatabaseCursor::seekPrev()
 {
 	if (m_itr->Valid())
 	{
 		m_itr->Prev();
 		return getCurrentKey();
 	}
-	return 0;
+	return Slice();
 }
 
-
-void DatabaseCursor::getValue(
-			const char*& value,
-			std::size_t& valuesize) const
+DatabaseCursorInterface::Slice DatabaseCursor::key() const
 {
 	if (m_itr->Valid())
 	{
-		value = (const char*)m_itr->value().data();
-		valuesize = m_itr->value().size();
+		return Slice( (const char*)m_itr->key().data(), m_itr->key().size());
 	}
 	else
 	{
-		value = 0;
-		valuesize = 0;
+		return Slice();
 	}
 }
 
-bool DatabaseCursor::getKeyValue(
-			const char* key,
-			std::size_t keysize,
-			const char*& value,
-			std::size_t& valuesize)
+DatabaseCursorInterface::Slice DatabaseCursor::value() const
 {
+	if (m_itr->Valid())
+	{
+		return Slice( (const char*)m_itr->value().data(), m_itr->value().size());
+	}
+	else
+	{
+		return Slice();
+	}
+}
+
+DatabaseCursorInterface::Slice DatabaseCursor::readValue(
+			const char* key,
+			std::size_t keysize)
+{
+	m_randomAccessValue.clear();
 	leveldb::Status status = m_db->Get( m_dboptions, leveldb::Slice( key, keysize), &m_randomAccessValue);
 	if (status.IsNotFound())
 	{
-		return false;
+		return Slice();
 	}
 	if (!status.ok())
 	{
 		throw std::runtime_error( status.ToString());
 	}
-	value = m_randomAccessValue.c_str();
-	valuesize = m_randomAccessValue.size();
-	return true;
+	return Slice( m_randomAccessValue.c_str(), m_randomAccessValue.size());
 }
 
 

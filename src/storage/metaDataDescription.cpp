@@ -28,6 +28,8 @@
 */
 #include "metaDataDescription.hpp"
 #include "keyValueStorage.hpp"
+#include "databaseTransactionInterface.hpp"
+#include "databaseCursorInterface.hpp"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
@@ -37,10 +39,10 @@ MetaDataDescription::MetaDataDescription()
 	:m_bytesize(0)
 {}
 
-MetaDataDescription::MetaDataDescription( leveldb::DB* db)
+MetaDataDescription::MetaDataDescription( DatabaseCursorInterface* dbcursor)
 	:m_bytesize(0)
 {
-	load( db);
+	load( dbcursor);
 }
 
 MetaDataDescription::MetaDataDescription( const MetaDataDescription& o)
@@ -188,17 +190,17 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 	m_ar.insert( ei, MetaDataElement( type_, ofs));
 }
 
-void MetaDataDescription::load( leveldb::DB* db)
+void MetaDataDescription::load( DatabaseCursorInterface* dbcursor)
 {
-	KeyValueStorage mdstorage( db, DatabaseKey::MetaDataDescrPrefix, false);
+	KeyValueStorage mdstorage( dbcursor, DatabaseKey::MetaDataDescrPrefix, false);
 	const KeyValueStorage::Value* mdptr = mdstorage.load( BlockKey());
 	*this = MetaDataDescription( std::string( mdptr->ptr(), mdptr->size()));
 }
 
-void MetaDataDescription::store( leveldb::WriteBatch& batch)
+void MetaDataDescription::store( DatabaseTransactionInterface* transaction)
 {
 	KeyValueStorage mdstorage( 0, DatabaseKey::MetaDataDescrPrefix, false);
-	mdstorage.store( BlockKey(), tostring(), batch);
+	mdstorage.store( BlockKey(), tostring(), transaction);
 }
 
 MetaDataDescription::TranslationMap

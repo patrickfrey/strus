@@ -26,60 +26,50 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
-#define _STRUS_LVDB_STORAGE_CONFIG_HPP_INCLUDED
-#include <string>
+#ifndef _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
+#define _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
+#include "dataBlockStorage.hpp"
+#include "blockKey.hpp"
 
 namespace strus {
 
-class StorageConfig
+/// \brief Forward declaration
+class DatabaseInterface;
+
+/// \class BlockStorage
+template <class BlockType>
+class BlockStorage
+	:public DataBlockStorage
 {
 public:
-	explicit StorageConfig( const char* source);
+	BlockStorage( DatabaseInterface* database, DatabaseKey::KeyPrefix dbkeyprefix_, const BlockKey& dbkey_, bool useLruCache_)
+		:DataBlockStorage( database, DatabaseKey( dbkeyprefix_, dbkey_), useLruCache_){}
+	BlockStorage( const BlockStorage& o)
+		:DataBlockStorage(o){}
 
-	const std::string& path() const
+	~BlockStorage(){}
+
+	const BlockType* curblock() const
 	{
-		return m_path;
+		return DataBlock::upcast<BlockType>( DataBlockStorage::curblock());
 	}
 
-	/// \brief File with line separated list of terms to cache (insert or query)
-	const std::string& cachedterms() const
+	const BlockType* load( const Index& id_)
 	{
-		return m_cachedterms;
+		return DataBlock::upcast<BlockType>( DataBlockStorage::load( id_));
 	}
 
-	bool acl() const
+	const BlockType* loadNext()
 	{
-		return m_acl;
+		return DataBlock::upcast<BlockType>( DataBlockStorage::loadNext());
 	}
 
-	bool compression() const
+	const BlockType* loadLast()
 	{
-		return m_compression;
+		return DataBlock::upcast<BlockType>( DataBlockStorage::loadLast());
 	}
-
-	const std::string& metadata() const
-	{
-		return m_metadata;
-	}
-
-	unsigned int cachesize_kb() const
-	{
-		return m_cachesize_kb;
-	}
-
-	static const char* getDescription();
-
-private:
-	std::string m_path;
-	std::string m_metadata;
-	std::string m_cachedterms;
-	bool m_acl;
-	unsigned int m_cachesize_kb;
-	bool m_compression;
 };
-}//namespace
+
+} //namespace
 #endif
-
-
 

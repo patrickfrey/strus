@@ -281,11 +281,17 @@ int main( int argc, const char* argv[])
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		std::cerr << "usage: strusDumpStorage <config> [ <what> ]" << std::endl;
-		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
+		std::cerr << "<config>  : configuration string of the storage;" << std::endl;
+		std::cerr << "            semicolon ';' separated list of assignments:" << std::endl;
 
 		strus::printIndentMultilineString(
-				std::cerr, 12,
-				strus::getStorageConfigDescription( strus::CmdCreateStorageClient));
+					std::cerr,
+					12, strus::getDatabaseConfigDescription(
+						strus::CmdCreateDatabaseClient));
+		strus::printIndentMultilineString(
+					std::cerr, 12,
+					strus::getStorageConfigDescription(
+						strus::CmdCreateStorageClient));
 		std::cerr << "<what>    : optional name of entries to dump:" << std::endl;
 		std::cerr << "            termtype  :term type definitions" << std::endl;
 		std::cerr << "            termvalue :term value definitions" << std::endl;

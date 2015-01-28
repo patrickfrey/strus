@@ -26,40 +26,63 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/attributeReaderInterface.hpp"
-#include "storage.hpp"
-#include <string>
-#include <leveldb/db.h>
+#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/reference.hpp"
+#include "posinfoIterator.hpp"
+#include "indexSetIterator.hpp"
+#include "blockStorage.hpp"
+#include "databaseKey.hpp"
 
-namespace strus
-{
+namespace strus {
+/// \brief Forward declaration
+class MetaDataReader;
+/// \brief Forward declaration
+class DatabaseInterface;
 
-/// \brief Interface for accessing document attributes from a strus storage
-class AttributeReader
-	:public AttributeReaderInterface
+class PostingIterator
+	:public PostingIteratorInterface
 {
 public:
-	AttributeReader( const Storage* storage_, leveldb::DB* db_)
-		:m_storage(storage_),m_db(db_),m_docno(0){}
-		
-	virtual Index elementHandle( const char* name) const;
+	PostingIterator( DatabaseInterface* database, Index termtypeno, Index termvalueno, const char* termstr);
 
-	virtual void skipDoc( const Index& docno)
+	virtual ~PostingIterator(){}
+
+	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const
 	{
-		m_docno = docno;
+		return std::vector<const PostingIteratorInterface*>();
+	}
+	virtual const char* featureid() const
+	{
+		return m_featureid.c_str();
 	}
 
-	virtual std::string getValue( const Index& elementHandle_) const;
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipPos( const Index& firstpos_);
+
+	virtual unsigned int frequency();
+
+	virtual Index documentFrequency() const;
+
+	virtual Index docno() const
+	{
+		return m_docno;
+	}
+
+	virtual Index posno() const
+	{
+		return m_posinfoIterator.posno();
+	}
 
 private:
-	const Storage* m_storage;
-	leveldb::DB* m_db;
+	IndexSetIterator m_docnoIterator;
+	PosinfoIterator m_posinfoIterator;
+
 	Index m_docno;
+	std::string m_featureid;
 };
 
-}//namespace
+}
 #endif
 

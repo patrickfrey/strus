@@ -48,12 +48,13 @@
 #include <string>
 #include <set>
 #include <map>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
 /// \brief Forward declaration
 class Storage;
+/// \brief Forward declaration
+class DatabaseInterface;
 
 /// \class StorageTransaction
 class StorageTransaction
@@ -62,7 +63,7 @@ class StorageTransaction
 public:
 	StorageTransaction( 
 		Storage* storage_,
-		leveldb::DB* db_,
+		DatabaseInterface* database_,
 		const MetaDataDescription* metadescr_,
 		const VarSizeNodeTree* termnomap_);
 
@@ -118,8 +119,7 @@ public:/*Document*/
 
 private:
 	Storage* m_storage;					///< Storage to call refresh after commit or rollback
-	leveldb::DB* m_db;					///< levelDB handle
-	leveldb::Options m_dboptions;				///< options for levelDB
+	DatabaseInterface* m_database;				///< database handle
 	const MetaDataDescription* m_metadescr;			///< description of metadata
 
 	AttributeMap m_attributeMap;				///< map of document attributes for writing

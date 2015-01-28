@@ -39,11 +39,12 @@
 using namespace strus;
 
 StorageTransaction::StorageTransaction(
-		Storage* storage_, leveldb::DB* db_,
+		Storage* storage_,
+		DatabaseInterface* database_,
 		const MetaDataDescription* metadescr_,
 		const VarSizeNodeTree* termnomap_)
 	:m_storage(storage_)
-	,m_db(db_)
+	,m_database(database_)
 	,m_metadescr(metadescr_)
 	,m_attributeMap(db_)
 	,m_metaDataBlockMap(db_,metadescr_)

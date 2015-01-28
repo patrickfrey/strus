@@ -3,7 +3,6 @@ include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
 	databaseLib.o \
-	databaseConfig.o \
 	database.o \
 	databaseCursor.o \
 	databaseTransaction.o

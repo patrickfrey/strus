@@ -28,7 +28,7 @@
 */
 #include "strus/databaseLib.hpp"
 #include "strus/databaseInterface.hpp"
-#include "databaseConfig.hpp"
+#include "strus/private/configParser.hpp"
 #include "database.hpp"
 #include "dll_tags.hpp"
 #include <leveldb/db.h>
@@ -37,14 +37,33 @@ using namespace strus;
 
 DLL_PUBLIC DatabaseInterface* strus::createDatabaseClient( const char* configsource)
 {
-	DatabaseConfig config( configsource);
-	return new Database( config.path().c_str(), config.cachesize_kb(), config.compression());
+	unsigned int cachesize_kb = 0;
+	bool compression = true;
+	std::string path;
+	std::string src( configsource?configsource:"");
+
+	if (!extractStringFromConfigString( path, src, "path"))
+	{
+		throw std::runtime_error("missing 'path' in database configuration string");
+	}
+	(void)extractBooleanFromConfigString( compression, src, "compression");
+	(void)extractUIntFromConfigString( cachesize_kb, src, "cache");
+
+	return new Database( path.c_str(), cachesize_kb, compression);
 }
 
 
 DLL_PUBLIC void strus::createDatabase( const char* configsource)
 {
-	DatabaseConfig config( configsource);
+	bool compression = true;
+	std::string path;
+	std::string src( configsource?configsource:"");
+
+	if (!extractStringFromConfigString( path, src, "path"))
+	{
+		throw std::runtime_error("missing 'path' in database configuration string");
+	}
+	(void)extractBooleanFromConfigString( compression, src, "compression");
 
 	leveldb::DB* db = 0;
 	leveldb::Options options;
@@ -53,11 +72,11 @@ DLL_PUBLIC void strus::createDatabase( const char* configsource)
 	options.create_if_missing = true;
 	options.error_if_exists = true;
 
-	if (!config.compression())
+	if (!compression)
 	{
 		options.compression = leveldb::kNoCompression;
 	}
-	leveldb::Status status = leveldb::DB::Open( options, config.path(), &db);
+	leveldb::Status status = leveldb::DB::Open( options, path, &db);
 	if (status.ok())
 	{
 		std::string err = status.ToString();
@@ -70,13 +89,20 @@ DLL_PUBLIC void strus::createDatabase( const char* configsource)
 
 DLL_PUBLIC void strus::destroyDatabase( const char* configsource)
 {
-	DatabaseConfig config( configsource);
+	std::string path;
+	std::string src( configsource?configsource:"");
+
+	if (!extractStringFromConfigString( path, src, "path"))
+	{
+		throw std::runtime_error("missing 'path' in database configuration string");
+	}
+
 	leveldb::Options options;
-	leveldb::Status status = leveldb::DestroyDB( config.path(), options);
+	leveldb::Status status = leveldb::DestroyDB( path, options);
 	if (!status.ok())
 	{
 		std::string err = status.ToString();
-		throw std::runtime_error( std::string( "failed to remove storage: ") + err);
+		throw std::runtime_error( std::string( "failed to remove key value store database: ") + err);
 	}
 }
 
@@ -86,7 +112,7 @@ DLL_PUBLIC const char* strus::getDatabaseConfigDescription( DatabaseConfigDescri
 	switch (type)
 	{
 		case CmdCreateDatabaseClient:
-			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>";
+			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>";
 
 		case CmdCreateDatabase:
 			return "path=<LevelDB storage path>;compression=<yes/no>";
@@ -97,6 +123,19 @@ DLL_PUBLIC const char* strus::getDatabaseConfigDescription( DatabaseConfigDescri
 	return 0;
 }
 
+DLL_PUBLIC const char** getDatabaseConfigParameters( DatabaseConfigDescriptionType type)
+{
+	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression", 0};
+	static const char* keys_CreateDatabase[] = {"path","compression", 0};
+	static const char* keys_DestroyDatabase[] = {"path", 0};
+	switch (type)
+	{
+		case CmdCreateDatabaseClient:	return keys_CreateDatabaseClient;
+		case CmdCreateDatabase:		return keys_CreateDatabase;
+		case CmdDestroyDatabase:	return keys_DestroyDatabase;
+	}
+	return 0;
+}
 
 
 

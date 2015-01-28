@@ -26,47 +26,52 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
-#define _STRUS_LVDB_BLOCK_STORAGE_TEMPLATE_HPP_INCLUDED
-#include "dataBlockStorage.hpp"
-#include "blockKey.hpp"
+#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "metaDataBlock.hpp"
+#include "metaDataRecord.hpp"
+#include "strus/databaseCursorInterface.hpp"
+#include "strus/reference.hpp"
+#include <utility>
+#include <stdexcept>
+#include <cstdlib>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace strus {
 
-/// \class BlockStorage
-template <class BlockType>
-class BlockStorage
-	:public DataBlockStorage
+/// \brief Forward declaration
+class DatabaseInterface;
+
+class MetaDataBlockCache
 {
 public:
-	BlockStorage( leveldb::DB* db_, DatabaseKey::KeyPrefix dbkeyprefix_, const BlockKey& dbkey_, bool useLruCache_)
-		:DataBlockStorage( db_, DatabaseKey( dbkeyprefix_, dbkey_), useLruCache_){}
-	BlockStorage( const BlockStorage& o)
-		:DataBlockStorage(o){}
+	MetaDataBlockCache( DatabaseInterface* database, const MetaDataDescription& descr_);
 
-	~BlockStorage(){}
+	~MetaDataBlockCache(){}
 
-	const BlockType* curblock() const
-	{
-		return DataBlock::upcast<BlockType>( DataBlockStorage::curblock());
-	}
+	const MetaDataRecord get( const Index& docno);
 
-	const BlockType* load( const Index& id_)
-	{
-		return DataBlock::upcast<BlockType>( DataBlockStorage::load( id_));
-	}
+	void declareVoid( const Index& blockno);
+	void refresh();
 
-	const BlockType* loadNext()
-	{
-		return DataBlock::upcast<BlockType>( DataBlockStorage::loadNext());
-	}
+private:
+	void resetBlock( const Index& blockno);
 
-	const BlockType* loadLast()
-	{
-		return DataBlock::upcast<BlockType>( DataBlockStorage::loadLast());
-	}
+private:
+	enum {
+		CacheSize=(1024*1024),				///< size of the cache in blocks
+		MaxDocno=(CacheSize*MetaDataBlock::BlockSize)	///< hardcode limit of maximum document number
+	};
+
+private:
+	Reference<DatabaseCursorInterface> m_cursor;
+	MetaDataDescription m_descr;
+	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
+	std::vector<unsigned int> m_voidar;
 };
 
-} //namespace
+}
 #endif
 

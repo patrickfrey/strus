@@ -29,15 +29,16 @@
 #include "posinfoIterator.hpp"
 #include "blockStorage.hpp"
 #include "databaseKey.hpp"
+#include "strus/databaseInterface.hpp"
 #include "statistics.hpp"
 #include "keyValueStorage.hpp"
 #include <leveldb/db.h>
 
 using namespace strus;
 
-PosinfoIterator::PosinfoIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno)
-	:m_db(db_)
-	,m_posinfoStorage( db_, DatabaseKey::PosinfoBlockPrefix, BlockKey( termtypeno, termvalueno), true)
+PosinfoIterator::PosinfoIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno)
+	:m_database(database_)
+	,m_posinfoStorage( database_, DatabaseKey::PosinfoBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoBlk(0)
 	,m_posinfoItr(0)
 	,m_termtypeno(termtypeno)
@@ -181,14 +182,12 @@ Index PosinfoIterator::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		KeyValueStorage dfstorage(
-			m_db, DatabaseKey::DocFrequencyPrefix, false);
-		const KeyValueStorage::Value* dfpacked
-			= dfstorage.load( BlockKey( m_termtypeno, m_termvalueno));
+		DatabaseKey dbkey( DatabaseKey::DocFrequencyPrefix, BlockKey( m_termtypeno, m_termvalueno));
+		std::string dfstr;
+		if (!m_database->readValue( dbkey.ptr(), dbkey.size(), dfstr, false)) return 0;
 
-		if (!dfpacked) return 0;
-		char const* cc = dfpacked->ptr();
-		m_documentFrequency = unpackIndex( cc, cc + dfpacked->size());
+		char const* cc = dfstr.c_str();
+		m_documentFrequency = unpackIndex( cc, cc + dfstr.size());
 	}
 	return m_documentFrequency;
 }

@@ -26,10 +26,14 @@
 
 --------------------------------------------------------------------
 */
+#include "storage.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
+#include "strus/databaseCursorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
-#include "storage.hpp"
+#include "strus/reference.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "postingIterator.hpp"
@@ -48,11 +52,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <leveldb/cache.h>
 
 using namespace strus;
-
-enum {ExpectedTransactionSize = (1<<14)};
 
 void Storage::cleanup()
 {
@@ -61,16 +62,6 @@ void Storage::cleanup()
 		delete m_metaDataBlockCache; 
 		m_metaDataBlockCache = 0;
 	}
-	if (m_db)
-	{
-		delete m_db;
-		m_db = 0;
-	}
-	if (m_dboptions.block_cache)
-	{
-		delete m_dboptions.block_cache;
-		m_dboptions.block_cache = 0;
-	}
 	if (m_termno_map)
 	{
 		delete m_termno_map;
@@ -78,9 +69,8 @@ void Storage::cleanup()
 	}
 }
 
-Storage::Storage( const std::string& path_, unsigned int cachesize_k, bool compression, const char* termnomap_source)
-	:m_path(path_)
-	,m_db(0)
+Storage::Storage( DatabaseInterface* database_, const char* termnomap_source)
+	:m_database(database_)
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_docno(0)
@@ -92,44 +82,23 @@ Storage::Storage( const std::string& path_, unsigned int cachesize_k, bool compr
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
 {
-	m_dboptions.create_if_missing = false;
-	if (cachesize_k)
+	try
 	{
-		if (cachesize_k * 1024 < cachesize_k) throw std::runtime_error("size of cache out of range");
-		m_dboptions.block_cache = leveldb::NewLRUCache( cachesize_k * 1024);
-	}
-	if (!compression)
-	{
-		// Compression reduces size of index by 25% and has about 10% better performance
-		m_dboptions.compression = leveldb::kNoCompression;
-	}
-	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_, &m_db);
-	if (status.ok())
-	{
-		try
-		{
-			m_metadescr.load( m_db);
-			m_metaDataBlockCache = new MetaDataBlockCache( m_db, m_metadescr);
+		m_metadescr.load( database_);
+		m_metaDataBlockCache = new MetaDataBlockCache( m_database, m_metadescr);
 
-			loadVariables();
-			if (termnomap_source) loadTermnoMap( termnomap_source);
-		}
-		catch (const std::bad_alloc& err)
-		{
-			cleanup();
-			throw err;
-		}
-		catch (const std::runtime_error& err)
-		{
-			cleanup();
-			throw err;
-		}
+		loadVariables();
+		if (termnomap_source) loadTermnoMap( termnomap_source);
 	}
-	else
+	catch (const std::bad_alloc& err)
 	{
-		std::string err = status.ToString();
 		cleanup();
-		throw std::runtime_error( std::string( "failed to open storage: ") + err);
+		throw err;
+	}
+	catch (const std::runtime_error& err)
+	{
+		cleanup();
+		throw err;
 	}
 }
 
@@ -151,7 +120,9 @@ void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 
 void Storage::loadVariables()
 {
-	KeyMap variableMap( m_db, DatabaseKey::VariablePrefix, 0);
+	Reference<DatabaseCursorInterface> cursor( m_database->createCursor(false));
+	
+	KeyMap variableMap( cursor.get(), DatabaseKey::VariablePrefix, 0);
 	m_next_termno = variableMap.lookUp( "TermNo");
 	m_next_typeno = variableMap.lookUp( "TypeNo");
 	m_next_docno = variableMap.lookUp( "DocNo");
@@ -162,43 +133,36 @@ void Storage::loadVariables()
 
 void Storage::storeVariables()
 {
-	leveldb::WriteBatch batch;
-	KeyValueStorage varstor( m_db, DatabaseKey::VariablePrefix, false);
+	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+	KeyValueStorage varstor( 0, DatabaseKey::VariablePrefix);
 	{
 		std::string termnoval;
 		packIndex( termnoval, m_next_termno);
-		varstor.store( "TermNo", termnoval, batch);
+		varstor.store( "TermNo", termnoval, transaction.get());
 	}{
 		std::string typenoval;
 		packIndex( typenoval, m_next_typeno);
-		varstor.store( "TypeNo", typenoval, batch);
+		varstor.store( "TypeNo", typenoval, transaction.get());
 	}{
 		std::string docnoval;
 		packIndex( docnoval, m_next_docno);
-		varstor.store( "DocNo", docnoval, batch);
+		varstor.store( "DocNo", docnoval, transaction.get());
 	}
 	if (withAcl())
 	{
 		std::string usernoval;
 		packIndex( usernoval, m_next_userno);
-		varstor.store( "UserNo", usernoval, batch);
+		varstor.store( "UserNo", usernoval, transaction.get());
 	}{
 		std::string attribnoval;
 		packIndex( attribnoval, m_next_attribno);
-		varstor.store( "AttribNo", attribnoval, batch);
+		varstor.store( "AttribNo", attribnoval, transaction.get());
 	}{
 		std::string nofdocsval;
 		packIndex( nofdocsval, m_nof_documents);
-		varstor.store( "NofDocs", nofdocsval, batch);
+		varstor.store( "NofDocs", nofdocsval, transaction.get());
 	}
-	leveldb::WriteOptions options;
-	options.sync = true;
-	leveldb::Status status = m_db->Write( options, &batch);
-	batch.Clear();
-	if (!status.ok())
-	{
-		throw std::runtime_error( std::string( "error when writing global counter batch: ") + status.ToString());
-	}
+	transaction->commit();
 }
 
 void Storage::close()
@@ -229,11 +193,13 @@ Index Storage::loadIndexValue(
 	const DatabaseKey::KeyPrefix type,
 	const std::string& name) const
 {
-	KeyValueStorage termstor( m_db, type, false);
-	const KeyValueStorage::Value* val = termstor.load( name);
-	if (!val) return 0;
-	char const* vi = val->ptr();
-	return unpackIndex( vi, vi+val->size());
+	std::string key;
+	std::string val;
+	key.push_back( (char)type);
+	key.append( name);
+	if (!m_database->readValue( key.c_str(), key.size(), val, false)) return 0;
+	char const* vi = val.c_str();
+	return unpackIndex( vi, vi+val.size());
 }
 
 Index Storage::getTermValue( const std::string& name) const
@@ -277,14 +243,14 @@ PostingIteratorInterface*
 	{
 		return new NullIterator( typeno, termno, termstr.c_str());
 	}
-	return new PostingIterator( m_db, typeno, termno, termstr.c_str());
+	return new PostingIterator( m_database, typeno, termno, termstr.c_str());
 }
 
 ForwardIteratorInterface*
 	Storage::createForwardIterator(
 		const std::string& type) const
 {
-	return new ForwardIterator( this, m_db, type);
+	return new ForwardIterator( this, m_database, type);
 }
 
 class InvertedAclIterator
@@ -293,8 +259,8 @@ class InvertedAclIterator
 	
 {
 public:
-	InvertedAclIterator( leveldb::DB* db_, const Index& userno_)
-		:IndexSetIterator( db_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_)){}
+	InvertedAclIterator( DatabaseInterface* database_, const Index& userno_)
+		:IndexSetIterator( database_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_)){}
 	virtual ~InvertedAclIterator(){}
 
 	virtual Index skipDoc( const Index& docno_)
@@ -326,7 +292,7 @@ InvAclIteratorInterface*
 	}
 	else
 	{
-		return new InvertedAclIterator( m_db, userno);
+		return new InvertedAclIterator( m_database, userno);
 	}
 }
 
@@ -338,7 +304,7 @@ StorageTransactionInterface*
 		boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
 		++m_transactionCnt;
 	}
-	return new StorageTransaction( this, m_db, &m_metadescr, m_termno_map);
+	return new StorageTransaction( this, m_database, &m_metadescr, m_termno_map);
 }
 
 StorageDocumentInterface* 
@@ -529,19 +495,21 @@ Index Storage::allocNameIm(
 	bool& isNew)
 {
 	Index rt;
-	KeyValueStorage stor( m_db, prefix, true);
-	const KeyValueStorage::Value* val = stor.load( name);
-	if (!val)
+	std::string val;
+	std::string dbkey;
+	dbkey.push_back( prefix);
+	dbkey.append( name);
+	if (!m_database->readValue( dbkey.c_str(), dbkey.size(), val, true))
 	{
 		std::string indexval;
 		packIndex( indexval, rt = counter++);
-		stor.storeIm( name, indexval);
+		m_database->writeImm( name.c_str(), name.size(), indexval.c_str(), indexval.size());
 		isNew = true;
 	}
 	else
 	{
-		char const* vi = val->ptr();
-		rt = unpackIndex( vi, vi+val->size());
+		char const* vi = val.c_str();
+		rt = unpackIndex( vi, vi+val.size());
 		isNew = false;
 	}
 	return rt;
@@ -549,12 +517,12 @@ Index Storage::allocNameIm(
 
 IndexSetIterator Storage::getAclIterator( const Index& docno) const
 {
-	return IndexSetIterator( m_db, DatabaseKey::AclBlockPrefix, BlockKey(docno));
+	return IndexSetIterator( m_database, DatabaseKey::AclBlockPrefix, BlockKey(docno));
 }
 
 IndexSetIterator Storage::getUserAclIterator( const Index& userno) const
 {
-	return IndexSetIterator( m_db, DatabaseKey::UserAclBlockPrefix, BlockKey(userno));
+	return IndexSetIterator( m_database, DatabaseKey::UserAclBlockPrefix, BlockKey(userno));
 }
 
 Index Storage::nofAttributeTypes()
@@ -588,7 +556,7 @@ Index Storage::userId( const std::string& username) const
 
 AttributeReaderInterface* Storage::createAttributeReader() const
 {
-	return new AttributeReader( this, m_db);
+	return new AttributeReader( this, m_database);
 }
 
 MetaDataReaderInterface* Storage::createMetaDataReader() const
@@ -609,18 +577,17 @@ std::vector<StatCounterValue> Storage::getStatistics() const
 
 void Storage::loadTermnoMap( const char* termnomap_source)
 {
-	leveldb::WriteBatch batch;
-	KeyValueStorage termnostor( m_db, DatabaseKey::TermValuePrefix, false);
-
+	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 	m_termno_map = new VarSizeNodeTree();
 	try
 	{
 		unsigned char const* si = (const unsigned char*)termnomap_source;
 		std::string name;
+		name.push_back( (char)DatabaseKey::TermValuePrefix);
 
 		while (*si)
 		{
-			name.resize(0);
+			name.resize(1);
 			for (; *si != '\n' && *si != '\r' && *si; ++si)
 			{
 				name.push_back( *si);
@@ -629,27 +596,25 @@ void Storage::loadTermnoMap( const char* termnomap_source)
 			if (*si == '\n') ++si;
 
 			VarSizeNodeTree::NodeData dupkey;
-			if (m_termno_map->find( name.c_str(), dupkey)) continue;
+			const char* termid = name.c_str()+1;
+			if (m_termno_map->find( termid, dupkey)) continue;
 
-			Index termno = loadIndexValue( DatabaseKey::TermValuePrefix, name);
+			std::string val;
+			m_database->readValue( name.c_str(), name.size(), val, false); 
+			char const* vi = val.c_str();
+			Index termno = unpackIndex( vi, vi+val.size());
 			if (!termno)
 			{
 				termno = allocTermno();
 				std::string termnostr;
 				packIndex( termnostr, termno);
-				termnostor.store( name, termnostr, batch);
+				transaction->write(
+					name.c_str(), name.size(),
+					termnostr.c_str(), termnostr.size());
 			}
-			m_termno_map->set( name.c_str(), termno);
+			m_termno_map->set( termid, termno);
 		}
-		leveldb::WriteOptions options;
-		options.sync = true;
-		leveldb::Status status = m_db->Write( options, &batch);
-		batch.Clear();
-
-		if (!status.ok())
-		{
-			throw std::runtime_error( std::string( "error writing leveldb database batch: ") + status.ToString());
-		}
+		transaction->commit();
 	}
 	catch (const std::runtime_error& err)
 	{

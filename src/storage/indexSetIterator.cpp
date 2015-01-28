@@ -30,8 +30,8 @@
 
 using namespace strus;
 
-IndexSetIterator::IndexSetIterator( leveldb::DB* db_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_)
-	:m_elemStorage( db_, dbprefix_, key_, true)
+IndexSetIterator::IndexSetIterator( DatabaseInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_)
+	:m_elemStorage( database_, dbprefix_, key_, true)
 	,m_elemBlk(0)
 	,m_elemItr(0)
 	,m_elemno(0)

@@ -27,90 +27,68 @@
 --------------------------------------------------------------------
 */
 #include "dataBlockStorage.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "indexPacker.hpp"
 #include <cstring>
 #include <stdexcept>
 
 using namespace strus;
 
-const DataBlock* DataBlockStorage::extractData()
-{
-	if (m_itr->Valid()
-	&&  m_keysize <= m_itr->key().size()
-	&&  0==std::memcmp( m_key.ptr(), m_itr->key().data(), m_keysize))
-	{
-		char const* ki = m_itr->key().data() + m_keysize;
-		const char* ke = ki + m_itr->key().size() - m_keysize;
-		Index id = unpackIndex( ki, ke);
+DataBlockStorage::DataBlockStorage( DatabaseInterface* database_, const DatabaseKey& key_, bool useLruCache_)
+	:m_database(database_)
+	,m_cursor(database_->createCursor( useLruCache_))
+	,m_key(key_)
+	,m_keysize(key_.size())
+	,m_curblock(key_.prefix())
+{}
 
-		m_curblock.init( id, m_itr->value().data(), m_itr->value().size());
-		return &m_curblock;
-	}
-	else
-	{
-		closeIterator();
-		return 0;
-	}
+const DataBlock* DataBlockStorage::extractData(
+		const DatabaseCursorInterface::Slice& key,
+		const DatabaseCursorInterface::Slice& value) const
+{
+	char const* ki = key.ptr() + m_keysize;
+	const char* ke = ki + key.size() - m_keysize;
+	Index id = unpackIndex( ki, ke);
+
+	m_curblock.init( id, value.ptr(), value.size());
+	return &m_curblock;
 }
 
 const DataBlock* DataBlockStorage::load( const Index& id)
 {
-	if (!m_itr)
-	{
-		m_itr = m_db->NewIterator( m_readOptions);
-	}
 	m_key.resize( m_keysize);
 	m_key.addElem( id);
-	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
-	return extractData();
+	DatabaseCursorInterface::Slice
+		key = m_cursor->seekUpperBound( m_key.c_str(), m_key.size(), m_keysize);
+	if (!value.defined()) return 0;
+
+	return extractData( key, m_cursor->value());
 }
 
 const DataBlock* DataBlockStorage::loadFirst()
 {
-	if (!m_itr)
-	{
-		m_itr = m_db->NewIterator( m_readOptions);
-	}
-	m_key.resize( m_keysize);
-	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
-	return extractData();
+	DatabaseCursorInterface::Slice
+		key = m_cursor->seekFirst( m_key.c_str(), m_keysize);
+
+	return extractData( key, m_cursor->value());
 }
 
 const DataBlock* DataBlockStorage::loadNext()
 {
-	if (!m_itr)
-	{
-		throw std::logic_error("called DataBlockStorage::loadNext without iterator defined");
-	}
-	m_itr->Next();
-	return extractData();
+	DatabaseCursorInterface::Slice key = m_cursor->seekNext();
+	return extractData( key, m_cursor->value());
 }
 
 const DataBlock* DataBlockStorage::loadLast()
 {
-	if (!m_itr)
-	{
-		m_itr = m_db->NewIterator( m_readOptions);
-	}
-	m_key.resize( m_keysize);
-	m_key.addPrefix( (char)0xff);
-	m_itr->Seek( leveldb::Slice( m_key.ptr(), m_key.size()));
-	if (!m_itr->Valid())
-	{
-		m_itr->SeekToLast();
-		if (!m_itr->Valid())
-		{
-			closeIterator();
-			return 0;
-		}
-		m_itr->Prev();
-	}
-	return extractData();
+	DatabaseCursorInterface::Slice key = m_cursor->seekLast();
+	return extractData( key, m_cursor->value());
 }
 
 void DataBlockStorage::store(
 	const DataBlock& block,
-	leveldb::WriteBatch& batch)
+	DatabaseTransactionInterface* transaction)
 {
 	m_key.resize( m_keysize);
 	if (!block.id())
@@ -118,23 +96,17 @@ void DataBlockStorage::store(
 		throw std::runtime_error("trying to store data block with id NULL");
 	}
 	m_key.addElem( block.id());
-
-	leveldb::Slice keyslice( m_key.ptr(), m_key.size());
-	leveldb::Slice valueslice( block.charptr(), block.size());
-
-	batch.Put( keyslice, valueslice);
+	transaction->write( m_key.ptr(), m_key.size(), block.charptr(), block.size());
 }
 
 void DataBlockStorage::dispose(
 	const Index& id,
-	leveldb::WriteBatch& batch)
+	DatabaseTransactionInterface* transaction)
 {
 	m_key.resize( m_keysize);
 	m_key.addElem( id);
 
-	leveldb::Slice keyslice( m_key.ptr(), m_key.size());
-
-	batch.Delete( keyslice);
+	transaction->remove( m_key.ptr(), m_key.size());
 }
 
 

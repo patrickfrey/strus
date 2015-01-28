@@ -63,6 +63,12 @@ public:
 			const char* key,
 			std::size_t keysize);
 
+	virtual bool readValue(
+			const char* key,
+			std::size_t keysize,
+			std::string& value,
+			bool useCache=false) const;
+
 public:
 	void cleanup();
 	friend class DatabaseTransaction;

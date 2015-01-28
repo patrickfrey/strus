@@ -2,13 +2,15 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
+	storage.o \
+	storageLib.o \
+	keyValueStorage.o \
 	varSizeNodeTree.o \
 	statistics.o \
 	floatConversions.o \
 	indexPacker.o \
 	databaseKey.o \
 	dataBlock.o \
-	keyValueStorage.o \
 	dataBlockStorage.o \
 	invTermBlock.o \
 	posinfoBlock.o \
@@ -29,7 +31,6 @@ CPP_OBJS=\
 	attributeMap.o \
 	keyMap.o \
 	documentFrequencyMap.o \
-	storage.o \
 	postingIterator.o \
 	indexSetIterator.o \
 	nullIterator.o \
@@ -37,9 +38,7 @@ CPP_OBJS=\
 	storageDocument.o \
 	storageDocumentChecker.o \
 	storageTransaction.o \
-	storageAlterMetaDataTable.o \
-	storageConfig.o \
-	storageLib.o
+	storageAlterMetaDataTable.o
 
 PRG_OBJS=\
 	extractKeyValueData.o
@@ -51,10 +50,10 @@ CPP_INCLUDE=\
 
 CXXFLAGS=-g -Wfatal-errors -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98 -msse4.2
 MODFLAGS=-fPIC $(VISIBILITY)
-LDFLAGS=-L/usr/lib -L$(TOPDIR)/src/utils
-LIBS=-lstrus_utils -lleveldb -lpthread -lstdc++ -Wl,--no-as-needed -lsnappy
+LDFLAGS=-L/usr/lib -L$(TOPDIR)/src/utils -L$(TOPDIR)/src/database_leveldb
+LIBS=-lstrus_utils -lstrus_database_leveldb -lpthread -lstdc++ -Wl,--no-as-needed
 
-all: libstrus_lvdbstorage.so strusCheckStorage strusDumpStorage
+all: libstrus_storage.so strusCheckStorage strusDumpStorage
 
 -include $(CPP_OBJS:.o=.d)
 -include $(PRG_OBJS:.o=.d)
@@ -63,7 +62,7 @@ all: libstrus_lvdbstorage.so strusCheckStorage strusDumpStorage
 	$(CXX) $(MODFLAGS) -c -o $@ $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp
 	$(CXX) -MM $(CXXFLAGS) $(CPP_INCLUDE) $*.cpp > $*.d
 
-libstrus_lvdbstorage.so: $(CPP_OBJS)
+libstrus_storage.so: $(CPP_OBJS)
 	$(CXX) -shared -o $@ $(CPP_OBJS) $(LDFLAGS) $(LIBS)
 
 strusCheckStorage: $(CPP_OBJS) $(PRG_OBJS) strusCheckStorage.o
@@ -76,7 +75,7 @@ strusDumpStorage: $(CPP_OBJS) $(PRG_OBJS) strusDumpStorage.o
 clean:
 	@rm -f $(CPP_OBJS) $(CPP_OBJS:.o=.d)
 	@rm -f $(PRG_OBJS) $(PRG_OBJS:.o=.d)
-	@rm -f libstrus_lvdbstorage.so
+	@rm -f libstrus_storage.so
 	@rm -f strusCheckStorage strusDumpStorage
 	@rm -f strusCheckStorage.o strusDumpStorage.o
 	@rm -f strusCheckStorage.d strusDumpStorage.d
@@ -84,13 +83,13 @@ clean:
 .PHONY: install
 install:
 	@mkdir -p $(INSTALL_LIBDIR)
-	@cp libstrus_lvdbstorage.so $(INSTALL_LIBDIR)
+	@cp libstrus_storage.so $(INSTALL_LIBDIR)
 	@cp strusCheckStorage $(INSTALL_BINDIR)
 	@cp strusDumpStorage $(INSTALL_BINDIR)
  
 .PHONY: uninstall
 uninstall:
-	@rm -f $(INSTALL_LIBDIR)/libstrus_lvdbstorage.so
+	@rm -f $(INSTALL_LIBDIR)/libstrus_storage.so
 	@rm -f $(INSTALL_BINDIR)/strusCheckStorage
 	@rm -f $(INSTALL_BINDIR)/strusDumpStorage
 

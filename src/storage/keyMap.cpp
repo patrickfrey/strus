@@ -89,7 +89,7 @@ void KeyMap::store( const std::string& name, const Index& value)
 
 void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
-		leveldb::WriteBatch& batch)
+		DatabaseTransactionInterface* transaction)
 {
 	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
@@ -102,7 +102,7 @@ void KeyMap::getWriteBatch(
 				std::string valuestr;
 				idx = m_allocator->alloc();
 				packIndex( valuestr, idx);
-				m_storage.store( mi.key(), valuestr, batch);
+				m_storage.store( mi.key(), valuestr, transaction);
 			}
 			rewriteUnknownMap[ mi.data()] = idx;
 		}

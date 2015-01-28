@@ -37,6 +37,28 @@ namespace strus
 class DatabaseCursorInterface
 {
 public:
+	class Slice
+	{
+	public:
+		Slice()
+			:m_ptr(0),m_size(0){}
+		Slice( const char* ptr_, std::size_t size_)
+			:m_ptr(ptr_),m_size(size_){}
+		Slice( const Slice& o)
+			:m_ptr(o.m_ptr),m_size(o.m_size){}
+
+		const char* ptr() const		{return m_ptr;}
+		std::size_t size() const	{return m_size;}
+
+		operator std::string() const	{return std::string(m_ptr,m_size);}
+		bool defined() const		{return m_ptr!=0;}
+
+	private:
+		const char* m_ptr;
+		std::size_t m_size;
+	};
+
+public:
 	/// \brief Destructor
 	virtual ~DatabaseCursorInterface(){}
 
@@ -44,8 +66,8 @@ public:
 	/// \param[in] key pointer to the key of the item to seek
 	/// \param[in] keysize size of 'key' in bytes
 	/// \param[in] domainkeysize size of 'key' that defines the key value domain (the subset set of keys to search in)
-	/// \return the key of the element found or NULL
-	virtual const char* seekUpperBound(
+	/// \return the key of the element found or an undefined key
+	virtual Slice seekUpperBound(
 			const char* key,
 			std::size_t keysize,
 			std::size_t domainkeysize)=0;
@@ -53,45 +75,42 @@ public:
 	/// \brief Move cursor to the first key stored in the database in a defined key domain
 	/// \param[in] domainkey defines the key value domain (the subset set of keys to scan)
 	/// \param[in] domainkeysize size of 'domainkey' in bytes
-	/// \return the key of the element found or NULL
-	virtual const char* seekFirst(
+	/// \return the key of the element found or an undefined key
+	virtual Slice seekFirst(
 			const char* domainkey,
 			std::size_t domainkeysize)=0;
 
 	/// \brief Move cursor to the last key stored in the database in a defined key domain
 	/// \param[in] domainkey defines the key value domain (the subset set of keys to scan)
 	/// \param[in] domainkeysize size of 'domainkey' in bytes
-	/// \return the key of the element found or NULL
-	virtual const char* seekLast(
+	/// \return the key of the element found or an undefined key
+	virtual Slice seekLast(
 			const char* domainkey,
 			std::size_t domainkeysize)=0;
 
 	/// \brief Move cursor to the next key stored in the database in the current key domain
-	/// \return the key of the element found or NULL
-	virtual const char* seekNext()=0;
+	/// \return the key of the element found or an undefined key
+	virtual Slice seekNext()=0;
 
 	/// \brief Move cursor to the previous key stored in the database in the current key domain
-	/// \return the key of the element found or NULL
-	virtual const char* seekPrev()=0;
+	/// \return the key of the element found or an undefined key
+	virtual Slice seekPrev()=0;
+
+	/// \brief Get the key of the current element
+	/// \return the key of the current element or an undefined key
+	virtual Slice key() const=0;
 
 	/// \brief Get the value of the current element
-	/// \param[out] value pointer to the element value
-	/// \param[out] valuesize size of 'value' in bytes
-	virtual void getValue(
-			const char*& value,
-			std::size_t& valuesize) const=0;
+	/// \return the value of the current element or an undefined key
+	virtual Slice value() const=0;
 
-	/// \brief Get the value of a key as exact match (random access)
+	/// \brief Get the value of a key as exact match (random access without changing the cursor state)
 	/// \param[in] key pointer to the key of the item to retrieve
 	/// \param[in] keysize size of 'key' in bytes
-	/// \param[out] value pointer to the element value returned
-	/// \param[out] valuesize size of 'value' in bytes
-	virtual bool getKeyValue(
+	/// \return the value of the element found or an undefined key
+	virtual Slice readValue(
 			const char* key,
-			std::size_t keysize,
-			const char*& value,
-			std::size_t& valuesize)=0;
-
+			std::size_t keysize)=0;
 };
 
 }//namespace

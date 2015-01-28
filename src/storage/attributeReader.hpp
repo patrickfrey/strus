@@ -26,53 +26,43 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
-#define _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
-#include "strus/forwardIteratorInterface.hpp"
-#include "databaseKey.hpp"
+#ifndef _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/attributeReaderInterface.hpp"
 #include "storage.hpp"
-#include "blockStorage.hpp"
-#include "forwardIndexBlock.hpp"
 #include <string>
 #include <leveldb/db.h>
 
 namespace strus
 {
 
-/// \brief Forward index for the index based on LevelDB
-class ForwardIterator
-	:public ForwardIteratorInterface
+/// \brief Forward declaration
+class DatabaseInterface;
+
+/// \brief Interface for accessing document attributes from a strus storage
+class AttributeReader
+	:public AttributeReaderInterface
 {
 public:
-	ForwardIterator(
-		const Storage* storage_,
-		leveldb::DB* db_,
-		const std::string& type_);
+	AttributeReader( const Storage* storage_, DatabaseInterface* database_)
+		:m_storage(storage_),m_database(database_),m_docno(0){}
 
-	virtual ~ForwardIterator();
+	virtual Index elementHandle( const char* name) const;
 
-	/// \brief Define the document of the items inspected
-	virtual void skipDoc( const Index& docno_);
+	virtual void skipDoc( const Index& docno)
+	{
+		m_docno = docno;
+	}
 
-	/// \brief Return the next matching position higher than or equal to firstpos in the current document.
-	virtual Index skipPos( const Index& firstpos_);
-
-	/// \brief Fetch the item at the current position
-	virtual std::string fetch();
+	virtual std::string getValue( const Index& elementHandle_) const;
 
 private:
-	leveldb::DB* m_db;
-	BlockStorage<ForwardIndexBlock>* m_forwardBlockStorage;
-	const ForwardIndexBlock* m_curblock;
-	Index m_curblock_firstpos;
-	Index m_curblock_lastpos;
-	char const* m_blockitr;
+	const Storage* m_storage;
+	DatabaseInterface* m_database;
 	Index m_docno;
-	Index m_typeno;
-	Index m_curpos;
 };
 
 }//namespace
 #endif
-
 

@@ -33,40 +33,47 @@
 namespace strus {
 
 /// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
 class StorageInterface;
+/// \brief Forward declaration
+class StorageDatabaseInterface;
 /// \brief Forward declaration
 class StorageAlterMetaDataTableInterface;
 
-/// \brief Creates an instance of the storage interface described with config
-/// \param[in] configsource Configuration source string of the config (not a filename !)
-/// \remark Because of restrictions imposed by LevelDB only one instance of a storage can be crated per storage
-StorageInterface* createStorageClient( const char* configsource);
+/// \remark Because of restrictions imposed by LevelDB only one client of a storage instance can exist simultaneously. But this can be used by several threads.
 
-/// \brief Creates a new storage described with config in the file system
-/// \param[in] configsource Configuration source string of the config (not a filename !)
-void createStorageDatabase( const char* configsource);
+/// \brief Creates an client instance of the storage using a defined key value store database
+/// \param[in] configsource configuration source string describing the storage (not a filename !)
+/// \param[in] database reference to key value store database used by this storage
+StorageInterface* createStorageClient( const char* configsource, DatabaseInterface* database);
 
-/// \brief Destroys an existing storage described with config in the file system
-/// \param[in] configsource Configuration string of the config (not a filename !)
-void destroyStorageDatabase( const char* configsource);
+/// \brief Creates a new storage described with configsource using a defined key value store database
+/// \param[in] configsource Configuration source string describing the storage (not a filename !)
+/// \param[in] database reference to a key value store database used by the storage
+/// \remark The database referenced by 'database' must have been created and active
+void createStorage( const char* configsource, DatabaseInterface* database);
 
 /// \brief Create an interface to alter the meta data table structure
-/// \param[in] configsource Configuration source string of the config (not a filename !)
+/// \param[in] database reference to a key value store database used by the storage
 /// \return the created reference to be disposed with delete by the caller
-StorageAlterMetaDataTableInterface* createAlterMetaDataTable( const char* configsource);
+StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseInterface* database);
 
 /// \brief Selection of command types for the storage config description
 enum StorageConfigDescriptionType
 {
-	CmdCreateStorageClient=0x1,	///< Config description for createStorageClient(const char*)
-	CmdCreateStorageDatabase=0x2,	///< Config description for createStorageDatabase(const char*)
-	CmdDestroyStorageDatabase=0x4	///< Config description for destroyStorageDatabase(const char*)
+	CmdCreateStorageClient=0x1,	///< Config description for createStorageClient(const char*,DatabaseInterface*)
+	CmdCreateStorage=0x2		///< Config description for createStorage(const char*,DatabaseInterface*)
 };
 
 /// \brief Gets an example configuration description (source string as used by the functions here)
 ///	createStorageDatabase(const char*) and createStorageClient(const char*)
-///	for the usage printed by programs using the storage.
+///	for the usage printed by programs using this storage implementation.
 const char* getStorageConfigDescription( StorageConfigDescriptionType type);
+
+/// \brief Get the list of known configuration parameter keys
+///	for verification of the configuration by programs using this storage implementation.
+const char** getStorageConfigParameters( StorageConfigDescriptionType type);
 
 }//namespace
 #endif

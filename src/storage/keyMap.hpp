@@ -26,61 +26,70 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#include "strus/postingIteratorInterface.hpp"
-#include "posinfoIterator.hpp"
-#include "indexSetIterator.hpp"
-#include "blockStorage.hpp"
+#ifndef _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
+#include "strus/index.hpp"
 #include "databaseKey.hpp"
-#include <leveldb/db.h>
+#include "keyValueStorage.hpp"
+#include "keyAllocatorInterface.hpp"
+#include "keyStorageInterface.hpp"
+#include "varSizeNodeTree.hpp"
+#include <cstdlib>
+#include <string>
 
 namespace strus {
-/// \brief Forward declaration
-class MetaDataReader;
 
-class PostingIterator
-	:public PostingIteratorInterface
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseCursorInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
+
+class KeyMap
 {
 public:
-	PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr);
-
-	virtual ~PostingIterator(){}
-
-	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const
+	KeyMap( DatabaseCursorInterface* cursor,
+			DatabaseKey::KeyPrefix prefix_,
+			KeyAllocatorInterface* allocator_,
+			const VarSizeNodeTree* globalmap_=0)
+		:m_storage( cursor, prefix_)
+		,m_globalmap(globalmap_)
+		,m_unknownHandleCount(0)
+		,m_allocator(allocator_)
+	{}
+	~KeyMap()
 	{
-		return std::vector<const PostingIteratorInterface*>();
-	}
-	virtual const char* featureid() const
-	{
-		return m_featureid.c_str();
-	}
-
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& firstpos_);
-
-	virtual unsigned int frequency();
-
-	virtual Index documentFrequency() const;
-
-	virtual Index docno() const
-	{
-		return m_docno;
+		delete m_allocator;
 	}
 
-	virtual Index posno() const
+	Index lookUp( const std::string& name);
+	Index getOrCreate( const std::string& name, bool& isNew);
+	void store( const std::string& name, const Index& value);
+
+	void getWriteBatch(
+		std::map<Index,Index>& rewriteUnknownMap,
+		DatabaseTransactionInterface* transaction);
+
+	static bool isUnknown( const Index& value)
 	{
-		return m_posinfoIterator.posno();
+		return value > UnknownValueHandleStart;
 	}
 
 private:
-	IndexSetIterator m_docnoIterator;
-	PosinfoIterator m_posinfoIterator;
+	enum {
+		UnknownValueHandleStart=(1<<30)
+	};
 
-	Index m_docno;
-	std::string m_featureid;
+private:
+	KeyValueStorage m_storage;
+	VarSizeNodeTree m_map;
+	const VarSizeNodeTree* m_globalmap;
+	Index m_unknownHandleCount;
+	KeyAllocatorInterface* m_allocator;
 };
 
-}
+}//namespace
 #endif
+
 

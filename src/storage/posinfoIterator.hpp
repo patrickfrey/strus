@@ -26,46 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_CACHE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataRecord.hpp"
-#include <utility>
-#include <stdexcept>
-#include <cstdlib>
-#include <vector>
-#include <boost/shared_ptr.hpp>
+#ifndef _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
+#include "posinfoBlock.hpp"
+#include "blockStorage.hpp"
 #include <leveldb/db.h>
 
 namespace strus {
 
-class MetaDataBlockCache
+/// \brief Forward declaration
+class DatabaseInterface;
+
+class PosinfoIterator
 {
 public:
-	MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_);
+	PosinfoIterator( DatabaseInterface* database, Index termtypeno, Index termvalueno);
+	~PosinfoIterator(){}
 
-	~MetaDataBlockCache(){}
+	Index skipDoc( const Index& docno_);
+	Index skipPos( const Index& firstpos_);
 
-	const MetaDataRecord get( const Index& docno);
+	Index docno() const					{return m_docno;}
+	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
 
-	void declareVoid( const Index& blockno);
-	void refresh();
-
-private:
-	void resetBlock( const Index& blockno);
-
-private:
-	enum {
-		CacheSize=(1024*1024),				///< size of the cache in blocks
-		MaxDocno=(CacheSize*MetaDataBlock::BlockSize)	///< hardcode limit of maximum document number
-	};
+	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
+	Index documentFrequency() const;
+	unsigned int frequency();
 
 private:
-	leveldb::DB* m_db;
-	MetaDataDescription m_descr;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
-	std::vector<unsigned int> m_voidar;
+	bool loadBlock( const Index& elemno_);
+
+private:
+	DatabaseInterface* m_database;
+	BlockStorage<PosinfoBlock> m_posinfoStorage;
+	const PosinfoBlock* m_posinfoBlk;
+	char const* m_posinfoItr;
+	PosinfoBlock::PositionScanner m_positionScanner;
+	Index m_termtypeno;
+	Index m_termvalueno;
+	Index m_docno;
+	Index m_docno_start;
+	Index m_docno_end;
+	mutable Index m_documentFrequency;
 };
 
 }

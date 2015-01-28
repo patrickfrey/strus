@@ -37,11 +37,10 @@
 #include <string>
 #include <set>
 #include <map>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 #include <boost/scoped_ptr.hpp>
 
 namespace strus {
+class DatabaseInterface;
 
 /// \class StorageTransaction
 class StorageAlterMetaDataTable
@@ -52,8 +51,7 @@ private:
 	void operator=( const StorageAlterMetaDataTable&){}		//... non copyable
 
 public:
-	StorageAlterMetaDataTable( 
-		const char* path);
+	StorageAlterMetaDataTable( DatabaseInterface* database_);
 
 	~StorageAlterMetaDataTable();
 
@@ -91,8 +89,7 @@ private:
 			MetaDataElement::Type type);
 
 private:
-	leveldb::DB* m_db;					///< levelDB handle
-	leveldb::Options m_dboptions;				///< options for levelDB
+	DatabaseInterface* m_database;				///< database interface
 
 	MetaDataDescription m_metadescr_old;			///< meta data structure changes
 	MetaDataDescription m_metadescr_new;			///< meta data structure changes

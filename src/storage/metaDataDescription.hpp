@@ -35,17 +35,21 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
+
 
 /// \brief Description of a meta data record structure
 class MetaDataDescription
 {
 public:
 	MetaDataDescription();
-	MetaDataDescription( leveldb::DB* db);
+	MetaDataDescription( DatabaseInterface* database);
 	MetaDataDescription( const std::string& str);
 	MetaDataDescription( const MetaDataDescription& o);
 
@@ -80,8 +84,8 @@ public:
 	int getHandle( const std::string& name_) const;
 	bool hasElement( const std::string& name_) const;
 
-	void load( leveldb::DB* db);
-	void store( leveldb::WriteBatch& batch);
+	void load( DatabaseInterface* database);
+	void store( DatabaseTransactionInterface* transaction);
 
 	struct TranslationElement
 	{

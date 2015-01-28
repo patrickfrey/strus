@@ -26,47 +26,56 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
-#include "posinfoBlock.hpp"
+#ifndef _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
+#define _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
+#include "strus/forwardIteratorInterface.hpp"
+#include "databaseKey.hpp"
+#include "storage.hpp"
 #include "blockStorage.hpp"
+#include "forwardIndexBlock.hpp"
+#include <string>
 #include <leveldb/db.h>
 
-namespace strus {
+namespace strus
+{
 
-class PosinfoIterator
+/// \brief Forward declaration
+class DatabaseInterface;
+
+/// \brief Forward index for the index based on LevelDB
+class ForwardIterator
+	:public ForwardIteratorInterface
 {
 public:
-	PosinfoIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno);
-	~PosinfoIterator(){}
+	ForwardIterator(
+		const Storage* storage_,
+		DatabaseInterface* database_,
+		const std::string& type_);
 
-	Index skipDoc( const Index& docno_);
-	Index skipPos( const Index& firstpos_);
+	virtual ~ForwardIterator();
 
-	Index docno() const					{return m_docno;}
-	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
+	/// \brief Define the document of the items inspected
+	virtual void skipDoc( const Index& docno_);
 
-	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
-	Index documentFrequency() const;
-	unsigned int frequency();
+	/// \brief Return the next matching position higher than or equal to firstpos in the current document.
+	virtual Index skipPos( const Index& firstpos_);
+
+	/// \brief Fetch the item at the current position
+	virtual std::string fetch();
 
 private:
-	bool loadBlock( const Index& elemno_);
-
-private:
-	leveldb::DB* m_db;
-	BlockStorage<PosinfoBlock> m_posinfoStorage;
-	const PosinfoBlock* m_posinfoBlk;
-	char const* m_posinfoItr;
-	PosinfoBlock::PositionScanner m_positionScanner;
-	Index m_termtypeno;
-	Index m_termvalueno;
+	DatabaseInterface* m_database;
+	BlockStorage<ForwardIndexBlock>* m_forwardBlockStorage;
+	const ForwardIndexBlock* m_curblock;
+	Index m_curblock_firstpos;
+	Index m_curblock_lastpos;
+	char const* m_blockitr;
 	Index m_docno;
-	Index m_docno_start;
-	Index m_docno_end;
-	mutable Index m_documentFrequency;
+	Index m_typeno;
+	Index m_curpos;
 };
 
-}
+}//namespace
 #endif
+
 

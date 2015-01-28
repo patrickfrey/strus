@@ -77,6 +77,17 @@ public:
 	virtual void deleteImm(
 			const char* key,
 			std::size_t keysize)=0;
+
+	/// \brief Read a value by key
+	/// \param[in] key pointer to the key of the item to fetch
+	/// \param[in] keysize size of the key of the item to fetch in bytes
+	/// \param[out] value the value as string
+	/// \return true, if it was found
+	virtual bool readValue(
+			const char* key,
+			std::size_t keysize,
+			std::string& value,
+			bool useCache=false) const=0;
 };
 
 }//namespace

@@ -29,12 +29,14 @@
 #include "metaDataBlockCache.hpp"
 #include "statistics.hpp"
 #include "keyValueStorage.hpp"
+#include "strus/databaseCursorInterface.hpp"
+#include <stdexcept>
 #include <stdint.h>
 
 using namespace strus;
 
-MetaDataBlockCache::MetaDataBlockCache( leveldb::DB* db_, const MetaDataDescription& descr_)
-	:m_db(db_),m_descr(descr_)
+MetaDataBlockCache::MetaDataBlockCache( DatabaseCursorInterface* database, const MetaDataDescription& descr_)
+	:m_cursor(database->createCursor(false)),m_descr(descr_)
 {}
 
 void MetaDataBlockCache::declareVoid( const Index& blockno)

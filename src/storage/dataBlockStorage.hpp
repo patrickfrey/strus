@@ -30,49 +30,28 @@
 #define _STRUS_LVDB_DATA_BLOCK_STORAGE_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include "databaseKey.hpp"
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
+#include "strus/databaseCursorInterface.hpp"
+#include "strus/reference.hpp"
 #include <cstdlib>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 /// \class DataBlockStorage
 class DataBlockStorage
 {
 public:
-	DataBlockStorage( leveldb::DB* db_, const DatabaseKey& key_, bool useLruCache_)
-		:m_db(db_)
-		,m_itr(0)
-		,m_key(key_)
-		,m_keysize(key_.size())
-		,m_curblock(key_.prefix())
-	{
-		m_readOptions.fill_cache = useLruCache_;
-	}
-	DataBlockStorage( const DataBlockStorage& o)
-		:m_db(o.m_db)
-		,m_itr(0)
-		,m_readOptions(o.m_readOptions)
-		,m_key(o.m_key)
-		,m_keysize(o.m_keysize)
-		,m_curblock(o.m_curblock){}
-	
-	virtual ~DataBlockStorage()
-	{
-		if (m_itr)
-		{
-			delete m_itr;
-		}
-	}
+	DataBlockStorage( DatabaseInterface* database_, const DatabaseKey& key_, bool useLruCache_);
+
+	virtual ~DataBlockStorage();
 
 	const DataBlock* curblock() const
 	{
 		return &m_curblock;
-	}
-
-	bool hasIterator() const
-	{
-		return m_itr != 0;
 	}
 
 	const DataBlock* load( const Index& id);
@@ -80,21 +59,18 @@ public:
 	const DataBlock* loadFirst();
 	const DataBlock* loadNext();
 
-	void store( const DataBlock& block, leveldb::WriteBatch& batch);
-	void dispose( const Index& id, leveldb::WriteBatch& batch);
+	void store( const DataBlock& block, DatabaseTransactionInterface* transaction);
+	void dispose( const Index& id, DatabaseTransactionInterface* transaction);
 
 private:
-	const DataBlock* extractData();
-	void closeIterator()
-	{
-		delete m_itr;
-		m_itr = 0;
-	}
+	const DataBlock*
+		extractData(
+			const DatabaseCursorInterface::Slice& key,
+			const DatabaseCursorInterface::Slice& value);
 
 private:
-	leveldb::DB* m_db;
-	leveldb::Iterator* m_itr;
-	leveldb::ReadOptions m_readOptions;
+	DatabaseInterface* m_database;
+	Reference<DatabaseCursorInterface> m_cursor;
 	DatabaseKey m_key;
 	std::size_t m_keysize;
 	DataBlock m_curblock;

@@ -55,7 +55,7 @@ Database::Database( const char* path_, unsigned int cachesize_k, bool compressio
 	{
 		std::string err = status.ToString();
 		cleanup();
-		throw std::runtime_error( std::string( "failed to open storage: ") + err);
+		throw std::runtime_error( std::string( "failed to open key calue store database: ") + err);
 	}
 }
 
@@ -91,7 +91,7 @@ void Database::close()
 	boost::mutex::scoped_lock lock( m_transactionOpen_mutex);
 	if (m_transactionOpen)
 	{
-		throw std::logic_error( "tried to close key value storage with a transaction alive");
+		throw std::logic_error( "tried to close key value store database with a transaction alive");
 	}
 }
 
@@ -100,7 +100,7 @@ DatabaseTransactionInterface* Database::createTransaction()
 	boost::mutex::scoped_lock lock( m_transactionOpen_mutex);
 	if (m_transactionOpen)
 	{
-		throw std::runtime_error( "this key value storage implementation allows only one transaction at a time");
+		throw std::runtime_error( "this key value store database implementation allows only one transaction at a time");
 	}
 	DatabaseTransaction* rt = new DatabaseTransaction( m_db, this);
 	m_transactionOpen = true;
@@ -152,4 +152,25 @@ void Database::deleteImm(
 	}
 }
 
+bool Database::readValue(
+		const char* key,
+		std::size_t keysize,
+		std::string& value,
+		bool useCache) const
+{
+	std::string rt;
+	leveldb::ReadOptions options;
+	options.fill_cache = useCache;
+
+	leveldb::Status status = m_db->Get( options, leveldb::Slice( key, keysize), &value);
+	if (status.IsNotFound())
+	{
+		return false;
+	}
+	if (!status.ok())
+	{
+		throw std::runtime_error( status.ToString());
+	}
+	return true;
+}
 

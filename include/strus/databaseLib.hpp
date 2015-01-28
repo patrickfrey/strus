@@ -35,17 +35,17 @@ namespace strus {
 /// \brief Forward declaration
 class DatabaseInterface;
 
-/// \brief Creates an instance of the key value store database interface described with config
-/// \param[in] configsource Configuration source string of the config (not a filename !)
-/// \remark Because of restrictions imposed by LevelDB only one instance of a key value store database can be crated per storage
+/// \brief Creates an instance of the key value store database interface
+/// \param[in] configsource configuration source string describing the database (not a filename !)
+/// \remark Because of restrictions imposed by LevelDB only one client of a key value store database instance can exist simultaneously. But this one can be used by several threads at the same time.
 DatabaseInterface* createDatabaseClient( const char* configsource);
 
 /// \brief Creates a new key value store database described with config
-/// \param[in] configsource Configuration source string of the config (not a filename !)
+/// \param[in] configsource configuration source string describing the database (not a filename !)
 void createDatabase( const char* configsource);
 
 /// \brief Destroys an existing key value store database described with config in the file system
-/// \param[in] configsource Configuration string of the config (not a filename !)
+/// \param[in] configsource configuration source string describing the key value store database (not a filename !)
 void destroyDatabase( const char* configsource);
 
 /// \brief Selection of command types for the storage config description
@@ -58,8 +58,12 @@ enum DatabaseConfigDescriptionType
 
 /// \brief Gets an example configuration description (source string as used by the functions here)
 ///	createDatabase(const char*), destroyDatabase(const char*) and createDatabaseClient(const char*)
-///	for the usage printed by programs using the storage.
+///	for the usage printed by programs using this database.
 const char* getDatabaseConfigDescription( DatabaseConfigDescriptionType type);
+
+/// \brief Get the list of known configuration parameter keys
+///	for verification of the configuration by programs using this database.
+const char** getDatabaseConfigParameters( DatabaseConfigDescriptionType type);
 
 }//namespace
 #endif

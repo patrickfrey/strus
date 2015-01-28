@@ -31,8 +31,6 @@
 #include "databaseKey.hpp"
 #include "blockKey.hpp"
 #include "indexPacker.hpp"
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 #include <cstdlib>
 #include <string>
 #include <map>
@@ -40,6 +38,14 @@
 #include <stdexcept>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
+/// \brief Forward declaration
+class DatabaseCursorInterface;
+
 
 /// \class KeyValueStorage
 class KeyValueStorage
@@ -75,57 +81,39 @@ public:
 
 public:
 	KeyValueStorage(
-			leveldb::DB* db_,
-			const DatabaseKey::KeyPrefix& keyprefix_,
-			bool useLruCache_)
-		:m_db(db_)
+			DatabaseCursorInterface* dbcursor_,
+			const DatabaseKey::KeyPrefix& keyprefix_)
+		:m_dbcursor(dbcursor_)
 		,m_keyprefix(keyprefix_)
-		,m_curvaluestr()
 		,m_curvalue()
-	{
-		m_readOptions.fill_cache = useLruCache_;
-	}
-	KeyValueStorage( const KeyValueStorage& o)
-		:m_db(o.m_db)
-		,m_readOptions(o.m_readOptions)
-		,m_keyprefix(o.m_keyprefix)
-		,m_curvaluestr(o.m_curvaluestr)
-		,m_curvalue(){}
-	
+	{}
+
 	virtual ~KeyValueStorage()
 	{}
 
 	const Value* load( const std::string& key);
 	const Value* load( const BlockKey& key, const Index& subnode=0);
 
-	void store( const std::string& key, const Value& value, leveldb::WriteBatch& batch);
-	void store( const BlockKey& key, const Index& subnode, const Value& value, leveldb::WriteBatch& batch);
-	void store( const BlockKey& key, const Value& value, leveldb::WriteBatch& batch);
+	void store( const std::string& key, const Value& value, DatabaseTransactionInterface* transaction);
+	void store( const BlockKey& key, const Index& subnode, const Value& value, DatabaseTransactionInterface* transaction);
+	void store( const BlockKey& key, const Value& value, DatabaseTransactionInterface* transaction);
 
-	void storeIm( const std::string& key, const Value& value);
-	void storeIm( const BlockKey& key, const Index& subnode, const Value& value);
-	void storeIm( const BlockKey& key, const Value& value);
+	void storeIm( DatabaseInterface* database, const std::string& key, const Value& value);
+	void storeIm( DatabaseInterface* database, const BlockKey& key, const Index& subnode, const Value& value);
+	void storeIm( DatabaseInterface* database, const BlockKey& key, const Value& value);
 
-	void dispose( const std::string& key, leveldb::WriteBatch& batch);
-	void dispose( const BlockKey& key, const Index& subnode, leveldb::WriteBatch& batch);
-	void dispose( const BlockKey& key, leveldb::WriteBatch& batch);
+	void dispose( const std::string& key, DatabaseTransactionInterface* transaction);
+	void dispose( const BlockKey& key, const Index& subnode, DatabaseTransactionInterface* transaction);
+	void dispose( const BlockKey& key, DatabaseTransactionInterface* transaction);
 
-	void disposeSubnodes( const BlockKey& key, leveldb::WriteBatch& batch);
+	void disposeSubnodes( const BlockKey& key, DatabaseTransactionInterface* transaction);
 
 	std::map<std::string,std::string> getMap();
 	std::map<std::string,std::string> getInvMap();
 
 private:
-	const Value* loadValue( const char* keystr, const std::size_t& keysize);
-	void storeValue( const char* keystr, const std::size_t& keysize, const Value& value, leveldb::WriteBatch& batch);
-	void storeValueIm( const char* keystr, const std::size_t& keysize, const Value& value);
-	void disposeValue( const char* keystr, const std::size_t& keysize, leveldb::WriteBatch& batch);
-
-private:
-	leveldb::DB* m_db;
-	leveldb::ReadOptions m_readOptions;
+	DatabaseCursorInterface* m_dbcursor;
 	DatabaseKey::KeyPrefix m_keyprefix;
-	std::string m_curvaluestr;
 	Value m_curvalue;
 };
 

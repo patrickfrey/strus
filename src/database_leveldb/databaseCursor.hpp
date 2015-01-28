@@ -44,37 +44,35 @@ public:
 
 	virtual ~DatabaseCursor();
 
-	virtual const char* seekUpperBound(
+	virtual Slice seekUpperBound(
 			const char* key,
 			std::size_t keysize,
 			std::size_t domainkeysize);
 
-	virtual const char* seekFirst(
+	virtual Slice seekFirst(
 			const char* domainkey,
 			std::size_t domainkeysize);
 
-	virtual const char* seekLast(
+	virtual Slice seekLast(
 			const char* domainkey,
 			std::size_t domainkeysize);
 
-	virtual const char* seekNext();
+	virtual Slice seekNext();
 
-	virtual const char* seekPrev();
+	virtual Slice seekPrev();
 
-	virtual void getValue(
-			const char*& value,
-			std::size_t& valuesize) const;
+	virtual Slice key() const;
 
-	virtual bool getKeyValue(
+	virtual Slice value() const;
+
+	virtual Slice readValue(
 			const char* key,
-			std::size_t keysize,
-			const char*& value,
-			std::size_t& valuesize);
+			std::size_t keysize);
 
 private:
 	bool checkDomain() const;
 	void initDomain( const char* domainkey, std::size_t domainkeysize);
-	const char* getCurrentKey() const;
+	Slice getCurrentKey() const;
 
 private:
 	leveldb::DB* m_db;					///< levelDB handle
