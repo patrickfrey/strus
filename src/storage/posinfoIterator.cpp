@@ -29,7 +29,7 @@
 #include "posinfoIterator.hpp"
 #include "blockStorage.hpp"
 #include "databaseKey.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 #include "strus/databaseInterface.hpp"
 #include "statistics.hpp"
 
@@ -182,7 +182,7 @@ Index PosinfoIterator::documentFrequency() const
 	if (m_documentFrequency < 0)
 	{
 		m_documentFrequency
-			= DatabaseRecord_DocFrequency::get(
+			= DatabaseAdapter_DocFrequency::get(
 				m_database, m_termtypeno, m_termvalueno);
 	}
 	return m_documentFrequency;

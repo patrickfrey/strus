@@ -28,7 +28,7 @@
 */
 #include "documentFrequencyMap.hpp"
 #include "databaseKey.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "keyMap.hpp"
@@ -80,12 +80,12 @@ void DocumentFrequencyMap::getWriteBatch( DatabaseTransactionInterface* transact
 	{
 		if (mi->second == 0) continue;
 
-		Index df = DatabaseRecord_DocFrequency::get(
+		Index df = DatabaseAdapter_DocFrequency::get(
 				m_database, mi->first.first/*typeno*/, mi->first.second/*termno*/);
 		df += mi->second;
 		if (df < 0) throw std::runtime_error( "internal: document frequency got negative");
 
-		DatabaseRecord_DocFrequency::store(
+		DatabaseAdapter_DocFrequency::store(
 				transaction, mi->first.first/*typeno*/, mi->first.second/*termno*/, df);
 	}
 	m_map.clear();

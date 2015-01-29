@@ -28,7 +28,7 @@
 */
 #include "metaDataDescription.hpp"
 #include "strus/databaseInterface.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 #include "databaseKey.hpp"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
@@ -193,7 +193,7 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 void MetaDataDescription::load( DatabaseInterface* database)
 {
 	std::string descr;
-	if (!DatabaseRecord_MetaDataDescr::load( database, descr))
+	if (!DatabaseAdapter_MetaDataDescr::load( database, descr))
 	{
 		*this = MetaDataDescription();
 	}
@@ -205,12 +205,12 @@ void MetaDataDescription::load( DatabaseInterface* database)
 
 void MetaDataDescription::store( DatabaseTransactionInterface* transaction)
 {
-	DatabaseRecord_MetaDataDescr::store( transaction, tostring());
+	DatabaseAdapter_MetaDataDescr::store( transaction, tostring());
 }
 
 void MetaDataDescription::storeImm( DatabaseInterface* database)
 {
-	DatabaseRecord_MetaDataDescr::storeImm( database, tostring());
+	DatabaseAdapter_MetaDataDescr::storeImm( database, tostring());
 }
 
 MetaDataDescription::TranslationMap

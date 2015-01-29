@@ -28,7 +28,7 @@
 */
 #include "attributeMap.hpp"
 #include "databaseKey.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 
 using namespace strus;
 
@@ -79,11 +79,11 @@ void AttributeMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		BlockKey key( *di);
 		if (!key.elem(2))
 		{
-			DatabaseRecord_DocAttribute::removeAll( transaction, key.elem(1));
+			DatabaseAdapter_DocAttribute::removeAll( transaction, key.elem(1));
 		}
 		else
 		{
-			DatabaseRecord_DocAttribute::remove( transaction, key.elem(1), key.elem(2));
+			DatabaseAdapter_DocAttribute::remove( transaction, key.elem(1), key.elem(2));
 		}
 	}
 
@@ -91,7 +91,7 @@ void AttributeMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	for (; mi != me; ++mi)
 	{
 		BlockKey key( mi->first);
-		DatabaseRecord_DocAttribute::store(
+		DatabaseAdapter_DocAttribute::store(
 				transaction, key.elem(1), key.elem(2),
 				m_strings.c_str() + mi->second);
 	}

@@ -31,7 +31,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "storageDocument.hpp"
 #include "storage.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <vector>
 #include <string>
@@ -258,7 +258,7 @@ void StorageTransaction::commit()
 	std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
 	for (; di != de; ++di)
 	{
-		DatabaseRecord_DocId::store( transaction.get(), di->first, di->second);
+		DatabaseAdapter_DocId::store( transaction.get(), di->first, di->second);
 	}
 	m_storage->declareNofDocumentsInserted( m_nof_documents);
 	transaction->commit();

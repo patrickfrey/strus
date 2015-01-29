@@ -34,7 +34,7 @@
 #include "strus/private/configParser.hpp"
 #include "storageAlterMetaDataTable.hpp"
 #include "databaseKey.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 #include "keyMap.hpp"
 #include "indexPacker.hpp"
 #include "storage.hpp"
@@ -127,14 +127,14 @@ DLL_PUBLIC void strus::createStorage( const char* configsource, DatabaseInterfac
 	MetaDataDescription md( metadata);
 	Reference<DatabaseTransactionInterface> transaction( database->createTransaction());
 
-	DatabaseRecord_Variable::store( transaction.get(), "TermNo", 1);
-	DatabaseRecord_Variable::store( transaction.get(), "TypeNo", 1);
-	DatabaseRecord_Variable::store( transaction.get(), "DocNo", 1);
-	DatabaseRecord_Variable::store( transaction.get(), "AttribNo", 1);
-	DatabaseRecord_Variable::store( transaction.get(), "NofDocs", 0);
+	DatabaseAdapter_Variable::store( transaction.get(), "TermNo", 1);
+	DatabaseAdapter_Variable::store( transaction.get(), "TypeNo", 1);
+	DatabaseAdapter_Variable::store( transaction.get(), "DocNo", 1);
+	DatabaseAdapter_Variable::store( transaction.get(), "AttribNo", 1);
+	DatabaseAdapter_Variable::store( transaction.get(), "NofDocs", 0);
 	if (useAcl)
 	{
-		DatabaseRecord_Variable::store( transaction.get(), "UserNo", 1);
+		DatabaseAdapter_Variable::store( transaction.get(), "UserNo", 1);
 	}
 	md.store( transaction.get());
 

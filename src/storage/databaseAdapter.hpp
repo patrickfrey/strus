@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DATABASE_RECORD_HPP_INCLUDED
-#define _STRUS_DATABASE_RECORD_HPP_INCLUDED
+#ifndef _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
+#define _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "databaseKey.hpp"
 #include <utility>
@@ -43,7 +43,7 @@ class DatabaseTransactionInterface;
 /// \brief Forward declaration
 class DatabaseCursorInterface;
 
-class DatabaseRecord_StringIndex_Base
+class DatabaseAdapter_StringIndex_Base
 {
 public:
 	static Index get( char prefix, const DatabaseInterface* database, const std::string& key);
@@ -54,93 +54,93 @@ public:
 };
 
 template <char KeyPrefix>
-class DatabaseRecord_StringIndex
-	:public DatabaseRecord_StringIndex_Base
+class DatabaseAdapter_StringIndex
+	:public DatabaseAdapter_StringIndex_Base
 {
 public:
 	static Index get( const DatabaseInterface* database, const std::string& key)
 	{
-		return DatabaseRecord_StringIndex_Base::get( KeyPrefix, database, key);
+		return DatabaseAdapter_StringIndex_Base::get( KeyPrefix, database, key);
 	}
 	static bool load( const DatabaseInterface* database, const std::string& key, Index& value)
 	{
-		return DatabaseRecord_StringIndex_Base::load( KeyPrefix, database, key, value);
+		return DatabaseAdapter_StringIndex_Base::load( KeyPrefix, database, key, value);
 	}
 	static void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value)
 	{
-		DatabaseRecord_StringIndex_Base::store( KeyPrefix, transaction, key, value);
+		DatabaseAdapter_StringIndex_Base::store( KeyPrefix, transaction, key, value);
 	}
 	static void remove( DatabaseTransactionInterface* transaction, const std::string& key)
 	{
-		DatabaseRecord_StringIndex_Base::remove( KeyPrefix, transaction, key);
+		DatabaseAdapter_StringIndex_Base::remove( KeyPrefix, transaction, key);
 	}
 	static void storeImm( DatabaseInterface* database, const std::string& key, const Index& value)
 	{
-		DatabaseRecord_StringIndex_Base::storeImm( KeyPrefix, database, key, value);
+		DatabaseAdapter_StringIndex_Base::storeImm( KeyPrefix, database, key, value);
 	}
 };
 
-class DatabaseRecord_TermType
-	:public DatabaseRecord_StringIndex<DatabaseKey::TermTypePrefix>{};
+class DatabaseAdapter_TermType
+	:public DatabaseAdapter_StringIndex<DatabaseKey::TermTypePrefix>{};
 
-class DatabaseRecord_TermValue
-	:public DatabaseRecord_StringIndex<DatabaseKey::TermValuePrefix>{};
+class DatabaseAdapter_TermValue
+	:public DatabaseAdapter_StringIndex<DatabaseKey::TermValuePrefix>{};
 
-class DatabaseRecord_DocId
-	:public DatabaseRecord_StringIndex<DatabaseKey::DocIdPrefix>{};
+class DatabaseAdapter_DocId
+	:public DatabaseAdapter_StringIndex<DatabaseKey::DocIdPrefix>{};
 
-class DatabaseRecord_Variable
-	:public DatabaseRecord_StringIndex<DatabaseKey::VariablePrefix>{};
+class DatabaseAdapter_Variable
+	:public DatabaseAdapter_StringIndex<DatabaseKey::VariablePrefix>{};
 
-class DatabaseRecord_AttributeKey
-	:public DatabaseRecord_StringIndex<DatabaseKey::AttributeKeyPrefix>{};
+class DatabaseAdapter_AttributeKey
+	:public DatabaseAdapter_StringIndex<DatabaseKey::AttributeKeyPrefix>{};
 
-class DatabaseRecord_UserName
-	:public DatabaseRecord_StringIndex<DatabaseKey::UserNamePrefix>{};
+class DatabaseAdapter_UserName
+	:public DatabaseAdapter_StringIndex<DatabaseKey::UserNamePrefix>{};
 
-class DatabaseRecord_ForwardIndex
+class DatabaseAdapter_ForwardIndex
 {
 public:
 private:
 	enum {KeyPrefix=DatabaseKey::ForwardIndexPrefix};
 };
 
-class DatabaseRecord_PosinfoBlock
+class DatabaseAdapter_PosinfoBlock
 {
 public:
 private:
 	enum {KeyPrefix=DatabaseKey::PosinfoBlockPrefix};
 };
 
-class DatabaseRecord_InverseTerm
+class DatabaseAdapter_InverseTerm
 {
 public:
 private:
 	enum {KeyPrefix=DatabaseKey::InverseTermPrefix};
 };
 
-class DatabaseRecord_UserAclBlock
+class DatabaseAdapter_UserAclBlock
 {
 public:
 private:
 	enum {KeyPrefix=DatabaseKey::UserAclBlockPrefix};
 };
 
-class DatabaseRecord_AclBlock
+class DatabaseAdapter_AclBlock
 {
 public:
 private:
 	enum {KeyPrefix=DatabaseKey::AclBlockPrefix};
 };
 
-class DatabaseRecord_DocListBlock
+class DatabaseAdapter_DocListBlock
 {
 public:
 private:
 	enum {KeyPrefix=DatabaseKey::DocListBlockPrefix};
 };
 
-class DatabaseRecord_DocMetaData
+class DatabaseAdapter_DocMetaData
 {
 public:
 	static bool load( const DatabaseInterface* database, const Index& blockno, std::string& blk);
@@ -151,7 +151,7 @@ private:
 	enum {KeyPrefix=DatabaseKey::DocMetaDataPrefix};
 };
 
-class DatabaseRecord_DocAttribute
+class DatabaseAdapter_DocAttribute
 {
 public:
 	static bool load( const DatabaseInterface* database, const Index& docno, const Index& attrno, std::string& value);
@@ -163,7 +163,7 @@ private:
 	enum {KeyPrefix=DatabaseKey::DocAttributePrefix};
 };
 
-class DatabaseRecord_DocFrequency
+class DatabaseAdapter_DocFrequency
 {
 public:
 	static Index get( const DatabaseInterface* database, const Index& typeno, const Index& termno);
@@ -175,7 +175,7 @@ private:
 	enum {KeyPrefix=DatabaseKey::DocFrequencyPrefix};
 };
 
-class DatabaseRecord_MetaDataDescr
+class DatabaseAdapter_MetaDataDescr
 {
 public:
 	static bool load( const DatabaseInterface* database, std::string& descr);

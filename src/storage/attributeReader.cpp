@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "attributeReader.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 #include <stdexcept>
 
 using namespace strus;
@@ -45,7 +45,7 @@ Index AttributeReader::elementHandle( const char* name) const
 std::string AttributeReader::getValue( const Index& elementHandle_) const
 {
 	std::string rt;
-	if (DatabaseRecord_DocAttribute::load( m_database, m_docno, elementHandle_, rt))
+	if (DatabaseAdapter_DocAttribute::load( m_database, m_docno, elementHandle_, rt))
 	{
 		return rt;
 	}

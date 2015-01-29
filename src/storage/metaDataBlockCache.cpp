@@ -29,7 +29,7 @@
 #include "metaDataBlockCache.hpp"
 #include "statistics.hpp"
 #include "strus/databaseInterface.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 #include <stdexcept>
 #include <stdint.h>
 
@@ -77,7 +77,7 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 		Statistics::increment( Statistics::MetaDataCacheMiss);
 
 		std::string blkstr;
-		if (DatabaseRecord_DocMetaData::load( m_database, blockno, blkstr))
+		if (DatabaseAdapter_DocMetaData::load( m_database, blockno, blkstr))
 		{
 			m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, blkstr.c_str(), blkstr.size()));
 		}

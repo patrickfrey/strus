@@ -27,13 +27,13 @@
 --------------------------------------------------------------------
 */
 #include "keyMap.hpp"
-#include "databaseRecord.hpp"
+#include "databaseAdapter.hpp"
 
 using namespace strus;
 
 Index KeyMap::lookUp( const std::string& name)
 {
-	return DatabaseRecord_StringIndex_Base::get( (char)m_prefix, m_database, name);
+	return DatabaseAdapter_StringIndex_Base::get( (char)m_prefix, m_database, name);
 }
 
 Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
@@ -50,7 +50,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		return data;
 	}
 	Index rt;
-	if (DatabaseRecord_StringIndex_Base::load( (char)m_prefix, m_database, name, rt))
+	if (DatabaseAdapter_StringIndex_Base::load( (char)m_prefix, m_database, name, rt))
 	{
 		m_map.set( name.c_str(), rt);
 		isNew = false;
@@ -85,7 +85,7 @@ void KeyMap::getWriteBatch(
 			if (!idx)
 			{
 				idx = m_allocator->alloc();
-				DatabaseRecord_StringIndex_Base::store(
+				DatabaseAdapter_StringIndex_Base::store(
 					(char)m_prefix, transaction, mi.key(), idx);
 			}
 			rewriteUnknownMap[ mi.data()] = idx;

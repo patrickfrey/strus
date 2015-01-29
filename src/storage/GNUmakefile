@@ -3,7 +3,7 @@ include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
 	databaseKey.o \
-	databaseRecord.o \
+	databaseAdapter.o \
 	storage.o \
 	storageLib.o \
 	varSizeNodeTree.o \
