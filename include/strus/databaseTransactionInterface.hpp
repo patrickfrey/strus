@@ -67,6 +67,13 @@ public:
 			const char* key,
 			std::size_t keysize)=0;
 
+	/// \brief Define a set of nodes defined by a key prefix to be deleted in the database as part of this transaction
+	/// \param[in] domainkey pointer to the key prefix to delete
+	/// \param[in] domainkeysize size of 'domainkey' in bytes
+	virtual void removeSubTree(
+			const char* domainkey,
+			std::size_t domainkeysize)=0;
+
 	/// \brief Executes all commands defined in the transaction or none if one operation fails
 	virtual void commit()=0;
 

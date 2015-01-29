@@ -34,18 +34,19 @@
 #include "blockKey.hpp"
 #include "blockStorage.hpp"
 #include <cstdlib>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 class UserAclBlockMap
 {
 public:
-	explicit UserAclBlockMap( leveldb::DB* db_)
-		:m_db(db_){}
-	UserAclBlockMap( const UserAclBlockMap& o)
-		:m_db(o.m_db),m_usrmap(o.m_usrmap),m_aclmap(o.m_aclmap){}
+	explicit UserAclBlockMap( DatabaseInterface* database_)
+		:m_database(database_){}
 
 	void defineUserAccess(
 		const Index& userno,
@@ -61,7 +62,7 @@ public:
 	void deleteDocumentAccess(
 		const Index& docno);
 
-	void getWriteBatch( leveldb::WriteBatch& batch);
+	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
 	void markSetElement(
@@ -76,7 +77,7 @@ public:
 	typedef std::map<MapKey,bool,MapCompare,MapAllocator> Map;
 
 private:
-	leveldb::DB* m_db;
+	DatabaseInterface* m_database;
 	Map m_usrmap;
 	Map m_aclmap;
 	std::vector<Index> m_usr_deletes;

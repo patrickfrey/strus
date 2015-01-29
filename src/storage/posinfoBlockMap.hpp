@@ -38,15 +38,18 @@
 #include "localStructAllocator.hpp"
 #include <vector>
 #include <iostream>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 class PosinfoBlockMap
 {
 public:
-	explicit PosinfoBlockMap( leveldb::DB* db_);
+	explicit PosinfoBlockMap( DatabaseInterface* database_);
 	PosinfoBlockMap( const PosinfoBlockMap& o);
 
 	void definePosinfoPosting(
@@ -59,7 +62,7 @@ public:
 
 	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
-	void getWriteBatch( leveldb::WriteBatch& batch);
+	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
 	struct MapKey
@@ -103,7 +106,7 @@ private:
 			PosinfoBlock& newposblk,
 			const Index& lastInsertBlockId,
 			std::vector<BooleanBlock::MergeRange>& docrangear,
-			leveldb::WriteBatch& batch);
+			DatabaseTransactionInterface* transaction);
 
 	void mergeNewPosElements(
 			BlockStorage<PosinfoBlock>& blkstorage,
@@ -111,7 +114,7 @@ private:
 			const Map::const_iterator& ee,
 			PosinfoBlock& newposblk,
 			std::vector<BooleanBlock::MergeRange>& docrangear,
-			leveldb::WriteBatch& batch);
+			DatabaseTransactionInterface* transaction);
 
 	PosinfoBlock mergePosBlock(
 			Map::const_iterator ei,
@@ -122,7 +125,7 @@ private:
 
 private:
 	DocumentFrequencyMap m_dfmap;
-	leveldb::DB* m_db;
+	DatabaseInterface* m_database;
 	Map m_map;
 	std::string m_strings;
 	InvTermMap m_invtermmap;

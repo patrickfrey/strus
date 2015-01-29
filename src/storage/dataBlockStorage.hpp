@@ -47,7 +47,7 @@ class DataBlockStorage
 public:
 	DataBlockStorage( DatabaseInterface* database_, const DatabaseKey& key_, bool useLruCache_);
 
-	virtual ~DataBlockStorage();
+	virtual ~DataBlockStorage(){}
 
 	const DataBlock* curblock() const
 	{

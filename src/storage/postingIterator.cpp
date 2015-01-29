@@ -41,12 +41,12 @@ using namespace strus;
 #undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char* termstr)
+PostingIterator::PostingIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
 #else
-PostingIterator::PostingIterator( leveldb::DB* db_, Index termtypeno, Index termvalueno, const char*)
+PostingIterator::PostingIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char*)
 #endif
-	:m_docnoIterator(db_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno))
-	,m_posinfoIterator( db_, termtypeno, termvalueno)
+	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno))
+	,m_posinfoIterator(database_, termtypeno, termvalueno)
 	,m_docno(0)
 {
 	m_featureid.reserve( 16);

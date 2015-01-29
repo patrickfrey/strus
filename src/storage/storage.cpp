@@ -39,6 +39,7 @@
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseKey.hpp"
+#include "databaseRecord.hpp"
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
 #include "blockStorage.hpp"
@@ -120,47 +121,29 @@ void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 
 void Storage::loadVariables()
 {
-	Reference<DatabaseCursorInterface> cursor( m_database->createCursor(false));
-	
-	KeyMap variableMap( cursor.get(), DatabaseKey::VariablePrefix, 0);
-	m_next_termno = variableMap.lookUp( "TermNo");
-	m_next_typeno = variableMap.lookUp( "TypeNo");
-	m_next_docno = variableMap.lookUp( "DocNo");
-	m_next_userno = variableMap.lookUp( "UserNo");
-	m_next_attribno = variableMap.lookUp( "AttribNo");
-	m_nof_documents = variableMap.lookUp( "NofDocs");
+	if (!DatabaseRecord_Variable::load( m_database, "TermNo", m_next_termno)
+	||  !DatabaseRecord_Variable::load( m_database, "TypeNo", m_next_typeno)
+	||  !DatabaseRecord_Variable::load( m_database, "DocNo", m_next_docno)
+	||  !DatabaseRecord_Variable::load( m_database, "AttribNo", m_next_attribno)
+	||  !DatabaseRecord_Variable::load( m_database, "NofDocs", m_nof_documents))
+	{
+		throw std::runtime_error( "corrupt storage, not all mandatory variables defined");
+	}
+	(void)DatabaseRecord_Variable::load( m_database, "UserNo", m_next_userno);
 }
 
 void Storage::storeVariables()
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	KeyValueStorage varstor( 0, DatabaseKey::VariablePrefix);
-	{
-		std::string termnoval;
-		packIndex( termnoval, m_next_termno);
-		varstor.store( "TermNo", termnoval, transaction.get());
-	}{
-		std::string typenoval;
-		packIndex( typenoval, m_next_typeno);
-		varstor.store( "TypeNo", typenoval, transaction.get());
-	}{
-		std::string docnoval;
-		packIndex( docnoval, m_next_docno);
-		varstor.store( "DocNo", docnoval, transaction.get());
-	}
+
+	DatabaseRecord_Variable::store( transaction.get(), "TermNo", m_next_termno);
+	DatabaseRecord_Variable::store( transaction.get(), "TypeNo", m_next_typeno);
+	DatabaseRecord_Variable::store( transaction.get(), "DocNo", m_next_docno);
+	DatabaseRecord_Variable::store( transaction.get(), "AttribNo", m_next_attribno);
+	DatabaseRecord_Variable::store( transaction.get(), "NofDocs", m_nof_documents);
 	if (withAcl())
 	{
-		std::string usernoval;
-		packIndex( usernoval, m_next_userno);
-		varstor.store( "UserNo", usernoval, transaction.get());
-	}{
-		std::string attribnoval;
-		packIndex( attribnoval, m_next_attribno);
-		varstor.store( "AttribNo", attribnoval, transaction.get());
-	}{
-		std::string nofdocsval;
-		packIndex( nofdocsval, m_nof_documents);
-		varstor.store( "NofDocs", nofdocsval, transaction.get());
+		DatabaseRecord_Variable::store( transaction.get(), "UserNo", m_next_userno);
 	}
 	transaction->commit();
 }
@@ -189,19 +172,6 @@ Storage::~Storage()
 	cleanup();
 }
 
-Index Storage::loadIndexValue(
-	const DatabaseKey::KeyPrefix type,
-	const std::string& name) const
-{
-	std::string key;
-	std::string val;
-	key.push_back( (char)type);
-	key.append( name);
-	if (!m_database->readValue( key.c_str(), key.size(), val, false)) return 0;
-	char const* vi = val.c_str();
-	return unpackIndex( vi, vi+val.size());
-}
-
 Index Storage::getTermValue( const std::string& name) const
 {
 	if (m_termno_map)
@@ -209,27 +179,27 @@ Index Storage::getTermValue( const std::string& name) const
 		VarSizeNodeTree::NodeData cached_termno;
 		if (m_termno_map->find( name.c_str(), cached_termno)) return cached_termno;
 	}
-	return loadIndexValue( DatabaseKey::TermValuePrefix, name);
+	return DatabaseRecord_TermValue::get( m_database, name);
 }
 
 Index Storage::getTermType( const std::string& name) const
 {
-	return loadIndexValue( DatabaseKey::TermTypePrefix, boost::algorithm::to_lower_copy( name));
+	return DatabaseRecord_TermType::get( m_database, name);
 }
 
 Index Storage::getDocno( const std::string& name) const
 {
-	return loadIndexValue( DatabaseKey::DocIdPrefix, name);
+	return DatabaseRecord_DocId::get( m_database, name);
 }
 
 Index Storage::getUserno( const std::string& name) const
 {
-	return loadIndexValue( DatabaseKey::UserNamePrefix, name);
+	return DatabaseRecord_UserName::get( m_database, name);
 }
 
 Index Storage::getAttributeName( const std::string& name) const
 {
-	return loadIndexValue( DatabaseKey::AttributeKeyPrefix, boost::algorithm::to_lower_copy( name));
+	return DatabaseRecord_AttributeKey::get( m_database, name);
 }
 
 PostingIteratorInterface*
@@ -467,50 +437,47 @@ Index Storage::allocTermno()
 Index Storage::allocTypenoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_typeno);
-	return allocNameIm( DatabaseKey::TermTypePrefix, m_next_typeno, name, isNew);
+	Index rt;
+	if (!DatabaseRecord_TermType::load( m_database, name, rt))
+	{
+		DatabaseRecord_TermType::storeImm( m_database, name, rt = m_next_typeno++);
+		isNew = true;
+	}
+	return rt;
 }
 
 Index Storage::allocDocnoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_docno);
-	return allocNameIm( DatabaseKey::DocIdPrefix, m_next_docno, name, isNew);
+	Index rt;
+	if (!DatabaseRecord_DocId::load( m_database, name, rt))
+	{
+		DatabaseRecord_DocId::storeImm( m_database, name, rt = m_next_docno++);
+		isNew = true;
+	}
+	return rt;
 }
 
 Index Storage::allocUsernoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_userno);
-	return allocNameIm( DatabaseKey::UserNamePrefix, m_next_userno, name, isNew);
+	Index rt;
+	if (!DatabaseRecord_UserName::load( m_database, name, rt))
+	{
+		DatabaseRecord_UserName::storeImm( m_database, name, rt = m_next_userno++);
+		isNew = true;
+	}
+	return rt;
 }
 
 Index Storage::allocAttribnoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_attribno);
-	return allocNameIm( DatabaseKey::AttributeKeyPrefix, m_next_attribno, name, isNew);
-}
-
-Index Storage::allocNameIm(
-	DatabaseKey::KeyPrefix prefix,
-	Index& counter,
-	const std::string& name,
-	bool& isNew)
-{
 	Index rt;
-	std::string val;
-	std::string dbkey;
-	dbkey.push_back( prefix);
-	dbkey.append( name);
-	if (!m_database->readValue( dbkey.c_str(), dbkey.size(), val, true))
+	if (!DatabaseRecord_AttributeKey::load( m_database, name, rt))
 	{
-		std::string indexval;
-		packIndex( indexval, rt = counter++);
-		m_database->writeImm( name.c_str(), name.size(), indexval.c_str(), indexval.size());
+		DatabaseRecord_AttributeKey::storeImm( m_database, name, rt = m_next_attribno++);
 		isNew = true;
-	}
-	else
-	{
-		char const* vi = val.c_str();
-		rt = unpackIndex( vi, vi+val.size());
-		isNew = false;
 	}
 	return rt;
 }
@@ -583,11 +550,11 @@ void Storage::loadTermnoMap( const char* termnomap_source)
 	{
 		unsigned char const* si = (const unsigned char*)termnomap_source;
 		std::string name;
-		name.push_back( (char)DatabaseKey::TermValuePrefix);
 
 		while (*si)
 		{
-			name.resize(1);
+			// [1] Fetch next term string to cache (one line in 'termnomap_source'):
+			name.resize(0);
 			for (; *si != '\n' && *si != '\r' && *si; ++si)
 			{
 				name.push_back( *si);
@@ -595,24 +562,20 @@ void Storage::loadTermnoMap( const char* termnomap_source)
 			if (*si == '\r') ++si;
 			if (*si == '\n') ++si;
 
+			// [2] Check, if already loaded:
 			VarSizeNodeTree::NodeData dupkey;
-			const char* termid = name.c_str()+1;
-			if (m_termno_map->find( termid, dupkey)) continue;
+			if (m_termno_map->find( name.c_str(), dupkey)) continue;
 
-			std::string val;
-			m_database->readValue( name.c_str(), name.size(), val, false); 
-			char const* vi = val.c_str();
-			Index termno = unpackIndex( vi, vi+val.size());
+			// [3] Check, if already defined in storage:
+			Index termno = DatabaseRecord_TermValue::get( m_database, name);
 			if (!termno)
 			{
+				// ... create it if not
 				termno = allocTermno();
-				std::string termnostr;
-				packIndex( termnostr, termno);
-				transaction->write(
-					name.c_str(), name.size(),
-					termnostr.c_str(), termnostr.size());
+				DatabaseRecord_TermValue::store( transaction.get(), name, termno);
 			}
-			m_termno_map->set( termid, termno);
+			// [4] Register it in the map:
+			m_termno_map->set( name.c_str(), termno);
 		}
 		transaction->commit();
 	}

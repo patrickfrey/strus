@@ -27,6 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "booleanBlockMap.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;
 
@@ -36,7 +38,7 @@ void BooleanBlockMap::insertNewElements(
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 		BooleanBlock& newblk,
 		const Index& lastInsertBlockId,
-		leveldb::WriteBatch& batch)
+		DatabaseTransactionInterface* transaction)
 {
 	if (newblk.id() < lastInsertBlockId)
 	{
@@ -49,7 +51,7 @@ void BooleanBlockMap::insertNewElements(
 		if (newblk.full())
 		{
 			newblk.setId( blkid);
-			blkstorage.store( newblk, batch);
+			blkstorage.store( newblk, transaction);
 			newblk.clear();
 			newblk.setId( lastInsertBlockId);
 		}
@@ -62,7 +64,7 @@ void BooleanBlockMap::insertNewElements(
 	if (!newblk.empty())
 	{
 		newblk.setId( blkid);
-		blkstorage.store( newblk, batch);
+		blkstorage.store( newblk, transaction);
 	}
 }
 
@@ -71,7 +73,7 @@ void BooleanBlockMap::mergeNewElements(
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 		BooleanBlock& newblk,
-		leveldb::WriteBatch& batch)
+		DatabaseTransactionInterface* transaction)
 {
 	const BooleanBlock* blk;
 	while (ei != ee && 0!=(blk=blkstorage.load( ei->from)))
@@ -103,7 +105,7 @@ void BooleanBlockMap::mergeNewElements(
 		if (blkstorage.loadNext())
 		{
 			// ... is not the last block, so we store it
-			blkstorage.store( newblk, batch);
+			blkstorage.store( newblk, transaction);
 			newblk.clear();
 		}
 		else
@@ -111,12 +113,12 @@ void BooleanBlockMap::mergeNewElements(
 			if (newblk.full())
 			{
 				// ... it is the last block, but full
-				blkstorage.store( newblk, batch);
+				blkstorage.store( newblk, transaction);
 				newblk.clear();
 			}
 			else
 			{
-				blkstorage.dispose( newblk.id(), batch);
+				blkstorage.dispose( newblk.id(), transaction);
 			}
 			break;
 		}
@@ -128,7 +130,7 @@ void BooleanBlockMap::mergeNewElements(
 		if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
 		{
 			newblk.initcopy( *blk);
-			blkstorage.dispose( blk->id(), batch);
+			blkstorage.dispose( blk->id(), transaction);
 		}
 	}
 }

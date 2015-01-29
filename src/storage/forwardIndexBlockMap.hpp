@@ -35,23 +35,19 @@
 #include "localStructAllocator.hpp"
 #include <vector>
 #include <map>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 class ForwardIndexBlockMap
 {
 public:
-	explicit ForwardIndexBlockMap( leveldb::DB* db_)
-		:m_db(db_),m_docno(0),m_maxtype(0){}
-	ForwardIndexBlockMap( const ForwardIndexBlockMap& o)
-		:m_db(o.m_db)
-		,m_map(o.m_map)
-		,m_curblockmap(o.m_curblockmap)
-		,m_docno(o.m_docno)
-		,m_maxtype(o.m_maxtype)
-		,m_deletes(o.m_deletes){}
+	explicit ForwardIndexBlockMap( DatabaseInterface* database_)
+		:m_database(database_),m_docno(0),m_maxtype(0){}
 
 	void defineForwardIndexTerm(
 		const Index& typeno,
@@ -62,7 +58,7 @@ public:
 	void closeForwardIndexDocument( const Index& docno);
 
 	void deleteDocument( const Index& docno);
-	void getWriteBatch( leveldb::WriteBatch& batch);
+	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
 	struct MapKey
@@ -97,7 +93,7 @@ private:
 	void closeCurblocks();
 
 private:
-	leveldb::DB* m_db;
+	DatabaseInterface* m_database;
 	Map m_map;
 	CurblockMap m_curblockmap;
 	Index m_docno;

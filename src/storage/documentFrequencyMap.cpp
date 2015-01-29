@@ -28,6 +28,9 @@
 */
 #include "documentFrequencyMap.hpp"
 #include "databaseKey.hpp"
+#include "databaseRecord.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "keyMap.hpp"
 #include "indexPacker.hpp"
 #include <cstdlib>
@@ -69,7 +72,7 @@ void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& re
 	}
 }
 
-void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)
+void DocumentFrequencyMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 
@@ -77,38 +80,13 @@ void DocumentFrequencyMap::getWriteBatch( leveldb::WriteBatch& batch)
 	{
 		if (mi->second == 0) continue;
 
-		std::string keystr;
-		keystr.push_back( DatabaseKey::DocFrequencyPrefix);
-		packIndex( keystr, mi->first.first);	// ... [typeno]
-		packIndex( keystr, mi->first.second);	// ... [valueno]
+		Index df = DatabaseRecord_DocFrequency::get(
+				m_database, mi->first.first/*typeno*/, mi->first.second/*termno*/);
+		df += mi->second;
+		if (df < 0) throw std::runtime_error( "internal: document frequency got negative");
 
-		leveldb::Slice keyslice( keystr.c_str(), keystr.size());
-		Index df;
-		std::string value;
-		leveldb::Status status = m_db->Get( leveldb::ReadOptions(), keyslice, &value);
-		if (status.IsNotFound() || value.empty())
-		{
-			df = mi->second;
-			if (df < 0) throw std::runtime_error("internal: decrementing document frequency of an undefined term");
-		}
-		else
-		{
-			if (!status.ok())
-			{
-				throw std::runtime_error( status.ToString());
-			}
-			char const* cc = value.c_str();
-			char const* ee = value.c_str() + value.size();
-			df = mi->second + unpackIndex( cc, ee);
-			if (df < 0) throw std::runtime_error("internal: document frequency got negative");
-		}
-		enum {MaxValueSize = sizeof(Index)*4};
-		char valuebuf[ MaxValueSize];
-		std::size_t valuepos = 0;
-		packIndex( valuebuf, valuepos, MaxValueSize, df);
-		leveldb::Slice valueslice( valuebuf, valuepos);
-
-		batch.Put( keyslice, valueslice);
+		DatabaseRecord_DocFrequency::store(
+				transaction, mi->first.first/*typeno*/, mi->first.second/*termno*/, df);
 	}
 	m_map.clear();
 }

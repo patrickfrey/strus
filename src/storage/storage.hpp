@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_STORAGE_HPP_INCLUDED
-#define _STRUS_LVDB_STORAGE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_HPP_INCLUDED
+#define _STRUS_STORAGE_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
@@ -161,10 +161,6 @@ public:/*StorageDocumentChecker*/
 private:
 	void cleanup();
 	void loadTermnoMap( const char* termnomap_source);
-	Index loadIndexValue(
-		const DatabaseKey::KeyPrefix type,
-		const std::string& name) const;
-
 	void loadVariables();
 	void storeVariables();
 
@@ -181,11 +177,6 @@ private:
 	boost::mutex m_mutex_docno;
 	boost::mutex m_mutex_userno;
 	boost::mutex m_mutex_attribno;
-
-	Index allocNameIm(
-		DatabaseKey::KeyPrefix prefix,
-		Index& counter,
-		const std::string& name, bool& isNew);
 
 	Index m_nof_documents;					///< number of documents inserted
 	GlobalCounter m_global_nof_documents;			///< global number of documents inserted

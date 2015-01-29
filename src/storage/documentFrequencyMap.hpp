@@ -32,25 +32,26 @@
 #include "localStructAllocator.hpp"
 #include <cstdlib>
 #include <map>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 class DocumentFrequencyMap
 {
 public:
-	DocumentFrequencyMap( leveldb::DB* db_)
-		:m_db(db_){}
-	DocumentFrequencyMap( const DocumentFrequencyMap& o)
-		:m_db(o.m_db),m_map(o.m_map){}
+	DocumentFrequencyMap( DatabaseInterface* database_)
+		:m_database(database_){}
 
 	void increment( Index typeno, Index termno, Index count=1);
 	void decrement( Index typeno, Index termno, Index count=1);
 
 	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
-	void getWriteBatch( leveldb::WriteBatch& batch);
+	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
 	typedef std::pair<Index,Index> Key;
@@ -59,7 +60,7 @@ private:
 	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
 
 private:
-	leveldb::DB* m_db;
+	DatabaseInterface* m_database;
 	Map m_map;
 };
 

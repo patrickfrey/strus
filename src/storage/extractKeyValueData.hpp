@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
 #define _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
 #include "databaseKey.hpp"
+#include "strus/databaseCursorInterface.hpp"
 #include "metaDataDescription.hpp"
 #include "metaDataBlock.hpp"
 #include "posinfoBlock.hpp"
@@ -37,7 +38,6 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <leveldb/db.h>
 
 namespace strus {
 
@@ -47,7 +47,7 @@ struct TermTypeData
 	std::size_t typesize;
 	Index typeno;
 
-	TermTypeData( const leveldb::Slice& key, const leveldb::Slice& value);
+	TermTypeData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -58,7 +58,7 @@ struct TermValueData
 	std::size_t valuesize;
 	Index valueno;
 
-	TermValueData( const leveldb::Slice& key, const leveldb::Slice& value);
+	TermValueData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -69,7 +69,7 @@ struct DocIdData
 	std::size_t docidsize;
 	Index docno;
 
-	DocIdData( const leveldb::Slice& key, const leveldb::Slice& value);
+	DocIdData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -80,7 +80,7 @@ struct UserNameData
 	std::size_t usernamesize;
 	Index userno;
 
-	UserNameData( const leveldb::Slice& key, const leveldb::Slice& value);
+	UserNameData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -104,7 +104,7 @@ struct ForwardIndexData
 	};
 	std::vector<Element> elements;
 
-	ForwardIndexData( const leveldb::Slice& key, const leveldb::Slice& value);
+	ForwardIndexData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -115,7 +115,7 @@ struct VariableData
 	std::size_t varnamesize;
 	Index valueno;
 
-	VariableData( const leveldb::Slice& key, const leveldb::Slice& value);
+	VariableData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -127,7 +127,7 @@ struct DocMetaDataData
 	const MetaDataDescription* descr;
 	MetaDataBlock block;
 
-	DocMetaDataData( const MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value);
+	DocMetaDataData( const MetaDataDescription* metadescr, const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -139,7 +139,7 @@ struct DocAttributeData
 	const char* valuestr;
 	unsigned int valuesize;
 
-	DocAttributeData( const leveldb::Slice& key, const leveldb::Slice& value);
+	DocAttributeData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -150,7 +150,7 @@ struct DocFrequencyData
 	Index termno;
 	Index df;
 
-	DocFrequencyData( const leveldb::Slice& key, const leveldb::Slice& value);
+	DocFrequencyData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -174,7 +174,7 @@ struct PosinfoBlockData
 	};
 	std::vector<PosinfoPosting> posinfo;
 
-	PosinfoBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+	PosinfoBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -188,7 +188,7 @@ struct DocListBlockData
 	typedef std::pair<Index,Index> Range;
 	std::vector<Range> docrangelist;
 
-	DocListBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+	DocListBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -200,7 +200,7 @@ struct InverseTermData
 	Index docno;
 	std::vector<InvTerm> terms;
 
-	InverseTermData( const leveldb::Slice& key, const leveldb::Slice& value);
+	InverseTermData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -213,7 +213,7 @@ struct UserAclBlockData
 	typedef std::pair<Index,Index> Range;
 	std::vector<Range> docrangelist;
 
-	UserAclBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+	UserAclBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -226,7 +226,7 @@ struct AclBlockData
 	typedef std::pair<Index,Index> Range;
 	std::vector<Range> userrangelist;
 
-	AclBlockData( const leveldb::Slice& key, const leveldb::Slice& value);
+	AclBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -237,7 +237,7 @@ struct AttributeKeyData
 	std::size_t varnamesize;
 	Index valueno;
 
-	AttributeKeyData( const leveldb::Slice& key, const leveldb::Slice& value);
+	AttributeKeyData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 
 	void print( std::ostream& out);
 };
@@ -246,7 +246,7 @@ struct MetaDataDescrData
 {
 	MetaDataDescription descr;
 
-	MetaDataDescrData( const leveldb::Slice& key, const leveldb::Slice& value);
+	MetaDataDescrData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
 	void print( std::ostream& out);
 };
 

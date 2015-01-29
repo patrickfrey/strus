@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DATABASE_KEY_HPP_INCLUDED
-#define _STRUS_LVDB_DATABASE_KEY_HPP_INCLUDED
+#ifndef _STRUS_DATABASE_ADAPTOR_KEY_HPP_INCLUDED
+#define _STRUS_DATABASE_ADAPTOR_KEY_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "blockKey.hpp"
 #include <utility>
@@ -49,7 +49,7 @@ public:
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
-		InverseTermIndex='i',	///< [docno]                   ->  [typeno,termno,df]*
+		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,df]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
 		AclBlockPrefix='w',	///< [docno,userno]            ->  [bit]*
@@ -74,7 +74,7 @@ public:
 
 			case ForwardIndexPrefix: return "forward index";
 			case PosinfoBlockPrefix: return "posinfo posting block";
-			case InverseTermIndex: return "inverse terminfo block";
+			case InverseTermPrefix: return "inverse terminfo block";
 			case UserAclBlockPrefix: return "user ACL block";
 			case AclBlockPrefix: return "inverted ACL block";
 			case DocListBlockPrefix: return "doc posting block";

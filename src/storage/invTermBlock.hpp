@@ -57,11 +57,11 @@ public:
 
 public:
 	explicit InvTermBlock()
-		:DataBlock( (char)DatabaseKey::InverseTermIndex){}
+		:DataBlock( (char)DatabaseKey::InverseTermPrefix){}
 	InvTermBlock( const InvTermBlock& o)
 		:DataBlock(o){}
 	InvTermBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( (char)DatabaseKey::InverseTermIndex, id_, ptr_, size_){}
+		:DataBlock( (char)DatabaseKey::InverseTermPrefix, id_, ptr_, size_){}
 
 	InvTermBlock& operator=( const InvTermBlock& o)
 	{

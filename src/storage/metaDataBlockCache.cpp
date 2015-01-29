@@ -28,15 +28,15 @@
 */
 #include "metaDataBlockCache.hpp"
 #include "statistics.hpp"
-#include "keyValueStorage.hpp"
-#include "strus/databaseCursorInterface.hpp"
+#include "strus/databaseInterface.hpp"
+#include "databaseRecord.hpp"
 #include <stdexcept>
 #include <stdint.h>
 
 using namespace strus;
 
-MetaDataBlockCache::MetaDataBlockCache( DatabaseCursorInterface* database, const MetaDataDescription& descr_)
-	:m_cursor(database->createCursor(false)),m_descr(descr_)
+MetaDataBlockCache::MetaDataBlockCache( DatabaseInterface* database_, const MetaDataDescription& descr_)
+	:m_database(database_),m_descr(descr_)
 {}
 
 void MetaDataBlockCache::declareVoid( const Index& blockno)
@@ -76,11 +76,10 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 	{
 		Statistics::increment( Statistics::MetaDataCacheMiss);
 
-		KeyValueStorage storage( m_db, DatabaseKey::DocMetaDataPrefix, false);
-		const KeyValueStorage::Value* mv = storage.load( BlockKey( blockno));
-		if (mv)
+		std::string blkstr;
+		if (DatabaseRecord_DocMetaData::load( m_database, blockno, blkstr))
 		{
-			m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, mv->ptr(), mv->size()));
+			m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, blkstr.c_str(), blkstr.size()));
 		}
 		else
 		{

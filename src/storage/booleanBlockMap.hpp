@@ -32,9 +32,11 @@
 #include "booleanBlock.hpp"
 #include "blockStorage.hpp"
 #include <vector>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 /// \class BooleanBlockMap
 /// \brief Methods for merging and inserting boolean blocks
@@ -47,14 +49,14 @@ public:
 			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 			BooleanBlock& newblk,
 			const Index& lastInsertBlockId,
-			leveldb::WriteBatch& batch);
+			DatabaseTransactionInterface* transaction);
 
 	static void mergeNewElements(
 			BlockStorage<BooleanBlock>& blkstorage,
 			std::vector<BooleanBlock::MergeRange>::iterator& ei,
 			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 			BooleanBlock& newblk,
-			leveldb::WriteBatch& batch);
+			DatabaseTransactionInterface* transaction);
 };
 
 }//namespace

@@ -139,7 +139,7 @@ void Database::writeImm(
 	}
 }
 
-void Database::deleteImm(
+void Database::removeImm(
 			const char* key,
 			std::size_t keysize)
 {

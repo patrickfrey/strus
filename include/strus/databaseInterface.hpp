@@ -74,7 +74,7 @@ public:
 	/// \brief Delete a key value stored immediately (synchronized)
 	/// \param[in] key pointer to the key of the item to write
 	/// \param[in] keysize size of the key of the item to write in bytes
-	virtual void deleteImm(
+	virtual void removeImm(
 			const char* key,
 			std::size_t keysize)=0;
 

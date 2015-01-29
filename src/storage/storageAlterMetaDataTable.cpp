@@ -28,54 +28,29 @@
 */
 #include "storageAlterMetaDataTable.hpp"
 #include "storage.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <vector>
 #include <string>
 #include <boost/algorithm/string.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
 StorageAlterMetaDataTable::StorageAlterMetaDataTable(
-		const char* path)
-	:m_db(0)
+		DatabaseInterface* database_)
+	:m_database(database_)
 	,m_commit(false)
 	,m_rollback(false)
 {
-	// Compression reduces size of index by 25% and has about 10% better performance
-	// m_dboptions.compression = leveldb::kNoCompression;
-	m_dboptions.create_if_missing = false;
-	leveldb::Status status = leveldb::DB::Open( m_dboptions, path, &m_db);
-	if (status.ok())
-	{
-		try
-		{
-			m_metadescr_old.load( m_db);
-			m_metadescr_new  = m_metadescr_old;
-		}
-		catch (const std::bad_alloc& err)
-		{
-			delete m_db;
-			m_db = 0;
-			throw err;
-		}
-		catch (const std::runtime_error& err)
-		{
-			delete m_db;
-			m_db = 0;
-			throw err;
-		}
-	}
-	else
-	{
-		std::string err = status.ToString();
-		throw std::runtime_error( std::string( "failed to open storage: ") + err);
-	}
+	m_metadescr_old.load( m_database);
+	m_metadescr_new  = m_metadescr_old;
 }
 
 StorageAlterMetaDataTable::~StorageAlterMetaDataTable()
 {
 	if (!m_rollback && !m_commit) rollback();
-	delete m_db;
 }
 
 void StorageAlterMetaDataTable::commit()
@@ -88,25 +63,19 @@ void StorageAlterMetaDataTable::commit()
 	{
 		throw std::runtime_error( "called alter meta data table commit after rollback");
 	}
-	leveldb::WriteBatch batch;	//... batch used for the alter meta data table transaction
+	boost::scoped_ptr<DatabaseTransactionInterface>
+		transaction( m_database->createTransaction());
 
 	MetaDataDescription::TranslationMap 
 		trmap = m_metadescr_new.getTranslationMap(
 				m_metadescr_old, m_metadescr_resets);
 
-	MetaDataBlockMap blockmap( m_db, &m_metadescr_old);
+	MetaDataBlockMap blockmap( m_database, &m_metadescr_old);
 	
-	blockmap.rewriteMetaData( trmap, m_metadescr_new, batch);
-	m_metadescr_new.store( batch);
+	blockmap.rewriteMetaData( trmap, m_metadescr_new, transaction.get());
+	m_metadescr_new.store( transaction.get());
+	transaction->commit();
 
-	leveldb::WriteOptions options;
-	options.sync = true;
-	leveldb::Status status = m_db->Write( options, &batch);
-	if (!status.ok())
-	{
-		throw std::runtime_error( std::string( "error in commit when writing alter meta data table batch: ") + status.ToString());
-	}
-	batch.Clear();
 	m_commit = true;
 }
 

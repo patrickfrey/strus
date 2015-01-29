@@ -59,6 +59,10 @@ public:
 			const char* key,
 			std::size_t keysize);
 
+	virtual void removeSubTree(
+			const char* domainkey,
+			std::size_t domainkeysize);
+
 	virtual void commit();
 
 	virtual void rollback();

@@ -28,6 +28,8 @@
 */
 #include "posinfoBlockMap.hpp"
 #include "booleanBlockMap.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "keyMap.hpp"
 #include "indexPacker.hpp"
 #include <sstream>
@@ -35,15 +37,15 @@
 
 using namespace strus;
 
-PosinfoBlockMap::PosinfoBlockMap( leveldb::DB* db_)
-	:m_dfmap(db_),m_db(db_),m_docno(0)
+PosinfoBlockMap::PosinfoBlockMap( DatabaseInterface* database_)
+	:m_dfmap(database_),m_database(database_),m_docno(0)
 {
 	m_strings.push_back( '\0');
 }
 
 PosinfoBlockMap::PosinfoBlockMap( const PosinfoBlockMap& o)
 	:m_dfmap(o.m_dfmap)
-	,m_db(o.m_db)
+	,m_database(o.m_database)
 	,m_map(o.m_map)
 	,m_strings(o.m_strings)
 	,m_invtermmap(o.m_invtermmap)
@@ -185,11 +187,11 @@ void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 	m_dfmap.renameNewTermNumbers( renamemap);
 }
 
-void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
+void PosinfoBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	// [1] Get deletes:
 	BlockStorage<InvTermBlock> invstorage(
-			m_db, DatabaseKey::InverseTermIndex, BlockKey(), false);
+			m_database, DatabaseKey::InverseTermPrefix, BlockKey(), false);
 	std::vector<Index>::const_iterator di = m_deletes.begin(), de = m_deletes.end();
 	for (; di != de; ++di)
 	{
@@ -209,7 +211,7 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 				m_dfmap.decrement( it.typeno, it.termno, it.df);
 			}
 		}
-		invstorage.dispose( *di, batch);
+		invstorage.dispose( *di, transaction);
 	}
 
 	// [2] Get inv and df map inserts:
@@ -227,7 +229,7 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 			// df map:
 			m_dfmap.increment( li->typeno, li->termno, li->df);
 		}
-		invstorage.store( invblk, batch);
+		invstorage.store( invblk, transaction);
 	}
 
 	// [3] Get index inserts and term deletes (defined in [1]):
@@ -245,18 +247,18 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 
 		BlockKey blkkey( ei->first.termkey);
 		BlockStorage<PosinfoBlock> blkstorage(
-				m_db, DatabaseKey::PosinfoBlockPrefix, blkkey, false);
+				m_database, DatabaseKey::PosinfoBlockPrefix, blkkey, false);
 		PosinfoBlock newposblk;
 		std::vector<BooleanBlock::MergeRange> docrangear;
 
 		// [1] Merge new elements with existing upper bound blocks:
-		mergeNewPosElements( blkstorage, ei, ee, newposblk, docrangear, batch);
+		mergeNewPosElements( blkstorage, ei, ee, newposblk, docrangear, transaction);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		insertNewPosElements( blkstorage, ei, ee, newposblk, lastInsertBlockId, docrangear, batch);
+		insertNewPosElements( blkstorage, ei, ee, newposblk, lastInsertBlockId, docrangear, transaction);
 
 		BlockStorage<BooleanBlock> docnostorage(
-				m_db, DatabaseKey::DocListBlockPrefix, blkkey, false);
+				m_database, DatabaseKey::DocListBlockPrefix, blkkey, false);
 		BooleanBlock newdocblk( DatabaseKey::DocListBlockPrefix);
 
 		std::vector<BooleanBlock::MergeRange>::iterator
@@ -265,14 +267,14 @@ void PosinfoBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		lastInsertBlockId = docrangear.back().to;
 
 		// [3] Merge new docno boolean block elements
-		BooleanBlockMap::mergeNewElements( docnostorage, di, de, newdocblk, batch);
+		BooleanBlockMap::mergeNewElements( docnostorage, di, de, newdocblk, transaction);
 
 		// [4] Merge new docno boolean block elements
-		BooleanBlockMap::insertNewElements( docnostorage, di, de, newdocblk, lastInsertBlockId, batch);
+		BooleanBlockMap::insertNewElements( docnostorage, di, de, newdocblk, lastInsertBlockId, transaction);
 	}
 
 	// [4] Get df writes:
-	m_dfmap.getWriteBatch( batch);
+	m_dfmap.getWriteBatch( transaction);
 
 	// [5] Clear the maps:
 	clear();
@@ -307,7 +309,7 @@ void PosinfoBlockMap::insertNewPosElements(
 		PosinfoBlock& newposblk,
 		const Index& lastInsertBlockId,
 		std::vector<BooleanBlock::MergeRange>& docrangear,
-		leveldb::WriteBatch& batch)
+		DatabaseTransactionInterface* transaction)
 {
 	while (ei != ee || newposblk.size())
 	{
@@ -339,7 +341,7 @@ void PosinfoBlockMap::insertNewPosElements(
 				defineDocnoRangeElement( docrangear, bi->first.docno, false);
 			}
 		}
-		blkstorage.store( newposblk, batch);
+		blkstorage.store( newposblk, transaction);
 		newposblk.clear();
 	}
 }
@@ -350,7 +352,7 @@ void PosinfoBlockMap::mergeNewPosElements(
 		const Map::const_iterator& ee,
 		PosinfoBlock& newposblk,
 		std::vector<BooleanBlock::MergeRange>& docrangear,
-		leveldb::WriteBatch& batch)
+		DatabaseTransactionInterface* transaction)
 {
 	const PosinfoBlock* blk;
 	while (ei != ee && 0!=(blk=blkstorage.load( ei->first.docno)))
@@ -367,7 +369,7 @@ void PosinfoBlockMap::mergeNewPosElements(
 		if (blkstorage.loadNext())
 		{
 			// ... is not the last block, so we store it
-			blkstorage.store( newposblk, batch);
+			blkstorage.store( newposblk, transaction);
 			newposblk.clear();
 		}
 		else
@@ -375,12 +377,12 @@ void PosinfoBlockMap::mergeNewPosElements(
 			if (newposblk.full())
 			{
 				// ... it is the last block, but full
-				blkstorage.store( newposblk, batch);
+				blkstorage.store( newposblk, transaction);
 				newposblk.clear();
 			}
 			else
 			{
-				blkstorage.dispose( newposblk.id(), batch);
+				blkstorage.dispose( newposblk.id(), transaction);
 			}
 			break;
 		}
@@ -392,7 +394,7 @@ void PosinfoBlockMap::mergeNewPosElements(
 		if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
 		{
 			newposblk.initcopy( *blk);
-			blkstorage.dispose( blk->id(), batch);
+			blkstorage.dispose( blk->id(), transaction);
 		}
 	}
 }

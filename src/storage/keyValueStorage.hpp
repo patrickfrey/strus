@@ -37,6 +37,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#error DEPRECATED
+
 namespace strus {
 
 /// \brief Forward declaration

@@ -39,12 +39,12 @@
 
 using namespace strus;
 
-TermTypeData::TermTypeData( const leveldb::Slice& key, const leveldb::Slice& value)
+TermTypeData::TermTypeData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	typestr = ki;
 	typesize = ke-ki;
@@ -114,12 +114,12 @@ void TermTypeData::print( std::ostream& out)
 }
 
 
-TermValueData::TermValueData( const leveldb::Slice& key, const leveldb::Slice& value)
+TermValueData::TermValueData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	valuestr = ki;
 	valuesize = ke-ki;
@@ -141,12 +141,12 @@ void TermValueData::print( std::ostream& out)
 
 
 
-DocIdData::DocIdData( const leveldb::Slice& key, const leveldb::Slice& value)
+DocIdData::DocIdData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	docidstr = ki;
 	docidsize = ke-ki;
@@ -167,12 +167,12 @@ void DocIdData::print( std::ostream& out)
 }
 
 
-UserNameData::UserNameData( const leveldb::Slice& key, const leveldb::Slice& value)
+UserNameData::UserNameData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	usernamestr = ki;
 	usernamesize = ke-ki;
@@ -194,12 +194,12 @@ void UserNameData::print( std::ostream& out)
 
 
 
-ForwardIndexData::ForwardIndexData( const leveldb::Slice& key, const leveldb::Slice& value)
+ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
@@ -248,12 +248,12 @@ void ForwardIndexData::print( std::ostream& out)
 }
 
 
-VariableData::VariableData( const leveldb::Slice& key, const leveldb::Slice& value)
+VariableData::VariableData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	varnamestr = ki;
 	varnamesize = ke-ki;
@@ -274,12 +274,12 @@ void VariableData::print( std::ostream& out)
 }
 
 
-DocMetaDataData::DocMetaDataData( const MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value)
+DocMetaDataData::DocMetaDataData( const MetaDataDescription* metadescr, const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	if (ki == ke)
 	{
@@ -318,12 +318,12 @@ void DocMetaDataData::print( std::ostream& out)
 }
 
 
-DocAttributeData::DocAttributeData( const leveldb::Slice& key, const leveldb::Slice& value)
+DocAttributeData::DocAttributeData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki == ke)
@@ -349,12 +349,12 @@ void DocAttributeData::print( std::ostream& out)
 }
 
 
-DocFrequencyData::DocFrequencyData( const leveldb::Slice& key, const leveldb::Slice& value)
+DocFrequencyData::DocFrequencyData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
 	termno = strus::unpackIndex( ki, ke);/*[valueno]*/
@@ -375,12 +375,12 @@ void DocFrequencyData::print( std::ostream& out)
 }
 
 
-PosinfoBlockData::PosinfoBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+PosinfoBlockData::PosinfoBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
 	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
@@ -495,12 +495,12 @@ static void printRangeList( std::ostream& out, const std::vector<std::pair<Index
 	}
 }
 
-DocListBlockData::DocListBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+DocListBlockData::DocListBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
 	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
@@ -523,12 +523,12 @@ void DocListBlockData::print( std::ostream& out)
 typedef InvTermBlock::Element InvTerm;
 std::vector<InvTerm> terms;
 
-InverseTermData::InverseTermData( const leveldb::Slice& key, const leveldb::Slice& value)
+InverseTermData::InverseTermData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
@@ -547,7 +547,7 @@ InverseTermData::InverseTermData( const leveldb::Slice& key, const leveldb::Slic
 
 void InverseTermData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::InverseTermIndex << ' ' << docno;
+	out << (char)DatabaseKey::InverseTermPrefix << ' ' << docno;
 	std::vector<InvTerm>::const_iterator ti = terms.begin(), te = terms.end();
 	for (; ti != te; ++ti)
 	{
@@ -557,12 +557,12 @@ void InverseTermData::print( std::ostream& out)
 }
 
 
-UserAclBlockData::UserAclBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+UserAclBlockData::UserAclBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	userno = strus::unpackIndex( ki, ke);/*[userno]*/
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
@@ -581,12 +581,12 @@ void UserAclBlockData::print( std::ostream& out)
 }
 
 
-AclBlockData::AclBlockData( const leveldb::Slice& key, const leveldb::Slice& value)
+AclBlockData::AclBlockData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	userno = strus::unpackIndex( ki, ke);/*[userno]*/
@@ -605,12 +605,12 @@ void AclBlockData::print( std::ostream& out)
 }
 
 
-AttributeKeyData::AttributeKeyData( const leveldb::Slice& key, const leveldb::Slice& value)
+AttributeKeyData::AttributeKeyData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
-	char const* ki = key.data()+1;
-	char const* ke = key.data()+key.size();
-	char const* vi = value.data();
-	char const* ve = value.data()+value.size();
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
 
 	varnamestr = ki;
 	varnamesize = ke-ki;
@@ -631,8 +631,8 @@ void AttributeKeyData::print( std::ostream& out)
 }
 
 
-MetaDataDescrData::MetaDataDescrData( const leveldb::Slice& key, const leveldb::Slice& value)
-	:descr( value.data())
+MetaDataDescrData::MetaDataDescrData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+	:descr( value.ptr())
 {
 	if (key.size() != 1) std::runtime_error( "illegal (not empty) key for meta data description");
 }

@@ -27,9 +27,9 @@
 --------------------------------------------------------------------
 */
 #include "metaDataDescription.hpp"
-#include "keyValueStorage.hpp"
-#include "databaseTransactionInterface.hpp"
-#include "databaseCursorInterface.hpp"
+#include "strus/databaseInterface.hpp"
+#include "databaseRecord.hpp"
+#include "databaseKey.hpp"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 
@@ -39,10 +39,10 @@ MetaDataDescription::MetaDataDescription()
 	:m_bytesize(0)
 {}
 
-MetaDataDescription::MetaDataDescription( DatabaseCursorInterface* dbcursor)
+MetaDataDescription::MetaDataDescription( DatabaseInterface* database_)
 	:m_bytesize(0)
 {
-	load( dbcursor);
+	load( database_);
 }
 
 MetaDataDescription::MetaDataDescription( const MetaDataDescription& o)
@@ -190,17 +190,27 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 	m_ar.insert( ei, MetaDataElement( type_, ofs));
 }
 
-void MetaDataDescription::load( DatabaseCursorInterface* dbcursor)
+void MetaDataDescription::load( DatabaseInterface* database)
 {
-	KeyValueStorage mdstorage( dbcursor, DatabaseKey::MetaDataDescrPrefix, false);
-	const KeyValueStorage::Value* mdptr = mdstorage.load( BlockKey());
-	*this = MetaDataDescription( std::string( mdptr->ptr(), mdptr->size()));
+	std::string descr;
+	if (!DatabaseRecord_MetaDataDescr::load( database, descr))
+	{
+		*this = MetaDataDescription();
+	}
+	else
+	{
+		*this = MetaDataDescription( descr);
+	}
 }
 
 void MetaDataDescription::store( DatabaseTransactionInterface* transaction)
 {
-	KeyValueStorage mdstorage( 0, DatabaseKey::MetaDataDescrPrefix, false);
-	mdstorage.store( BlockKey(), tostring(), transaction);
+	DatabaseRecord_MetaDataDescr::store( transaction, tostring());
+}
+
+void MetaDataDescription::storeImm( DatabaseInterface* database)
+{
+	DatabaseRecord_MetaDataDescr::storeImm( database, tostring());
 }
 
 MetaDataDescription::TranslationMap

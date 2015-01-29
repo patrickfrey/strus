@@ -31,8 +31,6 @@
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
-#include "strus/databaseCursorInterface.hpp"
-#include "strus/reference.hpp"
 #include <utility>
 #include <stdexcept>
 #include <cstdlib>
@@ -66,7 +64,7 @@ private:
 	};
 
 private:
-	Reference<DatabaseCursorInterface> m_cursor;
+	DatabaseInterface* m_database;
 	MetaDataDescription m_descr;
 	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
 	std::vector<unsigned int> m_voidar;

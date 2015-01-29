@@ -36,32 +36,32 @@
 #include <cstdlib>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
 /// \brief Forward declaration
 class MetaDataBlockCache;
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 
 class MetaDataBlockMap
 {
 public:
-	MetaDataBlockMap( leveldb::DB* db_, const MetaDataDescription* descr_)
-		:m_db(db_),m_descr(descr_){}
-	MetaDataBlockMap( const MetaDataBlockMap& o)
-		:m_db(o.m_db),m_descr(o.m_descr),m_map(o.m_map){}
+	MetaDataBlockMap( DatabaseInterface* database_, const MetaDataDescription* descr_)
+		:m_database(database_),m_descr(descr_){}
 	~MetaDataBlockMap();
 
 	void defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value);
 	void deleteMetaData( Index docno);
 	void deleteMetaData( Index docno, const std::string& varname);
 
-	void getWriteBatch( leveldb::WriteBatch& batch, std::vector<Index>& cacheRefreshList);
+	void getWriteBatch( DatabaseTransactionInterface* transaction, std::vector<Index>& cacheRefreshList);
 	void rewriteMetaData(
 			const MetaDataDescription::TranslationMap& trmap,
 			const MetaDataDescription& newDescr,
-			leveldb::WriteBatch& batch);
+			DatabaseTransactionInterface* transaction);
 
 private:
 	MetaDataRecord getRecord( Index docno);
@@ -73,7 +73,7 @@ private:
 	typedef std::map<MetaDataKey,ArithmeticVariant,MapCompare,MapAllocator> Map;
 
 private:
-	leveldb::DB* m_db;
+	DatabaseInterface* m_database;
 	const MetaDataDescription* m_descr;
 	Map m_map;
 };

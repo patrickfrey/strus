@@ -27,6 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "strus/reference.hpp"
+#include "strus/databaseLib.hpp"
+#include "strus/databaseInterface.hpp"
 #include "strus/storageLib.hpp"
 #include "strus/queryProcessorLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
@@ -906,13 +908,18 @@ int main( int argc, const char* argv[])
 
 		try
 		{
-			strus::destroyStorageDatabase( config);
+			strus::destroyDatabase( config);
 		}
 		catch(...){}
-		strus::createStorageDatabase( config);
+
+		strus::createDatabase( config);
+		boost::scoped_ptr<strus::DatabaseInterface>
+			database( strus::createDatabaseClient( config));
+		strus::createStorage( config, database.get());
+		boost::scoped_ptr<strus::StorageInterface>
+			storage( strus::createStorageClient( "", database.get()));
 
 		RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
-		boost::scoped_ptr<strus::StorageInterface> storage( strus::createStorageClient( config));
 
 		strus::Index totNofOccurrencies = 0;
 		strus::Index totNofDocuments = 0;

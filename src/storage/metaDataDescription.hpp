@@ -85,7 +85,8 @@ public:
 	bool hasElement( const std::string& name_) const;
 
 	void load( DatabaseInterface* database);
-	void store( DatabaseTransactionInterface* transaction);
+	void store( DatabaseTransactionInterface* database);
+	void storeImm( DatabaseInterface* database);
 
 	struct TranslationElement
 	{

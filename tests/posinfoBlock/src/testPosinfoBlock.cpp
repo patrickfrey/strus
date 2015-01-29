@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#include "lvdbstorage/indexPacker.hpp"
-#include "lvdbstorage/indexPacker.cpp"
-#include "lvdbstorage/dataBlock.hpp"
-#include "lvdbstorage/dataBlock.cpp"
-#include "lvdbstorage/posinfoBlock.hpp"
-#include "lvdbstorage/posinfoBlock.cpp"
+#include "indexPacker.hpp"
+#include "indexPacker.cpp"
+#include "dataBlock.hpp"
+#include "dataBlock.cpp"
+#include "posinfoBlock.hpp"
+#include "posinfoBlock.cpp"
 #include <stdexcept>
 #include <iostream>
 #include <cstdlib>

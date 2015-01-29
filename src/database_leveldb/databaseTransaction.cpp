@@ -64,6 +64,21 @@ void DatabaseTransaction::remove(
 	m_batch.Delete( leveldb::Slice( key, keysize));
 }
 
+void DatabaseTransaction::removeSubTree(
+		const char* domainkey,
+		std::size_t domainkeysize)
+{
+	leveldb::Iterator* itr = m_db->NewIterator( leveldb::ReadOptions());
+	for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
+		itr->Valid()
+			&& domainkeysize <= itr->key().size()
+			&& 0==std::memcmp( itr->key().data(), domainkey, domainkeysize);
+		itr->Next())
+	{
+		m_batch.Delete( itr->key());
+	}
+}
+
 void DatabaseTransaction::commit()
 {
 	leveldb::WriteOptions options;

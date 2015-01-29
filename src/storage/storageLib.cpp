@@ -34,6 +34,7 @@
 #include "strus/private/configParser.hpp"
 #include "storageAlterMetaDataTable.hpp"
 #include "databaseKey.hpp"
+#include "databaseRecord.hpp"
 #include "keyMap.hpp"
 #include "indexPacker.hpp"
 #include "storage.hpp"
@@ -123,20 +124,18 @@ DLL_PUBLIC void strus::createStorage( const char* configsource, DatabaseInterfac
 	(void)extractStringFromConfigString( metadata, src, "metadata");
 	(void)extractBooleanFromConfigString( useAcl, src, "acl");
 
+	MetaDataDescription md( metadata);
 	Reference<DatabaseTransactionInterface> transaction( database->createTransaction());
-	KeyValueStorage varstor( 0, DatabaseKey::VariablePrefix);
 
-	varstor.store( "TermNo", std::string("\1"), transaction.get());
-	varstor.store( "TypeNo", std::string("\1"), transaction.get());
-	varstor.store( "DocNo", std::string("\1"), transaction.get());
+	DatabaseRecord_Variable::store( transaction.get(), "TermNo", 1);
+	DatabaseRecord_Variable::store( transaction.get(), "TypeNo", 1);
+	DatabaseRecord_Variable::store( transaction.get(), "DocNo", 1);
+	DatabaseRecord_Variable::store( transaction.get(), "AttribNo", 1);
+	DatabaseRecord_Variable::store( transaction.get(), "NofDocs", 0);
 	if (useAcl)
 	{
-		varstor.store( "UserNo", std::string("\1"), transaction.get());
+		DatabaseRecord_Variable::store( transaction.get(), "UserNo", 1);
 	}
-	varstor.store( "AttribNo", std::string("\1"), transaction.get());
-	varstor.store( "NofDocs", std::string("\0",1), transaction.get());
-
-	MetaDataDescription md( metadata);
 	md.store( transaction.get());
 
 	transaction->commit();

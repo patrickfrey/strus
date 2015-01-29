@@ -3,7 +3,7 @@ TOPDIR=../../..
 CPP_OBJS=\
 	testPosinfoBlock.o
 
-CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src -I$(TOPDIR)/include/private -I$(TOPDIR)/include/tests
+CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/storage -I$(TOPDIR)/include/private -I$(TOPDIR)/include/tests
 CXXFLAGS=-g -Werror -Wall -Wfatal-errors -pedantic -std=c++98
 LDFLAGS=
 LIBS=

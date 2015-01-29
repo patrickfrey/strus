@@ -59,7 +59,7 @@ public:
 			const char* value,
 			std::size_t valuesize);
 
-	virtual void deleteImm(
+	virtual void removeImm(
 			const char* key,
 			std::size_t keysize);
 

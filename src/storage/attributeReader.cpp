@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "attributeReader.hpp"
-#include "keyValueStorage.hpp"
+#include "databaseRecord.hpp"
 #include <stdexcept>
 
 using namespace strus;
@@ -44,10 +44,15 @@ Index AttributeReader::elementHandle( const char* name) const
 
 std::string AttributeReader::getValue( const Index& elementHandle_) const
 {
-	KeyValueStorage kvs( m_db, DatabaseKey::DocAttributePrefix, false);
-	const KeyValueStorage::Value* val = kvs.load( BlockKey( m_docno), elementHandle_);
-	if (!val) return 0;
-	return std::string( val->ptr(), val->size());
+	std::string rt;
+	if (DatabaseRecord_DocAttribute::load( m_database, m_docno, elementHandle_, rt))
+	{
+		return rt;
+	}
+	else
+	{
+		return std::string();
+	}
 }
 
 

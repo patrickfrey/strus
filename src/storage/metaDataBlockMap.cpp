@@ -30,7 +30,8 @@
 #include "metaDataBlockCache.hpp"
 #include "dataBlock.hpp"
 #include "dataBlockStorage.hpp"
-#include <leveldb/write_batch.h>
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include <cstring>
 #include <boost/scoped_ptr.hpp>
 
@@ -62,12 +63,12 @@ void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, 
 	m_map[ key] = value;
 }
 
-void MetaDataBlockMap::getWriteBatch( leveldb::WriteBatch& batch, std::vector<Index>& cacheRefreshList)
+void MetaDataBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction, std::vector<Index>& cacheRefreshList)
 {
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	Index blockno = 0;
 	boost::scoped_ptr<MetaDataBlock> blk;
-	DataBlockStorage storage( m_db, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
+	DataBlockStorage storage( m_database, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
 
 	for (; mi != me; ++mi)
 	{
@@ -81,10 +82,11 @@ void MetaDataBlockMap::getWriteBatch( leveldb::WriteBatch& batch, std::vector<In
 			{
 				storage.store( 
 					DataBlock( DatabaseKey::DocMetaDataPrefix,
-							blockno, blk->charptr(), blk->bytesize()), batch);
+						blockno, blk->charptr(), blk->bytesize()),
+						transaction);
 			}
 			const DataBlock* mv;
-			if (bn == blockno + 1 && blockno != 0 && storage.hasIterator())
+			if (bn == blockno + 1 && blockno != 0)
 			{
 				mv = storage.loadNext();
 			}
@@ -112,7 +114,7 @@ void MetaDataBlockMap::getWriteBatch( leveldb::WriteBatch& batch, std::vector<In
 	{
 		storage.store( 
 			DataBlock( DatabaseKey::DocMetaDataPrefix,
-					blockno, blk->charptr(), blk->bytesize()), batch);
+					blockno, blk->charptr(), blk->bytesize()), transaction);
 	}
 }
 
@@ -120,9 +122,9 @@ void MetaDataBlockMap::getWriteBatch( leveldb::WriteBatch& batch, std::vector<In
 void MetaDataBlockMap::rewriteMetaData(
 		const MetaDataDescription::TranslationMap& trmap,
 		const MetaDataDescription& newDescr,
-		leveldb::WriteBatch& batch)
+		DatabaseTransactionInterface* transaction)
 {
-	DataBlockStorage storage( m_db, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
+	DataBlockStorage storage( m_database, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
 	const DataBlock* blk = storage.loadFirst();
 
 	for (; blk != 0; blk = storage.loadNext())
@@ -144,7 +146,7 @@ void MetaDataBlockMap::rewriteMetaData(
 			throw err;
 		}
 		DataBlock newblk( DatabaseKey::DocMetaDataPrefix, blk->id(), newblk_data, newblk_bytesize);
-		storage.store( newblk, batch);
+		storage.store( newblk, transaction);
 	}
 }
 

@@ -45,7 +45,7 @@ DataBlockStorage::DataBlockStorage( DatabaseInterface* database_, const Database
 
 const DataBlock* DataBlockStorage::extractData(
 		const DatabaseCursorInterface::Slice& key,
-		const DatabaseCursorInterface::Slice& value) const
+		const DatabaseCursorInterface::Slice& value)
 {
 	char const* ki = key.ptr() + m_keysize;
 	const char* ke = ki + key.size() - m_keysize;
@@ -60,8 +60,8 @@ const DataBlock* DataBlockStorage::load( const Index& id)
 	m_key.resize( m_keysize);
 	m_key.addElem( id);
 	DatabaseCursorInterface::Slice
-		key = m_cursor->seekUpperBound( m_key.c_str(), m_key.size(), m_keysize);
-	if (!value.defined()) return 0;
+		key = m_cursor->seekUpperBound( m_key.ptr(), m_key.size(), m_keysize);
+	if (!key.defined()) return 0;
 
 	return extractData( key, m_cursor->value());
 }
@@ -69,7 +69,7 @@ const DataBlock* DataBlockStorage::load( const Index& id)
 const DataBlock* DataBlockStorage::loadFirst()
 {
 	DatabaseCursorInterface::Slice
-		key = m_cursor->seekFirst( m_key.c_str(), m_keysize);
+		key = m_cursor->seekFirst( m_key.ptr(), m_keysize);
 
 	return extractData( key, m_cursor->value());
 }
@@ -82,7 +82,7 @@ const DataBlock* DataBlockStorage::loadNext()
 
 const DataBlock* DataBlockStorage::loadLast()
 {
-	DatabaseCursorInterface::Slice key = m_cursor->seekLast();
+	DatabaseCursorInterface::Slice key = m_cursor->seekLast( m_key.ptr(), m_keysize);
 	return extractData( key, m_cursor->value());
 }
 

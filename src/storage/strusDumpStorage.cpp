@@ -29,6 +29,9 @@
 #include "strus/storageLib.hpp"
 #include "storage.hpp"
 #include "databaseKey.hpp"
+#include "strus/databaseLib.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseCursorInterface.hpp"
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
 #include "metaDataBlock.hpp"
@@ -40,6 +43,7 @@
 #include <stdexcept>
 #include <leveldb/db.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/scoped_ptr.hpp>
 
 static unsigned int g_nofErrors = 0;
 
@@ -56,11 +60,11 @@ static void logError( const std::string& msg, const ARG& arg)
 }
 
 
-static std::string keystring( const leveldb::Slice& key)
+static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
 {
 	std::string rt;
-	char const* ki = key.data();
-	char const* ke = key.data()+key.size();
+	char const* ki = key.ptr();
+	char const* ke = key.ptr()+key.size();
 	for (; ki != ke; ++ki)
 	{
 		if (*ki > 32 && *ki < 128)
@@ -75,11 +79,15 @@ static std::string keystring( const leveldb::Slice& key)
 	return rt;
 }
 
-static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value)
+static void dumpKeyValue(
+		std::ostream& out,
+		const strus::MetaDataDescription* metadescr,
+		const strus::DatabaseCursorInterface::Slice& key,
+		const strus::DatabaseCursorInterface::Slice& value)
 {
 	try
 	{
-		switch (key.data()[0])
+		switch (key.ptr()[0])
 		{
 			case strus::DatabaseKey::TermTypePrefix:
 			{
@@ -159,7 +167,7 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::InverseTermIndex:
+			case strus::DatabaseKey::InverseTermPrefix:
 			{
 				strus::InverseTermData data( key, value);
 				data.print( out);
@@ -179,7 +187,7 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 			}
 			default:
 			{
-				logError( "illegal data base prefix", key.data()[0]);
+				logError( "illegal data base prefix", key.ptr()[0]);
 				break;
 			}
 		}
@@ -190,22 +198,24 @@ static void dumpKeyValue( std::ostream& out, const strus::MetaDataDescription* m
 	}
 }
 
-static void dumpDB( std::ostream& out, leveldb::DB* db)
+static void dumpDB( std::ostream& out, strus::DatabaseInterface* database)
 {
-	strus::MetaDataDescription metadescr( db);
+	strus::MetaDataDescription metadescr( database);
+	boost::scoped_ptr<strus::DatabaseCursorInterface>
+		cursor( database->createCursor(false));
 
-	unsigned int cnt = 0;
+	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
 	char prevkeytype = 0;
-	leveldb::Iterator* itr = db->NewIterator( leveldb::ReadOptions());
-	for (itr->SeekToFirst(); itr->Valid(); itr->Next())
+	unsigned int cnt = 0;
+
+	for (; key.defined(); key = cursor->seekNext())
 	{
-		leveldb::Slice key = itr->key();
-		if (!key.data() || key.size() == 0)
+		if (key.size() == 0)
 		{
 			logError( "found empty key in storage");
 			continue;
 		}
-		if (prevkeytype != key.data()[0])
+		if (prevkeytype != key.ptr()[0])
 		{
 			if (prevkeytype)
 			{
@@ -214,43 +224,38 @@ static void dumpDB( std::ostream& out, leveldb::DB* db)
 			}
 			std::cerr << "dumping entries of type '"
 				<< strus::DatabaseKey::keyPrefixName(
-					  (strus::DatabaseKey::KeyPrefix)key.data()[0])
+					  (strus::DatabaseKey::KeyPrefix)key.ptr()[0])
 				<< "':"
 				<< std::endl;
-			prevkeytype = key.data()[0];
+			prevkeytype = key.ptr()[0];
 		}
-		dumpKeyValue( out, &metadescr, key, itr->value());
+		dumpKeyValue( out, &metadescr, key, cursor->value());
 		++cnt;
 	};
 	std::cerr << "... dumped " << cnt << " entries" << std::endl;
 	cnt = 0;
-	delete itr;
 }
 
-
-static void dumpDB( std::ostream& out, leveldb::DB* db, char keyprefix)
+static void dumpDB( std::ostream& out, strus::DatabaseInterface* database, char keyprefix)
 {
 	if (!keyprefix)
 	{
-		dumpDB( out, db);
+		dumpDB( out, database);
 		return;
 	}
-	strus::MetaDataDescription metadescr( db);
+	strus::MetaDataDescription metadescr( database);
+	boost::scoped_ptr<strus::DatabaseCursorInterface>
+		cursor( database->createCursor(false));
 
+	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( &keyprefix, 1);
 	unsigned int cnt = 0;
-	leveldb::Iterator* itr = db->NewIterator( leveldb::ReadOptions());
-
-	for (itr->Seek( leveldb::Slice( &keyprefix, 1)); itr->Valid(); itr->Next())
+	for (; key.defined(); key = cursor->seekNext())
 	{
-		leveldb::Slice key = itr->key();
-		if (keyprefix != key.data()[0]) break;
-
-		dumpKeyValue( out, &metadescr, key, itr->value());
+		dumpKeyValue( out, &metadescr, key, cursor->value());
 		++cnt;
 	};
 	std::cerr << "... dumped " << cnt << " entries" << std::endl;
 	cnt = 0;
-	delete itr;
 }
 
 
@@ -264,7 +269,7 @@ static char getDatabaseKeyPrefix( const char* name)
 	if (boost::algorithm::iequals( name, "username")) return (char)strus::DatabaseKey::UserNamePrefix;
 	if (boost::algorithm::iequals( name, "forward")) return (char)strus::DatabaseKey::ForwardIndexPrefix;
 	if (boost::algorithm::iequals( name, "posinfo")) return (char)strus::DatabaseKey::PosinfoBlockPrefix;
-	if (boost::algorithm::iequals( name, "invterm")) return (char)strus::DatabaseKey::InverseTermIndex;
+	if (boost::algorithm::iequals( name, "invterm")) return (char)strus::DatabaseKey::InverseTermPrefix;
 	if (boost::algorithm::iequals( name, "useracl")) return (char)strus::DatabaseKey::UserAclBlockPrefix;
 	if (boost::algorithm::iequals( name, "docacl")) return (char)strus::DatabaseKey::AclBlockPrefix;
 	if (boost::algorithm::iequals( name, "doclist")) return (char)strus::DatabaseKey::DocListBlockPrefix;
@@ -322,35 +327,10 @@ int main( int argc, const char* argv[])
 		{
 			keyprefix = getDatabaseKeyPrefix( argv[2]);
 		}
-		leveldb::DB* db;
+		boost::scoped_ptr<strus::DatabaseInterface>
+			database( strus::createDatabaseClient( argv[1]));
 
-		const char* config = std::strstr( argv[1], "path=");
-		if (!config)
-		{
-			throw std::runtime_error( std::string( "no path=... definition in configuration string: '") + argv[1] + "'");
-		}
-		const char* path = config+5;
-		const char* pathend = std::strchr( path, ';');
-		if (!pathend) pathend = std::strchr( path, '\0');
-		
-		leveldb::Options dboptions;
-		dboptions.create_if_missing = false;
-		leveldb::Status status = leveldb::DB::Open( dboptions, std::string( path, pathend-path), &db);
-		if (status.ok())
-		{
-			dumpDB( std::cout, db, keyprefix);
-		}
-		else
-		{
-			std::string err = status.ToString();
-			if (!!db)
-			{
-				delete db;
-				db = 0;
-			}
-			throw std::runtime_error( std::string( "failed to open storage: ") + err);
-		}
-		
+		dumpDB( std::cout, database.get(), keyprefix);
 	}
 	catch (const std::runtime_error& e)
 	{

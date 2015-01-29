@@ -28,8 +28,10 @@
 */
 #include "strus/storageLib.hpp"
 #include "strus/databaseLib.hpp"
-#include "strus/databaseLib.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseCursorInterface.hpp"
 #include "storage.hpp"
+#include "strus/reference.hpp"
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
 #include "metaDataReader.hpp"
@@ -40,7 +42,7 @@
 #include <iostream>
 #include <cstring>
 #include <stdexcept>
-#include <leveldb/db.h>
+#include <boost/scoped_ptr.hpp>
 
 static unsigned int g_nofErrors = 0;
 
@@ -57,11 +59,11 @@ static void logError( const std::string& msg, const ARG& arg)
 }
 
 
-static std::string keystring( const leveldb::Slice& key)
+static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
 {
 	std::string rt;
-	char const* ki = key.data();
-	char const* ke = key.data()+key.size();
+	char const* ki = key.ptr();
+	char const* ke = key.ptr()+key.size();
 	for (; ki != ke; ++ki)
 	{
 		if (*ki > 32 && *ki < 128)
@@ -76,11 +78,13 @@ static std::string keystring( const leveldb::Slice& key)
 	return rt;
 }
 
-static void checkKeyValue( const strus::MetaDataDescription* metadescr, const leveldb::Slice& key, const leveldb::Slice& value)
+static void checkKeyValue( const strus::MetaDataDescription* metadescr,
+				const strus::DatabaseCursorInterface::Slice& key,
+				const strus::DatabaseCursorInterface::Slice& value)
 {
 	try
 	{
-		switch (key.data()[0])
+		switch (key.ptr()[0])
 		{
 			case strus::DatabaseKey::TermTypePrefix:
 			{
@@ -132,7 +136,7 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 				strus::PosinfoBlockData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::InverseTermIndex:
+			case strus::DatabaseKey::InverseTermPrefix:
 			{
 				strus::InverseTermData( key, value);
 				break;
@@ -170,27 +174,24 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr, const le
 	}
 }
 
-static void checkDB( leveldb::DB* db)
+static void checkDB( strus::DatabaseInterface* database)
 {
-	strus::MetaDataDescription metadescr( db);
+	strus::MetaDataDescription metadescr( database);
+	boost::scoped_ptr<strus::DatabaseCursorInterface>
+		cursor( database->createCursor(false));
 
-	unsigned int cnt = 0;
+	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
 	char prevkeytype = 0;
-	leveldb::Iterator* itr = db->NewIterator( leveldb::ReadOptions());
-	for (itr->SeekToFirst(); itr->Valid(); itr->Next())
+	unsigned int cnt = 0;
+
+	for (; key.defined(); key = cursor->seekNext())
 	{
-		leveldb::Slice key = itr->key();
-		if (!key.data() || key.size() == 0)
+		if (key.size() == 0)
 		{
 			logError( "found empty key in storage");
 			continue;
 		}
-		switch (key.data()[0])
-		{
-			logError( "illegal data base prefix", key.data()[0]);
-			continue;
-		}
-		if (prevkeytype != key.data()[0])
+		if (prevkeytype != key.ptr()[0])
 		{
 			if (prevkeytype)
 			{
@@ -199,12 +200,12 @@ static void checkDB( leveldb::DB* db)
 			}
 			std::cerr << "checking entries of type '"
 					<< strus::DatabaseKey::keyPrefixName(
-						  (strus::DatabaseKey::KeyPrefix)key.data()[0])
+						  (strus::DatabaseKey::KeyPrefix)key.ptr()[0])
 					<< "':"
 					<< std::endl;
-			prevkeytype = key.data()[0];
+			prevkeytype = key.ptr()[0];
 		}
-		checkKeyValue( &metadescr, key, itr->value());
+		checkKeyValue( &metadescr, key, cursor->value());
 		++cnt;
 	};
 	std::cerr << "... checked " << cnt << " entries" << std::endl;
@@ -218,7 +219,6 @@ static void checkDB( leveldb::DB* db)
 	{
 		std::cerr << "OK. No errors found in storage index" << std::endl;
 	}
-	delete itr;
 }
 
 int main( int argc, const char* argv[])
@@ -244,35 +244,10 @@ int main( int argc, const char* argv[])
 		if (argc < 2) throw std::runtime_error( "too few arguments (expected storage configuration string)");
 		if (argc > 2) throw std::runtime_error( "too many arguments for strusCheckStorage");
 
-		leveldb::DB* db;
+		boost::scoped_ptr<strus::DatabaseInterface>
+			database( strus::createDatabaseClient( argv[1]));
 
-		const char* config = std::strstr( argv[1], "path=");
-		if (!config)
-		{
-			throw std::runtime_error( std::string( "no path=... definition in configuration string: '") + argv[1] + "'");
-		}
-		const char* path = config+5;
-		const char* pathend = std::strchr( path, ';');
-		if (!pathend) pathend = std::strchr( path, '\0');
-		
-		leveldb::Options dboptions;
-		dboptions.create_if_missing = false;
-		leveldb::Status status = leveldb::DB::Open( dboptions, std::string( path, pathend-path), &db);
-		if (status.ok())
-		{
-			checkDB( db);
-		}
-		else
-		{
-			std::string err = status.ToString();
-			if (!!db)
-			{
-				delete db;
-				db = 0;
-			}
-			throw std::runtime_error( std::string( "failed to open storage: ") + err);
-		}
-		
+		checkDB( database.get());
 	}
 	catch (const std::runtime_error& e)
 	{

@@ -30,12 +30,11 @@
 #define _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "databaseKey.hpp"
-#include "keyValueStorage.hpp"
 #include "keyAllocatorInterface.hpp"
-#include "keyStorageInterface.hpp"
 #include "varSizeNodeTree.hpp"
 #include <cstdlib>
 #include <string>
+#include <map>
 
 namespace strus {
 
@@ -49,11 +48,12 @@ class DatabaseTransactionInterface;
 class KeyMap
 {
 public:
-	KeyMap( DatabaseCursorInterface* cursor,
+	KeyMap( DatabaseInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
 			KeyAllocatorInterface* allocator_,
 			const VarSizeNodeTree* globalmap_=0)
-		:m_storage( cursor, prefix_)
+		:m_database(database_)
+		,m_prefix(prefix_)
 		,m_globalmap(globalmap_)
 		,m_unknownHandleCount(0)
 		,m_allocator(allocator_)
@@ -65,7 +65,6 @@ public:
 
 	Index lookUp( const std::string& name);
 	Index getOrCreate( const std::string& name, bool& isNew);
-	void store( const std::string& name, const Index& value);
 
 	void getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
@@ -82,7 +81,8 @@ private:
 	};
 
 private:
-	KeyValueStorage m_storage;
+	DatabaseInterface* m_database;
+	DatabaseKey::KeyPrefix m_prefix;
 	VarSizeNodeTree m_map;
 	const VarSizeNodeTree* m_globalmap;
 	Index m_unknownHandleCount;

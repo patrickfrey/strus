@@ -29,9 +29,9 @@
 #include "posinfoIterator.hpp"
 #include "blockStorage.hpp"
 #include "databaseKey.hpp"
+#include "databaseRecord.hpp"
 #include "strus/databaseInterface.hpp"
 #include "statistics.hpp"
-#include "keyValueStorage.hpp"
 #include <leveldb/db.h>
 
 using namespace strus;
@@ -182,12 +182,9 @@ Index PosinfoIterator::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		DatabaseKey dbkey( DatabaseKey::DocFrequencyPrefix, BlockKey( m_termtypeno, m_termvalueno));
-		std::string dfstr;
-		if (!m_database->readValue( dbkey.ptr(), dbkey.size(), dfstr, false)) return 0;
-
-		char const* cc = dfstr.c_str();
-		m_documentFrequency = unpackIndex( cc, cc + dfstr.size());
+		m_documentFrequency
+			= DatabaseRecord_DocFrequency::get(
+				m_database, m_termtypeno, m_termvalueno);
 	}
 	return m_documentFrequency;
 }

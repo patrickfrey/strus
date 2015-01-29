@@ -35,7 +35,7 @@ namespace strus {
 bool extractStringFromConfigString( std::string& val, std::string& config, const char* key);
 bool extractBooleanFromConfigString( bool& val, std::string& config, const char* key);
 bool extractUIntFromConfigString( unsigned int& val, std::string& config, const char* key);
-bool removeKeysFromConfigString( std::string& config, const char** keys);
+void removeKeysFromConfigString( std::string& config, const char** keys);
 
 }//namespace
 #endif

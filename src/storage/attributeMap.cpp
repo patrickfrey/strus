@@ -28,7 +28,7 @@
 */
 #include "attributeMap.hpp"
 #include "databaseKey.hpp"
-#include "keyValueStorage.hpp"
+#include "databaseRecord.hpp"
 
 using namespace strus;
 
@@ -71,21 +71,19 @@ void AttributeMap::deleteAttribute( const Index& docno, const Index& varno)
 	m_deletes.push_back( key.index());
 }
 
-void AttributeMap::getWriteBatch( leveldb::WriteBatch& batch)
+void AttributeMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
-	KeyValueStorage attrstorage( m_db, DatabaseKey::DocAttributePrefix, false);
-
 	DeleteList::const_iterator di = m_deletes.begin(), de = m_deletes.end();
 	for (; di != de; ++di)
 	{
 		BlockKey key( *di);
 		if (!key.elem(2))
 		{
-			attrstorage.disposeSubnodes( key, batch);
+			DatabaseRecord_DocAttribute::removeAll( transaction, key.elem(1));
 		}
 		else
 		{
-			attrstorage.dispose( key, batch);
+			DatabaseRecord_DocAttribute::remove( transaction, key.elem(1), key.elem(2));
 		}
 	}
 
@@ -93,7 +91,9 @@ void AttributeMap::getWriteBatch( leveldb::WriteBatch& batch)
 	for (; mi != me; ++mi)
 	{
 		BlockKey key( mi->first);
-		attrstorage.store( key, KeyValueStorage::Value( m_strings.c_str() + mi->second), batch);
+		DatabaseRecord_DocAttribute::store(
+				transaction, key.elem(1), key.elem(2),
+				m_strings.c_str() + mi->second);
 	}
 	m_map.clear();
 }

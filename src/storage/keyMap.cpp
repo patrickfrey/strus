@@ -27,19 +27,13 @@
 --------------------------------------------------------------------
 */
 #include "keyMap.hpp"
-#include "keyValueStorage.hpp"
-#include "indexPacker.hpp"
+#include "databaseRecord.hpp"
 
 using namespace strus;
 
 Index KeyMap::lookUp( const std::string& name)
 {
-	const KeyValueStorage::Value* value = m_storage.load( name);
-	if (!value) return 0;
-	char const* vi = value->ptr();
-	char const* ve = vi + value->size();
-
-	return unpackIndex( vi, ve);
+	return DatabaseRecord_StringIndex_Base::get( (char)m_prefix, m_database, name);
 }
 
 Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
@@ -55,36 +49,27 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		isNew = false;
 		return data;
 	}
-	const KeyValueStorage::Value* value = m_storage.load( name);
-	if (value)
+	Index rt;
+	if (DatabaseRecord_StringIndex_Base::load( (char)m_prefix, m_database, name, rt))
 	{
-		char const* vi = value->ptr();
-		char const* ve = vi + value->size();
-
-		Index rt = unpackIndex( vi, ve);
-		store( name, rt);
+		m_map.set( name.c_str(), rt);
 		isNew = false;
-		return rt;
 	}
 	else if (m_allocator->immediate())
 	{
-		return m_allocator->getOrCreate( name, isNew);
+		rt = m_allocator->getOrCreate( name, isNew);
 	}
 	else
 	{
-		Index rt = ++m_unknownHandleCount;
+		rt = ++m_unknownHandleCount;
 		if (rt >= UnknownValueHandleStart)
 		{
 			throw std::runtime_error( "too many elements in keymap");
 		}
-		store( name, rt + UnknownValueHandleStart);
-		return rt + UnknownValueHandleStart;
+		rt += UnknownValueHandleStart;
+		m_map.set( name.c_str(), rt);
 	}
-}
-
-void KeyMap::store( const std::string& name, const Index& value)
-{
-	m_map.set( name.c_str(), value);
+	return rt;
 }
 
 void KeyMap::getWriteBatch(
@@ -99,10 +84,9 @@ void KeyMap::getWriteBatch(
 			Index idx = lookUp( mi.key());
 			if (!idx)
 			{
-				std::string valuestr;
 				idx = m_allocator->alloc();
-				packIndex( valuestr, idx);
-				m_storage.store( mi.key(), valuestr, transaction);
+				DatabaseRecord_StringIndex_Base::store(
+					(char)m_prefix, transaction, mi.key(), idx);
 			}
 			rewriteUnknownMap[ mi.data()] = idx;
 		}

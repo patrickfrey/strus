@@ -27,14 +27,18 @@
 --------------------------------------------------------------------
 */
 #include "storageTransaction.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "storageDocument.hpp"
 #include "storage.hpp"
+#include "databaseRecord.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <vector>
 #include <string>
 #include <set>
 #include <map>
 #include <boost/algorithm/string.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
@@ -46,16 +50,16 @@ StorageTransaction::StorageTransaction(
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_metadescr(metadescr_)
-	,m_attributeMap(db_)
-	,m_metaDataBlockMap(db_,metadescr_)
-	,m_posinfoBlockMap(db_)
-	,m_forwardIndexBlockMap(db_)
-	,m_userAclBlockMap(db_)
-	,m_termTypeMap(db_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
-	,m_termValueMap(db_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator(),termnomap_)
-	,m_docIdMap(db_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
-	,m_userIdMap(db_,DatabaseKey::UserNamePrefix, storage_->createUsernoAllocator())
-	,m_attributeNameMap(db_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())
+	,m_attributeMap(database_)
+	,m_metaDataBlockMap(database_,metadescr_)
+	,m_posinfoBlockMap(database_)
+	,m_forwardIndexBlockMap(database_)
+	,m_userAclBlockMap(database_)
+	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
+	,m_termValueMap(database_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator(),termnomap_)
+	,m_docIdMap(database_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
+	,m_userIdMap(database_,DatabaseKey::UserNamePrefix, storage_->createUsernoAllocator())
+	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())
 	,m_nof_documents(0)
 	,m_commit(false)
 	,m_rollback(false)
@@ -235,44 +239,32 @@ void StorageTransaction::commit()
 	{
 		throw std::runtime_error( "called transaction commit after rollback");
 	}
-	leveldb::WriteBatch batch;	//... batch used for the transaction
+	boost::scoped_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 
-	Storage::TransactionLock transactionLock( m_storage);
+	std::map<Index,Index> termnoUnknownMap;
+	m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
+
+	m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
+
+	std::vector<Index> refreshList;
+	m_attributeMap.getWriteBatch( transaction.get());
+	m_metaDataBlockMap.getWriteBatch( transaction.get(), refreshList);
+
+	m_posinfoBlockMap.getWriteBatch( transaction.get());
+	m_forwardIndexBlockMap.getWriteBatch( transaction.get());
+
+	m_userAclBlockMap.getWriteBatch( transaction.get());
+
+	std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
+	for (; di != de; ++di)
 	{
-		std::map<Index,Index> termnoUnknownMap;
-		m_termValueMap.getWriteBatch( termnoUnknownMap, batch);
-
-		m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
-
-		std::vector<Index> refreshList;
-		m_attributeMap.getWriteBatch( batch);
-		m_metaDataBlockMap.getWriteBatch( batch, refreshList);
-
-		m_posinfoBlockMap.getWriteBatch( batch);
-		m_forwardIndexBlockMap.getWriteBatch( batch);
-
-		m_userAclBlockMap.getWriteBatch( batch);
-
-		KeyValueStorage docidstor( m_db, DatabaseKey::DocIdPrefix, false);
-		std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
-		for (; di != de; ++di)
-		{
-			std::string docnostr;
-			packIndex( docnostr, di->second);
-			docidstor.store( di->first, docnostr, batch);
-		}
-
-		leveldb::WriteOptions options;
-		options.sync = true;
-		leveldb::Status status = m_db->Write( options, &batch);
-		if (!status.ok())
-		{
-			throw std::runtime_error( std::string( "error in commit when writing transaction batch: ") + status.ToString());
-		}
-		m_storage->declareNofDocumentsInserted( m_nof_documents);
-		m_storage->releaseTransaction( refreshList);
+		DatabaseRecord_DocId::store( transaction.get(), di->first, di->second);
 	}
-	batch.Clear();
+	m_storage->declareNofDocumentsInserted( m_nof_documents);
+	transaction->commit();
+
+	m_storage->releaseTransaction( refreshList);
+
 	m_commit = true;
 	m_nof_documents = 0;
 }

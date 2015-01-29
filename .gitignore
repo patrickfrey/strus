@@ -32,5 +32,5 @@ tests/posinfoBlock/src/testPosinfoBlock
 tests/varSizeNodeTree/src/testVarSizeNodeTree
 tests/metaDataRestrictions/src/testMetaDataRestrictions
 tests/ranker/src/testRanker
-src/lvdbstorage/strusCheckStorage
-src/lvdbstorage/strusDumpStorage
+src/storage/strusCheckStorage
+src/storage/strusDumpStorage

@@ -26,11 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#include "lvdbstorage/indexPacker.hpp"
-#include "lvdbstorage/indexPacker.cpp"
-#include "lvdbstorage/floatConversions.hpp"
-#include "lvdbstorage/floatConversions.cpp"
-#include "lvdbstorage/indexPacker.hpp"
+#include "indexPacker.hpp"
+#include "indexPacker.cpp"
+#include "floatConversions.hpp"
+#include "floatConversions.cpp"
 #include "private/bitOperations.hpp"
 #include <stdexcept>
 #include <iostream>

@@ -33,16 +33,19 @@
 #include "localStructAllocator.hpp"
 #include <vector>
 #include <map>
-#include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus {
+
+/// \brief Forward declaration
+class DatabaseInterface;
+/// \brief Forward declaration
+class DatabaseTransactionInterface;
 
 class AttributeMap
 {
 public:
-	explicit AttributeMap( leveldb::DB* db_)
-		:m_db(db_)
+	explicit AttributeMap( DatabaseInterface* database_)
+		:m_database(database_)
 	{
 		m_strings.push_back( '\0');
 	}
@@ -53,7 +56,7 @@ public:
 	void deleteAttributes( const Index& docno);
 	void deleteAttribute( const Index& docno, const Index& varno);
 
-	void getWriteBatch( leveldb::WriteBatch& batch);
+	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
 	typedef LocalStructAllocator<std::pair<BlockKeyIndex,std::size_t> > MapAllocator;
@@ -62,7 +65,7 @@ private:
 	typedef std::vector<BlockKeyIndex> DeleteList;
 
 private:
-	leveldb::DB* m_db;
+	DatabaseInterface* m_database;
 	Map m_map;
 	std::string m_strings;
 	DeleteList m_deletes;

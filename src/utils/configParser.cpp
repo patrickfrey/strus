@@ -150,7 +150,7 @@ DLL_PUBLIC bool strus::extractUIntFromConfigString( unsigned int& val, std::stri
 }
 
 
-DLL_PUBLIC bool strus::removeKeysFromConfigString( std::string& config, const char** keys)
+DLL_PUBLIC void strus::removeKeysFromConfigString( std::string& config, const char** keys)
 {
 	std::string val;
 	for (std::size_t ii=0; keys[ii]; ++ii)

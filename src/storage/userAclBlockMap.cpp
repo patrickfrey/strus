@@ -28,6 +28,8 @@
 */
 #include "userAclBlockMap.hpp"
 #include "booleanBlockMap.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "keyMap.hpp"
 
 using namespace strus;
@@ -146,13 +148,13 @@ static void defineRangeElement(
 }
 
 
-void UserAclBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
+void UserAclBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	std::vector<Index>::const_iterator di = m_usr_deletes.begin(), de = m_usr_deletes.end();
 	for (; di != de; ++di)
 	{
 		BlockStorage<BooleanBlock> usrstorage(
-				m_db, DatabaseKey::UserAclBlockPrefix,
+				m_database, DatabaseKey::UserAclBlockPrefix,
 				BlockKey(*di), false);
 
 		resetAllBooleanBlockElementsFromStorage( m_usrmap, *di, usrstorage);
@@ -162,7 +164,7 @@ void UserAclBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 	for (; ai != ae; ++ai)
 	{
 		BlockStorage<BooleanBlock> aclstorage(
-				m_db, DatabaseKey::AclBlockPrefix,
+				m_database, DatabaseKey::AclBlockPrefix,
 				BlockKey(*ai), false);
 
 		resetAllBooleanBlockElementsFromStorage( m_aclmap, *ai, aclstorage);
@@ -181,17 +183,17 @@ void UserAclBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		Index lastInsertBlockId = rangear.back().to;
 
 		BlockStorage<BooleanBlock> blkstorage(
-				m_db, DatabaseKey::UserAclBlockPrefix,
+				m_database, DatabaseKey::UserAclBlockPrefix,
 				BlockKey(start->first.first), false);
 		BooleanBlock newblk( (char)DatabaseKey::UserAclBlockPrefix);
 
 		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
 
 		// [1] Merge new elements with existing upper bound blocks:
-		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, batch);
+		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, transaction);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, batch);
+		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, transaction);
 	}
 
 	mi = m_aclmap.begin(), me = m_aclmap.end();
@@ -206,17 +208,17 @@ void UserAclBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		Index lastInsertBlockId = rangear.back().to;
 
 		BlockStorage<BooleanBlock> blkstorage(
-				m_db, DatabaseKey::AclBlockPrefix,
+				m_database, DatabaseKey::AclBlockPrefix,
 				BlockKey(start->first.first), false);
 		BooleanBlock newblk( (char)DatabaseKey::AclBlockPrefix);
 
 		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
 
 		// [1] Merge new elements with existing upper bound blocks:
-		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, batch);
+		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, transaction);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, batch);
+		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, transaction);
 	}
 	m_usrmap.clear();
 	m_aclmap.clear();

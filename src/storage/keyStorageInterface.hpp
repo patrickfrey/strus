@@ -29,9 +29,9 @@
 #ifndef _STRUS_LVDB_KEY_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_LVDB_KEY_STORAGE_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "databaseKey.hpp"
-#include "keyValueStorage.hpp"
 #include <string>
+
+#error DEPRECATED
 
 namespace strus {
 

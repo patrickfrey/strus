@@ -2,14 +2,14 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
+	databaseKey.o \
+	databaseRecord.o \
 	storage.o \
 	storageLib.o \
-	keyValueStorage.o \
 	varSizeNodeTree.o \
 	statistics.o \
 	floatConversions.o \
 	indexPacker.o \
-	databaseKey.o \
 	dataBlock.o \
 	dataBlockStorage.o \
 	invTermBlock.o \

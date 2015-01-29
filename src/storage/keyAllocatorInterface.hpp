@@ -30,7 +30,6 @@
 #define _STRUS_LVDB_KEY_ALLOCATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "databaseKey.hpp"
-#include "keyValueStorage.hpp"
 #include <string>
 
 namespace strus {

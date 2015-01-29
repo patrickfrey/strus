@@ -5,10 +5,10 @@ CPP_OBJS=\
 	testMetaDataRestrictions.o \
 	testMetaDataRestrictionFiles.o
 
-CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/utils -I$(TOPDIR)/src/queryeval -I$(TOPDIR)/src/lvdbstorage -I$(TOPDIR)/include/private
+CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/src/utils -I$(TOPDIR)/src/queryeval -I$(TOPDIR)/src/storage -I$(TOPDIR)/include/private
 CXXFLAGS=-g -Werror -Wall -Wfatal-errors -pedantic $(OPTIMIZE) -std=c++98
-LDFLAGS=
-LIBS=
+LDFLAGS=-L$(TOPDIR)/src/database_leveldb
+LIBS=-lstrus_database_leveldb
 
 all: testMetaDataRestrictions
 

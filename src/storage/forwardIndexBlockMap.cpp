@@ -27,7 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "forwardIndexBlockMap.hpp"
-#include "keyMap.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;
 
@@ -119,23 +120,23 @@ void ForwardIndexBlockMap::deleteDocument( const Index& docno)
 	m_deletes.push_back( docno);
 }
 
-void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
+void ForwardIndexBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	closeCurblocks();
 
-	// [1] Get deletes:
-	KeyValueStorage fwstorage( m_db, DatabaseKey::ForwardIndexPrefix, false);
+	// [1] Write deletes:
 	std::vector<Index>::const_iterator di = m_deletes.begin(), de = m_deletes.end();
 	for (; di != de; ++di)
 	{
 		Index ti = 1, te = m_maxtype+1;
 		for (; ti != te; ++ti)
 		{
-			fwstorage.disposeSubnodes( BlockKey( ti, *di), batch);
+			DatabaseKey dbkey( DatabaseKey::ForwardIndexPrefix, BlockKey( ti, *di));
+			transaction->removeSubTree( dbkey.ptr(), dbkey.size());
 		}
 	}
 
-	// [2] Get inserts:
+	// [2] Write inserts:
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	while (mi != me)
 	{
@@ -144,24 +145,23 @@ void ForwardIndexBlockMap::getWriteBatch( leveldb::WriteBatch& batch)
 		mi = ee;
 
 		BlockStorage<ForwardIndexBlock> blkstorage(
-				m_db, DatabaseKey::ForwardIndexPrefix,
+				m_database, DatabaseKey::ForwardIndexPrefix,
 				BlockKey(ei->first.termkey), false);
 		const ForwardIndexBlock* blk;
 
-		// [1] Delete all old blocks with the database key as prefix address:
+		// [2.1] Delete all old blocks with the database key as prefix address:
 		for (blk = blkstorage.load( 0);
 			blk != 0; blk = blkstorage.loadNext())
 		{
-			blkstorage.dispose( blk->id(), batch);
+			blkstorage.dispose( blk->id(), transaction);
 		}
-
-		// [2] Write the new blocks:
+		// [2.2] Write the new blocks:
 		for (; ei != ee; ++ei)
 		{
-			blkstorage.store( ei->second, batch);
+			blkstorage.store( ei->second, transaction);
 		}
 	}
-	// [3] clear maps:
+	// [3] Clear maps:
 	m_map.clear();
 	m_curblockmap.clear();
 	m_docno = 0;
