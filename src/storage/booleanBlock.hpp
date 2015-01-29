@@ -99,7 +99,7 @@ public:
 		return (elemno_ <= id() && elemno_ >= firstIndex());
 	}
 
-	/// \brief Check if the address 'elemno_', if it exists, is most likely in the following block we can get with 'leveldb::Iterator::Next()'
+	/// \brief Check if the address 'elemno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
 	bool isFollowBlockAddress( const Index& elemno_) const
 	{
 		return (elemno_ > id() && elemno_ < id() + id() - firstIndex());

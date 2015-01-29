@@ -32,7 +32,6 @@
 #include "databaseRecord.hpp"
 #include "strus/databaseInterface.hpp"
 #include "statistics.hpp"
-#include <leveldb/db.h>
 
 using namespace strus;
 

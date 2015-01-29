@@ -24,6 +24,9 @@
 # Helper scripts
 setenv.sh
 
+# Generated test data (cleaned with make clean)
+tests/randoc/data/
+
 # Compiled Programs
 tests/randoc/src/randomCollectionTest
 tests/program/src/parseQueryEvalProgramTest

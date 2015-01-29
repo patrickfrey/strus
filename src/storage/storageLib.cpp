@@ -162,7 +162,7 @@ DLL_PUBLIC StorageAlterMetaDataTableInterface*
 	return new StorageAlterMetaDataTable( database);
 }
 
-DLL_PUBLIC const char** getStorageConfigParameters( StorageConfigDescriptionType type)
+DLL_PUBLIC const char** strus::getStorageConfigParameters( StorageConfigDescriptionType type)
 {
 	static const char* keys_CreateStorageClient[]	= {"cachedterms", 0};
 	static const char* keys_CreateStorage[]		= {"acl", "metadata", 0};

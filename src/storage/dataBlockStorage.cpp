@@ -71,18 +71,21 @@ const DataBlock* DataBlockStorage::loadFirst()
 	DatabaseCursorInterface::Slice
 		key = m_cursor->seekFirst( m_key.ptr(), m_keysize);
 
+	if (!key.defined()) return 0;
 	return extractData( key, m_cursor->value());
 }
 
 const DataBlock* DataBlockStorage::loadNext()
 {
 	DatabaseCursorInterface::Slice key = m_cursor->seekNext();
+	if (!key.defined()) return 0;
 	return extractData( key, m_cursor->value());
 }
 
 const DataBlock* DataBlockStorage::loadLast()
 {
 	DatabaseCursorInterface::Slice key = m_cursor->seekLast( m_key.ptr(), m_keysize);
+	if (!key.defined()) return 0;
 	return extractData( key, m_cursor->value());
 }
 

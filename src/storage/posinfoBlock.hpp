@@ -97,7 +97,7 @@ public:
 	{
 		return (docno_ <= id() && docno_ > docno_at( begin()));
 	}
-	/// \brief Check if the address 'docno_', if it exists, probably is in the following block we can get with 'leveldb::Iterator::Next()' or not
+	/// \brief Check if the address 'docno_', if it exists, is most likely located in the following block (cheaper to fetch) or not
 	bool isFollowBlockAddress( const Index& docno_) const
 	{
 		Index diff = id() - docno_at( begin());

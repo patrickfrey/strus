@@ -30,7 +30,6 @@
 #define _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
 #include "posinfoBlock.hpp"
 #include "blockStorage.hpp"
-#include <leveldb/db.h>
 
 namespace strus {
 

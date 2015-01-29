@@ -41,14 +41,21 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 	char const* cc = config.c_str();
 	while (*cc)
 	{
+		while ((unsigned char) *cc <= 32) ++cc;
+		//... skip spaces
+
 		std::string cfgkey;
 		while ((*cc|32) >= 'a' && (*cc|32) <= 'z')
 		{
 			cfgkey.push_back( *cc++);
 		}
+		if (cfgkey.empty())
+		{
+			throw std::runtime_error( "expected item identifier as start of a declaration in a config string");
+		}
 		if (*cc != '=')
 		{
-			throw std::runtime_error( "'=' expected after item identifier in config string");
+			throw std::runtime_error( "'=' expected after item identifier in a config string");
 		}
 		++cc;
 		const char* ee = std::strchr( cc, ';');

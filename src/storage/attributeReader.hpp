@@ -32,7 +32,6 @@
 #include "strus/attributeReaderInterface.hpp"
 #include "storage.hpp"
 #include <string>
-#include <leveldb/db.h>
 
 namespace strus
 {

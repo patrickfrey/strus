@@ -34,7 +34,6 @@
 #include "blockStorage.hpp"
 #include "forwardIndexBlock.hpp"
 #include <string>
-#include <leveldb/db.h>
 
 namespace strus
 {
@@ -42,7 +41,7 @@ namespace strus
 /// \brief Forward declaration
 class DatabaseInterface;
 
-/// \brief Forward index for the index based on LevelDB
+/// \brief Forward index mapping document numbers to the document content
 class ForwardIterator
 	:public ForwardIteratorInterface
 {

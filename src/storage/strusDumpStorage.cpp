@@ -41,7 +41,6 @@
 #include <iostream>
 #include <cstring>
 #include <stdexcept>
-#include <leveldb/db.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
 

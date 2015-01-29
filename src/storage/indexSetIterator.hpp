@@ -31,7 +31,6 @@
 #include "booleanBlock.hpp"
 #include "blockStorage.hpp"
 #include "databaseKey.hpp"
-#include <leveldb/db.h>
 
 namespace strus {
 

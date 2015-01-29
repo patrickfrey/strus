@@ -77,7 +77,7 @@ DLL_PUBLIC void strus::createDatabase( const char* configsource)
 		options.compression = leveldb::kNoCompression;
 	}
 	leveldb::Status status = leveldb::DB::Open( options, path, &db);
-	if (status.ok())
+	if (!status.ok())
 	{
 		std::string err = status.ToString();
 		if (db) delete db;
@@ -123,7 +123,7 @@ DLL_PUBLIC const char* strus::getDatabaseConfigDescription( DatabaseConfigDescri
 	return 0;
 }
 
-DLL_PUBLIC const char** getDatabaseConfigParameters( DatabaseConfigDescriptionType type)
+DLL_PUBLIC const char** strus::getDatabaseConfigParameters( DatabaseConfigDescriptionType type)
 {
 	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression", 0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};
