@@ -47,7 +47,7 @@ bool DatabaseAdapter_StringIndex_Base::load( char prefix, const DatabaseInterfac
 {
 	std::string keystr;
 	keystr.push_back( prefix);
-	keystr.append( key.c_str(), key.size());
+	keystr.append( key);
 	std::string valuestr;
 	value = 0;
 	if (!database->readValue( keystr.c_str(), keystr.size(), valuestr, false)) return false;
@@ -61,7 +61,7 @@ void DatabaseAdapter_StringIndex_Base::store( char prefix, DatabaseTransactionIn
 {
 	std::string keystr;
 	keystr.push_back( prefix);
-	keystr.append( key.c_str(), key.size());
+	keystr.append( key);
 	std::string valuestr;
 	packIndex( valuestr, value);
 	transaction->write( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());
@@ -71,7 +71,7 @@ void DatabaseAdapter_StringIndex_Base::remove( char prefix, DatabaseTransactionI
 {
 	std::string keystr;
 	keystr.push_back( prefix);
-	keystr.append( key.c_str(), key.size());
+	keystr.append( key);
 	transaction->remove( keystr.c_str(), keystr.size());
 }
 
@@ -79,7 +79,7 @@ void DatabaseAdapter_StringIndex_Base::storeImm( char prefix, DatabaseInterface*
 {
 	std::string keystr;
 	keystr.push_back( prefix);
-	keystr.append( key.c_str(), key.size());
+	keystr.append( key);
 	std::string valuestr;
 	packIndex( valuestr, value);
 	database->writeImm( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());

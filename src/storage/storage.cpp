@@ -184,7 +184,7 @@ Index Storage::getTermValue( const std::string& name) const
 
 Index Storage::getTermType( const std::string& name) const
 {
-	return DatabaseAdapter_TermType::get( m_database, name);
+	return DatabaseAdapter_TermType::get( m_database, boost::algorithm::to_lower_copy( name));
 }
 
 Index Storage::getDocno( const std::string& name) const
@@ -199,7 +199,7 @@ Index Storage::getUserno( const std::string& name) const
 
 Index Storage::getAttributeName( const std::string& name) const
 {
-	return DatabaseAdapter_AttributeKey::get( m_database, name);
+	return DatabaseAdapter_AttributeKey::get( m_database, boost::algorithm::to_lower_copy( name));
 }
 
 PostingIteratorInterface*

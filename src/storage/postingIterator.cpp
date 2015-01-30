@@ -37,8 +37,8 @@
 
 using namespace strus;
 
-#undef STRUS_LOWLEVEL_DEBUG
-#undef STRUS_LOWLEVEL_CHECK
+#define STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
