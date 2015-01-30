@@ -42,6 +42,12 @@ class DatabaseInterface;
 class DatabaseTransactionInterface;
 /// \brief Forward declaration
 class DatabaseCursorInterface;
+/// \brief Forward declaration
+class MetaDataBlock;
+/// \brief Forward declaration
+class MetaDataDescription;
+/// \brief Forward declaration
+class PosinfoBlock;
 
 class DatabaseAdapter_StringIndex_Base
 {
@@ -108,6 +114,12 @@ private:
 class DatabaseAdapter_PosinfoBlock
 {
 public:
+	static bool loadUpperBound( DatabaseCursorInterface* cursor, const Index& typeno, const Index& termno, const Index& docno, PosinfoBlock& blk);
+	static bool loadFirst( DatabaseCursorInterface* cursor, const Index& typeno, const Index& termno, PosinfoBlock& blk);
+	static bool loadNext( DatabaseCursorInterface* cursor, PosinfoBlock& blk);
+	static void store( DatabaseTransactionInterface* transaction, const Index& typeno, const Index& termno, const PosinfoBlock& blk);
+	static void remove( DatabaseTransactionInterface* transaction, const Index& typeno, const Index& termno, const Index& docno);
+
 private:
 	enum {KeyPrefix=DatabaseKey::PosinfoBlockPrefix};
 };
@@ -143,8 +155,11 @@ private:
 class DatabaseAdapter_DocMetaData
 {
 public:
-	static bool load( const DatabaseInterface* database, const Index& blockno, std::string& blk);
-	static void store( DatabaseTransactionInterface* transaction, const Index& blockno, const char* blk, std::size_t blksize);
+	static MetaDataBlock* load( const DatabaseInterface* database, const MetaDataDescription* descr, const Index& blockno);
+	static bool seek( DatabaseCursorInterface* cursor, const Index& blockno);
+	static MetaDataBlock* loadFirst( DatabaseCursorInterface* cursor, const MetaDataDescription* descr);
+	static MetaDataBlock* loadNext( DatabaseCursorInterface* cursor, const MetaDataDescription* descr);
+	static void store( DatabaseTransactionInterface* transaction, const MetaDataBlock& blk);
 	static void remove( DatabaseTransactionInterface* transaction, const Index& blockno);
 
 private:

@@ -77,9 +77,10 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 		Statistics::increment( Statistics::MetaDataCacheMiss);
 
 		std::string blkstr;
-		if (DatabaseAdapter_DocMetaData::load( m_database, blockno, blkstr))
+		MetaDataBlock* newblk = DatabaseAdapter_DocMetaData::load( m_database, &m_descr, blockno);
+		if (newblk)
 		{
-			m_ar[ blkidx].reset( new MetaDataBlock( &m_descr, blockno, blkstr.c_str(), blkstr.size()));
+			m_ar[ blkidx].reset( newblk);
 		}
 		else
 		{

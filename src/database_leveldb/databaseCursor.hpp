@@ -65,10 +65,6 @@ public:
 
 	virtual Slice value() const;
 
-	virtual Slice readValue(
-			const char* key,
-			std::size_t keysize);
-
 private:
 	bool checkDomain() const;
 	void initDomain( const char* domainkey, std::size_t domainkeysize);
@@ -78,7 +74,8 @@ private:
 	leveldb::DB* m_db;					///< levelDB handle
 	leveldb::ReadOptions m_dboptions;			///< options for levelDB
 	leveldb::Iterator* m_itr;				///< iterator on levelDB blocks
-	char m_domainkey[ 32];					///< key prefix defining the current domain to scan
+	enum {MaxDomainKeySize=32};
+	unsigned char m_domainkey[ MaxDomainKeySize];		///< key prefix defining the current domain to scan
 	std::size_t m_domainkeysize;				///< size of domain key in bytes
 	std::string m_randomAccessValue;			///< buffer for value retrieved with getKeyValue
 };

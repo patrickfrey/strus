@@ -28,10 +28,10 @@
 */
 #include "metaDataBlockMap.hpp"
 #include "metaDataBlockCache.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "dataBlock.hpp"
 #include "dataBlockStorage.hpp"
-#include "strus/databaseInterface.hpp"
-#include "strus/databaseTransactionInterface.hpp"
+#include "databaseAdapter.hpp"
 #include <cstring>
 #include <boost/scoped_ptr.hpp>
 
@@ -68,7 +68,7 @@ void MetaDataBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction,
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	Index blockno = 0;
 	boost::scoped_ptr<MetaDataBlock> blk;
-	DataBlockStorage storage( m_database, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
+	boost::scoped_ptr<DatabaseCursorInterface> cursor( transaction->createCursor( false));
 
 	for (; mi != me; ++mi)
 	{
@@ -80,26 +80,31 @@ void MetaDataBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction,
 		{
 			if (blk.get())
 			{
-				storage.store( 
-					DataBlock( DatabaseKey::DocMetaDataPrefix,
-						blockno, blk->charptr(), blk->bytesize()),
-						transaction);
+				DatabaseAdapter_DocMetaData::store( transaction, *blk);
 			}
-			const DataBlock* mv;
+			MetaDataBlock* mv;
 			if (bn == blockno + 1 && blockno != 0)
 			{
-				mv = storage.loadNext();
+				mv = DatabaseAdapter_DocMetaData::loadNext( cursor.get(), m_descr);
 			}
 			else
 			{
-				mv = storage.load( bn);
+				mv = DatabaseAdapter_DocMetaData::load( m_database, m_descr, bn);
+				DatabaseAdapter_DocMetaData::seek( cursor.get(), bn);
 			}
 			blockno = bn;
-
-			if (mv && mv->id() == blockno)
+			if (mv)
 			{
-				blk.reset( new MetaDataBlock( m_descr, blockno, mv->charptr(), mv->size()));
-				cacheRefreshList.push_back( blockno);
+				if (mv->blockno() == blockno)
+				{
+					blk.reset( mv);
+					cacheRefreshList.push_back( blockno);
+				}
+				else
+				{
+					delete mv;
+					blk.reset( new MetaDataBlock( m_descr, blockno));
+				}
 			}
 			else
 			{
@@ -112,9 +117,7 @@ void MetaDataBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction,
 	}
 	if (blk.get())
 	{
-		storage.store( 
-			DataBlock( DatabaseKey::DocMetaDataPrefix,
-					blockno, blk->charptr(), blk->bytesize()), transaction);
+		DatabaseAdapter_DocMetaData::store( transaction, *blk);
 	}
 }
 
@@ -124,16 +127,15 @@ void MetaDataBlockMap::rewriteMetaData(
 		const MetaDataDescription& newDescr,
 		DatabaseTransactionInterface* transaction)
 {
-	DataBlockStorage storage( m_database, DatabaseKey( DatabaseKey::DocMetaDataPrefix), false);
-	const DataBlock* blk = storage.loadFirst();
+	boost::scoped_ptr<DatabaseCursorInterface> cursor( transaction->createCursor( false));
+	boost::scoped_ptr<MetaDataBlock>
+		blk( DatabaseAdapter_DocMetaData::loadFirst( cursor.get(), m_descr));
 
-	for (; blk != 0; blk = storage.loadNext())
+	for (; blk.get();
+		blk.reset( DatabaseAdapter_DocMetaData::loadNext( cursor.get(), m_descr)))
 	{
-		MetaDataBlock oldblk( m_descr, blk->id(), blk->charptr(), blk->size());
-
 		std::size_t newblk_bytesize = MetaDataBlock::BlockSize * newDescr.bytesize();
 		char* newblk_data = (char*)std::calloc( MetaDataBlock::BlockSize, newDescr.bytesize());
-
 		try
 		{
 			MetaDataRecord::translateBlock(
@@ -145,8 +147,8 @@ void MetaDataBlockMap::rewriteMetaData(
 			std::free( newblk_data);
 			throw err;
 		}
-		DataBlock newblk( DatabaseKey::DocMetaDataPrefix, blk->id(), newblk_data, newblk_bytesize);
-		storage.store( newblk, transaction);
+		MetaDataBlock newblk( &newDescr, blk->blockno(), newblk_data, newblk_bytesize);
+		DatabaseAdapter_DocMetaData::store( transaction, newblk);
 	}
 }
 

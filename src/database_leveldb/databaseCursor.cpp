@@ -60,12 +60,12 @@ bool DatabaseCursor::checkDomain() const
 
 void DatabaseCursor::initDomain( const char* domainkey, std::size_t domainkeysize)
 {
-	if (domainkeysize+1 > sizeof(m_domainkey))
+	if (domainkeysize+1 >= sizeof(m_domainkey))
 	{
 		throw std::runtime_error( "key domain prefix string exceeds maximum size allowed");
 	}
 	std::memcpy( m_domainkey, domainkey, m_domainkeysize=domainkeysize);
-	m_domainkey[ domainkeysize] = (char)0xFF;
+	m_domainkey[ m_domainkeysize] = 0xFF;
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::getCurrentKey() const
@@ -104,14 +104,21 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekLast(
 		std::size_t domainkeysize)
 {
 	initDomain( domainkey, domainkeysize);
-	m_itr->Seek( leveldb::Slice( m_domainkey, m_domainkeysize+1));
-	if (!m_itr->Valid())
+	if (m_domainkeysize == 0)
 	{
 		m_itr->SeekToLast();
 	}
-	if (m_itr->Valid())
+	else
 	{
-		m_itr->Prev();
+		m_itr->Seek( leveldb::Slice( (char*)m_domainkey, m_domainkeysize+1));
+		if (m_itr->Valid())
+		{
+			m_itr->Prev();
+		}
+		else
+		{
+			return Slice();
+		}
 	}
 	return getCurrentKey();
 }
@@ -159,24 +166,6 @@ DatabaseCursorInterface::Slice DatabaseCursor::value() const
 		return Slice();
 	}
 }
-
-DatabaseCursorInterface::Slice DatabaseCursor::readValue(
-			const char* key,
-			std::size_t keysize)
-{
-	m_randomAccessValue.clear();
-	leveldb::Status status = m_db->Get( m_dboptions, leveldb::Slice( key, keysize), &m_randomAccessValue);
-	if (status.IsNotFound())
-	{
-		return Slice();
-	}
-	if (!status.ok())
-	{
-		throw std::runtime_error( status.ToString());
-	}
-	return Slice( m_randomAccessValue.c_str(), m_randomAccessValue.size());
-}
-
 
 
 

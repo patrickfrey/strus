@@ -103,14 +103,6 @@ public:
 	/// \brief Get the value of the current element
 	/// \return the value of the current element or an undefined key
 	virtual Slice value() const=0;
-
-	/// \brief Get the value of a key as exact match (random access without changing the cursor state)
-	/// \param[in] key pointer to the key of the item to retrieve
-	/// \param[in] keysize size of 'key' in bytes
-	/// \return the value of the element found or an undefined key
-	virtual Slice readValue(
-			const char* key,
-			std::size_t keysize)=0;
 };
 
 }//namespace
