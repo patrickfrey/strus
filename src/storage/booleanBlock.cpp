@@ -216,7 +216,7 @@ BooleanBlock BooleanBlock::merge(
 			{
 				if (ei->from < old_from)
 				{
-					rt.defineRange( ei->from, ei->to);
+					rt.defineRange( ei->from, ei->to - ei->from);
 					++ei;
 				}
 				else
@@ -287,7 +287,7 @@ BooleanBlock BooleanBlock::merge(
 	{
 		if (ei->isMember)
 		{
-			rt.defineRange( ei->from, ei->to);
+			rt.defineRange( ei->from, ei->to - ei->from);
 		}
 		++ei;
 	}
