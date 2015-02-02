@@ -28,8 +28,9 @@
 */
 #ifndef _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
 #define _STRUS_LVDB_POSINFO_ITERATOR_HPP_INCLUDED
+#include "strus/reference.hpp"
 #include "posinfoBlock.hpp"
-#include "blockStorage.hpp"
+#include "databaseAdapter.hpp"
 
 namespace strus {
 
@@ -39,7 +40,7 @@ class DatabaseInterface;
 class PosinfoIterator
 {
 public:
-	PosinfoIterator( DatabaseInterface* database, Index termtypeno, Index termvalueno);
+	PosinfoIterator( DatabaseInterface* database_, Index termtypeno_, Index termvalueno_);
 	~PosinfoIterator(){}
 
 	Index skipDoc( const Index& docno_);
@@ -57,8 +58,8 @@ private:
 
 private:
 	DatabaseInterface* m_database;
-	BlockStorage<PosinfoBlock> m_posinfoStorage;
-	const PosinfoBlock* m_posinfoBlk;
+	DatabaseAdapter_PosinfoBlock_Cursor m_dbadapter;
+	PosinfoBlock m_posinfoBlk;
 	char const* m_posinfoItr;
 	PosinfoBlock::PositionScanner m_positionScanner;
 	Index m_termtypeno;

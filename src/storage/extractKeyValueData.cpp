@@ -28,6 +28,7 @@
 */
 #include "extractKeyValueData.hpp"
 #include "indexPacker.hpp"
+#include "databaseKey.hpp"
 #include "metaDataBlock.hpp"
 #include "forwardIndexBlock.hpp"
 #include "booleanBlock.hpp"
@@ -444,7 +445,7 @@ static std::vector<std::pair<Index,Index> > getRangeListFromBooleanBlock(
 		DatabaseKey::KeyPrefix prefix, const Index& id, char const* vi, const char* ve)
 {
 	std::vector<std::pair<Index,Index> > rt;
-	BooleanBlock blk( prefix, id, vi, ve-vi);
+	BooleanBlock blk( id, vi, ve-vi);
 	char const* itr = blk.charptr();
 
 	Index rangemin;
@@ -551,7 +552,7 @@ void InverseTermData::print( std::ostream& out)
 	std::vector<InvTerm>::const_iterator ti = terms.begin(), te = terms.end();
 	for (; ti != te; ++ti)
 	{
-		out << ' ' << ti->typeno << ',' << ti->termno << ',' << ti->df;
+		out << ' ' << ti->typeno << ',' << ti->termno << ',' << ti->ff;
 	}
 	out << std::endl;
 }

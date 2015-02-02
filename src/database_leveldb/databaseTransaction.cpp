@@ -89,14 +89,12 @@ void DatabaseTransaction::commit()
 		throw std::runtime_error( std::string( "error in commit when writing transaction batch: ") + status.ToString());
 	}
 	m_batch.Clear();
-	m_database->releaseTransaction();
 	m_commit_called = true;
 }
 
 void DatabaseTransaction::rollback()
 {
 	m_batch.Clear();
-	m_database->releaseTransaction();
 	m_rollback_called = true;
 }
 

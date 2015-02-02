@@ -29,7 +29,7 @@
 #ifndef _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
 #define _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "databaseKey.hpp"
+#include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "varSizeNodeTree.hpp"
 #include <cstdlib>
@@ -52,8 +52,7 @@ public:
 			DatabaseKey::KeyPrefix prefix_,
 			KeyAllocatorInterface* allocator_,
 			const VarSizeNodeTree* globalmap_=0)
-		:m_database(database_)
-		,m_prefix(prefix_)
+		:m_dbadapter(prefix_,database_)
 		,m_globalmap(globalmap_)
 		,m_unknownHandleCount(0)
 		,m_allocator(allocator_)
@@ -81,8 +80,7 @@ private:
 	};
 
 private:
-	DatabaseInterface* m_database;
-	DatabaseKey::KeyPrefix m_prefix;
+	DatabaseAdapter_StringIndex m_dbadapter;
 	VarSizeNodeTree m_map;
 	const VarSizeNodeTree* m_globalmap;
 	Index m_unknownHandleCount;

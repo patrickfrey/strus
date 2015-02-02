@@ -29,9 +29,8 @@
 #ifndef _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
 #define _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
 #include "strus/forwardIteratorInterface.hpp"
-#include "databaseKey.hpp"
+#include "databaseAdapter.hpp"
 #include "storage.hpp"
-#include "blockStorage.hpp"
 #include "forwardIndexBlock.hpp"
 #include <string>
 
@@ -64,8 +63,8 @@ public:
 
 private:
 	DatabaseInterface* m_database;
-	BlockStorage<ForwardIndexBlock>* m_forwardBlockStorage;
-	const ForwardIndexBlock* m_curblock;
+	Reference<DatabaseAdapter_ForwardIndex_Cursor> m_dbadapter;
+	ForwardIndexBlock m_curblock;
 	Index m_curblock_firstpos;
 	Index m_curblock_lastpos;
 	char const* m_blockitr;

@@ -29,7 +29,6 @@
 #include "metaDataDescription.hpp"
 #include "strus/databaseInterface.hpp"
 #include "databaseAdapter.hpp"
-#include "databaseKey.hpp"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
 

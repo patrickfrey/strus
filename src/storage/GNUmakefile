@@ -4,6 +4,10 @@ include $(TOPDIR)/variables.mk
 CPP_OBJS=\
 	databaseKey.o \
 	databaseAdapter.o \
+	keyMap.o \
+	posinfoIterator.o \
+	forwardIterator.o \
+	indexSetIterator.o \
 	storage.o \
 	storageLib.o \
 	varSizeNodeTree.o \
@@ -11,11 +15,9 @@ CPP_OBJS=\
 	floatConversions.o \
 	indexPacker.o \
 	dataBlock.o \
-	dataBlockStorage.o \
 	invTermBlock.o \
 	posinfoBlock.o \
 	posinfoBlockMap.o \
-	posinfoIterator.o \
 	forwardIndexBlock.o \
 	forwardIndexBlockMap.o \
 	booleanBlock.o \
@@ -29,12 +31,9 @@ CPP_OBJS=\
 	metaDataBlockCache.o \
 	attributeReader.o \
 	attributeMap.o \
-	keyMap.o \
 	documentFrequencyMap.o \
 	postingIterator.o \
-	indexSetIterator.o \
 	nullIterator.o \
-	forwardIterator.o \
 	storageDocument.o \
 	storageDocumentChecker.o \
 	storageTransaction.o \

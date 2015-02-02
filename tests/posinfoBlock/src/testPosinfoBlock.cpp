@@ -60,7 +60,7 @@ static void testDataBlockBuild( unsigned int times)
 	
 	for (; tt<times; ++tt)
 	{
-		DataBlock dblk('x');
+		DataBlock dblk;
 
 		unsigned int ii=0,nofDocs=RANDINT(1,tt+2);
 		for (; ii<nofDocs; ++ii)

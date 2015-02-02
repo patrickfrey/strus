@@ -27,7 +27,6 @@
 --------------------------------------------------------------------
 */
 #include "metaDataBlock.hpp"
-#include "databaseKey.hpp"
 #include <cstring>
 #include <stdexcept>
 
@@ -66,9 +65,32 @@ MetaDataBlock::MetaDataBlock( const MetaDataBlock& o)
 	std::memcpy( m_ptr, o.m_ptr, blkbytesize);
 }
 
+void MetaDataBlock::swap( MetaDataBlock& o)
+{
+	std::swap( m_ptr, o.m_ptr);
+	std::swap( m_descr, o.m_descr);
+	std::swap( m_blockno, o.m_blockno);
+}
+
 MetaDataBlock::~MetaDataBlock()
 {
 	if (m_ptr) std::free( m_ptr);
+}
+
+void MetaDataBlock::init( const MetaDataDescription* descr_, 
+				const Index& blockno_)
+{
+	m_blockno = blockno_;
+	if (m_descr == descr_ && m_ptr)
+	{
+		std::memset( m_ptr, 0, m_descr->bytesize() * BlockSize);
+	}
+	else
+	{
+		m_descr = descr_;
+		if (m_ptr) std::free( m_ptr);
+		m_ptr = std::calloc( BlockSize, descr_->bytesize());
+	}
 }
 
 void MetaDataBlock::init( const MetaDataDescription* descr_, 
@@ -82,6 +104,7 @@ void MetaDataBlock::init( const MetaDataDescription* descr_,
 	if (!mem) throw std::bad_alloc();
 	m_descr = descr_;
 	m_blockno = blockno_;
+	if (m_ptr) std::free( m_ptr);
 	m_ptr = mem;
 	std::memcpy( m_ptr, blk_, blkbytesize);
 }

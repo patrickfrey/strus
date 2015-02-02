@@ -38,7 +38,7 @@ InvTermBlock::Element InvTermBlock::element_at( const char* itr) const
 	char const* ri = itr;
 	rt.typeno = unpackIndex( ri, charend());
 	rt.termno = unpackIndex( ri, charend());
-	rt.df = unpackIndex( ri, charend());
+	rt.ff = unpackIndex( ri, charend());
 	return rt;
 }
 
@@ -52,12 +52,12 @@ const char* InvTermBlock::next( const char* ref) const
 	return ri;
 }
 
-void InvTermBlock::append( const Index& typeno, const Index& termno, const Index& df)
+void InvTermBlock::append( const Index& typeno, const Index& termno, const Index& ff)
 {
 	std::string elem;
 	packIndex( elem, typeno);
 	packIndex( elem, termno);
-	packIndex( elem, df);
+	packIndex( elem, ff);
 	DataBlock::append( elem.c_str(), elem.size());
 }
 

@@ -29,7 +29,6 @@
 #ifndef _STRUS_LVDB_BOOLEAN_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_BOOLEAN_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
-#include "databaseKey.hpp"
 #include <vector>
 #include <map>
 
@@ -42,20 +41,19 @@ class BooleanBlock
 {
 public:
 	enum {
-		MaxBlockSize=1024
+		MaxBlockSize=20
 	};
 
 public:
-	BooleanBlock( char dbkeyprefix)
-		:DataBlock( dbkeyprefix)
+	BooleanBlock()
 	{}
 
 	BooleanBlock( const BooleanBlock& o)
 		:DataBlock(o)
 	{}
 
-	BooleanBlock( char dbkeyprefix, const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( dbkeyprefix, id_, ptr_, size_)
+	BooleanBlock( const Index& id_, const void* ptr_, std::size_t size_)
+		:DataBlock( id_, ptr_, size_)
 	{}
 
 	BooleanBlock& operator=( const BooleanBlock& o)
@@ -64,11 +62,7 @@ public:
 		return *this;
 	}
 	void setId( const Index& id_);
-	void swap( BooleanBlock& o)
-	{
-		DataBlock::swap( o);
-	}
-	
+
 	const char* find( const Index& elemno_, const char* lowerbound) const;
 	const char* upper_bound( const Index& elemno_, const char* lowerbound) const;
 
@@ -117,10 +111,11 @@ public:
 			:from(o.from),to(o.to),isMember(o.isMember){}
 	};
 
-	static BooleanBlock merge( 
+	static void merge( 
 			std::vector<MergeRange>::const_iterator ei,
 			const std::vector<MergeRange>::const_iterator& ee,
-			const BooleanBlock& oldblk);
+			const BooleanBlock& oldblk,
+			BooleanBlock& newblk);
 
 	void check() const;
 

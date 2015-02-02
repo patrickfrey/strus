@@ -190,13 +190,14 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 	}
 }
 
-BooleanBlock BooleanBlock::merge( 
+void BooleanBlock::merge( 
 		std::vector<MergeRange>::const_iterator ei,
 		const std::vector<MergeRange>::const_iterator& ee,
-		const BooleanBlock& oldblk)
+		const BooleanBlock& oldblk,
+		BooleanBlock& newblk)
 {
-	BooleanBlock rt( oldblk.blocktype());
-	rt.setId( oldblk.id());
+	newblk.clear();
+	newblk.setId( oldblk.id());
 
 	char const* old_itr = oldblk.charptr();
 	Index old_from = 0;
@@ -216,12 +217,12 @@ BooleanBlock BooleanBlock::merge(
 			{
 				if (ei->from < old_from)
 				{
-					rt.defineRange( ei->from, ei->to - ei->from);
+					newblk.defineRange( ei->from, ei->to - ei->from);
 					++ei;
 				}
 				else
 				{
-					rt.defineRange( old_from, old_to - old_from);
+					newblk.defineRange( old_from, old_to - old_from);
 					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
 				}
 			}
@@ -239,7 +240,7 @@ BooleanBlock BooleanBlock::merge(
 					if (old_from < ei->from)
 					{
 						// => case [old.from][new.from][old.to]
-						rt.defineRange( old_from, ei->from - old_from - 1);
+						newblk.defineRange( old_from, ei->from - old_from - 1);
 					}
 					if (old_to > ei->to)
 					{
@@ -257,7 +258,7 @@ BooleanBlock BooleanBlock::merge(
 				{
 					// .... that does not touch the old block
 					// => case [old.from][old.to][new.from]
-					rt.defineRange( old_from, old_to - old_from);
+					newblk.defineRange( old_from, old_to - old_from);
 					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
 				}
 			}
@@ -287,16 +288,15 @@ BooleanBlock BooleanBlock::merge(
 	{
 		if (ei->isMember)
 		{
-			rt.defineRange( ei->from, ei->to - ei->from);
+			newblk.defineRange( ei->from, ei->to - ei->from);
 		}
 		++ei;
 	}
 	while (old_haselem)
 	{
-		rt.defineRange( old_from, old_to - old_from);
+		newblk.defineRange( old_from, old_to - old_from);
 		old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
 	}
-	return rt;
 }
 
 void BooleanBlock::check() const
@@ -325,7 +325,7 @@ void BooleanBlock::setId( const Index& id_)
 	}
 	else
 	{
-		BooleanBlock res( blocktype());
+		BooleanBlock res;
 		res.setId( id_);
 
 		char const* itr = charptr();

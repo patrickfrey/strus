@@ -32,6 +32,7 @@
 #include "storageDocument.hpp"
 #include "storage.hpp"
 #include "indexSetIterator.hpp"
+#include "strus/databaseInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
@@ -46,9 +47,11 @@ using namespace strus;
 
 StorageDocumentChecker::StorageDocumentChecker(
 		const Storage* storage_,
+		DatabaseInterface* database_,
 		const std::string& docid_,
 		const std::string& logfile_)
 	:m_storage(storage_)
+	,m_database(database_)
 	,m_docid(docid_)
 	,m_docno(storage_->documentNumber( docid_))
 	,m_logfile(logfile_)
@@ -126,6 +129,14 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	TermMap::const_iterator ti = m_termMap.begin(), te = m_termMap.end();
 	for (; ti != te; ++ti)
 	{
+		Index typeno = m_storage->getTermType( ti->first.type);
+		Index termno = m_storage->getTermValue( ti->first.value);
+
+		if (!typeno) throw std::runtime_error( std::string("unknown term type '") + ti->first.type + "'");
+		if (!termno) throw std::runtime_error( std::string("unknown term value '") + ti->first.value + "'");
+
+		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno));
+
 		boost::scoped_ptr<PostingIteratorInterface> pitr(
 			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
 
@@ -134,6 +145,11 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			logError( logout, m_docid, ti->first.type, ti->first.value,
 				"term not found in inverted index");
 			continue;
+		}
+		if (m_docno != docnoIterator.skip( m_docno))
+		{
+			logError( logout, m_docid, ti->first.type, ti->first.value,
+					"term not found in boolean document index");
 		}
 		Index pos = 0;
 

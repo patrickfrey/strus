@@ -36,7 +36,7 @@
 using namespace strus;
 
 MetaDataBlockCache::MetaDataBlockCache( DatabaseInterface* database_, const MetaDataDescription& descr_)
-	:m_database(database_),m_descr(descr_)
+	:m_database(database_),m_descr(descr_),m_dbadapter(database_, &m_descr)
 {}
 
 void MetaDataBlockCache::declareVoid( const Index& blockno)
@@ -75,9 +75,7 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 	while (!blkref.get())
 	{
 		Statistics::increment( Statistics::MetaDataCacheMiss);
-
-		std::string blkstr;
-		MetaDataBlock* newblk = DatabaseAdapter_DocMetaData::load( m_database, &m_descr, blockno);
+		MetaDataBlock* newblk = m_dbadapter.loadPtr( blockno);
 		if (newblk)
 		{
 			m_ar[ blkidx].reset( newblk);

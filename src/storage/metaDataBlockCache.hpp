@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
+#include "databaseAdapter.hpp"
 #include <utility>
 #include <stdexcept>
 #include <cstdlib>
@@ -66,6 +67,7 @@ private:
 private:
 	DatabaseInterface* m_database;
 	MetaDataDescription m_descr;
+	DatabaseAdapter_DocMetaData m_dbadapter;
 	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
 	std::vector<unsigned int> m_voidar;
 };

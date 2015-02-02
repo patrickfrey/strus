@@ -39,6 +39,8 @@
 namespace strus {
 /// \brief Forward declaration
 class Storage;
+/// \brief Forward declaration
+class DatabaseInterface;
 
 /// \class StorageDocumentChecker
 class StorageDocumentChecker
@@ -47,6 +49,7 @@ class StorageDocumentChecker
 public:
 	StorageDocumentChecker(
 		const Storage* storage_,
+		DatabaseInterface* database_,
 		const std::string& docid_,
 		const std::string& logfile_);
 
@@ -136,6 +139,7 @@ private:
 
 private:
 	const Storage* m_storage;
+	DatabaseInterface* m_database;
 	TermMap m_termMap;
 	InvTermMap m_invTermMap;
 	MetaDataMap m_metaDataMap;

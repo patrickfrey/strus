@@ -36,8 +36,7 @@ using namespace strus;
 
 ForwardIterator::ForwardIterator( const Storage* storage_, DatabaseInterface* database_, const std::string& type_)
 	:m_database(database_)
-	,m_forwardBlockStorage(0)
-	,m_curblock(0)
+	,m_dbadapter()
 	,m_blockitr(0)
 	,m_docno(0)
 	,m_typeno(storage_->getTermType( type_))
@@ -47,22 +46,17 @@ ForwardIterator::ForwardIterator( const Storage* storage_, DatabaseInterface* da
 }
 
 ForwardIterator::~ForwardIterator()
-{
-	if (m_forwardBlockStorage) delete m_forwardBlockStorage;
-}
+{}
 
 void ForwardIterator::skipDoc( const Index& docno_)
 {
-	if (m_docno != docno_ || !m_forwardBlockStorage)
+	if ((m_docno != docno_ && !m_docno) || !m_dbadapter.get())
 	{
-		if (m_forwardBlockStorage) delete m_forwardBlockStorage;
-		m_forwardBlockStorage = 0;
-		m_forwardBlockStorage
-			= new BlockStorage<ForwardIndexBlock>( 
-				m_database, DatabaseKey::ForwardIndexPrefix,
-				BlockKey( m_typeno, docno_), false);
+		m_dbadapter.reset(
+			new DatabaseAdapter_ForwardIndex_Cursor(
+				m_database, m_typeno, docno_));
 		m_docno = docno_;
-		m_curblock = 0;
+		m_curblock.clear();
 		m_curblock_lastpos = 0;
 		m_curblock_firstpos = 0;
 		m_blockitr = 0;
@@ -72,11 +66,10 @@ void ForwardIterator::skipDoc( const Index& docno_)
 
 Index ForwardIterator::skipPos( const Index& firstpos_)
 {
-	if (!m_forwardBlockStorage || !m_docno) return 0;
-	if (!m_curblock || firstpos_ < m_curblock_firstpos || firstpos_ > m_curblock_lastpos)
+	if (!m_dbadapter.get() || !m_docno) return 0;
+	if (m_curblock.empty() || firstpos_ < m_curblock_firstpos || firstpos_ > m_curblock_lastpos)
 	{
-		m_curblock = m_forwardBlockStorage->load( firstpos_);
-		if (!m_curblock)
+		if (!m_dbadapter->loadUpperBound( firstpos_, m_curblock))
 		{
 			m_curblock_lastpos = 0;
 			m_curblock_firstpos = 0;
@@ -86,9 +79,9 @@ Index ForwardIterator::skipPos( const Index& firstpos_)
 		}
 		else
 		{
-			m_curblock_lastpos = m_curblock->id();
-			m_curblock_firstpos = m_curblock->position_at( m_curblock->charptr());
-			m_blockitr = m_curblock->charptr();
+			m_curblock_lastpos = m_curblock.id();
+			m_curblock_firstpos = m_curblock.position_at( m_curblock.charptr());
+			m_blockitr = m_curblock.charptr();
 			m_curpos = m_curblock_firstpos;
 			if (m_curpos >= firstpos_)
 			{
@@ -99,11 +92,11 @@ Index ForwardIterator::skipPos( const Index& firstpos_)
 	else if (m_curpos > firstpos_ || m_curpos == 0 || !m_blockitr)
 	{
 		m_curpos = m_curblock_firstpos;
-		m_blockitr = m_curblock->charptr();
+		m_blockitr = m_curblock.charptr();
 	}
-	if (0!=(m_blockitr = m_curblock->upper_bound( firstpos_, m_blockitr)))
+	if (0!=(m_blockitr = m_curblock.upper_bound( firstpos_, m_blockitr)))
 	{
-		m_curpos = m_curblock->position_at( m_blockitr);
+		m_curpos = m_curblock.position_at( m_blockitr);
 	}
 	else
 	{
@@ -114,11 +107,11 @@ Index ForwardIterator::skipPos( const Index& firstpos_)
 
 std::string ForwardIterator::fetch()
 {
-	if (!m_blockitr || !m_curblock)
+	if (!m_blockitr || m_curblock.empty())
 	{
 		throw std::runtime_error("internal: forward iterator fetch called without a term selected");
 	}
-	return std::string( m_curblock->value_at( m_blockitr));
+	return std::string( m_curblock.value_at( m_blockitr));
 }
 
 

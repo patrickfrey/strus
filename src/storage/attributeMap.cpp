@@ -27,7 +27,6 @@
 --------------------------------------------------------------------
 */
 #include "attributeMap.hpp"
-#include "databaseKey.hpp"
 #include "databaseAdapter.hpp"
 
 using namespace strus;

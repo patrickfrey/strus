@@ -176,7 +176,7 @@ void StorageTransaction::closeForwardIndexDocument( const Index& docno)
 void StorageTransaction::deleteIndex( const Index& docno)
 {
 	m_posinfoBlockMap.deleteIndex( docno);
-	m_forwardIndexBlockMap.deleteDocument( docno);
+	m_forwardIndexBlockMap.deleteIndex( docno);
 }
 
 void StorageTransaction::deleteUserAccessRights(
@@ -239,32 +239,33 @@ void StorageTransaction::commit()
 	{
 		throw std::runtime_error( "called transaction commit after rollback");
 	}
-	boost::scoped_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-
-	std::map<Index,Index> termnoUnknownMap;
-	m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
-
-	m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
-
-	std::vector<Index> refreshList;
-	m_attributeMap.getWriteBatch( transaction.get());
-	m_metaDataBlockMap.getWriteBatch( transaction.get(), refreshList);
-
-	m_posinfoBlockMap.getWriteBatch( transaction.get());
-	m_forwardIndexBlockMap.getWriteBatch( transaction.get());
-
-	m_userAclBlockMap.getWriteBatch( transaction.get());
-
-	std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
-	for (; di != de; ++di)
 	{
-		DatabaseAdapter_DocId::store( transaction.get(), di->first, di->second);
+		Storage::TransactionLock lock( m_storage);
+		boost::scoped_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+
+		std::map<Index,Index> termnoUnknownMap;
+		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
+	
+		m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
+	
+		std::vector<Index> refreshList;
+		m_attributeMap.getWriteBatch( transaction.get());
+		m_metaDataBlockMap.getWriteBatch( transaction.get(), refreshList);
+	
+		m_posinfoBlockMap.getWriteBatch( transaction.get());
+		m_forwardIndexBlockMap.getWriteBatch( transaction.get());
+	
+		m_userAclBlockMap.getWriteBatch( transaction.get());
+	
+		std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
+		for (; di != de; ++di)
+		{
+			DatabaseAdapter_DocId(m_database).store( transaction.get(), di->first, di->second);
+		}
+		m_storage->declareNofDocumentsInserted( m_nof_documents);
+		transaction->commit();
+		m_storage->releaseTransaction( refreshList);
 	}
-	m_storage->declareNofDocumentsInserted( m_nof_documents);
-	transaction->commit();
-
-	m_storage->releaseTransaction( refreshList);
-
 	m_commit = true;
 	m_nof_documents = 0;
 }

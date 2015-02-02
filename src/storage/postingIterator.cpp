@@ -37,8 +37,8 @@
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
-#define STRUS_LOWLEVEL_CHECK
+#undef STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
@@ -84,7 +84,10 @@ Index PostingIterator::skipDoc( const Index& docno_)
 
 Index PostingIterator::skipPos( const Index& firstpos_)
 {
-	m_posinfoIterator.skipDoc( m_docno);
+	if (m_docno != m_posinfoIterator.skipDoc( m_docno))
+	{
+		throw std::runtime_error( "corrupt index -- document not in posinfo index");
+	}
 	return m_posinfoIterator.skipPos( firstpos_);
 }
 

@@ -29,7 +29,6 @@
 #ifndef _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "databaseKey.hpp"
 #include <cstdlib>
 #include <stdexcept>
 
@@ -39,18 +38,18 @@ namespace strus {
 class DataBlock
 {
 public:
-	explicit DataBlock( char type_)
-		:m_type(type_),m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
+	explicit DataBlock()
+		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{}
 
-	DataBlock( char type_, const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
-		:m_type(type_),m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
+	DataBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated_=false)
+		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{
 		init( id_, ptr_, size_, allocated_?size_:0);
 	}
 
 	DataBlock( const DataBlock& o)
-		:m_type(o.m_type),m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
+		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{
 		init( o.m_id, o.m_ptr, o.m_size, o.m_allocsize);
 	}
@@ -59,7 +58,6 @@ public:
 
 	DataBlock& operator=( const DataBlock& o)
 	{
-		m_type = o.m_type;
 		init( o.m_id, o.m_ptr, o.m_size, o.m_allocsize);
 		return *this;
 	}
@@ -67,7 +65,6 @@ public:
 
 	void clear()			{m_size=0;}
 	bool empty() const		{return !m_size;}
-	char blocktype() const		{return m_type;}
 	Index id() const		{return m_id;}
 	void setId( const Index& id_)	{m_id = id_;}
 	std::size_t size() const	{return m_size;}
@@ -115,7 +112,6 @@ private:
 	void expand( std::size_t datasize);
 
 private:
-	char m_type;
 	Index m_id;
 	char* m_ptr;
 	std::size_t m_size;

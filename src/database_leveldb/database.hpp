@@ -51,7 +51,7 @@ public:
 
 	virtual DatabaseTransactionInterface* createTransaction();
 
-	virtual DatabaseCursorInterface* createCursor( bool useCache);
+	virtual DatabaseCursorInterface* createCursor( bool useCache) const;
 
 	virtual void writeImm(
 			const char* key,
@@ -72,15 +72,11 @@ public:
 public:
 	void cleanup();
 	friend class DatabaseTransaction;
-	void releaseTransaction();
 
 private:
 	leveldb::DB* m_db;					///< levelDB handle
 	leveldb::Options m_dboptions;				///< options for levelDB
 	bool m_closed;						///< true, if 'close()' has been called
-
-	bool m_transactionOpen;
-	boost::mutex m_transactionOpen_mutex;			///< mutual exclusion for accessing 'm_transactionOpen'
 };
 
 }//namespace

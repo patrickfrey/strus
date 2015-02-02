@@ -30,6 +30,7 @@
 #include "booleanBlockMap.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "databaseAdapter.hpp"
 #include "keyMap.hpp"
 
 using namespace strus;
@@ -105,23 +106,22 @@ void UserAclBlockMap::deleteDocumentAccess(
 static void resetAllBooleanBlockElementsFromStorage(
 	UserAclBlockMap::Map& map,
 	const Index& idx,
-	BlockStorage<BooleanBlock>& storage)
+	DatabaseAdapter_BooleanBlock_Cursor& dbadapter)
 {
-	const BooleanBlock* blk;
-	Index blkidx=0;
-	while (0!=(blk=storage.load( blkidx)))
+	BooleanBlock blk;
+	for (bool more=dbadapter.loadFirst( blk)
+		;more; more=dbadapter.loadNext( blk))
 	{
-		char const* blkitr = blk->charptr();
+		char const* blkitr = blk.charptr();
 		Index from_;
 		Index to_;
-		while (blk->getNextRange( blkitr, from_, to_))
+		while (blk.getNextRange( blkitr, from_, to_))
 		{
 			for (; from_<=to_; ++from_)
 			{
-				map[ UserAclBlockMap::MapKey( idx, from_)]; // reset to false, only if it does not exist
+				map[ UserAclBlockMap::MapKey( blk.id(), from_)]; // reset to false, only if it does not exist
 			}
 		}
-		blkidx = blk->id()+1;
 	}
 }
 
@@ -153,21 +153,15 @@ void UserAclBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	std::vector<Index>::const_iterator di = m_usr_deletes.begin(), de = m_usr_deletes.end();
 	for (; di != de; ++di)
 	{
-		BlockStorage<BooleanBlock> usrstorage(
-				m_database, DatabaseKey::UserAclBlockPrefix,
-				BlockKey(*di), false);
-
-		resetAllBooleanBlockElementsFromStorage( m_usrmap, *di, usrstorage);
+		DatabaseAdapter_UserAclBlock_Cursor dbadapter_userAcl( m_database, *di);
+		resetAllBooleanBlockElementsFromStorage( m_usrmap, *di, dbadapter_userAcl);
 	}
 
 	std::vector<Index>::const_iterator ai = m_acl_deletes.begin(), ae = m_acl_deletes.end();
 	for (; ai != ae; ++ai)
 	{
-		BlockStorage<BooleanBlock> aclstorage(
-				m_database, DatabaseKey::AclBlockPrefix,
-				BlockKey(*ai), false);
-
-		resetAllBooleanBlockElementsFromStorage( m_aclmap, *ai, aclstorage);
+		DatabaseAdapter_AclBlock_Cursor dbadapter_acl( m_database, *ai);
+		resetAllBooleanBlockElementsFromStorage( m_aclmap, *ai, dbadapter_acl);
 	}
 
 	Map::const_iterator mi = m_usrmap.begin(), me = m_usrmap.end();
@@ -182,18 +176,15 @@ void UserAclBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 
 		Index lastInsertBlockId = rangear.back().to;
 
-		BlockStorage<BooleanBlock> blkstorage(
-				m_database, DatabaseKey::UserAclBlockPrefix,
-				BlockKey(start->first.first), false);
-		BooleanBlock newblk( (char)DatabaseKey::UserAclBlockPrefix);
-
 		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
+		DatabaseAdapter_UserAclBlock_Cursor dbadapter_userAcl( m_database, start->first.first);
+		BooleanBlock newblk;
 
 		// [1] Merge new elements with existing upper bound blocks:
-		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, transaction);
+		BooleanBlockMap::mergeNewElements( &dbadapter_userAcl, ri, re, newblk, transaction);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, transaction);
+		BooleanBlockMap::insertNewElements( &dbadapter_userAcl, ri, re, newblk, lastInsertBlockId, transaction);
 	}
 
 	mi = m_aclmap.begin(), me = m_aclmap.end();
@@ -207,18 +198,15 @@ void UserAclBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		}
 		Index lastInsertBlockId = rangear.back().to;
 
-		BlockStorage<BooleanBlock> blkstorage(
-				m_database, DatabaseKey::AclBlockPrefix,
-				BlockKey(start->first.first), false);
-		BooleanBlock newblk( (char)DatabaseKey::AclBlockPrefix);
-
 		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
+		DatabaseAdapter_AclBlock_Cursor dbadapter_acl( m_database, start->first.first);
+		BooleanBlock newblk;
 
 		// [1] Merge new elements with existing upper bound blocks:
-		BooleanBlockMap::mergeNewElements( blkstorage, ri, re, newblk, transaction);
+		BooleanBlockMap::mergeNewElements( &dbadapter_acl, ri, re, newblk, transaction);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		BooleanBlockMap::insertNewElements( blkstorage, ri, re, newblk, lastInsertBlockId, transaction);
+		BooleanBlockMap::insertNewElements( &dbadapter_acl, ri, re, newblk, lastInsertBlockId, transaction);
 	}
 	m_usrmap.clear();
 	m_aclmap.clear();

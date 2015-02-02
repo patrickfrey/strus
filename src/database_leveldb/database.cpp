@@ -37,7 +37,7 @@
 using namespace strus;
 
 Database::Database( const char* path_, unsigned int cachesize_k, bool compression)
-	:m_db(0),m_closed(false),m_transactionOpen(0)
+	:m_db(0),m_closed(false)
 {
 	m_dboptions.create_if_missing = false;
 	if (cachesize_k)
@@ -88,36 +88,14 @@ void Database::cleanup()
 
 void Database::close()
 {
-	boost::mutex::scoped_lock lock( m_transactionOpen_mutex);
-	if (m_transactionOpen)
-	{
-		throw std::logic_error( "tried to close key value store database with a transaction alive");
-	}
 }
 
 DatabaseTransactionInterface* Database::createTransaction()
 {
-	boost::mutex::scoped_lock lock( m_transactionOpen_mutex);
-	if (m_transactionOpen)
-	{
-		throw std::runtime_error( "this key value store database implementation allows only one transaction at a time");
-	}
-	DatabaseTransaction* rt = new DatabaseTransaction( m_db, this);
-	m_transactionOpen = true;
-	return rt;
+	return new DatabaseTransaction( m_db, this);
 }
 
-void Database::releaseTransaction()
-{
-	boost::mutex::scoped_lock lock( m_transactionOpen_mutex);
-	if (!m_transactionOpen)
-	{
-		throw std::logic_error( "something very bad happened: transaction flag inconsistency");
-	}
-	m_transactionOpen = false;
-}
-
-DatabaseCursorInterface* Database::createCursor( bool useCache)
+DatabaseCursorInterface* Database::createCursor( bool useCache) const
 {
 	return new DatabaseCursor( m_db, useCache);
 }

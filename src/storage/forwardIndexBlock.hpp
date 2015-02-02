@@ -29,7 +29,6 @@
 #ifndef _STRUS_LVDB_FORWARD_INDEX_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_FORWARD_INDEX_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
-#include "databaseKey.hpp"
 #include "localStructAllocator.hpp"
 #include <string>
 #include <map>
@@ -47,12 +46,11 @@ public:
 	};
 
 public:
-	explicit ForwardIndexBlock()
-		:DataBlock( (char)DatabaseKey::ForwardIndexPrefix){}
+	ForwardIndexBlock(){}
 	ForwardIndexBlock( const ForwardIndexBlock& o)
 		:DataBlock(o){}
 	ForwardIndexBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( (char)DatabaseKey::ForwardIndexPrefix, id_, ptr_, size_){}
+		:DataBlock( id_, ptr_, size_){}
 
 	ForwardIndexBlock& operator=( const ForwardIndexBlock& o)
 	{

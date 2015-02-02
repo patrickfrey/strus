@@ -32,7 +32,6 @@
 #include "booleanBlock.hpp"
 #include "localStructAllocator.hpp"
 #include "blockKey.hpp"
-#include "blockStorage.hpp"
 #include <cstdlib>
 
 namespace strus {

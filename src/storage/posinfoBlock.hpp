@@ -29,7 +29,6 @@
 #ifndef _STRUS_LVDB_POSINFO_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_POSINFO_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
-#include "databaseKey.hpp"
 #include <vector>
 #include <map>
 
@@ -47,11 +46,11 @@ public:
 
 public:
 	explicit PosinfoBlock()
-		:DataBlock( (char)DatabaseKey::PosinfoBlockPrefix){}
+		:DataBlock(){}
 	PosinfoBlock( const PosinfoBlock& o)
 		:DataBlock(o){}
 	PosinfoBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( (char)DatabaseKey::PosinfoBlockPrefix, id_, ptr_, size_){}
+		:DataBlock( id_, ptr_, size_){}
 
 	PosinfoBlock& operator=( const PosinfoBlock& o)
 	{
@@ -60,10 +59,6 @@ public:
 	}
 
 	void setId( const Index& id_);
-	void swap( PosinfoBlock& o)
-	{
-		DataBlock::swap( o);
-	}
 	Index docno_at( const char* ref) const;
 	std::vector<Index> positions_at( const char* itr) const;
 	unsigned int frequency_at( const char* itr) const;

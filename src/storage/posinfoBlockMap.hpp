@@ -33,8 +33,8 @@
 #include "booleanBlock.hpp"
 #include "invTermBlock.hpp"
 #include "documentFrequencyMap.hpp"
+#include "databaseAdapter.hpp"
 #include "blockKey.hpp"
-#include "blockStorage.hpp"
 #include "localStructAllocator.hpp"
 #include <vector>
 #include <iostream>
@@ -100,7 +100,7 @@ private:
 			bool isMember);
 
 	void insertNewPosElements(
-			BlockStorage<PosinfoBlock>& blkstorage,
+			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
 			PosinfoBlock& newposblk,
@@ -109,17 +109,18 @@ private:
 			DatabaseTransactionInterface* transaction);
 
 	void mergeNewPosElements(
-			BlockStorage<PosinfoBlock>& blkstorage,
+			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo,
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
 			PosinfoBlock& newposblk,
 			std::vector<BooleanBlock::MergeRange>& docrangear,
 			DatabaseTransactionInterface* transaction);
 
-	PosinfoBlock mergePosBlock(
+	void mergePosBlock(
 			Map::const_iterator ei,
 			const Map::const_iterator& ee,
-			const PosinfoBlock& oldblk);
+			const PosinfoBlock& oldblk,
+			PosinfoBlock& newblk);
 
 	void clear();
 

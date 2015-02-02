@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
 #define _STRUS_LVDB_EXTRACT_KEY_VALUE_DATA_HPP_INCLUDED
-#include "databaseKey.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "metaDataDescription.hpp"
 #include "metaDataBlock.hpp"

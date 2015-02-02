@@ -27,74 +27,91 @@
 --------------------------------------------------------------------
 */
 #include "booleanBlockMap.hpp"
+#include "databaseAdapter.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;
 
 void BooleanBlockMap::insertNewElements(
-		BlockStorage<BooleanBlock>& blkstorage,
+		DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 		BooleanBlock& newblk,
 		const Index& lastInsertBlockId,
 		DatabaseTransactionInterface* transaction)
 {
-	if (newblk.id() < lastInsertBlockId)
+	if (ei == ee)
 	{
-		newblk.setId( lastInsertBlockId);
-	}
-	Index blkid = newblk.id();
-	for (; ei != ee; ++ei)
-	{
-		// Define posinfo block elements (PosinfoBlock):
-		if (newblk.full())
+		if (!newblk.empty())
 		{
-			newblk.setId( blkid);
-			blkstorage.store( newblk, transaction);
+			dbadapter->store( transaction, newblk);
 			newblk.clear();
-			newblk.setId( lastInsertBlockId);
 		}
-		if (ei->isMember)
-		{
-			newblk.defineRange( ei->from, ei->to - ei->from);
-		}
-		blkid = ei->to;
 	}
-	if (!newblk.empty())
+	while (ei != ee)
 	{
-		newblk.setId( blkid);
-		blkstorage.store( newblk, transaction);
+		Index blockid = lastInsertBlockId;
+		std::vector<BooleanBlock::MergeRange>::iterator bi = ei;
+		for (std::size_t mm = newblk.size(); ei != ee && mm < BooleanBlock::MaxBlockSize; ++ei)
+		{
+			// ... estimate block size approximately
+			if (ei->isMember)
+			{
+				if (ei->from == ei->to)
+				{
+					mm += 2;
+				}
+				else
+				{
+					mm += 4;
+				}
+			}
+			blockid = ei->to;
+		}
+		// set new block id:
+		newblk.setId( blockid);
+
+		// insert member elements:
+		for (; bi != ei; ++bi)
+		{
+			if (bi->isMember)
+			{
+				newblk.defineRange( bi->from, bi->to - bi->from);
+			}
+		}
+		// store it:
+		dbadapter->store( transaction, newblk);
+		newblk.clear();
 	}
 }
 
 void BooleanBlockMap::mergeNewElements(
-		BlockStorage<BooleanBlock>& blkstorage,
+		DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 		BooleanBlock& newblk,
 		DatabaseTransactionInterface* transaction)
 {
-	const BooleanBlock* blk;
-	while (ei != ee && 0!=(blk=blkstorage.load( ei->from)))
+	BooleanBlock blk;
+	while (ei != ee && dbadapter->loadUpperBound( ei->from, blk))
 	{
-		// Merge posinfo block elements (PosinfoBlock):
 		Index splitStart = 0;
 		Index splitEnd = 0;
 
 		std::vector<BooleanBlock::MergeRange>::iterator newblk_start = ei;
-		for (; ei != ee && ei->from <= blk->id(); ++ei)
+		for (; ei != ee && ei->from <= blk.id(); ++ei)
 		{
-			if (ei->to > blk->id())
+			if (ei->to > blk.id())
 			{
 				// ... last element is overlapping block borders, so we split it
-				splitStart = blk->id()+1;
+				splitStart = blk.id()+1;
 				splitEnd = ei->to; 
-				ei->to = blk->id();
+				ei->to = blk.id();
 			}
 		}
 
-		newblk = BooleanBlock::merge( newblk_start, ei, *blk);
+		BooleanBlock::merge( newblk_start, ei, blk, newblk);
 		if (splitStart)
 		{
 			// ... last element is overlapping block borders, no we assign the second half of it to the block
@@ -102,23 +119,23 @@ void BooleanBlockMap::mergeNewElements(
 			ei->from = splitStart;
 			ei->to = splitEnd;
 		}
-		if (blkstorage.loadNext())
+		if (dbadapter->loadNext( blk))
 		{
-			// ... is not the last block, so we store it
-			blkstorage.store( newblk, transaction);
+			// ... is not the last block, so we store it and start with a new one
+			dbadapter->store( transaction, newblk);
 			newblk.clear();
 		}
 		else
 		{
 			if (newblk.full())
 			{
-				// ... it is the last block, but full
-				blkstorage.store( newblk, transaction);
+				// ... it is not the last block, but full, so we store it and start with a new one
+				dbadapter->store( transaction, newblk);
 				newblk.clear();
 			}
 			else
 			{
-				blkstorage.dispose( newblk.id(), transaction);
+				dbadapter->remove( transaction, newblk.id());
 			}
 			break;
 		}
@@ -127,10 +144,13 @@ void BooleanBlockMap::mergeNewElements(
 	{
 		// Fill first new block with elements of last 
 		// block and dispose the last block:
-		if (ei != ee &&  0!=(blk=blkstorage.loadLast()))
+		if (ei != ee && dbadapter->loadLast( blk))
 		{
-			newblk.initcopy( *blk);
-			blkstorage.dispose( blk->id(), transaction);
+			if (!blk.full())
+			{
+				newblk.initcopy( blk);
+				dbadapter->remove( transaction, blk.id());
+			}
 		}
 	}
 }

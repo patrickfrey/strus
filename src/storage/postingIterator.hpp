@@ -32,8 +32,6 @@
 #include "strus/reference.hpp"
 #include "posinfoIterator.hpp"
 #include "indexSetIterator.hpp"
-#include "blockStorage.hpp"
-#include "databaseKey.hpp"
 
 namespace strus {
 /// \brief Forward declaration

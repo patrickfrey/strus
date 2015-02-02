@@ -57,7 +57,7 @@ public:
 	/// \brief Create an object for reading values from and iterating on the key value store database
 	/// \param[in] useCache Hint for cursor to cache visited key/value elements or blocks
 	/// \return the created cursor interface to be disposed with delete by the caller
-	virtual DatabaseCursorInterface* createCursor( bool useCache)=0;
+	virtual DatabaseCursorInterface* createCursor( bool useCache) const=0;
 
 	/// \brief Write a key value immediately (synchronized)
 	/// \param[in] key pointer to the key of the item to write

@@ -29,8 +29,7 @@
 #ifndef _STRUS_LVDB_INDEX_SET_ITERATOR_HPP_INCLUDED
 #define _STRUS_LVDB_INDEX_SET_ITERATOR_HPP_INCLUDED
 #include "booleanBlock.hpp"
-#include "blockStorage.hpp"
-#include "databaseKey.hpp"
+#include "databaseAdapter.hpp"
 
 namespace strus {
 
@@ -41,7 +40,6 @@ class IndexSetIterator
 {
 public:
 	IndexSetIterator( DatabaseInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_);
-	IndexSetIterator( const IndexSetIterator& o);
 	~IndexSetIterator(){}
 
 	Index skip( const Index& elemno_);
@@ -51,8 +49,8 @@ private:
 	bool loadBlock( const Index& elemno_);
 
 private:
-	BlockStorage<BooleanBlock> m_elemStorage;
-	const BooleanBlock* m_elemBlk;
+	DatabaseAdapter_BooleanBlock_Cursor m_dbadapter;
+	BooleanBlock m_elemBlk;
 	char const* m_elemItr;
 
 	Index m_elemno;

@@ -34,7 +34,6 @@
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include "metaDataBlockCache.hpp"
-#include "databaseKey.hpp"
 #include "indexSetIterator.hpp"
 #include "varSizeNodeTree.hpp"
 #include <boost/thread/mutex.hpp>

@@ -86,7 +86,7 @@ static inline std::size_t utf8encode( char* buf, int32_t chr)
 {
 	if (chr<0)
 	{
-		throw std::runtime_error( "Illegal unicode character");
+		throw std::runtime_error( "illegal unicode character");
 	}
 	if (chr <= 127)
 	{

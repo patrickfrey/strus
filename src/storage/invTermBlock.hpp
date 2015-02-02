@@ -29,7 +29,6 @@
 #ifndef _STRUS_LVDB_INVTERM_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_INVTERM_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
-#include "databaseKey.hpp"
 #include <vector>
 #include <map>
 
@@ -45,23 +44,22 @@ public:
 	{
 		Index typeno;
 		Index termno;
-		Index df;
+		Index ff;
 
 		Element()
-			:typeno(0),termno(0),df(0){}
+			:typeno(0),termno(0),ff(0){}
 		Element( const Element& o)
-			:typeno(o.typeno),termno(o.termno),df(o.df){}
-		Element( const Index& typeno_, const Index& termno_, const Index& df_)
-			:typeno(typeno_),termno(termno_),df(df_){}
+			:typeno(o.typeno),termno(o.termno),ff(o.ff){}
+		Element( const Index& typeno_, const Index& termno_, const Index& ff_)
+			:typeno(typeno_),termno(termno_),ff(ff_){}
 	};
 
 public:
-	explicit InvTermBlock()
-		:DataBlock( (char)DatabaseKey::InverseTermPrefix){}
+	InvTermBlock(){}
 	InvTermBlock( const InvTermBlock& o)
 		:DataBlock(o){}
-	InvTermBlock( const Index& id_, const void* ptr_, std::size_t size_)
-		:DataBlock( (char)DatabaseKey::InverseTermPrefix, id_, ptr_, size_){}
+	InvTermBlock( const Index& id_, const void* ptr_, std::size_t size_, bool allocated=false)
+		:DataBlock( id_, ptr_, size_, allocated){}
 
 	InvTermBlock& operator=( const InvTermBlock& o)
 	{
@@ -82,7 +80,7 @@ public:
 
 	const char* next( const char* ref) const;
 
-	void append( const Index& typeno, const Index& termno, const Index& df);
+	void append( const Index& typeno, const Index& termno, const Index& ff);
 };
 
 }//namespace

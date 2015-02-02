@@ -47,13 +47,16 @@ public:
 			std::size_t blksize_);
 
 	MetaDataBlock( const MetaDataBlock& o);
-
 	~MetaDataBlock();
 
+	void swap( MetaDataBlock& o);
+	bool empty() const						{return m_ptr==0;}
 	void init( const MetaDataDescription* descr_, 
 			const Index& blockno_,
 			const char* blk_,
 			std::size_t blksize_);
+
+	void init( const MetaDataDescription* descr_, const Index& blockno_);
 
 	static std::size_t index( const Index& docno)			{return (docno-1) & BlockMask;}
 	static Index blockno( const Index& docno)			{return ((docno-1)>>BlockShift)+1;}

@@ -29,7 +29,11 @@
 #ifndef _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
 #define _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseCursorInterface.hpp"
+#include "strus/reference.hpp"
 #include "databaseKey.hpp"
+#include "blockKey.hpp"
 #include <utility>
 #include <string>
 #include <cstring>
@@ -37,134 +41,265 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
-/// \brief Forward declaration
 class DatabaseTransactionInterface;
-/// \brief Forward declaration
-class DatabaseCursorInterface;
 /// \brief Forward declaration
 class MetaDataBlock;
 /// \brief Forward declaration
 class MetaDataDescription;
 /// \brief Forward declaration
 class PosinfoBlock;
+/// \brief Forward declaration
+class BooleanBlock;
+/// \brief Forward declaration
+class InvTermBlock;
+/// \brief Forward declaration
+class DataBlock;
+/// \brief Forward declaration
+class ForwardIndexBlock;
 
-class DatabaseAdapter_StringIndex_Base
-{
-public:
-	static Index get( char prefix, const DatabaseInterface* database, const std::string& key);
-	static bool load( char prefix, const DatabaseInterface* database, const std::string& key, Index& value);
-	static void store( char prefix, DatabaseTransactionInterface* transaction, const std::string& key, const Index& value);
-	static void remove( char prefix, DatabaseTransactionInterface* transaction, const std::string& key);
-	static void storeImm( char prefix, DatabaseInterface* database, const std::string& key, const Index& value);
-};
-
-template <char KeyPrefix>
 class DatabaseAdapter_StringIndex
-	:public DatabaseAdapter_StringIndex_Base
 {
 public:
-	static Index get( const DatabaseInterface* database, const std::string& key)
-	{
-		return DatabaseAdapter_StringIndex_Base::get( KeyPrefix, database, key);
-	}
-	static bool load( const DatabaseInterface* database, const std::string& key, Index& value)
-	{
-		return DatabaseAdapter_StringIndex_Base::load( KeyPrefix, database, key, value);
-	}
-	static void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value)
-	{
-		DatabaseAdapter_StringIndex_Base::store( KeyPrefix, transaction, key, value);
-	}
-	static void remove( DatabaseTransactionInterface* transaction, const std::string& key)
-	{
-		DatabaseAdapter_StringIndex_Base::remove( KeyPrefix, transaction, key);
-	}
-	static void storeImm( DatabaseInterface* database, const std::string& key, const Index& value)
-	{
-		DatabaseAdapter_StringIndex_Base::storeImm( KeyPrefix, database, key, value);
-	}
+	DatabaseAdapter_StringIndex( char prefix_, DatabaseInterface* database_)
+		:m_prefix(prefix_),m_database(database_){}
+
+	Index get( const std::string& key);
+	bool load( const std::string& key, Index& value);
+	void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value);
+	void remove( DatabaseTransactionInterface* transaction, const std::string& key);
+	void storeImm( const std::string& key, const Index& value);
+
+private:
+	char m_prefix;
+	DatabaseInterface* m_database;
 };
 
 class DatabaseAdapter_TermType
-	:public DatabaseAdapter_StringIndex<DatabaseKey::TermTypePrefix>{};
-
-class DatabaseAdapter_TermValue
-	:public DatabaseAdapter_StringIndex<DatabaseKey::TermValuePrefix>{};
-
-class DatabaseAdapter_DocId
-	:public DatabaseAdapter_StringIndex<DatabaseKey::DocIdPrefix>{};
-
-class DatabaseAdapter_Variable
-	:public DatabaseAdapter_StringIndex<DatabaseKey::VariablePrefix>{};
-
-class DatabaseAdapter_AttributeKey
-	:public DatabaseAdapter_StringIndex<DatabaseKey::AttributeKeyPrefix>{};
-
-class DatabaseAdapter_UserName
-	:public DatabaseAdapter_StringIndex<DatabaseKey::UserNamePrefix>{};
-
-class DatabaseAdapter_ForwardIndex
+	:public DatabaseAdapter_StringIndex
 {
 public:
+	explicit DatabaseAdapter_TermType( DatabaseInterface* database_)
+		:DatabaseAdapter_StringIndex((char)DatabaseKey::TermTypePrefix, database_){}
+};
+
+class DatabaseAdapter_TermValue
+	:public DatabaseAdapter_StringIndex
+{
+public:
+	explicit DatabaseAdapter_TermValue( DatabaseInterface* database_)
+		:DatabaseAdapter_StringIndex((char)DatabaseKey::TermValuePrefix, database_){}
+};
+
+class DatabaseAdapter_DocId
+	:public DatabaseAdapter_StringIndex
+{
+public:
+	explicit DatabaseAdapter_DocId( DatabaseInterface* database_)
+		:DatabaseAdapter_StringIndex((char)DatabaseKey::DocIdPrefix, database_){}
+};
+
+class DatabaseAdapter_Variable
+	:public DatabaseAdapter_StringIndex
+{
+public:
+	explicit DatabaseAdapter_Variable( DatabaseInterface* database_)
+		:DatabaseAdapter_StringIndex((char)DatabaseKey::VariablePrefix, database_){}
+};
+
+class DatabaseAdapter_AttributeKey
+	:public DatabaseAdapter_StringIndex
+{
+public:
+	explicit DatabaseAdapter_AttributeKey( DatabaseInterface* database_)
+		:DatabaseAdapter_StringIndex((char)DatabaseKey::AttributeKeyPrefix, database_){}
+};
+
+class DatabaseAdapter_UserName
+	:public DatabaseAdapter_StringIndex
+{
+public:
+	explicit DatabaseAdapter_UserName( DatabaseInterface* database_)
+		:DatabaseAdapter_StringIndex((char)DatabaseKey::UserNamePrefix, database_){}
+};
+
+
+class DatabaseAdapter_DataBlock
+{
+public:
+	DatabaseAdapter_DataBlock( DatabaseInterface* database_, char prefix_, const BlockKey& domainKey_)
+		:m_database(database_),m_dbkey(prefix_,domainKey_),m_domainKeySize(0)
+	{
+		m_domainKeySize = m_dbkey.size();
+	}
+
+	bool load( const Index& docno, DataBlock& blk);
+	void store( DatabaseTransactionInterface* transaction, const DataBlock& blk);
+	void remove( DatabaseTransactionInterface* transaction, const Index& elemno);
+	void removeSubTree( DatabaseTransactionInterface* transaction);
+
+protected:
+	enum {KeyPrefix=DatabaseKey::PosinfoBlockPrefix};
+	DatabaseInterface* m_database;
+	DatabaseKey m_dbkey;
+	std::size_t m_domainKeySize;
+};
+
+
+class DatabaseAdapter_DataBlock_Cursor
+	:public DatabaseAdapter_DataBlock
+{
+public:
+	DatabaseAdapter_DataBlock_Cursor( DatabaseInterface* database_, char prefix_, const BlockKey& domainKey_)
+		:DatabaseAdapter_DataBlock( database_,prefix_,domainKey_),m_cursor(database_->createCursor(true))
+	{
+		m_domainKeySize = m_dbkey.size();
+	}
+
+	bool loadUpperBound( const Index& elemno, DataBlock& blk);
+	bool loadFirst( DataBlock& blk);
+	bool loadNext( DataBlock& blk);
+	bool loadLast( DataBlock& blk);
+
+private:
+	bool getBlock( const DatabaseCursorInterface::Slice& key, DataBlock& blk);
+
+protected:
+	Reference<DatabaseCursorInterface> m_cursor;
+};
+
+
+class DatabaseAdapter_ForwardIndex_Cursor
+	:protected DatabaseAdapter_DataBlock_Cursor
+{
+public:
+	DatabaseAdapter_ForwardIndex_Cursor( DatabaseInterface* database_, const Index& typeno_, const Index& docno_)
+		:DatabaseAdapter_DataBlock_Cursor( database_,(char)KeyPrefix, BlockKey(typeno_,docno_)){}
+
+	bool load( const Index& posno, ForwardIndexBlock& blk);
+	void store( DatabaseTransactionInterface* transaction, const ForwardIndexBlock& blk);
+	void remove( DatabaseTransactionInterface* transaction, const Index& posno);
+	void removeSubTree( DatabaseTransactionInterface* transaction);
+
+	bool loadUpperBound( const Index& posno, ForwardIndexBlock& blk);
+	bool loadFirst( ForwardIndexBlock& blk);
+	bool loadNext( ForwardIndexBlock& blk);
+	bool loadLast( ForwardIndexBlock& blk);
+
 private:
 	enum {KeyPrefix=DatabaseKey::ForwardIndexPrefix};
 };
 
-class DatabaseAdapter_PosinfoBlock
+
+class DatabaseAdapter_PosinfoBlock_Cursor
+	:public DatabaseAdapter_DataBlock_Cursor
 {
 public:
-	static bool loadUpperBound( DatabaseCursorInterface* cursor, const Index& typeno, const Index& termno, const Index& docno, PosinfoBlock& blk);
-	static bool loadFirst( DatabaseCursorInterface* cursor, const Index& typeno, const Index& termno, PosinfoBlock& blk);
-	static bool loadNext( DatabaseCursorInterface* cursor, PosinfoBlock& blk);
-	static void store( DatabaseTransactionInterface* transaction, const Index& typeno, const Index& termno, const PosinfoBlock& blk);
-	static void remove( DatabaseTransactionInterface* transaction, const Index& typeno, const Index& termno, const Index& docno);
+	DatabaseAdapter_PosinfoBlock_Cursor( DatabaseInterface* database_, const Index& typeno_, const Index& termno_)
+		:DatabaseAdapter_DataBlock_Cursor( database_,(char)KeyPrefix, BlockKey(typeno_,termno_)){}
+
+	bool loadUpperBound( const Index& docno, PosinfoBlock& blk);
+	bool loadFirst( PosinfoBlock& blk);
+	bool loadNext( PosinfoBlock& blk);
+	bool loadLast( PosinfoBlock& blk);
+	void store( DatabaseTransactionInterface* transaction, const PosinfoBlock& blk);
+	void remove( DatabaseTransactionInterface* transaction, const Index& docno);
 
 private:
 	enum {KeyPrefix=DatabaseKey::PosinfoBlockPrefix};
 };
 
+
 class DatabaseAdapter_InverseTerm
+	:protected DatabaseAdapter_DataBlock
 {
 public:
+	DatabaseAdapter_InverseTerm( DatabaseInterface* database_)
+		:DatabaseAdapter_DataBlock( database_,(char)KeyPrefix, BlockKey()){}
+
+	bool load( const Index& docno, InvTermBlock& blk);
+	void store( DatabaseTransactionInterface* transaction, const InvTermBlock& blk);
+	void remove( DatabaseTransactionInterface* transaction, const Index& docno);
+	void removeSubTree( DatabaseTransactionInterface* transaction);
+
 private:
 	enum {KeyPrefix=DatabaseKey::InverseTermPrefix};
 };
 
-class DatabaseAdapter_UserAclBlock
+
+class DatabaseAdapter_BooleanBlock_Cursor
+	:public DatabaseAdapter_DataBlock_Cursor
 {
 public:
+	DatabaseAdapter_BooleanBlock_Cursor( DatabaseInterface* database_, char prefix, const BlockKey& domainKey_)
+		:DatabaseAdapter_DataBlock_Cursor( database_, prefix, domainKey_){}
+
+	bool loadUpperBound( const Index& docno, BooleanBlock& blk);
+	bool loadFirst( BooleanBlock& blk);
+	bool loadNext( BooleanBlock& blk);
+	bool loadLast( BooleanBlock& blk);
+	void store( DatabaseTransactionInterface* transaction, const BooleanBlock& blk);
+	void remove( DatabaseTransactionInterface* transaction, const Index& docno);
+};
+
+
+class DatabaseAdapter_UserAclBlock_Cursor
+	:public DatabaseAdapter_BooleanBlock_Cursor
+{
+public:
+	DatabaseAdapter_UserAclBlock_Cursor( DatabaseInterface* database_, const Index& docno_)
+		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(docno_)){}
+
 private:
 	enum {KeyPrefix=DatabaseKey::UserAclBlockPrefix};
 };
 
-class DatabaseAdapter_AclBlock
+
+class DatabaseAdapter_AclBlock_Cursor
+	:public DatabaseAdapter_BooleanBlock_Cursor
 {
 public:
+	DatabaseAdapter_AclBlock_Cursor( DatabaseInterface* database_, const Index& userno_)
+		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(userno_)){}
+	
 private:
 	enum {KeyPrefix=DatabaseKey::AclBlockPrefix};
 };
 
-class DatabaseAdapter_DocListBlock
+
+class DatabaseAdapter_DocListBlock_Cursor
+	:public DatabaseAdapter_BooleanBlock_Cursor
 {
 public:
+	DatabaseAdapter_DocListBlock_Cursor( DatabaseInterface* database_, const Index& typeno_, const Index& termno_)
+		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(typeno_,termno_)){}
 private:
 	enum {KeyPrefix=DatabaseKey::DocListBlockPrefix};
 };
 
+
 class DatabaseAdapter_DocMetaData
 {
 public:
-	static MetaDataBlock* load( const DatabaseInterface* database, const MetaDataDescription* descr, const Index& blockno);
-	static bool seek( DatabaseCursorInterface* cursor, const Index& blockno);
-	static MetaDataBlock* loadFirst( DatabaseCursorInterface* cursor, const MetaDataDescription* descr);
-	static MetaDataBlock* loadNext( DatabaseCursorInterface* cursor, const MetaDataDescription* descr);
-	static void store( DatabaseTransactionInterface* transaction, const MetaDataBlock& blk);
-	static void remove( DatabaseTransactionInterface* transaction, const Index& blockno);
+	explicit DatabaseAdapter_DocMetaData( const DatabaseInterface* database_, const MetaDataDescription* descr_)
+		:m_database( database_),m_descr(descr_){}
+
+	MetaDataBlock* loadPtr( const Index& blockno);
+	bool load( const Index& blockno, MetaDataBlock& blk);
+	bool loadFirst( MetaDataBlock& blk);
+	bool loadNext( MetaDataBlock& blk);
+	void store( DatabaseTransactionInterface* transaction, const MetaDataBlock& blk);
+	void remove( DatabaseTransactionInterface* transaction, const Index& blockno);
+
+private:
+	bool getBlock( const DatabaseCursorInterface::Slice& key, MetaDataBlock& blk);
 
 private:
 	enum {KeyPrefix=DatabaseKey::DocMetaDataPrefix};
+	const DatabaseInterface* m_database;
+	Reference<DatabaseCursorInterface> m_cursor;
+	const MetaDataDescription* m_descr;
 };
+
 
 class DatabaseAdapter_DocAttribute
 {

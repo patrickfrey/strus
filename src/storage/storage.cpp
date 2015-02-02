@@ -38,11 +38,9 @@
 #include "storageDocumentChecker.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
-#include "databaseKey.hpp"
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
-#include "blockStorage.hpp"
 #include "statistics.hpp"
 #include "attributeReader.hpp"
 #include "keyMap.hpp"
@@ -121,29 +119,31 @@ void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 
 void Storage::loadVariables()
 {
-	if (!DatabaseAdapter_Variable::load( m_database, "TermNo", m_next_termno)
-	||  !DatabaseAdapter_Variable::load( m_database, "TypeNo", m_next_typeno)
-	||  !DatabaseAdapter_Variable::load( m_database, "DocNo", m_next_docno)
-	||  !DatabaseAdapter_Variable::load( m_database, "AttribNo", m_next_attribno)
-	||  !DatabaseAdapter_Variable::load( m_database, "NofDocs", m_nof_documents))
+	DatabaseAdapter_Variable varstor( m_database);
+	if (!varstor.load( "TermNo", m_next_termno)
+	||  !varstor.load( "TypeNo", m_next_typeno)
+	||  !varstor.load( "DocNo", m_next_docno)
+	||  !varstor.load( "AttribNo", m_next_attribno)
+	||  !varstor.load( "NofDocs", m_nof_documents))
 	{
 		throw std::runtime_error( "corrupt storage, not all mandatory variables defined");
 	}
-	(void)DatabaseAdapter_Variable::load( m_database, "UserNo", m_next_userno);
+	(void)varstor.load( "UserNo", m_next_userno);
 }
 
 void Storage::storeVariables()
 {
+	DatabaseAdapter_Variable varstor( m_database);
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 
-	DatabaseAdapter_Variable::store( transaction.get(), "TermNo", m_next_termno);
-	DatabaseAdapter_Variable::store( transaction.get(), "TypeNo", m_next_typeno);
-	DatabaseAdapter_Variable::store( transaction.get(), "DocNo", m_next_docno);
-	DatabaseAdapter_Variable::store( transaction.get(), "AttribNo", m_next_attribno);
-	DatabaseAdapter_Variable::store( transaction.get(), "NofDocs", m_nof_documents);
+	varstor.store( transaction.get(), "TermNo", m_next_termno);
+	varstor.store( transaction.get(), "TypeNo", m_next_typeno);
+	varstor.store( transaction.get(), "DocNo", m_next_docno);
+	varstor.store( transaction.get(), "AttribNo", m_next_attribno);
+	varstor.store( transaction.get(), "NofDocs", m_nof_documents);
 	if (withAcl())
 	{
-		DatabaseAdapter_Variable::store( transaction.get(), "UserNo", m_next_userno);
+		varstor.store( transaction.get(), "UserNo", m_next_userno);
 	}
 	transaction->commit();
 }
@@ -179,27 +179,27 @@ Index Storage::getTermValue( const std::string& name) const
 		VarSizeNodeTree::NodeData cached_termno;
 		if (m_termno_map->find( name.c_str(), cached_termno)) return cached_termno;
 	}
-	return DatabaseAdapter_TermValue::get( m_database, name);
+	return DatabaseAdapter_TermValue( m_database).get( name);
 }
 
 Index Storage::getTermType( const std::string& name) const
 {
-	return DatabaseAdapter_TermType::get( m_database, boost::algorithm::to_lower_copy( name));
+	return DatabaseAdapter_TermType( m_database).get( boost::algorithm::to_lower_copy( name));
 }
 
 Index Storage::getDocno( const std::string& name) const
 {
-	return DatabaseAdapter_DocId::get( m_database, name);
+	return DatabaseAdapter_DocId( m_database).get( name);
 }
 
 Index Storage::getUserno( const std::string& name) const
 {
-	return DatabaseAdapter_UserName::get( m_database, name);
+	return DatabaseAdapter_UserName( m_database).get( name);
 }
 
 Index Storage::getAttributeName( const std::string& name) const
 {
-	return DatabaseAdapter_AttributeKey::get( m_database, boost::algorithm::to_lower_copy( name));
+	return DatabaseAdapter_AttributeKey( m_database).get( boost::algorithm::to_lower_copy( name));
 }
 
 PostingIteratorInterface*
@@ -282,7 +282,7 @@ StorageDocumentInterface*
 		const std::string& docid,
 		const std::string& logfilename) const
 {
-	return new StorageDocumentChecker( this, docid, logfilename);
+	return new StorageDocumentChecker( this, m_database, docid, logfilename);
 }
 
 Index Storage::allocDocnoRange( std::size_t nofDocuments)
@@ -438,9 +438,10 @@ Index Storage::allocTypenoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_typeno);
 	Index rt;
-	if (!DatabaseAdapter_TermType::load( m_database, name, rt))
+	DatabaseAdapter_TermType stor(m_database);
+	if (!stor.load( name, rt))
 	{
-		DatabaseAdapter_TermType::storeImm( m_database, name, rt = m_next_typeno++);
+		stor.storeImm( name, rt = m_next_typeno++);
 		isNew = true;
 	}
 	return rt;
@@ -450,9 +451,10 @@ Index Storage::allocDocnoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_docno);
 	Index rt;
-	if (!DatabaseAdapter_DocId::load( m_database, name, rt))
+	DatabaseAdapter_DocId stor(m_database);
+	if (!stor.load( name, rt))
 	{
-		DatabaseAdapter_DocId::storeImm( m_database, name, rt = m_next_docno++);
+		stor.storeImm( name, rt = m_next_docno++);
 		isNew = true;
 	}
 	return rt;
@@ -462,9 +464,10 @@ Index Storage::allocUsernoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_userno);
 	Index rt;
-	if (!DatabaseAdapter_UserName::load( m_database, name, rt))
+	DatabaseAdapter_UserName stor( m_database);
+	if (!stor.load( name, rt))
 	{
-		DatabaseAdapter_UserName::storeImm( m_database, name, rt = m_next_userno++);
+		stor.storeImm( name, rt = m_next_userno++);
 		isNew = true;
 	}
 	return rt;
@@ -474,9 +477,10 @@ Index Storage::allocAttribnoIm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_attribno);
 	Index rt;
-	if (!DatabaseAdapter_AttributeKey::load( m_database, name, rt))
+	DatabaseAdapter_AttributeKey stor( m_database);
+	if (!stor.load( name, rt))
 	{
-		DatabaseAdapter_AttributeKey::storeImm( m_database, name, rt = m_next_attribno++);
+		stor.storeImm( name, rt = m_next_attribno++);
 		isNew = true;
 	}
 	return rt;
@@ -567,12 +571,13 @@ void Storage::loadTermnoMap( const char* termnomap_source)
 			if (m_termno_map->find( name.c_str(), dupkey)) continue;
 
 			// [3] Check, if already defined in storage:
-			Index termno = DatabaseAdapter_TermValue::get( m_database, name);
+			DatabaseAdapter_TermValue stor(m_database);
+			Index termno = stor.get( name);
 			if (!termno)
 			{
 				// ... create it if not
 				termno = allocTermno();
-				DatabaseAdapter_TermValue::store( transaction.get(), name, termno);
+				stor.store( transaction.get(), name, termno);
 			}
 			// [4] Register it in the map:
 			m_termno_map->set( name.c_str(), termno);

@@ -33,7 +33,7 @@ using namespace strus;
 
 Index KeyMap::lookUp( const std::string& name)
 {
-	return DatabaseAdapter_StringIndex_Base::get( (char)m_prefix, m_database, name);
+	return m_dbadapter.get( name);
 }
 
 Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
@@ -50,7 +50,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		return data;
 	}
 	Index rt;
-	if (DatabaseAdapter_StringIndex_Base::load( (char)m_prefix, m_database, name, rt))
+	if (m_dbadapter.load( name,rt))
 	{
 		m_map.set( name.c_str(), rt);
 		isNew = false;
@@ -85,8 +85,7 @@ void KeyMap::getWriteBatch(
 			if (!idx)
 			{
 				idx = m_allocator->alloc();
-				DatabaseAdapter_StringIndex_Base::store(
-					(char)m_prefix, transaction, mi.key(), idx);
+				m_dbadapter.store( transaction, mi.key(), idx);
 			}
 			rewriteUnknownMap[ mi.data()] = idx;
 		}

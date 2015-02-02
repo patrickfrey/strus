@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "forwardIndexBlockMap.hpp"
+#include "databaseAdapter.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 
@@ -98,23 +99,26 @@ void ForwardIndexBlockMap::defineForwardIndexTerm(
 	bi->second.push_back( CurblockElem( pos, termstring));
 }
 
-void ForwardIndexBlockMap::deleteDocument( const Index& docno)
+void ForwardIndexBlockMap::deleteIndex( const Index& docno)
 {
 	if (docno == m_docno)
 	{
 		m_curblockmap.clear();
 		m_docno = 0;
 	}
-	Index ti = 1, te = m_maxtype+1;
-	for (; ti != te; ++ti)
+	else
 	{
-		BlockKeyIndex termkey = BlockKey( ti, m_docno).index();
-		MapKey key( ti, m_docno, 0);
-
-		Map::iterator fi = m_map.upper_bound( key);
-		while (fi != m_map.end() && fi->first.termkey == termkey)
+		Index ti = 1, te = m_maxtype+1;
+		for (; ti != te; ++ti)
 		{
-			m_map.erase( fi++);
+			BlockKeyIndex termkey = BlockKey( ti, docno).index();
+			MapKey key( ti, docno, 0);
+	
+			Map::iterator fi = m_map.upper_bound( key);
+			while (fi != m_map.end() && fi->first.termkey == termkey)
+			{
+				m_map.erase( fi++);
+			}
 		}
 	}
 	m_deletes.push_back( docno);
@@ -131,8 +135,8 @@ void ForwardIndexBlockMap::getWriteBatch( DatabaseTransactionInterface* transact
 		Index ti = 1, te = m_maxtype+1;
 		for (; ti != te; ++ti)
 		{
-			DatabaseKey dbkey( DatabaseKey::ForwardIndexPrefix, BlockKey( ti, *di));
-			transaction->removeSubTree( dbkey.ptr(), dbkey.size());
+			DatabaseAdapter_ForwardIndex_Cursor dbadapter( m_database, ti, *di);
+			dbadapter.removeSubTree( transaction);
 		}
 	}
 
@@ -144,21 +148,17 @@ void ForwardIndexBlockMap::getWriteBatch( DatabaseTransactionInterface* transact
 		for (; ee != me && ee->first.termkey == mi->first.termkey; ++ee){}
 		mi = ee;
 
-		BlockStorage<ForwardIndexBlock> blkstorage(
-				m_database, DatabaseKey::ForwardIndexPrefix,
-				BlockKey(ei->first.termkey), false);
-		const ForwardIndexBlock* blk;
+		BlockKey key(ei->first.termkey);
+		ForwardIndexBlock blk;
+		DatabaseAdapter_ForwardIndex_Cursor dbadapter( m_database, key.elem(1), key.elem(2));
 
-		// [2.1] Delete all old blocks with the database key as prefix address:
-		for (blk = blkstorage.load( 0);
-			blk != 0; blk = blkstorage.loadNext())
-		{
-			blkstorage.dispose( blk->id(), transaction);
-		}
+		// [2.1] Delete all old blocks:
+		dbadapter.removeSubTree( transaction);
+
 		// [2.2] Write the new blocks:
 		for (; ei != ee; ++ei)
 		{
-			blkstorage.store( ei->second, transaction);
+			dbadapter.store( transaction, ei->second);
 		}
 	}
 	// [3] Clear maps:

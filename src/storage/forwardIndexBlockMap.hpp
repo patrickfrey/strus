@@ -31,7 +31,6 @@
 #include "strus/index.hpp"
 #include "forwardIndexBlock.hpp"
 #include "blockKey.hpp"
-#include "blockStorage.hpp"
 #include "localStructAllocator.hpp"
 #include <vector>
 #include <map>
@@ -57,7 +56,7 @@ public:
 
 	void closeForwardIndexDocument( const Index& docno);
 
-	void deleteDocument( const Index& docno);
+	void deleteIndex( const Index& docno);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
