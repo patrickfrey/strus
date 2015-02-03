@@ -41,7 +41,7 @@ class BooleanBlock
 {
 public:
 	enum {
-		MaxBlockSize=20
+		MaxBlockSize=1024
 	};
 
 public:

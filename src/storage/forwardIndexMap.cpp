@@ -26,14 +26,14 @@
 
 --------------------------------------------------------------------
 */
-#include "forwardIndexBlockMap.hpp"
+#include "forwardIndexMap.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;
 
-void ForwardIndexBlockMap::closeCurblock( const Index& typeno, CurblockElemList& elemlist)
+void ForwardIndexMap::closeCurblock( const Index& typeno, CurblockElemList& elemlist)
 {
 	if (elemlist.empty()) return;
 	Index lastpos = elemlist.back().first;
@@ -51,7 +51,7 @@ void ForwardIndexBlockMap::closeCurblock( const Index& typeno, CurblockElemList&
 	elemlist.clear();
 }
 
-void ForwardIndexBlockMap::closeCurblocks()
+void ForwardIndexMap::closeCurblocks()
 {
 	CurblockMap::iterator bi = m_curblockmap.begin(), be = m_curblockmap.end();
 	for (; bi != be; ++bi)
@@ -60,7 +60,7 @@ void ForwardIndexBlockMap::closeCurblocks()
 	}
 }
 
-void ForwardIndexBlockMap::closeForwardIndexDocument( const Index& docno)
+void ForwardIndexMap::closeForwardIndexDocument( const Index& docno)
 {
 	closeCurblocks();
 	if (m_docno != docno)
@@ -69,7 +69,7 @@ void ForwardIndexBlockMap::closeForwardIndexDocument( const Index& docno)
 	}
 }
 
-void ForwardIndexBlockMap::defineForwardIndexTerm(
+void ForwardIndexMap::defineForwardIndexTerm(
 	const Index& typeno,
 	const Index& docno,
 	const Index& pos,
@@ -99,7 +99,7 @@ void ForwardIndexBlockMap::defineForwardIndexTerm(
 	bi->second.push_back( CurblockElem( pos, termstring));
 }
 
-void ForwardIndexBlockMap::deleteIndex( const Index& docno)
+void ForwardIndexMap::deleteIndex( const Index& docno)
 {
 	if (docno == m_docno)
 	{
@@ -124,7 +124,7 @@ void ForwardIndexBlockMap::deleteIndex( const Index& docno)
 	m_deletes.push_back( docno);
 }
 
-void ForwardIndexBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
+void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	closeCurblocks();
 

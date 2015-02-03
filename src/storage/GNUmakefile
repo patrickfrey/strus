@@ -4,7 +4,19 @@ include $(TOPDIR)/variables.mk
 CPP_OBJS=\
 	databaseKey.o \
 	databaseAdapter.o \
+	invertedIndexMap.o \
+	forwardIndexMap.o \
+	documentFrequencyMap.o \
+	userAclMap.o \
+	metaDataMap.o \
+	attributeMap.o \
 	keyMap.o \
+	dataBlock.o \
+	booleanBlock.o \
+	booleanBlockBatchWrite.o \
+	forwardIndexBlock.o \
+	invTermBlock.o \
+	posinfoBlock.o \
 	posinfoIterator.o \
 	forwardIterator.o \
 	indexSetIterator.o \
@@ -14,24 +26,12 @@ CPP_OBJS=\
 	statistics.o \
 	floatConversions.o \
 	indexPacker.o \
-	dataBlock.o \
-	invTermBlock.o \
-	posinfoBlock.o \
-	posinfoBlockMap.o \
-	forwardIndexBlock.o \
-	forwardIndexBlockMap.o \
-	booleanBlock.o \
-	booleanBlockMap.o \
-	userAclBlockMap.o \
 	metaDataElement.o \
 	metaDataDescription.o \
 	metaDataRecord.o \
 	metaDataBlock.o \
-	metaDataBlockMap.o \
 	metaDataBlockCache.o \
 	attributeReader.o \
-	attributeMap.o \
-	documentFrequencyMap.o \
 	postingIterator.o \
 	nullIterator.o \
 	storageDocument.o \

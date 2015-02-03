@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "metaDataBlockMap.hpp"
+#include "metaDataMap.hpp"
 #include "metaDataBlockCache.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "dataBlock.hpp"
@@ -36,11 +36,11 @@
 
 using namespace strus;
 
-MetaDataBlockMap::~MetaDataBlockMap()
+MetaDataMap::~MetaDataMap()
 {
 }
 
-void MetaDataBlockMap::deleteMetaData( Index docno)
+void MetaDataMap::deleteMetaData( Index docno)
 {
 	std::size_t ii=0, nn=m_descr->nofElements();
 	for (; ii<nn; ++ii)
@@ -50,19 +50,19 @@ void MetaDataBlockMap::deleteMetaData( Index docno)
 	}
 }
 
-void MetaDataBlockMap::deleteMetaData( Index docno, const std::string& varname)
+void MetaDataMap::deleteMetaData( Index docno, const std::string& varname)
 {
 	MetaDataKey key( docno, m_descr->getHandle( varname));
 	m_map[ key] = ArithmeticVariant();
 }
 
-void MetaDataBlockMap::defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value)
+void MetaDataMap::defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value)
 {
 	MetaDataKey key( docno, m_descr->getHandle( varname));
 	m_map[ key] = value;
 }
 
-void MetaDataBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction, std::vector<Index>& cacheRefreshList)
+void MetaDataMap::getWriteBatch( DatabaseTransactionInterface* transaction, std::vector<Index>& cacheRefreshList)
 {
 	Map::const_iterator mi = m_map.begin(), me = m_map.end();
 	Index blockno = 0;
@@ -101,7 +101,7 @@ void MetaDataBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction,
 }
 
 
-void MetaDataBlockMap::rewriteMetaData(
+void MetaDataMap::rewriteMetaData(
 		const MetaDataDescription::TranslationMap& trmap,
 		const MetaDataDescription& newDescr,
 		DatabaseTransactionInterface* transaction)

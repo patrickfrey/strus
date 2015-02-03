@@ -26,14 +26,14 @@
 
 --------------------------------------------------------------------
 */
-#include "booleanBlockMap.hpp"
+#include "booleanBlockBatchWrite.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;
 
-void BooleanBlockMap::insertNewElements(
+void BooleanBlockBatchWrite::insertNewElements(
 		DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
@@ -86,7 +86,7 @@ void BooleanBlockMap::insertNewElements(
 	}
 }
 
-void BooleanBlockMap::mergeNewElements(
+void BooleanBlockBatchWrite::mergeNewElements(
 		DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,

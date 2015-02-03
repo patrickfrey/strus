@@ -51,10 +51,10 @@ StorageTransaction::StorageTransaction(
 	,m_database(database_)
 	,m_metadescr(metadescr_)
 	,m_attributeMap(database_)
-	,m_metaDataBlockMap(database_,metadescr_)
-	,m_posinfoBlockMap(database_)
-	,m_forwardIndexBlockMap(database_)
-	,m_userAclBlockMap(database_)
+	,m_metaDataMap(database_,metadescr_)
+	,m_invertedIndexMap(database_)
+	,m_forwardIndexMap(database_)
+	,m_userAclMap(database_)
 	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
 	,m_termValueMap(database_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator(),termnomap_)
 	,m_docIdMap(database_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
@@ -105,17 +105,17 @@ Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 
 void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value)
 {
-	m_metaDataBlockMap.defineMetaData( docno, varname, value);
+	m_metaDataMap.defineMetaData( docno, varname, value);
 }
 
 void StorageTransaction::deleteMetaData( const Index& docno, const std::string& varname)
 {
-	m_metaDataBlockMap.deleteMetaData( docno, varname);
+	m_metaDataMap.deleteMetaData( docno, varname);
 }
 
 void StorageTransaction::deleteMetaData( const Index& docno)
 {
-	m_metaDataBlockMap.deleteMetaData( docno);
+	m_metaDataMap.deleteMetaData( docno);
 }
 
 void StorageTransaction::defineAttribute( const Index& docno, const std::string& varname, const std::string& value)
@@ -137,24 +137,24 @@ void StorageTransaction::deleteAttributes( const Index& docno)
 
 void StorageTransaction::defineAcl( const Index& userno, const Index& docno)
 {
-	m_userAclBlockMap.defineUserAccess( userno, docno);
+	m_userAclMap.defineUserAccess( userno, docno);
 }
 
 void StorageTransaction::deleteAcl( const Index& userno, const Index& docno)
 {
-	m_userAclBlockMap.deleteUserAccess( userno, docno);
+	m_userAclMap.deleteUserAccess( userno, docno);
 }
 
 void StorageTransaction::deleteAcl( const Index& docno)
 {
-	m_userAclBlockMap.deleteDocumentAccess( docno);
+	m_userAclMap.deleteDocumentAccess( docno);
 }
 
 void StorageTransaction::definePosinfoPosting(
 	const Index& termtype, const Index& termvalue,
 	const Index& docno, const std::vector<Index>& posinfo)
 {
-	m_posinfoBlockMap.definePosinfoPosting(
+	m_invertedIndexMap.definePosinfoPosting(
 		termtype, termvalue, docno, posinfo);
 }
 
@@ -164,19 +164,19 @@ void StorageTransaction::defineForwardIndexTerm(
 	const Index& pos,
 	const std::string& termstring)
 {
-	m_forwardIndexBlockMap.defineForwardIndexTerm( typeno, docno, pos, termstring);
+	m_forwardIndexMap.defineForwardIndexTerm( typeno, docno, pos, termstring);
 }
 
 void StorageTransaction::closeForwardIndexDocument( const Index& docno)
 {
-	m_forwardIndexBlockMap.closeForwardIndexDocument( docno);
+	m_forwardIndexMap.closeForwardIndexDocument( docno);
 }
 
 
 void StorageTransaction::deleteIndex( const Index& docno)
 {
-	m_posinfoBlockMap.deleteIndex( docno);
-	m_forwardIndexBlockMap.deleteIndex( docno);
+	m_invertedIndexMap.deleteIndex( docno);
+	m_forwardIndexMap.deleteIndex( docno);
 }
 
 void StorageTransaction::deleteUserAccessRights(
@@ -185,7 +185,7 @@ void StorageTransaction::deleteUserAccessRights(
 	Index userno = m_userIdMap.lookUp( username);
 	if (userno != 0)
 	{
-		m_userAclBlockMap.deleteUserAccess( userno);
+		m_userAclMap.deleteUserAccess( userno);
 	}
 }
 
@@ -241,21 +241,23 @@ void StorageTransaction::commit()
 	}
 	{
 		Storage::TransactionLock lock( m_storage);
+		//... we need a lock because transactions need to be sequentialized
+
 		boost::scoped_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
 	
-		m_posinfoBlockMap.renameNewTermNumbers( termnoUnknownMap);
-	
 		std::vector<Index> refreshList;
 		m_attributeMap.getWriteBatch( transaction.get());
-		m_metaDataBlockMap.getWriteBatch( transaction.get(), refreshList);
+		m_metaDataMap.getWriteBatch( transaction.get(), refreshList);
 	
-		m_posinfoBlockMap.getWriteBatch( transaction.get());
-		m_forwardIndexBlockMap.getWriteBatch( transaction.get());
+		m_invertedIndexMap.renameNewTermNumbers( termnoUnknownMap);
+		m_invertedIndexMap.getWriteBatch( transaction.get());
+
+		m_forwardIndexMap.getWriteBatch( transaction.get());
 	
-		m_userAclBlockMap.getWriteBatch( transaction.get());
+		m_userAclMap.getWriteBatch( transaction.get());
 	
 		std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
 		for (; di != de; ++di)
@@ -263,6 +265,7 @@ void StorageTransaction::commit()
 			DatabaseAdapter_DocId(m_database).store( transaction.get(), di->first, di->second);
 		}
 		m_storage->declareNofDocumentsInserted( m_nof_documents);
+
 		transaction->commit();
 		m_storage->releaseTransaction( refreshList);
 	}

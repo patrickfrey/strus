@@ -46,11 +46,11 @@ class DatabaseInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
-class PosinfoBlockMap
+class InvertedIndexMap
 {
 public:
-	explicit PosinfoBlockMap( DatabaseInterface* database_);
-	PosinfoBlockMap( const PosinfoBlockMap& o);
+	explicit InvertedIndexMap( DatabaseInterface* database_);
+	InvertedIndexMap( const InvertedIndexMap& o);
 
 	void definePosinfoPosting(
 		const Index& typeno,

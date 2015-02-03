@@ -47,6 +47,7 @@ public:
 
 private:
 	bool loadBlock( const Index& elemno_);
+	bool loadNext();
 
 private:
 	DatabaseAdapter_BooleanBlock_Cursor m_dbadapter;

@@ -26,61 +26,56 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_LVDB_METADATA_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "booleanBlock.hpp"
+#include "metaDataBlock.hpp"
+#include "metaDataRecord.hpp"
 #include "localStructAllocator.hpp"
-#include "blockKey.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include <cstdlib>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace strus {
-
+/// \brief Forward declaration
+class MetaDataBlockCache;
 /// \brief Forward declaration
 class DatabaseInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
-class UserAclBlockMap
+
+class MetaDataMap
 {
 public:
-	explicit UserAclBlockMap( DatabaseInterface* database_)
-		:m_database(database_){}
+	MetaDataMap( DatabaseInterface* database_, const MetaDataDescription* descr_)
+		:m_database(database_),m_descr(descr_){}
+	~MetaDataMap();
 
-	void defineUserAccess(
-		const Index& userno,
-		const Index& docno);
+	void defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value);
+	void deleteMetaData( Index docno);
+	void deleteMetaData( Index docno, const std::string& varname);
 
-	void deleteUserAccess(
-		const Index& userno,
-		const Index& docno);
-
-	void deleteUserAccess(
-		const Index& userno);
-
-	void deleteDocumentAccess(
-		const Index& docno);
-
-	void getWriteBatch( DatabaseTransactionInterface* transaction);
+	void getWriteBatch( DatabaseTransactionInterface* transaction, std::vector<Index>& cacheRefreshList);
+	void rewriteMetaData(
+			const MetaDataDescription::TranslationMap& trmap,
+			const MetaDataDescription& newDescr,
+			DatabaseTransactionInterface* transaction);
 
 private:
-	void markSetElement(
-		const Index& userno,
-		const Index& docno,
-		bool isMember);
+	MetaDataRecord getRecord( Index docno);
 
-public:
-	typedef std::pair<Index,Index> MapKey;
-	typedef LocalStructAllocator<std::pair<MapKey,bool> > MapAllocator;
-	typedef std::less<MapKey> MapCompare;
-	typedef std::map<MapKey,bool,MapCompare,MapAllocator> Map;
+private:
+	typedef std::pair<Index,Index> MetaDataKey;
+	typedef LocalStructAllocator<std::pair<MetaDataKey,ArithmeticVariant> > MapAllocator;
+	typedef std::less<MetaDataKey> MapCompare;
+	typedef std::map<MetaDataKey,ArithmeticVariant,MapCompare,MapAllocator> Map;
 
 private:
 	DatabaseInterface* m_database;
-	Map m_usrmap;
-	Map m_aclmap;
-	std::vector<Index> m_usr_deletes;
-	std::vector<Index> m_acl_deletes;
+	const MetaDataDescription* m_descr;
+	Map m_map;
 };
 
 }

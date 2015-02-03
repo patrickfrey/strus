@@ -32,15 +32,15 @@
 #include "strus/arithmeticVariant.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
-#include "metaDataBlockMap.hpp"
+#include "metaDataMap.hpp"
 #include "metaDataReader.hpp"
 #include "attributeMap.hpp"
 #include "booleanBlock.hpp"
-#include "userAclBlockMap.hpp"
+#include "userAclMap.hpp"
 #include "posinfoBlock.hpp"
-#include "posinfoBlockMap.hpp"
+#include "invertedIndexMap.hpp"
 #include "forwardIndexBlock.hpp"
-#include "forwardIndexBlockMap.hpp"
+#include "forwardIndexMap.hpp"
 #include "documentFrequencyMap.hpp"
 #include "keyMap.hpp"
 #include "keyAllocatorInterface.hpp"
@@ -123,11 +123,11 @@ private:
 	const MetaDataDescription* m_metadescr;			///< description of metadata
 
 	AttributeMap m_attributeMap;				///< map of document attributes for writing
-	MetaDataBlockMap m_metaDataBlockMap;			///< map of meta data blocks for writing
+	MetaDataMap m_metaDataMap;				///< map of meta data blocks for writing
 
-	PosinfoBlockMap m_posinfoBlockMap;			///< map of posinfo postings for writing
-	ForwardIndexBlockMap m_forwardIndexBlockMap;		///< map of forward index for writing
-	UserAclBlockMap m_userAclBlockMap;			///< map of user rights for writing (forward and inverted)
+	InvertedIndexMap m_invertedIndexMap;			///< map of posinfo postings for writing
+	ForwardIndexMap m_forwardIndexMap;			///< map of forward index for writing
+	UserAclMap m_userAclMap;				///< map of user rights for writing (forward and inverted)
 
 	KeyMap m_termTypeMap;					///< map of term types
 	KeyMap m_termValueMap;					///< map of term values

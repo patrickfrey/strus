@@ -70,7 +70,7 @@ void StorageAlterMetaDataTable::commit()
 		trmap = m_metadescr_new.getTranslationMap(
 				m_metadescr_old, m_metadescr_resets);
 
-	MetaDataBlockMap blockmap( m_database, &m_metadescr_old);
+	MetaDataMap blockmap( m_database, &m_metadescr_old);
 	
 	blockmap.rewriteMetaData( trmap, m_metadescr_new, transaction.get());
 	m_metadescr_new.store( transaction.get());

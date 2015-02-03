@@ -42,10 +42,10 @@ class DatabaseInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
-class ForwardIndexBlockMap
+class ForwardIndexMap
 {
 public:
-	explicit ForwardIndexBlockMap( DatabaseInterface* database_)
+	explicit ForwardIndexMap( DatabaseInterface* database_)
 		:m_database(database_),m_docno(0),m_maxtype(0){}
 
 	void defineForwardIndexTerm(

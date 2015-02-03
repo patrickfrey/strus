@@ -31,7 +31,7 @@
 #include "strus/storageAlterMetaDataTableInterface.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
-#include "metaDataBlockMap.hpp"
+#include "metaDataMap.hpp"
 #include "metaDataReader.hpp"
 #include <vector>
 #include <string>

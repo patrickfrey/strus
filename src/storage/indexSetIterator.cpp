@@ -39,6 +39,19 @@ IndexSetIterator::IndexSetIterator( DatabaseInterface* database_, DatabaseKey::K
 	,m_range_to(0)
 {}
 
+bool IndexSetIterator::loadNext()
+{
+	if (!m_dbadapter.loadNext( m_elemBlk))
+	{
+		m_elemItr = 0;
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 bool IndexSetIterator::loadBlock( const Index& elemno_)
 {
 	if (!m_elemBlk.empty())
@@ -76,7 +89,7 @@ bool IndexSetIterator::loadBlock( const Index& elemno_)
 		}
 		else if (m_elemBlk.isFollowBlockAddress( elemno_))
 		{
-			while (m_dbadapter.loadNext( m_elemBlk))
+			while (loadNext())
 			{
 				if (elemno_ > m_elemBlk.id())
 				{	

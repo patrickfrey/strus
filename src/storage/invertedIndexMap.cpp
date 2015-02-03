@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#include "posinfoBlockMap.hpp"
-#include "booleanBlockMap.hpp"
+#include "invertedIndexMap.hpp"
+#include "booleanBlockBatchWrite.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "keyMap.hpp"
@@ -38,13 +38,13 @@
 
 using namespace strus;
 
-PosinfoBlockMap::PosinfoBlockMap( DatabaseInterface* database_)
+InvertedIndexMap::InvertedIndexMap( DatabaseInterface* database_)
 	:m_dfmap(database_),m_database(database_),m_docno(0)
 {
 	m_strings.push_back( '\0');
 }
 
-PosinfoBlockMap::PosinfoBlockMap( const PosinfoBlockMap& o)
+InvertedIndexMap::InvertedIndexMap( const InvertedIndexMap& o)
 	:m_dfmap(o.m_dfmap)
 	,m_database(o.m_database)
 	,m_map(o.m_map)
@@ -55,7 +55,7 @@ PosinfoBlockMap::PosinfoBlockMap( const PosinfoBlockMap& o)
 	,m_deletes(o.m_deletes)
 {}
 
-void PosinfoBlockMap::clear()
+void InvertedIndexMap::clear()
 {
 	m_map.clear();
 	m_strings.clear();
@@ -66,7 +66,7 @@ void PosinfoBlockMap::clear()
 	m_deletes.clear();
 }
 
-void PosinfoBlockMap::definePosinfoPosting(
+void InvertedIndexMap::definePosinfoPosting(
 	const Index& termtype,
 	const Index& termvalue,
 	const Index& docno,
@@ -125,7 +125,7 @@ void PosinfoBlockMap::definePosinfoPosting(
 	}
 }
 
-void PosinfoBlockMap::deleteIndex( const Index& docno)
+void InvertedIndexMap::deleteIndex( const Index& docno)
 {
 	InvTermMap::iterator vi = m_invtermmap.find( docno);
 	if (vi != m_invtermmap.end())
@@ -145,7 +145,7 @@ void PosinfoBlockMap::deleteIndex( const Index& docno)
 	m_deletes.push_back( docno);
 }
 
-void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
+void InvertedIndexMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
 {
 	// Rename terms:
 	Map::iterator mi = m_map.begin(), me = m_map.end();
@@ -188,7 +188,7 @@ void PosinfoBlockMap::renameNewTermNumbers( const std::map<Index,Index>& renamem
 	m_dfmap.renameNewTermNumbers( renamemap);
 }
 
-void PosinfoBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
+void InvertedIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	// [1] Get deletes:
 	DatabaseAdapter_InverseTerm dbadapter_inv( m_database);
@@ -270,10 +270,10 @@ void PosinfoBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		DatabaseAdapter_DocListBlock_Cursor dbadapter_doclist( m_database, typeno, termno);
 
 		// [3.1] Merge new docno boolean block elements
-		BooleanBlockMap::mergeNewElements( &dbadapter_doclist, di, de, newdocblk, transaction);
+		BooleanBlockBatchWrite::mergeNewElements( &dbadapter_doclist, di, de, newdocblk, transaction);
 
 		// [3.2] Insert new docno boolean block elements
-		BooleanBlockMap::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
+		BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
 	}
 
 	// [4] Get df writes:
@@ -283,7 +283,7 @@ void PosinfoBlockMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	clear();
 }
 
-void PosinfoBlockMap::defineDocnoRangeElement(
+void InvertedIndexMap::defineDocnoRangeElement(
 		std::vector<BooleanBlock::MergeRange>& docrangear,
 		const Index& docno,
 		bool isMember)
@@ -305,7 +305,7 @@ void PosinfoBlockMap::defineDocnoRangeElement(
 	}
 }
 
-void PosinfoBlockMap::insertNewPosElements(
+void InvertedIndexMap::insertNewPosElements(
 		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
@@ -349,7 +349,7 @@ void PosinfoBlockMap::insertNewPosElements(
 	}
 }
 
-void PosinfoBlockMap::mergeNewPosElements(
+void InvertedIndexMap::mergeNewPosElements(
 		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
@@ -402,7 +402,7 @@ void PosinfoBlockMap::mergeNewPosElements(
 	}
 }
 
-void PosinfoBlockMap::mergePosBlock( 
+void InvertedIndexMap::mergePosBlock( 
 		Map::const_iterator ei,
 		const Map::const_iterator& ee,
 		const PosinfoBlock& oldblk,

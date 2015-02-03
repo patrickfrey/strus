@@ -50,7 +50,7 @@ ForwardIterator::~ForwardIterator()
 
 void ForwardIterator::skipDoc( const Index& docno_)
 {
-	if ((m_docno != docno_ && !m_docno) || !m_dbadapter.get())
+	if ((m_docno != docno_ || !m_docno) || !m_dbadapter.get())
 	{
 		m_dbadapter.reset(
 			new DatabaseAdapter_ForwardIndex_Cursor(

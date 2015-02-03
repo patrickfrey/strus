@@ -41,9 +41,9 @@ namespace strus {
 /// \brief Forward declaration
 class DatabaseAdapter_BooleanBlock_Cursor;
 
-/// \class BooleanBlockMap
+/// \class BooleanBlockBatchWrite
 /// \brief Methods for merging and inserting boolean blocks
-class BooleanBlockMap
+class BooleanBlockBatchWrite
 {
 public:
 	static void insertNewElements(
