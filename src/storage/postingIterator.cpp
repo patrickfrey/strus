@@ -43,10 +43,10 @@ using namespace strus;
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
 #else
-PostingIterator::PostingIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char*)
+PostingIterator::PostingIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char*)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno))
-	,m_posinfoIterator(database_, termtypeno, termvalueno)
+	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
 	,m_docno(0)
 {
 	m_featureid.reserve( 16);

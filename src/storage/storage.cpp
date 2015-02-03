@@ -33,9 +33,13 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
+#include "strus/peerStorageTransactionInterface.hpp"
+#include "strus/peerStorageInterface.hpp"
 #include "strus/reference.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
+#include "peerStorageTransaction.hpp"
+#include "documentFrequencyCache.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseAdapter.hpp"
@@ -124,28 +128,36 @@ void Storage::loadVariables()
 	||  !varstor.load( "TypeNo", m_next_typeno)
 	||  !varstor.load( "DocNo", m_next_docno)
 	||  !varstor.load( "AttribNo", m_next_attribno)
-	||  !varstor.load( "NofDocs", m_nof_documents))
+	||  !varstor.load( "NofDocs", m_nof_documents)
+	)
 	{
 		throw std::runtime_error( "corrupt storage, not all mandatory variables defined");
 	}
 	(void)varstor.load( "UserNo", m_next_userno);
+	m_global_nof_documents = m_nof_documents;
 }
 
 void Storage::storeVariables()
 {
-	DatabaseAdapter_Variable varstor( m_database);
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+	getVariablesWriteBatch( transaction.get(), 0);
+	transaction->commit();
+}
 
-	varstor.store( transaction.get(), "TermNo", m_next_termno);
-	varstor.store( transaction.get(), "TypeNo", m_next_typeno);
-	varstor.store( transaction.get(), "DocNo", m_next_docno);
-	varstor.store( transaction.get(), "AttribNo", m_next_attribno);
-	varstor.store( transaction.get(), "NofDocs", m_nof_documents);
+void Storage::getVariablesWriteBatch(
+		DatabaseTransactionInterface* transaction,
+		int nof_documents_incr)
+{
+	DatabaseAdapter_Variable varstor( m_database);
+	varstor.store( transaction, "TermNo", m_next_termno);
+	varstor.store( transaction, "TypeNo", m_next_typeno);
+	varstor.store( transaction, "DocNo", m_next_docno);
+	varstor.store( transaction, "AttribNo", m_next_attribno);
+	varstor.store( transaction, "NofDocs", m_nof_documents + nof_documents_incr);
 	if (withAcl())
 	{
-		varstor.store( transaction.get(), "UserNo", m_next_userno);
+		varstor.store( transaction, "UserNo", m_next_userno);
 	}
-	transaction->commit();
 }
 
 void Storage::close()
@@ -202,6 +214,18 @@ Index Storage::getAttributeName( const std::string& name) const
 	return DatabaseAdapter_AttributeKey( m_database).get( boost::algorithm::to_lower_copy( name));
 }
 
+GlobalCounter Storage::documentFrequency( const Index& typeno, const Index& termno) const
+{
+	if (m_documentFrequencyCache.get())
+	{
+		return m_documentFrequencyCache->getValue( typeno, termno);
+	}
+	else
+	{
+		return DatabaseAdapter_DocFrequency::get( m_database, typeno, termno);
+	}
+}
+
 PostingIteratorInterface*
 	Storage::createTermPostingIterator(
 		const std::string& typestr,
@@ -213,7 +237,7 @@ PostingIteratorInterface*
 	{
 		return new NullIterator( typeno, termno, termstr.c_str());
 	}
-	return new PostingIterator( m_database, typeno, termno, termstr.c_str());
+	return new PostingIterator( this, m_database, typeno, termno, termstr.c_str());
 }
 
 ForwardIteratorInterface*
@@ -294,11 +318,11 @@ Index Storage::allocDocnoRange( std::size_t nofDocuments)
 	return rt;
 }
 
-void Storage::declareNofDocumentsInserted( int value)
+void Storage::declareNofDocumentsInserted( int incr)
 {
 	boost::mutex::scoped_lock lock( m_nof_documents_mutex);
-	m_nof_documents += value;
-	m_global_nof_documents += value;
+	m_nof_documents += incr;
+	m_global_nof_documents += incr;
 }
 
 class TypenoAllocator
@@ -501,9 +525,9 @@ Index Storage::nofAttributeTypes()
 	return m_next_termno -1;
 }
 
-Index Storage::nofDocumentsInserted() const
+GlobalCounter Storage::nofDocumentsInserted() const
 {
-	return m_nof_documents;
+	return m_global_nof_documents;
 }
 
 Index Storage::maxDocumentNumber() const
@@ -589,4 +613,92 @@ void Storage::loadTermnoMap( const char* termnomap_source)
 		throw std::runtime_error( std::string("failed to build termno map: ") + err.what());
 	}
 }
+
+void Storage::declareGlobalNofDocumentsInserted( int incr)
+{
+	boost::mutex::scoped_lock lock( m_nof_documents_mutex);
+	m_global_nof_documents += incr;
+}
+
+void Storage::fillDocumentFrequencyCache()
+{
+	TransactionLock lock( this);
+	
+	DocumentFrequencyCache::Batch dfbatch;
+	DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
+	Index typeno;
+	Index termno;
+	Index df;
+	for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
+		more=dfcursor.loadNext( typeno, termno, df))
+	{
+		dfbatch.put( typeno, termno, df);
+	}
+	m_documentFrequencyCache.reset( new DocumentFrequencyCache());
+	m_documentFrequencyCache->writeBatch( dfbatch);
+}
+
+PeerStorageTransactionInterface* Storage::createPeerStorageTransaction()
+{
+	if (!m_documentFrequencyCache.get())
+	{
+		fillDocumentFrequencyCache();
+	}
+	return new PeerStorageTransaction( this, m_database, m_documentFrequencyCache.get());
+}
+
+void Storage::definePeerStorageInterface( PeerStorageInterface* peerStorage)
+{
+	if (!m_documentFrequencyCache.get())
+	{
+		fillDocumentFrequencyCache();
+	}
+	m_peerStorage.reset( peerStorage);
+
+	TransactionLock lock( this);
+
+	// Fill a map with the strings of all types and terms in the collection:
+	std::map<Index,std::string> typenomap;
+	std::map<Index,std::string> termnomap;
+	{
+		DatabaseAdapter_TermType::Cursor typecursor( m_database);
+		Index typeno;
+		std::string typestr;
+		for (bool more=typecursor.loadFirst( typestr, typeno); more;
+			more=typecursor.loadNext( typestr, typeno))
+		{
+			typenomap[ typeno] = typestr;
+		}
+	}
+	{
+		DatabaseAdapter_TermValue::Cursor termcursor( m_database);
+		Index termno;
+		std::string termstr;
+		for (bool more=typecursor.loadFirst( termstr, termno); more;
+			more=typecursor.loadNext( termstr, termno))
+		{
+			termnomap[ termno] = termstr;
+		}
+	}
+	// Populate the df's and the number of documents stored through the interface
+	{
+		Reference<PeerStorageTransaction> transaction( peerStorage->createTransaction());
+		DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
+		Index typeno;
+		Index termno;
+		Index df;
+		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
+			more=dfcursor.loadNext( typeno, termno, df))
+		{
+			std::map<Index,std::string>::const_iterator ti = typenomap.find( typeno);
+			if (ti == typenomap.end()) throw std::runtime_error( "undefined type in df key");
+			std::map<Index,std::string>::const_iterator vi = termnomap.find( termno);
+			if (ti == typenomap.end()) throw std::runtime_error( "undefined term in df key");
+			transaction->populateDocumentFrequencyChange(
+					ti->second.c_str(), vi->second.c_str(), df);
+		}
+		transaction->populateNofDocumentsInsertedChange( m_nof_documents);
+	}
+}
+
 

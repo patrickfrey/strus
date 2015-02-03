@@ -27,13 +27,13 @@
 --------------------------------------------------------------------
 */
 #include "posinfoIterator.hpp"
-#include "strus/databaseInterface.hpp"
+#include "storage.hpp"
 #include "statistics.hpp"
 
 using namespace strus;
 
-PosinfoIterator::PosinfoIterator( DatabaseInterface* database_, Index termtypeno_, Index termvalueno_)
-	:m_database(database_)
+PosinfoIterator::PosinfoIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno_, Index termvalueno_)
+	:m_storage(storage_)
 	,m_dbadapter(database_,termtypeno_,termvalueno_)
 	,m_posinfoItr(0)
 	,m_termtypeno(termtypeno_)
@@ -173,9 +173,7 @@ Index PosinfoIterator::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		m_documentFrequency
-			= DatabaseAdapter_DocFrequency::get(
-				m_database, m_termtypeno, m_termvalueno);
+		m_documentFrequency = m_storage->documentFrequency( m_termtypeno, m_termvalueno);
 	}
 	return m_documentFrequency;
 }

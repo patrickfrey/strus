@@ -155,7 +155,7 @@ public:
 
 private:
 	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr);
-	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& node, float weight=0.0);
+	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& node);
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent);
 
 private:

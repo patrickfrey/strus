@@ -70,7 +70,7 @@ float WeightingClosureBM25::call( const Index& docno)
 
 	m_metadata->skipDoc( docno);
 
-	float ff = m_itr->frequency() * m_itr->weight();
+	float ff = m_itr->frequency();
 	if (ff == 0.0)
 	{
 		return 0.0;

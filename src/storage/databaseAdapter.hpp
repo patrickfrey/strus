@@ -60,6 +60,23 @@ class ForwardIndexBlock;
 class DatabaseAdapter_StringIndex
 {
 public:
+	class Cursor
+	{
+	public:
+		Cursor( char prefix_, DatabaseInterface* database_)
+			:m_cursor( database_->createCursor(false)),m_prefix(prefix_){}
+
+		bool loadFirst( std::string& key, Index& value);
+		bool loadNext( std::string& key, Index& value);
+
+	private:
+		bool getData( const DatabaseCursorInterface::Slice& dbkey, std::string& key, Index& value);
+
+	private:
+		Reference<DatabaseCursorInterface> m_cursor;
+		char m_prefix;
+	};
+
 	DatabaseAdapter_StringIndex( char prefix_, DatabaseInterface* database_)
 		:m_prefix(prefix_),m_database(database_){}
 
@@ -78,48 +95,91 @@ class DatabaseAdapter_TermType
 	:public DatabaseAdapter_StringIndex
 {
 public:
+	enum {KeyPrefix=DatabaseKey::TermTypePrefix};
+	class Cursor
+		:public DatabaseAdapter_StringIndex::Cursor
+	{
+		Cursor( DatabaseInterface* database_)
+			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
+	};
+
 	explicit DatabaseAdapter_TermType( DatabaseInterface* database_)
-		:DatabaseAdapter_StringIndex((char)DatabaseKey::TermTypePrefix, database_){}
+		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
 class DatabaseAdapter_TermValue
 	:public DatabaseAdapter_StringIndex
 {
 public:
+	enum {KeyPrefix=DatabaseKey::TermValuePrefix};
+	class Cursor
+		:public DatabaseAdapter_StringIndex::Cursor
+	{
+		Cursor( DatabaseInterface* database_)
+			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
+	};
 	explicit DatabaseAdapter_TermValue( DatabaseInterface* database_)
-		:DatabaseAdapter_StringIndex((char)DatabaseKey::TermValuePrefix, database_){}
+		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
 class DatabaseAdapter_DocId
 	:public DatabaseAdapter_StringIndex
 {
 public:
+	enum {KeyPrefix=DatabaseKey::DocIdPrefix};
+	class Cursor
+		:public DatabaseAdapter_StringIndex::Cursor
+	{
+		Cursor( DatabaseInterface* database_)
+			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
+	};
 	explicit DatabaseAdapter_DocId( DatabaseInterface* database_)
-		:DatabaseAdapter_StringIndex((char)DatabaseKey::DocIdPrefix, database_){}
+		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
 class DatabaseAdapter_Variable
 	:public DatabaseAdapter_StringIndex
 {
 public:
+	enum {KeyPrefix=DatabaseKey::VariablePrefix};
+	class Cursor
+		:public DatabaseAdapter_StringIndex::Cursor
+	{
+		Cursor( DatabaseInterface* database_)
+			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
+	};
 	explicit DatabaseAdapter_Variable( DatabaseInterface* database_)
-		:DatabaseAdapter_StringIndex((char)DatabaseKey::VariablePrefix, database_){}
+		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
 class DatabaseAdapter_AttributeKey
 	:public DatabaseAdapter_StringIndex
 {
 public:
+	enum {KeyPrefix=DatabaseKey::AttributeKeyPrefix};
+	class Cursor
+		:public DatabaseAdapter_StringIndex::Cursor
+	{
+		Cursor( DatabaseInterface* database_)
+			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
+	};
 	explicit DatabaseAdapter_AttributeKey( DatabaseInterface* database_)
-		:DatabaseAdapter_StringIndex((char)DatabaseKey::AttributeKeyPrefix, database_){}
+		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
 class DatabaseAdapter_UserName
 	:public DatabaseAdapter_StringIndex
 {
 public:
+	enum {KeyPrefix=DatabaseKey::UserNamePrefix};
+	class Cursor
+		:public DatabaseAdapter_StringIndex::Cursor
+	{
+		Cursor( DatabaseInterface* database_)
+			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
+	};
 	explicit DatabaseAdapter_UserName( DatabaseInterface* database_)
-		:DatabaseAdapter_StringIndex((char)DatabaseKey::UserNamePrefix, database_){}
+		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
 
@@ -315,6 +375,22 @@ private:
 
 class DatabaseAdapter_DocFrequency
 {
+public:
+	class Cursor
+	{
+	public:
+		Cursor( DatabaseInterface* database_)
+			:m_cursor( database_->createCursor(false)){}
+
+		bool loadFirst( Index& typeno, Index& termno, Index& df);
+		bool loadNext( Index& typeno, Index& termno, Index& df);
+
+	private:
+		bool getData( const DatabaseCursorInterface::Slice& key, Index& typeno, Index& termno, Index& df);
+
+	private:
+		Reference<DatabaseCursorInterface> m_cursor;
+	};
 public:
 	static Index get( const DatabaseInterface* database, const Index& typeno, const Index& termno);
 	static bool load( const DatabaseInterface* database, const Index& typeno, const Index& termno, Index& df);

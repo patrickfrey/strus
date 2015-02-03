@@ -43,7 +43,7 @@ class PostingIterator
 	:public PostingIteratorInterface
 {
 public:
-	PostingIterator( DatabaseInterface* database, Index termtypeno, Index termvalueno, const char* termstr);
+	PostingIterator( const Storage* storage_, DatabaseInterface* database, Index termtypeno, Index termvalueno, const char* termstr);
 
 	virtual ~PostingIterator(){}
 

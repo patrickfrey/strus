@@ -56,7 +56,7 @@ public:
 
 	virtual float call( const Index& docno)
 	{
-		return docno==m_itr->skipDoc(docno)?(m_weight * m_itr->weight()):(float)0.0;
+		return docno==m_itr->skipDoc(docno)?(m_weight):(float)0.0;
 	}
 
 private:

@@ -214,7 +214,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& node, float weight)
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& node)
 {
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( node))
@@ -224,12 +224,10 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			const Term& term = m_terms[ nodeIndex( node)];
 			rt = m_processor->createTermPostingIterator( term.type, term.value);
-			rt->setWeight( weight);
 			break;
 		}
 		case ExpressionNode:
 			rt = createExpressionPostingIterator( m_expressions[ nodeIndex( node)]);
-			rt->setWeight( weight);
 			break;
 	}
 	return rt;
@@ -260,7 +258,7 @@ std::vector<ResultDocument> Query::evaluate()
 	for (; fi != fe; ++fi)
 	{
 		Reference<PostingIteratorInterface> postingsElem(
-			createNodePostingIterator( fi->node, fi->weight));
+			createNodePostingIterator( fi->node));
 		postings.push_back( postingsElem);
 		featurePostingsMap[ fi->node] = postings.size()-1;
 	}
@@ -303,7 +301,7 @@ std::vector<ResultDocument> Query::evaluate()
 			if (*wi == fi->set)
 			{
 				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
-				accumulator.addFeature( postings[ pidx].get());
+				accumulator.addFeature( postings[ pidx].get(), fi->weight);
 			}
 		}
 	}

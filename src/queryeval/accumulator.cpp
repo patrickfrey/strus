@@ -25,11 +25,13 @@ void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, boo
 }
 
 void Accumulator::addFeature(
-		PostingIteratorInterface* iterator)
+		PostingIteratorInterface* iterator, float weight)
 {
-	m_functionClosures.push_back( 
-		m_function->createClosure( 
-			m_storage, iterator, m_metadata, m_parameter));
+	m_weightingFeatures.push_back(
+		WeightingFeature(
+			m_function->createClosure( 
+				m_storage, iterator, m_metadata, m_parameter),
+			weight));
 }
 
 void Accumulator::addAclRestriction(
@@ -133,11 +135,11 @@ bool Accumulator::nextRank(
 		weight = 0.0;
 
 		// Add a weight for every accumulator summand that has a match:
-		std::vector<Reference< WeightingClosureInterface> >::iterator
-			ai = m_functionClosures.begin(), ae = m_functionClosures.end();
+		std::vector<WeightingFeature>::iterator
+			ai = m_weightingFeatures.begin(), ae =  m_weightingFeatures.end();
 		for (; ai != ae; ++ai)
 		{
-			weight += (*ai)->call( m_docno);
+			weight += ai->functionClosure->call( m_docno) * ai->weight;
 		}
 		return true;
 	}

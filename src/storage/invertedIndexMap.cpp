@@ -44,19 +44,9 @@ InvertedIndexMap::InvertedIndexMap( DatabaseInterface* database_)
 	m_strings.push_back( '\0');
 }
 
-InvertedIndexMap::InvertedIndexMap( const InvertedIndexMap& o)
-	:m_dfmap(o.m_dfmap)
-	,m_database(o.m_database)
-	,m_map(o.m_map)
-	,m_strings(o.m_strings)
-	,m_invtermmap(o.m_invtermmap)
-	,m_invterms(o.m_invterms)
-	,m_docno(o.m_docno)
-	,m_deletes(o.m_deletes)
-{}
-
 void InvertedIndexMap::clear()
 {
+	m_dfmap.clear();
 	m_map.clear();
 	m_strings.clear();
 	m_strings.push_back('\0');

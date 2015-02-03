@@ -10,6 +10,7 @@ CPP_OBJS=\
 	userAclMap.o \
 	metaDataMap.o \
 	attributeMap.o \
+	documentFrequencyCache.o \
 	keyMap.o \
 	dataBlock.o \
 	booleanBlock.o \
@@ -37,7 +38,8 @@ CPP_OBJS=\
 	storageDocument.o \
 	storageDocumentChecker.o \
 	storageTransaction.o \
-	storageAlterMetaDataTable.o
+	storageAlterMetaDataTable.o \
+	peerStorageTransaction.o
 
 PRG_OBJS=\
 	extractKeyValueData.o

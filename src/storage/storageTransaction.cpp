@@ -264,9 +264,12 @@ void StorageTransaction::commit()
 		{
 			DatabaseAdapter_DocId(m_database).store( transaction.get(), di->first, di->second);
 		}
-		m_storage->declareNofDocumentsInserted( m_nof_documents);
 
+		m_storage->getVariablesWriteBatch( transaction.get(), m_nof_documents);
+
+		//!!!! POPULATE DFs HERE
 		transaction->commit();
+		m_storage->declareNofDocumentsInserted( m_nof_documents);
 		m_storage->releaseTransaction( refreshList);
 	}
 	m_commit = true;

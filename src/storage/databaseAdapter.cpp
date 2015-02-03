@@ -40,6 +40,29 @@
 
 using namespace strus;
 
+bool DatabaseAdapter_StringIndex::Cursor::getData( const DatabaseCursorInterface::Slice& dbkey, std::string& key, Index& value)
+{
+	if (!dbkey.defined()) return false;
+	key = std::string( dbkey.ptr()+1, dbkey.size()-1);
+	DatabaseCursorInterface::Slice blkslice = m_cursor->value();
+	char const* vi = blkslice.ptr();
+	char const* ve = vi + blkslice.size();
+	value = unpackIndex( vi, ve);
+	return true;
+}
+
+bool DatabaseAdapter_StringIndex::Cursor::loadFirst( std::string& key, Index& value)
+{
+	DatabaseCursorInterface::Slice dbkey( m_cursor->seekFirst( &m_prefix, 1));
+	return getData( dbkey, key, value);
+}
+
+bool DatabaseAdapter_StringIndex::Cursor::loadNext( std::string& key, Index& value)
+{
+	DatabaseCursorInterface::Slice dbkey( m_cursor->seekNext());
+	return getData( dbkey, key, value);
+}
+
 Index DatabaseAdapter_StringIndex::get( const std::string& key)
 {
 	Index rt;
@@ -406,6 +429,33 @@ void DatabaseAdapter_DocAttribute::removeAll( DatabaseTransactionInterface* tran
 	return transaction->removeSubTree( dbkey.ptr(), dbkey.size());
 }
 
+
+bool DatabaseAdapter_DocFrequency::Cursor::getData( const DatabaseCursorInterface::Slice& key, Index& typeno, Index& termno, Index& df)
+{
+	if (!key.defined()) return false;
+	char const* ki = key.ptr()+1;
+	char const* ke = ki + key.size()-1;
+	typeno = unpackIndex( ki, ke);
+	termno = unpackIndex( ki, ke);
+	DatabaseCursorInterface::Slice blkslice = m_cursor->value();
+	char const* vi = blkslice.ptr();
+	char const* ve = vi + blkslice.size();
+	df = unpackIndex( vi, ve);
+	return true;
+}
+
+bool DatabaseAdapter_DocFrequency::Cursor::loadFirst( Index& typeno, Index& termno, Index& df)
+{
+	char prefix = (char)KeyPrefix;
+	DatabaseCursorInterface::Slice key( m_cursor->seekFirst( &prefix, 1));
+	return getData( key, typeno, termno, df);
+}
+
+bool DatabaseAdapter_DocFrequency::Cursor::loadNext( Index& typeno, Index& termno, Index& df)
+{
+	DatabaseCursorInterface::Slice key( m_cursor->seekNext());
+	return getData( key, typeno, termno, df);
+}
 
 bool DatabaseAdapter_DocFrequency::load( const DatabaseInterface* database, const Index& typeno, const Index& termno, Index& df)
 {

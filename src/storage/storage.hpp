@@ -58,6 +58,8 @@ class MetaDataReaderInterface;
 class KeyAllocatorInterface;
 /// \brief Forward declaration
 class DatabaseInterface;
+/// \brief Forward declaration
+class DocumentFrequencyCache;
 
 /// \brief Implementation of the StorageInterface
 class Storage
@@ -98,7 +100,7 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual Index nofDocumentsInserted() const;
+	virtual GlobalCounter nofDocumentsInserted() const;
 
 	virtual Index maxDocumentNumber() const;
 
@@ -108,17 +110,26 @@ public:
 
 	virtual std::vector<StatCounterValue> getStatistics() const;
 
+	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
+
+	virtual void definePeerStorageInterface( PeerStorageInterface* peerStorage);
+
 public:/*QueryEval*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
 	Index getUserno( const std::string& name) const;
 	Index getAttributeName( const std::string& name) const;
+	GlobalCounter documentFrequency( const Index& typeno, const Index& termno) const;
 
 public:/*StorageTransaction*/
+	void getVariablesWriteBatch(
+			DatabaseTransactionInterface* transaction,
+			int nof_documents_incr);
+
 	void releaseTransaction( const std::vector<Index>& refreshList);
 
-	void declareNofDocumentsInserted( int value);
+	void declareNofDocumentsInserted( int incr);
 	Index nofAttributeTypes();
 
 	KeyAllocatorInterface* createTypenoAllocator();
@@ -153,6 +164,9 @@ public:/*StorageTransaction*/
 		boost::mutex* m_mutex;
 	};
 
+public:/*PeerStorageTransaction*/
+	void declareGlobalNofDocumentsInserted( int incr);
+
 public:/*StorageDocumentChecker*/
 	IndexSetIterator getAclIterator( const Index& docno) const;
 	IndexSetIterator getUserAclIterator( const Index& userno) const;
@@ -162,6 +176,7 @@ private:
 	void loadTermnoMap( const char* termnomap_source);
 	void loadVariables();
 	void storeVariables();
+	void fillDocumentFrequencyCache();
 
 private:
 	DatabaseInterface* m_database;				///< reference to key value store database
@@ -189,6 +204,9 @@ private:
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	VarSizeNodeTree* m_termno_map;				///< map of the most important (most frequent) terms, if specified
+
+	Reference<PeerStorageInterface> m_peerStorage;		///< reference to interface to other peer storages
+	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 };
 
 }

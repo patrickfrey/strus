@@ -87,7 +87,7 @@ public:
 
 	void addSelector( PostingIteratorInterface* iterator, int setindex, bool isExpression);
 
-	void addFeature( PostingIteratorInterface* iterator);
+	void addFeature( PostingIteratorInterface* iterator, float weight);
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression);
 
@@ -99,13 +99,17 @@ private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
 
 private:
-	const StorageInterface* m_storage;
-	const WeightingFunctionInterface* m_function;
-	std::vector<ArithmeticVariant> m_parameter;
-	MetaDataReaderInterface* m_metadata;
-	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
+	struct WeightingFeature
+	{
+		Reference< WeightingClosureInterface> functionClosure;
+		float weight;
 
-	std::vector<Reference< WeightingClosureInterface> > m_functionClosures;
+		WeightingFeature( WeightingClosureInterface* fc, float w)
+			:functionClosure(fc),weight(w){}
+		WeightingFeature( const WeightingFeature& o)
+			:functionClosure(o.functionClosure),weight(o.weight){}
+	};
+
 	struct SelectorPostings
 	{
 		bool isExpression;
@@ -120,6 +124,12 @@ private:
 			:isExpression(o.isExpression),setindex(o.setindex),postings(o.postings){}
 	};
 
+	const StorageInterface* m_storage;
+	const WeightingFunctionInterface* m_function;
+	std::vector<ArithmeticVariant> m_parameter;
+	MetaDataReaderInterface* m_metadata;
+	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
+	std::vector<WeightingFeature> m_weightingFeatures;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;
 	std::vector<InvAclIteratorInterface*> m_aclRestrictions;

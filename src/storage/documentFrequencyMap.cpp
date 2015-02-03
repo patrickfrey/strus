@@ -36,6 +36,11 @@
 
 using namespace strus;
 
+void DocumentFrequencyMap::clear()
+{
+	m_map.clear();
+}
+
 void DocumentFrequencyMap::increment( Index typeno, Index termno, Index count)
 {
 	Key key( typeno, termno);

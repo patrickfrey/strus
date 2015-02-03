@@ -28,10 +28,10 @@
 */
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
-#include <string>
-#include <vector>
 #include "strus/index.hpp"
 #include "strus/statCounterValue.hpp"
+#include <string>
+#include <vector>
 
 namespace strus
 {
@@ -46,6 +46,10 @@ class InvAclIteratorInterface;
 class StorageTransactionInterface;
 /// \brief Forward declaration
 class StorageDocumentInterface;
+/// \brief Forward declaration
+class PeerStorageTransactionInterface;
+/// \brief Forward declaration
+class PeerStorageInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
@@ -87,9 +91,9 @@ public:
 		createInvAclIterator(
 			const std::string& username) const=0;
 
-	/// \brief Get the number of documents inserted in this stogage
+	/// \brief Get the global number of documents inserted
 	/// \return the number of documents
-	virtual Index nofDocumentsInserted() const=0;
+	virtual GlobalCounter nofDocumentsInserted() const=0;
 
 	/// \brief Get the highest document number used in this stogage
 	/// \return the document number
@@ -116,6 +120,14 @@ public:
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
+
+	/// \brief Create an transaction object for global static statistic changes that come from other peer storages (in case of a distributed index)
+	/// \return the created transaction interface to be disposed with delete by the caller
+	virtual PeerStorageTransactionInterface* createPeerStorageTransaction()=0;
+
+	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
+	/// \param[in] peerStorage pointer to peer storage (passed ownership, deleted by this)
+	virtual void definePeerStorageInterface( PeerStorageInterface* peerStorage)=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check

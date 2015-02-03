@@ -37,7 +37,6 @@ namespace strus
 class PostingIteratorInterface
 {
 public:
-	PostingIteratorInterface() :m_weight(1.0){}
 	virtual ~PostingIteratorInterface(){}
 
 	/// \brief Return the next match candidate with a document number higher than or equal to docno
@@ -65,20 +64,6 @@ public:
 
 	/// \brief Get the current position number
 	virtual Index posno() const=0;
-
-	/// \brief Get the the weight of the feature
-	float weight() const
-	{
-		return m_weight;
-	}
-	/// \brief Set the the weight of the feature
-	void setWeight( float weight_)
-	{
-		m_weight = weight_;
-	}
-
-private:
-	float m_weight;
 };
 
 }//namespace

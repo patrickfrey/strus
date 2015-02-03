@@ -50,7 +50,6 @@ class InvertedIndexMap
 {
 public:
 	explicit InvertedIndexMap( DatabaseInterface* database_);
-	InvertedIndexMap( const InvertedIndexMap& o);
 
 	void definePosinfoPosting(
 		const Index& typeno,

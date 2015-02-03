@@ -26,47 +26,59 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "localStructAllocator.hpp"
-#include <cstdlib>
-#include <map>
+#ifndef _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
+#define _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
+#include "strus/peerStorageTransactionInterface.hpp"
+#include "documentFrequencyCache.hpp"
+#include "databaseAdapter.hpp"
+#include <string>
+#include <vector>
+#include <boost/thread/mutex.hpp>
 
-namespace strus {
+namespace strus
+{
 
+/// \brief Forward declaration
+class Storage;
+/// \brief Forward declaration
+class DocumentFrequencyCache;
 /// \brief Forward declaration
 class DatabaseInterface;
-/// \brief Forward declaration
-class DatabaseTransactionInterface;
 
-class DocumentFrequencyMap
+/// \brief Interface for a transaction of global statistic changes
+class PeerStorageTransaction
+	:public PeerStorageTransactionInterface
 {
 public:
-	DocumentFrequencyMap( DatabaseInterface* database_)
-		:m_database(database_){}
+	PeerStorageTransaction( Storage* storage_, DatabaseInterface* database_, DocumentFrequencyCache* dfcache_);
+	virtual ~PeerStorageTransaction();
 
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
+	virtual void populateNofDocumentsInsertedChange( int increment);
 
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
+	virtual void populateDocumentFrequencyChange(
+			const char* termtype, const char* termvalue, int increment, bool isnew);
 
-	void getWriteBatch( DatabaseTransactionInterface* transaction);
+	virtual void commit();
 
-	void clear();
-
-private:
-	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
-	typedef std::less<Key> MapCompare;
-	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
+	virtual void rollback();
 
 private:
+	enum {
+		UnknownValueHandleStart=(1<<30)
+	};
+
+private:
+	Storage* m_storage;
 	DatabaseInterface* m_database;
-	Map m_map;
+	DocumentFrequencyCache* m_documentFrequencyCache;
+	DocumentFrequencyCache::Batch m_dfbatch;
+	std::vector<std::string> m_unknownTerms;
+	DatabaseAdapter_TermValue m_dbadapter_termvalue;
+	Index m_termvaluecnt;
+	int m_nofDocumentsInserted;
+	bool m_commit;
+	bool m_rollback; 
 };
-
 }//namespace
 #endif
-
 
