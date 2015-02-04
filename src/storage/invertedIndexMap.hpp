@@ -61,7 +61,11 @@ public:
 
 	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 
-	void getWriteBatch( DatabaseTransactionInterface* transaction);
+	void getWriteBatch(
+			DatabaseTransactionInterface* transaction,
+			StoragePeerTransactionInterface* peerTransaction,
+			const KeyMapInv& termTypeMapInv,
+			const KeyMapInv& termValueMapInv);
 
 private:
 	struct MapKey

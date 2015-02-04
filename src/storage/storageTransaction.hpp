@@ -43,6 +43,7 @@
 #include "forwardIndexMap.hpp"
 #include "documentFrequencyMap.hpp"
 #include "keyMap.hpp"
+#include "keyMapInv.hpp"
 #include "keyAllocatorInterface.hpp"
 #include <vector>
 #include <string>
@@ -55,6 +56,9 @@ namespace strus {
 class Storage;
 /// \brief Forward declaration
 class DatabaseInterface;
+/// \brief Forward declaration
+class StoragePeerInterface;
+
 
 /// \class StorageTransaction
 class StorageTransaction
@@ -64,6 +68,7 @@ public:
 	StorageTransaction( 
 		Storage* storage_,
 		DatabaseInterface* database_,
+		const StoragePeerInterface* storagePeer_,
 		const MetaDataDescription* metadescr_,
 		const VarSizeNodeTree* termnomap_);
 
@@ -120,6 +125,7 @@ public:/*Document*/
 private:
 	Storage* m_storage;					///< Storage to call refresh after commit or rollback
 	DatabaseInterface* m_database;				///< database handle
+	const StoragePeerInterface* m_storagePeer;		///< interface to populate global statistics
 	const MetaDataDescription* m_metadescr;			///< description of metadata
 
 	AttributeMap m_attributeMap;				///< map of document attributes for writing
@@ -134,6 +140,9 @@ private:
 	KeyMap m_docIdMap;					///< map of document ids
 	KeyMap m_userIdMap;					///< map of user ids
 	KeyMap m_attributeNameMap;				///< map of document attribute names
+
+	KeyMapInv m_termTypeMapInv;				///< inverse map of term types
+	KeyMapInv m_termValueMapInv;				///< inverse map of term values
 
 	std::map<std::string,Index> m_newDocidMap;		///< map of new document identifiers (docid's allocated in ranges that must be written in the commit, because the were not written immediately)
 	int m_nof_documents;					///< total adjustment for the number of documents added minus number of documents deleted

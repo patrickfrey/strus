@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "keyMap.hpp"
+#include "keyMapInv.hpp"
 #include "databaseAdapter.hpp"
 
 using namespace strus;
@@ -42,6 +43,10 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	if (m_globalmap && m_globalmap->find( name.c_str(), data))
 	{
 		isNew = false;
+		if (m_invmap)
+		{
+			if (!m_invmap->get( data)) m_invmap->set( data, name);
+		}
 		return data;
 	}
 	if (m_map.find( name.c_str(), data))
@@ -53,11 +58,13 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	if (m_dbadapter.load( name,rt))
 	{
 		m_map.set( name.c_str(), rt);
+		if (m_invmap) m_invmap->set( data, name);
 		isNew = false;
 	}
 	else if (m_allocator->immediate())
 	{
 		rt = m_allocator->getOrCreate( name, isNew);
+		if (m_invmap) m_invmap->set( data, name);
 	}
 	else
 	{
@@ -88,6 +95,7 @@ void KeyMap::getWriteBatch(
 				m_dbadapter.store( transaction, mi.key(), idx);
 			}
 			rewriteUnknownMap[ mi.data()] = idx;
+			if (m_invmap) m_invmap->set( idx, mi.key());
 		}
 	}
 	m_map.clear();

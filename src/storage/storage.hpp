@@ -60,6 +60,10 @@ class KeyAllocatorInterface;
 class DatabaseInterface;
 /// \brief Forward declaration
 class DocumentFrequencyCache;
+/// \brief Forward declaration
+class PeerStorageTransactionInterface;
+/// \brief Forward declaration
+class StoragePeerInterface;
 
 /// \brief Implementation of the StorageInterface
 class Storage
@@ -112,7 +116,9 @@ public:
 
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
 
-	virtual void definePeerStorageInterface( PeerStorageInterface* peerStorage);
+	virtual void defineStoragePeerInterface(
+			const StoragePeerInterface* storagePeer,
+			bool doPopulateInitialState);
 
 public:/*QueryEval*/
 	Index getTermValue( const std::string& name) const;
@@ -205,7 +211,7 @@ private:
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	VarSizeNodeTree* m_termno_map;				///< map of the most important (most frequent) terms, if specified
 
-	Reference<PeerStorageInterface> m_peerStorage;		///< reference to interface to other peer storages
+	const StoragePeerInterface* m_storagePeer;		///< reference to interface to other peer storages
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 };
 

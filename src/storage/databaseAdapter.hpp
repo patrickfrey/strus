@@ -99,6 +99,7 @@ public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
+	public:
 		Cursor( DatabaseInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
@@ -115,6 +116,7 @@ public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
+	public:
 		Cursor( DatabaseInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
@@ -130,6 +132,7 @@ public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
+	public:
 		Cursor( DatabaseInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
@@ -145,6 +148,7 @@ public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
+	public:
 		Cursor( DatabaseInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
@@ -160,6 +164,7 @@ public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
+	public:
 		Cursor( DatabaseInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
@@ -175,6 +180,7 @@ public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
+	public:
 		Cursor( DatabaseInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};

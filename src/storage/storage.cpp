@@ -34,7 +34,8 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/peerStorageTransactionInterface.hpp"
-#include "strus/peerStorageInterface.hpp"
+#include "strus/storagePeerInterface.hpp"
+#include "strus/storagePeerTransactionInterface.hpp"
 #include "strus/reference.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
@@ -298,7 +299,7 @@ StorageTransactionInterface*
 		boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
 		++m_transactionCnt;
 	}
-	return new StorageTransaction( this, m_database, &m_metadescr, m_termno_map);
+	return new StorageTransaction( this, m_database, m_storagePeer, &m_metadescr, m_termno_map);
 }
 
 StorageDocumentInterface* 
@@ -647,15 +648,17 @@ PeerStorageTransactionInterface* Storage::createPeerStorageTransaction()
 	return new PeerStorageTransaction( this, m_database, m_documentFrequencyCache.get());
 }
 
-void Storage::definePeerStorageInterface( PeerStorageInterface* peerStorage)
+void Storage::defineStoragePeerInterface(
+		const StoragePeerInterface* storagePeer,
+		bool doPopulateInitialState)
 {
 	if (!m_documentFrequencyCache.get())
 	{
 		fillDocumentFrequencyCache();
 	}
-	m_peerStorage.reset( peerStorage);
 
 	TransactionLock lock( this);
+	m_storagePeer = storagePeer;
 
 	// Fill a map with the strings of all types and terms in the collection:
 	std::map<Index,std::string> typenomap;
@@ -674,30 +677,38 @@ void Storage::definePeerStorageInterface( PeerStorageInterface* peerStorage)
 		DatabaseAdapter_TermValue::Cursor termcursor( m_database);
 		Index termno;
 		std::string termstr;
-		for (bool more=typecursor.loadFirst( termstr, termno); more;
-			more=typecursor.loadNext( termstr, termno))
+		for (bool more=termcursor.loadFirst( termstr, termno); more;
+			more=termcursor.loadNext( termstr, termno))
 		{
 			termnomap[ termno] = termstr;
 		}
 	}
-	// Populate the df's and the number of documents stored through the interface
+	if (doPopulateInitialState)
 	{
-		Reference<PeerStorageTransaction> transaction( peerStorage->createTransaction());
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
-		Index typeno;
-		Index termno;
-		Index df;
-		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
-			more=dfcursor.loadNext( typeno, termno, df))
+		//... we have a normal startup and not a system recovery after a crash
+
+		// Populate the df's and the number of documents stored through the interface:
 		{
-			std::map<Index,std::string>::const_iterator ti = typenomap.find( typeno);
-			if (ti == typenomap.end()) throw std::runtime_error( "undefined type in df key");
-			std::map<Index,std::string>::const_iterator vi = termnomap.find( termno);
-			if (ti == typenomap.end()) throw std::runtime_error( "undefined term in df key");
-			transaction->populateDocumentFrequencyChange(
-					ti->second.c_str(), vi->second.c_str(), df);
+			Reference<StoragePeerTransactionInterface> transaction( storagePeer->createTransaction());
+			DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
+			Index typeno;
+			Index termno;
+			Index df;
+			for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
+				more=dfcursor.loadNext( typeno, termno, df))
+			{
+				std::map<Index,std::string>::const_iterator ti = typenomap.find( typeno);
+				if (ti == typenomap.end()) throw std::runtime_error( "undefined type in df key");
+				std::map<Index,std::string>::const_iterator vi = termnomap.find( termno);
+				if (ti == typenomap.end()) throw std::runtime_error( "undefined term in df key");
+
+				transaction->populateDocumentFrequencyChange(
+						ti->second.c_str(), vi->second.c_str(), df, true/*isNew*/);
+			}
+			transaction->populateNofDocumentsInsertedChange( m_nof_documents);
+			transaction->try_commit();
+			transaction->final_commit();
 		}
-		transaction->populateNofDocumentsInsertedChange( m_nof_documents);
 	}
 }
 

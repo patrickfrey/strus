@@ -26,55 +26,26 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "localStructAllocator.hpp"
-#include <cstdlib>
-#include <map>
+#ifndef _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
+#include <string>
 
-namespace strus {
+namespace strus
+{
 
-/// \brief Forward declaration
-class DatabaseInterface;
-/// \brief Forward declaration
-class DatabaseTransactionInterface;
-/// \brief Forward declaration
 class StoragePeerTransactionInterface;
-/// \brief Forward declaration
-class KeyMapInv;
 
-class DocumentFrequencyMap
+/// \brief Interface used by the storage to distribute statistics needed for document ranking to other peers in a cluster of storages
+class StoragePeerInterface
 {
 public:
-	DocumentFrequencyMap( DatabaseInterface* database_)
-		:m_database(database_){}
+	/// \brief Destructor
+	virtual ~StoragePeerInterface(){}
 
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
-
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
-
-	void getWriteBatch(
-			DatabaseTransactionInterface* transaction,
-			StoragePeerTransactionInterface* peerTransaction,
-			const KeyMapInv& termTypeMapInv,
-			const KeyMapInv& termValueMapInv);
-
-	void clear();
-
-private:
-	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
-	typedef std::less<Key> MapCompare;
-	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
-
-private:
-	DatabaseInterface* m_database;
-	Map m_map;
+	/// \brief Creates a new transaction object
+	/// \return return the pointer to the transaction object (with ownership - to be disposed with 'delete')
+	virtual StoragePeerTransactionInterface* createTransaction() const=0;
 };
-
 }//namespace
 #endif
-
 

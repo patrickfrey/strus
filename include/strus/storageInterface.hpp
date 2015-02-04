@@ -49,7 +49,7 @@ class StorageDocumentInterface;
 /// \brief Forward declaration
 class PeerStorageTransactionInterface;
 /// \brief Forward declaration
-class PeerStorageInterface;
+class StoragePeerInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
@@ -121,13 +121,16 @@ public:
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Create an transaction object for global static statistic changes that come from other peer storages (in case of a distributed index)
+	/// \brief Create an transaction object for global static statistic changes that come from other peer storages
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction()=0;
 
 	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
-	/// \param[in] peerStorage pointer to peer storage (passed ownership, deleted by this)
-	virtual void definePeerStorageInterface( PeerStorageInterface* peerStorage)=0;
+	/// \param[in] peerStorage reference to storage peer interface (owned by caller)
+	/// \param[in] doPopulateInitialState flag that is set to true in a normal startup and to false in the case of a system recovery after a crash. The flag set to false tells the storage not to populate its stored df's to other peers in the initialization phase. This is useful when the system crashed in a state when the populating of the own statistics was complete. After restart it continues without having to the change the global state. It just comsumes what it has missed in the mean while.
+	virtual void defineStoragePeerInterface(
+			const StoragePeerInterface* storagePeer,
+			bool doPopulateInitialState=true)=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check

@@ -178,7 +178,11 @@ void InvertedIndexMap::renameNewTermNumbers( const std::map<Index,Index>& rename
 	m_dfmap.renameNewTermNumbers( renamemap);
 }
 
-void InvertedIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
+void InvertedIndexMap::getWriteBatch(
+			DatabaseTransactionInterface* transaction,
+			StoragePeerTransactionInterface* peerTransaction,
+			const KeyMapInv& termTypeMapInv,
+			const KeyMapInv& termValueMapInv)
 {
 	// [1] Get deletes:
 	DatabaseAdapter_InverseTerm dbadapter_inv( m_database);
@@ -266,8 +270,8 @@ void InvertedIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
 	}
 
-	// [4] Get df writes:
-	m_dfmap.getWriteBatch( transaction);
+	// [4] Get df writes (and populate df's to other peers, if peerTransaction defined):
+	m_dfmap.getWriteBatch( transaction, peerTransaction, termTypeMapInv, termValueMapInv);
 
 	// [5] Clear the maps:
 	clear();

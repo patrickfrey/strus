@@ -29,6 +29,8 @@
 #include "storageTransaction.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "strus/storagePeerInterface.hpp"
+#include "strus/storagePeerTransactionInterface.hpp"
 #include "storageDocument.hpp"
 #include "storage.hpp"
 #include "databaseAdapter.hpp"
@@ -45,10 +47,12 @@ using namespace strus;
 StorageTransaction::StorageTransaction(
 		Storage* storage_,
 		DatabaseInterface* database_,
+		const StoragePeerInterface* storagePeer_,
 		const MetaDataDescription* metadescr_,
 		const VarSizeNodeTree* termnomap_)
 	:m_storage(storage_)
 	,m_database(database_)
+	,m_storagePeer(storagePeer_)
 	,m_metadescr(metadescr_)
 	,m_attributeMap(database_)
 	,m_metaDataMap(database_,metadescr_)
@@ -63,7 +67,13 @@ StorageTransaction::StorageTransaction(
 	,m_nof_documents(0)
 	,m_commit(false)
 	,m_rollback(false)
-{}
+{
+	if (m_storagePeer)
+	{
+		m_termTypeMap.defineInv( &m_termTypeMapInv);
+		m_termValueMap.defineInv( &m_termValueMapInv);
+	}
+}
 
 StorageTransaction::~StorageTransaction()
 {
@@ -247,13 +257,22 @@ void StorageTransaction::commit()
 
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
-	
+
 		std::vector<Index> refreshList;
 		m_attributeMap.getWriteBatch( transaction.get());
 		m_metaDataMap.getWriteBatch( transaction.get(), refreshList);
 	
 		m_invertedIndexMap.renameNewTermNumbers( termnoUnknownMap);
-		m_invertedIndexMap.getWriteBatch( transaction.get());
+
+		Reference<StoragePeerTransactionInterface> peerTransaction;
+		if (m_storagePeer)
+		{
+			peerTransaction.reset( m_storagePeer->createTransaction());
+		}
+		m_invertedIndexMap.getWriteBatch(
+				transaction.get(),
+				peerTransaction.get(),
+				m_termTypeMapInv, m_termValueMapInv);
 
 		m_forwardIndexMap.getWriteBatch( transaction.get());
 	
@@ -266,9 +285,17 @@ void StorageTransaction::commit()
 		}
 
 		m_storage->getVariablesWriteBatch( transaction.get(), m_nof_documents);
-
-		//!!!! POPULATE DFs HERE
-		transaction->commit();
+		if (m_storagePeer)
+		{
+			peerTransaction->populateNofDocumentsInsertedChange( m_nof_documents);
+			peerTransaction->try_commit();
+			transaction->commit();
+			peerTransaction->final_commit();
+		}
+		else
+		{
+			transaction->commit();
+		}
 		m_storage->declareNofDocumentsInserted( m_nof_documents);
 		m_storage->releaseTransaction( refreshList);
 	}

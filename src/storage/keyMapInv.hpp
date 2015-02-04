@@ -26,26 +26,42 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_PEER_STORAGE_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_STORAGE_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_KEY_MAP_INV_HPP_INCLUDED
+#define _STRUS_LVDB_KEY_MAP_INV_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <cstdlib>
 #include <string>
+#include <map>
 
-namespace strus
-{
+namespace strus {
 
-class PeerStorageTransactionInterface;
-
-/// \brief Interface used by the storage to distribute statistics needed for document ranking to other peers in a cluster of storages
-class PeerStorageInterface
+class KeyMapInv
 {
 public:
-	/// \brief Destructor
-	virtual ~PeerStorageInterface(){}
+	KeyMapInv(){}
+	KeyMapInv( const KeyMapInv& o)
+		:m_map(o.m_map),m_strings(o.m_strings){}
 
-	/// \brief Creates a new transaction object
-	/// \return return the transaction object (with ownership - to be disposed with 'delete')
-	virtual PeerStorageTransactionInterface* createTransaction()=0;
+	void set( const Index& idx, const std::string& value)
+	{
+		m_map[ idx] = m_strings.size();
+		m_strings.append( value);
+		m_strings.push_back( '\0');
+	}
+
+	const char* get( const Index& idx) const
+	{
+		std::map<Index,std::size_t>::const_iterator ei = m_map.find( idx);
+		if (ei == m_map.end()) return 0;
+		return m_strings.c_str() + ei->second;
+	}
+
+private:
+	std::map<Index,std::size_t> m_map;
+	std::string m_strings;
 };
+
 }//namespace
 #endif
+
 

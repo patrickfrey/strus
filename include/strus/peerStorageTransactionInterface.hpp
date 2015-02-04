@@ -33,7 +33,7 @@
 namespace strus
 {
 
-/// \brief Interface for a transaction of global statistic changes
+/// \brief Interface for a transaction on the local storage opened by a peer for updating global statistic changes
 class PeerStorageTransactionInterface
 {
 public:
@@ -41,30 +41,26 @@ public:
 	/// \note The destructor should do an automatic rollback if not issued yet
 	virtual ~PeerStorageTransactionInterface(){}
 
-	/// \brief Prepare to send the local change of the total number of document inserted to all other peers
-	/// \param[in] increment positive or negative (decrement) value of the local change of the collection size
-	/// \note throws if the send was not successful (the transport layer must guarantee that this change will be delivered, if the send operation was successful)
-	virtual void populateNofDocumentsInsertedChange(
+	/// \brief Prepare to update the total number of documents inserted
+	/// \param[in] increment value to use for update (positive or negative)
+	/// \note throws if the update was not successful
+	virtual void updateNofDocumentsInsertedChange(
 			int increment)=0;
 
-	/// \brief Prepare to send the local change of the total document frequency of a term to all other peers
+	/// \brief Prepare to update the global document frequency used for calculations
 	/// \param[in] termtype type of the term
 	/// \param[in] termvalue value of the term
-	/// \param[in] increment positive or negative (decrement) value of the local change of the document frequency
-	/// \param[in] isnew true, if the feature is new in the index of the sender. Triggers the receivers to send their value back for update
-	/// \note throws if the operation was not successful (if a send is invoked then the transport layer must guarantee that this change will be delivered (persistent queue or something similar), if the send operation was successful)
-	virtual void populateDocumentFrequencyChange(
+	/// \param[in] increment change (positive or negative value)
+	/// \note throws if the operation was not successful
+	virtual void updateDocumentFrequencyChange(
 			const char* termtype,
 			const char* termvalue,
-			int increment,
-			bool isnew=false)=0;
+			int increment)=0;
 
 	/// \brief Commit of the transaction
-	/// \remark The commit does not have to guarantee that all peers got up to date. But it has to ensure that all messages will be delivered.
 	virtual void commit()=0;
 
 	/// \brief Rollback of the transaction
-	/// \remark The commit does not have to guarantee that all peers got up to date. But it has to ensure that all messages will be delivered.
 	virtual void rollback()=0;
 };
 }//namespace

@@ -53,10 +53,10 @@ public:
 	PeerStorageTransaction( Storage* storage_, DatabaseInterface* database_, DocumentFrequencyCache* dfcache_);
 	virtual ~PeerStorageTransaction();
 
-	virtual void populateNofDocumentsInsertedChange( int increment);
+	virtual void updateNofDocumentsInsertedChange( int increment);
 
-	virtual void populateDocumentFrequencyChange(
-			const char* termtype, const char* termvalue, int increment, bool isnew);
+	virtual void updateDocumentFrequencyChange(
+			const char* termtype, const char* termvalue, int increment);
 
 	virtual void commit();
 

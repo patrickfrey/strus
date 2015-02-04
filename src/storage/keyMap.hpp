@@ -44,6 +44,8 @@ class DatabaseInterface;
 class DatabaseCursorInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
+/// \brief Forward declaration
+class KeyMapInv;
 
 class KeyMap
 {
@@ -56,10 +58,16 @@ public:
 		,m_globalmap(globalmap_)
 		,m_unknownHandleCount(0)
 		,m_allocator(allocator_)
+		,m_invmap(0)
 	{}
 	~KeyMap()
 	{
 		delete m_allocator;
+	}
+
+	void defineInv( KeyMapInv* invmap)
+	{
+		m_invmap = invmap;
 	}
 
 	Index lookUp( const std::string& name);
@@ -85,6 +93,7 @@ private:
 	const VarSizeNodeTree* m_globalmap;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
+	KeyMapInv* m_invmap;
 };
 
 }//namespace
