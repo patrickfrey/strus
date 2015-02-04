@@ -32,6 +32,7 @@
 #include "strus/weightedDocument.hpp"
 #include "localStructAllocator.hpp"
 #include <set>
+#include <vector>
 #include <cstring>
 
 namespace strus
