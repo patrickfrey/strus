@@ -47,8 +47,7 @@ class QueryProcessorInterface;
 /// \return the program reference
 QueryEvalInterface*
 	createQueryEval(
-		const QueryProcessorInterface* processor,
-		const std::string& evalProgramSource);
+		const QueryProcessorInterface* processor);
 
 }//namespace
 #endif

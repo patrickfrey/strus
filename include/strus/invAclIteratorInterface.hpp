@@ -33,17 +33,19 @@
 namespace strus
 {
 
-/// \brief Iterator of sets of documents used to implement access restrictions
+/// \brief Iterator of sets of documents used to implement ACL access restrictions
 class InvAclIteratorInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~InvAclIteratorInterface(){}
 
-	/// \brief Return the next element with a document number higher than or equal to docno
+	/// \brief Return the nearest element with a document number higher than or equal to docno
+	/// \param[in] docno minimum document number to seek
+	/// \return the minumum upper bound value for docno in the traversed set of documents
 	virtual Index skipDoc( const Index& docno)=0;
 };
 
 }//namespace
 #endif
-
 

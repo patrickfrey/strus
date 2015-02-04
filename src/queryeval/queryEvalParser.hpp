@@ -26,47 +26,36 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <utility>
+#ifndef _STRUS_QUERY_PROGRAM_PARSER_HPP_INCLUDED
+#define _STRUS_QUERY_PROGRAM_PARSER_HPP_INCLUDED
+#include <string>
 
 namespace strus {
 
-/// \class WeightedDocument
-/// \brief Pure ranking result of a strus query without the attributes
-class WeightedDocument
+/// \brief Forward declaration
+class WeightingFunctionDef;
+/// \brief Forward declaration
+class SummarizerDef;
+/// \brief Forward declaration
+class TermDef;
+/// \brief Forward declaration
+class QueryProcessorInterface;
+
+/// \brief Query evaluation program parser
+struct QueryEvalParser
 {
 public:
-	/// \brief Default constructor
-	WeightedDocument()
-		:m_docno(0),m_weight(0.0){}
-	/// \brief Copy constructor
-	WeightedDocument( const WeightedDocument& o)
-		:m_docno(o.m_docno),m_weight(o.m_weight){}
-	/// \brief Constructor
-	WeightedDocument( const Index& docno_, float weight_)
-		:m_docno(docno_),m_weight(weight_){}
+	QueryEvalParser( const QueryProcessorInterface* processor_)
+		:m_processor(processor_){}
 
-	/// \brief Get the document number of the result
-	Index docno() const					{return m_docno;}
-	/// \brief Get the accumulated weight of the ranking of the result
-	float weight() const					{return m_weight;}
+	WeightingFunctionDef parseWeightingFunctionDef( char const*& src) const;
+	TermDef parseTermDef( char const*& src) const;
+	SummarizerDef parseSummarizerDef( char const*& src) const;
 
-	/// \brief Comparison for sorting
-	bool operator < ( const WeightedDocument& o) const
-	{
-		return (m_weight < o.m_weight);
-	}
-	/// \brief Comparison for sorting
-	bool operator > ( const WeightedDocument& o) const
-	{
-		return (m_weight > o.m_weight);
-	}
+	void loadProgram( QueryEval& qeprg, const std::string& source) const;
 
 private:
-	Index m_docno;			///< document number
-	float m_weight;			///< accumulated ranking weight
+	const QueryProcessorInterface* m_processor;
 };
 
 }//namespace

@@ -44,6 +44,8 @@ public:
 	/// \brief Destructor
 	virtual ~QueryEvalInterface(){}
 
+	virtual void loadProgram( const std::string& source)=0;
+
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on
 	virtual QueryInterface* createQuery( const StorageInterface* storage) const=0;

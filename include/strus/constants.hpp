@@ -32,17 +32,23 @@
 namespace strus
 {
 
-/// \brief Some global constants that document some dependencies (hacks) that did not get yet into interfaces.
+/// \brief Some global constants that document some dependencies (hacks) that did not get yet into interfaces (and probably never will).
 struct Constants
 {
+	/// \brief Get the agreed attribute name for the document id
+	/// \note The inserter program set this attribute implicitely to the value of the path of the document inserted
 	static const char* attribute_docid()
 	{
 		return "docid";
 	}
+	/// \brief Get the metadata element value for the length of the document used by the BM25 weighting function
+	/// \note The inserter program initializes this metadata element implicitely if it is defined in the metadata table (don't forget to define it there if you use BM25 or another weighting function that relies on it)
 	static const char* metadata_doclen()
 	{
 		return "doclen";
 	}
+	/// \brief Get the name of the set union operator for postings
+	/// \note The query evaluation uses implicitely this operator to make joins of posting sets that have to be merged before passing it to some function (like for example the structure element posting set passed to summarizers)
 	static const char* operator_set_union()
 	{
 		return "union";

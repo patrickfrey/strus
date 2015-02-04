@@ -41,9 +41,18 @@ public:
 	/// \brief Destructor
 	virtual ~AttributeReaderInterface(){}
 
+	/// \brief Get the handle of an element addressed by its name
+	/// \param[in] name name of the element
+	/// \return the element handle as number (count starting with 0)
 	virtual Index elementHandle( const char* name) const=0;
+
+	/// \brief Move the attribute reader context to a specific document
+	/// \param[in] docno the number of the document to move the context to
 	virtual void skipDoc( const Index& docno)=0;
 
+	/// \brief Get the value of the attribute of the document in the current readed context -- defined with skipDoc(const Index&)
+	/// \param[in] elementHandle_ the handle of the element to retrieve
+	/// \return the value of the element as string or an empty string if undefined
 	virtual std::string getValue( const Index& elementHandle_) const=0;
 };
 }//namespace

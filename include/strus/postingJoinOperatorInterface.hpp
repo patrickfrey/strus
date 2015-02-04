@@ -40,6 +40,7 @@ class PostingIteratorInterface;
 class PostingJoinOperatorInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~PostingJoinOperatorInterface(){}
 
 	/// \brief Create an iterator on the join operator result (set of postings)

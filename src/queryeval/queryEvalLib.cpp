@@ -39,9 +39,8 @@ using namespace strus;
 
 DLL_PUBLIC QueryEvalInterface*
 	strus::createQueryEval(
-		const QueryProcessorInterface* processor,
-		const std::string& source)
+		const QueryProcessorInterface* processor)
 {
-	return new QueryEval( processor, source);
+	return new QueryEval( processor);
 }
 

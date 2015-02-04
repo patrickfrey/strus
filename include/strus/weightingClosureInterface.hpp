@@ -37,9 +37,11 @@ class MetaDataReaderInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
 
+/// \brief Interface for a weighting function with its state and context used during calculation
 class WeightingClosureInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~WeightingClosureInterface(){}
 
 	/// \brief Call the weighting function for a document

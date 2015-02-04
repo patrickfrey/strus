@@ -34,16 +34,20 @@
 #include <BaseTsd.h>
 namespace strus {
 	///\typedef Index
-	///\brief Document number type
+	///\brief Number type generally used for locally counted indices
 	typedef INT32 Index;
+	///\typedef GlobalCounter
+	///\brief Number type generally used for indices globally shared between different instances of strus
 	typedef INT64 GlobalCounter;
 }//namespace
 #else
 #include <stdint.h>
 namespace strus {
 	///\typedef Index
-	///\brief Index term number type
+	///\brief Number type generally used for locally counted indices
 	typedef int32_t Index;
+	///\typedef GlobalCounter
+	///\brief Number type generally used for indices globally shared between different instances of strus
 	typedef int64_t GlobalCounter;
 }//namespace
 #endif

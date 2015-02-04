@@ -43,9 +43,11 @@ class ArithmeticVariant;
 /// \brief Forward declaration
 class StorageInterface;
 
+/// \brief Interface for a weighting function that can be used for ranking in the query evaluation
 class WeightingFunctionInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~WeightingFunctionInterface(){}
 
 	/// \brief Get the parameter names of the function in the order they should be passed

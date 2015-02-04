@@ -37,12 +37,16 @@ namespace strus
 class StatCounterValue
 {
 public:
+	/// \brief Constructor
 	StatCounterValue( const char* name_, unsigned int value_)
 		:m_name(name_),m_value(value_){}
+	/// \brief Copy constructor
 	StatCounterValue( const StatCounterValue& o)
 		:m_name(o.m_name),m_value(o.m_value){}
 
+	/// \brief Get the name of the counter
 	const char* name() const		{return m_name;}
+	/// \brief Get the value of the counter
 	unsigned int value() const		{return m_value;}
 
 private:

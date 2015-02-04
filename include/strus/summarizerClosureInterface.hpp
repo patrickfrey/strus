@@ -39,6 +39,7 @@ namespace strus
 class SummarizerClosureInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~SummarizerClosureInterface(){}
 
 	/// \brief Get some summarization elements

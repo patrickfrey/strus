@@ -56,9 +56,9 @@ Query::Query( const QueryEval* queryEval_, const StorageInterface* storage_, con
 	,m_processor(processor_)
 	,m_metaDataReader(storage_->createMetaDataReader())
 {
-	std::vector<QueryEval::TermDef>::const_iterator
-		ti = m_queryEval->predefinedTerms().begin(),
-		te = m_queryEval->predefinedTerms().end();
+	std::vector<TermDef>::const_iterator
+		ti = m_queryEval->terms().begin(),
+		te = m_queryEval->terms().end();
 	for (; ti != te; ++ti)
 	{
 		pushTerm( ti->type, ti->value);
@@ -333,7 +333,7 @@ std::vector<ResultDocument> Query::evaluate()
 	std::vector<Reference<SummarizerClosureInterface> > summarizers;
 	std::vector<Reference<PostingIteratorInterface> > allSummarizerPostings;
 
-	std::vector<QueryEval::SummarizerDef>::const_iterator
+	std::vector<SummarizerDef>::const_iterator
 		zi = m_queryEval->summarizers().begin(),
 		ze = m_queryEval->summarizers().end();
 	for (; zi != ze; ++zi)

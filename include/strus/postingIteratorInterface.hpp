@@ -49,20 +49,26 @@ public:
 	/// \brief Unique id in the system for a feature expression
 	virtual const char* featureid() const=0;
 
-	/// \brief Return the list of subexpressions of the iterator
+	/// \brief Return the list of positive or negative subexpressions of the iterator
+	/// \param[in] positive true, if the subexpressions should belong to the ones that specify the elements of the set / false, if the subexpressions should belong to the ones that exclude elements from the set.
+	/// \return a list of const references to subexpression posting iterators without ownership
 	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const=0;
 
 	/// \brief Get the number of documents where the feature occurrs
-	/// \remark May not be defined exactly for composed features. In this case a substitute value should be returned, calculated from the df's of the sub expressions
+	/// \remark May not be defined exactly for composed features. In this case a substitute value should be returned, estimated from the df's of the sub expressions
+	/// \return the document frequency (aka 'df')
 	virtual Index documentFrequency() const=0;
 
 	/// \brief Get the frequency of the feature in the current document
+	/// \return the feature frequency (aka 'ff' of 'tf')
 	virtual unsigned int frequency()=0;
 
 	/// \brief Get the current document number
+	/// \return the document number
 	virtual Index docno() const=0;
 
 	/// \brief Get the current position number
+	/// \return the position number
 	virtual Index posno() const=0;
 };
 

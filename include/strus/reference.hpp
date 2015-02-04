@@ -40,8 +40,10 @@ template <class Object>
 class Reference
 {
 public:
+	/// \brief Default constructor
 	Reference()
 		:m_obj(0),m_refcnt(newRefCnt(0)){}
+	/// \brief Constructor
 	Reference( Object* obj_)
 		:m_obj(0),m_refcnt(0)
 	{
@@ -55,14 +57,17 @@ public:
 			delete m_obj;
 		}
 	}
+	/// \brief Copy constructor
 	Reference( const Reference& o)
 		:m_obj(o.m_obj),m_refcnt(o.m_refcnt){++*m_refcnt;}
 
+	/// \brief Destructor
 	~Reference()
 	{
 		freeRef();
 	}
 
+	/// \brief Assignment operator
 	Reference& operator = (const Reference& o)
 	{
 		m_obj = o.m_obj;
@@ -71,6 +76,7 @@ public:
 		return *this;
 	}
 
+	/// \brief Reinitialize the local value of the reference and dispose the old value if not referenced by others
 	void reset( Object* obj_)			
 	{
 		if (*m_refcnt == 1)
@@ -86,12 +92,18 @@ public:
 		m_obj = obj_;
 	}
 
+	/// \brief Object access operator
 	Object* operator->()				{return m_obj;}
+	/// \brief Object access operator
 	const Object* operator->() const		{return m_obj;}
+	/// \brief Object access operator
 	Object& operator*()				{return *m_obj;}
+	/// \brief Object access operator
 	const Object& operator*() const			{return *m_obj;}
 
+	/// \brief Object access as function
 	const Object* get() const			{return m_obj;}
+	/// \brief Object access as function
 	Object* get()					{return m_obj;}
 
 private:

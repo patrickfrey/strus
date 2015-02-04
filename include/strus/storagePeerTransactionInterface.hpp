@@ -58,7 +58,7 @@ public:
 			int increment,
 			bool isnew)=0;
 
-	/// \brief Query to commit of the transaction (two phase commit)
+	/// \brief Query to commit of the transaction
 	/// \remark The query to commit does not have to guarantee that all peers get up to date immediately. But it has to guarantee that no update is lost (persistent queue or something similar)
 	virtual void try_commit()=0;
 

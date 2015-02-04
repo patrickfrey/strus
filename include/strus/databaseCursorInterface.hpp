@@ -37,25 +37,39 @@ namespace strus
 class DatabaseCursorInterface
 {
 public:
+	/// \brief Chunk data structure without ownership for keys and values of the database cursor
 	class Slice
 	{
 	public:
+		/// \brief Defaul constructor
 		Slice()
 			:m_ptr(0),m_size(0){}
+		/// \brief Constructor
+		/// \param[in] ptr_ pointer to data chunk
+		/// \param[in] size_ size of ptr_ in bytes
 		Slice( const char* ptr_, std::size_t size_)
 			:m_ptr(ptr_),m_size(size_){}
+		/// \brief Copy constructor
+		/// \param[in] o chunk reference to copy
 		Slice( const Slice& o)
 			:m_ptr(o.m_ptr),m_size(o.m_size){}
 
+		/// \brief Get the pointer to data
+		/// \return the pointer
 		const char* ptr() const		{return m_ptr;}
+		/// \brief Get the size of the data in bytes
+		/// \return the size
 		std::size_t size() const	{return m_size;}
 
+		/// \brief Cast of the data to a string
 		operator std::string() const	{return std::string(m_ptr,m_size);}
+		/// \brief Evaluate if the chunk is defined or a NULL reference
+		/// \return true, if yes
 		bool defined() const		{return m_ptr!=0;}
 
 	private:
-		const char* m_ptr;
-		std::size_t m_size;
+		const char* m_ptr;		///< pointer to data (no ownership)
+		std::size_t m_size;		///< size of the data in bytes
 	};
 
 public:

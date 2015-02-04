@@ -38,6 +38,7 @@ namespace strus
 class ForwardIteratorInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~ForwardIteratorInterface(){}
 
 	/// \brief Define the document of the items inspected

@@ -36,10 +36,14 @@
 
 namespace strus {
 
+/// \class ResultDocument
+/// \brief Structure defining one result element of a strus query
 class ResultDocument
 	:public WeightedDocument
 {
 public:
+	/// \class Attribute
+	/// \brief Structure defining an attribute of a result
 	class Attribute
 	{
 	public:
@@ -56,18 +60,23 @@ public:
 		std::string m_value;
 	};
 
+	/// \brief Default constructor
 	ResultDocument(){}
+	/// \brief Copy constructor
 	ResultDocument( const ResultDocument& o)
 		:WeightedDocument(o),m_attributes(o.m_attributes){}
+	/// \brief Constructor from a composition of the pure query evaluation result with attributes coming from summarization
 	ResultDocument( const WeightedDocument& o, const std::vector<Attribute>& a)
 		:WeightedDocument(o),m_attributes(a){}
+	/// \brief Constructor from a composition its basic parts
 	ResultDocument( const Index& docno_, float weight_, const std::vector<Attribute>& attributes_)
 		:WeightedDocument(docno_,weight_),m_attributes(attributes_){}
 
+	/// \brief Get the list of attributes of this result element
 	const std::vector<Attribute>& attributes() const	{return m_attributes;}
 
 private:
-	std::vector<Attribute> m_attributes;
+	std::vector<Attribute> m_attributes;	///< attributes of this result element
 };
 
 }//namespace

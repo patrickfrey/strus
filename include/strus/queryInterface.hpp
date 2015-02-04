@@ -40,13 +40,15 @@ namespace strus {
 /// \brief Forward declaration
 class StorageInterface;
 
-/// \brief Defines a strus retrieval query as tree
+/// \brief Defines a strus information retrieval query
 class QueryInterface
 {
 public:
+	/// \brief Destructor
 	virtual ~QueryInterface(){}
 
 	/// \brief Print the contents of this query in readable form
+	/// \param[out] where to print to
 	virtual void print( std::ostream& out)=0;
 
 	/// \brief Push a term to the query stack

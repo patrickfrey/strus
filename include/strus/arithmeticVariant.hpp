@@ -34,41 +34,58 @@
 
 namespace strus {
 
-struct ArithmeticVariant
+
+/// \class ArithmeticVariant
+/// \brief Atomic type that can hold numeric values of different type
+class ArithmeticVariant
 {
+public:
+	/// \brief Constructor from a signed integer
+	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant( int value)
 	{
 		variant.Int = value;
 		type = Int;
 	}
 
+	/// \brief Constructor from an unsigned integer
+	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant( unsigned int value)
 	{
 		variant.UInt = value;
 		type = UInt;
 	}
 
+	/// \brief Constructor from a single precision floating point number
+	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant( float value)
 	{
 		variant.Float = value;
 		type = Float;
 	}
 
+	/// \brief Default constructor (as undefined value)
+	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant()
 	{
 		std::memset( this, 0, sizeof(*this));
 	}
 
+	/// \brief Copy constructor 
+	/// \param[in] o arithmetic variant to copy
 	ArithmeticVariant( const ArithmeticVariant& o)
 	{
 		std::memcpy( this, &o, sizeof(*this));
 	}
 
+	/// \brief Find out if this value is defined
+	/// \return true, if yes
 	bool defined() const
 	{
 		return type != Null;
 	}
 
+	/// \brief Template for casting to a defined value type
 	template <typename TYPE>
 	TYPE cast() const
 	{
@@ -82,28 +99,40 @@ struct ArithmeticVariant
 		throw std::logic_error( "illegal value of variant");
 	}
 
+	/// \brief Cast to a single precision floating point number
 	operator float() const
 	{
 		return cast<float>();
 	}
+	/// \brief Cast to a signed integer
 	operator int() const
 	{
 		return cast<int>();
 	}
+	/// \brief Cast to an unsigned integer
 	operator unsigned int() const
 	{
 		return cast<unsigned int>();
 	}
 
+	/// \brief Test for equality
+	/// \param[in] o arithmetic variant to compare
+	/// \return true, if yes
 	bool operator == (const ArithmeticVariant& o) const
 	{
 		return isequal(o);
 	}
+	/// \brief Test for inequality
+	/// \param[in] o arithmetic variant to compare
+	/// \return true, if yes
 	bool operator != (const ArithmeticVariant& o) const
 	{
 		return !isequal(o);
 	}
 
+	/// \brief Test for equality
+	/// \param[in] o arithmetic variant to compare
+	/// \return true, if yes
 	bool isequal( const ArithmeticVariant& o) const
 	{
 		if (type == o.type)
@@ -124,6 +153,8 @@ struct ArithmeticVariant
 		return false;
 	}
 
+	/// \brief Assignment operator for a singed integer
+	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant& operator=( int value)
 	{
 		variant.Int = value;
@@ -131,6 +162,8 @@ struct ArithmeticVariant
 		return *this;
 	}
 
+	/// \brief Assignment operator for an unsinged integer
+	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant& operator=( unsigned int value)
 	{
 		variant.UInt = value;
@@ -138,6 +171,8 @@ struct ArithmeticVariant
 		return *this;
 	}
 
+	/// \brief Assignment operator for a single precision floating point number
+	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant& operator=( float value)
 	{
 		variant.Float = value;
@@ -145,20 +180,23 @@ struct ArithmeticVariant
 		return *this;
 	}
 
+	/// \brief Assignment operator
+	/// \param[in] o arithmetic variant to copy
 	ArithmeticVariant& operator=( const ArithmeticVariant& o)
 	{
 		std::memcpy( this, &o, sizeof(*this));
 		return *this;
 	}
 
+	/// \brief Enumeration of all types an arithmetic variant can have
 	enum Type {Null,Int,UInt,Float};
-	Type type;
+	Type type;				///< Type of this arithmetic variant
 	union
 	{
-		int Int;
-		unsigned int UInt;
-		float Float;
-	} variant;
+		int Int;			///< value in case of a signed integer
+		unsigned int UInt;		///< value in case of an unsigned integer
+		float Float;			///< value in case of a single precision floating point number
+	} variant;				///< Value of this arithmetic variant
 };
 
 }//namespace
