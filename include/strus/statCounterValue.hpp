@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_STORAGE_STATISTICS_COUNTER_VALUE_HPP_INCLUDED
 #define _STRUS_STORAGE_STATISTICS_COUNTER_VALUE_HPP_INCLUDED
-#include "strus/index.hpp"
 
 namespace strus
 {

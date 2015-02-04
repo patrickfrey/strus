@@ -28,8 +28,6 @@
 */
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
-#include <vector>
 #include <iostream>
 
 namespace strus

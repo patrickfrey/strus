@@ -30,7 +30,6 @@
 #define _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #include <cstring>
 #include <stdexcept>
-#include <iostream>
 #include <limits>
 
 namespace strus {

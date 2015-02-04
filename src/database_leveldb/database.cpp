@@ -29,6 +29,7 @@
 #include "database.hpp"
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
+#include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include <stdexcept>
 #include <leveldb/db.h>
@@ -98,6 +99,47 @@ DatabaseTransactionInterface* Database::createTransaction()
 DatabaseCursorInterface* Database::createCursor( bool useCache) const
 {
 	return new DatabaseCursor( m_db, useCache);
+}
+
+
+class DatabaseBackupCursor
+	:public DatabaseBackupCursorInterface
+	,public DatabaseCursor
+{
+public:
+	explicit DatabaseBackupCursor( leveldb::DB* db_)
+		:DatabaseCursor( db_, false){}
+
+	virtual bool fetch(
+			const char*& key,
+			std::size_t& keysize,
+			const char*& blk,
+			std::size_t& blksize)
+	{
+		if (!m_key.defined())
+		{
+			m_key = seekFirst( 0, 0);
+		}
+		else
+		{
+			m_key = seekNext();
+		}
+		if (!m_key.defined()) return false;
+		Slice blkslice = value();
+		key = m_key.ptr();
+		keysize = m_key.size();
+		blk = blkslice.ptr();
+		blksize = blkslice.size();
+		return true;
+	}
+private:
+	Slice m_key;
+};
+
+
+DatabaseBackupCursorInterface* Database::createBackupCursor() const
+{
+	return new DatabaseBackupCursor( m_db);
 }
 
 void Database::writeImm(

@@ -53,6 +53,8 @@ public:
 
 	virtual DatabaseCursorInterface* createCursor( bool useCache) const;
 
+	virtual DatabaseBackupCursorInterface* createBackupCursor() const;
+	
 	virtual void writeImm(
 			const char* key,
 			std::size_t keysize,

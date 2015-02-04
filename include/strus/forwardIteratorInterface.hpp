@@ -30,7 +30,6 @@
 #define _STRUS_FORWARD_INDEX_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <string>
-#include <vector>
 
 namespace strus
 {

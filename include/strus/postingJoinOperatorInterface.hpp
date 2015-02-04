@@ -28,9 +28,8 @@
 */
 #ifndef _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
 #include "strus/reference.hpp"
-#include <string>
+#include <vector>
 
 namespace strus
 {

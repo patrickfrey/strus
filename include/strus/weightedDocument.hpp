@@ -29,8 +29,6 @@
 #ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
-#include <vector>
-#include <string>
 #include <utility>
 
 namespace strus {

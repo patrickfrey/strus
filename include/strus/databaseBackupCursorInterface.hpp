@@ -26,24 +26,31 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_DATABASE_BACKUP_CURSOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_DATABASE_BACKUP_CURSOR_INTERFACE_HPP_INCLUDED
+#include <string>
 
 namespace strus
 {
 
-class StoragePeerTransactionInterface;
-
-/// \brief Interface used by the storage to distribute statistics needed for document ranking to other peers in a cluster of storages
-class StoragePeerInterface
+/// \brief Database cursor interface that can be used for backup
+class DatabaseBackupCursorInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~StoragePeerInterface(){}
+	virtual ~DatabaseBackupCursorInterface(){}
 
-	/// \brief Creates a new transaction object
-	/// \return return the pointer to the transaction object (with ownership - to be disposed with 'delete')
-	virtual StoragePeerTransactionInterface* createTransaction() const=0;
+	/// \brief Fetches then next block to backup
+	/// \param[out] key pointer to the key of the block
+	/// \param[out] keysize size of key in bytes
+	/// \param[out] blk pointer to the value of the block
+	/// \param[out] blksize size of blk in bytes
+	/// \return true on success, false, if there is no block left
+	virtual bool fetch(
+			const char*& key,
+			std::size_t& keysize,
+			const char*& blk,
+			std::size_t& blksize)=0;
 };
 }//namespace
 #endif

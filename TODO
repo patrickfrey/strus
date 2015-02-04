@@ -3,7 +3,6 @@ check how expensive it is to calculate combined df's of features (number of docu
 document AND (contain) operator for selections
 interface queryeval program 
 interface analyzer program
-backup interface
 query language
 summarization with help of weighted union iterator
 SWIG bindings

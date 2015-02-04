@@ -29,7 +29,6 @@
 #ifndef _STRUS_REFERENCE_HPP_INCLUDED
 #define _STRUS_REFERENCE_HPP_INCLUDED
 #include <cstdlib>
-#include <cstring>
 #include <stdexcept>
 
 namespace strus
