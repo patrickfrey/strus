@@ -683,32 +683,30 @@ void Storage::defineStoragePeerInterface(
 			termnomap[ termno] = termstr;
 		}
 	}
-	if (doPopulateInitialState)
+	// Populate the df's and the number of documents stored through the interface:
 	{
-		//... we have a normal startup and not a system recovery after a crash
-
-		// Populate the df's and the number of documents stored through the interface:
+		Reference<StoragePeerTransactionInterface> transaction( storagePeer->createTransaction());
+		DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
+		Index typeno;
+		Index termno;
+		Index df;
+		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
+			more=dfcursor.loadNext( typeno, termno, df))
 		{
-			Reference<StoragePeerTransactionInterface> transaction( storagePeer->createTransaction());
-			DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
-			Index typeno;
-			Index termno;
-			Index df;
-			for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
-				more=dfcursor.loadNext( typeno, termno, df))
-			{
-				std::map<Index,std::string>::const_iterator ti = typenomap.find( typeno);
-				if (ti == typenomap.end()) throw std::runtime_error( "undefined type in df key");
-				std::map<Index,std::string>::const_iterator vi = termnomap.find( termno);
-				if (ti == typenomap.end()) throw std::runtime_error( "undefined term in df key");
+			std::map<Index,std::string>::const_iterator ti = typenomap.find( typeno);
+			if (ti == typenomap.end()) throw std::runtime_error( "undefined type in df key");
+			std::map<Index,std::string>::const_iterator vi = termnomap.find( termno);
+			if (ti == typenomap.end()) throw std::runtime_error( "undefined term in df key");
 
-				transaction->populateDocumentFrequencyChange(
-						ti->second.c_str(), vi->second.c_str(), df, true/*isNew*/);
-			}
-			transaction->populateNofDocumentsInsertedChange( m_nof_documents);
-			transaction->try_commit();
-			transaction->final_commit();
+			if (!doPopulateInitialState) df = 0;
+
+			transaction->populateDocumentFrequencyChange(
+				ti->second.c_str(), vi->second.c_str(),
+				df, true/*isNew*/);
 		}
+		transaction->populateNofDocumentsInsertedChange( m_nof_documents);
+		transaction->try_commit();
+		transaction->final_commit();
 	}
 }
 

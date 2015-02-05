@@ -127,7 +127,7 @@ public:
 
 	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
 	/// \param[in] peerStorage reference to storage peer interface (owned by caller)
-	/// \param[in] doPopulateInitialState flag that is set to true in a normal startup and to false in the case of a system recovery after a crash. The flag set to false tells the storage not to populate its stored df's to other peers in the initialization phase. This is useful when the system crashed in a state when the populating of the own statistics was complete. After restart it continues without having to the change the global state. It just comsumes what it has missed in the mean while.
+	/// \param[in] doPopulateInitialState flag that is set to true in a normal startup and to false in the case of a system recovery after a crash. The flag set to false tells the storage to populate its stored terms with a df change of 0 to the other peers in the initialization phase. After recovery restart the node should reinitialize its global statistics without changing the state of the other peers.
 	virtual void defineStoragePeerInterface(
 			const StoragePeerInterface* storagePeer,
 			bool doPopulateInitialState=true)=0;
