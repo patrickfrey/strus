@@ -8,6 +8,7 @@ CPP_OBJS=\
 	metaDataRestriction.o \
 	query.o \
 	queryEval.o \
+	queryEvalParser.o \
 	queryEvalLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I.

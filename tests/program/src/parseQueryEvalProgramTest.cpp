@@ -165,7 +165,9 @@ int main( int argc, const char* argv[])
 				strus::createQueryProcessorInterface( 0));
 
 			boost::scoped_ptr<strus::QueryEvalInterface> qeval(
-				strus::createQueryEval( qproc.get(), prgsource));
+				strus::createQueryEval( qproc.get()));
+			qeval->loadProgram( prgsource);
+
 			std::ostringstream out;
 			qeval->print( out);
 			std::string outstr( out.str());

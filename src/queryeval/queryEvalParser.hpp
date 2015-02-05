@@ -39,6 +39,8 @@ class SummarizerDef;
 /// \brief Forward declaration
 class TermDef;
 /// \brief Forward declaration
+class QueryEval;
+/// \brief Forward declaration
 class QueryProcessorInterface;
 
 /// \brief Query evaluation program parser

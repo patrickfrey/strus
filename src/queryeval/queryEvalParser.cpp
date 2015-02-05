@@ -26,13 +26,15 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_PROGRAM_PARSER_HPP_INCLUDED
-#define _STRUS_QUERY_PROGRAM_PARSER_HPP_INCLUDED
 #include "queryEvalParser.hpp"
+#include "queryEval.hpp"
 #include "weightingFunctionDef.hpp"
 #include "summarizerDef.hpp"
 #include "termDef.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+#include "mapFunctionParameters.hpp"
 #include "lexems.hpp"
 #include <string>
 #include <vector>
@@ -44,8 +46,6 @@
 
 using namespace strus;
 using namespace strus::parser;
-
-#include "mapFunctionParameters.hpp"
 
 static std::string errorPosition( const char* base, const char* itr)
 {
@@ -354,13 +354,13 @@ void QueryEvalParser::loadProgram( QueryEval& qeprg, const std::string& source) 
 			switch ((StatementKeyword)parse_KEYWORD( src, 3, "EVAL", "TERM", "SUMMARIZE"))
 			{
 				case e_TERM:
-					parseTermDef( src);
+					qeprg.defineTerm( parseTermDef( src));
 					break;
 				case e_EVAL:
-					parseWeightingFunctionDef( src);
+					qeprg.defineWeightingFunction( parseWeightingFunctionDef( src));
 					break;
 				case e_SUMMARIZE:
-					parseSummarizeDef( src);
+					qeprg.defineSummarizerDef( parseSummarizerDef( src));
 					break;
 			}
 			if (*src)
