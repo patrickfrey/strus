@@ -19,42 +19,49 @@ install:
 
 uninstall:
 	cd src; make uninstall; cd ..
-	@-rm $(INSTALL_INCDIR)/arithmeticVariant.hpp
-	@-rm $(INSTALL_INCDIR)/private/arithmeticVariantAsString.hpp
-	@-rm $(INSTALL_INCDIR)/private/cmdLineOpt.hpp
-	@-rm $(INSTALL_INCDIR)/private/fileio.hpp
-	@-rm $(INSTALL_INCDIR)/attributeReaderInterface.hpp
-	@-rm $(INSTALL_INCDIR)/constants.hpp
-	@-rm $(INSTALL_INCDIR)/docnoIteratorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/forwardIteratorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/index.hpp
-	@-rm $(INSTALL_INCDIR)/metaDataReaderInterface.hpp
-	@-rm $(INSTALL_INCDIR)/postingIteratorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/postingJoinOperatorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/queryEvalInterface.hpp
-	@-rm $(INSTALL_INCDIR)/queryEvalLib.hpp
-	@-rm $(INSTALL_INCDIR)/queryInterface.hpp
-	@-rm $(INSTALL_INCDIR)/queryProcessorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/queryProcessorLib.hpp
-	@-rm $(INSTALL_INCDIR)/resultDocument.hpp
-	@-rm $(INSTALL_INCDIR)/statCounterValue.hpp
-	@-rm $(INSTALL_INCDIR)/storageAlterMetaDataTableInterface.hpp
-	@-rm $(INSTALL_INCDIR)/storageDocumentInterface.hpp
-	@-rm $(INSTALL_INCDIR)/storageInterface.hpp
-	@-rm $(INSTALL_INCDIR)/storageLib.hpp
-	@-rm $(INSTALL_INCDIR)/storageTransactionInterface.hpp
-	@-rm $(INSTALL_INCDIR)/summarizerClosureInterface.hpp
-	@-rm $(INSTALL_INCDIR)/summarizerFunctionInterface.hpp
-	@-rm $(INSTALL_INCDIR)/weightedDocument.hpp
-	@-rm $(INSTALL_INCDIR)/weightingClosureInterface.hpp
-	@-rm $(INSTALL_INCDIR)/weightingFunctionInterface.hpp
-	@-rm $(INSTALL_INCDIR)/storage.hpp
-	@-rm $(INSTALL_INCDIR)/invAclIteratorInterface.hpp
-	@-rm $(INSTALL_INCDIR)/peerStorageTransactionInterface.hpp
-	@-rm $(INSTALL_INCDIR)/peerStorageInterface.hpp
-	@-rm $(INSTALL_INCDIR)/reference.hpp
+	@-rm -f $(INSTALL_INCDIR)/arithmeticVariant.hpp
+	@-rm -f $(INSTALL_INCDIR)/private/arithmeticVariantAsString.hpp
+	@-rm -f $(INSTALL_INCDIR)/private/cmdLineOpt.hpp
+	@-rm -f $(INSTALL_INCDIR)/private/fileio.hpp
+	@-rm -f $(INSTALL_INCDIR)/private/configParser.hpp
+	@-rm -f $(INSTALL_INCDIR)/databaseInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/databaseCursorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/databaseTransactionInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/databaseBackupCursorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/databaseLib.hpp
+	@-rm -f $(INSTALL_INCDIR)/storagePeerInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/storagePeerTransactionInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/attributeReaderInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/constants.hpp
+	@-rm -f $(INSTALL_INCDIR)/docnoIteratorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/forwardIteratorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/index.hpp
+	@-rm -f $(INSTALL_INCDIR)/metaDataReaderInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/postingIteratorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/postingJoinOperatorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/queryEvalInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/queryEvalLib.hpp
+	@-rm -f $(INSTALL_INCDIR)/queryInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/queryProcessorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/queryProcessorLib.hpp
+	@-rm -f $(INSTALL_INCDIR)/resultDocument.hpp
+	@-rm -f $(INSTALL_INCDIR)/statCounterValue.hpp
+	@-rm -f $(INSTALL_INCDIR)/storageAlterMetaDataTableInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/storageDocumentInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/storageInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/storageLib.hpp
+	@-rm -f $(INSTALL_INCDIR)/storageTransactionInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/summarizerClosureInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/summarizerFunctionInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/weightedDocument.hpp
+	@-rm -f $(INSTALL_INCDIR)/weightingClosureInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/weightingFunctionInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/storage.hpp
+	@-rm -f $(INSTALL_INCDIR)/invAclIteratorInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/peerStorageTransactionInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/peerStorageInterface.hpp
+	@-rm -f $(INSTALL_INCDIR)/reference.hpp
 	@-rmdir $(INSTALL_INCDIR)/private
 	@-rmdir $(INSTALL_INCDIR)
-	@-rmdir $(INSTALL_BINDIR)
 	@-rmdir $(INSTALL_LIBDIR)
 

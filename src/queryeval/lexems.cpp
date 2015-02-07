@@ -34,6 +34,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#error DEPRECATED 
+
 using namespace strus;
 using namespace strus::parser;
 

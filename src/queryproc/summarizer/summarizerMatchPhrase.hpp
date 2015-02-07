@@ -34,6 +34,7 @@
 #include "strus/reference.hpp"
 #include <vector>
 #include <string>
+#include <stdexcept>
 
 namespace strus
 {
@@ -44,6 +45,8 @@ class StorageInterface;
 class ForwardIteratorInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 
 class SummarizerClosureMatchPhrase
@@ -51,6 +54,7 @@ class SummarizerClosureMatchPhrase
 {
 public:
 	/// \param[in] storage_ storage to use
+	/// \param[in] processor_ query processor to use
 	/// \param[in] termtype_ type of the tokens to build the summary with
 	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
 	/// \param[in] summarylen_ maximum lenght of the whole summary
@@ -58,27 +62,29 @@ public:
 	/// \param[in] phrasestruct_ structure iterator to recognize end of phrases
 	SummarizerClosureMatchPhrase(
 			const StorageInterface* storage_,
-			const char* termtype_,
+			const QueryProcessorInterface* processor_,
+			const std::string& termtype_,
 			unsigned int maxlen_,
 			unsigned int summarylen_,
-			const std::vector<PostingIteratorInterface*>& itrs_,
-			PostingIteratorInterface* phrasestruct_);
+			const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_);
 
 	virtual ~SummarizerClosureMatchPhrase();
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
-	virtual std::vector<std::string> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
 	const StorageInterface* m_storage;
+	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_termtype;
 	unsigned int m_maxlen;
 	unsigned int m_summarylen;
 	std::vector<PostingIteratorInterface*> m_itr;
 	PostingIteratorInterface* m_phrasestruct;
+	Reference<PostingIteratorInterface> m_structop;
 };
 
 
@@ -90,30 +96,49 @@ public:
 
 	virtual ~SummarizerFunctionMatchPhrase(){}
 
-	virtual const char* name() const
-	{
-		return "matchphrase";
-	}
-
-	virtual const char** parameterNames() const
+	virtual const char** numericParameterNames() const
 	{
 		static const char* ar[] = {"phraselen","sumlen",0};
 		return ar;
 	}
 
+	virtual const char** textualParameterNames() const
+	{
+		static const char* ar[] = {"type",0};
+		return ar;
+	}
+
+	virtual const char** featureParameterClassNames() const
+	{
+		static const char* ar[] = {"struct","match",0};
+		return ar;
+	}
+	static bool isStructFeature( std::size_t classidx)
+	{
+		return classidx == 0;
+	}
+	static bool isMatchFeature( std::size_t classidx)
+	{
+		return classidx == 1;
+	}
+
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const char* elementname_,
-			PostingIteratorInterface* structitr_,
-			const std::vector<PostingIteratorInterface*>& itrs_,
-			MetaDataReaderInterface*,
-			const std::vector<ArithmeticVariant>& parameters) const
+			const QueryProcessorInterface* processor_,
+			MetaDataReaderInterface* metadata_,
+			const std::vector<FeatureParameter>& features_,
+			const std::vector<std::string>& textualParameters_,
+			const std::vector<ArithmeticVariant>& numericParameters_) const
 	{
-		return new SummarizerClosureMatchPhrase( 
-				storage_, elementname_,
-				parameters[0].defined()?(unsigned int)parameters[0]:30,
-				parameters[1].defined()?(unsigned int)parameters[1]:50,
-				itrs_, structitr_);
+		std::string termtype = textualParameters_[0];
+		unsigned int maxlen = numericParameters_[0].defined()?(unsigned int)numericParameters_[0]:30;
+		unsigned int sumlen = numericParameters_[1].defined()?(unsigned int)numericParameters_[1]:40;
+		if (termtype.empty())
+		{
+			throw std::runtime_error( "missing of emtpy term type definition (parameter 'type') in match phrase summarizer configuration");
+		}
+		return new SummarizerClosureMatchPhrase(
+				storage_, processor_, termtype, maxlen, sumlen, features_);
 	}
 };
 

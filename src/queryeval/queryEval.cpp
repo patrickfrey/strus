@@ -28,12 +28,10 @@
 */
 #include "queryEval.hpp"
 #include "query.hpp"
-#include "lexems.hpp"
 #include "keyMap.hpp"
-#include "termDef.hpp"
-#include "summarizerDef.hpp"
-#include "weightingFunctionDef.hpp"
-#include "mapFunctionParameters.hpp"
+#include "termConfig.hpp"
+#include "summarizerConfig.hpp"
+#include "weightingConfig.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/constants.hpp"
@@ -43,7 +41,6 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include "queryEvalParser.hpp"
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
@@ -55,115 +52,135 @@
 
 using namespace strus;
 
-void QueryEval::loadProgram( const std::string& source)
+void QueryEval::defineTerm(
+		const std::string& set_,
+		const std::string& type_,
+		const std::string& value_)
 {
-	QueryEvalParser parser( m_processor);
-	parser.loadProgram( *this, source);
+	defineTerm( TermConfig( set_, type_, value_));
 }
 
-void QueryEval::defineTerm( const TermDef& termDef)
+void QueryEval::defineSelectorFeature( const std::string& set_)
 {
-	m_terms.push_back( termDef);
+	m_selectorSets.push_back( set_);
 }
 
-void QueryEval::defineWeightingFunction( const WeightingFunctionDef& funcDef)
+void QueryEval::defineWeightingFeature( const std::string& set_)
 {
-	if (m_weightingFunction.function)
+	m_weightingSets.push_back( set_);
+}
+
+SummarizerConfigInterface* QueryEval::createSummarizerConfig(
+		const std::string& resultAttribute,
+		const std::string& functionName)
+{
+	const SummarizerFunctionInterface* function_ = m_processor->getSummarizerFunction( functionName);
+	return new SummarizerConfig( this, function_, functionName);
+}
+
+WeightingConfigInterface* QueryEval::createWeightingConfig(
+		const std::string& functionName)
+{
+	const WeightingFunctionInterface* function_ = m_processor->getWeightingFunction( functionName);
+	return new WeightingConfig( this, function_, functionName);
+}
+
+void QueryEval::defineTerm( const TermConfig& termConfig)
+{
+	m_terms.push_back( termConfig);
+}
+
+void QueryEval::defineWeighting( const WeightingConfig& weightingConfig_)
+{
+	if (m_weightingConfig.function())
 	{
 		throw std::runtime_error( "more than one weighting function defined");
 	}
-	m_weightingFunction = funcDef;
+	m_weightingConfig = weightingConfig_;
 }
 
-void QueryEval::defineSummarizerDef( const SummarizerDef& sumDef)
+void QueryEval::defineSummarizer( const SummarizerConfig& sumDef)
 {
 	m_summarizers.push_back( sumDef);
 }
 
 void QueryEval::print( std::ostream& out) const
 {
-	std::vector<TermDef>::const_iterator ti = m_terms.begin(), te = m_terms.end();
+	std::vector<TermConfig>::const_iterator ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
 		out << "TERM " << ti->set << ": " << ti->type << " '" << ti->value << "';" << std::endl;
 	}
-	if (m_weightingFunction.function)
+	if (m_weightingConfig.function())
 	{
 		out << "EVAL ";
-		out << " " << m_weightingFunction.functionName;
-		if (m_weightingFunction.parameters.size())
+		out << " " << m_weightingConfig.functionName();
+		if (m_weightingConfig.parameters().size())
 		{
-			out << "<";
-			std::size_t ai = 0, ae = m_weightingFunction.parameters.size();
+			out << "(";
+			std::size_t ai = 0, ae = m_weightingConfig.parameters().size();
 			for(; ai != ae; ++ai)
 			{
 				if (ai) out << ", ";
-				out << m_weightingFunction.function->parameterNames()[ai]
-					<< "=" << m_weightingFunction.parameters[ai];
-			}
-			out << ">";
-		}
-		if (m_weightingFunction.selectorSets.size())
-		{
-			out << "[";
-			std::size_t si = 0, se = m_weightingFunction.selectorSets.size();
-			for(; si != se; ++si)
-			{
-				if (si) out << ", ";
-				out << m_weightingFunction.selectorSets[si];
-			}
-			out << "]";
-		}
-		if (m_weightingFunction.weightingSets.size())
-		{
-			out << "(";
-			std::size_t wi = 0, we = m_weightingFunction.weightingSets.size();
-			for(; wi != we; ++wi)
-			{
-				if (wi) out << ", ";
-				out << m_weightingFunction.weightingSets[wi];
+				out << m_weightingConfig.function()->numericParameterNames()[ai]
+					<< "=" << m_weightingConfig.parameters()[ai];
 			}
 			out << ")";
 		}
+		if (m_selectorSets.size())
+		{
+			out << " ON ";
+			std::size_t si = 0, se = m_selectorSets.size();
+			for(; si != se; ++si)
+			{
+				if (si) out << ", ";
+				out << m_selectorSets[si];
+			}
+		}
+		if (m_weightingSets.size())
+		{
+			out << " WITH ";
+			std::size_t wi = 0, we = m_weightingSets.size();
+			for(; wi != we; ++wi)
+			{
+				if (wi) out << ", ";
+				out << m_weightingSets[wi];
+			}
+		}
 		out << ";" << std::endl;
 	}
-	std::vector<SummarizerDef>::const_iterator
+	std::vector<SummarizerConfig>::const_iterator
 		si = m_summarizers.begin(), se = m_summarizers.end();
 	for (; si != se; ++si)
 	{
 		out << "SUMMARIZE ";
-		out << si->resultAttribute << " = " << si->functionName;
-		if (si->parameters.size())
+		out << si->resultAttribute() << " = " << si->functionName();
+		out << "( ";
+		std::size_t argidx = 0;
+
+		std::size_t ai = 0, ae = si->numericParameters().size();
+		for(; ai != ae; ++ai,++argidx)
 		{
-			out << "<";
-			std::size_t ai = 0, ae = si->parameters.size();
-			for(; ai != ae; ++ai)
-			{
-				if (ai) out << ", ";
-				out << si->function->parameterNames()[ai] << "=" << si->parameters[ai];
-			}
-			out << ">";
+			if (argidx) out << ", ";
+			out << si->function()->numericParameterNames()[ai]
+				<< "=" << si->numericParameters()[ai];
 		}
-		if (!si->contentType.empty())
+		ai = 0, ae = si->textualParameters().size();
+		for(; ai != ae; ++ai,++argidx)
 		{
-			out << "[" << si->contentType << "]";
+			if (argidx) out << ", ";
+			out << si->function()->textualParameterNames()[ai] << "=" << si->textualParameters()[ai];
 		}
-		if (si->featureSet.size() || si->structSet.size())
+		std::vector<SummarizerConfig::Feature>::const_iterator
+			fi = si->featureParameters().begin(),
+			fe = si->featureParameters().end();
+		for (int fidx=0; fi != fe; ++fi,++fidx,++argidx)
 		{
-			out << "(";
-			if (!si->structSet.empty())
-			{
-				out << si->structSet << ":";
-			}
-			std::size_t fi = 0, fe = si->featureSet.size();
-			for(; fi != fe; ++fi)
-			{
-				if (fi) out << ", ";
-				out << si->featureSet[fi];
-			}
-			out << ")";
+			if (argidx) out << ", ";
+			out << si->function()->featureParameterClassNames()[fi->classidx]
+				<< "=" << fi->set;
 		}
-		out << ";" << std::endl;
+		out << ");" << std::endl;
 	}
 }
 

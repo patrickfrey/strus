@@ -26,21 +26,30 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_CONFIG_INTERFACE_HPP_INCLUDED
+#define _STRUS_WEIGHTING_CONFIG_INTERFACE_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
-#include "keyMap.hpp"
 #include <string>
-#include <vector>
 
-#error DEPRECATED 
+namespace strus {
 
-namespace strus
+/// \class WeightingConfigInterface
+/// \brief Interface for the configuration of a query evaluation weighting function
+class WeightingConfigInterface
 {
-	std::vector<ArithmeticVariant>
-		mapFunctionParameters(
-			const char** paramNames,
-			const KeyMap<ArithmeticVariant>& paramDefs);
-}
+public:
+	/// \brief Destructor
+	virtual ~WeightingConfigInterface(){}
 
+	/// \brief Defines a parameter to pass to the weighting function
+	/// \param[in] name_ name of the parameter
+	/// \param[in] value_ value of the parameter
+	virtual void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)=0;
+
+	/// \brief Finalizes the summarizer definition
+	virtual void done()=0;
+};
+
+}//namespace
 #endif
+

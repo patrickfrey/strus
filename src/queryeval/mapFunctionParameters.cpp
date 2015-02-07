@@ -31,6 +31,8 @@
 
 using namespace strus;
 
+#error DEPRECATED 
+
 std::vector<ArithmeticVariant>
 	strus::mapFunctionParameters(
 		const char** paramNames,

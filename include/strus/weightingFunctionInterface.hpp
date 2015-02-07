@@ -52,7 +52,7 @@ public:
 
 	/// \brief Get the parameter names of the function in the order they should be passed
 	/// \return the NULL terminated list of parameter names
-	virtual const char** parameterNames() const=0;
+	virtual const char** numericParameterNames() const=0;
 
 	/// \brief Create a closure for this weighting function on a posting iterator reference and a meta data reader reference
 	/// \param[in] storage_ storage reference for some statistics (like the document collection frequency)

@@ -37,6 +37,8 @@ namespace strus
 /// \brief Forward declaration
 class StorageInterface;
 /// \brief Forward declaration
+class QueryProcessorInterface;
+/// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
@@ -52,29 +54,50 @@ class SummarizerFunctionInterface
 public:
 	virtual ~SummarizerFunctionInterface(){}
 
-	/// \brief Get the name of the function
-	/// \return the name of the function
-	virtual const char* name() const=0;
+	/// \brief Get the numeric value parameter names of the function in the order they should be passed
+	/// \return the NULL terminated list of parameter names or NULL, if there are none
+	virtual const char** numericParameterNames() const		{return 0;}
 
-	/// \brief Get the parameter names of the function in the order they should be passed
-	/// \return the NULL terminated list of parameter names
-	virtual const char** parameterNames() const=0;
+	/// \brief Get the textual value parameter names of the function in the order they should be passed
+	/// \return the NULL terminated list of parameter names or NULL, if there are none
+	virtual const char** textualParameterNames() const		{return 0;}
 
-	/// \brief Create a closure for this summarization function on a posting iterator reference and a meta data reader reference with an optional posting iterator describing a structure context
-	/// \param[in] storage_ storage interface for getting info (like for example document attributes)
-	/// \param[in] elementname_ name of element to select for summarization
-	/// \param[in] structitr_ posting iterator describing the structural context of summarization (like for example sentence delimiters)
-	/// \param[in] itrs_ references to posting iterators that are subject of summarization
-	/// \param[in] metadata_ meta data interface
-	/// \param[in] parameters_ additional parameters for summarization
-	/// \return the closure with some global statistics calculated only once
+	/// \brief Get the feature class names of the function that define the class of the feature. The index of the name in this array (starting with 0) is assigned to the posting iterator when passing it to the function.
+	/// \return the NULL terminated list of feature class names or NULL, if there are none
+	virtual const char** featureParameterClassNames() const		{return 0;}
+
+	/// \brief Definition of an argument feature for 
+	class FeatureParameter
+	{
+	public:
+		FeatureParameter( std::size_t classidx_, PostingIteratorInterface* itr_)
+			:m_classidx(classidx_),m_postingIterator(itr_){}
+		FeatureParameter( const FeatureParameter& o)
+			:m_classidx(o.m_classidx),m_postingIterator(o.m_postingIterator){}
+
+		std::size_t classidx() const				{return m_classidx;}
+		PostingIteratorInterface* postingIterator() const	{return m_postingIterator;}
+
+	private:
+		std::size_t m_classidx;
+		PostingIteratorInterface* m_postingIterator;
+	};
+
+	/// \brief Create a closure (execution context) for this summarization function
+	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
+	/// \param[in] processor_ query processor to get posting set operators of weighting functions from
+	/// \param[in] metadata_ metadata interface for getting information for summarization (like for example the document insertion date)
+	/// \param[in] features_ features that are subject of summarization (like for example query features for extracting matching phrases)
+	/// \param[in] textualParameters_ parameters for summarization as strings
+	/// \param[in] numericParameters_ numeric parameters for summarization
+	/// \return the closure (the summarization function with its execution context)
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const char* elementname_,
-			PostingIteratorInterface* structitr_,
-			const std::vector<PostingIteratorInterface*>& itrs_,
+			const QueryProcessorInterface* processor_,
 			MetaDataReaderInterface* metadata_,
-			const std::vector<ArithmeticVariant>& parameters_) const=0;
+			const std::vector<FeatureParameter>& features_,
+			const std::vector<std::string>& textualParameters_,
+			const std::vector<ArithmeticVariant>& numericParameters_) const=0;
 };
 
 }//namespace

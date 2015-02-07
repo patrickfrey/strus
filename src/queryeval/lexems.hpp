@@ -30,6 +30,8 @@
 #define _STRUS_QUERY_PARSER_LEXEMS_HPP_INCLUDED
 #include <string>
 
+#error DEPRECATED 
+
 namespace strus {
 namespace parser {
 

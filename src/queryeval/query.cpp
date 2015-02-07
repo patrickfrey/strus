@@ -56,7 +56,7 @@ Query::Query( const QueryEval* queryEval_, const StorageInterface* storage_, con
 	,m_processor(processor_)
 	,m_metaDataReader(storage_->createMetaDataReader())
 {
-	std::vector<TermDef>::const_iterator
+	std::vector<TermConfig>::const_iterator
 		ti = m_queryEval->terms().begin(),
 		te = m_queryEval->terms().end();
 	for (; ti != te; ++ti)
@@ -240,7 +240,7 @@ std::vector<ResultDocument> Query::evaluate()
 	{
 		return std::vector<ResultDocument>();
 	}
-	if (!m_queryEval->weightingFunction().function)
+	if (!m_queryEval->weightingConfig().function())
 	{
 		throw std::runtime_error("cannot evaluate query, no weighting function defined");
 	}
@@ -266,15 +266,15 @@ std::vector<ResultDocument> Query::evaluate()
 	// [4] Create the accumulator:
 	Accumulator accumulator(
 		m_storage,
-		m_queryEval->weightingFunction().function, 
-		m_queryEval->weightingFunction().parameters,
+		m_queryEval->weightingConfig().function(), 
+		m_queryEval->weightingConfig().parameters(),
 		m_metaDataReader.get(), m_metaDataRestrictions,
 		m_maxNofRanks, m_storage->maxDocumentNumber());
 
 	// [4.1] Add document selection postings:
 	std::vector<std::string>::const_iterator
-		si = m_queryEval->weightingFunction().selectorSets.begin(),
-		se = m_queryEval->weightingFunction().selectorSets.end();
+		si = m_queryEval->selectorSets().begin(),
+		se = m_queryEval->selectorSets().end();
 	for (int sidx=0; si != se; ++si,++sidx)
 	{
 		fi = m_features.begin(), fe = m_features.end();
@@ -291,8 +291,8 @@ std::vector<ResultDocument> Query::evaluate()
 	}
 	// [4.2] Add features for weighting:
 	std::vector<std::string>::const_iterator
-		wi = m_queryEval->weightingFunction().weightingSets.begin(),
-		we = m_queryEval->weightingFunction().weightingSets.end();
+		wi = m_queryEval->weightingSets().begin(),
+		we = m_queryEval->weightingSets().end();
 	for (; wi != we; ++wi)
 	{
 		fi = m_features.begin(), fe = m_features.end();
@@ -329,65 +329,37 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 	}
 
-	// [5] Get the summarizers:
+	// [5] Create the summarizers:
 	std::vector<Reference<SummarizerClosureInterface> > summarizers;
-	std::vector<Reference<PostingIteratorInterface> > allSummarizerPostings;
-
-	std::vector<SummarizerDef>::const_iterator
+	std::vector<SummarizerConfig>::const_iterator
 		zi = m_queryEval->summarizers().begin(),
 		ze = m_queryEval->summarizers().end();
 	for (; zi != ze; ++zi)
 	{
-		PostingIteratorInterface* summarizerStructitr = 0;
-		std::vector<PostingIteratorInterface*> summarizerPostings;
-
-		// [5.1] Get the summarizer structure feature:
-		std::vector<NodeAddress> struct_nodes;
-		fi = m_features.begin(), fe = m_features.end();
-		for (; fi != fe; ++fi)
-		{
-			if (zi->structSet == fi->set)
-			{
-				struct_nodes.push_back( fi->node);
-			}
-		}
-		if (!struct_nodes.empty())
-		{
-			if (struct_nodes.size() == 1)
-			{
-				allSummarizerPostings.push_back(
-					createNodePostingIterator( struct_nodes[0]));
-			}
-			else
-			{
-				Expression expr( Constants::operator_set_union(), struct_nodes);
-				allSummarizerPostings.push_back(
-					createExpressionPostingIterator( expr));
-			}
-			summarizerStructitr = allSummarizerPostings.back().get();
-		}
-
-		// [5.2] Get the summarizer matching features:
-		std::vector<std::string>::const_iterator
-			ti = zi->featureSet.begin(), te = zi->featureSet.end();
-		for (; ti != te; ++ti)
+		// [5.1] Collect the summarization features:
+		std::vector<SummarizerFunctionInterface::FeatureParameter> summarizeFeatures;
+		std::vector<SummarizerConfig::Feature>::const_iterator
+			si = zi->featureParameters().begin(),
+			se = zi->featureParameters().end();
+		for (; si != se; ++si)
 		{
 			fi = m_features.begin(), fe = m_features.end();
 			for (; fi != fe; ++fi)
 			{
-				if (*ti == fi->set)
+				if (fi->set == si->set)
 				{
-					allSummarizerPostings.push_back(
-						createNodePostingIterator( fi->node));
-					summarizerPostings.push_back(
-						allSummarizerPostings.back().get());
+					std::size_t pidx = featurePostingsMap.find( fi->node)->second;
+					summarizeFeatures.push_back(
+						SummarizerFunctionInterface::FeatureParameter(
+							si->classidx, postings[ pidx].get()));
 				}
 			}
 		}
+		// [5.2] Create the summarizer:
 		summarizers.push_back(
-			zi->function->createClosure(
-				m_storage, zi->contentType.c_str(), summarizerStructitr,
-				summarizerPostings, m_metaDataReader.get(), zi->parameters));
+			zi->function()->createClosure(
+				m_storage, m_processor, m_metaDataReader.get(),
+				summarizeFeatures, zi->textualParameters(), zi->numericParameters()));
 	}
 
 	// [6] Do the Ranking and build the result:
@@ -420,14 +392,16 @@ std::vector<ResultDocument> Query::evaluate()
 			si = summarizers.begin(), se = summarizers.end();
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
-			std::vector<std::string> summary = (*si)->getSummary( ri->docno());
-			std::vector<std::string>::const_iterator
+			std::vector<SummarizerClosureInterface::SummaryElement>
+				summary = (*si)->getSummary( ri->docno());
+			std::vector<SummarizerClosureInterface::SummaryElement>::const_iterator
 				ci = summary.begin(), ce = summary.end();
 			for (; ci != ce; ++ci)
 			{
 				attr.push_back(
 					ResultDocument::Attribute(
-						m_queryEval->summarizers()[sidx].resultAttribute, *ci));
+						m_queryEval->summarizers()[sidx].resultAttribute(),
+						ci->text(), ci->weight()));
 			}
 		}
 		rt.push_back( ResultDocument( *ri, attr));

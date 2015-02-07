@@ -26,17 +26,17 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_PROGRAM_TERM_DEF_HPP_INCLUDED
-#define _STRUS_QUERY_PROGRAM_TERM_DEF_HPP_INCLUDED
+#ifndef _STRUS_TERM_CONFIG_HPP_INCLUDED
+#define _STRUS_TERM_CONFIG_HPP_INCLUDED
 #include <string>
 
 namespace strus {
 
-struct TermDef
+struct TermConfig
 {
-	TermDef( const TermDef& o)
+	TermConfig( const TermConfig& o)
 		:set(o.set),type(o.type),value(o.value){}
-	TermDef( const std::string& s, const std::string& t, const std::string& v)
+	TermConfig( const std::string& s, const std::string& t, const std::string& v)
 		:set(s),type(t),value(v){}
 
 	std::string set;	///< term set name

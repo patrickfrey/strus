@@ -26,21 +26,64 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
-#define _STRUS_QUERYEVAL_MAP_FUNCTION_PARAMETERS_HPP_INCLUDED
-#include "strus/arithmeticVariant.hpp"
-#include "keyMap.hpp"
-#include <string>
-#include <vector>
-
-#error DEPRECATED 
+#ifndef _STRUS_POSTING_ITERATOR_LINK_HPP_INCLUDED
+#define _STRUS_POSTING_ITERATOR_LINK_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
 
 namespace strus
 {
-	std::vector<ArithmeticVariant>
-		mapFunctionParameters(
-			const char** paramNames,
-			const KeyMap<ArithmeticVariant>& paramDefs);
-}
 
+class PostingIteratorLink
+	:public PostingIteratorInterface
+{
+public:
+	PostingIteratorLink( PostingIteratorInterface* ref_)
+		:m_ref(ref_){}
+
+	virtual Index skipDoc( const Index& docno)
+	{
+		return m_ref->skipDoc( docno);
+	}
+
+	virtual Index skipPos( const Index& firstpos)
+	{
+		return m_ref->skipPos( firstpos);
+	}
+
+	virtual const char* featureid() const
+	{
+		return m_ref->featureid();
+	}
+
+	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const
+	{
+		return m_ref->subExpressions( positive);
+	}
+
+	virtual Index documentFrequency() const
+	{
+		return m_ref->documentFrequency();
+	}
+
+	virtual unsigned int frequency()
+	{
+		return m_ref->frequency();
+	}
+
+	virtual Index docno() const
+	{
+		return m_ref->docno();
+	}
+
+	virtual Index posno() const
+	{
+		return m_ref->posno();
+	}
+
+private:
+	PostingIteratorInterface* m_ref;
+};
+
+}//namespace
 #endif
+

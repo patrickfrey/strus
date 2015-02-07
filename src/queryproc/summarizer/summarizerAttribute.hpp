@@ -48,14 +48,15 @@ class SummarizerClosureAttribute
 public:
 	/// \param[in] attribreader_ reader for document attributes
 	/// \param[in] name_ attribute identifier
-	SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const char* name_);
+	SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
 
 	virtual ~SummarizerClosureAttribute();
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
-	virtual std::vector<std::string> getSummary( const Index& docno);
+	virtual std::vector<SummarizerClosureInterface::SummaryElement>
+			getSummary( const Index& docno);
 
 private:
 	AttributeReaderInterface* m_attribreader;
@@ -71,24 +72,19 @@ public:
 
 	virtual ~SummarizerFunctionAttribute(){}
 
-	virtual const char* name() const
+	virtual const char** textualParameterNames() const
 	{
-		return "attribute";
-	}
-
-	virtual const char** parameterNames() const
-	{
-		static const char* ar[] = {0};
+		static const char* ar[] = {"name",0};
 		return ar;
 	}
 
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const char* elementname_,
-			PostingIteratorInterface* structitr_,
-			const std::vector<PostingIteratorInterface*>& itrs_,
-			MetaDataReaderInterface*,
-			const std::vector<ArithmeticVariant>&) const;
+			const QueryProcessorInterface* processor_,
+			MetaDataReaderInterface* metadata_,
+			const std::vector<FeatureParameter>& features_,
+			const std::vector<std::string>& textualParameters_,
+			const std::vector<ArithmeticVariant>& numericParameters_) const;
 };
 
 

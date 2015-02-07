@@ -2,13 +2,12 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
-	mapFunctionParameters.o \
-	lexems.o \
 	accumulator.o \
 	metaDataRestriction.o \
+	weightingConfig.o \
+	summarizerConfig.o \
 	query.o \
 	queryEval.o \
-	queryEvalParser.o \
 	queryEvalLib.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I.
@@ -38,6 +37,6 @@ install:
 
 .PHONY: uninstall
 uninstall:
-	@rm $(INSTALL_LIBDIR)/libstrus_queryeval.so
+	@rm -f $(INSTALL_LIBDIR)/libstrus_queryeval.so
 
 

@@ -37,7 +37,11 @@ namespace strus
 {
 
 /// \brief Forward declaration
+class StorageInterface;
+/// \brief Forward declaration
 class MetaDataReaderInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 
 /// \brief Interface for the summarization context (of a SummarizationFunction)
@@ -45,10 +49,10 @@ class SummarizerClosureMetaData
 	:public SummarizerClosureInterface
 {
 public:
-	SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const char* name_);
+	SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
 	virtual ~SummarizerClosureMetaData(){}
 
-	virtual std::vector<std::string> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
 	MetaDataReaderInterface* m_metadata;
@@ -64,27 +68,21 @@ public:
 
 	virtual ~SummarizerFunctionMetaData(){}
 
-	virtual const char* name() const
+	virtual const char** textualParameterNames() const
 	{
-		return "metadata";
-	}
-
-	virtual const char** parameterNames() const
-	{
-		static const char* ar[] = {0};
+		static const char* ar[] = {"name",0};
 		return ar;
 	}
 
 	virtual SummarizerClosureInterface* createClosure(
-			const StorageInterface*,
-			const char* elementname_,
-			PostingIteratorInterface* structitr_,
-			const std::vector<PostingIteratorInterface*>& itrs_,
+			const StorageInterface* storage_,
+			const QueryProcessorInterface* processor_,
 			MetaDataReaderInterface* metadata_,
-			const std::vector<ArithmeticVariant>&) const
+			const std::vector<FeatureParameter>& features_,
+			const std::vector<std::string>& textualParameters_,
+			const std::vector<ArithmeticVariant>& numericParameters_) const
 	{
-		if (itrs_.size() || structitr_) throw std::runtime_error( "no feature sets as arguments expected for summarizer 'metadata'");
-		return new SummarizerClosureMetaData( metadata_, elementname_);
+		return new SummarizerClosureMetaData( metadata_, textualParameters_[0]);
 	}
 };
 

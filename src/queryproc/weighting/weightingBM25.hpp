@@ -79,7 +79,7 @@ public:
 
 	virtual ~WeightingFunctionBM25(){}
 
-	virtual const char** parameterNames() const
+	virtual const char** numericParameterNames() const
 	{
 		static const char* ar[] = {"k1","b","avgdoclen",0};
 		return ar;

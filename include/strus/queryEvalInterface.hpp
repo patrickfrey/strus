@@ -36,6 +36,10 @@ namespace strus
 class QueryInterface;
 /// \brief Forward declaration
 class StorageInterface;
+/// \brief Forward declaration
+class SummarizerConfigInterface;
+/// \brief Forward declaration
+class WeightingConfigInterface;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -44,15 +48,43 @@ public:
 	/// \brief Destructor
 	virtual ~QueryEvalInterface(){}
 
-	virtual void loadProgram( const std::string& source)=0;
+	/// \brief Declare a predefined term for all queries of this type. 
+	/// \param[in] set_ name of the set of this term. The set is the identifier to address a group of terms. It declares the role of the term in the query
+	/// \param[in] type_ name of the type of the term
+	/// \param[in] value_ value of the term
+	/// \note This function is useful to define structural elements in the document used for query evaluation, that are not part of the query itself. For example sentence or paragraph marker.
+	virtual void defineTerm(
+			const std::string& set_,
+			const std::string& type_,
+			const std::string& value_)=0;
+
+	/// \brief Declare a set of features to be used for selection (declare what documents to weight)
+	/// \param[in] set_ name of the set of the selecting feature.
+	/// \remark If no selector feature is specified then the weighting features are used for selection
+	virtual void defineSelectorFeature( const std::string& set_)=0;
+
+	/// \brief Declare a set of features to be used for weighting (declare what features to weight)
+	/// \param[in] set_ name of the set of the weighting feature.
+	/// \remark If no weighhting feature is specified then the query evaluation will allways return an empty ranklist
+	virtual void defineWeightingFeature( const std::string& set_)=0;
+
+	/// \brief Create a summarizer to configure for this query evaluation
+	/// \param[in] resultAttribute specifies the attribute name this summarization is labeled with in the query evaluation result
+	/// \param[in] functionName name of the summarizer function to use. The name references a function defined with QueryProcessor::defineSummarizerFunction(const char*,const SummarizerFunctionInterface*)
+	/// \return the summarizer configuration object to be destroyed with 'delete' by the caller
+	virtual SummarizerConfigInterface* createSummarizerConfig(
+			const std::string& resultAttribute,
+			const std::string& functionName)=0;
+
+	/// \brief Create the weighting function to configure for this query evaluation
+	/// \param[in] functionName name of the weighting function to use. The name references a function defined with QueryProcessor::defineWeightingFunction(const char*,const WeightingFunctionInterface*)
+	/// \return the summarizer configuration object to be destroyed with 'delete' by the caller
+	virtual WeightingConfigInterface* createWeightingConfig(
+			const std::string& functionName)=0;
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on
 	virtual QueryInterface* createQuery( const StorageInterface* storage) const=0;
-
-	/// \brief Print the internal representation of this query program to 'out'
-	/// \param[out] out stream to print the program to
-	virtual void print( std::ostream& out) const=0;
 };
 
 }//namespace

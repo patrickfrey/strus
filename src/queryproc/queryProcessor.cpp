@@ -30,6 +30,7 @@
 #include "strus/constants.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "iterator/postingIteratorContains.hpp"
 #include "iterator/postingIteratorPred.hpp"
 #include "iterator/postingIteratorSucc.hpp"
 #include "iterator/postingIteratorIntersect.hpp"
@@ -70,6 +71,7 @@ static const PostingJoinSequence joinSequence;
 static const PostingJoinStructSequence joinSequenceStruct;
 static const PostingJoinDifference joinDiff;
 static const PostingJoinIntersect joinIntersect;
+static const PostingJoinContains joinContains;
 static const PostingJoinUnion joinUnion;
 static const PostingJoinSucc joinSucc;
 static const PostingJoinPred joinPred;
@@ -87,6 +89,7 @@ QueryProcessor::QueryProcessor( StorageInterface* storage_)
 	definePostingJoinOperator( "union", &joinUnion);
 	definePostingJoinOperator( "succ", &joinSucc);
 	definePostingJoinOperator( "pred", &joinPred);
+	definePostingJoinOperator( "contains", &joinContains);
 
 	defineWeightingFunction( "BM25", &weightingBM25);
 	defineWeightingFunction( "TF", &weightingTF);

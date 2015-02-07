@@ -1,5 +1,4 @@
 #include "accumulator.hpp"
-#include "mapFunctionParameters.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"

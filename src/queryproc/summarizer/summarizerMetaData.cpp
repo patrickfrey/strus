@@ -35,20 +35,21 @@
 
 using namespace strus;
 
-SummarizerClosureMetaData::SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const char* name_)
+SummarizerClosureMetaData::SummarizerClosureMetaData( 
+		MetaDataReaderInterface* metadata_, const std::string& name_)
 	:m_metadata(metadata_)
-	,m_attrib(metadata_->elementHandle( name_))
+	,m_attrib(metadata_->elementHandle( name_.c_str()))
 {}
 
-std::vector<std::string>
+std::vector<SummarizerClosureInterface::SummaryElement>
 	SummarizerClosureMetaData::getSummary( const Index& docno)
 {
-	std::vector<std::string> rt;
+	std::vector<SummarizerClosureInterface::SummaryElement> rt;
 	m_metadata->skipDoc( docno);
 	ArithmeticVariant value = m_metadata->getValue( m_attrib);
 	if (value.defined()) 
 	{
-		rt.push_back( arithmeticVariantToString( value));
+		rt.push_back( SummarizerClosureInterface::SummaryElement( arithmeticVariantToString( value), 1.0));
 	}
 	return rt;
 }

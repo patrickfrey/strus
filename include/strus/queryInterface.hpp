@@ -47,10 +47,6 @@ public:
 	/// \brief Destructor
 	virtual ~QueryInterface(){}
 
-	/// \brief Print the contents of this query in readable form
-	/// \param[out] where to print to
-	virtual void print( std::ostream& out)=0;
-
 	/// \brief Push a term to the query stack
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
@@ -107,6 +103,10 @@ public:
 
 	/// \brief Evaluate the query
 	virtual std::vector<ResultDocument> evaluate()=0;
+
+	/// \brief Print the contents of this query in readable form
+	/// \param[out] where to print to
+	virtual void print( std::ostream& out)=0;
 };
 
 }//namespace

@@ -27,28 +27,62 @@
 --------------------------------------------------------------------
 */
 #include "summarizerMatchPhrase.hpp"
+#include "iterator/postingIteratorLink.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
+#include "strus/constants.hpp"
 #include <cstdlib>
 
 using namespace strus;
 
 SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 		const StorageInterface* storage_,
-		const char* termtype_,
+		const QueryProcessorInterface* processor_,
+		const std::string& termtype_,
 		unsigned int maxlen_,
 		unsigned int summarylen_,
-		const std::vector<PostingIteratorInterface*>& itr_,
-		PostingIteratorInterface* phrasestruct_)
+		const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_)
 	:m_storage(storage_)
+	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( termtype_))
 	,m_termtype(termtype_)
 	,m_maxlen(maxlen_)
 	,m_summarylen(summarylen_)
-	,m_itr(itr_)
-	,m_phrasestruct(phrasestruct_)
+	,m_itr()
+	,m_phrasestruct(0)
+	,m_structop()
 {
+	std::vector<Reference<PostingIteratorInterface> > structelem;
+	std::vector<SummarizerFunctionInterface::FeatureParameter>::const_iterator fi = features_.begin(), fe = features_.end();
+	for (; fi != fe; ++fi)
+	{
+		if (SummarizerFunctionMatchPhrase::isStructFeature( fi->classidx()))
+		{
+			m_phrasestruct = fi->postingIterator();
+			Reference<PostingIteratorInterface> ref(
+				new PostingIteratorLink( fi->postingIterator()));
+			structelem.push_back( ref);
+		}
+		else if (SummarizerFunctionMatchPhrase::isMatchFeature( fi->classidx()))
+		{
+			m_itr.push_back( fi->postingIterator());
+		}
+		else
+		{
+			throw std::logic_error("unknown feature class passed to match phrase summarizer");
+		}
+	}
+	if (structelem.size() > 1)
+	{
+		const PostingJoinOperatorInterface*
+			join = m_processor->getPostingJoinOperator( Constants::operator_set_union());
+
+		m_structop.reset( join->createResultIterator( structelem, 0));
+		m_phrasestruct = m_structop.get();
+	}
 }
 
 SummarizerClosureMatchPhrase::~SummarizerClosureMatchPhrase()
@@ -89,7 +123,7 @@ static Index getEndPos( Index curpos, unsigned int maxlen, PostingIteratorInterf
 	return endpos;
 }
 
-static std::string
+static SummarizerClosureInterface::SummaryElement
 	summaryElement(
 		const Index& curpos,
 		PostingIteratorInterface* phrasestruct,
@@ -122,11 +156,11 @@ static std::string
 		}
 	}
 	if (!end_found) phrase.append( "...");
-	return phrase;
+	return SummarizerClosureInterface::SummaryElement( phrase, 1.0);
 }
 
 static void getSummary_(
-		std::vector<std::string>& res,
+		std::vector<SummarizerClosureInterface::SummaryElement>& res,
 		const Index& docno,
 		std::vector<PostingIteratorInterface*> itr,
 		PostingIteratorInterface* phrasestruct,
@@ -170,10 +204,10 @@ static void getSummary_(
 }
 
 
-std::vector<std::string>
+std::vector<SummarizerClosureInterface::SummaryElement>
 	SummarizerClosureMatchPhrase::getSummary( const Index& docno)
 {
-	std::vector<std::string> rt;
+	std::vector<SummarizerClosureInterface::SummaryElement> rt;
 	getSummary_(
 		rt, docno, m_itr, m_phrasestruct,
 		*m_forwardindex.get(), m_maxlen, m_summarylen);

@@ -39,13 +39,30 @@ namespace strus
 class SummarizerClosureInterface
 {
 public:
+	class SummaryElement
+	{
+	public:
+		SummaryElement( const std::string& text_, float weight_=1.0)
+			:m_text(text_),m_weight(weight_){}
+		SummaryElement( const SummaryElement& o)
+			:m_text(o.m_text),m_weight(o.m_weight){}
+
+		const std::string& text() const		{return m_text;}
+		float weight() const			{return m_weight;}
+
+	private:
+		std::string m_text;
+		float m_weight;
+	};
+
+public:
 	/// \brief Destructor
 	virtual ~SummarizerClosureInterface(){}
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
-	virtual std::vector<std::string> getSummary( const Index& docno)=0;
+	virtual std::vector<SummaryElement> getSummary( const Index& docno)=0;
 };
 
 }//namespace

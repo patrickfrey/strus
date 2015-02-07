@@ -74,7 +74,7 @@ public:
 	explicit WeightingFunctionConstant(){}
 	virtual ~WeightingFunctionConstant(){}
 
-	virtual const char** parameterNames() const
+	virtual const char** numericParameterNames() const
 	{
 		static const char* ar[] = {"weight",0};
 		return ar;

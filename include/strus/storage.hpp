@@ -26,35 +26,71 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_MAIN_INCLUDE_HPP_INCLUDED
-#define _STRUS_STORAGE_MAIN_INCLUDE_HPP_INCLUDED
-#include "strus/arithmeticVariant.hpp"
-#include "strus/attributeReaderInterface.hpp"
-#include "strus/constants.hpp"
-#include "strus/invAclIteratorInterface.hpp"
-#include "strus/forwardIteratorInterface.hpp"
+#ifndef _STRUS_MAIN_INCLUDE_HPP_INCLUDED
+#define _STRUS_MAIN_INCLUDE_HPP_INCLUDED
+// Basic storage data types:
 #include "strus/index.hpp"
+#include "strus/constants.hpp"
+#include "strus/arithmeticVariant.hpp"
+#include "strus/reference.hpp"
+#include "strus/statCounterValue.hpp"
+
+// Key/value store database for the storage:
+#include "strus/databaseLib.hpp"
+#include "strus/databaseInterface.hpp"
+#include "strus/databaseCursorInterface.hpp"
+#include "strus/databaseBackupCursorInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
+
+// Storage:
+#include "strus/storageLib.hpp"
+#include "strus/storageInterface.hpp"
+#include "strus/storageTransactionInterface.hpp"
+#include "strus/storageDocumentInterface.hpp"
+#include "strus/invAclIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
-#include "strus/peerStorageInterface.hpp"
-#include "strus/peerStorageTransactionInterface.hpp"
+#include "strus/storageAlterMetaDataTableInterface.hpp"
+#include "strus/attributeReaderInterface.hpp"
+#include "strus/forwardIteratorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
-#include "strus/queryEvalInterface.hpp"
-#include "strus/queryEvalLib.hpp"
-#include "strus/queryInterface.hpp"
-#include "strus/queryProcessorInterface.hpp"
+#include "strus/storagePeerTransactionInterface.hpp"
+#include "strus/storagePeerInterface.hpp"
+#include "strus/peerStorageTransactionInterface.hpp"
+
+// Query processor:
 #include "strus/queryProcessorLib.hpp"
-#include "strus/resultDocument.hpp"
-#include "strus/statCounterValue.hpp"
-#include "strus/storageAlterMetaDataTableInterface.hpp"
-#include "strus/storageDocumentInterface.hpp"
-#include "strus/storageInterface.hpp"
-#include "strus/storageLib.hpp"
-#include "strus/storageTransactionInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "strus/weightedDocument.hpp"
+#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerConfigInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingConfigInterface.hpp"
+
+// Query evaluation:
+#include "strus/queryEvalLib.hpp"
+#include "strus/queryEvalInterface.hpp"
+#include "strus/queryInterface.hpp"
+#include "strus/weightedDocument.hpp"
+#include "strus/resultDocument.hpp"
+
+// Analyzer:
+#include "strus/tokenizer/position.hpp"
+#include "strus/analyzer.hpp"
+#include "strus/analyzerInterface.hpp"
+#include "strus/analyzerLib.hpp"
+#include "strus/analyzer/attribute.hpp"
+#include "strus/analyzer/document.hpp"
+#include "strus/analyzer/metaData.hpp"
+#include "strus/analyzer/term.hpp"
+#include "strus/tokenizerInterface.hpp"
+#include "strus/tokenMinerFactory.hpp"
+#include "strus/tokenMiner.hpp"
+#include "strus/tokenMinerLib.hpp"
+#include "strus/normalizerInterface.hpp"
+
+// Loading and building strus objects from source:
+#include "strus/programLoader.hpp"
 #endif
 

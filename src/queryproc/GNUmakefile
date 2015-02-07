@@ -8,6 +8,7 @@ CPP_OBJS=\
 	iterator/postingIteratorDifference.o \
 	iterator/postingIteratorStructWithin.o \
 	iterator/postingIteratorStructSequence.o \
+	iterator/postingIteratorContains.o \
 	iterator/postingIteratorHelpers.o \
 	weighting/weightingBM25.o \
 	summarizer/summarizerMatchPhrase.o \
@@ -46,6 +47,6 @@ install:
 
 .PHONY: uninstall
 uninstall:
-	@rm $(INSTALL_LIBDIR)/libstrus_queryproc.so
+	@rm -f $(INSTALL_LIBDIR)/libstrus_queryproc.so
 
 

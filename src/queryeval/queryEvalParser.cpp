@@ -27,14 +27,11 @@
 --------------------------------------------------------------------
 */
 #include "queryEvalParser.hpp"
-#include "queryEval.hpp"
-#include "weightingFunctionDef.hpp"
-#include "summarizerDef.hpp"
-#include "termDef.hpp"
+#include "strus/queryEvalInterface.hpp"
+#include "strus/reference.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "mapFunctionParameters.hpp"
 #include "lexems.hpp"
 #include <string>
 #include <vector>
@@ -43,6 +40,8 @@
 #include <iostream>
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
+
+#error DEPRECATED 
 
 using namespace strus;
 using namespace strus::parser;
@@ -69,82 +68,7 @@ static std::string errorPosition( const char* base, const char* itr)
 	return msg.str();
 }
 
-static std::vector<ArithmeticVariant> parseParameters( const char** paramNames, char const*& src)
-{
-	KeyMap<ArithmeticVariant> paramDefs;
-	while (*src)
-	{
-		if (!isAlpha( *src))
-		{
-			throw std::runtime_error( "list of comma separated identifier value assignments expected as function parameters");
-		}
-		std::string paramName = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
-		if (!isAssign( *src))
-		{
-			throw std::runtime_error( "equal '=' expected after function parameter name");
-		}
-		parse_OPERATOR(src);
-		if (!isDigit( *src) && !isMinus(*src))
-		{
-			throw std::runtime_error( "numeric value expected as function argument value");
-		}
-		bool isNegative = false;
-		char const* cc = src;
-		if (isMinus(*src))
-		{
-			isNegative = true;
-			++cc;
-		}
-		if (!isDigit(*cc))
-		{
-			throw std::runtime_error("numeric scalar value expected as function argument value");
-		}
-		for (; *cc && isDigit( *cc); ++cc){}
-		if (*cc == '.')
-		{
-			paramDefs[ paramName] = parse_FLOAT( src);
-		}
-		else if (isNegative)
-		{
-			paramDefs[ paramName] = parse_INTEGER( src);
-		}
-		else
-		{
-			paramDefs[ paramName] = parse_UNSIGNED( src);
-		}
-		if (!isComma(*src))
-		{
-			break;
-		}
-		parse_OPERATOR(src);
-	}
-	return mapFunctionParameters( paramNames, paramDefs);
-}
-
-static std::vector<std::string> parseIdentifierList( char const*& src)
-{
-	std::vector<std::string> rt;
-	for (;;)
-	{
-		if (!isAlnum( *src))
-		{
-			throw std::runtime_error( "feature set identifier expected");
-		}
-		rt.push_back( boost::algorithm::to_lower_copy( parse_IDENTIFIER( src)));
-		if (isComma( *src))
-		{
-			parse_OPERATOR(src);
-		}
-		else
-		{
-			break;
-		}
-	}
-	return rt;
-}
-
-
-TermDef QueryEvalParser::parseTermDef( char const*& src) const
+void QueryEvalParser::parseTermConfig( char const*& src) const
 {
 	if (isAlpha(*src))
 	{
@@ -174,7 +98,7 @@ TermDef QueryEvalParser::parseTermDef( char const*& src) const
 			throw std::runtime_error( "term type identifier expected after colon and term value");
 		}
 		termtype = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
-		return TermDef( termset, termtype, termvalue);
+		m_qeval->defineTerm( termset, termtype, termvalue);
 	}
 	else
 	{
@@ -182,17 +106,17 @@ TermDef QueryEvalParser::parseTermDef( char const*& src) const
 	}
 }
 
-WeightingFunctionDef QueryEvalParser::parseWeightingFunctionDef( char const*& src) const
+void QueryEvalParser::parseWeightingConfig( char const*& src) const
 {
-	WeightingFunctionDef rt;
 	if (!isAlpha( *src))
 	{
 		throw std::runtime_error( "weighting function identifier expected");
 	}
-	rt.functionName = boost::algorithm::to_lower_copy( parse_IDENTIFIER( src));
-	rt.function = m_processor->getWeightingFunction( rt.functionName);
+	Reference<WeightingConfigInterface> wcfg( m_qeval->createWeightingConfig( parse_IDENTIFIER( src)));
 	for (;;)
 	{
+		!!!!! HIER WEITER !!!! NON INTRUSIVE PARSER DEN MAN NACH Utilities schieben kann
+				(gegen QueryEvalInterface programmiert)
 		if (isOpenSquareBracket( *src))
 		{
 			if (!rt.selectorSets.empty())
@@ -249,7 +173,7 @@ WeightingFunctionDef QueryEvalParser::parseWeightingFunctionDef( char const*& sr
 }
 
 
-SummarizerDef QueryEvalParser::parseSummarizerDef( char const*& src) const
+SummarizerDef QueryEvalParser::parseSummarizerConfig( char const*& src) const
 {
 	const SummarizerFunctionInterface* function;
 	std::string functionName;
@@ -354,13 +278,13 @@ void QueryEvalParser::loadProgram( QueryEval& qeprg, const std::string& source) 
 			switch ((StatementKeyword)parse_KEYWORD( src, 3, "EVAL", "TERM", "SUMMARIZE"))
 			{
 				case e_TERM:
-					qeprg.defineTerm( parseTermDef( src));
+					qeprg.defineTerm( parseTermConfig( src));
 					break;
 				case e_EVAL:
-					qeprg.defineWeightingFunction( parseWeightingFunctionDef( src));
+					qeprg.defineWeighting( parseWeightingConfig( src));
 					break;
 				case e_SUMMARIZE:
-					qeprg.defineSummarizerDef( parseSummarizerDef( src));
+					qeprg.defineSummarizer( parseSummarizerDef( src));
 					break;
 			}
 			if (*src)

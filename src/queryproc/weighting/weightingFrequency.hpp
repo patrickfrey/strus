@@ -71,7 +71,7 @@ public:
 	WeightingFunctionTermFrequency(){}
 	virtual ~WeightingFunctionTermFrequency(){}
 
-	virtual const char** parameterNames() const
+	virtual const char** numericParameterNames() const
 	{
 		static const char* ar[] = {0};
 		return ar;

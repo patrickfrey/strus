@@ -41,25 +41,22 @@ namespace strus
 class StorageInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
-
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 class SummarizerClosureListMatches
 	:public SummarizerClosureInterface
 {
 public:
 	/// \param[in] storage_ storage to use
-	/// \param[in] nofitrs_ number of argument iterators
-	/// \param[in] itrs_ argument iterators
+	/// \param[in] postings_ postings to get the matches from
 	SummarizerClosureListMatches(
 		const StorageInterface* storage_,
-		const std::vector<PostingIteratorInterface*>& itrs_);
+		const std::vector<SummarizerFunctionInterface::FeatureParameter>& postings_);
 
 	virtual ~SummarizerClosureListMatches();
 
-	/// \brief Get some summarization elements
-	/// \param[in] docno document to get the summary element from
-	/// \return the summarization elements
-	virtual std::vector<std::string> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
 	const StorageInterface* m_storage;
@@ -75,27 +72,21 @@ public:
 
 	virtual ~SummarizerFunctionListMatches(){}
 
-	virtual const char* name() const
+	virtual const char** featureParameterClassNames() const
 	{
-		return "matchpos";
-	}
-
-	virtual const char** parameterNames() const
-	{
-		static const char* ar[] = {0};
+		static const char* ar[] = {"match",0};
 		return ar;
 	}
 	
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageInterface* storage_,
-			const char*,
-			PostingIteratorInterface* structitr_,
-			const std::vector<PostingIteratorInterface*>& itrs_,
-			MetaDataReaderInterface*,
-			const std::vector<ArithmeticVariant>&) const
+			const QueryProcessorInterface*,
+			MetaDataReaderInterface* metadata_,
+			const std::vector<FeatureParameter>& features_,
+			const std::vector<std::string>& textualParameters_,
+			const std::vector<ArithmeticVariant>& numericParameters_) const
 	{
-		if (structitr_) throw std::runtime_error( "no structural argument expected for summarizer 'matchpositions'");
-		return new SummarizerClosureListMatches( storage_, itrs_);
+		return new SummarizerClosureListMatches( storage_, features_);
 	}
 };
 

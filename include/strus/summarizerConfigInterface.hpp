@@ -26,38 +26,44 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_PROGRAM_WEIGHTING_FUNCTION_DEF_HPP_INCLUDED
-#define _STRUS_QUERY_PROGRAM_WEIGHTING_FUNCTION_DEF_HPP_INCLUDED
+#ifndef _STRUS_SUMMARIZER_CONFIG_INTERFACE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_CONFIG_INTERFACE_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace strus {
 
 /// \brief Forward declaration
-class WeightingFunctionInterface;
+class SummarizerFunctionInterface;
 
-struct WeightingFunctionDef
+/// \class SummarizerConfigInterface
+/// \brief Interface for the configuration of a query evaluation summarizer
+class SummarizerConfigInterface
 {
-	WeightingFunctionDef()
-		:function(0),functionName(),parameters(),weightingSets(),selectorSets(){}
-	WeightingFunctionDef( const WeightingFunctionDef& o)
-		:function(o.function),functionName(o.functionName),parameters(o.parameters),weightingSets(o.weightingSets),selectorSets(o.selectorSets){}
-	WeightingFunctionDef(
-			const WeightingFunctionInterface* function_,
-			const std::string& functionName_,
-			const std::vector<ArithmeticVariant>& parameters_,
-			const std::vector<std::string>& weightingSets_,
-			const std::vector<std::string>& selectorSets_)
-		:function(function_),functionName(functionName_),parameters(parameters_),weightingSets(weightingSets_),selectorSets(selectorSets_){}
+public:
+	/// \brief Destructor
+	virtual ~SummarizerConfigInterface(){}
 
-	const WeightingFunctionInterface* function;	///< function used for weighting
-	std::string functionName;			///< name of the function used for weighting
-	std::vector<ArithmeticVariant> parameters;	///< weighting function parameters
-	std::vector<std::string> weightingSets;		///< posting sets that are used for weighting
-	std::vector<std::string> selectorSets;		///< posting sets selecting the documents to match
+	/// \brief Defines a numeric parameter to pass to the summarizer
+	/// \param[in] name_ name of the parameter
+	/// \param[in] value_ value of the parameter
+	virtual void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)=0;
+
+	/// \brief Defines a textual parameter to pass to the summarizer
+	/// \param[in] name_ name of the parameter
+	/// \param[in] value_ value of the parameter
+	virtual void defineTextualParameter( const std::string& name_, const std::string& value_)=0;
+
+	/// \brief References a set of postings to pass as PostingIteratorInterface to the summarizer
+	/// \param[in] class_ name of the feature set class for the summarizer. The class describes for what the feature is used.
+	/// \param[in] set_ feature set name
+	virtual void defineFeatureParameter( const std::string& class_, const std::string& set_)=0;
+	
+	/// \brief Finalizes the summarizer definition
+	virtual void done()=0;
 };
 
-}
+}//namespace
 #endif
 

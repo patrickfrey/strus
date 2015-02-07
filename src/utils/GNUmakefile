@@ -34,6 +34,6 @@ install:
 
 .PHONY: uninstall
 uninstall:
-	@-rm $(INSTALL_LIBDIR)/libstrus_utils.so
+	@-rm -f $(INSTALL_LIBDIR)/libstrus_utils.so
 
 

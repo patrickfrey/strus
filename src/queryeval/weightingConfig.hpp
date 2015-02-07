@@ -26,44 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_QUERY_PROGRAM_PARSER_HPP_INCLUDED
-#define _STRUS_QUERY_PROGRAM_PARSER_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
+#define _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
+#include "strus/arithmeticVariant.hpp"
+#include "strus/weightingConfigInterface.hpp"
+#include <vector>
 #include <string>
 
-#error DEPRECATED 
 namespace strus {
 
 /// \brief Forward declaration
-class WeightingConfig;
-/// \brief Forward declaration
-class SummarizerConfig;
-/// \brief Forward declaration
-class TermConfig;
+class WeightingFunctionInterface;
 /// \brief Forward declaration
 class QueryEval;
-/// \brief Forward declaration
-class QueryProcessorInterface;
-/// \brief Forward declaration
-class QueryEvalInterface;
 
-/// \brief Query evaluation program parser
-struct QueryEvalParser
+class WeightingConfig
+	:public WeightingConfigInterface
 {
 public:
-	QueryEvalParser( const QueryProcessorInterface* processor_, QueryEvalInterface* qeval_)
-		:m_processor(processor_),m_qeval(qeval_){}
+	WeightingConfig()
+		:m_qeval(0),m_function(0),m_functionName(),m_parameters(){}
+	WeightingConfig( const WeightingConfig& o)
+		:m_function(o.m_function),m_functionName(o.m_functionName),m_parameters(o.m_parameters){}
+	WeightingConfig(
+			QueryEval* qeval_,
+			const WeightingFunctionInterface* function_,
+			const std::string& functionName_);
 
-	void parseWeightingConfig( char const*& src) const;
-	void parseTermConfig( char const*& src) const;
-	void parseSummarizerConfig( char const*& src) const;
+	virtual void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
 
-	void loadProgram( const std::string& source) const;
+	virtual void done();
+
+	const WeightingFunctionInterface* function() const		{return m_function;}
+	const std::string& functionName() const				{return m_functionName;}
+	const std::vector<ArithmeticVariant>& parameters() const	{return m_parameters;}
 
 private:
-	const QueryProcessorInterface* m_processor;
-	QueryEvalInterface* m_qeval;
+	QueryEval* m_qeval;				///< Query evaluation where this configuration is part of
+	const WeightingFunctionInterface* m_function;	///< function used for weighting
+	std::string m_functionName;			///< name of the function used for weighting
+	std::vector<ArithmeticVariant> m_parameters;	///< weighting function parameters
 };
 
-}//namespace
+}
 #endif
 

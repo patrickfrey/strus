@@ -47,17 +47,19 @@ public:
 	class Attribute
 	{
 	public:
-		Attribute( const std::string& name_, const std::string& value_)
-			:m_name(name_),m_value(value_){}
+		Attribute( const std::string& name_, const std::string& value_, float weight_)
+			:m_name(name_),m_value(value_),m_weight(weight_){}
 		Attribute( const Attribute& o)
-			:m_name(o.m_name),m_value(o.m_value){}
+			:m_name(o.m_name),m_value(o.m_value),m_weight(o.m_weight){}
 
 		const std::string& name() const			{return m_name;}
 		const std::string& value() const		{return m_value;}
+		float weight() const				{return m_weight;}
 
 	private:
 		std::string m_name;
 		std::string m_value;
+		float m_weight;
 	};
 
 	/// \brief Default constructor

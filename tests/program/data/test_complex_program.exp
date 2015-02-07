@@ -1,6 +1,0 @@
-TERM comma: punctuation ',';
-TERM sentence: punctuation '.';
-TERM title: title '';
-EVAL  bm25<k1=0.75, b=2.1, avgdoclen=1000>[struct, stem](struct, stem, title);
-SUMMARIZE docid = metadata[title];
-SUMMARIZE content = matchphrase[orig](struct, stem);

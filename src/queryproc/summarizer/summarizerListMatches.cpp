@@ -39,10 +39,16 @@ using namespace strus;
 
 SummarizerClosureListMatches::SummarizerClosureListMatches(
 		const StorageInterface* storage_,
-		const std::vector<PostingIteratorInterface*>& itrs_)
+		const std::vector<SummarizerFunctionInterface::FeatureParameter>& postings_)
 	:m_storage(storage_)
-	,m_itrs(itrs_)
-{}
+{
+	std::vector<SummarizerFunctionInterface::FeatureParameter>::const_iterator
+		fi = postings_.begin(), fe = postings_.end();
+	for (; fi != fe; ++fi)
+	{
+		m_itrs.push_back( fi->postingIterator());
+	}
+}
 
 SummarizerClosureListMatches::~SummarizerClosureListMatches()
 {}
@@ -68,10 +74,10 @@ static std::string getMatches(
 	return rt.str();
 }
 
-std::vector<std::string>
+std::vector<SummarizerClosureInterface::SummaryElement>
 	SummarizerClosureListMatches::getSummary( const Index& docno)
 {
-	std::vector<std::string> rt;
+	std::vector<SummaryElement> rt;
 	std::vector<PostingIteratorInterface*>::const_iterator
 		ii = m_itrs.begin(), ie = m_itrs.end();
 
@@ -81,7 +87,7 @@ std::vector<std::string>
 			subexpr = (*ii)->subExpressions( true);
 		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
 		{
-			rt.push_back( getMatches( **ii, subexpr));
+			rt.push_back( SummaryElement( getMatches( **ii, subexpr)));
 		}
 	}
 	return rt;
