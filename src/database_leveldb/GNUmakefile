@@ -2,10 +2,10 @@ TOPDIR=../..
 include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
-	databaseLib.o \
 	database.o \
 	databaseCursor.o \
-	databaseTransaction.o
+	databaseTransaction.o \
+	libstrus_database_leveldb.o
 
 CPP_INCLUDE=\
 	-I$(TOPDIR)/include \

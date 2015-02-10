@@ -27,10 +27,10 @@
 --------------------------------------------------------------------
 */
 #include "strus/private/fileio.hpp"
-#include "strus/queryEvalLib.hpp"
 #include "strus/queryEvalInterface.hpp"
-#include "strus/queryProcessorLib.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/lib/queryeval.hpp"
+#include "strus/lib/queryproc.hpp"
 #include <string>
 #include <sstream>
 #include <vector>

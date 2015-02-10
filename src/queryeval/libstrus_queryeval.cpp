@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/queryEvalLib.hpp"
+#include "strus/lib/queryeval.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "queryEval.hpp"

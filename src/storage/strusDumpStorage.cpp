@@ -26,10 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/storageLib.hpp"
 #include "storage.hpp"
+#include "strus/lib/storage.hpp"
+#include "strus/lib/database.hpp"
 #include "databaseKey.hpp"
-#include "strus/databaseLib.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "indexPacker.hpp"

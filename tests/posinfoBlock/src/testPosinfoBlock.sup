@@ -1,0 +1,12 @@
+{
+   memrchr
+   Memcheck:Addr8
+   fun:memrchr
+   fun:_ZNK5strus12PosinfoBlock7prevDocEPKc
+}
+{
+   memrchr
+   Memcheck:Cond
+   fun:memrchr
+   fun:_ZNK5strus12PosinfoBlock7prevDocEPKc
+}

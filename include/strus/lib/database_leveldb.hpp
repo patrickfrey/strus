@@ -26,9 +26,8 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus key value store database library
-#ifndef _STRUS_DATABASE_LIB_HPP_INCLUDED
-#define _STRUS_DATABASE_LIB_HPP_INCLUDED
+#ifndef _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
+#define _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
 
 namespace strus {
 

@@ -16,7 +16,7 @@ CPP_OBJS=\
 	summarizer/summarizerAttribute.o \
 	summarizer/summarizerMetaData.o \
 	queryProcessor.o \
-	queryProcessorLib.o
+	libstrus_queryproc.o
 
 HFILES= queryProcessor.hpp
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I$(TOPDIR)/3rdParty/fastapprox/include/ -I.

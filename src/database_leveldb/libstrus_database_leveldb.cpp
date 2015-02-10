@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/databaseLib.hpp"
+#include "strus/lib/database_leveldb.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/private/configParser.hpp"
 #include "database.hpp"

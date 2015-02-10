@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/queryProcessorLib.hpp"
+#include "strus/lib/queryproc.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "queryProcessor.hpp"

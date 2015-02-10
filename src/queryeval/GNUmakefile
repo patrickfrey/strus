@@ -8,7 +8,7 @@ CPP_OBJS=\
 	summarizerConfig.o \
 	query.o \
 	queryEval.o \
-	queryEvalLib.o
+	libstrus_queryeval.o
 
 CPP_INCLUDE=-I$(TOPDIR)/include -I$(TOPDIR)/include/private -I.
 CXXFLAGS=-g -Wfatal-errors -Werror -Wall -pedantic $(OPTIMIZE) -std=c++98

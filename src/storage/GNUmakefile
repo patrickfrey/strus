@@ -22,7 +22,6 @@ CPP_OBJS=\
 	forwardIterator.o \
 	indexSetIterator.o \
 	storage.o \
-	storageLib.o \
 	varSizeNodeTree.o \
 	statistics.o \
 	floatConversions.o \
@@ -39,7 +38,8 @@ CPP_OBJS=\
 	storageDocumentChecker.o \
 	storageTransaction.o \
 	storageAlterMetaDataTable.o \
-	peerStorageTransaction.o
+	peerStorageTransaction.o \
+	libstrus_storage.o
 
 PRG_OBJS=\
 	extractKeyValueData.o

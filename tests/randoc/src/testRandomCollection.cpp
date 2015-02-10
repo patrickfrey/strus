@@ -27,12 +27,12 @@
 --------------------------------------------------------------------
 */
 #include "strus/reference.hpp"
-#include "strus/databaseLib.hpp"
 #include "strus/databaseInterface.hpp"
-#include "strus/storageLib.hpp"
-#include "strus/queryProcessorLib.hpp"
+#include "strus/lib/database_leveldb.hpp"
+#include "strus/lib/storage.hpp"
+#include "strus/lib/queryproc.hpp"
+#include "strus/lib/queryeval.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "strus/queryEvalLib.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
