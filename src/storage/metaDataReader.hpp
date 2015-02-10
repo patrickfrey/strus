@@ -33,6 +33,7 @@
 #include "metaDataRecord.hpp"
 #include "metaDataDescription.hpp"
 #include "metaDataElement.hpp"
+#include <string>
 
 namespace strus
 {
@@ -46,12 +47,12 @@ public:
 			const MetaDataDescription* description_)
 		:m_cache(cache_),m_description(description_),m_current(description_,0),m_docno(0){}
 
-	virtual Index elementHandle( const char* name) const
+	virtual Index elementHandle( const std::string& name) const
 	{
 		return m_description->getHandle( name);
 	}
 
-	virtual bool hasElement( const char* name) const
+	virtual bool hasElement( const std::string& name) const
 	{
 		return m_description->hasElement( name);
 	}

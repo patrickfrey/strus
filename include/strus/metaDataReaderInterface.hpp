@@ -30,6 +30,7 @@
 #define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include <string>
 
 namespace strus
 {
@@ -44,13 +45,13 @@ public:
 	/// \brief Find out if there exists a meta data table element with the specified name
 	/// \param[in] name name of the element to check
 	/// \return return true, if the element exists
-	virtual bool hasElement( const char* name_) const=0;
+	virtual bool hasElement( const std::string& name_) const=0;
 
 	/// \brief Get the handle for a table element addressed by name
 	/// \param[in] name name of the element
 	/// \return return the element handle
 	/// \remark Element handles are numbered from 0 to N-1, where N is what nofElements() returns
-	virtual Index elementHandle( const char* name) const=0;
+	virtual Index elementHandle( const std::string& name) const=0;
 
 	/// \brief Get the number of columns in the meta data table
 	/// \return return number of columns

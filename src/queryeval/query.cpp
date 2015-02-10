@@ -109,7 +109,7 @@ void Query::defineFeature( const std::string& set_, float weight_)
 }
 
 void Query::defineMetaDataRestriction(
-		CompareOperator opr, const char* name,
+		CompareOperator opr, const std::string&  name,
 		const ArithmeticVariant& operand, bool newGroup)
 {
 	Index hnd = m_metaDataReader->elementHandle( name);

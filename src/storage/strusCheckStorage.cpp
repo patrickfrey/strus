@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "strus/lib/storage.hpp"
-#include "strus/lib/database.hpp"
+#include "strus/lib/database_leveldb.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "storage.hpp"

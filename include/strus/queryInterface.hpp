@@ -84,7 +84,7 @@ public:
 	///			false, if the conditional belongs to the last group of elements joined with a logical "OR".
 	///		Different groups are joined with a logical "AND" to form the meta data restriction expression
 	virtual void defineMetaDataRestriction(
-			CompareOperator opr, const char* name,
+			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true)=0;
 
 	/// \brief Define a restriction on documents that contain a feature of a certain feature set

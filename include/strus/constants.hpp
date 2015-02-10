@@ -53,6 +53,18 @@ struct Constants
 	{
 		return "union";
 	}
+	/// \brief Get the name of the set join operator for postings for query phrase terms that got the same position asigned
+	/// \note The standard query language uses this operator to build query expressions for phrases in case of multiple occurrencies of distinct terms at the same position in the query
+	static const char* operator_query_phrase_same_position()
+	{
+		return "intersect";
+	}
+	/// \brief Get the name of the set join operator for postings for query phrase terms that got ascending position assigned
+	/// \note The standard query language uses this operator to build query expressions for phrases in case of subsequent occurrencies of terms in a query phrase
+	static const char* operator_query_phrase_sequence()
+	{
+		return "sequence";
+	}
 };
 
 }//namespace

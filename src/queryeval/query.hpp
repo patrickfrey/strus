@@ -71,7 +71,7 @@ public:
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 
 	virtual void defineMetaDataRestriction(
-			CompareOperator opr, const char* name,
+			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true);
 
 	virtual void defineFeatureRestriction( const std::string& set_);
