@@ -54,12 +54,12 @@ public:
 	MetaDataReader( const strus::MetaDataDescription* description_, void* data_)
 		:m_description(description_),m_current(description_,data_){}
 
-	virtual strus::Index elementHandle( const char* name) const
+	virtual strus::Index elementHandle( const std::string& name) const
 	{
 		return m_description->getHandle( name);
 	}
 
-	virtual bool hasElement( const char* name) const
+	virtual bool hasElement( const std::string& name) const
 	{
 		return m_description->hasElement( name);
 	}
