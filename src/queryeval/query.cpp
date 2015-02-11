@@ -47,6 +47,8 @@
 #include <utility>
 #include <boost/algorithm/string.hpp>
 
+#define STRUS_LOWLEVEL_DEBUG
+
 using namespace strus;
 
 ///\brief Constructor
@@ -144,13 +146,13 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent)
 		case TermNode:
 		{
 			const Term& term = m_terms[ nodeIndex( adr)];
-			out << "term " << term.type << " '" << term.value << "'" << std::endl;
+			out << indentstr << "term " << term.type << " '" << term.value << "'" << std::endl;
 			break;
 		}
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			out << expr.opname << " " << expr.range << ":" << std::endl;
+			out << indentstr << expr.opname << " " << expr.range << ":" << std::endl;
 			std::vector<NodeAddress>::const_iterator
 				ni = expr.subnodes.begin(),
 				ne = expr.subnodes.end();
@@ -235,6 +237,11 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 
 std::vector<ResultDocument> Query::evaluate()
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "evaluate query:" << std::endl;
+	print( std::cout);
+#endif
+
 	// [1] Check initial conditions:
 	if (m_minRank >= m_maxNofRanks)
 	{

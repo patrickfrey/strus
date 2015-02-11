@@ -32,7 +32,7 @@
 namespace strus
 {
 
-/// \brief Some global constants that document some dependencies (hacks) that did not get yet into interfaces (and probably never will).
+/// \brief Some reserved global constants that document some dependencies (hacks) that did not get yet into interfaces (and probably never will).
 struct Constants
 {
 	/// \brief Get the agreed attribute name for the document id
@@ -64,6 +64,11 @@ struct Constants
 	static const char* operator_query_phrase_sequence()
 	{
 		return "sequence";
+	}
+	/// \brief Get the default query phrase type if not explicitely specified in the query
+	static const char* query_default_phrase_type()
+	{
+		return "default";
 	}
 };
 

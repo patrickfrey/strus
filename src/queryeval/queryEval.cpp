@@ -48,7 +48,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 
@@ -187,6 +187,10 @@ void QueryEval::print( std::ostream& out) const
 
 QueryInterface* QueryEval::createQuery( const StorageInterface* storage) const
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "create query for program:" << std::endl;
+	print( std::cout);
+#endif
 	return new Query( this, storage, m_processor);
 }
 
