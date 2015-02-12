@@ -70,6 +70,11 @@ struct Constants
 	{
 		return "default";
 	}
+	/// \brief Get the default query feature set if no query section with explicit feature set defined in the query
+	static const char* query_default_feature_set()
+	{
+		return "weighted";
+	}
 };
 
 }//namespace

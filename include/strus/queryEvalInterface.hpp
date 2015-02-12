@@ -61,7 +61,11 @@ public:
 	/// \brief Declare a set of features to be used for selection (declare what documents to weight)
 	/// \param[in] set_ name of the set of the selecting feature.
 	/// \remark If no selector feature is specified then the weighting features are used for selection
-	virtual void defineSelectorFeature( const std::string& set_)=0;
+	virtual void defineSelectionFeature( const std::string& set_)=0;
+
+	/// \brief Define a set of features to be used as restriction (exclude documents that do not contain a feature of the set declared)
+	/// \param[in] set_ name of the set of the restriction feature
+	virtual void defineRestrictionFeature( const std::string& set_)=0;
 
 	/// \brief Declare a set of features to be used for weighting (declare what features to weight)
 	/// \param[in] set_ name of the set of the weighting feature.

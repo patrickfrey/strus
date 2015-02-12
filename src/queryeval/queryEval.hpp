@@ -61,7 +61,7 @@ public:
 	QueryEval( const QueryEval& o)
 		:m_processor(o.m_processor)
 		,m_weightingSets(o.m_weightingSets)
-		,m_selectorSets(o.m_selectorSets)
+		,m_selectionSets(o.m_selectionSets)
 		,m_weightingConfig(o.m_weightingConfig)
 		,m_summarizers(o.m_summarizers)
 		,m_terms(o.m_terms)
@@ -73,7 +73,8 @@ public:
 			const std::string& set_,
 			const std::string& type_,
 			const std::string& value_);
-	virtual void defineSelectorFeature( const std::string& set_);
+	virtual void defineSelectionFeature( const std::string& set_);
+	virtual void defineRestrictionFeature( const std::string& set_);
 	virtual void defineWeightingFeature( const std::string& set_);
 
 	virtual SummarizerConfigInterface* createSummarizerConfig(
@@ -90,7 +91,8 @@ public:/*WeightingConfig,SummarizerConfig*/
 	const std::vector<TermConfig>& terms() const			{return m_terms;}
 	const std::vector<SummarizerConfig>& summarizers() const	{return m_summarizers;}
 	const std::vector<std::string>& weightingSets() const		{return m_weightingSets;}
-	const std::vector<std::string>& selectorSets() const		{return m_selectorSets;}
+	const std::vector<std::string>& selectionSets() const		{return m_selectionSets;}
+	const std::vector<std::string>& restrictionSets() const		{return m_restrictionSets;}
 	const WeightingConfig& weightingConfig() const			{return m_weightingConfig;}
 
 	void defineTerm( const TermConfig& termConfig);
@@ -100,7 +102,8 @@ public:/*WeightingConfig,SummarizerConfig*/
 private:
 	const QueryProcessorInterface* m_processor;	///< query processor
 	std::vector<std::string> m_weightingSets;	///< posting sets that are used for weighting
-	std::vector<std::string> m_selectorSets;	///< posting sets selecting the documents to match
+	std::vector<std::string> m_selectionSets;	///< posting sets selecting the documents to match
+	std::vector<std::string> m_restrictionSets;	///< posting sets restricting the documents to match
 	WeightingConfig m_weightingConfig;		///< weighting function configuration
 	std::vector<SummarizerConfig> m_summarizers;	///< list of summarizer configurations
 	std::vector<TermConfig> m_terms;		///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)

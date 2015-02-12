@@ -47,7 +47,7 @@
 #include <utility>
 #include <boost/algorithm/string.hpp>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 
@@ -117,11 +117,6 @@ void Query::defineMetaDataRestriction(
 	Index hnd = m_metaDataReader->elementHandle( name);
 	const char* typeName = m_metaDataReader->getType( hnd);
 	m_metaDataRestrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
-}
-
-void Query::defineFeatureRestriction( const std::string& set_)
-{
-	m_featureRestrictions.push_back( boost::algorithm::to_lower_copy( set_));
 }
 
 void Query::print( std::ostream& out)
@@ -280,8 +275,13 @@ std::vector<ResultDocument> Query::evaluate()
 
 	// [4.1] Add document selection postings:
 	std::vector<std::string>::const_iterator
-		si = m_queryEval->selectorSets().begin(),
-		se = m_queryEval->selectorSets().end();
+		si = m_queryEval->selectionSets().begin(),
+		se = m_queryEval->selectionSets().end();
+	if (si == se)
+	{
+		si = m_queryEval->weightingSets().begin(),
+		se = m_queryEval->weightingSets().end();
+	}
 	for (int sidx=0; si != se; ++si,++sidx)
 	{
 		fi = m_features.begin(), fe = m_features.end();
@@ -321,7 +321,8 @@ std::vector<ResultDocument> Query::evaluate()
 	}
 	// [4.4] Define the feature restrictions:
 	std::vector<std::string>::const_iterator
-		xi = m_featureRestrictions.begin(), xe = m_featureRestrictions.end();
+		xi = m_queryEval->restrictionSets().begin(),
+		xe = m_queryEval->restrictionSets().end();
 	for (; xi != xe; ++xi)
 	{
 		fi = m_features.begin(), fe = m_features.end();

@@ -87,10 +87,6 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true)=0;
 
-	/// \brief Define a restriction on documents that contain a feature of a certain feature set
-	/// \param[in] set_ name of the set of the restriction feature
-	virtual void defineFeatureRestriction( const std::string& set_)=0;
-
 	/// \brief Set the maximum number of ranks to evaluate
 	/// \param[in] maxNofRanks_ maximum number of ranks
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_)=0;

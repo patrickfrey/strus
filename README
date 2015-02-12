@@ -30,14 +30,10 @@ The architecture defines three components that are implemented as libraries.
   |                    |  the atomic terms and the weighting the terms
   |                    |  in case of statistical IR.
   |--------------------|
+  |     database       |  Key/value store database: Implements the storing
+  |                    |  and retrieval of the storage data blocks.
+  |                    |  Currently there exists only one implementation
+  |                    |  based on LevelDB.
+  |--------------------|
 
-
-For using it you have to include "strus/strus.hpp"
-
-
-And link against at the libraries:
-
-  "libstrus_queryeval.so"
-  "libstrus_queryproc.so"
-  "libstrus_lvdbstorage.so"  (storage based on LevelDB)
 

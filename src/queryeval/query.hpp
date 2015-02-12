@@ -74,8 +74,6 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true);
 
-	virtual void defineFeatureRestriction( const std::string& set_);
-
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_);
 	virtual void setMinRank( std::size_t maxNofRanks_);
 	virtual void setUserName( const std::string& username_);
@@ -168,7 +166,6 @@ private:
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
-	std::vector<std::string> m_featureRestrictions;
 	std::size_t m_maxNofRanks;
 	std::size_t m_minRank;
 	std::string m_username;

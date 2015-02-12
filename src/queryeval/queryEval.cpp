@@ -48,7 +48,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 
@@ -60,9 +60,14 @@ void QueryEval::defineTerm(
 	defineTerm( TermConfig( set_, type_, value_));
 }
 
-void QueryEval::defineSelectorFeature( const std::string& set_)
+void QueryEval::defineSelectionFeature( const std::string& set_)
 {
-	m_selectorSets.push_back( set_);
+	m_selectionSets.push_back( set_);
+}
+
+void QueryEval::defineRestrictionFeature( const std::string& set_)
+{
+	m_restrictionSets.push_back( set_);
 }
 
 void QueryEval::defineWeightingFeature( const std::string& set_)
@@ -127,14 +132,14 @@ void QueryEval::print( std::ostream& out) const
 			}
 			out << ")";
 		}
-		if (m_selectorSets.size())
+		if (m_selectionSets.size())
 		{
 			out << " ON ";
-			std::size_t si = 0, se = m_selectorSets.size();
+			std::size_t si = 0, se = m_selectionSets.size();
 			for(; si != se; ++si)
 			{
 				if (si) out << ", ";
-				out << m_selectorSets[si];
+				out << m_selectionSets[si];
 			}
 		}
 		if (m_weightingSets.size())
