@@ -71,7 +71,7 @@ public:
 		typedef std::vector<Increment>::const_iterator const_iterator;
 
 		const_iterator begin() const	{return m_ar.begin();}
-		const_iterator end() const	{return m_ar.begin();}
+		const_iterator end() const	{return m_ar.end();}
 
 	public:
 		class Increment
@@ -94,7 +94,7 @@ public:
 private:
 	enum {
 		MaxNofTermTypes=256,		///< maximum number of term types
-		InitNodeSize=1024		///< initial node size of the cache
+		InitArraySize=256		///< initial size of the cache for one term type
 	};
 
 	class CounterArray
@@ -105,15 +105,16 @@ private:
 			if (m_ar) std::free( m_ar);
 		}
 
+		
 		explicit CounterArray( std::size_t size_)
-			:m_ar((GlobalCounter*)std::calloc( size_, sizeof(GlobalCounter)))
-			,m_size(size_)
+			:m_size(getAllocSize(size_))
 		{
+			m_ar = (GlobalCounter*) std::calloc( m_size, sizeof(GlobalCounter));
 			if (!m_ar) throw std::bad_alloc();
 		}
 
 		explicit CounterArray( const CounterArray& o, std::size_t size_)
-			:m_ar(0),m_size(size_)
+			:m_ar(0),m_size(getAllocSize(size_))
 		{
 			std::size_t copy_size = (size_ < o.m_size)?size_:o.m_size;
 			if (m_size * sizeof(GlobalCounter) < m_size) throw std::bad_alloc();
@@ -123,10 +124,23 @@ private:
 			std::memcpy( m_ar, o.m_ar, copy_size * sizeof(GlobalCounter));
 			std::memset( m_ar + copy_size, 0, m_size - copy_size);
 		}
+
 		const GlobalCounter& operator[]( std::size_t idx) const		{if (idx >= m_size) throw std::runtime_error("internal: array bound read (document frequency cache)"); return m_ar[idx];}
 		GlobalCounter& operator[]( std::size_t idx)			{if (idx >= m_size) throw std::runtime_error("internal: array bound write (document frequency cache)"); return m_ar[idx];}
 
 		std::size_t size() const					{return m_size;}
+
+	private:
+		static std::size_t getAllocSize( std::size_t neededSize=InitArraySize)
+		{
+			std::size_t mm = InitArraySize;
+			while (mm && mm < neededSize)
+			{
+				mm *= 2;
+			}
+			if (!mm) throw std::bad_alloc();
+			return mm;
+		}
 
 	private:
 		GlobalCounter* m_ar;

@@ -75,6 +75,16 @@ struct Constants
 	{
 		return "weighted";
 	}
+	/// \brief Get the identifier used in protocols for distributing the document frequency
+	static const char* storage_statistics_document_frequency()
+	{
+		return "df";
+	}
+	/// \brief Get the identifier used in protocols for distributing the collection size
+	static const char* storage_statistics_number_of_documents()
+	{
+		return "dn";
+	}
 };
 
 }//namespace

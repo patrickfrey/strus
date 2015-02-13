@@ -93,7 +93,23 @@ public:
 
 	/// \brief Get the global number of documents inserted
 	/// \return the number of documents
-	virtual GlobalCounter nofDocumentsInserted() const=0;
+	virtual GlobalCounter globalNofDocumentsInserted() const=0;
+
+	/// \brief Get the global number of documents inserted
+	/// \return the number of documents
+	virtual Index localNofDocumentsInserted() const=0;
+
+	/// \brief Get the global number of documents inserted
+	/// \return the number of documents
+	virtual GlobalCounter globalDocumentFrequency(
+			const std::string& type,
+			const std::string& term) const=0;
+
+	/// \brief Get the global number of documents inserted
+	/// \return the number of documents
+	virtual Index localDocumentFrequency(
+			const std::string& type,
+			const std::string& term) const=0;
 
 	/// \brief Get the highest document number used in this stogage
 	/// \return the document number

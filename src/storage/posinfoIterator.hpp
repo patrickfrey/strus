@@ -52,7 +52,7 @@ public:
 	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
 
 	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
-	Index documentFrequency() const;
+	GlobalCounter documentFrequency() const;
 	unsigned int frequency();
 
 private:

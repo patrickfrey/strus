@@ -1,7 +1,3 @@
 implement information extraction: variables attached to subexpressions. In the queryeval for every match collect the docnos of the subexpression variables and attach them to the list of match postings of this variable. Then create a postingIterator on them that can be passed to a summarizer
-check how expensive it is to calculate combined df's of features (number of documents, where all expression features occurr)
-summarization with help of weighted union iterator
 SWIG bindings
-negative feature restrictions are not implemented yet
-skipPosAnnotation( Index, Index), isAnnotation(): posinfo block mit einem zweiten level für die posinfo der annotationen, der erste level ist mit dem content synchronisiert, die zweite für strukturierte suche in annotationen, start/end marker für annotationen oder level 2 posinfo mit harten grenzen ohne übergänge -- denken
-value packer for posinfo (alternative posinfo block)
+operation 'in_annotation' that makes implements skipPos as skipPos/skipPosAnnotation, skipPosAnnotation( Index, Index), isAnnotation(): posinfo block mit einem zweiten level für die posinfo der annotationen, der erste level ist mit dem content synchronisiert, die zweite für strukturierte suche in annotationen, start/end marker für annotationen oder level 2 posinfo mit harten grenzen ohne übergänge -- denken

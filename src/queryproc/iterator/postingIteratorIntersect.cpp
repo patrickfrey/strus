@@ -139,7 +139,7 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 	}
 }
 
-Index IteratorIntersect::documentFrequency() const
+GlobalCounter IteratorIntersect::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

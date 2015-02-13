@@ -56,7 +56,7 @@ public:
 		return rt;
 	}
 
-	virtual Index documentFrequency() const=0;
+	virtual GlobalCounter documentFrequency() const=0;
 };
 
 }//namespace

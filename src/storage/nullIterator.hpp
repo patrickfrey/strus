@@ -70,7 +70,7 @@ public:
 		return 0;
 	}
 
-	virtual Index documentFrequency() const
+	virtual GlobalCounter documentFrequency() const
 	{
 		return 0;
 	}

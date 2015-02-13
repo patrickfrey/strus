@@ -97,7 +97,7 @@ unsigned int PostingIterator::frequency()
 	return m_posinfoIterator.frequency();
 }
 
-Index PostingIterator::documentFrequency() const
+GlobalCounter PostingIterator::documentFrequency() const
 {
 	return m_posinfoIterator.documentFrequency();
 }

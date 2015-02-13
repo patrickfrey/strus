@@ -106,7 +106,7 @@ Index IteratorContains::skipDoc( const Index& docno_)
 	}
 }
 
-Index IteratorContains::documentFrequency() const
+GlobalCounter IteratorContains::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

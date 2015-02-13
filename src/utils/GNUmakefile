@@ -3,6 +3,7 @@ include $(TOPDIR)/variables.mk
 
 CPP_OBJS=\
 	arithmeticVariantAsString.o \
+	protocol.o \
 	configParser.o \
 	fileio.o \
 	cmdLineOpt.o

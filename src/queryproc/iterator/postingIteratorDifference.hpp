@@ -53,7 +53,7 @@ public:
 	virtual std::vector<const PostingIteratorInterface*>
 			subExpressions( bool positive) const;
 
-	virtual Index documentFrequency() const
+	virtual GlobalCounter documentFrequency() const
 	{
 		return m_positive->documentFrequency();
 	}

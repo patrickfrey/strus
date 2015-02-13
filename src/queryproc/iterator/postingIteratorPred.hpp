@@ -70,7 +70,7 @@ public:
 		return m_origin->subExpressions( positive);
 	}
 
-	virtual Index documentFrequency() const
+	virtual GlobalCounter documentFrequency() const
 	{
 		return m_origin->documentFrequency();
 	}

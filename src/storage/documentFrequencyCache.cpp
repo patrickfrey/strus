@@ -39,7 +39,11 @@ void DocumentFrequencyCache::doIncrement( const Batch::Increment& incr)
 	std::size_t typeidx = incr.typeno-1;
 	std::size_t termidx = incr.termno-1;
 
-	CounterArrayRef dfar = m_ar[ typeidx];
+	CounterArrayRef& dfar = m_ar[ typeidx];
+	if (!dfar.get())
+	{
+		dfar.reset( new CounterArray( termidx+1));
+	}
 	if (termidx >= dfar->size())
 	{
 		dfar.reset( new CounterArray( *dfar, termidx+1));
@@ -52,7 +56,7 @@ void DocumentFrequencyCache::doRevertIncrement( const Batch::Increment& incr)
 	std::size_t typeidx = incr.typeno-1;
 	std::size_t termidx = incr.termno-1;
 
-	CounterArrayRef dfar = m_ar[ typeidx];
+	CounterArrayRef& dfar = m_ar[ typeidx];
 	(*dfar)[ termidx] -= incr.value;
 }
 
@@ -96,7 +100,7 @@ GlobalCounter DocumentFrequencyCache::getValue( const Index& typeno, const Index
 	std::size_t termidx = termno-1;
 
 	CounterArrayRef dfar = m_ar[ typeidx];
-	if (dfar->size() <= termidx) return 0;
+	if (!dfar.get() || dfar->size() <= termidx) return 0;
 	return (*dfar)[ termidx];
 }
 

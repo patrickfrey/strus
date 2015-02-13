@@ -59,7 +59,7 @@ public:
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipPos( const Index& pos);
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -84,7 +84,7 @@ private:
 	Reference<PostingIteratorInterface> m_cut;			///< the set of elements then must not appear inside the group
 	int m_range;							///< the maximum position difference between the start element and the end element of the group
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
 };
 
 

@@ -50,7 +50,7 @@ public:
 
 	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const;
 
-	virtual Index documentFrequency() const;
+	virtual GlobalCounter documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -67,7 +67,7 @@ private:
 	Index m_posno;							///< current position
 	std::vector<Reference< PostingIteratorInterface> > m_argar;
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
+	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
 };
 
 

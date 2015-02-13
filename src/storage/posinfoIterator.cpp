@@ -169,7 +169,7 @@ unsigned int PosinfoIterator::frequency()
 	return m_posinfoBlk.frequency_at( m_posinfoItr);
 }
 
-Index PosinfoIterator::documentFrequency() const
+GlobalCounter PosinfoIterator::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

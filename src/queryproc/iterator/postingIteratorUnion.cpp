@@ -126,7 +126,7 @@ Index IteratorUnion::skipPos( const Index& pos_)
 	return m_posno=pos;
 }
 
-Index IteratorUnion::documentFrequency() const
+GlobalCounter IteratorUnion::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

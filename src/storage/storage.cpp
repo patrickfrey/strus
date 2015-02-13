@@ -85,6 +85,7 @@ Storage::Storage( DatabaseInterface* database_, const char* termnomap_source)
 	,m_transactionCnt(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
+	,m_storagePeer(0)
 {
 	try
 	{
@@ -526,9 +527,40 @@ Index Storage::nofAttributeTypes()
 	return m_next_termno -1;
 }
 
-GlobalCounter Storage::nofDocumentsInserted() const
+GlobalCounter Storage::globalNofDocumentsInserted() const
 {
 	return m_global_nof_documents;
+}
+
+Index Storage::localNofDocumentsInserted() const
+{
+	return m_nof_documents;
+}
+
+GlobalCounter Storage::globalDocumentFrequency(
+		const std::string& type,
+		const std::string& term) const
+{
+	Index typeno = getTermValue( type);
+	Index termno = getTermValue( term);
+
+	if (m_documentFrequencyCache.get())
+	{
+		return m_documentFrequencyCache->getValue( typeno, termno);
+	}
+	else
+	{
+		return DatabaseAdapter_DocFrequency::get( m_database, typeno, termno);
+	}
+}
+
+Index Storage::localDocumentFrequency(
+		const std::string& type,
+		const std::string& term) const
+{
+	Index typeno = getTermValue( type);
+	Index termno = getTermValue( term);
+	return DatabaseAdapter_DocFrequency::get( m_database, typeno, termno);
 }
 
 Index Storage::maxDocumentNumber() const

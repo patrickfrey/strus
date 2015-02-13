@@ -104,7 +104,14 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual GlobalCounter nofDocumentsInserted() const;
+	virtual GlobalCounter globalNofDocumentsInserted() const;
+	virtual Index localNofDocumentsInserted() const;
+	virtual GlobalCounter globalDocumentFrequency(
+			const std::string& type,
+			const std::string& term) const;
+	virtual Index localDocumentFrequency(
+			const std::string& type,
+			const std::string& term) const;
 
 	virtual Index maxDocumentNumber() const;
 

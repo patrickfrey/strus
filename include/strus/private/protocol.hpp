@@ -26,25 +26,23 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_PROTOCOL_HPP_INCLUDED
+#define _STRUS_PROTOCOL_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <string>
+#include <ostream>
+#include <istream>
 
 namespace strus
 {
 
-class StoragePeerTransactionInterface;
-
-/// \brief Interface used by the storage to distribute statistics needed for document ranking to other peers in a cluster of storages
-class StoragePeerInterface
+/// \brief Some helper functions for implementing protocols to exchange data as ascii text
+struct Protocol
 {
-public:
-	/// \brief Destructor
-	virtual ~StoragePeerInterface(){}
-
-	/// \brief Creates a new transaction object to distribute statistics
-	/// \return return the pointer to the transaction object (with ownership - to be disposed with 'delete')
-	virtual StoragePeerTransactionInterface* createTransaction() const=0;
+	static std::string encodeString( const std::string& value);
+	static std::string decodeString( const std::string& value);
 };
+
 }//namespace
 #endif
 

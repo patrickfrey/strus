@@ -26,71 +26,68 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingBM25.hpp"
-#include "strus/constants.hpp"
-#include <cmath>
-#include <ctime>
+#include "strus/private/protocol.hpp"
+#include "private/dll_tags.hpp"
+#include <stdexcept>
 
 using namespace strus;
 
-WeightingClosureBM25::WeightingClosureBM25(
-		const StorageInterface* storage,
-		PostingIteratorInterface* itr_,
-		MetaDataReaderInterface* metadata_,
-		float k1_,
-		float b_,
-		float avgDocLength_)
-	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_),m_itr(itr_),m_metadata(metadata_)
-	,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-	,m_idf(0.0)
+DLL_PUBLIC std::string Protocol::encodeString( const std::string& value)
 {
-	float nofMatches = m_itr->documentFrequency();
-	float nofCollectionDocuments = storage->globalNofDocumentsInserted();
-
-	if (nofCollectionDocuments > nofMatches * 2)
+	const char* hex = "0123456789ABCDEF";
+	std::string rt;
+	char const* vv = value.c_str();
+	for (;*vv; ++vv)
 	{
-		m_idf =
-			logf(
-				(nofCollectionDocuments - nofMatches + 0.5)
-				/ (nofMatches + 0.5));
+		if ((signed char)*vv <= 32 || *vv == '#')
+		{
+			rt.push_back('#');
+			rt.push_back( hex[ (unsigned char)*vv >>  4]);
+			rt.push_back( hex[ (unsigned char)*vv & 0xF]);
+		}
+		else
+		{
+			rt.push_back( *vv);
+		}
 	}
-	else if (nofCollectionDocuments > 100)
+	return rt;
+}
+
+unsigned int decode_esc( char ch)
+{
+	ch |= 32;
+	if (ch >= '0' && ch <= '9')
 	{
-		m_idf = 0.0;
+		return ch - '0';
+	}
+	else if (ch >= 'a' && ch <= 'f')
+	{
+		return ch - 'a';
 	}
 	else
 	{
-		m_idf = 0.01;
+		throw std::runtime_error( "illegal character in protocol encoding");
 	}
 }
 
-
-float WeightingClosureBM25::call( const Index& docno)
+DLL_PUBLIC std::string Protocol::decodeString( const std::string& value)
 {
-	if (m_itr->skipDoc( docno) != docno) return 0.0;
-
-	m_metadata->skipDoc( docno);
-
-	float ff = m_itr->frequency();
-	if (ff == 0.0)
+	std::string rt;
+	char const* vv = value.c_str();
+	for (; *vv; ++vv)
 	{
-		return 0.0;
+		if (*vv == '#')
+		{
+			unsigned int chr = decode_esc( vv[1]) + decode_esc( vv[2]);
+			rt.push_back( (unsigned char)chr);
+			vv += 2;
+		}
+		else
+		{
+			rt.push_back( *vv);
+		}
 	}
-	else if (m_b)
-	{
-		float doclen = m_metadata->getValue( m_metadata_doclen);
-		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return m_idf
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
-	}
-	else
-	{
-		return m_idf
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * 1.0);
-	}
+	return rt;
 }
-
 
 

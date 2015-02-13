@@ -93,7 +93,7 @@ void PeerStorageTransaction::commit()
 		{
 			const std::string& termkey = m_unknownTerms[ bi->termno - UnknownValueHandleStart - 1];
 			Index termno = m_dbadapter_termvalue.get( termkey);
-			if (termno)
+			if (!termno)
 			{
 				termno = m_storage->allocTermno();
 				m_dbadapter_termvalue.store( transaction.get(), termkey, termno);

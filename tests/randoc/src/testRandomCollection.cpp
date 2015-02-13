@@ -981,7 +981,6 @@ int main( int argc, const char* argv[])
 		if (nofQueries)
 		{
 			std::clock_t start;
-			double duration;
 			unsigned int nofQueriesFailed = 0;
 			start = std::clock();
 			std::vector<std::vector<RandomQuery::Match> > result_matches;
@@ -996,7 +995,7 @@ int main( int argc, const char* argv[])
 				}
 				arglen += qi->arg.size();
 			}
-			duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+			double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 			std::cerr << "evaluated " << nofQueries << " random query operations in " << doubleToString(duration) << " seconds" << std::endl;
 			arglen /= nofQueries;
 			std::cerr << "average query size = " << doubleToString( arglen) << std::endl;
