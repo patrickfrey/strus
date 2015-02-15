@@ -29,6 +29,7 @@
 /// \brief Exported functions of the strus storage library
 #ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_LIB_HPP_INCLUDED
+#include <string>
 
 namespace strus {
 
@@ -46,13 +47,13 @@ class StorageAlterMetaDataTableInterface;
 /// \brief Creates an client instance of the storage using a defined key value store database
 /// \param[in] configsource configuration source string describing the storage (not a filename !)
 /// \param[in] database reference to key value store database used by this storage
-StorageInterface* createStorageClient( const char* configsource, DatabaseInterface* database);
+StorageInterface* createStorageClient( const std::string& configsource, DatabaseInterface* database);
 
 /// \brief Creates a new storage described with configsource using a defined key value store database
 /// \param[in] configsource Configuration source string describing the storage (not a filename !)
 /// \param[in] database reference to a key value store database used by the storage
 /// \remark The database referenced by 'database' must have been created and active
-void createStorage( const char* configsource, DatabaseInterface* database);
+void createStorage( const std::string& configsource, DatabaseInterface* database);
 
 /// \brief Create an interface to alter the meta data table structure
 /// \param[in] database reference to a key value store database used by the storage

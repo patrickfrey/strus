@@ -231,7 +231,7 @@ int main( int argc, const char* argv[])
 
 		strus::printIndentMultilineString(
 					std::cerr,
-					12, strus::getDatabaseConfigDescription(
+					12, strus::getDatabaseConfigDescription_leveldb(
 						strus::CmdCreateDatabaseClient));
 		strus::printIndentMultilineString(
 					std::cerr, 12, 
@@ -245,7 +245,7 @@ int main( int argc, const char* argv[])
 		if (argc > 2) throw std::runtime_error( "too many arguments for strusCheckStorage");
 
 		boost::scoped_ptr<strus::DatabaseInterface>
-			database( strus::createDatabaseClient( argv[1]));
+			database( strus::createDatabaseClient_leveldb( argv[1]));
 
 		checkDB( database.get());
 	}

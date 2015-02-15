@@ -52,7 +52,7 @@
 
 using namespace strus;
 
-void QueryEval::defineTerm(
+void QueryEval::addTerm(
 		const std::string& set_,
 		const std::string& type_,
 		const std::string& value_)
@@ -60,17 +60,17 @@ void QueryEval::defineTerm(
 	defineTerm( TermConfig( set_, type_, value_));
 }
 
-void QueryEval::defineSelectionFeature( const std::string& set_)
+void QueryEval::addSelectionFeature( const std::string& set_)
 {
 	m_selectionSets.push_back( set_);
 }
 
-void QueryEval::defineRestrictionFeature( const std::string& set_)
+void QueryEval::addRestrictionFeature( const std::string& set_)
 {
 	m_restrictionSets.push_back( set_);
 }
 
-void QueryEval::defineWeightingFeature( const std::string& set_)
+void QueryEval::addWeightingFeature( const std::string& set_)
 {
 	m_weightingSets.push_back( set_);
 }

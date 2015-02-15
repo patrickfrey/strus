@@ -42,7 +42,7 @@ class StorageInterface;
 /// \param[in] storage reference to storage
 /// \return the allocated processor
 QueryProcessorInterface*
-	createQueryProcessorInterface(
+	createQueryProcessor(
 		StorageInterface* storage);
 
 }//namespace

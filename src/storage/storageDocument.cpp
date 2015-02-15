@@ -60,15 +60,13 @@ StorageDocument::TermMapKey StorageDocument::termMapKey( const std::string& type
 void StorageDocument::addSearchIndexTerm(
 		const std::string& type_,
 		const std::string& value_,
-		const Index& position_,
-		float weight_)
+		const Index& position_)
 {
 	if (position_ == 0) throw std::runtime_error( "term occurrence position must not be 0");
 
 	TermMapKey key( termMapKey( type_, value_));
 	TermMapValue& ref = m_terms[ key];
 	ref.pos.insert( position_);
-	ref.weight += weight_;
 }
 
 void StorageDocument::addForwardIndexTerm(
@@ -94,7 +92,7 @@ void StorageDocument::setAttribute(
 	m_attributes.push_back( DocAttribute( name_, value_));
 }
 
-void StorageDocument::setUserAccessRights(
+void StorageDocument::setUserAccessRight(
 		const std::string& username_)
 {
 	bool isNew;

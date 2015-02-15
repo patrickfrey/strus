@@ -65,8 +65,7 @@ StorageDocumentChecker::~StorageDocumentChecker()
 void StorageDocumentChecker::addSearchIndexTerm(
 		const std::string& type_,
 		const std::string& value_,
-		const Index& position_,
-		float weight_)
+		const Index& position_)
 {
 	TermMap::iterator ti = m_termMap.find( Term( type_, value_));
 	TermAttributes* attributes = 0;
@@ -79,7 +78,6 @@ void StorageDocumentChecker::addSearchIndexTerm(
 		attributes = &ti->second;
 	}
 	attributes->poset.insert( position_);
-	attributes->weight += weight_;
 }
 
 void StorageDocumentChecker::addForwardIndexTerm(
@@ -258,7 +256,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	}
 }
 
-void StorageDocumentChecker::setUserAccessRights( const std::string& username)
+void StorageDocumentChecker::setUserAccessRight( const std::string& username)
 {
 	m_userlist.push_back( username);
 }

@@ -59,8 +59,7 @@ public:
 	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
-			const Index& position_,
-			float weight_);
+			const Index& position_);
 
 	/// \brief Implementation of StorageDocumentInterface::addForwardIndexTerm( const std::string&, const std::string&, const Index&);
 	virtual void addForwardIndexTerm(
@@ -79,7 +78,7 @@ public:
 			const std::string& value_);
 
 	/// \brief Implementation of StorageDocumentInterface::setUserAccessRights( const std::string&);
-	virtual void setUserAccessRights(
+	virtual void setUserAccessRight(
 			const std::string& username_);
 
 	/// \brief Implementation of StorageDocumentInterface::done();
@@ -89,14 +88,11 @@ public:
 	typedef std::pair<Index,Index> TermMapKey;
 	struct TermMapValue
 	{
-		TermMapValue()
-			:weight(0.0){}
+		TermMapValue(){}
 		TermMapValue( const TermMapValue& o)
-			:pos(o.pos),weight(o.weight){}
-
+			:pos(o.pos){}
 
 		std::set<Index> pos;
-		float weight;
 	};
 	typedef std::map< TermMapKey, TermMapValue> TermMap;
 

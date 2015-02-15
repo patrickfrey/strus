@@ -908,13 +908,13 @@ int main( int argc, const char* argv[])
 
 		try
 		{
-			strus::destroyDatabase( config);
+			strus::destroyDatabase_leveldb( config);
 		}
 		catch(...){}
 
-		strus::createDatabase( config);
+		strus::createDatabase_leveldb( config);
 		boost::scoped_ptr<strus::DatabaseInterface>
-			database( strus::createDatabaseClient( config));
+			database( strus::createDatabaseClient_leveldb( config));
 		strus::createStorage( config, database.get());
 		boost::scoped_ptr<strus::StorageInterface>
 			storage( strus::createStorageClient( "", database.get()));
@@ -942,7 +942,7 @@ int main( int argc, const char* argv[])
 			{
 				const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
 				doc->addForwardIndexTerm( term.type, term.value, oi->pos);
-				doc->addSearchIndexTerm( term.type, term.value, oi->pos, 0.0);
+				doc->addSearchIndexTerm( term.type, term.value, oi->pos);
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
 #endif
@@ -963,7 +963,7 @@ int main( int argc, const char* argv[])
 
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 		boost::scoped_ptr<strus::QueryProcessorInterface> queryproc(
-			strus::createQueryProcessorInterface( storage.get()));
+			strus::createQueryProcessor( storage.get()));
 
 		std::vector<RandomQuery> randomQueryAr;
 		if (collection.docar.size())

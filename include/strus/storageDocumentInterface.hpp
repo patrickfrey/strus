@@ -52,8 +52,7 @@ public:
 	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
-			const Index& position_,
-			float weight_)=0;
+			const Index& position_)=0;
 
 	/// \brief Add one occurrence of a term to the forward index for summarization of the document
 	/// \param[in] type_ type name of the term
@@ -88,7 +87,7 @@ public:
 	/// \remark The access control is a very primitive implementation and just designed as filter in the search index. You should not rely on this mechanism alone.
 	/// \note Adding no user means that nobody can search for the document if access control is enabled
 	/// \note The storage has to be created with "acl=yes" for enabling access control
-	virtual void setUserAccessRights(
+	virtual void setUserAccessRight(
 			const std::string& username_)=0;
 
 	/// \brief Closing the document definition

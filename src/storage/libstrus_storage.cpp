@@ -95,10 +95,10 @@ FILEERROR:
 }
 
 
-DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsource, DatabaseInterface* database)
+DLL_PUBLIC StorageInterface* strus::createStorageClient( const std::string& configsource, DatabaseInterface* database)
 {
 	std::string cachedterms;
-	std::string src( configsource?configsource:"");
+	std::string src = configsource;
 
 	(void)extractStringFromConfigString( cachedterms, src, "cachedterms");
 	if (cachedterms.size())
@@ -113,12 +113,12 @@ DLL_PUBLIC StorageInterface* strus::createStorageClient( const char* configsourc
 }
 
 
-DLL_PUBLIC void strus::createStorage( const char* configsource, DatabaseInterface* database)
+DLL_PUBLIC void strus::createStorage( const std::string& configsource, DatabaseInterface* database)
 {
 	bool useAcl = false;
 	std::string metadata;
 
-	std::string src( configsource?configsource:"");
+	std::string src = configsource;
 
 	(void)extractStringFromConfigString( metadata, src, "metadata");
 	(void)extractBooleanFromConfigString( useAcl, src, "acl");

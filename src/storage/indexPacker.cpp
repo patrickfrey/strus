@@ -370,23 +370,24 @@ static const char* findIndex( const char* ptr, const char* end, Index needle, ch
 	char const* pi = ptr;
 	const char* pe = end;
 
-	while (pe - pi > (NextSkipSize*2))
-	{
-		char const* npi = NextElem()( pi+NextSkipSize, pe, delim);
-		if (npi != pe
-			&& Comparator()( (const unsigned char*)npi,
-					 (const unsigned char*)needlebuf, needlesize))
-		{
-			pi = npi;
-			continue;
-		}
-		break;
-	}
 	while (pi != pe
 		&& Comparator()( (const unsigned char*)pi,
 				 (const unsigned char*)needlebuf, needlesize)
-		&& SkipElem()( pi, pe, delim)){}
-
+		&& SkipElem()( pi, pe, delim))
+	{
+		while (pe - pi > (NextSkipSize*2))
+		{
+			char const* npi = NextElem()( pi+NextSkipSize, pe, delim);
+			if (npi != pe
+				&& Comparator()( (const unsigned char*)npi,
+						 (const unsigned char*)needlebuf, needlesize))
+			{
+				pi = npi;
+				continue;
+			}
+			break;
+		}
+	}
 	return (pi == pe)?0:(const char*)pi;
 }
 

@@ -35,12 +35,12 @@
 
 using namespace strus;
 
-DLL_PUBLIC DatabaseInterface* strus::createDatabaseClient( const char* configsource)
+DLL_PUBLIC DatabaseInterface* strus::createDatabaseClient_leveldb( const std::string& configsource)
 {
 	unsigned int cachesize_kb = 0;
 	bool compression = true;
 	std::string path;
-	std::string src( configsource?configsource:"");
+	std::string src( configsource);
 
 	if (!extractStringFromConfigString( path, src, "path"))
 	{
@@ -53,11 +53,11 @@ DLL_PUBLIC DatabaseInterface* strus::createDatabaseClient( const char* configsou
 }
 
 
-DLL_PUBLIC void strus::createDatabase( const char* configsource)
+DLL_PUBLIC void strus::createDatabase_leveldb( const std::string& configsource)
 {
 	bool compression = true;
 	std::string path;
-	std::string src( configsource?configsource:"");
+	std::string src = configsource;
 
 	if (!extractStringFromConfigString( path, src, "path"))
 	{
@@ -87,10 +87,10 @@ DLL_PUBLIC void strus::createDatabase( const char* configsource)
 }
 
 
-DLL_PUBLIC void strus::destroyDatabase( const char* configsource)
+DLL_PUBLIC void strus::destroyDatabase_leveldb( const std::string& configsource)
 {
 	std::string path;
-	std::string src( configsource?configsource:"");
+	std::string src = configsource;
 
 	if (!extractStringFromConfigString( path, src, "path"))
 	{
@@ -107,7 +107,7 @@ DLL_PUBLIC void strus::destroyDatabase( const char* configsource)
 }
 
 
-DLL_PUBLIC const char* strus::getDatabaseConfigDescription( DatabaseConfigDescriptionType type)
+DLL_PUBLIC const char* strus::getDatabaseConfigDescription_leveldb( DatabaseConfigDescriptionType type)
 {
 	switch (type)
 	{
@@ -123,7 +123,7 @@ DLL_PUBLIC const char* strus::getDatabaseConfigDescription( DatabaseConfigDescri
 	return 0;
 }
 
-DLL_PUBLIC const char** strus::getDatabaseConfigParameters( DatabaseConfigDescriptionType type)
+DLL_PUBLIC const char** strus::getDatabaseConfigParameters_leveldb( DatabaseConfigDescriptionType type)
 {
 	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression", 0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};

@@ -58,8 +58,7 @@ public:
 	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
-			const Index& position_,
-			float weight_);
+			const Index& position_);
 
 	virtual void addForwardIndexTerm(
 			const std::string& type_,
@@ -74,7 +73,7 @@ public:
 			const std::string& name_,
 			const std::string& value_);
 
-	virtual void setUserAccessRights( const std::string& username);
+	virtual void setUserAccessRight( const std::string& username);
 
 	virtual void done();
 
@@ -123,13 +122,11 @@ private:
 
 	struct TermAttributes
 	{
-		explicit TermAttributes( float weight_=0.0)
-			:weight(weight_){}
+		explicit TermAttributes(){}
 		TermAttributes( const TermAttributes& o)
-			:poset(o.poset),weight(o.weight){}
+			:poset(o.poset){}
 
 		std::set<Index> poset;
-		float weight;
 	};
 
 	typedef std::map<Term,TermAttributes> TermMap;

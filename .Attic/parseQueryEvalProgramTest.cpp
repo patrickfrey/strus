@@ -162,7 +162,7 @@ int main( int argc, const char* argv[])
 				std::cerr << "ERROR could not read expected result file '" << expfile << "', error " << ec << std::endl;
 			}
 			boost::scoped_ptr<strus::QueryProcessorInterface> qproc(
-				strus::createQueryProcessorInterface( 0));
+				strus::createQueryProcessor( 0));
 
 			boost::scoped_ptr<strus::QueryEvalInterface> qeval(
 				strus::createQueryEval( qproc.get()));

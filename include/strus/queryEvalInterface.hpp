@@ -53,7 +53,7 @@ public:
 	/// \param[in] type_ name of the type of the term
 	/// \param[in] value_ value of the term
 	/// \note This function is useful to define structural elements in the document used for query evaluation, that are not part of the query itself. For example sentence or paragraph marker.
-	virtual void defineTerm(
+	virtual void addTerm(
 			const std::string& set_,
 			const std::string& type_,
 			const std::string& value_)=0;
@@ -61,16 +61,16 @@ public:
 	/// \brief Declare a set of features to be used for selection (declare what documents to weight)
 	/// \param[in] set_ name of the set of the selecting feature.
 	/// \remark If no selector feature is specified then the weighting features are used for selection
-	virtual void defineSelectionFeature( const std::string& set_)=0;
+	virtual void addSelectionFeature( const std::string& set_)=0;
 
 	/// \brief Define a set of features to be used as restriction (exclude documents that do not contain a feature of the set declared)
 	/// \param[in] set_ name of the set of the restriction feature
-	virtual void defineRestrictionFeature( const std::string& set_)=0;
+	virtual void addRestrictionFeature( const std::string& set_)=0;
 
 	/// \brief Declare a set of features to be used for weighting (declare what features to weight)
 	/// \param[in] set_ name of the set of the weighting feature.
 	/// \remark If no weighhting feature is specified then the query evaluation will allways return an empty ranklist
-	virtual void defineWeightingFeature( const std::string& set_)=0;
+	virtual void addWeightingFeature( const std::string& set_)=0;
 
 	/// \brief Create a summarizer to configure for this query evaluation
 	/// \param[in] resultAttribute specifies the attribute name this summarization is labeled with in the query evaluation result

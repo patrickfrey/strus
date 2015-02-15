@@ -33,43 +33,75 @@
 
 using namespace strus;
 
+static inline bool isDigit( char ch)
+{
+	return (ch >= '0' && ch <= '9');
+}
+
 DLL_PUBLIC ArithmeticVariant strus::arithmeticVariantFromString( const std::string& valueAsString)
 {
-	ArithmeticVariant rt;
-	if (valueAsString.empty())
+	std::string::const_iterator vi = valueAsString.begin(), ve = valueAsString.end();
+	bool sign = false;
+	unsigned int ival = 0;
+	unsigned int pval = 0;
+	float fval = 0.0;
+	bool int_overflow = false;
+	if (vi == ve)
 	{
-		throw std::runtime_error("empty string cannot be converted to arithmetic variant");
+		throw std::runtime_error( "empty string cannot be converted to arithmetic variant");
 	}
-	bool sign = (valueAsString[0] == '-');
-	bool fraction = (0!=std::strchr( valueAsString.c_str(), '.')
-			||0!=std::strchr( valueAsString.c_str(), 'E'));
-	const char* typeName;
-	try
+	if (vi != ve && *vi == '-')
 	{
-		if (fraction)
+		++vi;
+		sign = true;
+	}
+	for (; vi != ve; ++vi)
+	{
+		if (!isDigit( *vi)) break;
+		ival = ival * 10 + *vi - '0';
+		fval = fval * 10 + *vi - '0';
+		if (pval > ival)
 		{
-			typeName = "floating point number";
-			rt.variant.Float = boost::lexical_cast<float>( valueAsString);
-			rt.type = ArithmeticVariant::Float;
+			int_overflow = true;
 		}
-		else if (sign)
+		pval = ival;
+	}
+	if (vi == ve)
+	{
+		if (int_overflow)
 		{
-			typeName = "integer";
-			rt.variant.Int = boost::lexical_cast<int>( valueAsString);
-			rt.type = ArithmeticVariant::Int;
+			return ArithmeticVariant( sign?fval:-fval);
+		}
+		if (sign) 
+		{
+			if (ival > (unsigned int)std::numeric_limits<int>::max())
+			{
+				return ArithmeticVariant( sign?fval:-fval);
+			}
+			return ArithmeticVariant( -(int)ival);
 		}
 		else
 		{
-			typeName = "unsigned integer";
-			rt.variant.UInt = boost::lexical_cast<unsigned int>( valueAsString);
-			rt.type = ArithmeticVariant::UInt;
+			return ArithmeticVariant( ival);
 		}
-		return rt;
 	}
-	catch (const boost::bad_lexical_cast& err)
+	if (vi != ve && *vi == '.')
 	{
-		throw std::runtime_error( std::string( "cannot convert string to arithmetic variant value, error when trying to convert to ") + typeName + ": " + err.what());
+		fval = ival;
+		float dval = 0.1;
+		++vi;
+		for (; vi != ve; ++vi)
+		{
+			if (!isDigit( *vi)) break;
+			fval += dval * (*vi - '0');
+			dval /= 10;
+		}
+		if (vi == ve)
+		{
+			return ArithmeticVariant(sign?fval:-fval);
+		}
 	}
+	throw std::runtime_error( std::string( "cannot convert string to arithmetic variant value: '") + valueAsString + "'");
 }
 
 static void print( std::ostream& out, const ArithmeticVariant& val)

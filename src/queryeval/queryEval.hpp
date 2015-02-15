@@ -69,13 +69,13 @@ public:
 
 	virtual QueryInterface* createQuery( const StorageInterface* storage) const;
 
-	virtual void defineTerm(
+	virtual void addTerm(
 			const std::string& set_,
 			const std::string& type_,
 			const std::string& value_);
-	virtual void defineSelectionFeature( const std::string& set_);
-	virtual void defineRestrictionFeature( const std::string& set_);
-	virtual void defineWeightingFeature( const std::string& set_);
+	virtual void addSelectionFeature( const std::string& set_);
+	virtual void addRestrictionFeature( const std::string& set_);
+	virtual void addWeightingFeature( const std::string& set_);
 
 	virtual SummarizerConfigInterface* createSummarizerConfig(
 			const std::string& resultAttribute,
