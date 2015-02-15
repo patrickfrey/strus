@@ -37,9 +37,9 @@ class QueryInterface;
 /// \brief Forward declaration
 class StorageInterface;
 /// \brief Forward declaration
-class SummarizerConfigInterface;
+class SummarizerConfig;
 /// \brief Forward declaration
-class WeightingConfigInterface;
+class WeightingConfig;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -72,19 +72,23 @@ public:
 	/// \remark If no weighhting feature is specified then the query evaluation will allways return an empty ranklist
 	virtual void addWeightingFeature( const std::string& set_)=0;
 
-	/// \brief Create a summarizer to configure for this query evaluation
+	/// \brief Declare a summarizer for this query evaluation
 	/// \param[in] resultAttribute specifies the attribute name this summarization is labeled with in the query evaluation result
 	/// \param[in] functionName name of the summarizer function to use. The name references a function defined with QueryProcessor::defineSummarizerFunction(const char*,const SummarizerFunctionInterface*)
+	/// \param[in] config the configuration meaning parametrization of the summarizer declared
 	/// \return the summarizer configuration object to be destroyed with 'delete' by the caller
-	virtual SummarizerConfigInterface* createSummarizerConfig(
+	virtual void addSummarizer(
 			const std::string& resultAttribute,
-			const std::string& functionName)=0;
+			const std::string& functionName,
+			const SummarizerConfig& config)=0;
 
-	/// \brief Create the weighting function to configure for this query evaluation
+	/// \brief Declare the weighting function for this query evaluation
 	/// \param[in] functionName name of the weighting function to use. The name references a function defined with QueryProcessor::defineWeightingFunction(const char*,const WeightingFunctionInterface*)
+	/// \param[in] config the configuration meaning parametrization of the weighting function declared
 	/// \return the summarizer configuration object to be destroyed with 'delete' by the caller
-	virtual WeightingConfigInterface* createWeightingConfig(
-			const std::string& functionName)=0;
+	virtual void setWeighting(
+			const std::string& functionName,
+			const WeightingConfig& config)=0;
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on

@@ -242,7 +242,7 @@ std::vector<ResultDocument> Query::evaluate()
 	{
 		return std::vector<ResultDocument>();
 	}
-	if (!m_queryEval->weightingConfig().function())
+	if (!m_queryEval->weighting().function())
 	{
 		throw std::runtime_error("cannot evaluate query, no weighting function defined");
 	}
@@ -268,8 +268,8 @@ std::vector<ResultDocument> Query::evaluate()
 	// [4] Create the accumulator:
 	Accumulator accumulator(
 		m_storage,
-		m_queryEval->weightingConfig().function(), 
-		m_queryEval->weightingConfig().parameters(),
+		m_queryEval->weighting().function(), 
+		m_queryEval->weighting().parameters(),
 		m_metaDataReader.get(), m_metaDataRestrictions,
 		m_maxNofRanks, m_storage->maxDocumentNumber());
 
@@ -339,14 +339,14 @@ std::vector<ResultDocument> Query::evaluate()
 
 	// [5] Create the summarizers:
 	std::vector<Reference<SummarizerClosureInterface> > summarizers;
-	std::vector<SummarizerConfig>::const_iterator
+	std::vector<SummarizerDef>::const_iterator
 		zi = m_queryEval->summarizers().begin(),
 		ze = m_queryEval->summarizers().end();
 	for (; zi != ze; ++zi)
 	{
 		// [5.1] Collect the summarization features:
 		std::vector<SummarizerFunctionInterface::FeatureParameter> summarizeFeatures;
-		std::vector<SummarizerConfig::Feature>::const_iterator
+		std::vector<SummarizerDef::Feature>::const_iterator
 			si = zi->featureParameters().begin(),
 			se = zi->featureParameters().end();
 		for (; si != se; ++si)

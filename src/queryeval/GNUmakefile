@@ -5,7 +5,9 @@ CPP_OBJS=\
 	accumulator.o \
 	metaDataRestriction.o \
 	weightingConfig.o \
+	weightingDef.o \
 	summarizerConfig.o \
+	summarizerDef.o \
 	query.o \
 	queryEval.o \
 	libstrus_queryeval.o

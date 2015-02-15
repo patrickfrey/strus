@@ -26,28 +26,45 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONFIG_INTERFACE_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONFIG_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_SUMMARIZER_CONFIG_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_CONFIG_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
 #include <string>
+#include <map>
 
 namespace strus {
 
-/// \class WeightingConfigInterface
-/// \brief Interface for the configuration of a query evaluation weighting function
-class WeightingConfigInterface
+/// \class SummarizerConfig
+/// \brief Configuration of a query evaluation summarizer
+class SummarizerConfig
 {
 public:
 	/// \brief Destructor
-	virtual ~WeightingConfigInterface(){}
+	~SummarizerConfig(){}
 
-	/// \brief Defines a parameter to pass to the weighting function
+	/// \brief Defines a numeric parameter to pass to the summarizer
 	/// \param[in] name_ name of the parameter
 	/// \param[in] value_ value of the parameter
-	virtual void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)=0;
+	void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
 
-	/// \brief Finalizes the summarizer definition
-	virtual void done()=0;
+	/// \brief Defines a textual parameter to pass to the summarizer
+	/// \param[in] name_ name of the parameter
+	/// \param[in] value_ value of the parameter
+	void defineTextualParameter( const std::string& name_, const std::string& value_);
+
+	/// \brief References a set of postings to pass as PostingIteratorInterface to the summarizer
+	/// \param[in] class_ name of the feature set class for the summarizer. The class describes for what the feature is used.
+	/// \param[in] set_ feature set name
+	void defineFeatureParameter( const std::string& class_, const std::string& set_);
+
+	const std::map<std::string,ArithmeticVariant>& numericParameters() const	{return m_numericParameters;}
+	const std::map<std::string,std::string>& textualParameters() const		{return m_textualParameters;}
+	const std::map<std::string,std::string>& featureParameters() const		{return m_featureParameters;}
+
+private:
+	std::map<std::string,ArithmeticVariant> m_numericParameters;
+	std::map<std::string,std::string> m_textualParameters;
+	std::map<std::string,std::string> m_featureParameters;
 };
 
 }//namespace

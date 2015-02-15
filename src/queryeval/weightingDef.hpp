@@ -26,10 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_DEFINITION_HPP_INCLUDED
+#define _STRUS_WEIGHTING_DEFINITION_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
-#include "strus/weightingConfigInterface.hpp"
+#include "strus/weightingConfig.hpp"
 #include <vector>
 #include <string>
 
@@ -40,29 +40,23 @@ class WeightingFunctionInterface;
 /// \brief Forward declaration
 class QueryEval;
 
-class WeightingConfig
-	:public WeightingConfigInterface
+class WeightingDef
 {
 public:
-	WeightingConfig()
-		:m_qeval(0),m_function(0),m_functionName(),m_parameters(){}
-	WeightingConfig( const WeightingConfig& o)
+	WeightingDef()
+		:m_function(0),m_functionName(),m_parameters(){}
+	WeightingDef( const WeightingDef& o)
 		:m_function(o.m_function),m_functionName(o.m_functionName),m_parameters(o.m_parameters){}
-	WeightingConfig(
-			QueryEval* qeval_,
+	WeightingDef(
 			const WeightingFunctionInterface* function_,
-			const std::string& functionName_);
-
-	virtual void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
-
-	virtual void done();
+			const std::string& functionName_,
+			const WeightingConfig& config);
 
 	const WeightingFunctionInterface* function() const		{return m_function;}
 	const std::string& functionName() const				{return m_functionName;}
 	const std::vector<ArithmeticVariant>& parameters() const	{return m_parameters;}
 
 private:
-	QueryEval* m_qeval;				///< Query evaluation where this configuration is part of
 	const WeightingFunctionInterface* m_function;	///< function used for weighting
 	std::string m_functionName;			///< name of the function used for weighting
 	std::vector<ArithmeticVariant> m_parameters;	///< weighting function parameters

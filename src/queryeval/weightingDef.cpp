@@ -26,17 +26,55 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/weightingConfig.hpp"
+#include "weightingDef.hpp"
+#include "queryEval.hpp"
+#include "strus/weightingFunctionInterface.hpp"
 #include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
-void WeightingConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
+static std::size_t countArguments( char const** arg)
 {
-	std::string name = boost::algorithm::to_lower_copy( name_);
-	if (m_numericParameters.find( name) != m_numericParameters.end())
+	if (!arg) return 0;
+	std::size_t aidx = 0;
+	for (; arg[aidx]; ++aidx){}
+	return aidx;
+}
+
+WeightingDef::WeightingDef(
+		const WeightingFunctionInterface* function_,
+		const std::string& functionName_,
+		const WeightingConfig& config)
+	:m_function(function_),m_functionName(functionName_)
+{
+	m_parameters.resize( countArguments( m_function->numericParameterNames()));
+
+	std::map<std::string,ArithmeticVariant>::const_iterator
+		pi = config.numericParameters().begin(),
+		pe = config.numericParameters().end();
+
+	const char** arg = m_function->numericParameterNames();
+	if (!arg && pi != pe)
 	{
-		throw std::runtime_error( std::string( "duplicate definition of weighting function parameter '") + name_ + "'");
-		m_numericParameters[ name] = value_;
+		throw std::runtime_error( std::string( "no numeric arguments expected for weighting function '") + m_functionName + "'");
+	}
+	for (; pi != pe; ++pi)
+	{
+		std::size_t aidx = 0;
+		for (; arg[aidx]; ++aidx)
+		{
+			if (boost::algorithm::iequals( pi->first, arg[aidx]))
+			{
+				break;
+			}
+		}
+		if (!arg[aidx])
+		{
+			throw std::runtime_error(std::string( "unknown numeric argument name '") + pi->first + "' for weighting function '" + m_functionName + "'");
+		}
+		m_parameters[aidx] = pi->second;
 	}
 }
+
+
+

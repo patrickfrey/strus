@@ -26,10 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_CONFIG_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_CONFIG_HPP_INCLUDED
+#ifndef _STRUS_SUMMARIZER_DEFINITION_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_DEFINITION_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
-#include "strus/summarizerConfigInterface.hpp"
+#include "strus/summarizerConfig.hpp"
 #include <string>
 #include <vector>
 
@@ -40,19 +40,21 @@ class SummarizerFunctionInterface;
 /// \brief Forward declaration
 class QueryEval;
 
-class SummarizerConfig
-	:public SummarizerConfigInterface
+class SummarizerDef
 {
 public:
-	SummarizerConfig(
-			QueryEval* qeval_,
+	SummarizerDef(
 			const SummarizerFunctionInterface* function_,
-			const std::string& functionName_);
+			const std::string& functionName_,
+			const SummarizerConfig& config);
 
-	virtual void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
-	virtual void defineTextualParameter( const std::string& name_, const std::string& value_);
-	virtual void defineFeatureParameter( const std::string& class_, const std::string& set_);
-	virtual void done();
+	SummarizerDef( const SummarizerDef& o)
+		:m_function(o.m_function)
+		,m_functionName(o.m_functionName)
+		,m_numericParameters(o.m_numericParameters)
+		,m_textualParameters(o.m_textualParameters)
+		,m_featureParameters(o.m_featureParameters)
+		,m_resultAttribute(o.m_resultAttribute){}
 
 	struct Feature
 	{
@@ -65,31 +67,6 @@ public:
 		std::string set;
 	};
 
-	SummarizerConfig(
-			QueryEval* qeval_,
-			const SummarizerFunctionInterface* function_,
-			const std::string& functionName_,
-			const std::vector<ArithmeticVariant>& numericParameters_,
-			const std::vector<std::string>& textualParameters_,
-			const std::vector<Feature>& featureParameters_,
-			const std::string& resultAttribute_)
-		:m_qeval(qeval_)
-		,m_function(function_)
-		,m_functionName(functionName_)
-		,m_numericParameters(numericParameters_)
-		,m_textualParameters(textualParameters_)
-		,m_featureParameters(featureParameters_)
-		,m_resultAttribute(resultAttribute_){}
-
-	SummarizerConfig( const SummarizerConfig& o)
-		:m_qeval(o.m_qeval)
-		,m_function(o.m_function)
-		,m_functionName(o.m_functionName)
-		,m_numericParameters(o.m_numericParameters)
-		,m_textualParameters(o.m_textualParameters)
-		,m_featureParameters(o.m_featureParameters)
-		,m_resultAttribute(o.m_resultAttribute){}
-
 	const SummarizerFunctionInterface* function() const			{return m_function;}
 	const std::string& functionName() const					{return m_functionName;}
 	const std::vector<ArithmeticVariant>& numericParameters() const		{return m_numericParameters;}
@@ -98,7 +75,6 @@ public:
 	const std::string& resultAttribute() const				{return m_resultAttribute;}
 
 private:
-	QueryEval* m_qeval;					///< query evaluation program handle
 	const SummarizerFunctionInterface* m_function;		///< summarization function
 	std::string m_functionName;				///< name of the summarization function
 	std::vector<ArithmeticVariant> m_numericParameters;	///< summarization function numeric parameters

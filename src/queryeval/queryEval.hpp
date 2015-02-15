@@ -32,8 +32,8 @@
 #include "strus/resultDocument.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "termConfig.hpp"
-#include "summarizerConfig.hpp"
-#include "weightingConfig.hpp"
+#include "summarizerDef.hpp"
+#include "weightingDef.hpp"
 #include <string>
 #include <vector>
 
@@ -49,6 +49,10 @@ class QueryProcessorInterface;
 class WeightingFunctionInterface;
 /// \brief Forward declaration
 class SummarizerFunctionInterface;
+/// \brief Forward declaration
+class SummarizerConfig;
+/// \brief Forward declaration
+class WeightingConfig;
 
 /// \brief Query evaluation program representation
 class QueryEval
@@ -62,7 +66,7 @@ public:
 		:m_processor(o.m_processor)
 		,m_weightingSets(o.m_weightingSets)
 		,m_selectionSets(o.m_selectionSets)
-		,m_weightingConfig(o.m_weightingConfig)
+		,m_weighting(o.m_weighting)
 		,m_summarizers(o.m_summarizers)
 		,m_terms(o.m_terms)
 	{}
@@ -77,35 +81,33 @@ public:
 	virtual void addRestrictionFeature( const std::string& set_);
 	virtual void addWeightingFeature( const std::string& set_);
 
-	virtual SummarizerConfigInterface* createSummarizerConfig(
+	virtual void addSummarizer(
 			const std::string& resultAttribute,
-			const std::string& functionName);
+			const std::string& functionName,
+			const SummarizerConfig& config);
 
-	virtual WeightingConfigInterface* createWeightingConfig(
-			const std::string& functionName);
+	virtual void setWeighting(
+			const std::string& functionName,
+			const WeightingConfig& config);
 
 	void print( std::ostream& out) const;
 
 
-public:/*WeightingConfig,SummarizerConfig*/
+public:
 	const std::vector<TermConfig>& terms() const			{return m_terms;}
-	const std::vector<SummarizerConfig>& summarizers() const	{return m_summarizers;}
+	const std::vector<SummarizerDef>& summarizers() const		{return m_summarizers;}
 	const std::vector<std::string>& weightingSets() const		{return m_weightingSets;}
 	const std::vector<std::string>& selectionSets() const		{return m_selectionSets;}
 	const std::vector<std::string>& restrictionSets() const		{return m_restrictionSets;}
-	const WeightingConfig& weightingConfig() const			{return m_weightingConfig;}
-
-	void defineTerm( const TermConfig& termConfig);
-	void defineWeighting( const WeightingConfig& weightingConfig_);
-	void defineSummarizer( const SummarizerConfig& summarizerConfig_);
+	const WeightingDef& weighting() const				{return m_weighting;}
 
 private:
 	const QueryProcessorInterface* m_processor;	///< query processor
 	std::vector<std::string> m_weightingSets;	///< posting sets that are used for weighting
 	std::vector<std::string> m_selectionSets;	///< posting sets selecting the documents to match
 	std::vector<std::string> m_restrictionSets;	///< posting sets restricting the documents to match
-	WeightingConfig m_weightingConfig;		///< weighting function configuration
-	std::vector<SummarizerConfig> m_summarizers;	///< list of summarizer configurations
+	WeightingDef m_weighting;			///< weighting function configuration
+	std::vector<SummarizerDef> m_summarizers;	///< list of summarizer configurations
 	std::vector<TermConfig> m_terms;		///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
 };
 

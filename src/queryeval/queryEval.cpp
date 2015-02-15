@@ -30,8 +30,10 @@
 #include "query.hpp"
 #include "keyMap.hpp"
 #include "termConfig.hpp"
-#include "summarizerConfig.hpp"
-#include "weightingConfig.hpp"
+#include "strus/summarizerConfig.hpp"
+#include "summarizerDef.hpp"
+#include "strus/weightingConfig.hpp"
+#include "weightingDef.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/constants.hpp"
@@ -57,7 +59,7 @@ void QueryEval::addTerm(
 		const std::string& type_,
 		const std::string& value_)
 {
-	defineTerm( TermConfig( set_, type_, value_));
+	m_terms.push_back( TermConfig( set_, type_, value_));
 }
 
 void QueryEval::addSelectionFeature( const std::string& set_)
@@ -75,38 +77,25 @@ void QueryEval::addWeightingFeature( const std::string& set_)
 	m_weightingSets.push_back( set_);
 }
 
-SummarizerConfigInterface* QueryEval::createSummarizerConfig(
+void QueryEval::addSummarizer(
 		const std::string& resultAttribute,
-		const std::string& functionName)
+		const std::string& functionName,
+		const SummarizerConfig& config)
 {
-	const SummarizerFunctionInterface* function_ = m_processor->getSummarizerFunction( functionName);
-	return new SummarizerConfig( this, function_, functionName);
+	const SummarizerFunctionInterface*
+		function = m_processor->getSummarizerFunction( functionName);
+
+	m_summarizers.push_back( SummarizerDef( function, functionName, config));
 }
 
-WeightingConfigInterface* QueryEval::createWeightingConfig(
-		const std::string& functionName)
+void QueryEval::setWeighting(
+		const std::string& functionName,
+		const WeightingConfig& config)
 {
-	const WeightingFunctionInterface* function_ = m_processor->getWeightingFunction( functionName);
-	return new WeightingConfig( this, function_, functionName);
-}
+	const WeightingFunctionInterface*
+		function = m_processor->getWeightingFunction( functionName);
 
-void QueryEval::defineTerm( const TermConfig& termConfig)
-{
-	m_terms.push_back( termConfig);
-}
-
-void QueryEval::defineWeighting( const WeightingConfig& weightingConfig_)
-{
-	if (m_weightingConfig.function())
-	{
-		throw std::runtime_error( "more than one weighting function defined");
-	}
-	m_weightingConfig = weightingConfig_;
-}
-
-void QueryEval::defineSummarizer( const SummarizerConfig& sumDef)
-{
-	m_summarizers.push_back( sumDef);
+	m_weighting = WeightingDef( function, functionName, config);
 }
 
 void QueryEval::print( std::ostream& out) const
@@ -116,19 +105,19 @@ void QueryEval::print( std::ostream& out) const
 	{
 		out << "TERM " << ti->set << ": " << ti->type << " '" << ti->value << "';" << std::endl;
 	}
-	if (m_weightingConfig.function())
+	if (m_weighting.function())
 	{
 		out << "EVAL ";
-		out << " " << m_weightingConfig.functionName();
-		if (m_weightingConfig.parameters().size())
+		out << " " << m_weighting.functionName();
+		if (m_weighting.parameters().size())
 		{
 			out << "(";
-			std::size_t ai = 0, ae = m_weightingConfig.parameters().size();
+			std::size_t ai = 0, ae = m_weighting.parameters().size();
 			for(; ai != ae; ++ai)
 			{
 				if (ai) out << ", ";
-				out << m_weightingConfig.function()->numericParameterNames()[ai]
-					<< "=" << m_weightingConfig.parameters()[ai];
+				out << m_weighting.function()->numericParameterNames()[ai]
+					<< "=" << m_weighting.parameters()[ai];
 			}
 			out << ")";
 		}
@@ -154,7 +143,7 @@ void QueryEval::print( std::ostream& out) const
 		}
 		out << ";" << std::endl;
 	}
-	std::vector<SummarizerConfig>::const_iterator
+	std::vector<SummarizerDef>::const_iterator
 		si = m_summarizers.begin(), se = m_summarizers.end();
 	for (; si != se; ++si)
 	{
@@ -176,7 +165,7 @@ void QueryEval::print( std::ostream& out) const
 			if (argidx) out << ", ";
 			out << si->function()->textualParameterNames()[ai] << "=" << si->textualParameters()[ai];
 		}
-		std::vector<SummarizerConfig::Feature>::const_iterator
+		std::vector<SummarizerDef::Feature>::const_iterator
 			fi = si->featureParameters().begin(),
 			fe = si->featureParameters().end();
 		for (int fidx=0; fi != fe; ++fi,++fidx,++argidx)

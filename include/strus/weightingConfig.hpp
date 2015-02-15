@@ -26,42 +26,31 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_CONFIG_INTERFACE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_CONFIG_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
+#define _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
 #include <string>
-#include <vector>
+#include <map>
 
 namespace strus {
 
-/// \brief Forward declaration
-class SummarizerFunctionInterface;
-
-/// \class SummarizerConfigInterface
-/// \brief Interface for the configuration of a query evaluation summarizer
-class SummarizerConfigInterface
+/// \class WeightingConfig
+/// \brief Configuration of a query evaluation weighting function
+class WeightingConfig
 {
 public:
 	/// \brief Destructor
-	virtual ~SummarizerConfigInterface(){}
+	~WeightingConfig(){}
 
-	/// \brief Defines a numeric parameter to pass to the summarizer
+	/// \brief Defines a parameter to pass to the weighting function
 	/// \param[in] name_ name of the parameter
 	/// \param[in] value_ value of the parameter
-	virtual void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)=0;
+	void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
 
-	/// \brief Defines a textual parameter to pass to the summarizer
-	/// \param[in] name_ name of the parameter
-	/// \param[in] value_ value of the parameter
-	virtual void defineTextualParameter( const std::string& name_, const std::string& value_)=0;
+	const std::map<std::string,ArithmeticVariant>& numericParameters() const	{return m_numericParameters;}
 
-	/// \brief References a set of postings to pass as PostingIteratorInterface to the summarizer
-	/// \param[in] class_ name of the feature set class for the summarizer. The class describes for what the feature is used.
-	/// \param[in] set_ feature set name
-	virtual void defineFeatureParameter( const std::string& class_, const std::string& set_)=0;
-	
-	/// \brief Finalizes the summarizer definition
-	virtual void done()=0;
+private:
+	std::map<std::string,ArithmeticVariant> m_numericParameters;
 };
 
 }//namespace
