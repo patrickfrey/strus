@@ -169,7 +169,9 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	{
 		std::vector<BooleanBlock::MergeRange> rangear;
 		Map::const_iterator start = mi;
-		for (; mi != me && mi->first.second != start->first.second; ++mi)
+
+		defineRangeElement( rangear, mi->first.second, mi->second);
+		for (++mi; mi != me && mi->first.second != start->first.second; ++mi)
 		{
 			defineRangeElement( rangear, mi->first.second, mi->second);
 		}
@@ -192,7 +194,9 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	{
 		std::vector<BooleanBlock::MergeRange> rangear;
 		Map::const_iterator start = mi;
-		for (; mi != me && mi->first.second != start->first.second; ++mi)
+
+		defineRangeElement( rangear, mi->first.second, mi->second);
+		for (++mi; mi != me && mi->first.second != start->first.second; ++mi)
 		{
 			defineRangeElement( rangear, mi->first.second, mi->second);
 		}

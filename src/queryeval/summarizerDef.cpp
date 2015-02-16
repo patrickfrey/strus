@@ -42,9 +42,10 @@ static std::size_t countArguments( char const** arg)
 }
 
 SummarizerDef::SummarizerDef(
-		const SummarizerFunctionInterface* function_, const std::string& functionName_, const SummarizerConfig& config)
+		const std::string& resultAttribute_, const SummarizerFunctionInterface* function_, const std::string& functionName_, const SummarizerConfig& config)
 	:m_function(function_)
 	,m_functionName(functionName_)
+	,m_resultAttribute(resultAttribute_)
 {
 	m_numericParameters.resize( countArguments( m_function->numericParameterNames()));
 	m_textualParameters.resize( countArguments( m_function->textualParameterNames()));

@@ -85,7 +85,7 @@ void QueryEval::addSummarizer(
 	const SummarizerFunctionInterface*
 		function = m_processor->getSummarizerFunction( functionName);
 
-	m_summarizers.push_back( SummarizerDef( function, functionName, config));
+	m_summarizers.push_back( SummarizerDef( resultAttribute, function, functionName, config));
 }
 
 void QueryEval::setWeighting(

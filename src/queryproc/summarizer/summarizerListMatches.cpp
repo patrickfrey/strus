@@ -65,7 +65,7 @@ static std::string getMatches(
 		mposet.insert( (*si)->posno());
 	}
 	mposet.insert( itr.posno());
-	std::set<Index>::const_reverse_iterator ci = mposet.rbegin(), ce = mposet.rend();
+	std::set<Index>::const_iterator ci = mposet.begin(), ce = mposet.end();
 	for (int cidx=0; ci != ce; ++ci,++cidx)
 	{
 		if (cidx) rt << ' '; 

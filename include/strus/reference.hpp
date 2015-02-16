@@ -42,14 +42,14 @@ class Reference
 public:
 	/// \brief Default constructor
 	Reference()
-		:m_obj(0),m_refcnt(newRefCnt(0)){}
+		:m_obj(0),m_refcnt(0){}
 	/// \brief Constructor
 	Reference( Object* obj_)
 		:m_obj(0),m_refcnt(0)
 	{
 		try
 		{
-			m_refcnt = newRefCnt(1);
+			m_refcnt = newRefCnt();
 			m_obj = obj_;
 		}
 		catch (const std::bad_alloc&)
@@ -59,7 +59,10 @@ public:
 	}
 	/// \brief Copy constructor
 	Reference( const Reference& o)
-		:m_obj(o.m_obj),m_refcnt(o.m_refcnt){++*m_refcnt;}
+		:m_obj(o.m_obj),m_refcnt(o.m_refcnt)
+	{
+		if (m_refcnt) ++*m_refcnt;
+	}
 
 	/// \brief Destructor
 	~Reference()
@@ -72,20 +75,24 @@ public:
 	{
 		m_obj = o.m_obj;
 		m_refcnt = o.m_refcnt;
-		++*m_refcnt;
+		if (m_refcnt) ++*m_refcnt;
 		return *this;
 	}
 
 	/// \brief Reinitialize the local value of the reference and dispose the old value if not referenced by others
 	void reset( Object* obj_)			
 	{
-		if (*m_refcnt == 1)
+		if (!m_refcnt)
+		{
+			m_refcnt = newRefCnt();
+		}
+		else if (*m_refcnt == 1)
 		{
 			delete m_obj;
 		}
 		else
 		{
-			int* rc = newRefCnt(1);
+			int* rc = newRefCnt();
 			freeRef();
 			m_refcnt = rc;
 		}
@@ -107,19 +114,21 @@ public:
 	Object* get()					{return m_obj;}
 
 private:
-	int* newRefCnt( int initval=0)
+	int* newRefCnt()
 	{
 		int* rt = (int*)std::malloc(sizeof(int));
 		if (!rt) throw std::bad_alloc();
-		*rt = initval;
+		*rt = 1;
 		return rt;
 	}
 	void freeRef()
 	{
-		if (--*m_refcnt == 0)
+		if (m_refcnt && --*m_refcnt == 0)
 		{
 			delete m_obj;
 			std::free( m_refcnt);
+			m_refcnt = 0;
+			m_obj = 0;
 		}
 	}
 

@@ -63,9 +63,9 @@ void ForwardIndexMap::closeCurblocks()
 void ForwardIndexMap::closeForwardIndexDocument( const Index& docno)
 {
 	closeCurblocks();
-	if (m_docno != docno)
+	if (m_docno && m_docno != docno)
 	{
-		throw std::runtime_error( "forward document operations not grouped by document");
+		throw std::runtime_error( "forward index operations not grouped by document");
 	}
 }
 

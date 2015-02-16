@@ -107,9 +107,9 @@ void InvertedIndexMap::definePosinfoPosting(
 	}
 	else
 	{
-		if (m_docno != docno)
+		if (m_docno && m_docno != docno)
 		{
-			throw std::runtime_error( "posinfo not inserted grouped by document (duplicate document inserts in one transaction ?)");
+			throw std::runtime_error( "inverted index operations not grouped by document");
 		}
 		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size()));
 	}

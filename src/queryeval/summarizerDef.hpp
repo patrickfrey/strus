@@ -44,6 +44,7 @@ class SummarizerDef
 {
 public:
 	SummarizerDef(
+			const std::string& resultAttribute_,
 			const SummarizerFunctionInterface* function_,
 			const std::string& functionName_,
 			const SummarizerConfig& config);

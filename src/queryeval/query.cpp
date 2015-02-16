@@ -219,12 +219,14 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		case NullNode: break;
 		case TermNode:
 		{
-			const Term& term = m_terms[ nodeIndex( node)];
+			std::size_t nidx = nodeIndex( node);
+			const Term& term = m_terms[ nidx];
 			rt = m_processor->createTermPostingIterator( term.type, term.value);
 			break;
 		}
 		case ExpressionNode:
-			rt = createExpressionPostingIterator( m_expressions[ nodeIndex( node)]);
+			std::size_t nidx = nodeIndex( node);
+			rt = createExpressionPostingIterator( m_expressions[ nidx]);
 			break;
 	}
 	return rt;
@@ -246,10 +248,6 @@ std::vector<ResultDocument> Query::evaluate()
 	{
 		throw std::runtime_error("cannot evaluate query, no weighting function defined");
 	}
-
-	// [2] Define structures needed for query evaluation:
-	boost::scoped_ptr<AttributeReaderInterface>
-		attributeReader( m_storage->createAttributeReader());
 
 	// [3] Create the posting sets of the query features:
 	std::vector<Reference<PostingIteratorInterface> > postings;

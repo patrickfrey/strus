@@ -96,7 +96,7 @@ public:
 	}
 	static std::size_t nodeIndex( NodeAddress nd)
 	{
-		return (std::size_t)((nd > 0)?(nd-1):(-nd+1));
+		return (std::size_t)((nd > 0)?(nd-1):(-nd-1));
 	}
 	NodeAddress nodeAddress( NodeType type, std::size_t idx)
 	{

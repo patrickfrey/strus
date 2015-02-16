@@ -27,38 +27,39 @@
 --------------------------------------------------------------------
 */
 #include "strus/summarizerConfig.hpp"
+#include "dll_tags.hpp"
 #include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
-void SummarizerConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
+DLL_PUBLIC void SummarizerConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
 {
 	std::string name = boost::algorithm::to_lower_copy( name_);
 	if (m_numericParameters.find( name) != m_numericParameters.end())
 	{
 		throw std::runtime_error( std::string("duplicate definition of summarizer parameter '") + name_ + "'");
-		m_numericParameters[ name] = value_;
 	}
+	m_numericParameters[ name] = value_;
 }
 
-void SummarizerConfig::defineTextualParameter( const std::string& name_, const std::string& value_)
+DLL_PUBLIC void SummarizerConfig::defineTextualParameter( const std::string& name_, const std::string& value_)
 {
 	std::string name = boost::algorithm::to_lower_copy( name_);
 	if (m_textualParameters.find( name) != m_textualParameters.end())
 	{
 		throw std::runtime_error( std::string("duplicate definition of summarizer parameter '") + name_ + "'");
-		m_textualParameters[ name] = value_;
 	}
+	m_textualParameters[ name] = value_;
 }
 
-void SummarizerConfig::defineFeatureParameter( const std::string& class_, const std::string& set_)
+DLL_PUBLIC void SummarizerConfig::defineFeatureParameter( const std::string& class_, const std::string& set_)
 {
 	std::string name = boost::algorithm::to_lower_copy( class_);
 	if (m_featureParameters.find( name) != m_featureParameters.end())
 	{
 		throw std::runtime_error( std::string( "duplicate definition of summarizer feature parameter '") + class_ + "'");
-		m_featureParameters[ name] = set_;
 	}
+	m_featureParameters[ name] = set_;
 }
 
 
