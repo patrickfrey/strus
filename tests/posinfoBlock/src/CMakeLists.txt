@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+include_directories( ${Boost_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/src/storage" "${PROJECT_SOURCE_DIR}/include" )
+link_directories( /usr/local/lib "${PROJECT_SOURCE_DIR}/src/storage")
+
+add_executable( testPosinfoBlock testPosinfoBlock.cpp)
+target_link_libraries( testPosinfoBlock boost_system strus_utils strus_storage_static)
+

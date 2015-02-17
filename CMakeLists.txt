@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+# Project globals:
 project(Strus)
 set(STRUS_MAJOR_VERSION 0)
 set(STRUS_MINOR_VERSION 0)
@@ -27,14 +28,17 @@ endif()
 
 find_package(Boost 1.53.0 COMPONENTS thread system date_time)
 
-set(CMAKE_MODULE_PATH cmake)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 enable_testing()
 
+
+# Subdirectories:
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(include)
   
+# Message:
 MESSAGE("Platform:")
 MESSAGE("  Host: ${CMAKE_HOST_SYSTEM_NAME} ${CMAKE_HOST_SYSTEM_VERSION} ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 MESSAGE("  Canonical: ${INSTALLER_PLATFORM}")
@@ -46,6 +50,18 @@ MESSAGE("Compiler:")
 MESSAGE("  C++ compilation flags: ${CMAKE_CXX_FLAGS}")
 MESSAGE("  C compilation flags: ${CMAKE_C_FLAGS}")
 
+# Install header files:
 install(DIRECTORY include/strus
           DESTINATION include
           FILES_MATCHING PATTERN "*.hpp")
+
+# Uninstall target:
+configure_file(
+    "${CMAKE_MODULE_PATH}/uninstall.cmake.in"
+    "${CMAKE_MODULE_PATH}/uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND ${CMAKE_COMMAND} -P "${CMAKE_MODULE_PATH}/uninstall.cmake")
+
+

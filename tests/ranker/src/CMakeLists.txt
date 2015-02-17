@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+include_directories( ${Boost_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/src/queryeval" "${PROJECT_SOURCE_DIR}/include" )
+link_directories( /usr/local/lib "${PROJECT_SOURCE_DIR}/src/database_leveldb" "${PROJECT_SOURCE_DIR}/src/storage")
+
+add_executable( testRanker testRanker.cpp)
+target_link_libraries( testRanker boost_system strus_utils strus_queryeval_static)
+

@@ -27,23 +27,21 @@
 --------------------------------------------------------------------
 */
 #include "indexPacker.hpp"
-#include "indexPacker.cpp"
 #include "dataBlock.hpp"
-#include "dataBlock.cpp"
 #include "posinfoBlock.hpp"
-#include "posinfoBlock.cpp"
 #include <stdexcept>
 #include <iostream>
+#include <cstring>
 #include <cstdlib>
 #include <limits>
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
 
-static std::vector<Index> randPosinfo()
+static std::vector<strus::Index> randPosinfo()
 {
-	std::vector<Index> rt;
+	std::vector<strus::Index> rt;
 	unsigned int tt=0,nofElements=RANDINT(1,25);
-	Index pp = 0;
+	strus::Index pp = 0;
 	
 	for (; tt<nofElements; ++tt)
 	{
@@ -60,7 +58,7 @@ static void testDataBlockBuild( unsigned int times)
 	
 	for (; tt<times; ++tt)
 	{
-		DataBlock dblk;
+		strus::DataBlock dblk;
 
 		unsigned int ii=0,nofDocs=RANDINT(1,tt+2);
 		for (; ii<nofDocs; ++ii)
@@ -82,12 +80,12 @@ static void testPosinfoBlockBuild( unsigned int times)
 	
 	for (; tt<times; ++tt)
 	{
-		Index dd = 0;
+		strus::Index dd = 0;
 
-		typedef std::map<Index,std::vector<Index> > PosinfoMap;
+		typedef std::map<strus::Index,std::vector<strus::Index> > PosinfoMap;
 		PosinfoMap pmap;
 
-		PosinfoBlock block;
+		strus::PosinfoBlock block;
 		unsigned int ii=0,nofDocs=RANDINT(1,100);
 		for (; ii<nofDocs; ++ii)
 		{

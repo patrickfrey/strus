@@ -54,18 +54,18 @@ link_directories(/usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_
 
 # ------------------------------
 # STORAGE LIBRARY
+# Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # ------------------------------
 add_library(strus_storage SHARED ${libstrus_storage_source_files})
 target_link_libraries (strus_storage boost_system strus_utils strus_database_leveldb)
+add_library(strus_storage_static STATIC ${program_storage_source_files})
 
 # ------------------------------
 # HELPER PROGRAMS
-# The helper program link the storage sources as static library built, because they need to bypass the library interface to do their job:
 # ------------------------------
-add_library(strus_storage_static STATIC ${program_storage_source_files})
-add_executable( strusDumpStorage strusDumpStorage strusDumpStorage.cpp)
+add_executable( strusDumpStorage strusDumpStorage.cpp)
 target_link_libraries (strusDumpStorage boost_system strus_utils strus_database_leveldb strus_storage_static)
-add_executable( strusCheckStorage strusCheckStorage strusCheckStorage.cpp)
+add_executable( strusCheckStorage strusCheckStorage.cpp)
 target_link_libraries (strusCheckStorage boost_system strus_utils strus_database_leveldb strus_storage_static)
 
 
