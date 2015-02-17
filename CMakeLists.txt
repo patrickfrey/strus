@@ -26,16 +26,16 @@ if(WIN32)
 set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} /D_WIN32_WINNT=0x0504")
 endif()
 
-find_package(Boost 1.53.0 COMPONENTS thread system date_time)
+find_package( Boost 1.53.0 COMPONENTS thread system date_time )
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
+set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON )
 
 enable_testing()
 
 # Subdirectories:
 add_subdirectory(src)
 add_subdirectory(tests)
-add_subdirectory(include)
   
 # Message:
 MESSAGE("Platform:")
@@ -63,4 +63,9 @@ configure_file(
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P "${CMAKE_MODULE_PATH}/uninstall.cmake")
 
+# Packaging
+CPACK_PACKAGE_NAME strus
+CPACK_PACKAGE_VERSION 0.0.1
+CPACK_PACKAGE_DIRECTORY pkg
+CPACK_PACKAGE_VENDOR strus
 

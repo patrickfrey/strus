@@ -1,1 +1,1 @@
-make; sudo make install
+cmake CMakeLists.txt; make; sudo make install

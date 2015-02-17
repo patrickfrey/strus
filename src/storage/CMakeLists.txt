@@ -57,7 +57,7 @@ link_directories(/usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # ------------------------------
 add_library(strus_storage SHARED ${libstrus_storage_source_files})
-target_link_libraries (strus_storage boost_system strus_utils strus_database_leveldb)
+target_link_libraries( strus_storage boost_system strus_utils strus_database_leveldb)
 add_library(strus_storage_static STATIC ${program_storage_source_files})
 
 # ------------------------------

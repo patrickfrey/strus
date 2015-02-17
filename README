@@ -16,11 +16,11 @@ types of operations:
 The architecture defines three components that are implemented as libraries.
 
   |--------------------|
-  |     query eval     |  Query evaluation: Interpretes the query string
+  |     queryeval      |  Query evaluation: Interpretes the query
   |                    |  and uses the operators defined in the query
-  |                    |  processor to execute the query
+  |                    |  processor for its execution.
   |--------------------|
-  |     query proc     |  Query processor: Defines the set operations
+  |     queryproc      |  Query processor: Defines the set operations
   |                    |  on feature occurrencies, the weighting functions
   |                    |  and the summarizers to augment the results.
   |--------------------|
