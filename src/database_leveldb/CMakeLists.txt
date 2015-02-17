@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+# --------------------------------------
+# SOURCES AND INCLUDES
+# --------------------------------------
+set(libstrus_database_leveldb_source_files
+   database.cpp
+   databaseCursor.cpp
+   databaseTransaction.cpp
+   libstrus_database_leveldb.cpp
+)
+
+include_directories( ${Boost_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
+link_directories(/usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_DIR}/database_leveldb")
+
+
+# -------------------------------------------
+# DATABASE LIBRARY
+# -------------------------------------------
+add_library(strus_database_leveldb SHARED ${libstrus_database_leveldb_source_files})
+target_link_libraries (strus_database_leveldb boost_system strus_utils snappy leveldb)
+
+
+# ------------------------------
+# INSTALLATION
+# ------------------------------
+install( TARGETS strus_database_leveldb
+           LIBRARY DESTINATION lib/strus )
+

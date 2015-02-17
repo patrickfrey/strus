@@ -28,7 +28,7 @@
 */
 #include "strus/private/configParser.hpp"
 #include "strus/index.hpp"
-#include "dll_tags.hpp"
+#include "private/dll_tags.hpp"
 #include <map>
 #include <cstring>
 #include <stdexcept>

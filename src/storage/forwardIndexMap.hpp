@@ -31,7 +31,7 @@
 #include "strus/index.hpp"
 #include "forwardIndexBlock.hpp"
 #include "blockKey.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include <vector>
 #include <map>
 

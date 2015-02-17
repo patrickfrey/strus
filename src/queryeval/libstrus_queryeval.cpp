@@ -30,7 +30,7 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageInterface.hpp"
 #include "queryEval.hpp"
-#include "dll_tags.hpp"
+#include "private/dll_tags.hpp"
 #include <map>
 #include <set>
 #include <boost/scoped_array.hpp>

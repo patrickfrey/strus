@@ -30,7 +30,7 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/private/configParser.hpp"
 #include "database.hpp"
-#include "dll_tags.hpp"
+#include "private/dll_tags.hpp"
 #include <leveldb/db.h>
 
 using namespace strus;

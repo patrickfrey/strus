@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "strus/private/fileio.hpp"
-#include "dll_tags.hpp"
+#include "private/dll_tags.hpp"
 #include <cstdio>
 #include <cerrno>
 #include <dirent.h>

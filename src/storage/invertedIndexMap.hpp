@@ -35,7 +35,7 @@
 #include "documentFrequencyMap.hpp"
 #include "databaseAdapter.hpp"
 #include "blockKey.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include <vector>
 #include <iostream>
 

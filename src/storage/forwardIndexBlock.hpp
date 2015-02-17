@@ -29,7 +29,7 @@
 #ifndef _STRUS_LVDB_FORWARD_INDEX_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_FORWARD_INDEX_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include <string>
 #include <map>
 

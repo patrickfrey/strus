@@ -26,16 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#include "storage.hpp"
-#include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "databaseKey.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
-#include "indexPacker.hpp"
-#include "metaDataReader.hpp"
-#include "metaDataBlock.hpp"
-#include "metaDataDescription.hpp"
 #include "extractKeyValueData.hpp"
 #include "strus/private/cmdLineOpt.hpp"
 #include <iostream>
@@ -292,10 +286,6 @@ int main( int argc, const char* argv[])
 					std::cerr,
 					12, strus::getDatabaseConfigDescription_leveldb(
 						strus::CmdCreateDatabaseClient));
-		strus::printIndentMultilineString(
-					std::cerr, 12,
-					strus::getStorageConfigDescription(
-						strus::CmdCreateStorageClient));
 		std::cerr << "<what>    : optional name of entries to dump:" << std::endl;
 		std::cerr << "            termtype  :term type definitions" << std::endl;
 		std::cerr << "            termvalue :term value definitions" << std::endl;

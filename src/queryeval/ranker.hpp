@@ -30,7 +30,7 @@
 #define _STRUS_QUERYEVAL_RANKER_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/weightedDocument.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include <set>
 #include <vector>
 #include <cstring>

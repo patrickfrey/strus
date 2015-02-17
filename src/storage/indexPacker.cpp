@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "indexPacker.hpp"
-#include "bitOperations.hpp"
+#include "private/bitOperations.hpp"
 #include <map>
 #include <limits>
 #include <cmath>

@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "dll_tags.hpp"
+#include "private/dll_tags.hpp"
 #include "strus/private/cmdLineOpt.hpp"
 #include <iostream>
 #include <string>

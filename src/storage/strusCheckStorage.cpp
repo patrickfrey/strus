@@ -26,17 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
-#include "storage.hpp"
-#include "strus/reference.hpp"
 #include "databaseKey.hpp"
-#include "indexPacker.hpp"
-#include "metaDataReader.hpp"
-#include "metaDataDescription.hpp"
-#include "metaDataBlock.hpp"
 #include "extractKeyValueData.hpp"
 #include "strus/private/cmdLineOpt.hpp"
 #include <iostream>
@@ -233,10 +226,6 @@ int main( int argc, const char* argv[])
 					std::cerr,
 					12, strus::getDatabaseConfigDescription_leveldb(
 						strus::CmdCreateDatabaseClient));
-		strus::printIndentMultilineString(
-					std::cerr, 12, 
-					strus::getStorageConfigDescription(
-						strus::CmdCreateStorageClient));
 		return 0;
 	}
 	try

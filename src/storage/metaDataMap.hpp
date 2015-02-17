@@ -31,7 +31,7 @@
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <cstdlib>
 #include <vector>

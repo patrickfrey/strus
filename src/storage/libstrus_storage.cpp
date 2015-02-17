@@ -37,7 +37,7 @@
 #include "keyMap.hpp"
 #include "indexPacker.hpp"
 #include "storage.hpp"
-#include "dll_tags.hpp"
+#include "private/dll_tags.hpp"
 #include <string>
 #include <vector>
 #include <map>

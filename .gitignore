@@ -24,6 +24,16 @@ setenv.sh
 # Generated test data (cleaned with make clean)
 tests/randoc/data/
 
+# CMake generated files
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+CMakeLists.txt.user
+CTestTestfile.cmake.user
+
 # Compiled Programs
 tests/randoc/src/testRandomCollection
 tests/program/src/parseQueryEvalProgramTest
@@ -34,3 +44,4 @@ tests/metaDataRestrictions/src/testMetaDataRestrictions
 tests/ranker/src/testRanker
 src/storage/strusCheckStorage
 src/storage/strusDumpStorage
+

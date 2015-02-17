@@ -30,7 +30,7 @@
 #define _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "booleanBlock.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include "blockKey.hpp"
 #include <cstdlib>
 

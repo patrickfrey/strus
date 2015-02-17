@@ -29,7 +29,7 @@
 #ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
 #define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include <cstdlib>
 #include <map>
 

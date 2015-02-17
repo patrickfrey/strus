@@ -32,7 +32,7 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "bitOperations.hpp"
+#include "private/bitOperations.hpp"
 #include <vector>
 
 namespace strus

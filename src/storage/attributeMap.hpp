@@ -30,7 +30,7 @@
 #define _STRUS_LVDB_ATTRIBUTE_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "blockKey.hpp"
-#include "localStructAllocator.hpp"
+#include "private/localStructAllocator.hpp"
 #include <vector>
 #include <map>
 

@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "strus/summarizerConfig.hpp"
-#include "dll_tags.hpp"
+#include "private/dll_tags.hpp"
 #include <boost/algorithm/string.hpp>
 
 using namespace strus;
