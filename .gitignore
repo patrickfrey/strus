@@ -36,6 +36,8 @@ CTestTestfile.cmake.user
 cmake/uninstall.cmake
 DartConfiguration.tcl
 Testing/
+cmake/CPackSourceConfig.cmake
+cmake/CPackConfig.cmake
 
 # Compiled Programs
 tests/randoc/src/testRandomCollection
