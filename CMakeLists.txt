@@ -64,8 +64,16 @@ add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P "${CMAKE_MODULE_PATH}/uninstall.cmake")
 
 # Packaging
-CPACK_PACKAGE_NAME strus
-CPACK_PACKAGE_VERSION 0.0.1
-CPACK_PACKAGE_DIRECTORY pkg
-CPACK_PACKAGE_VENDOR strus
-
+project (strus)
+set( CPACK_PACKAGE_VERSION "0.0.1" )
+set( CPACK_PACKAGE_DIRECTORY /home/patrick/tmp )
+set( CPACK_GENERATOR "RPM" )
+set( CPACK_PACKAGE_NAME "strus" )
+set( CPACK_PACKAGE_RELEASE 1 )
+set( CPACK_PACKAGE_CONTACT "Patrick Frey" )
+set( CPACK_PACKAGE_VENDOR "project-strus.net" )
+set( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+set( CPACK_RPM_PACKAGE_SUMMARY "Library implementing the storage of a text search engine" )
+set( CPACK_RPM_CHANGELOG_FILE "pkg/CHANGELOG" )
+set( CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}" )
+include( CPack )
