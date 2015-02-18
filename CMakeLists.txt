@@ -66,6 +66,7 @@ configure_file(
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P "${CMAKE_MODULE_PATH}/uninstall.cmake")
 
+
 # Make distclean:
 IF (UNIX)
   ADD_CUSTOM_TARGET (distclean @echo cleaning for source distribution)

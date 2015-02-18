@@ -17,6 +17,9 @@
 # Dependency files
 *.d
 
+# Packaging directory
+pkg/
+
 # Helper scripts
 setenv.sh
 
@@ -35,6 +38,8 @@ CTestTestfile.cmake.user
 cmake/uninstall.cmake
 DartConfiguration.tcl
 Testing/
+CPackConfig.cmake
+CPackSourceConfig.cmake
 
 # Compiled Programs
 tests/randoc/src/testRandomCollection
