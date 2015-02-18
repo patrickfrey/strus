@@ -26,6 +26,13 @@ include_directories(
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # --------------------------------
 add_library( strus_queryeval SHARED ${libstrus_queryeval_source_files})
+set_target_properties(
+    strus_queryeval
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
 add_library( strus_queryeval_static STATIC ${libstrus_queryeval_source_files})
 
 

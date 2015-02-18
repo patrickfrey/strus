@@ -33,6 +33,13 @@ include_directories(
 # QUERY PROCESSOR LIBRARY
 # -------------------------------------------
 add_library(strus_queryproc SHARED ${libstrus_queryproc_source_files})
+set_target_properties(
+    strus_queryproc
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
 
 
 # ------------------------------

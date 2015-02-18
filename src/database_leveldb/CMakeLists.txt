@@ -19,7 +19,13 @@ link_directories(/usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_
 # -------------------------------------------
 add_library(strus_database_leveldb SHARED ${libstrus_database_leveldb_source_files})
 target_link_libraries (strus_database_leveldb boost_system strus_utils snappy leveldb)
-
+set_target_properties(
+    strus_database_leveldb
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
 
 # ------------------------------
 # INSTALLATION

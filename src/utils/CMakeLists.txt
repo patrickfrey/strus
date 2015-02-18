@@ -22,6 +22,13 @@ include_directories(
 # Library with some helper functions used by strus libraries and programs but not part of the public interface
 # -------------------------------------------
 add_library(strus_utils SHARED ${libstrus_utils_source_files})
+set_target_properties(
+    strus_utils
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
 
 
 # ------------------------------

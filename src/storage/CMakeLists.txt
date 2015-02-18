@@ -59,6 +59,13 @@ link_directories(/usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_
 add_library(strus_storage SHARED ${libstrus_storage_source_files})
 target_link_libraries( strus_storage boost_system strus_utils strus_database_leveldb)
 add_library(strus_storage_static STATIC ${program_storage_source_files})
+set_target_properties(
+    strus_storage
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
 
 # ------------------------------
 # HELPER PROGRAMS
