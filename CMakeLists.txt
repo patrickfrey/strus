@@ -63,7 +63,8 @@ configure_file(
 add_custom_target(uninstall
     COMMAND ${CMAKE_COMMAND} -P "${CMAKE_MODULE_PATH}/uninstall.cmake")
 
-# Packaging
+
+# Packaging (make package)
 project (strus)
 set( CPACK_PACKAGE_VERSION "0.0.1" )
 set( CPACK_PACKAGE_DIRECTORY /home/patrick/tmp )
@@ -81,6 +82,6 @@ set( CPACK_PACKAGE_CONTACT "PatrickFrey@project-strus.net" )
 set( CPACK_PACKAGE_VENDOR "project-strus.net" )
 set( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
 set( CPACK_RPM_PACKAGE_SUMMARY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}" )
-set( CPACK_RPM_CHANGELOG_FILE "${PROJECT_SOURCE_DIR}/pkg/CHANGELOG" )
+set( CPACK_RPM_CHANGELOG_FILE "${PROJECT_SOURCE_DIR}/CHANGELOG" )
 set( CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}" )
 include( CPack )
