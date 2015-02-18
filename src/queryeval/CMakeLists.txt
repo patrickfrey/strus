@@ -4,15 +4,15 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set(libstrus_queryeval_source_files
-summarizerConfig.cpp
-weightingConfig.cpp
-accumulator.cpp
-metaDataRestriction.cpp
-weightingDef.cpp
-queryEval.cpp
-query.cpp
-summarizerDef.cpp
-libstrus_queryeval.cpp
+	summarizerConfig.cpp
+	weightingConfig.cpp
+	accumulator.cpp
+	metaDataRestriction.cpp
+	weightingDef.cpp
+	queryEval.cpp
+	query.cpp
+	summarizerDef.cpp
+	libstrus_queryeval.cpp
 )
 
 include_directories(
