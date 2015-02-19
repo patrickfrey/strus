@@ -33,6 +33,7 @@ include_directories(
 # QUERY PROCESSOR LIBRARY
 # -------------------------------------------
 add_library(strus_queryproc SHARED ${libstrus_queryproc_source_files})
+target_link_libraries( strus_queryproc strus_utils )
 set_target_properties(
     strus_queryproc
     PROPERTIES

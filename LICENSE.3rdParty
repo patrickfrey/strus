@@ -6,7 +6,6 @@ Table of Contents
 
   boost
   LevelDB
-  fastapprox
 
 boost
 -----
@@ -16,8 +15,5 @@ LevelDB
 -------
    New BSD License
 
-fastapprox (code.google.com)
-----------------------------
-   New BSD License
 
 

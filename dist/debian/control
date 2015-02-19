@@ -1,0 +1,24 @@
+Source: strus
+Section: libs
+Priority: optional
+Maintainer: Patrick Frey <patrickfrey@project-strus.net>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.4
+Homepage: http://project-strus.net
+Package: strus
+Architecture: all
+Depends: ${misc:Depends}
+Installed-Size: 27493
+Built-Using: gcc-4.8 (= 4.8.2-19)
+Description: Library implementing the storage of a text search engine
+ Core library for a text search engine implementing the storage and
+ the query evaluation. 
+ Able to evaluate structured queries on unstructured text as well
+ as implenting classical information retrieval.
+ Independent from storage impementation. Current storage implementation
+ is based on LevelDB.
+ Strus defines information retrieval as evaluation of a query based on 3
+ types of operations:
+  * Fetching and joining of feature occurrencies (document/position number)
+  * Weighting of documents based on the feature occurrencies
+  * Summarization as extraction of content based on the query matches
