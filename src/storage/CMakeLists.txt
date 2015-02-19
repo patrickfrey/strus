@@ -49,8 +49,8 @@ ${libstrus_storage_source_files}
 extractKeyValueData.cpp
 )
 
-include_directories( ${Boost_INCLUDE_DIRS}  "${PROJECT_SOURCE_DIR}/include")
-link_directories(/usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_DIR}/database_leveldb")
+include_directories( "${Boost_INCLUDE_DIRS}"  "${PROJECT_SOURCE_DIR}/include")
+link_directories( /usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_DIR}/database_leveldb")
 
 # ------------------------------
 # STORAGE LIBRARY

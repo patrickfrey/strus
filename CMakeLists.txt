@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # Project globals:
-project(Strus)
+project( Strus )
 set( STRUS_MAJOR_VERSION 0 )
 set( STRUS_MINOR_VERSION 0 )
 set( STRUS_PATCH_VERSION 1 )
@@ -11,7 +11,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 set( CMAKE_INSTALL_PREFIX /usr/local )
 set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE ) 
 set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/strus" )
-set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
+set( CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE )
 endif()
 
 include(cmake/LinuxDistribution.cmake)
@@ -22,7 +22,7 @@ set_property(GLOBAL PROPERTY rule_launch_link ccache)
 if(CMAKE_COMPILER_IS_GNUCXX)
 set( STRUS_OPTIMIZATION_LEVEL "0" )
 set( CMAKE_CXX_FLAGS "-std=c++98  -Wall -pedantic -g -Wfatal-errors -Werror -fvisibility=hidden -fPIC -O${STRUS_OPTIMIZATION_LEVEL}" )
-set( CMAKE_C_FLAGS "-std=c99 -Wall -pedantic -Wfatal-errors -Werror -fvisibility=hidden -fPIC -O${STRUS_OPTIMIZATION_LEVEL}" )
+set( CMAKE_C_FLAGS "-std=c99 -Wall -pedantic -Wfatal-errors -Werror -fPIC -O${STRUS_OPTIMIZATION_LEVEL}" )
 endif()
 
 if(WIN32)
@@ -38,8 +38,8 @@ configure_file( "${PROJECT_SOURCE_DIR}/include/strus/version.hpp.in"  "${PROJECT
 enable_testing()
 
 # Subdirectories:
-add_subdirectory(src)
-add_subdirectory(tests)
+add_subdirectory( src )
+add_subdirectory( tests )
   
 # Message:
 MESSAGE("Platform:")
@@ -107,7 +107,7 @@ set( CPACK_INSTALL_CMAKE_PROJECTS "${PROJECT_SOURCE_DIR};${PROJECT_NAME};ALL;/" 
 set( CPACK_GENERATOR "RPM;DEB" )
 string( TOLOWER "${PROJECT_NAME}" CPACK_PACKAGE_NAME)
 set( CPACK_PACKAGE_RELEASE 1 )
-set( CPACK_PACKAGE_LICENSE "GPLv3" )
+set( CPACK_PACKAGE_LICENSE "GPL3" )
 set( CPACK_PACKAGE_GROUP "Development/Libraries/C++" )
 set( CPACK_PACKAGE_CONTACT "Patrick Frey <patrickfrey@project-strus.net>" )
 set( CPACK_PACKAGE_VENDOR "project-strus.net" )
@@ -115,12 +115,12 @@ set( CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${C
 set( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
 set( CPACK_RPM_PACKAGE_SUMMARY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}" )
 set( CPACK_RPM_CHANGELOG_FILE "${PROJECT_SOURCE_DIR}/CHANGELOG" )
-set( CPACK_RPM_PACKAGE_LICENSE "GPLv3" )
+set( CPACK_RPM_PACKAGE_LICENSE "GPL3" )
 set( CPACK_RPM_PACKAGE_GROUP "Development/Libraries/C++" )
 set( CPACK_RPM_PACKAGE_DEPENDS  "cmake >= 2.8" )
 set( CPACK_RPM_PACKAGE_REQUIRES  "libboost_system >= 1.53, libleveldb >= 1, libsnappy >= 1, libstdc++ >= 6, libc >= 6, libm >= 6, libpthread >= 0" )
 set( CPACK_RPM_PACKAGE_URL "project-strus.net" )
 set( CPACK_DEBIAN_PACKAGE_MAINTAINER "Patrick Frey <patrickfrey@project-strus.net>" )
-set( CPACK_DEBIAN_PACKAGE_LICENSE "GPLv3" )
+set( CPACK_DEBIAN_PACKAGE_LICENSE "GPL3" )
 include(CPack)
 ENDIF (UNIX)
