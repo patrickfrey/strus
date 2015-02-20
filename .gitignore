@@ -20,6 +20,9 @@
 # Packaging directory
 pkg/
 
+# Valgring suppression files
+*.sup
+
 # Helper scripts
 setenv.sh
 
