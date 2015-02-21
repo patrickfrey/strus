@@ -35,21 +35,22 @@
 #include "indexPacker.hpp"
 #include <sstream>
 #include <iostream>
+#include <limits>
 
 using namespace strus;
 
 InvertedIndexMap::InvertedIndexMap( DatabaseInterface* database_)
 	:m_dfmap(database_),m_database(database_),m_docno(0)
 {
-	m_strings.push_back( '\0');
+	m_posinfo.push_back( 0);
 }
 
 void InvertedIndexMap::clear()
 {
 	m_dfmap.clear();
 	m_map.clear();
-	m_strings.clear();
-	m_strings.push_back('\0');
+	m_posinfo.clear();
+	m_posinfo.push_back( 0);
 	m_invtermmap.clear();
 	m_invterms.clear();
 	m_docno = 0;
@@ -76,15 +77,22 @@ void InvertedIndexMap::definePosinfoPosting(
 	{
 		if (pos.size())
 		{
-			m_map[ key] = m_strings.size();
+			if (pos.size() > std::numeric_limits<PosinfoBlock::PositionType>::max())
+			{
+				throw std::runtime_error( "size of document out of range (max 65535)");
+			}
+			m_map[ key] = m_posinfo.size();
 
-			packIndex( m_strings, pos.size()); //... ff
+			m_posinfo.push_back( (unsigned short)pos.size());	//... ff
 			std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
 			for (; pi != pe; ++pi)
 			{
-				packIndex( m_strings, *pi);
+				if (*pi > std::numeric_limits<PosinfoBlock::PositionType>::max())
+				{
+					throw std::runtime_error( "token position out of range (max 65535)");
+				}
+				m_posinfo.push_back( (unsigned short)*pi);
 			}
-			m_strings.push_back( '\0');
 		}
 		else
 		{
@@ -236,29 +244,26 @@ void InvertedIndexMap::getWriteBatch(
 		for (; ee != me && ee->first.termkey == ei->first.termkey; ++ee){}
 		mi = ee;
 
-		Map::const_iterator lasti = ee;
-		Index lastInsertBlockId = (--lasti)->first.docno;
-
 		BlockKey blkkey( ei->first.termkey);
 		Index typeno = blkkey.elem(1);
 		Index termno = blkkey.elem(2);
 		DatabaseAdapter_PosinfoBlock_Cursor dbadapter_posinfo( m_database, typeno, termno);
 
-		PosinfoBlock newposblk;
+		PosinfoBlockBuilder newposblk;
 		std::vector<BooleanBlock::MergeRange> docrangear;
 
 		// [1] Merge new elements with existing upper bound blocks:
-		mergeNewPosElements( dbadapter_posinfo, ei, ee, newposblk, docrangear, transaction);
+		mergeNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
 
 		// [2] Write the new blocks that could not be merged into existing ones:
-		insertNewPosElements( dbadapter_posinfo, ei, ee, newposblk, lastInsertBlockId, docrangear, transaction);
+		insertNewPosElements( dbadapter_posinfo, transaction, ei, ee, newposblk, docrangear);
 
 		BooleanBlock newdocblk;
 
 		std::vector<BooleanBlock::MergeRange>::iterator
 			di = docrangear.begin(),
 			de = docrangear.end();
-		lastInsertBlockId = docrangear.back().to;
+		Index lastInsertBlockId = docrangear.back().to;
 
 		// [3] Update document list of the term (boolean block) in the database:
 		DatabaseAdapter_DocListBlock_Cursor dbadapter_doclist( m_database, typeno, termno);
@@ -301,55 +306,52 @@ void InvertedIndexMap::defineDocnoRangeElement(
 
 void InvertedIndexMap::insertNewPosElements(
 		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+		DatabaseTransactionInterface* transaction,
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
-		PosinfoBlock& newposblk,
-		const Index& lastInsertBlockId,
-		std::vector<BooleanBlock::MergeRange>& docrangear,
-		DatabaseTransactionInterface* transaction)
+		PosinfoBlockBuilder& newposblk,
+		std::vector<BooleanBlock::MergeRange>& docrangear)
 {
-	while (ei != ee || newposblk.size())
+	while (ei != ee)
 	{
-		Index blkid = newposblk.id();
-
-		Map::const_iterator bi = ei, be = ei;
-		std::size_t blksize = 0;
-		for (; be != ee && blksize < PosinfoBlock::MaxBlockSize; ++be)
+		if (ei->second)
 		{
-			blksize += std::strlen( m_strings.c_str() + be->second) + 1;
-			blkid = be->first.docno;
-		}
-		ei = be;
-
-		newposblk.setId( blkid);
-		for (; bi != be; ++bi)
-		{
-			if (bi->second)
+			// Define posinfo block elements (PosinfoBlock):
+			if (newposblk.fitsInto( m_posinfo[ ei->second] + 1) || newposblk.empty())
 			{
 				// Define docno list block elements (BooleanBlock):
-				defineDocnoRangeElement( docrangear, bi->first.docno, true);
+				defineDocnoRangeElement( docrangear, ei->first.docno, true);
 
 				// Define posinfo block elements (PosinfoBlock):
-				newposblk.append( bi->first.docno, m_strings.c_str() + bi->second);
+				newposblk.append( ei->first.docno, m_posinfo.data() + ei->second);
+				++ei;
 			}
 			else
 			{
-				// Delete docno list block element (BooleanBlock):
-				defineDocnoRangeElement( docrangear, bi->first.docno, false);
+				dbadapter_posinfo.store( transaction, newposblk.createBlock());
+				newposblk.clear();
 			}
 		}
-		dbadapter_posinfo.store( transaction, newposblk);
+		else
+		{
+			// Delete docno list block element (BooleanBlock):
+			defineDocnoRangeElement( docrangear, ei->first.docno, false);
+		}
+	}
+	if (!newposblk.empty())
+	{
+		dbadapter_posinfo.store( transaction, newposblk.createBlock());
 		newposblk.clear();
 	}
 }
 
 void InvertedIndexMap::mergeNewPosElements(
 		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+		DatabaseTransactionInterface* transaction,
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
-		PosinfoBlock& newposblk,
-		std::vector<BooleanBlock::MergeRange>& docrangear,
-		DatabaseTransactionInterface* transaction)
+		PosinfoBlockBuilder& newposblk,
+		std::vector<BooleanBlock::MergeRange>& docrangear)
 {
 	PosinfoBlock blk;
 	while (ei != ee && dbadapter_posinfo.loadUpperBound( ei->first.docno, blk))
@@ -362,11 +364,11 @@ void InvertedIndexMap::mergeNewPosElements(
 			defineDocnoRangeElement( docrangear, ei->first.docno, ei->second?true:false);
 		}
 
-		mergePosBlock( newposblk_start, ei, blk, newposblk);
+		mergePosBlock( dbadapter_posinfo, transaction, newposblk_start, ei, blk, newposblk);
 		if (dbadapter_posinfo.loadNext( blk))
 		{
 			// ... is not the last block, so we store it
-			dbadapter_posinfo.store( transaction, newposblk);
+			dbadapter_posinfo.store( transaction, newposblk.createBlock());
 			newposblk.clear();
 		}
 		else
@@ -374,12 +376,13 @@ void InvertedIndexMap::mergeNewPosElements(
 			if (newposblk.full())
 			{
 				// ... it is the last block, but full
-				dbadapter_posinfo.store( transaction, newposblk);
+				dbadapter_posinfo.store( transaction, newposblk.createBlock());
 				newposblk.clear();
 			}
 			else
 			{
-				dbadapter_posinfo.remove( transaction, newposblk.id());
+				dbadapter_posinfo.remove( transaction, blk.id());
+				newposblk.setId(0);
 			}
 			break;
 		}
@@ -390,23 +393,25 @@ void InvertedIndexMap::mergeNewPosElements(
 		// block and dispose the last block:
 		if (ei != ee && dbadapter_posinfo.loadLast( blk))
 		{
-			newposblk.initcopy( blk);
+			newposblk = PosinfoBlockBuilder( blk);
 			dbadapter_posinfo.remove( transaction, blk.id());
+			newposblk.setId(0);
 		}
 	}
 }
 
 void InvertedIndexMap::mergePosBlock( 
+		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+		DatabaseTransactionInterface* transaction,
 		Map::const_iterator ei,
 		const Map::const_iterator& ee,
 		const PosinfoBlock& oldblk,
-		PosinfoBlock& newblk)
+		PosinfoBlockBuilder& newblk)
 {
 	newblk.setId( oldblk.id());
+	PosinfoBlock::Cursor blkcursor;
 
-	char const* old_blkptr = oldblk.begin();
-	Index old_docno = oldblk.docno_at( old_blkptr);
-
+	Index old_docno = oldblk.firstDoc( blkcursor);
 	while (ei != ee && old_docno)
 	{
 		if (ei->first.docno <= old_docno)
@@ -414,25 +419,26 @@ void InvertedIndexMap::mergePosBlock(
 			if (ei->second)
 			{
 				//... append only if not empty (empty => delete)
-				newblk.append( ei->first.docno, m_strings.c_str() + ei->second);
+				if (!newblk.fitsInto( m_posinfo[ ei->second]))
+				{
+					newblk.setId(0);
+					dbadapter_posinfo.store( transaction, newblk.createBlock());
+					newblk.clear();
+					newblk.setId( oldblk.id());
+				}
+				newblk.append( ei->first.docno, m_posinfo.data() + ei->second);
 			}
 			if (ei->first.docno == old_docno)
 			{
 				//... defined twice -> prefer new entry and ignore old
-				old_blkptr = oldblk.nextDoc( old_blkptr);
-				old_docno = oldblk.docno_at( old_blkptr);
+				old_docno = oldblk.nextDoc( blkcursor);
 			}
 			++ei;
 		}
 		else
 		{
-			if (!oldblk.empty_at( old_blkptr))
-			{
-				//... append only if not empty (empty => delete)
-				newblk.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
-			}
-			old_blkptr = oldblk.nextDoc( old_blkptr);
-			old_docno = oldblk.docno_at( old_blkptr);
+			newblk.append( old_docno, oldblk.posinfo_at( blkcursor));
+			old_docno = oldblk.nextDoc( blkcursor);
 		}
 	}
 	while (ei != ee)
@@ -440,19 +446,28 @@ void InvertedIndexMap::mergePosBlock(
 		if (ei->second)
 		{
 			//... append only if not empty (empty => delete)
-			newblk.append( ei->first.docno, m_strings.c_str() + ei->second);
+			if (!newblk.fitsInto( m_posinfo[ ei->second]))
+			{
+				newblk.setId(0);
+				dbadapter_posinfo.store( transaction, newblk.createBlock());
+				newblk.clear();
+				newblk.setId( oldblk.id());
+			}
+			newblk.append( ei->first.docno, m_posinfo.data() + ei->second);
 		}
 		++ei;
 	}
 	while (old_docno)
 	{
-		if (!oldblk.empty_at( old_blkptr))
+		if (!newblk.fitsInto( oldblk.frequency_at( blkcursor)))
 		{
-			//... append only if not empty (empty => delete)
-			newblk.appendPositionsBlock( old_blkptr, oldblk.end_at( old_blkptr));
+			newblk.setId(0);
+			dbadapter_posinfo.store( transaction, newblk.createBlock());
+			newblk.clear();
+			newblk.setId( oldblk.id());
 		}
-		old_blkptr = oldblk.nextDoc( old_blkptr);
-		old_docno = oldblk.docno_at( old_blkptr);
+		newblk.append( old_docno, oldblk.posinfo_at( blkcursor));
+		old_docno = oldblk.nextDoc( blkcursor);
 	}
 }
 

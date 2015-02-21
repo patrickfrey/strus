@@ -1,4 +1,6 @@
 implement information extraction: variables attached to subexpressions. In the queryeval for every match collect the docnos of the subexpression variables and attach them to the list of match postings of this variable. Then create a postingIterator on them that can be passed to a summarizer
 reimplementation of the posinfo and of the boolean block
 strusModule project
+Dictionary Project for similarity search 
 operation 'in_annotation' that makes implements skipPos as skipPos/skipPosAnnotation, skipPosAnnotation( Index, Index), isAnnotation(): posinfo block mit einem zweiten level für die posinfo der annotationen, der erste level ist mit dem content synchronisiert, die zweite für strukturierte suche in annotationen, start/end marker für annotationen oder level 2 posinfo mit harten grenzen ohne übergänge -- denken
+flag set as integer instead of single boolean parameter (e.g. useLruCache) makes interface more stable (ABI change instead of API change for adding new flag)

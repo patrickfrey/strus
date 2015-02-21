@@ -391,22 +391,21 @@ PosinfoBlockData::PosinfoBlockData( const strus::DatabaseCursorInterface::Slice&
 		throw std::runtime_error( "unexpected extra bytes at end of term index key");
 	}
 	PosinfoBlock blk( docno, vi, ve-vi);
-	char const* itr = blk.begin();
-	char const* end = blk.end();
+	PosinfoBlock::Cursor cursor;
+	Index dn = blk.firstDoc( cursor);
 
-	while (itr != end)
+	while (dn)
 	{
-		Index docno_elem = blk.docno_at( itr);
-		std::size_t ff = (std::size_t)blk.frequency_at( itr);
-		if (docno_elem > docno)
+		unsigned int ff = (std::size_t)blk.frequency_at( cursor);
+		if (dn > docno)
 		{
 			throw std::runtime_error( "posinfo element docno bigger than upper bound docno");
 		}
-		if (posinfo.size() && docno_elem <= posinfo.back().docno)
+		if (posinfo.size() && dn <= posinfo.back().docno)
 		{
 			throw std::runtime_error( "elements in posinfo array of docno not not strictly ascending");
 		}
-		posinfo.push_back( PosinfoPosting( docno_elem, blk.positions_at( itr)));
+		posinfo.push_back( PosinfoPosting( dn, blk.positions_at( cursor)));
 		if (ff != posinfo.back().pos.size() && posinfo.back().pos.size() != 0)
 		{
 			throw std::runtime_error( "ff does not match to length of position array");
@@ -419,7 +418,7 @@ PosinfoBlockData::PosinfoBlockData( const strus::DatabaseCursorInterface::Slice&
 				throw std::runtime_error( "position elements in posinfo array not strictly ascending");
 			}
 		}
-		itr = blk.nextDoc( itr);
+		dn = blk.nextDoc( cursor);
 	}
 }
 

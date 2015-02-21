@@ -52,99 +52,77 @@ Index PosinfoIterator::skipDoc( const Index& docno_)
 	if (m_posinfoBlk.empty())
 	{
 		// [A] No block loaded yet
-		if (!m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
+		if (m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
 		{
-			m_posinfoItr = 0;
-			m_docno_start = 0;
-			m_docno_end = 0;
-			return m_docno=0;
+			m_docno_start = m_posinfoBlk.firstDoc( m_posinfoItr);
+			m_docno_end = m_posinfoBlk.id();
+			return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoItr);
 		}
 		else
 		{
-			m_posinfoItr = m_posinfoBlk.upper_bound( docno_, m_posinfoBlk.begin());
-			m_docno_start = m_posinfoBlk.docno_at( m_posinfoBlk.begin());
-			m_docno_end = m_posinfoBlk.id();
+			m_posinfoItr = 0;
+			return m_docno = m_docno_start = m_docno_end = 0;
 		}
 	}
 	else
 	{
 		if (m_docno_start <= docno_ && m_docno_end >= docno_)
 		{
-			// [B] Answer in same block as for the last query
-			if (docno_ < m_docno)
-			{
-				m_posinfoItr = m_posinfoBlk.begin();
-			}
-			m_posinfoItr = m_posinfoBlk.upper_bound( docno_, m_posinfoItr);
+			// [B] Document postings are in the same block as for the last query
+			return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoItr);
 		}
 		else if (docno_ > m_docno_end && m_docno_end + (m_docno_end - m_docno_start) > docno_)
 		{
-			// [C] Try to get answer from a follow block
-			do
+			// [C] Try to get document postings from a follow block
+			while (m_dbadapter.loadNext( m_posinfoBlk))
 			{
-				if (m_dbadapter.loadNext( m_posinfoBlk))
+				m_docno_start = m_posinfoBlk.firstDoc( m_posinfoItr);
+				m_docno_end = m_posinfoBlk.id();
+
+				Statistics::increment( Statistics::PosinfoBlockReadBlockFollow);
+
+				if (docno_ >= m_docno_start && docno_ <= m_docno_end)
 				{
-					m_docno_start = m_posinfoBlk.docno_at( m_posinfoBlk.begin());
-					m_docno_end = m_posinfoBlk.id();
-
-					Statistics::increment( Statistics::PosinfoBlockReadBlockFollow);
-
-					if (m_posinfoBlk.id() < docno_ && !m_posinfoBlk.isFollowBlockAddress( docno_))
+					return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoItr);
+				}
+				else if (!m_posinfoBlk.isFollowBlockAddress( docno_))
+				{
+					if (m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
 					{
-						if (m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
-						{
-							Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
-						}
-						else
-						{
-							Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
-							m_posinfoItr = 0;
-							m_docno_start = 0;
-							m_docno_end = 0;
-							return m_docno=0;
-						}
+						Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
+						m_docno_start = m_posinfoBlk.firstDoc( m_posinfoItr);
+						m_docno_end = m_posinfoBlk.id();
+						return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoItr);
+					}
+					else
+					{
+						Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
+						m_posinfoItr = 0;
+						return m_docno = m_docno_start = m_docno_end = 0;
 					}
 				}
-				else
-				{
-					Statistics::increment( Statistics::PosinfoBlockReadBlockFollowMiss);
-					m_posinfoItr = 0;
-					m_docno_start = 0;
-					m_docno_end = 0;
-					return m_docno=0;
-				}
 			}
-			while (m_posinfoBlk.id() < docno_);
-
-			m_posinfoItr = m_posinfoBlk.upper_bound( docno_, m_posinfoBlk.begin());
+			m_posinfoItr = 0;
+			return m_docno = m_docno_start = m_docno_end = 0;
 		}
 		else
 		{
-			// [D] Answer is in a 'far away' block
-			if (!m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
+			// [D] Document postings are in a 'far away' block
+			if (m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
 			{
-				Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
-				m_posinfoItr = 0;
-				m_docno_start = 0;
-				m_docno_end = 0;
-				return m_docno=0;
+				Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
+				m_docno_start = m_posinfoBlk.firstDoc( m_posinfoItr);
+				m_docno_end = m_posinfoBlk.id();
+				return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoItr);
 			}
 			else
 			{
-				Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
-				m_posinfoItr = m_posinfoBlk.upper_bound( docno_, m_posinfoBlk.begin());
-				m_docno_start = m_posinfoBlk.docno_at( m_posinfoBlk.begin());
-				m_docno_end = m_posinfoBlk.id();
+				Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
+				m_posinfoItr = 0;
+				return m_docno = m_docno_start = m_docno_end = 0;
 			}
 		}
 	}
-	if (!m_posinfoItr || m_posinfoItr == m_posinfoBlk.end())
-	{
-		m_docno_start = 0;
-		m_docno_end = 0;
-		return m_docno=0;
-	}
-	return m_docno=m_posinfoBlk.docno_at( m_posinfoItr);
 }
 
 Index PosinfoIterator::skipPos( const Index& firstpos_)

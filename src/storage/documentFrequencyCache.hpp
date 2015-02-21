@@ -60,9 +60,9 @@ public:
 	public:
 		class Increment;
 
-		void put( const Index& typeno, const Index termno, int incr)
+		void put( const Index& typeno, const Index termno, const GlobalCounter& increment)
 		{
-			m_ar.push_back( Increment( typeno, termno, incr));
+			m_ar.push_back( Increment( typeno, termno, increment));
 		}
 		void put( const Increment& o)
 		{
@@ -77,14 +77,14 @@ public:
 		class Increment
 		{
 		public:
-			Increment( const Index& typeno_, const Index termno_, int value_)
+			Increment( const Index& typeno_, const Index termno_, const GlobalCounter& value_)
 				:typeno(typeno_),termno(termno_),value(value_){}
 			Increment( const Increment& o)
 				:typeno(o.typeno),termno(o.termno),value(o.value){}
 
 			Index typeno;
 			Index termno;
-			int value;
+			GlobalCounter value;
 		};
 
 	private:

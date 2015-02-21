@@ -178,7 +178,7 @@ public:/*StorageTransaction*/
 	};
 
 public:/*PeerStorageTransaction*/
-	void declareGlobalNofDocumentsInserted( int incr);
+	void declareGlobalNofDocumentsInserted( const GlobalCounter& increment);
 
 public:/*StorageDocumentChecker*/
 	IndexSetIterator getAclIterator( const Index& docno) const;

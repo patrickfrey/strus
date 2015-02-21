@@ -49,13 +49,13 @@ PeerStorageTransaction::~PeerStorageTransaction()
 	if (!m_rollback && !m_commit) rollback();
 }
 
-void PeerStorageTransaction::updateNofDocumentsInsertedChange( int increment)
+void PeerStorageTransaction::updateNofDocumentsInsertedChange( const GlobalCounter& increment)
 {
 	m_nofDocumentsInserted += increment;
 }
 
 void PeerStorageTransaction::updateDocumentFrequencyChange(
-		const char* termtype, const char* termvalue, int increment)
+		const char* termtype, const char* termvalue, const GlobalCounter& increment)
 {
 	bool typeno_isNew = false;
 	Index typeno = m_storage->allocTypenoIm( termtype, typeno_isNew);

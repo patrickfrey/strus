@@ -462,7 +462,7 @@ bool DatabaseAdapter_DocFrequency::load( const DatabaseInterface* database, cons
 	DatabaseKey dbkey( KeyPrefix, BlockKey( typeno, termno));
 	std::string dfstr;
 	df = 0;
-	if (!database->readValue( dbkey.ptr(), dbkey.size(), dfstr, false)) return false;
+	if (!database->readValue( dbkey.ptr(), dbkey.size(), dfstr, true)) return false;
 
 	char const* cc = dfstr.c_str();
 	df = unpackIndex( cc, cc + dfstr.size());

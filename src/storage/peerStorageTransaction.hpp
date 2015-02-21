@@ -53,10 +53,10 @@ public:
 	PeerStorageTransaction( Storage* storage_, DatabaseInterface* database_, DocumentFrequencyCache* dfcache_);
 	virtual ~PeerStorageTransaction();
 
-	virtual void updateNofDocumentsInsertedChange( int increment);
+	virtual void updateNofDocumentsInsertedChange( const GlobalCounter& increment);
 
 	virtual void updateDocumentFrequencyChange(
-			const char* termtype, const char* termvalue, int increment);
+			const char* termtype, const char* termvalue, const GlobalCounter& increment);
 
 	virtual void commit();
 
@@ -75,7 +75,7 @@ private:
 	std::vector<std::string> m_unknownTerms;
 	DatabaseAdapter_TermValue m_dbadapter_termvalue;
 	Index m_termvaluecnt;
-	int m_nofDocumentsInserted;
+	GlobalCounter m_nofDocumentsInserted;
 	bool m_commit;
 	bool m_rollback; 
 };

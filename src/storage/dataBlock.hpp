@@ -48,6 +48,12 @@ public:
 		init( id_, ptr_, size_, allocated_?size_:0);
 	}
 
+	DataBlock( const Index& id_, std::size_t size_)
+		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
+	{
+		init( id_, size_);
+	}
+
 	DataBlock( const DataBlock& o)
 		:m_id(0),m_ptr(0),m_size(0),m_allocsize(0)
 	{
@@ -74,6 +80,7 @@ public:
 	const char* charend() const	{return (const char*)m_ptr + m_size;}
 
 	void init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_=0);
+	void init( const Index& id_, std::size_t allocsize_);
 	void initcopy( const DataBlock& o);
 
 	void append( const void* data, std::size_t datasize);

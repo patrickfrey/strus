@@ -28,6 +28,7 @@
 */
 #ifndef _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
 
 namespace strus
 {
@@ -44,7 +45,7 @@ public:
 	/// \param[in] increment value to use for update (positive or negative)
 	/// \note throws if the update was not successful
 	virtual void updateNofDocumentsInsertedChange(
-			int increment)=0;
+			const GlobalCounter& increment)=0;
 
 	/// \brief Prepare to update the global document frequency used for calculations
 	/// \param[in] termtype type of the term
@@ -54,7 +55,7 @@ public:
 	virtual void updateDocumentFrequencyChange(
 			const char* termtype,
 			const char* termvalue,
-			int increment)=0;
+			const GlobalCounter& increment)=0;
 
 	/// \brief Commit of the transaction
 	virtual void commit()=0;

@@ -103,27 +103,28 @@ private:
 			bool isMember);
 
 	void insertNewPosElements(
-			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo,
+			DatabaseTransactionInterface* transaction,
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
-			PosinfoBlock& newposblk,
-			const Index& lastInsertBlockId,
-			std::vector<BooleanBlock::MergeRange>& docrangear,
-			DatabaseTransactionInterface* transaction);
+			PosinfoBlockBuilder& newposblk,
+			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergeNewPosElements(
 			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo,
+			DatabaseTransactionInterface* transaction,
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
-			PosinfoBlock& newposblk,
-			std::vector<BooleanBlock::MergeRange>& docrangear,
-			DatabaseTransactionInterface* transaction);
+			PosinfoBlockBuilder& newposblk,
+			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergePosBlock(
+			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+			DatabaseTransactionInterface* transaction,
 			Map::const_iterator ei,
 			const Map::const_iterator& ee,
 			const PosinfoBlock& oldblk,
-			PosinfoBlock& newblk);
+			PosinfoBlockBuilder& newblk);
 
 	void clear();
 
@@ -131,7 +132,7 @@ private:
 	DocumentFrequencyMap m_dfmap;
 	DatabaseInterface* m_database;
 	Map m_map;
-	std::string m_strings;
+	std::vector<PosinfoBlock::PositionType> m_posinfo;
 	InvTermMap m_invtermmap;
 	InvTermList m_invterms;
 	Index m_docno;

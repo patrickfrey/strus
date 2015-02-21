@@ -66,6 +66,20 @@ void DataBlock::init( const Index& id_, const void* ptr_, std::size_t size_, std
 	m_id = id_;
 }
 
+void DataBlock::init( const Index& id_, std::size_t size_)
+{
+	std::size_t mm = BLOCK_ALLOC_SIZE( size_);
+	void* newptr = std::malloc( mm);
+	if (!newptr) throw std::bad_alloc();
+	std::memset( newptr, 0, size_);
+	if (m_allocsize) std::free( m_ptr);
+
+	m_ptr = (char*)newptr;
+	m_allocsize = mm;
+	m_size = 0;
+	m_id = id_;
+}
+
 void DataBlock::initcopy( const DataBlock& o)
 {
 	init( o.m_id, o.m_ptr, o.m_size, o.m_size /*force copy*/);

@@ -647,7 +647,7 @@ void Storage::loadTermnoMap( const char* termnomap_source)
 	}
 }
 
-void Storage::declareGlobalNofDocumentsInserted( int incr)
+void Storage::declareGlobalNofDocumentsInserted( const GlobalCounter& incr)
 {
 	boost::mutex::scoped_lock lock( m_nof_documents_mutex);
 	m_global_nof_documents += incr;

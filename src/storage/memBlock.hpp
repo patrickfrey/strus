@@ -26,52 +26,37 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_POSINFO_ITERATOR_HPP_INCLUDED
-#define _STRUS_POSINFO_ITERATOR_HPP_INCLUDED
-#include "strus/reference.hpp"
-#include "posinfoBlock.hpp"
-#include "databaseAdapter.hpp"
+#ifndef _STRUS_MEM_BLOCK_HPP_INCLUDED
+#define _STRUS_MEM_BLOCK_HPP_INCLUDED
+#include <cstring>
+#include <cstdlib>
 
 namespace strus {
 
-/// \brief Forward declaration
-class DatabaseInterface;
-/// \brief Forward declaration
-class Storage;
-
-class PosinfoIterator
+/// \class MemBlock
+/// \brief Helper class for exception save memory block handling
+/// \note I did not find a proper solution with STL/boost smart pointers for arrays. Because do not have both a release and the posibility to declare a deleter.
+class MemBlock
 {
 public:
-	PosinfoIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno_, Index termvalueno_);
-	~PosinfoIterator(){}
+	explicit MemBlock( std::size_t blksize)
+	{
+		m_ptr = std::calloc( blksize, 1);
+		if (!m_ptr) throw std::bad_alloc();
+	}
 
-	Index skipDoc( const Index& docno_);
-	Index skipPos( const Index& firstpos_);
+	~MemBlock()
+	{
+		std::free( m_ptr);
+	}
 
-	Index docno() const					{return m_docno;}
-	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
-
-	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
-	GlobalCounter documentFrequency() const;
-	unsigned int frequency();
-
-private:
-	bool loadBlock( const Index& elemno_);
+	void* ptr() const		{return m_ptr;}
 
 private:
-	const Storage* m_storage;
-	DatabaseAdapter_PosinfoBlock_Cursor m_dbadapter;
-	PosinfoBlock m_posinfoBlk;
-	PosinfoBlock::Cursor m_posinfoItr;
-	PosinfoBlock::PositionScanner m_positionScanner;
-	Index m_termtypeno;
-	Index m_termvalueno;
-	Index m_docno;
-	Index m_docno_start;
-	Index m_docno_end;
-	mutable Index m_documentFrequency;
+	void* m_ptr;
 };
 
 }
 #endif
+
 

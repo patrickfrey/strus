@@ -43,6 +43,7 @@ DartConfiguration.tcl
 Testing/
 CPackConfig.cmake
 CPackSourceConfig.cmake
+tests/cmake_install.cmake.user
 
 # Compiled Programs
 tests/randoc/src/testRandomCollection
