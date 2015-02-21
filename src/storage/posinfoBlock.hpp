@@ -61,6 +61,11 @@ public:
 		initDocIndexNodeFrame();
 		return *this;
 	}
+	void swap( DataBlock& o)
+	{
+		DataBlock::swap( o);
+		initDocIndexNodeFrame();
+	}
 
 	typedef unsigned int Cursor;
 	/// \brief Get the document number of the current PosinfoBlock::Cursor

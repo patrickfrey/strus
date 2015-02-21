@@ -68,7 +68,7 @@ int main( int , const char** )
 {
 	try
 	{
-		enum {MaxNofRanks=10,NofWeightedDocs=10000000};
+		enum {MaxNofRanks=10,NofWeightedDocs=1000000};
 		strus::Ranker ranker( MaxNofRanks);
 		typedef std::multiset<
 				strus::WeightedDocument,

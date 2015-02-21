@@ -300,7 +300,7 @@ PosinfoBlockBuilder::PosinfoBlockBuilder( const PosinfoBlock& o)
 	{
 		append( m_lastDoc = docno, o.posinfo_at( idx));
 	}
-	while (o.nextDoc( idx));
+	while (!!(docno=o.nextDoc( idx)));
 }
 
 void PosinfoBlockBuilder::append( const Index& docno, const std::vector<Index>& pos)
