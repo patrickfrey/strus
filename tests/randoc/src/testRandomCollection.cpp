@@ -1011,7 +1011,7 @@ int main( int argc, const char* argv[])
 				if (!compareMatches( *ri, expected_matches, collection))
 				{
 					std::cerr << "ERROR random query operation failed: " << qi->tostring( collection) << std::endl;
-					return false;
+					return -1;
 				}
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cerr << "random query operation " << tostring( collection) << " " << matches.size() << " matches" << std::endl;
@@ -1026,6 +1026,7 @@ int main( int argc, const char* argv[])
 			rsum += rcnt;
 			std::cerr << std::endl;
 			std::cerr << "verified " << rsum << " query results" << std::endl;
+			return (nofQueriesFailed?2:0);
 		}
 		return 0;
 	}
@@ -1037,7 +1038,7 @@ int main( int argc, const char* argv[])
 	{
 		std::cerr << "EXCEPTION " << e.what() << std::endl;
 	}
-	return -1;
+	return 4;
 }
 
 
