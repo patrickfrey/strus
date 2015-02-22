@@ -38,13 +38,12 @@ using namespace strus;
 
 enum {EndPosinfoMarker=(char)0xFE};
 
-Index PosinfoBlock::docno_at( const Cursor& idx) const
+Index PosinfoBlock::docno_at( const Cursor& cursor) const
 {
-	unsigned int ofs = idx & 0xF;
-	const DocIndexNode& nd = m_docindexptr[ idx >> 4];
-	if (ofs)
+	const DocIndexNode& nd = m_docindexptr[ cursor.nodeidx];
+	if (cursor.docidx)
 	{
-		return nd.base + nd.ofs[ ofs-1];
+		return nd.base + nd.ofs[ cursor.docidx-1];
 	}
 	else
 	{
@@ -52,11 +51,15 @@ Index PosinfoBlock::docno_at( const Cursor& idx) const
 	}
 }
 
-std::vector<Index> PosinfoBlock::positions_at( const Cursor& idx) const
+const PosinfoBlock::PositionType* PosinfoBlock::posinfo_at( const Cursor& cursor) const
 {
-	unsigned int ofs = idx & 0xF;
-	const DocIndexNode& nd = m_docindexptr[ idx >> 4];
-	const PositionType* pi = m_posinfoptr + nd.posrefIdx[ ofs];
+	const DocIndexNode& nd = m_docindexptr[ cursor.nodeidx];
+	return m_posinfoptr + nd.posrefIdx[ cursor.docidx];
+}
+
+std::vector<Index> PosinfoBlock::positions_at( const Cursor& cursor) const
+{
+	const PositionType* pi = posinfo_at( cursor);
 	const PositionType* pe = pi + *pi + 1;
 	std::vector<Index> rt;
 	for (++pi; pi != pe; ++pi)
@@ -66,135 +69,125 @@ std::vector<Index> PosinfoBlock::positions_at( const Cursor& idx) const
 	return rt;
 }
 
-unsigned int PosinfoBlock::frequency_at( const Cursor& idx) const
+unsigned int PosinfoBlock::frequency_at( const Cursor& cursor) const
 {
-	unsigned int ofs = idx & 0xF;
-	const DocIndexNode& nd = m_docindexptr[ idx >> 4];
-	const PositionType* pi = m_posinfoptr + nd.posrefIdx[ ofs];
-	return *pi;
+	const DocIndexNode& nd = m_docindexptr[ cursor.nodeidx];
+	return m_posinfoptr[ nd.posrefIdx[ cursor.docidx]];
 }
 
-const PosinfoBlock::PositionType* PosinfoBlock::posinfo_at( const Cursor& idx) const
+Index PosinfoBlock::firstDoc( Cursor& cursor) const
 {
-	unsigned int ofs = idx & 0xF;
-	const DocIndexNode& nd = m_docindexptr[ idx >> 4];
-	return m_posinfoptr + nd.posrefIdx[ ofs];
-}
-
-Index PosinfoBlock::firstDoc( Cursor& idx) const
-{
-	idx = 0;
+	cursor.reset();
 	return m_nofDocIndexNodes?m_docindexptr[ 0].base:0;
 }
 
-Index PosinfoBlock::nextDoc( Cursor& idx) const
+Index PosinfoBlock::nextDoc( Cursor& cursor) const
 {
-	unsigned int ndidx = idx >> 4;
-	unsigned int ofs = (idx+1) & 0xF;
-	if (ofs >= DocIndexNode::Size)
+	if (++cursor.docidx >= DocIndexNode::Size)
 	{
-		ofs = 0;
-		++ndidx;
+		cursor.docidx = 0;
+		++cursor.nodeidx;
 	}
 	for (;;)
 	{
-		if (ndidx >= m_nofDocIndexNodes)
+		if (cursor.nodeidx >= m_nofDocIndexNodes)
 		{
-			idx = 0;
+			cursor.reset();
 			return 0;
 		}
-		if (ofs == 0)
+		if (cursor.docidx == 0)
 		{
-			idx = (ndidx << 4) + ofs;
-			return m_docindexptr[ ndidx].base;
+			return m_docindexptr[ cursor.nodeidx].base;
 		}
-		if (m_docindexptr[ ndidx].ofs[ ofs-1])
+		if (m_docindexptr[ cursor.nodeidx].ofs[ cursor.docidx-1])
 		{
-			idx = (ndidx << 4) + ofs;
-			return m_docindexptr[ ndidx].base + m_docindexptr[ ndidx].ofs[ ofs-1];
-		}
-		ofs = 0;
-		++ndidx;
-	}
-}
-
-Index PosinfoBlock::skipDoc( const Index& docno_, Cursor& idx) const
-{
-	unsigned int ndidx = idx >> 4;
-	unsigned short ofs = idx & 0xF;
-
-	const DocIndexNode& nd = m_docindexptr[ ndidx];
-	if (nd.base >= docno_)
-	{
-		if (nd.base == docno_)
-		{
-			return docno_;
-		}
-		if (ndidx > 0)
-		{
-			ndidx = 0;
-			ofs = 0;
+			return m_docindexptr[ cursor.nodeidx].base
+				+ m_docindexptr[ cursor.nodeidx].ofs[ cursor.docidx-1];
 		}
 		else
 		{
-			return nd.base;
+			cursor.docidx = 0;
+			++cursor.nodeidx;
 		}
 	}
-	unsigned int fib1 = 1, fib2 = 1;
-	unsigned int prev_ndidx = ndidx++;
-	while (ndidx < m_nofDocIndexNodes && m_docindexptr[ ndidx].base < docno_)
+}
+
+Index PosinfoBlock::skipDoc( const Index& docno_, Cursor& cursor) const
+{
+	std::size_t di = cursor.nodeidx;
+	if (m_docindexptr[ di].base >= docno_)
 	{
-		prev_ndidx = ndidx;
-		unsigned int fibres = fib1 + fib2;
-		ndidx += fibres;
-		fib1 = fib2;
-		fib2 = fibres;
+		if (m_docindexptr[ di].base == docno_)
+		{
+			return docno_;
+		}
+		if (!di)
+		{
+			return m_docindexptr[ 0].base;
+		}
+		di = 0;
 	}
-	ndidx = prev_ndidx + 1;
-	while (ndidx < m_nofDocIndexNodes && m_docindexptr[ ndidx].base < docno_)
+	for (;di < m_nofDocIndexNodes && m_docindexptr[ di].base <= docno_; ++di){}
+	if (!di)
 	{
-		++ndidx;
+		if (m_nofDocIndexNodes)
+		{
+			cursor.reset();
+			return m_docindexptr[ 0].base;
+		}
+		else
+		{
+			return 0;
+		}
 	}
-	Index rt = m_docindexptr[ --ndidx].skipDoc( docno_, ofs);
+	unsigned short cursor_docidx;
+	Index rt = m_docindexptr[ di-1].skipDoc( docno_, cursor_docidx);
 	if (rt)
 	{
-		idx = (ofs + (ndidx << 4));
+		cursor.nodeidx = (unsigned short)(di-1);
+		cursor.docidx = cursor_docidx;
 		return rt;
 	}
 	else
 	{
-		idx = 0;
-		return 0;
+		if (di < m_nofDocIndexNodes)
+		{
+			cursor.nodeidx = (unsigned short)di;
+			cursor.docidx = 0;
+			return m_docindexptr[ di].base;
+		}
+		else
+		{
+			return 0;
+		}
 	}
 }
 
 Index PosinfoBlock::PositionScanner::skip( const Index& pos)
 {
-	if (m_itr >= m_size || (Index)m_ar[ m_itr] > pos)
+	if ((Index)m_ar[ m_itr] >= pos)
 	{
-		while (m_itr > 0 && (Index)m_ar[ m_itr>>1] > pos)
+		while (m_itr > 0 && (Index)m_ar[ m_itr] > pos)
 		{
 			m_itr >>= 1;
+		}
+		if (m_ar[ m_itr] >= pos)
+		{
+			return m_ar[ m_itr];
 		}
 	}
 	if (pos > (Index)std::numeric_limits<PositionType>::max()) return 0;
 
-	unsigned int fib1 = 1, fib2 = 1;
-	unsigned int prev_itr = m_itr++;
-	while (m_itr < m_size && (Index)m_ar[ m_itr] < pos)
+	unsigned int fibres = 0, fib1 = 1, fib2 = 1, ii = m_itr+1, nn = m_size;
+	while (ii < nn && (Index)m_ar[ ii] < pos)
 	{
-		prev_itr = m_itr;
-		unsigned int fibres = fib1 + fib2;
-		m_itr += fibres;
+		fibres = fib1 + fib2;
+		ii += fibres;
 		fib1 = fib2;
 		fib2 = fibres;
 	}
-	m_itr = prev_itr + 1;
-	while (m_itr < m_size && (Index)m_ar[ m_itr] < pos)
-	{
-		++m_itr;
-	}
-	return (m_itr < m_size)?(Index)m_ar[ m_itr]:0;
+	for (ii -= fibres; ii < nn && (Index)m_ar[ ii] < pos; ++ii){}
+	return ii < nn ? m_ar[ m_itr = (unsigned short)ii]:0;
 }
 
 void PosinfoBlock::initDocIndexNodeFrame()
@@ -250,7 +243,7 @@ bool PosinfoBlock::DocIndexNode::addDocument( const Index& docno_, unsigned shor
 		{
 			throw std::runtime_error( "internal: documents not added in ascending order into posinfo block");
 		}
-		if (base + std::numeric_limits<unsigned short>::max() < docno_)
+		if (base + std::numeric_limits<unsigned short>::max() <= docno_)
 		{
 			return false;
 		}
@@ -263,16 +256,16 @@ bool PosinfoBlock::DocIndexNode::addDocument( const Index& docno_, unsigned shor
 	return true;
 }
 
-Index PosinfoBlock::DocIndexNode::skipDoc( const Index& docno_, unsigned short& posrefIdx_) const
+Index PosinfoBlock::DocIndexNode::skipDoc( const Index& docno_, unsigned short& cursor_docidx) const
 {
 	if (docno_ <= base)
 	{
 		if (docno_ == base)
 		{
-			posrefIdx_ = posrefIdx[0];
+			cursor_docidx = 0;
 			return base;
 		}
-		return false;
+		return 0;
 	}
 	if (docno_ - base > std::numeric_limits<unsigned short>::max()) return false;
 	unsigned short ofs_ = (unsigned short)(docno_ - base);
@@ -280,12 +273,12 @@ Index PosinfoBlock::DocIndexNode::skipDoc( const Index& docno_, unsigned short& 
 	for (; ii<(Size-1) && ofs_ > ofs[ii]; ++ii){}
 	if (ii == (Size-1))
 	{
-		return false;
+		return 0;
 	}
 	else
 	{
-		posrefIdx_ = posrefIdx[ ii+1];
-		return base + ofs[ii];
+		cursor_docidx = ii+1;
+		return base + ofs[ ii];
 	}
 }
 

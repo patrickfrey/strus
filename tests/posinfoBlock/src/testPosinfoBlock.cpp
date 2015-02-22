@@ -90,29 +90,29 @@ static std::string indexVectorToString( const std::vector<strus::Index>& ar)
 	return rt.str();
 }
 
-static void testPosinfoBlockBuild( unsigned int times, unsigned int minNofDocs)
+static void testPosinfoBlock( unsigned int times, unsigned int minNofDocs, unsigned int nofQueries)
 {
 	unsigned int tt=0;
 	
 	for (; tt<times; ++tt)
 	{
+		strus::Index maxDocNo = 0;
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "test " << tt << ":" << std::endl;
 #endif
-		strus::Index dd = 0;
-
 		typedef std::map<strus::Index,std::vector<strus::Index> > PosinfoMap;
 		PosinfoMap pmap;
+		std::vector<strus::Index> docnoar;
 
 		std::vector<strus::PosinfoBlock> blockar;
 		strus::PosinfoBlockBuilder block;
 		unsigned int ii=0,nofDocs=minNofDocs+RANDINT(1,100);
 		for (; ii<nofDocs; ++ii)
 		{
-			dd += RANDINT(1,25);
-			pmap[ dd] = randPosinfo();
+			maxDocNo += RANDINT(1,25);
+			pmap[ maxDocNo] = randPosinfo();
+			docnoar.push_back( maxDocNo);
 		}
-		block.setId( dd);
 		PosinfoMap::const_iterator pi = pmap.begin(), pe = pmap.end();
 		for (; pi != pe; ++pi)
 		{
@@ -128,7 +128,7 @@ static void testPosinfoBlockBuild( unsigned int times, unsigned int minNofDocs)
 			blockar.push_back( block.createBlock());
 			block.clear();
 		}
-		std::vector<strus::PosinfoBlock>::const_iterator
+		std::vector<strus::PosinfoBlock>::iterator
 			bi = blockar.begin(),
 			be = blockar.end();
 		strus::PosinfoBlock::Cursor bidx;
@@ -185,8 +185,65 @@ static void testPosinfoBlockBuild( unsigned int times, unsigned int minNofDocs)
 			}
 			++pi;
 		}
+
+		unsigned int qi = 0, qe = nofQueries;
+		for (; qi != qe; ++qi)
+		{
+			std::size_t didx = RANDINT(0,docnoar.size());
+			strus::Index dn = docnoar[ didx];
+			strus::Index find_dn = dn;
+			if (didx > 0 && docnoar[ didx-1] +1 < dn && RANDINT(0,3) == 1)
+			{
+				find_dn = dn - 1;
+			}
+			PosinfoMap::const_iterator di = pmap.find( dn);
+			if (di == pmap.end()) throw std::logic_error("bad things happened");
+			std::size_t pidx = 0;
+			strus::Index pos = di->second.size()?di->second[ pidx=RANDINT(0,di->second.size())]:0;
+			strus::Index find_pos = pos;
+			if (pidx > 0 && di->second[ pidx-1] + 1 < pos && RANDINT(0,3) == 1)
+			{
+				find_pos = pos - 1;
+			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "try query skipDoc(" << find_dn << ") => " << dn << ", skipPos( " << find_pos << ") => " << pos << std::endl;
+#endif
+			for (bi = blockar.begin(); bi != be; ++bi)
+			{
+				if (bi->id() >= dn)
+				{
+					strus::PosinfoBlock::Cursor cursor;
+					if (dn != bi->skipDoc( find_dn, cursor))
+					{
+						throw std::runtime_error( "posinfo block skip doc query failed");
+					}
+					strus::PosinfoBlock::PositionScanner
+						scan = bi->positionScanner_at( cursor);
+					
+					if (scan.initialized())
+					{
+						if (pos != scan.skip( find_pos))
+						{
+							throw std::runtime_error( "posinfo block skip pos query failed");
+						}
+					}
+					else
+					{
+						if (pos)
+						{
+							throw std::runtime_error( "positions expected but not available");
+						}
+					}
+					break;
+				}
+			}
+			if (bi == be)
+			{
+				throw std::runtime_error("block for posinfo test query not found");
+			}
+		}
 	}
-	std::cerr << "tested posinfo block building " << times << " times with " << minNofDocs << " documents with success" << std::endl;
+	std::cerr << "tested posinfo block " << times << " times with " << minNofDocs << " documents with success" << std::endl;
 }
 
 
@@ -195,7 +252,7 @@ int main( int, const char**)
 	try
 	{
 		testDataBlockBuild( 1);
-		testPosinfoBlockBuild( 100, 3000);
+		testPosinfoBlock( 100, 3000, 1000);
 		return 0;
 	}
 	catch (const std::exception& err)

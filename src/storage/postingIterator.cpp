@@ -41,7 +41,7 @@ using namespace strus;
 #undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-PostingIterator::PostingIterator( DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
+PostingIterator::PostingIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
 #else
 PostingIterator::PostingIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char*)
 #endif

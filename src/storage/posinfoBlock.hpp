@@ -67,22 +67,37 @@ public:
 		initDocIndexNodeFrame();
 	}
 
-	typedef unsigned int Cursor;
+	struct Cursor
+	{
+		unsigned short nodeidx;
+		unsigned short docidx;
+
+		Cursor()
+			:nodeidx(0),docidx(0){}
+		Cursor( const Cursor& o)
+			:nodeidx(o.nodeidx),docidx(o.docidx){}
+		void reset()
+		{
+			nodeidx = 0;
+			docidx = 0;
+		}
+	};
+
 	/// \brief Get the document number of the current PosinfoBlock::Cursor
-	Index docno_at( const Cursor& idx) const;
+	Index docno_at( const Cursor& cursor) const;
 	/// \brief Get the internal representation of the postions of the current PosinfoBlock::Cursor
-	const PositionType* posinfo_at( const Cursor& idx) const;
+	const PositionType* posinfo_at( const Cursor& cursor) const;
 	/// \brief Get the postions of the current Cursor
-	std::vector<Index> positions_at( const Cursor& idx) const;
+	std::vector<Index> positions_at( const Cursor& cursor) const;
 	/// \brief Get the feature frequency of the current PosinfoBlock::Cursor
-	unsigned int frequency_at( const Cursor& idx) const;
+	unsigned int frequency_at( const Cursor& cursor) const;
 
 	/// \brief Get the next document with the current cursor
-	Index nextDoc( Cursor& idx) const;
+	Index nextDoc( Cursor& cursor) const;
 	/// \brief Get the first document with the current cursor
-	Index firstDoc( Cursor& idx) const;
+	Index firstDoc( Cursor& cursor) const;
 	/// \brief Upper bound search for a docnument number in the block
-	Index skipDoc( const Index& docno_, Cursor& idx) const;
+	Index skipDoc( const Index& docno_, Cursor& cursor) const;
 
 	bool isThisBlockAddress( const Index& docno_) const
 	{
@@ -105,7 +120,7 @@ public:
 		PositionScanner( const PositionScanner& o)
 			:m_ar(o.m_ar),m_size(o.m_size),m_itr(o.m_itr){}
 
-		bool initialized() const		{return !!m_itr;}
+		bool initialized() const		{return m_size;}
 
 		void init( const PositionType* ar_)
 		{
@@ -134,9 +149,9 @@ public:
 		unsigned short m_itr;
 	};
 
-	PositionScanner positionScanner_at( unsigned short posrefIdx) const
+	PositionScanner positionScanner_at( const Cursor& cursor) const
 	{
-		return PositionScanner( m_posinfoptr + posrefIdx);
+		return PositionScanner( posinfo_at( cursor));
 	}
 
 public:/*PosinfoBlockBuilder*/
@@ -147,7 +162,7 @@ public:/*PosinfoBlockBuilder*/
 		DocIndexNode( const DocIndexNode& o);
 
 		bool addDocument( const Index& docno_, unsigned short posrefIdx_);
-		Index skipDoc( const Index& docno_, unsigned short& posrefIdx_) const;
+		Index skipDoc( const Index& docno_, unsigned short& cursor_docidx) const;
 		std::size_t nofElements() const;
 
 		Index base;
@@ -159,7 +174,7 @@ private:
 	void initDocIndexNodeFrame();
 
 private:
-	unsigned int m_nofDocIndexNodes;
+	std::size_t m_nofDocIndexNodes;
 	const DocIndexNode* m_docindexptr;
 	const PositionType* m_posinfoptr;
 };
@@ -189,7 +204,9 @@ public:
 	bool fitsInto( std::size_t nofpos) const;
 	bool full() const
 	{
-		return m_posinfoArray.size() >= PosinfoBlock::MaxBlockSize;
+		return (m_posinfoArray.size() * sizeof(PositionType)
+				+ m_docIndexNodeArray.size() * sizeof(DocIndexNode))
+			>= PosinfoBlock::MaxBlockSize;
 	}
 
 	const std::vector<DocIndexNode>& docIndexNodeArray() const	{return m_docIndexNodeArray;}

@@ -146,7 +146,10 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 			Index pos_next = (*ai)->skipPos( pos_iter);
 			for (;;)
 			{
-				if (!pos_next) return m_posno=0;
+				if (!pos_next)
+				{
+					return m_posno=0;
+				}
 
 				if (std::find( poset.begin(), poset.end(), pos_next)==poset.end())
 				{

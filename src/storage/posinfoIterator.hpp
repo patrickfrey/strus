@@ -62,7 +62,7 @@ private:
 	const Storage* m_storage;
 	DatabaseAdapter_PosinfoBlock_Cursor m_dbadapter;
 	PosinfoBlock m_posinfoBlk;
-	PosinfoBlock::Cursor m_posinfoItr;
+	PosinfoBlock::Cursor m_posinfoCursor;
 	PosinfoBlock::PositionScanner m_positionScanner;
 	Index m_termtypeno;
 	Index m_termvalueno;
