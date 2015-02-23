@@ -47,16 +47,13 @@ public:
 
 private:
 	bool loadBlock( const Index& elemno_);
-	bool loadNext();
 
 private:
 	DatabaseAdapter_BooleanBlock_Cursor m_dbadapter;
 	BooleanBlock m_elemBlk;
-	char const* m_elemItr;
+	BooleanBlock::NodeCursor m_elemCursor;
 
 	Index m_elemno;
-	Index m_range_from;
-	Index m_range_to;
 };
 
 }

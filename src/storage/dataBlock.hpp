@@ -108,13 +108,6 @@ public:
 		}
 	}
 
-	template <class Derivation>
-	static const Derivation* upcast( const DataBlock* o)
-	{
-		if (!o) return 0;
-		return reinterpret_cast<const Derivation*>(o);
-	}
-
 private:
 	void expand( std::size_t datasize);
 

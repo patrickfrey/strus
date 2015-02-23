@@ -33,133 +33,45 @@ using namespace strus;
 IndexSetIterator::IndexSetIterator( DatabaseInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_)
 	:m_dbadapter( database_, (char)dbprefix_, key_)
 	,m_elemBlk()
-	,m_elemItr(0)
 	,m_elemno(0)
-	,m_range_from(0)
-	,m_range_to(0)
 {}
-
-bool IndexSetIterator::loadNext()
-{
-	if (!m_dbadapter.loadNext( m_elemBlk))
-	{
-		m_elemItr = 0;
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
 
 bool IndexSetIterator::loadBlock( const Index& elemno_)
 {
+	bool rt = true;
 	if (!m_elemBlk.empty())
 	{
-		if (m_elemBlk.isThisBlockAddress( elemno_))
+		if (m_elemBlk.isFollowBlockAddress( elemno_))
 		{
-			if (m_elemItr)
+			m_elemCursor.reset();
+			while ((rt=m_dbadapter.loadNext( m_elemBlk)) && elemno_ > m_elemBlk.id())
 			{
-				Index from_,to_;
-				char const* eitr = m_elemItr;
-				if (!m_elemBlk.getNextRange( eitr, from_, to_))
+				if (!m_elemBlk.isFollowBlockAddress( elemno_))
 				{
-					m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemBlk.charptr());
-				}
-				else if (elemno_ < from_)
-				{
-					m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemBlk.charptr());
-				}
-				else if (elemno_ > to_)
-				{
-					m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemItr);
-				}
-				else
-				{
-					m_range_from = from_;
-					m_range_to = to_;
-					m_elemItr = eitr;
-					return true;
-				}
-			}
-			else
-			{
-				m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemBlk.charptr());
-			}
-		}
-		else if (m_elemBlk.isFollowBlockAddress( elemno_))
-		{
-			while (loadNext())
-			{
-				if (elemno_ > m_elemBlk.id())
-				{	
-					if (!m_elemBlk.isFollowBlockAddress( elemno_))
-					{
-						if (m_dbadapter.loadUpperBound( elemno_, m_elemBlk))
-						{
-							m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemBlk.charptr());
-						}
-						else
-						{
-							m_elemItr = 0;
-						}
-						break;
-					}
-				}
-				else
-				{
-					m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemBlk.charptr());
+					rt = m_dbadapter.loadUpperBound( elemno_, m_elemBlk);
 					break;
 				}
 			}
 		}
 		else
 		{
-			if (m_dbadapter.loadUpperBound( elemno_, m_elemBlk))
-			{
-				m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemBlk.charptr());
-			}
-			else
-			{
-				m_elemItr = 0;
-			}
+			m_elemCursor.reset();
+			rt = m_dbadapter.loadUpperBound( elemno_, m_elemBlk);
 		}
 	}
 	else
 	{
-		if (m_dbadapter.loadUpperBound( elemno_, m_elemBlk))
-		{
-			m_elemItr = m_elemBlk.upper_bound( elemno_, m_elemBlk.charptr());
-		}
-		else
-		{
-			m_elemItr = 0;
-		}
+		rt = m_dbadapter.loadUpperBound( elemno_, m_elemBlk);
 	}
-	if (!m_elemItr || !m_elemBlk.getNextRange( m_elemItr, m_range_from, m_range_to))
-	{
-		return false;
-	}
-	return true;
+	return rt;
 }
 
 Index IndexSetIterator::skip( const Index& elemno_)
 {
-	if (m_elemBlk.empty() || m_range_from > elemno_ || m_range_to < elemno_)
+	if (!m_elemno || !m_elemBlk.isThisBlockAddress( elemno_))
 	{
 		if (!loadBlock( elemno_)) return 0;
 	}
-	if (m_range_from >= elemno_)
-	{
-		return m_elemno = m_range_from;
-	}
-	if (m_range_from <= elemno_ && m_range_to >= elemno_)
-	{
-		return m_elemno = elemno_;
-	}
-	else
-	{
-		return 0;
-	}
+	return m_elemno = m_elemBlk.skip( elemno_, m_elemCursor);
 }
 

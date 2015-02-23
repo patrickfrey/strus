@@ -112,15 +112,11 @@ static void resetAllBooleanBlockElementsFromStorage(
 	for (bool more=dbadapter.loadFirst( blk)
 		;more; more=dbadapter.loadNext( blk))
 	{
-		char const* blkitr = blk.charptr();
-		Index from_;
-		Index to_;
-		while (blk.getNextRange( blkitr, from_, to_))
+		BooleanBlock::NodeCursor cursor;
+		Index elemno = blk.getFirst( cursor);
+		for (;elemno; elemno = blk.getNext( cursor))
 		{
-			for (; from_<=to_; ++from_)
-			{
-				map[ UserAclMap::MapKey( blk.id(), from_)]; // reset to false, only if it does not exist
-			}
+			map[ UserAclMap::MapKey( blk.id(), elemno)]; // reset to false, only if it does not exist
 		}
 	}
 }

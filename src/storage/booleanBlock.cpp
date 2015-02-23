@@ -32,42 +32,329 @@
 
 using namespace strus;
 
-const char* BooleanBlock::find( const Index& elemno_, const char* lowerbound) const
+void BooleanBlock::Node::init( const Index& from_, const Index& to_)
 {
-	const char* itr = upper_bound( elemno_, lowerbound);
-	if (!itr) return 0;
-	Index from_;
-	Index to_;
-	char const* ii = itr;
-	if (!getNextRange( ii, from_, to_)) return 0;
-	return (from_ <= elemno_ && to_ >= elemno_)?itr:0;
+	if (from_ == to_)
+	{
+		type = PairNode;
+		alt.elemno2 = 0;
+		elemno = from_;
+	}
+	else
+	{
+		type = DiffNode;
+		alt.diff = to_ - from_;
+		elemno = to_;
+	}
 }
 
-const char* BooleanBlock::upper_bound( const Index& elemno_, const char* lowerbound) const
+void BooleanBlock::Node::normalize()
 {
-	if (!lowerbound || lowerbound == charend()) return 0;
-	if (id() < elemno_) throw std::logic_error("called BooleanBlock::upper_bound with wrong block");
-	return findRangeIndexDesc( lowerbound, charend(), relativeIndexFromElemno( elemno_));
+	switch (type)
+	{
+		case DiffNode:
+			if (alt.diff == 0)
+			{
+				type = PairNode;
+				alt.elemno2 = 0;
+			}
+			break;
+		case PairNode:
+			if (alt.elemno2 + 1 == elemno)
+			{
+				type = DiffNode;
+				alt.diff = 1;
+			}
+	}
 }
 
-bool BooleanBlock::getNextRange( char const*& itr, Index& from_, Index& to_) const
+bool BooleanBlock::Node::matches( const Index& elemno_) const
 {
-	if (itr == charend()) return false;
-	Index rangesize;
-	Index top = unpackRange( itr, charend(), rangesize);
-	to_ = elemnoFromRelativeIndex( top);
-	from_ = to_ - rangesize;
-	return true;
+	switch (type)
+	{
+		case DiffNode:
+			return (elemno_ <= elemno && elemno_ >= elemno - alt.diff);
+		case PairNode:
+			return (elemno_ == elemno || elemno_ == alt.elemno2);
+	}
+	return false;
 }
 
-bool BooleanBlock::getLastRange( std::size_t& at_, Index& from_, Index& to_) const
+bool BooleanBlock::Node::tryAddElem( const Index& elemno_)
 {
-	if (size() == 0) return false;
+	switch (type)
+	{
+		case DiffNode:
+			if (elemno_ <= elemno + 1 && elemno_ >= elemno - alt.diff - 1)
+			{
+				if (elemno_ == elemno + 1)
+				{
+					++elemno;
+				}
+				else if (elemno_ == elemno - alt.diff - 1)
+				{
+					++alt.diff;
+				}
+				normalize();
+				return true;
+			}
+			break;
 
-	char const* pr = prevPackedRangePos( charptr(), charend()-1);
-	at_ = pr - charptr();
+		case PairNode:
+			if (alt.elemno2)
+			{
+				if (elemno == elemno_ || alt.elemno2 == elemno_) return true;
+			}
+			else
+			{
+				if (elemno_ <= elemno)
+				{
+					if (elemno_ == elemno) return true;
+					alt.elemno2 = elemno_;
+				}
+				else
+				{
+					alt.elemno2 = elemno;
+					elemno = elemno_;
+				}
+				normalize();
+				return true;
+			}
+	}
+	return false;
+}
 
-	return getNextRange( pr, from_, to_);
+Index BooleanBlock::Node::getFirstElem() const
+{
+	switch (type)
+	{
+		case DiffNode:
+			return elemno - alt.diff;
+
+		case PairNode:
+			return alt.elemno2?alt.elemno2:elemno;
+	}
+	return 0;
+}
+
+Index BooleanBlock::Node::getLastElem() const
+{
+	return elemno;
+}
+
+Index BooleanBlock::Node::getNextElem( const Index& elemno_) const
+{
+	switch (type)
+	{
+		case DiffNode:
+			return (elemno_ < elemno)?(elemno_+1):0;
+
+		case PairNode:
+			if (elemno_ == alt.elemno2 && alt.elemno2)
+			{
+				return elemno;
+			}
+			else
+			{
+				return 0;
+			}
+	}
+	return 0;
+}
+
+Index BooleanBlock::Node::getUpperBound( const Index& elemno_) const
+{
+	switch (type)
+	{
+		case DiffNode:
+			return (elemno_ <= elemno && elemno_ >= elemno - alt.diff)?elemno_:(elemno - alt.diff);
+
+		case PairNode:
+			if (elemno_ <= elemno)
+			{
+				if (elemno_ <= alt.elemno2 && alt.elemno2)
+				{
+					return alt.elemno2;
+				}
+				else
+				{
+					return elemno;
+				}
+			}
+			else
+			{
+				return 0;
+			}
+	}
+	return 0;
+}
+
+void BooleanBlock::Node::getLastRange( Index& from_, Index& to_) const
+{
+	switch (type)
+	{
+		case DiffNode:
+			from_ = elemno - alt.diff;
+			to_ = elemno;
+			break;
+
+		case PairNode:
+			if (elemno == alt.elemno2+1)
+			{
+				from_ = alt.elemno2;
+				to_ = elemno;
+			}
+			else
+			{
+				from_ = to_ = elemno;
+			}
+			break;
+	}
+}
+
+void BooleanBlock::initFrameData()
+{
+	if (!empty())
+	{
+		const Node* nd = (const Node*)ptr();
+		m_first = nd->getFirstElem();
+	}
+}
+
+Index BooleanBlock::getFirst( NodeCursor& cursor) const
+{
+	cursor.reset();
+	if (empty()) return 0;
+	const Node* nd = (const Node*)ptr();
+	return cursor.elemno = nd->getFirstElem();
+}
+
+Index BooleanBlock::getLast() const
+{
+	if (empty()) return 0;
+	std::size_t nodearsize = (size() / sizeof(Node));
+	const Node* nd = (const Node*)ptr() + nodearsize-1;
+	return nd->getLastElem();
+}
+
+Index BooleanBlock::getLast( NodeCursor& cursor) const
+{
+	if (empty()) return 0;
+	std::size_t nodearsize = (size() / sizeof(Node));
+	cursor.idx = nodearsize-1;
+	const Node* nd = (const Node*)ptr() + cursor.idx;
+	return cursor.elemno = nd->getLastElem();
+}
+
+Index BooleanBlock::getNext( NodeCursor& cursor) const
+{
+	std::size_t nodearsize = (size() / sizeof(Node));
+	if (cursor.idx >= nodearsize) return cursor.elemno=0;
+	Node const* nd = (const Node*)ptr() + cursor.idx;
+	cursor.elemno = nd->getNextElem( cursor.elemno);
+	if (!cursor.elemno)
+	{
+		++nd;
+		++cursor.idx;
+		if (cursor.idx >= nodearsize) return cursor.elemno=0;
+
+		cursor.elemno = nd->getFirstElem();
+	}
+	return cursor.elemno;
+}
+
+bool BooleanBlock::getFirstRange( NodeCursor& cursor, Index& from_, Index& to_) const
+{
+	cursor.reset();
+	return getNextRange( cursor, from_, to_);
+}
+
+bool BooleanBlock::getNextRange( NodeCursor& cursor, Index& from_, Index& to_) const
+{
+	std::size_t nodearsize = (size() / sizeof(Node));
+	if (cursor.idx >= nodearsize) return false;
+	Node const* nd = (const Node*)ptr() + cursor.idx;
+	switch (nd->type)
+	{
+		case BooleanBlock::Node::DiffNode:
+			cursor.elemno = 0;
+			++cursor.idx;
+			nd->getLastRange( from_, to_);
+			return true;
+
+		case BooleanBlock::Node::PairNode:
+			if (cursor.elemno == 0 && nd->alt.elemno2)
+			{
+				cursor.elemno = nd->alt.elemno2;
+				from_ = to_ = nd->alt.elemno2;
+				return true;
+			}
+			else
+			{
+				cursor.elemno = 0;
+				++cursor.idx;
+				nd->getLastRange( from_, to_);
+				return true;
+			}
+	}
+	return false;
+}
+
+Index BooleanBlock::skip( const Index& elemno_, NodeCursor& cursor) const
+{
+	std::size_t nodearsize = (size() / sizeof(Node));
+	Node const* nd = ((Node const*)ptr()) + cursor.idx;
+	if (cursor.idx >= nodearsize)
+	{
+		cursor.idx = 0;
+		if (((const Node*)ptr())->elemno >= elemno_)
+		{
+			return ((const Node*)ptr())->getUpperBound( elemno_);
+		}
+	}
+	else if (nd->elemno >= elemno_)
+	{
+		if (nd->matches( elemno_))
+		{
+			return cursor.elemno = elemno_;
+		}
+		while (cursor.idx > 0 && nd->elemno > elemno_)
+		{
+			cursor.idx >>= 1;
+			nd = ((Node const*)ptr()) + cursor.idx;
+		}
+		if (nd->elemno >= elemno_)
+		{
+			return nd->getUpperBound( elemno_);
+		}
+	}
+	std::size_t fibres = 0, fib1 = 1, fib2 = 1, ii = cursor.idx+1, nn = nodearsize;
+	while (ii < nn && ((const Node*)ptr())[ ii].elemno < elemno_)
+	{
+		fibres = fib1 + fib2;
+		ii += fibres;
+		fib1 = fib2;
+		fib2 = fibres;
+	}
+	nd = ((Node const*)ptr()) + ii - fibres;
+	for (ii -= fibres; ii < nn && nd->elemno < elemno_; ++ii,++nd){}
+	if (ii < nn)
+	{
+		Index rt = nd->getUpperBound( elemno_);
+		if (rt)
+		{
+			cursor.idx = ii;
+			return cursor.elemno = rt;
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 void BooleanBlock::defineElement( const Index& elemno)
@@ -148,14 +435,16 @@ bool BooleanBlock::joinRange( Index& from_, Index& to_, const Index& from2_, con
 
 void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 {
-	std::size_t at_;
-	Index from_;
-	Index to_;
-	char buf[64];
-	std::size_t bufpos = 0;
+	Index from_ = 0;
+	Index to_ = 0;
 
-	if (getLastRange( at_, from_, to_))
+	std::size_t nodearsize = (size() / sizeof(Node));
+	if (nodearsize)
 	{
+		std::size_t nodearsize = (size() / sizeof(Node));
+		Node* nd = (Node*)ptr() + nodearsize - 1;
+		nd->getLastRange( from_, to_);
+
 		if (elemno < from_)
 		{
 			throw std::logic_error( "ranges not appended in order in boolean block");
@@ -165,10 +454,7 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 			//... overlapping ranges => join them
 			if (to_ < elemno + rangesize)
 			{
-				to_ = elemno + rangesize;
-				resize( at_);
-				packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( to_), to_ - from_);
-				append( buf, bufpos);
+				nd->init( from_, elemno + rangesize);
 			}
 			else
 			{
@@ -178,15 +464,23 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 		else
 		{
 			//... not overlapping with last range => add new
-			packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno + rangesize), rangesize);
-			append( buf, bufpos);
+			if (rangesize == 0 && nd->tryAddElem( elemno))
+			{}
+			else
+			{
+				Node newnod;
+				newnod.init( elemno, elemno + rangesize);
+				append( &newnod, sizeof(newnod));
+			}
 		}
 	}
 	else
 	{
 		//... first range => add new
-		packRange( buf, bufpos, sizeof(buf), relativeIndexFromElemno( elemno + rangesize), rangesize);
-		append( buf, bufpos);
+		Node newnod;
+		newnod.init( elemno, elemno + rangesize);
+		append( &newnod, sizeof(newnod));
+		initFrameData();
 	}
 }
 
@@ -198,11 +492,11 @@ void BooleanBlock::merge(
 {
 	newblk.clear();
 	newblk.setId( oldblk.id());
+	NodeCursor cursor;
 
-	char const* old_itr = oldblk.charptr();
 	Index old_from = 0;
 	Index old_to = 0;
-	bool old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+	bool old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 
 	while (ei != ee && old_haselem)
 	{
@@ -223,7 +517,7 @@ void BooleanBlock::merge(
 				else
 				{
 					newblk.defineRange( old_from, old_to - old_from);
-					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+					old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 				}
 			}
 		}
@@ -250,7 +544,7 @@ void BooleanBlock::merge(
 					}
 					else
 					{
-						old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+						old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 						++ei;
 					}
 				}
@@ -259,7 +553,7 @@ void BooleanBlock::merge(
 					// .... that does not touch the old block
 					// => case [old.from][old.to][new.from]
 					newblk.defineRange( old_from, old_to - old_from);
-					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+					old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 				}
 			}
 			else if (ei->to >= old_from)
@@ -269,7 +563,7 @@ void BooleanBlock::merge(
 				{
 					// => case [new.from][old.from][old.to][new.to]
 					//... deleted elements are covering old range completely
-					old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+					old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 				}
 				else
 				{
@@ -295,19 +589,19 @@ void BooleanBlock::merge(
 	while (old_haselem)
 	{
 		newblk.defineRange( old_from, old_to - old_from);
-		old_haselem = oldblk.getNextRange( old_itr, old_from, old_to);
+		old_haselem = oldblk.getNextRange( cursor, old_from, old_to);
 	}
 }
 
 void BooleanBlock::check() const
 {
-	char const* itr = charptr();
+	NodeCursor cursor;
 
 	Index rangemin;
 	Index rangemax;
 	Index prevmax = 0;
 
-	while (getNextRange( itr, rangemin, rangemax))
+	while (getNextRange( cursor, rangemin, rangemax))
 	{
 		if (rangemin <= 0 || rangemax <= 0 || rangemin > rangemax || rangemax > id() || rangemin <= prevmax)
 		{
@@ -316,31 +610,3 @@ void BooleanBlock::check() const
 	}
 }
 
-void BooleanBlock::setId( const Index& id_)
-{
-	if (id_ == id()) return;
-	if (empty())
-	{
-		DataBlock::setId( id_);
-	}
-	else
-	{
-		BooleanBlock res;
-		res.setId( id_);
-
-		char const* itr = charptr();
-	
-		Index rangemin;
-		Index rangemax;
-	
-		while (getNextRange( itr, rangemin, rangemax))
-		{
-			if (rangemin > id_ || rangemax < rangemin)
-			{
-				throw std::runtime_error( "internal: created illegal boolean block with setId()");
-			}
-			res.defineRange( rangemin, rangemax - rangemin);
-		}
-		swap( res);
-	}
-}

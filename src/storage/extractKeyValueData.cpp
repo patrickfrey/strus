@@ -445,13 +445,14 @@ static std::vector<std::pair<Index,Index> > getRangeListFromBooleanBlock(
 {
 	std::vector<std::pair<Index,Index> > rt;
 	BooleanBlock blk( id, vi, ve-vi);
-	char const* itr = blk.charptr();
+	BooleanBlock::NodeCursor cursor;
 
 	Index rangemin;
 	Index rangemax;
 	Index prevmax = 0;
 
-	while (blk.getNextRange( itr, rangemin, rangemax))
+	bool more = blk.getFirstRange( cursor, rangemin, rangemax);
+	for (; more; more = blk.getNextRange( cursor, rangemin, rangemax))
 	{
 		if (rangemax <= 0)
 		{
