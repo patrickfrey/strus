@@ -61,6 +61,7 @@ bool IndexSetIterator::loadBlock( const Index& elemno_)
 	}
 	else
 	{
+		m_elemCursor.reset();
 		rt = m_dbadapter.loadUpperBound( elemno_, m_elemBlk);
 	}
 	return rt;

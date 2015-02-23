@@ -199,7 +199,7 @@ void BooleanBlock::Node::getLastRange( Index& from_, Index& to_) const
 			break;
 
 		case PairNode:
-			if (elemno == alt.elemno2+1)
+			if (alt.elemno2 && elemno == alt.elemno2+1)
 			{
 				from_ = alt.elemno2;
 				to_ = elemno;
