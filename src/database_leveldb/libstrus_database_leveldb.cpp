@@ -31,6 +31,7 @@
 #include "strus/private/configParser.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
+#include <stdexcept>
 #include <leveldb/db.h>
 
 using namespace strus;

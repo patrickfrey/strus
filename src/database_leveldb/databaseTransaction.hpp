@@ -47,7 +47,7 @@ public:
 
 	virtual ~DatabaseTransaction();
 
-	virtual DatabaseCursorInterface* createCursor( bool useCache) const;
+	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const;
 
 	virtual void write(
 			const char* key,

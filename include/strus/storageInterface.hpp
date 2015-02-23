@@ -29,7 +29,6 @@
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/statCounterValue.hpp"
 #include <string>
 #include <vector>
 
@@ -155,9 +154,6 @@ public:
 	virtual StorageDocumentInterface* createDocumentChecker(
 			const std::string& docid,
 			const std::string& logfilename) const=0;
-
-	/// \brief Get some statistics (counters) of the storage
-	virtual std::vector<StatCounterValue> getStatistics() const=0;
 };
 
 }//namespace

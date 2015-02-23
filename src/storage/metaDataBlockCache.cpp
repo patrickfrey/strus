@@ -27,7 +27,6 @@
 --------------------------------------------------------------------
 */
 #include "metaDataBlockCache.hpp"
-#include "statistics.hpp"
 #include "strus/databaseInterface.hpp"
 #include "databaseAdapter.hpp"
 #include <stdexcept>
@@ -74,7 +73,6 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 	boost::shared_ptr<MetaDataBlock> blkref = m_ar[ blkidx];
 	while (!blkref.get())
 	{
-		Statistics::increment( Statistics::MetaDataCacheMiss);
 		MetaDataBlock* newblk = m_dbadapter.loadPtr( blockno);
 		if (newblk)
 		{

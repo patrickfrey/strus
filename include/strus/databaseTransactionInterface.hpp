@@ -34,6 +34,8 @@ namespace strus
 {
 /// \brief Forward declaration
 class DatabaseCursorInterface;
+/// \brief Forward declaration
+class DatabaseOptions;
 
 /// \brief Interface for transactions for writing on the strus key value storage database
 class DatabaseTransactionInterface
@@ -46,7 +48,7 @@ public:
 	/// \brief Get an interface for reading values in the context of this transaction
 	/// \param[in] useCache Hint for reader to cache visited key/value elements or blocks
 	/// \return the created cursor interface to be disposed with delete by the caller
-	virtual DatabaseCursorInterface* createCursor( bool useCache) const=0;
+	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const=0;
 
 	/// \brief Define a key/value pair to be written to the database as part of this transaction
 	/// \param[in] key pointer to the key to write

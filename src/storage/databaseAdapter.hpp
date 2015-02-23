@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
+#include "strus/databaseOptions.hpp"
 #include "strus/reference.hpp"
 #include "databaseKey.hpp"
 #include "blockKey.hpp"
@@ -64,7 +65,7 @@ public:
 	{
 	public:
 		Cursor( char prefix_, DatabaseInterface* database_)
-			:m_cursor( database_->createCursor(false)),m_prefix(prefix_){}
+			:m_cursor( database_->createCursor( DatabaseOptions())),m_prefix(prefix_){}
 
 		bool loadFirst( std::string& key, Index& value);
 		bool loadNext( std::string& key, Index& value);
@@ -216,7 +217,8 @@ class DatabaseAdapter_DataBlock_Cursor
 {
 public:
 	DatabaseAdapter_DataBlock_Cursor( DatabaseInterface* database_, char prefix_, const BlockKey& domainKey_)
-		:DatabaseAdapter_DataBlock( database_,prefix_,domainKey_),m_cursor(database_->createCursor(true))
+		:DatabaseAdapter_DataBlock( database_,prefix_,domainKey_)
+		,m_cursor(database_->createCursor( DatabaseOptions().useCache()))
 	{
 		m_domainKeySize = m_dbkey.size();
 	}
@@ -386,7 +388,7 @@ public:
 	{
 	public:
 		Cursor( DatabaseInterface* database_)
-			:m_cursor( database_->createCursor(false)){}
+			:m_cursor( database_->createCursor( DatabaseOptions())){}
 
 		bool loadFirst( Index& typeno, Index& termno, Index& df);
 		bool loadNext( Index& typeno, Index& termno, Index& df);

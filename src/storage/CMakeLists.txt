@@ -34,7 +34,6 @@ peerStorageTransaction.cpp
 posinfoBlock.cpp
 posinfoIterator.cpp
 postingIterator.cpp
-statistics.cpp
 storageAlterMetaDataTable.cpp
 storage.cpp
 storageDocumentChecker.cpp

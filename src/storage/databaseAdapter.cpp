@@ -77,7 +77,7 @@ bool DatabaseAdapter_StringIndex::load( const std::string& key, Index& value)
 	keystr.append( key);
 	std::string valuestr;
 	value = 0;
-	if (!m_database->readValue( keystr.c_str(), keystr.size(), valuestr, false)) return false;
+	if (!m_database->readValue( keystr.c_str(), keystr.size(), valuestr, DatabaseOptions())) return false;
 
 	char const* cc = valuestr.c_str();
 	value = unpackIndex( cc, cc + valuestr.size());
@@ -117,7 +117,7 @@ bool DatabaseAdapter_DataBlock::load( const Index& elemno, DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
 	std::string blkstr;
-	if (!m_database->readValue( m_dbkey.ptr(), m_dbkey.size(), blkstr, false)) return false;
+	if (!m_database->readValue( m_dbkey.ptr(), m_dbkey.size(), blkstr, DatabaseOptions())) return false;
 	blk.init( elemno, blkstr.c_str(), blkstr.size(), blkstr.size());
 	return true;
 }
@@ -361,7 +361,7 @@ bool DatabaseAdapter_DocMetaData::load( const Index& blockno, MetaDataBlock& blk
 {
 	std::string blkstr;
 	DatabaseKey dbkey( KeyPrefix, blockno);
-	if (!m_database->readValue( dbkey.ptr(), dbkey.size(), blkstr, false)) return false;
+	if (!m_database->readValue( dbkey.ptr(), dbkey.size(), blkstr, DatabaseOptions())) return false;
 	blk.init( m_descr, blockno, blkstr.c_str(), blkstr.size());
 	return true;
 }
@@ -370,7 +370,7 @@ MetaDataBlock* DatabaseAdapter_DocMetaData::loadPtr( const Index& blockno)
 {
 	std::string blkstr;
 	DatabaseKey dbkey( KeyPrefix, blockno);
-	if (!m_database->readValue( dbkey.ptr(), dbkey.size(), blkstr, false)) return 0;
+	if (!m_database->readValue( dbkey.ptr(), dbkey.size(), blkstr, DatabaseOptions())) return 0;
 	return new MetaDataBlock( m_descr, blockno, blkstr.c_str(), blkstr.size());
 }
 
@@ -378,7 +378,7 @@ bool DatabaseAdapter_DocMetaData::loadFirst( MetaDataBlock& blk)
 {
 	if (!m_cursor.get())
 	{
-		m_cursor.reset( m_database->createCursor( false));
+		m_cursor.reset( m_database->createCursor( DatabaseOptions()));
 	}
 	DatabaseKey dbkey( KeyPrefix);
 	DatabaseCursorInterface::Slice key = m_cursor->seekFirst( dbkey.ptr(), dbkey.size());
@@ -408,7 +408,7 @@ void DatabaseAdapter_DocMetaData::remove( DatabaseTransactionInterface* transact
 bool DatabaseAdapter_DocAttribute::load( const DatabaseInterface* database, const Index& docno, const Index& attrno, std::string& value)
 {
 	DatabaseKey dbkey( KeyPrefix, BlockKey( docno, attrno));
-	return database->readValue( dbkey.ptr(), dbkey.size(), value, true);
+	return database->readValue( dbkey.ptr(), dbkey.size(), value, DatabaseOptions().useCache());
 }
 
 void DatabaseAdapter_DocAttribute::store( DatabaseTransactionInterface* transaction, const Index& docno, const Index& attrno, const char* value)
@@ -462,7 +462,7 @@ bool DatabaseAdapter_DocFrequency::load( const DatabaseInterface* database, cons
 	DatabaseKey dbkey( KeyPrefix, BlockKey( typeno, termno));
 	std::string dfstr;
 	df = 0;
-	if (!database->readValue( dbkey.ptr(), dbkey.size(), dfstr, true)) return false;
+	if (!database->readValue( dbkey.ptr(), dbkey.size(), dfstr, DatabaseOptions().useCache())) return false;
 
 	char const* cc = dfstr.c_str();
 	df = unpackIndex( cc, cc + dfstr.size());
@@ -502,7 +502,7 @@ void DatabaseAdapter_DocFrequency::storeImm( DatabaseInterface* database, const 
 bool DatabaseAdapter_MetaDataDescr::load( const DatabaseInterface* database, std::string& descr)
 {
 	DatabaseKey dbkey( KeyPrefix);
-	return database->readValue( dbkey.ptr(), dbkey.size(), descr, false);
+	return database->readValue( dbkey.ptr(), dbkey.size(), descr, DatabaseOptions());
 }
 
 void DatabaseAdapter_MetaDataDescr::storeImm( DatabaseInterface* database, const std::string& descr)

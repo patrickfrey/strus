@@ -2,9 +2,4 @@ implement information extraction: variables attached to subexpressions. In the q
 strusModule project
 Dictionary Project for similarity search 
 operation 'in_annotation' that makes implements skipPos as skipPos/skipPosAnnotation, skipPosAnnotation( Index, Index), isAnnotation(): posinfo block mit einem zweiten level für die posinfo der annotationen, der erste level ist mit dem content synchronisiert, die zweite für strukturierte suche in annotationen, start/end marker für annotationen oder level 2 posinfo mit harten grenzen ohne übergänge -- denken
-flag set as integer instead of single boolean parameter (e.g. useLruCache) makes interface more stable (ABI change instead of API change for adding new flag)
-special handling (compression) of poisinfo blocks with df = 1
-See http://download.java.net/general/minion/javadoc/ for global statistics like nof distinct terms in the collection
-Enable analyzer to create configurable document metadata with per document statistics
-Check https://directory.fsf.org/wiki/Hyper_Estraier for publishing strus
-Replace locks on counters by atomic values
+

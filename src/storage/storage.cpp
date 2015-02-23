@@ -46,7 +46,6 @@
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
-#include "statistics.hpp"
 #include "attributeReader.hpp"
 #include "keyMap.hpp"
 #include "keyAllocatorInterface.hpp"
@@ -82,7 +81,6 @@ Storage::Storage( DatabaseInterface* database_, const char* termnomap_source)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
 	,m_global_nof_documents(0)
-	,m_transactionCnt(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
 	,m_storagePeer(0)
@@ -118,9 +116,6 @@ void Storage::releaseTransaction( const std::vector<Index>& refreshList)
 	m_metaDataBlockCache->refresh();
 
 	storeVariables();
-
-	boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
-	--m_transactionCnt;
 }
 
 void Storage::loadVariables()
@@ -165,12 +160,6 @@ void Storage::getVariablesWriteBatch(
 void Storage::close()
 {
 	storeVariables();
-
-	boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
-	if (m_transactionCnt)
-	{
-		throw std::runtime_error("cannot close storage with transactions alive");
-	}
 }
 
 Storage::~Storage()
@@ -296,10 +285,6 @@ InvAclIteratorInterface*
 StorageTransactionInterface*
 	Storage::createTransaction()
 {
-	{
-		boost::mutex::scoped_lock lock( m_transactionCnt_mutex);
-		++m_transactionCnt;
-	}
 	return new StorageTransaction( this, m_database, m_storagePeer, &m_metadescr, m_termno_map);
 }
 
@@ -335,7 +320,7 @@ public:
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		return m_storage->allocTypenoIm( name, isNew);
+		return m_storage->allocTypenoImm( name, isNew);
 	}
 	virtual Index alloc()
 	{
@@ -354,7 +339,7 @@ public:
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		return m_storage->allocDocnoIm( name, isNew);
+		return m_storage->allocDocnoImm( name, isNew);
 	}
 	virtual Index alloc()
 	{
@@ -376,7 +361,7 @@ public:
 		{
 			throw std::runtime_error( "storage configured without ACL. No users can be created");
 		}
-		return m_storage->allocUsernoIm( name, isNew);
+		return m_storage->allocUsernoImm( name, isNew);
 	}
 	virtual Index alloc()
 	{
@@ -394,7 +379,7 @@ public:
 		:KeyAllocatorInterface(true),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		return m_storage->allocAttribnoIm( name, isNew);
+		return m_storage->allocAttribnoImm( name, isNew);
 	}
 	virtual Index alloc()
 	{
@@ -460,7 +445,7 @@ Index Storage::allocTermno()
 	return m_next_termno++;
 }
 
-Index Storage::allocTypenoIm( const std::string& name, bool& isNew)
+Index Storage::allocTypenoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_typeno);
 	Index rt;
@@ -473,7 +458,7 @@ Index Storage::allocTypenoIm( const std::string& name, bool& isNew)
 	return rt;
 }
 
-Index Storage::allocDocnoIm( const std::string& name, bool& isNew)
+Index Storage::allocDocnoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_docno);
 	Index rt;
@@ -486,7 +471,7 @@ Index Storage::allocDocnoIm( const std::string& name, bool& isNew)
 	return rt;
 }
 
-Index Storage::allocUsernoIm( const std::string& name, bool& isNew)
+Index Storage::allocUsernoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_userno);
 	Index rt;
@@ -499,7 +484,7 @@ Index Storage::allocUsernoIm( const std::string& name, bool& isNew)
 	return rt;
 }
 
-Index Storage::allocAttribnoIm( const std::string& name, bool& isNew)
+Index Storage::allocAttribnoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_attribno);
 	Index rt;
@@ -590,17 +575,6 @@ AttributeReaderInterface* Storage::createAttributeReader() const
 MetaDataReaderInterface* Storage::createMetaDataReader() const
 {
 	return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
-}
-
-std::vector<StatCounterValue> Storage::getStatistics() const
-{
-	std::vector<StatCounterValue> rt;
-	Statistics::const_iterator si = Statistics::begin(), se = Statistics::end();
-	for (; si != se; ++si)
-	{
-		rt.push_back( StatCounterValue( si.typeName(), si.value()));
-	}
-	return rt;
 }
 
 void Storage::loadTermnoMap( const char* termnomap_source)

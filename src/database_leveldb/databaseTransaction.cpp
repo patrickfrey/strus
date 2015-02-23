@@ -29,6 +29,9 @@
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
 #include "database.hpp"
+#include "strus/databaseOptions.hpp"
+#include <cstring>
+#include <stdexcept>
 #include <boost/scoped_ptr.hpp>
 
 using namespace strus;
@@ -42,9 +45,9 @@ DatabaseTransaction::~DatabaseTransaction()
 	if (!m_commit_called && !m_rollback_called) rollback();
 }
 
-DatabaseCursorInterface* DatabaseTransaction::createCursor( bool useCache) const
+DatabaseCursorInterface* DatabaseTransaction::createCursor( const DatabaseOptions& options) const
 {
-	return m_database->createCursor( useCache);
+	return m_database->createCursor( options);
 }
 
 void DatabaseTransaction::write(

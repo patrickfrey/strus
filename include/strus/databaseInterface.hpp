@@ -39,6 +39,8 @@ class DatabaseTransactionInterface;
 class DatabaseCursorInterface;
 /// \brief Forward declaration
 class DatabaseBackupCursorInterface;
+/// \brief Forward declaration
+class DatabaseOptions;
 
 /// \brief Interface for accessing the strus key value storage database
 class DatabaseInterface
@@ -56,10 +58,12 @@ public:
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual DatabaseTransactionInterface* createTransaction()=0;
 
+	enum Options {UseLruCache};
+
 	/// \brief Create an object for reading values from and iterating on the key value store database
-	/// \param[in] useCache Hint for cursor to cache visited key/value elements or blocks
+	/// \param[in] options options for the created cursor
 	/// \return the created cursor interface to be disposed with delete by the caller
-	virtual DatabaseCursorInterface* createCursor( bool useCache) const=0;
+	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const=0;
 
 	/// \brief Creates an object for iterating on a snapshot of the database that can be used for backup
 	/// \return the created cursor interface to be disposed with delete by the caller
@@ -88,12 +92,13 @@ public:
 	/// \param[in] key pointer to the key of the item to fetch
 	/// \param[in] keysize size of the key of the item to fetch in bytes
 	/// \param[out] value the value as string
+	/// \param[in] options options as hints for the database
 	/// \return true, if it was found
 	virtual bool readValue(
 			const char* key,
 			std::size_t keysize,
 			std::string& value,
-			bool useCache=false) const=0;
+			const DatabaseOptions& options) const=0;
 };
 
 }//namespace

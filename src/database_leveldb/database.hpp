@@ -29,7 +29,6 @@
 #ifndef _STRUS_DATABASE_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_DATABASE_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseInterface.hpp"
-#include <boost/thread/mutex.hpp>
 #include <leveldb/db.h>
 
 namespace strus
@@ -51,7 +50,7 @@ public:
 
 	virtual DatabaseTransactionInterface* createTransaction();
 
-	virtual DatabaseCursorInterface* createCursor( bool useCache) const;
+	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const;
 
 	virtual DatabaseBackupCursorInterface* createBackupCursor() const;
 	
@@ -69,7 +68,7 @@ public:
 			const char* key,
 			std::size_t keysize,
 			std::string& value,
-			bool useCache=false) const;
+			const DatabaseOptions& options) const;
 
 public:
 	void cleanup();

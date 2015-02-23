@@ -26,27 +26,36 @@
 
 --------------------------------------------------------------------
 */
-#include "statistics.hpp"
-#include <boost/atomic.hpp>
+#ifndef _STRUS_DATABASE_OPTIONS_HPP_INCLUDED
+#define _STRUS_DATABASE_OPTIONS_HPP_INCLUDED
 
-using namespace strus;
-
-#ifdef _STRUS_ENABLE_STATISTICS
-static boost::atomic<Statistics::ValueType> g_counters[ Statistics::NofTypes];
-
-void Statistics::increment( Type idx)
+namespace strus
 {
-	g_counters[ idx].fetch_add( 1, boost::memory_order_relaxed);
-}
 
-Statistics::ValueType Statistics::value( Type idx)
+/// \brief Structure for passing some options to the strus key value storage database
+class DatabaseOptions
 {
-	return g_counters[ idx].load( boost::memory_order_relaxed);
-}
+public:
+	DatabaseOptions()
+		:m_opt(0){}
+
+	/// \brief Enable caching of visited key/value elements or blocks
+	DatabaseOptions& useCache( bool yes=true)
+	{
+		if (yes) m_opt |= UseCache; else m_opt &= ~UseCache;
+		return *this;
+	}
+
+	bool useCacheEnabled() const
+	{
+		return m_opt & UseCache;
+	}
+
+private:
+	unsigned int m_opt;
+	enum {UseCache=1};
+};
+
+}//namespace
 #endif
-
-
-
-
-
 

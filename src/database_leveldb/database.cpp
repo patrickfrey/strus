@@ -31,6 +31,7 @@
 #include "databaseCursor.hpp"
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/databaseOptions.hpp"
 #include <stdexcept>
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
@@ -96,9 +97,9 @@ DatabaseTransactionInterface* Database::createTransaction()
 	return new DatabaseTransaction( m_db, this);
 }
 
-DatabaseCursorInterface* Database::createCursor( bool useCache) const
+DatabaseCursorInterface* Database::createCursor( const DatabaseOptions& options) const
 {
-	return new DatabaseCursor( m_db, useCache);
+	return new DatabaseCursor( m_db, options.useCacheEnabled());
 }
 
 
@@ -176,13 +177,13 @@ bool Database::readValue(
 		const char* key,
 		std::size_t keysize,
 		std::string& value,
-		bool useCache) const
+		const DatabaseOptions& options) const
 {
 	std::string rt;
-	leveldb::ReadOptions options;
-	options.fill_cache = useCache;
+	leveldb::ReadOptions readoptions;
+	readoptions.fill_cache = options.useCacheEnabled();
 
-	leveldb::Status status = m_db->Get( options, leveldb::Slice( key, keysize), &value);
+	leveldb::Status status = m_db->Get( readoptions, leveldb::Slice( key, keysize), &value);
 	if (status.IsNotFound())
 	{
 		return false;

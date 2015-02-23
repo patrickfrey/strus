@@ -33,7 +33,6 @@
 #include "databaseAdapter.hpp"
 #include <string>
 #include <vector>
-#include <boost/thread/mutex.hpp>
 
 namespace strus
 {

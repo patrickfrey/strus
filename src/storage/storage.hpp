@@ -119,8 +119,6 @@ public:
 
 	Index userId( const std::string& username) const;
 
-	virtual std::vector<StatCounterValue> getStatistics() const;
-
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
 
 	virtual void defineStoragePeerInterface(
@@ -154,10 +152,10 @@ public:/*StorageTransaction*/
 	bool withAcl() const;
 
 	Index allocTermno();
-	Index allocTypenoIm( const std::string& name, bool& isNew);///< immediate allocation of a term type
-	Index allocDocnoIm( const std::string& name, bool& isNew); ///< immediate allocation of a doc number
-	Index allocUsernoIm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
-	Index allocAttribnoIm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
+	Index allocTypenoImm( const std::string& name, bool& isNew);///< immediate allocation of a term type
+	Index allocDocnoImm( const std::string& name, bool& isNew); ///< immediate allocation of a doc number
+	Index allocUsernoImm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
+	Index allocAttribnoImm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
 
 	friend class TransactionLock;
 	class TransactionLock
@@ -209,10 +207,7 @@ private:
 	GlobalCounter m_global_nof_documents;			///< global number of documents inserted
 	boost::mutex m_nof_documents_mutex;
 
-	Index m_transactionCnt;
-	boost::mutex m_transactionCnt_mutex;			///< mutual exclusion for accessing global counters
-
-	boost::mutex m_transaction_mutex;			///< mutual exclusion for the critical part of a transaction
+	boost::mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks

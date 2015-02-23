@@ -28,7 +28,6 @@
 */
 #include "posinfoIterator.hpp"
 #include "storage.hpp"
-#include "statistics.hpp"
 
 using namespace strus;
 
@@ -78,8 +77,6 @@ Index PosinfoIterator::skipDoc( const Index& docno_)
 				m_docno_start = m_posinfoBlk.firstDoc( m_posinfoCursor);
 				m_docno_end = m_posinfoBlk.id();
 
-				Statistics::increment( Statistics::PosinfoBlockReadBlockFollow);
-
 				if (docno_ >= m_docno_start && docno_ <= m_docno_end)
 				{
 					return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoCursor);
@@ -88,14 +85,12 @@ Index PosinfoIterator::skipDoc( const Index& docno_)
 				{
 					if (m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
 					{
-						Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
 						m_docno_start = m_posinfoBlk.firstDoc( m_posinfoCursor);
 						m_docno_end = m_posinfoBlk.id();
 						return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoCursor);
 					}
 					else
 					{
-						Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
 						m_posinfoCursor.reset();
 						return m_docno = m_docno_start = m_docno_end = 0;
 					}
@@ -109,14 +104,12 @@ Index PosinfoIterator::skipDoc( const Index& docno_)
 			// [D] Document postings are in a 'far away' block
 			if (m_dbadapter.loadUpperBound( docno_, m_posinfoBlk))
 			{
-				Statistics::increment( Statistics::PosinfoBlockReadBlockRandom);
 				m_docno_start = m_posinfoBlk.firstDoc( m_posinfoCursor);
 				m_docno_end = m_posinfoBlk.id();
 				return m_docno = m_posinfoBlk.skipDoc( docno_, m_posinfoCursor);
 			}
 			else
 			{
-				Statistics::increment( Statistics::PosinfoBlockReadBlockRandomMiss);
 				m_posinfoCursor.reset();
 				return m_docno = m_docno_start = m_docno_end = 0;
 			}

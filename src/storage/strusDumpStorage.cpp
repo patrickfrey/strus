@@ -30,6 +30,7 @@
 #include "databaseKey.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
+#include "strus/databaseOptions.hpp"
 #include "extractKeyValueData.hpp"
 #include "strus/private/cmdLineOpt.hpp"
 #include <iostream>
@@ -195,7 +196,7 @@ static void dumpDB( std::ostream& out, strus::DatabaseInterface* database)
 {
 	strus::MetaDataDescription metadescr( database);
 	boost::scoped_ptr<strus::DatabaseCursorInterface>
-		cursor( database->createCursor(false));
+		cursor( database->createCursor( strus::DatabaseOptions()));
 
 	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
 	char prevkeytype = 0;
@@ -238,7 +239,7 @@ static void dumpDB( std::ostream& out, strus::DatabaseInterface* database, char 
 	}
 	strus::MetaDataDescription metadescr( database);
 	boost::scoped_ptr<strus::DatabaseCursorInterface>
-		cursor( database->createCursor(false));
+		cursor( database->createCursor( strus::DatabaseOptions()));
 
 	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( &keyprefix, 1);
 	unsigned int cnt = 0;

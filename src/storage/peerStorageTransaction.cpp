@@ -29,7 +29,6 @@
 #include "peerStorageTransaction.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "storage.hpp"
-#include <boost/thread/mutex.hpp>
 
 using namespace strus;
 
@@ -58,7 +57,7 @@ void PeerStorageTransaction::updateDocumentFrequencyChange(
 		const char* termtype, const char* termvalue, const GlobalCounter& increment)
 {
 	bool typeno_isNew = false;
-	Index typeno = m_storage->allocTypenoIm( termtype, typeno_isNew);
+	Index typeno = m_storage->allocTypenoImm( termtype, typeno_isNew);
 	Index termno = m_dbadapter_termvalue.get( termvalue);
 	if (!termno)
 	{
