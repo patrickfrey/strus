@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_ITERATOR_PREDECCESSOR_HPP_INCLUDED
 #define _STRUS_ITERATOR_PREDECCESSOR_HPP_INCLUDED
-#include "iterator/postingIteratorJoin.hpp"
+#include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 
 namespace strus

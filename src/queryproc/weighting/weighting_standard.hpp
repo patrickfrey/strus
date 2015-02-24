@@ -26,54 +26,29 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of helper functions shared by iterators
-#include "postingIteratorHelpers.hpp"
-#include <sstream>
-#include <iostream>
+/// \brief Library providing some standard weighting functions
+#ifndef _STRUS_WEIGHTING_STANDARD_LIB_HPP_INCLUDED
+#define _STRUS_WEIGHTING_STANDARD_LIB_HPP_INCLUDED
 
-using namespace strus;
-
-Index strus::getFirstAllMatchDocno(
-		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno_iter)
+namespace strus
 {
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin(), ae = args.end();
-		if (ai == ae) return 0;
-		
-		Index docno_first = (*ai)->skipDoc( docno_iter);
-		if (!docno_first)
-		{
-			return 0;
-		}
-		bool match = true;
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDoc( docno_first);
-			if (!docno_next)
-			{
-				return 0;
-			}
-			if (docno_next != docno_first)
-			{
-				match = false;
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (match)
-		{
-			return docno_first;
-		}
-	}
-}
 
-void strus::encodeInteger( std::string& buf, int val)
-{
-	std::ostringstream num;
-	num << val;
-	buf.append( num.str());
-}
+/// \brief Forward declaration
+class WeightingFunctionInterface;
+
+/// \brief Create a weighting function for the weighting schema BM25
+/// \return the summarizer reference (to dispose with delete)
+WeightingFunctionInterface* createWeightingFunctionBm25();
+
+/// \brief Create a weighting function that accumulates a constant for each matching feature in a document
+/// \return the summarizer reference (to dispose with delete)
+WeightingFunctionInterface* createWeightingFunctionConstant();
+
+/// \brief Create a weighting function that accumulates the feature frequency for each matching feature in a document
+/// \return the summarizer reference (to dispose with delete)
+WeightingFunctionInterface* createWeightingFunctionTermFrequency();
+
+}//namespace
+#endif
+
 

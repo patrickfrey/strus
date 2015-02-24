@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/postingIteratorDifference.hpp"
+#include "postingIteratorDifference.hpp"
 #include <stdexcept>
 
 using namespace strus;

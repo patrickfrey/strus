@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/postingIteratorStructWithin.hpp"
-#include "iterator/postingIteratorHelpers.hpp"
+#include "postingIteratorStructWithin.hpp"
+#include "postingIteratorHelpers.hpp"
 #include <stdexcept>
 #include <vector>
 #include <algorithm>

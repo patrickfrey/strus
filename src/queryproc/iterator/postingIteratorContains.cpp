@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/postingIteratorContains.hpp"
+#include "postingIteratorContains.hpp"
 #include <stdexcept>
 #include <cstdlib>
 

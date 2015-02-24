@@ -59,6 +59,13 @@ public:
 	/// \param[in] range_ range of the expression
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_)=0;
 
+	/// \brief Attaches a variable to the top expression or term on the query stack.
+	/// \note The positions of the query matches of the referenced term or expression can be accessed through this variable in summarization.
+	/// \param[in] name_ name of the variable attached
+	/// \remark The stack is not changed
+	/// \remark More than one variable can be attached
+	virtual void attachVariable( const std::string& name_)=0;
+
 	/// \brief Define the topmost element of the stack as feature, removing it from the stack
 	/// \param[in] set_ name of the set of the new feature created
 	/// \param[in] weight_ weight of the feature for the weighting function in query evaluation 

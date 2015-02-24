@@ -1,5 +1,3 @@
-implement information extraction: variables attached to subexpressions. In the queryeval for every match collect the docnos of the subexpression variables and attach them to the list of match postings of this variable. Then create a postingIterator on them that can be passed to a summarizer
 strusModule project
-Dictionary Project for similarity search 
-operation 'in_annotation' that makes implements skipPos as skipPos/skipPosAnnotation, skipPosAnnotation( Index, Index), isAnnotation(): posinfo block mit einem zweiten level für die posinfo der annotationen, der erste level ist mit dem content synchronisiert, die zweite für strukturierte suche in annotationen, start/end marker für annotationen oder level 2 posinfo mit harten grenzen ohne übergänge -- denken
-
+get wikipedia as example project (english,german)
+See POS tagging (http://acopost.sourceforge.net/)

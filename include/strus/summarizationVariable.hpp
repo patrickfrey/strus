@@ -26,34 +26,35 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#define _STRUS_ITERATOR_UNION_WEIGHTED_HPP_INCLUDED
-#include "iterator/postingIteratorUnion.hpp"
-#include "strus/postingJoinOperatorInterface.hpp"
-#include <map>
+#ifndef _STRUS_SUMMARIZATION_VARIABLE_HPP_INCLUDED
+#define _STRUS_SUMMARIZATION_VARIABLE_HPP_INCLUDED
+#include "strus/index.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include <vector>
+#include <string>
 
 namespace strus
 {
 
-class IteratorUnionWeighted
-	:public IteratorUnion
+/// \brief Structure describing a variable referencing a named match of a subexpression. Variables are attached to features used for summarization.
+class SummarizationVariable
 {
 public:
-	IteratorUnionWeighted( const std::vector<Reference< PostingIteratorInterface> >& args);
+	SummarizationVariable( const std::string& name_, PostingIteratorInterface* itr_)
+		:m_name(name_),m_itr(itr_){}
+	SummarizationVariable( const SummarizationVariable& o)
+		:m_name(o.m_name),m_itr(o.m_itr){}
 
-	virtual ~IteratorUnionWeighted(){}
-
-	virtual Index skipDoc( const Index& docno_);
-	virtual Index skipPos( const Index& pos_);
-
-	float positionWeight() const;
+	/// \brief Name of the variable
+	const std::string& name() const			{return m_name;}
+	/// \brief Feature occurrence attached to this variable at the current position of the summarizer feature posting iterator this variable is attached to.
+	Index position() const				{return m_itr->posno();}
 
 private:
-	std::map<Index,float> m_weightmap;
-	std::map<Index,float>::const_iterator m_weightitr;
+	std::string m_name;
+	PostingIteratorInterface* m_itr;
 };
 
 }//namespace
 #endif
-
 

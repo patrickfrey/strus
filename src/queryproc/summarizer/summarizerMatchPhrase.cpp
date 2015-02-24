@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "summarizerMatchPhrase.hpp"
-#include "iterator/postingIteratorLink.hpp"
+#include "postingIteratorLink.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -61,14 +61,14 @@ SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 	{
 		if (SummarizerFunctionMatchPhrase::isStructFeature( fi->classidx()))
 		{
-			m_phrasestruct = fi->postingIterator();
+			m_phrasestruct = fi->feature().postingIterator();
 			Reference<PostingIteratorInterface> ref(
-				new PostingIteratorLink( fi->postingIterator()));
+				new PostingIteratorLink( fi->feature().postingIterator()));
 			structelem.push_back( ref);
 		}
 		else if (SummarizerFunctionMatchPhrase::isMatchFeature( fi->classidx()))
 		{
-			m_itr.push_back( fi->postingIterator());
+			m_itr.push_back( fi->feature().postingIterator());
 		}
 		else
 		{

@@ -30,6 +30,7 @@
 #define _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/summarizationFeature.hpp"
 #include <vector>
 
 namespace strus
@@ -66,21 +67,21 @@ public:
 	/// \return the NULL terminated list of feature class names or NULL, if there are none
 	virtual const char** featureParameterClassNames() const		{return 0;}
 
-	/// \brief Definition of an argument feature for 
+	/// \brief Definition of an argument feature for summarization
 	class FeatureParameter
 	{
 	public:
-		FeatureParameter( std::size_t classidx_, PostingIteratorInterface* itr_)
-			:m_classidx(classidx_),m_postingIterator(itr_){}
+		FeatureParameter( std::size_t classidx_, const SummarizationFeature& feature_)
+			:m_classidx(classidx_),m_feature(feature_){}
 		FeatureParameter( const FeatureParameter& o)
-			:m_classidx(o.m_classidx),m_postingIterator(o.m_postingIterator){}
+			:m_classidx(o.m_classidx),m_feature(o.m_feature){}
 
 		std::size_t classidx() const				{return m_classidx;}
-		PostingIteratorInterface* postingIterator() const	{return m_postingIterator;}
+		const SummarizationFeature& feature() const		{return m_feature;}
 
 	private:
 		std::size_t m_classidx;
-		PostingIteratorInterface* m_postingIterator;
+		SummarizationFeature m_feature;
 	};
 
 	/// \brief Create a closure (execution context) for this summarization function

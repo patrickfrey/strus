@@ -26,54 +26,30 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of helper functions shared by iterators
-#include "postingIteratorHelpers.hpp"
-#include <sstream>
-#include <iostream>
+/// \brief Library providing some standard weighting functions
+#include "weighting_standard.hpp"
+#include "weightingBM25.hpp"
+#include "weightingConstant.hpp"
+#include "weightingFrequency.hpp"
+#include "private/dll_tags.hpp"
 
 using namespace strus;
 
-Index strus::getFirstAllMatchDocno(
-		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno_iter)
+WeightingFunctionInterface* strus::createWeightingFunctionBm25()
 {
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin(), ae = args.end();
-		if (ai == ae) return 0;
-		
-		Index docno_first = (*ai)->skipDoc( docno_iter);
-		if (!docno_first)
-		{
-			return 0;
-		}
-		bool match = true;
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDoc( docno_first);
-			if (!docno_next)
-			{
-				return 0;
-			}
-			if (docno_next != docno_first)
-			{
-				match = false;
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (match)
-		{
-			return docno_first;
-		}
-	}
+	return new WeightingFunctionBM25();
 }
 
-void strus::encodeInteger( std::string& buf, int val)
+WeightingFunctionInterface* strus::createWeightingFunctionConstant()
 {
-	std::ostringstream num;
-	num << val;
-	buf.append( num.str());
+	return new WeightingFunctionConstant();
 }
+
+WeightingFunctionInterface* strus::createWeightingFunctionTermFrequency()
+{
+	return new WeightingFunctionTermFrequency();
+}
+
+
+
 

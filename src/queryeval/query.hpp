@@ -30,9 +30,11 @@
 #define _STRUS_QUERY_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/summarizationFeature.hpp"
 #include "metaDataRestriction.hpp"
 #include <vector>
 #include <string>
+#include <map>
 #include <utility>
 #include <iostream>
 #include <stdexcept>
@@ -68,6 +70,7 @@ public:
 
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_);
+	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 
 	virtual void defineMetaDataRestriction(
@@ -153,8 +156,15 @@ public:
 
 private:
 	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr);
-	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& node);
+	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr);
+	SummarizationFeature createSummarizationFeature( const NodeAddress& nodeadr);
+	void collectSummarizationVariables(
+				std::vector<SummarizationVariable>& variables,
+				const NodeAddress& nodeadr);
+	PostingIteratorInterface* nodePostings( const NodeAddress& nodeadr) const;
+
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent);
+	void printVariables( std::ostream& out, NodeAddress adr);
 
 private:
 	const QueryEval* m_queryEval;
@@ -166,6 +176,8 @@ private:
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
+	std::map<NodeAddress,PostingIteratorInterface*> m_nodePostingsMap;
+	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_maxNofRanks;
 	std::size_t m_minRank;
 	std::string m_username;

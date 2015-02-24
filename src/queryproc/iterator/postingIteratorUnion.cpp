@@ -1,4 +1,4 @@
-#include "iterator/postingIteratorUnion.hpp"
+#include "postingIteratorUnion.hpp"
 #include <cstdlib>
 
 using namespace strus;

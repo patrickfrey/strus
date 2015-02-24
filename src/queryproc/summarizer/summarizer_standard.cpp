@@ -26,54 +26,40 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of helper functions shared by iterators
-#include "postingIteratorHelpers.hpp"
-#include <sstream>
-#include <iostream>
+/// \brief Library providing some standard summarizers
+#include "summarizer_standard.hpp"
+#include "summarizerMetaData.hpp"
+#include "summarizerAttribute.hpp"
+#include "summarizerMatchPhrase.hpp"
+#include "summarizerListMatches.hpp"
+#include "summarizerMatchVariables.hpp"
 
 using namespace strus;
 
-Index strus::getFirstAllMatchDocno(
-		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno_iter)
+SummarizerFunctionInterface* strus::createSummarizerListMatches()
 {
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin(), ae = args.end();
-		if (ai == ae) return 0;
-		
-		Index docno_first = (*ai)->skipDoc( docno_iter);
-		if (!docno_first)
-		{
-			return 0;
-		}
-		bool match = true;
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDoc( docno_first);
-			if (!docno_next)
-			{
-				return 0;
-			}
-			if (docno_next != docno_first)
-			{
-				match = false;
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (match)
-		{
-			return docno_first;
-		}
-	}
+	return new SummarizerFunctionListMatches();
 }
 
-void strus::encodeInteger( std::string& buf, int val)
+SummarizerFunctionInterface* strus::createSummarizerAttribute()
 {
-	std::ostringstream num;
-	num << val;
-	buf.append( num.str());
+	return new SummarizerFunctionAttribute();
 }
+
+SummarizerFunctionInterface* strus::createSummarizerMetaData()
+{
+	return new SummarizerFunctionMetaData();
+}
+
+SummarizerFunctionInterface* strus::createSummarizerMatchPhrase()
+{
+	return new SummarizerFunctionMatchPhrase();
+}
+
+SummarizerFunctionInterface* strus::createSummarizerMatchVariables()
+{
+	return new SummarizerFunctionMatchVariables();
+}
+
+
 

@@ -1,26 +1,15 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+add_subdirectory( summarizer )
+add_subdirectory( iterator )
+add_subdirectory( weighting )
+
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set(libstrus_queryproc_source_files
-libstrus_queryproc.cpp
-queryProcessor.cpp
-libstrus_queryproc.cpp
-weighting/weightingBM25.cpp
-iterator/postingIteratorIntersect.cpp
-iterator/postingIteratorStructWithin.cpp
-iterator/postingIteratorHelpers.cpp
-iterator/postingIteratorContains.cpp
-iterator/postingIteratorUnionWeighted.cpp
-iterator/postingIteratorUnion.cpp
-iterator/postingIteratorStructSequence.cpp
-iterator/postingIteratorDifference.cpp
-summarizer/summarizerAttribute.cpp
-summarizer/summarizerListMatches.cpp
-summarizer/summarizerMetaData.cpp
-summarizer/summarizerMatchPhrase.cpp
-queryProcessor.cpp
+set( source_files
+	queryProcessor.cpp
+	libstrus_queryproc.cpp
 )
 
 include_directories(
@@ -29,11 +18,18 @@ include_directories(
   "${PROJECT_SOURCE_DIR}/src/queryproc"
 )
 
+link_directories(
+   "${PROJECT_SOURCE_DIR}/src/queryproc/iterator"
+   "${PROJECT_SOURCE_DIR}/src/queryproc/summarize"
+   "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
+)
+
+
 # -------------------------------------------
-# QUERY PROCESSOR LIBRARY
+# LIBRARY
 # -------------------------------------------
-add_library(strus_queryproc SHARED ${libstrus_queryproc_source_files})
-target_link_libraries( strus_queryproc strus_utils )
+add_library( strus_queryproc SHARED ${source_files})
+target_link_libraries( strus_queryproc strus_utils iterator_standard summarizer_standard weighting_standard)
 set_target_properties(
     strus_queryproc
     PROPERTIES

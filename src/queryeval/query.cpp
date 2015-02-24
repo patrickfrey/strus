@@ -70,16 +70,19 @@ Query::Query( const QueryEval* queryEval_, const StorageInterface* storage_, con
 
 Query::Query( const Query& o)
 	:m_queryEval(o.m_queryEval)
+	,m_storage(o.m_storage)
 	,m_processor(o.m_processor)
+	,m_metaDataReader(o.m_metaDataReader)
 	,m_terms(o.m_terms)
 	,m_expressions(o.m_expressions)
 	,m_features(o.m_features)
 	,m_stack(o.m_stack)
+	,m_metaDataRestrictions(o.m_metaDataRestrictions)
+	,m_variableAssignments(o.m_variableAssignments)
 	,m_maxNofRanks(o.m_maxNofRanks)
 	,m_minRank(o.m_minRank)
 	,m_username(o.m_username)
 {}
-
 
 void Query::pushTerm( const std::string& type_, const std::string& value_)
 {
@@ -102,6 +105,15 @@ void Query::pushExpression( const std::string& opname_, std::size_t argc, int ra
 	m_expressions.push_back( Expression( opname_, subnodes, range_));
 	m_stack.resize( m_stack.size() - argc);
 	m_stack.push_back( nodeAddress( ExpressionNode, m_expressions.size()-1));
+}
+
+void Query::attachVariable( const std::string& name_)
+{
+	if (m_stack.empty())
+	{
+		throw std::runtime_error( "cannot attach variable (query stack empty)");
+	}
+	m_variableAssignments.insert( std::pair<NodeAddress,std::string>( m_stack.back(), name_));
 }
 
 void Query::defineFeature( const std::string& set_, float weight_)
@@ -130,24 +142,48 @@ void Query::print( std::ostream& out)
 	}
 }
 
+void Query::printVariables( std::ostream& out, NodeAddress adr)
+{
+	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
+	std::pair<Itr,Itr> variables = m_variableAssignments.equal_range( adr);
+
+	if (variables.first != variables.second)
+	{
+		out << " [";
+		Itr vi = variables.first, ve = variables.second;
+		for (std::size_t vidx=0; vi != ve; ++vi,++vidx)
+		{
+			if (vidx) out << ",";
+			out << vi->second;
+		}
+		out << "]";
+	}
+}
+
 void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent)
 {
 	std::string indentstr( indent*2, ' ');
 	switch (nodeType( adr))
 	{
 		case NullNode:
-			out << indentstr << "NULL" << std::endl;
+			out << indentstr << "NULL";
+			printVariables( out, adr);
+			out << std::endl;
 			break;
 		case TermNode:
 		{
 			const Term& term = m_terms[ nodeIndex( adr)];
-			out << indentstr << "term " << term.type << " '" << term.value << "'" << std::endl;
+			out << indentstr << "term " << term.type << " '" << term.value << "'";
+			printVariables( out, adr);
+			out << std::endl;
 			break;
 		}
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			out << indentstr << expr.opname << " " << expr.range << ":" << std::endl;
+			out << indentstr << expr.opname << " " << expr.range << ":";
+			printVariables( out, adr);
+			out << std::endl;
 			std::vector<NodeAddress>::const_iterator
 				ni = expr.subnodes.begin(),
 				ne = expr.subnodes.end();
@@ -192,45 +228,99 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 	{
 		switch (nodeType( *ni))
 		{
-			case NullNode: break;
+			case NullNode:
+				break;
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				joinargs.push_back( m_processor->createTermPostingIterator(
 							term.type, term.value));
+				m_nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
 							m_expressions[ *ni]));
+				m_nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
-
 		}
 	}
 	return join->createResultIterator( joinargs, expr.range);
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& node)
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr)
 {
 	PostingIteratorInterface* rt = 0;
-	switch (nodeType( node))
+	switch (nodeType( nodeadr))
 	{
 		case NullNode: break;
 		case TermNode:
 		{
-			std::size_t nidx = nodeIndex( node);
+			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
 			rt = m_processor->createTermPostingIterator( term.type, term.value);
+			m_nodePostingsMap[ nodeadr] = rt;
 			break;
 		}
 		case ExpressionNode:
-			std::size_t nidx = nodeIndex( node);
+			std::size_t nidx = nodeIndex( nodeadr);
 			rt = createExpressionPostingIterator( m_expressions[ nidx]);
+			m_nodePostingsMap[ nodeadr] = rt;
 			break;
 	}
 	return rt;
 }
+
+PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
+{
+	std::map<NodeAddress,PostingIteratorInterface*>::const_iterator
+		pi = m_nodePostingsMap.find( nodeadr);
+	if (pi == m_nodePostingsMap.end())
+	{
+		throw std::runtime_error("internal: expression node postings not found");
+	}
+	return pi->second;
+}
+
+void Query::collectSummarizationVariables(
+			std::vector<SummarizationVariable>& variables,
+			const NodeAddress& nodeadr)
+{
+	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
+	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( nodeadr);
+
+	Itr vi = vrange.first, ve = vrange.second;
+	for (; vi != ve; ++vi)
+	{
+		variables.push_back( SummarizationVariable( vi->second, nodePostings( nodeadr)));
+	}
+
+	switch (nodeType( nodeadr))
+	{
+		case NullNode: break;
+		case TermNode: break;
+		case ExpressionNode:
+		{
+			std::size_t nidx = nodeIndex( nodeadr);
+			const Expression& expr = m_expressions[ nidx];
+			std::vector<NodeAddress>::const_iterator
+				ni = expr.subnodes.begin(), 
+				ne = expr.subnodes.end();
+			collectSummarizationVariables( variables, *ni);
+			break;
+		}
+	}
+}
+
+SummarizationFeature Query::createSummarizationFeature(
+			const NodeAddress& nodeadr)
+{
+	std::vector<SummarizationVariable> variables;
+	collectSummarizationVariables( variables, nodeadr);
+	return SummarizationFeature( nodePostings(nodeadr), variables);
+}
+
 
 std::vector<ResultDocument> Query::evaluate()
 {
@@ -251,7 +341,6 @@ std::vector<ResultDocument> Query::evaluate()
 
 	// [3] Create the posting sets of the query features:
 	std::vector<Reference<PostingIteratorInterface> > postings;
-	std::map<NodeAddress,std::size_t> featurePostingsMap;
 
 	std::vector<Feature>::const_iterator
 		fi = m_features.begin(), fe = m_features.end();
@@ -260,7 +349,6 @@ std::vector<ResultDocument> Query::evaluate()
 		Reference<PostingIteratorInterface> postingsElem(
 			createNodePostingIterator( fi->node));
 		postings.push_back( postingsElem);
-		featurePostingsMap[ fi->node] = postings.size()-1;
 	}
 
 	// [4] Create the accumulator:
@@ -287,13 +375,13 @@ std::vector<ResultDocument> Query::evaluate()
 		{
 			if (*si == fi->set)
 			{
-				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
 				accumulator.addSelector(
-					postings[ pidx].get(),
-					sidx, nodeType( fi->node) == ExpressionNode);
+					nodePostings( fi->node), sidx, 
+					nodeType( fi->node) == ExpressionNode);
 			}
 		}
 	}
+
 	// [4.2] Add features for weighting:
 	std::vector<std::string>::const_iterator
 		wi = m_queryEval->weightingSets().begin(),
@@ -305,8 +393,7 @@ std::vector<ResultDocument> Query::evaluate()
 		{
 			if (*wi == fi->set)
 			{
-				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
-				accumulator.addFeature( postings[ pidx].get(), fi->weight);
+				accumulator.addFeature( nodePostings( fi->node), fi->weight);
 			}
 		}
 	}
@@ -328,9 +415,9 @@ std::vector<ResultDocument> Query::evaluate()
 		{
 			if (*xi == fi->set)
 			{
-				std::size_t pidx = featurePostingsMap.find( fi->node)->second;
 				accumulator.addFeatureRestriction(
-					postings[ pidx].get(), nodeType( fi->node) == ExpressionNode);
+					nodePostings( fi->node),
+					nodeType( fi->node) == ExpressionNode);
 			}
 		}
 	}
@@ -354,10 +441,12 @@ std::vector<ResultDocument> Query::evaluate()
 			{
 				if (fi->set == si->set)
 				{
-					std::size_t pidx = featurePostingsMap.find( fi->node)->second;
+					SummarizationFeature
+						sumfeat = createSummarizationFeature( fi->node);
+
 					summarizeFeatures.push_back(
 						SummarizerFunctionInterface::FeatureParameter(
-							si->classidx, postings[ pidx].get()));
+							si->classidx, sumfeat));
 				}
 			}
 		}

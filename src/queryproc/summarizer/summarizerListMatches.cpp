@@ -46,7 +46,7 @@ SummarizerClosureListMatches::SummarizerClosureListMatches(
 		fi = postings_.begin(), fe = postings_.end();
 	for (; fi != fe; ++fi)
 	{
-		m_itrs.push_back( fi->postingIterator());
+		m_itrs.push_back( fi->feature().postingIterator());
 	}
 }
 

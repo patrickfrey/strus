@@ -49,6 +49,8 @@ class SummarizerClosureMetaData
 	:public SummarizerClosureInterface
 {
 public:
+	/// \param[in] metadata_ reader for document meta data
+	/// \param[in] name_ meta data field identifier
 	SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
 	virtual ~SummarizerClosureMetaData(){}
 

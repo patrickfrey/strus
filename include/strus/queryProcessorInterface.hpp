@@ -63,11 +63,11 @@ public:
 
 	/// \brief Define a new posting set join operation
 	/// \param[in] name the name of the function
-	/// \param[in] func the function reference
+	/// \param[in] op the function reference (ownership passed to this)
 	virtual void
 		definePostingJoinOperator(
-			const char* name,
-			const PostingJoinOperatorInterface* op)=0;
+			const std::string& name,
+			PostingJoinOperatorInterface* op)=0;
 
 	/// \brief Get a join function reference defined by 'name'
 	/// \param[in] name name of the join function to get
@@ -78,11 +78,12 @@ public:
 
 	/// \brief Define a new weighting function
 	/// \param[in] name the name of the function
-	/// \param[in] func the function to define
+	/// \param[in] func the function to define (ownership passed to this)
+
 	virtual void
 		defineWeightingFunction(
-			const char* name,
-			const WeightingFunctionInterface* func)=0;
+			const std::string& name,
+			WeightingFunctionInterface* func)=0;
 
 	/// \brief Get a weighting function reference by name
 	/// \param[in] name name of the weighting function
@@ -93,11 +94,11 @@ public:
 
 	/// \brief Define a new summarization function
 	/// \param[in] name name of the summarization function
-	/// \param[in] the summarization function object reference
+	/// \param[in] the summarization function object reference (ownership passed to this)
 	virtual void
 		defineSummarizerFunction(
-			const char* name,
-			const SummarizerFunctionInterface* sumfunc)=0;
+			const std::string& name,
+			SummarizerFunctionInterface* sumfunc)=0;
 
 	/// \brief Get a summarization function reference by name
 	/// \param[in] name name of the summarization function

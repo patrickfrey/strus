@@ -27,24 +27,11 @@
 --------------------------------------------------------------------
 */
 #include "queryProcessor.hpp"
+#include "summarizer/summarizer_standard.hpp"
+#include "iterator/iterator_standard.hpp"
+#include "weighting/weighting_standard.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageInterface.hpp"
-#include "strus/postingIteratorInterface.hpp"
-#include "iterator/postingIteratorContains.hpp"
-#include "iterator/postingIteratorPred.hpp"
-#include "iterator/postingIteratorSucc.hpp"
-#include "iterator/postingIteratorIntersect.hpp"
-#include "iterator/postingIteratorUnion.hpp"
-#include "iterator/postingIteratorDifference.hpp"
-#include "iterator/postingIteratorStructWithin.hpp"
-#include "iterator/postingIteratorStructSequence.hpp"
-#include "weighting/weightingConstant.hpp"
-#include "weighting/weightingFrequency.hpp"
-#include "weighting/weightingBM25.hpp"
-#include "summarizer/summarizerMetaData.hpp"
-#include "summarizer/summarizerAttribute.hpp"
-#include "summarizer/summarizerMatchPhrase.hpp"
-#include "summarizer/summarizerListMatches.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -55,50 +42,29 @@
 
 using namespace strus;
 
-// Predefined functions:
-static const WeightingFunctionBM25 weightingBM25;
-static const WeightingFunctionTermFrequency weightingTF;
-static const WeightingFunctionConstant weightingTD;
-
-static const SummarizerFunctionMetaData summarizerMetaData;
-static const SummarizerFunctionMatchPhrase summarizerMatchPhrase;
-static const SummarizerFunctionListMatches summarizerListMatches;
-static const SummarizerFunctionAttribute summarizerAttribute;
-
-static const PostingJoinWithin joinWithin;
-static const PostingJoinStructWithin joinWithinStruct;
-static const PostingJoinSequence joinSequence;
-static const PostingJoinStructSequence joinSequenceStruct;
-static const PostingJoinDifference joinDiff;
-static const PostingJoinIntersect joinIntersect;
-static const PostingJoinContains joinContains;
-static const PostingJoinUnion joinUnion;
-static const PostingJoinSucc joinSucc;
-static const PostingJoinPred joinPred;
-
-
 QueryProcessor::QueryProcessor( StorageInterface* storage_)
 	:m_storage(storage_)
 {
-	definePostingJoinOperator( "within", &joinWithin);
-	definePostingJoinOperator( "within_struct", &joinWithinStruct);
-	definePostingJoinOperator( "sequence", &joinSequence);
-	definePostingJoinOperator( "sequence_struct", &joinSequenceStruct);
-	definePostingJoinOperator( "diff", &joinDiff);
-	definePostingJoinOperator( "intersect", &joinIntersect);
-	definePostingJoinOperator( "union", &joinUnion);
-	definePostingJoinOperator( "succ", &joinSucc);
-	definePostingJoinOperator( "pred", &joinPred);
-	definePostingJoinOperator( "contains", &joinContains);
+	definePostingJoinOperator( "within", createPostingJoinWithin());
+	definePostingJoinOperator( "within_struct", createPostingJoinStructWithin());
+	definePostingJoinOperator( "sequence", createPostingJoinSequence());
+	definePostingJoinOperator( "sequence_struct", createPostingJoinStructSequence());
+	definePostingJoinOperator( "diff", createPostingJoinDifference());
+	definePostingJoinOperator( "intersect", createPostingJoinIntersect());
+	definePostingJoinOperator( "union", createPostingJoinUnion());
+	definePostingJoinOperator( "succ", createPostingSucc());
+	definePostingJoinOperator( "pred", createPostingPred());
+	definePostingJoinOperator( "contains", createPostingJoinContains());
+	
+	defineWeightingFunction( "bm25", createWeightingFunctionBm25());
+	defineWeightingFunction( "tf", createWeightingFunctionTermFrequency());
+	defineWeightingFunction( "td", createWeightingFunctionConstant());
 
-	defineWeightingFunction( "BM25", &weightingBM25);
-	defineWeightingFunction( "TF", &weightingTF);
-	defineWeightingFunction( "TD", &weightingTD);
-
-	defineSummarizerFunction( "metadata", &summarizerMetaData);
-	defineSummarizerFunction( "matchphrase", &summarizerMatchPhrase);
-	defineSummarizerFunction( "matchpos", &summarizerListMatches);
-	defineSummarizerFunction( "attribute", &summarizerAttribute);
+	defineSummarizerFunction( "metadata", createSummarizerMetaData());
+	defineSummarizerFunction( "matchphrase", createSummarizerMatchPhrase());
+	defineSummarizerFunction( "matchpos", createSummarizerListMatches());
+	defineSummarizerFunction( "attribute", createSummarizerAttribute());
+	defineSummarizerFunction( "matchvariables", createSummarizerMatchVariables());
 }
 
 PostingIteratorInterface*
@@ -115,60 +81,63 @@ PostingIteratorInterface*
 
 
 void QueryProcessor::definePostingJoinOperator(
-		const char* name,
-		const PostingJoinOperatorInterface* op)
+		const std::string& name,
+		PostingJoinOperatorInterface* op)
 {
-	m_joiners[ boost::algorithm::to_lower_copy( std::string(name))] = op;
+	Reference<PostingJoinOperatorInterface> opref( op);
+	m_joiners[ boost::algorithm::to_lower_copy( std::string(name))] = opref;
 }
 
 const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 		const std::string& name) const
 {
-	std::map<std::string,const PostingJoinOperatorInterface*>::const_iterator 
+	std::map<std::string,Reference<PostingJoinOperatorInterface> >::const_iterator 
 		ji = m_joiners.find( boost::algorithm::to_lower_copy( name));
 	if (ji == m_joiners.end())
 	{
 		throw std::runtime_error( std::string( "posting set join operator not defined: '") + name + "'");
 	}
-	return ji->second;
+	return ji->second.get();
 }
 
 void QueryProcessor::defineWeightingFunction(
-		const char* name,
-		const WeightingFunctionInterface* func)
+		const std::string& name,
+		WeightingFunctionInterface* func)
 {
-	m_weighters[ boost::algorithm::to_lower_copy( std::string(name))] = func;
+	Reference<WeightingFunctionInterface> funcref( func);
+	m_weighters[ boost::algorithm::to_lower_copy( std::string(name))] = funcref;
 }
 
 const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		const std::string& name) const
 {
-	std::map<std::string,const WeightingFunctionInterface*>::const_iterator 
+	std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
 		wi = m_weighters.find( boost::algorithm::to_lower_copy( std::string(name)));
 	if (wi == m_weighters.end())
 	{
 		throw std::runtime_error( std::string( "weighting function not defined: '") + name + "'");
 	}
-	return wi->second;
+	return wi->second.get();
 }
 
 void QueryProcessor::defineSummarizerFunction(
-		const char* name,
-		const SummarizerFunctionInterface* sumfunc)
+		const std::string& name,
+		SummarizerFunctionInterface* sumfunc)
 {
-	m_summarizers[ boost::algorithm::to_lower_copy( std::string(name))] = sumfunc;
+	Reference<SummarizerFunctionInterface> funcref( sumfunc);
+	m_summarizers[ boost::algorithm::to_lower_copy( std::string(name))] = funcref;
 }
 
 const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		const std::string& name) const
 {
-	std::map<std::string,const SummarizerFunctionInterface*>::const_iterator 
+	std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
 		si = m_summarizers.find( boost::algorithm::to_lower_copy( std::string(name)));
 	if (si == m_summarizers.end())
 	{
 		throw std::runtime_error( std::string( "summarization function not defined: '") + name + "'");
 	}
-	return si->second;
+	return si->second.get();
 }
 
 

@@ -29,6 +29,10 @@
 #ifndef _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/summarizerFunctionInterface.hpp"
+#include "strus/weightingFunctionInterface.hpp"
+#include "strus/reference.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -45,6 +49,7 @@ class QueryProcessor
 {
 public:
 	/// \brief Constructor
+	/// \param[in] storage_ reference to storage (ownership hold by caller)
 	explicit QueryProcessor( StorageInterface* storage_);
 
 	/// \brief Destructor
@@ -57,8 +62,8 @@ public:
 
 	virtual void
 		definePostingJoinOperator(
-			const char* name,
-			const PostingJoinOperatorInterface* op);
+			const std::string& name,
+			PostingJoinOperatorInterface* op);
 
 	virtual const PostingJoinOperatorInterface*
 		getPostingJoinOperator(
@@ -66,8 +71,8 @@ public:
 
 	virtual void
 		defineWeightingFunction(
-			const char* name,
-			const WeightingFunctionInterface* func);
+			const std::string& name,
+			WeightingFunctionInterface* func);
 
 	virtual const WeightingFunctionInterface*
 		getWeightingFunction(
@@ -75,8 +80,8 @@ public:
 
 	virtual void
 		defineSummarizerFunction(
-			const char* name,
-			const SummarizerFunctionInterface* sumfunc);
+			const std::string& name,
+			SummarizerFunctionInterface* sumfunc);
 	
 	virtual const SummarizerFunctionInterface*
 		getSummarizerFunction(
@@ -84,9 +89,9 @@ public:
 
 private:
 	StorageInterface* m_storage;
-	std::map<std::string,const SummarizerFunctionInterface*> m_summarizers;
-	std::map<std::string,const WeightingFunctionInterface*> m_weighters;
-	std::map<std::string,const PostingJoinOperatorInterface*> m_joiners;
+	std::map<std::string,Reference<SummarizerFunctionInterface> > m_summarizers;
+	std::map<std::string,Reference<WeightingFunctionInterface> > m_weighters;
+	std::map<std::string,Reference<PostingJoinOperatorInterface> > m_joiners;
 };
 
 }//namespace

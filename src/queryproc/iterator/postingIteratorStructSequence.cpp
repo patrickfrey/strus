@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/postingIteratorStructSequence.hpp"
-#include "iterator/postingIteratorHelpers.hpp"
+#include "postingIteratorStructSequence.hpp"
+#include "postingIteratorHelpers.hpp"
 #include <stdexcept>
 #include <cstdlib>
 

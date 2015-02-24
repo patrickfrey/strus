@@ -58,8 +58,7 @@ public:
 	/// \param[in] termtype_ type of the tokens to build the summary with
 	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
 	/// \param[in] summarylen_ maximum lenght of the whole summary
-	/// \param[in] itrs_ argument iterators
-	/// \param[in] phrasestruct_ structure iterator to recognize end of phrases
+	/// \param[in] features_ features to inspect
 	SummarizerClosureMatchPhrase(
 			const StorageInterface* storage_,
 			const QueryProcessorInterface* processor_,
@@ -135,7 +134,7 @@ public:
 		unsigned int sumlen = numericParameters_[1].defined()?(unsigned int)numericParameters_[1]:40;
 		if (termtype.empty())
 		{
-			throw std::runtime_error( "missing of emtpy term type definition (parameter 'type') in match phrase summarizer configuration");
+			throw std::runtime_error( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration");
 		}
 		return new SummarizerClosureMatchPhrase(
 				storage_, processor_, termtype, maxlen, sumlen, features_);

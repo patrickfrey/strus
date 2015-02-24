@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "iterator/postingIteratorIntersect.hpp"
+#include "postingIteratorIntersect.hpp"
 #include <stdexcept>
 #include <cstdlib>
 
