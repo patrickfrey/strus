@@ -143,15 +143,18 @@ DLL_PUBLIC void strus::createStorage( const std::string& configsource, DatabaseI
 }
 
 
-DLL_PUBLIC const char* strus::getStorageConfigDescription( StorageConfigDescriptionType type)
+DLL_PUBLIC const char* strus::getStorageConfigDescription( ConfigType type)
 {
 	switch (type)
 	{
-		case CmdCreateStorageClient:
+		case CmdCreateClient:
 			return "cachedterms=<file with list of terms to cache>";
 
-		case CmdCreateStorage:
+		case CmdCreate:
 			return "acl=<yes/no, yes if users with different access rights exist>\nmetadata=<comma separated list of meta data def>";
+
+		case CmdDestroy:
+			throw std::logic_error( "storage does not have a destroy command");
 	}
 	return 0;
 }
@@ -163,14 +166,15 @@ DLL_PUBLIC StorageAlterMetaDataTableInterface*
 	return new StorageAlterMetaDataTable( database);
 }
 
-DLL_PUBLIC const char** strus::getStorageConfigParameters( StorageConfigDescriptionType type)
+DLL_PUBLIC const char** strus::getStorageConfigParameters( ConfigType type)
 {
 	static const char* keys_CreateStorageClient[]	= {"cachedterms", 0};
 	static const char* keys_CreateStorage[]		= {"acl", "metadata", 0};
 	switch (type)
 	{
-		case CmdCreateStorageClient:	return keys_CreateStorageClient;
-		case CmdCreateStorage:		return keys_CreateStorage;
+		case CmdCreateClient:	return keys_CreateStorageClient;
+		case CmdCreate:		return keys_CreateStorage;
+		case CmdDestroy:	throw std::logic_error( "storage does not have a destroy command");
 	}
 	return 0;
 }

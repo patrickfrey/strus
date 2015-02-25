@@ -26,19 +26,21 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_VERSION_HPP_INCLUDED
-#define _STRUS_VERSION_HPP_INCLUDED
+#ifndef _STRUS_CONFIGURATION_TYPE_HPP_INCLUDED
+#define _STRUS_CONFIGURATION_TYPE_HPP_INCLUDED
+#include <string>
 
-namespace strus
+namespace strus {
+
+/// \brief Enumeration of different type of configurations for components that need a configuration string.
+///	Needed for getting the correct description of a configuration from such a component (storage,database).
+enum ConfigType
 {
+	CmdCreateClient,		///< Config description for the creation of an instance accessing the repository
+	CmdCreate,			///< Config description for the creation of a repository that does not exist yet
+	CmdDestroy			///< Config description for the physical disposal of a repository
+};
 
-#define STRUS_VERSION (\
-	@STRUS_MAJOR_VERSION@ * 1000000\
-	+ @STRUS_MAJOR_VERSION@ * 10000\
-	+ @STRUS_PATCH_VERSION@\
-)
-
-#define STRUS_VERSION_STRING "@STRUS_VERSION@"
-
-}//namespace
+}
 #endif
+

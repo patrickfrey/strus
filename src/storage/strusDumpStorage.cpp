@@ -31,6 +31,7 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseOptions.hpp"
+#include "strus/versionStorage.hpp"
 #include "extractKeyValueData.hpp"
 #include "strus/private/cmdLineOpt.hpp"
 #include <iostream>
@@ -277,16 +278,21 @@ static char getDatabaseKeyPrefix( const char* name)
 
 int main( int argc, const char* argv[])
 {
+	if (argc > 1 && (std::strcmp( argv[1], "-v") == 0 || std::strcmp( argv[1], "--version") == 0))
+	{
+		std::cout << "Strus storage version " << STRUS_STORAGE_VERSION_STRING << std::endl;
+		return 0;
+	}
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
-		std::cerr << "usage: strusDumpStorage <config> [ <what> ]" << std::endl;
+		std::cerr << "usage: strusDumpStorage [options] <config> [ <what> ]" << std::endl;
 		std::cerr << "<config>  : configuration string of the storage;" << std::endl;
 		std::cerr << "            semicolon ';' separated list of assignments:" << std::endl;
 
 		strus::printIndentMultilineString(
 					std::cerr,
 					12, strus::getDatabaseConfigDescription_leveldb(
-						strus::CmdCreateDatabaseClient));
+						strus::CmdCreateClient));
 		std::cerr << "<what>    : optional name of entries to dump:" << std::endl;
 		std::cerr << "            termtype  :term type definitions" << std::endl;
 		std::cerr << "            termvalue :term value definitions" << std::endl;
@@ -305,6 +311,9 @@ int main( int argc, const char* argv[])
 		std::cerr << "            docattr   :document attributes" << std::endl;
 		std::cerr << "            df        :term document frequency definitions" << std::endl;
 		std::cerr << "            metatable :meta data element descriptions" << std::endl;
+		std::cerr << "options:" << std::endl;
+		std::cerr << "-h,--help     : Print this usage info and exit" << std::endl;
+		std::cerr << "-v,--version  : Print the version info and exit" << std::endl;
 		return 0;
 	}
 	try

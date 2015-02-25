@@ -28,6 +28,7 @@
 */
 #ifndef _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
 #define _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
+#include "strus/lib/configType.hpp"
 #include <string>
 
 namespace strus {
@@ -48,22 +49,14 @@ void createDatabase_leveldb( const std::string& configsource);
 /// \param[in] configsource configuration source string describing the key value store database (not a filename !)
 void destroyDatabase_leveldb( const std::string& configsource);
 
-/// \brief Selection of command types for the storage config description
-enum DatabaseConfigDescriptionType
-{
-	CmdCreateDatabaseClient=0x1,	///< Config description for createDatabaseClient(const char*)
-	CmdCreateDatabase=0x2,		///< Config description for createDatabase(const char*)
-	CmdDestroyDatabase=0x4		///< Config description for destroyDatabase(const char*)
-};
-
 /// \brief Gets an example configuration description (source string as used by the functions here)
 ///	createDatabase(const char*), destroyDatabase(const char*) and createDatabaseClient(const char*)
 ///	for the usage printed by programs using this database.
-const char* getDatabaseConfigDescription_leveldb( DatabaseConfigDescriptionType type);
+const char* getDatabaseConfigDescription_leveldb( ConfigType type);
 
 /// \brief Get the list of known configuration parameter keys
 ///	for verification of the configuration by programs using this database.
-const char** getDatabaseConfigParameters_leveldb( DatabaseConfigDescriptionType type);
+const char** getDatabaseConfigParameters_leveldb( ConfigType type);
 
 }//namespace
 #endif

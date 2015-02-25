@@ -30,6 +30,7 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseOptions.hpp"
+#include "strus/versionStorage.hpp"
 #include "databaseKey.hpp"
 #include "extractKeyValueData.hpp"
 #include "strus/private/cmdLineOpt.hpp"
@@ -217,16 +218,24 @@ static void checkDB( strus::DatabaseInterface* database)
 
 int main( int argc, const char* argv[])
 {
+	if (argc > 1 && (std::strcmp( argv[1], "-v") == 0 || std::strcmp( argv[1], "--version") == 0))
+	{
+		std::cout << "Strus storage version " << STRUS_STORAGE_VERSION_STRING << std::endl;
+		return 0;
+	}
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
-		std::cerr << "usage: strusCheckStorage <config>" << std::endl;
+		std::cerr << "usage: strusCheckStorage [options] <config>" << std::endl;
 		std::cerr << "<config>  : configuration string of the storage:" << std::endl;
 		std::cerr << "            semicolon ';' separated list of assignments:" << std::endl;
 
 		strus::printIndentMultilineString(
 					std::cerr,
 					12, strus::getDatabaseConfigDescription_leveldb(
-						strus::CmdCreateDatabaseClient));
+						strus::CmdCreateClient));
+		std::cerr << "options:" << std::endl;
+		std::cerr << "-h,--help     : Print this usage info and exit" << std::endl;
+		std::cerr << "-v,--version  : Print the version info and exit" << std::endl;
 		return 0;
 	}
 	try

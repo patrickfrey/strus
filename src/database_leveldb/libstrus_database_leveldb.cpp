@@ -108,32 +108,32 @@ DLL_PUBLIC void strus::destroyDatabase_leveldb( const std::string& configsource)
 }
 
 
-DLL_PUBLIC const char* strus::getDatabaseConfigDescription_leveldb( DatabaseConfigDescriptionType type)
+DLL_PUBLIC const char* strus::getDatabaseConfigDescription_leveldb( ConfigType type)
 {
 	switch (type)
 	{
-		case CmdCreateDatabaseClient:
+		case CmdCreateClient:
 			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>";
 
-		case CmdCreateDatabase:
+		case CmdCreate:
 			return "path=<LevelDB storage path>;compression=<yes/no>";
 
-		case CmdDestroyDatabase:
+		case CmdDestroy:
 			return "path=<LevelDB storage path>";
 	}
 	return 0;
 }
 
-DLL_PUBLIC const char** strus::getDatabaseConfigParameters_leveldb( DatabaseConfigDescriptionType type)
+DLL_PUBLIC const char** strus::getDatabaseConfigParameters_leveldb( ConfigType type)
 {
 	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression", 0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};
 	static const char* keys_DestroyDatabase[] = {"path", 0};
 	switch (type)
 	{
-		case CmdCreateDatabaseClient:	return keys_CreateDatabaseClient;
-		case CmdCreateDatabase:		return keys_CreateDatabase;
-		case CmdDestroyDatabase:	return keys_DestroyDatabase;
+		case CmdCreateClient:	return keys_CreateDatabaseClient;
+		case CmdCreate:		return keys_CreateDatabase;
+		case CmdDestroy:	return keys_DestroyDatabase;
 	}
 	return 0;
 }

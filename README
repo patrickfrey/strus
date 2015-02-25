@@ -13,6 +13,9 @@ types of operations:
   * Weighting of documents based on the feature occurrencies
   * Summarization as extraction of content based on the query matches
 
+Architecture
+-------------
+
 The architecture defines three components that are implemented as libraries.
 
   |--------------------|
@@ -35,5 +38,7 @@ The architecture defines three components that are implemented as libraries.
   |                    |  Currently there exists only one implementation
   |                    |  based on LevelDB.
   |--------------------|
+
+
 
 
