@@ -43,7 +43,7 @@
 #include <ctime>
 #include <boost/lexical_cast.hpp>
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
+#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 static strus::Index g_docnum = 0;
 
 #undef STRUS_LOWLEVEL_DEBUG

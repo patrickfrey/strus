@@ -40,7 +40,7 @@
 #include <iomanip>
 #include <boost/lexical_cast.hpp>
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
+#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 static std::string doubleToString( double val_)
 {

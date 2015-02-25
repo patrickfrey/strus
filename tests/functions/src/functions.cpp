@@ -37,7 +37,7 @@
 #include <limits>
 #include <cstdlib>
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
+#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 
 static void spFloatConversionTest( float in)

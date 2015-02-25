@@ -40,7 +40,7 @@
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
+#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 
 static void testBooleanBlock( unsigned int times, unsigned int minNofElements, unsigned int nofQueries)

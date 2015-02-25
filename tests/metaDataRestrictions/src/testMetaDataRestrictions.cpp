@@ -43,7 +43,7 @@
 #include <limits>
 #include <boost/lexical_cast.hpp>
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
+#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 #undef STRUS_LOWLEVEL_DEBUG
 

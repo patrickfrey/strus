@@ -40,7 +40,7 @@
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX+MIN))+MIN)
+#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 static std::vector<strus::Index> randPosinfo()
 {
