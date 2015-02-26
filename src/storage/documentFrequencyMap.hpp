@@ -36,7 +36,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 /// \brief Forward declaration
@@ -47,7 +47,7 @@ class KeyMapInv;
 class DocumentFrequencyMap
 {
 public:
-	DocumentFrequencyMap( DatabaseInterface* database_)
+	DocumentFrequencyMap( DatabaseClientInterface* database_)
 		:m_database(database_){}
 
 	void increment( Index typeno, Index termno, Index count=1);
@@ -70,7 +70,7 @@ private:
 	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
 
 private:
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	Map m_map;
 };
 

@@ -33,7 +33,7 @@
 #include "strus/reference.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include <vector>
 
 namespace strus {

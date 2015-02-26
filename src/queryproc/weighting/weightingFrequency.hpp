@@ -78,7 +78,7 @@ public:
 	}
 
 	virtual WeightingClosureInterface* createClosure(
-			const StorageInterface*,
+			const StorageClientInterface*,
 			PostingIteratorInterface* itr,
 			MetaDataReaderInterface*,
 			const std::vector<ArithmeticVariant>&) const

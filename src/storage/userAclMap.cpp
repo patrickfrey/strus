@@ -28,7 +28,7 @@
 */
 #include "userAclMap.hpp"
 #include "booleanBlockBatchWrite.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "databaseAdapter.hpp"
 #include "keyMap.hpp"

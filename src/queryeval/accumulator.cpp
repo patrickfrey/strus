@@ -2,7 +2,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include <cstdlib>

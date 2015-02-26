@@ -30,21 +30,21 @@
 #define _STRUS_ATTRIBUTE_READER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/attributeReaderInterface.hpp"
-#include "storage.hpp"
+#include "storageClient.hpp"
 #include <string>
 
 namespace strus
 {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 
 /// \brief Interface for accessing document attributes from a strus storage
 class AttributeReader
 	:public AttributeReaderInterface
 {
 public:
-	AttributeReader( const Storage* storage_, DatabaseInterface* database_)
+	AttributeReader( const StorageClient* storage_, DatabaseClientInterface* database_)
 		:m_storage(storage_),m_database(database_),m_docno(0){}
 
 	virtual Index elementHandle( const char* name) const;
@@ -57,8 +57,8 @@ public:
 	virtual std::string getValue( const Index& elementHandle_) const;
 
 private:
-	const Storage* m_storage;
-	DatabaseInterface* m_database;
+	const StorageClient* m_storage;
+	DatabaseClientInterface* m_database;
 	Index m_docno;
 };
 

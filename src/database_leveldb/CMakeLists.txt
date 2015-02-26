@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 set(libstrus_database_leveldb_source_files
    database.cpp
+   databaseClient.cpp
    databaseCursor.cpp
    databaseTransaction.cpp
    libstrus_database_leveldb.cpp

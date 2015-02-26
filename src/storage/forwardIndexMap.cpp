@@ -28,7 +28,7 @@
 */
 #include "forwardIndexMap.hpp"
 #include "databaseAdapter.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;

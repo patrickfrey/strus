@@ -44,7 +44,7 @@ namespace strus {
 /// \brief Forward declaration
 class QueryProcessorInterface;
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class QueryEval;
 /// \brief Forward declaration
@@ -58,7 +58,7 @@ public:
 	///\brief Constructor
 	Query(
 			const QueryEval* queryEval_,
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_);
 
 	///\brief Copy constructor
@@ -168,7 +168,7 @@ private:
 
 private:
 	const QueryEval* m_queryEval;
-	const StorageInterface* m_storage;
+	const StorageClientInterface* m_storage;
 	const QueryProcessorInterface* m_processor;
 	Reference<MetaDataReaderInterface> m_metaDataReader;
 	std::vector<Term> m_terms;

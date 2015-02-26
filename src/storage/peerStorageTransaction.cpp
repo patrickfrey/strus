@@ -28,11 +28,11 @@
 */
 #include "peerStorageTransaction.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "storage.hpp"
+#include "storageClient.hpp"
 
 using namespace strus;
 
-PeerStorageTransaction::PeerStorageTransaction( Storage* storage_, DatabaseInterface* database_, DocumentFrequencyCache* dfcache_)
+PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_)
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_documentFrequencyCache(dfcache_)
@@ -83,7 +83,7 @@ void PeerStorageTransaction::commit()
 	}
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 
-	Storage::TransactionLock lock( m_storage);
+	StorageClient::TransactionLock lock( m_storage);
 	DocumentFrequencyCache::Batch cleaned_batch;
 	DocumentFrequencyCache::Batch::const_iterator bi = m_dfbatch.begin(), be = m_dfbatch.end();
 	for (; bi != be; ++bi)

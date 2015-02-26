@@ -28,7 +28,7 @@
 */
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
-#include "database.hpp"
+#include "databaseClient.hpp"
 #include "strus/databaseOptions.hpp"
 #include <cstring>
 #include <stdexcept>
@@ -36,7 +36,7 @@
 
 using namespace strus;
 
-DatabaseTransaction::DatabaseTransaction( leveldb::DB* db_, Database* database_)
+DatabaseTransaction::DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_)
 	:m_database(database_),m_db(db_),m_commit_called(false),m_rollback_called(false)
 {}
 

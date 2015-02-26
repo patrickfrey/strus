@@ -28,7 +28,7 @@
 */
 #include "documentFrequencyMap.hpp"
 #include "databaseAdapter.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "keyMap.hpp"

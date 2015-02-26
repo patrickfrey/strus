@@ -28,135 +28,57 @@
 */
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/lib/configType.hpp"
 #include <string>
-#include <vector>
 
-namespace strus
-{
+namespace strus {
 
 /// \brief Forward declaration
-class PostingIteratorInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
-class ForwardIteratorInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
-class InvAclIteratorInterface;
-/// \brief Forward declaration
-class StorageTransactionInterface;
-/// \brief Forward declaration
-class StorageDocumentInterface;
-/// \brief Forward declaration
-class PeerStorageTransactionInterface;
-/// \brief Forward declaration
-class StoragePeerInterface;
-/// \brief Forward declaration
-class MetaDataReaderInterface;
-/// \brief Forward declaration
-class AttributeReaderInterface;
+class StorageAlterMetaDataTableInterface;
 
-/// \brief Interface of a strus IR storage
+
+/// \brief Interface to the create and alter a storage for strus
 class StorageInterface
 {
 public:
-	/// \brief Destructor
-	/// \remark Should call call 'close()' but ignore errors there silently
-	virtual ~StorageInterface(){}
+	/// \brief Creates an client instance of the storage using a defined key value store database
+	/// \param[in] configsource configuration source string describing the storage (not a filename !)
+	/// \param[in] database key value store database used by this storage (ownership passed to this)
+	virtual StorageClientInterface* createClient( const std::string& configsource, DatabaseClientInterface* database) const=0;
 
-	/// \brief Close the storage and throw on error
-	/// \remark Call this function before the destructor if you want to catch errors in the close
-	virtual void close(){};
+	/// \brief Creates a new storage described with configsource using a defined key value store database
+	/// \param[in] configsource Configuration source string describing the storage (not a filename !)
+	/// \param[in] database reference to a key value store database used by the storage
+	/// \remark The database referenced by 'database' must have been created and active
+	virtual void createStorage( const std::string& configsource, DatabaseClientInterface* database) const=0;
+	
+	/// \brief Create an interface to alter the meta data table structure
+	/// \param[in] database key value store database used by the storage (ownership passed to returned object)
+	/// \return the created reference to be disposed with delete by the caller
+	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseClientInterface* database) const=0;
 
-	/// \brief Create an iterator on the occurrencies of a term in the storage
-	/// \param[in] type type name of the term
-	/// \param[in] value value string of the term
-	/// \return the created iterator reference to be disposed with delete by the caller
-	virtual PostingIteratorInterface*
-		createTermPostingIterator(
-			const std::string& type,
-			const std::string& value) const=0;
+	/// \brief Enumeration of different type of configurations
+	///	Needed for getting the correct description of the configuration
+	enum ConfigType
+	{
+		CmdCreateClient,		///< Config description for the creation of an instance accessing the repository
+		CmdCreate			///< Config description for the creation of a repository that does not exist yet
+	};
 
-	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
-	/// \param[in] type type name of the term to be inspected
-	/// \return the created viewer reference to be disposed with delete
-	virtual ForwardIteratorInterface*
-		createForwardIterator(
-			const std::string& type) const=0;
+	/// \brief Gets an example configuration description (source string as used by the functions here)
+	///	createStorageDatabase(const char*) and createStorageClient(const char*)
+	///	for the usage printed by programs using this storage implementation.
+	virtual const char* getConfigDescription( ConfigType type) const=0;
 
-	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see
-	/// \param[in] username name of the user
-	/// \return the iterator on the documents to be disposed with delete by the caller or NULL, if there is no access control enabled
-	/// \note The storage has to be created access control enabled
-	virtual InvAclIteratorInterface*
-		createInvAclIterator(
-			const std::string& username) const=0;
-
-	/// \brief Get the global number of documents inserted
-	/// \return the number of documents
-	virtual GlobalCounter globalNofDocumentsInserted() const=0;
-
-	/// \brief Get the global number of documents inserted
-	/// \return the number of documents
-	virtual Index localNofDocumentsInserted() const=0;
-
-	/// \brief Get the global number of documents inserted
-	/// \return the number of documents
-	virtual GlobalCounter globalDocumentFrequency(
-			const std::string& type,
-			const std::string& term) const=0;
-
-	/// \brief Get the global number of documents inserted
-	/// \return the number of documents
-	virtual Index localDocumentFrequency(
-			const std::string& type,
-			const std::string& term) const=0;
-
-	/// \brief Get the highest document number used in this stogage
-	/// \return the document number
-	virtual Index maxDocumentNumber() const=0;
-
-	/// \brief Get the local internal document number
-	/// \param[in] docid document id of the document inserted
-	virtual Index documentNumber( const std::string& docid) const=0;
-
-	/// \brief Create an interface to access items of document metadata
-	/// \param[in] varname variable name identifying the metadata attribute
-	/// \return the interface to access document metadata to be disposed with delete by the caller
-	virtual MetaDataReaderInterface* createMetaDataReader() const=0;
-
-	/// \brief Create an interface to access attributes attached to documents for representation
-	/// \return the interface to access document attributes to be disposed with delete by the caller
-	virtual AttributeReaderInterface* createAttributeReader() const=0;
-
-	/// \brief Allocate a range of document numbers to be used for documents known to be new in transactions
-	/// \param[in] nofDocuments number of document numbers to allocate
-	/// \return the first document number of the allocated range
-	virtual Index allocDocnoRange( std::size_t nofDocuments)=0;
-
-	/// \brief Create an insert/update transaction object
-	/// \return the created transaction interface to be disposed with delete by the caller
-	virtual StorageTransactionInterface* createTransaction()=0;
-
-	/// \brief Create an transaction object for global static statistic changes that come from other peer storages
-	/// \return the created transaction interface to be disposed with delete by the caller
-	virtual PeerStorageTransactionInterface* createPeerStorageTransaction()=0;
-
-	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
-	/// \param[in] peerStorage reference to storage peer interface (owned by caller)
-	/// \param[in] doPopulateInitialState flag that is set to true in a normal startup and to false in the case of a system recovery after a crash. The flag set to false tells the storage to populate its stored terms with a df change of 0 to the other peers in the initialization phase. After recovery restart the node should reinitialize its global statistics without changing the state of the other peers.
-	virtual void defineStoragePeerInterface(
-			const StoragePeerInterface* storagePeer,
-			bool doPopulateInitialState=true)=0;
-
-	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
-	/// \param[in] docid identifier (URI) of the document to check
-	/// \param[in] logfilename Where to log checking failures ("-" for stdout)
-	/// \return the created document interface to be disposed with delete by the caller
-	virtual StorageDocumentInterface* createDocumentChecker(
-			const std::string& docid,
-			const std::string& logfilename) const=0;
+	/// \brief Get the list of known configuration parameter keys
+	///	for verification of the configuration by programs using this storage implementation.
+	virtual const char** getConfigParameters( ConfigType type) const=0;
 };
 
 }//namespace
 #endif
-
 

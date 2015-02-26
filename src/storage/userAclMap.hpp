@@ -37,14 +37,14 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
 class UserAclMap
 {
 public:
-	explicit UserAclMap( DatabaseInterface* database_)
+	explicit UserAclMap( DatabaseClientInterface* database_)
 		:m_database(database_){}
 
 	void defineUserAccess(
@@ -76,7 +76,7 @@ public:
 	typedef std::map<MapKey,bool,MapCompare,MapAllocator> Map;
 
 private:
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	Map m_usrmap;
 	Map m_aclmap;
 	std::vector<Index> m_usr_deletes;

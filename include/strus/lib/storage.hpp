@@ -29,46 +29,12 @@
 /// \brief Exported functions of the strus storage library
 #ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_LIB_HPP_INCLUDED
-#include "strus/lib/configType.hpp"
-#include <string>
 
 namespace strus {
 
-/// \brief Forward declaration
-class DatabaseInterface;
-/// \brief Forward declaration
 class StorageInterface;
-/// \brief Forward declaration
-class StorageDatabaseInterface;
-/// \brief Forward declaration
-class StorageAlterMetaDataTableInterface;
 
-/// \remark Because of restrictions imposed by LevelDB only one client of a storage instance can exist simultaneously. But this can be used by several threads.
-
-/// \brief Creates an client instance of the storage using a defined key value store database
-/// \param[in] configsource configuration source string describing the storage (not a filename !)
-/// \param[in] database reference to key value store database used by this storage
-StorageInterface* createStorageClient( const std::string& configsource, DatabaseInterface* database);
-
-/// \brief Creates a new storage described with configsource using a defined key value store database
-/// \param[in] configsource Configuration source string describing the storage (not a filename !)
-/// \param[in] database reference to a key value store database used by the storage
-/// \remark The database referenced by 'database' must have been created and active
-void createStorage( const std::string& configsource, DatabaseInterface* database);
-
-/// \brief Create an interface to alter the meta data table structure
-/// \param[in] database reference to a key value store database used by the storage
-/// \return the created reference to be disposed with delete by the caller
-StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseInterface* database);
-
-/// \brief Gets an example configuration description (source string as used by the functions here)
-///	createStorageDatabase(const char*) and createStorageClient(const char*)
-///	for the usage printed by programs using this storage implementation.
-const char* getStorageConfigDescription( ConfigType type);
-
-/// \brief Get the list of known configuration parameter keys
-///	for verification of the configuration by programs using this storage implementation.
-const char** getStorageConfigParameters( ConfigType type);
+const StorageInterface* getStorage();
 
 }//namespace
 #endif

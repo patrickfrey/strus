@@ -42,7 +42,7 @@ namespace strus {
 /// \brief Forward declaration
 class SummarizerFunctionInterface;
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 /// \brief Forward declaration
@@ -71,7 +71,7 @@ public:
 		,m_terms(o.m_terms)
 	{}
 
-	virtual QueryInterface* createQuery( const StorageInterface* storage) const;
+	virtual QueryInterface* createQuery( const StorageClientInterface* storage) const;
 
 	virtual void addTerm(
 			const std::string& set_,

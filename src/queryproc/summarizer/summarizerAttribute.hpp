@@ -37,7 +37,7 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
 
@@ -79,7 +79,7 @@ public:
 	}
 
 	virtual SummarizerClosureInterface* createClosure(
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			MetaDataReaderInterface* metadata_,
 			const std::vector<FeatureParameter>& features_,

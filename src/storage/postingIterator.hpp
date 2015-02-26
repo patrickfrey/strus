@@ -37,13 +37,13 @@ namespace strus {
 /// \brief Forward declaration
 class MetaDataReader;
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 
 class PostingIterator
 	:public PostingIteratorInterface
 {
 public:
-	PostingIterator( const Storage* storage_, DatabaseInterface* database, Index termtypeno, Index termvalueno, const char* termstr);
+	PostingIterator( const StorageClient* storage_, DatabaseClientInterface* database, Index termtypeno, Index termvalueno, const char* termstr);
 
 	virtual ~PostingIterator(){}
 

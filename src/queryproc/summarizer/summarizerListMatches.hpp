@@ -38,7 +38,7 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
@@ -51,7 +51,7 @@ public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] postings_ postings to get the matches of
 	SummarizerClosureListMatches(
-		const StorageInterface* storage_,
+		const StorageClientInterface* storage_,
 		const std::vector<SummarizerFunctionInterface::FeatureParameter>& postings_);
 
 	virtual ~SummarizerClosureListMatches();
@@ -59,7 +59,7 @@ public:
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
-	const StorageInterface* m_storage;
+	const StorageClientInterface* m_storage;
 	std::vector<PostingIteratorInterface*> m_itrs;
 };
 
@@ -79,7 +79,7 @@ public:
 	}
 	
 	virtual SummarizerClosureInterface* createClosure(
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			const QueryProcessorInterface*,
 			MetaDataReaderInterface* metadata_,
 			const std::vector<FeatureParameter>& features_,

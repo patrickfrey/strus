@@ -34,12 +34,12 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 
 class IndexSetIterator
 {
 public:
-	IndexSetIterator( DatabaseInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_);
+	IndexSetIterator( DatabaseClientInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_);
 	~IndexSetIterator(){}
 
 	Index skip( const Index& elemno_);

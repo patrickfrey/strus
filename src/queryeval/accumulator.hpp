@@ -43,7 +43,7 @@
 namespace strus
 {
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 /// \brief Forward declaration
@@ -64,7 +64,7 @@ class Accumulator
 public:
 	/// \brief Constructor
 	Accumulator(
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			const WeightingFunctionInterface* function_,
 			const std::vector<ArithmeticVariant> parameter_,
 			MetaDataReaderInterface* metadata_,
@@ -124,7 +124,7 @@ private:
 			:isExpression(o.isExpression),setindex(o.setindex),postings(o.postings){}
 	};
 
-	const StorageInterface* m_storage;
+	const StorageClientInterface* m_storage;
 	const WeightingFunctionInterface* m_function;
 	std::vector<ArithmeticVariant> m_parameter;
 	MetaDataReaderInterface* m_metadata;

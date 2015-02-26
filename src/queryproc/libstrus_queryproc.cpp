@@ -28,7 +28,7 @@
 */
 #include "strus/lib/queryproc.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "queryProcessor.hpp"
 #include "private/dll_tags.hpp"
 #include <map>
@@ -38,7 +38,7 @@ using namespace strus;
 
 DLL_PUBLIC QueryProcessorInterface*
 	strus::createQueryProcessor(
-		StorageInterface* storage)
+		StorageClientInterface* storage)
 {
 	return new QueryProcessor( storage);
 }

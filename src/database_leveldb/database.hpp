@@ -29,58 +29,28 @@
 #ifndef _STRUS_DATABASE_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_DATABASE_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseInterface.hpp"
-#include <leveldb/db.h>
 
-namespace strus
-{
+namespace strus {
 
-/// \brief Implementation of the strus key value storage database based on the LevelDB library
+/// \brief Forward declaration
+class DatabaseClientInterface;
+
+/// \brief Interface to the create,destroy the key value store database
 class Database
 	:public DatabaseInterface
 {
 public:
-	/// \param[in] path of the storage
-	/// \param[in] cachesize_k number of K LRU cache for nodes
-	/// \param[in] compression wheter to use snappy compression (true) or not
-	Database( const char* path_, unsigned int cachesize_k, bool compression);
+	virtual DatabaseClientInterface* createClient( const std::string& configsource) const;
 
-	virtual ~Database();
+	virtual void createDatabase( const std::string& configsource) const;
 
-	virtual void close();
+	virtual void destroyDatabase( const std::string& configsource) const;
 
-	virtual DatabaseTransactionInterface* createTransaction();
+	virtual const char* getConfigDescription( ConfigType type) const;
 
-	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const;
-
-	virtual DatabaseBackupCursorInterface* createBackupCursor() const;
-	
-	virtual void writeImm(
-			const char* key,
-			std::size_t keysize,
-			const char* value,
-			std::size_t valuesize);
-
-	virtual void removeImm(
-			const char* key,
-			std::size_t keysize);
-
-	virtual bool readValue(
-			const char* key,
-			std::size_t keysize,
-			std::string& value,
-			const DatabaseOptions& options) const;
-
-public:
-	void cleanup();
-	friend class DatabaseTransaction;
-
-private:
-	leveldb::DB* m_db;					///< levelDB handle
-	leveldb::Options m_dboptions;				///< options for levelDB
-	bool m_closed;						///< true, if 'close()' has been called
+	virtual const char** getConfigParameters( ConfigType type) const;
 };
 
 }//namespace
 #endif
-
 

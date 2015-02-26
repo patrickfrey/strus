@@ -53,9 +53,9 @@
 namespace strus {
 
 /// \brief Forward declaration
-class Storage;
+class StorageClient;
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class StoragePeerInterface;
 
@@ -66,8 +66,8 @@ class StorageTransaction
 {
 public:
 	StorageTransaction( 
-		Storage* storage_,
-		DatabaseInterface* database_,
+		StorageClient* storage_,
+		DatabaseClientInterface* database_,
 		const StoragePeerInterface* storagePeer_,
 		const MetaDataDescription* metadescr_,
 		const VarSizeNodeTree* termnomap_);
@@ -123,8 +123,8 @@ public:/*Document*/
 	void closeForwardIndexDocument( const Index& docno);
 
 private:
-	Storage* m_storage;					///< Storage to call refresh after commit or rollback
-	DatabaseInterface* m_database;				///< database handle
+	StorageClient* m_storage;					///< Storage to call refresh after commit or rollback
+	DatabaseClientInterface* m_database;				///< database handle
 	const StoragePeerInterface* m_storagePeer;		///< interface to populate global statistics
 	const MetaDataDescription* m_metadescr;			///< description of metadata
 

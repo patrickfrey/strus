@@ -35,14 +35,14 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
-class Storage;
+class StorageClient;
 
 class PosinfoIterator
 {
 public:
-	PosinfoIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno_, Index termvalueno_);
+	PosinfoIterator( const StorageClient* storage_, DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_);
 	~PosinfoIterator(){}
 
 	Index skipDoc( const Index& docno_);
@@ -59,7 +59,7 @@ private:
 	bool loadBlock( const Index& elemno_);
 
 private:
-	const Storage* m_storage;
+	const StorageClient* m_storage;
 	DatabaseAdapter_PosinfoBlock_Cursor m_dbadapter;
 	PosinfoBlock m_posinfoBlk;
 	PosinfoBlock::Cursor m_posinfoCursor;

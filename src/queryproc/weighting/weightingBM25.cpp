@@ -34,7 +34,7 @@
 using namespace strus;
 
 WeightingClosureBM25::WeightingClosureBM25(
-		const StorageInterface* storage,
+		const StorageClientInterface* storage,
 		PostingIteratorInterface* itr_,
 		MetaDataReaderInterface* metadata_,
 		float k1_,

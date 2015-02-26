@@ -42,14 +42,14 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
 class InvertedIndexMap
 {
 public:
-	explicit InvertedIndexMap( DatabaseInterface* database_);
+	explicit InvertedIndexMap( DatabaseClientInterface* database_);
 
 	void definePosinfoPosting(
 		const Index& typeno,
@@ -130,7 +130,7 @@ private:
 
 private:
 	DocumentFrequencyMap m_dfmap;
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	Map m_map;
 	std::vector<PosinfoBlock::PositionType> m_posinfo;
 	InvTermMap m_invtermmap;

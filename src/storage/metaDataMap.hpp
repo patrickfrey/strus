@@ -41,7 +41,7 @@ namespace strus {
 /// \brief Forward declaration
 class MetaDataBlockCache;
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
@@ -49,7 +49,7 @@ class DatabaseTransactionInterface;
 class MetaDataMap
 {
 public:
-	MetaDataMap( DatabaseInterface* database_, const MetaDataDescription* descr_)
+	MetaDataMap( DatabaseClientInterface* database_, const MetaDataDescription* descr_)
 		:m_database(database_),m_descr(descr_){}
 	~MetaDataMap();
 
@@ -73,7 +73,7 @@ private:
 	typedef std::map<MetaDataKey,ArithmeticVariant,MapCompare,MapAllocator> Map;
 
 private:
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	const MetaDataDescription* m_descr;
 	Map m_map;
 };

@@ -26,198 +26,37 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_HPP_INCLUDED
-#define _STRUS_STORAGE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STORAGE_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/storageInterface.hpp"
-#include "strus/index.hpp"
-#include "strus/arithmeticVariant.hpp"
-#include "strus/databaseCursorInterface.hpp"
-#include "strus/reference.hpp"
-#include "metaDataBlockCache.hpp"
-#include "indexSetIterator.hpp"
-#include "varSizeNodeTree.hpp"
-#include <boost/thread/mutex.hpp>
+#include <string>
 
 namespace strus {
 
 /// \brief Forward declaration
-class PostingIteratorInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
-class ForwardIteratorInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
-class InvAclIteratorInterface;
-/// \brief Forward declaration
-class StorageTransactionInterface;
-/// \brief Forward declaration
-class StorageDocumentInterface;
-/// \brief Forward declaration
-class AttributeReaderInterface;
-/// \brief Forward declaration
-class MetaDataReaderInterface;
-/// \brief Forward declaration
-class KeyAllocatorInterface;
-/// \brief Forward declaration
-class DatabaseInterface;
-/// \brief Forward declaration
-class DocumentFrequencyCache;
-/// \brief Forward declaration
-class PeerStorageTransactionInterface;
-/// \brief Forward declaration
-class StoragePeerInterface;
+class StorageAlterMetaDataTableInterface;
 
-/// \brief Implementation of the StorageInterface
+
+/// \brief Object to the create and alter a storage for strus
 class Storage
 	:public StorageInterface
 {
 public:
-	/// \param[in] database reference to key value store database used by this storage
-	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	explicit Storage( DatabaseInterface* database_, const char* termnomap_source=0);
-	virtual ~Storage();
+	virtual StorageClientInterface* createClient( const std::string& configsource, DatabaseClientInterface* database) const;
 
-	virtual void close();
+	virtual void createStorage( const std::string& configsource, DatabaseClientInterface* database) const;
+	
+	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseClientInterface* database) const;
 
-	virtual PostingIteratorInterface*
-			createTermPostingIterator(
-				const std::string& termtype,
-				const std::string& termid) const;
+	virtual const char* getConfigDescription( ConfigType type) const;
 
-	virtual ForwardIteratorInterface*
-			createForwardIterator(
-				const std::string& type) const;
-
-	virtual InvAclIteratorInterface*
-			createInvAclIterator(
-				const std::string& username) const;
-
-	virtual StorageTransactionInterface*
-			createTransaction();
-
-	virtual StorageDocumentInterface* 
-			createDocumentChecker(
-				const std::string& docid,
-				const std::string& logfilename) const;
-
-	virtual Index allocDocnoRange( std::size_t nofDocuments);
-
-	virtual MetaDataReaderInterface* createMetaDataReader() const;
-
-	virtual AttributeReaderInterface* createAttributeReader() const;
-
-	virtual GlobalCounter globalNofDocumentsInserted() const;
-	virtual Index localNofDocumentsInserted() const;
-	virtual GlobalCounter globalDocumentFrequency(
-			const std::string& type,
-			const std::string& term) const;
-	virtual Index localDocumentFrequency(
-			const std::string& type,
-			const std::string& term) const;
-
-	virtual Index maxDocumentNumber() const;
-
-	virtual Index documentNumber( const std::string& docid) const;
-
-	Index userId( const std::string& username) const;
-
-	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
-
-	virtual void defineStoragePeerInterface(
-			const StoragePeerInterface* storagePeer,
-			bool doPopulateInitialState);
-
-public:/*QueryEval*/
-	Index getTermValue( const std::string& name) const;
-	Index getTermType( const std::string& name) const;
-	Index getDocno( const std::string& name) const;
-	Index getUserno( const std::string& name) const;
-	Index getAttributeName( const std::string& name) const;
-	GlobalCounter documentFrequency( const Index& typeno, const Index& termno) const;
-
-public:/*StorageTransaction*/
-	void getVariablesWriteBatch(
-			DatabaseTransactionInterface* transaction,
-			int nof_documents_incr);
-
-	void releaseTransaction( const std::vector<Index>& refreshList);
-
-	void declareNofDocumentsInserted( int incr);
-	Index nofAttributeTypes();
-
-	KeyAllocatorInterface* createTypenoAllocator();
-	KeyAllocatorInterface* createDocnoAllocator();
-	KeyAllocatorInterface* createUsernoAllocator();
-	KeyAllocatorInterface* createAttribnoAllocator();
-	KeyAllocatorInterface* createTermnoAllocator();
-
-	bool withAcl() const;
-
-	Index allocTermno();
-	Index allocTypenoImm( const std::string& name, bool& isNew);///< immediate allocation of a term type
-	Index allocDocnoImm( const std::string& name, bool& isNew); ///< immediate allocation of a doc number
-	Index allocUsernoImm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
-	Index allocAttribnoImm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
-
-	friend class TransactionLock;
-	class TransactionLock
-	{
-	public:
-		TransactionLock( Storage* storage_)
-			:m_mutex(&storage_->m_transaction_mutex)
-		{
-			m_mutex->lock();
-		}
-		~TransactionLock()
-		{
-			m_mutex->unlock();
-		}
-
-	private:
-		boost::mutex* m_mutex;
-	};
-
-public:/*PeerStorageTransaction*/
-	void declareGlobalNofDocumentsInserted( const GlobalCounter& increment);
-
-public:/*StorageDocumentChecker*/
-	IndexSetIterator getAclIterator( const Index& docno) const;
-	IndexSetIterator getUserAclIterator( const Index& userno) const;
-
-private:
-	void cleanup();
-	void loadTermnoMap( const char* termnomap_source);
-	void loadVariables();
-	void storeVariables();
-	void fillDocumentFrequencyCache();
-
-private:
-	DatabaseInterface* m_database;				///< reference to key value store database
-	Index m_next_typeno;					///< next index to assign to a new term type
-	Index m_next_termno;					///< next index to assign to a new term value
-	Index m_next_docno;					///< next index to assign to a new document id
-	Index m_next_userno;					///< next index to assign to a new user id
-	Index m_next_attribno;					///< next index to assign to a new attribute name
-
-	boost::mutex m_mutex_typeno;
-	boost::mutex m_mutex_termno;
-	boost::mutex m_mutex_docno;
-	boost::mutex m_mutex_userno;
-	boost::mutex m_mutex_attribno;
-
-	Index m_nof_documents;					///< number of documents inserted
-	GlobalCounter m_global_nof_documents;			///< global number of documents inserted
-	boost::mutex m_nof_documents_mutex;
-
-	boost::mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
-
-	MetaDataDescription m_metadescr;			///< description of the meta data
-	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
-	VarSizeNodeTree* m_termno_map;				///< map of the most important (most frequent) terms, if specified
-
-	const StoragePeerInterface* m_storagePeer;		///< reference to interface to other peer storages
-	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
+	virtual const char** getConfigParameters( ConfigType type) const;
 };
 
-}
+}//namespace
 #endif
-
 

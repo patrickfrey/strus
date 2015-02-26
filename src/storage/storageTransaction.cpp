@@ -27,12 +27,12 @@
 --------------------------------------------------------------------
 */
 #include "storageTransaction.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/storagePeerInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "storageDocument.hpp"
-#include "storage.hpp"
+#include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <vector>
@@ -45,8 +45,8 @@
 using namespace strus;
 
 StorageTransaction::StorageTransaction(
-		Storage* storage_,
-		DatabaseInterface* database_,
+		StorageClient* storage_,
+		DatabaseClientInterface* database_,
 		const StoragePeerInterface* storagePeer_,
 		const MetaDataDescription* metadescr_,
 		const VarSizeNodeTree* termnomap_)
@@ -250,7 +250,7 @@ void StorageTransaction::commit()
 		throw std::runtime_error( "called transaction commit after rollback");
 	}
 	{
-		Storage::TransactionLock lock( m_storage);
+		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
 
 		boost::scoped_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());

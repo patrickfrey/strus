@@ -28,6 +28,7 @@
 */
 #include "strus/reference.hpp"
 #include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
@@ -36,6 +37,7 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include <string>
@@ -906,18 +908,23 @@ int main( int argc, const char* argv[])
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
+		const strus::DatabaseInterface* dbi = strus::getDatabase_leveldb();
+		const strus::StorageInterface* sti = strus::getStorage();
 		try
 		{
-			strus::destroyDatabase_leveldb( config);
+			dbi->destroyDatabase( config);
 		}
 		catch(...){}
 
-		strus::createDatabase_leveldb( config);
-		boost::scoped_ptr<strus::DatabaseInterface>
-			database( strus::createDatabaseClient_leveldb( config));
-		strus::createStorage( config, database.get());
-		boost::scoped_ptr<strus::StorageInterface>
-			storage( strus::createStorageClient( "", database.get()));
+		dbi->createDatabase( config);
+		std::auto_ptr<strus::DatabaseClientInterface>
+			database( dbi->createClient( config));
+
+		sti->createStorage( config, database.get());
+
+		boost::scoped_ptr<strus::StorageClientInterface>
+			storage( sti->createClient( "", database.get()));
+		database.release();
 
 		RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
 

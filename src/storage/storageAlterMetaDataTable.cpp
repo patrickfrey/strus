@@ -28,7 +28,7 @@
 */
 #include "storageAlterMetaDataTable.hpp"
 #include "storage.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <vector>
@@ -39,12 +39,12 @@
 using namespace strus;
 
 StorageAlterMetaDataTable::StorageAlterMetaDataTable(
-		DatabaseInterface* database_)
+		DatabaseClientInterface* database_)
 	:m_database(database_)
 	,m_commit(false)
 	,m_rollback(false)
 {
-	m_metadescr_old.load( m_database);
+	m_metadescr_old.load( m_database.get());
 	m_metadescr_new  = m_metadescr_old;
 }
 
@@ -70,7 +70,7 @@ void StorageAlterMetaDataTable::commit()
 		trmap = m_metadescr_new.getTranslationMap(
 				m_metadescr_old, m_metadescr_resets);
 
-	MetaDataMap blockmap( m_database, &m_metadescr_old);
+	MetaDataMap blockmap( m_database.get(), &m_metadescr_old);
 	
 	blockmap.rewriteMetaData( trmap, m_metadescr_new, transaction.get());
 	m_metadescr_new.store( transaction.get());

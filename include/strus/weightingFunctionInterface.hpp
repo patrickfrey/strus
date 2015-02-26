@@ -41,7 +41,7 @@ class WeightingClosureInterface;
 /// \brief Forward declaration
 class ArithmeticVariant;
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 
 /// \brief Interface for a weighting function that can be used for ranking in the query evaluation
 class WeightingFunctionInterface
@@ -60,7 +60,7 @@ public:
 	/// \param[in] metadata meta data interface
 	/// \return the closure with some global statistics calculated only once
 	virtual WeightingClosureInterface* createClosure(
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			PostingIteratorInterface* itr,
 			MetaDataReaderInterface* metadata,
 			const std::vector<ArithmeticVariant>& parameters) const=0;

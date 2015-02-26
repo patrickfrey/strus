@@ -31,7 +31,7 @@
 #include "iterator/iterator_standard.hpp"
 #include "weighting/weighting_standard.hpp"
 #include "strus/constants.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -42,7 +42,7 @@
 
 using namespace strus;
 
-QueryProcessor::QueryProcessor( StorageInterface* storage_)
+QueryProcessor::QueryProcessor( StorageClientInterface* storage_)
 	:m_storage(storage_)
 {
 	definePostingJoinOperator( "within", createPostingJoinWithin());

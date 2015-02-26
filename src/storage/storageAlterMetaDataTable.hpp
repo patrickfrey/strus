@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_TRANSACTION_HPP_INCLUDED
 #define _STRUS_LVDB_TRANSACTION_HPP_INCLUDED
 #include "strus/storageAlterMetaDataTableInterface.hpp"
+#include "strus/reference.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataMap.hpp"
@@ -40,7 +41,7 @@
 #include <boost/scoped_ptr.hpp>
 
 namespace strus {
-class DatabaseInterface;
+class DatabaseClientInterface;
 
 /// \class StorageTransaction
 class StorageAlterMetaDataTable
@@ -51,7 +52,7 @@ private:
 	void operator=( const StorageAlterMetaDataTable&){}		//... non copyable
 
 public:
-	StorageAlterMetaDataTable( DatabaseInterface* database_);
+	StorageAlterMetaDataTable( DatabaseClientInterface* database_);
 
 	~StorageAlterMetaDataTable();
 
@@ -89,7 +90,7 @@ private:
 			MetaDataElement::Type type);
 
 private:
-	DatabaseInterface* m_database;				///< database interface
+	Reference<DatabaseClientInterface> m_database;		///< database interface
 
 	MetaDataDescription m_metadescr_old;			///< meta data structure changes
 	MetaDataDescription m_metadescr_new;			///< meta data structure changes

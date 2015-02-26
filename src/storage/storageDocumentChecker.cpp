@@ -27,12 +27,12 @@
 --------------------------------------------------------------------
 */
 #include "storageDocumentChecker.hpp"
-#include "storage.hpp"
+#include "storageClient.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocument.hpp"
 #include "storage.hpp"
 #include "indexSetIterator.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
@@ -46,8 +46,8 @@
 using namespace strus;
 
 StorageDocumentChecker::StorageDocumentChecker(
-		const Storage* storage_,
-		DatabaseInterface* database_,
+		const StorageClient* storage_,
+		DatabaseClientInterface* database_,
 		const std::string& docid_,
 		const std::string& logfile_)
 	:m_storage(storage_)

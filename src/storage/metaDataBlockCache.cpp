@@ -27,14 +27,14 @@
 --------------------------------------------------------------------
 */
 #include "metaDataBlockCache.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"
 #include <stdexcept>
 #include <stdint.h>
 
 using namespace strus;
 
-MetaDataBlockCache::MetaDataBlockCache( DatabaseInterface* database_, const MetaDataDescription& descr_)
+MetaDataBlockCache::MetaDataBlockCache( DatabaseClientInterface* database_, const MetaDataDescription& descr_)
 	:m_database(database_),m_descr(descr_),m_dbadapter(database_, &m_descr)
 {}
 

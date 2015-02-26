@@ -29,7 +29,7 @@
 #ifndef _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
 #define _STRUS_DATABASE_ADAPTER_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/reference.hpp"
@@ -64,7 +64,7 @@ public:
 	class Cursor
 	{
 	public:
-		Cursor( char prefix_, DatabaseInterface* database_)
+		Cursor( char prefix_, DatabaseClientInterface* database_)
 			:m_cursor( database_->createCursor( DatabaseOptions())),m_prefix(prefix_){}
 
 		bool loadFirst( std::string& key, Index& value);
@@ -78,7 +78,7 @@ public:
 		char m_prefix;
 	};
 
-	DatabaseAdapter_StringIndex( char prefix_, DatabaseInterface* database_)
+	DatabaseAdapter_StringIndex( char prefix_, DatabaseClientInterface* database_)
 		:m_prefix(prefix_),m_database(database_){}
 
 	Index get( const std::string& key);
@@ -89,7 +89,7 @@ public:
 
 private:
 	char m_prefix;
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 };
 
 class DatabaseAdapter_TermType
@@ -101,11 +101,11 @@ public:
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
 	public:
-		Cursor( DatabaseInterface* database_)
+		Cursor( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
 
-	explicit DatabaseAdapter_TermType( DatabaseInterface* database_)
+	explicit DatabaseAdapter_TermType( DatabaseClientInterface* database_)
 		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
@@ -118,10 +118,10 @@ public:
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
 	public:
-		Cursor( DatabaseInterface* database_)
+		Cursor( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
-	explicit DatabaseAdapter_TermValue( DatabaseInterface* database_)
+	explicit DatabaseAdapter_TermValue( DatabaseClientInterface* database_)
 		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
@@ -134,10 +134,10 @@ public:
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
 	public:
-		Cursor( DatabaseInterface* database_)
+		Cursor( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
-	explicit DatabaseAdapter_DocId( DatabaseInterface* database_)
+	explicit DatabaseAdapter_DocId( DatabaseClientInterface* database_)
 		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
@@ -150,10 +150,10 @@ public:
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
 	public:
-		Cursor( DatabaseInterface* database_)
+		Cursor( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
-	explicit DatabaseAdapter_Variable( DatabaseInterface* database_)
+	explicit DatabaseAdapter_Variable( DatabaseClientInterface* database_)
 		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
@@ -166,10 +166,10 @@ public:
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
 	public:
-		Cursor( DatabaseInterface* database_)
+		Cursor( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
-	explicit DatabaseAdapter_AttributeKey( DatabaseInterface* database_)
+	explicit DatabaseAdapter_AttributeKey( DatabaseClientInterface* database_)
 		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
@@ -182,10 +182,10 @@ public:
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
 	public:
-		Cursor( DatabaseInterface* database_)
+		Cursor( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
 	};
-	explicit DatabaseAdapter_UserName( DatabaseInterface* database_)
+	explicit DatabaseAdapter_UserName( DatabaseClientInterface* database_)
 		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
 };
 
@@ -193,7 +193,7 @@ public:
 class DatabaseAdapter_DataBlock
 {
 public:
-	DatabaseAdapter_DataBlock( DatabaseInterface* database_, char prefix_, const BlockKey& domainKey_)
+	DatabaseAdapter_DataBlock( DatabaseClientInterface* database_, char prefix_, const BlockKey& domainKey_)
 		:m_database(database_),m_dbkey(prefix_,domainKey_),m_domainKeySize(0)
 	{
 		m_domainKeySize = m_dbkey.size();
@@ -206,7 +206,7 @@ public:
 
 protected:
 	enum {KeyPrefix=DatabaseKey::PosinfoBlockPrefix};
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	DatabaseKey m_dbkey;
 	std::size_t m_domainKeySize;
 };
@@ -216,7 +216,7 @@ class DatabaseAdapter_DataBlock_Cursor
 	:public DatabaseAdapter_DataBlock
 {
 public:
-	DatabaseAdapter_DataBlock_Cursor( DatabaseInterface* database_, char prefix_, const BlockKey& domainKey_)
+	DatabaseAdapter_DataBlock_Cursor( DatabaseClientInterface* database_, char prefix_, const BlockKey& domainKey_)
 		:DatabaseAdapter_DataBlock( database_,prefix_,domainKey_)
 		,m_cursor(database_->createCursor( DatabaseOptions().useCache()))
 	{
@@ -240,7 +240,7 @@ class DatabaseAdapter_ForwardIndex_Cursor
 	:protected DatabaseAdapter_DataBlock_Cursor
 {
 public:
-	DatabaseAdapter_ForwardIndex_Cursor( DatabaseInterface* database_, const Index& typeno_, const Index& docno_)
+	DatabaseAdapter_ForwardIndex_Cursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& docno_)
 		:DatabaseAdapter_DataBlock_Cursor( database_,(char)KeyPrefix, BlockKey(typeno_,docno_)){}
 
 	bool load( const Index& posno, ForwardIndexBlock& blk);
@@ -262,7 +262,7 @@ class DatabaseAdapter_PosinfoBlock_Cursor
 	:public DatabaseAdapter_DataBlock_Cursor
 {
 public:
-	DatabaseAdapter_PosinfoBlock_Cursor( DatabaseInterface* database_, const Index& typeno_, const Index& termno_)
+	DatabaseAdapter_PosinfoBlock_Cursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& termno_)
 		:DatabaseAdapter_DataBlock_Cursor( database_,(char)KeyPrefix, BlockKey(typeno_,termno_)){}
 
 	bool loadUpperBound( const Index& docno, PosinfoBlock& blk);
@@ -281,7 +281,7 @@ class DatabaseAdapter_InverseTerm
 	:protected DatabaseAdapter_DataBlock
 {
 public:
-	DatabaseAdapter_InverseTerm( DatabaseInterface* database_)
+	DatabaseAdapter_InverseTerm( DatabaseClientInterface* database_)
 		:DatabaseAdapter_DataBlock( database_,(char)KeyPrefix, BlockKey()){}
 
 	bool load( const Index& docno, InvTermBlock& blk);
@@ -298,7 +298,7 @@ class DatabaseAdapter_BooleanBlock_Cursor
 	:public DatabaseAdapter_DataBlock_Cursor
 {
 public:
-	DatabaseAdapter_BooleanBlock_Cursor( DatabaseInterface* database_, char prefix, const BlockKey& domainKey_)
+	DatabaseAdapter_BooleanBlock_Cursor( DatabaseClientInterface* database_, char prefix, const BlockKey& domainKey_)
 		:DatabaseAdapter_DataBlock_Cursor( database_, prefix, domainKey_){}
 
 	bool loadUpperBound( const Index& docno, BooleanBlock& blk);
@@ -314,7 +314,7 @@ class DatabaseAdapter_UserAclBlock_Cursor
 	:public DatabaseAdapter_BooleanBlock_Cursor
 {
 public:
-	DatabaseAdapter_UserAclBlock_Cursor( DatabaseInterface* database_, const Index& docno_)
+	DatabaseAdapter_UserAclBlock_Cursor( DatabaseClientInterface* database_, const Index& docno_)
 		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(docno_)){}
 
 private:
@@ -326,7 +326,7 @@ class DatabaseAdapter_AclBlock_Cursor
 	:public DatabaseAdapter_BooleanBlock_Cursor
 {
 public:
-	DatabaseAdapter_AclBlock_Cursor( DatabaseInterface* database_, const Index& userno_)
+	DatabaseAdapter_AclBlock_Cursor( DatabaseClientInterface* database_, const Index& userno_)
 		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(userno_)){}
 	
 private:
@@ -338,7 +338,7 @@ class DatabaseAdapter_DocListBlock_Cursor
 	:public DatabaseAdapter_BooleanBlock_Cursor
 {
 public:
-	DatabaseAdapter_DocListBlock_Cursor( DatabaseInterface* database_, const Index& typeno_, const Index& termno_)
+	DatabaseAdapter_DocListBlock_Cursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& termno_)
 		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(typeno_,termno_)){}
 private:
 	enum {KeyPrefix=DatabaseKey::DocListBlockPrefix};
@@ -348,7 +348,7 @@ private:
 class DatabaseAdapter_DocMetaData
 {
 public:
-	explicit DatabaseAdapter_DocMetaData( const DatabaseInterface* database_, const MetaDataDescription* descr_)
+	explicit DatabaseAdapter_DocMetaData( const DatabaseClientInterface* database_, const MetaDataDescription* descr_)
 		:m_database( database_),m_descr(descr_){}
 
 	MetaDataBlock* loadPtr( const Index& blockno);
@@ -363,7 +363,7 @@ private:
 
 private:
 	enum {KeyPrefix=DatabaseKey::DocMetaDataPrefix};
-	const DatabaseInterface* m_database;
+	const DatabaseClientInterface* m_database;
 	Reference<DatabaseCursorInterface> m_cursor;
 	const MetaDataDescription* m_descr;
 };
@@ -372,7 +372,7 @@ private:
 class DatabaseAdapter_DocAttribute
 {
 public:
-	static bool load( const DatabaseInterface* database, const Index& docno, const Index& attrno, std::string& value);
+	static bool load( const DatabaseClientInterface* database, const Index& docno, const Index& attrno, std::string& value);
 	static void store( DatabaseTransactionInterface* transaction, const Index& docno, const Index& attrno, const char* value);
 	static void remove( DatabaseTransactionInterface* transaction, const Index& docno, const Index& attrno);
 	static void removeAll( DatabaseTransactionInterface* transaction, const Index& docno);
@@ -387,7 +387,7 @@ public:
 	class Cursor
 	{
 	public:
-		Cursor( DatabaseInterface* database_)
+		Cursor( DatabaseClientInterface* database_)
 			:m_cursor( database_->createCursor( DatabaseOptions())){}
 
 		bool loadFirst( Index& typeno, Index& termno, Index& df);
@@ -400,11 +400,11 @@ public:
 		Reference<DatabaseCursorInterface> m_cursor;
 	};
 public:
-	static Index get( const DatabaseInterface* database, const Index& typeno, const Index& termno);
-	static bool load( const DatabaseInterface* database, const Index& typeno, const Index& termno, Index& df);
+	static Index get( const DatabaseClientInterface* database, const Index& typeno, const Index& termno);
+	static bool load( const DatabaseClientInterface* database, const Index& typeno, const Index& termno, Index& df);
 	static void store( DatabaseTransactionInterface* transaction, const Index& typeno, const Index& termno, const Index& df);
 	static void remove( DatabaseTransactionInterface* transaction, const Index& typeno, const Index& termno);
-	static void storeImm( DatabaseInterface* database, const Index& typeno, const Index& termno, const Index& df);
+	static void storeImm( DatabaseClientInterface* database, const Index& typeno, const Index& termno, const Index& df);
 private:
 	enum {KeyPrefix=DatabaseKey::DocFrequencyPrefix};
 };
@@ -412,9 +412,9 @@ private:
 class DatabaseAdapter_MetaDataDescr
 {
 public:
-	static bool load( const DatabaseInterface* database, std::string& descr);
+	static bool load( const DatabaseClientInterface* database, std::string& descr);
 	static void store( DatabaseTransactionInterface* transaction, const std::string& descr);
-	static void storeImm( DatabaseInterface* database, const std::string& descr);
+	static void storeImm( DatabaseClientInterface* database, const std::string& descr);
 private:
 	enum {KeyPrefix=DatabaseKey::MetaDataDescrPrefix};
 };

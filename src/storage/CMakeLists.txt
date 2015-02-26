@@ -36,6 +36,7 @@ posinfoIterator.cpp
 postingIterator.cpp
 storageAlterMetaDataTable.cpp
 storage.cpp
+storageClient.cpp
 storageDocumentChecker.cpp
 storageDocument.cpp
 storageTransaction.cpp

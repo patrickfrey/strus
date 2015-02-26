@@ -28,7 +28,7 @@
 */
 #include "invertedIndexMap.hpp"
 #include "booleanBlockBatchWrite.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "keyMap.hpp"
 #include "databaseAdapter.hpp"
@@ -39,7 +39,7 @@
 
 using namespace strus;
 
-InvertedIndexMap::InvertedIndexMap( DatabaseInterface* database_)
+InvertedIndexMap::InvertedIndexMap( DatabaseClientInterface* database_)
 	:m_dfmap(database_),m_database(database_),m_docno(0)
 {
 	m_posinfo.push_back( 0);

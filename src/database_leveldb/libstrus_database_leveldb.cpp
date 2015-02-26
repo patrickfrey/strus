@@ -27,116 +27,14 @@
 --------------------------------------------------------------------
 */
 #include "strus/lib/database_leveldb.hpp"
-#include "strus/databaseInterface.hpp"
-#include "strus/private/configParser.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
-#include <stdexcept>
-#include <leveldb/db.h>
 
 using namespace strus;
 
-DLL_PUBLIC DatabaseInterface* strus::createDatabaseClient_leveldb( const std::string& configsource)
+DLL_PUBLIC const DatabaseInterface* strus::getDatabase_leveldb()
 {
-	unsigned int cachesize_kb = 0;
-	bool compression = true;
-	std::string path;
-	std::string src( configsource);
-
-	if (!extractStringFromConfigString( path, src, "path"))
-	{
-		throw std::runtime_error("missing 'path' in database configuration string");
-	}
-	(void)extractBooleanFromConfigString( compression, src, "compression");
-	(void)extractUIntFromConfigString( cachesize_kb, src, "cache");
-
-	return new Database( path.c_str(), cachesize_kb, compression);
+	static const Database database;
+	return &database;
 }
-
-
-DLL_PUBLIC void strus::createDatabase_leveldb( const std::string& configsource)
-{
-	bool compression = true;
-	std::string path;
-	std::string src = configsource;
-
-	if (!extractStringFromConfigString( path, src, "path"))
-	{
-		throw std::runtime_error("missing 'path' in database configuration string");
-	}
-	(void)extractBooleanFromConfigString( compression, src, "compression");
-
-	leveldb::DB* db = 0;
-	leveldb::Options options;
-	// Compression reduces size of index by 25% and has about 10% better performance
-	// m_dboptions.compression = leveldb::kNoCompression;
-	options.create_if_missing = true;
-	options.error_if_exists = true;
-
-	if (!compression)
-	{
-		options.compression = leveldb::kNoCompression;
-	}
-	leveldb::Status status = leveldb::DB::Open( options, path, &db);
-	if (!status.ok())
-	{
-		std::string err = status.ToString();
-		if (db) delete db;
-		throw std::runtime_error( std::string( "failed to create LevelDB key value store database: ") + err);
-	}
-	if (db) delete db;
-}
-
-
-DLL_PUBLIC void strus::destroyDatabase_leveldb( const std::string& configsource)
-{
-	std::string path;
-	std::string src = configsource;
-
-	if (!extractStringFromConfigString( path, src, "path"))
-	{
-		throw std::runtime_error("missing 'path' in database configuration string");
-	}
-
-	leveldb::Options options;
-	leveldb::Status status = leveldb::DestroyDB( path, options);
-	if (!status.ok())
-	{
-		std::string err = status.ToString();
-		throw std::runtime_error( std::string( "failed to remove key value store database: ") + err);
-	}
-}
-
-
-DLL_PUBLIC const char* strus::getDatabaseConfigDescription_leveldb( ConfigType type)
-{
-	switch (type)
-	{
-		case CmdCreateClient:
-			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>";
-
-		case CmdCreate:
-			return "path=<LevelDB storage path>;compression=<yes/no>";
-
-		case CmdDestroy:
-			return "path=<LevelDB storage path>";
-	}
-	return 0;
-}
-
-DLL_PUBLIC const char** strus::getDatabaseConfigParameters_leveldb( ConfigType type)
-{
-	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression", 0};
-	static const char* keys_CreateDatabase[] = {"path","compression", 0};
-	static const char* keys_DestroyDatabase[] = {"path", 0};
-	switch (type)
-	{
-		case CmdCreateClient:	return keys_CreateDatabaseClient;
-		case CmdCreate:		return keys_CreateDatabase;
-		case CmdDestroy:	return keys_DestroyDatabase;
-	}
-	return 0;
-}
-
-
 

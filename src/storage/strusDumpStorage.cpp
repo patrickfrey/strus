@@ -27,12 +27,13 @@
 --------------------------------------------------------------------
 */
 #include "strus/lib/database_leveldb.hpp"
-#include "databaseKey.hpp"
 #include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/versionStorage.hpp"
 #include "extractKeyValueData.hpp"
+#include "databaseKey.hpp"
 #include "strus/private/cmdLineOpt.hpp"
 #include <iostream>
 #include <cstring>
@@ -193,7 +194,7 @@ static void dumpKeyValue(
 	}
 }
 
-static void dumpDB( std::ostream& out, strus::DatabaseInterface* database)
+static void dumpDB( std::ostream& out, strus::DatabaseClientInterface* database)
 {
 	strus::MetaDataDescription metadescr( database);
 	boost::scoped_ptr<strus::DatabaseCursorInterface>
@@ -231,7 +232,7 @@ static void dumpDB( std::ostream& out, strus::DatabaseInterface* database)
 	cnt = 0;
 }
 
-static void dumpDB( std::ostream& out, strus::DatabaseInterface* database, char keyprefix)
+static void dumpDB( std::ostream& out, strus::DatabaseClientInterface* database, char keyprefix)
 {
 	if (!keyprefix)
 	{
@@ -283,6 +284,7 @@ int main( int argc, const char* argv[])
 		std::cout << "Strus storage version " << STRUS_STORAGE_VERSION_STRING << std::endl;
 		return 0;
 	}
+	const strus::DatabaseInterface* db = strus::getDatabase_leveldb();
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		std::cerr << "usage: strusDumpStorage [options] <config> [ <what> ]" << std::endl;
@@ -291,8 +293,8 @@ int main( int argc, const char* argv[])
 
 		strus::printIndentMultilineString(
 					std::cerr,
-					12, strus::getDatabaseConfigDescription_leveldb(
-						strus::CmdCreateClient));
+					12, db->getConfigDescription(
+						strus::DatabaseInterface::CmdCreateClient));
 		std::cerr << "<what>    : optional name of entries to dump:" << std::endl;
 		std::cerr << "            termtype  :term type definitions" << std::endl;
 		std::cerr << "            termvalue :term value definitions" << std::endl;
@@ -326,8 +328,8 @@ int main( int argc, const char* argv[])
 		{
 			keyprefix = getDatabaseKeyPrefix( argv[2]);
 		}
-		boost::scoped_ptr<strus::DatabaseInterface>
-			database( strus::createDatabaseClient_leveldb( argv[1]));
+		boost::scoped_ptr<strus::DatabaseClientInterface>
+			database( db->createClient( argv[1]));
 
 		dumpDB( std::cout, database.get(), keyprefix);
 	}

@@ -29,7 +29,7 @@
 #include "summarizerListMatches.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include <set>
 #include <cstdlib>
 #include <iostream>
@@ -38,7 +38,7 @@
 using namespace strus;
 
 SummarizerClosureListMatches::SummarizerClosureListMatches(
-		const StorageInterface* storage_,
+		const StorageClientInterface* storage_,
 		const std::vector<SummarizerFunctionInterface::FeatureParameter>& postings_)
 	:m_storage(storage_)
 {

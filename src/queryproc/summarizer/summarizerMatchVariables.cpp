@@ -31,7 +31,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
 #include <cstdlib>
@@ -39,7 +39,7 @@
 using namespace strus;
 
 SummarizerClosureMatchVariables::SummarizerClosureMatchVariables(
-		const StorageInterface* storage_,
+		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& termtype_,
 		const std::string& delimiter_,

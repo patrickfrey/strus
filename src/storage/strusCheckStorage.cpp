@@ -28,11 +28,12 @@
 */
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/versionStorage.hpp"
-#include "databaseKey.hpp"
 #include "extractKeyValueData.hpp"
+#include "databaseKey.hpp"
 #include "strus/private/cmdLineOpt.hpp"
 #include <iostream>
 #include <cstring>
@@ -169,7 +170,7 @@ static void checkKeyValue( const strus::MetaDataDescription* metadescr,
 	}
 }
 
-static void checkDB( strus::DatabaseInterface* database)
+static void checkDB( strus::DatabaseClientInterface* database)
 {
 	strus::MetaDataDescription metadescr( database);
 	boost::scoped_ptr<strus::DatabaseCursorInterface>
@@ -223,6 +224,7 @@ int main( int argc, const char* argv[])
 		std::cout << "Strus storage version " << STRUS_STORAGE_VERSION_STRING << std::endl;
 		return 0;
 	}
+	const strus::DatabaseInterface* db = strus::getDatabase_leveldb();
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		std::cerr << "usage: strusCheckStorage [options] <config>" << std::endl;
@@ -231,8 +233,8 @@ int main( int argc, const char* argv[])
 
 		strus::printIndentMultilineString(
 					std::cerr,
-					12, strus::getDatabaseConfigDescription_leveldb(
-						strus::CmdCreateClient));
+					12, db->getConfigDescription(
+						strus::DatabaseInterface::CmdCreateClient));
 		std::cerr << "options:" << std::endl;
 		std::cerr << "-h,--help     : Print this usage info and exit" << std::endl;
 		std::cerr << "-v,--version  : Print the version info and exit" << std::endl;
@@ -243,8 +245,8 @@ int main( int argc, const char* argv[])
 		if (argc < 2) throw std::runtime_error( "too few arguments (expected storage configuration string)");
 		if (argc > 2) throw std::runtime_error( "too many arguments for strusCheckStorage");
 
-		boost::scoped_ptr<strus::DatabaseInterface>
-			database( strus::createDatabaseClient_leveldb( argv[1]));
+		boost::scoped_ptr<strus::DatabaseClientInterface>
+			database( db->createClient( argv[1]));
 
 		checkDB( database.get());
 	}

@@ -35,7 +35,7 @@ namespace strus
 /// \brief Forward declaration
 class QueryInterface;
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class SummarizerConfig;
 /// \brief Forward declaration
@@ -92,7 +92,7 @@ public:
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on
-	virtual QueryInterface* createQuery( const StorageInterface* storage) const=0;
+	virtual QueryInterface* createQuery( const StorageClientInterface* storage) const=0;
 };
 
 }//namespace

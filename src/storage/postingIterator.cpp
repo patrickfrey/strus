@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "postingIterator.hpp"
-#include "storage.hpp"
+#include "storageClient.hpp"
 #include "indexPacker.hpp"
 #include <string>
 #include <vector>
@@ -41,9 +41,9 @@ using namespace strus;
 #undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-PostingIterator::PostingIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
+PostingIterator::PostingIterator( const StorageClient* storage_, DatabaseClientInterface* database_, Index termtypeno, Index termvalueno, const char* termstr)
 #else
-PostingIterator::PostingIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno, Index termvalueno, const char*)
+PostingIterator::PostingIterator( const StorageClient* storage_, DatabaseClientInterface* database_, Index termtypeno, Index termvalueno, const char*)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno))
 	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)

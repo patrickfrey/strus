@@ -29,12 +29,12 @@
 #include "forwardIterator.hpp"
 #include "storage.hpp"
 #include "indexPacker.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 
 using namespace strus;
 
-ForwardIterator::ForwardIterator( const Storage* storage_, DatabaseInterface* database_, const std::string& type_)
+ForwardIterator::ForwardIterator( const StorageClient* storage_, DatabaseClientInterface* database_, const std::string& type_)
 	:m_database(database_)
 	,m_dbadapter()
 	,m_blockitr(0)

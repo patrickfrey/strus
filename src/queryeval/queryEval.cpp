@@ -35,7 +35,7 @@
 #include "strus/weightingConfig.hpp"
 #include "weightingDef.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
@@ -179,7 +179,7 @@ void QueryEval::print( std::ostream& out) const
 }
 
 
-QueryInterface* QueryEval::createQuery( const StorageInterface* storage) const
+QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) const
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::cout << "create query for program:" << std::endl;

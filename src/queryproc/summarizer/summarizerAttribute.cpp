@@ -28,7 +28,7 @@
 */
 #include "summarizerAttribute.hpp"
 #include "strus/attributeReaderInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 
 using namespace strus;
 
@@ -59,7 +59,7 @@ std::vector<SummarizerClosureInterface::SummaryElement>
 
 
 SummarizerClosureInterface* SummarizerFunctionAttribute::createClosure(
-		const StorageInterface* storage_,
+		const StorageClientInterface* storage_,
 		const QueryProcessorInterface*,
 		MetaDataReaderInterface*,
 		const std::vector<FeatureParameter>&,

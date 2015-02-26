@@ -29,7 +29,7 @@
 #include "summarizerMetaData.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include "strus/arithmeticVariant.hpp"
 

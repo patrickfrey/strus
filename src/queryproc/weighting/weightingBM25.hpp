@@ -31,7 +31,7 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <vector>
@@ -50,7 +50,7 @@ class WeightingClosureBM25
 {
 public:
 	WeightingClosureBM25(
-		const StorageInterface* storage,
+		const StorageClientInterface* storage,
 		PostingIteratorInterface* itr_,
 		MetaDataReaderInterface* metadata_,
 		float k1_,
@@ -86,7 +86,7 @@ public:
 	}
 
 	virtual WeightingClosureInterface* createClosure(
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			PostingIteratorInterface* itr,
 			MetaDataReaderInterface* metadata,
 			const std::vector<ArithmeticVariant>& parameters) const

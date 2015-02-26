@@ -34,7 +34,7 @@
 #include "invTermBlock.hpp"
 #include "dataBlock.hpp"
 #include "forwardIndexBlock.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
 
@@ -405,7 +405,7 @@ void DatabaseAdapter_DocMetaData::remove( DatabaseTransactionInterface* transact
 }
 
 
-bool DatabaseAdapter_DocAttribute::load( const DatabaseInterface* database, const Index& docno, const Index& attrno, std::string& value)
+bool DatabaseAdapter_DocAttribute::load( const DatabaseClientInterface* database, const Index& docno, const Index& attrno, std::string& value)
 {
 	DatabaseKey dbkey( KeyPrefix, BlockKey( docno, attrno));
 	return database->readValue( dbkey.ptr(), dbkey.size(), value, DatabaseOptions().useCache());
@@ -457,7 +457,7 @@ bool DatabaseAdapter_DocFrequency::Cursor::loadNext( Index& typeno, Index& termn
 	return getData( key, typeno, termno, df);
 }
 
-bool DatabaseAdapter_DocFrequency::load( const DatabaseInterface* database, const Index& typeno, const Index& termno, Index& df)
+bool DatabaseAdapter_DocFrequency::load( const DatabaseClientInterface* database, const Index& typeno, const Index& termno, Index& df)
 {
 	DatabaseKey dbkey( KeyPrefix, BlockKey( typeno, termno));
 	std::string dfstr;
@@ -469,7 +469,7 @@ bool DatabaseAdapter_DocFrequency::load( const DatabaseInterface* database, cons
 	return true;
 }
 
-Index DatabaseAdapter_DocFrequency::get( const DatabaseInterface* database, const Index& typeno, const Index& termno)
+Index DatabaseAdapter_DocFrequency::get( const DatabaseClientInterface* database, const Index& typeno, const Index& termno)
 {
 	Index rt;
 	if (!load( database, typeno, termno, rt)) return 0;
@@ -490,7 +490,7 @@ void DatabaseAdapter_DocFrequency::remove( DatabaseTransactionInterface* transac
 	transaction->remove( dbkey.ptr(), dbkey.size());
 }
 
-void DatabaseAdapter_DocFrequency::storeImm( DatabaseInterface* database, const Index& typeno, const Index& termno, const Index& df)
+void DatabaseAdapter_DocFrequency::storeImm( DatabaseClientInterface* database, const Index& typeno, const Index& termno, const Index& df)
 {
 	DatabaseKey dbkey( KeyPrefix, BlockKey( typeno, termno));
 	std::string dfstr;
@@ -499,13 +499,13 @@ void DatabaseAdapter_DocFrequency::storeImm( DatabaseInterface* database, const 
 }
 
 
-bool DatabaseAdapter_MetaDataDescr::load( const DatabaseInterface* database, std::string& descr)
+bool DatabaseAdapter_MetaDataDescr::load( const DatabaseClientInterface* database, std::string& descr)
 {
 	DatabaseKey dbkey( KeyPrefix);
 	return database->readValue( dbkey.ptr(), dbkey.size(), descr, DatabaseOptions());
 }
 
-void DatabaseAdapter_MetaDataDescr::storeImm( DatabaseInterface* database, const std::string& descr)
+void DatabaseAdapter_MetaDataDescr::storeImm( DatabaseClientInterface* database, const std::string& descr)
 {
 	DatabaseKey dbkey( KeyPrefix);
 	database->writeImm( dbkey.ptr(), dbkey.size(), descr.c_str(), descr.size());

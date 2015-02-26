@@ -1,4 +1,6 @@
+continue rewrite databaseAdapter (see databaseAdapter.[ch]pp.new) (and then fix Reference::get())
 databaseInterface -> databaseClientInterface  and create databaseInterface, same with storage 
+use of useCache got a little bit confused -> check database adapters
 get wikipedia as example project (english,german)
 See POS tagging (http://acopost.sourceforge.net/)
 segmenter method to extract sub documents. Analyzer config that declares sub documents 

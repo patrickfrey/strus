@@ -39,7 +39,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseCursorInterface;
 /// \brief Forward declaration
@@ -50,7 +50,7 @@ class KeyMapInv;
 class KeyMap
 {
 public:
-	KeyMap( DatabaseInterface* database_,
+	KeyMap( DatabaseClientInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
 			KeyAllocatorInterface* allocator_,
 			const VarSizeNodeTree* globalmap_=0)

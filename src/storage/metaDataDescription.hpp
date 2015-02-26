@@ -39,7 +39,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
@@ -49,7 +49,7 @@ class MetaDataDescription
 {
 public:
 	MetaDataDescription();
-	MetaDataDescription( DatabaseInterface* database);
+	MetaDataDescription( DatabaseClientInterface* database);
 	MetaDataDescription( const std::string& str);
 	MetaDataDescription( const MetaDataDescription& o);
 
@@ -84,9 +84,9 @@ public:
 	int getHandle( const std::string& name_) const;
 	bool hasElement( const std::string& name_) const;
 
-	void load( DatabaseInterface* database);
+	void load( DatabaseClientInterface* database);
 	void store( DatabaseTransactionInterface* database);
-	void storeImm( DatabaseInterface* database);
+	void storeImm( DatabaseClientInterface* database);
 
 	struct TranslationElement
 	{

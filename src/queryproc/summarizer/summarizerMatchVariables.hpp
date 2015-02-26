@@ -41,7 +41,7 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
@@ -59,7 +59,7 @@ public:
 	/// \param[in] termtype_ type of the tokens to build the summary with
 	/// \param[in] features_ features to inspect
 	SummarizerClosureMatchVariables(
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& termtype_,
 			const std::string& delimiter_,
@@ -74,7 +74,7 @@ public:
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
-	const StorageInterface* m_storage;
+	const StorageClientInterface* m_storage;
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_termtype;
@@ -105,7 +105,7 @@ public:
 	}
 
 	virtual SummarizerClosureInterface* createClosure(
-			const StorageInterface* storage_,
+			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			MetaDataReaderInterface* metadata_,
 			const std::vector<FeatureParameter>& features_,

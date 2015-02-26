@@ -36,14 +36,14 @@ namespace strus {
 /// \brief Forward declaration
 class QueryProcessorInterface;
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 
 /// \brief Create a query processor with the functions and operators needed for query evaluation
 /// \param[in] storage reference to storage
 /// \return the allocated processor
 QueryProcessorInterface*
 	createQueryProcessor(
-		StorageInterface* storage);
+		StorageClientInterface* storage);
 
 }//namespace
 #endif

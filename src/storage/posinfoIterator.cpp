@@ -27,11 +27,11 @@
 --------------------------------------------------------------------
 */
 #include "posinfoIterator.hpp"
-#include "storage.hpp"
+#include "storageClient.hpp"
 
 using namespace strus;
 
-PosinfoIterator::PosinfoIterator( const Storage* storage_, DatabaseInterface* database_, Index termtypeno_, Index termvalueno_)
+PosinfoIterator::PosinfoIterator( const StorageClient* storage_, DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_)
 	:m_storage(storage_)
 	,m_dbadapter(database_,termtypeno_,termvalueno_)
 	,m_termtypeno(termtypeno_)

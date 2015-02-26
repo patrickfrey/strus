@@ -38,7 +38,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 
 /// \brief Defines a strus information retrieval query
 class QueryInterface

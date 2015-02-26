@@ -28,7 +28,7 @@
 */
 #include "strus/lib/queryeval.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "queryEval.hpp"
 #include "private/dll_tags.hpp"
 #include <map>

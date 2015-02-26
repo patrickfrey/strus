@@ -41,12 +41,12 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 
 class MetaDataBlockCache
 {
 public:
-	MetaDataBlockCache( DatabaseInterface* database, const MetaDataDescription& descr_);
+	MetaDataBlockCache( DatabaseClientInterface* database, const MetaDataDescription& descr_);
 
 	~MetaDataBlockCache(){}
 
@@ -65,7 +65,7 @@ private:
 	};
 
 private:
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	MetaDataDescription m_descr;
 	DatabaseAdapter_DocMetaData m_dbadapter;
 	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];

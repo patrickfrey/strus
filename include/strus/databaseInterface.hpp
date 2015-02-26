@@ -1,4 +1,3 @@
-!!! SEE TODO
 /*
 ---------------------------------------------------------------------
     The C++ library strus implements basic operations to build
@@ -31,78 +30,46 @@
 #define _STRUS_DATABASE_INTERFACE_HPP_INCLUDED
 #include <string>
 
-namespace strus
-{
+namespace strus {
 
 /// \brief Forward declaration
-class DatabaseTransactionInterface;
-/// \brief Forward declaration
-class DatabaseCursorInterface;
-/// \brief Forward declaration
-class DatabaseBackupCursorInterface;
-/// \brief Forward declaration
-class DatabaseOptions;
+class DatabaseClientInterface;
 
-/// \brief Interface for accessing the strus key value storage database
+/// \brief Interface to the create,destroy the key value store database
 class DatabaseInterface
 {
 public:
-	/// \brief Destructor
-	/// \remark Should call call 'close()' but ignore errors there silently
-	virtual ~DatabaseInterface(){}
+	/// \brief Creates a client to access the key value store database
+	/// \param[in] configsource configuration source string describing the database (not a filename !)
+	virtual DatabaseClientInterface* createClient( const std::string& configsource) const=0;
 
-	/// \brief Close the database client connection and throw on error
-	/// \remark Call this function before the destructor if you want to catch errors in the close
-	virtual void close()=0;
+	/// \brief Creates a new key value store database described with config
+	/// \param[in] configsource configuration source string describing the database (not a filename !)
+	virtual void createDatabase( const std::string& configsource) const=0;
 
-	/// \brief Create a transaction object for the database
-	/// \return the created transaction interface to be disposed with delete by the caller
-	virtual DatabaseTransactionInterface* createTransaction()=0;
+	/// \brief Destroys an existing key value store database described with config
+	/// \param[in] configsource configuration source string describing the key value store database (not a filename !)
+	virtual void destroyDatabase( const std::string& configsource) const=0;
 
-	enum Options {UseLruCache};
+	/// \brief Enumeration of different type of configurations
+	///	Needed for getting the correct description of the configuration
+	enum ConfigType
+	{
+		CmdCreateClient,		///< Config description for the creation of an instance accessing the repository
+		CmdCreate,			///< Config description for the creation of a repository that does not exist yet
+		CmdDestroy			///< Config description for the physical disposal of a repository
+	};
 
-	/// \brief Create an object for reading values from and iterating on the key value store database
-	/// \param[in] options options for the created cursor
-	/// \return the created cursor interface to be disposed with delete by the caller
-	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const=0;
+	/// \brief Gets an example configuration description (source string as used by the functions here)
+	///	createDatabase(const char*), destroyDatabase(const char*) and createDatabaseClient(const char*)
+	///	for the usage printed by programs using this database.
+	virtual const char* getConfigDescription( ConfigType type) const=0;
 
-	/// \brief Creates an object for iterating on a snapshot of the database that can be used for backup
-	/// \return the created cursor interface to be disposed with delete by the caller
-	virtual DatabaseBackupCursorInterface* createBackupCursor() const=0;
-
-	/// \brief Write a key value immediately (synchronized)
-	/// \param[in] key pointer to the key of the item to write
-	/// \param[in] keysize size of the key of the item to write in bytes
-	/// \param[in] val pointer to value to write
-	/// \param[in] valsize size of value to write in bytes
-	/// \note Replaces existing duplicate entry in the database (not issuing an error)
-	virtual void writeImm(
-			const char* key,
-			std::size_t keysize,
-			const char* value,
-			std::size_t valuesize)=0;
-
-	/// \brief Delete a key value stored immediately (synchronized)
-	/// \param[in] key pointer to the key of the item to write
-	/// \param[in] keysize size of the key of the item to write in bytes
-	virtual void removeImm(
-			const char* key,
-			std::size_t keysize)=0;
-
-	/// \brief Read a value by key
-	/// \param[in] key pointer to the key of the item to fetch
-	/// \param[in] keysize size of the key of the item to fetch in bytes
-	/// \param[out] value the value as string
-	/// \param[in] options options as hints for the database
-	/// \return true, if it was found
-	virtual bool readValue(
-			const char* key,
-			std::size_t keysize,
-			std::string& value,
-			const DatabaseOptions& options) const=0;
+	/// \brief Get the list of known configuration parameter keys
+	///	for verification of the configuration by programs using this database.
+	virtual const char** getConfigParameters( ConfigType type) const=0;
 };
 
 }//namespace
 #endif
-
 

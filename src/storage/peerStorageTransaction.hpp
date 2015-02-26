@@ -38,18 +38,18 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class Storage;
+class StorageClient;
 /// \brief Forward declaration
 class DocumentFrequencyCache;
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 
 /// \brief Interface for a transaction of global statistic changes
 class PeerStorageTransaction
 	:public PeerStorageTransactionInterface
 {
 public:
-	PeerStorageTransaction( Storage* storage_, DatabaseInterface* database_, DocumentFrequencyCache* dfcache_);
+	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_);
 	virtual ~PeerStorageTransaction();
 
 	virtual void updateNofDocumentsInsertedChange( const GlobalCounter& increment);
@@ -67,8 +67,8 @@ private:
 	};
 
 private:
-	Storage* m_storage;
-	DatabaseInterface* m_database;
+	StorageClient* m_storage;
+	DatabaseClientInterface* m_database;
 	DocumentFrequencyCache* m_documentFrequencyCache;
 	DocumentFrequencyCache::Batch m_dfbatch;
 	std::vector<std::string> m_unknownTerms;

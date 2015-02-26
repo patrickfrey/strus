@@ -30,7 +30,7 @@
 #define _STRUS_FORWARD_INDEX_ITERATOR_HPP_INCLUDED
 #include "strus/forwardIteratorInterface.hpp"
 #include "databaseAdapter.hpp"
-#include "storage.hpp"
+#include "storageClient.hpp"
 #include "forwardIndexBlock.hpp"
 #include <string>
 
@@ -38,7 +38,7 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 
 /// \brief Forward index mapping document numbers to the document content
 class ForwardIterator
@@ -46,8 +46,8 @@ class ForwardIterator
 {
 public:
 	ForwardIterator(
-		const Storage* storage_,
-		DatabaseInterface* database_,
+		const StorageClient* storage_,
+		DatabaseClientInterface* database_,
 		const std::string& type_);
 
 	virtual ~ForwardIterator();
@@ -62,7 +62,7 @@ public:
 	virtual std::string fetch();
 
 private:
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	Reference<DatabaseAdapter_ForwardIndex_Cursor> m_dbadapter;
 	ForwardIndexBlock m_curblock;
 	Index m_curblock_firstpos;

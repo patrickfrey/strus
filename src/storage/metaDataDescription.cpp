@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "metaDataDescription.hpp"
-#include "strus/databaseInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"
 #include <cstring>
 #include <boost/algorithm/string.hpp>
@@ -38,7 +38,7 @@ MetaDataDescription::MetaDataDescription()
 	:m_bytesize(0)
 {}
 
-MetaDataDescription::MetaDataDescription( DatabaseInterface* database_)
+MetaDataDescription::MetaDataDescription( DatabaseClientInterface* database_)
 	:m_bytesize(0)
 {
 	load( database_);
@@ -189,7 +189,7 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 	m_ar.insert( ei, MetaDataElement( type_, ofs));
 }
 
-void MetaDataDescription::load( DatabaseInterface* database)
+void MetaDataDescription::load( DatabaseClientInterface* database)
 {
 	std::string descr;
 	if (!DatabaseAdapter_MetaDataDescr::load( database, descr))
@@ -207,7 +207,7 @@ void MetaDataDescription::store( DatabaseTransactionInterface* transaction)
 	DatabaseAdapter_MetaDataDescr::store( transaction, tostring());
 }
 
-void MetaDataDescription::storeImm( DatabaseInterface* database)
+void MetaDataDescription::storeImm( DatabaseClientInterface* database)
 {
 	DatabaseAdapter_MetaDataDescr::storeImm( database, tostring());
 }

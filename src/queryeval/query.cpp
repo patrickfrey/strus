@@ -31,7 +31,7 @@
 #include "accumulator.hpp"
 #include "ranker.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "strus/storageInterface.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
@@ -52,7 +52,7 @@
 using namespace strus;
 
 ///\brief Constructor
-Query::Query( const QueryEval* queryEval_, const StorageInterface* storage_, const QueryProcessorInterface* processor_)
+Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_, const QueryProcessorInterface* processor_)
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_processor(processor_)

@@ -37,14 +37,14 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
 class AttributeMap
 {
 public:
-	explicit AttributeMap( DatabaseInterface* database_)
+	explicit AttributeMap( DatabaseClientInterface* database_)
 		:m_database(database_)
 	{
 		m_strings.push_back( '\0');
@@ -65,7 +65,7 @@ private:
 	typedef std::vector<BlockKeyIndex> DeleteList;
 
 private:
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	Map m_map;
 	std::string m_strings;
 	DeleteList m_deletes;

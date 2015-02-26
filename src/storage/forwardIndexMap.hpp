@@ -38,14 +38,14 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseInterface;
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
 class ForwardIndexMap
 {
 public:
-	explicit ForwardIndexMap( DatabaseInterface* database_)
+	explicit ForwardIndexMap( DatabaseClientInterface* database_)
 		:m_database(database_),m_docno(0),m_maxtype(0){}
 
 	void defineForwardIndexTerm(
@@ -92,7 +92,7 @@ private:
 	void closeCurblocks();
 
 private:
-	DatabaseInterface* m_database;
+	DatabaseClientInterface* m_database;
 	Map m_map;
 	CurblockMap m_curblockmap;
 	Index m_docno;

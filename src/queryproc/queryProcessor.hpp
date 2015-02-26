@@ -40,7 +40,7 @@
 namespace strus
 {
 /// \brief Forward declaration
-class StorageInterface;
+class StorageClientInterface;
 
 
 /// \brief Provides the objects needed for query processing
@@ -50,7 +50,7 @@ class QueryProcessor
 public:
 	/// \brief Constructor
 	/// \param[in] storage_ reference to storage (ownership hold by caller)
-	explicit QueryProcessor( StorageInterface* storage_);
+	explicit QueryProcessor( StorageClientInterface* storage_);
 
 	/// \brief Destructor
 	virtual ~QueryProcessor(){}
@@ -88,7 +88,7 @@ public:
 			const std::string& name) const;
 
 private:
-	StorageInterface* m_storage;
+	StorageClientInterface* m_storage;
 	std::map<std::string,Reference<SummarizerFunctionInterface> > m_summarizers;
 	std::map<std::string,Reference<WeightingFunctionInterface> > m_weighters;
 	std::map<std::string,Reference<PostingJoinOperatorInterface> > m_joiners;

@@ -26,53 +26,58 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DATABASE_TRANSACTION_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_DATABASE_TRANSACTION_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/databaseTransactionInterface.hpp"
+#ifndef _STRUS_DATABASE_CLIENT_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_DATABASE_CLIENT_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/databaseClientInterface.hpp"
 #include <leveldb/db.h>
-#include <leveldb/write_batch.h>
 
 namespace strus
 {
 
-/// \brief Forward declaration
-class DatabaseClient;
-
-/// \brief Implementation of DatabaseTransactionInterface based on the LevelDB library
-class DatabaseTransaction
-	:public DatabaseTransactionInterface
+/// \brief Implementation of the strus key value storage database based on the LevelDB library
+class DatabaseClient
+	:public DatabaseClientInterface
 {
 public:
-	DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_);
+	/// \param[in] path of the storage
+	/// \param[in] cachesize_k number of K LRU cache for nodes
+	/// \param[in] compression wheter to use snappy compression (true) or not
+	DatabaseClient( const char* path_, unsigned int cachesize_k, bool compression);
 
-	virtual ~DatabaseTransaction();
+	virtual ~DatabaseClient();
+
+	virtual void close();
+
+	virtual DatabaseTransactionInterface* createTransaction();
 
 	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const;
 
-	virtual void write(
+	virtual DatabaseBackupCursorInterface* createBackupCursor() const;
+	
+	virtual void writeImm(
 			const char* key,
 			std::size_t keysize,
 			const char* value,
 			std::size_t valuesize);
 
-	virtual void remove(
+	virtual void removeImm(
 			const char* key,
 			std::size_t keysize);
 
-	virtual void removeSubTree(
-			const char* domainkey,
-			std::size_t domainkeysize);
+	virtual bool readValue(
+			const char* key,
+			std::size_t keysize,
+			std::string& value,
+			const DatabaseOptions& options) const;
 
-	virtual void commit();
-
-	virtual void rollback();
+public:
+	void cleanup();
+	friend class DatabaseTransaction;
 
 private:
-	DatabaseClient* m_database;
-	leveldb::DB* m_db;			///< levelDB handle
-	leveldb::WriteBatch m_batch;		///< batch used for the transaction
-	bool m_commit_called;			///< true, if the transaction has been committed
-	bool m_rollback_called;			///< true, if the transaction has been rolled back
+	leveldb::DB* m_db;					///< levelDB handle
+	leveldb::Options m_dboptions;				///< options for levelDB
+	bool m_closed;						///< true, if 'close()' has been called
 };
 
 }//namespace
