@@ -135,7 +135,7 @@ void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		Index ti = 1, te = m_maxtype+1;
 		for (; ti != te; ++ti)
 		{
-			DatabaseAdapter_ForwardIndex_Cursor dbadapter( m_database, ti, *di);
+			DatabaseAdapter_ForwardIndex::Writer dbadapter( m_database, ti, *di);
 			dbadapter.removeSubTree( transaction);
 		}
 	}
@@ -150,7 +150,7 @@ void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 
 		BlockKey key(ei->first.termkey);
 		ForwardIndexBlock blk;
-		DatabaseAdapter_ForwardIndex_Cursor dbadapter( m_database, key.elem(1), key.elem(2));
+		DatabaseAdapter_ForwardIndex::Writer dbadapter( m_database, key.elem(1), key.elem(2));
 
 		// [2.1] Delete all old blocks:
 		dbadapter.removeSubTree( transaction);

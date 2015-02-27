@@ -39,7 +39,11 @@ class DatabaseClientInterface;
 class IndexSetIterator
 {
 public:
-	IndexSetIterator( DatabaseClientInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_);
+	IndexSetIterator(
+			const DatabaseClientInterface* database_,
+			DatabaseKey::KeyPrefix dbprefix_,
+			const BlockKey& key_,
+			bool useCache_);
 	~IndexSetIterator(){}
 
 	Index skip( const Index& elemno_);
@@ -49,7 +53,7 @@ private:
 	bool loadBlock( const Index& elemno_);
 
 private:
-	DatabaseAdapter_BooleanBlock_Cursor m_dbadapter;
+	DatabaseAdapter_BooleanBlock::Cursor m_dbadapter;
 	BooleanBlock m_elemBlk;
 	BooleanBlock::NodeCursor m_elemCursor;
 

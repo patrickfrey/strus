@@ -44,7 +44,7 @@ class AttributeReader
 	:public AttributeReaderInterface
 {
 public:
-	AttributeReader( const StorageClient* storage_, DatabaseClientInterface* database_)
+	AttributeReader( const StorageClient* storage_, const DatabaseClientInterface* database_)
 		:m_storage(storage_),m_database(database_),m_docno(0){}
 
 	virtual Index elementHandle( const char* name) const;
@@ -58,7 +58,7 @@ public:
 
 private:
 	const StorageClient* m_storage;
-	DatabaseClientInterface* m_database;
+	const DatabaseClientInterface* m_database;
 	Index m_docno;
 };
 

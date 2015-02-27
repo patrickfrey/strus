@@ -49,7 +49,7 @@ class StorageDocumentChecker
 public:
 	StorageDocumentChecker(
 		const StorageClient* storage_,
-		DatabaseClientInterface* database_,
+		const DatabaseClientInterface* database_,
 		const std::string& docid_,
 		const std::string& logfile_);
 
@@ -136,7 +136,7 @@ private:
 
 private:
 	const StorageClient* m_storage;
-	DatabaseClientInterface* m_database;
+	const DatabaseClientInterface* m_database;
 	TermMap m_termMap;
 	InvTermMap m_invTermMap;
 	MetaDataMap m_metaDataMap;

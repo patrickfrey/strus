@@ -30,8 +30,8 @@
 
 using namespace strus;
 
-IndexSetIterator::IndexSetIterator( DatabaseClientInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_)
-	:m_dbadapter( database_, (char)dbprefix_, key_)
+IndexSetIterator::IndexSetIterator( const DatabaseClientInterface* database_, DatabaseKey::KeyPrefix dbprefix_, const BlockKey& key_, bool useCache_)
+	:m_dbadapter( (char)dbprefix_, database_, key_, useCache_)
 	,m_elemBlk()
 	,m_elemno(0)
 {}

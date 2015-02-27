@@ -109,7 +109,7 @@ public:
 	const Object& operator*() const			{return *m_obj;}
 
 	/// \brief Object access as function
-	Object* get() const				{return m_obj;}
+	const Object* get() const			{return m_obj;}
 	/// \brief Object access as function
 	Object* get()					{return m_obj;}
 

@@ -42,7 +42,7 @@ class StorageClient;
 class PosinfoIterator
 {
 public:
-	PosinfoIterator( const StorageClient* storage_, DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_);
+	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_);
 	~PosinfoIterator(){}
 
 	Index skipDoc( const Index& docno_);
@@ -60,7 +60,7 @@ private:
 
 private:
 	const StorageClient* m_storage;
-	DatabaseAdapter_PosinfoBlock_Cursor m_dbadapter;
+	DatabaseAdapter_PosinfoBlock::Cursor m_dbadapter;
 	PosinfoBlock m_posinfoBlk;
 	PosinfoBlock::Cursor m_posinfoCursor;
 	PosinfoBlock::PositionScanner m_positionScanner;

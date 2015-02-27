@@ -88,7 +88,7 @@ private:
 	};
 
 private:
-	DatabaseAdapter_StringIndex m_dbadapter;
+	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
 	VarSizeNodeTree m_map;
 	const VarSizeNodeTree* m_globalmap;
 	Index m_unknownHandleCount;

@@ -281,7 +281,7 @@ void StorageTransaction::commit()
 		std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
 		for (; di != de; ++di)
 		{
-			DatabaseAdapter_DocId(m_database).store( transaction.get(), di->first, di->second);
+			DatabaseAdapter_DocId::Writer( m_database).store( transaction.get(), di->first, di->second);
 		}
 
 		m_storage->getVariablesWriteBatch( transaction.get(), m_nof_documents);

@@ -106,7 +106,7 @@ void UserAclMap::deleteDocumentAccess(
 static void resetAllBooleanBlockElementsFromStorage(
 	UserAclMap::Map& map,
 	const Index& idx,
-	DatabaseAdapter_BooleanBlock_Cursor& dbadapter)
+	DatabaseAdapter_BooleanBlock::Cursor& dbadapter)
 {
 	BooleanBlock blk;
 	for (bool more=dbadapter.loadFirst( blk)
@@ -149,14 +149,14 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	std::vector<Index>::const_iterator di = m_usr_deletes.begin(), de = m_usr_deletes.end();
 	for (; di != de; ++di)
 	{
-		DatabaseAdapter_UserAclBlock_Cursor dbadapter_userAcl( m_database, *di);
+		DatabaseAdapter_UserAclBlock::Cursor dbadapter_userAcl( m_database, *di, false);
 		resetAllBooleanBlockElementsFromStorage( m_usrmap, *di, dbadapter_userAcl);
 	}
 
 	std::vector<Index>::const_iterator ai = m_acl_deletes.begin(), ae = m_acl_deletes.end();
 	for (; ai != ae; ++ai)
 	{
-		DatabaseAdapter_AclBlock_Cursor dbadapter_acl( m_database, *ai);
+		DatabaseAdapter_AclBlock::Cursor dbadapter_acl( m_database, *ai, false);
 		resetAllBooleanBlockElementsFromStorage( m_aclmap, *ai, dbadapter_acl);
 	}
 
@@ -175,7 +175,7 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		Index lastInsertBlockId = rangear.back().to;
 
 		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
-		DatabaseAdapter_UserAclBlock_Cursor dbadapter_userAcl( m_database, start->first.first);
+		DatabaseAdapter_UserAclBlock::WriteCursor dbadapter_userAcl( m_database, start->first.first);
 		BooleanBlock newblk;
 
 		// [1] Merge new elements with existing upper bound blocks:
@@ -199,7 +199,7 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		Index lastInsertBlockId = rangear.back().to;
 
 		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
-		DatabaseAdapter_AclBlock_Cursor dbadapter_acl( m_database, start->first.first);
+		DatabaseAdapter_AclBlock::WriteCursor dbadapter_acl( m_database, start->first.first);
 		BooleanBlock newblk;
 
 		// [1] Merge new elements with existing upper bound blocks:

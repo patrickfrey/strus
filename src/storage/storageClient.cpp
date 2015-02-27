@@ -120,7 +120,7 @@ void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 
 void StorageClient::loadVariables()
 {
-	DatabaseAdapter_Variable varstor( m_database.get());
+	DatabaseAdapter_Variable::Reader varstor( m_database.get());
 	if (!varstor.load( "TermNo", m_next_termno)
 	||  !varstor.load( "TypeNo", m_next_typeno)
 	||  !varstor.load( "DocNo", m_next_docno)
@@ -145,7 +145,7 @@ void StorageClient::getVariablesWriteBatch(
 		DatabaseTransactionInterface* transaction,
 		int nof_documents_incr)
 {
-	DatabaseAdapter_Variable varstor( m_database.get());
+	DatabaseAdapter_Variable::Writer varstor( m_database.get());
 	varstor.store( transaction, "TermNo", m_next_termno);
 	varstor.store( transaction, "TypeNo", m_next_typeno);
 	varstor.store( transaction, "DocNo", m_next_docno);
@@ -182,27 +182,27 @@ Index StorageClient::getTermValue( const std::string& name) const
 		VarSizeNodeTree::NodeData cached_termno;
 		if (m_termno_map->find( name.c_str(), cached_termno)) return cached_termno;
 	}
-	return DatabaseAdapter_TermValue( m_database.get()).get( name);
+	return DatabaseAdapter_TermValue::Reader( m_database.get()).get( name);
 }
 
 Index StorageClient::getTermType( const std::string& name) const
 {
-	return DatabaseAdapter_TermType( m_database.get()).get( boost::algorithm::to_lower_copy( name));
+	return DatabaseAdapter_TermType::Reader( m_database.get()).get( boost::algorithm::to_lower_copy( name));
 }
 
 Index StorageClient::getDocno( const std::string& name) const
 {
-	return DatabaseAdapter_DocId( m_database.get()).get( name);
+	return DatabaseAdapter_DocId::Reader( m_database.get()).get( name);
 }
 
 Index StorageClient::getUserno( const std::string& name) const
 {
-	return DatabaseAdapter_UserName( m_database.get()).get( name);
+	return DatabaseAdapter_UserName::Reader( m_database.get()).get( name);
 }
 
 Index StorageClient::getAttributeName( const std::string& name) const
 {
-	return DatabaseAdapter_AttributeKey( m_database.get()).get( boost::algorithm::to_lower_copy( name));
+	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( boost::algorithm::to_lower_copy( name));
 }
 
 GlobalCounter StorageClient::documentFrequency( const Index& typeno, const Index& termno) const
@@ -244,8 +244,8 @@ class InvertedAclIterator
 	
 {
 public:
-	InvertedAclIterator( DatabaseClientInterface* database_, const Index& userno_)
-		:IndexSetIterator( database_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_)){}
+	InvertedAclIterator( const DatabaseClientInterface* database_, const Index& userno_)
+		:IndexSetIterator( database_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_), true){}
 	virtual ~InvertedAclIterator(){}
 
 	virtual Index skipDoc( const Index& docno_)
@@ -449,7 +449,7 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_typeno);
 	Index rt;
-	DatabaseAdapter_TermType stor(m_database.get());
+	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno++);
@@ -462,7 +462,7 @@ Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_docno);
 	Index rt;
-	DatabaseAdapter_DocId stor(m_database.get());
+	DatabaseAdapter_DocId::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_docno++);
@@ -475,7 +475,7 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_userno);
 	Index rt;
-	DatabaseAdapter_UserName stor( m_database.get());
+	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_userno++);
@@ -488,7 +488,7 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 {
 	boost::mutex::scoped_lock lock( m_mutex_attribno);
 	Index rt;
-	DatabaseAdapter_AttributeKey stor( m_database.get());
+	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_attribno++);
@@ -499,12 +499,12 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 
 IndexSetIterator StorageClient::getAclIterator( const Index& docno) const
 {
-	return IndexSetIterator( m_database.get(), DatabaseKey::AclBlockPrefix, BlockKey(docno));
+	return IndexSetIterator( m_database.get(), DatabaseKey::AclBlockPrefix, BlockKey(docno), false);
 }
 
 IndexSetIterator StorageClient::getUserAclIterator( const Index& userno) const
 {
-	return IndexSetIterator( m_database.get(), DatabaseKey::UserAclBlockPrefix, BlockKey(userno));
+	return IndexSetIterator( m_database.get(), DatabaseKey::UserAclBlockPrefix, BlockKey(userno), true);
 }
 
 Index StorageClient::nofAttributeTypes()
@@ -602,7 +602,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 			if (m_termno_map->find( name.c_str(), dupkey)) continue;
 
 			// [3] Check, if already defined in storage:
-			DatabaseAdapter_TermValue stor(m_database.get());
+			DatabaseAdapter_TermValue::ReadWriter stor(m_database.get());
 			Index termno = stor.get( name);
 			if (!termno)
 			{

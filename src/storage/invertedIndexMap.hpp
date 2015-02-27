@@ -103,7 +103,7 @@ private:
 			bool isMember);
 
 	void insertNewPosElements(
-			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo,
+			DatabaseAdapter_PosinfoBlock::WriteCursor& dbadapter_posinfo,
 			DatabaseTransactionInterface* transaction,
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
@@ -111,7 +111,7 @@ private:
 			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergeNewPosElements(
-			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo,
+			DatabaseAdapter_PosinfoBlock::WriteCursor& dbadapter_posinfo,
 			DatabaseTransactionInterface* transaction,
 			Map::const_iterator& ei,
 			const Map::const_iterator& ee,
@@ -119,7 +119,7 @@ private:
 			std::vector<BooleanBlock::MergeRange>& docrangear);
 
 	void mergePosBlock(
-			DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+			DatabaseAdapter_PosinfoBlock::WriteCursor& dbadapter_posinfo, 
 			DatabaseTransactionInterface* transaction,
 			Map::const_iterator ei,
 			const Map::const_iterator& ee,

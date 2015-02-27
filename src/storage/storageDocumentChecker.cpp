@@ -47,7 +47,7 @@ using namespace strus;
 
 StorageDocumentChecker::StorageDocumentChecker(
 		const StorageClient* storage_,
-		DatabaseClientInterface* database_,
+		const DatabaseClientInterface* database_,
 		const std::string& docid_,
 		const std::string& logfile_)
 	:m_storage(storage_)
@@ -133,7 +133,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		if (!typeno) throw std::runtime_error( std::string("unknown term type '") + ti->first.type + "'");
 		if (!termno) throw std::runtime_error( std::string("unknown term value '") + ti->first.value + "'");
 
-		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno));
+		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 
 		boost::scoped_ptr<PostingIteratorInterface> pitr(
 			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 

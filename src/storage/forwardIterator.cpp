@@ -34,7 +34,7 @@
 
 using namespace strus;
 
-ForwardIterator::ForwardIterator( const StorageClient* storage_, DatabaseClientInterface* database_, const std::string& type_)
+ForwardIterator::ForwardIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const std::string& type_)
 	:m_database(database_)
 	,m_dbadapter()
 	,m_blockitr(0)
@@ -53,7 +53,7 @@ void ForwardIterator::skipDoc( const Index& docno_)
 	if ((m_docno != docno_ || !m_docno) || !m_dbadapter.get())
 	{
 		m_dbadapter.reset(
-			new DatabaseAdapter_ForwardIndex_Cursor(
+			new DatabaseAdapter_ForwardIndex::Cursor(
 				m_database, m_typeno, docno_));
 		m_docno = docno_;
 		m_curblock.clear();

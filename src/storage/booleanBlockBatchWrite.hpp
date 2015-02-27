@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_BOOLEAN_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "booleanBlock.hpp"
+#include "databaseAdapter.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
@@ -38,16 +39,13 @@
 
 namespace strus {
 
-/// \brief Forward declaration
-class DatabaseAdapter_BooleanBlock_Cursor;
-
 /// \class BooleanBlockBatchWrite
 /// \brief Methods for merging and inserting boolean blocks
 class BooleanBlockBatchWrite
 {
 public:
 	static void insertNewElements(
-			DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
+			DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
 			std::vector<BooleanBlock::MergeRange>::iterator& ei,
 			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 			BooleanBlock& newblk,
@@ -55,7 +53,7 @@ public:
 			DatabaseTransactionInterface* transaction);
 
 	static void mergeNewElements(
-			DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
+			DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
 			std::vector<BooleanBlock::MergeRange>::iterator& ei,
 			const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 			BooleanBlock& newblk,

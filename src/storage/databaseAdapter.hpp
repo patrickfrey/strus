@@ -34,6 +34,11 @@
 #include "strus/databaseOptions.hpp"
 #include "strus/reference.hpp"
 #include "databaseKey.hpp"
+#include "dataBlock.hpp"
+#include "posinfoBlock.hpp"
+#include "booleanBlock.hpp"
+#include "invTermBlock.hpp"
+#include "forwardIndexBlock.hpp"
 #include "blockKey.hpp"
 #include <utility>
 #include <string>
@@ -58,290 +63,537 @@ class DataBlock;
 /// \brief Forward declaration
 class ForwardIndexBlock;
 
-class DatabaseAdapter_StringIndex
+struct DatabaseAdapter_StringIndex
 {
-public:
 	class Cursor
 	{
 	public:
-		Cursor( char prefix_, DatabaseClientInterface* database_)
+		Cursor( char prefix_, const DatabaseClientInterface* database_)
 			:m_cursor( database_->createCursor( DatabaseOptions())),m_prefix(prefix_){}
-
+	
 		bool loadFirst( std::string& key, Index& value);
 		bool loadNext( std::string& key, Index& value);
 
 	private:
 		bool getData( const DatabaseCursorInterface::Slice& dbkey, std::string& key, Index& value);
-
+	
 	private:
 		Reference<DatabaseCursorInterface> m_cursor;
 		char m_prefix;
 	};
 
-	DatabaseAdapter_StringIndex( char prefix_, DatabaseClientInterface* database_)
-		:m_prefix(prefix_),m_database(database_){}
-
-	Index get( const std::string& key);
-	bool load( const std::string& key, Index& value);
-	void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value);
-	void remove( DatabaseTransactionInterface* transaction, const std::string& key);
-	void storeImm( const std::string& key, const Index& value);
-
-private:
-	char m_prefix;
-	DatabaseClientInterface* m_database;
-};
-
-class DatabaseAdapter_TermType
-	:public DatabaseAdapter_StringIndex
-{
-public:
-	enum {KeyPrefix=DatabaseKey::TermTypePrefix};
-	class Cursor
-		:public DatabaseAdapter_StringIndex::Cursor
+	class Reader
 	{
 	public:
-		Cursor( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
-	};
-
-	explicit DatabaseAdapter_TermType( DatabaseClientInterface* database_)
-		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
-};
-
-class DatabaseAdapter_TermValue
-	:public DatabaseAdapter_StringIndex
-{
-public:
-	enum {KeyPrefix=DatabaseKey::TermValuePrefix};
-	class Cursor
-		:public DatabaseAdapter_StringIndex::Cursor
-	{
-	public:
-		Cursor( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
-	};
-	explicit DatabaseAdapter_TermValue( DatabaseClientInterface* database_)
-		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
-};
-
-class DatabaseAdapter_DocId
-	:public DatabaseAdapter_StringIndex
-{
-public:
-	enum {KeyPrefix=DatabaseKey::DocIdPrefix};
-	class Cursor
-		:public DatabaseAdapter_StringIndex::Cursor
-	{
-	public:
-		Cursor( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
-	};
-	explicit DatabaseAdapter_DocId( DatabaseClientInterface* database_)
-		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
-};
-
-class DatabaseAdapter_Variable
-	:public DatabaseAdapter_StringIndex
-{
-public:
-	enum {KeyPrefix=DatabaseKey::VariablePrefix};
-	class Cursor
-		:public DatabaseAdapter_StringIndex::Cursor
-	{
-	public:
-		Cursor( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
-	};
-	explicit DatabaseAdapter_Variable( DatabaseClientInterface* database_)
-		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
-};
-
-class DatabaseAdapter_AttributeKey
-	:public DatabaseAdapter_StringIndex
-{
-public:
-	enum {KeyPrefix=DatabaseKey::AttributeKeyPrefix};
-	class Cursor
-		:public DatabaseAdapter_StringIndex::Cursor
-	{
-	public:
-		Cursor( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
-	};
-	explicit DatabaseAdapter_AttributeKey( DatabaseClientInterface* database_)
-		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
-};
-
-class DatabaseAdapter_UserName
-	:public DatabaseAdapter_StringIndex
-{
-public:
-	enum {KeyPrefix=DatabaseKey::UserNamePrefix};
-	class Cursor
-		:public DatabaseAdapter_StringIndex::Cursor
-	{
-	public:
-		Cursor( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Cursor( (char)KeyPrefix, database_){}
-	};
-	explicit DatabaseAdapter_UserName( DatabaseClientInterface* database_)
-		:DatabaseAdapter_StringIndex((char)KeyPrefix, database_){}
-};
-
-
-class DatabaseAdapter_DataBlock
-{
-public:
-	DatabaseAdapter_DataBlock( DatabaseClientInterface* database_, char prefix_, const BlockKey& domainKey_)
-		:m_database(database_),m_dbkey(prefix_,domainKey_),m_domainKeySize(0)
-	{
-		m_domainKeySize = m_dbkey.size();
-	}
-
-	bool load( const Index& docno, DataBlock& blk);
-	void store( DatabaseTransactionInterface* transaction, const DataBlock& blk);
-	void remove( DatabaseTransactionInterface* transaction, const Index& elemno);
-	void removeSubTree( DatabaseTransactionInterface* transaction);
-
-protected:
-	enum {KeyPrefix=DatabaseKey::PosinfoBlockPrefix};
-	DatabaseClientInterface* m_database;
-	DatabaseKey m_dbkey;
-	std::size_t m_domainKeySize;
-};
-
-
-class DatabaseAdapter_DataBlock_Cursor
-	:public DatabaseAdapter_DataBlock
-{
-public:
-	DatabaseAdapter_DataBlock_Cursor( DatabaseClientInterface* database_, char prefix_, const BlockKey& domainKey_)
-		:DatabaseAdapter_DataBlock( database_,prefix_,domainKey_)
-		,m_cursor(database_->createCursor( DatabaseOptions().useCache()))
-	{
-		m_domainKeySize = m_dbkey.size();
-	}
-
-	bool loadUpperBound( const Index& elemno, DataBlock& blk);
-	bool loadFirst( DataBlock& blk);
-	bool loadNext( DataBlock& blk);
-	bool loadLast( DataBlock& blk);
-
-private:
-	bool getBlock( const DatabaseCursorInterface::Slice& key, DataBlock& blk);
-
-protected:
-	Reference<DatabaseCursorInterface> m_cursor;
-};
-
-
-class DatabaseAdapter_ForwardIndex_Cursor
-	:protected DatabaseAdapter_DataBlock_Cursor
-{
-public:
-	DatabaseAdapter_ForwardIndex_Cursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& docno_)
-		:DatabaseAdapter_DataBlock_Cursor( database_,(char)KeyPrefix, BlockKey(typeno_,docno_)){}
-
-	bool load( const Index& posno, ForwardIndexBlock& blk);
-	void store( DatabaseTransactionInterface* transaction, const ForwardIndexBlock& blk);
-	void remove( DatabaseTransactionInterface* transaction, const Index& posno);
-	void removeSubTree( DatabaseTransactionInterface* transaction);
-
-	bool loadUpperBound( const Index& posno, ForwardIndexBlock& blk);
-	bool loadFirst( ForwardIndexBlock& blk);
-	bool loadNext( ForwardIndexBlock& blk);
-	bool loadLast( ForwardIndexBlock& blk);
-
-private:
-	enum {KeyPrefix=DatabaseKey::ForwardIndexPrefix};
-};
-
-
-class DatabaseAdapter_PosinfoBlock_Cursor
-	:public DatabaseAdapter_DataBlock_Cursor
-{
-public:
-	DatabaseAdapter_PosinfoBlock_Cursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& termno_)
-		:DatabaseAdapter_DataBlock_Cursor( database_,(char)KeyPrefix, BlockKey(typeno_,termno_)){}
-
-	bool loadUpperBound( const Index& docno, PosinfoBlock& blk);
-	bool loadFirst( PosinfoBlock& blk);
-	bool loadNext( PosinfoBlock& blk);
-	bool loadLast( PosinfoBlock& blk);
-	void store( DatabaseTransactionInterface* transaction, const PosinfoBlock& blk);
-	void remove( DatabaseTransactionInterface* transaction, const Index& docno);
-
-private:
-	enum {KeyPrefix=DatabaseKey::PosinfoBlockPrefix};
-};
-
-
-class DatabaseAdapter_InverseTerm
-	:protected DatabaseAdapter_DataBlock
-{
-public:
-	DatabaseAdapter_InverseTerm( DatabaseClientInterface* database_)
-		:DatabaseAdapter_DataBlock( database_,(char)KeyPrefix, BlockKey()){}
-
-	bool load( const Index& docno, InvTermBlock& blk);
-	void store( DatabaseTransactionInterface* transaction, const InvTermBlock& blk);
-	void remove( DatabaseTransactionInterface* transaction, const Index& docno);
-	void removeSubTree( DatabaseTransactionInterface* transaction);
-
-private:
-	enum {KeyPrefix=DatabaseKey::InverseTermPrefix};
-};
-
-
-class DatabaseAdapter_BooleanBlock_Cursor
-	:public DatabaseAdapter_DataBlock_Cursor
-{
-public:
-	DatabaseAdapter_BooleanBlock_Cursor( DatabaseClientInterface* database_, char prefix, const BlockKey& domainKey_)
-		:DatabaseAdapter_DataBlock_Cursor( database_, prefix, domainKey_){}
-
-	bool loadUpperBound( const Index& docno, BooleanBlock& blk);
-	bool loadFirst( BooleanBlock& blk);
-	bool loadNext( BooleanBlock& blk);
-	bool loadLast( BooleanBlock& blk);
-	void store( DatabaseTransactionInterface* transaction, const BooleanBlock& blk);
-	void remove( DatabaseTransactionInterface* transaction, const Index& docno);
-};
-
-
-class DatabaseAdapter_UserAclBlock_Cursor
-	:public DatabaseAdapter_BooleanBlock_Cursor
-{
-public:
-	DatabaseAdapter_UserAclBlock_Cursor( DatabaseClientInterface* database_, const Index& docno_)
-		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(docno_)){}
-
-private:
-	enum {KeyPrefix=DatabaseKey::UserAclBlockPrefix};
-};
-
-
-class DatabaseAdapter_AclBlock_Cursor
-	:public DatabaseAdapter_BooleanBlock_Cursor
-{
-public:
-	DatabaseAdapter_AclBlock_Cursor( DatabaseClientInterface* database_, const Index& userno_)
-		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(userno_)){}
+		Reader( char prefix_, const DatabaseClientInterface* database_)
+			:m_prefix(prefix_),m_database(database_){}
 	
-private:
-	enum {KeyPrefix=DatabaseKey::AclBlockPrefix};
+		Index get( const std::string& key) const;
+		bool load( const std::string& key, Index& value) const;
+	
+	private:
+		char m_prefix;
+		const DatabaseClientInterface* m_database;
+	};
+
+	class Writer
+	{
+	public:
+		Writer( char prefix_, DatabaseClientInterface* database_)
+			:m_prefix(prefix_),m_database(database_){}
+	
+		void store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value);
+		void remove( DatabaseTransactionInterface* transaction, const std::string& key);
+		void storeImm( const std::string& key, const Index& value);
+	
+	private:
+		char m_prefix;
+		DatabaseClientInterface* m_database;
+	};
+
+	class WriteCursor
+		:public Writer
+		,public Cursor
+	{
+	public:
+		WriteCursor( char prefix_, DatabaseClientInterface* database_)
+			:Writer(prefix_,database_)
+			,Cursor(prefix_,database_){}
+	};
+
+	class ReadWriter
+		:public Reader
+		,public Writer
+	{
+	public:
+		ReadWriter( char prefix_, DatabaseClientInterface* database_)
+			:Reader(prefix_,database_)
+			,Writer(prefix_,database_){}
+	};
+};
+
+template <char KeyPrefix>
+struct DatabaseAdapter_TypedStringIndex
+{
+	class Cursor
+		:public DatabaseAdapter_StringIndex::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_)
+			:DatabaseAdapter_StringIndex::Cursor( KeyPrefix, database_){}
+	};
+	class Reader
+		:public DatabaseAdapter_StringIndex::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_)
+			:DatabaseAdapter_StringIndex::Reader( KeyPrefix, database_){}
+	};
+	class Writer
+		:public DatabaseAdapter_StringIndex::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_)
+			:DatabaseAdapter_StringIndex::Writer( KeyPrefix, database_){}
+	};
+	class ReadWriter
+		:public Reader
+		,public Writer
+	{
+	public:
+		ReadWriter( DatabaseClientInterface* database_)
+			:Reader( database_),Writer( database_){}
+	};
+};
+
+struct DatabaseAdapter_TermType
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TermTypePrefix>
+{};
+
+struct DatabaseAdapter_TermValue
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::TermValuePrefix>
+{};
+
+struct DatabaseAdapter_DocId
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::DocIdPrefix>
+{};
+
+struct DatabaseAdapter_Variable
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::VariablePrefix>
+{};
+
+struct DatabaseAdapter_AttributeKey
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::AttributeKeyPrefix>
+{};
+
+struct DatabaseAdapter_UserName
+	:public DatabaseAdapter_TypedStringIndex<DatabaseKey::UserNamePrefix>
+{};
+
+
+struct DatabaseAdapter_DataBlock
+{
+	class Base
+	{
+	public:
+		Base( char prefix_, const BlockKey& domainKey_)
+			:m_dbkey(prefix_,domainKey_),m_domainKeySize(0)
+		{
+			m_domainKeySize = m_dbkey.size();
+		}
+
+	protected:
+		DatabaseKey m_dbkey;
+		std::size_t m_domainKeySize;
+	};
+
+	class Reader
+		:public Base
+	{
+	public:
+		Reader( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_)
+			:Base(prefix_,domainKey_),m_database(database_),m_useCache(useCache_){}
+
+		bool load( const Index& docno, DataBlock& blk);
+
+	private:
+		const DatabaseClientInterface* m_database;
+		bool m_useCache;
+	};
+
+	class Writer
+		:public Base
+	{
+	public:
+		Writer( char prefix_, DatabaseClientInterface* database_, const BlockKey& domainKey_)
+			:Base(prefix_,domainKey_),m_database(database_){}
+
+		void store( DatabaseTransactionInterface* transaction, const DataBlock& blk);
+		void remove( DatabaseTransactionInterface* transaction, const Index& elemno);
+		void removeSubTree( DatabaseTransactionInterface* transaction);
+
+	private:
+		DatabaseClientInterface* m_database;
+	};
+
+	class Cursor
+		:public Base
+	{
+	public:
+		Cursor( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_)
+			:Base(prefix_,domainKey_)
+			,m_cursor(database_->createCursor( useCache_?(DatabaseOptions().useCache()):(DatabaseOptions()))){}
+
+		bool loadUpperBound( const Index& elemno, DataBlock& blk);
+		bool loadFirst( DataBlock& blk);
+		bool loadNext( DataBlock& blk);
+		bool loadLast( DataBlock& blk);
+
+	private:
+		bool getBlock( const DatabaseCursorInterface::Slice& key, DataBlock& blk);
+
+	protected:
+		Reference<DatabaseCursorInterface> m_cursor;
+	};
 };
 
 
-class DatabaseAdapter_DocListBlock_Cursor
-	:public DatabaseAdapter_BooleanBlock_Cursor
+template <char KeyPrefix,class DataBlockType,bool UseCache>
+struct DatabaseAdapter_TypedDataBlock
 {
-public:
-	DatabaseAdapter_DocListBlock_Cursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& termno_)
-		:DatabaseAdapter_BooleanBlock_Cursor( database_, (char)KeyPrefix, BlockKey(typeno_,termno_)){}
-private:
+	class Reader
+		:public DatabaseAdapter_DataBlock::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_, const BlockKey& domainKey_,bool useCache_=UseCache)
+			:DatabaseAdapter_DataBlock::Reader(KeyPrefix,database_,domainKey_,useCache_){}
+
+		bool load( const Index& elemno, DataBlockType& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Reader::load( elemno, blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+	};
+
+	class Writer
+		:public DatabaseAdapter_DataBlock::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_, const BlockKey& domainKey_)
+			:DatabaseAdapter_DataBlock::Writer(KeyPrefix,database_,domainKey_){}
+
+		void store( DatabaseTransactionInterface* transaction, const DataBlockType& blk)
+		{
+			DatabaseAdapter_DataBlock::Writer::store( transaction, blk);
+		}
+	};
+
+	class Cursor
+		:public DatabaseAdapter_DataBlock::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_, const BlockKey& domainKey_,bool useCache_=UseCache)
+			:DatabaseAdapter_DataBlock::Cursor(KeyPrefix,database_,domainKey_,useCache_){}
+
+		bool loadUpperBound( const Index& elemno, DataBlockType& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadUpperBound( elemno, blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+
+		bool loadFirst( DataBlockType& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadFirst( blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+
+		bool loadNext( DataBlockType& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadNext( blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+
+		bool loadLast( DataBlockType& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadLast( blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+	};
+};
+
+struct DatabaseAdapter_ForwardIndex
+{
+	typedef DatabaseAdapter_TypedDataBlock<
+			DatabaseKey::ForwardIndexPrefix, ForwardIndexBlock, false> Parent;
+
+	class Reader
+		:public Parent::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& docno_)
+			:Parent::Reader( database_, BlockKey(typeno_,docno_)){}
+	};
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& docno_)
+			:Parent::Writer( database_, BlockKey(typeno_,docno_)){}
+	};
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& docno_)
+			:Parent::Cursor( database_, BlockKey(typeno_,docno_)){}
+	};
+};
+
+
+struct DatabaseAdapter_PosinfoBlock
+{
+	typedef DatabaseAdapter_TypedDataBlock<
+			DatabaseKey::PosinfoBlockPrefix, PosinfoBlock, true> Parent;
+
+	class Reader
+		:public Parent::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_)
+			:Parent::Reader( database_, BlockKey(typeno_,termno_)){}
+	};
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_)
+			:Parent::Writer( database_, BlockKey(typeno_,termno_)){}
+	};
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_)
+			:Parent::Cursor( database_, BlockKey(typeno_,termno_)){}
+	};
+
+	class WriteCursor
+		:public Cursor
+		,public Writer
+	{
+	public:
+		WriteCursor( DatabaseClientInterface* database_, 
+				const Index& typeno_, const Index& termno_)
+			:Cursor(database_,typeno_,termno_)
+			,Writer(database_,typeno_,termno_){}
+	};
+};
+
+
+struct DatabaseAdapter_InverseTerm
+{
+	typedef DatabaseAdapter_TypedDataBlock<
+			DatabaseKey::InverseTermPrefix, InvTermBlock, false> Parent;
+
+	class Reader
+		:public Parent::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_)
+			:Parent::Reader( database_, BlockKey()){}
+	};
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_)
+			:Parent::Writer( database_, BlockKey()){}
+	};
+
+	class ReadWriter
+		:public Reader
+		,public Writer
+	{
+	public:
+		ReadWriter( DatabaseClientInterface* database_)
+			:Reader(database_)
+			,Writer(database_){}
+	};
+};
+
+
+struct DatabaseAdapter_BooleanBlock
+{
+	class Writer
+		:public DatabaseAdapter_DataBlock::Writer
+	{
+	public:
+		Writer( char prefix_, DatabaseClientInterface* database_, const BlockKey& domainKey_)
+			:DatabaseAdapter_DataBlock::Writer(prefix_,database_,domainKey_){}
+
+		void store( DatabaseTransactionInterface* transaction, const BooleanBlock& blk)
+		{
+			DatabaseAdapter_DataBlock::Writer::store( transaction, blk);
+		}
+	};
+
+	class Cursor
+		:public DatabaseAdapter_DataBlock::Cursor
+	{
+	public:
+		Cursor( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_)
+			:DatabaseAdapter_DataBlock::Cursor(prefix_,database_,domainKey_,useCache_){}
+
+		bool loadUpperBound( const Index& elemno, BooleanBlock& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadUpperBound( elemno, blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+
+		bool loadFirst( BooleanBlock& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadFirst( blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+
+		bool loadNext( BooleanBlock& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadNext( blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+
+		bool loadLast( BooleanBlock& blk)
+		{
+			DataBlock blk_;
+			if (!DatabaseAdapter_DataBlock::Cursor::loadLast( blk_)) return false;
+			blk.swap( blk_);
+			return true;
+		}
+	};
+
+	class WriteCursor
+		:public Cursor
+		,public Writer
+	{
+	public:
+		WriteCursor( char prefix_, DatabaseClientInterface* database_, const BlockKey& domainKey_)
+			:Cursor(prefix_,database_,domainKey_,false)
+			,Writer(prefix_,database_,domainKey_){}
+	};
+};
+
+
+struct DatabaseAdapter_UserAclBlock
+{
+	enum {KeyPrefix=DatabaseKey::UserAclBlockPrefix};
+	typedef DatabaseAdapter_BooleanBlock Parent;
+
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_, const Index& userno_)
+			:Parent::Writer( (char)KeyPrefix, database_, BlockKey(userno_)){}
+	};
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_, const Index& userno_, bool useCache_)
+			:Parent::Cursor( (char)KeyPrefix, database_, BlockKey(userno_), useCache_){}
+	};
+
+	class WriteCursor
+		:public Parent::WriteCursor
+	{
+	public:
+		WriteCursor( DatabaseClientInterface* database_, const Index& userno_)
+			:Parent::WriteCursor((char)KeyPrefix, database_,BlockKey(userno_)){}
+	};
+};
+
+
+struct DatabaseAdapter_AclBlock
+{
+	enum {KeyPrefix=DatabaseKey::AclBlockPrefix};
+	typedef DatabaseAdapter_BooleanBlock Parent;
+
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_, const Index& docno_)
+			:Parent::Writer( (char)KeyPrefix, database_, BlockKey(docno_)){}
+	};
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_, const Index& docno_, bool useCache_)
+			:Parent::Cursor( (char)KeyPrefix, database_, BlockKey(docno_), useCache_){}
+	};
+
+	class WriteCursor
+		:public Parent::WriteCursor
+	{
+	public:
+		WriteCursor( DatabaseClientInterface* database_, const Index& docno_)
+			:Parent::WriteCursor((char)KeyPrefix, database_,BlockKey(docno_)){}
+	};
+};
+
+
+struct DatabaseAdapter_DocListBlock
+{
 	enum {KeyPrefix=DatabaseKey::DocListBlockPrefix};
+	typedef DatabaseAdapter_BooleanBlock Parent;
+
+	class Writer
+		:public Parent::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_)
+			:Parent::Writer( (char)KeyPrefix, database_, BlockKey(typeno_,termno_)){}
+	};
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_,
+			const Index& typeno_, const Index& termno_, bool useCache_)
+			:Parent::Cursor( (char)KeyPrefix, database_, BlockKey(typeno_,termno_), useCache_){}
+	};
+
+	class WriteCursor
+		:public Parent::WriteCursor
+	{
+	public:
+		WriteCursor( DatabaseClientInterface* database_, const Index& typeno_, const Index& termno_)
+			:Parent::WriteCursor((char)KeyPrefix, database_,BlockKey(typeno_,termno_)){}
+	};
 };
 
 
@@ -387,7 +639,7 @@ public:
 	class Cursor
 	{
 	public:
-		Cursor( DatabaseClientInterface* database_)
+		Cursor( const DatabaseClientInterface* database_)
 			:m_cursor( database_->createCursor( DatabaseOptions())){}
 
 		bool loadFirst( Index& typeno, Index& termno, Index& df);

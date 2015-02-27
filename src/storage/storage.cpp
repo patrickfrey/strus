@@ -126,7 +126,7 @@ void Storage::createStorage( const std::string& configsource, DatabaseClientInte
 	MetaDataDescription md( metadata);
 	boost::scoped_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 
-	DatabaseAdapter_Variable stor( database);
+	DatabaseAdapter_Variable::Writer stor( database);
 	
 	stor.store( transaction.get(), "TermNo", 1);
 	stor.store( transaction.get(), "TypeNo", 1);

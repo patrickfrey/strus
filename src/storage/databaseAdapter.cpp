@@ -29,11 +29,6 @@
 #include "databaseAdapter.hpp"
 #include "indexPacker.hpp"
 #include "metaDataBlock.hpp"
-#include "posinfoBlock.hpp"
-#include "booleanBlock.hpp"
-#include "invTermBlock.hpp"
-#include "dataBlock.hpp"
-#include "forwardIndexBlock.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
@@ -63,14 +58,14 @@ bool DatabaseAdapter_StringIndex::Cursor::loadNext( std::string& key, Index& val
 	return getData( dbkey, key, value);
 }
 
-Index DatabaseAdapter_StringIndex::get( const std::string& key)
+Index DatabaseAdapter_StringIndex::Reader::get( const std::string& key) const
 {
 	Index rt;
-	if (!DatabaseAdapter_StringIndex::load( key, rt)) return 0;
+	if (!DatabaseAdapter_StringIndex::Reader::load( key, rt)) return 0;
 	return rt;
 }
 
-bool DatabaseAdapter_StringIndex::load( const std::string& key, Index& value)
+bool DatabaseAdapter_StringIndex::Reader::load( const std::string& key, Index& value) const
 {
 	std::string keystr;
 	keystr.push_back( m_prefix);
@@ -84,7 +79,7 @@ bool DatabaseAdapter_StringIndex::load( const std::string& key, Index& value)
 	return true;
 }
 
-void DatabaseAdapter_StringIndex::store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value)
+void DatabaseAdapter_StringIndex::Writer::store( DatabaseTransactionInterface* transaction, const std::string& key, const Index& value)
 {
 	std::string keystr;
 	keystr.push_back( m_prefix);
@@ -94,7 +89,7 @@ void DatabaseAdapter_StringIndex::store( DatabaseTransactionInterface* transacti
 	transaction->write( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());
 }
 
-void DatabaseAdapter_StringIndex::remove( DatabaseTransactionInterface* transaction, const std::string& key)
+void DatabaseAdapter_StringIndex::Writer::remove( DatabaseTransactionInterface* transaction, const std::string& key)
 {
 	std::string keystr;
 	keystr.push_back( m_prefix);
@@ -102,7 +97,7 @@ void DatabaseAdapter_StringIndex::remove( DatabaseTransactionInterface* transact
 	transaction->remove( keystr.c_str(), keystr.size());
 }
 
-void DatabaseAdapter_StringIndex::storeImm( const std::string& key, const Index& value)
+void DatabaseAdapter_StringIndex::Writer::storeImm( const std::string& key, const Index& value)
 {
 	std::string keystr;
 	keystr.push_back( m_prefix);
@@ -113,7 +108,7 @@ void DatabaseAdapter_StringIndex::storeImm( const std::string& key, const Index&
 }
 
 
-bool DatabaseAdapter_DataBlock::load( const Index& elemno, DataBlock& blk)
+bool DatabaseAdapter_DataBlock::Reader::load( const Index& elemno, DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
 	std::string blkstr;
@@ -122,27 +117,27 @@ bool DatabaseAdapter_DataBlock::load( const Index& elemno, DataBlock& blk)
 	return true;
 }
 
-void DatabaseAdapter_DataBlock::store( DatabaseTransactionInterface* transaction, const DataBlock& blk)
+void DatabaseAdapter_DataBlock::Writer::store( DatabaseTransactionInterface* transaction, const DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
 	m_dbkey.addElem( blk.id());
 	transaction->write( m_dbkey.ptr(), m_dbkey.size(), blk.charptr(), blk.size());
 }
 
-void DatabaseAdapter_DataBlock::remove( DatabaseTransactionInterface* transaction, const Index& elemno)
+void DatabaseAdapter_DataBlock::Writer::remove( DatabaseTransactionInterface* transaction, const Index& elemno)
 {
 	m_dbkey.resize( m_domainKeySize);
 	m_dbkey.addElem( elemno);
 	transaction->remove( m_dbkey.ptr(), m_dbkey.size());
 }
 
-void DatabaseAdapter_DataBlock::removeSubTree( DatabaseTransactionInterface* transaction)
+void DatabaseAdapter_DataBlock::Writer::removeSubTree( DatabaseTransactionInterface* transaction)
 {
 	m_dbkey.resize( m_domainKeySize);
 	transaction->removeSubTree( m_dbkey.ptr(), m_dbkey.size());
 }
 
-bool DatabaseAdapter_DataBlock_Cursor::getBlock( const DatabaseCursorInterface::Slice& key, DataBlock& blk)
+bool DatabaseAdapter_DataBlock::Cursor::getBlock( const DatabaseCursorInterface::Slice& key, DataBlock& blk)
 {
 	if (!key.defined()) return false;
 	char const* ki = key.ptr()+m_domainKeySize;
@@ -153,7 +148,7 @@ bool DatabaseAdapter_DataBlock_Cursor::getBlock( const DatabaseCursorInterface::
 	return true;
 }
 
-bool DatabaseAdapter_DataBlock_Cursor::loadUpperBound( const Index& elemno, DataBlock& blk)
+bool DatabaseAdapter_DataBlock::Cursor::loadUpperBound( const Index& elemno, DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
 	m_dbkey.addElem( elemno);
@@ -161,188 +156,24 @@ bool DatabaseAdapter_DataBlock_Cursor::loadUpperBound( const Index& elemno, Data
 	return getBlock( key, blk);
 }
 
-bool DatabaseAdapter_DataBlock_Cursor::loadFirst( DataBlock& blk)
+bool DatabaseAdapter_DataBlock::Cursor::loadFirst( DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
 	DatabaseCursorInterface::Slice key = m_cursor->seekFirst( m_dbkey.ptr(), m_dbkey.size());
 	return getBlock( key, blk);
 }
 
-bool DatabaseAdapter_DataBlock_Cursor::loadNext( DataBlock& blk)
+bool DatabaseAdapter_DataBlock::Cursor::loadNext( DataBlock& blk)
 {
 	DatabaseCursorInterface::Slice key = m_cursor->seekNext();
 	return getBlock( key, blk);
 }
 
-bool DatabaseAdapter_DataBlock_Cursor::loadLast( DataBlock& blk)
+bool DatabaseAdapter_DataBlock::Cursor::loadLast( DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
 	DatabaseCursorInterface::Slice key = m_cursor->seekLast( m_dbkey.ptr(), m_dbkey.size());
 	return getBlock( key, blk);
-}
-
-bool DatabaseAdapter_ForwardIndex_Cursor::load( const Index& posno, ForwardIndexBlock& blk)
-{
-	DataBlock blk_;
-	if (!DatabaseAdapter_DataBlock::load( posno, blk_)) return false;
-	blk.swap( blk_);
-	return true;
-}
-
-void DatabaseAdapter_ForwardIndex_Cursor::store( DatabaseTransactionInterface* transaction, const ForwardIndexBlock& blk)
-{
-	DatabaseAdapter_DataBlock_Cursor::store( transaction, blk);
-}
-
-void DatabaseAdapter_ForwardIndex_Cursor::remove( DatabaseTransactionInterface* transaction, const Index& posno)
-{
-	DatabaseAdapter_DataBlock::remove( transaction, posno);
-}
-
-void DatabaseAdapter_ForwardIndex_Cursor::removeSubTree( DatabaseTransactionInterface* transaction)
-{
-	DatabaseAdapter_DataBlock::removeSubTree( transaction);
-}
-
-bool DatabaseAdapter_ForwardIndex_Cursor::loadUpperBound( const Index& posno, ForwardIndexBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadUpperBound( posno, blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_ForwardIndex_Cursor::loadFirst( ForwardIndexBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadFirst( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_ForwardIndex_Cursor::loadNext( ForwardIndexBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadNext( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_ForwardIndex_Cursor::loadLast( ForwardIndexBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadLast( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_InverseTerm::load( const Index& docno, InvTermBlock& blk)
-{
-	DataBlock blk_;
-	if (!DatabaseAdapter_DataBlock::load( docno, blk_)) return false;
-	blk.swap( blk_);
-	return true;
-}
-
-void DatabaseAdapter_InverseTerm::store( DatabaseTransactionInterface* transaction, const InvTermBlock& blk)
-{
-	DatabaseAdapter_DataBlock::store( transaction, blk);
-}
-
-void DatabaseAdapter_InverseTerm::remove( DatabaseTransactionInterface* transaction, const Index& docno)
-{
-	DatabaseAdapter_DataBlock::remove( transaction, docno);
-}
-
-void DatabaseAdapter_InverseTerm::removeSubTree( DatabaseTransactionInterface* transaction)
-{
-	DatabaseAdapter_DataBlock::removeSubTree( transaction);
-}
-
-
-bool DatabaseAdapter_PosinfoBlock_Cursor::loadUpperBound( const Index& docno, PosinfoBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadUpperBound( docno, blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_PosinfoBlock_Cursor::loadFirst( PosinfoBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadFirst( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_PosinfoBlock_Cursor::loadLast( PosinfoBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadLast( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_PosinfoBlock_Cursor::loadNext( PosinfoBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadNext( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-void DatabaseAdapter_PosinfoBlock_Cursor::store( DatabaseTransactionInterface* transaction, const PosinfoBlock& blk)
-{
-	DatabaseAdapter_DataBlock_Cursor::store( transaction, blk);
-}
-
-void DatabaseAdapter_PosinfoBlock_Cursor::remove( DatabaseTransactionInterface* transaction, const Index& docno)
-{
-	DatabaseAdapter_DataBlock_Cursor::remove( transaction, docno);
-}
-
-
-bool DatabaseAdapter_BooleanBlock_Cursor::loadUpperBound( const Index& docno, BooleanBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadUpperBound( docno, blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_BooleanBlock_Cursor::loadFirst( BooleanBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadFirst( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_BooleanBlock_Cursor::loadLast( BooleanBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadLast( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-bool DatabaseAdapter_BooleanBlock_Cursor::loadNext( BooleanBlock& blk)
-{
-	DataBlock blk_;
-	bool rt = DatabaseAdapter_DataBlock_Cursor::loadNext( blk_);
-	blk.swap( blk_);
-	return rt;
-}
-
-void DatabaseAdapter_BooleanBlock_Cursor::store( DatabaseTransactionInterface* transaction, const BooleanBlock& blk)
-{
-	DatabaseAdapter_DataBlock_Cursor::store( transaction, blk);
-}
-
-void DatabaseAdapter_BooleanBlock_Cursor::remove( DatabaseTransactionInterface* transaction, const Index& docno)
-{
-	DatabaseAdapter_DataBlock_Cursor::remove( transaction, docno);
 }
 
 

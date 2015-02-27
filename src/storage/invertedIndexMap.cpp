@@ -193,7 +193,7 @@ void InvertedIndexMap::getWriteBatch(
 			const KeyMapInv& termValueMapInv)
 {
 	// [1] Get deletes:
-	DatabaseAdapter_InverseTerm dbadapter_inv( m_database);
+	DatabaseAdapter_InverseTerm::ReadWriter dbadapter_inv( m_database);
 	std::vector<Index>::const_iterator di = m_deletes.begin(), de = m_deletes.end();
 	for (; di != de; ++di)
 	{
@@ -247,7 +247,7 @@ void InvertedIndexMap::getWriteBatch(
 		BlockKey blkkey( ei->first.termkey);
 		Index typeno = blkkey.elem(1);
 		Index termno = blkkey.elem(2);
-		DatabaseAdapter_PosinfoBlock_Cursor dbadapter_posinfo( m_database, typeno, termno);
+		DatabaseAdapter_PosinfoBlock::WriteCursor dbadapter_posinfo( m_database, typeno, termno);
 
 		PosinfoBlockBuilder newposblk;
 		std::vector<BooleanBlock::MergeRange> docrangear;
@@ -266,7 +266,7 @@ void InvertedIndexMap::getWriteBatch(
 		Index lastInsertBlockId = docrangear.back().to;
 
 		// [3] Update document list of the term (boolean block) in the database:
-		DatabaseAdapter_DocListBlock_Cursor dbadapter_doclist( m_database, typeno, termno);
+		DatabaseAdapter_DocListBlock::WriteCursor dbadapter_doclist( m_database, typeno, termno);
 
 		// [3.1] Merge new docno boolean block elements
 		BooleanBlockBatchWrite::mergeNewElements( &dbadapter_doclist, di, de, newdocblk, transaction);
@@ -305,7 +305,7 @@ void InvertedIndexMap::defineDocnoRangeElement(
 }
 
 void InvertedIndexMap::insertNewPosElements(
-		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+		DatabaseAdapter_PosinfoBlock::WriteCursor& dbadapter_posinfo, 
 		DatabaseTransactionInterface* transaction,
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
@@ -346,7 +346,7 @@ void InvertedIndexMap::insertNewPosElements(
 }
 
 void InvertedIndexMap::mergeNewPosElements(
-		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+		DatabaseAdapter_PosinfoBlock::WriteCursor& dbadapter_posinfo,
 		DatabaseTransactionInterface* transaction,
 		Map::const_iterator& ei,
 		const Map::const_iterator& ee,
@@ -401,7 +401,7 @@ void InvertedIndexMap::mergeNewPosElements(
 }
 
 void InvertedIndexMap::mergePosBlock( 
-		DatabaseAdapter_PosinfoBlock_Cursor& dbadapter_posinfo, 
+		DatabaseAdapter_PosinfoBlock::WriteCursor& dbadapter_posinfo,
 		DatabaseTransactionInterface* transaction,
 		Map::const_iterator ei,
 		const Map::const_iterator& ee,

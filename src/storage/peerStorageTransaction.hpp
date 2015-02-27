@@ -72,7 +72,7 @@ private:
 	DocumentFrequencyCache* m_documentFrequencyCache;
 	DocumentFrequencyCache::Batch m_dfbatch;
 	std::vector<std::string> m_unknownTerms;
-	DatabaseAdapter_TermValue m_dbadapter_termvalue;
+	DatabaseAdapter_TermValue::ReadWriter m_dbadapter_termvalue;
 	Index m_termvaluecnt;
 	GlobalCounter m_nofDocumentsInserted;
 	bool m_commit;

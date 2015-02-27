@@ -47,7 +47,7 @@ class ForwardIterator
 public:
 	ForwardIterator(
 		const StorageClient* storage_,
-		DatabaseClientInterface* database_,
+		const DatabaseClientInterface* database_,
 		const std::string& type_);
 
 	virtual ~ForwardIterator();
@@ -62,8 +62,8 @@ public:
 	virtual std::string fetch();
 
 private:
-	DatabaseClientInterface* m_database;
-	Reference<DatabaseAdapter_ForwardIndex_Cursor> m_dbadapter;
+	const DatabaseClientInterface* m_database;
+	Reference<DatabaseAdapter_ForwardIndex::Cursor> m_dbadapter;
 	ForwardIndexBlock m_curblock;
 	Index m_curblock_firstpos;
 	Index m_curblock_lastpos;

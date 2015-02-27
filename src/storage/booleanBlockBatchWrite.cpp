@@ -34,7 +34,7 @@
 using namespace strus;
 
 void BooleanBlockBatchWrite::insertNewElements(
-		DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
+		DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 		BooleanBlock& newblk,
@@ -87,7 +87,7 @@ void BooleanBlockBatchWrite::insertNewElements(
 }
 
 void BooleanBlockBatchWrite::mergeNewElements(
-		DatabaseAdapter_BooleanBlock_Cursor* dbadapter,
+		DatabaseAdapter_BooleanBlock::WriteCursor* dbadapter,
 		std::vector<BooleanBlock::MergeRange>::iterator& ei,
 		const std::vector<BooleanBlock::MergeRange>::iterator& ee,
 		BooleanBlock& newblk,
