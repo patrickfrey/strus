@@ -744,7 +744,7 @@ struct RandomQuery
 		return rt.str();
 	}
 
-	bool execute( std::vector<Match>& result, strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
+	bool execute( std::vector<Match>& result, strus::StorageClientInterface* storage, strus::QueryProcessorInterface* queryproc, const RandomCollection& collection) const
 	{
 		unsigned int nofitr = arg.size();
 		std::vector<strus::Reference<strus::PostingIteratorInterface> > itrar;
@@ -752,7 +752,7 @@ struct RandomQuery
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
 			strus::Reference<strus::PostingIteratorInterface> itr(
-				queryproc->createTermPostingIterator( term.type, term.value));
+				storage->createTermPostingIterator( term.type, term.value));
 			if (!itr.get())
 			{
 				std::cerr << "ERROR term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
@@ -969,8 +969,8 @@ int main( int argc, const char* argv[])
 		transaction->commit();
 
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
-		boost::scoped_ptr<strus::QueryProcessorInterface> queryproc(
-			strus::createQueryProcessor( storage.get()));
+		boost::scoped_ptr<strus::QueryProcessorInterface> 
+			queryproc( strus::createQueryProcessor());
 
 		std::vector<RandomQuery> randomQueryAr;
 		if (collection.docar.size())
@@ -996,7 +996,7 @@ int main( int argc, const char* argv[])
 			for (; qi != qe; ++qi)
 			{
 				result_matches.push_back( std::vector<RandomQuery::Match>());
-				if (!qi->execute( result_matches.back(), queryproc.get(), collection))
+				if (!qi->execute( result_matches.back(), storage.get(), queryproc.get(), collection))
 				{
 					++nofQueriesFailed;
 				}

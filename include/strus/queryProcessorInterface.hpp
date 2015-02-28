@@ -52,15 +52,6 @@ public:
 	/// \brief Destructor
 	virtual ~QueryProcessorInterface(){}
 
-	/// \brief Create an iterator on the occurrencies of a term
-	/// \param[in] type type name of the term
-	/// \param[in] value value string of the term
-	/// \return the created iterator reference object (to dispose with 'delete')
-	virtual PostingIteratorInterface*
-		createTermPostingIterator(
-			const std::string& type,
-			const std::string& value) const=0;
-
 	/// \brief Define a new posting set join operation
 	/// \param[in] name the name of the function
 	/// \param[in] op the function reference (ownership passed to this)

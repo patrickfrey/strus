@@ -42,8 +42,7 @@
 
 using namespace strus;
 
-QueryProcessor::QueryProcessor( StorageClientInterface* storage_)
-	:m_storage(storage_)
+QueryProcessor::QueryProcessor()
 {
 	definePostingJoinOperator( "within", createPostingJoinWithin());
 	definePostingJoinOperator( "within_struct", createPostingJoinStructWithin());
@@ -66,19 +65,6 @@ QueryProcessor::QueryProcessor( StorageClientInterface* storage_)
 	defineSummarizerFunction( "attribute", createSummarizerAttribute());
 	defineSummarizerFunction( "matchvariables", createSummarizerMatchVariables());
 }
-
-PostingIteratorInterface*
-	QueryProcessor::createTermPostingIterator( 
-			const std::string& type,
-			const std::string& value) const
-{
-	PostingIteratorInterface* rt = m_storage->createTermPostingIterator( type, value);
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "create term " << value << ":" << type << " (" << rt->featureid() << ")" << std::endl;
-#endif
-	return rt;
-}
-
 
 void QueryProcessor::definePostingJoinOperator(
 		const std::string& name,

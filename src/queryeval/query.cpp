@@ -233,7 +233,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
-				joinargs.push_back( m_processor->createTermPostingIterator(
+				joinargs.push_back( m_storage->createTermPostingIterator(
 							term.type, term.value));
 				m_nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
@@ -259,7 +259,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			rt = m_processor->createTermPostingIterator( term.type, term.value);
+			rt = m_storage->createTermPostingIterator( term.type, term.value);
 			m_nodePostingsMap[ nodeadr] = rt;
 			break;
 		}

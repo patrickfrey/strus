@@ -39,11 +39,8 @@ class QueryProcessorInterface;
 class StorageClientInterface;
 
 /// \brief Create a query processor with the functions and operators needed for query evaluation
-/// \param[in] storage reference to storage
 /// \return the allocated processor
-QueryProcessorInterface*
-	createQueryProcessor(
-		StorageClientInterface* storage);
+QueryProcessorInterface* createQueryProcessor();
 
 }//namespace
 #endif

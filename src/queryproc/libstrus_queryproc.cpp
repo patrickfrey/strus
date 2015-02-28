@@ -28,19 +28,14 @@
 */
 #include "strus/lib/queryproc.hpp"
 #include "strus/queryProcessorInterface.hpp"
-#include "strus/storageClientInterface.hpp"
 #include "queryProcessor.hpp"
 #include "private/dll_tags.hpp"
-#include <map>
-#include <set>
 
 using namespace strus;
 
-DLL_PUBLIC QueryProcessorInterface*
-	strus::createQueryProcessor(
-		StorageClientInterface* storage)
+DLL_PUBLIC QueryProcessorInterface* strus::createQueryProcessor()
 {
-	return new QueryProcessor( storage);
+	return new QueryProcessor();
 }
 
 
