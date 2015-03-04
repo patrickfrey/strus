@@ -30,8 +30,6 @@
 #define _STRUS_PROTOCOL_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <string>
-#include <ostream>
-#include <istream>
 
 namespace strus
 {
