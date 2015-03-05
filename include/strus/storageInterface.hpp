@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
-#include "strus/lib/configType.hpp"
 #include <string>
 
 namespace strus {

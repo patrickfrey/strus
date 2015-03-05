@@ -1,4 +1,1 @@
 expression consumed with addFeature (duplicate expression for reuse)
-get wikipedia as example project (english,german)
-See POS tagging (http://acopost.sourceforge.net/)
-Analyzer config that declares sub documents. istream interface to analyze, segmenter chunk feeder interface
