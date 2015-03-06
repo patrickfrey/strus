@@ -27,7 +27,7 @@ pkg/
 setenv.sh
 
 # Generated test data (cleaned with make clean)
-tests/randoc/data/
+tests/randoc/data/test
 
 # CMake generated files
 CMakeCache.txt
