@@ -54,6 +54,4 @@ tests/booleanBlock/src/testBooleanBlock
 tests/varSizeNodeTree/src/testVarSizeNodeTree
 tests/metaDataRestrictions/src/testMetaDataRestrictions
 tests/ranker/src/testRanker
-src/storage/strusCheckStorage
-src/storage/strusDumpStorage
 
