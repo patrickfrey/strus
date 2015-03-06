@@ -117,13 +117,15 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
-	Index userId( const std::string& username) const;
-
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
 
 	virtual void defineStoragePeerInterface(
 			const StoragePeerInterface* storagePeer,
 			bool doPopulateInitialState);
+
+	virtual void checkStorage() const;
+
+	virtual void dumpStorage( std::ostream& output) const;
 
 public:/*QueryEval*/
 	Index getTermValue( const std::string& name) const;
@@ -132,6 +134,7 @@ public:/*QueryEval*/
 	Index getUserno( const std::string& name) const;
 	Index getAttributeName( const std::string& name) const;
 	GlobalCounter documentFrequency( const Index& typeno, const Index& termno) const;
+	Index userId( const std::string& username) const;
 
 public:/*StorageTransaction*/
 	void getVariablesWriteBatch(

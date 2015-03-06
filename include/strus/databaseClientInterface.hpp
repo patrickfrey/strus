@@ -58,8 +58,6 @@ public:
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual DatabaseTransactionInterface* createTransaction()=0;
 
-	enum Options {UseLruCache};
-
 	/// \brief Create an object for reading values from and iterating on the key value store database
 	/// \param[in] options options for the created cursor
 	/// \return the created cursor interface to be disposed with delete by the caller

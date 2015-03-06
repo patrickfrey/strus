@@ -38,7 +38,7 @@ MetaDataDescription::MetaDataDescription()
 	:m_bytesize(0)
 {}
 
-MetaDataDescription::MetaDataDescription( DatabaseClientInterface* database_)
+MetaDataDescription::MetaDataDescription( const DatabaseClientInterface* database_)
 	:m_bytesize(0)
 {
 	load( database_);
@@ -189,7 +189,7 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 	m_ar.insert( ei, MetaDataElement( type_, ofs));
 }
 
-void MetaDataDescription::load( DatabaseClientInterface* database)
+void MetaDataDescription::load( const DatabaseClientInterface* database)
 {
 	std::string descr;
 	if (!DatabaseAdapter_MetaDataDescr::load( database, descr))

@@ -49,6 +49,7 @@
 #include "attributeReader.hpp"
 #include "keyMap.hpp"
 #include "keyAllocatorInterface.hpp"
+#include "extractKeyValueData.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -714,6 +715,281 @@ void StorageClient::defineStoragePeerInterface(
 		transaction->try_commit();
 		transaction->final_commit();
 	}
+}
+
+
+static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
+{
+	const char hex[] = "0123456789abcdef";
+	std::string rt;
+	char const* ki = key.ptr();
+	char const* ke = key.ptr()+key.size();
+	for (; ki != ke; ++ki)
+	{
+		if (*ki > 32 && *ki < 128)
+		{
+			rt.push_back( *ki);
+		}
+		else
+		{
+			rt.push_back( '[');
+			rt.push_back( hex[ (unsigned char)*ki / 16]);
+			rt.push_back( hex[ (unsigned char)*ki % 16]);
+			rt.push_back( ']');
+		}
+	}
+	return rt;
+}
+
+static void checkKeyValue(
+		const strus::DatabaseClientInterface* database,
+		const strus::DatabaseCursorInterface::Slice& key,
+		const strus::DatabaseCursorInterface::Slice& value)
+{
+	try
+	{
+		switch (key.ptr()[0])
+		{
+			case strus::DatabaseKey::TermTypePrefix:
+			{
+				strus::TermTypeData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::TermValuePrefix:
+			{
+				strus::TermValueData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocIdPrefix:
+			{
+				strus::DocIdData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::ForwardIndexPrefix:
+			{
+				strus::ForwardIndexData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::VariablePrefix:
+			{
+				strus::VariableData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocMetaDataPrefix:
+			{
+				strus::MetaDataDescription metadescr( database);
+				strus::DocMetaDataData( &metadescr, key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocAttributePrefix:
+			{
+				strus::DocAttributeData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::UserNamePrefix:
+			{
+				strus::UserNameData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocFrequencyPrefix:
+			{
+				strus::DocFrequencyData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::PosinfoBlockPrefix:
+			{
+				strus::PosinfoBlockData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::InverseTermPrefix:
+			{
+				strus::InverseTermData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::UserAclBlockPrefix:
+			{
+				strus::UserAclBlockData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::AclBlockPrefix:
+			{
+				strus::AclBlockData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocListBlockPrefix:
+			{
+				strus::DocListBlockData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::MetaDataDescrPrefix:
+			{
+				strus::MetaDataDescrData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::AttributeKeyPrefix:
+			{
+				strus::AttributeKeyData( key, value);
+				break;
+			}
+		}
+	}
+	catch (const std::runtime_error& err)
+	{
+		throw std::runtime_error( std::string( err.what()) + " in key '" + keystring( key) + "'");
+	}
+}
+
+void StorageClient::checkStorage() const
+{
+	boost::scoped_ptr<strus::DatabaseCursorInterface>
+		cursor( m_database->createCursor( strus::DatabaseOptions()));
+
+	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
+
+	for (; key.defined(); key = cursor->seekNext())
+	{
+		if (key.size() == 0)
+		{
+			throw std::runtime_error( "found empty key in storage");
+		}
+		checkKeyValue( m_database.get(), key, cursor->value());
+	};
+}
+
+static void dumpKeyValue(
+		std::ostream& out,
+		const strus::DatabaseClientInterface* database,
+		const strus::DatabaseCursorInterface::Slice& key,
+		const strus::DatabaseCursorInterface::Slice& value)
+{
+	try
+	{
+		switch (key.ptr()[0])
+		{
+			case strus::DatabaseKey::TermTypePrefix:
+			{
+				strus::TermTypeData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::TermValuePrefix:
+			{
+				strus::TermValueData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::DocIdPrefix:
+			{
+				strus::DocIdData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::ForwardIndexPrefix:
+			{
+				strus::ForwardIndexData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::VariablePrefix:
+			{
+				strus::VariableData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::DocMetaDataPrefix:
+			{
+				strus::MetaDataDescription metadescr( database);
+				strus::DocMetaDataData data( &metadescr, key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::DocAttributePrefix:
+			{
+				strus::DocAttributeData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::UserNamePrefix:
+			{
+				strus::UserNameData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::DocFrequencyPrefix:
+			{
+				strus::DocFrequencyData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::PosinfoBlockPrefix:
+			{
+				strus::PosinfoBlockData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::UserAclBlockPrefix:
+			{
+				strus::UserAclBlockData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::AclBlockPrefix:
+			{
+				strus::AclBlockData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::DocListBlockPrefix:
+			{
+				strus::DocListBlockData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::InverseTermPrefix:
+			{
+				strus::InverseTermData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::MetaDataDescrPrefix:
+			{
+				strus::MetaDataDescrData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::AttributeKeyPrefix:
+			{
+				strus::AttributeKeyData data( key, value);
+				data.print( out);
+				break;
+			}
+			default:
+			{
+				throw std::runtime_error( "illegal data base prefix");
+			}
+		}
+	}
+	catch (const std::runtime_error& err)
+	{
+		throw std::runtime_error( std::string( err.what()) + std::string(" in key '") + keystring( key) + "'");
+	}
+}
+
+void StorageClient::dumpStorage( std::ostream& output) const
+{
+	boost::scoped_ptr<strus::DatabaseCursorInterface>
+		cursor( m_database->createCursor( strus::DatabaseOptions()));
+
+	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
+
+	for (; key.defined(); key = cursor->seekNext())
+	{
+		if (key.size() == 0)
+		{
+			throw std::runtime_error( "found empty key in storage");
+		}
+		dumpKeyValue( output, m_database.get(), key, cursor->value());
+	};
 }
 
 

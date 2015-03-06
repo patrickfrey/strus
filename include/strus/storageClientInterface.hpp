@@ -154,6 +154,13 @@ public:
 	virtual StorageDocumentInterface* createDocumentChecker(
 			const std::string& docid,
 			const std::string& logfilename) const=0;
+
+	/// \brief Iterate through all key/value pairs and check their data for validity
+	virtual void checkStorage() const=0;
+
+	/// \brief Iterate through all key/value pairs and dump them in readable form to output
+	/// \param[out] where to dump the storage content to
+	virtual void dumpStorage( std::ostream& output) const=0;
 };
 
 }//namespace

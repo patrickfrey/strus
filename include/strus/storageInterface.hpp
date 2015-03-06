@@ -54,7 +54,7 @@ public:
 	/// \param[in] database reference to a key value store database used by the storage
 	/// \remark The database referenced by 'database' must have been created and active
 	virtual void createStorage( const std::string& configsource, DatabaseClientInterface* database) const=0;
-	
+
 	/// \brief Create an interface to alter the meta data table structure
 	/// \param[in] database key value store database used by the storage (ownership passed to returned object)
 	/// \return the created reference to be disposed with delete by the caller
