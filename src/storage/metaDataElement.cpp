@@ -27,8 +27,8 @@
 --------------------------------------------------------------------
 */
 #include "metaDataElement.hpp"
+#include "private/utils.hpp"
 #include <stdexcept>
-#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -37,7 +37,7 @@ MetaDataElement::Type MetaDataElement::typeFromName( const char* namestr)
 	unsigned int ti = 0, te = NofTypes;
 	for (; ti<te; ++ti)
 	{
-		if (boost::iequals( namestr, typeName( (Type)ti)))
+		if (utils::caseInsensitiveEquals( namestr, typeName( (Type)ti)))
 		{
 			return (Type)ti;
 		}

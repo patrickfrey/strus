@@ -8,20 +8,26 @@ set(libstrus_utils_source_files
    cmdLineOpt.cpp
    configParser.cpp
    fileio.cpp
-   protocol.cpp  
+   protocol.cpp
+   utils.cpp  
 )
 
 include_directories(
-  ${Boost_INCLUDE_DIRS}
-  "${PROJECT_SOURCE_DIR}/include"
-)
+	"${Boost_INCLUDE_DIRS}"
+	"${PROJECT_SOURCE_DIR}/include" )
+link_directories(
+	"${Boost_LIBRARY_DIRS}"
+	"${PROJECT_SOURCE_DIR}/utils" )
 
 
 # -------------------------------------------
 # UTILS LIBRARY
 # Library with some helper functions used by strus libraries and programs but not part of the public interface
 # -------------------------------------------
-add_library(strus_utils SHARED ${libstrus_utils_source_files})
+add_library( strus_private_utils STATIC utils.cpp)
+target_link_libraries( strus_private_utils  "${Boost_LIBRARIES}" )
+add_library( strus_utils SHARED ${libstrus_utils_source_files})
+target_link_libraries( strus_utils  "${Boost_LIBRARIES}" )
 set_target_properties(
     strus_utils
     PROPERTIES

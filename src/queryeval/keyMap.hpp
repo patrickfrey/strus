@@ -28,9 +28,9 @@
 */
 #ifndef _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #define _STRUS_QUERY_KEYMAP_HPP_INCLUDED
+#include "private/utils.hpp"
 #include <string>
 #include <map>
-#include <boost/algorithm/string.hpp>
 
 namespace strus {
 
@@ -38,9 +38,9 @@ struct KeyString
 	:public std::string
 {
 	KeyString( const char* o)
-		:std::string( boost::to_lower_copy( std::string(o))){}
+		:std::string( utils::tolower( o)){}
 	KeyString( const std::string& o)
-		:std::string( boost::to_lower_copy( o)){}
+		:std::string( utils::tolower( o)){}
 	KeyString( const KeyString& o)
 		:std::string( o){}
 	KeyString(){}

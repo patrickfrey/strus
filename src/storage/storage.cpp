@@ -45,7 +45,7 @@
 #include <cerrno>
 #include <sstream>
 #include <iostream>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using namespace strus;
 
@@ -124,7 +124,7 @@ void Storage::createStorage( const std::string& configsource, DatabaseClientInte
 	(void)extractBooleanFromConfigString( useAcl, src, "acl");
 
 	MetaDataDescription md( metadata);
-	boost::scoped_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
+	std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 
 	DatabaseAdapter_Variable::Writer stor( database);
 	

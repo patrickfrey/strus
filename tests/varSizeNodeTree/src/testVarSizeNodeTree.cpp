@@ -28,6 +28,7 @@
 */
 #include "varSizeNodeTree.hpp"
 #include "varSizeNodeTree.cpp"
+#include "private/utils.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -38,7 +39,6 @@
 #include <ctime>
 #include <cmath>
 #include <iomanip>
-#include <boost/lexical_cast.hpp>
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
@@ -78,8 +78,8 @@ int main( int argc, const char** argv)
 		unsigned int nofQueries;
 		try
 		{
-			nofInserts = boost::lexical_cast<unsigned int>( argv[1]);
-			nofQueries = boost::lexical_cast<unsigned int>( argv[2]);
+			nofInserts = utils::toint( argv[1]);
+			nofQueries = utils::toint( argv[2]);
 		}
 		catch (const std::exception& e)
 		{

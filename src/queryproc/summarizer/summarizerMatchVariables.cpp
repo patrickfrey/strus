@@ -88,11 +88,15 @@ std::vector<SummarizerClosureInterface::SummaryElement>
 				std::string line;
 				for (int vidx=0; vi != ve; ++vi,++vidx)
 				{
-					if (vidx) line.append( m_delimiter);
-					line.append( vi->name());
-					line.append( m_assign);
-					m_forwardindex->skipPos( vi->position());
-					line.append( m_forwardindex->fetch());
+					Index pos = vi->position();
+					if (pos)
+					{
+						if (vidx) line.append( m_delimiter);
+						line.append( vi->name());
+						line.append( m_assign);
+						m_forwardindex->skipPos( pos);
+						line.append( m_forwardindex->fetch());
+					}
 				}
 			}
 		}

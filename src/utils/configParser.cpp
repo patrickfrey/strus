@@ -29,10 +29,10 @@
 #include "strus/private/configParser.hpp"
 #include "strus/index.hpp"
 #include "private/dll_tags.hpp"
+#include "private/utils.hpp"
 #include <map>
 #include <cstring>
 #include <stdexcept>
-#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -60,7 +60,7 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 		++cc;
 		const char* ee = std::strchr( cc, ';');
 		if (!ee) ee = std::strchr( cc, '\0');
-		if (boost::algorithm::iequals( cfgkey, key))
+		if (utils::caseInsensitiveEquals( cfgkey, key))
 		{
 			res = std::string( cc, ee - cc);
 			std::string rest_config( config.c_str(), cc);
@@ -77,7 +77,7 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 
 static bool yesNoFromString( const char* cfgname, const std::string& str)
 {
-	std::string lostr = boost::algorithm::to_lower_copy( str);
+	std::string lostr = utils::tolower( str);
 	if (lostr == "y") return true;
 	if (lostr == "n") return false;
 	if (lostr == "t") return true;

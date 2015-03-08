@@ -37,6 +37,7 @@
 #include "strus/storagePeerInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "strus/reference.hpp"
+#include "private/utils.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "peerStorageTransaction.hpp"
@@ -53,9 +54,6 @@
 #include <string>
 #include <vector>
 #include <cstring>
-#include <boost/algorithm/string.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
@@ -188,7 +186,7 @@ Index StorageClient::getTermValue( const std::string& name) const
 
 Index StorageClient::getTermType( const std::string& name) const
 {
-	return DatabaseAdapter_TermType::Reader( m_database.get()).get( boost::algorithm::to_lower_copy( name));
+	return DatabaseAdapter_TermType::Reader( m_database.get()).get( utils::tolower( name));
 }
 
 Index StorageClient::getDocno( const std::string& name) const
@@ -203,7 +201,7 @@ Index StorageClient::getUserno( const std::string& name) const
 
 Index StorageClient::getAttributeName( const std::string& name) const
 {
-	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( boost::algorithm::to_lower_copy( name));
+	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( utils::tolower( name));
 }
 
 GlobalCounter StorageClient::documentFrequency( const Index& typeno, const Index& termno) const
@@ -299,7 +297,7 @@ StorageDocumentInterface*
 
 Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 {
-	boost::mutex::scoped_lock lock( m_mutex_docno);
+	utils::ScopedLock lock( m_mutex_docno);
 	Index rt = m_next_docno;
 	m_next_docno += nofDocuments;
 	if (m_next_docno <= rt) throw std::runtime_error( "docno allocation error");
@@ -308,7 +306,7 @@ Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 
 void StorageClient::declareNofDocumentsInserted( int incr)
 {
-	boost::mutex::scoped_lock lock( m_nof_documents_mutex);
+	utils::ScopedLock lock( m_nof_documents_mutex);
 	m_nof_documents += incr;
 	m_global_nof_documents += incr;
 }
@@ -442,13 +440,13 @@ bool StorageClient::withAcl() const
 
 Index StorageClient::allocTermno()
 {
-	boost::mutex::scoped_lock lock( m_mutex_termno);
+	utils::ScopedLock lock( m_mutex_termno);
 	return m_next_termno++;
 }
 
 Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock lock( m_mutex_typeno);
+	utils::ScopedLock lock( m_mutex_typeno);
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
@@ -461,7 +459,7 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 
 Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock lock( m_mutex_docno);
+	utils::ScopedLock lock( m_mutex_docno);
 	Index rt;
 	DatabaseAdapter_DocId::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
@@ -474,7 +472,7 @@ Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
 
 Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock lock( m_mutex_userno);
+	utils::ScopedLock lock( m_mutex_userno);
 	Index rt;
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
@@ -487,7 +485,7 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 
 Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 {
-	boost::mutex::scoped_lock lock( m_mutex_attribno);
+	utils::ScopedLock lock( m_mutex_attribno);
 	Index rt;
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
@@ -624,7 +622,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 
 void StorageClient::declareGlobalNofDocumentsInserted( const GlobalCounter& incr)
 {
-	boost::mutex::scoped_lock lock( m_nof_documents_mutex);
+	utils::ScopedLock lock( m_nof_documents_mutex);
 	m_global_nof_documents += incr;
 }
 
@@ -841,7 +839,7 @@ static void checkKeyValue(
 
 void StorageClient::checkStorage() const
 {
-	boost::scoped_ptr<strus::DatabaseCursorInterface>
+	std::auto_ptr<strus::DatabaseCursorInterface>
 		cursor( m_database->createCursor( strus::DatabaseOptions()));
 
 	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
@@ -977,7 +975,7 @@ static void dumpKeyValue(
 
 void StorageClient::dumpStorage( std::ostream& output) const
 {
-	boost::scoped_ptr<strus::DatabaseCursorInterface>
+	std::auto_ptr<strus::DatabaseCursorInterface>
 		cursor( m_database->createCursor( strus::DatabaseOptions()));
 
 	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);

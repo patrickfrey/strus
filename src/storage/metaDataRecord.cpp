@@ -33,7 +33,6 @@
 #include <utility>
 #include <vector>
 #include <stdexcept>
-#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 

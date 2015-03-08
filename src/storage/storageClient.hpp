@@ -33,10 +33,10 @@
 #include "strus/arithmeticVariant.hpp"
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/reference.hpp"
+#include "private/utils.hpp"
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
 #include "varSizeNodeTree.hpp"
-#include <boost/thread/mutex.hpp>
 
 namespace strus {
 
@@ -175,7 +175,7 @@ public:/*StorageTransaction*/
 		}
 
 	private:
-		boost::mutex* m_mutex;
+		utils::Mutex* m_mutex;
 	};
 
 public:/*PeerStorageTransaction*/
@@ -200,17 +200,17 @@ private:
 	Index m_next_userno;					///< next index to assign to a new user id
 	Index m_next_attribno;					///< next index to assign to a new attribute name
 
-	boost::mutex m_mutex_typeno;
-	boost::mutex m_mutex_termno;
-	boost::mutex m_mutex_docno;
-	boost::mutex m_mutex_userno;
-	boost::mutex m_mutex_attribno;
+	utils::Mutex m_mutex_typeno;
+	utils::Mutex m_mutex_termno;
+	utils::Mutex m_mutex_docno;
+	utils::Mutex m_mutex_userno;
+	utils::Mutex m_mutex_attribno;
 
 	Index m_nof_documents;					///< number of documents inserted
 	GlobalCounter m_global_nof_documents;			///< global number of documents inserted
-	boost::mutex m_nof_documents_mutex;
+	utils::Mutex m_nof_documents_mutex;
 
-	boost::mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
+	utils::Mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks

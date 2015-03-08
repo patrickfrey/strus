@@ -73,7 +73,7 @@ bool Accumulator::nextRank(
 			//	were just inserted and are not respected in this query.
 			continue;
 		}
-		m_visited[ m_docno-1] = true;
+		m_visited.set( m_docno-1);
 
 		// Check meta data restrictions:
 		m_metadata->skipDoc( m_docno);

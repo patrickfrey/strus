@@ -28,8 +28,8 @@
 */
 #include "weightingDef.hpp"
 #include "queryEval.hpp"
+#include "private/utils.hpp"
 #include "strus/weightingFunctionInterface.hpp"
-#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -63,7 +63,7 @@ WeightingDef::WeightingDef(
 		std::size_t aidx = 0;
 		for (; arg[aidx]; ++aidx)
 		{
-			if (boost::algorithm::iequals( pi->first, arg[aidx]))
+			if (utils::caseInsensitiveEquals( pi->first, arg[aidx]))
 			{
 				break;
 			}

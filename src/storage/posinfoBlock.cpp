@@ -32,7 +32,6 @@
 #include <cstring>
 #include <limits>
 #include <iostream>
-#include <boost/scoped_array.hpp>
 
 using namespace strus;
 

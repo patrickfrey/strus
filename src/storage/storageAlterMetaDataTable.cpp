@@ -31,10 +31,9 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "private/utils.hpp"
 #include <vector>
 #include <string>
-#include <boost/algorithm/string.hpp>
-#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
@@ -63,7 +62,7 @@ void StorageAlterMetaDataTable::commit()
 	{
 		throw std::runtime_error( "called alter meta data table commit after rollback");
 	}
-	boost::scoped_ptr<DatabaseTransactionInterface>
+	std::auto_ptr<DatabaseTransactionInterface>
 		transaction( m_database->createTransaction());
 
 	MetaDataDescription::TranslationMap 
@@ -99,9 +98,9 @@ void StorageAlterMetaDataTable::renameElementReset(
 	std::vector<std::string>::iterator di = m_metadescr_resets.begin(), de = m_metadescr_resets.end();
 	for (; di != de; ++di)
 	{
-		if (boost::algorithm::iequals( oldname, *di))
+		if (utils::caseInsensitiveEquals( oldname, *di))
 		{
-			*di = boost::algorithm::to_lower_copy( name);
+			*di = utils::tolower( name);
 			break;
 		}
 	}
@@ -115,7 +114,7 @@ void StorageAlterMetaDataTable::changeElementType(
 	MetaDataDescription::const_iterator mi = m_metadescr_new.begin(), me = m_metadescr_new.end();
 	for (; mi != me; ++mi)
 	{
-		if (boost::algorithm::iequals( mi.name(), name))
+		if (utils::caseInsensitiveEquals( mi.name(), name))
 		{
 			chgdescr.add( type, name);
 		}
@@ -164,7 +163,7 @@ void StorageAlterMetaDataTable::deleteElement(
 	MetaDataDescription::const_iterator mi = m_metadescr_new.begin(), me = m_metadescr_new.end();
 	for (; mi != me; ++mi)
 	{
-		if (boost::algorithm::iequals( mi.name(), name))
+		if (utils::caseInsensitiveEquals( mi.name(), name))
 		{
 			continue;
 		}
@@ -174,13 +173,13 @@ void StorageAlterMetaDataTable::deleteElement(
 		}
 	}
 	m_metadescr_new = chgdescr;
-	m_metadescr_resets.push_back( boost::algorithm::to_lower_copy( name));
+	m_metadescr_resets.push_back( utils::tolower( name));
 }
 
 void StorageAlterMetaDataTable::clearElement(
 		const std::string& name)
 {
-	m_metadescr_resets.push_back( boost::algorithm::to_lower_copy( name));
+	m_metadescr_resets.push_back( utils::tolower( name));
 }
 
 void StorageAlterMetaDataTable::addElement(

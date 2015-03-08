@@ -54,8 +54,8 @@
 #include <algorithm>
 #include <limits>
 #include <cstdarg>
+#include <memory>
 #include <stdint.h>
-#include <boost/scoped_ptr.hpp>
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
@@ -922,7 +922,7 @@ int main( int argc, const char* argv[])
 
 		sti->createStorage( config, database.get());
 
-		boost::scoped_ptr<strus::StorageClientInterface>
+		std::auto_ptr<strus::StorageClientInterface>
 			storage( sti->createClient( "", database.get()));
 		database.release();
 
@@ -934,13 +934,13 @@ int main( int argc, const char* argv[])
 		unsigned int insertIntervallSize = 1000;
 		unsigned int insertIntervallCnt = 0;
 
-		typedef boost::scoped_ptr<strus::StorageTransactionInterface> StorageTransaction;
+		typedef std::auto_ptr<strus::StorageTransactionInterface> StorageTransaction;
 		StorageTransaction transaction( storage->createTransaction());
 
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (; di != de; ++di,++totNofDocuments)
 		{
-			typedef boost::scoped_ptr<strus::StorageDocumentInterface> StorageDocument;
+			typedef std::auto_ptr<strus::StorageDocumentInterface> StorageDocument;
 
 			StorageDocument doc( transaction->createDocument( di->docid));
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
@@ -969,7 +969,7 @@ int main( int argc, const char* argv[])
 		transaction->commit();
 
 		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
-		boost::scoped_ptr<strus::QueryProcessorInterface> 
+		std::auto_ptr<strus::QueryProcessorInterface> 
 			queryproc( strus::createQueryProcessor());
 
 		std::vector<RandomQuery> randomQueryAr;

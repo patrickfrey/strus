@@ -11,15 +11,20 @@ set(libstrus_database_leveldb_source_files
    libstrus_database_leveldb.cpp
 )
 
-include_directories( ${Boost_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/include")
-link_directories(/usr/local/lib "${PROJECT_SOURCE_DIR}/utils" "${PROJECT_SOURCE_DIR}/database_leveldb")
+include_directories(
+	"${Boost_INCLUDE_DIRS}"
+	"${PROJECT_SOURCE_DIR}/include" )
+link_directories(
+	"${Boost_LIBRARY_DIRS}"
+	"${PROJECT_SOURCE_DIR}/utils"
+	"${PROJECT_SOURCE_DIR}/database_leveldb" )
 
 
 # -------------------------------------------
 # DATABASE LIBRARY
 # -------------------------------------------
 add_library(strus_database_leveldb SHARED ${libstrus_database_leveldb_source_files})
-target_link_libraries (strus_database_leveldb boost_system strus_utils snappy leveldb)
+target_link_libraries (strus_database_leveldb boost_system strus_utils strus_private_utils snappy leveldb)
 set_target_properties(
     strus_database_leveldb
     PROPERTIES

@@ -70,7 +70,7 @@ const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 
 	// The fact that the reference counting of shared_ptr is
 	// thread safe is used to implement some kind of RCU:
-	boost::shared_ptr<MetaDataBlock> blkref = m_ar[ blkidx];
+	utils::SharedPtr<MetaDataBlock> blkref = m_ar[ blkidx];
 	while (!blkref.get())
 	{
 		MetaDataBlock* newblk = m_dbadapter.loadPtr( blockno);

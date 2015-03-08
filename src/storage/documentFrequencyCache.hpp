@@ -29,11 +29,10 @@
 #ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
 #define _STRUS_LVDB_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "private/utils.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <vector>
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace strus {
 
@@ -43,7 +42,6 @@ public:
 	class Batch;
 
 	DocumentFrequencyCache()
-		:m_locked(false)
 	{}
 	~DocumentFrequencyCache()
 	{}
@@ -147,14 +145,13 @@ private:
 		std::size_t m_size;
 	};
 
-	typedef boost::shared_ptr<CounterArray> CounterArrayRef;
+	typedef utils::SharedPtr<CounterArray> CounterArrayRef;
 
 	void doIncrement( const Batch::Increment& incr);
 	void doRevertIncrement( const Batch::Increment& incr);
 
 private:
-	boost::mutex m_mutex;
-	bool m_locked;
+	utils::Mutex m_mutex;
 	CounterArrayRef m_ar[ MaxNofTermTypes];
 };
 

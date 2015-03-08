@@ -33,12 +33,11 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "private/utils.hpp"
 #include "metaDataRestriction.hpp"
 #include <vector>
 #include <list>
 #include <limits>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/scoped_ptr.hpp>
 
 namespace strus
 {
@@ -135,7 +134,7 @@ private:
 	std::vector<InvAclIteratorInterface*> m_aclRestrictions;
 	unsigned int m_selectoridx;
 	Index m_docno;
-	boost::dynamic_bitset<> m_visited;
+	utils::DynamicBitset m_visited;
 	std::size_t m_maxNofRanks;
 	Index m_maxDocumentNumber;
 };

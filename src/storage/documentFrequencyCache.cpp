@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "documentFrequencyCache.hpp"
+#include "private/utils.hpp"
 #include <cstdlib>
 
 using namespace strus;
@@ -62,7 +63,7 @@ void DocumentFrequencyCache::doRevertIncrement( const Batch::Increment& incr)
 
 void DocumentFrequencyCache::writeBatch( const Batch& batch)
 {
-	boost::mutex::scoped_lock lock( m_mutex);
+	utils::ScopedLock lock( m_mutex);
 	Batch::const_iterator bi = batch.begin(), be = batch.end();
 	try
 	{

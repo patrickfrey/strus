@@ -32,7 +32,6 @@
 #include <string>
 #include <cstring>
 #include <set>
-#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 

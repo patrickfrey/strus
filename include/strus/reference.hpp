@@ -35,7 +35,7 @@ namespace strus
 {
 
 /// \brief Reference for passing objects accross library borders.
-/// \note Similar to boost::shared_ptr but without atomic (thread safe) reference counting
+/// \note Similar to shared_ptr but without atomic (thread safe) reference counting
 template <class Object>
 class Reference
 {

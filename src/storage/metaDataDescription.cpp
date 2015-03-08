@@ -27,10 +27,10 @@
 --------------------------------------------------------------------
 */
 #include "metaDataDescription.hpp"
+#include "private/utils.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"
 #include <cstring>
-#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -87,12 +87,12 @@ MetaDataDescription::MetaDataDescription( const std::string& str)
 		std::string typeName;
 		if (!sn)
 		{
-			typeName = boost::algorithm::trim_copy( std::string( si, se-si));
+			typeName = utils::trim( std::string( si, se-si));
 			si = se;
 		}
 		else
 		{
-			typeName = boost::algorithm::trim_copy( std::string( si, sn-si));
+			typeName = utils::trim( std::string( si, sn-si));
 			si = sn + 1;
 			skipSpaces( si, se);
 		}
@@ -136,7 +136,7 @@ std::string MetaDataDescription::tostring() const
 int MetaDataDescription::getHandle( const std::string& name_) const
 {
 	std::map<std::string,std::size_t>::const_iterator
-		ni = m_namemap.find( boost::algorithm::to_lower_copy( name_));
+		ni = m_namemap.find( utils::tolower( name_));
 	if (ni == m_namemap.end())
 	{
 		throw std::runtime_error( std::string( "meta data element with name '") + name_ + "' is not defined");
@@ -146,12 +146,12 @@ int MetaDataDescription::getHandle( const std::string& name_) const
 
 bool MetaDataDescription::hasElement( const std::string& name_) const
 {
-	return m_namemap.find( boost::algorithm::to_lower_copy( name_)) != m_namemap.end();
+	return m_namemap.find( utils::tolower( name_)) != m_namemap.end();
 }
 
 bool MetaDataDescription::defined( const std::string& name_)
 {
-	return m_namemap.find( boost::algorithm::to_lower_copy( name_)) != m_namemap.end();
+	return m_namemap.find( utils::tolower( name_)) != m_namemap.end();
 }
 
 void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& name_)
@@ -184,7 +184,7 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 			++ni->second;
 		}
 	}
-	m_namemap[ boost::algorithm::to_lower_copy( name_)] = eidx;
+	m_namemap[ utils::tolower( name_)] = eidx;
 	m_bytesize += MetaDataElement::size( type_);
 	m_ar.insert( ei, MetaDataElement( type_, ofs));
 }
@@ -228,7 +228,7 @@ MetaDataDescription::TranslationMap
 		{
 			std::vector<std::string>::const_iterator
 				ri = resets.begin(), re = resets.end();
-			for (; ri != re && !boost::algorithm::iequals( *ri, ti->first); ++ri){}
+			for (; ri != re && !utils::caseInsensitiveEquals( *ri, ti->first); ++ri){}
 			if (ri == re)
 			{
 				rt.push_back( TranslationElement(
@@ -266,9 +266,9 @@ void MetaDataDescription::renameElement( const std::string& oldname, const std::
 		ni = m_namemap.begin(), ne = m_namemap.end();
 	for (; ni != ne; ++ni)
 	{
-		if (boost::algorithm::iequals( oldname, ni->first))
+		if (utils::caseInsensitiveEquals( oldname, ni->first))
 		{
-			newnamemap[ boost::algorithm::to_lower_copy( newname)] = ni->second;
+			newnamemap[ utils::tolower( newname)] = ni->second;
 		}
 		else
 		{

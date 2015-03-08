@@ -38,7 +38,6 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include <boost/scoped_ptr.hpp>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -135,7 +134,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 
 		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 
-		boost::scoped_ptr<PostingIteratorInterface> pitr(
+		std::auto_ptr<PostingIteratorInterface> pitr(
 			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
 
 		if (m_docno != pitr->skipDoc( m_docno))
@@ -174,7 +173,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	InvTermMap::const_iterator vi = m_invTermMap.begin(), ve = m_invTermMap.end();
 	for (; vi != ve; ++vi)
 	{
-		boost::scoped_ptr<ForwardIteratorInterface> fitr(
+		std::auto_ptr<ForwardIteratorInterface> fitr(
 			m_storage->createForwardIterator( vi->first.type));
 
 		fitr->skipDoc( m_docno);
@@ -199,7 +198,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	}
 
 	//[3] Check meta data:
-	boost::scoped_ptr<MetaDataReaderInterface> metadata(
+	std::auto_ptr<MetaDataReaderInterface> metadata(
 		m_storage->createMetaDataReader());
 
 	MetaDataMap::const_iterator mi = m_metaDataMap.begin(), me = m_metaDataMap.end();
@@ -217,7 +216,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	}
 
 	//[4] Check attributes:
-	boost::scoped_ptr<AttributeReaderInterface> attributes(
+	std::auto_ptr<AttributeReaderInterface> attributes(
 		m_storage->createAttributeReader());
 
 	AttributeMap::const_iterator ai = m_attributeMap.begin(), ae = m_attributeMap.end();

@@ -28,8 +28,8 @@
 */
 #include "summarizerDef.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
+#include "private/utils.hpp"
 #include "queryEval.hpp"
-#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -64,7 +64,7 @@ SummarizerDef::SummarizerDef(
 		std::size_t aidx = 0;
 		for (; arg[aidx]; ++aidx)
 		{
-			if (boost::algorithm::iequals( pi->first, arg[aidx]))
+			if (utils::caseInsensitiveEquals( pi->first, arg[aidx]))
 			{
 				break;
 			}
@@ -90,7 +90,7 @@ SummarizerDef::SummarizerDef(
 		std::size_t aidx = 0;
 		for (; arg[aidx]; ++aidx)
 		{
-			if (boost::algorithm::iequals( ti->first, arg[aidx]))
+			if (utils::caseInsensitiveEquals( ti->first, arg[aidx]))
 			{
 				break;
 			}
@@ -115,7 +115,7 @@ SummarizerDef::SummarizerDef(
 		std::size_t aidx = 0;
 		for (; arg[aidx]; ++aidx)
 		{
-			if (boost::algorithm::iequals( fi->first, arg[aidx]))
+			if (utils::caseInsensitiveEquals( fi->first, arg[aidx]))
 			{
 				break;
 			}

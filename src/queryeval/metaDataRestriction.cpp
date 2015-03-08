@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "metaDataRestriction.hpp"
-#include <boost/algorithm/string.hpp>
+#include "private/utils.hpp"
 #include <limits>
 #include <stdexcept>
 
@@ -179,7 +179,7 @@ bool MetaDataRestriction::compareFunctionGreaterEqualUInt( const ArithmeticVaria
 
 MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( const char* type, QueryInterface::CompareOperator cmpop)
 {
-	if (boost::algorithm::iequals( type, "float16"))
+	if (utils::caseInsensitiveEquals( type, "float16"))
 	{
 		switch (cmpop)
 		{
@@ -198,7 +198,7 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 		}
 		throw std::logic_error("unknown meta data compare function");
 	}
-	else if (boost::algorithm::iequals( type, "float32"))
+	else if (utils::caseInsensitiveEquals( type, "float32"))
 	{
 		switch (cmpop)
 		{
@@ -217,7 +217,7 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 		}
 		throw std::logic_error("unknown meta data compare function");
 	}
-	else if (boost::algorithm::istarts_with( type, "int"))
+	else if (utils::caseInsensitiveStartsWith( type, "int"))
 	{
 		switch (cmpop)
 		{
@@ -236,7 +236,7 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 		}
 		throw std::logic_error("unknown meta data compare function");
 	}
-	else if (boost::algorithm::istarts_with( type, "uint"))
+	else if (utils::caseInsensitiveStartsWith( type, "uint"))
 	{
 		switch (cmpop)
 		{

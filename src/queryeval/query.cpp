@@ -41,11 +41,11 @@
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
+#include "private/utils.hpp"
 #include "keyMap.hpp"
 #include <vector>
 #include <string>
 #include <utility>
-#include <boost/algorithm/string.hpp>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -118,7 +118,7 @@ void Query::attachVariable( const std::string& name_)
 
 void Query::defineFeature( const std::string& set_, float weight_)
 {
-	m_features.push_back( Feature( boost::algorithm::to_lower_copy(set_), m_stack.back(), weight_));
+	m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
 	m_stack.pop_back();
 }
 

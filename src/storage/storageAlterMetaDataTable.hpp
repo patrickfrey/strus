@@ -38,7 +38,6 @@
 #include <string>
 #include <set>
 #include <map>
-#include <boost/scoped_ptr.hpp>
 
 namespace strus {
 class DatabaseClientInterface;

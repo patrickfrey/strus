@@ -47,8 +47,6 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
-#include <boost/scoped_ptr.hpp>
-#include <boost/algorithm/string.hpp>
 
 #undef STRUS_LOWLEVEL_DEBUG
 

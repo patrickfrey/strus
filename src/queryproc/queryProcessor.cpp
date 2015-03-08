@@ -32,13 +32,13 @@
 #include "weighting/weighting_standard.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "private/utils.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
 #include <set>
 #include <limits>
 #include <iostream>
-#include <boost/algorithm/string.hpp>
 
 using namespace strus;
 
@@ -71,14 +71,14 @@ void QueryProcessor::definePostingJoinOperator(
 		PostingJoinOperatorInterface* op)
 {
 	Reference<PostingJoinOperatorInterface> opref( op);
-	m_joiners[ boost::algorithm::to_lower_copy( std::string(name))] = opref;
+	m_joiners[ utils::tolower( std::string(name))] = opref;
 }
 
 const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 		const std::string& name) const
 {
 	std::map<std::string,Reference<PostingJoinOperatorInterface> >::const_iterator 
-		ji = m_joiners.find( boost::algorithm::to_lower_copy( name));
+		ji = m_joiners.find( utils::tolower( name));
 	if (ji == m_joiners.end())
 	{
 		throw std::runtime_error( std::string( "posting set join operator not defined: '") + name + "'");
@@ -91,14 +91,14 @@ void QueryProcessor::defineWeightingFunction(
 		WeightingFunctionInterface* func)
 {
 	Reference<WeightingFunctionInterface> funcref( func);
-	m_weighters[ boost::algorithm::to_lower_copy( std::string(name))] = funcref;
+	m_weighters[ utils::tolower( std::string(name))] = funcref;
 }
 
 const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		const std::string& name) const
 {
 	std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
-		wi = m_weighters.find( boost::algorithm::to_lower_copy( std::string(name)));
+		wi = m_weighters.find( utils::tolower( std::string(name)));
 	if (wi == m_weighters.end())
 	{
 		throw std::runtime_error( std::string( "weighting function not defined: '") + name + "'");
@@ -111,14 +111,14 @@ void QueryProcessor::defineSummarizerFunction(
 		SummarizerFunctionInterface* sumfunc)
 {
 	Reference<SummarizerFunctionInterface> funcref( sumfunc);
-	m_summarizers[ boost::algorithm::to_lower_copy( std::string(name))] = funcref;
+	m_summarizers[ utils::tolower( std::string(name))] = funcref;
 }
 
 const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		const std::string& name) const
 {
 	std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
-		si = m_summarizers.find( boost::algorithm::to_lower_copy( std::string(name)));
+		si = m_summarizers.find( utils::tolower( std::string(name)));
 	if (si == m_summarizers.end())
 	{
 		throw std::runtime_error( std::string( "summarization function not defined: '") + name + "'");

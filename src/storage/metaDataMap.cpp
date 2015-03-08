@@ -28,11 +28,12 @@
 */
 #include "metaDataMap.hpp"
 #include "metaDataBlockCache.hpp"
+#include "private/utils.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "dataBlock.hpp"
 #include "databaseAdapter.hpp"
 #include <cstring>
-#include <boost/scoped_array.hpp>
+#include "private/utils.hpp"
 
 using namespace strus;
 
@@ -113,7 +114,7 @@ void MetaDataMap::rewriteMetaData(
 	{
 		std::size_t newblk_bytesize = MetaDataBlock::BlockSize * newDescr.bytesize();
 		char* newblk_data = new char[ MetaDataBlock::BlockSize * newDescr.bytesize()];
-		boost::scoped_array<char> newblk_data_mem( newblk_data);
+		utils::ScopedArray<char> newblk_data_mem( newblk_data);
 
 		MetaDataRecord::translateBlock(
 				trmap, newDescr, newblk_data,

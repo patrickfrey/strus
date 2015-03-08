@@ -39,8 +39,6 @@
 #include <string>
 #include <set>
 #include <map>
-#include <boost/algorithm/string.hpp>
-#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
@@ -94,7 +92,7 @@ Index StorageTransaction::getOrCreateTermValue( const std::string& name)
 Index StorageTransaction::getOrCreateTermType( const std::string& name)
 {
 	bool isNew;
-	return m_termTypeMap.getOrCreate( boost::algorithm::to_lower_copy( name), isNew);
+	return m_termTypeMap.getOrCreate( utils::tolower( name), isNew);
 }
 
 Index StorageTransaction::getOrCreateDocno( const std::string& name, bool& isNew)
@@ -110,7 +108,7 @@ Index StorageTransaction::getOrCreateUserno( const std::string& name, bool& isNe
 Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 {
 	bool isNew;
-	return m_attributeNameMap.getOrCreate( boost::algorithm::to_lower_copy( name), isNew);
+	return m_attributeNameMap.getOrCreate( utils::tolower( name), isNew);
 }
 
 void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value)
@@ -253,7 +251,7 @@ void StorageTransaction::commit()
 		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
 
-		boost::scoped_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+		std::auto_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());

@@ -35,7 +35,6 @@ namespace strus {
 
 /// \class MemBlock
 /// \brief Helper class for exception save memory block handling
-/// \note I did not find a proper solution with STL/boost smart pointers for arrays. Because do not have both a release and the posibility to declare a deleter.
 class MemBlock
 {
 public:

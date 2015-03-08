@@ -28,13 +28,13 @@
 */
 #include "strus/weightingConfig.hpp"
 #include "private/dll_tags.hpp"
-#include <boost/algorithm/string.hpp>
+#include "private/utils.hpp"
 
 using namespace strus;
 
 DLL_PUBLIC void WeightingConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
 {
-	std::string name = boost::algorithm::to_lower_copy( name_);
+	std::string name = utils::tolower( name_);
 	if (m_numericParameters.find( name) != m_numericParameters.end())
 	{
 		throw std::runtime_error( std::string( "duplicate definition of weighting function parameter '") + name_ + "'");

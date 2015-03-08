@@ -36,7 +36,7 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+#include "private/utils.hpp"
 
 namespace strus {
 
@@ -68,7 +68,7 @@ private:
 	DatabaseClientInterface* m_database;
 	MetaDataDescription m_descr;
 	DatabaseAdapter_DocMetaData m_dbadapter;
-	boost::shared_ptr<MetaDataBlock> m_ar[ CacheSize];
+	utils::SharedPtr<MetaDataBlock> m_ar[ CacheSize];
 	std::vector<unsigned int> m_voidar;
 };
 

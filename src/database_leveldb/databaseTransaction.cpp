@@ -30,9 +30,9 @@
 #include "databaseCursor.hpp"
 #include "databaseClient.hpp"
 #include "strus/databaseOptions.hpp"
+#include <memory>
 #include <cstring>
 #include <stdexcept>
-#include <boost/scoped_ptr.hpp>
 
 using namespace strus;
 
@@ -72,7 +72,7 @@ void DatabaseTransaction::removeSubTree(
 		const char* domainkey,
 		std::size_t domainkeysize)
 {
-	boost::scoped_ptr<leveldb::Iterator> itr( m_db->NewIterator( leveldb::ReadOptions()));
+	std::auto_ptr<leveldb::Iterator> itr( m_db->NewIterator( leveldb::ReadOptions()));
 	for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
 		itr->Valid()
 			&& domainkeysize <= itr->key().size()

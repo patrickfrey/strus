@@ -26,40 +26,55 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/summarizerConfig.hpp"
-#include "private/dll_tags.hpp"
 #include "private/utils.hpp"
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 using namespace strus;
+using namespace strus::utils;
 
-DLL_PUBLIC void SummarizerConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
+std::string utils::tolower( const std::string& val)
 {
-	std::string name = utils::tolower( name_);
-	if (m_numericParameters.find( name) != m_numericParameters.end())
-	{
-		throw std::runtime_error( std::string("duplicate definition of summarizer parameter '") + name_ + "'");
-	}
-	m_numericParameters[ name] = value_;
+	return boost::algorithm::to_lower_copy( val);
 }
 
-DLL_PUBLIC void SummarizerConfig::defineTextualParameter( const std::string& name_, const std::string& value_)
+std::string utils::trim( const std::string& val)
 {
-	std::string name = utils::tolower( name_);
-	if (m_textualParameters.find( name) != m_textualParameters.end())
-	{
-		throw std::runtime_error( std::string("duplicate definition of summarizer parameter '") + name_ + "'");
-	}
-	m_textualParameters[ name] = value_;
+	return boost::algorithm::trim_copy( val);
 }
 
-DLL_PUBLIC void SummarizerConfig::defineFeatureParameter( const std::string& class_, const std::string& set_)
+bool utils::caseInsensitiveEquals( const std::string& val1, const std::string& val2)
 {
-	std::string name = utils::tolower( class_);
-	if (m_featureParameters.find( name) != m_featureParameters.end())
+	return boost::algorithm::iequals( val1, val2);
+}
+
+bool utils::caseInsensitiveStartsWith( const std::string& val, const std::string& prefix)
+{
+	return boost::algorithm::istarts_with( val, prefix);
+}
+
+int utils::toint( const std::string& val)
+{
+	try
 	{
-		throw std::runtime_error( std::string( "duplicate definition of summarizer feature parameter '") + class_ + "'");
+		return boost::lexical_cast<int>( val);
 	}
-	m_featureParameters[ name] = set_;
+	catch (const boost::bad_lexical_cast& err)
+	{
+		throw std::runtime_error( std::string( "failed to convert string '") + val + "' to integer: " + err.what());
+	}
+}
+
+std::string utils::tostring( int val)
+{
+	try
+	{
+		return boost::lexical_cast<std::string>( val);
+	}
+	catch (...)
+	{
+		throw std::runtime_error( "failed to convert number to string (out of memory)");
+	}
 }
 
 

@@ -41,7 +41,6 @@
 #include <string>
 #include <vector>
 #include <limits>
-#include <boost/lexical_cast.hpp>
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 

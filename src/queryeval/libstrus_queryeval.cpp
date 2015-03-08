@@ -33,7 +33,6 @@
 #include "private/dll_tags.hpp"
 #include <map>
 #include <set>
-#include <boost/scoped_array.hpp>
 
 using namespace strus;
 

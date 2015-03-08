@@ -29,7 +29,6 @@
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/dll_tags.hpp"
 #include <sstream>
-#include <boost/lexical_cast.hpp>
 
 using namespace strus;
 
