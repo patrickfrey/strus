@@ -80,6 +80,11 @@ public:
 		return m_ref->posno();
 	}
 
+	virtual Index queryPosno() const
+	{
+		return m_ref->queryPosno();
+	}
+
 private:
 	PostingIteratorInterface* m_ref;
 };

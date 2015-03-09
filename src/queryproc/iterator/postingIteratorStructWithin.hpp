@@ -71,9 +71,9 @@ public:
 		return m_posno;
 	}
 
-	virtual PostingIteratorInterface* copy() const
+	virtual Index queryPosno() const
 	{
-		return new IteratorStructWithin( *this);
+		return m_argar[0]->queryPosno();
 	}
 
 private:

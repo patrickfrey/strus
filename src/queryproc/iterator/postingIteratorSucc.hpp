@@ -85,6 +85,11 @@ public:
 		return m_origin->posno();
 	}
 
+	virtual Index queryPosno() const
+	{
+		return m_origin->queryPosno();
+	}
+
 private:
 	Reference<PostingIteratorInterface> m_origin;	///< base feature expression this is the successor of
 	std::string m_featureid;			///< unique id of the feature expression

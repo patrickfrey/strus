@@ -63,7 +63,7 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 		te = m_queryEval->terms().end();
 	for (; ti != te; ++ti)
 	{
-		pushTerm( ti->type, ti->value);
+		pushTerm( ti->type, ti->value, 0);
 		defineFeature( ti->set, 1.0);
 	}
 }
@@ -84,9 +84,9 @@ Query::Query( const Query& o)
 	,m_username(o.m_username)
 {}
 
-void Query::pushTerm( const std::string& type_, const std::string& value_)
+void Query::pushTerm( const std::string& type_, const std::string& value_, unsigned int pos_)
 {
-	m_terms.push_back( Term( type_, value_));
+	m_terms.push_back( Term( type_, value_, pos_));
 	m_stack.push_back( nodeAddress( TermNode, m_terms.size()-1));
 }
 
@@ -234,7 +234,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createTermPostingIterator(
-							term.type, term.value));
+							term.type, term.value, term.pos));
 				m_nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 			}
@@ -259,7 +259,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			rt = m_storage->createTermPostingIterator( term.type, term.value);
+			rt = m_storage->createTermPostingIterator( term.type, term.value, term.pos);
 			m_nodePostingsMap[ nodeadr] = rt;
 			break;
 		}

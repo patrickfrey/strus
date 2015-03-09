@@ -42,10 +42,6 @@ class IteratorJoin
 public:
 	virtual ~IteratorJoin(){}
 
-	virtual const char* featureid() const=0;
-	virtual Index skipDoc( const Index& docno)=0;
-	virtual Index skipPos( const Index& firstpos)=0;
-
 	virtual unsigned int frequency()
 	{
 		Index idx=0;
@@ -55,8 +51,6 @@ public:
 				++idx,++rt){}
 		return rt;
 	}
-
-	virtual GlobalCounter documentFrequency() const=0;
 };
 
 }//namespace

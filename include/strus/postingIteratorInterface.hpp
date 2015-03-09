@@ -70,6 +70,10 @@ public:
 	/// \brief Get the current position number
 	/// \return the position number
 	virtual Index posno() const=0;
+
+	/// \brief Get the position number in the query
+	/// \return the query position number
+	virtual Index queryPosno() const=0;
 };
 
 }//namespace

@@ -43,7 +43,7 @@ class PostingIterator
 	:public PostingIteratorInterface
 {
 public:
-	PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database, Index termtypeno, Index termvalueno, const char* termstr);
+	PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database, const Index& termtypeno, const Index& termvalueno, const Index& queryPosno_, const char* termstr);
 
 	virtual ~PostingIterator(){}
 
@@ -73,12 +73,18 @@ public:
 		return m_posinfoIterator.posno();
 	}
 
+	virtual Index queryPosno() const
+	{
+		return m_queryPosno;
+	}
+
 private:
 	IndexSetIterator m_docnoIterator;
 	PosinfoIterator m_posinfoIterator;
 
 	Index m_docno;
 	std::string m_featureid;
+	Index m_queryPosno;
 };
 
 }

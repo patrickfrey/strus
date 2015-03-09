@@ -68,7 +68,7 @@ public:
 
 	virtual void print( std::ostream& out);
 
-	virtual void pushTerm( const std::string& type_, const std::string& value_);
+	virtual void pushTerm( const std::string& type_, const std::string& value_, unsigned int pos_);
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_);
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
@@ -115,12 +115,13 @@ public:
 	struct Term
 	{
 		Term( const Term& o)
-			:type(o.type),value(o.value){}
-		Term( const std::string& t, const std::string& v)
-			:type(t),value(v){}
+			:type(o.type),value(o.value),pos(o.pos){}
+		Term( const std::string& t, const std::string& v, unsigned int p)
+			:type(t),value(v),pos(p){}
 
 		std::string type;	///< term type name
 		std::string value;	///< term value
+		unsigned int pos;	///< term position in the query
 	};
 
 	struct Expression

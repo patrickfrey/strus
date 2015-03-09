@@ -40,9 +40,6 @@ class NullIterator
 public:
 	NullIterator( Index termtypeno, Index termvalueno, const char* termstr);
 
-	NullIterator( const NullIterator& o)
-		:m_featureid(o.m_featureid){}
-
 	virtual ~NullIterator(){}
 
 	virtual std::vector<const PostingIteratorInterface*>
@@ -85,14 +82,9 @@ public:
 		return 0;
 	}
 
-	virtual float weight() const
+	virtual Index queryPosno() const
 	{
-		return 0.0;
-	}
-	
-	virtual PostingIteratorInterface* copy() const
-	{
-		return new NullIterator(*this);
+		return 0;
 	}
 
 private:

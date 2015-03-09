@@ -68,6 +68,11 @@ public:
 		return m_positive->posno();
 	}
 
+	virtual Index queryPosno() const
+	{
+		return m_positive->queryPosno();
+	}
+
 private:
 	Index m_docno;
 	Index m_docno_neg;
