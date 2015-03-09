@@ -82,11 +82,6 @@ public:
 		return 0;
 	}
 
-	virtual Index queryPosno() const
-	{
-		return 0;
-	}
-
 private:
 	std::string m_featureid;
 };

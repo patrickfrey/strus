@@ -73,11 +73,6 @@ public:
 		return m_posno;
 	}
 
-	virtual Index queryPosno() const
-	{
-		return m_argar[0]->queryPosno();
-	}
-
 private:
 	Index m_docno;							///< current document number
 	Index m_docno_cut;						///< next document number after m_docno that contains a cut element

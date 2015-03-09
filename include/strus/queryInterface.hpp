@@ -50,7 +50,7 @@ public:
 	/// \brief Push a term to the query stack
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
-	virtual void pushTerm( const std::string& type_, const std::string& value_, unsigned int pos_)=0;
+	virtual void pushTerm( const std::string& type_, const std::string& value_)=0;
 
 	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
 	///	removing the argument elements.

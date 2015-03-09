@@ -68,11 +68,6 @@ public:
 		return m_posno;
 	}
 
-	virtual Index queryPosno() const
-	{
-		return m_argar[0]->queryPosno();
-	}
-
 protected:
 	class selected_iterator
 	{

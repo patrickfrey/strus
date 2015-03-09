@@ -219,8 +219,7 @@ GlobalCounter StorageClient::documentFrequency( const Index& typeno, const Index
 PostingIteratorInterface*
 	StorageClient::createTermPostingIterator(
 		const std::string& typestr,
-		const std::string& termstr,
-		unsigned int pos) const
+		const std::string& termstr) const
 {
 	Index typeno = getTermType( typestr);
 	Index termno = getTermValue( termstr);
@@ -228,7 +227,7 @@ PostingIteratorInterface*
 	{
 		return new NullIterator( typeno, termno, termstr.c_str());
 	}
-	return new PostingIterator( this, m_database.get(), typeno, termno, pos, termstr.c_str());
+	return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str());
 }
 
 ForwardIteratorInterface*

@@ -69,13 +69,11 @@ public:
 	/// \brief Create an iterator on the occurrencies of a term in the storage
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
-	/// \param[in] pos position of the term in the query
 	/// \return the created iterator reference to be disposed with delete by the caller
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
 			const std::string& type,
-			const std::string& value,
-			unsigned int pos) const=0;
+			const std::string& value) const=0;
 
 	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
 	/// \param[in] type type name of the term to be inspected

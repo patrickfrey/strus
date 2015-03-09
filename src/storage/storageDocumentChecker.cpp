@@ -135,7 +135,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 
 		std::auto_ptr<PostingIteratorInterface> pitr(
-			m_storage->createTermPostingIterator( ti->first.type, ti->first.value, 0)); 
+			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
 
 		if (m_docno != pitr->skipDoc( m_docno))
 		{

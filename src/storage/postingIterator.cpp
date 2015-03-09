@@ -41,14 +41,13 @@ using namespace strus;
 #undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const Index& queryPosno_, const char* termstr)
+PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char* termstr)
 #else
-PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const Index& queryPosno_, const char*)
+PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char*)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
 	,m_docno(0)
-	,m_queryPosno(queryPosno_)
 {
 	m_featureid.reserve( 16);
 #ifdef STRUS_LOWLEVEL_DEBUG

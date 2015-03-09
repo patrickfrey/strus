@@ -80,8 +80,7 @@ public:
 	virtual PostingIteratorInterface*
 			createTermPostingIterator(
 				const std::string& termtype,
-				const std::string& termid,
-				unsigned int pos) const;
+				const std::string& termid) const;
 
 	virtual ForwardIteratorInterface*
 			createForwardIterator(
