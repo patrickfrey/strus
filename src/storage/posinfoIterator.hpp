@@ -53,7 +53,7 @@ public:
 
 	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
 	GlobalCounter documentFrequency() const;
-	unsigned int frequency();
+	unsigned int frequency() const;
 
 private:
 	bool loadBlock( const Index& elemno_);

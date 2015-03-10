@@ -133,7 +133,7 @@ Index PosinfoIterator::skipPos( const Index& firstpos_)
 	return rt;
 }
 
-unsigned int PosinfoIterator::frequency()
+unsigned int PosinfoIterator::frequency() const
 {
 	if (!m_docno) return 0;
 	return m_posinfoBlk.frequency_at( m_posinfoCursor);
