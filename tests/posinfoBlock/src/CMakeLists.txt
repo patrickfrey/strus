@@ -9,5 +9,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testPosinfoBlock testPosinfoBlock.cpp)
-target_link_libraries( testPosinfoBlock boost_system strus_utils strus_storage_static)
+target_link_libraries( testPosinfoBlock boost_system strus_utils strus_storage_static )
 

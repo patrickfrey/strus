@@ -1,3 +1,5 @@
 adapt inserter to stream processing with multipart documents
 join operator for subsequence that matches the longest subsequence (summarizer)
+possibility to chain normalizers
+solve resolving of with file names as resources
 template project derived from strusWikipediaSearch

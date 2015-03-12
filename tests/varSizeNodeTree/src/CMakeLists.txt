@@ -9,5 +9,5 @@ link_directories(
 	"${PROJECT_SOURCE_DIR}/src/utils" )
 
 add_executable( testVarSizeNodeTree testVarSizeNodeTree.cpp)
-target_link_libraries( testVarSizeNodeTree boost_system strus_storage_static strus_utils strus_private_utils)
+target_link_libraries( testVarSizeNodeTree boost_system strus_utils strus_private_utils strus_storage_static )
 
