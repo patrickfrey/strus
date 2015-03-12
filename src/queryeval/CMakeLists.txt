@@ -12,7 +12,6 @@ set(libstrus_queryeval_source_files
 	queryEval.cpp
 	query.cpp
 	summarizerDef.cpp
-	libstrus_queryeval.cpp
 )
 
 include_directories(
@@ -27,8 +26,12 @@ link_directories(
 # QUERY EVAL LIBRARY
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # --------------------------------
-add_library( strus_queryeval SHARED ${libstrus_queryeval_source_files})
-target_link_libraries( strus_queryeval strus_utils strus_private_utils "${Boost_LIBRARIES}" )
+add_library( strus_queryeval_static STATIC ${libstrus_queryeval_source_files})
+target_link_libraries( strus_queryeval_static strus_utils strus_private_utils )
+
+add_library( strus_queryeval SHARED  libstrus_queryeval.cpp )
+target_link_libraries( strus_queryeval strus_queryeval_static  strus_utils strus_private_utils "${Boost_LIBRARIES}" )
+
 set_target_properties(
     strus_queryeval
     PROPERTIES
@@ -36,8 +39,6 @@ set_target_properties(
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )
-add_library( strus_queryeval_static STATIC ${libstrus_queryeval_source_files})
-target_link_libraries( strus_queryeval_static strus_utils strus_private_utils )
 
 
 # ------------------------------

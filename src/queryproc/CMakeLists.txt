@@ -9,7 +9,6 @@ add_subdirectory( weighting )
 # --------------------------------------
 set( source_files
 	queryProcessor.cpp
-	libstrus_queryproc.cpp
 )
 
 include_directories(
@@ -27,8 +26,9 @@ link_directories(
 # -------------------------------------------
 # LIBRARY
 # -------------------------------------------
-add_library( strus_queryproc SHARED ${source_files})
-target_link_libraries( strus_queryproc strus_private_utils strus_utils iterator_standard summarizer_standard weighting_standard)
+add_library( strus_queryproc SHARED ${source_files} libstrus_queryproc.cpp )
+target_link_libraries( strus_queryproc strus_private_utils strus_utils iterator_standard summarizer_standard weighting_standard )
+
 set_target_properties(
     strus_queryproc
     PROPERTIES
