@@ -80,11 +80,6 @@ void DataBlock::init( const Index& id_, std::size_t size_)
 	m_id = id_;
 }
 
-void DataBlock::initcopy( const DataBlock& o)
-{
-	init( o.m_id, o.m_ptr, o.m_size, o.m_size /*force copy*/);
-}
-
 void DataBlock::swap( DataBlock& o)
 {
 	std::swap( m_id, o.m_id);

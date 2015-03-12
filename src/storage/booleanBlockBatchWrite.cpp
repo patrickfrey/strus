@@ -148,8 +148,8 @@ void BooleanBlockBatchWrite::mergeNewElements(
 		{
 			if (!blk.full())
 			{
-				newblk.initcopy( blk);
 				dbadapter->remove( transaction, blk.id());
+				newblk.swap( blk);
 			}
 		}
 	}

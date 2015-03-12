@@ -158,6 +158,7 @@ private:
 
 		void normalize();
 		bool tryAddElem( const Index& elemno_);
+		bool tryExpandRange( const Index& to_);
 		void init( const Index& from_, const Index& to_);
 		void getLastRange( Index& from_, Index& to_) const;
 	};

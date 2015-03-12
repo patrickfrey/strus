@@ -80,6 +80,30 @@ bool BooleanBlock::Node::matches( const Index& elemno_) const
 	return false;
 }
 
+bool BooleanBlock::Node::tryExpandRange( const Index& to_)
+{
+	switch (type)
+	{
+		case DiffNode:
+			if (elemno < to_) return false;
+			alt.diff += (to_ - elemno);
+			elemno = to_;
+			return true;
+
+		case PairNode:
+			if (alt.elemno2)
+			{
+				return false;
+			}
+			else
+			{
+				init( elemno, to_);
+				return true;
+			}
+	}
+	return false;
+}
+
 bool BooleanBlock::Node::tryAddElem( const Index& elemno_)
 {
 	switch (type)
@@ -441,7 +465,6 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 	std::size_t nodearsize = (size() / sizeof(Node));
 	if (nodearsize)
 	{
-		std::size_t nodearsize = (size() / sizeof(Node));
 		Node* nd = (Node*)ptr() + nodearsize - 1;
 		nd->getLastRange( from_, to_);
 
@@ -451,13 +474,21 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 		}
 		if (elemno <= to_ + 1)
 		{
+			// [from_ <= elemno <= to_+1]
 			//... overlapping ranges => join them
 			if (to_ < elemno + rangesize)
 			{
-				nd->init( from_, elemno + rangesize);
+				// [from_ <= elemno <= to_ < elemno+rangesize]
+				if (!nd->tryExpandRange( elemno+rangesize))
+				{
+					Node newnod;
+					newnod.init( elemno, elemno + rangesize);
+					append( &newnod, sizeof(newnod));
+				}
 			}
 			else
 			{
+				// [from_ <= elemno <= elemno+rangesize <= to_]
 				//... new range inside old one
 			}
 		}

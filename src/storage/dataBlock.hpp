@@ -81,7 +81,6 @@ public:
 
 	void init( const Index& id_, const void* ptr_, std::size_t size_, std::size_t allocsize_=0);
 	void init( const Index& id_, std::size_t allocsize_);
-	void initcopy( const DataBlock& o);
 
 	void append( const void* data, std::size_t datasize);
 	void fill( char ch, std::size_t datasize);

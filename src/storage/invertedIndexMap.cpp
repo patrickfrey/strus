@@ -34,7 +34,6 @@
 #include "databaseAdapter.hpp"
 #include "indexPacker.hpp"
 #include <sstream>
-#include <iostream>
 #include <limits>
 
 using namespace strus;
