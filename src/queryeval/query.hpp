@@ -70,6 +70,7 @@ public:
 
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_);
+	virtual void pushDuplicate();
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 

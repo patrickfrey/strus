@@ -1,4 +1,3 @@
 adapt inserter to stream processing with multipart documents
-expression consumed with addFeature (duplicate expression for reuse)
 join operator for subsequence that matches the longest subsequence (summarizer)
 template project derived from strusWikipediaSearch

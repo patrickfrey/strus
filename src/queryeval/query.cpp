@@ -107,6 +107,15 @@ void Query::pushExpression( const std::string& opname_, std::size_t argc, int ra
 	m_stack.push_back( nodeAddress( ExpressionNode, m_expressions.size()-1));
 }
 
+void Query::pushDuplicate()
+{
+	if (m_stack.empty())
+	{
+		throw std::runtime_error( "cannot push duplicate (query stack empty)");
+	}
+	m_stack.push_back( m_stack.back());
+}
+
 void Query::attachVariable( const std::string& name_)
 {
 	if (m_stack.empty())
