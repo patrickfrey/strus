@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC void WeightingConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
+DLL_PUBLIC void strus::WeightingConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
 {
 	std::string name = utils::tolower( name_);
 	if (m_numericParameters.find( name) != m_numericParameters.end())

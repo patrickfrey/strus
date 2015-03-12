@@ -47,7 +47,10 @@ public:
 	/// \param[in] value_ value of the parameter
 	void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
 
-	const std::map<std::string,ArithmeticVariant>& numericParameters() const	{return m_numericParameters;}
+	const std::map<std::string,ArithmeticVariant>& numericParameters() const
+	{
+		return m_numericParameters;
+	}
 
 private:
 	std::map<std::string,ArithmeticVariant> m_numericParameters;

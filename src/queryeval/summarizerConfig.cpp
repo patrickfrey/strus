@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC void SummarizerConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
+DLL_PUBLIC void strus::SummarizerConfig::defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_)
 {
 	std::string name = utils::tolower( name_);
 	if (m_numericParameters.find( name) != m_numericParameters.end())
@@ -42,7 +42,7 @@ DLL_PUBLIC void SummarizerConfig::defineNumericParameter( const std::string& nam
 	m_numericParameters[ name] = value_;
 }
 
-DLL_PUBLIC void SummarizerConfig::defineTextualParameter( const std::string& name_, const std::string& value_)
+DLL_PUBLIC void strus::SummarizerConfig::defineTextualParameter( const std::string& name_, const std::string& value_)
 {
 	std::string name = utils::tolower( name_);
 	if (m_textualParameters.find( name) != m_textualParameters.end())
@@ -52,7 +52,7 @@ DLL_PUBLIC void SummarizerConfig::defineTextualParameter( const std::string& nam
 	m_textualParameters[ name] = value_;
 }
 
-DLL_PUBLIC void SummarizerConfig::defineFeatureParameter( const std::string& class_, const std::string& set_)
+DLL_PUBLIC void strus::SummarizerConfig::defineFeatureParameter( const std::string& class_, const std::string& set_)
 {
 	std::string name = utils::tolower( class_);
 	if (m_featureParameters.find( name) != m_featureParameters.end())

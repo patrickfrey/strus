@@ -3,9 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set(libstrus_queryeval_source_files
-	summarizerConfig.cpp
-	weightingConfig.cpp
+set( source_files
 	accumulator.cpp
 	metaDataRestriction.cpp
 	weightingDef.cpp
@@ -26,10 +24,10 @@ link_directories(
 # QUERY EVAL LIBRARY
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # --------------------------------
-add_library( strus_queryeval_static STATIC ${libstrus_queryeval_source_files})
+add_library( strus_queryeval_static STATIC ${source_files})
 target_link_libraries( strus_queryeval_static strus_utils strus_private_utils )
 
-add_library( strus_queryeval SHARED  libstrus_queryeval.cpp )
+add_library( strus_queryeval SHARED libstrus_queryeval.cpp summarizerConfig.cpp weightingConfig.cpp )
 target_link_libraries( strus_queryeval strus_queryeval_static  strus_utils strus_private_utils "${Boost_LIBRARIES}" )
 
 set_target_properties(
