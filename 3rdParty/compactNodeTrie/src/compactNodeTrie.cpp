@@ -34,7 +34,7 @@
 #include <iostream>
 #include <stdint.h>
 
-using namespace strus;
+using namespace conotrie;
 
 void CompactNodeTrie::set( const char* key, const NodeData& data)
 {

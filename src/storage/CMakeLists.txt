@@ -40,17 +40,18 @@ set( libstrus_storage_source_files
 	storageDocument.cpp
 	storageTransaction.cpp
 	userAclMap.cpp
-	compactNodeTrie.cpp
 	extractKeyValueData.cpp
 )
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
-	"${PROJECT_SOURCE_DIR}/include" )
+	"${PROJECT_SOURCE_DIR}/include"
+	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include"  )
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
 	"${PROJECT_SOURCE_DIR}/utils"
-	"${PROJECT_SOURCE_DIR}/database_leveldb"  )
+	"${PROJECT_SOURCE_DIR}/database_leveldb"
+	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src"  )
 
 # ------------------------------
 # STORAGE LIBRARY
@@ -60,7 +61,7 @@ add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
 target_link_libraries( strus_storage_static strus_utils strus_private_utils )
 
 add_library(strus_storage SHARED libstrus_storage.cpp )
-target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_utils strus_database_leveldb)
+target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_utils strus_database_leveldb compactnodetrie_static )
 set_target_properties(
     strus_storage
     PROPERTIES

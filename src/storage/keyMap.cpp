@@ -39,7 +39,7 @@ Index KeyMap::lookUp( const std::string& name)
 
 Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 {
-	CompactNodeTrie::NodeData data;
+	conotrie::CompactNodeTrie::NodeData data;
 	if (m_globalmap && m_globalmap->get( name.c_str(), data))
 	{
 		isNew = false;
@@ -83,7 +83,7 @@ void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
 		DatabaseTransactionInterface* transaction)
 {
-	CompactNodeTrie::const_iterator mi = m_map.begin(), me = m_map.end();
+	conotrie::CompactNodeTrie::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
 		if (mi.data() > UnknownValueHandleStart)

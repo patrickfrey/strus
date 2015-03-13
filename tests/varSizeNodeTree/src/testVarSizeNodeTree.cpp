@@ -26,8 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "varSizeNodeTree.hpp"
-#include "varSizeNodeTree.cpp"
+#include "compactNodeTrie.hpp"
 #include "private/utils.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -78,16 +77,16 @@ int main( int argc, const char** argv)
 		unsigned int nofQueries;
 		try
 		{
-			nofInserts = utils::toint( argv[1]);
-			nofQueries = utils::toint( argv[2]);
+			nofInserts = strus::utils::toint( argv[1]);
+			nofQueries = strus::utils::toint( argv[2]);
 		}
 		catch (const std::exception& e)
 		{
 			throw std::runtime_error( std::string("bad values for arguments <nof inserts> <nof queries> (2 non negative integers expected): ") + e.what());
 		}
-		typedef std::map<std::string,strus::VarSizeNodeTree::NodeData> TestMap;
+		typedef std::map<std::string,conotrie::CompactNodeTrie::NodeData> TestMap;
 		TestMap testmap;
-		strus::VarSizeNodeTree origmap;
+		conotrie::CompactNodeTrie origmap;
 		std::vector<std::string> keyar;
 
 		std::size_t ii = 0;
@@ -142,8 +141,8 @@ int main( int argc, const char** argv)
 		for (ii=0; ii<nofQueries; ++ii)
 		{
 			unsigned int keyidx = RANDINT(0,nofInserts);
-			strus::VarSizeNodeTree::NodeData val;
-			if (!origmap.find( keyar[ keyidx].c_str(), val)
+			conotrie::CompactNodeTrie::NodeData val;
+			if (!origmap.get( keyar[ keyidx].c_str(), val)
 			||  val != keyidx+1)
 			{
 				throw std::runtime_error( "VARIABLE SIZE NODE LOOKUP FAILED");
@@ -157,14 +156,14 @@ int main( int argc, const char** argv)
 
 		for (; ti != te; ++ti)
 		{
-			strus::VarSizeNodeTree::NodeData val;
-			if (!origmap.find( ti->first.c_str(), val))
+			conotrie::CompactNodeTrie::NodeData val;
+			if (!origmap.get( ti->first.c_str(), val))
 			{
 				throw std::runtime_error( std::string( "inserted key '") + ti->first + "' disapeared in variable size node tree");
 			}
 		}
 
-		strus::VarSizeNodeTree::const_iterator
+		conotrie::CompactNodeTrie::const_iterator
 			oi = origmap.begin(), oe = origmap.end();
 		std::size_t oidx = 0;
 		for (; oi != oe; ++oi,++oidx)

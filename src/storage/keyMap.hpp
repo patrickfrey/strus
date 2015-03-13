@@ -53,7 +53,7 @@ public:
 	KeyMap( DatabaseClientInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
 			KeyAllocatorInterface* allocator_,
-			const CompactNodeTrie* globalmap_=0)
+			const conotrie::CompactNodeTrie* globalmap_=0)
 		:m_dbadapter(prefix_,database_)
 		,m_globalmap(globalmap_)
 		,m_unknownHandleCount(0)
@@ -89,8 +89,8 @@ private:
 
 private:
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
-	CompactNodeTrie m_map;
-	const CompactNodeTrie* m_globalmap;
+	conotrie::CompactNodeTrie m_map;
+	const conotrie::CompactNodeTrie* m_globalmap;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
 	KeyMapInv* m_invmap;

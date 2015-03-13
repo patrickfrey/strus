@@ -38,6 +38,7 @@ configure_file( "${PROJECT_SOURCE_DIR}/include/strus/versionStorage.hpp.in"  "${
 enable_testing()
 
 # Subdirectories:
+add_subdirectory( 3rdParty )
 add_subdirectory( src )
 add_subdirectory( tests )
   

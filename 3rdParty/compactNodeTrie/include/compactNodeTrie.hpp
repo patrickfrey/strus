@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_COMPACT_NODE_PREFIX_TRIE_HPP_INCLUDED
-#define _STRUS_LVDB_COMPACT_NODE_PREFIX_TRIE_HPP_INCLUDED
+#ifndef _COMPACT_NODE_TRIE_HPP_INCLUDED
+#define _COMPACT_NODE_TRIE_HPP_INCLUDED
 #include <cstdlib>
 #include <stdexcept>
 #include <utility>
@@ -36,7 +36,7 @@
 #include <iostream>
 #include <stdint.h>
 
-namespace strus {
+namespace conotrie {
 
 /// \class CompactNodeTrie
 /// \brief Implements a prefix trie that represents nodes in a compacted way. 
