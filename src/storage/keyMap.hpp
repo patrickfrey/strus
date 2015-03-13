@@ -31,7 +31,7 @@
 #include "strus/index.hpp"
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
-#include "compactNodePrefixTrie.hpp"
+#include "compactNodeTrie.hpp"
 #include <cstdlib>
 #include <string>
 #include <map>
@@ -53,7 +53,7 @@ public:
 	KeyMap( DatabaseClientInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
 			KeyAllocatorInterface* allocator_,
-			const CompactNodePrefixTrie* globalmap_=0)
+			const CompactNodeTrie* globalmap_=0)
 		:m_dbadapter(prefix_,database_)
 		,m_globalmap(globalmap_)
 		,m_unknownHandleCount(0)
@@ -89,8 +89,8 @@ private:
 
 private:
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
-	CompactNodePrefixTrie m_map;
-	const CompactNodePrefixTrie* m_globalmap;
+	CompactNodeTrie m_map;
+	const CompactNodeTrie* m_globalmap;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
 	KeyMapInv* m_invmap;

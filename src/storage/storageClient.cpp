@@ -178,7 +178,7 @@ Index StorageClient::getTermValue( const std::string& name) const
 {
 	if (m_termno_map)
 	{
-		CompactNodePrefixTrie::NodeData cached_termno;
+		CompactNodeTrie::NodeData cached_termno;
 		if (m_termno_map->get( name.c_str(), cached_termno)) return cached_termno;
 	}
 	return DatabaseAdapter_TermValue::Reader( m_database.get()).get( name);
@@ -579,7 +579,7 @@ MetaDataReaderInterface* StorageClient::createMetaDataReader() const
 void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	m_termno_map = new CompactNodePrefixTrie();
+	m_termno_map = new CompactNodeTrie();
 	try
 	{
 		unsigned char const* si = (const unsigned char*)termnomap_source;
@@ -597,7 +597,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 			if (*si == '\n') ++si;
 
 			// [2] Check, if already loaded:
-			CompactNodePrefixTrie::NodeData dupkey;
+			CompactNodeTrie::NodeData dupkey;
 			if (m_termno_map->get( name.c_str(), dupkey)) continue;
 
 			// [3] Check, if already defined in storage:

@@ -40,7 +40,7 @@ set( libstrus_storage_source_files
 	storageDocument.cpp
 	storageTransaction.cpp
 	userAclMap.cpp
-	compactNodePrefixTrie.cpp
+	compactNodeTrie.cpp
 	extractKeyValueData.cpp
 )
 

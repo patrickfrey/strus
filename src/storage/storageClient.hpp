@@ -36,7 +36,7 @@
 #include "private/utils.hpp"
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
-#include "compactNodePrefixTrie.hpp"
+#include "compactNodeTrie.hpp"
 
 namespace strus {
 
@@ -214,7 +214,7 @@ private:
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
-	CompactNodePrefixTrie* m_termno_map;				///< map of the most important (most frequent) terms, if specified
+	CompactNodeTrie* m_termno_map;				///< map of the most important (most frequent) terms, if specified
 
 	const StoragePeerInterface* m_storagePeer;		///< reference to interface to other peer storages
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache

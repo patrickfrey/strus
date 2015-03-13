@@ -38,7 +38,7 @@
 
 namespace strus {
 
-/// \class CompactNodePrefixTrie
+/// \class CompactNodeTrie
 /// \brief Implements a prefix trie that represents nodes in a compacted way. 
 ///	Unless other compact prefix trie implementations the compaction does not focus on the tail only.
 ///	It tries to minimize space by storing nodes with a distinct number of successors in different
@@ -50,7 +50,7 @@ namespace strus {
 ///	successor, that is in dictionary tries for european languages the far most frequent node
 ///	type, in only 32 bits (24 bit for the virtual node address of the successor and 8 bits for
 ///	the character. Values assigned to keys are stored in 32 bit integer number.
-class CompactNodePrefixTrie
+class CompactNodeTrie
 {
 public:
 	typedef uint32_t NodeData;	///< Value type of the node
@@ -59,7 +59,7 @@ public:
 
 public:
 	/// \brief Default constructor
-	CompactNodePrefixTrie()
+	CompactNodeTrie()
 		:m_rootaddr(0)
 	{
 		m_datablock.push_back(0);
@@ -89,7 +89,7 @@ public:
 		/// \brief Constructor
 		/// \param[in] tree_ the trie to iterate on 
 		/// \param[in] rootaddr the trie root node address of the trie
-		const_iterator( const CompactNodePrefixTrie* tree_, NodeAddress rootaddr);
+		const_iterator( const CompactNodeTrie* tree_, NodeAddress rootaddr);
 
 		/// \brief Copy constructor
 		/// \param[in] o the iterator to copy
@@ -145,7 +145,7 @@ public:
 			StackElement( const StackElement& o)
 				:m_addr(o.m_addr),m_itr(o.m_itr),m_chr(o.m_chr){}
 		};
-		const CompactNodePrefixTrie* m_tree;	///< trie visited
+		const CompactNodeTrie* m_tree;	///< trie visited
 		std::vector<StackElement> m_stack;	///< current state stack
 		std::string m_key;			///< key of the current node
 		NodeData m_data;			///< data of the current node
