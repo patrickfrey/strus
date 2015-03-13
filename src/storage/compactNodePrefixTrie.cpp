@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "varSizeNodeTree.hpp"
+#include "compactNodePrefixTrie.hpp"
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -36,7 +36,7 @@
 
 using namespace strus;
 
-void VarSizeNodeTree::set( const char* key, const NodeData& data)
+void CompactNodePrefixTrie::set( const char* key, const NodeData& data)
 {
 	if (!m_rootaddr)
 	{
@@ -104,7 +104,7 @@ void VarSizeNodeTree::set( const char* key, const NodeData& data)
 	}
 }
 
-bool VarSizeNodeTree::find( const char* key, NodeData& val) const
+bool CompactNodePrefixTrie::get( const char* key, NodeData& val) const
 {
 	NodeAddress addr = m_rootaddr;
 	if (!addr) return false;
@@ -133,7 +133,7 @@ bool VarSizeNodeTree::find( const char* key, NodeData& val) const
 	}
 }
 
-VarSizeNodeTree::const_iterator::const_iterator( const VarSizeNodeTree* tree_, NodeAddress rootaddr)
+CompactNodePrefixTrie::const_iterator::const_iterator( const CompactNodePrefixTrie* tree_, NodeAddress rootaddr)
 	:m_tree(tree_)
 {
 	m_stack.push_back( StackElement( rootaddr, 0));
@@ -149,13 +149,13 @@ VarSizeNodeTree::const_iterator::const_iterator( const VarSizeNodeTree* tree_, N
 	}
 }
 
-VarSizeNodeTree::const_iterator::const_iterator( const const_iterator& o)
+CompactNodePrefixTrie::const_iterator::const_iterator( const const_iterator& o)
 	:m_tree(o.m_tree)
 	,m_stack(o.m_stack)
 	,m_key(o.m_key)
 	,m_data(o.m_data){}
 
-void VarSizeNodeTree::const_iterator::extractData()
+void CompactNodePrefixTrie::const_iterator::extractData()
 {
 	std::vector<StackElement>::const_iterator
 		si = m_stack.begin(), se = m_stack.end();
@@ -167,7 +167,7 @@ void VarSizeNodeTree::const_iterator::extractData()
 	m_data = m_tree->m_datablock[ dataidx];
 }
 
-void VarSizeNodeTree::const_iterator::skipNode()
+void CompactNodePrefixTrie::const_iterator::skipNode()
 {
 	unsigned char lexem;
 	NodeAddress follow;
@@ -197,7 +197,7 @@ void VarSizeNodeTree::const_iterator::skipNode()
 	}
 }
 
-void VarSizeNodeTree::const_iterator::skip()
+void CompactNodePrefixTrie::const_iterator::skip()
 {
 	m_key.clear();
 	m_data = 0;
@@ -222,7 +222,7 @@ void VarSizeNodeTree::const_iterator::skip()
 	}
 }
 
-bool VarSizeNodeTree::const_iterator::isequal( const const_iterator& o) const
+bool CompactNodePrefixTrie::const_iterator::isequal( const const_iterator& o) const
 {
 	if (m_stack.size() != o.m_stack.size()) return false;
 	std::vector<StackElement>::const_iterator
@@ -237,7 +237,7 @@ bool VarSizeNodeTree::const_iterator::isequal( const const_iterator& o) const
 	return true;
 }
 
-void VarSizeNodeTree::const_iterator::printState( std::ostream& out) const
+void CompactNodePrefixTrie::const_iterator::printState( std::ostream& out) const
 {
 	out << "(" << m_key << "," << m_data << "):";
 	std::vector<StackElement>::const_iterator si = m_stack.begin(), se = m_stack.end();
@@ -252,7 +252,7 @@ void VarSizeNodeTree::const_iterator::printState( std::ostream& out) const
 	out << std::endl;
 }
 
-void VarSizeNodeTree::clear()
+void CompactNodePrefixTrie::clear()
 {
 	m_datablock.clear();
 	m_datablock.push_back( 0);
@@ -266,7 +266,7 @@ void VarSizeNodeTree::clear()
 	m_rootaddr = 0;
 }
 
-void VarSizeNodeTree::reset()
+void CompactNodePrefixTrie::reset()
 {
 	m_datablock.resize( 1);
 	//... address 0 is reserved for NULL
@@ -279,7 +279,7 @@ void VarSizeNodeTree::reset()
 	m_rootaddr = 0;
 }
 
-VarSizeNodeTree::NodeAddress VarSizeNodeTree::successorNodeAddress( const NodeAddress& addr, unsigned char lexem) const
+CompactNodePrefixTrie::NodeAddress CompactNodePrefixTrie::successorNodeAddress( const NodeAddress& addr, unsigned char lexem) const
 {
 	NodeClass::Id classid = nodeClassId(addr);
 	NodeIndex idx = nodeIndex( addr);
@@ -303,7 +303,7 @@ VarSizeNodeTree::NodeAddress VarSizeNodeTree::successorNodeAddress( const NodeAd
 	throw std::logic_error("called successor node address on unknown block type");
 }
 
-bool VarSizeNodeTree::addNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow)
+bool CompactNodePrefixTrie::addNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow)
 {
 	NodeClass::Id classid = nodeClassId( addr);
 	NodeIndex idx = nodeIndex( addr);
@@ -327,7 +327,7 @@ bool VarSizeNodeTree::addNode( const NodeAddress& addr, unsigned char lexem, con
 	throw std::logic_error("called add node on unknown block type");
 }
 
-bool VarSizeNodeTree::replaceNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow)
+bool CompactNodePrefixTrie::replaceNode( const NodeAddress& addr, unsigned char lexem, const NodeAddress& follow)
 {
 	NodeClass::Id classid = nodeClassId( addr);
 	NodeIndex idx = nodeIndex( addr);
@@ -351,7 +351,7 @@ bool VarSizeNodeTree::replaceNode( const NodeAddress& addr, unsigned char lexem,
 	throw std::logic_error("called replace node on unknown block type");
 }
 
-void VarSizeNodeTree::patchNodeAddress( const NodeAddress& addr, unsigned char chr,
+void CompactNodePrefixTrie::patchNodeAddress( const NodeAddress& addr, unsigned char chr,
 					const NodeAddress& oldaddr,
 					const NodeAddress& newaddr)
 {
@@ -383,7 +383,7 @@ void VarSizeNodeTree::patchNodeAddress( const NodeAddress& addr, unsigned char c
 	throw std::logic_error("called patch node address on unknown block type");
 }
 
-void VarSizeNodeTree::addNodeExpand( const NodeAddress& parentaddr,
+void CompactNodePrefixTrie::addNodeExpand( const NodeAddress& parentaddr,
 					unsigned char parentchr, NodeAddress& addr,
 					unsigned char lexem, const NodeAddress& followaddr)
 {
@@ -402,7 +402,7 @@ void VarSizeNodeTree::addNodeExpand( const NodeAddress& parentaddr,
 	}
 }
 
-void VarSizeNodeTree::unlinkNode( const NodeAddress& addr, unsigned char lexem)
+void CompactNodePrefixTrie::unlinkNode( const NodeAddress& addr, unsigned char lexem)
 {
 	NodeClass::Id classid = nodeClassId( addr);
 	NodeIndex idx = nodeIndex( addr);
@@ -431,7 +431,7 @@ void VarSizeNodeTree::unlinkNode( const NodeAddress& addr, unsigned char lexem)
 	}
 }
 
-VarSizeNodeTree::NodeAddress VarSizeNodeTree::expandNode( const NodeAddress& addr)
+CompactNodePrefixTrie::NodeAddress CompactNodePrefixTrie::expandNode( const NodeAddress& addr)
 {
 	switch (nodeClassId( addr))
 	{
@@ -458,7 +458,7 @@ VarSizeNodeTree::NodeAddress VarSizeNodeTree::expandNode( const NodeAddress& add
 	throw std::logic_error("called expand block on unknown block type");
 }
 
-void VarSizeNodeTree::addTail( const NodeAddress& parentaddr, unsigned char parentchr,
+void CompactNodePrefixTrie::addTail( const NodeAddress& parentaddr, unsigned char parentchr,
 				NodeAddress& addr, const unsigned char* tail, 
 				const NodeData& data)
 {
@@ -525,7 +525,7 @@ void VarSizeNodeTree::addTail( const NodeAddress& parentaddr, unsigned char pare
 	}
 }
 
-bool VarSizeNodeTree::getFollowNode( const NodeAddress& addr, std::size_t itridx, unsigned char& lexem, NodeAddress& follow) const
+bool CompactNodePrefixTrie::getFollowNode( const NodeAddress& addr, std::size_t itridx, unsigned char& lexem, NodeAddress& follow) const
 {
 	NodeIndex addridx = nodeIndex( addr);
 
@@ -561,7 +561,7 @@ bool VarSizeNodeTree::getFollowNode( const NodeAddress& addr, std::size_t itridx
 	throw std::logic_error("called get follow node on unknown block type");
 }
 
-bool VarSizeNodeTree::getFirstNode( const NodeAddress& addr, std::size_t& itridx) const
+bool CompactNodePrefixTrie::getFirstNode( const NodeAddress& addr, std::size_t& itridx) const
 {
 	NodeIndex addridx = nodeIndex( addr);
 	itridx = 0;
@@ -577,7 +577,7 @@ bool VarSizeNodeTree::getFirstNode( const NodeAddress& addr, std::size_t& itridx
 	return true;
 }
 
-bool VarSizeNodeTree::getNextNode( const NodeAddress& addr, std::size_t& itridx) const
+bool CompactNodePrefixTrie::getNextNode( const NodeAddress& addr, std::size_t& itridx) const
 {
 	NodeIndex addridx = nodeIndex( addr);
 
@@ -607,7 +607,7 @@ bool VarSizeNodeTree::getNextNode( const NodeAddress& addr, std::size_t& itridx)
 	throw std::logic_error("called get next node on unknown block type");
 }
 
-void VarSizeNodeTree::printNode( std::ostream& out, NodeAddress addr, const std::string& indent)
+void CompactNodePrefixTrie::printNode( std::ostream& out, NodeAddress addr, const std::string& indent)
 {
 	std::size_t itridx = 0;
 	unsigned char lexem;

@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_VARIABLE_SIZE_NODE_TREE_HPP_INCLUDED
-#define _STRUS_LVDB_VARIABLE_SIZE_NODE_TREE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_COMPACT_NODE_PREFIX_TRIE_HPP_INCLUDED
+#define _STRUS_LVDB_COMPACT_NODE_PREFIX_TRIE_HPP_INCLUDED
 #include <cstdlib>
 #include <stdexcept>
 #include <utility>
@@ -38,85 +38,145 @@
 
 namespace strus {
 
-class VarSizeNodeTree
+/// \class CompactNodePrefixTrie
+/// \brief Implements a prefix trie that represents nodes in a compacted way. 
+///	Unless other compact prefix trie implementations the compaction does not focus on the tail only.
+///	It tries to minimize space by storing nodes with a distinct number of successors in different
+///	structures. For each of these nodes types there exist a block type that stores the nodes
+///	as array of equally dimensioned structures. A node in the trie is addressed with a virtual
+///	24 bit address that uses the most significant 3 bits for the node type, that identifies the
+///	block where the node is stored. The least significant 21 bits are used for the offset of
+///	the node in the block. This representation makes it possible to store nodes with only one
+///	successor, that is in dictionary tries for european languages the far most frequent node
+///	type, in only 32 bits (24 bit for the virtual node address of the successor and 8 bits for
+///	the character. Values assigned to keys are stored in 32 bit integer number.
+class CompactNodePrefixTrie
 {
 public:
-	typedef uint32_t NodeData;
-	typedef uint32_t NodeAddress;
-	typedef uint32_t NodeIndex;
+	typedef uint32_t NodeData;	///< Value type of the node
+	typedef uint32_t NodeAddress;	///< Virtual address of a node
+	typedef uint32_t NodeIndex;	///< Index of the node in its block
 
 public:
-	VarSizeNodeTree()
+	/// \brief Default constructor
+	CompactNodePrefixTrie()
 		:m_rootaddr(0)
 	{
 		m_datablock.push_back(0);
 		//... address 0 is reserved for NULL
 	}
 
-	void set( const char* key, const NodeData& data);
+	/// \brief Insert a new unique entry with key and value
+	/// \param[in] key the key of the entry (NUL terminated)
+	/// \param[in] val the value assigned to the key
+	void set( const char* key, const NodeData& val);
 
-	bool find( const char* key, NodeData& val) const;
+	/// \brief Get the value of a new unique entry
+	/// \param[in] key the key of the entry (NUL terminated)
+	/// \param[in] val the value assigned to the key
+	/// \return true, if the entry was found, false else
+	bool get( const char* key, NodeData& val) const;
 
+	/// \class const_iterator
+	/// \brief Read only iterator on the trie
 	class const_iterator
 	{
 	public:
+		/// \brief Default constructor
 		const_iterator()
 			:m_tree(0)
 		{}
-		const_iterator( const VarSizeNodeTree* tree_, NodeAddress rootaddr);
+		/// \brief Constructor
+		/// \param[in] tree_ the trie to iterate on 
+		/// \param[in] rootaddr the trie root node address of the trie
+		const_iterator( const CompactNodePrefixTrie* tree_, NodeAddress rootaddr);
 
+		/// \brief Copy constructor
+		/// \param[in] o the iterator to copy
 		const_iterator( const const_iterator& o);
 
+		/// \brief Get the key of the current entry
+		/// \return the key
 		const std::string& key() const				{return m_key;}
+		/// \brief Get the value of the current entry
+		/// \return the value
 		const NodeData& data() const				{return m_data;}
 
+		/// \brief Equality comparison
+		/// \param[in] o the iterator to compare
+		/// \return true if the iterators point to the same node
 		bool operator==( const const_iterator& o) const		{return isequal(o);}
+		/// \brief Inequality comparison
+		/// \param[in] o the iterator to compare
+		/// \return true if the iterators point to distinct nodes
 		bool operator!=( const const_iterator& o) const		{return !isequal(o);}
 
+		/// \brief Preincrement operator
 		const_iterator& operator++()				{skip(); return *this;}
+		/// \brief Postincrement operator
 		const_iterator operator++(int)				{const_iterator rt(*this); skip(); return rt;}
 
 	private:
-		void extractData();
-		void skipNode();
-		void skip();
+		void extractData();			///< initialize the data of the current node
+		void skipNode();			///< skip to the next current node
+		void skip();				///< skip to the next trie value stored
 
 	private:
+		/// \brief Equality comparison
+		/// \param[in] o the iterator to compare
+		/// \return true if the iterators point to the same node
 		bool isequal( const const_iterator& o) const;
+		/// \brief Print the current state (tracing for debugging purposes)
+		/// \param[out] out where to print the current state to
 		void printState( std::ostream& out) const;
 
+		/// \struct StackElement
+		/// \brief Stack element for storing the visiting state of the ancessor nodes visited
 		struct StackElement
 		{
-			NodeAddress m_addr;
-			std::size_t m_itr;
-			char m_chr;
+			NodeAddress m_addr;	///< virtual address of the parent of the current node
+			std::size_t m_itr;	///< Index of the current node as child of its parent
+			char m_chr;		///< character of the node (if defined)
 
+			/// \brief Constructor
 			StackElement( NodeAddress addr_, std::size_t itr_, char chr_=0)
 				:m_addr(addr_),m_itr(itr_),m_chr(chr_){}
+			/// \brief Copy constructor
 			StackElement( const StackElement& o)
 				:m_addr(o.m_addr),m_itr(o.m_itr),m_chr(o.m_chr){}
 		};
-		const VarSizeNodeTree* m_tree;
-		std::vector<StackElement> m_stack;
-		std::string m_key;
-		NodeData m_data;
+		const CompactNodePrefixTrie* m_tree;	///< trie visited
+		std::vector<StackElement> m_stack;	///< current state stack
+		std::string m_key;			///< key of the current node
+		NodeData m_data;			///< data of the current node
 	};
 
+	/// \brief Get the iterator pointing to the first element stored in the trie
+	/// \return the iterator
 	const_iterator begin() const
 	{
 		return const_iterator( this, m_rootaddr);
 	}
+	/// \brief Get the iterator identifying the end of the trie
+	/// \return the iterator
 	const_iterator end() const
 	{
 		return const_iterator();
 	}
 
+	/// \brief Print the trie in readable for for tracing and debugging purposes
+	/// \param[out] out where to print the trie to
 	void print( std::ostream& out)
 	{
 		if (m_rootaddr) printNode( out, m_rootaddr, std::string());
 	}
 
+	/// \brief Clear the contents of the trie, releasing all memory allocated
+	/// \remark This clearing function is suitable for cases where the trie is really destroyed
 	void clear();
+
+	/// \brief Clear the contents of the trie without releasing any memory allocated
+	/// \remark This clearing function is suitable for cases where the trie is refilled again with content of similar dimension
 	void reset();
 
 private:

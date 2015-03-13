@@ -39,8 +39,8 @@ Index KeyMap::lookUp( const std::string& name)
 
 Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 {
-	VarSizeNodeTree::NodeData data;
-	if (m_globalmap && m_globalmap->find( name.c_str(), data))
+	CompactNodePrefixTrie::NodeData data;
+	if (m_globalmap && m_globalmap->get( name.c_str(), data))
 	{
 		isNew = false;
 		if (m_invmap)
@@ -49,7 +49,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		}
 		return data;
 	}
-	if (m_map.find( name.c_str(), data))
+	if (m_map.get( name.c_str(), data))
 	{
 		isNew = false;
 		return data;
@@ -83,7 +83,7 @@ void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
 		DatabaseTransactionInterface* transaction)
 {
-	VarSizeNodeTree::const_iterator mi = m_map.begin(), me = m_map.end();
+	CompactNodePrefixTrie::const_iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
 		if (mi.data() > UnknownValueHandleStart)

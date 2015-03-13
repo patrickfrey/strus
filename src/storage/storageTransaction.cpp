@@ -47,7 +47,7 @@ StorageTransaction::StorageTransaction(
 		DatabaseClientInterface* database_,
 		const StoragePeerInterface* storagePeer_,
 		const MetaDataDescription* metadescr_,
-		const VarSizeNodeTree* termnomap_)
+		const CompactNodePrefixTrie* termnomap_)
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_storagePeer(storagePeer_)

@@ -70,7 +70,7 @@ public:
 		DatabaseClientInterface* database_,
 		const StoragePeerInterface* storagePeer_,
 		const MetaDataDescription* metadescr_,
-		const VarSizeNodeTree* termnomap_);
+		const CompactNodePrefixTrie* termnomap_);
 
 	~StorageTransaction();
 
