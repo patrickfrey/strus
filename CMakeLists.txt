@@ -14,6 +14,8 @@ set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/strus" )
 set( CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE )
 endif()
 
+include(cmake/dist.cmake)
+
 include(cmake/LinuxDistribution.cmake)
 
 set_property(GLOBAL PROPERTY rule_launch_compile ccache)
