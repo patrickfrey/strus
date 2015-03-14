@@ -1,5 +1,4 @@
-adapt inserter to stream processing with multipart documents
+implement chaining of normalizers in analyzer program and bindings
+new normalizer lc,uc (lowercase uppercase) and rename wordmap to dictmap
 join operator for subsequence that matches the longest subsequence (summarizer)
-possibility to chain normalizers
-solve resolving of with file names as resources
 template project derived from strusWikipediaSearch
