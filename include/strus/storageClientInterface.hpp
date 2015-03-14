@@ -53,6 +53,9 @@ class StoragePeerInterface;
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
+/// \brief Forward declaration
+class DocnoRangeAllocatorInterface;
+
 
 /// \brief Interface of a strus IR storage
 class StorageClientInterface
@@ -127,10 +130,9 @@ public:
 	/// \return the interface to access document attributes to be disposed with delete by the caller
 	virtual AttributeReaderInterface* createAttributeReader() const=0;
 
-	/// \brief Allocate a range of document numbers to be used for documents known to be new in transactions
-	/// \param[in] nofDocuments number of document numbers to allocate
-	/// \return the first document number of the allocated range
-	virtual Index allocDocnoRange( std::size_t nofDocuments)=0;
+	/// \brief Create an interface to allocate document numbers in ranges
+	/// \return the interface to allocate document numbers from this storage
+	virtual DocnoRangeAllocatorInterface* createDocnoRangeAllocator()=0;
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface to be disposed with delete by the caller

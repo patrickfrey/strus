@@ -31,7 +31,6 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include "strus/databaseCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/utils.hpp"
 #include "metaDataBlockCache.hpp"
@@ -64,6 +63,8 @@ class DocumentFrequencyCache;
 class PeerStorageTransactionInterface;
 /// \brief Forward declaration
 class StoragePeerInterface;
+/// \brief Forward declaration
+class DocnoRangeAllocatorInterface;
 
 /// \brief Implementation of the StorageClientInterface
 class StorageClient
@@ -98,14 +99,16 @@ public:
 				const std::string& docid,
 				const std::string& logfilename) const;
 
-	virtual Index allocDocnoRange( std::size_t nofDocuments);
+	virtual DocnoRangeAllocatorInterface* createDocnoRangeAllocator();
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
 	virtual GlobalCounter globalNofDocumentsInserted() const;
+
 	virtual Index localNofDocumentsInserted() const;
+
 	virtual GlobalCounter globalDocumentFrequency(
 			const std::string& type,
 			const std::string& term) const;
@@ -159,6 +162,9 @@ public:/*StorageTransaction*/
 	Index allocDocnoImm( const std::string& name, bool& isNew); ///< immediate allocation of a doc number
 	Index allocUsernoImm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
 	Index allocAttribnoImm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
+
+	Index allocDocnoRange( std::size_t nofDocuments);
+	void deallocDocnoRange( const Index& docno, const Index& size);
 
 	friend class TransactionLock;
 	class TransactionLock

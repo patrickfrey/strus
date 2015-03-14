@@ -42,6 +42,8 @@
 #include "storageDocumentChecker.hpp"
 #include "peerStorageTransaction.hpp"
 #include "documentFrequencyCache.hpp"
+#include "metaDataBlockCache.hpp"
+#include "docnoRangeAllocator.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseAdapter.hpp"
@@ -295,6 +297,11 @@ StorageDocumentInterface*
 	return new StorageDocumentChecker( this, m_database.get(), docid, logfilename);
 }
 
+DocnoRangeAllocatorInterface* StorageClient::createDocnoRangeAllocator()
+{
+	return new DocnoRangeAllocator( this);
+}
+
 Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 {
 	utils::ScopedLock lock( m_mutex_docno);
@@ -302,6 +309,15 @@ Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 	m_next_docno += nofDocuments;
 	if (m_next_docno <= rt) throw std::runtime_error( "docno allocation error");
 	return rt;
+}
+
+void StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
+{
+	utils::ScopedLock lock( m_mutex_docno);
+	if (m_next_docno == docno + size)
+	{
+		m_next_docno -= size;
+	}
 }
 
 void StorageClient::declareNofDocumentsInserted( int incr)
