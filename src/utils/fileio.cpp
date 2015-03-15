@@ -28,6 +28,7 @@
 */
 #include "strus/private/fileio.hpp"
 #include "private/dll_tags.hpp"
+#include "fileio_sys.hpp"
 #include <cstdio>
 #include <cerrno>
 #include <dirent.h>
@@ -191,7 +192,7 @@ DLL_PUBLIC bool strus::isDir( const std::string& path)
 
 DLL_PUBLIC char strus::dirSeparator()
 {
-	return '/';
+	return STRUS_FILEIO_DIRSEP;
 }
 
 

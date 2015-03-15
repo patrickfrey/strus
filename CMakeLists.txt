@@ -35,6 +35,13 @@ set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
 set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON )
 configure_file( "${PROJECT_SOURCE_DIR}/include/strus/versionStorage.hpp.in"  "${PROJECT_SOURCE_DIR}/include/strus/versionStorage.hpp"  @ONLY )
 
+IF( WIN32 )
+set( STRUS_FILEIO_DIRSEP  '\\' )
+ELSE( WIN32 )
+set( STRUS_FILEIO_DIRSEP  '/' )
+ENDIF( WIN32 )
+configure_file( "${PROJECT_SOURCE_DIR}/src/utils/fileio_sys.hpp.in"  "${PROJECT_SOURCE_DIR}/src/utils/fileio_sys.hpp"  @ONLY )
+
 enable_testing()
 
 # Subdirectories:
