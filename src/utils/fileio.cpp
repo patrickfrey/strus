@@ -195,4 +195,20 @@ DLL_PUBLIC char strus::dirSeparator()
 	return STRUS_FILEIO_DIRSEP;
 }
 
+DLL_PUBLIC std::string strus::getParentPath( const std::string& path)
+{
+	const char* ri = path.c_str();
+	char const* re = path.c_str()+path.size();
+	for (; re != ri && *(re-1) == STRUS_FILEIO_DIRSEP; --re){}
+	for (; re != ri && *(re-1) != STRUS_FILEIO_DIRSEP; --re){}
+	if (re == ri)
+	{
+		return std::string();
+	}
+	else
+	{
+		for (; re != ri && *(re-1) == STRUS_FILEIO_DIRSEP; --re){}
+		return std::string( ri, re-ri-1);
+	}
+}
 

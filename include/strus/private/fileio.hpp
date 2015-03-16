@@ -68,6 +68,11 @@ bool isFile( const std::string& path);
 /// \return true, if yes
 bool isDir( const std::string& path);
 
+/// \brief Get the parent (containing) path of a file or directory
+/// \param[in] path file system path to get the containing path
+/// \return the containing path
+std::string getParentPath( const std::string& path);
+
 /// \brief Get the OS path element separator
 /// \return the separator
 char dirSeparator();
