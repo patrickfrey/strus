@@ -3,48 +3,56 @@
 
 if(NOT WIN32)
 # use newer systemd stuff for platforms already supporting it
-EXECUTE_PROCESS(
-  COMMAND cat /etc/os-release
-  COMMAND grep ^ID=
-  COMMAND awk -F= "{ print $2 }"
-  COMMAND tr "\n" " "
-  COMMAND sed "s/ //"
-  COMMAND sed "s/^\"//"
-  COMMAND sed "s/\"$//"
-  OUTPUT_VARIABLE SYSTEMD_ID
-  RESULT_VARIABLE SYSTEMD_ID_RESULT
+if(EXISTS "/etc/os-release")
+  EXECUTE_PROCESS(
+    COMMAND cat /etc/os-release
+    COMMAND grep ^ID=
+    COMMAND awk -F= "{ print $2 }"
+    COMMAND tr "\n" " "
+    COMMAND sed "s/ //"
+    COMMAND sed "s/^\"//"
+    COMMAND sed "s/\"$//"
+    OUTPUT_VARIABLE SYSTEMD_ID
+    RESULT_VARIABLE SYSTEMD_ID_RESULT
 )
-EXECUTE_PROCESS(
-  COMMAND cat /etc/os-release
-  COMMAND grep ^VERSION_ID=
-  COMMAND awk -F= "{ print $2 }"
-  COMMAND tr "\n" " "
-  COMMAND sed "s/ //"
-  COMMAND sed "s/^\"//"
-  COMMAND sed "s/\"$//"
-  OUTPUT_VARIABLE SYSTEMD_VER
-  RESULT_VARIABLE SYSTEMD_VER_RESULT
+endif(EXISTS "/etc/os-release")
+if(EXISTS "/etc/os-release")
+  EXECUTE_PROCESS(
+    COMMAND cat /etc/os-release
+    COMMAND grep ^VERSION_ID=
+    COMMAND awk -F= "{ print $2 }"
+    COMMAND tr "\n" " "
+    COMMAND sed "s/ //"
+    COMMAND sed "s/^\"//"
+    COMMAND sed "s/\"$//"
+    OUTPUT_VARIABLE SYSTEMD_VER
+    RESULT_VARIABLE SYSTEMD_VER_RESULT
 )
+endif(EXISTS "/etc/os-release")
 
 # use the LSB stuff if possible as fallback
-EXECUTE_PROCESS(
-  COMMAND cat /etc/lsb-release
-  COMMAND grep DISTRIB_ID
-  COMMAND awk -F= "{ print $2 }"
-  COMMAND tr "\n" " "
-  COMMAND sed "s/ //"
-  OUTPUT_VARIABLE LSB_ID
-  RESULT_VARIABLE LSB_ID_RESULT
+if(EXISTS "/etc/lsb-release")
+  EXECUTE_PROCESS(
+    COMMAND cat /etc/lsb-release
+    COMMAND grep DISTRIB_ID
+    COMMAND awk -F= "{ print $2 }"
+    COMMAND tr "\n" " "
+    COMMAND sed "s/ //"
+    OUTPUT_VARIABLE LSB_ID
+    RESULT_VARIABLE LSB_ID_RESULT
 )
-EXECUTE_PROCESS(
-  COMMAND cat /etc/lsb-release
-  COMMAND grep DISTRIB_RELEASE
-  COMMAND awk -F= "{ print $2 }"
-  COMMAND tr "\n" " "
-  COMMAND sed "s/ //"
-  OUTPUT_VARIABLE LSB_VER
-  RESULT_VARIABLE LSB_VER_RESULT
+endif(EXISTS "/etc/lsb-release")
+if(EXISTS "/etc/lsb-release")
+  EXECUTE_PROCESS(
+    COMMAND cat /etc/lsb-release
+    COMMAND grep DISTRIB_RELEASE
+    COMMAND awk -F= "{ print $2 }"
+    COMMAND tr "\n" " "
+    COMMAND sed "s/ //"
+    OUTPUT_VARIABLE LSB_VER
+    RESULT_VARIABLE LSB_VER_RESULT
 )
+endif(EXISTS "/etc/lsb-release")
 
 # TODO: use distro-specific files like /etc/redhat-release
 
