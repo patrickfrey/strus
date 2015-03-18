@@ -60,18 +60,20 @@ void ForwardIndexMap::closeCurblocks()
 	}
 }
 
-void ForwardIndexMap::closeForwardIndexDocument( const Index& docno)
+void ForwardIndexMap::openForwardIndexDocument( const Index& docno)
 {
 	closeCurblocks();
-	if (m_docno && m_docno != docno)
-	{
-		throw std::runtime_error( "forward index operations not grouped by document");
-	}
+	m_docno = docno;
+}
+
+void ForwardIndexMap::closeForwardIndexDocument()
+{
+	closeCurblocks();
+	m_docno = 0;
 }
 
 void ForwardIndexMap::defineForwardIndexTerm(
 	const Index& typeno,
-	const Index& docno,
 	const Index& pos,
 	const std::string& termstring)
 {
@@ -79,11 +81,6 @@ void ForwardIndexMap::defineForwardIndexTerm(
 	{
 		m_maxtype = typeno;
 	}
-	if (m_docno != 0 && m_docno != docno)
-	{
-		closeCurblocks();
-	}
-	m_docno = docno;
 
 	CurblockMap::iterator bi = m_curblockmap.find( typeno);
 	if (bi == m_curblockmap.end())

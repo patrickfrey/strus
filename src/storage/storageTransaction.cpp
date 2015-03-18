@@ -166,19 +166,24 @@ void StorageTransaction::definePosinfoPosting(
 		termtype, termvalue, docno, posinfo);
 }
 
+void StorageTransaction::openForwardIndexDocument( const Index& docno)
+{
+	m_forwardIndexMap.openForwardIndexDocument( docno);
+}
+
 void StorageTransaction::defineForwardIndexTerm(
 	const Index& typeno,
-	const Index& docno,
 	const Index& pos,
 	const std::string& termstring)
 {
-	m_forwardIndexMap.defineForwardIndexTerm( typeno, docno, pos, termstring);
+	m_forwardIndexMap.defineForwardIndexTerm( typeno, pos, termstring);
 }
 
-void StorageTransaction::closeForwardIndexDocument( const Index& docno)
+void StorageTransaction::closeForwardIndexDocument()
 {
-	m_forwardIndexMap.closeForwardIndexDocument( docno);
+	m_forwardIndexMap.closeForwardIndexDocument();
 }
+
 
 
 void StorageTransaction::deleteIndex( const Index& docno)

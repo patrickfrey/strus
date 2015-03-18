@@ -48,13 +48,14 @@ public:
 	explicit ForwardIndexMap( DatabaseClientInterface* database_)
 		:m_database(database_),m_docno(0),m_maxtype(0){}
 
+	void openForwardIndexDocument( const Index& docno);
+
 	void defineForwardIndexTerm(
 		const Index& typeno,
-		const Index& docno,
 		const Index& pos,
 		const std::string& termstring);
 
-	void closeForwardIndexDocument( const Index& docno);
+	void closeForwardIndexDocument();
 
 	void deleteIndex( const Index& docno);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);

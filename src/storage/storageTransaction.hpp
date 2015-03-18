@@ -116,11 +116,12 @@ public:/*Document*/
 		const Index& termtype, const Index& termvalue,
 		const Index& docno, const std::vector<Index>& posinfo);
 
-	void defineForwardIndexTerm(
-		const Index& typeno, const Index& docno,
-		const Index& pos, const std::string& termstring);
+	void openForwardIndexDocument( const Index& docno);
 
-	void closeForwardIndexDocument( const Index& docno);
+	void defineForwardIndexTerm(
+		const Index& typeno, const Index& pos, const std::string& termstring);
+
+	void closeForwardIndexDocument();
 
 private:
 	StorageClient* m_storage;					///< Storage to call refresh after commit or rollback

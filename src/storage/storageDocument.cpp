@@ -135,14 +135,15 @@ void StorageDocument::done()
 		m_transaction->definePosinfoPosting(
 				ti->first.first, ti->first.second, m_docno, pos);
 	}
+	m_transaction->openForwardIndexDocument( m_docno);
 	InvMap::const_iterator ri = m_invs.begin(), re = m_invs.end();
 	for (; ri != re; ++ri)
 	{
 		//[2.3.2] Insert forward index
 		m_transaction->defineForwardIndexTerm(
-			ri->first.typeno, m_docno, ri->first.pos, ri->second);
+			ri->first.typeno, ri->first.pos, ri->second);
 	}
-	m_transaction->closeForwardIndexDocument( m_docno);
+	m_transaction->closeForwardIndexDocument();
 
 	//[2.4] Insert new document access rights:
 	std::vector<Index>::const_iterator ui = m_userlist.begin(), ue = m_userlist.end();
