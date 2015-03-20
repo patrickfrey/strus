@@ -1,4 +1,3 @@
-implement chaining of normalizers in analyzer program and bindings
-new normalizer lc,uc (lowercase uppercase) and rename wordmap to dictmap
+segmenter with other encodings than UTF-8
 join operator for subsequence that matches the longest subsequence (summarizer)
 template project derived from strusWikipediaSearch
