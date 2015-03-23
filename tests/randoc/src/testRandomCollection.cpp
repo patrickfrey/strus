@@ -59,7 +59,7 @@
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 uint32_t uint32_hash( uint32_t a)
 {
@@ -1021,7 +1021,7 @@ int main( int argc, const char* argv[])
 						return -1;
 					}
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cerr << "random query operation " << tostring( collection) << " " << matches.size() << " matches" << std::endl;
+					std::cerr << "random query operation " << qi->tostring( collection) << " " << result_matches.size() << " matches" << std::endl;
 #endif
 					if (++rcnt >= 100)
 					{
