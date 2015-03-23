@@ -921,119 +921,120 @@ int main( int argc, const char* argv[])
 			database( dbi->createClient( config));
 
 		sti->createStorage( config, database.get());
-
-		std::auto_ptr<strus::StorageClientInterface>
-			storage( sti->createClient( "", database.get()));
-		database.release();
-
-		RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
-
-		strus::Index totNofOccurrencies = 0;
-		strus::Index totNofDocuments = 0;
-		strus::Index totTermStringSize = 0;
-		unsigned int insertIntervallSize = 1000;
-		unsigned int insertIntervallCnt = 0;
-
-		typedef std::auto_ptr<strus::StorageTransactionInterface> StorageTransaction;
-		StorageTransaction transaction( storage->createTransaction());
-
-		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
-		for (; di != de; ++di,++totNofDocuments)
 		{
-			typedef std::auto_ptr<strus::StorageDocumentInterface> StorageDocument;
-
-			StorageDocument doc( transaction->createDocument( di->docid));
-			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
-
-			for (; oi != oe; ++oi,++totNofOccurrencies)
+			std::auto_ptr<strus::StorageClientInterface>
+				storage( sti->createClient( "", database.get()));
+			database.release();
+	
+			RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
+	
+			strus::Index totNofOccurrencies = 0;
+			strus::Index totNofDocuments = 0;
+			strus::Index totTermStringSize = 0;
+			unsigned int insertIntervallSize = 1000;
+			unsigned int insertIntervallCnt = 0;
+	
+			typedef std::auto_ptr<strus::StorageTransactionInterface> StorageTransaction;
+			StorageTransaction transaction( storage->createTransaction());
+	
+			std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
+			for (; di != de; ++di,++totNofDocuments)
 			{
-				const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
-				doc->addForwardIndexTerm( term.type, term.value, oi->pos);
-				doc->addSearchIndexTerm( term.type, term.value, oi->pos);
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
-#endif
-				totTermStringSize += term.value.size();
-			}
-			doc->done();
-
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "inserted document '" << di->docid << "' size " << di->occurrencear.size() << std::endl;
-#endif
-			if (++insertIntervallCnt == insertIntervallSize)
-			{
-				insertIntervallCnt = 0;
-				std::cerr << "inserted " << (totNofDocuments+1) << " documents, " << totTermStringSize <<" bytes " << std::endl;
-			}
-		}
-		transaction->commit();
-
-		std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
-		std::auto_ptr<strus::QueryProcessorInterface> 
-			queryproc( strus::createQueryProcessor());
-
-		std::vector<RandomQuery> randomQueryAr;
-		if (collection.docar.size())
-		{
-			for (std::size_t qi=0; qi < nofQueries; ++qi)
-			{
-				randomQueryAr.push_back( RandomQuery( collection));
-			}
-		}
-		else if (nofQueries)
-		{
-			std::cerr << "ERROR cannot do random queries on empty collection" << std::endl;
-			nofQueries = 0;
-		}
-		if (nofQueries)
-		{
-			std::clock_t start;
-			unsigned int nofQueriesFailed = 0;
-			start = std::clock();
-			std::vector<std::vector<RandomQuery::Match> > result_matches;
-			std::vector<RandomQuery>::const_iterator qi = randomQueryAr.begin(), qe = randomQueryAr.end();
-			double arglen = 0.0;
-			for (; qi != qe; ++qi)
-			{
-				result_matches.push_back( std::vector<RandomQuery::Match>());
-				if (!qi->execute( result_matches.back(), storage.get(), queryproc.get(), collection))
+				typedef std::auto_ptr<strus::StorageDocumentInterface> StorageDocument;
+	
+				StorageDocument doc( transaction->createDocument( di->docid));
+				std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
+	
+				for (; oi != oe; ++oi,++totNofOccurrencies)
 				{
-					++nofQueriesFailed;
+					const TermCollection::Term& term = collection.termCollection.termar[ oi->term-1];
+					doc->addForwardIndexTerm( term.type, term.value, oi->pos);
+					doc->addSearchIndexTerm( term.type, term.value, oi->pos);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cerr << "term [" << oi->term << "] type '" << term.type << "' value '" << term.value << "' pos " << oi->pos << std::endl;
+#endif
+					totTermStringSize += term.value.size();
 				}
-				arglen += qi->arg.size();
-			}
-			double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-			std::cerr << "evaluated " << nofQueries << " random query operations in " << doubleToString(duration) << " seconds" << std::endl;
-			arglen /= nofQueries;
-			std::cerr << "average query size = " << doubleToString( arglen) << std::endl;
-
-			qi = randomQueryAr.begin(), qe = randomQueryAr.end();
-			std::vector<std::vector<RandomQuery::Match> >::const_iterator ri = result_matches.begin(), re = result_matches.end();
-			std::size_t rsum = 0;
-			std::size_t rcnt = 0;
-			for (; ri != re && qi != qe; ++qi,++ri)
-			{
-				arglen += qi->arg.size();
-				std::vector<RandomQuery::Match> expected_matches = qi->expectedMatches( collection);
-				if (!compareMatches( *ri, expected_matches, collection))
-				{
-					std::cerr << "ERROR random query operation failed: " << qi->tostring( collection) << std::endl;
-					return -1;
-				}
+				doc->done();
+	
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << "random query operation " << tostring( collection) << " " << matches.size() << " matches" << std::endl;
+				std::cerr << "inserted document '" << di->docid << "' size " << di->occurrencear.size() << std::endl;
 #endif
-				if (++rcnt >= 100)
+				if (++insertIntervallCnt == insertIntervallSize)
 				{
-					rsum += rcnt;
-					rcnt = 0;
-					std::cerr << ".";
+					insertIntervallCnt = 0;
+					std::cerr << "inserted " << (totNofDocuments+1) << " documents, " << totTermStringSize <<" bytes " << std::endl;
 				}
 			}
-			rsum += rcnt;
-			std::cerr << std::endl;
-			std::cerr << "verified " << rsum << " query results" << std::endl;
-			return (nofQueriesFailed?2:0);
+			transaction->commit();
+	
+			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
+			std::auto_ptr<strus::QueryProcessorInterface> 
+				queryproc( strus::createQueryProcessor());
+	
+			std::vector<RandomQuery> randomQueryAr;
+			if (collection.docar.size())
+			{
+				for (std::size_t qi=0; qi < nofQueries; ++qi)
+				{
+					randomQueryAr.push_back( RandomQuery( collection));
+				}
+			}
+			else if (nofQueries)
+			{
+				std::cerr << "ERROR cannot do random queries on empty collection" << std::endl;
+				nofQueries = 0;
+			}
+			if (nofQueries)
+			{
+				std::clock_t start;
+				unsigned int nofQueriesFailed = 0;
+				start = std::clock();
+				std::vector<std::vector<RandomQuery::Match> > result_matches;
+				std::vector<RandomQuery>::const_iterator qi = randomQueryAr.begin(), qe = randomQueryAr.end();
+				double arglen = 0.0;
+				for (; qi != qe; ++qi)
+				{
+					result_matches.push_back( std::vector<RandomQuery::Match>());
+					if (!qi->execute( result_matches.back(), storage.get(), queryproc.get(), collection))
+					{
+						++nofQueriesFailed;
+					}
+					arglen += qi->arg.size();
+				}
+				double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+				std::cerr << "evaluated " << nofQueries << " random query operations in " << doubleToString(duration) << " seconds" << std::endl;
+				arglen /= nofQueries;
+				std::cerr << "average query size = " << doubleToString( arglen) << std::endl;
+	
+				qi = randomQueryAr.begin(), qe = randomQueryAr.end();
+				std::vector<std::vector<RandomQuery::Match> >::const_iterator ri = result_matches.begin(), re = result_matches.end();
+				std::size_t rsum = 0;
+				std::size_t rcnt = 0;
+				for (; ri != re && qi != qe; ++qi,++ri)
+				{
+					arglen += qi->arg.size();
+					std::vector<RandomQuery::Match> expected_matches = qi->expectedMatches( collection);
+					if (!compareMatches( *ri, expected_matches, collection))
+					{
+						std::cerr << "ERROR random query operation failed: " << qi->tostring( collection) << std::endl;
+						return -1;
+					}
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cerr << "random query operation " << tostring( collection) << " " << matches.size() << " matches" << std::endl;
+#endif
+					if (++rcnt >= 100)
+					{
+						rsum += rcnt;
+						rcnt = 0;
+						std::cerr << ".";
+					}
+				}
+				rsum += rcnt;
+				std::cerr << std::endl;
+				std::cerr << "verified " << rsum << " query results" << std::endl;
+				return (nofQueriesFailed?2:0);
+			}
 		}
 		return 0;
 	}
