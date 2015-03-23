@@ -59,7 +59,7 @@
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 uint32_t uint32_hash( uint32_t a)
 {

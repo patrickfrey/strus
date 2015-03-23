@@ -63,7 +63,7 @@ using namespace strus;
 
 static inline unsigned char utf8charlen( unsigned char ch)
 {
-	unsigned char cl = 9-BitOperations::bitScanReverse( (uint32_t)(ch^0xFF));
+	unsigned char cl = 9-BitOperations::bitScanReverse( (uint8_t)(ch^0xFF));
 	return cl>2?(cl-1):1;
 }
 

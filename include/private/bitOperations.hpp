@@ -44,10 +44,52 @@ struct BitOperations
 		asm(" bsr %1, %0 \n" : "=r"(result) : "r"(idx) ); 
 		return result+1;
 #else
-		unsigned int ii = 1;
-		uint32_t mask = (1<<31);
-		for (;ii<=32 && 0==(idx & mask); ++ii,mask>>=1){}
-		return ii;
+		unsigned int xx = idx;
+		if (!xx) return 0;
+		int ee = 1;
+		if ((xx & 0xFFff0000))   { ee +=16; xx >>=16; }
+		if ((xx & 0x0000Ff00))   { ee += 8; xx >>= 8; }
+		if ((xx & 0x000000F0))   { ee += 4; xx >>= 4; }
+		if ((xx & 0x0000000C))   { ee += 2; xx >>= 2; }
+		if ((xx & 0x00000002))   { ee += 1; }
+		return ee;
+#endif
+	}
+
+	static inline unsigned int bitScanReverse( const uint16_t& idx)
+	{
+#ifdef __x86_64__
+		unsigned int result; 
+		if (!idx) return 0;
+		asm(" bsr %1, %0 \n" : "=r"(result) : "r"(idx) ); 
+		return result+1;
+#else
+		unsigned int xx = idx;
+		if (!xx) return 0;
+		int ee = 1;
+		if ((xx & 0xFf00))   { ee += 8; xx >>= 8; }
+		if ((xx & 0x00F0))   { ee += 4; xx >>= 4; }
+		if ((xx & 0x000C))   { ee += 2; xx >>= 2; }
+		if ((xx & 0x0002))   { ee += 1; }
+		return ee;
+#endif
+	}
+
+	static inline unsigned int bitScanReverse( const uint8_t& idx)
+	{
+#ifdef __x86_64__
+		unsigned int result; 
+		if (!idx) return 0;
+		asm(" bsr %1, %0 \n" : "=r"(result) : "r"(idx) ); 
+		return result+1;
+#else
+		unsigned int xx = idx;
+		if (!xx) return 0;
+		int ee = 1;
+		if ((xx & 0xF0))   { ee += 4; xx >>= 4; }
+		if ((xx & 0x0C))   { ee += 2; xx >>= 2; }
+		if ((xx & 0x02))   { ee += 1; }
+		return ee;
 #endif
 	}
 
