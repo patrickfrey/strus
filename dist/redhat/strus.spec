@@ -164,8 +164,19 @@ Requires: snappy
 Distribution: %{dist}
 %endif
 
+Packager: Patrick Frey <patrickfrey@project-strus.net>
+
 %description
 Library implementing the storage of a text search engine.
+
+%package devel
+Summary: strus development files
+Group: Development/Libraries/C++
+
+%description devel
+The libraries and header files used for development with strus.
+
+Requires: %{name} >= %{version}-%{release}
 
 %prep
 %setup
@@ -174,7 +185,7 @@ Library implementing the storage of a text search engine.
 
 mkdir build
 cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 make %{?_smp_mflags}
 
 %install
@@ -182,13 +193,37 @@ make %{?_smp_mflags}
 cd build
 make DESTDIR=$RPM_BUILD_ROOT install
 
+# TODO: avoid building this stuff in cmake. how?
+rm -rf $RPM_BUILD_ROOT%{_libdir}/debug
+rm -rf $RPM_BUILD_ROOT%{_includedir}/%{name}/lib/*.hpp
+rm -rf $RPM_BUILD_ROOT%{_prefix}/src/debug
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr( -, root, root )
-%dir %{_includedir}/%{name}
 %dir %{_libdir}/%{name}
+%{_libdir}/%{name}/libstrus_database_leveldb.so.0.0
+%{_libdir}/%{name}/libstrus_database_leveldb.so.0.0.1
+%{_libdir}/%{name}/libstrus_queryeval.so.0.0
+%{_libdir}/%{name}/libstrus_queryeval.so.0.0.1
+%{_libdir}/%{name}/libstrus_queryproc.so.0.0
+%{_libdir}/%{name}/libstrus_queryproc.so.0.0.1
+%{_libdir}/%{name}/libstrus_storage.so.0.0
+%{_libdir}/%{name}/libstrus_storage.so.0.0.1
+%{_libdir}/%{name}/libstrus_utils.so.0.0
+%{_libdir}/%{name}/libstrus_utils.so.0.0.1
+
+%files devel
+%{_libdir}/%{name}/libstrus_database_leveldb.so
+%{_libdir}/%{name}/libstrus_queryeval.so
+%{_libdir}/%{name}/libstrus_queryproc.so
+%{_libdir}/%{name}/libstrus_storage.so
+%{_libdir}/%{name}/libstrus_utils.so
+%dir %{_includedir}/%{name}
+%{_includedir}/%{name}/*.hpp
+%{_includedir}/%{name}/private/*.hpp
 
 %changelog
 * Fri Mar 20 2015 Patrick Frey <patrickfrey@project-strus.net> 0.0.1-0.1
