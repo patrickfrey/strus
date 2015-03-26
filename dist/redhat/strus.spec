@@ -120,7 +120,9 @@ BuildRoot: %{_tmppath}/%{name}-root
 # Build dependencies
 ###
 
+# OBS doesn't install the minimal set of build tools automatically
 BuildRequires: gcc
+BuildRequires: gcc-c++
 BuildRequires: cmake
 
 BuildRequires: boost-devel
