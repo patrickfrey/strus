@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_BLOCK_KEY_HPP_INCLUDED
 #define _STRUS_LVDB_BLOCK_KEY_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/private/internationalization.hpp"
 #include <stdexcept>
 
 #ifdef _MSC_VER
@@ -58,7 +59,7 @@ public:
 	{
 		if (idx1 <= 0 || idx2 <= 0)
 		{
-			throw std::logic_error("using illegal block key");
+			throw strus::logic_error( _TXT( "using illegal block key"));
 		}
 		m_index = idx1;
 		m_index <<= 32;
@@ -68,7 +69,7 @@ public:
 	{
 		if (idx <= 0)
 		{
-			throw std::logic_error("using illegal block key");
+			throw strus::logic_error( _TXT( "using illegal block key"));
 		}
 		m_index = idx;
 	}
@@ -79,7 +80,7 @@ public:
 	{
 		if (idx <= 0)
 		{
-			throw std::logic_error("using illegal block key");
+			throw strus::logic_error( _TXT( "using illegal block key"));
 		}
 		m_index = idx;
 	}
@@ -106,7 +107,7 @@ public:
 		}
 		else
 		{
-			throw std::logic_error("illegal block key element access");
+			throw strus::logic_error( _TXT( "illegal block key element access"));
 		}
 	}
 

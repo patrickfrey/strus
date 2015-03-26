@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/private/internationalization.hpp"
 #include <cstdlib>
 #include <stdexcept>
 
@@ -87,12 +88,12 @@ public:
 
 	void setByte( std::size_t idx, unsigned char elem)
 	{
-		if (idx >= m_size) throw std::logic_error("array bound write (DataBlock::setByte)");
+		if (idx >= m_size) throw strus::logic_error( _TXT( "array bound write (%s)"), __FUNCTION__);
 		m_ptr[ idx] = elem;
 	}
 	void unionByte( std::size_t idx, unsigned char elem)
 	{
-		if (idx >= m_size) throw std::logic_error("array bound write (DataBlock::setByte)");
+		if (idx >= m_size) throw strus::logic_error( _TXT( "array bound write (%s)"), __FUNCTION__);
 		m_ptr[ idx] |= elem;
 	}
 	void resize( std::size_t newsize_)

@@ -30,6 +30,7 @@
 #define _STRUS_ITERATOR_PREDECCESSOR_HPP_INCLUDED
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/private/internationalization.hpp"
 
 namespace strus
 {
@@ -101,9 +102,9 @@ public:
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range) const
 	{
-		if (range != 0) throw std::runtime_error( "no range argument expected");
-		if (argitr.size() < 1) throw std::runtime_error( "too few arguments");
-		if (argitr.size() > 1) throw std::runtime_error( "too many arguments");
+		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected"));
+		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments"));
+		if (argitr.size() > 1) throw strus::runtime_error( _TXT( "too many arguments"));
 
 		return new IteratorPred( argitr[0]);
 	}

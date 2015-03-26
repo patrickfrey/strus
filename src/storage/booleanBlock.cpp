@@ -28,6 +28,7 @@
 */
 #include "booleanBlock.hpp"
 #include "indexPacker.hpp"
+#include "strus/private/internationalization.hpp"
 #include <limits>
 
 using namespace strus;
@@ -470,7 +471,7 @@ void BooleanBlock::defineRange( const Index& elemno, const Index& rangesize)
 
 		if (elemno < from_)
 		{
-			throw std::logic_error( "ranges not appended in order in boolean block");
+			throw strus::logic_error( _TXT( "ranges not appended in order in boolean block"));
 		}
 		if (elemno <= to_ + 1)
 		{
@@ -636,7 +637,7 @@ void BooleanBlock::check() const
 	{
 		if (rangemin <= 0 || rangemax <= 0 || rangemin > rangemax || rangemax > id() || rangemin <= prevmax)
 		{
-			throw std::runtime_error( "internal: created illegal boolean block");
+			throw strus::runtime_error( _TXT( "created illegal boolean block"));
 		}
 	}
 }

@@ -34,6 +34,7 @@
 #include "booleanBlock.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
+#include "strus/private/internationalization.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <limits>
@@ -51,12 +52,12 @@ TermTypeData::TermTypeData( const strus::DatabaseCursorInterface::Slice& key, co
 	typesize = ke-ki;
 	if (!strus::checkStringUtf8( ki, ke-ki))
 	{
-		throw std::runtime_error( "key of term type is not a valid UTF8 string");
+		throw strus::runtime_error( _TXT( "key of term type is not a valid UTF8 string"));
 	}
 	typeno = strus::unpackIndex( vi, ve);/*[typeno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of term type number");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of term type number"));
 	}
 }
 
@@ -126,12 +127,12 @@ TermValueData::TermValueData( const strus::DatabaseCursorInterface::Slice& key, 
 	valuesize = ke-ki;
 	if (!strus::checkStringUtf8( ki, ke-ki))
 	{
-		throw std::runtime_error( "key of term value is not a valid UTF8 string");
+		throw strus::runtime_error( _TXT( "key of term value is not a valid UTF8 string"));
 	}
 	valueno = strus::unpackIndex( vi, ve);/*[valueno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of term value number");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of term value number"));
 	}
 }
 
@@ -153,12 +154,12 @@ DocIdData::DocIdData( const strus::DatabaseCursorInterface::Slice& key, const st
 	docidsize = ke-ki;
 	if (!strus::checkStringUtf8( ki, ke-ki))
 	{
-		throw std::runtime_error( "key of doc id is not a valid UTF8 string");
+		throw strus::runtime_error( _TXT( "key of doc id is not a valid UTF8 string"));
 	}
 	docno = strus::unpackIndex( vi, ve);/*[docno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of document number");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of document number"));
 	}
 }
 
@@ -179,12 +180,12 @@ UserNameData::UserNameData( const strus::DatabaseCursorInterface::Slice& key, co
 	usernamesize = ke-ki;
 	if (!strus::checkStringUtf8( ki, ke-ki))
 	{
-		throw std::runtime_error( "key of doc id is not a valid UTF8 string");
+		throw strus::runtime_error( _TXT( "key of doc id is not a valid UTF8 string"));
 	}
 	userno = strus::unpackIndex( vi, ve);/*[userno]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of user number");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of user number"));
 	}
 }
 
@@ -207,7 +208,7 @@ ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice&
 	pos = strus::unpackIndex( ki, ke);/*[pos]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of forward index key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of forward index key"));
 	}
 	ForwardIndexBlock blk( pos, vi, ve-vi);
 	const char* bi = blk.charptr();
@@ -218,16 +219,16 @@ ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice&
 		std::string value( blk.value_at( bi));
 		if (!strus::checkStringUtf8( value.c_str(), value.size()))
 		{
-			throw std::runtime_error( "value in addressed by forward index is not a valid UTF-8 string");
+			throw strus::runtime_error( _TXT( "value in addressed by forward index is not a valid UTF-8 string"));
 		}
 		Index curpos = blk.position_at(bi);
 		if (curpos <= prevpos)
 		{
-			throw std::runtime_error( "positions in forward index are not in strictly ascending order");
+			throw strus::runtime_error( _TXT( "positions in forward index are not in strictly ascending order"));
 		}
 		if (curpos > pos)
 		{
-			throw std::runtime_error( "position found in forward index that is bigger than the block id");
+			throw strus::runtime_error( _TXT( "position found in forward index that is bigger than the block id"));
 		}
 		elements.push_back( Element( curpos, value));
 	}
@@ -260,12 +261,12 @@ VariableData::VariableData( const strus::DatabaseCursorInterface::Slice& key, co
 	varnamesize = ke-ki;
 	if (!strus::checkStringUtf8( ki, ke-ki))
 	{
-		throw std::runtime_error( "illegal UTF8 string as key of global variable");
+		throw strus::runtime_error( _TXT( "illegal UTF8 string as key of global variable"));
 	}
 	valueno = strus::unpackIndex( vi, ve);/*[value]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of variable value");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of variable value"));
 	}
 }	
 
@@ -284,12 +285,12 @@ DocMetaDataData::DocMetaDataData( const MetaDataDescription* metadescr, const st
 
 	if (ki == ke)
 	{
-		throw std::runtime_error( "unexpected end of metadata key");
+		throw strus::runtime_error( _TXT( "unexpected end of metadata key"));
 	}
 	blockno = strus::unpackIndex( ki, ke);/*[blockno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of metadata block key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of metadata block key"));
 	}
 	block.init( metadescr, blockno, vi, ve-vi);
 	descr = metadescr;
@@ -329,18 +330,18 @@ DocAttributeData::DocAttributeData( const strus::DatabaseCursorInterface::Slice&
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki == ke)
 	{
-		throw std::runtime_error( "unexpected end of document attribute key");
+		throw strus::runtime_error( _TXT( "unexpected end of document attribute key"));
 	}
 	attribno = strus::unpackIndex( ki, ke); /*[attribno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "extra character at end of document attribute key");
+		throw strus::runtime_error( _TXT( "extra character at end of document attribute key"));
 	}
 	valuestr = vi;
 	valuesize = ve-vi;
 	if (!strus::checkStringUtf8( vi, ve-vi))
 	{
-		throw std::runtime_error( "value in document attribute value is not a valid UTF-8 string");
+		throw strus::runtime_error( _TXT( "value in document attribute value is not a valid UTF-8 string"));
 	}
 }	
 
@@ -361,12 +362,12 @@ DocFrequencyData::DocFrequencyData( const strus::DatabaseCursorInterface::Slice&
 	termno = strus::unpackIndex( ki, ke);/*[valueno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of term document frequency key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of term document frequency key"));
 	}
 	df = strus::unpackIndex( vi, ve);/*[df]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of df value");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of df value"));
 	}
 }
 
@@ -388,7 +389,7 @@ PosinfoBlockData::PosinfoBlockData( const strus::DatabaseCursorInterface::Slice&
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of term index key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
 	}
 	PosinfoBlock blk( docno, vi, ve-vi);
 	PosinfoBlock::Cursor cursor;
@@ -399,23 +400,23 @@ PosinfoBlockData::PosinfoBlockData( const strus::DatabaseCursorInterface::Slice&
 		unsigned int ff = (std::size_t)blk.frequency_at( cursor);
 		if (dn > docno)
 		{
-			throw std::runtime_error( "posinfo element docno bigger than upper bound docno");
+			throw strus::runtime_error( _TXT( "posinfo element docno bigger than upper bound docno"));
 		}
 		if (posinfo.size() && dn <= posinfo.back().docno)
 		{
-			throw std::runtime_error( "elements in posinfo array of docno not not strictly ascending");
+			throw strus::runtime_error( _TXT( "elements in posinfo array of docno not not strictly ascending"));
 		}
 		posinfo.push_back( PosinfoPosting( dn, blk.positions_at( cursor)));
 		if (ff != posinfo.back().pos.size() && posinfo.back().pos.size() != 0)
 		{
-			throw std::runtime_error( "ff does not match to length of position array");
+			throw strus::runtime_error( _TXT( "ff does not match to length of position array"));
 		}
 		std::vector<Index>::const_iterator pi = posinfo.back().pos.begin(), pe = posinfo.back().pos.end();
 		for (Index prevpos=0; pi != pe; ++pi)
 		{
 			if (prevpos >= *pi)
 			{
-				throw std::runtime_error( "position elements in posinfo array not strictly ascending");
+				throw strus::runtime_error( _TXT( "position elements in posinfo array not strictly ascending"));
 			}
 		}
 		dn = blk.nextDoc( cursor);
@@ -456,23 +457,23 @@ static std::vector<std::pair<Index,Index> > getRangeListFromBooleanBlock(
 	{
 		if (rangemax <= 0)
 		{
-			throw std::runtime_error( "illegal range in boolean block (negative or zero maximum)");
+			throw strus::runtime_error( _TXT( "illegal range in boolean block (negative or zero maximum)"));
 		}
 		if (rangemin <= 0)
 		{
-			throw std::runtime_error( "illegal range in boolean block (negative or zero minimum)");
+			throw strus::runtime_error( _TXT( "illegal range in boolean block (negative or zero minimum)"));
 		}
 		if (rangemin > rangemax)
 		{
-			throw std::runtime_error( "illegal range in boolean block (min > max)");
+			throw strus::runtime_error( _TXT( "illegal range in boolean block (min > max)"));
 		}
 		if (rangemax > id)
 		{
-			throw std::runtime_error( "illegal range in boolean block (max > blockId)");
+			throw strus::runtime_error( _TXT( "illegal range in boolean block (max > blockId)"));
 		}
 		if (rangemin <= prevmax)
 		{
-			throw std::runtime_error( "illegal range in boolean block (not strictly ascending or unjoined overlapping ranges)");
+			throw strus::runtime_error( _TXT( "illegal range in boolean block (not strictly ascending or unjoined overlapping ranges)"));
 		}
 		prevmax = rangemax;
 		rt.push_back( std::pair<Index,Index>( rangemin, rangemax));
@@ -508,7 +509,7 @@ DocListBlockData::DocListBlockData( const strus::DatabaseCursorInterface::Slice&
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of term index key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of term index key"));
 	}
 	docrangelist = getRangeListFromBooleanBlock( DatabaseKey::DocListBlockPrefix, docno, vi, ve);
 }
@@ -534,7 +535,7 @@ InverseTermData::InverseTermData( const strus::DatabaseCursorInterface::Slice& k
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of inverse term index key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of inverse term index key"));
 	}
 
 	InvTermBlock block( docno, vi, ve-vi);
@@ -569,7 +570,7 @@ UserAclBlockData::UserAclBlockData( const strus::DatabaseCursorInterface::Slice&
 	docno = strus::unpackIndex( ki, ke);/*[docno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of user index key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of user index key"));
 	}
 	docrangelist = getRangeListFromBooleanBlock( DatabaseKey::UserAclBlockPrefix, docno, vi, ve);
 }
@@ -593,7 +594,7 @@ AclBlockData::AclBlockData( const strus::DatabaseCursorInterface::Slice& key, co
 	userno = strus::unpackIndex( ki, ke);/*[userno]*/
 	if (ki != ke)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of docno index key");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of docno index key"));
 	}
 	userrangelist = getRangeListFromBooleanBlock( DatabaseKey::AclBlockPrefix, userno, vi, ve);
 }
@@ -617,12 +618,12 @@ AttributeKeyData::AttributeKeyData( const strus::DatabaseCursorInterface::Slice&
 	varnamesize = ke-ki;
 	if (!strus::checkStringUtf8( ki, ke-ki))
 	{
-		throw std::runtime_error( "illegal UTF8 string as attribute key");
+		throw strus::runtime_error( _TXT( "illegal UTF8 string as attribute key"));
 	}
 	valueno = strus::unpackIndex( vi, ve);/*[value]*/
 	if (vi != ve)
 	{
-		throw std::runtime_error( "unexpected extra bytes at end of attribute number");
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of attribute number"));
 	}
 }
 

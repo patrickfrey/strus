@@ -37,6 +37,7 @@
 #include "strus/storagePeerInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
@@ -129,7 +130,7 @@ void StorageClient::loadVariables()
 	||  !varstor.load( "NofDocs", m_nof_documents)
 	)
 	{
-		throw std::runtime_error( "corrupt storage, not all mandatory variables defined");
+		throw strus::runtime_error( _TXT( "corrupt storage, not all mandatory variables defined"));
 	}
 	(void)varstor.load( "UserNo", m_next_userno);
 	m_global_nof_documents = m_nof_documents;
@@ -307,7 +308,7 @@ Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 	utils::ScopedLock lock( m_mutex_docno);
 	Index rt = m_next_docno;
 	m_next_docno += nofDocuments;
-	if (m_next_docno <= rt) throw std::runtime_error( "docno allocation error");
+	if (m_next_docno <= rt) throw strus::runtime_error( _TXT( "docno allocation error"));
 	return rt;
 }
 
@@ -339,7 +340,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw std::logic_error("cannot use typeno allocator for non immediate alloc");
+		throw strus::logic_error( _TXT( "cannot use typeno allocator for non immediate alloc"));
 	}
 
 private:
@@ -358,7 +359,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw std::logic_error("cannot use docno allocator for non immediate alloc");
+		throw strus::logic_error( _TXT( "cannot use docno allocator for non immediate alloc"));
 	}
 private:
 	StorageClient* m_storage;
@@ -374,13 +375,13 @@ public:
 	{
 		if (!m_storage->withAcl())
 		{
-			throw std::runtime_error( "storage configured without ACL. No users can be created");
+			throw strus::runtime_error( _TXT( "storage configured without ACL. No users can be created"));
 		}
 		return m_storage->allocUsernoImm( name, isNew);
 	}
 	virtual Index alloc()
 	{
-		throw std::logic_error("cannot use docno allocator for non immediate alloc");
+		throw strus::logic_error( _TXT( "cannot use docno allocator for non immediate alloc"));
 	}
 private:
 	StorageClient* m_storage;
@@ -398,7 +399,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw std::logic_error("cannot use attribno allocator for non immediate alloc");
+		throw strus::logic_error( _TXT( "cannot use attribno allocator for non immediate alloc"));
 	}
 private:
 	StorageClient* m_storage;
@@ -413,7 +414,7 @@ public:
 
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		throw std::logic_error("cannot use termno allocator for immediate alloc");
+		throw strus::logic_error( _TXT( "cannot use termno allocator for immediate alloc"));
 	}
 	virtual Index alloc()
 	{
@@ -571,14 +572,14 @@ Index StorageClient::maxDocumentNumber() const
 Index StorageClient::documentNumber( const std::string& docid) const
 {
 	Index rt = getDocno( docid);
-	if (!rt) throw std::runtime_error( std::string( "document with id '") + docid + "' is not defined in index");
+	if (!rt) throw strus::runtime_error( _TXT( "document with id '%s' is not defined in index"), docid.c_str());
 	return rt;
 }
 
 Index StorageClient::userId( const std::string& username) const
 {
 	Index rt = getUserno( username);
-	if (!rt) throw std::runtime_error( std::string( "user with id '") + username + "' is not defined in index");
+	if (!rt) throw strus::runtime_error( _TXT( "user with id '%s' is not defined in index"), username.c_str());
 	return rt;
 }
 
@@ -632,7 +633,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 	}
 	catch (const std::runtime_error& err)
 	{
-		throw std::runtime_error( std::string("failed to build termno map: ") + err.what());
+		throw strus::runtime_error( _TXT( "failed to build termno map: "), err.what());
 	}
 }
 
@@ -715,9 +716,9 @@ void StorageClient::defineStoragePeerInterface(
 			more=dfcursor.loadNext( typeno, termno, df))
 		{
 			std::map<Index,std::string>::const_iterator ti = typenomap.find( typeno);
-			if (ti == typenomap.end()) throw std::runtime_error( "undefined type in df key");
+			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "undefined type in df key"));
 			std::map<Index,std::string>::const_iterator vi = termnomap.find( termno);
-			if (ti == typenomap.end()) throw std::runtime_error( "undefined term in df key");
+			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "undefined term in df key"));
 
 			if (!doPopulateInitialState) df = 0;
 
@@ -849,7 +850,8 @@ static void checkKeyValue(
 	}
 	catch (const std::runtime_error& err)
 	{
-		throw std::runtime_error( std::string( err.what()) + " in key '" + keystring( key) + "'");
+		std::string ks( keystring( key));
+		throw strus::runtime_error( _TXT( "error in checked key '%s': %s"), ks.c_str(), err.what());
 	}
 }
 
@@ -864,7 +866,7 @@ void StorageClient::checkStorage() const
 	{
 		if (key.size() == 0)
 		{
-			throw std::runtime_error( "found empty key in storage");
+			throw strus::runtime_error( _TXT( "found empty key in storage"));
 		}
 		checkKeyValue( m_database.get(), key, cursor->value());
 	};
@@ -979,13 +981,14 @@ static void dumpKeyValue(
 			}
 			default:
 			{
-				throw std::runtime_error( "illegal data base prefix");
+				throw strus::runtime_error( _TXT( "illegal data base prefix"));
 			}
 		}
 	}
 	catch (const std::runtime_error& err)
 	{
-		throw std::runtime_error( std::string( err.what()) + std::string(" in key '") + keystring( key) + "'");
+		std::string ks( keystring( key));
+		throw strus::runtime_error( _TXT( "error in dumped dkey '%s': %s"), ks.c_str(), err.what());
 	}
 }
 
@@ -1000,7 +1003,7 @@ void StorageClient::dumpStorage( std::ostream& output) const
 	{
 		if (key.size() == 0)
 		{
-			throw std::runtime_error( "found empty key in storage");
+			throw strus::runtime_error( _TXT( "found empty key in storage"));
 		}
 		dumpKeyValue( output, m_database.get(), key, cursor->value());
 	};

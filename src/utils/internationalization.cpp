@@ -26,56 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#include "private/utils.hpp"
+#include "private/dll_tags.hpp"
 #include "strus/private/internationalization.hpp"
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <libintl.h>
+#include <locale.h>
+#include <cstdarg>
 
-using namespace strus;
-using namespace strus::utils;
+#define STRUS_GETTEXT_PACKAGE		"strus-dom"
+#define STRUS_GETTEXT_LOCALEDIR		""
 
-std::string utils::tolower( const std::string& val)
+DLL_PUBLIC std::runtime_error strus::runtime_error( const char* format, ...)
 {
-	return boost::algorithm::to_lower_copy( val);
+	char buffer[ 1024];
+	va_list args;
+	va_start( args, format);
+	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, "format");
+	int buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
+	buffer[ sizeof(buffer)-1] = 0;
+	std::runtime_error rt( std::string( buffer, buffersize));
+	va_end (args);
+	return rt;
 }
 
-std::string utils::trim( const std::string& val)
+DLL_PUBLIC std::logic_error strus::logic_error( const char* format, ...)
 {
-	return boost::algorithm::trim_copy( val);
+	char buffer[ 1024];
+	va_list args;
+	va_start( args, format);
+	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, "format");
+	int buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
+	buffer[ sizeof(buffer)-1] = 0;
+	std::logic_error rt( std::string( buffer, buffersize));
+	va_end (args);
+	return rt;
 }
 
-bool utils::caseInsensitiveEquals( const std::string& val1, const std::string& val2)
+DLL_PUBLIC void strus::initInternationalization()
 {
-	return boost::algorithm::iequals( val1, val2);
-}
-
-bool utils::caseInsensitiveStartsWith( const std::string& val, const std::string& prefix)
-{
-	return boost::algorithm::istarts_with( val, prefix);
-}
-
-int utils::toint( const std::string& val)
-{
-	try
-	{
-		return boost::lexical_cast<int>( val);
-	}
-	catch (const boost::bad_lexical_cast& err)
-	{
-		throw strus::runtime_error( _TXT( "failed to convert string '%s' to integer: %s"), val.c_str(), err.what());
-	}
-}
-
-std::string utils::tostring( int val)
-{
-	try
-	{
-		return boost::lexical_cast<std::string>( val);
-	}
-	catch (...)
-	{
-		throw strus::runtime_error( _TXT( "failed to convert number to string (out of memory)"));
-	}
+#ifdef ENABLE_NLS
+	::bindtextdomain( STRUS_GETTEXT_PACKAGE, STRUS_GETTEXT_LOCALEDIR);
+#endif
 }
 
 

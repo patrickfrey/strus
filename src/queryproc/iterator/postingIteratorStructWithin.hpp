@@ -30,6 +30,7 @@
 #define _STRUS_ITERATOR_STRUCT_WITHIN_HPP_INCLUDED
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/private/internationalization.hpp"
 #include <vector>
 
 namespace strus
@@ -95,7 +96,7 @@ public:
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range_) const
 	{
-		if (argitr.size() < 2) throw std::runtime_error( "too few arguments");
+		if (argitr.size() < 2) throw strus::runtime_error( _TXT( "too few arguments"));
 
 		return new IteratorStructWithin( range_, argitr, true);
 	}
@@ -111,7 +112,7 @@ public:
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range_) const
 	{
-		if (argitr.size() < 1) throw std::runtime_error( "too few arguments");
+		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments"));
 
 		return new IteratorStructWithin( range_, argitr, false);
 	}

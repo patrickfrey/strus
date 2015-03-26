@@ -29,6 +29,7 @@
 #include "postingIterator.hpp"
 #include "storageClient.hpp"
 #include "indexPacker.hpp"
+#include "strus/private/internationalization.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -71,7 +72,7 @@ Index PostingIterator::skipDoc( const Index& docno_)
 #ifdef STRUS_LOWLEVEL_CHECK
 		if (m_docno != m_docnoIterator.skip( m_docno))
 		{
-			throw std::runtime_error( "corrupt index -- without posinfo");
+			throw strus::runtime_error( _TXT( "corrupt index, position info is missing"));
 		}
 #endif
 	}
@@ -86,7 +87,7 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 {
 	if (m_docno != m_posinfoIterator.skipDoc( m_docno))
 	{
-		throw std::runtime_error( "corrupt index -- document not in posinfo index");
+		throw strus::runtime_error( _TXT( "corrupt index, document not in posinfo index"));
 	}
 	return m_posinfoIterator.skipPos( firstpos_);
 }

@@ -30,6 +30,7 @@
 #define _STRUS_ITERATOR_INTERSECT_HPP_INCLUDED
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
+#include "strus/private/internationalization.hpp"
 
 namespace strus
 {
@@ -81,8 +82,8 @@ public:
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
 			int range) const
 	{
-		if (range != 0) throw std::runtime_error( "no range argument expected");
-		if (itrs.size() == 0) throw std::runtime_error( "too few arguments");
+		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected"));
+		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments"));
 
 		return new IteratorIntersect( itrs);
 	}

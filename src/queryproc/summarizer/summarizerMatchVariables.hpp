@@ -33,6 +33,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
+#include "strus/private/internationalization.hpp"
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -117,7 +118,7 @@ public:
 		std::string assign = textualParameters_[2];
 		if (termtype.empty())
 		{
-			throw std::runtime_error( "empty term type definition (parameter 'type') in match variables summarizer configuration");
+			throw strus::runtime_error( _TXT( "empty term type definition (parameter 'type') in match variables summarizer configuration"));
 		}
 		return new SummarizerClosureMatchVariables(
 				storage_, processor_, termtype, delimiter, assign, features_);

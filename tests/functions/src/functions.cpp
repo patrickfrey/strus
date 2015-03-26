@@ -27,9 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "indexPacker.hpp"
-#include "indexPacker.cpp"
 #include "floatConversions.hpp"
-#include "floatConversions.cpp"
 #include "private/bitOperations.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -39,6 +37,7 @@
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
+using namespace strus;
 
 static void spFloatConversionTest( float in)
 {

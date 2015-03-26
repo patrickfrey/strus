@@ -32,6 +32,7 @@
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseOptions.hpp"
+#include "strus/private/internationalization.hpp"
 #include <stdexcept>
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
@@ -44,7 +45,7 @@ DatabaseClient::DatabaseClient( const char* path_, unsigned int cachesize_k, boo
 	m_dboptions.create_if_missing = false;
 	if (cachesize_k)
 	{
-		if (cachesize_k * 1024 < cachesize_k) throw std::runtime_error("size of cache out of range");
+		if (cachesize_k * 1024 < cachesize_k) throw strus::runtime_error( _TXT( "size of cache out of range"));
 		m_dboptions.block_cache = leveldb::NewLRUCache( cachesize_k * 1024);
 	}
 	if (!compression)
@@ -57,7 +58,7 @@ DatabaseClient::DatabaseClient( const char* path_, unsigned int cachesize_k, boo
 	{
 		std::string err = status.ToString();
 		cleanup();
-		throw std::runtime_error( std::string( "failed to open key calue store database: ") + err);
+		throw strus::runtime_error( _TXT( "failed to open key calue store database: %s"), err.c_str());
 	}
 }
 
@@ -156,7 +157,8 @@ void DatabaseClient::writeImm(
 					leveldb::Slice( value, valuesize));
 	if (!status.ok())
 	{
-		throw std::runtime_error( status.ToString());
+		std::string ststr( status.ToString());
+		throw strus::runtime_error( _TXT( "Level DB error: %s"), ststr.c_str());
 	}
 }
 
@@ -169,7 +171,8 @@ void DatabaseClient::removeImm(
 	leveldb::Status status = m_db->Delete( options, leveldb::Slice( key, keysize));
 	if (!status.ok())
 	{
-		throw std::runtime_error( status.ToString());
+		std::string ststr( status.ToString());
+		throw strus::runtime_error( _TXT( "Level DB error: %s"), ststr.c_str());
 	}
 }
 
@@ -190,7 +193,8 @@ bool DatabaseClient::readValue(
 	}
 	if (!status.ok())
 	{
-		throw std::runtime_error( status.ToString());
+		std::string ststr( status.ToString());
+		throw strus::runtime_error( _TXT( "Level DB error: %s"), ststr.c_str());
 	}
 	return true;
 }

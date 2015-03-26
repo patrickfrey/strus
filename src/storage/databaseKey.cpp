@@ -28,6 +28,7 @@
 */
 #include "databaseKey.hpp"
 #include "indexPacker.hpp"
+#include "strus/private/internationalization.hpp"
 #include <cstring>
 #include <stdexcept>
 
@@ -43,7 +44,7 @@ DatabaseKey::DatabaseKey( char prefix, const std::string& varname)
 {
 	if (varname.size() >= MaxKeySize-1)
 	{
-		throw std::runtime_error( std::string( "database variable key out of range '") + varname + "'");
+		throw strus::runtime_error( _TXT( "database variable key out of range '%s'"), varname.c_str());
 	}
 	m_buf[ 0] = prefix;
 	std::memcpy( m_buf+1, varname.c_str(), varname.size());
@@ -83,7 +84,7 @@ void DatabaseKey::addElem( const std::string& var)
 {
 	if (m_size + var.size() >= MaxKeySize-1)
 	{
-		throw std::runtime_error( std::string( "database key exceeds maximum size allowed: '") + var + "'");
+		throw strus::runtime_error( _TXT( "database key exceeds maximum size allowed: '%s'"), var.c_str());
 	}
 	std::memcpy( m_buf+m_size, var.c_str(), var.size());
 	m_size += var.size();
@@ -91,13 +92,13 @@ void DatabaseKey::addElem( const std::string& var)
 
 void DatabaseKey::addPrefix( char prefix)
 {
-	if (m_size == MaxKeySize) throw std::runtime_error("static buffer overflow");
+	if (m_size == MaxKeySize) throw strus::runtime_error( _TXT( "static buffer overflow (%s)"), __FUNCTION__);
 	m_buf[ m_size++] = prefix;
 }
 
 void DatabaseKey::resize( std::size_t n)
 {
-	if (n > m_size) throw std::runtime_error("internal: resize in database key only allowed as shrinking of size");
+	if (n > m_size) throw strus::runtime_error( _TXT( "resize in database key only allowed as shrinking of size"));
 	m_size = n;
 }
 

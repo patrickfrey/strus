@@ -28,6 +28,7 @@
 */
 #include "storage.hpp"
 #include "storageClient.hpp"
+#include "strus/private/internationalization.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
@@ -88,10 +89,8 @@ static std::string loadFile( const std::string& filename)
 	return rt;
 FILEERROR:
 	{
-		std::ostringstream errstr;
-		errstr << errcode;
 		if (fh) ::fclose( fh);
-		throw std::runtime_error( std::string( "could not read file '") + filename + "': (errno " + errstr.str() + ")");
+		throw strus::runtime_error( _TXT( "could not read file '%s': (errno %d)"), filename.c_str(), errcode);
 	}
 }
 

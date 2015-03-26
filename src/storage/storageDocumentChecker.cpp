@@ -38,6 +38,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
+#include "strus/private/internationalization.hpp"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -129,8 +130,8 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		Index typeno = m_storage->getTermType( ti->first.type);
 		Index termno = m_storage->getTermValue( ti->first.value);
 
-		if (!typeno) throw std::runtime_error( std::string("unknown term type '") + ti->first.type + "'");
-		if (!termno) throw std::runtime_error( std::string("unknown term value '") + ti->first.value + "'");
+		if (!typeno) throw strus::runtime_error( _TXT( "unknown term type '%s'"), ti->first.type.c_str());
+		if (!termno) throw strus::runtime_error( _TXT( "unknown term value '%s'"), ti->first.value.c_str());
 
 		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 

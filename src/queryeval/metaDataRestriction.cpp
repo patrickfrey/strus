@@ -28,6 +28,7 @@
 */
 #include "metaDataRestriction.hpp"
 #include "private/utils.hpp"
+#include "strus/private/internationalization.hpp"
 #include <limits>
 #include <stdexcept>
 
@@ -196,7 +197,7 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat16;
 		}
-		throw std::logic_error("unknown meta data compare function");
+		throw strus::logic_error( _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveEquals( type, "float32"))
 	{
@@ -215,7 +216,7 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat32;
 		}
-		throw std::logic_error("unknown meta data compare function");
+		throw strus::logic_error( _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveStartsWith( type, "int"))
 	{
@@ -234,7 +235,7 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualInt;
 		}
-		throw std::logic_error("unknown meta data compare function");
+		throw strus::logic_error( _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveStartsWith( type, "uint"))
 	{
@@ -253,11 +254,11 @@ MetaDataRestriction::CompareFunction MetaDataRestriction::getCompareFunction( co
 			case QueryInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualUInt;
 		}
-		throw std::logic_error("unknown meta data compare function");
+		throw strus::logic_error( _TXT( "unknown meta data compare function"));
 	}
 	else
 	{
-		throw std::runtime_error( std::string("unknown type in meta data restriction: '") + type + "'");
+		throw strus::runtime_error( _TXT( "unknown type in meta data restriction: '%s'"), type);
 	}
 }
 

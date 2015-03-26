@@ -30,6 +30,7 @@
 #include "booleanBlockBatchWrite.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "strus/private/internationalization.hpp"
 #include "keyMap.hpp"
 #include "databaseAdapter.hpp"
 #include "indexPacker.hpp"
@@ -65,9 +66,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	if (pos.empty()) return;
 	if (termtype == 0 || termvalue == 0)
 	{
-		std::ostringstream arg;
-		arg << '(' << termtype << ',' << termvalue << ',' << docno << ')';
-		throw std::runtime_error( std::string("internal: calling definePosinfoPosting with illegal arguments: ") + arg.str());
+		throw strus::runtime_error( _TXT( "calling definePosinfoPosting with illegal arguments: (%u,%u,%u)"), termtype, termvalue, docno);
 	}
 	MapKey key( termtype, termvalue, docno);
 	Map::const_iterator mi = m_map.find( key);
@@ -78,7 +77,7 @@ void InvertedIndexMap::definePosinfoPosting(
 		{
 			if (pos.size() > std::numeric_limits<PosinfoBlock::PositionType>::max())
 			{
-				throw std::runtime_error( "size of document out of range (max 65535)");
+				throw strus::runtime_error( _TXT( "size of document out of range (max %u)"), 65535);
 			}
 			m_map[ key] = m_posinfo.size();
 
@@ -88,7 +87,7 @@ void InvertedIndexMap::definePosinfoPosting(
 			{
 				if (*pi > std::numeric_limits<PosinfoBlock::PositionType>::max())
 				{
-					throw std::runtime_error( "token position out of range (max 65535)");
+					throw strus::runtime_error( _TXT( "token position out of range (max %u)"), 65535);
 				}
 				m_posinfo.push_back( (unsigned short)*pi);
 			}
@@ -100,13 +99,13 @@ void InvertedIndexMap::definePosinfoPosting(
 	}
 	else
 	{
-		throw std::runtime_error( "document feature defined twice");
+		throw strus::runtime_error( _TXT( "document feature defined twice"));
 	}
 
 	InvTermMap::const_iterator vi = m_invtermmap.find( docno);
 	if (vi == m_invtermmap.end())
 	{
-		if (docno == 0) throw std::runtime_error( "illegal document number for insert (posinfo)");
+		if (docno == 0) throw strus::runtime_error( _TXT( "illegal document number for insert (posinfo)"));
 		if (m_invterms.size()) m_invterms.push_back( InvTerm());
 
 		m_invtermmap[ m_docno = docno] = m_invterms.size();
@@ -116,7 +115,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	{
 		if (m_docno && m_docno != docno)
 		{
-			throw std::runtime_error( "inverted index operations not grouped by document");
+			throw strus::runtime_error( _TXT( "inverted index operations not grouped by document"));
 		}
 		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size()));
 	}
@@ -154,7 +153,7 @@ void InvertedIndexMap::renameNewTermNumbers( const std::map<Index,Index>& rename
 			std::map<Index,Index>::const_iterator ri = renamemap.find( termno);
 			if (ri == renamemap.end())
 			{
-				throw std::runtime_error( "internal: term value undefined (posinfo map)");
+				throw strus::runtime_error( _TXT( "term value undefined (posinfo map)"));
 			}
 			MapKey newkey( BlockKey(mi->first.termkey).elem(1), ri->second, mi->first.docno);
 			m_map[ newkey] = mi->second;
@@ -175,7 +174,7 @@ void InvertedIndexMap::renameNewTermNumbers( const std::map<Index,Index>& rename
 			std::map<Index,Index>::const_iterator ri = renamemap.find( li->termno);
 			if (ri == renamemap.end())
 			{
-				throw std::runtime_error( "internal: term value undefined (inv posinfo map)");
+				throw strus::runtime_error( _TXT( "term value undefined (inv posinfo map)"));
 			}
 			li->termno = ri->second;
 		}

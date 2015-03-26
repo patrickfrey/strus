@@ -29,6 +29,7 @@
 #include "storageDocument.hpp"
 #include "storage.hpp"
 #include "indexPacker.hpp"
+#include "strus/private/internationalization.hpp"
 #include <string>
 #include <cstring>
 #include <set>
@@ -61,7 +62,7 @@ void StorageDocument::addSearchIndexTerm(
 		const std::string& value_,
 		const Index& position_)
 {
-	if (position_ == 0) throw std::runtime_error( "term occurrence position must not be 0");
+	if (position_ == 0) throw strus::runtime_error( _TXT( "term occurrence position must not be 0"));
 
 	TermMapKey key( termMapKey( type_, value_));
 	TermMapValue& ref = m_terms[ key];

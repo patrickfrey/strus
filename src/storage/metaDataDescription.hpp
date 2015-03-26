@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_METADATA_DESCRIPTION_HPP_INCLUDED
 #define _STRUS_LVDB_METADATA_DESCRIPTION_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/private/internationalization.hpp"
 #include "metaDataElement.hpp"
 #include <utility>
 #include <string>
@@ -72,7 +73,7 @@ public:
 
 	const MetaDataElement* get( int handle) const
 	{
-		if ((std::size_t)handle >= m_ar.size()) throw std::logic_error("array bound read in MetaDataDescription::get()");
+		if ((std::size_t)handle >= m_ar.size()) throw strus::logic_error( _TXT( "array bound read in function %s"), __FUNCTION__);
 		return &m_ar[ handle];
 	}
 	const char* getName( int handle) const

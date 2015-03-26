@@ -58,10 +58,10 @@ link_directories(
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # ------------------------------
 add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
-target_link_libraries( strus_storage_static strus_utils strus_private_utils )
+target_link_libraries( strus_storage_static strus_private_utils strus_utils )
 
 add_library(strus_storage SHARED libstrus_storage.cpp )
-target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_utils strus_database_leveldb compactnodetrie_static )
+target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb compactnodetrie_static strus_utils )
 set_target_properties(
     strus_storage
     PROPERTIES

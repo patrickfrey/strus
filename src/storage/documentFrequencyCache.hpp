@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/utils.hpp"
+#include "strus/private/internationalization.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <vector>
@@ -123,8 +124,8 @@ private:
 			std::memset( m_ar + copy_size, 0, m_size - copy_size);
 		}
 
-		const GlobalCounter& operator[]( std::size_t idx) const		{if (idx >= m_size) throw std::runtime_error("internal: array bound read (document frequency cache)"); return m_ar[idx];}
-		GlobalCounter& operator[]( std::size_t idx)			{if (idx >= m_size) throw std::runtime_error("internal: array bound write (document frequency cache)"); return m_ar[idx];}
+		const GlobalCounter& operator[]( std::size_t idx) const		{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound read (document frequency cache)")); return m_ar[idx];}
+		GlobalCounter& operator[]( std::size_t idx)			{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound write (document frequency cache)")); return m_ar[idx];}
 
 		std::size_t size() const					{return m_size;}
 

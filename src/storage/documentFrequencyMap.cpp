@@ -31,6 +31,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
+#include "strus/private/internationalization.hpp"
 #include "keyMap.hpp"
 #include "keyMapInv.hpp"
 #include "indexPacker.hpp"
@@ -65,7 +66,7 @@ void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& re
 			std::map<Index,Index>::const_iterator ri = renamemap.find( mi->first.second);
 			if (ri == renamemap.end())
 			{
-				throw std::runtime_error( "internal: term value undefined (term number map for df)");
+				throw strus::runtime_error( _TXT( "term value undefined for %d (term number map for df)"), mi->first.second);
 			}
 			Key newkey( mi->first.first, ri->second);
 			m_map[ newkey] = mi->second;
@@ -96,13 +97,13 @@ void DocumentFrequencyMap::getWriteBatch(
 		{
 			const char* typestr = termTypeMapInv.get( mi->first.first/*typeno*/);
 			const char* termstr = termValueMapInv.get( mi->first.second/*termno*/);
-			if (!typestr) throw std::runtime_error( std::string( "term type not defined in inverse key map: '") + typestr + "'");
-			if (!termstr) throw std::runtime_error( std::string( "term value not defined in inverse key map: '") + termstr + "'");
+			if (!typestr) throw strus::runtime_error( _TXT( "term type not defined in inverse key map for typeno %d"), mi->first.first);
+			if (!termstr) throw strus::runtime_error( _TXT( "term value not defined in inverse key map for termno %d"), mi->first.second);
 
 			peerTransaction->populateDocumentFrequencyChange( typestr, termstr, mi->second, (df==0));
 		}
 		df += mi->second;
-		if (df < 0) throw std::runtime_error( "internal: document frequency got negative");
+		if (df < 0) throw strus::runtime_error( _TXT( "document frequency got negative"));
 
 		DatabaseAdapter_DocFrequency::store(
 				transaction, mi->first.first/*typeno*/, mi->first.second/*termno*/, df);

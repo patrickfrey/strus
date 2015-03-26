@@ -26,56 +26,28 @@
 
 --------------------------------------------------------------------
 */
-#include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+#ifndef _STRUS_INTERNATIONALIZATION_HPP_INCLUDED
+#define _STRUS_INTERNATIONALIZATION_HPP_INCLUDED
+#include <libintl.h>
+#include <stdexcept>
 
-using namespace strus;
-using namespace strus::utils;
+#define _TXT(STRING) gettext(STRING)
 
-std::string utils::tolower( const std::string& val)
+namespace strus
 {
-	return boost::algorithm::to_lower_copy( val);
-}
 
-std::string utils::trim( const std::string& val)
-{
-	return boost::algorithm::trim_copy( val);
-}
+/// \brief Substitute for std::runtime_error with arguments
+/// \param[in] msg c printf format string
+/// \param[in] nofargs number of arguments passed to be substituted in the format string
+std::runtime_error runtime_error( const char* format, ...);
 
-bool utils::caseInsensitiveEquals( const std::string& val1, const std::string& val2)
-{
-	return boost::algorithm::iequals( val1, val2);
-}
+/// \brief Substitute for std::logic_error with arguments
+/// \param[in] msg c printf format string
+/// \param[in] nofargs number of arguments passed to be substituted in the format string
+std::logic_error logic_error( const char* format, ...);
 
-bool utils::caseInsensitiveStartsWith( const std::string& val, const std::string& prefix)
-{
-	return boost::algorithm::istarts_with( val, prefix);
-}
+void initInternationalization();
 
-int utils::toint( const std::string& val)
-{
-	try
-	{
-		return boost::lexical_cast<int>( val);
-	}
-	catch (const boost::bad_lexical_cast& err)
-	{
-		throw strus::runtime_error( _TXT( "failed to convert string '%s' to integer: %s"), val.c_str(), err.what());
-	}
-}
-
-std::string utils::tostring( int val)
-{
-	try
-	{
-		return boost::lexical_cast<std::string>( val);
-	}
-	catch (...)
-	{
-		throw strus::runtime_error( _TXT( "failed to convert number to string (out of memory)"));
-	}
-}
-
+}//namespace
+#endif
 

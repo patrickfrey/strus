@@ -30,6 +30,7 @@
 #include "strus/index.hpp"
 #include "private/dll_tags.hpp"
 #include "private/utils.hpp"
+#include "strus/private/internationalization.hpp"
 #include <map>
 #include <cstring>
 #include <stdexcept>
@@ -51,11 +52,11 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 		}
 		if (cfgkey.empty())
 		{
-			throw std::runtime_error( "expected item identifier as start of a declaration in a config string");
+			throw strus::runtime_error( _TXT( "expected item identifier as start of a declaration in a config string"));
 		}
 		if (*cc != '=')
 		{
-			throw std::runtime_error( "'=' expected after item identifier in a config string");
+			throw strus::runtime_error( _TXT( "'=' expected after item identifier in a config string"));
 		}
 		++cc;
 		const char* ee = std::strchr( cc, ';');
@@ -88,7 +89,7 @@ static bool yesNoFromString( const char* cfgname, const std::string& str)
 	if (lostr == "false") return false;
 	if (lostr == "1") return true;
 	if (lostr == "0") return false;
-	throw std::runtime_error( std::string("value for configuration option '") + cfgname + "' is not a boolean (yes/no or true/false)");
+	throw strus::runtime_error( _TXT( "value for configuration option '%s' is not a boolean (yes/no or true/false)"), cfgname);
 }
 
 DLL_PUBLIC bool strus::extractBooleanFromConfigString( bool& val, std::string& config, const char* key)
@@ -136,7 +137,7 @@ static unsigned int unsignedFromString( const std::string& numstr)
 	}
 	if (!cc)
 	{
-		throw std::runtime_error( std::string( "not a number (with optional 'K' or 'M' or 'G' suffix) for configuration option 'cache': '") + numstr + "'");
+		throw strus::runtime_error( _TXT( "not a number (with optional 'K' or 'M' or 'G' suffix) for configuration option 'cache': '%s'"), numstr.c_str());
 	}
 	return (unsigned int)((rt + 1023)/1024);
 }

@@ -28,6 +28,7 @@
 */
 #include "metaDataRecord.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
+#include "strus/private/internationalization.hpp"
 #include "floatConversions.hpp"
 #include "indexPacker.hpp"
 #include <utility>
@@ -66,7 +67,7 @@ static inline void setValue_( const MetaDataDescription& descr, void* ptr, const
 			*(float*)((char*)ptr + elem->ofs()) = (float)value;
 			break;
 		default:
-			throw std::logic_error( "unknown meta data type");
+			throw strus::logic_error( _TXT( "unknown meta data type"));
 	}
 }
 
@@ -99,7 +100,7 @@ static inline ValueType getValue_( const MetaDataDescription& descr, const void*
 		case MetaDataElement::Float32:
 			return (ValueType)*(float*)((const char*)ptr + elem->ofs());
 	}
-	throw std::logic_error( "unknown meta data type");
+	throw strus::logic_error( _TXT( "unknown meta data type"));
 }
 
 void MetaDataRecord::setValueInt( const MetaDataElement* elem, int32_t value_)

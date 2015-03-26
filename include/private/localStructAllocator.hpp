@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
 #define _STRUS_LVDB_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/private/internationalization.hpp"
 #include <memory>
 #include <stdexcept>
 #include <cstdlib>
@@ -55,7 +56,7 @@ public:
 	{
 		if (n != 1)
 		{
-			throw std::logic_error( "illegal use of allocator, only one item can be allocated at once");
+			throw strus::logic_error( _TXT( "illegal use of allocator, only one item can be allocated at once"));
 		}
 		StructType* rt = m_freelist.pop();
 		if (!rt) return m_blkalloc.alloc();
@@ -66,7 +67,7 @@ public:
 	{
 		if (n != 1)
 		{
-			throw std::logic_error( "illegal use of allocator, only on item can be deallocated at once");
+			throw strus::logic_error( _TXT( "illegal use of allocator, only on item can be deallocated at once"));
 		}
 		m_freelist.push( p);
 	}

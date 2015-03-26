@@ -31,6 +31,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <vector>
 #include <string>
@@ -56,11 +57,11 @@ void StorageAlterMetaDataTable::commit()
 {
 	if (m_commit)
 	{
-		throw std::runtime_error( "called alter meta data table commit twice");
+		throw strus::runtime_error( _TXT( "called alter meta data table commit twice"));
 	}
 	if (m_rollback)
 	{
-		throw std::runtime_error( "called alter meta data table commit after rollback");
+		throw strus::runtime_error( _TXT( "called alter meta data table commit after rollback"));
 	}
 	std::auto_ptr<DatabaseTransactionInterface>
 		transaction( m_database->createTransaction());
@@ -82,11 +83,11 @@ void StorageAlterMetaDataTable::rollback()
 {
 	if (m_rollback)
 	{
-		throw std::runtime_error( "called alter meta data table rollback twice");
+		throw strus::runtime_error( _TXT( "called alter meta data table rollback twice"));
 	}
 	if (m_commit)
 	{
-		throw std::runtime_error( "called alter meta data table rollback after commit");
+		throw strus::runtime_error( _TXT( "called alter meta data table rollback after commit"));
 	}
 	m_rollback = true;
 }

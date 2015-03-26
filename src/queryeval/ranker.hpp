@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "strus/weightedDocument.hpp"
 #include "private/localStructAllocator.hpp"
+#include "strus/private/internationalization.hpp"
 #include <set>
 #include <vector>
 #include <cstring>
@@ -47,7 +48,7 @@ public:
 	Ranker( std::size_t maxNofRanks_)
 		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0)
 	{
-		if (maxNofRanks_ == 0) throw std::runtime_error( "illegal value for max number of ranks");
+		if (maxNofRanks_ == 0) throw strus::runtime_error( _TXT( "illegal value for max number of ranks"));
 		for (std::size_t ii=0; ii<m_maxNofRanks; ++ii) m_brute_index[ii] = ii;
 	}
 	~Ranker(){}

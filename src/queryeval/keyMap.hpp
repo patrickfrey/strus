@@ -29,6 +29,7 @@
 #ifndef _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #define _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #include "private/utils.hpp"
+#include "strus/private/internationalization.hpp"
 #include <string>
 #include <map>
 
@@ -65,7 +66,7 @@ struct KeyMap
 	{
 		if (Parent::find( key) != this->end())
 		{
-			throw std::runtime_error( std::string( "duplicate definition of '") + key + "'");
+			throw strus::runtime_error( _TXT( "duplicate definition of '%s'"), key.c_str());
 		}
 		Parent::operator[](key) = value;
 	}

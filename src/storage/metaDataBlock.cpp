@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "metaDataBlock.hpp"
+#include "strus/private/internationalization.hpp"
 #include <cstring>
 #include <stdexcept>
 
@@ -50,7 +51,7 @@ MetaDataBlock::MetaDataBlock( const MetaDataDescription* descr_,
 	:m_descr(descr_),m_blockno(blockno_),m_ptr(0)
 {
 	std::size_t blkbytesize = m_descr->bytesize() * BlockSize;
-	if (blksize_ != blkbytesize) throw std::runtime_error( "meta data block size mismatch");
+	if (blksize_ != blkbytesize) throw strus::runtime_error( _TXT( "meta data block size mismatch"));
 	m_ptr = std::malloc( BlockSize * descr_->bytesize());
 	if (!m_ptr) throw std::bad_alloc();
 	std::memcpy( m_ptr, blk_, blkbytesize);
@@ -99,7 +100,7 @@ void MetaDataBlock::init( const MetaDataDescription* descr_,
 				std::size_t blksize_)
 {
 	std::size_t blkbytesize = descr_->bytesize() * BlockSize;
-	if (blksize_ != blkbytesize) throw std::runtime_error( "meta data block size mismatch");
+	if (blksize_ != blkbytesize) throw strus::runtime_error( _TXT( "meta data block size mismatch"));
 	void* mem = std::malloc( BlockSize * descr_->bytesize());
 	if (!mem) throw std::bad_alloc();
 	m_descr = descr_;
@@ -111,7 +112,7 @@ void MetaDataBlock::init( const MetaDataDescription* descr_,
 
 const MetaDataRecord MetaDataBlock::operator[]( std::size_t idx) const
 {
-	if (idx >= BlockSize) throw std::logic_error( "array bound read in meta data block");
+	if (idx >= BlockSize) throw strus::logic_error( _TXT( "array bound read in meta data block"));
 	void* recaddr = (char*)m_ptr + (idx * m_descr->bytesize());
 	return MetaDataRecord( m_descr, recaddr);
 }

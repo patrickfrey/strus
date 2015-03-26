@@ -28,6 +28,7 @@
 */
 #include "strus/private/protocol.hpp"
 #include "private/dll_tags.hpp"
+#include "strus/private/internationalization.hpp"
 #include <stdexcept>
 
 using namespace strus;
@@ -66,7 +67,7 @@ unsigned int decode_esc( char ch)
 	}
 	else
 	{
-		throw std::runtime_error( "illegal character in protocol encoding");
+		throw strus::runtime_error( _TXT( "illegal character in protocol encoding"));
 	}
 }
 

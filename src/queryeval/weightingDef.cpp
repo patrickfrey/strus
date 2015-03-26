@@ -30,6 +30,7 @@
 #include "queryEval.hpp"
 #include "private/utils.hpp"
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/private/internationalization.hpp"
 
 using namespace strus;
 
@@ -56,7 +57,7 @@ WeightingDef::WeightingDef(
 	const char** arg = m_function->numericParameterNames();
 	if (!arg && pi != pe)
 	{
-		throw std::runtime_error( std::string( "no numeric arguments expected for weighting function '") + m_functionName + "'");
+		throw strus::runtime_error( _TXT( "no numeric arguments expected for weighting function '%s'"), m_functionName.c_str());
 	}
 	for (; pi != pe; ++pi)
 	{
@@ -70,7 +71,7 @@ WeightingDef::WeightingDef(
 		}
 		if (!arg[aidx])
 		{
-			throw std::runtime_error(std::string( "unknown numeric argument name '") + pi->first + "' for weighting function '" + m_functionName + "'");
+			throw strus::runtime_error( _TXT( "unknown numeric argument name '%s' for weighting function '"), pi->first.c_str(), m_functionName.c_str());
 		}
 		m_parameters[aidx] = pi->second;
 	}
