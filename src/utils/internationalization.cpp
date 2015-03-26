@@ -63,7 +63,7 @@ DLL_PUBLIC std::logic_error strus::logic_error( const char* format, ...)
 	return rt;
 }
 
-DLL_PUBLIC void strus::initInternationalization()
+DLL_PUBLIC void strus::initMessageTextDomain()
 {
 #ifdef ENABLE_NLS
 	::bindtextdomain( STRUS_GETTEXT_PACKAGE, STRUS_GETTEXT_LOCALEDIR);

@@ -46,7 +46,7 @@ std::runtime_error runtime_error( const char* format, ...);
 /// \param[in] nofargs number of arguments passed to be substituted in the format string
 std::logic_error logic_error( const char* format, ...);
 
-void initInternationalization();
+void initMessageTextDomain();
 
 }//namespace
 #endif
