@@ -30,11 +30,18 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "queryProcessor.hpp"
 #include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
 DLL_PUBLIC QueryProcessorInterface* strus::createQueryProcessor()
 {
+	static bool intl_initialized = false;
+	if (!intl_initialized)
+	{
+		strus::initMessageTextDomain();
+		intl_initialized = true;
+	}
 	return new QueryProcessor();
 }
 

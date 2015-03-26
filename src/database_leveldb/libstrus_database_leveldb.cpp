@@ -29,12 +29,19 @@
 #include "strus/lib/database_leveldb.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
 DLL_PUBLIC const DatabaseInterface* strus::getDatabase_leveldb()
 {
 	static const Database database;
+	static bool intl_initialized = false;
+	if (!intl_initialized)
+	{
+		strus::initMessageTextDomain();
+		intl_initialized = true;
+	}
 	return &database;
 }
 

@@ -31,6 +31,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "queryEval.hpp"
 #include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
 #include <map>
 #include <set>
 
@@ -40,6 +41,12 @@ DLL_PUBLIC QueryEvalInterface*
 	strus::createQueryEval(
 		const QueryProcessorInterface* processor)
 {
+	static bool intl_initialized = false;
+	if (!intl_initialized)
+	{
+		strus::initMessageTextDomain();
+		intl_initialized = true;
+	}
 	return new QueryEval( processor);
 }
 
