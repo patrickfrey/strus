@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 # --------------------------------------
 # SOURCES AND INCLUDES
@@ -37,5 +37,5 @@ set_target_properties(
 # INSTALLATION
 # ------------------------------
 install( TARGETS strus_database_leveldb
-           LIBRARY DESTINATION lib/strus )
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
