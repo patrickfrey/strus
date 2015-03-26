@@ -31,7 +31,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <vector>
 #include <string>

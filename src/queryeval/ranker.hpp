@@ -31,7 +31,7 @@
 #include "strus/index.hpp"
 #include "strus/weightedDocument.hpp"
 #include "private/localStructAllocator.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <set>
 #include <vector>
 #include <cstring>

@@ -28,7 +28,7 @@
 */
 #include "strus/private/protocol.hpp"
 #include "private/dll_tags.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 
 using namespace strus;

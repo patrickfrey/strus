@@ -32,7 +32,7 @@
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 #include <string>
 #include <stdexcept>

@@ -30,7 +30,7 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "private/utils.hpp"
 #include "queryEval.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 

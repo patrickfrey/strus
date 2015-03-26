@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "databaseCursor.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 #include <stdexcept>
 

@@ -30,7 +30,7 @@
 #include "databaseCursor.hpp"
 #include "databaseClient.hpp"
 #include "strus/databaseOptions.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <memory>
 #include <cstring>
 #include <stdexcept>

@@ -30,7 +30,7 @@
 #define _STRUS_ITERATOR_STRUCT_SEQUENCE_HPP_INCLUDED
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 
 namespace strus

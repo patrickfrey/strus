@@ -5,7 +5,7 @@
 #include "strus/private/configParser.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 #include <leveldb/db.h>
 

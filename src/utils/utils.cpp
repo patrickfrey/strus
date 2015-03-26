@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 

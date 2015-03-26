@@ -28,7 +28,7 @@
 */
 #include "storage.hpp"
 #include "storageClient.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/databaseClientInterface.hpp"

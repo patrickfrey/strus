@@ -34,7 +34,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstdlib>
 
 using namespace strus;

@@ -31,7 +31,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "databaseAdapter.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "keyMap.hpp"
 
 using namespace strus;

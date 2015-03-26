@@ -35,7 +35,7 @@
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 #include <string>
 #include <set>

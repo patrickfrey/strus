@@ -28,7 +28,7 @@
 */
 #include "documentFrequencyCache.hpp"
 #include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstdlib>
 
 using namespace strus;

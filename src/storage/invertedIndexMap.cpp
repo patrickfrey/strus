@@ -30,7 +30,7 @@
 #include "booleanBlockBatchWrite.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "keyMap.hpp"
 #include "databaseAdapter.hpp"
 #include "indexPacker.hpp"

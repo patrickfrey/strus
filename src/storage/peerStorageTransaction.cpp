@@ -28,7 +28,7 @@
 */
 #include "peerStorageTransaction.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "storageClient.hpp"
 
 using namespace strus;

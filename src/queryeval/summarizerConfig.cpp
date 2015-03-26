@@ -29,7 +29,7 @@
 #include "strus/summarizerConfig.hpp"
 #include "private/dll_tags.hpp"
 #include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 

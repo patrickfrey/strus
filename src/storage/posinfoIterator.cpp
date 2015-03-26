@@ -28,7 +28,7 @@
 */
 #include "posinfoIterator.hpp"
 #include "storageClient.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 

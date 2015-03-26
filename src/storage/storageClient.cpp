@@ -37,7 +37,7 @@
 #include "strus/storagePeerInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "strus/reference.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"

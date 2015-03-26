@@ -30,7 +30,7 @@
 #include "queryEval.hpp"
 #include "private/utils.hpp"
 #include "strus/weightingFunctionInterface.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 

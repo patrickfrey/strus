@@ -31,7 +31,7 @@
 #include "strus/queryInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/summarizationFeature.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "metaDataRestriction.hpp"
 #include <vector>
 #include <string>

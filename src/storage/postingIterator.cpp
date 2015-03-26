@@ -29,7 +29,7 @@
 #include "postingIterator.hpp"
 #include "storageClient.hpp"
 #include "indexPacker.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <string>
 #include <vector>
 #include <cstring>

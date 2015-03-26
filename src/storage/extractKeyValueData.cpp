@@ -34,7 +34,7 @@
 #include "booleanBlock.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <limits>

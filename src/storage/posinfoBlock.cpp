@@ -29,7 +29,7 @@
 #include "posinfoBlock.hpp"
 #include "memBlock.hpp"
 #include "indexPacker.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 #include <limits>
 #include <iostream>

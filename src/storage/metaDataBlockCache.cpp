@@ -29,7 +29,7 @@
 #include "metaDataBlockCache.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 #include <stdint.h>
 

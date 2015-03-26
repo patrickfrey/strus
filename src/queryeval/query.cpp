@@ -42,7 +42,7 @@
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "keyMap.hpp"
 #include <vector>
 #include <string>

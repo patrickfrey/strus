@@ -29,7 +29,7 @@
 #ifndef _STRUS_LVDB_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
 #define _STRUS_LVDB_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <memory>
 #include <stdexcept>
 #include <cstdlib>

@@ -30,7 +30,7 @@
 #define _STRUS_LVDB_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <vector>

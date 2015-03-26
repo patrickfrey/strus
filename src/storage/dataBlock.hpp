@@ -29,7 +29,7 @@
 #ifndef _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
 #define _STRUS_LVDB_DATA_BLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstdlib>
 #include <stdexcept>
 

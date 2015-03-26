@@ -31,7 +31,7 @@
 #include "indexPacker.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 

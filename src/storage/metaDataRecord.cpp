@@ -28,7 +28,7 @@
 */
 #include "metaDataRecord.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "floatConversions.hpp"
 #include "indexPacker.hpp"
 #include <utility>

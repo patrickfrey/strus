@@ -28,7 +28,7 @@
 */
 #include "forwardIndexBlock.hpp"
 #include "indexPacker.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 
 using namespace strus;

@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "metaDataDescription.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"

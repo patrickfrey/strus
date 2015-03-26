@@ -1,5 +1,5 @@
 #include "postingIteratorUnion.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstdlib>
 
 using namespace strus;

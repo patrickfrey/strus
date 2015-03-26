@@ -28,7 +28,7 @@
 */
 #include "indexPacker.hpp"
 #include "private/bitOperations.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <map>
 #include <limits>
 #include <cmath>

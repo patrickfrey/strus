@@ -32,7 +32,7 @@
 #include "weighting/weighting_standard.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <string>
 #include <vector>

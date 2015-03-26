@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include "private/dll_tags.hpp"
 #include <sstream>
 

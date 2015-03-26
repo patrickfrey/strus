@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #define _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <limits>

@@ -29,7 +29,7 @@
 #include "keyMap.hpp"
 #include "keyMapInv.hpp"
 #include "databaseAdapter.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 

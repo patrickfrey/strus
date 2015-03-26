@@ -29,7 +29,7 @@
 #ifndef _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #define _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <string>
 #include <map>
 

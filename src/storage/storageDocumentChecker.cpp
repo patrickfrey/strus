@@ -38,7 +38,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <iostream>
 #include <sstream>
 #include <fstream>

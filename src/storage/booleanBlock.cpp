@@ -28,7 +28,7 @@
 */
 #include "booleanBlock.hpp"
 #include "indexPacker.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <limits>
 
 using namespace strus;

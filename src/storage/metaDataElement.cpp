@@ -28,7 +28,7 @@
 */
 #include "metaDataElement.hpp"
 #include "private/utils.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 
 using namespace strus;

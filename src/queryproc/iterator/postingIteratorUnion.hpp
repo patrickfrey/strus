@@ -33,7 +33,7 @@
 #include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/bitOperations.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 
 namespace strus

@@ -32,7 +32,7 @@
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseOptions.hpp"
-#include "strus/private/internationalization.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
