@@ -191,6 +191,7 @@ make %{?_smp_mflags}
 %install
 
 cd build
+make test
 make DESTDIR=$RPM_BUILD_ROOT install
 
 # TODO: avoid building this stuff in cmake. how?
