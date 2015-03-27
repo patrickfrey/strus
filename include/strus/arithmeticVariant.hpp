@@ -28,9 +28,7 @@
 */
 #ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #define _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
-#include "private/internationalization.hpp"
 #include <cstring>
-#include <stdexcept>
 #include <limits>
 
 namespace strus {
@@ -92,12 +90,12 @@ public:
 	{
 		switch (type)
 		{
-			case Null: throw strus::logic_error( _TXT( "illegal cast of NULL"));
+			case Null: return TYPE();
 			case Int: return (TYPE)variant.Int;
 			case UInt: return (TYPE)variant.UInt;
 			case Float: return (TYPE)variant.Float;
 		}
-		throw strus::logic_error( _TXT( "illegal value of variant"));
+		return TYPE();
 	}
 
 	/// \brief Cast to a single precision floating point number
