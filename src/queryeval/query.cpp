@@ -42,6 +42,7 @@
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/utils.hpp"
+#include "private/internationalization.hpp"
 #include "keyMap.hpp"
 #include <vector>
 #include <string>
@@ -94,7 +95,7 @@ void Query::pushExpression( const std::string& opname_, std::size_t argc, int ra
 {
 	if (argc > m_stack.size())
 	{
-		throw std::runtime_error( "illegal expression definition: size of expression bigger than stack size");
+		throw strus::runtime_error( _TXT( "illegal expression definition: size of expression bigger than stack size"));
 	}
 	std::vector<NodeAddress> subnodes;
 	std::vector<NodeAddress>::const_iterator si = m_stack.end() - argc, se = m_stack.end();
@@ -111,7 +112,7 @@ void Query::pushDuplicate()
 {
 	if (m_stack.empty())
 	{
-		throw std::runtime_error( "cannot push duplicate (query stack empty)");
+		throw strus::runtime_error( _TXT( "cannot push duplicate (query stack empty)"));
 	}
 	m_stack.push_back( m_stack.back());
 }
@@ -120,7 +121,7 @@ void Query::attachVariable( const std::string& name_)
 {
 	if (m_stack.empty())
 	{
-		throw std::runtime_error( "cannot attach variable (query stack empty)");
+		throw strus::runtime_error( _TXT( "cannot attach variable (query stack empty)"));
 	}
 	m_variableAssignments.insert( std::pair<NodeAddress,std::string>( m_stack.back(), name_));
 }
@@ -228,7 +229,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
 	{
-		throw std::runtime_error( "number of arguments of feature join expression in query out of range");
+		throw strus::runtime_error( _TXT( "number of arguments of feature join expression in query out of range"));
 	}
 	std::vector<Reference<PostingIteratorInterface> > joinargs;
 	std::vector<NodeAddress>::const_iterator
@@ -287,7 +288,7 @@ PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
 		pi = m_nodePostingsMap.find( nodeadr);
 	if (pi == m_nodePostingsMap.end())
 	{
-		throw std::runtime_error("internal: expression node postings not found");
+		throw strus::runtime_error( _TXT( "expression node postings not found"));
 	}
 	return pi->second;
 }
@@ -345,7 +346,7 @@ std::vector<ResultDocument> Query::evaluate()
 	}
 	if (!m_queryEval->weighting().function())
 	{
-		throw std::runtime_error("cannot evaluate query, no weighting function defined");
+		throw strus::runtime_error( _TXT( "cannot evaluate query, no weighting function defined"));
 	}
 
 	// [3] Create the posting sets of the query features:

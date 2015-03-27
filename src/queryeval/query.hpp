@@ -31,6 +31,7 @@
 #include "strus/queryInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/summarizationFeature.hpp"
+#include "private/internationalization.hpp"
 #include "metaDataRestriction.hpp"
 #include <vector>
 #include <string>
@@ -110,7 +111,7 @@ public:
 			case TermNode: return +(int)(idx+1);
 			case ExpressionNode: return -(int)(idx+1);
 		}
-		throw std::logic_error("illegal node address type (query)");
+		throw strus::logic_error( _TXT( "illegal node address type (query)"));
 	}
 
 	struct Term

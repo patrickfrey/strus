@@ -32,6 +32,7 @@
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -134,7 +135,7 @@ public:
 		unsigned int sumlen = numericParameters_[1].defined()?(unsigned int)numericParameters_[1]:40;
 		if (termtype.empty())
 		{
-			throw std::runtime_error( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration");
+			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
 		return new SummarizerClosureMatchPhrase(
 				storage_, processor_, termtype, maxlen, sumlen, features_);

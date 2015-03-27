@@ -31,6 +31,7 @@
 #include "indexPacker.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
@@ -42,7 +43,7 @@ ForwardIterator::ForwardIterator( const StorageClient* storage_, const DatabaseC
 	,m_typeno(storage_->getTermType( type_))
 	,m_curpos(0)
 {
-	if (m_typeno == 0) throw std::runtime_error( std::string("unknown term type name '") + type_ + "'");
+	if (m_typeno == 0) throw strus::runtime_error( _TXT( "unknown term type name '%s'"), type_.c_str());
 }
 
 ForwardIterator::~ForwardIterator()
@@ -109,7 +110,7 @@ std::string ForwardIterator::fetch()
 {
 	if (!m_blockitr || m_curblock.empty())
 	{
-		throw std::runtime_error("internal: forward iterator fetch called without a term selected");
+		throw strus::runtime_error( _TXT( "forward iterator fetch called without a term selected"));
 	}
 	return std::string( m_curblock.value_at( m_blockitr));
 }

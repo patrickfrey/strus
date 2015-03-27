@@ -1,4 +1,5 @@
 #include "postingIteratorUnion.hpp"
+#include "private/internationalization.hpp"
 #include <cstdlib>
 
 using namespace strus;
@@ -13,7 +14,7 @@ IteratorUnion::IteratorUnion( const std::vector<Reference<PostingIteratorInterfa
 {
 	if (args_.size() > 64)
 	{
-		throw std::runtime_error( "number of arguments of union out of range (> 64)");
+		throw strus::runtime_error( _TXT( "number of arguments of union out of range (> %u)"), 64);
 	}
 	std::vector<Reference<PostingIteratorInterface> >::const_iterator
 		ai = args_.begin(), ae = args_.end();

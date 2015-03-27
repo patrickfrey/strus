@@ -30,6 +30,7 @@
 #include "databaseCursor.hpp"
 #include "databaseClient.hpp"
 #include "strus/databaseOptions.hpp"
+#include "private/internationalization.hpp"
 #include <memory>
 #include <cstring>
 #include <stdexcept>
@@ -90,7 +91,8 @@ void DatabaseTransaction::commit()
 	leveldb::Status status = m_db->Write( options, &m_batch);
 	if (!status.ok())
 	{
-		throw std::runtime_error( std::string( "error in commit when writing transaction batch: ") + status.ToString());
+		std::string statusstr( status.ToString());
+		throw strus::runtime_error( _TXT( "error in commit when writing transaction batch: "), statusstr.c_str());
 	}
 	m_batch.Clear();
 	m_commit_called = true;

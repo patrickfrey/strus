@@ -26,57 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#include "indexPacker.hpp"
-#include "floatConversions.hpp"
-#include "private/bitOperations.hpp"
+#ifndef _STRUS_INTERNATIONALIZATION_HPP_INCLUDED
+#define _STRUS_INTERNATIONALIZATION_HPP_INCLUDED
+#include <libintl.h>
 #include <stdexcept>
-#include <iostream>
-#include <cstdlib>
-#include <limits>
-#include <cstdlib>
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
+#define _TXT(STRING) gettext(STRING)
 
-using namespace strus;
-
-static void spFloatConversionTest( float in)
+namespace strus
 {
-	float16_t res = strus::floatSingleToHalfPrecision( in);
-	float test = strus::floatHalfToSinglePrecision( res);
-	float diff = in - test;
-	float epsilon = 4.88e-04;
-	// half precision float epsilon is 4.88e-04 
-	//	according http://en.wikipedia.org/wiki/Machine_epsilon
-	if (diff*diff > epsilon)
-	{
-		throw std::runtime_error("float conversion failed");
-	}
-	std::cerr << "tested float single/half precision for " << in << " (error " << diff << ")" << std::endl;
-}
 
-static void testSinglePrecisionFloatConversions()
-{
-	spFloatConversionTest( 3.1);
-	spFloatConversionTest( 27);
-	spFloatConversionTest( 1.9);
-	spFloatConversionTest( 2.1);
-	spFloatConversionTest( 21.1);
-	spFloatConversionTest( -8.1);
-	spFloatConversionTest( -0.1);
-}
+/// \brief Substitute for std::runtime_error with arguments
+/// \param[in] msg c printf format string
+/// \param[in] nofargs number of arguments passed to be substituted in the format string
+std::runtime_error runtime_error( const char* format, ...);
 
-int main( int, const char**)
-{
-	try
-	{
-		testSinglePrecisionFloatConversions();
-		return 0;
-	}
-	catch (const std::exception& err)
-	{
-		std::cerr << "EXCEPTION " << err.what() << std::endl;
-	}
-	return -1;
-}
+/// \brief Substitute for std::logic_error with arguments
+/// \param[in] msg c printf format string
+/// \param[in] nofargs number of arguments passed to be substituted in the format string
+std::logic_error logic_error( const char* format, ...);
 
+/// \brief Declare the message domain used by this package for the exception constructors declared in this module for gettext
+void initMessageTextDomain();
+
+}//namespace
+#endif
 

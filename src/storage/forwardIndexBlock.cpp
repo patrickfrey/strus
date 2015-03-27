@@ -28,6 +28,7 @@
 */
 #include "forwardIndexBlock.hpp"
 #include "indexPacker.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 
 using namespace strus;
@@ -53,7 +54,7 @@ std::string ForwardIndexBlock::value_at( const char* ref) const
 const char* ForwardIndexBlock::nextItem( const char* ref) const
 {
 	if (ref == charend()) return 0;
-	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal forward index block access -- nextItem");
+	if (ref < charptr() || ref > charend()) throw strus::logic_error( _TXT( "illegal forward index block access (%s)"), __FUNCTION__);
 	char const* rt = (const char*)std::memchr( ref, EndItemMarker, charend()-ref);
 	return (rt)?(rt+1):charend();
 }
@@ -61,7 +62,7 @@ const char* ForwardIndexBlock::nextItem( const char* ref) const
 const char* ForwardIndexBlock::prevItem( const char* ref) const
 {
 	if (ref == charptr()) return 0;
-	if (ref < charptr() || ref > charend()) throw std::logic_error("illegal forward index block access -- prevItem");
+	if (ref < charptr() || ref > charend()) throw strus::logic_error( _TXT( "illegal forward index block access (%s)"), __FUNCTION__);
 	char const* rt = (const char*)::memrchr( charptr(), EndItemMarker, ref-charptr()-1);
 	return (rt >= charptr())?(rt+1):charptr();
 }
@@ -70,7 +71,7 @@ const char* ForwardIndexBlock::upper_bound( const Index& pos_, const char* lower
 {
 	if (!lowerbound || lowerbound == charend()) return 0;
 
-	if (id() < pos_) throw std::logic_error("called ForwardIndexBlock::upper_bound with wrong block");
+	if (id() < pos_) throw strus::logic_error( _TXT( "called %s with wrong block"), __FUNCTION__);
 
 	const char* rt = findStructIndexDesc(
 				lowerbound, charend(), EndItemMarker,
@@ -89,11 +90,11 @@ void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 	char const* pp = prevItem( charend());
 	if (pp && position_at( pp) >= pos)
 	{
-		throw std::runtime_error( "forward index items not added in strictly ascending position order");
+		throw strus::runtime_error( _TXT( "forward index items not added in strictly ascending position order"));
 	}
 	if (id() < pos)
 	{
-		throw std::runtime_error( "internal: upper bound of position in forward index block not set (setId)");
+		throw strus::runtime_error( _TXT( "upper bound of position in forward index block not set (%s)"), __FUNCTION__);
 	}
 	std::string blk;
 	if (size()) blk.push_back( EndItemMarker);
@@ -115,7 +116,7 @@ void ForwardIndexBlock::setId( const Index& id_)
 		char const* pp = prevItem( charend());
 		Index maxPos = position_at( pp);
 		
-		if (maxPos > id_) throw std::runtime_error( "internal: cannot set forward index block id to a smaller value than the highest position of an item inserted");
+		if (maxPos > id_) throw strus::runtime_error( _TXT( "cannot set forward index block id to a smaller value than the highest position of an item inserted"));
 		if (id() != id_)
 		{
 			// Rewrite relative position numbers (first element in variable size record):

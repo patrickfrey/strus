@@ -29,6 +29,7 @@
 #include "strus/summarizerConfig.hpp"
 #include "private/dll_tags.hpp"
 #include "private/utils.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
@@ -37,7 +38,7 @@ DLL_PUBLIC void strus::SummarizerConfig::defineNumericParameter( const std::stri
 	std::string name = utils::tolower( name_);
 	if (m_numericParameters.find( name) != m_numericParameters.end())
 	{
-		throw std::runtime_error( std::string("duplicate definition of summarizer parameter '") + name_ + "'");
+		throw strus::runtime_error( _TXT( "duplicate definition of summarizer parameter '%s'"), name_.c_str());
 	}
 	m_numericParameters[ name] = value_;
 }
@@ -47,7 +48,7 @@ DLL_PUBLIC void strus::SummarizerConfig::defineTextualParameter( const std::stri
 	std::string name = utils::tolower( name_);
 	if (m_textualParameters.find( name) != m_textualParameters.end())
 	{
-		throw std::runtime_error( std::string("duplicate definition of summarizer parameter '") + name_ + "'");
+		throw strus::runtime_error( _TXT( "duplicate definition of summarizer parameter '%s'"), name_.c_str());
 	}
 	m_textualParameters[ name] = value_;
 }
@@ -57,7 +58,7 @@ DLL_PUBLIC void strus::SummarizerConfig::defineFeatureParameter( const std::stri
 	std::string name = utils::tolower( class_);
 	if (m_featureParameters.find( name) != m_featureParameters.end())
 	{
-		throw std::runtime_error( std::string( "duplicate definition of summarizer feature parameter '") + class_ + "'");
+		throw strus::runtime_error( _TXT( "duplicate definition of summarizer feature parameter '%s'"), class_.c_str());
 	}
 	m_featureParameters[ name] = set_;
 }

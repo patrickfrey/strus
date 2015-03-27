@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "strus/private/arithmeticVariantAsString.hpp"
+#include "private/internationalization.hpp"
 #include "private/dll_tags.hpp"
 #include <sstream>
 
@@ -47,7 +48,7 @@ DLL_PUBLIC ArithmeticVariant strus::arithmeticVariantFromString( const std::stri
 	bool int_overflow = false;
 	if (vi == ve)
 	{
-		throw std::runtime_error( "empty string cannot be converted to arithmetic variant");
+		throw strus::runtime_error( _TXT( "empty string cannot be converted to arithmetic variant"));
 	}
 	if (vi != ve && *vi == '-')
 	{
@@ -100,7 +101,7 @@ DLL_PUBLIC ArithmeticVariant strus::arithmeticVariantFromString( const std::stri
 			return ArithmeticVariant(sign?fval:-fval);
 		}
 	}
-	throw std::runtime_error( std::string( "cannot convert string to arithmetic variant value: '") + valueAsString + "'");
+	throw strus::runtime_error( _TXT( "cannot convert string to arithmetic variant value: '%s'"), valueAsString.c_str());
 }
 
 static void print( std::ostream& out, const ArithmeticVariant& val)

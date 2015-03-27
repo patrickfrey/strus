@@ -26,57 +26,48 @@
 
 --------------------------------------------------------------------
 */
-#include "indexPacker.hpp"
-#include "floatConversions.hpp"
-#include "private/bitOperations.hpp"
-#include <stdexcept>
-#include <iostream>
-#include <cstdlib>
-#include <limits>
-#include <cstdlib>
+#include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
+#include <stdio.h>
+#include <stdlib.h>
+#include <libintl.h>
+#include <locale.h>
+#include <cstdarg>
 
-#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
+#define STRUS_GETTEXT_PACKAGE		"strus-dom"
+#define STRUS_GETTEXT_LOCALEDIR		""
 
-using namespace strus;
-
-static void spFloatConversionTest( float in)
+std::runtime_error strus::runtime_error( const char* format, ...)
 {
-	float16_t res = strus::floatSingleToHalfPrecision( in);
-	float test = strus::floatHalfToSinglePrecision( res);
-	float diff = in - test;
-	float epsilon = 4.88e-04;
-	// half precision float epsilon is 4.88e-04 
-	//	according http://en.wikipedia.org/wiki/Machine_epsilon
-	if (diff*diff > epsilon)
-	{
-		throw std::runtime_error("float conversion failed");
-	}
-	std::cerr << "tested float single/half precision for " << in << " (error " << diff << ")" << std::endl;
+	char buffer[ 1024];
+	va_list args;
+	va_start( args, format);
+	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, "format");
+	int buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
+	buffer[ sizeof(buffer)-1] = 0;
+	std::runtime_error rt( std::string( buffer, buffersize));
+	va_end (args);
+	return rt;
 }
 
-static void testSinglePrecisionFloatConversions()
+std::logic_error strus::logic_error( const char* format, ...)
 {
-	spFloatConversionTest( 3.1);
-	spFloatConversionTest( 27);
-	spFloatConversionTest( 1.9);
-	spFloatConversionTest( 2.1);
-	spFloatConversionTest( 21.1);
-	spFloatConversionTest( -8.1);
-	spFloatConversionTest( -0.1);
+	char buffer[ 1024];
+	va_list args;
+	va_start( args, format);
+	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, "format");
+	int buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
+	buffer[ sizeof(buffer)-1] = 0;
+	std::logic_error rt( std::string( buffer, buffersize));
+	va_end (args);
+	return rt;
 }
 
-int main( int, const char**)
+DLL_PUBLIC void strus::initMessageTextDomain()
 {
-	try
-	{
-		testSinglePrecisionFloatConversions();
-		return 0;
-	}
-	catch (const std::exception& err)
-	{
-		std::cerr << "EXCEPTION " << err.what() << std::endl;
-	}
-	return -1;
+#ifdef ENABLE_NLS
+	::bindtextdomain( STRUS_GETTEXT_PACKAGE, STRUS_GETTEXT_LOCALEDIR);
+#endif
 }
 
 

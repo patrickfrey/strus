@@ -5,6 +5,7 @@
 #include "strus/private/configParser.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 #include <leveldb/db.h>
 
@@ -19,7 +20,7 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 
 	if (!extractStringFromConfigString( path, src, "path"))
 	{
-		throw std::runtime_error("missing 'path' in database configuration string");
+		throw strus::runtime_error( _TXT( "missing 'path' in database configuration string"));
 	}
 	(void)extractBooleanFromConfigString( compression, src, "compression");
 	(void)extractUIntFromConfigString( cachesize_kb, src, "cache");
@@ -35,7 +36,7 @@ void Database::createDatabase( const std::string& configsource) const
 
 	if (!extractStringFromConfigString( path, src, "path"))
 	{
-		throw std::runtime_error("missing 'path' in database configuration string");
+		throw strus::runtime_error( _TXT( "missing 'path' in database configuration string"));
 	}
 	(void)extractBooleanFromConfigString( compression, src, "compression");
 
@@ -55,7 +56,7 @@ void Database::createDatabase( const std::string& configsource) const
 	{
 		std::string err = status.ToString();
 		if (db) delete db;
-		throw std::runtime_error( std::string( "failed to create LevelDB key value store database: ") + err);
+		throw strus::runtime_error( _TXT( "failed to create LevelDB key value store database: "), err.c_str());
 	}
 	if (db) delete db;
 }
@@ -67,7 +68,7 @@ void Database::destroyDatabase( const std::string& configsource) const
 
 	if (!extractStringFromConfigString( path, src, "path"))
 	{
-		throw std::runtime_error("missing 'path' in database configuration string");
+		throw strus::runtime_error( _TXT( "missing 'path' in database configuration string"));
 	}
 
 	leveldb::Options options;
@@ -75,7 +76,7 @@ void Database::destroyDatabase( const std::string& configsource) const
 	if (!status.ok())
 	{
 		std::string err = status.ToString();
-		throw std::runtime_error( std::string( "failed to remove key value store database: ") + err);
+		throw strus::runtime_error( _TXT( "failed to remove key value store database: "), err.c_str());
 	}
 }
 

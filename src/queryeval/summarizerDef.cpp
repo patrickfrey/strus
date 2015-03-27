@@ -30,6 +30,7 @@
 #include "strus/summarizerFunctionInterface.hpp"
 #include "private/utils.hpp"
 #include "queryEval.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
@@ -57,7 +58,7 @@ SummarizerDef::SummarizerDef(
 	const char** arg = m_function->numericParameterNames();
 	if (!arg && pi != pe)
 	{
-		throw std::runtime_error( std::string( "no numeric arguments expected for summarizer '") + m_functionName + "'");
+		throw strus::runtime_error( _TXT( "no numeric arguments expected for summarizer '%s'"), m_functionName.c_str());
 	}
 	for (; pi != pe; ++pi)
 	{
@@ -71,7 +72,7 @@ SummarizerDef::SummarizerDef(
 		}
 		if (!arg[aidx])
 		{
-			throw std::runtime_error(std::string( "unknown numeric argument name '") + pi->first + "' for summarizer '" + m_functionName + "'");
+			throw strus::runtime_error( _TXT( "unknown numeric argument name '%s' for summarizer '%s'") ,pi->first.c_str(), m_functionName.c_str());
 		}
 		m_numericParameters[aidx] = pi->second;
 	}
@@ -83,7 +84,7 @@ SummarizerDef::SummarizerDef(
 	arg = m_function->textualParameterNames();
 	if (!arg && ti != te)
 	{
-		throw std::runtime_error( std::string( "no textual arguments expected for summarizer '") + m_functionName + "'");
+		throw strus::runtime_error( _TXT( "no textual arguments expected for summarizer '%s'"), m_functionName.c_str());
 	}
 	for (; ti != te; ++ti)
 	{
@@ -97,7 +98,7 @@ SummarizerDef::SummarizerDef(
 		}
 		if (!arg[aidx])
 		{
-			throw std::runtime_error(std::string( "unknown textual argument name '") + ti->first + "' for summarizer '" + m_functionName + "'");
+			throw strus::runtime_error( _TXT( "unknown textual argument name '%s' for summarizer '%s'"), ti->first.c_str(), m_functionName.c_str());
 		}
 		m_textualParameters[aidx] = ti->second;
 	}
@@ -108,7 +109,7 @@ SummarizerDef::SummarizerDef(
 	arg = m_function->featureParameterClassNames();
 	if (!arg && fi != fe)
 	{
-		throw std::runtime_error( std::string( "no feature arguments expected for summarizer function '") + m_functionName + "'");
+		throw strus::runtime_error( _TXT( "no feature arguments expected for summarizer function '%s'"), m_functionName.c_str());
 	}
 	for (; fi != fe; ++fi)
 	{
@@ -122,7 +123,7 @@ SummarizerDef::SummarizerDef(
 		}
 		if (!arg[aidx])
 		{
-			throw std::runtime_error(std::string( "unknown feature argument name '") + fi->first + "' for summarizer function '" + m_functionName + "'");
+			throw strus::runtime_error( _TXT( "unknown feature argument name '%s' for summarizer function '%s'"), fi->first.c_str(), m_functionName.c_str());
 		}
 		m_featureParameters.push_back( Feature( aidx, fi->second));
 	}

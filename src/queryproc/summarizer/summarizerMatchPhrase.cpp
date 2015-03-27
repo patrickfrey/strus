@@ -34,6 +34,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
+#include "private/internationalization.hpp"
 #include <cstdlib>
 
 using namespace strus;
@@ -72,7 +73,7 @@ SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 		}
 		else
 		{
-			throw std::logic_error("unknown feature class passed to match phrase summarizer");
+			throw strus::logic_error( _TXT( "unknown feature class passed to match phrase summarizer"));
 		}
 	}
 	if (structelem.size() > 1)

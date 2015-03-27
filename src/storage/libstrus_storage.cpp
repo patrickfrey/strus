@@ -29,12 +29,19 @@
 #include "strus/lib/storage.hpp"
 #include "storage.hpp"
 #include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
 DLL_PUBLIC const StorageInterface* strus::getStorage()
 {
 	static const Storage storage;
+	static bool intl_initialized = false;
+	if (!intl_initialized)
+	{
+		strus::initMessageTextDomain();
+		intl_initialized = true;
+	}
 	return &storage;
 }
 

@@ -28,6 +28,7 @@
 */
 #include "indexPacker.hpp"
 #include "private/bitOperations.hpp"
+#include "private/internationalization.hpp"
 #include <map>
 #include <limits>
 #include <cmath>
@@ -86,7 +87,7 @@ static inline std::size_t utf8encode( char* buf, int32_t chr)
 {
 	if (chr<0)
 	{
-		throw std::runtime_error( "illegal unicode character");
+		throw strus::runtime_error( _TXT( "illegal unicode character (%s)"), __FUNCTION__);
 	}
 	if (chr <= 127)
 	{
@@ -114,12 +115,12 @@ static inline int32_t unpackInt32_( const char*& itr, const char* end)
 	int charlen = utf8charlen( *itr);
 	if (end - itr < charlen)
 	{
-		throw std::runtime_error( "corrupt data (unpackInt32_ 1)");
+		throw strus::runtime_error( _TXT( "corrupt data (%s 1)"), __FUNCTION__);
 	}
 	int32_t rt = utf8decode( itr, charlen);
 	if (rt < 0)
 	{
-		throw std::runtime_error( "corrupt data (unpackInt32_ 2)");
+		throw strus::runtime_error( _TXT( "corrupt data (%s 2)"), __FUNCTION__);
 	}
 	itr += charlen;
 	return rt;
@@ -150,7 +151,7 @@ const char* strus::prevPackedIndexPos( const char* start, const char* str)
 	if (start >= cc)
 	{
 		if (start == cc && ((unsigned char)*cc & B11000000) != B10000000) return cc;
-		throw std::runtime_error( "corrupt data (nextPackedIndexPos 1)");
+		throw strus::runtime_error( _TXT( "corrupt data (%s 1)"), __FUNCTION__);
 	}
 	return cc;
 }
@@ -176,12 +177,12 @@ const char* strus::skipIndex( const char* ptr, const char* end)
 	char const* rt = ptr;
 	if (ptr == end)
 	{
-		throw std::runtime_error( "corrupt data (skipIndex)");
+		throw strus::runtime_error( _TXT( "corrupt data (%s)"), __FUNCTION__);
 	}
 	rt += utf8charlen( *rt);
 	if (rt > end)
 	{
-		throw std::runtime_error( "corrupt data (skipIndex)");
+		throw strus::runtime_error( _TXT( "corrupt data (%s)"), __FUNCTION__);
 	}
 	return rt;
 }
@@ -223,13 +224,13 @@ void strus::packIndex( std::string& buf, const Index& idx)
 void strus::packIndex( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx)
 {
 	size += packIndex_( buf+size, idx);
-	if (size > maxsize) throw std::logic_error( "array bounds write (packIndex)");
+	if (size > maxsize) throw strus::logic_error( _TXT( "array bounds write (%s)"), __FUNCTION__);
 }
 
 void strus::packRange( char* buf, std::size_t& size, std::size_t maxsize, const Index& idx, const Index& rangesize)
 {
 	size += packRange_( buf, idx, rangesize);
-	if (size > maxsize) throw std::logic_error( "array bounds write (packRange)");
+	if (size > maxsize) throw strus::logic_error( _TXT( "array bounds write (%s)"), __FUNCTION__);
 }
 
 void strus::packRange( std::string& buf, const Index& idx, const Index& rangesize)
@@ -451,7 +452,7 @@ bool strus::checkStringUtf8( const char* ptr, std::size_t size)
 
 void strus::packGlobalCounter( char* buf, std::size_t& size, std::size_t maxsize, const GlobalCounter& cnt)
 {
-	if (cnt >> 62 != 0) throw std::runtime_error( "counter out of range (packGlobalCounter)");
+	if (cnt >> 62 != 0) throw strus::runtime_error( _TXT( "counter out of range (%s)"), __FUNCTION__);
 	Index hi = (Index)(cnt >> 31);
 	Index lo = (cnt & (0x7fffFFFFUL));
 	packIndex( buf, size, maxsize, hi);
@@ -460,7 +461,7 @@ void strus::packGlobalCounter( char* buf, std::size_t& size, std::size_t maxsize
 
 void strus::packGlobalCounter( std::string& buf, const GlobalCounter& cnt)
 {
-	if (cnt >> 62 != 0) throw std::runtime_error( "counter out of range (packGlobalCounter)");
+	if (cnt >> 62 != 0) throw strus::runtime_error( _TXT( "counter out of range (%s)"), __FUNCTION__);
 	Index hi = (Index)(cnt >> 31);
 	Index lo = (cnt & (0x7fffFFFFUL));
 	packIndex( buf, hi);

@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "metaDataDescription.hpp"
+#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"
@@ -79,7 +80,7 @@ MetaDataDescription::MetaDataDescription( const std::string& str)
 	{
 		skipSpaces( si, se);
 		const char* sn = (const char*)std::memchr( si, ' ', se-si);
-		if (!sn) throw std::runtime_error( "invalid meta data description string");
+		if (!sn) throw strus::runtime_error( _TXT( "invalid meta data description string"));
 		std::string varName( si, sn-si);
 		si = sn;
 		skipSpaces( si, se);
@@ -127,7 +128,7 @@ std::string MetaDataDescription::tostring() const
 				break;
 			}
 		}
-		if (ni == ne) throw std::logic_error( "corrupt meta data description");
+		if (ni == ne) throw strus::logic_error( _TXT( "corrupt meta data description"));
 		rt.append( ei->typeName());
 	}
 	return rt;
@@ -139,7 +140,7 @@ int MetaDataDescription::getHandle( const std::string& name_) const
 		ni = m_namemap.find( utils::tolower( name_));
 	if (ni == m_namemap.end())
 	{
-		throw std::runtime_error( std::string( "meta data element with name '") + name_ + "' is not defined");
+		throw strus::runtime_error( _TXT( "meta data element with name '%s' is not defined"), name_.c_str());
 	}
 	return (int)ni->second;
 }
@@ -158,11 +159,11 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 {
 	if (!isAlnumIdentifier( name_))
 	{
-		throw std::runtime_error( std::string( "meta data name '") + name_ + "'' is not an alphanumeric string");
+		throw strus::runtime_error( _TXT( "meta data name '%s' is not an alphanumeric string"), name_.c_str());
 	}
 	if (defined( name_))
 	{
-		throw std::runtime_error( std::string( "duplicate definition of meta data element '") + name_ + "'");
+		throw strus::runtime_error( _TXT( "duplicate definition of meta data element '%s'"), name_.c_str());
 	}
 	std::size_t ofs = 0;
 	std::vector<MetaDataElement>::iterator ei = m_ar.begin(), ee = m_ar.end();

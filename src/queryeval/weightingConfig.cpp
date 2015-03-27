@@ -29,6 +29,7 @@
 #include "strus/weightingConfig.hpp"
 #include "private/dll_tags.hpp"
 #include "private/utils.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
@@ -37,7 +38,7 @@ DLL_PUBLIC void strus::WeightingConfig::defineNumericParameter( const std::strin
 	std::string name = utils::tolower( name_);
 	if (m_numericParameters.find( name) != m_numericParameters.end())
 	{
-		throw std::runtime_error( std::string( "duplicate definition of weighting function parameter '") + name_ + "'");
+		throw strus::runtime_error( _TXT( "duplicate definition of weighting function parameter '%s'"), name_.c_str());
 	}
 	m_numericParameters[ name] = value_;
 }

@@ -33,6 +33,7 @@
 #include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/bitOperations.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 
 namespace strus
@@ -161,8 +162,8 @@ public:
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
 			int range) const
 	{
-		if (range != 0) throw std::runtime_error( "no range argument expected for union join");
-		if (itrs.size() == 0) throw std::runtime_error( "too few arguments for union join");
+		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for union join"));
+		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments for union join"));
 
 		return new IteratorUnion( itrs);
 	}

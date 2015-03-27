@@ -29,6 +29,7 @@
 #include "metaDataBlockCache.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "databaseAdapter.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 #include <stdint.h>
 
@@ -54,7 +55,7 @@ void MetaDataBlockCache::refresh()
 
 void MetaDataBlockCache::resetBlock( const Index& blockno)
 {
-	if (blockno > CacheSize || blockno <= 0) throw std::runtime_error("block number out of range (MetaDataBlockCache)");
+	if (blockno > CacheSize || blockno <= 0) throw strus::runtime_error( _TXT( "block number out of range (meta data block cache)"));
 	std::size_t blkidx = blockno-1;
 
 	m_ar[ blkidx].reset();
@@ -63,7 +64,7 @@ void MetaDataBlockCache::resetBlock( const Index& blockno)
 
 const MetaDataRecord MetaDataBlockCache::get( const Index& docno)
 {
-	if (docno > MaxDocno || docno <= 0) throw std::runtime_error("document number out of range (MetaDataBlockCache)");
+	if (docno > MaxDocno || docno <= 0) throw strus::runtime_error( _TXT( "document number out of range (meta data block cache)"));
 	std::size_t docidx     = (std::size_t)(docno -1);
 	std::size_t blkidx     = docidx / MetaDataBlock::BlockSize;
 	Index blockno          = blkidx+1;

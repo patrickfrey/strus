@@ -28,6 +28,7 @@
 */
 #include "attributeReader.hpp"
 #include "databaseAdapter.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 
 using namespace strus;
@@ -37,7 +38,7 @@ Index AttributeReader::elementHandle( const char* name) const
 	Index rt = m_storage->getAttributeName( name);
 	if (!rt)
 	{
-		throw std::runtime_error( std::string( "attribute with name '") + name + "' is not defined");
+		throw strus::runtime_error( _TXT( "attribute with name '%s' is not defined"), name);
 	}
 	return rt;
 }

@@ -28,6 +28,7 @@
 */
 #include "peerStorageTransaction.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "private/internationalization.hpp"
 #include "storageClient.hpp"
 
 using namespace strus;
@@ -65,7 +66,7 @@ void PeerStorageTransaction::updateDocumentFrequencyChange(
 		termno = ++m_termvaluecnt + UnknownValueHandleStart;
 		if (m_termvaluecnt >= UnknownValueHandleStart)
 		{
-			throw std::runtime_error("too many new terms inserted (peer storage transaction");
+			throw strus::runtime_error( _TXT( "too many new terms inserted (peer storage transaction"));
 		}
 	}
 	m_dfbatch.put( typeno, termno, increment);
@@ -75,11 +76,11 @@ void PeerStorageTransaction::commit()
 {
 	if (m_commit)
 	{
-		throw std::runtime_error( "called transaction commit twice");
+		throw strus::runtime_error( _TXT( "called transaction commit twice"));
 	}
 	if (m_rollback)
 	{
-		throw std::runtime_error( "called transaction commit after rollback");
+		throw strus::runtime_error( _TXT( "called transaction commit after rollback"));
 	}
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 
@@ -115,11 +116,11 @@ void PeerStorageTransaction::rollback()
 {
 	if (m_commit)
 	{
-		throw std::runtime_error( "called transaction rollback twice");
+		throw strus::runtime_error( _TXT( "called transaction rollback twice"));
 	}
 	if (m_rollback)
 	{
-		throw std::runtime_error( "called transaction rollback after commit");
+		throw strus::runtime_error( _TXT( "called transaction rollback after commit"));
 	}
 	m_rollback = true;
 }

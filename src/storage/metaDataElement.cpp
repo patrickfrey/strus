@@ -28,6 +28,7 @@
 */
 #include "metaDataElement.hpp"
 #include "private/utils.hpp"
+#include "private/internationalization.hpp"
 #include <stdexcept>
 
 using namespace strus;
@@ -42,7 +43,7 @@ MetaDataElement::Type MetaDataElement::typeFromName( const char* namestr)
 			return (Type)ti;
 		}
 	}
-	throw std::runtime_error( std::string( "unknown meta data element type name '") + namestr + "'");
+	throw strus::runtime_error( _TXT( "unknown meta data element type name '%s'"), namestr);
 }
 
 

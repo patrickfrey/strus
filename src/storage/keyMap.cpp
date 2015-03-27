@@ -29,6 +29,7 @@
 #include "keyMap.hpp"
 #include "keyMapInv.hpp"
 #include "databaseAdapter.hpp"
+#include "private/internationalization.hpp"
 
 using namespace strus;
 
@@ -71,7 +72,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		rt = ++m_unknownHandleCount;
 		if (rt >= UnknownValueHandleStart)
 		{
-			throw std::runtime_error( "too many elements in keymap");
+			throw strus::runtime_error( _TXT( "too many elements in keymap"));
 		}
 		rt += UnknownValueHandleStart;
 		m_map.set( name.c_str(), rt);

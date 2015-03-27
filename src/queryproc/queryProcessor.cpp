@@ -32,6 +32,7 @@
 #include "weighting/weighting_standard.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <string>
 #include <vector>
@@ -81,7 +82,7 @@ const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 		ji = m_joiners.find( utils::tolower( name));
 	if (ji == m_joiners.end())
 	{
-		throw std::runtime_error( std::string( "posting set join operator not defined: '") + name + "'");
+		throw strus::runtime_error( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
 	}
 	return ji->second.get();
 }
@@ -101,7 +102,7 @@ const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		wi = m_weighters.find( utils::tolower( std::string(name)));
 	if (wi == m_weighters.end())
 	{
-		throw std::runtime_error( std::string( "weighting function not defined: '") + name + "'");
+		throw strus::runtime_error( _TXT( "weighting function not defined: '%s'"), name.c_str());
 	}
 	return wi->second.get();
 }
@@ -121,7 +122,7 @@ const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		si = m_summarizers.find( utils::tolower( std::string(name)));
 	if (si == m_summarizers.end())
 	{
-		throw std::runtime_error( std::string( "summarization function not defined: '") + name + "'");
+		throw strus::runtime_error( _TXT( "summarization function not defined: '%s'"), name.c_str());
 	}
 	return si->second.get();
 }

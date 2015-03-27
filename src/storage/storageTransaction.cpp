@@ -35,6 +35,7 @@
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -246,11 +247,11 @@ void StorageTransaction::commit()
 {
 	if (m_commit)
 	{
-		throw std::runtime_error( "called transaction commit twice");
+		throw strus::runtime_error( _TXT( "called transaction commit twice"));
 	}
 	if (m_rollback)
 	{
-		throw std::runtime_error( "called transaction commit after rollback");
+		throw strus::runtime_error( _TXT( "called transaction commit after rollback"));
 	}
 	{
 		StorageClient::TransactionLock lock( m_storage);
@@ -310,11 +311,11 @@ void StorageTransaction::rollback()
 {
 	if (m_rollback)
 	{
-		throw std::runtime_error( "called transaction rollback twice");
+		throw strus::runtime_error( _TXT( "called transaction rollback twice"));
 	}
 	if (m_commit)
 	{
-		throw std::runtime_error( "called transaction rollback after commit");
+		throw strus::runtime_error( _TXT( "called transaction rollback after commit"));
 	}
 	std::vector<Index> refreshList;
 	m_storage->releaseTransaction( refreshList);
