@@ -50,16 +50,19 @@ public:
 	WeightingDef(
 			const WeightingFunctionInterface* function_,
 			const std::string& functionName_,
-			const WeightingConfig& config);
+			const WeightingConfig& config,
+			const std::vector<std::string>& weightingSets_);
 
 	const WeightingFunctionInterface* function() const		{return m_function;}
 	const std::string& functionName() const				{return m_functionName;}
 	const std::vector<ArithmeticVariant>& parameters() const	{return m_parameters;}
+	const std::vector<std::string>& weightingSets() const		{return m_weightingSets;}
 
 private:
 	const WeightingFunctionInterface* m_function;	///< function used for weighting
 	std::string m_functionName;			///< name of the function used for weighting
 	std::vector<ArithmeticVariant> m_parameters;	///< weighting function parameters
+	std::vector<std::string> m_weightingSets;	///< posting sets that are used for weighting
 };
 
 }

@@ -70,11 +70,6 @@ void QueryEval::addRestrictionFeature( const std::string& set_)
 	m_restrictionSets.push_back( set_);
 }
 
-void QueryEval::addWeightingFeature( const std::string& set_)
-{
-	m_weightingSets.push_back( set_);
-}
-
 void QueryEval::addSummarizer(
 		const std::string& resultAttribute,
 		const std::string& functionName,
@@ -86,57 +81,71 @@ void QueryEval::addSummarizer(
 	m_summarizers.push_back( SummarizerDef( resultAttribute, function, functionName, config));
 }
 
-void QueryEval::setWeighting(
+void QueryEval::addWeightingFunction(
 		const std::string& functionName,
-		const WeightingConfig& config)
+		const WeightingConfig& config,
+		const std::vector<std::string>& weightedFeatureSets)
 {
 	const WeightingFunctionInterface*
 		function = m_processor->getWeightingFunction( functionName);
 
-	m_weighting = WeightingDef( function, functionName, config);
+	m_weightingFunctions.push_back( WeightingDef( function, functionName, config, weightedFeatureSets));
 }
 
 void QueryEval::print( std::ostream& out) const
 {
-	std::vector<TermConfig>::const_iterator ti = m_terms.begin(), te = m_terms.end();
+	std::vector<TermConfig>::const_iterator
+		ti = m_terms.begin(), te = m_terms.end();
 	for (; ti != te; ++ti)
 	{
 		out << "TERM " << ti->set << ": " << ti->type << " '" << ti->value << "';" << std::endl;
 	}
-	if (m_weighting.function())
+	if (m_selectionSets.size())
 	{
-		out << "EVAL ";
-		out << " " << m_weighting.functionName();
-		if (m_weighting.parameters().size())
+		out << "SELECTORS ";
+		std::size_t si = 0, se = m_selectionSets.size();
+		for(; si != se; ++si)
+		{
+			if (si) out << ", ";
+			out << m_selectionSets[si];
+		}
+	}
+	if (m_restrictionSets.size())
+	{
+		out << "RESTRICTIONS ";
+		std::size_t si = 0, se = m_restrictionSets.size();
+		for(; si != se; ++si)
+		{
+			if (si) out << ", ";
+			out << m_restrictionSets[si];
+		}
+	}
+	std::vector<WeightingDef>::const_iterator
+		fi = m_weightingFunctions.begin(), fe = m_weightingFunctions.end();
+	for (; fi != fe; ++fi)
+	{
+		out << "WEIGHTING ";
+		out << " " << fi->functionName();
+		if (fi->parameters().size())
 		{
 			out << "(";
-			std::size_t ai = 0, ae = m_weighting.parameters().size();
+			std::size_t ai = 0, ae = fi->parameters().size();
 			for(; ai != ae; ++ai)
 			{
 				if (ai) out << ", ";
-				out << m_weighting.function()->numericParameterNames()[ai]
-					<< "=" << m_weighting.parameters()[ai];
+				out << fi->function()->numericParameterNames()[ai]
+					<< "=" << fi->parameters()[ai];
 			}
 			out << ")";
 		}
-		if (m_selectionSets.size())
-		{
-			out << " ON ";
-			std::size_t si = 0, se = m_selectionSets.size();
-			for(; si != se; ++si)
-			{
-				if (si) out << ", ";
-				out << m_selectionSets[si];
-			}
-		}
-		if (m_weightingSets.size())
+		if (fi->weightingSets().size())
 		{
 			out << " WITH ";
-			std::size_t wi = 0, we = m_weightingSets.size();
+			std::size_t wi = 0, we = fi->weightingSets().size();
 			for(; wi != we; ++wi)
 			{
 				if (wi) out << ", ";
-				out << m_weightingSets[wi];
+				out << fi->weightingSets()[wi];
 			}
 		}
 		out << ";" << std::endl;

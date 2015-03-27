@@ -344,66 +344,77 @@ std::vector<ResultDocument> Query::evaluate()
 	{
 		return std::vector<ResultDocument>();
 	}
-	if (!m_queryEval->weighting().function())
+	if (m_queryEval->weightingFunctions().empty())
 	{
 		throw strus::runtime_error( _TXT( "cannot evaluate query, no weighting function defined"));
+	}
+	if (m_queryEval->selectionSets().empty())
+	{
+		throw strus::runtime_error( _TXT( "cannot evaluate query, no selection features defined"));
 	}
 
 	// [3] Create the posting sets of the query features:
 	std::vector<Reference<PostingIteratorInterface> > postings;
-
-	std::vector<Feature>::const_iterator
-		fi = m_features.begin(), fe = m_features.end();
-	for (; fi != fe; ++fi)
 	{
-		Reference<PostingIteratorInterface> postingsElem(
-			createNodePostingIterator( fi->node));
-		postings.push_back( postingsElem);
+		std::vector<Feature>::const_iterator
+			fi = m_features.begin(), fe = m_features.end();
+		for (; fi != fe; ++fi)
+		{
+			Reference<PostingIteratorInterface> postingsElem(
+				createNodePostingIterator( fi->node));
+			postings.push_back( postingsElem);
+		}
 	}
-
 	// [4] Create the accumulator:
 	Accumulator accumulator(
 		m_storage,
-		m_queryEval->weighting().function(), 
-		m_queryEval->weighting().parameters(),
 		m_metaDataReader.get(), m_metaDataRestrictions,
 		m_maxNofRanks, m_storage->maxDocumentNumber());
 
 	// [4.1] Add document selection postings:
-	std::vector<std::string>::const_iterator
-		si = m_queryEval->selectionSets().begin(),
-		se = m_queryEval->selectionSets().end();
-	if (si == se)
 	{
-		si = m_queryEval->weightingSets().begin(),
-		se = m_queryEval->weightingSets().end();
-	}
-	for (int sidx=0; si != se; ++si,++sidx)
-	{
-		fi = m_features.begin(), fe = m_features.end();
-		for (; fi != fe; ++fi)
+		std::vector<std::string>::const_iterator
+			si = m_queryEval->selectionSets().begin(),
+			se = m_queryEval->selectionSets().end();
+
+		for (int sidx=0; si != se; ++si,++sidx)
 		{
-			if (*si == fi->set)
+			std::vector<Feature>::const_iterator
+				fi = m_features.begin(), fe = m_features.end();
+			for (; fi != fe; ++fi)
 			{
-				accumulator.addSelector(
-					nodePostings( fi->node), sidx, 
-					nodeType( fi->node) == ExpressionNode);
+				if (*si == fi->set)
+				{
+					accumulator.addSelector(
+						nodePostings( fi->node), sidx, 
+						nodeType( fi->node) == ExpressionNode);
+				}
 			}
 		}
 	}
-
 	// [4.2] Add features for weighting:
-	std::vector<std::string>::const_iterator
-		wi = m_queryEval->weightingSets().begin(),
-		we = m_queryEval->weightingSets().end();
-	for (; wi != we; ++wi)
 	{
-		fi = m_features.begin(), fe = m_features.end();
-		for (; fi != fe; ++fi)
+		std::vector<WeightingDef>::const_iterator
+			wi = m_queryEval->weightingFunctions().begin(),
+			we = m_queryEval->weightingFunctions().end();
+		for (; wi != we; ++wi)
 		{
-			if (*wi == fi->set)
+			std::vector<std::string>::const_iterator
+				si = wi->weightingSets().begin(),
+				se = wi->weightingSets().end();
+			for (; si != se; ++si)
 			{
-				accumulator.addFeature( nodePostings( fi->node), fi->weight);
+				std::vector<Feature>::const_iterator
+					fi = m_features.begin(), fe = m_features.end();
+				for (; fi != fe; ++fi)
+				{
+					if (*si == fi->set)
+					{
+						accumulator.addFeature(
+							nodePostings( fi->node), fi->weight,
+							wi->function(), wi->parameters());
+					}
+				}
 			}
 		}
 	}
@@ -415,58 +426,62 @@ std::vector<ResultDocument> Query::evaluate()
 		accumulator.addAclRestriction( invAcl.get());
 	}
 	// [4.4] Define the feature restrictions:
-	std::vector<std::string>::const_iterator
-		xi = m_queryEval->restrictionSets().begin(),
-		xe = m_queryEval->restrictionSets().end();
-	for (; xi != xe; ++xi)
 	{
-		fi = m_features.begin(), fe = m_features.end();
-		for (; fi != fe; ++fi)
+		std::vector<std::string>::const_iterator
+			xi = m_queryEval->restrictionSets().begin(),
+			xe = m_queryEval->restrictionSets().end();
+		for (; xi != xe; ++xi)
 		{
-			if (*xi == fi->set)
-			{
-				accumulator.addFeatureRestriction(
-					nodePostings( fi->node),
-					nodeType( fi->node) == ExpressionNode);
-			}
-		}
-	}
-
-	// [5] Create the summarizers:
-	std::vector<Reference<SummarizerClosureInterface> > summarizers;
-	std::vector<SummarizerDef>::const_iterator
-		zi = m_queryEval->summarizers().begin(),
-		ze = m_queryEval->summarizers().end();
-	for (; zi != ze; ++zi)
-	{
-		// [5.1] Collect the summarization features:
-		std::vector<SummarizerFunctionInterface::FeatureParameter> summarizeFeatures;
-		std::vector<SummarizerDef::Feature>::const_iterator
-			si = zi->featureParameters().begin(),
-			se = zi->featureParameters().end();
-		for (; si != se; ++si)
-		{
-			fi = m_features.begin(), fe = m_features.end();
+			std::vector<Feature>::const_iterator
+				fi = m_features.begin(), fe = m_features.end();
 			for (; fi != fe; ++fi)
 			{
-				if (fi->set == si->set)
+				if (*xi == fi->set)
 				{
-					SummarizationFeature
-						sumfeat = createSummarizationFeature( fi->node);
-
-					summarizeFeatures.push_back(
-						SummarizerFunctionInterface::FeatureParameter(
-							si->classidx, sumfeat));
+					accumulator.addFeatureRestriction(
+						nodePostings( fi->node),
+						nodeType( fi->node) == ExpressionNode);
 				}
 			}
 		}
-		// [5.2] Create the summarizer:
-		summarizers.push_back(
-			zi->function()->createClosure(
-				m_storage, m_processor, m_metaDataReader.get(),
-				summarizeFeatures, zi->textualParameters(), zi->numericParameters()));
 	}
-
+	// [5] Create the summarizers:
+	std::vector<Reference<SummarizerClosureInterface> > summarizers;
+	{
+		std::vector<SummarizerDef>::const_iterator
+			zi = m_queryEval->summarizers().begin(),
+			ze = m_queryEval->summarizers().end();
+		for (; zi != ze; ++zi)
+		{
+			// [5.1] Collect the summarization features:
+			std::vector<SummarizerFunctionInterface::FeatureParameter> summarizeFeatures;
+			std::vector<SummarizerDef::Feature>::const_iterator
+				si = zi->featureParameters().begin(),
+				se = zi->featureParameters().end();
+			for (; si != se; ++si)
+			{
+				std::vector<Feature>::const_iterator
+					fi = m_features.begin(), fe = m_features.end();
+				for (; fi != fe; ++fi)
+				{
+					if (fi->set == si->set)
+					{
+						SummarizationFeature
+							sumfeat = createSummarizationFeature( fi->node);
+	
+						summarizeFeatures.push_back(
+							SummarizerFunctionInterface::FeatureParameter(
+								si->classidx, sumfeat));
+					}
+				}
+			}
+			// [5.2] Create the summarizer:
+			summarizers.push_back(
+				zi->function()->createClosure(
+					m_storage, m_processor, m_metaDataReader.get(),
+					summarizeFeatures, zi->textualParameters(), zi->numericParameters()));
+		}
+	}
 	// [6] Do the Ranking and build the result:
 	std::vector<ResultDocument> rt;
 	Ranker ranker( m_maxNofRanks);
@@ -495,6 +510,7 @@ std::vector<ResultDocument> Query::evaluate()
 		std::vector<ResultDocument::Attribute> attr;
 		std::vector<Reference<SummarizerClosureInterface> >::iterator
 			si = summarizers.begin(), se = summarizers.end();
+
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
 			std::vector<SummarizerClosureInterface::SummaryElement>

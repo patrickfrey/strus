@@ -52,19 +52,25 @@ public:
 	/// \param[in] value_ value of the parameter
 	void defineTextualParameter( const std::string& name_, const std::string& value_);
 
-	/// \brief References a set of postings to pass as PostingIteratorInterface to the summarizer
+	/// \brief References a feature parameter (set of postings) to pass as PostingIteratorInterface to the summarizer
 	/// \param[in] class_ name of the feature set class for the summarizer. The class describes for what the feature is used.
 	/// \param[in] set_ feature set name
 	void defineFeatureParameter( const std::string& class_, const std::string& set_);
 
+	/// \brief Get all numeric parameter definitions of the summarizer
+	/// \return the numeric parameter list
 	const std::map<std::string,ArithmeticVariant>& numericParameters() const	{return m_numericParameters;}
+	/// \brief Get all textual parameter definitions of the summarizer
+	/// \return the textual parameter list
 	const std::map<std::string,std::string>& textualParameters() const		{return m_textualParameters;}
+	/// \brief Get all feature parameter definitions of the summarizer
+	/// \return the feature parameter list
 	const std::map<std::string,std::string>& featureParameters() const		{return m_featureParameters;}
 
 private:
-	std::map<std::string,ArithmeticVariant> m_numericParameters;
-	std::map<std::string,std::string> m_textualParameters;
-	std::map<std::string,std::string> m_featureParameters;
+	std::map<std::string,ArithmeticVariant> m_numericParameters;	///< the numeric parameter definition list
+	std::map<std::string,std::string> m_textualParameters;		///< the textual parameter definition list
+	std::map<std::string,std::string> m_featureParameters;		///< the feature parameter definition list
 };
 
 }//namespace

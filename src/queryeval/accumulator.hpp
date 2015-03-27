@@ -64,15 +64,11 @@ public:
 	/// \brief Constructor
 	Accumulator(
 			const StorageClientInterface* storage_,
-			const WeightingFunctionInterface* function_,
-			const std::vector<ArithmeticVariant> parameter_,
 			MetaDataReaderInterface* metadata_,
 			const std::vector<MetaDataRestriction>& metaDataRestrictionSets_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
-		,m_function(function_)
-		,m_parameter(parameter_)
 		,m_metadata(metadata_)
 		,m_metaDataRestrictionSets(metaDataRestrictionSets_)
 		,m_selectoridx(0)
@@ -86,7 +82,11 @@ public:
 
 	void addSelector( PostingIteratorInterface* iterator, int setindex, bool isExpression);
 
-	void addFeature( PostingIteratorInterface* iterator, float weight);
+	void addFeature(
+			PostingIteratorInterface* iterator,
+			float weight,
+			const WeightingFunctionInterface* function_,
+			const std::vector<ArithmeticVariant>& parameter_);
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression);
 
@@ -124,8 +124,6 @@ private:
 	};
 
 	const StorageClientInterface* m_storage;
-	const WeightingFunctionInterface* m_function;
-	std::vector<ArithmeticVariant> m_parameter;
 	MetaDataReaderInterface* m_metadata;
 	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
 	std::vector<WeightingFeature> m_weightingFeatures;

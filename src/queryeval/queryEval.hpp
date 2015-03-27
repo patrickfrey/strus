@@ -64,9 +64,9 @@ public:
 
 	QueryEval( const QueryEval& o)
 		:m_processor(o.m_processor)
-		,m_weightingSets(o.m_weightingSets)
 		,m_selectionSets(o.m_selectionSets)
-		,m_weighting(o.m_weighting)
+		,m_restrictionSets(o.m_restrictionSets)
+		,m_weightingFunctions(o.m_weightingFunctions)
 		,m_summarizers(o.m_summarizers)
 		,m_terms(o.m_terms)
 	{}
@@ -77,18 +77,20 @@ public:
 			const std::string& set_,
 			const std::string& type_,
 			const std::string& value_);
+
 	virtual void addSelectionFeature( const std::string& set_);
+
 	virtual void addRestrictionFeature( const std::string& set_);
-	virtual void addWeightingFeature( const std::string& set_);
 
 	virtual void addSummarizer(
 			const std::string& resultAttribute,
 			const std::string& functionName,
 			const SummarizerConfig& config);
 
-	virtual void setWeighting(
+	virtual void addWeightingFunction(
 			const std::string& functionName,
-			const WeightingConfig& config);
+			const WeightingConfig& config,
+			const std::vector<std::string>& weightedFeatureSets);
 
 	void print( std::ostream& out) const;
 
@@ -96,17 +98,15 @@ public:
 public:
 	const std::vector<TermConfig>& terms() const			{return m_terms;}
 	const std::vector<SummarizerDef>& summarizers() const		{return m_summarizers;}
-	const std::vector<std::string>& weightingSets() const		{return m_weightingSets;}
 	const std::vector<std::string>& selectionSets() const		{return m_selectionSets;}
 	const std::vector<std::string>& restrictionSets() const		{return m_restrictionSets;}
-	const WeightingDef& weighting() const				{return m_weighting;}
+	const std::vector<WeightingDef>& weightingFunctions() const	{return m_weightingFunctions;}
 
 private:
 	const QueryProcessorInterface* m_processor;	///< query processor
-	std::vector<std::string> m_weightingSets;	///< posting sets that are used for weighting
 	std::vector<std::string> m_selectionSets;	///< posting sets selecting the documents to match
 	std::vector<std::string> m_restrictionSets;	///< posting sets restricting the documents to match
-	WeightingDef m_weighting;			///< weighting function configuration
+	std::vector<WeightingDef> m_weightingFunctions;	///< weighting function configuration
 	std::vector<SummarizerDef> m_summarizers;	///< list of summarizer configurations
 	std::vector<TermConfig> m_terms;		///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
 };

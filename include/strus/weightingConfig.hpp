@@ -42,18 +42,20 @@ public:
 	/// \brief Destructor
 	~WeightingConfig(){}
 
-	/// \brief Defines a parameter to pass to the weighting function
+	/// \brief Defines a numeric parameter to pass to the weighting function
 	/// \param[in] name_ name of the parameter
 	/// \param[in] value_ value of the parameter
 	void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
 
+	/// \brief Get all numeric parameter definitions of the weighting function
+	/// \return the numeric parameter list
 	const std::map<std::string,ArithmeticVariant>& numericParameters() const
 	{
 		return m_numericParameters;
 	}
 
 private:
-	std::map<std::string,ArithmeticVariant> m_numericParameters;
+	std::map<std::string,ArithmeticVariant> m_numericParameters;	///< the numeric parameter definition list
 };
 
 }//namespace

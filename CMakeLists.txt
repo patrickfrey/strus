@@ -10,6 +10,12 @@ set( STRUS_VERSION ${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}.${STRUS_PATCH_V
 include(cmake/dist.cmake)
 include(cmake/LinuxDistribution.cmake)
 
+if(CMAKE_COMPILER_IS_GNUCXX)
+set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE )
+set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/strus" )
+set( CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE )
+endif()
+
 set_property(GLOBAL PROPERTY rule_launch_compile ccache)
 set_property(GLOBAL PROPERTY rule_launch_link ccache)
 

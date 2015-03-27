@@ -29,6 +29,7 @@
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #include <iostream>
+#include <vector>
 
 namespace strus
 {
@@ -60,17 +61,12 @@ public:
 
 	/// \brief Declare a set of features to be used for selection (declare what documents to weight)
 	/// \param[in] set_ name of the set of the selecting feature.
-	/// \remark If no selector feature is specified then the weighting features are used for selection
+	/// \remark If no selector feature is specified then the query evaluation fails
 	virtual void addSelectionFeature( const std::string& set_)=0;
 
 	/// \brief Define a set of features to be used as restriction (exclude documents that do not contain a feature of the set declared)
 	/// \param[in] set_ name of the set of the restriction feature
 	virtual void addRestrictionFeature( const std::string& set_)=0;
-
-	/// \brief Declare a set of features to be used for weighting (declare what features to weight)
-	/// \param[in] set_ name of the set of the weighting feature.
-	/// \remark If no weighhting feature is specified then the query evaluation will allways return an empty ranklist
-	virtual void addWeightingFeature( const std::string& set_)=0;
 
 	/// \brief Declare a summarizer for this query evaluation
 	/// \param[in] resultAttribute specifies the attribute name this summarization is labeled with in the query evaluation result
@@ -82,16 +78,19 @@ public:
 			const std::string& functionName,
 			const SummarizerConfig& config)=0;
 
-	/// \brief Declare the weighting function for this query evaluation
+	/// \brief Declare a weighting function for this query evaluation
 	/// \param[in] functionName name of the weighting function to use. The name references a function defined with QueryProcessor::defineWeightingFunction(const char*,const WeightingFunctionInterface*)
 	/// \param[in] config the configuration meaning parametrization of the weighting function declared
+	/// \param[in] weightedFeatureSets list of feature sets used by this function for weighting (declares what features to weight)
 	/// \return the summarizer configuration object to be destroyed with 'delete' by the caller
-	virtual void setWeighting(
+	virtual void addWeightingFunction(
 			const std::string& functionName,
-			const WeightingConfig& config)=0;
+			const WeightingConfig& config,
+			const std::vector<std::string>& weightedFeatureSets)=0;
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on
+	/// \return a query instance for this query evaluation type
 	virtual QueryInterface* createQuery( const StorageClientInterface* storage) const=0;
 };
 
