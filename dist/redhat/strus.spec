@@ -145,12 +145,12 @@ Requires: libboost_date_time1_53_0 >= 1.53.0
 %endif
 %endif
 
-%if %{rhel} || %{centos} || %{scilin} || %{fedora}
+%if %{rhel} || %{centos} || %{scilin} || %{fedora} || %{suse} || %{sles}
 BuildRequires: leveldb-devel
 Requires: leveldb
 %endif
 
-%if %{rhel} || %{centos} || %{scilin} || %{fedora}
+%if %{rhel} || %{centos} || %{scilin} || %{fedora} || %{suse} || %{sles}
 BuildRequires: snappy-devel
 Requires: snappy
 %endif
