@@ -397,22 +397,42 @@ std::vector<ResultDocument> Query::evaluate()
 		std::vector<WeightingDef>::const_iterator
 			wi = m_queryEval->weightingFunctions().begin(),
 			we = m_queryEval->weightingFunctions().end();
+		int empty_postings_index = -1;
 		for (; wi != we; ++wi)
 		{
 			std::vector<std::string>::const_iterator
 				si = wi->weightingSets().begin(),
 				se = wi->weightingSets().end();
-			for (; si != se; ++si)
+			if (si == se)
 			{
-				std::vector<Feature>::const_iterator
-					fi = m_features.begin(), fe = m_features.end();
-				for (; fi != fe; ++fi)
+				// ... no weighting features defined, then pass an empty posting set
+				//	the weighting function may use document weight only
+				if (empty_postings_index < 0)
 				{
-					if (*si == fi->set)
+					Reference<PostingIteratorInterface> postingsElem(
+						m_storage->createTermPostingIterator(
+							Constants::query_empty_postings_termtype(),""));
+					empty_postings_index = postings.size();
+					postings.push_back( postingsElem);
+				}
+				accumulator.addFeature(
+					postings[empty_postings_index].get(), 1.0,
+					wi->function(), wi->parameters());
+			}
+			else
+			{
+				for (; si != se; ++si)
+				{
+					std::vector<Feature>::const_iterator
+						fi = m_features.begin(), fe = m_features.end();
+					for (; fi != fe; ++fi)
 					{
-						accumulator.addFeature(
-							nodePostings( fi->node), fi->weight,
-							wi->function(), wi->parameters());
+						if (*si == fi->set)
+						{
+							accumulator.addFeature(
+								nodePostings( fi->node), fi->weight,
+								wi->function(), wi->parameters());
+						}
 					}
 				}
 			}
