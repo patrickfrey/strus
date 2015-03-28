@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Patrick Frey <patrickfrey@project-strus.net>
 Build-Depends: debhelper (>= 4.1.16), cmake,
  libboost-dev, libboost-thread-dev, libboost-system-dev,
- libboost-date-time-dev, libleveldb-dev
+ libboost-date-time-dev, libleveldb-dev, libsnappy-dev
 Standards-Version: 3.8.3
 Homepage: http://project-strus.net
 
