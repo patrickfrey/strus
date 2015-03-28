@@ -105,6 +105,7 @@
 %define dist sle11
 %define sles11 1
 %define sles 1
+%endif
 %if 0%{?sles_version} == 12
 %define dist sle12
 %define sles12 1
