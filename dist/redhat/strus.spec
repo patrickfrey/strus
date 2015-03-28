@@ -82,6 +82,8 @@
 %define osu122 0
 %define osu123 0
 %define osu131 0
+%define osu132 0
+%define osufactory 0
 %if 0%{?suse_version} == 1220
 %define dist osu122
 %define osu122 1
@@ -97,16 +99,26 @@
 %define osu131 1
 %define suse 1
 %endif
+%if 0%{?suse_version} == 1320
+%define dist osu132
+%define osu132 1
+%define suse 1
+%endif
+%if 0%{?suse_version} > 1320
+%define dist osufactory
+%define osufactory 1
+%define suse 1
+%endif
 
 %define sles 0
 %define sles11 0
 %define sles12 0
-%if 0%{?sles_version} == 11
+%if 0%{?suse_version} == 1110
 %define dist sle11
 %define sles11 1
 %define sles 1
 %endif
-%if 0%{?sles_version} == 12
+%if 0%{?suse_version} == 1315 
 %define dist sle12
 %define sles12 1
 %define sles 1
@@ -230,7 +242,9 @@ make test
 %{_libdir}/%{name}/libstrus_utils.so
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/*.hpp
+%dir %{_includedir}/%{name}/lib
 %{_includedir}/%{name}/lib/*.hpp
+%dir %{_includedir}/%{name}/private
 %{_includedir}/%{name}/private/*.hpp
 
 %changelog
