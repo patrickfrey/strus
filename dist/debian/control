@@ -2,14 +2,15 @@ Source: strus
 Section: libs
 Priority: optional
 Maintainer: Patrick Frey <patrickfrey@project-strus.net>
-Build-Depends: debhelper (>= 8.0.0)
-Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 4.1.16), cmake,
+ libboost-dev, libboost-thread-dev, libboost-system-dev,
+ libboost-date-time-dev, libleveldb-dev
+Standards-Version: 3.8.3
 Homepage: http://project-strus.net
+
 Package: strus
 Architecture: all
-Depends: ${misc:Depends}
-Installed-Size: 27493
-Built-Using: gcc-4.8 (= 4.8.2-19)
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Library implementing the storage of a text search engine
  Core library for a text search engine implementing the storage and
  the query evaluation. 
