@@ -45,8 +45,9 @@ static std::size_t countArguments( char const** arg)
 WeightingDef::WeightingDef(
 		const WeightingFunctionInterface* function_,
 		const std::string& functionName_,
-		const WeightingConfig& config)
-	:m_function(function_),m_functionName(functionName_)
+		const WeightingConfig& config,
+		const std::vector<std::string>& weightingSets_)
+	:m_function(function_),m_functionName(functionName_),m_weightingSets(weightingSets_)
 {
 	m_parameters.resize( countArguments( m_function->numericParameterNames()));
 

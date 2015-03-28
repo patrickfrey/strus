@@ -75,6 +75,11 @@ struct Constants
 	{
 		return "weighted";
 	}
+	/// \brief Get the term type that does not exist and is reserved for the empty posting set
+	static const char* query_empty_postings_termtype()
+	{
+		return "";
+	}
 	/// \brief Get the identifier used in protocols for distributing the document frequency
 	static const char* storage_statistics_document_frequency()
 	{
