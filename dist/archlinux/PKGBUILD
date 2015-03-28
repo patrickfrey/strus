@@ -9,6 +9,7 @@ license=('GPL3')
 arch=('i686' 'x86_64')
 url="http://project-strus.net"
 depends=('boost>=1.48' 'boost-libs>=1.48' 'leveldb')
+makedepends=('cmake')
 source=("${pkgname}-${pkgver}.tar.gz")
 
 build() {
