@@ -99,8 +99,15 @@
 %endif
 
 %define sles 0
+%define sles11 0
+%define sles12 0
 %if 0%{?sles_version} == 11
 %define dist sle11
+%define sles11 1
+%define sles 1
+%if 0%{?sles_version} == 12
+%define dist sle12
+%define sles12 1
 %define sles 1
 %endif
 
