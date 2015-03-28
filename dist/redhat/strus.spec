@@ -191,7 +191,6 @@ make DESTDIR=$RPM_BUILD_ROOT install
 
 # TODO: avoid building this stuff in cmake. how?
 rm -rf $RPM_BUILD_ROOT%{_libdir}/debug
-rm -rf $RPM_BUILD_ROOT%{_includedir}/%{name}/lib/*.hpp
 rm -rf $RPM_BUILD_ROOT%{_prefix}/src/debug
 
 %clean
@@ -223,6 +222,7 @@ make test
 %{_libdir}/%{name}/libstrus_utils.so
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/*.hpp
+%{_includedir}/%{name}/lib/*.hpp
 %{_includedir}/%{name}/private/*.hpp
 
 %changelog
