@@ -33,7 +33,7 @@ build-stamp:
 	# Add here commands to compile the package.
 	mkdir build && cd build && cmake .. && $(MAKE)
 ifeq "$(filter nocheck,$(DEB_BUILD_OPTIONS))" ""
-	cd build && $(MAKE) check
+	cd build && $(MAKE) test
 endif
 	# --- end custom part for compiling
 	touch build-stamp
