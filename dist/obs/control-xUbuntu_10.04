@@ -1,0 +1,25 @@
+Source: strus
+Section: libs
+Priority: optional
+Maintainer: Patrick Frey <patrickfrey@project-strus.net>
+Build-Depends: debhelper (>= 4.1.16), cmake,
+ libboost1.48-dev, libboost-thread1.48-dev, libboost-system1.48-dev,
+ libboost-date-time1.48-dev, libleveldb-dev, libsnappy-dev 
+Standards-Version: 3.8.3
+Homepage: http://project-strus.net
+
+Package: strus
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Library implementing the storage of a text search engine
+ Core library for a text search engine implementing the storage and
+ the query evaluation. 
+ Able to evaluate structured queries on unstructured text as well
+ as implenting classical information retrieval.
+ Independent from storage impementation. Current storage implementation
+ is based on LevelDB.
+ Strus defines information retrieval as evaluation of a query based on 3
+ types of operations:
+  * Fetching and joining of feature occurrencies (document/position number)
+  * Weighting of documents based on the feature occurrencies
+  * Summarization as extraction of content based on the query matches
