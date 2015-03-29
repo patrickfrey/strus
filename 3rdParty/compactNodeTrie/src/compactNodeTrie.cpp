@@ -36,11 +36,13 @@
 
 using namespace conotrie;
 
-void CompactNodeTrie::set( const char* key, const NodeData& data)
+bool CompactNodeTrie::set( const char* key, const NodeData& data)
 {
 	if (!m_rootaddr)
 	{
-		m_rootaddr = nodeAddress( NodeClass::Node1, m_block1.allocNode());
+		NodeIndex ridx = m_block1.allocNode();
+		if (ridx == NullNodeIndex) return false;
+		m_rootaddr = nodeAddress( NodeClass::Node1, ridx);
 	}
 	NodeAddress addr = m_rootaddr;
 	NodeAddress prev_addr = 0;
@@ -54,14 +56,14 @@ void CompactNodeTrie::set( const char* key, const NodeData& data)
 		{
 			if (m_rootaddr == addr)
 			{
-				addTail( 0, 0, addr, ki, data);
+				if (!addTail( 0, 0, addr, ki, data)) return false;
 				m_rootaddr = addr;
 			}
 			else
 			{
-				addTail( prev_addr, prev_chr, addr, ki, data);
+				if (!addTail( prev_addr, prev_chr, addr, ki, data)) return false;
 			}
-			return;
+			return true;
 		}
 		else if (nodeClassId( next) == NodeClass::NodeData)
 		{
@@ -69,9 +71,10 @@ void CompactNodeTrie::set( const char* key, const NodeData& data)
 			{
 				NodeIndex idx = nodeIndex( next);
 				m_datablock[ idx] = data;
-				return;
+				return true;
 			}
 			NodeIndex idx = m_block2.allocNode();
+			if (idx == NullNodeIndex) return false;
 			NodeAddress newaddr = nodeAddress( NodeClass::Node2, idx);
 			if (!addNode( newaddr, 0xFF, next))
 			{
@@ -95,13 +98,14 @@ void CompactNodeTrie::set( const char* key, const NodeData& data)
 	}
 	if (m_rootaddr == addr)
 	{
-		addTail( 0, 0, addr, ki, data);
+		if (!addTail( 0, 0, addr, ki, data)) return false;
 		m_rootaddr = addr;
 	}
 	else
 	{
-		addTail( prev_addr, prev_chr, addr, ki, data);
+		if (!addTail( prev_addr, prev_chr, addr, ki, data)) return false;
 	}
+	return true;
 }
 
 bool CompactNodeTrie::get( const char* key, NodeData& val) const
@@ -383,13 +387,14 @@ void CompactNodeTrie::patchNodeAddress( const NodeAddress& addr, unsigned char c
 	throw std::logic_error("called patch node address on unknown block type");
 }
 
-void CompactNodeTrie::addNodeExpand( const NodeAddress& parentaddr,
+bool CompactNodeTrie::addNodeExpand( const NodeAddress& parentaddr,
 					unsigned char parentchr, NodeAddress& addr,
 					unsigned char lexem, const NodeAddress& followaddr)
 {
 	if (!addNode( addr, lexem, followaddr))
 	{
 		NodeAddress newaddr = expandNode( addr);
+		if (!newaddr) return false;
 		if (parentaddr)
 		{
 			patchNodeAddress( parentaddr, parentchr, addr, newaddr);
@@ -400,6 +405,7 @@ void CompactNodeTrie::addNodeExpand( const NodeAddress& parentaddr,
 			throw std::logic_error( "add node failed even after expand node");
 		}
 	}
+	return true;
 }
 
 void CompactNodeTrie::unlinkNode( const NodeAddress& addr, unsigned char lexem)
@@ -438,6 +444,7 @@ CompactNodeTrie::NodeAddress CompactNodeTrie::expandNode( const NodeAddress& add
 		case NodeClass::NodeData:
 		{
 			NodeIndex newidx = m_block4.allocNode();
+			if (newidx == NullNodeIndex) return 0;
 			NodeAddress newaddr = nodeAddress( NodeClass::Node4, newidx);
 			Node4::addNode( m_block4[ newidx], 0xFF, addr);
 			return newaddr;
@@ -458,7 +465,7 @@ CompactNodeTrie::NodeAddress CompactNodeTrie::expandNode( const NodeAddress& add
 	throw std::logic_error("called expand block on unknown block type");
 }
 
-void CompactNodeTrie::addTail( const NodeAddress& parentaddr, unsigned char parentchr,
+bool CompactNodeTrie::addTail( const NodeAddress& parentaddr, unsigned char parentchr,
 				NodeAddress& addr, const unsigned char* tail, 
 				const NodeData& data)
 {
@@ -471,7 +478,7 @@ void CompactNodeTrie::addTail( const NodeAddress& parentaddr, unsigned char pare
 			NodeIndex idx = nodeIndex( next);
 			if (nodeClassId( next) != NodeClass::NodeData)
 			{
-				throw std::runtime_error("internal: data node expected for successor of 0xFF");
+				throw std::runtime_error( "data node expected as successor of 0xFF");
 			}
 			m_datablock[ idx] = data;
 		}
@@ -479,8 +486,8 @@ void CompactNodeTrie::addTail( const NodeAddress& parentaddr, unsigned char pare
 		{
 			NodeIndex idx = m_datablock.size();
 			NodeAddress followaddr = nodeAddress( NodeClass::NodeData, idx);
+			if (!addNodeExpand( parentaddr, parentchr, addr, 0xFF, followaddr)) return false;
 			m_datablock.push_back( data);
-			addNodeExpand( parentaddr, parentchr, addr, 0xFF, followaddr);
 		}
 		
 	}
@@ -494,35 +501,38 @@ void CompactNodeTrie::addTail( const NodeAddress& parentaddr, unsigned char pare
 			NodeIndex idx = m_block1.allocNode( false);
 			// ... do not use free list for tail blocks to put
 			//	them close to each other in memory
+			if (idx == NullNodeIndex) return false;
 			NodeAddress followaddr = nodeAddress( NodeClass::Node1, idx);
 
 			if (aa == addr)
 			{
-				addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
+				if (!addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr)) return false;
 				addr = aa;
 			}
 			else
 			{
-				addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
+				if (!addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr)) return false;
 			}
 			prev_chr = ti[1];
 			prev_aa = aa;
 			aa = followaddr;
 		}
 		NodeIndex idx = m_datablock.size();
+		if (idx >= NodeClass::MaxNofNodes) return false;
 		NodeAddress followaddr = nodeAddress( NodeClass::NodeData, idx);
-		m_datablock.push_back( data);
 
 		if (aa == addr)
 		{
-			addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
+			if (!addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr)) return false;
 			addr = aa;
 		}
 		else
 		{
-			addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr);
+			if (!addNodeExpand( prev_aa, prev_chr, aa, *ti, followaddr)) return false;
 		}
+		m_datablock.push_back( data);
 	}
+	return true;
 }
 
 bool CompactNodeTrie::getFollowNode( const NodeAddress& addr, std::size_t itridx, unsigned char& lexem, NodeAddress& follow) const

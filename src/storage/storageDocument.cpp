@@ -74,8 +74,8 @@ void StorageDocument::addForwardIndexTerm(
 		const std::string& value_,
 		const Index& position_)
 {
-	TermMapKey key( termMapKey( type_, value_));
-	m_invs[ InvMapKey( key.first, position_)] = value_;
+	Index typeno = m_transaction->getOrCreateTermType( type_);
+	m_invs[ InvMapKey( typeno, position_)] = value_;
 }
 
 void StorageDocument::setMetaData(

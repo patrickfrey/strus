@@ -90,6 +90,7 @@ private:
 private:
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
 	conotrie::CompactNodeTrie m_map;
+	std::map<std::string,Index> m_overflow_map;
 	const conotrie::CompactNodeTrie* m_globalmap;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;

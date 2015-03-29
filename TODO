@@ -1,4 +1,5 @@
-* take out selector sets from the EVAL in query evaluation and make more than one EVAL method possible (WikipediaSearch with title+non transitive pagerank)
+* parameter to storage with maximum string size to insert in the cache (compact node trie), 0 if no caching should be done
+* check backup interface for functions to replay the backup (create a storage from backup)
 * join operator for subsequence that matches the longest subsequence (summarizer for information ectraction in Wikipedia search)
 
 segmenter with other encodings than UTF-8

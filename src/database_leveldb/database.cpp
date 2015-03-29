@@ -56,7 +56,7 @@ void Database::createDatabase( const std::string& configsource) const
 	{
 		std::string err = status.ToString();
 		if (db) delete db;
-		throw strus::runtime_error( _TXT( "failed to create LevelDB key value store database: "), err.c_str());
+		throw strus::runtime_error( _TXT( "failed to create LevelDB key value store database: %s"), err.c_str());
 	}
 	if (db) delete db;
 }

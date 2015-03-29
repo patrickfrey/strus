@@ -58,7 +58,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	Index rt;
 	if (m_dbadapter.load( name,rt))
 	{
-		m_map.set( name.c_str(), rt);
+		(void)m_map.set( name.c_str(), rt);
 		if (m_invmap) m_invmap->set( data, name);
 		isNew = false;
 	}
@@ -75,7 +75,11 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 			throw strus::runtime_error( _TXT( "too many elements in keymap"));
 		}
 		rt += UnknownValueHandleStart;
-		m_map.set( name.c_str(), rt);
+		if (!m_map.set( name.c_str(), rt))
+		{
+			// ... Too many elements in the map, we have to switch to an STL map
+			m_overflow_map[ name] = rt;
+		}
 	}
 	return rt;
 }
@@ -100,6 +104,23 @@ void KeyMap::getWriteBatch(
 		}
 	}
 	m_map.clear();
+
+	std::map<std::string,Index>::const_iterator
+		oi = m_overflow_map.begin(), oe = m_overflow_map.end();
+	for (; oi != oe; ++oi)
+	{
+		if (oi->second > UnknownValueHandleStart)
+		{
+			Index idx = lookUp( oi->first);
+			if (!idx)
+			{
+				idx = m_allocator->alloc();
+				m_dbadapter.store( transaction, oi->first, idx);
+			}
+			rewriteUnknownMap[ oi->second] = idx;
+			if (m_invmap) m_invmap->set( idx, oi->first);
+		}
+	}
 }
 
 

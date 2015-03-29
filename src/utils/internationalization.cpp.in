@@ -42,7 +42,7 @@ std::runtime_error strus::runtime_error( const char* format, ...)
 	char buffer[ 1024];
 	va_list args;
 	va_start( args, format);
-	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, "format");
+	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, format);
 	int buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
 	buffer[ sizeof(buffer)-1] = 0;
 	std::runtime_error rt( std::string( buffer, buffersize));
@@ -55,7 +55,7 @@ std::logic_error strus::logic_error( const char* format, ...)
 	char buffer[ 1024];
 	va_list args;
 	va_start( args, format);
-	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, "format");
+	const char* formatTranslation = ::dgettext( STRUS_GETTEXT_PACKAGE, format);
 	int buffersize = vsnprintf( buffer, sizeof(buffer), formatTranslation, args);
 	buffer[ sizeof(buffer)-1] = 0;
 	std::logic_error rt( std::string( buffer, buffersize));
