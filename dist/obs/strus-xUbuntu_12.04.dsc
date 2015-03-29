@@ -1,6 +1,6 @@
 Format: 3.0 (quilt)
 Source: strus
-Version: 0.0.1
+Version: 0.0.1-xUbuntu12.04
 Binary: strus
 Maintainer: Patrick Frey <patrickfrey@project-strus.net>
 Architecture: any
