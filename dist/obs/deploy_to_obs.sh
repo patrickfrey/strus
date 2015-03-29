@@ -61,7 +61,7 @@ for i in `ls dist/obs/$PACKAGE_NAME-*.dsc`; do
 	cd $OLDDIR
 	mv -f $TMPDIR/${PACKAGE_NAME}_${PACKAGE_VERSION}-$OS.debian.tar.gz $OSC_HOME/.
 	DEBIAN_SIZE=`stat -c '%s' $OSC_HOME/${PACKAGE_NAME}_${PACKAGE_VERSION}-$OS.debian.tar.gz`
-	DEBIAN_CHKSUM=`md5sum  $OSC_HOME/${PACKAGE_NAME}_${PACKAGE_VERSION}.debian.tar.gz | cut -f 1 -d' '`
+	DEBIAN_CHKSUM=`md5sum $OSC_HOME/${PACKAGE_NAME}_${PACKAGE_VERSION}-$OS.debian.tar.gz | cut -f 1 -d' '`
 	echo " $DEBIAN_CHKSUM $DEBIAN_SIZE ${PACKAGE_NAME}_${PACKAGE_VERSION}-$OS.debian.tar.gz" >> $OSC_HOME/$dsc
 done
 
