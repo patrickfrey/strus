@@ -180,7 +180,7 @@ Requires: snappy
 Distribution: %{dist}
 %endif
 
-Packager: Patrick Frey <patrickfrey@project-strus.net>
+Packager: Patrick Frey <patrickpfrey@yahoo.com>
 
 %description
 Library implementing the storage of a text search engine.
@@ -248,5 +248,5 @@ make test
 %{_includedir}/%{name}/private/*.hpp
 
 %changelog
-* Fri Mar 20 2015 Patrick Frey <patrickfrey@project-strus.net> 0.0.1-0.1
+* Fri Mar 20 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.0.1-0.1
 - preliminary release

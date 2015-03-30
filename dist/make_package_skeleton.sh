@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # DEBIAN
-export DEBEMAIL="patrickfrey@project-strus.net"
+export DEBEMAIL="patrickpfrey@yahoo.com"
 export DEBFULLNAME="Patrick Frey"
 PACKAGEID="strus-0.0"
 
@@ -12,7 +12,7 @@ mkdir -p pkg/$PACKAGEID/lib/strus
 find src -name "*.so" -exec cp {} pkg/$PACKAGEID/lib/strus/ \;
 
 cd pkg/$PACKAGEID
-dh_make --email patrickfrey@project-strus.net --copyright=GPL3 --createorig -i
+dh_make --email patrickpfrey@yahoo.com --copyright=GPL3 --createorig -i
 rm debian/README.Debian
 rm debian/init.d.ex 
 rm debian/manpage.1.ex 

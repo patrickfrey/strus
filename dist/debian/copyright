@@ -3,11 +3,11 @@ Upstream-Name: strus
 Source: http://project-strus.net
 
 Files: *
-Copyright: 2015 Patrick Frey <patrickfrey@project-strus.net>
+Copyright: 2015 Patrick Frey <patrickpfrey@yahoo.com>
 License: GPL-3.0+
 
 Files: debian/*
-Copyright: 2015 Patrick P. Frey <patrickfrey@project-strus.net>
+Copyright: 2015 Patrick P. Frey <patrickpfrey@yahoo.com>
 License: GPL-3.0+
 
 License: GPL-3.0+
