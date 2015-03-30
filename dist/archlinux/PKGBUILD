@@ -1,0 +1,40 @@
+# Contributor: Patrick Frey <patrickfrey@project-strus.net> 
+# Maintainer: Patrick Frey <patrickfrey@project-strus.net> 
+
+pkgname=strus
+pkgver=0.0.1
+pkgrel=1
+pkgdesc='Library implementing the storage of a text search engine.'
+license=('GPL3')
+arch=('i686' 'x86_64')
+url="http://project-strus.net"
+depends=('boost>=1.48' 'boost-libs>=1.48' 'leveldb')
+makedepends=('cmake')
+source=("${pkgname}-${pkgver}.tar.gz")
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  msg "Building..."
+  mkdir build
+  cd build
+  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=%{_libdir} ..
+  make
+}
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  msg "Installing.."
+  cd build
+  make DESTDIR=${pkgdir} install
+}
+
+check() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  msg "Testing..."
+  cd build
+  make test
+}
+
