@@ -296,34 +296,6 @@ PosinfoBlockBuilder::PosinfoBlockBuilder( const PosinfoBlock& o)
 	while (!!(docno=o.nextDoc( idx)));
 }
 
-void PosinfoBlockBuilder::append( const Index& docno, const std::vector<Index>& pos)
-{
-	if (m_docIndexNodeArray.empty()
-	||  !m_docIndexNodeArray.back().addDocument( docno, m_posinfoArray.size()))
-	{
-		m_docIndexNodeArray.push_back( DocIndexNode());
-		if (!m_docIndexNodeArray.back().addDocument( docno, m_posinfoArray.size()))
-		{
-			throw strus::logic_error( _TXT( "corrupt structure in posinfo block builder"));
-		}
-	}
-	std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
-	if (pos.size() > std::numeric_limits<PositionType>::max())
-	{
-		throw strus::runtime_error( _TXT( "size of document out of range (max %d))"), 65535);
-	}
-	m_posinfoArray.push_back( (PositionType)pos.size());
-	for (; pi != pe; ++pi)
-	{
-		if (*pi > std::numeric_limits<PositionType>::max())
-		{
-			throw strus::runtime_error( _TXT( "token position out of range (max %d)"), 65535);
-		}
-		m_posinfoArray.push_back( (PositionType)*pi);
-	}
-	m_lastDoc = docno;
-}
-
 void PosinfoBlockBuilder::append( const Index& docno, const PositionType* posar)
 {
 	if (m_id && m_id < docno) throw strus::runtime_error( _TXT( "assigned illegal id to block"));

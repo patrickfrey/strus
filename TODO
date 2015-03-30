@@ -1,5 +1,5 @@
 * parameter to storage with maximum string size to insert in the cache (compact node trie), 0 if no caching should be done
-* check backup interface for functions to replay the backup (create a storage from backup)
+* method in database interface to reply backup (pass BackupCursorInterface to it)
 * join operator for subsequence that matches the longest subsequence (summarizer for information ectraction in Wikipedia search)
 
 segmenter with other encodings than UTF-8

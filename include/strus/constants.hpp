@@ -90,6 +90,13 @@ struct Constants
 	{
 		return "dn";
 	}
+
+	/// \brief Get the maximum position (counted from 1) in a document a token can have 
+	/// \note This is a limit given by the implementation of the position info block. Unfortunately it creeps through the system.
+	static unsigned int storage_max_position_info()
+	{
+		return 65535;
+	}
 };
 
 }//namespace

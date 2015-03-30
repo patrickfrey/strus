@@ -199,8 +199,12 @@ public:
 	void setId( const Index& id_);
 
 	bool empty() const						{return m_docIndexNodeArray.empty();}
-	void append( const Index& docno, const std::vector<Index>& pos);
+
+	/// \brief Append document position info
+	/// \param[in] docno document number
+	/// \param[in] posar pointer to posinfo encoded as: posar[0]=length, posar[1..]=posinfo array
 	void append( const Index& docno, const PositionType* posar);
+
 	bool fitsInto( std::size_t nofpos) const;
 	bool full() const
 	{

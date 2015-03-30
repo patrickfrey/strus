@@ -121,7 +121,15 @@ static void testPosinfoBlock( unsigned int times, unsigned int minNofDocs, unsig
 				blockar.push_back( block.createBlock());
 				block.clear();
 			}
-			block.append( pi->first, pi->second);
+			std::vector<strus::PosinfoBlock::PositionType> posar;
+			std::vector<strus::Index>::const_iterator
+				ci = pi->second.begin(), ce = pi->second.end();
+			posar.push_back( pi->second.size());
+			for (; ci != ce; ++ci)
+			{
+				posar.push_back( *ci);
+			}
+			block.append( pi->first, posar.data());
 		}
 		if (!block.empty())
 		{

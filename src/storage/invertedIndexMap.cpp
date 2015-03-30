@@ -81,7 +81,7 @@ void InvertedIndexMap::definePosinfoPosting(
 			}
 			m_map[ key] = m_posinfo.size();
 
-			m_posinfo.push_back( (unsigned short)pos.size());	//... ff
+			m_posinfo.push_back( (PosinfoBlock::PositionType)pos.size());	//... ff
 			std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
 			for (; pi != pe; ++pi)
 			{
@@ -89,7 +89,10 @@ void InvertedIndexMap::definePosinfoPosting(
 				{
 					throw strus::runtime_error( _TXT( "token position out of range (max %u)"), 65535);
 				}
-				m_posinfo.push_back( (unsigned short)*pi);
+				else
+				{
+					m_posinfo.push_back( (PosinfoBlock::PositionType)*pi);
+				}
 			}
 		}
 		else
