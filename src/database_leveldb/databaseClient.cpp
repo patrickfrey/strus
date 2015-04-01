@@ -58,7 +58,7 @@ DatabaseClient::DatabaseClient( const char* path_, unsigned int cachesize_k, boo
 	{
 		std::string err = status.ToString();
 		cleanup();
-		throw strus::runtime_error( _TXT( "failed to open key calue store database: %s"), err.c_str());
+		throw strus::runtime_error( _TXT( "failed to open key value store database: %s"), err.c_str());
 	}
 }
 

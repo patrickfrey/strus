@@ -34,6 +34,8 @@ namespace strus {
 
 /// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class DatabaseBackupCursorInterface;
 
 /// \brief Interface to the create,destroy the key value store database
 class DatabaseInterface
@@ -46,6 +48,11 @@ public:
 	/// \brief Creates a new key value store database described with config
 	/// \param[in] configsource configuration source string describing the database (not a filename !)
 	virtual void createDatabase( const std::string& configsource) const=0;
+
+	/// \brief Restore a database at the location described in config and restore the backup from the backup interface passed
+	/// \param[in] configsource configuration source string describing location of the database restored (not a filename !)
+	/// \param[in] backup interface to backup to restore
+	virtual void restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const=0;
 
 	/// \brief Destroys an existing key value store database described with config
 	/// \param[in] configsource configuration source string describing the key value store database (not a filename !)

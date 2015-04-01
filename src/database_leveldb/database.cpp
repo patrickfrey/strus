@@ -2,12 +2,15 @@
 #include "databaseClient.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
+#include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/private/configParser.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>
+#include <memory>
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 using namespace strus;
 
@@ -77,6 +80,59 @@ void Database::destroyDatabase( const std::string& configsource) const
 	{
 		std::string err = status.ToString();
 		throw strus::runtime_error( _TXT( "failed to remove key value store database: "), err.c_str());
+	}
+}
+
+void Database::restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const
+{
+	createDatabase( configsource);
+	leveldb::DB* db = 0;
+	std::auto_ptr<leveldb::DB> dbref;
+
+	// Open the database created:
+	std::string path;
+	std::string src = configsource;
+
+	if (!extractStringFromConfigString( path, src, "path"))
+	{
+		throw strus::runtime_error( _TXT( "missing 'path' in database configuration string"));
+	}
+	leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
+	if (!status.ok())
+	{
+		std::string err = status.ToString();
+		if (db) delete db;
+		throw strus::runtime_error( _TXT( "failed to open LevelDB key value store database for restoring backup: %s"), err.c_str());
+	}
+	else
+	{
+		dbref.reset( db);
+	}
+
+	unsigned int blkcnt = 0;
+	leveldb::WriteBatch batch;
+	leveldb::WriteOptions options;
+
+	const char* key;
+	std::size_t keysize;
+	const char* blk;
+	std::size_t blksize;
+
+	// Restore backup loop:
+	while (backup->fetch( key, keysize, blk, blksize))
+	{
+		batch.Put( leveldb::Slice( key, keysize), leveldb::Slice( blk, blksize));
+		if (++blkcnt >= 1000)
+		{
+			leveldb::Status status = db->Write( options, &batch);
+			if (!status.ok())
+			{
+				std::string statusstr( status.ToString());
+				throw strus::runtime_error( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+			}
+			batch.Clear();
+			blkcnt = 0;
+		}
 	}
 }
 
