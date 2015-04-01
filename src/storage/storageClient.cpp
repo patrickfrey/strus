@@ -51,7 +51,6 @@
 #include "forwardIterator.hpp"
 #include "indexPacker.hpp"
 #include "attributeReader.hpp"
-#include "keyMap.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "extractKeyValueData.hpp"
 #include <string>

@@ -75,7 +75,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 			throw strus::runtime_error( _TXT( "too many elements in keymap"));
 		}
 		rt += UnknownValueHandleStart;
-		if (!m_map.set( name.c_str(), rt))
+		if (name.size() > m_maxCachedKeyLen || !m_map.set( name.c_str(), rt))
 		{
 			// ... Too many elements in the map, we have to switch to an STL map
 			m_overflow_map[ name] = rt;

@@ -50,11 +50,14 @@ class KeyMapInv;
 class KeyMap
 {
 public:
+	enum {DefaultMaxCachedKeyLen=16};
+
 	KeyMap( DatabaseClientInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
 			KeyAllocatorInterface* allocator_,
 			const conotrie::CompactNodeTrie* globalmap_=0)
 		:m_dbadapter(prefix_,database_)
+		,m_maxCachedKeyLen(DefaultMaxCachedKeyLen)
 		,m_globalmap(globalmap_)
 		,m_unknownHandleCount(0)
 		,m_allocator(allocator_)
@@ -63,6 +66,11 @@ public:
 	~KeyMap()
 	{
 		delete m_allocator;
+	}
+
+	void defineMaxCachedKeyLen( unsigned int maxCachedKeyLen_)
+	{
+		m_maxCachedKeyLen = maxCachedKeyLen_;
 	}
 
 	void defineInv( KeyMapInv* invmap)
@@ -89,6 +97,7 @@ private:
 
 private:
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
+	unsigned int m_maxCachedKeyLen;
 	conotrie::CompactNodeTrie m_map;
 	std::map<std::string,Index> m_overflow_map;
 	const conotrie::CompactNodeTrie* m_globalmap;
