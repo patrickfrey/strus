@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Project strus is a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey <patrickpfrey (at) yahoo.com" />
+	<link rel="stylesheet" type="text/css" href="basic-profile.css" title="Basic Profile" media="all" />
+	<title>Strus</title>
+</head>
+
+<body>
+<div id="wrap">
+	<div id="sidebar">
+		<a href="index.html"><img src="images/logotype.jpg" width="280" height="280" alt="Strus logo" /></a>
+		<h1><a href="index.html">Strus</a></h1>
+		<p class="slogan">With strus you can build full-text search engines with
+		elementary bricks.</p>
+		<ul>
+			<li><a href="#">Status</a><br />Development status is "Beta".</li>
+			<li><a href="#">License</a><br />Strus is licensed as GPLv3</li>
+			<li><a href="#">Download</a><br />The work on packages is in progress but currently you have to fork the project on github.</li>
+		</ul>
+	</div>
+
+	<div id="content">
+		<h2>About</h2>
+		<p>The project strus provides a collection of C++ libraries for building a full-text search engine.
+		The strus search engine can be build using any key value store database that provides an 
+		upper bound seek function for the stored key/value pairs.
+		Currently there exists an implementation based on the google leveldb library.
+		</p>
+		<p></p>
+		<h2>Components</h2>
+		<p>
+		Strus consists of several components represented as sub project on github:
+		<ol>
+		<li><a href="https://github.com/patrickfrey/strus">strus</a>
+			<p>The storage and query processing of the search engine</p></li>
+		<li><a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>
+			<p>The document and query analysis for transforming content
+			into retrievable items and searchable terms.</li>
+		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
+			<p>Provides the loading of search engine components from dynamically 
+			loadable modules. (depends on strus and strusAnalyzer)</p></li>
+		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
+			<p>Provides some command line programs to access the search engine.
+			(Depends on strusModule)</p></li>
+		<li><a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>
+			<p>Provides language bindings to use strus with other
+			programming languages like PHP,Python,Perl,Java,Ruby,etc...
+			(Depends on strusModule)</p></li>
+		</ol>
+		</p>
+		<p>Some components to implement a competitive search are still missing.
+		For example the possibility to distribute the search index and running strus
+		as server nodes in a cluster without too much configuration and 
+		administration effort.
+		Strus has interfaces to populate and receive statistics that have to be shared
+		in order to make ranking weights of different search engine nodes comparable.
+		But strus as server with the messaging to exchange this data and the orchestration
+		of server nodes is not implemented yet.
+		</p>
+		<h3>News</h3>
+		<p class="timestamp">April 2nd, 2015<br />
+		<p>
+		The demo project of a search search engine for the wikipedia collection (english) is
+		close to be finished. Details about the project can be found <a href="http://github.com/patrickfrey/strusWikipediaSearch">here</a>.<br />
+		</p>
+		</p>
+		<p class="credits">&copy; 2015 Patrick Frey<br />
+		Template design by <a href="http://andreasviklund.com/">Andreas Viklund</a> / Best hosted at <a href="https://www.svenskadomaner.se/?ref=mall&amp;ling=en" title="Svenska Domäner AB">www.svenskadomaner.se</a></p>
+	</div>
+</div>
+</body>
+</html>
+
