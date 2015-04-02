@@ -14,29 +14,29 @@
 	<div id="sidebar">
 		<a href="index.html"><img src="images/logotype.jpg" width="280" height="280" alt="Strus logo" /></a>
 		<h1><a href="index.html">Strus</a></h1>
-		<p class="slogan">With strus you can build full-text search engines with
+		<p class="slogan">With <i>strus</i> you can build full-text search engines with
 		elementary bricks.</p>
 		<ul>
-			<li><a href="#">Status</a><br />Development status is "Beta".</li>
-			<li><a href="#">License</a><br />Strus is licensed as GPLv3</li>
-			<li><a href="#">Download</a><br />The work on packages is in progress but currently you have to fork the project on github.</li>
+			<li><a href="#">Status</a><br />Development status is <i>Beta</i>.</li>
+			<li><a href="#">License</a><br /><a href="https://www.gnu.org/copyleft/gpl.html">GPL v3</a></li>
+			<li><a href="#">Download</a><br />We are working on packages, but currently you have to fork the project on github.</li>
 		</ul>
 	</div>
 
 	<div id="content">
 		<h2>About</h2>
-		<p>The project strus provides a collection of C++ libraries for building a full-text search engine.
-		The strus search engine can be build using any key value store database that provides an 
+		<p>The project <i>strus</i> provides a collection of C++ libraries for building a full-text search engine.
+		The <i>strus</i> search engine can be build using any key value store database that provides an 
 		upper bound seek function for the stored key/value pairs.
-		Currently there exists an implementation based on the google leveldb library.
+		Currently there exists an implementation based on the <a href="http://leveldb.org">LevelDB</a> library.
 		</p>
-		<p></p>
 		<h2>Components</h2>
 		<p>
-		Strus consists of several components represented as sub project on github:
+		The project <i>strus</i> consists of several components.
 		<ol>
 		<li><a href="https://github.com/patrickfrey/strus">strus</a>
-			<p>The storage and query processing of the search engine</p></li>
+			<p>The storage and query processing of the search engine.
+			It also provides the key value store database connector to LevelDB.</p></li>
 		<li><a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>
 			<p>The document and query analysis for transforming content
 			into retrievable items and searchable terms.</li>
@@ -47,19 +47,19 @@
 			<p>Provides some command line programs to access the search engine.
 			(Depends on strusModule)</p></li>
 		<li><a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>
-			<p>Provides language bindings to use strus with other
-			programming languages like PHP,Python,Perl,Java,Ruby,etc...
+			<p>Provides language bindings to use <i>strus</i> with other
+			programming languages like <i>PHP</i>,<i>Python</i>,<i>Perl</i>,<i>Java</i>,<i>Ruby</i>,etc...
 			(Depends on strusModule)</p></li>
 		</ol>
 		</p>
-		<p>Some components to implement a competitive search are still missing.
-		For example the possibility to distribute the search index and running strus
+		<p>Many components needed to implement a competitive search are still missing.
+		For example the possibility to distribute the search index and running <i>strus</i>
 		as server nodes in a cluster without too much configuration and 
 		administration effort.
-		Strus has interfaces to populate and receive statistics that have to be shared
+		<i>Strus</i> has interfaces to populate and receive statistics that have to be shared
 		in order to make ranking weights of different search engine nodes comparable.
-		But strus as server with the messaging to exchange this data and the orchestration
-		of server nodes is not implemented yet.
+		But <i>strus</i> as a server with the messaging to exchange this data and the orchestration
+		of its nodes is not implemented yet.
 		</p>
 		<h3>News</h3>
 		<p class="timestamp">April 2nd, 2015<br />
