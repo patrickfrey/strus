@@ -42,6 +42,8 @@ cmake/uninstall.cmake
 DartConfiguration.tcl
 Testing/
 CPackConfig.cmake
+CPackConfig.cmake.user
+CPackSourceConfig.cmake.user
 CPackSourceConfig.cmake
 tests/cmake_install.cmake.user
 
