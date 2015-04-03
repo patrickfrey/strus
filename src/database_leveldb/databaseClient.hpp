@@ -40,9 +40,10 @@ class DatabaseClient
 {
 public:
 	/// \param[in] path of the storage
+	/// \param[in] maxOpenFiles maximum number of files open (0 for default)
 	/// \param[in] cachesize_k number of K LRU cache for nodes
 	/// \param[in] compression wheter to use snappy compression (true) or not
-	DatabaseClient( const char* path_, unsigned int cachesize_k, bool compression);
+	DatabaseClient( const char* path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression);
 
 	virtual ~DatabaseClient();
 

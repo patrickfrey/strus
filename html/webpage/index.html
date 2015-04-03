@@ -25,21 +25,24 @@
 
 	<div id="content">
 		<h2>About</h2>
-		<p>The project <i>strus</i> provides a collection of C++ libraries for building a full-text search engine.
+		<p>The project <i>strus</i> provides a collection of C++ (C++98) libraries for building a full-text search engine.
 		The <i>strus</i> search engine can be build using any key value store database that provides an 
-		upper bound seek function for the stored key/value pairs.
-		Currently there exists an implementation based on the <a href="http://leveldb.org">LevelDB</a> library.
+		<a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upper bound</a> seek function 
+		for the stored key/value pairs.
+		Currently there exists an implementation based on the 
+		<a href="http://leveldb.org">LevelDB</a> library.
 		</p>
 		<h2>Components</h2>
 		<p>
-		The project <i>strus</i> consists of several components.
+		The project <i>strus</i> consists of several components implemented in distinct
+		projects hosted on github.
 		<ol>
 		<li><a href="https://github.com/patrickfrey/strus">strus</a>
 			<p>The storage and query processing of the search engine.
-			It also provides the key value store database connector to LevelDB.</p></li>
+			It also provides the default key value store database connector (to LevelDB).</p></li>
 		<li><a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>
 			<p>The document and query analysis for transforming content
-			into retrievable items and searchable terms.</li>
+			into retrievable items.</li>
 		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
 			<p>Provides the loading of search engine components from dynamically 
 			loadable modules. (depends on strus and strusAnalyzer)</p></li>
@@ -52,12 +55,16 @@
 			(Depends on strusModule)</p></li>
 		</ol>
 		</p>
-		<p>Many components needed to implement a competitive search are still missing.
+		<p>Many components needed to be implemented for a competitive search are still missing.
 		For example the possibility to distribute the search index and running <i>strus</i>
 		as server nodes in a cluster without too much configuration and 
 		administration effort.
-		<i>Strus</i> has interfaces to populate and receive statistics that have to be shared
+		<i>Strus</i> has interfaces to populate and receive statistics, that have to be shared
 		in order to make ranking weights of different search engine nodes comparable.
+		<i>Strus</i> is built to take these statistics into account for ranking. But they have 
+		to be notified during the livetime of the storage client. On the other hand <i>Strus</i>
+		will use these interfaces to populate its statistics after startup and all changes in 
+		its index during runtime.
 		But <i>strus</i> as a server with the messaging to exchange this data and the orchestration
 		of its nodes is not implemented yet.
 		</p>

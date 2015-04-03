@@ -39,10 +39,14 @@
 
 using namespace strus;
 
-DatabaseClient::DatabaseClient( const char* path_, unsigned int cachesize_k, bool compression)
+DatabaseClient::DatabaseClient( const char* path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression)
 	:m_db(0),m_closed(false)
 {
 	m_dboptions.create_if_missing = false;
+	if (maxOpenFiles)
+	{
+		m_dboptions.max_open_files = maxOpenFiles;
+	}
 	if (cachesize_k)
 	{
 		if (cachesize_k * 1024 < cachesize_k) throw strus::runtime_error( _TXT( "size of cache out of range"));
