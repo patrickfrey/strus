@@ -143,7 +143,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 	switch (type)
 	{
 		case CmdCreateClient:
-			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>";
+			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmaxopenfiles=<maximum number of open files for LevelDB>";
 
 		case CmdCreate:
 			return "path=<LevelDB storage path>;compression=<yes/no>";
@@ -156,7 +156,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 
 const char** Database::getConfigParameters( ConfigType type) const
 {
-	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression", 0};
+	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression","maxopenfiles",0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};
 	static const char* keys_DestroyDatabase[] = {"path", 0};
 	switch (type)
