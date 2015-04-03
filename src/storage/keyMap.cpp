@@ -126,6 +126,7 @@ void KeyMap::getWriteBatch(
 			if (m_invmap) m_invmap->set( idx, oi->first);
 		}
 	}
+	m_overflow_map.clear();
 }
 
 
