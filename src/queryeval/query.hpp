@@ -67,8 +67,6 @@ public:
 
 	virtual ~Query(){}
 
-	virtual void print( std::ostream& out);
-
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
 	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_);
 	virtual void pushDuplicate();
@@ -156,6 +154,8 @@ public:
 	///\brief Get the joined features defined in the query
 	const std::vector<Feature>& features() const	{return m_features;}
 
+	void print( std::ostream& out) const;
+
 private:
 	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr);
 	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr);
@@ -165,8 +165,8 @@ private:
 				const NodeAddress& nodeadr);
 	PostingIteratorInterface* nodePostings( const NodeAddress& nodeadr) const;
 
-	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent);
-	void printVariables( std::ostream& out, NodeAddress adr);
+	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
+	void printVariables( std::ostream& out, NodeAddress adr) const;
 
 private:
 	const QueryEval* m_queryEval;

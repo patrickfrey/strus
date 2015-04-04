@@ -141,7 +141,7 @@ void Query::defineMetaDataRestriction(
 	m_metaDataRestrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
 }
 
-void Query::print( std::ostream& out)
+void Query::print( std::ostream& out) const
 {
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
@@ -152,7 +152,7 @@ void Query::print( std::ostream& out)
 	}
 }
 
-void Query::printVariables( std::ostream& out, NodeAddress adr)
+void Query::printVariables( std::ostream& out, NodeAddress adr) const
 {
 	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
 	std::pair<Itr,Itr> variables = m_variableAssignments.equal_range( adr);
@@ -170,7 +170,7 @@ void Query::printVariables( std::ostream& out, NodeAddress adr)
 	}
 }
 
-void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent)
+void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const
 {
 	std::string indentstr( indent*2, ' ');
 	switch (nodeType( adr))

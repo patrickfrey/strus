@@ -110,10 +110,6 @@ public:
 
 	/// \brief Evaluate the query
 	virtual std::vector<ResultDocument> evaluate()=0;
-
-	/// \brief Print the contents of this query in readable form
-	/// \param[out] where to print to
-	virtual void print( std::ostream& out)=0;
 };
 
 }//namespace
