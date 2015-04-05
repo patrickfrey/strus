@@ -241,6 +241,7 @@ make test
 %{_libdir}/%{name}/libstrus_utils.so.0.0.1
 
 %files devel
+%defattr( -, root, root )
 %{_libdir}/%{name}/libstrus_database_leveldb.so
 %{_libdir}/%{name}/libstrus_queryeval.so
 %{_libdir}/%{name}/libstrus_queryproc.so
