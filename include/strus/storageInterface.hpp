@@ -44,6 +44,9 @@ class StorageAlterMetaDataTableInterface;
 class StorageInterface
 {
 public:
+	/// \brief Destructor
+	virtual ~StorageInterface(){}
+
 	/// \brief Creates an client instance of the storage using a defined key value store database
 	/// \param[in] configsource configuration source string describing the storage (not a filename !)
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
