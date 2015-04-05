@@ -36,6 +36,7 @@
 #include "strus/peerStorageTransactionInterface.hpp"
 #include "strus/storagePeerInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
+#include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
@@ -991,21 +992,49 @@ static void dumpKeyValue(
 	}
 }
 
-void StorageClient::dumpStorage( std::ostream& output) const
+class StorageDump
+	:public StorageDumpInterface
 {
-	std::auto_ptr<strus::DatabaseCursorInterface>
-		cursor( m_database->createCursor( strus::DatabaseOptions()));
-
-	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
-
-	for (; key.defined(); key = cursor->seekNext())
+public:
+	explicit StorageDump( const strus::DatabaseClientInterface* database_)
+		:m_database(database_),m_cursor( database_->createCursor( strus::DatabaseOptions()))
 	{
-		if (key.size() == 0)
+		m_key = m_cursor->seekFirst( 0, 0);
+	}
+	virtual ~StorageDump(){}
+
+	virtual bool nextChunk( const char*& chunk, std::size_t& chunksize)
+	{
+		unsigned int ii = 0, nn = NofKeyValuePairsPerChunk;
+		std::ostringstream output;
+		for (; m_key.defined() && ii<nn; m_key = m_cursor->seekNext(),++ii)
 		{
-			throw strus::runtime_error( _TXT( "found empty key in storage"));
-		}
-		dumpKeyValue( output, m_database.get(), key, cursor->value());
-	};
+			if (m_key.size() == 0)
+			{
+				throw strus::runtime_error( _TXT( "found empty key in storage"));
+			}
+			dumpKeyValue( output, m_database, m_key, m_cursor->value());
+		};
+		m_chunk = output.str();
+		chunk = m_chunk.c_str();
+		chunksize = m_chunk.size();
+		return (chunksize != 0);
+	}
+
+	/// \brief How many key/value pairs to return in one chunk
+	enum {NofKeyValuePairsPerChunk=256};
+
+private:
+	const strus::DatabaseClientInterface* m_database;
+	std::auto_ptr<strus::DatabaseCursorInterface> m_cursor;
+	strus::DatabaseCursorInterface::Slice m_key;
+	std::string m_chunk;
+};
+
+StorageDumpInterface* StorageClient::createDump() const
+{
+	return new StorageDump( m_database.get());
 }
+
 
 

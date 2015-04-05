@@ -65,6 +65,9 @@ class PeerStorageTransactionInterface;
 class StoragePeerInterface;
 /// \brief Forward declaration
 class DocnoRangeAllocatorInterface;
+/// \brief Forward declaration
+class StorageDumpInterface;
+
 
 /// \brief Implementation of the StorageClientInterface
 class StorageClient
@@ -128,7 +131,7 @@ public:
 
 	virtual void checkStorage() const;
 
-	virtual void dumpStorage( std::ostream& output) const;
+	virtual StorageDumpInterface* createDump() const;
 
 public:/*QueryEval*/
 	Index getTermValue( const std::string& name) const;
