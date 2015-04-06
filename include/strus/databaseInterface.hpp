@@ -41,6 +41,9 @@ class DatabaseBackupCursorInterface;
 class DatabaseInterface
 {
 public:
+	/// \brief Destructor
+	virtual ~DatabaseInterface(){}
+
 	/// \brief Creates a client to access the key value store database
 	/// \param[in] configsource configuration source string describing the database (not a filename !)
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const=0;
