@@ -741,7 +741,14 @@ static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
 	char const* ke = key.ptr()+key.size();
 	for (; ki != ke; ++ki)
 	{
+// TODO: RHEL/Centos 5 complaun about the '*ki < 128' with: 
+// storageClient.cpp:744: warning: comparison is always true due to limited range of data type
+// consider this a quick hack to make the build work
+#if SCHAR_MAX == 127
+		if (*ki > 32)
+#else
 		if (*ki > 32 && *ki < 128)
+#endif		
 		{
 			rt.push_back( *ki);
 		}
