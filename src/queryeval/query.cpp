@@ -317,7 +317,10 @@ void Query::collectSummarizationVariables(
 			std::vector<NodeAddress>::const_iterator
 				ni = expr.subnodes.begin(), 
 				ne = expr.subnodes.end();
-			collectSummarizationVariables( variables, *ni);
+			for (; ni != ne; ++ni)
+			{
+				collectSummarizationVariables( variables, *ni);
+			}
 			break;
 		}
 	}
