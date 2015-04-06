@@ -741,7 +741,7 @@ static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
 	char const* ke = key.ptr()+key.size();
 	for (; ki != ke; ++ki)
 	{
-		if (*ki > 32 && *ki < 128)
+		if ((unsigned char)*ki > 32 && (unsigned char)*ki < 128)
 		{
 			rt.push_back( *ki);
 		}
