@@ -28,8 +28,7 @@
 */
 #ifndef _STRUS_DATABASE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_DATABASE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#include <cstring>
-#include <utility>
+#include <cstddef>
 
 namespace strus
 {
