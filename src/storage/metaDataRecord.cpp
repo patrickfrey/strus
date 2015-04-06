@@ -242,7 +242,7 @@ void MetaDataRecord::translateBlock(
 					case MetaDataElement::Float32:
 					{
 						float val = sr.getValueFloat( ti->src);
-						dr.setValueUInt( ti->dst, val);
+						dr.setValueFloat( ti->dst, val);
 						break;
 					}
 				}
