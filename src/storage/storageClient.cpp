@@ -312,13 +312,15 @@ Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 	return rt;
 }
 
-void StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
+bool StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
 {
 	utils::ScopedLock lock( m_mutex_docno);
 	if (m_next_docno == docno + size)
 	{
 		m_next_docno -= size;
+		return true;
 	}
+	return false;
 }
 
 void StorageClient::declareNofDocumentsInserted( int incr)

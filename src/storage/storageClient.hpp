@@ -167,7 +167,7 @@ public:/*StorageTransaction*/
 	Index allocAttribnoImm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
 
 	Index allocDocnoRange( std::size_t nofDocuments);
-	void deallocDocnoRange( const Index& docno, const Index& size);
+	bool deallocDocnoRange( const Index& docno, const Index& size);
 
 	friend class TransactionLock;
 	class TransactionLock
