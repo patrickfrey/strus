@@ -16,7 +16,7 @@ types of operations:
 Architecture
 -------------
 
-The architecture defines three components that are implemented as libraries.
+The architecture defines four components that are implemented as libraries.
 
   |--------------------|
   |     queryeval      |  Query evaluation: Interpretes the query
