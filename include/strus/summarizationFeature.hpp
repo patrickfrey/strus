@@ -71,6 +71,9 @@ public:
 	variable_const_iterator variables_begin() const			{return m_variables.begin();}
 	variable_const_iterator variables_end()	const			{return m_variables.end();}
 
+	/// \brief Get the list of all variables
+	const std::vector<SummarizationVariable>& variables() const	{return m_variables;}
+
 private:
 	PostingIteratorInterface* m_postingIterator;			///< iterator on postings
 	std::vector<SummarizationVariable> m_variables;			///< variables attached

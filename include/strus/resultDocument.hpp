@@ -70,9 +70,18 @@ public:
 	/// \brief Constructor from a composition of the pure query evaluation result with attributes coming from summarization
 	ResultDocument( const WeightedDocument& o, const std::vector<Attribute>& a)
 		:WeightedDocument(o),m_attributes(a){}
+	/// \brief Constructor from a composition of the pure query evaluation result without attributes
+	ResultDocument( const WeightedDocument& o)
+		:WeightedDocument(o){}
 	/// \brief Constructor from a composition its basic parts
 	ResultDocument( const Index& docno_, float weight_, const std::vector<Attribute>& attributes_)
 		:WeightedDocument(docno_,weight_),m_attributes(attributes_){}
+
+	/// \brief Add an attribute
+	void addAttribute( const std::string& name_, const std::string& value_, float weight_)
+	{
+		m_attributes.push_back( Attribute( name_, value_, weight_));
+	}
 
 	/// \brief Get the list of attributes of this result element
 	const std::vector<Attribute>& attributes() const	{return m_attributes;}

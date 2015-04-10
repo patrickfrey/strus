@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include <string>
 #include <vector>
+#include <ostream>
 
 namespace strus
 {
@@ -160,7 +161,8 @@ public:
 			const std::string& logfilename) const=0;
 
 	/// \brief Iterate through all key/value pairs and check their data for validity
-	virtual void checkStorage() const=0;
+	/// \param[out] stream for reporting errors
+	virtual void checkStorage( std::ostream& errorlog) const=0;
 
 	/// \brief Create a dump of the storage
 	/// \return the object to fetch the dump from

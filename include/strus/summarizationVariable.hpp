@@ -50,6 +50,9 @@ public:
 	/// \brief Feature occurrence attached to this variable at the current position of the summarizer feature posting iterator this variable is attached to.
 	Index position() const				{return m_itr->posno();}
 
+	/// \brief Posting iterator of the variable
+	const PostingIteratorInterface* itr() const	{return m_itr;}
+
 private:
 	std::string m_name;
 	PostingIteratorInterface* m_itr;

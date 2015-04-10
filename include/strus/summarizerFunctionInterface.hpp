@@ -71,16 +71,16 @@ public:
 	class FeatureParameter
 	{
 	public:
-		FeatureParameter( std::size_t classidx_, const SummarizationFeature& feature_)
+		FeatureParameter( unsigned int classidx_, const SummarizationFeature& feature_)
 			:m_classidx(classidx_),m_feature(feature_){}
 		FeatureParameter( const FeatureParameter& o)
 			:m_classidx(o.m_classidx),m_feature(o.m_feature){}
 
-		std::size_t classidx() const				{return m_classidx;}
+		unsigned int classidx() const				{return m_classidx;}
 		const SummarizationFeature& feature() const		{return m_feature;}
 
 	private:
-		std::size_t m_classidx;
+		unsigned int m_classidx;
 		SummarizationFeature m_feature;
 	};
 

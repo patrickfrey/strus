@@ -57,6 +57,7 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <cstdio>
 
 using namespace strus;
 
@@ -761,7 +762,8 @@ static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
 static void checkKeyValue(
 		const strus::DatabaseClientInterface* database,
 		const strus::DatabaseCursorInterface::Slice& key,
-		const strus::DatabaseCursorInterface::Slice& value)
+		const strus::DatabaseCursorInterface::Slice& value,
+		std::ostream& errorlog)
 {
 	try
 	{
@@ -853,11 +855,13 @@ static void checkKeyValue(
 	catch (const std::runtime_error& err)
 	{
 		std::string ks( keystring( key));
-		throw strus::runtime_error( _TXT( "error in checked key '%s': %s"), ks.c_str(), err.what());
+		char buf[ 256];
+		snprintf( buf, 256, _TXT( "error in checked key '%s':"), ks.c_str());
+		errorlog << buf << err.what() << std::endl;
 	}
 }
 
-void StorageClient::checkStorage() const
+void StorageClient::checkStorage( std::ostream& errorlog) const
 {
 	std::auto_ptr<strus::DatabaseCursorInterface>
 		cursor( m_database->createCursor( strus::DatabaseOptions()));
@@ -870,7 +874,7 @@ void StorageClient::checkStorage() const
 		{
 			throw strus::runtime_error( _TXT( "found empty key in storage"));
 		}
-		checkKeyValue( m_database.get(), key, cursor->value());
+		checkKeyValue( m_database.get(), key, cursor->value(), errorlog);
 	};
 }
 

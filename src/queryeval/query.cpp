@@ -534,6 +534,7 @@ std::vector<ResultDocument> Query::evaluate()
 		std::vector<Reference<SummarizerClosureInterface> >::iterator
 			si = summarizers.begin(), se = summarizers.end();
 
+		rt.push_back( ResultDocument( *ri));
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
 			std::vector<SummarizerClosureInterface::SummaryElement>
@@ -542,13 +543,11 @@ std::vector<ResultDocument> Query::evaluate()
 				ci = summary.begin(), ce = summary.end();
 			for (; ci != ce; ++ci)
 			{
-				attr.push_back(
-					ResultDocument::Attribute(
+				rt.back().addAttribute(
 						m_queryEval->summarizers()[sidx].resultAttribute(),
-						ci->text(), ci->weight()));
+						ci->text(), ci->weight());
 			}
 		}
-		rt.push_back( ResultDocument( *ri, attr));
 	}
 	return rt;
 }

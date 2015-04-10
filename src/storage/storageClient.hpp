@@ -97,7 +97,7 @@ public:
 	virtual StorageTransactionInterface*
 			createTransaction();
 
-	virtual StorageDocumentInterface* 
+	virtual StorageDocumentInterface*
 			createDocumentChecker(
 				const std::string& docid,
 				const std::string& logfilename) const;
@@ -129,7 +129,7 @@ public:
 			const StoragePeerInterface* storagePeer,
 			bool doPopulateInitialState);
 
-	virtual void checkStorage() const;
+	virtual void checkStorage( std::ostream& errorlog) const;
 
 	virtual StorageDumpInterface* createDump() const;
 

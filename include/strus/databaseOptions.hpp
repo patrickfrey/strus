@@ -36,8 +36,15 @@ namespace strus
 class DatabaseOptions
 {
 public:
+	/// \brief Default constructor
 	DatabaseOptions()
 		:m_opt(0){}
+	/// \brief Copy constructor
+	DatabaseOptions( const DatabaseOptions& o)
+		:m_opt(o.m_opt){}
+	/// \brief Constructor
+	DatabaseOptions( unsigned int opt_)
+		:m_opt(opt_){}
 
 	/// \brief Enable caching of visited key/value elements or blocks
 	DatabaseOptions& useCache( bool yes=true)
@@ -46,9 +53,16 @@ public:
 		return *this;
 	}
 
+	/// \brief Test flag for caching the values read in an LRU cache
 	bool useCacheEnabled() const
 	{
 		return m_opt & UseCache;
+	}
+
+	/// \brief Get the options transacription as integer
+	unsigned int opt() const
+	{
+		return m_opt;
 	}
 
 private:
