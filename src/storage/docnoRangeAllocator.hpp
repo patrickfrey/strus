@@ -46,9 +46,9 @@ public:
 		return m_storage->allocDocnoRange( size);
 	}
 
-	virtual void deallocDocnoRange( const Index& docno, const Index& size)
+	virtual bool deallocDocnoRange( const Index& docno, const Index& size)
 	{
-		m_storage->deallocDocnoRange( docno, size);
+		return m_storage->deallocDocnoRange( docno, size);
 	}
 
 private:

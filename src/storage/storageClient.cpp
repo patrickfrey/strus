@@ -312,13 +312,15 @@ Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 	return rt;
 }
 
-void StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
+bool StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
 {
 	utils::ScopedLock lock( m_mutex_docno);
 	if (m_next_docno == docno + size)
 	{
 		m_next_docno -= size;
+		return true;
 	}
+	return false;
 }
 
 void StorageClient::declareNofDocumentsInserted( int incr)
@@ -741,14 +743,7 @@ static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
 	char const* ke = key.ptr()+key.size();
 	for (; ki != ke; ++ki)
 	{
-// TODO: RHEL/Centos 5 complaun about the '*ki < 128' with: 
-// storageClient.cpp:744: warning: comparison is always true due to limited range of data type
-// consider this a quick hack to make the build work
-#if SCHAR_MAX == 127
-		if (*ki > 32)
-#else
-		if (*ki > 32 && *ki < 128)
-#endif		
+		if ((unsigned char)*ki > 32 && (unsigned char)*ki < 128)
 		{
 			rt.push_back( *ki);
 		}

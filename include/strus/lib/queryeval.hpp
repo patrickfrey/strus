@@ -41,9 +41,7 @@ class StorageClientInterface;
 class QueryProcessorInterface;
 
 /// \brief Create a program for query evaluation
-/// \param[in] storage reference to storage
 /// \param[in] processor reference to query processor
-/// \param[in] evalProgramSource the source of the query evaluation procedure
 /// \return the program reference
 QueryEvalInterface*
 	createQueryEval(

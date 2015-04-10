@@ -49,9 +49,9 @@ public:
 	/// \brief Deallocate a set of document numbers (if possible)
 	/// \param[in] docno first document number of document number range to deallocate
 	/// \param[in] size number of document numbers to deallocate
-	/// \return First document number of allocated document number range
+	/// \return true, on success, false, if failed
 	/// \remark May fail if the deallocation would lead to gaps in the set of available document numbers
-	virtual void deallocDocnoRange( const Index& docno, const Index& size)=0;
+	virtual bool deallocDocnoRange( const Index& docno, const Index& size)=0;
 };
 
 }//namespace

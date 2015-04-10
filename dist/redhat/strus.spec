@@ -157,9 +157,9 @@ Requires: boost-date_time >= 1.48
 BuildRequires: boost-devel
 %endif
 %endif
-%if %{suse}
+%if %{suse} || %{sles}
 BuildRequires: boost-devel
-%if %{osu122} || %{osu123}
+%if %{osu122} || %{osu123} || %{sles11} || %{sles12}
 Requires: libboost_thread1_49_0 >= 1.49.0
 Requires: libboost_system1_49_0 >= 1.49.0
 Requires: libboost_date_time1_49_0 >= 1.49.0
@@ -241,6 +241,7 @@ make test
 %{_libdir}/%{name}/libstrus_utils.so.0.0.1
 
 %files devel
+%defattr( -, root, root )
 %{_libdir}/%{name}/libstrus_database_leveldb.so
 %{_libdir}/%{name}/libstrus_queryeval.so
 %{_libdir}/%{name}/libstrus_queryproc.so
