@@ -95,35 +95,13 @@ private:
 	enum {
 		UnknownValueHandleStart=(1<<30)
 	};
-
-	struct OverflowMapElem
-	{
-		OverflowMapElem()
-			:base(0),idx(0)
-		{
-			static const std::string emptystr;
-			base = &emptystr;
-		}
-		OverflowMapElem( const OverflowMapElem& o)
-			:base(o.base),idx(o.idx){}
-		OverflowMapElem( const std::string* base_, std::size_t idx_)
-			:base(base_),idx(idx_){}
-
-		bool operator<( const OverflowMapElem& o) const
-		{
-			return std::strcmp( base->c_str() + idx, o.base->c_str() + o.idx) < 0;
-		}
-
-		const std::string* base;
-		std::size_t idx;
-	};
+	typedef std::map<std::string,Index> OverflowMap;
 
 private:
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
 	unsigned int m_maxCachedKeyLen;
 	conotrie::CompactNodeTrie m_map;
-	std::map<OverflowMapElem,Index> m_overflow_map;
-	std::string m_overflow_strings;
+	OverflowMap m_overflowmap;
 	const conotrie::CompactNodeTrie* m_globalmap;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;

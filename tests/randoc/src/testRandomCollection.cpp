@@ -85,8 +85,7 @@ public:
 
 		m_value = uint32_hash( ((now->tm_year+1)
 					* (now->tm_mon+100)
-					* (now->tm_mday+1))
-			);
+					* (now->tm_mday+1)));
 	}
 
 	unsigned int get( unsigned int min_, unsigned int max_)

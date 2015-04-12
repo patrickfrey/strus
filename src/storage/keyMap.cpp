@@ -69,8 +69,8 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	}
 	else
 	{
-		std::map<OverflowMapElem,Index>::const_iterator oi = m_overflow_map.find( OverflowMapElem( &name, 0));
-		if (oi != m_overflow_map.end())
+		OverflowMap::const_iterator oi = m_overflowmap.find( name);
+		if (oi != m_overflowmap.end())
 		{
 			return oi->second;
 		}
@@ -82,10 +82,10 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		rt += UnknownValueHandleStart;
 		if (name.size() > m_maxCachedKeyLen || !m_map.set( name.c_str(), rt))
 		{
-			// ... Too many elements in the map, we have to switch to an STL map
-			m_overflow_map[ OverflowMapElem( &m_overflow_strings, m_overflow_strings.size())] = rt;
-			m_overflow_strings.append( name);
-			m_overflow_strings.push_back( '\0');
+			// ... Too many elements in the map or the key is bigger than the limit
+			//	defined as reasonable for a compact node trie. We are switching
+			//	to an STL map for caching the value:
+			m_overflowmap[ name] = rt;
 		}
 	}
 	return rt;
@@ -112,24 +112,23 @@ void KeyMap::getWriteBatch(
 	}
 	m_map.clear();
 
-	std::map<OverflowMapElem,Index>::const_iterator
-		oi = m_overflow_map.begin(), oe = m_overflow_map.end();
+	OverflowMap::const_iterator
+		oi = m_overflowmap.begin(), oe = m_overflowmap.end();
 	for (; oi != oe; ++oi)
 	{
 		if (oi->second > UnknownValueHandleStart)
 		{
-			std::string ovlkey( oi->first.base->c_str() + oi->first.idx);
-			Index idx = lookUp( ovlkey);
+			Index idx = lookUp( oi->first);
 			if (!idx)
 			{
 				idx = m_allocator->alloc();
-				m_dbadapter.store( transaction, ovlkey, idx);
+				m_dbadapter.store( transaction, oi->first, idx);
 			}
 			rewriteUnknownMap[ oi->second] = idx;
-			if (m_invmap) m_invmap->set( idx, ovlkey);
+			if (m_invmap) m_invmap->set( idx, oi->first);
 		}
 	}
-	m_overflow_map.clear();
+	m_overflowmap.clear();
 }
 
 
