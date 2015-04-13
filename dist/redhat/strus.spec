@@ -154,7 +154,7 @@ Requires: boost >= 1.53.0
 Requires: boost-thread >= 1.53.0
 Requires: boost-system >= 1.53.0
 Requires: boost-date_time >= 1.53.0
-BuildRequires: boost153-devel
+BuildRequires: boost-devel
 %endif
 %endif
 %if %{suse} || %{sles}
