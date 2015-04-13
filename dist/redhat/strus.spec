@@ -227,6 +227,10 @@ rm -rf $RPM_BUILD_ROOT
 cd build
 make test
 
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
 %files
 %defattr( -, root, root )
 %dir %{_libdir}/%{name}
