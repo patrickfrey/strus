@@ -49,7 +49,7 @@ public:
 
 	/// \brief Creates an client instance of the storage using a defined key value store database
 	/// \param[in] configsource configuration source string describing the storage (not a filename !)
-	/// \param[in] database key value store database used by this storage (ownership passed to this)
+	/// \param[in] database key value store database used by this storage (ownership passed to returned object)
 	virtual StorageClientInterface* createClient( const std::string& configsource, DatabaseClientInterface* database) const=0;
 
 	/// \brief Creates a new storage described with configsource using a defined key value store database

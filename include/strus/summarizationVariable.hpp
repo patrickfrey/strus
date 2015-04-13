@@ -40,17 +40,24 @@ namespace strus
 class SummarizationVariable
 {
 public:
+	/// \brief Constructor
+	/// \param[in] name_ name of the variable
+	/// \param[in] itr_ pointer to postinglist representing the variable (owned by caller)
 	SummarizationVariable( const std::string& name_, PostingIteratorInterface* itr_)
 		:m_name(name_),m_itr(itr_){}
+	/// \brief Copy constructor
+	/// \param[in] o variable to copy
 	SummarizationVariable( const SummarizationVariable& o)
 		:m_name(o.m_name),m_itr(o.m_itr){}
 
 	/// \brief Name of the variable
 	const std::string& name() const			{return m_name;}
 	/// \brief Feature occurrence attached to this variable at the current position of the summarizer feature posting iterator this variable is attached to.
+	/// \return the current position
 	Index position() const				{return m_itr->posno();}
 
 	/// \brief Posting iterator of the variable
+	/// \return the posting iterator pointer of this variable
 	const PostingIteratorInterface* itr() const	{return m_itr;}
 
 private:
