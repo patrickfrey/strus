@@ -10,5 +10,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( functions functions.cpp)
-target_link_libraries( functions strus_utils strus_storage_static )
+target_link_libraries( functions strus_utils strus_storage_static boost_system )
 
