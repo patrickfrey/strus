@@ -147,27 +147,26 @@ BuildRequires: cmake
 
 %if %{rhel} || %{centos} || %{scilin} || %{fedora}
 %if %{rhel5} || %{centos5}
-Requires: boost148 >= 1.48
-BuildRequires: boost148-devel >= 1.48
+Requires: boost153 >= 1.53.0
+BuildRequires: boost153-devel >= 1.53.0
 %else
-Requires: boost >= 1.48
-Requires: boost-thread >= 1.48
-Requires: boost-system >= 1.48
-Requires: boost-date_time >= 1.48
+Requires: boost >= 1.53.0
+Requires: boost-thread >= 1.53.0
+Requires: boost-system >= 1.53.0
+Requires: boost-date_time >= 1.53.0
 BuildRequires: boost-devel
 %endif
 %endif
 %if %{suse} || %{sles}
-BuildRequires: boost-devel
-%if %{osu122} || %{osu123} || %{sles11} || %{sles12}
-Requires: libboost_thread1_49_0 >= 1.49.0
-Requires: libboost_system1_49_0 >= 1.49.0
-Requires: libboost_date_time1_49_0 >= 1.49.0
+%if %{osu122} || %{osu123} || %{sles11}
+Requires: boost153 >= 1.53.0
+BuildRequires: boost153-devel >= 1.53.0
 %endif
-%if %{osu131}
+%if %{osu131} || %{osu132} || %{osufactory} || %{sles12}
 Requires: libboost_thread1_53_0 >= 1.53.0
 Requires: libboost_system1_53_0 >= 1.53.0
 Requires: libboost_date_time1_53_0 >= 1.53.0
+BuildRequires: boost-devel
 %endif
 %endif
 
@@ -225,6 +224,10 @@ rm -rf $RPM_BUILD_ROOT
 %check
 cd build
 make test
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
 
 %files
 %defattr( -, root, root )
