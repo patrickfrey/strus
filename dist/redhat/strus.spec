@@ -158,13 +158,11 @@ BuildRequires: boost-devel
 %endif
 %endif
 %if %{suse} || %{sles}
-%if %{osu122} || %{osu123} || %{sles11} || %{sles12}
-Requires: libboost_thread1_53_0 >= 1.53.0
-Requires: libboost_system1_53_0 >= 1.53.0
-Requires: libboost_date_time1_53_0 >= 1.53.0
+%if %{osu122} || %{osu123} || %{sles11}
+Requires: boost153 >= 1.53.0
 BuildRequires: boost153-devel >= 1.53.0
 %endif
-%if %{osu131} || %{osu132}
+%if %{osu131} || %{osu132} || %{osufactory} || %{sles12}
 Requires: libboost_thread1_53_0 >= 1.53.0
 Requires: libboost_system1_53_0 >= 1.53.0
 Requires: libboost_date_time1_53_0 >= 1.53.0
