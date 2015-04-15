@@ -30,24 +30,82 @@
 #define _STRUS_DATABASE_CLIENT_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseClientInterface.hpp"
 #include <leveldb/db.h>
+#include "private/utils.hpp"
 
 namespace strus
 {
+
+/// \brief Shared handle for accessing Level DB
+class LevelDbHandle
+{
+public:
+	/// \brief Constructor
+	/// \param[in] path_ path of the storage
+	/// \param[in] maxOpenFiles maximum number of files open (0 for default)
+	/// \param[in] cachesize_k number of K LRU cache for nodes
+	/// \param[in] compression wheter to use snappy compression (true) or not
+	LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_);
+
+	/// \brief Destructor
+	~LevelDbHandle();
+
+	const std::string& path() const			{return m_path;}
+	leveldb::DB* db() const				{return m_db;}
+	unsigned int maxOpenFiles() const		{return m_maxOpenFiles;}
+	unsigned int cachesize_k() const		{return m_cachesize_k;}
+	bool compression() const			{return m_compression;}
+
+private:
+	void cleanup();
+
+private:
+	std::string m_path;				///< path to level DB storage directory
+	leveldb::Options m_dboptions;			///< options for level DB
+	leveldb::DB* m_db;				///< levelDB handle
+	unsigned int m_maxOpenFiles;			///< maximum number of files to be opened by Level DB
+	unsigned int m_cachesize_k;			///< kilobytes of LRU cache to use
+	bool m_compression;				///< true if compression enabled
+};
+
+/// \brief Map of shared Level DB handles
+class LevelDbHandleMap
+{
+public:
+	/// \brief Constructor
+	LevelDbHandleMap(){}
+	/// \brief Destructor
+	~LevelDbHandleMap(){}
+
+	/// \brief Create a new handle or return a reference to an instance already in use
+	/// \note the method throws if the configuration parameters are incompatible to an existing instance
+	utils::SharedPtr<LevelDbHandle> create( const std::string& path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression);
+
+	/// \brief Dereference the handle for the database referenced by path and dispose the handle, if this reference is the last instance
+	void dereference( const std::string& path_);
+
+private:
+	utils::Mutex m_map_mutex;
+	std::map<std::string,utils::SharedPtr<LevelDbHandle> > m_map;
+};
+
 
 /// \brief Implementation of the strus key value storage database based on the LevelDB library
 class DatabaseClient
 	:public DatabaseClientInterface
 {
 public:
-	/// \param[in] path of the storage
-	/// \param[in] maxOpenFiles maximum number of files open (0 for default)
-	/// \param[in] cachesize_k number of K LRU cache for nodes
-	/// \param[in] compression wheter to use snappy compression (true) or not
-	DatabaseClient( const char* path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression);
+	DatabaseClient( const utils::SharedPtr<LevelDbHandleMap>& dbmap_, const std::string& path, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression)
+		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression))
+	{}
 
-	virtual ~DatabaseClient();
+	virtual ~DatabaseClient()
+	{
+		std::string path( m_db->path());
+		m_db.reset();
+		m_dbmap->dereference( path);
+	}
 
-	virtual void close();
+	virtual void close(){}
 
 	virtual DatabaseTransactionInterface* createTransaction();
 
@@ -71,14 +129,9 @@ public:
 			std::string& value,
 			const DatabaseOptions& options) const;
 
-public:
-	void cleanup();
-	friend class DatabaseTransaction;
-
 private:
-	leveldb::DB* m_db;					///< levelDB handle
-	leveldb::Options m_dboptions;				///< options for levelDB
-	bool m_closed;						///< true, if 'close()' has been called
+	utils::SharedPtr<LevelDbHandleMap> m_dbmap;		///< reference to map of shared levelDB handles
+	utils::SharedPtr<LevelDbHandle> m_db;			///< shared levelDB handle
 };
 
 }//namespace

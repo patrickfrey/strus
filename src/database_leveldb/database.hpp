@@ -29,6 +29,8 @@
 #ifndef _STRUS_DATABASE_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_DATABASE_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseInterface.hpp"
+#include "databaseClient.hpp"
+#include <leveldb/db.h>
 
 namespace strus {
 
@@ -42,6 +44,9 @@ class Database
 	:public DatabaseInterface
 {
 public:
+	Database()
+		:m_dbhandle_map( new LevelDbHandleMap()){}
+
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const;
 
 	virtual void createDatabase( const std::string& configsource) const;
@@ -53,6 +58,9 @@ public:
 	virtual const char* getConfigDescription( ConfigType type) const;
 
 	virtual const char** getConfigParameters( ConfigType type) const;
+
+private:
+	utils::SharedPtr<LevelDbHandleMap> m_dbhandle_map;
 };
 
 }//namespace

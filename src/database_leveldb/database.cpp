@@ -30,7 +30,7 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 	(void)extractUIntFromConfigString( cachesize_kb, src, "cache");
 	(void)extractUIntFromConfigString( maxOpenFiles, src, "maxopenfiles");
 	
-	return new DatabaseClient( path.c_str(), maxOpenFiles, cachesize_kb, compression);
+ 	return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression);
 }
 
 void Database::createDatabase( const std::string& configsource) const

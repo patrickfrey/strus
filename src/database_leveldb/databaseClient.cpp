@@ -39,25 +39,47 @@
 
 using namespace strus;
 
-DatabaseClient::DatabaseClient( const char* path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression)
-	:m_db(0),m_closed(false)
+static std::string normalizePath( const std::string& path_)
+{
+	std::string rt;
+	std::string::const_iterator pi = path_.begin(), pe = path_.end();
+	for (; pi != pe; ++pi)
+	{
+		if (*pi == '/' || *pi == '\\')
+		{
+			while (pi+1 != pe && (pi[1] == '/' || pi[1] == '\\')) ++pi;
+			if (pi != pe)
+			{
+				rt.push_back( '/');
+			}
+		}
+		else
+		{
+			rt.push_back( *pi);
+		}
+	}
+	return rt;
+}
+
+LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_)
+	:m_path(path_),m_db(0),m_maxOpenFiles(maxOpenFiles_),m_cachesize_k(cachesize_k_),m_compression(compression_)
 {
 	m_dboptions.create_if_missing = false;
-	if (maxOpenFiles)
+	if (m_maxOpenFiles)
 	{
-		m_dboptions.max_open_files = maxOpenFiles;
+		m_dboptions.max_open_files = maxOpenFiles_;
 	}
-	if (cachesize_k)
+	if (m_cachesize_k)
 	{
-		if (cachesize_k * 1024 < cachesize_k) throw strus::runtime_error( _TXT( "size of cache out of range"));
-		m_dboptions.block_cache = leveldb::NewLRUCache( cachesize_k * 1024);
+		if (m_cachesize_k * 1024 < m_cachesize_k) throw strus::runtime_error( _TXT( "size of cache out of range"));
+		m_dboptions.block_cache = leveldb::NewLRUCache( m_cachesize_k * 1024);
 	}
-	if (!compression)
+	if (!m_compression)
 	{
 		//... compression reduces size of index by 25% and has about 10% better performance
 		m_dboptions.compression = leveldb::kNoCompression;
 	}
-	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_, &m_db);
+	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_.c_str(), &m_db);
 	if (!status.ok())
 	{
 		std::string err = status.ToString();
@@ -66,20 +88,7 @@ DatabaseClient::DatabaseClient( const char* path_, unsigned int maxOpenFiles, un
 	}
 }
 
-DatabaseClient::~DatabaseClient()
-{
-	try
-	{
-		if (!m_closed) close();
-	}
-	catch (const std::runtime_error&)
-	{
-		/// ... silently ignore close errors. Call close directly to catch them
-	}
-	cleanup();
-}
-
-void DatabaseClient::cleanup()
+void LevelDbHandle::cleanup()
 {
 	if (m_db)
 	{
@@ -93,18 +102,55 @@ void DatabaseClient::cleanup()
 	}
 }
 
-void DatabaseClient::close()
+utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression)
 {
+	utils::ScopedLock lock( m_map_mutex);
+	std::string path = normalizePath( path_);
+	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path);
+	if (mi == m_map.end())
+	{
+		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path, maxOpenFiles, cachesize_k, compression));
+		m_map[ path_] = rt;
+		return rt;
+	}
+	else
+	{
+		if ((maxOpenFiles && mi->second->maxOpenFiles() != maxOpenFiles)
+		||  (cachesize_k && mi->second->cachesize_k() != cachesize_k)
+		||  (compression != mi->second->compression()))
+		{
+			throw strus::runtime_error( _TXT( "level DB key value store with the same path opened twice but with different settings"));
+		}
+		return mi->second;
+	}
+}
+
+void LevelDbHandleMap::dereference( const std::string& path_)
+{
+	utils::ScopedLock lock( m_map_mutex);
+	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path_);
+	if (mi != m_map.end())
+	{
+		if (mi->second.unique())
+		{
+			m_map.erase( path_);
+		}
+	}
+}
+
+LevelDbHandle::~LevelDbHandle()
+{
+	cleanup();
 }
 
 DatabaseTransactionInterface* DatabaseClient::createTransaction()
 {
-	return new DatabaseTransaction( m_db, this);
+	return new DatabaseTransaction( m_db->db(), this);
 }
 
 DatabaseCursorInterface* DatabaseClient::createCursor( const DatabaseOptions& options) const
 {
-	return new DatabaseCursor( m_db, options.useCacheEnabled());
+	return new DatabaseCursor( m_db->db(), options.useCacheEnabled());
 }
 
 
@@ -145,7 +191,7 @@ private:
 
 DatabaseBackupCursorInterface* DatabaseClient::createBackupCursor() const
 {
-	return new DatabaseBackupCursor( m_db);
+	return new DatabaseBackupCursor( m_db->db());
 }
 
 void DatabaseClient::writeImm(
@@ -156,7 +202,7 @@ void DatabaseClient::writeImm(
 {
 	leveldb::WriteOptions options;
 	options.sync = true;
-	leveldb::Status status = m_db->Put( options,
+	leveldb::Status status = m_db->db()->Put( options,
 					leveldb::Slice( key, keysize),
 					leveldb::Slice( value, valuesize));
 	if (!status.ok())
@@ -172,7 +218,7 @@ void DatabaseClient::removeImm(
 {
 	leveldb::WriteOptions options;
 	options.sync = true;
-	leveldb::Status status = m_db->Delete( options, leveldb::Slice( key, keysize));
+	leveldb::Status status = m_db->db()->Delete( options, leveldb::Slice( key, keysize));
 	if (!status.ok())
 	{
 		std::string ststr( status.ToString());
@@ -190,7 +236,7 @@ bool DatabaseClient::readValue(
 	leveldb::ReadOptions readoptions;
 	readoptions.fill_cache = options.useCacheEnabled();
 
-	leveldb::Status status = m_db->Get( readoptions, leveldb::Slice( key, keysize), &value);
+	leveldb::Status status = m_db->db()->Get( readoptions, leveldb::Slice( key, keysize), &value);
 	if (status.IsNotFound())
 	{
 		return false;
