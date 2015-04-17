@@ -70,8 +70,8 @@ public:
 	/// \brief Write a key value immediately (synchronized)
 	/// \param[in] key pointer to the key of the item to write
 	/// \param[in] keysize size of the key of the item to write in bytes
-	/// \param[in] val pointer to value to write
-	/// \param[in] valsize size of value to write in bytes
+	/// \param[in] value pointer to value to write
+	/// \param[in] valuesize size of value to write in bytes
 	/// \note Replaces existing duplicate entry in the database (not issuing an error)
 	virtual void writeImm(
 			const char* key,

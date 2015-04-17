@@ -28,6 +28,8 @@ setenv.sh
 
 # Generated test data (cleaned with make clean)
 tests/randoc/storage/
+# Doxygen generated files
+doc/doxygen/
 
 # CMake generated files
 CMakeCache.txt

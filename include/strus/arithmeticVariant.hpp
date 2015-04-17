@@ -64,7 +64,6 @@ public:
 	}
 
 	/// \brief Default constructor (as undefined value)
-	/// \param[in] value value to assign to this arithmetic variant
 	ArithmeticVariant()
 	{
 		std::memset( this, 0, sizeof(*this));
@@ -85,6 +84,7 @@ public:
 	}
 
 	/// \brief Template for casting to a defined value type
+	/// \tparam TYPE what type to cast this arithmetic variant to
 	template <typename TYPE>
 	TYPE cast() const
 	{
@@ -188,7 +188,12 @@ public:
 	}
 
 	/// \brief Enumeration of all types an arithmetic variant can have
-	enum Type {Null,Int,UInt,Float};
+	enum Type {
+		Null,		///< uninitialized variant value
+		Int,		///< signed integer number value
+		UInt,		///< unsigned integer number value
+		Float		///< floating point number value
+	};
 	Type type;				///< Type of this arithmetic variant
 	union
 	{

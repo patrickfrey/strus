@@ -58,6 +58,7 @@ public:
 	/// \param[in] storage_ storage reference for some statistics (like the document collection frequency)
 	/// \param[in] itr term occurrency iterator reference
 	/// \param[in] metadata meta data interface
+	/// \param[in] parameters parameters for the function
 	/// \return the closure with some global statistics calculated only once
 	virtual WeightingClosureInterface* createClosure(
 			const StorageClientInterface* storage_,

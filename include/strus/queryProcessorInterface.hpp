@@ -85,7 +85,7 @@ public:
 
 	/// \brief Define a new summarization function
 	/// \param[in] name name of the summarization function
-	/// \param[in] the summarization function object reference (ownership passed to this)
+	/// \param[in] sumfunc the summarization function object reference (ownership passed to this)
 	virtual void
 		defineSummarizerFunction(
 			const std::string& name,

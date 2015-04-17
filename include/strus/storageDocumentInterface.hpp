@@ -47,7 +47,6 @@ public:
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document
-	/// \param[in] weight_ additional weight of the term at this position in the document
 	/// \remark Weights accumulated for each type,value,position tuple
 	virtual void addSearchIndexTerm(
 			const std::string& type_,

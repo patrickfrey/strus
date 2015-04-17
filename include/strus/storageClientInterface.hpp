@@ -125,7 +125,6 @@ public:
 	virtual Index documentNumber( const std::string& docid) const=0;
 
 	/// \brief Create an interface to access items of document metadata
-	/// \param[in] varname variable name identifying the metadata attribute
 	/// \return the interface to access document metadata to be disposed with delete by the caller
 	virtual MetaDataReaderInterface* createMetaDataReader() const=0;
 
@@ -146,7 +145,7 @@ public:
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction()=0;
 
 	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
-	/// \param[in] peerStorage reference to storage peer interface (owned by caller)
+	/// \param[in] storagePeer reference to storage peer interface (owned by caller)
 	/// \param[in] doPopulateInitialState flag that is set to true in a normal startup and to false in the case of a system recovery after a crash. The flag set to false tells the storage to populate its stored terms with a df change of 0 to the other peers in the initialization phase. After recovery restart the node should reinitialize its global statistics without changing the state of the other peers.
 	virtual void defineStoragePeerInterface(
 			const StoragePeerInterface* storagePeer,
@@ -161,7 +160,7 @@ public:
 			const std::string& logfilename) const=0;
 
 	/// \brief Iterate through all key/value pairs and check their data for validity
-	/// \param[out] stream for reporting errors
+	/// \param[out] errorlog stream for reporting errors
 	virtual void checkStorage( std::ostream& errorlog) const=0;
 
 	/// \brief Create a dump of the storage

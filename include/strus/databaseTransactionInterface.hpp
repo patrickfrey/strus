@@ -46,7 +46,7 @@ public:
 	virtual ~DatabaseTransactionInterface(){}
 
 	/// \brief Get an interface for reading values in the context of this transaction
-	/// \param[in] useCache Hint for reader to cache visited key/value elements or blocks
+	/// \param[in] options some hints how to access the key/value elements or blocks (e.g. fill LRU cache of not)
 	/// \return the created cursor interface to be disposed with delete by the caller
 	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const=0;
 

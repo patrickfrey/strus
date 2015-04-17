@@ -52,7 +52,7 @@ public:
 	virtual StorageDocumentInterface*
 		createDocument(
 			const std::string& docid_,
-			const Index& docno=0)=0;
+			const Index& docno_=0)=0;
 
 	/// \brief Declare a document to be removed from the storage within this transaction
 	/// \param[in] docid document identifier (URI)
