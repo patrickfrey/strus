@@ -5,8 +5,8 @@ The project strus provides some libraries for building a search engine
 for information retrieval. This engine is able to evaluate structured 
 queries on unstructured text as well as implenting classical information
 retrieval. It is independent from the key value store database impementation.
-Current database implementation is based on <a href="http://leveldb.org">LevelDB</a>.
-The project is hosted at [strus]: https://github.com/patrickfrey/strus.
+Current database implementation is based on <a href="http://leveldb.org">levelDB</a>.
+The project is hosted at <a href="https://github.com/patrickfrey/strus">github</a>.
 
 strus defines the evaluation of a query based on 3 types of operations:
 * <b>Fetching and joining</b> of feature occurrencies.
@@ -42,7 +42,7 @@ The architecture defines four components that are implemented as libraries.
 * [queryeval](@ref strus::QueryEvalInterface) Query evaluation: Interpretes the query and uses the operators defined in the query processor for its execution.
 * [queryproc](@ref strus::QueryProcessorInterface) Query processor: Defines the set operations on feature occurrencies, the weighting functions and the summarizers to augment the results.
 * [storage](@ref strus::StorageInterface) Storage: Defines the storage where the all retrievable information is stored. Implements the retrieval of occurrencies of the basic terms and the weighting the terms in case of statistical IR.
-* [database](@ref strus::DatabaseInterface)  Key/value store database: Implements the storing and retrieval of the storage data blocks. Currently there exists only one implementation based on [LevelDB]: http://leveldb.org/.
+* [database](@ref strus::DatabaseInterface)  Key/value store database: Implements the storing and retrieval of the storage data blocks. Currently there exists only one implementation based on <a href="http://leveldb.org">levelDB</a>.
 
 
 
