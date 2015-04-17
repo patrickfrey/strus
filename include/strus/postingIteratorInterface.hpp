@@ -34,6 +34,8 @@
 namespace strus
 {
 
+/// \class PostingIteratorInterface
+/// \brief Structure that represents a set of feature occurrencies (postings) as iterator.
 class PostingIteratorInterface
 {
 public:

@@ -34,7 +34,7 @@
 namespace strus
 {
 
-/// \brief Reference for passing objects accross library borders.
+/// \brief Shared pointer template with non thread-safe reference counting.
 /// \note Similar to shared_ptr but without atomic (thread safe) reference counting
 template <class Object>
 class Reference
