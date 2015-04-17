@@ -5,7 +5,7 @@ The project strus provides some libraries for building a search engine
 for information retrieval. This engine is able to evaluate structured 
 queries on unstructured text as well as implenting classical information
 retrieval. It is independent from the key value store database impementation.
-Current database implementationis based on [LevelDB]: http://leveldb.org/.
+Current database implementation is based on <a href="http://leveldb.org">LevelDB</a>.
 The project is hosted at [strus]: https://github.com/patrickfrey/strus.
 
 strus defines the evaluation of a query based on 3 types of operations:
@@ -24,7 +24,7 @@ strus defines the evaluation of a query based on 3 types of operations:
      3. N-ary set selection operators that select postings with help of context information. For example <i>within_struct</i>: get the first element in an interval of a defined maximum range containing at least one element of each input set, but not containing a specified delimiter token.
 
 * <b>Weighting</b> of documents based on the feature occurrencies
-  Weighting defines how documents are ranked in a search result. It is defined by weighting functions, that take an iterator on the feature occurrencies and some numeric parameters as input to calculate the weight of a document. Currently there is only BM25 defined in the core, but it is simple to define other weighting functions.
+  Weighting defines how documents are ranked in a search result. It is defined by weighting functions, that take an iterator on the feature occurrencies and some numeric parameters as input to calculate the weight of a document. Currently there is only BM25 defined in the core, but it is easy to define new weighting functions.
   Weighting functions can access the positions of query subexpressions too. This allows to implement query evaluation schemes that take relations of features like for example relative distance into account for weighting (proximity weighting scheme).
 
 * <b>Summarization</b> as extraction of content based on the query matches

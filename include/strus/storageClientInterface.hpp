@@ -96,21 +96,21 @@ public:
 		createInvAclIterator(
 			const std::string& username) const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the global number of documents inserted (absolute number of documents in case of a distributed index)
 	/// \return the number of documents
 	virtual GlobalCounter globalNofDocumentsInserted() const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the local number of documents inserted (the number of documents inserted in this storage instance)
 	/// \return the number of documents
 	virtual Index localNofDocumentsInserted() const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the global number of documents inserted (absolute document frequency in case of a distributed index)
 	/// \return the number of documents
 	virtual GlobalCounter globalDocumentFrequency(
 			const std::string& type,
 			const std::string& term) const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the local number of documents inserted (the document frequency in this storage instance)
 	/// \return the number of documents
 	virtual Index localDocumentFrequency(
 			const std::string& type,

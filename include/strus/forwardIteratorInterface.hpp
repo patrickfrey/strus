@@ -42,12 +42,16 @@ public:
 	virtual ~ForwardIteratorInterface(){}
 
 	/// \brief Define the document of the items inspected
+	/// \param[in] docno minimum document number to seek
 	virtual void skipDoc( const Index& docno_)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
+	/// \param[in] firstpos minimum position to seek
+	/// \return the matching upper bound position found
 	virtual Index skipPos( const Index& firstpos)=0;
 
-	/// \brief Fetch the item at the current position (defined by initType(const std::string&) and initDoc( const Index&))
+	/// \brief Fetch the item at the current position
+	/// \return the element string
 	virtual std::string fetch()=0;
 };
 

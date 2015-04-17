@@ -39,20 +39,25 @@ namespace strus
 class SummarizerClosureInterface
 {
 public:
+	/// \brief One result element of summarization
 	class SummaryElement
 	{
 	public:
+		/// \brief Constructor
 		SummaryElement( const std::string& text_, float weight_=1.0)
 			:m_text(text_),m_weight(weight_){}
+		/// \brief Copy constructor
 		SummaryElement( const SummaryElement& o)
 			:m_text(o.m_text),m_weight(o.m_weight){}
 
+		/// \brief Content value of the element
 		const std::string& text() const		{return m_text;}
+		/// \brief Weight of the element if defined
 		float weight() const			{return m_weight;}
 
 	private:
-		std::string m_text;
-		float m_weight;
+		std::string m_text;	///< content value of the element
+		float m_weight;		///< weight of the element if defined
 	};
 
 public:
