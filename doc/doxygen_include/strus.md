@@ -21,7 +21,7 @@ strus defines the evaluation of a query based on 3 types of operations:
      The basic set join operators are the following:
      1. Basic operators of the boolean algebra of sets of (<i>d</i>, <i>p</i>) pairs: intersection, union and relative complement.
      2. Unary set construction operators like the successor set <i>A+</i> of <i>A</i> defined as {(<i>d</i>,<i>p</i>) | (<i>d</i>,<i>p</i>-1) element of <i>A</i>} and the predecessor set defined accordingly.
-     3. N-ary set selection operators that select elements based on context conditions. For example <i>within_struct</i>: get the first element of every interval of a maximum size (range) containing at least one element of each input set, but not containing a specific delimiter token (like for example punctuation to filter structures crossing sentence borders).
+     3. N-ary set selection operators that select postings with help of context information. For example <i>within_struct</i>: get the first element in an interval of a defined maximum range containing at least one element of each input set, but not containing a specified delimiter token.
 
 * <b>Weighting</b> of documents based on the feature occurrencies
   Weighting defines how documents are ranked in a search result. It is defined by weighting functions, that take an iterator on the feature occurrencies and some numeric parameters as input to calculate the weight of a document. Currently there is only BM25 defined in the core, but it is simple to define other weighting functions.
