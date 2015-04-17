@@ -1,36 +1,38 @@
 strus	 {#mainpage}
 =====
 
-The project strus provides a library for building a search engine
+The project strus provides some libraries for building a search engine
 for information retrieval. This engine is able to evaluate structured 
 queries on unstructured text as well as implenting classical information
 retrieval. It is independent from the key value store database impementation.
-Current database implementationis based on LevelDB.
+Current database implementationis based on [LevelDB]: http://leveldb.org/.
+The project is hosted at [strus]: https://github.com/patrickfrey/strus.
 
 strus defines the evaluation of a query based on 3 types of operations:
 * <b>Fetching and joining</b> of feature occurrencies.
   The feature ocurrencies, also referred to a postings are represented as sets of pairs
-     {(d,p) | d is a document number, p is a position }, where 
-     d and p are positive integer numbers. d is a unique id of the document in
-     the storage while p is representing the term position in the document.
+     {(<i>d</i>,<i>p</i>) |  <i>d</i> is a document number, <i>p</i> is a position }, where 
+     <i>d</i> and  <i>p</i> are positive integer numbers.  <i>d</i> is a unique id of the document in
+     the storage while <i>p</i> is representing the term position in the document.
      These sets are built from the basic feature occurrencies of terms
      stored in the storage (See [here](@ref strus::StorageClientInterface::createTermPostingIterator)).
      Together with the set join operators provided by the [query processor interface](@ref strus::QueryProcessorInterface),
      you can build representations of more complex structures.
      The basic set join operators are the following:
-     1. Basic operators of the boolean algebra of sets of (d,p) pairs: intersection, union and relative complement.
-     2. Unary set construction operators like the successor set A+ of A defined as {(d,p) | (d,p-1) element of A} and the predecessor set defined accordingly.
-     3. N-ary set selection operators that select elements based on context conditions. For example within_struct: get the first element of every interval of a maximum size (range) containing at least one element of each input set, but not containing a specific delimiter token (like for example punctuation to filter structures crossing sentence borders).
+     1. Basic operators of the boolean algebra of sets of (<i>d</i>, <i>p</i>) pairs: intersection, union and relative complement.
+     2. Unary set construction operators like the successor set <i>A+</i> of <i>A</i> defined as {(<i>d</i>,<i>p</i>) | (<i>d</i>,<i>p</i>-1) element of <i>A</i>} and the predecessor set defined accordingly.
+     3. N-ary set selection operators that select elements based on context conditions. For example <i>within_struct</i>: get the first element of every interval of a maximum size (range) containing at least one element of each input set, but not containing a specific delimiter token (like for example punctuation to filter structures crossing sentence borders).
 
 * <b>Weighting</b> of documents based on the feature occurrencies
-  Weighting defines how documents are ranked in a search result. It is defined by weighting functions, that take an iterator on the feature occurrencies and some numeric calibrarion parameters as input to calculate the weight of a document. Currently there is only BM25 defined in the core, but it is simple to define other weighting functions.
+  Weighting defines how documents are ranked in a search result. It is defined by weighting functions, that take an iterator on the feature occurrencies and some numeric parameters as input to calculate the weight of a document. Currently there is only BM25 defined in the core, but it is simple to define other weighting functions.
   Weighting functions can access the positions of query subexpressions too. This allows to implement query evaluation schemes that take relations of features like for example relative distance into account for weighting (proximity weighting scheme).
 
 * <b>Summarization</b> as extraction of content based on the query matches
-  Summarization is used to extract content from matching documents. This can be done to do various things:
+  Summarization is used to extract content from matching documents. With summarization you can do various things:
      1. Extract the best matching passages of the query in a document to present it as summary of the rank to the user.
      2. Extract features close to matching passages for automated query rewriting (relevance feedback).
      3. Extract data close to matching passages for categorization, clustering, query answering, etc.
+
 
 Architecture
 -------------
