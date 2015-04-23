@@ -50,12 +50,16 @@
 			loadable modules. (depends on strus and strusAnalyzer)</p></li>
 		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
 			<p>Provides some command line programs to access the search engine.
-			(Depends on strusModule)</p></li>
+			(Depends on strusModule and strusRpc*)</p></li>
 		<li><a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>
 			<p>Provides language bindings to use <i>strus</i> with other
 			programming languages like <i>PHP</i>,<i>Python</i>,<i>Perl</i>,<i>Java</i>,<i>Ruby</i>,etc...
-			(Depends on strusModule)</p></li>
+			(Depends on strusModule and strusRpc*)</p></li>
 		</ol>
+		* the dependency on strusRpc is bad. There should exist alternative implementations
+		of accessing a local storage via TCP/IP. strusRpc has several flaws and is
+		insecure if its access is not retricted to trusted clients on the same machine only.
+		Currently there is no other solution provided.
 		</p>
 		<p>Many components needed to be implemented for a competitive search are still missing.
 		For example the possibility to distribute the search index and running <i>strus</i>
