@@ -53,14 +53,10 @@ DLL_PUBLIC void strus::SummarizerConfig::defineTextualParameter( const std::stri
 	m_textualParameters[ name] = value_;
 }
 
-DLL_PUBLIC void strus::SummarizerConfig::defineFeatureParameter( const std::string& class_, const std::string& set_)
+DLL_PUBLIC void strus::SummarizerConfig::defineFeatureParameter( const std::string& name_, const std::string& set_)
 {
-	std::string name = utils::tolower( class_);
-	if (m_featureParameters.find( name) != m_featureParameters.end())
-	{
-		throw strus::runtime_error( _TXT( "duplicate definition of summarizer feature parameter '%s'"), class_.c_str());
-	}
-	m_featureParameters[ name] = set_;
+	std::string name = utils::tolower( name_);
+	m_featureParameters.push_back( std::pair<std::string,std::string>(name,set_));
 }
 
 

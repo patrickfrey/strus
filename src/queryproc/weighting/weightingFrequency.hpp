@@ -32,15 +32,14 @@
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <limits>
 #include <vector>
 
 namespace strus
 {
-
-/// \brief Forward declaration
-class WeightingFunctionTermFrequency;
-
 
 /// \class WeightingClosureTermFrequency
 /// \brief Weighting function based on the TermFrequency formula
@@ -48,7 +47,7 @@ class WeightingClosureTermFrequency
 	:public WeightingClosureInterface
 {
 public:
-	WeightingClosureTermFrequency(
+	explicit WeightingClosureTermFrequency(
 			PostingIteratorInterface* itr_)
 		:m_itr(itr_){}
 
@@ -62,8 +61,44 @@ private:
 };
 
 
+/// \class WeightingFunctionInstanceTermFrequency
+/// \brief Weighting function instance based on the BM25 formula
+class WeightingFunctionInstanceTermFrequency
+	:public WeightingFunctionInstanceInterface
+{
+public:
+	WeightingFunctionInstanceTermFrequency(){}
+
+	virtual ~WeightingFunctionInstanceTermFrequency(){}
+
+	virtual void addParameter( const std::string& name, const std::string& value)
+	{
+		addParameter( name, arithmeticVariantFromString( value));
+	}
+
+	virtual void addParameter( const std::string& name, const ArithmeticVariant&)
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+
+	virtual WeightingClosureInterface* createClosure(
+			const StorageClientInterface*,
+			PostingIteratorInterface* itr,
+			MetaDataReaderInterface*) const
+	{
+		return new WeightingClosureTermFrequency( itr);
+	}
+
+	virtual std::string tostring() const
+	{
+		return std::string();
+	}
+};
+
+
+
 /// \class WeightingFunctionTermFrequency
-/// \brief Weighting function that simply returns the term frequency in the document
+/// \brief Weighting function that simply returns the ff (feature frequency in the document) multiplied with a constant weight 
 class WeightingFunctionTermFrequency
 	:public WeightingFunctionInterface
 {
@@ -71,19 +106,9 @@ public:
 	WeightingFunctionTermFrequency(){}
 	virtual ~WeightingFunctionTermFrequency(){}
 
-	virtual const char** numericParameterNames() const
+	virtual WeightingFunctionInstanceInterface* createInstance() const
 	{
-		static const char* ar[] = {0};
-		return ar;
-	}
-
-	virtual WeightingClosureInterface* createClosure(
-			const StorageClientInterface*,
-			PostingIteratorInterface* itr,
-			MetaDataReaderInterface*,
-			const std::vector<ArithmeticVariant>&) const
-	{
-		return new WeightingClosureTermFrequency( itr);
+		return new WeightingFunctionInstanceTermFrequency();
 	}
 };
 

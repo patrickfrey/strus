@@ -30,8 +30,11 @@
 #define _STRUS_SUMMARIZER_ATTRIBUTE_HPP_INCLUDED
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
 #include <string>
 #include <vector>
+#include <iostream>
+#include <sstream>
 
 namespace strus
 {
@@ -40,6 +43,8 @@ namespace strus
 class StorageClientInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
+/// \brief Forward declaration
+class PostingIteratorInterface;
 
 
 class SummarizerClosureAttribute
@@ -52,15 +57,47 @@ public:
 
 	virtual ~SummarizerClosureAttribute();
 
-	/// \brief Get some summarization elements
-	/// \param[in] docno document to get the summary element from
-	/// \return the summarization elements
-	virtual std::vector<SummarizerClosureInterface::SummaryElement>
-			getSummary( const Index& docno);
+	virtual void addSummarizationFeature(
+			const std::string&,
+			PostingIteratorInterface*,
+			const std::vector<SummarizationVariable>&);
+
+	virtual std::vector<SummarizerClosureInterface::SummaryElement> getSummary( const Index& docno);
 
 private:
 	AttributeReaderInterface* m_attribreader;
 	int m_attrib;
+};
+
+
+/// \class SummarizerFunctionInstanceAttribute
+/// \brief Summarizer instance for retrieving meta data
+class SummarizerFunctionInstanceAttribute
+	:public SummarizerFunctionInstanceInterface
+{
+public:
+	explicit SummarizerFunctionInstanceAttribute()
+		:m_name(){}
+
+	virtual ~SummarizerFunctionInstanceAttribute(){}
+
+	virtual void addParameter( const std::string& name, const std::string& value);
+	virtual void addParameter( const std::string& name, const ArithmeticVariant& value);
+
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageClientInterface* storage,
+			const QueryProcessorInterface*,
+			MetaDataReaderInterface*) const;
+
+	virtual std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << "name='" << m_name << "'";
+		return rt.str();
+	}
+
+private:
+	std::string m_name;
 };
 
 
@@ -69,22 +106,12 @@ class SummarizerFunctionAttribute
 {
 public:
 	SummarizerFunctionAttribute(){}
-
 	virtual ~SummarizerFunctionAttribute(){}
 
-	virtual const char** textualParameterNames() const
+	virtual SummarizerFunctionInstanceInterface* createInstance() const
 	{
-		static const char* ar[] = {"name",0};
-		return ar;
+		return new SummarizerFunctionInstanceAttribute();
 	}
-
-	virtual SummarizerClosureInterface* createClosure(
-			const StorageClientInterface* storage_,
-			const QueryProcessorInterface* processor_,
-			MetaDataReaderInterface* metadata_,
-			const std::vector<FeatureParameter>& features_,
-			const std::vector<std::string>& textualParameters_,
-			const std::vector<ArithmeticVariant>& numericParameters_) const;
 };
 
 

@@ -29,10 +29,14 @@
 #ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <limits>
 #include <vector>
 
@@ -44,7 +48,7 @@ class WeightingFunctionConstant;
 
 
 /// \class WeightingClosureConstant
-/// \brief Weighting function based on the FF formula
+/// \brief Weighting function closure for the constant weighting function
 class WeightingClosureConstant
 	:public WeightingClosureInterface
 {
@@ -64,33 +68,69 @@ private:
 	float m_weight;
 };
 
-
-/// \class WeightingFunctionConstant
-/// \brief Weighting function that simply returns the ff (feature frequency in the document)
-class WeightingFunctionConstant
-	:public WeightingFunctionInterface
+/// \class WeightingFunctionInstanceConstant
+/// \brief Weighting function instance for a weighting that returns a constant for every matching document
+class WeightingFunctionInstanceConstant
+	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionConstant(){}
-	virtual ~WeightingFunctionConstant(){}
+	explicit WeightingFunctionInstanceConstant()
+		:m_weight(1.0){}
 
-	virtual const char** numericParameterNames() const
+	virtual ~WeightingFunctionInstanceConstant(){}
+
+	virtual void addParameter( const std::string& name, const std::string& value)
 	{
-		static const char* ar[] = {"weight",0};
-		return ar;
+		addParameter( name, arithmeticVariantFromString( value));
+	}
+
+	virtual void addParameter( const std::string& name, const ArithmeticVariant& value)
+	{
+		if (utils::caseInsensitiveEquals( name, "weight"))
+		{
+			m_weight = (float)value;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "Constant", name.c_str());
+		}
 	}
 
 	virtual WeightingClosureInterface* createClosure(
 			const StorageClientInterface*,
-			PostingIteratorInterface* itr_,
-			MetaDataReaderInterface*,
-			const std::vector<ArithmeticVariant>& parameters) const
+			PostingIteratorInterface* itr,
+			MetaDataReaderInterface*) const
 	{
-		return new WeightingClosureConstant( itr_, parameters[0].defined()?(float)parameters[0]:(float)1.0);
+		return new WeightingClosureConstant( itr, m_weight);
+	}
+
+	virtual std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << std::setw(2) << std::setprecision(5)
+			<< "weight=" << m_weight;
+		return rt.str();
 	}
 
 private:
 	float m_weight;
+};
+
+
+/// \class WeightingFunctionConstant
+/// \brief Weighting function that simply returns the ff (feature frequency in the document) multiplied with a constant weight 
+class WeightingFunctionConstant
+	:public WeightingFunctionInterface
+{
+public:
+	WeightingFunctionConstant(){}
+	virtual ~WeightingFunctionConstant(){}
+
+
+	virtual WeightingFunctionInstanceInterface* createInstance() const
+	{
+		return new WeightingFunctionInstanceConstant();
+	}
 };
 
 }//namespace

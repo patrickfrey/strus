@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "strus/reference.hpp"
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "private/utils.hpp"
@@ -85,8 +86,7 @@ public:
 	void addFeature(
 			PostingIteratorInterface* iterator,
 			float weight,
-			const WeightingFunctionInterface* function_,
-			const std::vector<ArithmeticVariant>& parameter_);
+			const WeightingFunctionInstanceInterface* function_);
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression);
 

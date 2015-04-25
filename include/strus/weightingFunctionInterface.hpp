@@ -33,15 +33,9 @@
 namespace strus
 {
 /// \brief Forward declaration
-class MetaDataReaderInterface;
-/// \brief Forward declaration
-class PostingIteratorInterface;
-/// \brief Forward declaration
-class WeightingClosureInterface;
+class WeightingFunctionInstanceInterface;
 /// \brief Forward declaration
 class ArithmeticVariant;
-/// \brief Forward declaration
-class StorageClientInterface;
 
 /// \brief Interface for a weighting function that can be used for ranking in the query evaluation
 class WeightingFunctionInterface
@@ -50,21 +44,9 @@ public:
 	/// \brief Destructor
 	virtual ~WeightingFunctionInterface(){}
 
-	/// \brief Get the parameter names of the function in the order they should be passed
-	/// \return the NULL terminated list of parameter names
-	virtual const char** numericParameterNames() const=0;
-
-	/// \brief Create a closure for this weighting function on a posting iterator reference and a meta data reader reference
-	/// \param[in] storage_ storage reference for some statistics (like the document collection frequency)
-	/// \param[in] itr term occurrency iterator reference
-	/// \param[in] metadata meta data interface
-	/// \param[in] parameters parameters for the function
-	/// \return the closure with some global statistics calculated only once
-	virtual WeightingClosureInterface* createClosure(
-			const StorageClientInterface* storage_,
-			PostingIteratorInterface* itr,
-			MetaDataReaderInterface* metadata,
-			const std::vector<ArithmeticVariant>& parameters) const=0;
+	/// \brief Create an instance of this function for parametrization
+	/// \return the created function instance (ownership to caller)
+	virtual WeightingFunctionInstanceInterface* createInstance() const=0;
 };
 
 }//namespace

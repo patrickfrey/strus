@@ -28,6 +28,7 @@
 */
 #include "summarizerMatchPhrase.hpp"
 #include "postingIteratorLink.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -35,17 +36,58 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
 #include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <cstdlib>
 
 using namespace strus;
+
+void SummarizerFunctionInstanceMatchPhrase::addParameter( const std::string& name, const std::string& value)
+{
+	if (utils::caseInsensitiveEquals( name, "termtype"))
+	{
+		m_termtype = value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "phraselen"))
+	{
+		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else if (utils::caseInsensitiveEquals( name, "sumlen"))
+	{
+		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
+	}
+}
+
+void SummarizerFunctionInstanceMatchPhrase::addParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "phraselen"))
+	{
+		m_maxlen = (unsigned int)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "sumlen"))
+	{
+		m_sumlen = (unsigned int)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "termtype"))
+	{
+		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
+	}
+}
+
 
 SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& termtype_,
 		unsigned int maxlen_,
-		unsigned int summarylen_,
-		const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_)
+		unsigned int summarylen_)
 	:m_storage(storage_)
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( termtype_))
@@ -55,34 +97,27 @@ SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 	,m_itr()
 	,m_phrasestruct(0)
 	,m_structop()
-{
-	std::vector<Reference<PostingIteratorInterface> > structelem;
-	std::vector<SummarizerFunctionInterface::FeatureParameter>::const_iterator fi = features_.begin(), fe = features_.end();
-	for (; fi != fe; ++fi)
-	{
-		if (SummarizerFunctionMatchPhrase::isStructFeature( fi->classidx()))
-		{
-			m_phrasestruct = fi->feature().postingIterator();
-			Reference<PostingIteratorInterface> ref(
-				new PostingIteratorLink( fi->feature().postingIterator()));
-			structelem.push_back( ref);
-		}
-		else if (SummarizerFunctionMatchPhrase::isMatchFeature( fi->classidx()))
-		{
-			m_itr.push_back( fi->feature().postingIterator());
-		}
-		else
-		{
-			throw strus::logic_error( _TXT( "unknown feature class passed to match phrase summarizer"));
-		}
-	}
-	if (structelem.size() > 1)
-	{
-		const PostingJoinOperatorInterface*
-			join = m_processor->getPostingJoinOperator( Constants::operator_set_union());
+	,m_init_complete(false)
+{}
 
-		m_structop.reset( join->createResultIterator( structelem, 0));
-		m_phrasestruct = m_structop.get();
+void SummarizerClosureMatchPhrase::addSummarizationFeature(
+		const std::string& name,
+		PostingIteratorInterface* itr,
+		const std::vector<SummarizationVariable>&)
+{
+	if (utils::caseInsensitiveEquals( name, "struct"))
+	{
+		m_phrasestruct = itr;
+		Reference<PostingIteratorInterface> ref( new PostingIteratorLink( itr));
+		m_structelem.push_back( ref);
+	}
+	else if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_itr.push_back( itr);
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
 	}
 }
 
@@ -208,6 +243,18 @@ static void getSummary_(
 std::vector<SummarizerClosureInterface::SummaryElement>
 	SummarizerClosureMatchPhrase::getSummary( const Index& docno)
 {
+	if (!m_init_complete)
+	{
+		if (m_structelem.size() > 1)
+		{
+			const PostingJoinOperatorInterface*
+				join = m_processor->getPostingJoinOperator( Constants::operator_set_union());
+	
+			m_structop.reset( join->createResultIterator( m_structelem, 0));
+			m_phrasestruct = m_structop.get();
+		}
+		m_init_complete = true;
+	}
 	std::vector<SummarizerClosureInterface::SummaryElement> rt;
 	getSummary_(
 		rt, docno, m_itr, m_phrasestruct,

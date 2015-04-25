@@ -41,6 +41,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include <stdexcept>
@@ -102,42 +103,32 @@ void QueryEval::print( std::ostream& out) const
 	}
 	if (m_selectionSets.size())
 	{
-		out << "SELECTORS ";
+		out << "SELECT ";
 		std::size_t si = 0, se = m_selectionSets.size();
 		for(; si != se; ++si)
 		{
 			if (si) out << ", ";
 			out << m_selectionSets[si];
 		}
+		out << ";" << std::endl;
 	}
 	if (m_restrictionSets.size())
 	{
-		out << "RESTRICTIONS ";
+		out << "RESTRICT ";
 		std::size_t si = 0, se = m_restrictionSets.size();
 		for(; si != se; ++si)
 		{
 			if (si) out << ", ";
 			out << m_restrictionSets[si];
 		}
+		out << ";" << std::endl;
 	}
 	std::vector<WeightingDef>::const_iterator
 		fi = m_weightingFunctions.begin(), fe = m_weightingFunctions.end();
 	for (; fi != fe; ++fi)
 	{
-		out << "WEIGHTING ";
-		out << " " << fi->functionName();
-		if (fi->parameters().size())
-		{
-			out << "(";
-			std::size_t ai = 0, ae = fi->parameters().size();
-			for(; ai != ae; ++ai)
-			{
-				if (ai) out << ", ";
-				out << fi->function()->numericParameterNames()[ai]
-					<< "=" << fi->parameters()[ai];
-			}
-			out << ")";
-		}
+		out << "EVAL ";
+		out << " " << fi->functionName() << "( " << fi->function()->tostring() << " )";
 		if (fi->weightingSets().size())
 		{
 			out << " WITH ";
@@ -156,30 +147,15 @@ void QueryEval::print( std::ostream& out) const
 	{
 		out << "SUMMARIZE ";
 		out << si->resultAttribute() << " = " << si->functionName();
-		out << "( ";
-		std::size_t argidx = 0;
+		out << "( " << si->function()->tostring() << " )";
 
-		std::size_t ai = 0, ae = si->numericParameters().size();
-		for(; ai != ae; ++ai,++argidx)
-		{
-			if (argidx) out << ", ";
-			out << si->function()->numericParameterNames()[ai]
-				<< "=" << si->numericParameters()[ai];
-		}
-		ai = 0, ae = si->textualParameters().size();
-		for(; ai != ae; ++ai,++argidx)
-		{
-			if (argidx) out << ", ";
-			out << si->function()->textualParameterNames()[ai] << "=" << si->textualParameters()[ai];
-		}
-		std::vector<SummarizerDef::Feature>::const_iterator
+		std::vector<std::pair<std::string,std::string> >::const_iterator
 			fi = si->featureParameters().begin(),
 			fe = si->featureParameters().end();
-		for (int fidx=0; fi != fe; ++fi,++fidx,++argidx)
+		for (int fidx=0; fi != fe; ++fi,++fidx)
 		{
-			if (argidx) out << ", ";
-			out << si->function()->featureParameterClassNames()[fi->classidx]
-				<< "=" << fi->set;
+			if (fidx) out << ", ";
+			out << fi->first << "=" << fi->second;
 		}
 		out << ");" << std::endl;
 	}

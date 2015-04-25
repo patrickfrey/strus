@@ -29,6 +29,7 @@
 #ifndef _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
@@ -36,6 +37,8 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 namespace strus
 {
@@ -65,14 +68,14 @@ public:
 			const QueryProcessorInterface* processor_,
 			const std::string& termtype_,
 			unsigned int maxlen_,
-			unsigned int summarylen_,
-			const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_);
-
+			unsigned int summarylen_);
 	virtual ~SummarizerClosureMatchPhrase();
 
-	/// \brief Get some summarization elements
-	/// \param[in] docno document to get the summary element from
-	/// \return the summarization elements
+	virtual void addSummarizationFeature(
+			const std::string& name,
+			PostingIteratorInterface* itr,
+			const std::vector<SummarizationVariable>&);
+
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
@@ -85,6 +88,51 @@ private:
 	std::vector<PostingIteratorInterface*> m_itr;
 	PostingIteratorInterface* m_phrasestruct;
 	Reference<PostingIteratorInterface> m_structop;
+	std::vector<Reference<PostingIteratorInterface> > m_structelem;
+	bool m_init_complete;
+};
+
+
+/// \class SummarizerFunctionInstanceMatchPhrase
+/// \brief Summarizer instance for retrieving meta data
+class SummarizerFunctionInstanceMatchPhrase
+	:public SummarizerFunctionInstanceInterface
+{
+public:
+	explicit SummarizerFunctionInstanceMatchPhrase()
+		:m_termtype(),m_maxlen(30),m_sumlen(40){}
+
+	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
+
+	virtual void addParameter( const std::string& name, const std::string& value);
+	virtual void addParameter( const std::string& name, const ArithmeticVariant& value);
+
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageClientInterface* storage,
+			const QueryProcessorInterface* processor,
+			MetaDataReaderInterface*) const
+	{
+		if (m_termtype.empty())
+		{
+			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
+		}
+		return new SummarizerClosureMatchPhrase(
+				storage, processor, m_termtype, m_maxlen, m_sumlen);
+	}
+
+	virtual std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << "termtype='" << m_termtype 
+			<< "', phraselen=" << m_maxlen
+			<< ", sumlen=" << m_sumlen;
+		return rt.str();
+	}
+
+private:
+	std::string m_termtype;
+	unsigned int m_maxlen;
+	unsigned int m_sumlen;
 };
 
 
@@ -96,49 +144,9 @@ public:
 
 	virtual ~SummarizerFunctionMatchPhrase(){}
 
-	virtual const char** numericParameterNames() const
+	virtual SummarizerFunctionInstanceInterface* createInstance() const
 	{
-		static const char* ar[] = {"phraselen","sumlen",0};
-		return ar;
-	}
-
-	virtual const char** textualParameterNames() const
-	{
-		static const char* ar[] = {"type",0};
-		return ar;
-	}
-
-	virtual const char** featureParameterClassNames() const
-	{
-		static const char* ar[] = {"struct","match",0};
-		return ar;
-	}
-	static bool isStructFeature( std::size_t classidx)
-	{
-		return classidx == 0;
-	}
-	static bool isMatchFeature( std::size_t classidx)
-	{
-		return classidx == 1;
-	}
-
-	virtual SummarizerClosureInterface* createClosure(
-			const StorageClientInterface* storage_,
-			const QueryProcessorInterface* processor_,
-			MetaDataReaderInterface* metadata_,
-			const std::vector<FeatureParameter>& features_,
-			const std::vector<std::string>& textualParameters_,
-			const std::vector<ArithmeticVariant>& numericParameters_) const
-	{
-		std::string termtype = textualParameters_[0];
-		unsigned int maxlen = numericParameters_[0].defined()?(unsigned int)numericParameters_[0]:30;
-		unsigned int sumlen = numericParameters_[1].defined()?(unsigned int)numericParameters_[1]:40;
-		if (termtype.empty())
-		{
-			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
-		}
-		return new SummarizerClosureMatchPhrase(
-				storage_, processor_, termtype, maxlen, sumlen, features_);
+		return new SummarizerFunctionInstanceMatchPhrase();
 	}
 };
 

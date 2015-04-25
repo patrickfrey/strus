@@ -26,14 +26,11 @@ void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, boo
 void Accumulator::addFeature(
 		PostingIteratorInterface* iterator,
 		float weight,
-		const WeightingFunctionInterface* function_,
-		const std::vector<ArithmeticVariant>& parameter_)
+		const WeightingFunctionInstanceInterface* function_)
 {
 	m_weightingFeatures.push_back(
 		WeightingFeature(
-			function_->createClosure( 
-				m_storage, iterator, m_metadata, parameter_),
-			weight));
+			function_->createClosure( m_storage, iterator, m_metadata), weight));
 }
 
 void Accumulator::addAclRestriction(

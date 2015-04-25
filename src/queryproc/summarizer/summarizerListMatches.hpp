@@ -29,6 +29,7 @@
 #ifndef _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerClosureInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <string>
@@ -48,19 +49,46 @@ class SummarizerClosureListMatches
 	:public SummarizerClosureInterface
 {
 public:
-	/// \param[in] storage_ storage to use
-	/// \param[in] postings_ postings to get the matches of
-	SummarizerClosureListMatches(
-		const StorageClientInterface* storage_,
-		const std::vector<SummarizerFunctionInterface::FeatureParameter>& postings_);
+	SummarizerClosureListMatches(){}
+	virtual ~SummarizerClosureListMatches(){}
 
-	virtual ~SummarizerClosureListMatches();
+	virtual void addSummarizationFeature(
+			const std::string& name,
+			PostingIteratorInterface* itr,
+			const std::vector<SummarizationVariable>&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
 	const StorageClientInterface* m_storage;
 	std::vector<PostingIteratorInterface*> m_itrs;
+};
+
+
+/// \class SummarizerFunctionInstanceListMatches
+/// \brief Summarizer instance for retrieving meta data
+class SummarizerFunctionInstanceListMatches
+	:public SummarizerFunctionInstanceInterface
+{
+public:
+	SummarizerFunctionInstanceListMatches(){}
+	virtual ~SummarizerFunctionInstanceListMatches(){}
+
+	virtual void addParameter( const std::string& name, const std::string& value);
+	virtual void addParameter( const std::string& name, const ArithmeticVariant& value);
+
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageClientInterface*,
+			const QueryProcessorInterface*,
+			MetaDataReaderInterface*) const
+	{
+		return new SummarizerClosureListMatches();
+	}
+
+	virtual std::string tostring() const
+	{
+		return std::string();
+	}
 };
 
 
@@ -72,21 +100,9 @@ public:
 
 	virtual ~SummarizerFunctionListMatches(){}
 
-	virtual const char** featureParameterClassNames() const
+	virtual SummarizerFunctionInstanceInterface* createInstance() const
 	{
-		static const char* ar[] = {"match",0};
-		return ar;
-	}
-	
-	virtual SummarizerClosureInterface* createClosure(
-			const StorageClientInterface* storage_,
-			const QueryProcessorInterface*,
-			MetaDataReaderInterface* metadata_,
-			const std::vector<FeatureParameter>& features_,
-			const std::vector<std::string>& textualParameters_,
-			const std::vector<ArithmeticVariant>& numericParameters_) const
-	{
-		return new SummarizerClosureListMatches( storage_, features_);
+		return new SummarizerFunctionInstanceListMatches();
 	}
 };
 

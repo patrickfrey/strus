@@ -30,6 +30,8 @@
 #define _STRUS_SUMMARIZER_DEFINITION_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
 #include "strus/summarizerConfig.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
+#include "strus/reference.hpp"
 #include <string>
 #include <vector>
 
@@ -52,36 +54,19 @@ public:
 	SummarizerDef( const SummarizerDef& o)
 		:m_function(o.m_function)
 		,m_functionName(o.m_functionName)
-		,m_numericParameters(o.m_numericParameters)
-		,m_textualParameters(o.m_textualParameters)
-		,m_featureParameters(o.m_featureParameters)
-		,m_resultAttribute(o.m_resultAttribute){}
+		,m_resultAttribute(o.m_resultAttribute)
+		,m_featureParameters(o.m_featureParameters){}
 
-	struct Feature
-	{
-		Feature( std::size_t classidx_, const std::string& set_)
-			:classidx(classidx_),set(set_){}
-		Feature( const Feature& o)
-			:classidx(o.classidx),set(o.set){}
-
-		std::size_t classidx;
-		std::string set;
-	};
-
-	const SummarizerFunctionInterface* function() const			{return m_function;}
-	const std::string& functionName() const					{return m_functionName;}
-	const std::vector<ArithmeticVariant>& numericParameters() const		{return m_numericParameters;}
-	const std::vector<std::string>& textualParameters() const		{return m_textualParameters;}
-	const std::vector<Feature>& featureParameters() const			{return m_featureParameters;}
-	const std::string& resultAttribute() const				{return m_resultAttribute;}
+	const SummarizerFunctionInstanceInterface* function() const				{return m_function.get();}
+	const std::string& functionName() const							{return m_functionName;}
+	const std::string& resultAttribute() const						{return m_resultAttribute;}
+	const std::vector<std::pair<std::string,std::string> >& featureParameters() const	{return m_featureParameters;}
 
 private:
-	const SummarizerFunctionInterface* m_function;		///< summarization function
-	std::string m_functionName;				///< name of the summarization function
-	std::vector<ArithmeticVariant> m_numericParameters;	///< summarization function numeric parameters
-	std::vector<std::string> m_textualParameters;		///< summarization function textual parameters
-	std::vector<Feature> m_featureParameters;		///< summarization function feature parameters
-	std::string m_resultAttribute;				///< name of the result attribute the summarization is returned as
+	Reference<SummarizerFunctionInstanceInterface> m_function;		///< summarization function
+	std::string m_functionName;						///< name of the summarization function
+	std::string m_resultAttribute;						///< name of the result attribute the summarization is returned as
+	std::vector<std::pair<std::string,std::string> > m_featureParameters;	///< list of feature parameters
 };
 
 }

@@ -28,14 +28,18 @@
 */
 #ifndef _STRUS_SUMMARIZER_CLOSURE_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_CLOSURE_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+#include "strus/summarizationVariable.hpp"
 #include <string>
 #include <vector>
 
 namespace strus
 {
 
-/// \brief Interface for the summarization context (of a SummarizationFunction)
+/// \brief Forward declaration
+class PostingIteratorInterface;
+
+/// \class SummarizerClosureInterface
+/// \brief Interface for the summarization closure (execution context of a summarization function)
 class SummarizerClosureInterface
 {
 public:
@@ -63,6 +67,16 @@ public:
 public:
 	/// \brief Destructor
 	virtual ~SummarizerClosureInterface(){}
+
+	/// \brief Add a sumarization feature that is subject of summarization to the closure
+	/// \param[in] name_ name of the summarization feature
+	/// \param[in] postingIterator_ iterator on the matches of the summarization feature
+	/// \param[in] variables_ list of variables attached to subexpressions of the matches (passed with postingIterator_)
+	/// \remark Do call this method before calling getSummary the first time for not having incomplete results
+	virtual void addSummarizationFeature(
+			const std::string& name_,
+			PostingIteratorInterface* postingIterator_,
+			const std::vector<SummarizationVariable>& variables_)=0;
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from

@@ -34,35 +34,76 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
+#include "private/utils.hpp"
 #include <cstdlib>
 
 using namespace strus;
 
-SummarizerClosureMatchVariables::SummarizerClosureMatchVariables(
-		const StorageClientInterface* storage_,
-		const QueryProcessorInterface* processor_,
-		const std::string& termtype_,
-		const std::string& delimiter_,
-		const std::string& assign_,
-		const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_)
-	:m_storage(storage_)
-	,m_processor(processor_)
-	,m_forwardindex(storage_->createForwardIterator( termtype_))
-	,m_termtype(termtype_)
-	,m_delimiter(delimiter_.empty()?std::string(","):delimiter_)
-	,m_assign(assign_.empty()?std::string("="):assign_)
-	,m_features()
+void SummarizerFunctionInstanceMatchVariables::addParameter( const std::string& name, const std::string& value)
 {
-	std::vector<Reference<PostingIteratorInterface> > structelem;
-	std::vector<SummarizerFunctionInterface::FeatureParameter>::const_iterator fi = features_.begin(), fe = features_.end();
-	for (; fi != fe; ++fi)
+	if (utils::caseInsensitiveEquals( name, "type"))
 	{
-		m_features.push_back( fi->feature());
+		m_type = value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "delimiter"))
+	{
+		m_delimiter = value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "assign"))
+	{
+		m_assign = value;
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
 	}
 }
 
-SummarizerClosureMatchVariables::~SummarizerClosureMatchVariables()
+void SummarizerFunctionInstanceMatchVariables::addParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "type")
+	||  utils::caseInsensitiveEquals( name, "delimiter")
+	||  utils::caseInsensitiveEquals( name, "assign"))
+	{
+		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchVariables");
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
+	}
+}
+
+
+SummarizerClosureMatchVariables::SummarizerClosureMatchVariables(
+		const StorageClientInterface* storage_,
+		const QueryProcessorInterface* processor_,
+		const std::string& type_,
+		const std::string& delimiter_,
+		const std::string& assign_)
+	:m_storage(storage_)
+	,m_processor(processor_)
+	,m_forwardindex(storage_->createForwardIterator( type_))
+	,m_type(type_)
+	,m_delimiter(delimiter_.empty()?std::string(","):delimiter_)
+	,m_assign(assign_.empty()?std::string("="):assign_)
+	,m_features()
 {}
+
+
+void SummarizerClosureMatchVariables::addSummarizationFeature(
+		const std::string& name,
+		PostingIteratorInterface* itr,
+		const std::vector<SummarizationVariable>& variables)
+{
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_features.push_back( SummarizationFeature( itr, variables));
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization feature '%s'"), "MatchVariables", name.c_str());
+	}
+}
 
 
 std::vector<SummarizerClosureInterface::SummaryElement>
@@ -77,13 +118,13 @@ std::vector<SummarizerClosureInterface::SummaryElement>
 
 	for (; fi != fe; ++fi)
 	{
-		if (docno==fi->postingIterator()->skipDoc( docno))
+		if (docno==fi->itr->skipDoc( docno))
 		{
-			for (curpos = 0; curpos; curpos=fi->postingIterator()->skipPos( curpos+1))
+			for (curpos = 0; curpos; curpos=fi->itr->skipPos( curpos+1))
 			{
-				SummarizationFeature::variable_const_iterator
-					vi = fi->variables_begin(),
-					ve = fi->variables_end();
+				std::vector<SummarizationVariable>::const_iterator
+					vi = fi->variables.begin(),
+					ve = fi->variables.end();
 
 				std::string line;
 				for (int vidx=0; vi != ve; ++vi,++vidx)

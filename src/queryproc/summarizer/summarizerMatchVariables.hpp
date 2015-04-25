@@ -29,14 +29,17 @@
 #ifndef _STRUS_SUMMARIZER_MATCH_VARIABLES_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_MATCH_VARIABLES_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerClosureInterface.hpp"
+#include "strus/forwardIteratorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include <vector>
 #include <string>
-#include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 namespace strus
 {
@@ -57,31 +60,85 @@ class SummarizerClosureMatchVariables
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
-	/// \param[in] termtype_ type of the tokens to build the summary with
-	/// \param[in] features_ features to inspect
+	/// \param[in] type_ type of the forward index tokens to build the summary with
+	/// \param[in] delimiter_ delimiter to print between multiple output elements
+	/// \param[in] assing_ assingment operator to use for output
 	SummarizerClosureMatchVariables(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
-			const std::string& termtype_,
+			const std::string& type_,
 			const std::string& delimiter_,
-			const std::string& assign_,
-			const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_);
+			const std::string& assign_);
 
-	virtual ~SummarizerClosureMatchVariables();
+	virtual ~SummarizerClosureMatchVariables(){}
 
-	/// \brief Get some summarization elements
-	/// \param[in] docno document to get the summary element from
-	/// \return the summarization elements
+	virtual void addSummarizationFeature(
+			const std::string& name,
+			PostingIteratorInterface* itr,
+			const std::vector<SummarizationVariable>& variables);
+
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+
+private:
+	struct SummarizationFeature
+	{
+		PostingIteratorInterface* itr;
+		std::vector<SummarizationVariable> variables;
+
+		SummarizationFeature( PostingIteratorInterface* itr_, const std::vector<SummarizationVariable>& variables_)
+			:itr(itr_),variables(variables_){}
+		SummarizationFeature( const SummarizationFeature& o)
+			:itr(o.itr),variables(o.variables){}
+	};
 
 private:
 	const StorageClientInterface* m_storage;
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
-	std::string m_termtype;
+	std::string m_type;
 	std::string m_delimiter;
 	std::string m_assign;
 	std::vector<SummarizationFeature> m_features;
+};
+
+
+class SummarizerFunctionInstanceMatchVariables
+	:public SummarizerFunctionInstanceInterface
+{
+public:
+	explicit SummarizerFunctionInstanceMatchVariables()
+		:m_type(){}
+
+	virtual ~SummarizerFunctionInstanceMatchVariables(){}
+
+	virtual void addParameter( const std::string& name, const std::string& value);
+	virtual void addParameter( const std::string& name, const ArithmeticVariant& value);
+
+	virtual SummarizerClosureInterface* createClosure(
+			const StorageClientInterface* storage,
+			const QueryProcessorInterface* processor,
+			MetaDataReaderInterface*) const
+	{
+		if (m_type.empty())
+		{
+			throw strus::runtime_error( _TXT( "emtpy forward index type definition (parameter 'type') in match phrase summarizer configuration"));
+		}
+		return new SummarizerClosureMatchVariables( storage, processor, m_type, m_delimiter, m_assign);
+	}
+
+	virtual std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << "type='" << m_type 
+			<< "', delimiter='" << m_delimiter
+			<< "', assign='" << m_assign << "'";
+		return rt.str();
+	}
+
+private:
+	std::string m_type;
+	std::string m_delimiter;
+	std::string m_assign;
 };
 
 
@@ -90,38 +147,11 @@ class SummarizerFunctionMatchVariables
 {
 public:
 	SummarizerFunctionMatchVariables(){}
-
 	virtual ~SummarizerFunctionMatchVariables(){}
 
-	virtual const char** textualParameterNames() const
+	virtual SummarizerFunctionInstanceInterface* createInstance() const
 	{
-		static const char* ar[] = {"type",0};
-		return ar;
-	}
-
-	virtual const char** featureParameterClassNames() const
-	{
-		static const char* ar[] = {"match","delimiter","assign",0};
-		return ar;
-	}
-
-	virtual SummarizerClosureInterface* createClosure(
-			const StorageClientInterface* storage_,
-			const QueryProcessorInterface* processor_,
-			MetaDataReaderInterface* metadata_,
-			const std::vector<FeatureParameter>& features_,
-			const std::vector<std::string>& textualParameters_,
-			const std::vector<ArithmeticVariant>& numericParameters_) const
-	{
-		std::string termtype = textualParameters_[0];
-		std::string delimiter = textualParameters_[1];
-		std::string assign = textualParameters_[2];
-		if (termtype.empty())
-		{
-			throw strus::runtime_error( _TXT( "empty term type definition (parameter 'type') in match variables summarizer configuration"));
-		}
-		return new SummarizerClosureMatchVariables(
-				storage_, processor_, termtype, delimiter, assign, features_);
+		return new SummarizerFunctionInstanceMatchVariables();
 	}
 };
 

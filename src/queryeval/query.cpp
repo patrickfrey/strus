@@ -143,6 +143,9 @@ void Query::defineMetaDataRestriction(
 
 void Query::print( std::ostream& out) const
 {
+	out << "query evaluation program:" << std::endl;
+	m_queryEval->print( out);
+
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
@@ -326,14 +329,6 @@ void Query::collectSummarizationVariables(
 	}
 }
 
-SummarizationFeature Query::createSummarizationFeature(
-			const NodeAddress& nodeadr)
-{
-	std::vector<SummarizationVariable> variables;
-	collectSummarizationVariables( variables, nodeadr);
-	return SummarizationFeature( nodePostings(nodeadr), variables);
-}
-
 
 std::vector<ResultDocument> Query::evaluate()
 {
@@ -419,8 +414,7 @@ std::vector<ResultDocument> Query::evaluate()
 					postings.push_back( postingsElem);
 				}
 				accumulator.addFeature(
-					postings[empty_postings_index].get(), 1.0,
-					wi->function(), wi->parameters());
+					postings[empty_postings_index].get(), 1.0, wi->function());
 			}
 			else
 			{
@@ -434,7 +428,7 @@ std::vector<ResultDocument> Query::evaluate()
 						{
 							accumulator.addFeature(
 								nodePostings( fi->node), fi->weight,
-								wi->function(), wi->parameters());
+								wi->function());
 						}
 					}
 				}
@@ -476,9 +470,14 @@ std::vector<ResultDocument> Query::evaluate()
 			ze = m_queryEval->summarizers().end();
 		for (; zi != ze; ++zi)
 		{
-			// [5.1] Collect the summarization features:
-			std::vector<SummarizerFunctionInterface::FeatureParameter> summarizeFeatures;
-			std::vector<SummarizerDef::Feature>::const_iterator
+			// [5.1] Create the summarizer:
+			summarizers.push_back(
+				zi->function()->createClosure(
+					m_storage, m_processor, m_metaDataReader.get()));
+			SummarizerClosureInterface* closure = summarizers.back().get();
+
+			// [5.2] Add features with their variables assigned to summarizer:
+			std::vector< std::pair<std::string,std::string> >::const_iterator
 				si = zi->featureParameters().begin(),
 				se = zi->featureParameters().end();
 			for (; si != se; ++si)
@@ -487,22 +486,17 @@ std::vector<ResultDocument> Query::evaluate()
 					fi = m_features.begin(), fe = m_features.end();
 				for (; fi != fe; ++fi)
 				{
-					if (fi->set == si->set)
+					if (fi->set == si->second/*feature set addressed*/)
 					{
-						SummarizationFeature
-							sumfeat = createSummarizationFeature( fi->node);
-	
-						summarizeFeatures.push_back(
-							SummarizerFunctionInterface::FeatureParameter(
-								si->classidx, sumfeat));
+						std::vector<SummarizationVariable> variables;
+						collectSummarizationVariables( variables, fi->node);
+						
+						closure->addSummarizationFeature(
+							si->first/*name*/, nodePostings(fi->node),
+							variables);
 					}
 				}
 			}
-			// [5.2] Create the summarizer:
-			summarizers.push_back(
-				zi->function()->createClosure(
-					m_storage, m_processor, m_metaDataReader.get(),
-					summarizeFeatures, zi->textualParameters(), zi->numericParameters()));
 		}
 	}
 	// [6] Do the Ranking and build the result:

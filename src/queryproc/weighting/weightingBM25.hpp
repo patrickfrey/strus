@@ -29,12 +29,19 @@
 #ifndef _STRUS_WEIGHTING_BM25_HPP_INCLUDED
 #define _STRUS_WEIGHTING_BM25_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingClosureInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <vector>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 
 namespace strus
 {
@@ -69,33 +76,79 @@ private:
 	float m_idf;
 };
 
+
+/// \class WeightingFunctionInstanceBM25
+/// \brief Weighting function instance based on the BM25 formula
+class WeightingFunctionInstanceBM25
+	:public WeightingFunctionInstanceInterface
+{
+public:
+	explicit WeightingFunctionInstanceBM25()
+		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000){}
+
+	virtual ~WeightingFunctionInstanceBM25(){}
+
+	virtual void addParameter( const std::string& name, const std::string& value)
+	{
+		addParameter( name, arithmeticVariantFromString( value));
+	}
+
+	virtual void addParameter( const std::string& name, const ArithmeticVariant& value)
+	{
+		if (utils::caseInsensitiveEquals( name, "k1"))
+		{
+			m_k1 = (float)value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "b"))
+		{
+			m_b = (float)value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
+		{
+			m_avgdoclen = (float)value;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+		}
+	}
+
+	virtual WeightingClosureInterface* createClosure(
+			const StorageClientInterface* storage_,
+			PostingIteratorInterface* itr,
+			MetaDataReaderInterface* metadata) const
+	{
+		return new WeightingClosureBM25( storage_, itr, metadata, m_b, m_k1, m_avgdoclen);
+	}
+
+	virtual std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << std::setw(2) << std::setprecision(5)
+			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
+		return rt.str();
+	}
+
+private:
+	float m_b;
+	float m_k1;
+	float m_avgdoclen;
+};
+
+
 /// \class WeightingFunctionBM25
 /// \brief Weighting function based on the BM25 formula
 class WeightingFunctionBM25
 	:public WeightingFunctionInterface
 {
 public:
-	explicit WeightingFunctionBM25(){}
+	WeightingFunctionBM25(){}
 
 	virtual ~WeightingFunctionBM25(){}
 
-	virtual const char** numericParameterNames() const
+	virtual WeightingFunctionInstanceInterface* createInstance() const
 	{
-		static const char* ar[] = {"k1","b","avgdoclen",0};
-		return ar;
-	}
-
-	virtual WeightingClosureInterface* createClosure(
-			const StorageClientInterface* storage_,
-			PostingIteratorInterface* itr,
-			MetaDataReaderInterface* metadata,
-			const std::vector<ArithmeticVariant>& parameters) const
-	{
-		float b  = parameters[0].defined()?(float)parameters[0]:0.75;
-		float k1 = parameters[1].defined()?(float)parameters[1]:1.5;
-		float al = parameters[2].defined()?(float)parameters[2]:1000;
-
-		return new WeightingClosureBM25( storage_, itr, metadata, b, k1, al);
+		return new WeightingFunctionInstanceBM25();
 	}
 };
 

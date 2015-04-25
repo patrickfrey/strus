@@ -29,6 +29,8 @@
 #include "summarizerAttribute.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 
 using namespace strus;
 
@@ -38,11 +40,18 @@ SummarizerClosureAttribute::SummarizerClosureAttribute(
 	,m_attrib(attribreader_->elementHandle( name_.c_str()))
 {}
 
+void SummarizerClosureAttribute::addSummarizationFeature(
+		const std::string&,
+		PostingIteratorInterface*,
+		const std::vector<SummarizationVariable>&)
+{
+	throw strus::runtime_error( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
+}
+
 SummarizerClosureAttribute::~SummarizerClosureAttribute()
 {
 	delete m_attribreader;
 }
-
 
 std::vector<SummarizerClosureInterface::SummaryElement>
 	SummarizerClosureAttribute::getSummary( const Index& docno)
@@ -58,15 +67,36 @@ std::vector<SummarizerClosureInterface::SummaryElement>
 }
 
 
-SummarizerClosureInterface* SummarizerFunctionAttribute::createClosure(
-		const StorageClientInterface* storage_,
-		const QueryProcessorInterface*,
-		MetaDataReaderInterface*,
-		const std::vector<FeatureParameter>&,
-		const std::vector<std::string>& textualParameters_,
-		const std::vector<ArithmeticVariant>&) const
+void SummarizerFunctionInstanceAttribute::addParameter( const std::string& name, const std::string& value)
 {
-	return new SummarizerClosureAttribute( storage_->createAttributeReader(), textualParameters_[0]);
+	if (utils::caseInsensitiveEquals( name, "name"))
+	{
+		m_name = value;
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+	}
+}
+
+void SummarizerFunctionInstanceAttribute::addParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "name"))
+	{
+		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "Attribute");
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+	}
+}
+
+SummarizerClosureInterface* SummarizerFunctionInstanceAttribute::createClosure(
+		const StorageClientInterface* storage,
+		const QueryProcessorInterface*,
+		MetaDataReaderInterface*) const
+{
+	return new SummarizerClosureAttribute( storage->createAttributeReader(), m_name);
 }
 
 

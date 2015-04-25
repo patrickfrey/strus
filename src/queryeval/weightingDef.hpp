@@ -30,6 +30,8 @@
 #define _STRUS_WEIGHTING_DEFINITION_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
 #include "strus/weightingConfig.hpp"
+#include "strus/reference.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
 #include <vector>
 #include <string>
 
@@ -38,31 +40,34 @@ namespace strus {
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 /// \brief Forward declaration
+class WeightingFunctionInstanceInterface;
+/// \brief Forward declaration
 class QueryEval;
+
 
 class WeightingDef
 {
 public:
 	WeightingDef()
-		:m_function(0),m_functionName(),m_parameters(){}
+		:m_function(),m_functionName(),m_weightingSets(){}
 	WeightingDef( const WeightingDef& o)
-		:m_function(o.m_function),m_functionName(o.m_functionName),m_parameters(o.m_parameters){}
+		:m_function(o.m_function)
+		,m_functionName(o.m_functionName)
+		,m_weightingSets(o.m_weightingSets){}
 	WeightingDef(
 			const WeightingFunctionInterface* function_,
 			const std::string& functionName_,
 			const WeightingConfig& config,
 			const std::vector<std::string>& weightingSets_);
 
-	const WeightingFunctionInterface* function() const		{return m_function;}
+	const WeightingFunctionInstanceInterface* function() const	{return m_function.get();}
 	const std::string& functionName() const				{return m_functionName;}
-	const std::vector<ArithmeticVariant>& parameters() const	{return m_parameters;}
 	const std::vector<std::string>& weightingSets() const		{return m_weightingSets;}
 
 private:
-	const WeightingFunctionInterface* m_function;	///< function used for weighting
-	std::string m_functionName;			///< name of the function used for weighting
-	std::vector<ArithmeticVariant> m_parameters;	///< weighting function parameters
-	std::vector<std::string> m_weightingSets;	///< posting sets that are used for weighting
+	Reference<WeightingFunctionInstanceInterface> m_function;	///< parameterized function used for weighting
+	std::string m_functionName;					///< name of the function used for weighting
+	std::vector<std::string> m_weightingSets;			///< posting sets that are used for weighting
 };
 
 }

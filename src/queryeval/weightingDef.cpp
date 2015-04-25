@@ -34,47 +34,19 @@
 
 using namespace strus;
 
-static std::size_t countArguments( char const** arg)
-{
-	if (!arg) return 0;
-	std::size_t aidx = 0;
-	for (; arg[aidx]; ++aidx){}
-	return aidx;
-}
-
 WeightingDef::WeightingDef(
 		const WeightingFunctionInterface* function_,
 		const std::string& functionName_,
 		const WeightingConfig& config,
 		const std::vector<std::string>& weightingSets_)
-	:m_function(function_),m_functionName(functionName_),m_weightingSets(weightingSets_)
+	:m_function(function_->createInstance()),m_functionName(functionName_),m_weightingSets(weightingSets_)
 {
-	m_parameters.resize( countArguments( m_function->numericParameterNames()));
-
 	std::map<std::string,ArithmeticVariant>::const_iterator
 		pi = config.numericParameters().begin(),
 		pe = config.numericParameters().end();
-
-	const char** arg = m_function->numericParameterNames();
-	if (!arg && pi != pe)
-	{
-		throw strus::runtime_error( _TXT( "no numeric arguments expected for weighting function '%s'"), m_functionName.c_str());
-	}
 	for (; pi != pe; ++pi)
 	{
-		std::size_t aidx = 0;
-		for (; arg[aidx]; ++aidx)
-		{
-			if (utils::caseInsensitiveEquals( pi->first, arg[aidx]))
-			{
-				break;
-			}
-		}
-		if (!arg[aidx])
-		{
-			throw strus::runtime_error( _TXT( "unknown numeric argument name '%s' for weighting function '"), pi->first.c_str(), m_functionName.c_str());
-		}
-		m_parameters[aidx] = pi->second;
+		m_function->addParameter( pi->first, pi->second);
 	}
 }
 

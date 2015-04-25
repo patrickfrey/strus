@@ -29,8 +29,8 @@
 #ifndef _STRUS_QUERY_HPP_INCLUDED
 #define _STRUS_QUERY_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
+#include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
-#include "strus/summarizationFeature.hpp"
 #include "private/internationalization.hpp"
 #include "metaDataRestriction.hpp"
 #include <vector>
@@ -159,7 +159,6 @@ public:
 private:
 	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr);
 	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr);
-	SummarizationFeature createSummarizationFeature( const NodeAddress& nodeadr);
 	void collectSummarizationVariables(
 				std::vector<SummarizationVariable>& variables,
 				const NodeAddress& nodeadr);
