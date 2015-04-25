@@ -71,12 +71,12 @@ public:
 
 	virtual ~WeightingFunctionInstanceTermFrequency(){}
 
-	virtual void addParameter( const std::string& name, const std::string& value)
+	virtual void addStringParameter( const std::string& name, const std::string& value)
 	{
-		addParameter( name, arithmeticVariantFromString( value));
+		addNumericParameter( name, arithmeticVariantFromString( value));
 	}
 
-	virtual void addParameter( const std::string& name, const ArithmeticVariant&)
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant&)
 	{
 		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
 	}

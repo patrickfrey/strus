@@ -39,7 +39,7 @@
 
 using namespace strus;
 
-void SummarizerFunctionInstanceMatchVariables::addParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::string& name, const std::string& value)
 {
 	if (utils::caseInsensitiveEquals( name, "type"))
 	{
@@ -59,7 +59,7 @@ void SummarizerFunctionInstanceMatchVariables::addParameter( const std::string& 
 	}
 }
 
-void SummarizerFunctionInstanceMatchVariables::addParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "type")
 	||  utils::caseInsensitiveEquals( name, "delimiter")

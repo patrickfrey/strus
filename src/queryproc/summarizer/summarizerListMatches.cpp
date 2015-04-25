@@ -39,12 +39,12 @@
 
 using namespace strus;
 
-void SummarizerFunctionInstanceListMatches::addParameter( const std::string& name, const std::string&)
+void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string&)
 {
 	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
 }
 
-void SummarizerFunctionInstanceListMatches::addParameter( const std::string& name, const ArithmeticVariant&)
+void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant&)
 {
 	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
 }

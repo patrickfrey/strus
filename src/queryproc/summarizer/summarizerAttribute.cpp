@@ -67,7 +67,7 @@ std::vector<SummarizerClosureInterface::SummaryElement>
 }
 
 
-void SummarizerFunctionInstanceAttribute::addParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string& name, const std::string& value)
 {
 	if (utils::caseInsensitiveEquals( name, "name"))
 	{
@@ -79,7 +79,7 @@ void SummarizerFunctionInstanceAttribute::addParameter( const std::string& name,
 	}
 }
 
-void SummarizerFunctionInstanceAttribute::addParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "name"))
 	{

@@ -55,12 +55,12 @@ public:
 	/// \brief Add a named string value parameter
 	/// \param[in] name parameter name
 	/// \param[in] value parameter value
-	virtual void addParameter( const std::string& name, const std::string& value)=0;
+	virtual void addStringParameter( const std::string& name, const std::string& value)=0;
 
 	/// \brief Add a named arithmetic value parameter
 	/// \param[in] name parameter name
 	/// \param[in] value parameter value
-	virtual void addParameter( const std::string& name, const ArithmeticVariant& value)=0;
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)=0;
 
 	/// \brief Create a closure (execution context) for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)

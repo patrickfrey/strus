@@ -53,12 +53,12 @@ public:
 	/// \brief Add a named string value parameter
 	/// \param[in] name parameter name
 	/// \param[in] value parameter value
-	virtual void addParameter( const std::string& name, const std::string& value)=0;
+	virtual void addStringParameter( const std::string& name, const std::string& value)=0;
 
 	/// \brief Add a named arithmetic value parameter
 	/// \param[in] name parameter name
 	/// \param[in] value parameter value
-	virtual void addParameter( const std::string& name, const ArithmeticVariant& value)=0;
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)=0;
 	
 	/// \brief Create a closure for this weighting function instance in the context of a storage, a posting iterator and a meta data reader
 	/// \param[in] storage_ storage reference for retrieving some statistics (like the document collection frequency)

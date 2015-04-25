@@ -49,29 +49,29 @@ public:
 	/// \param[in] value_ value of the parameter
 	void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
 
-	/// \brief Defines a textual parameter to pass to the summarizer
+	/// \brief Defines a string value parameter to pass to the summarizer
 	/// \param[in] name_ name of the parameter
 	/// \param[in] value_ value of the parameter
-	void defineTextualParameter( const std::string& name_, const std::string& value_);
+	void defineStringParameter( const std::string& name_, const std::string& value_);
 
 	/// \brief References a feature parameter (set of postings) to pass as PostingIteratorInterface to the summarizer
 	/// \param[in] name_ name of the feature parameter for the summarizer
 	/// \param[in] set_ feature set name
-	void defineFeatureParameter( const std::string& name_, const std::string& set_);
+	void addFeatureParameter( const std::string& name_, const std::string& set_);
 
 	/// \brief Get all numeric parameter definitions of the summarizer
 	/// \return the numeric parameter list
 	const std::map<std::string,ArithmeticVariant>& numericParameters() const		{return m_numericParameters;}
 	/// \brief Get all textual parameter definitions of the summarizer
 	/// \return the textual parameter list
-	const std::map<std::string,std::string>& textualParameters() const			{return m_textualParameters;}
+	const std::map<std::string,std::string>& stringParameters() const			{return m_stringParameters;}
 	/// \brief Get all feature parameter definitions of the summarizer
 	/// \return the feature parameter list
 	const std::vector<std::pair<std::string,std::string> >& featureParameters() const	{return m_featureParameters;}
 
 private:
 	std::map<std::string,ArithmeticVariant> m_numericParameters;		///< the numeric parameter definition list
-	std::map<std::string,std::string> m_textualParameters;			///< the textual parameter definition list
+	std::map<std::string,std::string> m_stringParameters;			///< the textual parameter definition list
 	std::vector<std::pair<std::string,std::string> > m_featureParameters;	///< the feature parameter definition list
 };
 

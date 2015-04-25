@@ -46,15 +46,15 @@ SummarizerDef::SummarizerDef(
 		pe = config.numericParameters().end();
 	for (; pi != pe; ++pi)
 	{
-		m_function->addParameter( pi->first, pi->second);
+		m_function->addNumericParameter( pi->first, pi->second);
 	}
 
 	std::map<std::string,std::string>::const_iterator
-		ti = config.textualParameters().begin(),
-		te = config.textualParameters().end();
+		ti = config.stringParameters().begin(),
+		te = config.stringParameters().end();
 	for (; ti != te; ++ti)
 	{
-		m_function->addParameter( ti->first, ti->second);
+		m_function->addStringParameter( ti->first, ti->second);
 	}
 }
 

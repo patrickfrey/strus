@@ -41,11 +41,11 @@
 
 using namespace strus;
 
-void SummarizerFunctionInstanceMatchPhrase::addParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::string& name, const std::string& value)
 {
-	if (utils::caseInsensitiveEquals( name, "termtype"))
+	if (utils::caseInsensitiveEquals( name, "type"))
 	{
-		m_termtype = value;
+		m_type = value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "phraselen"))
 	{
@@ -61,7 +61,7 @@ void SummarizerFunctionInstanceMatchPhrase::addParameter( const std::string& nam
 	}
 }
 
-void SummarizerFunctionInstanceMatchPhrase::addParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "phraselen"))
 	{
@@ -71,7 +71,7 @@ void SummarizerFunctionInstanceMatchPhrase::addParameter( const std::string& nam
 	{
 		m_sumlen = (unsigned int)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "termtype"))
+	else if (utils::caseInsensitiveEquals( name, "type"))
 	{
 		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
 	}
@@ -85,13 +85,13 @@ void SummarizerFunctionInstanceMatchPhrase::addParameter( const std::string& nam
 SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
-		const std::string& termtype_,
+		const std::string& type_,
 		unsigned int maxlen_,
 		unsigned int summarylen_)
 	:m_storage(storage_)
 	,m_processor(processor_)
-	,m_forwardindex(storage_->createForwardIterator( termtype_))
-	,m_termtype(termtype_)
+	,m_forwardindex(storage_->createForwardIterator( type_))
+	,m_type(type_)
 	,m_maxlen(maxlen_)
 	,m_summarylen(summarylen_)
 	,m_itr()

@@ -90,7 +90,7 @@ public:
 
 	virtual ~SummarizerFunctionInstanceMetaData(){}
 
-	virtual void addParameter( const std::string& name, const std::string& value)
+	virtual void addStringParameter( const std::string& name, const std::string& value)
 	{
 		if (utils::caseInsensitiveEquals( name, "name"))
 		{
@@ -102,7 +102,7 @@ public:
 		}
 	}
 
-	virtual void addParameter( const std::string& name, const ArithmeticVariant& value)
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 	{
 		if (utils::caseInsensitiveEquals( name, "name"))
 		{

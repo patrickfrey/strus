@@ -111,8 +111,8 @@ public:
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
-	virtual void addParameter( const std::string& name, const std::string& value);
-	virtual void addParameter( const std::string& name, const ArithmeticVariant& value);
+	virtual void addStringParameter( const std::string& name, const std::string& value);
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageClientInterface* storage,

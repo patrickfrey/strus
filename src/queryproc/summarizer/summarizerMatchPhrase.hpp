@@ -59,14 +59,14 @@ class SummarizerClosureMatchPhrase
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
-	/// \param[in] termtype_ type of the tokens to build the summary with
+	/// \param[in] type_ type of the tokens to build the summary with
 	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
 	/// \param[in] summarylen_ maximum lenght of the whole summary
 	/// \param[in] features_ features to inspect
 	SummarizerClosureMatchPhrase(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
-			const std::string& termtype_,
+			const std::string& type_,
 			unsigned int maxlen_,
 			unsigned int summarylen_);
 	virtual ~SummarizerClosureMatchPhrase();
@@ -82,7 +82,7 @@ private:
 	const StorageClientInterface* m_storage;
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
-	std::string m_termtype;
+	std::string m_type;
 	unsigned int m_maxlen;
 	unsigned int m_summarylen;
 	std::vector<PostingIteratorInterface*> m_itr;
@@ -100,37 +100,37 @@ class SummarizerFunctionInstanceMatchPhrase
 {
 public:
 	explicit SummarizerFunctionInstanceMatchPhrase()
-		:m_termtype(),m_maxlen(30),m_sumlen(40){}
+		:m_type(),m_maxlen(30),m_sumlen(40){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
 
-	virtual void addParameter( const std::string& name, const std::string& value);
-	virtual void addParameter( const std::string& name, const ArithmeticVariant& value);
+	virtual void addStringParameter( const std::string& name, const std::string& value);
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
 	virtual SummarizerClosureInterface* createClosure(
 			const StorageClientInterface* storage,
 			const QueryProcessorInterface* processor,
 			MetaDataReaderInterface*) const
 	{
-		if (m_termtype.empty())
+		if (m_type.empty())
 		{
 			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
 		return new SummarizerClosureMatchPhrase(
-				storage, processor, m_termtype, m_maxlen, m_sumlen);
+				storage, processor, m_type, m_maxlen, m_sumlen);
 	}
 
 	virtual std::string tostring() const
 	{
 		std::ostringstream rt;
-		rt << "termtype='" << m_termtype 
+		rt << "type='" << m_type 
 			<< "', phraselen=" << m_maxlen
 			<< ", sumlen=" << m_sumlen;
 		return rt.str();
 	}
 
 private:
-	std::string m_termtype;
+	std::string m_type;
 	unsigned int m_maxlen;
 	unsigned int m_sumlen;
 };

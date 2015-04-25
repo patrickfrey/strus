@@ -46,7 +46,7 @@ WeightingDef::WeightingDef(
 		pe = config.numericParameters().end();
 	for (; pi != pe; ++pi)
 	{
-		m_function->addParameter( pi->first, pi->second);
+		m_function->addNumericParameter( pi->first, pi->second);
 	}
 }
 

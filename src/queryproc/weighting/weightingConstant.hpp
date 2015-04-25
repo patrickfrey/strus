@@ -79,12 +79,12 @@ public:
 
 	virtual ~WeightingFunctionInstanceConstant(){}
 
-	virtual void addParameter( const std::string& name, const std::string& value)
+	virtual void addStringParameter( const std::string& name, const std::string& value)
 	{
-		addParameter( name, arithmeticVariantFromString( value));
+		addNumericParameter( name, arithmeticVariantFromString( value));
 	}
 
-	virtual void addParameter( const std::string& name, const ArithmeticVariant& value)
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 	{
 		if (utils::caseInsensitiveEquals( name, "weight"))
 		{
