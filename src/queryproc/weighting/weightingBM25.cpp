@@ -33,7 +33,7 @@
 
 using namespace strus;
 
-WeightingClosureBM25::WeightingClosureBM25(
+WeightingExecutionContextBM25::WeightingExecutionContextBM25(
 		const StorageClientInterface* storage,
 		PostingIteratorInterface* itr_,
 		MetaDataReaderInterface* metadata_,
@@ -65,7 +65,7 @@ WeightingClosureBM25::WeightingClosureBM25(
 }
 
 
-float WeightingClosureBM25::call( const Index& docno)
+float WeightingExecutionContextBM25::call( const Index& docno)
 {
 	if (m_itr->skipDoc( docno) != docno) return 0.0;
 

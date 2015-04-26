@@ -30,7 +30,7 @@
 #define _STRUS_SUMMARIZER_METADATA_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
@@ -52,16 +52,16 @@ class QueryProcessorInterface;
 
 
 /// \brief Interface for the summarization context (of a SummarizationFunction)
-class SummarizerClosureMetaData
-	:public SummarizerClosureInterface
+class SummarizerExecutionContextMetaData
+	:public SummarizerExecutionContextInterface
 {
 public:
 	/// \brief Constructor
 	/// \param[in] metadata_ reader for document meta data
 	/// \param[in] name_ meta data field identifier
-	SummarizerClosureMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
+	SummarizerExecutionContextMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
 
-	virtual ~SummarizerClosureMetaData(){}
+	virtual ~SummarizerExecutionContextMetaData(){}
 
 	virtual void addSummarizationFeature(
 			const std::string&,
@@ -114,12 +114,12 @@ public:
 		}
 	}
 
-	virtual SummarizerClosureInterface* createClosure(
+	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
 			const QueryProcessorInterface*,
 			MetaDataReaderInterface* metadata) const
 	{
-		return new SummarizerClosureMetaData( metadata, m_name);
+		return new SummarizerExecutionContextMetaData( metadata, m_name);
 	}
 
 	virtual std::string tostring() const

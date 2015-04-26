@@ -29,7 +29,6 @@
 #ifndef _STRUS_WEIGHTING_DEFINITION_HPP_INCLUDED
 #define _STRUS_WEIGHTING_DEFINITION_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
-#include "strus/weightingConfig.hpp"
 #include "strus/reference.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include <vector>
@@ -38,12 +37,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class WeightingFunctionInterface;
-/// \brief Forward declaration
-class WeightingFunctionInstanceInterface;
-/// \brief Forward declaration
 class QueryEval;
-
 
 class WeightingDef
 {
@@ -55,10 +49,12 @@ public:
 		,m_functionName(o.m_functionName)
 		,m_weightingSets(o.m_weightingSets){}
 	WeightingDef(
-			const WeightingFunctionInterface* function_,
+			WeightingFunctionInstanceInterface* function_,
 			const std::string& functionName_,
-			const WeightingConfig& config,
-			const std::vector<std::string>& weightingSets_);
+			const std::vector<std::string>& weightingSets_)
+		:m_function(function_)
+		,m_functionName(functionName_)
+		,m_weightingSets(weightingSets_){}
 
 	const WeightingFunctionInstanceInterface* function() const	{return m_function.get();}
 	const std::string& functionName() const				{return m_functionName;}

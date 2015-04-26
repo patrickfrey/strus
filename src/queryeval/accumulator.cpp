@@ -4,7 +4,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
-#include "strus/weightingClosureInterface.hpp"
+#include "strus/weightingExecutionContextInterface.hpp"
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -30,7 +30,7 @@ void Accumulator::addFeature(
 {
 	m_weightingFeatures.push_back(
 		WeightingFeature(
-			function_->createClosure( m_storage, iterator, m_metadata), weight));
+			function_->createExecutionContext( m_storage, iterator, m_metadata), weight));
 }
 
 void Accumulator::addAclRestriction(
@@ -138,7 +138,7 @@ bool Accumulator::nextRank(
 			ai = m_weightingFeatures.begin(), ae =  m_weightingFeatures.end();
 		for (; ai != ae; ++ai)
 		{
-			weight += ai->functionClosure->call( m_docno) * ai->weight;
+			weight += ai->executionContext->call( m_docno) * ai->weight;
 		}
 		return true;
 	}

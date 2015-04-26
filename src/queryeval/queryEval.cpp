@@ -30,9 +30,7 @@
 #include "query.hpp"
 #include "keyMap.hpp"
 #include "termConfig.hpp"
-#include "strus/summarizerConfig.hpp"
 #include "summarizerDef.hpp"
-#include "strus/weightingConfig.hpp"
 #include "weightingDef.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
@@ -71,26 +69,21 @@ void QueryEval::addRestrictionFeature( const std::string& set_)
 	m_restrictionSets.push_back( set_);
 }
 
-void QueryEval::addSummarizer(
-		const std::string& resultAttribute,
+void QueryEval::addSummarizerFunction(
 		const std::string& functionName,
-		const SummarizerConfig& config)
+		SummarizerFunctionInstanceInterface* function,
+		const std::vector<SummarizerFeatureParameter>& featureParameters,
+		const std::string& resultAttribute)
 {
-	const SummarizerFunctionInterface*
-		function = m_processor->getSummarizerFunction( functionName);
-
-	m_summarizers.push_back( SummarizerDef( resultAttribute, function, functionName, config));
+	m_summarizers.push_back( SummarizerDef( resultAttribute, functionName, function, featureParameters));
 }
 
 void QueryEval::addWeightingFunction(
 		const std::string& functionName,
-		const WeightingConfig& config,
+		WeightingFunctionInstanceInterface* function,
 		const std::vector<std::string>& weightedFeatureSets)
 {
-	const WeightingFunctionInterface*
-		function = m_processor->getWeightingFunction( functionName);
-
-	m_weightingFunctions.push_back( WeightingDef( function, functionName, config, weightedFeatureSets));
+	m_weightingFunctions.push_back( WeightingDef( function, functionName, weightedFeatureSets));
 }
 
 void QueryEval::print( std::ostream& out) const
@@ -149,13 +142,13 @@ void QueryEval::print( std::ostream& out) const
 		out << si->resultAttribute() << " = " << si->functionName();
 		out << "( " << si->function()->tostring() << " )";
 
-		std::vector<std::pair<std::string,std::string> >::const_iterator
+		std::vector<SummarizerFeatureParameter>::const_iterator
 			fi = si->featureParameters().begin(),
 			fe = si->featureParameters().end();
 		for (int fidx=0; fi != fe; ++fi,++fidx)
 		{
 			if (fidx) out << ", ";
-			out << fi->first << "=" << fi->second;
+			out << fi->parameterName() << "=" << fi->featureSet();
 		}
 		out << ");" << std::endl;
 	}

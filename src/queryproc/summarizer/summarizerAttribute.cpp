@@ -34,13 +34,13 @@
 
 using namespace strus;
 
-SummarizerClosureAttribute::SummarizerClosureAttribute(
+SummarizerExecutionContextAttribute::SummarizerExecutionContextAttribute(
 		AttributeReaderInterface* attribreader_, const std::string& name_)
 	:m_attribreader(attribreader_)
 	,m_attrib(attribreader_->elementHandle( name_.c_str()))
 {}
 
-void SummarizerClosureAttribute::addSummarizationFeature(
+void SummarizerExecutionContextAttribute::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&)
@@ -48,20 +48,20 @@ void SummarizerClosureAttribute::addSummarizationFeature(
 	throw strus::runtime_error( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
 }
 
-SummarizerClosureAttribute::~SummarizerClosureAttribute()
+SummarizerExecutionContextAttribute::~SummarizerExecutionContextAttribute()
 {
 	delete m_attribreader;
 }
 
-std::vector<SummarizerClosureInterface::SummaryElement>
-	SummarizerClosureAttribute::getSummary( const Index& docno)
+std::vector<SummarizerExecutionContextInterface::SummaryElement>
+	SummarizerExecutionContextAttribute::getSummary( const Index& docno)
 {
-	std::vector<SummarizerClosureInterface::SummaryElement> rt;
+	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
 	m_attribreader->skipDoc( docno);
 	std::string attr = m_attribreader->getValue( m_attrib);
 	if (!attr.empty()) 
 	{
-		rt.push_back( SummarizerClosureInterface::SummaryElement( attr, 1.0));
+		rt.push_back( SummarizerExecutionContextInterface::SummaryElement( attr, 1.0));
 	}
 	return rt;
 }
@@ -91,12 +91,12 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 	}
 }
 
-SummarizerClosureInterface* SummarizerFunctionInstanceAttribute::createClosure(
+SummarizerExecutionContextInterface* SummarizerFunctionInstanceAttribute::createExecutionContext(
 		const StorageClientInterface* storage,
 		const QueryProcessorInterface*,
 		MetaDataReaderInterface*) const
 {
-	return new SummarizerClosureAttribute( storage->createAttributeReader(), m_name);
+	return new SummarizerExecutionContextAttribute( storage->createAttributeReader(), m_name);
 }
 
 

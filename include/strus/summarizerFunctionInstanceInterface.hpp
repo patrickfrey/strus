@@ -42,7 +42,7 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
-class SummarizerClosureInterface;
+class SummarizerExecutionContextInterface;
 
 
 /// \brief Interface for a parameterized instance of summarization
@@ -62,12 +62,12 @@ public:
 	/// \param[in] value parameter value
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)=0;
 
-	/// \brief Create a closure (execution context) for this summarization function instance
+	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
 	/// \param[in] processor_ query processor for posting set operators of weighting functions
 	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)
-	/// \return the closure, the summarization function instance with its execution context (ownership to caller)
-	virtual SummarizerClosureInterface* createClosure(
+	/// \return the execution context, the summarization function instance with its execution context (ownership to caller)
+	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			MetaDataReaderInterface* metadata_) const=0;

@@ -32,7 +32,7 @@
 #include "strus/reference.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
-#include "strus/weightingClosureInterface.hpp"
+#include "strus/weightingExecutionContextInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "private/utils.hpp"
 #include "metaDataRestriction.hpp"
@@ -100,13 +100,13 @@ private:
 private:
 	struct WeightingFeature
 	{
-		Reference< WeightingClosureInterface> functionClosure;
+		Reference< WeightingExecutionContextInterface> executionContext;
 		float weight;
 
-		WeightingFeature( WeightingClosureInterface* fc, float w)
-			:functionClosure(fc),weight(w){}
+		WeightingFeature( WeightingExecutionContextInterface* fc, float w)
+			:executionContext(fc),weight(w){}
 		WeightingFeature( const WeightingFeature& o)
-			:functionClosure(o.functionClosure),weight(o.weight){}
+			:executionContext(o.executionContext),weight(o.weight){}
 	};
 
 	struct SelectorPostings

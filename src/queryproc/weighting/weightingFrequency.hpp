@@ -29,7 +29,7 @@
 #ifndef _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
 #define _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
-#include "strus/weightingClosureInterface.hpp"
+#include "strus/weightingExecutionContextInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
@@ -41,13 +41,13 @@
 namespace strus
 {
 
-/// \class WeightingClosureTermFrequency
+/// \class WeightingExecutionContextTermFrequency
 /// \brief Weighting function based on the TermFrequency formula
-class WeightingClosureTermFrequency
-	:public WeightingClosureInterface
+class WeightingExecutionContextTermFrequency
+	:public WeightingExecutionContextInterface
 {
 public:
-	explicit WeightingClosureTermFrequency(
+	explicit WeightingExecutionContextTermFrequency(
 			PostingIteratorInterface* itr_)
 		:m_itr(itr_){}
 
@@ -81,12 +81,12 @@ public:
 		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
 	}
 
-	virtual WeightingClosureInterface* createClosure(
+	virtual WeightingExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
 			PostingIteratorInterface* itr,
 			MetaDataReaderInterface*) const
 	{
-		return new WeightingClosureTermFrequency( itr);
+		return new WeightingExecutionContextTermFrequency( itr);
 	}
 
 	virtual std::string tostring() const

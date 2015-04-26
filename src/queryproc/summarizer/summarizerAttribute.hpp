@@ -28,7 +28,7 @@
 */
 #ifndef _STRUS_SUMMARIZER_ATTRIBUTE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_ATTRIBUTE_HPP_INCLUDED
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include <string>
@@ -47,22 +47,22 @@ class AttributeReaderInterface;
 class PostingIteratorInterface;
 
 
-class SummarizerClosureAttribute
-	:public SummarizerClosureInterface
+class SummarizerExecutionContextAttribute
+	:public SummarizerExecutionContextInterface
 {
 public:
 	/// \param[in] attribreader_ reader for document attributes
 	/// \param[in] name_ attribute identifier
-	SummarizerClosureAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
+	SummarizerExecutionContextAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
 
-	virtual ~SummarizerClosureAttribute();
+	virtual ~SummarizerExecutionContextAttribute();
 
 	virtual void addSummarizationFeature(
 			const std::string&,
 			PostingIteratorInterface*,
 			const std::vector<SummarizationVariable>&);
 
-	virtual std::vector<SummarizerClosureInterface::SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummarizerExecutionContextInterface::SummaryElement> getSummary( const Index& docno);
 
 private:
 	AttributeReaderInterface* m_attribreader;
@@ -84,7 +84,7 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
-	virtual SummarizerClosureInterface* createClosure(
+	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage,
 			const QueryProcessorInterface*,
 			MetaDataReaderInterface*) const;

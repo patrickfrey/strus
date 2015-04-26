@@ -82,14 +82,15 @@ public:
 
 	virtual void addRestrictionFeature( const std::string& set_);
 
-	virtual void addSummarizer(
-			const std::string& resultAttribute,
+	virtual void addSummarizerFunction(
 			const std::string& functionName,
-			const SummarizerConfig& config);
+			SummarizerFunctionInstanceInterface* function,
+			const std::vector<SummarizerFeatureParameter>& featureParameters,
+			const std::string& resultAttribute);
 
 	virtual void addWeightingFunction(
 			const std::string& functionName,
-			const WeightingConfig& config,
+			WeightingFunctionInstanceInterface* function,
 			const std::vector<std::string>& weightedFeatureSets);
 
 	void print( std::ostream& out) const;

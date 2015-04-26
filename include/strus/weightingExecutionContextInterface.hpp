@@ -26,29 +26,30 @@
 
 --------------------------------------------------------------------
 */
-#include "weightingDef.hpp"
-#include "queryEval.hpp"
-#include "private/utils.hpp"
-#include "strus/weightingFunctionInterface.hpp"
-#include "private/internationalization.hpp"
+#ifndef _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
+#define _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
 
-using namespace strus;
-
-WeightingDef::WeightingDef(
-		const WeightingFunctionInterface* function_,
-		const std::string& functionName_,
-		const WeightingConfig& config,
-		const std::vector<std::string>& weightingSets_)
-	:m_function(function_->createInstance()),m_functionName(functionName_),m_weightingSets(weightingSets_)
+namespace strus
 {
-	std::map<std::string,ArithmeticVariant>::const_iterator
-		pi = config.numericParameters().begin(),
-		pe = config.numericParameters().end();
-	for (; pi != pe; ++pi)
-	{
-		m_function->addNumericParameter( pi->first, pi->second);
-	}
-}
+/// \brief Forward declaration
+class MetaDataReaderInterface;
+/// \brief Forward declaration
+class PostingIteratorInterface;
 
+/// \brief Interface for a weighting function with its state and context used during calculation
+class WeightingExecutionContextInterface
+{
+public:
+	/// \brief Destructor
+	virtual ~WeightingExecutionContextInterface(){}
 
+	/// \brief Call the weighting function for a document
+	/// \param[in] docno document number
+	/// \return the calculated weight of the document
+	virtual float call( const Index& docno)=0;
+};
+
+}//namespace
+#endif
 

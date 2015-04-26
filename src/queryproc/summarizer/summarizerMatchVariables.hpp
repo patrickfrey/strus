@@ -30,7 +30,7 @@
 #define _STRUS_SUMMARIZER_MATCH_VARIABLES_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizationVariable.hpp"
@@ -54,8 +54,8 @@ class PostingIteratorInterface;
 class QueryProcessorInterface;
 
 
-class SummarizerClosureMatchVariables
-	:public SummarizerClosureInterface
+class SummarizerExecutionContextMatchVariables
+	:public SummarizerExecutionContextInterface
 {
 public:
 	/// \param[in] storage_ storage to use
@@ -63,14 +63,14 @@ public:
 	/// \param[in] type_ type of the forward index tokens to build the summary with
 	/// \param[in] delimiter_ delimiter to print between multiple output elements
 	/// \param[in] assing_ assingment operator to use for output
-	SummarizerClosureMatchVariables(
+	SummarizerExecutionContextMatchVariables(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			const std::string& delimiter_,
 			const std::string& assign_);
 
-	virtual ~SummarizerClosureMatchVariables(){}
+	virtual ~SummarizerExecutionContextMatchVariables(){}
 
 	virtual void addSummarizationFeature(
 			const std::string& name,
@@ -114,7 +114,7 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
-	virtual SummarizerClosureInterface* createClosure(
+	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage,
 			const QueryProcessorInterface* processor,
 			MetaDataReaderInterface*) const
@@ -123,7 +123,7 @@ public:
 		{
 			throw strus::runtime_error( _TXT( "emtpy forward index type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
-		return new SummarizerClosureMatchVariables( storage, processor, m_type, m_delimiter, m_assign);
+		return new SummarizerExecutionContextMatchVariables( storage, processor, m_type, m_delimiter, m_assign);
 	}
 
 	virtual std::string tostring() const

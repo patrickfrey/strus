@@ -30,7 +30,7 @@
 #define _STRUS_SUMMARIZER_LIST_MATCHES_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include <string>
 #include <vector>
@@ -45,12 +45,12 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 
-class SummarizerClosureListMatches
-	:public SummarizerClosureInterface
+class SummarizerExecutionContextListMatches
+	:public SummarizerExecutionContextInterface
 {
 public:
-	SummarizerClosureListMatches(){}
-	virtual ~SummarizerClosureListMatches(){}
+	SummarizerExecutionContextListMatches(){}
+	virtual ~SummarizerExecutionContextListMatches(){}
 
 	virtual void addSummarizationFeature(
 			const std::string& name,
@@ -77,12 +77,12 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
-	virtual SummarizerClosureInterface* createClosure(
+	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
 			const QueryProcessorInterface*,
 			MetaDataReaderInterface*) const
 	{
-		return new SummarizerClosureListMatches();
+		return new SummarizerExecutionContextListMatches();
 	}
 
 	virtual std::string tostring() const

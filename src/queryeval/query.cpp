@@ -38,7 +38,7 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/utils.hpp"
@@ -463,7 +463,7 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 	}
 	// [5] Create the summarizers:
-	std::vector<Reference<SummarizerClosureInterface> > summarizers;
+	std::vector<Reference<SummarizerExecutionContextInterface> > summarizers;
 	{
 		std::vector<SummarizerDef>::const_iterator
 			zi = m_queryEval->summarizers().begin(),
@@ -472,12 +472,12 @@ std::vector<ResultDocument> Query::evaluate()
 		{
 			// [5.1] Create the summarizer:
 			summarizers.push_back(
-				zi->function()->createClosure(
+				zi->function()->createExecutionContext(
 					m_storage, m_processor, m_metaDataReader.get()));
-			SummarizerClosureInterface* closure = summarizers.back().get();
+			SummarizerExecutionContextInterface* closure = summarizers.back().get();
 
 			// [5.2] Add features with their variables assigned to summarizer:
-			std::vector< std::pair<std::string,std::string> >::const_iterator
+			std::vector<QueryEvalInterface::SummarizerFeatureParameter>::const_iterator
 				si = zi->featureParameters().begin(),
 				se = zi->featureParameters().end();
 			for (; si != se; ++si)
@@ -486,13 +486,13 @@ std::vector<ResultDocument> Query::evaluate()
 					fi = m_features.begin(), fe = m_features.end();
 				for (; fi != fe; ++fi)
 				{
-					if (fi->set == si->second/*feature set addressed*/)
+					if (fi->set == si->featureSet())
 					{
 						std::vector<SummarizationVariable> variables;
 						collectSummarizationVariables( variables, fi->node);
 						
 						closure->addSummarizationFeature(
-							si->first/*name*/, nodePostings(fi->node),
+							si->parameterName(), nodePostings(fi->node),
 							variables);
 					}
 				}
@@ -525,15 +525,15 @@ std::vector<ResultDocument> Query::evaluate()
 	for (; ri != re; ++ri)
 	{
 		std::vector<ResultDocument::Attribute> attr;
-		std::vector<Reference<SummarizerClosureInterface> >::iterator
+		std::vector<Reference<SummarizerExecutionContextInterface> >::iterator
 			si = summarizers.begin(), se = summarizers.end();
 
 		rt.push_back( ResultDocument( *ri));
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
-			std::vector<SummarizerClosureInterface::SummaryElement>
+			std::vector<SummarizerExecutionContextInterface::SummaryElement>
 				summary = (*si)->getSummary( ri->docno());
-			std::vector<SummarizerClosureInterface::SummaryElement>::const_iterator
+			std::vector<SummarizerExecutionContextInterface::SummaryElement>::const_iterator
 				ci = summary.begin(), ce = summary.end();
 			for (; ci != ce; ++ci)
 			{

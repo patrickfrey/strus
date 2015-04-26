@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_SUMMARIZER_CLOSURE_INTERFACE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_CLOSURE_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
+#define _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/summarizationVariable.hpp"
 #include <string>
 #include <vector>
@@ -38,9 +38,9 @@ namespace strus
 /// \brief Forward declaration
 class PostingIteratorInterface;
 
-/// \class SummarizerClosureInterface
-/// \brief Interface for the summarization closure (execution context of a summarization function)
-class SummarizerClosureInterface
+/// \class SummarizerExecutionContextInterface
+/// \brief Interface for the summarization execution context
+class SummarizerExecutionContextInterface
 {
 public:
 	/// \brief One result element of summarization
@@ -66,9 +66,9 @@ public:
 
 public:
 	/// \brief Destructor
-	virtual ~SummarizerClosureInterface(){}
+	virtual ~SummarizerExecutionContextInterface(){}
 
-	/// \brief Add a sumarization feature that is subject of summarization to the closure
+	/// \brief Add a sumarization feature that is subject of summarization to the execution context
 	/// \param[in] name_ name of the summarization feature
 	/// \param[in] postingIterator_ iterator on the matches of the summarization feature
 	/// \param[in] variables_ list of variables attached to subexpressions of the matches (passed with postingIterator_)

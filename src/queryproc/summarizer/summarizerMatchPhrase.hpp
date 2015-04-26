@@ -30,7 +30,7 @@
 #define _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
@@ -53,8 +53,8 @@ class PostingIteratorInterface;
 class QueryProcessorInterface;
 
 
-class SummarizerClosureMatchPhrase
-	:public SummarizerClosureInterface
+class SummarizerExecutionContextMatchPhrase
+	:public SummarizerExecutionContextInterface
 {
 public:
 	/// \param[in] storage_ storage to use
@@ -63,13 +63,13 @@ public:
 	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
 	/// \param[in] summarylen_ maximum lenght of the whole summary
 	/// \param[in] features_ features to inspect
-	SummarizerClosureMatchPhrase(
+	SummarizerExecutionContextMatchPhrase(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			unsigned int maxlen_,
 			unsigned int summarylen_);
-	virtual ~SummarizerClosureMatchPhrase();
+	virtual ~SummarizerExecutionContextMatchPhrase();
 
 	virtual void addSummarizationFeature(
 			const std::string& name,
@@ -107,7 +107,7 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
-	virtual SummarizerClosureInterface* createClosure(
+	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage,
 			const QueryProcessorInterface* processor,
 			MetaDataReaderInterface*) const
@@ -116,7 +116,7 @@ public:
 		{
 			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
-		return new SummarizerClosureMatchPhrase(
+		return new SummarizerExecutionContextMatchPhrase(
 				storage, processor, m_type, m_maxlen, m_sumlen);
 	}
 

@@ -82,7 +82,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 }
 
 
-SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
+SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
@@ -100,7 +100,7 @@ SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
 	,m_init_complete(false)
 {}
 
-void SummarizerClosureMatchPhrase::addSummarizationFeature(
+void SummarizerExecutionContextMatchPhrase::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>&)
@@ -121,7 +121,7 @@ void SummarizerClosureMatchPhrase::addSummarizationFeature(
 	}
 }
 
-SummarizerClosureMatchPhrase::~SummarizerClosureMatchPhrase()
+SummarizerExecutionContextMatchPhrase::~SummarizerExecutionContextMatchPhrase()
 {}
 
 static Index getStartPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
@@ -159,7 +159,7 @@ static Index getEndPos( Index curpos, unsigned int maxlen, PostingIteratorInterf
 	return endpos;
 }
 
-static SummarizerClosureInterface::SummaryElement
+static SummarizerExecutionContextInterface::SummaryElement
 	summaryElement(
 		const Index& curpos,
 		PostingIteratorInterface* phrasestruct,
@@ -192,11 +192,11 @@ static SummarizerClosureInterface::SummaryElement
 		}
 	}
 	if (!end_found) phrase.append( "...");
-	return SummarizerClosureInterface::SummaryElement( phrase, 1.0);
+	return SummarizerExecutionContextInterface::SummaryElement( phrase, 1.0);
 }
 
 static void getSummary_(
-		std::vector<SummarizerClosureInterface::SummaryElement>& res,
+		std::vector<SummarizerExecutionContextInterface::SummaryElement>& res,
 		const Index& docno,
 		std::vector<PostingIteratorInterface*> itr,
 		PostingIteratorInterface* phrasestruct,
@@ -240,8 +240,8 @@ static void getSummary_(
 }
 
 
-std::vector<SummarizerClosureInterface::SummaryElement>
-	SummarizerClosureMatchPhrase::getSummary( const Index& docno)
+std::vector<SummarizerExecutionContextInterface::SummaryElement>
+	SummarizerExecutionContextMatchPhrase::getSummary( const Index& docno)
 {
 	if (!m_init_complete)
 	{
@@ -255,7 +255,7 @@ std::vector<SummarizerClosureInterface::SummaryElement>
 		}
 		m_init_complete = true;
 	}
-	std::vector<SummarizerClosureInterface::SummaryElement> rt;
+	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
 	getSummary_(
 		rt, docno, m_itr, m_phrasestruct,
 		*m_forwardindex.get(), m_maxlen, m_summarylen);

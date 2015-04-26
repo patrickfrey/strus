@@ -29,7 +29,6 @@
 #ifndef _STRUS_SUMMARIZER_DEFINITION_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_DEFINITION_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
-#include "strus/summarizerConfig.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/reference.hpp"
 #include <string>
@@ -37,19 +36,19 @@
 
 namespace strus {
 
-/// \brief Forward declaration
-class SummarizerFunctionInterface;
-/// \brief Forward declaration
-class QueryEval;
-
 class SummarizerDef
 {
 public:
+	typedef QueryEvalInterface::SummarizerFeatureParameter SummarizerFeatureParameter;
 	SummarizerDef(
 			const std::string& resultAttribute_,
-			const SummarizerFunctionInterface* function_,
 			const std::string& functionName_,
-			const SummarizerConfig& config);
+			SummarizerFunctionInstanceInterface* function_,
+			const std::vector<SummarizerFeatureParameter>& featureParameters_)
+		:m_function(function_)
+		,m_functionName(functionName_)
+		,m_resultAttribute(resultAttribute_)
+		,m_featureParameters(featureParameters_){}
 
 	SummarizerDef( const SummarizerDef& o)
 		:m_function(o.m_function)
@@ -57,16 +56,16 @@ public:
 		,m_resultAttribute(o.m_resultAttribute)
 		,m_featureParameters(o.m_featureParameters){}
 
-	const SummarizerFunctionInstanceInterface* function() const				{return m_function.get();}
-	const std::string& functionName() const							{return m_functionName;}
-	const std::string& resultAttribute() const						{return m_resultAttribute;}
-	const std::vector<std::pair<std::string,std::string> >& featureParameters() const	{return m_featureParameters;}
+	const SummarizerFunctionInstanceInterface* function() const			{return m_function.get();}
+	const std::string& functionName() const						{return m_functionName;}
+	const std::string& resultAttribute() const					{return m_resultAttribute;}
+	const std::vector<SummarizerFeatureParameter>& featureParameters() const	{return m_featureParameters;}
 
 private:
 	Reference<SummarizerFunctionInstanceInterface> m_function;		///< summarization function
 	std::string m_functionName;						///< name of the summarization function
 	std::string m_resultAttribute;						///< name of the result attribute the summarization is returned as
-	std::vector<std::pair<std::string,std::string> > m_featureParameters;	///< list of feature parameters
+	std::vector<SummarizerFeatureParameter> m_featureParameters;		///< list of feature parameters that are subject of summarization
 };
 
 }

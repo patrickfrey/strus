@@ -38,9 +38,9 @@ class QueryInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
-class SummarizerConfig;
+class WeightingFunctionInstanceInterface;
 /// \brief Forward declaration
-class WeightingConfig;
+class SummarizerFunctionInstanceInterface;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -68,24 +68,45 @@ public:
 	/// \param[in] set_ name of the set of the restriction feature
 	virtual void addRestrictionFeature( const std::string& set_)=0;
 
-	/// \brief Declare a summarizer for this query evaluation
-	/// \param[in] resultAttribute specifies the attribute name this summarization is labeled with in the query evaluation result
-	/// \param[in] functionName name of the summarizer function to use. The name references a function defined with QueryProcessor::defineSummarizerFunction(const char*,const SummarizerFunctionInterface*)
-	/// \param[in] config the configuration meaning parametrization of the summarizer declared
-	/// \return the summarizer configuration object to be destroyed with 'delete' by the caller
-	virtual void addSummarizer(
-			const std::string& resultAttribute,
-			const std::string& functionName,
-			const SummarizerConfig& config)=0;
+	/// \class SummarizerFeatureParameter
+	/// \brief Structure that describes a feature that is subject of summarization
+	class SummarizerFeatureParameter
+	{
+	public:
+		SummarizerFeatureParameter(
+				const std::string& parameterName_,
+				const std::string& featureSet_)
+			:m_parameterName(parameterName_),m_featureSet(featureSet_){}
+		SummarizerFeatureParameter(
+				const SummarizerFeatureParameter& o)
+			:m_parameterName(o.m_parameterName),m_featureSet(o.m_featureSet){}
 
-	/// \brief Declare a weighting function for this query evaluation
-	/// \param[in] functionName name of the weighting function to use. The name references a function defined with QueryProcessor::defineWeightingFunction(const char*,const WeightingFunctionInterface*)
-	/// \param[in] config the configuration meaning parametrization of the weighting function declared
+		const std::string& parameterName() const	{return m_parameterName;}
+		const std::string& featureSet() const		{return m_featureSet;}
+
+	private:
+		std::string m_parameterName;
+		std::string m_featureSet;
+	};
+
+	/// \brief Declare a summarizer function to use for this query evaluation scheme
+	/// \param[in] functionName name of the summarizer function (no meaning, just for inspection and tracing)
+	/// \param[in] function parameterized summarizer function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
+	/// \param[in] featureParameters list of parameters adressing query features that are subject of sumarization
+	/// \param[in] resultAttribute specifies the attribute name this summarization is labeled with in the query evaluation result
+	virtual void addSummarizerFunction(
+			const std::string& functionName,
+			SummarizerFunctionInstanceInterface* function,
+			const std::vector<SummarizerFeatureParameter>& featureParameters,
+			const std::string& resultAttribute)=0;
+
+	/// \brief Declare a weighting function to use for this query evaluation scheme
+	/// \param[in] functionName name of the weighting function (no meaning, just for inspection and tracing)
+	/// \param[in] function parameterized weighting function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
 	/// \param[in] weightedFeatureSets list of feature sets used by this function for weighting (declares what features to weight)
-	/// \return the summarizer configuration object to be destroyed with 'delete' by the caller
 	virtual void addWeightingFunction(
 			const std::string& functionName,
-			const WeightingConfig& config,
+			WeightingFunctionInstanceInterface* function,
 			const std::vector<std::string>& weightedFeatureSets)=0;
 
 	/// \brief Create a new query
