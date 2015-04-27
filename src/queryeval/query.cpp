@@ -484,7 +484,7 @@ std::vector<ResultDocument> Query::evaluate()
 					{
 						std::vector<SummarizationVariable> variables;
 						collectSummarizationVariables( variables, fi->node);
-						
+
 						closure->addSummarizationFeature(
 							si->parameterName(), nodePostings(fi->node),
 							variables);

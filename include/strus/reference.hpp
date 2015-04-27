@@ -113,6 +113,25 @@ public:
 	/// \brief Object access as function
 	Object* get()					{return m_obj;}
 
+	/// \brief Release object reference and return the pointer to the object (with ownership) if this is possible
+	/// \remark A multiply shared object reference cannot be released
+	Object* release()
+	{
+		if (m_refcnt && *m_refcnt == 1)
+		{
+			--*m_refcnt;
+			Object* rt = m_obj;
+			std::free( m_refcnt);
+			m_refcnt = 0;
+			m_obj = 0;
+			return rt;
+		}
+		else
+		{
+			throw std::runtime_error( "cannot release shared object (having more than one reference)");
+		}
+	}
+
 private:
 	int* newRefCnt()
 	{
