@@ -79,7 +79,6 @@ public:
 
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
-			const QueryProcessorInterface*,
 			MetaDataReaderInterface*) const
 	{
 		return new SummarizerExecutionContextListMatches();
@@ -100,7 +99,8 @@ public:
 
 	virtual ~SummarizerFunctionListMatches(){}
 
-	virtual SummarizerFunctionInstanceInterface* createInstance() const
+	virtual SummarizerFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface*) const
 	{
 		return new SummarizerFunctionInstanceListMatches();
 	}

@@ -64,12 +64,10 @@ public:
 
 	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
-	/// \param[in] processor_ query processor for posting set operators of weighting functions
 	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)
 	/// \return the execution context, the summarization function instance with its execution context (ownership to caller)
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage_,
-			const QueryProcessorInterface* processor_,
 			MetaDataReaderInterface* metadata_) const=0;
 
 	/// \brief Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)

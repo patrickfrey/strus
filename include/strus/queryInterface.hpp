@@ -39,6 +39,8 @@ namespace strus {
 
 /// \brief Forward declaration
 class StorageClientInterface;
+/// \brief Forward declaration
+class PostingJoinOperatorInterface;
 
 /// \brief Defines a strus information retrieval query
 class QueryInterface
@@ -54,10 +56,12 @@ public:
 
 	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
 	///	removing the argument elements.
-	/// \param[in] opname_ name of the expression join operator
+	/// \param[in] operation the expression join operator
 	/// \param[in] argc number of expression arguments
-	/// \param[in] range_ range of the expression
-	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_)=0;
+	/// \param[in] range range of the expression
+	virtual void pushExpression(
+				const PostingJoinOperatorInterface* operation,
+				std::size_t argc, int range)=0;
 
 	/// \brief Push a duplicate of the topmost element of the query stack
 	/// \note This function makes it possible to reference terms or expressions more than once as features or as subexpressions.

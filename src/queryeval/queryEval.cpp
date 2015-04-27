@@ -161,6 +161,6 @@ QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) c
 	std::cout << "create query for program:" << std::endl;
 	print( std::cout);
 #endif
-	return new Query( this, storage, m_processor);
+	return new Query( this, storage);
 }
 

@@ -33,6 +33,8 @@ namespace strus
 {
 /// \brief Forward declaration
 class SummarizerFunctionInstanceInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 
 /// \brief Interface for summarization functions (additional info about the matches in the result ranklist of a retrieval query)
@@ -43,8 +45,10 @@ public:
 	virtual ~SummarizerFunctionInterface(){}
 
 	/// \brief Create an instance of this summarization function for parametrization
+	/// \param[in] processor provider for query processing functions
 	/// \return the created summarization function instance (ownership to caller)
-	virtual SummarizerFunctionInstanceInterface* createInstance() const=0;
+	virtual SummarizerFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const=0;
 };
 
 }//namespace

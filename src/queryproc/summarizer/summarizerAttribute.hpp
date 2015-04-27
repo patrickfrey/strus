@@ -45,7 +45,8 @@ class StorageClientInterface;
 class AttributeReaderInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
-
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 class SummarizerExecutionContextAttribute
 	:public SummarizerExecutionContextInterface
@@ -86,7 +87,6 @@ public:
 
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage,
-			const QueryProcessorInterface*,
 			MetaDataReaderInterface*) const;
 
 	virtual std::string tostring() const
@@ -108,7 +108,8 @@ public:
 	SummarizerFunctionAttribute(){}
 	virtual ~SummarizerFunctionAttribute(){}
 
-	virtual SummarizerFunctionInstanceInterface* createInstance() const
+	virtual SummarizerFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface*) const
 	{
 		return new SummarizerFunctionInstanceAttribute();
 	}

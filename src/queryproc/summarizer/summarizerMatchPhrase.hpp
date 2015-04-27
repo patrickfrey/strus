@@ -99,8 +99,8 @@ class SummarizerFunctionInstanceMatchPhrase
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceMatchPhrase()
-		:m_type(),m_maxlen(30),m_sumlen(40){}
+	explicit SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor)
+		:m_type(),m_maxlen(30),m_sumlen(40),m_processor(processor){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
 
@@ -109,7 +109,6 @@ public:
 
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage,
-			const QueryProcessorInterface* processor,
 			MetaDataReaderInterface*) const
 	{
 		if (m_type.empty())
@@ -117,7 +116,7 @@ public:
 			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
 		return new SummarizerExecutionContextMatchPhrase(
-				storage, processor, m_type, m_maxlen, m_sumlen);
+				storage, m_processor, m_type, m_maxlen, m_sumlen);
 	}
 
 	virtual std::string tostring() const
@@ -133,6 +132,7 @@ private:
 	std::string m_type;
 	unsigned int m_maxlen;
 	unsigned int m_sumlen;
+	const QueryProcessorInterface* m_processor;
 };
 
 
@@ -144,9 +144,10 @@ public:
 
 	virtual ~SummarizerFunctionMatchPhrase(){}
 
-	virtual SummarizerFunctionInstanceInterface* createInstance() const
+	virtual SummarizerFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const
 	{
-		return new SummarizerFunctionInstanceMatchPhrase();
+		return new SummarizerFunctionInstanceMatchPhrase( processor);
 	}
 };
 

@@ -116,7 +116,6 @@ public:
 
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
-			const QueryProcessorInterface*,
 			MetaDataReaderInterface* metadata) const
 	{
 		return new SummarizerExecutionContextMetaData( metadata, m_name);
@@ -142,7 +141,8 @@ public:
 
 	virtual ~SummarizerFunctionMetaData(){}
 
-	virtual SummarizerFunctionInstanceInterface* createInstance() const
+	virtual SummarizerFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface*) const
 	{
 		return new SummarizerFunctionInstanceMetaData();
 	}

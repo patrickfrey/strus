@@ -37,9 +37,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC QueryEvalInterface*
-	strus::createQueryEval(
-		const QueryProcessorInterface* processor)
+DLL_PUBLIC QueryEvalInterface* strus::createQueryEval()
 {
 	static bool intl_initialized = false;
 	if (!intl_initialized)
@@ -47,6 +45,6 @@ DLL_PUBLIC QueryEvalInterface*
 		strus::initMessageTextDomain();
 		intl_initialized = true;
 	}
-	return new QueryEval( processor);
+	return new QueryEval();
 }
 

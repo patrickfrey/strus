@@ -93,7 +93,6 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 
 SummarizerExecutionContextInterface* SummarizerFunctionInstanceAttribute::createExecutionContext(
 		const StorageClientInterface* storage,
-		const QueryProcessorInterface*,
 		MetaDataReaderInterface*) const
 {
 	return new SummarizerExecutionContextAttribute( storage->createAttributeReader(), m_name);

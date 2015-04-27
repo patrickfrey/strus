@@ -106,8 +106,8 @@ class SummarizerFunctionInstanceMatchVariables
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceMatchVariables()
-		:m_type(){}
+	explicit SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor)
+		:m_type(),m_processor(processor){}
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
@@ -116,14 +116,13 @@ public:
 
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage,
-			const QueryProcessorInterface* processor,
 			MetaDataReaderInterface*) const
 	{
 		if (m_type.empty())
 		{
 			throw strus::runtime_error( _TXT( "emtpy forward index type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
-		return new SummarizerExecutionContextMatchVariables( storage, processor, m_type, m_delimiter, m_assign);
+		return new SummarizerExecutionContextMatchVariables( storage, m_processor, m_type, m_delimiter, m_assign);
 	}
 
 	virtual std::string tostring() const
@@ -139,6 +138,7 @@ private:
 	std::string m_type;
 	std::string m_delimiter;
 	std::string m_assign;
+	const QueryProcessorInterface* m_processor;
 };
 
 
@@ -149,9 +149,10 @@ public:
 	SummarizerFunctionMatchVariables(){}
 	virtual ~SummarizerFunctionMatchVariables(){}
 
-	virtual SummarizerFunctionInstanceInterface* createInstance() const
+	virtual SummarizerFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const
 	{
-		return new SummarizerFunctionInstanceMatchVariables();
+		return new SummarizerFunctionInstanceMatchVariables( processor);
 	}
 };
 

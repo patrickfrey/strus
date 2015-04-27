@@ -30,7 +30,6 @@
 #include "queryEval.hpp"
 #include "accumulator.hpp"
 #include "ranker.hpp"
-#include "strus/queryProcessorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
@@ -53,10 +52,9 @@
 using namespace strus;
 
 ///\brief Constructor
-Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_, const QueryProcessorInterface* processor_)
+Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_)
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
-	,m_processor(processor_)
 	,m_metaDataReader(storage_->createMetaDataReader())
 {
 	std::vector<TermConfig>::const_iterator
@@ -72,7 +70,6 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 Query::Query( const Query& o)
 	:m_queryEval(o.m_queryEval)
 	,m_storage(o.m_storage)
-	,m_processor(o.m_processor)
 	,m_metaDataReader(o.m_metaDataReader)
 	,m_terms(o.m_terms)
 	,m_expressions(o.m_expressions)
@@ -91,7 +88,7 @@ void Query::pushTerm( const std::string& type_, const std::string& value_)
 	m_stack.push_back( nodeAddress( TermNode, m_terms.size()-1));
 }
 
-void Query::pushExpression( const std::string& opname_, std::size_t argc, int range_)
+void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_)
 {
 	if (argc > m_stack.size())
 	{
@@ -103,7 +100,7 @@ void Query::pushExpression( const std::string& opname_, std::size_t argc, int ra
 	{
 		subnodes.push_back( *si);
 	}
-	m_expressions.push_back( Expression( opname_, subnodes, range_));
+	m_expressions.push_back( Expression( operation, subnodes, range_));
 	m_stack.resize( m_stack.size() - argc);
 	m_stack.push_back( nodeAddress( ExpressionNode, m_expressions.size()-1));
 }
@@ -194,7 +191,7 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			out << indentstr << expr.opname << " " << expr.range << ":";
+			out << indentstr << std::hex<< (uintptr_t)expr.operation << std::dec << " " << expr.range << ":";
 			printVariables( out, adr);
 			out << std::endl;
 			std::vector<NodeAddress>::const_iterator
@@ -226,9 +223,6 @@ void Query::setUserName( const std::string& username_)
 
 PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr)
 {
-	const PostingJoinOperatorInterface*
-		join = m_processor->getPostingJoinOperator( expr.opname);
-
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
 	{
@@ -258,7 +252,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 				break;
 		}
 	}
-	return join->createResultIterator( joinargs, expr.range);
+	return expr.operation->createResultIterator( joinargs, expr.range);
 }
 
 
@@ -473,7 +467,7 @@ std::vector<ResultDocument> Query::evaluate()
 			// [5.1] Create the summarizer:
 			summarizers.push_back(
 				zi->function()->createExecutionContext(
-					m_storage, m_processor, m_metaDataReader.get()));
+					m_storage, m_metaDataReader.get()));
 			SummarizerExecutionContextInterface* closure = summarizers.back().get();
 
 			// [5.2] Add features with their variables assigned to summarizer:

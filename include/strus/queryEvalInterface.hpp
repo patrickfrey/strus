@@ -41,6 +41,8 @@ class StorageClientInterface;
 class WeightingFunctionInstanceInterface;
 /// \brief Forward declaration
 class SummarizerFunctionInstanceInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 /// \brief Defines a program for evaluating a query
 class QueryEvalInterface
@@ -112,7 +114,8 @@ public:
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on
 	/// \return a query instance for this query evaluation type
-	virtual QueryInterface* createQuery( const StorageClientInterface* storage) const=0;
+	virtual QueryInterface* createQuery(
+			const StorageClientInterface* storage) const=0;
 };
 
 }//namespace
