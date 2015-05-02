@@ -423,6 +423,9 @@ std::vector<ResultDocument> Query::evaluate()
 							accumulator.addFeature(
 								nodePostings( fi->node), fi->weight,
 								wi->function());
+#ifdef STRUS_LOWLEVEL_DEBUG
+							std::cout << "add feature " << fi->set << std::endl;
+#endif
 						}
 					}
 				}
@@ -518,6 +521,9 @@ std::vector<ResultDocument> Query::evaluate()
 
 	for (; ri != re; ++ri)
 	{
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "result rank docno=" << ri->docno() << ", weight=" << ri->weight() << std::endl;
+#endif
 		std::vector<ResultDocument::Attribute> attr;
 		std::vector<Reference<SummarizerExecutionContextInterface> >::iterator
 			si = summarizers.begin(), se = summarizers.end();
