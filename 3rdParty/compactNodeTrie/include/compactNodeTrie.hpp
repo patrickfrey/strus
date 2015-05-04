@@ -228,19 +228,7 @@ private:
 			out << "NULL";
 		}
 	}
-	static void printLexem( std::ostream& out, unsigned char chr)
-	{
-		if (chr >= 32 && chr <= 128)
-		{
-			out << "'" << (char)chr << "' ";
-		}
-		else
-		{
-			out << "[" << std::hex
-				<< (unsigned int)(unsigned char)chr
-				<< std::dec << "] ";
-		}
-	}
+	static void printLexem( std::ostream& out, unsigned char chr);
 
 	class NodeIteratorData
 	{
@@ -616,66 +604,20 @@ private:
 	};
 
 private:
-	template <class NODETYPE>
-	class Block
+	class BlockBase
 	{
 	public:
-		typedef NODETYPE NodeType;
+		explicit BlockBase( std::size_t elemsize_)
+			:m_ar(0),m_elemsize(elemsize_),m_size(0),m_allocsize(0),m_freelist(0){}
+		~BlockBase();
 
-	public:
-		Block()
-			:m_ar(0),m_size(0),m_allocsize(0),m_freelist(0){}
-
-		~Block()
+		void* blockPtr( std::size_t idx) const
 		{
-			if (m_ar) std::free( m_ar);
+			return (char*)m_ar + (idx * m_elemsize);
 		}
 
-		NodeIndex allocNode( bool useFreeList=true)
-		{
-			if (m_freelist && useFreeList)
-			{
-				NodeIndex rt = m_freelist-1;
-				m_freelist = *reinterpret_cast<uint32_t*>(m_ar + rt)+1;
-				std::memset( m_ar + rt, 0, sizeof( m_ar[0]));
-				return rt;
-			}
-			if (m_size == m_allocsize)
-			{
-				unsigned int mm = m_allocsize?(m_allocsize * 2):16;
-				if (mm < m_allocsize) throw std::bad_alloc();
-				unsigned int bytes = mm * sizeof( m_ar[0]);
-				if (bytes < mm) throw std::bad_alloc();
-				typename NodeType::UnitType* newar
-					= (typename NodeType::UnitType*)std::realloc(
-						m_ar, bytes);
-				if (!newar) throw std::bad_alloc();
-				m_ar = newar;
-				m_allocsize = mm;
-			}
-			if (m_size > NodeClass::MaxNofNodes)
-			{
-				return NullNodeIndex;
-			}
-			std::memset( m_ar + m_size, 0, sizeof( m_ar[0]));
-			return m_size++;
-		}
+		NodeIndex allocNode( bool useFreeList=true);
 
-		void releaseNode( const NodeIndex& idx)
-		{
-			checkAccess(idx);
-			*reinterpret_cast<uint32_t*>(m_ar + idx) = (m_freelist-1);
-			m_freelist = idx+1;
-		}
-
-		void checkAddress( const NodeAddress& addr) const
-		{
-			if ((int)((addr >> NodeClass::Shift) & NodeClass::Mask)
-			!=  (int)NodeType::ThisNodeClass)
-			{
-				throw std::logic_error( "accessing block with illegal node address");
-			}
-		}
 		void checkAccess( const std::size_t& idx) const
 		{
 			if (idx >= m_size)
@@ -684,34 +626,11 @@ private:
 			}
 		}
 
-		typename NodeType::UnitType& operator[]( std::size_t idx)
-		{
-			checkAccess( idx);
-			return m_ar[ idx];
-		}
+		void releaseNode( const NodeIndex& idx);
 
-		const typename NodeType::UnitType& operator[]( std::size_t idx) const
-		{
-			checkAccess( idx);
-			return m_ar[ idx];
-		}
+		void clear();
 
-		void clear()
-		{
-			if (m_ar)
-			{				std::free( m_ar);
-				m_ar = 0;
-			}
-			m_size = 0;
-			m_allocsize = 0;
-			m_freelist = 0;
-		}
-
-		void reset()
-		{
-			m_size = 0;
-			m_freelist = 0;
-		}
+		void reset();
 
 		NodeIndex spaceLeft() const
 		{
@@ -719,10 +638,46 @@ private:
 		}
 
 	private:
-		typename NodeType::UnitType* m_ar;
+		void* m_ar;
+		std::size_t m_elemsize;
 		std::size_t m_size;
 		std::size_t m_allocsize;
 		uint32_t m_freelist;
+	};
+
+	template <class NODETYPE>
+	class Block
+		:public BlockBase
+	{
+	public:
+		typedef NODETYPE NodeType;
+
+	public:
+		Block()
+			:BlockBase(sizeof(typename NodeType::UnitType)){}
+
+		~Block(){}
+
+		void checkAddress( const NodeAddress& addr) const
+		{
+			if ((int)((addr >> NodeClass::Shift) & NodeClass::Mask)
+				!=  (int)NodeType::ThisNodeClass)
+			{
+				throw std::logic_error( "accessing block with illegal node address");
+			}
+		}
+
+		typename NodeType::UnitType& operator[]( std::size_t idx)
+		{
+			checkAccess( idx);
+			return *(typename NodeType::UnitType*)blockPtr(idx);
+		}
+
+		const typename NodeType::UnitType& operator[]( std::size_t idx) const
+		{
+			checkAccess( idx);
+			return *(typename NodeType::UnitType*)blockPtr(idx);
+		}
 	};
 
 	template <class DestNodeType, class SourceNodeType>

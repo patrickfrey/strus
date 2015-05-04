@@ -36,6 +36,79 @@
 
 using namespace conotrie;
 
+CompactNodeTrie::BlockBase::~BlockBase()
+{
+	if (m_ar) std::free( m_ar);
+}
+
+CompactNodeTrie::NodeIndex CompactNodeTrie::BlockBase::allocNode( bool useFreeList)
+{
+	if (m_freelist && useFreeList)
+	{
+		NodeIndex rt = m_freelist-1;
+		m_freelist = *reinterpret_cast<uint32_t*>(blockPtr(rt)) + 1;
+		std::memset( blockPtr(rt), 0, m_elemsize);
+		return rt;
+	}
+	if (m_size > NodeClass::MaxNofNodes)
+	{
+		return NullNodeIndex;
+	}
+	if (m_size == m_allocsize)
+	{
+		unsigned int mm = m_allocsize?(m_allocsize * 2):16;
+		if (mm < m_allocsize) throw std::bad_alloc();
+		unsigned int bytes = mm * m_elemsize;
+		if (bytes < mm) throw std::bad_alloc();
+		void* newar = std::realloc( m_ar, bytes);
+		if (!newar) throw std::bad_alloc();
+		m_ar = newar;
+		m_allocsize = mm;
+	}
+	std::memset( blockPtr(m_size), 0, m_elemsize);
+	return m_size++;
+}
+
+void CompactNodeTrie::BlockBase::releaseNode( const NodeIndex& idx)
+{
+	checkAccess(idx);
+	*reinterpret_cast<uint32_t*>(blockPtr(idx)) = (m_freelist-1);
+	m_freelist = idx+1;
+}
+
+void CompactNodeTrie::BlockBase::clear()
+{
+	if (m_ar)
+	{
+		std::free( m_ar);
+		m_ar = 0;
+	}
+	m_size = 0;
+	m_allocsize = 0;
+	m_freelist = 0;
+}
+
+void CompactNodeTrie::BlockBase::reset()
+{
+	m_size = 0;
+	m_freelist = 0;
+}
+
+
+void CompactNodeTrie::printLexem( std::ostream& out, unsigned char chr)
+{
+	if (chr >= 32 && chr <= 128)
+	{
+		out << "'" << (char)chr << "' ";
+	}
+	else
+	{
+		out << "[" << std::hex
+			<< (unsigned int)(unsigned char)chr
+			<< std::dec << "] ";
+	}
+}
+
 bool CompactNodeTrie::set( const char* key, const NodeData& data)
 {
 	if (!m_rootaddr)
