@@ -47,11 +47,15 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 	{
 		m_type = value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "phraselen"))
+	else if (utils::caseInsensitiveEquals( name, "nof"))
 	{
 		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
 	}
-	else if (utils::caseInsensitiveEquals( name, "sumlen"))
+	else if (utils::caseInsensitiveEquals( name, "len"))
+	{
+		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else if (utils::caseInsensitiveEquals( name, "structseek"))
 	{
 		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
 	}
@@ -63,13 +67,17 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 
 void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "phraselen"))
+	if (utils::caseInsensitiveEquals( name, "nof"))
 	{
-		m_maxlen = (unsigned int)value;
+		m_nofsummaries = (unsigned int)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "sumlen"))
+	else if (utils::caseInsensitiveEquals( name, "len"))
 	{
-		m_sumlen = (unsigned int)value;
+		m_summarylen = (unsigned int)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "structseek"))
+	{
+		m_structseeklen = (unsigned int)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "type"))
 	{
@@ -86,14 +94,17 @@ SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
-		unsigned int maxlen_,
-		unsigned int summarylen_)
+		unsigned int nofsummaries_,
+		unsigned int summarylen_,
+		unsigned int structseeklen_)
 	:m_storage(storage_)
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
 	,m_type(type_)
-	,m_maxlen(maxlen_)
+	,m_nofsummaries(nofsummaries_)
 	,m_summarylen(summarylen_)
+	,m_structseeklen(structseeklen_)
+	,m_nofCollectionDocuments((float)storage_->globalNofDocumentsInserted())
 	,m_itr()
 	,m_phrasestruct(0)
 	,m_structop()
@@ -114,6 +125,9 @@ void SummarizerExecutionContextMatchPhrase::addSummarizationFeature(
 	else if (utils::caseInsensitiveEquals( name, "match"))
 	{
 		m_itr.push_back( itr);
+		float df = (float)itr->documentFrequency();
+		float idf = logf( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
+		m_weights.push_back( idf);
 	}
 	else
 	{
@@ -124,127 +138,12 @@ void SummarizerExecutionContextMatchPhrase::addSummarizationFeature(
 SummarizerExecutionContextMatchPhrase::~SummarizerExecutionContextMatchPhrase()
 {}
 
-static Index getStartPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
-{
-	found = true;
-	Index rangepos = ((unsigned int)curpos > maxlen) ? ((unsigned int)curpos-maxlen):1;
-	Index prevpos = phrasestruct?phrasestruct->skipPos( rangepos):0;
-	if (!prevpos || prevpos > curpos)
-	{
-		prevpos = rangepos;
-		if (rangepos > 1)
-		{
-			found = false;
-		}
-	}
-	if (phrasestruct) for (;;)
-	{
-		Index midpos = phrasestruct->skipPos( prevpos+1);
-		if (!midpos || midpos > curpos) break;
-		prevpos = midpos;
-	}
-	return prevpos;
-	
-}
-
-static Index getEndPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
-{
-	found = true;
-	Index endpos = phrasestruct?phrasestruct->skipPos( curpos):0;
-	if (!endpos || endpos - curpos > (Index)maxlen)
-	{
-		found = false;
-		endpos = curpos + maxlen;
-	}
-	return endpos;
-}
-
-static SummarizerExecutionContextInterface::SummaryElement
-	summaryElement(
-		const Index& curpos,
-		PostingIteratorInterface* phrasestruct,
-		ForwardIteratorInterface& forwardindex,
-		unsigned int maxlen,
-		unsigned int& length)
-{
-	bool start_found = true;
-	Index startpos = getStartPos( curpos, maxlen, phrasestruct, start_found);
-	bool end_found = true;
-	Index endpos = getEndPos( curpos, maxlen, phrasestruct, end_found);
-
-	length = 0;
-	std::string phrase;
-	if (!start_found) phrase.append( "...");
-
-	Index pp = startpos;
-	for (;pp < endpos; ++pp)
-	{
-		pp = forwardindex.skipPos(pp);
-		if (pp)
-		{
-			if (!phrase.empty()) phrase.push_back(' ');
-			phrase.append( forwardindex.fetch());
-			++length;
-		}
-		else
-		{
-			break;
-		}
-	}
-	if (!end_found) phrase.append( "...");
-	return SummarizerExecutionContextInterface::SummaryElement( phrase, 1.0);
-}
-
-static void getSummary_(
-		std::vector<SummarizerExecutionContextInterface::SummaryElement>& res,
-		const Index& docno,
-		std::vector<PostingIteratorInterface*> itr,
-		PostingIteratorInterface* phrasestruct,
-		ForwardIteratorInterface& forwardindex,
-		unsigned int maxlen,
-		unsigned int maxsummarylen)
-{
-	forwardindex.skipDoc( docno);
-	if (phrasestruct)
-	{
-		phrasestruct->skipDoc( docno);
-	}
-	Index curpos = 0;
-	Index nextpos = 0;
-
-	std::vector<PostingIteratorInterface*>::const_iterator
-		ii = itr.begin(), ie = itr.end();
-	unsigned int summarylen = 0;
-
-	for (; ii != ie && summarylen < maxsummarylen; ++ii)
-	{
-		if (docno==(*ii)->skipDoc( docno))
-		{
-			while (0!=(nextpos=(*ii)->skipPos( curpos)))
-			{
-				unsigned int length = 0;
-				res.push_back(
-					summaryElement( 
-						nextpos, phrasestruct,
-						forwardindex, maxlen, length));
-				summarylen += length;
-				curpos = nextpos + length + 1;
-	
-				if (summarylen >= maxsummarylen)
-				{
-					break;
-				}
-			}
-		}
-	}
-}
-
-
 std::vector<SummarizerExecutionContextInterface::SummaryElement>
 	SummarizerExecutionContextMatchPhrase::getSummary( const Index& docno)
 {
 	if (!m_init_complete)
 	{
+		// Create the end of structure delimiter iterator:
 		if (m_structelem.size() > 1)
 		{
 			const PostingJoinOperatorInterface*
@@ -253,12 +152,102 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 			m_structop.reset( join->createResultIterator( m_structelem, 0));
 			m_phrasestruct = m_structop.get();
 		}
+
 		m_init_complete = true;
 	}
+	// Create the sliding window for fetching the best matches:
+	std::set<SlidingMatchWindow::Match> matchset;
+	std::vector<PostingIteratorInterface*>::const_iterator
+		ii = m_itr.begin(), ei = m_itr.end();
+	for (unsigned int iidx=0; ii != ei; ++ii,++iidx)
+	{
+		if (docno==(*ii)->skipDoc( docno))
+		{
+			Index firstpos = (*ii)->skipPos(0);
+			if (firstpos)
+			{
+				matchset.insert( SlidingMatchWindow::Match( firstpos, m_weights[iidx], iidx));
+			}
+		}
+	}
+	SlidingMatchWindow slidingMatchWindow( m_summarylen, m_nofsummaries, matchset);
+
+	// Initialize the forward index and the structure elements:
 	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
-	getSummary_(
-		rt, docno, m_itr, m_phrasestruct,
-		*m_forwardindex.get(), m_maxlen, m_summarylen);
+	m_forwardindex->skipDoc( docno);
+	if (m_phrasestruct)
+	{
+		m_phrasestruct->skipDoc( docno);
+	}
+
+	// Calculate the best matching passages with help of the sliding window:
+	while (!slidingMatchWindow.finished())
+	{
+		unsigned int iidx = slidingMatchWindow.firstPostingIdx();
+		Index pos = m_itr[iidx]->skipPos( m_itr[iidx]->posno()+1);
+		slidingMatchWindow.push( iidx, pos);
+	}
+
+	// Build the result (best passages):
+	std::vector<SlidingMatchWindow::Window> war = slidingMatchWindow.getResult();
+	std::vector<SlidingMatchWindow::Window>::const_iterator wi = war.begin(), we = war.end();
+	Index lastpos = 0;
+	for (; wi != we; ++wi)
+	{
+		std::string phrase;
+		Index pos = wi->pos;
+		if (m_phrasestruct)
+		{
+			Index ph = m_phrasestruct->skipPos( pos<=(Index)m_structseeklen?1:(pos-m_structseeklen));
+			if (ph && ph < pos)
+			{
+				pos = ph;
+			}
+		}
+		else
+		{
+			pos -= (m_structseeklen/2);
+			if (pos <= 0) pos = 1;
+		}
+		if (lastpos && pos < lastpos)
+		{
+			pos = lastpos+1;
+			if (pos > wi->pos) continue;
+		}
+		if (m_phrasestruct)
+		{
+			lastpos = wi->pos + wi->size;
+			Index lp = m_phrasestruct->skipPos( lastpos);
+			{
+				if (lp && (Index)(lastpos + m_structseeklen) > lp)
+				{
+					lastpos = lp;
+				}
+				else
+				{
+					lastpos += (m_structseeklen/2);
+				}
+			}
+		}
+		else
+		{
+			lastpos += (m_structseeklen/2);
+		}
+		bool containsMatch = false;
+		for (; pos <= lastpos; ++pos)
+		{
+			if (m_forwardindex->skipPos(pos) == pos)
+			{
+				if (wi->pos == pos) containsMatch = true;
+				if (!phrase.empty()) phrase.push_back(' ');
+				phrase.append( m_forwardindex->fetch());
+			}
+		}
+		if (containsMatch)
+		{
+			rt.push_back( SummaryElement( phrase, 1.0));
+		}
+	}
 	return rt;
 }
 

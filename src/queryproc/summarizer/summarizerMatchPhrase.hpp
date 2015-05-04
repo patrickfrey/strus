@@ -34,6 +34,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
+#include "slidingMatchWindow.hpp"
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -68,7 +69,8 @@ public:
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			unsigned int maxlen_,
-			unsigned int summarylen_);
+			unsigned int summarylen_,
+			unsigned int structseeklen_);
 	virtual ~SummarizerExecutionContextMatchPhrase();
 
 	virtual void addSummarizationFeature(
@@ -83,9 +85,12 @@ private:
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_type;
-	unsigned int m_maxlen;
+	unsigned int m_nofsummaries;
 	unsigned int m_summarylen;
+	unsigned int m_structseeklen;
+	float m_nofCollectionDocuments;
 	std::vector<PostingIteratorInterface*> m_itr;
+	std::vector<float> m_weights;
 	PostingIteratorInterface* m_phrasestruct;
 	Reference<PostingIteratorInterface> m_structop;
 	std::vector<Reference<PostingIteratorInterface> > m_structelem;
@@ -100,7 +105,7 @@ class SummarizerFunctionInstanceMatchPhrase
 {
 public:
 	explicit SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor)
-		:m_type(),m_maxlen(30),m_sumlen(40),m_processor(processor){}
+		:m_type(),m_nofsummaries(3),m_summarylen(40),m_structseeklen(10),m_processor(processor){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
 
@@ -116,22 +121,23 @@ public:
 			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
 		return new SummarizerExecutionContextMatchPhrase(
-				storage, m_processor, m_type, m_maxlen, m_sumlen);
+				storage, m_processor, m_type, m_nofsummaries, m_summarylen, m_structseeklen);
 	}
 
 	virtual std::string tostring() const
 	{
 		std::ostringstream rt;
 		rt << "type='" << m_type 
-			<< "', phraselen=" << m_maxlen
-			<< ", sumlen=" << m_sumlen;
+			<< "', nof summaries=" << m_nofsummaries
+			<< ", summarylen=" << m_summarylen;
 		return rt.str();
 	}
 
 private:
 	std::string m_type;
-	unsigned int m_maxlen;
-	unsigned int m_sumlen;
+	unsigned int m_nofsummaries;
+	unsigned int m_summarylen;
+	unsigned int m_structseeklen;
 	const QueryProcessorInterface* m_processor;
 };
 
