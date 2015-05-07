@@ -62,7 +62,8 @@ public:
 		MetaDataReaderInterface* metadata_,
 		float k1_,
 		float b_,
-		float avgDocLength_);
+		float avgDocLength_,
+		const std::string& attribute_doclen_);
 
 	virtual float call( const Index& docno);
 
@@ -90,7 +91,15 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value)
 	{
-		addNumericParameter( name, arithmeticVariantFromString( value));
+		if (utils::caseInsensitiveEquals( name, "doclen"))
+		{
+			m_attribute_doclen = value;
+			if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+		}
+		else
+		{
+			addNumericParameter( name, arithmeticVariantFromString( value));
+		}
 	}
 
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -118,7 +127,7 @@ public:
 			PostingIteratorInterface* itr,
 			MetaDataReaderInterface* metadata) const
 	{
-		return new WeightingExecutionContextBM25( storage_, itr, metadata, m_b, m_k1, m_avgdoclen);
+		return new WeightingExecutionContextBM25( storage_, itr, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen);
 	}
 
 	virtual std::string tostring() const
@@ -133,6 +142,7 @@ private:
 	float m_b;
 	float m_k1;
 	float m_avgdoclen;
+	std::string m_attribute_doclen;
 };
 
 

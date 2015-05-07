@@ -170,7 +170,7 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 			}
 		}
 	}
-	SlidingMatchWindow slidingMatchWindow( m_summarylen, m_nofsummaries, matchset);
+	SlidingMatchWindow slidingMatchWindow( m_summarylen, m_nofsummaries*4, matchset);
 
 	// Initialize the forward index and the structure elements:
 	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
@@ -192,7 +192,7 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 	std::vector<SlidingMatchWindow::Window> war = slidingMatchWindow.getResult();
 	std::vector<SlidingMatchWindow::Window>::const_iterator wi = war.begin(), we = war.end();
 	Index lastpos = 0;
-	for (; wi != we; ++wi)
+	for (; wi != we && rt.size() < m_nofsummaries; ++wi)
 	{
 		std::string phrase;
 		Index pos = wi->pos;
@@ -231,20 +231,19 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 		}
 		else
 		{
-			lastpos += (m_structseeklen/2);
+			lastpos = wi->pos + wi->size + (m_structseeklen/2);
 		}
-		bool containsMatch = false;
-		for (; pos <= lastpos; ++pos)
-		{
-			if (m_forwardindex->skipPos(pos) == pos)
-			{
-				if (wi->pos == pos) containsMatch = true;
-				if (!phrase.empty()) phrase.push_back(' ');
-				phrase.append( m_forwardindex->fetch());
-			}
-		}
+		bool containsMatch = ((unsigned int)(wi->pos + wi->size) <= (unsigned int)(lastpos) && wi->pos >= pos);
 		if (containsMatch)
 		{
+			for (; pos <= lastpos; ++pos)
+			{
+				if (m_forwardindex->skipPos(pos) == pos)
+				{
+					if (!phrase.empty()) phrase.push_back(' ');
+					phrase.append( m_forwardindex->fetch());
+				}
+			}
 			rt.push_back( SummaryElement( phrase, 1.0));
 		}
 	}

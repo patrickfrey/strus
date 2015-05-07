@@ -39,9 +39,10 @@ WeightingExecutionContextBM25::WeightingExecutionContextBM25(
 		MetaDataReaderInterface* metadata_,
 		float k1_,
 		float b_,
-		float avgDocLength_)
+		float avgDocLength_,
+		const std::string& attribute_doclen_)
 	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_),m_itr(itr_),m_metadata(metadata_)
-	,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
+	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?Constants::metadata_doclen():attribute_doclen_))
 	,m_idf(0.0)
 {
 	float nofMatches = m_itr->documentFrequency();
