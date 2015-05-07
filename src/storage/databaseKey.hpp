@@ -49,7 +49,7 @@ public:
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
-		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,df]*
+		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
 		AclBlockPrefix='w',	///< [docno,userno]            ->  [bit]*
