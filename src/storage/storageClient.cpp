@@ -58,7 +58,6 @@
 #include <vector>
 #include <cstring>
 #include <cstdio>
-/*[-]*/#include <iostream>
 
 using namespace strus;
 
@@ -603,7 +602,6 @@ Index StorageClient::documentStatistics(
 				for (;ei != ee; ei = invblk.next( ei))
 				{
 					InvTerm it = invblk.element_at( ei);
-					/*[-]*/std::cout << it.typeno << ' ' << it.termno << " " << it.ff << std::endl;
 					if (typeno == it.typeno)
 					{
 						rt += 1;
