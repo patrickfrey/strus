@@ -123,6 +123,11 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
+	virtual Index documentStatistics(
+			const Index& docno,
+			const DocumentStatisticsType& stat,
+			const std::string& type) const;
+
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
 
 	virtual void defineStoragePeerInterface(

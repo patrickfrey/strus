@@ -579,6 +579,50 @@ Index StorageClient::documentNumber( const std::string& docid) const
 	return rt;
 }
 
+Index StorageClient::documentStatistics(
+		const Index& docno,
+		const DocumentStatisticsType& stat,
+		const std::string& type) const
+{
+	Index rt = 0;
+	Index typeno = getTermType( type);
+	if (typeno == 0) return 0;
+
+	DatabaseAdapter_InverseTerm::Reader dbadapter_inv( m_database.get());
+	InvTermBlock invblk;
+	typedef InvTermBlock::Element InvTerm;
+
+	if (dbadapter_inv.load( docno, invblk))
+	{
+		char const* ei = invblk.begin();
+		const char* ee = invblk.end();
+		switch (stat)
+		{
+			case StatNofTerms:
+				for (;ei != ee; ei = invblk.next( ei))
+				{
+					InvTerm it = invblk.element_at( ei);
+					if (typeno == it.typeno)
+					{
+						rt += 1;
+					}
+				}
+			break;
+			case StatNofTermOccurrencies:
+				for (;ei != ee; ei = invblk.next( ei))
+				{
+					InvTerm it = invblk.element_at( ei);
+					if (typeno == it.typeno)
+					{
+						rt += it.ff;
+					}
+				}
+			break;
+		}
+	}
+	return rt;
+}
+
 Index StorageClient::userId( const std::string& username) const
 {
 	Index rt = getUserno( username);
