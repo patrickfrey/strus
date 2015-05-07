@@ -111,6 +111,7 @@ void DatabaseAdapter_StringIndex::Writer::storeImm( const std::string& key, cons
 bool DatabaseAdapter_DataBlock::Reader::load( const Index& elemno, DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
+	m_dbkey.addElem( elemno);
 	std::string blkstr;
 	if (!m_database->readValue( m_dbkey.ptr(), m_dbkey.size(), blkstr, DatabaseOptions())) return false;
 	blk.init( elemno, blkstr.c_str(), blkstr.size(), blkstr.size());
