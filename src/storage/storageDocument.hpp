@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_DOCUMENT_HPP_INCLUDED
 #define _STRUS_LVDB_DOCUMENT_HPP_INCLUDED
 #include "strus/storageDocumentInterface.hpp"
+#include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "storageTransaction.hpp"
 #include <vector>
@@ -159,6 +160,61 @@ private:
 	std::vector<DocAttribute> m_attributes;
 	std::vector<DocMetaData> m_metadata;
 	std::vector<Index> m_userlist;
+};
+
+
+/// \class StorageDocumentUpdate
+class StorageDocumentUpdate
+	:public StorageDocumentUpdateInterface
+{
+public:
+	/// \brief Constructor
+	StorageDocumentUpdate(
+		StorageTransaction* transaction_,
+		const Index& docno_);
+
+	/// \brief Destructor
+	virtual ~StorageDocumentUpdate();
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::setMetaData( const std::string&, const ArithmeticVariant&);
+	virtual void setMetaData(
+			const std::string& name_,
+			const ArithmeticVariant& value_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::setAttribute( const std::string&, const std::string&);
+	virtual void setAttribute(
+			const std::string& name_,
+			const std::string& value_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearAttribute( const std::string&);
+	virtual void clearAttribute(
+			const std::string& name_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::setUserAccessRight( const std::string&);
+	virtual void setUserAccessRight(
+			const std::string& username_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearUserAccessRight( const std::string&);
+	virtual void clearUserAccessRight(
+			const std::string& username_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearUserAccessRights();
+	virtual void clearUserAccessRights();
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::done();
+	virtual void done();
+
+private:
+	typedef StorageDocument::DocAttribute DocAttribute;
+	typedef StorageDocument::DocMetaData DocMetaData;
+
+	StorageTransaction* m_transaction;
+	Index m_docno;
+	std::vector<DocAttribute> m_attributes;
+	std::vector<DocMetaData> m_metadata;
+	std::vector<Index> m_add_userlist;
+	std::vector<Index> m_del_userlist;
+	bool m_doClearUserlist;
 };
 
 }

@@ -85,6 +85,13 @@ public:
 			const std::string& docid_,
 			const Index& docno=0);
 
+	virtual StorageDocumentUpdateInterface*
+		createDocumentUpdate(
+			const Index& docno_);
+
+	virtual void updateMetaData(
+			const Index& docno, const std::string& varname, const ArithmeticVariant& value);
+
 	/// \brief Transaction commit
 	virtual void commit();
 	/// \brief Transaction rollback (automatically called with the destructor)

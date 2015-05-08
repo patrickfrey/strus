@@ -29,6 +29,8 @@
 #include "storageTransaction.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "strus/storageDocumentInterface.hpp"
+#include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/storagePeerInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "storageDocument.hpp"
@@ -241,6 +243,19 @@ StorageDocumentInterface*
 		if (isNew) m_nof_documents += 1;
 		return new StorageDocument( this, docid, dn, isNew);
 	}
+}
+
+StorageDocumentUpdateInterface*
+	StorageTransaction::createDocumentUpdate(
+		const Index& docno_)
+{
+	return new StorageDocumentUpdate( this, docno_);
+}
+
+void StorageTransaction::updateMetaData(
+		const Index& docno, const std::string& varname, const ArithmeticVariant& value)
+{
+	defineMetaData( docno, varname, value);
 }
 
 void StorageTransaction::commit()

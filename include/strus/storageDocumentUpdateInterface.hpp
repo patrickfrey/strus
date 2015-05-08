@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_DOCUMENT_UPDATE_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_DOCUMENT_UPDATE_INTERFACE_HPP_INCLUDED
 #include <string>
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
@@ -35,33 +35,13 @@
 namespace strus
 {
 
-/// \class StorageDocumentInterface
-/// \brief Object to declare all items for one insert/replace of a document in the storage
-class StorageDocumentInterface
+/// \class StorageDocumentUpdateInterface
+/// \brief Object to declare the items for an update of a document in the storage
+class StorageDocumentUpdateInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~StorageDocumentInterface(){}
-
-	/// \brief Add one occurrence of a term in the document for retrieval
-	/// \param[in] type_ type name of the term
-	/// \param[in] value_ value string of the term
-	/// \param[in] position_ position of the term in the document
-	/// \remark Weights accumulated for each type,value,position tuple
-	virtual void addSearchIndexTerm(
-			const std::string& type_,
-			const std::string& value_,
-			const Index& position_)=0;
-
-	/// \brief Add one occurrence of a term to the forward index for summarization of the document
-	/// \param[in] type_ type name of the term
-	/// \param[in] value_ value string of the term
-	/// \param[in] position_ position of the term in the document
-	/// \remark Only one type,value pair allowed at one position
-	virtual void addForwardIndexTerm(
-			const std::string& type_,
-			const std::string& value_,
-			const Index& position_)=0;
+	virtual ~StorageDocumentUpdateInterface(){}
 
 	/// \brief Define a meta data element of the document by name
 	/// \note Meta data are used for query restrictions and for document weights in query result ranking
@@ -72,13 +52,19 @@ public:
 			const std::string& name_,
 			const ArithmeticVariant& value_)=0;
 
-	/// \brief Define a string attribute of the document
+	/// \brief Define an attribute (string) of the document
 	/// \note Attributes are used for summarization in a query result
 	/// \param[in] name_ name of the attribute
 	/// \param[in] value_ value of the document attribute
 	virtual void setAttribute(
 			const std::string& name_,
 			const std::string& value_)=0;
+
+	/// \brief Delete an attribute (string) of the document
+	/// \note Attributes are used for summarization in a query result
+	/// \param[in] name_ name of the attribute
+	virtual void clearAttribute(
+			const std::string& name_)=0;
 
 	/// \brief Allow a user to access the document
 	/// \param[in] username_ name of the user to allow access
@@ -88,6 +74,14 @@ public:
 	/// \note The storage has to be created with "acl=yes" for enabling access control
 	virtual void setUserAccessRight(
 			const std::string& username_)=0;
+
+	/// \brief Disallow a user to access the document
+	/// \param[in] username_ name of the user to allow access
+	virtual void clearUserAccessRight(
+			const std::string& username_)=0;
+
+	/// \brief Clear the user rights for all users
+	virtual void clearUserAccessRights()=0;
 
 	/// \brief Closing the document definition
 	virtual void done()=0;

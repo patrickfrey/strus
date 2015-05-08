@@ -35,6 +35,11 @@
 namespace strus
 {
 
+/// \brief Forward declaration
+class StorageDocumentInterface;
+/// \brief Forward declaration
+class StorageDocumentUpdateInterface;
+
 /// \class StorageTransactionInterface
 /// \brief Object to declare all items for one insert/update of a document in the storage
 class StorageTransactionInterface
@@ -44,7 +49,7 @@ public:
 	/// \remark Expected to do an implicit rollback, if neither 'commit()' or 'rollback' was called
 	virtual ~StorageTransactionInterface(){}
 
-	/// \brief Create one document to be inserted/updated within this transaction
+	/// \brief Create one document to be inserted/replaced within this transaction
 	/// \param[in] docid_ identifier of the document
 	/// \param[in] docno_ document number of the document
 	/// \remark If the document number (second argument) is defined by the client, then the server is not called for a document number (no synchronization needed) and documents close to each other can get adjacent document numbers even if the transaction is done in parallel with another.
@@ -53,6 +58,13 @@ public:
 		createDocument(
 			const std::string& docid_,
 			const Index& docno_=0)=0;
+
+	/// \brief Create an interface for a document to be updated within this transaction
+	/// \param[in] docno_ document number of the document (StorageClientInterface::documentNumber( const std::string&))
+	/// \return the document updater object
+	virtual StorageDocumentUpdateInterface*
+		createDocumentUpdate(
+			const Index& docno_)=0;
 
 	/// \brief Declare a document to be removed from the storage within this transaction
 	/// \param[in] docid document identifier (URI)
@@ -63,6 +75,15 @@ public:
 	/// \param[in] username user name
 	virtual void deleteUserAccessRights(
 			const std::string& username)=0;
+
+	/// \brief Update of meta data for a specific document (without creating it)
+	/// \param[in] docno document number
+	/// \param[in] varname meta data element name to update
+	/// \param[in] value new value of this meta data element
+	virtual void updateMetaData(
+			const Index& docno,
+			const std::string& varname,
+			const ArithmeticVariant& value)=0;
 
 	/// \brief Insert all documents and executes all commands defined in the transaction or none if one operation fails
 	virtual void commit()=0;
