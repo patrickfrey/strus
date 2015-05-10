@@ -203,9 +203,23 @@ Index StorageClient::getUserno( const std::string& name) const
 	return DatabaseAdapter_UserName::Reader( m_database.get()).get( name);
 }
 
-Index StorageClient::getAttributeName( const std::string& name) const
+Index StorageClient::getAttributeno( const std::string& name) const
 {
 	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( utils::tolower( name));
+}
+
+std::vector<std::string> StorageClient::getAttributeNames() const
+{
+	std::vector<std::string> rt;
+	DatabaseAdapter_AttributeKey::Cursor attrcursor( m_database.get());
+	Index attrno;
+	std::string attrname;
+	for (bool more=attrcursor.loadFirst( attrname, attrno); more;
+		more=attrcursor.loadNext( attrname, attrno))
+	{
+		rt.push_back( attrname);
+	}
+	return rt;
 }
 
 GlobalCounter StorageClient::documentFrequency( const Index& typeno, const Index& termno) const

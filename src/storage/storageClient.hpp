@@ -138,12 +138,13 @@ public:
 
 	virtual StorageDumpInterface* createDump() const;
 
-public:/*QueryEval*/
+public:/*QueryEval,AttributeReader*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
 	Index getUserno( const std::string& name) const;
-	Index getAttributeName( const std::string& name) const;
+	Index getAttributeno( const std::string& name) const;
+	std::vector<std::string> getAttributeNames() const;
 	GlobalCounter documentFrequency( const Index& typeno, const Index& termno) const;
 	Index userId( const std::string& username) const;
 
