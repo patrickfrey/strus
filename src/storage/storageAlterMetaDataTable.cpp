@@ -121,7 +121,7 @@ void StorageAlterMetaDataTable::changeElementType(
 		}
 		else
 		{
-			chgdescr.add( type, mi.name());
+			chgdescr.add( mi.element().type(), mi.name());
 		}
 	}
 	m_metadescr_new = chgdescr;
