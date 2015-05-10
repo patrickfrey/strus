@@ -30,6 +30,7 @@
 #define _STRUS_ATTRIBUTE_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <string>
+#include <vector>
 
 namespace strus
 {
@@ -54,6 +55,10 @@ public:
 	/// \param[in] elementHandle_ the handle of the element to retrieve
 	/// \return the value of the element as string or an empty string if undefined
 	virtual std::string getValue( const Index& elementHandle_) const=0;
+
+	/// \brief Get the names of all attribute names defined in the storage
+	/// \note Returns the names of all attributes defined for any document, independent of the current document.
+	virtual std::vector<std::string> getAttributeNames() const=0;
 };
 }//namespace
 #endif
