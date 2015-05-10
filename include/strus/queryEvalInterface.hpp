@@ -106,10 +106,12 @@ public:
 	/// \param[in] functionName name of the weighting function (no meaning, just for inspection and tracing)
 	/// \param[in] function parameterized weighting function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
 	/// \param[in] weightedFeatureSets list of feature sets used by this function for weighting (declares what features to weight)
+	/// \param[in] weight part of the weight of this function in the total weight sum
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<std::string>& weightedFeatureSets)=0;
+			const std::vector<std::string>& weightedFeatureSets,
+			float weight)=0;
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on

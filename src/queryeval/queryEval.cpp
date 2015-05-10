@@ -81,9 +81,10 @@ void QueryEval::addSummarizerFunction(
 void QueryEval::addWeightingFunction(
 		const std::string& functionName,
 		WeightingFunctionInstanceInterface* function,
-		const std::vector<std::string>& weightedFeatureSets)
+		const std::vector<std::string>& weightedFeatureSets,
+		float weight)
 {
-	m_weightingFunctions.push_back( WeightingDef( function, functionName, weightedFeatureSets));
+	m_weightingFunctions.push_back( WeightingDef( function, functionName, weightedFeatureSets, weight));
 }
 
 void QueryEval::print( std::ostream& out) const

@@ -89,7 +89,8 @@ public:
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<std::string>& weightedFeatureSets);
+			const std::vector<std::string>& weightedFeatureSets,
+			float weight);
 
 	void print( std::ostream& out) const;
 

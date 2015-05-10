@@ -152,7 +152,6 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 			m_structop.reset( join->createResultIterator( m_structelem, 0));
 			m_phrasestruct = m_structop.get();
 		}
-
 		m_init_complete = true;
 	}
 	// Create the sliding window for fetching the best matches:

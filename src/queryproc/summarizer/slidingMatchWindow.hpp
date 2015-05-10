@@ -115,18 +115,17 @@ public:
 		}
 		std::sort( rt.begin(), rt.end());
 		std::vector<Window>::iterator ri = rt.begin(), re = rt.end();
-		for (; ri != re; ++ri)
+		while (ri != re)
 		{
 			std::vector<Window>::iterator ri_next = ri;
 			++ri_next;
-			if (ri_next != re && (unsigned int)(ri_next->pos) <= (unsigned int)(ri->pos + ri->size))
+			if (ri_next != re && (unsigned int)(ri->pos + ri->size + 1) >= (unsigned int)(ri_next->pos))
 			{
-				if ((unsigned int)(ri_next->pos + ri_next->size) > (unsigned int)(ri->pos + ri->size))
-				{
-					ri->size = ri_next->pos + ri_next->size - ri->pos;
-				}
+				//... ri reaches into ri_next
+				ri->size = ri_next->pos + ri_next->size - ri->pos;
 				rt.erase( ri_next);
 			}
+			++ri;
 		}
 		return rt;
 	}
@@ -141,12 +140,19 @@ private:
 		Index pp = mi->posno;
 		Index last_pp = mi->posno;
 		float ww = mi->weight;
-		float sqw = (ww*ww) / (m_windowSize+1);
+		float sqw = (ww*ww) / (16 * m_windowSize+1);
 
 		for (++mi; mi != me && (Index)(pp + m_windowSize) > mi->posno; ++mi)
 		{
-			ww += mi->weight;
-			float sqw2 = (ww*ww) / (m_windowSize + mi->posno - pp + 1);
+			float weight = mi->weight;
+			std::set<Match>::const_iterator mi_next = mi;
+			mi_next++;
+			if (mi_next != me)
+			{
+				weight += mi_next->weight * (1/(mi_next->posno - mi->posno));
+			}
+			ww += weight;
+			float sqw2 = (ww*ww) / (16 * m_windowSize + mi->posno - pp + 1);
 			if (sqw2 < sqw) break;
 			sqw = sqw2;
 			last_pp = mi->posno;

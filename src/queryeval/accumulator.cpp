@@ -9,8 +9,11 @@
 #include <limits>
 #include <stdexcept>
 #include <cmath>
+#include <iostream>
 
 using namespace strus;
+
+#undef STRUS_LOWLEVEL_DEBUG
 
 void Accumulator::addSelector(
 		PostingIteratorInterface* iterator, int setindex, bool isExpression)
@@ -133,12 +136,19 @@ bool Accumulator::nextRank(
 		selectorState = m_selectorPostings[ m_selectoridx].setindex;
 		weight = 0.0;
 
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "Checkin document " << m_docno << std::endl;
+#endif
 		// Add a weight for every accumulator summand that has a match:
 		std::vector<WeightingFeature>::iterator
-			ai = m_weightingFeatures.begin(), ae =  m_weightingFeatures.end();
+			ai = m_weightingFeatures.begin(), ae = m_weightingFeatures.end();
 		for (; ai != ae; ++ai)
 		{
-			weight += ai->executionContext->call( m_docno) * ai->weight;
+			float weight_result = ai->executionContext->call( m_docno) * ai->weight;
+			weight += weight_result * ai->weight;
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
+#endif
 		}
 		return true;
 	}

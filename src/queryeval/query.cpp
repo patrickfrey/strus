@@ -420,11 +420,11 @@ std::vector<ResultDocument> Query::evaluate()
 					{
 						if (*si == fi->set)
 						{
+							float weight = fi->weight * wi->weight();
 							accumulator.addFeature(
-								nodePostings( fi->node), fi->weight,
-								wi->function());
+								nodePostings( fi->node), weight, wi->function());
 #ifdef STRUS_LOWLEVEL_DEBUG
-							std::cout << "add feature " << fi->set << std::endl;
+							std::cout << "add feature " << fi->set << ' ' << weight << std::endl;
 #endif
 						}
 					}

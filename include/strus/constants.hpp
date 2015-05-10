@@ -65,16 +65,6 @@ struct Constants
 	{
 		return "sequence";
 	}
-	/// \brief Get the default query phrase type if not explicitely specified in the query
-	static const char* query_default_phrase_type()
-	{
-		return "default";
-	}
-	/// \brief Get the default query feature set if no query section with explicit feature set defined in the query
-	static const char* query_default_feature_set()
-	{
-		return "weighted";
-	}
 	/// \brief Get the term type that does not exist and is reserved for the empty posting set
 	static const char* query_empty_postings_termtype()
 	{
