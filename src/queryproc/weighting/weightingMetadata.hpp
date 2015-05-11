@@ -26,91 +26,78 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_BM25_HPP_INCLUDED
-#define _STRUS_WEIGHTING_BM25_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_METADATA_HPP_INCLUDED
+#define _STRUS_WEIGHTING_METADATA_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingExecutionContextInterface.hpp"
-#include "strus/metaDataReaderInterface.hpp"
-#include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
+#include <limits>
 #include <vector>
-#include <sstream>
-#include <iostream>
-#include <iomanip>
 
 namespace strus
 {
 
 /// \brief Forward declaration
-class WeightingFunctionBM25;
+class WeightingFunctionMetadata;
 
 
-/// \class WeightingExecutionContextBM25
-/// \brief Weighting function based on the BM25 formula
-class WeightingExecutionContextBM25
+/// \class WeightingExecutionContextMetadata
+/// \brief Weighting function ExecutionContext for the metadata weighting function
+class WeightingExecutionContextMetadata
 	:public WeightingExecutionContextInterface
 {
 public:
-	WeightingExecutionContextBM25(
-		const StorageClientInterface* storage,
-		MetaDataReaderInterface* metadata_,
-		float k1_,
-		float b_,
-		float avgDocLength_,
-		const std::string& attribute_doclen_);
-
-	struct Feature
-	{
-		PostingIteratorInterface* itr;
-		float weight;
-		float idf;
-
-		Feature( PostingIteratorInterface* itr_, float weight_, float idf_)
-			:itr(itr_),weight(weight_),idf(idf_){}
-		Feature( const Feature& o)
-			:itr(o.itr),weight(o.weight),idf(o.idf){}
-	};
+	WeightingExecutionContextMetadata(
+			MetaDataReaderInterface* metadata_,
+			const std::string& elementName_,
+			float weight_)
+		:m_metadata(metadata_)
+		,m_elementHandle(metadata_->elementHandle(elementName_))
+		,m_weight(weight_)
+	{}
 
 	virtual void addWeightingFeature(
-			const std::string& name_,
-			PostingIteratorInterface* itr_,
-			float weight_);
+			const std::string&,
+			PostingIteratorInterface*,
+			float)
+	{
+		throw strus::runtime_error( _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), "metadata");
+	}
 
-	virtual float call( const Index& docno);
+	virtual float call( const Index& docno)
+	{
+		m_metadata->skipDoc( docno);
+		return m_weight * (float)m_metadata->getValue( m_elementHandle);
+	}
 
 private:
-	float m_k1;
-	float m_b;
-	float m_avgDocLength;
-	float m_nofCollectionDocuments;
-	std::vector<Feature> m_featar;
 	MetaDataReaderInterface* m_metadata;
-	int m_metadata_doclen;
+	Index m_elementHandle;
+	float m_weight;
 };
 
-
-/// \class WeightingFunctionInstanceBM25
-/// \brief Weighting function instance based on the BM25 formula
-class WeightingFunctionInstanceBM25
+/// \class WeightingFunctionInstanceMetadata
+/// \brief Weighting function instance for a weighting that returns a metadata element for every matching document
+class WeightingFunctionInstanceMetadata
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceBM25()
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000){}
+	explicit WeightingFunctionInstanceMetadata()
+		:m_weight(1.0){}
 
-	virtual ~WeightingFunctionInstanceBM25(){}
+	virtual ~WeightingFunctionInstanceMetadata(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value)
 	{
-		if (utils::caseInsensitiveEquals( name, "doclen"))
+		if (utils::caseInsensitiveEquals( name, "name"))
 		{
-			m_attribute_doclen = value;
-			if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+			m_elementName = value;
 		}
 		else
 		{
@@ -120,60 +107,58 @@ public:
 
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 	{
-		if (utils::caseInsensitiveEquals( name, "k1"))
+		if (utils::caseInsensitiveEquals( name, "weight"))
 		{
-			m_k1 = (float)value;
+			m_weight = (float)value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "b"))
+		else if (utils::caseInsensitiveEquals( name, "name"))
 		{
-			m_b = (float)value;
-		}
-		else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
-		{
-			m_avgdoclen = (float)value;
+			throw strus::runtime_error( _TXT("illegal numeric type for '%s' weighting function parameter '%s'"), "metadata", name.c_str());
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "metadata", name.c_str());
 		}
 	}
 
 	virtual WeightingExecutionContextInterface* createExecutionContext(
-			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata) const
+			const StorageClientInterface*,
+			MetaDataReaderInterface* metadata_) const
 	{
-		return new WeightingExecutionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen);
+		if (m_elementName.empty())
+		{
+			throw strus::runtime_error( _TXT("undefined '%s' weighting function parameter '%s'"), "metadata", "name");
+		}
+		return new WeightingExecutionContextMetadata( metadata_, m_elementName, m_weight);
 	}
 
 	virtual std::string tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
+			<< "name=" << m_elementName << ", weight=" << m_weight;
 		return rt.str();
 	}
 
 private:
-	float m_b;
-	float m_k1;
-	float m_avgdoclen;
-	std::string m_attribute_doclen;
+	float m_weight;
+	std::string m_elementName;
 };
 
 
-/// \class WeightingFunctionBM25
-/// \brief Weighting function based on the BM25 formula
-class WeightingFunctionBM25
+/// \class WeightingFunctionMetadata
+/// \brief Weighting function that simply returns the value of a meta data element multiplied by a weight
+class WeightingFunctionMetadata
 	:public WeightingFunctionInterface
 {
 public:
-	WeightingFunctionBM25(){}
+	WeightingFunctionMetadata(){}
+	virtual ~WeightingFunctionMetadata(){}
 
-	virtual ~WeightingFunctionBM25(){}
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const
 	{
-		return new WeightingFunctionInstanceBM25();
+		return new WeightingFunctionInstanceMetadata();
 	}
 };
 

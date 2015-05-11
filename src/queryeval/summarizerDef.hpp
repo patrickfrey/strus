@@ -39,12 +39,12 @@ namespace strus {
 class SummarizerDef
 {
 public:
-	typedef QueryEvalInterface::SummarizerFeatureParameter SummarizerFeatureParameter;
+	typedef QueryEvalInterface::FeatureParameter FeatureParameter;
 	SummarizerDef(
 			const std::string& resultAttribute_,
 			const std::string& functionName_,
 			SummarizerFunctionInstanceInterface* function_,
-			const std::vector<SummarizerFeatureParameter>& featureParameters_)
+			const std::vector<FeatureParameter>& featureParameters_)
 		:m_function(function_)
 		,m_functionName(functionName_)
 		,m_resultAttribute(resultAttribute_)
@@ -56,16 +56,16 @@ public:
 		,m_resultAttribute(o.m_resultAttribute)
 		,m_featureParameters(o.m_featureParameters){}
 
-	const SummarizerFunctionInstanceInterface* function() const			{return m_function.get();}
-	const std::string& functionName() const						{return m_functionName;}
-	const std::string& resultAttribute() const					{return m_resultAttribute;}
-	const std::vector<SummarizerFeatureParameter>& featureParameters() const	{return m_featureParameters;}
+	const SummarizerFunctionInstanceInterface* function() const	{return m_function.get();}
+	const std::string& functionName() const				{return m_functionName;}
+	const std::string& resultAttribute() const			{return m_resultAttribute;}
+	const std::vector<FeatureParameter>& featureParameters() const	{return m_featureParameters;}
 
 private:
-	Reference<SummarizerFunctionInstanceInterface> m_function;		///< summarization function
-	std::string m_functionName;						///< name of the summarization function
-	std::string m_resultAttribute;						///< name of the result attribute the summarization is returned as
-	std::vector<SummarizerFeatureParameter> m_featureParameters;		///< list of feature parameters that are subject of summarization
+	Reference<SummarizerFunctionInstanceInterface> m_function;	///< summarization function
+	std::string m_functionName;					///< name of the summarization function
+	std::string m_resultAttribute;					///< name of the result attribute the summarization is returned as
+	std::vector<FeatureParameter> m_featureParameters;		///< list of feature parameters that are subject of summarization
 };
 
 }

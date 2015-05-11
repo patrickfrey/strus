@@ -60,14 +60,12 @@ public:
 	/// \param[in] value parameter value
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)=0;
 	
-	/// \brief Create an execution context for this weighting function instance in the context of a storage, a posting iterator and a meta data reader
+	/// \brief Create an execution context for this weighting function instance
 	/// \param[in] storage_ storage reference for retrieving some statistics (like the document collection frequency)
-	/// \param[in] itr term occurrency iterator reference
 	/// \param[in] metadata meta data interface
 	/// \return the execution context to fetch the calculated document weights from (ownership to caller)
 	virtual WeightingExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface* storage_,
-			PostingIteratorInterface* itr,
 			MetaDataReaderInterface* metadata) const=0;
 
 	/// \brief Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)

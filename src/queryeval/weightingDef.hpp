@@ -42,34 +42,36 @@ class QueryEval;
 class WeightingDef
 {
 public:
+	typedef QueryEvalInterface::FeatureParameter FeatureParameter;
+
 	WeightingDef()
-		:m_function(),m_functionName(),m_weightingSets(),m_weight(0.0){}
+		:m_function(),m_functionName(),m_featureParameters(),m_weight(0.0){}
 
 	WeightingDef( const WeightingDef& o)
 		:m_function(o.m_function)
 		,m_functionName(o.m_functionName)
-		,m_weightingSets(o.m_weightingSets)
+		,m_featureParameters(o.m_featureParameters)
 		,m_weight(o.m_weight){}
 
 	WeightingDef(
 			WeightingFunctionInstanceInterface* function_,
 			const std::string& functionName_,
-			const std::vector<std::string>& weightingSets_,
+			const std::vector<FeatureParameter>& featureParameters_,
 			float weight_)
 		:m_function(function_)
 		,m_functionName(functionName_)
-		,m_weightingSets(weightingSets_)
+		,m_featureParameters(featureParameters_)
 		,m_weight(weight_){}
 
 	const WeightingFunctionInstanceInterface* function() const	{return m_function.get();}
 	const std::string& functionName() const				{return m_functionName;}
-	const std::vector<std::string>& weightingSets() const		{return m_weightingSets;}
+	const std::vector<FeatureParameter>& featureParameters() const	{return m_featureParameters;}
 	float weight() const						{return m_weight;}
 
 private:
 	Reference<WeightingFunctionInstanceInterface> m_function;	///< parameterized function used for weighting
 	std::string m_functionName;					///< name of the function used for weighting
-	std::vector<std::string> m_weightingSets;			///< posting sets that are used for weighting
+	std::vector<FeatureParameter> m_featureParameters;		///< list of feature parameters that are subject of weighting
 	float m_weight;							///< part of the weight of this function in the total weight sum
 };
 

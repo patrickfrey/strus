@@ -27,13 +27,10 @@ void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, boo
 }
 
 void Accumulator::addFeature(
-		PostingIteratorInterface* iterator,
 		float weight,
-		const WeightingFunctionInstanceInterface* function_)
+		WeightingExecutionContextInterface* function_)
 {
-	m_weightingFeatures.push_back(
-		WeightingFeature(
-			function_->createExecutionContext( m_storage, iterator, m_metadata), weight));
+	m_weightingFeatures.push_back( WeightingFeature( function_, weight));
 }
 
 void Accumulator::addAclRestriction(

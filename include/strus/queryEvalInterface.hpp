@@ -70,17 +70,17 @@ public:
 	/// \param[in] set_ name of the set of the restriction feature
 	virtual void addRestrictionFeature( const std::string& set_)=0;
 
-	/// \class SummarizerFeatureParameter
-	/// \brief Structure that describes a feature that is subject of summarization
-	class SummarizerFeatureParameter
+	/// \class FeatureParameter
+	/// \brief Structure that describes a feature that is subject of summarization or weighting
+	class FeatureParameter
 	{
 	public:
-		SummarizerFeatureParameter(
+		FeatureParameter(
 				const std::string& parameterName_,
 				const std::string& featureSet_)
 			:m_parameterName(parameterName_),m_featureSet(featureSet_){}
-		SummarizerFeatureParameter(
-				const SummarizerFeatureParameter& o)
+		FeatureParameter(
+				const FeatureParameter& o)
 			:m_parameterName(o.m_parameterName),m_featureSet(o.m_featureSet){}
 
 		const std::string& parameterName() const	{return m_parameterName;}
@@ -99,18 +99,18 @@ public:
 	virtual void addSummarizerFunction(
 			const std::string& functionName,
 			SummarizerFunctionInstanceInterface* function,
-			const std::vector<SummarizerFeatureParameter>& featureParameters,
+			const std::vector<FeatureParameter>& featureParameters,
 			const std::string& resultAttribute)=0;
 
 	/// \brief Declare a weighting function to use for this query evaluation scheme
 	/// \param[in] functionName name of the weighting function (no meaning, just for inspection and tracing)
 	/// \param[in] function parameterized weighting function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
-	/// \param[in] weightedFeatureSets list of feature sets used by this function for weighting (declares what features to weight)
+	/// \param[in] featureParameters list of parameters adressing query features that are subject of weighting
 	/// \param[in] weight part of the weight of this function in the total weight sum
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<std::string>& weightedFeatureSets,
+			const std::vector<FeatureParameter>& featureParameters,
 			float weight)=0;
 
 	/// \brief Create a new query

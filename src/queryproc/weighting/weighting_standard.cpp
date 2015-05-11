@@ -30,6 +30,7 @@
 #include "weighting_standard.hpp"
 #include "weightingBM25.hpp"
 #include "weightingConstant.hpp"
+#include "weightingMetadata.hpp"
 #include "weightingFrequency.hpp"
 #include "private/dll_tags.hpp"
 
@@ -43,6 +44,11 @@ WeightingFunctionInterface* strus::createWeightingFunctionBm25()
 WeightingFunctionInterface* strus::createWeightingFunctionConstant()
 {
 	return new WeightingFunctionConstant();
+}
+
+WeightingFunctionInterface* strus::createWeightingFunctionMetadata()
+{
+	return new WeightingFunctionMetadata();
 }
 
 WeightingFunctionInterface* strus::createWeightingFunctionTermFrequency()

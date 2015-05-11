@@ -389,47 +389,36 @@ std::vector<ResultDocument> Query::evaluate()
 		std::vector<WeightingDef>::const_iterator
 			wi = m_queryEval->weightingFunctions().begin(),
 			we = m_queryEval->weightingFunctions().end();
-		int empty_postings_index = -1;
 		for (; wi != we; ++wi)
 		{
-			std::vector<std::string>::const_iterator
-				si = wi->weightingSets().begin(),
-				se = wi->weightingSets().end();
-			if (si == se)
+			std::auto_ptr<WeightingExecutionContextInterface> execContext(
+				wi->function()->createExecutionContext( m_storage, m_metaDataReader.get()));
+
+			std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
+				si = wi->featureParameters().begin(),
+				se = wi->featureParameters().end();
+			for (; si != se; ++si)
 			{
-				// ... no weighting features defined, then pass an empty posting set
-				//	the weighting function may use document weight only
-				if (empty_postings_index < 0)
+				std::vector<Feature>::const_iterator
+					fi = m_features.begin(), fe = m_features.end();
+				for (; fi != fe; ++fi)
 				{
-					Reference<PostingIteratorInterface> postingsElem(
-						m_storage->createTermPostingIterator(
-							Constants::query_empty_postings_termtype(),""));
-					empty_postings_index = postings.size();
-					postings.push_back( postingsElem);
-				}
-				accumulator.addFeature(
-					postings[empty_postings_index].get(), 1.0, wi->function());
-			}
-			else
-			{
-				for (; si != se; ++si)
-				{
-					std::vector<Feature>::const_iterator
-						fi = m_features.begin(), fe = m_features.end();
-					for (; fi != fe; ++fi)
+					if (si->featureSet() == fi->set)
 					{
-						if (*si == fi->set)
-						{
-							float weight = fi->weight * wi->weight();
-							accumulator.addFeature(
-								nodePostings( fi->node), weight, wi->function());
+						execContext->addWeightingFeature(
+							si->parameterName(),
+							nodePostings( fi->node),
+							fi->weight);
 #ifdef STRUS_LOWLEVEL_DEBUG
-							std::cout << "add feature " << fi->set << ' ' << weight << std::endl;
+						std::cout << "add feature parameter " << si->parameterName() << "=" << fi->set << ' ' << fi->weight << std::endl;
 #endif
-						}
 					}
 				}
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "add feature " << si->functionName() << " weight " << wi->weight() << std::endl;
+#endif
+			accumulator.addFeature( wi->weight(), execContext.release());
 		}
 	}
 	// [4.3] Define the user ACL restrictions:
@@ -474,7 +463,7 @@ std::vector<ResultDocument> Query::evaluate()
 			SummarizerExecutionContextInterface* closure = summarizers.back().get();
 
 			// [5.2] Add features with their variables assigned to summarizer:
-			std::vector<QueryEvalInterface::SummarizerFeatureParameter>::const_iterator
+			std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 				si = zi->featureParameters().begin(),
 				se = zi->featureParameters().end();
 			for (; si != se; ++si)

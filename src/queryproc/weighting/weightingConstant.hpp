@@ -54,17 +54,51 @@ class WeightingExecutionContextConstant
 {
 public:
 	WeightingExecutionContextConstant(
+			float weight_)
+		:m_featar(),m_weight(weight_){}
+
+	struct Feature
+	{
+		PostingIteratorInterface* itr;
+		float weight;
+
+		Feature( PostingIteratorInterface* itr_, float weight_)
+			:itr(itr_),weight(weight_){}
+		Feature( const Feature& o)
+			:itr(o.itr),weight(o.weight){}
+	};
+
+	virtual void addWeightingFeature(
+			const std::string& name_,
 			PostingIteratorInterface* itr_,
 			float weight_)
-		:m_itr(itr_),m_weight(weight_){}
+	{
+		if (utils::caseInsensitiveEquals( name_, "match"))
+		{
+			m_featar.push_back( Feature( itr_, weight_));
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), "constant", name_.c_str());
+		}
+	}
 
 	virtual float call( const Index& docno)
 	{
-		return docno==m_itr->skipDoc(docno)?(m_weight):(float)0.0;
+		float rt = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (;fi != fe; ++fi)
+		{
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				rt += fi->weight * m_weight;
+			}
+		}
+		return rt;
 	}
 
 private:
-	PostingIteratorInterface* m_itr;
+	std::vector<Feature> m_featar;
 	float m_weight;
 };
 
@@ -98,10 +132,9 @@ public:
 
 	virtual WeightingExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
-			PostingIteratorInterface* itr,
 			MetaDataReaderInterface*) const
 	{
-		return new WeightingExecutionContextConstant( itr, m_weight);
+		return new WeightingExecutionContextConstant( m_weight);
 	}
 
 	virtual std::string tostring() const
@@ -118,7 +151,7 @@ private:
 
 
 /// \class WeightingFunctionConstant
-/// \brief Weighting function that simply returns the ff (feature frequency in the document) multiplied with a constant weight 
+/// \brief Weighting function that simply returns a constant weight for every match
 class WeightingFunctionConstant
 	:public WeightingFunctionInterface
 {

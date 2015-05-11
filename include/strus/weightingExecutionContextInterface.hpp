@@ -44,6 +44,16 @@ public:
 	/// \brief Destructor
 	virtual ~WeightingExecutionContextInterface(){}
 
+	/// \brief Add a feature that is subject of weighting to the execution context
+	/// \param[in] name_ name of the summarization feature
+	/// \param[in] postingIterator_ iterator on the matches of the weighting feature
+	/// \param[in] weight_ weight of this feature
+	/// \remark Do call this method before calling call the first time for not having incomplete results
+	virtual void addWeightingFeature(
+			const std::string& name_,
+			PostingIteratorInterface* postingIterator_,
+			float weight_)=0;
+
 	/// \brief Call the weighting function for a document
 	/// \param[in] docno document number
 	/// \return the calculated weight of the document

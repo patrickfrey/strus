@@ -84,9 +84,8 @@ public:
 	void addSelector( PostingIteratorInterface* iterator, int setindex, bool isExpression);
 
 	void addFeature(
-			PostingIteratorInterface* iterator,
 			float weight,
-			const WeightingFunctionInstanceInterface* function_);
+			WeightingExecutionContextInterface* function_);
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression);
 

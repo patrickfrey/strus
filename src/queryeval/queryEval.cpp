@@ -72,7 +72,7 @@ void QueryEval::addRestrictionFeature( const std::string& set_)
 void QueryEval::addSummarizerFunction(
 		const std::string& functionName,
 		SummarizerFunctionInstanceInterface* function,
-		const std::vector<SummarizerFeatureParameter>& featureParameters,
+		const std::vector<FeatureParameter>& featureParameters,
 		const std::string& resultAttribute)
 {
 	m_summarizers.push_back( SummarizerDef( resultAttribute, functionName, function, featureParameters));
@@ -81,10 +81,10 @@ void QueryEval::addSummarizerFunction(
 void QueryEval::addWeightingFunction(
 		const std::string& functionName,
 		WeightingFunctionInstanceInterface* function,
-		const std::vector<std::string>& weightedFeatureSets,
+		const std::vector<FeatureParameter>& featureParameters,
 		float weight)
 {
-	m_weightingFunctions.push_back( WeightingDef( function, functionName, weightedFeatureSets, weight));
+	m_weightingFunctions.push_back( WeightingDef( function, functionName, featureParameters, weight));
 }
 
 void QueryEval::print( std::ostream& out) const
@@ -122,18 +122,17 @@ void QueryEval::print( std::ostream& out) const
 	for (; fi != fe; ++fi)
 	{
 		out << "EVAL ";
-		out << " " << fi->functionName() << "( " << fi->function()->tostring() << " )";
-		if (fi->weightingSets().size())
+		std::string params = fi->function()->tostring();
+		out << " " << fi->functionName() << "( " << params;
+		std::vector<FeatureParameter>::const_iterator
+			pi = fi->featureParameters().begin(), pe = fi->featureParameters().end();
+		int pidx = params.size();
+		for (; pi != pe; ++pi,++pidx)
 		{
-			out << " WITH ";
-			std::size_t wi = 0, we = fi->weightingSets().size();
-			for(; wi != we; ++wi)
-			{
-				if (wi) out << ", ";
-				out << fi->weightingSets()[wi];
-			}
+			if (pidx) out << ", ";
+			out << pi->parameterName() << "= %" << pi->featureSet();
 		}
-		out << ";" << std::endl;
+		out << ");" << std::endl;
 	}
 	std::vector<SummarizerDef>::const_iterator
 		si = m_summarizers.begin(), se = m_summarizers.end();
@@ -141,15 +140,17 @@ void QueryEval::print( std::ostream& out) const
 	{
 		out << "SUMMARIZE ";
 		out << si->resultAttribute() << " = " << si->functionName();
-		out << "( " << si->function()->tostring() << " )";
+		std::string params = si->function()->tostring();
+		out << "( " << params;
 
-		std::vector<SummarizerFeatureParameter>::const_iterator
+		std::vector<FeatureParameter>::const_iterator
 			fi = si->featureParameters().begin(),
 			fe = si->featureParameters().end();
-		for (int fidx=0; fi != fe; ++fi,++fidx)
+		int fidx=params.size();
+		for (; fi != fe; ++fi,++fidx)
 		{
 			if (fidx) out << ", ";
-			out << fi->parameterName() << "=" << fi->featureSet();
+			out << fi->parameterName() << "= %" << fi->featureSet();
 		}
 		out << ");" << std::endl;
 	}

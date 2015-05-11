@@ -47,17 +47,51 @@ class WeightingExecutionContextTermFrequency
 	:public WeightingExecutionContextInterface
 {
 public:
-	explicit WeightingExecutionContextTermFrequency(
-			PostingIteratorInterface* itr_)
-		:m_itr(itr_){}
+	explicit WeightingExecutionContextTermFrequency()
+		:m_featar(){}
+
+	struct Feature
+	{
+		PostingIteratorInterface* itr;
+		float weight;
+
+		Feature( PostingIteratorInterface* itr_, float weight_)
+			:itr(itr_),weight(weight_){}
+		Feature( const Feature& o)
+			:itr(o.itr),weight(o.weight){}
+	};
+
+	virtual void addWeightingFeature(
+			const std::string& name_,
+			PostingIteratorInterface* itr_,
+			float weight_)
+	{
+		if (utils::caseInsensitiveEquals( name_, "match"))
+		{
+			m_featar.push_back( Feature( itr_, weight_));
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), "frequency", name_.c_str());
+		}
+	}
 
 	virtual float call( const Index& docno)
 	{
-		return (docno==m_itr->skipDoc( docno)?(m_itr->frequency()):(float)0.0);
+		float rt = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (;fi != fe; ++fi)
+		{
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				rt += fi->weight * fi->itr->frequency();
+			}
+		}
+		return rt;
 	}
 
 private:
-	PostingIteratorInterface* m_itr;
+	std::vector<Feature> m_featar;
 };
 
 
@@ -83,10 +117,9 @@ public:
 
 	virtual WeightingExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
-			PostingIteratorInterface* itr,
 			MetaDataReaderInterface*) const
 	{
-		return new WeightingExecutionContextTermFrequency( itr);
+		return new WeightingExecutionContextTermFrequency();
 	}
 
 	virtual std::string tostring() const
