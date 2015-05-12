@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_BM25_HPP_INCLUDED
-#define _STRUS_WEIGHTING_BM25_HPP_INCLUDED
+#ifndef _STRUS_WEIGHTING_BM25_DPFC_HPP_INCLUDED
+#define _STRUS_WEIGHTING_BM25_DPFC_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingExecutionContextInterface.hpp"
@@ -46,19 +46,24 @@
 namespace strus
 {
 
-/// \class WeightingExecutionContextBM25
-/// \brief Weighting function based on the BM25 formula
-class WeightingExecutionContextBM25
+/// \class WeightingExecutionContextBM25_dpfc
+/// \brief Weighting function based on the BM25 formula with an artificial ff calculated from the real ff and some discrete increments given by some feature occurrence relation checks based on proximity and structures (sentences) 
+class WeightingExecutionContextBM25_dpfc
 	:public WeightingExecutionContextInterface
 {
 public:
-	WeightingExecutionContextBM25(
+	WeightingExecutionContextBM25_dpfc(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
 		float k1_,
 		float b_,
 		float avgDocLength_,
-		const std::string& attribute_doclen_);
+		const std::string& attribute_content_doclen_,
+		const std::string& attribute_title_doclen_,
+		unsigned int proximityMinDist_,
+		float title_ff_incr,
+		float sequence_ff_incr,
+		float sentence_ff_incr);
 
 	struct Feature
 	{
@@ -84,22 +89,29 @@ private:
 	float m_b;
 	float m_avgDocLength;
 	float m_nofCollectionDocuments;
-	std::vector<Feature> m_featar;
+	std::vector<Feature> m_weight_featar;
+	std::vector<Feature> m_struct_featar;
+	PostingIteratorInterface* m_title_itr;
 	MetaDataReaderInterface* m_metadata;
-	int m_metadata_doclen;
+	int m_metadata_content_doclen;
+	int m_metadata_title_doclen;
+	unsigned int m_proximityMinDist;
+	float m_title_ff_incr;
+	float m_sequence_ff_incr;
+	float m_sentence_ff_incr;
 };
 
-
-/// \class WeightingFunctionInstanceBM25
-/// \brief Weighting function instance based on the BM25 formula
-class WeightingFunctionInstanceBM25
+/// \class WeightingFunctionInstanceBM25_dpfc
+/// \brief Weighting function instance based on the BM25 formula with an artificial ff calculated from the real ff and some discrete increments given by some feature occurrence relation checks based on proximity and structures (sentences) 
+class WeightingFunctionInstanceBM25_dpfc
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceBM25()
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000){}
+	explicit WeightingFunctionInstanceBM25_dpfc()
+		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_proximityMinDist(300),m_title_ff_incr(1.5),m_sequence_ff_incr(1.5),m_sentence_ff_incr(0.5)
+	{}
 
-	virtual ~WeightingFunctionInstanceBM25(){}
+	virtual ~WeightingFunctionInstanceBM25_dpfc(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
@@ -108,14 +120,14 @@ public:
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata) const
 	{
-		return new WeightingExecutionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen);
+		return new WeightingExecutionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr);
 	}
 
 	virtual std::string tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
+			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen << ", doclen=" << m_attribute_content_doclen << ", doclen_title=" << m_attribute_title_doclen << ", proxmindist=" << m_proximityMinDist << ", titleinc=" << m_title_ff_incr << ", seqinc=" << m_sequence_ff_incr << "strinc=" << m_sentence_ff_incr << std::endl;
 		return rt.str();
 	}
 
@@ -123,23 +135,28 @@ private:
 	float m_b;
 	float m_k1;
 	float m_avgdoclen;
-	std::string m_attribute_doclen;
+	std::string m_attribute_content_doclen;
+	std::string m_attribute_title_doclen;
+	unsigned int m_proximityMinDist;
+	float m_title_ff_incr;
+	float m_sequence_ff_incr;
+	float m_sentence_ff_incr;
 };
 
 
-/// \class WeightingFunctionBM25
-/// \brief Weighting function based on the BM25 formula
-class WeightingFunctionBM25
+/// \class WeightingFunctionBM25_dpfc
+/// \brief Weighting function based on the BM25 formula with an artificial ff calculated from the real ff and some discrete increments given by some feature occurrence relation checks based on proximity and structures (sentences) 
+class WeightingFunctionBM25_dpfc
 	:public WeightingFunctionInterface
 {
 public:
-	WeightingFunctionBM25(){}
+	WeightingFunctionBM25_dpfc(){}
 
-	virtual ~WeightingFunctionBM25(){}
+	virtual ~WeightingFunctionBM25_dpfc(){}
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const
 	{
-		return new WeightingFunctionInstanceBM25();
+		return new WeightingFunctionInstanceBM25_dpfc();
 	}
 };
 

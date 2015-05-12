@@ -109,3 +109,43 @@ float WeightingExecutionContextBM25::call( const Index& docno)
 }
 
 
+
+
+void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name, const std::string& value)
+{
+	if (utils::caseInsensitiveEquals( name, "doclen"))
+	{
+		m_attribute_doclen = value;
+		if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+	if (utils::caseInsensitiveEquals( name, "k1")
+	||  utils::caseInsensitiveEquals( name, "b")
+	||  utils::caseInsensitiveEquals( name, "avgdoclen"))
+	{
+		addNumericParameter( name, arithmeticVariantFromString( value));
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+}
+
+void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "k1"))
+	{
+		m_k1 = (float)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "b"))
+	{
+		m_b = (float)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
+	{
+		m_avgdoclen = (float)value;
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+}

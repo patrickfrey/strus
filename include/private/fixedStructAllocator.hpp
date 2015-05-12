@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
-#define _STRUS_LOCAL_STRUCT_ALLOCATOR_HPP_INCLUDED
+#ifndef _STRUS_FIXED_STRUCT_ALLOCATOR_HPP_INCLUDED
+#define _STRUS_FIXED_STRUCT_ALLOCATOR_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/internationalization.hpp"
 #include <memory>
@@ -37,8 +37,8 @@
 namespace strus
 {
 
-template <typename StructType>
-class LocalStructAllocator
+template <typename StructType, unsigned int MAXSIZE>
+class FixedStructAllocator
 	:public std::allocator<StructType>
 {
 public:
@@ -49,7 +49,7 @@ public:
 	template<typename _Tp1>
 	struct rebind
 	{
-		typedef LocalStructAllocator<_Tp1> other;
+		typedef FixedStructAllocator<_Tp1, MAXSIZE> other;
 	};
 
 	pointer allocate( size_type n, const void *hint=0)
@@ -59,7 +59,7 @@ public:
 			throw strus::logic_error( _TXT( "illegal use of allocator, only one item can be allocated at once"));
 		}
 		StructType* rt = m_freelist.pop();
-		if (!rt) return m_blkalloc.alloc();
+		if (!rt) return alloc();
 		return rt;
 	}
 
@@ -72,102 +72,81 @@ public:
 		m_freelist.push( p);
 	}
 
-	LocalStructAllocator()
-		:std::allocator<StructType>()
-	{}
+	FixedStructAllocator()
+		:std::allocator<StructType>(),m_aridx(0)
+	{
+		m_freelist.init( m_ar, 0);
+	}
 
-	LocalStructAllocator( const LocalStructAllocator &a)
-		:std::allocator<StructType>(a)
-	{}
+	FixedStructAllocator( const FixedStructAllocator& o)
+		:std::allocator<StructType>(o),m_aridx(o.m_aridx)
+	{
+		std::memcpy( m_ar, o.m_ar, sizeof( m_ar));
+		m_freelist.init( m_ar, o.m_freelist.m_idx);
+	}
 
 	template <class U>
-	LocalStructAllocator( const LocalStructAllocator<U> &a)
-		:std::allocator<StructType>(a)
-	{}
+	FixedStructAllocator( const FixedStructAllocator<U,MAXSIZE> &o)
+		:std::allocator<StructType>(o),m_aridx(o.m_aridx)
+	{
+		unsigned int elemsize = (sizeof(U) < sizeof(StructType))?sizeof(U):sizeof(StructType);
+		unsigned int oi = 0, oe = o.m_freelist.m_idx==0?o.m_aridx:MAXSIZE;
+		for (; oi != oe; ++oi)
+		{
+			std::memcpy( m_ar+oi, o.m_ar+oi, elemsize);
+		}
+		m_freelist.init( m_ar, o.m_freelist.m_idx);
+	}
 
-	~LocalStructAllocator() {}
+	~FixedStructAllocator() {}
+
+	bool empty() const
+	{
+		return (m_aridx == 0);
+	}
 
 private:
-	enum {BlockSize=128};
-	struct Block
-	{
-		StructType ar[ BlockSize];
-	};
 	struct FreeList
 	{
 		FreeList()
-			:m_ar(0),m_size(0),m_allocsize(0){}
+			:m_ar(0),m_idx(0){}
 		~FreeList()
+		{}
+
+		void init( StructType* ar_, unsigned int idx_)
 		{
-			if (m_ar) std::free( m_ar);
+			m_ar = ar_;
+			m_idx = idx_;
 		}
 
 		void push( StructType* ptr)
 		{
-			if (m_size == m_allocsize)
-			{
-				std::size_t mm = m_allocsize?(m_allocsize*2):1024;
-				if (mm < m_allocsize) throw std::bad_alloc();
-				void* na = std::realloc( m_ar, mm * sizeof(StructType*));
-				if (!na) throw std::bad_alloc();
-				m_ar = (StructType**)na;
-				m_allocsize = mm;
-			}
-			m_ar[ m_size++] = ptr;
+			unsigned int idx = (ptr-m_ar);
+			*(unsigned int*)(void*)(m_ar+idx) = m_idx;
+			m_idx = idx+1;
 		}
 		StructType* pop()
 		{
-			if (!m_size) return 0;
-			return m_ar[ --m_size];
+			if (!m_idx) return 0;
+			StructType* rt = m_ar + m_idx - 1;
+			m_idx = *(unsigned int*)(void*)(rt);
+			return rt;
 		}
 
-		StructType** m_ar;
-		std::size_t m_size;
-		std::size_t m_allocsize;
+		StructType* m_ar;
+		unsigned int m_idx;
 	};
 
-	struct BlockAllocator
+	StructType* alloc()
 	{
-		BlockAllocator()
-			:m_ar(0),m_size(0),m_allocsize(0),m_blkidx(BlockSize){}
-		~BlockAllocator()
-		{
-			std::size_t ii = 0;
-			for (; ii<m_size; ++ii)
-			{
-				std::free( m_ar[ ii]);
-			}
-			std::free( m_ar);
-		}
-
-		StructType* alloc()
-		{
-			if (m_blkidx == BlockSize)
-			{
-				if (m_size == m_allocsize)
-				{
-					std::size_t mm = m_allocsize?(m_allocsize*2):1024;
-					if (mm * sizeof(Block*) < m_allocsize) throw std::bad_alloc();
-					void* na = std::realloc( m_ar, mm * sizeof(Block*));
-					if (!na) throw std::bad_alloc();
-					m_ar = (Block**)na;
-					m_allocsize = mm;
-				}
-				void* mem = std::malloc( sizeof( Block));
-				if (!mem) throw std::bad_alloc();
-				m_ar[ m_size++] = (Block*)mem;
-				m_blkidx = 0;
-			}
-			return &m_ar[ m_size-1]->ar[m_blkidx++];
-		}
-		Block** m_ar;
-		std::size_t m_size;
-		std::size_t m_allocsize;
-		std::size_t m_blkidx;
-	};
+		if (m_aridx >= MAXSIZE) throw std::bad_alloc();
+		return &m_ar[ m_aridx++];
+	}
 
 private:
-	BlockAllocator m_blkalloc;
+	template <class U, unsigned int M> friend class FixedStructAllocator;
+	StructType m_ar[ MAXSIZE];
+	unsigned int m_aridx;
 	FreeList m_freelist;
 };
 }//namespace
