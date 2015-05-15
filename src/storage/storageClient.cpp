@@ -54,6 +54,8 @@
 #include "attributeReader.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "extractKeyValueData.hpp"
+#include <sstream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <cstring>
@@ -123,6 +125,9 @@ void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 
 void StorageClient::loadVariables()
 {
+	enum {ByteOrderMark=0xFCfdFEff};
+	Index bom;
+
 	DatabaseAdapter_Variable::Reader varstor( m_database.get());
 	if (!varstor.load( "TermNo", m_next_termno)
 	||  !varstor.load( "TypeNo", m_next_typeno)
@@ -134,6 +139,19 @@ void StorageClient::loadVariables()
 		throw strus::runtime_error( _TXT( "corrupt storage, not all mandatory variables defined"));
 	}
 	(void)varstor.load( "UserNo", m_next_userno);
+	if (varstor.load( "ByteOrderMark", bom))
+	{
+		if (bom != (Index)ByteOrderMark)
+		{
+			std::ostringstream bom1,bom2;
+			bom1 << std::hex << bom;
+			bom2 << std::hex << (Index)ByteOrderMark;
+			std::string bom1str = bom1.str();
+			std::string bom2str = bom2.str();
+			
+			throw strus::runtime_error( _TXT( "incompatible platform for accessing this storage, the byte order mark does not match ('%s' != '%s')"), bom1str.c_str(), bom2str.c_str());
+		}
+	}
 	m_global_nof_documents = m_nof_documents;
 }
 
