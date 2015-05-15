@@ -130,6 +130,11 @@ public:
 		}
 	}
 
+	virtual bool isFeatureParameter( const std::string& name) const
+	{
+		return (utils::caseInsensitiveEquals( name, "match"));
+	}
+
 	virtual WeightingExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface*) const

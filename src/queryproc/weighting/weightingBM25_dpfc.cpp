@@ -347,3 +347,12 @@ void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string&
 	}
 }
 
+
+bool WeightingFunctionInstanceBM25_dpfc::isFeatureParameter( const std::string& name) const
+{
+	return utils::caseInsensitiveEquals( name, "match")
+		|| utils::caseInsensitiveEquals( name, "struct")
+		|| utils::caseInsensitiveEquals( name, "title");
+}
+
+

@@ -121,6 +121,11 @@ public:
 		}
 	}
 
+	virtual bool isFeatureParameter( const std::string&) const
+	{
+		return false;
+	}
+
 	virtual WeightingExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface* metadata_) const

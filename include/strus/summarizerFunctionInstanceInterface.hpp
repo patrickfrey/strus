@@ -62,6 +62,11 @@ public:
 	/// \param[in] value parameter value
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)=0;
 
+	/// \brief Check if a parameter name defines a feature parameter and not a numeric or string parameter
+	/// \param[in] name parameter name
+	/// \return true, if 'name' is the name of a feature parameter, false if not
+	virtual bool isFeatureParameter( const std::string& name) const=0;
+
 	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
 	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)
