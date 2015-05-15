@@ -89,12 +89,6 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	}
 }
 
-bool SummarizerFunctionInstanceMatchPhrase::isFeatureParameter( const std::string& name) const
-{
-	return utils::caseInsensitiveEquals( name, "match")
-		|| utils::caseInsensitiveEquals( name, "struct");
-}
-
 
 SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
 		const StorageClientInterface* storage_,

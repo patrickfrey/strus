@@ -49,11 +49,6 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
 }
 
-bool SummarizerFunctionInstanceListMatches::isFeatureParameter( const std::string& name) const
-{
-	return utils::caseInsensitiveEquals( name, "match");
-}
-
 void SummarizerExecutionContextListMatches::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,

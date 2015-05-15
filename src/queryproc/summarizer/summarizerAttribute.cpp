@@ -91,11 +91,6 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 	}
 }
 
-bool SummarizerFunctionInstanceAttribute::isFeatureParameter( const std::string&) const
-{
-	return false;
-}
-
 SummarizerExecutionContextInterface* SummarizerFunctionInstanceAttribute::createExecutionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*) const

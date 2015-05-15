@@ -149,11 +149,3 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
 	}
 }
-
-
-bool WeightingFunctionInstanceBM25::isFeatureParameter( const std::string& name) const
-{
-	return utils::caseInsensitiveEquals( name, "match");
-}
-
-

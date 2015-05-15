@@ -115,11 +115,6 @@ public:
 		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
 	}
 
-	virtual bool isFeatureParameter( const std::string& name) const
-	{
-		return (utils::caseInsensitiveEquals( name, "match"));
-	}
-
 	virtual WeightingExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface*) const

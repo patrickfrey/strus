@@ -60,11 +60,6 @@ public:
 	/// \param[in] value parameter value
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)=0;
 
-	/// \brief Check if a parameter name defines a feature parameter and not a numeric or string parameter
-	/// \param[in] name parameter name
-	/// \return true, if 'name' is the name of a feature parameter, false if not
-	virtual bool isFeatureParameter( const std::string& name) const=0;
-
 	/// \brief Create an execution context for this weighting function instance
 	/// \param[in] storage_ storage reference for retrieving some statistics (like the document collection frequency)
 	/// \param[in] metadata meta data interface

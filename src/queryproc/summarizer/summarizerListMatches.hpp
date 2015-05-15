@@ -76,7 +76,6 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
-	virtual bool isFeatureParameter( const std::string& name) const;
 
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,

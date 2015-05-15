@@ -114,11 +114,6 @@ public:
 		}
 	}
 
-	virtual bool isFeatureParameter( const std::string&) const
-	{
-		return false;
-	}
-
 	virtual SummarizerExecutionContextInterface* createExecutionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface* metadata) const
