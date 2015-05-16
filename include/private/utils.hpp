@@ -124,7 +124,7 @@ public:
 	///\param[in] val the value of the counter
 	void set( const IntegralCounterType& val)
 	{
-		boost::atomic<IntegralCounterType>::store( val, boost::memory_order_acquire);
+		boost::atomic<IntegralCounterType>::store( val);
 	}
 
 	///\brief Compare current value with 'testval', change it to 'newval' if matches
