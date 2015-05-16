@@ -127,18 +127,24 @@ void StorageClient::loadVariables()
 	ByteOrderMark byteOrderMark;
 	Index bom;
 	ByteOrderMark storage_byteOrderMark;
+	Index next_termno_;
+	Index next_typeno_;
+	Index next_docno_;
+	Index next_attribno_;
+	Index nof_documents_;
+	Index next_userno_;
 
 	DatabaseAdapter_Variable::Reader varstor( m_database.get());
-	if (!varstor.load( "TermNo", m_next_termno)
-	||  !varstor.load( "TypeNo", m_next_typeno)
-	||  !varstor.load( "DocNo", m_next_docno)
-	||  !varstor.load( "AttribNo", m_next_attribno)
-	||  !varstor.load( "NofDocs", m_nof_documents)
+	if (!varstor.load( "TermNo", next_termno_)
+	||  !varstor.load( "TypeNo", next_typeno_)
+	||  !varstor.load( "DocNo", next_docno_)
+	||  !varstor.load( "AttribNo", next_attribno_)
+	||  !varstor.load( "NofDocs", nof_documents_)
 	)
 	{
 		throw strus::runtime_error( _TXT( "corrupt storage, not all mandatory variables defined"));
 	}
-	(void)varstor.load( "UserNo", m_next_userno);
+	(void)varstor.load( "UserNo", next_userno_);
 	if (varstor.load( "ByteOrderMark", bom))
 	{
 		if (bom != byteOrderMark.value())
@@ -147,7 +153,13 @@ void StorageClient::loadVariables()
 			throw strus::runtime_error( _TXT( "incompatible platform for accessing this storage, storage created as %s, but accessed from a machine with %s"), storage_byteOrderMark.endianess(), byteOrderMark.endianess());
 		}
 	}
-	m_global_nof_documents = m_nof_documents;
+	m_next_termno.set( next_termno_);
+	m_next_typeno.set( next_typeno_);
+	m_next_docno.set( next_docno_);
+	m_next_attribno.set( next_attribno_);
+	m_nof_documents.set( nof_documents_);
+	m_next_userno.set( next_userno_);
+	m_global_nof_documents.set( nof_documents_);
 }
 
 void StorageClient::storeVariables()
@@ -162,14 +174,14 @@ void StorageClient::getVariablesWriteBatch(
 		int nof_documents_incr)
 {
 	DatabaseAdapter_Variable::Writer varstor( m_database.get());
-	varstor.store( transaction, "TermNo", m_next_termno);
-	varstor.store( transaction, "TypeNo", m_next_typeno);
-	varstor.store( transaction, "DocNo", m_next_docno);
-	varstor.store( transaction, "AttribNo", m_next_attribno);
-	varstor.store( transaction, "NofDocs", m_nof_documents + nof_documents_incr);
+	varstor.store( transaction, "TermNo", m_next_termno.value());
+	varstor.store( transaction, "TypeNo", m_next_typeno.value());
+	varstor.store( transaction, "DocNo", m_next_docno.value());
+	varstor.store( transaction, "AttribNo", m_next_attribno.value());
+	varstor.store( transaction, "NofDocs", m_nof_documents.value() + nof_documents_incr);
 	if (withAcl())
 	{
-		varstor.store( transaction, "UserNo", m_next_userno);
+		varstor.store( transaction, "UserNo", m_next_userno.value());
 	}
 }
 
@@ -333,29 +345,25 @@ DocnoRangeAllocatorInterface* StorageClient::createDocnoRangeAllocator()
 
 Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 {
-	utils::ScopedLock lock( m_mutex_docno);
-	Index rt = m_next_docno;
-	m_next_docno += nofDocuments;
-	if (m_next_docno <= rt) throw strus::runtime_error( _TXT( "docno allocation error"));
+	Index rt = m_next_docno.increment( nofDocuments);
+	if (m_next_docno.value() <= rt)
+	{
+		(void)m_next_docno.increment( -(int)nofDocuments);
+		throw strus::runtime_error( _TXT( "docno allocation error"));
+	}
 	return rt;
 }
 
 bool StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
 {
-	utils::ScopedLock lock( m_mutex_docno);
-	if (m_next_docno == docno + size)
-	{
-		m_next_docno -= size;
-		return true;
-	}
-	return false;
+	Index newval = m_next_docno.value() - size;
+	return (m_next_docno.test_and_set( docno + size, newval));
 }
 
 void StorageClient::declareNofDocumentsInserted( int incr)
 {
-	utils::ScopedLock lock( m_nof_documents_mutex);
-	m_nof_documents += incr;
-	m_global_nof_documents += incr;
+	m_nof_documents.increment( incr);
+	m_global_nof_documents.increment( incr);
 }
 
 class TypenoAllocator
@@ -482,23 +490,21 @@ KeyAllocatorInterface* StorageClient::createTermnoAllocator()
 
 bool StorageClient::withAcl() const
 {
-	return m_next_userno != 0;
+	return m_next_userno.value() != 0;
 }
 
 Index StorageClient::allocTermno()
 {
-	utils::ScopedLock lock( m_mutex_termno);
-	return m_next_termno++;
+	return m_next_termno.increment()-1;
 }
 
 Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 {
-	utils::ScopedLock lock( m_mutex_typeno);
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_typeno++);
+		stor.storeImm( name, rt = m_next_typeno.increment()-1);
 		isNew = true;
 	}
 	return rt;
@@ -506,12 +512,11 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 
 Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
 {
-	utils::ScopedLock lock( m_mutex_docno);
 	Index rt;
 	DatabaseAdapter_DocId::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_docno++);
+		stor.storeImm( name, rt = m_next_docno.increment()-1);
 		isNew = true;
 	}
 	return rt;
@@ -519,12 +524,11 @@ Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
 
 Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 {
-	utils::ScopedLock lock( m_mutex_userno);
 	Index rt;
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_userno++);
+		stor.storeImm( name, rt = m_next_userno.increment()-1);
 		isNew = true;
 	}
 	return rt;
@@ -532,12 +536,11 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 
 Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 {
-	utils::ScopedLock lock( m_mutex_attribno);
 	Index rt;
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_attribno++);
+		stor.storeImm( name, rt = m_next_attribno.increment()-1);
 		isNew = true;
 	}
 	return rt;
@@ -555,17 +558,17 @@ IndexSetIterator StorageClient::getUserAclIterator( const Index& userno) const
 
 Index StorageClient::nofAttributeTypes()
 {
-	return m_next_termno -1;
+	return m_next_termno.value() -1;
 }
 
 GlobalCounter StorageClient::globalNofDocumentsInserted() const
 {
-	return m_global_nof_documents;
+	return m_global_nof_documents.value();
 }
 
 Index StorageClient::localNofDocumentsInserted() const
 {
-	return m_nof_documents;
+	return m_nof_documents.value();
 }
 
 GlobalCounter StorageClient::globalDocumentFrequency(
@@ -596,7 +599,7 @@ Index StorageClient::localDocumentFrequency(
 
 Index StorageClient::maxDocumentNumber() const
 {
-	return m_next_docno-1;
+	return m_next_docno.value()-1;
 }
 
 Index StorageClient::documentNumber( const std::string& docid) const
@@ -713,8 +716,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 
 void StorageClient::declareGlobalNofDocumentsInserted( const GlobalCounter& incr)
 {
-	utils::ScopedLock lock( m_nof_documents_mutex);
-	m_global_nof_documents += incr;
+	m_global_nof_documents.increment( incr);
 }
 
 void StorageClient::fillDocumentFrequencyCache()
