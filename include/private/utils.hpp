@@ -133,7 +133,7 @@ public:
 	///\return true on success
 	bool test_and_set( IntegralCounterType testval, IntegralCounterType newval)
 	{
-		return boost::atomic<IntegralCounterType>::compare_exchange_strong( testval, newval, boost::memory_order_acquire, boost::memory_order_relaxed);
+		return boost::atomic<IntegralCounterType>::compare_exchange_strong( testval, newval, boost::memory_order_acquire, boost::memory_order_acquire);
 	}
 };
 
