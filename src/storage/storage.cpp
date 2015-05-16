@@ -37,6 +37,7 @@
 #include "storageAlterMetaDataTable.hpp"
 #include "databaseAdapter.hpp"
 #include "storage.hpp"
+#include "byteOrderMark.hpp"
 #include "private/dll_tags.hpp"
 #include <string>
 #include <vector>
@@ -116,7 +117,7 @@ void Storage::createStorage( const std::string& configsource, DatabaseClientInte
 {
 	bool useAcl = false;
 	std::string metadata;
-	enum {ByteOrderMark=0xFCfdFEff};
+	ByteOrderMark byteOrderMark;
 
 	std::string src = configsource;
 
@@ -133,7 +134,7 @@ void Storage::createStorage( const std::string& configsource, DatabaseClientInte
 	stor.store( transaction.get(), "DocNo", 1);
 	stor.store( transaction.get(), "AttribNo", 1);
 	stor.store( transaction.get(), "NofDocs", 0);
-	stor.store( transaction.get(), "ByteOrderMark", (Index)ByteOrderMark);
+	stor.store( transaction.get(), "ByteOrderMark", byteOrderMark.value());
 	if (useAcl)
 	{
 		stor.store( transaction.get(), "UserNo", 1);
