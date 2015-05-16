@@ -120,8 +120,6 @@ void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 		m_metaDataBlockCache->declareVoid( *ri);
 	}
 	m_metaDataBlockCache->refresh();
-
-	storeVariables();
 }
 
 void StorageClient::loadVariables()
