@@ -70,7 +70,8 @@ public:
 			const std::string& type_,
 			unsigned int maxlen_,
 			unsigned int summarylen_,
-			unsigned int structseeklen_);
+			unsigned int structseeklen_,
+			const std::pair<std::string,std::string>& matchmark_);
 	virtual ~SummarizerExecutionContextMatchPhrase();
 
 	virtual void addSummarizationFeature(
@@ -88,6 +89,7 @@ private:
 	unsigned int m_nofsummaries;
 	unsigned int m_summarylen;
 	unsigned int m_structseeklen;
+	std::pair<std::string,std::string> m_matchmark;
 	float m_nofCollectionDocuments;
 	std::vector<PostingIteratorInterface*> m_itr;
 	std::vector<float> m_weights;
@@ -121,7 +123,7 @@ public:
 			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
 		return new SummarizerExecutionContextMatchPhrase(
-				storage, m_processor, m_type, m_nofsummaries, m_summarylen, m_structseeklen);
+				storage, m_processor, m_type, m_nofsummaries, m_summarylen, m_structseeklen, m_matchmark);
 	}
 
 	virtual std::string tostring() const
@@ -138,6 +140,7 @@ private:
 	unsigned int m_nofsummaries;
 	unsigned int m_summarylen;
 	unsigned int m_structseeklen;
+	std::pair<std::string,std::string> m_matchmark;
 	const QueryProcessorInterface* m_processor;
 };
 

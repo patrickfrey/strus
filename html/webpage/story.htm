@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Story of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey <patrickpfrey (a) yahoo (dt) com" />
+	<link rel="stylesheet" type="text/css" href="basic-profile.css" title="Basic Profile" media="all" />
+	<title>Strus</title>
+</head>
+
+<body>
+<div id="wrap">
+	<div id="content">
+		<h2>What is strus ?</h2>
+		<p>Strus is a set of libraries and tools to build the core of a scalable search engine.
+		Core means that strus focuses only on some parts needed for building a search
+		engine. Other components are just left to people or groups  
+		for implementing them. Strus focusses on providing reasonable interfaces for these 
+		components.
+		</p><p>
+		Here is list of components that are "outsourced" to avoid spending time on things
+		where I am not able to provide a competitive solution:
+		<ul>
+		<li>The crawler (robot), that searches for documents in the the internet or an intranet,
+		extracts and possibly transforms the content the ACLs for user rights is not part of 
+		strus. 
+		</li>
+		<li>The document analyzer or indexer exists as a project, but it is not interlinked
+		in an intrusive way with the storage code. There exist more sophisticated 
+		solutions to analyze documents than the strusAnalyzer. So this component should
+		be replacable without too much hassle.
+		</li>
+		<li>
+		The database used to 
+		</li>
+		</p>
+		<h2>Why to build yet another search engine ?</h2>
+		<p>
+		</p>
+		<h2>Personal motivation</h2>
+		<p>The project <i>strus</i> started just out of frustration. I was working on a project
+		that was doomed from the beginning for two years. After realising that it had to fail,
+		I had to focus on finding a new job. Unfortunately this proved to be more difficult
+		than I thought. I had to do something to keep myself spinning and so I started a
+		this project dealing with a topic that I know by heart. I was working for ten 
+		years in a company providing services for information retrieval and also implementing
+		the core of the search engine for these services. So I knew what it was about and the
+		problems I had to face. In september 2014 I started the project strus.
+		</p>
+	</div>
+</div>
+</body>
+</html>
+

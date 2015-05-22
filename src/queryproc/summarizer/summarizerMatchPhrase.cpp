@@ -47,6 +47,30 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 	{
 		m_type = value;
 	}
+	else if (utils::caseInsensitiveEquals( name, "mark"))
+	{
+		char const* mid = std::strchr( value.c_str(), '$');
+		while (mid[1] == '$')
+		{
+			mid = std::strchr( mid+2, '$');
+		}
+		if (mid)
+		{
+			m_matchmark.first = std::string( value.c_str(), mid - value.c_str());
+			m_matchmark.second = std::string( mid+1);
+		}
+		else
+		{
+			if (m_matchmark.first.size())
+			{
+				m_matchmark.second = value;
+			}
+			else
+			{
+				m_matchmark.first = value;
+			}
+		}
+	}
 	else if (utils::caseInsensitiveEquals( name, "nof"))
 	{
 		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
@@ -83,6 +107,10 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	{
 		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
 	}
+	else if (utils::caseInsensitiveEquals( name, "mark"))
+	{
+		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
 	else
 	{
 		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
@@ -96,7 +124,8 @@ SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
 		const std::string& type_,
 		unsigned int nofsummaries_,
 		unsigned int summarylen_,
-		unsigned int structseeklen_)
+		unsigned int structseeklen_,
+		const std::pair<std::string,std::string>& matchmark_)
 	:m_storage(storage_)
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
@@ -104,6 +133,7 @@ SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
 	,m_nofsummaries(nofsummaries_)
 	,m_summarylen(summarylen_)
 	,m_structseeklen(structseeklen_)
+	,m_matchmark(matchmark_)
 	,m_nofCollectionDocuments((float)storage_->globalNofDocumentsInserted())
 	,m_itr()
 	,m_phrasestruct(0)
@@ -200,7 +230,12 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 			Index ph = m_phrasestruct->skipPos( pos<=(Index)m_structseeklen?1:(pos-m_structseeklen));
 			if (ph && ph < pos)
 			{
-				pos = ph;
+				pos = ph+1;
+			}
+			else
+			{
+				pos -= (m_structseeklen/2);
+				if (pos <= 0) pos = 1;
 			}
 		}
 		else
@@ -235,12 +270,37 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 		bool containsMatch = ((unsigned int)(wi->pos + wi->size) <= (unsigned int)(lastpos) && wi->pos >= pos);
 		if (containsMatch)
 		{
+			enum {MatchBefore,MatchAfter,MatchDone} matchState = MatchBefore;
 			for (; pos <= lastpos; ++pos)
 			{
 				if (m_forwardindex->skipPos(pos) == pos)
 				{
 					if (!phrase.empty()) phrase.push_back(' ');
+					switch (matchState)
+					{
+						case MatchBefore:
+							if (pos >= wi->pos)
+							{
+								phrase.append( m_matchmark.first);
+								matchState = MatchAfter;
+							}
+							/* no  break here! */
+						case MatchAfter:
+							if (pos > (Index)(wi->pos + wi->size))
+							{
+								phrase.append( m_matchmark.second);
+								matchState = MatchDone;
+							}
+							break;
+						case MatchDone:
+							break;
+					}
 					phrase.append( m_forwardindex->fetch());
+				}
+				if (matchState == MatchAfter)
+				{
+					phrase.append( m_matchmark.second);
+					matchState = MatchDone;
 				}
 			}
 			rt.push_back( SummaryElement( phrase, 1.0));
