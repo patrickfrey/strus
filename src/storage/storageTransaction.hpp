@@ -41,7 +41,6 @@
 #include "invertedIndexMap.hpp"
 #include "forwardIndexBlock.hpp"
 #include "forwardIndexMap.hpp"
-#include "documentFrequencyMap.hpp"
 #include "keyMap.hpp"
 #include "keyMapInv.hpp"
 #include "keyAllocatorInterface.hpp"

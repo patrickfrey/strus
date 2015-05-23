@@ -211,7 +211,7 @@ void InvertedIndexMap::getWriteBatch(
 				m_map[ key];	//... construct member (default 0) if it does not exist
 						// <=> mark as deleted, if not member of set of inserts
 
-				m_dfmap.decrement( it.typeno, it.termno, it.ff);
+				m_dfmap.decrement( it.typeno, it.termno);
 			}
 		}
 		dbadapter_inv.remove( transaction, *di);
@@ -230,7 +230,7 @@ void InvertedIndexMap::getWriteBatch(
 			// inv blk:
 			invblk.append( li->typeno, li->termno, li->ff);
 			// df map:
-			m_dfmap.increment( li->typeno, li->termno, li->ff);
+			m_dfmap.increment( li->typeno, li->termno);
 		}
 		dbadapter_inv.store( transaction, invblk);
 	}
