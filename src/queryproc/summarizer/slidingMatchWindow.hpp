@@ -29,6 +29,7 @@
 #ifndef _STRUS_SUMMARIZER_MATCH_PHRASE_SLIDING_MATCH_WINDOW_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_MATCH_PHRASE_SLIDING_MATCH_WINDOW_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "private/bitOperations.hpp"
 #include <limits>
 #include <set>
 #include <algorithm>
@@ -36,6 +37,29 @@
 
 namespace strus
 {
+
+class PosWeightTab
+{
+public:
+	PosWeightTab()
+	{
+		unsigned int ii=0;
+		for (; ii<TabSize; ++ii)
+		{
+			m_vec[ii] = (1-tanh( (float)ii/100));
+		}
+	}
+
+	float operator[]( const Index& pos)
+	{
+		if (pos >= TabSize) return 0.0;
+		return m_vec[ pos];
+	}
+
+private:
+	enum {TabSize=200};
+	float m_vec[TabSize];
+};
 
 class SlidingMatchWindow
 {
@@ -91,17 +115,33 @@ public:
 
 	struct Window
 	{
-		Index pos;
-		unsigned int size;
+		Index m_posno;
+		unsigned int m_size;
+		uint64_t m_selected;
 
-		Window( const Index& pos_, unsigned int size_)
-			:pos(pos_),size(size_){}
+		Window( const Index& posno_, unsigned int size_, uint64_t selected_)
+			:m_posno(posno_),m_size(size_),m_selected(selected_){}
 		Window( const Window& o)
-			:pos(o.pos),size(o.size){}
+			:m_posno(o.m_posno),m_size(o.m_size),m_selected(o.m_selected){}
 
 		bool operator < (const Window& o) const
 		{
-			return pos < o.pos;
+			return m_posno < o.m_posno;
+		}
+
+		void setSelectedPos( const Index& posno_)
+		{
+			if (posno_ - m_posno > 64) return;
+			m_selected |= ((uint64_t)1 << (posno_ - m_posno));
+		}
+		Index skipPos( Index posno_) const
+		{
+			if (posno_ >= m_posno + 64) return 0;
+			if (posno_ < m_posno) posno_ = m_posno;
+			uint64_t mask = ((uint64_t)1 << (posno_ - m_posno)) - 1;
+			Index bp = BitOperations::bitScanForward( m_selected & ~mask);
+			if (!bp) return 0;
+			return (bp - 1 + m_posno);
 		}
 	};
 
@@ -111,21 +151,31 @@ public:
 		std::set<MatchWindow>::const_iterator wi = m_windows.begin(), we = m_windows.end();
 		for (; wi != we; ++wi)
 		{
-			rt.push_back( Window( wi->m_posno, wi->m_size));
+			rt.push_back( Window( wi->m_posno, wi->m_size, wi->m_selected));
 		}
 		std::sort( rt.begin(), rt.end());
 		std::vector<Window>::iterator ri = rt.begin(), re = rt.end();
+
 		while (ri != re)
 		{
 			std::vector<Window>::iterator ri_next = ri;
 			++ri_next;
-			if (ri_next != re && (unsigned int)(ri->pos + ri->size + 1) >= (unsigned int)(ri_next->pos))
+			if (ri_next != re && (unsigned int)(ri->m_posno + ri->m_size + 1) >= (unsigned int)(ri_next->m_posno))
 			{
 				//... ri reaches into ri_next
-				ri->size = ri_next->pos + ri_next->size - ri->pos;
+				ri->m_size = ri_next->m_posno + ri_next->m_size - ri->m_posno;
+				Index pp = ri_next->skipPos( ri->m_posno);
+				for (; pp; pp=ri_next->skipPos( pp+1))
+				{
+					ri->setSelectedPos( pp);
+				}
 				rt.erase( ri_next);
+				re = rt.end();
 			}
-			++ri;
+			else
+			{
+				++ri;
+			}
 		}
 		return rt;
 	}
@@ -133,14 +183,17 @@ public:
 private:
 	void calculate()
 	{
+		static PosWeightTab posWeightTab;
+
 		std::set<Match>::const_iterator mi = m_matchset.begin(), me = m_matchset.end();
 		if (mi == me) return;
-		float posw = logf( mi->posno);
+		float posw = posWeightTab[ mi->posno];
 
 		Index pp = mi->posno;
-		Index last_pp = mi->posno;
 		float ww = mi->weight;
 		float sqw = (ww*ww) / (16 * m_windowSize+1);
+		MatchWindow win( pp, 1, ww);
+		win.setSelectedPos( pp);
 
 		for (++mi; mi != me && (Index)(pp + m_windowSize) > mi->posno; ++mi)
 		{
@@ -149,27 +202,28 @@ private:
 			mi_next++;
 			if (mi_next != me)
 			{
-				weight += mi_next->weight * (1/(mi_next->posno - mi->posno));
+				weight += mi_next->weight * (1/(mi_next->posno - mi->posno + 1));
 			}
 			ww += weight;
 			float sqw2 = (ww*ww) / (16 * m_windowSize + mi->posno - pp + 1);
 			if (sqw2 < sqw) break;
 			sqw = sqw2;
-			last_pp = mi->posno;
+			win.m_size = mi->posno - win.m_posno + 1;
+			win.setSelectedPos( mi->posno);
 		}
-		pushWindow( pp, last_pp - pp + 1, sqw - posw);
+		win.m_weight = sqw + (sqw * posw)/8;
+		pushWindow( win);
 	}
 
 	struct MatchWindow
+		:public Window
 	{
-		Index m_posno;
-		unsigned int m_size;
 		float m_weight;
 
 		MatchWindow( const Index& posno_, unsigned int size_, float weight_)
-			:m_posno(posno_),m_size(size_),m_weight(weight_){}
+			:Window(posno_,size_,0),m_weight(weight_){}
 		MatchWindow( const MatchWindow& o)
-			:m_posno(o.m_posno),m_size(o.m_size),m_weight(o.m_weight){}
+			:Window(o),m_weight(o.m_weight){}
 
 		bool operator<( const MatchWindow& o) const
 		{
@@ -180,14 +234,28 @@ private:
 		}
 	};
 
-	void pushWindow( Index posno_, unsigned int size_, float weight_)
+	void pushWindow( const MatchWindow& win)
 	{
-		m_windows.insert( MatchWindow( posno_, size_, weight_));
-		if (m_windows.size() >= m_nofWindows)
+		if (m_windows.size())
 		{
 			std::set<MatchWindow>::iterator it = m_windows.end();
 			--it;
-			m_windows.erase(it);
+			if (it->m_weight < win.m_weight)
+			{
+				if (m_windows.size() >= m_nofWindows)
+				{
+					m_windows.erase(it);
+				}
+				m_windows.insert( win);
+			}
+			else if (m_windows.size() < m_nofWindows)
+			{
+				m_windows.insert( win);
+			}
+		}
+		else
+		{
+			m_windows.insert( win);
 		}
 	}
 

@@ -85,6 +85,10 @@ Index PostingIterator::skipDoc( const Index& docno_)
 
 Index PostingIterator::skipPos( const Index& firstpos_)
 {
+	if (!m_docno)
+	{
+		return 0;
+	}
 	if (m_docno != m_posinfoIterator.skipDoc( m_docno))
 	{
 		throw strus::runtime_error( _TXT( "corrupt index, document not in posinfo index"));

@@ -32,6 +32,7 @@
 #include <cmath>
 #include <ctime>
 #include <set>
+#include <limits>
 
 using namespace strus;
 
@@ -124,7 +125,7 @@ typedef std::set<
 		FixedStructAllocator<FeatStruct,MaxNofFeatures> > FeatStructSet;
 
 
-static void handleSequence( const FeatStructSet& wset, float* accu, float weight)
+static void handleSequence( const FeatStructSet& wset, float* accu, float weight, const Index& docno)
 {
 	FeatStructSet::iterator first = wset.begin();
 	FeatStructSet::iterator next = first; ++next;
@@ -144,12 +145,12 @@ static void handleSequence( const FeatStructSet& wset, float* accu, float weight
 	}
 }
 
-static Index handleSameSentence( std::vector<WeightingExecutionContextBM25_dpfc::Feature>& struct_featar, const FeatStructSet& wset, float* accu, const Index& startPos, float weight)
+static Index handleSameSentence( std::vector<WeightingExecutionContextBM25_dpfc::Feature>& struct_featar, const FeatStructSet& wset, float* accu, const Index& startPos, float weight, const Index& docno)
 {
 	typedef WeightingExecutionContextBM25_dpfc::Feature Feature;
 	std::vector<Feature>::iterator si = struct_featar.begin(), se = struct_featar.end();
 	Index pos;
-	Index endOfSentence = 0xFFffFFff;
+	Index endOfSentence = std::numeric_limits<Index>::max();
 	for (; si != se; ++si)
 	{
 		pos = si->itr->skipPos( startPos);
@@ -216,6 +217,11 @@ float WeightingExecutionContextBM25_dpfc::call( const Index& docno)
 	// Calculate ff increments based on proximity criteria:
 	while (wset.size() > 1)
 	{
+		std::vector<Feature>::const_iterator si = m_struct_featar.begin(), se = m_struct_featar.end();
+		for (; si != se; ++si)
+		{
+			si->itr->skipDoc( docno);
+		}
 		// [0] Small optimization for not checkin elements with a too big distance (m_proximityMinDist) to others
 		FeatStructSet::iterator first = wset.begin();
 		FeatStructSet::iterator next = first; ++next;
@@ -230,16 +236,21 @@ float WeightingExecutionContextBM25_dpfc::call( const Index& docno)
 			}
 			continue;
 		}
-
 		// [1] Check sequence of subsequent elements in query:
-		handleSequence( wset, accu, m_sequence_ff_incr);
+		handleSequence( wset, accu, m_sequence_ff_incr, docno);
 
 		// [2] Check elements in the same sentence:
-		if (m_struct_featar.size())
+		if (m_struct_featar.size() && m_sentence_ff_incr > std::numeric_limits<float>::epsilon())
 		{
-			Index nextSentence = handleSameSentence( m_struct_featar, wset, accu, first->pos, m_sentence_ff_incr);
-			nextSentence = handleSameSentence( m_struct_featar, wset, accu, nextSentence+1, m_sentence_ff_incr/2);
-			nextSentence = handleSameSentence( m_struct_featar, wset, accu, nextSentence+1, m_sentence_ff_incr/3);
+			Index nextSentence = handleSameSentence( m_struct_featar, wset, accu, first->pos, m_sentence_ff_incr, docno);
+			if (nextSentence != std::numeric_limits<Index>::max())
+			{
+				nextSentence = handleSameSentence( m_struct_featar, wset, accu, nextSentence+1, m_sentence_ff_incr/2, docno);
+				if (nextSentence != std::numeric_limits<Index>::max())
+				{
+					nextSentence = handleSameSentence( m_struct_featar, wset, accu, nextSentence+1, m_sentence_ff_incr/3, docno);
+				}
+			}
 		}
 		FeatStruct elem = *wset.begin();
 		wset.erase( wset.begin());

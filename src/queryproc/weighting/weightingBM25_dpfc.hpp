@@ -108,7 +108,7 @@ class WeightingFunctionInstanceBM25_dpfc
 {
 public:
 	explicit WeightingFunctionInstanceBM25_dpfc()
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_proximityMinDist(300),m_title_ff_incr(1.5),m_sequence_ff_incr(1.5),m_sentence_ff_incr(0.5)
+		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_proximityMinDist(150),m_title_ff_incr(1.5),m_sequence_ff_incr(1.5),m_sentence_ff_incr(0.5)
 	{}
 
 	virtual ~WeightingFunctionInstanceBM25_dpfc(){}

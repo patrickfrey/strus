@@ -416,7 +416,7 @@ std::vector<ResultDocument> Query::evaluate()
 				}
 			}
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "add feature " << si->functionName() << " weight " << wi->weight() << std::endl;
+			std::cout << "add feature " << wi->functionName() << " weight " << wi->weight() << std::endl;
 #endif
 			accumulator.addFeature( wi->weight(), execContext.release());
 		}

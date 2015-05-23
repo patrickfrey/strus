@@ -224,7 +224,7 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 	for (; wi != we && rt.size() < m_nofsummaries; ++wi)
 	{
 		std::string phrase;
-		Index pos = wi->pos;
+		Index pos = wi->m_posno;
 		if (m_phrasestruct)
 		{
 			Index ph = m_phrasestruct->skipPos( pos<=(Index)m_structseeklen?1:(pos-m_structseeklen));
@@ -246,11 +246,11 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 		if (lastpos && pos < lastpos)
 		{
 			pos = lastpos+1;
-			if (pos > wi->pos) continue;
+			if (pos > wi->m_posno) continue;
 		}
 		if (m_phrasestruct)
 		{
-			lastpos = wi->pos + wi->size;
+			lastpos = wi->m_posno + wi->m_size;
 			Index lp = m_phrasestruct->skipPos( lastpos);
 			{
 				if (lp && (Index)(lastpos + m_structseeklen) > lp)
@@ -265,9 +265,9 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 		}
 		else
 		{
-			lastpos = wi->pos + wi->size + (m_structseeklen/2);
+			lastpos = wi->m_posno + wi->m_size + (m_structseeklen/2);
 		}
-		bool containsMatch = ((unsigned int)(wi->pos + wi->size) <= (unsigned int)(lastpos) && wi->pos >= pos);
+		bool containsMatch = ((unsigned int)(wi->m_posno + wi->m_size) <= (unsigned int)(lastpos) && wi->m_posno >= pos);
 		if (containsMatch)
 		{
 			enum {MatchBefore,MatchAfter,MatchDone} matchState = MatchBefore;
@@ -279,17 +279,17 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 					switch (matchState)
 					{
 						case MatchBefore:
-							if (pos >= wi->pos)
+							if (pos == wi->skipPos(pos))
 							{
 								phrase.append( m_matchmark.first);
 								matchState = MatchAfter;
 							}
-							/* no  break here! */
+							break;
 						case MatchAfter:
-							if (pos > (Index)(wi->pos + wi->size))
+							if (pos != wi->skipPos(pos))
 							{
 								phrase.append( m_matchmark.second);
-								matchState = MatchDone;
+								matchState = MatchBefore;
 							}
 							break;
 						case MatchDone:
@@ -297,11 +297,11 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 					}
 					phrase.append( m_forwardindex->fetch());
 				}
-				if (matchState == MatchAfter)
-				{
-					phrase.append( m_matchmark.second);
-					matchState = MatchDone;
-				}
+			}
+			if (matchState == MatchAfter)
+			{
+				phrase.append( m_matchmark.second);
+				matchState = MatchDone;
 			}
 			rt.push_back( SummaryElement( phrase, 1.0));
 		}
