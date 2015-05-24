@@ -52,7 +52,7 @@ MetaDataBlock::MetaDataBlock( const MetaDataDescription* descr_,
 {
 	std::size_t blkbytesize = m_descr->bytesize() * BlockSize;
 	if (blksize_ != blkbytesize) throw strus::runtime_error( _TXT( "meta data block size mismatch"));
-	m_ptr = std::malloc( BlockSize * descr_->bytesize());
+	m_ptr = std::malloc( blkbytesize);
 	if (!m_ptr) throw std::bad_alloc();
 	std::memcpy( m_ptr, blk_, blkbytesize);
 }
@@ -61,7 +61,7 @@ MetaDataBlock::MetaDataBlock( const MetaDataBlock& o)
 	:m_descr(o.m_descr),m_blockno(o.m_blockno),m_ptr(0)
 {
 	std::size_t blkbytesize = m_descr->bytesize() * BlockSize;
-	m_ptr = std::malloc( BlockSize * o.m_descr->bytesize());
+	m_ptr = std::malloc( blkbytesize);
 	if (!m_ptr) throw std::bad_alloc();
 	std::memcpy( m_ptr, o.m_ptr, blkbytesize);
 }

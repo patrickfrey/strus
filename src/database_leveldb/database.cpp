@@ -136,6 +136,16 @@ void Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 			blkcnt = 0;
 		}
 	}
+	if (blkcnt > 0)
+	{
+		leveldb::Status status = db->Write( options, &batch);
+		if (!status.ok())
+		{
+			std::string statusstr( status.ToString());
+			throw strus::runtime_error( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+		}
+		batch.Clear();
+	}
 }
 
 const char* Database::getConfigDescription( ConfigType type) const
