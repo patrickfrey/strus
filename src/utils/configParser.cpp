@@ -46,7 +46,7 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 		//... skip spaces
 
 		std::string cfgkey;
-		while ((*cc|32) >= 'a' && (*cc|32) <= 'z')
+		while (((*cc|32) >= 'a' && (*cc|32) <= 'z') || *cc == '_' || (*cc >= '0' && *cc <= '9'))
 		{
 			cfgkey.push_back( *cc++);
 		}
