@@ -33,6 +33,7 @@
 #include "strus/reference.hpp"
 #include "strus/databaseOptions.hpp"
 #include "private/internationalization.hpp"
+#include "getMemorySize.h"
 #include <stdexcept>
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
@@ -160,7 +161,7 @@ class DatabaseBackupCursor
 {
 public:
 	explicit DatabaseBackupCursor( leveldb::DB* db_)
-		:DatabaseCursor( db_, false){}
+		:DatabaseCursor( db_, false, true){}
 
 	virtual bool fetch(
 			const char*& key,

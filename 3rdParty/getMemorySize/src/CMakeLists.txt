@@ -15,7 +15,7 @@ include_directories(
 # -------------------------------------------
 # SNOWBALL STEMMER LIBRARY
 # -------------------------------------------
-add_library( getMemorySize_static STATIC ${source_files})
+add_library( getmemsize_static STATIC ${source_files} )
 
 
 

@@ -12,7 +12,7 @@ extern "C"
 size_t getMemorySize();
 
 #ifdef __cplusplus
-extern "C"
 }
+#endif
 #endif
 
