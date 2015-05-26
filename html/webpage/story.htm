@@ -6,7 +6,7 @@
 	<meta name="description" content="Story of strus, a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
 	<meta name="author" content="Patrick Frey <patrickpfrey (a) yahoo (dt) com" />
-	<link rel="stylesheet" type="text/css" href="basic-profile.css" title="Basic Profile" media="all" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
 	<title>Strus</title>
 </head>
 
@@ -14,27 +14,92 @@
 <div id="wrap">
 	<div id="content">
 		<h2>What is strus ?</h2>
-		<p>Strus is a set of libraries and tools to build the core of a scalable search engine.
-		Core means that strus focuses only on some parts needed for building a search
-		engine. Other components are just left to people or groups  
-		for implementing them. Strus focusses on providing reasonable interfaces for these 
-		components.
-		</p><p>
-		Here is list of components that are "outsourced" to avoid spending time on things
-		where I am not able to provide a competitive solution:
-		<ul>
-		<li>The crawler (robot), that searches for documents in the the internet or an intranet,
-		extracts and possibly transforms the content the ACLs for user rights is not part of 
-		strus. 
-		</li>
-		<li>The document analyzer or indexer exists as a project, but it is not interlinked
-		in an intrusive way with the storage code. There exist more sophisticated 
-		solutions to analyze documents than the strusAnalyzer. So this component should
-		be replacable without too much hassle.
-		</li>
-		<li>
-		The database used to 
-		</li>
+		<p>Strus is a set of components (libraries, programs and language bindings)
+		to build the core of a scalable full text search engine. It aims to cover
+		classical IR as well as structured search for arbitrary complex expressions 
+		on the boolean algebra of sets of term occurrencies (d,p) where d references a 
+		document and p a discrete position number. Besides matching of expressions,
+		strus also provides a mechanism to attach variables on subexpression matches
+		than can be referenced in the presentation of the query result.
+		<br/>
+		The core components strus implements are the following:
+		</p>
+		<h3>Key/value store database</h3>
+		<p>A key/value store database stores blocks of data for fast retrieval by their key.
+		The database is separated as own component to allow competitive solutions
+		for various architectures with different requirements implemented by experts
+		for this topic. The key/value store database has to implement an upper bound
+		seek on keys to support fast merging operations needed by the logical storage.
+		Currently there exists an implementation based on LevelDB
+		(In fact, LevelDB was the main stimulus for me to write a search engine.
+		I looked at it and noticed: "Heureka ! It has an upper bound seek. With this
+		I can write a search engine !").
+		</p>
+		<h3>Storage</h3>
+		<p> The storage provides interfaces to define the units to store
+		for retrieval and presentation of the search result. It allows you to
+		define documents as numbered lists of atomic terms, content, attributes
+		and meta data. For every document you can define user rights that restrict 
+		access to a document to defined users. The storage groups these 
+		definitions into blocks and tables stored for fast access in underlying 
+		the key/value store database.
+		</p>
+		<h3>Query evaluation</h3>
+		<p>The query evaluation combines the occurrencies of search terms according 
+		to a given query to higher level expressions, ranks a set of selected documents
+		according some defined weighting schemes and returns
+		a list of documents with named attributes as result.
+		Query evaluation is defined with the help of functions of two different types:</p>
+		<h4>Weighting</h4>
+		<p>Weighting accumulates a value as the weight of a document based on
+		a retrieval scheme (e.g. BM25, tf-idf, proximity weighting, etc.).
+		and the occurrencies of expressions in this document.
+		</p>
+		<h4>Summarization</h4>
+		<p>Summarization extracts content elements, attributes or meta data from a
+		matching document. As result summarizers return a set of weighted key
+		value pairs for the presentation of the result. Summarization can be
+		used for showing properties of the result to a user as well as for
+		exraction of data for feature selection for another iteration of
+		query evaluation in the background
+		(<a href="http://en.wikipedia.org/wiki/Relevance_feedback">relevance feedback</a>).
+		</p>
+		<h2>Associated components of strus</h2>
+		<p>For feeding a search engine there are some components needed that are not part
+		of the core.
+		<h3>Analyzer</h3>
+		<p> The analyzer (also called indexer in other information retrieval engines)
+			exists as a project, but it is not interlinked
+			in an intrusive way with the strus core. The strusAnalyzer provides
+			segmentation, tokenization and normalization to get the atomic terms
+			to insert into the storage and to tokenize and normalize phrases of
+			the query accordingly. The analyzer uses the following components
+			to do its job:
+		</p>
+		<h4>Segmenter</h4>
+		<p>The segmented splits a document of a certain format (XML,JSON,etc.) into content 
+		chunks defined by selection expressions.
+		Currently there exists only an implementation for XML based on the <a href="textwolf.net">textwolf</a>
+		library using <a href="http://en.wikipedia.org/wiki/XPath#Abbreviated_syntax">abbreviated syntax of XPath</a>
+		as selection language.
+		</p>
+		<h4>Tokenizer</h4>
+		<p>The tokenizer splits a segment or alternatively the join of all segments 
+		of a certain type into tokens. The tokens a referencing elements in the 
+		segments without modification.
+		</p>
+		<h4>Normalizer</h4>
+		<p>The normalizer maps a token to a term to be inserted into the storage.
+		</p>
+		<h2>What is missing in strus ?</h2>
+		<p>Several parts are not a subject for strus. 
+		Here follows a list of parts you may miss and have to find elsewhere.
+		</p>
+		<h3>Crawler</h3>
+		<p> A crawler (also called robot) that searches for documents in the the internet 
+		or an intranet, extracts and possibly transforms the content the ACLs for user rights <b>is not</b>
+		part of strus. There exist sophisticated solutions for different classes of document
+		collections.
 		</p>
 		<h2>Why to build yet another search engine ?</h2>
 		<p>
