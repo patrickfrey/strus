@@ -47,7 +47,8 @@ WeightingExecutionContextBM25_dpfc::WeightingExecutionContextBM25_dpfc(
 		unsigned int proximityMinDist_,
 		float title_ff_incr_,
 		float sequence_ff_incr_,
-		float sentence_ff_incr_)
+		float sentence_ff_incr_,
+		float relevant_df_factor_)
 	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_)
 	,m_nofCollectionDocuments(storage->globalNofDocumentsInserted())
 	,m_weight_featar()
@@ -59,6 +60,7 @@ WeightingExecutionContextBM25_dpfc::WeightingExecutionContextBM25_dpfc(
 	,m_title_ff_incr(title_ff_incr_)
 	,m_sequence_ff_incr(sequence_ff_incr_)
 	,m_sentence_ff_incr(sentence_ff_incr_)
+	,m_relevant_df_factor(relevant_df_factor_)
 {}
 
 void WeightingExecutionContextBM25_dpfc::addWeightingFeature(
@@ -70,7 +72,8 @@ void WeightingExecutionContextBM25_dpfc::addWeightingFeature(
 	{
 		float nofMatches = itr_->documentFrequency();
 		float idf = 0.0;
-	
+		bool relevant = (m_nofCollectionDocuments * m_relevant_df_factor > nofMatches);
+
 		if (m_nofCollectionDocuments > nofMatches * 2)
 		{
 			idf = logf(
@@ -81,11 +84,11 @@ void WeightingExecutionContextBM25_dpfc::addWeightingFeature(
 		{
 			idf = 0.00001;
 		}
-		m_weight_featar.push_back( Feature( itr_, weight_, idf));
+		m_weight_featar.push_back( Feature( itr_, weight_, idf, relevant));
 	}
 	else if (utils::caseInsensitiveEquals( name_, "struct"))
 	{
-		m_struct_featar.push_back( Feature( itr_, weight_, 0.0));
+		m_struct_featar.push_back( Feature( itr_, weight_, 0.0, false));
 	}
 	else if (utils::caseInsensitiveEquals( name_, "title"))
 	{
@@ -225,6 +228,12 @@ float WeightingExecutionContextBM25_dpfc::call( const Index& docno)
 		// [0] Small optimization for not checkin elements with a too big distance (m_proximityMinDist) to others
 		FeatStructSet::iterator first = wset.begin();
 		FeatStructSet::iterator next = first; ++next;
+		for (; next != wset.end(); ++next)
+		{
+			if (m_weight_featar[ next->itridx].relevant) break;
+		}
+		if (next == wset.end()) break;
+
 		if (first->pos + (Index)m_proximityMinDist < next->pos)
 		{
 			FeatStruct elem = *wset.begin();
@@ -312,7 +321,8 @@ void WeightingFunctionInstanceBM25_dpfc::addStringParameter( const std::string& 
 	||  utils::caseInsensitiveEquals( name, "proxmindist")
 	||  utils::caseInsensitiveEquals( name, "titleinc")
 	||  utils::caseInsensitiveEquals( name, "seqinc")
-	||  utils::caseInsensitiveEquals( name, "strinc"))
+	||  utils::caseInsensitiveEquals( name, "strinc")
+	||  utils::caseInsensitiveEquals( name, "relevant"))
 	{
 		addNumericParameter( name, arithmeticVariantFromString( value));
 	}
@@ -351,6 +361,10 @@ void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string&
 	else if (utils::caseInsensitiveEquals( name, "strinc"))
 	{
 		m_sentence_ff_incr = (float)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "relevant"))
+	{
+		m_relevant_df_factor = (float)value;
 	}
 	else
 	{

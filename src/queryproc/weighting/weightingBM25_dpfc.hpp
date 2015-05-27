@@ -63,18 +63,20 @@ public:
 		unsigned int proximityMinDist_,
 		float title_ff_incr,
 		float sequence_ff_incr,
-		float sentence_ff_incr);
+		float sentence_ff_incr,
+		float relevant_df_factor);
 
 	struct Feature
 	{
 		PostingIteratorInterface* itr;
 		float weight;
 		float idf;
+		bool relevant;
 
-		Feature( PostingIteratorInterface* itr_, float weight_, float idf_)
-			:itr(itr_),weight(weight_),idf(idf_){}
+		Feature( PostingIteratorInterface* itr_, float weight_, float idf_, bool relevant_)
+			:itr(itr_),weight(weight_),idf(idf_),relevant(relevant_){}
 		Feature( const Feature& o)
-			:itr(o.itr),weight(o.weight),idf(o.idf){}
+			:itr(o.itr),weight(o.weight),idf(o.idf),relevant(o.relevant){}
 	};
 
 	virtual void addWeightingFeature(
@@ -99,6 +101,7 @@ private:
 	float m_title_ff_incr;
 	float m_sequence_ff_incr;
 	float m_sentence_ff_incr;
+	float m_relevant_df_factor;
 };
 
 /// \class WeightingFunctionInstanceBM25_dpfc
@@ -108,7 +111,7 @@ class WeightingFunctionInstanceBM25_dpfc
 {
 public:
 	explicit WeightingFunctionInstanceBM25_dpfc()
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_proximityMinDist(150),m_title_ff_incr(1.5),m_sequence_ff_incr(1.5),m_sentence_ff_incr(0.5)
+		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_proximityMinDist(150),m_title_ff_incr(1.5),m_sequence_ff_incr(1.5),m_sentence_ff_incr(0.5),m_relevant_df_factor(0.5)
 	{}
 
 	virtual ~WeightingFunctionInstanceBM25_dpfc(){}
@@ -120,14 +123,14 @@ public:
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata) const
 	{
-		return new WeightingExecutionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr);
+		return new WeightingExecutionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr, m_relevant_df_factor);
 	}
 
 	virtual std::string tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen << ", doclen=" << m_attribute_content_doclen << ", doclen_title=" << m_attribute_title_doclen << ", proxmindist=" << m_proximityMinDist << ", titleinc=" << m_title_ff_incr << ", seqinc=" << m_sequence_ff_incr << "strinc=" << m_sentence_ff_incr << std::endl;
+			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen << ", doclen=" << m_attribute_content_doclen << ", doclen_title=" << m_attribute_title_doclen << ", proxmindist=" << m_proximityMinDist << ", titleinc=" << m_title_ff_incr << ", seqinc=" << m_sequence_ff_incr << ", strinc=" << m_sentence_ff_incr << ", relevant=" << m_relevant_df_factor << std::endl;
 		return rt.str();
 	}
 
@@ -141,6 +144,7 @@ private:
 	float m_title_ff_incr;
 	float m_sequence_ff_incr;
 	float m_sentence_ff_incr;
+	float m_relevant_df_factor;
 };
 
 
