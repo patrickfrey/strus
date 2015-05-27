@@ -77,7 +77,7 @@ Query::Query( const Query& o)
 	,m_stack(o.m_stack)
 	,m_metaDataRestrictions(o.m_metaDataRestrictions)
 	,m_variableAssignments(o.m_variableAssignments)
-	,m_maxNofRanks(o.m_maxNofRanks)
+	,m_nofRanks(o.m_nofRanks)
 	,m_minRank(o.m_minRank)
 	,m_username(o.m_username)
 {}
@@ -206,9 +206,9 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 	}
 }
 
-void Query::setMaxNofRanks( std::size_t maxNofRanks_)
+void Query::setMaxNofRanks( std::size_t nofRanks_)
 {
-	m_maxNofRanks = maxNofRanks_;
+	m_nofRanks = nofRanks_;
 }
 
 void Query::setMinRank( std::size_t minRank_)
@@ -332,7 +332,7 @@ std::vector<ResultDocument> Query::evaluate()
 #endif
 
 	// [1] Check initial conditions:
-	if (m_minRank >= m_maxNofRanks)
+	if (m_nofRanks == 0)
 	{
 		return std::vector<ResultDocument>();
 	}
@@ -361,7 +361,7 @@ std::vector<ResultDocument> Query::evaluate()
 	Accumulator accumulator(
 		m_storage,
 		m_metaDataReader.get(), m_metaDataRestrictions,
-		m_maxNofRanks, m_storage->maxDocumentNumber());
+		m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
 
 	// [4.1] Add document selection postings:
 	{
@@ -487,7 +487,7 @@ std::vector<ResultDocument> Query::evaluate()
 	}
 	// [6] Do the Ranking and build the result:
 	std::vector<ResultDocument> rt;
-	Ranker ranker( m_maxNofRanks);
+	Ranker ranker( m_nofRanks + m_minRank);
 
 	Index docno = 0;
 	unsigned int state = 0;
@@ -497,7 +497,7 @@ std::vector<ResultDocument> Query::evaluate()
 	while (accumulator.nextRank( docno, state, weight))
 	{
 		ranker.insert( WeightedDocument( docno, weight));
-		if (state > prev_state && ranker.nofRanks() >= m_maxNofRanks)
+		if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
 		{
 			break;
 		}

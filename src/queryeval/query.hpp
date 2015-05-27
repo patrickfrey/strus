@@ -78,8 +78,8 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true);
 
-	virtual void setMaxNofRanks( std::size_t maxNofRanks_);
-	virtual void setMinRank( std::size_t maxNofRanks_);
+	virtual void setMaxNofRanks( std::size_t nofRanks_);
+	virtual void setMinRank( std::size_t minRank_);
 	virtual void setUserName( const std::string& username_);
 
 	virtual std::vector<ResultDocument> evaluate();
@@ -179,7 +179,7 @@ private:
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
 	std::map<NodeAddress,PostingIteratorInterface*> m_nodePostingsMap;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
-	std::size_t m_maxNofRanks;
+	std::size_t m_nofRanks;
 	std::size_t m_minRank;
 	std::string m_username;
 };
