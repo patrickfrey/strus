@@ -103,6 +103,32 @@
 		<h4>Normalizer</h4>
 		<p>The normalizer maps a token to a term to be inserted into the storage.
 		</p>
+		<h2>Expandability of strus</h2>
+		<p>Strus offers various interfaces to hook in. The project strusModule provides a
+		mechanism to load functions extending capabilities of the storage or the analyzer
+		of strus.
+		<h3>strus core</h3>
+		<p>You can extend the strus core with own dynamically loadable modules with
+		functions written in C++:
+		<ol>
+		<h4>Iterator join operators</h4>
+		<p>You can define your own functions that create an iterator on postings representing 
+		the result of an n-ary join of iterators on postings.</p>
+		<h4>Weighting functions</h4>
+		<p>You can define your own document weighting functions used for ranking.</p>
+		<h4>Summarizers</h4>
+		<p>You can define your own summarization functions used for attributing the results.</p>
+		<h3>strus analyzer</h3>
+		<p>You can extend the strus analyzer with own dynamically loadable modules with
+		functions written in C++:
+		<ol>
+		<h4>Segmenters</h4>
+		<p>You can define your own segmenters for the document formats you need to process.</p>
+		<h4>Tokenizer</h4>
+		<p>You can define your own tokenizers splitting the document segments into tokens.</p>
+		<h4>Normalizer</h4>
+		<p>You can define your own normalizer functions to produce the retrievable items from 
+		the document tokens for the storage and the query.</p>
 		<h2>What is missing in strus ?</h2>
 		<p>Several parts are not a subject for strus. 
 		Here follows a list of parts you may miss and have to find elsewhere.
