@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for a parametrized summarizer function instance
+/// \file "summarizerFunctionInstanceInterface.hpp"
 #ifndef _STRUS_SUMMARIZER_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #include <string>

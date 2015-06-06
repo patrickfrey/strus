@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface to declare changes in the meta data table structure of the storage
+/// \file "storageAlterMetaDataTableInterface.hpp"
 #ifndef _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
 #include <string>
@@ -35,7 +37,7 @@ namespace strus
 {
 
 /// \class StorageAlterMetaDataTableInterface
-/// \brief Object to declare changes in the meta data table structure of the storage
+/// \brief Interface to declare changes in the meta data table structure of the storage
 class StorageAlterMetaDataTableInterface
 {
 public:

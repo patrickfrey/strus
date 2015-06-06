@@ -26,7 +26,8 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus query processor library
+/// \brief Exported functions of the strus query processor library (container for all types of functions needed for query evaluation)
+/// \file "queryproc.hpp"
 #ifndef _STRUS_QUERY_PROCESSOR_LIB_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_LIB_HPP_INCLUDED
 

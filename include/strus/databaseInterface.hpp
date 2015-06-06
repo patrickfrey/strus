@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Toplevel interface for the key/value store database
+/// \file "databaseInterface.hpp"
 #ifndef _STRUS_DATABASE_INTERFACE_HPP_INCLUDED
 #define _STRUS_DATABASE_INTERFACE_HPP_INCLUDED
 #include <string>

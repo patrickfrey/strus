@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Result element of the query evaluation
+/// \file "resultDocument.hpp"
 #ifndef _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
 #define _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"

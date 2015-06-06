@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface used by the storage to populate its local statistics to other peer storages (distributed index)
+/// \file "storagePeerInterface.hpp"
 #ifndef _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
 

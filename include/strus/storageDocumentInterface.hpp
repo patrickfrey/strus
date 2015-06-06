@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for contructing a document for inserting it into the storage
+/// \file "storageDocumentInterface.hpp"
 #ifndef _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
 #include <string>

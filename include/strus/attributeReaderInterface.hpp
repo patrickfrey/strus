@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface (readonly) for accessing document attributes
+/// \file "attributeReaderInterface.hpp"
 #ifndef _STRUS_ATTRIBUTE_READER_INTERFACE_HPP_INCLUDED
 #define _STRUS_ATTRIBUTE_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

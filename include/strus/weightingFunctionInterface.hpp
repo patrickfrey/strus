@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for a weighting function type
+/// \file "weightingFunctionInterface.hpp"
 #ifndef _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FUNCTION_INTERFACE_HPP_INCLUDED
 #include <vector>

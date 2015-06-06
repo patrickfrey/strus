@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Shared reference of an object that is not shared between different threads.
+/// \file "reference.hpp"
 #ifndef _STRUS_REFERENCE_HPP_INCLUDED
 #define _STRUS_REFERENCE_HPP_INCLUDED
 #include <cstdlib>

@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Weighted document of the query evaluation (result document without attributes)
+/// \file "weightedDocument.hpp"
 #ifndef _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #define _STRUS_WEIGHTED_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"

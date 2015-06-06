@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for a transaction on the key/value store database
+/// \file "databaseTransactionInterface.hpp"
 #ifndef _STRUS_DATABASE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_DATABASE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include <cstddef>

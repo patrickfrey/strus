@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for accessing the forward index of the storage
+/// \file "forwardIteratorInterface.hpp"
 #ifndef _STRUS_FORWARD_INDEX_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_FORWARD_INDEX_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Collection of constants that are shared between components of strus
+/// \file "constants.hpp"
 #ifndef _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
 #define _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
 

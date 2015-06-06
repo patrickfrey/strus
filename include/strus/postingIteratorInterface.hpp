@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for an iterator on postings (pairs of (d,p) where d is the document number and p the position of a feature)
+/// \file "postingIteratorInterface.hpp"
 #ifndef _STRUS_POSTING_ITERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_POSTING_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

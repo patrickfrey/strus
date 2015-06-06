@@ -26,8 +26,10 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for iterating on the document numbers a user is allowed to see
+/// \file "invAclIteratorInterface.hpp"
 #ifndef _STRUS_INVERTED_ACL_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_INVERTED_ACL_INTERFACE_HPP_INCLUDED
+#define _STRUS_INVERTED_ACL_ITERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 
 namespace strus

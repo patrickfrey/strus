@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Cursor interface to iterate on elements of the key/value store database for retrieval
+/// \file "databaseCursorInterface.hpp"
 #ifndef _STRUS_DATABASE_CURSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_DATABASE_CURSOR_INTERFACE_HPP_INCLUDED
 #include <string>

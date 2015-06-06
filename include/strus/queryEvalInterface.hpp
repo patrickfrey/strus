@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for defining a query evaluation scheme.
+/// \file "queryEvalInterface.hpp"
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
 #include <iostream>
@@ -44,7 +46,7 @@ class SummarizerFunctionInstanceInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 
-/// \brief Defines a program for evaluating a query
+/// \brief Defines a query evaluation scheme
 class QueryEvalInterface
 {
 public:

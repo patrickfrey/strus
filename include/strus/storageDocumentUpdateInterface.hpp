@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for contructing some document data for an update in the storage
+/// \file "storageDocumentUpdateInterface.hpp"
 #ifndef _STRUS_STORAGE_DOCUMENT_UPDATE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_UPDATE_INTERFACE_HPP_INCLUDED
 #include <string>

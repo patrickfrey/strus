@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Client interface for accessing a storage (read/write)
+/// \file "storageClientInterface.hpp"
 #ifndef _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

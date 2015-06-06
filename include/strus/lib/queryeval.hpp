@@ -27,10 +27,12 @@
 --------------------------------------------------------------------
 */
 /// \brief Exported functions of the strus query evaluation library
+/// \file "queryeval.hpp"
 #ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #include <string>
 
+/// \brief strus library toplevel namespace
 namespace strus {
 
 /// \brief Forward declaration

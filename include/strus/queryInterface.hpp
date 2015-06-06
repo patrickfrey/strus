@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for defining a query and evaluating it.
+/// \file "queryInterface.hpp"
 #ifndef _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #include <string>
