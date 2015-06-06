@@ -35,7 +35,7 @@ strus defines the evaluation of a query based on 3 types of operations:
 Architecture
 -------------
 
-The architecture defines four components that are implemented as libraries.
+The project strus defines four components that are implemented as libraries.
 
 * [queryeval](@ref strus::QueryEvalInterface) Query evaluation: Interpretes the query and uses the operators defined in the query processor for its execution.
 * [queryproc](@ref strus::QueryProcessorInterface) Query processor: Map to access functions by name, like the set operations on feature occurrencies, the weighting functions and the summarizers to augment the results.
