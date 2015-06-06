@@ -59,19 +59,17 @@ class QueryEval
 	:public QueryEvalInterface
 {
 public:
-	explicit QueryEval( const QueryProcessorInterface* processor_)
-		:m_processor(processor_){}
-
+	QueryEval(){}
 	QueryEval( const QueryEval& o)
-		:m_processor(o.m_processor)
-		,m_selectionSets(o.m_selectionSets)
+		:m_selectionSets(o.m_selectionSets)
 		,m_restrictionSets(o.m_restrictionSets)
 		,m_weightingFunctions(o.m_weightingFunctions)
 		,m_summarizers(o.m_summarizers)
 		,m_terms(o.m_terms)
 	{}
 
-	virtual QueryInterface* createQuery( const StorageClientInterface* storage) const;
+	virtual QueryInterface* createQuery(
+			const StorageClientInterface* storage) const;
 
 	virtual void addTerm(
 			const std::string& set_,
@@ -82,15 +80,17 @@ public:
 
 	virtual void addRestrictionFeature( const std::string& set_);
 
-	virtual void addSummarizer(
-			const std::string& resultAttribute,
+	virtual void addSummarizerFunction(
 			const std::string& functionName,
-			const SummarizerConfig& config);
+			SummarizerFunctionInstanceInterface* function,
+			const std::vector<FeatureParameter>& featureParameters,
+			const std::string& resultAttribute);
 
 	virtual void addWeightingFunction(
 			const std::string& functionName,
-			const WeightingConfig& config,
-			const std::vector<std::string>& weightedFeatureSets);
+			WeightingFunctionInstanceInterface* function,
+			const std::vector<FeatureParameter>& featureParameters,
+			float weight);
 
 	void print( std::ostream& out) const;
 
@@ -103,7 +103,6 @@ public:
 	const std::vector<WeightingDef>& weightingFunctions() const	{return m_weightingFunctions;}
 
 private:
-	const QueryProcessorInterface* m_processor;	///< query processor
 	std::vector<std::string> m_selectionSets;	///< posting sets selecting the documents to match
 	std::vector<std::string> m_restrictionSets;	///< posting sets restricting the documents to match
 	std::vector<WeightingDef> m_weightingFunctions;	///< weighting function configuration

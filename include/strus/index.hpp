@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Numeric types used for local and global indices
+/// \file "index.hpp"
 #ifndef _STRUS_INDEX_HPP_INCLUDED
 #define _STRUS_INDEX_HPP_INCLUDED
 

@@ -41,10 +41,17 @@ class LevelDbHandle
 public:
 	/// \brief Constructor
 	/// \param[in] path_ path of the storage
-	/// \param[in] maxOpenFiles maximum number of files open (0 for default)
-	/// \param[in] cachesize_k number of K LRU cache for nodes
-	/// \param[in] compression wheter to use snappy compression (true) or not
-	LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_);
+	/// \param[in] maxOpenFiles_ maximum number of files open (0 for default)
+	/// \param[in] cachesize_k_ number of K LRU cache for nodes
+	/// \param[in] compression_ wheter to use snappy compression (true) or not
+	/// \param[in] writeBufferSize_ size of write buffer per file
+	/// \param[in] blockSize_ block size on disk (size of units)
+	LevelDbHandle( const std::string& path_,
+			unsigned int maxOpenFiles_,
+			unsigned int cachesize_k_,
+			bool compression_,
+			unsigned int writeBufferSize_,
+			unsigned int blockSize_);
 
 	/// \brief Destructor
 	~LevelDbHandle();
@@ -53,6 +60,8 @@ public:
 	leveldb::DB* db() const				{return m_db;}
 	unsigned int maxOpenFiles() const		{return m_maxOpenFiles;}
 	unsigned int cachesize_k() const		{return m_cachesize_k;}
+	unsigned int writeBufferSize() const		{return m_writeBufferSize;}
+	unsigned int blockSize() const			{return m_blockSize;}
 	bool compression() const			{return m_compression;}
 
 private:
@@ -65,6 +74,8 @@ private:
 	unsigned int m_maxOpenFiles;			///< maximum number of files to be opened by Level DB
 	unsigned int m_cachesize_k;			///< kilobytes of LRU cache to use
 	bool m_compression;				///< true if compression enabled
+	unsigned int m_writeBufferSize;		///< size of write buffer (default 4M)
+	unsigned int m_blockSize;			///< block unit size (default 4K)
 };
 
 /// \brief Map of shared Level DB handles
@@ -77,8 +88,20 @@ public:
 	~LevelDbHandleMap(){}
 
 	/// \brief Create a new handle or return a reference to an instance already in use
+	/// \param[in] path_ path of the storage
+	/// \param[in] maxOpenFiles_ maximum number of files open (0 for default)
+	/// \param[in] cachesize_k_ number of K LRU cache for nodes
+	/// \param[in] compression_ wheter to use snappy compression (true) or not
+	/// \param[in] writeBufferSize_ size of write buffer per file
+	/// \param[in] blockSize_ block size on disk (size of units)
 	/// \note the method throws if the configuration parameters are incompatible to an existing instance
-	utils::SharedPtr<LevelDbHandle> create( const std::string& path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression);
+	utils::SharedPtr<LevelDbHandle> create(
+			const std::string& path_,
+			unsigned int maxOpenFiles,
+			unsigned int cachesize_k,
+			bool compression,
+			unsigned int writeBufferSize_,
+			unsigned int blockSize_);
 
 	/// \brief Dereference the handle for the database referenced by path and dispose the handle, if this reference is the last instance
 	void dereference( const std::string& path_);
@@ -94,8 +117,23 @@ class DatabaseClient
 	:public DatabaseClientInterface
 {
 public:
-	DatabaseClient( const utils::SharedPtr<LevelDbHandleMap>& dbmap_, const std::string& path, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression)
-		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression))
+	/// \brief Constructor
+	/// \param[in] dbmap_ reference to map of shared levelDB handles
+	/// \param[in] path path of the storage
+	/// \param[in] maxOpenFiles maximum number of files open (0 for default)
+	/// \param[in] cachesize_k number of K LRU cache for nodes
+	/// \param[in] compression wheter to use snappy compression (true) or not
+	/// \param[in] writeBufferSize size of write buffer per file
+	/// \param[in] blockSize block size on disk (size of units)
+	DatabaseClient(
+			const utils::SharedPtr<LevelDbHandleMap>& dbmap_,
+			const std::string& path,
+			unsigned int maxOpenFiles,
+			unsigned int cachesize_k,
+			bool compression,
+			unsigned int writeBufferSize,
+			unsigned int blockSize)
+		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize))
 	{}
 
 	virtual ~DatabaseClient()

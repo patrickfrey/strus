@@ -33,64 +33,119 @@
 
 using namespace strus;
 
-WeightingClosureBM25::WeightingClosureBM25(
+WeightingExecutionContextBM25::WeightingExecutionContextBM25(
 		const StorageClientInterface* storage,
-		PostingIteratorInterface* itr_,
 		MetaDataReaderInterface* metadata_,
 		float k1_,
 		float b_,
-		float avgDocLength_)
-	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_),m_itr(itr_),m_metadata(metadata_)
-	,m_metadata_doclen(metadata_->elementHandle( Constants::metadata_doclen()))
-	,m_idf(0.0)
-{
-	float nofMatches = m_itr->documentFrequency();
-	float nofCollectionDocuments = storage->globalNofDocumentsInserted();
+		float avgDocLength_,
+		const std::string& attribute_doclen_)
+	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_)
+	,m_nofCollectionDocuments(storage->globalNofDocumentsInserted())
+	,m_featar(),m_metadata(metadata_)
+	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?Constants::metadata_doclen():attribute_doclen_))
+{}
 
-	if (nofCollectionDocuments > nofMatches * 2)
+void WeightingExecutionContextBM25::addWeightingFeature(
+		const std::string& name_,
+		PostingIteratorInterface* itr_,
+		float weight_)
+{
+	if (utils::caseInsensitiveEquals( name_, "match"))
 	{
-		m_idf =
-			logf(
-				(nofCollectionDocuments - nofMatches + 0.5)
-				/ (nofMatches + 0.5));
-	}
-	else if (nofCollectionDocuments > 100)
-	{
-		m_idf = 0.0;
+		float nofMatches = itr_->documentFrequency();
+		float idf = 0.0;
+	
+		if (m_nofCollectionDocuments > nofMatches * 2)
+		{
+			idf = logf(
+					(m_nofCollectionDocuments - nofMatches + 0.5)
+					/ (nofMatches + 0.5));
+		}
+		if (idf < 0.00001)
+		{
+			idf = 0.00001;
+		}
+		m_featar.push_back( Feature( itr_, weight_, idf));
 	}
 	else
 	{
-		m_idf = 0.01;
+		throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), "BM25", name_.c_str());
 	}
 }
 
 
-float WeightingClosureBM25::call( const Index& docno)
+float WeightingExecutionContextBM25::call( const Index& docno)
 {
-	if (m_itr->skipDoc( docno) != docno) return 0.0;
-
-	m_metadata->skipDoc( docno);
-
-	float ff = m_itr->frequency();
-	if (ff == 0.0)
+	float rt = 0.0;
+	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+	for ( ;fi != fe; ++fi)
 	{
-		return 0.0;
+		if (docno==fi->itr->skipDoc( docno))
+		{
+			m_metadata->skipDoc( docno);
+		
+			float ff = fi->itr->frequency();
+			if (ff == 0.0)
+			{
+			}
+			else if (m_b)
+			{
+				float doclen = m_metadata->getValue( m_metadata_doclen);
+				float rel_doclen = (doclen+1) / m_avgDocLength;
+				rt += fi->weight * fi->idf
+					* (ff * (m_k1 + 1.0))
+					/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
+			}
+			else
+			{
+				rt += fi->weight * fi->idf
+					* (ff * (m_k1 + 1.0))
+					/ (ff + m_k1 * 1.0);
+			}
+		}
 	}
-	else if (m_b)
-	{
-		float doclen = m_metadata->getValue( m_metadata_doclen);
-		float rel_doclen = (doclen+1) / m_avgDocLength;
-		return m_idf
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
-	}
-	else
-	{
-		return m_idf
-			* (ff * (m_k1 + 1.0))
-			/ (ff + m_k1 * 1.0);
-	}
+	return rt;
 }
 
 
 
+
+void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name, const std::string& value)
+{
+	if (utils::caseInsensitiveEquals( name, "doclen"))
+	{
+		m_attribute_doclen = value;
+		if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+	if (utils::caseInsensitiveEquals( name, "k1")
+	||  utils::caseInsensitiveEquals( name, "b")
+	||  utils::caseInsensitiveEquals( name, "avgdoclen"))
+	{
+		addNumericParameter( name, arithmeticVariantFromString( value));
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+}
+
+void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "k1"))
+	{
+		m_k1 = (float)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "b"))
+	{
+		m_b = (float)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
+	{
+		m_avgdoclen = (float)value;
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+}

@@ -33,9 +33,13 @@
 
 using namespace strus;
 
-DatabaseCursor::DatabaseCursor( leveldb::DB* db_, bool useCache)
+DatabaseCursor::DatabaseCursor( leveldb::DB* db_, bool useCache, bool useSnapshot)
 	:m_db(db_),m_itr(0)
 {
+	if (useSnapshot)
+	{
+		m_dboptions.snapshot = m_db->GetSnapshot();
+	}
 	m_dboptions.fill_cache = useCache;
 	m_itr = m_db->NewIterator( m_dboptions);
 }
@@ -43,6 +47,10 @@ DatabaseCursor::DatabaseCursor( leveldb::DB* db_, bool useCache)
 DatabaseCursor::~DatabaseCursor()
 {
 	delete m_itr;
+	if (m_dboptions.snapshot)
+	{
+		m_db->ReleaseSnapshot( m_dboptions.snapshot);
+	}
 }
 
 bool DatabaseCursor::checkDomain() const

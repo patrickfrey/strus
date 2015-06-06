@@ -30,7 +30,6 @@
 #include "queryEval.hpp"
 #include "accumulator.hpp"
 #include "ranker.hpp"
-#include "strus/queryProcessorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
@@ -38,7 +37,7 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/utils.hpp"
@@ -53,10 +52,9 @@
 using namespace strus;
 
 ///\brief Constructor
-Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_, const QueryProcessorInterface* processor_)
+Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage_)
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
-	,m_processor(processor_)
 	,m_metaDataReader(storage_->createMetaDataReader())
 {
 	std::vector<TermConfig>::const_iterator
@@ -72,7 +70,6 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 Query::Query( const Query& o)
 	:m_queryEval(o.m_queryEval)
 	,m_storage(o.m_storage)
-	,m_processor(o.m_processor)
 	,m_metaDataReader(o.m_metaDataReader)
 	,m_terms(o.m_terms)
 	,m_expressions(o.m_expressions)
@@ -80,7 +77,7 @@ Query::Query( const Query& o)
 	,m_stack(o.m_stack)
 	,m_metaDataRestrictions(o.m_metaDataRestrictions)
 	,m_variableAssignments(o.m_variableAssignments)
-	,m_maxNofRanks(o.m_maxNofRanks)
+	,m_nofRanks(o.m_nofRanks)
 	,m_minRank(o.m_minRank)
 	,m_username(o.m_username)
 {}
@@ -91,7 +88,7 @@ void Query::pushTerm( const std::string& type_, const std::string& value_)
 	m_stack.push_back( nodeAddress( TermNode, m_terms.size()-1));
 }
 
-void Query::pushExpression( const std::string& opname_, std::size_t argc, int range_)
+void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_)
 {
 	if (argc > m_stack.size())
 	{
@@ -103,7 +100,7 @@ void Query::pushExpression( const std::string& opname_, std::size_t argc, int ra
 	{
 		subnodes.push_back( *si);
 	}
-	m_expressions.push_back( Expression( opname_, subnodes, range_));
+	m_expressions.push_back( Expression( operation, subnodes, range_));
 	m_stack.resize( m_stack.size() - argc);
 	m_stack.push_back( nodeAddress( ExpressionNode, m_expressions.size()-1));
 }
@@ -143,6 +140,9 @@ void Query::defineMetaDataRestriction(
 
 void Query::print( std::ostream& out) const
 {
+	out << "query evaluation program:" << std::endl;
+	m_queryEval->print( out);
+
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
@@ -191,7 +191,7 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			out << indentstr << expr.opname << " " << expr.range << ":";
+			out << indentstr << std::hex<< (uintptr_t)expr.operation << std::dec << " " << expr.range << ":";
 			printVariables( out, adr);
 			out << std::endl;
 			std::vector<NodeAddress>::const_iterator
@@ -206,9 +206,9 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 	}
 }
 
-void Query::setMaxNofRanks( std::size_t maxNofRanks_)
+void Query::setMaxNofRanks( std::size_t nofRanks_)
 {
-	m_maxNofRanks = maxNofRanks_;
+	m_nofRanks = nofRanks_;
 }
 
 void Query::setMinRank( std::size_t minRank_)
@@ -223,9 +223,6 @@ void Query::setUserName( const std::string& username_)
 
 PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr)
 {
-	const PostingJoinOperatorInterface*
-		join = m_processor->getPostingJoinOperator( expr.opname);
-
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
 	{
@@ -255,7 +252,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 				break;
 		}
 	}
-	return join->createResultIterator( joinargs, expr.range);
+	return expr.operation->createResultIterator( joinargs, expr.range);
 }
 
 
@@ -326,14 +323,6 @@ void Query::collectSummarizationVariables(
 	}
 }
 
-SummarizationFeature Query::createSummarizationFeature(
-			const NodeAddress& nodeadr)
-{
-	std::vector<SummarizationVariable> variables;
-	collectSummarizationVariables( variables, nodeadr);
-	return SummarizationFeature( nodePostings(nodeadr), variables);
-}
-
 
 std::vector<ResultDocument> Query::evaluate()
 {
@@ -343,7 +332,7 @@ std::vector<ResultDocument> Query::evaluate()
 #endif
 
 	// [1] Check initial conditions:
-	if (m_minRank >= m_maxNofRanks)
+	if (m_nofRanks == 0)
 	{
 		return std::vector<ResultDocument>();
 	}
@@ -372,7 +361,7 @@ std::vector<ResultDocument> Query::evaluate()
 	Accumulator accumulator(
 		m_storage,
 		m_metaDataReader.get(), m_metaDataRestrictions,
-		m_maxNofRanks, m_storage->maxDocumentNumber());
+		m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
 
 	// [4.1] Add document selection postings:
 	{
@@ -400,45 +389,36 @@ std::vector<ResultDocument> Query::evaluate()
 		std::vector<WeightingDef>::const_iterator
 			wi = m_queryEval->weightingFunctions().begin(),
 			we = m_queryEval->weightingFunctions().end();
-		int empty_postings_index = -1;
 		for (; wi != we; ++wi)
 		{
-			std::vector<std::string>::const_iterator
-				si = wi->weightingSets().begin(),
-				se = wi->weightingSets().end();
-			if (si == se)
+			std::auto_ptr<WeightingExecutionContextInterface> execContext(
+				wi->function()->createExecutionContext( m_storage, m_metaDataReader.get()));
+
+			std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
+				si = wi->featureParameters().begin(),
+				se = wi->featureParameters().end();
+			for (; si != se; ++si)
 			{
-				// ... no weighting features defined, then pass an empty posting set
-				//	the weighting function may use document weight only
-				if (empty_postings_index < 0)
+				std::vector<Feature>::const_iterator
+					fi = m_features.begin(), fe = m_features.end();
+				for (; fi != fe; ++fi)
 				{
-					Reference<PostingIteratorInterface> postingsElem(
-						m_storage->createTermPostingIterator(
-							Constants::query_empty_postings_termtype(),""));
-					empty_postings_index = postings.size();
-					postings.push_back( postingsElem);
-				}
-				accumulator.addFeature(
-					postings[empty_postings_index].get(), 1.0,
-					wi->function(), wi->parameters());
-			}
-			else
-			{
-				for (; si != se; ++si)
-				{
-					std::vector<Feature>::const_iterator
-						fi = m_features.begin(), fe = m_features.end();
-					for (; fi != fe; ++fi)
+					if (si->featureSet() == fi->set)
 					{
-						if (*si == fi->set)
-						{
-							accumulator.addFeature(
-								nodePostings( fi->node), fi->weight,
-								wi->function(), wi->parameters());
-						}
+						execContext->addWeightingFeature(
+							si->parameterName(),
+							nodePostings( fi->node),
+							fi->weight);
+#ifdef STRUS_LOWLEVEL_DEBUG
+						std::cout << "add feature parameter " << si->parameterName() << "=" << fi->set << ' ' << fi->weight << std::endl;
+#endif
 					}
 				}
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "add feature " << wi->functionName() << " weight " << wi->weight() << std::endl;
+#endif
+			accumulator.addFeature( wi->weight(), execContext.release());
 		}
 	}
 	// [4.3] Define the user ACL restrictions:
@@ -469,16 +449,21 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 	}
 	// [5] Create the summarizers:
-	std::vector<Reference<SummarizerClosureInterface> > summarizers;
+	std::vector<Reference<SummarizerExecutionContextInterface> > summarizers;
 	{
 		std::vector<SummarizerDef>::const_iterator
 			zi = m_queryEval->summarizers().begin(),
 			ze = m_queryEval->summarizers().end();
 		for (; zi != ze; ++zi)
 		{
-			// [5.1] Collect the summarization features:
-			std::vector<SummarizerFunctionInterface::FeatureParameter> summarizeFeatures;
-			std::vector<SummarizerDef::Feature>::const_iterator
+			// [5.1] Create the summarizer:
+			summarizers.push_back(
+				zi->function()->createExecutionContext(
+					m_storage, m_metaDataReader.get()));
+			SummarizerExecutionContextInterface* closure = summarizers.back().get();
+
+			// [5.2] Add features with their variables assigned to summarizer:
+			std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 				si = zi->featureParameters().begin(),
 				se = zi->featureParameters().end();
 			for (; si != se; ++si)
@@ -487,27 +472,22 @@ std::vector<ResultDocument> Query::evaluate()
 					fi = m_features.begin(), fe = m_features.end();
 				for (; fi != fe; ++fi)
 				{
-					if (fi->set == si->set)
+					if (fi->set == si->featureSet())
 					{
-						SummarizationFeature
-							sumfeat = createSummarizationFeature( fi->node);
-	
-						summarizeFeatures.push_back(
-							SummarizerFunctionInterface::FeatureParameter(
-								si->classidx, sumfeat));
+						std::vector<SummarizationVariable> variables;
+						collectSummarizationVariables( variables, fi->node);
+
+						closure->addSummarizationFeature(
+							si->parameterName(), nodePostings(fi->node),
+							variables);
 					}
 				}
 			}
-			// [5.2] Create the summarizer:
-			summarizers.push_back(
-				zi->function()->createClosure(
-					m_storage, m_processor, m_metaDataReader.get(),
-					summarizeFeatures, zi->textualParameters(), zi->numericParameters()));
 		}
 	}
 	// [6] Do the Ranking and build the result:
 	std::vector<ResultDocument> rt;
-	Ranker ranker( m_maxNofRanks);
+	Ranker ranker( m_nofRanks + m_minRank);
 
 	Index docno = 0;
 	unsigned int state = 0;
@@ -517,7 +497,7 @@ std::vector<ResultDocument> Query::evaluate()
 	while (accumulator.nextRank( docno, state, weight))
 	{
 		ranker.insert( WeightedDocument( docno, weight));
-		if (state > prev_state && ranker.nofRanks() >= m_maxNofRanks)
+		if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
 		{
 			break;
 		}
@@ -530,16 +510,19 @@ std::vector<ResultDocument> Query::evaluate()
 
 	for (; ri != re; ++ri)
 	{
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "result rank docno=" << ri->docno() << ", weight=" << ri->weight() << std::endl;
+#endif
 		std::vector<ResultDocument::Attribute> attr;
-		std::vector<Reference<SummarizerClosureInterface> >::iterator
+		std::vector<Reference<SummarizerExecutionContextInterface> >::iterator
 			si = summarizers.begin(), se = summarizers.end();
 
 		rt.push_back( ResultDocument( *ri));
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
-			std::vector<SummarizerClosureInterface::SummaryElement>
+			std::vector<SummarizerExecutionContextInterface::SummaryElement>
 				summary = (*si)->getSummary( ri->docno());
-			std::vector<SummarizerClosureInterface::SummaryElement>::const_iterator
+			std::vector<SummarizerExecutionContextInterface::SummaryElement>::const_iterator
 				ci = summary.begin(), ce = summary.end();
 			for (; ci != ce; ++ci)
 			{

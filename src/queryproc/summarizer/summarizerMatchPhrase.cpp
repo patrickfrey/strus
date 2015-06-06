@@ -28,6 +28,7 @@
 */
 #include "summarizerMatchPhrase.hpp"
 #include "postingIteratorLink.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -35,183 +36,276 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
 #include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <cstdlib>
 
 using namespace strus;
 
-SummarizerClosureMatchPhrase::SummarizerClosureMatchPhrase(
-		const StorageClientInterface* storage_,
-		const QueryProcessorInterface* processor_,
-		const std::string& termtype_,
-		unsigned int maxlen_,
-		unsigned int summarylen_,
-		const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_)
-	:m_storage(storage_)
-	,m_processor(processor_)
-	,m_forwardindex(storage_->createForwardIterator( termtype_))
-	,m_termtype(termtype_)
-	,m_maxlen(maxlen_)
-	,m_summarylen(summarylen_)
-	,m_itr()
-	,m_phrasestruct(0)
-	,m_structop()
+void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::string& name, const std::string& value)
 {
-	std::vector<Reference<PostingIteratorInterface> > structelem;
-	std::vector<SummarizerFunctionInterface::FeatureParameter>::const_iterator fi = features_.begin(), fe = features_.end();
-	for (; fi != fe; ++fi)
+	if (utils::caseInsensitiveEquals( name, "type"))
 	{
-		if (SummarizerFunctionMatchPhrase::isStructFeature( fi->classidx()))
+		m_type = value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "mark"))
+	{
+		char const* mid = std::strchr( value.c_str(), '$');
+		while (mid[1] == '$')
 		{
-			m_phrasestruct = fi->feature().postingIterator();
-			Reference<PostingIteratorInterface> ref(
-				new PostingIteratorLink( fi->feature().postingIterator()));
-			structelem.push_back( ref);
+			mid = std::strchr( mid+2, '$');
 		}
-		else if (SummarizerFunctionMatchPhrase::isMatchFeature( fi->classidx()))
+		if (mid)
 		{
-			m_itr.push_back( fi->feature().postingIterator());
+			m_matchmark.first = std::string( value.c_str(), mid - value.c_str());
+			m_matchmark.second = std::string( mid+1);
 		}
 		else
 		{
-			throw strus::logic_error( _TXT( "unknown feature class passed to match phrase summarizer"));
-		}
-	}
-	if (structelem.size() > 1)
-	{
-		const PostingJoinOperatorInterface*
-			join = m_processor->getPostingJoinOperator( Constants::operator_set_union());
-
-		m_structop.reset( join->createResultIterator( structelem, 0));
-		m_phrasestruct = m_structop.get();
-	}
-}
-
-SummarizerClosureMatchPhrase::~SummarizerClosureMatchPhrase()
-{}
-
-static Index getStartPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
-{
-	found = true;
-	Index rangepos = ((unsigned int)curpos > maxlen) ? ((unsigned int)curpos-maxlen):1;
-	Index prevpos = phrasestruct?phrasestruct->skipPos( rangepos):0;
-	if (!prevpos || prevpos > curpos)
-	{
-		prevpos = rangepos;
-		if (rangepos > 1)
-		{
-			found = false;
-		}
-	}
-	if (phrasestruct) for (;;)
-	{
-		Index midpos = phrasestruct->skipPos( prevpos+1);
-		if (!midpos || midpos > curpos) break;
-		prevpos = midpos;
-	}
-	return prevpos;
-	
-}
-
-static Index getEndPos( Index curpos, unsigned int maxlen, PostingIteratorInterface* phrasestruct, bool& found)
-{
-	found = true;
-	Index endpos = phrasestruct?phrasestruct->skipPos( curpos):0;
-	if (!endpos || endpos - curpos > (Index)maxlen)
-	{
-		found = false;
-		endpos = curpos + maxlen;
-	}
-	return endpos;
-}
-
-static SummarizerClosureInterface::SummaryElement
-	summaryElement(
-		const Index& curpos,
-		PostingIteratorInterface* phrasestruct,
-		ForwardIteratorInterface& forwardindex,
-		unsigned int maxlen,
-		unsigned int& length)
-{
-	bool start_found = true;
-	Index startpos = getStartPos( curpos, maxlen, phrasestruct, start_found);
-	bool end_found = true;
-	Index endpos = getEndPos( curpos, maxlen, phrasestruct, end_found);
-
-	length = 0;
-	std::string phrase;
-	if (!start_found) phrase.append( "...");
-
-	Index pp = startpos;
-	for (;pp < endpos; ++pp)
-	{
-		pp = forwardindex.skipPos(pp);
-		if (pp)
-		{
-			if (!phrase.empty()) phrase.push_back(' ');
-			phrase.append( forwardindex.fetch());
-			++length;
-		}
-		else
-		{
-			break;
-		}
-	}
-	if (!end_found) phrase.append( "...");
-	return SummarizerClosureInterface::SummaryElement( phrase, 1.0);
-}
-
-static void getSummary_(
-		std::vector<SummarizerClosureInterface::SummaryElement>& res,
-		const Index& docno,
-		std::vector<PostingIteratorInterface*> itr,
-		PostingIteratorInterface* phrasestruct,
-		ForwardIteratorInterface& forwardindex,
-		unsigned int maxlen,
-		unsigned int maxsummarylen)
-{
-	forwardindex.skipDoc( docno);
-	if (phrasestruct)
-	{
-		phrasestruct->skipDoc( docno);
-	}
-	Index curpos = 0;
-	Index nextpos = 0;
-
-	std::vector<PostingIteratorInterface*>::const_iterator
-		ii = itr.begin(), ie = itr.end();
-	unsigned int summarylen = 0;
-
-	for (; ii != ie && summarylen < maxsummarylen; ++ii)
-	{
-		if (docno==(*ii)->skipDoc( docno))
-		{
-			while (0!=(nextpos=(*ii)->skipPos( curpos)))
+			if (m_matchmark.first.size())
 			{
-				unsigned int length = 0;
-				res.push_back(
-					summaryElement( 
-						nextpos, phrasestruct,
-						forwardindex, maxlen, length));
-				summarylen += length;
-				curpos = nextpos + length + 1;
-	
-				if (summarylen >= maxsummarylen)
-				{
-					break;
-				}
+				m_matchmark.second = value;
+			}
+			else
+			{
+				m_matchmark.first = value;
 			}
 		}
 	}
+	else if (utils::caseInsensitiveEquals( name, "nof"))
+	{
+		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else if (utils::caseInsensitiveEquals( name, "len"))
+	{
+		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else if (utils::caseInsensitiveEquals( name, "structseek"))
+	{
+		throw strus::runtime_error( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
+	}
+}
+
+void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "nof"))
+	{
+		m_nofsummaries = (unsigned int)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "len"))
+	{
+		m_summarylen = (unsigned int)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "structseek"))
+	{
+		m_structseeklen = (unsigned int)value;
+	}
+	else if (utils::caseInsensitiveEquals( name, "type"))
+	{
+		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else if (utils::caseInsensitiveEquals( name, "mark"))
+	{
+		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
+	}
 }
 
 
-std::vector<SummarizerClosureInterface::SummaryElement>
-	SummarizerClosureMatchPhrase::getSummary( const Index& docno)
+SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
+		const StorageClientInterface* storage_,
+		const QueryProcessorInterface* processor_,
+		const std::string& type_,
+		unsigned int nofsummaries_,
+		unsigned int summarylen_,
+		unsigned int structseeklen_,
+		const std::pair<std::string,std::string>& matchmark_)
+	:m_storage(storage_)
+	,m_processor(processor_)
+	,m_forwardindex(storage_->createForwardIterator( type_))
+	,m_type(type_)
+	,m_nofsummaries(nofsummaries_)
+	,m_summarylen(summarylen_)
+	,m_structseeklen(structseeklen_)
+	,m_matchmark(matchmark_)
+	,m_nofCollectionDocuments((float)storage_->globalNofDocumentsInserted())
+	,m_itr()
+	,m_phrasestruct(0)
+	,m_structop()
+	,m_init_complete(false)
+{}
+
+void SummarizerExecutionContextMatchPhrase::addSummarizationFeature(
+		const std::string& name,
+		PostingIteratorInterface* itr,
+		const std::vector<SummarizationVariable>&)
 {
-	std::vector<SummarizerClosureInterface::SummaryElement> rt;
-	getSummary_(
-		rt, docno, m_itr, m_phrasestruct,
-		*m_forwardindex.get(), m_maxlen, m_summarylen);
+	if (utils::caseInsensitiveEquals( name, "struct"))
+	{
+		m_phrasestruct = itr;
+		Reference<PostingIteratorInterface> ref( new PostingIteratorLink( itr));
+		m_structelem.push_back( ref);
+	}
+	else if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_itr.push_back( itr);
+		float df = (float)itr->documentFrequency();
+		float idf = logf( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
+		m_weights.push_back( idf);
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
+	}
+}
+
+SummarizerExecutionContextMatchPhrase::~SummarizerExecutionContextMatchPhrase()
+{}
+
+std::vector<SummarizerExecutionContextInterface::SummaryElement>
+	SummarizerExecutionContextMatchPhrase::getSummary( const Index& docno)
+{
+	if (!m_init_complete)
+	{
+		// Create the end of structure delimiter iterator:
+		if (m_structelem.size() > 1)
+		{
+			const PostingJoinOperatorInterface*
+				join = m_processor->getPostingJoinOperator( Constants::operator_set_union());
+	
+			m_structop.reset( join->createResultIterator( m_structelem, 0));
+			m_phrasestruct = m_structop.get();
+		}
+		m_init_complete = true;
+	}
+	// Create the sliding window for fetching the best matches:
+	std::set<SlidingMatchWindow::Match> matchset;
+	std::vector<PostingIteratorInterface*>::const_iterator
+		ii = m_itr.begin(), ei = m_itr.end();
+	for (unsigned int iidx=0; ii != ei; ++ii,++iidx)
+	{
+		if (docno==(*ii)->skipDoc( docno))
+		{
+			Index firstpos = (*ii)->skipPos(0);
+			if (firstpos)
+			{
+				matchset.insert( SlidingMatchWindow::Match( firstpos, m_weights[iidx], iidx));
+			}
+		}
+	}
+	SlidingMatchWindow slidingMatchWindow( m_summarylen, m_nofsummaries*4, matchset);
+
+	// Initialize the forward index and the structure elements:
+	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
+	m_forwardindex->skipDoc( docno);
+	if (m_phrasestruct)
+	{
+		m_phrasestruct->skipDoc( docno);
+	}
+
+	// Calculate the best matching passages with help of the sliding window:
+	while (!slidingMatchWindow.finished())
+	{
+		unsigned int iidx = slidingMatchWindow.firstPostingIdx();
+		Index pos = m_itr[iidx]->skipPos( m_itr[iidx]->posno()+1);
+		slidingMatchWindow.push( iidx, pos);
+	}
+
+	// Build the result (best passages):
+	std::vector<SlidingMatchWindow::Window> war = slidingMatchWindow.getResult();
+	std::vector<SlidingMatchWindow::Window>::const_iterator wi = war.begin(), we = war.end();
+	Index lastpos = 0;
+	for (; wi != we && rt.size() < m_nofsummaries; ++wi)
+	{
+		std::string phrase;
+		Index pos = wi->m_posno;
+		if (m_phrasestruct)
+		{
+			Index ph = m_phrasestruct->skipPos( pos<=(Index)m_structseeklen?1:(pos-m_structseeklen));
+			if (ph && ph < pos)
+			{
+				pos = ph+1;
+			}
+			else
+			{
+				pos -= (m_structseeklen/2);
+				if (pos <= 0) pos = 1;
+			}
+		}
+		else
+		{
+			pos -= (m_structseeklen/2);
+			if (pos <= 0) pos = 1;
+		}
+		if (lastpos && pos < lastpos)
+		{
+			pos = lastpos+1;
+			if (pos > wi->m_posno) continue;
+		}
+		if (m_phrasestruct)
+		{
+			lastpos = wi->m_posno + wi->m_size;
+			Index lp = m_phrasestruct->skipPos( lastpos);
+			{
+				if (lp && (Index)(lastpos + m_structseeklen) > lp)
+				{
+					lastpos = lp;
+				}
+				else
+				{
+					lastpos += (m_structseeklen/2);
+				}
+			}
+		}
+		else
+		{
+			lastpos = wi->m_posno + wi->m_size + (m_structseeklen/2);
+		}
+		bool containsMatch = ((unsigned int)(wi->m_posno + wi->m_size) <= (unsigned int)(lastpos) && wi->m_posno >= pos);
+		if (containsMatch)
+		{
+			enum {MatchBefore,MatchAfter,MatchDone} matchState = MatchBefore;
+			for (; pos <= lastpos; ++pos)
+			{
+				if (m_forwardindex->skipPos(pos) == pos)
+				{
+					if (!phrase.empty()) phrase.push_back(' ');
+					switch (matchState)
+					{
+						case MatchBefore:
+							if (pos == wi->skipPos(pos))
+							{
+								phrase.append( m_matchmark.first);
+								matchState = MatchAfter;
+							}
+							break;
+						case MatchAfter:
+							if (pos != wi->skipPos(pos))
+							{
+								phrase.append( m_matchmark.second);
+								matchState = MatchBefore;
+							}
+							break;
+						case MatchDone:
+							break;
+					}
+					phrase.append( m_forwardindex->fetch());
+				}
+			}
+			if (matchState == MatchAfter)
+			{
+				phrase.append( m_matchmark.second);
+				matchState = MatchDone;
+			}
+			rt.push_back( SummaryElement( phrase, 1.0));
+		}
+	}
 	return rt;
 }
 

@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for defining a query and evaluating it.
+/// \file "queryInterface.hpp"
 #ifndef _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #include <string>
@@ -39,6 +41,8 @@ namespace strus {
 
 /// \brief Forward declaration
 class StorageClientInterface;
+/// \brief Forward declaration
+class PostingJoinOperatorInterface;
 
 /// \brief Defines a strus information retrieval query
 class QueryInterface
@@ -54,10 +58,12 @@ public:
 
 	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
 	///	removing the argument elements.
-	/// \param[in] opname_ name of the expression join operator
+	/// \param[in] operation the expression join operator
 	/// \param[in] argc number of expression arguments
-	/// \param[in] range_ range of the expression
-	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_)=0;
+	/// \param[in] range range of the expression
+	virtual void pushExpression(
+				const PostingJoinOperatorInterface* operation,
+				std::size_t argc, int range)=0;
 
 	/// \brief Push a duplicate of the topmost element of the query stack
 	/// \note This function makes it possible to reference terms or expressions more than once as features or as subexpressions.
@@ -98,7 +104,7 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true)=0;
 
-	/// \brief Set the maximum number of ranks to evaluate
+	/// \brief Set the maximum number of ranks to evaluate starting with the minimum rank
 	/// \param[in] maxNofRanks_ maximum number of ranks
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_)=0;
 	/// \brief Set the minimum rank number to return

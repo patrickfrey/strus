@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 set(source_files
 	weighting_standard.cpp
 	weightingBM25.cpp
+	weightingBM25_dpfc.cpp
 )
 
 include_directories(

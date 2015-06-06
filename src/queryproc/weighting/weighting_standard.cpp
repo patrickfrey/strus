@@ -29,7 +29,9 @@
 /// \brief Library providing some standard weighting functions
 #include "weighting_standard.hpp"
 #include "weightingBM25.hpp"
+#include "weightingBM25_dpfc.hpp"
 #include "weightingConstant.hpp"
+#include "weightingMetadata.hpp"
 #include "weightingFrequency.hpp"
 #include "private/dll_tags.hpp"
 
@@ -40,9 +42,19 @@ WeightingFunctionInterface* strus::createWeightingFunctionBm25()
 	return new WeightingFunctionBM25();
 }
 
+WeightingFunctionInterface* strus::createWeightingFunctionBm25_dpfc()
+{
+	return new WeightingFunctionBM25_dpfc();
+}
+
 WeightingFunctionInterface* strus::createWeightingFunctionConstant()
 {
 	return new WeightingFunctionConstant();
+}
+
+WeightingFunctionInterface* strus::createWeightingFunctionMetadata()
+{
+	return new WeightingFunctionMetadata();
 }
 
 WeightingFunctionInterface* strus::createWeightingFunctionTermFrequency()

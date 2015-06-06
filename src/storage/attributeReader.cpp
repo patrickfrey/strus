@@ -35,7 +35,7 @@ using namespace strus;
 
 Index AttributeReader::elementHandle( const char* name) const
 {
-	Index rt = m_storage->getAttributeName( name);
+	Index rt = m_storage->getAttributeno( name);
 	if (!rt)
 	{
 		throw strus::runtime_error( _TXT( "attribute with name '%s' is not defined"), name);
@@ -56,4 +56,8 @@ std::string AttributeReader::getValue( const Index& elementHandle_) const
 	}
 }
 
+std::vector<std::string> AttributeReader::getAttributeNames() const
+{
+	return m_storage->getAttributeNames();
+}
 

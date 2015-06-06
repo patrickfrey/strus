@@ -29,10 +29,14 @@
 #ifndef _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
-#include "strus/weightingClosureInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
+#include "strus/weightingExecutionContextInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <limits>
 #include <vector>
 
@@ -43,54 +47,123 @@ namespace strus
 class WeightingFunctionConstant;
 
 
-/// \class WeightingClosureConstant
-/// \brief Weighting function based on the FF formula
-class WeightingClosureConstant
-	:public WeightingClosureInterface
+/// \class WeightingExecutionContextConstant
+/// \brief Weighting function ExecutionContext for the constant weighting function
+class WeightingExecutionContextConstant
+	:public WeightingExecutionContextInterface
 {
 public:
-	WeightingClosureConstant(
+	WeightingExecutionContextConstant(
+			float weight_)
+		:m_featar(),m_weight(weight_){}
+
+	struct Feature
+	{
+		PostingIteratorInterface* itr;
+		float weight;
+
+		Feature( PostingIteratorInterface* itr_, float weight_)
+			:itr(itr_),weight(weight_){}
+		Feature( const Feature& o)
+			:itr(o.itr),weight(o.weight){}
+	};
+
+	virtual void addWeightingFeature(
+			const std::string& name_,
 			PostingIteratorInterface* itr_,
 			float weight_)
-		:m_itr(itr_),m_weight(weight_){}
+	{
+		if (utils::caseInsensitiveEquals( name_, "match"))
+		{
+			m_featar.push_back( Feature( itr_, weight_));
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), "constant", name_.c_str());
+		}
+	}
 
 	virtual float call( const Index& docno)
 	{
-		return docno==m_itr->skipDoc(docno)?(m_weight):(float)0.0;
+		float rt = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (;fi != fe; ++fi)
+		{
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				rt += fi->weight * m_weight;
+			}
+		}
+		return rt;
 	}
 
 private:
-	PostingIteratorInterface* m_itr;
+	std::vector<Feature> m_featar;
+	float m_weight;
+};
+
+/// \class WeightingFunctionInstanceConstant
+/// \brief Weighting function instance for a weighting that returns a constant for every matching document
+class WeightingFunctionInstanceConstant
+	:public WeightingFunctionInstanceInterface
+{
+public:
+	explicit WeightingFunctionInstanceConstant()
+		:m_weight(1.0){}
+
+	virtual ~WeightingFunctionInstanceConstant(){}
+
+	virtual void addStringParameter( const std::string& name, const std::string& value)
+	{
+		addNumericParameter( name, arithmeticVariantFromString( value));
+	}
+
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+	{
+		if (utils::caseInsensitiveEquals( name, "weight"))
+		{
+			m_weight = (float)value;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "Constant", name.c_str());
+		}
+	}
+
+	virtual WeightingExecutionContextInterface* createExecutionContext(
+			const StorageClientInterface*,
+			MetaDataReaderInterface*) const
+	{
+		return new WeightingExecutionContextConstant( m_weight);
+	}
+
+	virtual std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << std::setw(2) << std::setprecision(5)
+			<< "weight=" << m_weight;
+		return rt.str();
+	}
+
+private:
 	float m_weight;
 };
 
 
 /// \class WeightingFunctionConstant
-/// \brief Weighting function that simply returns the ff (feature frequency in the document)
+/// \brief Weighting function that simply returns a constant weight for every match
 class WeightingFunctionConstant
 	:public WeightingFunctionInterface
 {
 public:
-	explicit WeightingFunctionConstant(){}
+	WeightingFunctionConstant(){}
 	virtual ~WeightingFunctionConstant(){}
 
-	virtual const char** numericParameterNames() const
-	{
-		static const char* ar[] = {"weight",0};
-		return ar;
-	}
 
-	virtual WeightingClosureInterface* createClosure(
-			const StorageClientInterface*,
-			PostingIteratorInterface* itr_,
-			MetaDataReaderInterface*,
-			const std::vector<ArithmeticVariant>& parameters) const
+	virtual WeightingFunctionInstanceInterface* createInstance() const
 	{
-		return new WeightingClosureConstant( itr_, parameters[0].defined()?(float)parameters[0]:(float)1.0);
+		return new WeightingFunctionInstanceConstant();
 	}
-
-private:
-	float m_weight;
 };
 
 }//namespace

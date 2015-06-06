@@ -95,7 +95,7 @@ void StorageDocument::setAttribute(
 void StorageDocument::setUserAccessRight(
 		const std::string& username_)
 {
-	bool isNew;
+	bool isNew = false;
 	m_userlist.push_back( m_transaction->getOrCreateUserno( username_, isNew));
 }
 
@@ -158,5 +158,134 @@ void StorageDocument::done()
 	m_attributes.clear();
 	m_metadata.clear();
 	m_userlist.clear();
+}
+
+
+
+
+
+StorageDocumentUpdate::StorageDocumentUpdate(
+		StorageTransaction* transaction_,
+		const Index& docno_)
+	:m_transaction(transaction_)
+	,m_docno(docno_)
+	,m_doClearUserlist(false)
+{}
+
+StorageDocumentUpdate::~StorageDocumentUpdate()
+{}
+
+void StorageDocumentUpdate::setMetaData(
+		const std::string& name_,
+		const ArithmeticVariant& value_)
+{
+	m_metadata.push_back( DocMetaData( name_, value_));
+}
+
+void StorageDocumentUpdate::setAttribute(
+		const std::string& name_,
+		const std::string& value_)
+{
+	m_attributes.push_back( DocAttribute( name_, value_));
+}
+
+void StorageDocumentUpdate::clearAttribute(
+		const std::string& name_)
+{
+	m_attributes.push_back( DocAttribute( name_, ""));
+}
+
+void StorageDocumentUpdate::setUserAccessRight(
+		const std::string& username_)
+{
+	bool isNew = false;
+	Index usrno = m_transaction->getOrCreateUserno( username_, isNew);
+	std::vector<Index>::iterator ui = m_del_userlist.begin(), ue = m_del_userlist.end();
+	while (ui != ue)
+	{
+		if (*ui == usrno)
+		{
+			m_del_userlist.erase( ui);
+		}
+		else
+		{
+			++ui;
+		}
+	}
+	m_add_userlist.push_back( m_transaction->getOrCreateUserno( username_, isNew));
+}
+
+void StorageDocumentUpdate::clearUserAccessRight(
+		const std::string& username_)
+{
+	bool isNew = false;
+	Index usrno = m_transaction->getOrCreateUserno( username_, isNew);
+	std::vector<Index>::iterator ui = m_add_userlist.begin(), ue = m_add_userlist.end();
+	while (ui != ue)
+	{
+		if (*ui == usrno)
+		{
+			m_add_userlist.erase( ui);
+		}
+		else
+		{
+			++ui;
+		}
+	}
+	m_del_userlist.push_back( usrno);
+}
+
+void StorageDocumentUpdate::clearUserAccessRights()
+{
+	m_add_userlist.clear();
+	m_del_userlist.clear();
+	m_doClearUserlist = true;
+}
+
+void StorageDocumentUpdate::done()
+{
+	//[1] Update metadata:
+	std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
+	for (; wi != we; ++wi)
+	{
+		m_transaction->defineMetaData( m_docno, wi->name, wi->value);
+	}
+
+	//[2] Update attributes:
+	std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
+	for (; ai != ae; ++ai)
+	{
+		if (ai->value.empty())
+		{
+			m_transaction->deleteAttribute( m_docno, ai->name);
+		}
+		else
+		{
+			m_transaction->defineAttribute( m_docno, ai->name, ai->value);
+		}
+	}
+
+	//[3] Update document access rights:
+	if (m_doClearUserlist)
+	{
+		m_transaction->deleteAcl( m_docno);
+	}
+	std::vector<Index>::const_iterator ui = m_add_userlist.begin(), ue = m_add_userlist.end();
+	for (; ui != ue; ++ui)
+	{
+		m_transaction->defineAcl( *ui, m_docno);
+	}
+	ui = m_del_userlist.begin(), ue = m_del_userlist.end();
+	for (; ui != ue; ++ui)
+	{
+		m_transaction->deleteAcl( *ui, m_docno);
+	}
+
+	//[3] Clear data:
+	m_attributes.clear();
+	m_metadata.clear();
+	m_add_userlist.clear();
+	m_del_userlist.clear();
+	m_doClearUserlist = false;
 }
 

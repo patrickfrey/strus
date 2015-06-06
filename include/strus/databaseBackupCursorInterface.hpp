@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Cursor interface to read the content of a snapshot of the key/value store database for backup
+/// \file "databaseBackupCursorInterface.hpp"
 #ifndef _STRUS_STORAGE_DATABASE_BACKUP_CURSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_DATABASE_BACKUP_CURSOR_INTERFACE_HPP_INCLUDED
 #include <string>

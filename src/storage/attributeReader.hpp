@@ -56,6 +56,8 @@ public:
 
 	virtual std::string getValue( const Index& elementHandle_) const;
 
+	virtual std::vector<std::string> getAttributeNames() const;
+
 private:
 	const StorageClient* m_storage;
 	const DatabaseClientInterface* m_database;

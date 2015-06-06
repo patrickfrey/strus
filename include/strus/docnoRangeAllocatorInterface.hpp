@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for allocating ranges of document numbers in the storage to avoid synchronization and for compaction of certain features like user rights when inserting documents with similar properties in a more natural order.
+/// \file "docnoRangeAllocatorInterface.hpp"
 #ifndef _STRUS_DOCNO_RANGE_ALLOCATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_DOCNO_RANGE_ALLOCATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Collection of constants that are shared between components of strus
+/// \file "constants.hpp"
 #ifndef _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
 #define _STRUS_GLOBAL_CONSTANTS_HPP_INCLUDED
 
@@ -64,16 +66,6 @@ struct Constants
 	static const char* operator_query_phrase_sequence()
 	{
 		return "sequence";
-	}
-	/// \brief Get the default query phrase type if not explicitely specified in the query
-	static const char* query_default_phrase_type()
-	{
-		return "default";
-	}
-	/// \brief Get the default query feature set if no query section with explicit feature set defined in the query
-	static const char* query_default_feature_set()
-	{
-		return "weighted";
 	}
 	/// \brief Get the term type that does not exist and is reserved for the empty posting set
 	static const char* query_empty_postings_termtype()

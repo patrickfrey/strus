@@ -40,7 +40,7 @@ class DatabaseCursor
 	:public DatabaseCursorInterface
 {
 public:
-	DatabaseCursor( leveldb::DB* db_, bool useCache);
+	DatabaseCursor( leveldb::DB* db_, bool useCache, bool useSnapshot=false);
 
 	virtual ~DatabaseCursor();
 

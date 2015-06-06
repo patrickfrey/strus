@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Structure for passing read/write options to the the key/value store database
+/// \file "databaseOptions.hpp"
 #ifndef _STRUS_DATABASE_OPTIONS_HPP_INCLUDED
 #define _STRUS_DATABASE_OPTIONS_HPP_INCLUDED
 

@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Client interface to reading and writing to the key/value store database
+/// \file "databaseClientInterface.hpp"
 #ifndef _STRUS_DATABASE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_DATABASE_CLIENT_INTERFACE_HPP_INCLUDED
 #include <string>

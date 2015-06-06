@@ -29,44 +29,73 @@
 #include "summarizerAttribute.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 
 using namespace strus;
 
-SummarizerClosureAttribute::SummarizerClosureAttribute(
+SummarizerExecutionContextAttribute::SummarizerExecutionContextAttribute(
 		AttributeReaderInterface* attribreader_, const std::string& name_)
 	:m_attribreader(attribreader_)
 	,m_attrib(attribreader_->elementHandle( name_.c_str()))
 {}
 
-SummarizerClosureAttribute::~SummarizerClosureAttribute()
+void SummarizerExecutionContextAttribute::addSummarizationFeature(
+		const std::string&,
+		PostingIteratorInterface*,
+		const std::vector<SummarizationVariable>&)
+{
+	throw strus::runtime_error( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
+}
+
+SummarizerExecutionContextAttribute::~SummarizerExecutionContextAttribute()
 {
 	delete m_attribreader;
 }
 
-
-std::vector<SummarizerClosureInterface::SummaryElement>
-	SummarizerClosureAttribute::getSummary( const Index& docno)
+std::vector<SummarizerExecutionContextInterface::SummaryElement>
+	SummarizerExecutionContextAttribute::getSummary( const Index& docno)
 {
-	std::vector<SummarizerClosureInterface::SummaryElement> rt;
+	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
 	m_attribreader->skipDoc( docno);
 	std::string attr = m_attribreader->getValue( m_attrib);
 	if (!attr.empty()) 
 	{
-		rt.push_back( SummarizerClosureInterface::SummaryElement( attr, 1.0));
+		rt.push_back( SummarizerExecutionContextInterface::SummaryElement( attr, 1.0));
 	}
 	return rt;
 }
 
 
-SummarizerClosureInterface* SummarizerFunctionAttribute::createClosure(
-		const StorageClientInterface* storage_,
-		const QueryProcessorInterface*,
-		MetaDataReaderInterface*,
-		const std::vector<FeatureParameter>&,
-		const std::vector<std::string>& textualParameters_,
-		const std::vector<ArithmeticVariant>&) const
+void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string& name, const std::string& value)
 {
-	return new SummarizerClosureAttribute( storage_->createAttributeReader(), textualParameters_[0]);
+	if (utils::caseInsensitiveEquals( name, "name"))
+	{
+		m_name = value;
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+	}
+}
+
+void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "name"))
+	{
+		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "Attribute");
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+	}
+}
+
+SummarizerExecutionContextInterface* SummarizerFunctionInstanceAttribute::createExecutionContext(
+		const StorageClientInterface* storage,
+		MetaDataReaderInterface*) const
+{
+	return new SummarizerExecutionContextAttribute( storage->createAttributeReader(), m_name);
 }
 
 

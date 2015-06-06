@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Client interface for accessing a storage (read/write)
+/// \file "storageClientInterface.hpp"
 #ifndef _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
@@ -96,21 +98,25 @@ public:
 		createInvAclIterator(
 			const std::string& username) const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the global number of documents inserted (absolute number of documents in case of a distributed index)
 	/// \return the number of documents
 	virtual GlobalCounter globalNofDocumentsInserted() const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the local number of documents inserted (the number of documents inserted in this storage instance)
 	/// \return the number of documents
 	virtual Index localNofDocumentsInserted() const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the global number of documents inserted (absolute document frequency in case of a distributed index)
+	/// \param[in] type the term type addressed
+	/// \param[in] term the term value addressed
 	/// \return the number of documents
 	virtual GlobalCounter globalDocumentFrequency(
 			const std::string& type,
 			const std::string& term) const=0;
 
-	/// \brief Get the global number of documents inserted
+	/// \brief Get the local number of documents inserted (the document frequency in this storage instance)
+	/// \param[in] type the term type addressed
+	/// \param[in] term the term value addressed
 	/// \return the number of documents
 	virtual Index localDocumentFrequency(
 			const std::string& type,
@@ -123,6 +129,22 @@ public:
 	/// \brief Get the local internal document number
 	/// \param[in] docid document id of the document inserted
 	virtual Index documentNumber( const std::string& docid) const=0;
+
+	/// \brief Enumeration of document statistics
+	enum DocumentStatisticsType
+	{
+		StatNofTerms = 1,
+		StatNofTermOccurrencies = 2
+	};
+
+	/// \brief Get one specified element of the documents statistics for a term type
+	/// \param[in] docno the local internal document number addressed (return value of documentNumber( const std::string&) const)
+	/// \param[in] stat the enumeration value of the statistics to get
+	/// \param[in] type the term type addressed
+	virtual Index documentStatistics(
+			const Index& docno,
+			const DocumentStatisticsType& stat,
+			const std::string& type) const=0;
 
 	/// \brief Create an interface to access items of document metadata
 	/// \return the interface to access document metadata to be disposed with delete by the caller

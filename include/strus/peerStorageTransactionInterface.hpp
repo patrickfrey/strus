@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Transaction interface for peer storages to update the global statistics of a storage (distributed index)
+/// \file "peerStorageTransactionInterface.hpp"
 #ifndef _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

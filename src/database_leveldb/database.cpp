@@ -19,6 +19,8 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 	unsigned int cachesize_kb = 0;
 	bool compression = true;
 	unsigned int maxOpenFiles = 0;
+	unsigned int writeBufferSize = 0;
+	unsigned int blockSize = 0;
 	std::string path;
 	std::string src( configsource);
 
@@ -28,9 +30,11 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 	}
 	(void)extractBooleanFromConfigString( compression, src, "compression");
 	(void)extractUIntFromConfigString( cachesize_kb, src, "cache");
-	(void)extractUIntFromConfigString( maxOpenFiles, src, "maxopenfiles");
-	
- 	return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression);
+	(void)extractUIntFromConfigString( maxOpenFiles, src, "max_open_files");
+	(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size");
+	(void)extractUIntFromConfigString( blockSize, src, "block_size");
+
+	return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize);
 }
 
 void Database::createDatabase( const std::string& configsource) const
@@ -136,6 +140,16 @@ void Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 			blkcnt = 0;
 		}
 	}
+	if (blkcnt > 0)
+	{
+		leveldb::Status status = db->Write( options, &batch);
+		if (!status.ok())
+		{
+			std::string statusstr( status.ToString());
+			throw strus::runtime_error( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+		}
+		batch.Clear();
+	}
 }
 
 const char* Database::getConfigDescription( ConfigType type) const
@@ -143,7 +157,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 	switch (type)
 	{
 		case CmdCreateClient:
-			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmaxopenfiles=<maximum number of open files for LevelDB>";
+			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmax_open_files=<maximum number of open files for LevelDB>\nwrite_buffer_size=<Amount of data to build up in memory per file>\nblock_size=<approximate size of user data packed per block>";
 
 		case CmdCreate:
 			return "path=<LevelDB storage path>;compression=<yes/no>";
@@ -156,7 +170,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 
 const char** Database::getConfigParameters( ConfigType type) const
 {
-	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression","maxopenfiles",0};
+	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression","max_open_files","write_buffer_size","block_size",0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};
 	static const char* keys_DestroyDatabase[] = {"path", 0};
 	switch (type)

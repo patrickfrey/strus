@@ -26,9 +26,12 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Exported functions of the library implementing the key/value store database interface with leveldb
+/// \file "database_leveldb.hpp"
 #ifndef _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
 #define _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
 
+/// \brief strus library toplevel namespace
 namespace strus {
 
 /// \brief Forward declaration

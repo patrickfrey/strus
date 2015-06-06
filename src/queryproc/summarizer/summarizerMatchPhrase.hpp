@@ -29,13 +29,17 @@
 #ifndef _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
-#include "strus/summarizerClosureInterface.hpp"
+#include "strus/summarizerFunctionInstanceInterface.hpp"
+#include "strus/summarizerExecutionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
+#include "slidingMatchWindow.hpp"
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 namespace strus
 {
@@ -50,41 +54,94 @@ class PostingIteratorInterface;
 class QueryProcessorInterface;
 
 
-class SummarizerClosureMatchPhrase
-	:public SummarizerClosureInterface
+class SummarizerExecutionContextMatchPhrase
+	:public SummarizerExecutionContextInterface
 {
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
-	/// \param[in] termtype_ type of the tokens to build the summary with
+	/// \param[in] type_ type of the tokens to build the summary with
 	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
 	/// \param[in] summarylen_ maximum lenght of the whole summary
 	/// \param[in] features_ features to inspect
-	SummarizerClosureMatchPhrase(
+	SummarizerExecutionContextMatchPhrase(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
-			const std::string& termtype_,
+			const std::string& type_,
 			unsigned int maxlen_,
 			unsigned int summarylen_,
-			const std::vector<SummarizerFunctionInterface::FeatureParameter>& features_);
+			unsigned int structseeklen_,
+			const std::pair<std::string,std::string>& matchmark_);
+	virtual ~SummarizerExecutionContextMatchPhrase();
 
-	virtual ~SummarizerClosureMatchPhrase();
+	virtual void addSummarizationFeature(
+			const std::string& name,
+			PostingIteratorInterface* itr,
+			const std::vector<SummarizationVariable>&);
 
-	/// \brief Get some summarization elements
-	/// \param[in] docno document to get the summary element from
-	/// \return the summarization elements
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
 	const StorageClientInterface* m_storage;
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
-	std::string m_termtype;
-	unsigned int m_maxlen;
+	std::string m_type;
+	unsigned int m_nofsummaries;
 	unsigned int m_summarylen;
+	unsigned int m_structseeklen;
+	std::pair<std::string,std::string> m_matchmark;
+	float m_nofCollectionDocuments;
 	std::vector<PostingIteratorInterface*> m_itr;
+	std::vector<float> m_weights;
 	PostingIteratorInterface* m_phrasestruct;
 	Reference<PostingIteratorInterface> m_structop;
+	std::vector<Reference<PostingIteratorInterface> > m_structelem;
+	bool m_init_complete;
+};
+
+
+/// \class SummarizerFunctionInstanceMatchPhrase
+/// \brief Summarizer instance for retrieving meta data
+class SummarizerFunctionInstanceMatchPhrase
+	:public SummarizerFunctionInstanceInterface
+{
+public:
+	explicit SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor)
+		:m_type(),m_nofsummaries(3),m_summarylen(40),m_structseeklen(10),m_processor(processor){}
+
+	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
+
+	virtual void addStringParameter( const std::string& name, const std::string& value);
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
+
+	virtual SummarizerExecutionContextInterface* createExecutionContext(
+			const StorageClientInterface* storage,
+			MetaDataReaderInterface*) const
+	{
+		if (m_type.empty())
+		{
+			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
+		}
+		return new SummarizerExecutionContextMatchPhrase(
+				storage, m_processor, m_type, m_nofsummaries, m_summarylen, m_structseeklen, m_matchmark);
+	}
+
+	virtual std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << "type='" << m_type 
+			<< "', nof summaries=" << m_nofsummaries
+			<< ", summarylen=" << m_summarylen;
+		return rt.str();
+	}
+
+private:
+	std::string m_type;
+	unsigned int m_nofsummaries;
+	unsigned int m_summarylen;
+	unsigned int m_structseeklen;
+	std::pair<std::string,std::string> m_matchmark;
+	const QueryProcessorInterface* m_processor;
 };
 
 
@@ -96,49 +153,10 @@ public:
 
 	virtual ~SummarizerFunctionMatchPhrase(){}
 
-	virtual const char** numericParameterNames() const
+	virtual SummarizerFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const
 	{
-		static const char* ar[] = {"phraselen","sumlen",0};
-		return ar;
-	}
-
-	virtual const char** textualParameterNames() const
-	{
-		static const char* ar[] = {"type",0};
-		return ar;
-	}
-
-	virtual const char** featureParameterClassNames() const
-	{
-		static const char* ar[] = {"struct","match",0};
-		return ar;
-	}
-	static bool isStructFeature( std::size_t classidx)
-	{
-		return classidx == 0;
-	}
-	static bool isMatchFeature( std::size_t classidx)
-	{
-		return classidx == 1;
-	}
-
-	virtual SummarizerClosureInterface* createClosure(
-			const StorageClientInterface* storage_,
-			const QueryProcessorInterface* processor_,
-			MetaDataReaderInterface* metadata_,
-			const std::vector<FeatureParameter>& features_,
-			const std::vector<std::string>& textualParameters_,
-			const std::vector<ArithmeticVariant>& numericParameters_) const
-	{
-		std::string termtype = textualParameters_[0];
-		unsigned int maxlen = numericParameters_[0].defined()?(unsigned int)numericParameters_[0]:30;
-		unsigned int sumlen = numericParameters_[1].defined()?(unsigned int)numericParameters_[1]:40;
-		if (termtype.empty())
-		{
-			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
-		}
-		return new SummarizerClosureMatchPhrase(
-				storage_, processor_, termtype, maxlen, sumlen, features_);
+		return new SummarizerFunctionInstanceMatchPhrase( processor);
 	}
 };
 

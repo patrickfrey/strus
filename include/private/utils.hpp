@@ -33,6 +33,8 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
+#include <stdint.h>			///... boost atomic needs this
+#include <boost/atomic/atomic.hpp>
 
 namespace strus {
 namespace utils {
@@ -92,6 +94,47 @@ public:
 		:boost::scoped_array<X>(o){}
 	ScopedArray()
 		:boost::scoped_array<X>(){}
+};
+
+template <typename IntegralCounterType>
+class AtomicCounter
+	:public boost::atomic<IntegralCounterType>
+{
+public:
+	///\brief Constructor
+	AtomicCounter( IntegralCounterType initialValue_=0)
+		:boost::atomic<IntegralCounterType>(initialValue_)
+	{}
+
+	///\brief Increment of the counter
+	///\return the new value of the counter after the increment operation
+	IntegralCounterType increment( IntegralCounterType val = 1)
+	{
+		return boost::atomic<IntegralCounterType>::fetch_add( val, boost::memory_order_acquire)+1;
+	}
+
+	///\brief Increment of the counter
+	///\return the current value of the counter
+	IntegralCounterType value() const
+	{
+		return boost::atomic<IntegralCounterType>::load( boost::memory_order_acquire);
+	}
+
+	///\brief Initialization of the counter
+	///\param[in] val the value of the counter
+	void set( const IntegralCounterType& val)
+	{
+		boost::atomic<IntegralCounterType>::store( val);
+	}
+
+	///\brief Compare current value with 'testval', change it to 'newval' if matches
+	///\param[in] testval the value of the counter
+	///\param[in] newval the value of the counter
+	///\return true on success
+	bool test_and_set( IntegralCounterType testval, IntegralCounterType newval)
+	{
+		return boost::atomic<IntegralCounterType>::compare_exchange_strong( testval, newval, boost::memory_order_acquire, boost::memory_order_acquire);
+	}
 };
 
 }} //namespace

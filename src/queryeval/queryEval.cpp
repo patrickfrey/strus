@@ -30,9 +30,7 @@
 #include "query.hpp"
 #include "keyMap.hpp"
 #include "termConfig.hpp"
-#include "strus/summarizerConfig.hpp"
 #include "summarizerDef.hpp"
-#include "strus/weightingConfig.hpp"
 #include "weightingDef.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
@@ -41,6 +39,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include <stdexcept>
@@ -70,26 +69,22 @@ void QueryEval::addRestrictionFeature( const std::string& set_)
 	m_restrictionSets.push_back( set_);
 }
 
-void QueryEval::addSummarizer(
-		const std::string& resultAttribute,
+void QueryEval::addSummarizerFunction(
 		const std::string& functionName,
-		const SummarizerConfig& config)
+		SummarizerFunctionInstanceInterface* function,
+		const std::vector<FeatureParameter>& featureParameters,
+		const std::string& resultAttribute)
 {
-	const SummarizerFunctionInterface*
-		function = m_processor->getSummarizerFunction( functionName);
-
-	m_summarizers.push_back( SummarizerDef( resultAttribute, function, functionName, config));
+	m_summarizers.push_back( SummarizerDef( resultAttribute, functionName, function, featureParameters));
 }
 
 void QueryEval::addWeightingFunction(
 		const std::string& functionName,
-		const WeightingConfig& config,
-		const std::vector<std::string>& weightedFeatureSets)
+		WeightingFunctionInstanceInterface* function,
+		const std::vector<FeatureParameter>& featureParameters,
+		float weight)
 {
-	const WeightingFunctionInterface*
-		function = m_processor->getWeightingFunction( functionName);
-
-	m_weightingFunctions.push_back( WeightingDef( function, functionName, config, weightedFeatureSets));
+	m_weightingFunctions.push_back( WeightingDef( function, functionName, featureParameters, weight));
 }
 
 void QueryEval::print( std::ostream& out) const
@@ -102,53 +97,42 @@ void QueryEval::print( std::ostream& out) const
 	}
 	if (m_selectionSets.size())
 	{
-		out << "SELECTORS ";
+		out << "SELECT ";
 		std::size_t si = 0, se = m_selectionSets.size();
 		for(; si != se; ++si)
 		{
 			if (si) out << ", ";
 			out << m_selectionSets[si];
 		}
+		out << ";" << std::endl;
 	}
 	if (m_restrictionSets.size())
 	{
-		out << "RESTRICTIONS ";
+		out << "RESTRICT ";
 		std::size_t si = 0, se = m_restrictionSets.size();
 		for(; si != se; ++si)
 		{
 			if (si) out << ", ";
 			out << m_restrictionSets[si];
 		}
+		out << ";" << std::endl;
 	}
 	std::vector<WeightingDef>::const_iterator
 		fi = m_weightingFunctions.begin(), fe = m_weightingFunctions.end();
 	for (; fi != fe; ++fi)
 	{
-		out << "WEIGHTING ";
-		out << " " << fi->functionName();
-		if (fi->parameters().size())
+		out << "EVAL ";
+		std::string params = fi->function()->tostring();
+		out << " " << fi->functionName() << "( " << params;
+		std::vector<FeatureParameter>::const_iterator
+			pi = fi->featureParameters().begin(), pe = fi->featureParameters().end();
+		int pidx = params.size();
+		for (; pi != pe; ++pi,++pidx)
 		{
-			out << "(";
-			std::size_t ai = 0, ae = fi->parameters().size();
-			for(; ai != ae; ++ai)
-			{
-				if (ai) out << ", ";
-				out << fi->function()->numericParameterNames()[ai]
-					<< "=" << fi->parameters()[ai];
-			}
-			out << ")";
+			if (pidx) out << ", ";
+			out << pi->parameterName() << "= %" << pi->featureSet();
 		}
-		if (fi->weightingSets().size())
-		{
-			out << " WITH ";
-			std::size_t wi = 0, we = fi->weightingSets().size();
-			for(; wi != we; ++wi)
-			{
-				if (wi) out << ", ";
-				out << fi->weightingSets()[wi];
-			}
-		}
-		out << ";" << std::endl;
+		out << ");" << std::endl;
 	}
 	std::vector<SummarizerDef>::const_iterator
 		si = m_summarizers.begin(), se = m_summarizers.end();
@@ -156,30 +140,17 @@ void QueryEval::print( std::ostream& out) const
 	{
 		out << "SUMMARIZE ";
 		out << si->resultAttribute() << " = " << si->functionName();
-		out << "( ";
-		std::size_t argidx = 0;
+		std::string params = si->function()->tostring();
+		out << "( " << params;
 
-		std::size_t ai = 0, ae = si->numericParameters().size();
-		for(; ai != ae; ++ai,++argidx)
-		{
-			if (argidx) out << ", ";
-			out << si->function()->numericParameterNames()[ai]
-				<< "=" << si->numericParameters()[ai];
-		}
-		ai = 0, ae = si->textualParameters().size();
-		for(; ai != ae; ++ai,++argidx)
-		{
-			if (argidx) out << ", ";
-			out << si->function()->textualParameterNames()[ai] << "=" << si->textualParameters()[ai];
-		}
-		std::vector<SummarizerDef::Feature>::const_iterator
+		std::vector<FeatureParameter>::const_iterator
 			fi = si->featureParameters().begin(),
 			fe = si->featureParameters().end();
-		for (int fidx=0; fi != fe; ++fi,++fidx,++argidx)
+		int fidx=params.size();
+		for (; fi != fe; ++fi,++fidx)
 		{
-			if (argidx) out << ", ";
-			out << si->function()->featureParameterClassNames()[fi->classidx]
-				<< "=" << fi->set;
+			if (fidx) out << ", ";
+			out << fi->parameterName() << "= %" << fi->featureSet();
 		}
 		out << ");" << std::endl;
 	}
@@ -192,6 +163,6 @@ QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) c
 	std::cout << "create query for program:" << std::endl;
 	print( std::cout);
 #endif
-	return new Query( this, storage, m_processor);
+	return new Query( this, storage);
 }
 

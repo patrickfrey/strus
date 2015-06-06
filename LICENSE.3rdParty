@@ -6,6 +6,7 @@ Table of Contents
 
   boost
   LevelDB
+  getMemorySize (NadeauSoftware)
 
 boost
 -----
@@ -15,5 +16,10 @@ LevelDB
 -------
    New BSD License
 
-
+getMemorySize (NadeauSoftware)
+------------------------------
+   Link: http://nadeausoftware.com/articles/2012/09/c_c_tip_how_get_physical_memory_size_system
+   Author:  David Robert Nadeau
+   License: Creative Commons Attribution 3.0 Unported License
+            (http://creativecommons.org/licenses/by/3.0/deed.en_US)
 

@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for contructing a document for inserting it into the storage
+/// \file "storageDocumentInterface.hpp"
 #ifndef _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_INTERFACE_HPP_INCLUDED
 #include <string>
@@ -36,7 +38,7 @@ namespace strus
 {
 
 /// \class StorageDocumentInterface
-/// \brief Object to declare all items for one insert/update of a document in the storage
+/// \brief Object to declare all items for one insert/replace of a document in the storage
 class StorageDocumentInterface
 {
 public:
@@ -83,7 +85,7 @@ public:
 	/// \brief Allow a user to access the document
 	/// \param[in] username_ name of the user to allow access
 	/// \remark The access is only retriected for search, not for the admin interfaces for inspecting, deleting and updating a document
-	/// \remark The access control is a very primitive implementation and just designed as filter in the search index. You should not rely on this mechanism alone.
+	/// \remark The access control is a very primitive implementation and just designed as filter in the search index.
 	/// \note Adding no user means that nobody can search for the document if access control is enabled
 	/// \note The storage has to be created with "acl=yes" for enabling access control
 	virtual void setUserAccessRight(

@@ -26,38 +26,53 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CONFIG_HPP_INCLUDED
-#include "strus/arithmeticVariant.hpp"
-#include <string>
-#include <map>
+#ifndef _STRUS_STORAGE_BYTE_ORDER_MARK_HPP_INCLUDED
+#define _STRUS_STORAGE_BYTE_ORDER_MARK_HPP_INCLUDED
+#include "strus/index.hpp"
+#include <cstring>
 
 namespace strus {
 
-/// \class WeightingConfig
-/// \brief Configuration of a query evaluation weighting function
-class WeightingConfig
+class ByteOrderMark
 {
 public:
-	/// \brief Destructor
-	~WeightingConfig(){}
-
-	/// \brief Defines a numeric parameter to pass to the weighting function
-	/// \param[in] name_ name of the parameter
-	/// \param[in] value_ value of the parameter
-	void defineNumericParameter( const std::string& name_, const ArithmeticVariant& value_);
-
-	/// \brief Get all numeric parameter definitions of the weighting function
-	/// \return the numeric parameter list
-	const std::map<std::string,ArithmeticVariant>& numericParameters() const
+	ByteOrderMark()
 	{
-		return m_numericParameters;
+		std::memset( this, 0, sizeof(*this));
+		for (int ii=0; ii<4; ++ii) data.ar[ii] = ii;
+	}
+
+	void set( const Index& val)
+	{
+		data.val = val;
+	}
+
+	Index value() const
+	{
+		return data.val;
+	}
+
+	const char* endianess() const
+	{
+		if (data.val == 0x01020304)
+		{
+			return "big endian";
+		}
+		if (data.val == 0x04030201)
+		{
+			return "little endian";
+		}
+		return "endianess unknown (corrupt data)";
 	}
 
 private:
-	std::map<std::string,ArithmeticVariant> m_numericParameters;	///< the numeric parameter definition list
+	union
+	{
+		Index val;
+		char ar[4];
+	} data;
 };
 
-}//namespace
+} //namespace
 #endif
 

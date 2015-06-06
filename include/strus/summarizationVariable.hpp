@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Object describing a variable associated to a set of postings. This variable can be used by summarizers to extract features from the forward index of matching documents.
+/// \file "summarizationVariable.hpp"
 #ifndef _STRUS_SUMMARIZATION_VARIABLE_HPP_INCLUDED
 #define _STRUS_SUMMARIZATION_VARIABLE_HPP_INCLUDED
 #include "strus/index.hpp"

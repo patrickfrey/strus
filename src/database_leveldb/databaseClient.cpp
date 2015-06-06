@@ -33,6 +33,7 @@
 #include "strus/reference.hpp"
 #include "strus/databaseOptions.hpp"
 #include "private/internationalization.hpp"
+#include "getMemorySize.h"
 #include <stdexcept>
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
@@ -61,8 +62,14 @@ static std::string normalizePath( const std::string& path_)
 	return rt;
 }
 
-LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_)
-	:m_path(path_),m_db(0),m_maxOpenFiles(maxOpenFiles_),m_cachesize_k(cachesize_k_),m_compression(compression_)
+LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
+	:m_path(path_),m_db(0)
+	,m_maxOpenFiles(maxOpenFiles_)
+	,m_cachesize_k(cachesize_k_)
+	,m_compression(compression_)
+	,m_writeBufferSize(writeBufferSize_)
+	,m_blockSize(blockSize_)
+
 {
 	m_dboptions.create_if_missing = false;
 	if (m_maxOpenFiles)
@@ -78,6 +85,14 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 	{
 		//... compression reduces size of index by 25% and has about 10% better performance
 		m_dboptions.compression = leveldb::kNoCompression;
+	}
+	if (!m_writeBufferSize)
+	{
+		m_dboptions.write_buffer_size = m_writeBufferSize;
+	}
+	if (!m_blockSize)
+	{
+		m_dboptions.block_size = m_blockSize;
 	}
 	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_.c_str(), &m_db);
 	if (!status.ok())
@@ -102,22 +117,24 @@ void LevelDbHandle::cleanup()
 	}
 }
 
-utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles, unsigned int cachesize_k, bool compression)
+utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
 {
 	utils::ScopedLock lock( m_map_mutex);
 	std::string path = normalizePath( path_);
 	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path);
 	if (mi == m_map.end())
 	{
-		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path, maxOpenFiles, cachesize_k, compression));
+		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
 		m_map[ path_] = rt;
 		return rt;
 	}
 	else
 	{
-		if ((maxOpenFiles && mi->second->maxOpenFiles() != maxOpenFiles)
-		||  (cachesize_k && mi->second->cachesize_k() != cachesize_k)
-		||  (compression != mi->second->compression()))
+		if ((maxOpenFiles_ && mi->second->maxOpenFiles() != maxOpenFiles_)
+		||  (cachesize_k_ && mi->second->cachesize_k() != cachesize_k_)
+		||  (compression_ != mi->second->compression())
+		||  (writeBufferSize_ && mi->second->writeBufferSize() != writeBufferSize_)
+		||  (blockSize_ && mi->second->blockSize() != blockSize_))
 		{
 			throw strus::runtime_error( _TXT( "level DB key value store with the same path opened twice but with different settings"));
 		}
@@ -160,7 +177,7 @@ class DatabaseBackupCursor
 {
 public:
 	explicit DatabaseBackupCursor( leveldb::DB* db_)
-		:DatabaseCursor( db_, false){}
+		:DatabaseCursor( db_, false, true){}
 
 	virtual bool fetch(
 			const char*& key,

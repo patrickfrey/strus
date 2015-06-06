@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for reading elements of the document meta data table in the storage
+/// \file "metaDataReaderInterface.hpp"
 #ifndef _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

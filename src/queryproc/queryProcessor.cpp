@@ -57,8 +57,10 @@ QueryProcessor::QueryProcessor()
 	definePostingJoinOperator( "contains", createPostingJoinContains());
 	
 	defineWeightingFunction( "bm25", createWeightingFunctionBm25());
+	defineWeightingFunction( "bm25_dpfc", createWeightingFunctionBm25_dpfc());
 	defineWeightingFunction( "tf", createWeightingFunctionTermFrequency());
 	defineWeightingFunction( "td", createWeightingFunctionConstant());
+	defineWeightingFunction( "metadata", createWeightingFunctionMetadata());
 
 	defineSummarizerFunction( "metadata", createSummarizerMetaData());
 	defineSummarizerFunction( "matchphrase", createSummarizerMatchPhrase());

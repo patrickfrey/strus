@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Builder object for all toplevel interfaces related to the storage. Used by components acting as proxy or by components that build the storage universe from external components (loading storage objects from dynamically loadable modules)
+/// \file "storageObjectBuilderInterface.hpp"
 #ifndef _STRUS_STORAGE_OBJECT_BUILDER_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_OBJECT_BUILDER_INTERFACE_HPP_INCLUDED
 #include <string>

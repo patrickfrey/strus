@@ -26,6 +26,8 @@
 
 --------------------------------------------------------------------
 */
+/// \brief Interface for a function implementing a join of N posting sets and providing an posting iterator on the result.
+/// \file "postingJoinOperatorInterface.hpp"
 #ifndef _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/reference.hpp"

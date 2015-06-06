@@ -29,8 +29,8 @@
 #ifndef _STRUS_QUERY_HPP_INCLUDED
 #define _STRUS_QUERY_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
+#include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
-#include "strus/summarizationFeature.hpp"
 #include "private/internationalization.hpp"
 #include "metaDataRestriction.hpp"
 #include <vector>
@@ -59,8 +59,7 @@ public:
 	///\brief Constructor
 	Query(
 			const QueryEval* queryEval_,
-			const StorageClientInterface* storage_,
-			const QueryProcessorInterface* processor_);
+			const StorageClientInterface* storage_);
 
 	///\brief Copy constructor
 	Query( const Query& o);
@@ -68,7 +67,9 @@ public:
 	virtual ~Query(){}
 
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
-	virtual void pushExpression( const std::string& opname_, std::size_t argc, int range_);
+	virtual void pushExpression(
+			const PostingJoinOperatorInterface* operation,
+			std::size_t argc, int range_);
 	virtual void pushDuplicate();
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
@@ -77,8 +78,8 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true);
 
-	virtual void setMaxNofRanks( std::size_t maxNofRanks_);
-	virtual void setMinRank( std::size_t maxNofRanks_);
+	virtual void setMaxNofRanks( std::size_t nofRanks_);
+	virtual void setMinRank( std::size_t minRank_);
 	virtual void setUserName( const std::string& username_);
 
 	virtual std::vector<ResultDocument> evaluate();
@@ -126,15 +127,15 @@ public:
 	struct Expression
 	{
 		Expression(
-				const std::string& opname_,
+				const PostingJoinOperatorInterface* operation_,
 				const std::vector<NodeAddress>& subnodes_,
 				int range_=0)
-			:opname(opname_),subnodes(subnodes_),range(range_){}
+			:operation(operation_),subnodes(subnodes_),range(range_){}
 		Expression(
 				const Expression& o)
-			:opname(o.opname),subnodes(o.subnodes),range(o.range){}
+			:operation(o.operation),subnodes(o.subnodes),range(o.range){}
 
-		std::string opname;
+		const PostingJoinOperatorInterface* operation;
 		std::vector<NodeAddress> subnodes;
 		int range;
 	};
@@ -159,7 +160,6 @@ public:
 private:
 	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr);
 	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr);
-	SummarizationFeature createSummarizationFeature( const NodeAddress& nodeadr);
 	void collectSummarizationVariables(
 				std::vector<SummarizationVariable>& variables,
 				const NodeAddress& nodeadr);
@@ -171,7 +171,6 @@ private:
 private:
 	const QueryEval* m_queryEval;
 	const StorageClientInterface* m_storage;
-	const QueryProcessorInterface* m_processor;
 	Reference<MetaDataReaderInterface> m_metaDataReader;
 	std::vector<Term> m_terms;
 	std::vector<Expression> m_expressions;
@@ -180,7 +179,7 @@ private:
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
 	std::map<NodeAddress,PostingIteratorInterface*> m_nodePostingsMap;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
-	std::size_t m_maxNofRanks;
+	std::size_t m_nofRanks;
 	std::size_t m_minRank;
 	std::string m_username;
 };

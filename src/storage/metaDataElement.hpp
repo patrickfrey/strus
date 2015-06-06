@@ -41,7 +41,7 @@ class MetaDataElement
 {
 public:
 	enum Type {Int8,UInt8,Int16,UInt16,Int32,UInt32,Float16,Float32};
-	enum {NofTypes=Float32};
+	enum {NofTypes=Float32+1};
 
 public:
 	MetaDataElement( Type type_, std::size_t ofs_)

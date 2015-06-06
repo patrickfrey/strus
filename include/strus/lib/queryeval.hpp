@@ -27,10 +27,12 @@
 --------------------------------------------------------------------
 */
 /// \brief Exported functions of the strus query evaluation library
+/// \file "queryeval.hpp"
 #ifndef _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #include <string>
 
+/// \brief strus library toplevel namespace
 namespace strus {
 
 /// \brief Forward declaration
@@ -40,12 +42,9 @@ class StorageClientInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 
-/// \brief Create a program for query evaluation
-/// \param[in] processor reference to query processor
+/// \brief Create a parameterizable instance of a query evaluation scheme
 /// \return the program reference
-QueryEvalInterface*
-	createQueryEval(
-		const QueryProcessorInterface* processor);
+QueryEvalInterface* createQueryEval();
 
 }//namespace
 #endif

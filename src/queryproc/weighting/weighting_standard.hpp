@@ -37,15 +37,23 @@ namespace strus
 class WeightingFunctionInterface;
 
 /// \brief Create a weighting function for the weighting schema BM25
-/// \return the summarizer reference (to dispose with delete)
+/// \return the weighting function reference (to dispose with delete)
 WeightingFunctionInterface* createWeightingFunctionBm25();
 
+/// \brief Create a weighting function for the weighting schema BM25
+/// \return the weighting function reference (to dispose with delete)
+WeightingFunctionInterface* createWeightingFunctionBm25_dpfc();
+
 /// \brief Create a weighting function that accumulates a constant for each matching feature in a document
-/// \return the summarizer reference (to dispose with delete)
+/// \return the weighting function reference (to dispose with delete)
 WeightingFunctionInterface* createWeightingFunctionConstant();
 
+/// \brief Create a weighting function that returns an element of the metadata as weight
+/// \return the weighting function reference (to dispose with delete)
+WeightingFunctionInterface* createWeightingFunctionMetadata();
+
 /// \brief Create a weighting function that accumulates the feature frequency for each matching feature in a document
-/// \return the summarizer reference (to dispose with delete)
+/// \return the weighting function reference (to dispose with delete)
 WeightingFunctionInterface* createWeightingFunctionTermFrequency();
 
 }//namespace

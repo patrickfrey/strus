@@ -30,6 +30,8 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <set>
 #include <cstdlib>
 #include <iostream>
@@ -37,21 +39,30 @@
 
 using namespace strus;
 
-SummarizerClosureListMatches::SummarizerClosureListMatches(
-		const StorageClientInterface* storage_,
-		const std::vector<SummarizerFunctionInterface::FeatureParameter>& postings_)
-	:m_storage(storage_)
+void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string&)
 {
-	std::vector<SummarizerFunctionInterface::FeatureParameter>::const_iterator
-		fi = postings_.begin(), fe = postings_.end();
-	for (; fi != fe; ++fi)
-	{
-		m_itrs.push_back( fi->feature().postingIterator());
-	}
+	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
 }
 
-SummarizerClosureListMatches::~SummarizerClosureListMatches()
-{}
+void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant&)
+{
+	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+}
+
+void SummarizerExecutionContextListMatches::addSummarizationFeature(
+		const std::string& name,
+		PostingIteratorInterface* itr,
+		const std::vector<SummarizationVariable>&)
+{
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_itrs.push_back( itr);
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' summarization feature '%s'"), "ListMatches", name.c_str());
+	}
+}
 
 static std::string getMatches(
 	PostingIteratorInterface& itr,
@@ -74,8 +85,8 @@ static std::string getMatches(
 	return rt.str();
 }
 
-std::vector<SummarizerClosureInterface::SummaryElement>
-	SummarizerClosureListMatches::getSummary( const Index& docno)
+std::vector<SummarizerExecutionContextInterface::SummaryElement>
+	SummarizerExecutionContextListMatches::getSummary( const Index& docno)
 {
 	std::vector<SummaryElement> rt;
 	std::vector<PostingIteratorInterface*>::const_iterator

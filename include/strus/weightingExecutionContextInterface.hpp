@@ -26,8 +26,10 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_WEIGHTING_CLOSURE_INTERFACE_HPP_INCLUDED
-#define _STRUS_WEIGHTING_CLOSURE_INTERFACE_HPP_INCLUDED
+/// \brief Interface for the context data of a processed weighting function
+/// \file "weightingExecutionContextInterface.hpp"
+#ifndef _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
+#define _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 
 namespace strus
@@ -38,11 +40,21 @@ class MetaDataReaderInterface;
 class PostingIteratorInterface;
 
 /// \brief Interface for a weighting function with its state and context used during calculation
-class WeightingClosureInterface
+class WeightingExecutionContextInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~WeightingClosureInterface(){}
+	virtual ~WeightingExecutionContextInterface(){}
+
+	/// \brief Add a feature that is subject of weighting to the execution context
+	/// \param[in] name_ name of the summarization feature
+	/// \param[in] postingIterator_ iterator on the matches of the weighting feature
+	/// \param[in] weight_ weight of this feature
+	/// \remark Do call this method before calling call the first time for not having incomplete results
+	virtual void addWeightingFeature(
+			const std::string& name_,
+			PostingIteratorInterface* postingIterator_,
+			float weight_)=0;
 
 	/// \brief Call the weighting function for a document
 	/// \param[in] docno document number

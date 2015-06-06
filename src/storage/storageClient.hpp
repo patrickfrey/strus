@@ -123,6 +123,11 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
+	virtual Index documentStatistics(
+			const Index& docno,
+			const DocumentStatisticsType& stat,
+			const std::string& type) const;
+
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
 
 	virtual void defineStoragePeerInterface(
@@ -133,12 +138,13 @@ public:
 
 	virtual StorageDumpInterface* createDump() const;
 
-public:/*QueryEval*/
+public:/*QueryEval,AttributeReader*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
 	Index getUserno( const std::string& name) const;
-	Index getAttributeName( const std::string& name) const;
+	Index getAttributeno( const std::string& name) const;
+	std::vector<std::string> getAttributeNames() const;
 	GlobalCounter documentFrequency( const Index& typeno, const Index& termno) const;
 	Index userId( const std::string& username) const;
 
@@ -203,21 +209,14 @@ private:
 
 private:
 	Reference<DatabaseClientInterface> m_database;		///< reference to key value store database
-	Index m_next_typeno;					///< next index to assign to a new term type
-	Index m_next_termno;					///< next index to assign to a new term value
-	Index m_next_docno;					///< next index to assign to a new document id
-	Index m_next_userno;					///< next index to assign to a new user id
-	Index m_next_attribno;					///< next index to assign to a new attribute name
+	utils::AtomicCounter<Index> m_next_typeno;		///< next index to assign to a new term type
+	utils::AtomicCounter<Index> m_next_termno;		///< next index to assign to a new term value
+	utils::AtomicCounter<Index> m_next_docno;		///< next index to assign to a new document id
+	utils::AtomicCounter<Index> m_next_userno;		///< next index to assign to a new user id
+	utils::AtomicCounter<Index> m_next_attribno;		///< next index to assign to a new attribute name
 
-	utils::Mutex m_mutex_typeno;
-	utils::Mutex m_mutex_termno;
-	utils::Mutex m_mutex_docno;
-	utils::Mutex m_mutex_userno;
-	utils::Mutex m_mutex_attribno;
-
-	Index m_nof_documents;					///< number of documents inserted
-	GlobalCounter m_global_nof_documents;			///< global number of documents inserted
-	utils::Mutex m_nof_documents_mutex;
+	utils::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
+	utils::AtomicCounter<GlobalCounter> m_global_nof_documents; ///< global number of documents inserted
 
 	utils::Mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
 

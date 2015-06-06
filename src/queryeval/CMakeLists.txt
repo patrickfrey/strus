@@ -6,10 +6,8 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 set( source_files
 	accumulator.cpp
 	metaDataRestriction.cpp
-	weightingDef.cpp
 	queryEval.cpp
 	query.cpp
-	summarizerDef.cpp
 )
 
 include_directories(
@@ -27,7 +25,7 @@ link_directories(
 add_library( strus_queryeval_static STATIC ${source_files})
 target_link_libraries( strus_queryeval_static strus_utils strus_private_utils )
 
-add_library( strus_queryeval SHARED libstrus_queryeval.cpp summarizerConfig.cpp weightingConfig.cpp )
+add_library( strus_queryeval SHARED libstrus_queryeval.cpp )
 target_link_libraries( strus_queryeval strus_queryeval_static  strus_utils strus_private_utils "${Boost_LIBRARIES}" )
 
 set_target_properties(

@@ -1,15 +1,25 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 	<meta name="description" content="Project strus is a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
-	<meta name="author" content="Patrick Frey <patrickpfrey (at) yahoo.com" />
+	<meta name="author" content="Patrick Frey <patrickpfrey (a) yahoo (dt) com" />
 	<link rel="stylesheet" type="text/css" href="basic-profile.css" title="Basic Profile" media="all" />
 	<title>Strus</title>
 </head>
 
 <body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-63809026-1', 'auto');
+  ga('send', 'pageview');
+</script>
 <div id="wrap">
 	<div id="sidebar">
 		<a href="index.htm"><img src="images/logotype.jpg" width="280" height="280" alt="Strus logo" /></a>
@@ -17,9 +27,12 @@
 		<p class="slogan">With <i>strus</i> you can build full-text search engines with
 		elementary bricks.</p>
 		<ul>
-			<li><a href="#">Status</a><br />Development status is <i>Beta</i>.</li>
+			<li><a href="#">Status</a><br />Development status is <i>pre-alpha</i>.</li>
 			<li><a href="#">License</a><br /><a href="https://www.gnu.org/copyleft/gpl.html">GPL v3</a></li>
-			<li><a href="#">Download</a><br />We are working on packages, but currently you have to fork the project on github.</li>
+			<li><a href="#">Demo system</a><br />There is a demo system to show the properties of strus: <a href="http://patrickfrey.dyndns.org/strus.html">Search on complete wikipedia collection (english)</a></li>
+			<li><a href="#">Story</a><br />Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of strus. I also try to explain some architectural decisions in strus.</li>
+			<li><a href="#">Download</a><br />We are working on packages, but currently you have to fetch the sources from github and build it on your own.</li>
+			<li><a href="#">Contact</a><br />Contact us by mail: contact <i>at</i> project <i>dash</i> strus <i>dot</i> net or follow us on twitter @ProjectStrus.</li>
 		</ul>
 	</div>
 
@@ -43,18 +56,29 @@
 			The interface documentation can be found <a href="http://patrickfrey.github.io/strus">here</a>.</p></li>
 		<li><a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>
 			<p>The document and query analysis for transforming content
-			into retrievable items.</li>
+			into retrievable items.
+			The interface documentation can be found <a href="http://patrickfrey.github.io/strusAnalyzer">here</a>.</p></li>
 		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
 			<p>Provides the loading of search engine components from dynamically 
 			loadable modules. (depends on strus and strusAnalyzer)</p></li>
+		<li><a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>
+			<p>Provides a proxy interface via RPC for strus. If you want to use
+			strus in a webserver context you should access strus via RPC or a similar
+			mechanism. Currently strusRpc is your only alternative. strusRpc implements
+			the whole interface of strus and strusAnalyzer as RPC proxy calls to
+			a server (strusRpcServer).</p></li>
 		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
 			<p>Provides some command line programs to access the search engine.
-			(Depends on strusModule)</p></li>
+			(Depends on strusModule and strusRpc*)</p></li>
 		<li><a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>
 			<p>Provides language bindings to use <i>strus</i> with other
 			programming languages like <i>PHP</i>,<i>Python</i>,<i>Perl</i>,<i>Java</i>,<i>Ruby</i>,etc...
-			(Depends on strusModule)</p></li>
+			(Depends on strusModule and strusRpc*)</p></li>
 		</ol>
+		* the dependency on strusRpc is bad. There should exist alternative implementations
+		of accessing a local storage via TCP/IP. strusRpc has several flaws and is
+		insecure if its access is not retricted to trusted clients on the same machine only.
+		Currently there is no other solution provided.
 		</p>
 		<p>Many components needed to be implemented for a competitive search are still missing.
 		For example the possibility to distribute the search index and running <i>strus</i>
@@ -74,6 +98,12 @@
 		<p>
 		The demo project of a search engine for the wikipedia collection (english) is
 		close to be finished. Details about the project can be found <a href="http://github.com/patrickfrey/strusWikipediaSearch">here</a>.<br />
+		</p>
+		</p>
+		<p class="timestamp">Mai 27nd, 2015<br />
+		<p>
+		The demo project of a search engine for the wikipedia collection (english) is
+		<a href="http://patrickfrey.dyndns.org/strus.html">online</a>.<br />
 		</p>
 		</p>
 		<p class="credits">&copy; 2015 Patrick Frey<br />

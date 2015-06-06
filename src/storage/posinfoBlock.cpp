@@ -119,6 +119,7 @@ Index PosinfoBlock::skipDoc( const Index& docno_, Cursor& cursor) const
 	{
 		if (m_docindexptr[ di].base == docno_)
 		{
+			cursor.docidx = 0;
 			return docno_;
 		}
 		if (!di)

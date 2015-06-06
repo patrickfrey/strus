@@ -29,41 +29,109 @@
 #ifndef _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
 #define _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
-#include "strus/weightingClosureInterface.hpp"
+#include "strus/weightingExecutionContextInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/private/arithmeticVariantAsString.hpp"
+#include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <limits>
 #include <vector>
 
 namespace strus
 {
 
-/// \brief Forward declaration
-class WeightingFunctionTermFrequency;
-
-
-/// \class WeightingClosureTermFrequency
+/// \class WeightingExecutionContextTermFrequency
 /// \brief Weighting function based on the TermFrequency formula
-class WeightingClosureTermFrequency
-	:public WeightingClosureInterface
+class WeightingExecutionContextTermFrequency
+	:public WeightingExecutionContextInterface
 {
 public:
-	WeightingClosureTermFrequency(
-			PostingIteratorInterface* itr_)
-		:m_itr(itr_){}
+	explicit WeightingExecutionContextTermFrequency()
+		:m_featar(){}
+
+	struct Feature
+	{
+		PostingIteratorInterface* itr;
+		float weight;
+
+		Feature( PostingIteratorInterface* itr_, float weight_)
+			:itr(itr_),weight(weight_){}
+		Feature( const Feature& o)
+			:itr(o.itr),weight(o.weight){}
+	};
+
+	virtual void addWeightingFeature(
+			const std::string& name_,
+			PostingIteratorInterface* itr_,
+			float weight_)
+	{
+		if (utils::caseInsensitiveEquals( name_, "match"))
+		{
+			m_featar.push_back( Feature( itr_, weight_));
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), "frequency", name_.c_str());
+		}
+	}
 
 	virtual float call( const Index& docno)
 	{
-		return (docno==m_itr->skipDoc( docno)?(m_itr->frequency()):(float)0.0);
+		float rt = 0.0;
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (;fi != fe; ++fi)
+		{
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				rt += fi->weight * fi->itr->frequency();
+			}
+		}
+		return rt;
 	}
 
 private:
-	PostingIteratorInterface* m_itr;
+	std::vector<Feature> m_featar;
 };
 
 
+/// \class WeightingFunctionInstanceTermFrequency
+/// \brief Weighting function instance based on the BM25 formula
+class WeightingFunctionInstanceTermFrequency
+	:public WeightingFunctionInstanceInterface
+{
+public:
+	WeightingFunctionInstanceTermFrequency(){}
+
+	virtual ~WeightingFunctionInstanceTermFrequency(){}
+
+	virtual void addStringParameter( const std::string& name, const std::string& value)
+	{
+		addNumericParameter( name, arithmeticVariantFromString( value));
+	}
+
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant&)
+	{
+		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	}
+
+	virtual WeightingExecutionContextInterface* createExecutionContext(
+			const StorageClientInterface*,
+			MetaDataReaderInterface*) const
+	{
+		return new WeightingExecutionContextTermFrequency();
+	}
+
+	virtual std::string tostring() const
+	{
+		return std::string();
+	}
+};
+
+
+
 /// \class WeightingFunctionTermFrequency
-/// \brief Weighting function that simply returns the term frequency in the document
+/// \brief Weighting function that simply returns the ff (feature frequency in the document) multiplied with a constant weight 
 class WeightingFunctionTermFrequency
 	:public WeightingFunctionInterface
 {
@@ -71,19 +139,9 @@ public:
 	WeightingFunctionTermFrequency(){}
 	virtual ~WeightingFunctionTermFrequency(){}
 
-	virtual const char** numericParameterNames() const
+	virtual WeightingFunctionInstanceInterface* createInstance() const
 	{
-		static const char* ar[] = {0};
-		return ar;
-	}
-
-	virtual WeightingClosureInterface* createClosure(
-			const StorageClientInterface*,
-			PostingIteratorInterface* itr,
-			MetaDataReaderInterface*,
-			const std::vector<ArithmeticVariant>&) const
-	{
-		return new WeightingClosureTermFrequency( itr);
+		return new WeightingFunctionInstanceTermFrequency();
 	}
 };
 
