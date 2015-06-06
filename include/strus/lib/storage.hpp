@@ -31,7 +31,7 @@
 #ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_LIB_HPP_INCLUDED
 
-/// \brief strus library toplevel namespace
+/// \brief strus toplevel namespace
 namespace strus {
 
 class StorageInterface;
