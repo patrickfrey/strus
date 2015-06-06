@@ -34,13 +34,13 @@
 
 using namespace strus;
 
-SummarizerExecutionContextAttribute::SummarizerExecutionContextAttribute(
+SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 		AttributeReaderInterface* attribreader_, const std::string& name_)
 	:m_attribreader(attribreader_)
 	,m_attrib(attribreader_->elementHandle( name_.c_str()))
 {}
 
-void SummarizerExecutionContextAttribute::addSummarizationFeature(
+void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&)
@@ -48,20 +48,20 @@ void SummarizerExecutionContextAttribute::addSummarizationFeature(
 	throw strus::runtime_error( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
 }
 
-SummarizerExecutionContextAttribute::~SummarizerExecutionContextAttribute()
+SummarizerFunctionContextAttribute::~SummarizerFunctionContextAttribute()
 {
 	delete m_attribreader;
 }
 
-std::vector<SummarizerExecutionContextInterface::SummaryElement>
-	SummarizerExecutionContextAttribute::getSummary( const Index& docno)
+std::vector<SummarizerFunctionContextInterface::SummaryElement>
+	SummarizerFunctionContextAttribute::getSummary( const Index& docno)
 {
-	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
+	std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 	m_attribreader->skipDoc( docno);
 	std::string attr = m_attribreader->getValue( m_attrib);
 	if (!attr.empty()) 
 	{
-		rt.push_back( SummarizerExecutionContextInterface::SummaryElement( attr, 1.0));
+		rt.push_back( SummarizerFunctionContextInterface::SummaryElement( attr, 1.0));
 	}
 	return rt;
 }
@@ -91,11 +91,11 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 	}
 }
 
-SummarizerExecutionContextInterface* SummarizerFunctionInstanceAttribute::createExecutionContext(
+SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createFunctionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*) const
 {
-	return new SummarizerExecutionContextAttribute( storage->createAttributeReader(), m_name);
+	return new SummarizerFunctionContextAttribute( storage->createAttributeReader(), m_name);
 }
 
 

@@ -30,7 +30,7 @@
 #define _STRUS_WEIGHTING_BM25_DPFC_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
-#include "strus/weightingExecutionContextInterface.hpp"
+#include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
@@ -46,13 +46,13 @@
 namespace strus
 {
 
-/// \class WeightingExecutionContextBM25_dpfc
+/// \class WeightingFunctionContextBM25_dpfc
 /// \brief Weighting function based on the BM25 formula with an artificial ff calculated from the real ff and some discrete increments given by some feature occurrence relation checks based on proximity and structures (sentences) 
-class WeightingExecutionContextBM25_dpfc
-	:public WeightingExecutionContextInterface
+class WeightingFunctionContextBM25_dpfc
+	:public WeightingFunctionContextInterface
 {
 public:
-	WeightingExecutionContextBM25_dpfc(
+	WeightingFunctionContextBM25_dpfc(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
 		float k1_,
@@ -119,11 +119,11 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
-	virtual WeightingExecutionContextInterface* createExecutionContext(
+	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata) const
 	{
-		return new WeightingExecutionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr, m_relevant_df_factor);
+		return new WeightingFunctionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr, m_relevant_df_factor);
 	}
 
 	virtual std::string tostring() const

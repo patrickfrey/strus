@@ -32,7 +32,7 @@
 #define _STRUS_QUERYEVAL_LIB_HPP_INCLUDED
 #include <string>
 
-/// \brief strus library toplevel namespace
+/// \brief strus toplevel namespace
 namespace strus {
 
 /// \brief Forward declaration

@@ -10,7 +10,7 @@ The project is hosted at <a href="https://github.com/patrickfrey/strus">github</
 
 strus defines the evaluation of a query based on 3 types of operations:
 * <b>Fetching and joining</b> of feature occurrencies.
-  The feature ocurrencies, also referred to a postings are represented as sets of pairs
+  The feature ocurrencies, also called postings are represented as sets of pairs
      {(<i>d</i>,<i>p</i>) |  <i>d</i> is a document number, <i>p</i> is a position }, where 
      <i>d</i> and  <i>p</i> are positive integer numbers.  <i>d</i> is a unique id of the document in
      the storage while <i>p</i> is representing the term position in the document.

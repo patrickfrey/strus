@@ -32,7 +32,7 @@
 #include "strus/reference.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
-#include "strus/weightingExecutionContextInterface.hpp"
+#include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "private/utils.hpp"
 #include "metaDataRestriction.hpp"
@@ -85,7 +85,7 @@ public:
 
 	void addFeature(
 			float weight,
-			WeightingExecutionContextInterface* function_);
+			WeightingFunctionContextInterface* function_);
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression);
 
@@ -99,10 +99,10 @@ private:
 private:
 	struct WeightingFeature
 	{
-		Reference< WeightingExecutionContextInterface> executionContext;
+		Reference< WeightingFunctionContextInterface> executionContext;
 		float weight;
 
-		WeightingFeature( WeightingExecutionContextInterface* fc, float w)
+		WeightingFeature( WeightingFunctionContextInterface* fc, float w)
 			:executionContext(fc),weight(w){}
 		WeightingFeature( const WeightingFeature& o)
 			:executionContext(o.executionContext),weight(o.weight){}

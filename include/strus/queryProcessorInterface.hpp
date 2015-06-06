@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for the container of all types of functions provided for query evaluation.
-/// \file "queryProcessorInterface.hpp"
+/// \file queryProcessorInterface.hpp
 #ifndef _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
 #include <string>

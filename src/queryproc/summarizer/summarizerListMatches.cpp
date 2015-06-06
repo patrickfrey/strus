@@ -49,7 +49,7 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
 }
 
-void SummarizerExecutionContextListMatches::addSummarizationFeature(
+void SummarizerFunctionContextListMatches::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>&)
@@ -85,8 +85,8 @@ static std::string getMatches(
 	return rt.str();
 }
 
-std::vector<SummarizerExecutionContextInterface::SummaryElement>
-	SummarizerExecutionContextListMatches::getSummary( const Index& docno)
+std::vector<SummarizerFunctionContextInterface::SummaryElement>
+	SummarizerFunctionContextListMatches::getSummary( const Index& docno)
 {
 	std::vector<SummaryElement> rt;
 	std::vector<PostingIteratorInterface*>::const_iterator

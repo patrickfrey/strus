@@ -4,7 +4,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
-#include "strus/weightingExecutionContextInterface.hpp"
+#include "strus/weightingFunctionContextInterface.hpp"
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -28,7 +28,7 @@ void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, boo
 
 void Accumulator::addFeature(
 		float weight,
-		WeightingExecutionContextInterface* function_)
+		WeightingFunctionContextInterface* function_)
 {
 	m_weightingFeatures.push_back( WeightingFeature( function_, weight));
 }

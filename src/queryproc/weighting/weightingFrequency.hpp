@@ -29,7 +29,7 @@
 #ifndef _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
 #define _STRUS_WEIGHTING_TERM_FREQUENCY_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
-#include "strus/weightingExecutionContextInterface.hpp"
+#include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
@@ -41,13 +41,13 @@
 namespace strus
 {
 
-/// \class WeightingExecutionContextTermFrequency
+/// \class WeightingFunctionContextTermFrequency
 /// \brief Weighting function based on the TermFrequency formula
-class WeightingExecutionContextTermFrequency
-	:public WeightingExecutionContextInterface
+class WeightingFunctionContextTermFrequency
+	:public WeightingFunctionContextInterface
 {
 public:
-	explicit WeightingExecutionContextTermFrequency()
+	explicit WeightingFunctionContextTermFrequency()
 		:m_featar(){}
 
 	struct Feature
@@ -115,11 +115,11 @@ public:
 		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
 	}
 
-	virtual WeightingExecutionContextInterface* createExecutionContext(
+	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface*) const
 	{
-		return new WeightingExecutionContextTermFrequency();
+		return new WeightingFunctionContextTermFrequency();
 	}
 
 	virtual std::string tostring() const

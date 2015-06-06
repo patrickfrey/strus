@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a parametrized weighting function instance
+/// \brief Interface for a parameterized weighting function instance
 /// \file "weightingFunctionInstanceInterface.hpp"
 #ifndef _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
@@ -35,7 +35,7 @@
 namespace strus
 {
 /// \brief Forward declaration
-class WeightingExecutionContextInterface;
+class WeightingFunctionContextInterface;
 /// \brief Forward declaration
 class ArithmeticVariant;
 /// \brief Forward declaration
@@ -66,7 +66,7 @@ public:
 	/// \param[in] storage_ storage reference for retrieving some statistics (like the document collection frequency)
 	/// \param[in] metadata meta data interface
 	/// \return the execution context to fetch the calculated document weights from (ownership to caller)
-	virtual WeightingExecutionContextInterface* createExecutionContext(
+	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata) const=0;
 

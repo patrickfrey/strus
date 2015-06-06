@@ -36,7 +36,7 @@
 
 using namespace strus;
 
-WeightingExecutionContextBM25_dpfc::WeightingExecutionContextBM25_dpfc(
+WeightingFunctionContextBM25_dpfc::WeightingFunctionContextBM25_dpfc(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
 		float k1_,
@@ -63,7 +63,7 @@ WeightingExecutionContextBM25_dpfc::WeightingExecutionContextBM25_dpfc(
 	,m_relevant_df_factor(relevant_df_factor_)
 {}
 
-void WeightingExecutionContextBM25_dpfc::addWeightingFeature(
+void WeightingFunctionContextBM25_dpfc::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
 		float weight_)
@@ -148,9 +148,9 @@ static void handleSequence( const FeatStructSet& wset, float* accu, float weight
 	}
 }
 
-static Index handleSameSentence( std::vector<WeightingExecutionContextBM25_dpfc::Feature>& struct_featar, const FeatStructSet& wset, float* accu, const Index& startPos, float weight, const Index& docno)
+static Index handleSameSentence( std::vector<WeightingFunctionContextBM25_dpfc::Feature>& struct_featar, const FeatStructSet& wset, float* accu, const Index& startPos, float weight, const Index& docno)
 {
-	typedef WeightingExecutionContextBM25_dpfc::Feature Feature;
+	typedef WeightingFunctionContextBM25_dpfc::Feature Feature;
 	std::vector<Feature>::iterator si = struct_featar.begin(), se = struct_featar.end();
 	Index pos;
 	Index endOfSentence = std::numeric_limits<Index>::max();
@@ -177,7 +177,7 @@ static Index handleSameSentence( std::vector<WeightingExecutionContextBM25_dpfc:
 }
 
 
-float WeightingExecutionContextBM25_dpfc::call( const Index& docno)
+float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 {
 	float rt = 0.0;
 	FeatStructSet wset;

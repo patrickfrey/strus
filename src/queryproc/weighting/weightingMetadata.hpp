@@ -30,7 +30,7 @@
 #define _STRUS_WEIGHTING_METADATA_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
-#include "strus/weightingExecutionContextInterface.hpp"
+#include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
@@ -47,13 +47,13 @@ namespace strus
 class WeightingFunctionMetadata;
 
 
-/// \class WeightingExecutionContextMetadata
-/// \brief Weighting function ExecutionContext for the metadata weighting function
-class WeightingExecutionContextMetadata
-	:public WeightingExecutionContextInterface
+/// \class WeightingFunctionContextMetadata
+/// \brief Weighting function FunctionContext for the metadata weighting function
+class WeightingFunctionContextMetadata
+	:public WeightingFunctionContextInterface
 {
 public:
-	WeightingExecutionContextMetadata(
+	WeightingFunctionContextMetadata(
 			MetaDataReaderInterface* metadata_,
 			const std::string& elementName_,
 			float weight_)
@@ -121,7 +121,7 @@ public:
 		}
 	}
 
-	virtual WeightingExecutionContextInterface* createExecutionContext(
+	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface* metadata_) const
 	{
@@ -129,7 +129,7 @@ public:
 		{
 			throw strus::runtime_error( _TXT("undefined '%s' weighting function parameter '%s'"), "metadata", "name");
 		}
-		return new WeightingExecutionContextMetadata( metadata_, m_elementName, m_weight);
+		return new WeightingFunctionContextMetadata( metadata_, m_elementName, m_weight);
 	}
 
 	virtual std::string tostring() const
