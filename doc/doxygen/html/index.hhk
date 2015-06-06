@@ -20,10 +20,10 @@
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a1011ce3c7b0a10161c8ea27b95da0e3e"><param name="Name" value="strus::SummarizerFunctionInstanceInterface"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a1566833157c02dbdfad2c420713d02be"><param name="Name" value="strus::WeightingFunctionInstanceInterface"></OBJECT>
   </UL>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a3975de35402a2c7d7deac50144721729"><param name="Name" value="addSummarizationFeature"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a6efa8b73814b9c43832242ce43aae510"><param name="Name" value="addSummarizationFeature"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1QueryEvalInterface.html#a34421dcb9fbaeb9928c01ad80271d487"><param name="Name" value="addSummarizerFunction"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1QueryEvalInterface.html#ad3ff16ad708d3dbf1f9eb3655e025898"><param name="Name" value="addTerm"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a34870a925e0dc1a95865363e2c43d712"><param name="Name" value="addWeightingFeature"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#acad94d2eca899c13fb35a14ad28d9d60"><param name="Name" value="addWeightingFeature"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1QueryEvalInterface.html#adbedfd90392fcc5ec0db2734fe38bfba"><param name="Name" value="addWeightingFunction"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1DocnoRangeAllocatorInterface.html#aaa33f4b09057fd47bfaee2bb59296faf"><param name="Name" value="allocDocnoRange"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageAlterMetaDataTableInterface.html#aaf4ea9cd7fa45095791dc4e80443c926"><param name="Name" value="alterElement"></OBJECT>
@@ -32,7 +32,7 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1ResultDocument_1_1Attribute.html#a21959f86746c059d5d58141b629fa32d"><param name="Name" value="Attribute"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="structstrus_1_1Constants.html#a847339d5689eca8ca443bc8cb4520721"><param name="Name" value="attribute_docid"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1ResultDocument.html#aa1bb07ecccf269fd0c2eebeb06ae2572"><param name="Name" value="attributes"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a7c38ea3588ed433e4b5d4bd7abda147b"><param name="Name" value="call"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ac801500433b0ed8a9d98d95bc385751e"><param name="Name" value="call"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1ArithmeticVariant.html#a935629f9514a089538d1154167447e81"><param name="Name" value="cast"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#a62b069fbaccea4142781adb6bf279fcf"><param name="Name" value="checkStorage"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a"><param name="Name" value="clearAttribute"></OBJECT>
@@ -91,12 +91,12 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#a634e6cb4dd516d411bcf4a42594fc4ab"><param name="Name" value="createDocumentChecker"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#a7f56ed8765ff27f50e963dc0b0fb6eba"><param name="Name" value="createDocumentUpdate"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#a767184fa8964d2a61613c7c4eb840851"><param name="Name" value="createDump"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a8f29554344e7e7704aa3e824d9730c12"><param name="Name" value="createExecutionContext"></OBJECT>
-  <UL>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a8f29554344e7e7704aa3e824d9730c12"><param name="Name" value="strus::SummarizerFunctionInstanceInterface"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a3bb3850e0969f1a193128f9c3ecc7c2f"><param name="Name" value="strus::WeightingFunctionInstanceInterface"></OBJECT>
-  </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#a6580606d318d5af83cf8b47511c752a9"><param name="Name" value="createForwardIterator"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a19a8ca788cd9e9606fd9fe706a895f02"><param name="Name" value="createFunctionContext"></OBJECT>
+  <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a19a8ca788cd9e9606fd9fe706a895f02"><param name="Name" value="strus::SummarizerFunctionInstanceInterface"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#afa0d0a239a8749a380deffa6f00eb502"><param name="Name" value="strus::WeightingFunctionInstanceInterface"></OBJECT>
+  </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInterface.html#ac6a27374d720d54c3c6c6b60b68077e3"><param name="Name" value="createInstance"></OBJECT>
   <UL>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInterface.html#ac6a27374d720d54c3c6c6b60b68077e3"><param name="Name" value="strus::SummarizerFunctionInterface"></OBJECT>
@@ -203,7 +203,7 @@
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ae7f6484a13071675ab4f4354edfbc5d2"><param name="Name" value="strus::StorageObjectBuilderInterface"></OBJECT>
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1QueryProcessorInterface.html#a45a56dde58be36dd36626ab225dc1de8"><param name="Name" value="getSummarizerFunction"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a4cecabc1b045dfc538f6ac9e31d3fe67"><param name="Name" value="getSummary"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a3ab219d4c03246021a9acae9faedba84"><param name="Name" value="getSummary"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1MetaDataReaderInterface.html#a595a2bbffafb5b73d0e81029d151ab76"><param name="Name" value="getType"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1AttributeReaderInterface.html#a6053a8ceba4ef4d9a459b0c5024b9f91"><param name="Name" value="getValue"></OBJECT>
   <UL>
@@ -688,24 +688,24 @@
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizationVariable.html#a0942c92ff53e0e5a717e22f306a33b49"><param name="Name" value="position"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizationVariable.html#aec43215dddf869b20feb4504b95706fa"><param name="Name" value="SummarizationVariable"></OBJECT>
   </UL>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html"><param name="Name" value="strus::SummarizerExecutionContextInterface"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html"><param name="Name" value="strus::SummarizerExecutionContextInterface::SummaryElement"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html"><param name="Name" value="strus::SummarizerFunctionContextInterface"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html"><param name="Name" value="strus::SummarizerFunctionContextInterface::SummaryElement"></OBJECT>
   <UL>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#a0816e5f7d2ec4b4355d9a63ac3fc71ea"><param name="Name" value="SummaryElement"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ad0ac9bc7d4af0987f3b3e3c283ebcc63"><param name="Name" value="text"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#abf8d0c8b394104920317e49a875f2009"><param name="Name" value="weight"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a5727cff9f9cdfffbdc4b70f7d525e027"><param name="Name" value="SummaryElement"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a9755e283bc04d59538f45345bde9494f"><param name="Name" value="text"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#adcbb0526dbd4ba63a9234aca3da4bb6b"><param name="Name" value="weight"></OBJECT>
   </UL>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html"><param name="Name" value="strus::SummarizerExecutionContextInterface"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html"><param name="Name" value="strus::SummarizerFunctionContextInterface"></OBJECT>
   <UL>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a3975de35402a2c7d7deac50144721729"><param name="Name" value="addSummarizationFeature"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a4cecabc1b045dfc538f6ac9e31d3fe67"><param name="Name" value="getSummary"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a62ce9eb8f5cf7d5665a54fa40cec32de"><param name="Name" value="~SummarizerExecutionContextInterface"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a6efa8b73814b9c43832242ce43aae510"><param name="Name" value="addSummarizationFeature"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a3ab219d4c03246021a9acae9faedba84"><param name="Name" value="getSummary"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#ae98e834b6eed79f6714257860c5d2836"><param name="Name" value="~SummarizerFunctionContextInterface"></OBJECT>
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html"><param name="Name" value="strus::SummarizerFunctionInstanceInterface"></OBJECT>
   <UL>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7a0decd4f25d361518697761a0ab2cd6"><param name="Name" value="addNumericParameter"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a1011ce3c7b0a10161c8ea27b95da0e3e"><param name="Name" value="addStringParameter"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a8f29554344e7e7704aa3e824d9730c12"><param name="Name" value="createExecutionContext"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a19a8ca788cd9e9606fd9fe706a895f02"><param name="Name" value="createFunctionContext"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a79beff9b22b47737e539565309c7f68f"><param name="Name" value="tostring"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7c72461d32fb9e6ae0d66746ac6256ad"><param name="Name" value="~SummarizerFunctionInstanceInterface"></OBJECT>
   </UL>
@@ -722,17 +722,17 @@
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightedDocument.html#ab95b162122cba491212af52637650572"><param name="Name" value="weight"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightedDocument.html#a513470a298b419bef64cdff2caa178ef"><param name="Name" value="WeightedDocument"></OBJECT>
   </UL>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html"><param name="Name" value="strus::WeightingExecutionContextInterface"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html"><param name="Name" value="strus::WeightingFunctionContextInterface"></OBJECT>
   <UL>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a34870a925e0dc1a95865363e2c43d712"><param name="Name" value="addWeightingFeature"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a7c38ea3588ed433e4b5d4bd7abda147b"><param name="Name" value="call"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a164c2f2fd55021d083ba092eaa0070ed"><param name="Name" value="~WeightingExecutionContextInterface"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#acad94d2eca899c13fb35a14ad28d9d60"><param name="Name" value="addWeightingFeature"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ac801500433b0ed8a9d98d95bc385751e"><param name="Name" value="call"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ae7b9f57f3a2ae9dcb3883d30f1ae310c"><param name="Name" value="~WeightingFunctionContextInterface"></OBJECT>
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html"><param name="Name" value="strus::WeightingFunctionInstanceInterface"></OBJECT>
   <UL>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#ad1e8d10b328b4f5e9989964c26bcc7fb"><param name="Name" value="addNumericParameter"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a1566833157c02dbdfad2c420713d02be"><param name="Name" value="addStringParameter"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a3bb3850e0969f1a193128f9c3ecc7c2f"><param name="Name" value="createExecutionContext"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#afa0d0a239a8749a380deffa6f00eb502"><param name="Name" value="createFunctionContext"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a71b01c3423b71025aca31e5ec72d2322"><param name="Name" value="tostring"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a7dfcac44a85cab14fcb1f3d9782d9597"><param name="Name" value="~WeightingFunctionInstanceInterface"></OBJECT>
   </UL>
@@ -756,8 +756,8 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="versionStorage_8hpp.html#a16ace91aa34c6ada6929b79208d89821"><param name="Name" value="STRUS_STORAGE_VERSION_STRING"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1PostingIteratorInterface.html#acf6be06cb1992a3a1ee696b519072f51"><param name="Name" value="subExpressions"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizationVariable.html#aec43215dddf869b20feb4504b95706fa"><param name="Name" value="SummarizationVariable"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#a0816e5f7d2ec4b4355d9a63ac3fc71ea"><param name="Name" value="SummaryElement"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ad0ac9bc7d4af0987f3b3e3c283ebcc63"><param name="Name" value="text"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a5727cff9f9cdfffbdc4b70f7d525e027"><param name="Name" value="SummaryElement"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a9755e283bc04d59538f45345bde9494f"><param name="Name" value="text"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a79beff9b22b47737e539565309c7f68f"><param name="Name" value="tostring"></OBJECT>
   <UL>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a79beff9b22b47737e539565309c7f68f"><param name="Name" value="strus::SummarizerFunctionInstanceInterface"></OBJECT>
@@ -787,7 +787,7 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1ResultDocument_1_1Attribute.html#ae96546cf2719d0878ad4e35ab18b43e7"><param name="Name" value="weight"></OBJECT>
   <UL>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1ResultDocument_1_1Attribute.html#ae96546cf2719d0878ad4e35ab18b43e7"><param name="Name" value="strus::ResultDocument::Attribute"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#abf8d0c8b394104920317e49a875f2009"><param name="Name" value="strus::SummarizerExecutionContextInterface::SummaryElement"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#adcbb0526dbd4ba63a9234aca3da4bb6b"><param name="Name" value="strus::SummarizerFunctionContextInterface::SummaryElement"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightedDocument.html#ab95b162122cba491212af52637650572"><param name="Name" value="strus::WeightedDocument"></OBJECT>
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightedDocument.html#a513470a298b419bef64cdff2caa178ef"><param name="Name" value="WeightedDocument"></OBJECT>
@@ -820,10 +820,10 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StoragePeerInterface.html#aed8ed8fd79ab62f80833e22ea5587649"><param name="Name" value="~StoragePeerInterface"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StoragePeerTransactionInterface.html#a284f3814a4554f3517b2f6ae0e234191"><param name="Name" value="~StoragePeerTransactionInterface"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#abc051b8461e132f73e852892d6808ebf"><param name="Name" value="~StorageTransactionInterface"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a62ce9eb8f5cf7d5665a54fa40cec32de"><param name="Name" value="~SummarizerExecutionContextInterface"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#ae98e834b6eed79f6714257860c5d2836"><param name="Name" value="~SummarizerFunctionContextInterface"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7c72461d32fb9e6ae0d66746ac6256ad"><param name="Name" value="~SummarizerFunctionInstanceInterface"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1SummarizerFunctionInterface.html#acc11803170765fcdf282647c592e25f4"><param name="Name" value="~SummarizerFunctionInterface"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a164c2f2fd55021d083ba092eaa0070ed"><param name="Name" value="~WeightingExecutionContextInterface"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ae7b9f57f3a2ae9dcb3883d30f1ae310c"><param name="Name" value="~WeightingFunctionContextInterface"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a7dfcac44a85cab14fcb1f3d9782d9597"><param name="Name" value="~WeightingFunctionInstanceInterface"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1WeightingFunctionInterface.html#a09b68e7a7a0628047d6b7c16952abca6"><param name="Name" value="~WeightingFunctionInterface"></OBJECT>
 </UL>

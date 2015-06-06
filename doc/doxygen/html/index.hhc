@@ -409,25 +409,25 @@
         <LI><OBJECT type="text/sitemap"><param name="Name" value="name"><param name="Local" value="classstrus_1_1SummarizationVariable.html#ad87591fde000df467d7e5cdf886ed195"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="position"><param name="Local" value="classstrus_1_1SummarizationVariable.html#a0942c92ff53e0e5a717e22f306a33b49"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
-      <LI><OBJECT type="text/sitemap"><param name="Name" value="SummarizerExecutionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
+      <LI><OBJECT type="text/sitemap"><param name="Name" value="SummarizerFunctionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
         <UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="ImageNumber" value="1"></OBJECT>
           <UL>
-          <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#a0816e5f7d2ec4b4355d9a63ac3fc71ea"><param name="ImageNumber" value="11"></OBJECT>
-          <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ab6612eef7a8e06118fc3d233582604ff"><param name="ImageNumber" value="11"></OBJECT>
-          <LI><OBJECT type="text/sitemap"><param name="Name" value="text"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ad0ac9bc7d4af0987f3b3e3c283ebcc63"><param name="ImageNumber" value="11"></OBJECT>
-          <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#abf8d0c8b394104920317e49a875f2009"><param name="ImageNumber" value="11"></OBJECT>
+          <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a5727cff9f9cdfffbdc4b70f7d525e027"><param name="ImageNumber" value="11"></OBJECT>
+          <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#ae6ce85f55bcc4c962d4dc8c0d57306ab"><param name="ImageNumber" value="11"></OBJECT>
+          <LI><OBJECT type="text/sitemap"><param name="Name" value="text"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a9755e283bc04d59538f45345bde9494f"><param name="ImageNumber" value="11"></OBJECT>
+          <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#adcbb0526dbd4ba63a9234aca3da4bb6b"><param name="ImageNumber" value="11"></OBJECT>
           </UL>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="~SummarizerExecutionContextInterface"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a62ce9eb8f5cf7d5665a54fa40cec32de"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="addSummarizationFeature"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a3975de35402a2c7d7deac50144721729"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="getSummary"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a4cecabc1b045dfc538f6ac9e31d3fe67"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="~SummarizerFunctionContextInterface"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#ae98e834b6eed79f6714257860c5d2836"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="addSummarizationFeature"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a6efa8b73814b9c43832242ce43aae510"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="getSummary"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a3ab219d4c03246021a9acae9faedba84"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
       <LI><OBJECT type="text/sitemap"><param name="Name" value="SummarizerFunctionInstanceInterface"><param name="ImageNumber" value="1"></OBJECT>
         <UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="~SummarizerFunctionInstanceInterface"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7c72461d32fb9e6ae0d66746ac6256ad"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="addNumericParameter"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7a0decd4f25d361518697761a0ab2cd6"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="addStringParameter"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a1011ce3c7b0a10161c8ea27b95da0e3e"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="createExecutionContext"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a8f29554344e7e7704aa3e824d9730c12"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="createFunctionContext"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a19a8ca788cd9e9606fd9fe706a895f02"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="tostring"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a79beff9b22b47737e539565309c7f68f"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
       <LI><OBJECT type="text/sitemap"><param name="Name" value="SummarizerFunctionInterface"><param name="ImageNumber" value="1"></OBJECT>
@@ -445,18 +445,18 @@
         <LI><OBJECT type="text/sitemap"><param name="Name" value="operator>"><param name="Local" value="classstrus_1_1WeightedDocument.html#a1f8d99a79b5c7f0123df607e565cc7f2"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1WeightedDocument.html#ab95b162122cba491212af52637650572"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
-      <LI><OBJECT type="text/sitemap"><param name="Name" value="WeightingExecutionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
+      <LI><OBJECT type="text/sitemap"><param name="Name" value="WeightingFunctionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
         <UL>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="~WeightingExecutionContextInterface"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a164c2f2fd55021d083ba092eaa0070ed"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="addWeightingFeature"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a34870a925e0dc1a95865363e2c43d712"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="call"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a7c38ea3588ed433e4b5d4bd7abda147b"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="~WeightingFunctionContextInterface"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ae7b9f57f3a2ae9dcb3883d30f1ae310c"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="addWeightingFeature"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#acad94d2eca899c13fb35a14ad28d9d60"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="call"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ac801500433b0ed8a9d98d95bc385751e"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
       <LI><OBJECT type="text/sitemap"><param name="Name" value="WeightingFunctionInstanceInterface"><param name="ImageNumber" value="1"></OBJECT>
         <UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="~WeightingFunctionInstanceInterface"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a7dfcac44a85cab14fcb1f3d9782d9597"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="addNumericParameter"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#ad1e8d10b328b4f5e9989964c26bcc7fb"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="addStringParameter"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a1566833157c02dbdfad2c420713d02be"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="createExecutionContext"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a3bb3850e0969f1a193128f9c3ecc7c2f"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="createFunctionContext"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#afa0d0a239a8749a380deffa6f00eb502"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="tostring"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a71b01c3423b71025aca31e5ec72d2322"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
       <LI><OBJECT type="text/sitemap"><param name="Name" value="WeightingFunctionInterface"><param name="ImageNumber" value="1"></OBJECT>
@@ -503,15 +503,15 @@
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::StoragePeerTransactionInterface"><param name="Local" value="classstrus_1_1StoragePeerTransactionInterface.html"><param name="ImageNumber" value="11"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::StorageTransactionInterface"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html"><param name="ImageNumber" value="11"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::SummarizationVariable"><param name="Local" value="classstrus_1_1SummarizationVariable.html"><param name="ImageNumber" value="11"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::SummarizerExecutionContextInterface"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html"><param name="ImageNumber" value="11"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::SummarizerFunctionContextInterface"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html"><param name="ImageNumber" value="11"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::SummarizerFunctionInstanceInterface"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html"><param name="ImageNumber" value="11"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::SummarizerFunctionInterface"><param name="Local" value="classstrus_1_1SummarizerFunctionInterface.html"><param name="ImageNumber" value="11"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::SummarizerExecutionContextInterface::SummaryElement"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html"><param name="ImageNumber" value="11"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::SummarizerFunctionContextInterface::SummaryElement"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html"><param name="ImageNumber" value="11"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::WeightedDocument"><param name="ImageNumber" value="1"></OBJECT>
       <UL>
       <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::ResultDocument"><param name="Local" value="classstrus_1_1ResultDocument.html"><param name="ImageNumber" value="11"></OBJECT>
       </UL>
-    <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::WeightingExecutionContextInterface"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html"><param name="ImageNumber" value="11"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::WeightingFunctionContextInterface"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html"><param name="ImageNumber" value="11"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::WeightingFunctionInstanceInterface"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html"><param name="ImageNumber" value="11"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Name" value="strus::WeightingFunctionInterface"><param name="Local" value="classstrus_1_1WeightingFunctionInterface.html"><param name="ImageNumber" value="11"></OBJECT>
     </UL>
@@ -1111,27 +1111,27 @@
             <LI><OBJECT type="text/sitemap"><param name="Name" value="position"><param name="Local" value="classstrus_1_1SummarizationVariable.html#a0942c92ff53e0e5a717e22f306a33b49"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="summarizerExecutionContextInterface.hpp"><param name="Local" value="summarizerExecutionContextInterface_8hpp.html"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="summarizerFunctionContextInterface.hpp"><param name="Local" value="summarizerFunctionContextInterface_8hpp.html"><param name="ImageNumber" value="11"></OBJECT>
           <UL>
-          <LI><OBJECT type="text/sitemap"><param name="Name" value="SummarizerExecutionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
+          <LI><OBJECT type="text/sitemap"><param name="Name" value="SummarizerFunctionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
             <UL>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="ImageNumber" value="1"></OBJECT>
               <UL>
-              <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#a0816e5f7d2ec4b4355d9a63ac3fc71ea"><param name="ImageNumber" value="11"></OBJECT>
-              <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ab6612eef7a8e06118fc3d233582604ff"><param name="ImageNumber" value="11"></OBJECT>
-              <LI><OBJECT type="text/sitemap"><param name="Name" value="text"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ad0ac9bc7d4af0987f3b3e3c283ebcc63"><param name="ImageNumber" value="11"></OBJECT>
-              <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#abf8d0c8b394104920317e49a875f2009"><param name="ImageNumber" value="11"></OBJECT>
+              <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a5727cff9f9cdfffbdc4b70f7d525e027"><param name="ImageNumber" value="11"></OBJECT>
+              <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#ae6ce85f55bcc4c962d4dc8c0d57306ab"><param name="ImageNumber" value="11"></OBJECT>
+              <LI><OBJECT type="text/sitemap"><param name="Name" value="text"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a9755e283bc04d59538f45345bde9494f"><param name="ImageNumber" value="11"></OBJECT>
+              <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#adcbb0526dbd4ba63a9234aca3da4bb6b"><param name="ImageNumber" value="11"></OBJECT>
               </UL>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="~SummarizerExecutionContextInterface"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a62ce9eb8f5cf7d5665a54fa40cec32de"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="addSummarizationFeature"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a3975de35402a2c7d7deac50144721729"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="getSummary"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface.html#a4cecabc1b045dfc538f6ac9e31d3fe67"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="~SummarizerFunctionContextInterface"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#ae98e834b6eed79f6714257860c5d2836"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="addSummarizationFeature"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a6efa8b73814b9c43832242ce43aae510"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="getSummary"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface.html#a3ab219d4c03246021a9acae9faedba84"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="ImageNumber" value="1"></OBJECT>
             <UL>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#a0816e5f7d2ec4b4355d9a63ac3fc71ea"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ab6612eef7a8e06118fc3d233582604ff"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="text"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#ad0ac9bc7d4af0987f3b3e3c283ebcc63"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1SummarizerExecutionContextInterface_1_1SummaryElement.html#abf8d0c8b394104920317e49a875f2009"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a5727cff9f9cdfffbdc4b70f7d525e027"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="SummaryElement"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#ae6ce85f55bcc4c962d4dc8c0d57306ab"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="text"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#a9755e283bc04d59538f45345bde9494f"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html#adcbb0526dbd4ba63a9234aca3da4bb6b"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="summarizerFunctionInstanceInterface.hpp"><param name="Local" value="summarizerFunctionInstanceInterface_8hpp.html"><param name="ImageNumber" value="11"></OBJECT>
@@ -1141,7 +1141,7 @@
             <LI><OBJECT type="text/sitemap"><param name="Name" value="~SummarizerFunctionInstanceInterface"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7c72461d32fb9e6ae0d66746ac6256ad"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="addNumericParameter"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7a0decd4f25d361518697761a0ab2cd6"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="addStringParameter"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a1011ce3c7b0a10161c8ea27b95da0e3e"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="createExecutionContext"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a8f29554344e7e7704aa3e824d9730c12"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="createFunctionContext"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a19a8ca788cd9e9606fd9fe706a895f02"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="tostring"><param name="Local" value="classstrus_1_1SummarizerFunctionInstanceInterface.html#a79beff9b22b47737e539565309c7f68f"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>
@@ -1173,13 +1173,13 @@
             <LI><OBJECT type="text/sitemap"><param name="Name" value="weight"><param name="Local" value="classstrus_1_1WeightedDocument.html#ab95b162122cba491212af52637650572"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="weightingExecutionContextInterface.hpp"><param name="Local" value="weightingExecutionContextInterface_8hpp.html"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="weightingFunctionContextInterface.hpp"><param name="Local" value="weightingFunctionContextInterface_8hpp.html"><param name="ImageNumber" value="11"></OBJECT>
           <UL>
-          <LI><OBJECT type="text/sitemap"><param name="Name" value="WeightingExecutionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
+          <LI><OBJECT type="text/sitemap"><param name="Name" value="WeightingFunctionContextInterface"><param name="ImageNumber" value="1"></OBJECT>
             <UL>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="~WeightingExecutionContextInterface"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a164c2f2fd55021d083ba092eaa0070ed"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="addWeightingFeature"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a34870a925e0dc1a95865363e2c43d712"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="call"><param name="Local" value="classstrus_1_1WeightingExecutionContextInterface.html#a7c38ea3588ed433e4b5d4bd7abda147b"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="~WeightingFunctionContextInterface"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ae7b9f57f3a2ae9dcb3883d30f1ae310c"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="addWeightingFeature"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#acad94d2eca899c13fb35a14ad28d9d60"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="call"><param name="Local" value="classstrus_1_1WeightingFunctionContextInterface.html#ac801500433b0ed8a9d98d95bc385751e"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="weightingFunctionInstanceInterface.hpp"><param name="Local" value="weightingFunctionInstanceInterface_8hpp.html"><param name="ImageNumber" value="11"></OBJECT>
@@ -1189,7 +1189,7 @@
             <LI><OBJECT type="text/sitemap"><param name="Name" value="~WeightingFunctionInstanceInterface"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a7dfcac44a85cab14fcb1f3d9782d9597"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="addNumericParameter"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#ad1e8d10b328b4f5e9989964c26bcc7fb"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="addStringParameter"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a1566833157c02dbdfad2c420713d02be"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="createExecutionContext"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a3bb3850e0969f1a193128f9c3ecc7c2f"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="createFunctionContext"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#afa0d0a239a8749a380deffa6f00eb502"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="tostring"><param name="Local" value="classstrus_1_1WeightingFunctionInstanceInterface.html#a71b01c3423b71025aca31e5ec72d2322"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>
