@@ -44,7 +44,7 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
-class SummarizerExecutionContextInterface;
+class SummarizerFunctionContextInterface;
 
 
 /// \brief Interface for a parameterized instance of summarization
@@ -68,7 +68,7 @@ public:
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
 	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)
 	/// \return the execution context, the summarization function instance with its execution context (ownership to caller)
-	virtual SummarizerExecutionContextInterface* createExecutionContext(
+	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata_) const=0;
 

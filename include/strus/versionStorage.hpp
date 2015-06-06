@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Version of the strus (core) project
-/// \file "versionStorage.hpp"
+/// \file versionStorage.hpp
 #ifndef _STRUS_VERSION_HPP_INCLUDED
 #define _STRUS_VERSION_HPP_INCLUDED
 

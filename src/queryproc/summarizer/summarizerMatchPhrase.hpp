@@ -30,7 +30,7 @@
 #define _STRUS_SUMMARIZER_MATCH_PHRASE_HPP_INCLUDED
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
-#include "strus/summarizerExecutionContextInterface.hpp"
+#include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
@@ -54,8 +54,8 @@ class PostingIteratorInterface;
 class QueryProcessorInterface;
 
 
-class SummarizerExecutionContextMatchPhrase
-	:public SummarizerExecutionContextInterface
+class SummarizerFunctionContextMatchPhrase
+	:public SummarizerFunctionContextInterface
 {
 public:
 	/// \param[in] storage_ storage to use
@@ -64,7 +64,7 @@ public:
 	/// \param[in] maxlen_ maximum lenght of a sentence on both sides of the matching feature until it is cut and terminated with "..."
 	/// \param[in] summarylen_ maximum lenght of the whole summary
 	/// \param[in] features_ features to inspect
-	SummarizerExecutionContextMatchPhrase(
+	SummarizerFunctionContextMatchPhrase(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
@@ -72,7 +72,7 @@ public:
 			unsigned int summarylen_,
 			unsigned int structseeklen_,
 			const std::pair<std::string,std::string>& matchmark_);
-	virtual ~SummarizerExecutionContextMatchPhrase();
+	virtual ~SummarizerFunctionContextMatchPhrase();
 
 	virtual void addSummarizationFeature(
 			const std::string& name,
@@ -114,7 +114,7 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
-	virtual SummarizerExecutionContextInterface* createExecutionContext(
+	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
 			MetaDataReaderInterface*) const
 	{
@@ -122,7 +122,7 @@ public:
 		{
 			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
-		return new SummarizerExecutionContextMatchPhrase(
+		return new SummarizerFunctionContextMatchPhrase(
 				storage, m_processor, m_type, m_nofsummaries, m_summarylen, m_structseeklen, m_matchmark);
 	}
 

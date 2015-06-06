@@ -37,7 +37,7 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "strus/summarizerExecutionContextInterface.hpp"
+#include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/utils.hpp"
@@ -391,8 +391,8 @@ std::vector<ResultDocument> Query::evaluate()
 			we = m_queryEval->weightingFunctions().end();
 		for (; wi != we; ++wi)
 		{
-			std::auto_ptr<WeightingExecutionContextInterface> execContext(
-				wi->function()->createExecutionContext( m_storage, m_metaDataReader.get()));
+			std::auto_ptr<WeightingFunctionContextInterface> execContext(
+				wi->function()->createFunctionContext( m_storage, m_metaDataReader.get()));
 
 			std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 				si = wi->featureParameters().begin(),
@@ -449,7 +449,7 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 	}
 	// [5] Create the summarizers:
-	std::vector<Reference<SummarizerExecutionContextInterface> > summarizers;
+	std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
 	{
 		std::vector<SummarizerDef>::const_iterator
 			zi = m_queryEval->summarizers().begin(),
@@ -458,9 +458,9 @@ std::vector<ResultDocument> Query::evaluate()
 		{
 			// [5.1] Create the summarizer:
 			summarizers.push_back(
-				zi->function()->createExecutionContext(
+				zi->function()->createFunctionContext(
 					m_storage, m_metaDataReader.get()));
-			SummarizerExecutionContextInterface* closure = summarizers.back().get();
+			SummarizerFunctionContextInterface* closure = summarizers.back().get();
 
 			// [5.2] Add features with their variables assigned to summarizer:
 			std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
@@ -514,15 +514,15 @@ std::vector<ResultDocument> Query::evaluate()
 		std::cout << "result rank docno=" << ri->docno() << ", weight=" << ri->weight() << std::endl;
 #endif
 		std::vector<ResultDocument::Attribute> attr;
-		std::vector<Reference<SummarizerExecutionContextInterface> >::iterator
+		std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
 			si = summarizers.begin(), se = summarizers.end();
 
 		rt.push_back( ResultDocument( *ri));
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
-			std::vector<SummarizerExecutionContextInterface::SummaryElement>
+			std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				summary = (*si)->getSummary( ri->docno());
-			std::vector<SummarizerExecutionContextInterface::SummaryElement>::const_iterator
+			std::vector<SummarizerFunctionContextInterface::SummaryElement>::const_iterator
 				ci = summary.begin(), ce = summary.end();
 			for (; ci != ce; ++ci)
 			{

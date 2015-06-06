@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for the context data of a processed weighting function
-/// \file "weightingExecutionContextInterface.hpp"
+/// \file "weightingFunctionContextInterface.hpp"
 #ifndef _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
@@ -40,11 +40,11 @@ class MetaDataReaderInterface;
 class PostingIteratorInterface;
 
 /// \brief Interface for a weighting function with its state and context used during calculation
-class WeightingExecutionContextInterface
+class WeightingFunctionContextInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~WeightingExecutionContextInterface(){}
+	virtual ~WeightingFunctionContextInterface(){}
 
 	/// \brief Add a feature that is subject of weighting to the execution context
 	/// \param[in] name_ name of the summarization feature

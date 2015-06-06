@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for the context data of a processed summarizer
-/// \file "summarizerExecutionContextInterface.hpp"
+/// \file "summarizerFunctionContextInterface.hpp"
 #ifndef _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/summarizationVariable.hpp"
@@ -40,9 +40,9 @@ namespace strus
 /// \brief Forward declaration
 class PostingIteratorInterface;
 
-/// \class SummarizerExecutionContextInterface
+/// \class SummarizerFunctionContextInterface
 /// \brief Interface for the summarization execution context
-class SummarizerExecutionContextInterface
+class SummarizerFunctionContextInterface
 {
 public:
 	/// \brief One result element of summarization
@@ -68,7 +68,7 @@ public:
 
 public:
 	/// \brief Destructor
-	virtual ~SummarizerExecutionContextInterface(){}
+	virtual ~SummarizerFunctionContextInterface(){}
 
 	/// \brief Add a sumarization feature that is subject of summarization to the execution context
 	/// \param[in] name_ name of the summarization feature

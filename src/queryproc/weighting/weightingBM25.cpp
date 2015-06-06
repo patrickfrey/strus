@@ -33,7 +33,7 @@
 
 using namespace strus;
 
-WeightingExecutionContextBM25::WeightingExecutionContextBM25(
+WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
 		float k1_,
@@ -46,7 +46,7 @@ WeightingExecutionContextBM25::WeightingExecutionContextBM25(
 	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?Constants::metadata_doclen():attribute_doclen_))
 {}
 
-void WeightingExecutionContextBM25::addWeightingFeature(
+void WeightingFunctionContextBM25::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
 		float weight_)
@@ -75,7 +75,7 @@ void WeightingExecutionContextBM25::addWeightingFeature(
 }
 
 
-float WeightingExecutionContextBM25::call( const Index& docno)
+float WeightingFunctionContextBM25::call( const Index& docno)
 {
 	float rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();

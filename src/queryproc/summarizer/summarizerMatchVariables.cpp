@@ -74,7 +74,7 @@ void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::s
 }
 
 
-SummarizerExecutionContextMatchVariables::SummarizerExecutionContextMatchVariables(
+SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
@@ -90,7 +90,7 @@ SummarizerExecutionContextMatchVariables::SummarizerExecutionContextMatchVariabl
 {}
 
 
-void SummarizerExecutionContextMatchVariables::addSummarizationFeature(
+void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables)
@@ -106,10 +106,10 @@ void SummarizerExecutionContextMatchVariables::addSummarizationFeature(
 }
 
 
-std::vector<SummarizerExecutionContextInterface::SummaryElement>
-	SummarizerExecutionContextMatchVariables::getSummary( const Index& docno)
+std::vector<SummarizerFunctionContextInterface::SummaryElement>
+	SummarizerFunctionContextMatchVariables::getSummary( const Index& docno)
 {
-	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
+	std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 	m_forwardindex->skipDoc( docno);
 	Index curpos = 0;
 

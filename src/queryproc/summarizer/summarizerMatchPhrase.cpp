@@ -118,7 +118,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 }
 
 
-SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
+SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
@@ -141,7 +141,7 @@ SummarizerExecutionContextMatchPhrase::SummarizerExecutionContextMatchPhrase(
 	,m_init_complete(false)
 {}
 
-void SummarizerExecutionContextMatchPhrase::addSummarizationFeature(
+void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>&)
@@ -165,11 +165,11 @@ void SummarizerExecutionContextMatchPhrase::addSummarizationFeature(
 	}
 }
 
-SummarizerExecutionContextMatchPhrase::~SummarizerExecutionContextMatchPhrase()
+SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
 {}
 
-std::vector<SummarizerExecutionContextInterface::SummaryElement>
-	SummarizerExecutionContextMatchPhrase::getSummary( const Index& docno)
+std::vector<SummarizerFunctionContextInterface::SummaryElement>
+	SummarizerFunctionContextMatchPhrase::getSummary( const Index& docno)
 {
 	if (!m_init_complete)
 	{
@@ -202,7 +202,7 @@ std::vector<SummarizerExecutionContextInterface::SummaryElement>
 	SlidingMatchWindow slidingMatchWindow( m_summarylen, m_nofsummaries*4, matchset);
 
 	// Initialize the forward index and the structure elements:
-	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
+	std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 	m_forwardindex->skipDoc( docno);
 	if (m_phrasestruct)
 	{

@@ -30,7 +30,7 @@
 #define _STRUS_WEIGHTING_CONSTANT_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
-#include "strus/weightingExecutionContextInterface.hpp"
+#include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
@@ -47,13 +47,13 @@ namespace strus
 class WeightingFunctionConstant;
 
 
-/// \class WeightingExecutionContextConstant
-/// \brief Weighting function ExecutionContext for the constant weighting function
-class WeightingExecutionContextConstant
-	:public WeightingExecutionContextInterface
+/// \class WeightingFunctionContextConstant
+/// \brief Weighting function FunctionContext for the constant weighting function
+class WeightingFunctionContextConstant
+	:public WeightingFunctionContextInterface
 {
 public:
-	WeightingExecutionContextConstant(
+	WeightingFunctionContextConstant(
 			float weight_)
 		:m_featar(),m_weight(weight_){}
 
@@ -130,11 +130,11 @@ public:
 		}
 	}
 
-	virtual WeightingExecutionContextInterface* createExecutionContext(
+	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface*) const
 	{
-		return new WeightingExecutionContextConstant( m_weight);
+		return new WeightingFunctionContextConstant( m_weight);
 	}
 
 	virtual std::string tostring() const

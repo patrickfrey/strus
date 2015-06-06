@@ -35,21 +35,21 @@
 
 using namespace strus;
 
-SummarizerExecutionContextMetaData::SummarizerExecutionContextMetaData( 
+SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
 		MetaDataReaderInterface* metadata_, const std::string& name_)
 	:m_metadata(metadata_)
 	,m_attrib(metadata_->elementHandle( name_.c_str()))
 {}
 
-std::vector<SummarizerExecutionContextInterface::SummaryElement>
-	SummarizerExecutionContextMetaData::getSummary( const Index& docno)
+std::vector<SummarizerFunctionContextInterface::SummaryElement>
+	SummarizerFunctionContextMetaData::getSummary( const Index& docno)
 {
-	std::vector<SummarizerExecutionContextInterface::SummaryElement> rt;
+	std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 	m_metadata->skipDoc( docno);
 	ArithmeticVariant value = m_metadata->getValue( m_attrib);
 	if (value.defined()) 
 	{
-		rt.push_back( SummarizerExecutionContextInterface::SummaryElement( arithmeticVariantToString( value), 1.0));
+		rt.push_back( SummarizerFunctionContextInterface::SummaryElement( arithmeticVariantToString( value), 1.0));
 	}
 	return rt;
 }

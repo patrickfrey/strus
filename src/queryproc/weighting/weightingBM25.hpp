@@ -30,7 +30,7 @@
 #define _STRUS_WEIGHTING_BM25_HPP_INCLUDED
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
-#include "strus/weightingExecutionContextInterface.hpp"
+#include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
@@ -46,13 +46,13 @@
 namespace strus
 {
 
-/// \class WeightingExecutionContextBM25
+/// \class WeightingFunctionContextBM25
 /// \brief Weighting function based on the BM25 formula
-class WeightingExecutionContextBM25
-	:public WeightingExecutionContextInterface
+class WeightingFunctionContextBM25
+	:public WeightingFunctionContextInterface
 {
 public:
-	WeightingExecutionContextBM25(
+	WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
 		float k1_,
@@ -104,11 +104,11 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
-	virtual WeightingExecutionContextInterface* createExecutionContext(
+	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata) const
 	{
-		return new WeightingExecutionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen);
+		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen);
 	}
 
 	virtual std::string tostring() const
