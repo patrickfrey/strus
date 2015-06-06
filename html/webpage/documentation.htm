@@ -22,9 +22,14 @@
 		<h3>C++ interfaces</h3>
 		<ol>
 		<li><a href="http://patrickfrey.github.io/strus/doc/doxygen/html/index.html">strus core (storage and query evaluation)</a></li>
-		<li><a href="http://patrickfrey.github.io/strus/doc/doxygen/html/index.html">strus analyzer</a></li>
+		<li><a href="http://patrickfrey.github.io/strusAnalyzer/doc/doxygen/html/index.html">strus analyzer</a></li>
+		<li><a href="http://patrickfrey.github.io/strusModule/doc/doxygen/html/index.html">strus module loader</a></li>
+		<li><a href="http://patrickfrey.github.io/strusRpc/doc/doxygen/html/index.html">strus RPC client</a></li>
 		</ol>
 		<h3>Language binding interface</h3>
+		<p>The language binding interface provides an interface to the strus core and the analyzer.
+		Depending on how the context object is initialized, it uses either the module loader
+		or it acts as proxy that issues its method calls via RPC to a running RPC server.</p>
 	</div>
 </div>
 </body>
