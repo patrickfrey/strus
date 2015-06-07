@@ -31,18 +31,23 @@
 #ifndef _STRUS_VERSION_HPP_INCLUDED
 #define _STRUS_VERSION_HPP_INCLUDED
 
+/// \brief strus toplevel namespace
 namespace strus
 {
 
+/// \brief Version number of the strus code (storage)
 #define STRUS_STORAGE_VERSION (\
 	0 * 1000000\
 	+ 0 * 10000\
 	+ 1\
 )
 
+/// \brief Major version number of the strus core (storage)
 #define STRUS_STORAGE_VERSION_MAJOR 0
+/// \brief Minor version number of the strus core (storage)
 #define STRUS_STORAGE_VERSION_MINOR 0
 
+/// \brief The version of the storage as string
 #define STRUS_STORAGE_VERSION_STRING "0.0.1"
 
 }//namespace

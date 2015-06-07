@@ -11,7 +11,15 @@
 </head>
 
 <body>
-<div id="wrap">
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-63809026-3', 'auto');
+  ga('send', 'pageview');
+</script><div id="wrap">
 	<div id="content">
 		<h2>Interface documentation</h2>
 		<p>Strus provides two classes of interfaces with diametric objectives.
@@ -26,10 +34,12 @@
 		<li><a href="http://patrickfrey.github.io/strusModule/doc/doxygen/html/index.html">strus module loader</a></li>
 		<li><a href="http://patrickfrey.github.io/strusRpc/doc/doxygen/html/index.html">strus RPC client</a></li>
 		</ol>
-		<h3>Language binding interface</h3>
-		<p>The language binding interface provides an interface to the strus core and the analyzer.
-		Depending on how the context object is initialized, it uses either the module loader
-		or it acts as proxy that issues its method calls via RPC to a running RPC server.</p>
+		<h3>Language binding interfaces</h3>
+		<p>The language binding interfaces are for scripting languages calling strus
+		functions. Language bindings can call strus functions directly or they can 
+		call functions on objects residing on a server via RPC.
+		The documentation of the language bindings can be found <a href="http://patrickfrey.github.io/strusBindings/doc/index.html">here</a>.
+		</p>
 	</div>
 </div>
 </body>

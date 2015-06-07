@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Exported functions of the library implementing the key/value store database interface with leveldb
-/// \file "database_leveldb.hpp"
+/// \file database_leveldb.hpp
 #ifndef _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
 #define _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
 
@@ -37,6 +37,8 @@ namespace strus {
 /// \brief Forward declaration
 class DatabaseInterface;
 
+/// \brief Get the database interface implemented with leveldb with the functions for accessing the key/value store database.
+/// \return the database interface
 const DatabaseInterface* getDatabase_leveldb();
 
 }//namespace
