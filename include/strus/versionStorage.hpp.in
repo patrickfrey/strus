@@ -26,23 +26,28 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Version of the strus (core) project
+/// \brief Version of the strus core (storage) project
 /// \file versionStorage.hpp
 #ifndef _STRUS_VERSION_HPP_INCLUDED
 #define _STRUS_VERSION_HPP_INCLUDED
 
+/// \brief strus toplevel namespace
 namespace strus
 {
 
+/// \brief Version number of the strus core (storage)
 #define STRUS_STORAGE_VERSION (\
 	@STRUS_MAJOR_VERSION@ * 1000000\
 	+ @STRUS_MINOR_VERSION@ * 10000\
 	+ @STRUS_PATCH_VERSION@\
 )
 
+/// \brief Major version number of the strus core (storage)
 #define STRUS_STORAGE_VERSION_MAJOR @STRUS_MAJOR_VERSION@
+/// \brief Minor version number of the strus core (storage)
 #define STRUS_STORAGE_VERSION_MINOR @STRUS_MINOR_VERSION@
 
+/// \brief The version of the strus core (storage) as string
 #define STRUS_STORAGE_VERSION_STRING "@STRUS_VERSION@"
 
 }//namespace
