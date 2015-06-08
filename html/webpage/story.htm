@@ -138,7 +138,22 @@
 		<h4>Normalizer</h4>
 		<p>You can define your own normalizer functions to produce the retrievable items from 
 		the document tokens for the storage and the query.</p>
-		<h2>What is missing in strus ?</h2>
+
+		<h2>What is still missing in strus</h2>
+		<h3>Orchestration of a distributed index</h3>
+		<p>The ability of distributing the search index and running <i>strus</i>
+		as server nodes in a cluster without too much configuration and 
+		administration effort is crucial for implementing a competitive search. <br/>
+		<i>Strus</i> has interfaces to populate and receive statistics, that have to be shared
+		in order to make ranking weights of different search engine nodes comparable. 
+		<i>Strus</i> is built to take these statistics into account for ranking. 
+		<i>strus</i> also has the interfaces to populate its statistics after startup 
+		and all changes in its index during runtime.<br/>
+		But the messaging to exchange this data and the orchestration
+		of its nodes is not implemented yet.
+		</p>
+
+		<h2>What is not part of strus</h2>
 		<p>Several parts are not a subject for strus. 
 		Here follows a list of parts you may miss and have to find elsewhere.
 		</p>
