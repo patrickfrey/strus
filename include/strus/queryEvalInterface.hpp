@@ -72,6 +72,10 @@ public:
 	/// \param[in] set_ name of the set of the restriction feature
 	virtual void addRestrictionFeature( const std::string& set_)=0;
 
+	/// \brief Define a set of features to be used as exclusion (exclude documents that contain a feature of the set declared)
+	/// \param[in] set_ name of the set of the exclusion feature
+	virtual void addExclusionFeature( const std::string& set_)=0;
+
 	/// \class FeatureParameter
 	/// \brief Structure that describes a feature that is subject of summarization or weighting
 	class FeatureParameter
