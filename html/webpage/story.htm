@@ -22,7 +22,7 @@
 </script>
 <div id="wrap">
 	<div id="content">
-		<h2>Why to build yet another search engine ?</h2>
+		<h2>Why to build yet another search engine</h2>
 		<h3>Personal motivation</h3>
 		<p>The project <i>strus</i> started just out of frustration. I was working on a project
 		that was doomed from the beginning for two years. After realising that it had to fail,
@@ -34,16 +34,62 @@
 		problems I had to face. In September 2014 I started the project strus.
 		</p>
 
-		<h2>What is strus about ?</h2>
+		<h3>What is strus</h3>
 		<p>Strus is a set of components (libraries, programs and language bindings)
 		to build the core of a scalable full text search engine. It aims to cover
 		classical IR as well as structured search for arbitrary complex expressions 
 		on the boolean algebra of sets of term occurrencies (d,p) where d references a 
 		document and p a discrete position number. Besides matching of expressions,
 		strus also provides a mechanism to attach variables on subexpression matches
-		than can be referenced in the presentation of the query result.
-		<br/>
-		The core components strus implements are the following:
+		than can be referenced in the presentation of the query result.</p>
+
+		<h3>What distiguishes strus from other fulltext search engines</h3>
+		<h4>Outsourcing the data storage</h4>
+		<p>Strus can be build uppon any modern NOSQL key/value database that has
+		an <a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upperbound seek</a>
+		to implement its data storage.
+		This reduces the complexity of the problem (the strus core with storage and query
+		evaluation has about 32000 lines of code). Alternative implementations for the
+		database can be provided by experts on the topic.</p>
+		<h4>Modelling of structured queries</h4>
+		<p>All open source search engines I know (e.g. Lucene,Xapian,Sphinx) express
+		multi term expressions as subqueries. Strus implements expressions as operations
+		in the boolean algebra of sets of pairs of document number and position in the document.
+		Figuratively speaking: In classial open source search engines, a sequence of words
+		<i>(A,B)</i> is a subquery of type sequence. In strus, a sequence of words is a set
+		of occurrencies: The intersection of the occurrencies of <i>A</i>
+		with the predecessor set of occurrencies of <i>B</i>. Results of expressions can be
+		recombined in other expressions. <br/>
+		You can extend strus by writing your own set join operators.
+		An example that illustrates the capabilities of strus in expressing structures
+		is the built-in operator <b>struct_within</b>: Get the minimal position element of each
+		range (of a maximum size) where all input elements (arguments 2..N) occurr and that 
+		is not overlapping with a structure element (argument 1). With this operator
+		you can for example search for terms inside a range in the same sentence (the end of sentence
+		marker serves as delimiting structure element here).<br/>
+		Another advantage of this model is that you don't need query rewriting for 
+		optimization, because in pure set operations implemented as merge of
+		iterators with an efficient skip to the upperbound, the smaller set is dominating
+		and the number of disk accesses is minimal.
+		</p>
+		<h4>Information extraction</h4>
+		<p>In strus the result of the set operations needed to model expressions are
+		implemented as iterators. The advantage of this model is not only that you
+		do not need memory for storing intermediate results. You also do not need
+		to care about what information to collect for an intermediate result. 
+		As consequence all information about a match is available in the moment you
+		inspect the match.
+		A weighting function or a summarizer can access to positions of all 
+		subexpression matches without expensive introspection.
+		This empowers summarization to collect information that is part of a match
+		or close to a match. Hence you can implement powerful information extraction
+		for feature selection or feature extraction. If you have the resources
+		to do strong NLP for normalizing your documents, you could even imagine
+		to implement a system for query answering with strus.</p>
+
+		<h2>Introducing the components of strus</h2>
+		<p>
+		This section introduces the core components strus.
 		</p>
 		<h3>Key/value store database</h3>
 		<p>A key/value store database stores blocks of data for fast retrieval by their key.
@@ -140,6 +186,10 @@
 		the document tokens for the storage and the query.</p>
 
 		<h2>What is still missing in strus</h2>
+		<h3>Documentation</h3>
+		<p>The documentation of strus and its associated components is still poor. I am currently
+		working hard on it every day.</p>
+
 		<h3>Orchestration of a distributed index</h3>
 		<p>The ability of distributing the search index and running <i>strus</i>
 		as server nodes in a cluster without too much configuration and 
