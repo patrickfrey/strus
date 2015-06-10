@@ -18,12 +18,12 @@ using namespace strus;
 void Accumulator::addSelector(
 		PostingIteratorInterface* iterator, int setindex, bool isExpression)
 {
-	m_selectorPostings.push_back( SelectorPostings( isExpression, setindex, iterator));
+	m_selectorPostings.push_back( SelectorPostings( isExpression, false/*negative*/, setindex, iterator));
 }
 
-void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression)
+void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression, bool isNegative)
 {
-	m_featureRestrictions.push_back( SelectorPostings( isExpression, iterator));
+	m_featureRestrictions.push_back( SelectorPostings( isExpression, isNegative, iterator));
 }
 
 void Accumulator::addFeature(
@@ -114,7 +114,7 @@ bool Accumulator::nextRank(
 			re = m_featureRestrictions.end();
 		for (; ri != re; ++ri)
 		{
-			if (m_docno != ri->postings->skipDoc( m_docno))
+			if (ri->isNegative ^ (m_docno != ri->postings->skipDoc( m_docno)))
 			{
 				break;
 			}

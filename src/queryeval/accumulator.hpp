@@ -87,7 +87,7 @@ public:
 			float weight,
 			WeightingFunctionContextInterface* function_);
 
-	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression);
+	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression, bool isNegative);
 
 	void addAclRestriction( InvAclIteratorInterface* iterator);
 
@@ -111,15 +111,16 @@ private:
 	struct SelectorPostings
 	{
 		bool isExpression;
+		bool isNegative;
 		int setindex;
 		PostingIteratorInterface* postings;
 
-		SelectorPostings( bool isExpression_, int setindex_, PostingIteratorInterface* postings_)
-			:isExpression(isExpression_),setindex(setindex_),postings(postings_){}
-		SelectorPostings( bool isExpression_, PostingIteratorInterface* postings_)
-			:isExpression(isExpression_),setindex(0),postings(postings_){}
+		SelectorPostings( bool isExpression_, bool isNegative_, int setindex_, PostingIteratorInterface* postings_)
+			:isExpression(isExpression_),isNegative(isNegative_),setindex(setindex_),postings(postings_){}
+		SelectorPostings( bool isExpression_, bool isNegative_, PostingIteratorInterface* postings_)
+			:isExpression(isExpression_),isNegative(isNegative_),setindex(0),postings(postings_){}
 		SelectorPostings( const SelectorPostings& o)
-			:isExpression(o.isExpression),setindex(o.setindex),postings(o.postings){}
+			:isExpression(o.isExpression),isNegative(o.isNegative),setindex(o.setindex),postings(o.postings){}
 	};
 
 	const StorageClientInterface* m_storage;

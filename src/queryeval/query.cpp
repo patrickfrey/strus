@@ -443,7 +443,27 @@ std::vector<ResultDocument> Query::evaluate()
 				{
 					accumulator.addFeatureRestriction(
 						nodePostings( fi->node),
-						nodeType( fi->node) == ExpressionNode);
+						nodeType( fi->node) == ExpressionNode, false);
+				}
+			}
+		}
+	}
+	// [4.5] Define the feature exclusions:
+	{
+		std::vector<std::string>::const_iterator
+			xi = m_queryEval->exclusionSets().begin(),
+			xe = m_queryEval->exclusionSets().end();
+		for (; xi != xe; ++xi)
+		{
+			std::vector<Feature>::const_iterator
+				fi = m_features.begin(), fe = m_features.end();
+			for (; fi != fe; ++fi)
+			{
+				if (*xi == fi->set)
+				{
+					accumulator.addFeatureRestriction(
+						nodePostings( fi->node),
+						nodeType( fi->node) == ExpressionNode, true);
 				}
 			}
 		}
