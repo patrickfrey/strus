@@ -69,6 +69,11 @@ void QueryEval::addRestrictionFeature( const std::string& set_)
 	m_restrictionSets.push_back( set_);
 }
 
+void QueryEval::addExclusionFeature( const std::string& set_)
+{
+	m_exclusionSets.push_back( set_);
+}
+
 void QueryEval::addSummarizerFunction(
 		const std::string& functionName,
 		SummarizerFunctionInstanceInterface* function,
