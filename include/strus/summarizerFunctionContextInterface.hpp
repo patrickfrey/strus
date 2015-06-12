@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for the context data of a processed summarizer
-/// \file "summarizerFunctionContextInterface.hpp"
+/// \file summarizerFunctionContextInterface.hpp
 #ifndef _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/summarizationVariable.hpp"

@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Exported functions of the strus storage library
-/// \file "storage.hpp"
+/// \file storage.hpp
 #ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_LIB_HPP_INCLUDED
 

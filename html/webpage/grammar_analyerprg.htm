@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Analyzer program of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey <patrickpfrey (a) yahoo (dt) com" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
+	<title>Strus documentation</title>
+</head>
+
+<body><div id="wrap">
+<div id="content">
+	<h2>Grammar of an analyzer program source</h2>
+	<p class="description">The following grammar (as EBNF) describes the formal language for 
+	an analyzer program used by the strus utilities (strusUtilities).
+	</p>
+	<h3>Comments</h3>
+	<p class="description">
+		Comments are starting with '#' and are reaching to the end of the line.
+		Using '#' as part of a symbol is possible if it is part of a single or double
+		quoted string.
+	</p>
+	<h3>Handling of spaces</h3>
+	<p class="description">
+	Spaces, control characters and end of lines have no meaning in the language.
+	</p>
+	<h3>Case sensivity/insensivity</h3>
+	<p class="description">
+	Keywords and identifiers referring to elements in the storage are case insensitive.
+	Selection expression case sensitivity is dependent on the segmenters target language.
+	For example a selector for XML will have case sensitive expressions because XML is
+	case sensitive.
+	</p>
+	<h3>EBNF</h3>
+	<pre>
+		IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
+		STRING         : &lt;single or double quoted string with backslash escaping&gt;
+		EXPRESSION     : &lt;string format depending on segmenter&gt;
+
+		config         = configsection config
+		               ;
+		configsection  = sectionhdr definitionlist
+		               | "[" "Document" "]" docdeflist
+		               ;
+		sectionhdr     = "[" sectionid "]"
+		               ;
+		sectionid      = "Attribute"
+		               | "MetaData"
+		               | "SearchIndex"
+		               | "ForwardIndex"
+		               ;
+		docdeflist     = docdef docdeflist
+		               |
+		               ;
+		docdef         = type "=" selectexpression ";"
+		               ;
+		definitionlist = definition definitionlist
+		               |
+		               ;
+		definition     = type "=" normalizer tokenizer selector ";"
+		               ;
+		type           = IDENTIFIER ;
+		normalizer     = functioncall ":" normalizer
+		               | functioncall
+		               ;
+		tokenizer      = functioncall
+		               ;
+		functioncall   = functionname "(" argumentlist ")" ;
+		               | functionname
+		               ;
+		functionname   = IDENTIFIER ;
+		argumentlist   = argument "," argumentlist
+		               |
+		               ;
+		argument       = IDENTIFIER
+		               | STRING
+		               ;
+		selector       = EXPRESSION ;
+	</pre>
+	<h3>Example</h3>
+	<p class="description">The following example relies on the standard XML segmenter
+	(based on <h href="http://textwolf.net">the textwolf template library)</a>.
+	The selection expressions are in a language resembling the abbreviated syntax of XPath,
+	with the difference that a tag selection selects the tag and not the subtree and
+	tag content selections are expressed with oval brackets instead of "::text()".
+	</p>
+	<pre>
+		[Attribute]
+			title = orig content /doc/title();
+		
+		[SearchIndex]
+			para = empty orig /doc/para;
+			stem = convdia(en):stem(en):lc word /doc/title();
+			stem = convdia(en):stem(en):lc word /doc/para/text();
+			punctuation = orig punctuation(en) /doc/para/text();
+		
+		[ForwardIndex]
+			orig = orig word /doc/para/text();
+			orig = orig word /doc/title();
+	</pre>
+	<h3>Meaning of the sections</h3>
+	<h5>Document</h5>
+	<p class="description">The declarations in this sections are sub document definitions (in case of multipart documents).</p>
+	<h5>Attribute</h5>
+	<p class="description">The declarations in this section are document attribute value definitions.</p>
+	<h5>MetaData</h5>
+	<p class="description">The declarations in this section are document meta data element value definitions.</p>
+	<h5>SearchIndex</h5>
+	<p class="description">The declarations in this section are feature definitions to put into the search (inverted) index.</p>
+	<h5>ForwardIndex</h5>
+	<p class="description">The declarations in this section are feature definitions to put into the forward index.</p>
+	<h3>Meaning of the grammar elements</h3>
+	<h5>type</h5>
+	<p class="description">Type of feature or element name assigned to this definition result.</p>
+	<h5>functionname</h5>
+	<p class="description">Name of the function that identifier this tokenizer or normalizer.</p>
+	<h5>selector</h5>
+	<p class="description">The selector expression defines what document segments are used to produce the resulting feature or element.</p>
+</div>
+</div>
+</body>
+</html>
+

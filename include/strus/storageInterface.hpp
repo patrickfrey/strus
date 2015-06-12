@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Toplevel interface of a storage
-/// \file "storageInterface.hpp"
+/// \file storageInterface.hpp
 #ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED
 #include <string>

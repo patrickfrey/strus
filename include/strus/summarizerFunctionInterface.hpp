@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for a summarizer function type
-/// \file "summarizerFunctionInterface.hpp"
+/// \file summarizerFunctionInterface.hpp
 #ifndef _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
 
