@@ -6,7 +6,7 @@ use HTML::Entities;
 
 sub printProgramDescription
 {
-	my ($prgname,$description) = @_;
+	my ($prgname,$description,$project) = @_;
 	my $doc = `$prgname -h`;
 	$doc =~ s/[\&]/&amp;/g;
 	$doc =~ s/[\<]/&lt;/g;
@@ -14,7 +14,8 @@ sub printProgramDescription
 	$doc =~ s/description:[^\n]*\n//;
 
 	print '<h2>' . $prgname . '</h2>' . "\n";
-	print '<p>' . $description . '</p>' . "\n";
+	print '<p>' . $description . '<br\>' . "\n";
+	print "(implemented in the project <a href=\"https://github.com/patrickfrey/$project\">$project</a>)\n</p>\n";
 	print '<h4>Usage</h4>' . "\n";
 	print '<pre>' . "\n";
 	print "$doc\n";
@@ -23,7 +24,7 @@ sub printProgramDescription
 
 sub processFile
 {
-	my ($sourcefile) = @_;
+	my ($sourcefile,$project) = @_;
 	open( SRCFILE, "<$sourcefile") or die "Couldn't open file $sourcefile for reading, $!";
 	my $programName = '';
 	my $description = '';
@@ -34,7 +35,7 @@ sub processFile
 		{
 			if ($programName ne '')
 			{
-				printProgramDescription( $programName, $description);
+				printProgramDescription( $programName, $description,$project);
 			}
 			$programName = $1;
 			$description = ''; 
@@ -46,7 +47,7 @@ sub processFile
 	}
 	if ($programName ne '')
 	{
-		printProgramDescription( $programName, $description);
+		printProgramDescription( $programName, $description,$project);
 	}
 	close( SRCFILE);
 }
@@ -70,8 +71,8 @@ print <<EOF;
 		<h1>Utility programs</h1>
 EOF
 
-processFile( "/home/patrick/Projects/github/strusUtilities/README.md");
-printProgramDescription( "strusRpcServer", "Start a server processing requests from strus RPC clients");
+processFile( "/home/patrick/Projects/github/strusUtilities/README.md", "strusUtilities");
+printProgramDescription( "strusRpcServer", "Start a server processing requests from strus RPC clients", "strusRpc");
 
 print <<EOF;
 	</div>
