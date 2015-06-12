@@ -24,7 +24,7 @@
 	<div id="content">
 		<h2>Why to build yet another search engine</h2>
 		<h3>Personal motivation</h3>
-		<p>The project <i>strus</i> started just out of frustration. I was working on a project
+		<p class="description">The project <i>strus</i> started just out of frustration. I was working on a project
 		that was doomed from the beginning for two years. After realising that it had to fail,
 		I had to focus on finding a new job. Unfortunately this proved to be more difficult
 		than I thought. I had to do something to keep myself spinning and I wanted to do
@@ -35,7 +35,7 @@
 		</p>
 
 		<h3>What is strus</h3>
-		<p>Strus is a set of components (libraries, programs and language bindings)
+		<p class="description">Strus is a set of components (libraries, programs and language bindings)
 		to build the core of a scalable full text search engine. It aims to cover
 		classical IR as well as structured search for arbitrary complex expressions 
 		on the boolean algebra of sets of term occurrencies (d,p) where d references a 
@@ -48,15 +48,15 @@
 
 		<h3>What distiguishes strus from other fulltext search engines</h3>
 		<h4>Outsourcing the data storage</h4>
-		<p>Strus can be build uppon any modern NOSQL key/value database that has
+		<p class="description">Strus can be build uppon any modern NOSQL key/value database that has
 		an <a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upperbound seek</a>
 		to implement its data storage.
 		This reduces the complexity of the problem (the strus core with storage and query
 		evaluation has about 32000 lines of code). Alternative implementations for the
 		database can be provided by experts on the topic.</p>
 		<h4>Modelling of structured queries</h4>
-		<p>All open source search engines I know (e.g. Lucene,Xapian,Sphinx) express
-		multi term expressions as subqueries. Strus implements expressions as operations
+		<p class="description">All open source search engines I know (e.g. Lucene,Xapian,Sphinx)
+		express multi term expressions as subqueries. Strus implements expressions as operations
 		in the boolean algebra of sets of pairs of document number and position in the document.
 		Figuratively speaking: In classial open source search engines, a sequence of words
 		<i>(A,B)</i> is a subquery of type sequence. In strus, a sequence of words is a set
@@ -76,7 +76,7 @@
 		and the number of disk accesses is minimal.
 		</p>
 		<h4>Information extraction</h4>
-		<p>In strus the result of the set operations needed to model expressions are
+		<p class="description">In strus the result of the set operations needed to model expressions are
 		implemented as iterators. The advantage of this model is not only that you
 		do not need memory for storing intermediate results. You also do not need
 		to care about what information to collect for an intermediate result. 
