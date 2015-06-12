@@ -44,7 +44,7 @@ DLL_PUBLIC void strus::printIndentMultilineString( std::ostream& out, std::size_
 	{
 		ee = std::strchr( cc,'\n');
 		std::string line = ee?std::string( cc, ee-cc):std::string( cc);
-		std::cerr << indent << line << std::endl;
+		out << indent << line << std::endl;
 		cc = ee + 1;
 	}
 	while (ee);
