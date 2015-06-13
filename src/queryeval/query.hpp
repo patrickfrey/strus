@@ -80,7 +80,7 @@ public:
 
 	virtual void setMaxNofRanks( std::size_t nofRanks_);
 	virtual void setMinRank( std::size_t minRank_);
-	virtual void setUserName( const std::string& username_);
+	virtual void addUserName( const std::string& username_);
 
 	virtual std::vector<ResultDocument> evaluate();
 
@@ -181,7 +181,7 @@ private:
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_nofRanks;
 	std::size_t m_minRank;
-	std::string m_username;
+	std::vector<std::string> m_usernames;
 };
 
 }//namespace

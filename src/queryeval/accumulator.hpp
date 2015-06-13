@@ -89,7 +89,7 @@ public:
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression, bool isNegative);
 
-	void addAclRestriction( InvAclIteratorInterface* iterator);
+	void addAlternativeAclRestriction( InvAclIteratorInterface* iterator);
 
 	bool nextRank( Index& docno, unsigned int& selectorState, float& weight);
 
