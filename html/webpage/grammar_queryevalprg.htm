@@ -13,7 +13,7 @@
 <body><div id="wrap">
 <div id="content">
 	<h1>Strus query evaluation configuration source</h1>
-	<h2>Grammar of a query evaluation configuration source</h2>
+	<h2>Language grammar</h2>
 	<p class="description">The following grammar (as EBNF) describes the formal language for 
 	describing a query evaluation scheme used by the strus utilities (strusUtilities).
 	</p>
@@ -71,6 +71,15 @@ parametervalue = IDENTIFIER | STRING | NUMBER
                ;
 
 	</pre>
+	<h3>Meaning of the grammar elements</h3>
+	<h5>functionname</h5>
+	<p class="description">Name of the weighting or summarization function as provided
+	by the query processor.</p>
+	<h5>parametername</h5>
+	<p class="description">Name of the parameter passed to the weighting or summarization function.
+	A parameter name with dot '.' as prefix is specifying a feature parameter declaration.
+	The known names of weighting and summarization function depend on its implementation.
+	</p>
 	<h3>Example</h3>
 	<p class="description">
 	The following example declares the feature set 'selfeat' to define what is weighted.
@@ -91,14 +100,6 @@ SUMMARIZE content = matchphrase(
                         type=orig, nof=4, len=60,
                         structseek=40, .struct=sentence, .match=docfeat );
 	</pre>
-	<h3>Meaning of the grammar elements</h3>
-	<h5>functionname</h5>
-	<p class="description">Name of the weighting or summarization function as provided
-	by the query processor.</p>
-	<h5>parametername</h5>
-	<p class="description">Name of the parameter passed to the weighting or summarization function.
-	A parameter name with dot '.' as prefix is specifying a feature parameter declaration.
-	The known names of weighting and summarization function depend on its implementation.</p>
 	</div>
 </div>
 </body>

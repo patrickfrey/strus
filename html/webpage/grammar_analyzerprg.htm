@@ -13,7 +13,7 @@
 <body><div id="wrap">
 <div id="content">
 	<h1>Strus document analyzer configuration</h1>
-	<h2>Grammar of an analyzer configuration source</h2>
+	<h2>Language grammar</h2>
 	<p class="description">The following grammar (as EBNF) describes the formal language for 
 	an analyzer configuration used by the strus utilities (strusUtilities).
 	</p>
@@ -80,6 +80,26 @@ argument       = IDENTIFIER
                ;
 selector       = EXPRESSION ;
 	</pre>
+	<h3>Meaning of the sections</h3>
+	<h5>Document</h5>
+	<p class="description">The declarations in this sections are sub document definitions (in case of multipart documents).</p>
+	<h5>Attribute</h5>
+	<p class="description">The declarations in this section are document attribute value definitions.</p>
+	<h5>MetaData</h5>
+	<p class="description">The declarations in this section are document meta data element value definitions.</p>
+	<h5>SearchIndex</h5>
+	<p class="description">The declarations in this section are feature definitions to put into the search (inverted) index.</p>
+	<h5>ForwardIndex</h5>
+	<p class="description">The declarations in this section are feature definitions to put into the forward index.</p>
+
+	<h3>Meaning of the grammar elements</h3>
+	<h5>type</h5>
+	<p class="description">Type of feature or element name assigned to this definition result.</p>
+	<h5>functionname</h5>
+	<p class="description">Name of the function that identifier this tokenizer or normalizer.</p>
+	<h5>selector</h5>
+	<p class="description">The selector expression defines what document segments are used to produce the resulting feature or element.</p>
+
 	<h3>Example</h3>
 	<p class="description">The following example relies on the standard XML segmenter
 	(based on <h href="http://textwolf.net">the textwolf template library)</a>.
@@ -101,25 +121,6 @@ selector       = EXPRESSION ;
         orig = orig word /doc/para/text();
         orig = orig word /doc/title();
 	</pre>
-
-	<h3>Meaning of the sections</h3>
-	<h5>Document</h5>
-	<p class="description">The declarations in this sections are sub document definitions (in case of multipart documents).</p>
-	<h5>Attribute</h5>
-	<p class="description">The declarations in this section are document attribute value definitions.</p>
-	<h5>MetaData</h5>
-	<p class="description">The declarations in this section are document meta data element value definitions.</p>
-	<h5>SearchIndex</h5>
-	<p class="description">The declarations in this section are feature definitions to put into the search (inverted) index.</p>
-	<h5>ForwardIndex</h5>
-	<p class="description">The declarations in this section are feature definitions to put into the forward index.</p>
-	<h3>Meaning of the grammar elements</h3>
-	<h5>type</h5>
-	<p class="description">Type of feature or element name assigned to this definition result.</p>
-	<h5>functionname</h5>
-	<p class="description">Name of the function that identifier this tokenizer or normalizer.</p>
-	<h5>selector</h5>
-	<p class="description">The selector expression defines what document segments are used to produce the resulting feature or element.</p>
 </div>
 </div>
 </body>
