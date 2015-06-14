@@ -87,7 +87,7 @@ print <<EOF;
 		</p>
 		<h3>Analyzer program</h3>
 		<p class="description">The grammar of the sources referred to as analyzer programs 
-		by some utility programs are defined <a href="grammar_analyzerprg.htm">here (analyzer program grammar)</a>.
+		by some utility programs are defined <a href="grammar_analyzerprg_doc.htm">here (analyzer program grammar)</a>.
 		</p>
 		<h3>Query evaluation program</h3>
 		<p class="description">The grammar of the sources referred to as query evaluation programs 

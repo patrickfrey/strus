@@ -14,8 +14,8 @@
 <div id="content">
 	<h1>Strus document analyzer configuration</h1>
 	<h2>Language grammar</h2>
-	<p class="description">The following grammar (as EBNF) describes the formal language for 
-	an analyzer configuration used by the strus utilities (strusUtilities).
+	<p class="description">The following grammar (as EBNF) is the formal language for 
+	configuration used by the strus utilities (strusUtilities) for describing document analysis.
 	</p>
 	<h3>Comments</h3>
 	<p class="description">
@@ -30,6 +30,7 @@
 	<h3>Case sensivity/insensivity</h3>
 	<p class="description">
 	Keywords and identifiers referring to elements in the storage are case insensitive.
+	So are function names of tokenizers and normalizers.
 	Selection expression case sensitivity is dependent on the segmenters target language.
 	For example a selector for XML will have case sensitive expressions because XML is
 	case sensitive.
