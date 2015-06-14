@@ -4,5 +4,5 @@ strus
 Library for building a search engine for information retrieval. 
 Able to evaluate structured queries on unstructured text as well
 as implementing classical information retrieval.
-You will find more documentation at http://patrickfrey.github.io/strus.
 See also the project homepage http://project-strus.net.
+
