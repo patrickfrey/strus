@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Query language of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
+	<title>Strus query language</title>
+</head>
+
+<body><div id="wrap">
+<div id="content">
+	<h1>Strus query language</h1>
+	<h2>Language grammar</h2>
+	<p class="description">The following grammar (as EBNF) is the formal language
+	used by the strus utilities (strusUtilities) for describing search queries.
+	</p>
+	<h3>Comments</h3>
+	<p class="description">
+		Comments are starting with <b>#</b> and are reaching to the end of the line.
+		Using <b>#</b> as part of a symbol is possible if it is part of a single or double
+		quoted string.
+	</p>
+	<h3>Handling of spaces</h3>
+	<p class="description">
+	Spaces, control characters and end of lines have no meaning in the language.
+	</p>
+	<h3>Case sensivity/insensivity</h3>
+	<p class="description">
+	Keywords and identifiers referring to elements in the storage are case insensitive.
+	So are section and feature set identifiers.
+	</p>
+	<h3>EBNF</h3>
+	<pre>
+IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
+STRING         : &lt;single or double quoted string with backslash escaping&gt;
+INTEGER        : &lt;positive or negative integral number&gt;
+NUMBER         : &lt;positive or negative integral or floating point number&gt;
+
+config         = sectionlist
+               ;
+sectionlist    = section sectionlist
+               |
+               ;
+section        = "[" "Feature" featureset ":" phrasetype "]" qryexpression
+               = "[" "Condition" "]" restrictionlist
+               ;
+featureset     = IDENTIFIER
+               ;
+phrasetype     = IDENTIFIER
+               ;
+restrictionlist= restriction ";" restrictionlist
+               | restriction
+               ;
+qryexpression  = functionname "(" parameterlist [ "|" rangedef ] ")"
+               | STRING [ ":" phrasetype ]
+               | IDENTIFIER [ ":" phrasetype ]
+               ;
+rangedef       = INTEGER
+               ;
+parameterlist  = qryexpression { "," qryexpression }
+               |
+               ;
+restriction    = metadataname cmpoperator operandlist
+               ;"
+metadataname   = IDENTIFIER
+               ;
+cmpoperator    = "&gt;=" | "&lt;=" | "=" | "&gt;" | "&lt;" | "!="
+               ;
+operandlist    = operand { "," operand }
+               ;
+operand        = NUMBER | STRING | IDENTIFIER
+               ;
+	</pre>
+	<h3>Meaning of the grammar elements</h3>
+	<h5>phrasetype</h5>
+	<p class="description">In 'qryexpression' it specifies explicitely the type of the phrase,
+	that determines the phrase analysis method. In the 'section' definition it defines the 
+	default phrase type of the phrases defined without explicit definition of the phrase type.
+	</p>
+	<h5>functionname</h5>
+	<p class="description">Identifies a feature posings join operator defined in the query processor.
+	</p>
+	<h5>metadataname</h5>
+	<p class="description">Identifier referencing a meta data table element name.
+	</p>
+	<h5>operandlist</h5>
+	<p class="description">A set of alternative operands. The comparisons are joined as union (logical OR).
+	</p>
+	<h5>restrictionlist</h5>
+	<p class="description">List of meta data restriction that have all to match (logical AND).</p>
+	<h3>Example</h3>
+	<pre>
+[Feature selfeat :stem]
+        within( hello, world | 100000 )
+[Feature docfeat :stem]
+        hello world
+	</pre>
+</div>
+</div>
+</body>
+</html>
+
