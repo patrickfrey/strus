@@ -3,23 +3,24 @@
 <head>
 	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<meta name="description" content="Analyzer program of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="description" content="Document analyzer program of strus, a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
 	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
 	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
-	<title>Strus documentation</title>
+	<title>Strus document analyzer configuration source</title>
 </head>
 
 <body><div id="wrap">
 <div id="content">
-	<h2>Grammar of an analyzer program source</h2>
+	<h1>Strus document analyzer configuration</h1>
+	<h2>Grammar of an analyzer configuration source</h2>
 	<p class="description">The following grammar (as EBNF) describes the formal language for 
-	an analyzer program used by the strus utilities (strusUtilities).
+	an analyzer configuration used by the strus utilities (strusUtilities).
 	</p>
 	<h3>Comments</h3>
 	<p class="description">
-		Comments are starting with '#' and are reaching to the end of the line.
-		Using '#' as part of a symbol is possible if it is part of a single or double
+		Comments are starting with <b>#</b> and are reaching to the end of the line.
+		Using <b>#</b> as part of a symbol is possible if it is part of a single or double
 		quoted string.
 	</p>
 	<h3>Handling of spaces</h3>
@@ -35,49 +36,49 @@
 	</p>
 	<h3>EBNF</h3>
 	<pre>
-		IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
-		STRING         : &lt;single or double quoted string with backslash escaping&gt;
-		EXPRESSION     : &lt;string format depending on segmenter&gt;
+IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
+STRING         : &lt;single or double quoted string with backslash escaping&gt;
+EXPRESSION     : &lt;string format depending on segmenter&gt;
 
-		config         = configsection config
-		               ;
-		configsection  = sectionhdr definitionlist
-		               | "[" "Document" "]" docdeflist
-		               ;
-		sectionhdr     = "[" sectionid "]"
-		               ;
-		sectionid      = "Attribute"
-		               | "MetaData"
-		               | "SearchIndex"
-		               | "ForwardIndex"
-		               ;
-		docdeflist     = docdef docdeflist
-		               |
-		               ;
-		docdef         = type "=" selectexpression ";"
-		               ;
-		definitionlist = definition definitionlist
-		               |
-		               ;
-		definition     = type "=" normalizer tokenizer selector ";"
-		               ;
-		type           = IDENTIFIER ;
-		normalizer     = functioncall ":" normalizer
-		               | functioncall
-		               ;
-		tokenizer      = functioncall
-		               ;
-		functioncall   = functionname "(" argumentlist ")" ;
-		               | functionname
-		               ;
-		functionname   = IDENTIFIER ;
-		argumentlist   = argument "," argumentlist
-		               |
-		               ;
-		argument       = IDENTIFIER
-		               | STRING
-		               ;
-		selector       = EXPRESSION ;
+config         = configsection config
+               ;
+configsection  = sectionhdr definitionlist
+               | "[" "Document" "]" docdeflist
+               ;
+sectionhdr     = "[" sectionid "]"
+               ;
+sectionid      = "Attribute"
+               | "MetaData"
+               | "SearchIndex"
+               | "ForwardIndex"
+               ;
+docdeflist     = docdef docdeflist
+               |
+               ;
+docdef         = type "=" selectexpression ";"
+               ;
+definitionlist = definition definitionlist
+               |
+               ;
+definition     = type "=" normalizer tokenizer selector ";"
+               ;
+type           = IDENTIFIER ;
+normalizer     = functioncall ":" normalizer
+               | functioncall
+               ;
+tokenizer      = functioncall
+               ;
+functioncall   = functionname "(" argumentlist ")" ;
+               | functionname
+               ;
+functionname   = IDENTIFIER ;
+argumentlist   = argument "," argumentlist
+               |
+               ;
+argument       = IDENTIFIER
+               | STRING
+               ;
+selector       = EXPRESSION ;
 	</pre>
 	<h3>Example</h3>
 	<p class="description">The following example relies on the standard XML segmenter
@@ -87,19 +88,20 @@
 	tag content selections are expressed with oval brackets instead of "::text()".
 	</p>
 	<pre>
-		[Attribute]
-			title = orig content /doc/title();
-		
-		[SearchIndex]
-			para = empty orig /doc/para;
-			stem = convdia(en):stem(en):lc word /doc/title();
-			stem = convdia(en):stem(en):lc word /doc/para/text();
-			punctuation = orig punctuation(en) /doc/para/text();
-		
-		[ForwardIndex]
-			orig = orig word /doc/para/text();
-			orig = orig word /doc/title();
+[Attribute]
+        title = orig content /doc/title();
+
+[SearchIndex]
+        para = empty orig /doc/para;
+        stem = convdia(en):stem(en):lc word /doc/title();
+        stem = convdia(en):stem(en):lc word /doc/para/text();
+        punctuation = orig punctuation(en) /doc/para/text();
+
+[ForwardIndex]
+        orig = orig word /doc/para/text();
+        orig = orig word /doc/title();
 	</pre>
+
 	<h3>Meaning of the sections</h3>
 	<h5>Document</h5>
 	<p class="description">The declarations in this sections are sub document definitions (in case of multipart documents).</p>
