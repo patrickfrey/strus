@@ -30,6 +30,7 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .title {font-weight:bold;}
 .identifier {color:#0B0B61; font-weight:bold;}
+.library { padding-bottom: 50px; }
 .description a {color:#0B0B61; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}

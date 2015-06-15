@@ -16,64 +16,245 @@
 	<div id="content">
 		<h1>Strus built-in functions</h1>
 		<h2>Query evaluation</h2>
-		<a name="PostingJoinOperators">
+		<a name="PostingJoinOperators"></a>
 		<h3>Postings join operators</h3>
 		<p class="description">
 		The following table lists the posting set join operators implemented in the core.
+		A set of postings is modeled as
+		<pre>{ (d,p) | d is a positive document number, p is a positive position index }</pre>
 		</p>
-		<table>
+		<div class="library">
+		<table border="1">
 		<tr>
-		<th width=25%><p class="title">Name</p></th>
-		<th width=60%><p class="title">Description</p></th>
+		<th width=18%><p class="title">Name</p></th>
+		<th width=75%><p class="title">Description</p></th>
 		</tr><tr>
 		<td><p class="identifier">union</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Set union of the argument sets: (d,p) is a member of the
+		result set, if it is a member of any ot the argument sets.</p></td>
 		</tr><tr>
 		<td><p class="identifier">intersect</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Set intersection of the argument sets: (d,p) is a member
+		of the result set, if it is a member of every argument set.</p></td>
 		</tr><tr>
 		<td><p class="identifier">diff</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Set difference of the two arguments sets: (d,p) is a member 
+		of the result set, if it is member of the first set but not of the second set.</p></td>
 		</tr><tr>
 		<td><p class="identifier">contains</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Document intersection: (d,1) is a member of the result
+		set, if for every arument set there exist a p with (d,p) is a member of the argument
+		set. This operator is mainly used to describe efficient document selections not touching
+		the position information blocks.</p></td>
 		</tr><tr>
 		<td><p class="identifier">succ</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Successor set: (d,p+1) is member of the result set, for every
+		element (d,p) of the argument set.</p></td>
 		</tr><tr>
 		<td><p class="identifier">pred</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Predeccessor set: (d,p) is member of the result set, for every
+		element (d,p+1) of the argument where with p &ne; 0.</p></td>
 		</tr><tr>
 		<td><p class="identifier">within</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Select the first (positive range) or the last (negative range)
+		element of a selection of elements of each argument set in the same document with 
+		the positions in an interval of maximum size specified by the range argument.</p></td>
 		</tr><tr>
 		<td><p class="identifier">within_struct</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Same as <b>within</b> but with an additional element (1st argument)
+		that plays the role of a structure element, that must not be overlapped by the
+		area covered by the selected elements.</p></td>
 		</tr><tr>
 		<td><p class="identifier">sequence</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Select the first (positive range) or the last (negative range)
+		element of a selection of elements of each argument set in the same document with 
+		the positions in an interval of maximum size specified by the range argument, 
+		ordered in the same order of positions as they appear in the input.</p></td>
 		</tr><tr>
 		<td><p class="identifier">sequence_struct</p></td>
-		<td><p class="description"></p></td>
+		<td><p class="description">Same as <b>sequence</b> but with an additional element (1st argument)
+		that plays the role of a structure element, that must not be overlapped by the
+		area covered by the selected elements.</p></td>
 		</tr>
 		</table>
+		</div>
+		<a name="WeightingFunctions"></a>
 		<h3>Weighting functions</h3>
 		<p class="description">
+		Here is the list of weighting functions defined in the core.
 		</p>
+		<div class="library">
+		<table border="1">
+		<tr>
+		<th width=18%><p class="title">Name</p></th>
+		<th width=75%><p class="title">Description</p></th>
+		</tr><tr>
+		<td><p class="identifier">bm25</p></td>
+		<td><p class="description">BM25 (Okapi) weighting method. The parameters k1,b,a
+		can be specified by the caller.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">bm25_dpfc</p></td>
+		<td><p class="description">BM25 weighting method with an artificial ff calculated 
+		from the real ff and some discrete increments given by some feature occurrence 
+		relation checks based on proximity and structures (sentences). 
+		The artificial increments can be specified as weighting function parameters
+		titleinc,strinc,seqinc by the caller.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">metadata</p></td>
+		<td><p class="description">Weighting method taking a metadata table element value
+		as document weight.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">td</p></td>
+		<td><p class="description">Weighting method taking a constant value as document weight.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">tf</p></td>
+		<td><p class="description">Weighting method taking the feature frequency (ff) value as document weight.
+		</p></td>
+		</tr>
+		</table>
+		</div>
+		<a name="SummarizerFunctions"></a>
 		<h3>Summarizer functions</h3>
 		<p class="description">
+		Here is the list of summarizer functions defined in the core.
 		</p>
+		<div class="library">
+		<table border="1">
+		<tr>
+		<th width=18%><p class="title">Name</p></th>
+		<th width=75%><p class="title">Description</p></th>
+		</tr><tr>
+		<td><p class="identifier">metadata</p></td>
+		<td><p class="description">Return the value of a meta data table element as summary.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">attribute</p></td>
+		<td><p class="description">Return the value of a document attribue as summary.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">matchpos</p></td>
+		<td><p class="description">Return the feature matches as readable list of 
+		position numbers as summary (mainly for debugging purposes).
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">matchphrase</p></td>
+		<td><p class="description">Return the forward index features of the sentences 
+		covering the best matching windows in the result documents as summary.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">matchvariables</p></td>
+		<td><p class="description">Return the features in the forward index that are
+		referenced as position by variables in matching expressions.
+		</p></td>
+		</tr>
+		</table>
+		</div>
 
 		<h2>Analyzer</h2>
+		<a name="Segmenter"></a>
 		<h3>Segmenter</h3>
 		<p class="description">
+		Currently there is only one built-in segmenter defined in the core. It is based on
+		the <h href="http://textwolf.net">textwolf library</a> and is able to process XML.
 		</p>
+		<a name="Tokenizer"></a>
 		<h3>Tokenizer</h3>
 		<p class="description">
+		The following tokenizer functions are defined as built-in in the core.
 		</p>
+		<div class="library">
+		<table border="1">
+		<tr>
+		<th width=18%><p class="title">Name</p></th>
+		<th width=75%><p class="title">Description</p></th>
+		</tr><tr>
+		<td><p class="identifier">punctuation</p></td>
+		<td><p class="description">
+		This tokenizer extracts end of sentences or other configured punctuation markers.
+		It is available for the language English "en" and for German ("de").
+		Unfortunately the quality for both languages supported is bad and has to be improved
+		a lot.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">word</p></td>
+		<td><p class="description">This tokenizer splits the content on word boundaries. The
+		tokens are words. It is avaiable for european languages with a latin based alphabet.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">split</p></td>
+		<td><p class="description">This tokenizer splits the content into chunks without
+		whitespaces. It is mainly thought for the forward index creation.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">content</p></td>
+		<td><p class="description">
+		This tokenizer does not split the content at all. It just forward what it gets as
+		input as one token.
+		</p></td>
+		</tr>
+		</table>
+		</div>
+
+		<a name="Normalizer"></a>
 		<h3>Normalizer</h3>
 		<p class="description">
+		The following normalizer functions are defined as built-in in the core.
 		</p>
+		<div class="library">
+		<table border="1">
+		<tr>
+		<th width=18%><p class="title">Name</p></th>
+		<th width=75%><p class="title">Description</p></th>
+		</tr><tr>
+		<td><p class="identifier">orig</p></td>
+		<td><p class="description">
+		This normalizer does nothing but just forwards the input as term.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">empty</p></td>
+		<td><p class="description">
+		This normalizer does nothing but just an empty string for every input junk received as input.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">stem</p></td>
+		<td><p class="description">
+		This normalizer does stemming of the input based on snowball stemmer in the language specified
+		as argument.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">dictmap</p></td>
+		<td><p class="description">
+		This normalizer map each input token with a dictionary that is specified by file name in the
+		argument. The normalizer returns the value defined as value in the map for the having the
+		input element as key. If the element is not defined in the map then the result return 
+		is the input token passed to it.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">lc</p></td>
+		<td><p class="description">
+		This normalizer returns the input with each character mapped to its lowercase.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">uc</p></td>
+		<td><p class="description">
+		This normalizer returns the input with each character mapped to its uppercase.
+		</p></td>
+		</tr><tr>
+		<td><p class="identifier">convdia</p></td>
+		<td><p class="description">
+		This normalizer returns the input with each character that is a non latin character
+		A..Z or a..z to its corresponding list of latin base characters. The transformation
+		might depend on the language specified as first argument. For example in german ("de")
+		<a href="https://en.wikipedia.org/wiki/Umlaut_%28linguistics%29">umlauts</a>
+		are mapped to the latin base character followed by an 'e'.
+		</p></td>
+		</tr>
+		</table>
+		</div>
 	</div>
 </div>
 </body>
