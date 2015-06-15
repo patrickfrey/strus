@@ -11,7 +11,7 @@
 </head>
 
 <body>
-<script>
+<script type="text/javascript">
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
   m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
@@ -104,11 +104,17 @@
 		<ol>
 		<h4>Iterator join operators</h4>
 		<p>You can define your own functions that create an iterator on postings representing 
-		the result of an n-ary join of iterators on postings.</p>
+		the result of an n-ary join of iterators on postings. A description of the
+		built-in posting join operators can be found <a href="builtin_functions.htm#PostingJoinOperators">here (posting join operators)</a>.
+		</p>
 		<h4>Weighting functions</h4>
-		<p>You can define your own document weighting functions used for ranking.</p>
+		<p>You can define your own document weighting functions used for ranking.
+		A description of the built-in weighting functions can be found <a href="builtin_functions.htm#WeightingFunctions">here (weighting functions)</a>.
+		</p>
 		<h4>Summarizers</h4>
-		<p>You can define your own summarization functions used for attributing the results.</p>
+		<p>You can define your own summarization functions used for attributing the results.
+		A description of the built-in summarization functions can be found <a href="builtin_functions.htm#SummarizationFunctions">here (summarization functions)</a>.
+		</p>
 		<h3>strus analyzer</h3>
 		<p>You can extend the strus analyzer with own dynamically loadable modules with
 		functions written in C++:
