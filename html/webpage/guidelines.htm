@@ -20,7 +20,7 @@
 		<h4>Polymorphism</h4>
 		<p class="description">Inheritance is only used for implementing pure interfaces.
 		The names of the abstract classes all end with "Interface". Objects in <i>strus</i>
-		are all either pure data types with no polymorhism or implementations of 
+		are all either pure data types with no polymorphism or implementations of 
 		pure interfaces referenced by pointers. This restriction makes all elements of the
 		interface either serializable or proxyable. Following these rules makes
 		remoting possible without too much effort.</p>
@@ -39,23 +39,28 @@
 		<h2>Naming conventions</h2>
 
 		<h4>Type naming</h4>
-		<p class="description">In interfaces strict camel case is used. Type,struct and
-		class names and enum members, except data types implementing an STL concept like iterator, start 
-		with a capital letter. Method names start with a lower case letter. Enum names may or
-		may not contain only capital letters.</p>
+		<p class="description">In interfaces <i>strict camel case</i> is used.
+		Type,struct and class names and enum members start with a capital letter.
+		Exceptions of this rule are data types implementing an STL concept like for example an <i>iterator</i>.
+		Method names start with a lower case letter.
+		Enum names may or may not contain only capital letters.</p>
 
-		<h4>File names</h4>
-		<p class="description">File names start with a lower case letter and have otherwise 
-		exactly the same name as the main class they implement. Main source files of a
-		library have the same name trunk as the library. This name trunk has always 
+		<h4>Source file names</h4>
+		<p class="description">Source and header file names start with a lower case letter
+		and have - despite that - exactly the same name as the main class they implement.
+		The wished rule is one class per source file, but this is not always the case, though 
+		it is the case for interface header files.<br/>
+		The main source file of a library has the same name trunk as the library. This name trunk has always 
 		the prefix '<b>libstrus_</b>'. Main header files of libraries are in a 'lib' sub 
 		directory of the main include and have the same name as the library
 		without the prefix '<b>libstrus_</b>'. </p>
 
 		<h4>Macro names</h4>
 		<p class="description">Macros have only capital letters with underscores '<b>_</b>'
-		separating semantical parts of the macro identifier. But macros should
-		be avoided if possible.</p>
+		separating semantical parts of the macro identifier. <br/>
+		Macros should be avoided for data structures or functions if possible. 
+		Macros should only be used to stear alternative compiling and for 
+		injected values like for example version numbers.</p>
 
 		<h4>Module global variable names</h4>
 		<p class="description">Static global variable names in a modules (never exported)
@@ -70,16 +75,16 @@
 		<p class="description">Avoid variable names conaining only one letter like 'i', 'x'.
 		They are hard to find without an editor supporting the programming language.
 		(I personally do not like programming environments that go beyond a text editor with some
-		highlighting. I am convinced that the quality of code raises without semantically
-		supported navigation help, because it educates you to work towards a clear consistent naming
-		scheme.)</p>
+		highlighting. I am convinced that the quality of code raises in the absence of 
+		semantically supported navigation help, because it educates you to work towards 
+		a clear and consistent naming scheme.)</p>
 
 		<h4>Visibility</h4>
 		<p class="description">Use explicit visibility to declare exported symbols of
 		shared libraries. Shared libraries export only functions constructing objects implementing 
 		an interface, having only interface references or
 		<a href="http://www.fnal.gov/docs/working-groups/fpcltf/Pkg/ISOcxx/doc/POD.html">POD data types</a>
-		or C++ basic and STL data types as arguments.</p>
+		or serializable C++ and STL data types as arguments.</p>
 	
 		<h4>Friend declarations</h4>
 		<p class="description">Do not use friend declarations if possible.
@@ -98,9 +103,10 @@
 		</p>
 
 		<h4>Mixing compilers</h4>
-		<p class="description"><i>strus</i> is not composed of
-		real libraries. Compilers cannot be mixed due to an interface design using exceptions
-		as part of the interface and non basic (STL) data types passing the interface.
+		<p class="description"><i>strus</i> is <b>not</b> composed of
+		<b>real libraries</b>. Compilers cannot be mixed due to an interface design using exceptions
+		as part of the interface and STL data types and other C++ structures passing the 
+		interface.
 		</p>
 
 		<h2>Code appearance</h2>
@@ -111,17 +117,25 @@
 		written without opening an close brackets, e.g. "if (size > 0) sizeType = NON_ZERO;" </p>
 
 		<h4>Source code documentation</h4>
-		<p class="description">Avoid pseudo documentation. Documentation should be minimal
-		in the source. Use numbering for execution steps and alphabetic labeling for
-		alternative choices.</p>
+		<p class="description">Avoid documenting the obvious. Documentation should be minimal
+		in the source and only contain real information. Use numbering for execution steps and 
+		alphabetic labeling for alternative choices. If you have the alternative to
+		choose an implementation of a function with 300 lines of expanded code or an
+		implementation of it as small function calling 10 subroutines, that have 7
+		arguments and names that are not self explaining and each of them is called only
+		once, then please choose the 300 line expanded implementation and document 
+		the execution steps well.<br/> Use prefixes like
+		<b>XY:NOTE</b> or <b>XY:HACK</b> where XY stands for your acronym for marking undesirable 
+		situations (NOTE) or incomplete fixes or fixes with bad implications (HACK)
+		that should be fixed, but can not be fixed instantly.</p>
 		<h4>Doxygen documentation</h4>
 		<p class="description">Interface documentation should be in
 		<a href="www.doxygen.org">doxygen</a> style (backslash variant).</p>
 
 		<h4>Errors/Warnings</h4>
-		<p class="description">No warnings in the code. Use most restrictive settings
-		available on your platform and declare warnings as errors. There might be exceptional
-		cases, but they have to be discussed.</p>
+		<p class="description">There must not appear any compiler warning or error in the build.
+		Use the most restrictive compiler and linker settings available on your platform and declare warnings as 
+		errors. There might exist exceptional cases (not till now !), but they have to be discussed.</p>
 	</div>
 </div>
 </body>

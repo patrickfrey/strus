@@ -37,28 +37,45 @@
 	<div id="content">
 		<h2>About</h2>
 		<p class="description">The open source project <i>strus</i> provides a collection of C++ (C++98) 
-		libraries and command line tools for building a full-text search engine.
+		libraries and command line tools for building a <b>competitive full-text search engine</b>.
 		The <i>strus</i> search engine can be build using any key value store database that provides an
 		<a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upper bound</a> seek function
 		for the stored key/value pairs.
 		Currently there exists an implementation based on the 
-		<a href="http://leveldb.org">LevelDB</a> library.
+		<a href="http://leveldb.org">LevelDB</a> library.<br/>
+		The name <i>strus</i> is an acronym for <b><u>stru</u></b>ctured <b><u>s</u></b>earch
+		derived from the capability to find <i>arbitrary complex</i> left or right recursive 
+		expressions (meaning regular expressions on inserted terms as alphabet) in text and to <i>extract parts of matches</i>
+		for further processing. You might for example search for a sequence of two words 
+		with one of a set of verbs in the same sentence that forms a nominal phrase from
+		which the subject noun is extracted as part of the answer.<br/>
+		Besides finding structures, <i>strus</i> is of course also able to do <i>classical 
+		information retrieval</i> with a statistical, resp. stochastical (bag of words model)
+		<i>or a proximity weighting scheme</i>.<br/>
+		Support for global page rank schemes are not directly supported but implementable 
+		by taking precalculated document weights stored in a table (in memory) into account.<br/> 
+		Query based link popularity is <b>not</b> supported yet in the core since such weighting 
+		schemes are hard to implement on distributed indices and the capability to 
+		distribute the search engines and taking global statistics into account is 
+		a must for a competitive search engine.
 		</p>
 		<h2>Story/Motivation</h2>
-		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of strus.
-		I also try to explain, what distinguishes strus from other open source fulltext 
+		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of <i>strus</i>.
+		I also try to explain, what distinguishes <i>strus</i> from other open source fulltext 
 		search engines.
 		</p>
 		<h2>Demo system</h2>
 		<p class="description">There is one <b>running demo system online</b> to show the properties of 
-		strus under conditions of limited resources: <br/>
+		<i>strus</i> under conditions of limited resources: <br/> 
 		<a href="http://patrickfrey.dyndns.org/strus.html">Search on complete wikipedia collection (English)</a>
+		<br/><b>Remark:</b> The demo system shows only classical information retrieval and 
+		does not yet implement a query language for structured queries.
 		</p>
 		<h2>Project organization</h2>
 		<p class="description">
 			The project <i>strus</i> consists of several components implemented in distinct
 			projects hosted on <a href="https://github.com/patrickfrey?tab=repositories">github</a>.
-			A closer look at the components of strus and what is part of strus and what not,
+			A closer look at the components of <i>strus</i> and what is part of <i>strus</i> and what not,
 			can be found <a href="components.htm">here (components)</a> and the list of 
 			sub projects <a href="projects.htm">here (projects)</a>.
 		</p>
@@ -72,7 +89,7 @@
 
 		<tr>
 		<td><p class="timestamp">June 15th, 2015</p></td>
-		<td><p class="newstext">Started advertising strus to get some feedback and maybe even some support.</p></td>
+		<td><p class="newstext">Started advertising <i>strus</i> to get some feedback and maybe even some support.</p></td>
 		</tr>
 
 		<tr>

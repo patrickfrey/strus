@@ -99,16 +99,24 @@
 		as selection language.
 		</p>
 		<h4>Tokenizer</h4>
-		<p class="description">The tokenizer splits a segment or alternatively the join of all segments 
+		<p class="description">A tokenizer splits a segment or alternatively the join of all segments 
 		of a certain type into tokens. The tokens a referencing elements in the 
-		segments without modification.
+		segments without modification.<br/>
 		A description of the built-in tokenizer functions can be found
 		<a href="builtin_functions.htm#Tokenizer">here (tokenizer functions)</a>.
 		</p>
 		<h4>Normalizer</h4>
-		<p class="description">The normalizer maps a token to its nomalized form, the term 
-		inserted into the storage. A description of the built-in normalizer functions can be found
+		<p class="description">A normalizer maps a token to its nomalized form, the term 
+		inserted into the storage.<br/>A description of the built-in normalizer functions can be found
 		<a href="builtin_functions.htm#Normalizer">here (normalizer functions)</a>.
+		</p>
+		<h4>Aggregator</h4>
+		<p class="description">An aggregator aggregated some properties of a document
+		to a single value. With aggregators you can for example define statistics
+		as properties of the document and store them in the meta table to use them for
+		weighting in retrieval.<br/>
+		A description of the built-in aggregator functions can be found
+		<a href="builtin_functions.htm#Aggregator">here (aggregator functions)</a>.
 		</p>
 		<h2>Expandability of strus</h2>
 		<p class="description">Strus offers various interfaces to hook in. The project strusModule provides a
@@ -139,6 +147,9 @@
 		<h4>Normalizer</h4>
 		<p class="description">You can define your own normalizer functions to produce the retrievable items from 
 		the document tokens for the storage and the query.</p>
+		<h4>Aggregator</h4>
+		<p class="description">You can define your own aggregator functions to produce some 
+		statistical values from the document structure after analysis.</p>
 
 		<h2>What is still missing in strus</h2>
 		<h3>Documentation</h3>
