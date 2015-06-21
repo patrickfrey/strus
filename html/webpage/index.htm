@@ -44,19 +44,20 @@
 		Currently there exists an implementation based on the 
 		<a href="http://leveldb.org">LevelDB</a> library.<br/>
 		The name <i>strus</i> is an acronym for <b><u>stru</u></b>ctured <b><u>s</u></b>earch
-		derived from the capability to find <i>arbitrary complex</i> left or right recursive 
-		expressions (meaning regular expressions on inserted terms as alphabet) in text and to <i>extract parts of matches</i>
-		for further processing. You might for example search for a sequence of two words 
-		with one of a set of verbs in the same sentence that forms a nominal phrase from
-		which the subject noun is extracted as part of the answer.<br/>
+		derived from the capability to identify complex structures in text and to extract parts
+		of matches for further processing. You might for example search for a 
+		sequence of two words with one of a set of verbs in the same sentence
+		that forms a nominal phrase from which the subject noun is extracted as 
+		part of the answer.<br/>
 		Besides finding structures, <i>strus</i> is of course also able to do <i>classical 
 		information retrieval</i> with a statistical, resp. stochastical (bag of words model)
 		<i>or a proximity weighting scheme</i>.<br/>
 		Support for global page rank schemes are not directly supported but implementable 
-		by taking precalculated document weights stored in a table (in memory) into account.<br/> 
-		Query based link popularity is <b>not</b> supported yet in the core since such weighting 
+		by taking precalculated document weights stored in a table (in memory)
+		into account.<br/> 
+		Query based link popularity is <b>not</b> supported in the core since such weighting 
 		schemes are hard to implement on distributed indices and the capability to 
-		distribute the search engines and taking global statistics into account is 
+		distribute the index and taking global statistics into account is 
 		a must for a competitive search engine.
 		</p>
 		<h2>Story/Motivation</h2>

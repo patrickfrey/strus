@@ -47,6 +47,7 @@
 		is <a href="grammar_query.htm">here (query language grammar)</a>.
 		</p>
 		<h2>List of utility programs</h2>
+<a name="strusCreate"> </a>
 <h3>strusCreate</h3>
 <p class="description">Create a strus storage.
 <br\>
@@ -75,6 +76,7 @@ options:
     Search modules to load first in &lt;DIR&gt;
 
 </pre>
+<a name="strusDestroy"> </a>
 <h3>strusDestroy</h3>
 <p class="description">Remove a strus storage.
 <br\>
@@ -102,6 +104,7 @@ options:
     Search modules to load first in &lt;DIR&gt;
 
 </pre>
+<a name="strusInspect"> </a>
 <h3>strusInspect</h3>
 <p class="description">Inspect elements of items inserted in a strus storage.
 <br\>
@@ -170,6 +173,7 @@ options:
             cachedterms=&lt;file with list of terms to cache&gt;
 
 </pre>
+<a name="strusAnalyze"> </a>
 <h3>strusAnalyze</h3>
 <p class="description">Dump the document analyze result without feeding the storage. This program can be used to check the result of the document analysis.
 <br\>
@@ -195,6 +199,7 @@ options:
     Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
 
 </pre>
+<a name="strusAnalyzePhrase"> </a>
 <h3>strusAnalyzePhrase</h3>
 <p class="description">Call the query analyzer with a phrase to analyze. This program can also be used to check details of the document analyzer as it tokenizes and normalizes a text segment with the tokenizer and normalizer specified.
 <br\>
@@ -226,6 +231,7 @@ options:
     Do not print position and define default quotes as empty
 
 </pre>
+<a name="strusSegment"> </a>
 <h3>strusSegment</h3>
 <p class="description">Call the segmenter with a document and one or more expressions to exract with the segmenter. Dump the resulting segments to stdout.
 <br\>
@@ -257,6 +263,7 @@ options:
     Use the string &lt;STR&gt; as quote for the result (default "'")
 
 </pre>
+<a name="strusInsert"> </a>
 <h3>strusInsert</h3>
 <p class="description">Insert a document or all files in a directory or in any descendant directory of it.
 <br\>
@@ -305,6 +312,7 @@ options:
     Write the last error occurred to &lt;FILE&gt; in case of an exception
 
 </pre>
+<a name="strusUpdateStorage"> </a>
 <h3>strusUpdateStorage</h3>
 <p class="description">This program allows to update attributes, meta data and user access rights in a storage from a batch file.
 <br\>
@@ -349,6 +357,7 @@ options:
     If &lt;N&gt; is set to 0 then only one commit is done at the end
 
 </pre>
+<a name="strusCheckStorage"> </a>
 <h3>strusCheckStorage</h3>
 <p class="description">This program checks a strus storage for corrupt data.
 <br\>
@@ -380,6 +389,7 @@ options:
     Execute the commands on the RPC server specified by &lt;ADDR&gt;
 
 </pre>
+<a name="strusCheckInsert"> </a>
 <h3>strusCheckInsert</h3>
 <p class="description">Processes the documents the same way as strusInsert. But instead of inserting the documents, it checks if the document representation in the storage is complete compared with the checked documents.
 <br\>
@@ -423,6 +433,7 @@ options:
     Set &lt;N&gt; as notification interval (number of documents)
 
 </pre>
+<a name="strusQuery"> </a>
 <h3>strusQuery</h3>
 <p class="description">Evaluate a query per command line.
 <br\>
@@ -471,6 +482,7 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 
 </pre>
+<a name="strusAlterMetaData"> </a>
 <h3>strusAlterMetaData</h3>
 <p class="description">Alter the table structure for document metadata of a storage.
 <br\>
@@ -523,6 +535,7 @@ options:
     Search modules to load first in &lt;DIR&gt;
 
 </pre>
+<a name="strusGenerateKeyMap"> </a>
 <h3>strusGenerateKeyMap</h3>
 <p class="description">Dumps a list of terms as result of document anaylsis of a file or directory. The dump can be loaded by the storage on startup to create a map of frequently used terms.
 <br\>
@@ -556,6 +569,7 @@ options:
     Set &lt;N&gt; as number of elements in the key map generated
 
 </pre>
+<a name="strusDumpStatistics"> </a>
 <h3>strusDumpStatistics</h3>
 <p class="description">Dumps the statisics that would be populated to other peer storages in case of a distributed index to stout. 
 <br\>
@@ -588,6 +602,7 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 
 </pre>
+<a name="strusDumpStorage"> </a>
 <h3>strusDumpStorage</h3>
 <p class="description">This program dumps the contents of a strus storage to stout
 <br\>
@@ -619,6 +634,7 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 
 </pre>
+<a name="strusRpcServer"> </a>
 <h3>strusRpcServer</h3>
 <p class="description">Start a server processing requests from strus RPC clients<br\>
 (implemented in the project <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>)
