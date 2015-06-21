@@ -3,6 +3,7 @@ Original design: Basic Profile (v2.0 - Sep 11, 2012) - A free xhtml/css website 
 For more information, see http://andreasviklund.com/templates/basic-profile/
 */
 
+@media (min-width: 801px){
 *{margin:0; padding:0;}
 body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
 a {color:#0B0B61; text-decoration:none;}
@@ -33,3 +34,95 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .description a {color:#0B0B61; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
+}
+
+@media (max-width: 800px) and (min-width: 541px){
+*{margin:0; padding:0;}
+body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
+a {color:#0B0B61; text-decoration:none;}
+a:hover {text-decoration:underline;}
+p,ul,ol,dl {margin:0 0 30px 0;}
+h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
+h1 a {color:#0B0B61; text-transform:none;}
+h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h1,h2,h3 {font-weight:700; line-height:1.4em;}
+#wrap {color:#303030; margin:30px auto; padding:0; width:600px;}
+#content {text-align:left; width:500px; padding-right:30px;}
+#content ul {list-style:none; margin:0; padding:10px 0 0 0; border-top:1px solid #eee;}
+#content li {list-style:none; font-size:1.2em; margin:0 0 0; padding:0 0 0 0; color:#888; }
+#sidebar {float:right; width:280px; padding-left:40px; border-left:2px solid #ccc; }
+#sidebar ul {list-style:none; margin:0; padding:10px 0 0 0; border-top:1px solid #eee;}
+#sidebar li {list-style:none; font-size:1.2em; margin:0 0 10px; padding:0 0 10px 0; color:#888; border-bottom:1px solid #eee;}
+#sidebar li a {font-size:1.2em;}
+#sidebar h2 {font-size: 1.4em;}
+#news {display:table; border:1;}
+#newsrow {display:table-row;}
+.slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
+.readmore {text-align:right; margin:0 20px 30px 0;}
+.timestamp {display: table-cell; font-weight:700; color:#888; text-align:right; width:150px; padding:20px 20px 20px 0; float:left; margin:0 20px 20px 0; border-right:2px solid #eee;}
+.timestamp a {font-weight:normal;}
+.credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
+.newstext {display: table-cell;}
+.description a {color:#0B0B61; font-weight:bold;}
+.credits a {color:#888;}
+.clear {clear:both;}
+}
+
+@media (max-width: 540px) and (min-width: 401px){
+*{margin:0; padding:0;}
+body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
+a {color:#0B0B61; text-decoration:none;}
+a:hover {text-decoration:underline;}
+p,ul,ol,dl {margin:0 0 30px 0;}
+h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
+h1 a {color:#0B0B61; text-transform:none;}
+h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h1,h2,h3 {font-weight:700; line-height:1.4em;}
+#wrap {color:#303030; margin:20px auto; padding:0; width:500px;}
+#content {text-align:left; width:400px; padding-right:20px;}
+#content ul {list-style:none; margin:0; padding:10px 0 0 0; border-top:1px solid #eee;}
+#content li {list-style:none; font-size:1.2em; margin:0 0 0; padding:0 0 0 0; color:#888; }
+#sidebar {float:right; width:280px; padding-left:40px; border-left:2px solid #ccc; }
+#sidebar ul {list-style:none; margin:0; padding:10px 0 0 0; border-top:1px solid #eee;}
+#sidebar li {list-style:none; font-size:1.2em; margin:0 0 10px; padding:0 0 10px 0; color:#888; border-bottom:1px solid #eee;}
+#sidebar li a {font-size:1.2em;}
+#sidebar h2 {font-size: 1.4em;}
+#news {display:table; border:1;}
+#newsrow {display:table-row;}
+.slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
+.readmore {text-align:right; margin:0 20px 30px 0;}
+.timestamp {display: table-cell; font-weight:700; color:#888; text-align:right; width:150px; padding:20px 20px 20px 0; float:left; margin:0 20px 20px 0; border-right:2px solid #eee;}
+.timestamp a {font-weight:normal;}
+.credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
+.newstext {display: table-cell;}
+.description a {color:#0B0B61; font-weight:bold;}
+.credits a {color:#888;}
+.clear {clear:both;}
+}
+
+@media (max-width: 400px) and (min-width: 101px){
+*{margin:0; padding:0;}
+body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
+a {color:#0B0B61; text-decoration:none;}
+a:hover {text-decoration:underline;}
+p,ul,ol,dl {margin:0 0 30px 0;}
+h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
+h1 a {color:#0B0B61; text-transform:none;}
+h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h1,h2,h3 {font-weight:700; line-height:1.4em;}
+#wrap {color:#303030; margin:20px auto; padding:0; width:90%;}
+#news {display:table; border:1;}
+#newsrow {display:table-row;}
+.slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
+.readmore {text-align:right; margin:0 20px 30px 0;}
+.timestamp {display: table-cell; font-weight:700; color:#888; text-align:right; width:150px; padding:20px 20px 20px 0; float:none; margin:0 20px 20px 0; border-right:2px solid #eee;}
+.timestamp a {font-weight:normal;}
+.credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
+.newstext {display: table-cell;}
+.description a {color:#0B0B61; font-weight:bold;}
+.credits a {color:#888;}
+.clear {clear:both;}
+}
