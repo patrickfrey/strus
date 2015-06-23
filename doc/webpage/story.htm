@@ -47,14 +47,17 @@
 		implemented yet can be found <a href="components.htm">here</a>.
 		</p>
 
+		<a name="Differences"> </a>
 		<h3>What distiguishes strus from other fulltext search engines</h3>
+		<a name="OutsourcingDataStore"> </a>
 		<h4>Outsourcing the data storage</h4>
 		<p class="description">Strus can be build uppon any modern NOSQL key/value database that has
-		an <a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upperbound seek</a>
+		an <a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upper bound seek</a>
 		to implement its data storage.
 		This reduces the complexity of the problem (the strus core with storage and query
 		evaluation has about 32000 lines of code). Alternative implementations for the
 		database can be provided by experts on the topic.</p>
+		<a name="StructuredQueries"> </a>
 		<h4>Modelling of structured queries</h4>
 		<p class="description">All open source search engines I know (e.g. Lucene,Xapian,Sphinx)
 		express multi term expressions as subqueries. Strus implements expressions as operations
@@ -73,9 +76,10 @@
 		marker serves as delimiting structure element here).<br/>
 		Another advantage of this model is that you don't need query rewriting for 
 		optimization, because in pure set operations implemented as merge of
-		iterators with an efficient skip to the upperbound, the smaller set is dominating
+		iterators with an efficient skip to the upper bound, the smaller set is dominating
 		and the number of disk accesses is minimal.
 		</p>
+		<a name="InformationExtraction"> </a>
 		<h4>Information extraction</h4>
 		<p class="description">In strus the result of the set operations needed to model expressions are
 		implemented as iterators. The advantage of this model is not only that you
