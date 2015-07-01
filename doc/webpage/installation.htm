@@ -15,14 +15,24 @@
 </script><div id="wrap">
 	<div id="content">
 		<h1>Strus installation guide</h1>
-		<h2>Releasing</h2>
-		<p class="description">There are no tagged releases yet. You build from trunk.
-		There will be a first release version 0.1. soon. The development status is pre-alpha.
+		<h2>Packages</h2>
+		<p class="description">There are no packages yet. You have to work with a docker
+		image or fetch and build the software on your own.
 		</p>
+		<a name="docker"> </a>
+		<h2>Start it from a docker image</h2>
+		<p class="description">There are 2 docker images available for ubuntu 14.04:
+		<ol>
+		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404">patrickfrey/strus-ub1404</a>: strus with utilities and RPC server</li>
+		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-bind">patrickfrey/strus-ub1404-bind</a>: language bindings for scripting languages accessing strus</li>
+		</ol>
+		<p class="description">There is a <a href="tutorial_MusicBrainzDataset.htm">tutorial</a> based on these images.
+		</p>
+
+		<a name="github"> </a>
 		<h2>Fetch it from github</h2>
-		<p class="description">You have to fetch the projects from github and build them
-		on your own. There are no packages yet. In order to fetch them from github 
-		by cloning it with:
+		<p class="description">You can also fetch the projects from github and build them
+		on your own. In order to fetch them from github by cloning it with:
 		<pre>
 git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</pre>
@@ -53,6 +63,7 @@ unzip master.zip
 		<li><a href="https://code.google.com/p/gperftools">gperftools</a>(needed by leveldb)</li>
 		<li><a href="http://savannah.nongnu.org/projects/libunwind">libunwind</a> (needed by leveldb)</li>
 		<li><a href="https://code.google.com/p/snappy">snappy</a> (needed by leveldb)</li>
+		<li><a href="http://php.net">PHP</a> (needed by strusBindings)</li>
 		</ul>
 		</p>
 		<h2>Build</h2>
