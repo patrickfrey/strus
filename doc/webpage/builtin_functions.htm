@@ -252,6 +252,41 @@
 		<a href="https://en.wikipedia.org/wiki/Umlaut_%28linguistics%29">umlauts</a>
 		are mapped to the latin base character followed by an 'e'.
 		</p></td>
+		</tr><tr>
+		<td><p class="identifier">date2int</p></td>
+		<td><p class="description">
+		Returns a date time difference of a date time value to a constant base date time 
+		value (e.g. '1970-01-01') as integer.<br/>
+		The first parameter specifies the unit of the result and the constant base date time value.
+		This unit is specified as string with the granularity (one of { 'us'=microseconds, 'ms'=milliseconds, 's'=seconds, 'm'=minutes, 'h'=hours, 'd'=days })
+		optionally followed by a '>' and the base date time value. If the base date time
+		value is not specified, then "1970-01-01" is assumed. Examples:
+		<pre>
+d > 1970-01-01
+d
+d > 1789-07-14
+		</pre>
+		The following parameters specify accepted formats of the date time input value.
+		A possible format string is a string with '%' followed by an ascii character
+		as substitute. Accepted substitutes are "%a" for short weekday name, "%b" for
+		abbreviated month name, "%B" for full month name, "%d" for day of the month as 
+		decimal 01 to 31, "%m" for month name as a decimal 01 to 12, "%w" for weekday as 
+		decimal number 0 to 6 where Sunday is 0, "%W" week number 00 to 53 where 
+		Monday is first day of week 1, "%y" for year without the century, 
+		"%Y" for year with century, "%H" for hours in 24 hour calculation, 
+		"%I" for hours in 12 hour calculation, "%M" for minutes,
+		"%S" for seconds, "%s *" for fractional seconds, and many more.
+		The normalizer checks for the first matching input date time format value
+		and returns the difference from the base date time value and the granularity
+		specified in the first argument of the method. The method requires at least
+		two arguments. Example calls:
+		</p><p class="description">
+		<pre>
+date2int( "ms &gt; 2000-01-01 00:00:00", "%Y/%m/%d %H:%M:%S *")
+date2int( "d &gt; 1970-01-01", "%d.%m.%Y", "%Y/%m/%d")
+date2int( "d", "%d.%m.%Y", "%Y/%m/%d", "%Y%m%d")
+		</pre>
+		</p></td>
 		</tr>
 		</table>
 		</div>
