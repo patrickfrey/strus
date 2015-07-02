@@ -258,13 +258,14 @@
 		Returns a date time difference of a date time value to a constant base date time 
 		value (e.g. '1970-01-01') as integer.<br/>
 		The first parameter specifies the unit of the result and the constant base date time value.
-		This unit is specified as string with the granularity (one of { 'us'=microseconds, 'ms'=milliseconds, 's'=seconds, 'm'=minutes, 'h'=hours, 'd'=days })
-		optionally followed by a '>' and the base date time value. If the base date time
+		This unit is specified as string with the granularity 
+		(one of { 'us'=microseconds, 'ms'=milliseconds, 's'=seconds, 'm'=minutes, 'h'=hours, 'd'=days })
+		optionally followed by the base date time value. If the base date time
 		value is not specified, then "1970-01-01" is assumed. Examples:
 		<pre>
-d > 1970-01-01
+d 1970-01-01
 d
-d > 1789-07-14
+d 1789-07-14
 		</pre>
 		The following parameters specify accepted formats of the date time input value.
 		A possible format string is a string with '%' followed by an ascii character
@@ -282,8 +283,8 @@ d > 1789-07-14
 		two arguments. Example calls:
 		</p><p class="description">
 		<pre>
-date2int( "ms &gt; 2000-01-01 00:00:00", "%Y/%m/%d %H:%M:%S *")
-date2int( "d &gt; 1970-01-01", "%d.%m.%Y", "%Y/%m/%d")
+date2int( "ms 2000-01-01 00:00:00", "%Y/%m/%d %H:%M:%S *")
+date2int( "d 1970-01-01", "%d.%m.%Y", "%Y/%m/%d")
 date2int( "d", "%d.%m.%Y", "%Y/%m/%d", "%Y%m%d")
 		</pre>
 		</p></td>
