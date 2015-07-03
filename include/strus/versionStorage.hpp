@@ -38,17 +38,17 @@ namespace strus
 /// \brief Version number of the strus core (storage)
 #define STRUS_STORAGE_VERSION (\
 	0 * 1000000\
-	+ 0 * 10000\
+	+ 1 * 10000\
 	+ 1\
 )
 
 /// \brief Major version number of the strus core (storage)
 #define STRUS_STORAGE_VERSION_MAJOR 0
 /// \brief Minor version number of the strus core (storage)
-#define STRUS_STORAGE_VERSION_MINOR 0
+#define STRUS_STORAGE_VERSION_MINOR 1
 
 /// \brief The version of the strus core (storage) as string
-#define STRUS_STORAGE_VERSION_STRING "0.0.1"
+#define STRUS_STORAGE_VERSION_STRING "0.1.1"
 
 }//namespace
 #endif

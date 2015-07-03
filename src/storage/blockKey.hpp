@@ -59,7 +59,7 @@ public:
 	{
 		if (idx1 <= 0 || idx2 <= 0)
 		{
-			throw strus::logic_error( _TXT( "using illegal block key"));
+			throw strus::logic_error( _TXT( "using illegal block key [2]"));
 		}
 		m_index = idx1;
 		m_index <<= 32;
@@ -69,7 +69,7 @@ public:
 	{
 		if (idx <= 0)
 		{
-			throw strus::logic_error( _TXT( "using illegal block key"));
+			throw strus::logic_error( _TXT( "using illegal block key [1]"));
 		}
 		m_index = idx;
 	}
@@ -80,7 +80,7 @@ public:
 	{
 		if (idx <= 0)
 		{
-			throw strus::logic_error( _TXT( "using illegal block key"));
+			throw strus::logic_error( _TXT( "using illegal block key [3]"));
 		}
 		m_index = idx;
 	}

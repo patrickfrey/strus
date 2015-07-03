@@ -345,10 +345,10 @@ DocnoRangeAllocatorInterface* StorageClient::createDocnoRangeAllocator()
 
 Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 {
-	Index rt = m_next_docno.increment( nofDocuments);
+	Index rt = m_next_docno.allocIncrement( nofDocuments);
 	if (m_next_docno.value() <= rt)
 	{
-		(void)m_next_docno.increment( -(int)nofDocuments);
+		m_next_docno.decrement( nofDocuments);
 		throw strus::runtime_error( _TXT( "docno allocation error"));
 	}
 	return rt;
@@ -495,7 +495,7 @@ bool StorageClient::withAcl() const
 
 Index StorageClient::allocTermno()
 {
-	return m_next_termno.increment()-1;
+	return m_next_termno.allocIncrement();
 }
 
 Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
@@ -504,7 +504,7 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_typeno.increment()-1);
+		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
 		isNew = true;
 	}
 	return rt;
@@ -516,7 +516,7 @@ Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_DocId::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_docno.increment()-1);
+		stor.storeImm( name, rt = m_next_docno.allocIncrement());
 		isNew = true;
 	}
 	return rt;
@@ -528,7 +528,7 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_userno.increment()-1);
+		stor.storeImm( name, rt = m_next_userno.allocIncrement());
 		isNew = true;
 	}
 	return rt;
@@ -540,7 +540,7 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_attribno.increment()-1);
+		stor.storeImm( name, rt = m_next_attribno.allocIncrement());
 		isNew = true;
 	}
 	return rt;

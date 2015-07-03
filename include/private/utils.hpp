@@ -107,10 +107,22 @@ public:
 	{}
 
 	///\brief Increment of the counter
-	///\return the new value of the counter after the increment operation
-	IntegralCounterType increment( IntegralCounterType val = 1)
+	void increment( IntegralCounterType val = 1)
 	{
-		return boost::atomic<IntegralCounterType>::fetch_add( val, boost::memory_order_acquire)+1;
+		boost::atomic<IntegralCounterType>::fetch_add( val, boost::memory_order_acquire);
+	}
+
+	///\brief Decrement of the counter
+	void decrement( IntegralCounterType val = 1)
+	{
+		boost::atomic<IntegralCounterType>::fetch_sub( val, boost::memory_order_acquire);
+	}
+
+	///\brief Increment of the counter
+	///\return the new value of the counter after the increment operation
+	IntegralCounterType allocIncrement( IntegralCounterType val = 1)
+	{
+		return boost::atomic<IntegralCounterType>::fetch_add( val, boost::memory_order_acquire);
 	}
 
 	///\brief Increment of the counter
