@@ -130,6 +130,8 @@ usage: strusInspect [options] &lt;what...&gt;
                  If doc is not specified then dump value for all docs.
             "nofdocs"
                = Get the local number of documents in the storage
+            "maxdocno"
+               = Get the maximum document number allocated in the local storage
             "metadata" &lt;name&gt; [&lt;doc-id/no&gt;]
                = Get the value of a meta data element
                  If doc is not specified then dump value for all docs.
@@ -299,6 +301,8 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -g|--segmenter &lt;NAME&gt;
     Use the document segmenter with name &lt;NAME&gt; (default textwolf)
+-x|--extension &lt;EXT&gt;
+    Grab the files with extension &lt;EXT&gt; (default ".xml")
 -t|--threads &lt;N&gt;
     Set &lt;N&gt; as number of inserter threads to use
 -c|--commit &lt;N&gt;
