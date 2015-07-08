@@ -1,4 +1,3 @@
-INSTALLATION GUIDE
 GLOSSARY
 
 * parameter to storage with maximum string size to insert in the cache (compact node trie), 0 if no caching should be done, default 16
