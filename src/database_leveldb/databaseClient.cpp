@@ -62,7 +62,7 @@ static std::string normalizePath( const std::string& path_)
 	return rt;
 }
 
-LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
+LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_, bool createIfMissing_)
 	:m_path(path_),m_db(0)
 	,m_maxOpenFiles(maxOpenFiles_)
 	,m_cachesize_k(cachesize_k_)
@@ -71,7 +71,7 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 	,m_blockSize(blockSize_)
 
 {
-	m_dboptions.create_if_missing = false;
+	m_dboptions.create_if_missing = createIfMissing_;
 	if (m_maxOpenFiles)
 	{
 		m_dboptions.max_open_files = maxOpenFiles_;
@@ -117,14 +117,14 @@ void LevelDbHandle::cleanup()
 	}
 }
 
-utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
+utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_, bool createIfMissing_)
 {
 	utils::ScopedLock lock( m_map_mutex);
 	std::string path = normalizePath( path_);
 	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path);
 	if (mi == m_map.end())
 	{
-		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
+		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_, createIfMissing_));
 		m_map[ path_] = rt;
 		return rt;
 	}

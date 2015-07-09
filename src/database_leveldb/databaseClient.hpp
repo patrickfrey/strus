@@ -46,12 +46,14 @@ public:
 	/// \param[in] compression_ wheter to use snappy compression (true) or not
 	/// \param[in] writeBufferSize_ size of write buffer per file
 	/// \param[in] blockSize_ block size on disk (size of units)
+	/// \param[in] createIfMissing_ true, if the database should implicitely be created, if it does not exist yet
 	LevelDbHandle( const std::string& path_,
 			unsigned int maxOpenFiles_,
 			unsigned int cachesize_k_,
 			bool compression_,
 			unsigned int writeBufferSize_,
-			unsigned int blockSize_);
+			unsigned int blockSize_,
+			bool createIfMissing_);
 
 	/// \brief Destructor
 	~LevelDbHandle();
@@ -94,6 +96,7 @@ public:
 	/// \param[in] compression_ wheter to use snappy compression (true) or not
 	/// \param[in] writeBufferSize_ size of write buffer per file
 	/// \param[in] blockSize_ block size on disk (size of units)
+	/// \param[in] createIfMissing_ true, if the database should implicitely be created, if it does not exist yet
 	/// \note the method throws if the configuration parameters are incompatible to an existing instance
 	utils::SharedPtr<LevelDbHandle> create(
 			const std::string& path_,
@@ -101,7 +104,8 @@ public:
 			unsigned int cachesize_k,
 			bool compression,
 			unsigned int writeBufferSize_,
-			unsigned int blockSize_);
+			unsigned int blockSize_,
+			bool createIfMissing_);
 
 	/// \brief Dereference the handle for the database referenced by path and dispose the handle, if this reference is the last instance
 	void dereference( const std::string& path_);
@@ -125,6 +129,7 @@ public:
 	/// \param[in] compression wheter to use snappy compression (true) or not
 	/// \param[in] writeBufferSize size of write buffer per file
 	/// \param[in] blockSize block size on disk (size of units)
+	/// \param[in] createIfMissing true, if the database should implicitely be created, if it does not exist yet
 	DatabaseClient(
 			const utils::SharedPtr<LevelDbHandleMap>& dbmap_,
 			const std::string& path,
@@ -132,8 +137,9 @@ public:
 			unsigned int cachesize_k,
 			bool compression,
 			unsigned int writeBufferSize,
-			unsigned int blockSize)
-		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize))
+			unsigned int blockSize,
+			bool createIfMissing)
+		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize, createIfMissing))
 	{}
 
 	virtual ~DatabaseClient()

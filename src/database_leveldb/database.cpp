@@ -21,6 +21,7 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 	unsigned int maxOpenFiles = 0;
 	unsigned int writeBufferSize = 0;
 	unsigned int blockSize = 0;
+	bool createIfMissing = false;
 	std::string path;
 	std::string src( configsource);
 
@@ -29,12 +30,13 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 		throw strus::runtime_error( _TXT( "missing 'path' in database configuration string"));
 	}
 	(void)extractBooleanFromConfigString( compression, src, "compression");
+	(void)extractBooleanFromConfigString( createIfMissing, src, "create");
 	(void)extractUIntFromConfigString( cachesize_kb, src, "cache");
 	(void)extractUIntFromConfigString( maxOpenFiles, src, "max_open_files");
 	(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size");
 	(void)extractUIntFromConfigString( blockSize, src, "block_size");
 
-	return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize);
+	return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize, createIfMissing);
 }
 
 void Database::createDatabase( const std::string& configsource) const
@@ -157,7 +159,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 	switch (type)
 	{
 		case CmdCreateClient:
-			return "path=<LevelDB storage path>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmax_open_files=<maximum number of open files for LevelDB>\nwrite_buffer_size=<Amount of data to build up in memory per file>\nblock_size=<approximate size of user data packed per block>";
+			return "path=<LevelDB storage path>\ncreate=<yes/no, yes=do create if database does not exist yet>\ncache=<size of LRU cache for LevelDB>\ncompression=<yes/no>\nmax_open_files=<maximum number of open files for LevelDB>\nwrite_buffer_size=<Amount of data to build up in memory per file>\nblock_size=<approximate size of user data packed per block>";
 
 		case CmdCreate:
 			return "path=<LevelDB storage path>;compression=<yes/no>";
@@ -170,7 +172,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 
 const char** Database::getConfigParameters( ConfigType type) const
 {
-	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression","max_open_files","write_buffer_size","block_size",0};
+	static const char* keys_CreateDatabaseClient[] = {"path","create","cache","compression","max_open_files","write_buffer_size","block_size",0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};
 	static const char* keys_DestroyDatabase[] = {"path", 0};
 	switch (type)
