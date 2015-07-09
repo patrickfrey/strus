@@ -46,6 +46,10 @@ public:
 	/// \brief Destructor
 	virtual ~DatabaseInterface(){}
 
+	/// \brief Evaluate if the database specified exists
+	/// \param[in] configsource configuration source string describing the database (not a filename !)
+	virtual bool exists( const std::string& configsource) const=0;
+
 	/// \brief Creates a client to access the key value store database
 	/// \param[in] configsource configuration source string describing the database (not a filename !)
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const=0;

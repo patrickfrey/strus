@@ -11,6 +11,7 @@
 #include <memory>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
+#include "strus/private/fileio.hpp"
 
 using namespace strus;
 
@@ -35,6 +36,23 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 	(void)extractUIntFromConfigString( blockSize, src, "block_size");
 
 	return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize);
+}
+
+bool Database::exists( const std::string& configsource) const
+{
+	std::string src = configsource;
+	std::string path;
+
+	if (!extractStringFromConfigString( path, src, "path"))
+	{
+		throw strus::runtime_error( _TXT( "missing 'path' in database configuration string"));
+	}
+	path.push_back( dirSeparator());
+	path.append( "CURRENT");
+
+	// ... this is a little bit a hack but levelDB version <= 1.15 always creates files
+	// and nthis is not intended by a simple check
+	return isFile( path);
 }
 
 void Database::createDatabase( const std::string& configsource) const
