@@ -203,7 +203,7 @@ public:/*StorageDocumentChecker*/
 private:
 	void cleanup();
 	void loadTermnoMap( const char* termnomap_source);
-	void loadVariables();
+	void loadVariables( DatabaseClientInterface* database_);
 	void storeVariables();
 	void fillDocumentFrequencyCache();
 

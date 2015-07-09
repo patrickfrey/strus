@@ -79,7 +79,7 @@ void StorageClient::cleanup()
 }
 
 StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source)
-	:m_database(database_)
+	:m_database()
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_docno(0)
@@ -94,10 +94,11 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	try
 	{
 		m_metadescr.load( database_);
-		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
+		m_metaDataBlockCache = new MetaDataBlockCache( database_, m_metadescr);
 
-		loadVariables();
+		loadVariables( database_);
 		if (termnomap_source) loadTermnoMap( termnomap_source);
+		m_database.reset( database_);
 	}
 	catch (const std::bad_alloc& err)
 	{
@@ -122,7 +123,7 @@ void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 	m_metaDataBlockCache->refresh();
 }
 
-void StorageClient::loadVariables()
+void StorageClient::loadVariables( DatabaseClientInterface* database_)
 {
 	ByteOrderMark byteOrderMark;
 	Index bom;
@@ -134,7 +135,7 @@ void StorageClient::loadVariables()
 	Index nof_documents_;
 	Index next_userno_;
 
-	DatabaseAdapter_Variable::Reader varstor( m_database.get());
+	DatabaseAdapter_Variable::Reader varstor( database_);
 	if (!varstor.load( "TermNo", next_termno_)
 	||  !varstor.load( "TypeNo", next_typeno_)
 	||  !varstor.load( "DocNo", next_docno_)
