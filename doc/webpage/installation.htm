@@ -21,10 +21,12 @@
 		</p>
 		<a name="docker"> </a>
 		<h2>Start it from a docker image</h2>
-		<p class="description">There are 2 docker images available for ubuntu 14.04:
+		<p class="description">There are 4 docker images available for ubuntu 14.04:
 		<ol>
-		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404">patrickfrey/strus-ub1404</a>: strus with utilities and RPC server</li>
-		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-bind">patrickfrey/strus-ub1404-bind</a>: language bindings for scripting languages accessing strus</li>
+		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-env">patrickfrey/strus-ub1404-env</a>: strus search engine prerequisites (build tools, 3rdParty libraries) for ubuntu.</li>
+		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404">patrickfrey/strus-ub1404</a>: strus search engine libraries and command line tools (without language bindings).</li>
+		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-bind">patrickfrey/strus-ub1404-bind</a>: strus search engine application development base (strus-ub1404 plus language bindings).</li>
+		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-nginx">patrickfrey/strus-ub1404-nginx</a>: strus search engine service using nginx as webserver.</li>
 		</ol>
 		<p class="description">There is a <a href="tutorial_MusicBrainzDataset.htm">tutorial</a> based on these images.
 		</p>
