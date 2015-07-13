@@ -53,10 +53,16 @@ unsigned int writeFile( const std::string& filename, const std::string& content)
 
 /// \brief Reads all file names matching to the extension ext of a directory to an array of strings
 /// \param[in] path the name of director to read
-/// \param[in] ext the file extension the accepted files must have
+/// \param[in] ext the file extension the accepted files must have (empty if all extensions are accepted)
 /// \param[out] res the returned matching file names of the directory read
 /// \return 0 on success, errno on failure
-unsigned int readDir( const std::string& path, const std::string& ext, std::vector<std::string>& res);
+unsigned int readDirFiles( const std::string& path, const std::string& ext, std::vector<std::string>& res);
+
+/// \brief Reads all subdirectories of a directory to an array of strings
+/// \param[in] path the name of director to read
+/// \param[out] res the returned matching sub directories of the directory read
+/// \return 0 on success, errno on failure
+unsigned int readDirSubDirs( const std::string& path, std::vector<std::string>& res);
 
 /// \brief Check if a file system path points to a file
 /// \return true, if yes
