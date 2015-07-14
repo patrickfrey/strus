@@ -135,6 +135,7 @@ DLL_PUBLIC unsigned int strus::readDirSubDirs( const std::string& path, std::vec
 	std::size_t prevsize = res.size();
 	while (!!(ent = ::readdir(dir)))
 	{
+		if (ent->d_name[0] == '.') continue;
 		std::string entry( path + dirSeparator() + ent->d_name);
 		if (isDir( entry))
 		{
@@ -162,6 +163,7 @@ DLL_PUBLIC unsigned int strus::readDirFiles( const std::string& path, const std:
 	std::size_t prevsize = res.size();
 	while (!!(ent = ::readdir(dir)))
 	{
+		if (ent->d_name[0] == '.') continue;
 		std::string entry( ent->d_name);
 		if (ext.size() > entry.size())
 		{
