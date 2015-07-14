@@ -167,8 +167,8 @@ DLL_PUBLIC unsigned int strus::readDirFiles( const std::string& path, const std:
 		{
 			continue;
 		}
-		std::string path( path + dirSeparator() + entry);
-		if (isDir( path)) continue;
+		std::string entrypath( path + dirSeparator() + entry);
+		if (isDir( entrypath)) continue;
 		if (ext.empty())
 		{
 			res.push_back( entry);
