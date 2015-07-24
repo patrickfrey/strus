@@ -55,16 +55,8 @@
 </p>
 <h4>Usage</h4>
 <pre>
-usage: strusCreate [options] &lt;config&gt;
-&lt;config&gt;  = storage configuration string
-            semicolon ';' separated list of assignments:
-            path=&lt;LevelDB storage path&gt;
-            cache=&lt;size of LRU cache for LevelDB&gt;
-            compression=&lt;yes/no&gt;
-            max_open_files=&lt;maximum number of open files for LevelDB&gt;
-            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
-            block_size=&lt;approximate size of user data packed per block&gt;
-            cachedterms=&lt;file with list of terms to cache&gt;
+usage: strusCreate [options]
+description: Creates a storage with its key value store database.
 options:
 -h|--help
    Print this usage and do nothing else
@@ -74,7 +66,15 @@ options:
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
     Search modules to load first in &lt;DIR&gt;
-
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;;compression=&lt;yes/no&gt;
+            acl=&lt;yes/no, yes if users with different access rights exist&gt;
+            metadata=&lt;comma separated list of meta data def&gt;
+-S|--configfile &lt;FILENAME&gt;
+    Define the storage configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
 </pre>
 <a name="strusDestroy"> </a>
 <h3>strusDestroy</h3>
@@ -84,15 +84,8 @@ options:
 </p>
 <h4>Usage</h4>
 <pre>
-usage: strusDestroy [options] &lt;config&gt;
-&lt;config&gt;  = database configuration string
-            semicolon ';' separated list of assignments:
-            path=&lt;LevelDB storage path&gt;
-            cache=&lt;size of LRU cache for LevelDB&gt;
-            compression=&lt;yes/no&gt;
-            max_open_files=&lt;maximum number of open files for LevelDB&gt;
-            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
-            block_size=&lt;approximate size of user data packed per block&gt;
+usage: strusDestroy [options]
+description: Removes an existing storage database.
 options:
 -h|--help
    Print this usage and do nothing else
@@ -102,7 +95,19 @@ options:
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
     Search modules to load first in &lt;DIR&gt;
-
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            create=&lt;yes/no, yes=do create if database does not exist yet&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+-S|--configfile &lt;FILENAME&gt;
+    Define the storage configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
 </pre>
 <a name="strusInspect"> </a>
 <h3>strusInspect</h3>
@@ -648,7 +653,7 @@ options:
 strusRpcServer [options]
 options:
 -h|--help
-   Print this usage and do nothing else
+    Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
 -m|--module &lt;MOD&gt;
@@ -661,10 +666,14 @@ options:
     Define the port to listen for requests as &lt;PORT&gt; (default 7181)
 -s|--storage &lt;CONFIG&gt;
     Define configuration &lt;CONFIG&gt; of storage hosted by this server
+-S|--configfile &lt;CFGFILE&gt;
+    Define storage configuration as content of file &lt;CFGFILE&gt;
+-c|--create &lt;CONFIG&gt;
+    Implicitely create storage with &lt;CONFIG&gt; if it does not exist yet
 -g|--globalstats &lt;FILE&gt;
     Load global statistics of peers from file &lt;FILE&gt;
-
 </pre>
-	</div>
+</div>
 </div>
 </body>
+</html>
