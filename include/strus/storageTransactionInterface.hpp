@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for a transaction on the storage
-/// \file "storageTransactionInterface.hpp"
+/// \file storageTransactionInterface.hpp
 #ifndef _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include <string>

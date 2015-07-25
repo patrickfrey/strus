@@ -110,9 +110,9 @@ public:
 	/// \brief Set the minimum rank number to return
 	/// \param[in] minRank_ the minimum rank number
 	virtual void setMinRank( std::size_t minRank_)=0;
-	/// \brief Set the name of the user of the query for ACL restrictions
+	/// \brief Add a name of a user role in the query for alternative ACL restrictions
 	/// \param[in] username_ user of the query
-	virtual void setUserName( const std::string& username_)=0;
+	virtual void addUserName( const std::string& username_)=0;
 
 	/// \brief Evaluate the query
 	virtual std::vector<ResultDocument> evaluate()=0;

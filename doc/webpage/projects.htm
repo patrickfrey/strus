@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Project organization of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
+	<title>Strus project organization</title>
+</head>
+
+<body>
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-63809026-14', 'auto');
+  ga('send', 'pageview');
+</script><div id="wrap">
+	<div id="content">
+		<h1>Strus sub projects</h1>
+		<h2>Project organization</h2>
+		<p class="description">
+		The project <i>strus</i> consists of several components implemented in distinct
+		projects hosted on <a href="https://github.com/patrickfrey?tab=repositories">github</a>.
+		A closer look at the components of strus and what is part of strus and what not,
+		can be found <a href="components.htm">here</a>.
+		<ol>
+		<li><a href="https://github.com/patrickfrey/strus">strus</a>
+			<p class="description">The storage and query processing of the search engine.
+			It also provides the default key value store database connector (to LevelDB).</p></li>
+		<li><a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>
+			<p class="description">The document and query analysis for transforming content
+			into retrievable items.</p></li>
+		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
+			<p class="description">Provides the loading of search engine components from dynamically 
+			loadable modules. (depends on strus and strusAnalyzer)</p></li>
+		<li><a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>
+			<p class="description">Provides a proxy interface for strus objects residing on a server via RPC.
+			If you want to use strus in a webserver context, where loading modules by
+			another instance than the webserver itself is not allowed or at least 
+			not recommended, you should access strus via RPC or a similar mechanism.
+			(depends on strus, strusAnalyzer and strusModule)</p></li>
+		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
+			<p class="description">Provides some command line programs to access the search engine.
+			(Depends on strusModule and strusRpc (*)</p></li>
+		<li><a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>
+			<p class="description">Provides language bindings to use <i>strus</i> with other
+			programming languages (**) like <i>PHP</i>,<i>Python</i>,<i>Perl</i>,<i>Java</i>,<i>Ruby</i>,etc...  
+			(Depends on strusModule and strusRpc (*))</p></li>
+		</ol>
+		(*) The hardcoded dependency on strusRpc is bad. In the future there should exist 
+		alternative implementations for proxying the access on a storage.<br/>
+		(**) Currently are only language bindings to PHP provided. But others will be implemted soon.
+		</p>
+	</div>
+</div>
+</body>
+</html>
+

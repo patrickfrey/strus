@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for a parameterized weighting function instance
-/// \file "weightingFunctionInstanceInterface.hpp"
+/// \file weightingFunctionInstanceInterface.hpp
 #ifndef _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #include <string>

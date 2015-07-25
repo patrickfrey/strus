@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Query evaluation program of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
+	<title>Strus query evaluation configuration source</title>
+</head>
+
+<body><div id="wrap">
+<div id="content">
+	<h1>Strus query evaluation configuration source</h1>
+	<h2>Language grammar</h2>
+	<p class="description">The following grammar (as EBNF) describes the formal language for 
+	describing a query evaluation scheme used by the strus utilities (strusUtilities).
+	</p>
+	<h3>Comments</h3>
+	<p class="description">
+		Comments are starting with <b>#</b> and are reaching to the end of the line.
+		Using <b>#</b> as part of a symbol is possible if it is part of a single or double
+		quoted string.
+	</p>
+	<h3>Handling of spaces</h3>
+	<p class="description">
+	Spaces, control characters and end of lines have no meaning in the language.
+	</p>
+	<h3>Case sensivity/insensivity</h3>
+	<p class="description">
+	Parameter names (keys) of the query evaluation scheme are case insensitive.
+	Keywords and identifiers referring to elements in the storage are case insensitive.
+	</p>
+	<h3>EBNF</h3>
+	<pre>
+IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
+STRING         : &lt;single or double quoted string with backslash escaping&gt;
+NUMBER         : &lt;integer or floating point number in non exponential notation&gt;
+
+config         = statement ";" config
+               |
+               ;
+statement      = evalexpr | selectexpr | restrictexpr | termdef | evalexpr
+               ;
+evalexpr       = "EVAL" [ NUMBER "*" ] functionname "(" parameterlist ")" ;
+               ;
+selectexpr     = "SELECT" featureset { "," featureset }
+               ;
+restrictexpr   = "RESTRICT" featureset { "," featureset }
+               ;
+termdef        = "TERM" featureset termvalue termtype
+               ;
+evalexpr       = "SUMMARIZE" functionname "(" parameterlist ")"
+               ;
+functionname   = IDENTIFIER
+               ;
+featureset     = IDENTIFIER
+               ;
+termtype       = IDENTIFIER
+               ;
+termvalue      = IDENTIFIER | STRING
+               ;
+parameterlist  = parameter { "," parameter }
+               |
+parameter      = parametername "=" parametervalue
+               ;
+parametername  = [ "." ] IDENTIFIER
+               ;
+parametervalue = IDENTIFIER | STRING | NUMBER
+               ;
+
+	</pre>
+	<h3>Meaning of the grammar elements</h3>
+	<h5>functionname</h5>
+	<p class="description">Name of the weighting or summarization function as provided
+	by the query processor.</p>
+	<h5>parametername</h5>
+	<p class="description">Name of the parameter passed to the weighting or summarization function.
+	A parameter name with dot '.' as prefix is specifying a feature parameter declaration.
+	The known names of weighting and summarization function depend on its implementation.
+	</p>
+	<h3>Example</h3>
+	<p class="description">
+	The following example declares the feature set 'selfeat' to define what is weighted.
+	All documents containing the feature 'selfeat' will be selected for ranking.<br/>
+	As weighting function we take the arithmetic sum of the 'bm25' weight of the document plus
+	3 times the value of the meta data element called 'pageweight'.<br/>
+	For presentation of the result we use the summarizer extracting the title attribute and
+	taking the content elements of the best matching phrases.
+	</p>
+	<pre>
+SELECT selfeat;
+
+EVAL 1.0 * bm25( k1=0.75, b=2.1, avgdoclen=1000, .match=docfeat );
+EVAL 3.0 * metadata( name=pageweight );
+
+SUMMARIZE title = attribute( name=title );
+SUMMARIZE content = matchphrase(
+                        type=orig, nof=4, len=60,
+                        structseek=40, .struct=sentence, .match=docfeat );
+	</pre>
+	</div>
+</div>
+</body>
+</html>
+
+

@@ -1,0 +1,679 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Description of the command line utility programs of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
+	<title>Strus utility programs</title>
+</head>
+<body>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-63809026-12', 'auto');
+  ga('send', 'pageview');
+</script>
+<div id="wrap">
+	<div id="content">
+		<h1>Command line utility programs</h1>
+		<h2>Languages used by utility programs</h2>
+		<p class="description">
+		Some of the utility programs are based on source files with a proprietary grammar.
+		But the functionality expressed with these domain specific languages is not a parallel
+		universe. All languages map to calls of the strus core and analyzer API.
+		All loading of programs is implemented as calls of
+		<a href="http://patrickfrey.github.io/strusUtilities/doc/doxygen/html/index.html">the program loader interface</a>.
+		</p>
+		<h3>Document analyzer program</h3>
+		<p class="description">The grammar of the sources referred to as document analyzer programs 
+		by some utility programs are defined <a href="grammar_analyzerprg_doc.htm">here (document analyzer program grammar)</a>.
+		</p>
+		<h3>Query analyzer program</h3>
+		<p class="description">The grammar of the sources referred to as query analyzer programs 
+		by some utility programs are defined <a href="grammar_analyzerprg_qry.htm">here (query analyzer program grammar)</a>.
+		</p>
+		<h3>Query evaluation program</h3>
+		<p class="description">The grammar of the sources referred to as query evaluation programs 
+		by some utility programs are defined <a href="grammar_queryevalprg.htm">here (query evaluation program grammar)</a>.
+		</p>
+		<h3>Query language</h3>
+		<p class="description">The language used by utility programs for search queries
+		is <a href="grammar_query.htm">here (query language grammar)</a>.
+		</p>
+		<h2>List of utility programs</h2>
+<a name="strusCreate"> </a>
+<h3>strusCreate</h3>
+<p class="description">Create a strus storage.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusCreate [options]
+description: Creates a storage with its key value store database.
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;;compression=&lt;yes/no&gt;
+            acl=&lt;yes/no, yes if users with different access rights exist&gt;
+            metadata=&lt;comma separated list of meta data def&gt;
+-S|--configfile &lt;FILENAME&gt;
+    Define the storage configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
+</pre>
+<a name="strusDestroy"> </a>
+<h3>strusDestroy</h3>
+<p class="description">Remove a strus storage.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusDestroy [options]
+description: Removes an existing storage database.
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            create=&lt;yes/no, yes=do create if database does not exist yet&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+-S|--configfile &lt;FILENAME&gt;
+    Define the storage configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
+</pre>
+<a name="strusInspect"> </a>
+<h3>strusInspect</h3>
+<p class="description">Inspect elements of items inserted in a strus storage.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusInspect [options] &lt;what...&gt;
+&lt;what&gt;    : what to inspect:
+            "pos" &lt;type&gt; &lt;value&gt; [&lt;doc-id/no&gt;]
+               = Get the list of positions for a search index feature.
+                 If doc is not specified then dump value for all docs.
+            "ff" &lt;type&gt; &lt;value&gt; [&lt;doc-id/no&gt;]
+               = Get the feature frequency for a search index feature
+                 If doc is not specified then dump value for all docs.
+            "df" &lt;type&gt; &lt;value&gt;
+               = Get the document frequency for a search index feature
+            "ttf" &lt;type&gt; [&lt;doc-id/no&gt;]
+               = Get the term type frequency in a document
+                 If doc is not specified then dump value for all docs.
+            "ttc" &lt;type&gt; [&lt;doc-id/no&gt;]
+               = Get the term type count (distinct) in a document
+                 If doc is not specified then dump value for all docs.
+            "nofdocs"
+               = Get the local number of documents in the storage
+            "maxdocno"
+               = Get the maximum document number allocated in the local storage
+            "metadata" &lt;name&gt; [&lt;doc-id/no&gt;]
+               = Get the value of a meta data element
+                 If doc is not specified then dump value for all docs.
+            "metatable"
+               = Get the schema of the meta data table
+            "attribute" &lt;name&gt; [&lt;doc-id/no&gt;]
+               = Get the value of a document attribute
+                 If doc is not specified then dump value for all docs.
+            "attrnames"
+               = Get the list of all attribute names defined for the storage
+            "content" &lt;type&gt; [&lt;doc-id/no&gt;]
+               = Get the content of the forward index for a type
+                 If doc is not specified then dump content for all docs.
+            "fwstats" &lt;type&gt; [&lt;doc-id/no&gt;]
+               = Get the statistis of the forward index for a type
+                 If doc is not specified then dump value for all docs.
+            "token" &lt;type&gt; &lt;doc-id/no&gt;
+               = Get the list of terms in the forward index for a type
+            "docno" &lt;docid&gt;
+               = Get the internal local document number for a document id
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+
+</pre>
+<a name="strusAnalyze"> </a>
+<h3>strusAnalyze</h3>
+<p class="description">Dump the document analyze result without feeding the storage. This program can be used to check the result of the document analysis.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusAnalyze [options] &lt;program&gt; &lt;document&gt;
+&lt;program&gt;   = path of analyzer program
+&lt;document&gt;  = path of document to analyze ('-' for stdin)
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-s|--segmenter &lt;NAME&gt;
+    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+
+</pre>
+<a name="strusAnalyzePhrase"> </a>
+<h3>strusAnalyzePhrase</h3>
+<p class="description">Call the query analyzer with a phrase to analyze. This program can also be used to check details of the document analyzer as it tokenizes and normalizes a text segment with the tokenizer and normalizer specified.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusAnalyze [options] &lt;phrasepath&gt;
+&lt;phrasepath&gt; = path to phrase to analyze ('-' for stdin)
+             and prints the result to stdout.
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-t|--tokenizer &lt;CALL&gt;
+    Use the tokenizer &lt;CALL&gt; (default 'content')
+-n|--normalizer &lt;CALL&gt;
+    Use the normalizer &lt;CALL&gt; (default 'orig')
+-q|--quot &lt;STR&gt;
+    Use the string &lt;STR&gt; as quote for the result (default "'")
+-p|--plain
+    Do not print position and define default quotes as empty
+
+</pre>
+<a name="strusSegment"> </a>
+<h3>strusSegment</h3>
+<p class="description">Call the segmenter with a document and one or more expressions to exract with the segmenter. Dump the resulting segments to stdout.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusSegment [options] &lt;document&gt;
+&lt;document&gt;  = path to document to segment ('-' for stdin)
+             and dumps the resulting segments to stdout.
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-s|--segmenter &lt;NAME&gt;
+    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-e|--expression &lt;EXPR&gt;
+    Use the expression &lt;EXPR&gt; to select documents (default '//()')
+-i|--index
+    Print the indices of the expressions matching as prefix with ':'
+-p|--position
+    Print the positions of the expressions matching as prefix
+-q|--quot &lt;STR&gt;
+    Use the string &lt;STR&gt; as quote for the result (default "'")
+
+</pre>
+<a name="strusInsert"> </a>
+<h3>strusInsert</h3>
+<p class="description">Insert a document or all files in a directory or in any descendant directory of it.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusInsert [options] &lt;program&gt; &lt;docpath&gt;
+&lt;program&gt; = path of analyzer program
+&lt;docpath&gt; = path of document or directory to insert
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-g|--segmenter &lt;NAME&gt;
+    Use the document segmenter with name &lt;NAME&gt; (default textwolf)
+-x|--extension &lt;EXT&gt;
+    Grab the files with extension &lt;EXT&gt; (default ".xml")
+-t|--threads &lt;N&gt;
+    Set &lt;N&gt; as number of inserter threads to use
+-c|--commit &lt;N&gt;
+    Set &lt;N&gt; as number of documents inserted per transaction (default 1000)
+-f|--fetch &lt;N&gt;
+    Set &lt;N&gt; as number of files fetched in each inserter iteration
+    Default is the value of option '--commit' (one document/file)
+-n|--new
+    All inserts are new; use preallocated document numbers
+-L|--logerror &lt;FILE&gt;
+    Write the last error occurred to &lt;FILE&gt; in case of an exception
+
+</pre>
+<a name="strusUpdateStorage"> </a>
+<h3>strusUpdateStorage</h3>
+<p class="description">This program allows to update attributes, meta data and user access rights in a storage from a batch file.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusUpdateStorage [options] &lt;updatefile&gt;
+&lt;updatefile&gt;  = file with the batch of updates ('-' for stdin)
+             or user rights in a storage.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-a|--attribute &lt;NAME&gt;
+    The update batch is a list of attributes assignments
+    The name of the updated attribute is &lt;NAME&gt;.
+-m|--metadata &lt;NAME&gt;
+    The update batch is a list of meta data assignments.
+    The name of the updated meta data element is &lt;NAME&gt;.
+-u|--useraccess
+    The update batch is a list of user right assignments.
+-c|--commit &lt;N&gt;
+    Set &lt;N&gt; as number of updates per transaction (default 10000)
+    If &lt;N&gt; is set to 0 then only one commit is done at the end
+
+</pre>
+<a name="strusCheckStorage"> </a>
+<h3>strusCheckStorage</h3>
+<p class="description">This program checks a strus storage for corrupt data.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusCheckStorage [options]
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the commands on the RPC server specified by &lt;ADDR&gt;
+
+</pre>
+<a name="strusCheckInsert"> </a>
+<h3>strusCheckInsert</h3>
+<p class="description">Processes the documents the same way as strusInsert. But instead of inserting the documents, it checks if the document representation in the storage is complete compared with the checked documents.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusCheckInsert [options] &lt;program&gt; &lt;docpath&gt;
+&lt;program&gt; = path of analyzer program
+&lt;docpath&gt; = path of document or directory to check
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-g|--segmenter &lt;NAME&gt;
+    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-t|--threads &lt;N&gt;
+    Set &lt;N&gt; as number of inserter threads to use
+-l|--logfile &lt;FILE&gt;
+    Set &lt;FILE&gt; as output file (default stdout)
+-n|--notify &lt;N&gt;
+    Set &lt;N&gt; as notification interval (number of documents)
+
+</pre>
+<a name="strusQuery"> </a>
+<h3>strusQuery</h3>
+<p class="description">Evaluate a query per command line.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusQuery [options] &lt;anprg&gt; &lt;qeprg&gt; &lt;query&gt;
+&lt;anprg&gt;   = path of query analyzer program
+&lt;qeprg&gt;   = path of query eval program
+&lt;query&gt;   = path of query or '-' for stdin
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-u|--user &lt;NAME&gt;
+    Use user name &lt;NAME&gt; for the query
+-n|--nofranks &lt;N&gt;
+    Return maximum &lt;N&gt; ranks as query result
+-i|--firstrank &lt;N&gt;
+    Return the result starting with rank &lt;N&gt; as first rank
+-S|--silent
+    No output of results
+-g|--globalstats &lt;FILE&gt;
+    Load global statistics of peers from file &lt;FILE&gt;
+-t|--time
+    Do print duration of pure query evaluation
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+
+</pre>
+<a name="strusAlterMetaData"> </a>
+<h3>strusAlterMetaData</h3>
+<p class="description">Alter the table structure for document metadata of a storage.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusAlterMetaData [options] &lt;config&gt; &lt;cmds&gt;
+&lt;config&gt;  : configuration string of the storage
+            semicolon';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+&lt;cmds&gt;    : semicolon separated list of commands:
+            alter &lt;name&gt; &lt;newname&gt; &lt;newtype&gt;
+              &lt;name&gt;    :name of the element to change
+              &lt;newname&gt; :new name of the element
+              &lt;newtype&gt; :new type (*) of the element
+            add &lt;name&gt; &lt;type&gt;
+              &lt;name&gt;    :name of the element to add
+              &lt;type&gt;    :type (*) of the element to add
+            delete &lt;name&gt;
+              &lt;name&gt;    :name of the element to remove
+            rename &lt;name&gt; &lt;newname&gt;
+              &lt;name&gt;    :name of the element to rename
+              &lt;newname&gt; :new name of the element
+            clear &lt;name&gt;
+              &lt;name&gt;    :name of the element to clear all values
+(*)       :type of an element is one of the following:
+              INT8      :one byte signed integer value
+              UINT8     :one byte unsigned integer value
+              INT16     :two bytes signed integer value
+              UINT16    :two bytes unsigned integer value
+              INT32     :four bytes signed integer value
+              UINT32    :four bytes unsigned integer value
+              FLOAT16   :two bytes floating point value (IEEE 754 small)
+              FLOAT32   :four bytes floating point value (IEEE 754 single)
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+
+</pre>
+<a name="strusGenerateKeyMap"> </a>
+<h3>strusGenerateKeyMap</h3>
+<p class="description">Dumps a list of terms as result of document anaylsis of a file or directory. The dump can be loaded by the storage on startup to create a map of frequently used terms.
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusGenerateKeyMap [options] &lt;program&gt; &lt;docpath&gt;
+&lt;program&gt; = path of analyzer program
+&lt;docpath&gt; = path of document or directory to insert
+    anaylsis of a file or directory. The dump can be loaded by
+    the storage on startup to create a map of frequently used terms.
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-s|--segmenter &lt;NAME&gt;
+    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-t|--threads &lt;N&gt;
+    Set &lt;N&gt; as number of threads to use
+-u|--unit &lt;N&gt;
+    Set &lt;N&gt; as number of files processed per iteration (default 1000)
+-n|--results &lt;N&gt;
+    Set &lt;N&gt; as number of elements in the key map generated
+
+</pre>
+<a name="strusDumpStatistics"> </a>
+<h3>strusDumpStatistics</h3>
+<p class="description">Dumps the statisics that would be populated to other peer storages in case of a distributed index to stout. 
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusDumpStatistics [options]
+    other peer storages in case of a distributed index to stout.
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+
+</pre>
+<a name="strusDumpStorage"> </a>
+<h3>strusDumpStorage</h3>
+<p class="description">This program dumps the contents of a strus storage to stout
+<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+usage: strusDumpStorage [options]
+options:
+-h|--help
+   Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+
+</pre>
+<a name="strusRpcServer"> </a>
+<h3>strusRpcServer</h3>
+<p class="description">Start a server processing requests from strus RPC clients<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>)
+</p>
+<h4>Usage</h4>
+<pre>
+strusRpcServer [options]
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Define a resource path &lt;DIR&gt; for the analyzer
+-p|--port &lt;PORT&gt;
+    Define the port to listen for requests as &lt;PORT&gt; (default 7181)
+-s|--storage &lt;CONFIG&gt;
+    Define configuration &lt;CONFIG&gt; of storage hosted by this server
+-S|--configfile &lt;CFGFILE&gt;
+    Define storage configuration as content of file &lt;CFGFILE&gt;
+-c|--create &lt;CONFIG&gt;
+    Implicitely create storage with &lt;CONFIG&gt; if it does not exist yet
+-g|--globalstats &lt;FILE&gt;
+    Load global statistics of peers from file &lt;FILE&gt;
+</pre>
+</div>
+</div>
+</body>
+</html>

@@ -49,6 +49,8 @@ public:
 
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const;
 
+	virtual bool exists( const std::string& configsource) const;
+
 	virtual void createDatabase( const std::string& configsource) const;
 
 	virtual void destroyDatabase( const std::string& configsource) const;

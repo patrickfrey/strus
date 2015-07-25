@@ -79,7 +79,7 @@ void StorageClient::cleanup()
 }
 
 StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source)
-	:m_database(database_)
+	:m_database()
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_docno(0)
@@ -94,10 +94,11 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	try
 	{
 		m_metadescr.load( database_);
-		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
+		m_metaDataBlockCache = new MetaDataBlockCache( database_, m_metadescr);
 
-		loadVariables();
+		loadVariables( database_);
 		if (termnomap_source) loadTermnoMap( termnomap_source);
+		m_database.reset( database_);
 	}
 	catch (const std::bad_alloc& err)
 	{
@@ -122,7 +123,7 @@ void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 	m_metaDataBlockCache->refresh();
 }
 
-void StorageClient::loadVariables()
+void StorageClient::loadVariables( DatabaseClientInterface* database_)
 {
 	ByteOrderMark byteOrderMark;
 	Index bom;
@@ -134,7 +135,7 @@ void StorageClient::loadVariables()
 	Index nof_documents_;
 	Index next_userno_;
 
-	DatabaseAdapter_Variable::Reader varstor( m_database.get());
+	DatabaseAdapter_Variable::Reader varstor( database_);
 	if (!varstor.load( "TermNo", next_termno_)
 	||  !varstor.load( "TypeNo", next_typeno_)
 	||  !varstor.load( "DocNo", next_docno_)
@@ -345,10 +346,10 @@ DocnoRangeAllocatorInterface* StorageClient::createDocnoRangeAllocator()
 
 Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
 {
-	Index rt = m_next_docno.increment( nofDocuments);
+	Index rt = m_next_docno.allocIncrement( nofDocuments);
 	if (m_next_docno.value() <= rt)
 	{
-		(void)m_next_docno.increment( -(int)nofDocuments);
+		m_next_docno.decrement( nofDocuments);
 		throw strus::runtime_error( _TXT( "docno allocation error"));
 	}
 	return rt;
@@ -495,7 +496,7 @@ bool StorageClient::withAcl() const
 
 Index StorageClient::allocTermno()
 {
-	return m_next_termno.increment()-1;
+	return m_next_termno.allocIncrement();
 }
 
 Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
@@ -504,7 +505,7 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_typeno.increment()-1);
+		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
 		isNew = true;
 	}
 	return rt;
@@ -516,7 +517,7 @@ Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_DocId::ReadWriter stor(m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_docno.increment()-1);
+		stor.storeImm( name, rt = m_next_docno.allocIncrement());
 		isNew = true;
 	}
 	return rt;
@@ -528,7 +529,7 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_userno.increment()-1);
+		stor.storeImm( name, rt = m_next_userno.allocIncrement());
 		isNew = true;
 	}
 	return rt;
@@ -540,7 +541,7 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
 	if (!stor.load( name, rt))
 	{
-		stor.storeImm( name, rt = m_next_attribno.increment()-1);
+		stor.storeImm( name, rt = m_next_attribno.allocIncrement());
 		isNew = true;
 	}
 	return rt;

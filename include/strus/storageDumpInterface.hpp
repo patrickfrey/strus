@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for dumping the contents of the storage
-/// \file "storageDumpInterface.hpp"
+/// \file storageDumpInterface.hpp
 #ifndef _STRUS_STORAGE_DUMP_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_DUMP_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

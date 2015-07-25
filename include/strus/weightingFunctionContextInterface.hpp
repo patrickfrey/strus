@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Interface for the context data of a processed weighting function
-/// \file "weightingFunctionContextInterface.hpp"
+/// \file weightingFunctionContextInterface.hpp
 #ifndef _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"

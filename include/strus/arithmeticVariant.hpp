@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Variant type for fixed size numeric types (integers, floating point numbers)
-/// \file "arithmeticVariant.hpp"
+/// \file arithmeticVariant.hpp
 #ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #define _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #include <cstring>

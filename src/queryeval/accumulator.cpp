@@ -18,12 +18,12 @@ using namespace strus;
 void Accumulator::addSelector(
 		PostingIteratorInterface* iterator, int setindex, bool isExpression)
 {
-	m_selectorPostings.push_back( SelectorPostings( isExpression, setindex, iterator));
+	m_selectorPostings.push_back( SelectorPostings( isExpression, false/*negative*/, setindex, iterator));
 }
 
-void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression)
+void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression, bool isNegative)
 {
-	m_featureRestrictions.push_back( SelectorPostings( isExpression, iterator));
+	m_featureRestrictions.push_back( SelectorPostings( isExpression, isNegative, iterator));
 }
 
 void Accumulator::addFeature(
@@ -33,7 +33,7 @@ void Accumulator::addFeature(
 	m_weightingFeatures.push_back( WeightingFeature( function_, weight));
 }
 
-void Accumulator::addAclRestriction(
+void Accumulator::addAlternativeAclRestriction(
 		InvAclIteratorInterface* iterator)
 {
 	m_aclRestrictions.push_back( iterator);
@@ -82,30 +82,42 @@ bool Accumulator::nextRank(
 			continue;
 		}
 
-		// Check ACL restrictions:
+		// Check if any ACL restriction (alternatives combined with OR):
 		if (m_aclRestrictions.size())
 		{
 			std::vector<InvAclIteratorInterface*>::const_iterator
 				ri = m_aclRestrictions.begin(), re = m_aclRestrictions.end();
+			Index nextAclMatch = 0;
 			for (; ri != re; ++ri)
 			{
 				Index dn = (*ri)->skipDoc( m_docno);
-				if (dn != m_docno)
+				if (dn == m_docno)
 				{
-					if (!dn)
+					break;
+				}
+				else if (dn != 0)
+				{
+					if (!nextAclMatch || dn < nextAclMatch)
 					{
-						m_docno = 0;
-						++m_selectoridx;
-						break;
-					}
-					else
-					{
-						m_docno = dn -1;
-						break;
+						nextAclMatch = dn;
 					}
 				}
 			}
-			if (ri != re) continue;
+			if (ri == re)
+			{
+				if (nextAclMatch)
+				{
+					m_docno = nextAclMatch -1;
+					continue;
+				}
+				else
+				{
+					m_docno = 0;
+					++m_selectoridx;
+					++si;
+					continue;
+				}
+			}
 		}
 
 		// Check feature restrictions:
@@ -114,7 +126,7 @@ bool Accumulator::nextRank(
 			re = m_featureRestrictions.end();
 		for (; ri != re; ++ri)
 		{
-			if (m_docno != ri->postings->skipDoc( m_docno))
+			if (ri->isNegative ^ (m_docno != ri->postings->skipDoc( m_docno)))
 			{
 				break;
 			}

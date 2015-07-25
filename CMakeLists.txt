@@ -20,8 +20,8 @@ set( CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE )
 # Project globals:
 project( Strus )
 set( STRUS_MAJOR_VERSION 0 )
-set( STRUS_MINOR_VERSION 0 )
-set( STRUS_PATCH_VERSION 1 )
+set( STRUS_MINOR_VERSION 1 )
+set( STRUS_PATCH_VERSION 4 )
 set( STRUS_VERSION ${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}.${STRUS_PATCH_VERSION} )
 
 include(cmake/dist.cmake)
@@ -40,7 +40,7 @@ if(WIN32)
 set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} /D_WIN32_WINNT=0x0504")
 endif()
 
-find_package( Boost 1.53.0 COMPONENTS thread system date_time )
+find_package( Boost 1.53.0 COMPONENTS thread system date_time atomic )
 
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
 set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON )

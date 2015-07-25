@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Documentation of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
+	<title>Strus documentation</title>
+</head>
+
+<body>
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-63809026-3', 'auto');
+  ga('send', 'pageview');
+</script><div id="wrap">
+	<div id="content">
+		<h1>Strus documentation</h1>
+		<h2>Interface documentation</h2>
+		<p class="description"><i>Strus</i> provides two classes of interfaces with diametric objectives.
+		One is the C++ interface that is the base of the implementation and the other
+		is the interface for language bindings with implementations that wrap to the
+		C++ interface.
+		</p>
+		<h3>C++ interfaces</h3>
+		<ul>
+		<li><a href="http://patrickfrey.github.io/strus/doc/doxygen/html/index.html">strus core</a>:
+			Interface to storage and query evaluation</li>
+		<li><a href="http://patrickfrey.github.io/strusAnalyzer/doc/doxygen/html/index.html">strus analyzer</a>:
+			Interface to process documents and queries in strus.</li>
+		<li><a href="http://patrickfrey.github.io/strusModule/doc/doxygen/html/index.html">strus module loader</a>:
+			Interface to define strus components and to load them from dynamically loadable modules.</li>
+		<li><a href="http://patrickfrey.github.io/strusRpc/doc/doxygen/html/index.html">strus RPC client</a>:
+			Interfaces for strus RPC client and server</li>
+		<li><a href="http://patrickfrey.github.io/strusUtilities/doc/doxygen/html/index.html">strus program loader</a>:
+			Functions to instantiate strus components from source</li>
+		</ul>
+		<h3>Language bindings</h3>
+		<p class="description">The language binding interfaces are for scripting languages calling <i>strus</i>
+		functions. Language bindings can call <i>strus</i> functions directly or they can 
+		call functions on objects residing on a server via RPC.
+		The following list gives you the pointers to the bindings of the languages supported
+		till now:
+		<ul>
+		<li><a href="php_bindings.htm">PHP</a>: Bindings to PHP 5</li>
+		</ul>
+		</p>
+		<h2>Command line tools documentation</h2>
+		<p class="description">You do not need the command line tools of <i>strus</i>. 
+		All functionality is accessible with the API.<br/>
+		But there exist a lot of command line tools helpful for access and maintenance of
+		a <i>strus</i> storage. A list of the standard command line tools an their documentation can be found
+		<a href="utilities.htm">here (utilities)</a>.
+		</p>
+		<h2>Developer documentation</h2>
+		<h3>Programming guidelines</h3>
+		<p class="description">The programming guidelines contributors should respect, can be 
+		found <a href="guidelines.htm">here</a>. Suggestions for strenghtening these
+		rules are welcome.</p>
+	</div>
+</div>
+</body>
+</html>
+

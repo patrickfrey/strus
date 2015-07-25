@@ -123,7 +123,7 @@ DLL_PUBLIC unsigned int strus::readStdin( std::string& res)
 	return 0;
 }
 
-DLL_PUBLIC unsigned int strus::readDir( const std::string& path, const std::string& ext, std::vector<std::string>& res)
+DLL_PUBLIC unsigned int strus::readDirSubDirs( const std::string& path, std::vector<std::string>& res)
 {
 	DIR *dir = ::opendir( path.c_str());
 	struct dirent *ent;
@@ -135,15 +135,53 @@ DLL_PUBLIC unsigned int strus::readDir( const std::string& path, const std::stri
 	std::size_t prevsize = res.size();
 	while (!!(ent = ::readdir(dir)))
 	{
+		if (ent->d_name[0] == '.') continue;
+		std::string entry( path + dirSeparator() + ent->d_name);
+		if (isDir( entry))
+		{
+			res.push_back( ent->d_name);
+		}
+	}
+	unsigned int err = ::closedir(dir);
+	if (err)
+	{
+		return err;
+	}
+	std::sort( res.begin()+prevsize, res.end(), std::less<std::string>());
+	return 0;
+}
+
+DLL_PUBLIC unsigned int strus::readDirFiles( const std::string& path, const std::string& ext, std::vector<std::string>& res)
+{
+	DIR *dir = ::opendir( path.c_str());
+	struct dirent *ent;
+
+	if (!dir)
+	{
+		return errno;
+	}
+	std::size_t prevsize = res.size();
+	while (!!(ent = ::readdir(dir)))
+	{
+		if (ent->d_name[0] == '.') continue;
 		std::string entry( ent->d_name);
 		if (ext.size() > entry.size())
 		{
 			continue;
 		}
-		const char* ee = entry.c_str() + entry.size() - ext.size();
-		if (entry[0] != '.' && 0==std::memcmp( ee, ext.c_str(), ext.size()))
+		std::string entrypath( path + dirSeparator() + entry);
+		if (isDir( entrypath)) continue;
+		if (ext.empty())
 		{
-			res.push_back( entry );
+			res.push_back( entry);
+		}
+		else
+		{
+			const char* ee = entry.c_str() + entry.size() - ext.size();
+			if (entry[0] != '.' && 0==std::memcmp( ee, ext.c_str(), ext.size()))
+			{
+				res.push_back( entry );
+			}
 		}
 	}
 	unsigned int err = ::closedir(dir);

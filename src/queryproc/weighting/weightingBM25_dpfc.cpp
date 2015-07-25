@@ -217,14 +217,16 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 		}
 	}
 
+	// Initialize structure elements
+	std::vector<Feature>::const_iterator si = m_struct_featar.begin(), se = m_struct_featar.end();
+	for (; si != se; ++si)
+	{
+		si->itr->skipDoc( docno);
+	}
+
 	// Calculate ff increments based on proximity criteria:
 	while (wset.size() > 1)
 	{
-		std::vector<Feature>::const_iterator si = m_struct_featar.begin(), se = m_struct_featar.end();
-		for (; si != se; ++si)
-		{
-			si->itr->skipDoc( docno);
-		}
 		// [0] Small optimization for not checkin elements with a too big distance (m_proximityMinDist) to others
 		FeatStructSet::iterator first = wset.begin();
 		FeatStructSet::iterator next = first; ++next;
@@ -234,7 +236,7 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 		}
 		if (next == wset.end()) break;
 
-		if (first->pos + (Index)m_proximityMinDist < next->pos)
+		while (first != next && first->pos + (Index)m_proximityMinDist < next->pos)
 		{
 			FeatStruct elem = *wset.begin();
 			wset.erase( wset.begin());
@@ -243,6 +245,7 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 			{
 				wset.insert( elem);
 			}
+			first = wset.begin();
 			continue;
 		}
 		// [1] Check sequence of subsequent elements in query:

@@ -26,34 +26,77 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a summarizer function type
-/// \file summarizerFunctionInterface.hpp
-#ifndef _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
-#define _STRUS_SUMMARIZER_FUNCTION_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_LVDB_ALL_ITERATOR_HPP_INCLUDED
+#define _STRUS_LVDB_ALL_ITERATOR_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
 
-namespace strus
-{
-/// \brief Forward declaration
-class SummarizerFunctionInstanceInterface;
-/// \brief Forward declaration
-class QueryProcessorInterface;
+namespace strus {
 
-
-/// \brief Interface for summarization functions (additional info about the matches in the result ranklist of a retrieval query)
-class SummarizerFunctionInterface
+/// \brief Iterator representing the complete set of document numbers
+class AllIterator
+	:public PostingIteratorInterface
 {
 public:
-	/// \brief Destructor
-	virtual ~SummarizerFunctionInterface(){}
+	explicit AllIterator( Index maxDocno_)
+		:m_maxDocno(maxDocno_),m_docno(0){}
 
-	/// \brief Create an instance of this summarization function for parametrization
-	/// \param[in] processor provider for query processing functions
-	/// \return the created summarization function instance (ownership to caller)
-	virtual SummarizerFunctionInstanceInterface* createInstance(
-			const QueryProcessorInterface* processor) const=0;
+	virtual ~AllIterator(){}
+
+	virtual std::vector<const PostingIteratorInterface*>
+			subExpressions( bool positive) const
+	{
+		return std::vector<const PostingIteratorInterface*>();
+	}
+
+	virtual const char* featureid() const
+	{
+		return "*";
+	}
+
+	virtual Index skipDoc( const Index& docno_)
+	{
+		if (docno_ <= m_maxDocno)
+		{
+			if (docno_)
+			{
+				return m_docno = docno_;
+			}
+			else
+			{
+				return m_docno = 1;
+			}
+		}
+	}
+
+	virtual Index skipPos( const Index& posno_)
+	{
+		return 0;
+	}
+
+	virtual unsigned int frequency()
+	{
+		return 0;
+	}
+
+	virtual GlobalCounter documentFrequency() const
+	{
+		return m_maxDocno;
+	}
+	
+	virtual Index docno() const
+	{
+		return m_docno;
+	}
+
+	virtual Index posno() const
+	{
+		return 0;
+	}
+
+private:
+	Index m_maxDocno;
+	Index m_docno;
 };
 
-}//namespace
+}
 #endif
-
-

@@ -79,7 +79,7 @@ Query::Query( const Query& o)
 	,m_variableAssignments(o.m_variableAssignments)
 	,m_nofRanks(o.m_nofRanks)
 	,m_minRank(o.m_minRank)
-	,m_username(o.m_username)
+	,m_usernames(o.m_usernames)
 {}
 
 void Query::pushTerm( const std::string& type_, const std::string& value_)
@@ -216,9 +216,9 @@ void Query::setMinRank( std::size_t minRank_)
 	m_minRank = minRank_;
 }
 
-void Query::setUserName( const std::string& username_)
+void Query::addUserName( const std::string& username_)
 {
-	m_username = username_;
+	m_usernames.push_back( username_);
 }
 
 PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr)
@@ -422,11 +422,16 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 	}
 	// [4.3] Define the user ACL restrictions:
-	Reference<InvAclIteratorInterface> invAcl(
-		m_storage->createInvAclIterator( m_username));
-	if (invAcl.get())
+	std::vector<Reference<InvAclIteratorInterface> > invAclList;
+	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
+	for (; ui != ue; ++ui)
 	{
-		accumulator.addAclRestriction( invAcl.get());
+		Reference<InvAclIteratorInterface> invAcl( m_storage->createInvAclIterator( *ui));
+		if (invAcl.get())
+		{
+			invAclList.push_back( invAcl);
+			accumulator.addAlternativeAclRestriction( invAcl.get());
+		}
 	}
 	// [4.4] Define the feature restrictions:
 	{
@@ -443,7 +448,27 @@ std::vector<ResultDocument> Query::evaluate()
 				{
 					accumulator.addFeatureRestriction(
 						nodePostings( fi->node),
-						nodeType( fi->node) == ExpressionNode);
+						nodeType( fi->node) == ExpressionNode, false);
+				}
+			}
+		}
+	}
+	// [4.5] Define the feature exclusions:
+	{
+		std::vector<std::string>::const_iterator
+			xi = m_queryEval->exclusionSets().begin(),
+			xe = m_queryEval->exclusionSets().end();
+		for (; xi != xe; ++xi)
+		{
+			std::vector<Feature>::const_iterator
+				fi = m_features.begin(), fe = m_features.end();
+			for (; fi != fe; ++fi)
+			{
+				if (*xi == fi->set)
+				{
+					accumulator.addFeatureRestriction(
+						nodePostings( fi->node),
+						nodeType( fi->node) == ExpressionNode, true);
 				}
 			}
 		}

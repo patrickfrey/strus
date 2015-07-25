@@ -15,17 +15,22 @@ h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2p
 h1,h2,h3 {font-weight:700; line-height:1.4em;}
 #wrap {color:#303030; margin:40px auto; padding:0; width:60%;}
 #content {text-align:left; width:90%; padding-right:40px;}
-#content ul {list-style:none; margin:0; padding:10px 0 0 0; border-top:1px solid #eee;}
-#content li {list-style:none; font-size:1.2em; margin:0 0 0; padding:0 0 0 0; color:#888; }
+#content ul {margin:0; padding:10px 0 0 0;}
+#content li {padding-left:20px; margin:0 20px 0; padding:5px 0 0 0; }
 #sidebar {float:right; width:30%; padding-left:40px; border-left:2px solid #ccc; }
 #sidebar ul {list-style:none; margin:0; padding:10px 0 0 0; border-top:1px solid #eee;}
 #sidebar li {list-style:none; font-size:1.2em; margin:0 0 10px; padding:0 0 10px 0; color:#888; border-bottom:1px solid #eee;}
 #sidebar li a {font-size:1.2em;}
 #sidebar h2 {font-size: 1.4em;}
+#api table {margin:0 0 50px; }
 .slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
 .readmore {text-align:right; margin:0 20px 30px 0;}
 .timestamp {display:block; font-weight:700; color:#888; text-align:right; width:150px; padding:20px 20px 20px 0; float:left; margin:0 20px 20px 0; border-right:2px solid #eee;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
+.title {font-weight:bold;}
+.identifier {color:#0B0B61; font-weight:bold;}
+.library { padding-bottom: 50px; }
+.description a {color:#0B0B61; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
