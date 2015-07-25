@@ -86,6 +86,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aec4bb392c8f18f9024b39955817cc6dd"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#aec4bb392c8f18f9024b39955817cc6dd">~DatabaseInterface</a> ()</td></tr>
 <tr class="memdesc:aec4bb392c8f18f9024b39955817cc6dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#aec4bb392c8f18f9024b39955817cc6dd">More...</a><br/></td></tr>
 <tr class="separator:aec4bb392c8f18f9024b39955817cc6dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a789ae90b0f5d62353fbf2ceb15385872"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#a789ae90b0f5d62353fbf2ceb15385872">exists</a> (const std::string &amp;configsource) const =0</td></tr>
+<tr class="memdesc:a789ae90b0f5d62353fbf2ceb15385872"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate if the database specified exists.  <a href="#a789ae90b0f5d62353fbf2ceb15385872">More...</a><br/></td></tr>
+<tr class="separator:a789ae90b0f5d62353fbf2ceb15385872"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1009c69c0aac2586114317c551747016"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#a1009c69c0aac2586114317c551747016">createClient</a> (const std::string &amp;configsource) const =0</td></tr>
 <tr class="memdesc:a1009c69c0aac2586114317c551747016"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a client to access the key value store database.  <a href="#a1009c69c0aac2586114317c551747016">More...</a><br/></td></tr>
 <tr class="separator:a1009c69c0aac2586114317c551747016"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -256,6 +259,38 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a789ae90b0f5d62353fbf2ceb15385872"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool strus::DatabaseInterface::exists </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>configsource</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate if the database specified exists. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration source string describing the database (not a filename !) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a0c2cdfcacc9e2ffdfe547756590cb40b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -358,7 +393,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Jun 8 2015 00:54:12 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jul 25 2015 12:17:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

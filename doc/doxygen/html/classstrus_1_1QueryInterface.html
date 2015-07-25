@@ -119,9 +119,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a95e99179f1121fb89b8c1efd55673652"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a95e99179f1121fb89b8c1efd55673652">setMinRank</a> (std::size_t minRank_)=0</td></tr>
 <tr class="memdesc:a95e99179f1121fb89b8c1efd55673652"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the minimum rank number to return.  <a href="#a95e99179f1121fb89b8c1efd55673652">More...</a><br/></td></tr>
 <tr class="separator:a95e99179f1121fb89b8c1efd55673652"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad73aebadcb910c163eeee14c90f80ea9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#ad73aebadcb910c163eeee14c90f80ea9">setUserName</a> (const std::string &amp;username_)=0</td></tr>
-<tr class="memdesc:ad73aebadcb910c163eeee14c90f80ea9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the name of the user of the query for ACL restrictions.  <a href="#ad73aebadcb910c163eeee14c90f80ea9">More...</a><br/></td></tr>
-<tr class="separator:ad73aebadcb910c163eeee14c90f80ea9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c32a31f060c0df68c933f449cc93d01"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a5c32a31f060c0df68c933f449cc93d01">addUserName</a> (const std::string &amp;username_)=0</td></tr>
+<tr class="memdesc:a5c32a31f060c0df68c933f449cc93d01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a name of a user role in the query for alternative ACL restrictions.  <a href="#a5c32a31f060c0df68c933f449cc93d01">More...</a><br/></td></tr>
+<tr class="separator:a5c32a31f060c0df68c933f449cc93d01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92e5125688610a1e995b02fdf1fb3a06"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
 &lt; <a class="el" href="classstrus_1_1ResultDocument.html">ResultDocument</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a92e5125688610a1e995b02fdf1fb3a06">evaluate</a> ()=0</td></tr>
 <tr class="memdesc:a92e5125688610a1e995b02fdf1fb3a06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the query.  <a href="#a92e5125688610a1e995b02fdf1fb3a06">More...</a><br/></td></tr>
@@ -201,6 +201,38 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a5c32a31f060c0df68c933f449cc93d01"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryInterface::addUserName </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>username_</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add a name of a user role in the query for alternative ACL restrictions. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">username_</td><td>user of the query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="ad0143aa94f52d47dc47aba071fcffdb9"></a>
 <div class="memitem">
 <div class="memproto">
@@ -545,38 +577,6 @@ More than one variable can be attached </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="ad73aebadcb910c163eeee14c90f80ea9"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void strus::QueryInterface::setUserName </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>username_</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Set the name of the user of the query for ACL restrictions. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">username_</td><td>user of the query </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="queryInterface_8hpp_source.html">queryInterface.hpp</a></li>
 </ul>
@@ -584,7 +584,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Jun 8 2015 00:54:12 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jul 25 2015 12:17:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

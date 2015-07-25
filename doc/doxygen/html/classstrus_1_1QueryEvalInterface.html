@@ -92,6 +92,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4134874954a46e94dfad4a90d7d60190"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a4134874954a46e94dfad4a90d7d60190">addRestrictionFeature</a> (const std::string &amp;set_)=0</td></tr>
 <tr class="memdesc:a4134874954a46e94dfad4a90d7d60190"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a set of features to be used as restriction (exclude documents that do not contain a feature of the set declared)  <a href="#a4134874954a46e94dfad4a90d7d60190">More...</a><br/></td></tr>
 <tr class="separator:a4134874954a46e94dfad4a90d7d60190"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae95b9416827422ca9fa58c029406a283"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#ae95b9416827422ca9fa58c029406a283">addExclusionFeature</a> (const std::string &amp;set_)=0</td></tr>
+<tr class="memdesc:ae95b9416827422ca9fa58c029406a283"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a set of features to be used as exclusion (exclude documents that contain a feature of the set declared)  <a href="#ae95b9416827422ca9fa58c029406a283">More...</a><br/></td></tr>
+<tr class="separator:ae95b9416827422ca9fa58c029406a283"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34421dcb9fbaeb9928c01ad80271d487"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a34421dcb9fbaeb9928c01ad80271d487">addSummarizerFunction</a> (const std::string &amp;functionName, <a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html">SummarizerFunctionInstanceInterface</a> *function, const std::vector&lt; <a class="el" href="classstrus_1_1QueryEvalInterface_1_1FeatureParameter.html">FeatureParameter</a> &gt; &amp;featureParameters, const std::string &amp;resultAttribute)=0</td></tr>
 <tr class="memdesc:a34421dcb9fbaeb9928c01ad80271d487"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare a summarizer function to use for this query evaluation scheme.  <a href="#a34421dcb9fbaeb9928c01ad80271d487">More...</a><br/></td></tr>
 <tr class="separator:a34421dcb9fbaeb9928c01ad80271d487"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -131,6 +134,38 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="ae95b9416827422ca9fa58c029406a283"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryEvalInterface::addExclusionFeature </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>set_</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define a set of features to be used as exclusion (exclude documents that contain a feature of the set declared) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">set_</td><td>name of the set of the exclusion feature </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a4134874954a46e94dfad4a90d7d60190"></a>
 <div class="memitem">
 <div class="memproto">
@@ -401,7 +436,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Jun 8 2015 00:54:12 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jul 25 2015 12:17:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
