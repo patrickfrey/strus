@@ -50,7 +50,7 @@ public:
 	explicit QueryProcessor();
 
 	/// \brief Destructor
-	virtual ~QueryProcessor(){}
+	virtual ~QueryProcessor();
 
 	virtual void
 		definePostingJoinOperator(
