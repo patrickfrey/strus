@@ -5,5 +5,5 @@
 * Fri July 24 2015  Patrick Frey  <patrickpfrey@yahoo.com>
 - v0.1.4 Fixed dependencies for ARM (libboost_atomic added)
 * Fri July 24 2015  Patrick Frey  <patrickpfrey@yahoo.com>
-- v0.1.4 Fixed UMR
+- v0.1.5 Fixed UMR
 
