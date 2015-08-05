@@ -36,7 +36,7 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class PeerStorageTransactionInterface;
+class StorageClientInterface;
 /// \brief Forward declaration
 class StoragePeerClientInterface;
 
@@ -48,19 +48,16 @@ public:
 	/// \brief Destructor
 	virtual ~StoragePeerInterface(){}
 
-	/// \brief Pushes a message from another peer as part of a transaction to the storage client
-	/// \param[in,out] transaction transaction object to work on
-	/// \param[in] msgbody message sent from other peer
-	/// \param[in] msgsize size of message in bytes
-	virtual void pushPeerMessage( PeerStorageTransactionInterface* transaction, const char* msgbody, std::size_t msgsize) const;
-
 	/// \brief Creates a client to populate statistics to other peers
+	/// \param[in] storage where to populate statistic updates of peers
 	/// \param[in] configsource configuration string (not a filename!)
 	/// \return the client object (with ownership returned)
-	virtual StoragePeerClientInterface* createStoragePeerClient( const std::string& configsource) const=0;
+	virtual StoragePeerClientInterface* createClient(
+			StorageClientInterface* storage,
+			const std::string& configsource) const=0;
 
 	/// \brief Gets a configuration description (source string as used by the functions here)
-	///	createStoragePeerClient(const std::string&)
+	///	createClient(const std::string&)
 	///	for the usage printed by programs using this implementation.
 	virtual const char* getConfigDescription() const=0;
 

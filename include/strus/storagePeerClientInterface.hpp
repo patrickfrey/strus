@@ -28,8 +28,8 @@
 */
 /// \brief Client interface for forwarding statistics of other peer storages (distributed index)
 /// \file storagePeerClientInterface.hpp
-#ifndef _STRUS_STORAGE_PEER_INSTANCE_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_PEER_INSTANCE_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_PEER_CLIENT_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_PEER_CLIENT_INTERFACE_HPP_INCLUDED
 
 namespace strus
 {
@@ -44,7 +44,7 @@ public:
 	/// \brief Destructor
 	virtual ~StoragePeerClientInterface(){}
 
-	/// \brief Creates a new transaction object to distribute statistics
+	/// \brief Creates a new transaction object to distribute statistics to other peers
 	/// \return return the pointer to the transaction object (with ownership - to be disposed with 'delete')
 	virtual StoragePeerTransactionInterface* createTransaction() const=0;
 };
