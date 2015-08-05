@@ -27,10 +27,11 @@
 --------------------------------------------------------------------
 */
 /// \brief Transaction interface for peer storages to update the global statistics of a storage (distributed index)
-/// \file "peerStorageTransactionInterface.hpp"
+/// \file peerStorageTransactionInterface.hpp
 #ifndef _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include <vector>
 
 namespace strus
 {
@@ -53,14 +54,35 @@ public:
 	/// \param[in] termtype type of the term
 	/// \param[in] termvalue value of the term
 	/// \param[in] increment change (positive or negative value)
+	/// \param[in] isNew true, if the frequency is reported as new by the peer. In this case it has to be marked for beeing returned by he commit.
 	/// \note throws if the operation was not successful
 	virtual void updateDocumentFrequencyChange(
 			const char* termtype,
 			const char* termvalue,
-			const GlobalCounter& increment)=0;
+			const GlobalCounter& increment,
+			bool isNew)=0;
+
+	class DocumentFrequencyChange
+	{
+	public:
+		DocumentFrequencyChange( const char* type_, const char* value_, Index count_)
+			:m_type(type_),m_value(value_),m_count(count_){}
+		DocumentFrequencyChange( const DocumentFrequencyChange& o)
+			:m_type(o.m_type),m_value(o.m_value),m_count(o.m_count){}
+
+		const char* type() const		{return m_type;}
+		const char* value() const		{return m_value;}
+		Index count() const			{return m_count;}
+
+	private:
+		const char* m_type;
+		const char* m_value;
+		Index m_count;
+	};
 
 	/// \brief Commit of the transaction
-	virtual void commit()=0;
+	/// \return the list of document frequency changes of locally existing features marked as new in the update before this transaction.
+	virtual std::vector<DocumentFrequencyChange> commit()=0;
 
 	/// \brief Rollback of the transaction
 	virtual void rollback()=0;

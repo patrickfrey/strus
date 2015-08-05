@@ -31,7 +31,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
-#include "strus/storagePeerInterface.hpp"
+#include "strus/storagePeerClientInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "storageDocument.hpp"
 #include "storageClient.hpp"
@@ -48,7 +48,7 @@ using namespace strus;
 StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
-		const StoragePeerInterface* storagePeer_,
+		const StoragePeerClientInterface* storagePeer_,
 		const MetaDataDescription* metadescr_,
 		const conotrie::CompactNodeTrie* termnomap_)
 	:m_storage(storage_)

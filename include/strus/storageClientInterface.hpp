@@ -51,7 +51,7 @@ class StorageDocumentInterface;
 /// \brief Forward declaration
 class PeerStorageTransactionInterface;
 /// \brief Forward declaration
-class StoragePeerInterface;
+class StoragePeerClientInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
 /// \brief Forward declaration
@@ -169,8 +169,8 @@ public:
 	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
 	/// \param[in] storagePeer reference to storage peer interface (owned by caller)
 	/// \param[in] doPopulateInitialState flag that is set to true in a normal startup and to false in the case of a system recovery after a crash. The flag set to false tells the storage to populate its stored terms with a df change of 0 to the other peers in the initialization phase. After recovery restart the node should reinitialize its global statistics without changing the state of the other peers.
-	virtual void defineStoragePeerInterface(
-			const StoragePeerInterface* storagePeer,
+	virtual void defineStoragePeerClient(
+			const StoragePeerClientInterface* storagePeer,
 			bool doPopulateInitialState=true)=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.

@@ -73,8 +73,8 @@ public:
 		CmdCreate			///< Config description for the creation of a repository that does not exist yet
 	};
 
-	/// \brief Gets an example configuration description (source string as used by the functions here)
-	///	createStorageDatabase(const char*) and createStorageClient(const char*)
+	/// \brief Gets a configuration description (source string as used by the functions here)
+	///	createStorage(const std::string&) and createClient(const std::string&)
 	///	for the usage printed by programs using this storage implementation.
 	virtual const char* getConfigDescription( ConfigType type) const=0;
 

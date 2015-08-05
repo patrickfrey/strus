@@ -34,7 +34,7 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/peerStorageTransactionInterface.hpp"
-#include "strus/storagePeerInterface.hpp"
+#include "strus/storagePeerClientInterface.hpp"
 #include "strus/storagePeerTransactionInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
@@ -589,6 +589,11 @@ GlobalCounter StorageClient::globalDocumentFrequency(
 	}
 }
 
+Index StorageClient::localDocumentFrequency( const Index& typeno, const Index& termno) const
+{
+	return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+}
+
 Index StorageClient::localDocumentFrequency(
 		const std::string& type,
 		const std::string& term) const
@@ -747,8 +752,8 @@ PeerStorageTransactionInterface* StorageClient::createPeerStorageTransaction()
 	return new PeerStorageTransaction( this, m_database.get(), m_documentFrequencyCache.get());
 }
 
-void StorageClient::defineStoragePeerInterface(
-		const StoragePeerInterface* storagePeer,
+void StorageClient::defineStoragePeerClient(
+		const StoragePeerClientInterface* storagePeer,
 		bool doPopulateInitialState)
 {
 	if (!m_documentFrequencyCache.get())

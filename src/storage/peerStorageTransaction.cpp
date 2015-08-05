@@ -55,24 +55,44 @@ void PeerStorageTransaction::updateNofDocumentsInsertedChange( const GlobalCount
 }
 
 void PeerStorageTransaction::updateDocumentFrequencyChange(
-		const char* termtype, const char* termvalue, const GlobalCounter& increment)
+		const char* termtype, const char* termvalue, const GlobalCounter& increment, bool isNew)
 {
+	if (m_commit)
+	{
+		throw strus::runtime_error( _TXT( "called update document frequeny change after commit"));
+	}
 	bool typeno_isNew = false;
 	Index typeno = m_storage->allocTypenoImm( termtype, typeno_isNew);
 	Index termno = m_dbadapter_termvalue.get( termvalue);
 	if (!termno)
 	{
-		m_unknownTerms.push_back( termvalue);
+		m_unknownTerms.push_back( m_unknownTerms_strings.size());
+		m_unknownTerms_strings.append( termvalue);
+		m_unknownTerms_strings.push_back( '\0');
 		termno = ++m_termvaluecnt + UnknownValueHandleStart;
 		if (m_termvaluecnt >= UnknownValueHandleStart)
 		{
 			throw strus::runtime_error( _TXT( "too many new terms inserted (peer storage transaction"));
 		}
+		if (isNew)
+		{
+			if (m_typeStrings.size() <= (std::size_t)typeno)
+			{
+				m_typeStrings.resize( typeno);
+			}
+			if (m_typeStrings[ typeno].empty())
+			{
+				m_typeStrings[ typeno] = termtype;
+			}
+			m_newTerms.push_back( NewTerm( m_newTerms_strings.size(), m_dfbatch.size()));
+			m_newTerms_strings.append( termvalue);
+			m_newTerms_strings.push_back( '\0');
+		}
 	}
 	m_dfbatch.put( typeno, termno, increment);
 }
 
-void PeerStorageTransaction::commit()
+std::vector<PeerStorageTransactionInterface::DocumentFrequencyChange> PeerStorageTransaction::commit()
 {
 	if (m_commit)
 	{
@@ -82,22 +102,20 @@ void PeerStorageTransaction::commit()
 	{
 		throw strus::runtime_error( _TXT( "called transaction commit after rollback"));
 	}
-	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-
 	StorageClient::TransactionLock lock( m_storage);
 	DocumentFrequencyCache::Batch cleaned_batch;
-	DocumentFrequencyCache::Batch::const_iterator bi = m_dfbatch.begin(), be = m_dfbatch.end();
+	DocumentFrequencyCache::Batch::iterator bi = m_dfbatch.begin(), be = m_dfbatch.end();
 	for (; bi != be; ++bi)
 	{
 		if (bi->termno > UnknownValueHandleStart)
 		{
-			const std::string& termkey = m_unknownTerms[ bi->termno - UnknownValueHandleStart - 1];
+			std::size_t termidx = m_unknownTerms[ bi->termno - UnknownValueHandleStart - 1];
+			const char* termkey = m_unknownTerms_strings.c_str() + termidx;
 			Index termno = m_dbadapter_termvalue.get( termkey);
-			if (!termno)
+			if (termno)
 			{
-				termno = m_storage->allocTermno();
-				m_dbadapter_termvalue.store( transaction.get(), termkey, termno);
 				cleaned_batch.put( bi->typeno, termno, bi->value);
+				bi->termno = termno;
 			}
 		}
 		else
@@ -105,11 +123,26 @@ void PeerStorageTransaction::commit()
 			cleaned_batch.put( *bi);
 		}
 	}
+	std::vector<DocumentFrequencyChange> rt;
+	std::vector<NewTerm>::const_iterator ti = m_newTerms.begin(), te = m_newTerms.end();
+	for (; ti != te; ++ti)
+	{
+		const DocumentFrequencyCache::Batch::Increment& incr = m_dfbatch[ ti->batchidx];
+		if (incr.termno < UnknownValueHandleStart)
+		{
+			Index df = m_storage->localDocumentFrequency( incr.typeno, incr.termno);
+			const char* value = m_newTerms_strings.c_str() + ti->termidx;
+			const char* type = m_typeStrings[ incr.typeno].c_str();
+			rt.push_back( DocumentFrequencyChange( type, value, df));
+		}
+	}
+
 	m_documentFrequencyCache->writeBatch( cleaned_batch);
-	transaction->commit();
 	m_storage->declareGlobalNofDocumentsInserted( m_nofDocumentsInserted);
 	m_commit = true;
 	m_nofDocumentsInserted = 0;
+
+	return rt;
 }
 
 void PeerStorageTransaction::rollback()

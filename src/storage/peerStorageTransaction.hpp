@@ -55,9 +55,9 @@ public:
 	virtual void updateNofDocumentsInsertedChange( const GlobalCounter& increment);
 
 	virtual void updateDocumentFrequencyChange(
-			const char* termtype, const char* termvalue, const GlobalCounter& increment);
+			const char* termtype, const char* termvalue, const GlobalCounter& increment, bool isNew);
 
-	virtual void commit();
+	virtual std::vector<DocumentFrequencyChange> commit();
 
 	virtual void rollback();
 
@@ -66,12 +66,28 @@ private:
 		UnknownValueHandleStart=(1<<30)
 	};
 
+	struct NewTerm
+	{
+	public:
+		NewTerm( std::size_t termidx_, std::size_t batchidx_)
+			:termidx(termidx_),batchidx(batchidx_){}
+		NewTerm( const NewTerm& o)
+			:termidx(o.termidx),batchidx(o.batchidx){}
+
+		std::size_t termidx;
+		std::size_t batchidx;
+	};
+
 private:
 	StorageClient* m_storage;
 	DatabaseClientInterface* m_database;
 	DocumentFrequencyCache* m_documentFrequencyCache;
 	DocumentFrequencyCache::Batch m_dfbatch;
-	std::vector<std::string> m_unknownTerms;
+	std::vector<std::size_t> m_unknownTerms;
+	std::string m_unknownTerms_strings;
+	std::vector<NewTerm> m_newTerms;
+	std::string m_newTerms_strings;
+	std::vector<std::string> m_typeStrings;
 	DatabaseAdapter_TermValue::ReadWriter m_dbadapter_termvalue;
 	Index m_termvaluecnt;
 	GlobalCounter m_nofDocumentsInserted;

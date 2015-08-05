@@ -62,7 +62,7 @@ class DocumentFrequencyCache;
 /// \brief Forward declaration
 class PeerStorageTransactionInterface;
 /// \brief Forward declaration
-class StoragePeerInterface;
+class StoragePeerClientInterface;
 /// \brief Forward declaration
 class DocnoRangeAllocatorInterface;
 /// \brief Forward declaration
@@ -130,8 +130,8 @@ public:
 
 	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
 
-	virtual void defineStoragePeerInterface(
-			const StoragePeerInterface* storagePeer,
+	virtual void defineStoragePeerClient(
+			const StoragePeerClientInterface* storagePeer,
 			bool doPopulateInitialState);
 
 	virtual void checkStorage( std::ostream& errorlog) const;
@@ -195,6 +195,7 @@ public:/*StorageTransaction*/
 
 public:/*PeerStorageTransaction*/
 	void declareGlobalNofDocumentsInserted( const GlobalCounter& increment);
+	Index localDocumentFrequency( const Index& typeno, const Index& termno) const;
 
 public:/*StorageDocumentChecker*/
 	IndexSetIterator getAclIterator( const Index& docno) const;
@@ -224,7 +225,7 @@ private:
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	conotrie::CompactNodeTrie* m_termno_map;		///< map of the most important (most frequent) terms, if specified
 
-	const StoragePeerInterface* m_storagePeer;		///< reference to interface to other peer storages
+	const StoragePeerClientInterface* m_storagePeer;	///< reference to interface to other peer storages
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 };
 
