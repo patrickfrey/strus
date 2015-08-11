@@ -7,4 +7,4 @@ add_subdirectory( booleanBlock )
 add_subdirectory( posinfoBlock )
 add_subdirectory( randoc )
 add_subdirectory( varSizeNodeTree )
-
+add_subdirectory( peermsgproc )
