@@ -282,20 +282,16 @@ int main( int argc, const char* argv[])
 			termsByteSize += ti->type.size() + ti->value.size() + 5;
 			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff, ti->isnew);
 		}
-		const char* msgptr = 0;
-		std::size_t msgsize = 0;
 
-		builder->fetchMessage( msgptr, msgsize);
+		std::string message( builder->fetch());
 		typedef strus::PeerMessageViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
 		DocumentFrequencyChange rec;
 
 		std::vector<Term> termar;
-		std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( msgptr, msgsize));
-		while (viewer->fetchDfChange( rec))
+		std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( message.c_str(), message.size()));
+		while (viewer->nextDfChange( rec))
 		{
-			std::string term( rec.type, rec.typesize);
-			std::string value( rec.value, rec.valuesize);
-			termar.push_back( Term( term, value, rec.increment, rec.isnew));
+			termar.push_back( Term( rec.type, rec.value, rec.increment, rec.isnew));
 		}
 
 		if (collection.termar.size() != termar.size())
@@ -331,7 +327,7 @@ int main( int argc, const char* argv[])
 				throw std::runtime_error( "peer message item isnew does not match");
 			}
 		}
-		std::cerr << "processed blob of " << msgsize << " [uncompressed " << termsByteSize << "] bytes" << std::endl;
+		std::cerr << "processed blob of " << message.size() << " [uncompressed " << termsByteSize << "] bytes" << std::endl;
 		std::cerr << "Ok [" << collection.termar.size() << "]" << std::endl;
 		return 0;
 	}

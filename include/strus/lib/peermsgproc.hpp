@@ -34,6 +34,7 @@
 /// \brief strus toplevel namespace
 namespace strus {
 
+/// \brief Forward declaration
 class PeerMessageProcessorInterface;
 
 const PeerMessageProcessorInterface* getPeerMessageProcessor();

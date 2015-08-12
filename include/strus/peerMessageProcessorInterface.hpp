@@ -50,7 +50,7 @@ public:
 	virtual ~PeerMessageProcessorInterface(){}
 
 	/// \brief Creates a viewer for the contents of a peer message
-	/// \param[in] peermsgptr pointer to the packed peer message blob
+	/// \param[in] peermsgptr pointer to the packed peer message blob (not necessarily copied by the viewer, lifetime assumed longer than that of viewer)
 	/// \param[in] peermsgsize size of the packed peer message blob in bytes
 	/// \return the viewer object (with ownership returned)
 	virtual PeerMessageViewerInterface* createViewer(

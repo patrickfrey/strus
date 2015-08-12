@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
 #define _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
-#include "strus/peerStorageTransactionInterface.hpp"
 #include "documentFrequencyCache.hpp"
 #include "databaseAdapter.hpp"
 #include <string>
@@ -43,25 +42,25 @@ class StorageClient;
 class DocumentFrequencyCache;
 /// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class PeerMessageProcessorInterface;
 
 /// \brief Interface for a transaction of global statistic changes
 class PeerStorageTransaction
-	:public PeerStorageTransactionInterface
 {
 public:
-	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_);
-	virtual ~PeerStorageTransaction();
+	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_);
+	~PeerStorageTransaction(){}
 
-	virtual void updateNofDocumentsInsertedChange( const GlobalCounter& increment);
-
-	virtual void updateDocumentFrequencyChange(
-			const char* termtype, const char* termvalue, const GlobalCounter& increment, bool isNew);
-
-	virtual std::vector<DocumentFrequencyChange> commit();
-
-	virtual void rollback();
+	std::string run( const char* msg, std::size_t msgsize);
 
 private:
+	void clear();
+
+	void updateNofDocumentsInsertedChange( const GlobalCounter& increment);
+	void updateDocumentFrequencyChange(
+			const char* termtype, const char* termvalue, const GlobalCounter& increment, bool isNew);
+
 	enum {
 		UnknownValueHandleStart=(1<<30)
 	};
@@ -82,6 +81,7 @@ private:
 	StorageClient* m_storage;
 	DatabaseClientInterface* m_database;
 	DocumentFrequencyCache* m_documentFrequencyCache;
+	const PeerMessageProcessorInterface* m_peermsgproc;
 	DocumentFrequencyCache::Batch m_dfbatch;
 	std::vector<std::size_t> m_unknownTerms;
 	std::string m_unknownTerms_strings;
@@ -92,7 +92,6 @@ private:
 	Index m_termvaluecnt;
 	GlobalCounter m_nofDocumentsInserted;
 	bool m_commit;
-	bool m_rollback; 
 };
 }//namespace
 #endif

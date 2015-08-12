@@ -47,7 +47,7 @@ public:
 
 	virtual int nofDocumentsInsertedChange();
 
-	virtual bool fetchDfChange( DocumentFrequencyChange& rec);
+	virtual bool nextDfChange( DocumentFrequencyChange& rec);
 
 private:
 	const PeerMessageHeader* m_hdr;

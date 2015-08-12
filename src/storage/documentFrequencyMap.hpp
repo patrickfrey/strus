@@ -40,7 +40,7 @@ class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 /// \brief Forward declaration
-class StoragePeerTransactionInterface;
+class PeerMessageBuilderInterface;
 /// \brief Forward declaration
 class KeyMapInv;
 
@@ -57,7 +57,7 @@ public:
 
 	void getWriteBatch(
 			DatabaseTransactionInterface* transaction,
-			StoragePeerTransactionInterface* peerTransaction,
+			PeerMessageBuilderInterface* peerMessageBuilder,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv);
 

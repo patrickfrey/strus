@@ -54,7 +54,7 @@ int PeerMessageViewer::nofDocumentsInsertedChange()
 	return m_hdr->nofDocumentsInsertedChange;
 }
 
-bool PeerMessageViewer::fetchDfChange( DocumentFrequencyChange& rec)
+bool PeerMessageViewer::nextDfChange( DocumentFrequencyChange& rec)
 {
 	if (m_peermsgitr == m_peermsgend) return false;
 	std::size_t chlen = utf8charlen( *m_peermsgitr);
@@ -89,12 +89,12 @@ bool PeerMessageViewer::fetchDfChange( DocumentFrequencyChange& rec)
 
 	char const* mi = m_msg.c_str();
 	rec.type = mi;
-	rec.typesize = std::strlen( mi);
-	mi += rec.typesize + 1;
+	std::size_t typesize = std::strlen( mi);
+	mi += typesize + 1;
 	rec.value = mi;
-	rec.valuesize = std::strlen( mi);
-	mi += rec.valuesize + 1;
-	std::size_t midx = rec.typesize + rec.valuesize + 2;
+	std::size_t valuesize = std::strlen( mi);
+	mi += valuesize + 1;
+	std::size_t midx = typesize + valuesize + 2;
 	if (midx + 1 >= m_msg.size())
 	{
 		throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record)"));

@@ -82,7 +82,7 @@ public:
 	}
 
 	/// \brief Reinitialize the local value of the reference and dispose the old value if not referenced by others
-	void reset( Object* obj_)			
+	void reset( Object* obj_=0)
 	{
 		if (!m_refcnt)
 		{
@@ -92,11 +92,15 @@ public:
 		{
 			delete m_obj;
 		}
-		else
+		else if (obj_)
 		{
 			int* rc = newRefCnt();
 			freeRef();
 			m_refcnt = rc;
+		}
+		else
+		{
+			freeRef();
 		}
 		m_obj = obj_;
 	}

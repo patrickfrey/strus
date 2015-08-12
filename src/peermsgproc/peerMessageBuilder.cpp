@@ -45,7 +45,7 @@
 using namespace strus;
 
 PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_)
-	:m_insertInLexicalOrder(insertInLexicalOrder_),m_lastmsgpos(0)
+	:m_insertInLexicalOrder(insertInLexicalOrder_),m_hasContent(false),m_lastmsgpos(0)
 {
 	clear();
 }
@@ -56,12 +56,17 @@ PeerMessageBuilder::~PeerMessageBuilder()
 void PeerMessageBuilder::setNofDocumentsInsertedChange(
 			int increment)
 {
+	if (!m_hasContent)
+	{
+		clear();
+	}
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 	{
 		throw strus::runtime_error( _TXT( "number of documents inserted change value is out of range"));
 	}
 	PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( m_content.c_str()));
 	hdr->nofDocumentsInsertedChange = htonl( (uint32_t)(int32_t)increment);
+	m_hasContent = true;
 }
 
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -94,6 +99,10 @@ void PeerMessageBuilder::addDfChange(
 			int increment,
 			bool isnew)
 {
+	if (!m_hasContent)
+	{
+		clear();
+	}
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 	{
 		throw strus::runtime_error( _TXT( "document frequency change value is out of range"));
@@ -142,20 +151,25 @@ void PeerMessageBuilder::addDfChange(
 	std::cerr << "BLOCK ";
 	printRecord( std::cerr, m_content.c_str() + itemidx, m_content.size() - itemidx);
 #endif
+	m_hasContent = true;
 }
 
-void PeerMessageBuilder::fetchMessage( const char*& msg, std::size_t& msgsize)
+std::string PeerMessageBuilder::fetch()
 {
-	msg = m_content.c_str();
-	msgsize = m_content.size();
+	if (!m_hasContent) return std::string();
+	std::string rt = m_content;
+	clear();
+	return rt;
 }
 
 void PeerMessageBuilder::clear()
 {
 	PeerMessageHeader hdr;
+	m_stk.clear();
 	m_content.clear();
 	m_content.append( (char*)&hdr, sizeof(hdr));
 	m_lastmsgpos = sizeof(hdr);
+	m_hasContent = false;
 }
 
 void PeerMessageBuilder::start()
@@ -165,6 +179,7 @@ void PeerMessageBuilder::start()
 
 void PeerMessageBuilder::rollback()
 {
+	if (!m_hasContent) return;
 	if (m_stk.empty()) throw strus::runtime_error( _TXT( "logic error: calling rollback without start"));
 	m_lastmsgpos = m_stk.back().lastmsgpos;
 	m_content.resize( m_stk.back().contentsize);

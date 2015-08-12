@@ -31,6 +31,7 @@
 #ifndef _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
 #define _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
 #include <cstdlib>
+#include <string>
 
 namespace strus
 {
@@ -61,14 +62,12 @@ public:
 	/// \brief Mark the current state that can be restored with a rollback
 	virtual void start()=0;
 
-	/// \brief Rollback to the last state marked with 'mark()'
+	/// \brief Rollback to the last state marked with 'start()'
 	virtual void rollback()=0;
 
 	/// \brief Get the packed message to be sent to a peer
-	virtual void fetchMessage( const char*& msg, std::size_t& msgsize)=0;
-
-	/// \brief Reset the builder for building the next message
-	virtual void clear()=0;
+	/// \return the message or an empty string if there is none left
+	virtual std::string fetch()=0;
 };
 }//namespace
 #endif

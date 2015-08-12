@@ -53,16 +53,18 @@ public:
 			int increment,
 			bool isnew);
 
-	virtual void fetchMessage( const char*& msg, std::size_t& msgsize);
-
-	virtual void clear();
+	virtual std::string fetch();
 
 	virtual void start();
 
 	virtual void rollback();
 
-public:
+private:
+	void clear();
+
+private:
 	bool m_insertInLexicalOrder;
+	bool m_hasContent;
 	std::size_t m_lastmsgpos;
 	std::string m_content;
 	struct State

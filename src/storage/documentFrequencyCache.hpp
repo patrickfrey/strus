@@ -72,7 +72,10 @@ public:
 		{
 			return m_ar.size();
 		}
-
+		void clear()
+		{
+			m_ar.clear();
+		}
 		typedef std::vector<Increment>::const_iterator const_iterator;
 		typedef std::vector<Increment>::iterator iterator;
 

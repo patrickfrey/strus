@@ -33,9 +33,10 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
-#include "strus/peerStorageTransactionInterface.hpp"
-#include "strus/storagePeerClientInterface.hpp"
-#include "strus/storagePeerTransactionInterface.hpp"
+#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/peerMessageProcessorInterface.hpp"
+#include "strus/peerMessageViewerInterface.hpp"
+#include "peerStorageTransaction.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
@@ -43,7 +44,6 @@
 #include "byteOrderMark.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
-#include "peerStorageTransaction.hpp"
 #include "documentFrequencyCache.hpp"
 #include "metaDataBlockCache.hpp"
 #include "docnoRangeAllocator.hpp"
@@ -89,7 +89,8 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	,m_global_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
-	,m_storagePeer(0)
+	,m_peermsgproc(0)
+	,m_gotPeerReply(false)
 {
 	try
 	{
@@ -328,7 +329,7 @@ InvAclIteratorInterface*
 StorageTransactionInterface*
 	StorageClient::createTransaction()
 {
-	return new StorageTransaction( this, m_database.get(), m_storagePeer, &m_metadescr, m_termno_map);
+	return new StorageTransaction( this, m_database.get(), m_peerMessageBuilder.get(), &m_metadescr, m_termno_map);
 }
 
 StorageDocumentInterface* 
@@ -743,75 +744,66 @@ void StorageClient::fillDocumentFrequencyCache()
 	m_documentFrequencyCache->writeBatch( dfbatch);
 }
 
-PeerStorageTransactionInterface* StorageClient::createPeerStorageTransaction()
+void StorageClient::definePeerMessageProcessor(
+		const PeerMessageProcessorInterface* proc)
 {
 	if (!m_documentFrequencyCache.get())
 	{
 		fillDocumentFrequencyCache();
 	}
-	return new PeerStorageTransaction( this, m_database.get(), m_documentFrequencyCache.get());
+	TransactionLock lock( this);
+	m_peermsgproc = proc;
+	PeerMessageProcessorInterface::BuilderFlags flags( PeerMessageProcessorInterface::BuilderFlags::InsertInLexicalOrder);
+	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( flags));
 }
 
-void StorageClient::defineStoragePeerClient(
-		const StoragePeerClientInterface* storagePeer,
-		bool doPopulateInitialState)
+void StorageClient::startPeerInit()
 {
-	if (!m_documentFrequencyCache.get())
-	{
-		fillDocumentFrequencyCache();
-	}
+	m_initialStatsPopulateState.init( m_peermsgproc, m_database.get(), m_nof_documents.value());
+}
 
-	TransactionLock lock( this);
-	m_storagePeer = storagePeer;
-
-	// Fill a map with the strings of all types and terms in the collection:
-	std::map<Index,std::string> typenomap;
-	std::map<Index,std::string> termnomap;
+void StorageClient::pushPeerMessage( const char* msg, std::size_t msgsize)
+{
+	if (m_initialStatsPopulateState.running())
 	{
-		DatabaseAdapter_TermType::Cursor typecursor( m_database.get());
-		Index typeno;
-		std::string typestr;
-		for (bool more=typecursor.loadFirst( typestr, typeno); more;
-			more=typecursor.loadNext( typestr, typeno))
-		{
-			typenomap[ typeno] = typestr;
-		}
+		throw strus::runtime_error( _TXT( "cannot handle message from other peer before all own initial statistics populated (with fetchPeerMessage)"));
 	}
+	if (!m_peermsgproc)
 	{
-		DatabaseAdapter_TermValue::Cursor termcursor( m_database.get());
-		Index termno;
-		std::string termstr;
-		for (bool more=termcursor.loadFirst( termstr, termno); more;
-			more=termcursor.loadNext( termstr, termno))
-		{
-			termnomap[ termno] = termstr;
-		}
+		throw strus::runtime_error( _TXT( "cannot handle message from other peer because no peer message processor defined"));
 	}
-	// Populate the df's and the number of documents stored through the interface:
+	PeerStorageTransaction transaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peermsgproc);
+	m_peerReplyMessageBuffer = transaction.run( msg, msgsize);
+	m_gotPeerReply = m_peerReplyMessageBuffer.size() == 0;
+}
+
+bool StorageClient::fetchPeerReply( const char*& msg, std::size_t& msgsize)
+{
+	if (m_gotPeerReply)
 	{
-		Reference<StoragePeerTransactionInterface> transaction( storagePeer->createTransaction());
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database.get());
-		Index typeno;
-		Index termno;
-		Index df;
-		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
-			more=dfcursor.loadNext( typeno, termno, df))
-		{
-			std::map<Index,std::string>::const_iterator ti = typenomap.find( typeno);
-			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "undefined type in df key"));
-			std::map<Index,std::string>::const_iterator vi = termnomap.find( termno);
-			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "undefined term in df key"));
-
-			if (!doPopulateInitialState) df = 0;
-
-			transaction->populateDocumentFrequencyChange(
-				ti->second.c_str(), vi->second.c_str(),
-				df, true/*isNew*/);
-		}
-		transaction->populateNofDocumentsInsertedChange( m_nof_documents);
-		transaction->try_commit();
-		transaction->final_commit();
+		m_peerReplyMessageBuffer.clear();
+		return false;
 	}
+	msg = m_peerReplyMessageBuffer.c_str();
+	msgsize = m_peerReplyMessageBuffer.size();
+	m_gotPeerReply = true;
+	return true;
+}
+
+bool StorageClient::fetchPeerMessage( const char*& msg, std::size_t& msgsize)
+{
+	if (m_initialStatsPopulateState.running())
+	{
+		m_peerMessageBuffer = m_initialStatsPopulateState.fetch();
+	}
+	else
+	{
+		TransactionLock lock( this);
+		m_peerMessageBuffer = m_peerMessageBuilder->fetch();
+	}
+	msg = m_peerMessageBuffer.c_str();
+	msgsize = m_peerMessageBuffer.size();
+	return msgsize > 0;
 }
 
 

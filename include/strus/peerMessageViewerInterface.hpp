@@ -49,14 +49,12 @@ public:
 	struct DocumentFrequencyChange
 	{
 		DocumentFrequencyChange()
-			:type(0),typesize(0),value(0),valuesize(0),increment(0),isnew(false){}
+			:type(0),value(0),increment(0),isnew(false){}
 		DocumentFrequencyChange( const DocumentFrequencyChange& o)
-			:type(o.type),typesize(o.typesize),value(o.value),valuesize(o.valuesize),increment(o.increment),isnew(o.isnew){}
+			:type(o.type),value(o.value),increment(o.increment),isnew(o.isnew){}
 
 		const char* type;
-		std::size_t typesize;
 		const char* value;
-		std::size_t valuesize;
 		int increment;
 		bool isnew;
 	};
@@ -64,7 +62,7 @@ public:
 	/// \brief Fetch the next message propagating a change in the df (document frequency)
 	/// \param[out] the record describing the document frequency change
 	/// \return false, if there is no record left and wqe are at the end of the message
-	virtual bool fetchDfChange( DocumentFrequencyChange& rec)=0;
+	virtual bool nextDfChange( DocumentFrequencyChange& rec)=0;
 };
 }//namespace
 #endif

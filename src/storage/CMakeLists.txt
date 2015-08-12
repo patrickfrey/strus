@@ -29,6 +29,7 @@ set( libstrus_storage_source_files
 	metaDataMap.cpp
 	metaDataRecord.cpp
 	nullIterator.cpp
+	initialStatsPopulateState.cpp
 	peerStorageTransaction.cpp
 	posinfoBlock.cpp
 	posinfoIterator.cpp
@@ -51,6 +52,7 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}"
 	"${PROJECT_SOURCE_DIR}/utils"
 	"${PROJECT_SOURCE_DIR}/database_leveldb"
+	"${PROJECT_SOURCE_DIR}/peermsgproc"
 	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src"  )
 
 # ------------------------------
@@ -61,7 +63,7 @@ add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
 target_link_libraries( strus_storage_static strus_private_utils strus_utils )
 
 add_library(strus_storage SHARED libstrus_storage.cpp )
-target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb compactnodetrie_static strus_utils )
+target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb strus_peermsgproc compactnodetrie_static strus_utils )
 set_target_properties(
     strus_storage
     PROPERTIES
