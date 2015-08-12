@@ -158,3 +158,16 @@ void PeerMessageBuilder::clear()
 	m_lastmsgpos = sizeof(hdr);
 }
 
+void PeerMessageBuilder::start()
+{
+	m_stk.push_back( State( m_lastmsgpos, m_content.size()));
+}
+
+void PeerMessageBuilder::rollback()
+{
+	if (m_stk.empty()) throw strus::runtime_error( _TXT( "logic error: calling rollback without start"));
+	m_lastmsgpos = m_stk.back().lastmsgpos;
+	m_content.resize( m_stk.back().contentsize);
+}
+
+

@@ -58,6 +58,12 @@ public:
 			int increment,
 			bool isnew)=0;
 
+	/// \brief Mark the current state that can be restored with a rollback
+	virtual void start()=0;
+
+	/// \brief Rollback to the last state marked with 'mark()'
+	virtual void rollback()=0;
+
 	/// \brief Get the packed message to be sent to a peer
 	virtual void fetchMessage( const char*& msg, std::size_t& msgsize)=0;
 

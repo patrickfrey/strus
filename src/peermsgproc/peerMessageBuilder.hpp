@@ -32,6 +32,7 @@
 #define _STRUS_PEER_MESSAGE_BUILDER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/peerMessageBuilderInterface.hpp"
 #include <string>
+#include <vector>
 
 namespace strus
 {
@@ -56,9 +57,25 @@ public:
 
 	virtual void clear();
 
+	virtual void start();
+
+	virtual void rollback();
+
 public:
 	std::size_t m_lastmsgpos;
 	std::string m_content;
+	struct State
+	{
+		State( std::size_t lastmsgpos_, std::size_t contentsize_)
+			:lastmsgpos(lastmsgpos_),contentsize(contentsize_){}
+		State( const State& o)
+			:lastmsgpos(o.lastmsgpos),contentsize(o.contentsize){}
+
+		std::size_t lastmsgpos;
+		std::size_t contentsize;
+	};
+
+	std::vector<State> m_stk;
 };
 }//namespace
 #endif
