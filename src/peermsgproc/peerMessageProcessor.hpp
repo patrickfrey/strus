@@ -45,7 +45,7 @@ public:
 	virtual PeerMessageViewerInterface* createViewer(
 			const char* peermsgptr, std::size_t peermsgsize) const;
 
-	virtual PeerMessageBuilderInterface* createBuilder() const;
+	virtual PeerMessageBuilderInterface* createBuilder( const BuilderFlags& flags_) const;
 };
 
 }//namespace

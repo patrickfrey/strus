@@ -56,9 +56,25 @@ public:
 	virtual PeerMessageViewerInterface* createViewer(
 			const char* peermsgptr, std::size_t peermsgsize) const=0;
 
+	struct BuilderFlags
+	{
+		enum Set {
+			None=0x0,			///< No flags
+			InsertInLexicalOrder=0x1	///< insertion happens in lexial order
+		};
+		Set set;
+
+		BuilderFlags( const BuilderFlags& o)
+			:set(o.set){}
+		BuilderFlags( const Set& set_)
+			:set(set_){}
+		BuilderFlags()
+			:set(None){}
+	};
+
 	/// \brief Creates a builder for a peer message
 	/// \return the builder object (with ownership returned)
-	virtual PeerMessageBuilderInterface* createBuilder() const=0;
+	virtual PeerMessageBuilderInterface* createBuilder( const BuilderFlags& flags_) const=0;
 };
 
 }//namespace

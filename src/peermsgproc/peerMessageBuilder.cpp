@@ -44,8 +44,8 @@
 
 using namespace strus;
 
-PeerMessageBuilder::PeerMessageBuilder()
-	:m_lastmsgpos(0)
+PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_)
+	:m_insertInLexicalOrder(insertInLexicalOrder_),m_lastmsgpos(0)
 {
 	clear();
 }

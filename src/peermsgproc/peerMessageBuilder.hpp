@@ -41,7 +41,7 @@ class PeerMessageBuilder
 	:public PeerMessageBuilderInterface
 {
 public:
-	PeerMessageBuilder();
+	PeerMessageBuilder( bool insertInLexicalOrder_);
 	virtual ~PeerMessageBuilder();
 
 	virtual void setNofDocumentsInsertedChange(
@@ -62,6 +62,7 @@ public:
 	virtual void rollback();
 
 public:
+	bool m_insertInLexicalOrder;
 	std::size_t m_lastmsgpos;
 	std::string m_content;
 	struct State

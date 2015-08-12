@@ -266,7 +266,8 @@ int main( int argc, const char* argv[])
 		TermCollection collection( nofTerms, diffrange);
 
 		const strus::PeerMessageProcessorInterface* pmp = strus::getPeerMessageProcessor();
-		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder());
+		strus::PeerMessageProcessorInterface::BuilderFlags flags( strus::PeerMessageProcessorInterface::BuilderFlags::InsertInLexicalOrder);
+		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( flags));
 		builder->setNofDocumentsInsertedChange( (int)g_random.get( 0, 1000000) - 500000);
 
 		typedef TermCollection::Term Term;
