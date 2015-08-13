@@ -45,6 +45,9 @@ class PeerMessageBuilderInterface;
 /// \note this interface is used for distributing a search index
 class PeerMessageProcessorInterface
 {
+private:
+	enum {DefaultMaxBlockSize=32000};
+
 public:
 	/// \brief Destructor
 	virtual ~PeerMessageProcessorInterface(){}
@@ -56,25 +59,26 @@ public:
 	virtual PeerMessageViewerInterface* createViewer(
 			const char* peermsgptr, std::size_t peermsgsize) const=0;
 
-	struct BuilderFlags
+	struct BuilderOptions
 	{
 		enum Set {
 			None=0x0,			///< No flags
 			InsertInLexicalOrder=0x1	///< insertion happens in lexial order
 		};
 		Set set;
+		std::size_t maxBlockSize;
 
-		BuilderFlags( const BuilderFlags& o)
-			:set(o.set){}
-		BuilderFlags( const Set& set_)
-			:set(set_){}
-		BuilderFlags()
-			:set(None){}
+		BuilderOptions( const BuilderOptions& o)
+			:set(o.set),maxBlockSize(o.maxBlockSize){}
+		BuilderOptions( const Set& set_, std::size_t maxBlockSize_=DefaultMaxBlockSize)
+			:set(set_),maxBlockSize(maxBlockSize_){}
+		BuilderOptions()
+			:set(None),maxBlockSize(DefaultMaxBlockSize){}
 	};
 
 	/// \brief Creates a builder for a peer message
 	/// \return the builder object (with ownership returned)
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderFlags& flags_, std::size_t maxBlockSize) const=0;
+	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_) const=0;
 };
 
 }//namespace

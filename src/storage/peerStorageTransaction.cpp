@@ -137,8 +137,8 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 				cleaned_batch.put( *bi);
 			}
 		}
-		PeerMessageProcessorInterface::BuilderFlags flags( PeerMessageProcessorInterface::BuilderFlags::None);
-		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( flags));
+		PeerMessageProcessorInterface::BuilderOptions options;
+		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options));
 		std::vector<NewTerm>::const_iterator ti = m_newTerms.begin(), te = m_newTerms.end();
 		for (; ti != te; ++ti)
 		{

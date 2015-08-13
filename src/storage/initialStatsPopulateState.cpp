@@ -41,8 +41,8 @@ using namespace strus;
 void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peermsgproc_, DatabaseClientInterface* dbclient, const Index& nofDocuments_)
 {
 	m_peermsgproc = peermsgproc_;
-	PeerMessageProcessorInterface::BuilderFlags flags( PeerMessageProcessorInterface::BuilderFlags::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( flags));
+	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
 	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofDocuments_);
 	m_peerMessageBuilder->start();
 }

@@ -753,8 +753,8 @@ void StorageClient::definePeerMessageProcessor(
 	}
 	TransactionLock lock( this);
 	m_peermsgproc = proc;
-	PeerMessageProcessorInterface::BuilderFlags flags( PeerMessageProcessorInterface::BuilderFlags::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( flags));
+	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
 }
 
 void StorageClient::startPeerInit()
