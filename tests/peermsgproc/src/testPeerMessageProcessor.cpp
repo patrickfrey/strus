@@ -41,6 +41,9 @@
 #include <vector>
 #include <limits>
 #include <cstring>
+#include <ctime>
+#include <cmath>
+#include <iomanip>
 #include <stdint.h>
 #include <stdarg.h>
 
@@ -151,7 +154,7 @@ static std::string randomTerm()
 	for (; li < le; ++li)
 	{
 		unsigned int pf = (li * val) >> 8;
-		unsigned int chidx = ((val^pf) % 52);
+		unsigned int chidx = ((val^pf) % 4);
 		rt.push_back( alphabet[chidx]);
 	}
 	StlRandomGen rnd;
@@ -168,14 +171,14 @@ struct TermCollection
 			std::cerr << "ERROR number of distinct terms in the collection has to be at least 1" << std::endl;
 			nofTerms = 1;
 		}
-		std::set<Term> termSet;
-		while (termSet.size() < nofTerms)
+		std::set<Term> termset;
+		while (termset.size() < nofTerms)
 		{
 			int diff = g_random.get( 0, (int)diffrange) - (int)diffrange/2;
 			bool isnew = 0!=g_random.get( 0, 1);
-			termSet.insert( Term( randomType(), randomTerm(), diff, isnew));
+			termset.insert( Term( randomType(), randomTerm(), diff, isnew));
 		}
-		std::set<Term>::const_iterator ti = termSet.begin(), te = termSet.end();
+		std::set<Term>::const_iterator ti = termset.begin(), te = termset.end();
 		for (; ti != te; ++ti)
 		{
 			termar.push_back( *ti);
@@ -207,10 +210,6 @@ struct TermCollection
 			if (type < o.type) return true;
 			if (value > o.value) return false;
 			if (value < o.value) return true;
-			if (diff > o.diff) return false;
-			if (diff < o.diff) return true;
-			if (isnew > o.isnew) return false;
-			if (isnew < o.isnew) return true;
 			return false;
 		}
 	};
@@ -219,11 +218,23 @@ struct TermCollection
 };
 
 
+static std::string doubleToString( double val_)
+{
+	unsigned int val = (unsigned int)::floor( val_ * 10000);
+	unsigned int val_sec = val / 10000;
+	unsigned int val_ms = val & 10000;
+	std::ostringstream val_str;
+	val_str << val_sec << "." << std::setfill('0') << std::setw(4) << val_ms;
+	return val_str.str();
+}
+
 static void printUsage( int argc, const char* argv[])
 {
-	std::cerr << "usage: " << argv[0] << " <config> <nofdocs> <maxsize> <features> <ops>" << std::endl;
+	std::cerr << "usage: " << argv[0] << " <nofterms> <diffrange> <maxblocksize> [<lexorder>]" << std::endl;
 	std::cerr << "<nofterms>      = number of distinct terms" << std::endl;
 	std::cerr << "<diffrange>     = maximum diff" << std::endl;
+	std::cerr << "<maxblocksize>  = maximum size of a block in bytes" << std::endl;
+	std::cerr << "<lexorder>      = 1, if insert in lexical order, 0 if random" << std::endl;
 }
 
 static unsigned int getUintValue( const char* arg)
@@ -247,13 +258,13 @@ int main( int argc, const char* argv[])
 		printUsage( argc, argv);
 		return 0;
 	}
-	else if (argc < 3)
+	else if (argc < 4)
 	{
 		std::cerr << "ERROR too few parameters" << std::endl;
 		printUsage( argc, argv);
 		return 1;
 	}
-	else if (argc > 3)
+	else if (argc > 5)
 	{
 		std::cerr << "ERROR too many parameters" << std::endl;
 		printUsage( argc, argv);
@@ -262,16 +273,20 @@ int main( int argc, const char* argv[])
 	try
 	{
 		unsigned int nofTerms = getUintValue( argv[1]);
-		unsigned int diffrange = getUintValue( argv[2]);
-		TermCollection collection( nofTerms, diffrange);
+		unsigned int diffRange = getUintValue( argv[2]);
+		unsigned int maxBlockSize = getUintValue( argv[3]);
+		bool insertInOrder = (bool)g_random.get( 0, 2);
+		if (argc>4) insertInOrder = getUintValue( argv[4]);
+		TermCollection collection( nofTerms, diffRange);
 
 		const strus::PeerMessageProcessorInterface* pmp = strus::getPeerMessageProcessor();
-		strus::PeerMessageProcessorInterface::BuilderFlags flags( strus::PeerMessageProcessorInterface::BuilderFlags::InsertInLexicalOrder);
-		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( flags));
+		strus::PeerMessageProcessorInterface::BuilderFlags flags( insertInOrder?strus::PeerMessageProcessorInterface::BuilderFlags::InsertInLexicalOrder:strus::PeerMessageProcessorInterface::BuilderFlags::None);
+		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( flags, maxBlockSize));
 		builder->setNofDocumentsInsertedChange( (int)g_random.get( 0, 1000000) - 500000);
 
 		typedef TermCollection::Term Term;
 		unsigned int termsByteSize = 0;
+		std::clock_t start = std::clock();
 		std::vector<Term>::const_iterator ti = collection.termar.begin(), te = collection.termar.end();
 		for (; ti != te; ++ti)
 		{
@@ -282,21 +297,41 @@ int main( int argc, const char* argv[])
 			termsByteSize += ti->type.size() + ti->value.size() + 5;
 			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff, ti->isnew);
 		}
-
 		std::string message( builder->fetch());
+		std::size_t blobsize = message.size();
+
+		double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+		const char* insertInOrder_str = (insertInOrder?"in lexical order":"in random order");
+		std::cerr << "inserted " << collection.termar.size() << " terms in " << doubleToString(duration) << " seconds " << insertInOrder_str << std::endl;
+
 		typedef strus::PeerMessageViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
 		DocumentFrequencyChange rec;
 
-		std::vector<Term> termar;
-		std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( message.c_str(), message.size()));
-		while (viewer->nextDfChange( rec))
+		std::set<Term> termset;
+		while (!message.empty())
 		{
-			termar.push_back( Term( rec.type, rec.value, rec.increment, rec.isnew));
+			std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( message.c_str(), message.size()));
+			while (viewer->nextDfChange( rec))
+			{
+#ifdef STRUS_LOWLEVEL_DEBUG
+				const char* isnewstr = ti->isnew?"new":"old";
+				std::cout << "result df change " << rec.type << " " << rec.value << " " << rec.increment << " " << isnewstr << std::endl;
+#endif
+				termset.insert( Term( rec.type, rec.value, rec.increment, rec.isnew));
+			}
+			message = builder->fetch();
+			blobsize += message.size();
+		}
+		std::vector<Term> termar;
+		std::set<Term>::const_iterator si = termset.begin(), se = termset.end();
+		for (; si != se; ++si)
+		{
+			termar.push_back( *si);
 		}
 
 		if (collection.termar.size() != termar.size())
 		{
-			std::cerr << "COLLECTION SIZE " << collection.termar.size() << " MESSAGE ITEM NUMBER " << termar.size() << std::endl;
+			std::cerr << "COLLECTION SIZE " << collection.termar.size() << " MESSAGE ITEMS " << termar.size() << std::endl;
 			throw std::runtime_error( "peer message number of messages does not match");
 		}
 		std::vector<Term>::const_iterator oi = collection.termar.begin(), oe = collection.termar.end();
@@ -327,7 +362,7 @@ int main( int argc, const char* argv[])
 				throw std::runtime_error( "peer message item isnew does not match");
 			}
 		}
-		std::cerr << "processed blob of " << message.size() << " [uncompressed " << termsByteSize << "] bytes" << std::endl;
+		std::cerr << "processed blob of " << blobsize << " [uncompressed " << termsByteSize << "] bytes" << std::endl;
 		std::cerr << "Ok [" << collection.termar.size() << "]" << std::endl;
 		return 0;
 	}

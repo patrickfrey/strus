@@ -31,8 +31,10 @@
 #ifndef _STRUS_PEER_MESSAGE_BUILDER_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_PEER_MESSAGE_BUILDER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/peerMessageBuilderInterface.hpp"
+#include "compactNodeTrie.hpp"
 #include <string>
 #include <vector>
+#include <list>
 
 namespace strus
 {
@@ -41,7 +43,7 @@ class PeerMessageBuilder
 	:public PeerMessageBuilderInterface
 {
 public:
-	PeerMessageBuilder( bool insertInLexicalOrder_);
+	PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_);
 	virtual ~PeerMessageBuilder();
 
 	virtual void setNofDocumentsInsertedChange(
@@ -60,25 +62,26 @@ public:
 	virtual void rollback();
 
 private:
+	void addDfChange_final(
+			const std::string& key,
+			int increment,
+			bool isnew);
+	void addDfChange_tree(
+			const std::string& key,
+			int increment,
+			bool isnew);
+	void moveTree();
+	void newContent();
 	void clear();
 
 private:
 	bool m_insertInLexicalOrder;
-	bool m_hasContent;
-	std::size_t m_lastmsgpos;
-	std::string m_content;
-	struct State
-	{
-		State( std::size_t lastmsgpos_, std::size_t contentsize_)
-			:lastmsgpos(lastmsgpos_),contentsize(contentsize_){}
-		State( const State& o)
-			:lastmsgpos(o.lastmsgpos),contentsize(o.contentsize){}
-
-		std::size_t lastmsgpos;
-		std::size_t contentsize;
-	};
-
-	std::vector<State> m_stk;
+	std::string m_lastkey;
+	std::list<std::string> m_content;
+	conotrie::CompactNodeTrie m_tree;
+	std::size_t m_cnt;
+	std::size_t m_blocksize;
+	std::size_t m_maxblocksize;
 };
 }//namespace
 #endif

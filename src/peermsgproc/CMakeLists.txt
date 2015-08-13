@@ -12,18 +12,21 @@ set( source_files
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/include"
-	"${PROJECT_SOURCE_DIR}/src/peermsgproc" )
+	"${PROJECT_SOURCE_DIR}/src/peermsgproc" 
+	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include" 
+)
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
 	"${PROJECT_SOURCE_DIR}/utils"
+	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src" 
 )
 
 # -------------------------------------------
 # LIBRARY
 # -------------------------------------------
 add_library( strus_peermsgproc SHARED ${source_files} libstrus_peermsgproc.cpp )
-target_link_libraries( strus_peermsgproc strus_private_utils strus_utils )
+target_link_libraries( strus_peermsgproc strus_private_utils strus_utils compactnodetrie_static )
 
 set_target_properties(
     strus_peermsgproc

@@ -44,8 +44,8 @@
 
 using namespace strus;
 
-PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_)
-	:m_insertInLexicalOrder(insertInLexicalOrder_),m_hasContent(false),m_lastmsgpos(0)
+PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_)
+	:m_insertInLexicalOrder(insertInLexicalOrder_),m_blocksize(0),m_maxblocksize(maxblocksize_)
 {
 	clear();
 }
@@ -56,17 +56,12 @@ PeerMessageBuilder::~PeerMessageBuilder()
 void PeerMessageBuilder::setNofDocumentsInsertedChange(
 			int increment)
 {
-	if (!m_hasContent)
-	{
-		clear();
-	}
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 	{
 		throw strus::runtime_error( _TXT( "number of documents inserted change value is out of range"));
 	}
-	PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( m_content.c_str()));
+	PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( m_content.back().c_str()));
 	hdr->nofDocumentsInsertedChange = htonl( (uint32_t)(int32_t)increment);
-	m_hasContent = true;
 }
 
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -99,20 +94,68 @@ void PeerMessageBuilder::addDfChange(
 			int increment,
 			bool isnew)
 {
-	if (!m_hasContent)
+	std::string rec;
+	std::size_t termtypesize = std::strlen(termtype);
+	std::size_t termvaluesize = std::strlen(termvalue);
+	rec.reserve( termtypesize + termvaluesize + 2);
+	rec.append( termtype, termtypesize);
+	rec.push_back( '\1');
+	rec.append( termvalue, termvaluesize);
+	if (rec.size() > (uint32_t)std::numeric_limits<int32_t>::max() -64)
 	{
-		clear();
+		throw strus::runtime_error( _TXT( "document frequency change term size is out of range"));
 	}
+	m_blocksize += termtypesize + termvaluesize;
+	if (m_blocksize > m_maxblocksize)
+	{
+		newContent();
+	}
+	if (m_insertInLexicalOrder)
+	{
+
+		addDfChange_final( rec, increment, isnew);
+	}
+	else
+	{
+		addDfChange_tree( rec, increment, isnew);
+	}
+}
+
+void PeerMessageBuilder::addDfChange_tree(
+		const std::string& key,
+		int increment,
+		bool isnew)
+{
+	bool sign = (increment<0);
+	if (sign)
+	{
+		increment = -increment;
+	}
+	unsigned int flags = (isnew?0x1:0x0)|(sign?0x2:0x0);
+	unsigned int val = (increment << 2) + flags;
+	if (!m_tree.set( key.c_str(), (conotrie::CompactNodeTrie::NodeData)val))
+	{
+		newContent();
+		if (!m_tree.set( key.c_str(), (conotrie::CompactNodeTrie::NodeData)val))
+		{
+			throw strus::runtime_error( _TXT( "document frequency key is out of range"));
+		}
+	}
+}
+
+void PeerMessageBuilder::addDfChange_final(
+		const std::string& key,
+		int increment,
+		bool isnew)
+{
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 	{
 		throw strus::runtime_error( _TXT( "document frequency change value is out of range"));
 	}
+	std::string& content = m_content.back();
+
+	std::string pldata;
 	char idxbuf[ 32];
-	std::string rec;
-	rec.append( termtype, std::strlen(termtype));
-	rec.push_back( '\0');
-	rec.append( termvalue, std::strlen(termvalue));
-	rec.push_back( '\0');
 	unsigned char flags = 0x0;
 	if (increment < 0)
 	{
@@ -123,66 +166,126 @@ void PeerMessageBuilder::addDfChange(
 	{
 		flags |= 0x1;
 	}
-	rec.push_back( flags);
+	pldata.push_back( flags);
 	std::size_t idxpos = utf8encode( idxbuf, (int32_t)increment);
-	rec.append( idxbuf, idxpos);
-	if (rec.size() > (uint32_t)std::numeric_limits<int32_t>::max())
-	{
-		throw strus::runtime_error( _TXT( "document frequency change term size is out of range"));
-	}
-	const char* lastmsgptr = m_content.c_str() + m_lastmsgpos;
-	std::size_t lastmsgsize = m_content.size() - m_lastmsgpos;
+	pldata.append( idxbuf, idxpos);
+
 #ifdef STRUS_LOWLEVEL_DEBUG
-	std::size_t itemidx = m_content.size();
+	std::size_t itemidx = content.size();
 #endif
 	std::size_t ii = 0;
-	for (; ii<lastmsgsize && ii<rec.size(); ++ii)
+	for (; ii<m_lastkey.size() && ii<key.size(); ++ii)
 	{
-		if (lastmsgptr[ii] != rec[ ii]) break;
+		if (m_lastkey[ii] != key[ ii]) break;
 	}
-	idxpos = utf8encode( idxbuf, (int32_t)ii);
-	m_content.append( idxbuf, idxpos);
-	idxpos = utf8encode( idxbuf, (int32_t)(rec.size() - ii));
-	m_content.append( idxbuf, idxpos);
+	m_lastkey = key;
+	std::size_t commonsize = ii;
+	std::size_t restsize = key.size() - ii + 1;
 
-	m_lastmsgpos = m_content.size();
-	m_content.append( rec.c_str() + ii, rec.size() - ii);
+	idxpos = utf8encode( idxbuf, (int32_t)commonsize);
+	content.append( idxbuf, idxpos);
+
+	idxpos = utf8encode( idxbuf, (int32_t)(restsize) + pldata.size());
+	content.append( idxbuf, idxpos);
+	content.append( key.c_str() + commonsize, restsize);
+	char* ci = const_cast<char*>( std::strchr( content.c_str() + content.size() - restsize, '\1'));
+	if (ci) *ci = '\0';
+	content.append( pldata);
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::cerr << "BLOCK ";
-	printRecord( std::cerr, m_content.c_str() + itemidx, m_content.size() - itemidx);
+	printRecord( std::cerr, content.c_str() + itemidx, content.size() - itemidx);
 #endif
-	m_hasContent = true;
 }
 
 std::string PeerMessageBuilder::fetch()
 {
-	if (!m_hasContent) return std::string();
-	std::string rt = m_content;
+	if (!m_insertInLexicalOrder)
+	{
+		moveTree();
+	}
+	while (!m_content.empty())
+	{
+		std::string rt = m_content.front();
+		PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( rt.c_str()));
+		if (rt.size() == sizeof(*hdr) && hdr->empty())
+		{
+			m_content.pop_front();
+			continue;
+		}
+		m_content.pop_front();
+		return rt;
+	}
 	clear();
-	return rt;
+	return std::string();
 }
 
 void PeerMessageBuilder::clear()
 {
-	PeerMessageHeader hdr;
-	m_stk.clear();
 	m_content.clear();
-	m_content.append( (char*)&hdr, sizeof(hdr));
-	m_lastmsgpos = sizeof(hdr);
-	m_hasContent = false;
+	m_tree.clear();
+	m_cnt = 0;
+	newContent();
+}
+
+void PeerMessageBuilder::moveTree()
+{
+	conotrie::CompactNodeTrie::const_iterator ti = m_tree.begin(), te = m_tree.end();
+	if (ti == te) return;
+	for (; ti != te; ++ti)
+	{
+		unsigned int val = (unsigned int)ti.data();
+		int increment = val >> 2;
+		bool sign = ((val&0x2) != 0);
+		bool isnew = ((val&0x1) != 0);
+		if (sign)
+		{
+			increment = -increment;
+		}
+		addDfChange_final( ti.key(), increment, isnew);
+	}
+	m_tree.reset();
+}
+
+void PeerMessageBuilder::newContent()
+{
+	if (!m_insertInLexicalOrder)
+	{
+		moveTree();
+	}
+	PeerMessageHeader hdr;
+	if (m_maxblocksize < (1<<20))
+	{
+		std::string blk;
+		blk.reserve( m_maxblocksize);
+		blk.append( (char*)&hdr, sizeof(hdr));
+		m_content.push_back( blk);
+	}
+	else
+	{
+		m_content.push_back( std::string( (char*)&hdr, sizeof(hdr)));
+	}
+	m_cnt += 1;
+	m_blocksize = 0;
+	m_lastkey.clear();
 }
 
 void PeerMessageBuilder::start()
 {
-	m_stk.push_back( State( m_lastmsgpos, m_content.size()));
+	m_cnt = 0;
+	newContent();
 }
 
 void PeerMessageBuilder::rollback()
 {
-	if (!m_hasContent) return;
-	if (m_stk.empty()) throw strus::runtime_error( _TXT( "logic error: calling rollback without start"));
-	m_lastmsgpos = m_stk.back().lastmsgpos;
-	m_content.resize( m_stk.back().contentsize);
+	m_tree.clear();
+	for (; m_cnt > 0; --m_cnt)
+	{
+		m_content.pop_back();
+	}
+	if (m_content.empty())
+	{
+		newContent();
+	}
 }
 
 

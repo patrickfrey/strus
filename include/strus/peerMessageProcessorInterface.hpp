@@ -74,7 +74,7 @@ public:
 
 	/// \brief Creates a builder for a peer message
 	/// \return the builder object (with ownership returned)
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderFlags& flags_) const=0;
+	virtual PeerMessageBuilderInterface* createBuilder( const BuilderFlags& flags_, std::size_t maxBlockSize) const=0;
 };
 
 }//namespace

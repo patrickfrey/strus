@@ -42,6 +42,7 @@ struct PeerMessageHeader
 	{
 		std::memset( this, 0, sizeof(*this));
 	}
+	bool empty() const			{return nofDocumentsInsertedChange==0;}
 
 	uint32_t nofDocumentsInsertedChange;
 };

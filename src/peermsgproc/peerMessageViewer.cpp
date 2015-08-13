@@ -97,12 +97,12 @@ bool PeerMessageViewer::nextDfChange( DocumentFrequencyChange& rec)
 	std::size_t midx = typesize + valuesize + 2;
 	if (midx + 1 >= m_msg.size())
 	{
-		throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record)"));
+		throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record [2])"));
 	}
 	unsigned char flags = *mi;
 	if (flags >= 0x4)
 	{
-		throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record)"));
+		throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record [3])"));
 	}
 	++mi;
 	++midx;
