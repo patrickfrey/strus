@@ -105,8 +105,14 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for accessing meta data from a strus storage.  <a href="classstrus_1_1MetaDataReaderInterface.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html">PeerStorageTransactionInterface</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for a transaction on the local storage opened by a peer for updating global statistic changes.  <a href="classstrus_1_1PeerStorageTransactionInterface.html#details">More...</a><br/></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerMessageBuilderInterface.html">PeerMessageBuilderInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)  <a href="classstrus_1_1PeerMessageBuilderInterface.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.  <a href="classstrus_1_1PeerMessageProcessorInterface.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerMessageViewerInterface.html">PeerMessageViewerInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for a viewer of a message received from a peer with some statistics (distributed index)  <a href="classstrus_1_1PeerMessageViewerInterface.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure that represents a set of feature occurrencies (postings) as iterator.  <a href="classstrus_1_1PostingIteratorInterface.html#details">More...</a><br/></td></tr>
@@ -150,12 +156,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation in strus.  <a href="classstrus_1_1StorageObjectBuilderInterface.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StoragePeerInterface.html">StoragePeerInterface</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface used by the storage to distribute statistics needed for document ranking to other peers in a cluster of storages.  <a href="classstrus_1_1StoragePeerInterface.html#details">More...</a><br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StoragePeerTransactionInterface.html">StoragePeerTransactionInterface</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for a transaction to populate changes of global statistics from the local storage to its peers.  <a href="classstrus_1_1StoragePeerTransactionInterface.html#details">More...</a><br/></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html">StorageTransactionInterface</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Object to declare all items for one insert/update of a document in the storage.  <a href="classstrus_1_1StorageTransactionInterface.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -198,6 +198,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a46ad9856cffcc68802b630aa5f9fe63d"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a46ad9856cffcc68802b630aa5f9fe63d">getDatabase_leveldb</a> ()</td></tr>
 <tr class="memdesc:a46ad9856cffcc68802b630aa5f9fe63d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database interface implemented with leveldb with the functions for accessing the key/value store database.  <a href="#a46ad9856cffcc68802b630aa5f9fe63d">More...</a><br/></td></tr>
 <tr class="separator:a46ad9856cffcc68802b630aa5f9fe63d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad48da297a40b3df6becd12b438bf577e"><td class="memItemLeft" align="right" valign="top">const <br class="typebreak"/>
+<a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ad48da297a40b3df6becd12b438bf577e">getPeerMessageProcessor</a> ()</td></tr>
+<tr class="separator:ad48da297a40b3df6becd12b438bf577e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3aa5a29481259853f249cb40cdf8101d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1QueryEvalInterface.html">QueryEvalInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a3aa5a29481259853f249cb40cdf8101d">createQueryEval</a> ()</td></tr>
 <tr class="memdesc:a3aa5a29481259853f249cb40cdf8101d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a parameterizable instance of a query evaluation scheme.  <a href="#a3aa5a29481259853f249cb40cdf8101d">More...</a><br/></td></tr>
 <tr class="separator:a3aa5a29481259853f249cb40cdf8101d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -293,6 +296,21 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ad48da297a40b3df6becd12b438bf577e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a>* strus::getPeerMessageProcessor </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="a696fa93b9787b58b1af4acd0d0dc4f99"></a>
 <div class="memitem">
 <div class="memproto">
@@ -312,7 +330,7 @@ Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 25 2015 12:17:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Aug 16 2015 21:00:48 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

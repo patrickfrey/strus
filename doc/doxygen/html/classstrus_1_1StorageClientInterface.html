@@ -85,9 +85,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a42caf3ec5a181983338027a7829b3959"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a42caf3ec5a181983338027a7829b3959">~StorageClientInterface</a> ()</td></tr>
 <tr class="memdesc:a42caf3ec5a181983338027a7829b3959"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a42caf3ec5a181983338027a7829b3959">More...</a><br/></td></tr>
 <tr class="separator:a42caf3ec5a181983338027a7829b3959"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f13e4be0db12eab5835be93e17fc11a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a1f13e4be0db12eab5835be93e17fc11a">close</a> ()</td></tr>
-<tr class="memdesc:a1f13e4be0db12eab5835be93e17fc11a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the storage and throw on error.  <a href="#a1f13e4be0db12eab5835be93e17fc11a">More...</a><br/></td></tr>
-<tr class="separator:a1f13e4be0db12eab5835be93e17fc11a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ab84dc0ee94fe144fc018eca6253334"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a4ab84dc0ee94fe144fc018eca6253334">close</a> ()=0</td></tr>
+<tr class="memdesc:a4ab84dc0ee94fe144fc018eca6253334"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the storage and throw on error.  <a href="#a4ab84dc0ee94fe144fc018eca6253334">More...</a><br/></td></tr>
+<tr class="separator:a4ab84dc0ee94fe144fc018eca6253334"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a807092721e926eddbffb0dd7d0a360ee"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a807092721e926eddbffb0dd7d0a360ee">createTermPostingIterator</a> (const std::string &amp;type, const std::string &amp;value) const =0</td></tr>
 <tr class="memdesc:a807092721e926eddbffb0dd7d0a360ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the occurrencies of a term in the storage.  <a href="#a807092721e926eddbffb0dd7d0a360ee">More...</a><br/></td></tr>
 <tr class="separator:a807092721e926eddbffb0dd7d0a360ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -132,13 +132,21 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1StorageTransactionInterface.html">StorageTransactionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ae744509cd0e668a7fdbdcc63e2a62a02">createTransaction</a> ()=0</td></tr>
 <tr class="memdesc:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an insert/update transaction object.  <a href="#ae744509cd0e668a7fdbdcc63e2a62a02">More...</a><br/></td></tr>
 <tr class="separator:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d311f1899d723628d1f797a42bfb1e2"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html">PeerStorageTransactionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a9d311f1899d723628d1f797a42bfb1e2">createPeerStorageTransaction</a> ()=0</td></tr>
-<tr class="memdesc:a9d311f1899d723628d1f797a42bfb1e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an transaction object for global static statistic changes that come from other peer storages.  <a href="#a9d311f1899d723628d1f797a42bfb1e2">More...</a><br/></td></tr>
-<tr class="separator:a9d311f1899d723628d1f797a42bfb1e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36441157be821daaf6e4a55bde5bbfdd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a36441157be821daaf6e4a55bde5bbfdd">defineStoragePeerInterface</a> (const <a class="el" href="classstrus_1_1StoragePeerInterface.html">StoragePeerInterface</a> *storagePeer, bool doPopulateInitialState=true)=0</td></tr>
-<tr class="memdesc:a36441157be821daaf6e4a55bde5bbfdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)  <a href="#a36441157be821daaf6e4a55bde5bbfdd">More...</a><br/></td></tr>
-<tr class="separator:a36441157be821daaf6e4a55bde5bbfdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49d3f79e1957f35f1a449337fc60ffb7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a49d3f79e1957f35f1a449337fc60ffb7">definePeerMessageProcessor</a> (const <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a> *proc)=0</td></tr>
+<tr class="memdesc:a49d3f79e1957f35f1a449337fc60ffb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)  <a href="#a49d3f79e1957f35f1a449337fc60ffb7">More...</a><br/></td></tr>
+<tr class="separator:a49d3f79e1957f35f1a449337fc60ffb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d529ff383159fb7d49a88a2e9e3c5b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a7d529ff383159fb7d49a88a2e9e3c5b0">startPeerInit</a> ()=0</td></tr>
+<tr class="memdesc:a7d529ff383159fb7d49a88a2e9e3c5b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Start the init phase of distributing the statistics of the storage to other peers. The messages of the init phare are fetched with <a class="el" href="classstrus_1_1StorageClientInterface.html#a820c416bfab59571156fb0f66ca109b5" title="Fetches the next message to distribute to all other peers. ">fetchPeerMessage(const char*&amp;,std::size_t&amp;)</a>  <a href="#a7d529ff383159fb7d49a88a2e9e3c5b0">More...</a><br/></td></tr>
+<tr class="separator:a7d529ff383159fb7d49a88a2e9e3c5b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36d575a3ff1050a3b6dfeca830496978"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a36d575a3ff1050a3b6dfeca830496978">pushPeerMessage</a> (const char *msg, std::size_t msgsize)=0</td></tr>
+<tr class="memdesc:a36d575a3ff1050a3b6dfeca830496978"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a message blob from another peer storage.  <a href="#a36d575a3ff1050a3b6dfeca830496978">More...</a><br/></td></tr>
+<tr class="separator:a36d575a3ff1050a3b6dfeca830496978"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae003f5f7f02e462c60a97071c98ca210"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ae003f5f7f02e462c60a97071c98ca210">fetchPeerReply</a> (const char *&amp;msg, std::size_t &amp;msgsize)=0</td></tr>
+<tr class="memdesc:ae003f5f7f02e462c60a97071c98ca210"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetches the next reply from pushPeerMessage as answer to the sender.  <a href="#ae003f5f7f02e462c60a97071c98ca210">More...</a><br/></td></tr>
+<tr class="separator:ae003f5f7f02e462c60a97071c98ca210"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a820c416bfab59571156fb0f66ca109b5"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a820c416bfab59571156fb0f66ca109b5">fetchPeerMessage</a> (const char *&amp;msg, std::size_t &amp;msgsize)=0</td></tr>
+<tr class="memdesc:a820c416bfab59571156fb0f66ca109b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fetches the next message to distribute to all other peers.  <a href="#a820c416bfab59571156fb0f66ca109b5">More...</a><br/></td></tr>
+<tr class="separator:a820c416bfab59571156fb0f66ca109b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDocumentInterface.html">StorageDocumentInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a634e6cb4dd516d411bcf4a42594fc4ab">createDocumentChecker</a> (const std::string &amp;docid, const std::string &amp;logfilename) const =0</td></tr>
 <tr class="memdesc:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the <a class="el" href="classstrus_1_1StorageDocumentInterface.html#aac17acfd95b3c1fe3a97ede62e868c90" title="Closing the document definition. ">StorageDocumentInterface::done()</a> method after the definition of all elements.  <a href="#a634e6cb4dd516d411bcf4a42594fc4ab">More...</a><br/></td></tr>
 <tr class="separator:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -195,7 +203,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Destructor. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Should call call '<a class="el" href="classstrus_1_1StorageClientInterface.html#a1f13e4be0db12eab5835be93e17fc11a" title="Close the storage and throw on error. ">close()</a>' but ignore errors there silently </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Should call call '<a class="el" href="classstrus_1_1StorageClientInterface.html#a4ab84dc0ee94fe144fc018eca6253334" title="Close the storage and throw on error. ">close()</a>' but ignore errors there silently </dd></dl>
 
 </div>
 </div>
@@ -232,7 +240,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1f13e4be0db12eab5835be93e17fc11a"></a>
+<a class="anchor" id="a4ab84dc0ee94fe144fc018eca6253334"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -248,7 +256,7 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -473,32 +481,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a9d311f1899d723628d1f797a42bfb1e2"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html">PeerStorageTransactionInterface</a>* strus::StorageClientInterface::createPeerStorageTransaction </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Create an transaction object for global static statistic changes that come from other peer storages. </p>
-<dl class="section return"><dt>Returns</dt><dd>the created transaction interface to be disposed with delete by the caller </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="a807092721e926eddbffb0dd7d0a360ee"></a>
 <div class="memitem">
 <div class="memproto">
@@ -569,7 +551,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a36441157be821daaf6e4a55bde5bbfdd"></a>
+<a class="anchor" id="a49d3f79e1957f35f1a449337fc60ffb7"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -577,21 +559,11 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::StorageClientInterface::defineStoragePeerInterface </td>
+          <td class="memname">virtual void strus::StorageClientInterface::definePeerMessageProcessor </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1StoragePeerInterface.html">StoragePeerInterface</a> *&#160;</td>
-          <td class="paramname"><em>storagePeer</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a> *&#160;</td>
+          <td class="paramname"><em>proc</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>doPopulateInitialState</em> = <code>true</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -604,8 +576,7 @@ Public Member Functions</h2></td></tr>
 <p>Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">storagePeer</td><td>reference to storage peer interface (owned by caller) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">doPopulateInitialState</td><td>flag that is set to true in a normal startup and to false in the case of a system recovery after a crash. The flag set to false tells the storage to populate its stored terms with a df change of 0 to the other peers in the initialization phase. After recovery restart the node should reinitialize its global statistics without changing the state of the other peers. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">proc</td><td>peer message processor reference </td></tr>
   </table>
   </dd>
 </dl>
@@ -691,6 +662,95 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="a820c416bfab59571156fb0f66ca109b5"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool strus::StorageClientInterface::fetchPeerMessage </td>
+          <td>(</td>
+          <td class="paramtype">const char *&amp;&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t &amp;&#160;</td>
+          <td class="paramname"><em>msgsize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fetches the next message to distribute to all other peers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>pointer to message blob for other peers (interpretation depends on defined peer message processor) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">msgsize</td><td>size of msg blob in bytes </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>this function throws if there is no message processor interface defined with <a class="el" href="classstrus_1_1StorageClientInterface.html#a49d3f79e1957f35f1a449337fc60ffb7" title="Define the interface to use for creating peer storage transaction objects to populate global statisti...">definePeerMessageProcessor( const PeerMessageProcessorInterface*)</a> </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ae003f5f7f02e462c60a97071c98ca210"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool strus::StorageClientInterface::fetchPeerReply </td>
+          <td>(</td>
+          <td class="paramtype">const char *&amp;&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t &amp;&#160;</td>
+          <td class="paramname"><em>msgsize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Fetches the next reply from pushPeerMessage as answer to the sender. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>pointer to message blob the sender peer of the last message pushed (interpretation depends on defined peer message processor) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">msgsize</td><td>size of msg blob in bytes </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>false if there is no chunk of the reply left </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>this function throws if there is no message processor interface defined with <a class="el" href="classstrus_1_1StorageClientInterface.html#a49d3f79e1957f35f1a449337fc60ffb7" title="Define the interface to use for creating peer storage transaction objects to populate global statisti...">definePeerMessageProcessor( const PeerMessageProcessorInterface*)</a> </dd></dl>
 
 </div>
 </div>
@@ -860,6 +920,77 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a36d575a3ff1050a3b6dfeca830496978"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageClientInterface::pushPeerMessage </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>msgsize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Push a message blob from another peer storage. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">msg</td><td>pointer to message blob from peer (interpretation depends on defined peer message processor) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">msgsize</td><td>size of msg blob in bytes </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true, if there is at least one reply message to fetch with <a class="el" href="classstrus_1_1StorageClientInterface.html#ae003f5f7f02e462c60a97071c98ca210" title="Fetches the next reply from pushPeerMessage as answer to the sender. ">fetchPeerReply(const char*&amp;,std::size_t&amp;)</a> </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>this function throws if there is no message processor interface defined with <a class="el" href="classstrus_1_1StorageClientInterface.html#a49d3f79e1957f35f1a449337fc60ffb7" title="Define the interface to use for creating peer storage transaction objects to populate global statisti...">definePeerMessageProcessor( const PeerMessageProcessorInterface*)</a> </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a7d529ff383159fb7d49a88a2e9e3c5b0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageClientInterface::startPeerInit </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Start the init phase of distributing the statistics of the storage to other peers. The messages of the init phare are fetched with <a class="el" href="classstrus_1_1StorageClientInterface.html#a820c416bfab59571156fb0f66ca109b5" title="Fetches the next message to distribute to all other peers. ">fetchPeerMessage(const char*&amp;,std::size_t&amp;)</a> </p>
+<dl class="section remark"><dt>Remarks</dt><dd>this function throws if there is no message processor interface defined with <a class="el" href="classstrus_1_1StorageClientInterface.html#a49d3f79e1957f35f1a449337fc60ffb7" title="Define the interface to use for creating peer storage transaction objects to populate global statisti...">definePeerMessageProcessor( const PeerMessageProcessorInterface*)</a> </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="storageClientInterface_8hpp_source.html">storageClientInterface.hpp</a></li>
 </ul>
@@ -867,7 +998,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 25 2015 12:17:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Aug 16 2015 21:00:49 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

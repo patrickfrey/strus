@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>strus: /home/patrick/Projects/github/strus/include/strus/storagePeerInterface.hpp Source File</title>
+<title>strus: /home/patrick/Projects/github/strus/include/strus/lib/peermsgproc.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -52,15 +52,15 @@
   </div>
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_4c7fe52541d540b59710786f705b50e0.html">strus</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_4c7fe52541d540b59710786f705b50e0.html">strus</a></li><li class="navelem"><a class="el" href="dir_a73361def35442ed7e38ef668dbae29f.html">lib</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title">storagePeerInterface.hpp</div>  </div>
+<div class="title">peermsgproc.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<a href="storagePeerInterface_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<a href="peermsgproc_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">---------------------------------------------------------------------</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">    The C++ library strus implements basic operations to build</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">    a search engine for structured search on unstructured data.</span></div>
@@ -88,33 +88,24 @@
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"></span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">--------------------------------------------------------------------</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">*/</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#ifndef _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#ifndef _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED</span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keyword">namespace </span>strus</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;{</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">namespace </span>strus {</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keyword">class </span>StoragePeerTransactionInterface;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="classstrus_1_1StoragePeerInterface.html">   40</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1StoragePeerInterface.html">StoragePeerInterface</a></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;{</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="classstrus_1_1StoragePeerInterface.html#aed8ed8fd79ab62f80833e22ea5587649">   44</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StoragePeerInterface.html#aed8ed8fd79ab62f80833e22ea5587649">~StoragePeerInterface</a>(){}</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StoragePeerTransactionInterface.html">StoragePeerTransactionInterface</a>* <a class="code" href="classstrus_1_1StoragePeerInterface.html#a5b42ba82f8707262b2f2a1960c185a14">createTransaction</a>() <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;};</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor"></span></div>
-<div class="ttc" id="classstrus_1_1StoragePeerTransactionInterface_html"><div class="ttname"><a href="classstrus_1_1StoragePeerTransactionInterface.html">strus::StoragePeerTransactionInterface</a></div><div class="ttdoc">Interface for a transaction to populate changes of global statistics from the local storage to its pe...</div><div class="ttdef"><b>Definition:</b> storagePeerTransactionInterface.hpp:38</div></div>
-<div class="ttc" id="classstrus_1_1StoragePeerInterface_html_aed8ed8fd79ab62f80833e22ea5587649"><div class="ttname"><a href="classstrus_1_1StoragePeerInterface.html#aed8ed8fd79ab62f80833e22ea5587649">strus::StoragePeerInterface::~StoragePeerInterface</a></div><div class="ttdeci">virtual ~StoragePeerInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> storagePeerInterface.hpp:44</div></div>
-<div class="ttc" id="classstrus_1_1StoragePeerInterface_html"><div class="ttname"><a href="classstrus_1_1StoragePeerInterface.html">strus::StoragePeerInterface</a></div><div class="ttdoc">Interface used by the storage to distribute statistics needed for document ranking to other peers in ...</div><div class="ttdef"><b>Definition:</b> storagePeerInterface.hpp:40</div></div>
-<div class="ttc" id="classstrus_1_1StoragePeerInterface_html_a5b42ba82f8707262b2f2a1960c185a14"><div class="ttname"><a href="classstrus_1_1StoragePeerInterface.html#a5b42ba82f8707262b2f2a1960c185a14">strus::StoragePeerInterface::createTransaction</a></div><div class="ttdeci">virtual StoragePeerTransactionInterface * createTransaction() const =0</div><div class="ttdoc">Creates a new transaction object to distribute statistics. </div></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">class </span>PeerMessageProcessorInterface;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">const</span> PeerMessageProcessorInterface* <a class="code" href="namespacestrus.html#ad48da297a40b3df6becd12b438bf577e">getPeerMessageProcessor</a>();</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="namespacestrus_html_ad48da297a40b3df6becd12b438bf577e"><div class="ttname"><a href="namespacestrus.html#ad48da297a40b3df6becd12b438bf577e">strus::getPeerMessageProcessor</a></div><div class="ttdeci">const PeerMessageProcessorInterface * getPeerMessageProcessor()</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 25 2015 12:17:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Aug 16 2015 21:00:48 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

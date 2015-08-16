@@ -64,6 +64,7 @@
   <div id="navrow4" class="tabs3">
     <ul class="tablist">
       <li><a href="functions_func.html#index_a"><span>a</span></a></li>
+      <li><a href="functions_func_b.html#index_b"><span>b</span></a></li>
       <li class="current"><a href="functions_func_c.html#index_c"><span>c</span></a></li>
       <li><a href="functions_func_d.html#index_d"><span>d</span></a></li>
       <li><a href="functions_func_e.html#index_e"><span>e</span></a></li>
@@ -115,11 +116,10 @@
 </li>
 <li>close()
 : <a class="el" href="classstrus_1_1DatabaseClientInterface.html#a12ac2640adaf30c5fa698bd4b43e1d41">strus::DatabaseClientInterface</a>
-, <a class="el" href="classstrus_1_1StorageClientInterface.html#a1f13e4be0db12eab5835be93e17fc11a">strus::StorageClientInterface</a>
+, <a class="el" href="classstrus_1_1StorageClientInterface.html#a4ab84dc0ee94fe144fc018eca6253334">strus::StorageClientInterface</a>
 </li>
 <li>commit()
 : <a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#ac7f0990616f333a7fdf267e01e97ff5f">strus::DatabaseTransactionInterface</a>
-, <a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html#a4dbb66917acf517bc6d1301a682e0641">strus::PeerStorageTransactionInterface</a>
 , <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a1aafd624400bc3d81191011cfc3e57e0">strus::StorageAlterMetaDataTableInterface</a>
 , <a class="el" href="classstrus_1_1StorageTransactionInterface.html#a681c10df600e36f898797fdea88e88de">strus::StorageTransactionInterface</a>
 </li>
@@ -132,6 +132,9 @@
 </li>
 <li>createBackupCursor()
 : <a class="el" href="classstrus_1_1DatabaseClientInterface.html#ab2535a158bbd8803f0bd4aac2dd21e12">strus::DatabaseClientInterface</a>
+</li>
+<li>createBuilder()
+: <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html#aac96ae692b1b8d842bc7f14c902e72c1">strus::PeerMessageProcessorInterface</a>
 </li>
 <li>createClient()
 : <a class="el" href="classstrus_1_1DatabaseInterface.html#a1009c69c0aac2586114317c551747016">strus::DatabaseInterface</a>
@@ -176,9 +179,6 @@
 <li>createMetaDataReader()
 : <a class="el" href="classstrus_1_1StorageClientInterface.html#a06f8c8e118c96ee8c3c78cedd7cfda5b">strus::StorageClientInterface</a>
 </li>
-<li>createPeerStorageTransaction()
-: <a class="el" href="classstrus_1_1StorageClientInterface.html#a9d311f1899d723628d1f797a42bfb1e2">strus::StorageClientInterface</a>
-</li>
 <li>createQuery()
 : <a class="el" href="classstrus_1_1QueryEvalInterface.html#a785f11432b46e6381be51b58d973d6bf">strus::QueryEvalInterface</a>
 </li>
@@ -200,14 +200,16 @@
 <li>createTransaction()
 : <a class="el" href="classstrus_1_1DatabaseClientInterface.html#afa6f198f6f7ae388ff3688830b9a995b">strus::DatabaseClientInterface</a>
 , <a class="el" href="classstrus_1_1StorageClientInterface.html#ae744509cd0e668a7fdbdcc63e2a62a02">strus::StorageClientInterface</a>
-, <a class="el" href="classstrus_1_1StoragePeerInterface.html#a5b42ba82f8707262b2f2a1960c185a14">strus::StoragePeerInterface</a>
+</li>
+<li>createViewer()
+: <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html#a4339f0cf5933d9255090e612faee4039">strus::PeerMessageProcessorInterface</a>
 </li>
 </ul>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jul 25 2015 12:17:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Aug 16 2015 21:00:49 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
