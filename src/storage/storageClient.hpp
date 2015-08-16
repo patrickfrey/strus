@@ -36,7 +36,8 @@
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
 #include "compactNodeTrie.hpp"
-
+#include "initialStatsPopulateState.hpp"
+#include "strus/peerMessageProcessorInterface.hpp"
 namespace strus {
 
 /// \brief Forward declaration
@@ -59,10 +60,6 @@ class KeyAllocatorInterface;
 class DatabaseClientInterface;
 /// \brief Forward declaration
 class DocumentFrequencyCache;
-/// \brief Forward declaration
-class PeerStorageTransactionInterface;
-/// \brief Forward declaration
-class StoragePeerInterface;
 /// \brief Forward declaration
 class DocnoRangeAllocatorInterface;
 /// \brief Forward declaration
@@ -128,11 +125,13 @@ public:
 			const DocumentStatisticsType& stat,
 			const std::string& type) const;
 
-	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
+	virtual void pushPeerMessage( const char* msg, std::size_t msgsize);
+	virtual bool fetchPeerReply( const char*& msg, std::size_t& msgsize);
+	virtual void startPeerInit();
+	virtual bool fetchPeerMessage( const char*& msg, std::size_t& msgsize);
 
-	virtual void defineStoragePeerInterface(
-			const StoragePeerInterface* storagePeer,
-			bool doPopulateInitialState);
+	virtual void definePeerMessageProcessor(
+			const PeerMessageProcessorInterface* proc);
 
 	virtual void checkStorage( std::ostream& errorlog) const;
 
@@ -193,8 +192,9 @@ public:/*StorageTransaction*/
 		utils::Mutex* m_mutex;
 	};
 
-public:/*PeerStorageTransaction*/
+public:/*PeerMessageTransaction*/
 	void declareGlobalNofDocumentsInserted( const GlobalCounter& increment);
+	Index localDocumentFrequency( const Index& typeno, const Index& termno) const;
 
 public:/*StorageDocumentChecker*/
 	IndexSetIterator getAclIterator( const Index& docno) const;
@@ -224,7 +224,12 @@ private:
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	conotrie::CompactNodeTrie* m_termno_map;		///< map of the most important (most frequent) terms, if specified
 
-	const StoragePeerInterface* m_storagePeer;		///< reference to interface to other peer storages
+	const PeerMessageProcessorInterface* m_peermsgproc;	///< reference to interface to other peer storages
+	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder; ///< reference to builder of messages to other peers
+	std::string m_peerMessageBuffer;
+	std::string m_peerReplyMessageBuffer;
+	bool m_gotPeerReply;
+	InitialStatsPopulateState m_initialStatsPopulateState;	///< state for populating own statistics
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 };
 

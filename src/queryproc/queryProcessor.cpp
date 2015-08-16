@@ -69,6 +69,9 @@ QueryProcessor::QueryProcessor()
 	defineSummarizerFunction( "matchvariables", createSummarizerMatchVariables());
 }
 
+QueryProcessor::~QueryProcessor()
+{}
+
 void QueryProcessor::definePostingJoinOperator(
 		const std::string& name,
 		PostingJoinOperatorInterface* op)

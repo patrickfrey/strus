@@ -82,8 +82,8 @@ public:
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
 			int range) const
 	{
-		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected"));
-		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments"));
+		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for 'intersect'"));
+		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments for 'intersect'"));
 
 		return new IteratorIntersect( itrs);
 	}

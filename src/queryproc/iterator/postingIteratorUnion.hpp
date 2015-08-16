@@ -162,8 +162,8 @@ public:
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
 			int range) const
 	{
-		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for union join"));
-		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments for union join"));
+		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for 'union'"));
+		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments for 'union'"));
 
 		return new IteratorUnion( itrs);
 	}

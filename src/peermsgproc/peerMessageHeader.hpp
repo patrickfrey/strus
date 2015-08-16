@@ -26,27 +26,32 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface used by the storage to populate its local statistics to other peer storages (distributed index)
-/// \file storagePeerInterface.hpp
-#ifndef _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_PEER_INTERFACE_HPP_INCLUDED
+/// \brief Header of a peer message
+/// \file peerMessageHeader.hpp
+#ifndef _STRUS_PEER_MESSAGE_HEADER_HPP_INCLUDED
+#define _STRUS_PEER_MESSAGE_HEADER_HPP_INCLUDED
+#include <cstring>
+#include <stdint.h>
 
 namespace strus
 {
 
-class StoragePeerTransactionInterface;
-
-/// \brief Interface used by the storage to distribute statistics needed for document ranking to other peers in a cluster of storages
-class StoragePeerInterface
+struct PeerMessageHeader
 {
-public:
-	/// \brief Destructor
-	virtual ~StoragePeerInterface(){}
+	PeerMessageHeader()
+	{
+		std::memset( this, 0, sizeof(*this));
+	}
+	bool empty() const			{return nofDocumentsInsertedChange==0;}
 
-	/// \brief Creates a new transaction object to distribute statistics
-	/// \return return the pointer to the transaction object (with ownership - to be disposed with 'delete')
-	virtual StoragePeerTransactionInterface* createTransaction() const=0;
+	uint32_t nofDocumentsInsertedChange;
 };
+
+/*
+ * Message format:
+ * [PeerMessageHeader] [nof bytes last msg (UTF-8)] [nof bytes rest msg (UTF-8)] [rest msg bytes]
+ */
 }//namespace
 #endif
+
 

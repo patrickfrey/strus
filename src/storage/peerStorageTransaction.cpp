@@ -27,26 +27,37 @@
 --------------------------------------------------------------------
 */
 #include "peerStorageTransaction.hpp"
+#include "strus/peerMessageViewerInterface.hpp"
+#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/peerMessageProcessorInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "private/internationalization.hpp"
 #include "storageClient.hpp"
 
 using namespace strus;
 
-PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_)
+PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_)
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_documentFrequencyCache(dfcache_)
+	,m_peermsgproc(peermsgproc_)
 	,m_dbadapter_termvalue(database_)
 	,m_termvaluecnt(0)
 	,m_nofDocumentsInserted(0)
 	,m_commit(false)
-	,m_rollback(false)
 {}
 
-PeerStorageTransaction::~PeerStorageTransaction()
+void PeerStorageTransaction::clear()
 {
-	if (!m_rollback && !m_commit) rollback();
+	m_dfbatch.clear();
+	m_unknownTerms.clear();
+	m_unknownTerms_strings.clear();
+	m_newTerms.clear();
+	m_newTerms_strings.clear();
+	m_typeStrings.clear();
+	m_termvaluecnt = 0;
+	m_nofDocumentsInserted = 0;
+	m_commit = false;
 }
 
 void PeerStorageTransaction::updateNofDocumentsInsertedChange( const GlobalCounter& increment)
@@ -55,73 +66,110 @@ void PeerStorageTransaction::updateNofDocumentsInsertedChange( const GlobalCount
 }
 
 void PeerStorageTransaction::updateDocumentFrequencyChange(
-		const char* termtype, const char* termvalue, const GlobalCounter& increment)
+		const char* termtype, const char* termvalue, const GlobalCounter& increment, bool isNew)
 {
 	bool typeno_isNew = false;
 	Index typeno = m_storage->allocTypenoImm( termtype, typeno_isNew);
 	Index termno = m_dbadapter_termvalue.get( termvalue);
 	if (!termno)
 	{
-		m_unknownTerms.push_back( termvalue);
+		m_unknownTerms.push_back( m_unknownTerms_strings.size());
+		m_unknownTerms_strings.append( termvalue);
+		m_unknownTerms_strings.push_back( '\0');
 		termno = ++m_termvaluecnt + UnknownValueHandleStart;
 		if (m_termvaluecnt >= UnknownValueHandleStart)
 		{
 			throw strus::runtime_error( _TXT( "too many new terms inserted (peer storage transaction"));
 		}
+		if (isNew)
+		{
+			if (m_typeStrings.size() <= (std::size_t)typeno)
+			{
+				m_typeStrings.resize( typeno);
+			}
+			if (m_typeStrings[ typeno].empty())
+			{
+				m_typeStrings[ typeno] = termtype;
+			}
+			m_newTerms.push_back( NewTerm( m_newTerms_strings.size(), m_dfbatch.size()));
+			m_newTerms_strings.append( termvalue);
+			m_newTerms_strings.push_back( '\0');
+		}
 	}
 	m_dfbatch.put( typeno, termno, increment);
 }
 
-void PeerStorageTransaction::commit()
+std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 {
 	if (m_commit)
 	{
-		throw strus::runtime_error( _TXT( "called transaction commit twice"));
+		throw strus::runtime_error( _TXT( "called peer storage transaction run twice"));
 	}
-	if (m_rollback)
+	try
 	{
-		throw strus::runtime_error( _TXT( "called transaction commit after rollback"));
-	}
-	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-
-	StorageClient::TransactionLock lock( m_storage);
-	DocumentFrequencyCache::Batch cleaned_batch;
-	DocumentFrequencyCache::Batch::const_iterator bi = m_dfbatch.begin(), be = m_dfbatch.end();
-	for (; bi != be; ++bi)
-	{
-		if (bi->termno > UnknownValueHandleStart)
+		std::auto_ptr<PeerMessageViewerInterface> viewer( m_peermsgproc->createViewer( msg, msgsize));
+	
+		PeerMessageViewerInterface::DocumentFrequencyChange rec;
+		while (viewer->nextDfChange( rec))
 		{
-			const std::string& termkey = m_unknownTerms[ bi->termno - UnknownValueHandleStart - 1];
-			Index termno = m_dbadapter_termvalue.get( termkey);
-			if (!termno)
+			updateDocumentFrequencyChange( rec.type, rec.value, rec.increment, rec.isnew);
+		}
+		updateNofDocumentsInsertedChange( viewer->nofDocumentsInsertedChange());	
+	
+		StorageClient::TransactionLock lock( m_storage);
+		DocumentFrequencyCache::Batch cleaned_batch;
+		DocumentFrequencyCache::Batch::iterator bi = m_dfbatch.begin(), be = m_dfbatch.end();
+		for (; bi != be; ++bi)
+		{
+			if (bi->termno > UnknownValueHandleStart)
 			{
-				termno = m_storage->allocTermno();
-				m_dbadapter_termvalue.store( transaction.get(), termkey, termno);
-				cleaned_batch.put( bi->typeno, termno, bi->value);
+				std::size_t termidx = m_unknownTerms[ bi->termno - UnknownValueHandleStart - 1];
+				const char* termkey = m_unknownTerms_strings.c_str() + termidx;
+				Index termno = m_dbadapter_termvalue.get( termkey);
+				if (termno)
+				{
+					cleaned_batch.put( bi->typeno, termno, bi->value);
+					bi->termno = termno;
+				}
+			}
+			else
+			{
+				cleaned_batch.put( *bi);
 			}
 		}
-		else
+		PeerMessageProcessorInterface::BuilderOptions options;
+		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options));
+		std::vector<NewTerm>::const_iterator ti = m_newTerms.begin(), te = m_newTerms.end();
+		for (; ti != te; ++ti)
 		{
-			cleaned_batch.put( *bi);
+			const DocumentFrequencyCache::Batch::Increment& incr = m_dfbatch[ ti->batchidx];
+			if (incr.termno < UnknownValueHandleStart)
+			{
+				Index df = m_storage->localDocumentFrequency( incr.typeno, incr.termno);
+				const char* value = m_newTerms_strings.c_str() + ti->termidx;
+				const char* type = m_typeStrings[ incr.typeno].c_str();
+				msgbuilder->addDfChange( type, value, df, false);
+			}
 		}
+		std::string rt = msgbuilder->fetch();
+	
+		m_documentFrequencyCache->writeBatch( cleaned_batch);
+		m_storage->declareGlobalNofDocumentsInserted( m_nofDocumentsInserted);
+		m_commit = true;
+		m_nofDocumentsInserted = 0;
+		return rt;
 	}
-	m_documentFrequencyCache->writeBatch( cleaned_batch);
-	transaction->commit();
-	m_storage->declareGlobalNofDocumentsInserted( m_nofDocumentsInserted);
-	m_commit = true;
-	m_nofDocumentsInserted = 0;
+	catch (const std::bad_alloc& err)
+	{
+		clear();
+		throw err;
+	}
+	catch (const std::runtime_error& err)
+	{
+		clear();
+		throw err;
+	}
 }
 
-void PeerStorageTransaction::rollback()
-{
-	if (m_commit)
-	{
-		throw strus::runtime_error( _TXT( "called transaction rollback twice"));
-	}
-	if (m_rollback)
-	{
-		throw strus::runtime_error( _TXT( "called transaction rollback after commit"));
-	}
-	m_rollback = true;
-}
+
 

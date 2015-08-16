@@ -26,55 +26,19 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "private/localStructAllocator.hpp"
-#include <cstdlib>
-#include <map>
+/// \brief Exported functions of the strus peermsgproc library
+/// \file storage.hpp
+#ifndef _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
 
+/// \brief strus toplevel namespace
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseClientInterface;
-/// \brief Forward declaration
-class DatabaseTransactionInterface;
-/// \brief Forward declaration
-class PeerMessageBuilderInterface;
-/// \brief Forward declaration
-class KeyMapInv;
+class PeerMessageProcessorInterface;
 
-class DocumentFrequencyMap
-{
-public:
-	DocumentFrequencyMap( DatabaseClientInterface* database_)
-		:m_database(database_){}
-
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
-
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
-
-	void getWriteBatch(
-			DatabaseTransactionInterface* transaction,
-			PeerMessageBuilderInterface* peerMessageBuilder,
-			const KeyMapInv& termTypeMapInv,
-			const KeyMapInv& termValueMapInv);
-
-	void clear();
-
-private:
-	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
-	typedef std::less<Key> MapCompare;
-	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
-
-private:
-	DatabaseClientInterface* m_database;
-	Map m_map;
-};
+const PeerMessageProcessorInterface* getPeerMessageProcessor();
 
 }//namespace
 #endif
-
 

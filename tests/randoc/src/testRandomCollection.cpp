@@ -986,9 +986,8 @@ int main( int argc, const char* argv[])
 			}
 			if (nofQueries)
 			{
-				std::clock_t start;
+				std::clock_t start = std::clock();
 				unsigned int nofQueriesFailed = 0;
-				start = std::clock();
 				std::vector<std::vector<RandomQuery::Match> > result_matches;
 				std::vector<RandomQuery>::const_iterator qi = randomQueryAr.begin(), qe = randomQueryAr.end();
 				double arglen = 0.0;

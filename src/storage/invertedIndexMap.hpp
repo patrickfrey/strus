@@ -63,7 +63,7 @@ public:
 
 	void getWriteBatch(
 			DatabaseTransactionInterface* transaction,
-			StoragePeerTransactionInterface* peerTransaction,
+			PeerMessageBuilderInterface* peerMessageBuilder,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv);
 

@@ -26,55 +26,63 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "private/localStructAllocator.hpp"
-#include <cstdlib>
-#include <map>
+/// \brief Implementation of the interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
+/// \file peerMessageBuilderInterface.hpp
+#ifndef _STRUS_PEER_MESSAGE_BUILDER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_PEER_MESSAGE_BUILDER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/peerMessageBuilderInterface.hpp"
+#include "compactNodeTrie.hpp"
+#include <string>
+#include <vector>
+#include <list>
 
-namespace strus {
+namespace strus
+{
 
-/// \brief Forward declaration
-class DatabaseClientInterface;
-/// \brief Forward declaration
-class DatabaseTransactionInterface;
-/// \brief Forward declaration
-class PeerMessageBuilderInterface;
-/// \brief Forward declaration
-class KeyMapInv;
-
-class DocumentFrequencyMap
+class PeerMessageBuilder
+	:public PeerMessageBuilderInterface
 {
 public:
-	DocumentFrequencyMap( DatabaseClientInterface* database_)
-		:m_database(database_){}
+	PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_);
+	virtual ~PeerMessageBuilder();
 
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
+	virtual void setNofDocumentsInsertedChange(
+			int increment);
 
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
+	virtual void addDfChange(
+			const char* termtype,
+			const char* termvalue,
+			int increment,
+			bool isnew);
 
-	void getWriteBatch(
-			DatabaseTransactionInterface* transaction,
-			PeerMessageBuilderInterface* peerMessageBuilder,
-			const KeyMapInv& termTypeMapInv,
-			const KeyMapInv& termValueMapInv);
+	virtual std::string fetch();
 
+	virtual void start();
+
+	virtual void rollback();
+
+private:
+	void addDfChange_final(
+			const std::string& key,
+			int increment,
+			bool isnew);
+	void addDfChange_tree(
+			const std::string& key,
+			int increment,
+			bool isnew);
+	void moveTree();
+	void newContent();
 	void clear();
 
 private:
-	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
-	typedef std::less<Key> MapCompare;
-	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
-
-private:
-	DatabaseClientInterface* m_database;
-	Map m_map;
+	bool m_insertInLexicalOrder;
+	std::string m_lastkey;
+	std::list<std::string> m_content;
+	conotrie::CompactNodeTrie m_tree;
+	std::size_t m_cnt;
+	std::size_t m_blocksize;
+	std::size_t m_maxblocksize;
 };
-
 }//namespace
 #endif
-
 

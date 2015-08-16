@@ -26,44 +26,48 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Transaction interface for peer storages to update the global statistics of a storage (distributed index)
-/// \file "peerStorageTransactionInterface.hpp"
-#ifndef _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#include "strus/index.hpp"
+/// \brief Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
+/// \file peerMessageBuilderInterface.hpp
+#ifndef _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
+#define _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
+#include <cstdlib>
+#include <string>
 
 namespace strus
 {
 
-/// \brief Interface for a transaction on the local storage opened by a peer for updating global statistic changes
-class PeerStorageTransactionInterface
+/// \brief Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
+class PeerMessageBuilderInterface
 {
 public:
 	/// \brief Destructor
-	/// \note The destructor should do an automatic rollback if not issued yet
-	virtual ~PeerStorageTransactionInterface(){}
+	virtual ~PeerMessageBuilderInterface(){}
 
-	/// \brief Prepare to update the total number of documents inserted
-	/// \param[in] increment value to use for update (positive or negative)
-	/// \note throws if the update was not successful
-	virtual void updateNofDocumentsInsertedChange(
-			const GlobalCounter& increment)=0;
+	/// \brief Define the change of the number of document inserted
+	/// \param[in] increment positive or negative (decrement) value of the local change of the collection size
+	virtual void setNofDocumentsInsertedChange(
+			int increment)=0;
 
-	/// \brief Prepare to update the global document frequency used for calculations
+	/// \brief Add a message propagating a change in the df (document frequency)
 	/// \param[in] termtype type of the term
 	/// \param[in] termvalue value of the term
-	/// \param[in] increment change (positive or negative value)
-	/// \note throws if the operation was not successful
-	virtual void updateDocumentFrequencyChange(
+	/// \param[in] increment positive or negative (decrement) value of the local change of the document frequency
+	/// \param[in] isnew true, if the feature is new in the index of the sender. Triggers the receivers to send their value back for update
+	virtual void addDfChange(
 			const char* termtype,
 			const char* termvalue,
-			const GlobalCounter& increment)=0;
+			int increment,
+			bool isnew)=0;
 
-	/// \brief Commit of the transaction
-	virtual void commit()=0;
+	/// \brief Mark the current state that can be restored with a rollback
+	virtual void start()=0;
 
-	/// \brief Rollback of the transaction
+	/// \brief Rollback to the last state marked with 'start()'
 	virtual void rollback()=0;
+
+	/// \brief Get the packed message to be sent to a peer
+	/// \return the message or an empty string if there is none left
+	virtual std::string fetch()=0;
 };
 }//namespace
 #endif

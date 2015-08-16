@@ -26,55 +26,37 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "private/localStructAllocator.hpp"
-#include <cstdlib>
-#include <map>
+/// \brief Implementation of the interface for a viewer of a message received from a peer with some statistics (distributed index)
+/// \file peerMessageViewerInterface.hpp
+#ifndef _STRUS_PEER_MESSAGE_VIEWER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_PEER_MESSAGE_VIEWER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/peerMessageViewerInterface.hpp"
+#include "peerMessageHeader.hpp"
+#include <stdint.h>
+#include <string>
 
-namespace strus {
+namespace strus
+{
 
-/// \brief Forward declaration
-class DatabaseClientInterface;
-/// \brief Forward declaration
-class DatabaseTransactionInterface;
-/// \brief Forward declaration
-class PeerMessageBuilderInterface;
-/// \brief Forward declaration
-class KeyMapInv;
-
-class DocumentFrequencyMap
+class PeerMessageViewer
+	:public PeerMessageViewerInterface
 {
 public:
-	DocumentFrequencyMap( DatabaseClientInterface* database_)
-		:m_database(database_){}
+	PeerMessageViewer( const char* peermsgptr, std::size_t peermsgsize);
+	virtual ~PeerMessageViewer();
 
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
+	virtual int nofDocumentsInsertedChange();
 
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
-
-	void getWriteBatch(
-			DatabaseTransactionInterface* transaction,
-			PeerMessageBuilderInterface* peerMessageBuilder,
-			const KeyMapInv& termTypeMapInv,
-			const KeyMapInv& termValueMapInv);
-
-	void clear();
+	virtual bool nextDfChange( DocumentFrequencyChange& rec);
 
 private:
-	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
-	typedef std::less<Key> MapCompare;
-	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
-
-private:
-	DatabaseClientInterface* m_database;
-	Map m_map;
+	const PeerMessageHeader* m_hdr;
+	const char* m_peermsgptr;
+	char const* m_peermsgitr;
+	char const* m_peermsgend;
+	std::size_t m_peermsgsize;
+	std::string m_msg;
 };
-
 }//namespace
 #endif
-
 

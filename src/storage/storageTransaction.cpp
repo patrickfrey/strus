@@ -31,8 +31,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
-#include "strus/storagePeerInterface.hpp"
-#include "strus/storagePeerTransactionInterface.hpp"
+#include "strus/peerMessageBuilderInterface.hpp"
 #include "storageDocument.hpp"
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
@@ -48,12 +47,12 @@ using namespace strus;
 StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
-		const StoragePeerInterface* storagePeer_,
+		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
 		const conotrie::CompactNodeTrie* termnomap_)
 	:m_storage(storage_)
 	,m_database(database_)
-	,m_storagePeer(storagePeer_)
+	,m_peerMessageBuilder(peerMessageBuilder_)
 	,m_metadescr(metadescr_)
 	,m_attributeMap(database_)
 	,m_metaDataMap(database_,metadescr_)
@@ -69,7 +68,7 @@ StorageTransaction::StorageTransaction(
 	,m_commit(false)
 	,m_rollback(false)
 {
-	if (m_storagePeer)
+	if (m_peerMessageBuilder)
 	{
 		m_termTypeMap.defineInv( &m_termTypeMapInv);
 		m_termValueMap.defineInv( &m_termValueMapInv);
@@ -260,6 +259,26 @@ void StorageTransaction::updateMetaData(
 
 void StorageTransaction::commit()
 {
+	// Structure to make the rollback method be called in case of an exeption
+	struct PeerMessageBuilderScope
+	{
+		PeerMessageBuilderScope( PeerMessageBuilderInterface* obj_)
+			:m_obj(obj_)
+		{
+			if (m_obj) m_obj->start();
+		}
+		void done()
+		{
+			m_obj = 0;
+		}
+		~PeerMessageBuilderScope()
+		{
+			if (m_obj) m_obj->rollback();
+		}
+
+	private:
+		 PeerMessageBuilderInterface* m_obj;
+	};
 	if (m_commit)
 	{
 		throw strus::runtime_error( _TXT( "called transaction commit twice"));
@@ -283,14 +302,10 @@ void StorageTransaction::commit()
 	
 		m_invertedIndexMap.renameNewTermNumbers( termnoUnknownMap);
 
-		Reference<StoragePeerTransactionInterface> peerTransaction;
-		if (m_storagePeer)
-		{
-			peerTransaction.reset( m_storagePeer->createTransaction());
-		}
+		PeerMessageBuilderScope peerMessageBuilderScope( m_peerMessageBuilder);
 		m_invertedIndexMap.getWriteBatch(
 				transaction.get(),
-				peerTransaction.get(),
+				m_peerMessageBuilder,
 				m_termTypeMapInv, m_termValueMapInv);
 
 		m_forwardIndexMap.getWriteBatch( transaction.get());
@@ -304,19 +319,10 @@ void StorageTransaction::commit()
 		}
 
 		m_storage->getVariablesWriteBatch( transaction.get(), m_nof_documents);
-		if (m_storagePeer)
-		{
-			peerTransaction->populateNofDocumentsInsertedChange( m_nof_documents);
-			peerTransaction->try_commit();
-			transaction->commit();
-			peerTransaction->final_commit();
-		}
-		else
-		{
-			transaction->commit();
-		}
+		transaction->commit();
 		m_storage->declareNofDocumentsInserted( m_nof_documents);
 		m_storage->releaseTransaction( refreshList);
+		peerMessageBuilderScope.done();
 	}
 	m_commit = true;
 	m_nof_documents = 0;

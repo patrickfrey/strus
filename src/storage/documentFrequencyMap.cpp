@@ -30,7 +30,7 @@
 #include "databaseAdapter.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/storagePeerTransactionInterface.hpp"
+#include "strus/peerMessageBuilderInterface.hpp"
 #include "private/internationalization.hpp"
 #include "keyMap.hpp"
 #include "keyMapInv.hpp"
@@ -81,7 +81,7 @@ void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& re
 
 void DocumentFrequencyMap::getWriteBatch(
 		DatabaseTransactionInterface* transaction,
-		StoragePeerTransactionInterface* peerTransaction,
+		PeerMessageBuilderInterface* peerMessageBuilder,
 		const KeyMapInv& termTypeMapInv,
 		const KeyMapInv& termValueMapInv)
 {
@@ -93,14 +93,14 @@ void DocumentFrequencyMap::getWriteBatch(
 
 		Index df = DatabaseAdapter_DocFrequency::get(
 				m_database, mi->first.first/*typeno*/, mi->first.second/*termno*/);
-		if (peerTransaction)
+		if (peerMessageBuilder)
 		{
 			const char* typestr = termTypeMapInv.get( mi->first.first/*typeno*/);
 			const char* termstr = termValueMapInv.get( mi->first.second/*termno*/);
 			if (!typestr) throw strus::runtime_error( _TXT( "term type not defined in inverse key map for typeno %d"), mi->first.first);
 			if (!termstr) throw strus::runtime_error( _TXT( "term value not defined in inverse key map for termno %d"), mi->first.second);
 
-			peerTransaction->populateDocumentFrequencyChange( typestr, termstr, mi->second, (df==0));
+			peerMessageBuilder->addDfChange( typestr, termstr, mi->second, (df==0));
 		}
 		df += mi->second;
 		if (df < 0) throw strus::runtime_error( _TXT( "document frequency got negative"));

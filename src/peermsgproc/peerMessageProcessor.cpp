@@ -26,29 +26,27 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Version of the strus core (storage) project
-/// \file versionStorage.hpp
-#ifndef _STRUS_VERSION_HPP_INCLUDED
-#define _STRUS_VERSION_HPP_INCLUDED
+/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
+/// \file peerMessageProcessor.cpp
+#include "peerMessageProcessor.hpp"
+#include "peerMessageBuilder.hpp"
+#include "peerMessageViewer.hpp"
 
-/// \brief strus toplevel namespace
-namespace strus
+using namespace strus;
+
+PeerMessageProcessor::PeerMessageProcessor(){}
+
+PeerMessageProcessor::~PeerMessageProcessor(){}
+
+PeerMessageViewerInterface* PeerMessageProcessor::createViewer(
+			const char* peermsgptr, std::size_t peermsgsize) const
 {
+	return new PeerMessageViewer( peermsgptr, peermsgsize);
+}
 
-/// \brief Version number of the strus core (storage)
-#define STRUS_STORAGE_VERSION (\
-	0 * 1000000\
-	+ 1 * 10000\
-	+ 6\
-)
+PeerMessageBuilderInterface* PeerMessageProcessor::createBuilder( const BuilderOptions& options_) const
+{
+	return new PeerMessageBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize);
+}
 
-/// \brief Major version number of the strus core (storage)
-#define STRUS_STORAGE_VERSION_MAJOR 0
-/// \brief Minor version number of the strus core (storage)
-#define STRUS_STORAGE_VERSION_MINOR 1
 
-/// \brief The version of the strus core (storage) as string
-#define STRUS_STORAGE_VERSION_STRING "0.1.6"
-
-}//namespace
-#endif

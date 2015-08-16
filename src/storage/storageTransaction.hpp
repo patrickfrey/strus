@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_TRANSACTION_HPP_INCLUDED
-#define _STRUS_LVDB_TRANSACTION_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
+#define _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "metaDataBlock.hpp"
@@ -56,7 +56,7 @@ class StorageClient;
 /// \brief Forward declaration
 class DatabaseClientInterface;
 /// \brief Forward declaration
-class StoragePeerInterface;
+class PeerMessageBuilderInterface;
 
 
 /// \class StorageTransaction
@@ -64,10 +64,11 @@ class StorageTransaction
 	:public StorageTransactionInterface
 {
 public:
+	///\param[in] peerMessageBuilder_ Builder for peer messages owned by caller
 	StorageTransaction( 
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
-		const StoragePeerInterface* storagePeer_,
+		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
 		const conotrie::CompactNodeTrie* termnomap_);
 
@@ -130,9 +131,9 @@ public:/*Document*/
 	void closeForwardIndexDocument();
 
 private:
-	StorageClient* m_storage;					///< Storage to call refresh after commit or rollback
-	DatabaseClientInterface* m_database;				///< database handle
-	const StoragePeerInterface* m_storagePeer;		///< interface to populate global statistics
+	StorageClient* m_storage;				///< Storage to call refresh after commit or rollback
+	DatabaseClientInterface* m_database;			///< database handle
+	PeerMessageBuilderInterface* m_peerMessageBuilder;	///< interface to populate global statistics
 	const MetaDataDescription* m_metadescr;			///< description of metadata
 
 	AttributeMap m_attributeMap;				///< map of document attributes for writing

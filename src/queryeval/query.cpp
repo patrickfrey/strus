@@ -247,7 +247,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
-							m_expressions[ *ni]));
+							m_expressions[ nodeIndex(*ni)]));
 				m_nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 		}

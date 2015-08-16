@@ -26,29 +26,25 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Version of the strus core (storage) project
-/// \file versionStorage.hpp
-#ifndef _STRUS_VERSION_HPP_INCLUDED
-#define _STRUS_VERSION_HPP_INCLUDED
+/// \brief Exported functions of the strus peermsgproc library
+/// \file libstrus_peermsgproc.cpp
+#include "strus/lib/peermsgproc.hpp"
+#include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
+#include "peerMessageProcessor.hpp"
 
-/// \brief strus toplevel namespace
-namespace strus
+using namespace strus;
+
+DLL_PUBLIC const PeerMessageProcessorInterface* strus::getPeerMessageProcessor()
 {
+	static const PeerMessageProcessor proc;
+	static bool intl_initialized = false;
+	if (!intl_initialized)
+	{
+		strus::initMessageTextDomain();
+		intl_initialized = true;
+	}
+	return &proc;
+}
 
-/// \brief Version number of the strus core (storage)
-#define STRUS_STORAGE_VERSION (\
-	0 * 1000000\
-	+ 1 * 10000\
-	+ 6\
-)
 
-/// \brief Major version number of the strus core (storage)
-#define STRUS_STORAGE_VERSION_MAJOR 0
-/// \brief Minor version number of the strus core (storage)
-#define STRUS_STORAGE_VERSION_MINOR 1
-
-/// \brief The version of the strus core (storage) as string
-#define STRUS_STORAGE_VERSION_STRING "0.1.6"
-
-}//namespace
-#endif

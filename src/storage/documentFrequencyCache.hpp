@@ -59,7 +59,7 @@ public:
 	public:
 		class Increment;
 
-		void put( const Index& typeno, const Index termno, const GlobalCounter& increment)
+		void put( const Index& typeno, const Index& termno, const GlobalCounter& increment)
 		{
 			m_ar.push_back( Increment( typeno, termno, increment));
 		}
@@ -67,10 +67,27 @@ public:
 		{
 			m_ar.push_back( o);
 		}
+
+		std::size_t size() const
+		{
+			return m_ar.size();
+		}
+		void clear()
+		{
+			m_ar.clear();
+		}
 		typedef std::vector<Increment>::const_iterator const_iterator;
+		typedef std::vector<Increment>::iterator iterator;
 
 		const_iterator begin() const	{return m_ar.begin();}
 		const_iterator end() const	{return m_ar.end();}
+		iterator begin()		{return m_ar.begin();}
+		iterator end()			{return m_ar.end();}
+
+		const Increment& operator[]( std::size_t idx) const
+		{
+			return m_ar[ idx];
+		}
 
 	public:
 		class Increment

@@ -96,7 +96,7 @@ public:
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range_) const
 	{
-		if (argitr.size() < 2) throw strus::runtime_error( _TXT( "too few arguments"));
+		if (argitr.size() < 2) throw strus::runtime_error( _TXT( "too few arguments for 'sequence_struct'"));
 
 		return new IteratorStructSequence( range_, argitr, true);
 	}
@@ -112,7 +112,7 @@ public:
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range_) const
 	{
-		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments"));
+		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments for 'sequence_struct'"));
 
 		return new IteratorStructSequence( range_, argitr, false);
 	}

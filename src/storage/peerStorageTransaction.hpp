@@ -28,7 +28,6 @@
 */
 #ifndef _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
 #define _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
-#include "strus/peerStorageTransactionInterface.hpp"
 #include "documentFrequencyCache.hpp"
 #include "databaseAdapter.hpp"
 #include <string>
@@ -43,40 +42,56 @@ class StorageClient;
 class DocumentFrequencyCache;
 /// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class PeerMessageProcessorInterface;
 
 /// \brief Interface for a transaction of global statistic changes
 class PeerStorageTransaction
-	:public PeerStorageTransactionInterface
 {
 public:
-	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_);
-	virtual ~PeerStorageTransaction();
+	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_);
+	~PeerStorageTransaction(){}
 
-	virtual void updateNofDocumentsInsertedChange( const GlobalCounter& increment);
-
-	virtual void updateDocumentFrequencyChange(
-			const char* termtype, const char* termvalue, const GlobalCounter& increment);
-
-	virtual void commit();
-
-	virtual void rollback();
+	std::string run( const char* msg, std::size_t msgsize);
 
 private:
+	void clear();
+
+	void updateNofDocumentsInsertedChange( const GlobalCounter& increment);
+	void updateDocumentFrequencyChange(
+			const char* termtype, const char* termvalue, const GlobalCounter& increment, bool isNew);
+
 	enum {
 		UnknownValueHandleStart=(1<<30)
+	};
+
+	struct NewTerm
+	{
+	public:
+		NewTerm( std::size_t termidx_, std::size_t batchidx_)
+			:termidx(termidx_),batchidx(batchidx_){}
+		NewTerm( const NewTerm& o)
+			:termidx(o.termidx),batchidx(o.batchidx){}
+
+		std::size_t termidx;
+		std::size_t batchidx;
 	};
 
 private:
 	StorageClient* m_storage;
 	DatabaseClientInterface* m_database;
 	DocumentFrequencyCache* m_documentFrequencyCache;
+	const PeerMessageProcessorInterface* m_peermsgproc;
 	DocumentFrequencyCache::Batch m_dfbatch;
-	std::vector<std::string> m_unknownTerms;
+	std::vector<std::size_t> m_unknownTerms;
+	std::string m_unknownTerms_strings;
+	std::vector<NewTerm> m_newTerms;
+	std::string m_newTerms_strings;
+	std::vector<std::string> m_typeStrings;
 	DatabaseAdapter_TermValue::ReadWriter m_dbadapter_termvalue;
 	Index m_termvaluecnt;
 	GlobalCounter m_nofDocumentsInserted;
 	bool m_commit;
-	bool m_rollback; 
 };
 }//namespace
 #endif

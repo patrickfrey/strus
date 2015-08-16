@@ -108,9 +108,9 @@ public:
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range) const
 	{
-		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected"));
-		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments"));
-		if (argitr.size() > 1) throw strus::runtime_error( _TXT( "too many arguments"));
+		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for 'succ'"));
+		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments for 'succ'"));
+		if (argitr.size() > 1) throw strus::runtime_error( _TXT( "too many arguments for 'succ'"));
 
 		return new IteratorSucc( argitr[0]);
 	}
