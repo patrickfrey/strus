@@ -5,6 +5,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
+#include "private/internationalization.hpp"
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
@@ -48,6 +49,10 @@ bool Accumulator::nextRank(
 	std::vector<SelectorPostings>::const_iterator
 		si = m_selectorPostings.begin() + m_selectoridx,
 		se = m_selectorPostings.end();
+	if (si == se)
+	{
+		throw strus::runtime_error( _TXT( "query has no valid selection set defined"));
+	}
 	while (si != se)
 	{
 		// Select candidate document:
