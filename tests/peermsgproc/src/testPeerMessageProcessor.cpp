@@ -154,7 +154,7 @@ static std::string randomTerm()
 	for (; li < le; ++li)
 	{
 		unsigned int pf = (li * val) >> 8;
-		unsigned int chidx = ((val^pf) % 4);
+		unsigned int chidx = ((val^pf) % 52);
 		rt.push_back( alphabet[chidx]);
 	}
 	StlRandomGen rnd;
