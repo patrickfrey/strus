@@ -51,7 +51,8 @@ class KeyMapInv;
 class KeyMap
 {
 public:
-	enum {DefaultMaxCachedKeyLen=16};
+	/// \brief Maximum size of key to insert into the cache
+	enum {DefaultMaxCachedKeyLen=20};
 
 	KeyMap( DatabaseClientInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
