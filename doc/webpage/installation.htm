@@ -60,12 +60,17 @@ unzip master.zip
 		<ul>
 		<li><a href="http://www.boost.org">boost (>= 1.53)</a></li>
 		<li><a href="https://github.com/google/leveldb">leveldb</a> (needed by strus)</li>
-		<li><a href="http://libevent.org">libevent (2.x)</a> (needed by strusRpc)</li>
-		<li><a href="http://www.swig.org">SWIG (>= 2)</a> (needed by strusBindings)</li>
 		<li><a href="https://code.google.com/p/gperftools">gperftools</a>(needed by leveldb)</li>
 		<li><a href="http://savannah.nongnu.org/projects/libunwind">libunwind</a> (needed by leveldb)</li>
 		<li><a href="https://code.google.com/p/snappy">snappy</a> (needed by leveldb)</li>
-		<li><a href="http://php.net">PHP</a> (needed by strusBindings)</li>
+		<li><a href="http://www.swig.org">SWIG (>= 2)</a> (needed by strusBindings)</li>
+		</ul>
+		</p>
+		<p class="description">and some optional 3rd party packages:
+		<ul>
+		<li><a href="http://php.net">PHP</a> (needed by strusBindings when building with -DWITH_PHP)</li>
+		<li><a href="http://java.com">Java/JNI</a> Java openjdk >= 1.7 (needed by strusBindings when building with -DWITH_JAVA)</li>
+		<li><a href="http://python.org">Python</a> python >= 3.4 (needed by strusBindings when building with -DWITH_PYTHON)</li>
 		</ul>
 		</p>
 		<h2>Build</h2>
