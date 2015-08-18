@@ -1,9 +1,9 @@
 GLOSSARY
 
-* parameter to storage with maximum string size to insert in the cache (compact node trie), 0 if no caching should be done, default 16
+definePhraseType mit parameter mit zusätzlichen tokenizern, welche auch in die posinfo berechnung eingezogen werden
+"Herr K.Müller" > herr,1 k,2 muller,4 (statt 3!)  word/punct,brackets 
+
 * join operator for subsequence that matches the longest subsequence (summarizer for information ectraction in Wikipedia search)
 * BUG in end of sentence recognition (document analysis)
 
-segmenter with other encodings than UTF-8
-template project derived from strusWikipediaSearch
 
