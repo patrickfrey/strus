@@ -120,7 +120,7 @@ public:
 	{
 		if (m_type.empty())
 		{
-			throw strus::runtime_error( _TXT( "emtpy forward index type definition (parameter 'type') in match phrase summarizer configuration"));
+			throw strus::runtime_error( _TXT( "empty forward index type definition (parameter 'type') in match phrase summarizer configuration"));
 		}
 		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_type, m_delimiter, m_assign);
 	}

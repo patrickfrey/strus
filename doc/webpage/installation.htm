@@ -3,7 +3,7 @@
 <head>
 	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<meta name="description" content="Insallation guide of strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="description" content="Installation guide for strus, a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
 	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
 	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
@@ -32,31 +32,34 @@
 		</p>
 
 		<a name="github"> </a>
-		<h2>Fetch it from github</h2>
-		<p class="description">You can also fetch the projects from github and build them
-		on your own. In order to fetch them from github by cloning it with:
+		<h2>Clone from github</h2>
+		<p class="description">You can clone the projects from github:
 		<pre>
 git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</pre>
-		or by downloading and unpacking it with:
-		<pre>
-
-wget https://github.com/patrickfrey/&lt;projectname&gt;/archive/master.zip
-unzip master.zip
-		</pre>
-		The following projects (substitute for &lt;projectname&gt;) you need to fetch: 
-		<b>strus</b>, <b>strusAnalyzer</b>, <b>strusModule</b>, <b>strusRpc</b>, <b>strusBindings</b>, <b>strusUtilities</b>.
+		The following projects (substitute for &lt;projectname&gt;) are part of the strus universe:
+		<a href="https://github.com/patrickfrey/strus">strus</a>, <a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>, <a href="https://github.com/patrickfrey/strusModule">strusModule</a>, <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>, <a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>, <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
 		</p>
+
+		<h2>Build the latest stable version</h2>
+		<p class="description">If you extract the build description from the
+		current docker images of <a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404-env/Dockerfile">the pre-requisites</a>,
+		<a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404/Dockerfile">the core</a>
+		and the <a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404-bind/Dockerfile">language bindings</a>,
+		you get a version that builds and runs. These images are maintained, because some tutorials,
+		articles and some example projects rely on them.
+		</p>
+		
 		<h2>Plattforms supported</h2>
 		<p class="description">Currently only my development platform <b>Ubuntu 14.04.2 LTS</b>
 		and the deployment platform for the Wikipedia search <b>4.0.5-1-ARCH</b> is
-		guaranteed to be built without problems. On other platforms with a different gcc, 
+		guaranteed to be built without problems. On other platforms with a different gcc,
 		you might get compile warnings that are treated as errors. Please contact 
-		me immediately if you run into problems.
-		Build errors on any Linux I will handle with top priority. </p>
+		me if you run into problems.</p>
+
 		<h2>3rd party dependencies</h2>
 		<p class="description">
-		Hier is a list of 3rd party software you need to install for strus:
+		Hier is a list of 3rd party software you need to install for strus.:
 		<ul>
 		<li><a href="http://www.boost.org">boost (>= 1.53)</a></li>
 		<li><a href="https://github.com/google/leveldb">leveldb</a> (needed by strus)</li>
@@ -70,10 +73,11 @@ unzip master.zip
 		<ul>
 		<li><a href="http://php.net">PHP</a> (needed by strusBindings when building with -DWITH_PHP)</li>
 		<li><a href="http://java.com">Java/JNI</a> Java openjdk >= 1.7 (needed by strusBindings when building with -DWITH_JAVA)</li>
-		<li><a href="http://python.org">Python</a> python >= 3.4 (needed by strusBindings when building with -DWITH_PYTHON)</li>
+		<li><a href="http://python.org">Python</a> python >= 2.7 (needed by strusBindings when building with -DWITH_PYTHON)</li>
 		</ul>
 		</p>
-		<h2>Build</h2>
+
+		<h2>Build system</h2>
 		<p class="description">The build system is CMake. Go into the top level directory 
 		of each project and execute the following:
 		<pre>

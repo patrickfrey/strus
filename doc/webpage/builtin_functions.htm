@@ -130,25 +130,68 @@
 		</tr><tr>
 		<td><p class="identifier">metadata</p></td>
 		<td><p class="description">Return the value of a meta data table element as summary.
+		It has the following parameters:
+			<ul>
+			<li><b>name:</b>&nbsp;Name of the meta data element to return
+			</li>
+			</ul>
 		</p></td>
 		</tr><tr>
 		<td><p class="identifier">attribute</p></td>
 		<td><p class="description">Return the value of a document attribue as summary.
+		It has the following parameters:
+			<ul>
+			<li><b>name:</b>&nbsp;Name of the attribute to return
+			</li>
+			</ul>
 		</p></td>
 		</tr><tr>
 		<td><p class="identifier">matchpos</p></td>
 		<td><p class="description">Return the feature matches as readable list of 
 		position numbers as summary (mainly for debugging purposes).
+		It has the following parameters:
+			<ul>
+			<li><b>match:</b>&nbsp;Feature with the matches to print the positions 
+			</li>
+			</ul>
 		</p></td>
 		</tr><tr>
 		<td><p class="identifier">matchphrase</p></td>
 		<td><p class="description">Return the forward index features of the sentences 
 		covering the best matching windows in the result documents as summary.
+		It has the following parameters:
+			<ul>
+			<li><b>type:</b>&nbsp;Name of the forward index element to build the summary with
+			</li>
+			<li><b>mark:</b>&nbsp;Highlighting tags for marking matches in the summary as pair of start and end tag separated with a '$'
+			</li>
+			<li><b>len:</b>&nbsp;Maximum length of one summary
+			</li>
+			<li><b>nof:</b>&nbsp;Maximum number of returned passages
+			</li>
+			<li><b>structseek:</b>&nbsp;Distance to seek for structure delimiters (punctuation)
+			</li>
+			<li><b>match:</b>&nbsp;Feature with the matches to use for weighting the passages for the summary 
+			</li>
+			<li><b>struct:</b>&nbsp;Feature describing structure delimiters (punctuation)
+			</li>
+			</ul>
 		</p></td>
 		</tr><tr>
 		<td><p class="identifier">matchvariables</p></td>
 		<td><p class="description">Return the features in the forward index that are
 		referenced as position by variables in matching expressions.
+		It has the following parameters:
+			<ul>
+			<li><b>type:</b>&nbsp;Name of the forward index element to build the summary with
+			</li>
+			<li><b>delimiter:</b>&nbsp;Delimiter to use for multiple elements matching (optional, default is ',')
+			</li>
+			<li><b>assign:</b>&nbsp;Assignment operator to use for results (optional, default is '=')
+			</li>
+			<li><b>match:</b>&nbsp;Feature with the matches to extract the variables assignments from
+			</li>
+			</ul>
 		</p></td>
 		</tr>
 		</table>

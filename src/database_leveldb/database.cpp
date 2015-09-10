@@ -51,7 +51,7 @@ bool Database::exists( const std::string& configsource) const
 	path.append( "CURRENT");
 
 	// ... this is a little bit a hack but levelDB version <= 1.15 always creates files
-	// and nthis is not intended by a simple check
+	// and this is not intended by a simple check
 	return isFile( path);
 }
 
