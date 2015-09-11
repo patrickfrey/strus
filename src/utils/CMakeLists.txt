@@ -41,6 +41,7 @@ set_target_properties(
 )
 
 add_library( strus_unreliable_malloc SHARED unreliableMalloc.c )
+target_link_libraries( strus_unreliable_malloc  dl )
 set_target_properties(
     strus_unreliable_malloc
     PROPERTIES
