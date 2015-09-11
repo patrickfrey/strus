@@ -40,11 +40,22 @@ set_target_properties(
     VERSION ${STRUS_VERSION}
 )
 
+add_library( strus_unreliable_malloc SHARED unreliableMalloc.c )
+set_target_properties(
+    strus_unreliable_malloc
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
 
 # ------------------------------
 # INSTALLATION
 # ------------------------------
 install( TARGETS strus_utils
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
+
+install( TARGETS strus_unreliable_malloc
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
 
