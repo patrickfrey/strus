@@ -74,7 +74,7 @@ private:
 	unsigned int m_maxOpenFiles;			///< maximum number of files to be opened by Level DB
 	unsigned int m_cachesize_k;			///< kilobytes of LRU cache to use
 	bool m_compression;				///< true if compression enabled
-	unsigned int m_writeBufferSize;		///< size of write buffer (default 4M)
+	unsigned int m_writeBufferSize;			///< size of write buffer (default 4M)
 	unsigned int m_blockSize;			///< block unit size (default 4K)
 };
 

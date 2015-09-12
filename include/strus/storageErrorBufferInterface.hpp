@@ -26,38 +26,45 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Cursor interface to read the content of a snapshot of the key/value store database for backup
-/// \file "databaseBackupCursorInterface.hpp"
-#ifndef _STRUS_STORAGE_DATABASE_BACKUP_CURSOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_DATABASE_BACKUP_CURSOR_INTERFACE_HPP_INCLUDED
-#include <string>
+/// \brief Interface for reporting and catching errors in the core (storage)
+/// \file storageErrorBufferInterface.hpp
+#ifndef _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
 
+/// \brief strus toplevel namespace
 namespace strus
 {
 
-/// \brief Database cursor interface that can be used for backup
-class DatabaseBackupCursorInterface
+/// \class StorageErrorBufferInterface
+/// \brief Interface for reporting and catching errors in the core (storage)
+class StorageErrorBufferInterface
 {
 public:
+	enum ErrorClass
+	{
+		None,		///< no error
+		RuntimeError,	///< runtime error
+		BadAlloc	///< memory allocation error
+	};
+
 	/// \brief Destructor
-	virtual ~DatabaseBackupCursorInterface(){}
+	virtual ~StorageErrorBufferInterface(){}
 
-	/// \brief Fetches then next block to backup
-	/// \param[out] key pointer to the key of the block
-	/// \param[out] keysize size of key in bytes
-	/// \param[out] blk pointer to the value of the block
-	/// \param[out] blksize size of blk in bytes
-	/// \return true on success, false, if there is no block left or an error occurred
-	virtual bool fetch(
-			const char*& key,
-			std::size_t& keysize,
-			const char*& blk,
-			std::size_t& blksize)=0;
+	/// \brief Report an error
+	/// \param[in] errmsg_ error message
+	/// \remark must not throw
+	virtual void report( const std::string& errmsg_) const=0;
 
-	/// \brief Get the error message of the error occurred and clear it
-	/// \return the error message string
+	/// \brief Check, if an error has occurred and return it
+	/// \return an error string, if defined, NULL else
+	/// \remark resets the error
 	virtual const char* fetchError()=0;
+
+	/// \brief Check, if an error has occurred
+	/// \return an error string, if defined, NULL else
+	virtual bool hasError() const=0;
 };
+
 }//namespace
 #endif
 

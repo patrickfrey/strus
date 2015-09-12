@@ -51,18 +51,25 @@ public:
 
 	virtual bool exists( const std::string& configsource) const;
 
-	virtual void createDatabase( const std::string& configsource) const;
+	virtual bool createDatabase( const std::string& configsource) const;
 
-	virtual void destroyDatabase( const std::string& configsource) const;
+	virtual bool destroyDatabase( const std::string& configsource) const;
 
-	virtual void restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const;
+	virtual bool restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const;
 
 	virtual const char* getConfigDescription( ConfigType type) const;
 
 	virtual const char** getConfigParameters( ConfigType type) const;
 
+	virtual const char* fetchError();
+
 private:
+	void reportError( const char* errmsg) const;
+	void reportError( const char* errmsg, const char* arg) const;
+
 	utils::SharedPtr<LevelDbHandleMap> m_dbhandle_map;
+	mutable char m_errormsgbuf[ 256];
+	mutable bool m_haserror;
 };
 
 }//namespace

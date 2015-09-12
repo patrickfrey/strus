@@ -201,6 +201,12 @@ public:
 		blksize = blkslice.size();
 		return true;
 	}
+
+	virtual const char* fetchError()
+	{
+		return 0;
+	}
+
 private:
 	Slice m_key;
 };
