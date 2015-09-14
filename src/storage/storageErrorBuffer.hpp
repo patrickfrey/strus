@@ -26,44 +26,35 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a viewer of a message received from a peer with some statistics (distributed index)
-/// \file peerMessageViewerInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_VIEWER_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_VIEWER_INTERFACE_HPP_INCLUDED
-#include <cstdlib>
+/// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
+/// \file storageErrorBuffer.hpp
+#ifndef _STRUS_STORAGE_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STORAGE_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/storageErrorBufferInterface.hpp"
 
+/// \brief strus toplevel namespace
 namespace strus
 {
 
-/// \brief Interface for a viewer of a message received from a peer with some statistics (distributed index)
-class PeerMessageViewerInterface
+/// \class StorageErrorBuffer
+class StorageErrorBuffer
+	:public StorageErrorBufferInterface
 {
 public:
-	/// \brief Destructor
-	virtual ~PeerMessageViewerInterface(){}
+	StorageErrorBuffer();
+	virtual ~StorageErrorBuffer();
 
-	/// \brief Fetch the change of the number of document inserted
-	/// \return the increment positive or negative (decrement) value of the local change of the collection size
-	virtual int nofDocumentsInsertedChange()=0;
+	virtual void report( const char* format, ...) const;
 
-	struct DocumentFrequencyChange
-	{
-		DocumentFrequencyChange()
-			:type(0),value(0),increment(0),isnew(false){}
-		DocumentFrequencyChange( const DocumentFrequencyChange& o)
-			:type(o.type),value(o.value),increment(o.increment),isnew(o.isnew){}
+	virtual const char* fetchError();
 
-		const char* type;
-		const char* value;
-		int increment;
-		bool isnew;
-	};
+	virtual bool hasError() const;
 
-	/// \brief Fetch the next message propagating a change in the df (document frequency)
-	/// \param[out] the record describing the document frequency change
-	/// \return false, if there is no record left and wqe are at the end of the message
-	virtual bool nextDfChange( DocumentFrequencyChange& rec)=0;
+private:
+	mutable char msgbuf[ 512];
+	mutable bool hasmsg;
 };
+
 }//namespace
 #endif
 

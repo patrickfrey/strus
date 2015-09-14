@@ -44,9 +44,9 @@ PeerMessageViewerInterface* PeerMessageProcessor::createViewer(
 	return new PeerMessageViewer( peermsgptr, peermsgsize);
 }
 
-PeerMessageBuilderInterface* PeerMessageProcessor::createBuilder( const BuilderOptions& options_) const
+PeerMessageBuilderInterface* PeerMessageProcessor::createBuilder( const BuilderOptions& options_, StorageErrorBufferInterface* errorhnd) const
 {
-	return new PeerMessageBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize);
+	return new PeerMessageBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, errorhnd);
 }
 
 

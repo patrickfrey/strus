@@ -26,30 +26,46 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
-/// \file peerMessageProcessorInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageProcessorInterface.hpp"
+/// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
+/// \file storageErrorBuffer.cpp
+#include "storageErrorBuffer.hpp"
+#include "strus/private/snprintf.h"
+#include <stdarg.h>
 
-namespace strus
+using namespace strus;
+
+StorageErrorBuffer::StorageErrorBuffer()
 {
-///\brief Forward declaration
-class StorageErrorBufferInterface;
+	msgbuf[ 0] = '\0';
+	hasmsg = false;
+}
 
-class PeerMessageProcessor
-	:public PeerMessageProcessorInterface
+StorageErrorBuffer::~StorageErrorBuffer(){}
+
+void StorageErrorBuffer::report( const char* format, ...) const
 {
-public:
-	PeerMessageProcessor();
-	virtual ~PeerMessageProcessor();
+	
+	if (!hasmsg)
+	{
+		va_list ap;
+		va_start(ap, format);
+		strus_vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
+		va_end(ap);
+		hasmsg = true;
+	}
+	
+}
 
-	virtual PeerMessageViewerInterface* createViewer(
-			const char* peermsgptr, std::size_t peermsgsize) const;
+const char* StorageErrorBuffer::fetchError()
+{
+	if (!hasmsg) return 0;
+	hasmsg = false;
+	return msgbuf;
+}
 
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_, StorageErrorBufferInterface* errorhnd) const;
-};
+bool StorageErrorBuffer::hasError() const
+{
+	return hasmsg;
+}
 
-}//namespace
-#endif
 

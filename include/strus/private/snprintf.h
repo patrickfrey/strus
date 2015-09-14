@@ -26,30 +26,20 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
-/// \file peerMessageProcessorInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageProcessorInterface.hpp"
+///\brief Simple implementation of snprintf only supporing a small subset of format characters that is guaranteed not to use malloc
+#ifndef _STRUS_SNPRINTF_HPP_INCLUDED
+#define _STRUS_SNPRINTF_HPP_INCLUDED
+#include <stdlib.h>
+#include <stdarg.h>
 
-namespace strus
-{
-///\brief Forward declaration
-class StorageErrorBufferInterface;
-
-class PeerMessageProcessor
-	:public PeerMessageProcessorInterface
-{
-public:
-	PeerMessageProcessor();
-	virtual ~PeerMessageProcessor();
-
-	virtual PeerMessageViewerInterface* createViewer(
-			const char* peermsgptr, std::size_t peermsgsize) const;
-
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_, StorageErrorBufferInterface* errorhnd) const;
-};
-
-}//namespace
+#ifdef __cplusplus
+extern "C" {
 #endif
 
+extern void strus_vsnprintf( char* buf, size_t bufsize, const char* format, va_list arg);
+extern void strus_snprintf( char* buf, size_t bufsize, const char* format, ...);
+
+#ifdef __cplusplus
+}
+#endif
+#endif

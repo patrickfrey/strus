@@ -31,6 +31,7 @@
 
 #include "peerMessageBuilder.hpp"
 #include "peerMessageHeader.hpp"
+#include "strus/storageErrorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/utf8.hpp"
 #include <iostream>
@@ -44,8 +45,8 @@
 
 using namespace strus;
 
-PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_)
-	:m_insertInLexicalOrder(insertInLexicalOrder_),m_blocksize(0),m_maxblocksize(maxblocksize_)
+PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, StorageErrorBufferInterface* errorhnd)
+	:m_insertInLexicalOrder(insertInLexicalOrder_),m_content_consumed(false),m_cnt(0),m_blocksize(0),m_maxblocksize(maxblocksize_),m_errorhnd(errorhnd)
 {
 	clear();
 }
@@ -58,7 +59,7 @@ void PeerMessageBuilder::setNofDocumentsInsertedChange(
 {
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 	{
-		throw strus::runtime_error( _TXT( "number of documents inserted change value is out of range"));
+		m_errorhnd->report( _TXT( "number of documents inserted change value is out of range"));
 	}
 	PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( m_content.back().c_str()));
 	hdr->nofDocumentsInsertedChange = htonl( (uint32_t)(int32_t)increment);
@@ -94,30 +95,38 @@ void PeerMessageBuilder::addDfChange(
 			int increment,
 			bool isnew)
 {
-	std::string rec;
-	std::size_t termtypesize = std::strlen(termtype);
-	std::size_t termvaluesize = std::strlen(termvalue);
-	rec.reserve( termtypesize + termvaluesize + 2);
-	rec.append( termtype, termtypesize);
-	rec.push_back( '\1');
-	rec.append( termvalue, termvaluesize);
-	if (rec.size() > (uint32_t)std::numeric_limits<int32_t>::max() -64)
+	try
 	{
-		throw strus::runtime_error( _TXT( "document frequency change term size is out of range"));
+		if (m_content.empty()) clear();
+		std::string rec;
+		std::size_t termtypesize = std::strlen(termtype);
+		std::size_t termvaluesize = std::strlen(termvalue);
+		rec.reserve( termtypesize + termvaluesize + 2);
+		rec.append( termtype, termtypesize);
+		rec.push_back( '\1');
+		rec.append( termvalue, termvaluesize);
+		if (rec.size() > (uint32_t)std::numeric_limits<int32_t>::max() -64)
+		{
+			m_errorhnd->report( _TXT( "document frequency change term size is out of range"));
+		}
+		m_blocksize += termtypesize + termvaluesize;
+		if (m_blocksize > m_maxblocksize)
+		{
+			newContent();
+		}
+		if (m_insertInLexicalOrder)
+		{
+	
+			addDfChange_final( rec, increment, isnew);
+		}
+		else
+		{
+			addDfChange_tree( rec, increment, isnew);
+		}
 	}
-	m_blocksize += termtypesize + termvaluesize;
-	if (m_blocksize > m_maxblocksize)
+	catch (const std::bad_alloc&)
 	{
-		newContent();
-	}
-	if (m_insertInLexicalOrder)
-	{
-
-		addDfChange_final( rec, increment, isnew);
-	}
-	else
-	{
-		addDfChange_tree( rec, increment, isnew);
+		m_errorhnd->report( _TXT( "out of memory in peer message builder"));
 	}
 }
 
@@ -138,7 +147,7 @@ void PeerMessageBuilder::addDfChange_tree(
 		newContent();
 		if (!m_tree.set( key.c_str(), (conotrie::CompactNodeTrie::NodeData)val))
 		{
-			throw strus::runtime_error( _TXT( "document frequency key is out of range"));
+			m_errorhnd->report( _TXT( "feature key is out of range"));
 		}
 	}
 }
@@ -148,75 +157,101 @@ void PeerMessageBuilder::addDfChange_final(
 		int increment,
 		bool isnew)
 {
-	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
+	try
 	{
-		throw strus::runtime_error( _TXT( "document frequency change value is out of range"));
-	}
-	std::string& content = m_content.back();
-
-	std::string pldata;
-	char idxbuf[ 32];
-	unsigned char flags = 0x0;
-	if (increment < 0)
-	{
-		flags |= 0x2;
-		increment = -increment;
-	}
-	if (isnew)
-	{
-		flags |= 0x1;
-	}
-	pldata.push_back( flags);
-	std::size_t idxpos = utf8encode( idxbuf, (int32_t)increment);
-	pldata.append( idxbuf, idxpos);
+		if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
+		{
+			m_errorhnd->report( _TXT( "df increment is out of range"));
+			return;
+		}
+		std::string& content = m_content.back();
+	
+		std::string pldata;
+		char idxbuf[ 32];
+		unsigned char flags = 0x0;
+		if (increment < 0)
+		{
+			flags |= 0x2;
+			increment = -increment;
+		}
+		if (isnew)
+		{
+			flags |= 0x1;
+		}
+		pldata.push_back( flags);
+		std::size_t idxpos = utf8encode( idxbuf, (int32_t)increment);
+		pldata.append( idxbuf, idxpos);
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-	std::size_t itemidx = content.size();
+		std::size_t itemidx = content.size();
 #endif
-	std::size_t ii = 0;
-	for (; ii<m_lastkey.size() && ii<key.size(); ++ii)
-	{
-		if (m_lastkey[ii] != key[ ii]) break;
-	}
-	m_lastkey = key;
-	std::size_t commonsize = ii;
-	std::size_t restsize = key.size() - ii + 1;
-
-	idxpos = utf8encode( idxbuf, (int32_t)commonsize);
-	content.append( idxbuf, idxpos);
-
-	idxpos = utf8encode( idxbuf, (int32_t)(restsize) + pldata.size());
-	content.append( idxbuf, idxpos);
-	content.append( key.c_str() + commonsize, restsize);
-	char* ci = const_cast<char*>( std::strchr( content.c_str() + content.size() - restsize, '\1'));
-	if (ci) *ci = '\0';
-	content.append( pldata);
+		std::size_t ii = 0;
+		for (; ii<m_lastkey.size() && ii<key.size(); ++ii)
+		{
+			if (m_lastkey[ii] != key[ ii]) break;
+		}
+		m_lastkey = key;
+		std::size_t commonsize = ii;
+		std::size_t restsize = key.size() - ii + 1;
+	
+		idxpos = utf8encode( idxbuf, (int32_t)commonsize);
+		content.append( idxbuf, idxpos);
+	
+		idxpos = utf8encode( idxbuf, (int32_t)(restsize) + pldata.size());
+		content.append( idxbuf, idxpos);
+		content.append( key.c_str() + commonsize, restsize);
+		char* ci = const_cast<char*>( std::strchr( content.c_str() + content.size() - restsize, '\1'));
+		if (ci) *ci = '\0';
+		content.append( pldata);
 #ifdef STRUS_LOWLEVEL_DEBUG
-	std::cerr << "BLOCK ";
-	printRecord( std::cerr, content.c_str() + itemidx, content.size() - itemidx);
+		std::cerr << "BLOCK ";
+		printRecord( std::cerr, content.c_str() + itemidx, content.size() - itemidx);
 #endif
+	}
+	catch (const std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT( "out of memory in peer message builder"));
+	}
 }
 
-std::string PeerMessageBuilder::fetch()
+bool PeerMessageBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
 {
-	if (!m_insertInLexicalOrder)
+	if (m_content.empty()) return false;
+	try
 	{
-		moveTree();
-	}
-	while (!m_content.empty())
-	{
-		std::string rt = m_content.front();
-		PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( rt.c_str()));
-		if (rt.size() == sizeof(*hdr) && hdr->empty())
+		if (!m_insertInLexicalOrder)
+		{
+			moveTree();
+		}
+		if (m_content_consumed)
 		{
 			m_content.pop_front();
-			continue;
+			m_content_consumed = false;
 		}
-		m_content.pop_front();
-		return rt;
+		while (!m_content.empty())
+		{
+			std::string rt = m_content.front();
+			PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( rt.c_str()));
+			if (rt.size() == sizeof(*hdr) && hdr->empty())
+			{
+				m_content.pop_front();
+				continue;
+			}
+			m_content_consumed = true;
+			blk = m_content.front().c_str();
+			blksize = m_content.front().size();
+			return true;
+		}
+		clear();
+		blk = 0;
+		blksize = 0;
+		return false;
 	}
-	clear();
-	return std::string();
+	catch (const std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT( "out of memory in peer message builder"));
+		return false;
+	}
 }
 
 void PeerMessageBuilder::clear()
@@ -224,6 +259,7 @@ void PeerMessageBuilder::clear()
 	m_content.clear();
 	m_tree.clear();
 	m_cnt = 0;
+	m_content_consumed = false;
 	newContent();
 }
 
@@ -271,20 +307,34 @@ void PeerMessageBuilder::newContent()
 
 void PeerMessageBuilder::start()
 {
-	m_cnt = 0;
-	newContent();
+	try
+	{
+		m_cnt = 0;
+		newContent();
+	}
+	catch (const std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT( "out of memory in peer message builder"));
+	}
 }
 
 void PeerMessageBuilder::rollback()
 {
-	m_tree.clear();
-	for (; m_cnt > 0; --m_cnt)
+	try
 	{
-		m_content.pop_back();
+		m_tree.clear();
+		for (; m_cnt > 0; --m_cnt)
+		{
+			m_content.pop_back();
+		}
+		if (m_content.empty())
+		{
+			newContent();
+		}
 	}
-	if (m_content.empty())
+	catch (const std::bad_alloc&)
 	{
-		newContent();
+		m_errorhnd->report( _TXT( "out of memory in peer message builder"));
 	}
 }
 

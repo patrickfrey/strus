@@ -40,6 +40,7 @@ set( libstrus_storage_source_files
 	storageDocumentChecker.cpp
 	storageDocument.cpp
 	storageTransaction.cpp
+	storageErrorBuffer.cpp
 	userAclMap.cpp
 	extractKeyValueData.cpp
 )

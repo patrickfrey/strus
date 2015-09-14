@@ -64,6 +64,8 @@ class DocumentFrequencyCache;
 class DocnoRangeAllocatorInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
+/// \brief Forward declaration
+class StorageErrorBufferInterface;
 
 
 /// \brief Implementation of the StorageClientInterface
@@ -73,7 +75,7 @@ class StorageClient
 public:
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	explicit StorageClient( DatabaseClientInterface* database_, const char* termnomap_source=0);
+	StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, StorageErrorBufferInterface* errorhnd);
 	virtual ~StorageClient();
 
 	virtual void close();
@@ -226,11 +228,12 @@ private:
 
 	const PeerMessageProcessorInterface* m_peermsgproc;	///< reference to interface to other peer storages
 	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder; ///< reference to builder of messages to other peers
-	std::string m_peerMessageBuffer;
 	std::string m_peerReplyMessageBuffer;
 	bool m_gotPeerReply;
 	InitialStatsPopulateState m_initialStatsPopulateState;	///< state for populating own statistics
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
+
+	StorageErrorBufferInterface* m_errorhnd;		///< error buffer for exception free interface
 };
 
 }

@@ -78,7 +78,7 @@ void StorageClient::cleanup()
 	}
 }
 
-StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source)
+StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, StorageErrorBufferInterface* errorhnd)
 	:m_database()
 	,m_next_typeno(0)
 	,m_next_termno(0)
@@ -91,6 +91,7 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	,m_termno_map(0)
 	,m_peermsgproc(0)
 	,m_gotPeerReply(false)
+	,m_errorhnd(errorhnd)
 {
 	try
 	{
@@ -754,7 +755,7 @@ void StorageClient::definePeerMessageProcessor(
 	TransactionLock lock( this);
 	m_peermsgproc = proc;
 	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
+	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options, m_errorhnd));
 }
 
 void StorageClient::startPeerInit()
@@ -794,16 +795,28 @@ bool StorageClient::fetchPeerMessage( const char*& msg, std::size_t& msgsize)
 {
 	if (m_initialStatsPopulateState.running())
 	{
-		m_peerMessageBuffer = m_initialStatsPopulateState.fetch();
+		try
+		{
+			return m_initialStatsPopulateState.fetchMessage( msg, msgsize);
+		}
+		catch (const std::bad_alloc&)
+		{
+			m_errorhnd->report( _TXT("out of memory fetching peer message"));
+		}
+		catch (const std::runtime_error& err)
+		{
+			m_errorhnd->report( _TXT("error fetching peer message: %s"), err.what());
+		}
+		catch (const std::exception& err)
+		{
+			m_errorhnd->report( _TXT("uncaught exception fetching peer message: %s"), err.what());
+		}
 	}
 	else
 	{
 		TransactionLock lock( this);
-		m_peerMessageBuffer = m_peerMessageBuilder->fetch();
+		return m_peerMessageBuilder->fetchMessage( msg, msgsize);
 	}
-	msg = m_peerMessageBuffer.c_str();
-	msgsize = m_peerMessageBuffer.size();
-	return msgsize > 0;
 }
 
 

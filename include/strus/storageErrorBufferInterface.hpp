@@ -51,9 +51,9 @@ public:
 	virtual ~StorageErrorBufferInterface(){}
 
 	/// \brief Report an error
-	/// \param[in] errmsg_ error message
+	/// \param[in] format error message format string
 	/// \remark must not throw
-	virtual void report( const std::string& errmsg_) const=0;
+	virtual void report( const char* format, ...) const=0;
 
 	/// \brief Check, if an error has occurred and return it
 	/// \return an error string, if defined, NULL else

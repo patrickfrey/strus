@@ -33,6 +33,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "private/internationalization.hpp"
 #include "storageClient.hpp"
+#include "storageErrorBuffer.hpp"
 
 using namespace strus;
 
@@ -137,8 +138,9 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 				cleaned_batch.put( *bi);
 			}
 		}
+		StorageErrorBuffer peerMessageProcessorErrorBuffer;
 		PeerMessageProcessorInterface::BuilderOptions options;
-		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options));
+		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options, &peerMessageProcessorErrorBuffer));
 		std::vector<NewTerm>::const_iterator ti = m_newTerms.begin(), te = m_newTerms.end();
 		for (; ti != te; ++ti)
 		{
@@ -151,8 +153,16 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 				msgbuilder->addDfChange( type, value, df, false);
 			}
 		}
-		std::string rt = msgbuilder->fetch();
-	
+		std::string rt;
+		const char* blk;
+		std::size_t blksize;
+		while (msgbuilder->fetchMessage( blk, blksize))
+		{
+			rt.append( blk, blksize);
+		}
+		const char* errmsg = peerMessageProcessorErrorBuffer.fetchError();
+		if (errmsg) throw strus::runtime_error( _TXT("error in peer message transaction: %s"), errmsg);
+
 		m_documentFrequencyCache->writeBatch( cleaned_batch);
 		m_storage->declareGlobalNofDocumentsInserted( m_nofDocumentsInserted);
 		m_commit = true;

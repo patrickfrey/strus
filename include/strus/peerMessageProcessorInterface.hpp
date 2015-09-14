@@ -39,7 +39,8 @@ namespace strus
 class PeerMessageViewerInterface;
 /// \brief Forward declaration
 class PeerMessageBuilderInterface;
-
+/// \brief Forward declaration
+class StorageErrorBufferInterface;
 
 /// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
 /// \note this interface is used for distributing a search index
@@ -55,7 +56,7 @@ public:
 	/// \brief Creates a viewer for the contents of a peer message
 	/// \param[in] peermsgptr pointer to the packed peer message blob (not necessarily copied by the viewer, lifetime assumed longer than that of viewer)
 	/// \param[in] peermsgsize size of the packed peer message blob in bytes
-	/// \return the viewer object (with ownership returned)
+	/// \return the viewer object (with ownership returned) or NULL in case of a memory allocation error
 	virtual PeerMessageViewerInterface* createViewer(
 			const char* peermsgptr, std::size_t peermsgsize) const=0;
 
@@ -77,8 +78,10 @@ public:
 	};
 
 	/// \brief Creates a builder for a peer message
-	/// \return the builder object (with ownership returned)
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_) const=0;
+	/// \param[in] options_ options for the message builder
+	/// \param[in] errorhnd error buffer interface for reporting exeptions and errors
+	/// \return the builder object (with ownership returned) or NULL in case of a memory allocation error
+	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_, StorageErrorBufferInterface* errorhnd) const=0;
 };
 
 }//namespace
