@@ -55,6 +55,11 @@ public:
 	/// \remark must not throw
 	virtual void report( const char* format, ...) const=0;
 
+	/// \brief Report an error, overwriting the previous error
+	/// \param[in] format error message format string
+	/// \remark must not throw
+	virtual void explain( const char* format, ...) const=0;
+
 	/// \brief Check, if an error has occurred and return it
 	/// \return an error string, if defined, NULL else
 	/// \remark resets the error

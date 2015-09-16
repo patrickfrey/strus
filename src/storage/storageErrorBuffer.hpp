@@ -46,12 +46,15 @@ public:
 
 	virtual void report( const char* format, ...) const;
 
+	virtual void explain( const char* format, ...) const;
+
 	virtual const char* fetchError();
 
 	virtual bool hasError() const;
 
 private:
-	mutable char msgbuf[ 512];
+	enum {MsgBufSize=512};
+	mutable char msgbuf[ MsgBufSize];
 	mutable bool hasmsg;
 };
 

@@ -56,6 +56,17 @@ void StorageErrorBuffer::report( const char* format, ...) const
 	
 }
 
+void StorageErrorBuffer::explain( const char* format, ...) const
+{
+	char newmsgbuf[ MsgBufSize];
+	va_list ap;
+	va_start(ap, format);
+	strus_vsnprintf( newmsgbuf, sizeof(newmsgbuf), format, ap);
+	va_end(ap);
+	strcpy( msgbuf, newmsgbuf);
+	hasmsg = true;
+}
+
 const char* StorageErrorBuffer::fetchError()
 {
 	if (!hasmsg) return 0;
