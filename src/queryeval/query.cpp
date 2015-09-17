@@ -47,6 +47,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <algorithm>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -146,6 +147,7 @@ void Query::addDocumentEvaluationSet(
 		const std::vector<Index>& docnolist_)
 {
 	m_evalset_docnolist.insert( m_evalset_docnolist.end(), docnolist_.begin(), docnolist_.end());
+	std::sort( m_evalset_docnolist.begin(), m_evalset_docnolist.end());
 	m_evalset_defined = true;
 }
 
