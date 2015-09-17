@@ -116,7 +116,7 @@ void Query::pushDuplicate()
 	{
 		throw strus::runtime_error( _TXT( "cannot push duplicate (query stack empty)"));
 	}
-	m_stack.push_back( m_stack.back());
+	m_stack.push_back( duplicateNode( m_stack.back()));
 }
 
 void Query::attachVariable( const std::string& name_)
@@ -219,6 +219,33 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 	}
 }
 
+Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
+{
+	switch (nodeType( m_stack.back()))
+	{
+		case NullNode:
+			return nodeAddress( NullNode, 0);
+		case TermNode:
+		{
+			m_terms.push_back( m_terms[ nodeIndex( adr)]);
+			return nodeAddress( TermNode, m_terms.size()-1);
+		}
+		case ExpressionNode:
+		{
+			const Expression& expr = m_expressions[ nodeIndex( adr)];
+			std::vector<NodeAddress> subnodes;
+			std::vector<NodeAddress>::const_iterator si = expr.subnodes.begin(), se = expr.subnodes.end();
+			for (; si != se; ++si)
+			{
+				subnodes.push_back( duplicateNode( *si));
+			}
+			m_expressions.push_back( Expression( expr.operation, subnodes, expr.range));
+			return nodeAddress( ExpressionNode, m_expressions.size()-1);
+		}
+	}
+	return nodeAddress( NullNode, 0);
+}
+
 void Query::setMaxNofRanks( std::size_t nofRanks_)
 {
 	m_nofRanks = nofRanks_;
@@ -271,9 +298,6 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 
 PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr)
 {
-	NodePostingsMap::const_iterator pi = m_nodePostingsMap.find( nodeadr);
-	if (pi != m_nodePostingsMap.end()) return const_cast<PostingIteratorInterface*>(pi->second.get());
-
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
 	{
@@ -302,7 +326,7 @@ PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
 	{
 		throw strus::runtime_error( _TXT( "expression node postings not found"));
 	}
-	return const_cast<PostingIteratorInterface*>( pi->second.get());
+	return pi->second;
 }
 
 void Query::collectSummarizationVariables(

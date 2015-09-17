@@ -170,6 +170,7 @@ private:
 
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
 	void printVariables( std::ostream& out, NodeAddress adr) const;
+	NodeAddress duplicateNode( NodeAddress adr);
 
 private:
 	const QueryEval* m_queryEval;
@@ -180,7 +181,7 @@ private:
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
-	typedef std::map<NodeAddress,Reference<PostingIteratorInterface> > NodePostingsMap;
+	typedef std::map<NodeAddress,PostingIteratorInterface*> NodePostingsMap;
 	NodePostingsMap m_nodePostingsMap;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_nofRanks;
