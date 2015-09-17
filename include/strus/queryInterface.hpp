@@ -104,6 +104,11 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true)=0;
 
+	/// \brief Define a restriction on the documents as list of local document numbers (Add local document numbers to the list of documents to restrict the query on)
+	/// \param[in] docnolist_ list of documents to evaluate the query on
+	virtual void addDocumentEvaluationSet(
+			const std::vector<Index>& docnolist_)=0;
+
 	/// \brief Set the maximum number of ranks to evaluate starting with the minimum rank
 	/// \param[in] maxNofRanks_ maximum number of ranks
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_)=0;

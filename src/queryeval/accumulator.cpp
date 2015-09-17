@@ -56,7 +56,19 @@ bool Accumulator::nextRank(
 	while (si != se)
 	{
 		// Select candidate document:
-		m_docno = si->postings->skipDoc( m_docno+1);
+		if (m_evaluationSetIterator)
+		{
+			// ... we evaluate the query on a document subset defined by a posting iterator
+			do
+			{
+				m_docno = m_evaluationSetIterator->skipDoc( m_docno+1);
+			} while (m_docno != 0 && m_docno == si->postings->skipDoc( m_docno));
+		}
+		else
+		{
+			// ... we evaluate the query on all documents
+			m_docno = si->postings->skipDoc( m_docno+1);
+		}
 		if (!m_docno)
 		{
 			++si;
@@ -151,7 +163,7 @@ bool Accumulator::nextRank(
 		weight = 0.0;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "Checkin document " << m_docno << std::endl;
+		std::cerr << "Checking document " << m_docno << std::endl;
 #endif
 		// Add a weight for every accumulator summand that has a match:
 		std::vector<WeightingFeature>::iterator

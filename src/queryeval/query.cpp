@@ -40,6 +40,7 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
+#include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
 #include "private/internationalization.hpp"
 #include "keyMap.hpp"
@@ -56,6 +57,7 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
+	,m_evalset_defined(false)
 {
 	std::vector<TermConfig>::const_iterator
 		ti = m_queryEval->terms().begin(),
@@ -80,6 +82,8 @@ Query::Query( const Query& o)
 	,m_nofRanks(o.m_nofRanks)
 	,m_minRank(o.m_minRank)
 	,m_usernames(o.m_usernames)
+	,m_evalset_docnolist(o.m_evalset_docnolist)
+	,m_evalset_defined(o.m_evalset_defined)
 {}
 
 void Query::pushTerm( const std::string& type_, const std::string& value_)
@@ -136,6 +140,13 @@ void Query::defineMetaDataRestriction(
 	Index hnd = m_metaDataReader->elementHandle( name);
 	const char* typeName = m_metaDataReader->getType( hnd);
 	m_metaDataRestrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
+}
+
+void Query::addDocumentEvaluationSet(
+		const std::vector<Index>& docnolist_)
+{
+	m_evalset_docnolist.insert( m_evalset_docnolist.end(), docnolist_.begin(), docnolist_.end());
+	m_evalset_defined = true;
 }
 
 void Query::print( std::ostream& out) const
@@ -323,7 +334,6 @@ void Query::collectSummarizationVariables(
 	}
 }
 
-
 std::vector<ResultDocument> Query::evaluate()
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -358,12 +368,19 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 	}
 	// [4] Create the accumulator:
+	DocsetPostingIterator evalset_itr;
 	Accumulator accumulator(
 		m_storage,
 		m_metaDataReader.get(), m_metaDataRestrictions,
 		m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
 
-	// [4.1] Add document selection postings:
+	// [4.1] Define document subset to evaluate query on:
+	if (m_evalset_defined)
+	{
+		evalset_itr = DocsetPostingIterator( m_evalset_docnolist);
+		accumulator.defineEvaluationSet( &evalset_itr);
+	}
+	// [4.2] Add document selection postings:
 	{
 		std::vector<std::string>::const_iterator
 			si = m_queryEval->selectionSets().begin(),
@@ -384,7 +401,7 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [4.2] Add features for weighting:
+	// [4.3] Add features for weighting:
 	{
 		std::vector<WeightingDef>::const_iterator
 			wi = m_queryEval->weightingFunctions().begin(),
@@ -421,7 +438,7 @@ std::vector<ResultDocument> Query::evaluate()
 			accumulator.addFeature( wi->weight(), execContext.release());
 		}
 	}
-	// [4.3] Define the user ACL restrictions:
+	// [4.4] Define the user ACL restrictions:
 	std::vector<Reference<InvAclIteratorInterface> > invAclList;
 	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
 	for (; ui != ue; ++ui)
@@ -433,7 +450,7 @@ std::vector<ResultDocument> Query::evaluate()
 			accumulator.addAlternativeAclRestriction( invAcl.get());
 		}
 	}
-	// [4.4] Define the feature restrictions:
+	// [4.5] Define the feature restrictions:
 	{
 		std::vector<std::string>::const_iterator
 			xi = m_queryEval->restrictionSets().begin(),
@@ -453,7 +470,7 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [4.5] Define the feature exclusions:
+	// [4.6] Define the feature exclusions:
 	{
 		std::vector<std::string>::const_iterator
 			xi = m_queryEval->exclusionSets().begin(),

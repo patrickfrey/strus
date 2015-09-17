@@ -78,6 +78,9 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true);
 
+	virtual void addDocumentEvaluationSet(
+			const std::vector<Index>& docnolist_);
+
 	virtual void setMaxNofRanks( std::size_t nofRanks_);
 	virtual void setMinRank( std::size_t minRank_);
 	virtual void addUserName( const std::string& username_);
@@ -182,6 +185,8 @@ private:
 	std::size_t m_nofRanks;
 	std::size_t m_minRank;
 	std::vector<std::string> m_usernames;
+	std::vector<Index> m_evalset_docnolist;
+	bool m_evalset_defined;
 };
 
 }//namespace
