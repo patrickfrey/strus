@@ -271,6 +271,9 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 
 PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr)
 {
+	NodePostingsMap::const_iterator pi = m_nodePostingsMap.find( nodeadr);
+	if (pi != m_nodePostingsMap.end()) return const_cast<PostingIteratorInterface*>(pi->second.get());
+
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
 	{
@@ -294,13 +297,12 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 
 PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
 {
-	std::map<NodeAddress,PostingIteratorInterface*>::const_iterator
-		pi = m_nodePostingsMap.find( nodeadr);
+	NodePostingsMap::const_iterator pi = m_nodePostingsMap.find( nodeadr);
 	if (pi == m_nodePostingsMap.end())
 	{
 		throw strus::runtime_error( _TXT( "expression node postings not found"));
 	}
-	return pi->second;
+	return const_cast<PostingIteratorInterface*>( pi->second.get());
 }
 
 void Query::collectSummarizationVariables(

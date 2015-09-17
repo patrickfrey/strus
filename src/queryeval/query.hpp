@@ -180,7 +180,8 @@ private:
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
-	std::map<NodeAddress,PostingIteratorInterface*> m_nodePostingsMap;
+	typedef std::map<NodeAddress,Reference<PostingIteratorInterface> > NodePostingsMap;
+	NodePostingsMap m_nodePostingsMap;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_nofRanks;
 	std::size_t m_minRank;
