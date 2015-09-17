@@ -65,7 +65,7 @@ class DocnoRangeAllocatorInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
 /// \brief Forward declaration
-class StorageErrorBufferInterface;
+class ErrorBufferInterface;
 
 
 /// \brief Implementation of the StorageClientInterface
@@ -75,7 +75,7 @@ class StorageClient
 public:
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, StorageErrorBufferInterface* errorhnd);
+	StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd);
 	virtual ~StorageClient();
 
 	virtual void close();
@@ -233,7 +233,7 @@ private:
 	InitialStatsPopulateState m_initialStatsPopulateState;	///< state for populating own statistics
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 
-	StorageErrorBufferInterface* m_errorhnd;		///< error buffer for exception free interface
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }

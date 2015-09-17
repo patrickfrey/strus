@@ -40,7 +40,7 @@ class PeerMessageViewerInterface;
 /// \brief Forward declaration
 class PeerMessageBuilderInterface;
 /// \brief Forward declaration
-class StorageErrorBufferInterface;
+class ErrorBufferInterface;
 
 /// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
 /// \note this interface is used for distributing a search index
@@ -81,7 +81,7 @@ public:
 	/// \param[in] options_ options for the message builder
 	/// \param[in] errorhnd error buffer interface for reporting exeptions and errors
 	/// \return the builder object (with ownership returned) or NULL in case of a memory allocation error
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_, StorageErrorBufferInterface* errorhnd) const=0;
+	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_, ErrorBufferInterface* errorhnd) const=0;
 };
 
 }//namespace

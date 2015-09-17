@@ -39,6 +39,8 @@ class DatabaseClientInterface;
 class StorageClientInterface;
 /// \brief Forward declaration
 class StorageAlterMetaDataTableInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 /// \brief Object to the create and alter a storage for strus
@@ -46,6 +48,9 @@ class Storage
 	:public StorageInterface
 {
 public:
+	explicit Storage( ErrorBufferInterface* errorhnd)
+		:m_errorhnd(errorhnd){}
+
 	virtual StorageClientInterface* createClient( const std::string& configsource, DatabaseClientInterface* database) const;
 
 	virtual void createStorage( const std::string& configsource, DatabaseClientInterface* database) const;
@@ -55,6 +60,9 @@ public:
 	virtual const char* getConfigDescription( ConfigType type) const;
 
 	virtual const char** getConfigParameters( ConfigType type) const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;
 };
 
 }//namespace

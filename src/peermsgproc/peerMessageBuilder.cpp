@@ -31,7 +31,7 @@
 
 #include "peerMessageBuilder.hpp"
 #include "peerMessageHeader.hpp"
-#include "strus/storageErrorBufferInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/utf8.hpp"
 #include <iostream>
@@ -45,7 +45,7 @@
 
 using namespace strus;
 
-PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, StorageErrorBufferInterface* errorhnd)
+PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd)
 	:m_insertInLexicalOrder(insertInLexicalOrder_),m_content_consumed(false),m_cnt(0),m_blocksize(0),m_maxblocksize(maxblocksize_),m_errorhnd(errorhnd)
 {
 	clear();

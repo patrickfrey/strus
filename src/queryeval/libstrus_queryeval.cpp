@@ -29,22 +29,28 @@
 #include "strus/lib/queryeval.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "queryEval.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <map>
 #include <set>
 
 using namespace strus;
 
-DLL_PUBLIC QueryEvalInterface* strus::createQueryEval()
+DLL_PUBLIC QueryEvalInterface* strus::createQueryEval( ErrorBufferInterface* errorhnd)
 {
 	static bool intl_initialized = false;
-	if (!intl_initialized)
+	try
 	{
-		strus::initMessageTextDomain();
-		intl_initialized = true;
+		if (!intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			intl_initialized = true;
+		}
+		return new QueryEval( errorhnd);
 	}
-	return new QueryEval();
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating evaluation scheme: %s"), *errorhnd, 0);
 }
 

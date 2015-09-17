@@ -38,10 +38,12 @@ namespace strus {
 class QueryProcessorInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Create a query processor with the functions and operators needed for query evaluation
 /// \return the allocated processor
-QueryProcessorInterface* createQueryProcessor();
+QueryProcessorInterface* createQueryProcessor( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

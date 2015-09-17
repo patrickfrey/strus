@@ -58,16 +58,16 @@ public:
 
 	/// \brief Get the storage interface
 	/// \return the storage interface reference
-	virtual const StorageInterface* getStorage() const=0;
+	virtual StorageInterface* createStorage() const=0;
 
 	/// \brief Get the database interface as loaded from modules and optionally specified in the configuration string
 	/// \param[in] config configuration string (not a filename!) optionally containing an assignment database=<...> that specifies the database to use
 	/// \return the database interface reference
-	virtual const DatabaseInterface* getDatabase( const std::string& config) const=0;
+	virtual DatabaseInterface* creataDatabase( const std::string& config) const=0;
 
 	/// \brief Get the query processor interface
 	/// \return the query processor interface reference
-	virtual const QueryProcessorInterface* getQueryProcessor() const=0;
+	virtual QueryProcessorInterface* createQueryProcessor() const=0;
 
 	/// \brief Creates a storage client with its database client out of a configuration string
 	/// \param[in] config configuration string (not a filename!) of both storage and database

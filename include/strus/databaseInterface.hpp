@@ -88,10 +88,6 @@ public:
 	/// \brief Get the list of known configuration parameter keys
 	///	for verification of the configuration by programs using this database.
 	virtual const char** getConfigParameters( ConfigType type) const=0;
-
-	/// \brief Get the error message of the error occurred and clear it
-	/// \return the error message string
-	virtual const char* fetchError()=0;
 };
 
 }//namespace

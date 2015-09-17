@@ -36,10 +36,12 @@ namespace strus {
 
 /// \brief Forward declaration
 class DatabaseInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Get the database interface implemented with leveldb with the functions for accessing the key/value store database.
 /// \return the database interface
-const DatabaseInterface* getDatabase_leveldb();
+DatabaseInterface* createDatabase_leveldb( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

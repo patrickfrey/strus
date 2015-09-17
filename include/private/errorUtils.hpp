@@ -26,50 +26,47 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for reporting and catching errors in the core (storage)
-/// \file storageErrorBufferInterface.hpp
-#ifndef _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
-#define _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
+/// \brief Macros, classes and functions supporting error handling
+/// \file errorUtils.hpp
+#ifndef _STRUS_STORAGE_ERROR_UTILITIES_HPP_INCLUDED
+#define _STRUS_STORAGE_ERROR_UTILITIES_HPP_INCLUDED
+#include <stdexcept>
+#include "private/internationalization.hpp"
 
 /// \brief strus toplevel namespace
 namespace strus
 {
 
-/// \class StorageErrorBufferInterface
-/// \brief Interface for reporting and catching errors in the core (storage)
-class StorageErrorBufferInterface
-{
-public:
-	enum ErrorClass
-	{
-		None,		///< no error
-		RuntimeError,	///< runtime error
-		BadAlloc	///< memory allocation error
-	};
+#define CATCH_ERROR_MAP( contextExplainText, errorBuffer)\
+	catch (const std::bad_alloc&)\
+	{\
+		(errorBuffer).report( _TXT("memory allocation error"));\
+	}\
+	catch (const std::runtime_error& err)\
+	{\
+		(errorBuffer).report( contextExplainText, err.what());\
+	}\
+	catch (const std::exception& err)\
+	{\
+		(errorBuffer).report( _TXT("uncaught exception: %s"), err.what());\
+	}
 
-	/// \brief Destructor
-	virtual ~StorageErrorBufferInterface(){}
-
-	/// \brief Report an error
-	/// \param[in] format error message format string
-	/// \remark must not throw
-	virtual void report( const char* format, ...) const=0;
-
-	/// \brief Report an error, overwriting the previous error
-	/// \param[in] format error message format string
-	/// \remark must not throw
-	virtual void explain( const char* format, ...) const=0;
-
-	/// \brief Check, if an error has occurred and return it
-	/// \return an error string, if defined, NULL else
-	/// \remark resets the error
-	virtual const char* fetchError()=0;
-
-	/// \brief Check, if an error has occurred
-	/// \return an error string, if defined, NULL else
-	virtual bool hasError() const=0;
-};
+#define CATCH_ERROR_MAP_RETURN( contextExplainText, errorBuffer, errorReturnValue)\
+	catch (const std::bad_alloc&)\
+	{\
+		(errorBuffer).report( _TXT("memory allocation error"));\
+		return errorReturnValue;\
+	}\
+	catch (const std::runtime_error& err)\
+	{\
+		(errorBuffer).report( contextExplainText, err.what());\
+		return errorReturnValue;\
+	}\
+	catch (const std::exception& err)\
+	{\
+		(errorBuffer).report( _TXT("uncaught exception: %s"), err.what());\
+		return errorReturnValue;\
+	}
 
 }//namespace
 #endif
-

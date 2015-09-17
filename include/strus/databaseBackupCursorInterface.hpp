@@ -53,10 +53,6 @@ public:
 			std::size_t& keysize,
 			const char*& blk,
 			std::size_t& blksize)=0;
-
-	/// \brief Get the error message of the error occurred and clear it
-	/// \return the error message string
-	virtual const char* fetchError()=0;
 };
 }//namespace
 #endif

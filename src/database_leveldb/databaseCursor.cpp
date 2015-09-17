@@ -28,6 +28,7 @@
 */
 #include "databaseCursor.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <cstring>
 #include <stdexcept>
 

@@ -40,6 +40,7 @@
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include "byteOrderMark.hpp"
 #include "storageTransaction.hpp"
@@ -78,7 +79,7 @@ void StorageClient::cleanup()
 	}
 }
 
-StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, StorageErrorBufferInterface* errorhnd)
+StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd)
 	:m_database()
 	,m_next_typeno(0)
 	,m_next_termno(0)
@@ -187,6 +188,8 @@ void StorageClient::getVariablesWriteBatch(
 		varstor.store( transaction, "UserNo", m_next_userno.value());
 	}
 }
+
+!!! HIER WEITER: Make methods exception safe
 
 void StorageClient::close()
 {
@@ -799,18 +802,7 @@ bool StorageClient::fetchPeerMessage( const char*& msg, std::size_t& msgsize)
 		{
 			return m_initialStatsPopulateState.fetchMessage( msg, msgsize);
 		}
-		catch (const std::bad_alloc&)
-		{
-			m_errorhnd->report( _TXT("out of memory fetching peer message"));
-		}
-		catch (const std::runtime_error& err)
-		{
-			m_errorhnd->report( _TXT("error fetching peer message: %s"), err.what());
-		}
-		catch (const std::exception& err)
-		{
-			m_errorhnd->report( _TXT("uncaught exception fetching peer message: %s"), err.what());
-		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error database client fetching peer message: %s"), *m_errorhnd, false);
 	}
 	else
 	{

@@ -32,7 +32,9 @@
 #include "weighting/weighting_standard.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <string>
 #include <vector>
@@ -43,7 +45,8 @@
 
 using namespace strus;
 
-QueryProcessor::QueryProcessor()
+QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_)
 {
 	definePostingJoinOperator( "within", createPostingJoinWithin());
 	definePostingJoinOperator( "within_struct", createPostingJoinStructWithin());
@@ -76,8 +79,15 @@ void QueryProcessor::definePostingJoinOperator(
 		const std::string& name,
 		PostingJoinOperatorInterface* op)
 {
-	Reference<PostingJoinOperatorInterface> opref( op);
-	m_joiners[ utils::tolower( std::string(name))] = opref;
+	try
+	{
+		Reference<PostingJoinOperatorInterface> opref( op);
+		m_joiners[ utils::tolower( std::string(name))] = opref;
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
+	}
 }
 
 const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
@@ -87,7 +97,8 @@ const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 		ji = m_joiners.find( utils::tolower( name));
 	if (ji == m_joiners.end())
 	{
-		throw strus::runtime_error( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+		m_errorhnd->report( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+		return 0;
 	}
 	return ji->second.get();
 }
@@ -96,8 +107,15 @@ void QueryProcessor::defineWeightingFunction(
 		const std::string& name,
 		WeightingFunctionInterface* func)
 {
-	Reference<WeightingFunctionInterface> funcref( func);
-	m_weighters[ utils::tolower( std::string(name))] = funcref;
+	try
+	{
+		Reference<WeightingFunctionInterface> funcref( func);
+		m_weighters[ utils::tolower( std::string(name))] = funcref;
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
+	}
 }
 
 const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
@@ -107,7 +125,8 @@ const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		wi = m_weighters.find( utils::tolower( std::string(name)));
 	if (wi == m_weighters.end())
 	{
-		throw strus::runtime_error( _TXT( "weighting function not defined: '%s'"), name.c_str());
+		m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
+		return 0;
 	}
 	return wi->second.get();
 }
@@ -116,8 +135,15 @@ void QueryProcessor::defineSummarizerFunction(
 		const std::string& name,
 		SummarizerFunctionInterface* sumfunc)
 {
-	Reference<SummarizerFunctionInterface> funcref( sumfunc);
-	m_summarizers[ utils::tolower( std::string(name))] = funcref;
+	try
+	{
+		Reference<SummarizerFunctionInterface> funcref( sumfunc);
+		m_summarizers[ utils::tolower( std::string(name))] = funcref;
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
+	}
 }
 
 const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
@@ -127,7 +153,8 @@ const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		si = m_summarizers.find( utils::tolower( std::string(name)));
 	if (si == m_summarizers.end())
 	{
-		throw strus::runtime_error( _TXT( "summarization function not defined: '%s'"), name.c_str());
+		m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
+		return 0;
 	}
 	return si->second.get();
 }

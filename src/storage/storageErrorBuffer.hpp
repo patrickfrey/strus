@@ -28,9 +28,9 @@
 */
 /// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
 /// \file storageErrorBuffer.hpp
-#ifndef _STRUS_STORAGE_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_STORAGE_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/storageErrorBufferInterface.hpp"
+#ifndef _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/errorBufferInterface.hpp"
 
 /// \brief strus toplevel namespace
 namespace strus
@@ -38,7 +38,7 @@ namespace strus
 
 /// \class StorageErrorBuffer
 class StorageErrorBuffer
-	:public StorageErrorBufferInterface
+	:public ErrorBufferInterface
 {
 public:
 	StorageErrorBuffer();

@@ -28,12 +28,14 @@
 */
 #include "storage.hpp"
 #include "storageClient.hpp"
-#include "private/internationalization.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/private/configParser.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "storageAlterMetaDataTable.hpp"
 #include "databaseAdapter.hpp"
 #include "storage.hpp"
@@ -98,55 +100,67 @@ FILEERROR:
 
 StorageClientInterface* Storage::createClient( const std::string& configsource, DatabaseClientInterface* database) const
 {
-	std::string cachedterms;
-	std::string src = configsource;
-
-	(void)extractStringFromConfigString( cachedterms, src, "cachedterms");
-	if (cachedterms.size())
+	try
 	{
-		std::string cachedtermsrc = loadFile( cachedterms);
-		return new StorageClient( database, cachedtermsrc.c_str());
+		std::string cachedterms;
+		std::string src = configsource;
+	
+		(void)extractStringFromConfigString( cachedterms, src, "cachedterms");
+		if (cachedterms.size())
+		{
+			std::string cachedtermsrc = loadFile( cachedterms);
+			return new StorageClient( database, cachedtermsrc.c_str(), m_errorhnd);
+		}
+		else
+		{
+			return new StorageClient( database, 0, m_errorhnd);
+		}
 	}
-	else
-	{
-		return new StorageClient( database);
-	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }
 
 void Storage::createStorage( const std::string& configsource, DatabaseClientInterface* database) const
 {
-	bool useAcl = false;
-	std::string metadata;
-	ByteOrderMark byteOrderMark;
-
-	std::string src = configsource;
-
-	(void)extractStringFromConfigString( metadata, src, "metadata");
-	(void)extractBooleanFromConfigString( useAcl, src, "acl");
-
-	MetaDataDescription md( metadata);
-	std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
-
-	DatabaseAdapter_Variable::Writer stor( database);
-
-	stor.store( transaction.get(), "TermNo", 1);
-	stor.store( transaction.get(), "TypeNo", 1);
-	stor.store( transaction.get(), "DocNo", 1);
-	stor.store( transaction.get(), "AttribNo", 1);
-	stor.store( transaction.get(), "NofDocs", 0);
-	stor.store( transaction.get(), "ByteOrderMark", byteOrderMark.value());
-	if (useAcl)
+	try
 	{
-		stor.store( transaction.get(), "UserNo", 1);
+		bool useAcl = false;
+		std::string metadata;
+		ByteOrderMark byteOrderMark;
+	
+		std::string src = configsource;
+	
+		(void)extractStringFromConfigString( metadata, src, "metadata");
+		(void)extractBooleanFromConfigString( useAcl, src, "acl");
+	
+		MetaDataDescription md( metadata);
+		std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
+	
+		DatabaseAdapter_Variable::Writer stor( database);
+	
+		stor.store( transaction.get(), "TermNo", 1);
+		stor.store( transaction.get(), "TypeNo", 1);
+		stor.store( transaction.get(), "DocNo", 1);
+		stor.store( transaction.get(), "AttribNo", 1);
+		stor.store( transaction.get(), "NofDocs", 0);
+		stor.store( transaction.get(), "ByteOrderMark", byteOrderMark.value());
+		if (useAcl)
+		{
+			stor.store( transaction.get(), "UserNo", 1);
+		}
+		md.store( transaction.get());
+	
+		transaction->commit();
 	}
-	md.store( transaction.get());
-
-	transaction->commit();
+	CATCH_ERROR_MAP( _TXT("error creating storage client: %s"), *m_errorhnd);
 }
 
 StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable( DatabaseClientInterface* database) const
 {
-	return new StorageAlterMetaDataTable( database);
+	try
+	{
+		return new StorageAlterMetaDataTable( database);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }
 
 const char* Storage::getConfigDescription( ConfigType type) const

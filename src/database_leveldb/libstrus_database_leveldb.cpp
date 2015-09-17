@@ -27,21 +27,26 @@
 --------------------------------------------------------------------
 */
 #include "strus/lib/database_leveldb.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 
 using namespace strus;
 
-DLL_PUBLIC const DatabaseInterface* strus::getDatabase_leveldb()
+DLL_PUBLIC DatabaseInterface* strus::createDatabase_leveldb( ErrorBufferInterface* errorhnd)
 {
-	static const Database database;
-	static bool intl_initialized = false;
-	if (!intl_initialized)
+	try
 	{
-		strus::initMessageTextDomain();
-		intl_initialized = true;
+		static bool intl_initialized = false;
+		if (!intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			intl_initialized = true;
+		}
+		return new Database( errorhnd);
 	}
-	return &database;
+	CATCH_ERROR_MAP_RETURN( _TXT("error printing query evaluation structure: %s"), *errorhnd, 0);
 }
 

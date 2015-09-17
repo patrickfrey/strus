@@ -26,20 +26,49 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus storage library
-/// \file storage.hpp
-#ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
-#define _STRUS_STORAGE_LIB_HPP_INCLUDED
+/// \brief Interface for reporting and catching errors in the core (storage)
+/// \file errorBufferInterface.hpp
+#ifndef _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
 
 /// \brief strus toplevel namespace
-namespace strus {
+namespace strus
+{
 
-/// \brief Forward declaration
-class ErrorBufferInterface;
+/// \class ErrorBufferInterface
+/// \brief Interface for reporting and catching errors in the core (storage)
+class ErrorBufferInterface
+{
+public:
+	enum ErrorClass
+	{
+		None,		///< no error
+		RuntimeError,	///< runtime error
+		BadAlloc	///< memory allocation error
+	};
 
-class StorageInterface;
+	/// \brief Destructor
+	virtual ~ErrorBufferInterface(){}
 
-StorageInterface* createStorage( ErrorBufferInterface* errorhnd);
+	/// \brief Report an error
+	/// \param[in] format error message format string
+	/// \remark must not throw
+	virtual void report( const char* format, ...) const=0;
+
+	/// \brief Report an error, overwriting the previous error
+	/// \param[in] format error message format string
+	/// \remark must not throw
+	virtual void explain( const char* format, ...) const=0;
+
+	/// \brief Check, if an error has occurred and return it
+	/// \return an error string, if defined, NULL else
+	/// \remark resets the error
+	virtual const char* fetchError()=0;
+
+	/// \brief Check, if an error has occurred
+	/// \return an error string, if defined, NULL else
+	virtual bool hasError() const=0;
+};
 
 }//namespace
 #endif

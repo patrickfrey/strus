@@ -53,13 +53,17 @@ class SummarizerFunctionInterface;
 class SummarizerConfig;
 /// \brief Forward declaration
 class WeightingConfig;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Query evaluation program representation
 class QueryEval
 	:public QueryEvalInterface
 {
 public:
-	QueryEval(){}
+	explicit QueryEval( ErrorBufferInterface* errorhnd)
+		:m_errorhnd(errorhnd){}
+
 	QueryEval( const QueryEval& o)
 		:m_selectionSets(o.m_selectionSets)
 		,m_restrictionSets(o.m_restrictionSets)
@@ -112,6 +116,7 @@ private:
 	std::vector<WeightingDef> m_weightingFunctions;	///< weighting function configuration
 	std::vector<SummarizerDef> m_summarizers;	///< list of summarizer configurations
 	std::vector<TermConfig> m_terms;		///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 }//namespace

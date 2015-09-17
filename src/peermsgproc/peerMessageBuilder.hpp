@@ -39,13 +39,13 @@
 namespace strus
 {
 ///\brief Forward declaration
-class StorageErrorBufferInterface;
+class ErrorBufferInterface;
 
 class PeerMessageBuilder
 	:public PeerMessageBuilderInterface
 {
 public:
-	PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, StorageErrorBufferInterface* errorhnd);
+	PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd);
 	virtual ~PeerMessageBuilder();
 
 	virtual void setNofDocumentsInsertedChange(
@@ -85,7 +85,7 @@ private:
 	std::size_t m_cnt;
 	std::size_t m_blocksize;
 	std::size_t m_maxblocksize;
-	StorageErrorBufferInterface* m_errorhnd;
+	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace
 #endif

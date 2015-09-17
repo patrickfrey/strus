@@ -35,7 +35,7 @@
 namespace strus
 {
 ///\brief Forward declaration
-class StorageErrorBufferInterface;
+class ErrorBufferInterface;
 
 class PeerMessageProcessor
 	:public PeerMessageProcessorInterface
@@ -47,7 +47,7 @@ public:
 	virtual PeerMessageViewerInterface* createViewer(
 			const char* peermsgptr, std::size_t peermsgsize) const;
 
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_, StorageErrorBufferInterface* errorhnd) const;
+	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_, ErrorBufferInterface* errorhnd) const;
 };
 
 }//namespace

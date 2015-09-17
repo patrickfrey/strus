@@ -31,6 +31,7 @@
 #include "storageErrorBuffer.hpp"
 #include "strus/private/snprintf.h"
 #include <stdarg.h>
+#include <cstring>
 
 using namespace strus;
 
@@ -63,7 +64,7 @@ void StorageErrorBuffer::explain( const char* format, ...) const
 	va_start(ap, format);
 	strus_vsnprintf( newmsgbuf, sizeof(newmsgbuf), format, ap);
 	va_end(ap);
-	strcpy( msgbuf, newmsgbuf);
+	std::strcpy( msgbuf, newmsgbuf);
 	hasmsg = true;
 }
 

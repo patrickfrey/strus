@@ -38,14 +38,16 @@ namespace strus {
 class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseBackupCursorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Interface to the create,destroy the key value store database
 class Database
 	:public DatabaseInterface
 {
 public:
-	Database()
-		:m_dbhandle_map( new LevelDbHandleMap()){}
+	explicit Database( ErrorBufferInterface* errorhnd)
+		:m_dbhandle_map( new LevelDbHandleMap()),m_errorhnd(errorhnd){}
 
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const;
 
@@ -61,15 +63,9 @@ public:
 
 	virtual const char** getConfigParameters( ConfigType type) const;
 
-	virtual const char* fetchError();
-
 private:
-	void reportError( const char* errmsg) const;
-	void reportError( const char* errmsg, const char* arg) const;
-
 	utils::SharedPtr<LevelDbHandleMap> m_dbhandle_map;
-	mutable char m_errormsgbuf[ 256];
-	mutable bool m_haserror;
+	ErrorBufferInterface* m_errorhnd;
 };
 
 }//namespace
