@@ -221,14 +221,17 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 
 Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 {
+	Query::NodeAddress rtadr = nodeAddress( NullNode, 0);
 	switch (nodeType( m_stack.back()))
 	{
 		case NullNode:
-			return nodeAddress( NullNode, 0);
+			rtadr = nodeAddress( NullNode, 0);
+			break;
 		case TermNode:
 		{
 			m_terms.push_back( m_terms[ nodeIndex( adr)]);
-			return nodeAddress( TermNode, m_terms.size()-1);
+			rtadr = nodeAddress( TermNode, m_terms.size()-1);
+			break;
 		}
 		case ExpressionNode:
 		{
@@ -240,10 +243,21 @@ Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 				subnodes.push_back( duplicateNode( *si));
 			}
 			m_expressions.push_back( Expression( expr.operation, subnodes, expr.range));
-			return nodeAddress( ExpressionNode, m_expressions.size()-1);
+			rtadr = nodeAddress( ExpressionNode, m_expressions.size()-1);
+			break;
 		}
 	}
-	return nodeAddress( NullNode, 0);
+	// Duplicate assigned variables too:
+	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
+	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( adr);
+
+	Itr vi = vrange.first, ve = vrange.second;
+	for (; vi != ve; ++vi)
+	{
+		m_variableAssignments.insert( std::pair<NodeAddress,std::string>( rtadr, vi->second));
+	}
+	// Return result:
+	return rtadr;
 }
 
 void Query::setMaxNofRanks( std::size_t nofRanks_)
