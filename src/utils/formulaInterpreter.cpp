@@ -37,6 +37,8 @@
 #include <iomanip> 
 #include <stdint.h> 
 
+#undef STRUS_LOWLEVEL_DEBUG
+
 using namespace strus;
 
 static std::string lowercase( const std::string& name)
@@ -47,43 +49,43 @@ static std::string lowercase( const std::string& name)
 	return rt;
 }
 
-void FormulaInterpreter::Context::defineVariableMap( const std::string& name, VariableMap func)
+void FormulaInterpreter::FunctionMap::defineVariableMap( const std::string& name, VariableMap func)
 {
 	m_varmap[ lowercase(name)] = func;
 }
 
-FormulaInterpreter::VariableMap FormulaInterpreter::Context::getVariableMap( const std::string& name) const
+FormulaInterpreter::VariableMap FormulaInterpreter::FunctionMap::getVariableMap( const std::string& name) const
 {
 	std::map<std::string,VariableMap>::const_iterator vi = m_varmap.find( name);
 	if (vi == m_varmap.end()) throw strus::runtime_error(_TXT( "variable %s not defined"), name.c_str());
 	return vi->second;
 }
 
-void FormulaInterpreter::Context::defineUnaryFunction( const std::string& name, FormulaInterpreter::UnaryFunction func)
+void FormulaInterpreter::FunctionMap::defineUnaryFunction( const std::string& name, FormulaInterpreter::UnaryFunction func)
 {
 	m_unaryfuncmap[ lowercase(name)] = func;
 }
 
-FormulaInterpreter::UnaryFunction FormulaInterpreter::Context::getUnaryFunction( const std::string& name) const
+FormulaInterpreter::UnaryFunction FormulaInterpreter::FunctionMap::getUnaryFunction( const std::string& name) const
 {
 	std::map<std::string,UnaryFunction>::const_iterator vi = m_unaryfuncmap.find( name);
 	if (vi == m_unaryfuncmap.end()) throw strus::runtime_error(_TXT( "unary function %s not defined"), name.c_str());
 	return vi->second;
 }
 
-void FormulaInterpreter::Context::defineBinaryFunction( const std::string& name, FormulaInterpreter::BinaryFunction func)
+void FormulaInterpreter::FunctionMap::defineBinaryFunction( const std::string& name, FormulaInterpreter::BinaryFunction func)
 {
 	m_binaryfuncmap[ lowercase(name)] = func;
 }
 
-FormulaInterpreter::BinaryFunction FormulaInterpreter::Context::getBinaryFunction( const std::string& name) const
+FormulaInterpreter::BinaryFunction FormulaInterpreter::FunctionMap::getBinaryFunction( const std::string& name) const
 {
 	std::map<std::string,BinaryFunction>::const_iterator vi = m_binaryfuncmap.find( name);
 	if (vi == m_binaryfuncmap.end()) throw strus::runtime_error(_TXT( "binary function %s not defined"), name.c_str());
 	return vi->second;
 }
 
-FormulaInterpreter::DimMap FormulaInterpreter::Context::getDimMap() const
+FormulaInterpreter::DimMap FormulaInterpreter::FunctionMap::getDimMap() const
 {
 	return m_dimmap;
 }
@@ -178,22 +180,22 @@ unsigned int FormulaInterpreter::allocVariable( const std::string& name)
 	return rt;
 }
 
-void FormulaInterpreter::parseFunctionCall( const Context& context, const std::string& funcname, std::string::const_iterator& si, const std::string::const_iterator& se)
+void FormulaInterpreter::parseFunctionCall( const FunctionMap& functionMap, const std::string& funcname, std::string::const_iterator& si, const std::string::const_iterator& se)
 {
-	unsigned int nofargs = parseSubExpression( context, si, se, ')');
+	unsigned int nofargs = parseSubExpression( functionMap, si, se, ')');
 	if (nofargs == 0)
 	{
-		VariableMap vm = context.getVariableMap( funcname);
+		VariableMap vm = functionMap.getVariableMap( funcname);
 		m_program.push_back( OpStruct( OpPushVar, vm));
 	}
 	else if (nofargs == 1)
 	{
-		UnaryFunction func = context.getUnaryFunction( funcname);
+		UnaryFunction func = functionMap.getUnaryFunction( funcname);
 		m_program.push_back( OpStruct( OpUnaryFunction, func));
 	}
 	else if (nofargs == 2)
 	{
-		BinaryFunction func = context.getBinaryFunction( funcname);
+		BinaryFunction func = functionMap.getBinaryFunction( funcname);
 		m_program.push_back( OpStruct( OpBinaryFunction, func));
 	}
 	else
@@ -202,22 +204,22 @@ void FormulaInterpreter::parseFunctionCall( const Context& context, const std::s
 	}
 }
 
-void FormulaInterpreter::parseVariableExpression( const Context& context, std::string::const_iterator& si, const std::string::const_iterator& se)
+void FormulaInterpreter::parseVariableExpression( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se)
 {
 	std::string var = parseIdentifier( si, se);
 	if (*si == '(')
 	{
 		++si;
-		parseFunctionCall( context, var, si, se);
+		parseFunctionCall( functionMap, var, si, se);
 	}
 	else
 	{
-		VariableMap vm = context.getVariableMap( var);
+		VariableMap vm = functionMap.getVariableMap( var);
 		m_program.push_back( OpStruct( OpPushVar, vm));
 	}
 }
 
-void FormulaInterpreter::parseOperand( const Context& context, std::string::const_iterator& si, const std::string::const_iterator& se)
+void FormulaInterpreter::parseOperand( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se)
 {
 	if (si == se)
 	{
@@ -233,18 +235,18 @@ void FormulaInterpreter::parseOperand( const Context& context, std::string::cons
 		++fi; skipSpaces( fi, se);
 		if (fi < se)
 		{
-			if (isAlpha(*fi))
+			if (isAlpha(*fi) || *fi == '#' || *fi == '<')
 			{
 				// Parse variable reference or function call:
 				si = fi;
-				parseVariableExpression( context, si, se);
-				UnaryFunction func = context.getUnaryFunction( "-");
+				parseOperand( functionMap, si, se);
+				UnaryFunction func = functionMap.getUnaryFunction( "-");
 				m_program.push_back( OpStruct( OpUnaryFunction, func));
 			}
 			else if (*fi == '(')
 			{
 				si = fi; ++si; skipSpaces( si, se);
-				parseFunctionCall( context, "-", si, se);
+				parseFunctionCall( functionMap, "-", si, se);
 			}
 			else if (isDigit(*fi))
 			{
@@ -256,27 +258,45 @@ void FormulaInterpreter::parseOperand( const Context& context, std::string::cons
 			}
 		}
 	}
+	else if (*si == '(')
+	{
+		++si; skipSpaces(si,se);
+		unsigned int exprsize = parseSubExpression( functionMap, si, se, ')');
+		if (exprsize == 0) throw strus::runtime_error( _TXT( "content of operand '(...)' is empty"));
+		if (exprsize > 1) throw strus::runtime_error( _TXT( "content of operand '(...)' has more than one element"));
+	}
 	else if (*si == '#')
 	{
 		// Parse set dimension request:
 		++si; skipSpaces( si, se);
 		if (!isAlpha( *si)) throw strus::runtime_error( _TXT( "identifier expected after dimension operator '#'"));
 		std::string var = parseIdentifier( si, se);
-		m_program.push_back( OpStruct( OpPushDim, allocVariable( var)));
+		m_program.push_back( OpStruct( OpPushDim, (int)allocVariable( var)));
 	}
 	else if (isAlpha( *si))
 	{
 		// Parse variable reference or function call:
-		parseVariableExpression( context, si, se);
+		parseVariableExpression( functionMap, si, se);
 	}
 	else if (*si == '<')
 	{
 		// Parse loop <aggfunc,type>{ ... }:
-		++si;
-		if (!isAlpha( *si)) throw strus::runtime_error( _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
-		std::string aggregatorid = parseIdentifier( si, se);
+		std::string aggregatorid;
+		++si; skipSpaces(si,se);
+		if (isOperator( *si))
+		{
+			aggregatorid = parseOperator( si, se);
+		}
+		else if (isAlpha( *si))
+		{
+			aggregatorid = parseIdentifier( si, se);
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
+		}
 		if (si == se || *si != ',') throw strus::runtime_error( _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
-		++si;
+		++si; skipSpaces(si,se);
 		std::string type = parseIdentifier( si, se);
 		double initval = 0.0;
 		if (si < se && *si == ',')
@@ -295,13 +315,13 @@ void FormulaInterpreter::parseOperand( const Context& context, std::string::cons
 		++si; skipSpaces( si, se);
 		if (si == se || *si != '{') throw strus::runtime_error( _TXT( "open loop bracket '{' expected after loop predicate <aggfunc,type>"));
 		++si; skipSpaces( si, se);
-		BinaryFunction aggregatorf = context.getBinaryFunction( aggregatorid);
+		BinaryFunction aggregatorf = functionMap.getBinaryFunction( aggregatorid);
 
-		m_program.push_back( OpStruct( OpLoop, allocVariable( type)));
+		m_program.push_back( OpStruct( OpLoop, (int)allocVariable( type)));
 		m_program.push_back( OpStruct( OpPushConst, initval));
 		m_program.push_back( OpStruct( OpMark));
 
-		unsigned int loopsize = parseSubExpression( context, si, se, '}');
+		unsigned int loopsize = parseSubExpression( functionMap, si, se, '}');
 		if (loopsize == 0) throw strus::runtime_error( _TXT( "content of loop '{...}' is empty"));
 		if (loopsize > 1) throw strus::runtime_error( _TXT( "content of loop '{...}' has more than one expression element"));
 
@@ -310,11 +330,11 @@ void FormulaInterpreter::parseOperand( const Context& context, std::string::cons
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "function or variable itentifier or numeric operand expected"));
+		throw strus::runtime_error( _TXT( "function or variable identifier or numeric operand expected"));
 	}
 }
 
-unsigned int FormulaInterpreter::parseSubExpression( const Context& context, std::string::const_iterator& si, const std::string::const_iterator& se, char eb)
+unsigned int FormulaInterpreter::parseSubExpression( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se, char eb)
 {
 	unsigned int rt = 0;
 	skipSpaces(si,se);
@@ -322,49 +342,51 @@ unsigned int FormulaInterpreter::parseSubExpression( const Context& context, std
 	{
 		return 0;
 	}
-	while (si < se)
+	while (si < se && *si != eb)
 	{
-		parseOperand( context, si, se);
-		if (si < se)
+		parseOperand( functionMap, si, se);
+		++rt;
+		while (si < se && isOperator( *si))
 		{
-			if (*si == ',')
+			std::string op = parseOperator( si, se);
+			parseOperand( functionMap, si, se);
+			if (si < se && isOperator(*si))
 			{
-				// Parse next argument:
-				++si; skipSpaces( si, se);
-				++rt;
-				if (si == se || *si == eb)
+				std::string::const_iterator fi = si;
+				std::string opnext = parseOperator( fi, se);
+				if (operatorPrecedence(op) != operatorPrecedence(opnext))
 				{
-					throw strus::runtime_error( _TXT( "unexpected end of expression"));
+					throw strus::runtime_error( _TXT( "mixing operators with different precedence without grouping them with brackets '(' ')'"));
 				}
 			}
-			else if (isOperator( *si))
+			BinaryFunction opfunc = functionMap.getBinaryFunction( op);
+			m_program.push_back( OpStruct( OpBinaryFunction, opfunc));
+		}
+		if (si < se && *si == ',')
+		{
+			// Parse next argument:
+			++si; skipSpaces( si, se);
+			if (si == se || *si == eb)
 			{
-				std::string op = parseOperator( si, se);
-				parseOperand( context, si, se);
-				if (si < se && isOperator(*si))
-				{
-					std::string::const_iterator fi = si;
-					std::string opnext = parseOperator( fi, se);
-					if (operatorPrecedence(op) != operatorPrecedence(opnext))
-					{
-						throw strus::runtime_error( _TXT( "mixing operators with different precedence without grouping them with brackets '(' ')'"));
-					}
-				}
-				BinaryFunction opfunc = context.getBinaryFunction( op);
-				m_program.push_back( OpStruct( OpBinaryFunction, opfunc));
+				throw strus::runtime_error( _TXT( "unexpected end of expression"));
 			}
 		}
+	}
+	if (si < se && *si == eb)
+	{
+		++si;
+		skipSpaces(si,se);
 	}
 	return rt;
 }
 
-FormulaInterpreter::FormulaInterpreter( const Context& context, const std::string& source)
-	:m_dimmap(context.getDimMap())
+FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const std::string& source)
+	:m_dimmap(functionMap.getDimMap())
 {
 	std::string::const_iterator si = source.begin(), se = source.end();
 	try
 	{
-		unsigned int exprsize = parseSubExpression( context, si, se, '\0');
+		unsigned int exprsize = parseSubExpression( functionMap, si, se, '\0');
 		if (exprsize > 1)
 		{
 			throw strus::runtime_error( _TXT("program with more than one return value"));
@@ -416,6 +438,18 @@ public:
 		return m_itr == Size;
 	}
 
+	void print( std::ostream& out) const
+	{
+		std::ostringstream msg;
+		msg << std::setprecision(5);
+		for (std::size_t ii = m_itr; ii<Size; ++ii)
+		{
+			if (ii > m_itr) msg << "|";
+			msg << m_ar[ii];
+		}
+		out << msg.str();
+	}
+
 private:
 	Element m_ar[ Size];
 	std::size_t m_itr;
@@ -452,6 +486,13 @@ double FormulaInterpreter::run( void* ctx) const
 	while (ip < m_program.size())
 	{
 		const OpStruct& op = m_program[ ip];
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "[" << ip << "] ";
+		op.print( std::cerr, m_strings);
+		std::cerr << "  stack [";
+		stack.print( std::cerr);
+		std::cerr << "]" << std::endl;
+#endif
 		switch (op.opCode)
 		{
 			case OpMark:
@@ -514,11 +555,11 @@ double FormulaInterpreter::run( void* ctx) const
 			case OpPushVar:
 				if (loopctx.empty())
 				{
-					(*op.operand.variableMap)( ctx, 0, 0);
+					stack.push( (*op.operand.variableMap)( ctx, 0, 0));
 				}
 				else
 				{
-					(*op.operand.variableMap)( ctx, loopctx.back().type, loopctx.back().loopcnt);
+					stack.push( (*op.operand.variableMap)( ctx, loopctx.back().type, loopctx.back().loopcnt));
 				}
 				++ip;
 				break;
@@ -538,8 +579,8 @@ double FormulaInterpreter::run( void* ctx) const
 			}
 			case OpBinaryFunction:
 			{
-				double arg1 = stack.pop();
 				double arg2 = stack.pop();
+				double arg1 = stack.pop();
 				stack.push( (*op.operand.binaryFunction)( arg1, arg2));
 				++ip;
 				break;
@@ -570,13 +611,13 @@ void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& 
 		{
 			std::ostringstream num; 
 			num << std::setw(6) << std::setprecision(5) << operand.value;
-			out << num.str();
+			out << " " << num.str();
 			break;
 		}
 		case OpPushVar:
 		{
 			std::ostringstream msg;
-			msg << std::hex << (uintptr_t)operand.variableMap;
+			msg << " " << std::hex << (uintptr_t)operand.variableMap;
 			out << msg.str();
 			break;
 		}
@@ -586,14 +627,14 @@ void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& 
 		case OpUnaryFunction:
 		{
 			std::ostringstream msg;
-			msg << std::hex << (uintptr_t)operand.unaryFunction;
+			msg << " " << std::hex << (uintptr_t)operand.unaryFunction;
 			out << msg.str();
 			break;
 		}
 		case OpBinaryFunction:
 		{
 			std::ostringstream msg;
-			msg << std::hex << (uintptr_t)operand.binaryFunction;
+			msg << " " << std::hex << (uintptr_t)operand.binaryFunction;
 			out << msg.str();
 			break;
 		}
@@ -604,7 +645,7 @@ void FormulaInterpreter::print( std::ostream& out) const
 {
 	std::size_t ip = 0;
 
-	while (ip < m_program.size())
+	for (;ip < m_program.size(); ++ip)
 	{
 		const OpStruct& op = m_program[ ip];
 		op.print( out, m_strings);

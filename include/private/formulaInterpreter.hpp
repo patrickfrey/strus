@@ -41,7 +41,6 @@ namespace strus
 class FormulaInterpreter
 {
 public:
-private:
 	///\brief Function for mapping a variable. Returns -1, if variable not defined
 	typedef int (*DimMap)( void* ctx, const char* type);
 	///\brief Function for mapping a variable. Returns NAN, if variable not defined
@@ -51,10 +50,10 @@ private:
 	///\brief Binary function of the topmost element of the stack
 	typedef double (*UnaryFunction)( double arg);
 
-	class Context
+	class FunctionMap
 	{
 	public:
-		Context( DimMap func)
+		FunctionMap( DimMap func)
 			:m_dimmap(func){}
 
 		void defineVariableMap( const std::string& name, VariableMap func);
@@ -79,16 +78,16 @@ public:
 	FormulaInterpreter( const FormulaInterpreter& o)
 		:m_program(o.m_program),m_strings(o.m_strings),m_dimmap(o.m_dimmap){}
 
-	FormulaInterpreter( const Context& context, const std::string& source);
+	FormulaInterpreter( const FunctionMap& functionMap, const std::string& source);
 
 	double run( void* ctx) const;
 	void print( std::ostream& out) const;
 
 private:
-	void parseVariableExpression( const Context& context, std::string::const_iterator& si, const std::string::const_iterator& se);
-	void parseFunctionCall( const Context& context, const std::string& funcname, std::string::const_iterator& si, const std::string::const_iterator& se);
-	void parseOperand( const Context& context, std::string::const_iterator& si, const std::string::const_iterator& se);
-	unsigned int parseSubExpression( const Context& context, std::string::const_iterator& si, const std::string::const_iterator& se, char eb);
+	void parseVariableExpression( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se);
+	void parseFunctionCall( const FunctionMap& functionMap, const std::string& funcname, std::string::const_iterator& si, const std::string::const_iterator& se);
+	void parseOperand( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se);
+	unsigned int parseSubExpression( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se, char eb);
 	unsigned int allocVariable( const std::string& name);
 
 private:
@@ -123,6 +122,11 @@ private:
 			:opCode(opCode_)
 		{
 			operand.value = 0.0;
+		}
+		OpStruct( OpCode opCode_, int value_)
+			:opCode(opCode_)
+		{
+			operand.idx = value_;
 		}
 		OpStruct( OpCode opCode_, double value_)
 			:opCode(opCode_)
