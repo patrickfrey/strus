@@ -9,6 +9,7 @@ set(libstrus_shared_utils_source_files
 	configParser.cpp
 	fileio.cpp
 	protocol.cpp
+	formulaInterpreter.cpp
 )
 
 set( libstrus_private_utils_source_files
