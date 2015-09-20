@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <ostream>
 
 namespace strus
 {
@@ -81,6 +82,7 @@ public:
 	FormulaInterpreter( const Context& context, const std::string& source);
 
 	double run( void* ctx) const;
+	void print( std::ostream& out) const;
 
 private:
 	void parseVariableExpression( const Context& context, std::string::const_iterator& si, const std::string::const_iterator& se);
@@ -100,6 +102,12 @@ private:
 		OpUnaryFunction,		///< Call an unary function with the topmost element on the stack, pop the topmost element from the stack and push the result on the stack
 		OpBinaryFunction		///< Call a binary function with the two topmost elements on the stack, pop the argument elements from the stack and push the result on the stack
 	};
+	static const char* opCodeName( OpCode i)
+	{
+		static const char* ar[] = {"mark","loop","again","push const","push var","push dim","unary function","binary function",0};
+		return ar[ (unsigned int)i];
+	}
+
 	struct OpStruct
 	{
 		OpCode opCode;
@@ -139,6 +147,7 @@ private:
 		OpStruct( const OpStruct& o)
 			:opCode(o.opCode),operand(o.operand)
 		{}
+		void print( std::ostream& out, const std::string& strings) const;
 	};
 
 private:

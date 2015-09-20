@@ -32,6 +32,10 @@
 #include <limits> 
 #include <algorithm>
 #include <string> 
+#include <sstream> 
+#include <iostream> 
+#include <iomanip> 
+#include <stdint.h> 
 
 using namespace strus;
 
@@ -550,5 +554,62 @@ double FormulaInterpreter::run( void* ctx) const
 	return rt;
 }
 
+void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& strings) const
+{
+	out << FormulaInterpreter::opCodeName( opCode);
+	switch (opCode)
+	{
+		case OpMark:
+			break;
+		case OpLoop:
+			out << " " << (strings.c_str() + operand.idx);
+			break;
+		case OpAgain:
+			break;
+		case OpPushConst:
+		{
+			std::ostringstream num; 
+			num << std::setw(6) << std::setprecision(5) << operand.value;
+			out << num.str();
+			break;
+		}
+		case OpPushVar:
+		{
+			std::ostringstream msg;
+			msg << std::hex << (uintptr_t)operand.variableMap;
+			out << msg.str();
+			break;
+		}
+		case OpPushDim:
+			out << " " << (strings.c_str() + operand.idx);
+			break;
+		case OpUnaryFunction:
+		{
+			std::ostringstream msg;
+			msg << std::hex << (uintptr_t)operand.unaryFunction;
+			out << msg.str();
+			break;
+		}
+		case OpBinaryFunction:
+		{
+			std::ostringstream msg;
+			msg << std::hex << (uintptr_t)operand.binaryFunction;
+			out << msg.str();
+			break;
+		}
+	}
+}
+
+void FormulaInterpreter::print( std::ostream& out) const
+{
+	std::size_t ip = 0;
+
+	while (ip < m_program.size())
+	{
+		const OpStruct& op = m_program[ ip];
+		op.print( out, m_strings);
+		out << std::endl;
+	}
+}
 
 
