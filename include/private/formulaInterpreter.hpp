@@ -41,20 +41,50 @@ namespace strus
 class FormulaInterpreter
 {
 public:
-	///\brief Function for mapping a variable. Returns -1, if variable not defined
-	typedef int (*DimMap)( void* ctx, const char* type);
+	struct IteratorSpec
+	{
+		int typeidx;
+		unsigned int size;
+
+		bool defined() const
+		{
+			return typeidx >= 0;
+		}
+		IteratorSpec()
+			:typeidx(-1),size(0){}
+		IteratorSpec( const IteratorSpec& o)
+			:typeidx(o.typeidx),size(o.size){}
+		IteratorSpec( unsigned int typeidx_, unsigned int size_)
+			:typeidx(typeidx_),size(size_){}
+	};
+
+	///\brief Function for getting an iterator specification for iteration on a set
+	typedef IteratorSpec (*IteratorMap)( void* ctx, const char* type);
 	///\brief Function for mapping a variable. Returns NAN, if variable not defined
-	typedef double (*VariableMap)( void* ctx, const char* type, unsigned int idx);
+	typedef double (*VariableFunction)( void* ctx, int typeidx, unsigned int idx);
 	///\brief Binary function of the two topmost elements of the stack
 	typedef double (*BinaryFunction)( double arg1, double arg2);
 	///\brief Binary function of the topmost element of the stack
 	typedef double (*UnaryFunction)( double arg);
 
+	struct VariableMap
+	{
+		VariableFunction function;
+		int idx;
+
+		VariableMap( VariableFunction function_, int idx_=-1)
+			:function(function_),idx(idx_){}
+		VariableMap( const VariableMap& o)
+			:function(o.function),idx(o.idx){}
+		VariableMap()
+			:function(0),idx(-1){}
+	};
+
 	class FunctionMap
 	{
 	public:
-		FunctionMap( DimMap func)
-			:m_dimmap(func){}
+		explicit FunctionMap( IteratorMap func)
+			:m_iteratorMap(func){}
 
 		void defineVariableMap( const std::string& name, VariableMap func);
 		VariableMap getVariableMap( const std::string& name) const;
@@ -65,10 +95,11 @@ public:
 		void defineBinaryFunction( const std::string& name, BinaryFunction func);
 		BinaryFunction getBinaryFunction( const std::string& name) const;
 
-		DimMap getDimMap() const;
+		IteratorMap getIteratorMap() const;
+		std::string tostring() const;
 
 	private:
-		DimMap m_dimmap;
+		IteratorMap m_iteratorMap;
 		std::map<std::string,VariableMap> m_varmap;
 		std::map<std::string,UnaryFunction> m_unaryfuncmap;
 		std::map<std::string,BinaryFunction> m_binaryfuncmap;
@@ -76,7 +107,7 @@ public:
 
 public:
 	FormulaInterpreter( const FormulaInterpreter& o)
-		:m_program(o.m_program),m_strings(o.m_strings),m_dimmap(o.m_dimmap){}
+		:m_program(o.m_program),m_strings(o.m_strings),m_iteratorMap(o.m_iteratorMap){}
 
 	FormulaInterpreter( const FunctionMap& functionMap, const std::string& source);
 
@@ -114,7 +145,6 @@ private:
 		{
 			double value;
 			unsigned int idx;
-			VariableMap variableMap;
 			UnaryFunction unaryFunction;
 			BinaryFunction binaryFunction;
 		} operand;
@@ -133,11 +163,6 @@ private:
 		{
 			operand.value = value_;
 		}
-		OpStruct( OpCode opCode_, VariableMap VariableMap_)
-			:opCode(opCode_)
-		{
-			operand.variableMap = VariableMap_;
-		}
 		OpStruct( OpCode opCode_, UnaryFunction unaryFunction_)
 			:opCode(opCode_)
 		{
@@ -151,13 +176,14 @@ private:
 		OpStruct( const OpStruct& o)
 			:opCode(o.opCode),operand(o.operand)
 		{}
-		void print( std::ostream& out, const std::string& strings) const;
+		void print( std::ostream& out, const std::string& strings, const std::vector<VariableMap>& variablear) const;
 	};
 
 private:
 	std::vector<OpStruct> m_program;
 	std::string m_strings;
-	DimMap m_dimmap;
+	std::vector<VariableMap> m_variablear;
+	IteratorMap m_iteratorMap;
 };
 
 }//namespace

@@ -85,9 +85,37 @@ FormulaInterpreter::BinaryFunction FormulaInterpreter::FunctionMap::getBinaryFun
 	return vi->second;
 }
 
-FormulaInterpreter::DimMap FormulaInterpreter::FunctionMap::getDimMap() const
+FormulaInterpreter::IteratorMap FormulaInterpreter::FunctionMap::getIteratorMap() const
 {
-	return m_dimmap;
+	return m_iteratorMap;
+}
+
+std::string FormulaInterpreter::FunctionMap::tostring() const
+{
+	std::string rt;
+	rt.append( "variables: ");
+	std::map<std::string,VariableMap>::const_iterator vi = m_varmap.begin(), ve = m_varmap.end();
+	for (int vidx=0; vi != ve; ++vi,++vidx)
+	{
+		if (vidx) rt.append( " ");
+		rt.append( vi->first);
+	}
+	rt.append( "\nunary functions: ");
+	std::map<std::string,UnaryFunction>::const_iterator ui = m_unaryfuncmap.begin(), ue = m_unaryfuncmap.end();
+	for (int uidx=0; ui != ue; ++ui,++uidx)
+	{
+		if (uidx) rt.append( " ");
+		rt.append( ui->first);
+	}
+	rt.append( "\nbinary functions: ");
+	std::map<std::string,BinaryFunction>::const_iterator bi = m_binaryfuncmap.begin(), be = m_binaryfuncmap.end();
+	for (int bidx=0; bi != be; ++bi,++bidx)
+	{
+		if (bidx) rt.append( " ");
+		rt.append( bi->first);
+	}
+	rt.append("\n");
+	return rt;
 }
 
 static bool isAlpha( char ch)
@@ -186,7 +214,8 @@ void FormulaInterpreter::parseFunctionCall( const FunctionMap& functionMap, cons
 	if (nofargs == 0)
 	{
 		VariableMap vm = functionMap.getVariableMap( funcname);
-		m_program.push_back( OpStruct( OpPushVar, vm));
+		m_program.push_back( OpStruct( OpPushVar, (int)m_variablear.size()));
+		m_variablear.push_back( vm);
 	}
 	else if (nofargs == 1)
 	{
@@ -215,7 +244,8 @@ void FormulaInterpreter::parseVariableExpression( const FunctionMap& functionMap
 	else
 	{
 		VariableMap vm = functionMap.getVariableMap( var);
-		m_program.push_back( OpStruct( OpPushVar, vm));
+		m_program.push_back( OpStruct( OpPushVar, (int)m_variablear.size()));
+		m_variablear.push_back( vm);
 	}
 }
 
@@ -381,7 +411,7 @@ unsigned int FormulaInterpreter::parseSubExpression( const FunctionMap& function
 }
 
 FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const std::string& source)
-	:m_dimmap(functionMap.getDimMap())
+	:m_iteratorMap(functionMap.getIteratorMap())
 {
 	std::string::const_iterator si = source.begin(), se = source.end();
 	try
@@ -457,21 +487,20 @@ private:
 
 struct LoopContext
 {
-	const char* type;
-	unsigned int loopcnt;
-	unsigned int loopsize;
+	unsigned int itr;
+	FormulaInterpreter::IteratorSpec iteratorSpec;
 
 	LoopContext( const LoopContext& o)
-		:type(o.type),loopcnt(o.loopcnt),loopsize(o.loopsize){}
-	LoopContext( const char* type_, unsigned int loopsize_)
-		:type(type_),loopcnt(0),loopsize(loopsize_){}
+		:itr(o.itr),iteratorSpec(o.iteratorSpec){}
+	explicit LoopContext( const FormulaInterpreter::IteratorSpec& iteratorSpec_)
+		:itr(0),iteratorSpec(iteratorSpec_){}
 	LoopContext()
-		:type(0),loopcnt(0),loopsize(0){}
+		:itr(0){}
 
 	bool next()
 	{
-		if (loopcnt+1 == loopsize) return false;
-		++loopcnt;
+		if (itr+1 >= iteratorSpec.size) return false;
+		++itr;
 		return true;
 	}
 };
@@ -502,8 +531,8 @@ double FormulaInterpreter::run( void* ctx) const
 			}
 			case OpLoop:
 			{
-				int dim = (*m_dimmap)( ctx, m_strings.c_str() + op.operand.idx);
-				if (dim <= 0)
+				FormulaInterpreter::IteratorSpec iteratorSpec = (*m_iteratorMap)( ctx, m_strings.c_str() + op.operand.idx);
+				if (!iteratorSpec.defined())
 				{
 					int brkcnt = 1;
 					for (;ip < m_program.size(); ++ip)
@@ -528,7 +557,7 @@ double FormulaInterpreter::run( void* ctx) const
 					}
 				}
 				else {
-					loopctx.push( LoopContext( m_strings.c_str() + op.operand.idx, (unsigned int)dim));
+					loopctx.push( LoopContext( iteratorSpec));
 				}
 				++ip;
 				break;
@@ -553,21 +582,34 @@ double FormulaInterpreter::run( void* ctx) const
 				break;
 			}
 			case OpPushVar:
-				if (loopctx.empty())
+			{
+				const VariableMap& vm = m_variablear[ op.operand.idx];
+				if (vm.idx >= 0)
 				{
-					stack.push( (*op.operand.variableMap)( ctx, 0, 0));
+					stack.push( (*vm.function)( ctx, -1, vm.idx));
+				}
+				else if (loopctx.empty())
+				{
+					stack.push( (*vm.function)( ctx, -1, 0));
 				}
 				else
 				{
-					stack.push( (*op.operand.variableMap)( ctx, loopctx.back().type, loopctx.back().loopcnt));
+					stack.push( (*vm.function)( ctx, loopctx.back().iteratorSpec.typeidx, loopctx.back().itr));
 				}
 				++ip;
 				break;
+			}
 			case OpPushDim:
 			{
-				int dim = (*m_dimmap)( ctx, m_strings.c_str() + op.operand.idx);
-				if (dim < 0) dim = 0;
-				stack.push( (double)dim);
+				IteratorSpec iteratorSpec = (*m_iteratorMap)( ctx, m_strings.c_str() + op.operand.idx);
+				if (iteratorSpec.defined())
+				{
+					stack.push( (double)iteratorSpec.size);
+				}
+				else
+				{
+					stack.push( 0.0);
+				}
 				++ip;
 				break;
 			}
@@ -595,7 +637,7 @@ double FormulaInterpreter::run( void* ctx) const
 	return rt;
 }
 
-void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& strings) const
+void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& strings, const std::vector<VariableMap>& variablear) const
 {
 	out << FormulaInterpreter::opCodeName( opCode);
 	switch (opCode)
@@ -617,7 +659,9 @@ void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& 
 		case OpPushVar:
 		{
 			std::ostringstream msg;
-			msg << " " << std::hex << (uintptr_t)operand.variableMap;
+			const VariableMap& vm = variablear[ operand.idx];
+			msg << " " << std::hex << (uintptr_t)vm.function;
+			if (vm.idx >= 0) msg << " : " << std::dec << vm.idx;
 			out << msg.str();
 			break;
 		}
@@ -648,7 +692,7 @@ void FormulaInterpreter::print( std::ostream& out) const
 	for (;ip < m_program.size(); ++ip)
 	{
 		const OpStruct& op = m_program[ ip];
-		op.print( out, m_strings);
+		op.print( out, m_strings, m_variablear);
 		out << std::endl;
 	}
 }

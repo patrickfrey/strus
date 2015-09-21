@@ -61,6 +61,7 @@ QueryProcessor::QueryProcessor()
 	defineWeightingFunction( "tf", createWeightingFunctionTermFrequency());
 	defineWeightingFunction( "td", createWeightingFunctionConstant());
 	defineWeightingFunction( "metadata", createWeightingFunctionMetadata());
+	defineWeightingFunction( "formula", createWeightingFunctionFormula());
 
 	defineSummarizerFunction( "metadata", createSummarizerMetaData());
 	defineSummarizerFunction( "matchphrase", createSummarizerMatchPhrase());

@@ -59,6 +59,11 @@ public:
 		m_features[ idx].push_back( Feature( df, tf));
 	}
 
+	void defineParameter( double val)
+	{
+		m_x_ar.push_back( val);
+	}
+
 private:
 	struct Feature
 	{
@@ -74,6 +79,7 @@ private:
 	typedef std::vector<Feature> FeatureVector;
 	std::vector<FeatureVector> m_features;
 	std::map<std::string,std::size_t> m_sets;
+	std::vector<double> m_x_ar;
 };
 
 
@@ -84,6 +90,15 @@ public:
 	FunctionMap()
 		:FormulaInterpreter::FunctionMap( &dimMap)
 	{
+		std::size_t xi=0,xe=10;
+		for (; xi < xe; ++xi)
+		{
+			char nam[3];
+			nam[0] = 'x';
+			nam[1] = (char)(xi+'0');
+			nam[2] = '\0';
+			defineVariableMap( nam, FormulaInterpreter::VariableMap( &variableMap_xi, xi));
+		}
 		defineVariableMap( "df", &variableMap_df);
 		defineVariableMap( "tf", &variableMap_tf);
 		defineUnaryFunction( "log", &unaryFunction_log10);
@@ -95,28 +110,32 @@ public:
 	}
 
 private:
-	static int dimMap( void* ctx, const char* type)
+	static FormulaInterpreter::IteratorSpec dimMap( void* ctx, const char* type)
 	{
 		Context* THIS = (Context*)ctx;
 		std::map<std::string,std::size_t>::const_iterator ti = THIS->m_sets.find( type);
-		if (ti == THIS->m_sets.end()) return -1;
-		return THIS->m_features[ ti->second].size();
+		if (ti == THIS->m_sets.end()) return FormulaInterpreter::IteratorSpec();
+		return FormulaInterpreter::IteratorSpec( ti->second, THIS->m_features[ ti->second].size());
 	}
-	static double variableMap_df( void* ctx, const char* type, unsigned int idx)
+	static double variableMap_xi( void* ctx, int typeidx, unsigned int idx)
 	{
 		Context* THIS = (Context*)ctx;
-		std::map<std::string,std::size_t>::const_iterator ti = THIS->m_sets.find( type);
-		if (ti == THIS->m_sets.end()) return std::numeric_limits<double>::quiet_NaN();
-		if (idx >= THIS->m_features[ ti->second].size()) return std::numeric_limits<double>::quiet_NaN();
-		return THIS->m_features[ ti->second][idx].df;
+		if (idx >= THIS->m_x_ar.size()) return std::numeric_limits<double>::quiet_NaN();
+		return THIS->m_x_ar[idx];
 	}
-	static double variableMap_tf( void* ctx, const char* type, unsigned int idx)
+	static double variableMap_df( void* ctx, int typeidx, unsigned int idx)
 	{
 		Context* THIS = (Context*)ctx;
-		std::map<std::string,std::size_t>::const_iterator ti = THIS->m_sets.find( type);
-		if (ti == THIS->m_sets.end()) return std::numeric_limits<double>::quiet_NaN();
-		if (idx >= THIS->m_features[ ti->second].size()) return std::numeric_limits<double>::quiet_NaN();
-		return THIS->m_features[ ti->second][idx].tf;
+		if (typeidx < 0) return std::numeric_limits<double>::quiet_NaN();
+		if (idx >= THIS->m_features[ typeidx].size()) return std::numeric_limits<double>::quiet_NaN();
+		return THIS->m_features[ typeidx][idx].df;
+	}
+	static double variableMap_tf( void* ctx, int typeidx, unsigned int idx)
+	{
+		Context* THIS = (Context*)ctx;
+		if (typeidx < 0) return std::numeric_limits<double>::quiet_NaN();
+		if (idx >= THIS->m_features[ typeidx].size()) return std::numeric_limits<double>::quiet_NaN();
+		return THIS->m_features[ typeidx][idx].tf;
 	}
 	static double unaryFunction_minus( double arg)
 	{
@@ -156,6 +175,7 @@ struct Test
 	const char* name;
 	const char* formula;
 	FeatureDef feats[20];
+	double parameter[4];
 	double result;
 };
 
@@ -167,6 +187,11 @@ static bool run( unsigned int testidx, const Test& test)
 	for (;fi->name; ++fi)
 	{
 		context.defineFeature( fi->name, fi->df, fi->tf);
+	}
+	std::size_t xi = 0, xe = 4;
+	for (; xi<xe; ++xi)
+	{
+		context.defineParameter( test.parameter[xi]);
 	}
 	FormulaInterpreter interp( functionMap, test.formula);
 	double result = interp.run( &context);
@@ -185,57 +210,80 @@ static bool run( unsigned int testidx, const Test& test)
 static Test tests[] =
 {
 	{
+		"parameter variable",
+		"x1",
+		{{"stemmed",1.0,1.0},{"unstemmed",1.0,1.0},{"unstemmed",1.0,1.0},{0,0.0,0.0}},
+		{0.1, 0.2, 0.3, 0.4},
+		0.2
+	},
+	{
+		"parameter variable sum",
+		"x1 + x3",
+		{{"stemmed",1.0,1.0},{"unstemmed",1.0,1.0},{"unstemmed",1.0,1.0},{0,0.0,0.0}},
+		{0.1, 0.2, 0.3, 0.4},
+		0.6
+	},
+	{
 		"dimension variable",
 		"#unstemmed",
 		{{"stemmed",1.0,1.0},{"unstemmed",1.0,1.0},{"unstemmed",1.0,1.0},{0,0.0,0.0}},
+		{0.0},
 		2
 	},
 	{
 		"minus dimension variable",
 		"-#unstemmed",
 		{{"unstemmed",1.0,1.0},{"unstemmed",1.0,1.0},{0,0.0,0.0}},
+		{0.0},
 		-2
 	},
 	{
 		"difference dimension variables",
 		"#stemmed -#unstemmed",
 		{{"stemmed",1.0,1.0},{"stemmed",1.0,1.0},{"unstemmed",1.0,1.0},{0,0.0,0.0}},
+		{0.0},
 		1
 	},
 	{
 		"sum of 1 variable",
 		"<+,unstemmed,0>{df}",
 		{{"stemmed",1.1,2.1},{"stemmed",1.2,2.2},{"unstemmed",1.3,2.3},{0,0.0,0.0}},
+		{0.0},
 		1.3
 	},
 	{
 		"sum of 2 variables",
 		"<+,stemmed,0.4>{df}",
 		{{"stemmed",1.1,2.1},{"stemmed",1.2,2.2},{"unstemmed",1.3,2.3},{0,0.0,0.0}},
+		{0.0},
 		2.7
 	},
 	{
 		"sum of expressions",
 		"<+,stemmed,0.4>{df * tf}",
 		{{"stemmed",1.1,1.2},{"stemmed",2.1,2.2},{"unstemmed",3.1,3.2},{0,0.0,0.0}},
+		{0.0},
 		6.34
 	},
 	{
 		"sum of expressions with negative operand",
 		"< +, stemmed, 0.5>{ df*-tf} ",
 		{{"stemmed",1.1,1.2},{"stemmed",2.1,2.2},{"unstemmed",3.1,3.2},{0,0.0,0.0}},
+		{0.0},
 		-5.44
 	},
 	{
 		"addition of 2 sums of expressions [1]",
 		"< +, stemmed, 0.5>{ df*tf} + (<+,unstemmed>{ tf} / #unstemmed)",
 		{{"stemmed",1.1,1.2},{"stemmed",2.1,2.2},{"unstemmed",3.1,3.2},{0,0.0,0.0}},
+		{0.0},
 		9.64
 	},
 	{
 		"addition of 2 sums of expressions [2]",
 		"(<+,stemmed,0.5>{ df*tf} / #stemmed) + (<+,unstemmed>{ tf} / #unstemmed)",
 		{{"stemmed",1.1,1.2},{"stemmed",2.1,2.2},{"unstemmed",3.1,3.2},{0,0.0,0.0}},
+		{0.0},
 		6.42
 	},
 	{0,0,{0,0.0,0.0},0.0}
