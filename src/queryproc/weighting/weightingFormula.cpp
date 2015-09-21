@@ -149,7 +149,6 @@ WeightingFunctionContextFormula::WeightingFunctionContextFormula(
 	:m_paramar(paramar)
 	,m_featar()
 	,m_sets()
-	,m_nofCollectionDocuments(storage->globalNofDocumentsInserted())
 	,m_metadata(metadata_)
 	,m_interpreter( functionMap, formula)
 {
@@ -195,17 +194,21 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunct
 		MetaDataReaderInterface* metadata) const
 {
 	FormulaInterpreter::FunctionMap funcmap( m_functionmap);
+	std::vector<double> paramar( m_paramar);
 	Index ii=0,nn = metadata->nofElements();
 	for (;ii<nn;++ii)
 	{
 		const char* name = metadata->getName( ii);
 		funcmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_metadata, ii));
 	}
+	funcmap.defineVariableMap( "nofdocs", FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
+	paramar.push_back( (double)(storage_->globalNofDocumentsInserted());
+
 	if (m_formula.empty())
 	{
 		throw strus::runtime_error(_TXT("no weighting formula defined with string parameter 'formula'"));
 	}
-	return new WeightingFunctionContextFormula( storage_, metadata, funcmap, m_formula, m_paramar);
+	return new WeightingFunctionContextFormula( storage_, metadata, funcmap, m_formula, paramar);
 }
 
 void WeightingFunctionInstanceFormula::addStringParameter( const std::string& name, const std::string& value)

@@ -138,7 +138,6 @@ private:
 	std::vector<double> m_paramar;
 	std::vector<FeatureVector> m_featar;
 	std::map<std::string,std::size_t> m_sets;
-	float m_nofCollectionDocuments;
 	MetaDataReaderInterface* m_metadata;
 	FormulaInterpreter m_interpreter;
 };
