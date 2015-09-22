@@ -202,7 +202,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunct
 		funcmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_metadata, ii));
 	}
 	funcmap.defineVariableMap( "nofdocs", FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
-	paramar.push_back( (double)(storage_->globalNofDocumentsInserted());
+	paramar.push_back( (double)(storage_->globalNofDocumentsInserted()));
 
 	if (m_formula.empty())
 	{
