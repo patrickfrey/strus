@@ -532,8 +532,30 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [5] Create the summarizers:
+	// [5] Do the ranking:
+	std::vector<ResultDocument> rt;
+	Ranker ranker( m_nofRanks + m_minRank);
+
+	Index docno = 0;
+	unsigned int state = 0;
+	unsigned int prev_state = 0;
+	float weight = 0.0;
+
+	while (accumulator.nextRank( docno, state, weight))
+	{
+		ranker.insert( WeightedDocument( docno, weight));
+		if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
+		{
+			break;
+		}
+		prev_state = state;
+	}
+	std::vector<WeightedDocument>
+		resultlist = ranker.result( m_minRank);
+
+	// [6] Create the summarizers:
 	std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
+	if (!resultlist.empty())
 	{
 		std::vector<SummarizerDef>::const_iterator
 			zi = m_queryEval->summarizers().begin(),
@@ -569,26 +591,7 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [6] Do the Ranking and build the result:
-	std::vector<ResultDocument> rt;
-	Ranker ranker( m_nofRanks + m_minRank);
-
-	Index docno = 0;
-	unsigned int state = 0;
-	unsigned int prev_state = 0;
-	float weight = 0.0;
-
-	while (accumulator.nextRank( docno, state, weight))
-	{
-		ranker.insert( WeightedDocument( docno, weight));
-		if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
-		{
-			break;
-		}
-		prev_state = state;
-	}
-	std::vector<WeightedDocument>
-		resultlist = ranker.result( m_minRank);
+	// [7] Build the result:
 	std::vector<WeightedDocument>::const_iterator
 		ri=resultlist.begin(),re=resultlist.end();
 
