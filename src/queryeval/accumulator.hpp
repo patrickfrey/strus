@@ -77,9 +77,15 @@ public:
 		,m_visited(maxDocumentNumber_)
 		,m_maxNofRanks(maxNofRanks_)
 		,m_maxDocumentNumber(maxDocumentNumber_)
+		,m_evaluationSetIterator(0)
 	{}
 
 	~Accumulator(){}
+
+	void defineEvaluationSet( PostingIteratorInterface* iterator)
+	{
+		m_evaluationSetIterator = iterator;
+	}
 
 	void addSelector( PostingIteratorInterface* iterator, int setindex, bool isExpression);
 
@@ -135,6 +141,7 @@ private:
 	utils::DynamicBitset m_visited;
 	std::size_t m_maxNofRanks;
 	Index m_maxDocumentNumber;
+	PostingIteratorInterface* m_evaluationSetIterator;
 };
 
 }//namespace

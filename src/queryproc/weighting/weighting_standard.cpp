@@ -28,6 +28,7 @@
 */
 /// \brief Library providing some standard weighting functions
 #include "weighting_standard.hpp"
+#include "weightingFormula.hpp"
 #include "weightingBM25.hpp"
 #include "weightingBM25_dpfc.hpp"
 #include "weightingConstant.hpp"
@@ -36,6 +37,11 @@
 #include "private/dll_tags.hpp"
 
 using namespace strus;
+
+WeightingFunctionInterface* strus::createWeightingFunctionFormula()
+{
+	return new WeightingFunctionFormula();
+}
 
 WeightingFunctionInterface* strus::createWeightingFunctionBm25()
 {

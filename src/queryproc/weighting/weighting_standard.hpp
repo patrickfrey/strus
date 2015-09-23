@@ -36,6 +36,11 @@ namespace strus
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 
+/// \brief Create a weighting function for a schema defined as formula in a string
+/// \return the weighting function reference (to dispose with delete)
+/// \remark This type of weighting function may not have the ultimate preformance, but it might be used for prototyping
+WeightingFunctionInterface* createWeightingFunctionFormula();
+
 /// \brief Create a weighting function for the weighting schema BM25
 /// \return the weighting function reference (to dispose with delete)
 WeightingFunctionInterface* createWeightingFunctionBm25();

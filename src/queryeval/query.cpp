@@ -40,12 +40,14 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
+#include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
 #include "private/internationalization.hpp"
 #include "keyMap.hpp"
 #include <vector>
 #include <string>
 #include <utility>
+#include <algorithm>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -56,6 +58,7 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
+	,m_evalset_defined(false)
 {
 	std::vector<TermConfig>::const_iterator
 		ti = m_queryEval->terms().begin(),
@@ -80,6 +83,8 @@ Query::Query( const Query& o)
 	,m_nofRanks(o.m_nofRanks)
 	,m_minRank(o.m_minRank)
 	,m_usernames(o.m_usernames)
+	,m_evalset_docnolist(o.m_evalset_docnolist)
+	,m_evalset_defined(o.m_evalset_defined)
 {}
 
 void Query::pushTerm( const std::string& type_, const std::string& value_)
@@ -111,7 +116,7 @@ void Query::pushDuplicate()
 	{
 		throw strus::runtime_error( _TXT( "cannot push duplicate (query stack empty)"));
 	}
-	m_stack.push_back( m_stack.back());
+	m_stack.push_back( duplicateNode( m_stack.back()));
 }
 
 void Query::attachVariable( const std::string& name_)
@@ -136,6 +141,14 @@ void Query::defineMetaDataRestriction(
 	Index hnd = m_metaDataReader->elementHandle( name);
 	const char* typeName = m_metaDataReader->getType( hnd);
 	m_metaDataRestrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
+}
+
+void Query::addDocumentEvaluationSet(
+		const std::vector<Index>& docnolist_)
+{
+	m_evalset_docnolist.insert( m_evalset_docnolist.end(), docnolist_.begin(), docnolist_.end());
+	std::sort( m_evalset_docnolist.begin(), m_evalset_docnolist.end());
+	m_evalset_defined = true;
 }
 
 void Query::print( std::ostream& out) const
@@ -204,6 +217,47 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 			break;
 		}
 	}
+}
+
+Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
+{
+	Query::NodeAddress rtadr = nodeAddress( NullNode, 0);
+	switch (nodeType( m_stack.back()))
+	{
+		case NullNode:
+			rtadr = nodeAddress( NullNode, 0);
+			break;
+		case TermNode:
+		{
+			m_terms.push_back( m_terms[ nodeIndex( adr)]);
+			rtadr = nodeAddress( TermNode, m_terms.size()-1);
+			break;
+		}
+		case ExpressionNode:
+		{
+			const Expression& expr = m_expressions[ nodeIndex( adr)];
+			std::vector<NodeAddress> subnodes;
+			std::vector<NodeAddress>::const_iterator si = expr.subnodes.begin(), se = expr.subnodes.end();
+			for (; si != se; ++si)
+			{
+				subnodes.push_back( duplicateNode( *si));
+			}
+			m_expressions.push_back( Expression( expr.operation, subnodes, expr.range));
+			rtadr = nodeAddress( ExpressionNode, m_expressions.size()-1);
+			break;
+		}
+	}
+	// Duplicate assigned variables too:
+	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
+	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( adr);
+
+	Itr vi = vrange.first, ve = vrange.second;
+	for (; vi != ve; ++vi)
+	{
+		m_variableAssignments.insert( std::pair<NodeAddress,std::string>( rtadr, vi->second));
+	}
+	// Return result:
+	return rtadr;
 }
 
 void Query::setMaxNofRanks( std::size_t nofRanks_)
@@ -281,8 +335,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 
 PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
 {
-	std::map<NodeAddress,PostingIteratorInterface*>::const_iterator
-		pi = m_nodePostingsMap.find( nodeadr);
+	NodePostingsMap::const_iterator pi = m_nodePostingsMap.find( nodeadr);
 	if (pi == m_nodePostingsMap.end())
 	{
 		throw strus::runtime_error( _TXT( "expression node postings not found"));
@@ -323,7 +376,6 @@ void Query::collectSummarizationVariables(
 	}
 }
 
-
 std::vector<ResultDocument> Query::evaluate()
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -358,12 +410,19 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 	}
 	// [4] Create the accumulator:
+	DocsetPostingIterator evalset_itr;
 	Accumulator accumulator(
 		m_storage,
 		m_metaDataReader.get(), m_metaDataRestrictions,
 		m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
 
-	// [4.1] Add document selection postings:
+	// [4.1] Define document subset to evaluate query on:
+	if (m_evalset_defined)
+	{
+		evalset_itr = DocsetPostingIterator( m_evalset_docnolist);
+		accumulator.defineEvaluationSet( &evalset_itr);
+	}
+	// [4.2] Add document selection postings:
 	{
 		std::vector<std::string>::const_iterator
 			si = m_queryEval->selectionSets().begin(),
@@ -384,7 +443,7 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [4.2] Add features for weighting:
+	// [4.3] Add features for weighting:
 	{
 		std::vector<WeightingDef>::const_iterator
 			wi = m_queryEval->weightingFunctions().begin(),
@@ -421,7 +480,7 @@ std::vector<ResultDocument> Query::evaluate()
 			accumulator.addFeature( wi->weight(), execContext.release());
 		}
 	}
-	// [4.3] Define the user ACL restrictions:
+	// [4.4] Define the user ACL restrictions:
 	std::vector<Reference<InvAclIteratorInterface> > invAclList;
 	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
 	for (; ui != ue; ++ui)
@@ -433,7 +492,7 @@ std::vector<ResultDocument> Query::evaluate()
 			accumulator.addAlternativeAclRestriction( invAcl.get());
 		}
 	}
-	// [4.4] Define the feature restrictions:
+	// [4.5] Define the feature restrictions:
 	{
 		std::vector<std::string>::const_iterator
 			xi = m_queryEval->restrictionSets().begin(),
@@ -453,7 +512,7 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [4.5] Define the feature exclusions:
+	// [4.6] Define the feature exclusions:
 	{
 		std::vector<std::string>::const_iterator
 			xi = m_queryEval->exclusionSets().begin(),
@@ -473,8 +532,30 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [5] Create the summarizers:
+	// [5] Do the ranking:
+	std::vector<ResultDocument> rt;
+	Ranker ranker( m_nofRanks + m_minRank);
+
+	Index docno = 0;
+	unsigned int state = 0;
+	unsigned int prev_state = 0;
+	float weight = 0.0;
+
+	while (accumulator.nextRank( docno, state, weight))
+	{
+		ranker.insert( WeightedDocument( docno, weight));
+		if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
+		{
+			break;
+		}
+		prev_state = state;
+	}
+	std::vector<WeightedDocument>
+		resultlist = ranker.result( m_minRank);
+
+	// [6] Create the summarizers:
 	std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
+	if (!resultlist.empty())
 	{
 		std::vector<SummarizerDef>::const_iterator
 			zi = m_queryEval->summarizers().begin(),
@@ -510,26 +591,7 @@ std::vector<ResultDocument> Query::evaluate()
 			}
 		}
 	}
-	// [6] Do the Ranking and build the result:
-	std::vector<ResultDocument> rt;
-	Ranker ranker( m_nofRanks + m_minRank);
-
-	Index docno = 0;
-	unsigned int state = 0;
-	unsigned int prev_state = 0;
-	float weight = 0.0;
-
-	while (accumulator.nextRank( docno, state, weight))
-	{
-		ranker.insert( WeightedDocument( docno, weight));
-		if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
-		{
-			break;
-		}
-		prev_state = state;
-	}
-	std::vector<WeightedDocument>
-		resultlist = ranker.result( m_minRank);
+	// [7] Build the result:
 	std::vector<WeightedDocument>::const_iterator
 		ri=resultlist.begin(),re=resultlist.end();
 

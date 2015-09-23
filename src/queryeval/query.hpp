@@ -78,6 +78,9 @@ public:
 			CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup=true);
 
+	virtual void addDocumentEvaluationSet(
+			const std::vector<Index>& docnolist_);
+
 	virtual void setMaxNofRanks( std::size_t nofRanks_);
 	virtual void setMinRank( std::size_t minRank_);
 	virtual void addUserName( const std::string& username_);
@@ -167,6 +170,7 @@ private:
 
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
 	void printVariables( std::ostream& out, NodeAddress adr) const;
+	NodeAddress duplicateNode( NodeAddress adr);
 
 private:
 	const QueryEval* m_queryEval;
@@ -177,11 +181,14 @@ private:
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
-	std::map<NodeAddress,PostingIteratorInterface*> m_nodePostingsMap;
+	typedef std::map<NodeAddress,PostingIteratorInterface*> NodePostingsMap;
+	NodePostingsMap m_nodePostingsMap;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_nofRanks;
 	std::size_t m_minRank;
 	std::vector<std::string> m_usernames;
+	std::vector<Index> m_evalset_docnolist;
+	bool m_evalset_defined;
 };
 
 }//namespace

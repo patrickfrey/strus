@@ -7,12 +7,14 @@ set(source_files
 	weighting_standard.cpp
 	weightingBM25.cpp
 	weightingBM25_dpfc.cpp
+	weightingFormula.cpp
+	formulaInterpreter.cpp
 )
 
 include_directories(
   ${Boost_INCLUDE_DIRS}
   "${PROJECT_SOURCE_DIR}/include"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/weighting_bm25"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
 )
 
 # ------------------------------------
