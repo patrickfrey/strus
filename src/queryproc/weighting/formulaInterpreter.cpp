@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "private/formulaInterpreter.hpp"
+#include "formulaInterpreter.hpp"
 #include "private/internationalization.hpp"
 #include <cmath> 
 #include <limits> 

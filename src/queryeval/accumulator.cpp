@@ -59,10 +59,13 @@ bool Accumulator::nextRank(
 		if (m_evaluationSetIterator)
 		{
 			// ... we evaluate the query on a document subset defined by a posting iterator
+			Index dn = m_docno+1;
 			do
 			{
-				m_docno = m_evaluationSetIterator->skipDoc( m_docno+1);
-			} while (m_docno != 0 && m_docno == si->postings->skipDoc( m_docno));
+				m_docno = m_evaluationSetIterator->skipDoc( dn);
+				dn = si->postings->skipDoc( m_docno);
+			}
+			while (m_docno != 0 && dn != m_docno);
 		}
 		else
 		{

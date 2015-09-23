@@ -8,6 +8,7 @@ set(source_files
 	weightingBM25.cpp
 	weightingBM25_dpfc.cpp
 	weightingFormula.cpp
+	formulaInterpreter.cpp
 )
 
 include_directories(

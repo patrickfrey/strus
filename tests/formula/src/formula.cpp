@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "private/formulaInterpreter.hpp"
+#include "formulaInterpreter.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <limits>

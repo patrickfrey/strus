@@ -30,6 +30,7 @@
 ///\brief Implementation of a weighting function defined as formula in a string
 #ifndef _STRUS_WEIGHTING_FORMULA_HPP_INCLUDED
 #define _STRUS_WEIGHTING_FORMULA_HPP_INCLUDED
+#include "formulaInterpreter.hpp"
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
@@ -38,7 +39,6 @@
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
-#include "private/formulaInterpreter.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <vector>
