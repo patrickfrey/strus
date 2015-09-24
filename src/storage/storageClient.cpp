@@ -189,23 +189,18 @@ void StorageClient::getVariablesWriteBatch(
 	}
 }
 
-!!! HIER WEITER: Make methods exception safe
-
 void StorageClient::close()
 {
-	storeVariables();
+	try
+	{
+		storeVariables();
+	}
+	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
 }
 
 StorageClient::~StorageClient()
 {
-	try
-	{
-		close();
-	}
-	catch (...)
-	{
-		//... silently ignored. Call close directly to catch errors
-	}
+	close();
 	cleanup();
 }
 
@@ -270,20 +265,28 @@ PostingIteratorInterface*
 		const std::string& typestr,
 		const std::string& termstr) const
 {
-	Index typeno = getTermType( typestr);
-	Index termno = getTermValue( termstr);
-	if (!typeno || !termno)
+	try
 	{
-		return new NullIterator( typeno, termno, termstr.c_str());
+		Index typeno = getTermType( typestr);
+		Index termno = getTermValue( termstr);
+		if (!typeno || !termno)
+		{
+			return new NullIterator( typeno, termno, termstr.c_str());
+		}
+		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str());
 	}
-	return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str());
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
 }
 
 ForwardIteratorInterface*
 	StorageClient::createForwardIterator(
 		const std::string& type) const
 {
-	return new ForwardIterator( this, m_database.get(), type);
+	try
+	{
+		return new ForwardIterator( this, m_database.get(), type);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating forward iterator: %s"), *m_errorhnd, 0);
 }
 
 class InvertedAclIterator
@@ -292,14 +295,20 @@ class InvertedAclIterator
 	
 {
 public:
-	InvertedAclIterator( const DatabaseClientInterface* database_, const Index& userno_)
-		:IndexSetIterator( database_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_), true){}
+	InvertedAclIterator( const DatabaseClientInterface* database_, const Index& userno_, ErrorBufferInterface* errorhnd_)
+		:IndexSetIterator( database_, DatabaseKey::UserAclBlockPrefix, BlockKey(userno_), true),m_errorhnd(errorhnd_){}
 	virtual ~InvertedAclIterator(){}
 
 	virtual Index skipDoc( const Index& docno_)
 	{
-		return skip(docno_);
+		try
+		{
+			return skip(docno_);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error in skip doc of inverted ACL iterator: %s"), *m_errorhnd, 0);
 	}
+private:
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 class UnknownUserInvertedAclIterator
@@ -314,26 +323,34 @@ InvAclIteratorInterface*
 	StorageClient::createInvAclIterator(
 		const std::string& username) const
 {
-	if (!withAcl())
+	try
 	{
-		return 0;
+		if (!withAcl())
+		{
+			return 0;
+		}
+		Index userno = getUserno( username);
+		if (userno == 0)
+		{
+			return new UnknownUserInvertedAclIterator();
+		}
+		else
+		{
+			return new InvertedAclIterator( m_database.get(), userno, m_errorhnd);
+		}
 	}
-	Index userno = getUserno( username);
-	if (userno == 0)
-	{
-		return new UnknownUserInvertedAclIterator();
-	}
-	else
-	{
-		return new InvertedAclIterator( m_database.get(), userno);
-	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating inverted ACL iterator: %s"), *m_errorhnd, 0);
 }
 
 
 StorageTransactionInterface*
 	StorageClient::createTransaction()
 {
-	return new StorageTransaction( this, m_database.get(), m_peerMessageBuilder.get(), &m_metadescr, m_termno_map);
+	try
+	{
+		return new StorageTransaction( this, m_database.get(), m_peerMessageBuilder.get(), &m_metadescr, m_termno_map);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }
 
 StorageDocumentInterface* 
@@ -341,12 +358,20 @@ StorageDocumentInterface*
 		const std::string& docid,
 		const std::string& logfilename) const
 {
-	return new StorageDocumentChecker( this, m_database.get(), docid, logfilename);
+	try
+	{
+		return new StorageDocumentChecker( this, m_database.get(), docid, logfilename);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating document checker: %s"), *m_errorhnd, 0);
 }
 
 DocnoRangeAllocatorInterface* StorageClient::createDocnoRangeAllocator()
 {
-	return new DocnoRangeAllocator( this);
+	try
+	{
+		return new DocnoRangeAllocator( this, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating document number range allocator: %s"), *m_errorhnd, 0);
 }
 
 Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
@@ -581,17 +606,21 @@ GlobalCounter StorageClient::globalDocumentFrequency(
 		const std::string& type,
 		const std::string& term) const
 {
-	Index typeno = getTermValue( type);
-	Index termno = getTermValue( term);
-
-	if (m_documentFrequencyCache.get())
+	try
 	{
-		return m_documentFrequencyCache->getValue( typeno, termno);
+		Index typeno = getTermValue( type);
+		Index termno = getTermValue( term);
+	
+		if (m_documentFrequencyCache.get())
+		{
+			return m_documentFrequencyCache->getValue( typeno, termno);
+		}
+		else
+		{
+			return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+		}
 	}
-	else
-	{
-		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
-	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term global document frequency: %s"), *m_errorhnd, 0);
 }
 
 Index StorageClient::localDocumentFrequency( const Index& typeno, const Index& termno) const
@@ -603,9 +632,13 @@ Index StorageClient::localDocumentFrequency(
 		const std::string& type,
 		const std::string& term) const
 {
-	Index typeno = getTermValue( type);
-	Index termno = getTermValue( term);
-	return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+	try
+	{
+		Index typeno = getTermValue( type);
+		Index termno = getTermValue( term);
+		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term local document frequency: %s"), *m_errorhnd, 0);
 }
 
 Index StorageClient::maxDocumentNumber() const
@@ -615,8 +648,13 @@ Index StorageClient::maxDocumentNumber() const
 
 Index StorageClient::documentNumber( const std::string& docid) const
 {
-	Index rt = getDocno( docid);
-	if (!rt) throw strus::runtime_error( _TXT( "document with id '%s' is not defined in index"), docid.c_str());
+	Index rt = 0;
+	try
+	{
+		rt = getDocno( docid);
+		if (!rt) m_errorhnd->report( _TXT( "document with id '%s' is not defined in index"), docid.c_str());
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term local document frequency: %s"), *m_errorhnd, 0);
 	return rt;
 }
 
@@ -625,43 +663,47 @@ Index StorageClient::documentStatistics(
 		const DocumentStatisticsType& stat,
 		const std::string& type) const
 {
-	Index rt = 0;
-	Index typeno = getTermType( type);
-	if (typeno == 0) return 0;
-
-	DatabaseAdapter_InverseTerm::Reader dbadapter_inv( m_database.get());
-	InvTermBlock invblk;
-	typedef InvTermBlock::Element InvTerm;
-
-	if (dbadapter_inv.load( docno, invblk))
+	try
 	{
-		char const* ei = invblk.begin();
-		const char* ee = invblk.end();
-		switch (stat)
+		Index rt = 0;
+		Index typeno = getTermType( type);
+		if (typeno == 0) return 0;
+	
+		DatabaseAdapter_InverseTerm::Reader dbadapter_inv( m_database.get());
+		InvTermBlock invblk;
+		typedef InvTermBlock::Element InvTerm;
+	
+		if (dbadapter_inv.load( docno, invblk))
 		{
-			case StatNofTerms:
-				for (;ei != ee; ei = invblk.next( ei))
-				{
-					InvTerm it = invblk.element_at( ei);
-					if (typeno == it.typeno)
+			char const* ei = invblk.begin();
+			const char* ee = invblk.end();
+			switch (stat)
+			{
+				case StatNofTerms:
+					for (;ei != ee; ei = invblk.next( ei))
 					{
-						rt += 1;
+						InvTerm it = invblk.element_at( ei);
+						if (typeno == it.typeno)
+						{
+							rt += 1;
+						}
 					}
-				}
-			break;
-			case StatNofTermOccurrencies:
-				for (;ei != ee; ei = invblk.next( ei))
-				{
-					InvTerm it = invblk.element_at( ei);
-					if (typeno == it.typeno)
+				break;
+				case StatNofTermOccurrencies:
+					for (;ei != ee; ei = invblk.next( ei))
 					{
-						rt += it.ff;
+						InvTerm it = invblk.element_at( ei);
+						if (typeno == it.typeno)
+						{
+							rt += it.ff;
+						}
 					}
-				}
-			break;
+				break;
+			}
 		}
+		return rt;
 	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating document statistics: %s"), *m_errorhnd, 0);
 }
 
 Index StorageClient::userId( const std::string& username) const
@@ -673,12 +715,20 @@ Index StorageClient::userId( const std::string& username) const
 
 AttributeReaderInterface* StorageClient::createAttributeReader() const
 {
-	return new AttributeReader( this, m_database.get());
+	try
+	{
+		return new AttributeReader( this, m_database.get());
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating attribute reader: %s"), *m_errorhnd, 0);
 }
 
 MetaDataReaderInterface* StorageClient::createMetaDataReader() const
 {
-	return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
+	try
+	{
+		return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data reader: %s"), *m_errorhnd, 0);
 }
 
 void StorageClient::loadTermnoMap( const char* termnomap_source)
@@ -751,64 +801,80 @@ void StorageClient::fillDocumentFrequencyCache()
 void StorageClient::definePeerMessageProcessor(
 		const PeerMessageProcessorInterface* proc)
 {
-	if (!m_documentFrequencyCache.get())
+	try
 	{
-		fillDocumentFrequencyCache();
+		if (!m_documentFrequencyCache.get())
+		{
+			fillDocumentFrequencyCache();
+		}
+		TransactionLock lock( this);
+		m_peermsgproc = proc;
+		PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+		m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options, m_errorhnd));
 	}
-	TransactionLock lock( this);
-	m_peermsgproc = proc;
-	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options, m_errorhnd));
+	CATCH_ERROR_MAP( _TXT("error defining peer message processor: %s"), *m_errorhnd);
 }
 
 void StorageClient::startPeerInit()
 {
-	m_initialStatsPopulateState.init( m_peermsgproc, m_database.get(), m_nof_documents.value());
+	try
+	{
+		m_initialStatsPopulateState.init( m_peermsgproc, m_database.get(), m_nof_documents.value());
+	}
+	CATCH_ERROR_MAP( _TXT("error starting populating peer messages: %s"), *m_errorhnd);
 }
 
 void StorageClient::pushPeerMessage( const char* msg, std::size_t msgsize)
 {
-	if (m_initialStatsPopulateState.running())
+	try
 	{
-		throw strus::runtime_error( _TXT( "cannot handle message from other peer before all own initial statistics populated (with fetchPeerMessage)"));
+		if (m_initialStatsPopulateState.running())
+		{
+			throw strus::runtime_error( _TXT( "cannot handle message from other peer before all own initial statistics populated (with fetchPeerMessage)"));
+		}
+		if (!m_peermsgproc)
+		{
+			throw strus::runtime_error( _TXT( "cannot handle message from other peer because no peer message processor defined"));
+		}
+		PeerStorageTransaction transaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peermsgproc);
+		m_peerReplyMessageBuffer = transaction.run( msg, msgsize);
+		m_gotPeerReply = m_peerReplyMessageBuffer.size() == 0;
 	}
-	if (!m_peermsgproc)
-	{
-		throw strus::runtime_error( _TXT( "cannot handle message from other peer because no peer message processor defined"));
-	}
-	PeerStorageTransaction transaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peermsgproc);
-	m_peerReplyMessageBuffer = transaction.run( msg, msgsize);
-	m_gotPeerReply = m_peerReplyMessageBuffer.size() == 0;
+	CATCH_ERROR_MAP( _TXT("error pushing peer message to storage: %s"), *m_errorhnd);
 }
 
 bool StorageClient::fetchPeerReply( const char*& msg, std::size_t& msgsize)
 {
-	if (m_gotPeerReply)
+	try
 	{
-		m_peerReplyMessageBuffer.clear();
-		return false;
+		if (m_gotPeerReply)
+		{
+			m_peerReplyMessageBuffer.clear();
+			return false;
+		}
+		msg = m_peerReplyMessageBuffer.c_str();
+		msgsize = m_peerReplyMessageBuffer.size();
+		m_gotPeerReply = true;
+		return true;
 	}
-	msg = m_peerReplyMessageBuffer.c_str();
-	msgsize = m_peerReplyMessageBuffer.size();
-	m_gotPeerReply = true;
-	return true;
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message reply from storage: %s"), *m_errorhnd, false);
 }
 
 bool StorageClient::fetchPeerMessage( const char*& msg, std::size_t& msgsize)
 {
-	if (m_initialStatsPopulateState.running())
+	try
 	{
-		try
+		if (m_initialStatsPopulateState.running())
 		{
 			return m_initialStatsPopulateState.fetchMessage( msg, msgsize);
 		}
-		CATCH_ERROR_MAP_RETURN( _TXT("error database client fetching peer message: %s"), *m_errorhnd, false);
+		else
+		{
+			TransactionLock lock( this);
+			return m_peerMessageBuilder->fetchMessage( msg, msgsize);
+		}
 	}
-	else
-	{
-		TransactionLock lock( this);
-		return m_peerMessageBuilder->fetchMessage( msg, msgsize);
-	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error database client fetching peer message: %s"), *m_errorhnd, false);
 }
 
 
@@ -939,19 +1005,23 @@ static void checkKeyValue(
 
 void StorageClient::checkStorage( std::ostream& errorlog) const
 {
-	std::auto_ptr<strus::DatabaseCursorInterface>
-		cursor( m_database->createCursor( strus::DatabaseOptions()));
-
-	strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
-
-	for (; key.defined(); key = cursor->seekNext())
+	try
 	{
-		if (key.size() == 0)
+		std::auto_ptr<strus::DatabaseCursorInterface>
+			cursor( m_database->createCursor( strus::DatabaseOptions()));
+	
+		strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
+	
+		for (; key.defined(); key = cursor->seekNext())
 		{
-			throw strus::runtime_error( _TXT( "found empty key in storage"));
+			if (key.size() == 0)
+			{
+				throw strus::runtime_error( _TXT( "found empty key in storage"));
+			}
+			checkKeyValue( m_database.get(), key, cursor->value(), errorlog);
 		}
-		checkKeyValue( m_database.get(), key, cursor->value(), errorlog);
-	};
+	}
+	CATCH_ERROR_MAP( _TXT("error checking storage: %s"), *m_errorhnd);
 }
 
 static void dumpKeyValue(
@@ -1078,8 +1148,10 @@ class StorageDump
 	:public StorageDumpInterface
 {
 public:
-	explicit StorageDump( const strus::DatabaseClientInterface* database_)
-		:m_database(database_),m_cursor( database_->createCursor( strus::DatabaseOptions()))
+	StorageDump( const strus::DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
+		:m_database(database_)
+		,m_cursor( database_->createCursor( strus::DatabaseOptions()))
+		,m_errorhnd(errorhnd_)
 	{
 		m_key = m_cursor->seekFirst( 0, 0);
 	}
@@ -1087,20 +1159,24 @@ public:
 
 	virtual bool nextChunk( const char*& chunk, std::size_t& chunksize)
 	{
-		unsigned int ii = 0, nn = NofKeyValuePairsPerChunk;
-		std::ostringstream output;
-		for (; m_key.defined() && ii<nn; m_key = m_cursor->seekNext(),++ii)
+		try
 		{
-			if (m_key.size() == 0)
+			unsigned int ii = 0, nn = NofKeyValuePairsPerChunk;
+			std::ostringstream output;
+			for (; m_key.defined() && ii<nn; m_key = m_cursor->seekNext(),++ii)
 			{
-				throw strus::runtime_error( _TXT( "found empty key in storage"));
-			}
-			dumpKeyValue( output, m_database, m_key, m_cursor->value());
-		};
-		m_chunk = output.str();
-		chunk = m_chunk.c_str();
-		chunksize = m_chunk.size();
-		return (chunksize != 0);
+				if (m_key.size() == 0)
+				{
+					throw strus::runtime_error( _TXT( "found empty key in storage"));
+				}
+				dumpKeyValue( output, m_database, m_key, m_cursor->value());
+			};
+			m_chunk = output.str();
+			chunk = m_chunk.c_str();
+			chunksize = m_chunk.size();
+			return (chunksize != 0);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error fetching next chunk of storage dump: %s"), *m_errorhnd, false);
 	}
 
 	/// \brief How many key/value pairs to return in one chunk
@@ -1111,11 +1187,16 @@ private:
 	std::auto_ptr<strus::DatabaseCursorInterface> m_cursor;
 	strus::DatabaseCursorInterface::Slice m_key;
 	std::string m_chunk;
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 StorageDumpInterface* StorageClient::createDump() const
 {
-	return new StorageDump( m_database.get());
+	try
+	{
+		return new StorageDump( m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }
 
 

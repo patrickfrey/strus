@@ -27,9 +27,11 @@
 --------------------------------------------------------------------
 */
 #include "strus/lib/peermsgproc.hpp"
+#include "strus/lib/error.hpp"
 #include "strus/peerMessageProcessorInterface.hpp"
 #include "strus/peerMessageViewerInterface.hpp"
 #include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -123,6 +125,7 @@ private:
 };
 
 static Random g_random;
+static strus::ErrorBufferInterface* g_errorhnd = 0;
 
 class StlRandomGen
 {
@@ -252,7 +255,9 @@ static unsigned int getUintValue( const char* arg)
 
 int main( int argc, const char* argv[])
 {
-	
+	g_errorhnd = strus::createErrorBuffer_standard( stderr);
+	if (!g_errorhnd) return -1;
+
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		printUsage( argc, argv);
@@ -281,7 +286,11 @@ int main( int argc, const char* argv[])
 
 		const strus::PeerMessageProcessorInterface* pmp = strus::getPeerMessageProcessor();
 		strus::PeerMessageProcessorInterface::BuilderOptions options( insertInOrder?strus::PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder:strus::PeerMessageProcessorInterface::BuilderOptions::None, maxBlockSize);
-		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( options));
+		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( options, g_errorhnd));
+		if (!builder.get())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
 		builder->setNofDocumentsInsertedChange( (int)g_random.get( 0, 1000000) - 500000);
 
 		typedef TermCollection::Term Term;
@@ -297,9 +306,17 @@ int main( int argc, const char* argv[])
 			termsByteSize += ti->type.size() + ti->value.size() + 5;
 			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff, ti->isnew);
 		}
-		std::string message( builder->fetch());
-		std::size_t blobsize = message.size();
-
+		const char* msgblk;
+		std::size_t msgblksize;
+		std::size_t blobsize = 0;
+		if (!builder->fetchMessage( msgblk, msgblksize))
+		{
+			if (g_errorhnd->hasError())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
+		}
+		blobsize += msgblksize;
 		double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 		const char* insertInOrder_str = (insertInOrder?"in lexical order":"in random order");
 		std::cerr << "inserted " << collection.termar.size() << " terms in " << doubleToString(duration) << " seconds " << insertInOrder_str << std::endl;
@@ -308,9 +325,13 @@ int main( int argc, const char* argv[])
 		DocumentFrequencyChange rec;
 
 		std::set<Term> termset;
-		while (!message.empty())
+		while (msgblksize)
 		{
-			std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( message.c_str(), message.size()));
+			std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
+			if (!viewer.get())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
 			while (viewer->nextDfChange( rec))
 			{
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -319,8 +340,14 @@ int main( int argc, const char* argv[])
 #endif
 				termset.insert( Term( rec.type, rec.value, rec.increment, rec.isnew));
 			}
-			message = builder->fetch();
-			blobsize += message.size();
+			if (!builder->fetchMessage( msgblk, msgblksize))
+			{
+				if (g_errorhnd->hasError())
+				{
+					throw std::runtime_error( g_errorhnd->fetchError());
+				}
+			}
+			blobsize += msgblksize;
 		}
 		std::vector<Term> termar;
 		std::set<Term>::const_iterator si = termset.begin(), se = termset.end();
@@ -361,6 +388,10 @@ int main( int argc, const char* argv[])
 				std::cerr << "[" << tidx << "] ISNEW '" << ti_isnew << "' != '" << oi_isnew << "'" << std::endl;
 				throw std::runtime_error( "peer message item isnew does not match");
 			}
+		}
+		if (g_errorhnd->hasError())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
 		}
 		std::cerr << "processed blob of " << blobsize << " [uncompressed " << termsByteSize << "] bytes" << std::endl;
 		std::cerr << "Ok [" << collection.termar.size() << "]" << std::endl;

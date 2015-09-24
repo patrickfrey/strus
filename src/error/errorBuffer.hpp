@@ -26,55 +26,40 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
-/// \file storageErrorBuffer.cpp
-#include "storageErrorBuffer.hpp"
-#include "strus/private/snprintf.h"
-#include <stdarg.h>
-#include <cstring>
+/// \brief Standard implemenation of interface for reporting and catching errors in the core (storage)
+/// \file errorBuffer.hpp
+#ifndef _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/errorBufferInterface.hpp"
+#include <cstdio>
 
-using namespace strus;
-
-StorageErrorBuffer::StorageErrorBuffer()
+/// \brief strus toplevel namespace
+namespace strus
 {
-	msgbuf[ 0] = '\0';
-	hasmsg = false;
-}
 
-StorageErrorBuffer::~StorageErrorBuffer(){}
-
-void StorageErrorBuffer::report( const char* format, ...) const
+/// \class StorageErrorBuffer
+class ErrorBuffer
+	:public ErrorBufferInterface
 {
-	
-	if (!hasmsg)
-	{
-		va_list ap;
-		va_start(ap, format);
-		strus_vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
-		va_end(ap);
-		hasmsg = true;
-	}
-	
-}
+public:
+	explicit ErrorBuffer( FILE* logfilehandle_);
+	virtual ~ErrorBuffer();
 
-void StorageErrorBuffer::explain( const char* format) const
-{
-	char newmsgbuf[ MsgBufSize];
-	strus_snprintf( newmsgbuf, sizeof(newmsgbuf), format, msgbuf);
-	std::strcpy( msgbuf, newmsgbuf);
-	hasmsg = true;
-}
+	virtual void report( const char* format, ...) const;
 
-const char* StorageErrorBuffer::fetchError()
-{
-	if (!hasmsg) return 0;
-	hasmsg = false;
-	return msgbuf;
-}
+	virtual void explain( const char* format) const;
 
-bool StorageErrorBuffer::hasError() const
-{
-	return hasmsg;
-}
+	virtual const char* fetchError();
 
+	virtual bool hasError() const;
+
+private:
+	enum {MsgBufSize=512};
+	mutable char msgbuf[ MsgBufSize];
+	mutable bool hasmsg;
+	mutable FILE* logfilehandle;
+};
+
+}//namespace
+#endif
 

@@ -28,8 +28,8 @@
 */
 /// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
 /// \file storageErrorBuffer.hpp
-#ifndef _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STORAGE_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/errorBufferInterface.hpp"
 
 /// \brief strus toplevel namespace
@@ -46,7 +46,7 @@ public:
 
 	virtual void report( const char* format, ...) const;
 
-	virtual void explain( const char* format, ...) const;
+	virtual void explain( const char* format) const;
 
 	virtual const char* fetchError();
 

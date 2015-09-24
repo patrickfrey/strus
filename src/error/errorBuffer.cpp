@@ -26,24 +26,25 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
-/// \file storageErrorBuffer.cpp
-#include "storageErrorBuffer.hpp"
+/// \brief Implemenation of interface for reporting and catching errors in strus for implementing an expcetion free interface
+/// \file errorBuffer.cpp
+#include "errorBuffer.hpp"
 #include "strus/private/snprintf.h"
 #include <stdarg.h>
 #include <cstring>
 
 using namespace strus;
 
-StorageErrorBuffer::StorageErrorBuffer()
+ErrorBuffer::ErrorBuffer( FILE* logfilehandle_)
+	:logfilehandle(logfilehandle_)
 {
 	msgbuf[ 0] = '\0';
 	hasmsg = false;
 }
 
-StorageErrorBuffer::~StorageErrorBuffer(){}
+ErrorBuffer::~ErrorBuffer(){}
 
-void StorageErrorBuffer::report( const char* format, ...) const
+void ErrorBuffer::report( const char* format, ...) const
 {
 	
 	if (!hasmsg)
@@ -51,28 +52,48 @@ void StorageErrorBuffer::report( const char* format, ...) const
 		va_list ap;
 		va_start(ap, format);
 		strus_vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
+		if (logfilehandle)
+		{
+			vfprintf( logfilehandle, format, ap);
+			fputs( "\n", logfilehandle);
+		}
 		va_end(ap);
 		hasmsg = true;
 	}
-	
+	else if (logfilehandle)
+	{
+		va_list ap;
+		va_start(ap, format);
+		if (logfilehandle)
+		{
+			vfprintf( logfilehandle, format, ap);
+			fputs( "\n", logfilehandle);
+		}
+		va_end(ap);
+	}
 }
 
-void StorageErrorBuffer::explain( const char* format) const
+void ErrorBuffer::explain( const char* format) const
 {
 	char newmsgbuf[ MsgBufSize];
 	strus_snprintf( newmsgbuf, sizeof(newmsgbuf), format, msgbuf);
+	if (logfilehandle)
+	{
+		fprintf( logfilehandle, format, msgbuf);
+		fputs( "\n", logfilehandle);
+	}
 	std::strcpy( msgbuf, newmsgbuf);
 	hasmsg = true;
 }
 
-const char* StorageErrorBuffer::fetchError()
+const char* ErrorBuffer::fetchError()
 {
 	if (!hasmsg) return 0;
 	hasmsg = false;
 	return msgbuf;
 }
 
-bool StorageErrorBuffer::hasError() const
+bool ErrorBuffer::hasError() const
 {
 	return hasmsg;
 }

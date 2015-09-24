@@ -27,7 +27,7 @@
 --------------------------------------------------------------------
 */
 /// \brief Exported functions of the strus peermsgproc library
-/// \file storage.hpp
+/// \file peermsgproc.hpp
 #ifndef _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
 

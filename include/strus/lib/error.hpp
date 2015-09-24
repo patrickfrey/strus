@@ -26,55 +26,20 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
-/// \file storageErrorBuffer.cpp
-#include "storageErrorBuffer.hpp"
-#include "strus/private/snprintf.h"
-#include <stdarg.h>
-#include <cstring>
+/// \brief Exported functions of the strus error library implementing the standard error buffer interface
+/// \file error.hpp
+#ifndef _STRUS_STORAGE_ERROR_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_ERROR_LIB_HPP_INCLUDED
+#include <cstdio>
 
-using namespace strus;
+/// \brief strus toplevel namespace
+namespace strus {
 
-StorageErrorBuffer::StorageErrorBuffer()
-{
-	msgbuf[ 0] = '\0';
-	hasmsg = false;
-}
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
-StorageErrorBuffer::~StorageErrorBuffer(){}
+ErrorBufferInterface* createErrorBuffer_standard( FILE* logfilehandle);
 
-void StorageErrorBuffer::report( const char* format, ...) const
-{
-	
-	if (!hasmsg)
-	{
-		va_list ap;
-		va_start(ap, format);
-		strus_vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
-		va_end(ap);
-		hasmsg = true;
-	}
-	
-}
-
-void StorageErrorBuffer::explain( const char* format) const
-{
-	char newmsgbuf[ MsgBufSize];
-	strus_snprintf( newmsgbuf, sizeof(newmsgbuf), format, msgbuf);
-	std::strcpy( msgbuf, newmsgbuf);
-	hasmsg = true;
-}
-
-const char* StorageErrorBuffer::fetchError()
-{
-	if (!hasmsg) return 0;
-	hasmsg = false;
-	return msgbuf;
-}
-
-bool StorageErrorBuffer::hasError() const
-{
-	return hasmsg;
-}
-
+}//namespace
+#endif
 

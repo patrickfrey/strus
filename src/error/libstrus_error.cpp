@@ -26,55 +26,34 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Local implemenation of interface for reporting and catching errors in the core (storage)
-/// \file storageErrorBuffer.cpp
-#include "storageErrorBuffer.hpp"
-#include "strus/private/snprintf.h"
-#include <stdarg.h>
-#include <cstring>
+/// \brief Exported functions of the strus standard error buffer library
+/// \file libstrus_error.cpp
+#include "strus/lib/error.hpp"
+#include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
+#include "errorBuffer.hpp"
+#include <stdexcept>
+#include <cstdio>
 
 using namespace strus;
 
-StorageErrorBuffer::StorageErrorBuffer()
+DLL_PUBLIC ErrorBufferInterface* strus::createErrorBuffer_standard( FILE* logfilehandle)
 {
-	msgbuf[ 0] = '\0';
-	hasmsg = false;
-}
-
-StorageErrorBuffer::~StorageErrorBuffer(){}
-
-void StorageErrorBuffer::report( const char* format, ...) const
-{
-	
-	if (!hasmsg)
+	try
 	{
-		va_list ap;
-		va_start(ap, format);
-		strus_vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
-		va_end(ap);
-		hasmsg = true;
+		return new ErrorBuffer( logfilehandle);
 	}
-	
-}
-
-void StorageErrorBuffer::explain( const char* format) const
-{
-	char newmsgbuf[ MsgBufSize];
-	strus_snprintf( newmsgbuf, sizeof(newmsgbuf), format, msgbuf);
-	std::strcpy( msgbuf, newmsgbuf);
-	hasmsg = true;
-}
-
-const char* StorageErrorBuffer::fetchError()
-{
-	if (!hasmsg) return 0;
-	hasmsg = false;
-	return msgbuf;
-}
-
-bool StorageErrorBuffer::hasError() const
-{
-	return hasmsg;
+	catch (const std::bad_alloc&)
+	{
+		fprintf( logfilehandle?logfilehandle:stderr, _TXT("out of memory creating error buffer"));
+		return 0;
+	}
+	catch (const std::exception& err)
+	{
+		fprintf( logfilehandle?logfilehandle:stderr, _TXT("exception creating error buffer: %s"), err.what());
+		return 0;
+	}
 }
 
 

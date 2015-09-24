@@ -29,10 +29,12 @@
 #include "strus/reference.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
+#include "strus/lib/error.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
@@ -132,6 +134,7 @@ private:
 };
 
 static Random g_random;
+static strus::ErrorBufferInterface* g_errorhnd = 0;
 
 class StlRandomGen
 {
@@ -763,8 +766,16 @@ struct RandomQuery
 		std::string opname( operationName());
 		const strus::PostingJoinOperatorInterface* joinop =
 			queryproc->getPostingJoinOperator( opname);
+		if (!joinop)
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
 		strus::PostingIteratorInterface* res = 
 			joinop->createResultIterator( itrar, range);
+		if (!res)
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
 
 		result = resultMatches( res);
 		delete res;
@@ -882,6 +893,9 @@ static void printUsage( int argc, const char* argv[])
 
 int main( int argc, const char* argv[])
 {
+	g_errorhnd = strus::createErrorBuffer_standard( stderr);
+	if (!g_errorhnd) return -1;
+
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		printUsage( argc, argv);
@@ -907,8 +921,16 @@ int main( int argc, const char* argv[])
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
-		const strus::DatabaseInterface* dbi = strus::getDatabase_leveldb();
-		const strus::StorageInterface* sti = strus::getStorage();
+		std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabase_leveldb( g_errorhnd));
+		if (!dbi.get())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
+		std::auto_ptr<strus::StorageInterface> sti( strus::createStorage( g_errorhnd));
+		if (!sti.get())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
 		try
 		{
 			dbi->destroyDatabase( config);
@@ -923,6 +945,10 @@ int main( int argc, const char* argv[])
 		{
 			std::auto_ptr<strus::StorageClientInterface>
 				storage( sti->createClient( "", database.get()));
+			if (!storage.get())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
 			database.release();
 	
 			RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
@@ -935,13 +961,20 @@ int main( int argc, const char* argv[])
 	
 			typedef std::auto_ptr<strus::StorageTransactionInterface> StorageTransaction;
 			StorageTransaction transaction( storage->createTransaction());
-	
+			if (!transaction.get())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
 			std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 			for (; di != de; ++di,++totNofDocuments)
 			{
 				typedef std::auto_ptr<strus::StorageDocumentInterface> StorageDocument;
 	
 				StorageDocument doc( transaction->createDocument( di->docid));
+				if (!doc.get())
+				{
+					throw std::runtime_error( g_errorhnd->fetchError());
+				}
 				std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
 	
 				for (; oi != oe; ++oi,++totNofOccurrencies)
@@ -965,12 +998,20 @@ int main( int argc, const char* argv[])
 					std::cerr << "inserted " << (totNofDocuments+1) << " documents, " << totTermStringSize <<" bytes " << std::endl;
 				}
 			}
+			if (g_errorhnd->hasError())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
 			transaction->commit();
 	
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 			std::auto_ptr<strus::QueryProcessorInterface> 
-				queryproc( strus::createQueryProcessor());
-	
+				queryproc( strus::createQueryProcessor( g_errorhnd));
+			if (!queryproc.get())
+			{
+				throw std::runtime_error( g_errorhnd->fetchError());
+			}
+
 			std::vector<RandomQuery> randomQueryAr;
 			if (collection.docar.size())
 			{

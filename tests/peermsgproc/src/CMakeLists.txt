@@ -6,9 +6,10 @@ include_directories(
 	"${PROJECT_SOURCE_DIR}/include" )
 
 link_directories(
+	"${PROJECT_SOURCE_DIR}/src/error"
 	"${PROJECT_SOURCE_DIR}/src/peermsgproc"
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testPeerMessageProcessor testPeerMessageProcessor.cpp)
-target_link_libraries( testPeerMessageProcessor boost_system strus_peermsgproc strus_utils )
+target_link_libraries( testPeerMessageProcessor boost_system strus_error strus_peermsgproc strus_utils )
 
