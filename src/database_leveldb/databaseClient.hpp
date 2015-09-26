@@ -135,8 +135,8 @@ public:
 			bool compression,
 			unsigned int writeBufferSize,
 			unsigned int blockSize,
-			ErrorBufferInterface* errorhnd)
-		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize)),m_errorhnd(errorhnd)
+			ErrorBufferInterface* errorhnd_)
+		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize)),m_errorhnd(errorhnd_)
 	{}
 
 	virtual ~DatabaseClient();

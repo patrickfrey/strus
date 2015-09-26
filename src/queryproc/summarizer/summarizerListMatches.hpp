@@ -44,12 +44,15 @@ class StorageClientInterface;
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class SummarizerFunctionContextListMatches
 	:public SummarizerFunctionContextInterface
 {
 public:
-	SummarizerFunctionContextListMatches(){}
+	explicit SummarizerFunctionContextListMatches( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionContextListMatches(){}
 
 	virtual void addSummarizationFeature(
@@ -62,6 +65,7 @@ public:
 private:
 	const StorageClientInterface* m_storage;
 	std::vector<PostingIteratorInterface*> m_itrs;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -71,7 +75,8 @@ class SummarizerFunctionInstanceListMatches
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	SummarizerFunctionInstanceListMatches(){}
+	explicit SummarizerFunctionInstanceListMatches( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionInstanceListMatches(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
@@ -79,15 +84,12 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface*) const
-	{
-		return new SummarizerFunctionContextListMatches();
-	}
+			MetaDataReaderInterface*) const;
 
-	virtual std::string tostring() const
-	{
-		return std::string();
-	}
+	virtual std::string tostring() const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -95,15 +97,17 @@ class SummarizerFunctionListMatches
 	:public SummarizerFunctionInterface
 {
 public:
+	explicit SummarizerFunctionListMatches( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	SummarizerFunctionListMatches(){}
 
 	virtual ~SummarizerFunctionListMatches(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
-			const QueryProcessorInterface*) const
-	{
-		return new SummarizerFunctionInstanceListMatches();
-	}
+			const QueryProcessorInterface*) const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 

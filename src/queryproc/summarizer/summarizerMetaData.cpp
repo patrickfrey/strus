@@ -32,26 +32,104 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 
 using namespace strus;
 
 SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
-		MetaDataReaderInterface* metadata_, const std::string& name_)
+		MetaDataReaderInterface* metadata_, const std::string& name_, ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
 	,m_attrib(metadata_->elementHandle( name_.c_str()))
+	,m_errorhnd(errorhnd_)
 {}
+
+void SummarizerFunctionContextMetaData::addSummarizationFeature(
+		const std::string&,
+		PostingIteratorInterface*,
+		const std::vector<SummarizationVariable>&)
+{
+	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
+}
 
 std::vector<SummarizerFunctionContextInterface::SummaryElement>
 	SummarizerFunctionContextMetaData::getSummary( const Index& docno)
 {
-	std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
-	m_metadata->skipDoc( docno);
-	ArithmeticVariant value = m_metadata->getValue( m_attrib);
-	if (value.defined()) 
+	try
 	{
-		rt.push_back( SummarizerFunctionContextInterface::SummaryElement( arithmeticVariantToString( value), 1.0));
+		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		m_metadata->skipDoc( docno);
+		ArithmeticVariant value = m_metadata->getValue( m_attrib);
+		if (value.defined()) 
+		{
+			rt.push_back( SummarizerFunctionContextInterface::SummaryElement( arithmeticVariantToString( value), 1.0));
+		}
+		return rt;
 	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'metadata' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+}
+
+
+void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& name, const std::string& value)
+{
+	try
+	{
+		if (utils::caseInsensitiveEquals( name, "name"))
+		{
+			m_name = value;
+		}
+		else
+		{
+			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
+		}
+	}
+	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'metadata' summarizer: %s"), *m_errorhnd);
+}
+
+void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "name"))
+	{
+		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MetaData");
+	}
+	else
+	{
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
+	}
+}
+
+SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFunctionContext(
+		const StorageClientInterface*,
+		MetaDataReaderInterface* metadata) const
+{
+	try
+	{
+		return new SummarizerFunctionContextMetaData( metadata, m_name, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'metadata' summarizer: %s"), *m_errorhnd, 0);
+}
+
+std::string SummarizerFunctionInstanceMetaData::tostring() const
+{
+	try
+	{
+		std::ostringstream rt;
+		rt << "name='" << m_name << "'";
+		return rt.str();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'metadata' summarizer to string: %s"), *m_errorhnd, std::string());
+}
+
+
+SummarizerFunctionInstanceInterface* SummarizerFunctionMetaData::createInstance(
+		const QueryProcessorInterface*) const
+{
+	try
+	{
+		return new SummarizerFunctionInstanceMetaData( m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'metadata' summarizer: %s"), *m_errorhnd, 0);
 }
 
 

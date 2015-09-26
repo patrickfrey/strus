@@ -45,6 +45,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \class WeightingFunctionContextBM25_dpfc
 /// \brief Weighting function based on the BM25 formula with an artificial ff calculated from the real ff and some discrete increments given by some feature occurrence relation checks based on proximity and structures (sentences) 
@@ -64,7 +66,8 @@ public:
 		float title_ff_incr,
 		float sequence_ff_incr,
 		float sentence_ff_incr,
-		float relevant_df_factor);
+		float relevant_df_factor,
+		ErrorBufferInterface* errorhnd);
 
 	struct Feature
 	{
@@ -102,6 +105,7 @@ private:
 	float m_sequence_ff_incr;
 	float m_sentence_ff_incr;
 	float m_relevant_df_factor;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 /// \class WeightingFunctionInstanceBM25_dpfc
@@ -110,8 +114,8 @@ class WeightingFunctionInstanceBM25_dpfc
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceBM25_dpfc()
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_proximityMinDist(150),m_title_ff_incr(1.5),m_sequence_ff_incr(1.5),m_sentence_ff_incr(0.5),m_relevant_df_factor(0.5)
+	explicit WeightingFunctionInstanceBM25_dpfc( ErrorBufferInterface* errorhnd_)
+		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_proximityMinDist(150),m_title_ff_incr(1.5),m_sequence_ff_incr(1.5),m_sentence_ff_incr(0.5),m_relevant_df_factor(0.5),m_errorhnd(errorhnd_)
 	{}
 
 	virtual ~WeightingFunctionInstanceBM25_dpfc(){}
@@ -121,18 +125,9 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata) const
-	{
-		return new WeightingFunctionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr, m_relevant_df_factor);
-	}
+			MetaDataReaderInterface* metadata) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen << ", doclen=" << m_attribute_content_doclen << ", doclen_title=" << m_attribute_title_doclen << ", proxmindist=" << m_proximityMinDist << ", titleinc=" << m_title_ff_incr << ", seqinc=" << m_sequence_ff_incr << ", strinc=" << m_sentence_ff_incr << ", relevant=" << m_relevant_df_factor << std::endl;
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	float m_b;
@@ -145,6 +140,7 @@ private:
 	float m_sequence_ff_incr;
 	float m_sentence_ff_incr;
 	float m_relevant_df_factor;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -154,14 +150,15 @@ class WeightingFunctionBM25_dpfc
 	:public WeightingFunctionInterface
 {
 public:
-	WeightingFunctionBM25_dpfc(){}
+	explicit WeightingFunctionBM25_dpfc( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionBM25_dpfc(){}
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const
-	{
-		return new WeightingFunctionInstanceBM25_dpfc();
-	}
+	virtual WeightingFunctionInstanceInterface* createInstance() const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

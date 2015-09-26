@@ -70,8 +70,6 @@ public:
 private:
 	const PeerMessageProcessorInterface* m_peermsgproc;		///< reference to interface to other peer storages
 	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder;	///< reference to builder of messages to other peers
-	StorageErrorBuffer m_errorhnd;
-	
 };
 }
 #endif

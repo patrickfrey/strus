@@ -29,16 +29,18 @@
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
 #include "databaseClient.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "strus/databaseOptions.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <memory>
 #include <cstring>
 #include <stdexcept>
 
 using namespace strus;
 
-DatabaseTransaction::DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_)
-	:m_database(database_),m_db(db_),m_commit_called(false),m_rollback_called(false)
+DatabaseTransaction::DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_, ErrorBufferInterface* errorhnd_)
+	:m_database(database_),m_db(db_),m_commit_called(false),m_rollback_called(false),m_errorhnd(errorhnd_)
 {}
 
 DatabaseTransaction::~DatabaseTransaction()
@@ -48,7 +50,11 @@ DatabaseTransaction::~DatabaseTransaction()
 
 DatabaseCursorInterface* DatabaseTransaction::createCursor( const DatabaseOptions& options) const
 {
-	return m_database->createCursor( options);
+	try
+	{
+		return m_database->createCursor( options);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
 }
 
 void DatabaseTransaction::write(
@@ -57,45 +63,68 @@ void DatabaseTransaction::write(
 			const char* value,
 			std::size_t valuesize)
 {
-	m_batch.Put(
-		leveldb::Slice( key, keysize),
-		leveldb::Slice( value, valuesize));
+	try
+	{
+		m_batch.Put(
+			leveldb::Slice( key, keysize),
+			leveldb::Slice( value, valuesize));
+	}
+	CATCH_ERROR_MAP( _TXT("error writing element in database transaction: %s"), *m_errorhnd);
 }
 
 void DatabaseTransaction::remove(
 			const char* key,
 			std::size_t keysize)
 {
-	m_batch.Delete( leveldb::Slice( key, keysize));
+	try
+	{
+		m_batch.Delete( leveldb::Slice( key, keysize));
+	}
+	CATCH_ERROR_MAP( _TXT("error removing element in database transaction: %s"), *m_errorhnd);
 }
 
 void DatabaseTransaction::removeSubTree(
 		const char* domainkey,
 		std::size_t domainkeysize)
 {
-	std::auto_ptr<leveldb::Iterator> itr( m_db->NewIterator( leveldb::ReadOptions()));
-	for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
-		itr->Valid()
-			&& domainkeysize <= itr->key().size()
-			&& 0==std::memcmp( itr->key().data(), domainkey, domainkeysize);
-		itr->Next())
+	try
 	{
-		m_batch.Delete( itr->key());
+		std::auto_ptr<leveldb::Iterator> itr( m_db->NewIterator( leveldb::ReadOptions()));
+		for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
+			itr->Valid()
+				&& domainkeysize <= itr->key().size()
+				&& 0==std::memcmp( itr->key().data(), domainkey, domainkeysize);
+			itr->Next())
+		{
+			m_batch.Delete( itr->key());
+		}
 	}
+	CATCH_ERROR_MAP( _TXT("error removing subtree in database transaction: %s"), *m_errorhnd);
 }
 
-void DatabaseTransaction::commit()
+bool DatabaseTransaction::commit()
 {
-	leveldb::WriteOptions options;
-	options.sync = true;
-	leveldb::Status status = m_db->Write( options, &m_batch);
-	if (!status.ok())
+	try
 	{
-		std::string statusstr( status.ToString());
-		throw strus::runtime_error( _TXT( "error in commit when writing transaction batch: "), statusstr.c_str());
+		if (m_errorhnd->hasError())
+		{
+			m_errorhnd->explain( _TXT( "database transaction with error: %s"));
+			return false;
+		}
+		leveldb::WriteOptions options;
+		options.sync = true;
+		leveldb::Status status = m_db->Write( options, &m_batch);
+		if (!status.ok())
+		{
+			std::string statusstr( status.ToString());
+			m_errorhnd->report( _TXT( "error in commit when writing transaction batch: "), statusstr.c_str());
+			return false;
+		}
+		m_batch.Clear();
+		m_commit_called = true;
+		return true;
 	}
-	m_batch.Clear();
-	m_commit_called = true;
+	CATCH_ERROR_MAP_RETURN( _TXT("error in database transaction commit: %s"), *m_errorhnd, false);
 }
 
 void DatabaseTransaction::rollback()

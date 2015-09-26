@@ -46,8 +46,8 @@ class Database
 	:public DatabaseInterface
 {
 public:
-	explicit Database( ErrorBufferInterface* errorhnd)
-		:m_dbhandle_map( new LevelDbHandleMap()),m_errorhnd(errorhnd){}
+	explicit Database( ErrorBufferInterface* errorhnd_)
+		:m_dbhandle_map( new LevelDbHandleMap()),m_errorhnd(errorhnd_){}
 
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const;
 
@@ -65,7 +65,7 @@ public:
 
 private:
 	utils::SharedPtr<LevelDbHandleMap> m_dbhandle_map;
-	ErrorBufferInterface* m_errorhnd;
+	ErrorBufferInterface* m_errorhnd;	///< buffer for reporting errors
 };
 
 }//namespace

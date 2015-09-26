@@ -75,7 +75,7 @@ class StorageClient
 public:
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd);
+	StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd_);
 	virtual ~StorageClient();
 
 	virtual void close();

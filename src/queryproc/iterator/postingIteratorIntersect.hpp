@@ -34,12 +34,14 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class IteratorIntersect
 	:public IteratorJoin
 {
 public:
-	IteratorIntersect( const std::vector<Reference< PostingIteratorInterface> >& args);
+	IteratorIntersect( const std::vector<Reference< PostingIteratorInterface> >& args, ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorIntersect();
 
 	virtual const char* featureid() const
@@ -69,6 +71,7 @@ private:
 	std::vector<Reference< PostingIteratorInterface> > m_argar;
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -76,17 +79,16 @@ class PostingJoinIntersect
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinIntersect( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinIntersect(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
-			int range) const
-	{
-		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for 'intersect'"));
-		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments for 'intersect'"));
+			int range) const;
 
-		return new IteratorIntersect( itrs);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

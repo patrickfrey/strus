@@ -45,6 +45,8 @@ namespace strus
 
 /// \brief Forward declaration
 class WeightingFunctionMetadata;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 /// \class WeightingFunctionContextMetadata
@@ -56,30 +58,21 @@ public:
 	WeightingFunctionContextMetadata(
 			MetaDataReaderInterface* metadata_,
 			const std::string& elementName_,
-			float weight_)
-		:m_metadata(metadata_)
-		,m_elementHandle(metadata_->elementHandle(elementName_))
-		,m_weight(weight_)
-	{}
+			float weight_,
+			ErrorBufferInterface* errorhnd_);
 
 	virtual void addWeightingFeature(
 			const std::string&,
 			PostingIteratorInterface*,
-			float)
-	{
-		throw strus::runtime_error( _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), "metadata");
-	}
+			float);
 
-	virtual float call( const Index& docno)
-	{
-		m_metadata->skipDoc( docno);
-		return m_weight * (float)m_metadata->getValue( m_elementHandle);
-	}
+	virtual float call( const Index& docno);
 
 private:
 	MetaDataReaderInterface* m_metadata;
 	Index m_elementHandle;
 	float m_weight;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 /// \class WeightingFunctionInstanceMetadata
@@ -88,61 +81,25 @@ class WeightingFunctionInstanceMetadata
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceMetadata()
-		:m_weight(1.0){}
+	explicit WeightingFunctionInstanceMetadata( ErrorBufferInterface* errorhnd_)
+		:m_weight(1.0),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceMetadata(){}
 
-	virtual void addStringParameter( const std::string& name, const std::string& value)
-	{
-		if (utils::caseInsensitiveEquals( name, "name"))
-		{
-			m_elementName = value;
-		}
-		else
-		{
-			addNumericParameter( name, arithmeticVariantFromString( value));
-		}
-	}
+	virtual void addStringParameter( const std::string& name, const std::string& value);
 
-	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
-	{
-		if (utils::caseInsensitiveEquals( name, "weight"))
-		{
-			m_weight = (float)value;
-		}
-		else if (utils::caseInsensitiveEquals( name, "name"))
-		{
-			throw strus::runtime_error( _TXT("illegal numeric type for '%s' weighting function parameter '%s'"), "metadata", name.c_str());
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "metadata", name.c_str());
-		}
-	}
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface* metadata_) const
-	{
-		if (m_elementName.empty())
-		{
-			throw strus::runtime_error( _TXT("undefined '%s' weighting function parameter '%s'"), "metadata", "name");
-		}
-		return new WeightingFunctionContextMetadata( metadata_, m_elementName, m_weight);
-	}
+			MetaDataReaderInterface* metadata_) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << std::setw(2) << std::setprecision(5)
-			<< "name=" << m_elementName << ", weight=" << m_weight;
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	float m_weight;
 	std::string m_elementName;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -152,14 +109,14 @@ class WeightingFunctionMetadata
 	:public WeightingFunctionInterface
 {
 public:
-	WeightingFunctionMetadata(){}
+	explicit WeightingFunctionMetadata( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~WeightingFunctionMetadata(){}
 
+	virtual WeightingFunctionInstanceInterface* createInstance() const;
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const
-	{
-		return new WeightingFunctionInstanceMetadata();
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

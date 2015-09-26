@@ -47,6 +47,8 @@ class AttributeReaderInterface;
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class SummarizerFunctionContextAttribute
 	:public SummarizerFunctionContextInterface
@@ -54,7 +56,7 @@ class SummarizerFunctionContextAttribute
 public:
 	/// \param[in] attribreader_ reader for document attributes
 	/// \param[in] name_ attribute identifier
-	SummarizerFunctionContextAttribute( AttributeReaderInterface* attribreader_, const std::string& name_);
+	SummarizerFunctionContextAttribute( AttributeReaderInterface* attribreader_, const std::string& name_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextAttribute();
 
@@ -68,6 +70,7 @@ public:
 private:
 	AttributeReaderInterface* m_attribreader;
 	int m_attrib;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -77,8 +80,8 @@ class SummarizerFunctionInstanceAttribute
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceAttribute()
-		:m_name(){}
+	explicit SummarizerFunctionInstanceAttribute( ErrorBufferInterface* errorhnd_)
+		:m_name(),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAttribute(){}
 
@@ -89,15 +92,11 @@ public:
 			const StorageClientInterface* storage,
 			MetaDataReaderInterface*) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << "name='" << m_name << "'";
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	std::string m_name;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -105,14 +104,16 @@ class SummarizerFunctionAttribute
 	:public SummarizerFunctionInterface
 {
 public:
+	explicit SummarizerFunctionAttribute( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	SummarizerFunctionAttribute(){}
 	virtual ~SummarizerFunctionAttribute(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
-			const QueryProcessorInterface*) const
-	{
-		return new SummarizerFunctionInstanceAttribute();
-	}
+			const QueryProcessorInterface*) const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 

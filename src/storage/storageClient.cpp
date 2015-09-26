@@ -79,7 +79,7 @@ void StorageClient::cleanup()
 	}
 }
 
-StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd)
+StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd_)
 	:m_database()
 	,m_next_typeno(0)
 	,m_next_termno(0)
@@ -92,7 +92,7 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	,m_termno_map(0)
 	,m_peermsgproc(0)
 	,m_gotPeerReply(false)
-	,m_errorhnd(errorhnd)
+	,m_errorhnd(errorhnd_)
 {
 	try
 	{
@@ -273,7 +273,7 @@ PostingIteratorInterface*
 		{
 			return new NullIterator( typeno, termno, termstr.c_str());
 		}
-		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str());
+		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
 }
@@ -284,7 +284,7 @@ ForwardIteratorInterface*
 {
 	try
 	{
-		return new ForwardIterator( this, m_database.get(), type);
+		return new ForwardIterator( this, m_database.get(), type, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating forward iterator: %s"), *m_errorhnd, 0);
 }
@@ -717,7 +717,7 @@ AttributeReaderInterface* StorageClient::createAttributeReader() const
 {
 	try
 	{
-		return new AttributeReader( this, m_database.get());
+		return new AttributeReader( this, m_database.get(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating attribute reader: %s"), *m_errorhnd, 0);
 }
@@ -726,7 +726,7 @@ MetaDataReaderInterface* StorageClient::createMetaDataReader() const
 {
 	try
 	{
-		return new MetaDataReader( m_metaDataBlockCache, &m_metadescr);
+		return new MetaDataReader( m_metaDataBlockCache, &m_metadescr, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data reader: %s"), *m_errorhnd, 0);
 }
@@ -810,7 +810,7 @@ void StorageClient::definePeerMessageProcessor(
 		TransactionLock lock( this);
 		m_peermsgproc = proc;
 		PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-		m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options, m_errorhnd));
+		m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
 	}
 	CATCH_ERROR_MAP( _TXT("error defining peer message processor: %s"), *m_errorhnd);
 }
@@ -836,9 +836,9 @@ void StorageClient::pushPeerMessage( const char* msg, std::size_t msgsize)
 		{
 			throw strus::runtime_error( _TXT( "cannot handle message from other peer because no peer message processor defined"));
 		}
-		PeerStorageTransaction transaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peermsgproc);
+		PeerStorageTransaction transaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peermsgproc, m_errorhnd);
 		m_peerReplyMessageBuffer = transaction.run( msg, msgsize);
-		m_gotPeerReply = m_peerReplyMessageBuffer.size() == 0;
+		m_gotPeerReply = m_peerReplyMessageBuffer.size() > 0;
 	}
 	CATCH_ERROR_MAP( _TXT("error pushing peer message to storage: %s"), *m_errorhnd);
 }

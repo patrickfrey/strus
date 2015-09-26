@@ -47,6 +47,6 @@ DLL_PUBLIC DatabaseInterface* strus::createDatabase_leveldb( ErrorBufferInterfac
 		}
 		return new Database( errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error printing query evaluation structure: %s"), *errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating database based on leveldb: %s"), *errorhnd, 0);
 }
 

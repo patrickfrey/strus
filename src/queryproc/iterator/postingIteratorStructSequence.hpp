@@ -31,10 +31,11 @@
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
-#include <vector>
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \class IteratorStructSequence
 /// \brief Selects all elements that are appearing in a strict ascending position order inside a defined range without overlapping with a delimiter element.
@@ -48,7 +49,8 @@ public:
 	IteratorStructSequence(
 			int range_, 
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			bool with_cut);
+			bool with_cut,
+			ErrorBufferInterface* errorhnd_);
 
 	virtual ~IteratorStructSequence();
 
@@ -83,6 +85,7 @@ private:
 	int m_range;							///< the maximum position difference between the start element and the end element of the sequence
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -90,32 +93,32 @@ class PostingJoinStructSequence
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinStructSequence( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinStructSequence(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const
-	{
-		if (argitr.size() < 2) throw strus::runtime_error( _TXT( "too few arguments for 'sequence_struct'"));
+			int range_) const;
 
-		return new IteratorStructSequence( range_, argitr, true);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 class PostingJoinSequence
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinSequence( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinSequence(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const
-	{
-		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments for 'sequence_struct'"));
+			int range_) const;
 
-		return new IteratorStructSequence( range_, argitr, false);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

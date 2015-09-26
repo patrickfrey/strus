@@ -284,9 +284,9 @@ int main( int argc, const char* argv[])
 		if (argc>4) insertInOrder = getUintValue( argv[4]);
 		TermCollection collection( nofTerms, diffRange);
 
-		const strus::PeerMessageProcessorInterface* pmp = strus::getPeerMessageProcessor();
+		std::auto_ptr<strus::PeerMessageProcessorInterface> pmp( strus::createPeerMessageProcessor( g_errorhnd));
 		strus::PeerMessageProcessorInterface::BuilderOptions options( insertInOrder?strus::PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder:strus::PeerMessageProcessorInterface::BuilderOptions::None, maxBlockSize);
-		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( options, g_errorhnd));
+		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( options));
 		if (!builder.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());

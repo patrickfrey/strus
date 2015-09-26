@@ -34,52 +34,21 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <cstdlib>
 
 using namespace strus;
-
-void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::string& name, const std::string& value)
-{
-	if (utils::caseInsensitiveEquals( name, "type"))
-	{
-		m_type = value;
-	}
-	else if (utils::caseInsensitiveEquals( name, "delimiter"))
-	{
-		m_delimiter = value;
-	}
-	else if (utils::caseInsensitiveEquals( name, "assign"))
-	{
-		m_assign = value;
-	}
-	else
-	{
-		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
-	}
-}
-
-void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
-{
-	if (utils::caseInsensitiveEquals( name, "type")
-	||  utils::caseInsensitiveEquals( name, "delimiter")
-	||  utils::caseInsensitiveEquals( name, "assign"))
-	{
-		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchVariables");
-	}
-	else
-	{
-		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
-	}
-}
-
 
 SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
 		const std::string& delimiter_,
-		const std::string& assign_)
+		const std::string& assign_,
+		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
@@ -87,6 +56,7 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 	,m_delimiter(delimiter_.empty()?std::string(","):delimiter_)
 	,m_assign(assign_.empty()?std::string("="):assign_)
 	,m_features()
+	,m_errorhnd(errorhnd_)
 {}
 
 
@@ -95,54 +65,141 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	try
 	{
-		m_features.push_back( SummarizationFeature( itr, variables));
+		if (utils::caseInsensitiveEquals( name, "match"))
+		{
+			m_features.push_back( SummarizationFeature( itr, variables));
+		}
+		else
+		{
+			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "MatchVariables", name.c_str());
+		}
 	}
-	else
-	{
-		throw strus::runtime_error( _TXT("unknown '%s' summarization feature '%s'"), "MatchVariables", name.c_str());
-	}
+	CATCH_ERROR_MAP( _TXT("error adding feature to 'matchvariables' summarizer: %s"), *m_errorhnd);
 }
 
 
 std::vector<SummarizerFunctionContextInterface::SummaryElement>
 	SummarizerFunctionContextMatchVariables::getSummary( const Index& docno)
 {
-	std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
-	m_forwardindex->skipDoc( docno);
-	Index curpos = 0;
-
-	std::vector<SummarizationFeature>::const_iterator
-		fi = m_features.begin(), fe = m_features.end();
-
-	for (; fi != fe; ++fi)
+	try
 	{
-		if (docno==fi->itr->skipDoc( docno))
+		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		m_forwardindex->skipDoc( docno);
+		Index curpos = 0;
+	
+		std::vector<SummarizationFeature>::const_iterator
+			fi = m_features.begin(), fe = m_features.end();
+	
+		for (; fi != fe; ++fi)
 		{
-			for (curpos = 0; curpos; curpos=fi->itr->skipPos( curpos+1))
+			if (docno==fi->itr->skipDoc( docno))
 			{
-				std::vector<SummarizationVariable>::const_iterator
-					vi = fi->variables.begin(),
-					ve = fi->variables.end();
-
-				std::string line;
-				for (int vidx=0; vi != ve; ++vi,++vidx)
+				for (curpos = 0; curpos; curpos=fi->itr->skipPos( curpos+1))
 				{
-					Index pos = vi->position();
-					if (pos)
+					std::vector<SummarizationVariable>::const_iterator
+						vi = fi->variables.begin(),
+						ve = fi->variables.end();
+	
+					std::string line;
+					for (int vidx=0; vi != ve; ++vi,++vidx)
 					{
-						if (vidx) line.append( m_delimiter);
-						line.append( vi->name());
-						line.append( m_assign);
-						m_forwardindex->skipPos( pos);
-						line.append( m_forwardindex->fetch());
+						Index pos = vi->position();
+						if (pos)
+						{
+							if (vidx) line.append( m_delimiter);
+							line.append( vi->name());
+							line.append( m_assign);
+							m_forwardindex->skipPos( pos);
+							line.append( m_forwardindex->fetch());
+						}
 					}
 				}
 			}
 		}
+		return rt;
 	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'matchvariables' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
+
+
+void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::string& name, const std::string& value)
+{
+	try
+	{
+		if (utils::caseInsensitiveEquals( name, "type"))
+		{
+			m_type = value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "delimiter"))
+		{
+			m_delimiter = value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "assign"))
+		{
+			m_assign = value;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
+		}
+	}
+	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'matchvariables' summarizer: %s"), *m_errorhnd);
+}
+
+void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+{
+	if (utils::caseInsensitiveEquals( name, "type")
+	||  utils::caseInsensitiveEquals( name, "delimiter")
+	||  utils::caseInsensitiveEquals( name, "assign"))
+	{
+		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchVariables");
+	}
+	else
+	{
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
+	}
+}
+
+SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
+		const StorageClientInterface* storage,
+		MetaDataReaderInterface*) const
+{
+	if (m_type.empty())
+	{
+		m_errorhnd->report( _TXT( "empty forward index type definition (parameter 'type') in match phrase summarizer configuration"));
+	}
+	try
+	{
+		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_type, m_delimiter, m_assign, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'matchvariables' summarizer: %s"), *m_errorhnd, 0);
+}
+
+std::string SummarizerFunctionInstanceMatchVariables::tostring() const
+{
+	try
+	{
+		std::ostringstream rt;
+		rt << "type='" << m_type 
+			<< "', delimiter='" << m_delimiter
+			<< "', assign='" << m_assign << "'";
+		return rt.str();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'matchvariables' summarizer to string: %s"), *m_errorhnd, std::string());
+}
+
+
+SummarizerFunctionInstanceInterface* SummarizerFunctionMatchVariables::createInstance(
+		const QueryProcessorInterface* processor) const
+{
+	try
+	{
+		return new SummarizerFunctionInstanceMatchVariables( processor, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'matchvariables' summarizer: %s"), *m_errorhnd, 0);
+}
+
 
 

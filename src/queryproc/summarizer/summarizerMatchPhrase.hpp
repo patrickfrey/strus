@@ -52,6 +52,8 @@ class ForwardIteratorInterface;
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 class SummarizerFunctionContextMatchPhrase
@@ -71,7 +73,8 @@ public:
 			unsigned int maxlen_,
 			unsigned int summarylen_,
 			unsigned int structseeklen_,
-			const std::pair<std::string,std::string>& matchmark_);
+			const std::pair<std::string,std::string>& matchmark_,
+			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextMatchPhrase();
 
 	virtual void addSummarizationFeature(
@@ -97,6 +100,7 @@ private:
 	Reference<PostingIteratorInterface> m_structop;
 	std::vector<Reference<PostingIteratorInterface> > m_structelem;
 	bool m_init_complete;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -106,8 +110,8 @@ class SummarizerFunctionInstanceMatchPhrase
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor)
-		:m_type(),m_nofsummaries(3),m_summarylen(40),m_structseeklen(10),m_processor(processor){}
+	SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
+		:m_type(),m_nofsummaries(3),m_summarylen(40),m_structseeklen(10),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
 
@@ -116,24 +120,9 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
-			MetaDataReaderInterface*) const
-	{
-		if (m_type.empty())
-		{
-			throw strus::runtime_error( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
-		}
-		return new SummarizerFunctionContextMatchPhrase(
-				storage, m_processor, m_type, m_nofsummaries, m_summarylen, m_structseeklen, m_matchmark);
-	}
+			MetaDataReaderInterface*) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << "type='" << m_type 
-			<< "', nof summaries=" << m_nofsummaries
-			<< ", summarylen=" << m_summarylen;
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	std::string m_type;
@@ -142,6 +131,7 @@ private:
 	unsigned int m_structseeklen;
 	std::pair<std::string,std::string> m_matchmark;
 	const QueryProcessorInterface* m_processor;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -149,15 +139,16 @@ class SummarizerFunctionMatchPhrase
 	:public SummarizerFunctionInterface
 {
 public:
-	SummarizerFunctionMatchPhrase(){}
+	explicit SummarizerFunctionMatchPhrase( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionMatchPhrase(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
-			const QueryProcessorInterface* processor) const
-	{
-		return new SummarizerFunctionInstanceMatchPhrase( processor);
-	}
+			const QueryProcessorInterface* processor) const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

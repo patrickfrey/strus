@@ -42,8 +42,8 @@ void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peerm
 {
 	m_peermsgproc = peermsgproc_;
 	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options, &m_errorhnd));
-	if (!m_peerMessageBuilder.get()) throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd.hasError()?m_errorhnd.fetchError():"unknown error");
+	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
+	if (!m_peerMessageBuilder.get()) throw strus::runtime_error(_TXT("error creating peer message builder"));
 	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofDocuments_);
 	m_peerMessageBuilder->start();
 
@@ -103,21 +103,7 @@ void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peerm
 
 bool InitialStatsPopulateState::fetchMessage( const char* blk, std::size_t blksize)
 {
-	if (!m_peermsgproc) return false;
-
-	if (m_peerMessageBuilder->fetchMessage( blk, blksize))
-	{
-		return true;
-	}
-	else
-	{
-		const char* errmsg = m_errorhnd.fetchError();
-		m_peermsgproc = 0;
-		if (errmsg)
-		{
-			throw strus::runtime_error( _TXT("error fetching initial statistics for other peers: %s"), errmsg);
-		}
-		return false;
-	}
+	return m_peerMessageBuilder->fetchMessage( blk, blksize);
 }
+
 

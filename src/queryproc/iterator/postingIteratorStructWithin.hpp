@@ -31,10 +31,11 @@
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
-#include <vector>
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \class IteratorStructWithin
 /// \brief Selects all elements that are appearing inside a defined range without overlapping with a structure delimiter element.
@@ -45,7 +46,7 @@ public:
 	/// \param[in] range_ the maximum position difference between the start element and the end element of the group
 	/// \param[in] args the elements of this join 
 	/// \param[in] with_cut true, if the first element of args is the cut element
-	IteratorStructWithin( int range_, const std::vector<Reference< PostingIteratorInterface> >& args, bool with_cut);
+	IteratorStructWithin( int range_, const std::vector<Reference< PostingIteratorInterface> >& args, bool with_cut, ErrorBufferInterface* errorhnd_);
 
 	virtual ~IteratorStructWithin();
 
@@ -81,6 +82,7 @@ private:
 	int m_range;							///< the maximum position difference between the start element and the end element of the group
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -90,32 +92,33 @@ class PostingJoinStructWithin
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinStructWithin( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinStructWithin(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const
-	{
-		if (argitr.size() < 2) throw strus::runtime_error( _TXT( "too few arguments for 'within_struct'"));
+			int range_) const;
 
-		return new IteratorStructWithin( range_, argitr, true);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
+
 
 class PostingJoinWithin
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinWithin( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinWithin(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const
-	{
-		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments for 'within_struct'"));
+			int range_) const;
 
-		return new IteratorStructWithin( range_, argitr, false);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

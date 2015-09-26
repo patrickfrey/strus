@@ -37,7 +37,7 @@
 
 using namespace strus;
 
-PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_)
+PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_, ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_documentFrequencyCache(dfcache_)
@@ -46,6 +46,7 @@ PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, Databas
 	,m_termvaluecnt(0)
 	,m_nofDocumentsInserted(0)
 	,m_commit(false)
+	,m_errorhnd(errorhnd_)
 {}
 
 void PeerStorageTransaction::clear()
@@ -138,9 +139,8 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 				cleaned_batch.put( *bi);
 			}
 		}
-		StorageErrorBuffer peerMessageProcessorErrorBuffer;
 		PeerMessageProcessorInterface::BuilderOptions options;
-		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options, &peerMessageProcessorErrorBuffer));
+		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options));
 		std::vector<NewTerm>::const_iterator ti = m_newTerms.begin(), te = m_newTerms.end();
 		for (; ti != te; ++ti)
 		{
@@ -160,9 +160,11 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 		{
 			rt.append( blk, blksize);
 		}
-		const char* errmsg = peerMessageProcessorErrorBuffer.fetchError();
-		if (errmsg) throw strus::runtime_error( _TXT("error in peer message transaction: %s"), errmsg);
-
+		if( m_errorhnd->hasError())
+		{
+			m_errorhnd->explain( _TXT("error in peer message transaction: %s"));
+			return std::string();
+		}
 		m_documentFrequencyCache->writeBatch( cleaned_batch);
 		m_storage->declareGlobalNofDocumentsInserted( m_nofDocumentsInserted);
 		m_commit = true;

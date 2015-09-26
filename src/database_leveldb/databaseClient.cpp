@@ -175,7 +175,7 @@ DatabaseTransactionInterface* DatabaseClient::createTransaction()
 {
 	try
 	{
-		return new DatabaseTransaction( m_db->db(), this);
+		return new DatabaseTransaction( m_db->db(), this, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating transaction: %s"), *m_errorhnd, 0);
 }
@@ -184,7 +184,7 @@ DatabaseCursorInterface* DatabaseClient::createCursor( const DatabaseOptions& op
 {
 	try
 	{
-		return new DatabaseCursor( m_db->db(), options.useCacheEnabled());
+		return new DatabaseCursor( m_db->db(), options.useCacheEnabled(), false, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
 }
@@ -195,8 +195,8 @@ class DatabaseBackupCursor
 	,public DatabaseCursor
 {
 public:
-	explicit DatabaseBackupCursor( leveldb::DB* db_)
-		:DatabaseCursor( db_, false, true){}
+	DatabaseBackupCursor( leveldb::DB* db_, ErrorBufferInterface* errorhnd_)
+		:DatabaseCursor( db_, false, true, m_errorhnd),m_errorhnd(errorhnd_){}
 
 	virtual bool fetch(
 			const char*& key,
@@ -204,25 +204,30 @@ public:
 			const char*& blk,
 			std::size_t& blksize)
 	{
-		if (!m_key.defined())
+		try
 		{
-			m_key = seekFirst( 0, 0);
+			if (!m_key.defined())
+			{
+				m_key = seekFirst( 0, 0);
+			}
+			else
+			{
+				m_key = seekNext();
+			}
+			if (!m_key.defined()) return false;
+			Slice blkslice = value();
+			key = m_key.ptr();
+			keysize = m_key.size();
+			blk = blkslice.ptr();
+			blksize = blkslice.size();
+			return true;
 		}
-		else
-		{
-			m_key = seekNext();
-		}
-		if (!m_key.defined()) return false;
-		Slice blkslice = value();
-		key = m_key.ptr();
-		keysize = m_key.size();
-		blk = blkslice.ptr();
-		blksize = blkslice.size();
-		return true;
+		CATCH_ERROR_MAP_RETURN( _TXT("error in database cursor fetching next element: %s"), *m_errorhnd, false);
 	}
 
 private:
 	Slice m_key;
+	ErrorBufferInterface* m_errorhnd;
 };
 
 
@@ -230,7 +235,7 @@ DatabaseBackupCursorInterface* DatabaseClient::createBackupCursor() const
 {
 	try
 	{
-		return new DatabaseBackupCursor( m_db->db());
+		return new DatabaseBackupCursor( m_db->db(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database backup cursor: %s"), *m_errorhnd, 0);
 }

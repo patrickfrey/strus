@@ -28,6 +28,9 @@
 */
 #include "weightingBM25_dpfc.hpp"
 #include "strus/constants.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "private/fixedStructAllocator.hpp"
 #include <cmath>
 #include <ctime>
@@ -48,7 +51,8 @@ WeightingFunctionContextBM25_dpfc::WeightingFunctionContextBM25_dpfc(
 		float title_ff_incr_,
 		float sequence_ff_incr_,
 		float sentence_ff_incr_,
-		float relevant_df_factor_)
+		float relevant_df_factor_,
+		ErrorBufferInterface* errorhnd_)
 	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_)
 	,m_nofCollectionDocuments(storage->globalNofDocumentsInserted())
 	,m_weight_featar()
@@ -61,6 +65,7 @@ WeightingFunctionContextBM25_dpfc::WeightingFunctionContextBM25_dpfc(
 	,m_sequence_ff_incr(sequence_ff_incr_)
 	,m_sentence_ff_incr(sentence_ff_incr_)
 	,m_relevant_df_factor(relevant_df_factor_)
+	,m_errorhnd(errorhnd_)
 {}
 
 void WeightingFunctionContextBM25_dpfc::addWeightingFeature(
@@ -68,37 +73,41 @@ void WeightingFunctionContextBM25_dpfc::addWeightingFeature(
 		PostingIteratorInterface* itr_,
 		float weight_)
 {
-	if (utils::caseInsensitiveEquals( name_, "match"))
+	try
 	{
-		float nofMatches = itr_->documentFrequency();
-		float idf = 0.0;
-		bool relevant = (m_nofCollectionDocuments * m_relevant_df_factor > nofMatches);
-
-		if (m_nofCollectionDocuments > nofMatches * 2)
+		if (utils::caseInsensitiveEquals( name_, "match"))
 		{
-			idf = logf(
-					(m_nofCollectionDocuments - nofMatches + 0.5)
-					/ (nofMatches + 0.5));
+			float nofMatches = itr_->documentFrequency();
+			float idf = 0.0;
+			bool relevant = (m_nofCollectionDocuments * m_relevant_df_factor > nofMatches);
+	
+			if (m_nofCollectionDocuments > nofMatches * 2)
+			{
+				idf = logf(
+						(m_nofCollectionDocuments - nofMatches + 0.5)
+						/ (nofMatches + 0.5));
+			}
+			if (idf < 0.00001)
+			{
+				idf = 0.00001;
+			}
+			m_weight_featar.push_back( Feature( itr_, weight_, idf, relevant));
 		}
-		if (idf < 0.00001)
+		else if (utils::caseInsensitiveEquals( name_, "struct"))
 		{
-			idf = 0.00001;
+			m_struct_featar.push_back( Feature( itr_, weight_, 0.0, false));
 		}
-		m_weight_featar.push_back( Feature( itr_, weight_, idf, relevant));
+		else if (utils::caseInsensitiveEquals( name_, "title"))
+		{
+			if (m_title_itr) throw strus::runtime_error( _TXT( "duplicate '%s' weighting function feature parameter '%s'"), "BM25_dpfc", name_.c_str());
+			m_title_itr = itr_;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), "BM25_dpfc", name_.c_str());
+		}
 	}
-	else if (utils::caseInsensitiveEquals( name_, "struct"))
-	{
-		m_struct_featar.push_back( Feature( itr_, weight_, 0.0, false));
-	}
-	else if (utils::caseInsensitiveEquals( name_, "title"))
-	{
-		if (m_title_itr) throw strus::runtime_error( _TXT( "duplicate '%s' weighting function feature parameter '%s'"), "BM25_dpfc", name_.c_str());
-		m_title_itr = itr_;
-	}
-	else
-	{
-		throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), "BM25_dpfc", name_.c_str());
-	}
+	CATCH_ERROR_MAP( _TXT("error adding weighting feature to 'BM25_dpfc' weighting: %s"), *m_errorhnd);
 }
 
 
@@ -185,7 +194,8 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 
 	if (m_weight_featar.size() > MaxNofFeatures || m_struct_featar.size() > MaxNofFeatures)
 	{
-		throw strus::runtime_error( _TXT("to many features passed to weighting function '%s'"), "BM25_dpfc");
+		m_errorhnd->report( _TXT("to many features passed to weighting function '%s'"), "BM25_dpfc");
+		return 0.0;
 	}
 
 	// Initialize accumulator for ff increments
@@ -305,34 +315,46 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 }
 
 
-
 void WeightingFunctionInstanceBM25_dpfc::addStringParameter( const std::string& name, const std::string& value)
 {
-	if (utils::caseInsensitiveEquals( name, "doclen"))
+	try
 	{
-		m_attribute_content_doclen = value;
-		if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
+		if (utils::caseInsensitiveEquals( name, "doclen"))
+		{
+			m_attribute_content_doclen = value;
+			if (value.empty())
+			{
+				m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
+				return;
+			}
+		}
+		else if (utils::caseInsensitiveEquals( name, "doclen_title"))
+		{
+			m_attribute_title_doclen = value;
+			if (value.empty())
+			{
+				m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
+				return;
+			}
+		}
+		else if (utils::caseInsensitiveEquals( name, "k1")
+		||  utils::caseInsensitiveEquals( name, "b")
+		||  utils::caseInsensitiveEquals( name, "avgdoclen")
+		||  utils::caseInsensitiveEquals( name, "proxmindist")
+		||  utils::caseInsensitiveEquals( name, "titleinc")
+		||  utils::caseInsensitiveEquals( name, "seqinc")
+		||  utils::caseInsensitiveEquals( name, "strinc")
+		||  utils::caseInsensitiveEquals( name, "relevant"))
+		{
+			addNumericParameter( name, arithmeticVariantFromString( value));
+		}
+		else
+		{
+			m_errorhnd->report( _TXT("unknown '%s' textual weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
+			return;
+		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "doclen_title"))
-	{
-		m_attribute_title_doclen = value;
-		if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
-	}
-	else if (utils::caseInsensitiveEquals( name, "k1")
-	||  utils::caseInsensitiveEquals( name, "b")
-	||  utils::caseInsensitiveEquals( name, "avgdoclen")
-	||  utils::caseInsensitiveEquals( name, "proxmindist")
-	||  utils::caseInsensitiveEquals( name, "titleinc")
-	||  utils::caseInsensitiveEquals( name, "seqinc")
-	||  utils::caseInsensitiveEquals( name, "strinc")
-	||  utils::caseInsensitiveEquals( name, "relevant"))
-	{
-		addNumericParameter( name, arithmeticVariantFromString( value));
-	}
-	else
-	{
-		throw strus::runtime_error( _TXT("unknown '%s' textual weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
-	}
+	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'BM25_dpfc' weighting: %s"), *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -371,7 +393,41 @@ void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string&
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT("unknown '%s' numeric weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' numeric weighting function parameter '%s'"), "BM25_dpfc", name.c_str());
 	}
 }
+
+WeightingFunctionContextInterface* WeightingFunctionInstanceBM25_dpfc::createFunctionContext(
+		const StorageClientInterface* storage_,
+		MetaDataReaderInterface* metadata) const
+{
+	try
+	{
+		return new WeightingFunctionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr, m_relevant_df_factor, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'BM25_dpfc' function context: %s"), *m_errorhnd, 0);
+}
+
+std::string WeightingFunctionInstanceBM25_dpfc::tostring() const
+{
+	try
+	{
+		std::ostringstream rt;
+		rt << std::setw(2) << std::setprecision(5)
+			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen << ", doclen=" << m_attribute_content_doclen << ", doclen_title=" << m_attribute_title_doclen << ", proxmindist=" << m_proximityMinDist << ", titleinc=" << m_title_ff_incr << ", seqinc=" << m_sequence_ff_incr << ", strinc=" << m_sentence_ff_incr << ", relevant=" << m_relevant_df_factor << std::endl;
+		return rt.str();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'BM25_dpfc' function to string: %s"), *m_errorhnd, std::string());
+}
+
+
+WeightingFunctionInstanceInterface* WeightingFunctionBM25_dpfc::createInstance() const
+{
+	try
+	{
+		return new WeightingFunctionInstanceBM25_dpfc( m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'BM25_dpfc' function: %s"), *m_errorhnd, 0);
+}
+
 

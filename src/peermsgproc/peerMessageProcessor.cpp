@@ -31,22 +31,34 @@
 #include "peerMessageProcessor.hpp"
 #include "peerMessageBuilder.hpp"
 #include "peerMessageViewer.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 
 using namespace strus;
 
-PeerMessageProcessor::PeerMessageProcessor(){}
+PeerMessageProcessor::PeerMessageProcessor( ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_){}
 
 PeerMessageProcessor::~PeerMessageProcessor(){}
 
 PeerMessageViewerInterface* PeerMessageProcessor::createViewer(
 			const char* peermsgptr, std::size_t peermsgsize) const
 {
-	return new PeerMessageViewer( peermsgptr, peermsgsize);
+	try
+	{
+		return new PeerMessageViewer( peermsgptr, peermsgsize, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error create peer message viewer: %s"), *m_errorhnd, 0);
 }
 
-PeerMessageBuilderInterface* PeerMessageProcessor::createBuilder( const BuilderOptions& options_, ErrorBufferInterface* errorhnd) const
+PeerMessageBuilderInterface* PeerMessageProcessor::createBuilder( const BuilderOptions& options_) const
 {
-	return new PeerMessageBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, errorhnd);
+	try
+	{
+		return new PeerMessageBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error create peer message viewer: %s"), *m_errorhnd, 0);
 }
 
 

@@ -48,29 +48,29 @@ using namespace strus;
 QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
-	definePostingJoinOperator( "within", createPostingJoinWithin());
-	definePostingJoinOperator( "within_struct", createPostingJoinStructWithin());
-	definePostingJoinOperator( "sequence", createPostingJoinSequence());
-	definePostingJoinOperator( "sequence_struct", createPostingJoinStructSequence());
-	definePostingJoinOperator( "diff", createPostingJoinDifference());
-	definePostingJoinOperator( "intersect", createPostingJoinIntersect());
-	definePostingJoinOperator( "union", createPostingJoinUnion());
-	definePostingJoinOperator( "succ", createPostingSucc());
-	definePostingJoinOperator( "pred", createPostingPred());
-	definePostingJoinOperator( "contains", createPostingJoinContains());
+	definePostingJoinOperator( "within", createPostingJoinWithin( m_errorhnd));
+	definePostingJoinOperator( "within_struct", createPostingJoinStructWithin( m_errorhnd));
+	definePostingJoinOperator( "sequence", createPostingJoinSequence( m_errorhnd));
+	definePostingJoinOperator( "sequence_struct", createPostingJoinStructSequence( m_errorhnd));
+	definePostingJoinOperator( "diff", createPostingJoinDifference( m_errorhnd));
+	definePostingJoinOperator( "intersect", createPostingJoinIntersect( m_errorhnd));
+	definePostingJoinOperator( "union", createPostingJoinUnion( m_errorhnd));
+	definePostingJoinOperator( "succ", createPostingSucc( m_errorhnd));
+	definePostingJoinOperator( "pred", createPostingPred( m_errorhnd));
+	definePostingJoinOperator( "contains", createPostingJoinContains( m_errorhnd));
 	
-	defineWeightingFunction( "bm25", createWeightingFunctionBm25());
-	defineWeightingFunction( "bm25_dpfc", createWeightingFunctionBm25_dpfc());
-	defineWeightingFunction( "tf", createWeightingFunctionTermFrequency());
-	defineWeightingFunction( "td", createWeightingFunctionConstant());
-	defineWeightingFunction( "metadata", createWeightingFunctionMetadata());
-	defineWeightingFunction( "formula", createWeightingFunctionFormula());
+	defineWeightingFunction( "bm25", createWeightingFunctionBm25( m_errorhnd));
+	defineWeightingFunction( "bm25_dpfc", createWeightingFunctionBm25_dpfc( m_errorhnd));
+	defineWeightingFunction( "tf", createWeightingFunctionTermFrequency( m_errorhnd));
+	defineWeightingFunction( "td", createWeightingFunctionConstant( m_errorhnd));
+	defineWeightingFunction( "metadata", createWeightingFunctionMetadata( m_errorhnd));
+	defineWeightingFunction( "formula", createWeightingFunctionFormula( m_errorhnd));
 
-	defineSummarizerFunction( "metadata", createSummarizerMetaData());
-	defineSummarizerFunction( "matchphrase", createSummarizerMatchPhrase());
-	defineSummarizerFunction( "matchpos", createSummarizerListMatches());
-	defineSummarizerFunction( "attribute", createSummarizerAttribute());
-	defineSummarizerFunction( "matchvariables", createSummarizerMatchVariables());
+	defineSummarizerFunction( "metadata", createSummarizerMetaData( m_errorhnd));
+	defineSummarizerFunction( "matchphrase", createSummarizerMatchPhrase( m_errorhnd));
+	defineSummarizerFunction( "matchpos", createSummarizerListMatches( m_errorhnd));
+	defineSummarizerFunction( "attribute", createSummarizerAttribute( m_errorhnd));
+	defineSummarizerFunction( "matchvariables", createSummarizerMatchVariables( m_errorhnd));
 }
 
 QueryProcessor::~QueryProcessor()

@@ -29,15 +29,18 @@
 #include "summarizerAttribute.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 
 using namespace strus;
 
 SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
-		AttributeReaderInterface* attribreader_, const std::string& name_)
+		AttributeReaderInterface* attribreader_, const std::string& name_, ErrorBufferInterface* errorhnd_)
 	:m_attribreader(attribreader_)
 	,m_attrib(attribreader_->elementHandle( name_.c_str()))
+	,m_errorhnd(errorhnd_)
 {}
 
 void SummarizerFunctionContextAttribute::addSummarizationFeature(
@@ -45,7 +48,7 @@ void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&)
 {
-	throw strus::runtime_error( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
+	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "attribute");
 }
 
 SummarizerFunctionContextAttribute::~SummarizerFunctionContextAttribute()
@@ -56,46 +59,81 @@ SummarizerFunctionContextAttribute::~SummarizerFunctionContextAttribute()
 std::vector<SummarizerFunctionContextInterface::SummaryElement>
 	SummarizerFunctionContextAttribute::getSummary( const Index& docno)
 {
-	std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
-	m_attribreader->skipDoc( docno);
-	std::string attr = m_attribreader->getValue( m_attrib);
-	if (!attr.empty()) 
+	try
 	{
-		rt.push_back( SummarizerFunctionContextInterface::SummaryElement( attr, 1.0));
+		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		m_attribreader->skipDoc( docno);
+		std::string attr = m_attribreader->getValue( m_attrib);
+		if (!attr.empty()) 
+		{
+			rt.push_back( SummarizerFunctionContextInterface::SummaryElement( attr, 1.0));
+		}
+		return rt;
 	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'attribute' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
 
 
 void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string& name, const std::string& value)
 {
-	if (utils::caseInsensitiveEquals( name, "name"))
+	try
 	{
-		m_name = value;
+		if (utils::caseInsensitiveEquals( name, "name"))
+		{
+			m_name = value;
+		}
+		else
+		{
+			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+		}
 	}
-	else
-	{
-		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
-	}
+	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'attribute' summarizer: %s"), *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "name"))
 	{
-		throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "Attribute");
+		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "Attribute");
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
 	}
 }
+
+std::string SummarizerFunctionInstanceAttribute::tostring() const
+{
+	try
+	{
+		std::ostringstream rt;
+		rt << "name='" << m_name << "'";
+		return rt.str();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'attribute' summarizer to string: %s"), *m_errorhnd, std::string());
+}
+
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createFunctionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*) const
 {
-	return new SummarizerFunctionContextAttribute( storage->createAttributeReader(), m_name);
+	try
+	{
+		return new SummarizerFunctionContextAttribute( storage->createAttributeReader(), m_name, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'attribute' summarizer: %s"), *m_errorhnd, 0);
+}
+
+
+SummarizerFunctionInstanceInterface* SummarizerFunctionAttribute::createInstance(
+		const QueryProcessorInterface*) const
+{
+	try
+	{
+		return new SummarizerFunctionInstanceAttribute( m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'attribute' summarizer: %s"), *m_errorhnd, 0);
 }
 
 

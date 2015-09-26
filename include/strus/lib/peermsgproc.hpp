@@ -36,8 +36,10 @@ namespace strus {
 
 /// \brief Forward declaration
 class PeerMessageProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
-const PeerMessageProcessorInterface* getPeerMessageProcessor();
+PeerMessageProcessorInterface* createPeerMessageProcessor( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

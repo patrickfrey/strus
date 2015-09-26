@@ -34,14 +34,17 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class IteratorPred
 	:public IteratorJoin
 {
 public:
-	IteratorPred( const Reference< PostingIteratorInterface>& origin_)
+	IteratorPred( const Reference< PostingIteratorInterface>& origin_, ErrorBufferInterface* errorhnd_)
 		:m_origin( origin_)
 		,m_featureid(origin_->featureid())
+		,m_errorhnd(errorhnd_)
 	{
 		m_featureid.push_back('<');
 	}
@@ -87,8 +90,9 @@ public:
 	}
 
 private:
-	Reference<PostingIteratorInterface> m_origin;	///< base feature expression this is the predeccessor of
-	std::string m_featureid;			///< unique id of the feature expression
+	Reference<PostingIteratorInterface> m_origin;			///< base feature expression this is the predeccessor of
+	std::string m_featureid;					///< unique id of the feature expression
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -96,18 +100,16 @@ class PostingJoinPred
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinPred( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinPred(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range) const
-	{
-		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for 'pred'"));
-		if (argitr.size() < 1) throw strus::runtime_error( _TXT( "too few arguments for 'pred'"));
-		if (argitr.size() > 1) throw strus::runtime_error( _TXT( "too many arguments for 'pred'"));
+			int range) const;
 
-		return new IteratorPred( argitr[0]);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

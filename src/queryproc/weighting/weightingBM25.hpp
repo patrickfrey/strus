@@ -45,6 +45,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \class WeightingFunctionContextBM25
 /// \brief Weighting function based on the BM25 formula
@@ -58,7 +60,8 @@ public:
 		float k1_,
 		float b_,
 		float avgDocLength_,
-		const std::string& attribute_doclen_);
+		const std::string& attribute_doclen_,
+		ErrorBufferInterface* errorhnd_);
 
 	struct Feature
 	{
@@ -87,6 +90,7 @@ private:
 	std::vector<Feature> m_featar;
 	MetaDataReaderInterface* m_metadata;
 	int m_metadata_doclen;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -96,8 +100,8 @@ class WeightingFunctionInstanceBM25
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceBM25()
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000){}
+	explicit WeightingFunctionInstanceBM25( ErrorBufferInterface* errorhnd_)
+		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25(){}
 
@@ -106,24 +110,16 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata) const
-	{
-		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen);
-	}
+			MetaDataReaderInterface* metadata) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	float m_b;
 	float m_k1;
 	float m_avgdoclen;
 	std::string m_attribute_doclen;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -133,14 +129,15 @@ class WeightingFunctionBM25
 	:public WeightingFunctionInterface
 {
 public:
-	WeightingFunctionBM25(){}
+	explicit WeightingFunctionBM25( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionBM25(){}
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const
-	{
-		return new WeightingFunctionInstanceBM25();
-	}
+	virtual WeightingFunctionInstanceInterface* createInstance() const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

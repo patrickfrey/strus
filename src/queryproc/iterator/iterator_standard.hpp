@@ -31,49 +31,51 @@
 #define _STRUS_ITERATOR_STANDARD_LIB_HPP_INCLUDED
 
 namespace strus {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Forward declaration
 class PostingJoinOperatorInterface;
 
 /// \brief Create a join function returning the intersection of its argument sets
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinIntersect();
+PostingJoinOperatorInterface* createPostingJoinIntersect( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the union of its argument sets
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinUnion();
+PostingJoinOperatorInterface* createPostingJoinUnion( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the predecessor set of the argument set (one argument only)
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingPred();
+PostingJoinOperatorInterface* createPostingPred( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the predecessor set of the argument set (one argument only)
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingSucc();
+PostingJoinOperatorInterface* createPostingSucc( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets.
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinWithin();
+PostingJoinOperatorInterface* createPostingJoinWithin( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets. Additionally there exists a restricting structure element (like for example punctuation).
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinStructWithin();
+PostingJoinOperatorInterface* createPostingJoinStructWithin( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the order they apear as arguments
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinSequence();
+PostingJoinOperatorInterface* createPostingJoinSequence( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the order they apear as arguments. Additionally there exists a restricting structure element (like for example punctuation)
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinStructSequence();
+PostingJoinOperatorInterface* createPostingJoinStructSequence( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning one element (with position = 1) for each document containing all elements of all argument sets somewhere (position independent logical AND for use as pure document selection feature)
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinContains();
+PostingJoinOperatorInterface* createPostingJoinContains( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the all elements of the first argument set that does not overlap with one of the second
 /// \return the iterator reference (to dispose with delete)
-PostingJoinOperatorInterface* createPostingJoinDifference();
+PostingJoinOperatorInterface* createPostingJoinDifference( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

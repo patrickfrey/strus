@@ -29,35 +29,48 @@
 #include "attributeReader.hpp"
 #include "databaseAdapter.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <stdexcept>
 
 using namespace strus;
 
 Index AttributeReader::elementHandle( const char* name) const
 {
-	Index rt = m_storage->getAttributeno( name);
-	if (!rt)
+	try
 	{
-		throw strus::runtime_error( _TXT( "attribute with name '%s' is not defined"), name);
+		Index rt = m_storage->getAttributeno( name);
+		if (!rt)
+		{
+			m_errorhnd->report( _TXT( "attribute with name '%s' is not defined"), name);
+		}
+		return rt;
 	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error retrieving storage attribute element handle: %s"), *m_errorhnd, 0);
 }
 
 std::string AttributeReader::getValue( const Index& elementHandle_) const
 {
-	std::string rt;
-	if (DatabaseAdapter_DocAttribute::load( m_database, m_docno, elementHandle_, rt))
+	try
 	{
-		return rt;
+		std::string rt;
+		if (DatabaseAdapter_DocAttribute::load( m_database, m_docno, elementHandle_, rt))
+		{
+			return rt;
+		}
+		else
+		{
+			return std::string();
+		}
 	}
-	else
-	{
-		return std::string();
-	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error reading storage attribute value: %s"), *m_errorhnd, std::string());
 }
 
 std::vector<std::string> AttributeReader::getAttributeNames() const
 {
-	return m_storage->getAttributeNames();
+	try
+	{
+		return m_storage->getAttributeNames();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error reading storage attribute names: %s"), *m_errorhnd, std::vector<std::string>());
 }
 

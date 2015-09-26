@@ -48,8 +48,8 @@ class Storage
 	:public StorageInterface
 {
 public:
-	explicit Storage( ErrorBufferInterface* errorhnd)
-		:m_errorhnd(errorhnd){}
+	explicit Storage( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	virtual StorageClientInterface* createClient( const std::string& configsource, DatabaseClientInterface* database) const;
 

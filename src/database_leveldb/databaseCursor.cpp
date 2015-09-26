@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "databaseCursor.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <cstring>
@@ -34,7 +35,7 @@
 
 using namespace strus;
 
-DatabaseCursor::DatabaseCursor( leveldb::DB* db_, bool useCache, bool useSnapshot)
+DatabaseCursor::DatabaseCursor( leveldb::DB* db_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_)
 	:m_db(db_),m_itr(0)
 {
 	if (useSnapshot)
@@ -95,62 +96,82 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBound(
 		std::size_t keysize,
 		std::size_t domainkeysize)
 {
-	initDomain( key, domainkeysize);
-	m_itr->Seek( leveldb::Slice( key,keysize));
-	return getCurrentKey();
+	try
+	{
+		initDomain( key, domainkeysize);
+		m_itr->Seek( leveldb::Slice( key,keysize));
+		return getCurrentKey();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek upper bound: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::seekFirst(
 		const char* domainkey,
 		std::size_t domainkeysize)
 {
-	initDomain( domainkey, domainkeysize);
-	m_itr->Seek( leveldb::Slice( domainkey,domainkeysize));
-	return getCurrentKey();
+	try
+	{
+		initDomain( domainkey, domainkeysize);
+		m_itr->Seek( leveldb::Slice( domainkey,domainkeysize));
+		return getCurrentKey();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek first: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::seekLast(
 		const char* domainkey,
 		std::size_t domainkeysize)
 {
-	initDomain( domainkey, domainkeysize);
-	if (m_domainkeysize == 0)
+	try
 	{
-		m_itr->SeekToLast();
-	}
-	else
-	{
-		m_itr->Seek( leveldb::Slice( (char*)m_domainkey, m_domainkeysize+1));
-		if (m_itr->Valid())
+		initDomain( domainkey, domainkeysize);
+		if (m_domainkeysize == 0)
 		{
-			m_itr->Prev();
+			m_itr->SeekToLast();
 		}
 		else
 		{
-			return Slice();
+			m_itr->Seek( leveldb::Slice( (char*)m_domainkey, m_domainkeysize+1));
+			if (m_itr->Valid())
+			{
+				m_itr->Prev();
+			}
+			else
+			{
+				return Slice();
+			}
 		}
+		return getCurrentKey();
 	}
-	return getCurrentKey();
+	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek last: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::seekNext()
 {
-	if (m_itr->Valid())
+	try
 	{
-		m_itr->Next();
-		return getCurrentKey();
+		if (m_itr->Valid())
+		{
+			m_itr->Next();
+			return getCurrentKey();
+		}
+		return Slice();
 	}
-	return Slice();
+	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek next: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::seekPrev()
 {
-	if (m_itr->Valid())
+	try
 	{
-		m_itr->Prev();
-		return getCurrentKey();
+		if (m_itr->Valid())
+		{
+			m_itr->Prev();
+			return getCurrentKey();
+		}
+		return Slice();
 	}
-	return Slice();
+	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek previous: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
 }
 
 DatabaseCursorInterface::Slice DatabaseCursor::key() const
