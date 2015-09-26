@@ -50,6 +50,8 @@ class StorageClientInterface;
 class QueryEval;
 /// \brief Forward declaration
 class PostingIteratorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Implementation of the query interface
 class Query
@@ -59,7 +61,8 @@ public:
 	///\brief Constructor
 	Query(
 			const QueryEval* queryEval_,
-			const StorageClientInterface* storage_);
+			const StorageClientInterface* storage_,
+			ErrorBufferInterface* errorhnd_);
 
 	///\brief Copy constructor
 	Query( const Query& o);
@@ -189,6 +192,7 @@ private:
 	std::vector<std::string> m_usernames;
 	std::vector<Index> m_evalset_docnolist;
 	bool m_evalset_defined;
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 }//namespace

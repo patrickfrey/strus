@@ -88,7 +88,8 @@ public:
 			const ArithmeticVariant& value)=0;
 
 	/// \brief Insert all documents and executes all commands defined in the transaction or none if one operation fails
-	virtual void commit()=0;
+	/// \return true on success, false on error
+	virtual bool commit()=0;
 
 	/// \brief Rollback of the transaction, no changes made
 	virtual void rollback()=0;

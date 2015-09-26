@@ -61,8 +61,8 @@ class QueryEval
 	:public QueryEvalInterface
 {
 public:
-	explicit QueryEval( ErrorBufferInterface* errorhnd)
-		:m_errorhnd(errorhnd){}
+	explicit QueryEval( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	QueryEval( const QueryEval& o)
 		:m_selectionSets(o.m_selectionSets)

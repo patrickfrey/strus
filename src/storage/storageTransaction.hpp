@@ -57,6 +57,8 @@ class StorageClient;
 class DatabaseClientInterface;
 /// \brief Forward declaration
 class PeerMessageBuilderInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 /// \class StorageTransaction
@@ -70,7 +72,8 @@ public:
 		DatabaseClientInterface* database_,
 		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
-		const conotrie::CompactNodeTrie* termnomap_);
+		const conotrie::CompactNodeTrie* termnomap_,
+		ErrorBufferInterface* errorhnd_);
 
 	~StorageTransaction();
 
@@ -93,7 +96,7 @@ public:
 			const Index& docno, const std::string& varname, const ArithmeticVariant& value);
 
 	/// \brief Transaction commit
-	virtual void commit();
+	virtual bool commit();
 	/// \brief Transaction rollback (automatically called with the destructor)
 	virtual void rollback();
 
@@ -156,6 +159,8 @@ private:
 	int m_nof_documents;					///< total adjustment for the number of documents added minus number of documents deleted
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
+
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }//namespace

@@ -78,7 +78,7 @@ public:
 			const std::string& name)=0;
 
 	/// \brief Write the changes of the meta data table structure to the storage
-	virtual void commit()=0;
+	virtual bool commit()=0;
 
 	/// \brief Rollback of the meta data table changes, no changes made
 	virtual void rollback()=0;

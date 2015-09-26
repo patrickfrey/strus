@@ -32,11 +32,13 @@
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "storageDocument.hpp"
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -49,7 +51,8 @@ StorageTransaction::StorageTransaction(
 		DatabaseClientInterface* database_,
 		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
-		const conotrie::CompactNodeTrie* termnomap_)
+		const conotrie::CompactNodeTrie* termnomap_,
+		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_peerMessageBuilder(peerMessageBuilder_)
@@ -67,6 +70,7 @@ StorageTransaction::StorageTransaction(
 	,m_nof_documents(0)
 	,m_commit(false)
 	,m_rollback(false)
+	,m_errorhnd(errorhnd_)
 {
 	if (m_peerMessageBuilder)
 	{
@@ -197,31 +201,39 @@ void StorageTransaction::deleteIndex( const Index& docno)
 void StorageTransaction::deleteUserAccessRights(
 	const std::string& username)
 {
-	Index userno = m_userIdMap.lookUp( username);
-	if (userno != 0)
+	try
 	{
-		m_userAclMap.deleteUserAccess( userno);
+		Index userno = m_userIdMap.lookUp( username);
+		if (userno != 0)
+		{
+			m_userAclMap.deleteUserAccess( userno);
+		}
 	}
+	CATCH_ERROR_MAP( _TXT("error deleting document user access rights in transaction: %s"), *m_errorhnd);
 }
 
 void StorageTransaction::deleteDocument( const std::string& docid)
 {
-	Index docno = m_docIdMap.lookUp( docid);
-	if (docno == 0) return;
-
-	//[1] Delete metadata:
-	deleteMetaData( docno);
-
-	//[2] Delete attributes:
-	deleteAttributes( docno);
+	try
+	{
+		Index docno = m_docIdMap.lookUp( docid);
+		if (docno == 0) return;
 	
-	//[3] Delete index elements (forward index and inverted index):
-	deleteIndex( docno);
-
-	//[3] Delete ACL elements:
-	deleteAcl( docno);
-
-	m_nof_documents -= 1;
+		//[1] Delete metadata:
+		deleteMetaData( docno);
+	
+		//[2] Delete attributes:
+		deleteAttributes( docno);
+		
+		//[3] Delete index elements (forward index and inverted index):
+		deleteIndex( docno);
+	
+		//[3] Delete ACL elements:
+		deleteAcl( docno);
+	
+		m_nof_documents -= 1;
+	}
+	CATCH_ERROR_MAP( _TXT("error deleting document in transaction: %s"), *m_errorhnd);
 }
 
 StorageDocumentInterface*
@@ -229,35 +241,47 @@ StorageDocumentInterface*
 		const std::string& docid,
 		const Index& docno)
 {
-	if (docno)
+	try
 	{
-		m_nof_documents += 1;
-		m_newDocidMap[ docid] = docno;
-		return new StorageDocument( this, docid, docno, true);
+		if (docno)
+		{
+			m_nof_documents += 1;
+			m_newDocidMap[ docid] = docno;
+			return new StorageDocument( this, docid, docno, true, m_errorhnd);
+		}
+		else
+		{
+			bool isNew;
+			Index dn = m_docIdMap.getOrCreate( docid, isNew);
+			if (isNew) m_nof_documents += 1;
+			return new StorageDocument( this, docid, dn, isNew, m_errorhnd);
+		}
 	}
-	else
-	{
-		bool isNew;
-		Index dn = m_docIdMap.getOrCreate( docid, isNew);
-		if (isNew) m_nof_documents += 1;
-		return new StorageDocument( this, docid, dn, isNew);
-	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating document in transaction: %s"), *m_errorhnd, 0);
 }
 
 StorageDocumentUpdateInterface*
 	StorageTransaction::createDocumentUpdate(
 		const Index& docno_)
 {
-	return new StorageDocumentUpdate( this, docno_);
+	try
+	{
+		return new StorageDocumentUpdate( this, docno_, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating document update in transaction: %s"), *m_errorhnd, 0);
 }
 
 void StorageTransaction::updateMetaData(
 		const Index& docno, const std::string& varname, const ArithmeticVariant& value)
 {
-	defineMetaData( docno, varname, value);
+	try
+	{
+		defineMetaData( docno, varname, value);
+	}
+	CATCH_ERROR_MAP( _TXT("error updating document meta data in transaction: %s"), *m_errorhnd);
 }
 
-void StorageTransaction::commit()
+bool StorageTransaction::commit()
 {
 	// Structure to make the rollback method be called in case of an exeption
 	struct PeerMessageBuilderScope
@@ -281,12 +305,13 @@ void StorageTransaction::commit()
 	};
 	if (m_commit)
 	{
-		throw strus::runtime_error( _TXT( "called transaction commit twice"));
+		m_errorhnd->report( _TXT( "called transaction commit twice"));
 	}
 	if (m_rollback)
 	{
-		throw strus::runtime_error( _TXT( "called transaction commit after rollback"));
+		m_errorhnd->report( _TXT( "called transaction commit after rollback"));
 	}
+	try
 	{
 		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
@@ -323,23 +348,29 @@ void StorageTransaction::commit()
 		m_storage->declareNofDocumentsInserted( m_nof_documents);
 		m_storage->releaseTransaction( refreshList);
 		peerMessageBuilderScope.done();
+
+		m_commit = true;
+		m_nof_documents = 0;
+		return true;
 	}
-	m_commit = true;
-	m_nof_documents = 0;
+	CATCH_ERROR_MAP_RETURN( _TXT("error in transaction commit: %s"), *m_errorhnd, false);
 }
 
 void StorageTransaction::rollback()
 {
 	if (m_rollback)
 	{
-		throw strus::runtime_error( _TXT( "called transaction rollback twice"));
+		m_errorhnd->report( _TXT( "called transaction rollback twice"));
+		return;
 	}
 	if (m_commit)
 	{
-		throw strus::runtime_error( _TXT( "called transaction rollback after commit"));
+		m_errorhnd->report( _TXT( "called transaction rollback after commit"));
+		return;
 	}
 	std::vector<Index> refreshList;
 	m_storage->releaseTransaction( refreshList);
 	m_rollback = true;
 }
+
 

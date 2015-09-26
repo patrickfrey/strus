@@ -158,7 +158,7 @@ StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable( DatabaseC
 {
 	try
 	{
-		return new StorageAlterMetaDataTable( database);
+		return new StorageAlterMetaDataTable( database, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }

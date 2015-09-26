@@ -41,8 +41,8 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "strus/errorBufferInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <stdexcept>
@@ -201,7 +201,7 @@ QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) c
 		std::cout << "create query for program:" << std::endl;
 		print( std::cout);
 #endif
-		return new Query( this, storage);
+		return new Query( this, storage, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating query: %s"), *m_errorhnd, 0);
 }
