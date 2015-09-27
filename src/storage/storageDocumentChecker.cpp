@@ -39,6 +39,7 @@
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
+#include "strus/private/snprintf.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -105,20 +106,17 @@ void StorageDocumentChecker::setAttribute(
 
 static void logError(
 		std::ostream& logout, const std::string& docid,
-		const std::string& type, const std::string& term,
-		const std::string& msg)
+		const char* format, ...)
 {
-	logout << "error checking document '" << docid + "', ";
-	logout << "term '" << type << "' value '" << term << "': ";
-	logout << msg << std::endl;
-}
+	char msgbuf[ 1024];
+	va_list ap;
+	va_start(ap, format);
+	strus_vsnprintf( msgbuf, sizeof(msgbuf), format, ap);
 
-static void logError(
-		std::ostream& logout, const std::string& docid,
-		const std::string& msg)
-{
 	logout << "error checking document '" << docid + "': ";
-	logout << msg << std::endl;
+	logout << msgbuf << std::endl;
+
+	va_end(ap);
 }
 
 void StorageDocumentChecker::doCheck( std::ostream& logout)
@@ -137,17 +135,20 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 
 		std::auto_ptr<PostingIteratorInterface> pitr(
 			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
-
+		if (!pitr.get())
+		{
+			logError( logout, m_docid, _TXT("memory allocation error checking search index"));
+			break;
+		}
 		if (m_docno != pitr->skipDoc( m_docno))
 		{
-			logError( logout, m_docid, ti->first.type, ti->first.value,
-				"term not found in inverted index");
+			logError( logout, m_docid, _TXT("term %s '%s' not found in inverted index"), ti->first.type.c_str(), ti->first.value.c_str());
 			continue;
 		}
 		if (m_docno != docnoIterator.skip( m_docno))
 		{
-			logError( logout, m_docid, ti->first.type, ti->first.value,
-					"term not found in boolean document index");
+			logError( logout, m_docid,
+					_TXT("term %s '%s' not found in boolean document index"), ti->first.type.c_str(), ti->first.value.c_str());
 		}
 		Index pos = 0;
 
@@ -158,12 +159,8 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			Index ppos = pitr->skipPos( pos);
 			if (*pi != ppos)
 			{
-				std::ostringstream msg;
-				msg << *pi << " != " << ppos;
-
 				logError( logout, m_docid,
-					ti->first.type, ti->first.value,
-					std::string( "term inverted index position does not match: ") + msg.str());
+					_TXT("term %s '%s' inverted index position does not match: %u != %u"), ti->first.type.c_str(), ti->first.value.c_str(), *pi, ppos);
 				break;
 			}
 			pos = *pi + 1;
@@ -176,64 +173,76 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	{
 		std::auto_ptr<ForwardIteratorInterface> fitr(
 			m_storage->createForwardIterator( vi->first.type));
-
+		if (!fitr.get())
+		{
+			logError( logout, m_docid, _TXT("memory allocation error checking forward index"));
+			break;
+		}
 		fitr->skipDoc( m_docno);
 		Index fpos = fitr->skipPos( vi->first.pos);
 		if (vi->first.pos != fpos)
 		{
-			std::ostringstream msg;
-			msg << vi->first.pos << " != " << fpos;
-
 			logError( logout, m_docid,
-				std::string( "forward index position for type ") + vi->first.type + " does not match: " + msg.str());
+				_TXT( "forward index position for type %s does not match: %u != %u"), vi->first.type.c_str(), vi->first.pos, fpos);
 			break;
 		}
 		std::string fval = fitr->fetch();
 		if (vi->second != fval)
 		{
-			std::ostringstream msg;
-			msg << vi->first.pos;
 			logError( logout, m_docid,
-				std::string( "forward index element for type ") + vi->first.type + " at position " + msg.str() + " does not match: '" + fval + "' != '" + vi->second + "'");
+				_TXT( "forward index element for type %s at position %u does not match: '%s' != '%s'"), vi->first.type.c_str(), vi->first.pos, fval.c_str(), vi->second.c_str());
 		}
 	}
 
 	//[3] Check meta data:
 	std::auto_ptr<MetaDataReaderInterface> metadata(
 		m_storage->createMetaDataReader());
-
-	MetaDataMap::const_iterator mi = m_metaDataMap.begin(), me = m_metaDataMap.end();
-	for (; mi != me; ++mi)
+	if (!metadata.get())
 	{
-		Index hnd = metadata->elementHandle( mi->first.c_str());
-		metadata->skipDoc( m_docno);
-
-		ArithmeticVariant val = metadata->getValue( hnd);
-		if (val != mi->second)
+		logError( logout, m_docid, _TXT("memory allocation error creating metadata reader"));
+	}
+	else
+	{
+		MetaDataMap::const_iterator mi = m_metaDataMap.begin(), me = m_metaDataMap.end();
+		for (; mi != me; ++mi)
 		{
-			logError( logout, m_docid,
-				std::string( "document metadata does not match: '") + arithmeticVariantToString( mi->second) + "' != '" + arithmeticVariantToString(val) + "'");
+			Index hnd = metadata->elementHandle( mi->first.c_str());
+			metadata->skipDoc( m_docno);
+	
+			ArithmeticVariant val = metadata->getValue( hnd);
+			if (val != mi->second)
+			{
+				std::string str1 = arithmeticVariantToString( mi->second);
+				std::string str2 = arithmeticVariantToString( val);
+
+				logError( logout, m_docid,
+					_TXT( "document metadata does not match: '%s' != '%s'"), str1.c_str(), str2.c_str());
+			}
 		}
 	}
-
 	//[4] Check attributes:
 	std::auto_ptr<AttributeReaderInterface> attributes(
 		m_storage->createAttributeReader());
-
-	AttributeMap::const_iterator ai = m_attributeMap.begin(), ae = m_attributeMap.end();
-	for (; ai != ae; ++ai)
+	if (!attributes.get())
 	{
-		Index hnd = attributes->elementHandle( ai->first.c_str());
-		attributes->skipDoc( m_docno);
-
-		std::string val = attributes->getValue( hnd);
-		if (val != ai->second)
+		logError( logout, m_docid, _TXT("memory allocation error creating attribute reader"));
+	}
+	else
+	{
+		AttributeMap::const_iterator ai = m_attributeMap.begin(), ae = m_attributeMap.end();
+		for (; ai != ae; ++ai)
 		{
-			logError( logout, m_docid,
-				std::string( "document attribute does not match: '") + ai->second + "' != '" + val + "'");
+			Index hnd = attributes->elementHandle( ai->first.c_str());
+			attributes->skipDoc( m_docno);
+	
+			std::string val = attributes->getValue( hnd);
+			if (val != ai->second)
+			{
+				logError( logout, m_docid,
+					_TXT( "document attribute does not match: '%s' != '%s'"), ai->second.c_str(), val.c_str());
+			}
 		}
 	}
-
 	//[5] Check access rights:
 	std::vector<std::string>::const_iterator ui = m_userlist.begin(), ue = m_userlist.end();
 	IndexSetIterator aclitr = m_storage->getAclIterator( m_docno);
@@ -242,16 +251,16 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		Index userno = m_storage->getUserno( *ui);
 		if (!userno)
 		{
-			logError( logout, m_docid, "document user rights do not match (undefined username)");
+			logError( logout, m_docid, _TXT("document user rights do not match (undefined username)"));
 		}
 		IndexSetIterator invaclitr = m_storage->getUserAclIterator( userno);
 		if (m_docno != invaclitr.skip( m_docno))
 		{
-			logError( logout, m_docid, "document user rights do not match (document not found in inverted ACL)");
+			logError( logout, m_docid, _TXT("document user rights do not match (document not found in inverted ACL)"));
 		}
 		if (userno != aclitr.skip( userno))
 		{
-			logError( logout, m_docid, "document user rights do not match (user not found in ACL)");
+			logError( logout, m_docid, _TXT("document user rights do not match (user not found in ACL)"));
 		}
 	}
 }

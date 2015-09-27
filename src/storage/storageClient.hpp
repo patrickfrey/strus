@@ -135,7 +135,7 @@ public:
 	virtual void definePeerMessageProcessor(
 			const PeerMessageProcessorInterface* proc);
 
-	virtual void checkStorage( std::ostream& errorlog) const;
+	virtual bool checkStorage( std::ostream& errorlog) const;
 
 	virtual StorageDumpInterface* createDump() const;
 

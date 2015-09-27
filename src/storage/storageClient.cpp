@@ -170,6 +170,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 void StorageClient::storeVariables()
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+	if (!transaction.get()) throw strus::runtime_error(_TXT("error storing variables"));
 	getVariablesWriteBatch( transaction.get(), 0);
 	transaction->commit();
 }
@@ -735,6 +736,7 @@ MetaDataReaderInterface* StorageClient::createMetaDataReader() const
 void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+	if (!transaction.get()) throw strus::runtime_error(_TXT("error loading termno map"));
 	m_termno_map = new conotrie::CompactNodeTrie();
 	try
 	{
@@ -1004,25 +1006,28 @@ static void checkKeyValue(
 	}
 }
 
-void StorageClient::checkStorage( std::ostream& errorlog) const
+bool StorageClient::checkStorage( std::ostream& errorlog) const
 {
 	try
 	{
 		std::auto_ptr<strus::DatabaseCursorInterface>
 			cursor( m_database->createCursor( strus::DatabaseOptions()));
-	
+		if (!cursor.get()) return false;
+
 		strus::DatabaseCursorInterface::Slice key = cursor->seekFirst( 0, 0);
 	
 		for (; key.defined(); key = cursor->seekNext())
 		{
 			if (key.size() == 0)
 			{
-				throw strus::runtime_error( _TXT( "found empty key in storage"));
+				m_errorhnd->report( _TXT( "found empty key in storage"));
+				return false;
 			}
 			checkKeyValue( m_database.get(), key, cursor->value(), errorlog);
 		}
+		return true;
 	}
-	CATCH_ERROR_MAP( _TXT("error checking storage: %s"), *m_errorhnd);
+	CATCH_ERROR_MAP_RETURN( _TXT("error checking storage: %s"), *m_errorhnd, false);
 }
 
 static void dumpKeyValue(
@@ -1154,6 +1159,7 @@ public:
 		,m_cursor( database_->createCursor( strus::DatabaseOptions()))
 		,m_errorhnd(errorhnd_)
 	{
+		if (!m_cursor.get()) throw strus::runtime_error(_TXT("error creating database cursor"));
 		m_key = m_cursor->seekFirst( 0, 0);
 	}
 	virtual ~StorageDump(){}

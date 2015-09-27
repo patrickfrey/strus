@@ -66,7 +66,9 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_structop()
 	,m_init_complete(false)
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
+}
 
 void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 		const std::string& name,
@@ -111,8 +113,15 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			{
 				const PostingJoinOperatorInterface*
 					join = m_processor->getPostingJoinOperator( Constants::operator_set_union());
-		
+				if (!join)
+				{
+					m_errorhnd->explain(_TXT("error creating struct element iterator: %s"));
+				}
 				m_structop.reset( join->createResultIterator( m_structelem, 0));
+				if (!m_structop.get())
+				{
+					m_errorhnd->explain(_TXT("error creating struct element iterator: %s"));
+				}
 				m_phrasestruct = m_structop.get();
 			}
 			m_init_complete = true;

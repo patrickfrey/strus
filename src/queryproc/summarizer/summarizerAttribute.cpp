@@ -120,7 +120,13 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createF
 {
 	try
 	{
-		return new SummarizerFunctionContextAttribute( storage->createAttributeReader(), m_name, m_errorhnd);
+		AttributeReaderInterface* reader = storage->createAttributeReader();
+		if (!reader)
+		{
+			m_errorhnd->explain( _TXT("error creating context of 'attribute' summarizer: %s"));
+			return 0;
+		}
+		return new SummarizerFunctionContextAttribute( reader, m_name, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'attribute' summarizer: %s"), *m_errorhnd, 0);
 }

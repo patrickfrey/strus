@@ -110,6 +110,7 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 	try
 	{
 		std::auto_ptr<PeerMessageViewerInterface> viewer( m_peermsgproc->createViewer( msg, msgsize));
+		if (!viewer.get()) throw strus::runtime_error( _TXT( "error creating peer message viewer"));
 	
 		PeerMessageViewerInterface::DocumentFrequencyChange rec;
 		while (viewer->nextDfChange( rec))
@@ -141,6 +142,8 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 		}
 		PeerMessageProcessorInterface::BuilderOptions options;
 		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options));
+		if (!msgbuilder.get()) throw strus::runtime_error( _TXT( "error creating peer message builder"));
+
 		std::vector<NewTerm>::const_iterator ti = m_newTerms.begin(), te = m_newTerms.end();
 		for (; ti != te; ++ti)
 		{

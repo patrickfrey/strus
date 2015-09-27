@@ -33,6 +33,18 @@
 
 using namespace strus;
 
+KeyMap::KeyMap( DatabaseClientInterface* database_,
+		DatabaseKey::KeyPrefix prefix_,
+		KeyAllocatorInterface* allocator_,
+		const conotrie::CompactNodeTrie* globalmap_)
+	:m_dbadapter(prefix_,database_)
+	,m_maxCachedKeyLen(DefaultMaxCachedKeyLen)
+	,m_globalmap(globalmap_)
+	,m_unknownHandleCount(0)
+	,m_allocator(allocator_)
+	,m_invmap(0)
+{}
+
 Index KeyMap::lookUp( const std::string& name)
 {
 	return m_dbadapter.get( name);

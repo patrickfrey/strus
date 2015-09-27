@@ -35,6 +35,12 @@
 
 using namespace strus;
 
+DatabaseAdapter_StringIndex::Cursor::Cursor( char prefix_, const DatabaseClientInterface* database_)
+	:m_cursor( database_->createCursor( DatabaseOptions())),m_prefix(prefix_)
+{
+	if (!m_cursor.get()) throw std::runtime_error(_TXT("failed to create database cursor"));
+}
+
 bool DatabaseAdapter_StringIndex::Cursor::getData( const DatabaseCursorInterface::Slice& dbkey, std::string& key, Index& value)
 {
 	if (!dbkey.defined()) return false;
@@ -107,7 +113,6 @@ void DatabaseAdapter_StringIndex::Writer::storeImm( const std::string& key, cons
 	m_database->writeImm( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());
 }
 
-
 bool DatabaseAdapter_DataBlock::Reader::load( const Index& elemno, DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);
@@ -136,6 +141,13 @@ void DatabaseAdapter_DataBlock::Writer::removeSubTree( DatabaseTransactionInterf
 {
 	m_dbkey.resize( m_domainKeySize);
 	transaction->removeSubTree( m_dbkey.ptr(), m_dbkey.size());
+}
+
+DatabaseAdapter_DataBlock::Cursor::Cursor( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_)
+	:Base(prefix_,domainKey_)
+	,m_cursor(database_->createCursor( useCache_?(DatabaseOptions().useCache()):(DatabaseOptions())))
+{
+	if (!m_cursor.get()) throw std::runtime_error(_TXT("failed to create database cursor"));
 }
 
 bool DatabaseAdapter_DataBlock::Cursor::getBlock( const DatabaseCursorInterface::Slice& key, DataBlock& blk)
@@ -211,6 +223,7 @@ bool DatabaseAdapter_DocMetaData::loadFirst( MetaDataBlock& blk)
 	if (!m_cursor.get())
 	{
 		m_cursor.reset( m_database->createCursor( DatabaseOptions()));
+		if (!m_cursor.get()) return false;
 	}
 	DatabaseKey dbkey( KeyPrefix);
 	DatabaseCursorInterface::Slice key = m_cursor->seekFirst( dbkey.ptr(), dbkey.size());
@@ -261,6 +274,12 @@ void DatabaseAdapter_DocAttribute::removeAll( DatabaseTransactionInterface* tran
 	return transaction->removeSubTree( dbkey.ptr(), dbkey.size());
 }
 
+
+DatabaseAdapter_DocFrequency::Cursor::Cursor( const DatabaseClientInterface* database_)
+	:m_cursor( database_->createCursor( DatabaseOptions()))
+{
+	if (!m_cursor.get()) throw std::runtime_error(_TXT("failed to create database cursor"));
+}
 
 bool DatabaseAdapter_DocFrequency::Cursor::getData( const DatabaseCursorInterface::Slice& key, Index& typeno, Index& termno, Index& df)
 {

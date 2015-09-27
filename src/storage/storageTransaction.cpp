@@ -317,7 +317,11 @@ bool StorageTransaction::commit()
 		//... we need a lock because transactions need to be sequentialized
 
 		std::auto_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-
+		if (!transaction.get())
+		{
+			m_errorhnd->explain( _TXT( "error creating transaction"));
+			return false;
+		}
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
 

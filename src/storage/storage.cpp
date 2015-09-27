@@ -134,7 +134,8 @@ void Storage::createStorage( const std::string& configsource, DatabaseClientInte
 	
 		MetaDataDescription md( metadata);
 		std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
-	
+		if (!transaction.get()) return;
+
 		DatabaseAdapter_Variable::Writer stor( database);
 	
 		stor.store( transaction.get(), "TermNo", 1);

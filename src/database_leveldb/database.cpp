@@ -136,69 +136,48 @@ bool Database::destroyDatabase( const std::string& configsource) const
 
 bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const
 {
+	if (!createDatabase( configsource)) return false;
 	try
 	{
-		if (!createDatabase( configsource)) return false;
-		try
+		leveldb::DB* db = 0;
+		std::auto_ptr<leveldb::DB> dbref;
+
+		// Open the database created:
+		std::string path;
+		std::string src = configsource;
+
+		if (!extractStringFromConfigString( path, src, "path"))
 		{
-			leveldb::DB* db = 0;
-			std::auto_ptr<leveldb::DB> dbref;
-	
-			// Open the database created:
-			std::string path;
-			std::string src = configsource;
-	
-			if (!extractStringFromConfigString( path, src, "path"))
-			{
-				m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
-				return false;
-			}
-			leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
-			if (!status.ok())
-			{
-				std::string err = status.ToString();
-				if (db) delete db;
-				m_errorhnd->report( _TXT( "failed to open LevelDB key value store database for restoring backup: %s"), err.c_str());
-				return false;
-			}
-			else
-			{
-				dbref.reset( db);
-			}
-	
-			unsigned int blkcnt = 0;
-			leveldb::WriteBatch batch;
-			leveldb::WriteOptions options;
-	
-			const char* key;
-			std::size_t keysize;
-			const char* blk;
-			std::size_t blksize;
-	
-			// Restore backup loop:
-			while (backup->fetch( key, keysize, blk, blksize))
-			{
-				batch.Put( leveldb::Slice( key, keysize), leveldb::Slice( blk, blksize));
-				if (++blkcnt >= 1000)
-				{
-					leveldb::Status status = db->Write( options, &batch);
-					if (!status.ok())
-					{
-						std::string statusstr( status.ToString());
-						m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
-						batch.Clear();
-						return false;
-					}
-					batch.Clear();
-					blkcnt = 0;
-				}
-			}
-			if (m_errorhnd->hasError())
-			{
-				batch.Clear();
-				return false;
-			}
-			if (blkcnt > 0)
+			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
+			return false;
+		}
+		leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
+		if (!status.ok())
+		{
+			std::string err = status.ToString();
+			if (db) delete db;
+			m_errorhnd->report( _TXT( "failed to open LevelDB key value store database for restoring backup: %s"), err.c_str());
+			return false;
+		}
+		else
+		{
+			dbref.reset( db);
+		}
+
+		unsigned int blkcnt = 0;
+		leveldb::WriteBatch batch;
+		leveldb::WriteOptions options;
+
+		const char* key;
+		std::size_t keysize;
+		const char* blk;
+		std::size_t blksize;
+
+		// Restore backup loop:
+		while (backup->fetch( key, keysize, blk, blksize))
+		{
+			batch.Put( leveldb::Slice( key, keysize), leveldb::Slice( blk, blksize));
+			if (++blkcnt >= 1000)
 			{
 				leveldb::Status status = db->Write( options, &batch);
 				if (!status.ok())
@@ -209,14 +188,27 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 					return false;
 				}
 				batch.Clear();
+				blkcnt = 0;
 			}
-			return true;
 		}
-		catch (const std::bad_alloc& err)
+		if (m_errorhnd->hasError())
 		{
-			m_errorhnd->report( _TXT("out of memory when restoring database"));
+			batch.Clear();
 			return false;
 		}
+		if (blkcnt > 0)
+		{
+			leveldb::Status status = db->Write( options, &batch);
+			if (!status.ok())
+			{
+				std::string statusstr( status.ToString());
+				m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+				batch.Clear();
+				return false;
+			}
+			batch.Clear();
+		}
+		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error destroying database: %s"), *m_errorhnd, false);
 }

@@ -63,6 +63,8 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_evalset_defined(false)
 	,m_errorhnd(errorhnd_)
 {
+	if (!m_metaDataReader.get()) throw strus::runtime_error(_TXT("error creating meta data reader"));
+
 	std::vector<TermConfig>::const_iterator
 		ti = m_queryEval->terms().begin(),
 		te = m_queryEval->terms().end();
@@ -335,12 +337,16 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createTermPostingIterator(
 							term.type, term.value));
+				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
+
 				m_nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
 							m_expressions[ nodeIndex(*ni)]));
+				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
+
 				m_nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 		}
@@ -360,12 +366,14 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
 			rt = m_storage->createTermPostingIterator( term.type, term.value);
+			if (!rt) break;
 			m_nodePostingsMap[ nodeadr] = rt;
 			break;
 		}
 		case ExpressionNode:
 			std::size_t nidx = nodeIndex( nodeadr);
 			rt = createExpressionPostingIterator( m_expressions[ nidx]);
+			if (!rt) break;
 			m_nodePostingsMap[ nodeadr] = rt;
 			break;
 	}
@@ -495,6 +503,7 @@ std::vector<ResultDocument> Query::evaluate()
 			{
 				std::auto_ptr<WeightingFunctionContextInterface> execContext(
 					wi->function()->createFunctionContext( m_storage, m_metaDataReader.get()));
+				if (!execContext.get()) throw strus::runtime_error(_TXT("error creating weighting function context"));
 	
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 					si = wi->featureParameters().begin(),
@@ -610,7 +619,8 @@ std::vector<ResultDocument> Query::evaluate()
 					zi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get()));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
-	
+				if (!closure) throw strus::runtime_error(_TXT("error creating summarizer context"));
+
 				// [5.2] Add features with their variables assigned to summarizer:
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 					si = zi->featureParameters().begin(),

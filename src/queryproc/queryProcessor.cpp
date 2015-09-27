@@ -48,29 +48,53 @@ using namespace strus;
 QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
-	definePostingJoinOperator( "within", createPostingJoinWithin( m_errorhnd));
-	definePostingJoinOperator( "within_struct", createPostingJoinStructWithin( m_errorhnd));
-	definePostingJoinOperator( "sequence", createPostingJoinSequence( m_errorhnd));
-	definePostingJoinOperator( "sequence_struct", createPostingJoinStructSequence( m_errorhnd));
-	definePostingJoinOperator( "diff", createPostingJoinDifference( m_errorhnd));
-	definePostingJoinOperator( "intersect", createPostingJoinIntersect( m_errorhnd));
-	definePostingJoinOperator( "union", createPostingJoinUnion( m_errorhnd));
-	definePostingJoinOperator( "succ", createPostingSucc( m_errorhnd));
-	definePostingJoinOperator( "pred", createPostingPred( m_errorhnd));
-	definePostingJoinOperator( "contains", createPostingJoinContains( m_errorhnd));
-	
-	defineWeightingFunction( "bm25", createWeightingFunctionBm25( m_errorhnd));
-	defineWeightingFunction( "bm25_dpfc", createWeightingFunctionBm25_dpfc( m_errorhnd));
-	defineWeightingFunction( "tf", createWeightingFunctionTermFrequency( m_errorhnd));
-	defineWeightingFunction( "td", createWeightingFunctionConstant( m_errorhnd));
-	defineWeightingFunction( "metadata", createWeightingFunctionMetadata( m_errorhnd));
-	defineWeightingFunction( "formula", createWeightingFunctionFormula( m_errorhnd));
+	PostingJoinOperatorInterface* op;
+	if (0==(op=createPostingJoinWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "within", op);
+	if (0==(op=createPostingJoinStructWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "within_struct", op);
+	if (0==(op=createPostingJoinSequence( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "sequence", op);
+	if (0==(op=createPostingJoinStructSequence( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "sequence_struct", op);
+	if (0==(op=createPostingJoinDifference( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "diff", op);
+	if (0==(op=createPostingJoinIntersect( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "intersect", op);
+	if (0==(op=createPostingJoinUnion( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "union", op);
+	if (0==(op=createPostingSucc( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "succ", op);
+	if (0==(op=createPostingPred( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "pred", op);
+	if (0==(op=createPostingJoinContains( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "contains", op);
 
-	defineSummarizerFunction( "metadata", createSummarizerMetaData( m_errorhnd));
-	defineSummarizerFunction( "matchphrase", createSummarizerMatchPhrase( m_errorhnd));
-	defineSummarizerFunction( "matchpos", createSummarizerListMatches( m_errorhnd));
-	defineSummarizerFunction( "attribute", createSummarizerAttribute( m_errorhnd));
-	defineSummarizerFunction( "matchvariables", createSummarizerMatchVariables( m_errorhnd));
+	WeightingFunctionInterface* func;
+	if (0==(func=createWeightingFunctionBm25( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "bm25", func);
+	if (0==(func=createWeightingFunctionBm25_dpfc( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "bm25_dpfc", func);
+	if (0==(func=createWeightingFunctionTermFrequency( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "tf", func);
+	if (0==(func=createWeightingFunctionConstant( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "td", func);
+	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "metadata", func);
+	if (0==(func=createWeightingFunctionFormula( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "formula", func);
+
+	SummarizerFunctionInterface* sum;
+	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "metadata", sum);
+	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "matchphrase", sum);
+	if (0==(sum=createSummarizerListMatches( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "matchpos", sum);
+	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "attribute", sum);
+	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "matchvariables", sum);
 }
 
 QueryProcessor::~QueryProcessor()
