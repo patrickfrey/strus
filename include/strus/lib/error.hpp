@@ -38,7 +38,7 @@ namespace strus {
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-ErrorBufferInterface* createErrorBuffer_standard( FILE* logfilehandle);
+ErrorBufferInterface* createErrorBuffer_standard( FILE* logfilehandle, std::size_t maxNofThreads_);
 
 }//namespace
 #endif

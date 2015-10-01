@@ -26,23 +26,55 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Standard implemenation of interface for reporting and catching errors in the core (storage)
+/// \brief Standard implemenation of interface for reporting and catching errors
 /// \file errorBuffer.hpp
 #ifndef _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_ERROR_BUFFER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/errorBufferInterface.hpp"
+#include "private/utils.hpp"
 #include <cstdio>
 
 /// \brief strus toplevel namespace
 namespace strus
 {
 
-/// \class StorageErrorBuffer
+/// \class ProcessErrorBuffer
+/// \brief Error buffer context for one thread
+class ProcessErrorBuffer
+{
+public:
+	ProcessErrorBuffer();
+	~ProcessErrorBuffer(){}
+
+	void report( FILE* logfilehandle, const char* format, va_list arg) const;
+	void explain( FILE* logfilehandle, const char* format) const;
+
+	const char* fetchError()
+	{
+		if (!m_hasmsg) return 0;
+		m_hasmsg = false;
+		return m_msgbuf;
+	}
+
+	bool hasError() const
+	{
+		return m_hasmsg;
+	}
+
+private:
+	enum {ObjSize=512};
+	enum {MsgBufSize=(ObjSize-sizeof(bool))};
+	mutable char m_msgbuf[ MsgBufSize];
+	mutable bool m_hasmsg;
+};
+
+
+/// \class ErrorBuffer
 class ErrorBuffer
 	:public ErrorBufferInterface
 {
 public:
-	explicit ErrorBuffer( FILE* logfilehandle_);
+	ErrorBuffer( FILE* logfilehandle_, std::size_t maxNofThreads_);
 	virtual ~ErrorBuffer();
 
 	virtual void report( const char* format, ...) const;
@@ -53,11 +85,29 @@ public:
 
 	virtual bool hasError() const;
 
+	virtual void allocContext();
+	virtual void releaseContext();
+
 private:
-	enum {MsgBufSize=512};
-	mutable char msgbuf[ MsgBufSize];
-	mutable bool hasmsg;
-	mutable FILE* logfilehandle;
+	std::size_t threadidx() const;
+
+private:
+	mutable FILE* m_logfilehandle;
+	std::size_t m_size;
+	struct Slot
+	{
+		typedef utils::ThreadId::Type Id;
+		typedef utils::AtomicFlag Flag;
+
+		Slot(){}
+		~Slot(){}
+
+		Id id;
+		Flag flag;
+	};
+
+	mutable Slot* m_slots;
+	mutable ProcessErrorBuffer* m_ar;
 };
 
 }//namespace

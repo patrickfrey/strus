@@ -30,6 +30,7 @@
 #include "private/internationalization.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <unistd.h>
 
 using namespace strus;
 using namespace strus::utils;
@@ -78,4 +79,38 @@ std::string utils::tostring( int val)
 	}
 }
 
+
+///\brief Implementation of alligned malloc copied from http://jmabille.github.io/blog/2014/12/06/aligned-memory-allocator/
+#define HAS_POSIX_MEMALIGN (_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600)
+void* utils::aligned_malloc( std::size_t size, std::size_t alignment)
+{
+#if HAS_POSIX_MEMALIGN
+	void* res;
+	const int failed = posix_memalign( &res, size, alignment);
+	if (failed) res = 0;
+	return res;
+#elif (defined _MSC_VER)
+	return _aligned_malloc( size, alignment);
+#else
+	void* res = 0;
+	void* ptr = std::malloc( size + alignment);
+	if(ptr != 0)
+	{
+		res = reinterpret_cast<void*>((reinterpret_cast<std::size_t>(ptr) & ~(std::size_t(alignment-1))) + alignment);
+		*(reinterpret_cast<void**>(res) - 1) = ptr;
+	}
+	return res;
+#endif
+}
+
+void utils::aligned_free( void *ptr)
+{
+#if HAS_POSIX_MEMALIGN
+	std::free( ptr);
+#elif (defined _MSC_VER)
+	return _aligned_free( ptr);
+#else
+	std::free( *(reinterpret_cast<void**>(ptr) - 1));
+#endif
+}
 

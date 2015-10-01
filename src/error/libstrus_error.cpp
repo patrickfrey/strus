@@ -38,11 +38,11 @@
 
 using namespace strus;
 
-DLL_PUBLIC ErrorBufferInterface* strus::createErrorBuffer_standard( FILE* logfilehandle)
+DLL_PUBLIC ErrorBufferInterface* strus::createErrorBuffer_standard( FILE* logfilehandle, std::size_t maxNofThreads_)
 {
 	try
 	{
-		return new ErrorBuffer( logfilehandle);
+		return new ErrorBuffer( logfilehandle, maxNofThreads_);
 	}
 	catch (const std::bad_alloc&)
 	{
