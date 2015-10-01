@@ -34,7 +34,6 @@
 #include "strus/peerMessageProcessorInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/reference.hpp"
-#include "storageErrorBuffer.hpp"
 #include <vector>
 #include <string>
 #include <map>

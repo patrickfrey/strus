@@ -28,6 +28,7 @@
 */
 #include "attributeReader.hpp"
 #include "databaseAdapter.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <stdexcept>

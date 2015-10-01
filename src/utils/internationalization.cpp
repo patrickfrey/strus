@@ -63,14 +63,11 @@ std::logic_error strus::logic_error( const char* format, ...)
 	return rt;
 }
 
-void strus::initMessageTextDomain()
+DLL_PUBLIC void strus::initMessageTextDomain()
 {
-	static bool initialized = false;
-	if (initialized) return;
 #ifdef ENABLE_NLS
 	::bindtextdomain( STRUS_GETTEXT_PACKAGE, STRUS_GETTEXT_LOCALEDIR);
 #endif
-	initialized = true;
 }
 
 

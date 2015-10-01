@@ -31,9 +31,9 @@
 #include "strus/peerMessageBuilderInterface.hpp"
 #include "strus/peerMessageProcessorInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "storageClient.hpp"
-#include "storageErrorBuffer.hpp"
 
 using namespace strus;
 
