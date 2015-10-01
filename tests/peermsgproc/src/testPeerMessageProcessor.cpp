@@ -49,7 +49,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};

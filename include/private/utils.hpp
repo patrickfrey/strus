@@ -173,14 +173,14 @@ public:
 	bool set( const ValueType& val)
 	{
 		ValueType prev_val = 0;
-		return val!=boost::atomic<ValueType>::compare_exchange_strong( prev_val, val, boost::memory_order_acquire);
+		return boost::atomic<ValueType>::compare_exchange_strong( prev_val, val, boost::memory_order_acquire);
 	}
 
 	///\brief Reset the slot
 	void reset()
 	{
 		ValueType val = 0;
-		boost::atomic<ValueType>::exchange( val, boost::memory_order_acquire);
+		(void)boost::atomic<ValueType>::exchange( val, boost::memory_order_acquire);
 	}
 
 	///\brief Test if the current value equals the argument
@@ -207,7 +207,7 @@ public:
 	bool set( bool val)
 	{
 		bool prev_val = !val;
-		return val!=boost::atomic<bool>::compare_exchange_strong( prev_val, val, boost::memory_order_acquire);
+		return boost::atomic<bool>::compare_exchange_strong( prev_val, val, boost::memory_order_acquire);
 	}
 
 	///\brief Evaluate the current value

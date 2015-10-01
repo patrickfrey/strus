@@ -86,7 +86,7 @@ void* utils::aligned_malloc( std::size_t size, std::size_t alignment)
 {
 #if HAS_POSIX_MEMALIGN
 	void* res;
-	const int failed = posix_memalign( &res, size, alignment);
+	const int failed = posix_memalign( &res, alignment, size);
 	if (failed) res = 0;
 	return res;
 #elif (defined _MSC_VER)
