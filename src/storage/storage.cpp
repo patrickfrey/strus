@@ -134,7 +134,7 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 	
 		MetaDataDescription md( metadata);
 		std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
-		if (!transaction.get()) return;
+		if (!transaction.get()) return false;
 
 		DatabaseAdapter_Variable::Writer stor( database);
 	
