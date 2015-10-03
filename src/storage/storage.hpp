@@ -53,7 +53,7 @@ public:
 
 	virtual StorageClientInterface* createClient( const std::string& configsource, DatabaseClientInterface* database) const;
 
-	virtual void createStorage( const std::string& configsource, DatabaseClientInterface* database) const;
+	virtual bool createStorage( const std::string& configsource, DatabaseClientInterface* database) const;
 	
 	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseClientInterface* database) const;
 

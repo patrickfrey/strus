@@ -30,6 +30,7 @@
 /// \file errorBufferInterface.hpp
 #ifndef _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED
+#include <cstdio>
 
 /// \brief strus toplevel namespace
 namespace strus
@@ -49,6 +50,10 @@ public:
 
 	/// \brief Destructor
 	virtual ~ErrorBufferInterface(){}
+
+	/// \brief Define error log file
+	/// \param[in] hnd file handle to set as log file
+	virtual void setLogFile( FILE* hnd)=0;
 
 	/// \brief Report an error
 	/// \param[in] format error message format string

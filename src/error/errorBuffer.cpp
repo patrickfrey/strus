@@ -108,6 +108,11 @@ ErrorBuffer::~ErrorBuffer()
 	utils::aligned_free( (void*)m_slots);
 }
 
+void ErrorBuffer::setLogFile( FILE* hnd)
+{
+	m_logfilehandle = hnd;
+}
+
 std::size_t ErrorBuffer::threadidx() const
 {
 	utils::ThreadId::Type tid = utils::ThreadId::get();

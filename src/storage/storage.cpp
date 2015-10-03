@@ -119,7 +119,7 @@ StorageClientInterface* Storage::createClient( const std::string& configsource, 
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }
 
-void Storage::createStorage( const std::string& configsource, DatabaseClientInterface* database) const
+bool Storage::createStorage( const std::string& configsource, DatabaseClientInterface* database) const
 {
 	try
 	{
@@ -150,9 +150,9 @@ void Storage::createStorage( const std::string& configsource, DatabaseClientInte
 		}
 		md.store( transaction.get());
 	
-		transaction->commit();
+		return transaction->commit();
 	}
-	CATCH_ERROR_MAP( _TXT("error creating storage client: %s"), *m_errorhnd);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, false);
 }
 
 StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable( DatabaseClientInterface* database) const

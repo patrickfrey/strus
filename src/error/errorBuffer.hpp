@@ -77,6 +77,8 @@ public:
 	ErrorBuffer( FILE* logfilehandle_, std::size_t maxNofThreads_);
 	virtual ~ErrorBuffer();
 
+	virtual void setLogFile( FILE* hnd);
+
 	virtual void report( const char* format, ...) const;
 
 	virtual void explain( const char* format) const;
