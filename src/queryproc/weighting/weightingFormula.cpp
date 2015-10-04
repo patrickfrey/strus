@@ -66,7 +66,7 @@ double FunctionMap::variableMap_metadata( void* ctx, int typeidx, unsigned int i
 	ArithmeticVariant val = THIS->m_metadata->getValue( idx);
 	if (val.defined())
 	{
-		return (double)(float)val;
+		return (double)val;
 	}
 	else
 	{
@@ -251,7 +251,7 @@ void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& n
 	try
 	{
 		m_functionmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
-		m_paramar.push_back( (double)(float)value);
+		m_paramar.push_back( (double)value);
 	}
 	CATCH_ERROR_MAP( _TXT("error adding numeric parameter to weighting function 'formula': %s"), *m_errorhnd);
 }

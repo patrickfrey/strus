@@ -34,8 +34,10 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
-void printIndentMultilineString( std::ostream& out, std::size_t indentsize, const char* descr);
+void printIndentMultilineString( std::ostream& out, std::size_t indentsize, const char* descr, ErrorBufferInterface* errorhnd);
 
 }
 #endif

@@ -30,17 +30,17 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 		std::string path;
 		std::string src( configsource);
 
-		if (!extractStringFromConfigString( path, src, "path"))
+		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
 			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
 			return 0;
 		}
-		(void)extractBooleanFromConfigString( compression, src, "compression");
-		(void)extractUIntFromConfigString( cachesize_kb, src, "cache");
-		(void)extractUIntFromConfigString( maxOpenFiles, src, "max_open_files");
-		(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size");
-		(void)extractUIntFromConfigString( blockSize, src, "block_size");
-
+		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
+		(void)extractUIntFromConfigString( cachesize_kb, src, "cache", m_errorhnd);
+		(void)extractUIntFromConfigString( maxOpenFiles, src, "max_open_files", m_errorhnd);
+		(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size", m_errorhnd);
+		(void)extractUIntFromConfigString( blockSize, src, "block_size", m_errorhnd);
+		if (m_errorhnd->hasError()) return 0;
 		return new DatabaseClient( m_dbhandle_map, path.c_str(), maxOpenFiles, cachesize_kb, compression, writeBufferSize, blockSize, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database client: %s"), *m_errorhnd, 0);
@@ -53,7 +53,7 @@ bool Database::exists( const std::string& configsource) const
 		std::string src = configsource;
 		std::string path;
 
-		if (!extractStringFromConfigString( path, src, "path"))
+		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
 			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
 			return false;
@@ -76,12 +76,13 @@ bool Database::createDatabase( const std::string& configsource) const
 		std::string path;
 		std::string src = configsource;
 
-		if (!extractStringFromConfigString( path, src, "path"))
+		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
 			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
 			return false;
 		}
-		(void)extractBooleanFromConfigString( compression, src, "compression");
+		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
+		if (m_errorhnd->hasError()) return false;
 
 		leveldb::DB* db = 0;
 		leveldb::Options options;
@@ -115,7 +116,7 @@ bool Database::destroyDatabase( const std::string& configsource) const
 		std::string path;
 		std::string src = configsource;
 
-		if (!extractStringFromConfigString( path, src, "path"))
+		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
 			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
 			return false;
@@ -146,7 +147,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 		std::string path;
 		std::string src = configsource;
 
-		if (!extractStringFromConfigString( path, src, "path"))
+		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
 			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
 			return false;

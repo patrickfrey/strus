@@ -38,8 +38,8 @@ using namespace strus;
 
 bool MetaDataRestriction::compareFunctionEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 + EPSILON_FLOAT32 >= val2 && val1 <= val2 + EPSILON_FLOAT32);
 }
 
@@ -50,29 +50,29 @@ bool MetaDataRestriction::compareFunctionNotEqualFloat32( const ArithmeticVarian
 
 bool MetaDataRestriction::compareFunctionLessFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 + EPSILON_FLOAT32 < val2);
 }
 
 bool MetaDataRestriction::compareFunctionLessEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 <= val2 + EPSILON_FLOAT32);
 }
 
 bool MetaDataRestriction::compareFunctionGreaterFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 > val2 + EPSILON_FLOAT32);
 }
 
 bool MetaDataRestriction::compareFunctionGreaterEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 + EPSILON_FLOAT32 >= val2);
 }
 
@@ -80,8 +80,8 @@ bool MetaDataRestriction::compareFunctionGreaterEqualFloat32( const ArithmeticVa
 
 bool MetaDataRestriction::compareFunctionEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 + EPSILON_FLOAT16 >= val2 && val1 <= val2 + EPSILON_FLOAT16);
 }
 
@@ -92,29 +92,29 @@ bool MetaDataRestriction::compareFunctionNotEqualFloat16( const ArithmeticVarian
 
 bool MetaDataRestriction::compareFunctionLessFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 + EPSILON_FLOAT16 < val2);
 }
 
 bool MetaDataRestriction::compareFunctionLessEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 <= val2 + EPSILON_FLOAT16);
 }
 
 bool MetaDataRestriction::compareFunctionGreaterFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 > val2 + EPSILON_FLOAT16);
 }
 
 bool MetaDataRestriction::compareFunctionGreaterEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
 {
-	float val1 = op1;
-	float val2 = op2;
+	double val1 = op1;
+	double val2 = op2;
 	return (val1 + EPSILON_FLOAT16 >= val2);
 }
 
@@ -276,7 +276,7 @@ static const char* compareOperatorName( QueryInterface::CompareOperator op)
 
 void MetaDataRestriction::print( std::ostream& out) const
 {
-	out << (newGroup?"=>":"  ") << compareOperatorName(cmpoperator) << " " << elementHandle << " " << operand << std::endl;
+	out << (newGroup?"=>":"  ") << compareOperatorName(cmpoperator) << " " << elementHandle << " " << operand.tostring().c_str() << std::endl;
 }
 
 bool strus::matchesMetaDataRestriction(

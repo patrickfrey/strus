@@ -34,7 +34,6 @@
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <limits>

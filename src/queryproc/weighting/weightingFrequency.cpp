@@ -28,6 +28,7 @@
 */
 #include "weightingFrequency.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -70,11 +71,18 @@ float WeightingFunctionContextTermFrequency::call( const Index& docno)
 }
 
 
+static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+{
+	ArithmeticVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	return rt;
+}
+
 void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::string& name, const std::string& value)
 {
 	try
 	{
-		addNumericParameter( name, arithmeticVariantFromString( value));
+		addNumericParameter( name, parameterValue( name, value));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding string parameter to weighting function 'frequency': %s"), *m_errorhnd);
 }

@@ -27,27 +27,33 @@
 --------------------------------------------------------------------
 */
 #include "private/dll_tags.hpp"
+#include "private/errorUtils.hpp"
 #include "strus/private/cmdLineOpt.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include <iostream>
 #include <string>
 #include <cstring>
 
 using namespace strus;
 
-DLL_PUBLIC void strus::printIndentMultilineString( std::ostream& out, std::size_t indentsize, const char* descr)
+DLL_PUBLIC void strus::printIndentMultilineString( std::ostream& out, std::size_t indentsize, const char* descr, ErrorBufferInterface* errorhnd)
 {
-	std::string indent( indentsize, ' ');
-
-	char const* cc = descr;
-	char const* ee;
-	do
+	try
 	{
-		ee = std::strchr( cc,'\n');
-		std::string line = ee?std::string( cc, ee-cc):std::string( cc);
-		out << indent << line << std::endl;
-		cc = ee + 1;
+		std::string indent( indentsize, ' ');
+	
+		char const* cc = descr;
+		char const* ee;
+		do
+		{
+			ee = std::strchr( cc,'\n');
+			std::string line = ee?std::string( cc, ee-cc):std::string( cc);
+			out << indent << line << std::endl;
+			cc = ee + 1;
+		}
+		while (ee);
 	}
-	while (ee);
+	CATCH_ERROR_MAP("error printing multiline string for usage help: %s", *errorhnd);
 }
 
 

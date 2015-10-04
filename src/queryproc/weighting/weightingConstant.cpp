@@ -28,6 +28,7 @@
 */
 #include "weightingConstant.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -57,7 +58,7 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 
 float WeightingFunctionContextConstant::call( const Index& docno)
 {
-	float rt = 0.0;
+	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for (;fi != fe; ++fi)
 	{
@@ -70,11 +71,18 @@ float WeightingFunctionContextConstant::call( const Index& docno)
 }
 
 
+static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+{
+	ArithmeticVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	return rt;
+}
+
 void WeightingFunctionInstanceConstant::addStringParameter( const std::string& name, const std::string& value)
 {
 	try
 	{
-		addNumericParameter( name, arithmeticVariantFromString( value));
+		addNumericParameter( name, parameterValue( name, value));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'constant' weighting function: %s"), *m_errorhnd);
 }
@@ -83,7 +91,7 @@ void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& 
 {
 	if (utils::caseInsensitiveEquals( name, "weight"))
 	{
-		m_weight = (float)value;
+		m_weight = (double)value;
 	}
 	else
 	{

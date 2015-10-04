@@ -41,7 +41,6 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"

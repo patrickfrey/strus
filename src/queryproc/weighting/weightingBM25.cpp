@@ -86,7 +86,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 
 float WeightingFunctionContextBM25::call( const Index& docno)
 {
-	float rt = 0.0;
+	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for ( ;fi != fe; ++fi)
 	{
@@ -94,14 +94,14 @@ float WeightingFunctionContextBM25::call( const Index& docno)
 		{
 			m_metadata->skipDoc( docno);
 		
-			float ff = fi->itr->frequency();
+			double ff = fi->itr->frequency();
 			if (ff == 0.0)
 			{
 			}
 			else if (m_b)
 			{
-				float doclen = m_metadata->getValue( m_metadata_doclen);
-				float rel_doclen = (doclen+1) / m_avgDocLength;
+				double doclen = m_metadata->getValue( m_metadata_doclen);
+				double rel_doclen = (doclen+1) / m_avgDocLength;
 				rt += fi->weight * fi->idf
 					* (ff * (m_k1 + 1.0))
 					/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
@@ -117,6 +117,12 @@ float WeightingFunctionContextBM25::call( const Index& docno)
 	return rt;
 }
 
+static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+{
+	ArithmeticVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	return rt;
+}
 
 void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name, const std::string& value)
 {
@@ -131,7 +137,7 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 		||  utils::caseInsensitiveEquals( name, "b")
 		||  utils::caseInsensitiveEquals( name, "avgdoclen"))
 		{
-			addNumericParameter( name, arithmeticVariantFromString( value));
+			addNumericParameter( name, parameterValue( name, value));
 		}
 		else
 		{
@@ -145,15 +151,15 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 {
 	if (utils::caseInsensitiveEquals( name, "k1"))
 	{
-		m_k1 = (float)value;
+		m_k1 = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "b"))
 	{
-		m_b = (float)value;
+		m_b = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
 	{
-		m_avgdoclen = (float)value;
+		m_avgdoclen = (double)value;
 	}
 	else
 	{

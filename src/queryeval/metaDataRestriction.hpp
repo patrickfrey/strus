@@ -30,7 +30,7 @@
 #define _STRUS_METADATA_RESTRICTION_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include <vector>
 #include <utility>
 #include <iostream>
@@ -66,7 +66,7 @@ struct MetaDataRestriction
 	static bool compareFunctionGreaterEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
 
 	static CompareFunction getCompareFunction( const char* type, QueryInterface::CompareOperator cmpop);
-	
+
 	MetaDataRestriction( const MetaDataRestriction& o)
 		:cmpoperator(o.cmpoperator)
 		,func(o.func)

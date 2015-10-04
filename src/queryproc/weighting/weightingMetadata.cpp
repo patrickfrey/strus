@@ -29,6 +29,7 @@
 #include "weightingMetadata.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -59,9 +60,15 @@ void WeightingFunctionContextMetadata::addWeightingFeature(
 float WeightingFunctionContextMetadata::call( const Index& docno)
 {
 	m_metadata->skipDoc( docno);
-	return m_weight * (float)m_metadata->getValue( m_elementHandle);
+	return m_weight * (double)m_metadata->getValue( m_elementHandle);
 }
 
+static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+{
+	ArithmeticVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	return rt;
+}
 
 void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& name, const std::string& value)
 {
@@ -73,7 +80,7 @@ void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& n
 		}
 		else
 		{
-			addNumericParameter( name, arithmeticVariantFromString( value));
+			addNumericParameter( name, parameterValue( name, value));
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding string parameter to weighting function 'metadata': %s"), *m_errorhnd);
@@ -85,7 +92,7 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 	{
 		if (utils::caseInsensitiveEquals( name, "weight"))
 		{
-			m_weight = (float)value;
+			m_weight = (double)value;
 		}
 		else if (utils::caseInsensitiveEquals( name, "name"))
 		{

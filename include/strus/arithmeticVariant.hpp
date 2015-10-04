@@ -31,6 +31,7 @@
 #ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #define _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #include <cstring>
+#include <cstdio>
 #include <limits>
 
 namespace strus {
@@ -59,7 +60,7 @@ public:
 
 	/// \brief Constructor from a single precision floating point number
 	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant( float value)
+	ArithmeticVariant( double value)
 	{
 		variant.Float = value;
 		type = Float;
@@ -68,7 +69,7 @@ public:
 	/// \brief Default constructor (as undefined value)
 	ArithmeticVariant()
 	{
-		std::memset( this, 0, sizeof(*this));
+		init();
 	}
 
 	/// \brief Copy constructor 
@@ -76,6 +77,79 @@ public:
 	ArithmeticVariant( const ArithmeticVariant& o)
 	{
 		std::memcpy( this, &o, sizeof(*this));
+	}
+
+	void init()
+	{
+		std::memset( this, 0, sizeof(*this));
+	}
+
+	class String
+	{
+	public:
+		String()
+		{
+			m_buf[0] = '\0';
+		}
+
+		String( const ArithmeticVariant& val)
+		{
+			switch (val.type)
+			{
+				case Null: break;
+				case Int: std::snprintf( m_buf, sizeof(m_buf), "%d", val.variant.Int); return;
+				case UInt: std::snprintf( m_buf, sizeof(m_buf), "%u", val.variant.UInt); return;
+				case Float: std::snprintf( m_buf, sizeof(m_buf), "%.5f", val.variant.Float); return;
+			}
+			m_buf[0] = '\0';
+		}
+
+		operator const char*() const	{return m_buf;}
+		const char* c_str() const	{return m_buf;}
+
+	private:
+		char m_buf[ 128];
+	};
+
+	String tostring() const
+	{
+		return String( *this);
+	}
+
+	bool initFromString( const char* src)
+	{
+		char const* si = src;
+		bool sign_ = false;
+		if (!*si)
+		{
+			init();
+			return true;
+		}
+		if (*si && *si == '-')
+		{
+			sign_ = true;
+			++si;
+		}
+		if (*si < '0' || *si > '9') return false;
+		for (; *si >= '0' && *si <= '9'; ++si){}
+		if (*si == '.')
+		{
+			for (++si; *si >= '0' && *si <= '9'; ++si){}
+			if (*si) return false;
+			std::sscanf( src, "%lf", &variant.Float);
+			type = Float;
+		}
+		else if (sign_)
+		{
+			std::sscanf( src, "%d", &variant.Int);
+			type = Int;
+		}
+		else
+		{
+			std::sscanf( src, "%u", &variant.UInt);
+			type = UInt;
+		}
+		return true;
 	}
 
 	/// \brief Find out if this value is defined
@@ -101,9 +175,9 @@ public:
 	}
 
 	/// \brief Cast to a single precision floating point number
-	operator float() const
+	operator double() const
 	{
-		return cast<float>();
+		return cast<double>();
 	}
 	/// \brief Cast to a signed integer
 	operator int() const
@@ -145,9 +219,9 @@ public:
 				case UInt: return variant.UInt == o.variant.UInt;
 				case Float:
 				{
-					float xx = variant.Float - o.variant.Float;
+					double xx = variant.Float - o.variant.Float;
 					if (xx < 0) xx = -xx;
-					return xx <= std::numeric_limits<float>::epsilon();
+					return xx <= std::numeric_limits<double>::epsilon();
 				}
 			}
 		}
@@ -174,7 +248,7 @@ public:
 
 	/// \brief Assignment operator for a single precision floating point number
 	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant& operator=( float value)
+	ArithmeticVariant& operator=( double value)
 	{
 		variant.Float = value;
 		type = Float;
@@ -201,7 +275,7 @@ public:
 	{
 		int Int;			///< value in case of a signed integer
 		unsigned int UInt;		///< value in case of an unsigned integer
-		float Float;			///< value in case of a single precision floating point number
+		double Float;			///< value in case of a single precision floating point number
 	} variant;				///< Value of this arithmetic variant
 };
 

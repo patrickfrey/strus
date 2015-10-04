@@ -4,12 +4,10 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set(libstrus_shared_utils_source_files
-	arithmeticVariantAsString.cpp
 	cmdLineOpt.cpp
 	configParser.cpp
 	fileio.cpp
 	snprintf.c
-	protocol.cpp
 )
 
 set( libstrus_private_utils_source_files

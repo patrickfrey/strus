@@ -38,7 +38,6 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/utils.hpp"
 #include <vector>
 #include <sstream>

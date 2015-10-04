@@ -362,7 +362,7 @@ StorageDocumentInterface*
 {
 	try
 	{
-		return new StorageDocumentChecker( this, m_database.get(), docid, logfilename);
+		return new StorageDocumentChecker( this, m_database.get(), docid, logfilename, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document checker: %s"), *m_errorhnd, 0);
 }

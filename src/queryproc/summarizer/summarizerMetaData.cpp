@@ -30,7 +30,6 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
@@ -63,7 +62,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		ArithmeticVariant value = m_metadata->getValue( m_attrib);
 		if (value.defined()) 
 		{
-			rt.push_back( SummarizerFunctionContextInterface::SummaryElement( arithmeticVariantToString( value), 1.0));
+			rt.push_back( SummarizerFunctionContextInterface::SummaryElement( value.tostring().c_str(), 1.0));
 		}
 		return rt;
 	}

@@ -37,8 +37,8 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "strus/private/snprintf.h"
 #include <iostream>
 #include <sstream>
@@ -50,14 +50,15 @@ StorageDocumentChecker::StorageDocumentChecker(
 		const StorageClient* storage_,
 		const DatabaseClientInterface* database_,
 		const std::string& docid_,
-		const std::string& logfile_)
+		const std::string& logfile_,
+		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_docid(docid_)
 	,m_docno(storage_->documentNumber( docid_))
 	,m_logfile(logfile_)
-{
-}
+	,m_errorhnd(errorhnd_)
+{}
 
 StorageDocumentChecker::~StorageDocumentChecker()
 {
@@ -68,17 +69,21 @@ void StorageDocumentChecker::addSearchIndexTerm(
 		const std::string& value_,
 		const Index& position_)
 {
-	TermMap::iterator ti = m_termMap.find( Term( type_, value_));
-	TermAttributes* attributes = 0;
-	if (ti == m_termMap.end())
+	try
 	{
-		attributes = &m_termMap[ Term( type_, value_)];
+		TermMap::iterator ti = m_termMap.find( Term( type_, value_));
+		TermAttributes* attributes = 0;
+		if (ti == m_termMap.end())
+		{
+			attributes = &m_termMap[ Term( type_, value_)];
+		}
+		else
+		{
+			attributes = &ti->second;
+		}
+		attributes->poset.insert( position_);
 	}
-	else
-	{
-		attributes = &ti->second;
-	}
-	attributes->poset.insert( position_);
+	CATCH_ERROR_MAP( _TXT("error adding search index term: %s"), *m_errorhnd);
 }
 
 void StorageDocumentChecker::addForwardIndexTerm(
@@ -86,14 +91,22 @@ void StorageDocumentChecker::addForwardIndexTerm(
 		const std::string& value_,
 		const Index& position_)
 {
-	m_invTermMap[ InvKey( type_, position_)] = value_;
+	try
+	{
+		m_invTermMap[ InvKey( type_, position_)] = value_;
+	}
+	CATCH_ERROR_MAP( _TXT("error adding forward index term: %s"), *m_errorhnd);
 }
 
 void StorageDocumentChecker::setMetaData(
 		const std::string& name_,
 		const ArithmeticVariant& value_)
 {
-	m_metaDataMap[ name_] = value_;
+	try
+	{
+		m_metaDataMap[ name_] = value_;
+	}
+	CATCH_ERROR_MAP( _TXT("error setting meta data: %s"), *m_errorhnd);
 }
 
 
@@ -101,7 +114,11 @@ void StorageDocumentChecker::setAttribute(
 		const std::string& name_,
 		const std::string& value_)
 {
-	m_attributeMap[ name_] = value_;
+	try
+	{
+		m_attributeMap[ name_] = value_;
+	}
+	CATCH_ERROR_MAP( _TXT("error in transaction commit: %s"), *m_errorhnd);
 }
 
 static void logError(
@@ -212,11 +229,8 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			ArithmeticVariant val = metadata->getValue( hnd);
 			if (val != mi->second)
 			{
-				std::string str1 = arithmeticVariantToString( mi->second);
-				std::string str2 = arithmeticVariantToString( val);
-
 				logError( logout, m_docid,
-					_TXT( "document metadata does not match: '%s' != '%s'"), str1.c_str(), str2.c_str());
+					_TXT( "document metadata does not match: '%s' != '%s'"), mi->second.tostring().c_str(), val.tostring().c_str());
 			}
 		}
 	}
@@ -267,22 +281,30 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 
 void StorageDocumentChecker::setUserAccessRight( const std::string& username)
 {
-	m_userlist.push_back( username);
+	try
+	{
+		m_userlist.push_back( username);
+	}
+	CATCH_ERROR_MAP( _TXT("error setting user access right: %s"), *m_errorhnd);
 }
 
 void StorageDocumentChecker::done()
 {
-	if (m_logfile == "-")
+	try
 	{
-		doCheck( std::cout);
+		if (m_logfile == "-")
+		{
+			doCheck( std::cout);
+		}
+		else
+		{
+			std::ofstream logfileout;
+			logfileout.open( m_logfile.c_str(), std::ios_base::app);
+			doCheck( logfileout);
+			logfileout.close();
+		}
 	}
-	else
-	{
-		std::ofstream logfileout;
-		logfileout.open( m_logfile.c_str(), std::ios_base::app);
-		doCheck( logfileout);
-		logfileout.close();
-	}
+	CATCH_ERROR_MAP( _TXT("error in transaction commit: %s"), *m_errorhnd);
 }
 
 

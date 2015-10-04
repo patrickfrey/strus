@@ -34,10 +34,17 @@
 
 namespace strus {
 
+/// \brief Forward declaration
+class ErrorBufferInterface;
+
 ArithmeticVariant arithmeticVariantFromString( const std::string& valueAsString);
 std::string arithmeticVariantToString( const ArithmeticVariant& value);
 
-std::ostream& operator<< (std::ostream& out, const ArithmeticVariant& v);
+std::ostream& strus::operator<< (std::ostream& out, const ArithmeticVariant& v)
+{
+	print( out, v);
+	return out;
+}
 
 }
 #endif

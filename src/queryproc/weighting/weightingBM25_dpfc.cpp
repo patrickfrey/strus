@@ -137,7 +137,7 @@ typedef std::set<
 		FixedStructAllocator<FeatStruct,MaxNofFeatures> > FeatStructSet;
 
 
-static void handleSequence( const FeatStructSet& wset, float* accu, float weight, const Index& docno)
+static void handleSequence( const FeatStructSet& wset, double* accu, double weight, const Index& docno)
 {
 	FeatStructSet::iterator first = wset.begin();
 	FeatStructSet::iterator next = first; ++next;
@@ -157,7 +157,7 @@ static void handleSequence( const FeatStructSet& wset, float* accu, float weight
 	}
 }
 
-static Index handleSameSentence( std::vector<WeightingFunctionContextBM25_dpfc::Feature>& struct_featar, const FeatStructSet& wset, float* accu, const Index& startPos, float weight, const Index& docno)
+static Index handleSameSentence( std::vector<WeightingFunctionContextBM25_dpfc::Feature>& struct_featar, const FeatStructSet& wset, double* accu, const Index& startPos, double weight, const Index& docno)
 {
 	typedef WeightingFunctionContextBM25_dpfc::Feature Feature;
 	std::vector<Feature>::iterator si = struct_featar.begin(), se = struct_featar.end();
@@ -188,9 +188,9 @@ static Index handleSameSentence( std::vector<WeightingFunctionContextBM25_dpfc::
 
 float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 {
-	float rt = 0.0;
+	double rt = 0.0;
 	FeatStructSet wset;
-	float accu[ MaxNofFeatures];
+	double accu[ MaxNofFeatures];
 
 	if (m_weight_featar.size() > MaxNofFeatures || m_struct_featar.size() > MaxNofFeatures)
 	{
@@ -290,15 +290,15 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 		if (docno==fi->itr->skipDoc( docno))
 		{
 			m_metadata->skipDoc( docno);
-		
-			float ff = fi->itr->frequency() + accu[ fidx];
+
+			double ff = fi->itr->frequency() + accu[ fidx];
 			if (ff == 0.0)
 			{
 			}
 			else if (m_b)
 			{
-				float doclen = m_metadata->getValue( m_metadata_content_doclen);
-				float rel_doclen = (doclen+1) / m_avgDocLength;
+				double doclen = m_metadata->getValue( m_metadata_content_doclen);
+				double rel_doclen = (doclen+1) / m_avgDocLength;
 				rt += fi->weight * fi->idf
 					* (ff * (m_k1 + 1.0))
 					/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
@@ -314,6 +314,13 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 	return rt;
 }
 
+
+static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+{
+	ArithmeticVariant rt;
+	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
+	return rt;
+}
 
 void WeightingFunctionInstanceBM25_dpfc::addStringParameter( const std::string& name, const std::string& value)
 {
@@ -346,7 +353,7 @@ void WeightingFunctionInstanceBM25_dpfc::addStringParameter( const std::string& 
 		||  utils::caseInsensitiveEquals( name, "strinc")
 		||  utils::caseInsensitiveEquals( name, "relevant"))
 		{
-			addNumericParameter( name, arithmeticVariantFromString( value));
+			addNumericParameter( name, parameterValue( name, value));
 		}
 		else
 		{
@@ -361,15 +368,15 @@ void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string&
 {
 	if (utils::caseInsensitiveEquals( name, "k1"))
 	{
-		m_k1 = (float)value;
+		m_k1 = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "b"))
 	{
-		m_b = (float)value;
+		m_b = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
 	{
-		m_avgdoclen = (float)value;
+		m_avgdoclen = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "proxmindist"))
 	{
@@ -377,19 +384,19 @@ void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string&
 	}
 	else if (utils::caseInsensitiveEquals( name, "titleinc"))
 	{
-		m_title_ff_incr = (float)value;
+		m_title_ff_incr = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "seqinc"))
 	{
-		m_sequence_ff_incr = (float)value;
+		m_sequence_ff_incr = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "strinc"))
 	{
-		m_sentence_ff_incr = (float)value;
+		m_sentence_ff_incr = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "relevant"))
 	{
-		m_relevant_df_factor = (float)value;
+		m_relevant_df_factor = (double)value;
 	}
 	else
 	{

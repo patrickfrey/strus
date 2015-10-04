@@ -105,14 +105,18 @@ StorageClientInterface* Storage::createClient( const std::string& configsource, 
 		std::string cachedterms;
 		std::string src = configsource;
 	
-		(void)extractStringFromConfigString( cachedterms, src, "cachedterms");
-		if (cachedterms.size())
+		if (extractStringFromConfigString( cachedterms, src, "cachedterms", m_errorhnd))
 		{
 			std::string cachedtermsrc = loadFile( cachedterms);
 			return new StorageClient( database, cachedtermsrc.c_str(), m_errorhnd);
 		}
 		else
 		{
+			if (m_errorhnd->hasError())
+			{
+				m_errorhnd->explain(_TXT("error creating storage client: %s"));
+				return 0;
+			}
 			return new StorageClient( database, 0, m_errorhnd);
 		}
 	}
@@ -129,9 +133,10 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 	
 		std::string src = configsource;
 	
-		(void)extractStringFromConfigString( metadata, src, "metadata");
-		(void)extractBooleanFromConfigString( useAcl, src, "acl");
-	
+		(void)extractStringFromConfigString( metadata, src, "metadata", m_errorhnd);
+		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
+		if (m_errorhnd->hasError()) return false;
+
 		MetaDataDescription md( metadata);
 		std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 		if (!transaction.get()) return false;
