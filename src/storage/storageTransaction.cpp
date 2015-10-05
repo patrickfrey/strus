@@ -306,10 +306,17 @@ bool StorageTransaction::commit()
 	if (m_commit)
 	{
 		m_errorhnd->report( _TXT( "called transaction commit twice"));
+		return false;
 	}
 	if (m_rollback)
 	{
 		m_errorhnd->report( _TXT( "called transaction commit after rollback"));
+		return false;
+	}
+	if (m_errorhnd->hasError())
+	{
+		m_errorhnd->explain( _TXT( "storage transaction with error: %s"));
+		return false;
 	}
 	try
 	{

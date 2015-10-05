@@ -100,7 +100,8 @@ void QueryEval::addSummarizerFunction(
 {
 	try
 	{
-		m_summarizers.push_back( SummarizerDef( resultAttribute, functionName, function, featureParameters));
+		Reference<SummarizerFunctionInstanceInterface> functionref( function);
+		m_summarizers.push_back( SummarizerDef( resultAttribute, functionName, functionref, featureParameters));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding summarization function: %s"), *m_errorhnd);
 }
@@ -113,7 +114,8 @@ void QueryEval::addWeightingFunction(
 {
 	try
 	{
-		m_weightingFunctions.push_back( WeightingDef( function, functionName, featureParameters, weight));
+		Reference<WeightingFunctionInstanceInterface> functionref( function);
+		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters, weight));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding weighting function: %s"), *m_errorhnd);
 }

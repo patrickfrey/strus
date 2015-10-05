@@ -111,6 +111,7 @@ void QueryProcessor::definePostingJoinOperator(
 	}
 	catch (std::bad_alloc&)
 	{
+		delete op;
 		m_errorhnd->report( _TXT("out of memory"));
 	}
 }
@@ -139,6 +140,7 @@ void QueryProcessor::defineWeightingFunction(
 	}
 	catch (std::bad_alloc&)
 	{
+		delete func;
 		m_errorhnd->report( _TXT("out of memory"));
 	}
 }
@@ -167,6 +169,7 @@ void QueryProcessor::defineSummarizerFunction(
 	}
 	catch (std::bad_alloc&)
 	{
+		delete sumfunc;
 		m_errorhnd->report( _TXT("out of memory"));
 	}
 }

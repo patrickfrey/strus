@@ -54,7 +54,7 @@ public:
 		,m_weight(o.m_weight){}
 
 	WeightingDef(
-			WeightingFunctionInstanceInterface* function_,
+			const Reference<WeightingFunctionInstanceInterface>& function_,
 			const std::string& functionName_,
 			const std::vector<FeatureParameter>& featureParameters_,
 			float weight_)

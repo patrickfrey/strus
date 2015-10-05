@@ -43,7 +43,7 @@ public:
 	SummarizerDef(
 			const std::string& resultAttribute_,
 			const std::string& functionName_,
-			SummarizerFunctionInstanceInterface* function_,
+			const Reference<SummarizerFunctionInstanceInterface>& function_,
 			const std::vector<FeatureParameter>& featureParameters_)
 		:m_function(function_)
 		,m_functionName(functionName_)

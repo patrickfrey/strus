@@ -73,7 +73,7 @@ void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
 					break;
 				case 's':
 					val.s = va_arg(ap, char *);
-					for (; bi<be && *val.s; ++bi,++val.s) *bi = *val.s;
+					if (val.s) for (; bi<be && *val.s; ++bi,++val.s) *bi = *val.s;
 					break;
 				case 'd':
 					val.d = va_arg(ap, int);
