@@ -74,7 +74,7 @@ class ErrorBuffer
 	:public ErrorBufferInterface
 {
 public:
-	enum {DefaultMaxNofThreads=16};
+	enum {DefaultMaxNofThreads=32};
 
 	ErrorBuffer( FILE* logfilehandle_, std::size_t maxNofThreads_);
 	virtual ~ErrorBuffer();
