@@ -82,6 +82,10 @@ void ProcessErrorBuffer::explain( FILE* logfilehandle, const char* format) const
 ErrorBuffer::ErrorBuffer( FILE* logfilehandle_, std::size_t maxNofThreads_)
 	:m_logfilehandle(logfilehandle_),m_size(maxNofThreads_),m_slots(0),m_ar(0)
 {
+	if (m_size == 0)
+	{
+		m_size = DefaultMaxNofThreads;
+	}
 	void* mem_slots = utils::aligned_malloc( m_size * sizeof(Slot), CACHELINE_SIZE);
 	void* mem_ar = utils::aligned_malloc( m_size * sizeof(ProcessErrorBuffer), CACHELINE_SIZE);
 	if (!mem_slots || !mem_ar) goto ERROR_EXIT;
