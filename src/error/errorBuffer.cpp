@@ -34,6 +34,7 @@
 #include "private/utils.hpp"
 #include <stdarg.h>
 #include <cstring>
+#include <cstdio>
 
 using namespace strus;
 
@@ -130,7 +131,7 @@ bool ErrorBuffer::setMaxNofThreads( unsigned int maxNofThreads)
 {
 	if (!initMaxNofThreads( maxNofThreads))
 	{
-		fprintf( m_logfilehandle, _TXT("out of memory initializing standard error buffer\n"));
+		fprintf( m_logfilehandle?m_logfilehandle:stderr, _TXT("out of memory initializing standard error buffer\n"));
 		return false;
 	}
 	return true;
@@ -160,7 +161,7 @@ std::size_t ErrorBuffer::threadidx() const
 		if (ti == m_size)
 		{
 			
-			fprintf( m_logfilehandle, _TXT("number of threads in error buffer exhausted\n"));
+			fprintf( m_logfilehandle?m_logfilehandle:stderr, _TXT("number of threads in error buffer exhausted\n"));
 			throw std::logic_error( _TXT("number of threads in error buffer exhausted"));
 		}
 		m_slots[ti].id = tid;
