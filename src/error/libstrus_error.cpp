@@ -46,12 +46,12 @@ DLL_PUBLIC ErrorBufferInterface* strus::createErrorBuffer_standard( FILE* logfil
 	}
 	catch (const std::bad_alloc&)
 	{
-		fprintf( logfilehandle?logfilehandle:stderr, _TXT("out of memory creating error buffer"));
+		fprintf( logfilehandle?logfilehandle:stderr, _TXT("out of memory creating error buffer\n"));
 		return 0;
 	}
 	catch (const std::exception& err)
 	{
-		fprintf( logfilehandle?logfilehandle:stderr, _TXT("exception creating error buffer: %s"), err.what());
+		fprintf( logfilehandle?logfilehandle:stderr, _TXT("exception creating error buffer: %s\n"), err.what());
 		return 0;
 	}
 }

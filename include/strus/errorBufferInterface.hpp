@@ -55,6 +55,10 @@ public:
 	/// \param[in] hnd file handle to set as log file
 	virtual void setLogFile( FILE* hnd)=0;
 
+	/// \brief Redefine the maximum number of threads using the error buffer
+	/// \param[in] maxNofThreads number of threads
+	virtual bool setMaxNofThreads( unsigned int maxNofThreads)=0;
+
 	/// \brief Report an error
 	/// \param[in] format error message format string
 	/// \remark must not throw

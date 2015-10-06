@@ -30,6 +30,7 @@
 /// \file errorBuffer.cpp
 #include "errorBuffer.hpp"
 #include "strus/private/snprintf.h"
+#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <stdarg.h>
 #include <cstring>
@@ -80,27 +81,17 @@ void ProcessErrorBuffer::explain( FILE* logfilehandle, const char* format) const
 
 
 ErrorBuffer::ErrorBuffer( FILE* logfilehandle_, std::size_t maxNofThreads_)
-	:m_logfilehandle(logfilehandle_),m_size(maxNofThreads_),m_slots(0),m_ar(0)
+	:m_logfilehandle(logfilehandle_),m_size(0),m_slots(0),m_ar(0)
 {
-	if (m_size == 0)
-	{
-		m_size = DefaultMaxNofThreads;
-	}
-	void* mem_slots = utils::aligned_malloc( m_size * sizeof(Slot), CACHELINE_SIZE);
-	void* mem_ar = utils::aligned_malloc( m_size * sizeof(ProcessErrorBuffer), CACHELINE_SIZE);
-	if (!mem_slots || !mem_ar) goto ERROR_EXIT;
-
-	m_slots = new(mem_slots)Slot[ m_size];
-	m_ar = new(mem_ar)ProcessErrorBuffer[ m_size];
-	return;
-
-ERROR_EXIT:
-	if (mem_slots) utils::aligned_free( mem_slots);
-	if (mem_ar) utils::aligned_free( mem_ar);
-	throw std::bad_alloc();
+	if (!initMaxNofThreads( maxNofThreads_==0?DefaultMaxNofThreads:maxNofThreads_)) throw std::bad_alloc();
 }
 
 ErrorBuffer::~ErrorBuffer()
+{
+	clearBuffers();
+}
+
+void ErrorBuffer::clearBuffers()
 {
 	std::size_t ii=0;
 	for (; ii<m_size; ++ii)
@@ -110,6 +101,39 @@ ErrorBuffer::~ErrorBuffer()
 	}
 	utils::aligned_free( (void*)m_ar);
 	utils::aligned_free( (void*)m_slots);
+	m_ar = 0;
+	m_slots = 0;
+	m_size = 0;
+}
+
+bool ErrorBuffer::initMaxNofThreads( unsigned int maxNofThreads)
+{
+	if (maxNofThreads == 0) maxNofThreads = DefaultMaxNofThreads;
+
+	void* mem_slots = utils::aligned_malloc( maxNofThreads * sizeof(Slot), CACHELINE_SIZE);
+	void* mem_ar = utils::aligned_malloc( maxNofThreads * sizeof(ProcessErrorBuffer), CACHELINE_SIZE);
+	if (!mem_slots || !mem_ar) goto ERROR_EXIT;
+
+	if (m_slots || m_ar) clearBuffers();
+	m_slots = new(mem_slots)Slot[ m_size];
+	m_ar = new(mem_ar)ProcessErrorBuffer[ m_size];
+	m_size = maxNofThreads;
+	return true;
+
+ERROR_EXIT:
+	if (mem_slots) utils::aligned_free( mem_slots);
+	if (mem_ar) utils::aligned_free( mem_ar);
+	return false;
+}
+
+bool ErrorBuffer::setMaxNofThreads( unsigned int maxNofThreads)
+{
+	if (!initMaxNofThreads( maxNofThreads))
+	{
+		fprintf( m_logfilehandle, _TXT("out of memory initializing standard error buffer\n"));
+		return false;
+	}
+	return true;
 }
 
 void ErrorBuffer::setLogFile( FILE* hnd)
@@ -135,7 +159,9 @@ std::size_t ErrorBuffer::threadidx() const
 		}
 		if (ti == m_size)
 		{
-			throw std::logic_error( "number of threads in error buffer exhausted");
+			
+			fprintf( m_logfilehandle, _TXT("number of threads in error buffer exhausted\n"));
+			throw std::logic_error( _TXT("number of threads in error buffer exhausted"));
 		}
 		m_slots[ti].id = tid;
 	}

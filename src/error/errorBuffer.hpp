@@ -81,6 +81,8 @@ public:
 
 	virtual void setLogFile( FILE* hnd);
 
+	virtual bool setMaxNofThreads( unsigned int maxNofThreads);
+
 	virtual void report( const char* format, ...) const;
 
 	virtual void explain( const char* format) const;
@@ -94,6 +96,8 @@ public:
 
 private:
 	std::size_t threadidx() const;
+	bool initMaxNofThreads( unsigned int maxNofThreads);
+	void clearBuffers();
 
 private:
 	mutable FILE* m_logfilehandle;
