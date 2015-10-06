@@ -26,12 +26,15 @@
 
 --------------------------------------------------------------------
 */
-#include "unreliableMalloc.h"
+#include "loggingMalloc.h"
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <errno.h>
+#include <malloc.h>
 
 #if __GNUC__ >= 4
   #define DLL_PUBLIC __attribute__ ((visibility ("default")))
@@ -42,8 +45,14 @@
 #endif
 
 #undef STRUS_LOWLEVEL_DEBUG
-#define MALLOC_FAILURE_COUNTER_LIMIT 100000
 static unsigned int g_malloc_counter = 0;
+static unsigned int g_malloc_nofblks = 0;
+static unsigned int g_malloc_memsize = 0;
+static unsigned int g_interval_lo = 0;
+static unsigned int g_interval_hi = 0xFFFFFFFFUL;
+static unsigned int g_interval_cnt = 1000;
+static pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
+static char g_logfile[128];
 
 #define INITIALIZED_TRUE  0x1234567
 #define INITIALIZED_FALSE 0x7654321
@@ -84,6 +93,38 @@ static void  (*g_libc_free)( void*) = 0;
 
 static void init_module()
 {
+	pthread_mutex_init( &g_mutex, NULL);
+
+	const char* nm = getenv( "STRUS_MALLOC_LOGFILE");
+	if (nm)
+	{
+		size_t nmlen = strlen(nm);
+		if (nmlen >= sizeof(g_logfile))
+		{
+			nmlen = sizeof(g_logfile)-1;
+		}
+		memcpy( g_logfile, nm, nmlen);
+		g_logfile[ nmlen] = '\0';
+		fprintf( stderr, "malloc logging to file '%s'\n", g_logfile);
+	}
+	else
+	{
+		g_logfile[0] = '\0';
+	}
+	nm = getenv( "STRUS_MALLOC_INTERVAL");
+	if (nm)
+	{
+		sscanf( nm, "%u:%u:%u", &g_interval_cnt, &g_interval_lo, &g_interval_hi);
+		if (g_interval_lo > g_interval_hi)
+		{
+			/* swap lower and upper bound if they are in wrong order: */
+			unsigned int tmp = g_interval_lo;
+			g_interval_lo = g_interval_hi;
+			g_interval_hi = tmp;
+		}
+		fprintf( stderr, "malloc logging every %u malloc from size %u to size %u\n", g_interval_cnt, g_interval_lo, g_interval_hi);
+	}
+
 	/* This function gets a little bit complicated because of
 		"ISO C forbids conversion of object pointer to function pointer type" */
 	void* calloc_ptr = dlsym( RTLD_NEXT, "calloc");
@@ -112,31 +153,66 @@ static void init_module()
 		exit( 1);
 	}
 
-	fprintf( stderr, "warning: unreliable malloc initialized\n");
+	fprintf( stderr, "logging malloc initialized\n");
 }
 
-static int failure()
+static void log_malloc_call( size_t size)
 {
 	if (g_module_initialized != INITIALIZED_TRUE)
 	{
 		g_module_initialized = INITIALIZED_TRUE;
 		init_module();
 	}
-	if (++g_malloc_counter >= MALLOC_FAILURE_COUNTER_LIMIT)
+	pthread_mutex_lock( &g_mutex);
+	if (g_interval_lo <= size && g_interval_hi >= size)
 	{
-		fprintf( stderr, "error: unreliable malloc returns malloc failure\n");
+		g_malloc_memsize += size;
+		g_malloc_nofblks += 1;
+	}
+	g_malloc_counter += 1;
+
+	if (g_malloc_counter >= g_interval_cnt)
+	{
+		FILE* logfile = stderr;
+		if (g_logfile[0])
+		{
+			logfile = fopen( "a+", g_logfile);
+			if (!logfile)
+			{
+				fprintf( stderr, "cannot open malloc log file '%s' (errno %u)", g_logfile, errno);
+				logfile = stderr;
+			}
+		}
+		fprintf( logfile, "%u %u\n", g_malloc_nofblks, g_malloc_memsize);
+		if (logfile != stderr)
+		{
+			fclose( logfile);
+		}
 		g_malloc_counter = 0;
-		return 1;
 	}
-	else
+	pthread_mutex_unlock( &g_mutex);
+}
+
+static void log_free_call( size_t size)
+{
+	if (g_module_initialized != INITIALIZED_TRUE)
 	{
-		return 0;
+		g_module_initialized = INITIALIZED_TRUE;
+		init_module();
 	}
+	pthread_mutex_lock( &g_mutex);
+	if (g_interval_lo <= size && g_interval_hi >= size)
+	{
+		g_malloc_memsize -= size;
+		g_malloc_nofblks -= 1;
+	}
+	pthread_mutex_unlock( &g_mutex);
 }
 
 DLL_PUBLIC void* malloc( size_t size)
 {
-	void* rt = failure()?0:g_libc_malloc( size);
+	void* rt = g_libc_malloc( size);
+	log_malloc_call( malloc_usable_size( rt));
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "CALL malloc( %u) RETURNS %x\n", (unsigned int)size, (unsigned int)(uintptr_t)rt);
 #endif
@@ -145,7 +221,17 @@ DLL_PUBLIC void* malloc( size_t size)
 
 DLL_PUBLIC void* realloc( void* ptr, size_t size)
 {
-	void* rt = failure()?0:g_libc_realloc( ptr, size);
+	size_t oldsize = malloc_usable_size( ptr);
+	void* rt = g_libc_realloc( ptr, size);
+	size_t newsize = malloc_usable_size( rt);
+	if (newsize > oldsize)
+	{
+		log_malloc_call( newsize - oldsize);
+	}
+	else if (newsize < oldsize)
+	{
+		log_free_call( oldsize - newsize);
+	}
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "CALL realloc( %x, %u) RETURNS %x\n", (unsigned int)(uintptr_t)ptr, (unsigned int)size, (unsigned int)(uintptr_t)rt);
 #endif
@@ -154,7 +240,9 @@ DLL_PUBLIC void* realloc( void* ptr, size_t size)
 
 DLL_PUBLIC void* calloc( size_t nmemb, size_t size)
 {
-	void* rt = failure()?0:g_libc_calloc( nmemb, size);
+	void* rt = g_libc_calloc( nmemb, size);
+	log_malloc_call( malloc_usable_size( rt));
+
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "CALL calloc( %u, %u) RETURNS %x\n", (unsigned int)nmemb, (unsigned int)size, (unsigned int)(uintptr_t)rt);
 #endif
@@ -163,7 +251,9 @@ DLL_PUBLIC void* calloc( size_t nmemb, size_t size)
 
 DLL_PUBLIC void* memalign( size_t alignment, size_t size)
 {
-	void* rt = failure()?0:g_libc_memalign( alignment, size);
+	void* rt = g_libc_memalign( alignment, size);
+	log_malloc_call( malloc_usable_size( rt));
+
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "CALL memalign( %u, %u) RETURNS %x\n", (unsigned int)alignment, (unsigned int)size, (unsigned int)(uintptr_t)rt);
 #endif
@@ -172,7 +262,10 @@ DLL_PUBLIC void* memalign( size_t alignment, size_t size)
 
 DLL_PUBLIC void free( void* ptr)
 {
+	size_t size = malloc_usable_size( ptr);
+	log_free_call( size);
 	g_libc_free( ptr);
+
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "CALL free( %x)\n", (unsigned int)(uintptr_t)ptr);
 #endif

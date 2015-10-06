@@ -49,6 +49,16 @@ set_target_properties(
     VERSION ${STRUS_VERSION}
 )
 
+add_library( strus_logging_malloc SHARED loggingMalloc.c )
+target_link_libraries( strus_logging_malloc  dl )
+set_target_properties(
+    strus_logging_malloc
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
+
 # ------------------------------
 # INSTALLATION
 # ------------------------------
