@@ -39,20 +39,20 @@ set_target_properties(
     VERSION ${STRUS_VERSION}
 )
 
-add_library( strus_unreliable_malloc SHARED unreliableMalloc.c )
-target_link_libraries( strus_unreliable_malloc  dl )
+add_library( strus_malloc_unreliable SHARED unreliableMalloc.c )
+target_link_libraries( strus_malloc_unreliable  dl )
 set_target_properties(
-    strus_unreliable_malloc
+    strus_malloc_unreliable
     PROPERTIES
     DEBUG_POSTFIX "_d"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )
 
-add_library( strus_logging_malloc SHARED loggingMalloc.c )
-target_link_libraries( strus_logging_malloc  dl )
+add_library( strus_malloc_logging SHARED loggingMalloc.c )
+target_link_libraries( strus_malloc_logging  dl )
 set_target_properties(
-    strus_logging_malloc
+    strus_malloc_logging
     PROPERTIES
     DEBUG_POSTFIX "_d"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
@@ -65,7 +65,9 @@ set_target_properties(
 install( TARGETS strus_utils
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
-install( TARGETS strus_unreliable_malloc
+install( TARGETS strus_malloc_unreliable
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
+install( TARGETS strus_malloc_logging
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
