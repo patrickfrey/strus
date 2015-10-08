@@ -284,8 +284,6 @@ static int find_sym( const char* libname, const char* symname)
 	size_t si,se;
 	void* trace[ MAX_STACKTRACE];
 
-	/*[-]*/fprintf( stderr, "find sym '%s', '%s'\n", libname?libname:"(null)", symname?symname:"(null)");
-	
 	se = stacktrace( trace, MAX_STACKTRACE);
 	for (si=0; si<se; ++si)
 	{
@@ -294,11 +292,9 @@ static int find_sym( const char* libname, const char* symname)
 		{
 			if (libname && !match_dlname( info.dli_fname, libname)) continue;
 			if (symname && !match_dlname( info.dli_sname, symname)) continue;
-			/*[-]*/fprintf( stderr, "found match '%s' = '%s', '%s' = '%s'\n", libname?libname:"(null)", info.dli_fname?info.dli_fname:"(null)", symname?symname:"(null)", info.dli_sname?info.dli_sname:"(null)");
 			return si+1;
 		}
 	}
-	/*[-]*/fprintf( stderr, "not found\n");
 	return 0;
 }
 
