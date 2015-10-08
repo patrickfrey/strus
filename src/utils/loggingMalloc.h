@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_UNRELIABLE_MALLOC_HPP_INCLUDED
-#define _STRUS_UNRELIABLE_MALLOC_HPP_INCLUDED
+#ifndef _STRUS_LOGGING_MALLOC_HPP_INCLUDED
+#define _STRUS_LOGGING_MALLOC_HPP_INCLUDED
 #define _GNU_SOURCE
 #include <stdlib.h>
 

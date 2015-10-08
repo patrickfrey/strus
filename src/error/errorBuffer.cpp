@@ -116,6 +116,8 @@ bool ErrorBuffer::initMaxNofThreads( unsigned int maxNofThreads)
 	if (!mem_slots || !mem_ar) goto ERROR_EXIT;
 
 	if (m_slots || m_ar) clearBuffers();
+	std::memset( mem_slots, 0, maxNofThreads * sizeof(Slot));
+	std::memset( mem_ar, 0, maxNofThreads * sizeof(ProcessErrorBuffer));
 	m_slots = new(mem_slots)Slot[ m_size];
 	m_ar = new(mem_ar)ProcessErrorBuffer[ m_size];
 	m_size = maxNofThreads;

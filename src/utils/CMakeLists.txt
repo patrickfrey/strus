@@ -49,7 +49,7 @@ set_target_properties(
     VERSION ${STRUS_VERSION}
 )
 
-add_library( strus_malloc_logging SHARED loggingMalloc.c )
+add_library( strus_malloc_logging SHARED loggingMalloc.c snprintf.c )
 target_link_libraries( strus_malloc_logging  dl )
 set_target_properties(
     strus_malloc_logging
