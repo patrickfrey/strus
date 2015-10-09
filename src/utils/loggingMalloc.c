@@ -92,17 +92,6 @@ typedef struct Free_s {Free_f func;} Free_s;
 
 static char g_buf_calloc_for_dlsym[64];
 
-typedef uint64_t stacktrace_hashvalue;
-typedef struct caller_cache_elem
-{
-	stacktrace_hashvalue caller_id;
-	int caller_match;
-} caller_cache_elem;
-#define CACHE_SIZE (1<<9)
-#define CACHE_MASK (CACHE_SIZE-1)
-static caller_cache_elem g_caller_cache[ CACHE_SIZE];
-static size_t g_caller_cachepos = 0;
-
 static void* g_calloc_for_dlsym( size_t nmemb, size_t size)
 {
 	static int called = 0;
@@ -173,7 +162,6 @@ static void init_module()
 		fprintf( stderr, "error loading malloc function with 'dlsym'\n");
 		exit( 1);
 	}
-	memset( g_caller_cache, 0, sizeof(g_caller_cache));
 	pthread_mutex_init( &g_mutex, NULL);
 
 	g_logfile[0] = '\0';
@@ -349,70 +337,10 @@ static void print_stacktrace()
 	}
 }
 
-static uint32_t hash( uint32_t a)
-{
-	a += ~(a << 15);
-	a ^=  (a >> 10);
-	a +=  (a << 3);
-	a ^=  (a >> 6);
-	a += ~(a << 11);
-	a ^=  (a >> 16);
-	return a;
-}
-
-static inline stacktrace_hashvalue stacktrace_hash()
-{
-	stacktrace_hashvalue rt = 0;
-	void* stk[ 64];
-	size_t si,stksize;
-
-	stksize = stacktrace( stk, sizeof(stk)/sizeof(stk[0]));
-	for (si = 0; si < stksize && si < 4; ++si) 
-	{
-		uint32_t hh = hash( (uintptr_t)stk[si] % 0xFFFFFFFUL);
-		rt = (rt << 8) + hh;
-	}
-	rt = (rt << 8);
-	for (si = 0; si < stksize; ++si) 
-	{
-		uint32_t hh = hash( (uintptr_t)stk[si] % 0xFFFFFFFUL);
-		rt += hh;
-	}
-	return rt;
-}
-
 static inline int caller_match()
 {
 	if (!g_callerlib[0] && !g_callerfunc[0]) return 1;
-
-	/* Try first to find entry in cache: */
-	stacktrace_hashvalue caller_id = stacktrace_hash();
-
-	size_t ci = (g_caller_cachepos + CACHE_SIZE - 10) & CACHE_MASK;
-	size_t ce = (ci + CACHE_SIZE -1) & CACHE_MASK;
-	for (; ci != ce; ci=(ci+1) & CACHE_MASK)
-	{
-		if (g_caller_cache[ci].caller_id == caller_id)
-		{
-			pthread_mutex_lock( &g_mutex);
-			if (g_caller_cache[ci].caller_id == caller_id)
-			{
-				pthread_mutex_unlock( &g_mutex);
-				return g_caller_cache[ci].caller_match;
-			}
-			pthread_mutex_unlock( &g_mutex);
-		}
-	}
-	/* Caller not found in cache. So we match the back trace: */
-	int rt = find_sym( g_callerlib[0]?g_callerlib:0, g_callerfunc[0]?g_callerfunc:0)?g_callersel:!g_callersel;
-
-	/* And we put the found entry into the cache: */
-	pthread_mutex_lock( &g_mutex);
-	ci = g_caller_cachepos++;
-	g_caller_cache[ci].caller_id = caller_id;
-	g_caller_cache[ci].caller_match = rt;
-	pthread_mutex_unlock( &g_mutex);
-	return rt;
+	return find_sym( g_callerlib[0]?g_callerlib:0, g_callerfunc[0]?g_callerfunc:0)?g_callersel:!g_callersel;
 }
 
 static void stat_malloc_call( size_t size)
