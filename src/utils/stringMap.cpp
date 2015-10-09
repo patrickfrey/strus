@@ -105,4 +105,9 @@ const char* StringMapKeyBlockList::allocKey( const char* key, std::size_t keylen
 }
 
 
+void StringMapKeyBlockList::clear()
+{
+	m_ar.clear();
+}
+
 

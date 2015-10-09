@@ -32,6 +32,7 @@
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "compactNodeTrie.hpp"
+#include "private/stringMap.hpp"
 #include <cstdlib>
 #include <string>
 #include <cstring>
@@ -89,7 +90,7 @@ private:
 	enum {
 		UnknownValueHandleStart=(1<<30)
 	};
-	typedef std::map<std::string,Index> OverflowMap;
+	typedef StringMap<Index> OverflowMap;
 
 private:
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;

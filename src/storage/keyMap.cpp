@@ -122,8 +122,6 @@ void KeyMap::getWriteBatch(
 			if (m_invmap) m_invmap->set( idx, mi.key());
 		}
 	}
-	m_map.clear();
-
 	OverflowMap::const_iterator
 		oi = m_overflowmap.begin(), oe = m_overflowmap.end();
 	for (; oi != oe; ++oi)
@@ -140,6 +138,7 @@ void KeyMap::getWriteBatch(
 			if (m_invmap) m_invmap->set( idx, oi->first);
 		}
 	}
+	m_map.clear();
 	m_overflowmap.clear();
 }
 

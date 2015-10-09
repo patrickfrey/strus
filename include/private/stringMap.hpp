@@ -65,6 +65,7 @@ public:
 		:m_ar(o.m_ar){}
 
 	const char* allocKey( const char* key, std::size_t keylen);
+	void clear();
 
 private:
 	std::list<StringMapKeyBlock> m_ar;
@@ -124,14 +125,17 @@ public:
 	typedef typename Map::const_iterator const_iterator;
 	typedef typename Map::iterator iterator;
 
-	const_iterator begin() const			{return m_map.begin();}
-	const_iterator end() const			{return m_map.end();}
+	const_iterator begin() const				{return m_map.begin();}
+	const_iterator end() const				{return m_map.end();}
 
-	iterator begin()				{return m_map.begin();}
-	iterator end()					{return m_map.end();}
+	iterator begin()					{return m_map.begin();}
+	iterator end()						{return m_map.end();}
 
-	const_iterator find( const char* key) const	{return m_map.find(key);}
-	iterator find( const char* key)			{return m_map.find(key);}
+	const_iterator find( const char* key) const		{return m_map.find( key);}
+	iterator find( const char* key)				{return m_map.find( key);}
+
+	const_iterator find( const std::string& key) const	{return m_map.find( key.c_str());}
+	iterator find( const std::string& key)			{return m_map.find( key.c_str());}
 
 	ValueType& operator[]( const char* key)
 	{
@@ -163,6 +167,12 @@ public:
 	void insert( const char* key, const ValueType& value)
 	{
 		operator[]( key) = value;
+	}
+
+	void clear()
+	{
+		m_map.clear();
+		m_keystring_blocks.clear();
 	}
 
 private:
