@@ -32,6 +32,7 @@
 #include "forwardIndexBlock.hpp"
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
+#include "private/stringMap.hpp"
 #include <vector>
 #include <map>
 
@@ -83,7 +84,7 @@ private:
 	typedef std::less<MapKey> MapCompare;
 	typedef std::map<MapKey,ForwardIndexBlock,MapCompare,MapAllocator> Map;
 
-	typedef std::pair<Index,std::string> CurblockElem;
+	typedef std::pair<Index,const char*> CurblockElem;
 	typedef std::vector<CurblockElem> CurblockElemList;
 	typedef LocalStructAllocator<std::pair<Index,CurblockElemList> > CurblockMapAllocator;
 	typedef std::map<Index,CurblockElemList,std::less<Index>,CurblockMapAllocator> CurblockMap;
@@ -96,6 +97,7 @@ private:
 	DatabaseClientInterface* m_database;
 	Map m_map;
 	CurblockMap m_curblockmap;
+	StringVector m_strings;
 	Index m_docno;
 	Index m_maxtype;
 	std::vector<Index> m_deletes;

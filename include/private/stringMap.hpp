@@ -80,6 +80,11 @@ public:
 		const char* valuedup = m_blkar.allocKey( value, std::strlen( value));
 		return m_ar.push_back( valuedup);
 	}
+	void push_back( const char* value, std::size_t valuesize)
+	{
+		const char* valuedup = m_blkar.allocKey( value, valuesize);
+		return m_ar.push_back( valuedup);
+	}
 	void push_back( const std::string& value)
 	{
 		const char* valuedup = m_blkar.allocKey( value.c_str(), value.size());
