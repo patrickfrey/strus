@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_CHECKER_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_CHECKER_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_DOCUMENT_CHECKER_HPP_INCLUDED
+#define _STRUS_STORAGE_DOCUMENT_CHECKER_HPP_INCLUDED
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include <string>
@@ -41,6 +41,8 @@ namespace strus {
 class StorageClient;
 /// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \class StorageDocumentChecker
 class StorageDocumentChecker
@@ -51,7 +53,8 @@ public:
 		const StorageClient* storage_,
 		const DatabaseClientInterface* database_,
 		const std::string& docid_,
-		const std::string& logfile_);
+		const std::string& logfile_,
+		ErrorBufferInterface* errorhnd_);
 
 	virtual ~StorageDocumentChecker();
 
@@ -145,6 +148,7 @@ private:
 	std::string m_docid;
 	Index m_docno;
 	std::string m_logfile;
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }

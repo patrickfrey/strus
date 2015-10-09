@@ -4,11 +4,10 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set(libstrus_shared_utils_source_files
-	arithmeticVariantAsString.cpp
 	cmdLineOpt.cpp
 	configParser.cpp
 	fileio.cpp
-	protocol.cpp
+	snprintf.c
 )
 
 set( libstrus_private_utils_source_files
@@ -40,10 +39,20 @@ set_target_properties(
     VERSION ${STRUS_VERSION}
 )
 
-add_library( strus_unreliable_malloc SHARED unreliableMalloc.c )
-target_link_libraries( strus_unreliable_malloc  dl )
+add_library( strus_malloc_unreliable SHARED unreliableMalloc.c )
+target_link_libraries( strus_malloc_unreliable  dl )
 set_target_properties(
-    strus_unreliable_malloc
+    strus_malloc_unreliable
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
+
+add_library( strus_malloc_logging SHARED loggingMalloc.c snprintf.c )
+target_link_libraries( strus_malloc_logging  dl )
+set_target_properties(
+    strus_malloc_logging
     PROPERTIES
     DEBUG_POSTFIX "_d"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
@@ -56,7 +65,9 @@ set_target_properties(
 install( TARGETS strus_utils
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
-install( TARGETS strus_unreliable_malloc
+install( TARGETS strus_malloc_unreliable
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
+install( TARGETS strus_malloc_logging
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 

@@ -52,20 +52,24 @@ public:
 
 	/// \brief Creates a client to access the key value store database
 	/// \param[in] configsource configuration source string describing the database (not a filename !)
+	/// \return the client on success or NULL, if the operation failed
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const=0;
 
 	/// \brief Creates a new key value store database described with config
 	/// \param[in] configsource configuration source string describing the database (not a filename !)
-	virtual void createDatabase( const std::string& configsource) const=0;
+	/// \return true, if the operation succeeded
+	virtual bool createDatabase( const std::string& configsource) const=0;
 
 	/// \brief Restore a database at the location described in config and restore the backup from the backup interface passed
 	/// \param[in] configsource configuration source string describing location of the database restored (not a filename !)
 	/// \param[in] backup interface to backup to restore
-	virtual void restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const=0;
+	/// \return true, if the operation succeeded
+	virtual bool restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const=0;
 
 	/// \brief Destroys an existing key value store database described with config
 	/// \param[in] configsource configuration source string describing the key value store database (not a filename !)
-	virtual void destroyDatabase( const std::string& configsource) const=0;
+	/// \return true, if the operation succeeded
+	virtual bool destroyDatabase( const std::string& configsource) const=0;
 
 	/// \brief Enumeration of different type of configurations
 	///	Needed for getting the correct description of the configuration

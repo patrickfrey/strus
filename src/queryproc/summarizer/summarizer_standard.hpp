@@ -34,26 +34,28 @@ namespace strus {
 
 /// \brief Forward declaration
 class SummarizerFunctionInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Create a summarizer for getting all positions of the matches in document
 /// \return the summarizer reference (to dispose with delete)
-SummarizerFunctionInterface* createSummarizerListMatches();
+SummarizerFunctionInterface* createSummarizerListMatches( ErrorBufferInterface* errorhnd_);
 
 /// \brief Create a summarizer for getting the value of a document attribute
 /// \return the summarizer reference (to dispose with delete)
-SummarizerFunctionInterface* createSummarizerAttribute();
+SummarizerFunctionInterface* createSummarizerAttribute( ErrorBufferInterface* errorhnd_);
 
 /// \brief Create a summarizer for getting the value of a document meta data element
 /// \return the summarizer reference (to dispose with delete)
-SummarizerFunctionInterface* createSummarizerMetaData();
+SummarizerFunctionInterface* createSummarizerMetaData( ErrorBufferInterface* errorhnd_);
 
 /// \brief Create a summarizer for getting the best phrases of matches
 /// \return the summarizer reference (to dispose with delete)
-SummarizerFunctionInterface* createSummarizerMatchPhrase();
+SummarizerFunctionInterface* createSummarizerMatchPhrase( ErrorBufferInterface* errorhnd_);
 
 /// \brief Create a summarizer for getting the values (in the forward index) of referenced variables of all matches
 /// \return the summarizer reference (to dispose with delete)
-SummarizerFunctionInterface* createSummarizerMatchVariables();
+SummarizerFunctionInterface* createSummarizerMatchVariables( ErrorBufferInterface* errorhnd_);
 
 }//namespace
 #endif

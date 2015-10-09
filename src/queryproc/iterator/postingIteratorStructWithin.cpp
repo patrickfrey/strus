@@ -28,6 +28,9 @@
 */
 #include "postingIteratorStructWithin.hpp"
 #include "postingIteratorHelpers.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
@@ -41,12 +44,14 @@ IteratorStructWithin::~IteratorStructWithin()
 IteratorStructWithin::IteratorStructWithin(
 		int range_,
 		const std::vector<Reference< PostingIteratorInterface> >& args,
-		bool with_cut)
+		bool with_cut,
+		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
 	,m_range(range_)
 	,m_documentFrequency(-1)
+	,m_errorhnd(errorhnd_)
 {
 	if (with_cut)
 	{
@@ -81,22 +86,26 @@ IteratorStructWithin::IteratorStructWithin(
 std::vector<const PostingIteratorInterface*>
 	IteratorStructWithin::subExpressions( bool positive) const
 {
-	std::vector<const PostingIteratorInterface*> rt;
-	if (positive)
+	try
 	{
-		rt.reserve( m_argar.size());
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		for (; ai != ae; ++ai)
+		std::vector<const PostingIteratorInterface*> rt;
+		if (positive)
 		{
-			rt.push_back( ai->get());
+			rt.reserve( m_argar.size());
+			std::vector<Reference< PostingIteratorInterface> >::const_iterator
+				ai = m_argar.begin(), ae = m_argar.end();
+			for (; ai != ae; ++ai)
+			{
+				rt.push_back( ai->get());
+			}
 		}
+		else if (m_cut.get())
+		{
+			rt.push_back( m_cut.get());
+		}
+		return rt;
 	}
-	else if (m_cut.get())
-	{
-		rt.push_back( m_cut.get());
-	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error 'within' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorStructWithin::skipDoc( const Index& docno_)
@@ -217,4 +226,36 @@ GlobalCounter IteratorStructWithin::documentFrequency() const
 	return m_documentFrequency;
 }
 
+
+PostingIteratorInterface* PostingJoinStructWithin::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_) const
+{
+	if (argitr.size() < 2)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'within_struct'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructWithin( range_, argitr, true, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'within_struct' iterator: %s"), *m_errorhnd, 0);
+}
+
+PostingIteratorInterface* PostingJoinWithin::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_) const
+{
+	if (argitr.size() < 1)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'within'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructWithin( range_, argitr, false, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'within' iterator: %s"), *m_errorhnd, 0);
+}
 

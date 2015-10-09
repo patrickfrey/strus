@@ -27,21 +27,26 @@
 --------------------------------------------------------------------
 */
 #include "strus/lib/storage.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "storage.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 
 using namespace strus;
 
-DLL_PUBLIC const StorageInterface* strus::getStorage()
+DLL_PUBLIC StorageInterface* strus::createStorage( ErrorBufferInterface* errorhnd)
 {
-	static const Storage storage;
-	static bool intl_initialized = false;
-	if (!intl_initialized)
+	try
 	{
-		strus::initMessageTextDomain();
-		intl_initialized = true;
+		static bool intl_initialized = false;
+		if (!intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			intl_initialized = true;
+		}
+		return new Storage( errorhnd);
 	}
-	return &storage;
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage: %s"), *errorhnd, 0);
 }
 

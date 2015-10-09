@@ -34,6 +34,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Shared handle for accessing Level DB
 class LevelDbHandle
@@ -132,16 +134,12 @@ public:
 			unsigned int cachesize_k,
 			bool compression,
 			unsigned int writeBufferSize,
-			unsigned int blockSize)
-		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize))
+			unsigned int blockSize,
+			ErrorBufferInterface* errorhnd_)
+		:m_dbmap(dbmap_),m_db(dbmap_->create( path, maxOpenFiles, cachesize_k, compression, writeBufferSize, blockSize)),m_errorhnd(errorhnd_)
 	{}
 
-	virtual ~DatabaseClient()
-	{
-		std::string path( m_db->path());
-		m_db.reset();
-		m_dbmap->dereference( path);
-	}
+	virtual ~DatabaseClient();
 
 	virtual void close(){}
 
@@ -170,6 +168,7 @@ public:
 private:
 	utils::SharedPtr<LevelDbHandleMap> m_dbmap;		///< reference to map of shared levelDB handles
 	utils::SharedPtr<LevelDbHandle> m_db;			///< shared levelDB handle
+	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 
 }//namespace

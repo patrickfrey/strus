@@ -8,6 +8,9 @@ set(source_files
 	weightingBM25.cpp
 	weightingBM25_dpfc.cpp
 	weightingFormula.cpp
+	weightingFrequency.cpp
+	weightingConstant.cpp
+	weightingMetadata.cpp
 	formulaInterpreter.cpp
 )
 

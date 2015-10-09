@@ -38,12 +38,14 @@
 
 namespace strus
 {
+///\brief Forward declaration
+class ErrorBufferInterface;
 
 class PeerMessageBuilder
 	:public PeerMessageBuilderInterface
 {
 public:
-	PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_);
+	PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd);
 	virtual ~PeerMessageBuilder();
 
 	virtual void setNofDocumentsInsertedChange(
@@ -55,7 +57,7 @@ public:
 			int increment,
 			bool isnew);
 
-	virtual std::string fetch();
+	virtual bool fetchMessage( const char*& blk, std::size_t& blksize);
 
 	virtual void start();
 
@@ -78,10 +80,12 @@ private:
 	bool m_insertInLexicalOrder;
 	std::string m_lastkey;
 	std::list<std::string> m_content;
+	bool m_content_consumed;
 	conotrie::CompactNodeTrie m_tree;
 	std::size_t m_cnt;
 	std::size_t m_blocksize;
 	std::size_t m_maxblocksize;
+	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace
 #endif

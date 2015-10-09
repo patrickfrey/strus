@@ -8,6 +8,8 @@ set(source_files
 	postingIteratorIntersect.cpp
 	postingIteratorUnion.cpp
 	postingIteratorDifference.cpp
+	postingIteratorSucc.cpp
+	postingIteratorPred.cpp
 	postingIteratorStructWithin.cpp
 	postingIteratorStructSequence.cpp
 	postingIteratorHelpers.cpp

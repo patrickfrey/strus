@@ -38,12 +38,14 @@ namespace strus {
 class MetaDataReader;
 /// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class PostingIterator
 	:public PostingIteratorInterface
 {
 public:
-	PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database, const Index& termtypeno, const Index& termvalueno, const char* termstr);
+	PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database, const Index& termtypeno, const Index& termvalueno, const char* termstr, ErrorBufferInterface* errorhnd_);
 
 	virtual ~PostingIterator(){}
 
@@ -79,6 +81,7 @@ private:
 
 	Index m_docno;
 	std::string m_featureid;
+	ErrorBufferInterface* m_errorhnd;	///< buffer for error reporting
 };
 
 }

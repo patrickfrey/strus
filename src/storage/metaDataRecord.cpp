@@ -27,7 +27,6 @@
 --------------------------------------------------------------------
 */
 #include "metaDataRecord.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
 #include "floatConversions.hpp"
 #include "indexPacker.hpp"
@@ -125,7 +124,7 @@ void MetaDataRecord::setValue( const MetaDataElement* elem, const ArithmeticVari
 		case ArithmeticVariant::Null:   clearValue( elem); break;
 		case ArithmeticVariant::Int:    setValueInt( elem, value_); break;
 		case ArithmeticVariant::UInt:   setValueUInt( elem, value_); break;
-		case ArithmeticVariant::Float:  setValueFloat( elem, value_); break;
+		case ArithmeticVariant::Float:  setValueFloat( elem, (double)value_); break;
 	}
 }
 
@@ -260,7 +259,7 @@ void MetaDataRecord::print( std::ostream& out) const
 		out << "[" << ei << "] " 
 			<< m_descr->getName( ei) << " "
 			<< elem->typeName()
-			<< " '" << getValue( elem) << "'"
+			<< " '" << getValue( elem).tostring().c_str() << "'"
 			<< std::endl;
 	}
 }

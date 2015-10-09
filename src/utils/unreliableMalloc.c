@@ -31,11 +31,21 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include <pthread.h>
+
+#if __GNUC__ >= 4
+  #define DLL_PUBLIC __attribute__ ((visibility ("default")))
+  #define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+#else
+  #define DLL_PUBLIC
+  #define DLL_LOCAL
+#endif
 
 #undef STRUS_LOWLEVEL_DEBUG
 #define MALLOC_FAILURE_COUNTER_LIMIT 100000
 static unsigned int g_malloc_counter = 0;
+static unsigned int g_malloc_limit = MALLOC_FAILURE_COUNTER_LIMIT;
 
 #define INITIALIZED_TRUE  0x1234567
 #define INITIALIZED_FALSE 0x7654321
@@ -76,6 +86,13 @@ static void  (*g_libc_free)( void*) = 0;
 
 static void init_module()
 {
+	const char* nm = getenv( "STRUS_MALLOC_FAILURE_RATE");
+	if (nm)
+	{
+		sscanf( nm, "%u", &g_malloc_limit);
+		fprintf( stderr, "malloc failure occurring every %u mallocs\n", g_malloc_limit);
+	}
+
 	/* This function gets a little bit complicated because of
 		"ISO C forbids conversion of object pointer to function pointer type" */
 	void* calloc_ptr = dlsym( RTLD_NEXT, "calloc");
@@ -114,7 +131,7 @@ static int failure()
 		g_module_initialized = INITIALIZED_TRUE;
 		init_module();
 	}
-	if (++g_malloc_counter >= MALLOC_FAILURE_COUNTER_LIMIT)
+	if (++g_malloc_counter >= g_malloc_limit)
 	{
 		fprintf( stderr, "error: unreliable malloc returns malloc failure\n");
 		g_malloc_counter = 0;
@@ -126,7 +143,7 @@ static int failure()
 	}
 }
 
-void* malloc( size_t size)
+DLL_PUBLIC void* malloc( size_t size)
 {
 	void* rt = failure()?0:g_libc_malloc( size);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -135,7 +152,7 @@ void* malloc( size_t size)
 	return rt;
 }
 
-void* realloc( void* ptr, size_t size)
+DLL_PUBLIC void* realloc( void* ptr, size_t size)
 {
 	void* rt = failure()?0:g_libc_realloc( ptr, size);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -144,7 +161,7 @@ void* realloc( void* ptr, size_t size)
 	return rt;
 }
 
-void* calloc( size_t nmemb, size_t size)
+DLL_PUBLIC void* calloc( size_t nmemb, size_t size)
 {
 	void* rt = failure()?0:g_libc_calloc( nmemb, size);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -153,7 +170,7 @@ void* calloc( size_t nmemb, size_t size)
 	return rt;
 }
 
-void* memalign( size_t alignment, size_t size)
+DLL_PUBLIC void* memalign( size_t alignment, size_t size)
 {
 	void* rt = failure()?0:g_libc_memalign( alignment, size);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -162,7 +179,7 @@ void* memalign( size_t alignment, size_t size)
 	return rt;
 }
 
-void free( void* ptr)
+DLL_PUBLIC void free( void* ptr)
 {
 	g_libc_free( ptr);
 #ifdef STRUS_LOWLEVEL_DEBUG

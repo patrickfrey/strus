@@ -27,6 +27,10 @@
 --------------------------------------------------------------------
 */
 #include "weightingFormula.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
+#include "private/utils.hpp"
 #include "strus/constants.hpp"
 #include <cmath>
 #include <ctime>
@@ -62,7 +66,7 @@ double FunctionMap::variableMap_metadata( void* ctx, int typeidx, unsigned int i
 	ArithmeticVariant val = THIS->m_metadata->getValue( idx);
 	if (val.defined())
 	{
-		return (double)(float)val;
+		return (double)val;
 	}
 	else
 	{
@@ -145,12 +149,14 @@ WeightingFunctionContextFormula::WeightingFunctionContextFormula(
 		MetaDataReaderInterface* metadata_,
 		const FormulaInterpreter::FunctionMap& functionMap,
 		const std::string& formula,
-		const std::vector<double>& paramar)
+		const std::vector<double>& paramar,
+		ErrorBufferInterface* errorhnd_)
 	:m_paramar(paramar)
 	,m_featar()
 	,m_sets()
 	,m_metadata(metadata_)
 	,m_interpreter( functionMap, formula)
+	,m_errorhnd(errorhnd_)
 {
 	
 }
@@ -160,18 +166,22 @@ void WeightingFunctionContextFormula::addWeightingFeature(
 		PostingIteratorInterface* itr_,
 		float weight_)
 {
-	std::size_t idx;
-	std::map<std::string,std::size_t>::const_iterator ti = m_sets.find( name_);
-	if (ti == m_sets.end())
+	try
 	{
-		m_sets[ name_] = idx = m_featar.size();
-		m_featar.push_back( FeatureVector());
+		std::size_t idx;
+		std::map<std::string,std::size_t>::const_iterator ti = m_sets.find( name_);
+		if (ti == m_sets.end())
+		{
+			m_sets[ name_] = idx = m_featar.size();
+			m_featar.push_back( FeatureVector());
+		}
+		else
+		{
+			idx = ti->second;
+		}
+		m_featar[ idx].push_back( Feature( itr_, weight_));
 	}
-	else
-	{
-		idx = ti->second;
-	}
-	m_featar[ idx].push_back( Feature( itr_, weight_));
+	CATCH_ERROR_MAP( _TXT("error adding feature to weighting function 'formula': %s"), *m_errorhnd);
 }
 
 float WeightingFunctionContextFormula::call( const Index& docno)
@@ -185,7 +195,11 @@ float WeightingFunctionContextFormula::call( const Index& docno)
 			fi->skipDoc( docno);
 		}
 	}
-	return m_interpreter.run( this);
+	try
+	{
+		return m_interpreter.run( this);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error calling weighting function 'formula': %s"), *m_errorhnd, 0.0);
 }
 
 
@@ -193,40 +207,72 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunct
 		const StorageClientInterface* storage_,
 		MetaDataReaderInterface* metadata) const
 {
-	FormulaInterpreter::FunctionMap funcmap( m_functionmap);
-	std::vector<double> paramar( m_paramar);
-	Index ii=0,nn = metadata->nofElements();
-	for (;ii<nn;++ii)
+	try
 	{
-		const char* name = metadata->getName( ii);
-		funcmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_metadata, ii));
+		FormulaInterpreter::FunctionMap funcmap( m_functionmap);
+		std::vector<double> paramar( m_paramar);
+		Index ii=0,nn = metadata->nofElements();
+		for (;ii<nn;++ii)
+		{
+			const char* name = metadata->getName( ii);
+			funcmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_metadata, ii));
+		}
+		funcmap.defineVariableMap( "nofdocs", FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
+		paramar.push_back( (double)(storage_->globalNofDocumentsInserted()));
+	
+		if (m_formula.empty())
+		{
+			throw strus::runtime_error(_TXT("no weighting formula defined with string parameter 'formula'"));
+		}
+		return new WeightingFunctionContextFormula( storage_, metadata, funcmap, m_formula, paramar, m_errorhnd);
 	}
-	funcmap.defineVariableMap( "nofdocs", FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
-	paramar.push_back( (double)(storage_->globalNofDocumentsInserted()));
-
-	if (m_formula.empty())
-	{
-		throw strus::runtime_error(_TXT("no weighting formula defined with string parameter 'formula'"));
-	}
-	return new WeightingFunctionContextFormula( storage_, metadata, funcmap, m_formula, paramar);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of weighting function 'formula': %s"), *m_errorhnd, 0);
 }
 
 void WeightingFunctionInstanceFormula::addStringParameter( const std::string& name, const std::string& value)
 {
-	if (utils::caseInsensitiveEquals( name, "formula"))
+	try
 	{
-		m_formula = value;
-		if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "formula", name.c_str());
+		if (utils::caseInsensitiveEquals( name, "formula"))
+		{
+			m_formula = value;
+			if (value.empty()) throw strus::runtime_error( _TXT("empty value passed as '%s' weighting function parameter '%s'"), "formula", name.c_str());
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "formula", name.c_str());
+		}
 	}
-	else
-	{
-		throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "formula", name.c_str());
-	}
+	CATCH_ERROR_MAP( _TXT("error adding string parameter to weighting function 'formula': %s"), *m_errorhnd);
 }
 
 void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
-	m_functionmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
-	m_paramar.push_back( (double)(float)value);
+	try
+	{
+		m_functionmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
+		m_paramar.push_back( (double)value);
+	}
+	CATCH_ERROR_MAP( _TXT("error adding numeric parameter to weighting function 'formula': %s"), *m_errorhnd);
 }
+
+std::string WeightingFunctionInstanceFormula::tostring() const
+{
+	try
+	{
+		return m_formula + "\n--\n" + m_functionmap.tostring();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error mapping weighting function 'formula' to string: %s"), *m_errorhnd, std::string());
+}
+
+
+WeightingFunctionInstanceInterface* WeightingFunctionFormula::createInstance() const
+{
+	try
+	{
+		return new WeightingFunctionInstanceFormula( m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of weighting function 'formula': %s"), *m_errorhnd, 0);
+}
+
 

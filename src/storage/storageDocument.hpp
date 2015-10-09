@@ -40,6 +40,8 @@
 namespace strus {
 /// \brief Forward declaration
 class Storage;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \class StorageDocument
 class StorageDocument
@@ -51,7 +53,8 @@ public:
 		StorageTransaction* transaction_,
 		const std::string& docid_,
 		const Index& docno_,
-		bool isNew_);
+		bool isNew_,
+		ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor
 	virtual ~StorageDocument();
@@ -160,6 +163,7 @@ private:
 	std::vector<DocAttribute> m_attributes;
 	std::vector<DocMetaData> m_metadata;
 	std::vector<Index> m_userlist;
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 
@@ -171,7 +175,8 @@ public:
 	/// \brief Constructor
 	StorageDocumentUpdate(
 		StorageTransaction* transaction_,
-		const Index& docno_);
+		const Index& docno_,
+		ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor
 	virtual ~StorageDocumentUpdate();
@@ -215,6 +220,7 @@ private:
 	std::vector<Index> m_add_userlist;
 	std::vector<Index> m_del_userlist;
 	bool m_doClearUserlist;
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }

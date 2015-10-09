@@ -31,12 +31,13 @@
 #include "strus/peerMessageBuilderInterface.hpp"
 #include "strus/peerMessageProcessorInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "storageClient.hpp"
 
 using namespace strus;
 
-PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_)
+PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_, ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
 	,m_documentFrequencyCache(dfcache_)
@@ -45,6 +46,7 @@ PeerStorageTransaction::PeerStorageTransaction( StorageClient* storage_, Databas
 	,m_termvaluecnt(0)
 	,m_nofDocumentsInserted(0)
 	,m_commit(false)
+	,m_errorhnd(errorhnd_)
 {}
 
 void PeerStorageTransaction::clear()
@@ -108,6 +110,7 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 	try
 	{
 		std::auto_ptr<PeerMessageViewerInterface> viewer( m_peermsgproc->createViewer( msg, msgsize));
+		if (!viewer.get()) throw strus::runtime_error( _TXT( "error creating peer message viewer"));
 	
 		PeerMessageViewerInterface::DocumentFrequencyChange rec;
 		while (viewer->nextDfChange( rec))
@@ -139,6 +142,8 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 		}
 		PeerMessageProcessorInterface::BuilderOptions options;
 		std::auto_ptr<PeerMessageBuilderInterface> msgbuilder( m_peermsgproc->createBuilder( options));
+		if (!msgbuilder.get()) throw strus::runtime_error( _TXT( "error creating peer message builder"));
+
 		std::vector<NewTerm>::const_iterator ti = m_newTerms.begin(), te = m_newTerms.end();
 		for (; ti != te; ++ti)
 		{
@@ -151,8 +156,18 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 				msgbuilder->addDfChange( type, value, df, false);
 			}
 		}
-		std::string rt = msgbuilder->fetch();
-	
+		std::string rt;
+		const char* blk;
+		std::size_t blksize;
+		while (msgbuilder->fetchMessage( blk, blksize))
+		{
+			rt.append( blk, blksize);
+		}
+		if( m_errorhnd->hasError())
+		{
+			m_errorhnd->explain( _TXT("error in peer message transaction: %s"));
+			return std::string();
+		}
 		m_documentFrequencyCache->writeBatch( cleaned_batch);
 		m_storage->declareGlobalNofDocumentsInserted( m_nofDocumentsInserted);
 		m_commit = true;

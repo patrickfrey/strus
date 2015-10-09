@@ -34,6 +34,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class IteratorDifference
 	:public IteratorJoin
@@ -41,7 +43,8 @@ class IteratorDifference
 public:
 	IteratorDifference(
 			const Reference<PostingIteratorInterface>& positive_,
-			const Reference<PostingIteratorInterface>& negative_);
+			const Reference<PostingIteratorInterface>& negative_,
+			ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorDifference();
 
 	virtual const char* featureid() const
@@ -74,7 +77,8 @@ private:
 	Index m_docno_neg;
 	Reference<PostingIteratorInterface> m_positive;
 	Reference<PostingIteratorInterface> m_negative;
-	std::string m_featureid;		///< unique id of the feature expression
+	std::string m_featureid;				///< unique id of the feature expression
+	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
@@ -82,18 +86,16 @@ class PostingJoinDifference
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinDifference( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinDifference(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& argitr,
-			int range) const
-	{
-		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for 'diff'"));
-		if (argitr.size() < 2) throw strus::runtime_error( _TXT( "too few arguments for 'diff'"));
-		if (argitr.size() > 2) throw strus::runtime_error( _TXT( "too many arguments for 'diff'"));
+			int range) const;
 
-		return new IteratorDifference( argitr[0], argitr[1]);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 }//namespace

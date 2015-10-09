@@ -26,18 +26,47 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_AS_STRING_HPP_INCLUDED
-#define _STRUS_LVDB_ARITHMETIC_VARIANT_AS_STRING_HPP_INCLUDED
-#include <string>
-#include <iostream>
-#include "strus/arithmeticVariant.hpp"
+/// \brief Macros, classes and functions supporting error handling
+/// \file errorUtils.hpp
+#ifndef _STRUS_STORAGE_ERROR_UTILITIES_HPP_INCLUDED
+#define _STRUS_STORAGE_ERROR_UTILITIES_HPP_INCLUDED
+#include <stdexcept>
+#include "private/internationalization.hpp"
 
-namespace strus {
+/// \brief strus toplevel namespace
+namespace strus
+{
 
-ArithmeticVariant arithmeticVariantFromString( const std::string& valueAsString);
-std::string arithmeticVariantToString( const ArithmeticVariant& value);
+#define CATCH_ERROR_MAP( contextExplainText, errorBuffer)\
+	catch (const std::bad_alloc&)\
+	{\
+		(errorBuffer).report( _TXT("memory allocation error"));\
+	}\
+	catch (const std::runtime_error& err)\
+	{\
+		(errorBuffer).report( contextExplainText, err.what());\
+	}\
+	catch (const std::exception& err)\
+	{\
+		(errorBuffer).report( _TXT("uncaught exception: %s"), err.what());\
+	}
 
-std::ostream& operator<< (std::ostream& out, const ArithmeticVariant& v);
+#define CATCH_ERROR_MAP_RETURN( contextExplainText, errorBuffer, errorReturnValue)\
+	catch (const std::bad_alloc&)\
+	{\
+		(errorBuffer).report( _TXT("memory allocation error"));\
+		return errorReturnValue;\
+	}\
+	catch (const std::runtime_error& err)\
+	{\
+		(errorBuffer).report( contextExplainText, err.what());\
+		return errorReturnValue;\
+	}\
+	catch (const std::exception& err)\
+	{\
+		(errorBuffer).report( _TXT("uncaught exception: %s"), err.what());\
+		return errorReturnValue;\
+	}
 
-}
+}//namespace
 #endif

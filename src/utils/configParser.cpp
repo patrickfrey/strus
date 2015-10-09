@@ -28,52 +28,58 @@
 */
 #include "strus/private/configParser.hpp"
 #include "strus/index.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/dll_tags.hpp"
 #include "private/utils.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <map>
 #include <cstring>
 #include <stdexcept>
 
 using namespace strus;
 
-DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::string& config, const char* key)
+DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::string& config, const char* key, ErrorBufferInterface* errorhnd)
 {
-	char const* cc = config.c_str();
-	while (*cc)
+	try
 	{
-		while ((unsigned char) *cc <= 32) ++cc;
-		//... skip spaces
-
-		std::string cfgkey;
-		while (((*cc|32) >= 'a' && (*cc|32) <= 'z') || *cc == '_' || (*cc >= '0' && *cc <= '9'))
+		char const* cc = config.c_str();
+		while (*cc)
 		{
-			cfgkey.push_back( *cc++);
+			while ((unsigned char) *cc <= 32) ++cc;
+			//... skip spaces
+	
+			std::string cfgkey;
+			while (((*cc|32) >= 'a' && (*cc|32) <= 'z') || *cc == '_' || (*cc >= '0' && *cc <= '9'))
+			{
+				cfgkey.push_back( *cc++);
+			}
+			if (cfgkey.empty())
+			{
+				throw strus::runtime_error( _TXT( "expected item identifier as start of a declaration in a config string"));
+			}
+			if (*cc != '=')
+			{
+				throw strus::runtime_error( _TXT( "'=' expected after item identifier in a config string"));
+			}
+			++cc;
+			const char* ee = std::strchr( cc, ';');
+			if (!ee) ee = std::strchr( cc, '\0');
+			if (utils::caseInsensitiveEquals( cfgkey, key))
+			{
+				res = std::string( cc, ee - cc);
+				std::string rest_config( config.c_str(), cc);
+				rest_config.append( ee);
+				return true;
+			}
+			else
+			{
+				cc = (*ee)?(ee+1):ee;
+			}
 		}
-		if (cfgkey.empty())
-		{
-			throw strus::runtime_error( _TXT( "expected item identifier as start of a declaration in a config string"));
-		}
-		if (*cc != '=')
-		{
-			throw strus::runtime_error( _TXT( "'=' expected after item identifier in a config string"));
-		}
-		++cc;
-		const char* ee = std::strchr( cc, ';');
-		if (!ee) ee = std::strchr( cc, '\0');
-		if (utils::caseInsensitiveEquals( cfgkey, key))
-		{
-			res = std::string( cc, ee - cc);
-			std::string rest_config( config.c_str(), cc);
-			rest_config.append( ee);
-			return true;
-		}
-		else
-		{
-			cc = (*ee)?(ee+1):ee;
-		}
+		return false;
 	}
-	return false;
+	CATCH_ERROR_MAP_RETURN("error extracting string from configuration string: %s", *errorhnd, false);
 }
 
 static bool yesNoFromString( const char* cfgname, const std::string& str)
@@ -92,18 +98,22 @@ static bool yesNoFromString( const char* cfgname, const std::string& str)
 	throw strus::runtime_error( _TXT( "value for configuration option '%s' is not a boolean (yes/no or true/false)"), cfgname);
 }
 
-DLL_PUBLIC bool strus::extractBooleanFromConfigString( bool& val, std::string& config, const char* key)
+DLL_PUBLIC bool strus::extractBooleanFromConfigString( bool& val, std::string& config, const char* key, ErrorBufferInterface* errorhnd)
 {
-	std::string cfgval;
-	if (extractStringFromConfigString( cfgval, config, key))
+	try
 	{
-		val = yesNoFromString( key, cfgval);
-		return true;
+		std::string cfgval;
+		if (extractStringFromConfigString( cfgval, config, key, errorhnd))
+		{
+			val = yesNoFromString( key, cfgval);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
-	else
-	{
-		return false;
-	}
+	CATCH_ERROR_MAP_RETURN("error extracting unsigned integer from configuration string: %s", *errorhnd, false);
 }
 
 static unsigned int unsignedFromString( const std::string& numstr)
@@ -143,28 +153,36 @@ static unsigned int unsignedFromString( const std::string& numstr)
 }
 
 
-DLL_PUBLIC bool strus::extractUIntFromConfigString( unsigned int& val, std::string& config, const char* key)
+DLL_PUBLIC bool strus::extractUIntFromConfigString( unsigned int& val, std::string& config, const char* key, ErrorBufferInterface* errorhnd)
 {
-	std::string cfgval;
-	if (extractStringFromConfigString( cfgval, config, key))
+	try
 	{
-		val = unsignedFromString( cfgval);
-		return true;
+		std::string cfgval;
+		if (extractStringFromConfigString( cfgval, config, key, errorhnd))
+		{
+			val = unsignedFromString( cfgval);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
-	else
-	{
-		return false;
-	}
+	CATCH_ERROR_MAP_RETURN("error extracting unsigned integer from configuration string: %s", *errorhnd, false);
 }
 
 
-DLL_PUBLIC void strus::removeKeysFromConfigString( std::string& config, const char** keys)
+DLL_PUBLIC void strus::removeKeysFromConfigString( std::string& config, const char** keys, ErrorBufferInterface* errorhnd)
 {
-	std::string val;
-	for (std::size_t ii=0; keys[ii]; ++ii)
+	try
 	{
-		extractStringFromConfigString( val, config, keys[ii]);
+		std::string val;
+		for (std::size_t ii=0; keys[ii]; ++ii)
+		{
+			extractStringFromConfigString( val, config, keys[ii], errorhnd);
+		}
 	}
+	CATCH_ERROR_MAP("error removing keys from configuration string: %s", *errorhnd);
 }
 
 

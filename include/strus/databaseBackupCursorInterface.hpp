@@ -47,7 +47,7 @@ public:
 	/// \param[out] keysize size of key in bytes
 	/// \param[out] blk pointer to the value of the block
 	/// \param[out] blksize size of blk in bytes
-	/// \return true on success, false, if there is no block left
+	/// \return true on success, false, if there is no block left or an error occurred
 	virtual bool fetch(
 			const char*& key,
 			std::size_t& keysize,

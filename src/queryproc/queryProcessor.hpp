@@ -39,6 +39,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Provides the objects needed for query processing
 class QueryProcessor
@@ -46,8 +48,8 @@ class QueryProcessor
 {
 public:
 	/// \brief Constructor
-	/// \param[in] storage_ reference to storage (ownership hold by caller)
-	explicit QueryProcessor();
+	/// \param[in] errorhnd_ reference to error buffer (ownership hold by caller)
+	explicit QueryProcessor( ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor
 	virtual ~QueryProcessor();
@@ -83,6 +85,7 @@ private:
 	std::map<std::string,Reference<SummarizerFunctionInterface> > m_summarizers;
 	std::map<std::string,Reference<WeightingFunctionInterface> > m_weighters;
 	std::map<std::string,Reference<PostingJoinOperatorInterface> > m_joiners;
+	ErrorBufferInterface* m_errorhnd;
 };
 
 }//namespace

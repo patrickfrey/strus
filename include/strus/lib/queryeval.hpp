@@ -41,10 +41,12 @@ class QueryEvalInterface;
 class StorageClientInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Create a parameterizable instance of a query evaluation scheme
 /// \return the program reference
-QueryEvalInterface* createQueryEval();
+QueryEvalInterface* createQueryEval( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

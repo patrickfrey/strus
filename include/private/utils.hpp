@@ -31,10 +31,12 @@
 #define _STRUS_UTILS_HPP_INCLUDED
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_array.hpp>
 #include <stdint.h>			///... boost atomic needs this
 #include <boost/atomic/atomic.hpp>
+#include <boost/static_assert.hpp>
 
 namespace strus {
 namespace utils {
@@ -45,6 +47,10 @@ bool caseInsensitiveEquals( const std::string& val1, const std::string& val2);
 bool caseInsensitiveStartsWith( const std::string& val, const std::string& prefix);
 int toint( const std::string& val);
 std::string tostring( int val);
+
+void aligned_free( void *ptr);
+void* aligned_malloc( std::size_t size, std::size_t alignment);
+
 
 class DynamicBitset
 {
@@ -95,6 +101,7 @@ public:
 	ScopedArray()
 		:boost::scoped_array<X>(){}
 };
+
 
 template <typename IntegralCounterType>
 class AtomicCounter
@@ -148,6 +155,82 @@ public:
 		return boost::atomic<IntegralCounterType>::compare_exchange_strong( testval, newval, boost::memory_order_acquire, boost::memory_order_acquire);
 	}
 };
+
+
+template <typename ValueType>
+class AtomicSlot
+	:public boost::atomic<ValueType>
+{
+public:
+	///\brief Constructor
+	AtomicSlot()
+		:boost::atomic<ValueType>(0)
+	{}
+
+	///\brief Occupy the slot, if not yet occupied yet.
+	///\param[in] val value to test
+	///\return true on success
+	bool set( const ValueType& val)
+	{
+		ValueType prev_val = 0;
+		return boost::atomic<ValueType>::compare_exchange_strong( prev_val, val, boost::memory_order_acquire);
+	}
+
+	///\brief Reset the slot
+	void reset()
+	{
+		ValueType val = 0;
+		(void)boost::atomic<ValueType>::exchange( val, boost::memory_order_acquire);
+	}
+
+	///\brief Test if the current value equals the argument
+	///\param[in] val value to test
+	///\return true, if yes
+	bool test( const ValueType& val) const
+	{
+		return boost::atomic<bool>::load( boost::memory_order_acquire) == val;
+	}
+};
+
+
+class AtomicFlag
+	:public boost::atomic<bool>
+{
+public:
+	///\brief Constructor
+	AtomicFlag( bool initialValue_=false)
+		:boost::atomic<bool>(initialValue_)
+	{}
+
+	///\brief Set the flag, if the new value changes the current value.
+	///\return true on success
+	bool set( bool val)
+	{
+		bool prev_val = !val;
+		return boost::atomic<bool>::compare_exchange_strong( prev_val, val, boost::memory_order_acquire);
+	}
+
+	///\brief Evaluate the current value
+	///\return the current value
+	bool test()
+	{
+		return boost::atomic<bool>::load( boost::memory_order_acquire);
+	}
+};
+
+
+class ThreadId
+{
+public:
+	typedef boost::thread::id Type;
+	static Type get()
+	{
+		return boost::this_thread::get_id();
+	}
+};
+
+#define STRUS_STATIC_ASSERT( cond ) BOOST_STATIC_ASSERT((cond))
+#define CACHELINE_SIZE 64
 
 }} //namespace
 #endif

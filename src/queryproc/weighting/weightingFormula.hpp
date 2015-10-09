@@ -38,8 +38,6 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
-#include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <vector>
 #include <sstream>
@@ -48,6 +46,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class FunctionMap
 	:public FormulaInterpreter::FunctionMap
@@ -82,7 +82,8 @@ public:
 		MetaDataReaderInterface* metadata_,
 		const FormulaInterpreter::FunctionMap& functionMap,
 		const std::string& formula,
-		const std::vector<double>& paramar);
+		const std::vector<double>& paramar,
+		ErrorBufferInterface* errorhnd_);
 
 	class Feature
 	{
@@ -140,6 +141,7 @@ private:
 	std::map<std::string,std::size_t> m_sets;
 	MetaDataReaderInterface* m_metadata;
 	FormulaInterpreter m_interpreter;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -149,7 +151,8 @@ class WeightingFunctionInstanceFormula
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceFormula(){}
+	explicit WeightingFunctionInstanceFormula( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceFormula(){}
 
@@ -160,15 +163,13 @@ public:
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata) const;
 
-	virtual std::string tostring() const
-	{
-		return m_formula + "\n--\n" + m_functionmap.tostring();
-	}
+	virtual std::string tostring() const;
 
 private:
 	FunctionMap m_functionmap;
 	std::string m_formula;
 	std::vector<double> m_paramar;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -178,14 +179,15 @@ class WeightingFunctionFormula
 	:public WeightingFunctionInterface
 {
 public:
-	WeightingFunctionFormula(){}
+	explicit WeightingFunctionFormula( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionFormula(){}
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const
-	{
-		return new WeightingFunctionInstanceFormula();
-	}
+	virtual WeightingFunctionInstanceInterface* createInstance() const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

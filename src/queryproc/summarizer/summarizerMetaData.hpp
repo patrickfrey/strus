@@ -32,7 +32,6 @@
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <string>
@@ -49,6 +48,8 @@ class StorageClientInterface;
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 /// \brief Interface for the summarization context (of a SummarizationFunction)
@@ -59,23 +60,21 @@ public:
 	/// \brief Constructor
 	/// \param[in] metadata_ reader for document meta data
 	/// \param[in] name_ meta data field identifier
-	SummarizerFunctionContextMetaData( MetaDataReaderInterface* metadata_, const std::string& name_);
+	SummarizerFunctionContextMetaData( MetaDataReaderInterface* metadata_, const std::string& name_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMetaData(){}
 
 	virtual void addSummarizationFeature(
 			const std::string&,
 			PostingIteratorInterface*,
-			const std::vector<SummarizationVariable>&)
-	{
-		throw strus::runtime_error( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
-	}
+			const std::vector<SummarizationVariable>&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
 	MetaDataReaderInterface* m_metadata;
 	int m_attrib;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -85,51 +84,24 @@ class SummarizerFunctionInstanceMetaData
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceMetaData()
-		:m_name(){}
+	explicit SummarizerFunctionInstanceMetaData( ErrorBufferInterface* errorhnd_)
+		:m_name(),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMetaData(){}
 
-	virtual void addStringParameter( const std::string& name, const std::string& value)
-	{
-		if (utils::caseInsensitiveEquals( name, "name"))
-		{
-			m_name = value;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
-		}
-	}
+	virtual void addStringParameter( const std::string& name, const std::string& value);
 
-	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
-	{
-		if (utils::caseInsensitiveEquals( name, "name"))
-		{
-			throw strus::runtime_error( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MetaData");
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
-		}
-	}
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface* metadata) const
-	{
-		return new SummarizerFunctionContextMetaData( metadata, m_name);
-	}
+			MetaDataReaderInterface* metadata) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << "name='" << m_name << "'";
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	std::string m_name;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -137,15 +109,16 @@ class SummarizerFunctionMetaData
 	:public SummarizerFunctionInterface
 {
 public:
-	SummarizerFunctionMetaData(){}
+	explicit SummarizerFunctionMetaData( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionMetaData(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
-			const QueryProcessorInterface*) const
-	{
-		return new SummarizerFunctionInstanceMetaData();
-	}
+			const QueryProcessorInterface*) const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

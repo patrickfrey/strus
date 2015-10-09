@@ -47,6 +47,7 @@ class DatabaseClientInterface;
 class InitialStatsPopulateState
 {
 public:
+	///\brief Constructor
 	InitialStatsPopulateState()
 		:m_peermsgproc(0){}
 
@@ -60,24 +61,14 @@ public:
 	bool running() const	{return m_peermsgproc;}
 
 	///\brief Fetch the next chunk to send to the peers
-	std::string fetch();
-
-private:
-	void clear();
-
-	void addTypeDef( const std::string& name, const Index& no);
-	void addTermDef( const std::string& name, const Index& no);
-
-	const char* getTypeName( const Index& no) const;
-	const char* getTermName( const Index& no) const;
+	/// \param[out] blk pointer to the message 
+	/// \param[out] blksize size of message blk in bytes
+	/// \return true, if there is a message returned to be sent, false if not
+	bool fetchMessage( const char* blk, std::size_t blksize);
 
 private:
 	const PeerMessageProcessorInterface* m_peermsgproc;		///< reference to interface to other peer storages
-	DatabaseClientInterface* m_database;				///< database reference
 	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder;	///< reference to builder of messages to other peers
-	std::map<Index,std::size_t> m_typenomap;
-	std::map<Index,std::size_t> m_termnomap;
-	std::string m_strings;
 };
 }
 #endif

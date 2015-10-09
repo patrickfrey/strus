@@ -32,10 +32,13 @@
 
 namespace strus {
 
-bool extractStringFromConfigString( std::string& val, std::string& config, const char* key);
-bool extractBooleanFromConfigString( bool& val, std::string& config, const char* key);
-bool extractUIntFromConfigString( unsigned int& val, std::string& config, const char* key);
-void removeKeysFromConfigString( std::string& config, const char** keys);
+/// \brief Forward declaration
+class ErrorBufferInterface;
+
+bool extractStringFromConfigString( std::string& val, std::string& config, const char* key, ErrorBufferInterface* errorhnd);
+bool extractBooleanFromConfigString( bool& val, std::string& config, const char* key, ErrorBufferInterface* errorhnd);
+bool extractUIntFromConfigString( unsigned int& val, std::string& config, const char* key, ErrorBufferInterface* errorhnd);
+void removeKeysFromConfigString( std::string& config, const char** keys, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

@@ -30,6 +30,8 @@
 #define _STRUS_DOCNO_RANGE_ALLOCATOR_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/docnoRangeAllocatorInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "storageClient.hpp"
 
 namespace strus {
@@ -38,21 +40,30 @@ class DocnoRangeAllocator
 	:public DocnoRangeAllocatorInterface
 {
 public:
-	explicit DocnoRangeAllocator( StorageClient* storage_)
-		:m_storage(storage_){}
+	DocnoRangeAllocator( StorageClient* storage_, ErrorBufferInterface* errorhnd_)
+		:m_storage(storage_),m_errorhnd(errorhnd_){}
 
 	virtual Index allocDocnoRange( const Index& size)
 	{
-		return m_storage->allocDocnoRange( size);
+		try
+		{
+			return m_storage->allocDocnoRange( size);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error allocating document number range: %s"), *m_errorhnd, 0);
 	}
 
 	virtual bool deallocDocnoRange( const Index& docno, const Index& size)
 	{
-		return m_storage->deallocDocnoRange( docno, size);
+		try
+		{
+			return m_storage->deallocDocnoRange( docno, size);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error deallocating document number range: %s"), *m_errorhnd, false);
 	}
 
 private:
 	StorageClient* m_storage;
+	ErrorBufferInterface* m_errorhnd;		///< error buffer for exception free interface
 };
 
 }//namespace

@@ -32,7 +32,9 @@
 #include "weighting/weighting_standard.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <string>
 #include <vector>
@@ -43,31 +45,56 @@
 
 using namespace strus;
 
-QueryProcessor::QueryProcessor()
+QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_)
 {
-	definePostingJoinOperator( "within", createPostingJoinWithin());
-	definePostingJoinOperator( "within_struct", createPostingJoinStructWithin());
-	definePostingJoinOperator( "sequence", createPostingJoinSequence());
-	definePostingJoinOperator( "sequence_struct", createPostingJoinStructSequence());
-	definePostingJoinOperator( "diff", createPostingJoinDifference());
-	definePostingJoinOperator( "intersect", createPostingJoinIntersect());
-	definePostingJoinOperator( "union", createPostingJoinUnion());
-	definePostingJoinOperator( "succ", createPostingSucc());
-	definePostingJoinOperator( "pred", createPostingPred());
-	definePostingJoinOperator( "contains", createPostingJoinContains());
-	
-	defineWeightingFunction( "bm25", createWeightingFunctionBm25());
-	defineWeightingFunction( "bm25_dpfc", createWeightingFunctionBm25_dpfc());
-	defineWeightingFunction( "tf", createWeightingFunctionTermFrequency());
-	defineWeightingFunction( "td", createWeightingFunctionConstant());
-	defineWeightingFunction( "metadata", createWeightingFunctionMetadata());
-	defineWeightingFunction( "formula", createWeightingFunctionFormula());
+	PostingJoinOperatorInterface* op;
+	if (0==(op=createPostingJoinWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "within", op);
+	if (0==(op=createPostingJoinStructWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "within_struct", op);
+	if (0==(op=createPostingJoinSequence( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "sequence", op);
+	if (0==(op=createPostingJoinStructSequence( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "sequence_struct", op);
+	if (0==(op=createPostingJoinDifference( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "diff", op);
+	if (0==(op=createPostingJoinIntersect( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "intersect", op);
+	if (0==(op=createPostingJoinUnion( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "union", op);
+	if (0==(op=createPostingSucc( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "succ", op);
+	if (0==(op=createPostingPred( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "pred", op);
+	if (0==(op=createPostingJoinContains( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "contains", op);
 
-	defineSummarizerFunction( "metadata", createSummarizerMetaData());
-	defineSummarizerFunction( "matchphrase", createSummarizerMatchPhrase());
-	defineSummarizerFunction( "matchpos", createSummarizerListMatches());
-	defineSummarizerFunction( "attribute", createSummarizerAttribute());
-	defineSummarizerFunction( "matchvariables", createSummarizerMatchVariables());
+	WeightingFunctionInterface* func;
+	if (0==(func=createWeightingFunctionBm25( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "bm25", func);
+	if (0==(func=createWeightingFunctionBm25_dpfc( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "bm25_dpfc", func);
+	if (0==(func=createWeightingFunctionTermFrequency( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "tf", func);
+	if (0==(func=createWeightingFunctionConstant( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "td", func);
+	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "metadata", func);
+	if (0==(func=createWeightingFunctionFormula( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "formula", func);
+
+	SummarizerFunctionInterface* sum;
+	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "metadata", sum);
+	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "matchphrase", sum);
+	if (0==(sum=createSummarizerListMatches( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "matchpos", sum);
+	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "attribute", sum);
+	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "matchvariables", sum);
 }
 
 QueryProcessor::~QueryProcessor()
@@ -77,8 +104,16 @@ void QueryProcessor::definePostingJoinOperator(
 		const std::string& name,
 		PostingJoinOperatorInterface* op)
 {
-	Reference<PostingJoinOperatorInterface> opref( op);
-	m_joiners[ utils::tolower( std::string(name))] = opref;
+	try
+	{
+		Reference<PostingJoinOperatorInterface> opref( op);
+		m_joiners[ utils::tolower( std::string(name))] = opref;
+	}
+	catch (std::bad_alloc&)
+	{
+		delete op;
+		m_errorhnd->report( _TXT("out of memory"));
+	}
 }
 
 const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
@@ -88,7 +123,8 @@ const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 		ji = m_joiners.find( utils::tolower( name));
 	if (ji == m_joiners.end())
 	{
-		throw strus::runtime_error( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+		m_errorhnd->report( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+		return 0;
 	}
 	return ji->second.get();
 }
@@ -97,8 +133,16 @@ void QueryProcessor::defineWeightingFunction(
 		const std::string& name,
 		WeightingFunctionInterface* func)
 {
-	Reference<WeightingFunctionInterface> funcref( func);
-	m_weighters[ utils::tolower( std::string(name))] = funcref;
+	try
+	{
+		Reference<WeightingFunctionInterface> funcref( func);
+		m_weighters[ utils::tolower( std::string(name))] = funcref;
+	}
+	catch (std::bad_alloc&)
+	{
+		delete func;
+		m_errorhnd->report( _TXT("out of memory"));
+	}
 }
 
 const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
@@ -108,7 +152,8 @@ const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		wi = m_weighters.find( utils::tolower( std::string(name)));
 	if (wi == m_weighters.end())
 	{
-		throw strus::runtime_error( _TXT( "weighting function not defined: '%s'"), name.c_str());
+		m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
+		return 0;
 	}
 	return wi->second.get();
 }
@@ -117,8 +162,16 @@ void QueryProcessor::defineSummarizerFunction(
 		const std::string& name,
 		SummarizerFunctionInterface* sumfunc)
 {
-	Reference<SummarizerFunctionInterface> funcref( sumfunc);
-	m_summarizers[ utils::tolower( std::string(name))] = funcref;
+	try
+	{
+		Reference<SummarizerFunctionInterface> funcref( sumfunc);
+		m_summarizers[ utils::tolower( std::string(name))] = funcref;
+	}
+	catch (std::bad_alloc&)
+	{
+		delete sumfunc;
+		m_errorhnd->report( _TXT("out of memory"));
+	}
 }
 
 const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
@@ -128,7 +181,8 @@ const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		si = m_summarizers.find( utils::tolower( std::string(name)));
 	if (si == m_summarizers.end())
 	{
-		throw strus::runtime_error( _TXT( "summarization function not defined: '%s'"), name.c_str());
+		m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
+		return 0;
 	}
 	return si->second.get();
 }

@@ -38,14 +38,16 @@ namespace strus
 
 /// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Interface for accessing document attributes from a strus storage
 class AttributeReader
 	:public AttributeReaderInterface
 {
 public:
-	AttributeReader( const StorageClient* storage_, const DatabaseClientInterface* database_)
-		:m_storage(storage_),m_database(database_),m_docno(0){}
+	AttributeReader( const StorageClient* storage_, const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
+		:m_storage(storage_),m_database(database_),m_docno(0),m_errorhnd(errorhnd_){}
 
 	virtual Index elementHandle( const char* name) const;
 
@@ -59,9 +61,10 @@ public:
 	virtual std::vector<std::string> getAttributeNames() const;
 
 private:
-	const StorageClient* m_storage;
-	const DatabaseClientInterface* m_database;
-	Index m_docno;
+	const StorageClient* m_storage;				///< storage handle
+	const DatabaseClientInterface* m_database;		///< database handle
+	Index m_docno;						///< current document number
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }//namespace

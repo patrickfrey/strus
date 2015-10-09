@@ -38,7 +38,7 @@ static inline bool isDigit( char ch)
 	return (ch >= '0' && ch <= '9');
 }
 
-DLL_PUBLIC ArithmeticVariant strus::arithmeticVariantFromString( const std::string& valueAsString)
+ArithmeticVariant strus::arithmeticVariantFromString( const std::string& valueAsString)
 {
 	std::string::const_iterator vi = valueAsString.begin(), ve = valueAsString.end();
 	bool sign = false;
@@ -115,14 +115,14 @@ static void print( std::ostream& out, const ArithmeticVariant& val)
 	}
 }
 
-DLL_PUBLIC std::string strus::arithmeticVariantToString( const ArithmeticVariant& value)
+std::string strus::arithmeticVariantToString( const ArithmeticVariant& value)
 {
 	std::ostringstream out;
 	print( out, value);
 	return out.str();
 }
 
-DLL_PUBLIC std::ostream& strus::operator<< (std::ostream& out, const ArithmeticVariant& v)
+std::ostream& strus::operator<< (std::ostream& out, const ArithmeticVariant& v)
 {
 	print( out, v);
 	return out;

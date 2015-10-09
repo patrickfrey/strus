@@ -39,6 +39,8 @@ namespace strus
 
 /// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Forward index mapping document numbers to the document content
 class ForwardIterator
@@ -48,7 +50,8 @@ public:
 	ForwardIterator(
 		const StorageClient* storage_,
 		const DatabaseClientInterface* database_,
-		const std::string& type_);
+		const std::string& type_,
+		ErrorBufferInterface* errorhnd_);
 
 	virtual ~ForwardIterator();
 
@@ -71,6 +74,7 @@ private:
 	Index m_docno;
 	Index m_typeno;
 	Index m_curpos;
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }//namespace

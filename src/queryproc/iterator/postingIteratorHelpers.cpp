@@ -28,6 +28,9 @@
 */
 /// \brief Implementation of helper functions shared by iterators
 #include "postingIteratorHelpers.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <sstream>
 #include <iostream>
 

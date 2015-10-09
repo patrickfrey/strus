@@ -37,12 +37,14 @@
 
 namespace strus
 {
+///\brief Forward declaration
+class ErrorBufferInterface;
 
 class PeerMessageViewer
 	:public PeerMessageViewerInterface
 {
 public:
-	PeerMessageViewer( const char* peermsgptr, std::size_t peermsgsize);
+	PeerMessageViewer( const char* peermsgptr, std::size_t peermsgsize, ErrorBufferInterface* errorhnd_);
 	virtual ~PeerMessageViewer();
 
 	virtual int nofDocumentsInsertedChange();
@@ -56,6 +58,7 @@ private:
 	char const* m_peermsgend;
 	std::size_t m_peermsgsize;
 	std::string m_msg;
+	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace
 #endif
