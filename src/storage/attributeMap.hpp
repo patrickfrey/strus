@@ -46,10 +46,7 @@ class AttributeMap
 {
 public:
 	explicit AttributeMap( DatabaseClientInterface* database_)
-		:m_database(database_)
-	{
-		m_strings.push_back( '\0');
-	}
+		:m_database(database_){}
 
 	~AttributeMap(){}
 
