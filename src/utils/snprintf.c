@@ -29,7 +29,7 @@
 ///\brief Simple implementation of snprintf only supporing a small subset of format characters that is guaranteed not to use malloc
 #include "strus/private/snprintf.h"
 
-static void printnum( char* bi, char* be, unsigned long num)
+static void printnum( char** bi, char* be, unsigned long num)
 {
 	char buf[ 64];
 	size_t bufidx = sizeof(buf);
@@ -44,7 +44,7 @@ static void printnum( char* bi, char* be, unsigned long num)
 		buf[ --bufidx] = (num % 10) + '0';
 		num /= 10;
 	}
-	for (; bi < be && buf[ bufidx]; bufidx++,bi++) *bi = buf[ bufidx];
+	for (; *bi < be && buf[ bufidx]; bufidx++,(*bi)++) **bi = buf[ bufidx];
 }
 
 void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
@@ -80,7 +80,7 @@ void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
 					if (val.d < 0)
 					{
 						*bi++ = '-';
-						printnum( bi, be, -val.d);
+						printnum( &bi, be, -val.d);
 					}
 					else
 					{
