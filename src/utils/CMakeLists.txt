@@ -12,6 +12,7 @@ set(libstrus_shared_utils_source_files
 
 set( libstrus_private_utils_source_files
 	utils.cpp
+	stringMap.cpp
 	internationalization.cpp
 )
 
