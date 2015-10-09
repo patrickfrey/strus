@@ -69,6 +69,7 @@ static int g_interval_hi = 0x7FFFFFFFL;
 static int g_interval_cnt = 1000;
 static pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
 static char g_logfile[128];
+static int g_callersel = 1;
 static char g_callerlib[128];
 static char g_callerfunc[128];
 
@@ -90,6 +91,17 @@ typedef struct Memalign_s {Memalign_f func;} Memalign_s;
 typedef struct Free_s {Free_f func;} Free_s;
 
 static char g_buf_calloc_for_dlsym[64];
+
+typedef uint64_t stacktrace_hashvalue;
+typedef struct caller_cache_elem
+{
+	stacktrace_hashvalue caller_id;
+	int caller_match;
+} caller_cache_elem;
+#define CACHE_SIZE (1<<9)
+#define CACHE_MASK (CACHE_SIZE-1)
+static caller_cache_elem g_caller_cache[ CACHE_SIZE];
+static size_t g_caller_cachepos = 0;
 
 static void* g_calloc_for_dlsym( size_t nmemb, size_t size)
 {
@@ -161,7 +173,7 @@ static void init_module()
 		fprintf( stderr, "error loading malloc function with 'dlsym'\n");
 		exit( 1);
 	}
-
+	memset( g_caller_cache, 0, sizeof(g_caller_cache));
 	pthread_mutex_init( &g_mutex, NULL);
 
 	g_logfile[0] = '\0';
@@ -180,7 +192,7 @@ static void init_module()
 		}
 		fprintf( stderr, "malloc logging to file '%s'\n", g_logfile);
 
-		FILE* logfile = fopen( g_logfile, "w+");
+		FILE* logfile = fopen( g_logfile, "w");
 		if (!logfile)
 		{
 			fprintf( stderr, "cannot open malloc log file '%s' (errno %u)", g_logfile, errno);
@@ -233,6 +245,27 @@ static void init_module()
 	{
 		copy_string( g_callerfunc, sizeof(g_callerfunc), nm);
 		fprintf( stderr, "restrict logging to calls from function '%s'\n", g_callerfunc);
+	}
+	nm = getenv( "STRUS_MALLOC_CALLER");
+	if (nm && nm[0])
+	{
+		if (!g_callerfunc[0] && !g_callerlib[0])
+		{
+			fprintf( stderr, "environment variable STRUS_MALLOC_CALLER is ignored when not specifying any of STRUS_MALLOC_CALLERFUNC and STRUS_MALLOC_CALLERLIB\n");
+		}
+		if ((nm[0]|32) == 'y' || nm[0] == '1' || (nm[0]|32) == 't')
+		{
+			g_callersel = 1;
+		}
+		else if ((nm[0]|32) == 'n' || nm[0] == '0' || (nm[0]|32) == 'f')
+		{
+			g_callersel = 0;
+			fprintf( stderr, "inverting set of malloc calls logged\n");
+		}
+		else
+		{
+			fprintf( stderr, "error in value of the environment variable STRUS_MALLOC_CALLER: must be Y/YES/T/TRUE/1 or N/NO/F/0\n");
+		}
 	}
 	fprintf( stderr, "logging malloc initialized\n");
 }
@@ -316,10 +349,70 @@ static void print_stacktrace()
 	}
 }
 
-static int caller_match()
+static uint32_t hash( uint32_t a)
+{
+	a += ~(a << 15);
+	a ^=  (a >> 10);
+	a +=  (a << 3);
+	a ^=  (a >> 6);
+	a += ~(a << 11);
+	a ^=  (a >> 16);
+	return a;
+}
+
+static inline stacktrace_hashvalue stacktrace_hash()
+{
+	stacktrace_hashvalue rt = 0;
+	void* stk[ 64];
+	size_t si,stksize;
+
+	stksize = stacktrace( stk, sizeof(stk)/sizeof(stk[0]));
+	for (si = 0; si < stksize && si < 4; ++si) 
+	{
+		uint32_t hh = hash( (uintptr_t)stk[si] % 0xFFFFFFFUL);
+		rt = (rt << 8) + hh;
+	}
+	rt = (rt << 8);
+	for (si = 0; si < stksize; ++si) 
+	{
+		uint32_t hh = hash( (uintptr_t)stk[si] % 0xFFFFFFFUL);
+		rt += hh;
+	}
+	return rt;
+}
+
+static inline int caller_match()
 {
 	if (!g_callerlib[0] && !g_callerfunc[0]) return 1;
-	return find_sym( g_callerlib[0]?g_callerlib:0, g_callerfunc[0]?g_callerfunc:0)?1:0;
+
+	/* Try first to find entry in cache: */
+	stacktrace_hashvalue caller_id = stacktrace_hash();
+
+	size_t ci = (g_caller_cachepos + CACHE_SIZE - 10) & CACHE_MASK;
+	size_t ce = (ci + CACHE_SIZE -1) & CACHE_MASK;
+	for (; ci != ce; ci=(ci+1) & CACHE_MASK)
+	{
+		if (g_caller_cache[ci].caller_id == caller_id)
+		{
+			pthread_mutex_lock( &g_mutex);
+			if (g_caller_cache[ci].caller_id == caller_id)
+			{
+				pthread_mutex_unlock( &g_mutex);
+				return g_caller_cache[ci].caller_match;
+			}
+			pthread_mutex_unlock( &g_mutex);
+		}
+	}
+	/* Caller not found in cache. So we match the back trace: */
+	int rt = find_sym( g_callerlib[0]?g_callerlib:0, g_callerfunc[0]?g_callerfunc:0)?g_callersel:!g_callersel;
+
+	/* And we put the found entry into the cache: */
+	pthread_mutex_lock( &g_mutex);
+	ci = g_caller_cachepos++;
+	g_caller_cache[ci].caller_id = caller_id;
+	g_caller_cache[ci].caller_match = rt;
+	pthread_mutex_unlock( &g_mutex);
+	return rt;
 }
 
 static void stat_malloc_call( size_t size)
@@ -423,7 +516,7 @@ DLL_PUBLIC void* malloc_IMPL( size_t size)
 	log_statistics();
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-	fprintf( stderr, "CALLED malloc( %u) RETURNS %x\n", (unsigned int)size, (unsigned int)(uintptr_t)rt);
+	fprintf( stderr, "CALLED malloc( %u)%s RETURNS %x\n", (unsigned int)size, (frame->caller_match?" logged":""), (unsigned int)(uintptr_t)rt);
 #endif
 	return rt;
 }
@@ -474,7 +567,7 @@ DLL_PUBLIC void* realloc_IMPL( void* ptr, size_t size)
 	}
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-	fprintf( stderr, "CALLED realloc( %x, %u) RETURNS %x\n", (unsigned int)(uintptr_t)ptr, (unsigned int)size, (unsigned int)(uintptr_t)rt);
+	fprintf( stderr, "CALLED realloc( %x, %u)%s RETURNS %x\n", (unsigned int)(uintptr_t)ptr, (unsigned int)size, (new_frame->caller_match?" logged":""), (unsigned int)(uintptr_t)rt);
 #endif
 	return rt;
 }
@@ -508,7 +601,7 @@ DLL_PUBLIC void* calloc_IMPL( size_t nmemb, size_t size)
 	log_statistics();
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-	fprintf( stderr, "CALLED calloc( %u, %u) RETURNS %x\n", (unsigned int)nmemb, (unsigned int)size, (unsigned int)(uintptr_t)rt);
+	fprintf( stderr, "CALLED calloc( %u, %u)%s RETURNS %x\n", (unsigned int)nmemb, (unsigned int)size, (frame->caller_match?" logged":""), (unsigned int)(uintptr_t)rt);
 #endif
 	return rt;
 }
@@ -550,17 +643,20 @@ DLL_PUBLIC void free_IMPL( void* ptr)
 		fprintf( stderr, "invalid free( %x) caller match %d\n", (unsigned int)(uintptr_t)ptr, (int)frame->caller_match);
 		print_stacktrace();
 	}
-	if (frame->caller_match)
+	int caller_match = frame->caller_match;
+	if (caller_match)
 	{
 		stat_free_call( size);
 	}
+	log_statistics();
+
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "CALLING glibc free( %x)\n", (unsigned int)(uintptr_t)frame);
 #endif
 	g_libc_free( (void*)frame);
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-	fprintf( stderr, "CALLED free()\n");
+	fprintf( stderr, "CALLED free()%s\n", caller_match?" logged":"");
 #endif
 }
 
