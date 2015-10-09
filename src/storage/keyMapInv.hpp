@@ -29,6 +29,7 @@
 #ifndef _STRUS_LVDB_KEY_MAP_INV_HPP_INCLUDED
 #define _STRUS_LVDB_KEY_MAP_INV_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "private/stringMap.hpp"
 #include <cstdlib>
 #include <string>
 #include <map>
@@ -44,21 +45,21 @@ public:
 
 	void set( const Index& idx, const std::string& value)
 	{
-		m_map[ idx] = m_strings.size();
-		m_strings.append( value);
-		m_strings.push_back( '\0');
+		m_strings.push_back( value);
+		m_map[ idx] = m_strings.back();
 	}
 
 	const char* get( const Index& idx) const
 	{
-		std::map<Index,std::size_t>::const_iterator ei = m_map.find( idx);
+		Map::const_iterator ei = m_map.find( idx);
 		if (ei == m_map.end()) return 0;
-		return m_strings.c_str() + ei->second;
+		return ei->second;
 	}
 
 private:
-	std::map<Index,std::size_t> m_map;
-	std::string m_strings;
+	typedef std::map<Index,const char*> Map;
+	Map m_map;
+	StringVector m_strings;
 };
 
 }//namespace

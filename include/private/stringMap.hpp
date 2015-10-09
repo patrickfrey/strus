@@ -170,13 +170,6 @@ private:
 	StringMapKeyBlockList m_keystring_blocks;
 };
 
-
-template <typename ValueType>
-class CaseInsesitiveStringMap
-	:public StringMap<ValueType>
-{
-public:
-private:
 }//namespace
 #endif
 
