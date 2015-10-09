@@ -41,6 +41,7 @@
 namespace strus {
 namespace utils {
 
+std::string tolower( const char* val);
 std::string tolower( const std::string& val);
 std::string trim( const std::string& val);
 bool caseInsensitiveEquals( const std::string& val1, const std::string& val2);

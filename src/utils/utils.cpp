@@ -38,6 +38,16 @@
 using namespace strus;
 using namespace strus::utils;
 
+std::string utils::tolower( const char* val)
+{
+	std::size_t len = std::strlen(val)+1;
+	std::string rt;
+	rt.reserve( len);
+	char const* vv = val;
+	while (*vv) rt.push_back( std::tolower(*vv++));
+	return rt;
+}
+
 std::string utils::tolower( const std::string& val)
 {
 	return boost::algorithm::to_lower_copy( val);
