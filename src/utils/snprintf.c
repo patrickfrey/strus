@@ -35,7 +35,7 @@ static void printnum( char** bi, char* be, unsigned long num)
 	size_t bufidx = sizeof(buf);
 	if (num == 0)
 	{
-		if (bi < be) *bi++ = '0';
+		if (*bi < be) **bi++ = '0';
 		return;
 	}
 	buf[ --bufidx] = 0;
@@ -84,12 +84,12 @@ void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
 					}
 					else
 					{
-						printnum( bi, be, val.d);
+						printnum( &bi, be, val.d);
 					}
 					break;
 				case 'u':
 					val.u = va_arg(ap, unsigned int);
-					printnum( bi, be, val.u);
+					printnum( &bi, be, val.u);
 					break;
 				case 'c':
 					val.c = (char) va_arg(ap, int);
