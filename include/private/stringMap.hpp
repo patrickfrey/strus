@@ -116,6 +116,10 @@ private:
 	typedef std::map<const char*,ValueType, MapKeyCompare, MapAllocator> Map;
 
 public:
+	StringMap(){}
+	StringMap( const StringMap& o)
+		:m_map(o.m_map),m_keystring_blocks(o.m_keystring_blocks){}
+
 	typedef typename Map::const_iterator const_iterator;
 	typedef typename Map::iterator iterator;
 
