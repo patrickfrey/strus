@@ -348,7 +348,7 @@ bool StorageTransaction::commit()
 	
 		m_userAclMap.getWriteBatch( transaction.get());
 	
-		std::map<std::string,Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
+		StringMap<Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
 		for (; di != de; ++di)
 		{
 			DatabaseAdapter_DocId::Writer( m_database).store( transaction.get(), di->first, di->second);
