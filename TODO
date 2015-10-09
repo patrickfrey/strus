@@ -4,6 +4,5 @@ definePhraseType mit parameter mit zusätzlichen tokenizern, welche auch in die 
 "Herr K.Müller" > herr,1 k,2 muller,4 (statt 3!)  word/punct,brackets 
 
 * join operator for subsequence that matches the longest subsequence (summarizer for information ectraction in Wikipedia search)
-* BUG in end of sentence recognition (document analysis)
 
 
