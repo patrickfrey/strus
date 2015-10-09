@@ -92,6 +92,7 @@ public:
 	std::vector<const char*>::const_iterator end() const		{return m_ar.end();}
 
 	const char* operator[]( std::size_t i) const			{return m_ar[i];}
+	const char* back() const					{return m_ar.back();}
 	std::size_t size() const					{return m_ar.size();}
 
 private:
@@ -165,8 +166,14 @@ private:
 	StringMapKeyBlockList m_keystring_blocks;
 };
 
+
+template <typename ValueType>
+class CaseInsesitiveStringMap
+	:public StringMap<ValueType>
+{
+public:
+private:
 }//namespace
 #endif
-
 
 
