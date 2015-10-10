@@ -69,6 +69,7 @@ static int g_interval_hi = 0x7FFFFFFFL;
 static int g_interval_cnt = 1000;
 static pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
 static char g_logfile[128];
+static int g_logfile_opened = 0;
 static int g_callersel = 1;
 static char g_callerlib[128];
 static char g_callerfunc[128];
@@ -164,6 +165,9 @@ static void init_module()
 	}
 	pthread_mutex_init( &g_mutex, NULL);
 
+#ifdef STRUS_LOWLEVEL_DEBUG
+	fprintf( stderr, "GOT all memory access functions\n");
+#endif
 	g_logfile[0] = '\0';
 	const char* nm = getenv( "STRUS_MALLOC_LOGFILE");
 	if (nm && nm[0])
@@ -179,17 +183,6 @@ static void init_module()
 			copy_string( g_logfile, sizeof(g_logfile), nm);
 		}
 		fprintf( stderr, "malloc logging to file '%s'\n", g_logfile);
-
-		FILE* logfile = fopen( g_logfile, "w");
-		if (!logfile)
-		{
-			fprintf( stderr, "cannot open malloc log file '%s' (errno %u)", g_logfile, errno);
-			g_logfile[0] = '\0';
-		}
-		else
-		{
-			fclose( logfile);
-		}
 	}
 	nm = getenv( "STRUS_MALLOC_INTERVAL");
 	if (nm && nm[0])
@@ -278,14 +271,14 @@ struct stack_frame {
 	void* return_address;
 };
 
-static size_t stacktrace( void** trace, size_t tracesize)
+size_t stacktrace( void** trace, size_t tracesize)
 {
 	struct stack_frame* current;
 	struct stack_frame* previous;
 	void* frame_ptr;
 	size_t rt = 0;
 
-	frame_ptr = __builtin_frame_address(1);
+	frame_ptr = __builtin_frame_address(0);
 
 	/* We skip the call to this function, it makes no sense to record it.  */
 	current = ((struct stack_frame*) frame_ptr);
@@ -368,6 +361,7 @@ static void stat_free_call( size_t size)
 
 static void log_statistics()
 {
+	const char* logfile_attrib = 0;
 	int do_log = 0;
 	struct
 	{
@@ -380,6 +374,15 @@ static void log_statistics()
 	{
 		g_malloc_counter = 0;
 		do_log = 1;
+		if (g_logfile_opened)
+		{
+			logfile_attrib = "a+";
+		}
+		else
+		{
+			g_logfile_opened = 1;
+			logfile_attrib = "w";
+		}
 		info.memsize = g_malloc_memsize;
 		info.nofblks = g_malloc_nofblks;
 	}
@@ -390,7 +393,7 @@ static void log_statistics()
 		FILE* logfile = stderr;
 		if (g_logfile[0])
 		{
-			logfile = fopen( g_logfile, "a+");
+			logfile = fopen( g_logfile, logfile_attrib);
 			if (!logfile)
 			{
 				fprintf( stderr, "cannot open malloc log file '%s' (errno %u)", g_logfile, errno);
@@ -429,7 +432,7 @@ DLL_PUBLIC void* malloc_IMPL( size_t size)
 #endif
 	frame = (mem_frame*)g_libc_malloc( sizeof(mem_frame) + size);
 #ifdef STRUS_LOWLEVEL_DEBUG
-	fprintf( stderr, "CALLED glibc malloc( %u %x)\n", (unsigned int)size, (unsigned int)(uintptr_t)frame);
+	fprintf( stderr, "CALLED glibc malloc %x\n", (unsigned int)(uintptr_t)frame);
 #endif
 	if (!frame) return 0;
 	frame->signature = FRAME_SIGNATURE;
@@ -477,7 +480,7 @@ DLL_PUBLIC void* realloc_IMPL( void* ptr, size_t size)
 #endif
 	new_frame = (mem_frame*)g_libc_realloc( (void*)old_frame, sizeof(mem_frame) + size);
 #ifdef STRUS_LOWLEVEL_DEBUG
-	fprintf( stderr, "CALLED glibc realloc( %u %x)\n", (unsigned int)size, (unsigned int)(uintptr_t)new_frame);
+	fprintf( stderr, "CALLED glibc realloc %x\n", (unsigned int)(uintptr_t)new_frame);
 #endif
 	if (!new_frame) return 0;
 	new_frame->signature = FRAME_SIGNATURE;
@@ -514,6 +517,9 @@ DLL_PUBLIC void* calloc_IMPL( size_t nmemb, size_t size)
 	fprintf( stderr, "CALLING glibc calloc( %u,%u)\n", (unsigned int)nmemb, (unsigned int)size);
 #endif
 	frame = (mem_frame*)g_libc_calloc( sizeof(mem_frame) + nmemb * size, 1);
+#ifdef STRUS_LOWLEVEL_DEBUG
+	fprintf( stderr, "CALLED glibc calloc %x\n", (unsigned int)(uintptr_t)frame);
+#endif
 	if (!frame) return 0;
 	frame->signature = FRAME_SIGNATURE;
 	if ((void*)frame == &g_buf_calloc_for_dlsym) return (void*)(frame+1);
