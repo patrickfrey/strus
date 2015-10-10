@@ -23,10 +23,12 @@ databaseInterface_8hpp_source.html
 databaseOptions_8hpp_source.html
 databaseTransactionInterface_8hpp_source.html
 docnoRangeAllocatorInterface_8hpp_source.html
+errorBufferInterface_8hpp_source.html
 forwardIteratorInterface_8hpp_source.html
 index_8hpp_source.html
 invAclIteratorInterface_8hpp_source.html
 database__leveldb_8hpp_source.html
+error_8hpp_source.html
 peermsgproc_8hpp_source.html
 queryeval_8hpp_source.html
 queryproc_8hpp_source.html
@@ -70,10 +72,12 @@ databaseInterface_8hpp.html
 databaseOptions_8hpp.html
 databaseTransactionInterface_8hpp.html
 docnoRangeAllocatorInterface_8hpp.html
+errorBufferInterface_8hpp.html
 forwardIteratorInterface_8hpp.html
 index_8hpp.html
 invAclIteratorInterface_8hpp.html
 database__leveldb_8hpp.html
+error_8hpp.html
 peermsgproc_8hpp.html
 queryeval_8hpp.html
 queryproc_8hpp.html
@@ -109,6 +113,8 @@ weightingFunctionInterface_8hpp.html
 namespacestrus.html
 classstrus_1_1ArithmeticVariant.html
 classstrus_1_1ArithmeticVariant-members.html
+classstrus_1_1ArithmeticVariant_1_1String.html
+classstrus_1_1ArithmeticVariant_1_1String-members.html
 classstrus_1_1AttributeReaderInterface.html
 classstrus_1_1AttributeReaderInterface-members.html
 structstrus_1_1Constants.html
@@ -129,6 +135,8 @@ classstrus_1_1DatabaseTransactionInterface.html
 classstrus_1_1DatabaseTransactionInterface-members.html
 classstrus_1_1DocnoRangeAllocatorInterface.html
 classstrus_1_1DocnoRangeAllocatorInterface-members.html
+classstrus_1_1ErrorBufferInterface.html
+classstrus_1_1ErrorBufferInterface-members.html
 classstrus_1_1ForwardIteratorInterface.html
 classstrus_1_1ForwardIteratorInterface-members.html
 classstrus_1_1InvAclIteratorInterface.html

@@ -104,25 +104,25 @@
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#ad0baddd9ea51b6a3b12b501330db9f00">setNofDocumentsInsertedChange</a>(</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                        <span class="keywordtype">int</span> increment)=0;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#a408a49043819f6491529ca6a209a09e8">addDfChange</a>(</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* termtype,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* termvalue,</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                        <span class="keywordtype">int</span> increment,</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                        <span class="keywordtype">bool</span> isnew)=0;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#adcdcc1fa996ce06dcbe86b8e463f9893">start</a>()=0;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#a1852a0e161974498d2909154836d0065">rollback</a>()=0;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keyword">virtual</span> std::string <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#aa2cb1291446ec6d53133510695890863">fetch</a>()=0;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;};</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#a408a49043819f6491529ca6a209a09e8">addDfChange</a>(</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* termtype,</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* termvalue,</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                        <span class="keywordtype">int</span> increment,</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                        <span class="keywordtype">bool</span> isnew)=0;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#adcdcc1fa996ce06dcbe86b8e463f9893">start</a>()=0;</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#a1852a0e161974498d2909154836d0065">rollback</a>()=0;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1PeerMessageBuilderInterface.html#aa75d41e4295db39ed35e6da0692e9dd5">fetchMessage</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>*&amp; blk, std::size_t&amp; blksize)=0;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;};</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor"></span></div>
 <div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html_adcdcc1fa996ce06dcbe86b8e463f9893"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html#adcdcc1fa996ce06dcbe86b8e463f9893">strus::PeerMessageBuilderInterface::start</a></div><div class="ttdeci">virtual void start()=0</div><div class="ttdoc">Mark the current state that can be restored with a rollback. </div></div>
 <div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html_a1852a0e161974498d2909154836d0065"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html#a1852a0e161974498d2909154836d0065">strus::PeerMessageBuilderInterface::rollback</a></div><div class="ttdeci">virtual void rollback()=0</div><div class="ttdoc">Rollback to the last state marked with &#39;start()&#39;. </div></div>
 <div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html">strus::PeerMessageBuilderInterface</a></div><div class="ttdoc">Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)...</div><div class="ttdef"><b>Definition:</b> peerMessageBuilderInterface.hpp:40</div></div>
-<div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html_aa2cb1291446ec6d53133510695890863"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html#aa2cb1291446ec6d53133510695890863">strus::PeerMessageBuilderInterface::fetch</a></div><div class="ttdeci">virtual std::string fetch()=0</div><div class="ttdoc">Get the packed message to be sent to a peer. </div></div>
+<div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html_aa75d41e4295db39ed35e6da0692e9dd5"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html#aa75d41e4295db39ed35e6da0692e9dd5">strus::PeerMessageBuilderInterface::fetchMessage</a></div><div class="ttdeci">virtual bool fetchMessage(const char *&amp;blk, std::size_t &amp;blksize)=0</div><div class="ttdoc">Get the packed message to be sent to a peer. </div></div>
 <div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html_ad0baddd9ea51b6a3b12b501330db9f00"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html#ad0baddd9ea51b6a3b12b501330db9f00">strus::PeerMessageBuilderInterface::setNofDocumentsInsertedChange</a></div><div class="ttdeci">virtual void setNofDocumentsInsertedChange(int increment)=0</div><div class="ttdoc">Define the change of the number of document inserted. </div></div>
 <div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html_a7fa2f499163d6a1d8e2fbb8014381fc5"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html#a7fa2f499163d6a1d8e2fbb8014381fc5">strus::PeerMessageBuilderInterface::~PeerMessageBuilderInterface</a></div><div class="ttdeci">virtual ~PeerMessageBuilderInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> peerMessageBuilderInterface.hpp:44</div></div>
 <div class="ttc" id="classstrus_1_1PeerMessageBuilderInterface_html_a408a49043819f6491529ca6a209a09e8"><div class="ttname"><a href="classstrus_1_1PeerMessageBuilderInterface.html#a408a49043819f6491529ca6a209a09e8">strus::PeerMessageBuilderInterface::addDfChange</a></div><div class="ttdeci">virtual void addDfChange(const char *termtype, const char *termvalue, int increment, bool isnew)=0</div><div class="ttdoc">Add a message propagating a change in the df (document frequency) </div></div>
@@ -130,7 +130,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:36 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

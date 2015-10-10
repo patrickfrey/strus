@@ -88,9 +88,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5ccfd5a3e8c0cf03e8f1f6f9c17c5505"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#a5ccfd5a3e8c0cf03e8f1f6f9c17c5505">removeSubTree</a> (const char *domainkey, std::size_t domainkeysize)=0</td></tr>
 <tr class="memdesc:a5ccfd5a3e8c0cf03e8f1f6f9c17c5505"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a set of nodes defined by a key prefix to be deleted in the database as part of this transaction.  <a href="#a5ccfd5a3e8c0cf03e8f1f6f9c17c5505">More...</a><br/></td></tr>
 <tr class="separator:a5ccfd5a3e8c0cf03e8f1f6f9c17c5505"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac7f0990616f333a7fdf267e01e97ff5f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#ac7f0990616f333a7fdf267e01e97ff5f">commit</a> ()=0</td></tr>
-<tr class="memdesc:ac7f0990616f333a7fdf267e01e97ff5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes all commands defined in the transaction or none if one operation fails.  <a href="#ac7f0990616f333a7fdf267e01e97ff5f">More...</a><br/></td></tr>
-<tr class="separator:ac7f0990616f333a7fdf267e01e97ff5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9e6cb268df039a8da23b390cc2172e5"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#ac9e6cb268df039a8da23b390cc2172e5">commit</a> ()=0</td></tr>
+<tr class="memdesc:ac9e6cb268df039a8da23b390cc2172e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes all commands defined in the transaction or none if one operation fails.  <a href="#ac9e6cb268df039a8da23b390cc2172e5">More...</a><br/></td></tr>
+<tr class="separator:ac9e6cb268df039a8da23b390cc2172e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abba49249a4be21a3db05ae5fa9550cea"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#abba49249a4be21a3db05ae5fa9550cea">rollback</a> ()=0</td></tr>
 <tr class="memdesc:abba49249a4be21a3db05ae5fa9550cea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rollback of the transaction, no changes made.  <a href="#abba49249a4be21a3db05ae5fa9550cea">More...</a><br/></td></tr>
 <tr class="separator:abba49249a4be21a3db05ae5fa9550cea"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -120,12 +120,12 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Destructor. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Expected to do an implicit rollback, if neither '<a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#ac7f0990616f333a7fdf267e01e97ff5f" title="Executes all commands defined in the transaction or none if one operation fails. ">commit()</a>' or 'rollback' was called </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Expected to do an implicit rollback, if neither '<a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#ac9e6cb268df039a8da23b390cc2172e5" title="Executes all commands defined in the transaction or none if one operation fails. ">commit()</a>' or 'rollback' was called </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="ac7f0990616f333a7fdf267e01e97ff5f"></a>
+<a class="anchor" id="ac9e6cb268df039a8da23b390cc2172e5"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -133,7 +133,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::DatabaseTransactionInterface::commit </td>
+          <td class="memname">virtual bool strus::DatabaseTransactionInterface::commit </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -359,7 +359,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

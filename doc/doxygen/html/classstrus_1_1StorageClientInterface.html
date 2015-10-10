@@ -150,9 +150,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDocumentInterface.html">StorageDocumentInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a634e6cb4dd516d411bcf4a42594fc4ab">createDocumentChecker</a> (const std::string &amp;docid, const std::string &amp;logfilename) const =0</td></tr>
 <tr class="memdesc:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the <a class="el" href="classstrus_1_1StorageDocumentInterface.html#aac17acfd95b3c1fe3a97ede62e868c90" title="Closing the document definition. ">StorageDocumentInterface::done()</a> method after the definition of all elements.  <a href="#a634e6cb4dd516d411bcf4a42594fc4ab">More...</a><br/></td></tr>
 <tr class="separator:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62b069fbaccea4142781adb6bf279fcf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a62b069fbaccea4142781adb6bf279fcf">checkStorage</a> (std::ostream &amp;errorlog) const =0</td></tr>
-<tr class="memdesc:a62b069fbaccea4142781adb6bf279fcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through all key/value pairs and check their data for validity.  <a href="#a62b069fbaccea4142781adb6bf279fcf">More...</a><br/></td></tr>
-<tr class="separator:a62b069fbaccea4142781adb6bf279fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeae6016f195722d4772769e77ef41f0c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aeae6016f195722d4772769e77ef41f0c">checkStorage</a> (std::ostream &amp;errorlog) const =0</td></tr>
+<tr class="memdesc:aeae6016f195722d4772769e77ef41f0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through all key/value pairs and check their data for validity.  <a href="#aeae6016f195722d4772769e77ef41f0c">More...</a><br/></td></tr>
+<tr class="separator:aeae6016f195722d4772769e77ef41f0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a767184fa8964d2a61613c7c4eb840851"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a767184fa8964d2a61613c7c4eb840851">createDump</a> () const =0</td></tr>
 <tr class="memdesc:a767184fa8964d2a61613c7c4eb840851"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a dump of the storage.  <a href="#a767184fa8964d2a61613c7c4eb840851">More...</a><br/></td></tr>
 <tr class="separator:a767184fa8964d2a61613c7c4eb840851"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -208,7 +208,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a62b069fbaccea4142781adb6bf279fcf"></a>
+<a class="anchor" id="aeae6016f195722d4772769e77ef41f0c"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -216,7 +216,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::StorageClientInterface::checkStorage </td>
+          <td class="memname">virtual bool strus::StorageClientInterface::checkStorage </td>
           <td>(</td>
           <td class="paramtype">std::ostream &amp;&#160;</td>
           <td class="paramname"><em>errorlog</em></td><td>)</td>
@@ -237,6 +237,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>true, if the check succeeds, false if it fails </dd></dl>
 
 </div>
 </div>
@@ -998,7 +999,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

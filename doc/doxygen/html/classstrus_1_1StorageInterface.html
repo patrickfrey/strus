@@ -88,9 +88,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1043c67194c97ab42e73c4d1689b9a2a"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a1043c67194c97ab42e73c4d1689b9a2a">createClient</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
 <tr class="memdesc:a1043c67194c97ab42e73c4d1689b9a2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an client instance of the storage using a defined key value store database.  <a href="#a1043c67194c97ab42e73c4d1689b9a2a">More...</a><br/></td></tr>
 <tr class="separator:a1043c67194c97ab42e73c4d1689b9a2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56e2f84cb250646bee1ce9b3833fe26a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a56e2f84cb250646bee1ce9b3833fe26a">createStorage</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
-<tr class="memdesc:a56e2f84cb250646bee1ce9b3833fe26a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new storage described with configsource using a defined key value store database.  <a href="#a56e2f84cb250646bee1ce9b3833fe26a">More...</a><br/></td></tr>
-<tr class="separator:a56e2f84cb250646bee1ce9b3833fe26a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63888cef731e57f31f60a742957032bb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">createStorage</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
+<tr class="memdesc:a63888cef731e57f31f60a742957032bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new storage described with configsource using a defined key value store database.  <a href="#a63888cef731e57f31f60a742957032bb">More...</a><br/></td></tr>
+<tr class="separator:a63888cef731e57f31f60a742957032bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4af90c26d7118b46a21bf2c0c39e566a"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">createAlterMetaDataTable</a> (<a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
 <tr class="memdesc:a4af90c26d7118b46a21bf2c0c39e566a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to alter the meta data table structure.  <a href="#a4af90c26d7118b46a21bf2c0c39e566a">More...</a><br/></td></tr>
@@ -230,7 +230,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a56e2f84cb250646bee1ce9b3833fe26a"></a>
+<a class="anchor" id="a63888cef731e57f31f60a742957032bb"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -238,7 +238,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::StorageInterface::createStorage </td>
+          <td class="memname">virtual bool strus::StorageInterface::createStorage </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>configsource</em>, </td>
@@ -270,6 +270,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false on error </dd></dl>
 <dl class="section remark"><dt>Remarks</dt><dd>The database referenced by 'database' must have been created and active </dd></dl>
 
 </div>
@@ -333,7 +334,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

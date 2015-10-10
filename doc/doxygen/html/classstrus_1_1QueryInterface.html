@@ -113,6 +113,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aca789ed6157d8f4451d838a332ab8460"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#aca789ed6157d8f4451d838a332ab8460">defineMetaDataRestriction</a> (<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">CompareOperator</a> opr, const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;operand, bool newGroup=true)=0</td></tr>
 <tr class="memdesc:aca789ed6157d8f4451d838a332ab8460"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a restriction on documents base on a condition on the meta data.  <a href="#aca789ed6157d8f4451d838a332ab8460">More...</a><br/></td></tr>
 <tr class="separator:aca789ed6157d8f4451d838a332ab8460"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbd9f6ede6eecec88f35e1c5334e3342"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#adbd9f6ede6eecec88f35e1c5334e3342">addDocumentEvaluationSet</a> (const std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt; &amp;docnolist_)=0</td></tr>
+<tr class="memdesc:adbd9f6ede6eecec88f35e1c5334e3342"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a restriction on the documents as list of local document numbers (Add local document numbers to the list of documents to restrict the query on)  <a href="#adbd9f6ede6eecec88f35e1c5334e3342">More...</a><br/></td></tr>
+<tr class="separator:adbd9f6ede6eecec88f35e1c5334e3342"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af73bd5535ed23f33afd9f1146b0b1691"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#af73bd5535ed23f33afd9f1146b0b1691">setMaxNofRanks</a> (std::size_t maxNofRanks_)=0</td></tr>
 <tr class="memdesc:af73bd5535ed23f33afd9f1146b0b1691"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the maximum number of ranks to evaluate starting with the minimum rank.  <a href="#af73bd5535ed23f33afd9f1146b0b1691">More...</a><br/></td></tr>
 <tr class="separator:af73bd5535ed23f33afd9f1146b0b1691"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -201,6 +204,38 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="adbd9f6ede6eecec88f35e1c5334e3342"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryInterface::addDocumentEvaluationSet </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>docnolist_</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define a restriction on the documents as list of local document numbers (Add local document numbers to the list of documents to restrict the query on) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">docnolist_</td><td>list of documents to evaluate the query on </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a5c32a31f060c0df68c933f449cc93d01"></a>
 <div class="memitem">
 <div class="memproto">
@@ -584,7 +619,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

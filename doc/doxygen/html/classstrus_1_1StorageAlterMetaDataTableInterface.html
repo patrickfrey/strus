@@ -74,7 +74,7 @@
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a179586bfa422082d56241607b1e08365"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a179586bfa422082d56241607b1e08365">~StorageAlterMetaDataTableInterface</a> ()</td></tr>
-<tr class="memdesc:a179586bfa422082d56241607b1e08365"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor that is the doing the rollback too, if <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a1aafd624400bc3d81191011cfc3e57e0" title="Write the changes of the meta data table structure to the storage. ">commit()</a> was not called before.  <a href="#a179586bfa422082d56241607b1e08365">More...</a><br/></td></tr>
+<tr class="memdesc:a179586bfa422082d56241607b1e08365"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor that is the doing the rollback too, if <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a148decde37ea97e362ce4dd53d031964" title="Write the changes of the meta data table structure to the storage. ">commit()</a> was not called before.  <a href="#a179586bfa422082d56241607b1e08365">More...</a><br/></td></tr>
 <tr class="separator:a179586bfa422082d56241607b1e08365"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae46acf90dd73c4478d4790a25983ae6b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#ae46acf90dd73c4478d4790a25983ae6b">addElement</a> (const std::string &amp;name, const std::string &amp;datatype)=0</td></tr>
 <tr class="memdesc:ae46acf90dd73c4478d4790a25983ae6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare a new meta data element.  <a href="#ae46acf90dd73c4478d4790a25983ae6b">More...</a><br/></td></tr>
@@ -91,9 +91,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6483325ca19b986a8aa541b1b48379cb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a6483325ca19b986a8aa541b1b48379cb">clearElement</a> (const std::string &amp;name)=0</td></tr>
 <tr class="memdesc:a6483325ca19b986a8aa541b1b48379cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare a meta data element to be reset (all values are reinitialized with their default)  <a href="#a6483325ca19b986a8aa541b1b48379cb">More...</a><br/></td></tr>
 <tr class="separator:a6483325ca19b986a8aa541b1b48379cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1aafd624400bc3d81191011cfc3e57e0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a1aafd624400bc3d81191011cfc3e57e0">commit</a> ()=0</td></tr>
-<tr class="memdesc:a1aafd624400bc3d81191011cfc3e57e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the changes of the meta data table structure to the storage.  <a href="#a1aafd624400bc3d81191011cfc3e57e0">More...</a><br/></td></tr>
-<tr class="separator:a1aafd624400bc3d81191011cfc3e57e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a148decde37ea97e362ce4dd53d031964"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a148decde37ea97e362ce4dd53d031964">commit</a> ()=0</td></tr>
+<tr class="memdesc:a148decde37ea97e362ce4dd53d031964"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the changes of the meta data table structure to the storage.  <a href="#a148decde37ea97e362ce4dd53d031964">More...</a><br/></td></tr>
+<tr class="separator:a148decde37ea97e362ce4dd53d031964"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55f598224eaa86257ef662909cf14903"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a55f598224eaa86257ef662909cf14903">rollback</a> ()=0</td></tr>
 <tr class="memdesc:a55f598224eaa86257ef662909cf14903"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rollback of the meta data table changes, no changes made.  <a href="#a55f598224eaa86257ef662909cf14903">More...</a><br/></td></tr>
 <tr class="separator:a55f598224eaa86257ef662909cf14903"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,7 +122,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Destructor that is the doing the rollback too, if <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a1aafd624400bc3d81191011cfc3e57e0" title="Write the changes of the meta data table structure to the storage. ">commit()</a> was not called before. </p>
+<p>Destructor that is the doing the rollback too, if <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a148decde37ea97e362ce4dd53d031964" title="Write the changes of the meta data table structure to the storage. ">commit()</a> was not called before. </p>
 
 </div>
 </div>
@@ -252,7 +252,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1aafd624400bc3d81191011cfc3e57e0"></a>
+<a class="anchor" id="a148decde37ea97e362ce4dd53d031964"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -260,7 +260,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::StorageAlterMetaDataTableInterface::commit </td>
+          <td class="memname">virtual bool strus::StorageAlterMetaDataTableInterface::commit </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -384,7 +384,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

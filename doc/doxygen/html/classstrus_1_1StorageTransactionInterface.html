@@ -92,9 +92,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a741e74dcb4c0816f8e1602718bf34fc6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a741e74dcb4c0816f8e1602718bf34fc6">updateMetaData</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno, const std::string &amp;varname, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;value)=0</td></tr>
 <tr class="memdesc:a741e74dcb4c0816f8e1602718bf34fc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update of meta data for a specific document (without creating it)  <a href="#a741e74dcb4c0816f8e1602718bf34fc6">More...</a><br/></td></tr>
 <tr class="separator:a741e74dcb4c0816f8e1602718bf34fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a681c10df600e36f898797fdea88e88de"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a681c10df600e36f898797fdea88e88de">commit</a> ()=0</td></tr>
-<tr class="memdesc:a681c10df600e36f898797fdea88e88de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert all documents and executes all commands defined in the transaction or none if one operation fails.  <a href="#a681c10df600e36f898797fdea88e88de">More...</a><br/></td></tr>
-<tr class="separator:a681c10df600e36f898797fdea88e88de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e852019b5ca4665d5139fef4195289f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f">commit</a> ()=0</td></tr>
+<tr class="memdesc:a1e852019b5ca4665d5139fef4195289f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert all documents and executes all commands defined in the transaction or none if one operation fails.  <a href="#a1e852019b5ca4665d5139fef4195289f">More...</a><br/></td></tr>
+<tr class="separator:a1e852019b5ca4665d5139fef4195289f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a971f8524b13dfb2a04bc07c3959a8b2b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a971f8524b13dfb2a04bc07c3959a8b2b">rollback</a> ()=0</td></tr>
 <tr class="memdesc:a971f8524b13dfb2a04bc07c3959a8b2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rollback of the transaction, no changes made.  <a href="#a971f8524b13dfb2a04bc07c3959a8b2b">More...</a><br/></td></tr>
 <tr class="separator:a971f8524b13dfb2a04bc07c3959a8b2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,12 +124,12 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Destructor. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Expected to do an implicit rollback, if neither '<a class="el" href="classstrus_1_1StorageTransactionInterface.html#a681c10df600e36f898797fdea88e88de" title="Insert all documents and executes all commands defined in the transaction or none if one operation fa...">commit()</a>' or 'rollback' was called </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Expected to do an implicit rollback, if neither '<a class="el" href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f" title="Insert all documents and executes all commands defined in the transaction or none if one operation fa...">commit()</a>' or 'rollback' was called </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a681c10df600e36f898797fdea88e88de"></a>
+<a class="anchor" id="a1e852019b5ca4665d5139fef4195289f"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -137,7 +137,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::StorageTransactionInterface::commit </td>
+          <td class="memname">virtual bool strus::StorageTransactionInterface::commit </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -151,6 +151,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Insert all documents and executes all commands defined in the transaction or none if one operation fails. </p>
+<dl class="section return"><dt>Returns</dt><dd>true on success, false on error </dd></dl>
 
 </div>
 </div>
@@ -378,7 +379,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -92,15 +92,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1009c69c0aac2586114317c551747016"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#a1009c69c0aac2586114317c551747016">createClient</a> (const std::string &amp;configsource) const =0</td></tr>
 <tr class="memdesc:a1009c69c0aac2586114317c551747016"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a client to access the key value store database.  <a href="#a1009c69c0aac2586114317c551747016">More...</a><br/></td></tr>
 <tr class="separator:a1009c69c0aac2586114317c551747016"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af55ff6120c55c21362dc54312becb24d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#af55ff6120c55c21362dc54312becb24d">createDatabase</a> (const std::string &amp;configsource) const =0</td></tr>
-<tr class="memdesc:af55ff6120c55c21362dc54312becb24d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new key value store database described with config.  <a href="#af55ff6120c55c21362dc54312becb24d">More...</a><br/></td></tr>
-<tr class="separator:af55ff6120c55c21362dc54312becb24d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30377701e339b766d6d7495a45220026"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#a30377701e339b766d6d7495a45220026">restoreDatabase</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseBackupCursorInterface.html">DatabaseBackupCursorInterface</a> *backup) const =0</td></tr>
-<tr class="memdesc:a30377701e339b766d6d7495a45220026"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restore a database at the location described in config and restore the backup from the backup interface passed.  <a href="#a30377701e339b766d6d7495a45220026">More...</a><br/></td></tr>
-<tr class="separator:a30377701e339b766d6d7495a45220026"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad69e3263c57ac51213cb46641d7c7ed0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#ad69e3263c57ac51213cb46641d7c7ed0">destroyDatabase</a> (const std::string &amp;configsource) const =0</td></tr>
-<tr class="memdesc:ad69e3263c57ac51213cb46641d7c7ed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys an existing key value store database described with config.  <a href="#ad69e3263c57ac51213cb46641d7c7ed0">More...</a><br/></td></tr>
-<tr class="separator:ad69e3263c57ac51213cb46641d7c7ed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1fd9e71afed522fcb1d9f1d228b6df3"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#ab1fd9e71afed522fcb1d9f1d228b6df3">createDatabase</a> (const std::string &amp;configsource) const =0</td></tr>
+<tr class="memdesc:ab1fd9e71afed522fcb1d9f1d228b6df3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new key value store database described with config.  <a href="#ab1fd9e71afed522fcb1d9f1d228b6df3">More...</a><br/></td></tr>
+<tr class="separator:ab1fd9e71afed522fcb1d9f1d228b6df3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a702ff815150f3c36c6ff792fc88fc6f4"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#a702ff815150f3c36c6ff792fc88fc6f4">restoreDatabase</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseBackupCursorInterface.html">DatabaseBackupCursorInterface</a> *backup) const =0</td></tr>
+<tr class="memdesc:a702ff815150f3c36c6ff792fc88fc6f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restore a database at the location described in config and restore the backup from the backup interface passed.  <a href="#a702ff815150f3c36c6ff792fc88fc6f4">More...</a><br/></td></tr>
+<tr class="separator:a702ff815150f3c36c6ff792fc88fc6f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a978d01f813fe44efd410df93c5c3c2bd"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#a978d01f813fe44efd410df93c5c3c2bd">destroyDatabase</a> (const std::string &amp;configsource) const =0</td></tr>
+<tr class="memdesc:a978d01f813fe44efd410df93c5c3c2bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys an existing key value store database described with config.  <a href="#a978d01f813fe44efd410df93c5c3c2bd">More...</a><br/></td></tr>
+<tr class="separator:a978d01f813fe44efd410df93c5c3c2bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c2cdfcacc9e2ffdfe547756590cb40b"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseInterface.html#a0c2cdfcacc9e2ffdfe547756590cb40b">getConfigDescription</a> (<a class="el" href="classstrus_1_1DatabaseInterface.html#aa85a36730f859acb42927e3240bdc23e">ConfigType</a> type) const =0</td></tr>
 <tr class="memdesc:a0c2cdfcacc9e2ffdfe547756590cb40b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets an example configuration description (source string as used by the functions here) createDatabase(const char*), destroyDatabase(const char*) and createDatabaseClient(const char*) for the usage printed by programs using this database.  <a href="#a0c2cdfcacc9e2ffdfe547756590cb40b">More...</a><br/></td></tr>
 <tr class="separator:a0c2cdfcacc9e2ffdfe547756590cb40b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -192,10 +192,11 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>the client on success or NULL, if the operation failed </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="af55ff6120c55c21362dc54312becb24d"></a>
+<a class="anchor" id="ab1fd9e71afed522fcb1d9f1d228b6df3"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -203,7 +204,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::DatabaseInterface::createDatabase </td>
+          <td class="memname">virtual bool strus::DatabaseInterface::createDatabase </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>configsource</em></td><td>)</td>
@@ -224,10 +225,11 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>true, if the operation succeeded </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="ad69e3263c57ac51213cb46641d7c7ed0"></a>
+<a class="anchor" id="a978d01f813fe44efd410df93c5c3c2bd"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -235,7 +237,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::DatabaseInterface::destroyDatabase </td>
+          <td class="memname">virtual bool strus::DatabaseInterface::destroyDatabase </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>configsource</em></td><td>)</td>
@@ -256,6 +258,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>true, if the operation succeeded </dd></dl>
 
 </div>
 </div>
@@ -343,7 +346,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a30377701e339b766d6d7495a45220026"></a>
+<a class="anchor" id="a702ff815150f3c36c6ff792fc88fc6f4"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -351,7 +354,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void strus::DatabaseInterface::restoreDatabase </td>
+          <td class="memname">virtual bool strus::DatabaseInterface::restoreDatabase </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>configsource</em>, </td>
@@ -383,6 +386,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>true, if the operation succeeded </dd></dl>
 
 </div>
 </div>
@@ -393,7 +397,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:25:59 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
