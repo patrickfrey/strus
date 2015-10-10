@@ -42,8 +42,8 @@ public:
 	/// \brief Destructor
 	virtual ~PeerMessageViewerInterface(){}
 
-	/// \brief Define the change of the number of document inserted
-	/// \param[in] increment positive or negative (decrement) value of the local change of the collection size
+	/// \brief Fetch the change of the number of document inserted
+	/// \return the increment positive or negative (decrement) value of the local change of the collection size
 	virtual int nofDocumentsInsertedChange()=0;
 
 	struct DocumentFrequencyChange

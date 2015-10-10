@@ -266,7 +266,7 @@ static strus::ArithmeticVariant randomOperand(
 			{
 				epsilon = 0.0004887581f;
 			}
-			float value = (float)baseValue;
+			double value = (double)baseValue;
 			unsigned int rd = RANDINT(1,5);
 			if (ofs > 0)
 			{

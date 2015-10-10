@@ -34,7 +34,6 @@
 #include "strus/index.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include <limits>
@@ -45,6 +44,8 @@ namespace strus
 
 /// \brief Forward declaration
 class WeightingFunctionConstant;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 /// \class WeightingFunctionContextConstant
@@ -54,8 +55,8 @@ class WeightingFunctionContextConstant
 {
 public:
 	WeightingFunctionContextConstant(
-			float weight_)
-		:m_featar(),m_weight(weight_){}
+			float weight_, ErrorBufferInterface* errorhnd_)
+		:m_featar(),m_weight(weight_),m_errorhnd(errorhnd_){}
 
 	struct Feature
 	{
@@ -71,35 +72,14 @@ public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
-			float weight_)
-	{
-		if (utils::caseInsensitiveEquals( name_, "match"))
-		{
-			m_featar.push_back( Feature( itr_, weight_));
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), "constant", name_.c_str());
-		}
-	}
+			float weight_);
 
-	virtual float call( const Index& docno)
-	{
-		float rt = 0.0;
-		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-		for (;fi != fe; ++fi)
-		{
-			if (docno==fi->itr->skipDoc( docno))
-			{
-				rt += fi->weight * m_weight;
-			}
-		}
-		return rt;
-	}
+	virtual float call( const Index& docno);
 
 private:
 	std::vector<Feature> m_featar;
 	float m_weight;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 /// \class WeightingFunctionInstanceConstant
@@ -108,45 +88,24 @@ class WeightingFunctionInstanceConstant
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceConstant()
-		:m_weight(1.0){}
+	explicit WeightingFunctionInstanceConstant( ErrorBufferInterface* errorhnd_)
+		:m_weight(1.0),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceConstant(){}
 
-	virtual void addStringParameter( const std::string& name, const std::string& value)
-	{
-		addNumericParameter( name, arithmeticVariantFromString( value));
-	}
+	virtual void addStringParameter( const std::string& name, const std::string& value);
 
-	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)
-	{
-		if (utils::caseInsensitiveEquals( name, "weight"))
-		{
-			m_weight = (float)value;
-		}
-		else
-		{
-			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "Constant", name.c_str());
-		}
-	}
+	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface*) const
-	{
-		return new WeightingFunctionContextConstant( m_weight);
-	}
+			MetaDataReaderInterface*) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << std::setw(2) << std::setprecision(5)
-			<< "weight=" << m_weight;
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	float m_weight;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -156,14 +115,15 @@ class WeightingFunctionConstant
 	:public WeightingFunctionInterface
 {
 public:
-	WeightingFunctionConstant(){}
+	explicit WeightingFunctionConstant( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~WeightingFunctionConstant(){}
 
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const
-	{
-		return new WeightingFunctionInstanceConstant();
-	}
+	virtual WeightingFunctionInstanceInterface* createInstance() const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

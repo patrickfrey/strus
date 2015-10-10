@@ -28,6 +28,9 @@
 */
 #include "postingIteratorStructSequence.hpp"
 #include "postingIteratorHelpers.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <stdexcept>
 #include <cstdlib>
 
@@ -39,12 +42,14 @@ IteratorStructSequence::~IteratorStructSequence()
 IteratorStructSequence::IteratorStructSequence(
 		int range_,
 		const std::vector<Reference< PostingIteratorInterface> >& args,
-		bool with_cut)
+		bool with_cut,
+		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
 	,m_range(range_)
 	,m_documentFrequency(-1)
+	,m_errorhnd(errorhnd_)
 {
 	if (with_cut)
 	{
@@ -79,22 +84,26 @@ IteratorStructSequence::IteratorStructSequence(
 std::vector<const PostingIteratorInterface*>
 	IteratorStructSequence::subExpressions( bool positive) const
 {
-	std::vector<const PostingIteratorInterface*> rt;
-	if (positive)
+	try
 	{
-		rt.reserve( m_argar.size());
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		for (; ai != ae; ++ai)
+		std::vector<const PostingIteratorInterface*> rt;
+		if (positive)
 		{
-			rt.push_back( ai->get());
+			rt.reserve( m_argar.size());
+			std::vector<Reference< PostingIteratorInterface> >::const_iterator
+				ai = m_argar.begin(), ae = m_argar.end();
+			for (; ai != ae; ++ai)
+			{
+				rt.push_back( ai->get());
+			}
 		}
+		else if (m_cut.get())
+		{
+			rt.push_back( m_cut.get());
+		}
+		return rt;
 	}
-	else if (m_cut.get())
-	{
-		rt.push_back( m_cut.get());
-	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error 'sequence' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorStructSequence::skipDoc( const Index& docno_)
@@ -189,5 +198,40 @@ GlobalCounter IteratorStructSequence::documentFrequency() const
 	}
 	return m_documentFrequency;
 }
+
+
+PostingIteratorInterface* PostingJoinStructSequence::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_) const
+{
+	if (argitr.size() < 1)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'struct_sequence'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructSequence( range_, argitr, true, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'struct_sequence' iterator: %s"), *m_errorhnd, 0);
+}
+
+
+PostingIteratorInterface* PostingJoinSequence::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_) const
+{
+	if (argitr.size() < 1)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'sequence'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructSequence( range_, argitr, false, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'sequence' iterator: %s"), *m_errorhnd, 0);
+}
+
 
 

@@ -57,4 +57,5 @@ tests/varSizeNodeTree/src/testVarSizeNodeTree
 tests/metaDataRestrictions/src/testMetaDataRestrictions
 tests/ranker/src/testRanker
 tests/peermsgproc/src/testPeerMessageProcessor
-
+tests/formula/src/formula
+tests/loggingMalloc/src/testLoggingMalloc

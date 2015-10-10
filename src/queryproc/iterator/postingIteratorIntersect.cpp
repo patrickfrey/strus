@@ -27,16 +27,20 @@
 --------------------------------------------------------------------
 */
 #include "postingIteratorIntersect.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <stdexcept>
 #include <cstdlib>
 
 using namespace strus;
 
-IteratorIntersect::IteratorIntersect( const std::vector<Reference< PostingIteratorInterface> >& args)
+IteratorIntersect::IteratorIntersect( const std::vector<Reference< PostingIteratorInterface> >& args, ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_posno(0)
 	,m_argar(args)
 	,m_documentFrequency(-1)
+	,m_errorhnd(errorhnd_)
 {
 	std::vector<Reference< PostingIteratorInterface> >::const_iterator
 		ai = m_argar.begin(), ae = m_argar.end();
@@ -54,18 +58,22 @@ IteratorIntersect::~IteratorIntersect()
 std::vector<const PostingIteratorInterface*>
 	IteratorIntersect::subExpressions( bool positive) const
 {
-	std::vector<const PostingIteratorInterface*> rt;
-	if (positive)
+	try
 	{
-		rt.reserve( m_argar.size());
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		for (; ai != ae; ++ai)
+		std::vector<const PostingIteratorInterface*> rt;
+		if (positive)
 		{
-			rt.push_back( ai->get());
+			rt.reserve( m_argar.size());
+			std::vector<Reference< PostingIteratorInterface> >::const_iterator
+				ai = m_argar.begin(), ae = m_argar.end();
+			for (; ai != ae; ++ai)
+			{
+				rt.push_back( ai->get());
+			}
 		}
+		return rt;
 	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error 'intersect' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorIntersect::skipDoc( const Index& docno_)
@@ -159,4 +167,27 @@ GlobalCounter IteratorIntersect::documentFrequency() const
 	}
 	return m_documentFrequency;
 }
+
+
+PostingIteratorInterface* PostingJoinIntersect::createResultIterator(
+		const std::vector<Reference<PostingIteratorInterface> >& itrs,
+		int range) const
+{
+	if (range != 0)
+	{
+		m_errorhnd->report( _TXT( "no range argument expected for 'intersect'"));
+		return 0;
+	}
+	if (itrs.size() == 0)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'intersect'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorIntersect( itrs, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'intersect' iterator: %s"), *m_errorhnd, 0);
+}
+
 

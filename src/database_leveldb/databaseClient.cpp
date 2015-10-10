@@ -32,7 +32,9 @@
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/databaseOptions.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "getMemorySize.h"
 #include <stdexcept>
 #include <leveldb/db.h>
@@ -160,14 +162,31 @@ LevelDbHandle::~LevelDbHandle()
 	cleanup();
 }
 
+DatabaseClient::~DatabaseClient()
+{
+	m_db.reset();
+	if (m_db.unique())
+	{
+		m_dbmap->dereference( m_db->path());
+	}
+}
+
 DatabaseTransactionInterface* DatabaseClient::createTransaction()
 {
-	return new DatabaseTransaction( m_db->db(), this);
+	try
+	{
+		return new DatabaseTransaction( m_db->db(), this, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating transaction: %s"), *m_errorhnd, 0);
 }
 
 DatabaseCursorInterface* DatabaseClient::createCursor( const DatabaseOptions& options) const
 {
-	return new DatabaseCursor( m_db->db(), options.useCacheEnabled());
+	try
+	{
+		return new DatabaseCursor( m_db->db(), options.useCacheEnabled(), false, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
 }
 
 
@@ -176,8 +195,8 @@ class DatabaseBackupCursor
 	,public DatabaseCursor
 {
 public:
-	explicit DatabaseBackupCursor( leveldb::DB* db_)
-		:DatabaseCursor( db_, false, true){}
+	DatabaseBackupCursor( leveldb::DB* db_, ErrorBufferInterface* errorhnd_)
+		:DatabaseCursor( db_, false, true, m_errorhnd),m_errorhnd(errorhnd_){}
 
 	virtual bool fetch(
 			const char*& key,
@@ -185,30 +204,40 @@ public:
 			const char*& blk,
 			std::size_t& blksize)
 	{
-		if (!m_key.defined())
+		try
 		{
-			m_key = seekFirst( 0, 0);
+			if (!m_key.defined())
+			{
+				m_key = seekFirst( 0, 0);
+			}
+			else
+			{
+				m_key = seekNext();
+			}
+			if (!m_key.defined()) return false;
+			Slice blkslice = value();
+			key = m_key.ptr();
+			keysize = m_key.size();
+			blk = blkslice.ptr();
+			blksize = blkslice.size();
+			return true;
 		}
-		else
-		{
-			m_key = seekNext();
-		}
-		if (!m_key.defined()) return false;
-		Slice blkslice = value();
-		key = m_key.ptr();
-		keysize = m_key.size();
-		blk = blkslice.ptr();
-		blksize = blkslice.size();
-		return true;
+		CATCH_ERROR_MAP_RETURN( _TXT("error in database cursor fetching next element: %s"), *m_errorhnd, false);
 	}
+
 private:
 	Slice m_key;
+	ErrorBufferInterface* m_errorhnd;
 };
 
 
 DatabaseBackupCursorInterface* DatabaseClient::createBackupCursor() const
 {
-	return new DatabaseBackupCursor( m_db->db());
+	try
+	{
+		return new DatabaseBackupCursor( m_db->db(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating database backup cursor: %s"), *m_errorhnd, 0);
 }
 
 void DatabaseClient::writeImm(
@@ -217,30 +246,38 @@ void DatabaseClient::writeImm(
 			const char* value,
 			std::size_t valuesize)
 {
-	leveldb::WriteOptions options;
-	options.sync = true;
-	leveldb::Status status = m_db->db()->Put( options,
-					leveldb::Slice( key, keysize),
-					leveldb::Slice( value, valuesize));
-	if (!status.ok())
+	try
 	{
-		std::string ststr( status.ToString());
-		throw strus::runtime_error( _TXT( "Level DB error: %s"), ststr.c_str());
+		leveldb::WriteOptions options;
+		options.sync = true;
+		leveldb::Status status = m_db->db()->Put( options,
+						leveldb::Slice( key, keysize),
+						leveldb::Slice( value, valuesize));
+		if (!status.ok())
+		{
+			std::string ststr( status.ToString());
+			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+		}
 	}
+	CATCH_ERROR_MAP( _TXT("error database writeImm: %s"), *m_errorhnd);
 }
 
 void DatabaseClient::removeImm(
 			const char* key,
 			std::size_t keysize)
 {
-	leveldb::WriteOptions options;
-	options.sync = true;
-	leveldb::Status status = m_db->db()->Delete( options, leveldb::Slice( key, keysize));
-	if (!status.ok())
+	try
 	{
-		std::string ststr( status.ToString());
-		throw strus::runtime_error( _TXT( "Level DB error: %s"), ststr.c_str());
+		leveldb::WriteOptions options;
+		options.sync = true;
+		leveldb::Status status = m_db->db()->Delete( options, leveldb::Slice( key, keysize));
+		if (!status.ok())
+		{
+			std::string ststr( status.ToString());
+			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+		}
 	}
+	CATCH_ERROR_MAP( _TXT("error database removeImm: %s"), *m_errorhnd);
 }
 
 bool DatabaseClient::readValue(
@@ -249,20 +286,24 @@ bool DatabaseClient::readValue(
 		std::string& value,
 		const DatabaseOptions& options) const
 {
-	std::string rt;
-	leveldb::ReadOptions readoptions;
-	readoptions.fill_cache = options.useCacheEnabled();
-
-	leveldb::Status status = m_db->db()->Get( readoptions, leveldb::Slice( key, keysize), &value);
-	if (status.IsNotFound())
+	try
 	{
-		return false;
+		std::string rt;
+		leveldb::ReadOptions readoptions;
+		readoptions.fill_cache = options.useCacheEnabled();
+	
+		leveldb::Status status = m_db->db()->Get( readoptions, leveldb::Slice( key, keysize), &value);
+		if (status.IsNotFound())
+		{
+			return false;
+		}
+		if (!status.ok())
+		{
+			std::string ststr( status.ToString());
+			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+		}
+		return true;
 	}
-	if (!status.ok())
-	{
-		std::string ststr( status.ToString());
-		throw strus::runtime_error( _TXT( "Level DB error: %s"), ststr.c_str());
-	}
-	return true;
+	CATCH_ERROR_MAP_RETURN( _TXT("error database readValue: %s"), *m_errorhnd, false);
 }
 

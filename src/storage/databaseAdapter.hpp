@@ -68,9 +68,8 @@ struct DatabaseAdapter_StringIndex
 	class Cursor
 	{
 	public:
-		Cursor( char prefix_, const DatabaseClientInterface* database_)
-			:m_cursor( database_->createCursor( DatabaseOptions())),m_prefix(prefix_){}
-	
+		Cursor( char prefix_, const DatabaseClientInterface* database_);
+
 		bool loadFirst( std::string& key, Index& value);
 		bool loadNext( std::string& key, Index& value);
 
@@ -240,9 +239,7 @@ struct DatabaseAdapter_DataBlock
 		:public Base
 	{
 	public:
-		Cursor( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_)
-			:Base(prefix_,domainKey_)
-			,m_cursor(database_->createCursor( useCache_?(DatabaseOptions().useCache()):(DatabaseOptions()))){}
+		Cursor( char prefix_, const DatabaseClientInterface* database_, const BlockKey& domainKey_, bool useCache_);
 
 		bool loadUpperBound( const Index& elemno, DataBlock& blk);
 		bool loadFirst( DataBlock& blk);
@@ -639,8 +636,7 @@ public:
 	class Cursor
 	{
 	public:
-		Cursor( const DatabaseClientInterface* database_)
-			:m_cursor( database_->createCursor( DatabaseOptions())){}
+		Cursor( const DatabaseClientInterface* database_);
 
 		bool loadFirst( Index& typeno, Index& termno, Index& df);
 		bool loadNext( Index& typeno, Index& termno, Index& df);

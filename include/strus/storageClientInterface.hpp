@@ -199,7 +199,8 @@ public:
 
 	/// \brief Iterate through all key/value pairs and check their data for validity
 	/// \param[out] errorlog stream for reporting errors
-	virtual void checkStorage( std::ostream& errorlog) const=0;
+	/// \return true, if the check succeeds, false if it fails
+	virtual bool checkStorage( std::ostream& errorlog) const=0;
 
 	/// \brief Create a dump of the storage
 	/// \return the object to fetch the dump from

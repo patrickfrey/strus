@@ -31,6 +31,7 @@
 #include "strus/index.hpp"
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
+#include "private/stringMap.hpp"
 #include <vector>
 #include <map>
 
@@ -45,10 +46,7 @@ class AttributeMap
 {
 public:
 	explicit AttributeMap( DatabaseClientInterface* database_)
-		:m_database(database_)
-	{
-		m_strings.push_back( '\0');
-	}
+		:m_database(database_){}
 
 	~AttributeMap(){}
 
@@ -59,15 +57,15 @@ public:
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
-	typedef LocalStructAllocator<std::pair<BlockKeyIndex,std::size_t> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<BlockKeyIndex,const char*> > MapAllocator;
 	typedef std::less<BlockKeyIndex> MapCompare;
-	typedef std::map<BlockKeyIndex,std::size_t,MapCompare,MapAllocator> Map;
+	typedef std::map<BlockKeyIndex,const char*,MapCompare,MapAllocator> Map;
 	typedef std::vector<BlockKeyIndex> DeleteList;
 
 private:
 	DatabaseClientInterface* m_database;
 	Map m_map;
-	std::string m_strings;
+	StringVector m_strings;
 	DeleteList m_deletes;
 };
 

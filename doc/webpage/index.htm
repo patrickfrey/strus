@@ -23,6 +23,19 @@
 <div id="wrap">
 	<div id="sidebar">
 		<a href="index.htm"><img src="images/logotype.jpg" width="280" height="280" alt="Strus logo" /></a>
+		<table border=0>
+		<tr>
+		<td><a href="documentation.htm"><font size=5 style="Arial">C++&nbsp;</font></a>
+		</td>
+		<td><a href="http://www.project-strus.net/php_bindings.htm"><img src="images/php.jpeg" width="75" alt="PHP logo" />&nbsp;</a>
+		</td>
+		<td><a href="http://www.project-strus.net/java_bindings.htm"><font size=5 style="Arial">Java&nbsp;</font></a>
+		</td>
+		<td><a href="http://www.project-strus.net/python_bindings.htm"><img src="images/python.jpeg" width="75" alt="Python logo" /></a>
+		<br/>(available&nbsp;soon)
+		</td>
+		</tr>
+		</table>
 		<h1><a href="index.htm">Strus</a></h1>
 		<p class="slogan">With <i>strus</i> you can build full-text search engines with
 		elementary bricks.</p>
@@ -52,13 +65,6 @@
 		Besides finding structures, <i>strus</i> is of course also able to do <i>classical 
 		information retrieval</i> with a statistical, resp. stochastical (bag of words model)
 		<i>or a proximity weighting scheme</i>.<br/>
-		Support for global page rank schemes are not directly supported but implementable 
-		by taking precalculated document weights stored in a table (in memory)
-		into account.<br/> 
-		Query based link popularity is <b>not</b> supported in the core since such weighting 
-		schemes are hard to implement on distributed indices and the capability to 
-		distribute the index and taking global statistics into account is 
-		a must for a competitive search engine.
 		</p>
 		<h2>Story/Motivation</h2>
 		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of <i>strus</i>.
@@ -78,8 +84,8 @@
 
 		<h2>Installation</h2>
 		<p class="description">
-		There is a <a href="installation.htm#github">short guide</a> on how to fetch the strus sources from github and build them.
-		As alternative there exist also <a href="installation.htm#docker">docker images</a>.
+		There is a <a href="installation.htm">short installation guide</a> on how to fetch the strus 
+		sources from github and build them or alternatively to run strus from docker images.
 		</p>
 		<h2>Project organization</h2>
 		<p class="description">
@@ -95,6 +101,12 @@
 		</p>
 		<h3>News</h3>
 		<table>
+
+		<tr>
+		<td><p class="timestamp">Aug 17th, 2015</p></td>
+		<td><p class="newstext">Language bindings for Java are now available. Python bindings are
+			following soon. </p></td>
+		</tr>
 
 		<tr>
 		<td><p class="timestamp">Jul 1st, 2015</p></td>

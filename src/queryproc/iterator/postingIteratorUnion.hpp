@@ -38,12 +38,14 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 class IteratorUnion
 	:public IteratorJoin
 {
 public:
-	IteratorUnion( const std::vector<Reference< PostingIteratorInterface> >& args_);
+	IteratorUnion( const std::vector<Reference< PostingIteratorInterface> >& args_, ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorUnion();
 
 	virtual const char* featureid() const
@@ -149,6 +151,7 @@ private:
 	uint64_t m_selected;						///< set pf bits parallel to arguments that specifies the current document matches of the arguments
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the most frequent subexpression)
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -156,17 +159,16 @@ class PostingJoinUnion
 	:public PostingJoinOperatorInterface
 {
 public:
+	explicit PostingJoinUnion( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinUnion(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
-			int range) const
-	{
-		if (range != 0) throw strus::runtime_error( _TXT( "no range argument expected for 'union'"));
-		if (itrs.size() == 0) throw strus::runtime_error( _TXT( "too few arguments for 'union'"));
+			int range) const;
 
-		return new IteratorUnion( itrs);
-	}
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

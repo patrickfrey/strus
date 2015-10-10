@@ -49,7 +49,8 @@ public:
 		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0)
 	{
 		if (maxNofRanks_ == 0) throw strus::runtime_error( _TXT( "illegal value for max number of ranks"));
-		for (std::size_t ii=0; ii<m_maxNofRanks; ++ii) m_brute_index[ii] = ii;
+		std::size_t nn = (m_maxNofRanks < MaxIndexSize)?m_maxNofRanks:MaxIndexSize;
+		for (std::size_t ii=0; ii<nn; ++ii) m_brute_index[ii] = ii;
 	}
 	~Ranker(){}
 

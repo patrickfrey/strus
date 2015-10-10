@@ -29,7 +29,9 @@
 #include "postingIterator.hpp"
 #include "storageClient.hpp"
 #include "indexPacker.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <string>
 #include <vector>
 #include <cstring>
@@ -42,13 +44,14 @@ using namespace strus;
 #undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char* termstr)
+PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char* termstr, ErrorBufferInterface* errorhnd_)
 #else
-PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char*)
+PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char*, ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
 	,m_docno(0)
+	,m_errorhnd(errorhnd_)
 {
 	m_featureid.reserve( 16);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -64,46 +67,62 @@ PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseC
 
 Index PostingIterator::skipDoc( const Index& docno_)
 {
-	if (m_docno && m_docno == docno_) return m_docno;
-
-	if (m_posinfoIterator.isCloseCandidate( docno_))
+	try
 	{
-		m_docno = m_posinfoIterator.skipDoc( docno_);
-#ifdef STRUS_LOWLEVEL_CHECK
-		if (m_docno != m_docnoIterator.skip( m_docno))
+		if (m_docno && m_docno == docno_) return m_docno;
+	
+		if (m_posinfoIterator.isCloseCandidate( docno_))
 		{
-			throw strus::runtime_error( _TXT( "corrupt index, position info is missing"));
-		}
+			m_docno = m_posinfoIterator.skipDoc( docno_);
+#ifdef STRUS_LOWLEVEL_CHECK
+			if (m_docno != m_docnoIterator.skip( m_docno))
+			{
+				throw strus::runtime_error( _TXT( "corrupt index, position info is missing"));
+			}
 #endif
+		}
+		else
+		{
+			m_docno = m_docnoIterator.skip( docno_);
+		}
+		return m_docno;
 	}
-	else
-	{
-		m_docno = m_docnoIterator.skip( docno_);
-	}
-	return m_docno;
+	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip document: %s"), *m_errorhnd, 0);
 }
 
 Index PostingIterator::skipPos( const Index& firstpos_)
 {
-	if (!m_docno)
+	try
 	{
-		return 0;
+		if (!m_docno)
+		{
+			return 0;
+		}
+		if (m_docno != m_posinfoIterator.skipDoc( m_docno))
+		{
+			throw strus::runtime_error( _TXT( "corrupt index, document not in posinfo index"));
+		}
+		return m_posinfoIterator.skipPos( firstpos_);
 	}
-	if (m_docno != m_posinfoIterator.skipDoc( m_docno))
-	{
-		throw strus::runtime_error( _TXT( "corrupt index, document not in posinfo index"));
-	}
-	return m_posinfoIterator.skipPos( firstpos_);
+	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip position: %s"), *m_errorhnd, 0);
 }
 
 unsigned int PostingIterator::frequency()
 {
-	m_posinfoIterator.skipDoc( m_docno);
-	return m_posinfoIterator.frequency();
+	try
+	{
+		m_posinfoIterator.skipDoc( m_docno);
+		return m_posinfoIterator.frequency();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator get frequency: %s"), *m_errorhnd, 0);
 }
 
 GlobalCounter PostingIterator::documentFrequency() const
 {
-	return m_posinfoIterator.documentFrequency();
+	try
+	{
+		return m_posinfoIterator.documentFrequency();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator get document frequency: %s"), *m_errorhnd, 0);
 }
 

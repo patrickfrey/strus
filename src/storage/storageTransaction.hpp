@@ -44,6 +44,7 @@
 #include "keyMap.hpp"
 #include "keyMapInv.hpp"
 #include "keyAllocatorInterface.hpp"
+#include "private/stringMap.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -57,6 +58,8 @@ class StorageClient;
 class DatabaseClientInterface;
 /// \brief Forward declaration
 class PeerMessageBuilderInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 /// \class StorageTransaction
@@ -70,7 +73,8 @@ public:
 		DatabaseClientInterface* database_,
 		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
-		const conotrie::CompactNodeTrie* termnomap_);
+		const conotrie::CompactNodeTrie* termnomap_,
+		ErrorBufferInterface* errorhnd_);
 
 	~StorageTransaction();
 
@@ -93,7 +97,7 @@ public:
 			const Index& docno, const std::string& varname, const ArithmeticVariant& value);
 
 	/// \brief Transaction commit
-	virtual void commit();
+	virtual bool commit();
 	/// \brief Transaction rollback (automatically called with the destructor)
 	virtual void rollback();
 
@@ -152,10 +156,12 @@ private:
 	KeyMapInv m_termTypeMapInv;				///< inverse map of term types
 	KeyMapInv m_termValueMapInv;				///< inverse map of term values
 
-	std::map<std::string,Index> m_newDocidMap;		///< map of new document identifiers (docid's allocated in ranges that must be written in the commit, because the were not written immediately)
+	StringMap<Index> m_newDocidMap;				///< map of new document identifiers (docid's allocated in ranges that must be written in the commit, because the were not written immediately)
 	int m_nof_documents;					///< total adjustment for the number of documents added minus number of documents deleted
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
+
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
 }//namespace

@@ -39,54 +39,54 @@
 
 using namespace strus;
 
-PostingJoinOperatorInterface* strus::createPostingJoinIntersect()
+PostingJoinOperatorInterface* strus::createPostingJoinIntersect( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinIntersect();
+	return new PostingJoinIntersect( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingJoinUnion()
+PostingJoinOperatorInterface* strus::createPostingJoinUnion( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinUnion();
+	return new PostingJoinUnion( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingPred()
+PostingJoinOperatorInterface* strus::createPostingPred( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinPred();
+	return new PostingJoinPred( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingSucc()
+PostingJoinOperatorInterface* strus::createPostingSucc( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinSucc();
+	return new PostingJoinSucc( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingJoinWithin()
+PostingJoinOperatorInterface* strus::createPostingJoinWithin( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinWithin();
+	return new PostingJoinWithin( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingJoinStructWithin()
+PostingJoinOperatorInterface* strus::createPostingJoinStructWithin( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinStructWithin();
+	return new PostingJoinStructWithin( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingJoinSequence()
+PostingJoinOperatorInterface* strus::createPostingJoinSequence( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinSequence();
+	return new PostingJoinSequence( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingJoinStructSequence()
+PostingJoinOperatorInterface* strus::createPostingJoinStructSequence( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinStructSequence();
+	return new PostingJoinStructSequence( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingJoinContains()
+PostingJoinOperatorInterface* strus::createPostingJoinContains( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinContains();
+	return new PostingJoinContains( errorhnd);
 }
 
-PostingJoinOperatorInterface* strus::createPostingJoinDifference()
+PostingJoinOperatorInterface* strus::createPostingJoinDifference( ErrorBufferInterface* errorhnd)
 {
-	return new PostingJoinDifference();
+	return new PostingJoinDifference( errorhnd);
 }
 
 

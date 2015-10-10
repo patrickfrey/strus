@@ -52,6 +52,8 @@ class ForwardIteratorInterface;
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 
 class SummarizerFunctionContextMatchVariables
@@ -68,7 +70,8 @@ public:
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			const std::string& delimiter_,
-			const std::string& assign_);
+			const std::string& assign_,
+			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMatchVariables(){}
 
@@ -99,6 +102,7 @@ private:
 	std::string m_delimiter;
 	std::string m_assign;
 	std::vector<SummarizationFeature> m_features;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -106,8 +110,8 @@ class SummarizerFunctionInstanceMatchVariables
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	explicit SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor)
-		:m_type(),m_processor(processor){}
+	SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
+		:m_type(),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
@@ -116,29 +120,16 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
-			MetaDataReaderInterface*) const
-	{
-		if (m_type.empty())
-		{
-			throw strus::runtime_error( _TXT( "emtpy forward index type definition (parameter 'type') in match phrase summarizer configuration"));
-		}
-		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_type, m_delimiter, m_assign);
-	}
+			MetaDataReaderInterface*) const;
 
-	virtual std::string tostring() const
-	{
-		std::ostringstream rt;
-		rt << "type='" << m_type 
-			<< "', delimiter='" << m_delimiter
-			<< "', assign='" << m_assign << "'";
-		return rt.str();
-	}
+	virtual std::string tostring() const;
 
 private:
 	std::string m_type;
 	std::string m_delimiter;
 	std::string m_assign;
 	const QueryProcessorInterface* m_processor;
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
@@ -146,14 +137,15 @@ class SummarizerFunctionMatchVariables
 	:public SummarizerFunctionInterface
 {
 public:
-	SummarizerFunctionMatchVariables(){}
+	explicit SummarizerFunctionMatchVariables( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionMatchVariables(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
-			const QueryProcessorInterface* processor) const
-	{
-		return new SummarizerFunctionInstanceMatchVariables( processor);
-	}
+			const QueryProcessorInterface* processor) const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

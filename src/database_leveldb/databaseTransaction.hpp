@@ -34,6 +34,8 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Forward declaration
 class DatabaseClient;
@@ -43,7 +45,7 @@ class DatabaseTransaction
 	:public DatabaseTransactionInterface
 {
 public:
-	DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_);
+	DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~DatabaseTransaction();
 
@@ -63,7 +65,7 @@ public:
 			const char* domainkey,
 			std::size_t domainkeysize);
 
-	virtual void commit();
+	virtual bool commit();
 
 	virtual void rollback();
 
@@ -73,6 +75,7 @@ private:
 	leveldb::WriteBatch m_batch;		///< batch used for the transaction
 	bool m_commit_called;			///< true, if the transaction has been committed
 	bool m_rollback_called;			///< true, if the transaction has been rolled back
+	ErrorBufferInterface* m_errorhnd;	///< buffer for reporting errors
 };
 
 }//namespace

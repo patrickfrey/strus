@@ -28,21 +28,27 @@
 */
 #include "strus/lib/queryproc.hpp"
 #include "strus/queryProcessorInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "queryProcessor.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 
 using namespace strus;
 
-DLL_PUBLIC QueryProcessorInterface* strus::createQueryProcessor()
+DLL_PUBLIC QueryProcessorInterface* strus::createQueryProcessor( ErrorBufferInterface* errorhnd)
 {
 	static bool intl_initialized = false;
-	if (!intl_initialized)
+	try
 	{
-		strus::initMessageTextDomain();
-		intl_initialized = true;
+		if (!intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			intl_initialized = true;
+		}
+		return new QueryProcessor( errorhnd);
 	}
-	return new QueryProcessor();
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating query processor: %s"), *errorhnd, 0);
 }
 
 

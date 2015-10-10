@@ -53,6 +53,7 @@ public:
 	/// \param[in] termvalue value of the term
 	/// \param[in] increment positive or negative (decrement) value of the local change of the document frequency
 	/// \param[in] isnew true, if the feature is new in the index of the sender. Triggers the receivers to send their value back for update
+	/// \return true on success, false in case of an error (memory allocation error)
 	virtual void addDfChange(
 			const char* termtype,
 			const char* termvalue,
@@ -66,8 +67,10 @@ public:
 	virtual void rollback()=0;
 
 	/// \brief Get the packed message to be sent to a peer
-	/// \return the message or an empty string if there is none left
-	virtual std::string fetch()=0;
+	/// \param[out] blk pointer to the message 
+	/// \param[out] blksize size of message blk in bytes
+	/// \return true, if there is a message returned to be sent, false if not or an error occurred
+	virtual bool fetchMessage( const char*& blk, std::size_t& blksize)=0;
 };
 }//namespace
 #endif

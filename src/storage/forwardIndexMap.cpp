@@ -93,7 +93,8 @@ void ForwardIndexMap::defineForwardIndexTerm(
 	{
 		closeCurblock( typeno, bi->second);
 	}
-	bi->second.push_back( CurblockElem( pos, termstring));
+	m_strings.push_back( termstring.c_str(), termstring.size());
+	bi->second.push_back( CurblockElem( pos, m_strings.back()));
 }
 
 void ForwardIndexMap::deleteIndex( const Index& docno)

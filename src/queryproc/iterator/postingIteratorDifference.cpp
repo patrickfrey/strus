@@ -27,17 +27,22 @@
 --------------------------------------------------------------------
 */
 #include "postingIteratorDifference.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <stdexcept>
 
 using namespace strus;
 
 IteratorDifference::IteratorDifference(
 		const Reference<PostingIteratorInterface>& positive_,
-		const Reference<PostingIteratorInterface>& negative_)
+		const Reference<PostingIteratorInterface>& negative_,
+		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_docno_neg(0)
 	,m_positive( positive_)
 	,m_negative( negative_)
+	,m_errorhnd(errorhnd_)
 {
 	m_featureid.append( positive_->featureid());
 	m_featureid.append( negative_->featureid());
@@ -49,16 +54,20 @@ IteratorDifference::~IteratorDifference()
 
 std::vector<const PostingIteratorInterface*> IteratorDifference::subExpressions( bool positive) const
 {
-	std::vector<const PostingIteratorInterface*> rt;
-	if (positive)
+	try
 	{
-		rt.push_back( m_positive.get());
+		std::vector<const PostingIteratorInterface*> rt;
+		if (positive)
+		{
+			rt.push_back( m_positive.get());
+		}
+		else
+		{
+			rt.push_back( m_negative.get());
+		}
+		return rt;
 	}
-	else
-	{
-		rt.push_back( m_negative.get());
-	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error 'diff' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorDifference::skipDoc( const Index& docno_)
@@ -88,5 +97,32 @@ Index IteratorDifference::skipPos( const Index& pos_)
 		}
 		return pos_positive;
 	}
+}
+
+
+PostingIteratorInterface* PostingJoinDifference::createResultIterator(
+		const std::vector<Reference<PostingIteratorInterface> >& argitr,
+		int range) const
+{
+	if (range != 0)
+	{
+		m_errorhnd->report( _TXT( "no range argument expected for 'diff'"));
+		return 0;
+	}
+	if (argitr.size() < 2)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'diff'"));
+		return 0;
+	}
+	if (argitr.size() > 2)
+	{
+		m_errorhnd->report( _TXT( "too many arguments for 'diff'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorDifference( argitr[0], argitr[1], m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'diff' iterator: %s"), *m_errorhnd, 0);
 }
 

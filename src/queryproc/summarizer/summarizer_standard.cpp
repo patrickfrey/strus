@@ -36,29 +36,29 @@
 
 using namespace strus;
 
-SummarizerFunctionInterface* strus::createSummarizerListMatches()
+SummarizerFunctionInterface* strus::createSummarizerListMatches( ErrorBufferInterface* errorhnd_)
 {
-	return new SummarizerFunctionListMatches();
+	return new SummarizerFunctionListMatches( errorhnd_);
 }
 
-SummarizerFunctionInterface* strus::createSummarizerAttribute()
+SummarizerFunctionInterface* strus::createSummarizerAttribute( ErrorBufferInterface* errorhnd_)
 {
-	return new SummarizerFunctionAttribute();
+	return new SummarizerFunctionAttribute( errorhnd_);
 }
 
-SummarizerFunctionInterface* strus::createSummarizerMetaData()
+SummarizerFunctionInterface* strus::createSummarizerMetaData( ErrorBufferInterface* errorhnd_)
 {
-	return new SummarizerFunctionMetaData();
+	return new SummarizerFunctionMetaData( errorhnd_);
 }
 
-SummarizerFunctionInterface* strus::createSummarizerMatchPhrase()
+SummarizerFunctionInterface* strus::createSummarizerMatchPhrase( ErrorBufferInterface* errorhnd_)
 {
-	return new SummarizerFunctionMatchPhrase();
+	return new SummarizerFunctionMatchPhrase( errorhnd_);
 }
 
-SummarizerFunctionInterface* strus::createSummarizerMatchVariables()
+SummarizerFunctionInterface* strus::createSummarizerMatchVariables( ErrorBufferInterface* errorhnd_)
 {
-	return new SummarizerFunctionMatchVariables();
+	return new SummarizerFunctionMatchVariables( errorhnd_);
 }
 
 

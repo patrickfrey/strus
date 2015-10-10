@@ -43,5 +43,8 @@ include( cmake/report_build_settings.cmake )
 install(DIRECTORY include/strus
           DESTINATION include
           FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY include/strus
+          DESTINATION include
+          FILES_MATCHING PATTERN "*.h")
 
 include( cmake/standard_targets.cmake )

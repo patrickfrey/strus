@@ -40,7 +40,10 @@
 #include <map>
 
 namespace strus {
+/// \brief Forward declaration
 class DatabaseClientInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \class StorageTransaction
 class StorageAlterMetaDataTable
@@ -51,7 +54,7 @@ private:
 	void operator=( const StorageAlterMetaDataTable&){}		//... non copyable
 
 public:
-	StorageAlterMetaDataTable( DatabaseClientInterface* database_);
+	StorageAlterMetaDataTable( DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_);
 
 	~StorageAlterMetaDataTable();
 
@@ -75,7 +78,7 @@ public:
 			const std::string& name);
 
 	/// \brief Transaction commit
-	virtual void commit();
+	virtual bool commit();
 	/// \brief Transaction rollback (automatically called with the destructor)
 	virtual void rollback();
 
@@ -97,6 +100,7 @@ private:
 
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
+	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 
 }//namespace

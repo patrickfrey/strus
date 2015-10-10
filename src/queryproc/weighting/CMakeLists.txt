@@ -7,19 +7,24 @@ set(source_files
 	weighting_standard.cpp
 	weightingBM25.cpp
 	weightingBM25_dpfc.cpp
+	weightingFormula.cpp
+	weightingFrequency.cpp
+	weightingConstant.cpp
+	weightingMetadata.cpp
+	formulaInterpreter.cpp
 )
 
 include_directories(
   ${Boost_INCLUDE_DIRS}
   "${PROJECT_SOURCE_DIR}/include"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/weighting_bm25"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
 )
 
 # ------------------------------------
 # LIBRARY
 # ------------------------------------
 add_library( weighting_standard STATIC ${source_files})
-target_link_libraries( weighting_standard strus_utils )
+target_link_libraries( weighting_standard strus_private_utils strus_utils )
 
 
 

@@ -30,9 +30,23 @@
 #include "private/internationalization.hpp"
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <unistd.h>
+#ifndef _MSC_VER
+#include <malloc.h>
+#endif
 
 using namespace strus;
 using namespace strus::utils;
+
+std::string utils::tolower( const char* val)
+{
+	std::size_t len = std::strlen(val)+1;
+	std::string rt;
+	rt.reserve( len);
+	char const* vv = val;
+	while (*vv) rt.push_back( std::tolower(*vv++));
+	return rt;
+}
 
 std::string utils::tolower( const std::string& val)
 {
@@ -76,6 +90,27 @@ std::string utils::tostring( int val)
 	{
 		throw strus::runtime_error( _TXT( "failed to convert number to string (out of memory)"));
 	}
+}
+
+
+///\note Currently based on 'memalign' declared as obsolete
+///	For an alternative implementation of alligned malloc see http://jmabille.github.io/blog/2014/12/06/aligned-memory-allocator/
+void* utils::aligned_malloc( std::size_t size, std::size_t alignment)
+{
+#if (defined _MSC_VER)
+	return _aligned_malloc( size, alignment);
+#else
+	return memalign( alignment, size);
+#endif
+}
+
+void utils::aligned_free( void *ptr)
+{
+#if (defined _MSC_VER)
+	return _aligned_free( ptr);
+#else
+	free( ptr);
+#endif
 }
 
 

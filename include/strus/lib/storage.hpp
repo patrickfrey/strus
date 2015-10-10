@@ -34,9 +34,12 @@
 /// \brief strus toplevel namespace
 namespace strus {
 
+/// \brief Forward declaration
+class ErrorBufferInterface;
+
 class StorageInterface;
 
-const StorageInterface* getStorage();
+StorageInterface* createStorage( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

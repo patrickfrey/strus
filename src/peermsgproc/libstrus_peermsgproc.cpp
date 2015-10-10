@@ -29,22 +29,27 @@
 /// \brief Exported functions of the strus peermsgproc library
 /// \file libstrus_peermsgproc.cpp
 #include "strus/lib/peermsgproc.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "peerMessageProcessor.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
-#include "peerMessageProcessor.hpp"
+#include "private/errorUtils.hpp"
 
 using namespace strus;
 
-DLL_PUBLIC const PeerMessageProcessorInterface* strus::getPeerMessageProcessor()
+DLL_PUBLIC PeerMessageProcessorInterface* strus::createPeerMessageProcessor( ErrorBufferInterface* errorhnd)
 {
-	static const PeerMessageProcessor proc;
-	static bool intl_initialized = false;
-	if (!intl_initialized)
+	try
 	{
-		strus::initMessageTextDomain();
-		intl_initialized = true;
+		static bool intl_initialized = false;
+		if (!intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			intl_initialized = true;
+		}
+		return new PeerMessageProcessor( errorhnd);
 	}
-	return &proc;
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message processor: %s"), *errorhnd, 0);
 }
 
 

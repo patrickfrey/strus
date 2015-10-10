@@ -33,7 +33,6 @@
 #include "forwardIndexBlock.hpp"
 #include "booleanBlock.hpp"
 #include "strus/arithmeticVariant.hpp"
-#include "strus/private/arithmeticVariantAsString.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -312,7 +311,7 @@ void DocMetaDataData::print( std::ostream& out)
 			{
 				if (colidx) out << ',';
 				ArithmeticVariant value = record.getValue( descr->get( colidx));
-				out << value;
+				out << value.tostring().c_str();
 			}
 		}
 	}

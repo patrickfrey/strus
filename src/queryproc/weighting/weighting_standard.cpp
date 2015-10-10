@@ -28,6 +28,7 @@
 */
 /// \brief Library providing some standard weighting functions
 #include "weighting_standard.hpp"
+#include "weightingFormula.hpp"
 #include "weightingBM25.hpp"
 #include "weightingBM25_dpfc.hpp"
 #include "weightingConstant.hpp"
@@ -37,29 +38,34 @@
 
 using namespace strus;
 
-WeightingFunctionInterface* strus::createWeightingFunctionBm25()
+WeightingFunctionInterface* strus::createWeightingFunctionFormula( ErrorBufferInterface* errorhnd)
 {
-	return new WeightingFunctionBM25();
+	return new WeightingFunctionFormula( errorhnd);
 }
 
-WeightingFunctionInterface* strus::createWeightingFunctionBm25_dpfc()
+WeightingFunctionInterface* strus::createWeightingFunctionBm25( ErrorBufferInterface* errorhnd)
 {
-	return new WeightingFunctionBM25_dpfc();
+	return new WeightingFunctionBM25( errorhnd);
 }
 
-WeightingFunctionInterface* strus::createWeightingFunctionConstant()
+WeightingFunctionInterface* strus::createWeightingFunctionBm25_dpfc( ErrorBufferInterface* errorhnd)
 {
-	return new WeightingFunctionConstant();
+	return new WeightingFunctionBM25_dpfc( errorhnd);
 }
 
-WeightingFunctionInterface* strus::createWeightingFunctionMetadata()
+WeightingFunctionInterface* strus::createWeightingFunctionConstant( ErrorBufferInterface* errorhnd)
 {
-	return new WeightingFunctionMetadata();
+	return new WeightingFunctionConstant( errorhnd);
 }
 
-WeightingFunctionInterface* strus::createWeightingFunctionTermFrequency()
+WeightingFunctionInterface* strus::createWeightingFunctionMetadata( ErrorBufferInterface* errorhnd)
 {
-	return new WeightingFunctionTermFrequency();
+	return new WeightingFunctionMetadata( errorhnd);
+}
+
+WeightingFunctionInterface* strus::createWeightingFunctionTermFrequency( ErrorBufferInterface* errorhnd)
+{
+	return new WeightingFunctionTermFrequency( errorhnd);
 }
 
 

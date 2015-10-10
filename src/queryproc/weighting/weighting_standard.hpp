@@ -32,29 +32,35 @@
 
 namespace strus
 {
-
+/// \brief Forward declaration
+class ErrorBufferInterface;
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 
-/// \brief Create a weighting function for the weighting schema BM25
+/// \brief Create a weighting function for a schema defined as formula in a string
 /// \return the weighting function reference (to dispose with delete)
-WeightingFunctionInterface* createWeightingFunctionBm25();
+/// \remark This type of weighting function may not have the ultimate preformance, but it might be used for prototyping
+WeightingFunctionInterface* createWeightingFunctionFormula( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a weighting function for the weighting schema BM25
 /// \return the weighting function reference (to dispose with delete)
-WeightingFunctionInterface* createWeightingFunctionBm25_dpfc();
+WeightingFunctionInterface* createWeightingFunctionBm25( ErrorBufferInterface* errorhnd);
+
+/// \brief Create a weighting function for the weighting schema BM25
+/// \return the weighting function reference (to dispose with delete)
+WeightingFunctionInterface* createWeightingFunctionBm25_dpfc( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a weighting function that accumulates a constant for each matching feature in a document
 /// \return the weighting function reference (to dispose with delete)
-WeightingFunctionInterface* createWeightingFunctionConstant();
+WeightingFunctionInterface* createWeightingFunctionConstant( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a weighting function that returns an element of the metadata as weight
 /// \return the weighting function reference (to dispose with delete)
-WeightingFunctionInterface* createWeightingFunctionMetadata();
+WeightingFunctionInterface* createWeightingFunctionMetadata( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a weighting function that accumulates the feature frequency for each matching feature in a document
 /// \return the weighting function reference (to dispose with delete)
-WeightingFunctionInterface* createWeightingFunctionTermFrequency();
+WeightingFunctionInterface* createWeightingFunctionTermFrequency( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

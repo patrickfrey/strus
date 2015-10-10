@@ -33,6 +33,18 @@
 
 using namespace strus;
 
+KeyMap::KeyMap( DatabaseClientInterface* database_,
+		DatabaseKey::KeyPrefix prefix_,
+		KeyAllocatorInterface* allocator_,
+		const conotrie::CompactNodeTrie* globalmap_)
+	:m_dbadapter(prefix_,database_)
+	,m_maxCachedKeyLen(DefaultMaxCachedKeyLen)
+	,m_globalmap(globalmap_)
+	,m_unknownHandleCount(0)
+	,m_allocator(allocator_)
+	,m_invmap(0)
+{}
+
 Index KeyMap::lookUp( const std::string& name)
 {
 	return m_dbadapter.get( name);
@@ -110,8 +122,6 @@ void KeyMap::getWriteBatch(
 			if (m_invmap) m_invmap->set( idx, mi.key());
 		}
 	}
-	m_map.clear();
-
 	OverflowMap::const_iterator
 		oi = m_overflowmap.begin(), oe = m_overflowmap.end();
 	for (; oi != oe; ++oi)
@@ -128,6 +138,7 @@ void KeyMap::getWriteBatch(
 			if (m_invmap) m_invmap->set( idx, oi->first);
 		}
 	}
+	m_map.clear();
 	m_overflowmap.clear();
 }
 

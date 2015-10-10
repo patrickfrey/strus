@@ -30,7 +30,9 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <set>
 #include <cstdlib>
@@ -39,29 +41,23 @@
 
 using namespace strus;
 
-void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string&)
-{
-	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
-}
-
-void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant&)
-{
-	throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
-}
-
 void SummarizerFunctionContextListMatches::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>&)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	try
 	{
-		m_itrs.push_back( itr);
+		if (utils::caseInsensitiveEquals( name, "match"))
+		{
+			m_itrs.push_back( itr);
+		}
+		else
+		{
+			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "ListMatches", name.c_str());
+		}
 	}
-	else
-	{
-		throw strus::runtime_error( _TXT("unknown '%s' summarization feature '%s'"), "ListMatches", name.c_str());
-	}
+	CATCH_ERROR_MAP( _TXT("error adding summarization feature to 'matchpos' summarizer: %s"), *m_errorhnd);
 }
 
 static std::string getMatches(
@@ -88,19 +84,61 @@ static std::string getMatches(
 std::vector<SummarizerFunctionContextInterface::SummaryElement>
 	SummarizerFunctionContextListMatches::getSummary( const Index& docno)
 {
-	std::vector<SummaryElement> rt;
-	std::vector<PostingIteratorInterface*>::const_iterator
-		ii = m_itrs.begin(), ie = m_itrs.end();
-
-	for (; ii != ie; ++ii)
+	try
 	{
-		std::vector<const PostingIteratorInterface*>
-			subexpr = (*ii)->subExpressions( true);
-		if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
+		std::vector<SummaryElement> rt;
+		std::vector<PostingIteratorInterface*>::const_iterator
+			ii = m_itrs.begin(), ie = m_itrs.end();
+	
+		for (; ii != ie; ++ii)
 		{
-			rt.push_back( SummaryElement( getMatches( **ii, subexpr)));
+			std::vector<const PostingIteratorInterface*>
+				subexpr = (*ii)->subExpressions( true);
+			if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
+			{
+				rt.push_back( SummaryElement( getMatches( **ii, subexpr)));
+			}
 		}
+		return rt;
 	}
-	return rt;
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'matchpos' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
+
+void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string&)
+{
+	m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+}
+
+void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant&)
+{
+	m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+}
+
+SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::createFunctionContext(
+		const StorageClientInterface*,
+		MetaDataReaderInterface*) const
+{
+	try
+	{
+		return new SummarizerFunctionContextListMatches( m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'matchpos' summarizer: %s"), *m_errorhnd, 0);
+}
+
+std::string SummarizerFunctionInstanceListMatches::tostring() const
+{
+	return std::string();
+}
+
+
+SummarizerFunctionInstanceInterface* SummarizerFunctionListMatches::createInstance(
+		const QueryProcessorInterface*) const
+{
+	try
+	{
+		return new SummarizerFunctionInstanceListMatches( m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'matchpos' summarizer: %s"), *m_errorhnd, 0);
+}
+
 

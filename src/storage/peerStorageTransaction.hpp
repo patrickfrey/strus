@@ -44,12 +44,14 @@ class DocumentFrequencyCache;
 class DatabaseClientInterface;
 /// \brief Forward declaration
 class PeerMessageProcessorInterface;
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Interface for a transaction of global statistic changes
 class PeerStorageTransaction
 {
 public:
-	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_);
+	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_, ErrorBufferInterface* errorhnd_);
 	~PeerStorageTransaction(){}
 
 	std::string run( const char* msg, std::size_t msgsize);
@@ -92,6 +94,7 @@ private:
 	Index m_termvaluecnt;
 	GlobalCounter m_nofDocumentsInserted;
 	bool m_commit;
+	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace
 #endif

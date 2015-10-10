@@ -132,22 +132,30 @@ DLL_PUBLIC unsigned int strus::readDirSubDirs( const std::string& path, std::vec
 	{
 		return errno;
 	}
-	std::size_t prevsize = res.size();
-	while (!!(ent = ::readdir(dir)))
+	try
 	{
-		if (ent->d_name[0] == '.') continue;
-		std::string entry( path + dirSeparator() + ent->d_name);
-		if (isDir( entry))
+		std::size_t prevsize = res.size();
+		while (!!(ent = ::readdir(dir)))
 		{
-			res.push_back( ent->d_name);
+			if (ent->d_name[0] == '.') continue;
+			std::string entry( path + dirSeparator() + ent->d_name);
+			if (isDir( entry))
+			{
+				res.push_back( ent->d_name);
+			}
+		}
+		std::sort( res.begin()+prevsize, res.end(), std::less<std::string>());
+		unsigned int err = ::closedir(dir);
+		if (err)
+		{
+			return err;
 		}
 	}
-	unsigned int err = ::closedir(dir);
-	if (err)
+	catch (const std::bad_alloc&)
 	{
-		return err;
+		::closedir(dir);
+		return 12/*ENOMEM*/;
 	}
-	std::sort( res.begin()+prevsize, res.end(), std::less<std::string>());
 	return 0;
 }
 
@@ -160,37 +168,41 @@ DLL_PUBLIC unsigned int strus::readDirFiles( const std::string& path, const std:
 	{
 		return errno;
 	}
-	std::size_t prevsize = res.size();
-	while (!!(ent = ::readdir(dir)))
+	try
 	{
-		if (ent->d_name[0] == '.') continue;
-		std::string entry( ent->d_name);
-		if (ext.size() > entry.size())
+		std::size_t prevsize = res.size();
+		while (!!(ent = ::readdir(dir)))
 		{
-			continue;
-		}
-		std::string entrypath( path + dirSeparator() + entry);
-		if (isDir( entrypath)) continue;
-		if (ext.empty())
-		{
-			res.push_back( entry);
-		}
-		else
-		{
-			const char* ee = entry.c_str() + entry.size() - ext.size();
-			if (entry[0] != '.' && 0==std::memcmp( ee, ext.c_str(), ext.size()))
+			if (ent->d_name[0] == '.') continue;
+			std::string entry( ent->d_name);
+			if (ext.size() > entry.size())
 			{
-				res.push_back( entry );
+				continue;
+			}
+			std::string entrypath( path + dirSeparator() + entry);
+			if (isDir( entrypath)) continue;
+			if (ext.empty())
+			{
+				res.push_back( entry);
+			}
+			else
+			{
+				const char* ee = entry.c_str() + entry.size() - ext.size();
+				if (entry[0] != '.' && 0==std::memcmp( ee, ext.c_str(), ext.size()))
+				{
+					res.push_back( entry );
+				}
 			}
 		}
-	}
-	unsigned int err = ::closedir(dir);
-	if (err)
-	{
+		std::sort( res.begin()+prevsize, res.end(), std::less<std::string>());
+		unsigned int err = ::closedir(dir);
 		return err;
 	}
-	std::sort( res.begin()+prevsize, res.end(), std::less<std::string>());
-	return 0;
+	catch (const std::bad_alloc&)
+	{
+		::closedir(dir);
+		return 12/*ENOMEM*/;
+	}
 }
 
 enum PathType {PathFile,PathDir,PathUnknown,PathError};
@@ -233,7 +245,7 @@ DLL_PUBLIC char strus::dirSeparator()
 	return STRUS_FILEIO_DIRSEP;
 }
 
-DLL_PUBLIC std::string strus::getParentPath( const std::string& path)
+DLL_PUBLIC unsigned int strus::getParentPath( const std::string& path, std::string& dest)
 {
 	const char* ri = path.c_str();
 	char const* re = path.c_str()+path.size();
@@ -241,12 +253,23 @@ DLL_PUBLIC std::string strus::getParentPath( const std::string& path)
 	for (; re != ri && *(re-1) != STRUS_FILEIO_DIRSEP; --re){}
 	if (re == ri)
 	{
-		return std::string();
+		dest.clear();
+		return 0;
 	}
 	else
 	{
 		for (; re != ri && *(re-1) == STRUS_FILEIO_DIRSEP; --re){}
-		return std::string( ri, re-ri-1);
+		try
+		{
+			dest.clear();
+			dest.append( ri, re-ri-1);
+		}
+		catch (const std::bad_alloc&)
+		{
+			return 12/*ENOMEM*/;
+		}
+		dest.clear();
+		return 0;
 	}
 }
 

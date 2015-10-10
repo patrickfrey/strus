@@ -29,6 +29,9 @@
 #ifndef _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/metaDataReaderInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "metaDataBlockCache.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataDescription.hpp"
@@ -44,12 +47,17 @@ class MetaDataReader
 {
 public:
 	MetaDataReader( MetaDataBlockCache* cache_,
-			const MetaDataDescription* description_)
-		:m_cache(cache_),m_description(description_),m_current(description_,0),m_docno(0){}
+			const MetaDataDescription* description_,
+			ErrorBufferInterface* errorhnd_)
+		:m_cache(cache_),m_description(description_),m_current(description_,0),m_docno(0),m_errorhnd(errorhnd_){}
 
 	virtual Index elementHandle( const std::string& name) const
 	{
-		return m_description->getHandle( name);
+		try
+		{
+			return m_description->getHandle( name);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error meta data get element handle: %s"), *m_errorhnd, 0);
 	}
 
 	virtual bool hasElement( const std::string& name) const
@@ -59,10 +67,14 @@ public:
 
 	virtual void skipDoc( const Index& docno)
 	{
-		if (docno != m_docno)
+		try
 		{
-			m_current = m_cache->get( m_docno=docno);
+			if (docno != m_docno)
+			{
+				m_current = m_cache->get( m_docno=docno);
+			}
 		}
+		CATCH_ERROR_MAP( _TXT("error meta data skip document: %s"), *m_errorhnd);
 	}
 
 	virtual ArithmeticVariant getValue( const Index& elementHandle_) const
@@ -72,12 +84,20 @@ public:
 
 	virtual const char* getType( const Index& elementHandle_) const
 	{
-		return m_description->get( elementHandle_)->typeName();
+		try
+		{
+			return m_description->get( elementHandle_)->typeName();
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error meta data get element type: %s"), *m_errorhnd, 0);
 	}
 
 	virtual const char* getName( const Index& elementHandle_) const
 	{
-		return m_description->getName( elementHandle_);
+		try
+		{
+			return m_description->getName( elementHandle_);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error meta data get element name: %s"), *m_errorhnd, 0);
 	}
 
 	virtual Index nofElements() const
@@ -89,7 +109,8 @@ private:
 	MetaDataBlockCache* m_cache;
 	const MetaDataDescription* m_description;
 	MetaDataRecord m_current;
-	Index m_docno;
+	Index m_docno;						///< current document number
+	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 }//namespace
 #endif

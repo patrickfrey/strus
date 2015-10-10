@@ -79,7 +79,7 @@ public:
 			std::size_t domainkeysize)=0;
 
 	/// \brief Executes all commands defined in the transaction or none if one operation fails
-	virtual void commit()=0;
+	virtual bool commit()=0;
 
 	/// \brief Rollback of the transaction, no changes made
 	virtual void rollback()=0;

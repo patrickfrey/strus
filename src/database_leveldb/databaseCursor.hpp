@@ -34,13 +34,15 @@
 
 namespace strus
 {
+/// \brief Forward declaration
+class ErrorBufferInterface;
 
 /// \brief Implementation of the DatabaseCursorInterface based on the LevelDB library
 class DatabaseCursor
 	:public DatabaseCursorInterface
 {
 public:
-	DatabaseCursor( leveldb::DB* db_, bool useCache, bool useSnapshot=false);
+	DatabaseCursor( leveldb::DB* db_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_);
 
 	virtual ~DatabaseCursor();
 
@@ -78,6 +80,7 @@ private:
 	unsigned char m_domainkey[ MaxDomainKeySize];		///< key prefix defining the current domain to scan
 	std::size_t m_domainkeysize;				///< size of domain key in bytes
 	std::string m_randomAccessValue;			///< buffer for value retrieved with getKeyValue
+	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 
 }//namespace

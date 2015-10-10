@@ -34,9 +34,8 @@ using namespace strus;
 void AttributeMap::defineAttribute( const Index& docno, const Index& varno, const std::string& value)
 {
 	BlockKey key( docno, varno);
-	m_map[ key.index()] = m_strings.size();
-	m_strings.append( value);
-	m_strings.push_back( '\0');
+	m_strings.push_back( value);
+	m_map[ key.index()] = m_strings.back();
 }
 
 void AttributeMap::deleteAttributes( const Index& docno)
@@ -92,7 +91,7 @@ void AttributeMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		BlockKey key( mi->first);
 		DatabaseAdapter_DocAttribute::store(
 				transaction, key.elem(1), key.elem(2),
-				m_strings.c_str() + mi->second);
+				mi->second);
 	}
 	m_map.clear();
 }

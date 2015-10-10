@@ -30,49 +30,61 @@
 #define _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #include "private/utils.hpp"
 #include "private/internationalization.hpp"
+#include "private/stringMap.hpp"
 #include <string>
 #include <map>
 
 namespace strus {
 
-struct KeyString
-	:public std::string
-{
-	KeyString( const char* o)
-		:std::string( utils::tolower( o)){}
-	KeyString( const std::string& o)
-		:std::string( utils::tolower( o)){}
-	KeyString( const KeyString& o)
-		:std::string( o){}
-	KeyString(){}
-};
-
 /// \brief Case insensitive map of string to a value type defined a template argument
-template <typename Value>
+template <typename ValueType>
 struct KeyMap
-	:public std::map<KeyString,Value>
+	:public StringMap<ValueType>
 {
-	typedef std::map<KeyString,Value> Parent;
+	typedef StringMap<ValueType> Parent;
+	typedef typename Parent::const_iterator const_iterator;
+	typedef typename Parent::iterator iterator;
 
 	KeyMap(){}
 	KeyMap( const KeyMap& o)
-		:std::map<KeyString,Value>(o){}
-	KeyMap( const std::map<std::string,Value>& o)
+		:Parent(o){}
+
+	const_iterator find( const char* key) const
 	{
-		std::copy( o.begin(), o.end(), std::inserter( *this, this->end()));
+		return Parent::find(key);
 	}
 
-	void insert( const KeyString& key, const Value& value)
+	iterator find( const char* key)
 	{
-		if (Parent::find( key) != this->end())
-		{
-			throw strus::runtime_error( _TXT( "duplicate definition of '%s'"), key.c_str());
-		}
-		Parent::operator[](key) = value;
+		return Parent::find(key);
 	}
 
+	ValueType& operator[]( const char* key)
+	{
+		std::string keystr( utils::tolower( key));
+		return Parent::operator[]( keystr);
+	}
+
+	ValueType& operator[]( const std::string& key)
+	{
+		std::string keystr( utils::tolower( key));
+		return Parent::operator[]( keystr);
+	}
+
+	void insert( const std::string& key, const ValueType& value)
+	{
+		std::string keystr( utils::tolower( key));
+		Parent::insert( key, value);
+	}
+
+	void insert( const char* key, const ValueType& value)
+	{
+		std::string keystr( utils::tolower( key));
+		Parent::insert( key, value);
+	}
 };
 
 }//namespace
 #endif
+
 

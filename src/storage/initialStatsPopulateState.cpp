@@ -43,104 +43,67 @@ void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peerm
 	m_peermsgproc = peermsgproc_;
 	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
 	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
+	if (!m_peerMessageBuilder.get()) throw strus::runtime_error(_TXT("error creating peer message builder"));
 	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofDocuments_);
 	m_peerMessageBuilder->start();
-}
 
-void InitialStatsPopulateState::clear()
-{
-	m_peerMessageBuilder->rollback();
-	m_peerMessageBuilder->start();
-	m_typenomap.clear();
-	m_termnomap.clear();
-	m_strings.clear();
-}
+	std::map<Index,std::size_t> typenomap;
+	std::map<Index,std::size_t> termnomap;
+	std::string strings;
 
-void InitialStatsPopulateState::addTypeDef( const std::string& name, const Index& no)
-{
-	m_typenomap[ no] = m_strings.size();
-	m_strings.append( name);
-	m_strings.push_back( '\0');
-}
-
-void InitialStatsPopulateState::addTermDef( const std::string& name, const Index& no)
-{
-	m_termnomap[ no] = m_strings.size();
-	m_strings.append( name);
-	m_strings.push_back( '\0');
-}
-
-const char* InitialStatsPopulateState::getTypeName( const Index& no) const
-{
-	std::map<Index,std::size_t>::const_iterator ti = m_typenomap.find(no);
-	if (ti == m_typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type when populating df's"));
-	return m_strings.c_str() + ti->second;
-}
-
-const char* InitialStatsPopulateState::getTermName( const Index& no) const
-{
-	std::map<Index,std::size_t>::const_iterator ti = m_termnomap.find(no);
-	if (ti == m_termnomap.end()) throw strus::runtime_error( _TXT( "encountered undefined term when populating df's"));
-	return m_strings.c_str() + ti->second;
-}
-
-std::string InitialStatsPopulateState::fetch()
-{
-	// NOTE: This implementation does fetch the whole df map in one step.
-	//	Better implementations might do this differently.
-	if (!m_peermsgproc) return std::string();
-
-	try
+	// Fill a map with the strings of all types in the collection:
+	{
+		DatabaseAdapter_TermType::Cursor typecursor( dbclient);
+		Index typeno;
+		std::string typestr;
+		for (bool more=typecursor.loadFirst( typestr, typeno); more;
+			more=typecursor.loadNext( typestr, typeno))
+		{
+			typenomap[ typeno] = strings.size();
+			strings.append( typestr);
+			strings.push_back( '\0');
+		}
+	}
+	// Fill a map with the strings of all terms in the collection:
+	{
+		DatabaseAdapter_TermValue::Cursor termcursor( dbclient);
+		Index termno;
+		std::string termstr;
+		for (bool more=termcursor.loadFirst( termstr, termno); more;
+			more=termcursor.loadNext( termstr, termno))
+		{
+			termnomap[ termno] = strings.size();
+			strings.append( termstr);
+			strings.push_back( '\0');
+		}
+	}
+	// Feed all df changes to the peer message builder:
 	{
 		Index typeno;
 		Index termno;
 		Index df;
-	
-		m_peerMessageBuilder->rollback();
-		m_peerMessageBuilder->start();
-		// Fill a map with the strings of all types in the collection:
-		{
-			DatabaseAdapter_TermType::Cursor typecursor( m_database);
-			Index typeno;
-			std::string typestr;
-			for (bool more=typecursor.loadFirst( typestr, typeno); more;
-				more=typecursor.loadNext( typestr, typeno))
-			{
-				addTypeDef( typestr, typeno);
-			}
-		}
-		// Fill a map with the strings of all terms in the collection:
-		{
-			DatabaseAdapter_TermValue::Cursor termcursor( m_database);
-			Index termno;
-			std::string termstr;
-			for (bool more=termcursor.loadFirst( termstr, termno); more;
-				more=termcursor.loadNext( termstr, termno))
-			{
-				addTermDef( termstr, termno);
-			}
-		}
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
+
+		DatabaseAdapter_DocFrequency::Cursor dfcursor( dbclient);
 		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
 			more=dfcursor.loadNext( typeno, termno, df))
 		{
-			m_peerMessageBuilder->addDfChange(
-				getTypeName(typeno), getTermName(termno), df, true/*isNew*/);
+			std::map<Index,std::size_t>::const_iterator ti;
+			ti = typenomap.find( typeno);
+			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type when populating df's"));
+			const char* typenam = strings.c_str() + ti->second;
+	
+			ti = termnomap.find( termno);
+			if (ti == termnomap.end()) throw strus::runtime_error( _TXT( "encountered undefined term when populating df's"));
+			const char* termnam = strings.c_str() + ti->second;
+	
+			m_peerMessageBuilder->addDfChange( typenam, termnam, df, true/*isNew*/);
 		}
-		std::string rt = m_peerMessageBuilder->fetch();
-		clear();
-		m_peermsgproc = 0;
-		return rt;
-	}
-	catch (const std::bad_alloc& err)
-	{
-		clear();
-		throw err;
-	}
-	catch (const std::runtime_error& err)
-	{
-		clear();
-		throw err;
 	}
 }
+
+bool InitialStatsPopulateState::fetchMessage( const char* blk, std::size_t blksize)
+{
+	return m_peerMessageBuilder->fetchMessage( blk, blksize);
+}
+
 
