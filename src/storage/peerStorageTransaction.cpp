@@ -75,9 +75,9 @@ void PeerStorageTransaction::updateDocumentFrequencyChange(
 	Index termno = m_dbadapter_termvalue.get( termvalue);
 	if (!termno)
 	{
-		m_unknownTerms.push_back( m_unknownTerms_strings.size());
-		m_unknownTerms_strings.append( termvalue);
-		m_unknownTerms_strings.push_back( '\0');
+		m_unknownTerms_strings.push_back( termvalue);
+		m_unknownTerms.push_back( m_unknownTerms_strings.back());
+
 		termno = ++m_termvaluecnt + UnknownValueHandleStart;
 		if (m_termvaluecnt >= UnknownValueHandleStart)
 		{
@@ -93,9 +93,8 @@ void PeerStorageTransaction::updateDocumentFrequencyChange(
 			{
 				m_typeStrings[ typeno] = termtype;
 			}
-			m_newTerms.push_back( NewTerm( m_newTerms_strings.size(), m_dfbatch.size()));
-			m_newTerms_strings.append( termvalue);
-			m_newTerms_strings.push_back( '\0');
+			m_newTerms_strings.push_back( termvalue);
+			m_newTerms.push_back( NewTerm( m_newTerms_strings.back(), m_dfbatch.size()));
 		}
 	}
 	m_dfbatch.put( typeno, termno, increment);
@@ -126,8 +125,7 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 		{
 			if (bi->termno > UnknownValueHandleStart)
 			{
-				std::size_t termidx = m_unknownTerms[ bi->termno - UnknownValueHandleStart - 1];
-				const char* termkey = m_unknownTerms_strings.c_str() + termidx;
+				const char* termkey = m_unknownTerms[ bi->termno - UnknownValueHandleStart - 1];
 				Index termno = m_dbadapter_termvalue.get( termkey);
 				if (termno)
 				{
@@ -151,7 +149,7 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 			if (incr.termno < UnknownValueHandleStart)
 			{
 				Index df = m_storage->localDocumentFrequency( incr.typeno, incr.termno);
-				const char* value = m_newTerms_strings.c_str() + ti->termidx;
+				const char* value = ti->term;
 				const char* type = m_typeStrings[ incr.typeno].c_str();
 				msgbuilder->addDfChange( type, value, df, false);
 			}

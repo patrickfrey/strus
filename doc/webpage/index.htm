@@ -56,20 +56,6 @@
 		for the stored key/value pairs.
 		Currently there exists an implementation based on the 
 		<a href="http://leveldb.org">LevelDB</a> library.<br/>
-		The name <i>strus</i> is an acronym for <b><u>stru</u></b>ctured <b><u>s</u></b>earch
-		derived from the capability to identify complex structures in text and to extract parts
-		of matches for further processing. You might for example search for a 
-		sequence of two words with one of a set of verbs in the same sentence
-		that forms a nominal phrase from which the subject noun is extracted as 
-		part of the answer.<br/>
-		Besides finding structures, <i>strus</i> is of course also able to do <i>classical 
-		information retrieval</i> with a statistical, resp. stochastical (bag of words model)
-		<i>or a proximity weighting scheme</i>.<br/>
-		</p>
-		<h2>Story/Motivation</h2>
-		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of <i>strus</i>.
-		I also try to explain, what distinguishes <i>strus</i> from other open source fulltext 
-		search engines.
 		</p>
 		<h2>Demo system</h2>
 		<p class="description">There is one <b>running demo system online</b> to show the properties of 
@@ -80,7 +66,13 @@
 		</p>
 
 		<h2>Tutorial</h2>
-		<p class="description">There is a <a href="tutorial_MusicBrainzDataset.htm">tutorial</a> available based on a docker image.</p>
+		<p class="description">There is a <a href="http://www.codeproject.com/Articles/1009582/Building-a-search-engine-with-Strus-tutorial">tutorial</a> available based on a docker image.</p>
+
+		<h2>Story/Motivation</h2>
+		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of <i>strus</i>.
+		I also try to explain, what distinguishes <i>strus</i> from other open source fulltext 
+		search engines.
+		</p>
 
 		<h2>Installation</h2>
 		<p class="description">
@@ -101,6 +93,14 @@
 		</p>
 		<h3>News</h3>
 		<table>
+
+		<tr>
+		<td><p class="timestamp">Oct 12th, 2015</p></td>
+		<td><p class="newstext">C++ Interfaces of strus are now exception free. This means that 
+		libraries and modules can be linked with a defined set of symbols exported (visibility hidden)
+		and you can use different compilers to build the objects if some STL types (vector,string)
+		and the calling conventions are compatible.</p></td>
+		</tr>
 
 		<tr>
 		<td><p class="timestamp">Aug 17th, 2015</p></td>

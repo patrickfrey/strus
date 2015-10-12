@@ -30,6 +30,7 @@
 #define _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
 #include "documentFrequencyCache.hpp"
 #include "databaseAdapter.hpp"
+#include "private/stringMap.hpp"
 #include <string>
 #include <vector>
 
@@ -70,12 +71,12 @@ private:
 	struct NewTerm
 	{
 	public:
-		NewTerm( std::size_t termidx_, std::size_t batchidx_)
-			:termidx(termidx_),batchidx(batchidx_){}
+		NewTerm( const char* term_, std::size_t batchidx_)
+			:term(term_),batchidx(batchidx_){}
 		NewTerm( const NewTerm& o)
-			:termidx(o.termidx),batchidx(o.batchidx){}
+			:term(o.term),batchidx(o.batchidx){}
 
-		std::size_t termidx;
+		const char* term;
 		std::size_t batchidx;
 	};
 
@@ -85,10 +86,10 @@ private:
 	DocumentFrequencyCache* m_documentFrequencyCache;
 	const PeerMessageProcessorInterface* m_peermsgproc;
 	DocumentFrequencyCache::Batch m_dfbatch;
-	std::vector<std::size_t> m_unknownTerms;
-	std::string m_unknownTerms_strings;
+	std::vector<const char*> m_unknownTerms;
+	StringVector m_unknownTerms_strings;
 	std::vector<NewTerm> m_newTerms;
-	std::string m_newTerms_strings;
+	StringVector m_newTerms_strings;
 	std::vector<std::string> m_typeStrings;
 	DatabaseAdapter_TermValue::ReadWriter m_dbadapter_termvalue;
 	Index m_termvaluecnt;
