@@ -103,7 +103,7 @@ void Query::pushTerm( const std::string& type_, const std::string& value_)
 	CATCH_ERROR_MAP( _TXT("error pushing term to query: %s"), *m_errorhnd);
 }
 
-void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_)
+void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_, unsigned int cardinality_)
 {
 	try
 	{
@@ -119,7 +119,7 @@ void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::
 			{
 				subnodes.push_back( *si);
 			}
-			m_expressions.push_back( Expression( operation, subnodes, range_));
+			m_expressions.push_back( Expression( operation, subnodes, range_, cardinality_));
 			m_stack.resize( m_stack.size() - argc);
 			m_stack.push_back( nodeAddress( ExpressionNode, m_expressions.size()-1));
 		}
@@ -279,7 +279,7 @@ Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 			{
 				subnodes.push_back( duplicateNode( *si));
 			}
-			m_expressions.push_back( Expression( expr.operation, subnodes, expr.range));
+			m_expressions.push_back( Expression( expr.operation, subnodes, expr.range, expr.cardinality));
 			rtadr = nodeAddress( ExpressionNode, m_expressions.size()-1);
 			break;
 		}

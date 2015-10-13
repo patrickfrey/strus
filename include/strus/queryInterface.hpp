@@ -61,9 +61,10 @@ public:
 	/// \param[in] operation the expression join operator
 	/// \param[in] argc number of expression arguments
 	/// \param[in] range range of the expression
+	/// \param[in] cardinality required size of matching results (e.g. minimum number of elements of any input subset selection that builds a result) (0 for use default)
 	virtual void pushExpression(
 				const PostingJoinOperatorInterface* operation,
-				std::size_t argc, int range)=0;
+				std::size_t argc, int range, unsigned int cardinality)=0;
 
 	/// \brief Push a duplicate of the topmost element of the query stack
 	/// \note This function makes it possible to reference terms or expressions more than once as features or as subexpressions.
