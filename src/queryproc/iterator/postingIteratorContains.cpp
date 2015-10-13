@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "postingIteratorContains.hpp"
+#include "postingIteratorHelpers.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -55,6 +56,18 @@ IteratorContains::IteratorContains( const std::vector<Reference< PostingIterator
 IteratorContains::~IteratorContains()
 {}
 
+IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_)
+	:IteratorContains(args,errorhnd_), m_cardinality(cardinality_)
+{
+	m_featureid.resize( m_featureid.size()-1);
+	if (m_cardinality && m_cardinality != args.size())
+	{
+		encodeInteger( m_featureid, m_cardinality);
+		m_featureid.push_back( 'C');
+	}
+	m_featureid.push_back( 'A');
+}
+
 std::vector<const PostingIteratorInterface*>
 	IteratorContains::subExpressions( bool positive) const
 {
@@ -79,92 +92,13 @@ std::vector<const PostingIteratorInterface*>
 Index IteratorContains::skipDoc( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
-	if (m_argar.empty()) return 0;
-
-	Index docno_iter = docno_;
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-
-		docno_iter = (*ai)->skipDoc( docno_iter);
-		if (docno_iter == 0)
-		{
-			return m_docno = 0;
-		}
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDoc( docno_iter);
-			if (docno_next != docno_iter)
-			{
-				if (docno_next == 0)
-				{
-					return m_docno = 0;
-				}
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (ai == ae)
-		{
-			return m_docno = docno_iter;
-		}
-	}
+	return m_docno = getFirstAllMatchDocno( m_argar, docno_);
 }
 
 Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
-	if (m_argar.empty()) return 0;
-
-	Index docno_iter = docno_;
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-
-		std::size_t nof_matches = 0;
-		Index match_docno = 0;
-	AGAIN:
-		for (; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDoc( docno_iter);
-			if (docno_next)
-			{
-				if (match_docno)
-				{
-					if (match_docno == docno_next)
-					{
-						++nof_matches;
-					}
-					else if (match_docno > docno_next)
-					{
-						match_docno = docno_next;
-						nof_matches = 0;
-						ai = m_argar.begin();
-						goto AGAIN;
-					}
-					else
-					{
-						continue;
-					}
-				}
-				else
-				{
-					match_docno = docno_next;
-					nof_matches = 1;
-				}
-			}
-		}
-		if (nof_matches >= m_cardinality && match_docno)
-		{
-			return m_docno = match_docno;
-		}
-		else
-		{
-			docno_iter = match_docno+1;
-		}
-	}
+	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, m_cardinality);
 }
 
 GlobalCounter IteratorContains::documentFrequency() const

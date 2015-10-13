@@ -43,6 +43,11 @@ Index getFirstAllMatchDocno(
 		std::vector<Reference< PostingIteratorInterface> >& args,
 		Index docno);
 
+Index getFirstAllMatchDocnoSubset(
+		std::vector<Reference< PostingIteratorInterface> >& args,
+		Index docno,
+		std::size_t cardinality);
+
 void encodeInteger( std::string& buf, int val);
 }
 #endif

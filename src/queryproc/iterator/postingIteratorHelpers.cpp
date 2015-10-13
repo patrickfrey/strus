@@ -38,39 +38,101 @@ using namespace strus;
 
 Index strus::getFirstAllMatchDocno(
 		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno_iter)
+		Index docno)
 {
+	if (args.empty()) return 0;
+	
+	Index docno_iter = docno;
 	for (;;)
 	{
 		std::vector<Reference< PostingIteratorInterface> >::iterator
 			ai = args.begin(), ae = args.end();
-		if (ai == ae) return 0;
-		
-		Index docno_first = (*ai)->skipDoc( docno_iter);
-		if (!docno_first)
+	
+		docno_iter = (*ai)->skipDoc( docno_iter);
+		if (docno_iter == 0)
 		{
 			return 0;
 		}
-		bool match = true;
 		for (++ai; ai != ae; ++ai)
 		{
-			Index docno_next = (*ai)->skipDoc( docno_first);
-			if (!docno_next)
+			Index docno_next = (*ai)->skipDoc( docno_iter);
+			if (docno_next == 0)
 			{
 				return 0;
 			}
-			if (docno_next != docno_first)
+			if (docno_next != docno_iter)
 			{
-				match = false;
 				docno_iter = docno_next;
 				break;
 			}
 		}
-		if (match)
+		if (ai == ae)
 		{
-			return docno_first;
+			return docno_iter;
 		}
 	}
+}
+
+Index strus::getFirstAllMatchDocnoSubset(
+		std::vector<Reference< PostingIteratorInterface> >& args,
+		Index docno,
+		std::size_t cardinality)
+{
+	if (args.empty()) return 0;
+
+	Index docno_iter = docno;
+	for (;;)
+	{
+		std::vector<Reference< PostingIteratorInterface> >::iterator
+			ai = args.begin(), ae = args.end();
+
+		std::size_t nof_matches = 0;
+		Index match_docno = 0;
+	AGAIN:
+		for (; ai != ae; ++ai)
+		{
+			Index docno_next = (*ai)->skipDoc( docno_iter);
+			if (docno_next)
+			{
+				if (match_docno)
+				{
+					if (match_docno == docno_next)
+					{
+						++nof_matches;
+					}
+					else if (match_docno > docno_next)
+					{
+						match_docno = docno_next;
+						nof_matches = 0;
+						ai = args.begin();
+						goto AGAIN;
+					}
+					else
+					{
+						continue;
+					}
+				}
+				else
+				{
+					match_docno = docno_next;
+					nof_matches = 1;
+				}
+			}
+		}
+		if (nof_matches >= cardinality && match_docno)
+		{
+			return match_docno;
+		}
+		else if (match_docno)
+		{
+			docno_iter = match_docno+1;
+		}
+		else
+		{
+			break;
+		}
+	}
+	return 0;
 }
 
 void strus::encodeInteger( std::string& buf, int val)

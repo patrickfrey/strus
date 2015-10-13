@@ -81,8 +81,7 @@ class IteratorContainsWithCardinality
 	:public IteratorContains
 {
 public:
-	IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_)
-		:IteratorContains(args,errorhnd_), m_cardinality(cardinality_){}
+	IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorContainsWithCardinality(){}
 
 	virtual Index skipDoc( const Index& docno);
