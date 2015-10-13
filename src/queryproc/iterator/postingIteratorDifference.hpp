@@ -92,7 +92,8 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& argitr,
-			int range) const;
+			int range,
+			unsigned int cardinality) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages

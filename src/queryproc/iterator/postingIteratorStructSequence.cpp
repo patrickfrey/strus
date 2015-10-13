@@ -202,8 +202,14 @@ GlobalCounter IteratorStructSequence::documentFrequency() const
 
 PostingIteratorInterface* PostingJoinStructSequence::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
-		int range_) const
+		int range_,
+		unsigned int cardinality_) const
 {
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "struct_sequence");
+		return 0;
+	}
 	if (argitr.size() < 1)
 	{
 		m_errorhnd->report( _TXT( "too few arguments for 'struct_sequence'"));
@@ -219,11 +225,17 @@ PostingIteratorInterface* PostingJoinStructSequence::createResultIterator(
 
 PostingIteratorInterface* PostingJoinSequence::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
-		int range_) const
+		int range_,
+		unsigned int cardinality_) const
 {
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "sequence");
+		return 0;
+	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'sequence'"));
+		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "sequence");
 		return 0;
 	}
 	try

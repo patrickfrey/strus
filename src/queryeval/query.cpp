@@ -351,7 +351,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 				break;
 		}
 	}
-	return expr.operation->createResultIterator( joinargs, expr.range);
+	return expr.operation->createResultIterator( joinargs, expr.range, expr.cardinality);
 }
 
 

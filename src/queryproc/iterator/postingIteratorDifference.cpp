@@ -102,21 +102,27 @@ Index IteratorDifference::skipPos( const Index& pos_)
 
 PostingIteratorInterface* PostingJoinDifference::createResultIterator(
 		const std::vector<Reference<PostingIteratorInterface> >& argitr,
-		int range) const
+		int range,
+		unsigned int cardinality) const
 {
+	if (cardinality != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "diff");
+		return 0;
+	}
 	if (range != 0)
 	{
-		m_errorhnd->report( _TXT( "no range argument expected for 'diff'"));
+		m_errorhnd->report( _TXT( "no range argument expected for '%s'"), "diff");
 		return 0;
 	}
 	if (argitr.size() < 2)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'diff'"));
+		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "diff");
 		return 0;
 	}
 	if (argitr.size() > 2)
 	{
-		m_errorhnd->report( _TXT( "too many arguments for 'diff'"));
+		m_errorhnd->report( _TXT( "too many arguments for '%s'"), "diff");
 		return 0;
 	}
 	try

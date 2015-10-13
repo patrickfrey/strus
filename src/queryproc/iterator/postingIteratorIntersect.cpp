@@ -171,16 +171,22 @@ GlobalCounter IteratorIntersect::documentFrequency() const
 
 PostingIteratorInterface* PostingJoinIntersect::createResultIterator(
 		const std::vector<Reference<PostingIteratorInterface> >& itrs,
-		int range) const
+		int range,
+		unsigned int cardinality) const
 {
+	if (cardinality != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "intersect");
+		return 0;
+	}
 	if (range != 0)
 	{
-		m_errorhnd->report( _TXT( "no range argument expected for 'intersect'"));
+		m_errorhnd->report( _TXT( "no range argument expected for '%s'"), "intersect");
 		return 0;
 	}
 	if (itrs.size() == 0)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'intersect'"));
+		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "intersect");
 		return 0;
 	}
 	try

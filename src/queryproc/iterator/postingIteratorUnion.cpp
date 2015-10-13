@@ -157,8 +157,14 @@ GlobalCounter IteratorUnion::documentFrequency() const
 
 PostingIteratorInterface* PostingJoinUnion::createResultIterator(
 		const std::vector<Reference<PostingIteratorInterface> >& itrs,
-		int range) const
+		int range,
+		unsigned int cardinality_) const
 {
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "union");
+		return 0;
+	}
 	if (range != 0)
 	{
 		m_errorhnd->report( _TXT( "no range argument expected for '%s'"), "union");

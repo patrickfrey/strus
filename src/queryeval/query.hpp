@@ -135,15 +135,17 @@ public:
 		Expression(
 				const PostingJoinOperatorInterface* operation_,
 				const std::vector<NodeAddress>& subnodes_,
-				int range_=0)
-			:operation(operation_),subnodes(subnodes_),range(range_){}
+				int range_=0,
+				unsigned int cardinality_=0)
+			:operation(operation_),subnodes(subnodes_),range(range_),cardinality(cardinality_){}
 		Expression(
 				const Expression& o)
-			:operation(o.operation),subnodes(o.subnodes),range(o.range){}
+			:operation(o.operation),subnodes(o.subnodes),range(o.range),cardinality(o.cardinality){}
 
 		const PostingJoinOperatorInterface* operation;
 		std::vector<NodeAddress> subnodes;
 		int range;
+		unsigned int cardinality;
 	};
 
 	struct Feature

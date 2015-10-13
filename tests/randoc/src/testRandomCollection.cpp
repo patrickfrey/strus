@@ -771,7 +771,7 @@ struct RandomQuery
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
 		strus::PostingIteratorInterface* res = 
-			joinop->createResultIterator( itrar, range);
+			joinop->createResultIterator( itrar, range, 0);
 		if (!res)
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());

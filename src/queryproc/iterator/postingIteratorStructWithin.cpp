@@ -229,8 +229,14 @@ GlobalCounter IteratorStructWithin::documentFrequency() const
 
 PostingIteratorInterface* PostingJoinStructWithin::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
-		int range_) const
+		int range_,
+		unsigned int cardinality_) const
 {
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "within_struct");
+		return 0;
+	}
 	if (argitr.size() < 2)
 	{
 		m_errorhnd->report( _TXT( "too few arguments for 'within_struct'"));
@@ -245,11 +251,17 @@ PostingIteratorInterface* PostingJoinStructWithin::createResultIterator(
 
 PostingIteratorInterface* PostingJoinWithin::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
-		int range_) const
+		int range_,
+		unsigned int cardinality_) const
 {
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "within");
+		return 0;
+	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'within'"));
+		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "within");
 		return 0;
 	}
 	try

@@ -98,7 +98,8 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const;
+			int range_,
+			unsigned int cardinality_) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -115,7 +116,8 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const;
+			int range_,
+			unsigned int cardinality_) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

@@ -117,7 +117,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				{
 					m_errorhnd->explain(_TXT("error creating struct element iterator: %s"));
 				}
-				m_structop.reset( join->createResultIterator( m_structelem, 0));
+				m_structop.reset( join->createResultIterator( m_structelem, 0, 0));
 				if (!m_structop.get())
 				{
 					m_errorhnd->explain(_TXT("error creating struct element iterator: %s"));
