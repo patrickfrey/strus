@@ -48,7 +48,7 @@ public:
 	/// \brief Create an iterator on the join operator result (set of postings)
 	/// \param[in] argitrs argument posting iterators of the join operation
 	/// \param[in] range range of the operation
-	/// \param[in] cardinality required size of matching results (e.g. minimum number of elements of any input subset selection that builds a result)
+	/// \param[in] cardinality required size of matching results (e.g. minimum number of elements of any input subset selection that builds a result) (0 for default)
 	/// \return the iterator on the resulting set of postings
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& argitrs,
