@@ -28,6 +28,8 @@
 */
 ///\brief Simple implementation of snprintf only supporing a small subset of format characters that is guaranteed not to use malloc
 #include "strus/private/snprintf.h"
+#include <math.h>
+/*[-]*/#include <stdio.h>
 
 static void printnum( char** bi, char* be, unsigned long num)
 {
@@ -35,7 +37,11 @@ static void printnum( char** bi, char* be, unsigned long num)
 	size_t bufidx = sizeof(buf);
 	if (num == 0)
 	{
-		if (*bi < be) **bi++ = '0';
+		if (*bi < be)
+		{
+			**bi = '0';
+			++*bi;
+		}
 		return;
 	}
 	buf[ --bufidx] = 0;
@@ -44,7 +50,38 @@ static void printnum( char** bi, char* be, unsigned long num)
 		buf[ --bufidx] = (num % 10) + '0';
 		num /= 10;
 	}
-	for (; *bi < be && buf[ bufidx]; bufidx++,(*bi)++) **bi = buf[ bufidx];
+	for (; *bi < be && buf[ bufidx]; ++bufidx,++*bi) **bi = buf[ bufidx];
+}
+
+static void printfloat( char** bi, char* be, double num, unsigned int precision)
+{
+	double fl = floor( num);
+	double gz = (num < 0.0)?(fl+1.0):fl;                 /* ganzzahliger teil: -1.3 => -1.0, 0.7 => 0.0, 2.1 => 2.0 */
+	double tr = (num < 0.0)?(gz - num):(num - fl);       /* trunc:  -1.3 => 0.3, 0.7 => 0.7, 2.1 => 0.1 */
+
+	/*[-]*/fprintf( stderr, "+++++CALL printfloat %f %f %f %f\n", fl, gz, tr, num);
+	if (*bi >= be) return;
+	if (num < 0.0)
+	{
+		**bi = '-';
+		++*bi;
+		gz = -gz;
+	}
+	printnum( bi, be, (unsigned long)gz);
+	if (*bi < be && precision)
+	{
+		**bi = '.';
+		++*bi;
+	}
+	for (; *bi < be && precision > 0; ++*bi,--precision)
+	{
+		tr = tr * 10;
+		double trfl = floor(tr);
+		/*[-]*/fprintf( stderr, "+++++LOOP printfloat %f %f\n", tr, trfl);
+		tr -= trfl;
+		**bi = (char)(unsigned char)(unsigned int)(trfl) + '0';
+		/*[-]*/fprintf( stderr, "+++++NEXT printfloat %f %f '%c'\n", tr, trfl, **bi);
+	}
 }
 
 void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
@@ -59,6 +96,7 @@ void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
 		int d;
 		unsigned int u;
 		char c;
+		double f;
 	} val;
 
 	for (; *fi && bi < be; ++fi)
@@ -71,6 +109,28 @@ void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
 				case '%':
 					*bi++ = '%';
 					break;
+				case '.':
+				{
+					char const* fibk = fi++;
+					if (*fi < '0' || *fi > '9')
+					{
+						*bi++ = '.';
+						break;
+					}
+					unsigned int precision = atoi(fi);
+					for (; *fi >= '0' && *fi <= '9'; ++fi){}
+					if (*fi == 'f')
+					{
+						val.f = va_arg(ap, double);
+						printfloat( &bi, be, val.f, precision);
+					}
+					else
+					{
+						*bi++ = '.';
+						fi = fibk;
+					}
+					break;
+				}
 				case 's':
 					val.s = va_arg(ap, char *);
 					if (val.s) for (; bi<be && *val.s; ++bi,++val.s) *bi = *val.s;
