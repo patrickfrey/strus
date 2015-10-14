@@ -29,7 +29,6 @@
 ///\brief Simple implementation of snprintf only supporing a small subset of format characters that is guaranteed not to use malloc
 #include "strus/private/snprintf.h"
 #include <math.h>
-/*[-]*/#include <stdio.h>
 
 static void printnum( char** bi, char* be, unsigned long num)
 {
@@ -59,7 +58,6 @@ static void printfloat( char** bi, char* be, double num, unsigned int precision)
 	double gz = (num < 0.0)?(fl+1.0):fl;                 /* ganzzahliger teil: -1.3 => -1.0, 0.7 => 0.0, 2.1 => 2.0 */
 	double tr = (num < 0.0)?(gz - num):(num - fl);       /* trunc:  -1.3 => 0.3, 0.7 => 0.7, 2.1 => 0.1 */
 
-	/*[-]*/fprintf( stderr, "+++++CALL printfloat %f %f %f %f\n", fl, gz, tr, num);
 	if (*bi >= be) return;
 	if (num < 0.0)
 	{
@@ -77,10 +75,8 @@ static void printfloat( char** bi, char* be, double num, unsigned int precision)
 	{
 		tr = tr * 10;
 		double trfl = floor(tr);
-		/*[-]*/fprintf( stderr, "+++++LOOP printfloat %f %f\n", tr, trfl);
 		tr -= trfl;
 		**bi = (char)(unsigned char)(unsigned int)(trfl) + '0';
-		/*[-]*/fprintf( stderr, "+++++NEXT printfloat %f %f '%c'\n", tr, trfl, **bi);
 	}
 }
 
@@ -109,6 +105,12 @@ void strus_vsnprintf( char* bi, size_t bufsize, const char* format, va_list ap)
 				case '%':
 					*bi++ = '%';
 					break;
+				case 'f':
+				{
+					val.f = va_arg(ap, double);
+					printfloat( &bi, be, val.f, 8);
+					break;
+				}
 				case '.':
 				{
 					char const* fibk = fi++;
