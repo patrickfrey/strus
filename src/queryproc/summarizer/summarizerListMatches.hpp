@@ -32,6 +32,7 @@
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "private/internationalization.hpp"
 #include <string>
 #include <vector>
 
@@ -105,6 +106,11 @@ public:
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the list of occurencies printed for the features specified with the feature parameter 'match'.");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

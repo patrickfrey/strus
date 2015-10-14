@@ -54,6 +54,10 @@ public:
 			const std::vector<Reference<PostingIteratorInterface> >& argitrs,
 			int range,
 			unsigned int cardinality) const=0;
+
+	/// \brief Get a description of the function for user help
+	/// \return the description text
+	virtual const char* getDescription() const=0;
 };
 
 }//namespace

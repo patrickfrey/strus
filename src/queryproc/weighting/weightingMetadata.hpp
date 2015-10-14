@@ -114,6 +114,10 @@ public:
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const;
 
+	virtual const char* getDescription() const
+	{
+		return _TXT("Calculate the weight of a document as value of the meta data element specified by the parameter 'name'.");
+	}
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

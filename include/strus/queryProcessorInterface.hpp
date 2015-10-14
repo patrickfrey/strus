@@ -31,6 +31,7 @@
 #ifndef _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_INTERFACE_HPP_INCLUDED
 #include <string>
+#include <vector>
 
 namespace strus
 {
@@ -99,6 +100,25 @@ public:
 	virtual const SummarizerFunctionInterface*
 		getSummarizerFunction(
 			const std::string& name) const=0;
+
+	/// \brief Function type for fetching descriptions of available functions
+	enum FunctionType
+	{
+		PostingJoinOperator,		///< Addresses a posting iterator join operator
+		WeightingFunction,		///< Addresses a weighting function
+		SummarizerFunction		///< Addresses a summarization function
+	};
+
+	/// \brief Get a description of a specific function addressed by name
+	/// \param[in] type type of the function
+	/// \param[in] name name of the function
+	/// \return the description
+	virtual const char* getDescription( FunctionType type, const std::string& name) const=0;
+
+	/// \brief Get a list of all functions of a specific type available
+	/// \param[in] type type of the function
+	/// \return the list of function names
+	virtual std::vector<std::string> getFunctionList( FunctionType type) const=0;
 };
 
 }//namespace

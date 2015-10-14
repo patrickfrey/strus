@@ -109,6 +109,11 @@ public:
 			int range,
 			unsigned int cardinality) const;
 
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p-1) for all (d,p) with p>1 in the argument set");
+	}
+
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

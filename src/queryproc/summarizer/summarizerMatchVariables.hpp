@@ -144,6 +144,11 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
+	virtual const char* getDescription() const
+	{
+		return _TXT("Extract all variables assigned to subexpressions of features specified with the feature parameter 'match'. The feature type of the values extracted from the forward index as variable values are specified with the string parameter 'type'. With 'assign' you can specify the assignment operator used in the result other than '=' (default). With 'delimiter' you can specify the separator between two results other than ',' (default).");
+	}
+
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

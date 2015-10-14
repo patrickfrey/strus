@@ -102,6 +102,11 @@ public:
 			int range_,
 			unsigned int cardinality_) const;
 
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings");
+	}
+
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -118,6 +123,11 @@ public:
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			int range_,
 			unsigned int cardinality_) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

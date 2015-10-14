@@ -103,6 +103,12 @@ public:
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
 			int range,
 			unsigned int cardinality) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,1) for documents d that contain all of the argument features");
+	}
+
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

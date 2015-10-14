@@ -156,6 +156,11 @@ public:
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const;
 
+	virtual const char* getDescription() const
+	{
+		return _TXT("Calculate the document weight of the features specified with the feature parameter 'match' with a modified weighting scheme based on \"BM25\". The parameters 'k1','b' can be specified. The average document lenght is specified with the parameter 'avgdoclen'. The ff of the features used in the formula is not the original frequency, but an increment of it based on some properties: An increment specified with the parameter 'titleinc' applied if a feature occurs in the title, 'strinc' applied if two features occurr in the same phrase specified with the structural element, 'seqinc' applied if two features occurr in a row that are also in a sequence in the query. With the parameter 'proxmindist' you can specify a minimum distance two features must have to be weighted for calculating the ff increment. With the parameter 'relevant' you specify a minimum fraction of the local df a feature must have to be weighted for the calculation of the 'df' increment.");
+	}
+
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

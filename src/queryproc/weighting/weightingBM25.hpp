@@ -135,6 +135,11 @@ public:
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const;
 
+	virtual const char* getDescription() const
+	{
+		return _TXT("Calculate the document weight of the features specified with the feature parameter 'match' with the weighting scheme \"BM25\". The parameters 'k1','b' can be specified. The average document lenght is specified with the parameter 'avgdoclen'.");
+	}
+
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

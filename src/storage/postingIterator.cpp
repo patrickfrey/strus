@@ -74,12 +74,6 @@ Index PostingIterator::skipDoc( const Index& docno_)
 		if (m_posinfoIterator.isCloseCandidate( docno_))
 		{
 			m_docno = m_posinfoIterator.skipDoc( docno_);
-#ifdef STRUS_LOWLEVEL_CHECK
-			if (m_docno != m_docnoIterator.skip( m_docno))
-			{
-				throw strus::runtime_error( _TXT( "corrupt index, position info is missing"));
-			}
-#endif
 		}
 		else
 		{
@@ -100,7 +94,7 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 		}
 		if (m_docno != m_posinfoIterator.skipDoc( m_docno))
 		{
-			throw strus::runtime_error( _TXT( "corrupt index, document not in posinfo index"));
+			return 0;
 		}
 		return m_posinfoIterator.skipPos( firstpos_);
 	}
