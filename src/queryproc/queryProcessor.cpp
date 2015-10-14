@@ -216,11 +216,11 @@ const char* QueryProcessor::getDescription( FunctionType type, const std::string
 	{
 		switch (type)
 		{
-			case QueryProcessorInterface::PostingJoinOperator:
+			case PostingJoinOperator:
 				return getDescription_( m_joiners, name);
-			case QueryProcessorInterface::WeightingFunction:
+			case WeightingFunction:
 				return getDescription_( m_weighters, name);
-			case QueryProcessorInterface::SummarizerFunction:
+			case SummarizerFunction:
 				return getDescription_( m_summarizers, name);
 		}
 	}
@@ -237,11 +237,11 @@ std::vector<std::string> QueryProcessor::getFunctionList( QueryProcessorInterfac
 	{
 		switch (type)
 		{
-			case QueryProcessorInterface::PostingJoinOperator:
+			case PostingJoinOperator:
 				return getKeys( m_joiners);
-			case QueryProcessorInterface::WeightingFunction:
+			case WeightingFunction:
 				return getKeys( m_weighters);
-			case QueryProcessorInterface::SummarizerFunction:
+			case SummarizerFunction:
 				return getKeys( m_summarizers);
 		}
 	}
