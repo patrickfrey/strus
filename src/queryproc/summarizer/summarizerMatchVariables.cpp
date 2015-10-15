@@ -98,12 +98,13 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		{
 			if (docno==fi->itr->skipDoc( docno))
 			{
-				for (curpos = 0; curpos; curpos=fi->itr->skipPos( curpos+1))
+				curpos = fi->itr->skipPos( 0);
+				for (; curpos; curpos = fi->itr->skipPos( curpos+1))
 				{
 					std::vector<SummarizationVariable>::const_iterator
 						vi = fi->variables.begin(),
 						ve = fi->variables.end();
-	
+
 					std::string line;
 					for (int vidx=0; vi != ve; ++vi,++vidx)
 					{
