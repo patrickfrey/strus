@@ -199,7 +199,7 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 
 			Index rangediff = max_pos>=-m_range?(-m_range):max_pos;
 			min_pos = max_pos-rangediff-m_strict_incr;
-
+		AGAIN_AFTER_CUT:
 			for (; ai != am; ++ai)
 			{
 				min_pos = (*ai)->skipPos( min_pos+m_strict_incr);
@@ -228,7 +228,9 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 						}
 						else
 						{
-							pos_iter = max_pos + 1;
+							min_pos = pos_cut + 1 - m_strict_incr;
+							ai = m_argar.begin();
+							goto AGAIN_AFTER_CUT;
 						}
 					}
 					else

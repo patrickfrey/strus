@@ -35,7 +35,6 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
-/*[-]*/#include <iostream>
 
 using namespace strus;
 
@@ -160,7 +159,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 			for (++ai; ai != ae; ++ai)
 			{
 				Index pos_next = (*ai)->skipPos( pos_iter);
-			AGAIN_NEXT:
+			AGAIN_NEXT_POSITIVE_RANGE:
 				if (!pos_next) return m_posno = 0;
 
 				if (m_strict)
@@ -171,7 +170,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 					if (pi < posetsize)
 					{
 						pos_next = (*ai)->skipPos( pos_next +1);
-						goto AGAIN_NEXT;
+						goto AGAIN_NEXT_POSITIVE_RANGE;
 					}
 					poset[ posetsize++] = pos_next;
 				}
@@ -237,7 +236,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 			for (++ai; ai != ae; ++ai)
 			{
 				Index pos_next = (*ai)->skipPos( pos_iter);
-			AGAIN_NEXT:
+			AGAIN_NEXT_NEGATIVE_RANGE:
 				if (!pos_next) return m_posno = 0;
 
 				if (m_strict)
@@ -248,7 +247,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 					if (pi < posetsize)
 					{
 						pos_next = (*ai)->skipPos( pos_next +1);
-						goto AGAIN_NEXT;
+						goto AGAIN_NEXT_NEGATIVE_RANGE;
 					}
 					poset[ posetsize++] = pos_next;
 				}
@@ -287,7 +286,7 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 						}
 						else
 						{
-							pos_iter = max_pos + m_range +1;
+							pos_iter = pos_cut +1;
 						}
 					}
 					else
@@ -343,7 +342,7 @@ PostingIteratorInterface* PostingJoinStructWithin::createResultIterator(
 	}
 	try
 	{
-		return new IteratorStructWithin( range_, argitr, true, m_errorhnd);
+		return new IteratorStructWithin( range_, argitr, true/*with cut*/, true/*strict*/, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'within_struct' iterator: %s"), *m_errorhnd, 0);
 }
@@ -365,7 +364,7 @@ PostingIteratorInterface* PostingJoinWithin::createResultIterator(
 	}
 	try
 	{
-		return new IteratorStructWithin( range_, argitr, false, m_errorhnd);
+		return new IteratorStructWithin( range_, argitr, false/*without cut*/, true/*strict*/, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'within' iterator: %s"), *m_errorhnd, 0);
 }
