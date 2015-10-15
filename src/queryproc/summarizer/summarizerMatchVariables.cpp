@@ -118,6 +118,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 							line.append( m_forwardindex->fetch());
 						}
 					}
+					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line));
 				}
 			}
 		}
