@@ -118,10 +118,6 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 							line.append( m_assign);
 							m_forwardindex->skipPos( pos);
 							line.append( m_forwardindex->fetch());
-							std::ostringstream num;
-							num << pos;
-							line.append( "/ ");
-							line.append( num.str());
 						}
 					}
 					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line));
