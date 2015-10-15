@@ -50,6 +50,7 @@ public:
 			int range_, 
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
 			bool with_cut_,
+			bool strict_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~IteratorStructSequence();
@@ -83,6 +84,7 @@ private:
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
 	Reference<PostingIteratorInterface> m_cut;			///< the set of elements then must not appear inside the group
 	bool m_with_cut;						///< true, if a cut variable is used
+	unsigned char m_strict_incr;					///< 1, if strict ascending sequence, 0 if not
 	int m_range;							///< the maximum position difference between the start element and the end element of the sequence
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
@@ -128,6 +130,50 @@ public:
 	virtual const char* getDescription() const
 	{
 		return _TXT("Get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j");
+	}
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+};
+
+class PostingJoinStructChain
+	:public PostingJoinOperatorInterface
+{
+public:
+	explicit PostingJoinStructChain( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
+	virtual ~PostingJoinStructChain(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
+			int range_,
+			unsigned int cardinality_) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings");
+	}
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+};
+
+class PostingJoinChain
+	:public PostingJoinOperatorInterface
+{
+public:
+	explicit PostingJoinChain( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
+	virtual ~PostingJoinChain(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
+			int range_,
+			unsigned int cardinality_) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j");
 	}
 
 private:

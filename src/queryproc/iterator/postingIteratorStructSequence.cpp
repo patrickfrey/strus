@@ -43,11 +43,13 @@ IteratorStructSequence::IteratorStructSequence(
 		int range_,
 		const std::vector<Reference< PostingIteratorInterface> >& args,
 		bool with_cut_,
+		bool strict_,
 		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
 	,m_with_cut(with_cut_)
+	,m_strict_incr(strict_?1:0)
 	,m_range(range_)
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
@@ -131,7 +133,6 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 	Index pos_iter = pos_;
 	Index min_pos = 0;
 	Index max_pos = 0;
-	Index rangenum = m_range>0?m_range:(-m_range);
 
 	for (;;)
 	{
@@ -139,22 +140,46 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		min_pos = (*ai)->skipPos( pos_iter);
-		if (!min_pos)
+		if (m_range >= 0)
 		{
-			return m_posno=0;
-		}
-		max_pos = min_pos;
+			min_pos = (*ai)->skipPos( pos_iter);
+			if (!min_pos) return m_posno=0;
 
-		for (++ai; ai != ae; ++ai)
+			max_pos = min_pos;
+	
+			for (++ai; ai != ae; ++ai)
+			{
+				max_pos = (*ai)->skipPos( max_pos+m_strict_incr);
+				if (!max_pos) return m_posno=0;
+	
+				if (max_pos - min_pos > m_range)
+				{
+					pos_iter = max_pos - m_range;
+					break;
+				}
+			}
+		}
+		else
 		{
-			max_pos = (*ai)->skipPos( max_pos+1);
+			std::vector<Reference< PostingIteratorInterface> >::iterator am = ae-1;
+AGAIN_NEG_RANGE:
+			max_pos = (*am)->skipPos( pos_iter);
 			if (!max_pos) return m_posno=0;
 
-			if (max_pos - min_pos > rangenum)
+			Index rangediff = max_pos>=-m_range?(-m_range):max_pos;
+			min_pos = max_pos-rangediff-m_strict_incr;
+
+			for (; ai != am; ++ai)
 			{
-				pos_iter = max_pos - rangenum;
-				break;
+				min_pos = (*ai)->skipPos( min_pos+m_strict_incr);
+				if (!min_pos) return m_posno=0;
+
+				if (min_pos+m_strict_incr > max_pos)
+				{
+					pos_iter = max_pos+1;
+					ai = m_argar.begin();
+					goto AGAIN_NEG_RANGE;
+				}
 			}
 		}
 		if (ai == ae)
@@ -229,7 +254,7 @@ PostingIteratorInterface* PostingJoinStructSequence::createResultIterator(
 	}
 	try
 	{
-		return new IteratorStructSequence( range_, argitr, true, m_errorhnd);
+		return new IteratorStructSequence( range_, argitr, true/*with cut*/, true/*strict*/, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'struct_sequence' iterator: %s"), *m_errorhnd, 0);
 }
@@ -252,10 +277,57 @@ PostingIteratorInterface* PostingJoinSequence::createResultIterator(
 	}
 	try
 	{
-		return new IteratorStructSequence( range_, argitr, false, m_errorhnd);
+		return new IteratorStructSequence( range_, argitr, false/*without cut*/, true/*strict*/, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'sequence' iterator: %s"), *m_errorhnd, 0);
 }
+
+
+PostingIteratorInterface* PostingJoinStructChain::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_,
+		unsigned int cardinality_) const
+{
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "struct_chain");
+		return 0;
+	}
+	if (argitr.size() < 1)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'struct_chain'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructSequence( range_, argitr, true/*with cut*/, false/*strict*/, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'struct_chain' iterator: %s"), *m_errorhnd, 0);
+}
+
+
+PostingIteratorInterface* PostingJoinChain::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_,
+		unsigned int cardinality_) const
+{
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "chain");
+		return 0;
+	}
+	if (argitr.size() < 1)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "chain");
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructSequence( range_, argitr, false/*without cut*/, false/*strict*/, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'chain' iterator: %s"), *m_errorhnd, 0);
+}
+
 
 
 
