@@ -46,7 +46,7 @@ public:
 	/// \param[in] range_ the maximum position difference between the start element and the end element of the group
 	/// \param[in] args the elements of this join 
 	/// \param[in] with_cut true, if the first element of args is the cut element
-	IteratorStructWithin( int range_, const std::vector<Reference< PostingIteratorInterface> >& args, bool with_cut_, ErrorBufferInterface* errorhnd_);
+	IteratorStructWithin( int range_, const std::vector<Reference< PostingIteratorInterface> >& args, bool with_cut_, bool strict_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~IteratorStructWithin();
 
@@ -74,12 +74,14 @@ public:
 	}
 
 private:
+	enum {MaxNofArguments=256};
 	Index m_docno;							///< current document number
 	Index m_docno_cut;						///< next document number after m_docno that contains a cut element
 	Index m_posno;							///< current position
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
 	Reference<PostingIteratorInterface> m_cut;			///< the set of elements then must not appear inside the group
 	bool m_with_cut;						///< true, if a cut variable is used
+	bool m_strict;							///< true, if all elements must have different positions
 	int m_range;							///< the maximum position difference between the start element and the end element of the group
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
