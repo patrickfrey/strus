@@ -64,7 +64,8 @@ public:
 	virtual void addSummarizationFeature(
 			const std::string&,
 			PostingIteratorInterface*,
-			const std::vector<SummarizationVariable>&);
+			const std::vector<SummarizationVariable>&,
+			float /*weight*/);
 
 	virtual std::vector<SummarizerFunctionContextInterface::SummaryElement> getSummary( const Index& docno);
 

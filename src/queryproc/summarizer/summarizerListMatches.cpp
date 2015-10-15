@@ -45,7 +45,8 @@ using namespace strus;
 void SummarizerFunctionContextListMatches::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
-		const std::vector<SummarizationVariable>&)
+		const std::vector<SummarizationVariable>&,
+		float /*weight*/)
 {
 	try
 	{

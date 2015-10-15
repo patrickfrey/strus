@@ -67,13 +67,14 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
-		const std::vector<SummarizationVariable>& variables)
+		const std::vector<SummarizationVariable>& variables,
+		float weight)
 {
 	try
 	{
 		if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			m_features.push_back( SummarizationFeature( itr, variables));
+			m_features.push_back( SummarizationFeature( itr, variables, weight));
 		}
 		else
 		{
@@ -123,7 +124,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 							line.append( m_forwardindex->fetch());
 						}
 					}
-					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line));
+					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line, fi->weight));
 				}
 			}
 		}
