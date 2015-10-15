@@ -638,7 +638,7 @@ std::vector<ResultDocument> Query::evaluate()
 	
 							closure->addSummarizationFeature(
 								si->parameterName(), nodePostings(fi->node),
-								variables);
+								variables, fi->weight);
 						}
 					}
 				}
