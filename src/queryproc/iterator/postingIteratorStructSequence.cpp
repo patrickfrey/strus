@@ -161,7 +161,7 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 		{
 			if (m_with_cut)
 			{
-				if (m_docno_cut == 0)
+				if (!m_cut.get())
 				{
 					return m_posno=0;
 				}
