@@ -55,8 +55,8 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
 	,m_type(type_)
-	,m_delimiter(delimiter_.empty()?std::string(","):delimiter_)
-	,m_assign(assign_.empty()?std::string("="):assign_)
+	,m_delimiter(delimiter_)
+	,m_assign(assign_)
 	,m_features()
 	,m_errorhnd(errorhnd_)
 {
@@ -114,8 +114,11 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 						if (pos)
 						{
 							if (vidx) line.append( m_delimiter);
-							line.append( vi->name());
-							line.append( m_assign);
+							if (!m_assign.empty())
+							{
+								line.append( vi->name());
+								line.append( m_assign);
+							}
 							m_forwardindex->skipPos( pos);
 							line.append( m_forwardindex->fetch());
 						}

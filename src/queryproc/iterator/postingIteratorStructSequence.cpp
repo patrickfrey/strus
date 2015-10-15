@@ -42,16 +42,17 @@ IteratorStructSequence::~IteratorStructSequence()
 IteratorStructSequence::IteratorStructSequence(
 		int range_,
 		const std::vector<Reference< PostingIteratorInterface> >& args,
-		bool with_cut,
+		bool with_cut_,
 		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
+	,m_with_cut(with_cut_)
 	,m_range(range_)
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (with_cut)
+	if (m_with_cut)
 	{
 		m_argar.insert( m_argar.end(), args.begin()+1, args.end());
 		m_cut = args[0];
@@ -67,7 +68,7 @@ IteratorStructSequence::IteratorStructSequence(
 		if (aidx) m_featureid.push_back('=');
 		m_featureid.append( (*ai)->featureid());
 	}
-	if (with_cut)
+	if (m_with_cut)
 	{
 		m_featureid.push_back('=');
 		m_featureid.append( m_cut->featureid());
@@ -158,20 +159,27 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 		}
 		if (ai == ae)
 		{
-			if (m_docno_cut == 0)
+			if (m_with_cut)
 			{
-				return m_posno=0;
-			}
-			else if (m_docno_cut == m_docno)
-			{
-				Index pos_cut = m_cut->skipPos( min_pos);
-				if (pos_cut == 0 || pos_cut > max_pos)
+				if (m_docno_cut == 0)
 				{
-					return m_posno=(m_range>=0?min_pos:max_pos);
+					return m_posno=0;
+				}
+				else if (m_docno_cut == m_docno)
+				{
+					Index pos_cut = m_cut->skipPos( min_pos);
+					if (pos_cut == 0 || pos_cut > max_pos)
+					{
+						return m_posno=(m_range>=0?min_pos:max_pos);
+					}
+					else
+					{
+						pos_iter = pos_cut + 1;
+					}
 				}
 				else
 				{
-					pos_iter = pos_cut + 1;
+					return m_posno=(m_range>=0?min_pos:max_pos);
 				}
 			}
 			else

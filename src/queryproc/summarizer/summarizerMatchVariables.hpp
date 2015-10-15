@@ -111,7 +111,7 @@ class SummarizerFunctionInstanceMatchVariables
 {
 public:
 	SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_delimiter(","),m_assign("="),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
