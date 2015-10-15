@@ -35,6 +35,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
+/*[-]*/#include <iostream>
 
 using namespace strus;
 

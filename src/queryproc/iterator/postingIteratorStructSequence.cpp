@@ -130,23 +130,22 @@ Index IteratorStructSequence::skipDoc( const Index& docno_)
 
 Index IteratorStructSequence::skipPos( const Index& pos_)
 {
+	if (m_argar.empty()) return m_posno=0;
+
 	Index pos_iter = pos_;
 	Index min_pos = 0;
 	Index max_pos = 0;
 
-	for (;;)
+	std::vector<Reference< PostingIteratorInterface> >::iterator
+		ai = m_argar.begin(), ae = m_argar.end();
+	if (m_range >= 0)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		if (m_range >= 0)
+		for (;;ai = m_argar.begin())
 		{
 			min_pos = (*ai)->skipPos( pos_iter);
 			if (!min_pos) return m_posno=0;
 
 			max_pos = min_pos;
-	
 			for (++ai; ai != ae; ++ai)
 			{
 				max_pos = (*ai)->skipPos( max_pos+m_strict_incr);
@@ -158,13 +157,45 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 					break;
 				}
 			}
+			if (ai == ae)
+			{
+				if (m_with_cut)
+				{
+					if (!m_cut.get())
+					{
+						return m_posno = 0;
+					}
+					else if (m_docno_cut == m_docno)
+					{
+						Index pos_cut = m_cut->skipPos( min_pos);
+						if (pos_cut == 0 || pos_cut > max_pos)
+						{
+							return m_posno = min_pos;
+						}
+						else
+						{
+							pos_iter = pos_cut + 1;
+						}
+					}
+					else
+					{
+						return m_posno = min_pos;
+					}
+				}
+				else
+				{
+					return m_posno = min_pos;
+				}
+			}
 		}
-		else
+	}
+	else
+	{
+		std::vector<Reference< PostingIteratorInterface> >::iterator am = ae-1;
+		for (;;ai = m_argar.begin())
 		{
-			std::vector<Reference< PostingIteratorInterface> >::iterator am = ae-1;
-AGAIN_NEG_RANGE:
 			max_pos = (*am)->skipPos( pos_iter);
-			if (!max_pos) return m_posno=0;
+			if (!max_pos) return m_posno = 0;
 
 			Index rangediff = max_pos>=-m_range?(-m_range):max_pos;
 			min_pos = max_pos-rangediff-m_strict_incr;
@@ -172,44 +203,43 @@ AGAIN_NEG_RANGE:
 			for (; ai != am; ++ai)
 			{
 				min_pos = (*ai)->skipPos( min_pos+m_strict_incr);
-				if (!min_pos) return m_posno=0;
+				if (!min_pos) return m_posno = 0;
 
 				if (min_pos+m_strict_incr > max_pos)
 				{
-					pos_iter = max_pos+1;
-					ai = m_argar.begin();
-					goto AGAIN_NEG_RANGE;
+					pos_iter = max_pos + 1;
+					break;
 				}
 			}
-		}
-		if (ai == ae)
-		{
-			if (m_with_cut)
+			if (ai == am)
 			{
-				if (!m_cut.get())
+				if (m_with_cut)
 				{
-					return m_posno=0;
-				}
-				else if (m_docno_cut == m_docno)
-				{
-					Index pos_cut = m_cut->skipPos( min_pos);
-					if (pos_cut == 0 || pos_cut > max_pos)
+					if (!m_cut.get())
 					{
-						return m_posno=(m_range>=0?min_pos:max_pos);
+						return m_posno = 0;
+					}
+					else if (m_docno_cut == m_docno)
+					{
+						Index pos_cut = m_cut->skipPos( min_pos);
+						if (pos_cut == 0 || pos_cut > max_pos)
+						{
+							return m_posno = max_pos;
+						}
+						else
+						{
+							pos_iter = max_pos + 1;
+						}
 					}
 					else
 					{
-						pos_iter = pos_cut + 1;
+						return m_posno = max_pos;
 					}
 				}
 				else
 				{
-					return m_posno=(m_range>=0?min_pos:max_pos);
+					return m_posno = max_pos;
 				}
-			}
-			else
-			{
-				return m_posno=(m_range>=0?min_pos:max_pos);
 			}
 		}
 	}
