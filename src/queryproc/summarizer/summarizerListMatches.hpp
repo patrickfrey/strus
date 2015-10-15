@@ -52,8 +52,8 @@ class SummarizerFunctionContextListMatches
 	:public SummarizerFunctionContextInterface
 {
 public:
-	explicit SummarizerFunctionContextListMatches( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+	SummarizerFunctionContextListMatches( unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
+		:m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionContextListMatches(){}
 
 	virtual void addSummarizationFeature(
@@ -66,6 +66,7 @@ public:
 private:
 	const StorageClientInterface* m_storage;
 	std::vector<PostingIteratorInterface*> m_itrs;
+	unsigned int m_maxNofMatches;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -77,7 +78,7 @@ class SummarizerFunctionInstanceListMatches
 {
 public:
 	explicit SummarizerFunctionInstanceListMatches( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+		:m_maxNofMatches(100),m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionInstanceListMatches(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
@@ -90,6 +91,7 @@ public:
 	virtual std::string tostring() const;
 
 private:
+	unsigned int m_maxNofMatches;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -109,7 +111,7 @@ public:
 
 	virtual const char* getDescription() const
 	{
-		return _TXT("Get the list of occurencies printed for the features specified with the feature parameter 'match'.");
+		return _TXT("Get the list of occurencies printed for the features specified with the feature parameter 'match'. With the parameter 'N' you can specify the maximum number of matches to return");
 	}
 
 private:

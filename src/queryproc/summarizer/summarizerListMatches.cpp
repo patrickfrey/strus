@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "summarizerListMatches.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
@@ -94,9 +95,14 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		{
 			std::vector<const PostingIteratorInterface*>
 				subexpr = (*ii)->subExpressions( true);
-			if ((*ii)->skipDoc( docno) != 0 && (*ii)->skipPos( 0) != 0)
+			if ((*ii)->skipDoc( docno) == docno)
 			{
-				rt.push_back( SummaryElement( getMatches( **ii, subexpr)));
+				unsigned int kk=0;
+				Index pos = (*ii)->skipPos( 0);
+				for (; pos && kk<m_maxNofMatches; ++kk,pos = (*ii)->skipPos( pos+1))
+				{
+					rt.push_back( SummaryElement( getMatches( **ii, subexpr)));
+				}
 			}
 		}
 		return rt;
@@ -109,9 +115,16 @@ void SummarizerFunctionInstanceListMatches::addStringParameter( const std::strin
 	m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
 }
 
-void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant&)
+void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant& val)
 {
-	m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+	if (utils::caseInsensitiveEquals( name, "N"))
+	{
+		m_maxNofMatches = val.touint();
+	}
+	else
+	{
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+	}
 }
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::createFunctionContext(
@@ -120,7 +133,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::creat
 {
 	try
 	{
-		return new SummarizerFunctionContextListMatches( m_errorhnd);
+		return new SummarizerFunctionContextListMatches( m_maxNofMatches, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'matchpos' summarizer: %s"), *m_errorhnd, 0);
 }

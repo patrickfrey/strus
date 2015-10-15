@@ -39,6 +39,8 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <cstdlib>
+/*[-]*/#include <sstream>
+/*[-]*/#include <iostream>
 
 using namespace strus;
 
@@ -90,10 +92,10 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 		m_forwardindex->skipDoc( docno);
 		Index curpos = 0;
-	
+
 		std::vector<SummarizationFeature>::const_iterator
 			fi = m_features.begin(), fe = m_features.end();
-	
+
 		for (; fi != fe; ++fi)
 		{
 			if (docno==fi->itr->skipDoc( docno))
@@ -116,6 +118,10 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 							line.append( m_assign);
 							m_forwardindex->skipPos( pos);
 							line.append( m_forwardindex->fetch());
+							std::ostringstream num;
+							num << pos;
+							line.append( "/ ");
+							line.append( num.str());
 						}
 					}
 					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line));

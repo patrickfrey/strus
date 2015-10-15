@@ -185,7 +185,11 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 		}
 		if (ai == ae)
 		{
-			if (m_docno_cut == m_docno)
+			if (m_docno_cut == 0)
+			{
+				return m_posno=0;
+			}
+			else if (m_docno_cut == m_docno)
 			{
 				Index pos_cut = m_cut->skipPos( min_pos);
 				if (pos_cut == 0 || pos_cut > max_pos)
