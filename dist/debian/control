@@ -4,12 +4,12 @@ Priority: optional
 Maintainer: Patrick Frey <patrickpfrey@yahoo.com>
 Build-Depends: debhelper (>= 4.1.16), cmake,
  libboost-dev, libboost-thread-dev, libboost-system-dev,
- libboost-date-time-dev, libleveldb-dev, libsnappy-dev
+ libboost-date-time-dev, libleveldb-dev
 Standards-Version: 3.8.3
 Homepage: http://project-strus.net
 
 Package: strus
-Architecture: all
+Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Library implementing the storage of a text search engine
  Core library for a text search engine implementing the storage and
@@ -23,3 +23,9 @@ Description: Library implementing the storage of a text search engine
   * Fetching and joining of feature occurrencies (document/position number)
   * Weighting of documents based on the feature occurrencies
   * Summarization as extraction of content based on the query matches
+
+Package: strus-dev
+Architecture: any
+Depends: strus, ${shlibs:Depends}, ${misc:Depends}
+Description: strus development files
+ Strus development files.
