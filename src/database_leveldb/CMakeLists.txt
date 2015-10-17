@@ -26,7 +26,7 @@ link_directories(
 # DATABASE LIBRARY
 # -------------------------------------------
 add_library( strus_database_leveldb SHARED ${libstrus_database_leveldb_source_files} )
-target_link_libraries( strus_database_leveldb boost_system strus_utils getmemsize_static strus_private_utils snappy leveldb)
+target_link_libraries( strus_database_leveldb boost_system strus_utils getmemsize_static strus_private_utils leveldb)
 set_target_properties(
     strus_database_leveldb
     PROPERTIES

@@ -13,5 +13,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testRandomCollection testRandomCollection.cpp)
-target_link_libraries( testRandomCollection boost_system strus_error strus_storage strus_queryeval strus_queryproc strus_utils ${Boost_THREAD_LIBRARY})
+target_link_libraries( testRandomCollection boost_system strus_error strus_storage strus_queryeval strus_queryproc strus_utils ${Boost_LIBRARIES})
 
