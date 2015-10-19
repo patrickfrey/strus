@@ -448,7 +448,7 @@ FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const st
 		{
 			locstr.append( source.c_str(), restsize);
 		}
-		locstr.insert( locstr.begin() + locidx, '|');
+		locstr.insert( locidx, "<-- ! -->");
 
 		throw strus::runtime_error( _TXT("error in formula: %s (location %s)"), err.what(), locstr.c_str());
 	}
