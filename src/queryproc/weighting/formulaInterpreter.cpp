@@ -433,8 +433,27 @@ FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const st
 	catch (const std::runtime_error& err)
 	{
 		std::size_t locidx = (std::size_t)(si - source.begin());
-		std::string locstr( source);
-		locstr.insert( locstr.begin()+locidx, '|');
+		std::string locstr;
+		std::size_t insertsize = source.size() - locidx;
+		const char* tail = "";
+		if (insertsize > 60)
+		{
+			insertsize = 60;
+			tail = "...";
+		}
+		if (locidx > 30)
+		{
+			locstr.append( "...");
+			locstr.append( source.c_str() + locidx - 30, insertsize);
+			locidx = 30 + 3;
+		}
+		else
+		{
+			locstr.append( source.c_str(), insertsize);
+		}
+		locstr.append( tail);
+		locstr.insert( locstr.begin() + locidx, '|');
+
 		throw strus::runtime_error( _TXT("error in formula: %s (location %s)"), err.what(), locstr.c_str());
 	}
 }
