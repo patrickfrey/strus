@@ -57,7 +57,7 @@ void FormulaInterpreter::FunctionMap::defineVariableMap( const std::string& name
 FormulaInterpreter::VariableMap FormulaInterpreter::FunctionMap::getVariableMap( const std::string& name) const
 {
 	std::map<std::string,VariableMap>::const_iterator vi = m_varmap.find( name);
-	if (vi == m_varmap.end()) throw strus::runtime_error(_TXT( "variable %s not defined"), name.c_str());
+	if (vi == m_varmap.end()) throw strus::runtime_error(_TXT( "variable '%s' not defined"), name.c_str());
 	return vi->second;
 }
 
@@ -69,7 +69,7 @@ void FormulaInterpreter::FunctionMap::defineUnaryFunction( const std::string& na
 FormulaInterpreter::UnaryFunction FormulaInterpreter::FunctionMap::getUnaryFunction( const std::string& name) const
 {
 	std::map<std::string,UnaryFunction>::const_iterator vi = m_unaryfuncmap.find( name);
-	if (vi == m_unaryfuncmap.end()) throw strus::runtime_error(_TXT( "unary function %s not defined"), name.c_str());
+	if (vi == m_unaryfuncmap.end()) throw strus::runtime_error(_TXT( "unary function '%s' not defined"), name.c_str());
 	return vi->second;
 }
 
@@ -81,7 +81,7 @@ void FormulaInterpreter::FunctionMap::defineBinaryFunction( const std::string& n
 FormulaInterpreter::BinaryFunction FormulaInterpreter::FunctionMap::getBinaryFunction( const std::string& name) const
 {
 	std::map<std::string,BinaryFunction>::const_iterator vi = m_binaryfuncmap.find( name);
-	if (vi == m_binaryfuncmap.end()) throw strus::runtime_error(_TXT( "binary function %s not defined"), name.c_str());
+	if (vi == m_binaryfuncmap.end()) throw strus::runtime_error(_TXT( "binary function '%s' not defined"), name.c_str());
 	return vi->second;
 }
 
@@ -435,22 +435,33 @@ FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const st
 		std::size_t locidx = (std::size_t)(si - source.begin());
 		std::string locstr;
 		std::size_t restsize = source.size() - locidx;
+		bool cutend = false;
+		bool cutstart = false;
 		if (restsize > 60)
 		{
 			restsize = 60;
+			cutend = true;
 		}
 		if (locidx > 30)
 		{
 			locstr.append( source.c_str() + locidx - 30, restsize + 30);
 			locidx = 30;
+			cutstart = true;
 		}
 		else
 		{
 			locstr.append( source.c_str(), restsize);
 		}
 		locstr.insert( locidx, "<-- ! -->");
-
-		throw strus::runtime_error( _TXT("error in formula: %s (location %s)"), err.what(), locstr.c_str());
+		if (cutstart)
+		{
+			locstr = std::string("...") + locstr;
+		}
+		if (cutend)
+		{
+			locstr.append("...");
+		}
+		throw strus::runtime_error( _TXT("error in formula: %s location: %s"), err.what(), locstr.c_str());
 	}
 }
 
