@@ -165,7 +165,13 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
-			int range) const;
+			int range,
+			unsigned int cardinality) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings that are occurring in any argument set");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

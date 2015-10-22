@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "postingIteratorContains.hpp"
+#include "postingIteratorHelpers.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -55,6 +56,18 @@ IteratorContains::IteratorContains( const std::vector<Reference< PostingIterator
 IteratorContains::~IteratorContains()
 {}
 
+IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_)
+	:IteratorContains(args,errorhnd_), m_cardinality(cardinality_)
+{
+	m_featureid.resize( m_featureid.size()-1);
+	if (m_cardinality && m_cardinality != args.size())
+	{
+		encodeInteger( m_featureid, m_cardinality);
+		m_featureid.push_back( 'C');
+	}
+	m_featureid.push_back( 'A');
+}
+
 std::vector<const PostingIteratorInterface*>
 	IteratorContains::subExpressions( bool positive) const
 {
@@ -79,39 +92,13 @@ std::vector<const PostingIteratorInterface*>
 Index IteratorContains::skipDoc( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
+	return m_docno = getFirstAllMatchDocno( m_argar, docno_);
+}
 
-	Index docno_iter = docno_;
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		docno_iter = (*ai)->skipDoc( docno_iter);
-		if (docno_iter == 0)
-		{
-			m_docno = 0;
-			return 0;
-		}
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDoc( docno_iter);
-			if (docno_next != docno_iter)
-			{
-				if (docno_next == 0)
-				{
-					m_docno = 0;
-					return 0;
-				}
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (ai == ae)
-		{
-			return m_docno = docno_iter;
-		}
-	}
+Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
+{
+	if (m_docno == docno_ && m_docno) return m_docno;
+	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, m_cardinality);
 }
 
 GlobalCounter IteratorContains::documentFrequency() const
@@ -138,8 +125,14 @@ GlobalCounter IteratorContains::documentFrequency() const
 
 PostingIteratorInterface* PostingJoinContains::createResultIterator(
 		const std::vector<Reference<PostingIteratorInterface> >& itrs,
-		int range) const
+		int range,
+		unsigned int cardinality) const
 {
+	if (cardinality > itrs.size())
+	{
+		m_errorhnd->report( _TXT( "cardinality of 'contains' is out of range"));
+		return 0;
+	}
 	if (range != 0)
 	{
 		m_errorhnd->report( _TXT( "no range argument expected for 'contains'"));
@@ -152,7 +145,14 @@ PostingIteratorInterface* PostingJoinContains::createResultIterator(
 	}
 	try
 	{
-		return new IteratorContains( itrs, m_errorhnd);
+		if (cardinality == 0 || cardinality == itrs.size())
+		{
+			return new IteratorContains( itrs, m_errorhnd);
+		}
+		else
+		{
+			return new IteratorContainsWithCardinality( itrs, cardinality, m_errorhnd);
+		}
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'contains' iterator: %s"), *m_errorhnd, 0);
 }

@@ -39,6 +39,7 @@
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/utils.hpp"
+#include "private/internationalization.hpp"
 #include <vector>
 #include <sstream>
 #include <iostream>
@@ -185,6 +186,11 @@ public:
 	virtual ~WeightingFunctionFormula(){}
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Calculate the weight of a document with a formula 'formula'. The matching features are defined with the feature parameter 'match'. In formula you can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements.");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

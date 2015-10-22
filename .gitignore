@@ -46,6 +46,9 @@ CPackConfig.cmake.user
 CPackSourceConfig.cmake.user
 CPackSourceConfig.cmake
 tests/cmake_install.cmake.user
+include/strus/versionStorage.hpp
+src/utils/fileio_sys.hpp
+src/utils/internationalization.cpp
 
 # Compiled Programs
 tests/randoc/src/testRandomCollection

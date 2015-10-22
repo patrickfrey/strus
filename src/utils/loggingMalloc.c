@@ -275,10 +275,8 @@ size_t stacktrace( void** trace, size_t tracesize)
 {
 	struct stack_frame* current;
 	struct stack_frame* previous;
-	void* frame_ptr;
+	void* frame_ptr = __builtin_frame_address(0);
 	size_t rt = 0;
-
-	frame_ptr = __builtin_frame_address(0);
 
 	/* We skip the call to this function, it makes no sense to record it.  */
 	current = ((struct stack_frame*) frame_ptr);
@@ -288,7 +286,7 @@ size_t stacktrace( void** trace, size_t tracesize)
 		trace[ rt++] = current->return_address;
 		previous = current;
 		current = current->next;
-		if (current < previous || current > previous + 100) break;
+		if (current > previous || current + 10000 < previous) break;
 	}
 	return rt;
 }
@@ -304,28 +302,41 @@ static int find_sym( const char* libname, const char* symname)
 		Dl_info info;
 		if (dladdr( trace[si], &info))
 		{
-			if (libname && !match_dlname( info.dli_fname, libname)) continue;
-			if (symname && !match_dlname( info.dli_sname, symname)) continue;
-			return si+1;
+			if (libname && symname)
+			{
+				if (match_dlname( info.dli_fname, libname)
+				&&  match_dlname( info.dli_sname, symname))
+				{
+					break;
+				}
+			}
+			else if (libname)
+			{
+				if (match_dlname( info.dli_fname, libname)) break;
+			}
+			else if (symname)
+			{
+				if (match_dlname( info.dli_sname, symname)) break;
+			}
 		}
 	}
-	return 0;
+	return (si < se);
 }
 
-static void print_stacktrace()
+static inline void print_stacktrace()
 {
 	size_t si,se;
 	void* trace[ MAX_STACKTRACE];
+	se = stacktrace( trace, MAX_STACKTRACE);
 
 	fprintf( stderr, "STK:\n");
-	se = stacktrace( trace, MAX_STACKTRACE);
 	fprintf( stderr, "size %u:\n", (unsigned int)se);
 	for (si=0; si<se; ++si)
 	{
 		Dl_info info;
 		if (dladdr( trace[si], &info))
 		{
-			fprintf( stderr, "\t%s\t%s\n", info.dli_fname?info.dli_fname:"(unknown)", info.dli_sname?info.dli_sname:"(unknown)");
+			fprintf( stderr, "\t%s\t%s\n", info.dli_fname?basename(info.dli_fname):"(unknown)", info.dli_sname?info.dli_sname:"(unknown)");
 		}
 	}
 }
@@ -333,7 +344,14 @@ static void print_stacktrace()
 static inline int caller_match()
 {
 	if (!g_callerlib[0] && !g_callerfunc[0]) return 1;
-	return find_sym( g_callerlib[0]?g_callerlib:0, g_callerfunc[0]?g_callerfunc:0)?g_callersel:!g_callersel;
+	if (find_sym( g_callerlib[0]?g_callerlib:0, g_callerfunc[0]?g_callerfunc:0))
+	{
+		return g_callersel;
+	}
+	else
+	{
+		return !g_callersel;
+	}
 }
 
 static void stat_malloc_call( size_t size)
@@ -398,7 +416,7 @@ static void log_statistics()
 			{
 				fprintf( stderr, "cannot open malloc log file '%s' (errno %u)", g_logfile, errno);
 				g_logfile[0] = '\0';
-			}
+		}
 		}
 		if (logfile)
 		{

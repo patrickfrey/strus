@@ -190,6 +190,24 @@ public:
 		return cast<unsigned int>();
 	}
 
+	/// \brief Cast to a signed integer
+	unsigned int toint() const
+	{
+		return cast<int>();
+	}
+
+	/// \brief Cast to an unsigned integer
+	unsigned int touint() const
+	{
+		return cast<unsigned int>();
+	}
+
+	/// \brief Cast to an unsigned integer
+	double tofloat() const
+	{
+		return cast<double>();
+	}
+
 	/// \brief Test for equality
 	/// \param[in] o arithmetic variant to compare
 	/// \return true, if yes

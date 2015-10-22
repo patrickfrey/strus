@@ -48,10 +48,16 @@ public:
 	/// \brief Create an iterator on the join operator result (set of postings)
 	/// \param[in] argitrs argument posting iterators of the join operation
 	/// \param[in] range range of the operation
+	/// \param[in] cardinality required size of matching results (e.g. minimum number of elements of any input subset selection that builds a result) (0 for default)
 	/// \return the iterator on the resulting set of postings
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& argitrs,
-			int range) const=0;
+			int range,
+			unsigned int cardinality) const=0;
+
+	/// \brief Get a description of the function for user help
+	/// \return the description text
+	virtual const char* getDescription() const=0;
 };
 
 }//namespace

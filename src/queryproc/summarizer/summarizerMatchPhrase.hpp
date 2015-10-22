@@ -80,7 +80,8 @@ public:
 	virtual void addSummarizationFeature(
 			const std::string& name,
 			PostingIteratorInterface* itr,
-			const std::vector<SummarizationVariable>&);
+			const std::vector<SummarizationVariable>&,
+			float /*weight*/);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
@@ -146,6 +147,11 @@ public:
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get best matching phrases delimited by the structure postings specified with the feature parameter 'struct'. The best matching phrases are found by weighting the occurrencies of the feature 'match'. The forward index type of the result phrase elements are specified with the string parameter 'type'. The maximum number of phrases extracted is specified with the parameter 'nof'. The parameter 'len' allows to restrict the lenght of the matching phrases and the parameter 'structseek' defines +/- the area where to search for structure delimiters. The pattern specified by the string parameter type allows to specify a start and end tag (separated by '$') for highlighting matches in the resulting phrases");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

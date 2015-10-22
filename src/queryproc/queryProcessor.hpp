@@ -81,6 +81,10 @@ public:
 		getSummarizerFunction(
 			const std::string& name) const;
 
+	virtual const char* getDescription( FunctionType type, const std::string& name) const;
+
+	virtual std::vector<std::string> getFunctionList( FunctionType type) const;
+
 private:
 	std::map<std::string,Reference<SummarizerFunctionInterface> > m_summarizers;
 	std::map<std::string,Reference<WeightingFunctionInterface> > m_weighters;

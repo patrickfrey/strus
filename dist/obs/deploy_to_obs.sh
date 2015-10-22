@@ -1,17 +1,23 @@
 #!/bin/sh
 
 PACKAGE_NAME=strus
-PACKAGE_VERSION=0.0.1
+PACKAGE_VERSION=0.1.6
 OSC_HOME=$HOME/home:andreas_baumann/$PACKAGE_NAME
 
 rm -f ${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz
 cmake .
 make dist-gz
 
+# git commit count since last tagging is used for a build number of
+# the package to make individual builds distinguishable
+
+GIT_COMMIT_COUNT=`git describe --long --tags | cut -f 2 -d -`
+
 # Redhat/SuSE
 
 cp ${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz $OSC_HOME/${PACKAGE_NAME}_${PACKAGE_VERSION}.tar.gz
 cp dist/redhat/$PACKAGE_NAME.spec $OSC_HOME/$PACKAGE_NAME.spec
+sed -i "s/Version:.*/Version: %{main_version}.${GIT_COMMIT_COUNT}/" $OSC_HOME/$PACKAGE_NAME.spec
 
 # Debian/Ubuntu
 
@@ -29,6 +35,7 @@ TMPDIR=/tmp
 rm -f $OSC_HOME/${PACKAGE_NAME}_${PACKAGE_VERSION}.debian.tar.gz
 rm -rf $TMPDIR/debian
 cp -r dist/debian $TMPDIR/.
+sed -i "s/${PACKAGE_NAME} (\([0-9.]*\)-\([0-9]*\))/${PACKAGE_NAME} (\1-$GIT_COMMIT_COUNT)/" $TMPDIR/debian/changelog
 OLDDIR=$PWD
 cd $TMPDIR
 tar zcf $TMPDIR/${PACKAGE_NAME}_${PACKAGE_VERSION}.debian.tar.gz debian
@@ -54,6 +61,7 @@ for i in `ls dist/obs/$PACKAGE_NAME-*.dsc`; do
 	cp -a dist/debian $TMPDIR/.
 	test -f dist/obs/control-$OS_ORIG && cp -a dist/obs/control-$OS_ORIG $TMPDIR/debian/control
 	test -f dist/obs/rules-$OS_ORIG && cp -a dist/obs/rules-$OS_ORIG $TMPDIR/debian/rules
+	sed -i "s/${PACKAGE_NAME} (\([0-9.]*\)-\([0-9]*\))/${PACKAGE_NAME} (\1-$GIT_COMMIT_COUNT)/" $TMPDIR/debian/changelog
 
 	OLDDIR=$PWD
 	cd $TMPDIR
@@ -73,3 +81,5 @@ CHKSUM=`md5sum $OSC_HOME/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz  | cut -f 1 -
 
 cat dist/archlinux/PKGBUILD > $OSC_HOME/PKGBUILD
 echo "md5sums=('$CHKSUM')" >> $OSC_HOME/PKGBUILD
+
+sed -i "s/^pkgver=.*/pkgver=\${_mainpkgver}.r${GIT_COMMIT_COUNT}/" $OSC_HOME/PKGBUILD

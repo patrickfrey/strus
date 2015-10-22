@@ -46,7 +46,7 @@ public:
 	/// \param[in] range_ the maximum position difference between the start element and the end element of the group
 	/// \param[in] args the elements of this join 
 	/// \param[in] with_cut true, if the first element of args is the cut element
-	IteratorStructWithin( int range_, const std::vector<Reference< PostingIteratorInterface> >& args, bool with_cut, ErrorBufferInterface* errorhnd_);
+	IteratorStructWithin( int range_, const std::vector<Reference< PostingIteratorInterface> >& args, bool with_cut_, bool strict_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~IteratorStructWithin();
 
@@ -74,11 +74,14 @@ public:
 	}
 
 private:
+	enum {MaxNofArguments=256};
 	Index m_docno;							///< current document number
 	Index m_docno_cut;						///< next document number after m_docno that contains a cut element
 	Index m_posno;							///< current position
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
 	Reference<PostingIteratorInterface> m_cut;			///< the set of elements then must not appear inside the group
+	bool m_with_cut;						///< true, if a cut variable is used
+	bool m_strict;							///< true, if all elements must have different positions
 	int m_range;							///< the maximum position difference between the start element and the end element of the group
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
@@ -98,7 +101,13 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const;
+			int range_,
+			unsigned int cardinality_) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -115,7 +124,13 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_) const;
+			int range_,
+			unsigned int cardinality_) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

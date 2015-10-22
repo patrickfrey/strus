@@ -149,7 +149,7 @@ const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		const std::string& name) const
 {
 	std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
-		wi = m_weighters.find( utils::tolower( std::string(name)));
+		wi = m_weighters.find( utils::tolower( name));
 	if (wi == m_weighters.end())
 	{
 		m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
@@ -165,7 +165,7 @@ void QueryProcessor::defineSummarizerFunction(
 	try
 	{
 		Reference<SummarizerFunctionInterface> funcref( sumfunc);
-		m_summarizers[ utils::tolower( std::string(name))] = funcref;
+		m_summarizers[ utils::tolower( name)] = funcref;
 	}
 	catch (std::bad_alloc&)
 	{
@@ -178,7 +178,7 @@ const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		const std::string& name) const
 {
 	std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
-		si = m_summarizers.find( utils::tolower( std::string(name)));
+		si = m_summarizers.find( utils::tolower( name));
 	if (si == m_summarizers.end())
 	{
 		m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
@@ -187,5 +187,68 @@ const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 	return si->second.get();
 }
 
+template <class Map>
+static std::vector<std::string> getKeys( const Map& map)
+{
+	std::vector<std::string> rt;
+	typename Map::const_iterator mi = map.begin(), me = map.end();
+	for (; mi != me; ++mi)
+	{
+		rt.push_back( mi->first);
+	}
+	return rt;
+}
 
+template <class Map>
+static const char* getDescription_( const Map& map, const std::string& name)
+{
+	typename Map::const_iterator mi = map.find( utils::tolower( name));
+	if (mi != map.end())
+	{
+		return mi->second->getDescription();
+	}
+	return 0;
+}
+
+const char* QueryProcessor::getDescription( FunctionType type, const std::string& name) const
+{
+	try
+	{
+		switch (type)
+		{
+			case PostingJoinOperator:
+				return getDescription_( m_joiners, name);
+			case WeightingFunction:
+				return getDescription_( m_weighters, name);
+			case SummarizerFunction:
+				return getDescription_( m_summarizers, name);
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
+	}
+	return 0;
+}
+
+std::vector<std::string> QueryProcessor::getFunctionList( QueryProcessorInterface::FunctionType type) const
+{
+	try
+	{
+		switch (type)
+		{
+			case PostingJoinOperator:
+				return getKeys( m_joiners);
+			case WeightingFunction:
+				return getKeys( m_weighters);
+			case SummarizerFunction:
+				return getKeys( m_summarizers);
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
+	}
+	return std::vector<std::string>();
+}
 

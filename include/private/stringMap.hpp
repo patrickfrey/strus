@@ -101,6 +101,11 @@ public:
 	const char* back() const					{return m_ar.back();}
 	std::size_t size() const					{return m_ar.size();}
 
+	void clear()
+	{
+		m_ar.clear();
+		m_blkar.clear();
+	}
 private:
 	std::vector<const char*> m_ar;
 	StringMapKeyBlockList m_blkar;

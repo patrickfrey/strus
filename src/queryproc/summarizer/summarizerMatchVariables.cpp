@@ -39,6 +39,8 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <cstdlib>
+/*[-]*/#include <sstream>
+/*[-]*/#include <iostream>
 
 using namespace strus;
 
@@ -53,8 +55,8 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
 	,m_type(type_)
-	,m_delimiter(delimiter_.empty()?std::string(","):delimiter_)
-	,m_assign(assign_.empty()?std::string("="):assign_)
+	,m_delimiter(delimiter_)
+	,m_assign(assign_)
 	,m_features()
 	,m_errorhnd(errorhnd_)
 {
@@ -65,13 +67,14 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
-		const std::vector<SummarizationVariable>& variables)
+		const std::vector<SummarizationVariable>& variables,
+		float weight)
 {
 	try
 	{
 		if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			m_features.push_back( SummarizationFeature( itr, variables));
+			m_features.push_back( SummarizationFeature( itr, variables, weight));
 		}
 		else
 		{
@@ -90,20 +93,21 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 		m_forwardindex->skipDoc( docno);
 		Index curpos = 0;
-	
+
 		std::vector<SummarizationFeature>::const_iterator
 			fi = m_features.begin(), fe = m_features.end();
-	
+
 		for (; fi != fe; ++fi)
 		{
 			if (docno==fi->itr->skipDoc( docno))
 			{
-				for (curpos = 0; curpos; curpos=fi->itr->skipPos( curpos+1))
+				curpos = fi->itr->skipPos( 0);
+				for (; curpos; curpos = fi->itr->skipPos( curpos+1))
 				{
 					std::vector<SummarizationVariable>::const_iterator
 						vi = fi->variables.begin(),
 						ve = fi->variables.end();
-	
+
 					std::string line;
 					for (int vidx=0; vi != ve; ++vi,++vidx)
 					{
@@ -111,12 +115,16 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 						if (pos)
 						{
 							if (vidx) line.append( m_delimiter);
-							line.append( vi->name());
-							line.append( m_assign);
+							if (!m_assign.empty())
+							{
+								line.append( vi->name());
+								line.append( m_assign);
+							}
 							m_forwardindex->skipPos( pos);
 							line.append( m_forwardindex->fetch());
 						}
 					}
+					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line, fi->weight));
 				}
 			}
 		}

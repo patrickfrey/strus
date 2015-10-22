@@ -61,13 +61,21 @@ PostingJoinOperatorInterface* createPostingJoinWithin( ErrorBufferInterface* err
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinStructWithin( ErrorBufferInterface* errorhnd);
 
-/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the order they apear as arguments
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the strict order they apear as arguments
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinSequence( ErrorBufferInterface* errorhnd);
 
-/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the order they apear as arguments. Additionally there exists a restricting structure element (like for example punctuation)
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the strict order they apear as arguments. Additionally there exists a restricting structure element (like for example punctuation)
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinStructSequence( ErrorBufferInterface* errorhnd);
+
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the order they apear as arguments
+/// \return the iterator reference (to dispose with delete)
+PostingJoinOperatorInterface* createPostingJoinChain( ErrorBufferInterface* errorhnd);
+
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the order they apear as arguments. Additionally there exists a restricting structure element (like for example punctuation)
+/// \return the iterator reference (to dispose with delete)
+PostingJoinOperatorInterface* createPostingJoinStructChain( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning one element (with position = 1) for each document containing all elements of all argument sets somewhere (position independent logical AND for use as pure document selection feature)
 /// \return the iterator reference (to dispose with delete)

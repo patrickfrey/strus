@@ -9,5 +9,5 @@ link_directories(
 	"${PROJECT_SOURCE_DIR}/src/utils" )
 
 add_executable( testLoggingMalloc testLoggingMalloc.cpp )
-target_link_libraries( testLoggingMalloc dl strus_utils strus_private_utils )
+target_link_libraries( testLoggingMalloc dl strus_utils strus_private_utils boost_system )
 

@@ -72,7 +72,7 @@ public:
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
-			std::size_t argc, int range_);
+			std::size_t argc, int range_, unsigned int cardinality_);
 	virtual void pushDuplicate();
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
@@ -135,15 +135,17 @@ public:
 		Expression(
 				const PostingJoinOperatorInterface* operation_,
 				const std::vector<NodeAddress>& subnodes_,
-				int range_=0)
-			:operation(operation_),subnodes(subnodes_),range(range_){}
+				int range_,
+				unsigned int cardinality_)
+			:operation(operation_),subnodes(subnodes_),range(range_),cardinality(cardinality_){}
 		Expression(
 				const Expression& o)
-			:operation(o.operation),subnodes(o.subnodes),range(o.range){}
+			:operation(o.operation),subnodes(o.subnodes),range(o.range),cardinality(o.cardinality){}
 
 		const PostingJoinOperatorInterface* operation;
 		std::vector<NodeAddress> subnodes;
 		int range;
+		unsigned int cardinality;
 	};
 
 	struct Feature

@@ -11,5 +11,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testPeerMessageProcessor testPeerMessageProcessor.cpp)
-target_link_libraries( testPeerMessageProcessor boost_system strus_error strus_peermsgproc strus_utils )
+target_link_libraries( testPeerMessageProcessor strus_error strus_peermsgproc strus_utils boost_system )
 

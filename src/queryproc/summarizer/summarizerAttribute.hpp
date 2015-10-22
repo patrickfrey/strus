@@ -31,6 +31,7 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
+#include "private/internationalization.hpp"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -63,7 +64,8 @@ public:
 	virtual void addSummarizationFeature(
 			const std::string&,
 			PostingIteratorInterface*,
-			const std::vector<SummarizationVariable>&);
+			const std::vector<SummarizationVariable>&,
+			float /*weight*/);
 
 	virtual std::vector<SummarizerFunctionContextInterface::SummaryElement> getSummary( const Index& docno);
 
@@ -111,6 +113,11 @@ public:
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the value of the document attribute specified with the string parameter 'name'.");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

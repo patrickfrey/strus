@@ -51,6 +51,10 @@ public:
 	/// \return the created summarization function instance (ownership to caller)
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const=0;
+
+	/// \brief Get a description of the function for user help
+	/// \return the description
+	virtual const char* getDescription() const=0;
 };
 
 }//namespace

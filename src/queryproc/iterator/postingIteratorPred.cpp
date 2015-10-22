@@ -8,8 +8,14 @@ using namespace strus;
 
 PostingIteratorInterface* PostingJoinPred::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
-		int range) const
+		int range,
+		unsigned int cardinality) const
 {
+	if (cardinality != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "pred");
+		return 0;
+	}
 	if (range != 0)
 	{
 		m_errorhnd->report( _TXT( "no range argument expected for '%s'"), "pred");

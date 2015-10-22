@@ -74,11 +74,13 @@ public:
 	/// \param[in] name_ name of the summarization feature
 	/// \param[in] postingIterator_ iterator on the matches of the summarization feature
 	/// \param[in] variables_ list of variables attached to subexpressions of the matches (passed with postingIterator_)
+	/// \param[in] weight_ weight of this summarization feature
 	/// \remark Do call this method before calling getSummary the first time for not having incomplete results
 	virtual void addSummarizationFeature(
 			const std::string& name_,
 			PostingIteratorInterface* postingIterator_,
-			const std::vector<SummarizationVariable>& variables_)=0;
+			const std::vector<SummarizationVariable>& variables_,
+			float weight_)=0;
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from

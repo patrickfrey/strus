@@ -78,7 +78,8 @@ public:
 	virtual void addSummarizationFeature(
 			const std::string& name,
 			PostingIteratorInterface* itr,
-			const std::vector<SummarizationVariable>& variables);
+			const std::vector<SummarizationVariable>& variables,
+			float weight);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
@@ -87,11 +88,12 @@ private:
 	{
 		PostingIteratorInterface* itr;
 		std::vector<SummarizationVariable> variables;
+		float weight;
 
-		SummarizationFeature( PostingIteratorInterface* itr_, const std::vector<SummarizationVariable>& variables_)
-			:itr(itr_),variables(variables_){}
+		SummarizationFeature( PostingIteratorInterface* itr_, const std::vector<SummarizationVariable>& variables_, float weight_)
+			:itr(itr_),variables(variables_),weight(weight_){}
 		SummarizationFeature( const SummarizationFeature& o)
-			:itr(o.itr),variables(o.variables){}
+			:itr(o.itr),variables(o.variables),weight(o.weight){}
 	};
 
 private:
@@ -111,7 +113,7 @@ class SummarizerFunctionInstanceMatchVariables
 {
 public:
 	SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_delimiter(","),m_assign("="),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
@@ -143,6 +145,11 @@ public:
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Extract all variables assigned to subexpressions of features specified with the feature parameter 'match'. The feature type of the values extracted from the forward index as variable values are specified with the string parameter 'type'. With 'assign' you can specify the assignment operator used in the result other than '=' (default). With 'delimiter' you can specify the separator between two results other than ',' (default).");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

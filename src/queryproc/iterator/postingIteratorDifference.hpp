@@ -92,7 +92,13 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& argitr,
-			int range) const;
+			int range,
+			unsigned int cardinality) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that are in the first argument set but not in the second");
+	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages

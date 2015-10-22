@@ -79,6 +79,16 @@ PostingJoinOperatorInterface* strus::createPostingJoinStructSequence( ErrorBuffe
 	return new PostingJoinStructSequence( errorhnd);
 }
 
+PostingJoinOperatorInterface* strus::createPostingJoinChain( ErrorBufferInterface* errorhnd)
+{
+	return new PostingJoinChain( errorhnd);
+}
+
+PostingJoinOperatorInterface* strus::createPostingJoinStructChain( ErrorBufferInterface* errorhnd)
+{
+	return new PostingJoinStructChain( errorhnd);
+}
+
 PostingJoinOperatorInterface* strus::createPostingJoinContains( ErrorBufferInterface* errorhnd)
 {
 	return new PostingJoinContains( errorhnd);

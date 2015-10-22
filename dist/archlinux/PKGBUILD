@@ -2,36 +2,41 @@
 # Maintainer: Patrick Frey <patrickpfrey@yahoo.com> 
 
 pkgname=strus
-pkgver=0.0.1
+_mainpkgver=0.1.6
+pkgver=${_mainpkgver}
 pkgrel=1
 pkgdesc='Library implementing the storage of a text search engine.'
 license=('GPL3')
 arch=('i686' 'x86_64')
 url="http://project-strus.net"
-depends=('boost>=1.48' 'boost-libs>=1.48' 'leveldb')
+depends=('boost>=1.53' 'boost-libs>=1.53' 'leveldb')
 makedepends=('cmake')
-source=("${pkgname}-${pkgver}.tar.gz")
+source=("${pkgname}-${_mainpkgver}.tar.gz")
 
 build() {
-  cd ${srcdir}/${pkgname}-${pkgver}
+  cd ${srcdir}/${pkgname}-${_mainpkgver}
 
   msg "Building..."
   mkdir build
   cd build
-  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=%{_libdir} ..
+  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib ..
   make
 }
 
 package() {
-  cd ${srcdir}/${pkgname}-${pkgver}
+  cd ${srcdir}/${pkgname}-${_mainpkgver}
 
   msg "Installing.."
   cd build
   make DESTDIR=${pkgdir} install
+  
+  msg "Adding strus to ld.so.conf..."
+  install -d ${pkgdir}/etc/ld.so.conf.d
+  echo "/usr/lib/${pkgname}" > ${pkgdir}/etc/ld.so.conf.d/${pkgname}.conf  
 }
 
 check() {
-  cd ${srcdir}/${pkgname}-${pkgver}
+  cd ${srcdir}/${pkgname}-${_mainpkgver}
 
   msg "Testing..."
   cd build

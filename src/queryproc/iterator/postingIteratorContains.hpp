@@ -68,13 +68,26 @@ public:
 		return m_posno;
 	}
 
-private:
+protected:
 	Index m_docno;
 	Index m_posno;							///< current position
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< argument iterators
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+};
+
+class IteratorContainsWithCardinality
+	:public IteratorContains
+{
+public:
+	IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_);
+	virtual ~IteratorContainsWithCardinality(){}
+
+	virtual Index skipDoc( const Index& docno);
+
+private:
+	std::size_t m_cardinality;					///< number of elements to count for a match
 };
 
 
@@ -88,7 +101,14 @@ public:
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference<PostingIteratorInterface> >& itrs,
-			int range) const;
+			int range,
+			unsigned int cardinality) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,1) for documents d that contain all of the argument features");
+	}
+
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
