@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.0</span>
+   &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -102,26 +101,30 @@
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="classstrus_1_1PostingJoinOperatorInterface.html#af73fcb9710e1e5b83002e297665adef5">   46</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1PostingJoinOperatorInterface.html#af73fcb9710e1e5b83002e297665adef5">~PostingJoinOperatorInterface</a>(){}</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a>* <a class="code" href="classstrus_1_1PostingJoinOperatorInterface.html#af9099629d7e09fc07fc1655343995bdf">createResultIterator</a>(</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                        <span class="keyword">const</span> std::vector&lt;<a class="code" href="classstrus_1_1Reference.html">Reference&lt;PostingIteratorInterface&gt;</a> &gt;&amp; argitrs,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                        <span class="keywordtype">int</span> range) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;};</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a>* <a class="code" href="classstrus_1_1PostingJoinOperatorInterface.html#a3577f82c55b21c04d2368726b335b09c">createResultIterator</a>(</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                        <span class="keyword">const</span> std::vector&lt;<a class="code" href="classstrus_1_1Reference.html">Reference&lt;PostingIteratorInterface&gt;</a> &gt;&amp; argitrs,</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                        <span class="keywordtype">int</span> range,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> cardinality) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1PostingJoinOperatorInterface.html#a7cbfd9d9cf06bb1632fe9f2126c89686">getDescription</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;};</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
 <div class="ttc" id="reference_8hpp_html"><div class="ttname"><a href="reference_8hpp.html">reference.hpp</a></div><div class="ttdoc">Shared reference of an object that is not shared between different threads. </div></div>
+<div class="ttc" id="classstrus_1_1PostingJoinOperatorInterface_html_a3577f82c55b21c04d2368726b335b09c"><div class="ttname"><a href="classstrus_1_1PostingJoinOperatorInterface.html#a3577f82c55b21c04d2368726b335b09c">strus::PostingJoinOperatorInterface::createResultIterator</a></div><div class="ttdeci">virtual PostingIteratorInterface * createResultIterator(const std::vector&lt; Reference&lt; PostingIteratorInterface &gt; &gt; &amp;argitrs, int range, unsigned int cardinality) const =0</div><div class="ttdoc">Create an iterator on the join operator result (set of postings) </div></div>
 <div class="ttc" id="classstrus_1_1PostingJoinOperatorInterface_html_af73fcb9710e1e5b83002e297665adef5"><div class="ttname"><a href="classstrus_1_1PostingJoinOperatorInterface.html#af73fcb9710e1e5b83002e297665adef5">strus::PostingJoinOperatorInterface::~PostingJoinOperatorInterface</a></div><div class="ttdeci">virtual ~PostingJoinOperatorInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> postingJoinOperatorInterface.hpp:46</div></div>
 <div class="ttc" id="classstrus_1_1Reference_html"><div class="ttname"><a href="classstrus_1_1Reference.html">strus::Reference</a></div><div class="ttdoc">Shared pointer template with non thread-safe reference counting. </div><div class="ttdef"><b>Definition:</b> reference.hpp:42</div></div>
-<div class="ttc" id="classstrus_1_1PostingJoinOperatorInterface_html_af9099629d7e09fc07fc1655343995bdf"><div class="ttname"><a href="classstrus_1_1PostingJoinOperatorInterface.html#af9099629d7e09fc07fc1655343995bdf">strus::PostingJoinOperatorInterface::createResultIterator</a></div><div class="ttdeci">virtual PostingIteratorInterface * createResultIterator(const std::vector&lt; Reference&lt; PostingIteratorInterface &gt; &gt; &amp;argitrs, int range) const =0</div><div class="ttdoc">Create an iterator on the join operator result (set of postings) </div></div>
+<div class="ttc" id="classstrus_1_1PostingJoinOperatorInterface_html_a7cbfd9d9cf06bb1632fe9f2126c89686"><div class="ttname"><a href="classstrus_1_1PostingJoinOperatorInterface.html#a7cbfd9d9cf06bb1632fe9f2126c89686">strus::PostingJoinOperatorInterface::getDescription</a></div><div class="ttdeci">virtual const char * getDescription() const =0</div><div class="ttdoc">Get a description of the function for user help. </div></div>
 <div class="ttc" id="classstrus_1_1PostingIteratorInterface_html"><div class="ttname"><a href="classstrus_1_1PostingIteratorInterface.html">strus::PostingIteratorInterface</a></div><div class="ttdoc">Structure that represents a set of feature occurrencies (postings) as iterator. </div><div class="ttdef"><b>Definition:</b> postingIteratorInterface.hpp:41</div></div>
 <div class="ttc" id="classstrus_1_1PostingJoinOperatorInterface_html"><div class="ttname"><a href="classstrus_1_1PostingJoinOperatorInterface.html">strus::PostingJoinOperatorInterface</a></div><div class="ttdoc">Interface for creating iterators on joined sets of postings. </div><div class="ttdef"><b>Definition:</b> postingJoinOperatorInterface.hpp:42</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:27:36 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Oct 22 2015 12:16:19 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

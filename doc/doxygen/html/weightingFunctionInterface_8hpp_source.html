@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.0</span>
+   &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -103,20 +102,23 @@
 <div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classstrus_1_1WeightingFunctionInterface.html#a09b68e7a7a0628047d6b7c16952abca6">   47</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1WeightingFunctionInterface.html#a09b68e7a7a0628047d6b7c16952abca6">~WeightingFunctionInterface</a>(){}</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1WeightingFunctionInstanceInterface.html">WeightingFunctionInstanceInterface</a>* <a class="code" href="classstrus_1_1WeightingFunctionInterface.html#a024fec5b63a36b277d231ec2fa8d724d">createInstance</a>() <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;};</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1WeightingFunctionInterface.html#a185723fa57f4ed4587ad30f66d863537">getDescription</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;};</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="preprocessor"></span></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionInstanceInterface_html"><div class="ttname"><a href="classstrus_1_1WeightingFunctionInstanceInterface.html">strus::WeightingFunctionInstanceInterface</a></div><div class="ttdoc">Interface for a parameterized weighting function instance. </div><div class="ttdef"><b>Definition:</b> weightingFunctionInstanceInterface.hpp:49</div></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionInterface_html_a024fec5b63a36b277d231ec2fa8d724d"><div class="ttname"><a href="classstrus_1_1WeightingFunctionInterface.html#a024fec5b63a36b277d231ec2fa8d724d">strus::WeightingFunctionInterface::createInstance</a></div><div class="ttdeci">virtual WeightingFunctionInstanceInterface * createInstance() const =0</div><div class="ttdoc">Create an instance of this function for parametrization. </div></div>
+<div class="ttc" id="classstrus_1_1WeightingFunctionInterface_html_a185723fa57f4ed4587ad30f66d863537"><div class="ttname"><a href="classstrus_1_1WeightingFunctionInterface.html#a185723fa57f4ed4587ad30f66d863537">strus::WeightingFunctionInterface::getDescription</a></div><div class="ttdeci">virtual const char * getDescription() const =0</div><div class="ttdoc">Get a description of the function for user help. </div></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionInterface_html_a09b68e7a7a0628047d6b7c16952abca6"><div class="ttname"><a href="classstrus_1_1WeightingFunctionInterface.html#a09b68e7a7a0628047d6b7c16952abca6">strus::WeightingFunctionInterface::~WeightingFunctionInterface</a></div><div class="ttdeci">virtual ~WeightingFunctionInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> weightingFunctionInterface.hpp:47</div></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionInterface_html"><div class="ttname"><a href="classstrus_1_1WeightingFunctionInterface.html">strus::WeightingFunctionInterface</a></div><div class="ttdoc">Interface for a weighting function that can be used for ranking in the query evaluation. </div><div class="ttdef"><b>Definition:</b> weightingFunctionInterface.hpp:43</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:27:36 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Oct 22 2015 12:16:19 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

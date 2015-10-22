@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.0</span>
+   &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
  </tr>
@@ -98,9 +98,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5bf6a86a4a2f508de5c03bb7fb94b43e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a5bf6a86a4a2f508de5c03bb7fb94b43e">pushTerm</a> (const std::string &amp;type_, const std::string &amp;value_)=0</td></tr>
 <tr class="memdesc:a5bf6a86a4a2f508de5c03bb7fb94b43e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a term to the query stack.  <a href="#a5bf6a86a4a2f508de5c03bb7fb94b43e">More...</a><br/></td></tr>
 <tr class="separator:a5bf6a86a4a2f508de5c03bb7fb94b43e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09d7f1fec5628167334fc3b9da03b5b2"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a09d7f1fec5628167334fc3b9da03b5b2">pushExpression</a> (const <a class="el" href="classstrus_1_1PostingJoinOperatorInterface.html">PostingJoinOperatorInterface</a> *operation, std::size_t argc, int range)=0</td></tr>
-<tr class="memdesc:a09d7f1fec5628167334fc3b9da03b5b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push an expression formed by the topmost elements from the stack to the query stack, removing the argument elements.  <a href="#a09d7f1fec5628167334fc3b9da03b5b2">More...</a><br/></td></tr>
-<tr class="separator:a09d7f1fec5628167334fc3b9da03b5b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc82b6fe487b3c2ce3caefdb7a4278a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#abc82b6fe487b3c2ce3caefdb7a4278a1">pushExpression</a> (const <a class="el" href="classstrus_1_1PostingJoinOperatorInterface.html">PostingJoinOperatorInterface</a> *operation, std::size_t argc, int range, unsigned int cardinality)=0</td></tr>
+<tr class="memdesc:abc82b6fe487b3c2ce3caefdb7a4278a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push an expression formed by the topmost elements from the stack to the query stack, removing the argument elements.  <a href="#abc82b6fe487b3c2ce3caefdb7a4278a1">More...</a><br/></td></tr>
+<tr class="separator:abc82b6fe487b3c2ce3caefdb7a4278a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9af06b912417880365b6a82305e8ccc9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a9af06b912417880365b6a82305e8ccc9">pushDuplicate</a> ()=0</td></tr>
 <tr class="memdesc:a9af06b912417880365b6a82305e8ccc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a duplicate of the topmost element of the query stack.  <a href="#a9af06b912417880365b6a82305e8ccc9">More...</a><br/></td></tr>
 <tr class="separator:a9af06b912417880365b6a82305e8ccc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -455,7 +455,7 @@ More than one variable can be attached </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a09d7f1fec5628167334fc3b9da03b5b2"></a>
+<a class="anchor" id="abc82b6fe487b3c2ce3caefdb7a4278a1"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -478,7 +478,13 @@ More than one variable can be attached </dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>range</em>&#160;</td>
+          <td class="paramname"><em>range</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>cardinality</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -499,6 +505,7 @@ More than one variable can be attached </dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">operation</td><td>the expression join operator </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">argc</td><td>number of expression arguments </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">range</td><td>range of the expression </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cardinality</td><td>required size of matching results (e.g. minimum number of elements of any input subset selection that builds a result) (0 for use default) </td></tr>
   </table>
   </dd>
 </dl>
@@ -619,7 +626,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:27:37 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Oct 22 2015 12:16:19 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

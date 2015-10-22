@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.0</span>
+   &#160;<span id="projectnumber">0.1</span>
    </div>
   </td>
  </tr>
@@ -47,7 +47,6 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
-      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <div id="nav-path" class="navpath">
@@ -104,22 +103,25 @@
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1SummarizerFunctionInstanceInterface.html">SummarizerFunctionInstanceInterface</a>* <a class="code" href="classstrus_1_1SummarizerFunctionInterface.html#ac6a27374d720d54c3c6c6b60b68077e3">createInstance</a>(</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1QueryProcessorInterface.html">QueryProcessorInterface</a>* processor) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;};</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1SummarizerFunctionInterface.html#a3e6b25a01a23b8f2c5a4354e61638f01">getDescription</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;};</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
+<div class="ttc" id="classstrus_1_1SummarizerFunctionInterface_html_a3e6b25a01a23b8f2c5a4354e61638f01"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInterface.html#a3e6b25a01a23b8f2c5a4354e61638f01">strus::SummarizerFunctionInterface::getDescription</a></div><div class="ttdeci">virtual const char * getDescription() const =0</div><div class="ttdoc">Get a description of the function for user help. </div></div>
 <div class="ttc" id="classstrus_1_1SummarizerFunctionInterface_html"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInterface.html">strus::SummarizerFunctionInterface</a></div><div class="ttdoc">Interface for summarization functions (additional info about the matches in the result ranklist of a ...</div><div class="ttdef"><b>Definition:</b> summarizerFunctionInterface.hpp:43</div></div>
 <div class="ttc" id="classstrus_1_1SummarizerFunctionInterface_html_ac6a27374d720d54c3c6c6b60b68077e3"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInterface.html#ac6a27374d720d54c3c6c6b60b68077e3">strus::SummarizerFunctionInterface::createInstance</a></div><div class="ttdeci">virtual SummarizerFunctionInstanceInterface * createInstance(const QueryProcessorInterface *processor) const =0</div><div class="ttdoc">Create an instance of this summarization function for parametrization. </div></div>
-<div class="ttc" id="classstrus_1_1QueryProcessorInterface_html"><div class="ttname"><a href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></div><div class="ttdoc">Defines all object instances involved in query evaluation addressable by name. </div><div class="ttdef"><b>Definition:</b> queryProcessorInterface.hpp:51</div></div>
+<div class="ttc" id="classstrus_1_1QueryProcessorInterface_html"><div class="ttname"><a href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></div><div class="ttdoc">Defines all object instances involved in query evaluation addressable by name. </div><div class="ttdef"><b>Definition:</b> queryProcessorInterface.hpp:52</div></div>
 <div class="ttc" id="classstrus_1_1SummarizerFunctionInstanceInterface_html"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInstanceInterface.html">strus::SummarizerFunctionInstanceInterface</a></div><div class="ttdoc">Interface for a parameterized instance of summarization. </div><div class="ttdef"><b>Definition:</b> summarizerFunctionInstanceInterface.hpp:51</div></div>
 <div class="ttc" id="classstrus_1_1SummarizerFunctionInterface_html_acc11803170765fcdf282647c592e25f4"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInterface.html#acc11803170765fcdf282647c592e25f4">strus::SummarizerFunctionInterface::~SummarizerFunctionInterface</a></div><div class="ttdeci">virtual ~SummarizerFunctionInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> summarizerFunctionInterface.hpp:47</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Oct 10 2015 19:27:36 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Oct 22 2015 12:16:19 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

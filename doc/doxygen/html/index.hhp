@@ -56,7 +56,6 @@ summarizationVariable_8hpp_source.html
 summarizerFunctionContextInterface_8hpp_source.html
 summarizerFunctionInstanceInterface_8hpp_source.html
 summarizerFunctionInterface_8hpp_source.html
-versionStorage_8hpp_source.html
 weightedDocument_8hpp_source.html
 weightingFunctionContextInterface_8hpp_source.html
 weightingFunctionInstanceInterface_8hpp_source.html
@@ -105,7 +104,6 @@ summarizationVariable_8hpp.html
 summarizerFunctionContextInterface_8hpp.html
 summarizerFunctionInstanceInterface_8hpp.html
 summarizerFunctionInterface_8hpp.html
-versionStorage_8hpp.html
 weightedDocument_8hpp.html
 weightingFunctionContextInterface_8hpp.html
 weightingFunctionInstanceInterface_8hpp.html
@@ -266,8 +264,6 @@ functions_vars.html
 functions_enum.html
 functions_eval.html
 files.html
-globals.html
-globals_defs.html
 tab_a.png
 tab_b.png
 tab_h.png
