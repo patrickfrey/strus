@@ -44,6 +44,7 @@ ForwardIterator::ForwardIterator( const StorageClient* storage_, const DatabaseC
 	,m_docno(0)
 	,m_typeno(storage_->getTermType( type_))
 	,m_curpos(0)
+	,m_errorhnd(errorhnd_)
 {
 	if (m_typeno == 0) throw strus::runtime_error( _TXT( "unknown term type name '%s'"), type_.c_str());
 }
