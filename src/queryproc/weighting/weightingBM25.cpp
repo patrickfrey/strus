@@ -47,7 +47,7 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_)
 	,m_nofCollectionDocuments(storage->globalNofDocumentsInserted())
 	,m_featar(),m_metadata(metadata_)
-	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?Constants::metadata_doclen():attribute_doclen_))
+	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_))
 	,m_errorhnd(errorhnd_)
 {}
 

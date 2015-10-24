@@ -58,7 +58,7 @@ WeightingFunctionContextBM25_dpfc::WeightingFunctionContextBM25_dpfc(
 	,m_weight_featar()
 	,m_struct_featar()
 	,m_title_itr(0),m_metadata(metadata_)
-	,m_metadata_content_doclen(metadata_->elementHandle( attribute_content_doclen_.empty()?Constants::metadata_doclen():attribute_content_doclen_))
+	,m_metadata_content_doclen(metadata_->elementHandle( attribute_content_doclen_.empty()?std::string("doclen"):attribute_content_doclen_))
 	,m_metadata_title_doclen(attribute_title_doclen_.size()?metadata_->elementHandle( attribute_title_doclen_):-1)
 	,m_proximityMinDist(proximityMinDist_)
 	,m_title_ff_incr(title_ff_incr_)
