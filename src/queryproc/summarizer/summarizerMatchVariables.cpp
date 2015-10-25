@@ -39,8 +39,6 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <cstdlib>
-/*[-]*/#include <sstream>
-/*[-]*/#include <iostream>
 
 using namespace strus;
 
