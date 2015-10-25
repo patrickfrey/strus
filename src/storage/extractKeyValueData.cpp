@@ -193,7 +193,26 @@ void UserNameData::print( std::ostream& out)
 	out << (char)DatabaseKey::UserNamePrefix << ' ' << userno << ' ' << escapestr( usernamestr, usernamesize) << std::endl;
 }
 
-
+static std::string encodeString( const std::string& value)
+{
+	const char* hex = "0123456789ABCDEF";
+	std::string rt;
+	char const* vv = value.c_str();
+	for (;*vv; ++vv)
+	{
+		if ((signed char)*vv <= 32 || *vv == '#')
+		{
+			rt.push_back('#');
+			rt.push_back( hex[ (unsigned char)*vv >>  4]);
+			rt.push_back( hex[ (unsigned char)*vv & 0xF]);
+		}
+		else
+		{
+			rt.push_back( *vv);
+		}
+	}
+	return rt;
+}
 
 ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
@@ -218,7 +237,15 @@ ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice&
 		std::string value( blk.value_at( bi));
 		if (!strus::checkStringUtf8( value.c_str(), value.size()))
 		{
-			throw strus::runtime_error( _TXT( "value in addressed by forward index is not a valid UTF-8 string"));
+			if (value.size() > 100)
+			{
+				std::size_t nn = 60;
+				while (value.size() > nn && (unsigned char)value[nn] > 127) nn++;
+				value.resize( nn);
+				value.append( "...");
+			}
+			std::string encvalue = encodeString( value);
+			throw strus::runtime_error( _TXT( "value in forward index is not a valid UTF-8 string: '%s' [%s]"), value.c_str(), encvalue.c_str());
 		}
 		Index curpos = blk.position_at(bi);
 		if (curpos <= prevpos)
