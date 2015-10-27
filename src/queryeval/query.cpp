@@ -60,6 +60,8 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
+	,m_nofRanks(20)
+	,m_minRank(0)
 	,m_evalset_defined(false)
 	,m_errorhnd(errorhnd_)
 {
@@ -316,7 +318,7 @@ void Query::addUserName( const std::string& username_)
 	CATCH_ERROR_MAP( _TXT("error adding user to query: %s"), *m_errorhnd);
 }
 
-PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr)
+PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodePostingsMap& nodePostingsMap)
 {
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
@@ -339,15 +341,15 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 							term.type, term.value));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
-				m_nodePostingsMap[ *ni] = joinargs.back().get();
+				nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
-							m_expressions[ nodeIndex(*ni)]));
+							m_expressions[ nodeIndex(*ni)], nodePostingsMap));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
-				m_nodePostingsMap[ *ni] = joinargs.back().get();
+				nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 		}
 	}
@@ -355,7 +357,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr)
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodePostingsMap& nodePostingsMap)
 {
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
@@ -367,23 +369,23 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 			const Term& term = m_terms[ nidx];
 			rt = m_storage->createTermPostingIterator( term.type, term.value);
 			if (!rt) break;
-			m_nodePostingsMap[ nodeadr] = rt;
+			nodePostingsMap[ nodeadr] = rt;
 			break;
 		}
 		case ExpressionNode:
 			std::size_t nidx = nodeIndex( nodeadr);
-			rt = createExpressionPostingIterator( m_expressions[ nidx]);
+			rt = createExpressionPostingIterator( m_expressions[ nidx], nodePostingsMap);
 			if (!rt) break;
-			m_nodePostingsMap[ nodeadr] = rt;
+			nodePostingsMap[ nodeadr] = rt;
 			break;
 	}
 	return rt;
 }
 
-PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
+PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr, const NodePostingsMap& nodePostingsMap) const
 {
-	NodePostingsMap::const_iterator pi = m_nodePostingsMap.find( nodeadr);
-	if (pi == m_nodePostingsMap.end())
+	NodePostingsMap::const_iterator pi = nodePostingsMap.find( nodeadr);
+	if (pi == nodePostingsMap.end())
 	{
 		throw strus::runtime_error( _TXT( "expression node postings not found"));
 	}
@@ -392,7 +394,8 @@ PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
 
 void Query::collectSummarizationVariables(
 			std::vector<SummarizationVariable>& variables,
-			const NodeAddress& nodeadr)
+			const NodeAddress& nodeadr,
+			const NodePostingsMap& nodePostingsMap)
 {
 	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
 	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( nodeadr);
@@ -400,7 +403,7 @@ void Query::collectSummarizationVariables(
 	Itr vi = vrange.first, ve = vrange.second;
 	for (; vi != ve; ++vi)
 	{
-		variables.push_back( SummarizationVariable( vi->second, nodePostings( nodeadr)));
+		variables.push_back( SummarizationVariable( vi->second, nodePostings( nodeadr, nodePostingsMap)));
 	}
 
 	switch (nodeType( nodeadr))
@@ -416,7 +419,7 @@ void Query::collectSummarizationVariables(
 				ne = expr.subnodes.end();
 			for (; ni != ne; ++ni)
 			{
-				collectSummarizationVariables( variables, *ni);
+				collectSummarizationVariables( variables, *ni, nodePostingsMap);
 			}
 			break;
 		}
@@ -446,7 +449,8 @@ std::vector<ResultDocument> Query::evaluate()
 			m_errorhnd->report( _TXT( "cannot evaluate query, no selection features defined"));
 			return std::vector<ResultDocument>();
 		}
-	
+		NodePostingsMap nodePostingsMap;
+
 		// [3] Create the posting sets of the query features:
 		std::vector<Reference<PostingIteratorInterface> > postings;
 		{
@@ -455,7 +459,7 @@ std::vector<ResultDocument> Query::evaluate()
 			for (; fi != fe; ++fi)
 			{
 				Reference<PostingIteratorInterface> postingsElem(
-					createNodePostingIterator( fi->node));
+					createNodePostingIterator( fi->node, nodePostingsMap));
 				if (!postingsElem.get()) return std::vector<ResultDocument>();
 				postings.push_back( postingsElem);
 			}
@@ -488,7 +492,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*si == fi->set)
 					{
 						accumulator.addSelector(
-							nodePostings( fi->node), sidx, 
+							nodePostings( fi->node, nodePostingsMap), sidx, 
 							nodeType( fi->node) == ExpressionNode);
 					}
 				}
@@ -518,7 +522,7 @@ std::vector<ResultDocument> Query::evaluate()
 						{
 							execContext->addWeightingFeature(
 								si->parameterName(),
-								nodePostings( fi->node),
+								nodePostings( fi->node, nodePostingsMap),
 								fi->weight);
 #ifdef STRUS_LOWLEVEL_DEBUG
 							std::cout << "add feature parameter " << si->parameterName() << "=" << fi->set << ' ' << fi->weight << std::endl;
@@ -558,7 +562,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodePostings( fi->node),
+							nodePostings( fi->node, nodePostingsMap),
 							nodeType( fi->node) == ExpressionNode, false);
 					}
 				}
@@ -578,7 +582,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodePostings( fi->node),
+							nodePostings( fi->node, nodePostingsMap),
 							nodeType( fi->node) == ExpressionNode, true);
 					}
 				}
@@ -634,10 +638,10 @@ std::vector<ResultDocument> Query::evaluate()
 						if (fi->set == si->featureSet())
 						{
 							std::vector<SummarizationVariable> variables;
-							collectSummarizationVariables( variables, fi->node);
+							collectSummarizationVariables( variables, fi->node, nodePostingsMap);
 	
 							closure->addSummarizationFeature(
-								si->parameterName(), nodePostings(fi->node),
+								si->parameterName(), nodePostings(fi->node, nodePostingsMap),
 								variables, fi->weight);
 						}
 					}

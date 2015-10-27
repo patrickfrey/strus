@@ -166,12 +166,14 @@ public:
 	void print( std::ostream& out) const;
 
 private:
-	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr);
-	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr);
+	typedef std::map<NodeAddress,PostingIteratorInterface*> NodePostingsMap;
+
+	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodePostingsMap& nodePostingsMap);
+	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodePostingsMap& nodePostingsMap);
 	void collectSummarizationVariables(
 				std::vector<SummarizationVariable>& variables,
-				const NodeAddress& nodeadr);
-	PostingIteratorInterface* nodePostings( const NodeAddress& nodeadr) const;
+				const NodeAddress& nodeadr, const NodePostingsMap& nodePostingsMap);
+	PostingIteratorInterface* nodePostings( const NodeAddress& nodeadr, const NodePostingsMap& nodePostingsMap) const;
 
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
 	void printVariables( std::ostream& out, NodeAddress adr) const;
@@ -186,8 +188,6 @@ private:
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
 	std::vector<MetaDataRestriction> m_metaDataRestrictions;
-	typedef std::map<NodeAddress,PostingIteratorInterface*> NodePostingsMap;
-	NodePostingsMap m_nodePostingsMap;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_nofRanks;
 	std::size_t m_minRank;
