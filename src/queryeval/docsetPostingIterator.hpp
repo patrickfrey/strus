@@ -39,7 +39,7 @@ class DocsetPostingIterator
 {
 public:
 	DocsetPostingIterator( const std::vector<Index>& ar)
-		:m_size(ar.size()),m_itr(ar.begin()),m_end(ar.end()){}
+		:m_size(ar.size()),m_start(ar.begin()),m_itr(ar.begin()),m_end(ar.end()){}
 	DocsetPostingIterator( const DocsetPostingIterator& o)
 		:m_size(o.m_size),m_itr(o.m_itr),m_end(o.m_end){}
 	DocsetPostingIterator()
@@ -49,6 +49,22 @@ public:
 
 	virtual Index skipDoc( const Index& docno)
 	{
+		if (m_itr < m_end)
+		{
+			if (*m_itr > docno)
+			{
+				if (m_itr > m_start)
+				{
+					--m_itr;
+					if (*m_itr < docno)
+					{
+						++m_itr;
+						return *m_itr;
+					}
+				}
+				m_itr = m_start;
+			}
+		}
 		while (m_itr < m_end && *m_itr < docno)
 		{
 			++m_itr;
@@ -93,6 +109,7 @@ public:
 
 private:
 	std::size_t m_size;
+	std::vector<Index>::const_iterator m_start;
 	std::vector<Index>::const_iterator m_itr;
 	std::vector<Index>::const_iterator m_end;
 };
