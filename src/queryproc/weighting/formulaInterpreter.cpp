@@ -543,7 +543,7 @@ double FormulaInterpreter::run( void* ctx) const
 		const OpStruct& op = m_program[ ip];
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "[" << ip << "] ";
-		op.print( std::cerr, m_strings);
+		op.print( std::cerr, m_strings, m_variablear);
 		std::cerr << "  stack [";
 		stack.print( std::cerr);
 		std::cerr << "]" << std::endl;
