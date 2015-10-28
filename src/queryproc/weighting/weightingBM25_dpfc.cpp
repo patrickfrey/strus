@@ -326,7 +326,11 @@ void WeightingFunctionInstanceBM25_dpfc::addStringParameter( const std::string& 
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "doclen"))
+		if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct"))
+		{
+			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), "BM25_dpfc");
+		}
+		else if (utils::caseInsensitiveEquals( name, "doclen"))
 		{
 			m_attribute_content_doclen = value;
 			if (value.empty())
@@ -366,7 +370,11 @@ void WeightingFunctionInstanceBM25_dpfc::addStringParameter( const std::string& 
 
 void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "k1"))
+	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), "BM25_dpfc");
+	}
+	else if (utils::caseInsensitiveEquals( name, "k1"))
 	{
 		m_k1 = (double)value;
 	}

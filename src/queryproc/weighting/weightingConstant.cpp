@@ -89,7 +89,11 @@ void WeightingFunctionInstanceConstant::addStringParameter( const std::string& n
 
 void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "weight"))
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), "constant");
+	}
+	else if (utils::caseInsensitiveEquals( name, "weight"))
 	{
 		m_weight = (double)value;
 	}

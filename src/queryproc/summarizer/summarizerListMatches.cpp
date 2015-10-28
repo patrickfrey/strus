@@ -113,12 +113,23 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 
 void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string&)
 {
-	m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "listmatches");
+	}
+	else
+	{
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+	}
 }
 
 void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant& val)
 {
-	if (utils::caseInsensitiveEquals( name, "N"))
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), "listmatches");
+	}
+	else if (utils::caseInsensitiveEquals( name, "N"))
 	{
 		m_maxNofMatches = val.touint();
 	}

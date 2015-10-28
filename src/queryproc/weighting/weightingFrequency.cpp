@@ -89,7 +89,14 @@ void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::stri
 
 void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::string& name, const ArithmeticVariant&)
 {
-	m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), "frequency");
+	}
+	else
+	{
+		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), "frequency", name.c_str());
+	}
 }
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceTermFrequency::createFunctionContext(

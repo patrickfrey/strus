@@ -136,7 +136,11 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "type"))
+		if (utils::caseInsensitiveEquals( name, "match"))
+		{
+			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "matchvariables");
+		}
+		else if (utils::caseInsensitiveEquals( name, "type"))
 		{
 			m_type = value;
 		}
@@ -158,7 +162,11 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 
 void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "type")
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), "matchvariables");
+	}
+	else if (utils::caseInsensitiveEquals( name, "type")
 	||  utils::caseInsensitiveEquals( name, "delimiter")
 	||  utils::caseInsensitiveEquals( name, "assign"))
 	{
