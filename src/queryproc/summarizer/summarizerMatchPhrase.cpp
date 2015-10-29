@@ -96,7 +96,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding feature to 'matchphrase' summarizer: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), "matchphrase", *m_errorhnd);
 }
 
 SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
@@ -251,7 +251,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'matchphrase' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchphrase", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
 
 
@@ -308,7 +308,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'matchphrase' summarizer: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "matchphrase", *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -356,7 +356,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 		return new SummarizerFunctionContextMatchPhrase(
 				storage, m_processor, m_type, m_nofsummaries, m_summarylen, m_structseeklen, m_matchmark, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'matchphrase' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
@@ -369,7 +369,7 @@ std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
 			<< ", summarylen=" << m_summarylen;
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'matchphrase' summarizer to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "matchphrase", *m_errorhnd, std::string());
 }
 
 
@@ -380,7 +380,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchPhrase::createInstan
 	{
 		return new SummarizerFunctionInstanceMatchPhrase( processor, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'matchphrase' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
 }
 
 

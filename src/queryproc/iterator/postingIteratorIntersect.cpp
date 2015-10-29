@@ -73,7 +73,7 @@ std::vector<const PostingIteratorInterface*>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error 'intersect' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "intersect", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorIntersect::skipDoc( const Index& docno_)
@@ -193,7 +193,7 @@ PostingIteratorInterface* PostingJoinIntersect::createResultIterator(
 	{
 		return new IteratorIntersect( itrs, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'intersect' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "intersect", *m_errorhnd, 0);
 }
 
 

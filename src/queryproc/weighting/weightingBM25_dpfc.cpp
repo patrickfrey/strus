@@ -107,7 +107,7 @@ void WeightingFunctionContextBM25_dpfc::addWeightingFeature(
 			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), "BM25_dpfc", name_.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding weighting feature to 'BM25_dpfc' weighting: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), "BM25_dpfc", *m_errorhnd);
 }
 
 
@@ -365,7 +365,7 @@ void WeightingFunctionInstanceBM25_dpfc::addStringParameter( const std::string& 
 			return;
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'BM25_dpfc' weighting: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' weighting: %s"), "BM25_dpfc", *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25_dpfc::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -420,7 +420,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25_dpfc::createFun
 	{
 		return new WeightingFunctionContextBM25_dpfc( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_content_doclen, m_attribute_title_doclen, m_proximityMinDist, m_title_ff_incr, m_sequence_ff_incr, m_sentence_ff_incr, m_relevant_df_factor, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'BM25_dpfc' function context: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function context: %s"), "BM25_dpfc", *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceBM25_dpfc::tostring() const
@@ -432,7 +432,7 @@ std::string WeightingFunctionInstanceBM25_dpfc::tostring() const
 			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen << ", doclen=" << m_attribute_content_doclen << ", doclen_title=" << m_attribute_title_doclen << ", proxmindist=" << m_proximityMinDist << ", titleinc=" << m_title_ff_incr << ", seqinc=" << m_sequence_ff_incr << ", strinc=" << m_sentence_ff_incr << ", relevant=" << m_relevant_df_factor << std::endl;
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'BM25_dpfc' function to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' function to string: %s"), "BM25_dpfc", *m_errorhnd, std::string());
 }
 
 
@@ -442,7 +442,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25_dpfc::createInstance()
 	{
 		return new WeightingFunctionInstanceBM25_dpfc( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'BM25_dpfc' function: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' function: %s"), "BM25_dpfc", *m_errorhnd, 0);
 }
 
 

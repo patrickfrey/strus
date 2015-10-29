@@ -80,7 +80,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), "BM25", name_.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding weighting feature to 'BM25' weighting: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), "BM25", *m_errorhnd);
 }
 
 
@@ -148,7 +148,7 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 			m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), "BM25", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error 'BM25' weighting function add string parameter: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), "BM25", *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -184,7 +184,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 	{
 		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'BM25' weighting function: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), "BM25", *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceBM25::tostring() const
@@ -197,7 +197,7 @@ std::string WeightingFunctionInstanceBM25::tostring() const
 			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'BM25' weighting function to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), "BM25", *m_errorhnd, std::string());
 }
 
 
@@ -207,7 +207,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance() cons
 	{
 		return new WeightingFunctionInstanceBM25( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'BM25' function instance: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), "BM25", *m_errorhnd, 0);
 }
 
 

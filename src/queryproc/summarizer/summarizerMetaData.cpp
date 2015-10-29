@@ -67,7 +67,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'metadata' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "metadata", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
 
 
@@ -84,7 +84,7 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'metadata' summarizer: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "metadata", *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -107,7 +107,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFu
 	{
 		return new SummarizerFunctionContextMetaData( metadata, m_name, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'metadata' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "metadata", *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceMetaData::tostring() const
@@ -118,7 +118,7 @@ std::string SummarizerFunctionInstanceMetaData::tostring() const
 		rt << "name='" << m_name << "'";
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'metadata' summarizer to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "metadata", *m_errorhnd, std::string());
 }
 
 
@@ -129,7 +129,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMetaData::createInstance(
 	{
 		return new SummarizerFunctionInstanceMetaData( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'metadata' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "metadata", *m_errorhnd, 0);
 }
 
 

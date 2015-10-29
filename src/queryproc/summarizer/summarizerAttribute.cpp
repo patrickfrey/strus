@@ -71,7 +71,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'attribute' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "attribute", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
 
 
@@ -88,7 +88,7 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'attribute' summarizer: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "attribute", *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -111,7 +111,7 @@ std::string SummarizerFunctionInstanceAttribute::tostring() const
 		rt << "name='" << m_name << "'";
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'attribute' summarizer to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "attribute", *m_errorhnd, std::string());
 }
 
 
@@ -129,7 +129,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createF
 		}
 		return new SummarizerFunctionContextAttribute( reader, m_name, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'attribute' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "attribute", *m_errorhnd, 0);
 }
 
 
@@ -140,7 +140,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAttribute::createInstance
 	{
 		return new SummarizerFunctionInstanceAttribute( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'attribute' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "attribute", *m_errorhnd, 0);
 }
 
 

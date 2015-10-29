@@ -428,6 +428,7 @@ void Query::collectSummarizationVariables(
 
 std::vector<ResultDocument> Query::evaluate()
 {
+	const char* evaluationPhase = "query feature postings initialization";
 	try
 	{
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -498,6 +499,7 @@ std::vector<ResultDocument> Query::evaluate()
 				}
 			}
 		}
+		evaluationPhase = "weighting functions initialization";
 		// [4.3] Add features for weighting:
 		{
 			std::vector<WeightingDef>::const_iterator
@@ -536,6 +538,7 @@ std::vector<ResultDocument> Query::evaluate()
 				accumulator.addFeature( wi->weight(), execContext.release());
 			}
 		}
+		evaluationPhase = "restrictions initialization";
 		// [4.4] Define the user ACL restrictions:
 		std::vector<Reference<InvAclIteratorInterface> > invAclList;
 		std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
@@ -588,6 +591,7 @@ std::vector<ResultDocument> Query::evaluate()
 				}
 			}
 		}
+		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
 		std::vector<ResultDocument> rt;
 		Ranker ranker( m_nofRanks + m_minRank);
@@ -609,6 +613,7 @@ std::vector<ResultDocument> Query::evaluate()
 		std::vector<WeightedDocument>
 			resultlist = ranker.result( m_minRank);
 	
+		evaluationPhase = "summarization";
 		// [6] Create the summarizers:
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
 		if (!resultlist.empty())
@@ -648,6 +653,7 @@ std::vector<ResultDocument> Query::evaluate()
 				}
 			}
 		}
+		evaluationPhase = "building of the result";
 		// [7] Build the result:
 		std::vector<WeightedDocument>::const_iterator
 			ri=resultlist.begin(),re=resultlist.end();
@@ -678,7 +684,7 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating query: %s"), *m_errorhnd, std::vector<ResultDocument>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, std::vector<ResultDocument>());
 }
 
 

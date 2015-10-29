@@ -181,7 +181,7 @@ void WeightingFunctionContextFormula::addWeightingFeature(
 		}
 		m_featar[ idx].push_back( Feature( itr_, weight_));
 	}
-	CATCH_ERROR_MAP( _TXT("error adding feature to weighting function 'formula': %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
 float WeightingFunctionContextFormula::call( const Index& docno)
@@ -199,7 +199,7 @@ float WeightingFunctionContextFormula::call( const Index& docno)
 	{
 		return m_interpreter.run( this);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error calling weighting function 'formula': %s"), *m_errorhnd, 0.0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), "formula", *m_errorhnd, 0.0);
 }
 
 
@@ -226,7 +226,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunct
 		}
 		return new WeightingFunctionContextFormula( storage_, metadata, funcmap, m_formula, paramar, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of weighting function 'formula': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), "formula", *m_errorhnd, 0);
 }
 
 void WeightingFunctionInstanceFormula::addStringParameter( const std::string& name, const std::string& value)
@@ -243,7 +243,7 @@ void WeightingFunctionInstanceFormula::addStringParameter( const std::string& na
 			throw strus::runtime_error( _TXT("unknown '%s' weighting function parameter '%s'"), "formula", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to weighting function 'formula': %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
 void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -253,7 +253,7 @@ void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& n
 		m_functionmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
 		m_paramar.push_back( (double)value);
 	}
-	CATCH_ERROR_MAP( _TXT("error adding numeric parameter to weighting function 'formula': %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
 std::string WeightingFunctionInstanceFormula::tostring() const
@@ -262,7 +262,7 @@ std::string WeightingFunctionInstanceFormula::tostring() const
 	{
 		return m_formula + "\n--\n" + m_functionmap.tostring();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping weighting function 'formula' to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), "formula", *m_errorhnd, std::string());
 }
 
 
@@ -272,7 +272,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionFormula::createInstance() c
 	{
 		return new WeightingFunctionInstanceFormula( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of weighting function 'formula': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "formula", *m_errorhnd, 0);
 }
 
 

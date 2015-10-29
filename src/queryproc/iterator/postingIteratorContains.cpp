@@ -86,7 +86,7 @@ std::vector<const PostingIteratorInterface*>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error 'contains' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "contains", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorContains::skipDoc( const Index& docno_)
@@ -154,5 +154,5 @@ PostingIteratorInterface* PostingJoinContains::createResultIterator(
 			return new IteratorContainsWithCardinality( itrs, cardinality, m_errorhnd);
 		}
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'contains' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "contains", *m_errorhnd, 0);
 }

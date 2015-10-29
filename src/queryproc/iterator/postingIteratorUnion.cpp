@@ -50,7 +50,7 @@ std::vector<const PostingIteratorInterface*>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error 'union' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "union", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 static inline Index selectSmallerNotNull( Index idx0, Index idx1)
@@ -179,6 +179,6 @@ PostingIteratorInterface* PostingJoinUnion::createResultIterator(
 	{
 		return new IteratorUnion( itrs, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'union' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "union", *m_errorhnd, 0);
 }
 

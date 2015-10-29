@@ -67,7 +67,7 @@ std::vector<const PostingIteratorInterface*> IteratorDifference::subExpressions(
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error 'diff' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "diff", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorDifference::skipDoc( const Index& docno_)
@@ -129,6 +129,6 @@ PostingIteratorInterface* PostingJoinDifference::createResultIterator(
 	{
 		return new IteratorDifference( argitr[0], argitr[1], m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'diff' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "diff", *m_errorhnd, 0);
 }
 

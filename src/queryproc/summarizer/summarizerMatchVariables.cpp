@@ -76,10 +76,10 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "MatchVariables", name.c_str());
+			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "matchvariables", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding feature to 'matchvariables' summarizer: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), "matchvariables", *m_errorhnd);
 }
 
 
@@ -128,7 +128,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'matchvariables' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchvariables", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
 
 
@@ -157,7 +157,7 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'matchvariables' summarizer: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "matchvariables", *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -190,7 +190,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::cr
 	{
 		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_type, m_delimiter, m_assign, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'matchvariables' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchvariables", *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceMatchVariables::tostring() const
@@ -203,7 +203,7 @@ std::string SummarizerFunctionInstanceMatchVariables::tostring() const
 			<< "', assign='" << m_assign << "'";
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping 'matchvariables' summarizer to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "matchvariables", *m_errorhnd, std::string());
 }
 
 
@@ -214,7 +214,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchVariables::createIns
 	{
 		return new SummarizerFunctionInstanceMatchVariables( processor, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'matchvariables' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "matchvariables", *m_errorhnd, 0);
 }
 
 

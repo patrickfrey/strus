@@ -53,7 +53,7 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 			m_errorhnd->report( _TXT("unknown '%s' weighting function feature parameter '%s'"), "frequency", name_.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error creating instance of weighting function 'frequency': %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of weighting function '%s': %s"), "frequency", *m_errorhnd);
 }
 
 float WeightingFunctionContextTermFrequency::call( const Index& docno)
@@ -84,7 +84,7 @@ void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::stri
 	{
 		addNumericParameter( name, parameterValue( name, value));
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to weighting function 'frequency': %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "frequency", *m_errorhnd);
 }
 
 void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::string& name, const ArithmeticVariant&)
@@ -107,7 +107,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceTermFrequency::creat
 	{
 		return new WeightingFunctionContextTermFrequency( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of weighting function 'frequency': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), "frequency", *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceTermFrequency::tostring() const
@@ -122,7 +122,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstan
 	{
 		return new WeightingFunctionInstanceTermFrequency( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of weighting function 'frequency': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "frequency", *m_errorhnd, 0);
 }
 
 

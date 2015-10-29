@@ -35,5 +35,5 @@ PostingIteratorInterface* PostingJoinPred::createResultIterator(
 	{
 		return new IteratorPred( argitr[0], m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'pred' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "pred", *m_errorhnd, 0);
 }
