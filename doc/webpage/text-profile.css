@@ -12,6 +12,7 @@ h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:
 h1 a {color:#080808; text-transform:none;}
 h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h4 {font-size:1.4em; margin:10px 0 15px 0; letter-spacing:-1px;}
 h1,h2,h3 {font-weight:700; line-height:1.4em;}
 #wrap {color:#303030; margin:40px auto; padding:0; width:60%;}
 #content {text-align:left; width:90%; padding-right:40px;}

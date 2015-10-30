@@ -28,12 +28,13 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 #sidebar b {font-size: 1.4em; color: #080808;}
 #news {display:table; border:1;}
 #newsrow {display:table-row;}
-.slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
+.slogan {color:#888; font-size:1.5em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
 .readmore {text-align:right; margin:0 20px 30px 0;}
 .timestamp {display: table-cell; font-weight:700; color:#888; text-align:right; width:150px; padding:20px 20px 20px 0; float:left; margin:0 20px 20px 0; border-right:2px solid #eee;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .newstext {display: table-cell;}
+.description {font-size:1.1em; font-weight:200;}
 .description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
@@ -41,7 +42,7 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 
 @media (max-width: 800px) and (min-width: 541px){
 *{margin:0; padding:0;}
-body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
+body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Helvetica,Arial,sans-serif; line-height:1.6em;}
 a {color:#5070A0; text-decoration:none;}
 a:hover {text-decoration:underline;}
 p,ul,ol,dl {margin:0 0 30px 0;}
@@ -61,12 +62,13 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 #sidebar h2 {font-size: 1.4em;}
 #news {display:table; border:1;}
 #newsrow {display:table-row;}
-.slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
+.slogan {color:#888; font-size:1.5em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
 .readmore {text-align:right; margin:0 20px 30px 0;}
 .timestamp {display: table-cell; font-weight:700; color:#888; text-align:right; width:150px; padding:20px 20px 20px 0; float:left; margin:0 20px 20px 0; border-right:2px solid #eee;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .newstext {display: table-cell;}
+.description {font-size:1.1em; font-weight:normal;}
 .description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
@@ -94,12 +96,13 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 #sidebar h2 {font-size: 1.4em;}
 #news {display:table; border:1;}
 #newsrow {display:table-row;}
-.slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
+.slogan {color:#888; font-size:1.5em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
 .readmore {text-align:right; margin:0 20px 30px 0;}
 .timestamp {display: table-cell; font-weight:700; color:#888; text-align:right; width:150px; padding:20px 20px 20px 0; float:left; margin:0 20px 20px 0; border-right:2px solid #eee;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .newstext {display: table-cell;}
+.description {font-size:1.1em; font-weight:normal;}
 .description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
@@ -125,6 +128,7 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .newstext {display: table-cell;}
+.description {font-size:1.1em; font-weight:normal;}
 .description a {color:#0B0B61; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
