@@ -222,7 +222,7 @@ float WeightingFunctionContextBM25_dpfc::call( const Index& docno)
 			}
 			if (firstpos >= title_start && firstpos < title_end)
 			{
-				accu[ fidx] += m_title_ff_incr;
+				accu[ fidx] += m_title_ff_incr/m_metadata_title_doclen;
 			}
 		}
 	}
