@@ -5,7 +5,7 @@ For more information, see http://andreasviklund.com/templates/basic-profile/
 
 *{margin:0; padding:0;}
 body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
-a {color:#0B0B61; text-decoration:none;}
+a {color:#5070A0; text-decoration:none;}
 a:hover {text-decoration:underline;}
 p,ul,ol,dl {margin:0 0 30px 0;}
 h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
@@ -31,6 +31,6 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .title {font-weight:bold;}
 .identifier {color:#080808; font-weight:bold;}
 .library { padding-bottom: 50px; }
-.description a {color:#0B0B61; font-weight:bold;}
+.description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}

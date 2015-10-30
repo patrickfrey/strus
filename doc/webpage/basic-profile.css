@@ -6,11 +6,11 @@ For more information, see http://andreasviklund.com/templates/basic-profile/
 @media (min-width: 801px){
 *{margin:0; padding:0;}
 body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
-a {color:#0B0B61; text-decoration:none;}
+a {color:#5070A0; text-decoration:none;}
 a:hover {text-decoration:underline;}
 p,ul,ol,dl {margin:0 0 30px 0;}
 h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
-h1 a {color:#0B0B61; text-transform:none;}
+h1 a {color:#5070A0; text-transform:none;}
 h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h1,h2,h3 {font-weight:700; line-height:1.4em;}
@@ -34,7 +34,7 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .newstext {display: table-cell;}
-.description a {color:#0B0B61; font-weight:bold;}
+.description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
 }
@@ -42,7 +42,7 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 @media (max-width: 800px) and (min-width: 541px){
 *{margin:0; padding:0;}
 body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
-a {color:#0B0B61; text-decoration:none;}
+a {color:#5070A0; text-decoration:none;}
 a:hover {text-decoration:underline;}
 p,ul,ol,dl {margin:0 0 30px 0;}
 h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
@@ -67,7 +67,7 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .newstext {display: table-cell;}
-.description a {color:#0B0B61; font-weight:bold;}
+.description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
 }
@@ -75,11 +75,11 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 @media (max-width: 540px) and (min-width: 401px){
 *{margin:0; padding:0;}
 body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
-a {color:#0B0B61; text-decoration:none;}
+a {color:#5070A0; text-decoration:none;}
 a:hover {text-decoration:underline;}
 p,ul,ol,dl {margin:0 0 30px 0;}
 h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
-h1 a {color:#0B0B61; text-transform:none;}
+h1 a {color:#5070A0; text-transform:none;}
 h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h1,h2,h3 {font-weight:700; line-height:1.4em;}
@@ -100,7 +100,7 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .timestamp a {font-weight:normal;}
 .credits {display:block; clear:left; font-size:0.9em; color:#aaa; margin:20px 0;}
 .newstext {display: table-cell;}
-.description a {color:#0B0B61; font-weight:bold;}
+.description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
 }
@@ -108,11 +108,11 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 @media (max-width: 400px) and (min-width: 101px){
 *{margin:0; padding:0;}
 body {background:#fff url(background.jpg) top center no-repeat; color:#303030; font:84% Arial,Helvetica,sans-serif; line-height:1.6em;}
-a {color:#0B0B61; text-decoration:none;}
+a {color:#5070A0; text-decoration:none;}
 a:hover {text-decoration:underline;}
 p,ul,ol,dl {margin:0 0 30px 0;}
 h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
-h1 a {color:#0B0B61; text-transform:none;}
+h1 a {color:#5070A0; text-transform:none;}
 h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h1,h2,h3 {font-weight:700; line-height:1.4em;}
