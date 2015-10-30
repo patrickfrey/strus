@@ -70,6 +70,9 @@ public:
 	/// \param[in] argc number of arguments to duplicate
 	/// \note This function makes it possible to reference terms or expressions more than once as features or as subexpressions.
 	virtual void pushDuplicate( std::size_t argc=1)=0;
+	/// \brief Swap an element with the topmost element of the query stack
+	/// \param[in] idx counting distance of the element to swap from the topmost element of the stack
+	virtual void swapElements( std::size_t idx)=0;
 
 	/// \brief Attaches a variable to the top expression or term on the query stack.
 	/// \note The positions of the query matches of the referenced term or expression can be accessed through this variable in summarization.

@@ -135,7 +135,7 @@ void Query::pushDuplicate( std::size_t argc)
 	{
 		if (m_stack.size() < argc)
 		{
-			throw strus::runtime_error( _TXT( "cannot push duplicate (query stack empty)"));
+			throw strus::runtime_error( _TXT( "cannot push duplicate (query stack too small)"));
 		}
 		std::size_t idx = m_stack.size() - argc;
 		while (argc--)
@@ -144,6 +144,21 @@ void Query::pushDuplicate( std::size_t argc)
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error pushing duplicate to query: %s"), *m_errorhnd);
+}
+
+void Query::swapElements( std::size_t idx)
+{
+	try
+	{
+		if (m_stack.size() <= idx)
+		{
+			throw strus::runtime_error( _TXT( "cannot swap elements (query stack too small)"));
+		}
+		if (!idx) return;
+		std::size_t i1 = m_stack.size() - idx - 1, i2 = m_stack.size() - 1;
+		std::swap( m_stack[ i1], m_stack[ i2]);
+	}
+	CATCH_ERROR_MAP( _TXT("error swapping stack element when building query: %s"), *m_errorhnd);
 }
 
 void Query::attachVariable( const std::string& name_)
