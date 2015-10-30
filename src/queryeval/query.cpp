@@ -129,15 +129,19 @@ void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::
 	CATCH_ERROR_MAP( _TXT("error pushing expression to query: %s"), *m_errorhnd);
 }
 
-void Query::pushDuplicate()
+void Query::pushDuplicate( std::size_t argc)
 {
 	try
 	{
-		if (m_stack.empty())
+		if (m_stack.size() < argc)
 		{
 			throw strus::runtime_error( _TXT( "cannot push duplicate (query stack empty)"));
 		}
-		m_stack.push_back( duplicateNode( m_stack.back()));
+		std::size_t idx = m_stack.size() - argc;
+		while (argc--)
+		{
+			m_stack.push_back( duplicateNode( m_stack[ idx]));
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error pushing duplicate to query: %s"), *m_errorhnd);
 }

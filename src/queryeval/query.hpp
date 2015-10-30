@@ -73,7 +73,7 @@ public:
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
 			std::size_t argc, int range_, unsigned int cardinality_);
-	virtual void pushDuplicate();
+	virtual void pushDuplicate( std::size_t argc=1);
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 
