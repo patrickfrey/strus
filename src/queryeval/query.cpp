@@ -43,6 +43,7 @@
 #include "strus/reference.hpp"
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
+#include "strus/private/snprintf.h"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -50,8 +51,9 @@
 #include <string>
 #include <utility>
 #include <algorithm>
+#include <cstdio>
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 
@@ -95,8 +97,26 @@ Query::Query( const Query& o)
 	,m_errorhnd(o.m_errorhnd)
 {}
 
+void Query::printStack( std::ostream& out, std::size_t indent) const
+{
+	std::vector<NodeAddress>::const_iterator si = m_stack.begin(), se = m_stack.end();
+	std::size_t sidx = m_stack.size();
+	out << std::string( indent*2, ' ') << "Stack" << std::endl;
+	for (--sidx; si != se; ++si,--sidx)
+	{
+		out << "STK [" << sidx << "] ";
+		printNode( out, *si, indent+1);
+	}
+}
+
 void Query::pushTerm( const std::string& type_, const std::string& value_)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "pushTerm %s %s stack %u\n", type_.c_str(), value_.c_str(), (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		m_terms.push_back( Term( type_, value_));
@@ -107,6 +127,12 @@ void Query::pushTerm( const std::string& type_, const std::string& value_)
 
 void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_, unsigned int cardinality_)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "pushExpression %u stack %u\n", (unsigned int)argc, (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		if (argc > m_stack.size())
@@ -131,6 +157,12 @@ void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::
 
 void Query::pushDuplicate( std::size_t argc)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "pushDuplicate %u stack %u\n", (unsigned int)argc, (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		if (m_stack.size() < argc)
@@ -140,7 +172,7 @@ void Query::pushDuplicate( std::size_t argc)
 		std::size_t idx = m_stack.size() - argc;
 		while (argc--)
 		{
-			m_stack.push_back( duplicateNode( m_stack[ idx]));
+			m_stack.push_back( duplicateNode( m_stack[ idx++]));
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error pushing duplicate to query: %s"), *m_errorhnd);
@@ -148,15 +180,48 @@ void Query::pushDuplicate( std::size_t argc)
 
 void Query::swapElements( std::size_t idx)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "swapElements %u stack %u\n", (unsigned int)idx, (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		if (m_stack.size() <= idx)
 		{
-			throw strus::runtime_error( _TXT( "cannot swap elements (query stack too small)"));
+			throw strus::runtime_error( _TXT( "cannot swap elements (query stack too small; size=%u, index=%d)"), m_stack.size(), idx);
 		}
 		if (!idx) return;
 		std::size_t i1 = m_stack.size() - idx - 1, i2 = m_stack.size() - 1;
 		std::swap( m_stack[ i1], m_stack[ i2]);
+	}
+	CATCH_ERROR_MAP( _TXT("error swapping stack element when building query: %s"), *m_errorhnd);
+}
+
+void Query::moveElement( std::size_t idx)
+{
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "moveElement %u stack %u\n", (unsigned int)idx, (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
+	try
+	{
+		if (m_stack.size() <= idx)
+		{
+			throw strus::runtime_error( _TXT( "cannot swap elements (query stack too small; size=%u, index=%d)"), (unsigned int)m_stack.size(), (unsigned int)idx);
+		}
+		if (!idx) return;
+		std::vector<NodeAddress>::iterator si = m_stack.begin() + (m_stack.size() - idx - 1), se = m_stack.end() - 1;
+		std::vector<NodeAddress>::iterator sb = si;
+		NodeAddress top = m_stack.back();
+		for (; si < se; ++si)
+		{
+			*(si+1) = *si;
+		}
+		*sb = top;
 	}
 	CATCH_ERROR_MAP( _TXT("error swapping stack element when building query: %s"), *m_errorhnd);
 }
@@ -176,6 +241,12 @@ void Query::attachVariable( const std::string& name_)
 
 void Query::defineFeature( const std::string& set_, float weight_)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "defineFeature %s stack %u\n", set_.c_str(), (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
@@ -279,8 +350,9 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 
 Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 {
+	/*[-]*/fprintf( stderr, "+++ do duplicate node: %s %u\n", nodeTypeName( nodeType( adr)), (unsigned int)nodeIndex( adr));
 	Query::NodeAddress rtadr = nodeAddress( NullNode, 0);
-	switch (nodeType( m_stack.back()))
+	switch (nodeType( adr))
 	{
 		case NullNode:
 			rtadr = nodeAddress( NullNode, 0);

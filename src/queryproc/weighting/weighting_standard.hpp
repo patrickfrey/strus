@@ -46,10 +46,6 @@ WeightingFunctionInterface* createWeightingFunctionFormula( ErrorBufferInterface
 /// \return the weighting function reference (to dispose with delete)
 WeightingFunctionInterface* createWeightingFunctionBm25( ErrorBufferInterface* errorhnd);
 
-/// \brief Create a weighting function for the weighting schema BM25
-/// \return the weighting function reference (to dispose with delete)
-WeightingFunctionInterface* createWeightingFunctionBm25_dpfc( ErrorBufferInterface* errorhnd);
-
 /// \brief Create a weighting function that accumulates a constant for each matching feature in a document
 /// \return the weighting function reference (to dispose with delete)
 WeightingFunctionInterface* createWeightingFunctionConstant( ErrorBufferInterface* errorhnd);

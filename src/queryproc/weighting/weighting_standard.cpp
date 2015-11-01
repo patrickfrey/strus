@@ -30,7 +30,6 @@
 #include "weighting_standard.hpp"
 #include "weightingFormula.hpp"
 #include "weightingBM25.hpp"
-#include "weightingBM25_dpfc.hpp"
 #include "weightingConstant.hpp"
 #include "weightingMetadata.hpp"
 #include "weightingFrequency.hpp"
@@ -46,11 +45,6 @@ WeightingFunctionInterface* strus::createWeightingFunctionFormula( ErrorBufferIn
 WeightingFunctionInterface* strus::createWeightingFunctionBm25( ErrorBufferInterface* errorhnd)
 {
 	return new WeightingFunctionBM25( errorhnd);
-}
-
-WeightingFunctionInterface* strus::createWeightingFunctionBm25_dpfc( ErrorBufferInterface* errorhnd)
-{
-	return new WeightingFunctionBM25_dpfc( errorhnd);
 }
 
 WeightingFunctionInterface* strus::createWeightingFunctionConstant( ErrorBufferInterface* errorhnd)

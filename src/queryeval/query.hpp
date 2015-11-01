@@ -75,6 +75,7 @@ public:
 			std::size_t argc, int range_, unsigned int cardinality_);
 	virtual void pushDuplicate( std::size_t argc=1);
 	virtual void swapElements( std::size_t idx);
+	virtual void moveElement( std::size_t idx);
 
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
@@ -101,6 +102,11 @@ public:
 		TermNode,
 		ExpressionNode
 	};
+	static const char* nodeTypeName( NodeType i)
+	{
+		static const char* ar[] = {"NullNode","TermNode","ExpressionNode"};
+		return ar[i];
+	}
 
 	static NodeType nodeType( NodeAddress nd)
 	{
@@ -180,6 +186,7 @@ private:
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
 	void printVariables( std::ostream& out, NodeAddress adr) const;
 	NodeAddress duplicateNode( NodeAddress adr);
+	void printStack( std::ostream& out, std::size_t indent) const;
 
 private:
 	const QueryEval* m_queryEval;
