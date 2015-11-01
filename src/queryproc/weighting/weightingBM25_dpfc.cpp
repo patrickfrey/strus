@@ -31,7 +31,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/fixedStructAllocator.hpp"
+#include "private/fixedSizeStructAllocator.hpp"
 #include <cmath>
 #include <ctime>
 #include <set>
@@ -134,7 +134,7 @@ enum {MaxNofFeatures=256};
 typedef std::set<
 		FeatStruct,
 		std::less<FeatStruct>,
-		FixedStructAllocator<FeatStruct,MaxNofFeatures> > FeatStructSet;
+		FixedSizeStructAllocator<FeatStruct,MaxNofFeatures> > FeatStructSet;
 
 
 static void handleSequence( const FeatStructSet& wset, double* accu, double weight, const Index& docno)

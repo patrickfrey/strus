@@ -38,7 +38,7 @@ namespace strus
 {
 
 template <typename StructType, unsigned int MAXSIZE>
-class FixedStructAllocator
+class FixedSizeStructAllocator
 	:public std::allocator<StructType>
 {
 public:
@@ -49,7 +49,7 @@ public:
 	template<typename _Tp1>
 	struct rebind
 	{
-		typedef FixedStructAllocator<_Tp1, MAXSIZE> other;
+		typedef FixedSizeStructAllocator<_Tp1, MAXSIZE> other;
 	};
 
 	pointer allocate( size_type n, const void *hint=0)
@@ -72,13 +72,13 @@ public:
 		m_freelist.push( p);
 	}
 
-	FixedStructAllocator()
+	FixedSizeStructAllocator()
 		:std::allocator<StructType>(),m_aridx(0)
 	{
 		m_freelist.init( m_ar, 0);
 	}
 
-	FixedStructAllocator( const FixedStructAllocator& o)
+	FixedSizeStructAllocator( const FixedSizeStructAllocator& o)
 		:std::allocator<StructType>(o),m_aridx(o.m_aridx)
 	{
 		std::memcpy( m_ar, o.m_ar, sizeof( m_ar));
@@ -86,7 +86,7 @@ public:
 	}
 
 	template <class U>
-	FixedStructAllocator( const FixedStructAllocator<U,MAXSIZE> &o)
+	FixedSizeStructAllocator( const FixedSizeStructAllocator<U,MAXSIZE> &o)
 		:std::allocator<StructType>(o),m_aridx(o.m_aridx)
 	{
 		unsigned int elemsize = (sizeof(U) < sizeof(StructType))?sizeof(U):sizeof(StructType);
@@ -98,7 +98,7 @@ public:
 		m_freelist.init( m_ar, o.m_freelist.m_idx);
 	}
 
-	~FixedStructAllocator() {}
+	~FixedSizeStructAllocator() {}
 
 	bool empty() const
 	{
@@ -144,7 +144,7 @@ private:
 	}
 
 private:
-	template <class U, unsigned int M> friend class FixedStructAllocator;
+	template <class U, unsigned int M> friend class FixedSizeStructAllocator;
 	StructType m_ar[ MAXSIZE];
 	unsigned int m_aridx;
 	FreeList m_freelist;
