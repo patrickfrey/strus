@@ -53,7 +53,7 @@
 #include <algorithm>
 #include <cstdio>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 
@@ -350,7 +350,6 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 
 Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 {
-	/*[-]*/fprintf( stderr, "+++ do duplicate node: %s %u\n", nodeTypeName( nodeType( adr)), (unsigned int)nodeIndex( adr));
 	Query::NodeAddress rtadr = nodeAddress( NullNode, 0);
 	switch (nodeType( adr))
 	{
