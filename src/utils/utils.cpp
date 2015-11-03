@@ -31,9 +31,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <unistd.h>
-#ifndef _MSC_VER
-#include <malloc.h>
-#endif
+#include <stdlib.h>
 
 using namespace strus;
 using namespace strus::utils;
@@ -100,7 +98,7 @@ void* utils::aligned_malloc( std::size_t size, std::size_t alignment)
 #if (defined _MSC_VER)
 	return _aligned_malloc( size, alignment);
 #else
-	return memalign( alignment, size);
+	return aligned_alloc( alignment, size);
 #endif
 }
 
