@@ -32,6 +32,7 @@
 #include <vector>
 #include <map>
 #include <ostream>
+#include <stdint.h>
 
 namespace strus
 {
@@ -91,9 +92,11 @@ public:
 
 		void defineUnaryFunction( const std::string& name, UnaryFunction func);
 		UnaryFunction getUnaryFunction( const std::string& name) const;
+		const std::string& getUnaryFunctionName( UnaryFunction func) const;
 
 		void defineBinaryFunction( const std::string& name, BinaryFunction func);
 		BinaryFunction getBinaryFunction( const std::string& name) const;
+		const std::string& getBinaryFunctionName( BinaryFunction func) const;
 
 		IteratorMap getIteratorMap() const;
 		std::string tostring() const;
@@ -103,11 +106,12 @@ public:
 		std::map<std::string,VariableMap> m_varmap;
 		std::map<std::string,UnaryFunction> m_unaryfuncmap;
 		std::map<std::string,BinaryFunction> m_binaryfuncmap;
+		std::map<uintptr_t,std::string> m_namemap;
 	};
 
 public:
 	FormulaInterpreter( const FormulaInterpreter& o)
-		:m_program(o.m_program),m_strings(o.m_strings),m_iteratorMap(o.m_iteratorMap){}
+		:m_program(o.m_program),m_strings(o.m_strings),m_funcmap(o.m_funcmap),m_iteratorMap(o.m_iteratorMap){}
 
 	FormulaInterpreter( const FunctionMap& functionMap, const std::string& source);
 
@@ -176,13 +180,14 @@ private:
 		OpStruct( const OpStruct& o)
 			:opCode(o.opCode),operand(o.operand)
 		{}
-		void print( std::ostream& out, const std::string& strings, const std::vector<VariableMap>& variablear) const;
+		void print( std::ostream& out, const std::string& strings, const std::vector<VariableMap>& variablear, const FunctionMap& funcmap) const;
 	};
 
 private:
 	std::vector<OpStruct> m_program;
 	std::string m_strings;
 	std::vector<VariableMap> m_variablear;
+	FunctionMap m_funcmap;
 	IteratorMap m_iteratorMap;
 };
 
