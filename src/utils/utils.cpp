@@ -98,7 +98,8 @@ void* utils::aligned_malloc( std::size_t size, std::size_t alignment)
 #if (defined _MSC_VER)
 	return _aligned_malloc( size, alignment);
 #else
-	return aligned_alloc( alignment, size);
+	void* rt = 0;
+	return (0==posix_memalign( &rt, alignment, size))?rt:0;
 #endif
 }
 

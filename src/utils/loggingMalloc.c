@@ -323,7 +323,7 @@ static int find_sym( const char* libname, const char* symname)
 	return (si < se);
 }
 
-static inline void print_stacktrace()
+static void print_stacktrace()
 {
 	size_t si,se;
 	void* trace[ MAX_STACKTRACE];
