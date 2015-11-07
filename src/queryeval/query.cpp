@@ -215,13 +215,12 @@ void Query::moveElement( std::size_t idx)
 		}
 		if (!idx) return;
 		std::vector<NodeAddress>::iterator si = m_stack.begin() + (m_stack.size() - idx - 1), se = m_stack.end() - 1;
-		std::vector<NodeAddress>::iterator sb = si;
 		NodeAddress top = m_stack.back();
-		for (; si < se; ++si)
+		for (; se > si; --se)
 		{
-			*(si+1) = *si;
+			*(se) = *(se-1);
 		}
-		*sb = top;
+		*si = top;
 	}
 	CATCH_ERROR_MAP( _TXT("error swapping stack element when building query: %s"), *m_errorhnd);
 }
@@ -288,7 +287,9 @@ void Query::print( std::ostream& out) const
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
-		out << "feature '" << fi->set << "':" << std::endl;
+		char buf[ 128];
+		strus_snprintf( buf, sizeof(buf), "%.5f", fi->weight);
+		out << "feature '" << fi->set << "' " << buf << ": " << std::endl;
 		printNode( out, fi->node, 1);
 		out << std::endl;
 	}
