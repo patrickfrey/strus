@@ -46,8 +46,9 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 		char const* cc = config.c_str();
 		while (*cc)
 		{
-			while ((unsigned char) *cc <= 32) ++cc;
+			while (*cc && (unsigned char)*cc <= 32) ++cc;
 			//... skip spaces
+			if (!*cc) break;
 
 			const char* start = cc;
 			std::string cfgkey;
@@ -57,11 +58,11 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 			}
 			if (cfgkey.empty())
 			{
-				throw strus::runtime_error( _TXT( "expected item identifier as start of a declaration in a config string"));
+				throw strus::runtime_error( _TXT( "expected item identifier as start of a declaration in a config string ('%s' | '%s')"), cfgkey.c_str(), config.c_str());
 			}
 			if (*cc != '=')
 			{
-				throw strus::runtime_error( _TXT( "'=' expected after item identifier in a config string"));
+				throw strus::runtime_error( _TXT( "'=' expected after item identifier in a config string ('%s %s' | '%s')"), cfgkey.c_str(), cc, config.c_str());
 			}
 			++cc;
 			const char* ee = std::strchr( cc, ';');
