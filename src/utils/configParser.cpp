@@ -48,7 +48,8 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 		{
 			while ((unsigned char) *cc <= 32) ++cc;
 			//... skip spaces
-	
+
+			const char* start = cc;
 			std::string cfgkey;
 			while (((*cc|32) >= 'a' && (*cc|32) <= 'z') || *cc == '_' || (*cc >= '0' && *cc <= '9'))
 			{
@@ -68,8 +69,9 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 			if (utils::caseInsensitiveEquals( cfgkey, key))
 			{
 				res = std::string( cc, ee - cc);
-				std::string rest_config( config.c_str(), cc);
-				rest_config.append( ee);
+				std::string rest_config( config.c_str(), start);
+				if (*ee) rest_config.append( ee+1);
+				config = rest_config;
 				return true;
 			}
 			else
