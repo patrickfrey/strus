@@ -104,7 +104,6 @@ StorageClientInterface* Storage::createClient( const std::string& configsource, 
 	{
 		std::string cachedterms;
 		std::string src = configsource;
-	
 		if (extractStringFromConfigString( cachedterms, src, "cachedterms", m_errorhnd))
 		{
 			std::string cachedtermsrc = loadFile( cachedterms);
@@ -130,9 +129,8 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 		bool useAcl = false;
 		std::string metadata;
 		ByteOrderMark byteOrderMark;
-	
+
 		std::string src = configsource;
-	
 		(void)extractStringFromConfigString( metadata, src, "metadata", m_errorhnd);
 		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
