@@ -72,7 +72,15 @@ public:
 	/// \brief Comparison for sorting
 	bool operator > ( const WeightedDocument& o) const
 	{
-		return (m_weight > o.m_weight);
+		double diff = m_weight - o.m_weight;
+		if (fabs( diff) < std::numeric_limits<double>::epsilon())
+		{
+			return m_docno > o.m_docno;
+		}
+		else
+		{
+			return (diff > 0.0);
+		}
 	}
 
 private:
