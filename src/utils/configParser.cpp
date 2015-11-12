@@ -46,9 +46,11 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 		char const* cc = config.c_str();
 		while (*cc)
 		{
-			while ((unsigned char) *cc <= 32) ++cc;
+			while (*cc && (unsigned char)*cc <= 32) ++cc;
 			//... skip spaces
-	
+			if (!*cc) break;
+
+			const char* start = cc;
 			std::string cfgkey;
 			while (((*cc|32) >= 'a' && (*cc|32) <= 'z') || *cc == '_' || (*cc >= '0' && *cc <= '9'))
 			{
@@ -56,11 +58,11 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 			}
 			if (cfgkey.empty())
 			{
-				throw strus::runtime_error( _TXT( "expected item identifier as start of a declaration in a config string"));
+				throw strus::runtime_error( _TXT( "expected item identifier as start of a declaration in a config string ('%s' | '%s')"), cfgkey.c_str(), config.c_str());
 			}
 			if (*cc != '=')
 			{
-				throw strus::runtime_error( _TXT( "'=' expected after item identifier in a config string"));
+				throw strus::runtime_error( _TXT( "'=' expected after item identifier in a config string ('%s %s' | '%s')"), cfgkey.c_str(), cc, config.c_str());
 			}
 			++cc;
 			const char* ee = std::strchr( cc, ';');
@@ -68,8 +70,9 @@ DLL_PUBLIC bool strus::extractStringFromConfigString( std::string& res, std::str
 			if (utils::caseInsensitiveEquals( cfgkey, key))
 			{
 				res = std::string( cc, ee - cc);
-				std::string rest_config( config.c_str(), cc);
-				rest_config.append( ee);
+				std::string rest_config( config.c_str(), start);
+				if (*ee) rest_config.append( ee+1);
+				config = rest_config;
 				return true;
 			}
 			else

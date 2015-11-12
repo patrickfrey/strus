@@ -66,10 +66,6 @@ public:
 				const PostingJoinOperatorInterface* operation,
 				std::size_t argc, int range, unsigned int cardinality)=0;
 
-	/// \brief Push a duplicate of the topmost element of the query stack
-	/// \note This function makes it possible to reference terms or expressions more than once as features or as subexpressions.
-	virtual void pushDuplicate()=0;
-
 	/// \brief Attaches a variable to the top expression or term on the query stack.
 	/// \note The positions of the query matches of the referenced term or expression can be accessed through this variable in summarization.
 	/// \param[in] name_ name of the variable attached

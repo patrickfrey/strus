@@ -46,7 +46,7 @@ StringMapKeyBlock::StringMapKeyBlock( const StringMapKeyBlock& o)
 
 StringMapKeyBlock::~StringMapKeyBlock()
 {
-	delete m_blk;
+	std::free( m_blk);
 }
 
 const char* StringMapKeyBlock::allocKey( const std::string& key)

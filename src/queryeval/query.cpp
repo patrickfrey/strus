@@ -43,6 +43,7 @@
 #include "strus/reference.hpp"
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
+#include "strus/private/snprintf.h"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -50,6 +51,7 @@
 #include <string>
 #include <utility>
 #include <algorithm>
+#include <cstdio>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -60,6 +62,8 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
+	,m_nofRanks(20)
+	,m_minRank(0)
 	,m_evalset_defined(false)
 	,m_errorhnd(errorhnd_)
 {
@@ -93,8 +97,26 @@ Query::Query( const Query& o)
 	,m_errorhnd(o.m_errorhnd)
 {}
 
+void Query::printStack( std::ostream& out, std::size_t indent) const
+{
+	std::vector<NodeAddress>::const_iterator si = m_stack.begin(), se = m_stack.end();
+	std::size_t sidx = m_stack.size();
+	out << std::string( indent*2, ' ') << "Stack" << std::endl;
+	for (--sidx; si != se; ++si,--sidx)
+	{
+		out << "STK [" << sidx << "] ";
+		printNode( out, *si, indent+1);
+	}
+}
+
 void Query::pushTerm( const std::string& type_, const std::string& value_)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "pushTerm %s %s stack %u\n", type_.c_str(), value_.c_str(), (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		m_terms.push_back( Term( type_, value_));
@@ -105,6 +127,12 @@ void Query::pushTerm( const std::string& type_, const std::string& value_)
 
 void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_, unsigned int cardinality_)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "pushExpression %u stack %u\n", (unsigned int)argc, (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		if (argc > m_stack.size())
@@ -127,19 +155,6 @@ void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::
 	CATCH_ERROR_MAP( _TXT("error pushing expression to query: %s"), *m_errorhnd);
 }
 
-void Query::pushDuplicate()
-{
-	try
-	{
-		if (m_stack.empty())
-		{
-			throw strus::runtime_error( _TXT( "cannot push duplicate (query stack empty)"));
-		}
-		m_stack.push_back( duplicateNode( m_stack.back()));
-	}
-	CATCH_ERROR_MAP( _TXT("error pushing duplicate to query: %s"), *m_errorhnd);
-}
-
 void Query::attachVariable( const std::string& name_)
 {
 	try
@@ -155,6 +170,12 @@ void Query::attachVariable( const std::string& name_)
 
 void Query::defineFeature( const std::string& set_, float weight_)
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "defineFeature %s stack %u\n", set_.c_str(), (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
 	try
 	{
 		m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
@@ -196,7 +217,9 @@ void Query::print( std::ostream& out) const
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
 	for (; fi != fe; ++fi)
 	{
-		out << "feature '" << fi->set << "':" << std::endl;
+		char buf[ 128];
+		strus_snprintf( buf, sizeof(buf), "%.5f", fi->weight);
+		out << "feature '" << fi->set << "' " << buf << ": " << std::endl;
 		printNode( out, fi->node, 1);
 		out << std::endl;
 	}
@@ -259,7 +282,7 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 {
 	Query::NodeAddress rtadr = nodeAddress( NullNode, 0);
-	switch (nodeType( m_stack.back()))
+	switch (nodeType( adr))
 	{
 		case NullNode:
 			rtadr = nodeAddress( NullNode, 0);
@@ -316,7 +339,7 @@ void Query::addUserName( const std::string& username_)
 	CATCH_ERROR_MAP( _TXT("error adding user to query: %s"), *m_errorhnd);
 }
 
-PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr)
+PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodePostingsMap& nodePostingsMap)
 {
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
@@ -339,15 +362,15 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 							term.type, term.value));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
-				m_nodePostingsMap[ *ni] = joinargs.back().get();
+				nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
-							m_expressions[ nodeIndex(*ni)]));
+							m_expressions[ nodeIndex(*ni)], nodePostingsMap));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
-				m_nodePostingsMap[ *ni] = joinargs.back().get();
+				nodePostingsMap[ *ni] = joinargs.back().get();
 				break;
 		}
 	}
@@ -355,7 +378,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr)
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodePostingsMap& nodePostingsMap)
 {
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
@@ -367,23 +390,23 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 			const Term& term = m_terms[ nidx];
 			rt = m_storage->createTermPostingIterator( term.type, term.value);
 			if (!rt) break;
-			m_nodePostingsMap[ nodeadr] = rt;
+			nodePostingsMap[ nodeadr] = rt;
 			break;
 		}
 		case ExpressionNode:
 			std::size_t nidx = nodeIndex( nodeadr);
-			rt = createExpressionPostingIterator( m_expressions[ nidx]);
+			rt = createExpressionPostingIterator( m_expressions[ nidx], nodePostingsMap);
 			if (!rt) break;
-			m_nodePostingsMap[ nodeadr] = rt;
+			nodePostingsMap[ nodeadr] = rt;
 			break;
 	}
 	return rt;
 }
 
-PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
+PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr, const NodePostingsMap& nodePostingsMap) const
 {
-	NodePostingsMap::const_iterator pi = m_nodePostingsMap.find( nodeadr);
-	if (pi == m_nodePostingsMap.end())
+	NodePostingsMap::const_iterator pi = nodePostingsMap.find( nodeadr);
+	if (pi == nodePostingsMap.end())
 	{
 		throw strus::runtime_error( _TXT( "expression node postings not found"));
 	}
@@ -392,7 +415,8 @@ PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr) const
 
 void Query::collectSummarizationVariables(
 			std::vector<SummarizationVariable>& variables,
-			const NodeAddress& nodeadr)
+			const NodeAddress& nodeadr,
+			const NodePostingsMap& nodePostingsMap)
 {
 	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
 	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( nodeadr);
@@ -400,7 +424,7 @@ void Query::collectSummarizationVariables(
 	Itr vi = vrange.first, ve = vrange.second;
 	for (; vi != ve; ++vi)
 	{
-		variables.push_back( SummarizationVariable( vi->second, nodePostings( nodeadr)));
+		variables.push_back( SummarizationVariable( vi->second, nodePostings( nodeadr, nodePostingsMap)));
 	}
 
 	switch (nodeType( nodeadr))
@@ -416,7 +440,7 @@ void Query::collectSummarizationVariables(
 				ne = expr.subnodes.end();
 			for (; ni != ne; ++ni)
 			{
-				collectSummarizationVariables( variables, *ni);
+				collectSummarizationVariables( variables, *ni, nodePostingsMap);
 			}
 			break;
 		}
@@ -425,6 +449,7 @@ void Query::collectSummarizationVariables(
 
 std::vector<ResultDocument> Query::evaluate()
 {
+	const char* evaluationPhase = "query feature postings initialization";
 	try
 	{
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -446,7 +471,8 @@ std::vector<ResultDocument> Query::evaluate()
 			m_errorhnd->report( _TXT( "cannot evaluate query, no selection features defined"));
 			return std::vector<ResultDocument>();
 		}
-	
+		NodePostingsMap nodePostingsMap;
+
 		// [3] Create the posting sets of the query features:
 		std::vector<Reference<PostingIteratorInterface> > postings;
 		{
@@ -455,7 +481,7 @@ std::vector<ResultDocument> Query::evaluate()
 			for (; fi != fe; ++fi)
 			{
 				Reference<PostingIteratorInterface> postingsElem(
-					createNodePostingIterator( fi->node));
+					createNodePostingIterator( fi->node, nodePostingsMap));
 				if (!postingsElem.get()) return std::vector<ResultDocument>();
 				postings.push_back( postingsElem);
 			}
@@ -488,12 +514,13 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*si == fi->set)
 					{
 						accumulator.addSelector(
-							nodePostings( fi->node), sidx, 
+							nodePostings( fi->node, nodePostingsMap), sidx, 
 							nodeType( fi->node) == ExpressionNode);
 					}
 				}
 			}
 		}
+		evaluationPhase = "weighting functions initialization";
 		// [4.3] Add features for weighting:
 		{
 			std::vector<WeightingDef>::const_iterator
@@ -518,7 +545,7 @@ std::vector<ResultDocument> Query::evaluate()
 						{
 							execContext->addWeightingFeature(
 								si->parameterName(),
-								nodePostings( fi->node),
+								nodePostings( fi->node, nodePostingsMap),
 								fi->weight);
 #ifdef STRUS_LOWLEVEL_DEBUG
 							std::cout << "add feature parameter " << si->parameterName() << "=" << fi->set << ' ' << fi->weight << std::endl;
@@ -532,6 +559,7 @@ std::vector<ResultDocument> Query::evaluate()
 				accumulator.addFeature( wi->weight(), execContext.release());
 			}
 		}
+		evaluationPhase = "restrictions initialization";
 		// [4.4] Define the user ACL restrictions:
 		std::vector<Reference<InvAclIteratorInterface> > invAclList;
 		std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
@@ -558,7 +586,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodePostings( fi->node),
+							nodePostings( fi->node, nodePostingsMap),
 							nodeType( fi->node) == ExpressionNode, false);
 					}
 				}
@@ -578,12 +606,13 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodePostings( fi->node),
+							nodePostings( fi->node, nodePostingsMap),
 							nodeType( fi->node) == ExpressionNode, true);
 					}
 				}
 			}
 		}
+		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
 		std::vector<ResultDocument> rt;
 		Ranker ranker( m_nofRanks + m_minRank);
@@ -605,6 +634,7 @@ std::vector<ResultDocument> Query::evaluate()
 		std::vector<WeightedDocument>
 			resultlist = ranker.result( m_minRank);
 	
+		evaluationPhase = "summarization";
 		// [6] Create the summarizers:
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
 		if (!resultlist.empty())
@@ -634,16 +664,17 @@ std::vector<ResultDocument> Query::evaluate()
 						if (fi->set == si->featureSet())
 						{
 							std::vector<SummarizationVariable> variables;
-							collectSummarizationVariables( variables, fi->node);
+							collectSummarizationVariables( variables, fi->node, nodePostingsMap);
 	
 							closure->addSummarizationFeature(
-								si->parameterName(), nodePostings(fi->node),
+								si->parameterName(), nodePostings(fi->node, nodePostingsMap),
 								variables, fi->weight);
 						}
 					}
 				}
 			}
 		}
+		evaluationPhase = "building of the result";
 		// [7] Build the result:
 		std::vector<WeightedDocument>::const_iterator
 			ri=resultlist.begin(),re=resultlist.end();
@@ -674,7 +705,7 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating query: %s"), *m_errorhnd, std::vector<ResultDocument>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, std::vector<ResultDocument>());
 }
 
 

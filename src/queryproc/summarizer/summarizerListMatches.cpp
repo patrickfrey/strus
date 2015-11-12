@@ -56,10 +56,10 @@ void SummarizerFunctionContextListMatches::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "ListMatches", name.c_str());
+			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "matchpos", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding summarization feature to 'matchpos' summarizer: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding summarization feature to '%s' summarizer: %s"), "matchpos", *m_errorhnd);
 }
 
 static std::string getMatches(
@@ -108,23 +108,34 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching 'matchpos' summary: %s"), *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchpos", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
 
 void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string&)
 {
-	m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "matchpos");
+	}
+	else
+	{
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "matchpos", name.c_str());
+	}
 }
 
 void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant& val)
 {
-	if (utils::caseInsensitiveEquals( name, "N"))
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), "matchpos");
+	}
+	else if (utils::caseInsensitiveEquals( name, "N"))
 	{
 		m_maxNofMatches = val.touint();
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "ListMatches", name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "matchpos", name.c_str());
 	}
 }
 
@@ -136,7 +147,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::creat
 	{
 		return new SummarizerFunctionContextListMatches( m_maxNofMatches, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of 'matchpos' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchpos", *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceListMatches::tostring() const
@@ -152,7 +163,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionListMatches::createInstan
 	{
 		return new SummarizerFunctionInstanceListMatches( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of 'matchpos' summarizer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "matchpos", *m_errorhnd, 0);
 }
 
 

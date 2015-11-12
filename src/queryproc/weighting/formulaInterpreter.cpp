@@ -64,6 +64,7 @@ FormulaInterpreter::VariableMap FormulaInterpreter::FunctionMap::getVariableMap(
 void FormulaInterpreter::FunctionMap::defineUnaryFunction( const std::string& name, FormulaInterpreter::UnaryFunction func)
 {
 	m_unaryfuncmap[ lowercase(name)] = func;
+	m_namemap[ (uintptr_t)func] = name;
 }
 
 FormulaInterpreter::UnaryFunction FormulaInterpreter::FunctionMap::getUnaryFunction( const std::string& name) const
@@ -73,9 +74,17 @@ FormulaInterpreter::UnaryFunction FormulaInterpreter::FunctionMap::getUnaryFunct
 	return vi->second;
 }
 
+const std::string& FormulaInterpreter::FunctionMap::getUnaryFunctionName( UnaryFunction func) const
+{
+	std::map<uintptr_t,std::string>::const_iterator ni = m_namemap.find( (uintptr_t)func);
+	if (ni == m_namemap.end()) throw strus::runtime_error(_TXT("name of unary function not defined"));
+	return ni->second;
+}
+
 void FormulaInterpreter::FunctionMap::defineBinaryFunction( const std::string& name, FormulaInterpreter::BinaryFunction func)
 {
 	m_binaryfuncmap[ lowercase(name)] = func;
+	m_namemap[ (uintptr_t)func] = name;
 }
 
 FormulaInterpreter::BinaryFunction FormulaInterpreter::FunctionMap::getBinaryFunction( const std::string& name) const
@@ -83,6 +92,13 @@ FormulaInterpreter::BinaryFunction FormulaInterpreter::FunctionMap::getBinaryFun
 	std::map<std::string,BinaryFunction>::const_iterator vi = m_binaryfuncmap.find( name);
 	if (vi == m_binaryfuncmap.end()) throw strus::runtime_error(_TXT( "binary function '%s' not defined"), name.c_str());
 	return vi->second;
+}
+
+const std::string& FormulaInterpreter::FunctionMap::getBinaryFunctionName( BinaryFunction func) const
+{
+	std::map<uintptr_t,std::string>::const_iterator ni = m_namemap.find( (uintptr_t)func);
+	if (ni == m_namemap.end()) throw strus::runtime_error(_TXT("name of binary function not defined"));
+	return ni->second;
 }
 
 FormulaInterpreter::IteratorMap FormulaInterpreter::FunctionMap::getIteratorMap() const
@@ -411,7 +427,7 @@ unsigned int FormulaInterpreter::parseSubExpression( const FunctionMap& function
 }
 
 FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const std::string& source)
-	:m_iteratorMap(functionMap.getIteratorMap())
+	:m_funcmap(functionMap),m_iteratorMap(functionMap.getIteratorMap())
 {
 	std::string::const_iterator si = source.begin(), se = source.end();
 	try
@@ -543,7 +559,7 @@ double FormulaInterpreter::run( void* ctx) const
 		const OpStruct& op = m_program[ ip];
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "[" << ip << "] ";
-		op.print( std::cerr, m_strings);
+		op.print( std::cerr, m_strings, m_variablear, m_funcmap);
 		std::cerr << "  stack [";
 		stack.print( std::cerr);
 		std::cerr << "]" << std::endl;
@@ -663,7 +679,7 @@ double FormulaInterpreter::run( void* ctx) const
 	return rt;
 }
 
-void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& strings, const std::vector<VariableMap>& variablear) const
+void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& strings, const std::vector<VariableMap>& variablear, const FunctionMap& funcmap) const
 {
 	out << FormulaInterpreter::opCodeName( opCode);
 	switch (opCode)
@@ -696,16 +712,12 @@ void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& 
 			break;
 		case OpUnaryFunction:
 		{
-			std::ostringstream msg;
-			msg << " " << std::hex << (uintptr_t)operand.unaryFunction;
-			out << msg.str();
+			out << " " << funcmap.getUnaryFunctionName( operand.unaryFunction);
 			break;
 		}
 		case OpBinaryFunction:
 		{
-			std::ostringstream msg;
-			msg << " " << std::hex << (uintptr_t)operand.binaryFunction;
-			out << msg.str();
+			out << " " << funcmap.getBinaryFunctionName( operand.binaryFunction);
 			break;
 		}
 	}
@@ -718,7 +730,7 @@ void FormulaInterpreter::print( std::ostream& out) const
 	for (;ip < m_program.size(); ++ip)
 	{
 		const OpStruct& op = m_program[ ip];
-		op.print( out, m_strings, m_variablear);
+		op.print( out, m_strings, m_variablear, m_funcmap);
 		out << std::endl;
 	}
 }

@@ -43,12 +43,6 @@ struct Constants
 	{
 		return "docid";
 	}
-	/// \brief Get the metadata element value for the length of the document used by the BM25 weighting function
-	/// \note The inserter program initializes this metadata element implicitely if it is defined in the metadata table (don't forget to define it there if you use BM25 or another weighting function that relies on it)
-	static const char* metadata_doclen()
-	{
-		return "doclen";
-	}
 	/// \brief Get the name of the set union operator for postings
 	/// \note The query evaluation uses implicitely this operator to make joins of posting sets that have to be merged before passing it to some function (like for example the structure element posting set passed to summarizers)
 	static const char* operator_set_union()

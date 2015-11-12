@@ -53,7 +53,7 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 			throw strus::runtime_error( _TXT("unknown '%s' weighting function feature parameter '%s'"), "constant", name_.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding feature to 'constant' weighting function: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' weighting function: %s"), "constant", *m_errorhnd);
 }
 
 float WeightingFunctionContextConstant::call( const Index& docno)
@@ -84,12 +84,16 @@ void WeightingFunctionInstanceConstant::addStringParameter( const std::string& n
 	{
 		addNumericParameter( name, parameterValue( name, value));
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to 'constant' weighting function: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' weighting function: %s"), "constant", *m_errorhnd);
 }
 
 void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "weight"))
+	if (utils::caseInsensitiveEquals( name, "match"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), "constant");
+	}
+	else if (utils::caseInsensitiveEquals( name, "weight"))
 	{
 		m_weight = (double)value;
 	}
@@ -107,7 +111,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceConstant::createFunc
 	{
 		return new WeightingFunctionContextConstant( m_weight, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of weighting function 'constant': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), "constant", *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceConstant::tostring() const
@@ -119,7 +123,7 @@ std::string WeightingFunctionInstanceConstant::tostring() const
 			<< "weight=" << m_weight;
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping weighting function 'constant' to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), "constant", *m_errorhnd, std::string());
 }
 
 
@@ -129,7 +133,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionConstant::createInstance() 
 	{
 		return new WeightingFunctionInstanceConstant( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of weighting function 'constant': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "constant", *m_errorhnd, 0);
 }
 
 

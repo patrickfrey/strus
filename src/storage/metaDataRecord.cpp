@@ -148,22 +148,22 @@ ArithmeticVariant MetaDataRecord::getValue( const MetaDataElement* elem) const
 	switch (elem->type())
 	{
 		case MetaDataElement::Int8:
-			return ArithmeticVariant( *(int8_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( (int)*(int8_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt8:
-			return ArithmeticVariant( *(uint8_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( (unsigned int)*(uint8_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Int16:
-			return ArithmeticVariant( *(int16_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( (int)*(int16_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt16:
-			return ArithmeticVariant( *(uint16_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( (unsigned int)*(uint16_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Int32:
-			return ArithmeticVariant( *(int32_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( (int)*(int32_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt32:
-			return ArithmeticVariant( *(uint32_t*)((const char*)m_ptr + elem->ofs()));
+			return ArithmeticVariant( (unsigned int)*(uint32_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Float16:
 			return ArithmeticVariant( floatHalfToSinglePrecision( *(float16_t*)((const char*)m_ptr + elem->ofs())));

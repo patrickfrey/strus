@@ -162,7 +162,6 @@ std::size_t ErrorBuffer::threadidx() const
 		}
 		if (ti == m_size)
 		{
-			
 			fprintf( m_logfilehandle?m_logfilehandle:stderr, _TXT("number of threads in error buffer exhausted\n"));
 			throw std::logic_error( _TXT("number of threads in error buffer exhausted"));
 		}

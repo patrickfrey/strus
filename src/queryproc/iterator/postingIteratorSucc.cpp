@@ -35,5 +35,5 @@ PostingIteratorInterface* PostingJoinSucc::createResultIterator(
 	{
 		return new IteratorSucc( argitr[0], m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'succ' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "succ", *m_errorhnd, 0);
 }

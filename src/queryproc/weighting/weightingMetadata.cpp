@@ -83,7 +83,7 @@ void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& n
 			addNumericParameter( name, parameterValue( name, value));
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding string parameter to weighting function 'metadata': %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "metadata", *m_errorhnd);
 }
 
 void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
@@ -103,7 +103,7 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 			m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), "metadata", name.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error adding numeric parameter to weighting function 'metadata': %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), "metadata", *m_errorhnd);
 }
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunctionContext(
@@ -118,7 +118,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunc
 		}
 		return new WeightingFunctionContextMetadata( metadata_, m_elementName, m_weight, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating context of weighting function 'metadata': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), "metadata", *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceMetadata::tostring() const
@@ -130,7 +130,7 @@ std::string WeightingFunctionInstanceMetadata::tostring() const
 			<< "name=" << m_elementName << ", weight=" << m_weight;
 		return rt.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error mapping weighting function 'metadata' to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), "metadata", *m_errorhnd, std::string());
 }
 
 
@@ -140,7 +140,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance() 
 	{
 		return new WeightingFunctionInstanceMetadata( m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of weighting function 'metadata': %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "metadata", *m_errorhnd, 0);
 }
 
 

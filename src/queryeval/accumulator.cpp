@@ -65,7 +65,7 @@ bool Accumulator::nextRank(
 				m_docno = m_evaluationSetIterator->skipDoc( dn);
 				dn = si->postings->skipDoc( m_docno);
 			}
-			while (m_docno != 0 && dn != m_docno);
+			while (m_docno != 0 && dn != 0 && dn != m_docno);
 		}
 		else
 		{
@@ -85,7 +85,6 @@ bool Accumulator::nextRank(
 				continue;
 			}
 		}
-
 		// Test if it already has been visited:
 		if (m_docno > m_maxDocumentNumber || m_visited.test( m_docno-1))
 		{

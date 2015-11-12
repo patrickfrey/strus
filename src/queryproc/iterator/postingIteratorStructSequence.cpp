@@ -106,7 +106,7 @@ std::vector<const PostingIteratorInterface*>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error 'sequence' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "sequence", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorStructSequence::skipDoc( const Index& docno_)
@@ -288,7 +288,7 @@ PostingIteratorInterface* PostingJoinStructSequence::createResultIterator(
 	{
 		return new IteratorStructSequence( range_, argitr, true/*with cut*/, true/*strict*/, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'struct_sequence' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "struct_sequence", *m_errorhnd, 0);
 }
 
 
@@ -311,7 +311,7 @@ PostingIteratorInterface* PostingJoinSequence::createResultIterator(
 	{
 		return new IteratorStructSequence( range_, argitr, false/*without cut*/, true/*strict*/, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'sequence' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence", *m_errorhnd, 0);
 }
 
 
@@ -334,7 +334,7 @@ PostingIteratorInterface* PostingJoinStructChain::createResultIterator(
 	{
 		return new IteratorStructSequence( range_, argitr, true/*with cut*/, false/*strict*/, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'struct_chain' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "struct_chain", *m_errorhnd, 0);
 }
 
 
@@ -357,7 +357,7 @@ PostingIteratorInterface* PostingJoinChain::createResultIterator(
 	{
 		return new IteratorStructSequence( range_, argitr, false/*without cut*/, false/*strict*/, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'chain' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "chain", *m_errorhnd, 0);
 }
 
 

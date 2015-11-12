@@ -112,7 +112,7 @@ std::vector<const PostingIteratorInterface*>
 		}
 		return rt;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error 'within' iterator getting subexpressions: %s"), *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "within", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
 }
 
 Index IteratorStructWithin::skipDoc( const Index& docno_)
@@ -344,7 +344,7 @@ PostingIteratorInterface* PostingJoinStructWithin::createResultIterator(
 	{
 		return new IteratorStructWithin( range_, argitr, true/*with cut*/, true/*strict*/, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'within_struct' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "within_struct", *m_errorhnd, 0);
 }
 
 PostingIteratorInterface* PostingJoinWithin::createResultIterator(
@@ -366,6 +366,6 @@ PostingIteratorInterface* PostingJoinWithin::createResultIterator(
 	{
 		return new IteratorStructWithin( range_, argitr, false/*without cut*/, true/*strict*/, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating 'within' iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "within", *m_errorhnd, 0);
 }
 

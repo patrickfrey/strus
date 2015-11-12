@@ -46,9 +46,9 @@ std::string ForwardIndexBlock::value_at( const char* ref) const
 {
 	if (ref == charend()) return 0;
 	const char* namestart = skipIndex( ref, charend());
-	const char* nameend = (const char*)std::memchr( ref, EndItemMarker, charend()-namestart);
+	const char* nameend = (const char*)std::memchr( namestart, EndItemMarker, charend()-namestart);
 	if (!nameend) nameend = charend();
-	return std::string( namestart, nameend);
+	return std::string( namestart, nameend - namestart);
 }
 
 const char* ForwardIndexBlock::nextItem( const char* ref) const

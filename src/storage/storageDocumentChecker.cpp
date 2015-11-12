@@ -230,7 +230,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			if (val != mi->second)
 			{
 				logError( logout, m_docid,
-					_TXT( "document metadata does not match: '%s' != '%s'"), mi->second.tostring().c_str(), val.tostring().c_str());
+					_TXT( "document meta data does not match for '%s': '%s' != '%s'"), mi->first.c_str(), mi->second.tostring().c_str(), val.tostring().c_str());
 			}
 		}
 	}
@@ -253,7 +253,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			if (val != ai->second)
 			{
 				logError( logout, m_docid,
-					_TXT( "document attribute does not match: '%s' != '%s'"), ai->second.c_str(), val.c_str());
+					_TXT( "document attribute does not match for '%s': '%s' != '%s'"), ai->first.c_str(), ai->second.c_str(), val.c_str());
 			}
 		}
 	}
