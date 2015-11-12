@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.1</span>
+   &#160;<span id="projectnumber">0.2</span>
    </div>
   </td>
  </tr>
@@ -101,9 +101,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abc82b6fe487b3c2ce3caefdb7a4278a1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#abc82b6fe487b3c2ce3caefdb7a4278a1">pushExpression</a> (const <a class="el" href="classstrus_1_1PostingJoinOperatorInterface.html">PostingJoinOperatorInterface</a> *operation, std::size_t argc, int range, unsigned int cardinality)=0</td></tr>
 <tr class="memdesc:abc82b6fe487b3c2ce3caefdb7a4278a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push an expression formed by the topmost elements from the stack to the query stack, removing the argument elements.  <a href="#abc82b6fe487b3c2ce3caefdb7a4278a1">More...</a><br/></td></tr>
 <tr class="separator:abc82b6fe487b3c2ce3caefdb7a4278a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9af06b912417880365b6a82305e8ccc9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a9af06b912417880365b6a82305e8ccc9">pushDuplicate</a> ()=0</td></tr>
-<tr class="memdesc:a9af06b912417880365b6a82305e8ccc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a duplicate of the topmost element of the query stack.  <a href="#a9af06b912417880365b6a82305e8ccc9">More...</a><br/></td></tr>
-<tr class="separator:a9af06b912417880365b6a82305e8ccc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0143aa94f52d47dc47aba071fcffdb9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#ad0143aa94f52d47dc47aba071fcffdb9">attachVariable</a> (const std::string &amp;name_)=0</td></tr>
 <tr class="memdesc:ad0143aa94f52d47dc47aba071fcffdb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attaches a variable to the top expression or term on the query stack.  <a href="#ad0143aa94f52d47dc47aba071fcffdb9">More...</a><br/></td></tr>
 <tr class="separator:ad0143aa94f52d47dc47aba071fcffdb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -429,32 +426,6 @@ More than one variable can be attached </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a9af06b912417880365b6a82305e8ccc9"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void strus::QueryInterface::pushDuplicate </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Push a duplicate of the topmost element of the query stack. </p>
-<dl class="section note"><dt>Note</dt><dd>This function makes it possible to reference terms or expressions more than once as features or as subexpressions. </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="abc82b6fe487b3c2ce3caefdb7a4278a1"></a>
 <div class="memitem">
 <div class="memproto">
@@ -626,7 +597,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Oct 22 2015 12:16:19 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 13 2015 00:29:33 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
