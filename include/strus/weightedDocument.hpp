@@ -33,6 +33,7 @@
 #include "strus/index.hpp"
 #include <utility>
 #include <cmath>
+#include <limits>
 
 namespace strus {
 
