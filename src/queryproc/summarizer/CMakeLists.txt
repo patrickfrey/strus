@@ -10,6 +10,7 @@ set(source_files
 	summarizerMetaData.cpp
 	summarizerMatchPhrase.cpp
 	summarizerMatchVariables.cpp
+	summarizerAccumulateVariable.cpp
 )
 
 include_directories(

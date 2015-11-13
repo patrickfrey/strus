@@ -93,6 +93,8 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	defineSummarizerFunction( "attribute", sum);
 	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchvariables", sum);
+	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "accuvariable", sum);
 }
 
 QueryProcessor::~QueryProcessor()
