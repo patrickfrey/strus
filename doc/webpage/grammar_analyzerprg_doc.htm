@@ -44,6 +44,7 @@ EXPRESSION     : &lt;string format depending on segmenter&gt;
 config         = configsection config
                ;
 configsection  = sectionhdr definitionlist
+               | "[" "Aggregator" "]" aggdeflist
                | "[" "Document" "]" docdeflist
                ;
 sectionhdr     = "[" sectionid "]"
@@ -58,6 +59,12 @@ docdeflist     = docdef docdeflist
                ;
 docdef         = type "=" selectexpression ";"
                ;
+aggdeflist     = aggdef aggdeflist
+               | 
+               ;
+aggdef         = metadataelem "=" functioncall ";"
+               ;
+metadataelem   = IDENTIFIER ;
 definitionlist = definition definitionlist
                |
                ;
@@ -92,6 +99,11 @@ selector       = EXPRESSION ;
 	<p class="description">The declarations in this section are feature definitions to put into the search (inverted) index.</p>
 	<h5>ForwardIndex</h5>
 	<p class="description">The declarations in this section are feature definitions to put into the forward index.</p>
+	<h5>Aggregator</h5>
+	<p class="description">The declarations in this section are meta data definitions that assign a value 
+	calculated from a function called after all other document analysis steps. The function called is meant 
+	to aggregate statistical values of the document. The functions get the resulting indexed document as 
+	argument and return the aggregated value, like for example the count of elements of a specified type.</p>
 
 	<h3>Meaning of the grammar elements</h3>
 	<h5>type</h5>
@@ -121,7 +133,10 @@ selector       = EXPRESSION ;
 [ForwardIndex]
         orig = orig word /doc/para/text();
         orig = orig word /doc/title();
-	</pre>
+
+[Aggregator]
+        doclen = count( stem);
+</pre>
 </div>
 </div>
 </body>
