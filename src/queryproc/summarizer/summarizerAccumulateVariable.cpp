@@ -89,7 +89,14 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 			}
 			else
 			{
-				m_features.push_back( SummarizationFeature( itr, varitr, weight));
+				if (varitr.empty())
+				{
+					m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_var.c_str(), "AccumulateVariable");
+				}
+				else
+				{
+					m_features.push_back( SummarizationFeature( itr, varitr, weight));
+				}
 			}
 		}
 		else
@@ -170,7 +177,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			PosWeightMap curmap;
 			uint64_t docselitr = docsel;
 			int idx = 0;
-			while (0<(idx=nextSelected( docselitr)))
+			while (0<=(idx=nextSelected( docselitr)))
 			{
 				const SummarizationFeature& sumfeat = m_features[ idx];
 				Index np = sumfeat.itr->skipPos( curpos);
