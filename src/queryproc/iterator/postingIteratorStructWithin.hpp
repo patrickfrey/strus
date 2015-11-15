@@ -106,7 +106,7 @@ public:
 
 	virtual const char* getDescription() const
 	{
-		return _TXT("Get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.");
+		return _TXT("Get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.");
 	}
 
 private:
@@ -129,12 +129,59 @@ public:
 
 	virtual const char* getDescription() const
 	{
+		return _TXT("Get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|");
+	}
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+};
+
+
+class PostingJoinStructInRange
+	:public PostingJoinOperatorInterface
+{
+public:
+	explicit PostingJoinStructInRange( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
+	virtual ~PostingJoinStructInRange(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
+			int range_,
+			unsigned int cardinality_) const;
+
+	virtual const char* getDescription() const
+	{
+		return _TXT("Get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.");
+	}
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+};
+
+
+class PostingJoinInRange
+	:public PostingJoinOperatorInterface
+{
+public:
+	explicit PostingJoinInRange( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
+	virtual ~PostingJoinInRange(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
+			int range_,
+			unsigned int cardinality_) const;
+
+	virtual const char* getDescription() const
+	{
 		return _TXT("Get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|");
 	}
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
+
 
 }//namespace
 #endif

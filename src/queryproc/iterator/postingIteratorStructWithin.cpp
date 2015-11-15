@@ -369,3 +369,48 @@ PostingIteratorInterface* PostingJoinWithin::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "within", *m_errorhnd, 0);
 }
 
+
+PostingIteratorInterface* PostingJoinStructInRange::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_,
+		unsigned int cardinality_) const
+{
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "inrange_struct");
+		return 0;
+	}
+	if (argitr.size() < 2)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for 'inrange_struct'"));
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructWithin( range_, argitr, true/*with cut*/, false/*strict*/, m_errorhnd);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "inrange_struct", *m_errorhnd, 0);
+}
+
+PostingIteratorInterface* PostingJoinInRange::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_,
+		unsigned int cardinality_) const
+{
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "inrange");
+		return 0;
+	}
+	if (argitr.size() < 1)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "inrange");
+		return 0;
+	}
+	try
+	{
+		return new IteratorStructWithin( range_, argitr, false/*without cut*/, false/*strict*/, m_errorhnd);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "inrange", *m_errorhnd, 0);
+}
+

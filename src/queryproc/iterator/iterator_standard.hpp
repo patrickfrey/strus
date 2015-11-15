@@ -53,13 +53,21 @@ PostingJoinOperatorInterface* createPostingPred( ErrorBufferInterface* errorhnd)
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingSucc( ErrorBufferInterface* errorhnd);
 
-/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets.
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets at different positions.
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinWithin( ErrorBufferInterface* errorhnd);
 
-/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets. Additionally there exists a restricting structure element (like for example punctuation).
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets at different positions. Additionally there exists a restricting structure element (like for example punctuation).
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinStructWithin( ErrorBufferInterface* errorhnd);
+
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets.
+/// \return the iterator reference (to dispose with delete)
+PostingJoinOperatorInterface* createPostingJoinInRange( ErrorBufferInterface* errorhnd);
+
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets. Additionally there exists a restricting structure element (like for example punctuation).
+/// \return the iterator reference (to dispose with delete)
+PostingJoinOperatorInterface* createPostingJoinStructInRange( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the strict order they apear as arguments
 /// \return the iterator reference (to dispose with delete)

@@ -49,6 +49,10 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
 	PostingJoinOperatorInterface* op;
+	if (0==(op=createPostingJoinInRange( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "inrange", op);
+	if (0==(op=createPostingJoinStructInRange( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "inrange_struct", op);
 	if (0==(op=createPostingJoinWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
 	definePostingJoinOperator( "within", op);
 	if (0==(op=createPostingJoinStructWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
@@ -57,6 +61,10 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	definePostingJoinOperator( "sequence", op);
 	if (0==(op=createPostingJoinStructSequence( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
 	definePostingJoinOperator( "sequence_struct", op);
+	if (0==(op=createPostingJoinChain( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "chain", op);
+	if (0==(op=createPostingJoinStructChain( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "chain_struct", op);
 	if (0==(op=createPostingJoinDifference( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
 	definePostingJoinOperator( "diff", op);
 	if (0==(op=createPostingJoinIntersect( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
