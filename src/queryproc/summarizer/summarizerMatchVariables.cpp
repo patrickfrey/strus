@@ -118,8 +118,10 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 								line.append( vi->name());
 								line.append( m_assign);
 							}
-							m_forwardindex->skipPos( pos);
-							line.append( m_forwardindex->fetch());
+							if (pos == m_forwardindex->skipPos( pos))
+							{
+								line.append( m_forwardindex->fetch());
+							}
 						}
 					}
 					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line, fi->weight));
