@@ -226,9 +226,11 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		PosWeightMap::const_iterator ti = totalmap.begin(), te = totalmap.end();
 		for (; ti != te; ++ti)
 		{
-			m_forwardindex->skipPos( ti->first);
-			rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
-					m_forwardindex->fetch(), ti->second));
+			if (m_forwardindex->skipPos( ti->first) == ti->first)
+			{
+				rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
+						m_forwardindex->fetch(), ti->second));
+			}
 		}
 		return rt;
 	}
