@@ -2,7 +2,7 @@
 # Maintainer: Patrick Frey <patrickpfrey@yahoo.com> 
 
 pkgname=strus
-_mainpkgver=0.1.6
+_mainpkgver=@STRUS_VERSION@
 pkgver=${_mainpkgver}
 pkgrel=1
 pkgdesc='Library implementing the storage of a text search engine.'

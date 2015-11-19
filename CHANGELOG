@@ -6,8 +6,8 @@
 - v0.1.4 Fixed dependencies for ARM (libboost_atomic added)
 * Fri July 24 2015  Patrick Frey  <patrickpfrey@yahoo.com>
 - v0.1.5 Fixed UMR
-* Fri Nov 11 2015  Patrick Frey  <patrickpfrey@yahoo.com>
+* Wed Nov 11 2015  Patrick Frey  <patrickpfrey@yahoo.com>
 - 0.2.0 Exception free interfaces
-* Fri Nov 15 2015  Patrick Frey  <patrickpfrey@yahoo.com>
+* Sun Nov 15 2015  Patrick Frey  <patrickpfrey@yahoo.com>
 - 0.2.1 New posting join operator methods (inrange,inrange_struct)
 
