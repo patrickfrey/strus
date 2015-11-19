@@ -1,5 +1,47 @@
+strus (0.2.1-1) unstable; urgency=low
+
+  * New posting join operator methods (inrange,inrange_struct)
+
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 15 Nov 2015 10:04:35 +0100
+
+strus (0.2.0-1) unstable; urgency=low
+
+  * Exception free interfaces
+
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 11 Nov 2015 02:50:17 +0100
+
 strus (0.1.6-1) unstable; urgency=low
 
-  * Initial Release.
+  * ???
 
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 18 Aug 2015 10:20:58 +0200
+
+strus (0.1.5-1) unstable; urgency=low
+
+  * Fixed UMR
+  
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 24 Jul 2015 18:50:39 +0200
+  
+strus (0.1.4-1) unstable; urgency=low
+
+  * Fixed dependencies for ARM (libboost_atomic added)
+  
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 24 Jul 2015 18:50:39 +0200
+
+strus (0.1.3-1) unstable; urgency=low
+
+  * ???
+  
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 14 Jul 2015 12:04:55 +0200
+
+strus (0.1.2-1) unstable; urgency=low
+
+  * ???
+  
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 19 Feb 2015 09:48:41 +0100
+
+strus (0.1.1-1) unstable; urgency=low
+
+  * Initial release
+  
  -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 19 Feb 2015 09:48:41 +0100
