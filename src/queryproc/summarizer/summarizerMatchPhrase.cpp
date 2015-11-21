@@ -107,6 +107,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 {
 	try
 	{
+		bool has_struct = false;
 		if (!m_init_complete)
 		{
 			// Create the end of structure delimiter iterator:
@@ -149,7 +150,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		m_forwardindex->skipDoc( docno);
 		if (m_phrasestruct)
 		{
-			m_phrasestruct->skipDoc( docno);
+			has_struct = (docno == m_phrasestruct->skipDoc( docno));
 		}
 	
 		// Calculate the best matching passages with help of the sliding window:
@@ -168,7 +169,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		{
 			std::string phrase;
 			Index pos = wi->m_posno;
-			if (m_phrasestruct)
+			if (has_struct)
 			{
 				Index ph = m_phrasestruct->skipPos( pos<=(Index)m_structseeklen?1:(pos-m_structseeklen));
 				if (ph && ph < pos)
@@ -191,7 +192,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				pos = lastpos+1;
 				if (pos > wi->m_posno) continue;
 			}
-			if (m_phrasestruct)
+			if (has_struct)
 			{
 				lastpos = wi->m_posno + wi->m_size;
 				Index lp = m_phrasestruct->skipPos( lastpos);
