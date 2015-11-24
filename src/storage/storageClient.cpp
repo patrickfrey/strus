@@ -650,14 +650,7 @@ Index StorageClient::maxDocumentNumber() const
 
 Index StorageClient::documentNumber( const std::string& docid) const
 {
-	Index rt = 0;
-	try
-	{
-		rt = getDocno( docid);
-		if (!rt) m_errorhnd->report( _TXT( "document with id '%s' is not defined in index"), docid.c_str());
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term local document frequency: %s"), *m_errorhnd, 0);
-	return rt;
+	return getDocno( docid);
 }
 
 Index StorageClient::documentStatistics(

@@ -121,11 +121,12 @@ public:
 			const std::string& term) const=0;
 
 	/// \brief Get the highest document number used in this stogage
-	/// \return the document number
+	/// \return the document number, or 0, if no documents are inserted
 	virtual Index maxDocumentNumber() const=0;
 
 	/// \brief Get the local internal document number
 	/// \param[in] docid document id of the document inserted
+	/// \return the document number or 0, if it does not exist
 	virtual Index documentNumber( const std::string& docid) const=0;
 
 	/// \brief Enumeration of document statistics
