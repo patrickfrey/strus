@@ -184,7 +184,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			}
 			else
 			{
-				pos -= (m_structseeklen/2);
+				pos -= m_structseeklen;
 				if (pos <= 0) pos = 1;
 			}
 			if (lastpos && pos < lastpos)
