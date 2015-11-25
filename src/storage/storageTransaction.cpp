@@ -218,19 +218,19 @@ void StorageTransaction::deleteDocument( const std::string& docid)
 	{
 		Index docno = m_docIdMap.lookUp( docid);
 		if (docno == 0) return;
-	
+
 		//[1] Delete metadata:
 		deleteMetaData( docno);
-	
+
 		//[2] Delete attributes:
 		deleteAttributes( docno);
-		
+
 		//[3] Delete index elements (forward index and inverted index):
 		deleteIndex( docno);
-	
+
 		//[3] Delete ACL elements:
 		deleteAcl( docno);
-	
+
 		m_nof_documents -= 1;
 	}
 	CATCH_ERROR_MAP( _TXT("error deleting document in transaction: %s"), *m_errorhnd);
@@ -347,7 +347,7 @@ bool StorageTransaction::commit()
 		m_forwardIndexMap.getWriteBatch( transaction.get());
 	
 		m_userAclMap.getWriteBatch( transaction.get());
-	
+
 		StringMap<Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
 		for (; di != de; ++di)
 		{
