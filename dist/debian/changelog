@@ -1,8 +1,8 @@
-strus (0.2.3-1)
+strus (0.2.3-1) unstable; urgency=low
   * StorageClient::documentNumber( const std::string&) returns 0, if document does not exist
  -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 24 Nov 2015 19:49:41 +0100
 
-strus (0.2.2-1)
+strus (0.2.2-1) unstable; urgency=low
   * more info in corrupt index error message. Better summarization for first sentences in summarizer match phrase (abstracting)
   * fix bug in summarizer: if end of sentence was not existing in a document, then the end of sentence of the previous document was taken
   * fixed a type in 12.04 DSC file
@@ -12,13 +12,13 @@ strus (0.2.2-1)
   * remove BM23_dpfc weighting scheme from core (to module in wikipedia demo project)
  -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 24 Nov 2015 14:33:27 +0100
 
-strus (0.2.1-1)
+strus (0.2.1-1) unstable; urgency=low
   * added posting join operator "inrange" (= "within", but not strict, different positions)
   * added new summarizer to accumulate weights of variable references
   * added documentation of aggregator functions to analyzer grammar
  -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 15 Nov 2015 10:04:35 +0100
 
-strus (0.2.0-1)
+strus (0.2.0-1) unstable; urgency=low
   * make ranked document list deterministic
   * fixed config parser: string was not extracted correctly in extractStringFromConfigString
   * improving web page style sheets
@@ -99,7 +99,7 @@ strus (0.2.0-1)
   * adapted dependency description
  -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 12 Nov 2015 14:08:21 +0100
 
-strus (0.1.6-1)
+strus (0.1.6-1) unstable; urgency=low
   * updated wegpage with language logos
   * updated landing page and documentation
   * throw is there is no selection feature defined in the query
@@ -114,25 +114,26 @@ strus (0.1.6-1)
   * some changes in peer storage interface
  -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 18 Aug 2015 10:20:58 +0200
 
-strus (0.1.5-1)
+strus (0.1.5-1) unstable; urgency=low
   * fixed bug in expression evaluation in query.cpp (causing UMR)
   * updated utilities documentation
  -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 2 Aug 2015 13:03:12 +0200
 
-strus (0.1.4-1)
+strus (0.1.4-1) unstable; urgency=low
   * Added dependency to libboost_atomic needed by ARM for boost 1.54 (see https://svn.boost.org/trac/boost/ticket/8810)
  -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 24 Jul 2015 18:50:39 +0200
 
-strus (0.1.3-1)
+strus (0.1.3-1) unstable; urgency=low
   * skip entries starting with '.' in read files/directories (fileio.cpp)
   * extended fileio with function to read directory only (assumed in programs that directories do not have a file extension - HACK)
  -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 14 Jul 2015 12:04:55 +0200
 
-strus (0.1.2-1)
+strus (0.1.2-1) unstable; urgency=low
   * small update of documentation
  -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 9 Jul 2015 15:33:14 +0200
 
-strus (0.1.1-1)
+strus (0.1.1-1) unstable; urgency=low
   * Initial revision
  -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 3 Jul 2015 15:16:29 +0200
+
 
