@@ -95,7 +95,6 @@ void Storage::open( const char* config)
 	}
 	try
 	{
-		std::cerr << "destroying old storage" << std::endl;
 		dbi->destroyDatabase( config);
 	}
 	catch(...){}
@@ -132,8 +131,8 @@ static void testDeleteNonExistingDoc()
 #define RUN_TEST( TestName)\
 	try\
 	{\
-		std::cerr << "Executing test " << #TestName << std::endl;\
 		test ## TestName();\
+		std::cerr << "Executing test " << #TestName << " [OK]" << std::endl;\
 	}\
 	catch (const std::runtime_error& err)\
 	{\
