@@ -114,6 +114,17 @@ void Storage::open( const char* config)
 	}
 }
 
+static void destroyStorage( const char* config)
+{
+	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
+	dbi.reset( strus::createDatabase_leveldb( g_errorhnd));
+	if (!dbi.get())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
+	dbi->destroyDatabase( config);
+}
+
 bool Transaction::commit()
 {
 	return tri->commit();
@@ -123,9 +134,33 @@ static void testDeleteNonExistingDoc()
 {
 	Storage storage;
 	storage.open( "path=storage");
-	Transaction transaction( storage);
-	transaction.tri->deleteDocument( "ABC");
-	transaction.commit();
+	Transaction transactionInsert( storage);
+	std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert.tri->createDocument( "ABC"));
+	doc->addSearchIndexTerm( "word", "hello", 1);
+	doc->addSearchIndexTerm( "word", "world", 2);
+	doc->addForwardIndexTerm( "word", "Hello, ", 1);
+	doc->addForwardIndexTerm( "word", "world!", 2);
+	doc->setAttribute( "title", "Hello World");
+	doc->done();
+	transactionInsert.commit();
+
+	std::cerr << "Document inserted " << storage.sci->documentNumber( "ABC") << std::endl;
+
+	Transaction transactionDelete1( storage);
+	transactionDelete1.tri->deleteDocument( "ABC");
+	transactionDelete1.commit();
+
+	std::cerr << "Document deleted " << storage.sci->documentNumber( "ABC") << std::endl;
+
+	Transaction transactionDelete2( storage);
+	transactionDelete2.tri->deleteDocument( "ABC");
+	transactionDelete2.commit();
+
+	std::cerr << "Document deleted " << storage.sci->documentNumber( "ABC") << std::endl;
+	if (g_errorhnd->hasError())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
 }
 
 #define RUN_TEST( TestName)\
@@ -143,7 +178,7 @@ static void testDeleteNonExistingDoc()
 	{\
 		std::cerr << "Out of memory in test " << #TestName << std::endl;\
 		return -1;\
-	}
+	}\
 
 
 int main( int argc, const char* argv[])
@@ -152,6 +187,7 @@ int main( int argc, const char* argv[])
 	if (!g_errorhnd) return -1;
 
 	RUN_TEST( DeleteNonExistingDoc )
+	destroyStorage( "path=storage");
 	return 0;
 }
 

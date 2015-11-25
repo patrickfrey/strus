@@ -228,9 +228,11 @@ void StorageTransaction::deleteDocument( const std::string& docid)
 		//[3] Delete index elements (forward index and inverted index):
 		deleteIndex( docno);
 
-		//[3] Delete ACL elements:
+		//[4] Delete ACL elements:
 		deleteAcl( docno);
 
+		//[5] Delete the document id
+		m_docIdMap.deleteKey( docid);
 		m_nof_documents -= 1;
 	}
 	CATCH_ERROR_MAP( _TXT("error deleting document in transaction: %s"), *m_errorhnd);
@@ -331,6 +333,7 @@ bool StorageTransaction::commit()
 		}
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
+		m_docIdMap.getWriteBatch( transaction.get());
 
 		std::vector<Index> refreshList;
 		m_attributeMap.getWriteBatch( transaction.get());

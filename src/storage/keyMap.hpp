@@ -80,10 +80,17 @@ public:
 	void getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
 		DatabaseTransactionInterface* transaction);
+	void getWriteBatch(
+		DatabaseTransactionInterface* transaction);
 
 	static bool isUnknown( const Index& value)
 	{
 		return value > UnknownValueHandleStart;
+	}
+
+	void deleteKey( const std::string& name)
+	{
+		m_deletedlist.push_back( name.c_str());
 	}
 
 private:
@@ -101,6 +108,7 @@ private:
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
 	KeyMapInv* m_invmap;
+	StringVector m_deletedlist;
 };
 
 }//namespace
