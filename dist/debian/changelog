@@ -1,3 +1,7 @@
+strus (0.2.4-1) unstable; urgency=low
+  * incremented version to 0.2.4 to resolve OBS trouble with dependencies
+ -- patrickfrey <patrickpfrey@yahoo.com>  Thu, 26 Nov 2015 09:08:36 +0100
+
 strus (0.2.3-1) unstable; urgency=low
   * StorageClient::documentNumber( const std::string&) returns 0, if document does not exist
  -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 24 Nov 2015 19:49:41 +0100

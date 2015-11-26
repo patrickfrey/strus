@@ -309,6 +309,9 @@ make test
 %{_includedir}/%{name}/private/*.h
 
 %changelog
+* Thu Nov 26 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.2.4-0.1
+- incremented version to 0.2.4 to resolve OBS trouble with dependencies
+
 * Tue Nov 24 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.2.3-0.1
 - ABI change. StorageClient::documentNumber( const std::string&) returns 0, if document does not exist
 
