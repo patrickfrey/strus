@@ -44,6 +44,7 @@
 #include "strus/storageDocumentInterface.hpp"
 #include "private/utils.hpp"
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 #include <memory>
@@ -163,31 +164,82 @@ static void testDeleteNonExistingDoc()
 	}
 }
 
-#define RUN_TEST( TestName)\
+#define RUN_TEST( idx, TestName)\
 	try\
 	{\
 		test ## TestName();\
-		std::cerr << "Executing test " << #TestName << " [OK]" << std::endl;\
+		std::cerr << "Executing test (" << idx << ") " << #TestName << " [OK]" << std::endl;\
 	}\
 	catch (const std::runtime_error& err)\
 	{\
-		std::cerr << "Error in test " << #TestName << ": " << err.what() << std::endl;\
+		std::cerr << "Error in test (" << idx << ") " << #TestName << ": " << err.what() << std::endl;\
 		return -1;\
 	}\
 	catch (const std::bad_alloc& err)\
 	{\
-		std::cerr << "Out of memory in test " << #TestName << std::endl;\
+		std::cerr << "Out of memory in test (" << idx << ") " << #TestName << std::endl;\
 		return -1;\
 	}\
 
 
 int main( int argc, const char* argv[])
 {
+	bool do_cleanup = true;
+	unsigned int ii = 1;
+	unsigned int test_index = 0;
+	for (; argc > (int)ii; ++ii)
+	{
+		if (std::strcmp( argv[ii], "-K") == 0)
+		{
+			do_cleanup = false;
+		}
+		else if (std::strcmp( argv[ii], "-T") == 0)
+		{
+			++ii;
+			if (argc == (int)ii)
+			{
+				std::cerr << "option -T expects an argument" << std::endl;
+				return -1;
+			}
+			test_index = atoi( argv[ ii]);
+		}
+		else if (std::strcmp( argv[ii], "-h") == 0)
+		{
+			std::cerr << "usage: testStorageOp [options]" << std::endl;
+			std::cerr << "options:" << std::endl;
+			std::cerr << "  -h      :print usage" << std::endl;
+			std::cerr << "  -K      :keep artefacts, do not clean up" << std::endl;
+			std::cerr << "  -T <i>  :execute only test with index <i>" << std::endl;
+		}
+		else if (argv[ii][0] == '-')
+		{
+			std::cerr << "unknown option " << argv[ii] << std::endl;
+			return -1;
+		}
+		else
+		{
+			std::cerr << "unexpected argument" << std::endl;
+			return -1;
+		}
+	}
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
 	if (!g_errorhnd) return -1;
 
-	RUN_TEST( DeleteNonExistingDoc )
-	destroyStorage( "path=storage");
+	unsigned int ti=test_index?test_index:1;
+	for (;;++ti)
+	{
+		switch (ti)
+		{
+			case 1: RUN_TEST( ti, DeleteNonExistingDoc ) break;
+			default: goto TESTS_DONE;
+		}
+		if (test_index) break;
+	}
+TESTS_DONE:
+	if (do_cleanup)
+	{
+		destroyStorage( "path=storage");
+	}
 	return 0;
 }
 

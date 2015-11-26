@@ -350,7 +350,7 @@ StorageTransactionInterface*
 {
 	try
 	{
-		return new StorageTransaction( this, m_database.get(), m_peerMessageBuilder.get(), &m_metadescr, m_termno_map, m_errorhnd);
+		return new StorageTransaction( this, m_database.get(), m_peerMessageBuilder.get(), &m_metadescr, m_termno_map, m_next_typeno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }

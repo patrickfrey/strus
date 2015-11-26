@@ -52,6 +52,7 @@ StorageTransaction::StorageTransaction(
 		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
 		const conotrie::CompactNodeTrie* termnomap_,
+		const Index& maxtypeno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
@@ -60,7 +61,7 @@ StorageTransaction::StorageTransaction(
 	,m_attributeMap(database_)
 	,m_metaDataMap(database_,metadescr_)
 	,m_invertedIndexMap(database_)
-	,m_forwardIndexMap(database_)
+	,m_forwardIndexMap(database_,maxtypeno_)
 	,m_userAclMap(database_)
 	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
 	,m_termValueMap(database_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator(),termnomap_)

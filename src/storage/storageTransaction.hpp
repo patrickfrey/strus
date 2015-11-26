@@ -74,6 +74,7 @@ public:
 		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
 		const conotrie::CompactNodeTrie* termnomap_,
+		const Index& maxtypeno_,
 		ErrorBufferInterface* errorhnd_);
 
 	~StorageTransaction();
