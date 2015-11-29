@@ -815,6 +815,7 @@ void StorageClient::startPeerInit()
 {
 	try
 	{
+		if (!m_peermsgproc) throw strus::runtime_error("no peer message processor defined");
 		m_initialStatsPopulateState.init( m_peermsgproc, m_database.get(), m_nof_documents.value());
 	}
 	CATCH_ERROR_MAP( _TXT("error starting populating peer messages: %s"), *m_errorhnd);
@@ -824,13 +825,13 @@ void StorageClient::pushPeerMessage( const char* msg, std::size_t msgsize)
 {
 	try
 	{
+		if (!m_peermsgproc)
+		{
+			throw strus::runtime_error( _TXT( "no peer message processor defined"));
+		}
 		if (m_initialStatsPopulateState.running())
 		{
 			throw strus::runtime_error( _TXT( "cannot handle message from other peer before all own initial statistics populated (with fetchPeerMessage)"));
-		}
-		if (!m_peermsgproc)
-		{
-			throw strus::runtime_error( _TXT( "cannot handle message from other peer because no peer message processor defined"));
 		}
 		PeerStorageTransaction transaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peermsgproc, m_errorhnd);
 		m_peerReplyMessageBuffer = transaction.run( msg, msgsize);
@@ -860,6 +861,14 @@ bool StorageClient::fetchPeerMessage( const char*& msg, std::size_t& msgsize)
 {
 	try
 	{
+		if (!m_peermsgproc)
+		{
+			throw strus::runtime_error( _TXT( "no peer message processor defined"));
+		}
+		if (!m_peerMessageBuilder.get())
+		{
+			throw strus::runtime_error( _TXT( "no peer message builder defined"));
+		}
 		if (m_initialStatsPopulateState.running())
 		{
 			return m_initialStatsPopulateState.fetchMessage( msg, msgsize);

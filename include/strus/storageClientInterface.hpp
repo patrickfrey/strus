@@ -180,13 +180,14 @@ public:
 	/// \brief Fetches the next reply from pushPeerMessage as answer to the sender
 	/// \param[in] msg pointer to message blob the sender peer of the last message pushed (interpretation depends on defined peer message processor)
 	/// \param[in] msgsize size of msg blob in bytes
-	/// \return false if there is no chunk of the reply left
+	/// \return false if there is no chunk of the reply left or an error occurred
 	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
 	virtual bool fetchPeerReply( const char*& msg, std::size_t& msgsize)=0;
 	
 	/// \brief Fetches the next message to distribute to all other peers
 	/// \param[in] msg pointer to message blob for other peers (interpretation depends on defined peer message processor)
 	/// \param[in] msgsize size of msg blob in bytes
+	/// \return false if there is no chunk of a message left or an error occurred
 	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
 	virtual bool fetchPeerMessage( const char*& msg, std::size_t& msgsize)=0;
 
