@@ -110,7 +110,7 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 	{
 		std::auto_ptr<PeerMessageViewerInterface> viewer( m_peermsgproc->createViewer( msg, msgsize));
 		if (!viewer.get()) throw strus::runtime_error( _TXT( "error creating peer message viewer"));
-	
+
 		PeerMessageViewerInterface::DocumentFrequencyChange rec;
 		while (viewer->nextDfChange( rec))
 		{
@@ -172,15 +172,15 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 		m_nofDocumentsInserted = 0;
 		return rt;
 	}
-	catch (const std::bad_alloc& err)
+	catch (const std::bad_alloc&)
 	{
 		clear();
-		throw err;
+		throw strus::runtime_error( _TXT("out of memory in peer storage transaction"));
 	}
 	catch (const std::runtime_error& err)
 	{
 		clear();
-		throw err;
+		throw strus::runtime_error( _TXT("error in peer storage transaction: %s"), err.what());
 	}
 }
 

@@ -38,6 +38,8 @@
 #include <string>
 #include <map>
 
+#error DEPRECATED
+
 namespace strus {
 
 ///\brief Forward declaration
@@ -48,17 +50,17 @@ class InitialStatsPopulateState
 {
 public:
 	///\brief Constructor
-	InitialStatsPopulateState()
-		:m_peermsgproc(0){}
-
-	///\brief Initializes a run of this
 	///\param[in] peermsgproc_ processor to use for packing/unpacking peer messages
 	///\param[in] database_ database client interface to use (owned by caller)
 	///\param[in] nofDocuments_ initial number of documents to announce, if doPopulateInitialState_ == true
-	void init( const PeerMessageProcessorInterface* peermsgproc_, DatabaseClientInterface* database_, const Index& nofDocuments_);
+	InitialStatsPopulateState(
+			const PeerMessageProcessorInterface* peermsgproc_,
+			DatabaseClientInterface* database_,
+			const Index& nofDocuments_);
 
 	///\brief Check if there are more messages to fetch
-	bool running() const	{return m_peermsgproc;}
+	bool running() const		{return m_peermsgproc;}
+	void done();
 
 	///\brief Fetch the next chunk to send to the peers
 	/// \param[out] blk pointer to the message 

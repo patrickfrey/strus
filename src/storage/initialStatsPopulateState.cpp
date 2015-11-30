@@ -38,67 +38,8 @@
 
 using namespace strus;
 
-void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peermsgproc_, DatabaseClientInterface* dbclient, const Index& nofDocuments_)
+InitialStatsPopulateState::InitialStatsPopulateState( const PeerMessageProcessorInterface* peermsgproc_, DatabaseClientInterface* dbclient, const Index& nofDocuments_)
 {
-	m_peermsgproc = peermsgproc_;
-	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
-	if (!m_peerMessageBuilder.get()) throw strus::runtime_error(_TXT("error creating peer message builder"));
-	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofDocuments_);
-	m_peerMessageBuilder->start();
-
-	std::map<Index,std::size_t> typenomap;
-	std::map<Index,std::size_t> termnomap;
-	std::string strings;
-
-	// Fill a map with the strings of all types in the collection:
-	{
-		DatabaseAdapter_TermType::Cursor typecursor( dbclient);
-		Index typeno;
-		std::string typestr;
-		for (bool more=typecursor.loadFirst( typestr, typeno); more;
-			more=typecursor.loadNext( typestr, typeno))
-		{
-			typenomap[ typeno] = strings.size();
-			strings.append( typestr);
-			strings.push_back( '\0');
-		}
-	}
-	// Fill a map with the strings of all terms in the collection:
-	{
-		DatabaseAdapter_TermValue::Cursor termcursor( dbclient);
-		Index termno;
-		std::string termstr;
-		for (bool more=termcursor.loadFirst( termstr, termno); more;
-			more=termcursor.loadNext( termstr, termno))
-		{
-			termnomap[ termno] = strings.size();
-			strings.append( termstr);
-			strings.push_back( '\0');
-		}
-	}
-	// Feed all df changes to the peer message builder:
-	{
-		Index typeno;
-		Index termno;
-		Index df;
-
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( dbclient);
-		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
-			more=dfcursor.loadNext( typeno, termno, df))
-		{
-			std::map<Index,std::size_t>::const_iterator ti;
-			ti = typenomap.find( typeno);
-			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type when populating df's"));
-			const char* typenam = strings.c_str() + ti->second;
-	
-			ti = termnomap.find( termno);
-			if (ti == termnomap.end()) throw strus::runtime_error( _TXT( "encountered undefined term when populating df's"));
-			const char* termnam = strings.c_str() + ti->second;
-	
-			m_peerMessageBuilder->addDfChange( typenam, termnam, df, true/*isNew*/);
-		}
-	}
 }
 
 bool InitialStatsPopulateState::fetchMessage( const char* blk, std::size_t blksize)
@@ -106,4 +47,15 @@ bool InitialStatsPopulateState::fetchMessage( const char* blk, std::size_t blksi
 	return m_peerMessageBuilder->fetchMessage( blk, blksize);
 }
 
+void InitialStatsPopulateState::done()
+{
+	const char* blk;
+	std::size_t blksize;
+	if (m_peerMessageBuilder->fetchMessage( blk, blksize))
+	{
+		throw strus::runtime_error( _TXT( "closing peer message builder for initial messages without consuming all messages"));
+	}
+	m_peerMessageBuilder.reset();
+	m_peermsgproc = 0;
+}
 

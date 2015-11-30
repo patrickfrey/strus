@@ -29,8 +29,8 @@ set( libstrus_storage_source_files
 	metaDataMap.cpp
 	metaDataRecord.cpp
 	nullIterator.cpp
-	initialStatsPopulateState.cpp
 	peerStorageTransaction.cpp
+	peerMessageQueue.cpp
 	posinfoBlock.cpp
 	posinfoIterator.cpp
 	postingIterator.cpp

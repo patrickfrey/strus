@@ -51,6 +51,8 @@ class StorageDocumentInterface;
 /// \brief Forward declaration
 class PeerMessageProcessorInterface;
 /// \brief Forward declaration
+class PeerMessageQueueInterface;
+/// \brief Forward declaration
 class StorageDumpInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
@@ -161,35 +163,12 @@ public:
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
+	/// \brief Creates the interface with the queues to use for feeding the storage client with messages containing feature statistics from other peers and for fetching the messages to send to other peers.
 	/// \param[in] proc peer message processor reference
-	virtual void definePeerMessageProcessor(
+	/// \return the peer message queue interface
+	/// \remark Only one peer message queue can exist at one moment
+	virtual PeerMessageQueueInterface* createPeerMessageQueue(
 			const PeerMessageProcessorInterface* proc)=0;
-
-	/// \brief Start the init phase of distributing the statistics of the storage to other peers. The messages of the init phare are fetched with fetchPeerMessage(const char*&,std::size_t&)
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual void startPeerInit()=0;
-
-	/// \brief Push a message blob from another peer storage
-	/// \param[in] msg pointer to message blob from peer (interpretation depends on defined peer message processor)
-	/// \param[in] msgsize size of msg blob in bytes
-	/// \return true, if there is at least one reply message to fetch with fetchPeerReply(const char*&,std::size_t&)
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual void pushPeerMessage( const char* msg, std::size_t msgsize)=0;
-
-	/// \brief Fetches the next reply from pushPeerMessage as answer to the sender
-	/// \param[in] msg pointer to message blob the sender peer of the last message pushed (interpretation depends on defined peer message processor)
-	/// \param[in] msgsize size of msg blob in bytes
-	/// \return false if there is no chunk of the reply left or an error occurred
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual bool fetchPeerReply( const char*& msg, std::size_t& msgsize)=0;
-	
-	/// \brief Fetches the next message to distribute to all other peers
-	/// \param[in] msg pointer to message blob for other peers (interpretation depends on defined peer message processor)
-	/// \param[in] msgsize size of msg blob in bytes
-	/// \return false if there is no chunk of a message left or an error occurred
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual bool fetchPeerMessage( const char*& msg, std::size_t& msgsize)=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check

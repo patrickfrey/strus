@@ -34,8 +34,7 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/peerMessageBuilderInterface.hpp"
-#include "strus/peerMessageProcessorInterface.hpp"
-#include "strus/peerMessageViewerInterface.hpp"
+#include "peerMessageQueue.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "peerStorageTransaction.hpp"
 #include "strus/storageDumpInterface.hpp"
@@ -91,8 +90,6 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	,m_global_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
-	,m_peermsgproc(0)
-	,m_gotPeerReply(false)
 	,m_errorhnd(errorhnd_)
 {
 	try
@@ -107,12 +104,12 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	catch (const std::bad_alloc& err)
 	{
 		cleanup();
-		throw err;
+		throw strus::runtime_error(_TXT("out of memory creating storage client"));
 	}
 	catch (const std::runtime_error& err)
 	{
 		cleanup();
-		throw err;
+		throw strus::runtime_error(_TXT("error creating storage client: %s"), err.what());
 	}
 }
 
@@ -778,6 +775,7 @@ void StorageClient::declareGlobalNofDocumentsInserted( const GlobalCounter& incr
 
 void StorageClient::fillDocumentFrequencyCache()
 {
+	if (m_documentFrequencyCache.get()) return;
 	TransactionLock lock( this);
 	
 	DocumentFrequencyCache::Batch dfbatch;
@@ -794,94 +792,34 @@ void StorageClient::fillDocumentFrequencyCache()
 	m_documentFrequencyCache->writeBatch( dfbatch);
 }
 
-void StorageClient::definePeerMessageProcessor(
+DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
+{
+	fillDocumentFrequencyCache();
+	return m_documentFrequencyCache.get();
+}
+
+bool StorageClient::fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize)
+{
+	TransactionLock lock( this);
+	return m_peerMessageBuilder->fetchMessage( msg, msgsize);
+}
+
+PeerMessageQueueInterface* StorageClient::createPeerMessageQueue(
 		const PeerMessageProcessorInterface* proc)
 {
 	try
 	{
-		if (!m_documentFrequencyCache.get())
-		{
-			fillDocumentFrequencyCache();
-		}
-		TransactionLock lock( this);
-		m_peermsgproc = proc;
-		PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-		m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
-	}
-	CATCH_ERROR_MAP( _TXT("error defining peer message processor: %s"), *m_errorhnd);
-}
-
-void StorageClient::startPeerInit()
-{
-	try
-	{
-		if (!m_peermsgproc) throw strus::runtime_error("no peer message processor defined");
-		m_initialStatsPopulateState.init( m_peermsgproc, m_database.get(), m_nof_documents.value());
-	}
-	CATCH_ERROR_MAP( _TXT("error starting populating peer messages: %s"), *m_errorhnd);
-}
-
-void StorageClient::pushPeerMessage( const char* msg, std::size_t msgsize)
-{
-	try
-	{
-		if (!m_peermsgproc)
-		{
-			throw strus::runtime_error( _TXT( "no peer message processor defined"));
-		}
-		if (m_initialStatsPopulateState.running())
-		{
-			throw strus::runtime_error( _TXT( "cannot handle message from other peer before all own initial statistics populated (with fetchPeerMessage)"));
-		}
-		PeerStorageTransaction transaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peermsgproc, m_errorhnd);
-		m_peerReplyMessageBuffer = transaction.run( msg, msgsize);
-		m_gotPeerReply = m_peerReplyMessageBuffer.size() > 0;
-	}
-	CATCH_ERROR_MAP( _TXT("error pushing peer message to storage: %s"), *m_errorhnd);
-}
-
-bool StorageClient::fetchPeerReply( const char*& msg, std::size_t& msgsize)
-{
-	try
-	{
-		if (m_gotPeerReply)
-		{
-			m_peerReplyMessageBuffer.clear();
-			return false;
-		}
-		msg = m_peerReplyMessageBuffer.c_str();
-		msgsize = m_peerReplyMessageBuffer.size();
-		m_gotPeerReply = true;
-		return true;
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message reply from storage: %s"), *m_errorhnd, false);
-}
-
-bool StorageClient::fetchPeerMessage( const char*& msg, std::size_t& msgsize)
-{
-	try
-	{
-		if (!m_peermsgproc)
-		{
-			throw strus::runtime_error( _TXT( "no peer message processor defined"));
-		}
 		if (!m_peerMessageBuilder.get())
 		{
-			throw strus::runtime_error( _TXT( "no peer message builder defined"));
+			PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+			m_peerMessageBuilder.reset( proc->createBuilder( options));
 		}
-		if (m_initialStatsPopulateState.running())
-		{
-			return m_initialStatsPopulateState.fetchMessage( msg, msgsize);
-		}
-		else
-		{
-			TransactionLock lock( this);
-			return m_peerMessageBuilder->fetchMessage( msg, msgsize);
-		}
+		TransactionLock lock( this);
+		fillDocumentFrequencyCache();
+		return new PeerMessageQueue( this, m_database.get(), proc, m_nof_documents.value(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error database client fetching peer message: %s"), *m_errorhnd, false);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message queues: %s"), *m_errorhnd, 0);
 }
-
 
 static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
 {
