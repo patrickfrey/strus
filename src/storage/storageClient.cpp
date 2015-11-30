@@ -79,7 +79,11 @@ void StorageClient::cleanup()
 	}
 }
 
-StorageClient::StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd_)
+StorageClient::StorageClient(
+		DatabaseClientInterface* database_,
+		const char* termnomap_source,
+		const PeerMessageProcessorInterface* peerMessageProc_,
+		ErrorBufferInterface* errorhnd_)
 	:m_database()
 	,m_next_typeno(0)
 	,m_next_termno(0)
@@ -90,6 +94,7 @@ StorageClient::StorageClient( DatabaseClientInterface* database_, const char* te
 	,m_global_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
+	,m_peerMessageProc(peerMessageProc_)
 	,m_errorhnd(errorhnd_)
 {
 	try
@@ -804,19 +809,22 @@ bool StorageClient::fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsi
 	return m_peerMessageBuilder->fetchMessage( msg, msgsize);
 }
 
-PeerMessageQueueInterface* StorageClient::createPeerMessageQueue(
-		const PeerMessageProcessorInterface* proc)
+PeerMessageQueueInterface* StorageClient::createPeerMessageQueue()
 {
 	try
 	{
+		if (!m_peerMessageProc)
+		{
+			throw strus::runtime_error(_TXT( "no peer message processor defined"));
+		}
 		if (!m_peerMessageBuilder.get())
 		{
 			PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-			m_peerMessageBuilder.reset( proc->createBuilder( options));
+			m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
 		}
 		TransactionLock lock( this);
 		fillDocumentFrequencyCache();
-		return new PeerMessageQueue( this, m_database.get(), proc, m_nof_documents.value(), m_errorhnd);
+		return new PeerMessageQueue( this, m_database.get(), m_peerMessageProc, m_nof_documents.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message queues: %s"), *m_errorhnd, 0);
 }

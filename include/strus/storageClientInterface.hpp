@@ -164,11 +164,9 @@ public:
 	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Creates the interface with the queues to use for feeding the storage client with messages containing feature statistics from other peers and for fetching the messages to send to other peers.
-	/// \param[in] proc peer message processor reference
 	/// \return the peer message queue interface
 	/// \remark Only one peer message queue can exist at one moment
-	virtual PeerMessageQueueInterface* createPeerMessageQueue(
-			const PeerMessageProcessorInterface* proc)=0;
+	virtual PeerMessageQueueInterface* createPeerMessageQueue()=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check

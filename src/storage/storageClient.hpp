@@ -74,7 +74,13 @@ class StorageClient
 public:
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd_);
+	/// \param[in] peerMessageProc_ peer message processor interface
+	/// \param[in] errorhnd_ error buffering interface for error handling
+	StorageClient(
+			DatabaseClientInterface* database_,
+			const char* termnomap_source,
+			const PeerMessageProcessorInterface* peerMessageProc_,
+			ErrorBufferInterface* errorhnd_);
 	virtual ~StorageClient();
 
 	virtual void close();
@@ -106,8 +112,7 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual PeerMessageQueueInterface* createPeerMessageQueue(
-			const PeerMessageProcessorInterface* proc);
+	virtual PeerMessageQueueInterface* createPeerMessageQueue();
 
 	virtual GlobalCounter globalNofDocumentsInserted() const;
 
@@ -226,6 +231,7 @@ private:
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	conotrie::CompactNodeTrie* m_termno_map;		///< map of the most important (most frequent) terms, if specified
 
+	const PeerMessageProcessorInterface* m_peerMessageProc;	///< peer message processor
 	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder; ///< builder of peer messages from updates by transactions
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 

@@ -106,7 +106,8 @@ void Storage::open( const char* config)
 
 	sti->createStorage( config, database.get());
 	{
-		sci.reset( sti->createClient( "", database.get()));
+		const strus::PeerMessageProcessorInterface* peerMessageProc = 0;
+		sci.reset( sti->createClient( "", database.get(), peerMessageProc));
 		if (!sci.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
