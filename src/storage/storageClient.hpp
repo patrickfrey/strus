@@ -210,7 +210,6 @@ public:/*StorageDocumentChecker*/
 	IndexSetIterator getUserAclIterator( const Index& userno) const;
 
 public:/*PeerMessageQueue*/
-	void fillDocumentFrequencyCache();
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
 	///\brief Fetch a message from a storage update transaction
@@ -221,6 +220,7 @@ private:
 	void loadTermnoMap( const char* termnomap_source);
 	void loadVariables( DatabaseClientInterface* database_);
 	void storeVariables();
+	void fillDocumentFrequencyCache();
 
 private:
 	Reference<DatabaseClientInterface> m_database;		///< reference to key value store database

@@ -817,9 +817,6 @@ void StorageClient::declareGlobalNofDocumentsInserted( const GlobalCounter& incr
 
 void StorageClient::fillDocumentFrequencyCache()
 {
-	if (m_documentFrequencyCache.get()) return;
-	TransactionLock lock( this);
-	
 	DocumentFrequencyCache::Batch dfbatch;
 	DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database.get());
 	Index typeno;
@@ -836,7 +833,11 @@ void StorageClient::fillDocumentFrequencyCache()
 
 DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 {
-	fillDocumentFrequencyCache();
+	if (!m_documentFrequencyCache.get())
+	{
+		TransactionLock lock( this);
+		fillDocumentFrequencyCache();
+	}
 	return m_documentFrequencyCache.get();
 }
 
@@ -860,7 +861,10 @@ PeerMessageQueueInterface* StorageClient::createPeerMessageQueue()
 			PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
 			m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
 		}
-		fillDocumentFrequencyCache();
+		if (!m_documentFrequencyCache.get())
+		{
+			fillDocumentFrequencyCache();
+		}
 		return new PeerMessageQueue( this, m_database.get(), m_peerMessageProc, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message queues: %s"), *m_errorhnd, 0);
