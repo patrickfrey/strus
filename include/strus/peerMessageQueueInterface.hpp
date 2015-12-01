@@ -67,6 +67,10 @@ public:
 	/// \param[in] msgsize size of msg blob in bytes
 	/// \return false if there is no chunk of a message left or an error occurred
 	virtual bool fetch( const char*& msg, std::size_t& msgsize)=0;
+
+	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
+	/// \return the message processor interface
+	virtual const PeerMessageProcessorInterface* getMessageProcessor() const=0;
 };
 
 }//namespace

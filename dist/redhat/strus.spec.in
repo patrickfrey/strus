@@ -309,6 +309,9 @@ make test
 %{_includedir}/%{name}/private/*.h
 
 %changelog
+* Tue Dec 1 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.2.6-0.1
+- added interfaces for introspection (user names, docids, term types, term values)
+
 * Tue Dec 1 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.2.5-0.1
 - define method PeerMessageQueue start for register/deregister of peers
 - change way how peer message processor is passed to storage: Now an argument of createClient and an argument of StorageClient::createPeerMessageQueue

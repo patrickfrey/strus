@@ -70,6 +70,7 @@ struct DatabaseAdapter_StringIndex
 	public:
 		Cursor( char prefix_, const DatabaseClientInterface* database_);
 
+		bool skip( const std::string& key, std::string& keyfound, Index& value);
 		bool loadFirst( std::string& key, Index& value);
 		bool loadNext( std::string& key, Index& value);
 

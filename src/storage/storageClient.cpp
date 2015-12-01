@@ -56,6 +56,7 @@
 #include "attributeReader.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "extractKeyValueData.hpp"
+#include "valueIterator.hpp"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -655,6 +656,42 @@ Index StorageClient::documentNumber( const std::string& docid) const
 	return getDocno( docid);
 }
 
+ValueIteratorInterface* StorageClient::createTermTypeIterator() const
+{
+	try
+	{
+		return new ValueIterator<DatabaseAdapter_TermType>( m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating term type iterator: %s"), *m_errorhnd, 0);
+}
+
+ValueIteratorInterface* StorageClient::createTermValueIterator() const
+{
+	try
+	{
+		return new ValueIterator<DatabaseAdapter_TermValue>( m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating term value iterator: %s"), *m_errorhnd, 0);
+}
+
+ValueIteratorInterface* StorageClient::createDocIdIterator() const
+{
+	try
+	{
+		return new ValueIterator<DatabaseAdapter_DocId>( m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating document id iterator: %s"), *m_errorhnd, 0);
+}
+
+ValueIteratorInterface* StorageClient::createUserNameIterator() const
+{
+	try
+	{
+		return new ValueIterator<DatabaseAdapter_UserName>( m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating user name iterator: %s"), *m_errorhnd, 0);
+}
+
 Index StorageClient::documentStatistics(
 		const Index& docno,
 		const DocumentStatisticsType& stat,
@@ -817,12 +854,12 @@ PeerMessageQueueInterface* StorageClient::createPeerMessageQueue()
 		{
 			throw strus::runtime_error(_TXT( "no peer message processor defined"));
 		}
+		TransactionLock lock( this);
 		if (!m_peerMessageBuilder.get())
 		{
 			PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
 			m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
 		}
-		TransactionLock lock( this);
 		fillDocumentFrequencyCache();
 		return new PeerMessageQueue( this, m_database.get(), m_peerMessageProc, m_errorhnd);
 	}

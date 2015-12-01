@@ -45,6 +45,8 @@ class ForwardIteratorInterface;
 /// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
+class ValueIteratorInterface;
+/// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
 class StorageDocumentInterface;
@@ -130,6 +132,22 @@ public:
 	/// \param[in] docid document id of the document inserted
 	/// \return the document number or 0, if it does not exist
 	virtual Index documentNumber( const std::string& docid) const=0;
+
+	/// \brief Create an iterator on the term types inserted
+	/// \return the iterator
+	virtual ValueIteratorInterface* createTermTypeIterator() const=0;
+
+	/// \brief Create an iterator on the term value inserted
+	/// \return the iterator
+	virtual ValueIteratorInterface* createTermValueIterator() const=0;
+
+	/// \brief Create an iterator on the document identifiers inserted
+	/// \return the iterator
+	virtual ValueIteratorInterface* createDocIdIterator() const=0;
+
+	/// \brief Create an iterator on the user names used in document access restrictions
+	/// \return the iterator
+	virtual ValueIteratorInterface* createUserNameIterator() const=0;
 
 	/// \brief Enumeration of document statistics
 	enum DocumentStatisticsType

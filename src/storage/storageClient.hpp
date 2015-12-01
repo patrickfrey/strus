@@ -129,6 +129,14 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
+	virtual ValueIteratorInterface* createTermTypeIterator() const;
+
+	virtual ValueIteratorInterface* createTermValueIterator() const;
+
+	virtual ValueIteratorInterface* createDocIdIterator() const;
+
+	virtual ValueIteratorInterface* createUserNameIterator() const;
+
 	virtual Index documentStatistics(
 			const Index& docno,
 			const DocumentStatisticsType& stat,

@@ -63,6 +63,11 @@ public:
 	virtual void push( const char* inmsg, std::size_t inmsgsize, const char*& outmsg, std::size_t& outmsgsize);
 	virtual bool fetch( const char*& msg, std::size_t& msgsize);
 
+	virtual const PeerMessageProcessorInterface* getMessageProcessor() const
+	{
+		return m_proc;
+	}
+
 private:
 	StorageClient* m_storage;					///< storage related
 	DatabaseClientInterface* m_database;				///< database related

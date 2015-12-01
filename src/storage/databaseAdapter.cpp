@@ -64,6 +64,15 @@ bool DatabaseAdapter_StringIndex::Cursor::loadNext( std::string& key, Index& val
 	return getData( dbkey, key, value);
 }
 
+bool DatabaseAdapter_StringIndex::Cursor::skip( const std::string& key, std::string& keyfound, Index& value)
+{
+	std::string dbkey;
+	dbkey.push_back( m_prefix);
+	dbkey.append( key);
+	DatabaseCursorInterface::Slice reskey( m_cursor->seekUpperBound( dbkey.c_str(), dbkey.size(), 1));
+	return getData( reskey, keyfound, value);
+}
+
 Index DatabaseAdapter_StringIndex::Reader::get( const std::string& key) const
 {
 	Index rt;

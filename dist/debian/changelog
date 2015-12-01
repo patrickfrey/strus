@@ -1,3 +1,7 @@
+strus (0.2.6-1) unstable; urgency=low
+  * added interfaces for introspection (user names, docids, term types, term values)
+ -- patrickfrey <patrickpfrey@yahoo.com>  Tue, 1 Dec 2015 20:54:00 +0100
+
 strus (0.2.5-1) unstable; urgency=low
   * define method PeerMessageQueue start for register/deregister of peers
   * change way how peer message processor is passed to storage: Now an argument of createClient and an argument of StorageClient::createPeerMessageQueue

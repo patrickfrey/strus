@@ -42,6 +42,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
+#include "strus/valueIteratorInterface.hpp"
 #include "private/utils.hpp"
 #include <string>
 #include <cstring>
@@ -165,6 +166,67 @@ static void testDeleteNonExistingDoc()
 	}
 }
 
+static void testTermTypeIterator()
+{
+	Storage storage;
+	storage.open( "path=storage");
+	Transaction transactionInsert( storage);
+	std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert.tri->createDocument( "ABC"));
+	for (unsigned int ii=0; ii<100; ++ii)
+	{
+		std::string key( "w");
+		key.push_back( '0' + (ii % 10));
+		key.push_back( '0' + (ii / 10) % 10);
+
+		doc->addSearchIndexTerm( key, "hello", 1);
+		doc->addSearchIndexTerm( key, "world", 2);
+	}
+	doc->done();
+	transactionInsert.commit();
+
+	std::auto_ptr<strus::ValueIteratorInterface> itr( storage.sci->createTermTypeIterator());
+	std::vector<std::string> types = itr->fetchValues( 3);
+	std::string res;
+	while (types.size() > 0)
+	{
+		std::vector<std::string>::const_iterator ti = types.begin(), te = types.end();
+		for (; ti != te; ++ti)
+		{
+			res.append( *ti);
+			res.push_back( ' ');
+		}
+		types = itr->fetchValues( 3);
+	}
+	itr->skip( "w61", 3);
+	types = itr->fetchValues( 2);
+	std::vector<std::string>::const_iterator ti = types.begin(), te = types.end();
+	for (; ti != te; ++ti)
+	{
+		res.append( *ti);
+		res.push_back( ' ');
+	}
+	itr->skip( "w6", 3);
+	types = itr->fetchValues( 2);
+	ti = types.begin(), te = types.end();
+	for (; ti != te; ++ti)
+	{
+		res.append( *ti);
+		res.push_back( ' ');
+	}
+	itr->skip( "w", 3);
+	types = itr->fetchValues( 2);
+	ti = types.begin(), te = types.end();
+	for (; ti != te; ++ti)
+	{
+		res.append( *ti);
+		res.push_back( ' ');
+	}
+	if (res != "w00 w01 w02 w03 w04 w05 w06 w07 w08 w09 w10 w11 w12 w13 w14 w15 w16 w17 w18 w19 w20 w21 w22 w23 w24 w25 w26 w27 w28 w29 w30 w31 w32 w33 w34 w35 w36 w37 w38 w39 w40 w41 w42 w43 w44 w45 w46 w47 w48 w49 w50 w51 w52 w53 w54 w55 w56 w57 w58 w59 w60 w61 w62 w63 w64 w65 w66 w67 w68 w69 w70 w71 w72 w73 w74 w75 w76 w77 w78 w79 w80 w81 w82 w83 w84 w85 w86 w87 w88 w89 w90 w91 w92 w93 w94 w95 w96 w97 w98 w99 w61 w62 w60 w61 w00 w01 ")
+	{
+		throw std::runtime_error("result not as expected");
+	}
+}
+
 #define RUN_TEST( idx, TestName)\
 	try\
 	{\
@@ -232,6 +294,7 @@ int main( int argc, const char* argv[])
 		switch (ti)
 		{
 			case 1: RUN_TEST( ti, DeleteNonExistingDoc ) break;
+			case 2: RUN_TEST( ti, TermTypeIterator ) break;
 			default: goto TESTS_DONE;
 		}
 		if (test_index) break;
