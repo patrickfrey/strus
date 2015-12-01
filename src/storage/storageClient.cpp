@@ -824,7 +824,7 @@ PeerMessageQueueInterface* StorageClient::createPeerMessageQueue()
 		}
 		TransactionLock lock( this);
 		fillDocumentFrequencyCache();
-		return new PeerMessageQueue( this, m_database.get(), m_peerMessageProc, m_nof_documents.value(), m_errorhnd);
+		return new PeerMessageQueue( this, m_database.get(), m_peerMessageProc, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message queues: %s"), *m_errorhnd, 0);
 }

@@ -51,16 +51,19 @@ public:
 	/// \brief Destructor
 	virtual ~PeerMessageQueueInterface(){}
 
-	/// \brief Push a message blob from another peer storage
-	/// \param[in] inmsg pointer to message blob from peer
+	/// \brief Notify initialization/deinitialization, fetching local statistics to populate to other peers
+	/// \param[in] sign of the statistics to populate, true = positive (on initialization), false = negative (on deinitialization)
+	virtual void start( bool sign)=0;
+
+	/// \brief Push a message from another peer storage
+	/// \param[in] inmsg pointer to message from peer storage
 	/// \param[in] inmsgsize size of msg blob in bytes
 	/// \param[out] outmsg pointer to message to the sender peer of the last message pushed
 	/// \param[out] outmsgsize size of outmsg in bytes
-	/// \return true, if there is at least one reply message to fetch with fetchPeerReply(const char*&,std::size_t&)
 	virtual void push( const char* inmsg, std::size_t inmsgsize, const char*& outmsg, std::size_t& outmsgsize)=0;
 
 	/// \brief Fetches the next message to distribute to all other peers
-	/// \param[in] msg pointer to message blob for other peers (interpretation depends on defined peer message processor)
+	/// \param[in] msg pointer to message for other peers
 	/// \param[in] msgsize size of msg blob in bytes
 	/// \return false if there is no chunk of a message left or an error occurred
 	virtual bool fetch( const char*& msg, std::size_t& msgsize)=0;

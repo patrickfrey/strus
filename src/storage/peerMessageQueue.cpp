@@ -45,7 +45,6 @@ PeerMessageQueue::PeerMessageQueue(
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
 		const PeerMessageProcessorInterface* proc_,
-		const Index& nofDocuments_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
@@ -56,9 +55,16 @@ PeerMessageQueue::PeerMessageQueue(
 {
 	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
 	m_peerMessageBuilder.reset( m_proc->createBuilder( options));
-	if (!m_peerMessageBuilder.get()) throw strus::runtime_error(_TXT("error creating peer message builder"));
+	if (!m_peerMessageBuilder.get())
+	{
+		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());
+	}
+}
 
-	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofDocuments_);
+void PeerMessageQueue::start( bool sign)
+{
+	int nofdocs = m_storage->localNofDocumentsInserted();
+	m_peerMessageBuilder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
 	m_peerMessageBuilder->start();
 
 	std::map<Index,std::size_t> typenomap;
@@ -67,7 +73,7 @@ PeerMessageQueue::PeerMessageQueue(
 
 	// Fill a map with the strings of all types in the collection:
 	{
-		DatabaseAdapter_TermType::Cursor typecursor( database_);
+		DatabaseAdapter_TermType::Cursor typecursor( m_database);
 		Index typeno;
 		std::string typestr;
 		for (bool more=typecursor.loadFirst( typestr, typeno); more;
@@ -80,7 +86,7 @@ PeerMessageQueue::PeerMessageQueue(
 	}
 	// Fill a map with the strings of all terms in the collection:
 	{
-		DatabaseAdapter_TermValue::Cursor termcursor( database_);
+		DatabaseAdapter_TermValue::Cursor termcursor( m_database);
 		Index termno;
 		std::string termstr;
 		for (bool more=termcursor.loadFirst( termstr, termno); more;
@@ -97,7 +103,7 @@ PeerMessageQueue::PeerMessageQueue(
 		Index termno;
 		Index df;
 
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( database_);
+		DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
 		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
 			more=dfcursor.loadNext( typeno, termno, df))
 		{
@@ -110,7 +116,7 @@ PeerMessageQueue::PeerMessageQueue(
 			if (ti == termnomap.end()) throw strus::runtime_error( _TXT( "encountered undefined term when populating df's"));
 			const char* termnam = strings.c_str() + ti->second;
 	
-			m_peerMessageBuilder->addDfChange( typenam, termnam, df, true/*isNew*/);
+			m_peerMessageBuilder->addDfChange( typenam, termnam, sign?df:-df, sign/*isNew*/);
 		}
 	}
 }
@@ -141,7 +147,12 @@ bool PeerMessageQueue::fetch( const char*& msg, std::size_t& msgsize)
 	{
 		if (m_peerMessageBuilder.get())
 		{
-			bool rt = m_peerMessageBuilder->fetchMessage( msg, msgsize);
+			bool rt = true;
+			do
+			{
+				rt = m_peerMessageBuilder->fetchMessage( msg, msgsize);
+			}
+			while (rt && msgsize == 0);
 			if (rt)
 			{
 				return rt;
