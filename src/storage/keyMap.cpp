@@ -71,13 +71,13 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	if (m_dbadapter.load( name,rt))
 	{
 		(void)m_map.set( name.c_str(), rt);
-		if (m_invmap) m_invmap->set( data, name);
+		if (m_invmap) m_invmap->set( rt, name);
 		isNew = false;
 	}
 	else if (m_allocator->immediate())
 	{
 		rt = m_allocator->getOrCreate( name, isNew);
-		if (m_invmap) m_invmap->set( data, name);
+		if (m_invmap) m_invmap->set( rt, name);
 	}
 	else
 	{
