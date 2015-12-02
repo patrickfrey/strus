@@ -175,6 +175,7 @@ public:
 
 	/// \brief Create an interface to allocate document numbers in ranges
 	/// \return the interface to allocate document numbers from this storage
+	/// \note Allocate document numbers in ranges is inevitable for fast insert of documents known to be new
 	virtual DocnoRangeAllocatorInterface* createDocnoRangeAllocator()=0;
 
 	/// \brief Create an insert/update transaction object
