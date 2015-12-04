@@ -26,52 +26,40 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_POSINFO_ITERATOR_HPP_INCLUDED
-#define _STRUS_POSINFO_ITERATOR_HPP_INCLUDED
-#include "strus/reference.hpp"
-#include "posinfoBlock.hpp"
-#include "databaseAdapter.hpp"
+#ifndef _STRUS_TERM_STATISTICS_HPP_INCLUDED
+#define _STRUS_TERM_STATISTICS_HPP_INCLUDED
+#include "strus/index.hpp"
 
 namespace strus {
 
-/// \brief Forward declaration
-class DatabaseClientInterface;
-/// \brief Forward declaration
-class StorageClient;
-
-class PosinfoIterator
+/// \brief Global term statistics, if passed down with the query
+/// \note If values of this structure is undefined, then the value stored is used
+class TermStatistics
 {
 public:
-	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_, GlobalCounter documentFrequency_=-1);
-	~PosinfoIterator(){}
+	/// \brief Constructor
+	TermStatistics()
+		:m_df(-1){}
+	/// \brief Copy constructor
+	TermStatistics( const TermStatistics& o)
+		:m_df(o.m_df){}
 
-	Index skipDoc( const Index& docno_);
-	Index skipPos( const Index& firstpos_);
+	/// \brief Evaluate if this structure is defined
+	bool defined() const					{return m_df >= 0;}
 
-	Index docno() const					{return m_docno;}
-	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
+	/// \brief Get the global document frequency
+	/// \return the global document frequency or -1 for undefined, if undefined then the value cache for the global dfs in the document frequency or what is stored in the local storage)
+	GlobalCounter documentFrequency() const			{return m_df;}
 
-	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
-	GlobalCounter documentFrequency() const;
-	unsigned int frequency() const;
+	/// \brief Set the global document frequency to use for the associated term
+	/// \param[in] df_ the global document frequency value
+	void setDocumentFrequency( const GlobalCounter& df_)	{m_df = df_;}
 
 private:
-	bool loadBlock( const Index& elemno_);
-
-private:
-	const StorageClient* m_storage;
-	DatabaseAdapter_PosinfoBlock::Cursor m_dbadapter;
-	PosinfoBlock m_posinfoBlk;
-	PosinfoBlock::Cursor m_posinfoCursor;
-	PosinfoBlock::PositionScanner m_positionScanner;
-	Index m_termtypeno;
-	Index m_termvalueno;
-	Index m_docno;
-	Index m_docno_start;
-	Index m_docno_end;
-	mutable GlobalCounter m_documentFrequency;
+	GlobalCounter m_df;		///< global document frequency (-1 for undefined, if undefined then the value cache for the global dfs in the document frequency or what is stored in the local storage)
 };
 
-}
+}//namespace
 #endif
+
 

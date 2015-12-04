@@ -88,6 +88,13 @@ public:
 	virtual void setMinRank( std::size_t minRank_);
 	virtual void addUserName( const std::string& username_);
 
+	virtual void defineTermStatistics(
+			const std::string& type_,
+			const std::string& value_,
+			const TermStatistics& stats_);
+	virtual void defineGlobalStatistics(
+			const GlobalStatistics& stats_);
+
 	virtual std::vector<ResultDocument> evaluate();
 
 public:
@@ -131,6 +138,8 @@ public:
 		Term( const std::string& t, const std::string& v)
 			:type(t),value(v){}
 
+		bool operator<( const Term& o) const;
+
 		std::string type;	///< term type name
 		std::string value;	///< term value
 	};
@@ -171,6 +180,7 @@ public:
 	void print( std::ostream& out) const;
 
 private:
+	const TermStatistics& getTermStatistics( const std::string& type_, const std::string& value_) const;
 	typedef std::map<NodeAddress,PostingIteratorInterface*> NodePostingsMap;
 
 	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodePostingsMap& nodePostingsMap);
@@ -200,6 +210,8 @@ private:
 	std::vector<std::string> m_usernames;
 	std::vector<Index> m_evalset_docnolist;
 	bool m_evalset_defined;
+	std::map<Term,TermStatistics> m_termstatsmap;
+	GlobalStatistics m_globstats;
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

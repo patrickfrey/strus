@@ -26,52 +26,36 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_POSINFO_ITERATOR_HPP_INCLUDED
-#define _STRUS_POSINFO_ITERATOR_HPP_INCLUDED
-#include "strus/reference.hpp"
-#include "posinfoBlock.hpp"
-#include "databaseAdapter.hpp"
+#ifndef _STRUS_GLOBAL_STATISTICS_HPP_INCLUDED
+#define _STRUS_GLOBAL_STATISTICS_HPP_INCLUDED
+#include "strus/index.hpp"
 
 namespace strus {
 
-/// \brief Forward declaration
-class DatabaseClientInterface;
-/// \brief Forward declaration
-class StorageClient;
-
-class PosinfoIterator
+/// \brief Global document statistics, if passed down with the query
+/// \note If values of this structure is undefined, then the storage values are used
+struct GlobalStatistics
 {
-public:
-	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_, GlobalCounter documentFrequency_=-1);
-	~PosinfoIterator(){}
+	/// \brief Default constructor
+	GlobalStatistics()
+		:m_nofDocumentsInserted(-1){}
+	/// \brief Constructor
+	explicit GlobalStatistics( const GlobalCounter& nofDocumentsInserted_)
+		:m_nofDocumentsInserted(nofDocumentsInserted_){}
+	/// \brief Copy constructor
+	GlobalStatistics( const GlobalStatistics& o)
+		:m_nofDocumentsInserted(o.m_nofDocumentsInserted){}
 
-	Index skipDoc( const Index& docno_);
-	Index skipPos( const Index& firstpos_);
+	bool defined() const					{return m_nofDocumentsInserted >= 0;}
 
-	Index docno() const					{return m_docno;}
-	Index posno() const					{return m_positionScanner.initialized()?m_positionScanner.curpos():0;}
-
-	bool isCloseCandidate( const Index& docno_) const	{return m_docno_start <= docno_ && m_docno_end >= docno_;}
-	GlobalCounter documentFrequency() const;
-	unsigned int frequency() const;
-
-private:
-	bool loadBlock( const Index& elemno_);
+	GlobalCounter nofDocumentsInserted() const		{return m_nofDocumentsInserted;}
+	void setNofDocumentsInserted( const GlobalCounter& n)	{m_nofDocumentsInserted = n;}
 
 private:
-	const StorageClient* m_storage;
-	DatabaseAdapter_PosinfoBlock::Cursor m_dbadapter;
-	PosinfoBlock m_posinfoBlk;
-	PosinfoBlock::Cursor m_posinfoCursor;
-	PosinfoBlock::PositionScanner m_positionScanner;
-	Index m_termtypeno;
-	Index m_termvalueno;
-	Index m_docno;
-	Index m_docno_start;
-	Index m_docno_end;
-	mutable GlobalCounter m_documentFrequency;
+	GlobalCounter m_nofDocumentsInserted;	///< global number of documents inserted (-1 for undefined, if undefined then the storage value of the global number of documents is used)
 };
 
-}
+}//namespace
 #endif
+
 

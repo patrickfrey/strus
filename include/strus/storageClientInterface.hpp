@@ -31,6 +31,7 @@
 #ifndef _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/termStatistics.hpp"
 #include <string>
 #include <vector>
 #include <ostream>
@@ -81,11 +82,13 @@ public:
 	/// \brief Create an iterator on the occurrencies of a term in the storage
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
+	/// \param[in] stats (optional) global term statistics passed down with the query. if not defined, then the values are used defined by the local storage and the notifications from other peer storages
 	/// \return the created iterator reference to be disposed with delete by the caller
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
 			const std::string& type,
-			const std::string& value) const=0;
+			const std::string& value,
+			const TermStatistics& stats=TermStatistics()) const=0;
 
 	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
 	/// \param[in] type type name of the term to be inspected

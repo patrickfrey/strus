@@ -91,7 +91,8 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface* metadata_) const;
+			MetaDataReaderInterface* metadata_,
+			const GlobalStatistics&) const;
 
 	virtual std::string tostring() const;
 

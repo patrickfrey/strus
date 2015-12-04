@@ -59,6 +59,7 @@ public:
 		float k1_,
 		float b_,
 		float avgDocLength_,
+		float nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
 		ErrorBufferInterface* errorhnd_);
 
@@ -109,7 +110,8 @@ public:
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata) const;
+			MetaDataReaderInterface* metadata,
+			const GlobalStatistics& stats) const;
 
 	virtual std::string tostring() const;
 

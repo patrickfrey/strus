@@ -32,7 +32,7 @@
 
 using namespace strus;
 
-PosinfoIterator::PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_)
+PosinfoIterator::PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_, GlobalCounter documentFrequency_)
 	:m_storage(storage_)
 	,m_dbadapter(database_,termtypeno_,termvalueno_)
 	,m_termtypeno(termtypeno_)
@@ -40,7 +40,7 @@ PosinfoIterator::PosinfoIterator( const StorageClient* storage_, const DatabaseC
 	,m_docno(0)
 	,m_docno_start(0)
 	,m_docno_end(0)
-	,m_documentFrequency(-1){}
+	,m_documentFrequency(documentFrequency_){}
 
 
 Index PosinfoIterator::skipDoc( const Index& docno_)

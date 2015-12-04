@@ -97,6 +97,16 @@ Query::Query( const Query& o)
 	,m_errorhnd(o.m_errorhnd)
 {}
 
+bool Query::Term::operator<( const Term& o) const
+{
+	int cmpres;
+	if (type.size() != o.type.size()) return type.size() < o.type.size();
+	if ((cmpres = std::strcmp( type.c_str(), o.type.c_str())) < 0) return cmpres;
+	if (value.size() != o.value.size()) return value.size() < o.value.size();
+	if ((cmpres = std::strcmp( value.c_str(), o.value.c_str())) < 0) return cmpres;
+	return 0;
+}
+
 void Query::printStack( std::ostream& out, std::size_t indent) const
 {
 	std::vector<NodeAddress>::const_iterator si = m_stack.begin(), se = m_stack.end();
@@ -359,7 +369,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createTermPostingIterator(
-							term.type, term.value));
+							term.type, term.value, getTermStatistics( term.type, term.value)));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
 				nodePostingsMap[ *ni] = joinargs.back().get();
@@ -388,7 +398,8 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			rt = m_storage->createTermPostingIterator( term.type, term.value);
+			rt = m_storage->createTermPostingIterator(
+				term.type, term.value, getTermStatistics( term.type, term.value));
 			if (!rt) break;
 			nodePostingsMap[ nodeadr] = rt;
 			break;
@@ -445,6 +456,29 @@ void Query::collectSummarizationVariables(
 			break;
 		}
 	}
+}
+
+void Query::defineTermStatistics(
+		const std::string& type_,
+		const std::string& value_,
+		const TermStatistics& stats_)
+{
+	m_termstatsmap[ Term( type_, value_)] = stats_;
+}
+
+void Query::defineGlobalStatistics(
+		const GlobalStatistics& stats_)
+{
+	m_globstats = stats_;
+}
+
+const TermStatistics& Query::getTermStatistics( const std::string& type_, const std::string& value_) const
+{
+	static TermStatistics undef;
+	if (m_termstatsmap.empty()) return undef;
+	std::map<Term,TermStatistics>::const_iterator si = m_termstatsmap.find( Term( type_, value_));
+	if (si == m_termstatsmap.end()) return undef;
+	return si->second;
 }
 
 std::vector<ResultDocument> Query::evaluate()
@@ -529,7 +563,8 @@ std::vector<ResultDocument> Query::evaluate()
 			for (; wi != we; ++wi)
 			{
 				std::auto_ptr<WeightingFunctionContextInterface> execContext(
-					wi->function()->createFunctionContext( m_storage, m_metaDataReader.get()));
+					wi->function()->createFunctionContext(
+						m_storage, m_metaDataReader.get(), m_globstats));
 				if (!execContext.get()) throw strus::runtime_error(_TXT("error creating weighting function context"));
 	
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
