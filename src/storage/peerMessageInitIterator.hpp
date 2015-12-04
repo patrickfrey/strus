@@ -26,56 +26,49 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of input and an output queue for the peer messages of the StorageClient
-/// \file peerMessageQueue.hpp
-#ifndef _STRUS_PEER_MESSAGE_QUEUE_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_QUEUE_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageQueueInterface.hpp"
+/// \brief Implementation of the iterator on peer messages of the local storage for other peers in a registration phase
+/// \file peerMessageInitIterator.hpp
+#ifndef _STRUS_PEER_MESSAGE_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_PEER_MESSAGE_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/peerMessageIteratorInterface.hpp"
+#include "strus/peerMessageBuilderInterface.hpp"
 #include "strus/reference.hpp"
-#include "storageClient.hpp"
-#include <string>
-#include <vector>
 
 namespace strus
 {
-
 /// \brief Forward declaration
-class PeerMessageViewerInterface;
+class ErrorBufferInterface;
 /// \brief Forward declaration
-class PeerMessageBuilderInterface;
+class StorageClientInterface;
+/// \brief Forward declaration
+class DatabaseClientInterface;
 /// \brief Forward declaration
 class PeerMessageProcessorInterface;
+/// \brief Forward declaration
+class PeerMessageBuilderInterface;
 
-/// \brief Implementation of input and an output queue for the peer messages of the StorageClient
-class PeerMessageQueue
-	:public PeerMessageQueueInterface
+/// \brief Interface for a iterator on peer messages of the local storage (state) for other peers
+/// \note this interface is used for distributing a search index
+class PeerMessageInitIterator
+	:public PeerMessageIteratorInterface
 {
 
 public:
-	PeerMessageQueue(
-			StorageClient* storage_,
+	PeerMessageInitIterator(
+			StorageClientInterface* storage_,
 			DatabaseClientInterface* database_,
-			const PeerMessageProcessorInterface* proc_,
+			bool sign,
 			ErrorBufferInterface* errorhnd_);
-	virtual ~PeerMessageQueue();
 
-	virtual void start( bool sign);
-	virtual void push( const char* inmsg, std::size_t inmsgsize, const char*& outmsg, std::size_t& outmsgsize);
-	virtual bool fetch( const char*& msg, std::size_t& msgsize);
+	virtual ~PeerMessageInitIterator(){}
 
-	virtual const PeerMessageProcessorInterface* getMessageProcessor() const
-	{
-		return m_proc;
-	}
+	virtual bool getNext( const char*& msg, std::size_t& msgsize);
 
 private:
-	StorageClient* m_storage;					///< storage related
+	StorageClientInterface* m_storage;				///< storage related
 	DatabaseClientInterface* m_database;				///< database related
 	const PeerMessageProcessorInterface* m_proc;			///< interface for processing messages (packing,unpacking)
 	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder;	///< peer message builder
-	std::string m_peerReplyMessageBuffer;				///< buffer for peer message replies
-	std::vector<std::string> m_bufferedPeerMessageList;		///< queue of peer messages that came in before the initial statistics were processed at startup.
-	std::size_t m_bufferedPeerMessageIdx;				///< fetch index in m_bufferedPeerMessageList queue
 	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
 };
 

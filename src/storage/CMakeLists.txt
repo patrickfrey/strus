@@ -30,7 +30,8 @@ set( libstrus_storage_source_files
 	metaDataRecord.cpp
 	nullIterator.cpp
 	peerStorageTransaction.cpp
-	peerMessageQueue.cpp
+	peerMessageInitIterator.cpp
+	peerMessageUpdateIterator.cpp
 	posinfoBlock.cpp
 	posinfoIterator.cpp
 	postingIterator.cpp

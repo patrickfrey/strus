@@ -53,7 +53,9 @@ class StorageDocumentInterface;
 /// \brief Forward declaration
 class PeerMessageProcessorInterface;
 /// \brief Forward declaration
-class PeerMessageQueueInterface;
+class PeerStorageTransactionInterface;
+/// \brief Forward declaration
+class PeerMessageIteratorInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
 /// \brief Forward declaration
@@ -182,10 +184,22 @@ public:
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Creates the interface with the queues to use for feeding the storage client with messages containing feature statistics from other peers and for fetching the messages to send to other peers.
-	/// \return the peer message queue interface
-	/// \remark Only one peer message queue can exist at one moment
-	virtual PeerMessageQueueInterface* createPeerMessageQueue()=0;
+	/// \brief Creates an iterator on the storage peer messages for initialization
+	/// \param[in] sign sign of the df and nof documents increments (true=positive in registering phase, false=negative in deregistering phase)
+	/// \return the iterator on the peer message blobs used for initialization of other peers
+	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator( bool sign)=0;
+
+	/// \brief Creates an iterator on the storage peer messages created by updates of this storage
+	/// \return the iterator on the peer message blobs used for initialization of other peers
+	virtual PeerMessageIteratorInterface* createUpdatePeerMessageIterator()=0;
+
+	/// \brief Creates a transaction for updating statistics of this storage by messages from other peers
+	/// \return the transaction interface
+	virtual PeerStorageTransactionInterface* createPeerStorageTransaction()=0;
+
+	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
+	/// \return the message processor interface
+	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check

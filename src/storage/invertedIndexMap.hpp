@@ -33,6 +33,7 @@
 #include "booleanBlock.hpp"
 #include "invTermBlock.hpp"
 #include "documentFrequencyMap.hpp"
+#include "documentFrequencyCache.hpp"
 #include "databaseAdapter.hpp"
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"
@@ -64,6 +65,7 @@ public:
 	void getWriteBatch(
 			DatabaseTransactionInterface* transaction,
 			PeerMessageBuilderInterface* peerMessageBuilder,
+			DocumentFrequencyCache::Batch* dfbatch,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv);
 

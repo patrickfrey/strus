@@ -49,14 +49,12 @@ using namespace strus;
 StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
-		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
 		const conotrie::CompactNodeTrie* termnomap_,
 		const Index& maxtypeno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_database(database_)
-	,m_peerMessageBuilder(peerMessageBuilder_)
 	,m_metadescr(metadescr_)
 	,m_attributeMap(database_)
 	,m_metaDataMap(database_,metadescr_)
@@ -73,7 +71,7 @@ StorageTransaction::StorageTransaction(
 	,m_rollback(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (m_peerMessageBuilder)
+	if (m_storage->getPeerMessageProcessor() != 0)
 	{
 		m_termTypeMap.defineInv( &m_termTypeMapInv);
 		m_termValueMap.defineInv( &m_termValueMapInv);
@@ -326,6 +324,9 @@ bool StorageTransaction::commit()
 		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
 
+		PeerMessageBuilderInterface* peerMessageBuilder = m_storage->getPeerMessageBuilder();
+		DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
+
 		std::auto_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 		if (!transaction.get())
 		{
@@ -342,10 +343,12 @@ bool StorageTransaction::commit()
 	
 		m_invertedIndexMap.renameNewTermNumbers( termnoUnknownMap);
 
-		PeerMessageBuilderScope peerMessageBuilderScope( m_peerMessageBuilder);
+		PeerMessageBuilderScope peerMessageBuilderScope( peerMessageBuilder);
+		DocumentFrequencyCache::Batch dfbatch;
+
 		m_invertedIndexMap.getWriteBatch(
 				transaction.get(),
-				m_peerMessageBuilder,
+				peerMessageBuilder, dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
 				m_termTypeMapInv, m_termValueMapInv);
 
 		m_forwardIndexMap.getWriteBatch( transaction.get());
@@ -359,7 +362,15 @@ bool StorageTransaction::commit()
 		}
 
 		m_storage->getVariablesWriteBatch( transaction.get(), m_nof_documents);
-		transaction->commit();
+		if (!transaction->commit())
+		{
+			m_errorhnd->explain(_TXT("error in database transaction commit: %s"));
+			return false;
+		}
+		if (dfcache)
+		{
+			dfcache->writeBatch( dfbatch);
+		}
 		m_storage->declareNofDocumentsInserted( m_nof_documents);
 		m_storage->releaseTransaction( refreshList);
 		peerMessageBuilderScope.done();

@@ -190,6 +190,7 @@ void InvertedIndexMap::renameNewTermNumbers( const std::map<Index,Index>& rename
 void InvertedIndexMap::getWriteBatch(
 			DatabaseTransactionInterface* transaction,
 			PeerMessageBuilderInterface* peerMessageBuilder,
+			DocumentFrequencyCache::Batch* dfbatch,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv)
 {
@@ -277,7 +278,7 @@ void InvertedIndexMap::getWriteBatch(
 	}
 
 	// [4] Get df writes (and populate df's to other peers, if peerMessageBuilder defined):
-	m_dfmap.getWriteBatch( transaction, peerMessageBuilder, termTypeMapInv, termValueMapInv);
+	m_dfmap.getWriteBatch( transaction, peerMessageBuilder, dfbatch, termTypeMapInv, termValueMapInv);
 
 	// [5] Clear the maps:
 	clear();

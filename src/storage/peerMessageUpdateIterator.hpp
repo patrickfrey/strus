@@ -26,36 +26,40 @@
 
 --------------------------------------------------------------------
 */
-///\brief Class that manages the population of statistics to other peers
-///\file initialStatsPopulateState.cpp
-#include "initialStatsPopulateState.hpp"
-#include "private/internationalization.hpp"
-#include "strus/databaseClientInterface.hpp"
-#include "databaseAdapter.hpp"
-#include <vector>
-#include <string>
-#include <map>
+/// \brief Implementation of the iterators on peer messages of the local storage for updating other peers
+/// \file peerMessageUpdateIterator.hpp
+#ifndef _STRUS_PEER_MESSAGE_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_PEER_MESSAGE_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/peerMessageIteratorInterface.hpp"
 
-using namespace strus;
-
-InitialStatsPopulateState::InitialStatsPopulateState( const PeerMessageProcessorInterface* peermsgproc_, DatabaseClientInterface* dbclient, const Index& nofDocuments_)
+namespace strus
 {
-}
 
-bool InitialStatsPopulateState::fetchMessage( const char* blk, std::size_t blksize)
-{
-	return m_peerMessageBuilder->fetchMessage( blk, blksize);
-}
+/// \brief Forward declaration
+class ErrorBufferInterface;
+/// \brief Forward declaration
+class StorageClient;
 
-void InitialStatsPopulateState::done()
+/// \brief Interface for a iterator on peer messages of the local storage (updates) for other peers
+/// \note this interface is used for distributing a search index
+class PeerMessageUpdateIterator
+	:public PeerMessageIteratorInterface
 {
-	const char* blk;
-	std::size_t blksize;
-	if (m_peerMessageBuilder->fetchMessage( blk, blksize))
-	{
-		throw strus::runtime_error( _TXT( "closing peer message builder for initial messages without consuming all messages"));
-	}
-	m_peerMessageBuilder.reset();
-	m_peermsgproc = 0;
-}
+
+public:
+	PeerMessageUpdateIterator(
+			StorageClient* storage_,
+			ErrorBufferInterface* errorhnd_);
+
+	virtual ~PeerMessageUpdateIterator(){}
+
+	virtual bool getNext( const char*& msg, std::size_t& msgsize);
+
+private:
+	StorageClient* m_storage;					///< storage related
+	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
+};
+
+}//namespace
+#endif
 

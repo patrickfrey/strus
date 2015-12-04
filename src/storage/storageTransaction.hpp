@@ -57,8 +57,6 @@ class StorageClient;
 /// \brief Forward declaration
 class DatabaseClientInterface;
 /// \brief Forward declaration
-class PeerMessageBuilderInterface;
-/// \brief Forward declaration
 class ErrorBufferInterface;
 
 
@@ -71,7 +69,6 @@ public:
 	StorageTransaction( 
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
-		PeerMessageBuilderInterface* peerMessageBuilder_,
 		const MetaDataDescription* metadescr_,
 		const conotrie::CompactNodeTrie* termnomap_,
 		const Index& maxtypeno_,
@@ -138,7 +135,6 @@ public:/*Document*/
 private:
 	StorageClient* m_storage;				///< Storage to call refresh after commit or rollback
 	DatabaseClientInterface* m_database;			///< database handle
-	PeerMessageBuilderInterface* m_peerMessageBuilder;	///< interface to populate global statistics
 	const MetaDataDescription* m_metadescr;			///< description of metadata
 
 	AttributeMap m_attributeMap;				///< map of document attributes for writing

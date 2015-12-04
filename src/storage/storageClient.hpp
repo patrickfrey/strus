@@ -112,7 +112,13 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual PeerMessageQueueInterface* createPeerMessageQueue();
+	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator( bool sign);
+
+	virtual PeerMessageIteratorInterface* createUpdatePeerMessageIterator();
+
+	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
+
+	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const;
 
 	virtual GlobalCounter globalNofDocumentsInserted() const;
 
@@ -182,6 +188,7 @@ public:/*StorageTransaction*/
 
 	Index allocDocnoRange( std::size_t nofDocuments);
 	bool deallocDocnoRange( const Index& docno, const Index& size);
+	PeerMessageBuilderInterface* getPeerMessageBuilder();
 
 	friend class TransactionLock;
 	class TransactionLock
@@ -209,9 +216,11 @@ public:/*StorageDocumentChecker*/
 	IndexSetIterator getAclIterator( const Index& docno) const;
 	IndexSetIterator getUserAclIterator( const Index& userno) const;
 
-public:/*PeerMessageQueue*/
+public:/*PeerMessageIterator*/
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
+
+public:/*PeerMessageIterator*/
 	///\brief Fetch a message from a storage update transaction
 	bool fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize);
 

@@ -82,6 +82,7 @@ void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& re
 void DocumentFrequencyMap::getWriteBatch(
 		DatabaseTransactionInterface* transaction,
 		PeerMessageBuilderInterface* peerMessageBuilder,
+		DocumentFrequencyCache::Batch* dfbatch,
 		const KeyMapInv& termTypeMapInv,
 		const KeyMapInv& termValueMapInv)
 {
@@ -107,6 +108,10 @@ void DocumentFrequencyMap::getWriteBatch(
 
 		DatabaseAdapter_DocFrequency::store(
 				transaction, mi->first.first/*typeno*/, mi->first.second/*termno*/, df);
+		if (dfbatch)
+		{
+			dfbatch->put( mi->first.first/*typeno*/, mi->first.second/*termno*/, mi->second);
+		}
 	}
 	m_map.clear();
 }

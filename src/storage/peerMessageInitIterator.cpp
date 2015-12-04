@@ -26,31 +26,30 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of input and an output queue for the peer messages of the StorageClient
-/// \file peerMessageQueue.cpp
-#include "peerMessageQueue.hpp"
-#include "peerStorageTransaction.hpp"
-#include "strus/peerMessageViewerInterface.hpp"
+/// \brief Implementation of the iterator on peer messages of the local storage initialization for other peers
+/// \file peerMessageInitIterator.cpp
+#include "peerMessageInitIterator.hpp"
+#include "strus/storageClientInterface.hpp"
 #include "strus/peerMessageBuilderInterface.hpp"
 #include "strus/peerMessageProcessorInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "databaseAdapter.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include <map>
 
 using namespace strus;
 
-PeerMessageQueue::PeerMessageQueue(
-		StorageClient* storage_,
-		DatabaseClientInterface* database_,
-		const PeerMessageProcessorInterface* proc_,
+PeerMessageInitIterator::PeerMessageInitIterator(
+		StorageClientInterface* storage_,
+		DatabaseClientInterface* database,
+		bool sign,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
-	,m_database(database_)
-	,m_proc(proc_)
+	,m_proc(storage_->getPeerMessageProcessor())
 	,m_peerMessageBuilder()
-	,m_bufferedPeerMessageIdx(0)
 	,m_errorhnd(errorhnd_)
 {
 	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
@@ -59,10 +58,6 @@ PeerMessageQueue::PeerMessageQueue(
 	{
 		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());
 	}
-}
-
-void PeerMessageQueue::start( bool sign)
-{
 	int nofdocs = m_storage->localNofDocumentsInserted();
 	m_peerMessageBuilder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
 	m_peerMessageBuilder->start();
@@ -73,7 +68,7 @@ void PeerMessageQueue::start( bool sign)
 
 	// Fill a map with the strings of all types in the collection:
 	{
-		DatabaseAdapter_TermType::Cursor typecursor( m_database);
+		DatabaseAdapter_TermType::Cursor typecursor( database);
 		Index typeno;
 		std::string typestr;
 		for (bool more=typecursor.loadFirst( typestr, typeno); more;
@@ -86,7 +81,7 @@ void PeerMessageQueue::start( bool sign)
 	}
 	// Fill a map with the strings of all terms in the collection:
 	{
-		DatabaseAdapter_TermValue::Cursor termcursor( m_database);
+		DatabaseAdapter_TermValue::Cursor termcursor( database);
 		Index termno;
 		std::string termstr;
 		for (bool more=termcursor.loadFirst( termstr, termno); more;
@@ -103,7 +98,7 @@ void PeerMessageQueue::start( bool sign)
 		Index termno;
 		Index df;
 
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( m_database);
+		DatabaseAdapter_DocFrequency::Cursor dfcursor( database);
 		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
 			more=dfcursor.loadNext( typeno, termno, df))
 		{
@@ -121,22 +116,7 @@ void PeerMessageQueue::start( bool sign)
 	}
 }
 
-PeerMessageQueue::~PeerMessageQueue()
-{}
-
-void PeerMessageQueue::push( const char* inmsg, std::size_t inmsgsize, const char*& outmsg, std::size_t& outmsgsize)
-{
-	try
-	{
-		PeerStorageTransaction transaction( m_storage, m_database, m_storage->getDocumentFrequencyCache(), m_proc, m_errorhnd);
-		m_peerReplyMessageBuffer = transaction.run( inmsg, inmsgsize);
-		outmsg = m_peerReplyMessageBuffer.c_str();
-		outmsgsize = m_peerReplyMessageBuffer.size();
-	}
-	CATCH_ERROR_MAP( _TXT("error pushing peer message to storage: %s"), *m_errorhnd);
-}
-
-bool PeerMessageQueue::fetch( const char*& msg, std::size_t& msgsize)
+bool PeerMessageInitIterator::getNext( const char*& msg, std::size_t& msgsize)
 {
 	if (m_errorhnd->hasError())
 	{
@@ -145,29 +125,26 @@ bool PeerMessageQueue::fetch( const char*& msg, std::size_t& msgsize)
 	}
 	try
 	{
-		if (m_peerMessageBuilder.get())
+		bool rt = true;
+		do
 		{
-			bool rt = true;
-			do
-			{
-				rt = m_peerMessageBuilder->fetchMessage( msg, msgsize);
-			}
-			while (rt && msgsize == 0);
-			if (rt)
-			{
-				return rt;
-			}
-			else if (m_errorhnd->hasError())
-			{
-				m_errorhnd->explain( _TXT("error fetching initialization peer message from storage: %s"));
-				return false;
-			}
-			else
-			{
-				m_peerMessageBuilder.reset();
-			}
+			rt = m_peerMessageBuilder->fetchMessage( msg, msgsize);
 		}
-		return m_storage->fetchPeerUpdateMessage( msg, msgsize);
+		while (rt && msgsize == 0);
+		if (rt)
+		{
+			return true;
+		}
+		else if (m_errorhnd->hasError())
+		{
+			m_errorhnd->explain( _TXT("error fetching initialization peer message from storage: %s"));
+			return false;
+		}
+		else
+		{
+			m_peerMessageBuilder.reset();
+			return false;
+		}
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message from storage: %s"), *m_errorhnd, false);
 }
