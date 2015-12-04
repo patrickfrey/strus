@@ -51,7 +51,6 @@ public:
 			const Index& termtypeno,
 			const Index& termvalueno,
 			const char* termstr,
-			const GlobalCounter& documentFrequency_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~PostingIterator(){}

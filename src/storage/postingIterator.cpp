@@ -52,11 +52,10 @@ PostingIterator::PostingIterator(
 		const Index& termtypeno,
 		const Index& termvalueno,
 		const char*,
-		const GlobalCounter& documentFrequency_,
 		ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
-	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno, documentFrequency_)
+	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
 	,m_docno(0)
 	,m_errorhnd(errorhnd_)
 {

@@ -42,7 +42,7 @@ class StorageClient;
 class PosinfoIterator
 {
 public:
-	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_, GlobalCounter documentFrequency_=-1);
+	PosinfoIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, Index termtypeno_, Index termvalueno_);
 	~PosinfoIterator(){}
 
 	Index skipDoc( const Index& docno_);

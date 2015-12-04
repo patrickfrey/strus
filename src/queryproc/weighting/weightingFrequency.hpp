@@ -66,13 +66,14 @@ public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
-			float weight_);
+			float weight_,
+			const TermStatistics&);
 
 	virtual float call( const Index& docno);
 
 private:
 	std::vector<Feature> m_featar;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	ErrorBufferInterface* m_errorhnd;	///< buffer for error messages
 };
 
 
@@ -94,7 +95,7 @@ public:
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface*,
-			const GlobalStatistics&) const;
+			const GlobalStatistics& stats_) const;
 
 	virtual std::string tostring() const;
 

@@ -31,6 +31,7 @@
 #ifndef _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/summarizationVariable.hpp"
+#include "strus/termStatistics.hpp"
 #include <string>
 #include <vector>
 
@@ -75,12 +76,14 @@ public:
 	/// \param[in] postingIterator_ iterator on the matches of the summarization feature
 	/// \param[in] variables_ list of variables attached to subexpressions of the matches (passed with postingIterator_)
 	/// \param[in] weight_ weight of this summarization feature
+	/// \param[in] stats_ global term statistics passed down with the query. If undefined, they can be defined by or estimated from the posting iterator data. 
 	/// \remark Do call this method before calling getSummary the first time for not having incomplete results
 	virtual void addSummarizationFeature(
 			const std::string& name_,
 			PostingIteratorInterface* postingIterator_,
 			const std::vector<SummarizationVariable>& variables_,
-			float weight_)=0;
+			float weight_,
+			const TermStatistics& stats_)=0;
 
 	/// \brief Get some summarization elements
 	/// \param[in] docno document to get the summary element from

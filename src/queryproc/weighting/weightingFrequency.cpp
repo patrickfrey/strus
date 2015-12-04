@@ -40,7 +40,8 @@ using namespace strus;
 void WeightingFunctionContextTermFrequency::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		float weight_)
+		float weight_,
+		const TermStatistics&)
 {
 	try
 	{

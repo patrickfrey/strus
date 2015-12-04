@@ -91,8 +91,8 @@ public:
 	public:
 		Feature( const Feature& o)
 			:m_itr(o.m_itr),m_weight(o.m_weight),m_df(o.m_df){}
-		Feature( PostingIteratorInterface* itr_, double weight_)
-			:m_itr(itr_),m_weight(weight_),m_df(std::numeric_limits<double>::quiet_NaN()){}
+		Feature( PostingIteratorInterface* itr_, double weight_, const TermStatistics& stats_)
+			:m_itr(itr_),m_weight(weight_),m_df(stats_.defined()?stats_.documentFrequency():std::numeric_limits<double>::quiet_NaN()){}
 
 		double df() const
 		{
@@ -130,7 +130,8 @@ public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
-			float weight_);
+			float weight_,
+			const TermStatistics& stats_);
 
 	virtual float call( const Index& docno);
 

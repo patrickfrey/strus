@@ -66,7 +66,8 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
-		float weight)
+		float weight,
+		const TermStatistics&)
 {
 	try
 	{
@@ -182,7 +183,8 @@ void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::s
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface*) const
+		MetaDataReaderInterface*,
+		const GlobalStatistics&) const
 {
 	if (m_type.empty())
 	{

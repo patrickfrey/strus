@@ -349,7 +349,7 @@ void Query::addUserName( const std::string& username_)
 	CATCH_ERROR_MAP( _TXT("error adding user to query: %s"), *m_errorhnd);
 }
 
-PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodePostingsMap& nodePostingsMap)
+PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap)
 {
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
@@ -368,19 +368,18 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
-				joinargs.push_back( m_storage->createTermPostingIterator(
-							term.type, term.value, getTermStatistics( term.type, term.value)));
+				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
-				nodePostingsMap[ *ni] = joinargs.back().get();
+				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
 				break;
 			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
-							m_expressions[ nodeIndex(*ni)], nodePostingsMap));
+							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
-				nodePostingsMap[ *ni] = joinargs.back().get();
+				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get());
 				break;
 		}
 	}
@@ -388,7 +387,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodePostingsMap& nodePostingsMap)
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap)
 {
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
@@ -398,26 +397,25 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			rt = m_storage->createTermPostingIterator(
-				term.type, term.value, getTermStatistics( term.type, term.value));
+			rt = m_storage->createTermPostingIterator( term.type, term.value);
 			if (!rt) break;
-			nodePostingsMap[ nodeadr] = rt;
+			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, getTermStatistics( term.type, term.value));
 			break;
 		}
 		case ExpressionNode:
 			std::size_t nidx = nodeIndex( nodeadr);
-			rt = createExpressionPostingIterator( m_expressions[ nidx], nodePostingsMap);
+			rt = createExpressionPostingIterator( m_expressions[ nidx], nodeStorageDataMap);
 			if (!rt) break;
-			nodePostingsMap[ nodeadr] = rt;
+			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt);
 			break;
 	}
 	return rt;
 }
 
-PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr, const NodePostingsMap& nodePostingsMap) const
+const Query::NodeStorageData& Query::nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const
 {
-	NodePostingsMap::const_iterator pi = nodePostingsMap.find( nodeadr);
-	if (pi == nodePostingsMap.end())
+	NodeStorageDataMap::const_iterator pi = nodeStorageDataMap.find( nodeadr);
+	if (pi == nodeStorageDataMap.end())
 	{
 		throw strus::runtime_error( _TXT( "expression node postings not found"));
 	}
@@ -427,7 +425,7 @@ PostingIteratorInterface* Query::nodePostings( const NodeAddress& nodeadr, const
 void Query::collectSummarizationVariables(
 			std::vector<SummarizationVariable>& variables,
 			const NodeAddress& nodeadr,
-			const NodePostingsMap& nodePostingsMap)
+			const NodeStorageDataMap& nodeStorageDataMap)
 {
 	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
 	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( nodeadr);
@@ -435,7 +433,8 @@ void Query::collectSummarizationVariables(
 	Itr vi = vrange.first, ve = vrange.second;
 	for (; vi != ve; ++vi)
 	{
-		variables.push_back( SummarizationVariable( vi->second, nodePostings( nodeadr, nodePostingsMap)));
+		const NodeStorageData& nd = nodeStorageData( nodeadr, nodeStorageDataMap);
+		variables.push_back( SummarizationVariable( vi->second, nd.itr));
 	}
 
 	switch (nodeType( nodeadr))
@@ -451,7 +450,7 @@ void Query::collectSummarizationVariables(
 				ne = expr.subnodes.end();
 			for (; ni != ne; ++ni)
 			{
-				collectSummarizationVariables( variables, *ni, nodePostingsMap);
+				collectSummarizationVariables( variables, *ni, nodeStorageDataMap);
 			}
 			break;
 		}
@@ -505,7 +504,7 @@ std::vector<ResultDocument> Query::evaluate()
 			m_errorhnd->report( _TXT( "cannot evaluate query, no selection features defined"));
 			return std::vector<ResultDocument>();
 		}
-		NodePostingsMap nodePostingsMap;
+		NodeStorageDataMap nodeStorageDataMap;
 
 		// [3] Create the posting sets of the query features:
 		std::vector<Reference<PostingIteratorInterface> > postings;
@@ -515,7 +514,7 @@ std::vector<ResultDocument> Query::evaluate()
 			for (; fi != fe; ++fi)
 			{
 				Reference<PostingIteratorInterface> postingsElem(
-					createNodePostingIterator( fi->node, nodePostingsMap));
+					createNodePostingIterator( fi->node, nodeStorageDataMap));
 				if (!postingsElem.get()) return std::vector<ResultDocument>();
 				postings.push_back( postingsElem);
 			}
@@ -548,7 +547,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*si == fi->set)
 					{
 						accumulator.addSelector(
-							nodePostings( fi->node, nodePostingsMap), sidx, 
+							nodeStorageData( fi->node, nodeStorageDataMap).itr, sidx, 
 							nodeType( fi->node) == ExpressionNode);
 					}
 				}
@@ -578,10 +577,9 @@ std::vector<ResultDocument> Query::evaluate()
 					{
 						if (si->featureSet() == fi->set)
 						{
+							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
 							execContext->addWeightingFeature(
-								si->parameterName(),
-								nodePostings( fi->node, nodePostingsMap),
-								fi->weight);
+								si->parameterName(), nd.itr, fi->weight, nd.stats);
 #ifdef STRUS_LOWLEVEL_DEBUG
 							std::cout << "add feature parameter " << si->parameterName() << "=" << fi->set << ' ' << fi->weight << std::endl;
 #endif
@@ -621,7 +619,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodePostings( fi->node, nodePostingsMap),
+							nodeStorageData( fi->node, nodeStorageDataMap).itr,
 							nodeType( fi->node) == ExpressionNode, false);
 					}
 				}
@@ -641,7 +639,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodePostings( fi->node, nodePostingsMap),
+							nodeStorageData( fi->node, nodeStorageDataMap).itr,
 							nodeType( fi->node) == ExpressionNode, true);
 					}
 				}
@@ -682,7 +680,7 @@ std::vector<ResultDocument> Query::evaluate()
 				// [5.1] Create the summarizer:
 				summarizers.push_back(
 					zi->function()->createFunctionContext(
-						m_storage, m_metaDataReader.get()));
+						m_storage, m_metaDataReader.get(), m_globstats));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
 				if (!closure) throw strus::runtime_error(_TXT("error creating summarizer context"));
 
@@ -699,11 +697,12 @@ std::vector<ResultDocument> Query::evaluate()
 						if (fi->set == si->featureSet())
 						{
 							std::vector<SummarizationVariable> variables;
-							collectSummarizationVariables( variables, fi->node, nodePostingsMap);
-	
+							collectSummarizationVariables( variables, fi->node, nodeStorageDataMap);
+
+							const NodeStorageData& nd = nodeStorageData( fi->node, nodeStorageDataMap);
 							closure->addSummarizationFeature(
-								si->parameterName(), nodePostings(fi->node, nodePostingsMap),
-								variables, fi->weight);
+								si->parameterName(), nd.itr,
+								variables, fi->weight, nd.stats);
 						}
 					}
 				}

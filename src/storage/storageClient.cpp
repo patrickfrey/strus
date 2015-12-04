@@ -269,8 +269,7 @@ GlobalCounter StorageClient::documentFrequency( const Index& typeno, const Index
 PostingIteratorInterface*
 	StorageClient::createTermPostingIterator(
 		const std::string& typestr,
-		const std::string& termstr,
-		const TermStatistics& stats) const
+		const std::string& termstr) const
 {
 	try
 	{
@@ -280,7 +279,7 @@ PostingIteratorInterface*
 		{
 			return new NullIterator( typeno, termno, termstr.c_str());
 		}
-		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), stats.defined()?-1:stats.documentFrequency(), m_errorhnd);
+		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
 }

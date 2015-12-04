@@ -68,7 +68,8 @@ public:
 			const std::string&,
 			PostingIteratorInterface*,
 			const std::vector<SummarizationVariable>&,
-			float /*weight*/);
+			float /*weight*/,
+			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
@@ -96,7 +97,8 @@ public:
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
-			MetaDataReaderInterface* metadata) const;
+			MetaDataReaderInterface* metadata,
+			const GlobalStatistics&) const;
 
 	virtual std::string tostring() const;
 

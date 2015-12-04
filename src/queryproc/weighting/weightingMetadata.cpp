@@ -52,7 +52,8 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 void WeightingFunctionContextMetadata::addWeightingFeature(
 		const std::string&,
 		PostingIteratorInterface*,
-		float)
+		float,
+		const TermStatistics&)
 {
 	m_errorhnd->report( _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), "metadata");
 }
