@@ -40,12 +40,12 @@ public:
 	/// \brief Constructor
 	TermStatistics()
 		:m_df(-1){}
+	/// \brief Constructor
+	TermStatistics( const GlobalCounter& df_)
+		:m_df(df_){}
 	/// \brief Copy constructor
 	TermStatistics( const TermStatistics& o)
 		:m_df(o.m_df){}
-
-	/// \brief Evaluate if this structure is defined
-	bool defined() const					{return m_df >= 0;}
 
 	/// \brief Get the global document frequency
 	/// \return the global document frequency or -1 for undefined, if undefined then the value cache for the global dfs in the document frequency or what is stored in the local storage)

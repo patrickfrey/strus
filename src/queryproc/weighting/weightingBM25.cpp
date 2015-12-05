@@ -62,7 +62,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 	{
 		if (utils::caseInsensitiveEquals( name_, "match"))
 		{
-			float nofMatches = stats_.defined()?stats_.documentFrequency():itr_->documentFrequency();
+			float nofMatches = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
 			float idf = 0.0;
 		
 			if (m_nofCollectionDocuments > nofMatches * 2)
@@ -185,7 +185,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 {
 	try
 	{
-		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, stats.defined()?stats.nofDocumentsInserted():storage_->globalNofDocumentsInserted(), m_attribute_doclen, m_errorhnd);
+		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():storage_->globalNofDocumentsInserted(), m_attribute_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), "BM25", *m_errorhnd, 0);
 }

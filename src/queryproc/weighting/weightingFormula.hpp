@@ -92,7 +92,7 @@ public:
 		Feature( const Feature& o)
 			:m_itr(o.m_itr),m_weight(o.m_weight),m_df(o.m_df){}
 		Feature( PostingIteratorInterface* itr_, double weight_, const TermStatistics& stats_)
-			:m_itr(itr_),m_weight(weight_),m_df(stats_.defined()?stats_.documentFrequency():std::numeric_limits<double>::quiet_NaN()){}
+			:m_itr(itr_),m_weight(weight_),m_df(stats_.documentFrequency()>=0?stats_.documentFrequency():std::numeric_limits<double>::quiet_NaN()){}
 
 		double df() const
 		{

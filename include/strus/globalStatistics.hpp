@@ -46,8 +46,6 @@ struct GlobalStatistics
 	GlobalStatistics( const GlobalStatistics& o)
 		:m_nofDocumentsInserted(o.m_nofDocumentsInserted){}
 
-	bool defined() const					{return m_nofDocumentsInserted >= 0;}
-
 	GlobalCounter nofDocumentsInserted() const		{return m_nofDocumentsInserted;}
 	void setNofDocumentsInserted( const GlobalCounter& n)	{m_nofDocumentsInserted = n;}
 
