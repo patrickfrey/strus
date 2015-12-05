@@ -83,8 +83,6 @@ public:
 			ErrorBufferInterface* errorhnd_);
 	virtual ~StorageClient();
 
-	virtual void close();
-
 	virtual PostingIteratorInterface*
 			createTermPostingIterator(
 				const std::string& termtype,

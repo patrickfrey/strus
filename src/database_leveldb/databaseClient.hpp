@@ -141,8 +141,6 @@ public:
 
 	virtual ~DatabaseClient();
 
-	virtual void close(){}
-
 	virtual DatabaseTransactionInterface* createTransaction();
 
 	virtual DatabaseCursorInterface* createCursor( const DatabaseOptions& options) const;

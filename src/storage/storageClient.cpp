@@ -195,18 +195,13 @@ void StorageClient::getVariablesWriteBatch(
 	}
 }
 
-void StorageClient::close()
+StorageClient::~StorageClient()
 {
 	try
 	{
 		storeVariables();
 	}
 	CATCH_ERROR_MAP( _TXT("error closing storage client: %s"), *m_errorhnd);
-}
-
-StorageClient::~StorageClient()
-{
-	close();
 	cleanup();
 }
 
