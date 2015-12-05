@@ -57,7 +57,6 @@ public:
 	PeerMessageInitIterator(
 			StorageClientInterface* storage_,
 			DatabaseClientInterface* database_,
-			bool sign,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~PeerMessageInitIterator(){}

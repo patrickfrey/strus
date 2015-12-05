@@ -45,7 +45,6 @@ using namespace strus;
 PeerMessageInitIterator::PeerMessageInitIterator(
 		StorageClientInterface* storage_,
 		DatabaseClientInterface* database,
-		bool sign,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_proc(storage_->getPeerMessageProcessor())
@@ -59,7 +58,7 @@ PeerMessageInitIterator::PeerMessageInitIterator(
 		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());
 	}
 	int nofdocs = m_storage->localNofDocumentsInserted();
-	m_peerMessageBuilder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
+	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofdocs);
 	m_peerMessageBuilder->start();
 
 	std::map<Index,std::size_t> typenomap;
@@ -111,7 +110,7 @@ PeerMessageInitIterator::PeerMessageInitIterator(
 			if (ti == termnomap.end()) throw strus::runtime_error( _TXT( "encountered undefined term when populating df's"));
 			const char* termnam = strings.c_str() + ti->second;
 	
-			m_peerMessageBuilder->addDfChange( typenam, termnam, sign?df:-df, sign/*isNew*/);
+			m_peerMessageBuilder->addDfChange( typenam, termnam, df, true/*isNew*/);
 		}
 	}
 }

@@ -182,12 +182,11 @@ public:
 	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Creates an iterator on the storage peer messages for initialization
-	/// \param[in] sign sign of the df and nof documents increments (true=positive in registering phase, false=negative in deregistering phase)
-	/// \return the iterator on the peer message blobs used for initialization of other peers
-	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator( bool sign)=0;
+	/// \return the iterator on the peer message blobs
+	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator()=0;
 
-	/// \brief Creates an iterator on the storage peer messages created by updates of this storage
-	/// \return the iterator on the peer message blobs used for initialization of other peers
+	/// \brief Creates an iterator on the storage peer messages created by updates of this storage as notifications to be sent to other peers
+	/// \return the iterator on the peer message blobs
 	virtual PeerMessageIteratorInterface* createUpdatePeerMessageIterator()=0;
 
 	/// \brief Creates a transaction for updating statistics of this storage by messages from other peers
