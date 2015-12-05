@@ -82,10 +82,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad1e8d10b328b4f5e9989964c26bcc7fb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#ad1e8d10b328b4f5e9989964c26bcc7fb">addNumericParameter</a> (const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;value)=0</td></tr>
 <tr class="memdesc:ad1e8d10b328b4f5e9989964c26bcc7fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a named arithmetic value parameter.  <a href="#ad1e8d10b328b4f5e9989964c26bcc7fb">More...</a><br/></td></tr>
 <tr class="separator:ad1e8d10b328b4f5e9989964c26bcc7fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa0d0a239a8749a380deffa6f00eb502"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html">WeightingFunctionContextInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#afa0d0a239a8749a380deffa6f00eb502">createFunctionContext</a> (const <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *storage_, <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *metadata) const =0</td></tr>
-<tr class="memdesc:afa0d0a239a8749a380deffa6f00eb502"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an execution context for this weighting function instance.  <a href="#afa0d0a239a8749a380deffa6f00eb502">More...</a><br/></td></tr>
-<tr class="separator:afa0d0a239a8749a380deffa6f00eb502"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4570babb71bb85a75bf580ead4a9536b"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html">WeightingFunctionContextInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a4570babb71bb85a75bf580ead4a9536b">createFunctionContext</a> (const <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *storage_, <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *metadata, const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats) const =0</td></tr>
+<tr class="memdesc:a4570babb71bb85a75bf580ead4a9536b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an execution context for this weighting function instance.  <a href="#a4570babb71bb85a75bf580ead4a9536b">More...</a><br/></td></tr>
+<tr class="separator:a4570babb71bb85a75bf580ead4a9536b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71b01c3423b71025aca31e5ec72d2322"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a71b01c3423b71025aca31e5ec72d2322">tostring</a> () const =0</td></tr>
 <tr class="memdesc:a71b01c3423b71025aca31e5ec72d2322"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)  <a href="#a71b01c3423b71025aca31e5ec72d2322">More...</a><br/></td></tr>
 <tr class="separator:a71b01c3423b71025aca31e5ec72d2322"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -205,7 +205,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="afa0d0a239a8749a380deffa6f00eb502"></a>
+<a class="anchor" id="a4570babb71bb85a75bf580ead4a9536b"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -222,7 +222,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *&#160;</td>
-          <td class="paramname"><em>metadata</em>&#160;</td>
+          <td class="paramname"><em>metadata</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;&#160;</td>
+          <td class="paramname"><em>stats</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -242,6 +248,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">storage_</td><td>storage reference for retrieving some statistics (like the document collection frequency) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">metadata</td><td>meta data interface </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>global statistics for weighting </td></tr>
   </table>
   </dd>
 </dl>
@@ -282,7 +289,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 13 2015 00:29:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

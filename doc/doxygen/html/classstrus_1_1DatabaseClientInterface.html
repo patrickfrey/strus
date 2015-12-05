@@ -76,9 +76,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac6b4346d80ad2918270a79a7cafb7137"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#ac6b4346d80ad2918270a79a7cafb7137">~DatabaseClientInterface</a> ()</td></tr>
 <tr class="memdesc:ac6b4346d80ad2918270a79a7cafb7137"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ac6b4346d80ad2918270a79a7cafb7137">More...</a><br/></td></tr>
 <tr class="separator:ac6b4346d80ad2918270a79a7cafb7137"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12ac2640adaf30c5fa698bd4b43e1d41"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#a12ac2640adaf30c5fa698bd4b43e1d41">close</a> ()=0</td></tr>
-<tr class="memdesc:a12ac2640adaf30c5fa698bd4b43e1d41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the database client connection and throw on error.  <a href="#a12ac2640adaf30c5fa698bd4b43e1d41">More...</a><br/></td></tr>
-<tr class="separator:a12ac2640adaf30c5fa698bd4b43e1d41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa6f198f6f7ae388ff3688830b9a995b"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1DatabaseTransactionInterface.html">DatabaseTransactionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#afa6f198f6f7ae388ff3688830b9a995b">createTransaction</a> ()=0</td></tr>
 <tr class="memdesc:afa6f198f6f7ae388ff3688830b9a995b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a transaction object for the database.  <a href="#afa6f198f6f7ae388ff3688830b9a995b">More...</a><br/></td></tr>
@@ -125,37 +122,11 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Destructor. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Should call call '<a class="el" href="classstrus_1_1DatabaseClientInterface.html#a12ac2640adaf30c5fa698bd4b43e1d41" title="Close the database client connection and throw on error. ">close()</a>' but ignore errors there silently </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Should call call 'close()' but ignore errors there silently </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a12ac2640adaf30c5fa698bd4b43e1d41"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void strus::DatabaseClientInterface::close </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Close the database client connection and throw on error. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Call this function before the destructor if you want to catch errors in the close </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="ab2535a158bbd8803f0bd4aac2dd21e12"></a>
 <div class="memitem">
 <div class="memproto">
@@ -407,7 +378,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 13 2015 00:29:33 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

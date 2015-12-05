@@ -82,10 +82,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7a0decd4f25d361518697761a0ab2cd6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7a0decd4f25d361518697761a0ab2cd6">addNumericParameter</a> (const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;value)=0</td></tr>
 <tr class="memdesc:a7a0decd4f25d361518697761a0ab2cd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a named arithmetic value parameter.  <a href="#a7a0decd4f25d361518697761a0ab2cd6">More...</a><br/></td></tr>
 <tr class="separator:a7a0decd4f25d361518697761a0ab2cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19a8ca788cd9e9606fd9fe706a895f02"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html">SummarizerFunctionContextInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#a19a8ca788cd9e9606fd9fe706a895f02">createFunctionContext</a> (const <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *storage_, <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *metadata_) const =0</td></tr>
-<tr class="memdesc:a19a8ca788cd9e9606fd9fe706a895f02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an execution context for this summarization function instance.  <a href="#a19a8ca788cd9e9606fd9fe706a895f02">More...</a><br/></td></tr>
-<tr class="separator:a19a8ca788cd9e9606fd9fe706a895f02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acdabdd3bff1cb043c74e0eab2a3c9716"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html">SummarizerFunctionContextInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#acdabdd3bff1cb043c74e0eab2a3c9716">createFunctionContext</a> (const <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *storage_, <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *metadata_, const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats) const =0</td></tr>
+<tr class="memdesc:acdabdd3bff1cb043c74e0eab2a3c9716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an execution context for this summarization function instance.  <a href="#acdabdd3bff1cb043c74e0eab2a3c9716">More...</a><br/></td></tr>
+<tr class="separator:acdabdd3bff1cb043c74e0eab2a3c9716"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79beff9b22b47737e539565309c7f68f"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#a79beff9b22b47737e539565309c7f68f">tostring</a> () const =0</td></tr>
 <tr class="memdesc:a79beff9b22b47737e539565309c7f68f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)  <a href="#a79beff9b22b47737e539565309c7f68f">More...</a><br/></td></tr>
 <tr class="separator:a79beff9b22b47737e539565309c7f68f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -205,7 +205,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a19a8ca788cd9e9606fd9fe706a895f02"></a>
+<a class="anchor" id="acdabdd3bff1cb043c74e0eab2a3c9716"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -222,7 +222,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *&#160;</td>
-          <td class="paramname"><em>metadata_</em>&#160;</td>
+          <td class="paramname"><em>metadata_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;&#160;</td>
+          <td class="paramname"><em>stats</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -242,6 +248,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">storage_</td><td>storage interface for getting information for summarization (like for example document attributes) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">metadata_</td><td>metadata interface for inspecting document meta data (like for example the document insertion date) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stats</td><td>global statistics for weighting </td></tr>
   </table>
   </dd>
 </dl>
@@ -282,7 +289,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 13 2015 00:29:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

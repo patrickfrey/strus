@@ -107,6 +107,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a56ce6b7dd0b15edfe4d54dcb2dcb5631"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a56ce6b7dd0b15edfe4d54dcb2dcb5631">defineFeature</a> (const std::string &amp;set_, float weight_=1.0)=0</td></tr>
 <tr class="memdesc:a56ce6b7dd0b15edfe4d54dcb2dcb5631"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the topmost element of the stack as feature, removing it from the stack.  <a href="#a56ce6b7dd0b15edfe4d54dcb2dcb5631">More...</a><br/></td></tr>
 <tr class="separator:a56ce6b7dd0b15edfe4d54dcb2dcb5631"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78074cc3f229b01b3b4e3e65598c68dd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a78074cc3f229b01b3b4e3e65598c68dd">defineTermStatistics</a> (const std::string &amp;type_, const std::string &amp;value_, const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;stats_)=0</td></tr>
+<tr class="memdesc:a78074cc3f229b01b3b4e3e65598c68dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the statistics of a term for the case that they are defined by the client.  <a href="#a78074cc3f229b01b3b4e3e65598c68dd">More...</a><br/></td></tr>
+<tr class="separator:a78074cc3f229b01b3b4e3e65598c68dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37a7455f7ed52fe58de5bdfde57fed71"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a37a7455f7ed52fe58de5bdfde57fed71">defineGlobalStatistics</a> (const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats_)=0</td></tr>
+<tr class="memdesc:a37a7455f7ed52fe58de5bdfde57fed71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the global statistics for the case that they are defined by the client.  <a href="#a37a7455f7ed52fe58de5bdfde57fed71">More...</a><br/></td></tr>
+<tr class="separator:a37a7455f7ed52fe58de5bdfde57fed71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca789ed6157d8f4451d838a332ab8460"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#aca789ed6157d8f4451d838a332ab8460">defineMetaDataRestriction</a> (<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">CompareOperator</a> opr, const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;operand, bool newGroup=true)=0</td></tr>
 <tr class="memdesc:aca789ed6157d8f4451d838a332ab8460"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a restriction on documents base on a condition on the meta data.  <a href="#aca789ed6157d8f4451d838a332ab8460">More...</a><br/></td></tr>
 <tr class="separator:aca789ed6157d8f4451d838a332ab8460"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -344,6 +350,38 @@ More than one variable can be attached </dd></dl>
 
 </div>
 </div>
+<a class="anchor" id="a37a7455f7ed52fe58de5bdfde57fed71"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryInterface::defineGlobalStatistics </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;&#160;</td>
+          <td class="paramname"><em>stats_</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the global statistics for the case that they are defined by the client. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">stats_</td><td>global statistics </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="aca789ed6157d8f4451d838a332ab8460"></a>
 <div class="memitem">
 <div class="memproto">
@@ -395,6 +433,56 @@ More than one variable can be attached </dd></dl>
     <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of meta data element to check </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">operand</td><td>constant number to check against </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">newGroup</td><td>true, if the conditional opens a new group of elements joined with a logical "OR" false, if the conditional belongs to the last group of elements joined with a logical "OR". Different groups are joined with a logical "AND" to form the meta data restriction expression </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a78074cc3f229b01b3b4e3e65598c68dd"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryInterface::defineTermStatistics </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>value_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;&#160;</td>
+          <td class="paramname"><em>stats_</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define the statistics of a term for the case that they are defined by the client. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_</td><td>term type </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value_</td><td>term value </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stats_</td><td>term statistics </td></tr>
   </table>
   </dd>
 </dl>
@@ -597,7 +685,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 13 2015 00:29:33 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

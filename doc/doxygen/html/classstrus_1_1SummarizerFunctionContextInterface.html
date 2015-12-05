@@ -83,9 +83,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae98e834b6eed79f6714257860c5d2836"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#ae98e834b6eed79f6714257860c5d2836">~SummarizerFunctionContextInterface</a> ()</td></tr>
 <tr class="memdesc:ae98e834b6eed79f6714257860c5d2836"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ae98e834b6eed79f6714257860c5d2836">More...</a><br/></td></tr>
 <tr class="separator:ae98e834b6eed79f6714257860c5d2836"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10b04425b9c215b349340bcbc05c8b4c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#a10b04425b9c215b349340bcbc05c8b4c">addSummarizationFeature</a> (const std::string &amp;name_, <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *postingIterator_, const std::vector&lt; <a class="el" href="classstrus_1_1SummarizationVariable.html">SummarizationVariable</a> &gt; &amp;variables_, float weight_)=0</td></tr>
-<tr class="memdesc:a10b04425b9c215b349340bcbc05c8b4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a sumarization feature that is subject of summarization to the execution context.  <a href="#a10b04425b9c215b349340bcbc05c8b4c">More...</a><br/></td></tr>
-<tr class="separator:a10b04425b9c215b349340bcbc05c8b4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab28aa248402d4271677410ec95833e8d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#ab28aa248402d4271677410ec95833e8d">addSummarizationFeature</a> (const std::string &amp;name_, <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *postingIterator_, const std::vector&lt; <a class="el" href="classstrus_1_1SummarizationVariable.html">SummarizationVariable</a> &gt; &amp;variables_, float weight_, const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;stats_)=0</td></tr>
+<tr class="memdesc:ab28aa248402d4271677410ec95833e8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a sumarization feature that is subject of summarization to the execution context.  <a href="#ab28aa248402d4271677410ec95833e8d">More...</a><br/></td></tr>
+<tr class="separator:ab28aa248402d4271677410ec95833e8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ab219d4c03246021a9acae9faedba84"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
 &lt; <a class="el" href="classstrus_1_1SummarizerFunctionContextInterface_1_1SummaryElement.html">SummaryElement</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#a3ab219d4c03246021a9acae9faedba84">getSummary</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno)=0</td></tr>
 <tr class="memdesc:a3ab219d4c03246021a9acae9faedba84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get some summarization elements.  <a href="#a3ab219d4c03246021a9acae9faedba84">More...</a><br/></td></tr>
@@ -120,7 +120,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a10b04425b9c215b349340bcbc05c8b4c"></a>
+<a class="anchor" id="ab28aa248402d4271677410ec95833e8d"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -149,7 +149,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>weight_</em>&#160;</td>
+          <td class="paramname"><em>weight_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;&#160;</td>
+          <td class="paramname"><em>stats_</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -171,6 +177,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">postingIterator_</td><td>iterator on the matches of the summarization feature </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">variables_</td><td>list of variables attached to subexpressions of the matches (passed with postingIterator_) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight_</td><td>weight of this summarization feature </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stats_</td><td>global term statistics passed down with the query. If undefined, they can be defined by or estimated from the posting iterator data. </td></tr>
   </table>
   </dd>
 </dl>
@@ -218,7 +225,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 13 2015 00:29:34 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
