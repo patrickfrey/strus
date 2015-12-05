@@ -101,7 +101,10 @@ void PeerMessageBuilder::addDfChange(
 {
 	try
 	{
-		if (m_content.empty()) clear();
+		if (m_content.empty())
+		{
+			clear();
+		}
 		std::string rec;
 		std::size_t termtypesize = std::strlen(termtype);
 		std::size_t termvaluesize = std::strlen(termvalue);
@@ -213,7 +216,11 @@ void PeerMessageBuilder::addDfChange_final(
 
 bool PeerMessageBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
 {
-	if (m_content.empty()) return false;
+	if (m_content.empty())
+	{
+		clear();
+		return false;
+	}
 	try
 	{
 		if (!m_insertInLexicalOrder)
