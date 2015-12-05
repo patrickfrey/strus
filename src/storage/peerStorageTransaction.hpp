@@ -28,6 +28,7 @@
 */
 #ifndef _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
 #define _STRUS_PEER_STORAGE_TRANSACTION_HPP_INCLUDED
+#include "strus/peerStorageTransactionInterface.hpp"
 #include "documentFrequencyCache.hpp"
 #include "databaseAdapter.hpp"
 #include "private/stringMap.hpp"
@@ -50,12 +51,17 @@ class ErrorBufferInterface;
 
 /// \brief Interface for a transaction of global statistic changes
 class PeerStorageTransaction
+	:public PeerStorageTransactionInterface
 {
 public:
 	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_, ErrorBufferInterface* errorhnd_);
-	~PeerStorageTransaction(){}
+	virtual ~PeerStorageTransaction(){}
 
-	std::string run( const char* msg, std::size_t msgsize);
+	virtual void push( const char* inmsg, std::size_t inmsgsize, bool sign);
+
+	virtual bool commit( const char*& outmsg, std::size_t& outmsgsize);
+
+	virtual void rollback();
 
 private:
 	void clear();
@@ -95,6 +101,7 @@ private:
 	Index m_termvaluecnt;
 	GlobalCounter m_nofDocumentsInserted;
 	bool m_commit;
+	std::string m_returnblob;
 	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace

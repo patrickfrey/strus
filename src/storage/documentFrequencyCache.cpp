@@ -80,7 +80,7 @@ void DocumentFrequencyCache::writeBatch( const Batch& batch)
 		{
 			doRevertIncrement( *bi);
 		}
-		throw err;
+		throw strus::runtime_error(_TXT("error in document frequency cache transaction: %s"), err.what());
 	}
 	catch (const std::bad_alloc& err)
 	{
@@ -89,7 +89,7 @@ void DocumentFrequencyCache::writeBatch( const Batch& batch)
 		{
 			doRevertIncrement( *bi);
 		}
-		throw err;
+		throw strus::runtime_error(_TXT("out of memory in document frequency cache transaction"));
 	}
 }
 

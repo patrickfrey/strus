@@ -58,6 +58,7 @@ public:
 	virtual PeerMessageViewerInterface* createViewer(
 			const char* peermsgptr, std::size_t peermsgsize) const=0;
 
+	/// \brief Structure with the options for the processing of peer messages
 	struct BuilderOptions
 	{
 		enum Set {

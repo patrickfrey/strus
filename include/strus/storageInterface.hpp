@@ -40,6 +40,8 @@ class DatabaseClientInterface;
 class StorageClientInterface;
 /// \brief Forward declaration
 class StorageAlterMetaDataTableInterface;
+/// \brief Forward declaration
+class PeerMessageProcessorInterface;
 
 
 /// \brief Interface to the create and alter a storage for strus
@@ -52,14 +54,20 @@ public:
 	/// \brief Creates an client instance of the storage using a defined key value store database
 	/// \param[in] configsource configuration source string describing the storage (not a filename !)
 	/// \param[in] database key value store database used by this storage (ownership passed to returned object)
-	virtual StorageClientInterface* createClient( const std::string& configsource, DatabaseClientInterface* database) const=0;
+	/// \param[in] (optional) peerMessageProc defines the format of messages for and from other peer storages (distribute statistics)
+	virtual StorageClientInterface* createClient(
+			const std::string& configsource,
+			DatabaseClientInterface* database,
+			const PeerMessageProcessorInterface* peerMessageProc=0) const=0;
 
 	/// \brief Creates a new storage described with configsource using a defined key value store database
 	/// \param[in] configsource Configuration source string describing the storage (not a filename !)
 	/// \param[in] database reference to a key value store database used by the storage
 	/// \return true on success, false on error
 	/// \remark The database referenced by 'database' must have been created and active
-	virtual bool createStorage( const std::string& configsource, DatabaseClientInterface* database) const=0;
+	virtual bool createStorage(
+			const std::string& configsource,
+			DatabaseClientInterface* database) const=0;
 
 	/// \brief Create an interface to alter the meta data table structure
 	/// \param[in] database key value store database used by the storage (ownership passed to returned object)

@@ -88,6 +88,13 @@ public:
 	virtual void setMinRank( std::size_t minRank_);
 	virtual void addUserName( const std::string& username_);
 
+	virtual void defineTermStatistics(
+			const std::string& type_,
+			const std::string& value_,
+			const TermStatistics& stats_);
+	virtual void defineGlobalStatistics(
+			const GlobalStatistics& stats_);
+
 	virtual std::vector<ResultDocument> evaluate();
 
 public:
@@ -131,6 +138,8 @@ public:
 		Term( const std::string& t, const std::string& v)
 			:type(t),value(v){}
 
+		bool operator<( const Term& o) const;
+
 		std::string type;	///< term type name
 		std::string value;	///< term value
 	};
@@ -171,14 +180,30 @@ public:
 	void print( std::ostream& out) const;
 
 private:
-	typedef std::map<NodeAddress,PostingIteratorInterface*> NodePostingsMap;
+	const TermStatistics& getTermStatistics( const std::string& type_, const std::string& value_) const;
 
-	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodePostingsMap& nodePostingsMap);
-	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodePostingsMap& nodePostingsMap);
+	struct NodeStorageData
+	{
+		explicit NodeStorageData( PostingIteratorInterface* itr_=0)
+			:itr(itr_),stats(){}
+		NodeStorageData( PostingIteratorInterface* itr_, TermStatistics stats_)
+			:itr(itr_),stats(stats_){}
+		NodeStorageData( const NodeStorageData& o)
+			:itr(o.itr),stats(o.stats){}
+
+		PostingIteratorInterface* itr;
+		TermStatistics stats;
+	};
+
+	typedef std::map<NodeAddress,NodeStorageData> NodeStorageDataMap;
+
+	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap);
+	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap);
 	void collectSummarizationVariables(
 				std::vector<SummarizationVariable>& variables,
-				const NodeAddress& nodeadr, const NodePostingsMap& nodePostingsMap);
-	PostingIteratorInterface* nodePostings( const NodeAddress& nodeadr, const NodePostingsMap& nodePostingsMap) const;
+				const NodeAddress& nodeadr,
+				const NodeStorageDataMap& nodeStorageDataMap);
+	const NodeStorageData& nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const;
 
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
 	void printVariables( std::ostream& out, NodeAddress adr) const;
@@ -200,6 +225,8 @@ private:
 	std::vector<std::string> m_usernames;
 	std::vector<Index> m_evalset_docnolist;
 	bool m_evalset_defined;
+	std::map<Term,TermStatistics> m_termstatsmap;
+	GlobalStatistics m_globstats;
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

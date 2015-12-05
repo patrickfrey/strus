@@ -30,6 +30,7 @@
 /// \file summarizerFunctionInstanceInterface.hpp
 #ifndef _STRUS_SUMMARIZER_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_FUNCTION_INSTANCE_INTERFACE_HPP_INCLUDED
+#include "strus/globalStatistics.hpp"
 #include <string>
 
 namespace strus
@@ -67,10 +68,12 @@ public:
 	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
 	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)
+	/// \param[in] stats global statistics for weighting
 	/// \return the execution context, the summarization function instance with its execution context (ownership to caller)
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata_) const=0;
+			MetaDataReaderInterface* metadata_,
+			const GlobalStatistics& stats) const=0;
 
 	/// \brief Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)
 	/// \return the parameter list as string

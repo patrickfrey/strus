@@ -36,7 +36,6 @@
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
 #include "compactNodeTrie.hpp"
-#include "initialStatsPopulateState.hpp"
 #include "strus/peerMessageProcessorInterface.hpp"
 namespace strus {
 
@@ -75,10 +74,14 @@ class StorageClient
 public:
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	StorageClient( DatabaseClientInterface* database_, const char* termnomap_source, ErrorBufferInterface* errorhnd_);
+	/// \param[in] peerMessageProc_ peer message processor interface
+	/// \param[in] errorhnd_ error buffering interface for error handling
+	StorageClient(
+			DatabaseClientInterface* database_,
+			const char* termnomap_source,
+			const PeerMessageProcessorInterface* peerMessageProc_,
+			ErrorBufferInterface* errorhnd_);
 	virtual ~StorageClient();
-
-	virtual void close();
 
 	virtual PostingIteratorInterface*
 			createTermPostingIterator(
@@ -107,6 +110,14 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
+	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator();
+
+	virtual PeerMessageIteratorInterface* createUpdatePeerMessageIterator();
+
+	virtual PeerStorageTransactionInterface* createPeerStorageTransaction();
+
+	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const;
+
 	virtual GlobalCounter globalNofDocumentsInserted() const;
 
 	virtual Index localNofDocumentsInserted() const;
@@ -122,18 +133,18 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
+	virtual ValueIteratorInterface* createTermTypeIterator() const;
+
+	virtual ValueIteratorInterface* createTermValueIterator() const;
+
+	virtual ValueIteratorInterface* createDocIdIterator() const;
+
+	virtual ValueIteratorInterface* createUserNameIterator() const;
+
 	virtual Index documentStatistics(
 			const Index& docno,
 			const DocumentStatisticsType& stat,
 			const std::string& type) const;
-
-	virtual void pushPeerMessage( const char* msg, std::size_t msgsize);
-	virtual bool fetchPeerReply( const char*& msg, std::size_t& msgsize);
-	virtual void startPeerInit();
-	virtual bool fetchPeerMessage( const char*& msg, std::size_t& msgsize);
-
-	virtual void definePeerMessageProcessor(
-			const PeerMessageProcessorInterface* proc);
 
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
@@ -175,6 +186,7 @@ public:/*StorageTransaction*/
 
 	Index allocDocnoRange( std::size_t nofDocuments);
 	bool deallocDocnoRange( const Index& docno, const Index& size);
+	PeerMessageBuilderInterface* getPeerMessageBuilder();
 
 	friend class TransactionLock;
 	class TransactionLock
@@ -202,6 +214,14 @@ public:/*StorageDocumentChecker*/
 	IndexSetIterator getAclIterator( const Index& docno) const;
 	IndexSetIterator getUserAclIterator( const Index& userno) const;
 
+public:/*PeerMessageIterator*/
+	///\brief Get the document frequency cache
+	DocumentFrequencyCache* getDocumentFrequencyCache();
+
+public:/*PeerMessageIterator*/
+	///\brief Fetch a message from a storage update transaction
+	bool fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize);
+
 private:
 	void cleanup();
 	void loadTermnoMap( const char* termnomap_source);
@@ -226,11 +246,8 @@ private:
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 	conotrie::CompactNodeTrie* m_termno_map;		///< map of the most important (most frequent) terms, if specified
 
-	const PeerMessageProcessorInterface* m_peermsgproc;	///< reference to interface to other peer storages
-	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder; ///< reference to builder of messages to other peers
-	std::string m_peerReplyMessageBuffer;
-	bool m_gotPeerReply;
-	InitialStatsPopulateState m_initialStatsPopulateState;	///< state for populating own statistics
+	const PeerMessageProcessorInterface* m_peerMessageProc;	///< peer message processor
+	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder; ///< builder of peer messages from updates by transactions
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface

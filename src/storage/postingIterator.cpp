@@ -44,9 +44,15 @@ using namespace strus;
 #undef STRUS_LOWLEVEL_CHECK
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char* termstr, ErrorBufferInterface* errorhnd_)
+PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char* termstr, GlobalCounter documentFrequency_, ErrorBufferInterface* errorhnd_)
 #else
-PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char*, ErrorBufferInterface* errorhnd_)
+PostingIterator::PostingIterator(
+		const StorageClient* storage_,
+		const DatabaseClientInterface* database_,
+		const Index& termtypeno,
+		const Index& termvalueno,
+		const char*,
+		ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)

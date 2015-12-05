@@ -46,8 +46,8 @@ class DatabaseTransactionInterface;
 class ForwardIndexMap
 {
 public:
-	explicit ForwardIndexMap( DatabaseClientInterface* database_)
-		:m_database(database_),m_docno(0),m_maxtype(0){}
+	ForwardIndexMap( DatabaseClientInterface* database_, Index maxtype_)
+		:m_database(database_),m_docno(0),m_maxtype(maxtype_){}
 
 	void openForwardIndexDocument( const Index& docno);
 

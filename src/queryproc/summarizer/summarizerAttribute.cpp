@@ -47,7 +47,8 @@ void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&,
-		float /*weight*/)
+		float /*weight*/,
+		const TermStatistics&)
 {
 	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "attribute");
 }
@@ -117,7 +118,8 @@ std::string SummarizerFunctionInstanceAttribute::tostring() const
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface*) const
+		MetaDataReaderInterface*,
+		const GlobalStatistics&) const
 {
 	try
 	{

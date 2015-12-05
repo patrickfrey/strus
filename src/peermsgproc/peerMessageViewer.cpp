@@ -89,42 +89,32 @@ bool PeerMessageViewer::nextDfChange( DocumentFrequencyChange& rec)
 			throw strus::runtime_error( _TXT( "got illegal message from peer (unexpected end of message [3])"));
 		}
 		m_msg.resize( commonbytes);
-		m_msg.append( m_peermsgitr, restlen);
+		const char* msg_itr = m_peermsgitr;
 		m_peermsgitr += restlen;
-	
-		char const* mi = m_msg.c_str();
-		rec.type = mi;
-		std::size_t typesize = std::strlen( mi);
-		mi += typesize + 1;
-		rec.value = mi;
-		std::size_t valuesize = std::strlen( mi);
-		mi += valuesize + 1;
-		std::size_t midx = typesize + valuesize + 2;
-		if (midx + 1 >= m_msg.size())
+		char const* df_itr = utf8prev( m_peermsgitr);
+		char const* flags_itr = utf8prev( df_itr);
+		if (flags_itr < msg_itr)
 		{
-			throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record [2])"));
+			throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt block [3])"));
 		}
-		unsigned char flags = *mi;
+		m_msg.append( msg_itr, flags_itr - msg_itr);
+
+		rec.type = m_msg.c_str();
+		std::size_t typesize = std::strlen( rec.type);
+		rec.value = rec.type + typesize + 1;
+
+		unsigned char flags = (unsigned char)*flags_itr;
 		if (flags >= 0x4)
 		{
 			throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record [3])"));
 		}
-		++mi;
-		++midx;
-		chlen = utf8charlen( *mi);
-		rec.increment = utf8decode( mi, chlen);
+		chlen = utf8charlen( *df_itr);
+		rec.increment = utf8decode( df_itr, chlen);
 		if ((flags & 0x2) != 0)
 		{
 			rec.increment = -rec.increment;
 		}
 		rec.isnew = ((flags & 0x1) != 0);
-	
-		mi += chlen;
-		midx += chlen;
-		if (midx > m_msg.size())
-		{
-			throw strus::runtime_error( _TXT( "got illegal message from peer (corrupt message record)"));
-		}
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error peer message viewer fetching next df change: %s"), *m_errorhnd, false);

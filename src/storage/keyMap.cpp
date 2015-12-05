@@ -71,13 +71,13 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	if (m_dbadapter.load( name,rt))
 	{
 		(void)m_map.set( name.c_str(), rt);
-		if (m_invmap) m_invmap->set( data, name);
+		if (m_invmap) m_invmap->set( rt, name);
 		isNew = false;
 	}
 	else if (m_allocator->immediate())
 	{
 		rt = m_allocator->getOrCreate( name, isNew);
-		if (m_invmap) m_invmap->set( data, name);
+		if (m_invmap) m_invmap->set( rt, name);
 	}
 	else
 	{
@@ -101,6 +101,17 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		}
 	}
 	return rt;
+}
+
+void KeyMap::getWriteBatch(
+	DatabaseTransactionInterface* transaction)
+{
+	std::map<Index,Index> unknownMap;
+	getWriteBatch( unknownMap, transaction);
+	if (!unknownMap.empty())
+	{
+		throw strus::runtime_error( _TXT( "internal: unexpected unknown elements in keymap"));
+	}
 }
 
 void KeyMap::getWriteBatch(
@@ -138,6 +149,12 @@ void KeyMap::getWriteBatch(
 			if (m_invmap) m_invmap->set( idx, oi->first);
 		}
 	}
+	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
+	for (; di != de; ++di)
+	{
+		m_dbadapter.remove( transaction, *di);
+	}
+
 	m_map.clear();
 	m_overflowmap.clear();
 }

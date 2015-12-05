@@ -1,5 +1,156 @@
+strus (0.2.6-1) unstable; urgency=low
+  * added interfaces for introspection (user names, docids, term types, term values)
+ -- patrickfrey <patrickpfrey@yahoo.com>  Tue, 1 Dec 2015 20:54:00 +0100
+
+strus (0.2.5-1) unstable; urgency=low
+  * define method PeerMessageQueue start for register/deregister of peers
+  * change way how peer message processor is passed to storage: Now an argument of createClient and an argument of StorageClient::createPeerMessageQueue
+  * reimplemented peer message processing interface completely (because we are still prealpha only a patch version number increment)
+  * fixed: throw error instead of segfaulting when peer message methods called without peer message processor defined
+  * fixed bug in storage transaction: cleanup of forward index not complete when only documents deleted in a transaction
+ -- patrickfrey <patrickpfrey@yahoo.com>  Tue, 1 Dec 2015 13:22:17 +0100
+
+strus (0.2.4-1) unstable; urgency=low
+  * added test StorageOp that exceutes some combination of storage operations
+  * incremented version to 0.2.4 to resolve OBS trouble with dependencies
+ -- patrickfrey <patrickpfrey@yahoo.com>  Thu, 26 Nov 2015 09:08:36 +0100
+
+strus (0.2.3-1) unstable; urgency=low
+  * StorageClient::documentNumber( const std::string&) returns 0, if document does not exist
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 24 Nov 2015 19:49:41 +0100
+
+strus (0.2.2-1) unstable; urgency=low
+  * more info in corrupt index error message. Better summarization for first sentences in summarizer match phrase (abstracting)
+  * fix bug in summarizer: if end of sentence was not existing in a document, then the end of sentence of the previous document was taken
+  * fixed a type in 12.04 DSC file
+  * some date fixes in redhat spec file
+  * cmake patches the version now, also adapted the changelogs
+  * fixed error in summarizer match variables and accumulate variables: fetch from forward index only if element exists
+  * remove BM23_dpfc weighting scheme from core (to module in wikipedia demo project)
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 24 Nov 2015 14:33:27 +0100
+
+strus (0.2.1-1) unstable; urgency=low
+  * added posting join operator "inrange" (= "within", but not strict, different positions)
+  * added new summarizer to accumulate weights of variable references
+  * added documentation of aggregator functions to analyzer grammar
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 15 Nov 2015 10:04:35 +0100
+
+strus (0.2.0-1) unstable; urgency=low
+  * make ranked document list deterministic
+  * fixed config parser: string was not extracted correctly in extractStringFromConfigString
+  * improving web page style sheets
+  * weighting also weight of title in BM23_dpfc
+  * update landing page CSS and add packaging info
+  * better error messages for mixing feature parameters with numeric or string values in summarizers and weighting functions
+  * fixed missing default initialization of max nof ranks in query
+  * fixed bug in accumulator: Specifying an evaluation set with Query::addDocumentEvaluationSet could cause an endless loop
+  * fixed bug in metadata record (unsigned integers of 8 and 16 bit were not assigned correctly (mapped to an integer)
+  * fixed bug in forward index iterator: return illegal chunks
+  * remove hardcoded doclen meta data element (has to be configured now with an aggregator)
+  * fixed description of summarizer match phrase
+  * fixed missing initialization of error handler in forward iterator (causing a segfault)
+  * fixed bug in new string maps used in storage: calling C++ delete of memory block allocated with C malloc
+  * better error messages for formula interpreter in formula weighting method
+  * update webpage: python bindings available
+  * improve visibility of error position in messages for formula weighting scheme
+  * better error message in formula weighting scheme
+  * added all boost libraries when linking in randoc test not only boost_thread (because of missing boost_atomic)
+  * added a missing boost_system in testLoggingMalloc
+  * added a missing strus_private_utils library dependency for formula test
+  * strus_database_leveldb depends on leveldb only not on snappy too
+  * fixed seek of alternative matches in struct join operators
+  * fixed some small bugs in reversed (negative range) of "struct_within" 
+  * added join operator chain and struct_chain, that do not require a strict ordering of the member elements
+  * added weight as parameter to summarizer
+  * make summarizer 'matchvariables' work
+  * added methods for retrieving description of functions
+  * implement printing of floats and doubles with precision in strus_snprintf
+  * reorganise 'contains' iterator join
+  * fixed segfault in logging malloc library
+  * fixed bug in own snprintf
+  * (origin/memfrag, memfrag) fix segfault (error in last checkins)
+  * (origin) remove string maps also from forward index
+  * replace STL string map with StringMap
+  * replace map of strings in transaction by StringMap
+  * temporary checkin
+  * fixing missing dependency to private utils in logging malloc library test
+  * temporary checkin
+  * added string map for better memory management (prevent heap fragmentation)
+  * removed cache for stack trace pattern matches
+  * added cache of match stack trace function calls
+  * remove debug code from last checkin
+  * fixing bugs in logging malloc and make test for it
+  * make logging malloc library work
+  * added new library that logs malloc call statistics (to be used with LD_PRELOAD)
+  * added error buffer method to change the maximum number of threads
+  * reverting optimization level change
+  * set default max nof threads default in error buffer
+  * delete all objects passed with ownership to functions that have no return value. caller cannot always determine if function was successful
+  * cleaning up utils shared library
+  * make createStorage return bool (success/failure)
+  * make tests run again
+  * make error buffer run in multithreaded environment
+  * removed local error buffer implementation (non used anymore)
+  * making standard iterators,weighting functions and summarizers exception safe
+  * (origin/interface_exceptions, interface_exceptions) fixed missing linking to private_utils static library in weighing
+  * revert visibility of linked symbols after merge with master
+  * moved formula interpreter source from utils to weighting function
+  * fix a bug in ranker: segfault when retrieving more than 128 results. Do not build summarizers if result is empty
+  * weighting 'formula':added hardcoded variable for the number of documents
+  * added weighting function defined by formula specified as string
+  * added test for formula parser
+  * added formula interpreter for weighting functions with formula defined from string
+  * changed guidelines to exception free interfaces
+  * copy variable assignments too with pushDuplicate
+  * fixed bad memory management in query (came in with last checkin)
+  * removed memory leak
+  * implicitely define order of elements in subset query
+  * add possibility to evaluate query on a subset of documents. This allows us to make a multi pass query evaluation like evaluating a query on the N best results of a BM25 query
+  * temporary checkin
+  * make visibility default (all visible) for temporarily enable exceptions
+  * work on exception free interfaces - in progress
+  * start to change error handling
+  * fixed unreliable malloc library - works now
+  * added an unreliable malloc library for testing
+  * fixed typos and updated documentation
+  * adapted dependency description
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 12 Nov 2015 14:08:21 +0100
+
 strus (0.1.6-1) unstable; urgency=low
+  * updated wegpage with language logos
+  * updated landing page and documentation
+  * throw is there is no selection feature defined in the query
+  * better error messages
+  * test also random order insert in peer message processor
+  * redesigned storage peer message processing completely. You do not pass an interface to a messaging, but just an interface for packing and unpacking messages. The peer message processing is passive: You fetch messages that have to be sent to peers and you push messages from peers
+  * added flags to peer message processor
+  * added start/rollback to peer message builder
+  * added library for packing unpacking of peer storage messages
+  * put common CMAKE stuff of all strus relaed projects into includes
+  * some small storage peer interface changes and documentation
+  * some changes in peer storage interface
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 18 Aug 2015 10:20:58 +0200
 
-  * Initial Release.
+strus (0.1.5-1) unstable; urgency=low
+  * fixed bug in expression evaluation in query.cpp (causing UMR)
+  * updated utilities documentation
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 2 Aug 2015 13:03:12 +0200
 
- -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 19 Feb 2015 09:48:41 +0100
+strus (0.1.4-1) unstable; urgency=low
+  * Added dependency to libboost_atomic needed by ARM for boost 1.54 (see https://svn.boost.org/trac/boost/ticket/8810)
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 24 Jul 2015 18:50:39 +0200
+
+strus (0.1.3-1) unstable; urgency=low
+  * skip entries starting with '.' in read files/directories (fileio.cpp)
+  * extended fileio with function to read directory only (assumed in programs that directories do not have a file extension - HACK)
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 14 Jul 2015 12:04:55 +0200
+
+strus (0.1.2-1) unstable; urgency=low
+  * small update of documentation
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 9 Jul 2015 15:33:14 +0200
+
+strus (0.1.1-1) unstable; urgency=low
+  * Initial revision
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 3 Jul 2015 15:16:29 +0200
+
+

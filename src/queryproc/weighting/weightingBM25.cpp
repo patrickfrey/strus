@@ -42,10 +42,11 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 		float k1_,
 		float b_,
 		float avgDocLength_,
+		float nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
 		ErrorBufferInterface* errorhnd_)
 	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_)
-	,m_nofCollectionDocuments(storage->globalNofDocumentsInserted())
+	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_featar(),m_metadata(metadata_)
 	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_))
 	,m_errorhnd(errorhnd_)
@@ -54,13 +55,14 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 void WeightingFunctionContextBM25::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		float weight_)
+		float weight_,
+		const TermStatistics& stats_)
 {
 	try
 	{
 		if (utils::caseInsensitiveEquals( name_, "match"))
 		{
-			float nofMatches = itr_->documentFrequency();
+			float nofMatches = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
 			float idf = 0.0;
 		
 			if (m_nofCollectionDocuments > nofMatches * 2)
@@ -178,11 +180,12 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunctionContext(
 		const StorageClientInterface* storage_,
-		MetaDataReaderInterface* metadata) const
+		MetaDataReaderInterface* metadata,
+		const GlobalStatistics& stats) const
 {
 	try
 	{
-		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, m_attribute_doclen, m_errorhnd);
+		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():storage_->globalNofDocumentsInserted(), m_attribute_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), "BM25", *m_errorhnd, 0);
 }

@@ -194,7 +194,7 @@ void PeerMessageBuilder::addDfChange_final(
 	}
 	m_lastkey = key;
 	std::size_t commonsize = ii;
-	std::size_t restsize = key.size() - ii + 1;
+	std::size_t restsize = key.size() - ii;
 
 	idxpos = utf8encode( idxbuf, (int32_t)commonsize);
 	content.append( idxbuf, idxpos);

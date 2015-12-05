@@ -66,7 +66,8 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
-		float weight)
+		float weight,
+		const TermStatistics&)
 {
 	try
 	{
@@ -118,8 +119,10 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 								line.append( vi->name());
 								line.append( m_assign);
 							}
-							m_forwardindex->skipPos( pos);
-							line.append( m_forwardindex->fetch());
+							if (pos == m_forwardindex->skipPos( pos))
+							{
+								line.append( m_forwardindex->fetch());
+							}
 						}
 					}
 					rt.push_back( SummarizerFunctionContextInterface::SummaryElement( line, fi->weight));
@@ -180,7 +183,8 @@ void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::s
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
 		const StorageClientInterface* storage,
-		MetaDataReaderInterface*) const
+		MetaDataReaderInterface*,
+		const GlobalStatistics&) const
 {
 	if (m_type.empty())
 	{

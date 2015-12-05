@@ -30,17 +30,18 @@
 /// \file "queryInterface.hpp"
 #ifndef _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_INTERFACE_HPP_INCLUDED
+#include "strus/storageClientInterface.hpp"
+#include "strus/resultDocument.hpp"
+#include "strus/arithmeticVariant.hpp"
+#include "strus/termStatistics.hpp"
+#include "strus/globalStatistics.hpp"
 #include <string>
 #include <vector>
 #include <utility>
 #include <iostream>
-#include "strus/resultDocument.hpp"
-#include "strus/arithmeticVariant.hpp"
 
 namespace strus {
 
-/// \brief Forward declaration
-class StorageClientInterface;
 /// \brief Forward declaration
 class PostingJoinOperatorInterface;
 
@@ -63,8 +64,8 @@ public:
 	/// \param[in] range range of the expression
 	/// \param[in] cardinality required size of matching results (e.g. minimum number of elements of any input subset selection that builds a result) (0 for use default)
 	virtual void pushExpression(
-				const PostingJoinOperatorInterface* operation,
-				std::size_t argc, int range, unsigned int cardinality)=0;
+			const PostingJoinOperatorInterface* operation,
+			std::size_t argc, int range, unsigned int cardinality)=0;
 
 	/// \brief Attaches a variable to the top expression or term on the query stack.
 	/// \note The positions of the query matches of the referenced term or expression can be accessed through this variable in summarization.
@@ -77,6 +78,20 @@ public:
 	/// \param[in] set_ name of the set of the new feature created
 	/// \param[in] weight_ weight of the feature for the weighting function in query evaluation 
 	virtual void defineFeature( const std::string& set_, float weight_=1.0)=0;
+
+	/// \brief Define the statistics of a term for the case that they are defined by the client
+	/// \param[in] type_ term type
+	/// \param[in] value_ term value
+	/// \param[in] stats_ term statistics
+	virtual void defineTermStatistics(
+			const std::string& type_,
+			const std::string& value_,
+			const TermStatistics& stats_)=0;
+
+	/// \brief Define the global statistics for the case that they are defined by the client
+	/// \param[in] stats_ global statistics
+	virtual void defineGlobalStatistics(
+			const GlobalStatistics& stats_)=0;
 
 	/// \brief Comparison operator for restrictions
 	enum CompareOperator

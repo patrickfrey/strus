@@ -82,6 +82,7 @@ void DocumentFrequencyMap::renameNewTermNumbers( const std::map<Index,Index>& re
 void DocumentFrequencyMap::getWriteBatch(
 		DatabaseTransactionInterface* transaction,
 		PeerMessageBuilderInterface* peerMessageBuilder,
+		DocumentFrequencyCache::Batch* dfbatch,
 		const KeyMapInv& termTypeMapInv,
 		const KeyMapInv& termValueMapInv)
 {
@@ -103,10 +104,14 @@ void DocumentFrequencyMap::getWriteBatch(
 			peerMessageBuilder->addDfChange( typestr, termstr, mi->second, (df==0));
 		}
 		df += mi->second;
-		if (df < 0) throw strus::runtime_error( _TXT( "document frequency got negative"));
+		if (df < 0) throw strus::runtime_error( _TXT( "document frequency got negative: %d (%d)"), (int)df, (int)mi->second);
 
 		DatabaseAdapter_DocFrequency::store(
 				transaction, mi->first.first/*typeno*/, mi->first.second/*termno*/, df);
+		if (dfbatch)
+		{
+			dfbatch->put( mi->first.first/*typeno*/, mi->first.second/*termno*/, mi->second);
+		}
 	}
 	m_map.clear();
 }

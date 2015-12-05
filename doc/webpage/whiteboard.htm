@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 2.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+	<link rel="icon" type="image/ico" href="images/strus.ico" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="description" content="Strus whiteboard. Notes about the future of strus, what we are working on and what we wish to archieve for strus, a collection of C++ libraries for building a full-text search engine." />
+	<meta name="keywords" content="fulltext search engine C++" />
+	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
+	<link rel="stylesheet" type="text/css" href="text-profile.css" title="Text Profile" media="all" />
+	<title>Strus whiteboard</title>
+</head>
+
+<body>
+<script type="text/javascript">
+</script>
+<div id="wrap">
+<div id="content">
+	<h1>Strus whiteboard</h1>
+	<div id="whiteboarddescr">The Strus whiteboard is a page for brainstorming.
+	Here we put our ideas and draw the first sketches of the near future of strus.
+	You are welcome to work with us on the whiteboard.
+	</div>
+
+	<div id="whiteboard">
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">
+			Planned&nbsp;articles on&nbsp;codeproject<br/>(SHORT-TERM)
+		</div>
+		<div id="whiteboardcol">The following articles on <a href="codeproject.com">codeproject</a> are planned for the
+			next weeks:
+			<br/>- Show <i>how to scale</i>, how to distribute a Strus search index. A web server example on three nodes with
+			an unbalanced split of the collection. It shows that strus can scale without implications
+			on the architecture. It can distribute the statistics and does not need a central node
+			orchestrating insertions.
+			<br/>- Show the <i>expandability</i> of the Strus core. Explain how to build
+			modules for it. Introduce the interfaces for weighting functions, summarizers,
+			expression joins. Do this also for the analyzer. 
+			Introduce the interfaces for segmenters, tokenizers, normalizers, aggregators.
+		</div>
+	</div>
+
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">
+			UIMA&nbsp;integration<br/>(MEDIUM-TERM)
+		</div>
+		<div id="whiteboardcol">The Strus analyzer might be a good choice for small projects.
+			It does not have too many dependencies. It has in my opinion some expressive 
+			languages to describe document transformation. It is very efficient.
+			<br/>But it has <i>limits</i>, there is a wall. Document processing is an extremely
+			<i>competitive environment</i> with many mature solutions available.
+			You cannot compete there without a strong focus on it and many man years of
+			valuable development behind you.
+			<br/>
+			The Strus analyzer has also been developed as separated project, because
+			this is not the ground to fight for Strus.
+			<br/>One framework that looks very interesting is 
+			<a href="https://uima.apache.org/">UIMA</a>. It would be interesting to build 
+			a document processing chain with UIMA for feeding Strus.
+		</div>
+	</div>
+
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">
+			Mailinglist<br/>(MEDIUM-TERM)
+		</div>
+		<div id="whiteboardcol">
+			A mailing list is needed as platform for sharing ideas, discussing
+			and solving problems.
+		</div>
+	</div>
+
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">
+			Cooperation<br/>(MEDIUM-TERM)
+		</div>
+		<div id="whiteboardcol">
+			Strus has already reached the limits, where it is 
+			healthy for the project to be dependent on only one or two brains.
+			<i>Sharing ideas</i> is the primary stimulation for development.
+			A first step could be to find open source projects that probably need a search and try
+			to integrate there.
+			<br/>
+			For <i>people out there</i> reading these lines: Please mail us (contact (at) project (dash) strus (dot) net)
+			if you have problems, ideas or you are looking for cooperation.
+		</div>
+	</div>
+
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">
+			Introspection of&nbsp;Strus&nbsp;objects on&nbsp;client&nbsp;side<br/>(LONG-TERM)
+		</div>
+		<div id="whiteboardcol">
+			Something missing in strus is <i>introspection</i> of the data structures built 
+			in a program (expression trees, function definitions, data loaded and processed etc.). 
+			<br/>
+			Because this seems to be an aspect on its own, we could implement an own
+			proxy universe from StorageObjectBuilderInterface and AnalyzerObjectBuilderInterface,
+			similarly to what strusModule (the module loader) or strusRpc does.
+			Every object created would implement its method calls as redirect to the real
+			method call and additionaly build some representation in a
+			universe that is introspectable (an object tree). 
+		</div>
+	</div>
+
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">
+			Stress tests<br/>(MEDIUM-TERM)
+		</div>
+		<div id="whiteboardcol">
+			Stress test have to be done more extensively on server hardware.
+			Machines are needed and time.
+		</div>
+	</div>
+</div>
+</div>
+</body>
+</html>
+

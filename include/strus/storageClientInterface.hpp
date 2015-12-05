@@ -31,6 +31,7 @@
 #ifndef _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/termStatistics.hpp"
 #include <string>
 #include <vector>
 #include <ostream>
@@ -45,11 +46,17 @@ class ForwardIteratorInterface;
 /// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
+class ValueIteratorInterface;
+/// \brief Forward declaration
 class StorageTransactionInterface;
 /// \brief Forward declaration
 class StorageDocumentInterface;
 /// \brief Forward declaration
 class PeerMessageProcessorInterface;
+/// \brief Forward declaration
+class PeerStorageTransactionInterface;
+/// \brief Forward declaration
+class PeerMessageIteratorInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
 /// \brief Forward declaration
@@ -67,10 +74,6 @@ public:
 	/// \brief Destructor
 	/// \remark Should call call 'close()' but ignore errors there silently
 	virtual ~StorageClientInterface(){}
-
-	/// \brief Close the storage and throw on error
-	/// \remark Call this function before the destructor if you want to catch errors in the close
-	virtual void close()=0;
 
 	/// \brief Create an iterator on the occurrencies of a term in the storage
 	/// \param[in] type type name of the term
@@ -96,7 +99,7 @@ public:
 		createInvAclIterator(
 			const std::string& username) const=0;
 
-	/// \brief Get the global number of documents inserted (absolute number of documents in case of a distributed index)
+	/// \brief Get the global number of documents inserted (absolute number of documents in case of a distributed index with global statistics cached locally)
 	/// \return the number of documents
 	virtual GlobalCounter globalNofDocumentsInserted() const=0;
 
@@ -121,12 +124,29 @@ public:
 			const std::string& term) const=0;
 
 	/// \brief Get the highest document number used in this stogage
-	/// \return the document number
+	/// \return the document number, or 0, if no documents are inserted
 	virtual Index maxDocumentNumber() const=0;
 
 	/// \brief Get the local internal document number
 	/// \param[in] docid document id of the document inserted
+	/// \return the document number or 0, if it does not exist
 	virtual Index documentNumber( const std::string& docid) const=0;
+
+	/// \brief Create an iterator on the term types inserted
+	/// \return the iterator
+	virtual ValueIteratorInterface* createTermTypeIterator() const=0;
+
+	/// \brief Create an iterator on the term value inserted
+	/// \return the iterator
+	virtual ValueIteratorInterface* createTermValueIterator() const=0;
+
+	/// \brief Create an iterator on the document identifiers inserted
+	/// \return the iterator
+	virtual ValueIteratorInterface* createDocIdIterator() const=0;
+
+	/// \brief Create an iterator on the user names used in document access restrictions
+	/// \return the iterator
+	virtual ValueIteratorInterface* createUserNameIterator() const=0;
 
 	/// \brief Enumeration of document statistics
 	enum DocumentStatisticsType
@@ -154,40 +174,28 @@ public:
 
 	/// \brief Create an interface to allocate document numbers in ranges
 	/// \return the interface to allocate document numbers from this storage
+	/// \note Allocate document numbers in ranges is inevitable for fast insert of documents known to be new
 	virtual DocnoRangeAllocatorInterface* createDocnoRangeAllocator()=0;
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Define the interface to use for creating peer storage transaction objects to populate global statistic changes to other peer storages (in case of a distributed index)
-	/// \param[in] proc peer message processor reference
-	virtual void definePeerMessageProcessor(
-			const PeerMessageProcessorInterface* proc)=0;
+	/// \brief Creates an iterator on the storage peer messages for initialization
+	/// \return the iterator on the peer message blobs
+	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator()=0;
 
-	/// \brief Start the init phase of distributing the statistics of the storage to other peers. The messages of the init phare are fetched with fetchPeerMessage(const char*&,std::size_t&)
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual void startPeerInit()=0;
+	/// \brief Creates an iterator on the storage peer messages created by updates of this storage as notifications to be sent to other peers
+	/// \return the iterator on the peer message blobs
+	virtual PeerMessageIteratorInterface* createUpdatePeerMessageIterator()=0;
 
-	/// \brief Push a message blob from another peer storage
-	/// \param[in] msg pointer to message blob from peer (interpretation depends on defined peer message processor)
-	/// \param[in] msgsize size of msg blob in bytes
-	/// \return true, if there is at least one reply message to fetch with fetchPeerReply(const char*&,std::size_t&)
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual void pushPeerMessage( const char* msg, std::size_t msgsize)=0;
+	/// \brief Creates a transaction for updating statistics of this storage by messages from other peers
+	/// \return the transaction interface
+	virtual PeerStorageTransactionInterface* createPeerStorageTransaction()=0;
 
-	/// \brief Fetches the next reply from pushPeerMessage as answer to the sender
-	/// \param[in] msg pointer to message blob the sender peer of the last message pushed (interpretation depends on defined peer message processor)
-	/// \param[in] msgsize size of msg blob in bytes
-	/// \return false if there is no chunk of the reply left
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual bool fetchPeerReply( const char*& msg, std::size_t& msgsize)=0;
-	
-	/// \brief Fetches the next message to distribute to all other peers
-	/// \param[in] msg pointer to message blob for other peers (interpretation depends on defined peer message processor)
-	/// \param[in] msgsize size of msg blob in bytes
-	/// \remark this function throws if there is no message processor interface defined with definePeerMessageProcessor( const PeerMessageProcessorInterface*)
-	virtual bool fetchPeerMessage( const char*& msg, std::size_t& msgsize)=0;
+	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
+	/// \return the message processor interface
+	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check

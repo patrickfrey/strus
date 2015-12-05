@@ -23,6 +23,11 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 #sidebar li {list-style:none; font-size:1.2em; margin:0 0 10px; padding:0 0 10px 0; color:#888; border-bottom:1px solid #eee;}
 #sidebar li a {font-size:1.2em;}
 #sidebar h2 {font-size: 1.4em;}
+#whiteboard {display:table; }
+#whiteboarddescr {font-size:1.2em; font-style:italic;}
+#whiteboardrow {display:table-row; }
+#whiteboardcol {display:table-cell; padding:30px 0 0 0; font-size:1.1em; color:#303030; text-align:left; }
+#whiteboardheading {display:table-cell; font-weight:700; font-size:1.2em; color:#1888; text-align:left; }
 #api table {margin:0 0 50px; }
 .slogan {color:#888; font-size:1.4em; font-weight:700; margin:0 0 20px 0; letter-spacing:-1px;}
 .readmore {text-align:right; margin:0 20px 30px 0;}

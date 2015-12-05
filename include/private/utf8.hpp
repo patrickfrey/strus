@@ -58,6 +58,12 @@
 namespace strus
 {
 
+static inline const char* utf8prev( char const* end)
+{
+	for (--end; ((unsigned char)*end & B11000000) == B10000000; --end){}
+	return end;
+}
+
 static inline unsigned char utf8charlen( unsigned char ch)
 {
 	unsigned char cl = 9-BitOperations::bitScanReverse( (uint8_t)(ch^0xFF));

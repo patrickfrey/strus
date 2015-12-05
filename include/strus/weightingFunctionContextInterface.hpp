@@ -31,6 +31,7 @@
 #ifndef _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #define _STRUS_WEIGHTING_EXECUTION_CONTEXT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
+#include "strus/termStatistics.hpp"
 #include <string>
 
 namespace strus
@@ -51,11 +52,13 @@ public:
 	/// \param[in] name_ name of the summarization feature
 	/// \param[in] postingIterator_ iterator on the matches of the weighting feature
 	/// \param[in] weight_ weight of this feature
+	/// \param[in] stats_ global term statistics passed down with the query. If undefined, they can be defined by or estimated from the posting iterator data. 
 	/// \remark Do call this method before calling call the first time for not having incomplete results
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* postingIterator_,
-			float weight_)=0;
+			float weight_,
+			const TermStatistics& stats_)=0;
 
 	/// \brief Call the weighting function for a document
 	/// \param[in] docno document number

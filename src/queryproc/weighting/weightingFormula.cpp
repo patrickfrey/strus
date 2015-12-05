@@ -164,7 +164,8 @@ WeightingFunctionContextFormula::WeightingFunctionContextFormula(
 void WeightingFunctionContextFormula::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		float weight_)
+		float weight_,
+		const TermStatistics& stats_)
 {
 	try
 	{
@@ -179,7 +180,7 @@ void WeightingFunctionContextFormula::addWeightingFeature(
 		{
 			idx = ti->second;
 		}
-		m_featar[ idx].push_back( Feature( itr_, weight_));
+		m_featar[ idx].push_back( Feature( itr_, weight_, stats_));
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
@@ -205,7 +206,8 @@ float WeightingFunctionContextFormula::call( const Index& docno)
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunctionContext(
 		const StorageClientInterface* storage_,
-		MetaDataReaderInterface* metadata) const
+		MetaDataReaderInterface* metadata,
+		const GlobalStatistics& stats) const
 {
 	try
 	{
@@ -218,8 +220,8 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunct
 			funcmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_metadata, ii));
 		}
 		funcmap.defineVariableMap( "nofdocs", FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
-		paramar.push_back( (double)(storage_->globalNofDocumentsInserted()));
-	
+		paramar.push_back( (double)(stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():storage_->globalNofDocumentsInserted()));
+
 		if (m_formula.empty())
 		{
 			throw strus::runtime_error(_TXT("no weighting formula defined with string parameter 'formula'"));

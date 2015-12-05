@@ -33,6 +33,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include "storageClient.hpp"
 
 using namespace strus;
@@ -60,6 +61,7 @@ void PeerStorageTransaction::clear()
 	m_termvaluecnt = 0;
 	m_nofDocumentsInserted = 0;
 	m_commit = false;
+	m_returnblob.clear();
 }
 
 void PeerStorageTransaction::updateNofDocumentsInsertedChange( const GlobalCounter& increment)
@@ -100,24 +102,47 @@ void PeerStorageTransaction::updateDocumentFrequencyChange(
 	m_dfbatch.put( typeno, termno, increment);
 }
 
-std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
+void PeerStorageTransaction::push( const char* inmsg, std::size_t inmsgsize, bool sign)
 {
-	if (m_commit)
-	{
-		throw strus::runtime_error( _TXT( "called peer storage transaction run twice"));
-	}
 	try
 	{
-		std::auto_ptr<PeerMessageViewerInterface> viewer( m_peermsgproc->createViewer( msg, msgsize));
+		if (m_commit)
+		{
+			m_errorhnd->report( _TXT( "called peer storage transaction push after commit"));
+		}
+		std::auto_ptr<PeerMessageViewerInterface> viewer( m_peermsgproc->createViewer( inmsg, inmsgsize));
 		if (!viewer.get()) throw strus::runtime_error( _TXT( "error creating peer message viewer"));
-	
+
 		PeerMessageViewerInterface::DocumentFrequencyChange rec;
 		while (viewer->nextDfChange( rec))
 		{
-			updateDocumentFrequencyChange( rec.type, rec.value, rec.increment, rec.isnew);
+			updateDocumentFrequencyChange( rec.type, rec.value, sign?rec.increment:-rec.increment, rec.isnew);
 		}
-		updateNofDocumentsInsertedChange( viewer->nofDocumentsInsertedChange());	
-	
+		GlobalCounter nofdocs = viewer->nofDocumentsInsertedChange();
+		updateNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
+	}
+	CATCH_ERROR_MAP( _TXT("error in peer storage transaction push: %s"), *m_errorhnd);
+}
+
+void PeerStorageTransaction::rollback()
+{
+	clear();
+}
+
+bool PeerStorageTransaction::commit( const char*& outmsg, std::size_t& outmsgsize)
+{
+	try
+	{
+		if (m_errorhnd->hasError())
+		{
+			m_errorhnd->explain(_TXT("peer storage transaction commit failed: %s"));
+			return false;
+		}
+		if (m_commit)
+		{
+			throw strus::runtime_error( _TXT( "called peer storage transaction commit twice"));
+		}
+		m_returnblob.clear();
 		StorageClient::TransactionLock lock( m_storage);
 		DocumentFrequencyCache::Batch cleaned_batch;
 		DocumentFrequencyCache::Batch::iterator bi = m_dfbatch.begin(), be = m_dfbatch.end();
@@ -154,34 +179,26 @@ std::string PeerStorageTransaction::run( const char* msg, std::size_t msgsize)
 				msgbuilder->addDfChange( type, value, df, false);
 			}
 		}
-		std::string rt;
 		const char* blk;
 		std::size_t blksize;
 		while (msgbuilder->fetchMessage( blk, blksize))
 		{
-			rt.append( blk, blksize);
+			m_returnblob.append( blk, blksize);
 		}
 		if( m_errorhnd->hasError())
 		{
 			m_errorhnd->explain( _TXT("error in peer message transaction: %s"));
-			return std::string();
+			return false;
 		}
 		m_documentFrequencyCache->writeBatch( cleaned_batch);
 		m_storage->declareGlobalNofDocumentsInserted( m_nofDocumentsInserted);
 		m_commit = true;
 		m_nofDocumentsInserted = 0;
-		return rt;
+		outmsg = m_returnblob.c_str();
+		outmsgsize = m_returnblob.size();
+		return true;
 	}
-	catch (const std::bad_alloc& err)
-	{
-		clear();
-		throw err;
-	}
-	catch (const std::runtime_error& err)
-	{
-		clear();
-		throw err;
-	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error in peer storage transaction commit: %s"), *m_errorhnd, false);
 }
 
 

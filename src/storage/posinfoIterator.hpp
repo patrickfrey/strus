@@ -69,7 +69,7 @@ private:
 	Index m_docno;
 	Index m_docno_start;
 	Index m_docno_end;
-	mutable Index m_documentFrequency;
+	mutable GlobalCounter m_documentFrequency;
 };
 
 }

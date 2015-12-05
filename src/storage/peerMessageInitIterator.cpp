@@ -26,25 +26,39 @@
 
 --------------------------------------------------------------------
 */
-///\brief Class that manages the population of statistics to other peers
-///\file initialStatsPopulateState.cpp
-#include "initialStatsPopulateState.hpp"
-#include "private/internationalization.hpp"
+/// \brief Implementation of the iterator on peer messages of the local storage initialization for other peers
+/// \file peerMessageInitIterator.cpp
+#include "peerMessageInitIterator.hpp"
+#include "strus/storageClientInterface.hpp"
+#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/peerMessageProcessorInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
+#include "strus/storageClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "databaseAdapter.hpp"
-#include <vector>
-#include <string>
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <map>
 
 using namespace strus;
 
-void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peermsgproc_, DatabaseClientInterface* dbclient, const Index& nofDocuments_)
+PeerMessageInitIterator::PeerMessageInitIterator(
+		StorageClientInterface* storage_,
+		DatabaseClientInterface* database,
+		ErrorBufferInterface* errorhnd_)
+	:m_storage(storage_)
+	,m_proc(storage_->getPeerMessageProcessor())
+	,m_peerMessageBuilder()
+	,m_errorhnd(errorhnd_)
 {
-	m_peermsgproc = peermsgproc_;
 	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_peermsgproc->createBuilder( options));
-	if (!m_peerMessageBuilder.get()) throw strus::runtime_error(_TXT("error creating peer message builder"));
-	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofDocuments_);
+	m_peerMessageBuilder.reset( m_proc->createBuilder( options));
+	if (!m_peerMessageBuilder.get())
+	{
+		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());
+	}
+	int nofdocs = m_storage->localNofDocumentsInserted();
+	m_peerMessageBuilder->setNofDocumentsInsertedChange( nofdocs);
 	m_peerMessageBuilder->start();
 
 	std::map<Index,std::size_t> typenomap;
@@ -53,7 +67,7 @@ void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peerm
 
 	// Fill a map with the strings of all types in the collection:
 	{
-		DatabaseAdapter_TermType::Cursor typecursor( dbclient);
+		DatabaseAdapter_TermType::Cursor typecursor( database);
 		Index typeno;
 		std::string typestr;
 		for (bool more=typecursor.loadFirst( typestr, typeno); more;
@@ -66,7 +80,7 @@ void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peerm
 	}
 	// Fill a map with the strings of all terms in the collection:
 	{
-		DatabaseAdapter_TermValue::Cursor termcursor( dbclient);
+		DatabaseAdapter_TermValue::Cursor termcursor( database);
 		Index termno;
 		std::string termstr;
 		for (bool more=termcursor.loadFirst( termstr, termno); more;
@@ -83,7 +97,7 @@ void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peerm
 		Index termno;
 		Index df;
 
-		DatabaseAdapter_DocFrequency::Cursor dfcursor( dbclient);
+		DatabaseAdapter_DocFrequency::Cursor dfcursor( database);
 		for (bool more=dfcursor.loadFirst( typeno, termno, df); more;
 			more=dfcursor.loadNext( typeno, termno, df))
 		{
@@ -101,9 +115,37 @@ void InitialStatsPopulateState::init( const PeerMessageProcessorInterface* peerm
 	}
 }
 
-bool InitialStatsPopulateState::fetchMessage( const char* blk, std::size_t blksize)
+bool PeerMessageInitIterator::getNext( const char*& msg, std::size_t& msgsize)
 {
-	return m_peerMessageBuilder->fetchMessage( blk, blksize);
+	if (m_errorhnd->hasError())
+	{
+		m_errorhnd->explain( _TXT("calling peer message queue fetch with pending error: %s"));
+		return false;
+	}
+	try
+	{
+		bool rt = true;
+		do
+		{
+			rt = m_peerMessageBuilder->fetchMessage( msg, msgsize);
+		}
+		while (rt && msgsize == 0);
+		if (rt)
+		{
+			return true;
+		}
+		else if (m_errorhnd->hasError())
+		{
+			m_errorhnd->explain( _TXT("error fetching initialization peer message from storage: %s"));
+			return false;
+		}
+		else
+		{
+			m_peerMessageBuilder.reset();
+			return false;
+		}
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message from storage: %s"), *m_errorhnd, false);
 }
 
 

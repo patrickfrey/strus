@@ -46,6 +46,7 @@ public:
 	/// \return the increment positive or negative (decrement) value of the local change of the collection size
 	virtual int nofDocumentsInsertedChange()=0;
 
+	/// \brief Structure describing the document frequency change of one term in the collection
 	struct DocumentFrequencyChange
 	{
 		DocumentFrequencyChange()
@@ -53,10 +54,10 @@ public:
 		DocumentFrequencyChange( const DocumentFrequencyChange& o)
 			:type(o.type),value(o.value),increment(o.increment),isnew(o.isnew){}
 
-		const char* type;
-		const char* value;
-		int increment;
-		bool isnew;
+		const char* type;	///< type of the term
+		const char* value;	///< value of the term
+		int increment;		///< document frequency increment/decrement
+		bool isnew;		///< true, if the term is new and the receiver has to send it's document frequency value back
 	};
 
 	/// \brief Fetch the next message propagating a change in the df (document frequency)

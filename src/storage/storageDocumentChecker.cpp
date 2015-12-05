@@ -58,7 +58,12 @@ StorageDocumentChecker::StorageDocumentChecker(
 	,m_docno(storage_->documentNumber( docid_))
 	,m_logfile(logfile_)
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (!m_docno)
+	{
+		throw strus::runtime_error( _TXT( "docid not defined '%s'"), m_docid.c_str());
+	}
+}
 
 StorageDocumentChecker::~StorageDocumentChecker()
 {

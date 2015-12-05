@@ -52,10 +52,6 @@ public:
 	/// \remark Should call call 'close()' but ignore errors there silently
 	virtual ~DatabaseClientInterface(){}
 
-	/// \brief Close the database client connection and throw on error
-	/// \remark Call this function before the destructor if you want to catch errors in the close
-	virtual void close()=0;
-
 	/// \brief Create a transaction object for the database
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual DatabaseTransactionInterface* createTransaction()=0;

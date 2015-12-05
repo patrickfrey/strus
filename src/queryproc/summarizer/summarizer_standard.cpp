@@ -33,6 +33,7 @@
 #include "summarizerMatchPhrase.hpp"
 #include "summarizerListMatches.hpp"
 #include "summarizerMatchVariables.hpp"
+#include "summarizerAccumulateVariable.hpp"
 
 using namespace strus;
 
@@ -61,5 +62,9 @@ SummarizerFunctionInterface* strus::createSummarizerMatchVariables( ErrorBufferI
 	return new SummarizerFunctionMatchVariables( errorhnd_);
 }
 
+SummarizerFunctionInterface* strus::createSummarizerAccumulateVariable( ErrorBufferInterface* errorhnd_)
+{
+	return new SummarizerFunctionAccumulateVariable( errorhnd_);
+}
 
 

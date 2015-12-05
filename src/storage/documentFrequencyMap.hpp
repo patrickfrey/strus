@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_DOCUMENT_FREQUENCY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/localStructAllocator.hpp"
+#include "documentFrequencyCache.hpp"
 #include <cstdlib>
 #include <map>
 
@@ -58,6 +59,7 @@ public:
 	void getWriteBatch(
 			DatabaseTransactionInterface* transaction,
 			PeerMessageBuilderInterface* peerMessageBuilder,
+			DocumentFrequencyCache::Batch* dfbatch,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv);
 

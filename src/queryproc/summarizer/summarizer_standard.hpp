@@ -57,6 +57,10 @@ SummarizerFunctionInterface* createSummarizerMatchPhrase( ErrorBufferInterface* 
 /// \return the summarizer reference (to dispose with delete)
 SummarizerFunctionInterface* createSummarizerMatchVariables( ErrorBufferInterface* errorhnd_);
 
+/// \brief Create a summarizer for accumulating weights of contents (taken from the forward index) referenced by variable 
+/// \return the summarizer reference (to dispose with delete)
+SummarizerFunctionInterface* createSummarizerAccumulateVariable( ErrorBufferInterface* errorhnd_);
+
 }//namespace
 #endif
 

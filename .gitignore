@@ -46,9 +46,16 @@ CPackConfig.cmake.user
 CPackSourceConfig.cmake.user
 CPackSourceConfig.cmake
 tests/cmake_install.cmake.user
+cmake/build_rules.cmake.user
 include/strus/versionStorage.hpp
 src/utils/fileio_sys.hpp
 src/utils/internationalization.cpp
+dist/obs/deploy_to_obs.sh
+dist/archlinux/PKGBUILD
+dist/obs/strus.dsc
+dist/obs/strus-Debian_7.0.dsc
+dist/obs/strus-xUbuntu_12.04.dsc
+dist/redhat/strus.spec
 
 # Compiled Programs
 tests/randoc/src/testRandomCollection
@@ -62,3 +69,4 @@ tests/ranker/src/testRanker
 tests/peermsgproc/src/testPeerMessageProcessor
 tests/formula/src/formula
 tests/loggingMalloc/src/testLoggingMalloc
+tests/storageop/src/testStorageOp

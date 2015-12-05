@@ -1,2 +1,0 @@
-The open source (GPL v3) project strus provides a collection of programs and libraries for building a competitive scalable full-text search engine. The search index is distributable and user rights can be implemented. The core is written in C++ but there exist language bindings for other programming languages.
-
