@@ -359,11 +359,6 @@ StorageTransactionInterface*
 			PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
 			m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
 		}
-		if (!m_documentFrequencyCache.get())
-		{
-			TransactionLock lock( this);
-			fillDocumentFrequencyCache();
-		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_termno_map, m_next_typeno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
@@ -849,11 +844,6 @@ void StorageClient::fillDocumentFrequencyCache()
 
 DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 {
-	if (!m_documentFrequencyCache.get())
-	{
-		TransactionLock lock( this);
-		fillDocumentFrequencyCache();
-	}
 	return m_documentFrequencyCache.get();
 }
 
@@ -918,7 +908,7 @@ PeerStorageTransactionInterface* StorageClient::createPeerStorageTransaction()
 			TransactionLock lock( this);
 			fillDocumentFrequencyCache();
 		}
-		return new PeerStorageTransaction( this, m_database.get(), getDocumentFrequencyCache(), m_peerMessageProc, m_errorhnd);
+		return new PeerStorageTransaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peerMessageProc, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer storage transaction: %s"), *m_errorhnd, 0);
 }
