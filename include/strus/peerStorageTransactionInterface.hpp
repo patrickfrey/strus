@@ -47,7 +47,7 @@ public:
 	/// \brief Push a message from another peer storage
 	/// \param[in] inmsg pointer to message from peer storage
 	/// \param[in] inmsgsize size of msg blob in bytes
-	/// \param[in] sign true, if the sign of the increments is positive, false if negative (decremented)
+	/// \param[in] sign true, if the sign of the increments is positive, false if negative (inverted sign, decrement)
 	virtual void push( const char* inmsg, std::size_t inmsgsize, bool sign=true)=0;
 
 	/// \brief Transaction commit
