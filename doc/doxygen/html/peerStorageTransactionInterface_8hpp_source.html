@@ -101,26 +101,26 @@
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classstrus_1_1PeerStorageTransactionInterface.html#af48a600856214e4d05658f8555fa8be4">   45</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1PeerStorageTransactionInterface.html#af48a600856214e4d05658f8555fa8be4">~PeerStorageTransactionInterface</a>(){}</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerStorageTransactionInterface.html#a255ff21bdded3efb8f91516507d466b4">push</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* inmsg, std::size_t inmsgsize, <span class="keywordtype">bool</span> sign=<span class="keyword">true</span>)=0;</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1PeerStorageTransactionInterface.html#a9bc1eaa07f9aafa95ab3b824abf0e6c7">commit</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>*&amp; outmsg, std::size_t&amp; outmsgsize)=0;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerStorageTransactionInterface.html#aa854a883eb3be1cd7e2fbcfb5b422733">rollback</a>()=0;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;};</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerStorageTransactionInterface.html#af5fae42b9d54934e1c9ae74602d56a52">push</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* inmsg, std::size_t inmsgsize)=0;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1PeerStorageTransactionInterface.html#a9bc1eaa07f9aafa95ab3b824abf0e6c7">commit</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>*&amp; outmsg, std::size_t&amp; outmsgsize)=0;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1PeerStorageTransactionInterface.html#aa854a883eb3be1cd7e2fbcfb5b422733">rollback</a>()=0;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;};</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor"></span></div>
 <div class="ttc" id="classstrus_1_1PeerStorageTransactionInterface_html_aa854a883eb3be1cd7e2fbcfb5b422733"><div class="ttname"><a href="classstrus_1_1PeerStorageTransactionInterface.html#aa854a883eb3be1cd7e2fbcfb5b422733">strus::PeerStorageTransactionInterface::rollback</a></div><div class="ttdeci">virtual void rollback()=0</div><div class="ttdoc">Transaction rollback. </div></div>
 <div class="ttc" id="classstrus_1_1PeerStorageTransactionInterface_html"><div class="ttname"><a href="classstrus_1_1PeerStorageTransactionInterface.html">strus::PeerStorageTransactionInterface</a></div><div class="ttdoc">Interface for a transaction on the global statistics of the storage from another peer. </div><div class="ttdef"><b>Definition:</b> peerStorageTransactionInterface.hpp:40</div></div>
 <div class="ttc" id="classstrus_1_1PeerStorageTransactionInterface_html_a9bc1eaa07f9aafa95ab3b824abf0e6c7"><div class="ttname"><a href="classstrus_1_1PeerStorageTransactionInterface.html#a9bc1eaa07f9aafa95ab3b824abf0e6c7">strus::PeerStorageTransactionInterface::commit</a></div><div class="ttdeci">virtual bool commit(const char *&amp;outmsg, std::size_t &amp;outmsgsize)=0</div><div class="ttdoc">Transaction commit. </div></div>
-<div class="ttc" id="classstrus_1_1PeerStorageTransactionInterface_html_a255ff21bdded3efb8f91516507d466b4"><div class="ttname"><a href="classstrus_1_1PeerStorageTransactionInterface.html#a255ff21bdded3efb8f91516507d466b4">strus::PeerStorageTransactionInterface::push</a></div><div class="ttdeci">virtual void push(const char *inmsg, std::size_t inmsgsize, bool sign=true)=0</div><div class="ttdoc">Push a message from another peer storage. </div></div>
+<div class="ttc" id="classstrus_1_1PeerStorageTransactionInterface_html_af5fae42b9d54934e1c9ae74602d56a52"><div class="ttname"><a href="classstrus_1_1PeerStorageTransactionInterface.html#af5fae42b9d54934e1c9ae74602d56a52">strus::PeerStorageTransactionInterface::push</a></div><div class="ttdeci">virtual void push(const char *inmsg, std::size_t inmsgsize)=0</div><div class="ttdoc">Push a message from another peer storage. </div></div>
 <div class="ttc" id="classstrus_1_1PeerStorageTransactionInterface_html_af48a600856214e4d05658f8555fa8be4"><div class="ttname"><a href="classstrus_1_1PeerStorageTransactionInterface.html#af48a600856214e4d05658f8555fa8be4">strus::PeerStorageTransactionInterface::~PeerStorageTransactionInterface</a></div><div class="ttdeci">virtual ~PeerStorageTransactionInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> peerStorageTransactionInterface.hpp:45</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

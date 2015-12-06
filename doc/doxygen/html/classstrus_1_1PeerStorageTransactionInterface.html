@@ -76,9 +76,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af48a600856214e4d05658f8555fa8be4"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html#af48a600856214e4d05658f8555fa8be4">~PeerStorageTransactionInterface</a> ()</td></tr>
 <tr class="memdesc:af48a600856214e4d05658f8555fa8be4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#af48a600856214e4d05658f8555fa8be4">More...</a><br/></td></tr>
 <tr class="separator:af48a600856214e4d05658f8555fa8be4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a255ff21bdded3efb8f91516507d466b4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html#a255ff21bdded3efb8f91516507d466b4">push</a> (const char *inmsg, std::size_t inmsgsize, bool sign=true)=0</td></tr>
-<tr class="memdesc:a255ff21bdded3efb8f91516507d466b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a message from another peer storage.  <a href="#a255ff21bdded3efb8f91516507d466b4">More...</a><br/></td></tr>
-<tr class="separator:a255ff21bdded3efb8f91516507d466b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5fae42b9d54934e1c9ae74602d56a52"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html#af5fae42b9d54934e1c9ae74602d56a52">push</a> (const char *inmsg, std::size_t inmsgsize)=0</td></tr>
+<tr class="memdesc:af5fae42b9d54934e1c9ae74602d56a52"><td class="mdescLeft">&#160;</td><td class="mdescRight">Push a message from another peer storage.  <a href="#af5fae42b9d54934e1c9ae74602d56a52">More...</a><br/></td></tr>
+<tr class="separator:af5fae42b9d54934e1c9ae74602d56a52"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9bc1eaa07f9aafa95ab3b824abf0e6c7"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html#a9bc1eaa07f9aafa95ab3b824abf0e6c7">commit</a> (const char *&amp;outmsg, std::size_t &amp;outmsgsize)=0</td></tr>
 <tr class="memdesc:a9bc1eaa07f9aafa95ab3b824abf0e6c7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transaction commit.  <a href="#a9bc1eaa07f9aafa95ab3b824abf0e6c7">More...</a><br/></td></tr>
 <tr class="separator:a9bc1eaa07f9aafa95ab3b824abf0e6c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -160,7 +160,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a255ff21bdded3efb8f91516507d466b4"></a>
+<a class="anchor" id="af5fae42b9d54934e1c9ae74602d56a52"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -177,13 +177,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">std::size_t&#160;</td>
-          <td class="paramname"><em>inmsgsize</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>sign</em> = <code>true</code>&#160;</td>
+          <td class="paramname"><em>inmsgsize</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -203,7 +197,6 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">inmsg</td><td>pointer to message from peer storage </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">inmsgsize</td><td>size of msg blob in bytes </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">sign</td><td>true, if the sign of the increments is positive, false if negative (inverted sign, decrement) </td></tr>
   </table>
   </dd>
 </dl>
@@ -242,7 +235,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

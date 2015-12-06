@@ -141,10 +141,10 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1StorageTransactionInterface.html">StorageTransactionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ae744509cd0e668a7fdbdcc63e2a62a02">createTransaction</a> ()=0</td></tr>
 <tr class="memdesc:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an insert/update transaction object.  <a href="#ae744509cd0e668a7fdbdcc63e2a62a02">More...</a><br/></td></tr>
 <tr class="separator:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f23f81647faabf8df5b76a3d23caa0f"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a8f23f81647faabf8df5b76a3d23caa0f">createInitPeerMessageIterator</a> ()=0</td></tr>
-<tr class="memdesc:a8f23f81647faabf8df5b76a3d23caa0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage peer messages for initialization.  <a href="#a8f23f81647faabf8df5b76a3d23caa0f">More...</a><br/></td></tr>
-<tr class="separator:a8f23f81647faabf8df5b76a3d23caa0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a225b377b8434890c9c4d2bb4131adb9d"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a225b377b8434890c9c4d2bb4131adb9d">createInitPeerMessageIterator</a> (bool sign=true)=0</td></tr>
+<tr class="memdesc:a225b377b8434890c9c4d2bb4131adb9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage peer messages for initialization/deregistration.  <a href="#a225b377b8434890c9c4d2bb4131adb9d">More...</a><br/></td></tr>
+<tr class="separator:a225b377b8434890c9c4d2bb4131adb9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0ef410d48778ba2347766817d04e3c08"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a0ef410d48778ba2347766817d04e3c08">createUpdatePeerMessageIterator</a> ()=0</td></tr>
 <tr class="memdesc:a0ef410d48778ba2347766817d04e3c08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage peer messages created by updates of this storage as notifications to be sent to other peers.  <a href="#a0ef410d48778ba2347766817d04e3c08">More...</a><br/></td></tr>
@@ -433,7 +433,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8f23f81647faabf8df5b76a3d23caa0f"></a>
+<a class="anchor" id="a225b377b8434890c9c4d2bb4131adb9d"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -443,7 +443,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual <a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a>* strus::StorageClientInterface::createInitPeerMessageIterator </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>sign</em> = <code>true</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -454,7 +455,13 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Creates an iterator on the storage peer messages for initialization. </p>
+<p>Creates an iterator on the storage peer messages for initialization/deregistration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">sign</td><td>true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration) </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>the iterator on the peer message blobs </dd></dl>
 
 </div>
@@ -1001,7 +1008,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Dec 5 2015 18:29:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
