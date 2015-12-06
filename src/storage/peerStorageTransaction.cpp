@@ -102,7 +102,7 @@ void PeerStorageTransaction::updateDocumentFrequencyChange(
 	m_dfbatch.put( typeno, termno, increment);
 }
 
-void PeerStorageTransaction::push( const char* inmsg, std::size_t inmsgsize, bool sign)
+void PeerStorageTransaction::push( const char* inmsg, std::size_t inmsgsize)
 {
 	try
 	{
@@ -116,10 +116,10 @@ void PeerStorageTransaction::push( const char* inmsg, std::size_t inmsgsize, boo
 		PeerMessageViewerInterface::DocumentFrequencyChange rec;
 		while (viewer->nextDfChange( rec))
 		{
-			updateDocumentFrequencyChange( rec.type, rec.value, sign?rec.increment:-rec.increment, rec.isnew);
+			updateDocumentFrequencyChange( rec.type, rec.value, rec.increment, rec.isnew);
 		}
 		GlobalCounter nofdocs = viewer->nofDocumentsInsertedChange();
-		updateNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
+		updateNofDocumentsInsertedChange( nofdocs);
 	}
 	CATCH_ERROR_MAP( _TXT("error in peer storage transaction push: %s"), *m_errorhnd);
 }

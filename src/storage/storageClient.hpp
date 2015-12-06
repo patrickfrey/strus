@@ -110,7 +110,7 @@ public:
 
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator();
+	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator( bool sign);
 
 	virtual PeerMessageIteratorInterface* createUpdatePeerMessageIterator();
 

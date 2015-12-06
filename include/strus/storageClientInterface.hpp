@@ -181,9 +181,10 @@ public:
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Creates an iterator on the storage peer messages for initialization
+	/// \brief Creates an iterator on the storage peer messages for initialization/deregistration
+	/// \param[in] sign true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration)
 	/// \return the iterator on the peer message blobs
-	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator()=0;
+	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator( bool sign=true)=0;
 
 	/// \brief Creates an iterator on the storage peer messages created by updates of this storage as notifications to be sent to other peers
 	/// \return the iterator on the peer message blobs
