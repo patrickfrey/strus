@@ -72,7 +72,7 @@ public:
 
 	/// \brief Get the peer message processor interface
 	/// \return the peer message processor interface reference
-	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const;
+	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const=0;
 
 	/// \brief Creates a storage client with its database client out of a configuration string
 	/// \param[in] config configuration string (not a filename!) of both storage and database
