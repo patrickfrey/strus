@@ -848,7 +848,7 @@ bool StorageClient::fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsi
 	return m_peerMessageBuilder->fetchMessage( msg, msgsize);
 }
 
-PeerMessageIteratorInterface* StorageClient::createInitPeerMessageIterator()
+PeerMessageIteratorInterface* StorageClient::createInitPeerMessageIterator( bool sign)
 {
 	try
 	{
@@ -864,7 +864,7 @@ PeerMessageIteratorInterface* StorageClient::createInitPeerMessageIterator()
 				m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
 			}
 		}
-		return new PeerMessageInitIterator( this, m_database.get(), m_errorhnd);
+		return new PeerMessageInitIterator( this, m_database.get(), sign, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
 }

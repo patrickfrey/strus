@@ -47,16 +47,17 @@ class PeerMessageProcessorInterface;
 /// \brief Forward declaration
 class PeerMessageBuilderInterface;
 
-/// \brief Interface for a iterator on peer messages of the local storage (state) for other peers
-/// \note this interface is used for distributing a search index
+/// \brief Implementation of the iterator on peer messages of the local storage for other peers in a registration phase
 class PeerMessageInitIterator
 	:public PeerMessageIteratorInterface
 {
 
 public:
+	/// \param[in] sign true = positive, false = negative, means all offsets are inverted and isnew is false too (deregistration)
 	PeerMessageInitIterator(
 			StorageClientInterface* storage_,
 			DatabaseClientInterface* database_,
+			bool sign_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~PeerMessageInitIterator(){}

@@ -57,7 +57,7 @@ public:
 	PeerStorageTransaction( StorageClient* storage_, DatabaseClientInterface* database_, DocumentFrequencyCache* dfcache_, const PeerMessageProcessorInterface* peermsgproc_, ErrorBufferInterface* errorhnd_);
 	virtual ~PeerStorageTransaction(){}
 
-	virtual void push( const char* inmsg, std::size_t inmsgsize, bool sign);
+	virtual void push( const char* inmsg, std::size_t inmsgsize);
 
 	virtual bool commit( const char*& outmsg, std::size_t& outmsgsize);
 
