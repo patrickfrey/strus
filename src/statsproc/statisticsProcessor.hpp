@@ -26,40 +26,33 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the interface for a viewer of a message received from a peer with some statistics (distributed index)
-/// \file peerMessageViewerInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_VIEWER_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_VIEWER_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageViewerInterface.hpp"
-#include "peerMessageHeader.hpp"
-#include <stdint.h>
-#include <string>
+/// \brief Interface for packing/unpacking messages with statistics used for query evaluation.
+/// \file statisticsProcessorInterface.hpp
+#ifndef _STRUS_STATISTICS_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STATISTICS_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/statisticsProcessorInterface.hpp"
 
 namespace strus
 {
 ///\brief Forward declaration
 class ErrorBufferInterface;
 
-class PeerMessageViewer
-	:public PeerMessageViewerInterface
+class StatisticsProcessor
+	:public StatisticsProcessorInterface
 {
 public:
-	PeerMessageViewer( const char* peermsgptr, std::size_t peermsgsize, ErrorBufferInterface* errorhnd_);
-	virtual ~PeerMessageViewer();
+	explicit StatisticsProcessor( ErrorBufferInterface* errorhnd_);
+	virtual ~StatisticsProcessor();
 
-	virtual int nofDocumentsInsertedChange();
+	virtual StatisticsViewerInterface* createViewer(
+			const char* msgptr, std::size_t msgsize) const;
 
-	virtual bool nextDfChange( DocumentFrequencyChange& rec);
+	virtual StatisticsBuilderInterface* createBuilder( const BuilderOptions& options_) const;
 
 private:
-	const PeerMessageHeader* m_hdr;
-	const char* m_peermsgptr;
-	char const* m_peermsgitr;
-	char const* m_peermsgend;
-	std::size_t m_peermsgsize;
-	std::string m_msg;
 	ErrorBufferInterface* m_errorhnd;
 };
+
 }//namespace
 #endif
 

@@ -26,22 +26,22 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
-/// \file peerMessageBuilderInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
+/// \brief Interface for a builder for a message to populate statistics (distributed index)
+/// \file statisticsBuilderInterface.hpp
+#ifndef _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
+#define _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
 #include <cstdlib>
 #include <string>
 
 namespace strus
 {
 
-/// \brief Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
-class PeerMessageBuilderInterface
+/// \brief Interface for a builder for a statistics message (distributed index)
+class StatisticsBuilderInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~PeerMessageBuilderInterface(){}
+	virtual ~StatisticsBuilderInterface(){}
 
 	/// \brief Define the change of the number of document inserted
 	/// \param[in] increment positive or negative (decrement) value of the local change of the collection size
@@ -66,7 +66,7 @@ public:
 	/// \brief Rollback to the last state marked with 'start()'
 	virtual void rollback()=0;
 
-	/// \brief Get the packed message to be sent to a peer
+	/// \brief Get the packed statistics message
 	/// \param[out] blk pointer to the message 
 	/// \param[out] blksize size of message blk in bytes
 	/// \return true, if there is a message returned to be sent, false if not or an error occurred

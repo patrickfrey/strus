@@ -49,7 +49,7 @@ public:
 
 	void writeBatch( const Batch& batch);
 
-	GlobalCounter getValue( const Index& typeno, const Index& termno) const;
+	Index getValue( const Index& typeno, const Index& termno) const;
 
 	void clear();
 
@@ -59,7 +59,7 @@ public:
 	public:
 		class Increment;
 
-		void put( const Index& typeno, const Index& termno, const GlobalCounter& increment)
+		void put( const Index& typeno, const Index& termno, const Index& increment)
 		{
 			m_ar.push_back( Increment( typeno, termno, increment));
 		}
@@ -93,14 +93,14 @@ public:
 		class Increment
 		{
 		public:
-			Increment( const Index& typeno_, const Index termno_, const GlobalCounter& value_)
+			Increment( const Index& typeno_, const Index termno_, const Index& value_)
 				:typeno(typeno_),termno(termno_),value(value_){}
 			Increment( const Increment& o)
 				:typeno(o.typeno),termno(o.termno),value(o.value){}
 
 			Index typeno;
 			Index termno;
-			GlobalCounter value;
+			Index value;
 		};
 
 	private:
@@ -125,7 +125,7 @@ private:
 		explicit CounterArray( std::size_t size_)
 			:m_size(getAllocSize(size_))
 		{
-			m_ar = (GlobalCounter*) std::calloc( m_size, sizeof(GlobalCounter));
+			m_ar = (Index*) std::calloc( m_size, sizeof(Index));
 			if (!m_ar) throw std::bad_alloc();
 		}
 
@@ -133,16 +133,16 @@ private:
 			:m_ar(0),m_size(getAllocSize(size_))
 		{
 			std::size_t copy_size = (size_ < o.m_size)?size_:o.m_size;
-			if (m_size * sizeof(GlobalCounter) < m_size) throw std::bad_alloc();
-			m_ar = (GlobalCounter*)std::malloc( m_size * sizeof(GlobalCounter));
+			if (m_size * sizeof(Index) < m_size) throw std::bad_alloc();
+			m_ar = (Index*)std::malloc( m_size * sizeof(Index));
 			if (!m_ar) throw std::bad_alloc();
 
-			std::memcpy( m_ar, o.m_ar, copy_size * sizeof(GlobalCounter));
+			std::memcpy( m_ar, o.m_ar, copy_size * sizeof(Index));
 			std::memset( m_ar + copy_size, 0, m_size - copy_size);
 		}
 
-		const GlobalCounter& operator[]( std::size_t idx) const		{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound read (document frequency cache)")); return m_ar[idx];}
-		GlobalCounter& operator[]( std::size_t idx)			{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound write (document frequency cache)")); return m_ar[idx];}
+		const Index& operator[]( std::size_t idx) const		{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound read (document frequency cache)")); return m_ar[idx];}
+		Index& operator[]( std::size_t idx)			{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound write (document frequency cache)")); return m_ar[idx];}
 
 		std::size_t size() const					{return m_size;}
 
@@ -159,7 +159,7 @@ private:
 		}
 
 	private:
-		GlobalCounter* m_ar;
+		Index* m_ar;
 		std::size_t m_size;
 	};
 

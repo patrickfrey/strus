@@ -26,39 +26,39 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
-/// \file peerMessageProcessor.cpp
-#include "peerMessageProcessor.hpp"
-#include "peerMessageBuilder.hpp"
-#include "peerMessageViewer.hpp"
+/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other  storages.
+/// \file statisticsProcessor.cpp
+#include "statisticsProcessor.hpp"
+#include "statisticsBuilder.hpp"
+#include "statisticsViewer.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 
 using namespace strus;
 
-PeerMessageProcessor::PeerMessageProcessor( ErrorBufferInterface* errorhnd_)
+StatisticsProcessor::StatisticsProcessor( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_){}
 
-PeerMessageProcessor::~PeerMessageProcessor(){}
+StatisticsProcessor::~StatisticsProcessor(){}
 
-PeerMessageViewerInterface* PeerMessageProcessor::createViewer(
-			const char* peermsgptr, std::size_t peermsgsize) const
+StatisticsViewerInterface* StatisticsProcessor::createViewer(
+			const char* msgptr, std::size_t msgsize) const
 {
 	try
 	{
-		return new PeerMessageViewer( peermsgptr, peermsgsize, m_errorhnd);
+		return new StatisticsViewer( msgptr, msgsize, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error create peer message viewer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message viewer: %s"), *m_errorhnd, 0);
 }
 
-PeerMessageBuilderInterface* PeerMessageProcessor::createBuilder( const BuilderOptions& options_) const
+StatisticsBuilderInterface* StatisticsProcessor::createBuilder( const BuilderOptions& options_) const
 {
 	try
 	{
-		return new PeerMessageBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, m_errorhnd);
+		return new StatisticsBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error create peer message viewer: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message builder: %s"), *m_errorhnd, 0);
 }
 
 

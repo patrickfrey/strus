@@ -31,7 +31,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "storageDocument.hpp"
 #include "storageClient.hpp"
@@ -71,7 +71,7 @@ StorageTransaction::StorageTransaction(
 	,m_rollback(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (m_storage->getPeerMessageProcessor() != 0)
+	if (m_storage->getStatisticsProcessor() != 0)
 	{
 		m_termTypeMap.defineInv( &m_termTypeMapInv);
 		m_termValueMap.defineInv( &m_termValueMapInv);
@@ -285,9 +285,9 @@ void StorageTransaction::updateMetaData(
 bool StorageTransaction::commit()
 {
 	// Structure to make the rollback method be called in case of an exeption
-	struct PeerMessageBuilderScope
+	struct StatisticsBuilderScope
 	{
-		PeerMessageBuilderScope( PeerMessageBuilderInterface* obj_)
+		StatisticsBuilderScope( StatisticsBuilderInterface* obj_)
 			:m_obj(obj_)
 		{
 			if (m_obj) m_obj->start();
@@ -296,13 +296,13 @@ bool StorageTransaction::commit()
 		{
 			m_obj = 0;
 		}
-		~PeerMessageBuilderScope()
+		~StatisticsBuilderScope()
 		{
 			if (m_obj) m_obj->rollback();
 		}
 
 	private:
-		 PeerMessageBuilderInterface* m_obj;
+		 StatisticsBuilderInterface* m_obj;
 	};
 	if (m_commit)
 	{
@@ -324,7 +324,7 @@ bool StorageTransaction::commit()
 		StorageClient::TransactionLock lock( m_storage);
 		//... we need a lock because transactions need to be sequentialized
 
-		PeerMessageBuilderInterface* peerMessageBuilder = m_storage->getPeerMessageBuilder();
+		StatisticsBuilderInterface* statisticsBuilder = m_storage->getStatisticsBuilder();
 		DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
 
 		std::auto_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
@@ -343,12 +343,12 @@ bool StorageTransaction::commit()
 	
 		m_invertedIndexMap.renameNewTermNumbers( termnoUnknownMap);
 
-		PeerMessageBuilderScope peerMessageBuilderScope( peerMessageBuilder);
+		StatisticsBuilderScope statisticsBuilderScope( statisticsBuilder);
 		DocumentFrequencyCache::Batch dfbatch;
 
 		m_invertedIndexMap.getWriteBatch(
 				transaction.get(),
-				peerMessageBuilder, dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
+				statisticsBuilder, dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
 				m_termTypeMapInv, m_termValueMapInv);
 
 		m_forwardIndexMap.getWriteBatch( transaction.get());
@@ -373,7 +373,7 @@ bool StorageTransaction::commit()
 		}
 		m_storage->declareNofDocumentsInserted( m_nof_documents);
 		m_storage->releaseTransaction( refreshList);
-		peerMessageBuilderScope.done();
+		statisticsBuilderScope.done();
 
 		m_commit = true;
 		m_nof_documents = 0;

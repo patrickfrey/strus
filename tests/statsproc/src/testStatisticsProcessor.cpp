@@ -26,11 +26,11 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/lib/peermsgproc.hpp"
+#include "strus/lib/statsproc.hpp"
 #include "strus/lib/error.hpp"
-#include "strus/peerMessageProcessorInterface.hpp"
-#include "strus/peerMessageViewerInterface.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/statisticsProcessorInterface.hpp"
+#include "strus/statisticsViewerInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include <memory>
 #include <iostream>
@@ -284,9 +284,9 @@ int main( int argc, const char* argv[])
 		if (argc>4) insertInOrder = getUintValue( argv[4]);
 		TermCollection collection( nofTerms, diffRange);
 
-		std::auto_ptr<strus::PeerMessageProcessorInterface> pmp( strus::createPeerMessageProcessor( g_errorhnd));
-		strus::PeerMessageProcessorInterface::BuilderOptions options( insertInOrder?strus::PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder:strus::PeerMessageProcessorInterface::BuilderOptions::None, maxBlockSize);
-		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( options));
+		std::auto_ptr<strus::StatisticsProcessorInterface> pmp( strus::createStatisticsProcessor( g_errorhnd));
+		strus::StatisticsProcessorInterface::BuilderOptions options( insertInOrder?strus::StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder:strus::StatisticsProcessorInterface::BuilderOptions::None, maxBlockSize);
+		std::auto_ptr<strus::StatisticsBuilderInterface> builder( pmp->createBuilder( options));
 		if (!builder.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -321,13 +321,13 @@ int main( int argc, const char* argv[])
 		const char* insertInOrder_str = (insertInOrder?"in lexical order":"in random order");
 		std::cerr << "inserted " << collection.termar.size() << " terms in " << doubleToString(duration) << " seconds " << insertInOrder_str << std::endl;
 
-		typedef strus::PeerMessageViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
+		typedef strus::StatisticsViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
 		DocumentFrequencyChange rec;
 
 		std::set<Term> termset;
 		while (msgblksize)
 		{
-			std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
+			std::auto_ptr<strus::StatisticsViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
 			if (!viewer.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());

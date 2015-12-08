@@ -26,21 +26,32 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus peermsgproc library
-/// \file peermsgproc.hpp
-#ifndef _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
-#define _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
+/// \brief Header of a statistics message
+/// \file statisticsHeader.hpp
+#ifndef _STRUS_STATISTICS_HEADER_HPP_INCLUDED
+#define _STRUS_STATISTICS_HEADER_HPP_INCLUDED
+#include <cstring>
+#include <stdint.h>
 
-/// \brief strus toplevel namespace
-namespace strus {
+namespace strus
+{
 
-/// \brief Forward declaration
-class PeerMessageProcessorInterface;
-/// \brief Forward declaration
-class ErrorBufferInterface;
+struct StatisticsHeader
+{
+	StatisticsHeader()
+	{
+		std::memset( this, 0, sizeof(*this));
+	}
+	bool empty() const			{return nofDocumentsInsertedChange==0;}
 
-PeerMessageProcessorInterface* createPeerMessageProcessor( ErrorBufferInterface* errorhnd);
+	uint32_t nofDocumentsInsertedChange;
+};
 
+/*
+ * Message format:
+ * [StatisticsHeader] [nof bytes last msg (UTF-8)] [nof bytes rest msg (UTF-8)] [rest msg bytes]
+ */
 }//namespace
 #endif
+
 

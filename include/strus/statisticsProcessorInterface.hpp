@@ -26,39 +26,39 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
-/// \file peerMessageProcessorInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_PROCESSOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_PROCESSOR_INTERFACE_HPP_INCLUDED
+/// \brief Interface for packing/unpacking messages with statistics (distributed index)
+/// \file statisticsProcessorInterface.hpp
+#ifndef _STRUS_STATISTICS_PROCESSOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_STATISTICS_PROCESSOR_INTERFACE_HPP_INCLUDED
 #include <string>
 
 namespace strus
 {
 
 /// \brief Forward declaration
-class PeerMessageViewerInterface;
+class StatisticsViewerInterface;
 /// \brief Forward declaration
-class PeerMessageBuilderInterface;
+class StatisticsBuilderInterface;
 
-/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
+/// \brief Interface for packing/unpacking messages with statistics used for query evaluation
 /// \note this interface is used for distributing a search index
-class PeerMessageProcessorInterface
+class StatisticsProcessorInterface
 {
 private:
 	enum {DefaultMaxBlockSize=32000};
 
 public:
 	/// \brief Destructor
-	virtual ~PeerMessageProcessorInterface(){}
+	virtual ~StatisticsProcessorInterface(){}
 
-	/// \brief Creates a viewer for the contents of a peer message
-	/// \param[in] peermsgptr pointer to the packed peer message blob (not necessarily copied by the viewer, lifetime assumed longer than that of viewer)
-	/// \param[in] peermsgsize size of the packed peer message blob in bytes
+	/// \brief Creates a viewer for the contents of a statistics message
+	/// \param[in] msgptr pointer to the packed statistics message blob (not necessarily copied by the viewer, lifetime assumed longer than that of viewer)
+	/// \param[in] msgsize size of the packed statistics message blob in bytes
 	/// \return the viewer object (with ownership returned) or NULL in case of a memory allocation error
-	virtual PeerMessageViewerInterface* createViewer(
-			const char* peermsgptr, std::size_t peermsgsize) const=0;
+	virtual StatisticsViewerInterface* createViewer(
+			const char* msgptr, std::size_t msgsize) const=0;
 
-	/// \brief Structure with the options for the processing of peer messages
+	/// \brief Structure with the options for the processing of statistics messages
 	struct BuilderOptions
 	{
 		enum Set {
@@ -76,10 +76,10 @@ public:
 			:set(None),maxBlockSize(DefaultMaxBlockSize){}
 	};
 
-	/// \brief Creates a builder for a peer message
+	/// \brief Creates a builder for a statistics message
 	/// \param[in] options_ options for the message builder
 	/// \return the builder object (with ownership returned) or NULL in case of a memory allocation error
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_) const=0;
+	virtual StatisticsBuilderInterface* createBuilder( const BuilderOptions& options_) const=0;
 };
 
 }//namespace

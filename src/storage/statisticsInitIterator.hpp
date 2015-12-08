@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterator on peer messages of the local storage for other peers in a registration phase
-/// \file peerMessageInitIterator.hpp
-#ifndef _STRUS_PEER_MESSAGE_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageIteratorInterface.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
+/// \brief Implementation of the iterator on statistics of the storage for other peers in a registration/deregistration phase
+/// \file statisticsInitIterator.hpp
+#ifndef _STRUS_STATISTICS_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STATISTICS_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/statisticsIteratorInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
 #include "strus/reference.hpp"
 
 namespace strus
@@ -43,32 +43,32 @@ class StorageClientInterface;
 /// \brief Forward declaration
 class DatabaseClientInterface;
 /// \brief Forward declaration
-class PeerMessageProcessorInterface;
+class StatisticsProcessorInterface;
 /// \brief Forward declaration
-class PeerMessageBuilderInterface;
+class StatisticsBuilderInterface;
 
-/// \brief Implementation of the iterator on peer messages of the local storage for other peers in a registration phase
-class PeerMessageInitIterator
-	:public PeerMessageIteratorInterface
+/// \brief Implementation of the iterator on statistics of the storage for other peers in a registration/deregistration phase
+class StatisticsInitIterator
+	:public StatisticsIteratorInterface
 {
 
 public:
 	/// \param[in] sign true = positive, false = negative, means all offsets are inverted and isnew is false too (deregistration)
-	PeerMessageInitIterator(
+	StatisticsInitIterator(
 			StorageClientInterface* storage_,
 			DatabaseClientInterface* database_,
 			bool sign_,
 			ErrorBufferInterface* errorhnd_);
 
-	virtual ~PeerMessageInitIterator(){}
+	virtual ~StatisticsInitIterator(){}
 
 	virtual bool getNext( const char*& msg, std::size_t& msgsize);
 
 private:
 	StorageClientInterface* m_storage;				///< storage related
 	DatabaseClientInterface* m_database;				///< database related
-	const PeerMessageProcessorInterface* m_proc;			///< interface for processing messages (packing,unpacking)
-	Reference<PeerMessageBuilderInterface> m_peerMessageBuilder;	///< peer message builder
+	const StatisticsProcessorInterface* m_proc;			///< interface for processing messages (packing,unpacking)
+	Reference<StatisticsBuilderInterface> m_statisticsBuilder;	///< peer message builder
 	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
 };
 

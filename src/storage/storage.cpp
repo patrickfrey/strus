@@ -101,7 +101,7 @@ FILEERROR:
 StorageClientInterface* Storage::createClient(
 		const std::string& configsource,
 		DatabaseClientInterface* database,
-		const PeerMessageProcessorInterface* peerMessageProc) const
+		const StatisticsProcessorInterface* statisticsProc) const
 {
 	try
 	{
@@ -110,7 +110,7 @@ StorageClientInterface* Storage::createClient(
 		if (extractStringFromConfigString( cachedterms, src, "cachedterms", m_errorhnd))
 		{
 			std::string cachedtermsrc = loadFile( cachedterms);
-			return new StorageClient( database, cachedtermsrc.c_str(), peerMessageProc, m_errorhnd);
+			return new StorageClient( database, cachedtermsrc.c_str(), statisticsProc, m_errorhnd);
 		}
 		else
 		{
@@ -119,7 +119,7 @@ StorageClientInterface* Storage::createClient(
 				m_errorhnd->explain(_TXT("error creating storage client: %s"));
 				return 0;
 			}
-			return new StorageClient( database, 0, peerMessageProc, m_errorhnd);
+			return new StorageClient( database, 0, statisticsProc, m_errorhnd);
 		}
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);

@@ -33,7 +33,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
@@ -41,9 +41,8 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include "byteOrderMark.hpp"
-#include "peerMessageInitIterator.hpp"
-#include "peerMessageUpdateIterator.hpp"
-#include "peerStorageTransaction.hpp"
+#include "statisticsInitIterator.hpp"
+#include "statisticsUpdateIterator.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "documentFrequencyCache.hpp"
@@ -84,7 +83,7 @@ void StorageClient::cleanup()
 StorageClient::StorageClient(
 		DatabaseClientInterface* database_,
 		const char* termnomap_source,
-		const PeerMessageProcessorInterface* peerMessageProc_,
+		const StatisticsProcessorInterface* statisticsProc_,
 		ErrorBufferInterface* errorhnd_)
 	:m_database()
 	,m_next_typeno(0)
@@ -96,7 +95,7 @@ StorageClient::StorageClient(
 	,m_global_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
-	,m_peerMessageProc(peerMessageProc_)
+	,m_statisticsProc(statisticsProc_)
 	,m_errorhnd(errorhnd_)
 {
 	try
@@ -249,18 +248,6 @@ std::vector<std::string> StorageClient::getAttributeNames() const
 	return rt;
 }
 
-GlobalCounter StorageClient::documentFrequency( const Index& typeno, const Index& termno) const
-{
-	if (m_documentFrequencyCache.get())
-	{
-		return m_documentFrequencyCache->getValue( typeno, termno);
-	}
-	else
-	{
-		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
-	}
-}
-
 PostingIteratorInterface*
 	StorageClient::createTermPostingIterator(
 		const std::string& typestr,
@@ -349,10 +336,10 @@ StorageTransactionInterface*
 {
 	try
 	{
-		if (m_peerMessageProc && !m_peerMessageBuilder.get())
+		if (m_statisticsProc && !m_statisticsBuilder.get())
 		{
-			PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-			m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
+			StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+			m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_termno_map, m_next_typeno.value(), m_errorhnd);
 	}
@@ -397,9 +384,9 @@ bool StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
 	return (m_next_docno.test_and_set( docno + size, newval));
 }
 
-PeerMessageBuilderInterface* StorageClient::getPeerMessageBuilder()
+StatisticsBuilderInterface* StorageClient::getStatisticsBuilder()
 {
-	return m_peerMessageBuilder.get();
+	return m_statisticsBuilder.get();
 }
 
 void StorageClient::declareNofDocumentsInserted( int incr)
@@ -603,45 +590,17 @@ Index StorageClient::nofAttributeTypes()
 	return m_next_termno.value() -1;
 }
 
-GlobalCounter StorageClient::globalNofDocumentsInserted() const
-{
-	return m_global_nof_documents.value();
-}
-
-Index StorageClient::localNofDocumentsInserted() const
+Index StorageClient::nofDocumentsInserted() const
 {
 	return m_nof_documents.value();
 }
 
-GlobalCounter StorageClient::globalDocumentFrequency(
-		const std::string& type,
-		const std::string& term) const
-{
-	try
-	{
-		Index typeno = getTermValue( type);
-		Index termno = getTermValue( term);
-	
-		if (m_documentFrequencyCache.get())
-		{
-			return m_documentFrequencyCache->getValue( typeno, termno);
-		}
-		else
-		{
-			return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
-		}
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term global document frequency: %s"), *m_errorhnd, 0);
-}
-
-Index StorageClient::localDocumentFrequency( const Index& typeno, const Index& termno) const
+Index StorageClient::documentFrequency( const Index& typeno, const Index& termno) const
 {
 	return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
 }
 
-Index StorageClient::localDocumentFrequency(
-		const std::string& type,
-		const std::string& term) const
+Index StorageClient::documentFrequency( const std::string& type, const std::string& term) const
 {
 	try
 	{
@@ -649,7 +608,7 @@ Index StorageClient::localDocumentFrequency(
 		Index termno = getTermValue( term);
 		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term local document frequency: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term document frequency: %s"), *m_errorhnd, 0);
 }
 
 Index StorageClient::maxDocumentNumber() const
@@ -816,11 +775,6 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 	}
 }
 
-void StorageClient::declareGlobalNofDocumentsInserted( const GlobalCounter& incr)
-{
-	m_global_nof_documents.increment( incr);
-}
-
 void StorageClient::fillDocumentFrequencyCache()
 {
 	DocumentFrequencyCache::Batch dfbatch;
@@ -845,72 +799,54 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 bool StorageClient::fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize)
 {
 	TransactionLock lock( this);
-	return m_peerMessageBuilder->fetchMessage( msg, msgsize);
+	return m_statisticsBuilder->fetchMessage( msg, msgsize);
 }
 
-PeerMessageIteratorInterface* StorageClient::createInitPeerMessageIterator( bool sign)
+StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool sign)
 {
 	try
 	{
-		if (!m_peerMessageProc)
+		if (!m_statisticsProc)
 		{
 			throw strus::runtime_error(_TXT( "no peer message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
-			if (!m_peerMessageBuilder.get())
+			if (!m_statisticsBuilder.get())
 			{
-				PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
+				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 			}
 		}
-		return new PeerMessageInitIterator( this, m_database.get(), sign, m_errorhnd);
+		return new StatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
 }
 
-PeerMessageIteratorInterface* StorageClient::createUpdatePeerMessageIterator()
+StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
 {
 	try
 	{
-		if (!m_peerMessageProc)
+		if (!m_statisticsProc)
 		{
 			throw strus::runtime_error(_TXT( "no peer message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
-			if (!m_peerMessageBuilder.get())
+			if (!m_statisticsBuilder.get())
 			{
-				PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
+				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 			}
 		}
-		return new PeerMessageUpdateIterator( this, m_errorhnd);
+		return new StatisticsUpdateIterator( this, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
 }
 
-PeerStorageTransactionInterface* StorageClient::createPeerStorageTransaction()
+const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() const
 {
-	try
-	{
-		if (!m_peerMessageProc)
-		{
-			throw strus::runtime_error(_TXT( "no peer message processor defined"));
-		}
-		if (!m_documentFrequencyCache.get())
-		{
-			TransactionLock lock( this);
-			fillDocumentFrequencyCache();
-		}
-		return new PeerStorageTransaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peerMessageProc, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer storage transaction: %s"), *m_errorhnd, 0);
-}
-
-const PeerMessageProcessorInterface*  StorageClient::getPeerMessageProcessor() const
-{
-	return m_peerMessageProc;
+	return m_statisticsProc;
 }
 
 static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)

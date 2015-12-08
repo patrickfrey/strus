@@ -64,7 +64,7 @@ public:
 
 	void getWriteBatch(
 			DatabaseTransactionInterface* transaction,
-			PeerMessageBuilderInterface* peerMessageBuilder,
+			StatisticsBuilderInterface* statisticsBuilder,
 			DocumentFrequencyCache::Batch* dfbatch,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv);

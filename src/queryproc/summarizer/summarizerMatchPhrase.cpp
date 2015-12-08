@@ -60,7 +60,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_summarylen(summarylen_)
 	,m_structseeklen(structseeklen_)
 	,m_matchmark(matchmark_)
-	,m_nofCollectionDocuments((float)storage_->globalNofDocumentsInserted())
+	,m_nofCollectionDocuments((float)storage_->nofDocumentsInserted())
 	,m_itr()
 	,m_phrasestruct(0)
 	,m_structop()

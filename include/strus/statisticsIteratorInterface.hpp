@@ -26,38 +26,28 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterators on peer messages of the local storage for updating other peers
-/// \file peerMessageUpdateIterator.hpp
-#ifndef _STRUS_PEER_MESSAGE_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageIteratorInterface.hpp"
+/// \brief Interface for a iterator on messages with statistics
+/// \file statisticsIteratorInterface.hpp
+#ifndef _STRUS_STATISTICS_ITERATOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_STATISTICS_ITERATOR_INTERFACE_HPP_INCLUDED
+#include <cstddef>
 
 namespace strus
 {
 
-/// \brief Forward declaration
-class ErrorBufferInterface;
-/// \brief Forward declaration
-class StorageClient;
-
-/// \brief Interface for a iterator on peer messages of the local storage (updates) for other peers
-/// \note this interface is used for distributing a search index
-class PeerMessageUpdateIterator
-	:public PeerMessageIteratorInterface
+/// \brief Interface for an iterator on statistics
+class StatisticsIteratorInterface
 {
 
 public:
-	PeerMessageUpdateIterator(
-			StorageClient* storage_,
-			ErrorBufferInterface* errorhnd_);
+	/// \brief Destructor
+	virtual ~StatisticsIteratorInterface(){}
 
-	virtual ~PeerMessageUpdateIterator(){}
-
-	virtual bool getNext( const char*& msg, std::size_t& msgsize);
-
-private:
-	StorageClient* m_storage;					///< storage related
-	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
+	/// \brief Fetches the next statistics message
+	/// \param[in] msg pointer to message
+	/// \param[in] msgsize size of msg blob in bytes
+	/// \return false if there is no chunk of a message left or an error occurred
+	virtual bool getNext( const char*& msg, std::size_t& msgsize)=0;
 };
 
 }//namespace

@@ -26,32 +26,20 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
-/// \file peerMessageProcessorInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageProcessorInterface.hpp"
+/// \brief Exported functions of the strus statsproc library
+/// \file peermsgproc.hpp
+#ifndef _STRUS_STORAGE_STATISTICS_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_STATISTICS_LIB_HPP_INCLUDED
 
-namespace strus
-{
-///\brief Forward declaration
+/// \brief strus toplevel namespace
+namespace strus {
+
+/// \brief Forward declaration
+class StatisticsProcessorInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
-class PeerMessageProcessor
-	:public PeerMessageProcessorInterface
-{
-public:
-	explicit PeerMessageProcessor( ErrorBufferInterface* errorhnd_);
-	virtual ~PeerMessageProcessor();
-
-	virtual PeerMessageViewerInterface* createViewer(
-			const char* peermsgptr, std::size_t peermsgsize) const;
-
-	virtual PeerMessageBuilderInterface* createBuilder( const BuilderOptions& options_) const;
-
-private:
-	ErrorBufferInterface* m_errorhnd;
-};
+StatisticsProcessorInterface* createStatisticsProcessor( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

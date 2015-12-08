@@ -185,7 +185,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 {
 	try
 	{
-		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():storage_->globalNofDocumentsInserted(), m_attribute_doclen, m_errorhnd);
+		return new WeightingFunctionContextBM25( storage_, metadata, m_b, m_k1, m_avgdoclen, stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():storage_->nofDocumentsInserted(), m_attribute_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), "BM25", *m_errorhnd, 0);
 }

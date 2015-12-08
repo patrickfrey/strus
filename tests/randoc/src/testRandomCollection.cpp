@@ -943,9 +943,9 @@ int main( int argc, const char* argv[])
 
 		sti->createStorage( config, database.get());
 		{
-			const strus::PeerMessageProcessorInterface* peerMessageProc = 0;
+			const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
 			std::auto_ptr<strus::StorageClientInterface>
-				storage( sti->createClient( "", database.get(), peerMessageProc));
+				storage( sti->createClient( "", database.get(), statisticsMessageProc));
 			if (!storage.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());

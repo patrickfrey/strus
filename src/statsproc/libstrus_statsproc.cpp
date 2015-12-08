@@ -26,32 +26,30 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Header of a peer message
-/// \file peerMessageHeader.hpp
-#ifndef _STRUS_PEER_MESSAGE_HEADER_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_HEADER_HPP_INCLUDED
-#include <cstring>
-#include <stdint.h>
+/// \brief Exported functions of the strus statsproc library
+/// \file libstrus_statsproc.cpp
+#include "strus/lib/statsproc.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "statisticsProcessor.hpp"
+#include "private/dll_tags.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 
-namespace strus
-{
+using namespace strus;
 
-struct PeerMessageHeader
+DLL_PUBLIC StatisticsProcessorInterface* strus::createStatisticsProcessor( ErrorBufferInterface* errorhnd)
 {
-	PeerMessageHeader()
+	try
 	{
-		std::memset( this, 0, sizeof(*this));
+		static bool intl_initialized = false;
+		if (!intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			intl_initialized = true;
+		}
+		return new StatisticsProcessor( errorhnd);
 	}
-	bool empty() const			{return nofDocumentsInsertedChange==0;}
-
-	uint32_t nofDocumentsInsertedChange;
-};
-
-/*
- * Message format:
- * [PeerMessageHeader] [nof bytes last msg (UTF-8)] [nof bytes rest msg (UTF-8)] [rest msg bytes]
- */
-}//namespace
-#endif
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message processor: %s"), *errorhnd, 0);
+}
 
 

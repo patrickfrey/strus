@@ -26,37 +26,38 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a transaction on the global statistics of the storage from another peer
-/// \file peerStorageTransactionInterface.hpp
-#ifndef _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#include <string>
+/// \brief Implementation of the iterators on statistics of a storage for updating the global statistics
+/// \file statisticsUpdateIterator.hpp
+#ifndef _STRUS_STATISTICS_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STATISTICS_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/statisticsIteratorInterface.hpp"
 
 namespace strus
 {
 
-/// \brief Interface for a transaction on the global statistics of the storage from another peer
+/// \brief Forward declaration
+class ErrorBufferInterface;
+/// \brief Forward declaration
+class StorageClient;
+
+/// \brief Interface for a iterator on update of statistics of a storage for the global statistics
 /// \note this interface is used for distributing a search index
-class PeerStorageTransactionInterface
+class StatisticsUpdateIterator
+	:public StatisticsIteratorInterface
 {
 
 public:
-	/// \brief Destructor
-	virtual ~PeerStorageTransactionInterface(){}
+	StatisticsUpdateIterator(
+			StorageClient* storage_,
+			ErrorBufferInterface* errorhnd_);
 
-	/// \brief Push a message from another peer storage
-	/// \param[in] inmsg pointer to message from peer storage
-	/// \param[in] inmsgsize size of msg blob in bytes
-	virtual void push( const char* inmsg, std::size_t inmsgsize)=0;
+	virtual ~StatisticsUpdateIterator(){}
 
-	/// \brief Transaction commit
-	/// \param[out] outmsg pointer to message to the sender peer that invoked the transaction
-	/// \param[out] outmsgsize size of outmsg in bytes
-	/// \return true on success, false if the operation failed
-	virtual bool commit( const char*& outmsg, std::size_t& outmsgsize)=0;
+	virtual bool getNext( const char*& msg, std::size_t& msgsize);
 
-	/// \brief Transaction rollback
-	virtual void rollback()=0;
+private:
+	StorageClient* m_storage;					///< storage related
+	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
 };
 
 }//namespace

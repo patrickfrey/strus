@@ -27,10 +27,10 @@
 --------------------------------------------------------------------
 */
 /// \brief Implementation of the iterators on peer messages of the local storage updates for other peers
-/// \file peerMessageUpdateIterator.cpp
-#include "peerMessageUpdateIterator.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
-#include "strus/peerMessageProcessorInterface.hpp"
+/// \file statisticsUpdateIterator.cpp
+#include "statisticsUpdateIterator.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
+#include "strus/statisticsProcessorInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -40,14 +40,14 @@
 
 using namespace strus;
 
-PeerMessageUpdateIterator::PeerMessageUpdateIterator(
+StatisticsUpdateIterator::StatisticsUpdateIterator(
 		StorageClient* storage_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_errorhnd(errorhnd_)
 {}
 
-bool PeerMessageUpdateIterator::getNext( const char*& msg, std::size_t& msgsize)
+bool StatisticsUpdateIterator::getNext( const char*& msg, std::size_t& msgsize)
 {
 	try
 	{

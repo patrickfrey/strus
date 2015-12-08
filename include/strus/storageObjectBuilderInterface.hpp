@@ -48,7 +48,7 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
-class PeerMessageProcessorInterface;
+class StatisticsProcessorInterface;
 
 /// \brief Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation in strus.
 class StorageObjectBuilderInterface
@@ -70,9 +70,9 @@ public:
 	/// \return the query processor interface reference
 	virtual const QueryProcessorInterface* getQueryProcessor() const=0;
 
-	/// \brief Get the peer message processor interface
-	/// \return the peer message processor interface reference
-	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const=0;
+	/// \brief Get the statistics processor interface
+	/// \return the statistics processor interface reference
+	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const=0;
 
 	/// \brief Creates a storage client with its database client out of a configuration string
 	/// \param[in] config configuration string (not a filename!) of both storage and database

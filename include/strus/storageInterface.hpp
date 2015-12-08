@@ -41,7 +41,7 @@ class StorageClientInterface;
 /// \brief Forward declaration
 class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
-class PeerMessageProcessorInterface;
+class StatisticsProcessorInterface;
 
 
 /// \brief Interface to the create and alter a storage for strus
@@ -54,11 +54,11 @@ public:
 	/// \brief Creates an client instance of the storage using a defined key value store database
 	/// \param[in] configsource configuration source string describing the storage (not a filename !)
 	/// \param[in] database key value store database used by this storage (ownership passed to returned object)
-	/// \param[in] (optional) peerMessageProc defines the format of messages for and from other peer storages (distribute statistics)
+	/// \param[in] (optional) statisticsProc defines the format of statistic messages (distribute statistics)
 	virtual StorageClientInterface* createClient(
 			const std::string& configsource,
 			DatabaseClientInterface* database,
-			const PeerMessageProcessorInterface* peerMessageProc=0) const=0;
+			const StatisticsProcessorInterface* statisticsProc=0) const=0;
 
 	/// \brief Creates a new storage described with configsource using a defined key value store database
 	/// \param[in] configsource Configuration source string describing the storage (not a filename !)
