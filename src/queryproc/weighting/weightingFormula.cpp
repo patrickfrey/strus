@@ -157,9 +157,7 @@ WeightingFunctionContextFormula::WeightingFunctionContextFormula(
 	,m_metadata(metadata_)
 	,m_interpreter( functionMap, formula)
 	,m_errorhnd(errorhnd_)
-{
-	
-}
+{}
 
 void WeightingFunctionContextFormula::addWeightingFeature(
 		const std::string& name_,
@@ -219,8 +217,9 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunct
 			const char* name = metadata->getName( ii);
 			funcmap.defineVariableMap( name, FormulaInterpreter::VariableMap( &FunctionMap::variableMap_metadata, ii));
 		}
+		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		funcmap.defineVariableMap( "nofdocs", FormulaInterpreter::VariableMap( &FunctionMap::variableMap_param, m_paramar.size()));
-		paramar.push_back( (double)(stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():storage_->nofDocumentsInserted()));
+		paramar.push_back( (double)nofdocs);
 
 		if (m_formula.empty())
 		{
