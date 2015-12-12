@@ -178,8 +178,7 @@ struct TermCollection
 		while (termset.size() < nofTerms)
 		{
 			int diff = g_random.get( 0, (int)diffrange) - (int)diffrange/2;
-			bool isnew = 0!=g_random.get( 0, 1);
-			termset.insert( Term( randomType(), randomTerm(), diff, isnew));
+			termset.insert( Term( randomType(), randomTerm(), diff));
 		}
 		std::set<Term>::const_iterator ti = termset.begin(), te = termset.end();
 		for (; ti != te; ++ti)
@@ -193,17 +192,16 @@ struct TermCollection
 		std::string type;
 		std::string value;
 		int diff;
-		bool isnew;
 
 		Term( const Term& o)
-			:type(o.type),value(o.value),diff(o.diff),isnew(o.isnew){}
-		Term( const std::string& type_, const std::string& value_, int diff_, bool isnew_)
-			:type(type_),value(value_),diff(diff_),isnew(isnew_){}
+			:type(o.type),value(o.value),diff(o.diff){}
+		Term( const std::string& type_, const std::string& value_, int diff_)
+			:type(type_),value(value_),diff(diff_){}
 
 		std::string tostring() const
 		{
 			std::ostringstream rt;
-			rt << " " << type << " '" << value << "' " << diff << " " << (isnew?"new":"old");
+			rt << " " << type << " '" << value << "' " << diff;
 			return rt.str();
 		}
 
@@ -300,11 +298,10 @@ int main( int argc, const char* argv[])
 		for (; ti != te; ++ti)
 		{
 #ifdef STRUS_LOWLEVEL_DEBUG
-			const char* isnewstr = ti->isnew?"new":"old";
-			std::cerr << "add df change '" << ti->type << "' '" << ti->value << "' " << ti->diff << " " << isnewstr << std::endl;
+			std::cerr << "add df change '" << ti->type << "' '" << ti->value << "' " << ti->diff << std::endl;
 #endif
 			termsByteSize += ti->type.size() + ti->value.size() + 5;
-			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff, ti->isnew);
+			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff);
 		}
 		const char* msgblk;
 		std::size_t msgblksize;
@@ -335,10 +332,9 @@ int main( int argc, const char* argv[])
 			while (viewer->nextDfChange( rec))
 			{
 #ifdef STRUS_LOWLEVEL_DEBUG
-				const char* isnewstr = ti->isnew?"new":"old";
-				std::cout << "result df change " << rec.type << " " << rec.value << " " << rec.increment << " " << isnewstr << std::endl;
+				std::cout << "result df change " << rec.type << " " << rec.value << " " << rec.increment << std::endl;
 #endif
-				termset.insert( Term( rec.type, rec.value, rec.increment, rec.isnew));
+				termset.insert( Term( rec.type, rec.value, rec.increment));
 			}
 			if (!builder->fetchMessage( msgblk, msgblksize))
 			{
@@ -380,13 +376,6 @@ int main( int argc, const char* argv[])
 			{
 				std::cerr << "[" << tidx << "] DIFF '" << ti->diff << "' != '" << oi->diff << "'" << std::endl;
 				throw std::runtime_error( "peer message item diff does not match");
-			}
-			if (oi->isnew != ti->isnew)
-			{
-				const char* oi_isnew = oi->isnew?"true":"false";
-				const char* ti_isnew = ti->isnew?"true":"false";
-				std::cerr << "[" << tidx << "] ISNEW '" << ti_isnew << "' != '" << oi_isnew << "'" << std::endl;
-				throw std::runtime_error( "peer message item isnew does not match");
 			}
 		}
 		if (g_errorhnd->hasError())

@@ -54,8 +54,7 @@ public:
 	virtual void addDfChange(
 			const char* termtype,
 			const char* termvalue,
-			int increment,
-			bool isnew);
+			int increment);
 
 	virtual bool fetchMessage( const char*& blk, std::size_t& blksize);
 
@@ -66,12 +65,10 @@ public:
 private:
 	void addDfChange_final(
 			const std::string& key,
-			int increment,
-			bool isnew);
+			int increment);
 	void addDfChange_tree(
 			const std::string& key,
-			int increment,
-			bool isnew);
+			int increment);
 	void moveTree();
 	void newContent();
 	void clear();

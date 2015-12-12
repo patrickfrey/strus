@@ -96,8 +96,7 @@ static void printRecord( std::ostream& out, const char* rc, std::size_t rcsize)
 void StatisticsBuilder::addDfChange(
 			const char* termtype,
 			const char* termvalue,
-			int increment,
-			bool isnew)
+			int increment)
 {
 	try
 	{
@@ -126,11 +125,11 @@ void StatisticsBuilder::addDfChange(
 			if (m_insertInLexicalOrder)
 			{
 		
-				addDfChange_final( rec, increment, isnew);
+				addDfChange_final( rec, increment);
 			}
 			else
 			{
-				addDfChange_tree( rec, increment, isnew);
+				addDfChange_tree( rec, increment);
 			}
 		}
 	}
@@ -139,16 +138,15 @@ void StatisticsBuilder::addDfChange(
 
 void StatisticsBuilder::addDfChange_tree(
 		const std::string& key,
-		int increment,
-		bool isnew)
+		int increment)
 {
 	bool sign = (increment<0);
 	if (sign)
 	{
 		increment = -increment;
 	}
-	unsigned int flags = (isnew?0x1:0x0)|(sign?0x2:0x0);
-	unsigned int val = (increment << 2) + flags;
+	unsigned int flags = (sign?0x1:0x0);
+	unsigned int val = (increment << 1) + flags;
 	if (!m_tree.set( key.c_str(), (conotrie::CompactNodeTrie::NodeData)val))
 	{
 		newContent();
@@ -161,8 +159,7 @@ void StatisticsBuilder::addDfChange_tree(
 
 void StatisticsBuilder::addDfChange_final(
 		const std::string& key,
-		int increment,
-		bool isnew)
+		int increment)
 {
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 	{
@@ -176,12 +173,8 @@ void StatisticsBuilder::addDfChange_final(
 	unsigned char flags = 0x0;
 	if (increment < 0)
 	{
-		flags |= 0x2;
-		increment = -increment;
-	}
-	if (isnew)
-	{
 		flags |= 0x1;
+		increment = -increment;
 	}
 	pldata.push_back( flags);
 	std::size_t idxpos = utf8encode( idxbuf, (int32_t)increment);
@@ -270,14 +263,13 @@ void StatisticsBuilder::moveTree()
 	for (; ti != te; ++ti)
 	{
 		unsigned int val = (unsigned int)ti.data();
-		int increment = val >> 2;
-		bool sign = ((val&0x2) != 0);
-		bool isnew = ((val&0x1) != 0);
+		int increment = val >> 1;
+		bool sign = ((val&0x1) != 0);
 		if (sign)
 		{
 			increment = -increment;
 		}
-		addDfChange_final( ti.key(), increment, isnew);
+		addDfChange_final( ti.key(), increment);
 	}
 	m_tree.reset();
 }

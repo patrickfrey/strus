@@ -101,7 +101,7 @@ void DocumentFrequencyMap::getWriteBatch(
 			if (!typestr) throw strus::runtime_error( _TXT( "term type not defined in inverse key map for typeno %d"), mi->first.first);
 			if (!termstr) throw strus::runtime_error( _TXT( "term value not defined in inverse key map for termno %d"), mi->first.second);
 
-			statisticsBuilder->addDfChange( typestr, termstr, mi->second, (df==0));
+			statisticsBuilder->addDfChange( typestr, termstr, mi->second);
 		}
 		df += mi->second;
 		if (df < 0) throw strus::runtime_error( _TXT( "document frequency got negative: %d (%d)"), (int)df, (int)mi->second);

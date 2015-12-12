@@ -50,14 +50,13 @@ public:
 	struct DocumentFrequencyChange
 	{
 		DocumentFrequencyChange()
-			:type(0),value(0),increment(0),isnew(false){}
+			:type(0),value(0),increment(0){}
 		DocumentFrequencyChange( const DocumentFrequencyChange& o)
-			:type(o.type),value(o.value),increment(o.increment),isnew(o.isnew){}
+			:type(o.type),value(o.value),increment(o.increment){}
 
 		const char* type;	///< type of the term
 		const char* value;	///< value of the term
 		int increment;		///< document frequency increment/decrement
-		bool isnew;		///< true, if the term is new and the receiver has to send it's document frequency value back
 	};
 
 	/// \brief Fetch the next message propagating a change in the df (document frequency)

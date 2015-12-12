@@ -104,17 +104,16 @@ bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
 		rec.value = rec.type + typesize + 1;
 
 		unsigned char flags = (unsigned char)*flags_itr;
-		if (flags >= 0x4)
+		if (flags >= 0x2)
 		{
 			throw strus::runtime_error( _TXT( "got illegal message from  (corrupt message record [3])"));
 		}
 		chlen = utf8charlen( *df_itr);
 		rec.increment = utf8decode( df_itr, chlen);
-		if ((flags & 0x2) != 0)
+		if ((flags & 0x1) != 0)
 		{
 			rec.increment = -rec.increment;
 		}
-		rec.isnew = ((flags & 0x1) != 0);
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message viewer fetching next df change: %s"), *m_errorhnd, false);
