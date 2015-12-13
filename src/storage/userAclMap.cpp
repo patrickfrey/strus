@@ -36,25 +36,69 @@
 
 using namespace strus;
 
+void UserAclMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
+{
+	Map::iterator ui = m_usrmap.begin(), ue = m_usrmap.end();
+	while (ui != ue)
+	{
+		Index docno = MapKey(ui->first).second;
+		if (KeyMap::isUnknown( docno))
+		{
+			Index userno = MapKey(ui->first).first;
+			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+			if (ri == renamemap.end())
+			{
+				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "user acl map");
+			}
+			m_usrmap[ MapKey( userno, ri->second)] = ui->second;
+			m_usrmap.erase( ui++);
+		}
+		else
+		{
+			++ui;
+		}
+	}
+	Map::iterator ai = m_aclmap.begin(), ae = m_aclmap.end();
+	while (ai != ae)
+	{
+		Index docno = MapKey(ai->first).first;
+		if (KeyMap::isUnknown( docno))
+		{
+			Index userno = MapKey(ai->first).second;
+			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+			if (ri == renamemap.end())
+			{
+				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "acl user map");
+			}
+			m_aclmap[ MapKey( ri->second, userno)] = ai->second;
+			m_aclmap.erase( ai++);
+		}
+		else
+		{
+			++ai;
+		}
+	}
+}
+
 void UserAclMap::markSetElement(
 	const Index& userno,
-	const Index& elemno,
+	const Index& docno,
 	bool isMember)
 {
-	Map::iterator mi = m_usrmap.find( MapKey( userno, elemno));
+	Map::iterator mi = m_usrmap.find( MapKey( userno, docno));
 	if (mi == m_usrmap.end())
 	{
-		m_usrmap[ MapKey( userno, elemno)] = isMember;
+		m_usrmap[ MapKey( userno, docno)] = isMember;
 	}
 	else
 	{
 		mi->second = isMember;
 	}
 
-	mi = m_aclmap.find( MapKey( elemno, userno));
+	mi = m_aclmap.find( MapKey( docno, userno));
 	if (mi == m_aclmap.end())
 	{
-		m_aclmap[ MapKey( elemno, userno)] = isMember;
+		m_aclmap[ MapKey( docno, userno)] = isMember;
 	}
 	else
 	{
@@ -64,16 +108,16 @@ void UserAclMap::markSetElement(
 
 void UserAclMap::defineUserAccess(
 	const Index& userno,
-	const Index& elemno)
+	const Index& docno)
 {
-	markSetElement( userno, elemno, true);
+	markSetElement( userno, docno, true);
 }
 
 void UserAclMap::deleteUserAccess(
 	const Index& userno,
-	const Index& elemno)
+	const Index& docno)
 {
-	markSetElement( userno, elemno, false);
+	markSetElement( userno, docno, false);
 }
 
 void UserAclMap::deleteUserAccess(
@@ -114,10 +158,10 @@ static void resetAllBooleanBlockElementsFromStorage(
 		;more; more=dbadapter.loadNext( blk))
 	{
 		BooleanBlock::NodeCursor cursor;
-		Index elemno = blk.getFirst( cursor);
-		for (;elemno; elemno = blk.getNext( cursor))
+		Index docno = blk.getFirst( cursor);
+		for (;docno; docno = blk.getNext( cursor))
 		{
-			map[ UserAclMap::MapKey( blk.id(), elemno)]; // reset to false, only if it does not exist
+			map[ UserAclMap::MapKey( blk.id(), docno)]; // reset to false, only if it does not exist
 		}
 	}
 }

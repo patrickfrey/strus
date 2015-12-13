@@ -239,24 +239,14 @@ void StorageTransaction::deleteDocument( const std::string& docid)
 
 StorageDocumentInterface*
 	StorageTransaction::createDocument(
-		const std::string& docid,
-		const Index& docno)
+		const std::string& docid)
 {
 	try
 	{
-		if (docno)
-		{
-			m_nof_documents += 1;
-			m_newDocidMap[ docid] = docno;
-			return new StorageDocument( this, docid, docno, true, m_errorhnd);
-		}
-		else
-		{
-			bool isNew;
-			Index dn = m_docIdMap.getOrCreate( docid, isNew);
-			if (isNew) m_nof_documents += 1;
-			return new StorageDocument( this, docid, dn, isNew, m_errorhnd);
-		}
+		bool isNew;
+		Index dn = m_docIdMap.getOrCreate( docid, isNew);
+		if (isNew) m_nof_documents += 1;
+		return new StorageDocument( this, docid, dn, isNew, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document in transaction: %s"), *m_errorhnd, 0);
 }
@@ -335,13 +325,16 @@ bool StorageTransaction::commit()
 		}
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
-		m_docIdMap.getWriteBatch( transaction.get());
+		std::map<Index,Index> docnoUnknownMap;
+		m_docIdMap.getWriteBatch( docnoUnknownMap, transaction.get());
 
 		std::vector<Index> refreshList;
+		m_attributeMap.renameNewDocNumbers( docnoUnknownMap);
 		m_attributeMap.getWriteBatch( transaction.get());
+		m_metaDataMap.renameNewDocNumbers( docnoUnknownMap);
 		m_metaDataMap.getWriteBatch( transaction.get(), refreshList);
-	
-		m_invertedIndexMap.renameNewTermNumbers( termnoUnknownMap);
+
+		m_invertedIndexMap.renameNewNumbers( docnoUnknownMap, termnoUnknownMap);
 
 		StatisticsBuilderScope statisticsBuilderScope( statisticsBuilder);
 		DocumentFrequencyCache::Batch dfbatch;
@@ -351,15 +344,11 @@ bool StorageTransaction::commit()
 				statisticsBuilder, dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
 				m_termTypeMapInv, m_termValueMapInv);
 
+		m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
 		m_forwardIndexMap.getWriteBatch( transaction.get());
-	
-		m_userAclMap.getWriteBatch( transaction.get());
 
-		StringMap<Index>::const_iterator di = m_newDocidMap.begin(), de = m_newDocidMap.end();
-		for (; di != de; ++di)
-		{
-			DatabaseAdapter_DocId::Writer( m_database).store( transaction.get(), di->first, di->second);
-		}
+		m_userAclMap.renameNewDocNumbers( docnoUnknownMap);
+		m_userAclMap.getWriteBatch( transaction.get());
 
 		m_storage->getVariablesWriteBatch( transaction.get(), m_nof_documents);
 		if (!transaction->commit())

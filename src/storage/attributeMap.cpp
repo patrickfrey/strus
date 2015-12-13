@@ -28,8 +28,34 @@
 */
 #include "attributeMap.hpp"
 #include "databaseAdapter.hpp"
+#include "keyMap.hpp"
 
 using namespace strus;
+
+void AttributeMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
+{
+	Map::iterator mi = m_map.begin(), me = m_map.end();
+	while (mi != me)
+	{
+		Index docno = BlockKey(mi->first).elem(1);
+		if (KeyMap::isUnknown( docno))
+		{
+			Index varno = BlockKey(mi->first).elem(2);
+			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+			if (ri == renamemap.end())
+			{
+				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "attribute map");
+			}
+			BlockKey newkey( docno, varno);
+			m_map[ newkey.index()] = mi->second;
+			m_map.erase( mi++);
+		}
+		else
+		{
+			++mi;
+		}
+	}
+}
 
 void AttributeMap::defineAttribute( const Index& docno, const Index& varno, const std::string& value)
 {

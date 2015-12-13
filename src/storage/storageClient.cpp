@@ -407,7 +407,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use typeno allocator for non immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "typeno");
 	}
 
 private:
@@ -419,14 +419,14 @@ class DocnoAllocator
 {
 public:
 	DocnoAllocator( StorageClient* storage_)
-		:KeyAllocatorInterface(true),m_storage(storage_){}
+		:KeyAllocatorInterface(false),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		return m_storage->allocDocnoImm( name, isNew);
+		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "docno");
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use docno allocator for non immediate alloc"));
+		return m_storage->allocDocno();
 	}
 private:
 	StorageClient* m_storage;
@@ -448,7 +448,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use docno allocator for non immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "userno");
 	}
 private:
 	StorageClient* m_storage;
@@ -466,7 +466,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use attribno allocator for non immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "attribno");
 	}
 private:
 	StorageClient* m_storage;
@@ -481,7 +481,7 @@ public:
 
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		throw strus::logic_error( _TXT( "cannot use termno allocator for immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "termno");
 	}
 	virtual Index alloc()
 	{
@@ -527,6 +527,11 @@ Index StorageClient::allocTermno()
 	return m_next_termno.allocIncrement();
 }
 
+Index StorageClient::allocDocno()
+{
+	return m_next_docno.allocIncrement();
+}
+
 Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
@@ -534,18 +539,6 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
-		isNew = true;
-	}
-	return rt;
-}
-
-Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
-{
-	Index rt;
-	DatabaseAdapter_DocId::ReadWriter stor(m_database.get());
-	if (!stor.load( name, rt))
-	{
-		stor.storeImm( name, rt = m_next_docno.allocIncrement());
 		isNew = true;
 	}
 	return rt;

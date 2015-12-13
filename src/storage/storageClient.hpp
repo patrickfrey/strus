@@ -171,8 +171,9 @@ public:/*StorageTransaction*/
 	bool withAcl() const;
 
 	Index allocTermno();
+	Index allocDocno();
+
 	Index allocTypenoImm( const std::string& name, bool& isNew);///< immediate allocation of a term type
-	Index allocDocnoImm( const std::string& name, bool& isNew); ///< immediate allocation of a doc number
 	Index allocUsernoImm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
 	Index allocAttribnoImm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
 
