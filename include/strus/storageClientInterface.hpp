@@ -61,8 +61,6 @@ class StorageDumpInterface;
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
-/// \brief Forward declaration
-class DocnoRangeAllocatorInterface;
 
 
 /// \brief Interface of a strus IR storage
@@ -157,11 +155,6 @@ public:
 	/// \brief Create an interface to access attributes attached to documents for representation
 	/// \return the interface to access document attributes to be disposed with delete by the caller
 	virtual AttributeReaderInterface* createAttributeReader() const=0;
-
-	/// \brief Create an interface to allocate document numbers in ranges
-	/// \return the interface to allocate document numbers from this storage
-	/// \note Allocate document numbers in ranges is inevitable for fast insert of documents known to be new
-	virtual DocnoRangeAllocatorInterface* createDocnoRangeAllocator()=0;
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface to be disposed with delete by the caller

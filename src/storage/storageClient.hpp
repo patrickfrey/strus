@@ -60,8 +60,6 @@ class DatabaseClientInterface;
 /// \brief Forward declaration
 class DocumentFrequencyCache;
 /// \brief Forward declaration
-class DocnoRangeAllocatorInterface;
-/// \brief Forward declaration
 class StorageDumpInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
@@ -103,8 +101,6 @@ public:
 			createDocumentChecker(
 				const std::string& docid,
 				const std::string& logfilename) const;
-
-	virtual DocnoRangeAllocatorInterface* createDocnoRangeAllocator();
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
@@ -177,8 +173,6 @@ public:/*StorageTransaction*/
 	Index allocUsernoImm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
 	Index allocAttribnoImm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
 
-	Index allocDocnoRange( std::size_t nofDocuments);
-	bool deallocDocnoRange( const Index& docno, const Index& size);
 	StatisticsBuilderInterface* getStatisticsBuilder();
 
 	friend class TransactionLock;

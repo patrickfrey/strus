@@ -47,7 +47,6 @@
 #include "storageDocumentChecker.hpp"
 #include "documentFrequencyCache.hpp"
 #include "metaDataBlockCache.hpp"
-#include "docnoRangeAllocator.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseAdapter.hpp"
@@ -356,32 +355,6 @@ StorageDocumentInterface*
 		return new StorageDocumentChecker( this, m_database.get(), docid, logfilename, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document checker: %s"), *m_errorhnd, 0);
-}
-
-DocnoRangeAllocatorInterface* StorageClient::createDocnoRangeAllocator()
-{
-	try
-	{
-		return new DocnoRangeAllocator( this, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating document number range allocator: %s"), *m_errorhnd, 0);
-}
-
-Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
-{
-	Index rt = m_next_docno.allocIncrement( nofDocuments);
-	if (m_next_docno.value() <= rt)
-	{
-		m_next_docno.decrement( nofDocuments);
-		throw strus::runtime_error( _TXT( "docno allocation error"));
-	}
-	return rt;
-}
-
-bool StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
-{
-	Index newval = m_next_docno.value() - size;
-	return (m_next_docno.test_and_set( docno + size, newval));
 }
 
 StatisticsBuilderInterface* StorageClient::getStatisticsBuilder()
