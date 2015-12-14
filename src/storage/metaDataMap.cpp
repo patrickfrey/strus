@@ -56,7 +56,7 @@ void MetaDataMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
 			{
 				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "metadata map");
 			}
-			MetaDataKey newkey( docno, elemno);
+			MetaDataKey newkey( ri->second, elemno);
 			m_map[ newkey] = mi->second;
 			m_map.erase( mi++);
 		}

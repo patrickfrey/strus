@@ -40,11 +40,15 @@
 
 using namespace strus;
 
-#undef STRUS_LOWLEVEL_DEBUG
-#undef STRUS_LOWLEVEL_CHECK
+#define STRUS_LOWLEVEL_DEBUG
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-PostingIterator::PostingIterator( const StorageClient* storage_, const DatabaseClientInterface* database_, const Index& termtypeno, const Index& termvalueno, const char* termstr, GlobalCounter documentFrequency_, ErrorBufferInterface* errorhnd_)
+PostingIterator::PostingIterator(
+		const StorageClient* storage_,
+		const DatabaseClientInterface* database_,
+		const Index& termtypeno,
+		const Index& termvalueno, const char* termstr,
+		ErrorBufferInterface* errorhnd_)
 #else
 PostingIterator::PostingIterator(
 		const StorageClient* storage_,

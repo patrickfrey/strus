@@ -227,11 +227,25 @@ struct RandomDoc
 		,occurrencear(o.occurrencear)
 		,weightmap(o.weightmap){}
 
-	explicit RandomDoc( unsigned int docid_, const TermCollection& collection, unsigned int size)
+	static const char* getDocIdFormatString( unsigned int nofDocs)
 	{
-		std::ostringstream docid_cnv;
-		docid_cnv << "doc" << docid_;
-		docid = docid_cnv.str();
+		if (nofDocs < 10)        return "doc%1u";
+		if (nofDocs < 100)       return "doc%02u";
+		if (nofDocs < 1000)      return "doc%03u";
+		if (nofDocs < 10000)     return "doc%04u";
+		if (nofDocs < 100000)    return "doc%05u";
+		if (nofDocs < 1000000)   return "doc%06u";
+		if (nofDocs < 10000000)  return "doc%07u";
+		if (nofDocs < 100000000) return "doc%08u";
+		throw std::runtime_error("too many documents for random document collection");
+	}
+
+	explicit RandomDoc( unsigned int docid_, unsigned int nofDocs_, const TermCollection& collection, unsigned int size)
+	{
+		const char* docid_formatstring = getDocIdFormatString( nofDocs_);
+		char docidstr[ 64];
+		std::snprintf( docidstr, sizeof(docidstr), docid_formatstring, docid_);
+		docid.append( docidstr);
 
 		unsigned int posidx = 1;
 		while (posidx <= size)
@@ -291,7 +305,7 @@ struct RandomCollection
 			unsigned int big_docsize   = g_random.get( 2, 3 + (maxDocumentSize/2)) + (maxDocumentSize/2);
 
 			unsigned int docsize = g_random.get( 2, maxDocumentSize, 4, tiny_docsize, small_docsize, med_docsize, big_docsize);
-			docar.push_back( RandomDoc( di+1, termCollection, docsize));
+			docar.push_back( RandomDoc( di+1, nofDocuments, termCollection, docsize));
 		}
 		std::vector<unsigned int> termDocumentFrequencyMap( termCollection.termar.size(), 0);
 		std::vector<unsigned int> termCollectionFrequencyMap( termCollection.termar.size(), 0);

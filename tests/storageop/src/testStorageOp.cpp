@@ -34,6 +34,7 @@
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
+#include "strus/private/fileio.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -44,8 +45,10 @@
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
 #include "private/utils.hpp"
+#include "private/errorUtils.hpp"
 #include <string>
 #include <cstring>
+#include <cstdio>
 #include <iostream>
 #include <stdexcept>
 #include <memory>
@@ -227,6 +230,177 @@ static void testTermTypeIterator()
 	}
 }
 
+
+struct Feature
+{
+	enum Kind
+	{
+		SearchIndex,
+		ForwardIndex,
+		Attribute,
+		MetaData
+	};
+	Kind kind;
+	std::string type;
+	std::string value;
+	unsigned int pos;
+
+	Feature( Kind kind_, const std::string& type_, const std::string& value_, unsigned int pos_=0)
+		:kind(kind_),type(type_),value(value_),pos(pos_){}
+	Feature( const Feature& o)
+		:kind(o.kind),type(o.type),value(o.value),pos(o.pos){}
+};
+
+static void testTrivialInsert()
+{
+	enum
+	{
+		NofDocs=100,
+		NofTermTypes=10,
+		NofTermValues=100,
+		NofAttributes=3,
+		NofMetaData=3
+	};
+	struct DocumentBuilder
+	{
+		static std::vector<Feature> create( unsigned int docno)
+		{
+			std::vector<Feature> rt;
+			char docid[ 32];
+			std::snprintf( docid, sizeof(docid), "D%02u", docno);
+	
+			unsigned int ti=0, te=NofTermTypes;
+			for (ti=0; ti<te; ++ti)
+			{
+				char searchtype[ 32];
+				std::snprintf( searchtype, sizeof(searchtype), "S%02u", ti);
+				char forwardtype[ 32];
+				std::snprintf( forwardtype, sizeof(forwardtype), "F%02u", ti);
+	
+				unsigned int vi=0, ve=NofTermValues;
+				for (vi=0; vi<ve; ++vi)
+				{
+					if ((vi + docno) % 4 == 0) continue;
+					char value[ 32];
+					std::snprintf( value, sizeof(value), "s%02u", vi);
+					rt.push_back( Feature( Feature::SearchIndex, searchtype, value, vi+1));
+	
+					std::snprintf( value, sizeof(value), "f%02u", vi);
+					rt.push_back( Feature( Feature::ForwardIndex, forwardtype, value, vi+1));
+				}
+			}
+			unsigned int ai=0, ae=NofAttributes;
+			for (ai=0; ai<ae; ++ai)
+			{
+				char attributename[ 32];
+				std::snprintf( attributename, sizeof(attributename), "A%02u", ai);
+				char attributevalue[ 32];
+				std::snprintf( attributevalue, sizeof(attributevalue), "a%02u", ai);
+
+				rt.push_back( Feature( Feature::Attribute, attributename, attributevalue));
+			}
+			unsigned int mi=0, me=NofMetaData;
+			for (mi=0; mi<me; ++mi)
+			{
+				char metadataname[ 32];
+				std::snprintf( metadataname, sizeof(metadataname), "M%1u", mi);
+				char metadatavalue[ 32];
+				std::snprintf( metadatavalue, sizeof(metadatavalue), "m%1u", mi * 11);
+				
+				rt.push_back( Feature( Feature::MetaData, metadataname, metadatavalue));
+			}
+			return rt;
+		}
+	};
+	Storage storage;
+	storage.open( "path=storage; metadata=M0 UINT32, M1 UINT16, M2 UINT8");
+	Transaction transaction( storage);
+	unsigned int di=0, de=NofDocs;
+	for (; di != de; ++di)
+	{
+		char docid[ 32];
+		std::snprintf( docid, sizeof(docid), "D%02u", di);
+		std::auto_ptr<strus::StorageDocumentInterface>
+			doc( transaction.tri->createDocument( docid));
+
+		std::vector<Feature> feats = DocumentBuilder::create( di);
+		std::vector<Feature>::const_iterator fi = feats.begin(), fe = feats.end();
+		for (; fi != fe; ++fi)
+		{
+			switch (fi->kind)
+			{
+				case Feature::SearchIndex:
+					doc->addSearchIndexTerm( fi->type, fi->value, fi->pos);
+					break;
+				case Feature::ForwardIndex:
+					doc->addForwardIndexTerm( fi->type, fi->value, fi->pos);
+					break;
+				case Feature::Attribute:
+					doc->setAttribute( fi->type, fi->value);
+					break;
+				case Feature::MetaData:
+					doc->setMetaData( fi->type, (unsigned int)atoi(fi->value.c_str()));
+					break;
+			}
+		}
+		doc->done();
+	}
+	if (!transaction.commit() || g_errorhnd->hasError())
+	{
+		throw strus::runtime_error( "transaction failed: %s", g_errorhnd->fetchError());
+	}
+
+	for (di=0; di != de; ++di)
+	{
+		char docid[ 32];
+		std::snprintf( docid, sizeof(docid), "D%02u", di);
+		const char* errlog = "checkindex.log";
+
+		unsigned int ec = strus::writeFile( errlog, "");
+		if (ec) throw strus::runtime_error("error opening logfile '%s' (%u)", errlog, ec);
+
+		std::auto_ptr<strus::StorageDocumentInterface>
+			doc( storage.sci->createDocumentChecker( docid, errlog));
+		if (!doc.get())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
+
+		std::vector<Feature> feats = DocumentBuilder::create( di);
+		std::vector<Feature>::const_iterator fi = feats.begin(), fe = feats.end();
+		for (; fi != fe; ++fi)
+		{
+			switch (fi->kind)
+			{
+				case Feature::SearchIndex:
+					doc->addSearchIndexTerm( fi->type, fi->value, fi->pos);
+					break;
+				case Feature::ForwardIndex:
+					doc->addForwardIndexTerm( fi->type, fi->value, fi->pos);
+					break;
+				case Feature::Attribute:
+					doc->setAttribute( fi->type, fi->value);
+					break;
+				case Feature::MetaData:
+					doc->setMetaData( fi->type, (unsigned int)atoi(fi->value.c_str()));
+					break;
+			}
+		}
+		doc->done();
+		std::string errors;
+		ec = strus::readFile( errlog, errors);
+		if (ec) throw strus::runtime_error("error opening logfile '%s' for reading (%u)", errlog, ec);
+		if (errors.size() > 1000)
+		{
+			errors.resize(1000);
+		}
+		if (!errors.empty())
+		{
+			throw strus::runtime_error("error checking insert of %s: %s", docid, errors.c_str());
+		}
+	}
+}
+
 #define RUN_TEST( idx, TestName)\
 	try\
 	{\
@@ -295,6 +469,7 @@ int main( int argc, const char* argv[])
 		{
 			case 1: RUN_TEST( ti, DeleteNonExistingDoc ) break;
 			case 2: RUN_TEST( ti, TermTypeIterator ) break;
+			case 3: RUN_TEST( ti, TrivialInsert ) break;
 			default: goto TESTS_DONE;
 		}
 		if (test_index) break;

@@ -90,7 +90,7 @@ void ForwardIndexMap::renameNewDocNumbers( const std::map<Index,Index>& renamema
 			{
 				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "forward index map");
 			}
-			MapKey newkey( typeno, docno, maxpos);
+			MapKey newkey( typeno, ri->second, maxpos);
 			m_map[ newkey] = mi->second;
 			m_map.erase( mi++);
 		}

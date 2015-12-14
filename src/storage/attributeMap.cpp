@@ -46,7 +46,7 @@ void AttributeMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
 			{
 				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "attribute map");
 			}
-			BlockKey newkey( docno, varno);
+			BlockKey newkey( ri->second, varno);
 			m_map[ newkey.index()] = mi->second;
 			m_map.erase( mi++);
 		}
