@@ -90,12 +90,14 @@
 		<table>
 		<tr>
 		<td><p class="timestamp">Dec 14th, 2015</p></td>
-		<td><p class="newstext">Fixed a big design flaw causing an fdatasync for every
+		<td><p class="newstext">
+		Fixed a big design flaw causing an fdatasync for every
 		new document inserted when using the interface in a straightforward way.
-		This led to a loss of insert performance by factor 10 at least.
+		This led to a loss of performance when inserting documents by
+		a factor of 10 at least.
 		The problem could be circumvented with a hack (pre-allocating document numbers), 
-		that has also been removed now. If you tried strus and experienced an unacceptable insert
-		performance, you might give it a chance again.
+		that has also been removed now. If you tried strus and experienced an unacceptable
+		performance when inserting, you might give it a chance again.
 		</td>
 		</tr>
 		<tr>
