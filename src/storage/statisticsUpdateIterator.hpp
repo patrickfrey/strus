@@ -26,44 +26,38 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_DOCNO_RANGE_ALLOCATOR_HPP_INCLUDED
-#define _STRUS_DOCNO_RANGE_ALLOCATOR_HPP_INCLUDED
-#include "strus/index.hpp"
-#include "strus/docnoRangeAllocatorInterface.hpp"
-#include "private/internationalization.hpp"
-#include "private/errorUtils.hpp"
-#include "storageClient.hpp"
+/// \brief Implementation of the iterators on statistics of a storage for updating the global statistics
+/// \file statisticsUpdateIterator.hpp
+#ifndef _STRUS_STATISTICS_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STATISTICS_UPDATE_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/statisticsIteratorInterface.hpp"
 
-namespace strus {
-
-class DocnoRangeAllocator
-	:public DocnoRangeAllocatorInterface
+namespace strus
 {
+
+/// \brief Forward declaration
+class ErrorBufferInterface;
+/// \brief Forward declaration
+class StorageClient;
+
+/// \brief Interface for a iterator on update of statistics of a storage for the global statistics
+/// \note this interface is used for distributing a search index
+class StatisticsUpdateIterator
+	:public StatisticsIteratorInterface
+{
+
 public:
-	DocnoRangeAllocator( StorageClient* storage_, ErrorBufferInterface* errorhnd_)
-		:m_storage(storage_),m_errorhnd(errorhnd_){}
+	StatisticsUpdateIterator(
+			StorageClient* storage_,
+			ErrorBufferInterface* errorhnd_);
 
-	virtual Index allocDocnoRange( const Index& size)
-	{
-		try
-		{
-			return m_storage->allocDocnoRange( size);
-		}
-		CATCH_ERROR_MAP_RETURN( _TXT("error allocating document number range: %s"), *m_errorhnd, 0);
-	}
+	virtual ~StatisticsUpdateIterator(){}
 
-	virtual bool deallocDocnoRange( const Index& docno, const Index& size)
-	{
-		try
-		{
-			return m_storage->deallocDocnoRange( docno, size);
-		}
-		CATCH_ERROR_MAP_RETURN( _TXT("error deallocating document number range: %s"), *m_errorhnd, false);
-	}
+	virtual bool getNext( const char*& msg, std::size_t& msgsize);
 
 private:
-	StorageClient* m_storage;
-	ErrorBufferInterface* m_errorhnd;		///< error buffer for exception free interface
+	StorageClient* m_storage;					///< storage related
+	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
 };
 
 }//namespace

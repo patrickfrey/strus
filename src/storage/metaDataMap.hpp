@@ -56,6 +56,7 @@ public:
 	void deleteMetaData( Index docno);
 	void deleteMetaData( Index docno, const std::string& varname);
 
+	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction, std::vector<Index>& cacheRefreshList);
 	void rewriteMetaData(
 			const MetaDataDescription::TranslationMap& trmap,

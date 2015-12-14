@@ -59,6 +59,8 @@ public:
 	void closeForwardIndexDocument();
 
 	void deleteIndex( const Index& docno);
+
+	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
@@ -80,9 +82,10 @@ private:
 		}
 	};
 
-	typedef LocalStructAllocator<std::pair<MapKey,ForwardIndexBlock> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<MapKey,std::size_t> > MapAllocator;
 	typedef std::less<MapKey> MapCompare;
-	typedef std::map<MapKey,ForwardIndexBlock,MapCompare,MapAllocator> Map;
+	typedef std::map<MapKey,std::size_t,MapCompare,MapAllocator> Map;
+	typedef std::vector<ForwardIndexBlock> BlockList;
 
 	typedef std::pair<Index,const char*> CurblockElem;
 	typedef std::vector<CurblockElem> CurblockElemList;
@@ -96,6 +99,7 @@ private:
 private:
 	DatabaseClientInterface* m_database;
 	Map m_map;
+	BlockList m_blocklist;
 	CurblockMap m_curblockmap;
 	StringVector m_strings;
 	Index m_docno;

@@ -93,7 +93,7 @@ void DocumentFrequencyCache::writeBatch( const Batch& batch)
 	}
 }
 
-GlobalCounter DocumentFrequencyCache::getValue( const Index& typeno, const Index& termno) const
+Index DocumentFrequencyCache::getValue( const Index& typeno, const Index& termno) const
 {
 	if (!typeno || typeno > MaxNofTermTypes) throw strus::runtime_error( _TXT( "term type number out of range for document frequency cache"));
 	if (!termno) throw strus::runtime_error( _TXT( "term value number 0 passed to document frequency cache"));

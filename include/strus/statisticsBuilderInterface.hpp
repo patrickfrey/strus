@@ -26,22 +26,22 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
-/// \file peerMessageBuilderInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_BUILDER_INTERFACE_HPP_INCLUDED
+/// \brief Interface for a builder for a message to populate statistics (distributed index)
+/// \file statisticsBuilderInterface.hpp
+#ifndef _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
+#define _STRUS_STATISTICS_BUILDER_INTERFACE_HPP_INCLUDED
 #include <cstdlib>
 #include <string>
 
 namespace strus
 {
 
-/// \brief Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
-class PeerMessageBuilderInterface
+/// \brief Interface for a builder for a statistics message (distributed index)
+class StatisticsBuilderInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~PeerMessageBuilderInterface(){}
+	virtual ~StatisticsBuilderInterface(){}
 
 	/// \brief Define the change of the number of document inserted
 	/// \param[in] increment positive or negative (decrement) value of the local change of the collection size
@@ -52,13 +52,11 @@ public:
 	/// \param[in] termtype type of the term
 	/// \param[in] termvalue value of the term
 	/// \param[in] increment positive or negative (decrement) value of the local change of the document frequency
-	/// \param[in] isnew true, if the feature is new in the index of the sender. Triggers the receivers to send their value back for update
 	/// \return true on success, false in case of an error (memory allocation error)
 	virtual void addDfChange(
 			const char* termtype,
 			const char* termvalue,
-			int increment,
-			bool isnew)=0;
+			int increment)=0;
 
 	/// \brief Mark the current state that can be restored with a rollback
 	virtual void start()=0;
@@ -66,7 +64,7 @@ public:
 	/// \brief Rollback to the last state marked with 'start()'
 	virtual void rollback()=0;
 
-	/// \brief Get the packed message to be sent to a peer
+	/// \brief Get the packed statistics message
 	/// \param[out] blk pointer to the message 
 	/// \param[out] blksize size of message blk in bytes
 	/// \return true, if there is a message returned to be sent, false if not or an error occurred

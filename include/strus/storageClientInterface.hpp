@@ -52,19 +52,15 @@ class StorageTransactionInterface;
 /// \brief Forward declaration
 class StorageDocumentInterface;
 /// \brief Forward declaration
-class PeerMessageProcessorInterface;
+class StatisticsProcessorInterface;
 /// \brief Forward declaration
-class PeerStorageTransactionInterface;
-/// \brief Forward declaration
-class PeerMessageIteratorInterface;
+class StatisticsIteratorInterface;
 /// \brief Forward declaration
 class StorageDumpInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
-/// \brief Forward declaration
-class DocnoRangeAllocatorInterface;
 
 
 /// \brief Interface of a strus IR storage
@@ -99,27 +95,15 @@ public:
 		createInvAclIterator(
 			const std::string& username) const=0;
 
-	/// \brief Get the global number of documents inserted (absolute number of documents in case of a distributed index with global statistics cached locally)
+	/// \brief Get the number of documents inserted in this storage instance
 	/// \return the number of documents
-	virtual GlobalCounter globalNofDocumentsInserted() const=0;
+	virtual Index nofDocumentsInserted() const=0;
 
-	/// \brief Get the local number of documents inserted (the number of documents inserted in this storage instance)
-	/// \return the number of documents
-	virtual Index localNofDocumentsInserted() const=0;
-
-	/// \brief Get the global number of documents inserted (absolute document frequency in case of a distributed index)
+	/// \brief Get the number of documents inserted in this storage instance
 	/// \param[in] type the term type addressed
 	/// \param[in] term the term value addressed
 	/// \return the number of documents
-	virtual GlobalCounter globalDocumentFrequency(
-			const std::string& type,
-			const std::string& term) const=0;
-
-	/// \brief Get the local number of documents inserted (the document frequency in this storage instance)
-	/// \param[in] type the term type addressed
-	/// \param[in] term the term value addressed
-	/// \return the number of documents
-	virtual Index localDocumentFrequency(
+	virtual Index documentFrequency(
 			const std::string& type,
 			const std::string& term) const=0;
 
@@ -172,31 +156,22 @@ public:
 	/// \return the interface to access document attributes to be disposed with delete by the caller
 	virtual AttributeReaderInterface* createAttributeReader() const=0;
 
-	/// \brief Create an interface to allocate document numbers in ranges
-	/// \return the interface to allocate document numbers from this storage
-	/// \note Allocate document numbers in ranges is inevitable for fast insert of documents known to be new
-	virtual DocnoRangeAllocatorInterface* createDocnoRangeAllocator()=0;
-
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface to be disposed with delete by the caller
 	virtual StorageTransactionInterface* createTransaction()=0;
 
-	/// \brief Creates an iterator on the storage peer messages for initialization/deregistration
+	/// \brief Creates an iterator on storage statistics messages for initialization/deregistration
 	/// \param[in] sign true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration)
-	/// \return the iterator on the peer message blobs
-	virtual PeerMessageIteratorInterface* createInitPeerMessageIterator( bool sign=true)=0;
+	/// \return the iterator on the statistics message blobs
+	virtual StatisticsIteratorInterface* createInitStatisticsIterator( bool sign=true)=0;
 
-	/// \brief Creates an iterator on the storage peer messages created by updates of this storage as notifications to be sent to other peers
-	/// \return the iterator on the peer message blobs
-	virtual PeerMessageIteratorInterface* createUpdatePeerMessageIterator()=0;
-
-	/// \brief Creates a transaction for updating statistics of this storage by messages from other peers
-	/// \return the transaction interface
-	virtual PeerStorageTransactionInterface* createPeerStorageTransaction()=0;
+	/// \brief Creates an iterator on the storage statistics messages created by updates of this storage
+	/// \return the iterator on the statistics message blobs
+	virtual StatisticsIteratorInterface* createUpdateStatisticsIterator()=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface
-	virtual const PeerMessageProcessorInterface* getPeerMessageProcessor() const=0;
+	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const=0;
 
 	/// \brief Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the StorageDocumentInterface::done() method after the definition of all elements.
 	/// \param[in] docid identifier (URI) of the document to check

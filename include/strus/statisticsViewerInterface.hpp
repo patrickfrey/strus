@@ -26,21 +26,21 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a viewer of a message received from a peer with some statistics (distributed index)
-/// \file peerMessageViewerInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_VIEWER_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_VIEWER_INTERFACE_HPP_INCLUDED
+/// \brief Interface for a viewer of a message with statistics (distributed index)
+/// \file statisticsViewerInterface.hpp
+#ifndef _STRUS_STATISTICS_VIEWER_INTERFACE_HPP_INCLUDED
+#define _STRUS_STATISTICS_VIEWER_INTERFACE_HPP_INCLUDED
 #include <cstdlib>
 
 namespace strus
 {
 
-/// \brief Interface for a viewer of a message received from a peer with some statistics (distributed index)
-class PeerMessageViewerInterface
+/// \brief Interface for a viewer of a statistics message (distributed index)
+class StatisticsViewerInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~PeerMessageViewerInterface(){}
+	virtual ~StatisticsViewerInterface(){}
 
 	/// \brief Fetch the change of the number of document inserted
 	/// \return the increment positive or negative (decrement) value of the local change of the collection size
@@ -50,14 +50,13 @@ public:
 	struct DocumentFrequencyChange
 	{
 		DocumentFrequencyChange()
-			:type(0),value(0),increment(0),isnew(false){}
+			:type(0),value(0),increment(0){}
 		DocumentFrequencyChange( const DocumentFrequencyChange& o)
-			:type(o.type),value(o.value),increment(o.increment),isnew(o.isnew){}
+			:type(o.type),value(o.value),increment(o.increment){}
 
 		const char* type;	///< type of the term
 		const char* value;	///< value of the term
 		int increment;		///< document frequency increment/decrement
-		bool isnew;		///< true, if the term is new and the receiver has to send it's document frequency value back
 	};
 
 	/// \brief Fetch the next message propagating a change in the df (document frequency)

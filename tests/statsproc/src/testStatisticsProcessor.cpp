@@ -26,11 +26,11 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/lib/peermsgproc.hpp"
+#include "strus/lib/statsproc.hpp"
 #include "strus/lib/error.hpp"
-#include "strus/peerMessageProcessorInterface.hpp"
-#include "strus/peerMessageViewerInterface.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/statisticsProcessorInterface.hpp"
+#include "strus/statisticsViewerInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include <memory>
 #include <iostream>
@@ -178,8 +178,7 @@ struct TermCollection
 		while (termset.size() < nofTerms)
 		{
 			int diff = g_random.get( 0, (int)diffrange) - (int)diffrange/2;
-			bool isnew = 0!=g_random.get( 0, 1);
-			termset.insert( Term( randomType(), randomTerm(), diff, isnew));
+			termset.insert( Term( randomType(), randomTerm(), diff));
 		}
 		std::set<Term>::const_iterator ti = termset.begin(), te = termset.end();
 		for (; ti != te; ++ti)
@@ -193,17 +192,16 @@ struct TermCollection
 		std::string type;
 		std::string value;
 		int diff;
-		bool isnew;
 
 		Term( const Term& o)
-			:type(o.type),value(o.value),diff(o.diff),isnew(o.isnew){}
-		Term( const std::string& type_, const std::string& value_, int diff_, bool isnew_)
-			:type(type_),value(value_),diff(diff_),isnew(isnew_){}
+			:type(o.type),value(o.value),diff(o.diff){}
+		Term( const std::string& type_, const std::string& value_, int diff_)
+			:type(type_),value(value_),diff(diff_){}
 
 		std::string tostring() const
 		{
 			std::ostringstream rt;
-			rt << " " << type << " '" << value << "' " << diff << " " << (isnew?"new":"old");
+			rt << " " << type << " '" << value << "' " << diff;
 			return rt.str();
 		}
 
@@ -284,9 +282,9 @@ int main( int argc, const char* argv[])
 		if (argc>4) insertInOrder = getUintValue( argv[4]);
 		TermCollection collection( nofTerms, diffRange);
 
-		std::auto_ptr<strus::PeerMessageProcessorInterface> pmp( strus::createPeerMessageProcessor( g_errorhnd));
-		strus::PeerMessageProcessorInterface::BuilderOptions options( insertInOrder?strus::PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder:strus::PeerMessageProcessorInterface::BuilderOptions::None, maxBlockSize);
-		std::auto_ptr<strus::PeerMessageBuilderInterface> builder( pmp->createBuilder( options));
+		std::auto_ptr<strus::StatisticsProcessorInterface> pmp( strus::createStatisticsProcessor( g_errorhnd));
+		strus::StatisticsProcessorInterface::BuilderOptions options( insertInOrder?strus::StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder:strus::StatisticsProcessorInterface::BuilderOptions::None, maxBlockSize);
+		std::auto_ptr<strus::StatisticsBuilderInterface> builder( pmp->createBuilder( options));
 		if (!builder.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -300,11 +298,10 @@ int main( int argc, const char* argv[])
 		for (; ti != te; ++ti)
 		{
 #ifdef STRUS_LOWLEVEL_DEBUG
-			const char* isnewstr = ti->isnew?"new":"old";
-			std::cerr << "add df change '" << ti->type << "' '" << ti->value << "' " << ti->diff << " " << isnewstr << std::endl;
+			std::cerr << "add df change '" << ti->type << "' '" << ti->value << "' " << ti->diff << std::endl;
 #endif
 			termsByteSize += ti->type.size() + ti->value.size() + 5;
-			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff, ti->isnew);
+			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff);
 		}
 		const char* msgblk;
 		std::size_t msgblksize;
@@ -321,13 +318,13 @@ int main( int argc, const char* argv[])
 		const char* insertInOrder_str = (insertInOrder?"in lexical order":"in random order");
 		std::cerr << "inserted " << collection.termar.size() << " terms in " << doubleToString(duration) << " seconds " << insertInOrder_str << std::endl;
 
-		typedef strus::PeerMessageViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
+		typedef strus::StatisticsViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
 		DocumentFrequencyChange rec;
 
 		std::set<Term> termset;
 		while (msgblksize)
 		{
-			std::auto_ptr<strus::PeerMessageViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
+			std::auto_ptr<strus::StatisticsViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
 			if (!viewer.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
@@ -335,10 +332,9 @@ int main( int argc, const char* argv[])
 			while (viewer->nextDfChange( rec))
 			{
 #ifdef STRUS_LOWLEVEL_DEBUG
-				const char* isnewstr = ti->isnew?"new":"old";
-				std::cout << "result df change " << rec.type << " " << rec.value << " " << rec.increment << " " << isnewstr << std::endl;
+				std::cout << "result df change " << rec.type << " " << rec.value << " " << rec.increment << std::endl;
 #endif
-				termset.insert( Term( rec.type, rec.value, rec.increment, rec.isnew));
+				termset.insert( Term( rec.type, rec.value, rec.increment));
 			}
 			if (!builder->fetchMessage( msgblk, msgblksize))
 			{
@@ -380,13 +376,6 @@ int main( int argc, const char* argv[])
 			{
 				std::cerr << "[" << tidx << "] DIFF '" << ti->diff << "' != '" << oi->diff << "'" << std::endl;
 				throw std::runtime_error( "peer message item diff does not match");
-			}
-			if (oi->isnew != ti->isnew)
-			{
-				const char* oi_isnew = oi->isnew?"true":"false";
-				const char* ti_isnew = ti->isnew?"true":"false";
-				std::cerr << "[" << tidx << "] ISNEW '" << ti_isnew << "' != '" << oi_isnew << "'" << std::endl;
-				throw std::runtime_error( "peer message item isnew does not match");
 			}
 		}
 		if (g_errorhnd->hasError())

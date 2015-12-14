@@ -26,20 +26,20 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Exported functions of the strus peermsgproc library
+/// \brief Exported functions of the strus statsproc library
 /// \file peermsgproc.hpp
-#ifndef _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
-#define _STRUS_STORAGE_PEERMSGPROC_LIB_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_STATISTICS_LIB_HPP_INCLUDED
+#define _STRUS_STORAGE_STATISTICS_LIB_HPP_INCLUDED
 
 /// \brief strus toplevel namespace
 namespace strus {
 
 /// \brief Forward declaration
-class PeerMessageProcessorInterface;
+class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-PeerMessageProcessorInterface* createPeerMessageProcessor( ErrorBufferInterface* errorhnd);
+StatisticsProcessorInterface* createStatisticsProcessor( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

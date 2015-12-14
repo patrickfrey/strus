@@ -26,31 +26,40 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a iterator on peer messages of the local storage for other peers
-/// \file peerMessageIteratorInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_ITERATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_ITERATOR_INTERFACE_HPP_INCLUDED
-#include <cstddef>
+/// \brief Implementation of the interface for inspecting messages with statistics (distributed index)
+/// \file statisticsViewerInterface.hpp
+#ifndef _STRUS_STATISTICS_VIEWER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STATISTICS_VIEWER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/statisticsViewerInterface.hpp"
+#include "statisticsHeader.hpp"
+#include <stdint.h>
+#include <string>
 
 namespace strus
 {
+///\brief Forward declaration
+class ErrorBufferInterface;
 
-/// \brief Interface for a iterator on peer messages of the local storage for other peers
-/// \note this interface is used for distributing a search index
-class PeerMessageIteratorInterface
+class StatisticsViewer
+	:public StatisticsViewerInterface
 {
-
 public:
-	/// \brief Destructor
-	virtual ~PeerMessageIteratorInterface(){}
+	StatisticsViewer( const char* msgptr, std::size_t msgsize, ErrorBufferInterface* errorhnd_);
+	virtual ~StatisticsViewer();
 
-	/// \brief Fetches the next message to distribute to other peers
-	/// \param[in] msg pointer to message for other peers
-	/// \param[in] msgsize size of msg blob in bytes
-	/// \return false if there is no chunk of a message left or an error occurred
-	virtual bool getNext( const char*& msg, std::size_t& msgsize)=0;
+	virtual int nofDocumentsInsertedChange();
+
+	virtual bool nextDfChange( DocumentFrequencyChange& rec);
+
+private:
+	const StatisticsHeader* m_hdr;
+	const char* m_msgptr;
+	char const* m_msgitr;
+	char const* m_msgend;
+	std::size_t m_msgsize;
+	std::string m_msg;
+	ErrorBufferInterface* m_errorhnd;
 };
-
 }//namespace
 #endif
 

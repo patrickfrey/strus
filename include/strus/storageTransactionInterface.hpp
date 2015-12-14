@@ -53,13 +53,9 @@ public:
 
 	/// \brief Create one document to be inserted/replaced within this transaction
 	/// \param[in] docid_ identifier of the document
-	/// \param[in] docno_ document number of the document
-	/// \remark If the document number (second argument) is defined by the client, then the server is not called for a document number (no synchronization needed) and documents close to each other can get adjacent document numbers even if the transaction is done in parallel with another.
 	/// \return the document object
 	virtual StorageDocumentInterface*
-		createDocument(
-			const std::string& docid_,
-			const Index& docno_=0)=0;
+		createDocument( const std::string& docid_)=0;
 
 	/// \brief Create an interface for a document to be updated within this transaction
 	/// \param[in] docno_ document number of the document (StorageClientInterface::documentNumber( const std::string&))

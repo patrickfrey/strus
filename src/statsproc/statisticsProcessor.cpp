@@ -26,34 +26,39 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterators on peer messages of the local storage updates for other peers
-/// \file peerMessageUpdateIterator.cpp
-#include "peerMessageUpdateIterator.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
-#include "strus/peerMessageProcessorInterface.hpp"
-#include "strus/databaseClientInterface.hpp"
-#include "strus/storageClientInterface.hpp"
+/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other  storages.
+/// \file statisticsProcessor.cpp
+#include "statisticsProcessor.hpp"
+#include "statisticsBuilder.hpp"
+#include "statisticsViewer.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "storageClient.hpp"
 
 using namespace strus;
 
-PeerMessageUpdateIterator::PeerMessageUpdateIterator(
-		StorageClient* storage_,
-		ErrorBufferInterface* errorhnd_)
-	:m_storage(storage_)
-	,m_errorhnd(errorhnd_)
-{}
+StatisticsProcessor::StatisticsProcessor( ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_){}
 
-bool PeerMessageUpdateIterator::getNext( const char*& msg, std::size_t& msgsize)
+StatisticsProcessor::~StatisticsProcessor(){}
+
+StatisticsViewerInterface* StatisticsProcessor::createViewer(
+			const char* msgptr, std::size_t msgsize) const
 {
 	try
 	{
-		return m_storage->fetchPeerUpdateMessage( msg, msgsize);
+		return new StatisticsViewer( msgptr, msgsize, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message from storage: %s"), *m_errorhnd, false);
+	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message viewer: %s"), *m_errorhnd, 0);
+}
+
+StatisticsBuilderInterface* StatisticsProcessor::createBuilder( const BuilderOptions& options_) const
+{
+	try
+	{
+		return new StatisticsBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message builder: %s"), *m_errorhnd, 0);
 }
 
 

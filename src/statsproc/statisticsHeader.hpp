@@ -26,40 +26,32 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the interface for a viewer of a message received from a peer with some statistics (distributed index)
-/// \file peerMessageViewerInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_VIEWER_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_VIEWER_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageViewerInterface.hpp"
-#include "peerMessageHeader.hpp"
+/// \brief Header of a statistics message
+/// \file statisticsHeader.hpp
+#ifndef _STRUS_STATISTICS_HEADER_HPP_INCLUDED
+#define _STRUS_STATISTICS_HEADER_HPP_INCLUDED
+#include <cstring>
 #include <stdint.h>
-#include <string>
 
 namespace strus
 {
-///\brief Forward declaration
-class ErrorBufferInterface;
 
-class PeerMessageViewer
-	:public PeerMessageViewerInterface
+struct StatisticsHeader
 {
-public:
-	PeerMessageViewer( const char* peermsgptr, std::size_t peermsgsize, ErrorBufferInterface* errorhnd_);
-	virtual ~PeerMessageViewer();
+	StatisticsHeader()
+	{
+		std::memset( this, 0, sizeof(*this));
+	}
+	bool empty() const			{return nofDocumentsInsertedChange==0;}
 
-	virtual int nofDocumentsInsertedChange();
-
-	virtual bool nextDfChange( DocumentFrequencyChange& rec);
-
-private:
-	const PeerMessageHeader* m_hdr;
-	const char* m_peermsgptr;
-	char const* m_peermsgitr;
-	char const* m_peermsgend;
-	std::size_t m_peermsgsize;
-	std::string m_msg;
-	ErrorBufferInterface* m_errorhnd;
+	uint32_t nofDocumentsInsertedChange;
 };
+
+/*
+ * Message format:
+ * [StatisticsHeader] [nof bytes last msg (UTF-8)] [nof bytes rest msg (UTF-8)] [rest msg bytes]
+ */
 }//namespace
 #endif
+
 

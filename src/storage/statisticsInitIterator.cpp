@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterator on peer messages of the local storage initialization for other peers
-/// \file peerMessageInitIterator.cpp
-#include "peerMessageInitIterator.hpp"
+/// \brief Implementation of the iterator on peer messages of the storage initialization for other peers
+/// \file statisticsInitIterator.cpp
+#include "statisticsInitIterator.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
-#include "strus/peerMessageProcessorInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
+#include "strus/statisticsProcessorInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -42,25 +42,25 @@
 
 using namespace strus;
 
-PeerMessageInitIterator::PeerMessageInitIterator(
+StatisticsInitIterator::StatisticsInitIterator(
 		StorageClientInterface* storage_,
 		DatabaseClientInterface* database,
 		bool sign,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
-	,m_proc(storage_->getPeerMessageProcessor())
-	,m_peerMessageBuilder()
+	,m_proc(storage_->getStatisticsProcessor())
+	,m_statisticsBuilder()
 	,m_errorhnd(errorhnd_)
 {
-	PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_peerMessageBuilder.reset( m_proc->createBuilder( options));
-	if (!m_peerMessageBuilder.get())
+	StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+	m_statisticsBuilder.reset( m_proc->createBuilder( options));
+	if (!m_statisticsBuilder.get())
 	{
 		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());
 	}
-	int nofdocs = m_storage->localNofDocumentsInserted();
-	m_peerMessageBuilder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
-	m_peerMessageBuilder->start();
+	int nofdocs = m_storage->nofDocumentsInserted();
+	m_statisticsBuilder->setNofDocumentsInsertedChange( sign?nofdocs:-nofdocs);
+	m_statisticsBuilder->start();
 
 	std::map<Index,std::size_t> typenomap;
 	std::map<Index,std::size_t> termnomap;
@@ -111,12 +111,12 @@ PeerMessageInitIterator::PeerMessageInitIterator(
 			if (ti == termnomap.end()) throw strus::runtime_error( _TXT( "encountered undefined term when populating df's"));
 			const char* termnam = strings.c_str() + ti->second;
 	
-			m_peerMessageBuilder->addDfChange( typenam, termnam, sign?df:-df, sign/*isNew*/);
+			m_statisticsBuilder->addDfChange( typenam, termnam, sign?df:-df);
 		}
 	}
 }
 
-bool PeerMessageInitIterator::getNext( const char*& msg, std::size_t& msgsize)
+bool StatisticsInitIterator::getNext( const char*& msg, std::size_t& msgsize)
 {
 	if (m_errorhnd->hasError())
 	{
@@ -128,7 +128,7 @@ bool PeerMessageInitIterator::getNext( const char*& msg, std::size_t& msgsize)
 		bool rt = true;
 		do
 		{
-			rt = m_peerMessageBuilder->fetchMessage( msg, msgsize);
+			rt = m_statisticsBuilder->fetchMessage( msg, msgsize);
 		}
 		while (rt && msgsize == 0);
 		if (rt)
@@ -142,7 +142,7 @@ bool PeerMessageInitIterator::getNext( const char*& msg, std::size_t& msgsize)
 		}
 		else
 		{
-			m_peerMessageBuilder.reset();
+			m_statisticsBuilder.reset();
 			return false;
 		}
 	}

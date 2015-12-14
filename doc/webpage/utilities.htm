@@ -315,8 +315,6 @@ options:
 -f|--fetch &lt;N&gt;
     Set &lt;N&gt; as number of files fetched in each inserter iteration
     Default is the value of option '--commit' (one document/file)
--n|--new
-    All inserts are new; use preallocated document numbers
 -L|--logerror &lt;FILE&gt;
     Write the last error occurred to &lt;FILE&gt; in case of an exception
 
@@ -477,8 +475,6 @@ options:
     Return the result starting with rank &lt;N&gt; as first rank
 -S|--silent
     No output of results
--g|--globalstats &lt;FILE&gt;
-    Load global statistics of peers from file &lt;FILE&gt;
 -t|--time
     Do print duration of pure query evaluation
 -m|--module &lt;MOD&gt;
@@ -580,14 +576,13 @@ options:
 </pre>
 <a name="strusDumpStatistics"> </a>
 <h3>strusDumpStatistics</h3>
-<p class="description">Dumps the statisics that would be populated to other peer storages in case of a distributed index to stout. 
+<p class="description">Dumps the statisics that would be populated to in case of a distributed index to stout. 
 <br\>
 (implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
 </p>
 <h4>Usage</h4>
 <pre>
 usage: strusDumpStatistics [options]
-    other peer storages in case of a distributed index to stout.
 options:
 -h|--help
    Print this usage and do nothing else
@@ -670,8 +665,6 @@ options:
     Define storage configuration as content of file &lt;CFGFILE&gt;
 -c|--create &lt;CONFIG&gt;
     Implicitely create storage with &lt;CONFIG&gt; if it does not exist yet
--g|--globalstats &lt;FILE&gt;
-    Load global statistics of peers from file &lt;FILE&gt;
 </pre>
 </div>
 </div>

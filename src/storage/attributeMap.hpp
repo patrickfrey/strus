@@ -54,6 +54,7 @@ public:
 	void deleteAttributes( const Index& docno);
 	void deleteAttribute( const Index& docno, const Index& varno);
 
+	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:

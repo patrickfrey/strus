@@ -144,21 +144,48 @@ void InvertedIndexMap::deleteIndex( const Index& docno)
 	m_deletes.push_back( docno);
 }
 
-void InvertedIndexMap::renameNewTermNumbers( const std::map<Index,Index>& renamemap)
+void InvertedIndexMap::renameNewNumbers(
+		const std::map<Index,Index>& docnoUnknownMap,
+		const std::map<Index,Index>& termUnknownMap)
 {
 	// Rename terms:
 	Map::iterator mi = m_map.begin(), me = m_map.end();
 	while (mi != me)
 	{
 		Index termno = BlockKey(mi->first.termkey).elem(2);
-		if (KeyMap::isUnknown( termno))
+		Index docno = mi->first.docno;
+		if (KeyMap::isUnknown( termno) || KeyMap::isUnknown( docno))
 		{
-			std::map<Index,Index>::const_iterator ri = renamemap.find( termno);
-			if (ri == renamemap.end())
+			Index typeno = BlockKey( mi->first.termkey).elem(1);
+			Index new_termno;
+			if (KeyMap::isUnknown( termno))
 			{
-				throw strus::runtime_error( _TXT( "term value undefined (posinfo map)"));
+				std::map<Index,Index>::const_iterator ri = termUnknownMap.find( termno);
+				if (ri == termUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "posinfo map");
+				}
+				new_termno = ri->second;
 			}
-			MapKey newkey( BlockKey(mi->first.termkey).elem(1), ri->second, mi->first.docno);
+			else
+			{
+				new_termno = termno;
+			}
+			Index new_docno;
+			if (KeyMap::isUnknown( docno))
+			{
+				std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( docno);
+				if (ri == docnoUnknownMap.end())
+				{
+					throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "posinfo map");
+				}
+				new_docno = ri->second;
+			}
+			else
+			{
+				new_docno = docno;
+			}
+			MapKey newkey( typeno, new_termno, new_docno);
 			m_map[ newkey] = mi->second;
 			m_map.erase( mi++);
 		}
@@ -167,29 +194,41 @@ void InvertedIndexMap::renameNewTermNumbers( const std::map<Index,Index>& rename
 			++mi;
 		}
 	}
-
 	// Rename inv:
 	InvTermList::iterator li = m_invterms.begin(), le = m_invterms.end();
 	for (; li != le; ++li)
 	{
 		if (KeyMap::isUnknown( li->termno))
 		{
-			std::map<Index,Index>::const_iterator ri = renamemap.find( li->termno);
-			if (ri == renamemap.end())
+			std::map<Index,Index>::const_iterator ri = termUnknownMap.find( li->termno);
+			if (ri == termUnknownMap.end())
 			{
-				throw strus::runtime_error( _TXT( "term value undefined (inv posinfo map)"));
+				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "term", "inv posinfo map");
 			}
 			li->termno = ri->second;
 		}
 	}
-
+	InvTermMap::iterator di = m_invtermmap.begin(), de = m_invtermmap.end();
+	for (; di != de; ++di)
+	{
+		if (KeyMap::isUnknown( di->first))
+		{
+			std::map<Index,Index>::const_iterator ri = docnoUnknownMap.find( di->first);
+			if (ri == docnoUnknownMap.end())
+			{
+				throw strus::runtime_error( _TXT( "%s value undefined (%s)"), "docno", "inv posinfo map");
+			}
+			m_invtermmap[ ri->second] = di->second;
+			m_invtermmap.erase( di++);
+		}
+	}
 	// Rename df:
-	m_dfmap.renameNewTermNumbers( renamemap);
+	m_dfmap.renameNewTermNumbers( termUnknownMap);
 }
 
 void InvertedIndexMap::getWriteBatch(
 			DatabaseTransactionInterface* transaction,
-			PeerMessageBuilderInterface* peerMessageBuilder,
+			StatisticsBuilderInterface* statisticsBuilder,
 			DocumentFrequencyCache::Batch* dfbatch,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv)
@@ -277,8 +316,8 @@ void InvertedIndexMap::getWriteBatch(
 		BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
 	}
 
-	// [4] Get df writes (and populate df's to other peers, if peerMessageBuilder defined):
-	m_dfmap.getWriteBatch( transaction, peerMessageBuilder, dfbatch, termTypeMapInv, termValueMapInv);
+	// [4] Get df writes (and populate df's to other peers, if statisticsBuilder defined):
+	m_dfmap.getWriteBatch( transaction, statisticsBuilder, dfbatch, termTypeMapInv, termValueMapInv);
 
 	// [5] Clear the maps:
 	clear();

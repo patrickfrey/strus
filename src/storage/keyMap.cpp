@@ -92,6 +92,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 			throw strus::runtime_error( _TXT( "too many elements in keymap"));
 		}
 		rt += UnknownValueHandleStart;
+		isNew = true;
 		if (name.size() > m_maxCachedKeyLen || !m_map.set( name.c_str(), rt))
 		{
 			// ... Too many elements in the map or the key is bigger than the limit
@@ -106,12 +107,14 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 void KeyMap::getWriteBatch(
 	DatabaseTransactionInterface* transaction)
 {
-	std::map<Index,Index> unknownMap;
-	getWriteBatch( unknownMap, transaction);
-	if (!unknownMap.empty())
+	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
+	for (; di != de; ++di)
 	{
-		throw strus::runtime_error( _TXT( "internal: unexpected unknown elements in keymap"));
+		m_dbadapter.remove( transaction, *di);
 	}
+
+	m_map.clear();
+	m_overflowmap.clear();
 }
 
 void KeyMap::getWriteBatch(

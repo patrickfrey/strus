@@ -26,39 +26,34 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a transaction on the global statistics of the storage from another peer
-/// \file peerStorageTransactionInterface.hpp
-#ifndef _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#define _STRUS_PEER_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
-#include <string>
+/// \brief Implementation of the iterators on peer messages of the local storage updates for other peers
+/// \file statisticsUpdateIterator.cpp
+#include "statisticsUpdateIterator.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
+#include "strus/statisticsProcessorInterface.hpp"
+#include "strus/databaseClientInterface.hpp"
+#include "strus/storageClientInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
+#include "storageClient.hpp"
 
-namespace strus
+using namespace strus;
+
+StatisticsUpdateIterator::StatisticsUpdateIterator(
+		StorageClient* storage_,
+		ErrorBufferInterface* errorhnd_)
+	:m_storage(storage_)
+	,m_errorhnd(errorhnd_)
+{}
+
+bool StatisticsUpdateIterator::getNext( const char*& msg, std::size_t& msgsize)
 {
+	try
+	{
+		return m_storage->fetchPeerUpdateMessage( msg, msgsize);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message from storage: %s"), *m_errorhnd, false);
+}
 
-/// \brief Interface for a transaction on the global statistics of the storage from another peer
-/// \note this interface is used for distributing a search index
-class PeerStorageTransactionInterface
-{
-
-public:
-	/// \brief Destructor
-	virtual ~PeerStorageTransactionInterface(){}
-
-	/// \brief Push a message from another peer storage
-	/// \param[in] inmsg pointer to message from peer storage
-	/// \param[in] inmsgsize size of msg blob in bytes
-	virtual void push( const char* inmsg, std::size_t inmsgsize)=0;
-
-	/// \brief Transaction commit
-	/// \param[out] outmsg pointer to message to the sender peer that invoked the transaction
-	/// \param[out] outmsgsize size of outmsg in bytes
-	/// \return true on success, false if the operation failed
-	virtual bool commit( const char*& outmsg, std::size_t& outmsgsize)=0;
-
-	/// \brief Transaction rollback
-	virtual void rollback()=0;
-};
-
-}//namespace
-#endif
 

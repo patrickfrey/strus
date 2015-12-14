@@ -60,11 +60,13 @@ public:
 
 	void deleteIndex( const Index& docno);
 
-	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
+	void renameNewNumbers(
+			const std::map<Index,Index>& docnoUnknownMap,
+			const std::map<Index,Index>& termUnknownMap);
 
 	void getWriteBatch(
 			DatabaseTransactionInterface* transaction,
-			PeerMessageBuilderInterface* peerMessageBuilder,
+			StatisticsBuilderInterface* statisticsBuilder,
 			DocumentFrequencyCache::Batch* dfbatch,
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv);

@@ -26,11 +26,11 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
-/// \file peerMessageBuilder.cpp
+/// \brief Interface for a builder for a statistics message (distributed index)
+/// \file statisticsBuilder.cpp
 
-#include "peerMessageBuilder.hpp"
-#include "peerMessageHeader.hpp"
+#include "statisticsBuilder.hpp"
+#include "statisticsHeader.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -46,16 +46,16 @@
 
 using namespace strus;
 
-PeerMessageBuilder::PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd)
+StatisticsBuilder::StatisticsBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd)
 	:m_insertInLexicalOrder(insertInLexicalOrder_),m_content_consumed(false),m_cnt(0),m_blocksize(0),m_maxblocksize(maxblocksize_),m_errorhnd(errorhnd)
 {
 	clear();
 }
 
-PeerMessageBuilder::~PeerMessageBuilder()
+StatisticsBuilder::~StatisticsBuilder()
 {}
 
-void PeerMessageBuilder::setNofDocumentsInsertedChange(
+void StatisticsBuilder::setNofDocumentsInsertedChange(
 			int increment)
 {
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
@@ -64,7 +64,7 @@ void PeerMessageBuilder::setNofDocumentsInsertedChange(
 	}
 	else
 	{
-		PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( m_content.back().c_str()));
+		StatisticsHeader* hdr = reinterpret_cast<StatisticsHeader*>( const_cast<char*>( m_content.back().c_str()));
 		hdr->nofDocumentsInsertedChange = htonl( (uint32_t)(int32_t)increment);
 	}
 }
@@ -93,11 +93,10 @@ static void printRecord( std::ostream& out, const char* rc, std::size_t rcsize)
 }
 #endif
 
-void PeerMessageBuilder::addDfChange(
+void StatisticsBuilder::addDfChange(
 			const char* termtype,
 			const char* termvalue,
-			int increment,
-			bool isnew)
+			int increment)
 {
 	try
 	{
@@ -126,29 +125,28 @@ void PeerMessageBuilder::addDfChange(
 			if (m_insertInLexicalOrder)
 			{
 		
-				addDfChange_final( rec, increment, isnew);
+				addDfChange_final( rec, increment);
 			}
 			else
 			{
-				addDfChange_tree( rec, increment, isnew);
+				addDfChange_tree( rec, increment);
 			}
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error peer message builder add df change: %s"), *m_errorhnd);
+	CATCH_ERROR_MAP( _TXT("error statistics message builder add df change: %s"), *m_errorhnd);
 }
 
-void PeerMessageBuilder::addDfChange_tree(
+void StatisticsBuilder::addDfChange_tree(
 		const std::string& key,
-		int increment,
-		bool isnew)
+		int increment)
 {
 	bool sign = (increment<0);
 	if (sign)
 	{
 		increment = -increment;
 	}
-	unsigned int flags = (isnew?0x1:0x0)|(sign?0x2:0x0);
-	unsigned int val = (increment << 2) + flags;
+	unsigned int flags = (sign?0x1:0x0);
+	unsigned int val = (increment << 1) + flags;
 	if (!m_tree.set( key.c_str(), (conotrie::CompactNodeTrie::NodeData)val))
 	{
 		newContent();
@@ -159,10 +157,9 @@ void PeerMessageBuilder::addDfChange_tree(
 	}
 }
 
-void PeerMessageBuilder::addDfChange_final(
+void StatisticsBuilder::addDfChange_final(
 		const std::string& key,
-		int increment,
-		bool isnew)
+		int increment)
 {
 	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 	{
@@ -176,12 +173,8 @@ void PeerMessageBuilder::addDfChange_final(
 	unsigned char flags = 0x0;
 	if (increment < 0)
 	{
-		flags |= 0x2;
-		increment = -increment;
-	}
-	if (isnew)
-	{
 		flags |= 0x1;
+		increment = -increment;
 	}
 	pldata.push_back( flags);
 	std::size_t idxpos = utf8encode( idxbuf, (int32_t)increment);
@@ -214,7 +207,7 @@ void PeerMessageBuilder::addDfChange_final(
 #endif
 }
 
-bool PeerMessageBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
+bool StatisticsBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
 {
 	if (m_content.empty())
 	{
@@ -235,7 +228,7 @@ bool PeerMessageBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
 		while (!m_content.empty())
 		{
 			std::string rt = m_content.front();
-			PeerMessageHeader* hdr = reinterpret_cast<PeerMessageHeader*>( const_cast<char*>( rt.c_str()));
+			StatisticsHeader* hdr = reinterpret_cast<StatisticsHeader*>( const_cast<char*>( rt.c_str()));
 			if (rt.size() == sizeof(*hdr) && hdr->empty())
 			{
 				m_content.pop_front();
@@ -251,10 +244,10 @@ bool PeerMessageBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
 		blksize = 0;
 		return false;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error peer message builder fetch message: %s"), *m_errorhnd, false);
+	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message builder fetch message: %s"), *m_errorhnd, false);
 }
 
-void PeerMessageBuilder::clear()
+void StatisticsBuilder::clear()
 {
 	m_content.clear();
 	m_tree.clear();
@@ -263,32 +256,31 @@ void PeerMessageBuilder::clear()
 	newContent();
 }
 
-void PeerMessageBuilder::moveTree()
+void StatisticsBuilder::moveTree()
 {
 	conotrie::CompactNodeTrie::const_iterator ti = m_tree.begin(), te = m_tree.end();
 	if (ti == te) return;
 	for (; ti != te; ++ti)
 	{
 		unsigned int val = (unsigned int)ti.data();
-		int increment = val >> 2;
-		bool sign = ((val&0x2) != 0);
-		bool isnew = ((val&0x1) != 0);
+		int increment = val >> 1;
+		bool sign = ((val&0x1) != 0);
 		if (sign)
 		{
 			increment = -increment;
 		}
-		addDfChange_final( ti.key(), increment, isnew);
+		addDfChange_final( ti.key(), increment);
 	}
 	m_tree.reset();
 }
 
-void PeerMessageBuilder::newContent()
+void StatisticsBuilder::newContent()
 {
 	if (!m_insertInLexicalOrder)
 	{
 		moveTree();
 	}
-	PeerMessageHeader hdr;
+	StatisticsHeader hdr;
 	if (m_maxblocksize < (1<<20))
 	{
 		std::string blk;
@@ -305,17 +297,17 @@ void PeerMessageBuilder::newContent()
 	m_lastkey.clear();
 }
 
-void PeerMessageBuilder::start()
+void StatisticsBuilder::start()
 {
 	try
 	{
 		m_cnt = 0;
 		newContent();
 	}
-	CATCH_ERROR_MAP( _TXT("error peer message builder start: %s"), *m_errorhnd);
+	CATCH_ERROR_MAP( _TXT("error statistics message builder start: %s"), *m_errorhnd);
 }
 
-void PeerMessageBuilder::rollback()
+void StatisticsBuilder::rollback()
 {
 	try
 	{
@@ -329,7 +321,7 @@ void PeerMessageBuilder::rollback()
 			newContent();
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error peer message builder rollback: %s"), *m_errorhnd);
+	CATCH_ERROR_MAP( _TXT("error statistics message builder rollback: %s"), *m_errorhnd);
 }
 
 

@@ -61,6 +61,7 @@ public:
 	void deleteDocumentAccess(
 		const Index& docno);
 
+	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:

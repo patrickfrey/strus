@@ -32,6 +32,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "dataBlock.hpp"
 #include "databaseAdapter.hpp"
+#include "keyMap.hpp"
 #include <cstring>
 #include "private/utils.hpp"
 
@@ -39,6 +40,31 @@ using namespace strus;
 
 MetaDataMap::~MetaDataMap()
 {
+}
+
+void MetaDataMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
+{
+	Map::iterator mi = m_map.begin(), me = m_map.end();
+	while (mi != me)
+	{
+		Index docno = MetaDataKey(mi->first).first;
+		if (KeyMap::isUnknown( docno))
+		{
+			Index elemno = MetaDataKey(mi->first).second;
+			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+			if (ri == renamemap.end())
+			{
+				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "metadata map");
+			}
+			MetaDataKey newkey( ri->second, elemno);
+			m_map[ newkey] = mi->second;
+			m_map.erase( mi++);
+		}
+		else
+		{
+			++mi;
+		}
+	}
 }
 
 void MetaDataMap::deleteMetaData( Index docno)

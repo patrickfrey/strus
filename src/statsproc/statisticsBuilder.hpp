@@ -26,11 +26,11 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the interface for a builder for a message sent to peer(s) to populate some statistics (distributed index)
-/// \file peerMessageBuilderInterface.hpp
-#ifndef _STRUS_PEER_MESSAGE_BUILDER_IMPLEMENTATION_HPP_INCLUDED
-#define _STRUS_PEER_MESSAGE_BUILDER_IMPLEMENTATION_HPP_INCLUDED
-#include "strus/peerMessageBuilderInterface.hpp"
+/// \brief Implementation of the interface for building messages to populate some statistics (distributed index)
+/// \file statisticsBuilderInterface.hpp
+#ifndef _STRUS_STATISTICS_BUILDER_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STATISTICS_BUILDER_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/statisticsBuilderInterface.hpp"
 #include "compactNodeTrie.hpp"
 #include <string>
 #include <vector>
@@ -41,12 +41,12 @@ namespace strus
 ///\brief Forward declaration
 class ErrorBufferInterface;
 
-class PeerMessageBuilder
-	:public PeerMessageBuilderInterface
+class StatisticsBuilder
+	:public StatisticsBuilderInterface
 {
 public:
-	PeerMessageBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd);
-	virtual ~PeerMessageBuilder();
+	StatisticsBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd);
+	virtual ~StatisticsBuilder();
 
 	virtual void setNofDocumentsInsertedChange(
 			int increment);
@@ -54,8 +54,7 @@ public:
 	virtual void addDfChange(
 			const char* termtype,
 			const char* termvalue,
-			int increment,
-			bool isnew);
+			int increment);
 
 	virtual bool fetchMessage( const char*& blk, std::size_t& blksize);
 
@@ -66,12 +65,10 @@ public:
 private:
 	void addDfChange_final(
 			const std::string& key,
-			int increment,
-			bool isnew);
+			int increment);
 	void addDfChange_tree(
 			const std::string& key,
-			int increment,
-			bool isnew);
+			int increment);
 	void moveTree();
 	void newContent();
 	void clear();

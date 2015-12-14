@@ -54,7 +54,7 @@ public:
 	virtual StorageClientInterface* createClient(
 			const std::string& configsource,
 			DatabaseClientInterface* database,
-			const PeerMessageProcessorInterface* peerMessageProc) const;
+			const StatisticsProcessorInterface* statisticsProc) const;
 
 	virtual bool createStorage( const std::string& configsource, DatabaseClientInterface* database) const;
 	

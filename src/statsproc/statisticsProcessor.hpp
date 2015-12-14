@@ -26,39 +26,33 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for packing/unpacking messages with statistics used for query evaluation to other peer storages.
-/// \file peerMessageProcessor.cpp
-#include "peerMessageProcessor.hpp"
-#include "peerMessageBuilder.hpp"
-#include "peerMessageViewer.hpp"
-#include "strus/errorBufferInterface.hpp"
-#include "private/internationalization.hpp"
-#include "private/errorUtils.hpp"
+/// \brief Interface for packing/unpacking messages with statistics used for query evaluation.
+/// \file statisticsProcessorInterface.hpp
+#ifndef _STRUS_STATISTICS_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
+#define _STRUS_STATISTICS_PROCESSOR_IMPLEMENTATION_HPP_INCLUDED
+#include "strus/statisticsProcessorInterface.hpp"
 
-using namespace strus;
-
-PeerMessageProcessor::PeerMessageProcessor( ErrorBufferInterface* errorhnd_)
-	:m_errorhnd(errorhnd_){}
-
-PeerMessageProcessor::~PeerMessageProcessor(){}
-
-PeerMessageViewerInterface* PeerMessageProcessor::createViewer(
-			const char* peermsgptr, std::size_t peermsgsize) const
+namespace strus
 {
-	try
-	{
-		return new PeerMessageViewer( peermsgptr, peermsgsize, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error create peer message viewer: %s"), *m_errorhnd, 0);
-}
+///\brief Forward declaration
+class ErrorBufferInterface;
 
-PeerMessageBuilderInterface* PeerMessageProcessor::createBuilder( const BuilderOptions& options_) const
+class StatisticsProcessor
+	:public StatisticsProcessorInterface
 {
-	try
-	{
-		return new PeerMessageBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error create peer message viewer: %s"), *m_errorhnd, 0);
-}
+public:
+	explicit StatisticsProcessor( ErrorBufferInterface* errorhnd_);
+	virtual ~StatisticsProcessor();
 
+	virtual StatisticsViewerInterface* createViewer(
+			const char* msgptr, std::size_t msgsize) const;
+
+	virtual StatisticsBuilderInterface* createBuilder( const BuilderOptions& options_) const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;
+};
+
+}//namespace
+#endif
 

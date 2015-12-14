@@ -79,7 +79,7 @@ public:
 	/// \param[in] weight_ weight of the feature for the weighting function in query evaluation 
 	virtual void defineFeature( const std::string& set_, float weight_=1.0)=0;
 
-	/// \brief Define the statistics of a term for the case that they are defined by the client
+	/// \brief Define the statistics of a term for the case that they are defined by the client (for example in a system with a distributed index)
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
 	/// \param[in] stats_ term statistics

@@ -33,7 +33,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
-#include "strus/peerMessageBuilderInterface.hpp"
+#include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
@@ -41,14 +41,12 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include "byteOrderMark.hpp"
-#include "peerMessageInitIterator.hpp"
-#include "peerMessageUpdateIterator.hpp"
-#include "peerStorageTransaction.hpp"
+#include "statisticsInitIterator.hpp"
+#include "statisticsUpdateIterator.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
 #include "documentFrequencyCache.hpp"
 #include "metaDataBlockCache.hpp"
-#include "docnoRangeAllocator.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseAdapter.hpp"
@@ -84,7 +82,7 @@ void StorageClient::cleanup()
 StorageClient::StorageClient(
 		DatabaseClientInterface* database_,
 		const char* termnomap_source,
-		const PeerMessageProcessorInterface* peerMessageProc_,
+		const StatisticsProcessorInterface* statisticsProc_,
 		ErrorBufferInterface* errorhnd_)
 	:m_database()
 	,m_next_typeno(0)
@@ -96,7 +94,7 @@ StorageClient::StorageClient(
 	,m_global_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
-	,m_peerMessageProc(peerMessageProc_)
+	,m_statisticsProc(statisticsProc_)
 	,m_errorhnd(errorhnd_)
 {
 	try
@@ -249,18 +247,6 @@ std::vector<std::string> StorageClient::getAttributeNames() const
 	return rt;
 }
 
-GlobalCounter StorageClient::documentFrequency( const Index& typeno, const Index& termno) const
-{
-	if (m_documentFrequencyCache.get())
-	{
-		return m_documentFrequencyCache->getValue( typeno, termno);
-	}
-	else
-	{
-		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
-	}
-}
-
 PostingIteratorInterface*
 	StorageClient::createTermPostingIterator(
 		const std::string& typestr,
@@ -349,10 +335,10 @@ StorageTransactionInterface*
 {
 	try
 	{
-		if (m_peerMessageProc && !m_peerMessageBuilder.get())
+		if (m_statisticsProc && !m_statisticsBuilder.get())
 		{
-			PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-			m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
+			StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+			m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_termno_map, m_next_typeno.value(), m_errorhnd);
 	}
@@ -371,35 +357,9 @@ StorageDocumentInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document checker: %s"), *m_errorhnd, 0);
 }
 
-DocnoRangeAllocatorInterface* StorageClient::createDocnoRangeAllocator()
+StatisticsBuilderInterface* StorageClient::getStatisticsBuilder()
 {
-	try
-	{
-		return new DocnoRangeAllocator( this, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating document number range allocator: %s"), *m_errorhnd, 0);
-}
-
-Index StorageClient::allocDocnoRange( std::size_t nofDocuments)
-{
-	Index rt = m_next_docno.allocIncrement( nofDocuments);
-	if (m_next_docno.value() <= rt)
-	{
-		m_next_docno.decrement( nofDocuments);
-		throw strus::runtime_error( _TXT( "docno allocation error"));
-	}
-	return rt;
-}
-
-bool StorageClient::deallocDocnoRange( const Index& docno, const Index& size)
-{
-	Index newval = m_next_docno.value() - size;
-	return (m_next_docno.test_and_set( docno + size, newval));
-}
-
-PeerMessageBuilderInterface* StorageClient::getPeerMessageBuilder()
-{
-	return m_peerMessageBuilder.get();
+	return m_statisticsBuilder.get();
 }
 
 void StorageClient::declareNofDocumentsInserted( int incr)
@@ -420,7 +380,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use typeno allocator for non immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "typeno");
 	}
 
 private:
@@ -432,14 +392,14 @@ class DocnoAllocator
 {
 public:
 	DocnoAllocator( StorageClient* storage_)
-		:KeyAllocatorInterface(true),m_storage(storage_){}
+		:KeyAllocatorInterface(false),m_storage(storage_){}
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		return m_storage->allocDocnoImm( name, isNew);
+		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "docno");
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use docno allocator for non immediate alloc"));
+		return m_storage->allocDocno();
 	}
 private:
 	StorageClient* m_storage;
@@ -461,7 +421,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use docno allocator for non immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "userno");
 	}
 private:
 	StorageClient* m_storage;
@@ -479,7 +439,7 @@ public:
 	}
 	virtual Index alloc()
 	{
-		throw strus::logic_error( _TXT( "cannot use attribno allocator for non immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for non immediate alloc"), "attribno");
 	}
 private:
 	StorageClient* m_storage;
@@ -494,7 +454,7 @@ public:
 
 	virtual Index getOrCreate( const std::string& name, bool& isNew)
 	{
-		throw strus::logic_error( _TXT( "cannot use termno allocator for immediate alloc"));
+		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "termno");
 	}
 	virtual Index alloc()
 	{
@@ -540,6 +500,11 @@ Index StorageClient::allocTermno()
 	return m_next_termno.allocIncrement();
 }
 
+Index StorageClient::allocDocno()
+{
+	return m_next_docno.allocIncrement();
+}
+
 Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
@@ -547,18 +512,6 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
-		isNew = true;
-	}
-	return rt;
-}
-
-Index StorageClient::allocDocnoImm( const std::string& name, bool& isNew)
-{
-	Index rt;
-	DatabaseAdapter_DocId::ReadWriter stor(m_database.get());
-	if (!stor.load( name, rt))
-	{
-		stor.storeImm( name, rt = m_next_docno.allocIncrement());
 		isNew = true;
 	}
 	return rt;
@@ -603,45 +556,17 @@ Index StorageClient::nofAttributeTypes()
 	return m_next_termno.value() -1;
 }
 
-GlobalCounter StorageClient::globalNofDocumentsInserted() const
-{
-	return m_global_nof_documents.value();
-}
-
-Index StorageClient::localNofDocumentsInserted() const
+Index StorageClient::nofDocumentsInserted() const
 {
 	return m_nof_documents.value();
 }
 
-GlobalCounter StorageClient::globalDocumentFrequency(
-		const std::string& type,
-		const std::string& term) const
-{
-	try
-	{
-		Index typeno = getTermValue( type);
-		Index termno = getTermValue( term);
-	
-		if (m_documentFrequencyCache.get())
-		{
-			return m_documentFrequencyCache->getValue( typeno, termno);
-		}
-		else
-		{
-			return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
-		}
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term global document frequency: %s"), *m_errorhnd, 0);
-}
-
-Index StorageClient::localDocumentFrequency( const Index& typeno, const Index& termno) const
+Index StorageClient::documentFrequency( const Index& typeno, const Index& termno) const
 {
 	return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
 }
 
-Index StorageClient::localDocumentFrequency(
-		const std::string& type,
-		const std::string& term) const
+Index StorageClient::documentFrequency( const std::string& type, const std::string& term) const
 {
 	try
 	{
@@ -649,7 +574,7 @@ Index StorageClient::localDocumentFrequency(
 		Index termno = getTermValue( term);
 		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term local document frequency: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term document frequency: %s"), *m_errorhnd, 0);
 }
 
 Index StorageClient::maxDocumentNumber() const
@@ -816,11 +741,6 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 	}
 }
 
-void StorageClient::declareGlobalNofDocumentsInserted( const GlobalCounter& incr)
-{
-	m_global_nof_documents.increment( incr);
-}
-
 void StorageClient::fillDocumentFrequencyCache()
 {
 	DocumentFrequencyCache::Batch dfbatch;
@@ -845,72 +765,54 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 bool StorageClient::fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize)
 {
 	TransactionLock lock( this);
-	return m_peerMessageBuilder->fetchMessage( msg, msgsize);
+	return m_statisticsBuilder->fetchMessage( msg, msgsize);
 }
 
-PeerMessageIteratorInterface* StorageClient::createInitPeerMessageIterator( bool sign)
+StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool sign)
 {
 	try
 	{
-		if (!m_peerMessageProc)
+		if (!m_statisticsProc)
 		{
 			throw strus::runtime_error(_TXT( "no peer message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
-			if (!m_peerMessageBuilder.get())
+			if (!m_statisticsBuilder.get())
 			{
-				PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
+				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 			}
 		}
-		return new PeerMessageInitIterator( this, m_database.get(), sign, m_errorhnd);
+		return new StatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
 }
 
-PeerMessageIteratorInterface* StorageClient::createUpdatePeerMessageIterator()
+StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
 {
 	try
 	{
-		if (!m_peerMessageProc)
+		if (!m_statisticsProc)
 		{
 			throw strus::runtime_error(_TXT( "no peer message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
-			if (!m_peerMessageBuilder.get())
+			if (!m_statisticsBuilder.get())
 			{
-				PeerMessageProcessorInterface::BuilderOptions options( PeerMessageProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_peerMessageBuilder.reset( m_peerMessageProc->createBuilder( options));
+				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 			}
 		}
-		return new PeerMessageUpdateIterator( this, m_errorhnd);
+		return new StatisticsUpdateIterator( this, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
 }
 
-PeerStorageTransactionInterface* StorageClient::createPeerStorageTransaction()
+const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() const
 {
-	try
-	{
-		if (!m_peerMessageProc)
-		{
-			throw strus::runtime_error(_TXT( "no peer message processor defined"));
-		}
-		if (!m_documentFrequencyCache.get())
-		{
-			TransactionLock lock( this);
-			fillDocumentFrequencyCache();
-		}
-		return new PeerStorageTransaction( this, m_database.get(), m_documentFrequencyCache.get(), m_peerMessageProc, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer storage transaction: %s"), *m_errorhnd, 0);
-}
-
-const PeerMessageProcessorInterface*  StorageClient::getPeerMessageProcessor() const
-{
-	return m_peerMessageProc;
+	return m_statisticsProc;
 }
 
 static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
