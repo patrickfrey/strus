@@ -80,13 +80,6 @@
 		What is available can be found <a href="documentation.htm">here</a>.
 		</p>
 
-		<h2>Performance issues</h2>
-		<p class="description">Some performance issues of strus are very important to know about.
-		Not looking at them will lead to big disappointment, because we are talking here
-		about factor 50, insertion time can vary, if you do not care about the settings.
-		What is important to know about performance issues can be found <a href="performance.htm">here</a>.
-		</p>
-
 		<h2>Background</h2>
 		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of <i>strus</i>.
 		I also try to explain, what distinguishes <i>strus</i> from other open source fulltext 
@@ -95,6 +88,16 @@
 
 		<h3>News</h3>
 		<table>
+		<tr>
+		<td><p class="timestamp">Dec 14th, 2015</p></td>
+		<td><p class="newstext">Fixed a big design flaw causing an fdatasync for every
+		new document inserted when using the interface in a straightforward way.
+		This led to a loss of insert performance by factor 10 at least.
+		The problem could be circumvented with a hack (pre-allocating document numbers), 
+		that has also been removed now. If you tried strus and experienced an unacceptable insert
+		performance, you might give it a chance again.
+		</td>
+		</tr>
 		<tr>
 		<td><p class="timestamp">Nov 28th, 2015</p></td>
 		<td><p class="newstext">A tutorial for building a search engine with Strus
