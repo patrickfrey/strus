@@ -94,18 +94,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1InvAclIteratorInterface.html">InvAclIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3">createInvAclIterator</a> (const std::string &amp;username) const =0</td></tr>
 <tr class="memdesc:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a an iterator on the numbers of documents a specified user is allowed to see.  <a href="#adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3">More...</a><br/></td></tr>
 <tr class="separator:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee2d6a2864233196ed131b22eb806f16"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aee2d6a2864233196ed131b22eb806f16">globalNofDocumentsInserted</a> () const =0</td></tr>
-<tr class="memdesc:aee2d6a2864233196ed131b22eb806f16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global number of documents inserted (absolute number of documents in case of a distributed index with global statistics cached locally)  <a href="#aee2d6a2864233196ed131b22eb806f16">More...</a><br/></td></tr>
-<tr class="separator:aee2d6a2864233196ed131b22eb806f16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac41f408eaf8c5b3c9a6586c3f34132dc"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ac41f408eaf8c5b3c9a6586c3f34132dc">localNofDocumentsInserted</a> () const =0</td></tr>
-<tr class="memdesc:ac41f408eaf8c5b3c9a6586c3f34132dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the local number of documents inserted (the number of documents inserted in this storage instance)  <a href="#ac41f408eaf8c5b3c9a6586c3f34132dc">More...</a><br/></td></tr>
-<tr class="separator:ac41f408eaf8c5b3c9a6586c3f34132dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fdf132208b3579f15fb5e5f3c56b403"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a4fdf132208b3579f15fb5e5f3c56b403">globalDocumentFrequency</a> (const std::string &amp;type, const std::string &amp;term) const =0</td></tr>
-<tr class="memdesc:a4fdf132208b3579f15fb5e5f3c56b403"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global number of documents inserted (absolute document frequency in case of a distributed index)  <a href="#a4fdf132208b3579f15fb5e5f3c56b403">More...</a><br/></td></tr>
-<tr class="separator:a4fdf132208b3579f15fb5e5f3c56b403"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa8d4596dddbcbfac62f680be2b55e005"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aa8d4596dddbcbfac62f680be2b55e005">localDocumentFrequency</a> (const std::string &amp;type, const std::string &amp;term) const =0</td></tr>
-<tr class="memdesc:aa8d4596dddbcbfac62f680be2b55e005"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the local number of documents inserted (the document frequency in this storage instance)  <a href="#aa8d4596dddbcbfac62f680be2b55e005">More...</a><br/></td></tr>
-<tr class="separator:aa8d4596dddbcbfac62f680be2b55e005"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a758ed150db8dbbe1292b2455b66bb287"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a758ed150db8dbbe1292b2455b66bb287">nofDocumentsInserted</a> () const =0</td></tr>
+<tr class="memdesc:a758ed150db8dbbe1292b2455b66bb287"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of documents inserted in this storage instance.  <a href="#a758ed150db8dbbe1292b2455b66bb287">More...</a><br/></td></tr>
+<tr class="separator:a758ed150db8dbbe1292b2455b66bb287"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80e167ff8cd374a20315056709b308d2"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a80e167ff8cd374a20315056709b308d2">documentFrequency</a> (const std::string &amp;type, const std::string &amp;term) const =0</td></tr>
+<tr class="memdesc:a80e167ff8cd374a20315056709b308d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of documents inserted in this storage instance.  <a href="#a80e167ff8cd374a20315056709b308d2">More...</a><br/></td></tr>
+<tr class="separator:a80e167ff8cd374a20315056709b308d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b6a44b9732390a1181776b5bb96c0a9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a2b6a44b9732390a1181776b5bb96c0a9">maxDocumentNumber</a> () const =0</td></tr>
 <tr class="memdesc:a2b6a44b9732390a1181776b5bb96c0a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the highest document number used in this stogage.  <a href="#a2b6a44b9732390a1181776b5bb96c0a9">More...</a><br/></td></tr>
 <tr class="separator:a2b6a44b9732390a1181776b5bb96c0a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -133,30 +127,22 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7e1b5d973e38a890f20858f0c7661567"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1AttributeReaderInterface.html">AttributeReaderInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a7e1b5d973e38a890f20858f0c7661567">createAttributeReader</a> () const =0</td></tr>
 <tr class="memdesc:a7e1b5d973e38a890f20858f0c7661567"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to access attributes attached to documents for representation.  <a href="#a7e1b5d973e38a890f20858f0c7661567">More...</a><br/></td></tr>
 <tr class="separator:a7e1b5d973e38a890f20858f0c7661567"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad555a758b136d026544d04f5d5cb3677"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1DocnoRangeAllocatorInterface.html">DocnoRangeAllocatorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ad555a758b136d026544d04f5d5cb3677">createDocnoRangeAllocator</a> ()=0</td></tr>
-<tr class="memdesc:ad555a758b136d026544d04f5d5cb3677"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to allocate document numbers in ranges.  <a href="#ad555a758b136d026544d04f5d5cb3677">More...</a><br/></td></tr>
-<tr class="separator:ad555a758b136d026544d04f5d5cb3677"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1StorageTransactionInterface.html">StorageTransactionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ae744509cd0e668a7fdbdcc63e2a62a02">createTransaction</a> ()=0</td></tr>
 <tr class="memdesc:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an insert/update transaction object.  <a href="#ae744509cd0e668a7fdbdcc63e2a62a02">More...</a><br/></td></tr>
 <tr class="separator:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a225b377b8434890c9c4d2bb4131adb9d"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a225b377b8434890c9c4d2bb4131adb9d">createInitPeerMessageIterator</a> (bool sign=true)=0</td></tr>
-<tr class="memdesc:a225b377b8434890c9c4d2bb4131adb9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage peer messages for initialization/deregistration.  <a href="#a225b377b8434890c9c4d2bb4131adb9d">More...</a><br/></td></tr>
-<tr class="separator:a225b377b8434890c9c4d2bb4131adb9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ef410d48778ba2347766817d04e3c08"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a0ef410d48778ba2347766817d04e3c08">createUpdatePeerMessageIterator</a> ()=0</td></tr>
-<tr class="memdesc:a0ef410d48778ba2347766817d04e3c08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage peer messages created by updates of this storage as notifications to be sent to other peers.  <a href="#a0ef410d48778ba2347766817d04e3c08">More...</a><br/></td></tr>
-<tr class="separator:a0ef410d48778ba2347766817d04e3c08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d311f1899d723628d1f797a42bfb1e2"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html">PeerStorageTransactionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a9d311f1899d723628d1f797a42bfb1e2">createPeerStorageTransaction</a> ()=0</td></tr>
-<tr class="memdesc:a9d311f1899d723628d1f797a42bfb1e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a transaction for updating statistics of this storage by messages from other peers.  <a href="#a9d311f1899d723628d1f797a42bfb1e2">More...</a><br/></td></tr>
-<tr class="separator:a9d311f1899d723628d1f797a42bfb1e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a11acd572688a7e7465ed6bc7c8827c9b"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
-<a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a11acd572688a7e7465ed6bc7c8827c9b">getPeerMessageProcessor</a> () const =0</td></tr>
-<tr class="memdesc:a11acd572688a7e7465ed6bc7c8827c9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the processing message interface for introspecting and packing messages outside the queue context.  <a href="#a11acd572688a7e7465ed6bc7c8827c9b">More...</a><br/></td></tr>
-<tr class="separator:a11acd572688a7e7465ed6bc7c8827c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94604e4a857374837b0a970b5091ad6a"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a94604e4a857374837b0a970b5091ad6a">createInitStatisticsIterator</a> (bool sign=true)=0</td></tr>
+<tr class="memdesc:a94604e4a857374837b0a970b5091ad6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on storage statistics messages for initialization/deregistration.  <a href="#a94604e4a857374837b0a970b5091ad6a">More...</a><br/></td></tr>
+<tr class="separator:a94604e4a857374837b0a970b5091ad6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a74c50b8961ffc459da04a47da455ef3c"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a74c50b8961ffc459da04a47da455ef3c">createUpdateStatisticsIterator</a> ()=0</td></tr>
+<tr class="memdesc:a74c50b8961ffc459da04a47da455ef3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage statistics messages created by updates of this storage.  <a href="#a74c50b8961ffc459da04a47da455ef3c">More...</a><br/></td></tr>
+<tr class="separator:a74c50b8961ffc459da04a47da455ef3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac5518519276a1c5172f6dbe6800d6a0"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
+<a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aac5518519276a1c5172f6dbe6800d6a0">getStatisticsProcessor</a> () const =0</td></tr>
+<tr class="memdesc:aac5518519276a1c5172f6dbe6800d6a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the processing message interface for introspecting and packing messages outside the queue context.  <a href="#aac5518519276a1c5172f6dbe6800d6a0">More...</a><br/></td></tr>
+<tr class="separator:aac5518519276a1c5172f6dbe6800d6a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDocumentInterface.html">StorageDocumentInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a634e6cb4dd516d411bcf4a42594fc4ab">createDocumentChecker</a> (const std::string &amp;docid, const std::string &amp;logfilename) const =0</td></tr>
 <tr class="memdesc:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to verify, if the contents of a document are inserted correctly into the storage. The checking is invoked by calling the <a class="el" href="classstrus_1_1StorageDocumentInterface.html#aac17acfd95b3c1fe3a97ede62e868c90" title="Closing the document definition. ">StorageDocumentInterface::done()</a> method after the definition of all elements.  <a href="#a634e6cb4dd516d411bcf4a42594fc4ab">More...</a><br/></td></tr>
 <tr class="separator:a634e6cb4dd516d411bcf4a42594fc4ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -303,33 +289,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad555a758b136d026544d04f5d5cb3677"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1DocnoRangeAllocatorInterface.html">DocnoRangeAllocatorInterface</a>* strus::StorageClientInterface::createDocnoRangeAllocator </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Create an interface to allocate document numbers in ranges. </p>
-<dl class="section return"><dt>Returns</dt><dd>the interface to allocate document numbers from this storage </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Allocate document numbers in ranges is inevitable for fast insert of documents known to be new </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="a634e6cb4dd516d411bcf4a42594fc4ab"></a>
 <div class="memitem">
 <div class="memproto">
@@ -433,7 +392,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a225b377b8434890c9c4d2bb4131adb9d"></a>
+<a class="anchor" id="a94604e4a857374837b0a970b5091ad6a"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -441,7 +400,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a>* strus::StorageClientInterface::createInitPeerMessageIterator </td>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a>* strus::StorageClientInterface::createInitStatisticsIterator </td>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>sign</em> = <code>true</code></td><td>)</td>
@@ -455,14 +414,14 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Creates an iterator on the storage peer messages for initialization/deregistration. </p>
+<p>Creates an iterator on storage statistics messages for initialization/deregistration. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">sign</td><td>true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the iterator on the peer message blobs </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the iterator on the statistics message blobs </dd></dl>
 
 </div>
 </div>
@@ -523,32 +482,6 @@ Public Member Functions</h2></td></tr>
 
 <p>Create an interface to access items of document metadata. </p>
 <dl class="section return"><dt>Returns</dt><dd>the interface to access document metadata to be disposed with delete by the caller </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a9d311f1899d723628d1f797a42bfb1e2"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1PeerStorageTransactionInterface.html">PeerStorageTransactionInterface</a>* strus::StorageClientInterface::createPeerStorageTransaction </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Creates a transaction for updating statistics of this storage by messages from other peers. </p>
-<dl class="section return"><dt>Returns</dt><dd>the transaction interface </dd></dl>
 
 </div>
 </div>
@@ -674,7 +607,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a0ef410d48778ba2347766817d04e3c08"></a>
+<a class="anchor" id="a74c50b8961ffc459da04a47da455ef3c"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -682,7 +615,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1PeerMessageIteratorInterface.html">PeerMessageIteratorInterface</a>* strus::StorageClientInterface::createUpdatePeerMessageIterator </td>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a>* strus::StorageClientInterface::createUpdateStatisticsIterator </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -695,8 +628,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Creates an iterator on the storage peer messages created by updates of this storage as notifications to be sent to other peers. </p>
-<dl class="section return"><dt>Returns</dt><dd>the iterator on the peer message blobs </dd></dl>
+<p>Creates an iterator on the storage statistics messages created by updates of this storage. </p>
+<dl class="section return"><dt>Returns</dt><dd>the iterator on the statistics message blobs </dd></dl>
 
 </div>
 </div>
@@ -723,6 +656,50 @@ Public Member Functions</h2></td></tr>
 
 <p>Create an iterator on the user names used in document access restrictions. </p>
 <dl class="section return"><dt>Returns</dt><dd>the iterator </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a80e167ff8cd374a20315056709b308d2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> strus::StorageClientInterface::documentFrequency </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>term</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the number of documents inserted in this storage instance. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>the term type addressed </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">term</td><td>the term value addressed </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of documents </dd></dl>
 
 </div>
 </div>
@@ -809,7 +786,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a11acd572688a7e7465ed6bc7c8827c9b"></a>
+<a class="anchor" id="aac5518519276a1c5172f6dbe6800d6a0"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -817,7 +794,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual const <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a>* strus::StorageClientInterface::getPeerMessageProcessor </td>
+          <td class="memname">virtual const <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a>* strus::StorageClientInterface::getStatisticsProcessor </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -832,146 +809,6 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the processing message interface for introspecting and packing messages outside the queue context. </p>
 <dl class="section return"><dt>Returns</dt><dd>the message processor interface </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a4fdf132208b3579f15fb5e5f3c56b403"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a> strus::StorageClientInterface::globalDocumentFrequency </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>term</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the global number of documents inserted (absolute document frequency in case of a distributed index) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>the term type addressed </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">term</td><td>the term value addressed </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the number of documents </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="aee2d6a2864233196ed131b22eb806f16"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a> strus::StorageClientInterface::globalNofDocumentsInserted </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the global number of documents inserted (absolute number of documents in case of a distributed index with global statistics cached locally) </p>
-<dl class="section return"><dt>Returns</dt><dd>the number of documents </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="aa8d4596dddbcbfac62f680be2b55e005"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> strus::StorageClientInterface::localDocumentFrequency </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>term</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the local number of documents inserted (the document frequency in this storage instance) </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>the term type addressed </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">term</td><td>the term value addressed </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the number of documents </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="ac41f408eaf8c5b3c9a6586c3f34132dc"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> strus::StorageClientInterface::localNofDocumentsInserted </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the local number of documents inserted (the number of documents inserted in this storage instance) </p>
-<dl class="section return"><dt>Returns</dt><dd>the number of documents </dd></dl>
 
 </div>
 </div>
@@ -1001,6 +838,32 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a758ed150db8dbbe1292b2455b66bb287"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> strus::StorageClientInterface::nofDocumentsInserted </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the number of documents inserted in this storage instance. </p>
+<dl class="section return"><dt>Returns</dt><dd>the number of documents </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="storageClientInterface_8hpp_source.html">storageClientInterface.hpp</a></li>
 </ul>
@@ -1008,7 +871,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Dec 14 2015 18:03:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

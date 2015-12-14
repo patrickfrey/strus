@@ -86,10 +86,10 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1QueryProcessorInterface.html">QueryProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#a890ce9180addda6ae832d02c2c8d69e1">getQueryProcessor</a> () const =0</td></tr>
 <tr class="memdesc:a890ce9180addda6ae832d02c2c8d69e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the query processor interface.  <a href="#a890ce9180addda6ae832d02c2c8d69e1">More...</a><br/></td></tr>
 <tr class="separator:a890ce9180addda6ae832d02c2c8d69e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32ebc74c4dfb4ab489fda4e49e522ac5"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
-<a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#a32ebc74c4dfb4ab489fda4e49e522ac5">getPeerMessageProcessor</a> () const =0</td></tr>
-<tr class="memdesc:a32ebc74c4dfb4ab489fda4e49e522ac5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the peer message processor interface.  <a href="#a32ebc74c4dfb4ab489fda4e49e522ac5">More...</a><br/></td></tr>
-<tr class="separator:a32ebc74c4dfb4ab489fda4e49e522ac5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9120f2d79250e2206e831a8ae001585"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
+<a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#af9120f2d79250e2206e831a8ae001585">getStatisticsProcessor</a> () const =0</td></tr>
+<tr class="memdesc:af9120f2d79250e2206e831a8ae001585"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the statistics processor interface.  <a href="#af9120f2d79250e2206e831a8ae001585">More...</a><br/></td></tr>
+<tr class="separator:af9120f2d79250e2206e831a8ae001585"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acce5c549d49cde2f04da5a7c3cdeb962"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#acce5c549d49cde2f04da5a7c3cdeb962">createStorageClient</a> (const std::string &amp;config) const =0</td></tr>
 <tr class="memdesc:acce5c549d49cde2f04da5a7c3cdeb962"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a storage client with its database client out of a configuration string.  <a href="#acce5c549d49cde2f04da5a7c3cdeb962">More...</a><br/></td></tr>
 <tr class="separator:acce5c549d49cde2f04da5a7c3cdeb962"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -255,32 +255,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a32ebc74c4dfb4ab489fda4e49e522ac5"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual const <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a>* strus::StorageObjectBuilderInterface::getPeerMessageProcessor </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the peer message processor interface. </p>
-<dl class="section return"><dt>Returns</dt><dd>the peer message processor interface reference </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="a890ce9180addda6ae832d02c2c8d69e1"></a>
 <div class="memitem">
 <div class="memproto">
@@ -304,6 +278,32 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the query processor interface. </p>
 <dl class="section return"><dt>Returns</dt><dd>the query processor interface reference </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="af9120f2d79250e2206e831a8ae001585"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a>* strus::StorageObjectBuilderInterface::getStatisticsProcessor </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the statistics processor interface. </p>
+<dl class="section return"><dt>Returns</dt><dd>the statistics processor interface reference </dd></dl>
 
 </div>
 </div>
@@ -340,7 +340,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Dec 14 2015 18:03:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

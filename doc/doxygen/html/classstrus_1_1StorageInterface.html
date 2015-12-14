@@ -85,9 +85,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3cfca86dc674de6cbe153e442fa227d7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">~StorageInterface</a> ()</td></tr>
 <tr class="memdesc:a3cfca86dc674de6cbe153e442fa227d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a3cfca86dc674de6cbe153e442fa227d7">More...</a><br/></td></tr>
 <tr class="separator:a3cfca86dc674de6cbe153e442fa227d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73b60eb8ac6dc77969ecf924a1c66bb5"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a73b60eb8ac6dc77969ecf924a1c66bb5">createClient</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database, const <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a> *peerMessageProc=0) const =0</td></tr>
-<tr class="memdesc:a73b60eb8ac6dc77969ecf924a1c66bb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an client instance of the storage using a defined key value store database.  <a href="#a73b60eb8ac6dc77969ecf924a1c66bb5">More...</a><br/></td></tr>
-<tr class="separator:a73b60eb8ac6dc77969ecf924a1c66bb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab527f470f0b55544f626095c57acfbdb"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#ab527f470f0b55544f626095c57acfbdb">createClient</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database, const <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *statisticsProc=0) const =0</td></tr>
+<tr class="memdesc:ab527f470f0b55544f626095c57acfbdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an client instance of the storage using a defined key value store database.  <a href="#ab527f470f0b55544f626095c57acfbdb">More...</a><br/></td></tr>
+<tr class="separator:ab527f470f0b55544f626095c57acfbdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63888cef731e57f31f60a742957032bb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">createStorage</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
 <tr class="memdesc:a63888cef731e57f31f60a742957032bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new storage described with configsource using a defined key value store database.  <a href="#a63888cef731e57f31f60a742957032bb">More...</a><br/></td></tr>
 <tr class="separator:a63888cef731e57f31f60a742957032bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -187,7 +187,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a73b60eb8ac6dc77969ecf924a1c66bb5"></a>
+<a class="anchor" id="ab527f470f0b55544f626095c57acfbdb"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -209,8 +209,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1PeerMessageProcessorInterface.html">PeerMessageProcessorInterface</a> *&#160;</td>
-          <td class="paramname"><em>peerMessageProc</em> = <code>0</code>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *&#160;</td>
+          <td class="paramname"><em>statisticsProc</em> = <code>0</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -230,7 +230,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration source string describing the storage (not a filename !) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database used by this storage (ownership passed to returned object) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">(optional)</td><td>peerMessageProc defines the format of messages for and from other peer storages (distribute statistics) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">(optional)</td><td>statisticsProc defines the format of statistic messages (distribute statistics) </td></tr>
   </table>
   </dd>
 </dl>
@@ -341,7 +341,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Dec 14 2015 18:03:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -76,9 +76,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abc051b8461e132f73e852892d6808ebf"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#abc051b8461e132f73e852892d6808ebf">~StorageTransactionInterface</a> ()</td></tr>
 <tr class="memdesc:abc051b8461e132f73e852892d6808ebf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#abc051b8461e132f73e852892d6808ebf">More...</a><br/></td></tr>
 <tr class="separator:abc051b8461e132f73e852892d6808ebf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78d6eed24917fe1a2defa5f7c8187841"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDocumentInterface.html">StorageDocumentInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a78d6eed24917fe1a2defa5f7c8187841">createDocument</a> (const std::string &amp;docid_, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno_=0)=0</td></tr>
-<tr class="memdesc:a78d6eed24917fe1a2defa5f7c8187841"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create one document to be inserted/replaced within this transaction.  <a href="#a78d6eed24917fe1a2defa5f7c8187841">More...</a><br/></td></tr>
-<tr class="separator:a78d6eed24917fe1a2defa5f7c8187841"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42603e754a281d5ad4b3c578cec2b556"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDocumentInterface.html">StorageDocumentInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a42603e754a281d5ad4b3c578cec2b556">createDocument</a> (const std::string &amp;docid_)=0</td></tr>
+<tr class="memdesc:a42603e754a281d5ad4b3c578cec2b556"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create one document to be inserted/replaced within this transaction.  <a href="#a42603e754a281d5ad4b3c578cec2b556">More...</a><br/></td></tr>
+<tr class="separator:a42603e754a281d5ad4b3c578cec2b556"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f56ed8765ff27f50e963dc0b0fb6eba"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html">StorageDocumentUpdateInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a7f56ed8765ff27f50e963dc0b0fb6eba">createDocumentUpdate</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno_)=0</td></tr>
 <tr class="memdesc:a7f56ed8765ff27f50e963dc0b0fb6eba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface for a document to be updated within this transaction.  <a href="#a7f56ed8765ff27f50e963dc0b0fb6eba">More...</a><br/></td></tr>
@@ -155,7 +155,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a78d6eed24917fe1a2defa5f7c8187841"></a>
+<a class="anchor" id="a42603e754a281d5ad4b3c578cec2b556"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -166,18 +166,8 @@ Public Member Functions</h2></td></tr>
           <td class="memname">virtual <a class="el" href="classstrus_1_1StorageDocumentInterface.html">StorageDocumentInterface</a>* strus::StorageTransactionInterface::createDocument </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>docid_</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>docid_</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
-          <td class="paramname"><em>docno_</em> = <code>0</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -191,11 +181,9 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">docid_</td><td>identifier of the document </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">docno_</td><td>document number of the document </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>If the document number (second argument) is defined by the client, then the server is not called for a document number (no synchronization needed) and documents close to each other can get adjacent document numbers even if the transaction is done in parallel with another. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>the document object </dd></dl>
 
 </div>
@@ -379,7 +367,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Dec 14 2015 18:03:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

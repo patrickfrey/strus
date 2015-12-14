@@ -86,9 +86,9 @@ Public Types</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a9bf5d7dd437f8e5fbc62555928f8e415"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator for restrictions.  <a href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">More...</a><br/></td></tr>
 <tr class="separator:a9bf5d7dd437f8e5fbc62555928f8e415"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ecb771a159b50d8bf30b341acaa53c3"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="classstrus_1_1QueryInterface.html#a9ecb771a159b50d8bf30b341acaa53c3a897f7cf033c1faaa7ba78314559bfbf6">NofCompareOperators</a> =((int)CompareGreaterEqual+1)
+<tr class="memitem:a0cc2334559cdd7dd28b181f626dcb22e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="classstrus_1_1QueryInterface.html#a0cc2334559cdd7dd28b181f626dcb22ea897f7cf033c1faaa7ba78314559bfbf6">NofCompareOperators</a> =((int)CompareGreaterEqual+1)
  }</td></tr>
-<tr class="separator:a9ecb771a159b50d8bf30b341acaa53c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a0cc2334559cdd7dd28b181f626dcb22e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -108,7 +108,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a56ce6b7dd0b15edfe4d54dcb2dcb5631"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the topmost element of the stack as feature, removing it from the stack.  <a href="#a56ce6b7dd0b15edfe4d54dcb2dcb5631">More...</a><br/></td></tr>
 <tr class="separator:a56ce6b7dd0b15edfe4d54dcb2dcb5631"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78074cc3f229b01b3b4e3e65598c68dd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a78074cc3f229b01b3b4e3e65598c68dd">defineTermStatistics</a> (const std::string &amp;type_, const std::string &amp;value_, const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;stats_)=0</td></tr>
-<tr class="memdesc:a78074cc3f229b01b3b4e3e65598c68dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the statistics of a term for the case that they are defined by the client.  <a href="#a78074cc3f229b01b3b4e3e65598c68dd">More...</a><br/></td></tr>
+<tr class="memdesc:a78074cc3f229b01b3b4e3e65598c68dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the statistics of a term for the case that they are defined by the client (for example in a system with a distributed index)  <a href="#a78074cc3f229b01b3b4e3e65598c68dd">More...</a><br/></td></tr>
 <tr class="separator:a78074cc3f229b01b3b4e3e65598c68dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37a7455f7ed52fe58de5bdfde57fed71"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a37a7455f7ed52fe58de5bdfde57fed71">defineGlobalStatistics</a> (const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats_)=0</td></tr>
 <tr class="memdesc:a37a7455f7ed52fe58de5bdfde57fed71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the global statistics for the case that they are defined by the client.  <a href="#a37a7455f7ed52fe58de5bdfde57fed71">More...</a><br/></td></tr>
@@ -136,7 +136,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Defines a strus information retrieval query. </p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
-<a class="anchor" id="a9ecb771a159b50d8bf30b341acaa53c3"></a>
+<a class="anchor" id="a0cc2334559cdd7dd28b181f626dcb22e"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -146,7 +146,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a9ecb771a159b50d8bf30b341acaa53c3a897f7cf033c1faaa7ba78314559bfbf6"></a>NofCompareOperators</em>&#160;</td><td class="fielddoc">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a0cc2334559cdd7dd28b181f626dcb22ea897f7cf033c1faaa7ba78314559bfbf6"></a>NofCompareOperators</em>&#160;</td><td class="fielddoc">
 </td></tr>
 </table>
 
@@ -477,7 +477,7 @@ More than one variable can be attached </dd></dl>
 </table>
 </div><div class="memdoc">
 
-<p>Define the statistics of a term for the case that they are defined by the client. </p>
+<p>Define the statistics of a term for the case that they are defined by the client (for example in a system with a distributed index) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">type_</td><td>term type </td></tr>
@@ -685,7 +685,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Dec 6 2015 14:24:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Dec 14 2015 18:03:28 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
