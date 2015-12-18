@@ -309,6 +309,10 @@ make test
 %{_includedir}/%{name}/private/*.h
 
 %changelog
+* Fri Dec 18 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.3.0-0.1
+- better introspection for functions
+- removed docno allocator interface and fdatasync on every new document insert when not using the docno allocator
+
 * Tue Dec 1 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.2.6-0.1
 - added interfaces for introspection (user names, docids, term types, term values)
 

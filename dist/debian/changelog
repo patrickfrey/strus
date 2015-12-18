@@ -1,3 +1,8 @@
+strus (0.3.0-1) unstable; urgency=low
+  * better introspection for functions
+  * removed docno allocator interface and fdatasync on every new document insert when not using the docno allocator
+ -- patrickfrey <patrickpfrey@yahoo.com>  Fri, 18 Dec 2015 15:00:00 +0100
+
 strus (0.2.6-1) unstable; urgency=low
   * added interfaces for introspection (user names, docids, term types, term values)
  -- patrickfrey <patrickpfrey@yahoo.com>  Tue, 1 Dec 2015 20:54:00 +0100
