@@ -81,14 +81,15 @@ public:
 		getSummarizerFunction(
 			const std::string& name) const;
 
-	virtual const char* getDescription( FunctionType type, const std::string& name) const;
-
 	virtual std::vector<std::string> getFunctionList( FunctionType type) const;
 
 private:
-	std::map<std::string,Reference<SummarizerFunctionInterface> > m_summarizers;
-	std::map<std::string,Reference<WeightingFunctionInterface> > m_weighters;
-	std::map<std::string,Reference<PostingJoinOperatorInterface> > m_joiners;
+	typedef std::map<std::string,Reference<SummarizerFunctionInterface> > SummarizerFunctionMap;
+	typedef std::map<std::string,Reference<WeightingFunctionInterface> > WeightingFunctionMap;
+	typedef std::map<std::string,Reference<PostingJoinOperatorInterface> > PostingJoinOperatorMap;
+	SummarizerFunctionMap m_summarizers;
+	WeightingFunctionMap m_weighters;
+	PostingJoinOperatorMap m_joiners;
 	ErrorBufferInterface* m_errorhnd;
 };
 

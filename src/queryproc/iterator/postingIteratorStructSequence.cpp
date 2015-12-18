@@ -291,6 +291,15 @@ PostingIteratorInterface* PostingJoinStructSequence::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "struct_sequence", *m_errorhnd, 0);
 }
 
+PostingJoinOperatorInterface::Description PostingJoinStructSequence::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "struct_sequence", *m_errorhnd, Description());
+}
+
 
 PostingIteratorInterface* PostingJoinSequence::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
@@ -312,6 +321,15 @@ PostingIteratorInterface* PostingJoinSequence::createResultIterator(
 		return new IteratorStructSequence( range_, argitr, false/*without cut*/, true/*strict*/, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence", *m_errorhnd, 0);
+}
+
+PostingJoinOperatorInterface::Description PostingJoinSequence::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence", *m_errorhnd, Description());
 }
 
 
@@ -337,6 +355,15 @@ PostingIteratorInterface* PostingJoinStructChain::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "struct_chain", *m_errorhnd, 0);
 }
 
+PostingJoinOperatorInterface::Description PostingJoinStructChain::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "struct_chain", *m_errorhnd, Description());
+}
+
 
 PostingIteratorInterface* PostingJoinChain::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
@@ -358,6 +385,15 @@ PostingIteratorInterface* PostingJoinChain::createResultIterator(
 		return new IteratorStructSequence( range_, argitr, false/*without cut*/, false/*strict*/, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "chain", *m_errorhnd, 0);
+}
+
+PostingJoinOperatorInterface::Description PostingJoinChain::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "chain", *m_errorhnd, Description());
 }
 
 

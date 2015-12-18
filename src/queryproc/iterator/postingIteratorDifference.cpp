@@ -132,3 +132,12 @@ PostingIteratorInterface* PostingJoinDifference::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "diff", *m_errorhnd, 0);
 }
 
+PostingJoinOperatorInterface::Description PostingJoinDifference::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that are in the first argument set but not in the second"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "diff", *m_errorhnd, Description());
+}
+

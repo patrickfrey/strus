@@ -124,10 +124,7 @@ public:
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Calculate the weight of a document by multiplying the number of matches with a contant weight specified with the parameter 'weight'. The matching features are defined with the feature parameter 'match'.");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

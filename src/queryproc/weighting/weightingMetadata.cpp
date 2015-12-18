@@ -146,3 +146,14 @@ WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance() 
 }
 
 
+WeightingFunctionInterface::Description WeightingFunctionMetadata::getDescription() const
+{
+	try
+	{
+		Description rt( _TXT("Calculate the weight of a document as value of a meta data element."));
+		rt( Description::Param::String, "name", _TXT( "name of the meta data element to use as weight"));
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "metadata", *m_errorhnd, WeightingFunctionInterface::Description());
+}
+

@@ -207,38 +207,6 @@ static std::vector<std::string> getKeys( const Map& map)
 	return rt;
 }
 
-template <class Map>
-static const char* getDescription_( const Map& map, const std::string& name)
-{
-	typename Map::const_iterator mi = map.find( utils::tolower( name));
-	if (mi != map.end())
-	{
-		return mi->second->getDescription();
-	}
-	return 0;
-}
-
-const char* QueryProcessor::getDescription( FunctionType type, const std::string& name) const
-{
-	try
-	{
-		switch (type)
-		{
-			case PostingJoinOperator:
-				return getDescription_( m_joiners, name);
-			case WeightingFunction:
-				return getDescription_( m_weighters, name);
-			case SummarizerFunction:
-				return getDescription_( m_summarizers, name);
-		}
-	}
-	catch (const std::bad_alloc&)
-	{
-		m_errorhnd->report( _TXT("out of memory"));
-	}
-	return 0;
-}
-
 std::vector<std::string> QueryProcessor::getFunctionList( QueryProcessorInterface::FunctionType type) const
 {
 	try

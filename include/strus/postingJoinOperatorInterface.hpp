@@ -55,9 +55,29 @@ public:
 			int range,
 			unsigned int cardinality) const=0;
 
-	/// \brief Get a description of the function for user help
-	/// \return the description text
-	virtual const char* getDescription() const=0;
+	/// \brief Structure that describes the join operator
+	struct Description
+	{
+		/// \brief Default constructor
+		Description()
+			:m_text(){}
+		/// \brief Constructor
+		explicit Description( const std::string& text_)
+			:m_text(text_){}
+		/// \brief Copy constructor
+		Description( const Description& o)
+			:m_text(o.m_text){}
+
+		/// \brief Get description text
+		const std::string& text() const			{return m_text;}
+
+	private:
+		std::string m_text;		///< description text (english)
+	};
+
+	/// \brief Get a description of the function for user help and introspection
+	/// \return the description structure
+	virtual Description getDescription() const=0;
 };
 
 }//namespace

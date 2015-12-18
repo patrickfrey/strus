@@ -145,10 +145,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Accumulate the weights of all contents of the variable defined with 'var' in matches of features specified with the feature parameter 'match'. The weights of matches are accumulated and assigned to the variable content. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content. The feature type of the values extracted from the forward index as variable contents are specified with the string parameter 'type'.");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

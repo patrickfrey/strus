@@ -214,4 +214,18 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance() cons
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), "BM25", *m_errorhnd, 0);
 }
 
+WeightingFunctionInterface::Description WeightingFunctionBM25::getDescription() const
+{
+	try
+	{
+		Description rt(_TXT("Calculate the document weight with the weighting scheme \"BM25\""));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"));
+		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"));
+		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"));
+		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"));
+		rt( Description::Param::String, "doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"));
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "BM25", *m_errorhnd, WeightingFunctionInterface::Description());
+}
 

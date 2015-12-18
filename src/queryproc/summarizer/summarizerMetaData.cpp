@@ -135,3 +135,15 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMetaData::createInstance(
 }
 
 
+
+SummarizerFunctionInterface::Description SummarizerFunctionMetaData::getDescription() const
+{
+	try
+	{
+		Description rt( _TXT("Get the value of a document meta data element."));
+		rt( Description::Param::String, "name", _TXT( "the name of the meta data element to get"));
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "metadata", *m_errorhnd, SummarizerFunctionInterface::Description());
+}
+

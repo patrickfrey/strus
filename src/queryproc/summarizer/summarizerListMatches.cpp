@@ -169,3 +169,16 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionListMatches::createInstan
 }
 
 
+SummarizerFunctionInterface::Description SummarizerFunctionListMatches::getDescription() const
+{
+	try
+	{
+		Description rt( _TXT("Get the feature occurencies printed"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features"));
+		rt( Description::Param::Numeric, "N", _TXT( "the maximum number of matches to return"));
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchpos", *m_errorhnd, SummarizerFunctionInterface::Description());
+}
+
+

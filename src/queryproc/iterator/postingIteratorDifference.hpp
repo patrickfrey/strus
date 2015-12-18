@@ -95,10 +95,7 @@ public:
 			int range,
 			unsigned int cardinality) const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Get the set of postings (d,p) that are in the first argument set but not in the second");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
