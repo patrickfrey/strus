@@ -63,6 +63,8 @@ public:
 			enum Type
 			{
 				Feature,
+				Attribute,
+				Metadata,
 				Numeric,
 				String
 			};

@@ -223,7 +223,7 @@ WeightingFunctionInterface::Description WeightingFunctionBM25::getDescription() 
 		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"));
 		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"));
 		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"));
-		rt( Description::Param::String, "doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"));
+		rt( Description::Param::Metadata, "doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"));
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "BM25", *m_errorhnd, WeightingFunctionInterface::Description());
