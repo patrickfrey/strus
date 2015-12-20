@@ -41,7 +41,7 @@ set_target_properties(
 )
 
 add_library( strus_malloc_unreliable SHARED unreliableMalloc.c )
-target_link_libraries( strus_malloc_unreliable  dl )
+target_link_libraries( strus_malloc_unreliable ${CMAKE_DL_LIBS} )
 set_target_properties(
     strus_malloc_unreliable
     PROPERTIES
@@ -51,7 +51,7 @@ set_target_properties(
 )
 
 add_library( strus_malloc_logging SHARED loggingMalloc.c snprintf.c )
-target_link_libraries( strus_malloc_logging  dl )
+target_link_libraries( strus_malloc_logging ${CMAKE_DL_LIBS} )
 set_target_properties(
     strus_malloc_logging
     PROPERTIES

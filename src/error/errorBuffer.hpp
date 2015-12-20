@@ -33,6 +33,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/utils.hpp"
 #include <cstdio>
+#include <cstdarg>
 
 /// \brief strus toplevel namespace
 namespace strus

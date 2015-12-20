@@ -48,7 +48,7 @@
 #include "private/errorUtils.hpp"
 #include <string>
 #include <cstring>
-#include <cstdio>
+#include <stdio.h>
 #include <iostream>
 #include <stdexcept>
 #include <memory>
@@ -267,25 +267,25 @@ static void testTrivialInsert()
 		{
 			std::vector<Feature> rt;
 			char docid[ 32];
-			std::snprintf( docid, sizeof(docid), "D%02u", docno);
+			snprintf( docid, sizeof(docid), "D%02u", docno);
 	
 			unsigned int ti=0, te=NofTermTypes;
 			for (ti=0; ti<te; ++ti)
 			{
 				char searchtype[ 32];
-				std::snprintf( searchtype, sizeof(searchtype), "S%02u", ti);
+				snprintf( searchtype, sizeof(searchtype), "S%02u", ti);
 				char forwardtype[ 32];
-				std::snprintf( forwardtype, sizeof(forwardtype), "F%02u", ti);
+				snprintf( forwardtype, sizeof(forwardtype), "F%02u", ti);
 	
 				unsigned int vi=0, ve=NofTermValues;
 				for (vi=0; vi<ve; ++vi)
 				{
 					if ((vi + docno) % 4 == 0) continue;
 					char value[ 32];
-					std::snprintf( value, sizeof(value), "s%02u", vi);
+					snprintf( value, sizeof(value), "s%02u", vi);
 					rt.push_back( Feature( Feature::SearchIndex, searchtype, value, vi+1));
 	
-					std::snprintf( value, sizeof(value), "f%02u", vi);
+					snprintf( value, sizeof(value), "f%02u", vi);
 					rt.push_back( Feature( Feature::ForwardIndex, forwardtype, value, vi+1));
 				}
 			}
@@ -293,9 +293,9 @@ static void testTrivialInsert()
 			for (ai=0; ai<ae; ++ai)
 			{
 				char attributename[ 32];
-				std::snprintf( attributename, sizeof(attributename), "A%02u", ai);
+				snprintf( attributename, sizeof(attributename), "A%02u", ai);
 				char attributevalue[ 32];
-				std::snprintf( attributevalue, sizeof(attributevalue), "a%02u", ai);
+				snprintf( attributevalue, sizeof(attributevalue), "a%02u", ai);
 
 				rt.push_back( Feature( Feature::Attribute, attributename, attributevalue));
 			}
@@ -303,9 +303,9 @@ static void testTrivialInsert()
 			for (mi=0; mi<me; ++mi)
 			{
 				char metadataname[ 32];
-				std::snprintf( metadataname, sizeof(metadataname), "M%1u", mi);
+				snprintf( metadataname, sizeof(metadataname), "M%1u", mi);
 				char metadatavalue[ 32];
-				std::snprintf( metadatavalue, sizeof(metadatavalue), "m%1u", mi * 11);
+				snprintf( metadatavalue, sizeof(metadatavalue), "m%1u", mi * 11);
 				
 				rt.push_back( Feature( Feature::MetaData, metadataname, metadatavalue));
 			}
@@ -319,7 +319,7 @@ static void testTrivialInsert()
 	for (; di != de; ++di)
 	{
 		char docid[ 32];
-		std::snprintf( docid, sizeof(docid), "D%02u", di);
+		snprintf( docid, sizeof(docid), "D%02u", di);
 		std::auto_ptr<strus::StorageDocumentInterface>
 			doc( transaction.tri->createDocument( docid));
 
@@ -353,7 +353,7 @@ static void testTrivialInsert()
 	for (di=0; di != de; ++di)
 	{
 		char docid[ 32];
-		std::snprintf( docid, sizeof(docid), "D%02u", di);
+		snprintf( docid, sizeof(docid), "D%02u", di);
 		const char* errlog = "checkindex.log";
 
 		unsigned int ec = strus::writeFile( errlog, "");

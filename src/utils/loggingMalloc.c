@@ -41,7 +41,11 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
-#include <malloc.h>
+#ifdef __FreeBSD__
+#include <malloc_np.h>
+#endif
+#include <stdlib.h>
+#include <libgen.h>
 #include <execinfo.h>
 #include <unistd.h>
 #include "strus/private/snprintf.h"
