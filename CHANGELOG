@@ -1,3 +1,7 @@
+strus (0.3.1)
+  * fixing versioning problems on the Open Suse build cluster
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 21 Dec 2015 09:38:00 +0100
+
 strus (0.3.0)
   * better introspection for functions
   * removed docno allocator interface and fdatasync on every new document insert when not using the docno allocator
