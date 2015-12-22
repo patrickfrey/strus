@@ -112,19 +112,21 @@ static bool isValueEqual( strus::MetaDataElement::Type type, const strus::Arithm
 	if (type == strus::MetaDataElement::Float16)
 	{
 		if (aa.type != strus::ArithmeticVariant::Float) return false;
-		/// [PF:HACK] Bad epsilon !
-		float epsilon = 0.05;
 		double diff = aa.tofloat() - bb.tofloat();
 		if (diff < 0.0) diff = -diff;
+		/// [PF:HACK] Bad epsilon !
+		float epsilon = 0.002 * aa.tofloat();
+		if (epsilon < 0.0) epsilon = -epsilon;
 		return (diff <= epsilon);
 	}
 	else if (type == strus::MetaDataElement::Float32)
 	{
 		if (aa.type != strus::ArithmeticVariant::Float) return false;
-		/// [PF:HACK] Bad epsilon !
-		float epsilon = 0.0001;
 		double diff = aa.tofloat() - bb.tofloat();
 		if (diff < 0.0) diff = -diff;
+		/// [PF:HACK] Bad epsilon !
+		float epsilon = 0.000001 * aa.tofloat();
+		if (epsilon < 0.0) epsilon = -epsilon;
 		return (diff <= epsilon);
 	}
 	else
