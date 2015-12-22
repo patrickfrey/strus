@@ -37,7 +37,7 @@
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 template <typename ValueType>
 static inline void setValue_( const MetaDataDescription& descr, void* ptr, const MetaDataElement* elem, const ValueType& value)
