@@ -33,8 +33,11 @@
 #include <utility>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 using namespace strus;
+
+#undef STRUS_LOWLEVEL_DEBUG
 
 template <typename ValueType>
 static inline void setValue_( const MetaDataDescription& descr, void* ptr, const MetaDataElement* elem, const ValueType& value)
@@ -42,27 +45,51 @@ static inline void setValue_( const MetaDataDescription& descr, void* ptr, const
 	switch (elem->type())
 	{
 		case MetaDataElement::Int8:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element int8 at offset " << elem->ofs() << std::endl;
+#endif
 			*(int8_t*)((char*)ptr + elem->ofs()) = (int8_t)value;
 			break;
 		case MetaDataElement::UInt8:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element uint8 at offset " << elem->ofs() << std::endl;
+#endif
 			*(uint8_t*)((char*)ptr + elem->ofs()) = (uint8_t)value;
 			break;
 		case MetaDataElement::Int16:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element int16 at offset " << elem->ofs() << std::endl;
+#endif
 			*(int16_t*)((char*)ptr + elem->ofs()) = (int16_t)value;
 			break;
 		case MetaDataElement::UInt16:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element uint16 at offset " << elem->ofs() << std::endl;
+#endif
 			*(uint16_t*)((char*)ptr + elem->ofs()) = (uint16_t)value;
 			break;
 		case MetaDataElement::Int32:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element int32 at offset " << elem->ofs() << std::endl;
+#endif
 			*(int32_t*)((char*)ptr + elem->ofs()) = (int32_t)value;
 			break;
 		case MetaDataElement::UInt32:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element uint32 at offset " << elem->ofs() << std::endl;
+#endif
 			*(uint32_t*)((char*)ptr + elem->ofs()) = (uint32_t)value;
 			break;
 		case MetaDataElement::Float16:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element float16 at offset " << elem->ofs() << std::endl;
+#endif
 			*(float16_t*)((char*)ptr + elem->ofs()) = floatSingleToHalfPrecision( (float)value);
 			break;
 		case MetaDataElement::Float32:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "write meta data element float32 at offset " << elem->ofs() << std::endl;
+#endif
 			*(float*)((char*)ptr + elem->ofs()) = (float)value;
 			break;
 		default:
@@ -76,27 +103,51 @@ static inline ValueType getValue_( const MetaDataDescription& descr, const void*
 	switch (elem->type())
 	{
 		case MetaDataElement::Int8:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element int8 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)*(int8_t*)((const char*)ptr + elem->ofs());
 
 		case MetaDataElement::UInt8:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element uint8 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)*(uint8_t*)((const char*)ptr + elem->ofs());
 
 		case MetaDataElement::Int16:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element int16 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)*(int16_t*)((const char*)ptr + elem->ofs());
 
 		case MetaDataElement::UInt16:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element uint16 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)*(uint16_t*)((const char*)ptr + elem->ofs());
 
 		case MetaDataElement::Int32:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element int32 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)*(int32_t*)((const char*)ptr + elem->ofs());
 
 		case MetaDataElement::UInt32:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element uint32 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)*(uint32_t*)((const char*)ptr + elem->ofs());
 
 		case MetaDataElement::Float16:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element float16 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)floatHalfToSinglePrecision( *(float16_t*)((const char*)ptr + elem->ofs()));
 
 		case MetaDataElement::Float32:
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "read meta data element float32 at offset " << elem->ofs() << std::endl;
+#endif
 			return (ValueType)*(float*)((const char*)ptr + elem->ofs());
 	}
 	throw strus::logic_error( _TXT( "unknown meta data type"));
