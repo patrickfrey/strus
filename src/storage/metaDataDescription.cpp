@@ -170,7 +170,7 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 	std::size_t eidx=0;
 	for (; ei != ee; ofs += ei->size(), ++ei,++eidx)
 	{
-		if (ei->size() > MetaDataElement::size( type_))
+		if (ei->size() < MetaDataElement::size( type_))
 		{
 			break;
 		}
