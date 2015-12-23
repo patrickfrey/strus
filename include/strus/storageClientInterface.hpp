@@ -135,8 +135,8 @@ public:
 	/// \brief Enumeration of document statistics
 	enum DocumentStatisticsType
 	{
-		StatNofTerms = 1,
-		StatNofTermOccurrencies = 2
+		StatNofTerms = 1,			///< number of distinct terms
+		StatNofTermOccurrencies = 2		///< number of accumulated dfs (number of terms)
 	};
 
 	/// \brief Get one specified element of the documents statistics for a term type
