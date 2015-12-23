@@ -89,6 +89,15 @@
 		<h3>News</h3>
 		<table>
 		<tr>
+		<td><p class="timestamp">Dec 23th, 2015</p></td>
+		<td><p class="newstext">
+		Fixed a terrible bug in the calculation of the metadata table layout causing
+		unaligned memory accesses for every document ranked document in the query.
+		It also led to wrong results due to overlapping table elements and to a significant
+		performance loss.
+		</td>
+		</tr>
+		<tr>
 		<td><p class="timestamp">Dec 14th, 2015</p></td>
 		<td><p class="newstext">
 		Fixed a big design flaw causing an fdatasync for every

@@ -70,6 +70,7 @@ public:
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			const std::string& var_,
+			unsigned int maxNofElements_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextAccumulateVariable(){}
@@ -102,6 +103,7 @@ private:
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_type;
 	std::string m_var;
+	unsigned int m_maxNofElements;
 	std::vector<SummarizationFeature> m_features;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -112,7 +114,7 @@ class SummarizerFunctionInstanceAccumulateVariable
 {
 public:
 	SummarizerFunctionInstanceAccumulateVariable( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_var(),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_var(),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAccumulateVariable(){}
 
@@ -129,6 +131,7 @@ public:
 private:
 	std::string m_type;
 	std::string m_var;
+	unsigned int m_maxNofElements;
 	const QueryProcessorInterface* m_processor;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
