@@ -1,3 +1,7 @@
+strus (0.3.2-1) unstable; urgency=low
+  * fixing bug in metadata cache layout: was completely broken
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 23 Dec 2015 10:55:00 +0100
+
 strus (0.3.1-1) unstable; urgency=low
   * fixing versioning problems of the Open Suse build cluster 
  -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 21 Dec 2015 09:38:00 +0100
