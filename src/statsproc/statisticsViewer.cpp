@@ -55,7 +55,8 @@ StatisticsViewer::~StatisticsViewer(){}
 
 int StatisticsViewer::nofDocumentsInsertedChange()
 {
-	return ntohl( (int32_t)(uint32_t)m_hdr->nofDocumentsInsertedChange);
+	int rt = (int32_t)ntohl( (uint32_t)m_hdr->nofDocumentsInsertedChange);
+	return rt;
 }
 
 bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
