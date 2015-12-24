@@ -33,6 +33,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utf8.hpp"
+#include <arpa/inet.h>
 
 using namespace strus;
 
@@ -54,7 +55,7 @@ StatisticsViewer::~StatisticsViewer(){}
 
 int StatisticsViewer::nofDocumentsInsertedChange()
 {
-	return m_hdr->nofDocumentsInsertedChange;
+	return ntohl( (int32_t)(uint32_t)m_hdr->nofDocumentsInsertedChange);
 }
 
 bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
