@@ -1,4 +1,8 @@
 strus (0.3.2)
+  * fixed bug in statistics viewer: wrong decoding of global number of documents (collection size)
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 24 Dec 2015 12:55:00 +0100
+
+strus (0.3.2)
   * fixing bug in metadata cache layout: was completely broken
  -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 23 Dec 2015 10:55:00 +0100
 
