@@ -28,6 +28,8 @@
 */
 #include "summarizerAccumulateVariable.hpp"
 #include "postingIteratorLink.hpp"
+#include "ranker.hpp"
+#include "strus/arithmeticVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -49,12 +51,14 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
 		const std::string& var_,
+		unsigned int maxNofElements_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
 	,m_type(type_)
 	,m_var(var_)
+	,m_maxNofElements(maxNofElements_)
 	,m_features()
 	,m_errorhnd(errorhnd_)
 {
@@ -86,13 +90,13 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 			}
 			if (m_features.size() >= 64)
 			{
-				m_errorhnd->report( _TXT("too many features (>64) defined for '%s' summarization"), "AccumulateVariable");
+				m_errorhnd->report( _TXT("too many features (>64) defined for '%s' summarization"), "accuvariable");
 			}
 			else
 			{
 				if (varitr.empty())
 				{
-					m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_var.c_str(), "AccumulateVariable");
+					m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_var.c_str(), "accuvariable");
 				}
 				else
 				{
@@ -102,10 +106,10 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "AccumulateVariable", name.c_str());
+			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), "accuvariable", name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), "AccumulateVariable", *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), "accuvariable", *m_errorhnd);
 }
 
 
@@ -221,21 +225,41 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			}
 			curpos = nextpos;
 		}
-
 		// Build the accumulation result:
 		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 		PosWeightMap::const_iterator ti = totalmap.begin(), te = totalmap.end();
-		for (; ti != te; ++ti)
+		if (m_maxNofElements < totalmap.size())
 		{
-			if (m_forwardindex->skipPos( ti->first) == ti->first)
+			Ranker ranker( m_maxNofElements);
+			for (; ti != te; ++ti)
 			{
-				rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
-						m_forwardindex->fetch(), ti->second));
+				ranker.insert( ti->second, ti->first);
+			}
+			std::vector<Ranker::Element> ranklist = ranker.result();
+			std::vector<Ranker::Element>::const_iterator ri = ranklist.begin(), re = ranklist.end();
+			for (; ri != re; ++ri)
+			{
+				if (m_forwardindex->skipPos( ri->idx) == ri->idx)
+				{
+					rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
+							m_forwardindex->fetch(), ri->weight));
+				}
+			}
+		}
+		else
+		{
+			for (; ti != te; ++ti)
+			{
+				if (m_forwardindex->skipPos( ti->first) == ti->first)
+				{
+					rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
+							m_forwardindex->fetch(), ti->second));
+				}
 			}
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "AccumulateVariable", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "accuvariable", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
 }
 
 
@@ -245,7 +269,7 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 	{
 		if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "AccumulateVariable");
+			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "accuvariable");
 		}
 		else if (utils::caseInsensitiveEquals( name, "type"))
 		{
@@ -255,28 +279,36 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 		{
 			m_var = value;
 		}
+		else if (utils::caseInsensitiveEquals( name, "nof"))
+		{
+			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "accuvariable");
+		}
 		else
 		{
-			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "AccumulateVariable", name.c_str());
+			throw strus::runtime_error( _TXT("unknown '%s' summarization function parameter '%s'"), "accuvariable", name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "AccumulateVariable", *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "accuvariable", *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), "AccumulateVariable");
+		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), "accuvariable");
 	}
 	else if (utils::caseInsensitiveEquals( name, "type")
 	||  utils::caseInsensitiveEquals( name, "var"))
 	{
-		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "AccumulateVariable");
+		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "accuvariable");
+	}
+	else if (utils::caseInsensitiveEquals( name, "nof"))
+	{
+		m_maxNofElements = value.touint();
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "AccumulateVariable", name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "accuvariable", name.c_str());
 	}
 }
 
@@ -291,9 +323,9 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateVariable
 	}
 	try
 	{
-		return new SummarizerFunctionContextAccumulateVariable( storage, m_processor, m_type, m_var, m_errorhnd);
+		return new SummarizerFunctionContextAccumulateVariable( storage, m_processor, m_type, m_var, m_maxNofElements, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "AccumulateVariable", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "accuvariable", *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceAccumulateVariable::tostring() const
@@ -302,10 +334,11 @@ std::string SummarizerFunctionInstanceAccumulateVariable::tostring() const
 	{
 		std::ostringstream rt;
 		rt << "type='" << m_type 
-			<< "', var='" << m_var << "'";
+			<< "', var='" << m_var << "', nof="
+			<< m_maxNofElements;
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "AccumulateVariable", *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "accuvariable", *m_errorhnd, std::string());
 }
 
 
@@ -316,8 +349,21 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateVariable::creat
 	{
 		return new SummarizerFunctionInstanceAccumulateVariable( processor, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "AccumulateVariable", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "accuvariable", *m_errorhnd, 0);
 }
 
 
+SummarizerFunctionInterface::Description SummarizerFunctionAccumulateVariable::getDescription() const
+{
+	try
+	{
+		Description rt( _TXT("Accumulate the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content."));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"));
+		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"));
+		rt( Description::Param::String, "var", _TXT( "the name of the variable referencing the content to weight"));
+		rt( Description::Param::String, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"));
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "accuvariable", *m_errorhnd, SummarizerFunctionInterface::Description());
+}
 

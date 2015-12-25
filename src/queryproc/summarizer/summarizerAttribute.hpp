@@ -116,10 +116,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Get the value of the document attribute specified with the string parameter 'name'.");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

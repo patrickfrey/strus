@@ -309,6 +309,22 @@ make test
 %{_includedir}/%{name}/private/*.h
 
 %changelog
+* Thu Dec 24 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.3.4-0.1
+- fixed bug in transaction: statistics number of documents (collection size) was not set correctly
+
+* Thu Dec 24 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.3.3-0.1
+- fixed bug in statistics viewer: wrong decoding of global number of documents (collection size)
+
+* Wed Dec 23 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.3.2-0.1
+- fixing bug in metadata cache layout: was completely broken
+
+* Mon Dec 21 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.3.1-0.1
+- fixing versioning problems of the Open Suse build cluster 
+
+* Fri Dec 18 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.3.0-0.1
+- better introspection for functions
+- removed docno allocator interface and fdatasync on every new document insert when not using the docno allocator
+
 * Tue Dec 1 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.2.6-0.1
 - added interfaces for introspection (user names, docids, term types, term values)
 

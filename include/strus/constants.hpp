@@ -66,17 +66,6 @@ struct Constants
 	{
 		return "";
 	}
-	/// \brief Get the identifier used in protocols for distributing the document frequency
-	static const char* storage_statistics_document_frequency()
-	{
-		return "df";
-	}
-	/// \brief Get the identifier used in protocols for distributing the collection size
-	static const char* storage_statistics_number_of_documents()
-	{
-		return "dn";
-	}
-
 	/// \brief Get the maximum position (counted from 1) in a document a token can have 
 	/// \note This is a limit given by the implementation of the position info block. Unfortunately it creeps through the system.
 	static unsigned int storage_max_position_info()

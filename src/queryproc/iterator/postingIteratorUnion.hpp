@@ -168,10 +168,7 @@ public:
 			int range,
 			unsigned int cardinality) const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Get the set of postings that are occurring in any argument set");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

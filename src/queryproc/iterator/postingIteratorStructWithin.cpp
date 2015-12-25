@@ -347,6 +347,15 @@ PostingIteratorInterface* PostingJoinStructWithin::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "within_struct", *m_errorhnd, 0);
 }
 
+PostingJoinOperatorInterface::Description PostingJoinStructWithin::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings."));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "within_struct", *m_errorhnd, Description());
+}
+
 PostingIteratorInterface* PostingJoinWithin::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
 		int range_,
@@ -369,6 +378,14 @@ PostingIteratorInterface* PostingJoinWithin::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "within", *m_errorhnd, 0);
 }
 
+PostingJoinOperatorInterface::Description PostingJoinWithin::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "within", *m_errorhnd, Description());
+}
 
 PostingIteratorInterface* PostingJoinStructInRange::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
@@ -392,6 +409,15 @@ PostingIteratorInterface* PostingJoinStructInRange::createResultIterator(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "inrange_struct", *m_errorhnd, 0);
 }
 
+PostingJoinOperatorInterface::Description PostingJoinStructInRange::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings."));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "inrange_struct", *m_errorhnd, Description());
+}
+
 PostingIteratorInterface* PostingJoinInRange::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,
 		int range_,
@@ -413,4 +439,14 @@ PostingIteratorInterface* PostingJoinInRange::createResultIterator(
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "inrange", *m_errorhnd, 0);
 }
+
+PostingJoinOperatorInterface::Description PostingJoinInRange::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "inrange", *m_errorhnd, Description());
+}
+
 

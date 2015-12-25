@@ -41,6 +41,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <algorithm>
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
@@ -106,12 +107,42 @@ static strus::MetaDataDescription randomMetaDataDescription()
 	return rt;
 }
 
+static bool isValueEqual( strus::MetaDataElement::Type type, const strus::ArithmeticVariant& aa, const strus::ArithmeticVariant& bb)
+{
+	if (aa.type != bb.type) return false;
+	if (type == strus::MetaDataElement::Float16)
+	{
+		if (aa.type != strus::ArithmeticVariant::Float) return false;
+		double diff = aa.tofloat() - bb.tofloat();
+		if (diff < 0.0) diff = -diff;
+		/// [PF:HACK] Bad epsilon !
+		double epsilon = std::max<double>( 0.002 * aa.tofloat(), 0.002);
+		if (epsilon < 0.0) epsilon = -epsilon;
+		return (diff <= epsilon);
+	}
+	else if (type == strus::MetaDataElement::Float32)
+	{
+		if (aa.type != strus::ArithmeticVariant::Float) return false;
+		double diff = aa.tofloat() - bb.tofloat();
+		if (diff < 0.0) diff = -diff;
+		/// [PF:HACK] Bad epsilon !
+		double epsilon = std::max<double>( 0.000001 * aa.tofloat(), 0.000001);
+		if (epsilon < 0.0) epsilon = -epsilon;
+		return (diff <= epsilon);
+	}
+	else
+	{
+		return aa == bb;
+	}
+}
+
 static strus::MetaDataRecord randomMetaDataRecord(
 		const strus::MetaDataDescription* descr, void* ptr)
 {
 	strus::MetaDataRecord rt( descr, ptr);
 	std::vector<std::string> columns = descr->columns();
 	std::vector<std::string>::const_iterator ci = columns.begin(), ce = columns.end();
+	std::vector<strus::ArithmeticVariant> valar;
 
 	for (; ci != ce; ++ci)
 	{
@@ -127,25 +158,46 @@ static strus::MetaDataRecord randomMetaDataRecord(
 				val = strus::ArithmeticVariant( (unsigned int)RANDINT(0,0xfFU));
 				break;
 			case strus::MetaDataElement::Int16:
-				val = strus::ArithmeticVariant( (int)RANDINT(0,0xffFFU)-0x7fFFU);
+				val = strus::ArithmeticVariant( (int)RANDINT(0,0xffFFU)-0x7fFF);
 				break;
 			case strus::MetaDataElement::UInt16:
-				val = strus::ArithmeticVariant( (int)RANDINT(0,0xffFFU));
+				val = strus::ArithmeticVariant( (unsigned int)RANDINT(0,0xffFFU));
 				break;
 			case strus::MetaDataElement::Int32:
-				val = strus::ArithmeticVariant( (int)(RANDINT(0,0xffffFFFFUL) - 0x7fffFFFFUL));
+				val = strus::ArithmeticVariant( (int)(RANDINT(0,0xffffFFFFUL) - 0x7fffFFFFL));
 				break;
 			case strus::MetaDataElement::UInt32:
-				val = strus::ArithmeticVariant( (int)(RANDINT(0,0xffffFFFFUL)));
+				val = strus::ArithmeticVariant( (unsigned int)(RANDINT(0,0xffffFFFFL)));
 				break;
 			case strus::MetaDataElement::Float16:
-				val = strus::ArithmeticVariant( (float)RANDINT(0,0xffffFFFFUL)/RANDINT(1,0xffffFFFFUL));
+				val = strus::ArithmeticVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
 				break;
 			case strus::MetaDataElement::Float32:
-				val = strus::ArithmeticVariant( (float)RANDINT(0,0xffffFFFFUL)/RANDINT(1,0xffffFFFFUL));
+				val = strus::ArithmeticVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
 				break;
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		strus::ArithmeticVariant::String valstr( val);
+		std::cerr << "[" << eh << "] " << elem->typeName() << " " << descr->getName( eh) << " = " << valstr << std::endl;
+#endif
 		rt.setValue( elem, val);
+		valar.push_back( val);
+	}
+	std::vector<strus::ArithmeticVariant>::const_iterator vi = valar.begin(), ve = valar.end();
+	for (ci = columns.begin(); ci != ce; ++ci,++vi)
+	{
+		strus::Index eh = descr->getHandle( *ci);
+		const strus::MetaDataElement* elem = descr->get(eh);
+		strus::ArithmeticVariant val( rt.getValue( elem));
+#ifdef STRUS_LOWLEVEL_DEBUG
+		strus::ArithmeticVariant::String valstr( val);
+		strus::ArithmeticVariant::String vistr( *vi);
+		std::cerr << "check value " << valstr.c_str() << " == " << vistr.c_str() << std::endl;
+#endif
+		if (!isValueEqual( elem->type(), val, *vi))
+		{
+			throw std::runtime_error("meta data record value is not stored as expected");
+		}
 	}
 	return rt;
 }

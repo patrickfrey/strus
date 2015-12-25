@@ -197,3 +197,12 @@ PostingIteratorInterface* PostingJoinIntersect::createResultIterator(
 }
 
 
+PostingJoinOperatorInterface::Description PostingJoinIntersect::getDescription() const
+{
+	try
+	{
+		return Description( _TXT("Get the set of postings (d,p) that are occurring in all argument sets"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "intersect", *m_errorhnd, Description());
+}
+

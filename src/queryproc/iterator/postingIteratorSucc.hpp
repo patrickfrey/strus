@@ -115,10 +115,7 @@ public:
 			int range,
 			unsigned int cardinality) const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Get the set of postings (d,p+1) for all (d,p) in the argument set");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

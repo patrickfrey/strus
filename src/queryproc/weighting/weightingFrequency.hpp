@@ -117,10 +117,7 @@ public:
 
 	virtual WeightingFunctionInstanceInterface* createInstance() const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Calculate the weight of a document as sum of the feature frequency of a feature multiplied with its weight of the feature. The weighted features are defined with the feature parameter 'match'.");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

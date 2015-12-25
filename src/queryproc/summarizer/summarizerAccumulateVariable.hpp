@@ -70,6 +70,7 @@ public:
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			const std::string& var_,
+			unsigned int maxNofElements_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextAccumulateVariable(){}
@@ -102,6 +103,7 @@ private:
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_type;
 	std::string m_var;
+	unsigned int m_maxNofElements;
 	std::vector<SummarizationFeature> m_features;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -112,7 +114,7 @@ class SummarizerFunctionInstanceAccumulateVariable
 {
 public:
 	SummarizerFunctionInstanceAccumulateVariable( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_var(),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_var(),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAccumulateVariable(){}
 
@@ -129,6 +131,7 @@ public:
 private:
 	std::string m_type;
 	std::string m_var;
+	unsigned int m_maxNofElements;
 	const QueryProcessorInterface* m_processor;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -145,10 +148,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Accumulate the weights of all contents of the variable defined with 'var' in matches of features specified with the feature parameter 'match'. The weights of matches are accumulated and assigned to the variable content. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content. The feature type of the values extracted from the forward index as variable contents are specified with the string parameter 'type'.");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

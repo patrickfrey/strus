@@ -112,10 +112,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface*) const;
 
-	virtual const char* getDescription() const
-	{
-		return _TXT("Get the list of occurencies printed for the features specified with the feature parameter 'match'. With the parameter 'N' you can specify the maximum number of matches to return");
-	}
+	virtual Description getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

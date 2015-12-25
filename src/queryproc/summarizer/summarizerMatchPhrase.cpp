@@ -386,4 +386,20 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchPhrase::createInstan
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
 }
 
+SummarizerFunctionInterface::Description SummarizerFunctionMatchPhrase::getDescription() const
+{
+	try
+	{
+		Description rt( _TXT("Get best matching phrases delimited by the structure postings"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the features to weight"));
+		rt( Description::Param::Feature, "struct", _TXT( "defines the delimiter for structures"));
+		rt( Description::Param::String, "type", _TXT( "the forward index type of the result phrase elements"));
+		rt( Description::Param::Numeric, "nof", _TXT( "the maximum number of phrases extracted"));
+		rt( Description::Param::Numeric, "len", _TXT( "restrict the lenght of the matching phrases"));
+		rt( Description::Param::Numeric, "structseek", _TXT( "defines +/- the area where to search for structure delimiters"));
+		rt( Description::Param::String, "mark", _TXT( "specifies a start and end tag (separated by '$') for highlighting matches in the resulting phrases"));
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchphrase", *m_errorhnd, SummarizerFunctionInterface::Description());
+}
 

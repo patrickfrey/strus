@@ -146,3 +146,14 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAttribute::createInstance
 }
 
 
+SummarizerFunctionInterface::Description SummarizerFunctionAttribute::getDescription() const
+{
+	try
+	{
+		Description rt( _TXT("Get the value of a document attribute."));
+		rt( Description::Param::String, "name", _TXT( "the name of the attribute to get"));
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "attribute", *m_errorhnd, SummarizerFunctionInterface::Description());
+}
+
