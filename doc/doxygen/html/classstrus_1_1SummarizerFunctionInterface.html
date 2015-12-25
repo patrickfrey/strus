@@ -59,6 +59,7 @@
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classstrus_1_1SummarizerFunctionInterface-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -71,6 +72,12 @@
 
 <p><code>#include &lt;<a class="el" href="summarizerFunctionInterface_8hpp_source.html">summarizerFunctionInterface.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstrus_1_1SummarizerFunctionInterface_1_1Description.html">Description</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure that describes the summarizer function (for introspection)  <a href="structstrus_1_1SummarizerFunctionInterface_1_1Description.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:acc11803170765fcdf282647c592e25f4"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInterface.html#acc11803170765fcdf282647c592e25f4">~SummarizerFunctionInterface</a> ()</td></tr>
@@ -80,9 +87,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html">SummarizerFunctionInstanceInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInterface.html#ac6a27374d720d54c3c6c6b60b68077e3">createInstance</a> (const <a class="el" href="classstrus_1_1QueryProcessorInterface.html">QueryProcessorInterface</a> *processor) const =0</td></tr>
 <tr class="memdesc:ac6a27374d720d54c3c6c6b60b68077e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an instance of this summarization function for parametrization.  <a href="#ac6a27374d720d54c3c6c6b60b68077e3">More...</a><br/></td></tr>
 <tr class="separator:ac6a27374d720d54c3c6c6b60b68077e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e6b25a01a23b8f2c5a4354e61638f01"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInterface.html#a3e6b25a01a23b8f2c5a4354e61638f01">getDescription</a> () const =0</td></tr>
-<tr class="memdesc:a3e6b25a01a23b8f2c5a4354e61638f01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a description of the function for user help.  <a href="#a3e6b25a01a23b8f2c5a4354e61638f01">More...</a><br/></td></tr>
-<tr class="separator:a3e6b25a01a23b8f2c5a4354e61638f01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7f3a83e41df9b0db74a9f9afcf423f1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structstrus_1_1SummarizerFunctionInterface_1_1Description.html">Description</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInterface.html#ae7f3a83e41df9b0db74a9f9afcf423f1">getDescription</a> () const =0</td></tr>
+<tr class="memdesc:ae7f3a83e41df9b0db74a9f9afcf423f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a description of the function for user help and introspection.  <a href="#ae7f3a83e41df9b0db74a9f9afcf423f1">More...</a><br/></td></tr>
+<tr class="separator:ae7f3a83e41df9b0db74a9f9afcf423f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for summarization functions (additional info about the matches in the result ranklist of a retrieval query) </p>
@@ -146,7 +153,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3e6b25a01a23b8f2c5a4354e61638f01"></a>
+<a class="anchor" id="ae7f3a83e41df9b0db74a9f9afcf423f1"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -154,7 +161,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual const char* strus::SummarizerFunctionInterface::getDescription </td>
+          <td class="memname">virtual <a class="el" href="structstrus_1_1SummarizerFunctionInterface_1_1Description.html">Description</a> strus::SummarizerFunctionInterface::getDescription </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -167,8 +174,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get a description of the function for user help. </p>
-<dl class="section return"><dt>Returns</dt><dd>the description </dd></dl>
+<p>Get a description of the function for user help and introspection. </p>
+<dl class="section return"><dt>Returns</dt><dd>the description structure </dd></dl>
 
 </div>
 </div>
@@ -179,7 +186,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Dec 14 2015 18:03:29 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Dec 25 2015 06:21:23 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

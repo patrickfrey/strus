@@ -78,7 +78,7 @@ Public Types</h2></td></tr>
 <a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193aca809cb3abcdb793c35350b1079a9c69">WeightingFunction</a>, 
 <a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193afd4302fe2ed2e3d231372de4d45984f3">SummarizerFunction</a>
  }</td></tr>
-<tr class="memdesc:a037a1d7e54e477cb69db5a34e5d9a193"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for fetching descriptions of available functions.  <a href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">More...</a><br/></td></tr>
+<tr class="memdesc:a037a1d7e54e477cb69db5a34e5d9a193"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function type for fetching the list of available functions.  <a href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">More...</a><br/></td></tr>
 <tr class="separator:a037a1d7e54e477cb69db5a34e5d9a193"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -107,9 +107,6 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1SummarizerFunctionInterface.html">SummarizerFunctionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a45a56dde58be36dd36626ab225dc1de8">getSummarizerFunction</a> (const std::string &amp;name) const =0</td></tr>
 <tr class="memdesc:a45a56dde58be36dd36626ab225dc1de8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a summarization function reference by name.  <a href="#a45a56dde58be36dd36626ab225dc1de8">More...</a><br/></td></tr>
 <tr class="separator:a45a56dde58be36dd36626ab225dc1de8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a148ba0ce3d45cf927a6d5c2a4d76be62"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a148ba0ce3d45cf927a6d5c2a4d76be62">getDescription</a> (<a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> type, const std::string &amp;name) const =0</td></tr>
-<tr class="memdesc:a148ba0ce3d45cf927a6d5c2a4d76be62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a description of a specific function addressed by name.  <a href="#a148ba0ce3d45cf927a6d5c2a4d76be62">More...</a><br/></td></tr>
-<tr class="separator:a148ba0ce3d45cf927a6d5c2a4d76be62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50413652ee13ed24c2e87ece35f7a6b3"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a50413652ee13ed24c2e87ece35f7a6b3">getFunctionList</a> (<a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> type) const =0</td></tr>
 <tr class="memdesc:a50413652ee13ed24c2e87ece35f7a6b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a list of all functions of a specific type available.  <a href="#a50413652ee13ed24c2e87ece35f7a6b3">More...</a><br/></td></tr>
 <tr class="separator:a50413652ee13ed24c2e87ece35f7a6b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -127,7 +124,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Function type for fetching descriptions of available functions. </p>
+<p>Function type for fetching the list of available functions. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a037a1d7e54e477cb69db5a34e5d9a193aebb46c3fe674f3e6062eecb71bb95c50"></a>PostingJoinOperator</em>&#160;</td><td class="fielddoc">
 <p>Addresses a posting iterator join operator. </p>
@@ -298,50 +295,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a148ba0ce3d45cf927a6d5c2a4d76be62"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual const char* strus::QueryProcessorInterface::getDescription </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a>&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get a description of a specific function addressed by name. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>type of the function </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the function </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the description </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="a50413652ee13ed24c2e87ece35f7a6b3"></a>
 <div class="memitem">
 <div class="memproto">
@@ -481,7 +434,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Dec 14 2015 18:03:28 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Dec 25 2015 06:21:23 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
