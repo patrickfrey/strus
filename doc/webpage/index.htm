@@ -3,7 +3,7 @@
 <head>
 	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<meta name="description" content="Project strus is a collection of open source C++ libraries for building a full-text search engine." />
+	<meta name="description" content="Project <i>Strus</i> is a collection of open source C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++ PHP Python Java/JNI" />
 	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
 	<link rel="stylesheet" type="text/css" href="basic-profile.css" title="Basic Profile" media="all" />
@@ -36,21 +36,21 @@
 		</tr>
 		</table>
 		<h1>Strus</h1>
-		<p class="slogan">If you are looking for software to build a non monolithic search engine with a clear model you might get enthused about <i>strus</i>.</p>
+		<p class="slogan">If you are looking for software to build a non monolithic search engine with a clear model you might get enthused about <i>Strus</i>.</p>
 		<ul>
 			<li><b>Status</b><br />Development status is <i>pre-alpha</i>.</li>
 			<li><b>License</b><br /><a href="https://www.gnu.org/copyleft/gpl.html">GPL v3</a></li>
 			<li><b>Download</b><br />There are <a href="installation.htm#packages">packages</a> and docker <a href="installation.htm#docker">images</a> available. You can also fetch the <a href="installation.htm#github">sources</a> from github and build them on your own.</li>
 			<li><b>Contact</b><br />Contact us by mail: contact <i>at</i> project <i>dash</i> strus <i>dot</i> net or follow us on twitter <a href="https://twitter.com/ProjectStrus">@ProjectStrus</a> or subscribe to the <a href="https://groups.google.com/forum/#!forum/project-strus">mailing list</a>.</li>
-			<li><b>Whiteboard</b><br />Take part in the development of strus or just inform yourself what is going on and have a look at the Strus <a href="whiteboard.htm">whiteboard</a>.</li>
+			<li><b>Whiteboard</b><br />Take part in the development of <i>Strus</i> or just inform yourself what is going on and have a look at the <i>Strus</i> <a href="whiteboard.htm">whiteboard</a>.</li>
 		</ul>
 	</div>
 
 	<div id="content">
 		<h2>About</h2>
-		<p class="description">The open source project <i>strus</i> provides a collection of C++ (C++98) 
+		<p class="description">The open source project <i>Strus</i> provides a collection of C++ (C++98) 
 		libraries and command line tools for building a competitive full-text search engine.
-		The <i>strus</i> search engine can be build using any key value store database that provides an
+		The <i>Strus</i> search engine can be build using any key value store database that provides an
 		<a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upper bound</a> seek function
 		for the stored key/value pairs.
 		Currently there exists an implementation based on the 
@@ -58,7 +58,7 @@
 		</p>
 		<h2>Demo system</h2>
 		<p class="description">There is one running demo system online to show the properties of 
-		<i>strus</i> under conditions of limited resources: <br/> 
+		<i>Strus</i> under conditions of limited resources: <br/> 
 		<a href="http://demo.project-strus.net/strus.html">Search on complete wikipedia collection (English)</a>
 		</p>
 
@@ -71,8 +71,8 @@
 
 		<h2>Installation</h2>
 		<p class="description">
-		There is a <a href="installation.htm">short installation guide</a> on how to fetch the strus 
-		sources from github and build them or alternatively to run strus from docker images.
+		There is a <a href="installation.htm">short installation guide</a> on how to fetch the <i>Strus</i> 
+		sources from github and build them or alternatively to run <i>Strus</i> from docker images.
 		</p>
 
 		<h2>Documentation</h2>
@@ -81,13 +81,19 @@
 		</p>
 
 		<h2>Background</h2>
-		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of <i>strus</i>.
-		I also try to explain, what distinguishes <i>strus</i> from other open source fulltext 
+		<p class="description">Why to build yet another search engine ? <a href="story.htm">Here</a> I tell about my motivation and the story of <i>Strus</i>.
+		I also try to explain, what distinguishes <i>Strus</i> from other open source fulltext 
 		search engines.
 		</p>
 
 		<h3>News</h3>
 		<table>
+        <tr>
+		<td><p class="timestamp">Dec 25th, 2015</p></td>
+		<td><p class="newstext">
+		<a href="http://www.codeproject.com/Articles/1066960/Distributing-a-search-engine-index-with-Strus">Article</a> that shows how scalabile search engines can be built with <i>Strus</i>.
+		</td>
+		</tr>
 		<tr>
 		<td><p class="timestamp">Dec 23th, 2015</p></td>
 		<td><p class="newstext">
@@ -105,13 +111,13 @@
 		This led to a loss of performance when inserting documents by
 		a factor of 10 at least.
 		The problem could be circumvented with a hack (pre-allocating document numbers), 
-		that has also been removed now. If you tried strus and experienced an unacceptable
+		that has also been removed now. If you tried <i>Strus</i> and experienced an unacceptable
 		performance when inserting, you might give it a chance again.
 		</td>
 		</tr>
 		<tr>
 		<td><p class="timestamp">Nov 28th, 2015</p></td>
-		<td><p class="newstext">A tutorial for building a search engine with Strus
+		<td><p class="newstext">A tutorial for building a search engine with <i>Strus</i>
 		based on Python and the Tornado web framework has been published on codeproject.</td>
 		</tr>
 		<tr>
@@ -119,7 +125,7 @@
 		<td><p class="newstext">The NBLNK weighting scheme for the Wikipedia demo is now online.
 		This weighting scheme does not match documents against the query, but ranks the links
 		in documents by weighting the sentences the links appear in against the query. It is
-		a good example for the information extraction capabilities of strus.</p></td>
+		a good example for the information extraction capabilities of <i>Strus</i>.</p></td>
 		</tr>
 
 		<tr>
@@ -135,7 +141,7 @@
 
 		<tr>
 		<td><p class="timestamp">Oct 12th, 2015</p></td>
-		<td><p class="newstext">C++ Interfaces of strus are now exception free. This means that 
+		<td><p class="newstext">C++ Interfaces of <i>Strus</i> are now exception free. This means that 
 		libraries and modules can be linked with a defined set of symbols exported (visibility hidden)
 		and you can use different compilers to build the objects if some STL types (vector,string)
 		and the calling conventions are compatible.</p></td>
@@ -149,12 +155,12 @@
 
 		<tr>
 		<td><p class="timestamp">Jul 1st, 2015</p></td>
-		<td><p class="newstext">A docker image and a tutorial is available for strus.</p></td>
+		<td><p class="newstext">A docker image and a tutorial is available for <i>Strus</i>.</p></td>
 		</tr>
 
 		<tr>
 		<td><p class="timestamp">June 15th, 2015</p></td>
-		<td><p class="newstext">Started advertising <i>strus</i> to get some feedback and maybe even some support.</p></td>
+		<td><p class="newstext">Started advertising <i>Strus</i> to get some feedback and maybe even some support.</p></td>
 		</tr>
 
 		<tr>
