@@ -343,9 +343,10 @@ bool StorageTransaction::commit()
 				transaction.get(),
 				statisticsBuilder, dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
 				m_termTypeMapInv, m_termValueMapInv);
-// Aba: segfaults in the web service, no clue why
-//		statisticsBuilder->setNofDocumentsInsertedChange( m_nof_documents);
-
+		if (statisticsBuilder)
+		{
+			statisticsBuilder->setNofDocumentsInsertedChange( m_nof_documents);
+		}
 		m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
 		m_forwardIndexMap.getWriteBatch( transaction.get());
 
