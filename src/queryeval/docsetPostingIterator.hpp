@@ -87,7 +87,7 @@ public:
 		return std::vector<const PostingIteratorInterface*>();
 	}
 
-	virtual GlobalCounter documentFrequency() const
+	virtual Index documentFrequency() const
 	{
 		return m_size;
 	}
