@@ -101,7 +101,7 @@ Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, m_cardinality);
 }
 
-GlobalCounter IteratorContains::documentFrequency() const
+Index IteratorContains::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

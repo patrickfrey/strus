@@ -247,7 +247,7 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 	}
 }
 
-GlobalCounter IteratorStructSequence::documentFrequency() const
+Index IteratorStructSequence::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

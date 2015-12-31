@@ -91,7 +91,6 @@ StorageClient::StorageClient(
 	,m_next_userno(0)
 	,m_next_attribno(0)
 	,m_nof_documents(0)
-	,m_global_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_termno_map(0)
 	,m_statisticsProc(statisticsProc_)
@@ -166,7 +165,6 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	m_next_attribno.set( next_attribno_);
 	m_nof_documents.set( nof_documents_);
 	m_next_userno.set( next_userno_);
-	m_global_nof_documents.set( nof_documents_);
 }
 
 void StorageClient::storeVariables()
@@ -365,7 +363,6 @@ StatisticsBuilderInterface* StorageClient::getStatisticsBuilder()
 void StorageClient::declareNofDocumentsInserted( int incr)
 {
 	m_nof_documents.increment( incr);
-	m_global_nof_documents.increment( incr);
 }
 
 class TypenoAllocator

@@ -60,7 +60,7 @@ public:
 		return m_ref->subExpressions( positive);
 	}
 
-	virtual GlobalCounter documentFrequency() const
+	virtual Index documentFrequency() const
 	{
 		return m_ref->documentFrequency();
 	}

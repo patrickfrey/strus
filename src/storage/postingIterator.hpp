@@ -69,7 +69,7 @@ public:
 
 	virtual unsigned int frequency();
 
-	virtual GlobalCounter documentFrequency() const;
+	virtual Index documentFrequency() const;
 
 	virtual Index docno() const
 	{
