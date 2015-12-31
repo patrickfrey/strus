@@ -121,7 +121,7 @@ unsigned int PostingIterator::frequency()
 	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator get frequency: %s"), *m_errorhnd, 0);
 }
 
-GlobalCounter PostingIterator::documentFrequency() const
+Index PostingIterator::documentFrequency() const
 {
 	try
 	{

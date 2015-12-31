@@ -222,7 +222,6 @@ private:
 	utils::AtomicCounter<Index> m_next_attribno;		///< next index to assign to a new attribute name
 
 	utils::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
-	utils::AtomicCounter<GlobalCounter> m_global_nof_documents; ///< global number of documents inserted
 
 	utils::Mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
 

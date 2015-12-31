@@ -78,7 +78,7 @@ public:
 		return 0;
 	}
 
-	virtual GlobalCounter documentFrequency() const
+	virtual Index documentFrequency() const
 	{
 		return m_maxDocno;
 	}
