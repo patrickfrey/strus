@@ -44,6 +44,9 @@
 #ifdef __FreeBSD__
 #include <malloc_np.h>
 #endif
+#ifdef __linux__
+#include <malloc.h>
+#endif
 #include <stdlib.h>
 #include <libgen.h>
 #include <execinfo.h>
@@ -340,7 +343,7 @@ static void print_stacktrace()
 		Dl_info info;
 		if (dladdr( trace[si], &info))
 		{
-			fprintf( stderr, "\t%s\t%s\n", info.dli_fname?basename(info.dli_fname):"(unknown)", info.dli_sname?info.dli_sname:"(unknown)");
+			fprintf( stderr, "\t%s\t%s\n", info.dli_fname?basename((char *)info.dli_fname):"(unknown)", info.dli_sname?info.dli_sname:"(unknown)");
 		}
 	}
 }
