@@ -47,29 +47,14 @@ public:
 
 	virtual ~DocsetPostingIterator(){}
 
-	virtual Index skipDoc( const Index& docno)
+	virtual Index skipDoc( const Index& docno_)
 	{
-		if (m_itr < m_end)
-		{
-			if (*m_itr > docno)
-			{
-				if (m_itr > m_start)
-				{
-					--m_itr;
-					if (*m_itr < docno)
-					{
-						++m_itr;
-						return *m_itr;
-					}
-				}
-				m_itr = m_start;
-			}
-		}
-		while (m_itr < m_end && *m_itr < docno)
-		{
-			++m_itr;
-		}
-		return (m_itr == m_end)?0:*m_itr;
+		return skipDocImpl( docno_);
+	}
+
+	virtual Index skipDocCandidate( const Index& docno_)
+	{
+		return skipDocImpl( docno_);
 	}
 
 	virtual Index skipPos( const Index& firstpos)
@@ -87,7 +72,7 @@ public:
 		return std::vector<const PostingIteratorInterface*>();
 	}
 
-	virtual GlobalCounter documentFrequency() const
+	virtual Index documentFrequency() const
 	{
 		return m_size;
 	}
@@ -105,6 +90,32 @@ public:
 	virtual Index posno() const
 	{
 		return (m_itr == m_end)?0:1;
+	}
+
+private:
+	Index skipDocImpl( const Index& docno_)
+	{
+		if (m_itr < m_end)
+		{
+			if (*m_itr > docno_)
+			{
+				if (m_itr > m_start)
+				{
+					--m_itr;
+					if (*m_itr < docno_)
+					{
+						++m_itr;
+						return *m_itr;
+					}
+				}
+				m_itr = m_start;
+			}
+		}
+		while (m_itr < m_end && *m_itr < docno_)
+		{
+			++m_itr;
+		}
+		return (m_itr == m_end)?0:*m_itr;
 	}
 
 private:

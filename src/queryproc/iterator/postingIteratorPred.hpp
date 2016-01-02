@@ -62,19 +62,18 @@ public:
 		return m_origin->skipDoc( docno_);
 	}
 
+	virtual Index skipDocCandidate( const Index& docno_)
+	{
+		return m_origin->skipDocCandidate( docno_);
+	}
+
 	virtual Index skipPos( const Index& pos_)
 	{
 		Index rt = m_origin->skipPos( pos_+1);
 		return rt?(rt - 1):0;
 	}
 
-	virtual std::vector<const PostingIteratorInterface*>
-			subExpressions( bool positive) const
-	{
-		return m_origin->subExpressions( positive);
-	}
-
-	virtual GlobalCounter documentFrequency() const
+	virtual Index documentFrequency() const
 	{
 		return m_origin->documentFrequency();
 	}

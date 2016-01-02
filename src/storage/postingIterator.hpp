@@ -55,21 +55,18 @@ public:
 
 	virtual ~PostingIterator(){}
 
-	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const
-	{
-		return std::vector<const PostingIteratorInterface*>();
-	}
 	virtual const char* featureid() const
 	{
 		return m_featureid.c_str();
 	}
 
 	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& firstpos_);
 
 	virtual unsigned int frequency();
 
-	virtual GlobalCounter documentFrequency() const;
+	virtual Index documentFrequency() const;
 
 	virtual Index docno() const
 	{

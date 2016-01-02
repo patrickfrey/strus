@@ -48,15 +48,14 @@ public:
 	{
 		return m_featureid.c_str();
 	}
-	virtual Index skipDoc( const Index& docno);
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos)
 	{
 		return m_posno=(pos?pos:1);
 	}
 
-	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const;
-
-	virtual GlobalCounter documentFrequency() const;
+	virtual Index documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -85,6 +84,7 @@ public:
 	virtual ~IteratorContainsWithCardinality(){}
 
 	virtual Index skipDoc( const Index& docno);
+	virtual Index skipDocCandidate( const Index& docno_);
 
 private:
 	std::size_t m_cardinality;					///< number of elements to count for a match

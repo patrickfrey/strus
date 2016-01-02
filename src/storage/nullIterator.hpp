@@ -42,17 +42,17 @@ public:
 
 	virtual ~NullIterator(){}
 
-	virtual std::vector<const PostingIteratorInterface*>
-			subExpressions( bool positive) const
-	{
-		return std::vector<const PostingIteratorInterface*>();
-	}
 	virtual const char* featureid() const
 	{
 		return m_featureid.c_str();
 	}
 
 	virtual Index skipDoc( const Index&)
+	{
+		return 0;
+	}
+
+	virtual Index skipDocCandidate( const Index&)
 	{
 		return 0;
 	}
@@ -67,7 +67,7 @@ public:
 		return 0;
 	}
 
-	virtual GlobalCounter documentFrequency() const
+	virtual Index documentFrequency() const
 	{
 		return 0;
 	}

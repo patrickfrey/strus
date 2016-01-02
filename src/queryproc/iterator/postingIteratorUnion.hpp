@@ -54,12 +54,10 @@ public:
 	}
 
 	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
 
-	virtual std::vector<const PostingIteratorInterface*>
-			subExpressions( bool positive) const;
-
-	virtual GlobalCounter documentFrequency() const;
+	virtual Index documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -139,6 +137,10 @@ private:
 	{
 		m_selected |= ((uint64_t)1 << idx);
 	}
+	void unsetSelected( unsigned int idx)
+	{
+		m_selected ^= ((uint64_t)1 << idx);
+	}
 	void clearSelected()
 	{
 		m_selected = 0;
@@ -150,7 +152,7 @@ private:
 	std::vector<Reference<PostingIteratorInterface> > m_argar;	///< arguments
 	uint64_t m_selected;						///< set pf bits parallel to arguments that specifies the current document matches of the arguments
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the most frequent subexpression)
+	mutable Index m_documentFrequency;				///< document frequency (of the most frequent subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

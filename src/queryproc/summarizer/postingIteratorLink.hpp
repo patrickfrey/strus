@@ -40,9 +40,14 @@ public:
 	PostingIteratorLink( PostingIteratorInterface* ref_)
 		:m_ref(ref_){}
 
-	virtual Index skipDoc( const Index& docno)
+	virtual Index skipDoc( const Index& docno_)
 	{
-		return m_ref->skipDoc( docno);
+		return m_ref->skipDoc( docno_);
+	}
+
+	virtual Index skipDocCandidate( const Index& docno_)
+	{
+		return m_ref->skipDocCandidate( docno_);
 	}
 
 	virtual Index skipPos( const Index& firstpos)
@@ -55,12 +60,7 @@ public:
 		return m_ref->featureid();
 	}
 
-	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const
-	{
-		return m_ref->subExpressions( positive);
-	}
-
-	virtual GlobalCounter documentFrequency() const
+	virtual Index documentFrequency() const
 	{
 		return m_ref->documentFrequency();
 	}

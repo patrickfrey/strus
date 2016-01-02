@@ -547,8 +547,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*si == fi->set)
 					{
 						accumulator.addSelector(
-							nodeStorageData( fi->node, nodeStorageDataMap).itr, sidx, 
-							nodeType( fi->node) == ExpressionNode);
+							nodeStorageData( fi->node, nodeStorageDataMap).itr, sidx);
 					}
 				}
 			}
@@ -619,8 +618,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodeStorageData( fi->node, nodeStorageDataMap).itr,
-							nodeType( fi->node) == ExpressionNode, false);
+							nodeStorageData( fi->node, nodeStorageDataMap).itr, false);
 					}
 				}
 			}
@@ -639,8 +637,7 @@ std::vector<ResultDocument> Query::evaluate()
 					if (*xi == fi->set)
 					{
 						accumulator.addFeatureRestriction(
-							nodeStorageData( fi->node, nodeStorageDataMap).itr,
-							nodeType( fi->node) == ExpressionNode, true);
+							nodeStorageData( fi->node, nodeStorageDataMap).itr, true);
 					}
 				}
 			}

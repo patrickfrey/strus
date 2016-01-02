@@ -84,36 +84,11 @@ IteratorStructSequence::IteratorStructSequence(
 	m_featureid.push_back( 'S');
 }
 
-std::vector<const PostingIteratorInterface*>
-	IteratorStructSequence::subExpressions( bool positive) const
-{
-	try
-	{
-		std::vector<const PostingIteratorInterface*> rt;
-		if (positive)
-		{
-			rt.reserve( m_argar.size());
-			std::vector<Reference< PostingIteratorInterface> >::const_iterator
-				ai = m_argar.begin(), ae = m_argar.end();
-			for (; ai != ae; ++ai)
-			{
-				rt.push_back( ai->get());
-			}
-		}
-		else if (m_cut.get())
-		{
-			rt.push_back( m_cut.get());
-		}
-		return rt;
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "sequence", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
-}
-
-Index IteratorStructSequence::skipDoc( const Index& docno_)
+Index IteratorStructSequence::skipDocCandidate( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
 
-	m_docno = getFirstAllMatchDocno( m_argar, docno_);
+	m_docno = getFirstAllMatchDocno( m_argar, docno_, true/*allow empty*/);
 	if (m_docno)
 	{
 		if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
@@ -124,6 +99,35 @@ Index IteratorStructSequence::skipDoc( const Index& docno_)
 		{
 			m_docno_cut = 0;
 		}
+	}
+	return m_docno;
+}
+
+Index IteratorStructSequence::skipDoc( const Index& docno_)
+{
+	if (m_docno == docno_ && m_docno) return m_docno;
+	Index docno_iter = docno_;
+
+	for (;;)
+	{
+		m_docno = getFirstAllMatchDocno( m_argar, docno_iter, false/*allow empty*/);
+		if (m_docno)
+		{
+			if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
+			{
+				m_docno_cut = m_docno;
+			}
+			else
+			{
+				m_docno_cut = 0;
+			}
+			if (!skipPos(0))
+			{
+				docno_iter = m_docno + 1;
+				continue;
+			}
+		}
+		break;
 	}
 	return m_docno;
 }
@@ -247,7 +251,7 @@ Index IteratorStructSequence::skipPos( const Index& pos_)
 	}
 }
 
-GlobalCounter IteratorStructSequence::documentFrequency() const
+Index IteratorStructSequence::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

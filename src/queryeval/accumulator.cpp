@@ -17,14 +17,14 @@ using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
 
 void Accumulator::addSelector(
-		PostingIteratorInterface* iterator, int setindex, bool isExpression)
+		PostingIteratorInterface* iterator, int setindex)
 {
-	m_selectorPostings.push_back( SelectorPostings( isExpression, false/*negative*/, setindex, iterator));
+	m_selectorPostings.push_back( SelectorPostings( false/*negative*/, setindex, iterator));
 }
 
-void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isExpression, bool isNegative)
+void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, bool isNegative)
 {
-	m_featureRestrictions.push_back( SelectorPostings( isExpression, isNegative, iterator));
+	m_featureRestrictions.push_back( SelectorPostings( isNegative, iterator));
 }
 
 void Accumulator::addFeature(
@@ -77,13 +77,6 @@ bool Accumulator::nextRank(
 			++si;
 			++m_selectoridx;
 			continue;
-		}
-		if (si->isExpression)
-		{
-			if (!si->postings->skipPos(0))
-			{
-				continue;
-			}
 		}
 		// Test if it already has been visited:
 		if (m_docno > m_maxDocumentNumber || m_visited.test( m_docno-1))
@@ -148,13 +141,6 @@ bool Accumulator::nextRank(
 			if (ri->isNegative ^ (m_docno != ri->postings->skipDoc( m_docno)))
 			{
 				break;
-			}
-			if (ri->isExpression)
-			{
-				if (!ri->postings->skipPos(0))
-				{
-					break;
-				}
 			}
 		}
 		if (ri != re) continue;

@@ -1,3 +1,13 @@
+strus (0.4.0-1) unstable; urgency=low
+  * changed posting iterator interface: new method skipDocCandidate that does what skipDoc was doing before and method skipDoc that always delivers a real match and not only a candidate, removed obsolete method subExpressions
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sat, 2 Jan 2016 17:00:00 +0100
+
+strus (0.3.5-1) unstable; urgency=low
+  * fixed bug in Reference::reset()
+  * changed type of document frequency from GlobalCounter to Index
+  * fixed new segfault in case of no statistics populated
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 1 Jan 2016 20:00:00 +0100
+
 strus (0.3.4-1) unstable; urgency=low
   * fixed bug in transaction: statistics number of documents (collection size) was not set correctly
  -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 24 Dec 2015 20:00:00 +0100

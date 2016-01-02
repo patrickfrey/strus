@@ -60,12 +60,10 @@ public:
 		return m_featureid.c_str();
 	}
 	virtual Index skipDoc( const Index& docno);
+	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos);
 
-	virtual std::vector<const PostingIteratorInterface*>
-			subExpressions( bool positive) const;
-
-	virtual GlobalCounter documentFrequency() const;
+	virtual Index documentFrequency() const;
 
 	virtual Index docno() const
 	{
@@ -87,7 +85,7 @@ private:
 	unsigned char m_strict_incr;					///< 1, if strict ascending sequence, 0 if not
 	int m_range;							///< the maximum position difference between the start element and the end element of the sequence
 	std::string m_featureid;					///< unique id of the feature expression
-	mutable GlobalCounter m_documentFrequency;			///< document frequency (of the rarest subexpression)
+	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

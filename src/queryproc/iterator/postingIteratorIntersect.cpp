@@ -55,28 +55,7 @@ IteratorIntersect::IteratorIntersect( const std::vector<Reference< PostingIterat
 IteratorIntersect::~IteratorIntersect()
 {}
 
-std::vector<const PostingIteratorInterface*>
-	IteratorIntersect::subExpressions( bool positive) const
-{
-	try
-	{
-		std::vector<const PostingIteratorInterface*> rt;
-		if (positive)
-		{
-			rt.reserve( m_argar.size());
-			std::vector<Reference< PostingIteratorInterface> >::const_iterator
-				ai = m_argar.begin(), ae = m_argar.end();
-			for (; ai != ae; ++ai)
-			{
-				rt.push_back( ai->get());
-			}
-		}
-		return rt;
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "intersect", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
-}
-
-Index IteratorIntersect::skipDoc( const Index& docno_)
+Index IteratorIntersect::skipDocCandidate( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
 
@@ -87,7 +66,7 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 			ai = m_argar.begin(), ae = m_argar.end();
 		if (ai == ae) return 0;
 
-		docno_iter = (*ai)->skipDoc( docno_iter);
+		docno_iter = (*ai)->skipDocCandidate( docno_iter);
 		if (docno_iter == 0)
 		{
 			m_docno = 0;
@@ -95,7 +74,7 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			Index docno_next = (*ai)->skipDoc( docno_iter);
+			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
 			if (docno_next != docno_iter)
 			{
 				if (docno_next == 0)
@@ -112,6 +91,37 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 			return m_docno = docno_iter;
 		}
 	}
+}
+
+Index IteratorIntersect::skipDoc( const Index& docno_)
+{
+	if (m_docno == docno_ && docno_)
+	{
+		return m_docno;
+	}
+	Index docno_iter = docno_;
+	for (;;)
+	{
+		if (!skipDocCandidate( docno_iter)) return 0;
+		std::vector<Reference< PostingIteratorInterface> >::iterator
+			ai = m_argar.begin(), ae = m_argar.end();
+		for (;ai != ae; ++ai)
+		{
+			if (m_docno != (*ai)->skipDoc( m_docno)) break;
+		}
+		if (ai != ae)
+		{
+			docno_iter = m_docno+1;
+			continue;
+		}
+		if (!skipPos(0))
+		{
+			docno_iter = m_docno+1;
+			continue;
+		}
+		break;
+	}
+	return m_docno;
 }
 
 Index IteratorIntersect::skipPos( const Index& pos_)
@@ -147,7 +157,7 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 	}
 }
 
-GlobalCounter IteratorIntersect::documentFrequency() const
+Index IteratorIntersect::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{

@@ -309,6 +309,14 @@ make test
 %{_includedir}/%{name}/private/*.h
 
 %changelog
+* Sat Jan 2 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.4.0-0.1
+- changed posting iterator interface: new method skipDocCandidate that does what skipDoc was doing before and method skipDoc that always delivers a real match and not only a candidate, removed obsolete method subExpressions
+
+* Fri Jan 1 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.3.5-0.1
+- fixed bug in Reference::reset()
+- changed type of document frequency from GlobalCounter to Index
+- fixed new segfault in case of no statistics populated
+
 * Thu Dec 24 2015 Patrick Frey <patrickpfrey@yahoo.com> 0.3.4-0.1
 - fixed bug in transaction: statistics number of documents (collection size) was not set correctly
 
