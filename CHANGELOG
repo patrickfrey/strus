@@ -1,3 +1,7 @@
+strus (0.4.0)
+  * changed posting iterator interface: new method skipDocCandidate that does what skipDoc was doing before and method skipDoc that always delivers a real match and not only a candidate, removed obsolete method subExpressions
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sat, 2 Jan 2016 17:00:00 +0100
+
 strus (0.3.5)
   * fixed bug in Reference::reset()
   * changed type of document frequency from GlobalCounter to Index

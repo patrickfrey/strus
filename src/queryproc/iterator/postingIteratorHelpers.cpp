@@ -31,6 +31,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "private/bitOperations.hpp"
 #include <sstream>
 #include <iostream>
 
@@ -38,24 +39,27 @@ using namespace strus;
 
 Index strus::getFirstAllMatchDocno(
 		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno)
+		Index docno,
+		bool allowEmpty)
 {
 	if (args.empty()) return 0;
 	
 	Index docno_iter = docno;
+	std::vector<Reference< PostingIteratorInterface> >::iterator
+		ae = args.end();
 	for (;;)
 	{
 		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin(), ae = args.end();
-	
-		docno_iter = (*ai)->skipDoc( docno_iter);
+			ai = args.begin();
+
+		docno_iter = (*ai)->skipDocCandidate( docno_iter);
 		if (docno_iter == 0)
 		{
 			return 0;
 		}
 		for (++ai; ai != ae; ++ai)
 		{
-			Index docno_next = (*ai)->skipDoc( docno_iter);
+			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
 			if (docno_next == 0)
 			{
 				return 0;
@@ -68,6 +72,18 @@ Index strus::getFirstAllMatchDocno(
 		}
 		if (ai == ae)
 		{
+			if (!allowEmpty)
+			{
+				ai = args.begin();
+				for (; ai != ae; ++ai)
+				{
+					if (docno_iter != (*ai)->skipDoc( docno_iter))
+					{
+						++docno_iter;
+						continue;
+					}
+				}
+			}
 			return docno_iter;
 		}
 	}
@@ -76,9 +92,11 @@ Index strus::getFirstAllMatchDocno(
 Index strus::getFirstAllMatchDocnoSubset(
 		std::vector<Reference< PostingIteratorInterface> >& args,
 		Index docno,
+		bool allowEmpty,
 		std::size_t cardinality)
 {
 	if (args.empty()) return 0;
+	if (args.size() > 64) throw std::runtime_error("number of arguments for getFirstAllMatchDocnoSubset out of range");
 
 	Index docno_iter = docno;
 	for (;;)
@@ -88,32 +106,30 @@ Index strus::getFirstAllMatchDocnoSubset(
 
 		std::size_t nof_matches = 0;
 		Index match_docno = 0;
-	AGAIN:
-		for (; ai != ae; ++ai)
+		uint64_t candidate_set = 0;
+
+		for (unsigned int aidx = 0; ai != ae; ++ai,++aidx)
 		{
-			Index docno_next = (*ai)->skipDoc( docno_iter);
+			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
 			if (docno_next)
 			{
 				if (match_docno)
 				{
 					if (match_docno == docno_next)
 					{
+						candidate_set |= (uint64_t)1<<(aidx);
 						++nof_matches;
 					}
 					else if (match_docno > docno_next)
 					{
+						candidate_set = (uint64_t)1<<(aidx);
 						match_docno = docno_next;
-						nof_matches = 0;
-						ai = args.begin();
-						goto AGAIN;
-					}
-					else
-					{
-						continue;
+						nof_matches = 1;
 					}
 				}
 				else
 				{
+					candidate_set = (uint64_t)1<<(aidx);
 					match_docno = docno_next;
 					nof_matches = 1;
 				}
@@ -121,6 +137,25 @@ Index strus::getFirstAllMatchDocnoSubset(
 		}
 		if (nof_matches >= cardinality && match_docno)
 		{
+			if (!allowEmpty)
+			{
+				unsigned int aidx = BitOperations::bitScanForward( candidate_set);
+				while (aidx)
+				{
+					if (match_docno != (*ai)->skipDoc( match_docno))
+					{
+						--nof_matches;
+						if (nof_matches < cardinality) break;
+					}
+					candidate_set -= (uint64_t)1<<(aidx-1);
+					aidx = BitOperations::bitScanForward( candidate_set);
+				}
+				if (nof_matches < cardinality)
+				{
+					docno_iter = match_docno+1;
+					continue;
+				}
+			}
 			return match_docno;
 		}
 		else if (match_docno)

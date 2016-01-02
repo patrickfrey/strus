@@ -63,27 +63,6 @@ void SummarizerFunctionContextListMatches::addSummarizationFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding summarization feature to '%s' summarizer: %s"), "matchpos", *m_errorhnd);
 }
 
-static std::string getMatches(
-	PostingIteratorInterface& itr,
-	const std::vector<const PostingIteratorInterface*>& subexpr)
-{
-	std::ostringstream rt;
-	std::set<Index> mposet;
-	std::vector<const PostingIteratorInterface*>::const_iterator si = subexpr.begin(), se = subexpr.end();
-	for (; si != se; ++si)
-	{
-		mposet.insert( (*si)->posno());
-	}
-	mposet.insert( itr.posno());
-	std::set<Index>::const_iterator ci = mposet.begin(), ce = mposet.end();
-	for (int cidx=0; ci != ce; ++ci,++cidx)
-	{
-		if (cidx) rt << ' '; 
-		rt << *ci;
-	}
-	return rt.str();
-}
-
 std::vector<SummarizerFunctionContextInterface::SummaryElement>
 	SummarizerFunctionContextListMatches::getSummary( const Index& docno)
 {
@@ -95,15 +74,15 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 	
 		for (; ii != ie; ++ii)
 		{
-			std::vector<const PostingIteratorInterface*>
-				subexpr = (*ii)->subExpressions( true);
 			if ((*ii)->skipDoc( docno) == docno)
 			{
 				unsigned int kk=0;
 				Index pos = (*ii)->skipPos( 0);
 				for (; pos && kk<m_maxNofMatches; ++kk,pos = (*ii)->skipPos( pos+1))
 				{
-					rt.push_back( SummaryElement( getMatches( **ii, subexpr)));
+					char posstr[ 64];
+					snprintf( posstr, sizeof(posstr), "%u", (unsigned int)pos);
+					rt.push_back( SummaryElement( posstr));
 				}
 			}
 		}

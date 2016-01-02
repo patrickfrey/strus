@@ -41,14 +41,17 @@ namespace strus
 
 Index getFirstAllMatchDocno(
 		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno);
+		Index docno,
+		bool allowEmpty);
 
 Index getFirstAllMatchDocnoSubset(
 		std::vector<Reference< PostingIteratorInterface> >& args,
 		Index docno,
+		bool allowEmpty,
 		std::size_t cardinality);
 
 void encodeInteger( std::string& buf, int val);
-}
+
+}//namespace
 #endif
 
