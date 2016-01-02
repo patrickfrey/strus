@@ -68,37 +68,28 @@ IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vec
 	m_featureid.push_back( 'A');
 }
 
-std::vector<const PostingIteratorInterface*>
-	IteratorContains::subExpressions( bool positive) const
+Index IteratorContains::skipDocCandidate( const Index& docno_)
 {
-	try
-	{
-		std::vector<const PostingIteratorInterface*> rt;
-		if (positive)
-		{
-			rt.reserve( m_argar.size());
-			std::vector<Reference< PostingIteratorInterface> >::const_iterator
-				ai = m_argar.begin(), ae = m_argar.end();
-			for (; ai != ae; ++ai)
-			{
-				rt.push_back( ai->get());
-			}
-		}
-		return rt;
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "contains", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	if (m_docno == docno_ && m_docno) return m_docno;
+	return m_docno = getFirstAllMatchDocno( m_argar, docno_, true);
 }
 
 Index IteratorContains::skipDoc( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocno( m_argar, docno_);
+	return m_docno = getFirstAllMatchDocno( m_argar, docno_, false);
+}
+
+Index IteratorContainsWithCardinality::skipDocCandidate( const Index& docno_)
+{
+	if (m_docno == docno_ && m_docno) return m_docno;
+	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, true, m_cardinality);
 }
 
 Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, m_cardinality);
+	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, false, m_cardinality);
 }
 
 Index IteratorContains::documentFrequency() const

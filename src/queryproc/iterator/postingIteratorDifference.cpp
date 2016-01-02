@@ -52,28 +52,31 @@ IteratorDifference::IteratorDifference(
 IteratorDifference::~IteratorDifference()
 {}
 
-std::vector<const PostingIteratorInterface*> IteratorDifference::subExpressions( bool positive) const
+Index IteratorDifference::skipDocCandidate( const Index& docno_)
 {
-	try
-	{
-		std::vector<const PostingIteratorInterface*> rt;
-		if (positive)
-		{
-			rt.push_back( m_positive.get());
-		}
-		else
-		{
-			rt.push_back( m_negative.get());
-		}
-		return rt;
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "diff", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
+	m_docno = m_positive->skipDocCandidate( docno_);
+	m_docno_neg = m_negative->skipDocCandidate( m_docno);
+	return m_docno;
 }
 
 Index IteratorDifference::skipDoc( const Index& docno_)
 {
-	m_docno = m_positive->skipDoc( docno_);
-	m_docno_neg = m_negative->skipDoc( m_docno);
+	Index docno_iter = docno_;
+	for (;;)
+	{
+		m_docno = m_positive->skipDoc( docno_iter);
+		if (!m_docno)
+		{
+			break;
+		}
+		m_docno_neg = m_negative->skipDoc( m_docno);
+		if (!skipPos(0))
+		{
+			docno_iter = m_docno + 1;
+			continue;
+		}
+		break;
+	}
 	return m_docno;
 }
 

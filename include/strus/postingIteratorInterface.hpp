@@ -43,20 +43,18 @@ class PostingIteratorInterface
 public:
 	virtual ~PostingIteratorInterface(){}
 
-	/// \brief Return the next match candidate with a document number higher than or equal to docno
-	/// \note Candidate means that the document may not match in case of an expression. You have to call ff() or skipPos( const Index&) to decide if the candidate document contains a match. But if 0 is returned you can be sure that there is no match.
+	/// \brief Return the next document match with a document number higher than or equal to docno
 	virtual Index skipDoc( const Index& docno)=0;
+
+	/// \brief Return a candidate with a document number higher than or equal to docno without guarantee, that the document has matching positions
+	/// \note Used for optimizing complex join operations that would first like to make a join on the document sets, before looking at the positions
+	virtual Index skipDocCandidate( const Index& docno)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
 	virtual Index skipPos( const Index& firstpos)=0;
 
 	/// \brief Unique id in the system for a feature expression
 	virtual const char* featureid() const=0;
-
-	/// \brief Return the list of positive or negative subexpressions of the iterator
-	/// \param[in] positive true, if the subexpressions should belong to the ones that specify the elements of the set / false, if the subexpressions should belong to the ones that exclude elements from the set.
-	/// \return a list of const references to subexpression posting iterators without ownership
-	virtual std::vector<const PostingIteratorInterface*> subExpressions( bool positive) const=0;
 
 	/// \brief Get the number of documents where the feature occurrs
 	/// \remark May not be defined exactly for composed features. In this case a substitute value should be returned, estimated from the df's of the sub expressions
