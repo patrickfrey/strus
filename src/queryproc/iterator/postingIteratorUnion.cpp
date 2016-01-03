@@ -32,27 +32,6 @@ IteratorUnion::IteratorUnion( const std::vector<Reference<PostingIteratorInterfa
 IteratorUnion::~IteratorUnion()
 {}
 
-std::vector<const PostingIteratorInterface*>
-	IteratorUnion::subExpressions( bool positive) const
-{
-	try
-	{
-		std::vector<const PostingIteratorInterface*> rt;
-		if (positive)
-		{
-			rt.reserve( m_argar.size());
-			std::vector<Reference<PostingIteratorInterface> >::const_iterator
-				ai = m_argar.begin(), ae = m_argar.end();
-			for (; ai != ae; ++ai)
-			{
-				rt.push_back( ai->get());
-			}
-		}
-		return rt;
-	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' iterator getting subexpressions: %s"), "union", *m_errorhnd, std::vector<const PostingIteratorInterface*>());
-}
-
 static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 {
 	if (idx0 <= idx1)
@@ -79,7 +58,7 @@ static inline Index selectSmallerNotNull( Index idx0, Index idx1)
 	}
 }
 
-Index IteratorUnion::skipDoc( const Index& docno_)
+Index IteratorUnion::skipDocCandidate( const Index& docno_)
 {
 	if (m_docno == docno_ && docno_)
 	{
@@ -95,7 +74,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 	int aidx=0;
 	for (; ai != ae; ++ai,++aidx)
 	{
-		minimum = (*ai)->skipDoc( base);
+		minimum = (*ai)->skipDocCandidate( base);
 		if (minimum) break;
 	}
 	if (!minimum)
@@ -107,7 +86,7 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 
 	for (aidx++,ai++; ai != ae; ++ai,++aidx)
 	{
-		Index next = (*ai)->skipDoc( base);
+		Index next = (*ai)->skipDocCandidate( base);
 		if (next && next <= minimum)
 		{
 			if (next < minimum)
@@ -119,6 +98,32 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 		}
 	}
 	m_docno = minimum;
+	return m_docno;
+}
+
+Index IteratorUnion::skipDoc( const Index& docno_)
+{
+	if (m_docno == docno_ && docno_)
+	{
+		return m_docno;
+	}
+	Index docno_iter = docno_;
+	for (;;)
+	{
+		if (!skipDocCandidate( docno_iter)) return 0;
+		selected_iterator si = selected_begin(), se = selected_end();
+		for (unsigned int aidx=0; si != se; ++si,++aidx)
+		{
+			if (m_docno == si->skipDoc( m_docno)) break;
+			unsetSelected( aidx); //... because we break, when we found one, we might not unset all non matching candidates
+		}
+		if (si == se)
+		{
+			docno_iter = m_docno+1;
+			continue;
+		}
+		break;
+	}
 	return m_docno;
 }
 

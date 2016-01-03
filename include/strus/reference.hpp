@@ -86,7 +86,10 @@ public:
 	{
 		if (!m_refcnt)
 		{
-			m_refcnt = newRefCnt();
+			if (obj_)
+			{
+				m_refcnt = newRefCnt();
+			}
 		}
 		else if (*m_refcnt == 1)
 		{
@@ -101,6 +104,7 @@ public:
 		else
 		{
 			freeRef();
+			m_refcnt = 0;
 		}
 		m_obj = obj_;
 	}

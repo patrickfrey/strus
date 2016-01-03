@@ -60,10 +60,8 @@ public:
 		return m_featureid.c_str();
 	}
 	virtual Index skipDoc( const Index& docno);
+	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos);
-
-	virtual std::vector<const PostingIteratorInterface*>
-			subExpressions( bool positive) const;
 
 	virtual Index documentFrequency() const;
 

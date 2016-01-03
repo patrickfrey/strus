@@ -54,10 +54,8 @@ public:
 	}
 
 	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos_);
-
-	virtual std::vector<const PostingIteratorInterface*>
-			subExpressions( bool positive) const;
 
 	virtual Index documentFrequency() const;
 
@@ -138,6 +136,10 @@ private:
 	void setSelected( unsigned int idx)
 	{
 		m_selected |= ((uint64_t)1 << idx);
+	}
+	void unsetSelected( unsigned int idx)
+	{
+		m_selected ^= ((uint64_t)1 << idx);
 	}
 	void clearSelected()
 	{

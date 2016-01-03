@@ -55,17 +55,12 @@ public:
 
 	virtual Index skipDoc( const Index& docno_)
 	{
-		if (docno_ <= m_maxDocno)
-		{
-			if (docno_)
-			{
-				return m_docno = docno_;
-			}
-			else
-			{
-				return m_docno = 1;
-			}
-		}
+		return skipDocImpl( docno_);
+	}
+
+	virtual Index skipDocCandidate( const Index& docno_)
+	{
+		return skipDocImpl( docno_);
 	}
 
 	virtual Index skipPos( const Index& posno_)
@@ -90,6 +85,23 @@ public:
 
 	virtual Index posno() const
 	{
+		return 0;
+	}
+
+private:
+	Index skipDocImpl( const Index& docno_)
+	{
+		if (docno_ <= m_maxDocno)
+		{
+			if (docno_)
+			{
+				return m_docno = docno_;
+			}
+			else
+			{
+				return m_docno = 1;
+			}
+		}
 		return 0;
 	}
 

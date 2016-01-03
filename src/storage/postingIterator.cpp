@@ -94,6 +94,25 @@ Index PostingIterator::skipDoc( const Index& docno_)
 	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip document: %s"), *m_errorhnd, 0);
 }
 
+Index PostingIterator::skipDocCandidate( const Index& docno_)
+{
+	try
+	{
+		if (m_docno && m_docno == docno_) return m_docno;
+	
+		if (m_posinfoIterator.isCloseCandidate( docno_))
+		{
+			m_docno = m_posinfoIterator.skipDoc( docno_);
+		}
+		else
+		{
+			m_docno = m_docnoIterator.skip( docno_);
+		}
+		return m_docno;
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip document candidate: %s"), *m_errorhnd, 0);
+}
+
 Index PostingIterator::skipPos( const Index& firstpos_)
 {
 	try
