@@ -53,7 +53,8 @@ public:
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
 	virtual Index skipPos( const Index& firstpos)=0;
 
-	/// \brief Unique id in the system for a feature expression
+	/// \brief Unique id in the system for a feature expression used for debugging and tracing
+	/// \return the id string
 	virtual const char* featureid() const=0;
 
 	/// \brief Get the number of documents where the feature occurrs
