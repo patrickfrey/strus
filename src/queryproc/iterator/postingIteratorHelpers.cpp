@@ -135,7 +135,7 @@ Index strus::getFirstAllMatchDocnoSubset(
 				}
 			}
 		}
-		if (nof_matches >= cardinality && match_docno)
+		if (nof_matches >= cardinality)
 		{
 			if (!allowEmpty)
 			{

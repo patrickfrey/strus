@@ -130,7 +130,12 @@ void StorageDocument::done()
 {
 	try
 	{
-		if (!m_isNew)
+		if (m_isNew)
+		{
+			// Increment document counter
+			m_transaction->countDocument();
+		}
+		else
 		{
 			//[1.1] Delete old metadata:
 			m_transaction->deleteMetaData( m_docno);
