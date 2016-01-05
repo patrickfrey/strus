@@ -190,7 +190,7 @@ int main( int argc, const char* argv[])
 			}
 			else if (0==std::strcmp( argv[argi], "-c") || 0==std::strcmp( argv[argi], "--commit"))
 			{
-				if (argi <= argc || argv[argi+1][0] == '-')
+				if (argi == argc || argv[argi+1][0] == '-')
 				{
 					throw strus::runtime_error( _TXT("no argument given to option --commit"));
 				}

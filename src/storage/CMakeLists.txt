@@ -73,7 +73,7 @@ set_target_properties(
 )
 
 add_executable( strusResizeBlocks strusResizeBlocks.cpp )
-target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_private_utils strus_error strus_utils strus_storage_static compactnodetrie_static )
+target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_utils strus_storage_static compactnodetrie_static )
 
 # ------------------------------
 # INSTALLATION
