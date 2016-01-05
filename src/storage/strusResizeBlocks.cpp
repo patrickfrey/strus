@@ -62,6 +62,8 @@ static void printUsage()
 	std::cout << "    " << _TXT("Write logs to file <FILE>") << std::endl;
 	std::cout << "-c|--commit <N>" << std::endl;
 	std::cout << "    " << _TXT("Set <N> as number of documents inserted per transaction (default 1000)") << std::endl;
+	std::cout << "-T|--termtype <TYPE>" << std::endl;
+	std::cout << "    " << _TXT("Set <TYPE> as term type to select for resize") << std::endl;
 	std::cout << "<config>     : " << _TXT("configuration string of the key/value store database") << std::endl;
 	std::cout << "<blocktype>  : " << _TXT("storage block type. One of the following:") << std::endl;
 	std::cout << "               forwardindex:" << _TXT("forward index block type") << std::endl;
@@ -100,12 +102,17 @@ static void commitTransaction( strus::DatabaseClientInterface& database, std::au
 	}
 }
 
-static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string& blocktype, unsigned int newsize, unsigned int transactionsize)
+static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string& blocktype, const std::string& termtype, unsigned int newsize, unsigned int transactionsize)
 {
 	strus::StorageClient storage( dbc, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
 	std::auto_ptr<strus::DatabaseTransactionInterface> transaction( dbc->createTransaction());
 	unsigned int transactionidx = 0;
 	unsigned int blockcount = 0;
+	strus::Index termtypeno = 0;
+	if (!termtype.empty())
+	{
+		termtypeno = storage.getTermType( termtype);
+	}
 	if (!transaction.get())
 	{
 		throw strus::runtime_error(_TXT("failed to create storage transaction"));
@@ -120,6 +127,11 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 			fwdmap.openForwardIndexDocument( di);
 
 			strus::Index ti=1, te = storage.maxTermTypeNo()+1;
+			if (termtypeno)
+			{
+				ti = termtypeno;
+				te = termtypeno+1;
+			}
 			for (; ti<te; ++ti)
 			{
 				strus::ForwardIndexBlock blk;
@@ -179,6 +191,7 @@ int main( int argc, const char* argv[])
 		bool doExit = false;
 		int argi = 1;
 		unsigned int transactionsize = 1000;
+		std::string termtype;
 
 		// Parsing arguments:
 		for (; argi < argc; ++argi)
@@ -202,9 +215,18 @@ int main( int argc, const char* argv[])
 				++argi;
 				transactionsize = parseNumber( argv[argi], "argument for option --commit");
 			}
+			else if (0==std::strcmp( argv[argi], "-T") || 0==std::strcmp( argv[argi], "--termtype"))
+			{
+				if (argi == argc || argv[argi+1][0] == '-')
+				{
+					throw strus::runtime_error( _TXT("no argument given to option --termtype"));
+				}
+				++argi;
+				termtype = argv[ argi];
+			}
 			else if (argv[argi][0] == '-')
 			{
-				throw strus::runtime_error(_TXT("unknown option %s"), argv[argi]);
+				throw strus::runtime_error(_TXT("unknown option %s"), argv[ argi]);
 			}
 			else
 			{
@@ -225,7 +247,7 @@ int main( int argc, const char* argv[])
 		if (!dbc) throw strus::runtime_error( _TXT("could not open leveldb key/value store database"));
 		if (g_errorBuffer->hasError()) throw strus::runtime_error(_TXT("error in initialization"));
 
-		resizeBlocks( dbc, blocktype, newblocksize, transactionsize);
+		resizeBlocks( dbc, blocktype, termtype, newblocksize, transactionsize);
 
 		// Check for reported error an terminate regularly:
 		if (g_errorBuffer->hasError())
