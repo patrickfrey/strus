@@ -538,6 +538,11 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 	return rt;
 }
 
+Index StorageClient::maxTermTypeNo() const
+{
+	return m_next_termno.value() -1;
+}
+
 IndexSetIterator StorageClient::getAclIterator( const Index& docno) const
 {
 	return IndexSetIterator( m_database.get(), DatabaseKey::AclBlockPrefix, BlockKey(docno), false);
@@ -550,7 +555,7 @@ IndexSetIterator StorageClient::getUserAclIterator( const Index& userno) const
 
 Index StorageClient::nofAttributeTypes()
 {
-	return m_next_termno.value() -1;
+	return m_next_attribno.value();
 }
 
 Index StorageClient::nofDocumentsInserted() const
