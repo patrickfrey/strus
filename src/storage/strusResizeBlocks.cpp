@@ -130,7 +130,7 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 				{
 					char const* blkitr = blk.charptr();
 					const char* blkend = blk.charend();
-					while (blkitr < blkend)
+					for (; blkitr < blkend; blkitr = blk.nextItem( blkitr))
 					{
 						strus::Index pos = blk.position_at( blkitr);
 						std::string termstr = blk.value_at( blkitr);
@@ -194,7 +194,8 @@ int main( int argc, const char* argv[])
 				{
 					throw strus::runtime_error( _TXT("no argument given to option --commit"));
 				}
-				transactionsize = parseNumber( argv[argi+1], "argument for option --commit");
+				++argi;
+				transactionsize = parseNumber( argv[argi], "argument for option --commit");
 			}
 			else if (argv[argi][0] == '-')
 			{
@@ -202,7 +203,7 @@ int main( int argc, const char* argv[])
 			}
 			else
 			{
-				throw strus::runtime_error( _TXT("no arguments expected (only options)"));
+				break;
 			}
 		}
 		if (doExit) return 0;
