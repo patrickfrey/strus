@@ -105,6 +105,7 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 	strus::StorageClient storage( dbc, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
 	std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.createTransaction());
 	unsigned int transactionidx = 0;
+	unsigned int blockcount = 0;
 	if (!transaction.get())
 	{
 		throw strus::runtime_error(_TXT("failed to create storage transaction"));
@@ -139,12 +140,16 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 			}
 			if (++transactionidx == transactionsize)
 			{
+				blockcount += transactionidx;
+				::printf( "\rresized %u blocks (total %u)     ", transactionidx, blockcount);
 				commitTransaction( storage, transaction);
 				transactionidx = 0;
 			}
 		}
 		if (transactionidx)
 		{
+			blockcount += transactionidx;
+			::printf( "\rresized %u blocks (total %u)     ", transactionidx, blockcount);
 			commitTransaction( storage, transaction);
 		}
 	}
