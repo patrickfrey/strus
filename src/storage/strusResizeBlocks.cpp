@@ -112,6 +112,7 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 	if (!termtype.empty())
 	{
 		termtypeno = storage.getTermType( termtype);
+		if (termtypeno == 0) throw strus::runtime_error(_TXT("unknown term type %s"), termtype.c_str());
 	}
 	if (!transaction.get())
 	{
