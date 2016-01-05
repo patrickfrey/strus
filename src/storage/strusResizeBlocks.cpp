@@ -141,7 +141,8 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 			if (++transactionidx == transactionsize)
 			{
 				blockcount += transactionidx;
-				::printf( "\rresized %u blocks (total %u)     ", transactionidx, blockcount);
+				::printf( "\rresized %u        ", blockcount);
+				::fflush( stdout);
 				commitTransaction( storage, transaction);
 				transactionidx = 0;
 			}
@@ -149,7 +150,8 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 		if (transactionidx)
 		{
 			blockcount += transactionidx;
-			::printf( "\rresized %u blocks (total %u)     ", transactionidx, blockcount);
+			::printf( "\rresized %u        ", blockcount);
+			::fflush( stdout);
 			commitTransaction( storage, transaction);
 		}
 	}
