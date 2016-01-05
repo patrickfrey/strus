@@ -31,7 +31,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/private/fileio.hpp"
 #include "strus/versionStorage.hpp"
-#include "strus/storageTransactionInterface.hpp"
+#include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
@@ -82,7 +82,7 @@ static unsigned int parseNumber( const char* arg, const char* location)
 	return rt;
 }
 
-static void commitTransaction( strus::StorageClient& storage, std::auto_ptr<strus::StorageTransactionInterface>& transaction)
+static void commitTransaction( strus::DatabaseClientInterface& database, std::auto_ptr<strus::DatabaseTransactionInterface>& transaction)
 {
 	if (g_errorBuffer->hasError())
 	{
@@ -93,7 +93,7 @@ static void commitTransaction( strus::StorageClient& storage, std::auto_ptr<stru
 	{
 		throw strus::runtime_error(_TXT("error in storage transaction commit"));
 	}
-	transaction.reset( storage.createTransaction());
+	transaction.reset( database.createTransaction());
 	if (g_errorBuffer->hasError())
 	{
 		throw strus::runtime_error(_TXT("error creating new storage transaction"));
@@ -103,7 +103,7 @@ static void commitTransaction( strus::StorageClient& storage, std::auto_ptr<stru
 static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string& blocktype, unsigned int newsize, unsigned int transactionsize)
 {
 	strus::StorageClient storage( dbc, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
-	std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.createTransaction());
+	std::auto_ptr<strus::DatabaseTransactionInterface> transaction( dbc->createTransaction());
 	unsigned int transactionidx = 0;
 	unsigned int blockcount = 0;
 	if (!transaction.get())
@@ -140,19 +140,22 @@ static void resizeBlocks( strus::DatabaseClientInterface* dbc, const std::string
 			}
 			if (++transactionidx == transactionsize)
 			{
+				fwdmap.getWriteBatch( transaction.get());
+				commitTransaction( *dbc, transaction);
 				blockcount += transactionidx;
+				transactionidx = 0;
 				::printf( "\rresized %u        ", blockcount);
 				::fflush( stdout);
-				commitTransaction( storage, transaction);
-				transactionidx = 0;
 			}
 		}
 		if (transactionidx)
 		{
+			fwdmap.getWriteBatch( transaction.get());
+			commitTransaction( *dbc, transaction);
 			blockcount += transactionidx;
+			transactionidx = 0;
 			::printf( "\rresized %u        ", blockcount);
 			::fflush( stdout);
-			commitTransaction( storage, transaction);
 		}
 	}
 	else
