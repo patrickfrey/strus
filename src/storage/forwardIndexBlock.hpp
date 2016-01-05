@@ -42,7 +42,7 @@ class ForwardIndexBlock
 {
 public:
 	enum {
-		MaxBlockTokens=256
+		MaxBlockTokens=64
 	};
 
 public:

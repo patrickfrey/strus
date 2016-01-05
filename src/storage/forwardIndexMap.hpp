@@ -46,8 +46,8 @@ class DatabaseTransactionInterface;
 class ForwardIndexMap
 {
 public:
-	ForwardIndexMap( DatabaseClientInterface* database_, Index maxtype_)
-		:m_database(database_),m_docno(0),m_maxtype(maxtype_){}
+	ForwardIndexMap( DatabaseClientInterface* database_, Index maxtype_, unsigned int maxblocksize_=ForwardIndexBlock::MaxBlockTokens)
+		:m_database(database_),m_docno(0),m_maxtype(maxtype_),m_maxblocksize(maxblocksize_){}
 
 	void openForwardIndexDocument( const Index& docno);
 
@@ -104,6 +104,7 @@ private:
 	StringVector m_strings;
 	Index m_docno;
 	Index m_maxtype;
+	unsigned int m_maxblocksize;
 	std::vector<Index> m_deletes;
 };
 

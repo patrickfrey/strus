@@ -116,9 +116,9 @@ void ForwardIndexMap::defineForwardIndexTerm(
 	{
 		m_curblockmap[ typeno] = CurblockElemList();
 		bi = m_curblockmap.find( typeno);
+		bi->second.reserve( m_maxblocksize);
 	}
-
-	if (bi->second.size() > ForwardIndexBlock::MaxBlockTokens)
+	else if (bi->second.size() >= m_maxblocksize)
 	{
 		closeCurblock( typeno, bi->second);
 	}
