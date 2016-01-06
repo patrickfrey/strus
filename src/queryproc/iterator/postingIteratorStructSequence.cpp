@@ -91,7 +91,7 @@ Index IteratorStructSequence::skipDocCandidate( const Index& docno_)
 	m_docno = getFirstAllMatchDocno( m_argar, docno_, true/*allow empty*/);
 	if (m_docno)
 	{
-		if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
+		if (m_cut.get() && m_cut->skipDocCandidate( m_docno) == m_docno)
 		{
 			m_docno_cut = m_docno;
 		}
