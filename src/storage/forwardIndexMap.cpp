@@ -187,11 +187,19 @@ void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			dbadapter.store( transaction, m_blocklist[ ei->second]);
 		}
 	}
+
 	// [3] Clear maps:
+	clear();
+}
+
+void ForwardIndexMap::clear()
+{
 	m_map.clear();
 	m_blocklist.clear();
 	m_curblockmap.clear();
+	m_strings.clear();
 	m_docno = 0;
 	m_deletes.clear();
 }
+
 

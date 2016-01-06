@@ -64,6 +64,9 @@ public:
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
+	void clear();
+
+private:
 	struct MapKey
 	{
 		BlockKeyIndex termkey;
