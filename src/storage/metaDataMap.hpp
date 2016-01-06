@@ -65,6 +65,7 @@ public:
 
 private:
 	MetaDataRecord getRecord( Index docno);
+	void clear();
 
 private:
 	typedef std::pair<Index,Index> MetaDataKey;

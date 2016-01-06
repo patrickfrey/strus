@@ -184,7 +184,7 @@ static strus::MetaDataRecord randomMetaDataRecord(
 		valar.push_back( val);
 	}
 	std::vector<strus::ArithmeticVariant>::const_iterator vi = valar.begin(), ve = valar.end();
-	for (ci = columns.begin(); ci != ce; ++ci,++vi)
+	for (ci = columns.begin(); ci != ce && vi != ve; ++ci,++vi)
 	{
 		strus::Index eh = descr->getHandle( *ci);
 		const strus::MetaDataElement* elem = descr->get(eh);

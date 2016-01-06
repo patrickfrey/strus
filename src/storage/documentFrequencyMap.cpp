@@ -113,7 +113,8 @@ void DocumentFrequencyMap::getWriteBatch(
 			dfbatch->put( mi->first.first/*typeno*/, mi->first.second/*termno*/, mi->second);
 		}
 	}
-	m_map.clear();
+	// Clear maps:
+	clear();
 }
 
 

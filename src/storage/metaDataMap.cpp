@@ -148,7 +148,13 @@ void MetaDataMap::rewriteMetaData(
 		MetaDataBlock newblk( &newDescr, blk.blockno(), newblk_data, newblk_bytesize);
 		dbadapter.store( transaction, newblk);
 	}
+	// Clear maps:
+	clear();
 }
 
+void MetaDataMap::clear()
+{
+	m_map.clear();
+}
 
 

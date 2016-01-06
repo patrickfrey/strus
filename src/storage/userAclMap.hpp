@@ -70,6 +70,8 @@ private:
 		const Index& docno,
 		bool isMember);
 
+	void clear();
+
 public:
 	typedef std::pair<Index,Index> MapKey;
 	typedef LocalStructAllocator<std::pair<MapKey,bool> > MapAllocator;
