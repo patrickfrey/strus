@@ -11,5 +11,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testMetaDataRestrictions  testMetaDataRestrictions.cpp)
-target_link_libraries( testMetaDataRestrictions strus_queryeval_static strus_utils strus_storage_static ${Boost_LIBRARIES} ${Intl_LIBRARY})
+target_link_libraries( testMetaDataRestrictions strus_queryeval_static strus_utils strus_storage_static ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 

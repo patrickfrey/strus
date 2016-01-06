@@ -13,5 +13,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testVarSizeNodeTree testVarSizeNodeTree.cpp)
-target_link_libraries( testVarSizeNodeTree strus_utils strus_private_utils strus_storage_static compactnodetrie_static ${Boost_LIBRARIES} ${Intl_LIBRARY} )
+target_link_libraries( testVarSizeNodeTree strus_utils strus_private_utils strus_storage_static compactnodetrie_static ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
 

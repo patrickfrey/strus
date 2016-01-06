@@ -12,5 +12,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testStatisticsProcessor testStatisticsProcessor.cpp)
-target_link_libraries( testStatisticsProcessor strus_error strus_statsproc strus_utils ${Boost_LIBRARIES} ${Intl_LIBRARY} )
+target_link_libraries( testStatisticsProcessor strus_error strus_statsproc strus_utils ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
 

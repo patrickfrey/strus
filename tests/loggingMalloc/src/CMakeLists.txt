@@ -11,5 +11,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testLoggingMalloc testLoggingMalloc.cpp )
-target_link_libraries( testLoggingMalloc ${CMAKE_DL_LIBS} strus_utils strus_private_utils ${Boost_LIBRARIES} ${Intl_LIBRARY} )
+target_link_libraries( testLoggingMalloc ${CMAKE_DL_LIBS} strus_utils strus_private_utils ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
 

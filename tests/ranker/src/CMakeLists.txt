@@ -11,5 +11,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testRanker testRanker.cpp)
-target_link_libraries( testRanker boost_system strus_utils strus_queryeval_static ${Boost_LIBRARIES} ${Intl_LIBRARY})
+target_link_libraries( testRanker boost_system strus_utils strus_queryeval_static ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 
