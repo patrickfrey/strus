@@ -58,6 +58,9 @@ public:
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
 private:
+	void clear();
+
+private:
 	typedef LocalStructAllocator<std::pair<BlockKeyIndex,const char*> > MapAllocator;
 	typedef std::less<BlockKeyIndex> MapCompare;
 	typedef std::map<BlockKeyIndex,const char*,MapCompare,MapAllocator> Map;

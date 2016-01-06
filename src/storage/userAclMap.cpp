@@ -188,7 +188,6 @@ static void defineRangeElement(
 	}
 }
 
-
 void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 {
 	std::vector<Index>::const_iterator di = m_usr_deletes.begin(), de = m_usr_deletes.end();
@@ -253,8 +252,16 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		// [2] Write the new blocks that could not be merged into existing ones:
 		BooleanBlockBatchWrite::insertNewElements( &dbadapter_acl, ri, re, newblk, lastInsertBlockId, transaction);
 	}
+	// Clear maps:
+	clear();
+}
+
+void UserAclMap::clear()
+{
 	m_usrmap.clear();
 	m_aclmap.clear();
+	m_usr_deletes.clear();
+	m_acl_deletes.clear();
 }
 
 

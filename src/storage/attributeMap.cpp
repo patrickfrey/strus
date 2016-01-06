@@ -119,7 +119,14 @@ void AttributeMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 				transaction, key.elem(1), key.elem(2),
 				mi->second);
 	}
-	m_map.clear();
+	// Clear maps:
+	clear();
 }
 
+void AttributeMap::clear()
+{
+	m_map.clear();
+	m_strings.clear();
+	m_deletes.clear();
+}
 

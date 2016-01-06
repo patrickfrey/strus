@@ -130,6 +130,7 @@ public:/*Document*/
 		const Index& typeno, const Index& pos, const std::string& termstring);
 
 	void closeForwardIndexDocument();
+	void countDocument();
 
 private:
 	StorageClient* m_storage;				///< Storage to call refresh after commit or rollback

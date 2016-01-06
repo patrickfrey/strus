@@ -60,8 +60,6 @@ class BooleanBlock;
 class InvTermBlock;
 /// \brief Forward declaration
 class DataBlock;
-/// \brief Forward declaration
-class ForwardIndexBlock;
 
 struct DatabaseAdapter_StringIndex
 {

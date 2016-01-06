@@ -113,8 +113,8 @@ void KeyMap::getWriteBatch(
 		m_dbadapter.remove( transaction, *di);
 	}
 
-	m_map.clear();
-	m_overflowmap.clear();
+	// Clear maps:
+	clear();
 }
 
 void KeyMap::getWriteBatch(
@@ -158,8 +158,16 @@ void KeyMap::getWriteBatch(
 		m_dbadapter.remove( transaction, *di);
 	}
 
+	// Clear maps:
+	clear();
+}
+
+void KeyMap::clear()
+{
 	m_map.clear();
 	m_overflowmap.clear();
+	m_unknownHandleCount = 0;
+	m_deletedlist.clear();
 }
 
 

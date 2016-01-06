@@ -206,6 +206,9 @@ public:/*StatisticsIterator*/
 	///\brief Fetch a message from a storage update transaction
 	bool fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize);
 
+public:/*strusResizeBlocks*/
+	Index maxTermTypeNo() const;
+
 private:
 	void cleanup();
 	void loadTermnoMap( const char* termnomap_source);

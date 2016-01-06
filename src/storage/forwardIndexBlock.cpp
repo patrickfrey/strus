@@ -90,7 +90,7 @@ void ForwardIndexBlock::append( const Index& pos, const std::string& item)
 	char const* pp = prevItem( charend());
 	if (pp && position_at( pp) >= pos)
 	{
-		throw strus::runtime_error( _TXT( "forward index items not added in strictly ascending position order"));
+		throw strus::runtime_error( _TXT( "forward index items not added in strictly ascending position order: %u after %u"), pos, position_at( pp));
 	}
 	if (id() < pos)
 	{

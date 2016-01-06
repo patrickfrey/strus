@@ -94,6 +94,9 @@ public:
 	}
 
 private:
+	void clear();
+
+private:
 	enum {
 		UnknownValueHandleStart=(1<<30)
 	};
