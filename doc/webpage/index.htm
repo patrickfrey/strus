@@ -89,6 +89,18 @@
 		<h3>News</h3>
 		<table>
 		<tr>
+		<td><p class="timestamp">Jan 7th, 2016</p></td>
+		<td><p class="newstext">
+		Rewrote the summarizer for accumulating variables used for example in the NBLNK search of
+		the wikipedia demo. The NBLNK search got now usable, only 2 or 3 times slower than the
+		BM25 search plus abstracting. The old implementation was accessing the storage too often.
+		Reduced the forward index size of the wikipedia demo. On many systems this would speed up
+		the performance significantly. Unfortunately this slowed down
+		the BM25 search on the demo system, presumably due to higher seek times on
+		SATA disks. Obviously block sizes should be configurable depending on the hardware used.
+		</td>
+		</tr>
+		<tr>
 		<td><p class="timestamp">Jan 2th, 2016</p></td>
 		<td><p class="newstext">
 		Some significant improvements in reducing the access of datablocks in the query.
