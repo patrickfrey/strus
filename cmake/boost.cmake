@@ -5,3 +5,7 @@ if( Boost_ATOMIC_FOUND )
 else()
 	find_package( Boost 1.53.0 REQUIRED COMPONENTS thread system date_time)
 endif()
+
+MESSAGE( STATUS "Boost includes: ${Boost_INCLUDE_DIRS}" )
+MESSAGE( STATUS "Boost library directories: ${Boost_LIBRARY_DIRS}" )
+MESSAGE( STATUS "Boost libraries: ${Boost_LIBRARIES}" )
