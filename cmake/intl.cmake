@@ -16,7 +16,12 @@ if(HAS_MODULE_Intl)
   if(FOUND_Intl)
     MESSAGE( STATUS  "libintl found." )
   endif()
-  MESSAGE( STATUS "libintl libraries: ${Intl_LIBRARIES}" )
+else()
+  # avoid having empty directory warnings, include /usr/include should not harm too much for now
+  set(Intl_INCLUDE_DIRS "/usr/include")
 endif()
+
+MESSAGE( STATUS "libintl include: ${Intl_INCLUDE_DIRS}" )
+MESSAGE( STATUS "libintl libraries: ${Intl_LIBRARIES}" )
 
 find_package(Gettext REQUIRED)
