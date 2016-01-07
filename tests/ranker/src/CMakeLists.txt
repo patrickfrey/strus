@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
+	"${Intl_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/src/storage"
 	"${PROJECT_SOURCE_DIR}/src/queryeval"
 	"${PROJECT_SOURCE_DIR}/include" )
@@ -10,5 +11,5 @@ link_directories(
 	"${Boost_LIBRARY_DIRS}" )
 
 add_executable( testRanker testRanker.cpp)
-target_link_libraries( testRanker boost_system strus_utils strus_queryeval_static)
+target_link_libraries( testRanker boost_system strus_utils strus_queryeval_static ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 
