@@ -289,6 +289,7 @@ make test
 %{_libdir}/%{name}/libstrus_statsproc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_sysconfdir}/ld.so.conf.d/%{name}.conf
 
+
 %files devel
 %defattr( -, root, root )
 %{_libdir}/%{name}/libstrus_database_leveldb.so
@@ -307,6 +308,8 @@ make test
 %dir %{_includedir}/%{name}/private
 %{_includedir}/%{name}/private/*.hpp
 %{_includedir}/%{name}/private/*.h
+# temporary
+%{_bindir}/strusResizeBlocks
 
 %changelog
 * Sat Jan 2 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.4.0-0.1

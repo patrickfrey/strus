@@ -32,6 +32,7 @@
 #define _STRUS_POSTING_JOIN_OPERATOR_INTERFACE_HPP_INCLUDED
 #include "strus/reference.hpp"
 #include <vector>
+#include <string>
 
 namespace strus
 {

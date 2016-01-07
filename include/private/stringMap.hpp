@@ -33,6 +33,7 @@
 #include <map>
 #include <list>
 #include <vector>
+#include <string>
 #include <cstring>
 
 namespace strus
@@ -118,7 +119,7 @@ class StringMap
 private:
 	struct MapKeyCompare
 	{
-		bool operator()( char const *a, char const *b)
+		bool operator()( char const *a, char const *b) const
 		{
 			return std::strcmp( a, b) < 0;
 		}

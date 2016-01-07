@@ -31,7 +31,7 @@
 #ifndef _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #define _STRUS_LVDB_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
 #include <cstring>
-#include <cstdio>
+#include <stdio.h>
 #include <limits>
 
 namespace strus {
@@ -97,9 +97,9 @@ public:
 			switch (val.type)
 			{
 				case Null: break;
-				case Int: std::snprintf( m_buf, sizeof(m_buf), "%d", val.variant.Int); return;
-				case UInt: std::snprintf( m_buf, sizeof(m_buf), "%u", val.variant.UInt); return;
-				case Float: std::snprintf( m_buf, sizeof(m_buf), "%.5f", val.variant.Float); return;
+				case Int: snprintf( m_buf, sizeof(m_buf), "%d", val.variant.Int); return;
+				case UInt: snprintf( m_buf, sizeof(m_buf), "%u", val.variant.UInt); return;
+				case Float: snprintf( m_buf, sizeof(m_buf), "%.5f", val.variant.Float); return;
 			}
 			m_buf[0] = '\0';
 		}
@@ -136,17 +136,17 @@ public:
 		{
 			for (++si; *si >= '0' && *si <= '9'; ++si){}
 			if (*si) return false;
-			std::sscanf( src, "%lf", &variant.Float);
+			sscanf( src, "%lf", &variant.Float);
 			type = Float;
 		}
 		else if (sign_)
 		{
-			std::sscanf( src, "%d", &variant.Int);
+			sscanf( src, "%d", &variant.Int);
 			type = Int;
 		}
 		else
 		{
-			std::sscanf( src, "%u", &variant.UInt);
+			sscanf( src, "%u", &variant.UInt);
 			type = UInt;
 		}
 		return true;
