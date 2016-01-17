@@ -33,6 +33,7 @@
 #include <libintl.h>
 #include <locale.h>
 #include <cstdarg>
+#include <string>
 
 #define STRUS_GETTEXT_PACKAGE		"@STRUS_GETTEXT_PACKAGE@"
 #define STRUS_GETTEXT_LOCALEDIR		"@STRUS_GETTEXT_LOCALEDIR@"

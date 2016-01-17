@@ -116,9 +116,9 @@ void ForwardIndexMap::defineForwardIndexTerm(
 	{
 		m_curblockmap[ typeno] = CurblockElemList();
 		bi = m_curblockmap.find( typeno);
+		bi->second.reserve( m_maxblocksize);
 	}
-
-	if (bi->second.size() > ForwardIndexBlock::MaxBlockTokens)
+	else if (bi->second.size() >= m_maxblocksize)
 	{
 		closeCurblock( typeno, bi->second);
 	}
@@ -187,11 +187,19 @@ void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			dbadapter.store( transaction, m_blocklist[ ei->second]);
 		}
 	}
+
 	// [3] Clear maps:
+	clear();
+}
+
+void ForwardIndexMap::clear()
+{
 	m_map.clear();
 	m_blocklist.clear();
 	m_curblockmap.clear();
+	m_strings.clear();
 	m_docno = 0;
 	m_deletes.clear();
 }
+
 

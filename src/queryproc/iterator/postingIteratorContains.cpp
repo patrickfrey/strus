@@ -101,7 +101,7 @@ Index IteratorContains::documentFrequency() const
 		if (ai == ae) return 0;
 
 		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
+		for (++ai; ai != ae; ++ai)
 		{
 			Index df = (*ai)->documentFrequency();
 			if (df < m_documentFrequency)

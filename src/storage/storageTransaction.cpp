@@ -189,7 +189,10 @@ void StorageTransaction::closeForwardIndexDocument()
 	m_forwardIndexMap.closeForwardIndexDocument();
 }
 
-
+void StorageTransaction::countDocument()
+{
+	m_nof_documents += 1;
+}
 
 void StorageTransaction::deleteIndex( const Index& docno)
 {
@@ -245,7 +248,6 @@ StorageDocumentInterface*
 	{
 		bool isNew;
 		Index dn = m_docIdMap.getOrCreate( docid, isNew);
-		if (isNew) m_nof_documents += 1;
 		return new StorageDocument( this, docid, dn, isNew, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document in transaction: %s"), *m_errorhnd, 0);

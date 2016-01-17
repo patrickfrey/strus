@@ -91,7 +91,7 @@ Index IteratorStructSequence::skipDocCandidate( const Index& docno_)
 	m_docno = getFirstAllMatchDocno( m_argar, docno_, true/*allow empty*/);
 	if (m_docno)
 	{
-		if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
+		if (m_cut.get() && m_cut->skipDocCandidate( m_docno) == m_docno)
 		{
 			m_docno_cut = m_docno;
 		}
@@ -260,7 +260,7 @@ Index IteratorStructSequence::documentFrequency() const
 		if (ai == ae) return 0;
 
 		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae && m_documentFrequency < 0; ++ai)
+		for (++ai; ai != ae; ++ai)
 		{
 			Index df = (*ai)->documentFrequency();
 			if (df < m_documentFrequency)

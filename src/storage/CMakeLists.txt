@@ -46,6 +46,7 @@ set( libstrus_storage_source_files
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
+	"${Intl_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/include"
 	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include"  )
 link_directories(
@@ -72,10 +73,16 @@ set_target_properties(
     VERSION ${STRUS_VERSION}
 )
 
+add_executable( strusResizeBlocks strusResizeBlocks.cpp )
+target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_utils strus_storage_static compactnodetrie_static ${Intl_LIBRARIES})
+
 # ------------------------------
 # INSTALLATION
 # ------------------------------
 install( TARGETS strus_storage
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus
+	   RUNTIME DESTINATION bin )
+
+install( TARGETS strusResizeBlocks
 	   RUNTIME DESTINATION bin )
 

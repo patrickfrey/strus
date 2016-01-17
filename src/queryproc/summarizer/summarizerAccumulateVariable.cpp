@@ -113,11 +113,6 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 }
 
 
-static void clearSelected( uint64_t& set, unsigned int idx)
-{
-	set &= ~((uint64_t)1 << idx);
-}
-
 static void setSelected( uint64_t& set, unsigned int idx)
 {
 	set |= ((uint64_t)1 << idx);
@@ -144,7 +139,6 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		uint64_t docsel = 0;
 
 		m_forwardindex->skipDoc( docno);
-		Index curpos = 0;
 
 		// Build a bitmap with all matching documents:
 		std::vector<SummarizationFeature>::const_iterator
@@ -152,88 +146,42 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		unsigned int fidx=0;
 		for (; fi != fe; ++fi,++fidx)
 		{
-			if (docno==fi->itr->skipDoc( docno))
+			if (docno==fi->itr->skipDocCandidate( docno))
 			{
 				setSelected( docsel, fidx);
 			}
 		}
-		// Find out first match position to start with:
-		for (fidx = 0, fi = m_features.begin(); fi != fe; ++fi,++fidx)
-		{
-			if (docno==fi->itr->skipDoc( docno))
-			{
-				Index dn = fi->itr->skipPos( curpos);
-				if (dn)
-				{
-					setSelected( docsel, fidx);
-					if (curpos == 0 || dn < curpos)
-					{
-						curpos = dn;
-					}
-				}
-			}
-		}
 		// For every match position multiply the weights for each position and add them 
 		// to the final accumulation result:
-		PosWeightMap totalmap;
-		while (curpos)
+		PosWeightMap posWeightMap;
+		uint64_t docselitr = docsel;
+		int idx = 0;
+		while (0<=(idx=nextSelected( docselitr)))
 		{
-			Index nextpos = 0;
-			PosWeightMap curmap;
-			uint64_t docselitr = docsel;
-			int idx = 0;
-			while (0<=(idx=nextSelected( docselitr)))
+			const SummarizationFeature& sumfeat = m_features[ idx];
+			Index curpos = sumfeat.itr->skipPos( 0);
+			for (; curpos; curpos = sumfeat.itr->skipPos( curpos+1))
 			{
-				const SummarizationFeature& sumfeat = m_features[ idx];
-				Index np = sumfeat.itr->skipPos( curpos);
-				if (!np)
+				PosWeightMap::iterator wi = posWeightMap.find( curpos);
+				if (wi == posWeightMap.end())
 				{
-					clearSelected( docsel, idx);
-					continue;
+					posWeightMap[ curpos] = sumfeat.weight;
 				}
-				if (np == curpos)
+				else
 				{
-					std::vector<const PostingIteratorInterface*>::const_iterator
-						vi = sumfeat.varitr.begin(), ve = sumfeat.varitr.end();
-					for (; vi != ve; ++vi)
-					{
-						Index pos = (*vi)->posno();
-						PosWeightMap::iterator mi = curmap.find( pos);
-						if (mi == curmap.end())
-						{
-							curmap[ pos] = sumfeat.weight;
-						}
-						else
-						{
-							curmap[ pos] *= sumfeat.weight;
-						}
-					}
-					if (!nextpos)
-					{
-						nextpos = sumfeat.itr->skipPos( curpos+1);
-					}
-				}
-				else if (nextpos == 0 || np < nextpos)
-				{
-					nextpos = np;
+					wi->second *= sumfeat.weight;
 				}
 			}
-			PosWeightMap::const_iterator ci = curmap.begin(), ce = curmap.end();
-			for (; ci != ce; ++ci)
-			{
-				totalmap[ ci->first] += ci->second;
-			}
-			curpos = nextpos;
 		}
 		// Build the accumulation result:
 		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
-		PosWeightMap::const_iterator ti = totalmap.begin(), te = totalmap.end();
-		if (m_maxNofElements < totalmap.size())
+		PosWeightMap::const_iterator wi = posWeightMap.begin(), we = posWeightMap.end();
+		if (m_maxNofElements < posWeightMap.size())
 		{
 			Ranker ranker( m_maxNofElements);
-			for (; ti != te; ++ti)
+			for (; wi != we; ++wi)
 			{
-				ranker.insert( ti->second, ti->first);
+				ranker.insert( wi->second, wi->first);
 			}
 			std::vector<Ranker::Element> ranklist = ranker.result();
 			std::vector<Ranker::Element>::const_iterator ri = ranklist.begin(), re = ranklist.end();
@@ -248,12 +196,12 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		}
 		else
 		{
-			for (; ti != te; ++ti)
+			for (; wi != we; ++wi)
 			{
-				if (m_forwardindex->skipPos( ti->first) == ti->first)
+				if (m_forwardindex->skipPos( wi->first) == wi->first)
 				{
 					rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
-							m_forwardindex->fetch(), ti->second));
+							m_forwardindex->fetch(), wi->second));
 				}
 			}
 		}

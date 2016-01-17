@@ -196,7 +196,7 @@ class DatabaseBackupCursor
 {
 public:
 	DatabaseBackupCursor( leveldb::DB* db_, ErrorBufferInterface* errorhnd_)
-		:DatabaseCursor( db_, false, true, m_errorhnd),m_errorhnd(errorhnd_){}
+		:DatabaseCursor( db_, false, true, errorhnd_),m_errorhnd(errorhnd_){}
 
 	virtual bool fetch(
 			const char*& key,

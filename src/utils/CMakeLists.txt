@@ -29,9 +29,9 @@ link_directories(
 # Library with some helper functions used by strus libraries and programs but not part of the public interface
 # -------------------------------------------
 add_library( strus_private_utils STATIC ${libstrus_private_utils_source_files} )
-target_link_libraries( strus_private_utils  "${Boost_LIBRARIES}" )
+target_link_libraries( strus_private_utils ${Boost_LIBRARIES} )
 add_library( strus_utils SHARED ${libstrus_shared_utils_source_files} )
-target_link_libraries( strus_utils  "${Boost_LIBRARIES}"  strus_private_utils )
+target_link_libraries( strus_utils ${Boost_LIBRARIES} strus_private_utils )
 set_target_properties(
     strus_utils
     PROPERTIES
@@ -41,7 +41,7 @@ set_target_properties(
 )
 
 add_library( strus_malloc_unreliable SHARED unreliableMalloc.c )
-target_link_libraries( strus_malloc_unreliable  dl )
+target_link_libraries( strus_malloc_unreliable ${CMAKE_DL_LIBS} )
 set_target_properties(
     strus_malloc_unreliable
     PROPERTIES
@@ -51,7 +51,7 @@ set_target_properties(
 )
 
 add_library( strus_malloc_logging SHARED loggingMalloc.c snprintf.c )
-target_link_libraries( strus_malloc_logging  dl )
+target_link_libraries( strus_malloc_logging ${CMAKE_DL_LIBS} )
 set_target_properties(
     strus_malloc_logging
     PROPERTIES
