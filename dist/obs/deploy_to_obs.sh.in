@@ -4,9 +4,24 @@ PACKAGE_NAME=strus
 PACKAGE_VERSION=@STRUS_VERSION@
 OSC_HOME=$HOME/home:PatrickFrey/$PACKAGE_NAME
 
-rm -f ${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz
-cmake .
-make dist-gz
+TMPDIR=/tmp
+
+if test "x$1" = "xtest"; then
+	rm -f ${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz
+	rm -rf $TMPDIR/${PACKAGE_NAME}-${PACKAGE_VERSION}
+	cmake .
+	mkdir -p $TMPDIR/${PACKAGE_NAME}-${PACKAGE_VERSION}
+	cp -R * $TMPDIR/${PACKAGE_NAME}-${PACKAGE_VERSION}
+	OLDDIR=$PWD
+	cd $TMPDIR
+	( cd ${PACKAGE_NAME}-${PACKAGE_VERSION} && make clean distclean )
+	tar zcf $TMPDIR/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz ${PACKAGE_NAME}-${PACKAGE_VERSION}
+	cd $OLDDIR
+	mv -f $TMPDIR/${PACKAGE_NAME}-${PACKAGE_VERSION}.tar.gz .
+	rm -rf $TMPDIR/${PACKAGE_NAME}-${PACKAGE_VERSION}
+else
+	make dist-gz
+fi
 
 # git commit count since last tagging is used for a build number of
 # the package to make individual builds distinguishable

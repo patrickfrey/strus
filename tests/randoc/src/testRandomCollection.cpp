@@ -56,6 +56,7 @@
 #include <algorithm>
 #include <limits>
 #include <cstdarg>
+#include <stdio.h>
 #include <memory>
 #include <stdint.h>
 
@@ -244,7 +245,7 @@ struct RandomDoc
 	{
 		const char* docid_formatstring = getDocIdFormatString( nofDocs_);
 		char docidstr[ 64];
-		std::snprintf( docidstr, sizeof(docidstr), docid_formatstring, docid_);
+		snprintf( docidstr, sizeof(docidstr), docid_formatstring, docid_);
 		docid.append( docidstr);
 
 		unsigned int posidx = 1;

@@ -32,6 +32,7 @@
 #define _STRUS_REFERENCE_HPP_INCLUDED
 #include <cstdlib>
 #include <stdexcept>
+#include <new>
 
 namespace strus
 {
