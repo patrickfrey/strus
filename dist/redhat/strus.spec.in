@@ -309,6 +309,10 @@ make test
 %{_includedir}/%{name}/private/*.h
 
 %changelog
+* Sun Jan 17 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.4.1-0.1
+- change default forward index block size to 128
+- fix typos in src license reference
+
 * Sat Jan 2 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.4.0-0.1
 - changed posting iterator interface: new method skipDocCandidate that does what skipDoc was doing before and method skipDoc that always delivers a real match and not only a candidate, removed obsolete method subExpressions
 

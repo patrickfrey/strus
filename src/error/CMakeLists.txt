@@ -22,7 +22,7 @@ link_directories(
 # LIBRARY
 # -------------------------------------------
 add_library( strus_error SHARED ${source_files} libstrus_error.cpp )
-target_link_libraries( strus_error strus_private_utils )
+target_link_libraries( strus_error strus_private_utils strus_utils )
 
 set_target_properties(
     strus_error
