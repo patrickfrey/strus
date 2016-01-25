@@ -50,6 +50,8 @@ FunctionMap::FunctionMap()
 	defineBinaryFunction( "+", &binaryFunction_plus);
 	defineBinaryFunction( "*", &binaryFunction_mul);
 	defineBinaryFunction( "/", &binaryFunction_div);
+	defineWeightingFunction( "minwinsize", &weightingFunction_minwinsize);
+	defineWeightingFunction( "minwinpos", &weightingFunction_minwinpos);
 }
 
 FormulaInterpreter::IteratorSpec FunctionMap::dimMap( void* ctx, const char* type)
@@ -141,6 +143,18 @@ double FunctionMap::binaryFunction_mul( double arg1, double arg2)
 double FunctionMap::binaryFunction_div( double arg1, double arg2)
 {
 	return arg1 / arg2;
+}
+
+double FunctionMap::weightingFunction_minwinsize( void* ctx, int typeidx, int range, int cardinality)
+{
+	// Code for min window size calculation
+	return 0.0;
+}
+
+double FunctionMap::weightingFunction_minwinpos( void* ctx, int typeidx, int range, int cardinality)
+{
+	// Code for min window first position calculation
+	return 0.0;
 }
 
 

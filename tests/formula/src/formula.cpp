@@ -107,6 +107,7 @@ public:
 		defineBinaryFunction( "+", &binaryFunction_plus);
 		defineBinaryFunction( "*", &binaryFunction_mul);
 		defineBinaryFunction( "/", &binaryFunction_div);
+		defineWeightingFunction( "minwin", weightingFunction_minwin);
 	}
 
 private:
@@ -160,6 +161,13 @@ private:
 	static double binaryFunction_div( double arg1, double arg2)
 	{
 		return arg1 / arg2;
+	}
+	static double weightingFunction_minwin( void* ctx, int typeidx, int range, int cardinality)
+	{
+		Context* THIS = (Context*)ctx;
+		if (typeidx < 0) return std::numeric_limits<double>::quiet_NaN();
+		int size = THIS->m_features[ typeidx].size();
+		return (double)(size + range * 2) / (double)cardinality;
 	}
 };
 
@@ -285,6 +293,13 @@ static Test tests[] =
 		{{"stemmed",1.1,1.2},{"stemmed",2.1,2.2},{"unstemmed",3.1,3.2},{0,0.0,0.0}},
 		{0.0},
 		6.42
+	},
+	{
+		"min win parameter passing [1]",
+		"minwin( stemmed, 17, 32)",
+		{{"stemmed",1.1,1.2},{"stemmed",2.1,2.2},{"unstemmed",3.1,3.2},{0,0.0,0.0}},
+		{0.0},
+		1.125
 	},
 	{0,0,{{0,0.0,0.0}},{0.0},0.0}
 };

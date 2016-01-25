@@ -70,6 +70,8 @@ public:
 	static double binaryFunction_plus( double arg1, double arg2);
 	static double binaryFunction_mul( double arg1, double arg2);
 	static double binaryFunction_div( double arg1, double arg2);
+	static double weightingFunction_minwinsize( void* ctx, int typeidx, int range, int cardinality);
+	static double weightingFunction_minwinpos( void* ctx, int typeidx, int range, int cardinality);
 };
 
 /// \class WeightingFunctionContextFormula
