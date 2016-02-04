@@ -293,7 +293,7 @@ void FormulaInterpreter::parseFunctionCall( const FunctionMap& functionMap, cons
 
 void FormulaInterpreter::parseWeightingFunctionCall( const FunctionMap& functionMap, WeightingFunction func, std::string::const_iterator& si, const std::string::const_iterator& se)
 {
-	++si; skipSpaces( si, se);
+	skipSpaces( si, se);
 	if (si != se && isAlpha( *si))
 	{
 		std::string typestr = parseIdentifier( si, se);
