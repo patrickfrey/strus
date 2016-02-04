@@ -104,6 +104,11 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 	}
 }
 
+void SummarizerFunctionInstanceAttribute::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+}
+
 std::string SummarizerFunctionInstanceAttribute::tostring() const
 {
 	try

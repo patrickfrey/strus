@@ -107,6 +107,11 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), "metadata", *m_errorhnd);
 }
 
+void WeightingFunctionInstanceMetadata::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "metadata", name.c_str());
+}
+
 WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface* metadata_,

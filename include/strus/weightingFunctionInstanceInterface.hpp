@@ -63,6 +63,11 @@ public:
 	/// \param[in] value parameter value
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value)=0;
 
+	/// \brief Add a named boolean value parameter
+	/// \param[in] name parameter name
+	/// \param[in] value parameter value
+	virtual void addBooleanParameter( const std::string& name, const bool& value)=0;
+
 	/// \brief Create an execution context for this weighting function instance
 	/// \param[in] storage_ storage reference for retrieving some statistics (like the document collection frequency)
 	/// \param[in] metadata meta data interface

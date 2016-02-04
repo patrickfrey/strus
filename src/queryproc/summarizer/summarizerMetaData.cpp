@@ -100,6 +100,11 @@ void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string&
 	}
 }
 
+void SummarizerFunctionInstanceMetaData::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
+}
+
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface* metadata,

@@ -177,6 +177,11 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 	}
 }
 
+void WeightingFunctionInstanceBM25::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "BM25", name.c_str());
+}
+
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunctionContext(
 		const StorageClientInterface* storage_,
