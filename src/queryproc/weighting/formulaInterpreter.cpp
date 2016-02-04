@@ -760,7 +760,7 @@ double FormulaInterpreter::run( void* ctx) const
 					}
 					else
 					{
-						throw strus::runtime_error(_TXT("referenced unknown feature type in weighting function"));
+						throw strus::runtime_error(_TXT("referenced unknown feature type '%s' in weighting function"), m_strings.c_str() + typenameidx);
 					}
 				}
 
