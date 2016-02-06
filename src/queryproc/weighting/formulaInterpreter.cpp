@@ -101,6 +101,33 @@ const std::string& FormulaInterpreter::FunctionMap::getBinaryFunctionName( Binar
 	return ni->second;
 }
 
+void FormulaInterpreter::FunctionMap::defineWeightingFunction( const std::string& name, FormulaInterpreter::WeightingFunction func)
+{
+	m_weightingfuncmap[ lowercase(name)] = func;
+	m_namemap[ (uintptr_t)func] = name;
+}
+
+FormulaInterpreter::WeightingFunction FormulaInterpreter::FunctionMap::getWeightingFunction( const std::string& name) const
+{
+	std::map<std::string,WeightingFunction>::const_iterator vi = m_weightingfuncmap.find( name);
+	if (vi == m_weightingfuncmap.end()) throw strus::runtime_error(_TXT( "binary function '%s' not defined"), name.c_str());
+	return vi->second;
+}
+
+FormulaInterpreter::WeightingFunction FormulaInterpreter::FunctionMap::findWeightingFunction( const std::string& name) const
+{
+	std::map<std::string,WeightingFunction>::const_iterator vi = m_weightingfuncmap.find( name);
+	if (vi == m_weightingfuncmap.end()) return 0;
+	return vi->second;
+}
+
+const std::string& FormulaInterpreter::FunctionMap::getWeightingFunctionName( WeightingFunction func) const
+{
+	std::map<uintptr_t,std::string>::const_iterator ni = m_namemap.find( (uintptr_t)func);
+	if (ni == m_namemap.end()) throw strus::runtime_error(_TXT("name of binary function not defined"));
+	return ni->second;
+}
+
 FormulaInterpreter::IteratorMap FormulaInterpreter::FunctionMap::getIteratorMap() const
 {
 	return m_iteratorMap;
@@ -129,6 +156,13 @@ std::string FormulaInterpreter::FunctionMap::tostring() const
 	{
 		if (bidx) rt.append( " ");
 		rt.append( bi->first);
+	}
+	rt.append( "\nweighting functions: ");
+	std::map<std::string,WeightingFunction>::const_iterator wi = m_weightingfuncmap.begin(), we = m_weightingfuncmap.end();
+	for (int widx=0; wi != we; ++wi,++widx)
+	{
+		if (widx) rt.append( " ");
+		rt.append( wi->first);
 	}
 	rt.append("\n");
 	return rt;
@@ -226,27 +260,69 @@ unsigned int FormulaInterpreter::allocVariable( const std::string& name)
 
 void FormulaInterpreter::parseFunctionCall( const FunctionMap& functionMap, const std::string& funcname, std::string::const_iterator& si, const std::string::const_iterator& se)
 {
-	unsigned int nofargs = parseSubExpression( functionMap, si, se, ')');
-	if (nofargs == 0)
+	WeightingFunction wfunc = functionMap.findWeightingFunction( funcname);
+	if (wfunc)
 	{
-		VariableMap vm = functionMap.getVariableMap( funcname);
-		m_program.push_back( OpStruct( OpPushVar, (int)m_variablear.size()));
-		m_variablear.push_back( vm);
-	}
-	else if (nofargs == 1)
-	{
-		UnaryFunction func = functionMap.getUnaryFunction( funcname);
-		m_program.push_back( OpStruct( OpUnaryFunction, func));
-	}
-	else if (nofargs == 2)
-	{
-		BinaryFunction func = functionMap.getBinaryFunction( funcname);
-		m_program.push_back( OpStruct( OpBinaryFunction, func));
+		parseWeightingFunctionCall( functionMap, wfunc, si, se);
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "too many arguments for function '%s'"), funcname.c_str());
+		unsigned int nofargs = parseSubExpression( functionMap, si, se, ')');
+		if (nofargs == 0)
+		{
+			VariableMap vm = functionMap.getVariableMap( funcname);
+			m_program.push_back( OpStruct( OpPushVar, (int)m_variablear.size()));
+			m_variablear.push_back( vm);
+		}
+		else if (nofargs == 1)
+		{
+			UnaryFunction func = functionMap.getUnaryFunction( funcname);
+			m_program.push_back( OpStruct( OpUnaryFunction, func));
+		}
+		else if (nofargs == 2)
+		{
+			BinaryFunction func = functionMap.getBinaryFunction( funcname);
+			m_program.push_back( OpStruct( OpBinaryFunction, func));
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT( "too many arguments for function '%s'"), funcname.c_str());
+		}
 	}
+}
+
+void FormulaInterpreter::parseWeightingFunctionCall( const FunctionMap& functionMap, WeightingFunction func, std::string::const_iterator& si, const std::string::const_iterator& se)
+{
+	skipSpaces( si, se);
+	if (si != se && isAlpha( *si))
+	{
+		std::string typestr = parseIdentifier( si, se);
+		m_program.push_back( OpStruct( OpPushConst, (double)allocVariable( typestr)));
+		if (si == se || *si != ',') strus::runtime_error( _TXT( "unexpected end of expression (comma ',' expected in argument list)"));
+		++si; skipSpaces( si, se);
+	}
+	else
+	{
+		m_program.push_back( OpStruct( OpPushConst, -1));
+	}
+	unsigned int nofargs = parseSubExpression( functionMap, si, se, ')');
+	if (nofargs == 0)
+	{
+		m_program.push_back( OpStruct( OpPushConst, (double)0)); /*range*/
+		m_program.push_back( OpStruct( OpPushConst, (double)0)); /*cardinality*/
+	}
+	else if (nofargs == 1)
+	{
+		m_program.push_back( OpStruct( OpPushConst, (double)0)); /*cardinality*/
+	}
+	else if (nofargs == 2)
+	{
+	}
+	else
+	{
+		throw strus::runtime_error( _TXT( "too many arguments for function '%s'"), functionMap.getWeightingFunctionName( func).c_str());
+	}
+	m_program.push_back( OpStruct( OpWeightingFunction, func));
 }
 
 void FormulaInterpreter::parseVariableExpression( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se)
@@ -669,6 +745,29 @@ double FormulaInterpreter::run( void* ctx) const
 				++ip;
 				break;
 			}
+			case OpWeightingFunction:
+			{
+				int cardinality = (int)stack.pop();
+				int range = (int)stack.pop();
+				int typenameidx = (int)stack.pop();
+				int typeidx = -1;
+				if (typenameidx > 0)
+				{
+					IteratorSpec iteratorSpec = (*m_iteratorMap)( ctx, m_strings.c_str() + typenameidx);
+					if (iteratorSpec.defined())
+					{
+						typeidx = iteratorSpec.typeidx;
+					}
+					else
+					{
+						throw strus::runtime_error(_TXT("referenced unknown feature type '%s' in weighting function"), m_strings.c_str() + typenameidx);
+					}
+				}
+
+				stack.push( (*op.operand.weightingFunction)( ctx, typeidx, range, cardinality));
+				++ip;
+				break;
+			}
 		}
 	}
 	double rt = stack.pop();
@@ -718,6 +817,11 @@ void FormulaInterpreter::OpStruct::print( std::ostream& out, const std::string& 
 		case OpBinaryFunction:
 		{
 			out << " " << funcmap.getBinaryFunctionName( operand.binaryFunction);
+			break;
+		}
+		case OpWeightingFunction:
+		{
+			out << " " << funcmap.getWeightingFunctionName( operand.weightingFunction);
 			break;
 		}
 	}

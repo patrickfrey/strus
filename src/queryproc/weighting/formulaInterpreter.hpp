@@ -67,6 +67,8 @@ public:
 	typedef double (*BinaryFunction)( double arg1, double arg2);
 	///\brief Binary function of the topmost element of the stack
 	typedef double (*UnaryFunction)( double arg);
+	///\brief Weighting function with the three topmost elements of the stack (feature type, range and cardinality) as arguments
+	typedef double (*WeightingFunction)( void* ctx, int typeidx, int range, int cardinality);
 
 	struct VariableMap
 	{
@@ -98,6 +100,11 @@ public:
 		BinaryFunction getBinaryFunction( const std::string& name) const;
 		const std::string& getBinaryFunctionName( BinaryFunction func) const;
 
+		void defineWeightingFunction( const std::string& name, WeightingFunction func);
+		WeightingFunction getWeightingFunction( const std::string& name) const;
+		WeightingFunction findWeightingFunction( const std::string& name) const;
+		const std::string& getWeightingFunctionName( WeightingFunction func) const;
+
 		IteratorMap getIteratorMap() const;
 		std::string tostring() const;
 
@@ -106,6 +113,7 @@ public:
 		std::map<std::string,VariableMap> m_varmap;
 		std::map<std::string,UnaryFunction> m_unaryfuncmap;
 		std::map<std::string,BinaryFunction> m_binaryfuncmap;
+		std::map<std::string,WeightingFunction> m_weightingfuncmap;
 		std::map<uintptr_t,std::string> m_namemap;
 	};
 
@@ -121,6 +129,7 @@ public:
 private:
 	void parseVariableExpression( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se);
 	void parseFunctionCall( const FunctionMap& functionMap, const std::string& funcname, std::string::const_iterator& si, const std::string::const_iterator& se);
+	void parseWeightingFunctionCall( const FunctionMap& functionMap, WeightingFunction func, std::string::const_iterator& si, const std::string::const_iterator& se);
 	void parseOperand( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se);
 	unsigned int parseSubExpression( const FunctionMap& functionMap, std::string::const_iterator& si, const std::string::const_iterator& se, char eb);
 	unsigned int allocVariable( const std::string& name);
@@ -134,11 +143,12 @@ private:
 		OpPushVar,			///< Push a variable on the stack (argument variable reference operand.idx)
 		OpPushDim,			///< Push the dimension of an array on the stack (argument variable reference operand.idx)
 		OpUnaryFunction,		///< Call an unary function with the topmost element on the stack, pop the topmost element from the stack and push the result on the stack
-		OpBinaryFunction		///< Call a binary function with the two topmost elements on the stack, pop the argument elements from the stack and push the result on the stack
+		OpBinaryFunction,		///< Call a binary function with the two topmost elements on the stack, pop the argument elements from the stack and push the result on the stack
+		OpWeightingFunction		///< Call an weighting function with the three topmost elements on the stack
 	};
 	static const char* opCodeName( OpCode i)
 	{
-		static const char* ar[] = {"mark","loop","again","push const","push var","push dim","unary function","binary function",0};
+		static const char* ar[] = {"mark","loop","again","push const","push var","push dim","unary function","binary function","weighting function",0};
 		return ar[ (unsigned int)i];
 	}
 
@@ -151,6 +161,7 @@ private:
 			unsigned int idx;
 			UnaryFunction unaryFunction;
 			BinaryFunction binaryFunction;
+			WeightingFunction weightingFunction;
 		} operand;
 		OpStruct( OpCode opCode_)
 			:opCode(opCode_)
@@ -176,6 +187,11 @@ private:
 			:opCode(opCode_)
 		{
 			operand.binaryFunction = binaryFunction_;
+		}
+		OpStruct( OpCode opCode_, WeightingFunction weightingFunction_)
+			:opCode(opCode_)
+		{
+			operand.weightingFunction = weightingFunction_;
 		}
 		OpStruct( const OpStruct& o)
 			:opCode(o.opCode),operand(o.operand)
