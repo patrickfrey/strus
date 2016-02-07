@@ -40,7 +40,7 @@
 
 using namespace strus;
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 PostingIterator::PostingIterator(

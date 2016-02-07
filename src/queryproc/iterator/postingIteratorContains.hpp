@@ -52,7 +52,8 @@ public:
 	virtual Index skipDocCandidate( const Index& docno_);
 	virtual Index skipPos( const Index& pos)
 	{
-		return m_posno=(pos?pos:1);
+		if (pos > 1) return m_posno=0;
+		return m_posno=1;
 	}
 
 	virtual Index documentFrequency() const;
