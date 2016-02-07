@@ -83,13 +83,15 @@ Index IteratorContains::skipDoc( const Index& docno_)
 Index IteratorContainsWithCardinality::skipDocCandidate( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, true, m_cardinality);
+	uint64_t candidate_set;
+	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, true, m_cardinality, candidate_set);
 }
 
 Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 {
 	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, false, m_cardinality);
+	uint64_t candidate_set;
+	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, false, m_cardinality, candidate_set);
 }
 
 Index IteratorContains::documentFrequency() const
@@ -142,6 +144,10 @@ PostingIteratorInterface* PostingJoinContains::createResultIterator(
 		}
 		else
 		{
+			if (itrs.size() > 64)
+			{
+				m_errorhnd->report( _TXT( "number of argument posting iterators for 'contains' with cardinality is out of range (64)"));
+			}
 			return new IteratorContainsWithCardinality( itrs, cardinality, m_errorhnd);
 		}
 	}

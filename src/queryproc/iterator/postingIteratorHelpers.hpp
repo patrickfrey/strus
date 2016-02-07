@@ -35,6 +35,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 namespace strus
 {
@@ -48,7 +49,8 @@ Index getFirstAllMatchDocnoSubset(
 		std::vector<Reference< PostingIteratorInterface> >& args,
 		Index docno,
 		bool allowEmpty,
-		std::size_t cardinality);
+		std::size_t cardinality,
+		uint64_t& candidate_set);
 
 void encodeInteger( std::string& buf, int val);
 

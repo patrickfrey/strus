@@ -148,13 +148,13 @@ double FunctionMap::binaryFunction_div( double arg1, double arg2)
 double FunctionMap::weightingFunction_minwinsize( void* ctx, int typeidx, int range, int cardinality)
 {
 	// Code for min window size calculation
-	return 3.0;
+	return 0.0;
 }
 
 double FunctionMap::weightingFunction_minwinpos( void* ctx, int typeidx, int range, int cardinality)
 {
 	// Code for min window first position calculation
-	return 1.0;
+	return 0.0;
 }
 
 

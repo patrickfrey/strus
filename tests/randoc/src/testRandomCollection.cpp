@@ -63,6 +63,7 @@
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
 #undef STRUS_LOWLEVEL_DEBUG
+#undef STRUS_GENERATE_READABLE_NAMES
 
 uint32_t uint32_hash( uint32_t a)
 {
@@ -156,6 +157,19 @@ static const char* randomType()
 	return ar[ g_random.get( 0, (unsigned int)NofTypes-1)];
 }
 
+#ifdef STRUS_GENERATE_READABLE_NAMES
+static const char* readableNameIndexString( std::size_t maxval)
+{
+	if (maxval < 10) return "%01u";
+	if (maxval < 100) return "%02u";
+	if (maxval < 1000) return "%03u";
+	if (maxval < 10000) return "%04u";
+	if (maxval < 100000) return "%05u";
+	if (maxval < 1000000) return "%06u";
+	if (maxval < 10000000) return "%07u";
+	return "%09u";
+}
+#else
 static std::string randomTerm()
 {
 	std::string rt;
@@ -174,6 +188,7 @@ static std::string randomTerm()
 	std::random_shuffle( rt.begin(), rt.end(), rnd);
 	return rt;
 }
+#endif
 
 struct TermCollection
 {
@@ -187,7 +202,16 @@ struct TermCollection
 		std::set<std::string> termSet;
 		while (termSet.size() < nofTerms)
 		{
+#ifdef STRUS_GENERATE_READABLE_NAMES
+			char termformatbuf[ 64];
+			char termnamebuf[ 64];
+
+			snprintf( termformatbuf, sizeof(termformatbuf), "T%s", readableNameIndexString( nofTerms-1));
+			snprintf( termnamebuf, sizeof(termnamebuf), termformatbuf, (unsigned int)termSet.size());
+			termSet.insert( termnamebuf);
+#else
 			termSet.insert( randomTerm());
+#endif
 		}
 		std::set<std::string>::const_iterator ti = termSet.begin(), te = termSet.end();
 		for (; ti != te; ++ti)
@@ -381,12 +405,41 @@ struct RandomQuery
 	AGAIN:
 		arg.clear();
 		range = 0;
+		cardinality = 0;
 		operation = (Operation)g_random.get( 0, NofOperations);
 		std::size_t pickDocIdx = g_random.get( 0, collection.docar.size());
 		const RandomDoc& pickDoc = collection.docar[ pickDocIdx];
 
 		switch (operation)
 		{
+			case Contains:
+			{
+				cardinality = 1;
+				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
+				arg.push_back( pickDoc.occurrencear[pi].term);
+
+				while (arg.size() < (unsigned int)MaxNofArgs)
+				{
+					unsigned int sel = g_random.get( 0, 4);
+					if (sel == 0)
+					{
+						pi = g_random.get( 0, pickDoc.occurrencear.size());
+						arg.push_back( pickDoc.occurrencear[pi].term);
+						cardinality += 1;
+					}
+					else if (sel <= 2)
+					{
+						unsigned int nofTerms = collection.termCollection.termar.size();
+						unsigned int termidx = 1+g_random.get( 0, nofTerms);
+						arg.push_back( termidx);
+					}
+					else
+					{
+						break;
+					}
+				}
+				break;
+			}
 			case Intersect:
 			{
 				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
@@ -516,7 +569,7 @@ struct RandomQuery
 		}
 	}
 	RandomQuery( const RandomQuery& o)
-		:operation(o.operation),arg(o.arg),range(o.range){}
+		:operation(o.operation),arg(o.arg),range(o.range),cardinality(o.cardinality){}
 
 	void shuffleArg()
 	{
@@ -567,11 +620,36 @@ struct RandomQuery
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 		for (unsigned int docno=1; di != de; ++di,++docno)
 		{
+			if (operation == Contains)
+			{
+				// ... no position involved, handle document matches:
+				std::vector<unsigned int>::const_iterator ai = arg.begin(), ae = arg.end();
+				unsigned int cardinality_cnt = 0;
+				for (; ai!=ae; ++ai)
+				{
+					std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
+					for (; oi != oe && oi->term != *ai; ++oi){}
+					if (oi != oe)
+					{
+						//... match found
+						cardinality_cnt += 1;
+					}
+				}
+				if (cardinality_cnt >= cardinality)
+				{
+					rt.push_back( Match( docno, 1));
+				}
+			}
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
 			for (; oi != oe; (void)skipNextPosition(oi,oe))
 			{
 				switch (operation)
 				{
+					case Contains:
+					{
+						// ... already handled in document matches
+						break;
+					}
 					case Intersect:
 					{
 						if (arg.empty()) continue;
@@ -751,7 +829,11 @@ struct RandomQuery
 		rt << operationName();
 		if (range)
 		{
-			rt << " " << range;
+			rt << " range " << range;
+		}
+		if (cardinality)
+		{
+			rt << " cardinality " << cardinality;
 		}
 		for (unsigned int ai=0; ai<arg.size(); ++ai)
 		{
@@ -786,12 +868,11 @@ struct RandomQuery
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
 		strus::PostingIteratorInterface* res = 
-			joinop->createResultIterator( itrar, range, 0);
+			joinop->createResultIterator( itrar, range, cardinality);
 		if (!res)
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-
 		result = resultMatches( res);
 		delete res;
 		return true;
@@ -799,6 +880,7 @@ struct RandomQuery
 
 	enum Operation
 	{
+		Contains,
 		Intersect,
 		Union,
 		Difference,
@@ -810,7 +892,7 @@ struct RandomQuery
 	enum {NofOperations=7};
 	static const char* operationName( Operation op)
 	{
-		static const char* ar[] = {"intersect","union","diff","within","within_struct","sequence","sequence_struct"};
+		static const char* ar[] = {"contains","intersect","union","diff","within","within_struct","sequence","sequence_struct"};
 		return ar[op];
 	}
 	const char* operationName() const
@@ -821,10 +903,12 @@ struct RandomQuery
 	Operation operation;
 	std::vector<unsigned int> arg;
 	int range;
+	unsigned int cardinality;
 };
 
 static bool compareMatches( const std::vector<RandomQuery::Match>& res, const std::vector<RandomQuery::Match>& matchar, const RandomCollection& collection)
 {
+	enum {MaxSummarySize=100};
 	std::vector<RandomQuery::Match>::const_iterator mi = matchar.begin(), me = matchar.end();
 	std::vector<RandomQuery::Match>::const_iterator ri = res.begin(), re = res.end();
 	for (; mi != me && ri != re; ++mi,++ri)
@@ -833,28 +917,28 @@ static bool compareMatches( const std::vector<RandomQuery::Match>& res, const st
 		{
 			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
 			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+			std::cerr << collection.docSummary( mi->docno, mi->pos, MaxSummarySize);
 			return false;
 		}
 		if (mi->docno > ri->docno)
 		{
 			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
 			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
+			std::cerr << collection.docSummary( ri->docno, ri->pos, MaxSummarySize);
 			return false;
 		}
 		if (mi->pos < ri->pos)
 		{
 			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
 			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+			std::cerr << collection.docSummary( mi->docno, mi->pos, MaxSummarySize);
 			return false;
 		}
 		if (mi->pos > ri->pos)
 		{
 			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
 			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
+			std::cerr << collection.docSummary( ri->docno, ri->pos, MaxSummarySize);
 			return false;
 		}
 	}
@@ -862,12 +946,13 @@ static bool compareMatches( const std::vector<RandomQuery::Match>& res, const st
 	{
 		std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
 		std::cerr << "summary: " << std::endl;
-		std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+		std::cerr << collection.docSummary( mi->docno, mi->pos, MaxSummarySize);
 		return false;
 	}
 	if (ri != re)
 	{
 		std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+		std::cerr << collection.docSummary( ri->docno, ri->pos, MaxSummarySize);
 		return false;
 	}
 	return true;

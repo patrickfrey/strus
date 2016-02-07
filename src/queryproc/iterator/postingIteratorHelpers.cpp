@@ -93,7 +93,8 @@ Index strus::getFirstAllMatchDocnoSubset(
 		std::vector<Reference< PostingIteratorInterface> >& args,
 		Index docno,
 		bool allowEmpty,
-		std::size_t cardinality)
+		std::size_t cardinality,
+		uint64_t& candidate_set)
 {
 	if (args.empty()) return 0;
 	if (args.size() > 64) throw std::runtime_error("number of arguments for getFirstAllMatchDocnoSubset out of range");
@@ -106,7 +107,7 @@ Index strus::getFirstAllMatchDocnoSubset(
 
 		std::size_t nof_matches = 0;
 		Index match_docno = 0;
-		uint64_t candidate_set = 0;
+		candidate_set = 0;
 
 		for (unsigned int aidx = 0; ai != ae; ++ai,++aidx)
 		{
@@ -142,7 +143,7 @@ Index strus::getFirstAllMatchDocnoSubset(
 				unsigned int aidx = BitOperations::bitScanForward( candidate_set);
 				while (aidx)
 				{
-					if (match_docno != (*ai)->skipDoc( match_docno))
+					if (match_docno != args[aidx-1]->skipDoc( match_docno))
 					{
 						--nof_matches;
 						if (nof_matches < cardinality) break;
