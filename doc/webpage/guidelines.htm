@@ -23,7 +23,7 @@
 		<h4>Exception free interfaces</h4>
 		<p class="description">
 		Interface classes must be exception free (they must not throw any exception), because 
-		their calls might cross library or module borders and the very rigid linking rules 
+		their calls might cross library or module boundaries and the very rigid linking rules 
 		implied do not allow exceptions to be caught when
 		crossing library or module borders on many systems (e.g. with gcc).<br/>
 		Classes implementing such an interface class catch exceptions in their 
