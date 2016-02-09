@@ -81,7 +81,7 @@ public:
 			float weight_,
 			const TermStatistics& stats_);
 
-	virtual float call( const Index& docno);
+	virtual double call( const Index& docno);
 
 private:
 	float m_k1;

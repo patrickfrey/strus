@@ -57,7 +57,7 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of weighting function '%s': %s"), "frequency", *m_errorhnd);
 }
 
-float WeightingFunctionContextTermFrequency::call( const Index& docno)
+double WeightingFunctionContextTermFrequency::call( const Index& docno)
 {
 	float rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();

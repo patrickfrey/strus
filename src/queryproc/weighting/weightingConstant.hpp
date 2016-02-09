@@ -75,7 +75,7 @@ public:
 			float weight_,
 			const TermStatistics& stats_);
 
-	virtual float call( const Index& docno);
+	virtual double call( const Index& docno);
 
 private:
 	std::vector<Feature> m_featar;

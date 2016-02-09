@@ -86,7 +86,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 }
 
 
-float WeightingFunctionContextBM25::call( const Index& docno)
+double WeightingFunctionContextBM25::call( const Index& docno)
 {
 	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();

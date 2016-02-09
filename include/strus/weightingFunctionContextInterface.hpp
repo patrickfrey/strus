@@ -63,7 +63,7 @@ public:
 	/// \brief Call the weighting function for a document
 	/// \param[in] docno document number
 	/// \return the calculated weight of the document
-	virtual float call( const Index& docno)=0;
+	virtual double call( const Index& docno)=0;
 };
 
 }//namespace
