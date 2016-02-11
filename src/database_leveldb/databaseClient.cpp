@@ -88,11 +88,11 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 		//... compression reduces size of index by 25% and has about 10% better performance
 		m_dboptions.compression = leveldb::kNoCompression;
 	}
-	if (!m_writeBufferSize)
+	if (m_writeBufferSize)
 	{
 		m_dboptions.write_buffer_size = m_writeBufferSize;
 	}
-	if (!m_blockSize)
+	if (m_blockSize)
 	{
 		m_dboptions.block_size = m_blockSize;
 	}
