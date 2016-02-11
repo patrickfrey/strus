@@ -84,6 +84,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		OverflowMap::const_iterator oi = m_overflowmap.find( name);
 		if (oi != m_overflowmap.end())
 		{
+			isNew = false;
 			return oi->second;
 		}
 		rt = ++m_unknownHandleCount;
