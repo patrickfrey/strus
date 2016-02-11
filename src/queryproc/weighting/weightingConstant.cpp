@@ -57,7 +57,7 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' weighting function: %s"), "constant", *m_errorhnd);
 }
 
-float WeightingFunctionContextConstant::call( const Index& docno)
+double WeightingFunctionContextConstant::call( const Index& docno)
 {
 	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();

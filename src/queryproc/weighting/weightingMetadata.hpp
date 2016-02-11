@@ -66,7 +66,7 @@ public:
 			float/*weight*/,
 			const TermStatistics&);
 
-	virtual float call( const Index& docno);
+	virtual double call( const Index& docno);
 
 private:
 	MetaDataReaderInterface* m_metadata;

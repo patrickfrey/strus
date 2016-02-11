@@ -197,7 +197,7 @@ void WeightingFunctionContextFormula::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
-float WeightingFunctionContextFormula::call( const Index& docno)
+double WeightingFunctionContextFormula::call( const Index& docno)
 {
 	std::vector<FeatureVector>::iterator vi = m_featar.begin(), ve = m_featar.end();
 	for (; vi != ve; ++vi)

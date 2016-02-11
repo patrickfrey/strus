@@ -58,7 +58,7 @@ void WeightingFunctionContextMetadata::addWeightingFeature(
 	m_errorhnd->report( _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), "metadata");
 }
 
-float WeightingFunctionContextMetadata::call( const Index& docno)
+double WeightingFunctionContextMetadata::call( const Index& docno)
 {
 	m_metadata->skipDoc( docno);
 	return m_weight * (double)m_metadata->getValue( m_elementHandle);
