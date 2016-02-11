@@ -102,7 +102,25 @@ void InvertedIndexMap::definePosinfoPosting(
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "document feature defined twice"));
+		// create exception message:
+		std::ostringstream posmsg;
+		std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
+		for (int pidx=0;pi != pe; ++pi,++pidx)
+		{
+			if (pidx) posmsg << ",";
+			posmsg << *pi;
+		}
+		std::size_t posidx = mi->second;
+		unsigned int fi=0,fe=m_posinfo[posidx++];
+		posmsg << " | ";
+		for (; fi != fe; ++fi)
+		{
+			if (!fi) posmsg << ",";
+			posmsg << m_posinfo[posidx+fi];
+		}
+		std::string posstr = posmsg.str();
+		// throw exception message:
+		throw strus::runtime_error( _TXT( "document feature defined twice [termtype=%u,termvalue=%u,docno=%u] %s"), termtype, termvalue, docno, posstr.c_str());
 	}
 
 	InvTermMap::const_iterator vi = m_invtermmap.find( docno);
