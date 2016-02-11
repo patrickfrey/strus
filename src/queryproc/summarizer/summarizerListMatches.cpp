@@ -119,6 +119,11 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	}
 }
 
+void SummarizerFunctionInstanceListMatches::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "matchpos", name.c_str());
+}
+
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface*,

@@ -88,6 +88,11 @@ void WeightingFunctionInstanceConstant::addStringParameter( const std::string& n
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' weighting function: %s"), "constant", *m_errorhnd);
 }
 
+void WeightingFunctionInstanceConstant::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "constant", name.c_str());
+}
+
 void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))

@@ -100,6 +100,11 @@ void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::str
 	}
 }
 
+void WeightingFunctionInstanceTermFrequency::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "frequency", name.c_str());
+}
+
 WeightingFunctionContextInterface* WeightingFunctionInstanceTermFrequency::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface*,

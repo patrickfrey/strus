@@ -260,6 +260,11 @@ void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const st
 	}
 }
 
+void SummarizerFunctionInstanceAccumulateVariable::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "accuvariable", name.c_str());
+}
+
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateVariable::createFunctionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*,

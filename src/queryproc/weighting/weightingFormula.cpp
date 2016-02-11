@@ -271,6 +271,11 @@ void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& n
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
+void WeightingFunctionInstanceFormula::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "formula", name.c_str());
+}
+
 std::string WeightingFunctionInstanceFormula::tostring() const
 {
 	try

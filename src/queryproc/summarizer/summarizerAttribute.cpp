@@ -104,6 +104,11 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 	}
 }
 
+void SummarizerFunctionInstanceAttribute::addBooleanParameter( const std::string& name, const bool& value)
+{
+	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+}
+
 std::string SummarizerFunctionInstanceAttribute::tostring() const
 {
 	try
@@ -151,7 +156,7 @@ SummarizerFunctionInterface::Description SummarizerFunctionAttribute::getDescrip
 	try
 	{
 		Description rt( _TXT("Get the value of a document attribute."));
-		rt( Description::Param::String, "name", _TXT( "the name of the attribute to get"));
+		rt( Description::Param::Attribute, "name", _TXT( "the name of the attribute to get"));
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "attribute", *m_errorhnd, SummarizerFunctionInterface::Description());

@@ -63,8 +63,11 @@ public:
 			enum Type
 			{
 				Feature,
+				Attribute,
+				Metadata,
 				Numeric,
-				String
+				String,
+				Boolean
 			};
 			/// \brief Constructor
 			Param( Type type_, const std::string& name_, const std::string& text_)
