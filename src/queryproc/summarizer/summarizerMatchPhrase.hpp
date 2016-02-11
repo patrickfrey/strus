@@ -67,6 +67,16 @@ public:
 	/// \param[in] summarylen_ maximum lenght of the whole summary
 	/// \param[in] features_ features to inspect
 	SummarizerFunctionContextMatchPhrase(
+			/*[+]
+					const StorageClientInterface* storage_,
+					const QueryProcessorInterface* processor_,
+					const std::string& type_,
+					unsigned int sentencesize_,
+					unsigned int windowsize_,
+					const std::string& attribute_title_doclen_,
+					const std::pair<std::string,std::string>& matchmark_,
+					ErrorBufferInterface* errorhnd_);
+			[+]*/
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
@@ -119,7 +129,6 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
-	virtual void addBooleanParameter( const std::string& name, const bool& value);
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,

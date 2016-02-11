@@ -85,7 +85,6 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
-	virtual void addBooleanParameter( const std::string& name, const bool& value);
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,

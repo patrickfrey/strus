@@ -260,11 +260,6 @@ void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const st
 	}
 }
 
-void SummarizerFunctionInstanceAccumulateVariable::addBooleanParameter( const std::string& name, const bool& value)
-{
-	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "accuvariable", name.c_str());
-}
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateVariable::createFunctionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*,
@@ -311,10 +306,10 @@ SummarizerFunctionInterface::Description SummarizerFunctionAccumulateVariable::g
 	try
 	{
 		Description rt( _TXT("Accumulate the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content."));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"));
-		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"));
-		rt( Description::Param::String, "var", _TXT( "the name of the variable referencing the content to weight"));
-		rt( Description::Param::String, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
+		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
+		rt( Description::Param::String, "var", _TXT( "the name of the variable referencing the content to weight"), "");
+		rt( Description::Param::String, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"), "1:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "accuvariable", *m_errorhnd, SummarizerFunctionInterface::Description());

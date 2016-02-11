@@ -100,11 +100,6 @@ void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string&
 	}
 }
 
-void SummarizerFunctionInstanceMetaData::addBooleanParameter( const std::string& name, const bool& value)
-{
-	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
-}
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface* metadata,
@@ -146,7 +141,7 @@ SummarizerFunctionInterface::Description SummarizerFunctionMetaData::getDescript
 	try
 	{
 		Description rt( _TXT("Get the value of a document meta data element."));
-		rt( Description::Param::Metadata, "name", _TXT( "the name of the meta data element to get"));
+		rt( Description::Param::Metadata, "name", _TXT( "the name of the meta data element to get"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "metadata", *m_errorhnd, SummarizerFunctionInterface::Description());

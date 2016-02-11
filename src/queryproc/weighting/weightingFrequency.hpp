@@ -92,8 +92,6 @@ public:
 
 	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant&);
 
-	virtual void addBooleanParameter( const std::string& name, const bool& value);
-
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface*,

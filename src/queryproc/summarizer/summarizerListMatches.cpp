@@ -119,11 +119,6 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	}
 }
 
-void SummarizerFunctionInstanceListMatches::addBooleanParameter( const std::string& name, const bool& value)
-{
-	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "matchpos", name.c_str());
-}
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface*,
@@ -158,8 +153,8 @@ SummarizerFunctionInterface::Description SummarizerFunctionListMatches::getDescr
 	try
 	{
 		Description rt( _TXT("Get the feature occurencies printed"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features"));
-		rt( Description::Param::Numeric, "N", _TXT( "the maximum number of matches to return"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features"), "");
+		rt( Description::Param::Numeric, "N", _TXT( "the maximum number of matches to return"), "1:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchpos", *m_errorhnd, SummarizerFunctionInterface::Description());

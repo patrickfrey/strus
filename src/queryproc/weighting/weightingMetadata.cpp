@@ -107,11 +107,6 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), "metadata", *m_errorhnd);
 }
 
-void WeightingFunctionInstanceMetadata::addBooleanParameter( const std::string& name, const bool& value)
-{
-	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "metadata", name.c_str());
-}
-
 WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface* metadata_,
@@ -156,7 +151,7 @@ WeightingFunctionInterface::Description WeightingFunctionMetadata::getDescriptio
 	try
 	{
 		Description rt( _TXT("Calculate the weight of a document as value of a meta data element."));
-		rt( Description::Param::Metadata, "name", _TXT( "name of the meta data element to use as weight"));
+		rt( Description::Param::Metadata, "name", _TXT( "name of the meta data element to use as weight"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "metadata", *m_errorhnd, WeightingFunctionInterface::Description());

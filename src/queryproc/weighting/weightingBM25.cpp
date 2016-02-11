@@ -177,11 +177,6 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 	}
 }
 
-void WeightingFunctionInstanceBM25::addBooleanParameter( const std::string& name, const bool& value)
-{
-	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "BM25", name.c_str());
-}
-
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunctionContext(
 		const StorageClientInterface* storage_,
@@ -224,11 +219,11 @@ WeightingFunctionInterface::Description WeightingFunctionBM25::getDescription() 
 	try
 	{
 		Description rt(_TXT("Calculate the document weight with the weighting scheme \"BM25\""));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"));
-		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"));
-		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"));
-		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"));
-		rt( Description::Param::Metadata, "doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"), "");
+		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"), "1:1000");
+		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"), "0.0001:1000");
+		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
+		rt( Description::Param::Metadata, "doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "BM25", *m_errorhnd, WeightingFunctionInterface::Description());

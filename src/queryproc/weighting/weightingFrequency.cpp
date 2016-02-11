@@ -100,11 +100,6 @@ void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::str
 	}
 }
 
-void WeightingFunctionInstanceTermFrequency::addBooleanParameter( const std::string& name, const bool& value)
-{
-	m_errorhnd->report( _TXT("unknown boolean '%s' weighting function parameter '%s'"), "frequency", name.c_str());
-}
-
 WeightingFunctionContextInterface* WeightingFunctionInstanceTermFrequency::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface*,
@@ -137,8 +132,8 @@ WeightingFunctionInterface::Description WeightingFunctionTermFrequency::getDescr
 	try
 	{
 		Description rt( _TXT("Calculate the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"));
-		rt( Description::Param::Numeric, "weight", _TXT( "defines the query feature weight factor"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"), "");
+		rt( Description::Param::Numeric, "weight", _TXT( "defines the query feature weight factor"), "0:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "frequency", *m_errorhnd, WeightingFunctionInterface::Description());

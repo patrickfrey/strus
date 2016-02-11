@@ -181,11 +181,6 @@ void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::s
 	}
 }
 
-void SummarizerFunctionInstanceMatchVariables::addBooleanParameter( const std::string& name, const bool& value)
-{
-	m_errorhnd->report( _TXT("unknown boolean '%s' summarization function parameter '%s'"), "MatchVariables", name.c_str());
-}
-
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*,
@@ -233,10 +228,10 @@ SummarizerFunctionInterface::Description SummarizerFunctionMatchVariables::getDe
 	try
 	{
 		Description rt( _TXT("Extract all variables assigned to subexpressions of features specified."));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"));
-		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"));
-		rt( Description::Param::String, "assign", _TXT( "the assignment operator in the result other than '=' (default)"));
-		rt( Description::Param::String, "delimiter", _TXT( "the separator between two results other than ',' (default)"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
+		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
+		rt( Description::Param::String, "assign", _TXT( "the assignment operator in the result other than '=' (default)"), "");
+		rt( Description::Param::String, "delimiter", _TXT( "the separator between two results other than ',' (default)"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchvariables", *m_errorhnd, SummarizerFunctionInterface::Description());
