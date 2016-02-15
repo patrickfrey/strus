@@ -3,8 +3,22 @@
 #include "private/internationalization.hpp"
 #include <limits>
 #include <cmath>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 
 using namespace strus;
+
+std::string ProximityWeightAccumulator::WeightArray::tostring() const
+{
+	std::ostringstream rt;
+	for (std::size_t ai=0; ai < arsize; ++ai)
+	{
+		if (ai) rt << ' ';
+		rt << std::setprecision(7) << std::fixed << ar[ai];
+	}
+	return rt.str();
+}
 
 void ProximityWeightAccumulator::proportionalAssignment( WeightArray& ar, double sum, double constpart, const WeightArray& base)
 {

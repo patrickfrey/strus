@@ -45,6 +45,7 @@
 #include <cstdlib>
 
 using namespace strus;
+#define STRUS_LOWLEVEL_DEBUG
 
 SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const StorageClientInterface* storage_,
@@ -127,6 +128,111 @@ static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std:
 	}
 }
 
+static Index skipPosArray( Index start, PostingIteratorInterface** ar, std::size_t size)
+{
+	Index rt = 0;
+	std::size_t ti=0;
+	for (; ti<size; ++ti)
+	{
+		Index pos = ar[ ti]->skipPos( start);
+		if (pos)
+		{
+			if (!rt || pos < rt) rt = pos;
+		}
+	}
+	return rt;
+}
+
+static bool isOverlappingParagraph(
+		const Index& startPos, const Index& endPos, PostingIteratorInterface** paraar, std::size_t parasize)
+{
+	std::size_t gi=0;
+	for (; gi<parasize; ++gi)
+	{
+		Index nextpara = paraar[gi]->skipPos( startPos+1);
+		if (nextpara && nextpara < endPos) break;
+	}
+	return (gi < parasize);
+}
+
+struct Candidate
+{
+	double weight;
+	Index pos;
+	Index span;
+
+	Candidate( double weight_, Index pos_, Index span_)
+		:weight(weight_),pos(pos_),span(span_){}
+	Candidate( const Candidate& o)
+		:weight(o.weight),pos(o.pos),span(o.span){}
+};
+
+static Candidate findCandidate( const Index& firstpos,
+			const ProximityWeightAccumulator::WeightArray& idfar,
+			const ProximityWeightAccumulator::WeightArray& weightincr,
+			unsigned int minwindowsize, unsigned int cardinality,
+			PostingIteratorInterface** itrar, std::size_t itrarsize,
+			PostingIteratorInterface** structar, std::size_t structarsize,
+			PostingIteratorInterface** paraar, std::size_t parasize)
+{
+	Candidate rt( 0.0,firstpos,0);
+	Index prevPara=firstpos, nextPara=skipPosArray( firstpos, paraar, parasize);
+	PositionWindow poswin( itrar, itrarsize, minwindowsize, cardinality,
+				firstpos, PositionWindow::MaxWin);
+	bool more = poswin.first();
+	for (;more; more = poswin.next())
+	{
+		const std::size_t* window = poswin.window();
+		std::size_t windowsize = poswin.size();
+		Index windowpos = poswin.pos();
+		Index windowspan = poswin.span();
+
+		// Check if window is overlapping a paragraph. In this case to not use it for summary:
+		if (isOverlappingParagraph( windowpos, windowpos + windowspan, paraar, parasize)) continue;
+
+		// Calculate the weight of the current window:
+		ProximityWeightAccumulator::WeightArray weightar( itrarsize, 1.0);
+
+		ProximityWeightAccumulator::weight_same_sentence(
+			weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize, structar, structarsize);
+
+		ProximityWeightAccumulator::weight_imm_follow(
+			weightar, 0.4, weightincr, window, windowsize, itrar, itrarsize);
+
+		ProximityWeightAccumulator::weight_invdist(
+			weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize);
+
+		if (windowpos - firstpos < 1000)
+		{
+			ProximityWeightAccumulator::weight_invpos(
+				weightar, 0.5, weightincr, firstpos, itrar, itrarsize);
+		}
+		if (nextPara && windowpos >= nextPara)
+		{
+			// Weight inv distance to paragraph start:
+			do
+			{
+				prevPara = nextPara;
+				nextPara = skipPosArray( prevPara+1, paraar, parasize);
+			} while (nextPara && nextPara < windowpos);
+
+			ProximityWeightAccumulator::weight_invpos(
+				weightar, 0.3, weightincr, prevPara, itrar, itrarsize);
+		}
+		weightar.multiply( idfar);
+		double weight = weightar.sum();
+		// Select the best window:
+		if (weight > rt.weight)
+		{
+			rt.weight = weight;
+			rt.pos = windowpos;
+			rt.span = windowspan;
+		}
+	}
+	return rt;
+}
+
+
 std::vector<SummarizerFunctionContextInterface::SummaryElement>
 	SummarizerFunctionContextMatchPhrase::getSummary( const Index& docno)
 {
@@ -144,6 +250,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		callSkipDoc( docno, m_itrar, m_itrarsize);
 		callSkipDoc( docno, m_structar, m_structarsize);
 		callSkipDoc( docno, m_paraar, m_paraarsize);
+		m_forwardindex->skipDoc( docno);
 
 		// Define search start position:
 		Index firstpos = 0;
@@ -153,58 +260,55 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			firstpos = firstposval.toint()+1;
 		}
 		// Define best match to find:
-		struct
+		// Find the best match:
+		Candidate candidate
+			= findCandidate(
+				firstpos, m_idfar, m_weightincr, m_windowsize, m_cardinality,
+				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize);
+		if (candidate.span == 0 && m_metadata_header_maxpos>=0)
 		{
-			double weight;
-			Index pos;
-			Index span;
-		} candidate = {0.0,firstpos,0};
-
-		PositionWindow poswin( m_itrar, m_itrarsize, m_windowsize, m_cardinality,
-					firstpos, PositionWindow::MaxWin);
-		bool more = poswin.first();
-		for (;more; more = poswin.next())
+			//... we did not find a summary with m_cardinality terms, so we try to find one
+			//	without the terms appearing in the document title:
+			PostingIteratorInterface* noTitleTerms[ MaxNofArguments];
+			ProximityWeightAccumulator::WeightArray noTitleIdfs;
+			ProximityWeightAccumulator::WeightArray noWeightIncrs;
+			std::size_t noTitleSize = 0;
+			std::size_t ti=0,te=m_itrarsize;
+			for (; ti < te; ++ti)
+			{
+				Index pos = m_itrar[ti]->skipPos( 0);
+				if (pos > firstpos)
+				{
+					noTitleTerms[ noTitleSize++] = m_itrar[ ti];
+					noTitleIdfs.add( m_idfar[ ti]);
+					noWeightIncrs.add( m_weightincr[ ti]);
+				}
+			}
+			if (noTitleSize && m_itrarsize > noTitleSize)
+			{
+				unsigned int cardinality = noTitleSize;
+				if (m_cardinality > 0 && m_cardinality < m_itrarsize)
+				{
+					if (cardinality > m_itrarsize - m_cardinality)
+					{
+						cardinality -= (m_itrarsize - m_cardinality);
+					}
+					else
+					{
+						cardinality = 1;
+					}
+				}
+				candidate = findCandidate(
+						firstpos, noTitleIdfs, noWeightIncrs, m_windowsize, cardinality,
+						noTitleTerms, noTitleSize, m_structar, m_structarsize,
+						m_paraar, m_paraarsize);
+			}
+		}
+		if (candidate.span == 0)
 		{
-			// Check if window is overlapping a paragraph. In this case to not use it for summary:
-			std::size_t gi=0;
-			for (; gi<m_paraarsize; ++gi)
-			{
-				Index pos = poswin.pos();
-				Index nextpara = m_paraar[gi]->skipPos( pos+1);
-				if (nextpara - pos < (Index)poswin.span()) break;
-			}
-			if (gi < m_paraarsize) continue;
-
-			// Calculate the weight of the current window:
-			ProximityWeightAccumulator::WeightArray weightar( m_itrarsize);
-
-			const std::size_t* window = poswin.window();
-			std::size_t windowsize = poswin.size();
-
-			ProximityWeightAccumulator::weight_same_sentence(
-				weightar, 0.3, m_weightincr, window, windowsize, m_itrar, m_itrarsize, m_structar, m_structarsize);
-		
-			ProximityWeightAccumulator::weight_imm_follow(
-				weightar, 0.4, m_weightincr, window, windowsize, m_itrar, m_itrarsize);
-		
-			ProximityWeightAccumulator::weight_invdist(
-				weightar, 0.3, m_weightincr, window, windowsize, m_itrar, m_itrarsize);
-
-			if (poswin.pos() < 1000)
-			{
-				ProximityWeightAccumulator::weight_invpos(
-					weightar, 0.5, m_weightincr, firstpos, m_itrar, m_itrarsize);
-			}
-			weightar.multiply( m_idfar);
-			double weight = weightar.sum();
-
-			// Select the best window:
-			if (weight > candidate.weight)
-			{
-				candidate.weight = weight;
-				candidate.pos = poswin.pos();
-				candidate.span = poswin.span();
-			}
+			// ... if we did not find any candidate window, we take the start of the document as abstract:
+			candidate.pos = firstpos;
+			candidate.span = 10;
 		}
 		struct
 		{
@@ -212,38 +316,32 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			Index span;
 			bool defined_start;
 			bool defined_end;
-		} abstract = {0,0,false,false};
+		} abstract = {candidate.pos,candidate.span,(candidate.pos == firstpos),false};
 
 		// Find the start of the abstract as start of the preceeding structure or paragraph marker:
 		std::size_t ti=0,te=m_paraarsize+m_structarsize;
-		Index astart = (Index)m_sentencesize > candidate.pos ? (candidate.pos - (Index)m_sentencesize):firstpos;
-		for (std::size_t ti=0; ti<te && astart < candidate.pos; ++ti)
+		Index astart = (Index)m_sentencesize + firstpos < candidate.pos ? (candidate.pos - (Index)m_sentencesize):firstpos;
+		for (; ti<te && astart < candidate.pos; ++ti)
 		{
 			Index pos = m_structar[ti]->skipPos( astart);
 			while (pos > astart && pos <= candidate.pos)
 			{
 				abstract.defined_start = true;
-				astart = pos;
-				pos = m_structar[ti]->skipPos( astart+1);
+				astart = pos + 1;
+				pos = m_structar[ti]->skipPos( astart);
 			}
 		}
 		abstract.span += candidate.pos - astart;
 		abstract.start = astart;
-
 		// Find the end of the abstract, by scanning for the next sentence:
 		if (abstract.span < (Index)m_sentencesize)
 		{
-			Index aspan = (Index)m_sentencesize;
-			for (ti=0; ti<te; ++ti)
+			Index pos = skipPosArray( abstract.start + abstract.span, m_structar, m_structarsize);
+			if (pos && (pos - abstract.start) < (Index)m_sentencesize)
 			{
-				Index pos = m_structar[ti]->skipPos( abstract.start + abstract.span);
-				if (pos && (pos - abstract.start) < aspan)
-				{
-					aspan = pos - abstract.start;
-					abstract.defined_end = true;
-				}
+				abstract.span = pos - abstract.start;
+				abstract.defined_end = true;
 			}
-			abstract.span = aspan;
 		}
 
 		// Create the highlighted result, if exists:
@@ -254,20 +352,8 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			Index pi = abstract.start, pe = abstract.start + abstract.span;
 			while (pi < pe)
 			{
-				Index minpos = 0;
-				std::size_t ti=0, te=m_itrarsize;
-				for (;ti<te; ++ti)
-				{
-					Index pos = m_itrar[ti]->skipPos( pi);
-					if (pos && pos < pe)
-					{
-						if (!minpos || pos < minpos)
-						{
-							minpos = pos;
-						}
-					}
-				}
-				if (minpos)
+				Index minpos = skipPosArray( pi, m_itrar, m_itrarsize);
+				if (minpos && minpos < pe)
 				{
 					highlightpos.push_back( minpos);
 					pi = minpos+1;
@@ -295,7 +381,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				if (m_forwardindex->skipPos(pi) == pi)
 				{
 					if (!phrase.empty()) phrase.push_back(' ');
-					for (; hi < he && pi < highlightpos[hi]; ++he){}
+					for (; hi < he && pi > highlightpos[hi]; ++hi){}
 					if (hi < he && pi == highlightpos[hi])
 					{
 						phrase.append( m_matchmark.first);

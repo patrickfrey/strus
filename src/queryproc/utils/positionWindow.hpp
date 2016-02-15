@@ -41,7 +41,7 @@ public:
 	/// \brief Return the span of the current window (distance from start to end, depends on evaluation type)
 	unsigned int span() const
 	{
-		return (m_windowsize)?(m_posar[m_windowsize-1]-m_posar[0]):0;
+		return (m_windowsize)?(m_posar[m_windowsize-1]-m_posar[0]+1):1;
 	}
 
 	/// \brief Return the starting position of the current window:

@@ -62,8 +62,8 @@ PositionWindow::PositionWindow(
 			// Insert element:
 			std::size_t pi = 0, pe = m_arsize;
 			for (; pi != pe && m_posar[pi] < pos; ++pi){}
-			std::memmove( m_posar+pi, m_posar+pi+1, (pe-pi)*sizeof(Index));
-			std::memmove( m_window+pi, m_window+pi+1, (pe-pi)*sizeof(PostingIteratorInterface*));
+			std::memmove( m_posar+pi+1, m_posar+pi, (pe-pi)*sizeof(Index));
+			std::memmove( m_window+pi+1, m_window+pi, (pe-pi)*sizeof(PostingIteratorInterface*));
 			++m_arsize;
 			m_posar[ pi] = pos;
 			m_window[ pi] = ai;

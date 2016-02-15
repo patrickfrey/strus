@@ -75,6 +75,8 @@ public:
 			if (arsize != operand.arsize) throw strus::runtime_error( "number of weighting array elements do not match for multiplication");
 			for (std::size_t ai=0; ai<arsize; ++ai) ar[ai] *= operand.ar[ai];
 		}
+
+		std::string tostring() const;
 	};
 	/// \brief Assigne weights to ar that sum up to 'sum'. each weight assigned consists of a part that is equal for all and a part that is in the proportions of base
 	static void proportionalAssignment( WeightArray& ar, double sum, double constpart, const WeightArray& base);
