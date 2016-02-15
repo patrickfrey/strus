@@ -71,6 +71,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_matchmark(matchmark_)
 	,m_itrarsize(0)
 	,m_structarsize(0)
+	,m_paraarsize(0)
 	,m_initialized(false)
 	,m_errorhnd(errorhnd_)
 {
