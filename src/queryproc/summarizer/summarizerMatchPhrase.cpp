@@ -459,7 +459,7 @@ SummarizerFunctionInterface::Description SummarizerFunctionMatchPhrase::getDescr
 		rt( Description::Param::Numeric, "sentencesize", _TXT( "restrict the maximum lenght of sentences in summaries"), "1:");
 		rt( Description::Param::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
 		rt( Description::Param::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
-		rt( Description::Param::String, "matchmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
+		rt( Description::Param::String, "mark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchphrase", *m_errorhnd, SummarizerFunctionInterface::Description());
