@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
+add_subdirectory( utils )
 add_subdirectory( summarizer )
 add_subdirectory( iterator )
 add_subdirectory( weighting )
@@ -27,7 +28,7 @@ link_directories(
 # LIBRARY
 # -------------------------------------------
 add_library( strus_queryproc SHARED ${source_files} libstrus_queryproc.cpp )
-target_link_libraries( strus_queryproc strus_private_utils strus_utils iterator_standard summarizer_standard weighting_standard )
+target_link_libraries( strus_queryproc strus_private_utils strus_utils queryproc_utils iterator_standard summarizer_standard weighting_standard )
 
 set_target_properties(
     strus_queryproc

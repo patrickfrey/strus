@@ -35,6 +35,8 @@
 #include <algorithm>
 #include <cmath>
 
+#error DEPRECATED
+
 namespace strus
 {
 

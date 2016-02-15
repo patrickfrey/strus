@@ -67,9 +67,9 @@ public:
 	{
 		PostingIteratorInterface* itr;
 		float weight;
-		float idf;
+		double idf;
 
-		Feature( PostingIteratorInterface* itr_, float weight_, float idf_)
+		Feature( PostingIteratorInterface* itr_, float weight_, double idf_)
 			:itr(itr_),weight(weight_),idf(idf_){}
 		Feature( const Feature& o)
 			:itr(o.itr),weight(o.weight),idf(o.idf){}

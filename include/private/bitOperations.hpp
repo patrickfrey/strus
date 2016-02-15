@@ -106,13 +106,19 @@ struct BitOperations
 	static inline unsigned int bitScanForward( const uint64_t& idx)
 	{
 #ifdef __x86_64__
-		uint64_t result; 
+		uint64_t result;
 		if (!idx) return 0;
 		asm(" bsfq %1, %0 \n" : "=r"(result) : "r"(idx) ); 
 		return (unsigned int)(result+1);
 #else
 		return ffsl( idx);
 #endif
+	}
+
+	static inline uint64_t bitInsert( const uint64_t& bitset, unsigned int bi)
+	{
+		uint64_t mask = ((uint64_t)1<<bi)-1;
+		return ((bitset &~ mask) << 1) | ((uint64_t)1<<bi) | (bitset & mask);
 	}
 };
 }//namespace

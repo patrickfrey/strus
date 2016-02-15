@@ -14,8 +14,15 @@ set(source_files
 )
 
 include_directories(
-  ${Boost_INCLUDE_DIRS}
+  "${Boost_INCLUDE_DIRS}"
   "${PROJECT_SOURCE_DIR}/include"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
+)
+
+link_directories(
+  "${Boost_LIBRARY_DIRS}"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
   "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
 )
 
@@ -23,7 +30,7 @@ include_directories(
 # LIBRARY
 # ------------------------------------
 add_library( weighting_standard STATIC ${source_files})
-target_link_libraries( weighting_standard strus_private_utils strus_utils )
+target_link_libraries( weighting_standard strus_private_utils strus_utils queryproc_utils )
 
 
 

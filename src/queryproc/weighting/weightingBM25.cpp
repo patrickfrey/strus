@@ -63,7 +63,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 		if (utils::caseInsensitiveEquals( name_, "match"))
 		{
 			float nofMatches = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
-			float idf = 0.0;
+			double idf = 0.0;
 		
 			if (m_nofCollectionDocuments > nofMatches * 2)
 			{
