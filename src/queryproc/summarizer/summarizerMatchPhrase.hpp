@@ -55,26 +55,13 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-/*
-Use PositionWindow to iterate on Windows that do not overlap with the title:
-For each window assign to each feature the idf times a measure,
-          that is taken from a table between 70% and 100% depending on the abs(log(position))
-          from the start of the document. 
-For each feature multiply its weight with values between 1.3 to 1.0 depending on neighborhood of other features
-          with criteria immediately followed, immediately followed also in the query, close (dist < 5),
-          in the same sentence
-Add the calculate measures together. Because the weight factors have an upper bound we can prune calculation,
-          e.g. if the sum of idfs is below factor 2.
-The window with the highest weight wins and all the sentences (without title) that are overlaped by the window
-          form the summary.
-*/
-
 class SummarizerFunctionContextMatchPhrase
 	:public SummarizerFunctionContextInterface
 {
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
+	/// \param[in] metadata_ meta data reader
 	/// \param[in] type_ type of the tokens to build the summary with
 	/// \param[in] sentencesize_ maximum lenght of a sentence until it is cut with "..."
 	/// \param[in] windowsize_ maximum size of window to look for matches
@@ -85,8 +72,8 @@ public:
 	/// \param[in] errorhnd_ error buffer interface
 	SummarizerFunctionContextMatchPhrase(
 			const StorageClientInterface* storage_,
-			const MetaDataReaderInterface* metadata_,
 			const QueryProcessorInterface* processor_,
+			MetaDataReaderInterface* metadata_,
 			const std::string& type_,
 			unsigned int sentencesize_,
 			unsigned int windowsize_,
@@ -107,10 +94,10 @@ public:
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
-	enum {MaxNofArguments=64};
-	const StorageClientInterface* m_storage;
-	const MetaDataReaderInterface* m_metadata;
-	const QueryProcessorInterface* m_processor;
+	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
+	const StorageClientInterface* m_storage;		///< storage access
+	const QueryProcessorInterface* m_processor;		///< query processor interface
+	MetaDataReaderInterface* m_metadata;			///< access metadata arguments
 	Reference<ForwardIteratorInterface> m_forwardindex;	///< forward index iterator
 	std::string m_type;					///< forward index type
 	unsigned int m_sentencesize;				///< search area for end of sentence

@@ -49,8 +49,8 @@ using namespace strus;
 
 SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const StorageClientInterface* storage_,
-		const MetaDataReaderInterface* metadata_,
 		const QueryProcessorInterface* processor_,
+		MetaDataReaderInterface* metadata_,
 		const std::string& type_,
 		unsigned int sentencesize_,
 		unsigned int windowsize_,
@@ -60,8 +60,8 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const std::pair<std::string,std::string>& matchmark_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
-	,m_metadata(metadata_)
 	,m_processor(processor_)
+	,m_metadata(metadata_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
 	,m_type(type_)
 	,m_sentencesize(sentencesize_)
@@ -106,6 +106,10 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
 			double idf = logl( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
+			if (idf < 0.00001)
+			{
+				idf = 0.00001;
+			}
 			m_itrar[ m_itrarsize++] = itr;
 			m_idfar.add( idf * weight);
 		}
@@ -120,6 +124,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
 {}
 
+
 static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize)
 {
 	for (std::size_t ai=0; ai < arsize; ++ai)
@@ -128,7 +133,7 @@ static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std:
 	}
 }
 
-static Index skipPosArray( Index start, PostingIteratorInterface** ar, std::size_t size)
+static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size)
 {
 	Index rt = 0;
 	std::size_t ti=0;
@@ -143,18 +148,6 @@ static Index skipPosArray( Index start, PostingIteratorInterface** ar, std::size
 	return rt;
 }
 
-static bool isOverlappingParagraph(
-		const Index& startPos, const Index& endPos, PostingIteratorInterface** paraar, std::size_t parasize)
-{
-	std::size_t gi=0;
-	for (; gi<parasize; ++gi)
-	{
-		Index nextpara = paraar[gi]->skipPos( startPos+1);
-		if (nextpara && nextpara < endPos) break;
-	}
-	return (gi < parasize);
-}
-
 struct Candidate
 {
 	double weight;
@@ -167,17 +160,18 @@ struct Candidate
 		:weight(o.weight),pos(o.pos),span(o.span){}
 };
 
-static Candidate findCandidate( const Index& firstpos,
+static Candidate findCandidate(
+			const Index& firstpos,
 			const ProximityWeightAccumulator::WeightArray& idfar,
 			const ProximityWeightAccumulator::WeightArray& weightincr,
-			unsigned int minwindowsize, unsigned int cardinality,
+			unsigned int maxwindowsize, unsigned int cardinality,
 			PostingIteratorInterface** itrar, std::size_t itrarsize,
 			PostingIteratorInterface** structar, std::size_t structarsize,
 			PostingIteratorInterface** paraar, std::size_t parasize)
 {
 	Candidate rt( 0.0,firstpos,0);
-	Index prevPara=firstpos, nextPara=skipPosArray( firstpos, paraar, parasize);
-	PositionWindow poswin( itrar, itrarsize, minwindowsize, cardinality,
+	Index prevPara=firstpos, nextPara=callSkipPos( firstpos, paraar, parasize);
+	PositionWindow poswin( itrar, itrarsize, maxwindowsize, cardinality,
 				firstpos, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
@@ -187,8 +181,14 @@ static Candidate findCandidate( const Index& firstpos,
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
 
+		// Calculate the paragraph elements before and after the current window position:
+		while (nextPara && nextPara < windowpos)
+		{
+			prevPara = nextPara;
+			nextPara = callSkipPos( prevPara+1, paraar, parasize);
+		}
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
-		if (isOverlappingParagraph( windowpos, windowpos + windowspan, paraar, parasize)) continue;
+		if (nextPara && nextPara < windowpos + windowspan) continue;
 
 		// Calculate the weight of the current window:
 		ProximityWeightAccumulator::WeightArray weightar( itrarsize, 1.0);
@@ -210,12 +210,6 @@ static Candidate findCandidate( const Index& firstpos,
 		if (nextPara && windowpos >= nextPara)
 		{
 			// Weight inv distance to paragraph start:
-			do
-			{
-				prevPara = nextPara;
-				nextPara = skipPosArray( prevPara+1, paraar, parasize);
-			} while (nextPara && nextPara < windowpos);
-
 			ProximityWeightAccumulator::weight_invpos(
 				weightar, 0.3, weightincr, prevPara, itrar, itrarsize);
 		}
@@ -253,9 +247,10 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		m_forwardindex->skipDoc( docno);
 
 		// Define search start position:
-		Index firstpos = 0;
+		Index firstpos = 1;
 		if (m_metadata_header_maxpos>=0)
 		{
+			m_metadata->skipDoc( docno);
 			ArithmeticVariant firstposval = m_metadata->getValue( m_metadata_header_maxpos);
 			firstpos = firstposval.toint()+1;
 		}
@@ -277,7 +272,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			for (; ti < te; ++ti)
 			{
 				Index pos = m_itrar[ti]->skipPos( 0);
-				if (pos > firstpos)
+				if (pos >= firstpos)
 				{
 					noTitleTerms[ noTitleSize++] = m_itrar[ ti];
 					noTitleIdfs.add( m_idfar[ ti]);
@@ -287,16 +282,9 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			if (noTitleSize && m_itrarsize > noTitleSize)
 			{
 				unsigned int cardinality = noTitleSize;
-				if (m_cardinality > 0 && m_cardinality < m_itrarsize)
+				if (m_cardinality && m_cardinality < cardinality)
 				{
-					if (cardinality > m_itrarsize - m_cardinality)
-					{
-						cardinality -= (m_itrarsize - m_cardinality);
-					}
-					else
-					{
-						cardinality = 1;
-					}
+					cardinality = m_cardinality;
 				}
 				candidate = findCandidate(
 						firstpos, noTitleIdfs, noWeightIncrs, m_windowsize, cardinality,
@@ -336,7 +324,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		// Find the end of the abstract, by scanning for the next sentence:
 		if (abstract.span < (Index)m_sentencesize)
 		{
-			Index pos = skipPosArray( abstract.start + abstract.span, m_structar, m_structarsize);
+			Index pos = callSkipPos( abstract.start + abstract.span, m_structar, m_structarsize);
 			if (pos && (pos - abstract.start) < (Index)m_sentencesize)
 			{
 				abstract.span = pos - abstract.start;
@@ -352,7 +340,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			Index pi = abstract.start, pe = abstract.start + abstract.span;
 			while (pi < pe)
 			{
-				Index minpos = skipPosArray( pi, m_itrar, m_itrarsize);
+				Index minpos = callSkipPos( pi, m_itrar, m_itrarsize);
 				if (minpos && minpos < pe)
 				{
 					highlightpos.push_back( minpos);
@@ -499,7 +487,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 	{
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
 		return new SummarizerFunctionContextMatchPhrase(
-				storage, metadata, m_processor, m_type, m_sentencesize, m_windowsize, m_cardinality,
+				storage, m_processor, metadata, m_type, m_sentencesize, m_windowsize, m_cardinality,
 				nofCollectionDocuments, m_attribute_title_maxpos, m_matchmark, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
@@ -542,7 +530,7 @@ SummarizerFunctionInterface::Description SummarizerFunctionMatchPhrase::getDescr
 		rt( Description::Param::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
 		rt( Description::Param::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
 		rt( Description::Param::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( Description::Param::Numeric, "attribute_title_maxpos", _TXT( "the metadata attribute that specifies the last title element and thus the part of the content that is used for abstracting"), "1:");
+		rt( Description::Param::Metadata, "attribute_title_maxpos", _TXT( "the metadata element that specifies the last title element. Only content is used for abstracting"), "1:");
 		rt( Description::Param::Numeric, "sentencesize", _TXT( "restrict the maximum lenght of sentences in summaries"), "1:");
 		rt( Description::Param::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
 		rt( Description::Param::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");

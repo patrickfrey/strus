@@ -90,7 +90,7 @@ unsigned int PositionWindow::getMaxWinSize()
 	return ai;
 }
 
-bool PositionWindow::advance()
+bool PositionWindow::advance( const Index& advancepos)
 {
 	if (m_arsize < m_cardinality)
 	{
@@ -106,7 +106,12 @@ bool PositionWindow::advance()
 	// Change the position of the first element in the sliding window by the calculated size:
 	std::size_t idx = m_window[ 0];
 	PostingIteratorInterface* itr = m_itrar[ idx];
-	Index pos = itr->skipPos( m_posar[0] + skipsize);
+	Index pos = m_posar[0] + skipsize;
+	if (pos < advancepos)
+	{
+		pos = advancepos;
+	}
+	pos = itr->skipPos( pos);
 	if (pos)
 	{
 		// Rearrange array to be sorted again by positions:
@@ -154,6 +159,17 @@ bool PositionWindow::next()
 	do
 	{
 		if (!advance()) return false;
+	}
+	while (!m_windowsize);
+	return true;
+}
+
+bool PositionWindow::skip( const Index& pos)
+{
+	m_isnew_bitset = 0;
+	do
+	{
+		if (!advance( pos)) return false;
 	}
 	while (!m_windowsize);
 	return true;

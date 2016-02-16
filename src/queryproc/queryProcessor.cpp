@@ -81,6 +81,8 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	WeightingFunctionInterface* func;
 	if (0==(func=createWeightingFunctionBm25( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "bm25", func);
+	if (0==(func=createWeightingFunctionBm25pff( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "bm25pff", func);
 	if (0==(func=createWeightingFunctionTermFrequency( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "tf", func);
 	if (0==(func=createWeightingFunctionConstant( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));

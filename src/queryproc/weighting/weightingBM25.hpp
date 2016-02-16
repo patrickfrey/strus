@@ -56,20 +56,20 @@ public:
 	WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
-		float k1_,
-		float b_,
-		float avgDocLength_,
-		float nofCollectionDocuments_,
+		double k1_,
+		double b_,
+		double avgDocLength_,
+		double nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
 		ErrorBufferInterface* errorhnd_);
 
 	struct Feature
 	{
 		PostingIteratorInterface* itr;
-		float weight;
+		double weight;
 		double idf;
 
-		Feature( PostingIteratorInterface* itr_, float weight_, double idf_)
+		Feature( PostingIteratorInterface* itr_, double weight_, double idf_)
 			:itr(itr_),weight(weight_),idf(idf_){}
 		Feature( const Feature& o)
 			:itr(o.itr),weight(o.weight),idf(o.idf){}
@@ -84,10 +84,10 @@ public:
 	virtual double call( const Index& docno);
 
 private:
-	float m_k1;
-	float m_b;
-	float m_avgDocLength;
-	float m_nofCollectionDocuments;
+	double m_k1;
+	double m_b;
+	double m_avgDocLength;
+	double m_nofCollectionDocuments;
 	std::vector<Feature> m_featar;
 	MetaDataReaderInterface* m_metadata;
 	int m_metadata_doclen;
@@ -102,7 +102,7 @@ class WeightingFunctionInstanceBM25
 {
 public:
 	explicit WeightingFunctionInstanceBM25( ErrorBufferInterface* errorhnd_)
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_errorhnd(errorhnd_){}
+		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25(){}
 
@@ -117,9 +117,9 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	float m_b;
-	float m_k1;
-	float m_avgdoclen;
+	double m_k1;
+	double m_b;
+	double m_avgdoclen;
 	std::string m_attribute_doclen;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

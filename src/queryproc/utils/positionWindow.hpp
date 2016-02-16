@@ -32,6 +32,9 @@ public:
 	/// \brief Skip to the next window and return true, if there is one more:
 	bool next();
 
+	/// \brief Skip to the first window after pos and return true, if there is one more:
+	bool skip( const Index& pos);
+
 	/// \brief Return the number of elements of the current window (depends on evaluation type)
 	unsigned int size() const
 	{
@@ -71,8 +74,8 @@ private:
 	unsigned int getMinWinSize();
 	/// \brief Get the size of the current maximal window within a proximity range:
 	unsigned int getMaxWinSize();
-	/// \brief Advance to the next candidate:
-	bool advance();
+	/// \brief Advance to the next candidate (after advancepos if defined):
+	bool advance( const Index& advancepos=0);
 
 private:
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< element iterators
