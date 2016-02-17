@@ -67,7 +67,7 @@ public:
 	/// \param[in] windowsize_ maximum size of window to look for matches
 	/// \param[in] cardinality_ minimum number of features to look for in a window
 	/// \param[in] nofCollectionDocuments_ number of documents in the collection
-	/// \param[in] attribute_header_maxpos_ optional attribute in metadata that defines the last position in the document that belongs to the document header and should not be considered for summary
+	/// \param[in] metadata_title_maxpos_ optional attribute in metadata that defines the last position in the document that belongs to the document title and should not be considered for summary
 	/// \param[in] matchmark_ begin and marker for highlighting
 	/// \param[in] errorhnd_ error buffer interface
 	SummarizerFunctionContextMatchPhrase(
@@ -79,7 +79,7 @@ public:
 			unsigned int windowsize_,
 			unsigned int cardinality_,
 			double nofCollectionDocuments_,
-			const std::string& attribute_header_maxpos_,
+			const std::string& metadata_title_maxpos_,
 			const std::pair<std::string,std::string>& matchmark_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextMatchPhrase();
@@ -104,7 +104,7 @@ private:
 	unsigned int m_windowsize;				///< maximum window size
 	unsigned int m_cardinality;				///< window cardinality
 	double m_nofCollectionDocuments;			///< number of documents in the collection
-	int m_metadata_header_maxpos;				///< meta data element for maximum title position
+	int m_metadata_title_maxpos;				///< meta data element for maximum title position
 	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
@@ -142,7 +142,7 @@ public:
 
 private:
 	std::string m_type;
-	std::string m_attribute_title_maxpos;
+	std::string m_metadata_title_maxpos;
 	unsigned int m_sentencesize;
 	unsigned int m_windowsize;
 	unsigned int m_cardinality;

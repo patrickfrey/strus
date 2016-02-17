@@ -62,6 +62,7 @@ public:
 		unsigned int windowsize_,
 		unsigned int cardinality_,
 		double ffbase_,
+		double mindf_,
 		double avgDocLength_,
 		double titleinc_,
 		double nofCollectionDocuments_,
@@ -84,6 +85,7 @@ private:
 	unsigned int m_windowsize;				///< maximum position range of a window considered for weighting
 	unsigned int m_cardinality;				///< minumum number of features in a window considered for weighting
 	double m_ffbase;					///< constant base value of ff
+	double m_maxdf;						///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double m_avgDocLength;					///< average document length in the collection
 	double m_titleinc;					///< ff increment for title features
 	double m_nofCollectionDocuments;			///< number of documents in the collection
@@ -94,6 +96,7 @@ private:
 	std::size_t m_itrarsize;				///< number of weighted features
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
+	std::size_t m_nof_maxdf_features;			///< number of features with a df bigger than maximum
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
@@ -134,6 +137,7 @@ private:
 	unsigned int m_windowsize;			///< size of window for proximity weighting
 	unsigned int m_cardinality;			///< minimal number of query features in a window
 	double m_ffbase;				///< base used for feature frequency calculation
+	double m_maxdf;					///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

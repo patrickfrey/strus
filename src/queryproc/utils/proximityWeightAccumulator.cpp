@@ -56,8 +56,8 @@ void ProximityWeightAccumulator::weight_same_sentence(
 			}
 			if (si == structarsize)
 			{
-				ar[ window[ pi]] += incrar[ window[ wi]] * factor;
-				ar[ window[ wi]] += incrar[ window[ pi]] * factor;
+				ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * factor;
+				ar[ window[ wi]] += incrar[ window[ pi]] / (1.0 - incrar[ window[ wi]]) * factor;
 			}
 		}
 	}
@@ -76,8 +76,8 @@ void ProximityWeightAccumulator::weight_imm_follow(
 		if (window[wi] == window[wi-1]+1
 		&& featar[window[wi]]->posno() == featar[window[wi-1]]->posno()+1)
 		{
-			ar[ window[ wi]] += incrar[ window[ wi-1]] * factor;
-			ar[ window[ wi-1]] += incrar[ window[ wi]] * factor;
+			ar[ window[ wi]] += incrar[ window[ wi-1]] / (1.0 - incrar[ window[ wi]]) * factor;
+			ar[ window[ wi-1]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ wi-1]]) * factor;
 		}
 	}
 }
@@ -98,8 +98,8 @@ void ProximityWeightAccumulator::weight_invdist(
 		{
 			double dist = featar[ window[ pi]]->posno() - featar[ window[ wi]]->posno();
 			double weight = 1.0 / sqrt( dist+1);
-			ar[ window[ pi]] += incrar[ window[ wi]] * weight * factor;
-			ar[ window[ wi]] += incrar[ window[ pi]] * weight * factor;
+			ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * weight * factor;
+			ar[ window[ wi]] += incrar[ window[ pi]] / (1.0 - incrar[ window[ wi]]) * weight * factor;
 		}
 	}
 }

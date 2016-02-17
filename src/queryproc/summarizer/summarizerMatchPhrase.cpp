@@ -45,7 +45,7 @@
 #include <cstdlib>
 
 using namespace strus;
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const StorageClientInterface* storage_,
@@ -56,7 +56,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		unsigned int windowsize_,
 		unsigned int cardinality_,
 		double nofCollectionDocuments_,
-		const std::string& attribute_header_maxpos_,
+		const std::string& metadata_title_maxpos_,
 		const std::pair<std::string,std::string>& matchmark_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
@@ -68,7 +68,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_windowsize(windowsize_)
 	,m_cardinality(cardinality_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
-	,m_metadata_header_maxpos(attribute_header_maxpos_.empty()?-1:metadata_->elementHandle( attribute_header_maxpos_))
+	,m_metadata_title_maxpos(metadata_title_maxpos_.empty()?-1:metadata_->elementHandle( metadata_title_maxpos_))
 	,m_matchmark(matchmark_)
 	,m_itrarsize(0)
 	,m_structarsize(0)
@@ -187,6 +187,9 @@ static Candidate findCandidate(
 			prevPara = nextPara;
 			nextPara = callSkipPos( prevPara+1, paraar, parasize);
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "weighting window " << windowpos << "..." << (windowpos+windowspan) << " para " << prevPara << "|" << nextPara << std::endl;
+#endif
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
 		if (nextPara && nextPara < windowpos + windowspan) continue;
 
@@ -195,26 +198,44 @@ static Candidate findCandidate(
 
 		ProximityWeightAccumulator::weight_same_sentence(
 			weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize, structar, structarsize);
-
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "\taccumulated ff incr [same sentence] " << weightar.tostring() << std::endl;
+#endif
 		ProximityWeightAccumulator::weight_imm_follow(
 			weightar, 0.4, weightincr, window, windowsize, itrar, itrarsize);
-
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "\taccumulated ff incr [imm follow] " << weightar.tostring() << std::endl;
+#endif
 		ProximityWeightAccumulator::weight_invdist(
 			weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize);
-
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "\taccumulated ff incr [inv distance] " << weightar.tostring() << std::endl;
+#endif
 		if (windowpos - firstpos < 1000)
 		{
 			ProximityWeightAccumulator::weight_invpos(
 				weightar, 0.5, weightincr, firstpos, itrar, itrarsize);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "\taccumulated ff incr [inv distance begin] " << weightar.tostring() << std::endl;
+#endif
 		}
 		if (nextPara && windowpos >= nextPara)
 		{
 			// Weight inv distance to paragraph start:
 			ProximityWeightAccumulator::weight_invpos(
 				weightar, 0.3, weightincr, prevPara, itrar, itrarsize);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "\taccumulated ff incr [inv distance paragraph] " << weightar.tostring() << std::endl;
+#endif
 		}
 		weightar.multiply( idfar);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "\twindow feature weights: " << weightar.tostring() << std::endl;
+#endif
 		double weight = weightar.sum();
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "\twindow weight: " << weight << std::endl;
+#endif
 		// Select the best window:
 		if (weight > rt.weight)
 		{
@@ -235,6 +256,14 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
 		if (!m_initialized)
 		{
+			if (m_itrarsize == 0)
+			{
+				return std::vector<SummarizerFunctionContextInterface::SummaryElement>();
+			}
+			if (m_itrarsize < m_cardinality || m_cardinality == 0)
+			{
+				m_cardinality = m_itrarsize;
+			}
 			// initialize proportional ff increment weights
 			m_weightincr.init( m_itrarsize);
 			ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, 0.3, m_idfar);
@@ -248,10 +277,10 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 
 		// Define search start position:
 		Index firstpos = 1;
-		if (m_metadata_header_maxpos>=0)
+		if (m_metadata_title_maxpos>=0)
 		{
 			m_metadata->skipDoc( docno);
-			ArithmeticVariant firstposval = m_metadata->getValue( m_metadata_header_maxpos);
+			ArithmeticVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
 			firstpos = firstposval.toint()+1;
 		}
 		// Define best match to find:
@@ -260,7 +289,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			= findCandidate(
 				firstpos, m_idfar, m_weightincr, m_windowsize, m_cardinality,
 				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize);
-		if (candidate.span == 0 && m_metadata_header_maxpos>=0)
+		if (candidate.span == 0 && m_metadata_title_maxpos>=0)
 		{
 			//... we did not find a summary with m_cardinality terms, so we try to find one
 			//	without the terms appearing in the document title:
@@ -282,7 +311,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			if (noTitleSize && m_itrarsize > noTitleSize)
 			{
 				unsigned int cardinality = noTitleSize;
-				if (m_cardinality && m_cardinality < cardinality)
+				if (m_cardinality < cardinality)
 				{
 					cardinality = m_cardinality;
 				}
@@ -308,7 +337,16 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 
 		// Find the start of the abstract as start of the preceeding structure or paragraph marker:
 		std::size_t ti=0,te=m_paraarsize+m_structarsize;
-		Index astart = (Index)m_sentencesize + firstpos < candidate.pos ? (candidate.pos - (Index)m_sentencesize):firstpos;
+		Index astart;
+		if ((Index)m_sentencesize + firstpos < candidate.pos)
+		{
+			astart = candidate.pos - (Index)m_sentencesize;
+		}
+		else
+		{
+			astart = firstpos;
+			abstract.defined_start = true;
+		}
 		for (; ti<te && astart < candidate.pos; ++ti)
 		{
 			Index pos = m_structar[ti]->skipPos( astart);
@@ -331,7 +369,6 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				abstract.defined_end = true;
 			}
 		}
-
 		// Create the highlighted result, if exists:
 		if (abstract.span > 0)
 		{
@@ -402,9 +439,9 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_type = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "attribute_title_maxpos"))
+		else if (utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 		{
-			m_attribute_title_maxpos = value;
+			m_metadata_title_maxpos = value;
 		}
 		else if (utils::caseInsensitiveEquals( name, "mark"))
 		{
@@ -464,7 +501,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	}
 	else if (utils::caseInsensitiveEquals( name, "type")
 		|| utils::caseInsensitiveEquals( name, "mark")
-		|| utils::caseInsensitiveEquals( name, "attribute_title_maxpos"))
+		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
 	}
@@ -488,7 +525,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
 		return new SummarizerFunctionContextMatchPhrase(
 				storage, m_processor, metadata, m_type, m_sentencesize, m_windowsize, m_cardinality,
-				nofCollectionDocuments, m_attribute_title_maxpos, m_matchmark, m_errorhnd);
+				nofCollectionDocuments, m_metadata_title_maxpos, m_matchmark, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
 }
@@ -500,7 +537,7 @@ std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
 		std::ostringstream rt;
 		rt << "type='" << m_type
 			<< "', matchmark=(" << m_matchmark.first << "," << m_matchmark.second << ")"
-			<< "', attribute_title_maxpos='" << m_attribute_title_maxpos
+			<< "', metadata_title_maxpos='" << m_metadata_title_maxpos
 			<< "', sentencesize='" << m_sentencesize
 			<< "', windowsize='" << m_windowsize
 			<< "', cardinality='" << m_cardinality
@@ -530,8 +567,8 @@ SummarizerFunctionInterface::Description SummarizerFunctionMatchPhrase::getDescr
 		rt( Description::Param::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
 		rt( Description::Param::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
 		rt( Description::Param::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( Description::Param::Metadata, "attribute_title_maxpos", _TXT( "the metadata element that specifies the last title element. Only content is used for abstracting"), "1:");
-		rt( Description::Param::Numeric, "sentencesize", _TXT( "restrict the maximum lenght of sentences in summaries"), "1:");
+		rt( Description::Param::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Only content is used for abstracting"), "1:");
+		rt( Description::Param::Numeric, "sentencesize", _TXT( "restrict the maximum length of sentences in summaries"), "1:");
 		rt( Description::Param::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
 		rt( Description::Param::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
 		rt( Description::Param::String, "mark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
