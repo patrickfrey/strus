@@ -64,7 +64,6 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 {
 	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
 	if (m_type.empty()) throw strus::runtime_error(_TXT("type of forward index to extract not defined (parameter 'type')"));
-	if (m_var.empty()) throw strus::runtime_error(_TXT("variable to extract not defined (parameter 'var')"));
 }
 
 
@@ -80,28 +79,36 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 		if (utils::caseInsensitiveEquals( name, "match"))
 		{
 			std::vector<const PostingIteratorInterface*> varitr;
-			std::vector<SummarizationVariable>::const_iterator vi = variables.begin(), ve = variables.end();
-			for (; vi != ve; ++vi)
+			if (!m_var.empty())
 			{
-				if (utils::caseInsensitiveEquals( vi->name(), m_var))
+				std::vector<SummarizationVariable>::const_iterator vi = variables.begin(), ve = variables.end();
+				for (; vi != ve; ++vi)
 				{
-					varitr.push_back( vi->itr());
+					if (utils::caseInsensitiveEquals( vi->name(), m_var))
+					{
+						varitr.push_back( vi->itr());
+					}
 				}
 			}
 			if (m_features.size() >= 64)
 			{
 				m_errorhnd->report( _TXT("too many features (>64) defined for '%s' summarization"), "accuvariable");
 			}
-			else
+			else if (varitr.empty())
 			{
-				if (varitr.empty())
+				if (!m_var.empty())
 				{
 					m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_var.c_str(), "accuvariable");
 				}
 				else
 				{
+					varitr.push_back( itr);
 					m_features.push_back( SummarizationFeature( itr, varitr, weight));
 				}
+			}
+			else
+			{
+				m_features.push_back( SummarizationFeature( itr, varitr, weight));
 			}
 		}
 		else
@@ -162,14 +169,19 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			Index curpos = sumfeat.itr->skipPos( 0);
 			for (; curpos; curpos = sumfeat.itr->skipPos( curpos+1))
 			{
-				PosWeightMap::iterator wi = posWeightMap.find( curpos);
-				if (wi == posWeightMap.end())
+				std::vector<const PostingIteratorInterface*>::const_iterator
+					vi = sumfeat.varitr.begin(), ve = sumfeat.varitr.end();
+				for (;vi != ve; ++vi)
 				{
-					posWeightMap[ curpos] = sumfeat.weight;
-				}
-				else
-				{
-					wi->second *= sumfeat.weight;
+					PosWeightMap::iterator wi = posWeightMap.find( curpos);
+					if (wi == posWeightMap.end())
+					{
+						posWeightMap[ curpos] = sumfeat.weight;
+					}
+					else
+					{
+						wi->second *= sumfeat.weight;
+					}
 				}
 			}
 		}
@@ -281,9 +293,9 @@ std::string SummarizerFunctionInstanceAccumulateVariable::tostring() const
 	try
 	{
 		std::ostringstream rt;
-		rt << "type='" << m_type 
-			<< "', var='" << m_var << "', nof="
-			<< m_maxNofElements;
+		rt << "type='" << m_type << "'";
+		if (!m_var.empty()) rt << ", var='" << m_var << "'";
+		rt << ", nof=" << m_maxNofElements;
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "accuvariable", *m_errorhnd, std::string());
