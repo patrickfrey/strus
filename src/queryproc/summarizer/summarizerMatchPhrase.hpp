@@ -81,6 +81,8 @@ public:
 			double nofCollectionDocuments_,
 			const std::string& metadata_title_maxpos_,
 			const std::pair<std::string,std::string>& matchmark_,
+			const std::pair<std::string,std::string>& floatingmark_,
+			const std::string& startdocmark_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextMatchPhrase();
 
@@ -88,7 +90,7 @@ public:
 			const std::string& name,
 			PostingIteratorInterface* itr,
 			const std::vector<SummarizationVariable>&,
-			float /*weight*/,
+			float weight,
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
@@ -99,13 +101,15 @@ private:
 	const QueryProcessorInterface* m_processor;		///< query processor interface
 	MetaDataReaderInterface* m_metadata;			///< access metadata arguments
 	Reference<ForwardIteratorInterface> m_forwardindex;	///< forward index iterator
-	std::string m_type;					///< forward index type
+	std::string m_type;					///< forward index type to extract
 	unsigned int m_sentencesize;				///< search area for end of sentence
 	unsigned int m_windowsize;				///< maximum window size
 	unsigned int m_cardinality;				///< window cardinality
 	double m_nofCollectionDocuments;			///< number of documents in the collection
 	int m_metadata_title_maxpos;				///< meta data element for maximum title position
 	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
+	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
+	std::string m_startdocmark;				///< marker for the beginning of the document
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
@@ -126,7 +130,11 @@ class SummarizerFunctionInstanceMatchPhrase
 {
 public:
 	SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0)
+		,m_matchmark()
+		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
+		,m_startdocmark("| ")
+		,m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
 
@@ -141,14 +149,16 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_type;
-	std::string m_metadata_title_maxpos;
-	unsigned int m_sentencesize;
-	unsigned int m_windowsize;
-	unsigned int m_cardinality;
-	std::pair<std::string,std::string> m_matchmark;
-	const QueryProcessorInterface* m_processor;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	std::string m_type;					///< forward index type to extract
+	std::string m_metadata_title_maxpos;			///< name of metadata element for the last title element position 
+	unsigned int m_sentencesize;				///< search area for end of sentence
+	unsigned int m_windowsize;				///< maximum window size
+	unsigned int m_cardinality;				///< window cardinality
+	std::pair<std::string,std::string> m_matchmark;		///< highlight marker for matches
+	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
+	std::string m_startdocmark;				///< marker for the beginning of the document
+	const QueryProcessorInterface* m_processor;		///< query processor interface
+	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
