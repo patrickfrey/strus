@@ -32,6 +32,7 @@
 #include "private/internationalization.hpp"
 
 using namespace strus;
+#undef STRUS_READ_KEYMAPS_DURING_INSERTION
 
 KeyMap::KeyMap( DatabaseClientInterface* database_,
 		DatabaseKey::KeyPrefix prefix_,
@@ -56,13 +57,16 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		return mi->second;
 	}
 	Index rt;
+#ifdef STRUS_READ_KEYMAPS_DURING_INSERTION
 	if (m_dbadapter.load( name,rt))
 	{
 		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
 		isNew = false;
 	}
-	else if (m_allocator->immediate())
+	else
+#endif
+	if (m_allocator->immediate())
 	{
 		rt = m_allocator->getOrCreate( name, isNew);
 		m_map[ name] = rt;
