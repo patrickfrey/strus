@@ -50,7 +50,6 @@ StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
 		const MetaDataDescription* metadescr_,
-		const conotrie::CompactNodeTrie* termnomap_,
 		const Index& maxtypeno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
@@ -62,7 +61,7 @@ StorageTransaction::StorageTransaction(
 	,m_forwardIndexMap(database_,maxtypeno_)
 	,m_userAclMap(database_)
 	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
-	,m_termValueMap(database_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator(),termnomap_)
+	,m_termValueMap(database_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator())
 	,m_docIdMap(database_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
 	,m_userIdMap(database_,DatabaseKey::UserNamePrefix, storage_->createUsernoAllocator())
 	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())

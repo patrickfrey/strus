@@ -71,6 +71,8 @@ public:
 			const KeyMapInv& termTypeMapInv,
 			const KeyMapInv& termValueMapInv);
 
+	void print( std::ostream& out) const;
+
 private:
 	struct MapKey
 	{

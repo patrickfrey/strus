@@ -227,7 +227,7 @@ void InvertedIndexMap::renameNewNumbers(
 		}
 	}
 	InvTermMap::iterator di = m_invtermmap.begin(), de = m_invtermmap.end();
-	for (; di != de; ++di)
+	while (di != de)
 	{
 		if (KeyMap::isUnknown( di->first))
 		{
@@ -238,6 +238,10 @@ void InvertedIndexMap::renameNewNumbers(
 			}
 			m_invtermmap[ ri->second] = di->second;
 			m_invtermmap.erase( di++);
+		}
+		else
+		{
+			++di;
 		}
 	}
 	// Rename df:
@@ -530,4 +534,27 @@ void InvertedIndexMap::mergePosBlock(
 	}
 }
 
+void InvertedIndexMap::print( std::ostream& out) const
+{
+	out << "[typeno,termno,docno] to positions map:" << std::endl;
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	for (;mi != me; ++mi)
+	{
+		Index termno = BlockKey(mi->first.termkey).elem(2);
+		Index docno = mi->first.docno;
+		Index typeno = BlockKey( mi->first.termkey).elem(1);
+		std::vector<PosinfoBlock::PositionType>::const_iterator pi = m_posinfo.begin() + mi->second;
+		std::size_t nofpos = *pi++;
+		std::vector<PosinfoBlock::PositionType>::const_iterator pe = pi + nofpos;
+		out << "[termno=" << termno;
+		out << ", typeno=" << typeno;
+		out << ", docno=" << docno << "] ";
+		for (int pidx=0; pi != pe; ++pi,++pidx)
+		{
+			if (pidx) out << ", ";
+			out << *pi;
+		}
+		out << std::endl;
+	}
+}
 

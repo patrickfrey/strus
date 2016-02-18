@@ -72,11 +72,6 @@ void StorageClient::cleanup()
 		delete m_metaDataBlockCache; 
 		m_metaDataBlockCache = 0;
 	}
-	if (m_termno_map)
-	{
-		delete m_termno_map;
-		m_termno_map = 0;
-	}
 }
 
 StorageClient::StorageClient(
@@ -92,7 +87,6 @@ StorageClient::StorageClient(
 	,m_next_attribno(0)
 	,m_nof_documents(0)
 	,m_metaDataBlockCache(0)
-	,m_termno_map(0)
 	,m_statisticsProc(statisticsProc_)
 	,m_errorhnd(errorhnd_)
 {
@@ -203,11 +197,6 @@ StorageClient::~StorageClient()
 
 Index StorageClient::getTermValue( const std::string& name) const
 {
-	if (m_termno_map)
-	{
-		conotrie::CompactNodeTrie::NodeData cached_termno;
-		if (m_termno_map->get( name.c_str(), cached_termno)) return cached_termno;
-	}
 	return DatabaseAdapter_TermValue::Reader( m_database.get()).get( name);
 }
 
@@ -338,7 +327,7 @@ StorageTransactionInterface*
 			StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
 			m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 		}
-		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_termno_map, m_next_typeno.value(), m_errorhnd);
+		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }
@@ -702,7 +691,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 	if (!transaction.get()) throw strus::runtime_error(_TXT("error loading termno map"));
-	m_termno_map = new conotrie::CompactNodeTrie();
+	utils::UnorderedMap<std::string,Index> termno_map;
 	try
 	{
 		unsigned char const* si = (const unsigned char*)termnomap_source;
@@ -720,8 +709,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 			if (*si == '\n') ++si;
 
 			// [2] Check, if already loaded:
-			conotrie::CompactNodeTrie::NodeData dupkey;
-			if (m_termno_map->get( name.c_str(), dupkey)) continue;
+			if (termno_map.find( name) != termno_map.end()) continue;
 
 			// [3] Check, if already defined in storage:
 			DatabaseAdapter_TermValue::ReadWriter stor(m_database.get());
@@ -733,7 +721,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 				stor.store( transaction.get(), name, termno);
 			}
 			// [4] Register it in the map:
-			m_termno_map->set( name.c_str(), termno);
+			termno_map[ name] = termno;
 		}
 		transaction->commit();
 	}

@@ -30,6 +30,7 @@
 #define _STRUS_LVDB_KEY_MAP_INV_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/stringMap.hpp"
+#include "private/utils.hpp"
 #include <cstdlib>
 #include <string>
 #include <map>
@@ -55,9 +56,18 @@ public:
 		if (ei == m_map.end()) return 0;
 		return ei->second;
 	}
+	void clear()
+	{
+		m_map.clear();
+		m_strings.clear();
+	}
+	void erase( const Index& idx)
+	{
+		m_map.erase( idx);
+	}
 
 private:
-	typedef std::map<Index,const char*> Map;
+	typedef utils::UnorderedMap<Index,const char*> Map;
 	Map m_map;
 	StringVector m_strings;
 };

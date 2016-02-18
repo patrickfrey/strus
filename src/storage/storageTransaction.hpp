@@ -70,7 +70,6 @@ public:
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
 		const MetaDataDescription* metadescr_,
-		const conotrie::CompactNodeTrie* termnomap_,
 		const Index& maxtypeno_,
 		ErrorBufferInterface* errorhnd_);
 

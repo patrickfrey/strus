@@ -7,6 +7,7 @@ set(libstrus_shared_utils_source_files
 	cmdLineOpt.cpp
 	configParser.cpp
 	fileio.cpp
+	crc32.cpp
 	snprintf.c
 )
 

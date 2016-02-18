@@ -586,6 +586,12 @@ struct RandomQuery
 			:docno(o.docno),pos(o.pos){}
 		Match( unsigned int docno_, unsigned int pos_)
 			:docno(docno_),pos(pos_){}
+
+		bool operator < (const Match& o) const
+		{
+			if (docno == o.docno) return pos < o.pos;
+			return docno < o.docno;
+		}
 	};
 
 	std::vector<RandomDoc::Occurrence>::const_iterator
@@ -958,6 +964,26 @@ static bool compareMatches( const std::vector<RandomQuery::Match>& res, const st
 	return true;
 }
 
+/// \brief the assignement of document numbers is not transparent and the document numbers get not assigned
+///	in ascending order of insertion. We have to query the storage to get the document numbers assigned.
+static std::vector<strus::Index> getDocnoMap(
+		const strus::StorageClientInterface* storage,
+		const std::vector<RandomDoc>& docar)
+{
+	std::vector<strus::Index> rt;
+	rt.resize( docar.size(), 0);
+	std::size_t docidx=0;
+	for (; docidx<docar.size(); ++docidx)
+	{
+		strus::Index docno = storage->documentNumber( docar[ docidx].docid);
+		if (docno <= 0 || docno > (strus::Index)rt.size()) throw std::runtime_error( std::string( "unexpected document number for docid ") + docar[ docidx].docid);
+		if (rt[ docidx] != 0) throw std::runtime_error( std::string( "duplicated document number for docid ") + docar[ docidx].docid);
+		rt[ docidx] = docno;
+	}
+	return rt;
+}
+
+
 static unsigned int getUintValue( const char* arg)
 {
 	unsigned int rt = 0, prev = 0;
@@ -1104,6 +1130,9 @@ int main( int argc, const char* argv[])
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
 			transaction->commit();
+
+			// Calculate the map that assigns document ids from the random collection to document numbers:
+			std::vector<strus::Index> docnomap = getDocnoMap( storage.get(), collection.docar); 
 	
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 			std::auto_ptr<strus::QueryProcessorInterface> 
@@ -1154,7 +1183,18 @@ int main( int argc, const char* argv[])
 				for (; ri != re && qi != qe; ++qi,++ri)
 				{
 					arglen += qi->arg.size();
-					std::vector<RandomQuery::Match> expected_matches = qi->expectedMatches( collection);
+					std::vector<RandomQuery::Match> expected_matches
+						= qi->expectedMatches( collection);
+					// Map document numbers to their correct value:
+					std::vector<RandomQuery::Match>::iterator
+						ei = expected_matches.begin(), ee = expected_matches.end();
+					for (;ei != ee; ++ei)
+					{
+						ei->docno = docnomap[ ei->docno-1];
+					}
+					std::sort( expected_matches.begin(), ee = expected_matches.end());
+
+					// Compare the matches:
 					if (!compareMatches( *ri, expected_matches, collection))
 					{
 						std::cerr << "ERROR random query operation failed: " << qi->tostring( collection) << std::endl;

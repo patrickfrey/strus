@@ -31,7 +31,7 @@
 #include "strus/index.hpp"
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
-#include "compactNodeTrie.hpp"
+#include "private/utils.hpp"
 #include "private/stringMap.hpp"
 #include <cstdlib>
 #include <string>
@@ -52,21 +52,12 @@ class KeyMapInv;
 class KeyMap
 {
 public:
-	/// \brief Maximum size of key to insert into the cache
-	enum {DefaultMaxCachedKeyLen=20};
-
 	KeyMap( DatabaseClientInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
-			KeyAllocatorInterface* allocator_,
-			const conotrie::CompactNodeTrie* globalmap_=0);
+			KeyAllocatorInterface* allocator_);
 	~KeyMap()
 	{
 		delete m_allocator;
-	}
-
-	void defineMaxCachedKeyLen( unsigned int maxCachedKeyLen_)
-	{
-		m_maxCachedKeyLen = maxCachedKeyLen_;
 	}
 
 	void defineInv( KeyMapInv* invmap)
@@ -88,10 +79,7 @@ public:
 		return value > UnknownValueHandleStart;
 	}
 
-	void deleteKey( const std::string& name)
-	{
-		m_deletedlist.push_back( name.c_str());
-	}
+	void deleteKey( const std::string& name);
 
 private:
 	void clear();
@@ -100,14 +88,11 @@ private:
 	enum {
 		UnknownValueHandleStart=(1<<30)
 	};
-	typedef StringMap<Index> OverflowMap;
 
 private:
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
-	unsigned int m_maxCachedKeyLen;
-	conotrie::CompactNodeTrie m_map;
-	OverflowMap m_overflowmap;
-	const conotrie::CompactNodeTrie* m_globalmap;
+	typedef StringMap<Index> Map;
+	Map m_map;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
 	KeyMapInv* m_invmap;
