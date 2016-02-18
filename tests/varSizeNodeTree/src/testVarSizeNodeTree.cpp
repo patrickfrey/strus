@@ -32,7 +32,6 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
-#include <map>
 #include <string>
 #include <vector>
 #include <ctime>
@@ -84,7 +83,7 @@ int main( int argc, const char** argv)
 		{
 			throw std::runtime_error( std::string("bad values for arguments <nof inserts> <nof queries> (2 non negative integers expected): ") + e.what());
 		}
-		typedef std::map<std::string,conotrie::CompactNodeTrie::NodeData> TestMap;
+		typedef strus::utils::UnorderedMap<std::string,conotrie::CompactNodeTrie::NodeData> TestMap;
 		TestMap testmap;
 		conotrie::CompactNodeTrie origmap;
 		std::vector<std::string> keyar;
@@ -135,7 +134,7 @@ int main( int argc, const char** argv)
 			}
 		}
 		duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-		std::cerr << "queried STL map with " << nofQueries << " random selected keys in " << doubleToString(duration) << " seconds" << std::endl;
+		std::cerr << "queried boost unordered map with " << nofQueries << " random selected keys in " << doubleToString(duration) << " seconds" << std::endl;
 
 		start = std::clock();
 		for (ii=0; ii<nofQueries; ++ii)

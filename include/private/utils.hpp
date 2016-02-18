@@ -37,6 +37,7 @@
 #include <stdint.h>			///... boost atomic needs this
 #include <boost/atomic/atomic.hpp>
 #include <boost/static_assert.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace strus {
 namespace utils {
@@ -52,6 +53,15 @@ std::string tostring( int val);
 void aligned_free( void *ptr);
 void* aligned_malloc( std::size_t size, std::size_t alignment);
 
+template<typename Key, typename Elem>
+class UnorderedMap
+	:public boost::unordered_map<Key,Elem>
+{
+public:
+	UnorderedMap(){}
+	UnorderedMap( const UnorderedMap& o)
+		:boost::unordered_map<Key,Elem>(){}
+};
 
 class DynamicBitset
 {
