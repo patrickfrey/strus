@@ -115,13 +115,6 @@ bool Accumulator::nextRank(
 		}
 		m_visited.set( m_docno-1);
 
-		// Check meta data restrictions:
-		m_metadata->skipDoc( m_docno);
-		if (!matchesMetaDataRestriction( m_metaDataRestrictionSets, m_metadata))
-		{
-			continue;
-		}
-
 		// Check if any ACL restriction (alternatives combined with OR):
 		if (m_aclRestrictions.size())
 		{
@@ -160,6 +153,15 @@ bool Accumulator::nextRank(
 			}
 		}
 
+		++m_nofDocumentsVisited;
+
+		// Check meta data restrictions:
+		m_metadata->skipDoc( m_docno);
+		if (!matchesMetaDataRestriction( m_metaDataRestrictionSets, m_metadata))
+		{
+			continue;
+		}
+
 		// Check feature restrictions:
 		std::vector<SelectorPostings>::const_iterator
 			ri = m_featureRestrictions.begin(),
@@ -177,6 +179,7 @@ bool Accumulator::nextRank(
 		docno = m_docno;
 		selectorState = m_selectorPostings[ m_selectoridx].setindex;
 		weight = 0.0;
+		++m_nofDocumentsRanked;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "Checking document " << m_docno << std::endl;
@@ -189,7 +192,7 @@ bool Accumulator::nextRank(
 			float weight_result = ai->executionContext->call( m_docno) * ai->weight;
 			weight += weight_result * ai->weight;
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
+			std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
 #endif
 		}
 		return true;

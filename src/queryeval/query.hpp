@@ -95,7 +95,7 @@ public:
 	virtual void defineGlobalStatistics(
 			const GlobalStatistics& stats_);
 
-	virtual std::vector<ResultDocument> evaluate();
+	virtual QueryResult evaluate();
 
 public:
 	typedef int NodeAddress;

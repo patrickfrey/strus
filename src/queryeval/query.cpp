@@ -480,7 +480,7 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 	return si->second;
 }
 
-std::vector<ResultDocument> Query::evaluate()
+QueryResult Query::evaluate()
 {
 	const char* evaluationPhase = "query feature postings initialization";
 	try
@@ -492,17 +492,17 @@ std::vector<ResultDocument> Query::evaluate()
 		// [1] Check initial conditions:
 		if (m_nofRanks == 0)
 		{
-			return std::vector<ResultDocument>();
+			return QueryResult();
 		}
 		if (m_queryEval->weightingFunctions().empty())
 		{
 			m_errorhnd->report( _TXT( "cannot evaluate query, no weighting function defined"));
-			return std::vector<ResultDocument>();
+			return QueryResult();
 		}
 		if (m_queryEval->selectionSets().empty())
 		{
 			m_errorhnd->report( _TXT( "cannot evaluate query, no selection features defined"));
-			return std::vector<ResultDocument>();
+			return QueryResult();
 		}
 		NodeStorageDataMap nodeStorageDataMap;
 
@@ -515,7 +515,7 @@ std::vector<ResultDocument> Query::evaluate()
 			{
 				Reference<PostingIteratorInterface> postingsElem(
 					createNodePostingIterator( fi->node, nodeStorageDataMap));
-				if (!postingsElem.get()) return std::vector<ResultDocument>();
+				if (!postingsElem.get()) return QueryResult();
 				postings.push_back( postingsElem);
 			}
 		}
@@ -644,9 +644,8 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
-		std::vector<ResultDocument> rt;
+		std::vector<ResultDocument> ranks;
 		Ranker ranker( m_nofRanks + m_minRank);
-	
 		Index docno = 0;
 		unsigned int state = 0;
 		unsigned int prev_state = 0;
@@ -657,6 +656,7 @@ std::vector<ResultDocument> Query::evaluate()
 			ranker.insert( WeightedDocument( docno, weight));
 			if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
 			{
+				state = prev_state;
 				break;
 			}
 			prev_state = state;
@@ -718,8 +718,8 @@ std::vector<ResultDocument> Query::evaluate()
 			std::vector<ResultDocument::Attribute> attr;
 			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
 				si = summarizers.begin(), se = summarizers.end();
-	
-			rt.push_back( ResultDocument( *ri));
+
+			ranks.push_back( ResultDocument( *ri));
 			for (std::size_t sidx=0; si != se; ++si,++sidx)
 			{
 				std::vector<SummarizerFunctionContextInterface::SummaryElement>
@@ -728,15 +728,15 @@ std::vector<ResultDocument> Query::evaluate()
 					ci = summary.begin(), ce = summary.end();
 				for (; ci != ce; ++ci)
 				{
-					rt.back().addAttribute(
+					ranks.back().addAttribute(
 							m_queryEval->summarizers()[sidx].resultAttribute(),
 							ci->text(), ci->weight());
 				}
 			}
 		}
-		return rt;
+		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, std::vector<ResultDocument>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, QueryResult());
 }
 
 

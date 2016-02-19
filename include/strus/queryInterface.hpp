@@ -31,7 +31,7 @@
 #ifndef _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #include "strus/storageClientInterface.hpp"
-#include "strus/resultDocument.hpp"
+#include "strus/queryResult.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/termStatistics.hpp"
 #include "strus/globalStatistics.hpp"
@@ -132,7 +132,7 @@ public:
 	virtual void addUserName( const std::string& username_)=0;
 
 	/// \brief Evaluate the query
-	virtual std::vector<ResultDocument> evaluate()=0;
+	virtual QueryResult evaluate()=0;
 };
 
 }//namespace

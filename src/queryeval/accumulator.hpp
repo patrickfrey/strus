@@ -59,6 +59,7 @@ class InvAclIteratorInterface;
 
 /// \class Accumulator
 /// \brief Accumulator for weights of matches
+/// \remark This class represents an object that should be used only one time, for one ranklist calculation. It keeps its state.
 class Accumulator
 {
 public:
@@ -77,6 +78,8 @@ public:
 		,m_visited(maxDocumentNumber_)
 		,m_maxNofRanks(maxNofRanks_)
 		,m_maxDocumentNumber(maxDocumentNumber_)
+		,m_nofDocumentsRanked(0)
+		,m_nofDocumentsVisited(0)
 		,m_evaluationSetIterator(0)
 	{}
 
@@ -98,6 +101,9 @@ public:
 	void addAlternativeAclRestriction( InvAclIteratorInterface* iterator);
 
 	bool nextRank( Index& docno, unsigned int& selectorState, float& weight);
+
+	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
+	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}
 
 private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
@@ -140,6 +146,8 @@ private:
 	utils::DynamicBitset m_visited;
 	std::size_t m_maxNofRanks;
 	Index m_maxDocumentNumber;
+	unsigned int m_nofDocumentsRanked;
+	unsigned int m_nofDocumentsVisited;
 	PostingIteratorInterface* m_evaluationSetIterator;
 };
 
