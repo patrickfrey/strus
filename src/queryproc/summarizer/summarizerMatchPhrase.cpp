@@ -382,6 +382,10 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 					abstract.span = eospos - abstract.start + 1;
 					abstract.defined_end = true;
 				}
+				else
+				{
+					abstract.span = m_sentencesize;
+				}
 			}
 		}
 		// Create the highlighted result, if exists:
