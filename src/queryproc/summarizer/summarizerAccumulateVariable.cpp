@@ -51,6 +51,7 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
 		const std::string& var_,
+		double norm_,
 		unsigned int maxNofElements_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
@@ -58,6 +59,7 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 	,m_forwardindex(storage_->createForwardIterator( type_))
 	,m_type(type_)
 	,m_var(var_)
+	,m_norm(norm_)
 	,m_maxNofElements(maxNofElements_)
 	,m_features()
 	,m_errorhnd(errorhnd_)
@@ -202,7 +204,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				if (m_forwardindex->skipPos( ri->idx) == ri->idx)
 				{
 					rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
-							m_forwardindex->fetch(), ri->weight));
+							m_forwardindex->fetch(), ri->weight * m_norm));
 				}
 			}
 		}
@@ -213,7 +215,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				if (m_forwardindex->skipPos( wi->first) == wi->first)
 				{
 					rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
-							m_forwardindex->fetch(), wi->second));
+							m_forwardindex->fetch(), wi->second * m_norm));
 				}
 			}
 		}
@@ -239,9 +241,13 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 		{
 			m_var = value;
 		}
+		else if (utils::caseInsensitiveEquals( name, "norm"))
+		{
+			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "norm");
+		}
 		else if (utils::caseInsensitiveEquals( name, "nof"))
 		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "accuvariable");
+			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "nof");
 		}
 		else
 		{
@@ -266,6 +272,10 @@ void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const st
 	{
 		m_maxNofElements = value.touint();
 	}
+	else if (utils::caseInsensitiveEquals( name, "norm"))
+	{
+		m_norm = value.tofloat();
+	}
 	else
 	{
 		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "accuvariable", name.c_str());
@@ -283,7 +293,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateVariable
 	}
 	try
 	{
-		return new SummarizerFunctionContextAccumulateVariable( storage, m_processor, m_type, m_var, m_maxNofElements, m_errorhnd);
+		return new SummarizerFunctionContextAccumulateVariable( storage, m_processor, m_type, m_var, m_norm, m_maxNofElements, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "accuvariable", *m_errorhnd, 0);
 }
@@ -296,6 +306,7 @@ std::string SummarizerFunctionInstanceAccumulateVariable::tostring() const
 		rt << "type='" << m_type << "'";
 		if (!m_var.empty()) rt << ", var='" << m_var << "'";
 		rt << ", nof=" << m_maxNofElements;
+		rt << ", norm=" << m_norm;
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "accuvariable", *m_errorhnd, std::string());
@@ -321,7 +332,8 @@ SummarizerFunctionInterface::Description SummarizerFunctionAccumulateVariable::g
 		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
 		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		rt( Description::Param::String, "var", _TXT( "the name of the variable referencing the content to weight"), "");
-		rt( Description::Param::String, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"), "1:");
+		rt( Description::Param::Numeric, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"), "1:");
+		rt( Description::Param::Numeric, "norm", _TXT( "the normalization factor of the calculated weights (default 1.0)"), "0.0:1.0");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "accuvariable", *m_errorhnd, SummarizerFunctionInterface::Description());

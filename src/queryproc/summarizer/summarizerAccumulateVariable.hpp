@@ -63,13 +63,16 @@ public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] type_ type of the forward index tokens to build the summary with
-	/// \param[in] delimiter_ delimiter to print between multiple output elements
-	/// \param[in] assing_ assingment operator to use for output
+	/// \param[in] var_ variable to extract
+	/// \param[in] norm_ weight normalization factor
+	/// \param[in] maxNofElements_ number of best matches to inspect
+	/// \param[in] errorhnd_ error buffer
 	SummarizerFunctionContextAccumulateVariable(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			const std::string& var_,
+			double norm_,
 			unsigned int maxNofElements_,
 			ErrorBufferInterface* errorhnd_);
 
@@ -103,6 +106,7 @@ private:
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_type;
 	std::string m_var;
+	double m_norm;
 	unsigned int m_maxNofElements;
 	std::vector<SummarizationFeature> m_features;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -114,7 +118,7 @@ class SummarizerFunctionInstanceAccumulateVariable
 {
 public:
 	SummarizerFunctionInstanceAccumulateVariable( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_var(),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_var(),m_norm(1.0),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAccumulateVariable(){}
 
@@ -129,11 +133,12 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_type;
-	std::string m_var;
-	unsigned int m_maxNofElements;
-	const QueryProcessorInterface* m_processor;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	std::string m_type;				///< forward index type to extract
+	std::string m_var;				///< variable name to extract for accumulation
+	double m_norm;					///< normalization factor
+	unsigned int m_maxNofElements;			///< number of best matches to inspect
+	const QueryProcessorInterface* m_processor;	///< query processor
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 
