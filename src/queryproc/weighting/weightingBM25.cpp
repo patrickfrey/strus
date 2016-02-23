@@ -134,7 +134,7 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), WEIGHTING_SCHEME_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "doclen"))
+		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_attribute_doclen = value;
 			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
@@ -223,7 +223,7 @@ WeightingFunctionInterface::Description WeightingFunctionBM25::getDescription() 
 		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"), "1:1000");
 		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"), "0.0001:1000");
 		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
-		rt( Description::Param::Metadata, "doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
+		rt( Description::Param::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, WeightingFunctionInterface::Description());
