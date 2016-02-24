@@ -69,11 +69,12 @@ public:
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getOverallSummary()		{return std::vector<SummaryElement>();}
 
 private:
-	AttributeReaderInterface* m_attribreader;
-	std::string m_attribname;
-	int m_attrib;
+	AttributeReaderInterface* m_attribreader;			///< attribute reader interface
+	std::string m_attribname;					///< attribute name to output
+	int m_attrib;							///< attribute handle to output
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -100,7 +101,7 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_name;
+	std::string m_name;						///< attribute name to output
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

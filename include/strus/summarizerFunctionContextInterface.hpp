@@ -64,10 +64,14 @@ public:
 			float weight_,
 			const TermStatistics& stats_)=0;
 
-	/// \brief Get some summarization elements
+	/// \brief Get the summarization elements for one document
 	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
 	virtual std::vector<SummaryElement> getSummary( const Index& docno)=0;
+
+	/// \brief Get the summarization elements over all documents queried (global query summarization over all getSummary calls)
+	/// \return the summarization elements
+	virtual std::vector<SummaryElement> getOverallSummary()=0;
 };
 
 }//namespace

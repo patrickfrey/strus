@@ -78,11 +78,11 @@ std::vector<SummaryElement>
 			{
 				unsigned int kk=0;
 				Index pos = (*ii)->skipPos( 0);
-				for (; pos && kk<m_maxNofMatches; ++kk,pos = (*ii)->skipPos( pos+1))
+				for (int gidx=0; pos && kk<m_maxNofMatches; ++kk,pos = (*ii)->skipPos( pos+1))
 				{
 					char posstr[ 64];
 					snprintf( posstr, sizeof(posstr), "%u", (unsigned int)pos);
-					rt.push_back( SummaryElement( m_resultname, posstr));
+					rt.push_back( SummaryElement( m_resultname, posstr, 1.0, gidx));
 				}
 			}
 		}

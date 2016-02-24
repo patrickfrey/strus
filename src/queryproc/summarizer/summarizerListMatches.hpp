@@ -64,12 +64,13 @@ public:
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getOverallSummary()		{return std::vector<SummaryElement>();}
 
 private:
-	const StorageClientInterface* m_storage;
-	std::vector<PostingIteratorInterface*> m_itrs;
-	std::string m_resultname;
-	unsigned int m_maxNofMatches;
+	const StorageClientInterface* m_storage;			///< storage interface
+	std::vector<PostingIteratorInterface*> m_itrs;			///< iterators for summarization
+	std::string m_resultname;					///< result element name
+	unsigned int m_maxNofMatches;					///< maximum number of matches to list
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -95,8 +96,8 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_resultname;
-	unsigned int m_maxNofMatches;
+	std::string m_resultname;					///< result element name
+	unsigned int m_maxNofMatches;					///< maximum number of matches to list
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

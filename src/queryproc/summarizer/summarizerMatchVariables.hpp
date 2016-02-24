@@ -79,6 +79,7 @@ public:
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getOverallSummary()		{return std::vector<SummaryElement>();}
 
 private:
 	struct SummarizationFeature

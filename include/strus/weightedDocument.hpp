@@ -49,13 +49,13 @@ public:
 	WeightedDocument( const WeightedDocument& o)
 		:m_docno(o.m_docno),m_weight(o.m_weight){}
 	/// \brief Constructor
-	WeightedDocument( const Index& docno_, float weight_)
+	WeightedDocument( const Index& docno_, double weight_)
 		:m_docno(docno_),m_weight(weight_){}
 
 	/// \brief Get the document number of the result
 	Index docno() const					{return m_docno;}
 	/// \brief Get the accumulated weight of the ranking of the result
-	float weight() const					{return m_weight;}
+	double weight() const					{return m_weight;}
 
 	/// \brief Comparison for sorting
 	bool operator < ( const WeightedDocument& o) const
@@ -86,7 +86,7 @@ public:
 
 private:
 	Index m_docno;			///< document number
-	float m_weight;			///< accumulated ranking weight
+	double m_weight;		///< accumulated ranking weight
 };
 
 }//namespace

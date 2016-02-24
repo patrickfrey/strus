@@ -86,6 +86,7 @@ public:
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getOverallSummary()		{return std::vector<SummaryElement>();}
 
 private:
 	struct SummarizationFeature
@@ -101,14 +102,14 @@ private:
 	};
 
 private:
-	const StorageClientInterface* m_storage;
-	const QueryProcessorInterface* m_processor;
-	Reference<ForwardIteratorInterface> m_forwardindex;
-	std::string m_type;
-	std::string m_var;
-	double m_norm;
-	unsigned int m_maxNofElements;
-	std::vector<SummarizationFeature> m_features;
+	const StorageClientInterface* m_storage;			///< storage interface
+	const QueryProcessorInterface* m_processor;			///< query processor
+	Reference<ForwardIteratorInterface> m_forwardindex;		///< forward index interface
+	std::string m_type;						///< forward index type for extraction of result elements
+	std::string m_var;						///< name of variable to accumulate
+	double m_norm;							///< normalization factor for end result weights
+	unsigned int m_maxNofElements;					///< maximum number of best elements to return
+	std::vector<SummarizationFeature> m_features;			///< features used for summarization
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
