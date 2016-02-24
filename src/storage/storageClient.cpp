@@ -32,6 +32,7 @@
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
+#include "strus/documentTermIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -52,6 +53,7 @@
 #include "nullIterator.hpp"
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
+#include "documentTermIterator.hpp"
 #include "indexPacker.hpp"
 #include "attributeReader.hpp"
 #include "keyAllocatorInterface.hpp"
@@ -285,6 +287,17 @@ ForwardIteratorInterface*
 		return new ForwardIterator( this, m_database.get(), type, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating forward iterator: %s"), *m_errorhnd, 0);
+}
+
+DocumentTermIteratorInterface*
+	StorageClient::createDocumentTermIterator(
+		const std::string& type) const
+{
+	try
+	{
+		return new DocumentTermIterator( this, m_database.get(), type, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating term occurrence iterator: %s"), *m_errorhnd, 0);
 }
 
 class InvertedAclIterator

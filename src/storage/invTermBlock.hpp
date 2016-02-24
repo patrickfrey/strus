@@ -45,13 +45,14 @@ public:
 		Index typeno;
 		Index termno;
 		Index ff;
+		Index firstpos;
 
 		Element()
-			:typeno(0),termno(0),ff(0){}
+			:typeno(0),termno(0),ff(0),firstpos(0){}
 		Element( const Element& o)
-			:typeno(o.typeno),termno(o.termno),ff(o.ff){}
-		Element( const Index& typeno_, const Index& termno_, const Index& ff_)
-			:typeno(typeno_),termno(termno_),ff(ff_){}
+			:typeno(o.typeno),termno(o.termno),ff(o.ff),firstpos(o.firstpos){}
+		Element( const Index& typeno_, const Index& termno_, const Index& ff_, const Index& firstpos_)
+			:typeno(typeno_),termno(termno_),ff(ff_),firstpos(firstpos_){}
 	};
 
 public:
@@ -80,7 +81,7 @@ public:
 
 	const char* next( const char* ref) const;
 
-	void append( const Index& typeno, const Index& termno, const Index& ff);
+	void append( const Index& typeno, const Index& termno, const Index& ff, const Index& firstpos);
 };
 
 }//namespace

@@ -17,6 +17,7 @@ set( libstrus_storage_source_files
 	forwardIndexBlock.cpp
 	forwardIndexMap.cpp
 	forwardIterator.cpp
+	documentTermIterator.cpp
 	indexPacker.cpp
 	indexSetIterator.cpp
 	invertedIndexMap.cpp

@@ -39,6 +39,7 @@ InvTermBlock::Element InvTermBlock::element_at( const char* itr) const
 	rt.typeno = unpackIndex( ri, charend());
 	rt.termno = unpackIndex( ri, charend());
 	rt.ff = unpackIndex( ri, charend());
+	rt.firstpos = unpackIndex( ri, charend());
 	return rt;
 }
 
@@ -49,15 +50,17 @@ const char* InvTermBlock::next( const char* ref) const
 	ri = skipIndex( ri, charend());
 	ri = skipIndex( ri, charend());
 	ri = skipIndex( ri, charend());
+	ri = skipIndex( ri, charend());
 	return ri;
 }
 
-void InvTermBlock::append( const Index& typeno, const Index& termno, const Index& ff)
+void InvTermBlock::append( const Index& typeno, const Index& termno, const Index& ff, const Index& firstpos)
 {
 	std::string elem;
 	packIndex( elem, typeno);
 	packIndex( elem, termno);
 	packIndex( elem, ff);
+	packIndex( elem, firstpos);
 	DataBlock::append( elem.c_str(), elem.size());
 }
 

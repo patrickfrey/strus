@@ -36,12 +36,31 @@ using namespace strus;
 
 KeyMap::KeyMap( DatabaseClientInterface* database_,
 		DatabaseKey::KeyPrefix prefix_,
+		DatabaseKey::KeyPrefix invprefix_,
 		KeyAllocatorInterface* allocator_)
-	:m_dbadapter(prefix_,database_)
+	:m_database(database_)
+	,m_dbadapter(prefix_,database_)
+	,m_dbadapterinv(invprefix_,database_)
 	,m_unknownHandleCount(0)
 	,m_allocator(allocator_)
 	,m_invmap(0)
 {}
+
+KeyMap::KeyMap( DatabaseClientInterface* database_,
+		DatabaseKey::KeyPrefix prefix_,
+		KeyAllocatorInterface* allocator_)
+	:m_database(database_)
+	,m_dbadapter(prefix_,database_)
+	,m_dbadapterinv(0,0)
+	,m_unknownHandleCount(0)
+	,m_allocator(allocator_)
+	,m_invmap(0)
+{}
+
+void KeyMap::defineInv( KeyMapInv* invmap_)
+{
+	m_invmap = invmap_;
+}
 
 Index KeyMap::lookUp( const std::string& name)
 {
@@ -71,6 +90,7 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		rt = m_allocator->getOrCreate( name, isNew);
 		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
+		if (m_dbadapterinv.defined()) m_dbadapterinv.storeImm( rt, name);
 		isNew = true;
 	}
 	else
@@ -88,14 +108,25 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	return rt;
 }
 
-void KeyMap::getWriteBatch(
-	DatabaseTransactionInterface* transaction)
+void KeyMap::deleteAllFromDeletedList( DatabaseTransactionInterface* transaction)
 {
 	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
 	for (; di != de; ++di)
 	{
+		if (m_dbadapterinv.defined())
+		{
+			Index value;
+			m_dbadapter.load( *di, value);
+			m_dbadapterinv.remove( transaction, value);
+		}
 		m_dbadapter.remove( transaction, *di);
 	}
+}
+
+void KeyMap::getWriteBatch(
+	DatabaseTransactionInterface* transaction)
+{
+	deleteAllFromDeletedList( transaction);
 	// Clear maps:
 	clear();
 }
@@ -104,11 +135,8 @@ void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
 		DatabaseTransactionInterface* transaction)
 {
-	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
-	for (; di != de; ++di)
-	{
-		m_dbadapter.remove( transaction, *di);
-	}
+	deleteAllFromDeletedList( transaction);
+
 	Map::iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
@@ -119,6 +147,7 @@ void KeyMap::getWriteBatch(
 			{
 				idx = m_allocator->alloc();
 				m_dbadapter.store( transaction, mi->first, idx);
+				if (m_dbadapterinv.defined()) m_dbadapterinv.store( transaction, idx, mi->first);
 			}
 			rewriteUnknownMap[ mi->second] = idx;
 			if (m_invmap) m_invmap->set( idx, mi->first);
@@ -151,7 +180,10 @@ void KeyMap::clear()
 {
 	m_map.clear();
 	m_unknownHandleCount = 0;
-	if (m_invmap) m_invmap->clear();
+	if (m_invmap)
+	{
+		m_invmap->clear();
+	}
 	m_deletedlist.clear();
 }
 

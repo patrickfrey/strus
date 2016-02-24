@@ -139,6 +139,8 @@ public:
 		Reader( char prefix_, const DatabaseClientInterface* database_)
 			:m_prefix(prefix_),m_database(database_){}
 	
+		bool defined()		{return m_prefix != 0;}
+
 		bool load( const Index& key, std::string& value) const;
 	
 	private:
@@ -151,7 +153,9 @@ public:
 	public:
 		Writer( char prefix_, DatabaseClientInterface* database_)
 			:m_prefix(prefix_),m_database(database_){}
-	
+
+		bool defined()		{return m_prefix != 0;}
+
 		void store( DatabaseTransactionInterface* transaction, const Index& key, const char* value);
 		void remove( DatabaseTransactionInterface* transaction, const Index& key);
 		void storeImm( const Index& key, const std::string& value);
@@ -169,6 +173,8 @@ public:
 		ReadWriter( char prefix_, DatabaseClientInterface* database_)
 			:Reader(prefix_,database_)
 			,Writer(prefix_,database_){}
+
+		bool defined()		{return Reader::defined();}
 	};
 };
 
@@ -176,6 +182,7 @@ public:
 template <char KeyPrefix>
 struct DatabaseAdapter_TypedStringIndex
 {
+public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
@@ -210,19 +217,20 @@ struct DatabaseAdapter_TypedStringIndex
 template <char KeyPrefix>
 struct DatabaseAdapter_TypedIndexString
 {
+public:
 	class Reader
-		:public DatabaseAdapter_StringIndex::Reader
+		:public DatabaseAdapter_IndexString::Reader
 	{
 	public:
 		Reader( const DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Reader( KeyPrefix, database_){}
+			:DatabaseAdapter_IndexString::Reader( KeyPrefix, database_){}
 	};
 	class Writer
-		:public DatabaseAdapter_StringIndex::Writer
+		:public DatabaseAdapter_IndexString::Writer
 	{
 	public:
 		Writer( DatabaseClientInterface* database_)
-			:DatabaseAdapter_StringIndex::Writer( KeyPrefix, database_){}
+			:DatabaseAdapter_IndexString::Writer( KeyPrefix, database_){}
 	};
 	class ReadWriter
 		:public Reader
@@ -700,8 +708,12 @@ private:
 };
 
 
-class DatabaseAdapter_TermValueString
-	:DatabaseAdapter_TypedIndexString<DatabaseKey::TermNoPrefix>
+class DatabaseAdapter_TermTypeInv
+	:public DatabaseAdapter_TypedIndexString<DatabaseKey::TermTypeInvPrefix>
+{};
+
+class DatabaseAdapter_TermValueInv
+	:public DatabaseAdapter_TypedIndexString<DatabaseKey::TermValueInvPrefix>
 {};
 
 

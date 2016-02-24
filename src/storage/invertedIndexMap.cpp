@@ -130,7 +130,7 @@ void InvertedIndexMap::definePosinfoPosting(
 		if (m_invterms.size()) m_invterms.push_back( InvTerm());
 
 		m_invtermmap[ m_docno = docno] = m_invterms.size();
-		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size()));
+		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size(), pos.empty()?0:pos[0]));
 	}
 	else
 	{
@@ -138,7 +138,7 @@ void InvertedIndexMap::definePosinfoPosting(
 		{
 			throw strus::runtime_error( _TXT( "inverted index operations not grouped by document"));
 		}
-		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size()));
+		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size(), pos.empty()?0:pos[0]));
 	}
 }
 
@@ -290,7 +290,7 @@ void InvertedIndexMap::getWriteBatch(
 		for (; li != le && li->typeno; ++li)
 		{
 			// inv blk:
-			invblk.append( li->typeno, li->termno, li->ff);
+			invblk.append( li->typeno, li->termno, li->ff, li->firstpos);
 			// df map:
 			m_dfmap.increment( li->typeno, li->termno);
 		}

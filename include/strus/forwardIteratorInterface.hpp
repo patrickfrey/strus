@@ -44,7 +44,7 @@ public:
 	virtual ~ForwardIteratorInterface(){}
 
 	/// \brief Define the document of the items inspected
-	/// \param[in] docno minimum document number to seek
+	/// \param[in] docno document number to seek
 	virtual void skipDoc( const Index& docno)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.

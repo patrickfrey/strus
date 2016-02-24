@@ -46,11 +46,12 @@ public:
 		VariablePrefix='V',	///< [variable string]         ->  [index]
 		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
 		UserNamePrefix='U',	///< [name string]             ->  [userno]
-		TermNoPrefix='N',	///< [valueno]                 ->  [term string]
+		TermTypeInvPrefix='K',	///< [typeno]                  ->  [type string]
+		TermValueInvPrefix='N',	///< [valueno]                 ->  [term string]
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
-		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff]*
+		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff,firstpos]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
 		AclBlockPrefix='w',	///< [docno,userno]            ->  [bit]*
@@ -72,7 +73,8 @@ public:
 			case VariablePrefix: return "global variable";
 			case AttributeKeyPrefix: return "document attribute name";
 			case UserNamePrefix: return "user id";
-			case TermNoPrefix: return "termno name";
+			case TermTypeInvPrefix: return "term type inv";
+			case TermValueInvPrefix: return "term value inv";
 
 			case ForwardIndexPrefix: return "forward index";
 			case PosinfoBlockPrefix: return "posinfo posting block";

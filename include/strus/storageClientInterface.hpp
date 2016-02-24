@@ -44,6 +44,8 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
+class DocumentTermIteratorInterface;
+/// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
 class ValueIteratorInterface;
@@ -85,6 +87,13 @@ public:
 	/// \return the created viewer reference to be disposed with delete
 	virtual ForwardIteratorInterface*
 		createForwardIterator(
+			const std::string& type) const=0;
+
+	/// \brief Create an iterator on term occurrencies in documents (support for feature selection)
+	/// \param[in] type type name of the term
+	/// \return the created iterator reference to be disposed with delete by the caller
+	virtual DocumentTermIteratorInterface*
+		createDocumentTermIterator(
 			const std::string& type) const=0;
 
 	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see

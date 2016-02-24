@@ -43,6 +43,8 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
+class DocumentTermIteratorInterface;
+/// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
 class StorageTransactionInterface;
@@ -87,6 +89,10 @@ public:
 
 	virtual ForwardIteratorInterface*
 			createForwardIterator(
+				const std::string& type) const;
+
+	virtual DocumentTermIteratorInterface*
+			createDocumentTermIterator(
 				const std::string& type) const;
 
 	virtual InvAclIteratorInterface*
@@ -138,7 +144,7 @@ public:
 
 	virtual StorageDumpInterface* createDump() const;
 
-public:/*QueryEval,AttributeReader*/
+public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
