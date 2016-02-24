@@ -48,6 +48,8 @@ public:
 		unsigned int firstpos;		//< first occurrence term position
 		Index termno;			//< internal term number (only valid in local server context)
 
+		Term()
+			:tf(0),firstpos(0),termno(0){}
 		Term( unsigned int tf_, unsigned int firstpos_, Index termno_)
 			:tf(tf_),firstpos(firstpos_),termno(termno_){}
 		Term( const Term& o)
