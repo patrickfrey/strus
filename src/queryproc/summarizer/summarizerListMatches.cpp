@@ -63,7 +63,7 @@ void SummarizerFunctionContextListMatches::addSummarizationFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding summarization feature to '%s' summarizer: %s"), "matchpos", *m_errorhnd);
 }
 
-std::vector<SummarizerFunctionContextInterface::SummaryElement>
+std::vector<SummaryElement>
 	SummarizerFunctionContextListMatches::getSummary( const Index& docno)
 {
 	try
@@ -82,20 +82,24 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 				{
 					char posstr[ 64];
 					snprintf( posstr, sizeof(posstr), "%u", (unsigned int)pos);
-					rt.push_back( SummaryElement( posstr));
+					rt.push_back( SummaryElement( m_resultname, posstr));
 				}
 			}
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchpos", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchpos", *m_errorhnd, std::vector<SummaryElement>());
 }
 
-void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string&)
+void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "matchpos");
+	}
+	else if (utils::caseInsensitiveEquals( name, "name"))
+	{
+		m_resultname = value;
 	}
 	else
 	{
@@ -108,6 +112,10 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), "matchpos");
+	}
+	else if (utils::caseInsensitiveEquals( name, "name"))
+	{
+		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), "matchpos");
 	}
 	else if (utils::caseInsensitiveEquals( name, "N"))
 	{
@@ -126,7 +134,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::creat
 {
 	try
 	{
-		return new SummarizerFunctionContextListMatches( m_maxNofMatches, m_errorhnd);
+		return new SummarizerFunctionContextListMatches( m_resultname, m_maxNofMatches, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchpos", *m_errorhnd, 0);
 }

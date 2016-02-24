@@ -75,6 +75,7 @@ public:
 
 private:
 	MetaDataReaderInterface* m_metadata;
+	std::string m_name;
 	int m_attrib;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

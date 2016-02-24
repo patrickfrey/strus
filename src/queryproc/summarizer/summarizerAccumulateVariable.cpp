@@ -66,6 +66,7 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 {
 	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
 	if (m_type.empty()) throw strus::runtime_error(_TXT("type of forward index to extract not defined (parameter 'type')"));
+	if (m_var.empty()) throw strus::runtime_error(_TXT("name of variable to extract not defined (parameter 'var')"));
 }
 
 
@@ -81,37 +82,23 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 		if (utils::caseInsensitiveEquals( name, "match"))
 		{
 			std::vector<const PostingIteratorInterface*> varitr;
-			if (!m_var.empty())
+			std::vector<SummarizationVariable>::const_iterator vi = variables.begin(), ve = variables.end();
+			for (; vi != ve; ++vi)
 			{
-				std::vector<SummarizationVariable>::const_iterator vi = variables.begin(), ve = variables.end();
-				for (; vi != ve; ++vi)
+				if (utils::caseInsensitiveEquals( vi->name(), m_var))
 				{
-					if (utils::caseInsensitiveEquals( vi->name(), m_var))
-					{
-						varitr.push_back( vi->itr());
-					}
+					varitr.push_back( vi->itr());
 				}
 			}
 			if (m_features.size() >= 64)
 			{
 				m_errorhnd->report( _TXT("too many features (>64) defined for '%s' summarization"), "accuvariable");
 			}
-			else if (varitr.empty())
+			if (varitr.empty())
 			{
-				if (!m_var.empty())
-				{
-					m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_var.c_str(), "accuvariable");
-				}
-				else
-				{
-					varitr.push_back( itr);
-					m_features.push_back( SummarizationFeature( itr, varitr, weight));
-				}
+				m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_var.c_str(), "accuvariable");
 			}
-			else
-			{
-				m_features.push_back( SummarizationFeature( itr, varitr, weight));
-			}
+			m_features.push_back( SummarizationFeature( itr, varitr, weight));
 		}
 		else
 		{
@@ -137,7 +124,7 @@ static int nextSelected( uint64_t& set)
 	return rt;
 }
 
-std::vector<SummarizerFunctionContextInterface::SummaryElement>
+std::vector<SummaryElement>
 	SummarizerFunctionContextAccumulateVariable::getSummary( const Index& docno)
 {
 	try
@@ -188,7 +175,7 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			}
 		}
 		// Build the accumulation result:
-		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		std::vector<SummaryElement> rt;
 		PosWeightMap::const_iterator wi = posWeightMap.begin(), we = posWeightMap.end();
 		if (m_maxNofElements < posWeightMap.size())
 		{
@@ -203,8 +190,8 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			{
 				if (m_forwardindex->skipPos( ri->idx) == ri->idx)
 				{
-					rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
-							m_forwardindex->fetch(), ri->weight * m_norm));
+					rt.push_back( SummaryElement(
+							m_var, m_forwardindex->fetch(), ri->weight * m_norm));
 				}
 			}
 		}
@@ -214,14 +201,13 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			{
 				if (m_forwardindex->skipPos( wi->first) == wi->first)
 				{
-					rt.push_back( SummarizerFunctionContextInterface::SummaryElement(
-							m_forwardindex->fetch(), wi->second * m_norm));
+					rt.push_back( SummaryElement( m_var, m_forwardindex->fetch(), wi->second * m_norm));
 				}
 			}
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "accuvariable", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "accuvariable", *m_errorhnd, std::vector<SummaryElement>());
 }
 
 

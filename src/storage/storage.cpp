@@ -34,6 +34,7 @@
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/private/configParser.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/versionStorage.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "storageAlterMetaDataTable.hpp"
@@ -150,6 +151,7 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 		stor.store( transaction.get(), "AttribNo", 1);
 		stor.store( transaction.get(), "NofDocs", 0);
 		stor.store( transaction.get(), "ByteOrderMark", byteOrderMark.value());
+		stor.store( transaction.get(), "Version", (STRUS_STORAGE_VERSION_MAJOR * 1000) + STRUS_STORAGE_VERSION_MINOR);
 		if (useAcl)
 		{
 			stor.store( transaction.get(), "UserNo", 1);

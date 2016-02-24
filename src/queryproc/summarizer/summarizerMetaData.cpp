@@ -40,6 +40,7 @@ using namespace strus;
 SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
 		MetaDataReaderInterface* metadata_, const std::string& name_, ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
+	,m_name(name_)
 	,m_attrib(metadata_->elementHandle( name_.c_str()))
 	,m_errorhnd(errorhnd_)
 {}
@@ -54,21 +55,21 @@ void SummarizerFunctionContextMetaData::addSummarizationFeature(
 	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
 }
 
-std::vector<SummarizerFunctionContextInterface::SummaryElement>
+std::vector<SummaryElement>
 	SummarizerFunctionContextMetaData::getSummary( const Index& docno)
 {
 	try
 	{
-		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		std::vector<SummaryElement> rt;
 		m_metadata->skipDoc( docno);
 		ArithmeticVariant value = m_metadata->getValue( m_attrib);
 		if (value.defined()) 
 		{
-			rt.push_back( SummarizerFunctionContextInterface::SummaryElement( value.tostring().c_str(), 1.0));
+			rt.push_back( SummaryElement( m_name, value.tostring().c_str(), 1.0));
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "metadata", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "metadata", *m_errorhnd, std::vector<SummaryElement>());
 }
 
 

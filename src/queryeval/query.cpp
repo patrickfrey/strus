@@ -41,6 +41,7 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/summaryElement.hpp"
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
 #include "strus/private/snprintf.h"
@@ -707,32 +708,22 @@ QueryResult Query::evaluate()
 		}
 		evaluationPhase = "building of the result";
 		// [7] Build the result:
-		std::vector<WeightedDocument>::const_iterator
-			ri=resultlist.begin(),re=resultlist.end();
-	
+		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();
 		for (; ri != re; ++ri)
 		{
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "result rank docno=" << ri->docno() << ", weight=" << ri->weight() << std::endl;
 #endif
-			std::vector<ResultDocument::Attribute> attr;
+			std::vector<SummaryElement> summaries;
+
 			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
 				si = summarizers.begin(), se = summarizers.end();
-
-			ranks.push_back( ResultDocument( *ri));
-			for (std::size_t sidx=0; si != se; ++si,++sidx)
+			for (;si != se; ++si)
 			{
-				std::vector<SummarizerFunctionContextInterface::SummaryElement>
-					summary = (*si)->getSummary( ri->docno());
-				std::vector<SummarizerFunctionContextInterface::SummaryElement>::const_iterator
-					ci = summary.begin(), ce = summary.end();
-				for (; ci != ce; ++ci)
-				{
-					ranks.back().addAttribute(
-							m_queryEval->summarizers()[sidx].resultAttribute(),
-							ci->text(), ci->weight());
-				}
+				std::vector<SummaryElement> summary = (*si)->getSummary( ri->docno());
+				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
+			ranks.push_back( ResultDocument( *ri, summaries));
 		}
 		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}

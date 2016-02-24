@@ -95,13 +95,12 @@ void QueryEval::addExclusionFeature( const std::string& set_)
 void QueryEval::addSummarizerFunction(
 		const std::string& functionName,
 		SummarizerFunctionInstanceInterface* function,
-		const std::vector<FeatureParameter>& featureParameters,
-		const std::string& resultAttribute)
+		const std::vector<FeatureParameter>& featureParameters)
 {
 	try
 	{
 		Reference<SummarizerFunctionInstanceInterface> functionref( function);
-		m_summarizers.push_back( SummarizerDef( resultAttribute, functionName, functionref, featureParameters));
+		m_summarizers.push_back( SummarizerDef( functionName, functionref, featureParameters));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding summarization function: %s"), *m_errorhnd);
 }
@@ -174,7 +173,7 @@ void QueryEval::print( std::ostream& out) const
 		for (; si != se; ++si)
 		{
 			out << "SUMMARIZE ";
-			out << si->resultAttribute() << " = " << si->functionName();
+			out << si->functionName();
 			std::string params = si->function()->tostring();
 			out << "( " << params;
 	

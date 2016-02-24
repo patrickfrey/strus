@@ -89,8 +89,7 @@ public:
 	virtual void addSummarizerFunction(
 			const std::string& functionName,
 			SummarizerFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters,
-			const std::string& resultAttribute);
+			const std::vector<FeatureParameter>& featureParameters);
 
 	virtual void addWeightingFunction(
 			const std::string& functionName,

@@ -52,8 +52,8 @@ class SummarizerFunctionContextListMatches
 	:public SummarizerFunctionContextInterface
 {
 public:
-	SummarizerFunctionContextListMatches( unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
-		:m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_){}
+	SummarizerFunctionContextListMatches( const std::string& resultname_, unsigned int maxNofMatches_, ErrorBufferInterface* errorhnd_)
+		:m_resultname(resultname_),m_maxNofMatches(maxNofMatches_),m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionContextListMatches(){}
 
 	virtual void addSummarizationFeature(
@@ -68,6 +68,7 @@ public:
 private:
 	const StorageClientInterface* m_storage;
 	std::vector<PostingIteratorInterface*> m_itrs;
+	std::string m_resultname;
 	unsigned int m_maxNofMatches;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -80,7 +81,7 @@ class SummarizerFunctionInstanceListMatches
 {
 public:
 	explicit SummarizerFunctionInstanceListMatches( ErrorBufferInterface* errorhnd_)
-		:m_maxNofMatches(100),m_errorhnd(errorhnd_){}
+		:m_resultname("position"),m_maxNofMatches(100),m_errorhnd(errorhnd_){}
 	virtual ~SummarizerFunctionInstanceListMatches(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
@@ -94,6 +95,7 @@ public:
 	virtual std::string tostring() const;
 
 private:
+	std::string m_resultname;
 	unsigned int m_maxNofMatches;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

@@ -35,6 +35,7 @@
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/versionStorage.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
@@ -122,6 +123,19 @@ void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 	m_metaDataBlockCache->refresh();
 }
 
+static Index versionNo( Index major, Index minor)
+{
+	return (major * 1000) + minor;
+}
+
+static unsigned int versionIndex( const Index& version)
+{
+	static const Index ar[] = {0004,0};
+	unsigned int ii=0;
+	for (;ar[ii] && ar[ii] < version; ++ii){}
+	return ii;
+}
+
 void StorageClient::loadVariables( DatabaseClientInterface* database_)
 {
 	ByteOrderMark byteOrderMark;
@@ -133,16 +147,26 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	Index next_attribno_;
 	Index nof_documents_;
 	Index next_userno_;
+	Index version_;
 
 	DatabaseAdapter_Variable::Reader varstor( database_);
 	if (!varstor.load( "TermNo", next_termno_)
 	||  !varstor.load( "TypeNo", next_typeno_)
 	||  !varstor.load( "DocNo", next_docno_)
 	||  !varstor.load( "AttribNo", next_attribno_)
-	||  !varstor.load( "NofDocs", nof_documents_)
-	)
+	||  !varstor.load( "NofDocs", nof_documents_))
 	{
 		throw strus::runtime_error( _TXT( "corrupt storage, not all mandatory variables defined"));
+	}
+	if (!varstor.load( "Version", version_))
+	{
+		version_ = versionNo( 0, 4);
+	}
+	if (versionIndex( version_) != versionIndex( versionNo( STRUS_STORAGE_VERSION_MAJOR, STRUS_STORAGE_VERSION_MINOR)))
+	{
+		unsigned int major = version_ / 1000;
+		unsigned int minor = version_ % 1000;
+		throw strus::runtime_error( _TXT( "incompatible storage version %u.%u software is %u.%u. please rebuild your storage"), major, minor, (unsigned int)STRUS_STORAGE_VERSION_MAJOR, (unsigned int)STRUS_STORAGE_VERSION_MINOR);
 	}
 	(void)varstor.load( "UserNo", next_userno_);
 	if (varstor.load( "ByteOrderMark", bom))

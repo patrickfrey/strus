@@ -68,7 +68,10 @@ public:
 	/// \param[in] cardinality_ minimum number of features to look for in a window
 	/// \param[in] nofCollectionDocuments_ number of documents in the collection
 	/// \param[in] metadata_title_maxpos_ optional attribute in metadata that defines the last position in the document that belongs to the document title and should not be considered for summary
-	/// \param[in] matchmark_ begin and marker for highlighting
+	/// \param[in] matchmark_ begin and end marker for highlighting
+	/// \param[in] floatingmark_ begin and end marker for not terminated sentences
+	/// \param[in] name_para_ name of summary elements defining paragraphs
+	/// \param[in] name_phrase_ name of summary elements defining phrases
 	/// \param[in] errorhnd_ error buffer interface
 	SummarizerFunctionContextMatchPhrase(
 			const StorageClientInterface* storage_,
@@ -82,7 +85,8 @@ public:
 			const std::string& metadata_title_maxpos_,
 			const std::pair<std::string,std::string>& matchmark_,
 			const std::pair<std::string,std::string>& floatingmark_,
-			const std::string& startdocmark_,
+			const std::string& name_para_,
+			const std::string& name_phrase_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextMatchPhrase();
 
@@ -109,7 +113,8 @@ private:
 	int m_metadata_title_maxpos;				///< meta data element for maximum title position
 	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
-	std::string m_startdocmark;				///< marker for the beginning of the document
+	std::string m_name_para;				///< name of the summary elements for paragraphs
+	std::string m_name_phrase;				///< name of the summary elements for phrases
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
@@ -133,7 +138,8 @@ public:
 		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0)
 		,m_matchmark()
 		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
-		,m_startdocmark("| ")
+		,m_name_para("para")
+		,m_name_phrase("phrase")
 		,m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
@@ -156,7 +162,8 @@ private:
 	unsigned int m_cardinality;				///< window cardinality
 	std::pair<std::string,std::string> m_matchmark;		///< highlight marker for matches
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
-	std::string m_startdocmark;				///< marker for the beginning of the document
+	std::string m_name_para;				///< name of the summary elements for paragraphs
+	std::string m_name_phrase;				///< name of the summary elements for phrases
 	const QueryProcessorInterface* m_processor;		///< query processor interface
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };

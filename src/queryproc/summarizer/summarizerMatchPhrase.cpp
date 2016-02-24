@@ -59,7 +59,8 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const std::string& metadata_title_maxpos_,
 		const std::pair<std::string,std::string>& matchmark_,
 		const std::pair<std::string,std::string>& floatingmark_,
-		const std::string& startdocmark_,
+		const std::string& name_para_,
+		const std::string& name_phrase_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_processor(processor_)
@@ -73,7 +74,8 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_metadata_title_maxpos(metadata_title_maxpos_.empty()?-1:metadata_->elementHandle( metadata_title_maxpos_))
 	,m_matchmark(matchmark_)
 	,m_floatingmark(floatingmark_)
-	,m_startdocmark(startdocmark_)
+	,m_name_para(name_para_)
+	,m_name_phrase(name_phrase_)
 	,m_itrarsize(0)
 	,m_structarsize(0)
 	,m_paraarsize(0)
@@ -252,17 +254,17 @@ static Candidate findCandidate(
 }
 
 
-std::vector<SummarizerFunctionContextInterface::SummaryElement>
+std::vector<SummaryElement>
 	SummarizerFunctionContextMatchPhrase::getSummary( const Index& docno)
 {
 	try
 	{
-		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		std::vector<SummaryElement> rt;
 		if (!m_initialized)
 		{
 			if (m_itrarsize == 0)
 			{
-				return std::vector<SummarizerFunctionContextInterface::SummaryElement>();
+				return std::vector<SummaryElement>();
 			}
 			if (m_itrarsize < m_cardinality || m_cardinality == 0)
 			{
@@ -407,13 +409,8 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 					break;
 				}
 			}
-
 			// Build the phrase:
 			std::string phrase;
-			if (abstract.start != firstpos)
-			{
-				phrase.append( m_startdocmark);
-			}
 			if (!abstract.defined_start)
 			{
 				phrase.append( m_floatingmark.first);
@@ -446,11 +443,11 @@ std::vector<SummarizerFunctionContextInterface::SummaryElement>
 			{
 				phrase.append( m_floatingmark.second);
 			}
-			rt.push_back( SummaryElement( phrase, 1.0));
+			rt.push_back( SummaryElement( m_name_phrase, phrase, 1.0));
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchphrase", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchphrase", *m_errorhnd, std::vector<SummaryElement>());
 }
 
 static std::pair<std::string,std::string> parseMarker( const std::string& value)
@@ -498,9 +495,13 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_floatingmark = parseMarker( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "startdocmark"))
+		else if (utils::caseInsensitiveEquals( name, "name_para"))
 		{
-			m_startdocmark = value;
+			m_name_para = value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "name_phrase"))
+		{
+			m_name_phrase = value;
 		}
 		else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 		{
@@ -543,7 +544,8 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	else if (utils::caseInsensitiveEquals( name, "type")
 		|| utils::caseInsensitiveEquals( name, "matchmark")
 		|| utils::caseInsensitiveEquals( name, "floatingmark")
-		|| utils::caseInsensitiveEquals( name, "startdocmark")
+		|| utils::caseInsensitiveEquals( name, "name_para")
+		|| utils::caseInsensitiveEquals( name, "name_phrase")
 		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
@@ -570,7 +572,8 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 				storage, m_processor, metadata, m_type,
 				m_sentencesize, m_windowsize, m_cardinality,
 				nofCollectionDocuments, m_metadata_title_maxpos,
-				m_matchmark, m_floatingmark, m_startdocmark, m_errorhnd);
+				m_matchmark, m_floatingmark, m_name_para, m_name_phrase,
+				m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
 }
@@ -583,7 +586,7 @@ std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
 		rt << "type='" << m_type << "'"
 			<< ", matchmark=(" << m_matchmark.first << "," << m_matchmark.second << ")"
 			<< ", floatingmark=(" << m_floatingmark.first << "," << m_floatingmark.second << ")"
-			<< ", startdocmark='" << m_startdocmark << "'"
+			<< ", name_para=" << m_name_para << ", name_phrase=" << m_name_phrase
 			<< ", metadata_title_maxpos='" << m_metadata_title_maxpos << "'"
 			<< ", sentencesize='" << m_sentencesize << "'"
 			<< ", windowsize='" << m_windowsize << "'"
@@ -619,7 +622,8 @@ SummarizerFunctionInterface::Description SummarizerFunctionMatchPhrase::getDescr
 		rt( Description::Param::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
 		rt( Description::Param::String, "matchmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
 		rt( Description::Param::String, "floatingmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found"), "");
-		rt( Description::Param::String, "startdocmark", _TXT( "specifies the markers for highlighting start of a documents if the phrase returned is the document start"), "");
+		rt( Description::Param::String, "name_para", _TXT( "specifies the summary element name used for paragraphs (default 'para')"), "");
+		rt( Description::Param::String, "name_phrase", _TXT( "specifies the summary element name used for phrases (default 'phrase')"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchphrase", *m_errorhnd, SummarizerFunctionInterface::Description());

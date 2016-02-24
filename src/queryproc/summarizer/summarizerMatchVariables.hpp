@@ -63,14 +63,10 @@ public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] type_ type of the forward index tokens to build the summary with
-	/// \param[in] delimiter_ delimiter to print between multiple output elements
-	/// \param[in] assing_ assingment operator to use for output
 	SummarizerFunctionContextMatchVariables(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
-			const std::string& delimiter_,
-			const std::string& assign_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMatchVariables(){}
@@ -102,8 +98,6 @@ private:
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_type;
-	std::string m_delimiter;
-	std::string m_assign;
 	std::vector<SummarizationFeature> m_features;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -114,7 +108,7 @@ class SummarizerFunctionInstanceMatchVariables
 {
 public:
 	SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_delimiter(","),m_assign("="),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
@@ -130,8 +124,6 @@ public:
 
 private:
 	std::string m_type;
-	std::string m_delimiter;
-	std::string m_assign;
 	const QueryProcessorInterface* m_processor;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

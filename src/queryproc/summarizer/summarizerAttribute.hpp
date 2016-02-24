@@ -68,10 +68,11 @@ public:
 			float /*weight*/,
 			const TermStatistics&);
 
-	virtual std::vector<SummarizerFunctionContextInterface::SummaryElement> getSummary( const Index& docno);
+	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 private:
 	AttributeReaderInterface* m_attribreader;
+	std::string m_attribname;
 	int m_attrib;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

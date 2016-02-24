@@ -39,6 +39,7 @@ using namespace strus;
 SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 		AttributeReaderInterface* attribreader_, const std::string& name_, ErrorBufferInterface* errorhnd_)
 	:m_attribreader(attribreader_)
+	,m_attribname(name_)
 	,m_attrib(attribreader_->elementHandle( name_.c_str()))
 	,m_errorhnd(errorhnd_)
 {}
@@ -58,21 +59,21 @@ SummarizerFunctionContextAttribute::~SummarizerFunctionContextAttribute()
 	delete m_attribreader;
 }
 
-std::vector<SummarizerFunctionContextInterface::SummaryElement>
+std::vector<SummaryElement>
 	SummarizerFunctionContextAttribute::getSummary( const Index& docno)
 {
 	try
 	{
-		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		std::vector<SummaryElement> rt;
 		m_attribreader->skipDoc( docno);
 		std::string attr = m_attribreader->getValue( m_attrib);
 		if (!attr.empty()) 
 		{
-			rt.push_back( SummarizerFunctionContextInterface::SummaryElement( attr, 1.0));
+			rt.push_back( SummaryElement( m_attribname, attr, 1.0));
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "attribute", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "attribute", *m_errorhnd, std::vector<SummaryElement>());
 }
 
 
