@@ -130,6 +130,49 @@ struct DatabaseAdapter_StringIndex
 	};
 };
 
+class DatabaseAdapter_IndexString
+{
+public:
+	class Reader
+	{
+	public:
+		Reader( char prefix_, const DatabaseClientInterface* database_)
+			:m_prefix(prefix_),m_database(database_){}
+	
+		bool load( const Index& key, std::string& value) const;
+	
+	private:
+		char m_prefix;
+		const DatabaseClientInterface* m_database;
+	};
+
+	class Writer
+	{
+	public:
+		Writer( char prefix_, DatabaseClientInterface* database_)
+			:m_prefix(prefix_),m_database(database_){}
+	
+		void store( DatabaseTransactionInterface* transaction, const Index& key, const char* value);
+		void remove( DatabaseTransactionInterface* transaction, const Index& key);
+		void storeImm( const Index& key, const std::string& value);
+	
+	private:
+		char m_prefix;
+		DatabaseClientInterface* m_database;
+	};
+
+	class ReadWriter
+		:public Reader
+		,public Writer
+	{
+	public:
+		ReadWriter( char prefix_, DatabaseClientInterface* database_)
+			:Reader(prefix_,database_)
+			,Writer(prefix_,database_){}
+	};
+};
+
+
 template <char KeyPrefix>
 struct DatabaseAdapter_TypedStringIndex
 {
@@ -140,6 +183,33 @@ struct DatabaseAdapter_TypedStringIndex
 		Cursor( const DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Cursor( KeyPrefix, database_){}
 	};
+	class Reader
+		:public DatabaseAdapter_StringIndex::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_)
+			:DatabaseAdapter_StringIndex::Reader( KeyPrefix, database_){}
+	};
+	class Writer
+		:public DatabaseAdapter_StringIndex::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_)
+			:DatabaseAdapter_StringIndex::Writer( KeyPrefix, database_){}
+	};
+	class ReadWriter
+		:public Reader
+		,public Writer
+	{
+	public:
+		ReadWriter( DatabaseClientInterface* database_)
+			:Reader( database_),Writer( database_){}
+	};
+};
+
+template <char KeyPrefix>
+struct DatabaseAdapter_TypedIndexString
+{
 	class Reader
 		:public DatabaseAdapter_StringIndex::Reader
 	{
@@ -628,6 +698,12 @@ public:
 private:
 	enum {KeyPrefix=DatabaseKey::DocAttributePrefix};
 };
+
+
+class DatabaseAdapter_TermValueString
+	:DatabaseAdapter_TypedIndexString<DatabaseKey::TermNoPrefix>
+{};
+
 
 class DatabaseAdapter_DocFrequency
 {

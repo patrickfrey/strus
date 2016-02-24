@@ -122,6 +122,31 @@ void DatabaseAdapter_StringIndex::Writer::storeImm( const std::string& key, cons
 	m_database->writeImm( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());
 }
 
+bool DatabaseAdapter_IndexString::Reader::load( const Index& key, std::string& value) const
+{
+	DatabaseKey dbkey( m_prefix, key);
+	return m_database->readValue( dbkey.ptr(), dbkey.size(), value, DatabaseOptions().useCache());
+}
+
+void DatabaseAdapter_IndexString::Writer::store( DatabaseTransactionInterface* transaction, const Index& key, const char* value)
+{
+	DatabaseKey dbkey( m_prefix, key);
+	return transaction->write( dbkey.ptr(), dbkey.size(), value, std::strlen(value));
+}
+
+void DatabaseAdapter_IndexString::Writer::storeImm( const Index& key, const std::string& value)
+{
+	DatabaseKey dbkey( m_prefix, key);
+	m_database->writeImm( dbkey.ptr(), dbkey.size(), value.c_str(), value.size());
+}
+
+void DatabaseAdapter_IndexString::Writer::remove( DatabaseTransactionInterface* transaction, const Index& key)
+{
+	DatabaseKey dbkey( m_prefix, key);
+	return transaction->remove( dbkey.ptr(), dbkey.size());
+}
+
+
 bool DatabaseAdapter_DataBlock::Reader::load( const Index& elemno, DataBlock& blk)
 {
 	m_dbkey.resize( m_domainKeySize);

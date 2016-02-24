@@ -46,6 +46,7 @@ public:
 		VariablePrefix='V',	///< [variable string]         ->  [index]
 		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
 		UserNamePrefix='U',	///< [name string]             ->  [userno]
+		TermNoPrefix='N',	///< [valueno]                 ->  [term string]
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
@@ -71,6 +72,7 @@ public:
 			case VariablePrefix: return "global variable";
 			case AttributeKeyPrefix: return "document attribute name";
 			case UserNamePrefix: return "user id";
+			case TermNoPrefix: return "termno name";
 
 			case ForwardIndexPrefix: return "forward index";
 			case PosinfoBlockPrefix: return "posinfo posting block";
