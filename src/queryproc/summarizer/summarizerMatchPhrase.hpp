@@ -87,6 +87,7 @@ public:
 			const std::pair<std::string,std::string>& floatingmark_,
 			const std::string& name_para_,
 			const std::string& name_phrase_,
+			const std::string& name_docstart_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextMatchPhrase();
 
@@ -115,6 +116,7 @@ private:
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
 	std::string m_name_para;				///< name of the summary elements for paragraphs
 	std::string m_name_phrase;				///< name of the summary elements for phrases
+	std::string m_name_docstart;				///< name of the summary elements for document start (alternative summary if no match found)
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
@@ -140,6 +142,7 @@ public:
 		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
 		,m_name_para("para")
 		,m_name_phrase("phrase")
+		,m_name_docstart("docstart")
 		,m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchPhrase(){}
@@ -164,6 +167,7 @@ private:
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
 	std::string m_name_para;				///< name of the summary elements for paragraphs
 	std::string m_name_phrase;				///< name of the summary elements for phrases
+	std::string m_name_docstart;				///< name of the summary elements for document start (alternative summary if no match found)
 	const QueryProcessorInterface* m_processor;		///< query processor interface
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };

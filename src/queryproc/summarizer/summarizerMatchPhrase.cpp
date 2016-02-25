@@ -61,6 +61,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const std::pair<std::string,std::string>& floatingmark_,
 		const std::string& name_para_,
 		const std::string& name_phrase_,
+		const std::string& name_docstart_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_processor(processor_)
@@ -76,6 +77,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_floatingmark(floatingmark_)
 	,m_name_para(name_para_)
 	,m_name_phrase(name_phrase_)
+	,m_name_docstart(name_docstart_)
 	,m_itrarsize(0)
 	,m_structarsize(0)
 	,m_paraarsize(0)
@@ -327,7 +329,8 @@ std::vector<SummaryElement>
 						m_paraar, m_paraarsize);
 			}
 		}
-		if (candidate.span == 0)
+		bool is_docstart = (candidate.span == 0);
+		if (is_docstart)
 		{
 			// ... if we did not find any candidate window, we take the start of the document as abstract:
 			candidate.pos = firstpos;
@@ -339,7 +342,8 @@ std::vector<SummaryElement>
 			Index span;
 			bool defined_start;
 			bool defined_end;
-		} abstract = {candidate.pos,candidate.span,(candidate.pos == firstpos),false};
+			bool is_docstart;
+		} abstract = {candidate.pos,candidate.span,(candidate.pos == firstpos),false,is_docstart};
 
 		// Find the start of the abstract as start of the preceeding structure or paragraph marker:
 		std::size_t ti=0,te=m_paraarsize+m_structarsize;
@@ -443,7 +447,14 @@ std::vector<SummaryElement>
 			{
 				phrase.append( m_floatingmark.second);
 			}
-			rt.push_back( SummaryElement( m_name_phrase, phrase, 1.0));
+			if (abstract.is_docstart)
+			{
+				rt.push_back( SummaryElement( m_name_docstart, phrase, 1.0));
+			}
+			else
+			{
+				rt.push_back( SummaryElement( m_name_phrase, phrase, 1.0));
+			}
 		}
 		return rt;
 	}
@@ -503,6 +514,10 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_name_phrase = value;
 		}
+		else if (utils::caseInsensitiveEquals( name, "name_docstart"))
+		{
+			m_name_docstart = value;
+		}
 		else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
@@ -546,6 +561,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 		|| utils::caseInsensitiveEquals( name, "floatingmark")
 		|| utils::caseInsensitiveEquals( name, "name_para")
 		|| utils::caseInsensitiveEquals( name, "name_phrase")
+		|| utils::caseInsensitiveEquals( name, "name_docstart")
 		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
@@ -572,7 +588,8 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 				storage, m_processor, metadata, m_type,
 				m_sentencesize, m_windowsize, m_cardinality,
 				nofCollectionDocuments, m_metadata_title_maxpos,
-				m_matchmark, m_floatingmark, m_name_para, m_name_phrase,
+				m_matchmark, m_floatingmark,
+				m_name_para, m_name_phrase, m_name_docstart,
 				m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
@@ -624,6 +641,7 @@ SummarizerFunctionInterface::Description SummarizerFunctionMatchPhrase::getDescr
 		rt( Description::Param::String, "floatingmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found"), "");
 		rt( Description::Param::String, "name_para", _TXT( "specifies the summary element name used for paragraphs (default 'para')"), "");
 		rt( Description::Param::String, "name_phrase", _TXT( "specifies the summary element name used for phrases (default 'phrase')"), "");
+		rt( Description::Param::String, "name_docstart", _TXT( "specifies the summary element name used for the document start (alternative summary, if no match found, default 'docstart')"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchphrase", *m_errorhnd, SummarizerFunctionInterface::Description());
