@@ -725,17 +725,7 @@ QueryResult Query::evaluate()
 			}
 			ranks.push_back( ResultDocument( *ri, summaries));
 		}
-		{
-			std::vector<SummaryElement> summaries;
-			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
-				si = summarizers.begin(), se = summarizers.end();
-			for (;si != se; ++si)
-			{
-				std::vector<SummaryElement> summary = (*si)->getOverallSummary();
-				summaries.insert( summaries.end(), summary.begin(), summary.end());
-			}
-			return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks, summaries);
-		}
+		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, QueryResult());
 }

@@ -44,20 +44,27 @@ class DocumentTermIteratorInterface
 public:
 	struct Term
 	{
-		unsigned int tf;		//< term frequency in the document
-		unsigned int firstpos;		//< first occurrence term position
-		Index termno;			//< internal term number (only valid in local server context)
+		Index tf;		///< term frequency in the document
+		Index firstpos;		///< first occurrence term position in the document
+		Index termno;		///< internal term number (only valid in local server context, use the method DocumentTermIteratorInterface::termValue(const Index& termno)const to get the term value string)
 
+		/// \brief Default contructor
 		Term()
 			:tf(0),firstpos(0),termno(0){}
-		Term( unsigned int tf_, unsigned int firstpos_, Index termno_)
+		/// \brief Contructor
+		/// \param[in] tf_ term frequency in the document
+		/// \param[in] firstpos_ first occurrence term position in the document
+		/// \param[in] termno_ local storage internal term number
+		Term( Index tf_, Index firstpos_, Index termno_)
 			:tf(tf_),firstpos(firstpos_),termno(termno_){}
+		/// \brief Copy contructor
 		Term( const Term& o)
 			:tf(o.tf),firstpos(o.firstpos),termno(o.termno){}
-		void init( unsigned int tf_, unsigned int firstpos_, Index termno_)
+		/// \brief Initialization
+		void init( Index tf_, Index firstpos_, Index termno_)
 			{tf=tf_; firstpos=firstpos_; termno=termno_;}
 	};
-
+	/// \brief Destructor
 	virtual ~DocumentTermIteratorInterface(){}
 
 	/// \brief Define the document of the items inspected

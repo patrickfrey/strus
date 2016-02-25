@@ -68,10 +68,6 @@ public:
 	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
 	virtual std::vector<SummaryElement> getSummary( const Index& docno)=0;
-
-	/// \brief Get the summarization elements over all documents queried (global query summarization over all getSummary calls)
-	/// \return the summarization elements
-	virtual std::vector<SummaryElement> getOverallSummary()=0;
 };
 
 }//namespace

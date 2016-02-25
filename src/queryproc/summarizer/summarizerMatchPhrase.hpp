@@ -98,7 +98,6 @@ public:
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
-	virtual std::vector<SummaryElement> getOverallSummary()		{return std::vector<SummaryElement>();}
 
 private:
 	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
