@@ -34,8 +34,8 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
 #include "private/utils.hpp"
-#include "metaDataRestriction.hpp"
 #include <vector>
 #include <list>
 #include <limits>
@@ -67,12 +67,12 @@ public:
 	Accumulator(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata_,
-			const std::vector<MetaDataRestriction>& metaDataRestrictionSets_,
+			MetaDataRestrictionInterface* metaDataRestriction_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
 		,m_metadata(metadata_)
-		,m_metaDataRestrictionSets(metaDataRestrictionSets_)
+		,m_metaDataRestriction(metaDataRestriction_)
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
@@ -136,7 +136,7 @@ private:
 
 	const StorageClientInterface* m_storage;
 	MetaDataReaderInterface* m_metadata;
-	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
+	MetaDataRestrictionInterface* m_metaDataRestriction;
 	std::vector<WeightingFeature> m_weightingFeatures;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;

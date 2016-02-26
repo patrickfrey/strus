@@ -37,6 +37,7 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/attributeReaderInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/private/snprintf.h"

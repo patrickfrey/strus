@@ -29,6 +29,8 @@ set( libstrus_storage_source_files
 	metaDataElement.cpp
 	metaDataMap.cpp
 	metaDataRecord.cpp
+	metaDataReader.cpp
+	metaDataRestriction.cpp
 	nullIterator.cpp
 	statisticsInitIterator.cpp
 	statisticsUpdateIterator.cpp

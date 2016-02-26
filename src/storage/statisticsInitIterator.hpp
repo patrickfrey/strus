@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterator on statistics of the storage for other peers in a registration/deregistration phase
+/// \brief Implementation of the iterator on statistics of the storage to populate in a registration/deregistration phase
 /// \file statisticsInitIterator.hpp
 #ifndef _STRUS_STATISTICS_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_STATISTICS_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
@@ -47,7 +47,7 @@ class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class StatisticsBuilderInterface;
 
-/// \brief Implementation of the iterator on statistics of the storage for other peers in a registration/deregistration phase
+/// \brief Implementation of the iterator on statistics of the storage to populate in a registration/deregistration phase
 class StatisticsInitIterator
 	:public StatisticsIteratorInterface
 {
@@ -68,9 +68,9 @@ private:
 	StorageClientInterface* m_storage;				///< storage related
 	DatabaseClientInterface* m_database;				///< database related
 	const StatisticsProcessorInterface* m_proc;			///< interface for processing messages (packing,unpacking)
-	Reference<StatisticsBuilderInterface> m_statisticsBuilder;	///< peer message builder
+	Reference<StatisticsBuilderInterface> m_statisticsBuilder;	///< statistics message builder
 	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
-};
+}; 
 
 }//namespace
 #endif

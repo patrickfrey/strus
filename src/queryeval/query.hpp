@@ -32,7 +32,7 @@
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
-#include "metaDataRestriction.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -64,9 +64,6 @@ public:
 			const StorageClientInterface* storage_,
 			ErrorBufferInterface* errorhnd_);
 
-	///\brief Copy constructor
-	Query( const Query& o);
-
 	virtual ~Query(){}
 
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
@@ -78,8 +75,8 @@ public:
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 
 	virtual void defineMetaDataRestriction(
-			CompareOperator opr, const std::string& name,
-			const ArithmeticVariant& operand, bool newGroup=true);
+			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
+			const ArithmeticVariant& operand, bool newGroup);
 
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_);
@@ -214,11 +211,11 @@ private:
 	const QueryEval* m_queryEval;
 	const StorageClientInterface* m_storage;
 	Reference<MetaDataReaderInterface> m_metaDataReader;
+	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;
 	std::vector<Term> m_terms;
 	std::vector<Expression> m_expressions;
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
-	std::vector<MetaDataRestriction> m_metaDataRestrictions;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_nofRanks;
 	std::size_t m_minRank;

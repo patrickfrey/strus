@@ -30,6 +30,8 @@
 #include "storage.hpp"
 #include "indexPacker.hpp"
 #include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include <string>
 #include <cstring>
 #include <set>

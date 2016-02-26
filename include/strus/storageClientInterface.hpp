@@ -62,6 +62,8 @@ class StorageDumpInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
+class MetaDataRestrictionInterface;
+/// \brief Forward declaration
 class AttributeReaderInterface;
 
 
@@ -148,7 +150,7 @@ public:
 		StatNofTermOccurrencies = 2		///< number of accumulated dfs (number of terms)
 	};
 
-	/// \brief Get one specified element of the documents statistics for a term type
+	/// \brief Get one specified element of the documents statistics for a term type on the local server node
 	/// \param[in] docno the local internal document number addressed (return value of documentNumber( const std::string&) const)
 	/// \param[in] stat the enumeration value of the statistics to get
 	/// \param[in] type the term type addressed
@@ -160,6 +162,10 @@ public:
 	/// \brief Create an interface to access items of document metadata
 	/// \return the interface to access document metadata to be disposed with delete by the caller
 	virtual MetaDataReaderInterface* createMetaDataReader() const=0;
+
+	/// \brief Create an object for restrictions on metadata
+	/// \return the created, uninitialized restriction object
+	virtual MetaDataRestrictionInterface* createMetaDataRestriction() const=0;
 
 	/// \brief Create an interface to access attributes attached to documents for representation
 	/// \return the interface to access document attributes to be disposed with delete by the caller

@@ -338,7 +338,7 @@ void InvertedIndexMap::getWriteBatch(
 		BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
 	}
 
-	// [4] Get df writes (and populate df's to other peers, if statisticsBuilder defined):
+	// [4] Get df writes (and df changes to populate, if statisticsBuilder defined):
 	m_dfmap.getWriteBatch( transaction, statisticsBuilder, dfbatch, termTypeMapInv, termValueMapInv);
 
 	// [5] Clear the maps:

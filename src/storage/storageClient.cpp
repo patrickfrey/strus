@@ -49,6 +49,8 @@
 #include "storageDocumentChecker.hpp"
 #include "documentFrequencyCache.hpp"
 #include "metaDataBlockCache.hpp"
+#include "metaDataRestriction.hpp"
+#include "metaDataReader.hpp"
 #include "postingIterator.hpp"
 #include "nullIterator.hpp"
 #include "databaseAdapter.hpp"
@@ -724,6 +726,15 @@ MetaDataReaderInterface* StorageClient::createMetaDataReader() const
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data reader: %s"), *m_errorhnd, 0);
 }
 
+MetaDataRestrictionInterface* StorageClient::createMetaDataRestriction() const
+{
+	try
+	{
+		return new MetaDataRestriction( this, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data restriction object: %s"), *m_errorhnd, 0);
+}
+
 void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
@@ -789,7 +800,7 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-bool StorageClient::fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize)
+bool StorageClient::fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize)
 {
 	TransactionLock lock( this);
 	return m_statisticsBuilder->fetchMessage( msg, msgsize);
@@ -801,7 +812,7 @@ StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool s
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no peer message processor defined"));
+			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
@@ -813,7 +824,7 @@ StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool s
 		}
 		return new StatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
 StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
@@ -822,7 +833,7 @@ StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no peer message processor defined"));
+			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
@@ -834,7 +845,7 @@ StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
 		}
 		return new StatisticsUpdateIterator( this, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
 const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() const

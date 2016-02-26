@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterators on peer messages of the local storage updates for other peers
+/// \brief Implementation of the iterators on statistics messages of the local storage updates to populate 
 /// \file statisticsUpdateIterator.cpp
 #include "statisticsUpdateIterator.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
@@ -51,9 +51,9 @@ bool StatisticsUpdateIterator::getNext( const char*& msg, std::size_t& msgsize)
 {
 	try
 	{
-		return m_storage->fetchPeerUpdateMessage( msg, msgsize);
+		return m_storage->fetchNextStatisticsMessage( msg, msgsize);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching peer message from storage: %s"), *m_errorhnd, false);
+	CATCH_ERROR_MAP_RETURN( _TXT("error fetching statistics message from storage: %s"), *m_errorhnd, false);
 }
 
 

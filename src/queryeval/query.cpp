@@ -63,6 +63,7 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
+	,m_metaDataRestriction()
 	,m_nofRanks(20)
 	,m_minRank(0)
 	,m_evalset_defined(false)
@@ -79,24 +80,6 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 		defineFeature( ti->set, 1.0);
 	}
 }
-
-Query::Query( const Query& o)
-	:m_queryEval(o.m_queryEval)
-	,m_storage(o.m_storage)
-	,m_metaDataReader(o.m_metaDataReader)
-	,m_terms(o.m_terms)
-	,m_expressions(o.m_expressions)
-	,m_features(o.m_features)
-	,m_stack(o.m_stack)
-	,m_metaDataRestrictions(o.m_metaDataRestrictions)
-	,m_variableAssignments(o.m_variableAssignments)
-	,m_nofRanks(o.m_nofRanks)
-	,m_minRank(o.m_minRank)
-	,m_usernames(o.m_usernames)
-	,m_evalset_docnolist(o.m_evalset_docnolist)
-	,m_evalset_defined(o.m_evalset_defined)
-	,m_errorhnd(o.m_errorhnd)
-{}
 
 bool Query::Term::operator<( const Term& o) const
 {
@@ -196,14 +179,16 @@ void Query::defineFeature( const std::string& set_, float weight_)
 }
 
 void Query::defineMetaDataRestriction(
-		CompareOperator opr, const std::string&  name,
+		MetaDataRestrictionInterface::CompareOperator opr, const std::string&  name,
 		const ArithmeticVariant& operand, bool newGroup)
 {
 	try
 	{
-		Index hnd = m_metaDataReader->elementHandle( name);
-		const char* typeName = m_metaDataReader->getType( hnd);
-		m_metaDataRestrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
+		if (!m_metaDataRestriction.get())
+		{
+			m_metaDataRestriction.reset( m_storage->createMetaDataRestriction());
+		}
+		m_metaDataRestriction->addCondition( opr, name, operand, newGroup);
 	}
 	CATCH_ERROR_MAP( _TXT("error define meta data restriction of query: %s"), *m_errorhnd);
 }
@@ -524,7 +509,7 @@ QueryResult Query::evaluate()
 		DocsetPostingIterator evalset_itr;
 		Accumulator accumulator(
 			m_storage,
-			m_metaDataReader.get(), m_metaDataRestrictions,
+			m_metaDataReader.get(), m_metaDataRestriction.get(),
 			m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
 	
 		// [4.1] Define document subset to evaluate query on:

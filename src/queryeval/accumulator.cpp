@@ -152,12 +152,10 @@ bool Accumulator::nextRank(
 				}
 			}
 		}
-
 		++m_nofDocumentsVisited;
 
 		// Check meta data restrictions:
-		m_metadata->skipDoc( m_docno);
-		if (!matchesMetaDataRestriction( m_metaDataRestrictionSets, m_metadata))
+		if (m_metaDataRestriction && !m_metaDataRestriction->match(docno))
 		{
 			continue;
 		}

@@ -65,7 +65,7 @@ class StorageTransaction
 	:public StorageTransactionInterface
 {
 public:
-	///\param[in] peerMessageBuilder_ Builder for peer messages owned by caller
+	///\param[in] maxtypeno_ biggest type number to use in this transaction in the forward index map when deleting elements there
 	StorageTransaction( 
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,

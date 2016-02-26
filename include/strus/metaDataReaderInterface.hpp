@@ -37,6 +37,9 @@
 namespace strus
 {
 
+/// \brief Forward declaration
+class MetaDataRestrictionInterface;
+
 /// \brief Interface for accessing meta data from a strus storage
 class MetaDataReaderInterface
 {

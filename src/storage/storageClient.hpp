@@ -55,6 +55,8 @@ class AttributeReaderInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
+class MetaDataRestrictionInterface;
+/// \brief Forward declaration
 class KeyAllocatorInterface;
 /// \brief Forward declaration
 class DatabaseClientInterface;
@@ -73,7 +75,7 @@ class StorageClient
 public:
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	/// \param[in] statisticsProc_ peer message processor interface
+	/// \param[in] statisticsProc_ statistics message processor interface
 	/// \param[in] errorhnd_ error buffering interface for error handling
 	StorageClient(
 			DatabaseClientInterface* database_,
@@ -109,6 +111,8 @@ public:
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
+	virtual MetaDataRestrictionInterface* createMetaDataRestriction() const;
+	
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
 	virtual StatisticsIteratorInterface* createInitStatisticsIterator( bool sign);
@@ -209,7 +213,7 @@ public:/*StatisticsIterator*/
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
 	///\brief Fetch a message from a storage update transaction
-	bool fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize);
+	bool fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize);
 
 public:/*strusResizeBlocks*/
 	Index maxTermTypeNo() const;
@@ -236,8 +240,8 @@ private:
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
 
-	const StatisticsProcessorInterface* m_statisticsProc;	///< peer message processor
-	Reference<StatisticsBuilderInterface> m_statisticsBuilder; ///< builder of peer messages from updates by transactions
+	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
+	Reference<StatisticsBuilderInterface> m_statisticsBuilder; ///< builder of statistics messages from updates by transactions
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface

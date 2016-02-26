@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterator on peer messages of the storage initialization for other peers
+/// \brief Implementation of the iterator statistics messages of the storage initialization to populate
 /// \file statisticsInitIterator.cpp
 #include "statisticsInitIterator.hpp"
 #include "strus/storageClientInterface.hpp"
