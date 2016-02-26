@@ -26,27 +26,65 @@
 
 --------------------------------------------------------------------
 */
-#include "nullIterator.hpp"
-#include "indexPacker.hpp"
+#ifndef _STRUS_STORAGE_NULL_POSTING_ITERATOR_HPP_INCLUDED
+#define _STRUS_STORAGE_NULL_POSTING_ITERATOR_HPP_INCLUDED
+#include "strus/postingIteratorInterface.hpp"
+#include <string>
 
-using namespace strus;
+namespace strus {
 
-#undef STRUS_LOWLEVEL_DEBUG
-
-#ifdef STRUS_LOWLEVEL_DEBUG
-NullIterator::NullIterator( Index termtypeno, Index termvalueno, const char* termstr)
-#else
-NullIterator::NullIterator( Index termtypeno, Index termvalueno, const char*)
-#endif
+/// \brief Iterator representing an empty set
+class NullPostingIterator
+	:public PostingIteratorInterface
 {
-#ifdef STRUS_LOWLEVEL_DEBUG
-	m_featureid.append( termstr);
-	m_featureid.push_back('?');
-	m_featureid.push_back( (char)(termtypeno/10) + '0');
-	m_featureid.push_back( (char)(termtypeno%10) + '0');
-#else
-	packIndex( m_featureid, termtypeno);
-	packIndex( m_featureid, termvalueno);
-#endif
-}
+public:
+	NullPostingIterator( const char* termstr);
 
+	virtual ~NullPostingIterator(){}
+
+	virtual const char* featureid() const
+	{
+		return m_featureid.c_str();
+	}
+
+	virtual Index skipDoc( const Index&)
+	{
+		return 0;
+	}
+
+	virtual Index skipDocCandidate( const Index&)
+	{
+		return 0;
+	}
+
+	virtual Index skipPos( const Index&)
+	{
+		return 0;
+	}
+
+	virtual unsigned int frequency()
+	{
+		return 0;
+	}
+
+	virtual Index documentFrequency() const
+	{
+		return 0;
+	}
+	
+	virtual Index docno() const
+	{
+		return 0;
+	}
+
+	virtual Index posno() const
+	{
+		return 0;
+	}
+
+private:
+	std::string m_featureid;
+};
+
+}
+#endif

@@ -89,6 +89,11 @@ public:
 				const std::string& termtype,
 				const std::string& termid) const;
 
+	virtual PostingIteratorInterface*
+		createBrowsePostingIterator(
+			MetaDataRestrictionInterface* restriction,
+			const Index& maxpos) const;
+
 	virtual ForwardIteratorInterface*
 			createForwardIterator(
 				const std::string& type) const;

@@ -52,7 +52,8 @@
 #include "metaDataRestriction.hpp"
 #include "metaDataReader.hpp"
 #include "postingIterator.hpp"
-#include "nullIterator.hpp"
+#include "browsePostingIterator.hpp"
+#include "nullPostingIterator.hpp"
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
 #include "documentTermIterator.hpp"
@@ -273,11 +274,40 @@ PostingIteratorInterface*
 		Index termno = getTermValue( termstr);
 		if (!typeno || !termno)
 		{
-			return new NullIterator( typeno, termno, termstr.c_str());
+			return new NullPostingIterator( termstr.c_str());
 		}
 		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
+}
+
+PostingIteratorInterface*
+	StorageClient::createBrowsePostingIterator(
+		MetaDataRestrictionInterface* restriction,
+		const Index& maxpos) const
+{
+	try
+	{
+		if (maxpos == 0)
+		{
+			if (restriction) delete restriction;
+			return new NullPostingIterator("?");
+		}
+		else
+		{
+			return new BrowsePostingIterator( restriction, m_next_docno.value()-1, maxpos);
+		}
+	}
+	catch (const std::bad_alloc& err)
+	{
+		m_errorhnd->report( _TXT("out of memory creating browse posting iterator"));
+	}
+	catch (const std::runtime_error& err)
+	{
+		m_errorhnd->report( _TXT("error creating browse posting iterator: %s"), err.what());
+	}
+	if (restriction) delete restriction;
+	return 0;
 }
 
 ForwardIteratorInterface*

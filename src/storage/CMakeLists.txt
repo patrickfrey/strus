@@ -31,7 +31,8 @@ set( libstrus_storage_source_files
 	metaDataRecord.cpp
 	metaDataReader.cpp
 	metaDataRestriction.cpp
-	nullIterator.cpp
+	nullPostingIterator.cpp
+	browsePostingIterator.cpp
 	statisticsInitIterator.cpp
 	statisticsUpdateIterator.cpp
 	posinfoBlock.cpp

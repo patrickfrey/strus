@@ -26,65 +26,22 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_NULL_ITERATOR_HPP_INCLUDED
-#include "strus/postingIteratorInterface.hpp"
-#include <string>
+#include "nullPostingIterator.hpp"
+#include "indexPacker.hpp"
 
-namespace strus {
+using namespace strus;
 
-/// \brief Iterator representing an empty set
-class NullIterator
-	:public PostingIteratorInterface
+#undef STRUS_LOWLEVEL_DEBUG
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+NullPostingIterator::NullPostingIterator( const char* termstr)
 {
-public:
-	NullIterator( Index termtypeno, Index termvalueno, const char* termstr);
-
-	virtual ~NullIterator(){}
-
-	virtual const char* featureid() const
-	{
-		return m_featureid.c_str();
-	}
-
-	virtual Index skipDoc( const Index&)
-	{
-		return 0;
-	}
-
-	virtual Index skipDocCandidate( const Index&)
-	{
-		return 0;
-	}
-
-	virtual Index skipPos( const Index&)
-	{
-		return 0;
-	}
-
-	virtual unsigned int frequency()
-	{
-		return 0;
-	}
-
-	virtual Index documentFrequency() const
-	{
-		return 0;
-	}
-	
-	virtual Index docno() const
-	{
-		return 0;
-	}
-
-	virtual Index posno() const
-	{
-		return 0;
-	}
-
-private:
-	std::string m_featureid;
-};
-
+	m_featureid.append( termstr);
+	m_featureid.append( "!NIL");
+}
+#else
+NullPostingIterator::NullPostingIterator( const char*)
+{
+	m_featureid.append( "!NIL");
 }
 #endif

@@ -72,7 +72,8 @@ public:
 	/// \brief Create an interface to alter the meta data table structure
 	/// \param[in] database key value store database used by the storage (ownership passed to returned object)
 	/// \return the created reference to be disposed with delete by the caller
-	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseClientInterface* database) const=0;
+	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable(
+			DatabaseClientInterface* database) const=0;
 
 	/// \brief Enumeration of different type of configurations
 	///	Needed for getting the correct description of the configuration

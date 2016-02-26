@@ -84,6 +84,18 @@ public:
 			const std::string& type,
 			const std::string& value) const=0;
 
+	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
+	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets (ownership passed to created object).
+	/// \param[in] maxpos maximum position visited. 
+	/// \return the created iterator reference to be disposed with delete by the caller
+	/// \note This iterator use is mainly for browsing occurrencies fulfilling a condition without query involved
+	/// \remark The iterator does not take the alive status of the documents into account. You have to formulate a restriction expression that does not match deleted documents if you do not want deleted documents in your iterated set of postings.
+	/// \remark The iterator does not take the document length into account. It returns the set of postings with positions in the range [1..maxpos]. Read postings you get only when joining this set with another.
+	virtual PostingIteratorInterface*
+		createBrowsePostingIterator(
+			MetaDataRestrictionInterface* restriction,
+			const Index& maxpos) const=0;
+
 	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
 	/// \param[in] type type name of the term to be inspected
 	/// \return the created viewer reference to be disposed with delete

@@ -41,8 +41,6 @@ namespace strus
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
-class MetaDataReaderInterface;
-/// \brief Forward declaration
 class AttributeReaderInterface;
 
 /// \brief Defines all object instances involved in query evaluation addressable by name
