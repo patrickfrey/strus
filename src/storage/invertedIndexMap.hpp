@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_POSINFO_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_POSINFO_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_STORAGE_POSINFO_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "posinfoBlock.hpp"
 #include "booleanBlock.hpp"

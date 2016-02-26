@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_TRANSACTION_HPP_INCLUDED
-#define _STRUS_LVDB_TRANSACTION_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
+#define _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
 #include "strus/storageAlterMetaDataTableInterface.hpp"
 #include "strus/reference.hpp"
 #include "metaDataBlock.hpp"

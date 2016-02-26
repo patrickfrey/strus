@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_USER_ACL_BLOCK_MAP_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_USER_ACL_BLOCK_MAP_HPP_INCLUDED
+#define _STRUS_STORAGE_USER_ACL_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "booleanBlock.hpp"
 #include "private/localStructAllocator.hpp"

@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
-#define _STRUS_LVDB_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
+#define _STRUS_STORAGE_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/utils.hpp"
 #include "private/internationalization.hpp"

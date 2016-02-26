@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_INDEX_SET_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_INDEX_SET_ITERATOR_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_INDEX_SET_ITERATOR_HPP_INCLUDED
+#define _STRUS_STORAGE_INDEX_SET_ITERATOR_HPP_INCLUDED
 #include "booleanBlock.hpp"
 #include "databaseAdapter.hpp"
 

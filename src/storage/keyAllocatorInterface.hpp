@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_KEY_ALLOCATOR_INTERFACE_HPP_INCLUDED
-#define _STRUS_LVDB_KEY_ALLOCATOR_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_KEY_ALLOCATOR_INTERFACE_HPP_INCLUDED
+#define _STRUS_STORAGE_KEY_ALLOCATOR_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <string>
 

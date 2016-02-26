@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ALL_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ALL_ITERATOR_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_ALL_ITERATOR_HPP_INCLUDED
+#define _STRUS_STORAGE_ALL_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
 
 namespace strus {

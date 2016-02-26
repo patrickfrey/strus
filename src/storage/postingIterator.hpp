@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ITERATOR_HPP_INCLUDED
-#define _STRUS_LVDB_ITERATOR_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_ITERATOR_HPP_INCLUDED
+#define _STRUS_STORAGE_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/reference.hpp"
 #include "posinfoIterator.hpp"

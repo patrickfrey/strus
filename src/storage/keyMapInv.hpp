@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_KEY_MAP_INV_HPP_INCLUDED
-#define _STRUS_LVDB_KEY_MAP_INV_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_KEY_MAP_INV_HPP_INCLUDED
+#define _STRUS_STORAGE_KEY_MAP_INV_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/stringMap.hpp"
 #include "private/utils.hpp"

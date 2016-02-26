@@ -34,6 +34,7 @@
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "storageDocument.hpp"
+#include "storageDocumentUpdate.hpp"
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/arithmeticVariant.hpp"

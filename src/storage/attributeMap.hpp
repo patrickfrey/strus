@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_ATTRIBUTE_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_ATTRIBUTE_MAP_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_ATTRIBUTE_MAP_HPP_INCLUDED
+#define _STRUS_STORAGE_ATTRIBUTE_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "blockKey.hpp"
 #include "private/localStructAllocator.hpp"

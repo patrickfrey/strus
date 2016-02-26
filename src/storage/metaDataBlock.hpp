@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
-#define _STRUS_LVDB_METADATA_BLOCK_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_METADATA_BLOCK_HPP_INCLUDED
+#define _STRUS_STORAGE_METADATA_BLOCK_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataDescription.hpp"

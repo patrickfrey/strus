@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_KEY_MAP_HPP_INCLUDED
+#define _STRUS_STORAGE_KEY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"

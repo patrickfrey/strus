@@ -43,6 +43,7 @@ set( libstrus_storage_source_files
 	storageClient.cpp
 	storageDocumentChecker.cpp
 	storageDocument.cpp
+	storageDocumentUpdate.cpp
 	storageTransaction.cpp
 	userAclMap.cpp
 	extractKeyValueData.cpp

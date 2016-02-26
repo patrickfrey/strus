@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_BOOLEAN_BLOCK_HPP_INCLUDED
-#define _STRUS_LVDB_BOOLEAN_BLOCK_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_BOOLEAN_BLOCK_HPP_INCLUDED
+#define _STRUS_STORAGE_BOOLEAN_BLOCK_HPP_INCLUDED
 #include "dataBlock.hpp"
 #include <vector>
 #include <map>
