@@ -254,19 +254,19 @@ struct DocumentBuilder
 		for (ti=0; ti<te; ++ti)
 		{
 			char searchtype[ 32];
-			snprintf( searchtype, sizeof(searchtype), "q%02u", (ti + docno) % dim.nofTermTypes);
+			snprintf( searchtype, sizeof(searchtype), "q%02u", (ti + 10 * docno) % dim.nofTermTypes);
 			char forwardtype[ 32];
-			snprintf( forwardtype, sizeof(forwardtype), "r%02u", (ti + docno) % dim.nofTermTypes);
+			snprintf( forwardtype, sizeof(forwardtype), "r%02u", (ti + 10 * docno) % dim.nofTermTypes);
 
 			unsigned int vi=0, ve=dim.nofTermValues;
 			for (vi=0; vi<ve; ++vi)
 			{
 				if ((vi + docno) % 4 == 0) continue;
 				char value[ 32];
-				snprintf( value, sizeof(value), "s%02u", (vi + docno) % dim.nofDiffTermValues);
+				snprintf( value, sizeof(value), "s%02u", (vi + 10 * docno) % dim.nofDiffTermValues);
 				rt.push_back( Feature( Feature::SearchIndex, searchtype, value, vi+1));
 
-				snprintf( value, sizeof(value), "f%02u", (vi + docno) % dim.nofDiffTermValues);
+				snprintf( value, sizeof(value), "f%02u", (vi + 10 * docno) % dim.nofDiffTermValues);
 				rt.push_back( Feature( Feature::ForwardIndex, forwardtype, value, vi+1));
 			}
 		}
@@ -428,10 +428,10 @@ static void testTrivialInsert()
 static void testDfCalculation()
 {
 	DocumentBuilder::Dim dim;
-	dim.nofDocs = 5;
-	dim.nofTermTypes = 4;
-	dim.nofTermValues = 10;
-	dim.nofDiffTermValues = 2;
+	dim.nofDocs = 100;
+	dim.nofTermTypes = 3;
+	dim.nofTermValues = 1000;
+	dim.nofDiffTermValues = 200;
 	dim.nofAttributes = 0;
 	dim.nofMetaData = 0;
 
