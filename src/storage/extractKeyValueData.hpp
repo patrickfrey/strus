@@ -84,6 +84,28 @@ struct UserNameData
 	void print( std::ostream& out);
 };
 
+struct TermTypeInvData
+{
+	const char* typestr;
+	std::size_t typesize;
+	Index typeno;
+
+	TermTypeInvData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
+
+	void print( std::ostream& out);
+};
+
+struct TermValueInvData
+{
+	const char* valuestr;
+	std::size_t valuesize;
+	Index valueno;
+
+	TermValueInvData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
+
+	void print( std::ostream& out);
+};
+
 struct ForwardIndexData
 {
 	Index docno;

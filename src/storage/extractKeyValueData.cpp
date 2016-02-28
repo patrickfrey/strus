@@ -193,6 +193,56 @@ void UserNameData::print( std::ostream& out)
 	out << (char)DatabaseKey::UserNamePrefix << ' ' << userno << ' ' << escapestr( usernamestr, usernamesize) << std::endl;
 }
 
+TermTypeInvData::TermTypeInvData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+{
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
+
+	typestr = vi;
+	typesize = ve-vi;
+	if (!strus::checkStringUtf8( vi, ve-vi))
+	{
+		throw strus::runtime_error( _TXT( "value of term type is not a valid UTF8 string"));
+	}
+	typeno = strus::unpackIndex( ki, ke);/*[typeno]*/
+	if (ki != ke)
+	{
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of term type number"));
+	}
+}
+
+void TermTypeInvData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::TermTypeInvPrefix << escapestr( typestr, typesize) << ' ' << typeno << std::endl;
+}
+
+TermValueInvData::TermValueInvData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+{
+	char const* ki = key.ptr()+1;
+	char const* ke = key.ptr()+key.size();
+	char const* vi = value.ptr();
+	char const* ve = value.ptr()+value.size();
+
+	valuestr = vi;
+	valuesize = ve-vi;
+	if (!strus::checkStringUtf8( vi, ve-vi))
+	{
+		throw strus::runtime_error( _TXT( "value of term is not a valid UTF8 string"));
+	}
+	valueno = strus::unpackIndex( ki, ke);/*[valueno]*/
+	if (ki != ke)
+	{
+		throw strus::runtime_error( _TXT( "unexpected extra bytes at end of term number"));
+	}
+}
+
+void TermValueInvData::print( std::ostream& out)
+{
+	out << (char)DatabaseKey::TermValueInvPrefix << escapestr( valuestr, valuesize) << ' ' << valueno << std::endl;
+}
+
 static std::string encodeString( const std::string& value)
 {
 	const char* hex = "0123456789ABCDEF";

@@ -632,7 +632,14 @@ Index StorageClient::documentFrequency( const std::string& type, const std::stri
 	{
 		Index typeno = getTermValue( type);
 		Index termno = getTermValue( term);
-		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+		if (typeno && termno)
+		{
+			return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+		}
+		else
+		{
+			return 0;
+		}
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term document frequency: %s"), *m_errorhnd, 0);
 }
@@ -931,22 +938,6 @@ static void checkKeyValue(
 				strus::DocIdData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::ForwardIndexPrefix:
-			{
-				strus::ForwardIndexData( key, value);
-				break;
-			}
-			case strus::DatabaseKey::VariablePrefix:
-			{
-				strus::VariableData( key, value);
-				break;
-			}
-			case strus::DatabaseKey::DocMetaDataPrefix:
-			{
-				strus::MetaDataDescription metadescr( database);
-				strus::DocMetaDataData( &metadescr, key, value);
-				break;
-			}
 			case strus::DatabaseKey::DocAttributePrefix:
 			{
 				strus::DocAttributeData( key, value);
@@ -955,6 +946,32 @@ static void checkKeyValue(
 			case strus::DatabaseKey::UserNamePrefix:
 			{
 				strus::UserNameData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::VariablePrefix:
+			{
+				strus::VariableData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::TermTypeInvPrefix:
+			{
+				strus::TermTypeInvData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::TermValueInvPrefix:
+			{
+				strus::TermValueInvData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::ForwardIndexPrefix:
+			{
+				strus::ForwardIndexData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocMetaDataPrefix:
+			{
+				strus::MetaDataDescription metadescr( database);
+				strus::DocMetaDataData( &metadescr, key, value);
 				break;
 			}
 			case strus::DatabaseKey::DocFrequencyPrefix:
@@ -1060,15 +1077,31 @@ static void dumpKeyValue(
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::ForwardIndexPrefix:
-			{
-				strus::ForwardIndexData data( key, value);
-				data.print( out);
-				break;
-			}
 			case strus::DatabaseKey::VariablePrefix:
 			{
 				strus::VariableData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::DocAttributePrefix:
+			{
+				strus::DocAttributeData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::TermTypeInvPrefix:
+			{
+				strus::TermTypeInvData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::TermValueInvPrefix:
+			{
+				strus::TermValueInvData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::ForwardIndexPrefix:
+			{
+				strus::ForwardIndexData data( key, value);
 				data.print( out);
 				break;
 			}
@@ -1076,12 +1109,6 @@ static void dumpKeyValue(
 			{
 				strus::MetaDataDescription metadescr( database);
 				strus::DocMetaDataData data( &metadescr, key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::DocAttributePrefix:
-			{
-				strus::DocAttributeData data( key, value);
 				data.print( out);
 				break;
 			}
