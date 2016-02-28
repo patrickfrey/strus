@@ -342,6 +342,9 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 			if (m_b)
 			{
 				double doclen = m_metadata->getValue( m_metadata_doclen);
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cout << "idf[" << fi << "]=" << m_idfar[ fi] << " doclen=" << doclen << std::endl;
+#endif
 				double rel_doclen = (doclen+1) / m_avgDocLength;
 				rt += m_idfar[ fi]
 					* (prox_ff * (m_k1 + 1.0))
@@ -349,11 +352,17 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 			}
 			else
 			{
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cout << "idf[" << fi << "]=" << m_idfar[ fi] << std::endl;
+#endif
 				rt += m_idfar[ fi]
 					* (prox_ff * (m_k1 + 1.0))
 					/ (prox_ff + m_k1 * 1.0);
 			}
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "calculated weight " << rt << ", k1=" << m_k1 << ", b=" << m_b << " ,avgdoclen=" << m_avgDocLength << std::endl;
+#endif
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0.0);

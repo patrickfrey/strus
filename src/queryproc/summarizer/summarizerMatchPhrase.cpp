@@ -336,14 +336,18 @@ std::vector<SummaryElement>
 			candidate.pos = firstpos;
 			candidate.span = 10;
 		}
-		struct
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "candidate found pos=" << candidate.pos << ", span=" << candidate.span << " is docstart " << (is_docstart?"YES":"NO") << std::endl;
+#endif
+		struct Abstract
 		{
 			Index start;
 			Index span;
 			bool defined_start;
 			bool defined_end;
 			bool is_docstart;
-		} abstract = {candidate.pos,candidate.span,(candidate.pos == firstpos),false,is_docstart};
+		};
+		Abstract phrase_abstract = {candidate.pos,candidate.span,(candidate.pos == firstpos),false,is_docstart};
 
 		// Find the start of the abstract as start of the preceeding structure or paragraph marker:
 		std::size_t ti=0,te=m_paraarsize+m_structarsize;
@@ -355,51 +359,140 @@ std::vector<SummaryElement>
 		else
 		{
 			astart = firstpos;
-			abstract.defined_start = true;
+			phrase_abstract.defined_start = true;
 		}
 		for (; ti<te && astart < candidate.pos; ++ti)
 		{
 			Index pos = m_structar[ti]->skipPos( astart);
 			while (pos > astart && pos <= candidate.pos)
 			{
-				abstract.defined_start = true;
+				phrase_abstract.defined_start = true;
 				astart = pos + 1;
 				pos = m_structar[ti]->skipPos( astart);
 			}
 		}
-		abstract.span += candidate.pos - astart;
-		abstract.start = astart;
+		phrase_abstract.span += candidate.pos - astart;
+		phrase_abstract.start = astart;
 		// Find the end of the abstract, by scanning for the next sentence:
-		if (abstract.span < (Index)m_sentencesize)
+		if (phrase_abstract.span < (Index)m_sentencesize)
 		{
 			Index minincr = 0;
-			if (abstract.span < ((Index)m_sentencesize >> 2))
+			if (phrase_abstract.span < ((Index)m_sentencesize >> 2))
 			{
 				minincr += (Index)m_sentencesize >> 2;
 				// .... heuristics for minimal size of abstract we want to show
 			}
-			Index nextparapos = callSkipPos( abstract.start + abstract.span, m_paraar, m_paraarsize);
-			Index eospos = callSkipPos( abstract.start + abstract.span + minincr, m_structar, m_structarsize + m_paraarsize);
+			Index nextparapos = callSkipPos( phrase_abstract.start + phrase_abstract.span, m_paraar, m_paraarsize);
+			Index eospos = callSkipPos( phrase_abstract.start + phrase_abstract.span + minincr, m_structar, m_structarsize + m_paraarsize);
 			if (eospos)
 			{
 				if (nextparapos && nextparapos <= eospos) eospos = nextparapos - 1;
-				if ((eospos - abstract.start) < (Index)m_sentencesize)
+				if ((eospos - phrase_abstract.start) < (Index)m_sentencesize)
 				{
-					abstract.span = eospos - abstract.start + 1;
-					abstract.defined_end = true;
+					phrase_abstract.span = eospos - phrase_abstract.start + 1;
+					phrase_abstract.defined_end = true;
 				}
 				else
 				{
-					abstract.span = m_sentencesize;
+					phrase_abstract.span = m_sentencesize;
 				}
 			}
 		}
-		// Create the highlighted result, if exists:
-		if (abstract.span > 0)
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "phrase abstract pos=" << phrase_abstract.start << ", span=" << phrase_abstract.span << " defined start " << (phrase_abstract.defined_start?"YES":"NO") << " defined end " << (phrase_abstract.defined_end?"YES":"NO") << std::endl;
+#endif
+		// Find the title of the paragraph the phrase belongs to:
+		Index searchrange = 200;
+		Index parapos = 0;
+		Index eoppos = 0;
+		Abstract para_abstract = {0,0,true,true,false};
+		for (;;)
+		{
+			Index pstart = phrase_abstract.start  > searchrange + firstpos ? phrase_abstract.start - searchrange : (firstpos + 1);
+			Index prevparapos = callSkipPos( pstart, m_paraar, m_paraarsize);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "start search candidate para pos=" << pstart << ", nextpara=" << prevparapos << std::endl;
+#endif
+			if (prevparapos && prevparapos <= phrase_abstract.start)
+			{
+				parapos = prevparapos;
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cout << "found candidate para pos=" << parapos << std::endl;
+#endif
+				for (;;)
+				{
+					prevparapos = callSkipPos( parapos+1, m_paraar, m_paraarsize);
+					if (prevparapos && prevparapos <= phrase_abstract.start)
+					{
+						parapos = prevparapos;
+					}
+					else
+					{
+						break;
+					}
+				}
+				eoppos = callSkipPos( parapos+1, m_structar, m_structarsize + m_paraarsize);
+				if (eoppos && eoppos - parapos < 12)
+				{
+					if (eoppos >= phrase_abstract.start)
+					{
+						if (eoppos >= phrase_abstract.start)
+						{
+							if (eoppos < phrase_abstract.start + phrase_abstract.span)
+							{
+								phrase_abstract.span -= (eoppos - phrase_abstract.start);
+								phrase_abstract.start = eoppos+1;
+							}
+							else
+							{
+								phrase_abstract.span = 0;
+							}
+						}
+						para_abstract.start = parapos;
+						para_abstract.span = (eoppos-parapos+1);
+					}
+					else if (parapos != firstpos)
+					{
+						para_abstract.start = parapos;
+						para_abstract.span = (eoppos-parapos+1);
+					}
+				}
+				break;
+			}
+			else
+			{
+				if (pstart <= (firstpos + 1)) break;
+				searchrange *= 2;
+			}
+		}
+		
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "para abstract pos=" << para_abstract.start << ", span=" << para_abstract.span << std::endl;
+#endif
+		// Create the paragraph result, if exists:
+		if (para_abstract.span > 0)
+		{
+			std::string paratitle;
+			Index pi = para_abstract.start, pe = para_abstract.start + para_abstract.span;
+			for (; pi < pe; ++pi)
+			{
+				if (m_forwardindex->skipPos(pi) == pi)
+				{
+					if (!paratitle.empty()) paratitle.push_back(' ');
+					paratitle.append( m_forwardindex->fetch());
+				}
+			}
+			rt.push_back( SummaryElement( m_name_para, paratitle, 1.0));
+		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "firstpos=" << firstpos << std::endl;
+#endif
+		// Create the highlighted phrase result, if exists:
+		if (phrase_abstract.span > 0)
 		{
 			// Create the array of positions to highlight:
 			std::vector<Index> highlightpos;
-			Index pi = abstract.start, pe = abstract.start + abstract.span;
+			Index pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
 			while (pi < pe)
 			{
 				Index minpos = callSkipPos( pi, m_itrar, m_itrarsize);
@@ -415,11 +508,11 @@ std::vector<SummaryElement>
 			}
 			// Build the phrase:
 			std::string phrase;
-			if (!abstract.defined_start)
+			if (!phrase_abstract.defined_start)
 			{
 				phrase.append( m_floatingmark.first);
 			}
-			pi = abstract.start, pe = abstract.start + abstract.span;
+			pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
 			if (pi > pe || (unsigned int)(pe - pi) > 2*m_sentencesize+10)
 			{
 				throw strus::runtime_error(_TXT("internal: got illegal summary (%u:%u)"), (unsigned int)pi, (unsigned int)pe);
@@ -443,11 +536,11 @@ std::vector<SummaryElement>
 					}
 				}
 			}
-			if (!abstract.defined_end)
+			if (!phrase_abstract.defined_end)
 			{
 				phrase.append( m_floatingmark.second);
 			}
-			if (abstract.is_docstart)
+			if (phrase_abstract.is_docstart)
 			{
 				rt.push_back( SummaryElement( m_name_docstart, phrase, 1.0));
 			}
