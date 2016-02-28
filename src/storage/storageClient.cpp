@@ -630,7 +630,7 @@ Index StorageClient::documentFrequency( const std::string& type, const std::stri
 {
 	try
 	{
-		Index typeno = getTermValue( type);
+		Index typeno = getTermType( type);
 		Index termno = getTermValue( term);
 		if (typeno && termno)
 		{

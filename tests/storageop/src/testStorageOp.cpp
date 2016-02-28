@@ -204,6 +204,10 @@ static void testTermTypeIterator()
 		res.append( *ti);
 		res.push_back( ' ');
 	}
+	if (g_errorhnd->hasError())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
 	if (res != "w00 w01 w02 w03 w04 w05 w06 w07 w08 w09 w10 w11 w12 w13 w14 w15 w16 w17 w18 w19 w20 w21 w22 w23 w24 w25 w26 w27 w28 w29 w30 w31 w32 w33 w34 w35 w36 w37 w38 w39 w40 w41 w42 w43 w44 w45 w46 w47 w48 w49 w50 w51 w52 w53 w54 w55 w56 w57 w58 w59 w60 w61 w62 w63 w64 w65 w66 w67 w68 w69 w70 w71 w72 w73 w74 w75 w76 w77 w78 w79 w80 w81 w82 w83 w84 w85 w86 w87 w88 w89 w90 w91 w92 w93 w94 w95 w96 w97 w98 w99 w61 w62 w60 w61 w00 w01 ")
 	{
 		throw std::runtime_error("result not as expected");
@@ -250,9 +254,9 @@ struct DocumentBuilder
 		for (ti=0; ti<te; ++ti)
 		{
 			char searchtype[ 32];
-			snprintf( searchtype, sizeof(searchtype), "S%02u", (ti + docno) % dim.nofTermTypes);
+			snprintf( searchtype, sizeof(searchtype), "q%02u", (ti + docno) % dim.nofTermTypes);
 			char forwardtype[ 32];
-			snprintf( forwardtype, sizeof(forwardtype), "F%02u", (ti + docno) % dim.nofTermTypes);
+			snprintf( forwardtype, sizeof(forwardtype), "r%02u", (ti + docno) % dim.nofTermTypes);
 
 			unsigned int vi=0, ve=dim.nofTermValues;
 			for (vi=0; vi<ve; ++vi)
@@ -328,11 +332,6 @@ static void insertCollection( strus::StorageClientInterface* storage, const Docu
 		if (!doc.get()) throw strus::runtime_error("error creating document to insert");
 
 		std::vector<Feature> feats = DocumentBuilder::create( di, dim);
-		/*[-]*/std::vector<Feature>::const_iterator fi=feats.begin(), fe= feats.end();
-		/*[-]*/for (; fi != fe; ++fi)
-		/*[-]*/{
-		/*[-]*/	std::cout << "DOC " << di << " CREATE FEATURE " << fi->type << " '" << fi->value << "' pos " << fi->pos << std::endl;
-		/*[-]*/}
 		insertDocument( doc.get(), feats);
 	}
 	if (!transaction->commit() || g_errorhnd->hasError())
@@ -346,6 +345,7 @@ typedef std::map<DfMapKey,strus::Index> DfMap;
 
 static void calculateDocumentDfMap( DfMap& dfmap, const DocumentBuilder::Dim& dim, unsigned int docno)
 {
+	std::set<DfMapKey> visited;
 	std::vector<Feature> feats = DocumentBuilder::create( docno, dim);
 	std::vector<Feature>::const_iterator fi = feats.begin(), fe = feats.end();
 	for (; fi != fe; ++fi)
@@ -353,22 +353,13 @@ static void calculateDocumentDfMap( DfMap& dfmap, const DocumentBuilder::Dim& di
 		if (fi->kind == Feature::SearchIndex)
 		{
 			DfMapKey key = DfMapKey( fi->type, fi->value);
-			DfMap::iterator xi = dfmap.find( key);
-			if (xi == dfmap.end())
+			if (visited.find( key) == visited.end())
 			{
-				dfmap[ key] = 1;
-			}
-			else
-			{
-				xi->second += 1;
+				visited.insert( key);
+				dfmap[ key] += 1;
 			}
 		}
 	}
-	/*[-]*/fi=feats.begin(), fi=feats.end();
-	/*[-]*/for (; fi != fe; ++fi)
-	/*[-]*/{
-	/*[-]*/	std::cout << "DOC " << docno << " CALCULATE DF " << fi->type << " '" << fi->value << "' = " << dfmap[DfMapKey( fi->type, fi->value)] << std::endl;
-	/*[-]*/}
 }
 
 static DfMap calculateCollectionDfMap( const DocumentBuilder::Dim& dim)
@@ -416,6 +407,10 @@ static void testTrivialInsert()
 		std::vector<Feature> feats = DocumentBuilder::create( di, dim);
 		insertDocument( doc.get(), feats);
 
+		if (g_errorhnd->hasError())
+		{
+			throw std::runtime_error( g_errorhnd->fetchError());
+		}
 		std::string errors;
 		ec = strus::readFile( errlog, errors);
 		if (ec) throw strus::runtime_error("error opening logfile '%s' for reading (%u)", errlog, ec);
@@ -452,44 +447,51 @@ static void testDfCalculation()
 		std::cout << "GET FEATURE DF " << xi->first.first << " '" << xi->first.second << "' = " << df << std::endl;
 		if (df != xi->second) throw strus::runtime_error("df of feature %s '%s' does not match: %d != %d", xi->first.first.c_str(), xi->first.second.c_str(), (int)df, (int)xi->second);
 	}
-	
-	std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
-	unsigned int di=0, de=dim.nofDocs;
-	for (; di < de; di+=2)
 	{
-		char docid[ 32];
-		snprintf( docid, sizeof(docid), "D%02u", di);
-
-		transaction->deleteDocument( docid);
-		DfMap doc_dfmap;
-		calculateDocumentDfMap( doc_dfmap, dim, di);
-		
-		xi = doc_dfmap.begin(), xe = doc_dfmap.end();
+		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		unsigned int di=0, de=dim.nofDocs;
+		for (; di < de; di+=2)
+		{
+			char docid[ 32];
+			snprintf( docid, sizeof(docid), "D%02u", di);
+	
+			transaction->deleteDocument( docid);
+			DfMap doc_dfmap;
+			calculateDocumentDfMap( doc_dfmap, dim, di);
+			
+			xi = doc_dfmap.begin(), xe = doc_dfmap.end();
+			for (; xi != xe; ++xi)
+			{
+				DfMap::iterator mi = dfmap.find( DfMapKey( xi->first.first, xi->first.second));
+				if (mi == dfmap.end()) throw strus::runtime_error("feature %s '%s' not found in dfmap", xi->first.first.c_str(), xi->first.second.c_str());
+				if (mi->second < xi->second) throw strus::runtime_error("df of feature %s '%s' got negative after deletion", xi->first.first.c_str(), xi->first.second.c_str());
+				mi->second -= xi->second;
+			}
+		}
+		transaction->commit();
+	}
+	{
+		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		xi = dfmap.begin(), xe = dfmap.end();
 		for (; xi != xe; ++xi)
 		{
-			DfMap::iterator mi = dfmap.find( DfMapKey( xi->first.first, xi->first.second));
-			if (mi == dfmap.end()) throw strus::runtime_error("feature %s '%s' not found in dfmap", xi->first.first.c_str(), xi->first.second.c_str());
-			if (mi->second < xi->second) throw strus::runtime_error("df of feature %s '%s' got negative after deletion", xi->first.first.c_str(), xi->first.second.c_str());
-			mi->second -= xi->second;
+			strus::Index df = storage.sci->documentFrequency( xi->first.first, xi->first.second);
+			if (df != xi->second) throw strus::runtime_error("df of feature %s '%s' does not match after deletion of documents: %d != %d", xi->first.first.c_str(), xi->first.second.c_str(), (int)df, (int)xi->second);
 		}
+		unsigned int di=0, de=dim.nofDocs;
+		for (di=1; di < de; di+=2)
+		{
+			char docid[ 32];
+			snprintf( docid, sizeof(docid), "D%02u", di);
+	
+			transaction->deleteDocument( docid);
+		}
+		transaction->commit();
 	}
-	transaction->commit();
-	xi = dfmap.begin(), xe = dfmap.end();
-	for (; xi != xe; ++xi)
+	if (g_errorhnd->hasError())
 	{
-		strus::Index df = storage.sci->documentFrequency( xi->first.first, xi->first.second);
-		if (df != xi->second) throw strus::runtime_error("df of feature %s '%s' does not match after deletion of documents: %d != %d", xi->first.first.c_str(), xi->first.second.c_str(), (int)df, (int)xi->second);
+		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-
-	for (di=1; di < de; di+=2)
-	{
-		char docid[ 32];
-		snprintf( docid, sizeof(docid), "D%02u", di);
-
-		transaction->deleteDocument( docid);
-	}
-	transaction->commit();
-
 	xi = dfmap.begin(), xe = dfmap.end();
 	for (; xi != xe; ++xi)
 	{
@@ -565,10 +567,10 @@ int main( int argc, const char* argv[])
 	{
 		switch (ti)
 		{
-			case 1: RUN_TEST( ti, DeleteNonExistingDoc ) break;
-			case 2: RUN_TEST( ti, TermTypeIterator ) break;
-			case 3: RUN_TEST( ti, TrivialInsert ) break;
-			case 4: RUN_TEST( ti, DfCalculation ) break;
+			case 1: RUN_TEST( ti, DfCalculation ) break;
+			case 2: RUN_TEST( ti, DeleteNonExistingDoc ) break;
+			case 3: RUN_TEST( ti, TermTypeIterator ) break;
+			case 4: RUN_TEST( ti, TrivialInsert ) break;
 			default: goto TESTS_DONE;
 		}
 		if (test_index) break;
