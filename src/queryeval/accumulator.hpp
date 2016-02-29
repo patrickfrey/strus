@@ -71,7 +71,7 @@ public:
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
 		,m_metadata(metadata_)
-		,m_metaDataRestriction(metaDataRestriction_->createInstance())
+		,m_metaDataRestriction(metaDataRestriction_?metaDataRestriction_->createInstance():0)
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
