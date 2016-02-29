@@ -34,6 +34,7 @@
 #include "metaDataDescription.hpp"
 #include "metaDataElement.hpp"
 #include <string>
+/*[-]*/#include <iostream>
 
 namespace strus
 {
@@ -48,6 +49,10 @@ public:
 	MetaDataReader( MetaDataBlockCache* cache_,
 			const MetaDataDescription* description_,
 			ErrorBufferInterface* errorhnd_);
+	virtual ~MetaDataReader()
+	{
+		/*[-]*/std::cout << "HALLY GALLY MetaDataReader" << std::endl;
+	}
 
 	virtual Index elementHandle( const std::string& name) const;
 	virtual bool hasElement( const std::string& name) const;

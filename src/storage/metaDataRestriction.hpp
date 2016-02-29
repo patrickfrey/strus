@@ -29,6 +29,7 @@
 #ifndef _STRUS_METADATA_RESTRICTION_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_METADATA_RESTRICTION_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/metaDataRestrictionInterface.hpp"
+#include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/index.hpp"
 #include "strus/reference.hpp"
@@ -81,6 +82,13 @@ public:
 	/// \return true if yes
 	bool match( const MetaDataReaderInterface* md) const;
 
+	/// \brief Return string representation of this operation
+	std::string tostring() const;
+
+	/// \brief Evaluate, if this element start a new CNF group
+	/// \return true if yes
+	bool newGroup() const					{return m_newGroup;}
+
 private:
 	static CompareFunction getCompareFunction( const char* type_, CompareOperator opr_);
 
@@ -94,19 +102,37 @@ private:
 	bool m_newGroup;		///< true if element opens a new OR group in a CNF
 };
 
+class MetaDataRestrictionInstance
+	:public MetaDataRestrictionInstanceInterface
+{
+public:
+	/// \param[in] metadata_ metadata reader (ownership passed)
+	MetaDataRestrictionInstance(
+			MetaDataReaderInterface* metadata_,
+			const std::vector<MetaDataCompareOperation>& opar_,
+			ErrorBufferInterface* errorhnd_);
+
+	virtual ~MetaDataRestrictionInstance(){}
+
+	virtual bool match( const Index& docno) const;
+
+private:
+	std::vector<MetaDataCompareOperation> m_opar;		///< list of comparison operations as CNF
+	mutable Reference<MetaDataReaderInterface> m_metadata;	///< we change it only when calling match and there is no other method accessing this metadata reader
+	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
+};
+
 
 class MetaDataRestriction
 	:public MetaDataRestrictionInterface
 {
 public:
 	MetaDataRestriction(
-			const StorageClientInterface* storage,
-			ErrorBufferInterface* errorhnd_);
-	MetaDataRestriction(
-			const Reference<MetaDataReaderInterface>& metadata_,
+			const StorageClientInterface* storage_,
 			ErrorBufferInterface* errorhnd_);
 
-	virtual ~MetaDataRestriction(){}
+	virtual ~MetaDataRestriction()
+	{}
 	
 	virtual void addCondition(
 			CompareOperator opr,
@@ -116,11 +142,12 @@ public:
 
 	virtual std::string tostring() const;
 
-	virtual bool match( const Index& docno) const;
+	virtual MetaDataRestrictionInstanceInterface* createInstance() const;
 
 private:
 	std::vector<MetaDataCompareOperation> m_opar;		///< list of comparison operations as CNF
-	mutable Reference<MetaDataReaderInterface> m_metadata;	///< we change it only when calling match and there is no other method accessing this metadata reader
+	const StorageClientInterface* m_storage;		///< storage reference
+	Reference<MetaDataReaderInterface> m_metadata;		///< meta data reader for inspecting the table elements
 	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 

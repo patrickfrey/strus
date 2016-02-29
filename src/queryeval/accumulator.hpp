@@ -35,6 +35,7 @@
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
+#include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "private/utils.hpp"
 #include <vector>
 #include <list>
@@ -48,8 +49,6 @@ class StorageClientInterface;
 class QueryProcessorInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
-/// \brief Forward declaration
-class MetaDataReaderInterface;
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 /// \brief Forward declaration
@@ -72,7 +71,7 @@ public:
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
 		,m_metadata(metadata_)
-		,m_metaDataRestriction(metaDataRestriction_)
+		,m_metaDataRestriction(metaDataRestriction_->createInstance())
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
@@ -136,7 +135,7 @@ private:
 
 	const StorageClientInterface* m_storage;
 	MetaDataReaderInterface* m_metadata;
-	MetaDataRestrictionInterface* m_metaDataRestriction;
+	Reference<MetaDataRestrictionInstanceInterface> m_metaDataRestriction;
 	std::vector<WeightingFeature> m_weightingFeatures;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;

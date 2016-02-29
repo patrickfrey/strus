@@ -26,35 +26,29 @@
 
 --------------------------------------------------------------------
 */
-#include "browsePostingIterator.hpp"
-#include "strus/metaDataRestrictionInterface.hpp"
+/// \brief Interface for a metadata restriction instance
+#ifndef _STRUS_METADATA_RESTRICTION_INSTANCE_INTERFACE_HPP_INCLUDED
+#define _STRUS_METADATA_RESTRICTION_INSTANCE_INTERFACE_HPP_INCLUDED
+#include "strus/arithmeticVariant.hpp"
+#include "strus/index.hpp"
+#include <string>
 
-using namespace strus;
+namespace strus {
 
-BrowsePostingIterator::BrowsePostingIterator( const MetaDataRestrictionInterface* restriction_, const Index& maxdocno_, const Index& maxposno_)
-	:m_restriction(restriction_->createInstance()),m_docno(0),m_posno(0),m_maxdocno(maxdocno_),m_maxposno(maxposno_)
+/// \brief Class for building up a metadata restriction
+class MetaDataRestrictionInstanceInterface
 {
-#ifdef STRUS_LOWLEVEL_DEBUG
-	m_featureid.append( m_restriction.get()?m_restriction->tostring():"");
-#else
-	m_featureid.append( "!BRO");
+public:
+	/// \brief Destructor
+	virtual ~MetaDataRestrictionInstanceInterface(){}
+
+	/// \brief Evaluate if a document matches the restriction condition
+	/// \param[in] docno local internal document number of the document to match
+	/// \return true, if it matches, false if not
+	/// \remark A deleted document has every metadata element nulled out. So it depends on the restriction expression wheter the document number matches or not. There esists no other flag for the document number in the system telling wheter it exists or not. 
+	virtual bool match( const Index& docno) const=0;
+};
+
+} //namespace
 #endif
-}
-
-BrowsePostingIterator::~BrowsePostingIterator()
-{}
-
-Index BrowsePostingIterator::skipDoc( const Index& docno_)
-{
-	if (docno_ < 0 || docno_ > m_maxdocno) return m_docno = 0;
-	Index dn = (docno_ == 0) ? 1 : docno_;
-	while (!m_restriction->match( dn))
-	{
-		++dn;
-		if (dn > m_maxdocno) return m_docno = 0;
-	}
-	return m_docno = dn;
-}
-
-
 

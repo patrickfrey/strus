@@ -155,7 +155,7 @@ bool Accumulator::nextRank(
 		++m_nofDocumentsVisited;
 
 		// Check meta data restrictions:
-		if (m_metaDataRestriction && !m_metaDataRestriction->match(m_docno))
+		if (m_metaDataRestriction.get() && !m_metaDataRestriction->match(m_docno))
 		{
 			continue;
 		}

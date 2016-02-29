@@ -283,7 +283,7 @@ PostingIteratorInterface*
 
 PostingIteratorInterface*
 	StorageClient::createBrowsePostingIterator(
-		MetaDataRestrictionInterface* restriction,
+		const MetaDataRestrictionInterface* restriction,
 		const Index& maxpos) const
 {
 	try

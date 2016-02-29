@@ -29,6 +29,8 @@
 #ifndef _STRUS_STORAGE_BROWSE_POSTING_ITERATOR_HPP_INCLUDED
 #define _STRUS_STORAGE_BROWSE_POSTING_ITERATOR_HPP_INCLUDED
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/metaDataRestrictionInstanceInterface.hpp"
+#include "strus/reference.hpp"
 #include "strus/index.hpp"
 #include <string>
 
@@ -43,7 +45,7 @@ class BrowsePostingIterator
 {
 public:
 	BrowsePostingIterator( 
-		MetaDataRestrictionInterface* restriction_,
+		const MetaDataRestrictionInterface* restriction_,
 		const Index& maxdocno_, const Index& maxposno_);
 
 	virtual ~BrowsePostingIterator();
@@ -89,7 +91,7 @@ public:
 	}
 
 private:
-	MetaDataRestrictionInterface* m_restriction;
+	Reference<MetaDataRestrictionInstanceInterface> m_restriction;
 	std::string m_featureid;
 	Index m_docno;
 	Index m_posno;

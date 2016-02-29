@@ -184,6 +184,12 @@ static bool compareFunctionGreaterEqualUInt( const ArithmeticVariant& op1, const
 	return (unsigned int)op1 >= (unsigned int)op2;
 }
 
+static const char* compareOperatorName( MetaDataRestrictionInterface::CompareOperator op)
+{
+	static const char* ar[] = {"<", "<=", "==", "!=", ">", ">="};
+	return ar[op];
+}
+
 MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFunction( const char* type, CompareOperator cmpop)
 {
 	if (utils::caseInsensitiveEquals( type, "float16"))
@@ -273,10 +279,20 @@ bool MetaDataCompareOperation::match( const MetaDataReaderInterface* md) const
 	return m_func( md->getValue( m_elementHandle), m_operand);
 }
 
-MetaDataRestriction::MetaDataRestriction(
-		const StorageClientInterface* storage,
+std::string MetaDataCompareOperation::tostring() const
+{
+	std::ostringstream rt;
+	rt << "(" << m_name << compareOperatorName(m_opr) << m_operand.tostring().c_str()
+		<< ")[" << (m_newGroup?"T":"F") << "]" << std::endl;
+	return rt.str();
+}
+
+MetaDataRestrictionInstance::MetaDataRestrictionInstance(
+		MetaDataReaderInterface* metadata_,
+		const std::vector<MetaDataCompareOperation>& opar_,
 		ErrorBufferInterface* errorhnd_)
-	:m_metadata(storage->createMetaDataReader())
+	:m_opar(opar_)
+	,m_metadata(metadata_)
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metadata.get())
@@ -285,14 +301,7 @@ MetaDataRestriction::MetaDataRestriction(
 	}
 }
 
-MetaDataRestriction::MetaDataRestriction(
-		const Reference<MetaDataReaderInterface>& metadata_,
-		ErrorBufferInterface* errorhnd_)
-	:m_metadata(metadata_)
-	,m_errorhnd(errorhnd_)
-{}
-
-bool MetaDataRestriction::match( const Index& docno) const
+bool MetaDataRestrictionInstance::match( const Index& docno) const
 {
 	m_metadata->skipDoc( docno);
 	std::vector<MetaDataCompareOperation>::const_iterator
@@ -300,7 +309,7 @@ bool MetaDataRestriction::match( const Index& docno) const
 	while (oi != oe)
 	{
 		bool val = oi->match( m_metadata.get());
-		for (++oi; oi != oe && !oi->m_newGroup; ++oi)
+		for (++oi; oi != oe && !oi->newGroup(); ++oi)
 		{
 			val |= oi->match( m_metadata.get());
 		}
@@ -308,6 +317,16 @@ bool MetaDataRestriction::match( const Index& docno) const
 	}
 	return true;
 }
+
+
+MetaDataRestriction::MetaDataRestriction(
+		const StorageClientInterface* storage_,
+		ErrorBufferInterface* errorhnd_)
+	:m_opar()
+	,m_storage(storage_)
+	,m_metadata(storage_->createMetaDataReader())
+	,m_errorhnd(errorhnd_)
+{}
 
 void MetaDataRestriction::addCondition(
 		CompareOperator opr,
@@ -329,14 +348,8 @@ void MetaDataRestriction::addCondition(
 		}
 		m_opar.push_back( MetaDataCompareOperation( elemtype, opr, elemhnd, name, operand, newGroup));
 	}
-	CATCH_ERROR_MAP( _TXT("error in meta data restriction add condition: %s"), *m_errorhnd);
+	CATCH_ERROR_MAP( _TXT("error in meta data restriction add condition"), *m_errorhnd);
 
-}
-
-static const char* compareOperatorName( MetaDataRestrictionInterface::CompareOperator op)
-{
-	static const char* ar[] = {"<", "<=", "==", "!=", ">", ">="};
-	return ar[op];
 }
 
 std::string MetaDataRestriction::tostring() const
@@ -369,9 +382,17 @@ std::string MetaDataRestriction::tostring() const
 		}
 		return resbuf.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in meta data restriction to string: %s"), *m_errorhnd, std::string());
+	CATCH_ERROR_MAP_RETURN( _TXT("error in meta data restriction to string"), *m_errorhnd, std::string());
 }
 
+MetaDataRestrictionInstanceInterface* MetaDataRestriction::createInstance() const
+{
+	try
+	{
+		return new MetaDataRestrictionInstance( m_storage->createMetaDataReader(), m_opar, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("failed to create meta data restriction instance"), *m_errorhnd, 0);
+}
 
 
 

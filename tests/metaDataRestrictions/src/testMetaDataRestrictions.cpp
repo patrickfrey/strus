@@ -347,8 +347,8 @@ static strus::ArithmeticVariant randomOperand(
 	return strus::ArithmeticVariant();
 }
 
-static void addRandomMetaDataCondition(
-		strus::MetaDataRestrictionInterface* restriction,
+static strus::MetaDataCompareOperation
+	randomMetaDataCondition(
 		const strus::MetaDataDescription* descr,
 		const strus::MetaDataRecord& rec,
 		bool newGroup,
@@ -362,22 +362,23 @@ static void addRandomMetaDataCondition(
 	const strus::MetaDataElement* elem = descr->get( hnd);
 	strus::ArithmeticVariant value = rec.getValue( elem);
 
-	const char* elemName = descr->getName( hnd);
+	std::string elemName( descr->getName( hnd));
 	strus::ArithmeticVariant 
 		operand = randomOperand( value, opr, elem->type(), positiveResult);
 
-	restriction->addCondition( opr, elemName, operand, newGroup);
+	return strus::MetaDataCompareOperation(
+			elem->typeName(), opr, hnd, elemName, operand, newGroup);
 }
 
-static strus::Reference<strus::MetaDataRestrictionInterface>
+static strus::Reference<strus::MetaDataRestrictionInstanceInterface>
 	randomMetaDataRestriction(
-		const strus::Reference<strus::MetaDataReaderInterface>& reader,
+		strus::MetaDataReaderInterface* reader,
 		const strus::MetaDataDescription* descr,
 		const strus::MetaDataRecord& rec,
-		bool positiveResult)
+		bool positiveResult,
+		std::string expressionstr)
 {
-	strus::Reference<strus::MetaDataRestrictionInterface>
-		rt( new strus::MetaDataRestriction( reader, g_errorbuf.get()));
+	std::vector<strus::MetaDataCompareOperation> ops;
 	unsigned int ri = 0, re = RANDINT(1,6);
 	for (; ri != re; ++ri)
 	{
@@ -392,21 +393,29 @@ static strus::Reference<strus::MetaDataRestrictionInterface>
 		{
 			bool positiveResultGroupElement = positiveResult?(gi==matchGroupElement):false;
 			bool newGroup = (gi == 0);
-			addRandomMetaDataCondition( rt.get(), descr, rec, newGroup, positiveResultGroupElement);
+			ops.push_back( randomMetaDataCondition( descr, rec, newGroup, positiveResultGroupElement));
+			if (expressionstr.size())
+			{
+				expressionstr.append( ", ");
+			}
+			expressionstr.append( ops.back().tostring());
 		}
 	}
+	strus::Reference<strus::MetaDataRestrictionInstanceInterface>
+		rt( new strus::MetaDataRestrictionInstance( reader, ops, g_errorbuf.get()));
 	return rt;
 }
 
 static void reportTest(
 		std::ostream& out,
-		const strus::Reference<strus::MetaDataRestrictionInterface>& restriction,
+		const strus::Reference<strus::MetaDataRestrictionInstanceInterface>& restriction,
+		const std::string& expressionstr,
 		const strus::MetaDataRecord& rc,
 		bool expectedResult)
 {
 	out << "checking record:" << std::endl;
 	rc.print( out);
-	out << "against expression:" << restriction->tostring() << std::endl;
+	out << "against expression:" << expressionstr << std::endl;
 	out << "expecting " << (expectedResult?"positive":"negative") << " result" << std::endl;
 }
 
@@ -471,27 +480,29 @@ int main( int argc, const char* argv[])
 			{
 				std::memset( data, 0, descr.bytesize());
 				strus::MetaDataRecord rc = randomMetaDataRecord( &descr, data);
-				strus::Reference<strus::MetaDataReaderInterface> reader( new MetaDataReader( &descr, data));
 
 				std::size_t xi=0, xe=nofQueries;
 				for (; xi<xe; ++xi)
 				{
 					try
 					{
+						std::string expressionstr;
 						bool expectedResult = (bool)RANDINT(0,2);
-						strus::Reference<strus::MetaDataRestrictionInterface>
-							restriction = randomMetaDataRestriction(
-										reader, &descr, rc, expectedResult);
+						strus::Reference<strus::MetaDataRestrictionInstanceInterface>
+							restriction =
+								randomMetaDataRestriction(
+									new MetaDataReader( &descr, data),
+									&descr, rc, expectedResult, expressionstr);
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 						std::cerr << "test " << di << "/" << ri << "/" << xi << std::endl;
-						reportTest( std::cerr, restriction, rc, expectedResult);
+						reportTest( std::cerr, restriction, expressionstr, rc, expectedResult);
 #endif
 						queryCount++;
 						if (expectedResult != restriction->match(1))
 						{
 #ifndef STRUS_LOWLEVEL_DEBUG
-							reportTest( std::cerr, restriction, rc, expectedResult);
+							reportTest( std::cerr, restriction, expressionstr, rc, expectedResult);
 #endif
 							std::cout << "query no " << queryCount << " failed" << std::endl;
 							throw std::runtime_error( "test failed");

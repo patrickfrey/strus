@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Interface for metadata restrictions
+/// \brief Interface for building up metadata restrictions
 #ifndef _STRUS_METADATA_RESTRICTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_RESTRICTION_INTERFACE_HPP_INCLUDED
 #include "strus/arithmeticVariant.hpp"
@@ -36,14 +36,15 @@
 namespace strus {
 
 /// \brief Forward declaration
-class MetaDataReaderInterface;
+class MetaDataRestrictionInstanceInterface;
 
 /// \brief Class for building up a metadata restriction
 class MetaDataRestrictionInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~MetaDataRestrictionInterface(){}
+	virtual ~MetaDataRestrictionInterface()
+	{}
 
 	/// \brief Comparison operator for restrictions
 	enum CompareOperator
@@ -72,11 +73,9 @@ public:
 			const ArithmeticVariant& operand,
 			bool newGroup=true)=0;
 
-	/// \brief Evaluate if a document matches the restriction condition
-	/// \param[in] docno local internal document number of the document to match
-	/// \return true, if it matches, false if not
-	/// \remark A deleted document has every metadata element nulled out. So it depends on the restriction expression wheter the document number matches or not. There esists no other flag for the document number in the system telling wheter it exists or not. 
-	virtual bool match( const Index& docno) const=0;
+	/// \brief Create an instance of this metadata restriction
+	/// \return the created restriction instance
+	virtual MetaDataRestrictionInstanceInterface* createInstance() const=0;
 
 	/// \brief Return a readable string representation of the expression
 	/// \return the expression as string
