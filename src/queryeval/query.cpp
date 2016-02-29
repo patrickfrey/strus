@@ -178,7 +178,7 @@ void Query::defineFeature( const std::string& set_, float weight_)
 	CATCH_ERROR_MAP( _TXT("error define feature of query: %s"), *m_errorhnd);
 }
 
-void Query::defineMetaDataRestriction(
+void Query::addMetaDataRestrictionCondition(
 		MetaDataRestrictionInterface::CompareOperator opr, const std::string&  name,
 		const ArithmeticVariant& operand, bool newGroup)
 {

@@ -74,7 +74,7 @@ public:
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 
-	virtual void defineMetaDataRestriction(
+	virtual void addMetaDataRestrictionCondition(
 			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
 			const ArithmeticVariant& operand, bool newGroup);
 

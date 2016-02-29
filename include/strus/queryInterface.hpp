@@ -96,14 +96,14 @@ public:
 	virtual void defineGlobalStatistics(
 			const GlobalStatistics& stats_)=0;
 
-	/// \brief Define a restriction on documents base on a condition on the meta data
+	/// \brief Add a condition clause to the restriction on the document meta data of this query
 	/// \param[in] opr condition compare operator
 	/// \param[in] name name of meta data element to check
 	/// \param[in] operand constant number to check against
 	/// \param[in] newGroup true, if the conditional opens a new group of elements joined with a logical "OR" 
 	///			false, if the conditional belongs to the last group of elements joined with a logical "OR".
 	///		Different groups are joined with a logical "AND" to form the meta data restriction expression
-	virtual void defineMetaDataRestriction(
+	virtual void addMetaDataRestrictionCondition(
 			MetaDataRestrictionInterface::CompareOperator opr,
 			const std::string& name,
 			const ArithmeticVariant& operand,

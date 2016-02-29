@@ -68,6 +68,7 @@ void MetaDataReader::skipDoc( const Index& docno)
 
 ArithmeticVariant MetaDataReader::getValue( const Index& elementHandle_) const
 {
+	if (!m_docno) return ArithmeticVariant();
 	return m_current.getValue( m_description->get( elementHandle_));
 }
 
