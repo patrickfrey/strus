@@ -42,7 +42,12 @@ SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 	,m_attribname(name_)
 	,m_attrib(attribreader_->elementHandle( name_.c_str()))
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (!m_attrib)
+	{
+		throw strus::runtime_error(_TXT("unknown attribute name '%s' passed to summarizer '%s'"), m_attribname.c_str(), "attribute");
+	}
+}
 
 void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		const std::string&,

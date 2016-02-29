@@ -43,7 +43,12 @@ SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData(
 	,m_name(name_)
 	,m_attrib(metadata_->elementHandle( name_.c_str()))
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (!m_attrib)
+	{
+		throw strus::runtime_error(_TXT("unknown metadata element name '%s' passed to summarizer '%s'"), m_name.c_str(), "metadata");
+	}
+}
 
 void SummarizerFunctionContextMetaData::addSummarizationFeature(
 		const std::string&,
