@@ -57,7 +57,7 @@ public:
 			ErrorBufferInterface* errorhnd_);
 	virtual ~DocumentTermIterator(){}
 
-	virtual void skipDoc( const Index& docno);
+	virtual bool skipDoc( const Index& docno);
 
 	virtual bool nextTerm( Term& value);
 

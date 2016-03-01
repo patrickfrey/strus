@@ -51,13 +51,13 @@ DocumentTermIterator::DocumentTermIterator(
 	,m_invblkitr(0)
 	,m_errorhnd(errorhnd_){}
 
-void DocumentTermIterator::skipDoc( const Index& docno)
+bool DocumentTermIterator::skipDoc( const Index& docno)
 {
 	try
 	{
 		m_invblk.clear();
 		m_invblkitr = 0;
-		if (m_typeno) m_dbadapter_inv.load( docno, m_invblk);
+		if (m_typeno) return m_dbadapter_inv.load( docno, m_invblk);
 	}
 	CATCH_ERROR_MAP( _TXT("error in document term iterator skip doc: %s"), *m_errorhnd);
 }

@@ -69,7 +69,7 @@ public:
 
 	/// \brief Define the document of the items inspected
 	/// \param[in] docno document number to seek
-	virtual void skipDoc( const Index& docno)=0;
+	virtual bool skipDoc( const Index& docno)=0;
 
 	/// \brief Get the next term
 	/// \param[out] value the next term fetched, if exists
@@ -85,7 +85,6 @@ public:
 	/// \param[in] termno internal local term number
 	/// \return the term string
 	virtual std::string termValue( const Index& termno) const=0;
-
 };
 
 }//namespace

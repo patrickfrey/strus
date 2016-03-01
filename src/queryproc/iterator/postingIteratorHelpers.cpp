@@ -33,7 +33,6 @@
 #include "private/errorUtils.hpp"
 #include "private/bitOperations.hpp"
 #include <sstream>
-#include <iostream>
 
 using namespace strus;
 
@@ -43,7 +42,7 @@ Index strus::getFirstAllMatchDocno(
 		bool allowEmpty)
 {
 	if (args.empty()) return 0;
-	
+
 	Index docno_iter = docno;
 	std::vector<Reference< PostingIteratorInterface> >::iterator
 		ae = args.end();
@@ -57,6 +56,8 @@ Index strus::getFirstAllMatchDocno(
 		{
 			return 0;
 		}
+		Index max_docno = docno_iter;
+		bool failed = false;
 		for (++ai; ai != ae; ++ai)
 		{
 			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
@@ -66,11 +67,15 @@ Index strus::getFirstAllMatchDocno(
 			}
 			if (docno_next != docno_iter)
 			{
-				docno_iter = docno_next;
-				break;
+				if (docno_next > max_docno)
+				{
+					max_docno = docno_next;
+					docno_iter = docno_next;
+					failed = true;
+				}
 			}
 		}
-		if (ai == ae)
+		if (!failed)
 		{
 			if (!allowEmpty)
 			{
