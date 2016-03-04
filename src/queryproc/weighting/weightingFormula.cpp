@@ -122,7 +122,7 @@ double FunctionMap::unaryFunction_minus( double arg)
 
 double FunctionMap::unaryFunction_log10( double arg)
 {
-	return std::log( arg);
+	return std::log10( arg);
 }
 
 double FunctionMap::binaryFunction_minus( double arg1, double arg2)

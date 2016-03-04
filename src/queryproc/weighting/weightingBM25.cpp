@@ -68,7 +68,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 		
 			if (m_nofCollectionDocuments > nofMatches * 2)
 			{
-				idf = logf(
+				idf = log10(
 						(m_nofCollectionDocuments - nofMatches + 0.5)
 						/ (nofMatches + 0.5));
 			}

@@ -31,25 +31,25 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/bitOperations.hpp"
 #include <sstream>
+#include <cstring>
 
 using namespace strus;
 
+typedef Reference< PostingIteratorInterface> PostingIteratorReference;
+
 Index strus::getFirstAllMatchDocno(
-		std::vector<Reference< PostingIteratorInterface> >& args,
+		std::vector<PostingIteratorReference>& args,
 		Index docno,
 		bool allowEmpty)
 {
 	if (args.empty()) return 0;
 
 	Index docno_iter = docno;
-	std::vector<Reference< PostingIteratorInterface> >::iterator
-		ae = args.end();
+	std::vector<PostingIteratorReference>::iterator ae = args.end();
 	for (;;)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin();
+		std::vector<PostingIteratorReference>::iterator ai = args.begin();
 
 		docno_iter = (*ai)->skipDocCandidate( docno_iter);
 		if (docno_iter == 0)
@@ -80,100 +80,17 @@ Index strus::getFirstAllMatchDocno(
 			if (!allowEmpty)
 			{
 				ai = args.begin();
-				for (; ai != ae; ++ai)
+				for (; ai != ae && (*ai)->skipPos(0); ++ai){}
+
+				if (ai != ae)
 				{
-					if (docno_iter != (*ai)->skipDoc( docno_iter))
-					{
-						++docno_iter;
-						continue;
-					}
+					++docno_iter;
+					continue;
 				}
 			}
 			return docno_iter;
 		}
 	}
-}
-
-Index strus::getFirstAllMatchDocnoSubset(
-		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno,
-		bool allowEmpty,
-		std::size_t cardinality,
-		uint64_t& candidate_set)
-{
-	if (args.empty()) return 0;
-	if (args.size() > 64) throw std::runtime_error("number of arguments for getFirstAllMatchDocnoSubset out of range");
-
-	Index docno_iter = docno;
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin(), ae = args.end();
-
-		std::size_t nof_matches = 0;
-		Index match_docno = 0;
-		candidate_set = 0;
-
-		for (unsigned int aidx = 0; ai != ae; ++ai,++aidx)
-		{
-			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
-			if (docno_next)
-			{
-				if (match_docno)
-				{
-					if (match_docno == docno_next)
-					{
-						candidate_set |= (uint64_t)1<<(aidx);
-						++nof_matches;
-					}
-					else if (match_docno > docno_next)
-					{
-						candidate_set = (uint64_t)1<<(aidx);
-						match_docno = docno_next;
-						nof_matches = 1;
-					}
-				}
-				else
-				{
-					candidate_set = (uint64_t)1<<(aidx);
-					match_docno = docno_next;
-					nof_matches = 1;
-				}
-			}
-		}
-		if (nof_matches >= cardinality)
-		{
-			if (!allowEmpty)
-			{
-				unsigned int aidx = BitOperations::bitScanForward( candidate_set);
-				while (aidx)
-				{
-					if (match_docno != args[aidx-1]->skipDoc( match_docno))
-					{
-						--nof_matches;
-						if (nof_matches < cardinality) break;
-					}
-					candidate_set -= (uint64_t)1<<(aidx-1);
-					aidx = BitOperations::bitScanForward( candidate_set);
-				}
-				if (nof_matches < cardinality)
-				{
-					docno_iter = match_docno+1;
-					continue;
-				}
-			}
-			return match_docno;
-		}
-		else if (match_docno)
-		{
-			docno_iter = match_docno+1;
-		}
-		else
-		{
-			break;
-		}
-	}
-	return 0;
 }
 
 void strus::encodeInteger( std::string& buf, int val)

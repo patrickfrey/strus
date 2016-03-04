@@ -56,13 +56,13 @@ IteratorContains::IteratorContains( const std::vector<Reference< PostingIterator
 IteratorContains::~IteratorContains()
 {}
 
-IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_)
-	:IteratorContains(args,errorhnd_), m_cardinality(cardinality_)
+IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, unsigned int cardinality_, ErrorBufferInterface* errorhnd_)
+	:IteratorContains(args,errorhnd_), m_prioqueue(args,cardinality_)
 {
 	m_featureid.resize( m_featureid.size()-1);
-	if (m_cardinality && m_cardinality != args.size())
+	if (cardinality_)
 	{
-		encodeInteger( m_featureid, m_cardinality);
+		encodeInteger( m_featureid, cardinality_);
 		m_featureid.push_back( 'C');
 	}
 	m_featureid.push_back( 'A');
@@ -82,16 +82,12 @@ Index IteratorContains::skipDoc( const Index& docno_)
 
 Index IteratorContainsWithCardinality::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	uint64_t candidate_set;
-	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, true, m_cardinality, candidate_set);
+	return m_prioqueue.skipDocCandidate( docno_);
 }
 
 Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	uint64_t candidate_set;
-	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, false, m_cardinality, candidate_set);
+	return m_prioqueue.skipDoc( docno_);
 }
 
 Index IteratorContains::documentFrequency() const

@@ -72,7 +72,11 @@ public:
 	}
 
 private:
+	Index positionCut( const Index& minpos, const Index& maxpos);
+
+public:
 	enum {MaxNofArguments=256};
+private:
 	Index m_docno;							///< current document number
 	Index m_docno_cut;						///< next document number after m_docno that contains a cut element
 	Index m_posno;							///< current position

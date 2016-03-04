@@ -44,7 +44,7 @@ SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData(
 	,m_attrib(metadata_->elementHandle( name_.c_str()))
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_attrib)
+	if (m_attrib < 0)
 	{
 		throw strus::runtime_error(_TXT("unknown metadata element name '%s' passed to summarizer '%s'"), m_name.c_str(), "metadata");
 	}

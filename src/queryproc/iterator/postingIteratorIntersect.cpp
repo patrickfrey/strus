@@ -69,8 +69,7 @@ Index IteratorIntersect::skipDocCandidate( const Index& docno_)
 		docno_iter = (*ai)->skipDocCandidate( docno_iter);
 		if (docno_iter == 0)
 		{
-			m_docno = 0;
-			return 0;
+			return m_docno = 0;
 		}
 		for (++ai; ai != ae; ++ai)
 		{
@@ -79,8 +78,7 @@ Index IteratorIntersect::skipDocCandidate( const Index& docno_)
 			{
 				if (docno_next == 0)
 				{
-					m_docno = 0;
-					return 0;
+					return m_docno = 0;
 				}
 				docno_iter = docno_next;
 				break;

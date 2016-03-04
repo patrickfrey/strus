@@ -29,6 +29,7 @@
 #ifndef _STRUS_ITERATOR_CONTAINS_HPP_INCLUDED
 #define _STRUS_ITERATOR_CONTAINS_HPP_INCLUDED
 #include "postingIteratorJoin.hpp"
+#include "docnoMatchPrioQueue.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
 
@@ -81,14 +82,17 @@ class IteratorContainsWithCardinality
 	:public IteratorContains
 {
 public:
-	IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_);
+	IteratorContainsWithCardinality(
+		const std::vector<Reference< PostingIteratorInterface> >& args,
+		unsigned int cardinality_,
+		ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorContainsWithCardinality(){}
 
 	virtual Index skipDoc( const Index& docno);
 	virtual Index skipDocCandidate( const Index& docno_);
 
 private:
-	std::size_t m_cardinality;					///< number of elements to count for a match
+	DocnoMatchPrioQueue m_prioqueue;				///< priority queue for iterating on matches
 };
 
 
