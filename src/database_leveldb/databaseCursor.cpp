@@ -105,6 +105,24 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBound(
 	CATCH_ERROR_MAP_RETURN( _TXT("error database cursor seek upper bound: %s"), *m_errorhnd, DatabaseCursorInterface::Slice());
 }
 
+DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBoundRestricted(
+		const char* key,
+		std::size_t keysize,
+		const char* upkey,
+		std::size_t upkeysize)
+{
+	m_itr->Seek( leveldb::Slice( key,keysize));
+	if (m_itr->Valid())
+	{
+		std::size_t kk = upkeysize < keysize ? upkeysize : keysize;
+		if (std::memcmp( m_itr->key().data(), upkey, kk) < 0)
+		{
+			return Slice( m_itr->key().data(), m_itr->key().size());
+		}
+	}
+	return Slice();
+}
+
 DatabaseCursorInterface::Slice DatabaseCursor::seekFirst(
 		const char* domainkey,
 		std::size_t domainkeysize)

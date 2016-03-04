@@ -38,6 +38,7 @@
 namespace strus
 {
 
+/// \brief Iterator on the all document matches
 class DocnoMatchPrioQueue
 {
 public:
@@ -91,6 +92,12 @@ public:
 	/// \brief Get the current top elements with same docno of the queue
 	/// \return the list of top queue elements with same docno
 	CandidateList getCandidateList();
+
+	/// \brief Get the argument iterators in their order passed to this
+	const std::vector<PostingIteratorReference>& args() const
+	{
+		return m_args;
+	}
 
 private:
 	/// \brief Initialize the queue, so that elements are ordered ascending by document number and all document numbers are bigger or equal the passed document number

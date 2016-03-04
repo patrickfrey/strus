@@ -33,7 +33,6 @@
 #include "private/errorUtils.hpp"
 #include <stdexcept>
 #include <vector>
-#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
@@ -44,24 +43,6 @@ using namespace strus;
 IteratorStructWithin::~IteratorStructWithin()
 {}
 
-struct IteratorDf
-{
-	Index argidx;
-	Index df;
-
-	IteratorDf( const Index& argidx_, const Index& df_)
-		:argidx(argidx_),df(df_){}
-	IteratorDf( const IteratorDf& o)
-		:argidx(o.argidx),df(o.df){}
-
-	bool operator<( const IteratorDf& o) const
-	{
-		if (df == o.df) return argidx < o.argidx;
-		return df > o.df;
-	}
-};
-
-
 IteratorStructWithin::IteratorStructWithin(
 		int range_,
 		const std::vector<Reference< PostingIteratorInterface> >& args,
@@ -71,6 +52,9 @@ IteratorStructWithin::IteratorStructWithin(
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
+	,m_argar(orderByDocumentFrequency( with_cut_?(args.begin()+1):args.begin(),args.end()))
+	,m_docnoAllMatchItr(with_cut_?(args.begin()+1):args.begin(), args.end())
+	,m_cut(with_cut_?*args.begin():Reference<PostingIteratorInterface>())
 	,m_with_cut(with_cut_)
 	,m_strict(strict_)
 	,m_range(range_)
@@ -82,38 +66,9 @@ IteratorStructWithin::IteratorStructWithin(
 	{
 		throw strus::runtime_error(_TXT("too many arguments for '%s' join iterator"), "within");
 	}
-	if (args.size() < 1 + (m_with_cut?1:0))
-	{
-		throw strus::runtime_error(_TXT("too few arguments for '%s' join iterator"), "within");
-	}
-	// Sort the positive arguments by descending df and assign the cut element if defined:
-	std::vector<IteratorDf> dfar;
-	dfar.reserve( args.size());
-
-	Index aidx = 0;
-	std::vector<Reference< PostingIteratorInterface> >::const_iterator
-		ai = args.begin(), ae = args.end();
-	if (m_with_cut)
-	{
-		m_cut = *ai;
-		++aidx;
-		++ai;
-	}
-	for (; ai != ae; ++ai,++aidx)
-	{
-		dfar.push_back( IteratorDf( aidx, (*ai)->documentFrequency()));
-	}
-	std::sort( dfar.begin(), dfar.end());
-
-	m_argar.reserve( dfar.size());
-	std::vector<IteratorDf>::const_iterator di = dfar.begin(), de = dfar.end();
-	for (; di != de; ++di)
-	{
-		m_argar.push_back( args[ di->argidx]);
-	}
-
 	// Create feature identifier string:
-	ai = m_argar.begin(), ae = m_argar.end();
+	std::vector<Reference< PostingIteratorInterface> >::iterator
+		ai = m_argar.begin(), ae = m_argar.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
 	{
 		if (aidx) m_featureid.push_back('=');
@@ -135,49 +90,27 @@ IteratorStructWithin::IteratorStructWithin(
 
 Index IteratorStructWithin::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-
-	m_docno = getFirstAllMatchDocno( m_argar, docno_, true/*allow empty*/);
+	m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
 	if (m_docno)
 	{
-		if (m_cut.get() && m_cut->skipDocCandidate( m_docno) == m_docno)
-		{
-			m_docno_cut = m_docno;
-		}
-		else
-		{
-			m_docno_cut = 0;
-		}
+		m_docno_cut = m_cut.get()?m_cut->skipDocCandidate( m_docno):0;
 	}
 	return m_docno;
 }
 
 Index IteratorStructWithin::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	Index docno_iter = docno_;
-
-	for (;;)
+	m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
+	while (m_docno)
 	{
-		m_docno = getFirstAllMatchDocno( m_argar, docno_iter, false/*allow empty*/);
-		if (m_docno)
+		m_docno_cut = m_cut.get()?m_cut->skipDocCandidate( m_docno):0;
+		if (skipPos(0))
 		{
-			if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
-			{
-				m_docno_cut = m_docno;
-			}
-			else
-			{
-				m_docno_cut = 0;
-			}
-			if (!skipPos(0))
-			{
-				docno_iter = m_docno + 1;
-				continue;
-			}
+			return m_docno;
 		}
-		break;
+		m_docno = m_docnoAllMatchItr.skipDocCandidate( m_docno+1);
 	}
+	m_docno_cut = 0;
 	return m_docno;
 }
 
@@ -451,19 +384,7 @@ Index IteratorStructWithin::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae; ++ai)
-		{
-			Index df = (*ai)->documentFrequency();
-			if (df < m_documentFrequency)
-			{
-				m_documentFrequency = df;
-			}
-		}
+		m_documentFrequency = minDocumentFrequency( m_argar);
 	}
 	return m_documentFrequency;
 }

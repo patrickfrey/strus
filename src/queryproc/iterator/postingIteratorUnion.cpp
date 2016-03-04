@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "postingIteratorUnion.hpp"
+#include "postingIteratorHelpers.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -171,19 +172,7 @@ Index IteratorUnion::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<Reference<PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae; ++ai)
-		{
-			Index df = (*ai)->documentFrequency();
-			if (df > m_documentFrequency)
-			{
-				m_documentFrequency = df;
-			}
-		}
+		m_documentFrequency = maxDocumentFrequency( m_argar);
 	}
 	return m_documentFrequency;
 }

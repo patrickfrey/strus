@@ -232,7 +232,7 @@ Index DocnoMatchPrioQueue::skipDoc( const Index& docno_)
 		unsigned char qi=0;
 		for (; qi<m_quearsize && matchcnt<m_cardinality && dn == m_ar[ m_quear[ qi]].docno; qi++)
 		{
-			if (m_args[ m_ar[ m_quear[ qi]].argidx]->skipPos(0))
+			if (dn==m_args[ m_ar[ m_quear[ qi]].argidx]->skipDoc(dn))
 			{
 				++matchcnt; //... found a match
 			}

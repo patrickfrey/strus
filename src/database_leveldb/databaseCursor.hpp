@@ -51,6 +51,12 @@ public:
 			std::size_t keysize,
 			std::size_t domainkeysize);
 
+	virtual Slice seekUpperBoundRestricted(
+			const char* key,
+			std::size_t keysize,
+			const char* upkey,
+			std::size_t upkeysize);
+
 	virtual Slice seekFirst(
 			const char* domainkey,
 			std::size_t domainkeysize);

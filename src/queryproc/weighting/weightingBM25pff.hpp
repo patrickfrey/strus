@@ -68,6 +68,7 @@ public:
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
 		const std::string& metadata_title_maxpos_,
+		const std::string& metadata_title_size_,
 		ErrorBufferInterface* errorhnd_);
 
 	virtual void addWeightingFeature(
@@ -102,6 +103,7 @@ private:
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
 	int m_metadata_doclen;					///< meta data doclen handle
 	int m_metadata_title_maxpos;				///< meta data title maximum position handle
+	int m_metadata_title_size;				///< meta data title size
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
@@ -134,6 +136,7 @@ private:
 	double m_titleinc;				///< ff increment for title features
 	std::string m_metadata_doclen;			///< attribute defining the document length
 	std::string m_metadata_title_maxpos;		///< (optional) meta data element defining the last title position
+	std::string m_metadata_title_size;		///< (optional) meta data element defining the size of the title
 	unsigned int m_windowsize;			///< size of window for proximity weighting
 	unsigned int m_cardinality;			///< minimal number of query features in a window
 	double m_ffbase;				///< base used for feature frequency calculation

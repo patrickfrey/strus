@@ -27,6 +27,7 @@
 --------------------------------------------------------------------
 */
 #include "postingIteratorIntersect.hpp"
+#include "postingIteratorHelpers.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -39,6 +40,7 @@ IteratorIntersect::IteratorIntersect( const std::vector<Reference< PostingIterat
 	:m_docno(0)
 	,m_posno(0)
 	,m_argar(args)
+	,m_docnoAllMatchItr(args)
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
@@ -57,67 +59,16 @@ IteratorIntersect::~IteratorIntersect()
 
 Index IteratorIntersect::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-
-	Index docno_iter = docno_;
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		docno_iter = (*ai)->skipDocCandidate( docno_iter);
-		if (docno_iter == 0)
-		{
-			return m_docno = 0;
-		}
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
-			if (docno_next != docno_iter)
-			{
-				if (docno_next == 0)
-				{
-					return m_docno = 0;
-				}
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (ai == ae)
-		{
-			return m_docno = docno_iter;
-		}
-	}
+	return m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
 }
 
 Index IteratorIntersect::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && docno_)
+	m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
+	while (m_docno)
 	{
-		return m_docno;
-	}
-	Index docno_iter = docno_;
-	for (;;)
-	{
-		if (!skipDocCandidate( docno_iter)) return 0;
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		for (;ai != ae; ++ai)
-		{
-			if (m_docno != (*ai)->skipDoc( m_docno)) break;
-		}
-		if (ai != ae)
-		{
-			docno_iter = m_docno+1;
-			continue;
-		}
-		if (!skipPos(0))
-		{
-			docno_iter = m_docno+1;
-			continue;
-		}
-		break;
+		if (skipPos(0)) return m_docno;
+		m_docno = m_docnoAllMatchItr.skipDocCandidate( m_docno+1);
 	}
 	return m_docno;
 }
@@ -143,7 +94,10 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 			Index pos_next = (*ai)->skipPos( pos_iter);
 			if (pos_next != pos_iter)
 			{
-				if (pos_next == 0) return m_posno=0;
+				if (pos_next == 0)
+				{
+					return m_posno=0;
+				}
 				pos_iter = pos_next;
 				break;
 			}
@@ -159,19 +113,7 @@ Index IteratorIntersect::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae; ++ai)
-		{
-			Index df = (*ai)->documentFrequency();
-			if (df < m_documentFrequency)
-			{
-				m_documentFrequency = df;
-			}
-		}
+		m_documentFrequency = minDocumentFrequency( m_argar);
 	}
 	return m_documentFrequency;
 }

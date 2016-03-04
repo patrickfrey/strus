@@ -52,6 +52,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
 		const std::string& metadata_title_maxpos_,
+		const std::string& metadata_title_size_,
 		ErrorBufferInterface* errorhnd_)
 	:m_k1(k1_),m_b(b_)
 	,m_windowsize(windowsize_)
@@ -69,6 +70,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_metadata(metadata_)
 	,m_metadata_doclen(metadata_->elementHandle( metadata_doclen_.empty()?std::string("doclen"):metadata_doclen_))
 	,m_metadata_title_maxpos(metadata_title_maxpos_.empty()?-1:metadata_->elementHandle( metadata_title_maxpos_))
+	,m_metadata_title_size(metadata_title_size_.empty()?-1:metadata_->elementHandle( metadata_title_size_))
 	,m_errorhnd(errorhnd_)
 {}
 
@@ -144,6 +146,7 @@ static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_
 static void calcTitleFfIncrements(
 		ProximityWeightAccumulator::WeightArray& result,
 		const Index& firstpos,
+		const Index& titlesize,
 		double titleweight,
 		const ProximityWeightAccumulator::WeightArray& weightincr,
 		PostingIteratorInterface** itrar, std::size_t itrarsize)
@@ -153,7 +156,7 @@ static void calcTitleFfIncrements(
 		Index pos = itrar[ii]->skipPos(0);
 		if (pos && pos < firstpos)
 		{
-			result[ ii] += titleweight * weightincr[ii];
+			result[ ii] += titleweight * weightincr[ii] / titlesize;
 		}
 	}
 }
@@ -273,17 +276,28 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 
 		// Define search start position:
 		Index firstpos = 1;
+		Index titlesize = 1;
 		if (m_metadata_title_maxpos>=0)
 		{
 			ArithmeticVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
 			firstpos = firstposval.toint()+1;
+		}
+		if (m_metadata_title_size>=0)
+		{
+			ArithmeticVariant titlesizeval = m_metadata->getValue( m_metadata_title_size);
+			titlesize = titlesizeval.toint();
+			if (!titlesize) titlesize = 1;
+		}
+		else if (m_metadata_title_maxpos>=0)
+		{
+			titlesize = (firstpos > 1) ? (firstpos - 1):1;
 		}
 		// Define the structure of accumulated proximity weights:
 		ProximityWeightAccumulator::WeightArray ffincrar( m_itrarsize);
 
 		// Calculate ff title increment weights:
 		calcTitleFfIncrements(
-			ffincrar, firstpos, m_titleinc, m_weightincr, m_itrar, m_itrarsize);
+			ffincrar, firstpos, titlesize, m_titleinc, m_weightincr, m_itrar, m_itrarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "accumulated ff incr [title terms] " << ffincrar.tostring() << std::endl;
 #endif
@@ -316,7 +330,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 					notitle_cardinality = m_cardinality;
 				}
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "do second pass without title terms:" << std::endl;
+				std::cout << "do second pass without title terms:" << std::endl;
 #endif
 				calcProximityFfIncrements(
 					ffincrar, firstpos, m_weightincr,  m_windowsize, notitle_cardinality,
@@ -391,6 +405,11 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 		else if (utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 		{
 			m_metadata_title_maxpos = value;
+			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
+		}
+		else if (utils::caseInsensitiveEquals( name, "metadata_title_size"))
+		{
+			m_metadata_title_size = value;
 			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
 		}
 		else if (utils::caseInsensitiveEquals( name, "k1")
@@ -484,7 +503,8 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		}
 	}
 	else if (utils::caseInsensitiveEquals( name, "metadata_doclen")
-		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
+		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos")
+		|| utils::caseInsensitiveEquals( name, "metadata_title_size"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name.c_str(), WEIGHTING_SCHEME_NAME);
 	}
@@ -503,7 +523,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25pff::createFunct
 	try
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
-		return new WeightingFunctionContextBM25pff( storage_, metadata, m_k1, m_b, m_windowsize, m_cardinality, m_ffbase, m_maxdf, m_avgdoclen, m_titleinc, nofdocs, m_metadata_doclen, m_metadata_title_maxpos, m_errorhnd);
+		return new WeightingFunctionContextBM25pff( storage_, metadata, m_k1, m_b, m_windowsize, m_cardinality, m_ffbase, m_maxdf, m_avgdoclen, m_titleinc, nofdocs, m_metadata_doclen, m_metadata_title_maxpos, m_metadata_title_size, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }
@@ -544,7 +564,8 @@ WeightingFunctionInterface::Description WeightingFunctionBM25pff::getDescription
 		rt( Description::Param::Numeric, "titleinc", _TXT("ff increment for title features"), "0.0:");
 		rt( Description::Param::Numeric, "windowsize", _TXT("the size of the window used for finding features to increment proximity scores"), "");
 		rt( Description::Param::Numeric, "cardinality", _TXT("the number of query features a proximity score window must contain to be considered (optional, default is all features)"), "");		
-		rt( Description::Param::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Elements in title are scored with an ff increment"), "1:");
+		rt( Description::Param::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Elements in title are scored with an ff increment"), "");
+		rt( Description::Param::Metadata, "metadata_title_size", _TXT( "the metadata element that specifies the number of terms (size) of the title"), "");
 		rt( Description::Param::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25)"), "0.0:1.0");
 		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
 		rt( Description::Param::Numeric, "maxdf", _TXT("the maximum df as fraction of the collection size"), "0:");

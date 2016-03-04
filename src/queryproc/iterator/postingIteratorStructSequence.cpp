@@ -48,21 +48,16 @@ IteratorStructSequence::IteratorStructSequence(
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
+	,m_argar(with_cut_?(args.begin()+1):args.begin(),args.end())
+	,m_docnoAllMatchItr(with_cut_?(args.begin()+1):args.begin(), args.end())
+	,m_cut(with_cut_?*args.begin():Reference<PostingIteratorInterface>())
 	,m_with_cut(with_cut_)
 	,m_strict_incr(strict_?1:0)
 	,m_range(range_)
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (m_with_cut)
-	{
-		m_argar.insert( m_argar.end(), args.begin()+1, args.end());
-		m_cut = args[0];
-	}
-	else
-	{
-		m_argar = args;
-	}
+	// Create feature identifier string:
 	std::vector<Reference< PostingIteratorInterface> >::iterator
 		ai = m_argar.begin(), ae = m_argar.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
@@ -86,49 +81,27 @@ IteratorStructSequence::IteratorStructSequence(
 
 Index IteratorStructSequence::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-
-	m_docno = getFirstAllMatchDocno( m_argar, docno_, true/*allow empty*/);
+	m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
 	if (m_docno)
 	{
-		if (m_cut.get() && m_cut->skipDocCandidate( m_docno) == m_docno)
-		{
-			m_docno_cut = m_docno;
-		}
-		else
-		{
-			m_docno_cut = 0;
-		}
+		m_docno_cut = m_cut.get()?m_cut->skipDocCandidate( m_docno):0;
 	}
 	return m_docno;
 }
 
 Index IteratorStructSequence::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	Index docno_iter = docno_;
-
-	for (;;)
+	m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
+	while (m_docno)
 	{
-		m_docno = getFirstAllMatchDocno( m_argar, docno_iter, false/*allow empty*/);
-		if (m_docno)
+		m_docno_cut = m_cut.get()?m_cut->skipDocCandidate( m_docno):0;
+		if (skipPos(0))
 		{
-			if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
-			{
-				m_docno_cut = m_docno;
-			}
-			else
-			{
-				m_docno_cut = 0;
-			}
-			if (!skipPos(0))
-			{
-				docno_iter = m_docno + 1;
-				continue;
-			}
+			return m_docno;
 		}
-		break;
+		m_docno = m_docnoAllMatchItr.skipDocCandidate( m_docno+1);
 	}
+	m_docno_cut = 0;
 	return m_docno;
 }
 
@@ -231,19 +204,7 @@ Index IteratorStructSequence::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae; ++ai)
-		{
-			Index df = (*ai)->documentFrequency();
-			if (df < m_documentFrequency)
-			{
-				m_documentFrequency = df;
-			}
-		}
+		m_documentFrequency = minDocumentFrequency( m_argar);
 	}
 	return m_documentFrequency;
 }

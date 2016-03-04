@@ -31,6 +31,7 @@
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
+#include "docnoAllMatchItr.hpp"
 
 namespace strus
 {
@@ -41,7 +42,9 @@ class IteratorIntersect
 	:public IteratorJoin
 {
 public:
-	IteratorIntersect( const std::vector<Reference< PostingIteratorInterface> >& args, ErrorBufferInterface* errorhnd_);
+	IteratorIntersect(
+			const std::vector<Reference< PostingIteratorInterface> >& args,
+			ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorIntersect();
 
 	virtual const char* featureid() const
@@ -67,7 +70,8 @@ public:
 private:
 	Index m_docno;
 	Index m_posno;							///< current position
-	std::vector<Reference< PostingIteratorInterface> > m_argar;
+	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
+	DocnoAllMatchItr m_docnoAllMatchItr;				///< document all match joiner
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

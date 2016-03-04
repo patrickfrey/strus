@@ -36,15 +36,17 @@
 
 using namespace strus;
 
-IteratorContains::IteratorContains( const std::vector<Reference< PostingIteratorInterface> >& args, ErrorBufferInterface* errorhnd_)
+IteratorContains::IteratorContains(
+		const std::vector<Reference< PostingIteratorInterface> >& args,
+		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_posno(0)
-	,m_argar(args)
+	,m_docnoAllMatchItr(args)
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
 	std::vector<Reference< PostingIteratorInterface> >::const_iterator
-		ai = m_argar.begin(), ae = m_argar.end();
+		ai = args.begin(), ae = args.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
 	{
 		if (aidx) m_featureid.push_back('=');
@@ -56,10 +58,23 @@ IteratorContains::IteratorContains( const std::vector<Reference< PostingIterator
 IteratorContains::~IteratorContains()
 {}
 
-IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, unsigned int cardinality_, ErrorBufferInterface* errorhnd_)
-	:IteratorContains(args,errorhnd_), m_prioqueue(args,cardinality_)
+IteratorContainsWithCardinality::IteratorContainsWithCardinality(
+		const std::vector<Reference< PostingIteratorInterface> >& args,
+		unsigned int cardinality_,
+		ErrorBufferInterface* errorhnd_)
+	:m_docno(0)
+	,m_posno(0)
+	,m_prioqueue(args,cardinality_)
+	,m_documentFrequency(-1)
+	,m_errorhnd(errorhnd_)
 {
-	m_featureid.resize( m_featureid.size()-1);
+	std::vector<Reference< PostingIteratorInterface> >::const_iterator
+		ai = args.begin(), ae = args.end();
+	for (int aidx=0; ai != ae; ++ai,++aidx)
+	{
+		if (aidx) m_featureid.push_back('=');
+		m_featureid.append( (*ai)->featureid());
+	}
 	if (cardinality_)
 	{
 		encodeInteger( m_featureid, cardinality_);
@@ -70,46 +85,43 @@ IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vec
 
 Index IteratorContains::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocno( m_argar, docno_, true);
+	return m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
 }
 
 Index IteratorContains::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocno( m_argar, docno_, false);
+	return m_docno = m_docnoAllMatchItr.skipDoc( docno_);
 }
 
 Index IteratorContainsWithCardinality::skipDocCandidate( const Index& docno_)
 {
-	return m_prioqueue.skipDocCandidate( docno_);
+	return m_docno = m_prioqueue.skipDocCandidate( docno_);
 }
 
 Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 {
-	return m_prioqueue.skipDoc( docno_);
+	return m_docno = m_prioqueue.skipDoc( docno_);
 }
+
 
 Index IteratorContains::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae; ++ai)
-		{
-			Index df = (*ai)->documentFrequency();
-			if (df < m_documentFrequency)
-			{
-				m_documentFrequency = df;
-			}
-		}
+		m_documentFrequency = m_docnoAllMatchItr.minDocumentFrequency();
 	}
 	return m_documentFrequency;
 }
+
+Index IteratorContainsWithCardinality::documentFrequency() const
+{
+	if (m_documentFrequency < 0)
+	{
+		m_documentFrequency = minDocumentFrequency( m_prioqueue.args());
+	}
+	return m_documentFrequency;
+}
+
 
 
 PostingIteratorInterface* PostingJoinContains::createResultIterator(

@@ -30,6 +30,7 @@
 #define _STRUS_ITERATOR_CONTAINS_HPP_INCLUDED
 #include "postingIteratorJoin.hpp"
 #include "docnoMatchPrioQueue.hpp"
+#include "docnoAllMatchItr.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
 
@@ -42,7 +43,9 @@ class IteratorContains
 	:public IteratorJoin
 {
 public:
-	IteratorContains( const std::vector<Reference< PostingIteratorInterface> >& args, ErrorBufferInterface* errorhnd_);
+	IteratorContains( 
+		const std::vector<Reference< PostingIteratorInterface> >& args,
+		ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorContains();
 
 	virtual const char* featureid() const
@@ -71,15 +74,15 @@ public:
 
 protected:
 	Index m_docno;
-	Index m_posno;							///< current position
-	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< argument iterators
-	std::string m_featureid;					///< unique id of the feature expression
-	mutable Index m_documentFrequency;				///< document frequency (of the rarest subexpression)
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	Index m_posno;					///< current position
+	DocnoAllMatchItr m_docnoAllMatchItr;		///< document all match joiner
+	std::string m_featureid;			///< unique id of the feature expression
+	mutable Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 class IteratorContainsWithCardinality
-	:public IteratorContains
+	:public IteratorJoin
 {
 public:
 	IteratorContainsWithCardinality(
@@ -88,11 +91,38 @@ public:
 		ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorContainsWithCardinality(){}
 
-	virtual Index skipDoc( const Index& docno);
-	virtual Index skipDocCandidate( const Index& docno_);
+	virtual const char* featureid() const
+	{
+		return m_featureid.c_str();
+	}
 
+	virtual Index skipDoc( const Index& docno_);
+	virtual Index skipDocCandidate( const Index& docno_);
+	virtual Index skipPos( const Index& pos)
+	{
+		if (pos > 1) return m_posno=0;
+		return m_posno=1;
+	}
+
+	virtual Index documentFrequency() const;
+
+	virtual Index docno() const
+	{
+		return m_docno;
+	}
+
+	virtual Index posno() const
+	{
+		return m_posno;
+	}
+	
 private:
-	DocnoMatchPrioQueue m_prioqueue;				///< priority queue for iterating on matches
+	Index m_docno;
+	Index m_posno;					///< current position
+	DocnoMatchPrioQueue m_prioqueue;		///< priority queue for iterating on matches
+	std::string m_featureid;			///< unique id of the feature expression
+	mutable Index m_documentFrequency;		///< document frequency (of the rarest subexpression)
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 

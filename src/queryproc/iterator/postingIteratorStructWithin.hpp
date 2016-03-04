@@ -31,6 +31,7 @@
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
+#include "docnoAllMatchItr.hpp"
 
 namespace strus
 {
@@ -81,6 +82,7 @@ private:
 	Index m_docno_cut;						///< next document number after m_docno that contains a cut element
 	Index m_posno;							///< current position
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
+	DocnoAllMatchItr m_docnoAllMatchItr;				///< document all match joiner
 	Reference<PostingIteratorInterface> m_cut;			///< the set of elements then must not appear inside the group
 	bool m_with_cut;						///< true, if a cut variable is used
 	bool m_strict;							///< true, if all elements must have different positions

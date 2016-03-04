@@ -39,12 +39,18 @@
 namespace strus
 {
 
-Index getFirstAllMatchDocno(
-		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno,
-		bool allowEmpty);
-
 void encodeInteger( std::string& buf, int val);
+
+typedef Reference<PostingIteratorInterface> PostingIteratorReference;
+
+std::vector<PostingIteratorReference>
+	orderByDocumentFrequency(
+		std::vector<PostingIteratorReference>::const_iterator ai,
+		const std::vector<PostingIteratorReference>::const_iterator& ae);
+
+Index minDocumentFrequency( const std::vector<PostingIteratorReference>& ar);
+Index maxDocumentFrequency( const std::vector<PostingIteratorReference>& ar);
+
 
 }//namespace
 #endif

@@ -31,72 +31,93 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include <vector>
 #include <sstream>
 #include <cstring>
+#include <algorithm>
 
 using namespace strus;
-
-typedef Reference< PostingIteratorInterface> PostingIteratorReference;
-
-Index strus::getFirstAllMatchDocno(
-		std::vector<PostingIteratorReference>& args,
-		Index docno,
-		bool allowEmpty)
-{
-	if (args.empty()) return 0;
-
-	Index docno_iter = docno;
-	std::vector<PostingIteratorReference>::iterator ae = args.end();
-	for (;;)
-	{
-		std::vector<PostingIteratorReference>::iterator ai = args.begin();
-
-		docno_iter = (*ai)->skipDocCandidate( docno_iter);
-		if (docno_iter == 0)
-		{
-			return 0;
-		}
-		Index max_docno = docno_iter;
-		bool failed = false;
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
-			if (docno_next == 0)
-			{
-				return 0;
-			}
-			if (docno_next != docno_iter)
-			{
-				if (docno_next > max_docno)
-				{
-					max_docno = docno_next;
-					docno_iter = docno_next;
-					failed = true;
-				}
-			}
-		}
-		if (!failed)
-		{
-			if (!allowEmpty)
-			{
-				ai = args.begin();
-				for (; ai != ae && (*ai)->skipPos(0); ++ai){}
-
-				if (ai != ae)
-				{
-					++docno_iter;
-					continue;
-				}
-			}
-			return docno_iter;
-		}
-	}
-}
 
 void strus::encodeInteger( std::string& buf, int val)
 {
 	std::ostringstream num;
 	num << val;
 	buf.append( num.str());
+}
+
+struct IteratorDf
+{
+	Index argidx;
+	Index df;
+
+	IteratorDf( const Index& argidx_, const Index& df_)
+		:argidx(argidx_),df(df_){}
+	IteratorDf( const IteratorDf& o)
+		:argidx(o.argidx),df(o.df){}
+
+	bool operator<( const IteratorDf& o) const
+	{
+		if (df == o.df) return argidx < o.argidx;
+		return df > o.df;
+	}
+};
+
+std::vector<PostingIteratorReference>
+	strus::orderByDocumentFrequency(
+		std::vector<PostingIteratorReference>::const_iterator ai,
+		const std::vector<PostingIteratorReference>::const_iterator& ae)
+{
+	std::vector<IteratorDf> dfar;
+	std::vector<PostingIteratorReference>::const_iterator start = ai;
+	for (Index aidx=0; ai != ae; ++ai,++aidx)
+	{
+		dfar.push_back( IteratorDf( aidx, (*ai)->documentFrequency()));
+	}
+	std::sort( dfar.begin(), dfar.end());
+
+	std::vector<Reference< PostingIteratorInterface> > rt;
+	rt.reserve( dfar.size());
+	std::vector<IteratorDf>::const_iterator di = dfar.begin(), de = dfar.end();
+	for (; di != de; ++di)
+	{
+		rt.push_back( *(start + di->argidx));
+	}
+	return rt;
+}
+
+Index strus::minDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
+{
+	std::vector<PostingIteratorReference>::const_iterator
+		ai = ar.begin(), ae = ar.end();
+	if (ai == ae) return 0;
+
+	Index rt = (*ai)->documentFrequency();
+	for (++ai; ai != ae; ++ai)
+	{
+		Index df = (*ai)->documentFrequency();
+		if (df < rt)
+		{
+			rt = df;
+		}
+	}
+	return rt;
+}
+
+Index strus::maxDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
+{
+	std::vector<PostingIteratorReference>::const_iterator
+		ai = ar.begin(), ae = ar.end();
+	if (ai == ae) return 0;
+
+	Index rt = (*ai)->documentFrequency();
+	for (++ai; ai != ae; ++ai)
+	{
+		Index df = (*ai)->documentFrequency();
+		if (df > rt)
+		{
+			rt = df;
+		}
+	}
+	return rt;
 }
 
