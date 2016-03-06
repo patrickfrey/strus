@@ -57,6 +57,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		unsigned int cardinality_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_title_maxpos_,
+		double maxdf_,
 		const std::pair<std::string,std::string>& matchmark_,
 		const std::pair<std::string,std::string>& floatingmark_,
 		const std::string& name_para_,
@@ -73,6 +74,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_cardinality(cardinality_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_metadata_title_maxpos(metadata_title_maxpos_.empty()?-1:metadata_->elementHandle( metadata_title_maxpos_))
+	,m_maxdf(maxdf_)
 	,m_matchmark(matchmark_)
 	,m_floatingmark(floatingmark_)
 	,m_name_para(name_para_)
@@ -117,6 +119,14 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			if (idf < 0.00001)
 			{
 				idf = 0.00001;
+			}
+			if (m_maxdf * m_nofCollectionDocuments < df)
+			{
+				m_maxdist_featar[ m_itrarsize] = (m_windowsize > 5)?5:m_windowsize;
+			}
+			else
+			{
+				m_maxdist_featar[ m_itrarsize] = m_windowsize;
 			}
 			m_itrar[ m_itrarsize++] = itr;
 			m_idfar.add( idf * weight);
@@ -175,7 +185,8 @@ static Candidate findCandidate(
 			unsigned int maxwindowsize, unsigned int cardinality,
 			PostingIteratorInterface** itrar, std::size_t itrarsize,
 			PostingIteratorInterface** structar, std::size_t structarsize,
-			PostingIteratorInterface** paraar, std::size_t parasize)
+			PostingIteratorInterface** paraar, std::size_t parasize,
+			const Index* maxdist_featar)
 {
 	Candidate rt( 0.0,firstpos,0);
 	Index prevPara=firstpos, nextPara=callSkipPos( firstpos, paraar, parasize);
@@ -205,7 +216,8 @@ static Candidate findCandidate(
 		ProximityWeightAccumulator::WeightArray weightar( itrarsize, 1.0);
 
 		ProximityWeightAccumulator::weight_same_sentence(
-			weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize, structar, structarsize);
+			weightar, 0.3, weightincr, window, windowsize,
+			maxdist_featar, itrar, itrarsize, structar, structarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "\taccumulated ff incr [same sentence] " << weightar.tostring() << std::endl;
 #endif
@@ -296,7 +308,8 @@ std::vector<SummaryElement>
 		Candidate candidate
 			= findCandidate(
 				firstpos, m_idfar, m_weightincr, m_windowsize, m_cardinality,
-				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize);
+				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize, 
+				m_maxdist_featar);
 		if (candidate.span == 0 && m_metadata_title_maxpos>=0)
 		{
 			//... we did not find a summary with m_cardinality terms, so we try to find one
@@ -326,7 +339,7 @@ std::vector<SummaryElement>
 				candidate = findCandidate(
 						firstpos, noTitleIdfs, noWeightIncrs, m_windowsize, cardinality,
 						noTitleTerms, noTitleSize, m_structar, m_structarsize,
-						m_paraar, m_paraarsize);
+						m_paraar, m_paraarsize, m_maxdist_featar);
 			}
 		}
 		bool is_docstart = (candidate.span == 0);
@@ -649,6 +662,14 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	{
 		m_cardinality = (unsigned int)value;
 	}
+	else if (utils::caseInsensitiveEquals( name, "maxdf"))
+	{
+		m_maxdf = (double)value;
+		if (m_maxdf < 0.0 || m_maxdf > 1.0)
+		{
+			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), "matchphrase");
+		}
+	}
 	else if (utils::caseInsensitiveEquals( name, "type")
 		|| utils::caseInsensitiveEquals( name, "matchmark")
 		|| utils::caseInsensitiveEquals( name, "floatingmark")
@@ -680,7 +701,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 		return new SummarizerFunctionContextMatchPhrase(
 				storage, m_processor, metadata, m_type,
 				m_sentencesize, m_windowsize, m_cardinality,
-				nofCollectionDocuments, m_metadata_title_maxpos,
+				nofCollectionDocuments, m_metadata_title_maxpos, m_maxdf,
 				m_matchmark, m_floatingmark,
 				m_name_para, m_name_phrase, m_name_docstart,
 				m_errorhnd);

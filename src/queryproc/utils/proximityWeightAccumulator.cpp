@@ -39,26 +39,40 @@ void ProximityWeightAccumulator::weight_same_sentence(
 	double factor,
 	const WeightArray& incrar,
 	const std::size_t* window, std::size_t windowsize,
+	const Index* maxdist_featar,
 	PostingIteratorInterface** featar, std::size_t featarsize,
 	PostingIteratorInterface** structar, std::size_t structarsize)
 {
-	std::size_t wi=0;
+	Index win_pos[ MaxNofArguments];
+	Index smark_pos[ MaxNofArguments];
+
+	std::size_t wi = 0;
 	for (; wi < windowsize; ++wi)
+	{
+		win_pos[ wi] = featar[ window[ wi]]->posno();
+		smark_pos[ wi] = 0;
+		std::size_t si = 0;
+		for (; si < structarsize; ++si)
+		{
+			Index smark = structar[si]->skipPos( win_pos[ wi]+1);
+			if (smark && (!smark_pos[ wi] || smark < smark_pos[ wi]))
+			{
+				smark_pos[ wi] = smark;
+			}
+		}
+	}
+	for (wi=0; wi < windowsize; ++wi)
 	{
 		std::size_t pi=wi+1;
 		for (; pi < windowsize; ++pi)
 		{
-			std::size_t si = 0;
-			for (; si < structarsize; ++si)
-			{
-				Index smark = structar[si]->skipPos( featar[ window[ wi]]->posno()+1);
-				if (smark && smark <= featar[ window[ pi]]->posno()) break;
-			}
-			if (si == structarsize)
-			{
-				ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * factor;
-				ar[ window[ wi]] += incrar[ window[ pi]] / (1.0 - incrar[ window[ wi]]) * factor;
-			}
+			if (smark_pos[ wi] && smark_pos[ wi] <= win_pos[ pi]) continue;
+			//... count same sentence only if there is no end of sentence marker inbetween
+			if (win_pos[ wi] + maxdist_featar[ window[ wi]] < win_pos[ pi]) continue;
+			//... count same sentence only withing a maximum proximity range
+
+			ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * factor;
+			ar[ window[ wi]] += incrar[ window[ pi]] / (1.0 - incrar[ window[ wi]]) * factor;
 		}
 	}
 }
@@ -90,13 +104,19 @@ void ProximityWeightAccumulator::weight_invdist(
 	const std::size_t* window, std::size_t windowsize,
 	PostingIteratorInterface** featar, std::size_t featarsize)
 {
-	std::size_t wi=0;
-	for (; wi < windowsize; ++wi)
+	std::size_t wi = 0;
+	Index win_pos[ MaxNofArguments];
+
+	for (wi = 0; wi < windowsize; ++wi)
+	{
+		win_pos[ wi] = featar[ window[ wi]]->posno();
+	}
+	for (wi=0; wi < windowsize; ++wi)
 	{
 		std::size_t pi=wi+1;
 		for (; pi < windowsize; ++pi)
 		{
-			double dist = featar[ window[ pi]]->posno() - featar[ window[ wi]]->posno();
+			double dist = win_pos[ pi] - win_pos[ wi];
 			double weight = 1.0 / sqrt( dist+1);
 			ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * weight * factor;
 			ar[ window[ wi]] += incrar[ window[ pi]] / (1.0 - incrar[ window[ wi]]) * weight * factor;

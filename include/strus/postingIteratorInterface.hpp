@@ -43,14 +43,17 @@ class PostingIteratorInterface
 public:
 	virtual ~PostingIteratorInterface(){}
 
-	/// \brief Return the next document match with a document number higher than or equal to docno
+	/// \brief Return the next document match with a document number higher than or equal to a given document number
+	/// \param[in] docno the minimum document number to fetch
 	virtual Index skipDoc( const Index& docno)=0;
 
-	/// \brief Return a candidate with a document number higher than or equal to docno without guarantee, that the document has matching positions
+	/// \brief Return a candidate with a document number higher than or equal to a given document number without guarantee, that the document has matching positions
 	/// \note Used for optimizing complex join operations that would first like to make a join on the document sets, before looking at the positions
+	/// \param[in] docno the minimum document number to fetch
 	virtual Index skipDocCandidate( const Index& docno)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
+	/// \param[in] firstpos the minimum position to fetch
 	virtual Index skipPos( const Index& firstpos)=0;
 
 	/// \brief Unique id in the system for a feature expression used for debugging and tracing

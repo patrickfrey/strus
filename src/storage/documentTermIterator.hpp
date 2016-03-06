@@ -57,7 +57,7 @@ public:
 			ErrorBufferInterface* errorhnd_);
 	virtual ~DocumentTermIterator(){}
 
-	virtual bool skipDoc( const Index& docno);
+	virtual Index skipDoc( const Index& docno_);
 
 	virtual bool nextTerm( Term& value);
 
@@ -69,7 +69,8 @@ private:
 	const StorageClient* m_storage;					///< storage interface
 	const DatabaseClientInterface* m_database;			///< database interface
 	Index m_typeno;							///< typeno scope of this iterator
-	DatabaseAdapter_InverseTerm::Reader m_dbadapter_inv;		///< db adapter for reading blocks with term occurrencies
+	Index m_docno;							///< current document number
+	DatabaseAdapter_InverseTerm::Cursor m_dbadapter_inv;		///< db adapter for reading blocks with term occurrencies
 	DatabaseAdapter_TermValueInv::Reader m_dbadapter_termno;	///< db adapter for reading term value strings with termno as key
 	InvTermBlock m_invblk;						///< current block (document) iterated
 	char const* m_invblkitr;					///< iterator on term occurrencies

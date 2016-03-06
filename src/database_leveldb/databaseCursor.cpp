@@ -115,7 +115,8 @@ DatabaseCursorInterface::Slice DatabaseCursor::seekUpperBoundRestricted(
 	if (m_itr->Valid())
 	{
 		std::size_t kk = upkeysize < keysize ? upkeysize : keysize;
-		if (std::memcmp( m_itr->key().data(), upkey, kk) < 0)
+		int res = std::memcmp( m_itr->key().data(), upkey, kk);
+		if (res < 0 || (res == 0 && upkeysize < keysize))
 		{
 			return Slice( m_itr->key().data(), m_itr->key().size());
 		}

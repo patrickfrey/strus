@@ -98,6 +98,8 @@ private:
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
 	std::size_t m_nof_maxdf_features;			///< number of features with a df bigger than maximum
+	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
+	double m_normfactorar[ MaxNofArguments];		///< normalization factor taking missing features in a window into account
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
@@ -115,7 +117,7 @@ class WeightingFunctionInstanceBM25pff
 {
 public:
 	explicit WeightingFunctionInstanceBM25pff( ErrorBufferInterface* errorhnd_)
-		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_windowsize(100),m_cardinality(0),m_ffbase(0.4),m_errorhnd(errorhnd_){}
+		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_windowsize(100),m_cardinality(0),m_ffbase(0.4),m_maxdf(0.5),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25pff(){}
 

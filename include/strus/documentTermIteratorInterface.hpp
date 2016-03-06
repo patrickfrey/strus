@@ -67,9 +67,10 @@ public:
 	/// \brief Destructor
 	virtual ~DocumentTermIteratorInterface(){}
 
-	/// \brief Define the document of the items inspected
+	/// \brief Skip to the next document
 	/// \param[in] docno document number to seek
-	virtual bool skipDoc( const Index& docno)=0;
+	/// \return least upper bound of the document number seeked
+	virtual Index skipDoc( const Index& docno)=0;
 
 	/// \brief Get the next term
 	/// \param[out] value the next term fetched, if exists

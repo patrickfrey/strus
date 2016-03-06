@@ -68,6 +68,7 @@ public:
 	/// \param[in] cardinality_ minimum number of features to look for in a window
 	/// \param[in] nofCollectionDocuments_ number of documents in the collection
 	/// \param[in] metadata_title_maxpos_ optional attribute in metadata that defines the last position in the document that belongs to the document title and should not be considered for summary
+	/// \param[in] maxdf_ fraction of collection size, defining what is considered to be a stopword or not
 	/// \param[in] matchmark_ begin and end marker for highlighting
 	/// \param[in] floatingmark_ begin and end marker for not terminated sentences
 	/// \param[in] name_para_ name of summary elements defining paragraphs
@@ -83,6 +84,7 @@ public:
 			unsigned int cardinality_,
 			double nofCollectionDocuments_,
 			const std::string& metadata_title_maxpos_,
+			double maxdf_,
 			const std::pair<std::string,std::string>& matchmark_,
 			const std::pair<std::string,std::string>& floatingmark_,
 			const std::string& name_para_,
@@ -112,6 +114,7 @@ private:
 	unsigned int m_cardinality;				///< window cardinality
 	double m_nofCollectionDocuments;			///< number of documents in the collection
 	int m_metadata_title_maxpos;				///< meta data element for maximum title position
+	double m_maxdf;						///< the maximum df of features considered for same sentence proximity weighing as fraction of the total collection size
 	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
 	std::string m_name_para;				///< name of the summary elements for paragraphs
@@ -124,6 +127,7 @@ private:
 	std::size_t m_itrarsize;				///< number of weighted features
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
+	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
@@ -163,6 +167,7 @@ private:
 	unsigned int m_sentencesize;				///< search area for end of sentence
 	unsigned int m_windowsize;				///< maximum window size
 	unsigned int m_cardinality;				///< window cardinality
+	double m_maxdf;						///< df limit for judging if a term is a stopword or not
 	std::pair<std::string,std::string> m_matchmark;		///< highlight marker for matches
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
 	std::string m_name_para;				///< name of the summary elements for paragraphs

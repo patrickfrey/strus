@@ -509,6 +509,14 @@ struct DatabaseAdapter_InverseTerm
 			:Reader(database_)
 			,Writer(database_){}
 	};
+
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_)
+			:Parent::Cursor( database_, BlockKey()){}
+	};
 };
 
 

@@ -33,9 +33,11 @@
 #include "strus/constants.hpp"
 #include <cmath>
 #include <ctime>
+#include <iostream>
 
 using namespace strus;
 #define WEIGHTING_SCHEME_NAME "BM25"
+#undef STRUS_LOWLEVEL_DEBUG
 
 WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
@@ -68,7 +70,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 		
 			if (m_nofCollectionDocuments > nofMatches * 2)
 			{
-				idf = log10(
+				idf = std::log10(
 						(m_nofCollectionDocuments - nofMatches + 0.5)
 						/ (nofMatches + 0.5));
 			}
@@ -96,6 +98,9 @@ double WeightingFunctionContextBM25::call( const Index& docno)
 		if (docno==fi->itr->skipDoc( docno))
 		{
 			double ff = fi->itr->frequency();
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "ff=" << ff << std::endl;
+#endif
 			if (ff == 0.0)
 			{
 			}
@@ -104,18 +109,33 @@ double WeightingFunctionContextBM25::call( const Index& docno)
 				m_metadata->skipDoc( docno);
 				double doclen = m_metadata->getValue( m_metadata_doclen);
 				double rel_doclen = (doclen+1) / m_avgDocLength;
+#ifdef STRUS_LOWLEVEL_DEBUG
+				double ww = fi->weight * fi->idf
+						* (ff * (m_k1 + 1.0))
+						/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
+				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " doclen=" << doclen << " reldoclen=" << rel_doclen << " weight=" << ww << std::endl;
+#endif
 				rt += fi->weight * fi->idf
 					* (ff * (m_k1 + 1.0))
 					/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
 			}
 			else
 			{
+#ifdef STRUS_LOWLEVEL_DEBUG
+				double ww = fi->weight * fi->idf
+						* (ff * (m_k1 + 1.0))
+						/ (ff + m_k1 * 1.0);
+				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " weight=" << ww << std::endl;
+#endif
 				rt += fi->weight * fi->idf
 					* (ff * (m_k1 + 1.0))
 					/ (ff + m_k1 * 1.0);
 			}
 		}
 	}
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "document weight=" << rt << std::endl;
+#endif
 	return rt;
 }
 

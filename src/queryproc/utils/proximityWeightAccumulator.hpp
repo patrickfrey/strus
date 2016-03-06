@@ -87,6 +87,7 @@ public:
 		double factor,
 		const WeightArray& incrar,
 		const std::size_t* window, std::size_t windowsize,
+		const Index* maxdist_featar,
 		PostingIteratorInterface** featar, std::size_t featarsize,
 		PostingIteratorInterface** structar, std::size_t structarsize);
 
