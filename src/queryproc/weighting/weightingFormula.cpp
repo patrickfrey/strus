@@ -34,6 +34,7 @@
 #include "strus/constants.hpp"
 #include <cmath>
 #include <ctime>
+/*[-]*/#include <iostream>
 
 using namespace strus;
 
@@ -94,8 +95,11 @@ double FunctionMap::variableMap_df( void* ctx, int typeidx, unsigned int idx)
 double FunctionMap::variableMap_ff( void* ctx, int typeidx, unsigned int idx)
 {
 	WeightingFunctionContextFormula* THIS = (WeightingFunctionContextFormula*)ctx;
+	/*[-]*/std::cout << "++++ CALL variableMap_ff typeidx=" << typeidx << " idx=" << idx << std::endl;
 	if (typeidx < 0) return std::numeric_limits<double>::quiet_NaN();
+	/*[-]*/std::cout << "++++ feats=" << THIS->m_featar[ typeidx].size() << std::endl;
 	if (idx >= THIS->m_featar[ typeidx].size()) return std::numeric_limits<double>::quiet_NaN();
+	/*[-]*/std::cout << "++++ ff=" << THIS->m_featar[ typeidx][idx].ff() << std::endl;
 	return THIS->m_featar[ typeidx][idx].ff();
 }
 

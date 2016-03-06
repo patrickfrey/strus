@@ -542,7 +542,7 @@ FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const st
 		}
 		else
 		{
-			locstr.append( source.c_str(), restsize);
+			locstr.append( source.c_str(), locidx + restsize);
 		}
 		locstr.insert( locidx, "<-- ! -->");
 		if (cutstart)
@@ -571,7 +571,10 @@ public:
 
 	Element pop()
 	{
-		if (m_itr == Size) throw strus::runtime_error( _TXT("logic error: pop from empty stack"));
+		if (m_itr == Size)
+		{
+			throw strus::runtime_error( _TXT("logic error: pop from empty stack"));
+		}
 		return m_ar[ m_itr++];
 	}
 
@@ -653,7 +656,18 @@ double FormulaInterpreter::run( void* ctx) const
 				if (!iteratorSpec.defined())
 				{
 					int brkcnt = 1;
-					for (;ip < m_program.size(); ++ip)
+					++ip;
+					if (ip == m_program.size())
+					{
+						throw strus::runtime_error(_TXT("illegal program code: end of loop not found"));
+					}
+					const OpStruct& xp = m_program[ ip];
+					if (xp.opCode != OpPushConst)
+					{
+						throw strus::runtime_error(_TXT("illegal program code: expected push const after loop operation"));
+					}
+					stack.push( xp.operand.value);
+					for (++ip; ip < m_program.size(); ++ip)
 					{
 						const OpStruct& xp = m_program[ ip];
 						if (xp.opCode == OpLoop)
