@@ -1,6 +1,7 @@
 #ifndef _STRUS_UTILS_CRC32_HPP_INCLUDED
 #define _STRUS_UTILS_CRC32_HPP_INCLUDED
 #include <utility>
+#include <cstddef> 
 #include <stdint.h>
 
 namespace strus {

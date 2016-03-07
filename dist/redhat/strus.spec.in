@@ -312,6 +312,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Mon Mar 7 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.1-0.1
+- Small fixes for bringing up packages again
+
 * Sun Mar 6 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.0-0.1
 - add upperbound seek with upper key restriction to database interface (not used yet in storage)
 - change return value of document term iterator skipDoc from boolean to document number
