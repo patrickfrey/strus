@@ -312,6 +312,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Mon Mar 7 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.2-0.1
+- More fixes for bringing up packages again
+
 * Mon Mar 7 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.1-0.1
 - Small fixes for bringing up packages again
 
