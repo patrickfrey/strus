@@ -151,7 +151,7 @@ public:
 
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
-	virtual StorageDumpInterface* createDump() const;
+	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const;
 
 public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index getTermValue( const std::string& name) const;

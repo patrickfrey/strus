@@ -1183,13 +1183,13 @@ class StorageDump
 	:public StorageDumpInterface
 {
 public:
-	StorageDump( const strus::DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
+	StorageDump( const strus::DatabaseClientInterface* database_, const std::string& keyprefix, ErrorBufferInterface* errorhnd_)
 		:m_database(database_)
 		,m_cursor( database_->createCursor( strus::DatabaseOptions()))
 		,m_errorhnd(errorhnd_)
 	{
 		if (!m_cursor.get()) throw strus::runtime_error(_TXT("error creating database cursor"));
-		m_key = m_cursor->seekFirst( 0, 0);
+		m_key = m_cursor->seekFirst( keyprefix.c_str(), keyprefix.size());
 	}
 	virtual ~StorageDump(){}
 
@@ -1226,11 +1226,11 @@ private:
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
-StorageDumpInterface* StorageClient::createDump() const
+StorageDumpInterface* StorageClient::createDump( const std::string& keyprefix) const
 {
 	try
 	{
-		return new StorageDump( m_database.get(), m_errorhnd);
+		return new StorageDump( m_database.get(), keyprefix, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }

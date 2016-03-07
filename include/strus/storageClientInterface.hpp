@@ -214,8 +214,9 @@ public:
 	virtual bool checkStorage( std::ostream& errorlog) const=0;
 
 	/// \brief Create a dump of the storage
+	/// \param[in] keyprefix prefix for keys to resrict the dump to
 	/// \return the object to fetch the dump from
-	virtual StorageDumpInterface* createDump() const=0;
+	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const=0;
 };
 
 }//namespace
