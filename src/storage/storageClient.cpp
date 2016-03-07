@@ -564,6 +564,8 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
+
+	utils::ScopedLock lock( m_immalloc_typeno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
@@ -576,6 +578,8 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
+
+	utils::ScopedLock lock( m_immalloc_userno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_userno.allocIncrement());
@@ -588,6 +592,8 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
+
+	utils::ScopedLock lock( m_immalloc_attribno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_attribno.allocIncrement());

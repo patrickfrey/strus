@@ -241,6 +241,9 @@ private:
 	utils::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
 
 	utils::Mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
+	utils::Mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno s
+	utils::Mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno s
+	utils::Mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno s
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
