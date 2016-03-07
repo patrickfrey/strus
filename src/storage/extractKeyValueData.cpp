@@ -215,7 +215,7 @@ TermTypeInvData::TermTypeInvData( const strus::DatabaseCursorInterface::Slice& k
 
 void TermTypeInvData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::TermTypeInvPrefix << escapestr( typestr, typesize) << ' ' << typeno << std::endl;
+	out << (char)DatabaseKey::TermTypeInvPrefix << ' ' << escapestr( typestr, typesize) << ' ' << typeno << std::endl;
 }
 
 TermValueInvData::TermValueInvData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
@@ -240,7 +240,7 @@ TermValueInvData::TermValueInvData( const strus::DatabaseCursorInterface::Slice&
 
 void TermValueInvData::print( std::ostream& out)
 {
-	out << (char)DatabaseKey::TermValueInvPrefix << escapestr( valuestr, valuesize) << ' ' << valueno << std::endl;
+	out << (char)DatabaseKey::TermValueInvPrefix << ' ' << escapestr( valuestr, valuesize) << ' ' << valueno << std::endl;
 }
 
 static std::string encodeString( const std::string& value)

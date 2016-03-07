@@ -104,7 +104,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 		{
 			std::map<Index,std::size_t>::const_iterator ti;
 			ti = typenomap.find( typeno);
-			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type when populating df's"));
+			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type (no %d) when populating df's"), (int)typeno);
 			const char* typenam = strings.c_str() + ti->second;
 	
 			ti = termnomap.find( termno);

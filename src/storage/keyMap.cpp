@@ -90,7 +90,10 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		rt = m_allocator->getOrCreate( name, isNew);
 		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
-		if (m_dbadapterinv.defined()) m_dbadapterinv.storeImm( rt, name);
+		if (m_dbadapterinv.defined())
+		{
+			m_dbadapterinv.storeImm( rt, name);
+		}
 		isNew = true;
 	}
 	else

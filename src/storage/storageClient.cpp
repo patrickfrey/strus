@@ -1091,12 +1091,14 @@ static void dumpKeyValue(
 			}
 			case strus::DatabaseKey::TermTypeInvPrefix:
 			{
-				strus::TermTypeInvData( key, value);
+				strus::TermTypeInvData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::TermValueInvPrefix:
 			{
-				strus::TermValueInvData( key, value);
+				strus::TermValueInvData data( key, value);
+				data.print( out);
 				break;
 			}
 			case strus::DatabaseKey::ForwardIndexPrefix:
