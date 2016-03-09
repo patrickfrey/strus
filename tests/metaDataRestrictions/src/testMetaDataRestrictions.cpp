@@ -31,7 +31,10 @@
 #include "metaDataElement.hpp"
 #include "metaDataRecord.hpp"
 #include "strus/metaDataReaderInterface.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/errorBufferInterface.hpp"
+#include "strus/lib/error.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -42,6 +45,8 @@
 #include <vector>
 #include <limits>
 #include <algorithm>
+
+static strus::Reference<strus::ErrorBufferInterface> g_errorbuf;
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
@@ -202,52 +207,52 @@ static strus::MetaDataRecord randomMetaDataRecord(
 	return rt;
 }
 
-static int randomOfs( strus::QueryInterface::CompareOperator opr, bool positiveResult)
+static int randomOfs( strus::MetaDataRestrictionInterface::CompareOperator opr, bool positiveResult)
 {
 	if (!positiveResult)
 	{
 		switch (opr)
 		{
-			case strus::QueryInterface::CompareLess:
-				opr = strus::QueryInterface::CompareGreaterEqual;
+			case strus::MetaDataRestrictionInterface::CompareLess:
+				opr = strus::MetaDataRestrictionInterface::CompareGreaterEqual;
 				break;
-			case strus::QueryInterface::CompareLessEqual:
-				opr = strus::QueryInterface::CompareGreater;
+			case strus::MetaDataRestrictionInterface::CompareLessEqual:
+				opr = strus::MetaDataRestrictionInterface::CompareGreater;
 				break;
-			case strus::QueryInterface::CompareEqual:
-				opr = strus::QueryInterface::CompareNotEqual;
+			case strus::MetaDataRestrictionInterface::CompareEqual:
+				opr = strus::MetaDataRestrictionInterface::CompareNotEqual;
 				break;
-			case strus::QueryInterface::CompareNotEqual:
-				opr = strus::QueryInterface::CompareEqual;
+			case strus::MetaDataRestrictionInterface::CompareNotEqual:
+				opr = strus::MetaDataRestrictionInterface::CompareEqual;
 				break;
-			case strus::QueryInterface::CompareGreater:
-				opr = strus::QueryInterface::CompareLessEqual;
+			case strus::MetaDataRestrictionInterface::CompareGreater:
+				opr = strus::MetaDataRestrictionInterface::CompareLessEqual;
 				break;
-			case strus::QueryInterface::CompareGreaterEqual:
-				opr = strus::QueryInterface::CompareLess;
+			case strus::MetaDataRestrictionInterface::CompareGreaterEqual:
+				opr = strus::MetaDataRestrictionInterface::CompareLess;
 				break;
 		}
 	}
 	int ofs = RANDINT(1,100);
 	switch (opr)
 	{
-		case strus::QueryInterface::CompareLess:
+		case strus::MetaDataRestrictionInterface::CompareLess:
 			break;
-		case strus::QueryInterface::CompareLessEqual:
+		case strus::MetaDataRestrictionInterface::CompareLessEqual:
 			if (ofs > 60)
 			{
 				ofs = 0;
 			}
 			break;
-		case strus::QueryInterface::CompareEqual:
+		case strus::MetaDataRestrictionInterface::CompareEqual:
 			ofs = 0;
 			break;
-		case strus::QueryInterface::CompareNotEqual:
+		case strus::MetaDataRestrictionInterface::CompareNotEqual:
 			break;
-		case strus::QueryInterface::CompareGreater:
+		case strus::MetaDataRestrictionInterface::CompareGreater:
 			ofs = -ofs;
 			break;
-		case strus::QueryInterface::CompareGreaterEqual:
+		case strus::MetaDataRestrictionInterface::CompareGreaterEqual:
 			if (ofs > 60)
 			{
 				ofs = 0;
@@ -263,7 +268,7 @@ struct RandomDataException
 
 static strus::ArithmeticVariant randomOperand(
 	const strus::ArithmeticVariant& baseValue,
-	strus::QueryInterface::CompareOperator opr,
+	strus::MetaDataRestrictionInterface::CompareOperator opr,
 	strus::MetaDataElement::Type elemtype,
 	bool positiveResult)
 {
@@ -342,34 +347,38 @@ static strus::ArithmeticVariant randomOperand(
 	return strus::ArithmeticVariant();
 }
 
-static strus::MetaDataRestriction randomMetaDataRestriction(
+static strus::MetaDataCompareOperation
+	randomMetaDataCondition(
 		const strus::MetaDataDescription* descr,
 		const strus::MetaDataRecord& rec,
 		bool newGroup,
 		bool positiveResult)
 {
 	strus::Index hnd = RANDINT( 0, descr->nofElements());
-	strus::QueryInterface::CompareOperator 
-		opr = (strus::QueryInterface::CompareOperator)
-			RANDINT( 0, strus::QueryInterface::NofCompareOperators);
+	strus::MetaDataRestrictionInterface::CompareOperator 
+		opr = (strus::MetaDataRestrictionInterface::CompareOperator)
+			RANDINT( 0, strus::MetaDataRestrictionInterface::NofCompareOperators);
 
 	const strus::MetaDataElement* elem = descr->get( hnd);
 	strus::ArithmeticVariant value = rec.getValue( elem);
 
-	const char* typeName = elem->typeName();
-
+	std::string elemName( descr->getName( hnd));
 	strus::ArithmeticVariant 
 		operand = randomOperand( value, opr, elem->type(), positiveResult);
-	
-	return strus::MetaDataRestriction( typeName, opr, hnd, operand, newGroup);
+
+	return strus::MetaDataCompareOperation(
+			elem->typeName(), opr, hnd, elemName, operand, newGroup);
 }
 
-static std::vector<strus::MetaDataRestriction> randomMetaDataRestrictionList(
+static strus::Reference<strus::MetaDataRestrictionInstanceInterface>
+	randomMetaDataRestriction(
+		strus::MetaDataReaderInterface* reader,
 		const strus::MetaDataDescription* descr,
 		const strus::MetaDataRecord& rec,
-		bool positiveResult)
-{		
-	std::vector<strus::MetaDataRestriction> rt;
+		bool positiveResult,
+		std::string expressionstr)
+{
+	std::vector<strus::MetaDataCompareOperation> ops;
 	unsigned int ri = 0, re = RANDINT(1,6);
 	for (; ri != re; ++ri)
 	{
@@ -384,31 +393,30 @@ static std::vector<strus::MetaDataRestriction> randomMetaDataRestrictionList(
 		{
 			bool positiveResultGroupElement = positiveResult?(gi==matchGroupElement):false;
 			bool newGroup = (gi == 0);
-			rt.push_back(
-				randomMetaDataRestriction(
-					descr, rec, newGroup, positiveResultGroupElement));
+			ops.push_back( randomMetaDataCondition( descr, rec, newGroup, positiveResultGroupElement));
+			if (expressionstr.size())
+			{
+				expressionstr.append( ", ");
+			}
+			expressionstr.append( ops.back().tostring());
 		}
 	}
+	strus::Reference<strus::MetaDataRestrictionInstanceInterface>
+		rt( new strus::MetaDataRestrictionInstance( reader, ops, g_errorbuf.get()));
 	return rt;
 }
 
 static void reportTest(
 		std::ostream& out,
-		const std::vector<strus::MetaDataRestriction>& restrictions,
+		const strus::Reference<strus::MetaDataRestrictionInstanceInterface>& restriction,
+		const std::string& expressionstr,
 		const strus::MetaDataRecord& rc,
 		bool expectedResult)
 {
 	out << "checking record:" << std::endl;
 	rc.print( out);
-	out << "against expression:" << std::endl;
-	std::vector<strus::MetaDataRestriction>::const_iterator
-		ri = restrictions.begin(), re = restrictions.end();
-	for (; ri != re; ++ri)
-	{
-		ri->print( out);
-	}
-	out << "expecting " << (expectedResult?"positive":"negative")
-			<< " result" << std::endl;
+	out << "against expression:" << expressionstr << std::endl;
+	out << "expecting " << (expectedResult?"positive":"negative") << " result" << std::endl;
 }
 
 static unsigned int getUintValue( const char* arg)
@@ -434,6 +442,8 @@ static void printUsage( int argc, const char* argv[])
 
 int main( int argc, const char* argv[])
 {
+	g_errorbuf.reset( strus::createErrorBuffer_standard( stderr, 1));
+
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		printUsage( argc, argv);
@@ -470,28 +480,29 @@ int main( int argc, const char* argv[])
 			{
 				std::memset( data, 0, descr.bytesize());
 				strus::MetaDataRecord rc = randomMetaDataRecord( &descr, data);
-				MetaDataReader reader( &descr, data);
 
 				std::size_t xi=0, xe=nofQueries;
 				for (; xi<xe; ++xi)
 				{
 					try
 					{
+						std::string expressionstr;
 						bool expectedResult = (bool)RANDINT(0,2);
-						std::vector<strus::MetaDataRestriction>
-							restrictions = randomMetaDataRestrictionList(
-										&descr, rc, expectedResult);
+						strus::Reference<strus::MetaDataRestrictionInstanceInterface>
+							restriction =
+								randomMetaDataRestriction(
+									new MetaDataReader( &descr, data),
+									&descr, rc, expectedResult, expressionstr);
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 						std::cerr << "test " << di << "/" << ri << "/" << xi << std::endl;
-						reportTest( std::cerr, restrictions, rc, expectedResult);
+						reportTest( std::cerr, restriction, expressionstr, rc, expectedResult);
 #endif
 						queryCount++;
-						if (expectedResult != strus::matchesMetaDataRestriction(
-									restrictions, &reader))
+						if (expectedResult != restriction->match(1))
 						{
 #ifndef STRUS_LOWLEVEL_DEBUG
-							reportTest( std::cerr, restrictions, rc, expectedResult);
+							reportTest( std::cerr, restriction, expressionstr, rc, expectedResult);
 #endif
 							std::cout << "query no " << queryCount << " failed" << std::endl;
 							throw std::runtime_error( "test failed");
@@ -509,7 +520,14 @@ int main( int argc, const char* argv[])
 				}
 			}
 		}
-		std::cerr << "OK processed " << (nofTables * nofRecords * nofQueries) << " (" << ((nofTables * nofRecords * nofQueries) + failedRandomQueries) << ") random meta data table queries with success" << std::endl;
+		if (g_errorbuf->hasError())
+		{
+			std::cerr << "ERROR in metadata restriction test: %s" << g_errorbuf->fetchError() << std::endl;
+		}
+		else
+		{
+			std::cerr << "OK processed " << (nofTables * nofRecords * nofQueries) << " (" << ((nofTables * nofRecords * nofQueries) + failedRandomQueries) << ") random meta data table queries with success" << std::endl;
+		}
 		return 0;
 	}
 	catch (const std::exception& err)

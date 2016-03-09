@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -34,6 +34,7 @@
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "storageDocument.hpp"
+#include "storageDocumentUpdate.hpp"
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/arithmeticVariant.hpp"
@@ -50,7 +51,6 @@ StorageTransaction::StorageTransaction(
 		StorageClient* storage_,
 		DatabaseClientInterface* database_,
 		const MetaDataDescription* metadescr_,
-		const conotrie::CompactNodeTrie* termnomap_,
 		const Index& maxtypeno_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
@@ -61,11 +61,11 @@ StorageTransaction::StorageTransaction(
 	,m_invertedIndexMap(database_)
 	,m_forwardIndexMap(database_,maxtypeno_)
 	,m_userAclMap(database_)
-	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix, storage_->createTypenoAllocator())
-	,m_termValueMap(database_,DatabaseKey::TermValuePrefix, storage_->createTermnoAllocator(),termnomap_)
-	,m_docIdMap(database_,DatabaseKey::DocIdPrefix, storage_->createDocnoAllocator())
-	,m_userIdMap(database_,DatabaseKey::UserNamePrefix, storage_->createUsernoAllocator())
-	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix, storage_->createAttribnoAllocator())
+	,m_termTypeMap(database_,DatabaseKey::TermTypePrefix,DatabaseKey::TermTypeInvPrefix,storage_->createTypenoAllocator())
+	,m_termValueMap(database_,DatabaseKey::TermValuePrefix,DatabaseKey::TermValueInvPrefix,storage_->createTermnoAllocator())
+	,m_docIdMap(database_,DatabaseKey::DocIdPrefix,storage_->createDocnoAllocator())
+	,m_userIdMap(database_,DatabaseKey::UserNamePrefix,storage_->createUsernoAllocator())
+	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix,storage_->createAttribnoAllocator())
 	,m_nof_documents(0)
 	,m_commit(false)
 	,m_rollback(false)

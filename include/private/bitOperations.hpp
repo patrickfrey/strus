@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -26,8 +26,8 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_BIT_OPERATIONS_HPP_INCLUDED
-#define _STRUS_LVDB_BIT_OPERATIONS_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_BIT_OPERATIONS_HPP_INCLUDED
+#define _STRUS_STORAGE_BIT_OPERATIONS_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <cstdlib>
 #include <cstring>
@@ -106,13 +106,19 @@ struct BitOperations
 	static inline unsigned int bitScanForward( const uint64_t& idx)
 	{
 #ifdef __x86_64__
-		uint64_t result; 
+		uint64_t result;
 		if (!idx) return 0;
 		asm(" bsfq %1, %0 \n" : "=r"(result) : "r"(idx) ); 
 		return (unsigned int)(result+1);
 #else
 		return ffsl( idx);
 #endif
+	}
+
+	static inline uint64_t bitInsert( const uint64_t& bitset, unsigned int bi)
+	{
+		uint64_t mask = ((uint64_t)1<<bi)-1;
+		return ((bitset &~ mask) << 1) | ((uint64_t)1<<bi) | (bitset & mask);
 	}
 };
 }//namespace

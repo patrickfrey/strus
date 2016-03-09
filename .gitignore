@@ -48,6 +48,7 @@ CPackSourceConfig.cmake.user
 CPackSourceConfig.cmake
 tests/cmake_install.cmake.user
 cmake/build_rules.cmake.user
+src/queryeval/cmake_install.cmake.user
 include/strus/versionStorage.hpp
 src/utils/fileio_sys.hpp
 src/utils/internationalization.cpp
@@ -72,3 +73,4 @@ tests/statsproc/src/testStatisticsProcessor
 tests/formula/src/formula
 tests/loggingMalloc/src/testLoggingMalloc
 tests/storageop/src/testStorageOp
+tests/positionWindow/src/testPositionWindow

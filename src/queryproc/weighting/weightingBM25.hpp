@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -56,20 +56,20 @@ public:
 	WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
-		float k1_,
-		float b_,
-		float avgDocLength_,
-		float nofCollectionDocuments_,
+		double k1_,
+		double b_,
+		double avgDocLength_,
+		double nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
 		ErrorBufferInterface* errorhnd_);
 
 	struct Feature
 	{
 		PostingIteratorInterface* itr;
-		float weight;
-		float idf;
+		double weight;
+		double idf;
 
-		Feature( PostingIteratorInterface* itr_, float weight_, float idf_)
+		Feature( PostingIteratorInterface* itr_, double weight_, double idf_)
 			:itr(itr_),weight(weight_),idf(idf_){}
 		Feature( const Feature& o)
 			:itr(o.itr),weight(o.weight),idf(o.idf){}
@@ -81,13 +81,13 @@ public:
 			float weight_,
 			const TermStatistics& stats_);
 
-	virtual float call( const Index& docno);
+	virtual double call( const Index& docno);
 
 private:
-	float m_k1;
-	float m_b;
-	float m_avgDocLength;
-	float m_nofCollectionDocuments;
+	double m_k1;
+	double m_b;
+	double m_avgDocLength;
+	double m_nofCollectionDocuments;
 	std::vector<Feature> m_featar;
 	MetaDataReaderInterface* m_metadata;
 	int m_metadata_doclen;
@@ -102,7 +102,7 @@ class WeightingFunctionInstanceBM25
 {
 public:
 	explicit WeightingFunctionInstanceBM25( ErrorBufferInterface* errorhnd_)
-		:m_b(0.75),m_k1(1.5),m_avgdoclen(1000),m_errorhnd(errorhnd_){}
+		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25(){}
 
@@ -117,9 +117,9 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	float m_b;
-	float m_k1;
-	float m_avgdoclen;
+	double m_k1;
+	double m_b;
+	double m_avgdoclen;
 	std::string m_attribute_doclen;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

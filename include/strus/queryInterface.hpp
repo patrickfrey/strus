@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -31,7 +31,8 @@
 #ifndef _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #define _STRUS_QUERY_INTERFACE_HPP_INCLUDED
 #include "strus/storageClientInterface.hpp"
-#include "strus/resultDocument.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
+#include "strus/queryResult.hpp"
 #include "strus/arithmeticVariant.hpp"
 #include "strus/termStatistics.hpp"
 #include "strus/globalStatistics.hpp"
@@ -55,7 +56,9 @@ public:
 	/// \brief Push a term to the query stack
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
-	virtual void pushTerm( const std::string& type_, const std::string& value_)=0;
+	virtual void pushTerm(
+			const std::string& type_,
+			const std::string& value_)=0;
 
 	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
 	///	removing the argument elements.
@@ -93,28 +96,18 @@ public:
 	virtual void defineGlobalStatistics(
 			const GlobalStatistics& stats_)=0;
 
-	/// \brief Comparison operator for restrictions
-	enum CompareOperator
-	{
-		CompareLess,
-		CompareLessEqual,
-		CompareEqual,
-		CompareNotEqual,
-		CompareGreater,
-		CompareGreaterEqual
-	};
-	enum {NofCompareOperators=((int)CompareGreaterEqual+1)};
-
-	/// \brief Define a restriction on documents base on a condition on the meta data
+	/// \brief Add a condition clause to the restriction on the document meta data of this query
 	/// \param[in] opr condition compare operator
 	/// \param[in] name name of meta data element to check
 	/// \param[in] operand constant number to check against
 	/// \param[in] newGroup true, if the conditional opens a new group of elements joined with a logical "OR" 
 	///			false, if the conditional belongs to the last group of elements joined with a logical "OR".
 	///		Different groups are joined with a logical "AND" to form the meta data restriction expression
-	virtual void defineMetaDataRestriction(
-			CompareOperator opr, const std::string& name,
-			const ArithmeticVariant& operand, bool newGroup=true)=0;
+	virtual void addMetaDataRestrictionCondition(
+			MetaDataRestrictionInterface::CompareOperator opr,
+			const std::string& name,
+			const ArithmeticVariant& operand,
+			bool newGroup=true)=0;
 
 	/// \brief Define a restriction on the documents as list of local document numbers (Add local document numbers to the list of documents to restrict the query on)
 	/// \param[in] docnolist_ list of documents to evaluate the query on
@@ -132,7 +125,7 @@ public:
 	virtual void addUserName( const std::string& username_)=0;
 
 	/// \brief Evaluate the query
-	virtual std::vector<ResultDocument> evaluate()=0;
+	virtual QueryResult evaluate()=0;
 };
 
 }//namespace

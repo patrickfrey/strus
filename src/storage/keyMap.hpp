@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -26,12 +26,12 @@
 
 --------------------------------------------------------------------
 */
-#ifndef _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
-#define _STRUS_LVDB_KEY_MAP_HPP_INCLUDED
+#ifndef _STRUS_STORAGE_KEY_MAP_HPP_INCLUDED
+#define _STRUS_STORAGE_KEY_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
-#include "compactNodeTrie.hpp"
+#include "private/utils.hpp"
 #include "private/stringMap.hpp"
 #include <cstdlib>
 #include <string>
@@ -52,27 +52,19 @@ class KeyMapInv;
 class KeyMap
 {
 public:
-	/// \brief Maximum size of key to insert into the cache
-	enum {DefaultMaxCachedKeyLen=20};
-
 	KeyMap( DatabaseClientInterface* database_,
 			DatabaseKey::KeyPrefix prefix_,
-			KeyAllocatorInterface* allocator_,
-			const conotrie::CompactNodeTrie* globalmap_=0);
+			DatabaseKey::KeyPrefix invprefix_,
+			KeyAllocatorInterface* allocator_);
+	KeyMap( DatabaseClientInterface* database_,
+			DatabaseKey::KeyPrefix prefix_,
+			KeyAllocatorInterface* allocator_);
 	~KeyMap()
 	{
 		delete m_allocator;
 	}
 
-	void defineMaxCachedKeyLen( unsigned int maxCachedKeyLen_)
-	{
-		m_maxCachedKeyLen = maxCachedKeyLen_;
-	}
-
-	void defineInv( KeyMapInv* invmap)
-	{
-		m_invmap = invmap;
-	}
+	void defineInv( KeyMapInv* invmap_);
 
 	Index lookUp( const std::string& name);
 	Index getOrCreate( const std::string& name, bool& isNew);
@@ -88,26 +80,23 @@ public:
 		return value > UnknownValueHandleStart;
 	}
 
-	void deleteKey( const std::string& name)
-	{
-		m_deletedlist.push_back( name.c_str());
-	}
+	void deleteKey( const std::string& name);
 
 private:
 	void clear();
+	void deleteAllFromDeletedList( DatabaseTransactionInterface* transaction);
 
 private:
 	enum {
 		UnknownValueHandleStart=(1<<30)
 	};
-	typedef StringMap<Index> OverflowMap;
 
 private:
+	DatabaseClientInterface* m_database;
 	DatabaseAdapter_StringIndex::ReadWriter m_dbadapter;
-	unsigned int m_maxCachedKeyLen;
-	conotrie::CompactNodeTrie m_map;
-	OverflowMap m_overflowmap;
-	const conotrie::CompactNodeTrie* m_globalmap;
+	DatabaseAdapter_IndexString::ReadWriter m_dbadapterinv;
+	typedef StringMap<Index> Map;
+	Map m_map;
 	Index m_unknownHandleCount;
 	KeyAllocatorInterface* m_allocator;
 	KeyMapInv* m_invmap;

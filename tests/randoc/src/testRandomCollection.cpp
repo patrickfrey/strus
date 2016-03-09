@@ -63,6 +63,7 @@
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};
 #undef STRUS_LOWLEVEL_DEBUG
+#undef STRUS_GENERATE_READABLE_NAMES
 
 uint32_t uint32_hash( uint32_t a)
 {
@@ -156,6 +157,19 @@ static const char* randomType()
 	return ar[ g_random.get( 0, (unsigned int)NofTypes-1)];
 }
 
+#ifdef STRUS_GENERATE_READABLE_NAMES
+static const char* readableNameIndexString( std::size_t maxval)
+{
+	if (maxval < 10) return "%01u";
+	if (maxval < 100) return "%02u";
+	if (maxval < 1000) return "%03u";
+	if (maxval < 10000) return "%04u";
+	if (maxval < 100000) return "%05u";
+	if (maxval < 1000000) return "%06u";
+	if (maxval < 10000000) return "%07u";
+	return "%09u";
+}
+#else
 static std::string randomTerm()
 {
 	std::string rt;
@@ -174,6 +188,7 @@ static std::string randomTerm()
 	std::random_shuffle( rt.begin(), rt.end(), rnd);
 	return rt;
 }
+#endif
 
 struct TermCollection
 {
@@ -187,7 +202,16 @@ struct TermCollection
 		std::set<std::string> termSet;
 		while (termSet.size() < nofTerms)
 		{
+#ifdef STRUS_GENERATE_READABLE_NAMES
+			char termformatbuf[ 64];
+			char termnamebuf[ 64];
+
+			snprintf( termformatbuf, sizeof(termformatbuf), "T%s", readableNameIndexString( nofTerms-1));
+			snprintf( termnamebuf, sizeof(termnamebuf), termformatbuf, (unsigned int)termSet.size());
+			termSet.insert( termnamebuf);
+#else
 			termSet.insert( randomTerm());
+#endif
 		}
 		std::set<std::string>::const_iterator ti = termSet.begin(), te = termSet.end();
 		for (; ti != te; ++ti)
@@ -279,7 +303,7 @@ static float tfIdf( unsigned int collSize, unsigned int nofMatchingDocs, unsigne
 	const float k1 = 1.5; //.... [1.2,2.0]
 	const float b = 0.75; // fix
 
-	float IDF = ::log( collSize / (nofMatchingDocs + 1.0));
+	float IDF = ::log10( collSize / (nofMatchingDocs + 1.0));
 	float tf = ((float)nofMatchesInDoc * (k1 + 1.0))
 		/ ((float)nofMatchesInDoc 
 			+ (k1 * (1.0 - b + ((b * (float)docLen) / avgDocLen)))
@@ -351,18 +375,24 @@ struct RandomCollection
 		}
 	}
 
-	std::string docSummary( unsigned int docno_, unsigned int pos_, unsigned int range) const
+	std::string docSummary( std::size_t docidx_, unsigned int pos_, unsigned int range) const
 	{
 		std::ostringstream rt;
-		const RandomDoc& doc = docar[docno_-1];
-		std::vector<RandomDoc::Occurrence>::const_iterator oi = doc.occurrencear.begin(), oe = doc.occurrencear.end();
+		const RandomDoc& doc = docar[ docidx_];
+		std::vector<RandomDoc::Occurrence>::const_iterator
+			oi = doc.occurrencear.begin(), oe = doc.occurrencear.end();
 		for (; oi != oe; ++oi)
 		{
+#ifdef STRUS_LOWLEVEL_DEBUG
+			rt << " " << oi->pos << ": " << termCollection.termar[ oi->term-1].tostring() << " (" << oi->term << ")";
+			rt << std::endl;
+#else
 			if (oi->pos+1 >= pos_ && oi->pos <= pos_ + range)
 			{
 				rt << " " << oi->pos << ": " << termCollection.termar[ oi->term-1].tostring() << " (" << oi->term << ")";
 				rt << std::endl;
 			}
+#endif
 		}
 		return rt.str();
 	}
@@ -381,12 +411,41 @@ struct RandomQuery
 	AGAIN:
 		arg.clear();
 		range = 0;
+		cardinality = 0;
 		operation = (Operation)g_random.get( 0, NofOperations);
 		std::size_t pickDocIdx = g_random.get( 0, collection.docar.size());
 		const RandomDoc& pickDoc = collection.docar[ pickDocIdx];
 
 		switch (operation)
 		{
+			case Contains:
+			{
+				cardinality = 1;
+				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
+				arg.push_back( pickDoc.occurrencear[pi].term);
+
+				while (arg.size() < (unsigned int)MaxNofArgs)
+				{
+					unsigned int sel = g_random.get( 0, 4);
+					if (sel == 0)
+					{
+						pi = g_random.get( 0, pickDoc.occurrencear.size());
+						arg.push_back( pickDoc.occurrencear[pi].term);
+						cardinality += 1;
+					}
+					else if (sel <= 2)
+					{
+						unsigned int nofTerms = collection.termCollection.termar.size();
+						unsigned int termidx = 1+g_random.get( 0, nofTerms);
+						arg.push_back( termidx);
+					}
+					else
+					{
+						break;
+					}
+				}
+				break;
+			}
 			case Intersect:
 			{
 				unsigned int pi = g_random.get( 0, pickDoc.occurrencear.size());
@@ -460,6 +519,14 @@ struct RandomQuery
 				range = g_random.get( 0, maxRange+1, 8, 1, 2, 3, 5, 7, 9, 11, 13);
 
 				unsigned int maxNofPicks = MaxNofArgs-2;
+				if (operation == StructWithin || operation == Within)
+				{
+					while (maxNofPicks > 4) maxNofPicks /= 2;
+					// ... avoid too big ranges for within because we create all permutations
+					//	of configurations in the test. The operator implementation is smarter
+					//	though, but we want to test with a different solution of the
+					//	problem without any optimizations.
+				}
 				unsigned int nofPicks = g_random.get( 1, maxNofPicks+1);
 
 				// select ordered position occurrencies in a range:
@@ -516,7 +583,7 @@ struct RandomQuery
 		}
 	}
 	RandomQuery( const RandomQuery& o)
-		:operation(o.operation),arg(o.arg),range(o.range){}
+		:operation(o.operation),arg(o.arg),range(o.range),cardinality(o.cardinality){}
 
 	void shuffleArg()
 	{
@@ -533,6 +600,12 @@ struct RandomQuery
 			:docno(o.docno),pos(o.pos){}
 		Match( unsigned int docno_, unsigned int pos_)
 			:docno(docno_),pos(pos_){}
+
+		bool operator < (const Match& o) const
+		{
+			if (docno == o.docno) return pos < o.pos;
+			return docno < o.docno;
+		}
 	};
 
 	std::vector<RandomDoc::Occurrence>::const_iterator
@@ -561,17 +634,73 @@ struct RandomQuery
 		return oi != oe;
 	}
 
-	std::vector<Match> expectedMatches( const RandomCollection& collection) const
+	static void getPermutations_( std::vector< std::vector<unsigned char> >& res, unsigned char* ar, unsigned char pos, unsigned char size)
+	{
+		if (pos == size)
+		{
+			// when we have a permutation, we add it to the result:
+			res.push_back( std::vector<unsigned char>( ar, ar+(std::size_t)size));
+		}
+		else for (unsigned char ii=pos; ii<size; ++ii)
+		{
+			// select an element and permute the others:
+			std::swap( ar[ ii], ar[ pos]);
+			getPermutations_( res, ar, pos+1, size);
+			std::swap( ar[ ii], ar[ pos]);
+		}
+	}
+
+	static std::vector< std::vector<unsigned char> > getPermutations( std::size_t size)
+	{
+		unsigned char ar[ 256];
+		if (size > 256) throw std::runtime_error("permutation exceeds maximum size");
+		for (unsigned int ii=0; ii<size; ++ii)
+		{
+			ar[ ii] = (unsigned char)ii;
+		}
+		std::vector< std::vector<unsigned char> > rt;
+		getPermutations_( rt, ar, 0, (unsigned char)size);
+		return rt;
+	}
+
+	std::vector<Match> expectedMatches( const RandomCollection& collection, const std::vector<strus::Index>& docnomap) const
 	{
 		std::vector<Match> rt;
 		std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
-		for (unsigned int docno=1; di != de; ++di,++docno)
+		for (unsigned int docidx=0; di != de; ++di,++docidx)
 		{
+			unsigned int docno = docnomap[ docidx];
+
+			if (operation == Contains)
+			{
+				// ... no position involved, handle document matches:
+				std::vector<unsigned int>::const_iterator ai = arg.begin(), ae = arg.end();
+				unsigned int cardinality_cnt = 0;
+				for (; ai!=ae; ++ai)
+				{
+					std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
+					for (; oi != oe && oi->term != *ai; ++oi){}
+					if (oi != oe)
+					{
+						//... match found
+						cardinality_cnt += 1;
+					}
+				}
+				if (cardinality_cnt >= cardinality)
+				{
+					rt.push_back( Match( docno, 1));
+				}
+			}
 			std::vector<RandomDoc::Occurrence>::const_iterator oi = di->occurrencear.begin(), oe = di->occurrencear.end();
 			for (; oi != oe; (void)skipNextPosition(oi,oe))
 			{
 				switch (operation)
 				{
+					case Contains:
+					{
+						// ... already handled in document matches
+						break;
+					}
 					case Intersect:
 					{
 						if (arg.empty()) continue;
@@ -640,7 +769,6 @@ struct RandomQuery
 							{
 								lastmatchpos = fi->pos;
 								argidx++;
-								if (argidx == arg.size()) break;
 							}
 						}
 						// Check if matched and check the structure delimiter term
@@ -653,7 +781,7 @@ struct RandomQuery
 							}
 							else
 							{
-								rt.push_back( Match( docno, fi->pos));
+								rt.push_back( Match( docno, lastmatchpos));
 							}
 						}
 						break;
@@ -671,47 +799,42 @@ struct RandomQuery
 							delimiter_term = arg[argidx++];
 							if (arg.size() == 1) continue;
 						}
-						std::size_t ai = argidx;
-						for (; ai<arg.size(); ++ai)
+						// Get all permutations and try to match sequence for each:
+						std::vector< std::vector<unsigned char> >
+							permutations = getPermutations( arg.size() - argidx);
+						std::vector< std::vector<unsigned char> >::const_iterator
+							pi = permutations.begin(), pe = permutations.end();
+						for (; pi != pe; ++pi)
 						{
-							if (matchTerm( oi, oe, arg[ai], oi->pos)) break;
-						}
-						if (ai<arg.size())
-						{
-							std::vector<unsigned int> poset;	// .. linear search because sets are small
+							std::vector<unsigned char>::const_iterator
+								ei = pi->begin(), ee = pi->end();
+							if (!matchTerm( oi, oe, arg[argidx+*ei], oi->pos)) continue;
 
-							unsigned int maxpos = oi->pos;
-							for (ai=argidx; ai<arg.size(); ++ai)
+							std::vector<RandomDoc::Occurrence>::const_iterator fi = oi;
+							(void)skipNextPosition(fi,oe);
+
+							unsigned int lastmatchpos = oi->pos;
+							for (++ei; ei != ee && fi != oe && fi->pos <= lastpos; (void)skipNextPosition(fi,oe))
 							{
-								std::vector<RandomDoc::Occurrence>::const_iterator
-									fi = findTerm( oi, oe, arg[ai], lastpos);
-								for (;;)
+								if (matchTerm( fi, oe, arg[argidx+*ei], fi->pos))
 								{
-									if (fi == oe) break;
-									if (std::find( poset.begin(), poset.end(), fi->pos)==poset.end())
-									{
-										// ... only items at distinct positions are allowed
-										break;
-									}
-									fi = findTerm( fi+1, oe, arg[ai], lastpos);
+									lastmatchpos = fi->pos;
+									ei++;
 								}
-								if (fi == oe) break;
-								if (fi->pos > maxpos)
-								{
-									maxpos = fi->pos;
-								}
-								poset.push_back( fi->pos);
 							}
-							if (ai == arg.size()
-							&& !(delimiter_term && matchTerm( oi, oe, delimiter_term, maxpos)))
+							// Check if matched and check the structure delimiter term
+							if (ei == ee
+							&& !(delimiter_term && matchTerm( oi, oe, delimiter_term, lastmatchpos)))
 							{
 								if (range >= 0)
 								{
 									rt.push_back( Match( docno, oi->pos));
+									break; //... we need only one result per permutation
 								}
 								else
 								{
-									rt.push_back( Match( docno, maxpos));
+									rt.push_back( Match( docno, lastmatchpos));
+									break; //... we need only one result per permutation
 								}
 							}
 						}
@@ -720,6 +843,7 @@ struct RandomQuery
 				}
 			}
 		}
+		std::sort( rt.begin(), rt.end());
 		return rt;
 	}
 
@@ -751,7 +875,11 @@ struct RandomQuery
 		rt << operationName();
 		if (range)
 		{
-			rt << " " << range;
+			rt << " range " << range;
+		}
+		if (cardinality)
+		{
+			rt << " cardinality " << cardinality;
 		}
 		for (unsigned int ai=0; ai<arg.size(); ++ai)
 		{
@@ -786,12 +914,11 @@ struct RandomQuery
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
 		strus::PostingIteratorInterface* res = 
-			joinop->createResultIterator( itrar, range, 0);
+			joinop->createResultIterator( itrar, range, cardinality);
 		if (!res)
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-
 		result = resultMatches( res);
 		delete res;
 		return true;
@@ -799,6 +926,7 @@ struct RandomQuery
 
 	enum Operation
 	{
+		Contains,
 		Intersect,
 		Union,
 		Difference,
@@ -810,7 +938,7 @@ struct RandomQuery
 	enum {NofOperations=7};
 	static const char* operationName( Operation op)
 	{
-		static const char* ar[] = {"intersect","union","diff","within","within_struct","sequence","sequence_struct"};
+		static const char* ar[] = {"contains","intersect","union","diff","within","within_struct","sequence","sequence_struct"};
 		return ar[op];
 	}
 	const char* operationName() const
@@ -821,57 +949,84 @@ struct RandomQuery
 	Operation operation;
 	std::vector<unsigned int> arg;
 	int range;
+	unsigned int cardinality;
 };
 
-static bool compareMatches( const std::vector<RandomQuery::Match>& res, const std::vector<RandomQuery::Match>& matchar, const RandomCollection& collection)
+static std::size_t getDocidx( const std::vector<strus::Index>& docnomap, const strus::Index& docno)
 {
+	std::vector<strus::Index>::const_iterator di = docnomap.begin(), de = docnomap.end();
+	for (; di != de; ++di)
+	{
+		if (*di == docno) return di-docnomap.begin();
+	}
+	throw std::runtime_error( "internal: document not found (docno -> docidx map)");
+}
+
+static bool compareMatches( const std::vector<RandomQuery::Match>& res, const std::vector<RandomQuery::Match>& matchar, const RandomCollection& collection, const std::vector<strus::Index>& docnomap)
+{
+	enum {MaxSummarySize=100};
 	std::vector<RandomQuery::Match>::const_iterator mi = matchar.begin(), me = matchar.end();
 	std::vector<RandomQuery::Match>::const_iterator ri = res.begin(), re = res.end();
 	for (; mi != me && ri != re; ++mi,++ri)
 	{
-		if (mi->docno < ri->docno)
+		if (mi->docno < ri->docno || (mi->docno == ri->docno && mi->pos < ri->pos))
 		{
-			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+			std::size_t docidx = getDocidx( docnomap, mi->docno);
+			std::string docid = collection.docar[ docidx].docid;
+			std::cerr << "ERROR match missed [diff] in document " << docid << " docno (" << mi->docno << ") at " << mi->pos << std::endl;
 			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+			std::cerr << collection.docSummary( docidx, mi->pos, MaxSummarySize);
 			return false;
 		}
-		if (mi->docno > ri->docno)
+		if (mi->docno > ri->docno || (mi->docno == ri->docno && mi->pos > ri->pos))
 		{
-			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+			std::size_t docidx = getDocidx( docnomap, ri->docno);
+			std::string docid = collection.docar[ docidx].docid;
+			std::cerr << "ERROR unexpected match [diff] in doc " << docid << " docno (" << ri->docno << ") at " << ri->pos << std::endl;
 			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
-			return false;
-		}
-		if (mi->pos < ri->pos)
-		{
-			std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
-			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
-			return false;
-		}
-		if (mi->pos > ri->pos)
-		{
-			std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
-			std::cerr << "summary: " << std::endl;
-			std::cerr << collection.docSummary( ri->docno, ri->pos, 10);
+			std::cerr << collection.docSummary( getDocidx( docnomap, ri->docno), ri->pos, MaxSummarySize);
 			return false;
 		}
 	}
 	if (mi != me)
 	{
-		std::cerr << "ERROR match missed in doc " << mi->docno << " at " << mi->pos << std::endl;
+		std::size_t docidx = getDocidx( docnomap, mi->docno);
+		std::string docid = collection.docar[ docidx].docid;
+		std::cerr << "ERROR match missed [eof] in doc " << docid << " docno (" << mi->docno << ") at " << mi->pos << std::endl;
 		std::cerr << "summary: " << std::endl;
-		std::cerr << collection.docSummary( mi->docno, mi->pos, 10);
+		std::cerr << collection.docSummary( getDocidx( docnomap, mi->docno), mi->pos, MaxSummarySize);
 		return false;
 	}
 	if (ri != re)
 	{
-		std::cerr << "ERROR unexpected match in doc " << ri->docno << " at " << ri->pos << std::endl;
+		std::size_t docidx = getDocidx( docnomap, ri->docno);
+		std::string docid = collection.docar[ docidx].docid;
+		std::cerr << "ERROR unexpected match [eof] in doc " << docid << " docno (" << ri->docno << ") at " << ri->pos << std::endl;
+		std::cerr << collection.docSummary( getDocidx( docnomap, ri->docno), ri->pos, MaxSummarySize);
 		return false;
 	}
 	return true;
 }
+
+/// \brief the assignement of document numbers is not transparent and the document numbers get not assigned
+///	in ascending order of insertion. We have to query the storage to get the document numbers assigned.
+static std::vector<strus::Index> getDocnoMap(
+		const strus::StorageClientInterface* storage,
+		const std::vector<RandomDoc>& docar)
+{
+	std::vector<strus::Index> rt;
+	rt.resize( docar.size(), 0);
+	std::size_t docidx=0;
+	for (; docidx<docar.size(); ++docidx)
+	{
+		strus::Index docno = storage->documentNumber( docar[ docidx].docid);
+		if (docno <= 0 || docno > (strus::Index)rt.size()) throw std::runtime_error( std::string( "unexpected document number for docid ") + docar[ docidx].docid);
+		if (rt[ docidx] != 0) throw std::runtime_error( std::string( "duplicated document number for docid ") + docar[ docidx].docid);
+		rt[ docidx] = docno;
+	}
+	return rt;
+}
+
 
 static unsigned int getUintValue( const char* arg)
 {
@@ -1019,7 +1174,18 @@ int main( int argc, const char* argv[])
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
 			transaction->commit();
-	
+
+			// Calculate the map that assigns document ids from the random collection to document numbers:
+			std::vector<strus::Index> docnomap = getDocnoMap( storage.get(), collection.docar); 
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "docid to docno map:";
+			std::vector<strus::Index>::const_iterator ni=docnomap.begin(), ne=docnomap.end();
+			for (; ni != ne; ++ni)
+			{
+				std::cout << " " << collection.docar[(ni-docnomap.begin())].docid << ":" << *ni;
+			}
+			std::cout << std::endl;
+#endif
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
 			std::auto_ptr<strus::QueryProcessorInterface> 
 				queryproc( strus::createQueryProcessor( g_errorhnd));
@@ -1050,6 +1216,9 @@ int main( int argc, const char* argv[])
 				double arglen = 0.0;
 				for (; qi != qe; ++qi)
 				{
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "execute query " << qi->tostring( collection) << std::endl;
+#endif
 					result_matches.push_back( std::vector<RandomQuery::Match>());
 					if (!qi->execute( result_matches.back(), storage.get(), queryproc.get(), collection))
 					{
@@ -1061,16 +1230,40 @@ int main( int argc, const char* argv[])
 				std::cerr << "evaluated " << nofQueries << " random query operations in " << doubleToString(duration) << " seconds" << std::endl;
 				arglen /= nofQueries;
 				std::cerr << "average query size = " << doubleToString( arglen) << std::endl;
-	
+
+				if (randomQueryAr.size() != result_matches.size())
+				{
+					std::cerr << "ERROR number of queries and results do not match" << std::endl;
+					return -1;
+				}
 				qi = randomQueryAr.begin(), qe = randomQueryAr.end();
-				std::vector<std::vector<RandomQuery::Match> >::const_iterator ri = result_matches.begin(), re = result_matches.end();
+				std::vector<std::vector<RandomQuery::Match> >::const_iterator
+					ri = result_matches.begin(), re = result_matches.end();
 				std::size_t rsum = 0;
 				std::size_t rcnt = 0;
 				for (; ri != re && qi != qe; ++qi,++ri)
 				{
 					arglen += qi->arg.size();
-					std::vector<RandomQuery::Match> expected_matches = qi->expectedMatches( collection);
-					if (!compareMatches( *ri, expected_matches, collection))
+					std::vector<RandomQuery::Match> expected_matches
+						= qi->expectedMatches( collection, docnomap);
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "query " << qi->tostring( collection) << std::endl;
+					std::vector<RandomQuery::Match>::const_iterator
+						xi = expected_matches.begin(),
+						xe = expected_matches.end();
+					for (; xi != xe; ++xi)
+					{
+						std::cout << "\texpected match docno " << xi->docno << " pos " << xi->pos << std::endl;
+					}
+					xi = ri->begin(), xe = ri->end();
+					for (; xi != xe; ++xi)
+					{
+						std::cout << "\tresult match docno " << xi->docno << " pos " << xi->pos << std::endl;
+					}
+#endif
+					// Compare the matches:
+					if (!compareMatches( *ri, expected_matches, collection, docnomap))
 					{
 						std::cerr << "ERROR random query operation failed: " << qi->tostring( collection) << std::endl;
 						return -1;

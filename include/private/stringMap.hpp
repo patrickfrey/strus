@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -30,6 +30,9 @@
 #define _STRUS_STRING_MAP_HPP_INCLUDED
 #include "private/internationalization.hpp"
 #include "private/localStructAllocator.hpp"
+#include "private/utils.hpp"
+#include "strus/private/crc32.hpp"
+#include <boost/unordered_map.hpp>
 #include <map>
 #include <list>
 #include <vector>
@@ -117,16 +120,28 @@ template <typename ValueType>
 class StringMap
 {
 private:
-	struct MapKeyCompare
+	struct MapKeyLess
 	{
 		bool operator()( char const *a, char const *b) const
 		{
 			return std::strcmp( a, b) < 0;
 		}
 	};
+	struct MapKeyEqual
+	{
+		bool operator()( char const *a, char const *b) const
+		{
+			return std::strcmp( a, b) == 0;
+		}
+	};
+	struct HashFunc{
+		int operator()( const char * str)const
+		{
+			return utils::Crc32::calc( str);
+		}
+	};
 
-	typedef LocalStructAllocator<std::pair<const char*,ValueType> > MapAllocator;
-	typedef std::map<const char*,ValueType, MapKeyCompare, MapAllocator> Map;
+	typedef boost::unordered_map<const char*,ValueType,HashFunc,MapKeyEqual> Map;
 
 public:
 	StringMap(){}
@@ -178,6 +193,21 @@ public:
 	void insert( const char* key, const ValueType& value)
 	{
 		operator[]( key) = value;
+	}
+
+	void erase( const char* key)
+	{
+		m_map.erase( key);
+	}
+
+	void erase( const std::string& key)
+	{
+		m_map.erase( key.c_str());
+	}
+
+	void erase( iterator keyitr)
+	{
+		m_map.erase( keyitr);
 	}
 
 	void clear()

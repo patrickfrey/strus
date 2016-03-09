@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -44,6 +44,8 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
 /// \brief Forward declaration
+class DocumentTermIteratorInterface;
+/// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
 class ValueIteratorInterface;
@@ -59,6 +61,8 @@ class StatisticsIteratorInterface;
 class StorageDumpInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
+/// \brief Forward declaration
+class MetaDataRestrictionInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
 
@@ -80,11 +84,30 @@ public:
 			const std::string& type,
 			const std::string& value) const=0;
 
+	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
+	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets.
+	/// \param[in] maxpos maximum position visited. 
+	/// \return the created iterator reference to be disposed with delete by the caller
+	/// \note This iterator use is mainly for browsing occurrencies fulfilling a condition without query involved
+	/// \remark The iterator does not take the alive status of the documents into account. You have to formulate a restriction expression that does not match deleted documents if you do not want deleted documents in your iterated set of postings.
+	/// \remark The iterator does not take the document length into account. It returns the set of postings with positions in the range [1..maxpos]. Read postings you get only when joining this set with another.
+	virtual PostingIteratorInterface*
+		createBrowsePostingIterator(
+			const MetaDataRestrictionInterface* restriction,
+			const Index& maxpos) const=0;
+
 	/// \brief Create a viewer to inspect the term stored values with the forward index of the storage
 	/// \param[in] type type name of the term to be inspected
 	/// \return the created viewer reference to be disposed with delete
 	virtual ForwardIteratorInterface*
 		createForwardIterator(
+			const std::string& type) const=0;
+
+	/// \brief Create an iterator on term occurrencies in documents (support for feature selection)
+	/// \param[in] type type name of the term
+	/// \return the created iterator reference to be disposed with delete by the caller
+	virtual DocumentTermIteratorInterface*
+		createDocumentTermIterator(
 			const std::string& type) const=0;
 
 	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see
@@ -139,7 +162,7 @@ public:
 		StatNofTermOccurrencies = 2		///< number of accumulated dfs (number of terms)
 	};
 
-	/// \brief Get one specified element of the documents statistics for a term type
+	/// \brief Get one specified element of the documents statistics for a term type on the local server node
 	/// \param[in] docno the local internal document number addressed (return value of documentNumber( const std::string&) const)
 	/// \param[in] stat the enumeration value of the statistics to get
 	/// \param[in] type the term type addressed
@@ -151,6 +174,10 @@ public:
 	/// \brief Create an interface to access items of document metadata
 	/// \return the interface to access document metadata to be disposed with delete by the caller
 	virtual MetaDataReaderInterface* createMetaDataReader() const=0;
+
+	/// \brief Create an object for restrictions on metadata
+	/// \return the created, uninitialized restriction object
+	virtual MetaDataRestrictionInterface* createMetaDataRestriction() const=0;
 
 	/// \brief Create an interface to access attributes attached to documents for representation
 	/// \return the interface to access document attributes to be disposed with delete by the caller
@@ -187,8 +214,9 @@ public:
 	virtual bool checkStorage( std::ostream& errorlog) const=0;
 
 	/// \brief Create a dump of the storage
+	/// \param[in] keyprefix prefix for keys to resrict the dump to
 	/// \return the object to fetch the dump from
-	virtual StorageDumpInterface* createDump() const=0;
+	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const=0;
 };
 
 }//namespace

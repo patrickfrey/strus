@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -102,7 +102,25 @@ void InvertedIndexMap::definePosinfoPosting(
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "document feature defined twice"));
+		// create exception message:
+		std::ostringstream posmsg;
+		std::vector<Index>::const_iterator pi = pos.begin(), pe = pos.end();
+		for (int pidx=0;pi != pe; ++pi,++pidx)
+		{
+			if (pidx) posmsg << ",";
+			posmsg << *pi;
+		}
+		std::size_t posidx = mi->second;
+		unsigned int fi=0,fe=m_posinfo[posidx++];
+		posmsg << " | ";
+		for (; fi != fe; ++fi)
+		{
+			if (!fi) posmsg << ",";
+			posmsg << m_posinfo[posidx+fi];
+		}
+		std::string posstr = posmsg.str();
+		// throw exception message:
+		throw strus::runtime_error( _TXT( "document feature defined twice [termtype=%u,termvalue=%u,docno=%u] %s"), termtype, termvalue, docno, posstr.c_str());
 	}
 
 	InvTermMap::const_iterator vi = m_invtermmap.find( docno);
@@ -112,7 +130,7 @@ void InvertedIndexMap::definePosinfoPosting(
 		if (m_invterms.size()) m_invterms.push_back( InvTerm());
 
 		m_invtermmap[ m_docno = docno] = m_invterms.size();
-		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size()));
+		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size(), pos.empty()?0:pos[0]));
 	}
 	else
 	{
@@ -120,7 +138,7 @@ void InvertedIndexMap::definePosinfoPosting(
 		{
 			throw strus::runtime_error( _TXT( "inverted index operations not grouped by document"));
 		}
-		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size()));
+		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size(), pos.empty()?0:pos[0]));
 	}
 }
 
@@ -209,7 +227,7 @@ void InvertedIndexMap::renameNewNumbers(
 		}
 	}
 	InvTermMap::iterator di = m_invtermmap.begin(), de = m_invtermmap.end();
-	for (; di != de; ++di)
+	while (di != de)
 	{
 		if (KeyMap::isUnknown( di->first))
 		{
@@ -220,6 +238,10 @@ void InvertedIndexMap::renameNewNumbers(
 			}
 			m_invtermmap[ ri->second] = di->second;
 			m_invtermmap.erase( di++);
+		}
+		else
+		{
+			++di;
 		}
 	}
 	// Rename df:
@@ -268,7 +290,7 @@ void InvertedIndexMap::getWriteBatch(
 		for (; li != le && li->typeno; ++li)
 		{
 			// inv blk:
-			invblk.append( li->typeno, li->termno, li->ff);
+			invblk.append( li->typeno, li->termno, li->ff, li->firstpos);
 			// df map:
 			m_dfmap.increment( li->typeno, li->termno);
 		}
@@ -316,7 +338,7 @@ void InvertedIndexMap::getWriteBatch(
 		BooleanBlockBatchWrite::insertNewElements( &dbadapter_doclist, di, de, newdocblk, lastInsertBlockId, transaction);
 	}
 
-	// [4] Get df writes (and populate df's to other peers, if statisticsBuilder defined):
+	// [4] Get df writes (and df changes to populate, if statisticsBuilder defined):
 	m_dfmap.getWriteBatch( transaction, statisticsBuilder, dfbatch, termTypeMapInv, termValueMapInv);
 
 	// [5] Clear the maps:
@@ -512,4 +534,27 @@ void InvertedIndexMap::mergePosBlock(
 	}
 }
 
+void InvertedIndexMap::print( std::ostream& out) const
+{
+	out << "[typeno,termno,docno] to positions map:" << std::endl;
+	Map::const_iterator mi = m_map.begin(), me = m_map.end();
+	for (;mi != me; ++mi)
+	{
+		Index termno = BlockKey(mi->first.termkey).elem(2);
+		Index docno = mi->first.docno;
+		Index typeno = BlockKey( mi->first.termkey).elem(1);
+		std::vector<PosinfoBlock::PositionType>::const_iterator pi = m_posinfo.begin() + mi->second;
+		std::size_t nofpos = *pi++;
+		std::vector<PosinfoBlock::PositionType>::const_iterator pe = pi + nofpos;
+		out << "[termno=" << termno;
+		out << ", typeno=" << typeno;
+		out << ", docno=" << docno << "] ";
+		for (int pidx=0; pi != pe; ++pi,++pidx)
+		{
+			if (pidx) out << ", ";
+			out << *pi;
+		}
+		out << std::endl;
+	}
+}
 

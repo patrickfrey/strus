@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -130,9 +130,59 @@ struct DatabaseAdapter_StringIndex
 	};
 };
 
+class DatabaseAdapter_IndexString
+{
+public:
+	class Reader
+	{
+	public:
+		Reader( char prefix_, const DatabaseClientInterface* database_)
+			:m_prefix(prefix_),m_database(database_){}
+	
+		bool defined()		{return m_prefix != 0;}
+
+		bool load( const Index& key, std::string& value) const;
+	
+	private:
+		char m_prefix;
+		const DatabaseClientInterface* m_database;
+	};
+
+	class Writer
+	{
+	public:
+		Writer( char prefix_, DatabaseClientInterface* database_)
+			:m_prefix(prefix_),m_database(database_){}
+
+		bool defined()		{return m_prefix != 0;}
+
+		void store( DatabaseTransactionInterface* transaction, const Index& key, const char* value);
+		void remove( DatabaseTransactionInterface* transaction, const Index& key);
+		void storeImm( const Index& key, const std::string& value);
+	
+	private:
+		char m_prefix;
+		DatabaseClientInterface* m_database;
+	};
+
+	class ReadWriter
+		:public Reader
+		,public Writer
+	{
+	public:
+		ReadWriter( char prefix_, DatabaseClientInterface* database_)
+			:Reader(prefix_,database_)
+			,Writer(prefix_,database_){}
+
+		bool defined()		{return Reader::defined();}
+	};
+};
+
+
 template <char KeyPrefix>
 struct DatabaseAdapter_TypedStringIndex
 {
+public:
 	class Cursor
 		:public DatabaseAdapter_StringIndex::Cursor
 	{
@@ -153,6 +203,34 @@ struct DatabaseAdapter_TypedStringIndex
 	public:
 		Writer( DatabaseClientInterface* database_)
 			:DatabaseAdapter_StringIndex::Writer( KeyPrefix, database_){}
+	};
+	class ReadWriter
+		:public Reader
+		,public Writer
+	{
+	public:
+		ReadWriter( DatabaseClientInterface* database_)
+			:Reader( database_),Writer( database_){}
+	};
+};
+
+template <char KeyPrefix>
+struct DatabaseAdapter_TypedIndexString
+{
+public:
+	class Reader
+		:public DatabaseAdapter_IndexString::Reader
+	{
+	public:
+		Reader( const DatabaseClientInterface* database_)
+			:DatabaseAdapter_IndexString::Reader( KeyPrefix, database_){}
+	};
+	class Writer
+		:public DatabaseAdapter_IndexString::Writer
+	{
+	public:
+		Writer( DatabaseClientInterface* database_)
+			:DatabaseAdapter_IndexString::Writer( KeyPrefix, database_){}
 	};
 	class ReadWriter
 		:public Reader
@@ -431,6 +509,14 @@ struct DatabaseAdapter_InverseTerm
 			:Reader(database_)
 			,Writer(database_){}
 	};
+
+	class Cursor
+		:public Parent::Cursor
+	{
+	public:
+		Cursor( const DatabaseClientInterface* database_)
+			:Parent::Cursor( database_, BlockKey()){}
+	};
 };
 
 
@@ -628,6 +714,16 @@ public:
 private:
 	enum {KeyPrefix=DatabaseKey::DocAttributePrefix};
 };
+
+
+class DatabaseAdapter_TermTypeInv
+	:public DatabaseAdapter_TypedIndexString<DatabaseKey::TermTypeInvPrefix>
+{};
+
+class DatabaseAdapter_TermValueInv
+	:public DatabaseAdapter_TypedIndexString<DatabaseKey::TermValueInvPrefix>
+{};
+
 
 class DatabaseAdapter_DocFrequency
 {

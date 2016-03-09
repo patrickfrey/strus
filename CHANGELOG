@@ -1,3 +1,39 @@
+strus (0.5.2)
+  * More fixes for bringing up packages again
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 7 Mar 2016 19:00:00 +0100
+
+strus (0.5.1)
+  * Small fixes for bringing up packages again
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 7 Mar 2016 18:00:00 +0100
+
+strus (0.5.0)
+  * add upperbound seek with upper key restriction to database interface (not used yet in storage)
+  * change return value of document term iterator skipDoc from boolean to document number
+  * more helpers for posting iterator implementations (just a start) and reorganize code in posting join operator iterators (eliminate copy paste code)
+  * changed logarithm base in weighting from e to 10, fixed summarizer metadata
+  * fixed metadata summarizer: could not extract first metadata element
+  * rewrote posting set join of the 'contains', 'sequence' and 'within' operators
+  * fixed bug in 'randoc' test: cases for within were not correctly generated in case of position conflicts in strict case
+  * implemented browse posting iterator with metadata restriction for browsing documents matching a boolean condition without query evaluation involved
+  * changed query interface: result is now a structure containing also some statistical information like the number of matching documents and not only a vector of ranks
+  * use unordered_map instead of compact node trie for keymaps. They are about 30% slower, but the problem with memory limits and an overflow map, that eats up any performance gain, does not appear (much better)
+  * do not read keymaps during insertion (performance gain in bulk insert of factors)
+  * added new weighting function BM25pff (BM25 with proximity based ff) 
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 6 Mar 2016 19:00:00 +0100
+
+strus (0.4.3)
+  * changed return value of weighting function from float to double
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 9 Feb 2016 11:00:00 +0100
+
+strus (0.4.2)
+  * fix build errors
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 17 Jan 2016 12:00:00 +0100
+
+strus (0.4.1)
+  * change default forward index block size from 1024 to 128 terms
+  * fix typos in src license reference
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 17 Jan 2016 12:00:00 +0100
+
 strus (0.4.0)
   * changed posting iterator interface: new method skipDocCandidate that does what skipDoc was doing before and method skipDoc that always delivers a real match and not only a candidate, removed obsolete method subExpressions
  -- Patrick Frey <patrickpfrey@yahoo.com>  Sat, 2 Jan 2016 17:00:00 +0100

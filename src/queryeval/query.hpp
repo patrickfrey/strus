@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -32,7 +32,7 @@
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
-#include "metaDataRestriction.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -64,9 +64,6 @@ public:
 			const StorageClientInterface* storage_,
 			ErrorBufferInterface* errorhnd_);
 
-	///\brief Copy constructor
-	Query( const Query& o);
-
 	virtual ~Query(){}
 
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
@@ -77,9 +74,9 @@ public:
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, float weight_=1.0);
 
-	virtual void defineMetaDataRestriction(
-			CompareOperator opr, const std::string& name,
-			const ArithmeticVariant& operand, bool newGroup=true);
+	virtual void addMetaDataRestrictionCondition(
+			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
+			const ArithmeticVariant& operand, bool newGroup);
 
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_);
@@ -95,7 +92,7 @@ public:
 	virtual void defineGlobalStatistics(
 			const GlobalStatistics& stats_);
 
-	virtual std::vector<ResultDocument> evaluate();
+	virtual QueryResult evaluate();
 
 public:
 	typedef int NodeAddress;
@@ -214,11 +211,11 @@ private:
 	const QueryEval* m_queryEval;
 	const StorageClientInterface* m_storage;
 	Reference<MetaDataReaderInterface> m_metaDataReader;
+	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;
 	std::vector<Term> m_terms;
 	std::vector<Expression> m_expressions;
 	std::vector<Feature> m_features;
 	std::vector<NodeAddress> m_stack;
-	std::vector<MetaDataRestriction> m_metaDataRestrictions;
 	std::multimap<NodeAddress,std::string> m_variableAssignments;
 	std::size_t m_nofRanks;
 	std::size_t m_minRank;

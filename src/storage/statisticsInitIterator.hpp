@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterator on statistics of the storage for other peers in a registration/deregistration phase
+/// \brief Implementation of the iterator on statistics of the storage to populate in a registration/deregistration phase
 /// \file statisticsInitIterator.hpp
 #ifndef _STRUS_STATISTICS_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_STATISTICS_INIT_ITERATOR_IMPLEMENTATION_HPP_INCLUDED
@@ -47,7 +47,7 @@ class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class StatisticsBuilderInterface;
 
-/// \brief Implementation of the iterator on statistics of the storage for other peers in a registration/deregistration phase
+/// \brief Implementation of the iterator on statistics of the storage to populate in a registration/deregistration phase
 class StatisticsInitIterator
 	:public StatisticsIteratorInterface
 {
@@ -68,9 +68,9 @@ private:
 	StorageClientInterface* m_storage;				///< storage related
 	DatabaseClientInterface* m_database;				///< database related
 	const StatisticsProcessorInterface* m_proc;			///< interface for processing messages (packing,unpacking)
-	Reference<StatisticsBuilderInterface> m_statisticsBuilder;	///< peer message builder
+	Reference<StatisticsBuilderInterface> m_statisticsBuilder;	///< statistics message builder
 	ErrorBufferInterface* m_errorhnd;				///< error buffer for exception free interface
-};
+}; 
 
 }//namespace
 #endif

@@ -355,7 +355,7 @@ int main( int argc, const char* argv[])
 		if (collection.termar.size() != termar.size())
 		{
 			std::cerr << "COLLECTION SIZE " << collection.termar.size() << " MESSAGE ITEMS " << termar.size() << std::endl;
-			throw std::runtime_error( "peer message number of messages does not match");
+			throw std::runtime_error( "statistics message number of messages does not match");
 		}
 		std::vector<Term>::const_iterator oi = collection.termar.begin(), oe = collection.termar.end();
 		ti = termar.begin(), te = termar.end();
@@ -365,17 +365,17 @@ int main( int argc, const char* argv[])
 			if (oi->type != ti->type)
 			{
 				std::cerr << "[" << tidx << "] TYPE '" << ti->type << "' != '" << oi->type << "'" << std::endl;
-				throw std::runtime_error( "peer message item type does not match");
+				throw std::runtime_error( "statistics message item type does not match");
 			}
 			if (oi->value != ti->value)
 			{
 				std::cerr << "[" << tidx << "] VALUE '" << ti->value << "' != '" << oi->value << "'" << std::endl;
-				throw std::runtime_error( "peer message item value does not match");
+				throw std::runtime_error( "statistics message item value does not match");
 			}
 			if (oi->diff != ti->diff)
 			{
 				std::cerr << "[" << tidx << "] DIFF '" << ti->diff << "' != '" << oi->diff << "'" << std::endl;
-				throw std::runtime_error( "peer message item diff does not match");
+				throw std::runtime_error( "statistics message item diff does not match");
 			}
 		}
 		if (g_errorhnd->hasError())

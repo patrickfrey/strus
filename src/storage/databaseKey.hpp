@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -46,10 +46,12 @@ public:
 		VariablePrefix='V',	///< [variable string]         ->  [index]
 		AttributeKeyPrefix='A',	///< [attribute string]        ->  [index]
 		UserNamePrefix='U',	///< [name string]             ->  [userno]
+		TermTypeInvPrefix='K',	///< [typeno]                  ->  [type string]
+		TermValueInvPrefix='N',	///< [valueno]                 ->  [term string]
 
 		ForwardIndexPrefix='r',	///< [typeno,docno,position]   ->  [string]*
 		PosinfoBlockPrefix='p',	///< [typeno,termno,docno]     ->  [pos]*
-		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff]*
+		InverseTermPrefix='i',	///< [docno]                   ->  [typeno,termno,ff,firstpos]*
 
 		UserAclBlockPrefix='u',	///< [userno,docno]            ->  [bit]*
 		AclBlockPrefix='w',	///< [docno,userno]            ->  [bit]*
@@ -71,6 +73,8 @@ public:
 			case VariablePrefix: return "global variable";
 			case AttributeKeyPrefix: return "document attribute name";
 			case UserNamePrefix: return "user id";
+			case TermTypeInvPrefix: return "term type inv";
+			case TermValueInvPrefix: return "term value inv";
 
 			case ForwardIndexPrefix: return "forward index";
 			case PosinfoBlockPrefix: return "posinfo posting block";

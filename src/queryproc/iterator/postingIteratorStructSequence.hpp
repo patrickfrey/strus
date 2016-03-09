@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -31,6 +31,7 @@
 #include "postingIteratorJoin.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "private/internationalization.hpp"
+#include "docnoAllMatchItr.hpp"
 
 namespace strus
 {
@@ -76,10 +77,14 @@ public:
 	}
 
 private:
+	Index positionCut( const Index& minpos, const Index& maxpos);
+
+private:
 	Index m_docno;							///< current document number
 	Index m_docno_cut;						///< next document number after m_docno that contains a cut element
 	Index m_posno;							///< current position
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
+	DocnoAllMatchItr m_docnoAllMatchItr;				///< document all match joiner
 	Reference<PostingIteratorInterface> m_cut;			///< the set of elements then must not appear inside the group
 	bool m_with_cut;						///< true, if a cut variable is used
 	unsigned char m_strict_incr;					///< 1, if strict ascending sequence, 0 if not

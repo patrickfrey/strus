@@ -1,3 +1,31 @@
+/*
+---------------------------------------------------------------------
+    The C++ library strus implements basic operations to build
+    a search engine for structured search on unstructured data.
+
+    Copyright (C) 2015 Patrick Frey
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public
+    License as published by the Free Software Foundation; either
+    version 3 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+--------------------------------------------------------------------
+
+	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
+	For documentation see 'http://patrickfrey.github.com/strus'
+
+--------------------------------------------------------------------
+*/
 #include "accumulator.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
@@ -87,13 +115,6 @@ bool Accumulator::nextRank(
 		}
 		m_visited.set( m_docno-1);
 
-		// Check meta data restrictions:
-		m_metadata->skipDoc( m_docno);
-		if (!matchesMetaDataRestriction( m_metaDataRestrictionSets, m_metadata))
-		{
-			continue;
-		}
-
 		// Check if any ACL restriction (alternatives combined with OR):
 		if (m_aclRestrictions.size())
 		{
@@ -131,6 +152,13 @@ bool Accumulator::nextRank(
 				}
 			}
 		}
+		++m_nofDocumentsVisited;
+
+		// Check meta data restrictions:
+		if (m_metaDataRestriction.get() && !m_metaDataRestriction->match(m_docno))
+		{
+			continue;
+		}
 
 		// Check feature restrictions:
 		std::vector<SelectorPostings>::const_iterator
@@ -149,6 +177,7 @@ bool Accumulator::nextRank(
 		docno = m_docno;
 		selectorState = m_selectorPostings[ m_selectoridx].setindex;
 		weight = 0.0;
+		++m_nofDocumentsRanked;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "Checking document " << m_docno << std::endl;
@@ -161,7 +190,7 @@ bool Accumulator::nextRank(
 			float weight_result = ai->executionContext->call( m_docno) * ai->weight;
 			weight += weight_result * ai->weight;
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
+			std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
 #endif
 		}
 		return true;

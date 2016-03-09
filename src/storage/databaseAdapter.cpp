@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -121,6 +121,31 @@ void DatabaseAdapter_StringIndex::Writer::storeImm( const std::string& key, cons
 	packIndex( valuestr, value);
 	m_database->writeImm( keystr.c_str(), keystr.size(), valuestr.c_str(), valuestr.size());
 }
+
+bool DatabaseAdapter_IndexString::Reader::load( const Index& key, std::string& value) const
+{
+	DatabaseKey dbkey( m_prefix, key);
+	return m_database->readValue( dbkey.ptr(), dbkey.size(), value, DatabaseOptions().useCache());
+}
+
+void DatabaseAdapter_IndexString::Writer::store( DatabaseTransactionInterface* transaction, const Index& key, const char* value)
+{
+	DatabaseKey dbkey( m_prefix, key);
+	return transaction->write( dbkey.ptr(), dbkey.size(), value, std::strlen(value));
+}
+
+void DatabaseAdapter_IndexString::Writer::storeImm( const Index& key, const std::string& value)
+{
+	DatabaseKey dbkey( m_prefix, key);
+	m_database->writeImm( dbkey.ptr(), dbkey.size(), value.c_str(), value.size());
+}
+
+void DatabaseAdapter_IndexString::Writer::remove( DatabaseTransactionInterface* transaction, const Index& key)
+{
+	DatabaseKey dbkey( m_prefix, key);
+	return transaction->remove( dbkey.ptr(), dbkey.size());
+}
+
 
 bool DatabaseAdapter_DataBlock::Reader::load( const Index& elemno, DataBlock& blk)
 {

@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-/// \brief Implementation of the iterator on peer messages of the storage initialization for other peers
+/// \brief Implementation of the iterator statistics messages of the storage initialization to populate
 /// \file statisticsInitIterator.cpp
 #include "statisticsInitIterator.hpp"
 #include "strus/storageClientInterface.hpp"
@@ -104,7 +104,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 		{
 			std::map<Index,std::size_t>::const_iterator ti;
 			ti = typenomap.find( typeno);
-			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type when populating df's"));
+			if (ti == typenomap.end()) throw strus::runtime_error( _TXT( "encountered undefined type (no %d) when populating df's"), (int)typeno);
 			const char* typenam = strings.c_str() + ti->second;
 	
 			ti = termnomap.find( termno);

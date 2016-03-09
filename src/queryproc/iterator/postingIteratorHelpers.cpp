@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -31,149 +31,93 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/bitOperations.hpp"
+#include <vector>
 #include <sstream>
-#include <iostream>
+#include <cstring>
+#include <algorithm>
 
 using namespace strus;
-
-Index strus::getFirstAllMatchDocno(
-		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno,
-		bool allowEmpty)
-{
-	if (args.empty()) return 0;
-	
-	Index docno_iter = docno;
-	std::vector<Reference< PostingIteratorInterface> >::iterator
-		ae = args.end();
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin();
-
-		docno_iter = (*ai)->skipDocCandidate( docno_iter);
-		if (docno_iter == 0)
-		{
-			return 0;
-		}
-		for (++ai; ai != ae; ++ai)
-		{
-			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
-			if (docno_next == 0)
-			{
-				return 0;
-			}
-			if (docno_next != docno_iter)
-			{
-				docno_iter = docno_next;
-				break;
-			}
-		}
-		if (ai == ae)
-		{
-			if (!allowEmpty)
-			{
-				ai = args.begin();
-				for (; ai != ae; ++ai)
-				{
-					if (docno_iter != (*ai)->skipDoc( docno_iter))
-					{
-						++docno_iter;
-						continue;
-					}
-				}
-			}
-			return docno_iter;
-		}
-	}
-}
-
-Index strus::getFirstAllMatchDocnoSubset(
-		std::vector<Reference< PostingIteratorInterface> >& args,
-		Index docno,
-		bool allowEmpty,
-		std::size_t cardinality)
-{
-	if (args.empty()) return 0;
-	if (args.size() > 64) throw std::runtime_error("number of arguments for getFirstAllMatchDocnoSubset out of range");
-
-	Index docno_iter = docno;
-	for (;;)
-	{
-		std::vector<Reference< PostingIteratorInterface> >::iterator
-			ai = args.begin(), ae = args.end();
-
-		std::size_t nof_matches = 0;
-		Index match_docno = 0;
-		uint64_t candidate_set = 0;
-
-		for (unsigned int aidx = 0; ai != ae; ++ai,++aidx)
-		{
-			Index docno_next = (*ai)->skipDocCandidate( docno_iter);
-			if (docno_next)
-			{
-				if (match_docno)
-				{
-					if (match_docno == docno_next)
-					{
-						candidate_set |= (uint64_t)1<<(aidx);
-						++nof_matches;
-					}
-					else if (match_docno > docno_next)
-					{
-						candidate_set = (uint64_t)1<<(aidx);
-						match_docno = docno_next;
-						nof_matches = 1;
-					}
-				}
-				else
-				{
-					candidate_set = (uint64_t)1<<(aidx);
-					match_docno = docno_next;
-					nof_matches = 1;
-				}
-			}
-		}
-		if (nof_matches >= cardinality)
-		{
-			if (!allowEmpty)
-			{
-				unsigned int aidx = BitOperations::bitScanForward( candidate_set);
-				while (aidx)
-				{
-					if (match_docno != (*ai)->skipDoc( match_docno))
-					{
-						--nof_matches;
-						if (nof_matches < cardinality) break;
-					}
-					candidate_set -= (uint64_t)1<<(aidx-1);
-					aidx = BitOperations::bitScanForward( candidate_set);
-				}
-				if (nof_matches < cardinality)
-				{
-					docno_iter = match_docno+1;
-					continue;
-				}
-			}
-			return match_docno;
-		}
-		else if (match_docno)
-		{
-			docno_iter = match_docno+1;
-		}
-		else
-		{
-			break;
-		}
-	}
-	return 0;
-}
 
 void strus::encodeInteger( std::string& buf, int val)
 {
 	std::ostringstream num;
 	num << val;
 	buf.append( num.str());
+}
+
+struct IteratorDf
+{
+	Index argidx;
+	Index df;
+
+	IteratorDf( const Index& argidx_, const Index& df_)
+		:argidx(argidx_),df(df_){}
+	IteratorDf( const IteratorDf& o)
+		:argidx(o.argidx),df(o.df){}
+
+	bool operator<( const IteratorDf& o) const
+	{
+		if (df == o.df) return argidx < o.argidx;
+		return df > o.df;
+	}
+};
+
+std::vector<PostingIteratorReference>
+	strus::orderByDocumentFrequency(
+		std::vector<PostingIteratorReference>::const_iterator ai,
+		const std::vector<PostingIteratorReference>::const_iterator& ae)
+{
+	std::vector<IteratorDf> dfar;
+	std::vector<PostingIteratorReference>::const_iterator start = ai;
+	for (Index aidx=0; ai != ae; ++ai,++aidx)
+	{
+		dfar.push_back( IteratorDf( aidx, (*ai)->documentFrequency()));
+	}
+	std::sort( dfar.begin(), dfar.end());
+
+	std::vector<Reference< PostingIteratorInterface> > rt;
+	rt.reserve( dfar.size());
+	std::vector<IteratorDf>::const_iterator di = dfar.begin(), de = dfar.end();
+	for (; di != de; ++di)
+	{
+		rt.push_back( *(start + di->argidx));
+	}
+	return rt;
+}
+
+Index strus::minDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
+{
+	std::vector<PostingIteratorReference>::const_iterator
+		ai = ar.begin(), ae = ar.end();
+	if (ai == ae) return 0;
+
+	Index rt = (*ai)->documentFrequency();
+	for (++ai; ai != ae; ++ai)
+	{
+		Index df = (*ai)->documentFrequency();
+		if (df < rt)
+		{
+			rt = df;
+		}
+	}
+	return rt;
+}
+
+Index strus::maxDocumentFrequency( const std::vector<PostingIteratorReference>& ar)
+{
+	std::vector<PostingIteratorReference>::const_iterator
+		ai = ar.begin(), ae = ar.end();
+	if (ai == ae) return 0;
+
+	Index rt = (*ai)->documentFrequency();
+	for (++ai; ai != ae; ++ai)
+	{
+		Index df = (*ai)->documentFrequency();
+		if (df > rt)
+		{
+			rt = df;
+		}
+	}
+	return rt;
 }
 

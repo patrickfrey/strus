@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -34,8 +34,9 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/arithmeticVariant.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
+#include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "private/utils.hpp"
-#include "metaDataRestriction.hpp"
 #include <vector>
 #include <list>
 #include <limits>
@@ -49,8 +50,6 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class PostingIteratorInterface;
 /// \brief Forward declaration
-class MetaDataReaderInterface;
-/// \brief Forward declaration
 class WeightingFunctionInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
@@ -59,6 +58,7 @@ class InvAclIteratorInterface;
 
 /// \class Accumulator
 /// \brief Accumulator for weights of matches
+/// \remark This class represents an object that should be used only one time, for one ranklist calculation. It keeps its state.
 class Accumulator
 {
 public:
@@ -66,17 +66,19 @@ public:
 	Accumulator(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata_,
-			const std::vector<MetaDataRestriction>& metaDataRestrictionSets_,
+			MetaDataRestrictionInterface* metaDataRestriction_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
 		,m_metadata(metadata_)
-		,m_metaDataRestrictionSets(metaDataRestrictionSets_)
+		,m_metaDataRestriction(metaDataRestriction_?metaDataRestriction_->createInstance():0)
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
 		,m_maxNofRanks(maxNofRanks_)
 		,m_maxDocumentNumber(maxDocumentNumber_)
+		,m_nofDocumentsRanked(0)
+		,m_nofDocumentsVisited(0)
 		,m_evaluationSetIterator(0)
 	{}
 
@@ -98,6 +100,9 @@ public:
 	void addAlternativeAclRestriction( InvAclIteratorInterface* iterator);
 
 	bool nextRank( Index& docno, unsigned int& selectorState, float& weight);
+
+	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
+	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}
 
 private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
@@ -130,7 +135,7 @@ private:
 
 	const StorageClientInterface* m_storage;
 	MetaDataReaderInterface* m_metadata;
-	std::vector<MetaDataRestriction> m_metaDataRestrictionSets;
+	Reference<MetaDataRestrictionInstanceInterface> m_metaDataRestriction;
 	std::vector<WeightingFeature> m_weightingFeatures;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;
@@ -140,6 +145,8 @@ private:
 	utils::DynamicBitset m_visited;
 	std::size_t m_maxNofRanks;
 	Index m_maxDocumentNumber;
+	unsigned int m_nofDocumentsRanked;
+	unsigned int m_nofDocumentsVisited;
 	PostingIteratorInterface* m_evaluationSetIterator;
 };
 

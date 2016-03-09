@@ -14,6 +14,8 @@ set(source_files
 	postingIteratorStructSequence.cpp
 	postingIteratorHelpers.cpp
 	postingIteratorContains.cpp
+	docnoMatchPrioQueue.cpp
+	docnoAllMatchItr.cpp
 )
 
 include_directories(

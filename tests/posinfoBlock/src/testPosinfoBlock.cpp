@@ -69,11 +69,6 @@ static void testDataBlockBuild( unsigned int times)
 		{
 			dblk.append( str.c_str(), RANDINT(1,125));
 		}
-		const char* bb = (const char*)::memrchr( dblk.charptr(), 'a', dblk.size());
-		if (bb == dblk.charptr())
-		{
-			std::cerr << "HALLY GALLY" << std::endl;
-		}
 	}
 	std::cerr << "tested data block building " << times << " times with success" << std::endl;
 }

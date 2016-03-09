@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -43,14 +43,17 @@ class PostingIteratorInterface
 public:
 	virtual ~PostingIteratorInterface(){}
 
-	/// \brief Return the next document match with a document number higher than or equal to docno
+	/// \brief Return the next document match with a document number higher than or equal to a given document number
+	/// \param[in] docno the minimum document number to fetch
 	virtual Index skipDoc( const Index& docno)=0;
 
-	/// \brief Return a candidate with a document number higher than or equal to docno without guarantee, that the document has matching positions
+	/// \brief Return a candidate with a document number higher than or equal to a given document number without guarantee, that the document has matching positions
 	/// \note Used for optimizing complex join operations that would first like to make a join on the document sets, before looking at the positions
+	/// \param[in] docno the minimum document number to fetch
 	virtual Index skipDocCandidate( const Index& docno)=0;
 
 	/// \brief Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last 'skipDoc( const Index&)' call.
+	/// \param[in] firstpos the minimum position to fetch
 	virtual Index skipPos( const Index& firstpos)=0;
 
 	/// \brief Unique id in the system for a feature expression used for debugging and tracing

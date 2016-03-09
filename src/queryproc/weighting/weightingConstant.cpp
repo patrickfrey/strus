@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -57,7 +57,7 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' weighting function: %s"), "constant", *m_errorhnd);
 }
 
-float WeightingFunctionContextConstant::call( const Index& docno)
+double WeightingFunctionContextConstant::call( const Index& docno)
 {
 	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
@@ -143,7 +143,7 @@ WeightingFunctionInterface::Description WeightingFunctionConstant::getDescriptio
 	try
 	{
 		Description rt(_TXT("Calculate the weight of a document as sum of the the feature weights multiplied with their feature frequency"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "BM25", *m_errorhnd, WeightingFunctionInterface::Description());

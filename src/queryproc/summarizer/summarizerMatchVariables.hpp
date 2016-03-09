@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -63,14 +63,10 @@ public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] type_ type of the forward index tokens to build the summary with
-	/// \param[in] delimiter_ delimiter to print between multiple output elements
-	/// \param[in] assing_ assingment operator to use for output
 	SummarizerFunctionContextMatchVariables(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
-			const std::string& delimiter_,
-			const std::string& assign_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMatchVariables(){}
@@ -102,8 +98,6 @@ private:
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_type;
-	std::string m_delimiter;
-	std::string m_assign;
 	std::vector<SummarizationFeature> m_features;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -114,7 +108,7 @@ class SummarizerFunctionInstanceMatchVariables
 {
 public:
 	SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_delimiter(","),m_assign("="),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
@@ -130,8 +124,6 @@ public:
 
 private:
 	std::string m_type;
-	std::string m_delimiter;
-	std::string m_assign;
 	const QueryProcessorInterface* m_processor;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

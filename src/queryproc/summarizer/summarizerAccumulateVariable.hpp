@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -63,13 +63,16 @@ public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] type_ type of the forward index tokens to build the summary with
-	/// \param[in] delimiter_ delimiter to print between multiple output elements
-	/// \param[in] assing_ assingment operator to use for output
+	/// \param[in] var_ variable to extract
+	/// \param[in] norm_ weight normalization factor
+	/// \param[in] maxNofElements_ number of best matches to inspect
+	/// \param[in] errorhnd_ error buffer
 	SummarizerFunctionContextAccumulateVariable(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
 			const std::string& var_,
+			double norm_,
 			unsigned int maxNofElements_,
 			ErrorBufferInterface* errorhnd_);
 
@@ -98,13 +101,14 @@ private:
 	};
 
 private:
-	const StorageClientInterface* m_storage;
-	const QueryProcessorInterface* m_processor;
-	Reference<ForwardIteratorInterface> m_forwardindex;
-	std::string m_type;
-	std::string m_var;
-	unsigned int m_maxNofElements;
-	std::vector<SummarizationFeature> m_features;
+	const StorageClientInterface* m_storage;			///< storage interface
+	const QueryProcessorInterface* m_processor;			///< query processor
+	Reference<ForwardIteratorInterface> m_forwardindex;		///< forward index interface
+	std::string m_type;						///< forward index type for extraction of result elements
+	std::string m_var;						///< name of variable to accumulate
+	double m_norm;							///< normalization factor for end result weights
+	unsigned int m_maxNofElements;					///< maximum number of best elements to return
+	std::vector<SummarizationFeature> m_features;			///< features used for summarization
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -114,7 +118,7 @@ class SummarizerFunctionInstanceAccumulateVariable
 {
 public:
 	SummarizerFunctionInstanceAccumulateVariable( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_var(),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_var(),m_norm(1.0),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAccumulateVariable(){}
 
@@ -129,11 +133,12 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_type;
-	std::string m_var;
-	unsigned int m_maxNofElements;
-	const QueryProcessorInterface* m_processor;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	std::string m_type;				///< forward index type to extract
+	std::string m_var;				///< variable name to extract for accumulation
+	double m_norm;					///< normalization factor
+	unsigned int m_maxNofElements;			///< number of best matches to inspect
+	const QueryProcessorInterface* m_processor;	///< query processor
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 

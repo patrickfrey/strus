@@ -1,8 +1,3 @@
-GLOSSARY
-
-definePhraseType mit parameter mit zusätzlichen tokenizern, welche auch in die posinfo berechnung eingezogen werden
-"Herr K.Müller" > herr,1 k,2 muller,4 (statt 3!)  word/punct,brackets 
-
-* join operator for subsequence that matches the longest subsequence (summarizer for information ectraction in Wikipedia search)
-
+Write storage conversion to change endianess of an index. Write a storage conversion utility
+Define an interface to declare a limit of query execution to prevent DoS attacks (counter of micro ops in the query evaluation)
 

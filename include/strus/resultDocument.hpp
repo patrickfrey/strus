@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -32,9 +32,8 @@
 #define _STRUS_RESULT_DOCUMENT_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/weightedDocument.hpp"
+#include "strus/summaryElement.hpp"
 #include <vector>
-#include <string>
-#include <utility>
 
 namespace strus {
 
@@ -44,52 +43,26 @@ class ResultDocument
 	:public WeightedDocument
 {
 public:
-	/// \class Attribute
-	/// \brief Structure defining an attribute of a result
-	class Attribute
-	{
-	public:
-		Attribute( const std::string& name_, const std::string& value_, float weight_)
-			:m_name(name_),m_value(value_),m_weight(weight_){}
-		Attribute( const Attribute& o)
-			:m_name(o.m_name),m_value(o.m_value),m_weight(o.m_weight){}
-
-		const std::string& name() const			{return m_name;}
-		const std::string& value() const		{return m_value;}
-		float weight() const				{return m_weight;}
-
-	private:
-		std::string m_name;
-		std::string m_value;
-		float m_weight;
-	};
-
 	/// \brief Default constructor
 	ResultDocument(){}
 	/// \brief Copy constructor
 	ResultDocument( const ResultDocument& o)
-		:WeightedDocument(o),m_attributes(o.m_attributes){}
-	/// \brief Constructor from a composition of the pure query evaluation result with attributes coming from summarization
-	ResultDocument( const WeightedDocument& o, const std::vector<Attribute>& a)
-		:WeightedDocument(o),m_attributes(a){}
-	/// \brief Constructor from a composition of the pure query evaluation result without attributes
+		:WeightedDocument(o),m_summaryElements(o.m_summaryElements){}
+	/// \brief Constructor from a composition of the pure query evaluation result and the summary elements
+	ResultDocument( const WeightedDocument& o, const std::vector<SummaryElement>& summaryElements_)
+		:WeightedDocument(o),m_summaryElements(summaryElements_){}
+	/// \brief Constructor from a composition of the pure query evaluation result without summary elements
 	ResultDocument( const WeightedDocument& o)
 		:WeightedDocument(o){}
 	/// \brief Constructor from a composition its basic parts
-	ResultDocument( const Index& docno_, float weight_, const std::vector<Attribute>& attributes_)
-		:WeightedDocument(docno_,weight_),m_attributes(attributes_){}
+	ResultDocument( const Index& docno_, float weight_, const std::vector<SummaryElement>& summaryElements_)
+		:WeightedDocument(docno_,weight_),m_summaryElements(summaryElements_){}
 
-	/// \brief Add an attribute
-	void addAttribute( const std::string& name_, const std::string& value_, float weight_)
-	{
-		m_attributes.push_back( Attribute( name_, value_, weight_));
-	}
-
-	/// \brief Get the list of attributes of this result element
-	const std::vector<Attribute>& attributes() const	{return m_attributes;}
+	/// \brief Get the list of summary elements of this result
+	const std::vector<SummaryElement>& summaryElements() const	{return m_summaryElements;}
 
 private:
-	std::vector<Attribute> m_attributes;	///< attributes of this result element
+	std::vector<SummaryElement> m_summaryElements;	///< summary elements of this result
 };
 
 }//namespace

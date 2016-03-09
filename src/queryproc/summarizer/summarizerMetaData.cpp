@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -40,9 +40,15 @@ using namespace strus;
 SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
 		MetaDataReaderInterface* metadata_, const std::string& name_, ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
+	,m_name(name_)
 	,m_attrib(metadata_->elementHandle( name_.c_str()))
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (m_attrib < 0)
+	{
+		throw strus::runtime_error(_TXT("unknown metadata element name '%s' passed to summarizer '%s'"), m_name.c_str(), "metadata");
+	}
+}
 
 void SummarizerFunctionContextMetaData::addSummarizationFeature(
 		const std::string&,
@@ -54,21 +60,21 @@ void SummarizerFunctionContextMetaData::addSummarizationFeature(
 	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
 }
 
-std::vector<SummarizerFunctionContextInterface::SummaryElement>
+std::vector<SummaryElement>
 	SummarizerFunctionContextMetaData::getSummary( const Index& docno)
 {
 	try
 	{
-		std::vector<SummarizerFunctionContextInterface::SummaryElement> rt;
+		std::vector<SummaryElement> rt;
 		m_metadata->skipDoc( docno);
 		ArithmeticVariant value = m_metadata->getValue( m_attrib);
 		if (value.defined()) 
 		{
-			rt.push_back( SummarizerFunctionContextInterface::SummaryElement( value.tostring().c_str(), 1.0));
+			rt.push_back( SummaryElement( m_name, value.tostring().c_str(), 1.0));
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "metadata", *m_errorhnd, std::vector<SummarizerFunctionContextInterface::SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "metadata", *m_errorhnd, std::vector<SummaryElement>());
 }
 
 
@@ -141,7 +147,7 @@ SummarizerFunctionInterface::Description SummarizerFunctionMetaData::getDescript
 	try
 	{
 		Description rt( _TXT("Get the value of a document meta data element."));
-		rt( Description::Param::String, "name", _TXT( "the name of the meta data element to get"));
+		rt( Description::Param::Metadata, "name", _TXT( "the name of the meta data element to get"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "metadata", *m_errorhnd, SummarizerFunctionInterface::Description());

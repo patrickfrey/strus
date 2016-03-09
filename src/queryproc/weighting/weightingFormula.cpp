@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -50,6 +50,8 @@ FunctionMap::FunctionMap()
 	defineBinaryFunction( "+", &binaryFunction_plus);
 	defineBinaryFunction( "*", &binaryFunction_mul);
 	defineBinaryFunction( "/", &binaryFunction_div);
+	defineWeightingFunction( "minwinsize", &weightingFunction_minwinsize);
+	defineWeightingFunction( "minwinpos", &weightingFunction_minwinpos);
 }
 
 FormulaInterpreter::IteratorSpec FunctionMap::dimMap( void* ctx, const char* type)
@@ -120,7 +122,7 @@ double FunctionMap::unaryFunction_minus( double arg)
 
 double FunctionMap::unaryFunction_log10( double arg)
 {
-	return std::log( arg);
+	return std::log10( arg);
 }
 
 double FunctionMap::binaryFunction_minus( double arg1, double arg2)
@@ -141,6 +143,18 @@ double FunctionMap::binaryFunction_mul( double arg1, double arg2)
 double FunctionMap::binaryFunction_div( double arg1, double arg2)
 {
 	return arg1 / arg2;
+}
+
+double FunctionMap::weightingFunction_minwinsize( void* ctx, int typeidx, int range, int cardinality)
+{
+	// Code for min window size calculation
+	return 0.0;
+}
+
+double FunctionMap::weightingFunction_minwinpos( void* ctx, int typeidx, int range, int cardinality)
+{
+	// Code for min window first position calculation
+	return 0.0;
 }
 
 
@@ -183,7 +197,7 @@ void WeightingFunctionContextFormula::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
-float WeightingFunctionContextFormula::call( const Index& docno)
+double WeightingFunctionContextFormula::call( const Index& docno)
 {
 	std::vector<FeatureVector>::iterator vi = m_featar.begin(), ve = m_featar.end();
 	for (; vi != ve; ++vi)
@@ -281,9 +295,9 @@ WeightingFunctionInterface::Description WeightingFunctionFormula::getDescription
 	try
 	{
 		Description rt( _TXT("Calculate the weight of a document with a formula"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features referenced in the formula to weight"));
-		rt( Description::Param::String, "formula", _TXT( "defines an expression to evaluate. You can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements"));
-		rt( Description::Param::Numeric, "[a-z]+", _TXT( "defines a variable to be used in the formula expression"));
+		rt( Description::Param::Feature, "match", _TXT( "defines the query features referenced in the formula to weight"), "");
+		rt( Description::Param::String, "formula", _TXT( "defines an expression to evaluate. You can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements"), "");
+		rt( Description::Param::Numeric, "[a-z]+", _TXT( "defines a variable to be used in the formula expression"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "formula", *m_errorhnd, WeightingFunctionInterface::Description());

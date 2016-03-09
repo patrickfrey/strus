@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -33,8 +33,10 @@
 #include "private/errorUtils.hpp"
 #include <stdexcept>
 #include <vector>
-#include <algorithm>
 #include <cstdlib>
+#include <cstring>
+#include <sstream>
+#include <iostream>
 
 using namespace strus;
 
@@ -50,25 +52,21 @@ IteratorStructWithin::IteratorStructWithin(
 	:m_docno(0)
 	,m_docno_cut(0)
 	,m_posno(0)
+	,m_argar(orderByDocumentFrequency( with_cut_?(args.begin()+1):args.begin(),args.end()))
+	,m_docnoAllMatchItr(with_cut_?(args.begin()+1):args.begin(), args.end())
+	,m_cut(with_cut_?*args.begin():Reference<PostingIteratorInterface>())
 	,m_with_cut(with_cut_)
 	,m_strict(strict_)
 	,m_range(range_)
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (m_with_cut)
-	{
-		m_argar.insert( m_argar.end(), args.begin()+1, args.end());
-		m_cut = args[0];
-	}
-	else
-	{
-		m_argar = args;
-	}
-	if (m_argar.size() > MaxNofArguments)
+	// Some integrity checks:
+	if (args.size() > MaxNofArguments)
 	{
 		throw strus::runtime_error(_TXT("too many arguments for '%s' join iterator"), "within");
 	}
+	// Create feature identifier string:
 	std::vector<Reference< PostingIteratorInterface> >::iterator
 		ai = m_argar.begin(), ae = m_argar.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
@@ -92,50 +90,179 @@ IteratorStructWithin::IteratorStructWithin(
 
 Index IteratorStructWithin::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-
-	m_docno = getFirstAllMatchDocno( m_argar, docno_, true/*allow empty*/);
+	m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
 	if (m_docno)
 	{
-		if (m_cut.get() && m_cut->skipDocCandidate( m_docno) == m_docno)
-		{
-			m_docno_cut = m_docno;
-		}
-		else
-		{
-			m_docno_cut = 0;
-		}
+		m_docno_cut = m_cut.get()?m_cut->skipDocCandidate( m_docno):0;
 	}
 	return m_docno;
 }
 
 Index IteratorStructWithin::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	Index docno_iter = docno_;
-
-	for (;;)
+	m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
+	while (m_docno)
 	{
-		m_docno = getFirstAllMatchDocno( m_argar, docno_iter, false/*allow empty*/);
-		if (m_docno)
+		m_docno_cut = m_cut.get()?m_cut->skipDocCandidate( m_docno):0;
+		if (skipPos(0))
 		{
-			if (m_cut.get() && m_cut->skipDoc( m_docno) == m_docno)
+			return m_docno;
+		}
+		m_docno = m_docnoAllMatchItr.skipDocCandidate( m_docno+1);
+	}
+	m_docno_cut = 0;
+	return m_docno;
+}
+
+struct WithinMatch
+{
+	Index pos;
+	std::size_t argidx;
+
+	WithinMatch(){}
+	WithinMatch( const Index& pos_, std::size_t argidx_)
+		:pos(pos_),argidx(argidx_){}
+	WithinMatch( const WithinMatch& o)
+		:pos(o.pos),argidx(o.argidx){}
+};
+
+struct WithinMatchArray
+{
+	WithinMatchArray()
+		:size(0){}
+	WithinMatchArray( const WithinMatchArray& o)
+		:size(o.size)
+	{
+		std::memcpy( ar, o.ar, size * sizeof(*ar));
+	}
+
+	WithinMatch ar[ IteratorStructWithin::MaxNofArguments];
+	std::size_t size;
+
+	std::string tostring() const
+	{
+		std::ostringstream rt;
+		for (std::size_t ii=0; ii<size; ++ii)
+		{
+			rt << " (" << ar[ii].pos << " [" << ar[ii].argidx << "])";
+		}
+		return rt.str();
+	}
+
+	void insert( const Index& pos, std::size_t argidx)
+	{
+		std::size_t wi=0;
+		for (;wi<size && pos >= ar[wi].pos; ++wi){}
+		if (wi < size)
+		{
+			std::memmove( ar+wi+1, ar+wi, (size-wi)*sizeof(WithinMatch));
+		}
+		ar[wi].pos = pos;
+		ar[wi].argidx = argidx;
+		++size;
+	}
+
+	bool hasConflicts() const
+	{
+		std::size_t wi=1;
+		for (;wi<size; ++wi)
+		{
+			if (ar[wi].pos == ar[wi-1].pos) return true;
+		}
+		return false;
+	}
+
+	bool shiftPosition( std::size_t ai, std::vector<Reference< PostingIteratorInterface> >& arg)
+	{
+		PostingIteratorInterface* itr = arg[ ar[ ai].argidx].get();
+		Index pos = itr->skipPos( ar[ ai].pos+1);
+		if (!pos) return false;
+		std::size_t argidx = ar[ ai].argidx;
+		std::size_t wi=ai+1;
+		for (;wi<size && pos >= ar[wi].pos; ++wi)
+		{
+			ar[ wi-1] = ar[ wi];
+		}
+		ar[ wi-1].pos = pos;
+		ar[ wi-1].argidx = argidx;
+		return true;
+	}
+
+	const Index& maxpos() const
+	{
+		return ar[ size-1].pos;
+	}
+
+	bool resolveConflicts( std::vector<Reference< PostingIteratorInterface> >& arg)
+	{
+		Index minpos = 0;
+		std::vector<WithinMatchArray> conflictar;
+		conflictar.push_back( *this);
+		while (!conflictar.empty())
+		{
+			WithinMatchArray candidate1 = conflictar.back();
+			conflictar.pop_back();
+
+			std::size_t wi=1;
+			for (;wi<candidate1.size; ++wi)
 			{
-				m_docno_cut = m_docno;
+				if (candidate1.ar[wi].pos == candidate1.ar[wi-1].pos) break;
 			}
-			else
+			if (wi < candidate1.size)
 			{
-				m_docno_cut = 0;
-			}
-			if (!skipPos(0))
-			{
-				docno_iter = m_docno + 1;
-				continue;
+				WithinMatchArray candidate2( candidate1);
+				if (candidate2.shiftPosition( wi, arg))
+				{
+					if (!minpos || minpos > candidate2.maxpos())
+					{
+						if (candidate2.hasConflicts())
+						{
+							conflictar.push_back( candidate2);
+						}
+						else
+						{
+							minpos = candidate2.maxpos();
+							*this = candidate2;
+						}
+					}
+				}
+				if (candidate1.shiftPosition( wi-1, arg))
+				{
+					if (!minpos || minpos > candidate1.maxpos())
+					{
+						if (candidate1.hasConflicts())
+						{
+							conflictar.push_back( candidate1);
+						}
+						else
+						{
+							minpos = candidate1.maxpos();
+							*this = candidate1;
+						}
+					}
+				}
 			}
 		}
-		break;
+		return minpos != 0;
 	}
-	return m_docno;
+};
+
+Index IteratorStructWithin::positionCut( const Index& min_pos, const Index& max_pos)
+{
+	Index rt = 0;
+	if (!m_cut.get())
+	{
+		rt = 0;
+	}
+	else if (m_docno_cut == m_docno)
+	{
+		rt = m_cut->skipPos( min_pos);
+		if (rt > max_pos)
+		{
+			rt = 0;
+		}
+	}
+	return rt;
 }
 
 Index IteratorStructWithin::skipPos( const Index& pos_)
@@ -148,160 +275,106 @@ Index IteratorStructWithin::skipPos( const Index& pos_)
 
 	std::vector<Reference< PostingIteratorInterface> >::iterator
 		ai = m_argar.begin(), ae = m_argar.end();
+	Index dist;
 	if (m_range >= 0)
 	{
-		for (;;ai = m_argar.begin())
-		{
-			min_pos = (*ai)->skipPos( pos_iter);
-			if (!min_pos) return m_posno = 0;
-
-			max_pos = min_pos;
-			Index poset[ MaxNofArguments];
-			std::size_t posetsize = 0;
-			poset[ posetsize++] = min_pos;
-
-			for (++ai; ai != ae; ++ai)
-			{
-				Index pos_next = (*ai)->skipPos( pos_iter);
-			AGAIN_NEXT_POSITIVE_RANGE:
-				if (!pos_next) return m_posno = 0;
-
-				if (m_strict)
-				{
-					// ... strict => only items at distinct positions are allowed
-					std::size_t pi=0;
-					for (; pi < posetsize && poset[pi] != pos_next; ++pi){}
-					if (pi < posetsize)
-					{
-						pos_next = (*ai)->skipPos( pos_next +1);
-						goto AGAIN_NEXT_POSITIVE_RANGE;
-					}
-					poset[ posetsize++] = pos_next;
-				}
-				if (min_pos > pos_next)
-				{
-					min_pos = pos_next;
-				}
-				if (max_pos < pos_next)
-				{
-					max_pos = pos_next;
-				}
-				if (max_pos - min_pos > m_range)
-				{
-					pos_iter = max_pos - m_range;
-					break;
-				}
-			}
-			if (ai == ae)
-			{
-				if (m_with_cut)
-				{
-					if (!m_cut.get())
-					{
-						return m_posno = 0;
-					}
-					else if (m_docno_cut == m_docno)
-					{
-						Index pos_cut = m_cut->skipPos( min_pos);
-						if (pos_cut == 0 || pos_cut > max_pos)
-						{
-							return m_posno = min_pos;
-						}
-						else
-						{
-							pos_iter = pos_cut + 1;
-						}
-					}
-					else
-					{
-						return m_posno = min_pos;
-					}
-				}
-				else
-				{
-					return m_posno = min_pos;
-				}
-			}
-		}
+		dist = (Index)m_range;
 	}
 	else
 	{
-		pos_iter -= pos_iter>=-m_range?(-m_range):pos_iter;
-		for (;;ai = m_argar.begin())
+		dist = -(Index)m_range;
+		pos_iter = (pos_iter > dist)?(pos_iter - dist):0;
+	}
+	for (;;ai = m_argar.begin())
+	{
+		min_pos = (*ai)->skipPos( pos_iter);
+		if (!min_pos) return m_posno = 0;
+
+		max_pos = min_pos;
+		for (++ai; ai != ae; ++ai)
 		{
-			min_pos = (*ai)->skipPos( pos_iter);
-			if (!min_pos) return m_posno = 0;
+			Index pos_next = (*ai)->skipPos( pos_iter);
+			if (!pos_next) return m_posno = 0;
 
-			max_pos = min_pos;
-			Index poset[ MaxNofArguments];
-			std::size_t posetsize = 0;
-			poset[ posetsize++] = min_pos;
-
-			for (++ai; ai != ae; ++ai)
+			if (min_pos > pos_next)
 			{
-				Index pos_next = (*ai)->skipPos( pos_iter);
-			AGAIN_NEXT_NEGATIVE_RANGE:
-				if (!pos_next) return m_posno = 0;
-
-				if (m_strict)
-				{
-					// ... strict => only items at distinct positions are allowed
-					std::size_t pi=0;
-					for (; pi < posetsize && poset[pi] != pos_next; ++pi){}
-					if (pi < posetsize)
-					{
-						pos_next = (*ai)->skipPos( pos_next +1);
-						goto AGAIN_NEXT_NEGATIVE_RANGE;
-					}
-					poset[ posetsize++] = pos_next;
-				}
-				if (min_pos > pos_next)
-				{
-					min_pos = pos_next;
-				}
-				if (max_pos < pos_next)
-				{
-					max_pos = pos_next;
-				}
-				if (max_pos - min_pos > m_range)
-				{
-					pos_iter = max_pos + m_range + 1;
-					break;
-				}
+				min_pos = pos_next;
 			}
-			if (ai == ae)
+			if (max_pos < pos_next)
 			{
-				if (max_pos < pos_)
+				max_pos = pos_next;
+			}
+			if (max_pos - min_pos > dist)
+			{
+				pos_iter = max_pos - dist;
+				break;
+			}
+			if (m_range < 0 && max_pos < pos_)
+			{
+				pos_iter = min_pos + 1;
+				break;
+			}
+		}
+		if (ai == ae)
+		{
+			if (m_strict)
+			{
+				WithinMatchArray war;
+				std::size_t aidx = 0;
+				for (ai=m_argar.begin(); ai != ae; ++ai,++aidx)
 				{
-					pos_iter = min_pos + 1;
+					war.insert( (*ai)->posno(), aidx);
 				}
-				else if (m_with_cut)
+				if (war.hasConflicts())
 				{
-					if (!m_cut.get())
+					if (!war.resolveConflicts( m_argar))
 					{
-						return m_posno = 0;
-					}
-					else if (m_docno_cut == m_docno)
-					{
-						Index pos_cut = m_cut->skipPos( min_pos);
-						if (pos_cut == 0 || pos_cut > max_pos)
+						pos_iter = min_pos + 1;
+						if (pos_iter + dist < max_pos)
 						{
-							return m_posno = max_pos;
+							pos_iter = max_pos - dist;
 						}
-						else
-						{
-							pos_iter = pos_cut +1;
-						}
+						continue;
 					}
 					else
 					{
-						return m_posno = max_pos;
+						max_pos = war.maxpos();
+						if (max_pos - min_pos > dist)
+						{
+							pos_iter = max_pos - dist;
+							continue;
+						}
+						for (std::size_t wi=0; wi<war.size; ++wi)
+						{
+							m_argar[ war.ar[ wi].argidx]->skipPos( war.ar[ wi].pos);
+							// ... we have to be sure that all iterators are on the position of the match (because of variables for information extraction)
+						}
 					}
+				}
+			}
+			if (m_with_cut)
+			{
+				Index pos_cut = positionCut( min_pos, max_pos);
+				if (pos_cut)
+				{
+					pos_iter = pos_cut + 1;
+				}
+				else if (m_range >= 0)
+				{
+					return m_posno = min_pos;
 				}
 				else
 				{
 					return m_posno = max_pos;
 				}
+			}
+			else if (m_range >= 0)
+			{
+				return m_posno = min_pos;
+			}
+			else
+			{
+				return m_posno = max_pos;
 			}
 		}
 	}
@@ -311,19 +384,7 @@ Index IteratorStructWithin::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae; ++ai)
-		{
-			Index df = (*ai)->documentFrequency();
-			if (df < m_documentFrequency)
-			{
-				m_documentFrequency = df;
-			}
-		}
+		m_documentFrequency = minDocumentFrequency( m_argar);
 	}
 	return m_documentFrequency;
 }

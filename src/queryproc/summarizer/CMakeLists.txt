@@ -16,13 +16,20 @@ set(source_files
 include_directories(
   ${Boost_INCLUDE_DIRS}
   "${PROJECT_SOURCE_DIR}/include"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
   "${PROJECT_SOURCE_DIR}/src/queryproc/summarizer"
+)
+
+link_directories(
+  "${Boost_LIBRARY_DIRS}"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
+  "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
 )
 
 # ------------------------------------
 # LIBRARY
 # ------------------------------------
 add_library( summarizer_standard STATIC ${source_files})
-target_link_libraries( summarizer_standard strus_utils )
+target_link_libraries( summarizer_standard strus_utils queryproc_utils )
 
 

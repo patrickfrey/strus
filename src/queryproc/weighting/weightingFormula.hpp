@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -70,6 +70,8 @@ public:
 	static double binaryFunction_plus( double arg1, double arg2);
 	static double binaryFunction_mul( double arg1, double arg2);
 	static double binaryFunction_div( double arg1, double arg2);
+	static double weightingFunction_minwinsize( void* ctx, int typeidx, int range, int cardinality);
+	static double weightingFunction_minwinpos( void* ctx, int typeidx, int range, int cardinality);
 };
 
 /// \class WeightingFunctionContextFormula
@@ -133,7 +135,7 @@ public:
 			float weight_,
 			const TermStatistics& stats_);
 
-	virtual float call( const Index& docno);
+	virtual double call( const Index& docno);
 
 private:
 	friend class FunctionMap;

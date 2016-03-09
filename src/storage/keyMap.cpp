@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -32,18 +32,35 @@
 #include "private/internationalization.hpp"
 
 using namespace strus;
+#undef STRUS_READ_KEYMAPS_DURING_INSERTION
 
 KeyMap::KeyMap( DatabaseClientInterface* database_,
 		DatabaseKey::KeyPrefix prefix_,
-		KeyAllocatorInterface* allocator_,
-		const conotrie::CompactNodeTrie* globalmap_)
-	:m_dbadapter(prefix_,database_)
-	,m_maxCachedKeyLen(DefaultMaxCachedKeyLen)
-	,m_globalmap(globalmap_)
+		DatabaseKey::KeyPrefix invprefix_,
+		KeyAllocatorInterface* allocator_)
+	:m_database(database_)
+	,m_dbadapter(prefix_,database_)
+	,m_dbadapterinv(invprefix_,database_)
 	,m_unknownHandleCount(0)
 	,m_allocator(allocator_)
 	,m_invmap(0)
 {}
+
+KeyMap::KeyMap( DatabaseClientInterface* database_,
+		DatabaseKey::KeyPrefix prefix_,
+		KeyAllocatorInterface* allocator_)
+	:m_database(database_)
+	,m_dbadapter(prefix_,database_)
+	,m_dbadapterinv(0,0)
+	,m_unknownHandleCount(0)
+	,m_allocator(allocator_)
+	,m_invmap(0)
+{}
+
+void KeyMap::defineInv( KeyMapInv* invmap_)
+{
+	m_invmap = invmap_;
+}
 
 Index KeyMap::lookUp( const std::string& name)
 {
@@ -52,67 +69,67 @@ Index KeyMap::lookUp( const std::string& name)
 
 Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 {
-	conotrie::CompactNodeTrie::NodeData data;
-	if (m_globalmap && m_globalmap->get( name.c_str(), data))
+	Map::const_iterator mi = m_map.find( name);
+	if (mi != m_map.end())
 	{
 		isNew = false;
-		if (m_invmap)
-		{
-			if (!m_invmap->get( data)) m_invmap->set( data, name);
-		}
-		return data;
-	}
-	if (m_map.get( name.c_str(), data))
-	{
-		isNew = false;
-		return data;
+		return mi->second;
 	}
 	Index rt;
+#ifdef STRUS_READ_KEYMAPS_DURING_INSERTION
 	if (m_dbadapter.load( name,rt))
 	{
-		(void)m_map.set( name.c_str(), rt);
+		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
 		isNew = false;
 	}
-	else if (m_allocator->immediate())
+	else
+#endif
+	if (m_allocator->immediate())
 	{
 		rt = m_allocator->getOrCreate( name, isNew);
+		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
+		if (m_dbadapterinv.defined())
+		{
+			m_dbadapterinv.storeImm( rt, name);
+		}
+		isNew = true;
 	}
 	else
 	{
-		OverflowMap::const_iterator oi = m_overflowmap.find( name);
-		if (oi != m_overflowmap.end())
-		{
-			return oi->second;
-		}
 		rt = ++m_unknownHandleCount;
 		if (rt >= UnknownValueHandleStart)
 		{
 			throw strus::runtime_error( _TXT( "too many elements in keymap"));
 		}
 		rt += UnknownValueHandleStart;
+		m_map[ name] = rt;
+		if (m_invmap) m_invmap->set( rt, name);
 		isNew = true;
-		if (name.size() > m_maxCachedKeyLen || !m_map.set( name.c_str(), rt))
-		{
-			// ... Too many elements in the map or the key is bigger than the limit
-			//	defined as reasonable for a compact node trie. We are switching
-			//	to an STL map for caching the value:
-			m_overflowmap[ name] = rt;
-		}
 	}
 	return rt;
+}
+
+void KeyMap::deleteAllFromDeletedList( DatabaseTransactionInterface* transaction)
+{
+	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
+	for (; di != de; ++di)
+	{
+		if (m_dbadapterinv.defined())
+		{
+			Index value;
+			m_dbadapter.load( *di, value);
+			m_dbadapterinv.remove( transaction, value);
+		}
+		m_dbadapter.remove( transaction, *di);
+	}
 }
 
 void KeyMap::getWriteBatch(
 	DatabaseTransactionInterface* transaction)
 {
-	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
-	for (; di != de; ++di)
-	{
-		m_dbadapter.remove( transaction, *di);
-	}
-
+	deleteAllFromDeletedList( transaction);
 	// Clear maps:
 	clear();
 }
@@ -121,52 +138,55 @@ void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
 		DatabaseTransactionInterface* transaction)
 {
-	conotrie::CompactNodeTrie::const_iterator mi = m_map.begin(), me = m_map.end();
+	deleteAllFromDeletedList( transaction);
+
+	Map::iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
-		if (mi.data() > UnknownValueHandleStart)
+		if (mi->second > UnknownValueHandleStart)
 		{
-			Index idx = lookUp( mi.key());
+			Index idx = lookUp( mi->first);
 			if (!idx)
 			{
 				idx = m_allocator->alloc();
-				m_dbadapter.store( transaction, mi.key(), idx);
+				m_dbadapter.store( transaction, mi->first, idx);
+				if (m_dbadapterinv.defined()) m_dbadapterinv.store( transaction, idx, mi->first);
 			}
-			rewriteUnknownMap[ mi.data()] = idx;
-			if (m_invmap) m_invmap->set( idx, mi.key());
+			rewriteUnknownMap[ mi->second] = idx;
+			if (m_invmap) m_invmap->set( idx, mi->first);
+			mi->second = idx;
 		}
 	}
-	OverflowMap::const_iterator
-		oi = m_overflowmap.begin(), oe = m_overflowmap.end();
-	for (; oi != oe; ++oi)
-	{
-		if (oi->second > UnknownValueHandleStart)
-		{
-			Index idx = lookUp( oi->first);
-			if (!idx)
-			{
-				idx = m_allocator->alloc();
-				m_dbadapter.store( transaction, oi->first, idx);
-			}
-			rewriteUnknownMap[ oi->second] = idx;
-			if (m_invmap) m_invmap->set( idx, oi->first);
-		}
-	}
-	StringVector::const_iterator di = m_deletedlist.begin(), de = m_deletedlist.end();
-	for (; di != de; ++di)
-	{
-		m_dbadapter.remove( transaction, *di);
-	}
-
 	// Clear maps:
 	clear();
+}
+
+void KeyMap::deleteKey( const std::string& name)
+{
+	if (m_invmap)
+	{
+		Map::iterator mi = m_map.find( name);
+		if (mi != m_map.end())
+		{
+			m_invmap->erase( mi->second);
+		}
+		m_map.erase( mi);
+	}
+	else
+	{
+		m_map.erase( name);
+	}
+	m_deletedlist.push_back( name);
 }
 
 void KeyMap::clear()
 {
 	m_map.clear();
-	m_overflowmap.clear();
 	m_unknownHandleCount = 0;
+	if (m_invmap)
+	{
+		m_invmap->clear();
+	}
 	m_deletedlist.clear();
 }
 

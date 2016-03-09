@@ -27,12 +27,12 @@
 --------------------------------------------------------------------
 */
 #include "compactNodeTrie.hpp"
+#include "private/stringMap.hpp"
 #include "private/utils.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
-#include <map>
 #include <string>
 #include <vector>
 #include <ctime>
@@ -84,7 +84,7 @@ int main( int argc, const char** argv)
 		{
 			throw std::runtime_error( std::string("bad values for arguments <nof inserts> <nof queries> (2 non negative integers expected): ") + e.what());
 		}
-		typedef std::map<std::string,conotrie::CompactNodeTrie::NodeData> TestMap;
+		typedef strus::StringMap<strus::Index> TestMap;
 		TestMap testmap;
 		conotrie::CompactNodeTrie origmap;
 		std::vector<std::string> keyar;
@@ -129,13 +129,13 @@ int main( int argc, const char** argv)
 			unsigned int keyidx = RANDINT(0,nofInserts);
 			TestMap::const_iterator
 				mi = testmap.find( keyar[ keyidx]);
-			if (mi == testmap.end() || mi->second != keyidx+1)
+			if (mi == testmap.end() || mi->second != (strus::Index)keyidx+1)
 			{
 				throw std::logic_error("TESTMAP LOOKUP FAILED");
 			}
 		}
 		duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-		std::cerr << "queried STL map with " << nofQueries << " random selected keys in " << doubleToString(duration) << " seconds" << std::endl;
+		std::cerr << "queried boost unordered map with " << nofQueries << " random selected keys in " << doubleToString(duration) << " seconds" << std::endl;
 
 		start = std::clock();
 		for (ii=0; ii<nofQueries; ++ii)
@@ -157,7 +157,7 @@ int main( int argc, const char** argv)
 		for (; ti != te; ++ti)
 		{
 			conotrie::CompactNodeTrie::NodeData val;
-			if (!origmap.get( ti->first.c_str(), val))
+			if (!origmap.get( ti->first, val))
 			{
 				throw std::runtime_error( std::string( "inserted key '") + ti->first + "' disapeared in variable size node tree");
 			}
@@ -173,7 +173,7 @@ int main( int argc, const char** argv)
 			{
 				throw std::runtime_error( std::string( "non existing key '") + oi.key() + "' found in variable size node tree");
 			}
-			else if (ti->second != oi.data())
+			else if (ti->second != (strus::Index)oi.data())
 			{
 				std::ostringstream dt;
 				dt << ti->second << " != " << oi.data();

@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -32,9 +32,11 @@
 #include "strus/databaseCursorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
+#include "strus/documentTermIteratorInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/versionStorage.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
@@ -47,10 +49,14 @@
 #include "storageDocumentChecker.hpp"
 #include "documentFrequencyCache.hpp"
 #include "metaDataBlockCache.hpp"
+#include "metaDataRestriction.hpp"
+#include "metaDataReader.hpp"
 #include "postingIterator.hpp"
-#include "nullIterator.hpp"
+#include "browsePostingIterator.hpp"
+#include "nullPostingIterator.hpp"
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
+#include "documentTermIterator.hpp"
 #include "indexPacker.hpp"
 #include "attributeReader.hpp"
 #include "keyAllocatorInterface.hpp"
@@ -72,11 +78,6 @@ void StorageClient::cleanup()
 		delete m_metaDataBlockCache; 
 		m_metaDataBlockCache = 0;
 	}
-	if (m_termno_map)
-	{
-		delete m_termno_map;
-		m_termno_map = 0;
-	}
 }
 
 StorageClient::StorageClient(
@@ -92,7 +93,6 @@ StorageClient::StorageClient(
 	,m_next_attribno(0)
 	,m_nof_documents(0)
 	,m_metaDataBlockCache(0)
-	,m_termno_map(0)
 	,m_statisticsProc(statisticsProc_)
 	,m_errorhnd(errorhnd_)
 {
@@ -128,6 +128,19 @@ void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 	m_metaDataBlockCache->refresh();
 }
 
+static Index versionNo( Index major, Index minor)
+{
+	return (major * 1000) + minor;
+}
+
+static unsigned int versionIndex( const Index& version)
+{
+	static const Index ar[] = {0004,0};
+	unsigned int ii=0;
+	for (;ar[ii] && ar[ii] < version; ++ii){}
+	return ii;
+}
+
 void StorageClient::loadVariables( DatabaseClientInterface* database_)
 {
 	ByteOrderMark byteOrderMark;
@@ -139,16 +152,26 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	Index next_attribno_;
 	Index nof_documents_;
 	Index next_userno_;
+	Index version_;
 
 	DatabaseAdapter_Variable::Reader varstor( database_);
 	if (!varstor.load( "TermNo", next_termno_)
 	||  !varstor.load( "TypeNo", next_typeno_)
 	||  !varstor.load( "DocNo", next_docno_)
 	||  !varstor.load( "AttribNo", next_attribno_)
-	||  !varstor.load( "NofDocs", nof_documents_)
-	)
+	||  !varstor.load( "NofDocs", nof_documents_))
 	{
 		throw strus::runtime_error( _TXT( "corrupt storage, not all mandatory variables defined"));
+	}
+	if (!varstor.load( "Version", version_))
+	{
+		version_ = versionNo( 0, 4);
+	}
+	if (versionIndex( version_) != versionIndex( versionNo( STRUS_STORAGE_VERSION_MAJOR, STRUS_STORAGE_VERSION_MINOR)))
+	{
+		unsigned int major = version_ / 1000;
+		unsigned int minor = version_ % 1000;
+		throw strus::runtime_error( _TXT( "incompatible storage version %u.%u software is %u.%u. please rebuild your storage"), major, minor, (unsigned int)STRUS_STORAGE_VERSION_MAJOR, (unsigned int)STRUS_STORAGE_VERSION_MINOR);
 	}
 	(void)varstor.load( "UserNo", next_userno_);
 	if (varstor.load( "ByteOrderMark", bom))
@@ -203,11 +226,6 @@ StorageClient::~StorageClient()
 
 Index StorageClient::getTermValue( const std::string& name) const
 {
-	if (m_termno_map)
-	{
-		conotrie::CompactNodeTrie::NodeData cached_termno;
-		if (m_termno_map->get( name.c_str(), cached_termno)) return cached_termno;
-	}
 	return DatabaseAdapter_TermValue::Reader( m_database.get()).get( name);
 }
 
@@ -256,11 +274,40 @@ PostingIteratorInterface*
 		Index termno = getTermValue( termstr);
 		if (!typeno || !termno)
 		{
-			return new NullIterator( typeno, termno, termstr.c_str());
+			return new NullPostingIterator( termstr.c_str());
 		}
 		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
+}
+
+PostingIteratorInterface*
+	StorageClient::createBrowsePostingIterator(
+		const MetaDataRestrictionInterface* restriction,
+		const Index& maxpos) const
+{
+	try
+	{
+		if (maxpos == 0)
+		{
+			if (restriction) delete restriction;
+			return new NullPostingIterator("?");
+		}
+		else
+		{
+			return new BrowsePostingIterator( restriction, m_next_docno.value()-1, maxpos);
+		}
+	}
+	catch (const std::bad_alloc& err)
+	{
+		m_errorhnd->report( _TXT("out of memory creating browse posting iterator"));
+	}
+	catch (const std::runtime_error& err)
+	{
+		m_errorhnd->report( _TXT("error creating browse posting iterator: %s"), err.what());
+	}
+	if (restriction) delete restriction;
+	return 0;
 }
 
 ForwardIteratorInterface*
@@ -272,6 +319,17 @@ ForwardIteratorInterface*
 		return new ForwardIterator( this, m_database.get(), type, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating forward iterator: %s"), *m_errorhnd, 0);
+}
+
+DocumentTermIteratorInterface*
+	StorageClient::createDocumentTermIterator(
+		const std::string& type) const
+{
+	try
+	{
+		return new DocumentTermIterator( this, m_database.get(), type, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating term occurrence iterator: %s"), *m_errorhnd, 0);
 }
 
 class InvertedAclIterator
@@ -338,7 +396,7 @@ StorageTransactionInterface*
 			StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
 			m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
 		}
-		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_termno_map, m_next_typeno.value(), m_errorhnd);
+		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client transaction: %s"), *m_errorhnd, 0);
 }
@@ -506,6 +564,8 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
+
+	utils::ScopedLock lock( m_immalloc_typeno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
@@ -518,6 +578,8 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
+
+	utils::ScopedLock lock( m_immalloc_userno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_userno.allocIncrement());
@@ -530,6 +592,8 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 {
 	Index rt;
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
+
+	utils::ScopedLock lock( m_immalloc_attribno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_attribno.allocIncrement());
@@ -572,9 +636,16 @@ Index StorageClient::documentFrequency( const std::string& type, const std::stri
 {
 	try
 	{
-		Index typeno = getTermValue( type);
+		Index typeno = getTermType( type);
 		Index termno = getTermValue( term);
-		return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+		if (typeno && termno)
+		{
+			return DatabaseAdapter_DocFrequency::get( m_database.get(), typeno, termno);
+		}
+		else
+		{
+			return 0;
+		}
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error evaluating term document frequency: %s"), *m_errorhnd, 0);
 }
@@ -698,11 +769,20 @@ MetaDataReaderInterface* StorageClient::createMetaDataReader() const
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data reader: %s"), *m_errorhnd, 0);
 }
 
+MetaDataRestrictionInterface* StorageClient::createMetaDataRestriction() const
+{
+	try
+	{
+		return new MetaDataRestriction( this, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating meta data restriction object: %s"), *m_errorhnd, 0);
+}
+
 void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 	if (!transaction.get()) throw strus::runtime_error(_TXT("error loading termno map"));
-	m_termno_map = new conotrie::CompactNodeTrie();
+	utils::UnorderedMap<std::string,Index> termno_map;
 	try
 	{
 		unsigned char const* si = (const unsigned char*)termnomap_source;
@@ -720,8 +800,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 			if (*si == '\n') ++si;
 
 			// [2] Check, if already loaded:
-			conotrie::CompactNodeTrie::NodeData dupkey;
-			if (m_termno_map->get( name.c_str(), dupkey)) continue;
+			if (termno_map.find( name) != termno_map.end()) continue;
 
 			// [3] Check, if already defined in storage:
 			DatabaseAdapter_TermValue::ReadWriter stor(m_database.get());
@@ -733,7 +812,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 				stor.store( transaction.get(), name, termno);
 			}
 			// [4] Register it in the map:
-			m_termno_map->set( name.c_str(), termno);
+			termno_map[ name] = termno;
 		}
 		transaction->commit();
 	}
@@ -764,7 +843,7 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-bool StorageClient::fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize)
+bool StorageClient::fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize)
 {
 	TransactionLock lock( this);
 	return m_statisticsBuilder->fetchMessage( msg, msgsize);
@@ -776,7 +855,7 @@ StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool s
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no peer message processor defined"));
+			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
@@ -788,7 +867,7 @@ StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool s
 		}
 		return new StatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
 StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
@@ -797,7 +876,7 @@ StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no peer message processor defined"));
+			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
@@ -809,7 +888,7 @@ StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
 		}
 		return new StatisticsUpdateIterator( this, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating peer message iterator: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
 const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() const
@@ -865,22 +944,6 @@ static void checkKeyValue(
 				strus::DocIdData( key, value);
 				break;
 			}
-			case strus::DatabaseKey::ForwardIndexPrefix:
-			{
-				strus::ForwardIndexData( key, value);
-				break;
-			}
-			case strus::DatabaseKey::VariablePrefix:
-			{
-				strus::VariableData( key, value);
-				break;
-			}
-			case strus::DatabaseKey::DocMetaDataPrefix:
-			{
-				strus::MetaDataDescription metadescr( database);
-				strus::DocMetaDataData( &metadescr, key, value);
-				break;
-			}
 			case strus::DatabaseKey::DocAttributePrefix:
 			{
 				strus::DocAttributeData( key, value);
@@ -889,6 +952,32 @@ static void checkKeyValue(
 			case strus::DatabaseKey::UserNamePrefix:
 			{
 				strus::UserNameData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::VariablePrefix:
+			{
+				strus::VariableData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::TermTypeInvPrefix:
+			{
+				strus::TermTypeInvData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::TermValueInvPrefix:
+			{
+				strus::TermValueInvData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::ForwardIndexPrefix:
+			{
+				strus::ForwardIndexData( key, value);
+				break;
+			}
+			case strus::DatabaseKey::DocMetaDataPrefix:
+			{
+				strus::MetaDataDescription metadescr( database);
+				strus::DocMetaDataData( &metadescr, key, value);
 				break;
 			}
 			case strus::DatabaseKey::DocFrequencyPrefix:
@@ -994,15 +1083,33 @@ static void dumpKeyValue(
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::ForwardIndexPrefix:
-			{
-				strus::ForwardIndexData data( key, value);
-				data.print( out);
-				break;
-			}
 			case strus::DatabaseKey::VariablePrefix:
 			{
 				strus::VariableData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::DocAttributePrefix:
+			{
+				strus::DocAttributeData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::TermTypeInvPrefix:
+			{
+				strus::TermTypeInvData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::TermValueInvPrefix:
+			{
+				strus::TermValueInvData data( key, value);
+				data.print( out);
+				break;
+			}
+			case strus::DatabaseKey::ForwardIndexPrefix:
+			{
+				strus::ForwardIndexData data( key, value);
 				data.print( out);
 				break;
 			}
@@ -1010,12 +1117,6 @@ static void dumpKeyValue(
 			{
 				strus::MetaDataDescription metadescr( database);
 				strus::DocMetaDataData data( &metadescr, key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::DocAttributePrefix:
-			{
-				strus::DocAttributeData data( key, value);
 				data.print( out);
 				break;
 			}
@@ -1090,13 +1191,13 @@ class StorageDump
 	:public StorageDumpInterface
 {
 public:
-	StorageDump( const strus::DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
+	StorageDump( const strus::DatabaseClientInterface* database_, const std::string& keyprefix, ErrorBufferInterface* errorhnd_)
 		:m_database(database_)
 		,m_cursor( database_->createCursor( strus::DatabaseOptions()))
 		,m_errorhnd(errorhnd_)
 	{
 		if (!m_cursor.get()) throw strus::runtime_error(_TXT("error creating database cursor"));
-		m_key = m_cursor->seekFirst( 0, 0);
+		m_key = m_cursor->seekFirst( keyprefix.c_str(), keyprefix.size());
 	}
 	virtual ~StorageDump(){}
 
@@ -1133,11 +1234,11 @@ private:
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
-StorageDumpInterface* StorageClient::createDump() const
+StorageDumpInterface* StorageClient::createDump( const std::string& keyprefix) const
 {
 	try
 	{
-		return new StorageDump( m_database.get(), m_errorhnd);
+		return new StorageDump( m_database.get(), keyprefix, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }

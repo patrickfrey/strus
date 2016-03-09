@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -41,6 +41,7 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/summaryElement.hpp"
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
 #include "strus/private/snprintf.h"
@@ -62,6 +63,7 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	:m_queryEval(queryEval_)
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
+	,m_metaDataRestriction()
 	,m_nofRanks(20)
 	,m_minRank(0)
 	,m_evalset_defined(false)
@@ -78,24 +80,6 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 		defineFeature( ti->set, 1.0);
 	}
 }
-
-Query::Query( const Query& o)
-	:m_queryEval(o.m_queryEval)
-	,m_storage(o.m_storage)
-	,m_metaDataReader(o.m_metaDataReader)
-	,m_terms(o.m_terms)
-	,m_expressions(o.m_expressions)
-	,m_features(o.m_features)
-	,m_stack(o.m_stack)
-	,m_metaDataRestrictions(o.m_metaDataRestrictions)
-	,m_variableAssignments(o.m_variableAssignments)
-	,m_nofRanks(o.m_nofRanks)
-	,m_minRank(o.m_minRank)
-	,m_usernames(o.m_usernames)
-	,m_evalset_docnolist(o.m_evalset_docnolist)
-	,m_evalset_defined(o.m_evalset_defined)
-	,m_errorhnd(o.m_errorhnd)
-{}
 
 bool Query::Term::operator<( const Term& o) const
 {
@@ -194,15 +178,17 @@ void Query::defineFeature( const std::string& set_, float weight_)
 	CATCH_ERROR_MAP( _TXT("error define feature of query: %s"), *m_errorhnd);
 }
 
-void Query::defineMetaDataRestriction(
-		CompareOperator opr, const std::string&  name,
+void Query::addMetaDataRestrictionCondition(
+		MetaDataRestrictionInterface::CompareOperator opr, const std::string&  name,
 		const ArithmeticVariant& operand, bool newGroup)
 {
 	try
 	{
-		Index hnd = m_metaDataReader->elementHandle( name);
-		const char* typeName = m_metaDataReader->getType( hnd);
-		m_metaDataRestrictions.push_back( MetaDataRestriction( typeName, opr, hnd, operand, newGroup));
+		if (!m_metaDataRestriction.get())
+		{
+			m_metaDataRestriction.reset( m_storage->createMetaDataRestriction());
+		}
+		m_metaDataRestriction->addCondition( opr, name, operand, newGroup);
 	}
 	CATCH_ERROR_MAP( _TXT("error define meta data restriction of query: %s"), *m_errorhnd);
 }
@@ -480,7 +466,7 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 	return si->second;
 }
 
-std::vector<ResultDocument> Query::evaluate()
+QueryResult Query::evaluate()
 {
 	const char* evaluationPhase = "query feature postings initialization";
 	try
@@ -492,17 +478,17 @@ std::vector<ResultDocument> Query::evaluate()
 		// [1] Check initial conditions:
 		if (m_nofRanks == 0)
 		{
-			return std::vector<ResultDocument>();
+			return QueryResult();
 		}
 		if (m_queryEval->weightingFunctions().empty())
 		{
 			m_errorhnd->report( _TXT( "cannot evaluate query, no weighting function defined"));
-			return std::vector<ResultDocument>();
+			return QueryResult();
 		}
 		if (m_queryEval->selectionSets().empty())
 		{
 			m_errorhnd->report( _TXT( "cannot evaluate query, no selection features defined"));
-			return std::vector<ResultDocument>();
+			return QueryResult();
 		}
 		NodeStorageDataMap nodeStorageDataMap;
 
@@ -515,7 +501,7 @@ std::vector<ResultDocument> Query::evaluate()
 			{
 				Reference<PostingIteratorInterface> postingsElem(
 					createNodePostingIterator( fi->node, nodeStorageDataMap));
-				if (!postingsElem.get()) return std::vector<ResultDocument>();
+				if (!postingsElem.get()) return QueryResult();
 				postings.push_back( postingsElem);
 			}
 		}
@@ -523,7 +509,7 @@ std::vector<ResultDocument> Query::evaluate()
 		DocsetPostingIterator evalset_itr;
 		Accumulator accumulator(
 			m_storage,
-			m_metaDataReader.get(), m_metaDataRestrictions,
+			m_metaDataReader.get(), m_metaDataRestriction.get(),
 			m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
 	
 		// [4.1] Define document subset to evaluate query on:
@@ -644,9 +630,8 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 		evaluationPhase = "document ranking";
 		// [5] Do the ranking:
-		std::vector<ResultDocument> rt;
+		std::vector<ResultDocument> ranks;
 		Ranker ranker( m_nofRanks + m_minRank);
-	
 		Index docno = 0;
 		unsigned int state = 0;
 		unsigned int prev_state = 0;
@@ -657,6 +642,7 @@ std::vector<ResultDocument> Query::evaluate()
 			ranker.insert( WeightedDocument( docno, weight));
 			if (state > prev_state && ranker.nofRanks() >= m_nofRanks + m_minRank)
 			{
+				state = prev_state;
 				break;
 			}
 			prev_state = state;
@@ -707,36 +693,26 @@ std::vector<ResultDocument> Query::evaluate()
 		}
 		evaluationPhase = "building of the result";
 		// [7] Build the result:
-		std::vector<WeightedDocument>::const_iterator
-			ri=resultlist.begin(),re=resultlist.end();
-	
+		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();
 		for (; ri != re; ++ri)
 		{
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "result rank docno=" << ri->docno() << ", weight=" << ri->weight() << std::endl;
 #endif
-			std::vector<ResultDocument::Attribute> attr;
+			std::vector<SummaryElement> summaries;
+
 			std::vector<Reference<SummarizerFunctionContextInterface> >::iterator
 				si = summarizers.begin(), se = summarizers.end();
-	
-			rt.push_back( ResultDocument( *ri));
-			for (std::size_t sidx=0; si != se; ++si,++sidx)
+			for (;si != se; ++si)
 			{
-				std::vector<SummarizerFunctionContextInterface::SummaryElement>
-					summary = (*si)->getSummary( ri->docno());
-				std::vector<SummarizerFunctionContextInterface::SummaryElement>::const_iterator
-					ci = summary.begin(), ce = summary.end();
-				for (; ci != ce; ++ci)
-				{
-					rt.back().addAttribute(
-							m_queryEval->summarizers()[sidx].resultAttribute(),
-							ci->text(), ci->weight());
-				}
+				std::vector<SummaryElement> summary = (*si)->getSummary( ri->docno());
+				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
+			ranks.push_back( ResultDocument( *ri, summaries));
 		}
-		return rt;
+		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, std::vector<ResultDocument>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error during %s when evaluating query: %s"), evaluationPhase, *m_errorhnd, QueryResult());
 }
 
 

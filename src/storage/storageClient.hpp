@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -35,7 +35,6 @@
 #include "private/utils.hpp"
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
-#include "compactNodeTrie.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
 namespace strus {
 
@@ -43,6 +42,8 @@ namespace strus {
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class ForwardIteratorInterface;
+/// \brief Forward declaration
+class DocumentTermIteratorInterface;
 /// \brief Forward declaration
 class InvAclIteratorInterface;
 /// \brief Forward declaration
@@ -53,6 +54,8 @@ class StorageDocumentInterface;
 class AttributeReaderInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
+/// \brief Forward declaration
+class MetaDataRestrictionInterface;
 /// \brief Forward declaration
 class KeyAllocatorInterface;
 /// \brief Forward declaration
@@ -72,7 +75,7 @@ class StorageClient
 public:
 	/// \param[in] database key value store database used by this storage (ownership passed to this)
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
-	/// \param[in] statisticsProc_ peer message processor interface
+	/// \param[in] statisticsProc_ statistics message processor interface
 	/// \param[in] errorhnd_ error buffering interface for error handling
 	StorageClient(
 			DatabaseClientInterface* database_,
@@ -86,8 +89,17 @@ public:
 				const std::string& termtype,
 				const std::string& termid) const;
 
+	virtual PostingIteratorInterface*
+		createBrowsePostingIterator(
+			const MetaDataRestrictionInterface* restriction,
+			const Index& maxpos) const;
+
 	virtual ForwardIteratorInterface*
 			createForwardIterator(
+				const std::string& type) const;
+
+	virtual DocumentTermIteratorInterface*
+			createDocumentTermIterator(
 				const std::string& type) const;
 
 	virtual InvAclIteratorInterface*
@@ -104,6 +116,8 @@ public:
 
 	virtual MetaDataReaderInterface* createMetaDataReader() const;
 
+	virtual MetaDataRestrictionInterface* createMetaDataRestriction() const;
+	
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
 	virtual StatisticsIteratorInterface* createInitStatisticsIterator( bool sign);
@@ -137,9 +151,9 @@ public:
 
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
-	virtual StorageDumpInterface* createDump() const;
+	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const;
 
-public:/*QueryEval,AttributeReader*/
+public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;
 	Index getDocno( const std::string& name) const;
@@ -204,7 +218,7 @@ public:/*StatisticsIterator*/
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
 	///\brief Fetch a message from a storage update transaction
-	bool fetchPeerUpdateMessage( const char*& msg, std::size_t& msgsize);
+	bool fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize);
 
 public:/*strusResizeBlocks*/
 	Index maxTermTypeNo() const;
@@ -227,13 +241,15 @@ private:
 	utils::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
 
 	utils::Mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
+	utils::Mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno s
+	utils::Mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno s
+	utils::Mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno s
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks
-	conotrie::CompactNodeTrie* m_termno_map;		///< map of the most important (most frequent) terms, if specified
 
-	const StatisticsProcessorInterface* m_statisticsProc;	///< peer message processor
-	Reference<StatisticsBuilderInterface> m_statisticsBuilder; ///< builder of peer messages from updates by transactions
+	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
+	Reference<StatisticsBuilderInterface> m_statisticsBuilder; ///< builder of statistics messages from updates by transactions
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
 
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface

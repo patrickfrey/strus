@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -87,6 +87,18 @@ public:
 			const char* key,
 			std::size_t keysize,
 			std::size_t domainkeysize)=0;
+
+	/// \brief Move cursor to the least upper bound key stored in the database with upper limit specified by key and not by the domain key size
+	/// \param[in] key pointer to the key of the item to seek
+	/// \param[in] keysize size of 'key' in bytes
+	/// \param[in] upkey pointer to the upper limit key that does not belong anymore to the key domain scanned
+	/// \param[in] upkeysize size of 'upkey' in bytes
+	/// \return the key of the element found or an undefined key
+	virtual Slice seekUpperBoundRestricted(
+			const char* key,
+			std::size_t keysize,
+			const char* upkey,
+			std::size_t upkeysize)=0;
 
 	/// \brief Move cursor to the first key stored in the database in a defined key domain
 	/// \param[in] domainkey defines the key value domain (the subset set of keys to scan)

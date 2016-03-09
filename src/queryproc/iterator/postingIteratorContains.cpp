@@ -3,19 +3,19 @@
     The C++ library strus implements basic operations to build
     a search engine for structured search on unstructured data.
 
-    Copyright (C) 2013,2014 Patrick Frey
+    Copyright (C) 2015 Patrick Frey
 
     This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
+    modify it under the terms of the GNU General Public
     License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    version 3 of the License, or (at your option) any later version.
 
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
+    You should have received a copy of the GNU General Public
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
@@ -36,15 +36,17 @@
 
 using namespace strus;
 
-IteratorContains::IteratorContains( const std::vector<Reference< PostingIteratorInterface> >& args, ErrorBufferInterface* errorhnd_)
+IteratorContains::IteratorContains(
+		const std::vector<Reference< PostingIteratorInterface> >& args,
+		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_posno(0)
-	,m_argar(args)
+	,m_docnoAllMatchItr(args)
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
 	std::vector<Reference< PostingIteratorInterface> >::const_iterator
-		ai = m_argar.begin(), ae = m_argar.end();
+		ai = args.begin(), ae = args.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
 	{
 		if (aidx) m_featureid.push_back('=');
@@ -56,13 +58,26 @@ IteratorContains::IteratorContains( const std::vector<Reference< PostingIterator
 IteratorContains::~IteratorContains()
 {}
 
-IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vector<Reference< PostingIteratorInterface> >& args, std::size_t cardinality_, ErrorBufferInterface* errorhnd_)
-	:IteratorContains(args,errorhnd_), m_cardinality(cardinality_)
+IteratorContainsWithCardinality::IteratorContainsWithCardinality(
+		const std::vector<Reference< PostingIteratorInterface> >& args,
+		unsigned int cardinality_,
+		ErrorBufferInterface* errorhnd_)
+	:m_docno(0)
+	,m_posno(0)
+	,m_prioqueue(args,cardinality_)
+	,m_documentFrequency(-1)
+	,m_errorhnd(errorhnd_)
 {
-	m_featureid.resize( m_featureid.size()-1);
-	if (m_cardinality && m_cardinality != args.size())
+	std::vector<Reference< PostingIteratorInterface> >::const_iterator
+		ai = args.begin(), ae = args.end();
+	for (int aidx=0; ai != ae; ++ai,++aidx)
 	{
-		encodeInteger( m_featureid, m_cardinality);
+		if (aidx) m_featureid.push_back('=');
+		m_featureid.append( (*ai)->featureid());
+	}
+	if (cardinality_)
+	{
+		encodeInteger( m_featureid, cardinality_);
 		m_featureid.push_back( 'C');
 	}
 	m_featureid.push_back( 'A');
@@ -70,48 +85,43 @@ IteratorContainsWithCardinality::IteratorContainsWithCardinality( const std::vec
 
 Index IteratorContains::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocno( m_argar, docno_, true);
+	return m_docno = m_docnoAllMatchItr.skipDocCandidate( docno_);
 }
 
 Index IteratorContains::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocno( m_argar, docno_, false);
+	return m_docno = m_docnoAllMatchItr.skipDoc( docno_);
 }
 
 Index IteratorContainsWithCardinality::skipDocCandidate( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, true, m_cardinality);
+	return m_docno = m_prioqueue.skipDocCandidate( docno_);
 }
 
 Index IteratorContainsWithCardinality::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && m_docno) return m_docno;
-	return m_docno = getFirstAllMatchDocnoSubset( m_argar, docno_, false, m_cardinality);
+	return m_docno = m_prioqueue.skipDoc( docno_);
 }
+
 
 Index IteratorContains::documentFrequency() const
 {
 	if (m_documentFrequency < 0)
 	{
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator
-			ai = m_argar.begin(), ae = m_argar.end();
-		if (ai == ae) return 0;
-
-		m_documentFrequency = (*ai)->documentFrequency();
-		for (++ai; ai != ae; ++ai)
-		{
-			Index df = (*ai)->documentFrequency();
-			if (df < m_documentFrequency)
-			{
-				m_documentFrequency = df;
-			}
-		}
+		m_documentFrequency = m_docnoAllMatchItr.minDocumentFrequency();
 	}
 	return m_documentFrequency;
 }
+
+Index IteratorContainsWithCardinality::documentFrequency() const
+{
+	if (m_documentFrequency < 0)
+	{
+		m_documentFrequency = minDocumentFrequency( m_prioqueue.args());
+	}
+	return m_documentFrequency;
+}
+
 
 
 PostingIteratorInterface* PostingJoinContains::createResultIterator(
@@ -142,6 +152,10 @@ PostingIteratorInterface* PostingJoinContains::createResultIterator(
 		}
 		else
 		{
+			if (itrs.size() > 64)
+			{
+				m_errorhnd->report( _TXT( "number of argument posting iterators for 'contains' with cardinality is out of range (64)"));
+			}
 			return new IteratorContainsWithCardinality( itrs, cardinality, m_errorhnd);
 		}
 	}

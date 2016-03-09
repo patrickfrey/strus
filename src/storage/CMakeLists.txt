@@ -17,6 +17,7 @@ set( libstrus_storage_source_files
 	forwardIndexBlock.cpp
 	forwardIndexMap.cpp
 	forwardIterator.cpp
+	documentTermIterator.cpp
 	indexPacker.cpp
 	indexSetIterator.cpp
 	invertedIndexMap.cpp
@@ -28,7 +29,10 @@ set( libstrus_storage_source_files
 	metaDataElement.cpp
 	metaDataMap.cpp
 	metaDataRecord.cpp
-	nullIterator.cpp
+	metaDataReader.cpp
+	metaDataRestriction.cpp
+	nullPostingIterator.cpp
+	browsePostingIterator.cpp
 	statisticsInitIterator.cpp
 	statisticsUpdateIterator.cpp
 	posinfoBlock.cpp
@@ -39,6 +43,7 @@ set( libstrus_storage_source_files
 	storageClient.cpp
 	storageDocumentChecker.cpp
 	storageDocument.cpp
+	storageDocumentUpdate.cpp
 	storageTransaction.cpp
 	userAclMap.cpp
 	extractKeyValueData.cpp
