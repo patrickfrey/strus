@@ -10,7 +10,7 @@ a:hover {text-decoration:underline;}
 p,ul,ol,dl {margin:0 0 30px 0;}
 h1 {color:#888; font-size:3.2em; line-height:1.1em; letter-spacing:-3px; margin:20px 0 0 0;}
 h1 a {color:#080808; text-transform:none;}
-h2 {font-size:2.2em; color:#333; margin:0 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
+h2 {font-size:2.2em; color:#333; margin:20px 0 20px; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h3 {font-size:1.8em; margin:10px 0 15px 0; letter-spacing:-1px; border-bottom:2px solid #eee;}
 h4 {font-size:1.4em; margin:10px 0 15px 0; letter-spacing:-1px;}
 h1,h2,h3 {font-weight:700; line-height:1.4em;}
@@ -40,3 +40,47 @@ h1,h2,h3 {font-weight:700; line-height:1.4em;}
 .description a {color:#5070A0; font-weight:bold;}
 .credits a {color:#888;}
 .clear {clear:both;}
+
+.toggle-box {
+  display: none;
+}
+
+.toggle-box + label {
+  cursor: pointer;
+  display: block;
+  font-weight: italic;
+  line-height: 21px;
+  margin-bottom: 5px;
+}
+
+.toggle-box + label + pre {
+  display: none;
+  margin-bottom: 10px;
+}
+
+.toggle-box:checked + label + pre {
+  display: block;
+}
+
+.toggle-box + label:before {
+  background-color: #888;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+  color: #FFFFFF;
+  content: "+";
+  display: block;
+  float: left;
+  font-weight: bold;
+  height: 20px;
+  line-height: 20px;
+  margin-right: 5px;
+  text-align: center;
+  width: 20px;
+}
+
+.toggle-box:checked + label:before {
+  content: "\2212";
+} 
+
+
