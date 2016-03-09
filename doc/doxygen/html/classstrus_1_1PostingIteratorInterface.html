@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -76,13 +76,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac78f5a71bd04aaf9b904eb695e5490cb"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PostingIteratorInterface.html#ac78f5a71bd04aaf9b904eb695e5490cb">~PostingIteratorInterface</a> ()</td></tr>
 <tr class="separator:ac78f5a71bd04aaf9b904eb695e5490cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb96f70390aa6f01a2f4c8a0cdc32627"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PostingIteratorInterface.html#adb96f70390aa6f01a2f4c8a0cdc32627">skipDoc</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;<a class="el" href="classstrus_1_1PostingIteratorInterface.html#a9a5c6050569d96729af062aee02e6dfa">docno</a>)=0</td></tr>
-<tr class="memdesc:adb96f70390aa6f01a2f4c8a0cdc32627"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the next document match with a document number higher than or equal to docno.  <a href="#adb96f70390aa6f01a2f4c8a0cdc32627">More...</a><br/></td></tr>
+<tr class="memdesc:adb96f70390aa6f01a2f4c8a0cdc32627"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the next document match with a document number higher than or equal to a given document number.  <a href="#adb96f70390aa6f01a2f4c8a0cdc32627">More...</a><br/></td></tr>
 <tr class="separator:adb96f70390aa6f01a2f4c8a0cdc32627"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06ed13e7e8a62c7eac3f1f9c0bcbbc40"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PostingIteratorInterface.html#a06ed13e7e8a62c7eac3f1f9c0bcbbc40">skipDocCandidate</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;<a class="el" href="classstrus_1_1PostingIteratorInterface.html#a9a5c6050569d96729af062aee02e6dfa">docno</a>)=0</td></tr>
-<tr class="memdesc:a06ed13e7e8a62c7eac3f1f9c0bcbbc40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a candidate with a document number higher than or equal to docno without guarantee, that the document has matching positions.  <a href="#a06ed13e7e8a62c7eac3f1f9c0bcbbc40">More...</a><br/></td></tr>
+<tr class="memdesc:a06ed13e7e8a62c7eac3f1f9c0bcbbc40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a candidate with a document number higher than or equal to a given document number without guarantee, that the document has matching positions.  <a href="#a06ed13e7e8a62c7eac3f1f9c0bcbbc40">More...</a><br/></td></tr>
 <tr class="separator:a06ed13e7e8a62c7eac3f1f9c0bcbbc40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c0010412b848df94b629fa50148b966"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PostingIteratorInterface.html#a7c0010412b848df94b629fa50148b966">skipPos</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;firstpos)=0</td></tr>
-<tr class="memdesc:a7c0010412b848df94b629fa50148b966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last '<a class="el" href="classstrus_1_1PostingIteratorInterface.html#adb96f70390aa6f01a2f4c8a0cdc32627" title="Return the next document match with a document number higher than or equal to docno. ">skipDoc( const Index&amp;)</a>' call.  <a href="#a7c0010412b848df94b629fa50148b966">More...</a><br/></td></tr>
+<tr class="memdesc:a7c0010412b848df94b629fa50148b966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last '<a class="el" href="classstrus_1_1PostingIteratorInterface.html#adb96f70390aa6f01a2f4c8a0cdc32627" title="Return the next document match with a document number higher than or equal to a given document number...">skipDoc( const Index&amp;)</a>' call.  <a href="#a7c0010412b848df94b629fa50148b966">More...</a><br/></td></tr>
 <tr class="separator:a7c0010412b848df94b629fa50148b966"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc497a3198ab8385db2f1ef86797237a"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1PostingIteratorInterface.html#abc497a3198ab8385db2f1ef86797237a">featureid</a> () const =0</td></tr>
 <tr class="memdesc:abc497a3198ab8385db2f1ef86797237a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unique id in the system for a feature expression used for debugging and tracing.  <a href="#abc497a3198ab8385db2f1ef86797237a">More...</a><br/></td></tr>
@@ -280,7 +280,13 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Return the next document match with a document number higher than or equal to docno. </p>
+<p>Return the next document match with a document number higher than or equal to a given document number. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">docno</td><td>the minimum document number to fetch </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -306,8 +312,14 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Return a candidate with a document number higher than or equal to docno without guarantee, that the document has matching positions. </p>
+<p>Return a candidate with a document number higher than or equal to a given document number without guarantee, that the document has matching positions. </p>
 <dl class="section note"><dt>Note</dt><dd>Used for optimizing complex join operations that would first like to make a join on the document sets, before looking at the positions </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">docno</td><td>the minimum document number to fetch </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -333,7 +345,13 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last '<a class="el" href="classstrus_1_1PostingIteratorInterface.html#adb96f70390aa6f01a2f4c8a0cdc32627" title="Return the next document match with a document number higher than or equal to docno. ">skipDoc( const Index&amp;)</a>' call. </p>
+<p>Return the next matching position higher than or equal to firstpos in the current document. The current document is the one returned with the last '<a class="el" href="classstrus_1_1PostingIteratorInterface.html#adb96f70390aa6f01a2f4c8a0cdc32627" title="Return the next document match with a document number higher than or equal to a given document number...">skipDoc( const Index&amp;)</a>' call. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">firstpos</td><td>the minimum position to fetch </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -344,7 +362,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -79,9 +79,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:add56e4ba7f9667f5a8c923b824a823ac"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#add56e4ba7f9667f5a8c923b824a823ac">addWeightingFeature</a> (const std::string &amp;name_, <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *postingIterator_, float weight_, const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;stats_)=0</td></tr>
 <tr class="memdesc:add56e4ba7f9667f5a8c923b824a823ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a feature that is subject of weighting to the execution context.  <a href="#add56e4ba7f9667f5a8c923b824a823ac">More...</a><br/></td></tr>
 <tr class="separator:add56e4ba7f9667f5a8c923b824a823ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac801500433b0ed8a9d98d95bc385751e"><td class="memItemLeft" align="right" valign="top">virtual float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#ac801500433b0ed8a9d98d95bc385751e">call</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno)=0</td></tr>
-<tr class="memdesc:ac801500433b0ed8a9d98d95bc385751e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call the weighting function for a document.  <a href="#ac801500433b0ed8a9d98d95bc385751e">More...</a><br/></td></tr>
-<tr class="separator:ac801500433b0ed8a9d98d95bc385751e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79d0b1f312353c0a6feb133b68cbd237"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#a79d0b1f312353c0a6feb133b68cbd237">call</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno)=0</td></tr>
+<tr class="memdesc:a79d0b1f312353c0a6feb133b68cbd237"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call the weighting function for a document.  <a href="#a79d0b1f312353c0a6feb133b68cbd237">More...</a><br/></td></tr>
+<tr class="separator:a79d0b1f312353c0a6feb133b68cbd237"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for a weighting function with its state and context used during calculation. </p>
@@ -170,7 +170,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ac801500433b0ed8a9d98d95bc385751e"></a>
+<a class="anchor" id="a79d0b1f312353c0a6feb133b68cbd237"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -178,7 +178,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual float strus::WeightingFunctionContextInterface::call </td>
+          <td class="memname">virtual double strus::WeightingFunctionContextInterface::call </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
           <td class="paramname"><em>docno</em></td><td>)</td>
@@ -210,7 +210,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -65,19 +65,19 @@
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">    The C++ library strus implements basic operations to build</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">    a search engine for structured search on unstructured data.</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2013,2014 Patrick Frey</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2015 Patrick Frey</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"></span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">    This library is free software; you can redistribute it and/or</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU Lesser General Public</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU General Public</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">    License as published by the Free Software Foundation; either</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 2.1 of the License, or (at your option) any later version.</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 3 of the License, or (at your option) any later version.</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">    This library is distributed in the hope that it will be useful,</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">    but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    Lesser General Public License for more details.</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    General Public License for more details.</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU Lesser General Public</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU General Public</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">    License along with this library; if not, write to the Free Software</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span></div>
@@ -127,32 +127,39 @@
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                        std::size_t keysize,</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                        std::size_t domainkeysize)=0;</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a5b1d6f3c6c86a17b5d6aa8be0883d9fe">seekFirst</a>(</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* domainkey,</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                        std::size_t domainkeysize)=0;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a34b285f1f5bca3075ca76cf9a8c73b63">seekLast</a>(</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* domainkey,</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                        std::size_t domainkeysize)=0;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#abd1a97c67e83bcadae060f486c525014">seekNext</a>()=0;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a4356b5ebdb72c2ee9648973761d6076c">seekUpperBoundRestricted</a>(</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a921380c5f03f2fda3d6e54195fc75a7b">key</a>,</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                        std::size_t keysize,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* upkey,</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                        std::size_t upkeysize)=0;</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a5b1d6f3c6c86a17b5d6aa8be0883d9fe">seekFirst</a>(</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* domainkey,</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                        std::size_t domainkeysize)=0;</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a9152f94f38b4bf3aa5a21a81c6da82f8">seekPrev</a>()=0;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a921380c5f03f2fda3d6e54195fc75a7b">key</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a34b285f1f5bca3075ca76cf9a8c73b63">seekLast</a>(</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                        <span class="keyword">const</span> <span class="keywordtype">char</span>* domainkey,</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                        std::size_t domainkeysize)=0;</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a1baa88dc9ea3e1415b36e188edec1a46">value</a>() <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;};</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#abd1a97c67e83bcadae060f486c525014">seekNext</a>()=0;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a9152f94f38b4bf3aa5a21a81c6da82f8">seekPrev</a>()=0;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a921380c5f03f2fda3d6e54195fc75a7b">key</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        <span class="keyword">virtual</span> Slice <a class="code" href="classstrus_1_1DatabaseCursorInterface.html#a1baa88dc9ea3e1415b36e188edec1a46">value</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;};</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;</div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_1_1Slice_html_a1db62d28dd60ca57b70da86a70ff054b"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html#a1db62d28dd60ca57b70da86a70ff054b">strus::DatabaseCursorInterface::Slice::size</a></div><div class="ttdeci">std::size_t size() const </div><div class="ttdoc">Get the size of the data in bytes. </div><div class="ttdef"><b>Definition:</b> databaseCursorInterface.hpp:64</div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_html_acbd6daa61fd63f8341de233e13fed85a"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface.html#acbd6daa61fd63f8341de233e13fed85a">strus::DatabaseCursorInterface::~DatabaseCursorInterface</a></div><div class="ttdeci">virtual ~DatabaseCursorInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> databaseCursorInterface.hpp:79</div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_html"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface.html">strus::DatabaseCursorInterface</a></div><div class="ttdoc">Interface to database cursor. </div><div class="ttdef"><b>Definition:</b> databaseCursorInterface.hpp:39</div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_html_abd1a97c67e83bcadae060f486c525014"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface.html#abd1a97c67e83bcadae060f486c525014">strus::DatabaseCursorInterface::seekNext</a></div><div class="ttdeci">virtual Slice seekNext()=0</div><div class="ttdoc">Move cursor to the next key stored in the database in the current key domain. </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_1_1Slice_html"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html">strus::DatabaseCursorInterface::Slice</a></div><div class="ttdoc">Chunk data structure without ownership for keys and values of the database cursor. </div><div class="ttdef"><b>Definition:</b> databaseCursorInterface.hpp:43</div></div>
+<div class="ttc" id="classstrus_1_1DatabaseCursorInterface_html_a4356b5ebdb72c2ee9648973761d6076c"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface.html#a4356b5ebdb72c2ee9648973761d6076c">strus::DatabaseCursorInterface::seekUpperBoundRestricted</a></div><div class="ttdeci">virtual Slice seekUpperBoundRestricted(const char *key, std::size_t keysize, const char *upkey, std::size_t upkeysize)=0</div><div class="ttdoc">Move cursor to the least upper bound key stored in the database with upper limit specified by key and...</div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_1_1Slice_html_a93affdeb336f8c2690d382c7fd0ba94f"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html#a93affdeb336f8c2690d382c7fd0ba94f">strus::DatabaseCursorInterface::Slice::defined</a></div><div class="ttdeci">bool defined() const </div><div class="ttdoc">Evaluate if the chunk is defined or a NULL reference. </div><div class="ttdef"><b>Definition:</b> databaseCursorInterface.hpp:70</div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_html_a921380c5f03f2fda3d6e54195fc75a7b"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface.html#a921380c5f03f2fda3d6e54195fc75a7b">strus::DatabaseCursorInterface::key</a></div><div class="ttdeci">virtual Slice key() const =0</div><div class="ttdoc">Get the key of the current element. </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_1_1Slice_html_a3b583e73dd1854e5033508049a1b9596"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html#a3b583e73dd1854e5033508049a1b9596">strus::DatabaseCursorInterface::Slice::Slice</a></div><div class="ttdeci">Slice()</div><div class="ttdoc">Defaul constructor. </div><div class="ttdef"><b>Definition:</b> databaseCursorInterface.hpp:47</div></div>
@@ -168,7 +175,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

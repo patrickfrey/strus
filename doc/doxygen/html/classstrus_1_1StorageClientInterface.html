@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -88,9 +88,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a807092721e926eddbffb0dd7d0a360ee"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a807092721e926eddbffb0dd7d0a360ee">createTermPostingIterator</a> (const std::string &amp;type, const std::string &amp;value) const =0</td></tr>
 <tr class="memdesc:a807092721e926eddbffb0dd7d0a360ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the occurrencies of a term in the storage.  <a href="#a807092721e926eddbffb0dd7d0a360ee">More...</a><br/></td></tr>
 <tr class="separator:a807092721e926eddbffb0dd7d0a360ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af707ea61df2896e4cf84f03df0b85193"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#af707ea61df2896e4cf84f03df0b85193">createBrowsePostingIterator</a> (const <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html">MetaDataRestrictionInterface</a> *restriction, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;maxpos) const =0</td></tr>
+<tr class="memdesc:af707ea61df2896e4cf84f03df0b85193"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on all enumerable postings of document selected by a metadata restriction.  <a href="#af707ea61df2896e4cf84f03df0b85193">More...</a><br/></td></tr>
+<tr class="separator:af707ea61df2896e4cf84f03df0b85193"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6580606d318d5af83cf8b47511c752a9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ForwardIteratorInterface.html">ForwardIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a6580606d318d5af83cf8b47511c752a9">createForwardIterator</a> (const std::string &amp;type) const =0</td></tr>
 <tr class="memdesc:a6580606d318d5af83cf8b47511c752a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a viewer to inspect the term stored values with the forward index of the storage.  <a href="#a6580606d318d5af83cf8b47511c752a9">More...</a><br/></td></tr>
 <tr class="separator:a6580606d318d5af83cf8b47511c752a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a327cbb5347a8add3ac03d8dafa9da428"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1DocumentTermIteratorInterface.html">DocumentTermIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a327cbb5347a8add3ac03d8dafa9da428">createDocumentTermIterator</a> (const std::string &amp;type) const =0</td></tr>
+<tr class="memdesc:a327cbb5347a8add3ac03d8dafa9da428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on term occurrencies in documents (support for feature selection)  <a href="#a327cbb5347a8add3ac03d8dafa9da428">More...</a><br/></td></tr>
+<tr class="separator:a327cbb5347a8add3ac03d8dafa9da428"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1InvAclIteratorInterface.html">InvAclIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3">createInvAclIterator</a> (const std::string &amp;username) const =0</td></tr>
 <tr class="memdesc:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a an iterator on the numbers of documents a specified user is allowed to see.  <a href="#adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3">More...</a><br/></td></tr>
 <tr class="separator:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -119,11 +126,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ab6512978ae85fbc1f449f4118e75a417"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the user names used in document access restrictions.  <a href="#ab6512978ae85fbc1f449f4118e75a417">More...</a><br/></td></tr>
 <tr class="separator:ab6512978ae85fbc1f449f4118e75a417"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64175eaed2543f19d300d435c3c4018a"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a64175eaed2543f19d300d435c3c4018a">documentStatistics</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno, const <a class="el" href="classstrus_1_1StorageClientInterface.html#ab67f45a0f02c0ccf6a44d7e217e2bb21">DocumentStatisticsType</a> &amp;stat, const std::string &amp;type) const =0</td></tr>
-<tr class="memdesc:a64175eaed2543f19d300d435c3c4018a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one specified element of the documents statistics for a term type.  <a href="#a64175eaed2543f19d300d435c3c4018a">More...</a><br/></td></tr>
+<tr class="memdesc:a64175eaed2543f19d300d435c3c4018a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get one specified element of the documents statistics for a term type on the local server node.  <a href="#a64175eaed2543f19d300d435c3c4018a">More...</a><br/></td></tr>
 <tr class="separator:a64175eaed2543f19d300d435c3c4018a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06f8c8e118c96ee8c3c78cedd7cfda5b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a06f8c8e118c96ee8c3c78cedd7cfda5b">createMetaDataReader</a> () const =0</td></tr>
 <tr class="memdesc:a06f8c8e118c96ee8c3c78cedd7cfda5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to access items of document metadata.  <a href="#a06f8c8e118c96ee8c3c78cedd7cfda5b">More...</a><br/></td></tr>
 <tr class="separator:a06f8c8e118c96ee8c3c78cedd7cfda5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6fcd2da730734b8cb09ed14a1a0be337"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html">MetaDataRestrictionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a6fcd2da730734b8cb09ed14a1a0be337">createMetaDataRestriction</a> () const =0</td></tr>
+<tr class="memdesc:a6fcd2da730734b8cb09ed14a1a0be337"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an object for restrictions on metadata.  <a href="#a6fcd2da730734b8cb09ed14a1a0be337">More...</a><br/></td></tr>
+<tr class="separator:a6fcd2da730734b8cb09ed14a1a0be337"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e1b5d973e38a890f20858f0c7661567"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1AttributeReaderInterface.html">AttributeReaderInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a7e1b5d973e38a890f20858f0c7661567">createAttributeReader</a> () const =0</td></tr>
 <tr class="memdesc:a7e1b5d973e38a890f20858f0c7661567"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to access attributes attached to documents for representation.  <a href="#a7e1b5d973e38a890f20858f0c7661567">More...</a><br/></td></tr>
 <tr class="separator:a7e1b5d973e38a890f20858f0c7661567"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,9 +160,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aeae6016f195722d4772769e77ef41f0c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aeae6016f195722d4772769e77ef41f0c">checkStorage</a> (std::ostream &amp;errorlog) const =0</td></tr>
 <tr class="memdesc:aeae6016f195722d4772769e77ef41f0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through all key/value pairs and check their data for validity.  <a href="#aeae6016f195722d4772769e77ef41f0c">More...</a><br/></td></tr>
 <tr class="separator:aeae6016f195722d4772769e77ef41f0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a767184fa8964d2a61613c7c4eb840851"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a767184fa8964d2a61613c7c4eb840851">createDump</a> () const =0</td></tr>
-<tr class="memdesc:a767184fa8964d2a61613c7c4eb840851"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a dump of the storage.  <a href="#a767184fa8964d2a61613c7c4eb840851">More...</a><br/></td></tr>
-<tr class="separator:a767184fa8964d2a61613c7c4eb840851"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a526bb95e4603e9f96c0cbf11bb5e68"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a5a526bb95e4603e9f96c0cbf11bb5e68">createDump</a> (const std::string &amp;keyprefix) const =0</td></tr>
+<tr class="memdesc:a5a526bb95e4603e9f96c0cbf11bb5e68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a dump of the storage.  <a href="#a5a526bb95e4603e9f96c0cbf11bb5e68">More...</a><br/></td></tr>
+<tr class="separator:a5a526bb95e4603e9f96c0cbf11bb5e68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface of a strus IR storage. </p>
@@ -265,6 +276,54 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af707ea61df2896e4cf84f03df0b85193"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a>* strus::StorageClientInterface::createBrowsePostingIterator </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html">MetaDataRestrictionInterface</a> *&#160;</td>
+          <td class="paramname"><em>restriction</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
+          <td class="paramname"><em>maxpos</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an iterator on all enumerable postings of document selected by a metadata restriction. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">restriction</td><td>restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maxpos</td><td>maximum position visited. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the created iterator reference to be disposed with delete by the caller </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This iterator use is mainly for browsing occurrencies fulfilling a condition without query involved </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The iterator does not take the alive status of the documents into account. You have to formulate a restriction expression that does not match deleted documents if you do not want deleted documents in your iterated set of postings. </dd>
+<dd>
+The iterator does not take the document length into account. It returns the set of postings with positions in the range [1..maxpos]. Read postings you get only when joining this set with another. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a2e288d94aded7031aa841eb4e107c00a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -335,7 +394,40 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a767184fa8964d2a61613c7c4eb840851"></a>
+<a class="anchor" id="a327cbb5347a8add3ac03d8dafa9da428"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1DocumentTermIteratorInterface.html">DocumentTermIteratorInterface</a>* strus::StorageClientInterface::createDocumentTermIterator </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an iterator on term occurrencies in documents (support for feature selection) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>type name of the term </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the created iterator reference to be disposed with delete by the caller </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a5a526bb95e4603e9f96c0cbf11bb5e68"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -345,7 +437,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a>* strus::StorageClientInterface::createDump </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>keyprefix</em></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -357,6 +450,12 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Create a dump of the storage. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">keyprefix</td><td>prefix for keys to resrict the dump to </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>the object to fetch the dump from </dd></dl>
 
 </div>
@@ -484,6 +583,32 @@ Public Member Functions</h2></td></tr>
 
 <p>Create an interface to access items of document metadata. </p>
 <dl class="section return"><dt>Returns</dt><dd>the interface to access document metadata to be disposed with delete by the caller </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a6fcd2da730734b8cb09ed14a1a0be337"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html">MetaDataRestrictionInterface</a>* strus::StorageClientInterface::createMetaDataRestriction </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create an object for restrictions on metadata. </p>
+<dl class="section return"><dt>Returns</dt><dd>the created, uninitialized restriction object </dd></dl>
 
 </div>
 </div>
@@ -776,7 +901,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get one specified element of the documents statistics for a term type. </p>
+<p>Get one specified element of the documents statistics for a term type on the local server node. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">docno</td><td>the local internal document number addressed (return value of <a class="el" href="classstrus_1_1StorageClientInterface.html#ab216cde8b792beb06990647faddba708" title="Get the local internal document number. ">documentNumber( const std::string&amp;) const</a>) </td></tr>
@@ -873,7 +998,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -86,6 +86,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6f51b6dc91934e7be7e6b5b95c4432cf"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html">Slice</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a6f51b6dc91934e7be7e6b5b95c4432cf">seekUpperBound</a> (const char *<a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a921380c5f03f2fda3d6e54195fc75a7b">key</a>, std::size_t keysize, std::size_t domainkeysize)=0</td></tr>
 <tr class="memdesc:a6f51b6dc91934e7be7e6b5b95c4432cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move cursor to the least upper bound key stored in the database.  <a href="#a6f51b6dc91934e7be7e6b5b95c4432cf">More...</a><br/></td></tr>
 <tr class="separator:a6f51b6dc91934e7be7e6b5b95c4432cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4356b5ebdb72c2ee9648973761d6076c"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html">Slice</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a4356b5ebdb72c2ee9648973761d6076c">seekUpperBoundRestricted</a> (const char *<a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a921380c5f03f2fda3d6e54195fc75a7b">key</a>, std::size_t keysize, const char *upkey, std::size_t upkeysize)=0</td></tr>
+<tr class="memdesc:a4356b5ebdb72c2ee9648973761d6076c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move cursor to the least upper bound key stored in the database with upper limit specified by key and not by the domain key size.  <a href="#a4356b5ebdb72c2ee9648973761d6076c">More...</a><br/></td></tr>
+<tr class="separator:a4356b5ebdb72c2ee9648973761d6076c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b1d6f3c6c86a17b5d6aa8be0883d9fe"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html">Slice</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseCursorInterface.html#a5b1d6f3c6c86a17b5d6aa8be0883d9fe">seekFirst</a> (const char *domainkey, std::size_t domainkeysize)=0</td></tr>
 <tr class="memdesc:a5b1d6f3c6c86a17b5d6aa8be0883d9fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move cursor to the first key stored in the database in a defined key domain.  <a href="#a5b1d6f3c6c86a17b5d6aa8be0883d9fe">More...</a><br/></td></tr>
 <tr class="separator:a5b1d6f3c6c86a17b5d6aa8be0883d9fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -351,6 +354,64 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a4356b5ebdb72c2ee9648973761d6076c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1DatabaseCursorInterface_1_1Slice.html">Slice</a> strus::DatabaseCursorInterface::seekUpperBoundRestricted </td>
+          <td>(</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>key</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>keysize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>upkey</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>upkeysize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Move cursor to the least upper bound key stored in the database with upper limit specified by key and not by the domain key size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>pointer to the key of the item to seek </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">keysize</td><td>size of 'key' in bytes </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">upkey</td><td>pointer to the upper limit key that does not belong anymore to the key domain scanned </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">upkeysize</td><td>size of 'upkey' in bytes </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the key of the element found or an undefined key </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a1baa88dc9ea3e1415b36e188edec1a46"></a>
 <div class="memitem">
 <div class="memproto">
@@ -384,7 +445,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

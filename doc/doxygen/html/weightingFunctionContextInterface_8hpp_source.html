@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -65,19 +65,19 @@
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">    The C++ library strus implements basic operations to build</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">    a search engine for structured search on unstructured data.</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2013,2014 Patrick Frey</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2015 Patrick Frey</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"></span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">    This library is free software; you can redistribute it and/or</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU Lesser General Public</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU General Public</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">    License as published by the Free Software Foundation; either</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 2.1 of the License, or (at your option) any later version.</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 3 of the License, or (at your option) any later version.</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">    This library is distributed in the hope that it will be useful,</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">    but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    Lesser General Public License for more details.</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    General Public License for more details.</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU Lesser General Public</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU General Public</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">    License along with this library; if not, write to the Free Software</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span></div>
@@ -110,7 +110,7 @@
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                        <span class="keywordtype">float</span> weight_,</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1TermStatistics.html">TermStatistics</a>&amp; stats_)=0;</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">float</span> <a class="code" href="classstrus_1_1WeightingFunctionContextInterface.html#ac801500433b0ed8a9d98d95bc385751e">call</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; docno)=0;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code" href="classstrus_1_1WeightingFunctionContextInterface.html#a79d0b1f312353c0a6feb133b68cbd237">call</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; docno)=0;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;};</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}<span class="comment">//namespace</span></div>
@@ -118,10 +118,10 @@
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor"></span></div>
 <div class="ttc" id="namespacestrus_html_a3c5a45d9cd423c89104928e5feff5a4e"><div class="ttname"><a href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></div><div class="ttdeci">int32_t Index</div><div class="ttdoc">Number type generally used for locally counted indices. </div><div class="ttdef"><b>Definition:</b> index.hpp:50</div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
-<div class="ttc" id="classstrus_1_1WeightingFunctionContextInterface_html_ac801500433b0ed8a9d98d95bc385751e"><div class="ttname"><a href="classstrus_1_1WeightingFunctionContextInterface.html#ac801500433b0ed8a9d98d95bc385751e">strus::WeightingFunctionContextInterface::call</a></div><div class="ttdeci">virtual float call(const Index &amp;docno)=0</div><div class="ttdoc">Call the weighting function for a document. </div></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionContextInterface_html"><div class="ttname"><a href="classstrus_1_1WeightingFunctionContextInterface.html">strus::WeightingFunctionContextInterface</a></div><div class="ttdoc">Interface for a weighting function with its state and context used during calculation. </div><div class="ttdef"><b>Definition:</b> weightingFunctionContextInterface.hpp:45</div></div>
 <div class="ttc" id="classstrus_1_1PostingIteratorInterface_html"><div class="ttname"><a href="classstrus_1_1PostingIteratorInterface.html">strus::PostingIteratorInterface</a></div><div class="ttdoc">Structure that represents a set of feature occurrencies (postings) as iterator. </div><div class="ttdef"><b>Definition:</b> postingIteratorInterface.hpp:41</div></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionContextInterface_html_add56e4ba7f9667f5a8c923b824a823ac"><div class="ttname"><a href="classstrus_1_1WeightingFunctionContextInterface.html#add56e4ba7f9667f5a8c923b824a823ac">strus::WeightingFunctionContextInterface::addWeightingFeature</a></div><div class="ttdeci">virtual void addWeightingFeature(const std::string &amp;name_, PostingIteratorInterface *postingIterator_, float weight_, const TermStatistics &amp;stats_)=0</div><div class="ttdoc">Add a feature that is subject of weighting to the execution context. </div></div>
+<div class="ttc" id="classstrus_1_1WeightingFunctionContextInterface_html_a79d0b1f312353c0a6feb133b68cbd237"><div class="ttname"><a href="classstrus_1_1WeightingFunctionContextInterface.html#a79d0b1f312353c0a6feb133b68cbd237">strus::WeightingFunctionContextInterface::call</a></div><div class="ttdeci">virtual double call(const Index &amp;docno)=0</div><div class="ttdoc">Call the weighting function for a document. </div></div>
 <div class="ttc" id="termStatistics_8hpp_html"><div class="ttname"><a href="termStatistics_8hpp.html">termStatistics.hpp</a></div></div>
 <div class="ttc" id="classstrus_1_1TermStatistics_html"><div class="ttname"><a href="classstrus_1_1TermStatistics.html">strus::TermStatistics</a></div><div class="ttdoc">Global term statistics, if passed down with the query. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:37</div></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionContextInterface_html_ae7b9f57f3a2ae9dcb3883d30f1ae310c"><div class="ttname"><a href="classstrus_1_1WeightingFunctionContextInterface.html#ae7b9f57f3a2ae9dcb3883d30f1ae310c">strus::WeightingFunctionContextInterface::~WeightingFunctionContextInterface</a></div><div class="ttdeci">virtual ~WeightingFunctionContextInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> weightingFunctionContextInterface.hpp:49</div></div>
@@ -129,7 +129,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

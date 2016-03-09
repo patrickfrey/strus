@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -65,19 +65,19 @@
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">    The C++ library strus implements basic operations to build</span></div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">    a search engine for structured search on unstructured data.</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2013,2014 Patrick Frey</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2015 Patrick Frey</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"></span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">    This library is free software; you can redistribute it and/or</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU Lesser General Public</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU General Public</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">    License as published by the Free Software Foundation; either</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 2.1 of the License, or (at your option) any later version.</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 3 of the License, or (at your option) any later version.</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">    This library is distributed in the hope that it will be useful,</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">    but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    Lesser General Public License for more details.</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    General Public License for more details.</span></div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU Lesser General Public</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU General Public</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">    License along with this library; if not, write to the Free Software</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span></div>
@@ -136,39 +136,38 @@
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                std::string m_featureSet;</div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        };</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1QueryEvalInterface.html#a34421dcb9fbaeb9928c01ad80271d487">addSummarizerFunction</a>(</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                        <span class="keyword">const</span> std::string&amp; functionName,</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                        <a class="code" href="classstrus_1_1SummarizerFunctionInstanceInterface.html">SummarizerFunctionInstanceInterface</a>* <span class="keyword">function</span>,</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                        <span class="keyword">const</span> std::vector&lt;FeatureParameter&gt;&amp; featureParameters,</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                        <span class="keyword">const</span> std::string&amp; resultAttribute)=0;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1QueryEvalInterface.html#adbedfd90392fcc5ec0db2734fe38bfba">addWeightingFunction</a>(</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                        <span class="keyword">const</span> std::string&amp; functionName,</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                        <a class="code" href="classstrus_1_1WeightingFunctionInstanceInterface.html">WeightingFunctionInstanceInterface</a>* <span class="keyword">function</span>,</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                        <span class="keyword">const</span> std::vector&lt;FeatureParameter&gt;&amp; featureParameters,</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                        <span class="keywordtype">float</span> weight)=0;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1QueryInterface.html">QueryInterface</a>* <a class="code" href="classstrus_1_1QueryEvalInterface.html#a785f11432b46e6381be51b58d973d6bf">createQuery</a>(</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a>* storage) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;};</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;<span class="preprocessor"></span></div>
-<div class="ttc" id="classstrus_1_1StorageClientInterface_html"><div class="ttname"><a href="classstrus_1_1StorageClientInterface.html">strus::StorageClientInterface</a></div><div class="ttdoc">Interface of a strus IR storage. </div><div class="ttdef"><b>Definition:</b> storageClientInterface.hpp:67</div></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1QueryEvalInterface.html#ac5c00c083487d70e9e5fcb0ed4c31b5f">addSummarizerFunction</a>(</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                        <span class="keyword">const</span> std::string&amp; functionName,</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                        <a class="code" href="classstrus_1_1SummarizerFunctionInstanceInterface.html">SummarizerFunctionInstanceInterface</a>* <span class="keyword">function</span>,</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                        <span class="keyword">const</span> std::vector&lt;FeatureParameter&gt;&amp; featureParameters)=0;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1QueryEvalInterface.html#adbedfd90392fcc5ec0db2734fe38bfba">addWeightingFunction</a>(</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                        <span class="keyword">const</span> std::string&amp; functionName,</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                        <a class="code" href="classstrus_1_1WeightingFunctionInstanceInterface.html">WeightingFunctionInstanceInterface</a>* <span class="keyword">function</span>,</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                        <span class="keyword">const</span> std::vector&lt;FeatureParameter&gt;&amp; featureParameters,</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                        <span class="keywordtype">float</span> weight)=0;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1QueryInterface.html">QueryInterface</a>* <a class="code" href="classstrus_1_1QueryEvalInterface.html#a785f11432b46e6381be51b58d973d6bf">createQuery</a>(</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a>* storage) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;};</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="classstrus_1_1StorageClientInterface_html"><div class="ttname"><a href="classstrus_1_1StorageClientInterface.html">strus::StorageClientInterface</a></div><div class="ttdoc">Interface of a strus IR storage. </div><div class="ttdef"><b>Definition:</b> storageClientInterface.hpp:71</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></div><div class="ttdoc">Defines a query evaluation scheme. </div><div class="ttdef"><b>Definition:</b> queryEvalInterface.hpp:50</div></div>
 <div class="ttc" id="classstrus_1_1WeightingFunctionInstanceInterface_html"><div class="ttname"><a href="classstrus_1_1WeightingFunctionInstanceInterface.html">strus::WeightingFunctionInstanceInterface</a></div><div class="ttdoc">Interface for a parameterized weighting function instance. </div><div class="ttdef"><b>Definition:</b> weightingFunctionInstanceInterface.hpp:50</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html_a66303958c032fea489f193fb9c15fab3"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#a66303958c032fea489f193fb9c15fab3">strus::QueryEvalInterface::~QueryEvalInterface</a></div><div class="ttdeci">virtual ~QueryEvalInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> queryEvalInterface.hpp:54</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_1_1FeatureParameter_html"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface_1_1FeatureParameter.html">strus::QueryEvalInterface::FeatureParameter</a></div><div class="ttdoc">Structure that describes a feature that is subject of summarization or weighting. ...</div><div class="ttdef"><b>Definition:</b> queryEvalInterface.hpp:81</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html_adbedfd90392fcc5ec0db2734fe38bfba"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#adbedfd90392fcc5ec0db2734fe38bfba">strus::QueryEvalInterface::addWeightingFunction</a></div><div class="ttdeci">virtual void addWeightingFunction(const std::string &amp;functionName, WeightingFunctionInstanceInterface *function, const std::vector&lt; FeatureParameter &gt; &amp;featureParameters, float weight)=0</div><div class="ttdoc">Declare a weighting function to use for this query evaluation scheme. </div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html_a4134874954a46e94dfad4a90d7d60190"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#a4134874954a46e94dfad4a90d7d60190">strus::QueryEvalInterface::addRestrictionFeature</a></div><div class="ttdeci">virtual void addRestrictionFeature(const std::string &amp;set_)=0</div><div class="ttdoc">Define a set of features to be used as restriction (exclude documents that do not contain a feature o...</div></div>
-<div class="ttc" id="classstrus_1_1QueryInterface_html"><div class="ttname"><a href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></div><div class="ttdoc">Defines a strus information retrieval query. </div><div class="ttdef"><b>Definition:</b> queryInterface.hpp:49</div></div>
+<div class="ttc" id="classstrus_1_1QueryInterface_html"><div class="ttname"><a href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></div><div class="ttdoc">Defines a strus information retrieval query. </div><div class="ttdef"><b>Definition:</b> queryInterface.hpp:50</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html_a785f11432b46e6381be51b58d973d6bf"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#a785f11432b46e6381be51b58d973d6bf">strus::QueryEvalInterface::createQuery</a></div><div class="ttdeci">virtual QueryInterface * createQuery(const StorageClientInterface *storage) const =0</div><div class="ttdoc">Create a new query. </div></div>
+<div class="ttc" id="classstrus_1_1QueryEvalInterface_html_ac5c00c083487d70e9e5fcb0ed4c31b5f"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#ac5c00c083487d70e9e5fcb0ed4c31b5f">strus::QueryEvalInterface::addSummarizerFunction</a></div><div class="ttdeci">virtual void addSummarizerFunction(const std::string &amp;functionName, SummarizerFunctionInstanceInterface *function, const std::vector&lt; FeatureParameter &gt; &amp;featureParameters)=0</div><div class="ttdoc">Declare a summarizer function to use for this query evaluation scheme. </div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html_ac2aded5ae260583392cf08cd03278dec"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#ac2aded5ae260583392cf08cd03278dec">strus::QueryEvalInterface::addSelectionFeature</a></div><div class="ttdeci">virtual void addSelectionFeature(const std::string &amp;set_)=0</div><div class="ttdoc">Declare a set of features to be used for selection (declare what documents to weight) ...</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_1_1FeatureParameter_html_a9dc8eefe0139d15fecb0d7a79a8d58fa"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface_1_1FeatureParameter.html#a9dc8eefe0139d15fecb0d7a79a8d58fa">strus::QueryEvalInterface::FeatureParameter::parameterName</a></div><div class="ttdeci">const std::string &amp; parameterName() const </div><div class="ttdef"><b>Definition:</b> queryEvalInterface.hpp:92</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html_ae95b9416827422ca9fa58c029406a283"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#ae95b9416827422ca9fa58c029406a283">strus::QueryEvalInterface::addExclusionFeature</a></div><div class="ttdeci">virtual void addExclusionFeature(const std::string &amp;set_)=0</div><div class="ttdoc">Define a set of features to be used as exclusion (exclude documents that contain a feature of the set...</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_html_ad3ff16ad708d3dbf1f9eb3655e025898"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#ad3ff16ad708d3dbf1f9eb3655e025898">strus::QueryEvalInterface::addTerm</a></div><div class="ttdeci">virtual void addTerm(const std::string &amp;set_, const std::string &amp;type_, const std::string &amp;value_)=0</div><div class="ttdoc">Declare a predefined term for all queries of this type. </div></div>
-<div class="ttc" id="classstrus_1_1QueryEvalInterface_html_a34421dcb9fbaeb9928c01ad80271d487"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface.html#a34421dcb9fbaeb9928c01ad80271d487">strus::QueryEvalInterface::addSummarizerFunction</a></div><div class="ttdeci">virtual void addSummarizerFunction(const std::string &amp;functionName, SummarizerFunctionInstanceInterface *function, const std::vector&lt; FeatureParameter &gt; &amp;featureParameters, const std::string &amp;resultAttribute)=0</div><div class="ttdoc">Declare a summarizer function to use for this query evaluation scheme. </div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_1_1FeatureParameter_html_ae31c99eaabcf6f7e9a9ed61d457aa9c5"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface_1_1FeatureParameter.html#ae31c99eaabcf6f7e9a9ed61d457aa9c5">strus::QueryEvalInterface::FeatureParameter::FeatureParameter</a></div><div class="ttdeci">FeatureParameter(const std::string &amp;parameterName_, const std::string &amp;featureSet_)</div><div class="ttdef"><b>Definition:</b> queryEvalInterface.hpp:84</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_1_1FeatureParameter_html_a29b8c66b6382f5c59531c56308f56856"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface_1_1FeatureParameter.html#a29b8c66b6382f5c59531c56308f56856">strus::QueryEvalInterface::FeatureParameter::FeatureParameter</a></div><div class="ttdeci">FeatureParameter(const FeatureParameter &amp;o)</div><div class="ttdef"><b>Definition:</b> queryEvalInterface.hpp:88</div></div>
 <div class="ttc" id="classstrus_1_1QueryEvalInterface_1_1FeatureParameter_html_a68e2b1e046613a4d13ab362a6670d0b2"><div class="ttname"><a href="classstrus_1_1QueryEvalInterface_1_1FeatureParameter.html#a68e2b1e046613a4d13ab362a6670d0b2">strus::QueryEvalInterface::FeatureParameter::featureSet</a></div><div class="ttdeci">const std::string &amp; featureSet() const </div><div class="ttdef"><b>Definition:</b> queryEvalInterface.hpp:93</div></div>
@@ -177,7 +176,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

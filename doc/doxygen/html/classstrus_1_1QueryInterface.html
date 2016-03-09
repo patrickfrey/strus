@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.4</span>
+   &#160;<span id="projectnumber">0.5</span>
    </div>
   </td>
  </tr>
@@ -59,7 +59,6 @@
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classstrus_1_1QueryInterface-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -72,24 +71,6 @@
 
 <p><code>#include &lt;<a class="el" href="queryInterface_8hpp_source.html">queryInterface.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:a9bf5d7dd437f8e5fbc62555928f8e415"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">CompareOperator</a> { <br/>
-&#160;&#160;<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415a7b435ed17f3877259d0ebcccfd76298e">CompareLess</a>, 
-<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415a50a67cece2872214eaadb3677aba2b45">CompareLessEqual</a>, 
-<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415ad38ab286ec801ddf412e02ee4f2376c6">CompareEqual</a>, 
-<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415afc387cf611d672ed8dcaf419fcae9e22">CompareNotEqual</a>, 
-<br/>
-&#160;&#160;<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415a50e889a38721363918743e43c5d23a2e">CompareGreater</a>, 
-<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415ab2846400803fefe97606c8d45bc0585c">CompareGreaterEqual</a>
-<br/>
- }</td></tr>
-<tr class="memdesc:a9bf5d7dd437f8e5fbc62555928f8e415"><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator for restrictions.  <a href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">More...</a><br/></td></tr>
-<tr class="separator:a9bf5d7dd437f8e5fbc62555928f8e415"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0cc2334559cdd7dd28b181f626dcb22e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <a class="el" href="classstrus_1_1QueryInterface.html#a0cc2334559cdd7dd28b181f626dcb22ea897f7cf033c1faaa7ba78314559bfbf6">NofCompareOperators</a> =((int)CompareGreaterEqual+1)
- }</td></tr>
-<tr class="separator:a0cc2334559cdd7dd28b181f626dcb22e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af60d4b0f826740ebd97c16536bda74ea"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#af60d4b0f826740ebd97c16536bda74ea">~QueryInterface</a> ()</td></tr>
@@ -113,9 +94,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a37a7455f7ed52fe58de5bdfde57fed71"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a37a7455f7ed52fe58de5bdfde57fed71">defineGlobalStatistics</a> (const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats_)=0</td></tr>
 <tr class="memdesc:a37a7455f7ed52fe58de5bdfde57fed71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the global statistics for the case that they are defined by the client.  <a href="#a37a7455f7ed52fe58de5bdfde57fed71">More...</a><br/></td></tr>
 <tr class="separator:a37a7455f7ed52fe58de5bdfde57fed71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca789ed6157d8f4451d838a332ab8460"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#aca789ed6157d8f4451d838a332ab8460">defineMetaDataRestriction</a> (<a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">CompareOperator</a> opr, const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;operand, bool newGroup=true)=0</td></tr>
-<tr class="memdesc:aca789ed6157d8f4451d838a332ab8460"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a restriction on documents base on a condition on the meta data.  <a href="#aca789ed6157d8f4451d838a332ab8460">More...</a><br/></td></tr>
-<tr class="separator:aca789ed6157d8f4451d838a332ab8460"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3da7db5f01881f97e5b064d7f4d9f2e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#aa3da7db5f01881f97e5b064d7f4d9f2e">addMetaDataRestrictionCondition</a> (<a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">MetaDataRestrictionInterface::CompareOperator</a> opr, const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;operand, bool newGroup=true)=0</td></tr>
+<tr class="memdesc:aa3da7db5f01881f97e5b064d7f4d9f2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a condition clause to the restriction on the document meta data of this query.  <a href="#aa3da7db5f01881f97e5b064d7f4d9f2e">More...</a><br/></td></tr>
+<tr class="separator:aa3da7db5f01881f97e5b064d7f4d9f2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adbd9f6ede6eecec88f35e1c5334e3342"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#adbd9f6ede6eecec88f35e1c5334e3342">addDocumentEvaluationSet</a> (const std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt; &amp;docnolist_)=0</td></tr>
 <tr class="memdesc:adbd9f6ede6eecec88f35e1c5334e3342"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a restriction on the documents as list of local document numbers (Add local document numbers to the list of documents to restrict the query on)  <a href="#adbd9f6ede6eecec88f35e1c5334e3342">More...</a><br/></td></tr>
 <tr class="separator:adbd9f6ede6eecec88f35e1c5334e3342"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -128,59 +109,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5c32a31f060c0df68c933f449cc93d01"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a5c32a31f060c0df68c933f449cc93d01">addUserName</a> (const std::string &amp;username_)=0</td></tr>
 <tr class="memdesc:a5c32a31f060c0df68c933f449cc93d01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a name of a user role in the query for alternative ACL restrictions.  <a href="#a5c32a31f060c0df68c933f449cc93d01">More...</a><br/></td></tr>
 <tr class="separator:a5c32a31f060c0df68c933f449cc93d01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92e5125688610a1e995b02fdf1fb3a06"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
-&lt; <a class="el" href="classstrus_1_1ResultDocument.html">ResultDocument</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a92e5125688610a1e995b02fdf1fb3a06">evaluate</a> ()=0</td></tr>
-<tr class="memdesc:a92e5125688610a1e995b02fdf1fb3a06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the query.  <a href="#a92e5125688610a1e995b02fdf1fb3a06">More...</a><br/></td></tr>
-<tr class="separator:a92e5125688610a1e995b02fdf1fb3a06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28242d537b8dcf32d00b48c407ff8fc4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1QueryResult.html">QueryResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a28242d537b8dcf32d00b48c407ff8fc4">evaluate</a> ()=0</td></tr>
+<tr class="memdesc:a28242d537b8dcf32d00b48c407ff8fc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the query.  <a href="#a28242d537b8dcf32d00b48c407ff8fc4">More...</a><br/></td></tr>
+<tr class="separator:a28242d537b8dcf32d00b48c407ff8fc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Defines a strus information retrieval query. </p>
-</div><h2 class="groupheader">Member Enumeration Documentation</h2>
-<a class="anchor" id="a0cc2334559cdd7dd28b181f626dcb22e"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">anonymous enum</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a0cc2334559cdd7dd28b181f626dcb22ea897f7cf033c1faaa7ba78314559bfbf6"></a>NofCompareOperators</em>&#160;</td><td class="fielddoc">
-</td></tr>
-</table>
-
-</div>
-</div>
-<a class="anchor" id="a9bf5d7dd437f8e5fbc62555928f8e415"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">strus::QueryInterface::CompareOperator</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Comparison operator for restrictions. </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a9bf5d7dd437f8e5fbc62555928f8e415a7b435ed17f3877259d0ebcccfd76298e"></a>CompareLess</em>&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a9bf5d7dd437f8e5fbc62555928f8e415a50a67cece2872214eaadb3677aba2b45"></a>CompareLessEqual</em>&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a9bf5d7dd437f8e5fbc62555928f8e415ad38ab286ec801ddf412e02ee4f2376c6"></a>CompareEqual</em>&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a9bf5d7dd437f8e5fbc62555928f8e415afc387cf611d672ed8dcaf419fcae9e22"></a>CompareNotEqual</em>&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a9bf5d7dd437f8e5fbc62555928f8e415a50e889a38721363918743e43c5d23a2e"></a>CompareGreater</em>&#160;</td><td class="fielddoc">
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a9bf5d7dd437f8e5fbc62555928f8e415ab2846400803fefe97606c8d45bc0585c"></a>CompareGreaterEqual</em>&#160;</td><td class="fielddoc">
-</td></tr>
-</table>
-
-</div>
-</div>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="af60d4b0f826740ebd97c16536bda74ea"></a>
 <div class="memitem">
 <div class="memproto">
@@ -233,6 +168,63 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">docnolist_</td><td>list of documents to evaluate the query on </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa3da7db5f01881f97e5b064d7f4d9f2e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryInterface::addMetaDataRestrictionCondition </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">MetaDataRestrictionInterface::CompareOperator</a>&#160;</td>
+          <td class="paramname"><em>opr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;&#160;</td>
+          <td class="paramname"><em>operand</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>newGroup</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add a condition clause to the restriction on the document meta data of this query. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">opr</td><td>condition compare operator </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of meta data element to check </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">operand</td><td>constant number to check against </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">newGroup</td><td>true, if the conditional opens a new group of elements joined with a logical "OR" false, if the conditional belongs to the last group of elements joined with a logical "OR". Different groups are joined with a logical "AND" to form the meta data restriction expression </td></tr>
   </table>
   </dd>
 </dl>
@@ -382,63 +374,6 @@ More than one variable can be attached </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="aca789ed6157d8f4451d838a332ab8460"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void strus::QueryInterface::defineMetaDataRestriction </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1QueryInterface.html#a9bf5d7dd437f8e5fbc62555928f8e415">CompareOperator</a>&#160;</td>
-          <td class="paramname"><em>opr</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;&#160;</td>
-          <td class="paramname"><em>operand</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>newGroup</em> = <code>true</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Define a restriction on documents base on a condition on the meta data. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">opr</td><td>condition compare operator </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of meta data element to check </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">operand</td><td>constant number to check against </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">newGroup</td><td>true, if the conditional opens a new group of elements joined with a logical "OR" false, if the conditional belongs to the last group of elements joined with a logical "OR". Different groups are joined with a logical "AND" to form the meta data restriction expression </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a class="anchor" id="a78074cc3f229b01b3b4e3e65598c68dd"></a>
 <div class="memitem">
 <div class="memproto">
@@ -489,7 +424,7 @@ More than one variable can be attached </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a92e5125688610a1e995b02fdf1fb3a06"></a>
+<a class="anchor" id="a28242d537b8dcf32d00b48c407ff8fc4"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -497,7 +432,7 @@ More than one variable can be attached </dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::vector&lt;<a class="el" href="classstrus_1_1ResultDocument.html">ResultDocument</a>&gt; strus::QueryInterface::evaluate </td>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1QueryResult.html">QueryResult</a> strus::QueryInterface::evaluate </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -685,7 +620,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jan 17 2016 13:49:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 9 2016 10:54:53 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
