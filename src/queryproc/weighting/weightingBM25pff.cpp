@@ -515,7 +515,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		{
 			m_cardinality = value.touint();
 		}
-		else if (value.type == ArithmeticVariant::UInt && value.touint() >= 0)
+		else if (value.type == ArithmeticVariant::UInt)
 		{
 			m_cardinality = value.touint();
 		}

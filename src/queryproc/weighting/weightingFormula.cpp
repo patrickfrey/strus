@@ -210,6 +210,7 @@ double WeightingFunctionContextFormula::call( const Index& docno)
 	}
 	try
 	{
+		m_metadata->skipDoc( docno);
 		return m_interpreter.run( this);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), "formula", *m_errorhnd, 0.0);

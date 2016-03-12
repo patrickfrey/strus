@@ -24,37 +24,40 @@
 	<div id="content">
 		<h1>Strus background</h1>
 		<h2>Why to build yet another search engine</h2>
+		<h3>Why?</h3>
+		<p class="description">
+		Why not?
+		</p>
+
 		<h3>Personal motivation</h3>
-		<p class="description">The project <i>strus</i> started just out of frustration. 
+		<p class="description">The project <i>Strus</i> started just out of frustration. 
 		I was working on a project that was doomed from the beginning for two years. 
 		After realising that it had to fail, I had to focus on finding a new job.
 		Unfortunately this proved to be more difficult than I thought. I had to do something
 		to keep myself spinning and I wanted to do something in a topic that I knew by heart.
 		I was working for ten years in a company providing services for information retrieval 
 		and also implementing the core of the search engine for these services. So I knew 
-		what it was about and the problems I had to face. In September 2014 I started the project strus.
+		what it was about and the problems I had to face. In September 2014 I started the project Strus.
 		</p>
 
-		<h3>What is strus</h3>
-		<p class="description">Strus is a set of components (libraries, programs and language bindings)
+		<h3>What is Strus?</h3>
+		<p class="description"><i>Strus</i> is a set of components (libraries, programs and language bindings)
 		to build the core of a scalable full text search engine. It aims to cover
 		classical IR as well as structured search for arbitrary complex expressions 
 		on the boolean algebra of sets of term occurrencies (d,p) where d references a 
 		document and p a discrete position number. Besides matching of expressions,
-		strus also provides a mechanism to attach variables on subexpression matches
+		<i>Strus</i> also provides a mechanism to attach variables on subexpression matches
 		than can be referenced in the presentation of the query result.
-		A description of the components of strus and what is not part of strus or not
-		implemented yet can be found <a href="components.htm">here</a>.
 		</p>
 
 		<a name="Differences"> </a>
-		<h3>What distiguishes strus from other fulltext search engines</h3>
+		<h3>What distiguishes Strus from other fulltext search engines</h3>
 		<a name="OutsourcingDataStore"> </a>
 		<h4>Outsourcing the data storage</h4>
-		<p class="description">Strus can be build uppon any modern NOSQL key/value database that has
+		<p class="description"><i>Strus</i> can be build uppon any modern NOSQL key/value database that has
 		an <a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upper bound seek</a>
 		to implement its data storage.
-		This reduces the complexity of the problem (the strus core with storage and query
+		This reduces the complexity of the problem (the <i>Strus</i> core with storage and query
 		evaluation has about 32000 lines of code). Alternative implementations for the
 		database can be provided by experts on the topic.</p>
 		<a name="StructuredQueries"> </a>
@@ -62,7 +65,7 @@
 		<p class="description">
 		The modeling of structured queries is more rigid than in other search engine like for
 		example Lucene. This means that you can not do everything you can do with Lucene.
-		Strus describes every structure as a N-ary operator on sets of pairs document number, position.
+		<i>Strus</i> describes every structure as a N-ary operator on sets of pairs document number, position.
 		The operators are implemented as iterators and can be assembled to arbitrary complex
 		exression trees. The intention of this reduction is simplicity. But even with this
 		simple approach you can do most of the things you would expect to have. For example 
@@ -71,7 +74,7 @@
 		</p>
 		<a name="InformationExtraction"> </a>
 		<h4>Information extraction</h4>
-		<p class="description">In strus the result of the set operations needed to 
+		<p class="description">In <i>Strus</i> the result of the set operations needed to 
 		model expressions are implemented as iterators. The advantage of this model 
 		is not only that you do not need memory for storing intermediate results.
 		You also do not need to care about what information to collect for an intermediate result. 
@@ -83,8 +86,8 @@
 		or close to a match. Hence you can implement powerful information extraction
 		for feature selection or feature extraction. If you have the resources
 		to do strong NLP for normalizing your documents, you could even imagine
-		that strus could help to implement a system for query answering.
-		At least strus could help to find candidate hypothesis for query 
+		that <i>Strus</i> could help to implement a system for query answering.
+		At least <i>Strus</i> could help to find candidate hypothesis for query 
 		answering that can be verified with another program.</p>
 	</div>
 </div>

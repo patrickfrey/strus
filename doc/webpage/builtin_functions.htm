@@ -15,345 +15,167 @@
 </script><div id="wrap">
 	<div id="content">
 		<h1>Strus built-in functions</h1>
-		<h2>Query evaluation</h2>
-		<a name="PostingJoinOperators"></a>
-		<h3>Postings join operators</h3>
-		<p class="description">
-		The following table lists the posting set join operators implemented in the core.
-		A set of postings is modeled as
-		<pre>{ (d,p) | d is a positive document number, p is a positive position index }</pre>
-		</p>
-		<div class="library">
-		<table border="1">
-		<tr>
-		<th width=18%><p class="title">Name</p></th>
-		<th width=75%><p class="title">Description</p></th>
-		</tr><tr>
-		<td><p class="identifier">union</p></td>
-		<td><p class="description">Set union of the argument sets: (d,p) is a member of the
-		result set, if it is a member of any ot the argument sets.</p></td>
-		</tr><tr>
-		<td><p class="identifier">intersect</p></td>
-		<td><p class="description">Set intersection of the argument sets: (d,p) is a member
-		of the result set, if it is a member of every argument set.</p></td>
-		</tr><tr>
-		<td><p class="identifier">diff</p></td>
-		<td><p class="description">Set difference of the two arguments sets: (d,p) is a member 
-		of the result set, if it is member of the first set but not of the second set.</p></td>
-		</tr><tr>
-		<td><p class="identifier">contains</p></td>
-		<td><p class="description">Document intersection: (d,1) is a member of the result
-		set, if for every arument set there exist a p with (d,p) is a member of the argument
-		set. This operator is mainly used to describe efficient document selections not touching
-		the position information blocks.</p></td>
-		</tr><tr>
-		<td><p class="identifier">succ</p></td>
-		<td><p class="description">Successor set: (d,p+1) is member of the result set, for every
-		element (d,p) of the argument set.</p></td>
-		</tr><tr>
-		<td><p class="identifier">pred</p></td>
-		<td><p class="description">Predeccessor set: (d,p) is member of the result set, for every
-		element (d,p+1) of the argument where with p &ne; 0.</p></td>
-		</tr><tr>
-		<td><p class="identifier">within</p></td>
-		<td><p class="description">Select the first (positive range) or the last (negative range)
-		element of a selection of elements of each argument set in the same document with 
-		the positions in an interval of maximum size specified by the range argument.</p></td>
-		</tr><tr>
-		<td><p class="identifier">within_struct</p></td>
-		<td><p class="description">Same as <b>within</b> but with an additional element (1st argument)
-		that plays the role of a structure element, that must not be overlapped by the
-		area covered by the selected elements.</p></td>
-		</tr><tr>
-		<td><p class="identifier">sequence</p></td>
-		<td><p class="description">Select the first (positive range) or the last (negative range)
-		element of a selection of elements of each argument set in the same document with 
-		the positions in an interval of maximum size specified by the range argument, 
-		ordered in the same order of positions as they appear in the input.</p></td>
-		</tr><tr>
-		<td><p class="identifier">sequence_struct</p></td>
-		<td><p class="description">Same as <b>sequence</b> but with an additional element (1st argument)
-		that plays the role of a structure element, that must not be overlapped by the
-		area covered by the selected elements.</p></td>
-		</tr>
-		</table>
-		</div>
-		<a name="WeightingFunctions"></a>
-		<h3>Weighting functions</h3>
-		<p class="description">
-		Here is the list of weighting functions defined in the core.
-		</p>
-		<div class="library">
-		<table border="1">
-		<tr>
-		<th width=18%><p class="title">Name</p></th>
-		<th width=75%><p class="title">Description</p></th>
-		</tr><tr>
-		<td><p class="identifier">bm25</p></td>
-		<td><p class="description">BM25 (Okapi) weighting method. The parameters k1,b,a
-		can be specified by the caller.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">bm25_dpfc</p></td>
-		<td><p class="description">BM25 weighting method with an artificial ff calculated 
-		from the real ff and some discrete increments given by some feature occurrence 
-		relation checks based on proximity and structures (sentences). 
-		The artificial increments can be specified as weighting function parameters
-		titleinc,strinc,seqinc by the caller.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">metadata</p></td>
-		<td><p class="description">Weighting method taking a metadata table element value
-		as document weight.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">td</p></td>
-		<td><p class="description">Weighting method taking a constant value as document weight.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">tf</p></td>
-		<td><p class="description">Weighting method taking the feature frequency (ff) value as document weight.
-		</p></td>
-		</tr>
-		</table>
-		</div>
-		<a name="SummarizerFunctions"></a>
-		<h3>Summarizer functions</h3>
-		<p class="description">
-		Here is the list of summarizer functions defined in the core.
-		</p>
-		<div class="library">
-		<table border="1">
-		<tr>
-		<th width=18%><p class="title">Name</p></th>
-		<th width=75%><p class="title">Description</p></th>
-		</tr><tr>
-		<td><p class="identifier">metadata</p></td>
-		<td><p class="description">Return the value of a meta data table element as summary.
-		It has the following parameters:
-			<ul>
-			<li><b>name:</b>&nbsp;Name of the meta data element to return
-			</li>
-			</ul>
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">attribute</p></td>
-		<td><p class="description">Return the value of a document attribue as summary.
-		It has the following parameters:
-			<ul>
-			<li><b>name:</b>&nbsp;Name of the attribute to return
-			</li>
-			</ul>
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">matchpos</p></td>
-		<td><p class="description">Return the feature matches as readable list of 
-		position numbers as summary (mainly for debugging purposes).
-		It has the following parameters:
-			<ul>
-			<li><b>match:</b>&nbsp;Feature with the matches to print the positions 
-			</li>
-			</ul>
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">matchphrase</p></td>
-		<td><p class="description">Return the forward index features of the sentences 
-		covering the best matching windows in the result documents as summary.
-		It has the following parameters:
-			<ul>
-			<li><b>type:</b>&nbsp;Name of the forward index element to build the summary with
-			</li>
-			<li><b>mark:</b>&nbsp;Highlighting tags for marking matches in the summary as pair of start and end tag separated with a '$'
-			</li>
-			<li><b>len:</b>&nbsp;Maximum length of one summary
-			</li>
-			<li><b>nof:</b>&nbsp;Maximum number of returned passages
-			</li>
-			<li><b>structseek:</b>&nbsp;Distance to seek for structure delimiters (punctuation)
-			</li>
-			<li><b>match:</b>&nbsp;Feature with the matches to use for weighting the passages for the summary 
-			</li>
-			<li><b>struct:</b>&nbsp;Feature describing structure delimiters (punctuation)
-			</li>
-			</ul>
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">matchvariables</p></td>
-		<td><p class="description">Return the features in the forward index that are
-		referenced as position by variables in matching expressions.
-		It has the following parameters:
-			<ul>
-			<li><b>type:</b>&nbsp;Name of the forward index element to build the summary with
-			</li>
-			<li><b>delimiter:</b>&nbsp;Delimiter to use for multiple elements matching (optional, default is ',')
-			</li>
-			<li><b>assign:</b>&nbsp;Assignment operator to use for results (optional, default is '=')
-			</li>
-			<li><b>match:</b>&nbsp;Feature with the matches to extract the variables assignments from
-			</li>
-			</ul>
-		</p></td>
-		</tr>
-		</table>
-		</div>
+
+		<h2>Core</h2>
+		<p>List of functions and operators predefined in the storage queryprocessor:</p>
+		<h3>Posting join operator</h3>
+		<p>List of predefined posting join operators:</p>
+		<ul>
+		<li><b>chain</b> gets the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j.</li>
+		<li><b>chain_struct</b> gett the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
+		<li><b>contains</b> getsthe set of postings (d,1) for documents d that contain all of the argument features.</li>
+		<li><b>diff</b> get the set of postings (d,p) that are in the first argument set but not in the second..</li>
+		<li><b>inrange</b> gets the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|.</li>
+		<li><b>inrange_struct</b>get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
+		<li><b>intersect</b> get the set of postings (d,p) that are occurring in all argument sets.</li>
+		<li><b>pred</b> get the set of postings (d,p-1) for all (d,p) with p>1 in the argument set.</li>
+		<li><b>sequence</b> get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j.</li>
+		<li><b>sequence_struct</b> get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
+		<li><b>succ</b> get the set of postings (d,p+1) for all (d,p) in the argument set.</li>
+		<li><b>union</b>get the set of postings that are occurring in any argument set.</li>
+		<li><b>within</b>get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|.</li>
+		<li><b>within_struct</b>get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
+		</ul>
+
+		<h3>Weighting function</h3>
+		<p>List of predefined weighting functions with argument descriptions:</p>
+		<ul>
+		<li><b>bm25</b> calculates the document weight with the weighting scheme "BM25" (Okapi)
+			<ol>
+			<li><b>match</b> [Feature] defines the query features to weight.</li>
+			<li><b>k1</b> [Numeric (1:1000)] parameter of the BM25 weighting scheme.</li>
+			<li><b>b</b> [Numeric (0.0001:1000)] parameter of the BM25 weighting scheme.</li>
+			<li><b>avgdoclen</b> [Numeric (0:)] the average document lenght.</li>
+			<li><b>metadata_doclen</b> [Metadata] the meta data element name referencing the document lenght for each document weighted.</li>
+			</ol>
+		</li>
+		<li><b>bm25pff</b> calculates the document weight with the weighting scheme "BM25pff". This is "BM25" where the feature frequency is counted by 1.0 per feature only for features with the maximum proximity score. The proximity score is a measure that takes the proximity of other query features into account.
+			<ol>
+			<li><b>match</b> [Feature] defines the query features to weight.</li>
+			<li><b>struct</b> [Feature] defines the delimiter for structures.</li>
+			<li><b>para</b> [Feature] defines the delimiter for paragraphs (windows used for proximity weighting must not overlap paragraph borders).</li>
+			<li><b>k1</b> [Numeric (1:1000)] parameter of the BM25pff weighting scheme.</li>
+			<li><b>b</b> [Numeric (0.0001:1000)] parameter of the BM25pff weighting scheme.</li>
+			<li><b>titleinc</b> [Numeric (0.0:)] ff increment for title features.</li>
+			<li><b>windowsize</b> [Numeric] the size of the window used for finding features to increment proximity scores.</li>
+			<li><b>cardinality</b> [Numeric] the number of query features a proximity score window must contain to be considered (optional, default is all features).</li>
+			<li><b>metadata_title_maxpos</b> [Metadata] the metadata element that specifies the last title element. Elements in title are scored with an ff increment.</li>
+			<li><b>metadata_title_size</b> [Metadata] the metadata element that specifies the number of terms (size) of the title.</li>
+			<li><b>ffbase</b> [Numeric (0.0:1.0)] value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25).</li>
+			<li><b>avgdoclen</b> [Numeric (0:)] the average document lenght.</li>
+			<li><b>maxdf</b> [Numeric (0:)] the maximum df as fraction of the collection size.</li>
+			<li><b>metadata_doclen</b> [Metadata] the meta data element name referencing the document lenght for each document weighted.</li>
+			</ol>
+		</li>
+		<li><b>formula</b> calculates the weight of a document with a formula
+			<ol>
+			<li><b>match</b> [Feature] defines the query features referenced in the formula to weight.</li>
+			<li><b>formula</b> [String] defines an expression to evaluate. You can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements.</li>
+			<li><b>[a-z]+</b> [Numeric] defines a variable to be used in the formula expression.</li>
+			</ol>
+		</li>
+		<li><b>metadata</b> calculate the weight of a document as value of a meta data element.
+			<ol>
+			<li><b>name</b> [Metadata] name of the meta data element to use as weight.</li>
+			</ol>
+		</li>
+		<li><b>td</b> calculates the weight of a document as sum of the the feature weights multiplied with their feature frequency.</li>
+			<ol>
+			<li><b>match</b> [Feature] defines the query features to weight.</li>
+			</ol>
+		</li>
+		<li><b>tf</b> calculates the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight
+			<ol>
+			<li><b>match</b> [Feature] defines the query features to weight.</li>
+			<li><b>weight</b> [Numeric (0:)] defines the query feature weight factor.</li>
+			</ol>
+		</li>
+		</ul>
+
+		<h3>Summarizer</h3>
+		<p>List of predefined summarizer functions with argument descriptions:</p>
+		<ul>
+		<li><b>accuvariable</b> accumulates the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content.
+			<ol>
+			<li><b>match</b> [Feature] defines the query features to inspect for variable matches.</li>
+			<li><b>type</b> [String] the forward index feature type for the content to extract.</li>
+			<li><b>var</b> [String] the name of the variable referencing the content to weight.</li>
+			<li><b>nof</b> [Numeric (1:)] the maximum number of the best weighted elements  to return (default 10).</li>
+			<li><b>norm</b> [Numeric (0.0:1.0)] the normalization factor of the calculated weights (default 1.0).</li>
+			</ol>
+		</li>
+
+		<li><b>attribute</b> gets the value of a document attribute.
+			<ol>
+			<li><b>name</b> [Attribute] the name of the attribute to get.</li>
+			</ol>
+		</li>
+		<li><b>matchphrase</b> gets the best matching phrase delimited by the structure postings.
+			<ol>
+			<li><b>match</b> [Feature] defines the features to weight.</li>
+			<li><b>struct</b> [Feature] defines the delimiter for structures.</li>
+			<li><b>para</b> [Feature] defines the delimiter for paragraphs (summaries must not overlap paragraph borders).</li>
+			<li><b>type</b> [String] the forward index type of the result phrase elements.</li>
+			<li><b>metadata_title_maxpos</b> [Metadata (1:)] the metadata element that specifies the last title element. Only content is used for abstracting.</li>
+			<li><b>sentencesize</b> [Numeric (1:)] restrict the maximum length of sentences in summaries.</li>
+			<li><b>windowsize</b> [Numeric (1:)] maximum size of window used for identifying matches.</li>
+			<li><b>cardinality</b> [Numeric (1:)] minimum number of features in a window.</li>
+			<li><b>matchmark</b> [String] specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases.</li>
+			<li><b>floatingmark</b> [String] specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found.</li>
+			<li><b>name_para</b> [String] specifies the summary element name used for paragraphs (default 'para').</li>
+			<li><b>name_phrase</b> [String] specifies the summary element name used for phrases (default 'phrase').</li>
+			<li><b>name_docstart</b> [String] specifies the summary element name used for the document start (alternative summary, if no match found, default 'docstart').</li>
+			</ol>
+		</li>
+		<li><b>matchpos</b> get the feature occurencies printed.
+			<ol>
+			<li><b>match</b> [Feature] defines the query features.</li>
+			<li><b>N</b> [Numeric (1:)] the maximum number of matches to return.</li>
+			</ol>
+		</li>
+		<li><b>matchvariables</b> extracts all variables assigned to subexpressions of features specified.
+			<ol>
+			<li><b>match</b> [Feature] defines the query features to inspect for variable matches.</li>
+			<li><b>type</b> [String] the forward index feature type for the content to extract.</li>
+			</ol>
+		</li>
+		<li><b>metadata</b> get the value of a document meta data element.
+			<ol>
+			<li><b>name</b> [Metadata] the name of the meta data element to get.</li>
+			</ol>
+		</li>
 
 		<h2>Analyzer</h2>
-		<a name="Segmenter"></a>
-		<h3>Segmenter</h3>
-		<p class="description">
-		Currently there is only one built-in segmenter defined in the core. It is based on
-		the <h href="http://textwolf.net">textwolf library</a> and is able to process XML.
-		</p>
-		<a name="Tokenizer"></a>
+		<p>List of functions and operators predefined in the analyzer textprocessor:</p>
 		<h3>Tokenizer</h3>
-		<p class="description">
-		The following tokenizer functions are defined as built-in in the core.
-		</p>
-		<div class="library">
-		<table border="1">
-		<tr>
-		<th width=18%><p class="title">Name</p></th>
-		<th width=75%><p class="title">Description</p></th>
-		</tr><tr>
-		<td><p class="identifier">punctuation</p></td>
-		<td><p class="description">
-		This tokenizer extracts end of sentences or other configured punctuation markers.
-		It is available for the language English "en" and for German ("de").
-		Unfortunately the quality for both languages supported is bad and has to be improved
-		a lot.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">word</p></td>
-		<td><p class="description">This tokenizer splits the content on word boundaries. The
-		tokens are words. It is avaiable for european languages with a latin based alphabet.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">split</p></td>
-		<td><p class="description">This tokenizer splits the content into chunks without
-		whitespaces. It is mainly thought for the forward index creation.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">content</p></td>
-		<td><p class="description">
-		This tokenizer does not split the content at all. It just forward what it gets as
-		input as one token.
-		</p></td>
-		</tr>
-		</table>
-		</div>
-
-		<a name="Normalizer"></a>
+		<p>List of predefined tokenizer functions:</p>
+		<ul>
+		<li><b>content</b> producing one token for each input chunk (identity).</li>
+		<li><b>punctuation</b> producing punctuation elements (end of sentence recognition). The language is specified as parameter (currently only german 'de' and english 'en' supported).</li>
+		<li><b>split</b> splitting tokens separated by whitespace characters.</li>
+		<li><b>word</b> splitting tokens by word boundaries for european languages.</li>
+		</ul>
 		<h3>Normalizer</h3>
-		<p class="description">
-		The following normalizer functions are defined as built-in in the core.
-		</p>
-		<div class="library">
-		<table border="1">
-		<tr>
-		<th width=18%><p class="title">Name</p></th>
-		<th width=75%><p class="title">Description</p></th>
-		</tr><tr>
-		<td><p class="identifier">orig</p></td>
-		<td><p class="description">
-		This normalizer does nothing but just forwards the input as term.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">empty</p></td>
-		<td><p class="description">
-		This normalizer does nothing but just an empty string for every input junk received as input.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">stem</p></td>
-		<td><p class="description">
-		This normalizer does stemming of the input based on snowball stemmer in the language specified
-		as argument.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">dictmap</p></td>
-		<td><p class="description">
-		This normalizer map each input token with a dictionary that is specified by file name in the
-		argument. The normalizer returns the value defined as value in the map for the having the
-		input element as key. If the element is not defined in the map then the result return 
-		is the input token passed to it.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">lc</p></td>
-		<td><p class="description">
-		This normalizer returns the input with each character mapped to its lowercase.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">uc</p></td>
-		<td><p class="description">
-		This normalizer returns the input with each character mapped to its uppercase.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">convdia</p></td>
-		<td><p class="description">
-		This normalizer returns the input with each character that is a non latin character
-		A..Z or a..z to its corresponding list of latin base characters. The transformation
-		might depend on the language specified as first argument. For example in german ("de")
-		<a href="https://en.wikipedia.org/wiki/Umlaut_%28linguistics%29">umlauts</a>
-		are mapped to the latin base character followed by an 'e'.
-		</p></td>
-		</tr><tr>
-		<td><p class="identifier">date2int</p></td>
-		<td><p class="description">
-		Returns a date time difference of a date time value to a constant base date time 
-		value (e.g. '1970-01-01') as integer.<br/>
-		The first parameter specifies the unit of the result and the constant base date time value.
-		This unit is specified as string with the granularity 
-		(one of { 'us'=microseconds, 'ms'=milliseconds, 's'=seconds, 'm'=minutes, 'h'=hours, 'd'=days })
-		optionally followed by the base date time value. If the base date time
-		value is not specified, then "1970-01-01" is assumed. Examples:
-		<pre>
-d 1970-01-01
-d
-d 1789-07-14
-		</pre>
-		The following parameters specify accepted formats of the date time input value.
-		A possible format string is a string with '%' followed by an ascii character
-		as substitute. Accepted substitutes are "%a" for short weekday name, "%b" for
-		abbreviated month name, "%B" for full month name, "%d" for day of the month as 
-		decimal 01 to 31, "%m" for month name as a decimal 01 to 12, "%w" for weekday as 
-		decimal number 0 to 6 where Sunday is 0, "%W" week number 00 to 53 where 
-		Monday is first day of week 1, "%y" for year without the century, 
-		"%Y" for year with century, "%H" for hours in 24 hour calculation, 
-		"%I" for hours in 12 hour calculation, "%M" for minutes,
-		"%S" for seconds, "%s *" for fractional seconds, and many more.
-		The normalizer checks for the first matching input date time format value
-		and returns the difference from the base date time value and the granularity
-		specified in the first argument of the method. The method requires at least
-		two arguments. Example calls:
-		</p><p class="description">
-		<pre>
-date2int( "ms 2000-01-01 00:00:00", "%Y/%m/%d %H:%M:%S *")
-date2int( "d 1970-01-01", "%d.%m.%Y", "%Y/%m/%d")
-date2int( "d", "%d.%m.%Y", "%Y/%m/%d", "%Y%m%d")
-		</pre>
-		</p></td>
-		</tr>
-		</table>
-		</div>
-
-		<a name="Aggregator"></a>
+		<p>List of predefined normalizer functions:</p>
+		<ul>
+		<li><b>convdia</b> mapping all diacritical characters to ascii. The language is passed as first argument and alternative date formats as following argument (currently only german 'de' and english 'en' supported).</li>
+		<li><b>date2int</b> mapping a date to an integer. The granularity of the result is passed as first argument and alternative date formats as following arguments.</li>
+		<li><b>dictmap</b> mapping the elements with a dictionary. For found elements the passed value is returned. The dictionary file name is passed as argument.</li>
+		<li><b>empty</b> mapping input tokens to an empty string.</li>
+		<li><b>lc</b> mapping all characters to lowercase.</li>
+		<li><b>orig</b> mapping the identity of the input tokens-</li>
+		<li><b>stem</b> doing stemming based on snowball. The language is passed as parameter.</li>
+		<li><b>text</b> mapping the identity of the input tokens.</li>
+		<li><b>uc</b> mapping all characters to uppercase.</li>
+		</ul>
 		<h3>Aggregator</h3>
-		<p class="description">
-		The following aggregator functions are defined as built-in in the core.
-		</p>
-		<div class="library">
-		<table border="1">
-		<tr>
-		<th width=18%><p class="title">Name</p></th>
-		<th width=75%><p class="title">Description</p></th>
-		</tr><tr>
-		<td><p class="identifier">count</p></td>
-		<td><p class="description">
-		This aggregator counts the elements of the feature type passed as argument in the document. 
-		It is useful for some simple statistics.
-		</p></td>
-		</tr>
-		</table>
-		</div>
+		<p>List of predefined aggregator functions:</p>
+		<ul>
+		<li><b>count</b> counting the input elements.</li>
+		<li><b>maxpos</b> getting the maximum position of the input elements.</li>
+		<li><b>minpos</b> getting the minimum position of the input elements.</li>
+		<li><b>sumsquaretf</b> calculating the sum of the square of the tf of all selected elements.</li>
+		</ul>
 	</div>
 </div>
 </body>

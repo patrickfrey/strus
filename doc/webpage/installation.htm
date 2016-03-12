@@ -33,6 +33,12 @@
 		<p class="description">Packages that failed to build are not visible. You can get an overview 
 		on the status of the latest build
 		<a href="https://build.opensuse.org/project/monitor/home:PatrickFrey">here</a>.
+		The bindings package is on many platforms marked as failed, but it might still be available 
+		for your purpose.
+		The package is splitted into a variant for each binding language. You might be able
+		to install the package <i>strus-python</i>, even if <i>strusbindings</i> is marked as failed on
+		the open suse build cluster. This can for example be the case because the Java build
+		failed but Python succeeded.
 		</p>
 		<a name="docker"> </a>
 		<h2>Start it from a docker image</h2>
@@ -44,8 +50,6 @@
 		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-nginx">patrickfrey/strus-ub1404-nginx</a>: strus search engine service using nginx as webserver.</li>
 		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-nginx">patrickfrey/strus-ub1404-pysrv</a>: strus search engine server implemented using <a href="http://www.tornadoweb.org">tornado</a>.</li>
 		</ol>
-		<p class="description">There exists a <a href="http://www.codeproject.com/Articles/1009582/Building-a-search-engine-with-Strus-tutorial">tutorial</a> based on the 'strus-ub1404-nginx' image.
-		</p>
 
 		<a name="github"> </a>
 		<h2>Clone from github</h2>
