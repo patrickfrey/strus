@@ -312,6 +312,10 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Wed Mar 16 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.3-0.1
+- some more normalization factors configurable in BM25pff
+- some small fixes in BM25 and Formula weighting method
+
 * Mon Mar 7 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.2-0.1
 - More fixes for bringing up packages again
 
