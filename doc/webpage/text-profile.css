@@ -16,8 +16,8 @@ h4 {font-size:1.4em; margin:10px 0 15px 0; letter-spacing:-1px;}
 h1,h2,h3 {font-weight:700; line-height:1.4em;}
 #wrap {color:#303030; margin:40px auto; padding:0; width:60%;}
 #content {text-align:left; width:90%; padding-right:40px;}
-#content ul {margin:0; padding:10px 0 0 0;}
-#content li {padding-left:20px; margin:0 20px 0; padding:5px 0 0 0; }
+#content ul {margin:10px; padding:0px 0 0 0;}
+#content li {padding-left:20px; margin:0 10px 0; padding:0 0 0 0; }
 #sidebar {float:right; width:30%; padding-left:40px; border-left:2px solid #ccc; }
 #sidebar ul {list-style:none; margin:0; padding:10px 0 0 0; border-top:1px solid #eee;}
 #sidebar li {list-style:none; font-size:1.2em; margin:0 0 10px; padding:0 0 10px 0; color:#888; border-bottom:1px solid #eee;}
