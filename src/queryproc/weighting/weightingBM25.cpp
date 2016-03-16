@@ -53,7 +53,12 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	,m_featar(),m_metadata(metadata_)
 	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_))
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (m_metadata_doclen<0)
+	{
+		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
+	}
+}
 
 void WeightingFunctionContextBM25::addWeightingFeature(
 		const std::string& name_,
@@ -156,7 +161,7 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 		}
 		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
-			m_attribute_doclen = value;
+			m_metadata_doclen = value;
 			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
 		}
 		else if (utils::caseInsensitiveEquals( name, "k1")
@@ -206,7 +211,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 	try
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
-		return new WeightingFunctionContextBM25( storage_, metadata, m_k1, m_b, m_avgdoclen, nofdocs, m_attribute_doclen, m_errorhnd);
+		return new WeightingFunctionContextBM25( storage_, metadata, m_k1, m_b, m_avgdoclen, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }
@@ -218,7 +223,9 @@ std::string WeightingFunctionInstanceBM25::tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
+			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen
+			<< ", metadata_doclen=" << m_metadata_doclen
+		;
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, std::string());

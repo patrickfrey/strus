@@ -120,7 +120,7 @@ private:
 	double m_k1;
 	double m_b;
 	double m_avgdoclen;
-	std::string m_attribute_doclen;
+	std::string m_metadata_doclen;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

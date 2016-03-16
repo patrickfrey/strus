@@ -62,9 +62,11 @@ public:
 		unsigned int windowsize_,
 		unsigned int cardinality_,
 		double ffbase_,
+		unsigned int fftie_,
 		double mindf_,
 		double avgDocLength_,
 		double titleinc_,
+		unsigned int tidocnorm_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
 		const std::string& metadata_title_maxpos_,
@@ -85,10 +87,12 @@ private:
 	double m_b;						///< b value of BM25
 	unsigned int m_windowsize;				///< maximum position range of a window considered for weighting
 	unsigned int m_cardinality;				///< minumum number of features in a window considered for weighting
-	double m_ffbase;					///< constant base value of ff
+	double m_ffbase;					///< relative constant base factor of pure ff [0..1]
+	unsigned int m_fftie;					///< the maximum pure ff value that is considered for weighting (used for normalization of pure ff part)
 	double m_maxdf;						///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double m_avgDocLength;					///< average document length in the collection
 	double m_titleinc;					///< ff increment for title features
+	unsigned int m_tidocnorm;				///< the document size used for calibrating the title match weight normalization between 0 and 1 (0->0 titleinc_docsizenorm and bigger->1).
 	double m_nofCollectionDocuments;			///< number of documents in the collection
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
@@ -117,7 +121,9 @@ class WeightingFunctionInstanceBM25pff
 {
 public:
 	explicit WeightingFunctionInstanceBM25pff( ErrorBufferInterface* errorhnd_)
-		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_windowsize(100),m_cardinality(0),m_ffbase(0.4),m_maxdf(0.5),m_errorhnd(errorhnd_){}
+		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_titleinc(0.0),m_tidocnorm(0)
+		,m_windowsize(100),m_cardinality(0)
+		,m_ffbase(0.4),m_fftie(0),m_maxdf(0.5),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25pff(){}
 
@@ -136,12 +142,14 @@ private:
 	double m_b;					///< BM25 b parameter
 	double m_avgdoclen;				///< average document length
 	double m_titleinc;				///< ff increment for title features
+	unsigned int m_tidocnorm;			///< the document size used for calibrating the title match weight normalization between 0 and 1 (0->0 titleinc_docsizenorm and bigger->1).
 	std::string m_metadata_doclen;			///< attribute defining the document length
 	std::string m_metadata_title_maxpos;		///< (optional) meta data element defining the last title position
 	std::string m_metadata_title_size;		///< (optional) meta data element defining the size of the title
 	unsigned int m_windowsize;			///< size of window for proximity weighting
 	unsigned int m_cardinality;			///< minimal number of query features in a window
 	double m_ffbase;				///< base used for feature frequency calculation
+	unsigned int m_fftie;				///< the maximum pure ff value that is considered for weighting (used for normalization of pure ff part)
 	double m_maxdf;					///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };

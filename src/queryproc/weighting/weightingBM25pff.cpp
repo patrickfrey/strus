@@ -46,9 +46,11 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 		unsigned int windowsize_,
 		unsigned int cardinality_,
 		double ffbase_,
+		unsigned int fftie_,
 		double maxdf_,
 		double avgDocLength_,
 		double titleinc_,
+		unsigned int tidocnorm_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
 		const std::string& metadata_title_maxpos_,
@@ -58,9 +60,11 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_windowsize(windowsize_)
 	,m_cardinality(cardinality_)
 	,m_ffbase(ffbase_)
+	,m_fftie(fftie_)
 	,m_maxdf(maxdf_)
 	,m_avgDocLength(avgDocLength_)
 	,m_titleinc(titleinc_)
+	,m_tidocnorm(tidocnorm_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_itrarsize(0)
 	,m_structarsize(0)
@@ -72,7 +76,12 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_metadata_title_maxpos(metadata_title_maxpos_.empty()?-1:metadata_->elementHandle( metadata_title_maxpos_))
 	,m_metadata_title_size(metadata_title_size_.empty()?-1:metadata_->elementHandle( metadata_title_size_))
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (m_metadata_doclen<0)
+	{
+		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
+	}
+}
 
 void WeightingFunctionContextBM25pff::addWeightingFeature(
 		const std::string& name,
@@ -275,6 +284,11 @@ static void calcProximityFfIncrements(
 	}
 }
 
+static double normalize_0_max( double value, double maxvalue)
+{
+	return tanh( value/maxvalue) * maxvalue;
+}
+
 double WeightingFunctionContextBM25pff::call( const Index& docno)
 {
 	try
@@ -313,6 +327,9 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		callSkipDoc( docno, m_paraar, m_paraarsize);
 		m_metadata->skipDoc( docno);
 
+		// Define document length:
+		double doclen = m_metadata->getValue( m_metadata_doclen);
+
 		// Define search start position:
 		Index firstpos = 1;
 		Index titlesize = 1;
@@ -331,12 +348,14 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		{
 			titlesize = (firstpos > 1) ? (firstpos - 1):1;
 		}
+
 		// Define the structure of accumulated proximity weights:
 		ProximityWeightAccumulator::WeightArray ffincrar( m_itrarsize);
 
 		// Calculate ff title increment weights:
+		double tiweight = m_tidocnorm > 0 ? tanh( doclen / (double)m_tidocnorm):1.0;
 		calcTitleFfIncrements(
-			ffincrar, firstpos, titlesize, m_titleinc, m_weightincr, m_itrar, m_itrarsize);
+			ffincrar, firstpos, titlesize, m_titleinc * tiweight, m_weightincr, m_itrar, m_itrarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "accumulated ff incr [title terms] " << ffincrar.tostring() << std::endl;
 #endif
@@ -388,14 +407,14 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 			double ff = m_itrar[ fi]->frequency();
 			if (ff <= std::numeric_limits<double>::epsilon()) continue;
 
-			double prox_ff = m_ffbase * ff
+			double fftied = (m_fftie>0)?normalize_0_max( ff, m_fftie):ff;
+			double prox_ff = m_ffbase * fftied
 					+ (1.0-m_ffbase) * ffincrar[ fi];
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "proximity ff [" << m_itrar[ fi]->featureid() << "] ff=" << ff << " proximity ff=" << prox_ff << std::endl;
 #endif
 			if (m_b)
 			{
-				double doclen = m_metadata->getValue( m_metadata_doclen);
 				double rel_doclen = (doclen+1) / m_avgDocLength;
 #ifdef STRUS_LOWLEVEL_DEBUG
 				double ww = m_idfar[ fi]
@@ -462,9 +481,11 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 		||  utils::caseInsensitiveEquals( name, "b")
 		||  utils::caseInsensitiveEquals( name, "avgdoclen")
 		||  utils::caseInsensitiveEquals( name, "titleinc")
+		||  utils::caseInsensitiveEquals( name, "tidocnorm")
 		||  utils::caseInsensitiveEquals( name, "windowsize")
 		||  utils::caseInsensitiveEquals( name, "cardinality")
-		||  utils::caseInsensitiveEquals( name, "ffbase"))
+		||  utils::caseInsensitiveEquals( name, "ffbase")
+		||  utils::caseInsensitiveEquals( name, "fftie"))
 		{
 			addNumericParameter( name, parameterValue( name, value));
 		}
@@ -532,6 +553,21 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), WEIGHTING_SCHEME_NAME);
 		}
 	}
+	else if (utils::caseInsensitiveEquals( name, "fftie"))
+	{
+		if (value.type == ArithmeticVariant::Int && value.toint() >= 0)
+		{
+			m_fftie = value.touint();
+		}
+		else if (value.type == ArithmeticVariant::UInt)
+		{
+			m_fftie = value.touint();
+		}
+		else
+		{
+			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a non negative integer value"), name.c_str(), WEIGHTING_SCHEME_NAME);
+		}
+	}
 	else if (utils::caseInsensitiveEquals( name, "maxdf"))
 	{
 		m_maxdf = (double)value;
@@ -546,6 +582,21 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		if (m_titleinc < 0.0)
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number"), name.c_str(), WEIGHTING_SCHEME_NAME);
+		}
+	}
+	else if (utils::caseInsensitiveEquals( name, "tidocnorm"))
+	{
+		if (value.type == ArithmeticVariant::Int && value.toint() >= 0)
+		{
+			m_tidocnorm = value.touint();
+		}
+		else if (value.type == ArithmeticVariant::UInt)
+		{
+			m_tidocnorm = value.touint();
+		}
+		else
+		{
+			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a non negative integer value"), name.c_str(), WEIGHTING_SCHEME_NAME);
 		}
 	}
 	else if (utils::caseInsensitiveEquals( name, "metadata_doclen")
@@ -569,7 +620,11 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25pff::createFunct
 	try
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
-		return new WeightingFunctionContextBM25pff( storage_, metadata, m_k1, m_b, m_windowsize, m_cardinality, m_ffbase, m_maxdf, m_avgdoclen, m_titleinc, nofdocs, m_metadata_doclen, m_metadata_title_maxpos, m_metadata_title_size, m_errorhnd);
+		return new WeightingFunctionContextBM25pff(
+				storage_, metadata, m_k1, m_b, m_windowsize, m_cardinality,
+				m_ffbase, m_fftie, m_maxdf, m_avgdoclen, m_titleinc, m_tidocnorm,
+				nofdocs, m_metadata_doclen, m_metadata_title_maxpos, m_metadata_title_size,
+				m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }
@@ -581,7 +636,14 @@ std::string WeightingFunctionInstanceBM25pff::tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
+			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen
+			<< ", windowsize=" << m_windowsize << ", cardinality=" << m_cardinality
+			<< ", ffbase=" << m_ffbase << ", fftie=" << m_fftie
+			<< ", maxdf=" << m_maxdf << ", titleinc=" << m_titleinc
+			<< ", tidocnorm=" << m_tidocnorm << ", metadata_doclen=" << m_metadata_doclen
+			<< ", metadata_title_maxpos=" << m_metadata_title_maxpos 
+			<< ", metadata_title_size=" << m_metadata_title_size
+			;
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, std::string());
@@ -608,11 +670,13 @@ WeightingFunctionInterface::Description WeightingFunctionBM25pff::getDescription
 		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25pff weighting scheme"), "1:1000");
 		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25pff weighting scheme"), "0.0001:1000");
 		rt( Description::Param::Numeric, "titleinc", _TXT("ff increment for title features"), "0.0:");
+		rt( Description::Param::Numeric, "tidocnorm", _TXT("specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller"), "0:");
 		rt( Description::Param::Numeric, "windowsize", _TXT("the size of the window used for finding features to increment proximity scores"), "");
 		rt( Description::Param::Numeric, "cardinality", _TXT("the number of query features a proximity score window must contain to be considered (optional, default is all features)"), "");		
 		rt( Description::Param::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Elements in title are scored with an ff increment"), "");
 		rt( Description::Param::Metadata, "metadata_title_size", _TXT( "the metadata element that specifies the number of terms (size) of the title"), "");
 		rt( Description::Param::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25)"), "0.0:1.0");
+		rt( Description::Param::Numeric, "fftie", _TXT( "value specifying the mapping of the ff of a weighted to an intervall between 0 and this value"), "0:");
 		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
 		rt( Description::Param::Numeric, "maxdf", _TXT("the maximum df as fraction of the collection size"), "0:");
 		rt( Description::Param::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
