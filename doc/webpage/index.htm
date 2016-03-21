@@ -39,7 +39,7 @@
 		<p class="slogan">If you are looking for software to build a non monolithic search engine with a clear model you might get enthused about <i>Strus</i>.</p>
 		<ul>
 			<li><b>Status</b><br />Development status is <i>pre-alpha</i>.</li>
-			<li><b>License</b><br /><a href="https://www.gnu.org/copyleft/gpl.html">GPL v3</a></li>
+			<li><b>License</b><br /><a href="https://www.mozilla.org/en-US/MPL/2.0/">MPL (Mozilla Public License) 2.0</a></li>
 			<li><b>Download</b><br />There are <a href="installation.htm#packages">packages</a> and docker <a href="installation.htm#docker">images</a> available. You can also fetch the <a href="installation.htm#github">sources</a> from github and build them on your own.</li>
 			<li><b>Contact</b><br />Contact us by mail: contact <i>at</i> project <i>dash</i> strus <i>dot</i> net or follow us on twitter <a href="https://twitter.com/ProjectStrus">@ProjectStrus</a> or subscribe to the <a href="https://groups.google.com/forum/#!forum/project-strus">mailing list</a>.</li>
 			<li><b>Whiteboard</b><br />Take part in the development of <i>Strus</i> or just inform yourself what is going on and have a look at the <i>Strus</i> <a href="whiteboard.htm">whiteboard</a>.</li>
@@ -91,10 +91,23 @@
 		<h2>News</h2>
 		<table>
 		<tr>
+		<td><p class="timestamp">Mar 21st, 2016</p></td>
+		<td><p class="newstext">License of <i>Strus</i> changed from GPLv3 to <a href="https://www.mozilla.org/en-US/MPL/2.0/">MPLv2 (Mozilla Public License, Version 2.0)</a>.
+		We were looking for a license, that on one hand protects the work done for <i>Strus</i> and on the other
+		hand allows users of <i>Strus</i> to attribute their own work in their way, even as closed 
+		source. We think that the <i>Mozilla Public License, Version 2.0</i> meets these requirements best.
+		Fortunately <i>Strus</i> did never include nor link against any pervasively licenced code, so this
+		change of the software license is possible with the agreement of all contributors.
+		</p>
+		</td>
+		</tr>
+
+		<tr>
 		<td><p class="timestamp">Mar 14th, 2016</p></td>
 		<td><p class="newstext">
 		The Wikipedia demo search engine is now hosted on an Intel NUC.
 		<a href="wikipediaSearchNuc.htm">Read more....</a>
+		</p>
 		</td>
 		</tr>
 
@@ -102,7 +115,8 @@
 		<td><p class="timestamp">Feb 9th, 2016</p></td>
 		<td><p class="newstext">
 		<a href="http://www.codeproject.com/Articles/1072683/How-to-extend-a-Strus-search-engine-with-new-funct">New article published on codeproject</a>
-		about writing Strus extension modules in C++.
+		about writing <i>Strus</i> extension modules in C++.
+		</p>
 		</td>
 		</tr>
 		<tr>
@@ -116,6 +130,7 @@
 		the performance significantly. Unfortunately this slowed down
 		the BM25 search on the demo system, presumably due to higher seek times on
 		its disk. Obviously block sizes should be configurable depending on the hardware used.
+		</p>
 		</td>
 		</tr>
 		<tr>
@@ -123,12 +138,14 @@
 		<td><p class="newstext">
 		Some significant improvements in reducing the access of datablocks in the query.
 		You see it in the standard query evaluation, for example the BM25 of the Wikipedia search.
+		</p>
 		</td>
 		</tr>
 		<tr>
 		<td><p class="timestamp">Dec 25th, 2015</p></td>
 		<td><p class="newstext">
 		<a href="http://www.codeproject.com/Articles/1066960/Distributing-a-search-engine-index-with-Strus">Article</a> that shows how scalable search engines can be built with <i>Strus</i>.
+		</p>
 		</td>
 		</tr>
 		<tr>
@@ -138,6 +155,7 @@
 		unaligned memory accesses for every document ranked document in the query.
 		It also led to wrong results due to overlapping table elements and to a significant
 		performance loss.
+		</p>
 		</td>
 		</tr>
 		<tr>
@@ -150,6 +168,7 @@
 		The problem could be circumvented with a hack (pre-allocating document numbers), 
 		that has also been removed now. If you tried <i>Strus</i> and experienced an unacceptable
 		performance when inserting, you might give it a chance again.
+		</p>
 		</td>
 		</tr>
 		<tr>
@@ -162,18 +181,24 @@
 		<td><p class="newstext">The NBLNK weighting scheme for the Wikipedia demo is now online.
 		This weighting scheme does not match documents against the query, but ranks the links
 		in documents by weighting the sentences the links appear in against the query. It is
-		a good example for the information extraction capabilities of <i>Strus</i>.</p></td>
+		a good example for the information extraction capabilities of <i>Strus</i>.
+		</p>
+		</td>
 		</tr>
 
 		<tr>
 		<td><p class="timestamp">Oct 29th, 2015</p></td>
 		<td><p class="newstext">Packages of the latest build are available now. You can fetch
-		them from the openSUSE Build Service.</p></td>
+		them from the openSUSE Build Service.
+		</p>
+		</td>
 		</tr>
 
 		<tr>
 		<td><p class="timestamp">Oct 21th, 2015</p></td>
-		<td><p class="newstext">Python bindings are available now.</p></td>
+		<td><p class="newstext">Python bindings are available now.
+		</p>
+		</td>
 		</tr>
 
 		<tr>
@@ -181,13 +206,17 @@
 		<td><p class="newstext">C++ Interfaces of <i>Strus</i> are now exception free. This means that 
 		libraries and modules can be linked with a defined set of symbols exported (visibility hidden)
 		and you can use different compilers to build the objects if some STL types (vector,string)
-		and the calling conventions are compatible.</p></td>
+		and the calling conventions are compatible.
+		</p>
+		</td>
 		</tr>
 
 		<tr>
 		<td><p class="timestamp">Aug 17th, 2015</p></td>
 		<td><p class="newstext">Language bindings for Java are now available. Python bindings are
-			following soon. </p></td>
+			following soon.
+		</p>
+		</td>
 		</tr>
 
 		<tr>
