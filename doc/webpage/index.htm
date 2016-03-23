@@ -128,28 +128,7 @@
 		</p>
 		</td>
 		</tr>
-		<tr>
-		<td><p class="timestamp">Jan 7th, 2016</p></td>
-		<td><p class="newstext">
-		Rewrote the summarizer for accumulating variables used for example in the NBLNK search of
-		the wikipedia demo. The NBLNK search got now usable, only 2 or 3 times slower than the
-		BM25 search plus abstracting. The old implementation was accessing the storage far
-		(up to 50 times) too often.<br/>
-		Reduced the forward index size of the wikipedia demo. On many systems this would speed up
-		the performance significantly. Unfortunately this slowed down
-		the BM25 search on the demo system, presumably due to higher seek times on
-		its disk. Obviously block sizes should be configurable depending on the hardware used.
-		</p>
-		</td>
-		</tr>
-		<tr>
-		<td><p class="timestamp">Jan 2th, 2016</p></td>
-		<td><p class="newstext">
-		Some significant improvements in reducing the access of datablocks in the query.
-		You see it in the standard query evaluation, for example the BM25 of the Wikipedia search.
-		</p>
-		</td>
-		</tr>
+
 		<tr>
 		<td><p class="timestamp">Dec 25th, 2015</p></td>
 		<td><p class="newstext">
@@ -157,34 +136,13 @@
 		</p>
 		</td>
 		</tr>
-		<tr>
-		<td><p class="timestamp">Dec 23th, 2015</p></td>
-		<td><p class="newstext">
-		Fixed a terrible bug in the calculation of the metadata table layout causing
-		unaligned memory accesses for every document ranked document in the query.
-		It also led to wrong results due to overlapping table elements and to a significant
-		performance loss.
-		</p>
-		</td>
-		</tr>
-		<tr>
-		<td><p class="timestamp">Dec 14th, 2015</p></td>
-		<td><p class="newstext">
-		Fixed a big design flaw causing an fdatasync for every
-		new document inserted when using the interface in a straightforward way.
-		This led to a loss of performance when inserting documents by
-		a factor of 10 at least.
-		The problem could be circumvented with a hack (pre-allocating document numbers), 
-		that has also been removed now. If you tried <i>Strus</i> and experienced an unacceptable
-		performance when inserting, you might give it a chance again.
-		</p>
-		</td>
-		</tr>
+
 		<tr>
 		<td><p class="timestamp">Nov 28th, 2015</p></td>
 		<td><p class="newstext">A tutorial for building a search engine with <i>Strus</i>
 		based on Python and the Tornado web framework has been published on codeproject.</td>
 		</tr>
+
 		<tr>
 		<td><p class="timestamp">Nov 16th, 2015</p></td>
 		<td><p class="newstext">The NBLNK weighting scheme for the Wikipedia demo is now online.
@@ -197,35 +155,17 @@
 
 		<tr>
 		<td><p class="timestamp">Oct 29th, 2015</p></td>
-		<td><p class="newstext">Packages of the latest build are available now. You can fetch
-		them from the openSUSE Build Service.
-		</p>
-		</td>
+		<td><p class="newstext">Packages of the latest build are available now.</p></td>
 		</tr>
 
 		<tr>
 		<td><p class="timestamp">Oct 21th, 2015</p></td>
-		<td><p class="newstext">Python bindings are available now.
-		</p>
-		</td>
-		</tr>
-
-		<tr>
-		<td><p class="timestamp">Oct 12th, 2015</p></td>
-		<td><p class="newstext">C++ Interfaces of <i>Strus</i> are now exception free. This means that 
-		libraries and modules can be linked with a defined set of symbols exported (visibility hidden)
-		and you can use different compilers to build the objects if some STL types (vector,string)
-		and the calling conventions are compatible.
-		</p>
-		</td>
+		<td><p class="newstext">Python bindings are available now.</p></td>
 		</tr>
 
 		<tr>
 		<td><p class="timestamp">Aug 17th, 2015</p></td>
-		<td><p class="newstext">Language bindings for Java are now available. Python bindings are
-			following soon.
-		</p>
-		</td>
+		<td><p class="newstext">Language bindings for Java are now available.</p></td>
 		</tr>
 
 		<tr>
