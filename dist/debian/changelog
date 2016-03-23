@@ -1,3 +1,7 @@
+strus (0.6.1-1) unstable; urgency=low
+  * improved BM25pff weighting function: Two more parameters for a proximity ff cap for feature occurrencies not fulfilling minimal proximity requirements
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 23 Mar 2016 17:00:00 +0100
+
 strus (0.6.0-1) unstable; urgency=low
   * changed license from GPLv3 to MPLv2 (Mozilla Public License, Version 2)
  -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 21 Mar 2016 17:00:00 +0100
@@ -8,11 +12,11 @@ strus (0.5.3-1) unstable; urgency=low
  -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 16 Mar 2016 15:00:00 +0100
 
 strus (0.5.2-1) unstable; urgency=low
-  * More fixes for bringing up packages again
+  * more fixes for bringing up packages again
  -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 7 Mar 2016 19:00:00 +0100
 
 strus (0.5.1-1) unstable; urgency=low
-  * Small fixes for bringing up packages again
+  * small fixes for bringing up packages again
  -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 7 Mar 2016 18:00:00 +0100
 
 strus (0.5.0-1) unstable; urgency=low

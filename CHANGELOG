@@ -1,3 +1,7 @@
+strus (0.6.1)
+  * improved BM25pff weighting function: Two more parameters for a proximity ff cap for feature occurrencies not fulfilling minimal proximity requirements
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 23 Mar 2016 17:00:00 +0100
+
 strus (0.6.0)
   * changed license from GPLv3 to MPLv2 (Mozilla Public License, Version 2)
  -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 21 Mar 2016 17:00:00 +0100
