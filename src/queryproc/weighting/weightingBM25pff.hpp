@@ -42,6 +42,8 @@ public:
 		unsigned int cardinality_,
 		double ffbase_,
 		unsigned int fftie_,
+		double proxffbias_,
+		unsigned int proxfftie_,
 		double mindf_,
 		double avgDocLength_,
 		double titleinc_,
@@ -68,10 +70,12 @@ private:
 	unsigned int m_cardinality;				///< minumum number of features in a window considered for weighting
 	double m_ffbase;					///< relative constant base factor of pure ff [0..1]
 	unsigned int m_fftie;					///< the maximum pure ff value that is considered for weighting (used for normalization of pure ff part)
+	double m_proxffbias;					///< bias for proximity ff increments always counted (the others are counted only till m_proxfftie)
+	unsigned int m_proxfftie;				///< the maximum proximity based ff value that is considered for weighting except for increments exceeding m_proxffbias
 	double m_maxdf;						///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double m_avgDocLength;					///< average document length in the collection
 	double m_titleinc;					///< ff increment for title features
-	unsigned int m_tidocnorm;				///< the document size used for calibrating the title match weight normalization between 0 and 1 (0->0 titleinc_docsizenorm and bigger->1).
+	unsigned int m_tidocnorm;				///< the document size used for calibrating the title match weight normalization between 0 and 1 (0->0 titleinc_docsizenorm and bigger->1). This weight is a measure of how much information a document should contain so that query terms in the title can be weighted.
 	double m_nofCollectionDocuments;			///< number of documents in the collection
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
@@ -102,7 +106,10 @@ public:
 	explicit WeightingFunctionInstanceBM25pff( ErrorBufferInterface* errorhnd_)
 		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_titleinc(0.0),m_tidocnorm(0)
 		,m_windowsize(100),m_cardinality(0)
-		,m_ffbase(0.4),m_fftie(0),m_maxdf(0.5),m_errorhnd(errorhnd_){}
+		,m_ffbase(0.4),m_fftie(0)
+		,m_proxffbias(0.0)
+		,m_proxfftie(0)
+		,m_maxdf(0.5),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25pff(){}
 
@@ -129,6 +136,8 @@ private:
 	unsigned int m_cardinality;			///< minimal number of query features in a window
 	double m_ffbase;				///< base used for feature frequency calculation
 	unsigned int m_fftie;				///< the maximum pure ff value that is considered for weighting (used for normalization of pure ff part)
+	double m_proxffbias;				///< bias for proximity ff increments always counted (the others are counted only till m_proxfftie)
+	unsigned int m_proxfftie;			///< the maximum proximity based ff value that is considered for weighting except for increments exceeding m_proxffbias
 	double m_maxdf;					///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
