@@ -156,13 +156,15 @@ static void calcTitleFfIncrements(
 	for (std::size_t ii=0; ii<itrarsize; ++ii)
 	{
 		Index pos = itrar[ii]->skipPos(0);
-		if (pos && pos < firstpos)
+		while (pos && pos < firstpos)
 		{
 			if ((poset & (1<<pos)) == 0)
 			{
 				poset |= (1<<pos);
 				++nofFeaturesInTitle;
+				break;
 			}
+			pos = itrar[ii]->skipPos( pos+1);
 		}
 	}
 	if (titlesize < nofFeaturesInTitle)
