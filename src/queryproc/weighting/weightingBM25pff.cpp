@@ -386,7 +386,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 			double ff = m_itrar[ fi]->frequency();
 			if (ff <= std::numeric_limits<double>::epsilon()) continue;
 
-			double fftied = (m_fftie>0)?normalize_0_max( ff, m_fftie):ff;
+			double fftied = (m_fftie>0)?normalize_0_max( ff, (double)m_fftie / m_itrarsize):ff;
 			double prox_ff = m_ffbase * fftied
 					+ (1.0-m_ffbase) * ffincrar[ fi];
 #ifdef STRUS_LOWLEVEL_DEBUG
