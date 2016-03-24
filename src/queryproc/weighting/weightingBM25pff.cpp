@@ -336,12 +336,12 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		Index titlesize = 1;
 		if (m_metadata_title_maxpos>=0)
 		{
-			ArithmeticVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
+			NumericVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
 			firstpos = firstposval.toint()+1;
 		}
 		if (m_metadata_title_size>=0)
 		{
-			ArithmeticVariant titlesizeval = m_metadata->getValue( m_metadata_title_size);
+			NumericVariant titlesizeval = m_metadata->getValue( m_metadata_title_size);
 			titlesize = titlesizeval.toint();
 			if (!titlesize) titlesize = 1;
 		}
@@ -470,9 +470,9 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0.0);
 }
 
-static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {
-	ArithmeticVariant rt;
+	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
 	return rt;
 }
@@ -522,7 +522,7 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
 }
 
-void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para"))
 	{
@@ -542,11 +542,11 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	}
 	else if (utils::caseInsensitiveEquals( name, "windowsize"))
 	{
-		if (value.type == ArithmeticVariant::Int && value.toint() > 0)
+		if (value.type == NumericVariant::Int && value.toint() > 0)
 		{
 			m_windowsize = value.touint();
 		}
-		else if (value.type == ArithmeticVariant::UInt && value.touint() > 0)
+		else if (value.type == NumericVariant::UInt && value.touint() > 0)
 		{
 			m_windowsize = value.touint();
 		}
@@ -557,11 +557,11 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	}
 	else if (utils::caseInsensitiveEquals( name, "cardinality"))
 	{
-		if (value.type == ArithmeticVariant::Int && value.toint() >= 0)
+		if (value.type == NumericVariant::Int && value.toint() >= 0)
 		{
 			m_cardinality = value.touint();
 		}
-		else if (value.type == ArithmeticVariant::UInt)
+		else if (value.type == NumericVariant::UInt)
 		{
 			m_cardinality = value.touint();
 		}
@@ -580,11 +580,11 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	}
 	else if (utils::caseInsensitiveEquals( name, "fftie"))
 	{
-		if (value.type == ArithmeticVariant::Int && value.toint() >= 0)
+		if (value.type == NumericVariant::Int && value.toint() >= 0)
 		{
 			m_fftie = value.touint();
 		}
-		else if (value.type == ArithmeticVariant::UInt)
+		else if (value.type == NumericVariant::UInt)
 		{
 			m_fftie = value.touint();
 		}
@@ -603,11 +603,11 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	}
 	else if (utils::caseInsensitiveEquals( name, "proxfftie"))
 	{
-		if (value.type == ArithmeticVariant::Int && value.toint() >= 0)
+		if (value.type == NumericVariant::Int && value.toint() >= 0)
 		{
 			m_proxfftie = value.touint();
 		}
-		else if (value.type == ArithmeticVariant::UInt)
+		else if (value.type == NumericVariant::UInt)
 		{
 			m_proxfftie = value.touint();
 		}
@@ -634,11 +634,11 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	}
 	else if (utils::caseInsensitiveEquals( name, "tidocnorm"))
 	{
-		if (value.type == ArithmeticVariant::Int && value.toint() >= 0)
+		if (value.type == NumericVariant::Int && value.toint() >= 0)
 		{
 			m_tidocnorm = value.touint();
 		}
-		else if (value.type == ArithmeticVariant::UInt)
+		else if (value.type == NumericVariant::UInt)
 		{
 			m_tidocnorm = value.touint();
 		}

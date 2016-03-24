@@ -11,7 +11,7 @@
 #define _STRUS_STORAGE_DOCUMENT_UPDATE_INTERFACE_HPP_INCLUDED
 #include <string>
 #include "strus/index.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 
 namespace strus
 {
@@ -31,7 +31,7 @@ public:
 	/// \param[in] value_ value of the element
 	virtual void setMetaData(
 			const std::string& name_,
-			const ArithmeticVariant& value_)=0;
+			const NumericVariant& value_)=0;
 
 	/// \brief Define an attribute (string) of the document
 	/// \note Attributes are used for summarization in a query result

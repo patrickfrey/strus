@@ -9,7 +9,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -46,7 +46,7 @@ std::vector<SummaryElement>
 	{
 		std::vector<SummaryElement> rt;
 		m_metadata->skipDoc( docno);
-		ArithmeticVariant value = m_metadata->getValue( m_attrib);
+		NumericVariant value = m_metadata->getValue( m_attrib);
 		if (value.defined()) 
 		{
 			rt.push_back( SummaryElement( m_name, value.tostring().c_str(), 1.0));
@@ -73,7 +73,7 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "metadata", *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "name"))
 	{

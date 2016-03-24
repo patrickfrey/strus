@@ -11,7 +11,7 @@
 #include "metaDataRecord.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/lib/error.hpp"
 #include <stdexcept>
@@ -51,7 +51,7 @@ public:
 	virtual void skipDoc( const strus::Index&)
 	{}
 
-	virtual strus::ArithmeticVariant getValue( const strus::Index& elementHandle_) const
+	virtual strus::NumericVariant getValue( const strus::Index& elementHandle_) const
 	{
 		return m_current.getValue( m_description->get( elementHandle_));
 	}
@@ -91,12 +91,12 @@ static strus::MetaDataDescription randomMetaDataDescription()
 	return rt;
 }
 
-static bool isValueEqual( strus::MetaDataElement::Type type, const strus::ArithmeticVariant& aa, const strus::ArithmeticVariant& bb)
+static bool isValueEqual( strus::MetaDataElement::Type type, const strus::NumericVariant& aa, const strus::NumericVariant& bb)
 {
 	if (aa.type != bb.type) return false;
 	if (type == strus::MetaDataElement::Float16)
 	{
-		if (aa.type != strus::ArithmeticVariant::Float) return false;
+		if (aa.type != strus::NumericVariant::Float) return false;
 		double diff = aa.tofloat() - bb.tofloat();
 		if (diff < 0.0) diff = -diff;
 		/// [PF:HACK] Bad epsilon !
@@ -106,7 +106,7 @@ static bool isValueEqual( strus::MetaDataElement::Type type, const strus::Arithm
 	}
 	else if (type == strus::MetaDataElement::Float32)
 	{
-		if (aa.type != strus::ArithmeticVariant::Float) return false;
+		if (aa.type != strus::NumericVariant::Float) return false;
 		double diff = aa.tofloat() - bb.tofloat();
 		if (diff < 0.0) diff = -diff;
 		/// [PF:HACK] Bad epsilon !
@@ -126,56 +126,56 @@ static strus::MetaDataRecord randomMetaDataRecord(
 	strus::MetaDataRecord rt( descr, ptr);
 	std::vector<std::string> columns = descr->columns();
 	std::vector<std::string>::const_iterator ci = columns.begin(), ce = columns.end();
-	std::vector<strus::ArithmeticVariant> valar;
+	std::vector<strus::NumericVariant> valar;
 
 	for (; ci != ce; ++ci)
 	{
-		strus::ArithmeticVariant val;
+		strus::NumericVariant val;
 		strus::Index eh = descr->getHandle( *ci);
 		const strus::MetaDataElement* elem = descr->get(eh);
 		switch (elem->type())
 		{
 			case strus::MetaDataElement::Int8:
-				val = strus::ArithmeticVariant((int)RANDINT(0,0xfFU)-0x7f);
+				val = strus::NumericVariant((int)RANDINT(0,0xfFU)-0x7f);
 				break;
 			case strus::MetaDataElement::UInt8:
-				val = strus::ArithmeticVariant( (unsigned int)RANDINT(0,0xfFU));
+				val = strus::NumericVariant( (unsigned int)RANDINT(0,0xfFU));
 				break;
 			case strus::MetaDataElement::Int16:
-				val = strus::ArithmeticVariant( (int)RANDINT(0,0xffFFU)-0x7fFF);
+				val = strus::NumericVariant( (int)RANDINT(0,0xffFFU)-0x7fFF);
 				break;
 			case strus::MetaDataElement::UInt16:
-				val = strus::ArithmeticVariant( (unsigned int)RANDINT(0,0xffFFU));
+				val = strus::NumericVariant( (unsigned int)RANDINT(0,0xffFFU));
 				break;
 			case strus::MetaDataElement::Int32:
-				val = strus::ArithmeticVariant( (int)(RANDINT(0,0xffffFFFFUL) - 0x7fffFFFFL));
+				val = strus::NumericVariant( (int)(RANDINT(0,0xffffFFFFUL) - 0x7fffFFFFL));
 				break;
 			case strus::MetaDataElement::UInt32:
-				val = strus::ArithmeticVariant( (unsigned int)(RANDINT(0,0xffffFFFFL)));
+				val = strus::NumericVariant( (unsigned int)(RANDINT(0,0xffffFFFFL)));
 				break;
 			case strus::MetaDataElement::Float16:
-				val = strus::ArithmeticVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
+				val = strus::NumericVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
 				break;
 			case strus::MetaDataElement::Float32:
-				val = strus::ArithmeticVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
+				val = strus::NumericVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
 				break;
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		strus::ArithmeticVariant::String valstr( val);
+		strus::NumericVariant::String valstr( val);
 		std::cerr << "[" << eh << "] " << elem->typeName() << " " << descr->getName( eh) << " = " << valstr << std::endl;
 #endif
 		rt.setValue( elem, val);
 		valar.push_back( val);
 	}
-	std::vector<strus::ArithmeticVariant>::const_iterator vi = valar.begin(), ve = valar.end();
+	std::vector<strus::NumericVariant>::const_iterator vi = valar.begin(), ve = valar.end();
 	for (ci = columns.begin(); ci != ce && vi != ve; ++ci,++vi)
 	{
 		strus::Index eh = descr->getHandle( *ci);
 		const strus::MetaDataElement* elem = descr->get(eh);
-		strus::ArithmeticVariant val( rt.getValue( elem));
+		strus::NumericVariant val( rt.getValue( elem));
 #ifdef STRUS_LOWLEVEL_DEBUG
-		strus::ArithmeticVariant::String valstr( val);
-		strus::ArithmeticVariant::String vistr( *vi);
+		strus::NumericVariant::String valstr( val);
+		strus::NumericVariant::String vistr( *vi);
 		std::cerr << "check value " << valstr.c_str() << " == " << vistr.c_str() << std::endl;
 #endif
 		if (!isValueEqual( elem->type(), val, *vi))
@@ -245,8 +245,8 @@ static int randomOfs( strus::MetaDataRestrictionInterface::CompareOperator opr, 
 struct RandomDataException
 {};
 
-static strus::ArithmeticVariant randomOperand(
-	const strus::ArithmeticVariant& baseValue,
+static strus::NumericVariant randomOperand(
+	const strus::NumericVariant& baseValue,
 	strus::MetaDataRestrictionInterface::CompareOperator opr,
 	strus::MetaDataElement::Type elemtype,
 	bool positiveResult)
@@ -254,9 +254,9 @@ static strus::ArithmeticVariant randomOperand(
 	int ofs = randomOfs( opr, positiveResult);
 	switch (baseValue.type)
 	{
-		case strus::ArithmeticVariant::Null:
-			return strus::ArithmeticVariant();
-		case strus::ArithmeticVariant::Int:
+		case strus::NumericVariant::Null:
+			return strus::NumericVariant();
+		case strus::NumericVariant::Int:
 		{
 			int value = (int)baseValue;
 			if (ofs < 0)
@@ -270,9 +270,9 @@ static strus::ArithmeticVariant randomOperand(
 			{
 				throw RandomDataException();
 			}
-			return strus::ArithmeticVariant( value + ofs);
+			return strus::NumericVariant( value + ofs);
 		}
-		case strus::ArithmeticVariant::UInt:
+		case strus::NumericVariant::UInt:
 		{
 			unsigned int value = (unsigned int)baseValue;
 			if (ofs < 0)
@@ -288,14 +288,14 @@ static strus::ArithmeticVariant randomOperand(
 			}
 			if (ofs < 0)
 			{
-				return strus::ArithmeticVariant( value - (unsigned int)-ofs);
+				return strus::NumericVariant( value - (unsigned int)-ofs);
 			}
 			else
 			{
-				return strus::ArithmeticVariant( value + (unsigned int)ofs);
+				return strus::NumericVariant( value + (unsigned int)ofs);
 			}
 		}
-		case strus::ArithmeticVariant::Float:
+		case strus::NumericVariant::Float:
 		{
 			float epsilon = std::numeric_limits<float>::epsilon();
 			if (elemtype == strus::MetaDataElement::Float16)
@@ -320,10 +320,10 @@ static strus::ArithmeticVariant randomOperand(
 			{
 				value -= epsilon/rd;
 			}
-			return strus::ArithmeticVariant( value + ofs * epsilon * RANDINT(1,4));
+			return strus::NumericVariant( value + ofs * epsilon * RANDINT(1,4));
 		}
 	}
-	return strus::ArithmeticVariant();
+	return strus::NumericVariant();
 }
 
 static strus::MetaDataCompareOperation
@@ -339,10 +339,10 @@ static strus::MetaDataCompareOperation
 			RANDINT( 0, strus::MetaDataRestrictionInterface::NofCompareOperators);
 
 	const strus::MetaDataElement* elem = descr->get( hnd);
-	strus::ArithmeticVariant value = rec.getValue( elem);
+	strus::NumericVariant value = rec.getValue( elem);
 
 	std::string elemName( descr->getName( hnd));
-	strus::ArithmeticVariant 
+	strus::NumericVariant 
 		operand = randomOperand( value, opr, elem->type(), positiveResult);
 
 	return strus::MetaDataCompareOperation(

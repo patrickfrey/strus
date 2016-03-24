@@ -6,9 +6,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Variant type for fixed size numeric types (integers, floating point numbers)
-/// \file arithmeticVariant.hpp
-#ifndef _STRUS_STORAGE_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
-#define _STRUS_STORAGE_ARITHMETIC_VARIANT_TYPE_HPP_INCLUDED
+/// \file numericVariant.hpp
+#ifndef _STRUS_STORAGE_NUMERIC_VARIANT_TYPE_HPP_INCLUDED
+#define _STRUS_STORAGE_NUMERIC_VARIANT_TYPE_HPP_INCLUDED
 #include <cstring>
 #include <stdio.h>
 #include <limits>
@@ -16,44 +16,44 @@
 namespace strus {
 
 
-/// \class ArithmeticVariant
+/// \class NumericVariant
 /// \brief Atomic type that can hold numeric values of different type
-class ArithmeticVariant
+class NumericVariant
 {
 public:
 	/// \brief Constructor from a signed integer
-	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant( int value)
+	/// \param[in] value value to assign to this numeric variant
+	NumericVariant( int value)
 	{
 		variant.Int = value;
 		type = Int;
 	}
 
 	/// \brief Constructor from an unsigned integer
-	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant( unsigned int value)
+	/// \param[in] value value to assign to this numeric variant
+	NumericVariant( unsigned int value)
 	{
 		variant.UInt = value;
 		type = UInt;
 	}
 
 	/// \brief Constructor from a single precision floating point number
-	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant( double value)
+	/// \param[in] value value to assign to this numeric variant
+	NumericVariant( double value)
 	{
 		variant.Float = value;
 		type = Float;
 	}
 
 	/// \brief Default constructor (as undefined value)
-	ArithmeticVariant()
+	NumericVariant()
 	{
 		init();
 	}
 
 	/// \brief Copy constructor 
-	/// \param[in] o arithmetic variant to copy
-	ArithmeticVariant( const ArithmeticVariant& o)
+	/// \param[in] o numeric variant to copy
+	NumericVariant( const NumericVariant& o)
 	{
 		std::memcpy( this, &o, sizeof(*this));
 	}
@@ -71,7 +71,7 @@ public:
 			m_buf[0] = '\0';
 		}
 
-		String( const ArithmeticVariant& val)
+		String( const NumericVariant& val)
 		{
 			switch (val.type)
 			{
@@ -139,7 +139,7 @@ public:
 	}
 
 	/// \brief Template for casting to a defined value type
-	/// \tparam TYPE what type to cast this arithmetic variant to
+	/// \tparam TYPE what type to cast this numeric variant to
 	template <typename TYPE>
 	TYPE cast() const
 	{
@@ -188,24 +188,24 @@ public:
 	}
 
 	/// \brief Test for equality
-	/// \param[in] o arithmetic variant to compare
+	/// \param[in] o numeric variant to compare
 	/// \return true, if yes
-	bool operator == (const ArithmeticVariant& o) const
+	bool operator == (const NumericVariant& o) const
 	{
 		return isequal(o);
 	}
 	/// \brief Test for inequality
-	/// \param[in] o arithmetic variant to compare
+	/// \param[in] o numeric variant to compare
 	/// \return true, if yes
-	bool operator != (const ArithmeticVariant& o) const
+	bool operator != (const NumericVariant& o) const
 	{
 		return !isequal(o);
 	}
 
 	/// \brief Test for equality
-	/// \param[in] o arithmetic variant to compare
+	/// \param[in] o numeric variant to compare
 	/// \return true, if yes
-	bool isequal( const ArithmeticVariant& o) const
+	bool isequal( const NumericVariant& o) const
 	{
 		if (type == o.type)
 		{
@@ -226,8 +226,8 @@ public:
 	}
 
 	/// \brief Assignment operator for a singed integer
-	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant& operator=( int value)
+	/// \param[in] value value to assign to this numeric variant
+	NumericVariant& operator=( int value)
 	{
 		variant.Int = value;
 		type = Int;
@@ -235,8 +235,8 @@ public:
 	}
 
 	/// \brief Assignment operator for an unsinged integer
-	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant& operator=( unsigned int value)
+	/// \param[in] value value to assign to this numeric variant
+	NumericVariant& operator=( unsigned int value)
 	{
 		variant.UInt = value;
 		type = UInt;
@@ -244,8 +244,8 @@ public:
 	}
 
 	/// \brief Assignment operator for a single precision floating point number
-	/// \param[in] value value to assign to this arithmetic variant
-	ArithmeticVariant& operator=( double value)
+	/// \param[in] value value to assign to this numeric variant
+	NumericVariant& operator=( double value)
 	{
 		variant.Float = value;
 		type = Float;
@@ -253,27 +253,27 @@ public:
 	}
 
 	/// \brief Assignment operator
-	/// \param[in] o arithmetic variant to copy
-	ArithmeticVariant& operator=( const ArithmeticVariant& o)
+	/// \param[in] o numeric variant to copy
+	NumericVariant& operator=( const NumericVariant& o)
 	{
 		std::memcpy( this, &o, sizeof(*this));
 		return *this;
 	}
 
-	/// \brief Enumeration of all types an arithmetic variant can have
+	/// \brief Enumeration of all types an numeric variant can have
 	enum Type {
 		Null,		///< uninitialized variant value
 		Int,		///< signed integer number value
 		UInt,		///< unsigned integer number value
 		Float		///< floating point number value
 	};
-	Type type;				///< Type of this arithmetic variant
+	Type type;				///< Type of this numeric variant
 	union
 	{
 		int Int;			///< value in case of a signed integer
 		unsigned int UInt;		///< value in case of an unsigned integer
 		double Float;			///< value in case of a single precision floating point number
-	} variant;				///< Value of this arithmetic variant
+	} variant;				///< Value of this numeric variant
 };
 
 }//namespace

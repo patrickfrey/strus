@@ -52,17 +52,17 @@ void MetaDataMap::deleteMetaData( Index docno)
 	for (; ii<nn; ++ii)
 	{
 		MetaDataKey key( docno, ii);
-		m_map[ key] = ArithmeticVariant();
+		m_map[ key] = NumericVariant();
 	}
 }
 
 void MetaDataMap::deleteMetaData( Index docno, const std::string& varname)
 {
 	MetaDataKey key( docno, m_descr->getHandle( varname));
-	m_map[ key] = ArithmeticVariant();
+	m_map[ key] = NumericVariant();
 }
 
-void MetaDataMap::defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value)
+void MetaDataMap::defineMetaData( Index docno, const std::string& varname, const NumericVariant& value)
 {
 	MetaDataKey key( docno, m_descr->getHandle( varname));
 	m_map[ key] = value;

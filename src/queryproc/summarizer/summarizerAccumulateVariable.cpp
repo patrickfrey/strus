@@ -8,7 +8,7 @@
 #include "summarizerAccumulateVariable.hpp"
 #include "postingIteratorLink.hpp"
 #include "ranker.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -222,7 +222,7 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "accuvariable", *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{

@@ -32,7 +32,7 @@ StorageDocumentUpdate::~StorageDocumentUpdate()
 
 void StorageDocumentUpdate::setMetaData(
 		const std::string& name_,
-		const ArithmeticVariant& value_)
+		const NumericVariant& value_)
 {
 	try
 	{

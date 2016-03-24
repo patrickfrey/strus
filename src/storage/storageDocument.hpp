@@ -9,7 +9,7 @@
 #define _STRUS_STORAGE_DOCUMENT_HPP_INCLUDED
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/storageDocumentUpdateInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "storageTransaction.hpp"
 #include <vector>
 #include <string>
@@ -50,10 +50,10 @@ public:
 			const std::string& value_,
 			const Index& position_);
 
-	/// \brief Implementation of StorageDocumentInterface::setMetaData( const std::string&, const ArithmeticVariant&);
+	/// \brief Implementation of StorageDocumentInterface::setMetaData( const std::string&, const NumericVariant&);
 	virtual void setMetaData(
 			const std::string& name_,
-			const ArithmeticVariant& value_);
+			const NumericVariant& value_);
 
 	/// \brief Implementation of StorageDocumentInterface::setAttribute( const std::string&, const std::string&);
 	virtual void setAttribute(
@@ -112,9 +112,9 @@ public:
 	struct DocMetaData
 	{
 		std::string name;
-		ArithmeticVariant value;
+		NumericVariant value;
 
-		DocMetaData( const std::string& name_, const ArithmeticVariant& value_)
+		DocMetaData( const std::string& name_, const NumericVariant& value_)
 			:name(name_),value(value_){}
 		DocMetaData( const DocMetaData& o)
 			:name(o.name),value(o.value){}

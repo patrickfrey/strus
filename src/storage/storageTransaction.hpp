@@ -8,7 +8,7 @@
 #ifndef _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
 #define _STRUS_STORAGE_TRANSACTION_HPP_INCLUDED
 #include "strus/storageTransactionInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataMap.hpp"
@@ -69,7 +69,7 @@ public:
 			const Index& docno_);
 
 	virtual void updateMetaData(
-			const Index& docno, const std::string& varname, const ArithmeticVariant& value);
+			const Index& docno, const std::string& varname, const NumericVariant& value);
 
 	/// \brief Transaction commit
 	virtual bool commit();
@@ -84,7 +84,7 @@ public:/*Document*/
 	Index getOrCreateUserno( const std::string& name, bool& isNew);
 	Index lookUpTermValue( const std::string& name);
 
-	void defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value);
+	void defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value);
 	void deleteMetaData( const Index& docno, const std::string& varname);
 	void deleteMetaData( const Index& docno);
 

@@ -16,7 +16,7 @@ namespace strus
 {
 
 /// \brief Forward declaration
-class ArithmeticVariant;
+class NumericVariant;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
@@ -41,12 +41,12 @@ public:
 			const std::string& name,
 			const std::string& value)=0;
 
-	/// \brief Add a named arithmetic value parameter
+	/// \brief Add a named numeric value parameter
 	/// \param[in] name parameter name
 	/// \param[in] value parameter value
 	virtual void addNumericParameter(
 			const std::string& name,
-			const ArithmeticVariant& value)=0;
+			const NumericVariant& value)=0;
 
 	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)

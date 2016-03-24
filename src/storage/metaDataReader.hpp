@@ -8,6 +8,7 @@
 #ifndef _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_METADATA_READER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/metaDataReaderInterface.hpp"
+#include "strus/numericVariant.hpp"
 #include "metaDataBlockCache.hpp"
 #include "metaDataRecord.hpp"
 #include "metaDataDescription.hpp"
@@ -32,7 +33,7 @@ public:
 	virtual Index elementHandle( const std::string& name) const;
 	virtual bool hasElement( const std::string& name) const;
 	virtual void skipDoc( const Index& docno);
-	virtual ArithmeticVariant getValue( const Index& elementHandle_) const;
+	virtual NumericVariant getValue( const Index& elementHandle_) const;
 	virtual const char* getType( const Index& elementHandle_) const;
 	virtual const char* getName( const Index& elementHandle_) const;
 	virtual Index nofElements() const;

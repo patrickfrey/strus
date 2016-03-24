@@ -122,7 +122,7 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "matchvariables", *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{

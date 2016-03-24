@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "summarizerListMatches.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
@@ -86,7 +86,7 @@ void SummarizerFunctionInstanceListMatches::addStringParameter( const std::strin
 	}
 }
 
-void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const ArithmeticVariant& val)
+void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const NumericVariant& val)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{

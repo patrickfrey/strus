@@ -8,7 +8,7 @@
 #ifndef _STRUS_STORAGE_DOCUMENT_UPDATE_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_UPDATE_HPP_INCLUDED
 #include "strus/storageDocumentUpdateInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "storageTransaction.hpp"
 #include <vector>
 #include <string>
@@ -35,10 +35,10 @@ public:
 	/// \brief Destructor
 	virtual ~StorageDocumentUpdate();
 
-	/// \brief Implementation of StorageDocumentUpdateInterface::setMetaData( const std::string&, const ArithmeticVariant&);
+	/// \brief Implementation of StorageDocumentUpdateInterface::setMetaData( const std::string&, const NumericVariant&);
 	virtual void setMetaData(
 			const std::string& name_,
-			const ArithmeticVariant& value_);
+			const NumericVariant& value_);
 
 	/// \brief Implementation of StorageDocumentUpdateInterface::setAttribute( const std::string&, const std::string&);
 	virtual void setAttribute(
@@ -78,9 +78,9 @@ private:
 	struct DocMetaData
 	{
 		std::string name;
-		ArithmeticVariant value;
+		NumericVariant value;
 
-		DocMetaData( const std::string& name_, const ArithmeticVariant& value_)
+		DocMetaData( const std::string& name_, const NumericVariant& value_)
 			:name(name_),value(value_){}
 		DocMetaData( const DocMetaData& o)
 			:name(o.name),value(o.value){}

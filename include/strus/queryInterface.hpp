@@ -12,7 +12,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/queryResult.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/termStatistics.hpp"
 #include "strus/globalStatistics.hpp"
 #include <string>
@@ -85,7 +85,7 @@ public:
 	virtual void addMetaDataRestrictionCondition(
 			MetaDataRestrictionInterface::CompareOperator opr,
 			const std::string& name,
-			const ArithmeticVariant& operand,
+			const NumericVariant& operand,
 			bool newGroup=true)=0;
 
 	/// \brief Define a restriction on the documents as list of local document numbers (Add local document numbers to the list of documents to restrict the query on)

@@ -16,7 +16,7 @@
 #include "storageDocumentUpdate.hpp"
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
@@ -95,7 +95,7 @@ Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 	return m_attributeNameMap.getOrCreate( utils::tolower( name), isNew);
 }
 
-void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const ArithmeticVariant& value)
+void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value)
 {
 	m_metaDataMap.defineMetaData( docno, varname, value);
 }
@@ -244,7 +244,7 @@ StorageDocumentUpdateInterface*
 }
 
 void StorageTransaction::updateMetaData(
-		const Index& docno, const std::string& varname, const ArithmeticVariant& value)
+		const Index& docno, const std::string& varname, const NumericVariant& value)
 {
 	try
 	{

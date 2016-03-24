@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_SUMMARIZER_DEFINITION_HPP_INCLUDED
 #define _STRUS_SUMMARIZER_DEFINITION_HPP_INCLUDED
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/summarizerFunctionInstanceInterface.hpp"
 #include "strus/reference.hpp"
 #include <string>

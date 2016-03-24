@@ -77,7 +77,7 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "attribute", *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "name"))
 	{

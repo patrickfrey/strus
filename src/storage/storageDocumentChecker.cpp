@@ -85,7 +85,7 @@ void StorageDocumentChecker::addForwardIndexTerm(
 
 void StorageDocumentChecker::setMetaData(
 		const std::string& name_,
-		const ArithmeticVariant& value_)
+		const NumericVariant& value_)
 {
 	try
 	{
@@ -211,7 +211,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 			Index hnd = metadata->elementHandle( mi->first.c_str());
 			metadata->skipDoc( m_docno);
 	
-			ArithmeticVariant val = metadata->getValue( hnd);
+			NumericVariant val = metadata->getValue( hnd);
 			if (val != mi->second)
 			{
 				logError( logout, m_docid,

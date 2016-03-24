@@ -45,9 +45,9 @@ void MetaDataReader::skipDoc( const Index& docno)
 	CATCH_ERROR_MAP( _TXT("error meta data skip document: %s"), *m_errorhnd);
 }
 
-ArithmeticVariant MetaDataReader::getValue( const Index& elementHandle_) const
+NumericVariant MetaDataReader::getValue( const Index& elementHandle_) const
 {
-	if (!m_docno) return ArithmeticVariant();
+	if (!m_docno) return NumericVariant();
 	return m_current.getValue( m_description->get( elementHandle_));
 }
 

@@ -114,7 +114,7 @@ public:
 	virtual ~WeightingFunctionInstanceBM25pff(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
-	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
+	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,

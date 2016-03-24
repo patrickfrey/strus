@@ -11,7 +11,7 @@
 #define _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include <string>
 #include "strus/storageDocumentInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 
 namespace strus
 {
@@ -60,7 +60,7 @@ public:
 	virtual void updateMetaData(
 			const Index& docno,
 			const std::string& varname,
-			const ArithmeticVariant& value)=0;
+			const NumericVariant& value)=0;
 
 	/// \brief Insert all documents and executes all commands defined in the transaction or none if one operation fails
 	/// \return true on success, false on error

@@ -9,7 +9,7 @@
 #include "proximityWeightAccumulator.hpp"
 #include "positionWindow.hpp"
 #include "postingIteratorLink.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/forwardIteratorInterface.hpp"
@@ -279,7 +279,7 @@ std::vector<SummaryElement>
 		if (m_metadata_title_maxpos>=0)
 		{
 			m_metadata->skipDoc( docno);
-			ArithmeticVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
+			NumericVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
 			firstpos = firstposval.toint()+1;
 		}
 		// Define best match to find:
@@ -623,7 +623,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "matchphrase", *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para"))
 	{

@@ -11,7 +11,7 @@
 #include "metaDataBlock.hpp"
 #include "forwardIndexBlock.hpp"
 #include "booleanBlock.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>
 #include <iostream>
@@ -366,7 +366,7 @@ void DocMetaDataData::print( std::ostream& out)
 			for (; colidx<colend; ++colidx)
 			{
 				if (colidx) out << ',';
-				ArithmeticVariant value = record.getValue( descr->get( colidx));
+				NumericVariant value = record.getValue( descr->get( colidx));
 				out << value.tostring().c_str();
 			}
 		}

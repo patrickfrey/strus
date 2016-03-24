@@ -8,7 +8,7 @@
 #include "weightingMetadata.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -43,9 +43,9 @@ double WeightingFunctionContextMetadata::call( const Index& docno)
 	return m_weight * (double)m_metadata->getValue( m_elementHandle);
 }
 
-static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {
-	ArithmeticVariant rt;
+	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
 	return rt;
 }
@@ -66,7 +66,7 @@ void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& n
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "metadata", *m_errorhnd);
 }
 
-void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	try
 	{

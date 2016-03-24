@@ -16,8 +16,6 @@ namespace strus
 {
 /// \brief Forward declaration
 class WeightingFunctionInstanceInterface;
-/// \brief Forward declaration
-class ArithmeticVariant;
 
 /// \brief Interface for a weighting function that can be used for ranking in the query evaluation
 class WeightingFunctionInterface

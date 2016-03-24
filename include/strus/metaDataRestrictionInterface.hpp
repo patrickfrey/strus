@@ -8,7 +8,7 @@
 /// \brief Interface for building up metadata restrictions
 #ifndef _STRUS_METADATA_RESTRICTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_RESTRICTION_INTERFACE_HPP_INCLUDED
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/index.hpp"
 #include <string>
 
@@ -49,7 +49,7 @@ public:
 	virtual void addCondition(
 			CompareOperator opr,
 			const std::string& name,
-			const ArithmeticVariant& operand,
+			const NumericVariant& operand,
 			bool newGroup=true)=0;
 
 	/// \brief Create an instance of this metadata restriction

@@ -44,7 +44,7 @@ FormulaInterpreter::IteratorSpec FunctionMap::dimMap( void* ctx, const char* typ
 double FunctionMap::variableMap_metadata( void* ctx, int typeidx, unsigned int idx)
 {
 	WeightingFunctionContextFormula* THIS = (WeightingFunctionContextFormula*)ctx;
-	ArithmeticVariant val = THIS->m_metadata->getValue( idx);
+	NumericVariant val = THIS->m_metadata->getValue( idx);
 	if (val.defined())
 	{
 		return (double)val;
@@ -241,7 +241,7 @@ void WeightingFunctionInstanceFormula::addStringParameter( const std::string& na
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
-void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	try
 	{

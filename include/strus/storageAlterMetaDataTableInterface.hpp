@@ -10,7 +10,6 @@
 #ifndef _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
 #define _STRUS_STORAGE_ALTER_META_DATA_TABLE_INTERFACE_HPP_INCLUDED
 #include <string>
-#include "strus/arithmeticVariant.hpp"
 
 namespace strus
 {

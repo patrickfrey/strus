@@ -10,7 +10,7 @@
 #ifndef _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include <string>
 
 namespace strus
@@ -50,7 +50,7 @@ public:
 	/// \brief Get the value a table element
 	/// \param[in] elementHandle_ the handle for the element
 	/// \return return the element value as atomic variant (type depending on internal representation)
-	virtual ArithmeticVariant getValue( const Index& elementHandle_) const=0;
+	virtual NumericVariant getValue( const Index& elementHandle_) const=0;
 
 	/// \brief Get the type name of a table element (internal representation)
 	/// \param[in] elementHandle_ the handle for the element

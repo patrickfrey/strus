@@ -69,7 +69,7 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 
-	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant&);
+	virtual void addNumericParameter( const std::string& name, const NumericVariant&);
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,

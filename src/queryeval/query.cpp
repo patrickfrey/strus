@@ -159,7 +159,7 @@ void Query::defineFeature( const std::string& set_, float weight_)
 
 void Query::addMetaDataRestrictionCondition(
 		MetaDataRestrictionInterface::CompareOperator opr, const std::string&  name,
-		const ArithmeticVariant& operand, bool newGroup)
+		const NumericVariant& operand, bool newGroup)
 {
 	try
 	{

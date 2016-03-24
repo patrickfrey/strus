@@ -9,7 +9,6 @@
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/resultDocument.hpp"
-#include "strus/arithmeticVariant.hpp"
 #include "termConfig.hpp"
 #include "summarizerDef.hpp"
 #include "weightingDef.hpp"

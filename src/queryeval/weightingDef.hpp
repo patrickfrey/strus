@@ -7,7 +7,7 @@
  */
 #ifndef _STRUS_WEIGHTING_DEFINITION_HPP_INCLUDED
 #define _STRUS_WEIGHTING_DEFINITION_HPP_INCLUDED
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/reference.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include <vector>

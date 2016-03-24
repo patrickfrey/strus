@@ -11,7 +11,7 @@
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
 #include "strus/index.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
@@ -67,7 +67,7 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 
-	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
+	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,

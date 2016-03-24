@@ -8,7 +8,7 @@
 #ifndef _STRUS_STORAGE_DOCUMENT_CHECKER_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_CHECKER_HPP_INCLUDED
 #include "strus/storageDocumentInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include <string>
 #include <vector>
 #include <set>
@@ -49,7 +49,7 @@ public:
 
 	virtual void setMetaData(
 			const std::string& name_,
-			const ArithmeticVariant& value_);
+			const NumericVariant& value_);
 
 	virtual void setAttribute(
 			const std::string& name_,
@@ -113,7 +113,7 @@ private:
 
 	typedef std::map<Term,TermAttributes> TermMap;
 	typedef std::map<InvKey,std::string> InvTermMap;
-	typedef std::map<std::string,ArithmeticVariant> MetaDataMap;
+	typedef std::map<std::string,NumericVariant> MetaDataMap;
 	typedef std::map<std::string,std::string> AttributeMap;
 
 private:

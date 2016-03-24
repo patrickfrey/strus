@@ -12,7 +12,6 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "private/utils.hpp"

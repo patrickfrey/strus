@@ -9,7 +9,7 @@
 #define _STRUS_STORAGE_HPP_INCLUDED
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/reference.hpp"
 #include "private/utils.hpp"
 #include "metaDataBlockCache.hpp"

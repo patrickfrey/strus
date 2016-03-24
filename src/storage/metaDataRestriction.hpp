@@ -9,7 +9,7 @@
 #define _STRUS_METADATA_RESTRICTION_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/index.hpp"
 #include "strus/reference.hpp"
 #include <vector>
@@ -31,7 +31,7 @@ public:
 	/// \brief Comparison operator implemented
 	typedef MetaDataRestrictionInterface::CompareOperator CompareOperator;
 	/// \brief Function implementing the comparison operator
-	typedef bool (*CompareFunction)( const ArithmeticVariant& op1, const ArithmeticVariant& op2);
+	typedef bool (*CompareFunction)( const NumericVariant& op1, const NumericVariant& op2);
 
 	/// \brief Copy constructor
 	MetaDataCompareOperation( const MetaDataCompareOperation& o)
@@ -48,7 +48,7 @@ public:
 			CompareOperator opr_,
 			const Index& elementHandle_,
 			const std::string& name_,
-			const ArithmeticVariant& operand_,
+			const NumericVariant& operand_,
 			bool newGroup_)
 		:m_opr(opr_)
 		,m_func(getCompareFunction(type_,opr_))
@@ -77,7 +77,7 @@ private:
 	CompareFunction m_func;		///< comparison function implementing m_opr
 	Index m_elementHandle;		///< metadata element handle
 	std::string m_name;		///< name of metadata table element
-	ArithmeticVariant m_operand;	///< operand to compare with the metadata table element
+	NumericVariant m_operand;	///< operand to compare with the metadata table element
 	bool m_newGroup;		///< true if element opens a new OR group in a CNF
 };
 
@@ -116,7 +116,7 @@ public:
 	virtual void addCondition(
 			CompareOperator opr,
 			const std::string& name,
-			const ArithmeticVariant& operand,
+			const NumericVariant& operand,
 			bool newGroup);
 
 	virtual std::string tostring() const;

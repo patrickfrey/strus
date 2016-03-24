@@ -55,7 +55,7 @@ public:
 
 	virtual void addMetaDataRestrictionCondition(
 			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
-			const ArithmeticVariant& operand, bool newGroup);
+			const NumericVariant& operand, bool newGroup);
 
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_);

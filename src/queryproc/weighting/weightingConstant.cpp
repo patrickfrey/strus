@@ -7,7 +7,7 @@
  */
 #include "weightingConstant.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -51,9 +51,9 @@ double WeightingFunctionContextConstant::call( const Index& docno)
 }
 
 
-static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {
-	ArithmeticVariant rt;
+	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
 	return rt;
 }
@@ -67,7 +67,7 @@ void WeightingFunctionInstanceConstant::addStringParameter( const std::string& n
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' weighting function: %s"), "constant", *m_errorhnd);
 }
 
-void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{

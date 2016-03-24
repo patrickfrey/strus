@@ -10,7 +10,6 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "private/errorUtils.hpp"

@@ -76,7 +76,7 @@ void StorageDocument::addForwardIndexTerm(
 
 void StorageDocument::setMetaData(
 		const std::string& name_,
-		const ArithmeticVariant& value_)
+		const NumericVariant& value_)
 {
 	try
 	{

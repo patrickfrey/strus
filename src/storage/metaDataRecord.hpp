@@ -8,7 +8,7 @@
 #ifndef _STRUS_STORAGE_METADATA_RECORD_HPP_INCLUDED
 #define _STRUS_STORAGE_METADATA_RECORD_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "metaDataDescription.hpp"
 #include "metaDataElement.hpp"
 #include <utility>
@@ -26,12 +26,12 @@ public:
 	void setValueInt( const MetaDataElement* elem, int32_t value_);
 	void setValueUInt( const MetaDataElement* elem, uint32_t value_);
 	void setValueFloat( const MetaDataElement* elem, float value_);
-	void setValue( const MetaDataElement* elem, const ArithmeticVariant& value_);
+	void setValue( const MetaDataElement* elem, const NumericVariant& value_);
 
 	int getValueInt( const MetaDataElement* elem) const;
 	unsigned int getValueUInt( const MetaDataElement* elem) const;
 	float getValueFloat( const MetaDataElement* elem) const;
-	ArithmeticVariant getValue( const MetaDataElement* elem) const;
+	NumericVariant getValue( const MetaDataElement* elem) const;
 
 	void clearValue( const MetaDataElement* elem);
 

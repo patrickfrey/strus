@@ -8,7 +8,7 @@
 /// \brief Interface for a metadata restriction instance
 #ifndef _STRUS_METADATA_RESTRICTION_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_METADATA_RESTRICTION_INSTANCE_INTERFACE_HPP_INCLUDED
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "strus/index.hpp"
 #include <string>
 

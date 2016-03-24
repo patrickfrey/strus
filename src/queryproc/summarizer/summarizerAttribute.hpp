@@ -69,7 +69,7 @@ public:
 	virtual ~SummarizerFunctionInstanceAttribute(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
-	virtual void addNumericParameter( const std::string& name, const ArithmeticVariant& value);
+	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,

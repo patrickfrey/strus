@@ -11,7 +11,7 @@
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
 #include "private/localStructAllocator.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include <cstdlib>
 #include <vector>
 
@@ -31,7 +31,7 @@ public:
 		:m_database(database_),m_descr(descr_){}
 	~MetaDataMap();
 
-	void defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value);
+	void defineMetaData( Index docno, const std::string& varname, const NumericVariant& value);
 	void deleteMetaData( Index docno);
 	void deleteMetaData( Index docno, const std::string& varname);
 
@@ -48,9 +48,9 @@ private:
 
 private:
 	typedef std::pair<Index,Index> MetaDataKey;
-	typedef LocalStructAllocator<std::pair<MetaDataKey,ArithmeticVariant> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<MetaDataKey,NumericVariant> > MapAllocator;
 	typedef std::less<MetaDataKey> MapCompare;
-	typedef std::map<MetaDataKey,ArithmeticVariant,MapCompare,MapAllocator> Map;
+	typedef std::map<MetaDataKey,NumericVariant,MapCompare,MapAllocator> Map;
 
 private:
 	DatabaseClientInterface* m_database;
