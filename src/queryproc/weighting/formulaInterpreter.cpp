@@ -7,6 +7,7 @@
  */
 #include "formulaInterpreter.hpp"
 #include "private/internationalization.hpp"
+#include "private/utils.hpp"
 #include <cmath> 
 #include <limits> 
 #include <algorithm>
@@ -20,17 +21,9 @@
 
 using namespace strus;
 
-static std::string lowercase( const std::string& name)
-{
-	std::string rt;
-	rt = name;
-	std::transform( rt.begin(), rt.end(), rt.begin(), ::tolower);
-	return rt;
-}
-
 void FormulaInterpreter::FunctionMap::defineVariableMap( const std::string& name, VariableMap func)
 {
-	m_varmap[ lowercase(name)] = func;
+	m_varmap[ strus::utils::tolower(name)] = func;
 }
 
 FormulaInterpreter::VariableMap FormulaInterpreter::FunctionMap::getVariableMap( const std::string& name) const
@@ -42,7 +35,7 @@ FormulaInterpreter::VariableMap FormulaInterpreter::FunctionMap::getVariableMap(
 
 void FormulaInterpreter::FunctionMap::defineUnaryFunction( const std::string& name, FormulaInterpreter::UnaryFunction func)
 {
-	m_unaryfuncmap[ lowercase(name)] = func;
+	m_unaryfuncmap[ strus::utils::tolower(name)] = func;
 	m_namemap[ (uintptr_t)func] = name;
 }
 
@@ -62,7 +55,7 @@ const std::string& FormulaInterpreter::FunctionMap::getUnaryFunctionName( UnaryF
 
 void FormulaInterpreter::FunctionMap::defineBinaryFunction( const std::string& name, FormulaInterpreter::BinaryFunction func)
 {
-	m_binaryfuncmap[ lowercase(name)] = func;
+	m_binaryfuncmap[ strus::utils::tolower(name)] = func;
 	m_namemap[ (uintptr_t)func] = name;
 }
 
@@ -82,7 +75,7 @@ const std::string& FormulaInterpreter::FunctionMap::getBinaryFunctionName( Binar
 
 void FormulaInterpreter::FunctionMap::defineWeightingFunction( const std::string& name, FormulaInterpreter::WeightingFunction func)
 {
-	m_weightingfuncmap[ lowercase(name)] = func;
+	m_weightingfuncmap[ strus::utils::tolower(name)] = func;
 	m_namemap[ (uintptr_t)func] = name;
 }
 
