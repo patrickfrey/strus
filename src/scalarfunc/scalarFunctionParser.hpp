@@ -17,6 +17,8 @@ namespace strus
 /// \brief Forward declaration
 class ScalarFunctionInterface;
 /// \brief Forward declaration
+class ScalarFunction;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
 /// \brief Default implementation of the scalar function parser
@@ -34,6 +36,11 @@ public:
 	virtual void defineNaryFunction( const std::string& name, NaryFunction func);
 
 	virtual ScalarFunctionInterface* createFunction( const std::string& src) const;
+
+private:
+	void parseOperand( ScalarFunction* func, std::string::const_iterator& si, const std::string::const_iterator& se) const;
+	void parseExpression( ScalarFunction* func, unsigned int oprPrecedence, std::string::const_iterator& si, const std::string::const_iterator& se) const;
+	void parseFunctionCall( ScalarFunction* func, const std::string& functionName, std::string::const_iterator& si, const std::string::const_iterator& se) const;
 
 private:
 	typedef std::map<std::string,BinaryFunction> BinaryFunctionMap;
