@@ -45,9 +45,7 @@ public:
 		OpLdCnt,	//< Load a counter for the next operation (FuncNary)
 		OpPush,		//< Push a numeric value on the stack
 		OpArg,		//< Push an argument on the stack
-		OpSto,		//< Store value in a temporary array and take it from the stack
-		OpRcl,		//< Move all values from the temporary array built with 'Sto' on the stack
-		OpDup,		//< Push duplicate of the stack top element on the stack
+		OpNeg,		//< Replace the topmost element on the stack by its negation
 		OpAdd,		//< Add two topmost values removed from the stack and put result back on the stack
 		OpSub,		//< Subtract operation of two topmost values removed from the stack and put result back on the stack
 		OpDiv,		//< Divide operation of two topmost values removed from the stack and put result back on the stack
@@ -60,7 +58,7 @@ public:
 	};
 	static const char* opCodeName( OpCode opCode)
 	{
-		static const char* ar[] = {"LdCnt", "Push", "Arg", "Sto", "Rcl", "Dup", "Add", "Sub", "Div", "Mul", "Min", "Max", "FuncUnary", "FuncBinary", "FuncNary"};
+		static const char* ar[] = {"LdCnt", "Push", "Arg", "Neg", "Add", "Sub", "Div", "Mul", "Min", "Max", "FuncUnary", "FuncBinary", "FuncNary"};
 		return ar[ opCode];
 	}
 

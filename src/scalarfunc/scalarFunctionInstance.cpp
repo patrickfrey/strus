@@ -48,7 +48,6 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 		}
 		std::size_t ip = 0;
 		std::vector<double> stk;
-		std::vector<double> reg;
 		std::size_t idxreg = 0;
 
 		for (;m_func->hasInstruction(ip); ++ip)
@@ -72,23 +71,10 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					stk.push_back( args[ validx]);
 					break;
 				}
-				case ScalarFunction::OpSto:
+				case ScalarFunction::OpNeg:
 				{
-					if (stk.empty()) throw strus::runtime_error(_TXT("illegal stack operation"));
-					reg.push_back( stk.back());
-					stk.pop_back();
-					break;
-				}
-				case ScalarFunction::OpRcl:
-				{
-					stk.insert( stk.end(), reg.begin(), reg.end());
-					reg.clear();
-					break;
-				}
-				case ScalarFunction::OpDup:
-				{
-					if (stk.empty()) throw strus::runtime_error(_TXT("illegal stack operation"));
-					stk.push_back( stk.back());
+					if (stk.size() < 1) throw strus::runtime_error(_TXT("illegal stack operation"));
+					stk.back() = -stk.back();
 					break;
 				}
 				case ScalarFunction::OpAdd:
@@ -212,9 +198,7 @@ std::string ScalarFunctionInstance::tostring() const
 					dmp << " " << validx;
 					break;
 				}
-				case ScalarFunction::OpSto:
-				case ScalarFunction::OpRcl:
-				case ScalarFunction::OpDup:
+				case ScalarFunction::OpNeg:
 				case ScalarFunction::OpAdd:
 				case ScalarFunction::OpSub:
 				case ScalarFunction::OpDiv:

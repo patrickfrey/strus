@@ -14,6 +14,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <memory>
 
 using namespace strus;
 
@@ -173,9 +174,7 @@ std::string ScalarFunction::tostring() const
 					dmp << " " << validx;
 					break;
 				}
-				case ScalarFunction::OpSto:
-				case ScalarFunction::OpRcl:
-				case ScalarFunction::OpDup:
+				case ScalarFunction::OpNeg:
 				case ScalarFunction::OpAdd:
 				case ScalarFunction::OpSub:
 				case ScalarFunction::OpDiv:

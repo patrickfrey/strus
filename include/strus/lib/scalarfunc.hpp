@@ -9,6 +9,7 @@
 /// \file "scalarfunc.hpp"
 #ifndef _STRUS_STORAGE_SCALARFUNC_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_SCALARFUNC_LIB_HPP_INCLUDED
+#include <vector>
 
 /// \brief strus toplevel namespace
 namespace strus {
@@ -16,10 +17,16 @@ namespace strus {
 /// \brief Forward declaration
 class ScalarFunctionParserInterface;
 /// \brief Forward declaration
+class ScalarFunctionInstanceInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
-/// \brief Create an instance of the default scalar function parser for strus
+
+/// \brief Create an instance of the default scalar function parser
 ScalarFunctionParserInterface* createScalarFunctionParser_default( ErrorBufferInterface* errorhnd);
+
+/// \brief Create an instance of a scalar function that implements a linear combination of the arguments
+ScalarFunctionInstanceInterface* createScalarFunction_linearcomb( const std::vector<double>& factors, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif
