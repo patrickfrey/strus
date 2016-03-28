@@ -102,6 +102,13 @@ const char* ScalarFunction::reverseLookupVariableName( std::size_t validx) const
 	return 0;
 }
 
+std::size_t ScalarFunction::getVariableIndex( const std::string& name) const
+{
+	VariableMap::const_iterator vi = m_variablemap.find( strus::utils::tolower( name));
+	if (vi == m_variablemap.end()) throw strus::runtime_error("variable '%s' is not defined in scalar function", name.c_str());
+	return vi->second;
+}
+
 std::vector<std::string> ScalarFunction::getVariables() const
 {
 	std::vector<std::string> rt;
@@ -113,11 +120,9 @@ std::vector<std::string> ScalarFunction::getVariables() const
 	return rt;
 }
 
-std::size_t ScalarFunction::getVariableIndex( const std::string& name) const
+std::size_t ScalarFunction::getNofArguments() const
 {
-	VariableMap::const_iterator vi = m_variablemap.find( strus::utils::tolower( name));
-	if (vi == m_variablemap.end()) throw strus::runtime_error("variable '%s' is not defined in scalar function", name.c_str());
-	return vi->second;
+	return m_nofargs;
 }
 
 ScalarFunctionInstanceInterface* ScalarFunction::createInstance() const

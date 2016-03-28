@@ -30,6 +30,8 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 /// \brief Forward declaration
+class ScalarFunctionInstanceInterface;
+/// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class InvAclIteratorInterface;
@@ -45,11 +47,13 @@ public:
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata_,
 			MetaDataRestrictionInterface* metaDataRestriction_,
+			const ScalarFunctionInstanceInterface* weightingFormula_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
 		,m_metadata(metadata_)
 		,m_metaDataRestriction(metaDataRestriction_?metaDataRestriction_->createInstance():0)
+		,m_weightingFormula(weightingFormula_)
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
@@ -69,8 +73,7 @@ public:
 
 	void addSelector( PostingIteratorInterface* iterator, int setindex);
 
-	void addFeature(
-			float weight,
+	void addWeightingElement(
 			WeightingFunctionContextInterface* function_);
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isNegative);
@@ -86,16 +89,7 @@ private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
 
 private:
-	struct WeightingFeature
-	{
-		Reference< WeightingFunctionContextInterface> executionContext;
-		float weight;
-
-		WeightingFeature( WeightingFunctionContextInterface* fc, float w)
-			:executionContext(fc),weight(w){}
-		WeightingFeature( const WeightingFeature& o)
-			:executionContext(o.executionContext),weight(o.weight){}
-	};
+	typedef Reference< WeightingFunctionContextInterface> WeightingElement;
 
 	struct SelectorPostings
 	{
@@ -114,7 +108,9 @@ private:
 	const StorageClientInterface* m_storage;
 	MetaDataReaderInterface* m_metadata;
 	Reference<MetaDataRestrictionInstanceInterface> m_metaDataRestriction;
-	std::vector<WeightingFeature> m_weightingFeatures;
+	const ScalarFunctionInstanceInterface* m_weightingFormula;
+	std::vector<WeightingElement> m_weightingElements;
+	std::vector<double> m_weights;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;
 	std::vector<InvAclIteratorInterface*> m_aclRestrictions;

@@ -12,6 +12,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/invAclIteratorInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
+#include "strus/scalarFunctionInstanceInterface.hpp"
 #include "private/internationalization.hpp"
 #include <cstdlib>
 #include <limits>
@@ -34,11 +35,11 @@ void Accumulator::addFeatureRestriction( PostingIteratorInterface* iterator, boo
 	m_featureRestrictions.push_back( SelectorPostings( isNegative, iterator));
 }
 
-void Accumulator::addFeature(
-		float weight,
+void Accumulator::addWeightingElement(
 		WeightingFunctionContextInterface* function_)
 {
-	m_weightingFeatures.push_back( WeightingFeature( function_, weight));
+	m_weightingElements.push_back( WeightingElement( function_));
+	m_weights.push_back( 0.0);
 }
 
 void Accumulator::addAlternativeAclRestriction(
@@ -155,22 +156,33 @@ bool Accumulator::nextRank(
 		// Init result:
 		docno = m_docno;
 		selectorState = m_selectorPostings[ m_selectoridx].setindex;
-		weight = 0.0;
 		++m_nofDocumentsRanked;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "Checking document " << m_docno << std::endl;
+		std::cerr << "Weighting document " << m_docno << std::endl;
 #endif
-		// Add a weight for every accumulator summand that has a match:
-		std::vector<WeightingFeature>::iterator
-			ai = m_weightingFeatures.begin(), ae = m_weightingFeatures.end();
-		for (; ai != ae; ++ai)
+		std::vector<WeightingElement>::iterator
+			ai = m_weightingElements.begin(), ae = m_weightingElements.end();
+		if (m_weightingFormula)
 		{
-			float weight_result = ai->executionContext->call( m_docno) * ai->weight;
-			weight += weight_result * ai->weight;
+			// Calculate a weight for every element and call the weighting formula with the result:
+			for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
+			{
+				m_weights[ aidx] = (*ai)->call( m_docno);
+			}
+			weight = m_weightingFormula->call( m_weights.data(), m_weights.size());
+		}
+		else
+		{
+			// Add a weight to the result for every element:
+			weight = 0.0;
+			for (; ai != ae; ++ai)
+			{
+				weight += (*ai)->call( m_docno);
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
+				std::cerr << "weight +" << (weight_result * ai->weight) << " (" << weight_result << "*" << ai->weight << ") = " << weight << std::endl;
 #endif
+			}
 		}
 		return true;
 	}

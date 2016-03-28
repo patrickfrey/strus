@@ -9,6 +9,7 @@
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/resultDocument.hpp"
+#include "strus/scalarFunctionInterface.hpp"
 #include "termConfig.hpp"
 #include "summarizerDef.hpp"
 #include "weightingDef.hpp"
@@ -18,19 +19,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class SummarizerFunctionInterface;
-/// \brief Forward declaration
 class StorageClientInterface;
-/// \brief Forward declaration
-class QueryProcessorInterface;
-/// \brief Forward declaration
-class WeightingFunctionInterface;
-/// \brief Forward declaration
-class SummarizerFunctionInterface;
-/// \brief Forward declaration
-class SummarizerConfig;
-/// \brief Forward declaration
-class WeightingConfig;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
@@ -72,8 +61,10 @@ public:
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters,
-			float weight);
+			const std::vector<FeatureParameter>& featureParameters);
+
+	virtual void defineWeightingFormula(
+			ScalarFunctionInterface* combinefunc);
 
 	void print( std::ostream& out) const;
 
@@ -85,6 +76,7 @@ public:
 	const std::vector<std::string>& restrictionSets() const		{return m_restrictionSets;}
 	const std::vector<std::string>& exclusionSets() const		{return m_exclusionSets;}
 	const std::vector<WeightingDef>& weightingFunctions() const	{return m_weightingFunctions;}
+	const ScalarFunctionInterface* weightingFormula() const		{return m_weightingFormula.get();}
 
 private:
 	std::vector<std::string> m_selectionSets;	///< posting sets selecting the documents to match
@@ -92,6 +84,8 @@ private:
 	std::vector<std::string> m_exclusionSets;	///< posting sets excluding the documents to match
 	std::vector<WeightingDef> m_weightingFunctions;	///< weighting function configuration
 	std::vector<SummarizerDef> m_summarizers;	///< list of summarizer configurations
+	Reference<ScalarFunctionInterface> m_weightingFormula;	///< scalar function to calculate the weight of a document from the weighting functions defined as parameter
+
 	std::vector<TermConfig> m_terms;		///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };

@@ -103,6 +103,11 @@ public:
 	/// \param[in] username_ user of the query
 	virtual void addUserName( const std::string& username_)=0;
 
+	/// \brief Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(ScalarFunctionInterface* combinefunc)
+	/// \param[in] name name of the variable
+	/// \param[in] value value of the variable
+	virtual void setWeightingFormulaVariableValue( const std::string& name, double value)=0;
+
 	/// \brief Evaluate the query
 	virtual QueryResult evaluate()=0;
 };

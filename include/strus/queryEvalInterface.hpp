@@ -23,6 +23,8 @@ class WeightingFunctionInstanceInterface;
 /// \brief Forward declaration
 class SummarizerFunctionInstanceInterface;
 /// \brief Forward declaration
+class ScalarFunctionInterface;
+/// \brief Forward declaration
 class QueryProcessorInterface;
 
 /// \brief Defines a query evaluation scheme
@@ -89,12 +91,16 @@ public:
 	/// \param[in] functionName name of the weighting function (no meaning, just for inspection and tracing)
 	/// \param[in] function parameterized weighting function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
 	/// \param[in] featureParameters list of parameters adressing query features that are subject of weighting
-	/// \param[in] weight part of the weight of this function in the total weight sum
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters,
-			float weight)=0;
+			const std::vector<FeatureParameter>& featureParameters)=0;
+
+	/// \brief Declare the scalar function to combine the weighting functions declared
+	/// \param[in] combinefunc scalar function (passed ownership) for combining the weighting functions defined to one value
+	/// \remark If not defined, then the weights of the declared weighting functions are just added together
+	virtual void defineWeightingFormula(
+			ScalarFunctionInterface* combinefunc)=0;
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on

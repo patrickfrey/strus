@@ -24,14 +24,6 @@ public:
 	/// \brief Destructor
 	virtual ~ScalarFunctionInstanceInterface(){}
 
-	/// \brief Get the list of variables the function is parameterized with
-	/// \return list of variable names
-	virtual std::vector<std::string> getVariables() const=0;
-
-	/// \brief Get the number of arguments of this function
-	/// \return the number of arguments
-	virtual std::size_t getNofArguments() const=0;
-
 	/// \brief Initialize a variable value
 	/// \param[in] name variable name
 	/// \param[in] value value of the variable to check

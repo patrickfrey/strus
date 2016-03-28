@@ -26,6 +26,14 @@ public:
 	/// \brief Destructor
 	virtual ~ScalarFunctionInterface(){}
 
+	/// \brief Get the list of variables the function is parameterized with
+	/// \return list of variable names
+	virtual std::vector<std::string> getVariables() const=0;
+
+	/// \brief Get the number of arguments of this function
+	/// \return the number of arguments
+	virtual std::size_t getNofArguments() const=0;
+
 	/// \brief Creates an instance of the function
 	/// \return the created scalar function instance
 	virtual ScalarFunctionInstanceInterface* createInstance() const=0;

@@ -36,6 +36,21 @@ DLL_PUBLIC ScalarFunctionParserInterface* strus::createScalarFunctionParser_defa
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating default scalar function parser: %s"), *errorhnd, 0);
 }
 
+static std::string linearcomb_tostring( const std::vector<double>& factors)
+{
+	std::ostringstream out;
+	out << std::setprecision(6) << std::fixed;
+	std::vector<double>::const_iterator fi = factors.begin(), fe = factors.end();
+	std::size_t ai = 0;
+	for (; fi != fe; ++fi,++ai)
+	{
+		if (ai) out << " + ";
+		out << *fi << " * _" << ai;
+	}
+	return out.str();
+}
+
+
 class ScalarFunctionInstance_linearcomb
 	:public ScalarFunctionInstanceInterface
 {
@@ -77,16 +92,11 @@ public:
 	}
 	virtual std::string tostring() const
 	{
-		std::ostringstream out;
-		out << std::setprecision(6) << std::fixed;
-		std::vector<double>::const_iterator fi = m_factors.begin(), fe = m_factors.end();
-		std::size_t ai = 0;
-		for (; fi != fe; ++fi,++ai)
+		try
 		{
-			if (ai) out << " + ";
-			out << *fi << " * _" << ai;
+			return linearcomb_tostring( m_factors);
 		}
-		return out.str();
+		CATCH_ERROR_MAP_RETURN( _TXT("error mapping scalar function linear combination to string: %s"), *m_errorhnd, std::string());
 	}
 
 private:
@@ -94,11 +104,43 @@ private:
 	std::vector<double> m_factors;
 };
 
-DLL_PUBLIC ScalarFunctionInstanceInterface* strus::createScalarFunction_linearcomb( const std::vector<double>& factors, ErrorBufferInterface* errorhnd)
+class ScalarFunction_linearcomb
+	:public ScalarFunctionInterface
+{
+public:
+	ScalarFunction_linearcomb( const std::vector<double>& factors_, ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_),m_factors(factors_){}
+	virtual ~ScalarFunction_linearcomb(){}
+
+	virtual ScalarFunctionInstanceInterface* createInstance() const
+	{
+		try
+		{
+			return new ScalarFunctionInstance_linearcomb( m_factors, m_errorhnd);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error creating instance of linear combination scalar function: %s"), *m_errorhnd, 0);
+	}
+
+	virtual std::string tostring() const
+	{
+		try
+		{
+			return linearcomb_tostring( m_factors);
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error mapping scalar function linear combination to string: %s"), *m_errorhnd, std::string());
+	}
+	
+private:
+	ErrorBufferInterface* m_errorhnd;
+	std::vector<double> m_factors;
+};
+
+
+DLL_PUBLIC ScalarFunctionInterface* strus::createScalarFunction_linearcomb( const std::vector<double>& factors, ErrorBufferInterface* errorhnd)
 {
 	try
 	{
-		return new ScalarFunctionInstance_linearcomb( factors, errorhnd);
+		return new ScalarFunction_linearcomb( factors, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating linear combination scalar function instance: %s"), *errorhnd, 0);
 }

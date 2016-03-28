@@ -27,10 +27,6 @@ public:
 
 	virtual ~ScalarFunctionInstance(){}
 
-	virtual std::vector<std::string> getVariables() const;
-
-	virtual std::size_t getNofArguments() const;
-
 	virtual void setVariableValue( const std::string& name, double value);
 
 	virtual double call( const double* args, std::size_t nofargs) const;

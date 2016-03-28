@@ -17,7 +17,7 @@ namespace strus {
 /// \brief Forward declaration
 class ScalarFunctionParserInterface;
 /// \brief Forward declaration
-class ScalarFunctionInstanceInterface;
+class ScalarFunctionInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
@@ -26,7 +26,7 @@ class ErrorBufferInterface;
 ScalarFunctionParserInterface* createScalarFunctionParser_default( ErrorBufferInterface* errorhnd);
 
 /// \brief Create an instance of a scalar function that implements a linear combination of the arguments
-ScalarFunctionInstanceInterface* createScalarFunction_linearcomb( const std::vector<double>& factors, ErrorBufferInterface* errorhnd);
+ScalarFunctionInterface* createScalarFunction_linearcomb( const std::vector<double>& factors, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

@@ -144,14 +144,13 @@ public://ScalarFunctionInstance
 		return m_nfuncar[ rtidx];
 	}
 
-	/// \brief Fetch all variable names defined
-	/// \return the variable names
-	std::vector<std::string> getVariables() const;
-
 	/// \brief Get the internal value index of a variable
 	std::size_t getVariableIndex( const std::string& name) const;
 
 public:
+	virtual std::vector<std::string> getVariables() const;
+	virtual std::size_t getNofArguments() const;
+
 	virtual ScalarFunctionInstanceInterface* createInstance() const;
 	virtual std::string tostring() const;
 

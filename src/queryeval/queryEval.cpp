@@ -87,15 +87,20 @@ void QueryEval::addSummarizerFunction(
 void QueryEval::addWeightingFunction(
 		const std::string& functionName,
 		WeightingFunctionInstanceInterface* function,
-		const std::vector<FeatureParameter>& featureParameters,
-		float weight)
+		const std::vector<FeatureParameter>& featureParameters)
 {
 	try
 	{
 		Reference<WeightingFunctionInstanceInterface> functionref( function);
-		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters, weight));
+		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding weighting function: %s"), *m_errorhnd);
+}
+
+void QueryEval::defineWeightingFormula(
+		ScalarFunctionInterface* combinefunc)
+{
+	m_weightingFormula.reset( combinefunc);
 }
 
 void QueryEval::print( std::ostream& out) const

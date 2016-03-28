@@ -12,6 +12,7 @@
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
+#include "strus/scalarFunctionInstanceInterface.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -190,20 +191,21 @@ private:
 	const QueryEval* m_queryEval;
 	const StorageClientInterface* m_storage;
 	Reference<MetaDataReaderInterface> m_metaDataReader;
-	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;
-	std::vector<Term> m_terms;
-	std::vector<Expression> m_expressions;
-	std::vector<Feature> m_features;
-	std::vector<NodeAddress> m_stack;
-	std::multimap<NodeAddress,std::string> m_variableAssignments;
-	std::size_t m_nofRanks;
-	std::size_t m_minRank;
-	std::vector<std::string> m_usernames;
-	std::vector<Index> m_evalset_docnolist;
-	bool m_evalset_defined;
-	std::map<Term,TermStatistics> m_termstatsmap;
-	GlobalStatistics m_globstats;
-	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
+	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;	///< restriction function on metadata
+	Reference<ScalarFunctionInstanceInterface> m_weightingFormula;	///< instance of the scalar function to calculate the weight of a document from the weighting functions defined as parameter
+	std::vector<Term> m_terms;					///< query terms
+	std::vector<Expression> m_expressions;				///< query expressions
+	std::vector<Feature> m_features;				///< query features
+	std::vector<NodeAddress> m_stack;				///< expression build stack
+	std::multimap<NodeAddress,std::string> m_variableAssignments;	///< maps node addresses to names of variables attached to
+	std::size_t m_nofRanks;						///< number of ranks to evaluate
+	std::size_t m_minRank;						///< smallest rank to return (start of result ranklist -- browsing)
+	std::vector<std::string> m_usernames;				///< users allowed to see the query result
+	std::vector<Index> m_evalset_docnolist;				///< set of document numbers to restrict the query to
+	bool m_evalset_defined;						///< true, if the set of document numbers to restrict the query to is defined
+	std::map<Term,TermStatistics> m_termstatsmap;			///< term statistics (evaluation in case of a distributed index)
+	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

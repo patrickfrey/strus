@@ -49,6 +49,11 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metaDataReader.get()) throw strus::runtime_error(_TXT("error creating meta data reader"));
+	const ScalarFunctionInterface* weightingFormula = m_queryEval->weightingFormula();
+	if (weightingFormula)
+	{
+		m_weightingFormula.reset( weightingFormula->createInstance());
+	}
 
 	std::vector<TermConfig>::const_iterator
 		ti = m_queryEval->terms().begin(),
@@ -488,9 +493,9 @@ QueryResult Query::evaluate()
 		DocsetPostingIterator evalset_itr;
 		Accumulator accumulator(
 			m_storage,
-			m_metaDataReader.get(), m_metaDataRestriction.get(),
+			m_metaDataReader.get(), m_metaDataRestriction.get(), m_weightingFormula.get(),
 			m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
-	
+
 		// [4.1] Define document subset to evaluate query on:
 		if (m_evalset_defined)
 		{
@@ -553,7 +558,7 @@ QueryResult Query::evaluate()
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cout << "add feature " << wi->functionName() << " weight " << wi->weight() << std::endl;
 #endif
-				accumulator.addFeature( wi->weight(), execContext.release());
+				accumulator.addWeightingElement( execContext.release());
 			}
 		}
 		evaluationPhase = "restrictions initialization";
