@@ -12,6 +12,7 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
 #include "strus/weightingFunctionInterface.hpp"
+#include "strus/scalarFunctionParserInterface.hpp"
 #include <string>
 #include <vector>
 
@@ -87,6 +88,21 @@ public:
 	/// \param[in] type type of the function
 	/// \return the list of function names
 	virtual std::vector<std::string> getFunctionList( FunctionType type) const=0;
+
+	/// \brief Define a function parser for scalar functions used in weighting or summarization
+	/// \param[in] name name of the scalar function language
+	/// \param[in] parser the scalar function parser reference (ownership passed to this)
+	virtual void
+		defineScalarFunctionParser(
+			const std::string& name,
+			ScalarFunctionParserInterface* parser)=0;
+
+	/// \brief Get a scalar function parser reference by name
+	/// \param[in] name name of the scalar function language or empty for the default scalar function language
+	/// \return the scalar function parser object reference
+	virtual const ScalarFunctionParserInterface*
+		getScalarFunctionParser(
+			const std::string& name) const=0;
 };
 
 }//namespace

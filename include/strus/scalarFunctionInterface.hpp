@@ -35,6 +35,12 @@ public:
 	/// \return the number of arguments
 	virtual std::size_t getNofArguments() const=0;
 
+	/// \brief Set a variable value default
+	/// \param[in] name variable name
+	/// \param[in] value default value of the variable to set
+	/// \remark Reports an error, if the domain does not match
+	virtual void setDefaultVariableValue( const std::string& name, double value)=0;
+
 	/// \brief Creates an instance of the function
 	/// \return the created scalar function instance
 	virtual ScalarFunctionInstanceInterface* createInstance() const=0;

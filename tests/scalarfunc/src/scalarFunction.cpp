@@ -29,26 +29,6 @@ using namespace strus;
 
 ErrorBufferInterface* g_errorhnd = 0;
 
-static double if_greater( std::size_t nofargs, const double* args)
-{
-	return (args[0] > args[1])?args[2]:args[3];
-}
-
-static double if_smaller( std::size_t nofargs, const double* args)
-{
-	return (args[0] < args[1])?args[2]:args[3];
-}
-
-static double mod( double num, double div)
-{
-	return num - div * floor(num / div);
-}
-
-static double log_base( double x, double base)
-{
-	return log(x) / log(base);
-}
-
 static ScalarFunctionParserInterface* createScalarFunctionParser( ErrorBufferInterface* errorhnd)
 {
 	std::auto_ptr<ScalarFunctionParserInterface> sfp( createScalarFunctionParser_default( errorhnd));
@@ -56,16 +36,6 @@ static ScalarFunctionParserInterface* createScalarFunctionParser( ErrorBufferInt
 	{
 		throw strus::runtime_error( "failed to create parser: %s", errorhnd->fetchError());
 	}
-	sfp->defineUnaryFunction( "log", &std::log10);
-	sfp->defineBinaryFunction( "log", &log_base);
-	sfp->defineUnaryFunction( "ln", &std::log);
-	sfp->defineUnaryFunction( "tanh", &std::tanh);
-	sfp->defineUnaryFunction( "exp", &std::exp);
-	sfp->defineBinaryFunction( "pow", &std::pow);
-	sfp->defineBinaryFunction( "mod", &mod);
-	sfp->defineNaryFunction( "if_greater", &if_greater, 4, 4);
-	sfp->defineNaryFunction( "if_smaller", &if_smaller, 4, 4);
-
 	ScalarFunctionParserInterface* rt = sfp.get();
 	sfp.release();
 	return rt;
@@ -142,7 +112,7 @@ static Test tests[] =
 	},
 	{
 		"variable argument sum",
-		"x + _1",
+		"x + _0",
 		{{"x",2.7},{0,0.0}},
 		1,
 		{0.4},
@@ -150,7 +120,7 @@ static Test tests[] =
 	},
 	{
 		"argument argument subtraction",
-		"_1 - _2",
+		"_0 - _1",
 		{{0,0.0}},
 		2,
 		{17.8,3.1},
@@ -158,7 +128,7 @@ static Test tests[] =
 	},
 	{
 		"linear combination",
-		"x * _1 - y * _2",
+		"x * _0 - y * _1",
 		{{"x",2.2},{"y",1.1},{0,0.0}},
 		2,
 		{0.5,0.1},
@@ -166,7 +136,7 @@ static Test tests[] =
 	},
 	{
 		"normalized log",
-		"log( x*x - y + _1)",
+		"log( x*x - y + _0)",
 		{{"x",2.0},{"y",3.0},{0,0.0}},
 		1,
 		{0.5},
@@ -190,7 +160,7 @@ static Test tests[] =
 	},
 	{
 		"BM25",
-		"w * log( (N - _2 + 0.5) / (_2 + 0.5)) * (_1 * (k1 + 1.0)) / (_1 + k1 * (1.0 - b + b * ((_3+1) / avgdoclen)))",
+		"w * log( (N - _1 + 0.5) / (_1 + 0.5)) * (_0 * (k1 + 1.0)) / (_0 + k1 * (1.0 - b + b * ((_2+1) / avgdoclen)))",
 		{{"w",1.3},{"N",100000},{"k1",1.5},{"b",0.75},{"avgdoclen",200},{0,0.0}},
 		3,
 		{3/*ff*/,12345/*df*/,123/*doclen*/},

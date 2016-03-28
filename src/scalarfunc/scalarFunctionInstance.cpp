@@ -99,24 +99,6 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					stk.push_back( a1 * a2);
 					break;
 				}
-				case ScalarFunction::OpMin:
-				{
-					if (stk.size() < 2) throw strus::runtime_error(_TXT("illegal stack operation"));
-					double a1 = stk[ stk.size() -2];
-					double a2 = stk[ stk.size() -1];
-					stk.resize( stk.size() -2);
-					stk.push_back( a1 > a2 ? a2 : a1);
-					break;
-				}
-				case ScalarFunction::OpMax:
-				{
-					if (stk.size() < 2) throw strus::runtime_error(_TXT("illegal stack operation"));
-					double a1 = stk[ stk.size() -2];
-					double a2 = stk[ stk.size() -1];
-					stk.resize( stk.size() -2);
-					stk.push_back( a1 > a2 ? a1 : a2);
-					break;
-				}
 				case ScalarFunction::FuncUnary:
 				{
 					if (stk.size() < 1) throw strus::runtime_error(_TXT("illegal stack operation"));
@@ -189,8 +171,6 @@ std::string ScalarFunctionInstance::tostring() const
 				case ScalarFunction::OpSub:
 				case ScalarFunction::OpDiv:
 				case ScalarFunction::OpMul:
-				case ScalarFunction::OpMin:
-				case ScalarFunction::OpMax:
 				case ScalarFunction::FuncUnary:
 				case ScalarFunction::FuncBinary:
 				case ScalarFunction::FuncNary:

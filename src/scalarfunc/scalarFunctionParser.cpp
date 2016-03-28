@@ -11,10 +11,57 @@
 #include "scalarFunction.hpp"
 #include "private/utils.hpp"
 #include "strus/private/snprintf.h"
+#include "scalarFunctionLinearComb.hpp"
 #include <limits>
 
 using namespace strus;
 #define STRUS_LOWLEVEL_DEBUG
+
+static double if_greater( std::size_t nofargs, const double* args)
+{
+	return (args[0] > args[1])?args[2]:args[3];
+}
+
+static double if_greaterequal( std::size_t nofargs, const double* args)
+{
+	return (args[0] >= args[1])?args[2]:args[3];
+}
+
+static double if_smaller( std::size_t nofargs, const double* args)
+{
+	return (args[0] < args[1])?args[2]:args[3];
+}
+
+static double if_smallerequal( std::size_t nofargs, const double* args)
+{
+	return (args[0] <= args[1])?args[2]:args[3];
+}
+
+static double mod( double num, double div)
+{
+	return num - div * floor(num / div);
+}
+
+static double log_base( double x, double base)
+{
+	return log(x) / log(base);
+}
+
+ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
+	:m_errorhnd(errorhnd_)
+{
+	defineUnaryFunction( "log", &std::log10);
+	defineBinaryFunction( "log", &log_base);
+	defineUnaryFunction( "ln", &std::log);
+	defineUnaryFunction( "tanh", &std::tanh);
+	defineUnaryFunction( "exp", &std::exp);
+	defineBinaryFunction( "pow", &std::pow);
+	defineBinaryFunction( "mod", &mod);
+	defineNaryFunction( "if_gt", &if_greater, 4, 4);
+	defineNaryFunction( "if_ge", &if_greaterequal, 4, 4);
+	defineNaryFunction( "if_lt", &if_smaller, 4, 4);
+	defineNaryFunction( "if_le", &if_smallerequal, 4, 4);
+}
 
 static bool isAlpha( char ch)
 {
@@ -139,10 +186,6 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 					throw strus::runtime_error( _TXT("argument identifier out of range"));
 				}
 			}
-			if (!argid)
-			{
-				throw strus::runtime_error( _TXT("argument indices are starting with _1 and not with _0"));
-			}
 			if (si != se && isAlpha(*si))
 			{
 				si = start;
@@ -154,9 +197,9 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 			}
 			else
 			{
-				func->addOpPushArgument( argid-1);
+				func->addOpPushArgument( argid);
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "parse argument id " << (argid-1) << std::endl;
+				std::cout << "parse argument id " << argid << std::endl;
 #endif
 			}
 		}
@@ -416,8 +459,18 @@ ScalarFunctionInterface* ScalarFunctionParser::createFunction( const std::string
 			std::string expr( si, se);
 			throw strus::runtime_error( _TXT( "unexpected characters at end of expression: '%s'"), expr.c_str());
 		}
-		func.release();
-		return rt;
+		// Special treatment of linear combination:
+		std::vector<double> linearcomb_factors;
+		if (func->isLinearComb( linearcomb_factors))
+		{
+			return createScalarFunction_linearcomb( linearcomb_factors, m_errorhnd);
+		}
+		else
+		{
+			// Return built function to caller:
+			func.release();
+			return rt;
+		}
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error parsing and creating scalar function: %s"), *m_errorhnd, 0);
 }

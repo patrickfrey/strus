@@ -7,6 +7,7 @@ set( source_files
 	scalarFunction.cpp
 	scalarFunctionInstance.cpp
 	scalarFunctionParser.cpp
+	scalarFunctionLinearComb.cpp
 )
 
 include_directories(

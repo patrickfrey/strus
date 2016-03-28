@@ -108,14 +108,22 @@ void QueryProcessor::definePostingJoinOperator(
 const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 		const std::string& name) const
 {
-	std::map<std::string,Reference<PostingJoinOperatorInterface> >::const_iterator 
-		ji = m_joiners.find( utils::tolower( name));
-	if (ji == m_joiners.end())
+	try
 	{
-		m_errorhnd->report( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+		std::map<std::string,Reference<PostingJoinOperatorInterface> >::const_iterator 
+			ji = m_joiners.find( utils::tolower( name));
+		if (ji == m_joiners.end())
+		{
+			m_errorhnd->report( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return ji->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
 		return 0;
 	}
-	return ji->second.get();
 }
 
 void QueryProcessor::defineWeightingFunction(
@@ -137,14 +145,22 @@ void QueryProcessor::defineWeightingFunction(
 const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		const std::string& name) const
 {
-	std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
-		wi = m_weighters.find( utils::tolower( name));
-	if (wi == m_weighters.end())
+	try
 	{
-		m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
+		std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
+			wi = m_weighters.find( utils::tolower( name));
+		if (wi == m_weighters.end())
+		{
+			m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return wi->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
 		return 0;
 	}
-	return wi->second.get();
 }
 
 void QueryProcessor::defineSummarizerFunction(
@@ -166,14 +182,22 @@ void QueryProcessor::defineSummarizerFunction(
 const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		const std::string& name) const
 {
-	std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
-		si = m_summarizers.find( utils::tolower( name));
-	if (si == m_summarizers.end())
+	try
 	{
-		m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
+		std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
+			si = m_summarizers.find( utils::tolower( name));
+		if (si == m_summarizers.end())
+		{
+			m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return si->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
 		return 0;
 	}
-	return si->second.get();
 }
 
 template <class Map>
@@ -207,5 +231,44 @@ std::vector<std::string> QueryProcessor::getFunctionList( QueryProcessorInterfac
 		m_errorhnd->report( _TXT("out of memory"));
 	}
 	return std::vector<std::string>();
+}
+
+void QueryProcessor::defineScalarFunctionParser(
+		const std::string& name,
+		ScalarFunctionParserInterface* parser)
+{
+	try
+	{
+		Reference<ScalarFunctionParserInterface> funcref( parser);
+		m_funcparsers[ utils::tolower( name)] = funcref;
+	}
+	catch (std::bad_alloc&)
+	{
+		delete parser;
+		m_errorhnd->report( _TXT("out of memory"));
+	}
+	
+}
+
+const ScalarFunctionParserInterface*
+	QueryProcessor::getScalarFunctionParser(
+		const std::string& name) const
+{
+	try
+	{
+		std::map<std::string,Reference<ScalarFunctionParserInterface> >::const_iterator 
+			si = m_funcparsers.find( utils::tolower( name));
+		if (si == m_funcparsers.end())
+		{
+			m_errorhnd->report( _TXT( "scalar function parser not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return si->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
+		return 0;
+	}
 }
 

@@ -21,6 +21,30 @@ using namespace strus;
 ScalarFunction::ScalarFunction( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_),m_nofargs(0){}
 
+bool ScalarFunction::isLinearComb( std::vector<double>& values) const
+{
+	std::size_t ip = 0;
+	std::size_t aidx = 0;
+	if (!m_variablemap.empty()) return false;
+	values.clear();
+	if (ip+2 < m_instructionar.size())
+	{
+		if (!(opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul))
+		{
+			values.push_back( m_valuear[aidx]);
+		}
+		++aidx;
+	}
+	for (ip=3; ip+3 < m_instructionar.size(); ip+=4,++aidx)
+	{
+		if (!(opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul && opCode(ip+3) == OpAdd))
+		{
+			return false;
+		}
+	}
+	return ip == m_instructionar.size();
+}
+
 void ScalarFunction::pushInstruction( const OpCode& op, unsigned int operand)
 {
 	if (operand >= (1 << InstructionOpodeShift))
@@ -125,6 +149,15 @@ std::size_t ScalarFunction::getNofArguments() const
 	return m_nofargs;
 }
 
+void ScalarFunction::setDefaultVariableValue( const std::string& name, double value)
+{
+	try
+	{
+		m_valuear[ getVariableIndex( name)] = value;
+	}
+	CATCH_ERROR_MAP( _TXT("error setting default variable value of scalar function: %s"), *m_errorhnd);
+}
+
 ScalarFunctionInstanceInterface* ScalarFunction::createInstance() const
 {
 	try
@@ -184,8 +217,6 @@ std::string ScalarFunction::tostring() const
 				case ScalarFunction::OpSub:
 				case ScalarFunction::OpDiv:
 				case ScalarFunction::OpMul:
-				case ScalarFunction::OpMin:
-				case ScalarFunction::OpMax:
 				case ScalarFunction::FuncUnary:
 				case ScalarFunction::FuncBinary:
 				case ScalarFunction::FuncNary:

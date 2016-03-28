@@ -24,31 +24,6 @@ public:
 	/// \brief Destructor
 	virtual ~ScalarFunctionParserInterface(){}
 
-	typedef double (*BinaryFunction)( double arg1, double arg2);
-	typedef double (*UnaryFunction)( double arg);
-	typedef double (*NaryFunction)( std::size_t nofargs, const double* args);
-
-	/// \brief Define a binary function by name
-	/// \param[in] name name of the function
-	/// \param[in] func pointer to the function
-	virtual void defineBinaryFunction(
-			const std::string& name, BinaryFunction func)=0;
-
-	/// \brief Define an unary function by name
-	/// \param[in] name name of the function
-	/// \param[in] func pointer to the function
-	virtual void defineUnaryFunction(
-			const std::string& name, UnaryFunction func)=0;
-
-	/// \brief Define an N-ary function by name
-	/// \param[in] name name of the function
-	/// \param[in] func pointer to the function
-	/// \param[in] min_nofargs minimum number of arguments
-	/// \param[in] max_nofargs maximum number of arguments
-	virtual void defineNaryFunction(
-			const std::string& name, NaryFunction func,
-			std::size_t min_nofargs, std::size_t max_nofargs)=0;
-
 	/// \brief Parses a function from source and instantiates a function object
 	/// \param[in] src source describing the function
 	/// \return the created function object

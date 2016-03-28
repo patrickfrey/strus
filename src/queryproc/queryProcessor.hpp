@@ -55,20 +55,31 @@ public:
 		defineSummarizerFunction(
 			const std::string& name,
 			SummarizerFunctionInterface* sumfunc);
-	
+
 	virtual const SummarizerFunctionInterface*
 		getSummarizerFunction(
 			const std::string& name) const;
 
 	virtual std::vector<std::string> getFunctionList( FunctionType type) const;
 
+	virtual void
+		defineScalarFunctionParser(
+			const std::string& name,
+			ScalarFunctionParserInterface* parser);
+
+	virtual const ScalarFunctionParserInterface*
+		getScalarFunctionParser(
+			const std::string& name) const;
+
 private:
 	typedef std::map<std::string,Reference<SummarizerFunctionInterface> > SummarizerFunctionMap;
 	typedef std::map<std::string,Reference<WeightingFunctionInterface> > WeightingFunctionMap;
 	typedef std::map<std::string,Reference<PostingJoinOperatorInterface> > PostingJoinOperatorMap;
+	typedef std::map<std::string,Reference<ScalarFunctionParserInterface> > ScalarFunctionParserMap;
 	SummarizerFunctionMap m_summarizers;
 	WeightingFunctionMap m_weighters;
 	PostingJoinOperatorMap m_joiners;
+	ScalarFunctionParserMap m_funcparsers;
 	ErrorBufferInterface* m_errorhnd;
 };
 

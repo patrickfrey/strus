@@ -26,16 +26,33 @@ class ScalarFunctionParser
 	:public ScalarFunctionParserInterface
 {
 public:
-	explicit ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+	/// \brief Constructor
+	explicit ScalarFunctionParser( ErrorBufferInterface* errorhnd_);
 
 	virtual ~ScalarFunctionParser(){}
 
-	virtual void defineUnaryFunction(
+	typedef double (*BinaryFunction)( double arg1, double arg2);
+	typedef double (*UnaryFunction)( double arg);
+	typedef double (*NaryFunction)( std::size_t nofargs, const double* args);
+
+	/// \brief Define a binary function by name
+	/// \param[in] name name of the function
+	/// \param[in] func pointer to the function
+	void defineUnaryFunction(
 			const std::string& name, UnaryFunction func);
-	virtual void defineBinaryFunction(
+
+	/// \brief Define an unary function by name
+	/// \param[in] name name of the function
+	/// \param[in] func pointer to the function
+	void defineBinaryFunction(
 			const std::string& name, BinaryFunction func);
-	virtual void defineNaryFunction(
+
+	/// \brief Define an N-ary function by name
+	/// \param[in] name name of the function
+	/// \param[in] func pointer to the function
+	/// \param[in] min_nofargs minimum number of arguments
+	/// \param[in] max_nofargs maximum number of arguments
+	void defineNaryFunction(
 			const std::string& name, NaryFunction func,
 			std::size_t min_nofargs, std::size_t max_nofargs);
 

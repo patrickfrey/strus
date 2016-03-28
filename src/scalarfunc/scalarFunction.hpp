@@ -36,9 +36,9 @@ public:
 
 	virtual ~ScalarFunction(){}
 
-	typedef ScalarFunctionParserInterface::UnaryFunction UnaryFunction;
-	typedef ScalarFunctionParserInterface::BinaryFunction BinaryFunction;
-	typedef ScalarFunctionParserInterface::NaryFunction NaryFunction;
+	typedef double (*BinaryFunction)( double arg1, double arg2);
+	typedef double (*UnaryFunction)( double arg);
+	typedef double (*NaryFunction)( std::size_t nofargs, const double* args);
 
 	enum OpCode
 	{
@@ -50,15 +50,13 @@ public:
 		OpSub,		//< Subtract operation of two topmost values removed from the stack and put result back on the stack
 		OpDiv,		//< Divide operation of two topmost values removed from the stack and put result back on the stack
 		OpMul,		//< Multiply two topmost values removed from the stack and put result back on the stack
-		OpMin,		//< Minimum operation of two topmost values removed from the stack and put result back on the stack
-		OpMax,		//< Maximum operation of two topmost values removed from the stack and put result back on the stack
 		FuncUnary,	//< Unary function call of the topmost value removed from the stack and put result back on the stack
 		FuncBinary,	//< Binary function call of the two topmost values removed from the stack and put result back on the stack
 		FuncNary	//< N-ary function call of the N topmost values removed from the stack and put result back on the stack. The N is loaded with the preceeding OpLdCnt operation.
 	};
 	static const char* opCodeName( OpCode opCode)
 	{
-		static const char* ar[] = {"LdCnt", "Push", "Arg", "Neg", "Add", "Sub", "Div", "Mul", "Min", "Max", "FuncUnary", "FuncBinary", "FuncNary"};
+		static const char* ar[] = {"LdCnt", "Push", "Arg", "Neg", "Add", "Sub", "Div", "Mul", "FuncUnary", "FuncBinary", "FuncNary"};
 		return ar[ opCode];
 	}
 
@@ -107,9 +105,13 @@ public://ScalarFunctionInstance
 	{
 		return m_instructionar.size() > ip;
 	}
+	std::size_t indexOperand( std::size_t ip) const
+	{
+		return m_instructionar[ ip] &~ (0x1F << InstructionOpodeShift);
+	}
 	std::size_t getIndexOperand( std::size_t ip, std::size_t endval=std::numeric_limits<std::size_t>::max()) const
 	{
-		std::size_t rt = m_instructionar[ ip] &~ (0x1F << InstructionOpodeShift);
+		std::size_t rt = indexOperand( ip);
 		if (rt >= endval)
 		{
 			throw strus::runtime_error(_TXT("illegal operand in instruction"));
@@ -118,7 +120,7 @@ public://ScalarFunctionInstance
 	}
 	BinaryFunction getBinaryFunctionOperand( std::size_t ip) const
 	{
-		std::size_t rtidx = m_instructionar[ ip] &~ (0x1F << InstructionOpodeShift);
+		std::size_t rtidx = indexOperand( ip);
 		if (rtidx >= m_binfuncar.size())
 		{
 			throw strus::runtime_error(_TXT("illegal operand in instruction"));
@@ -127,7 +129,7 @@ public://ScalarFunctionInstance
 	}
 	UnaryFunction getUnaryFunctionOperand( std::size_t ip) const
 	{
-		std::size_t rtidx = m_instructionar[ ip] &~ (0x1F << InstructionOpodeShift);
+		std::size_t rtidx = indexOperand( ip);
 		if (rtidx >= m_unfuncar.size())
 		{
 			throw strus::runtime_error(_TXT("illegal operand in instruction"));
@@ -136,7 +138,7 @@ public://ScalarFunctionInstance
 	}
 	NaryFunction getNaryFunctionOperand( std::size_t ip) const
 	{
-		std::size_t rtidx = m_instructionar[ ip] &~ (0x1F << InstructionOpodeShift);
+		std::size_t rtidx = indexOperand( ip);
 		if (rtidx >= m_nfuncar.size())
 		{
 			throw strus::runtime_error(_TXT("illegal operand in instruction"));
@@ -151,11 +153,16 @@ public:
 	virtual std::vector<std::string> getVariables() const;
 	virtual std::size_t getNofArguments() const;
 
+	virtual void setDefaultVariableValue( const std::string& name, double value);
+
 	virtual ScalarFunctionInstanceInterface* createInstance() const;
 	virtual std::string tostring() const;
 
 private:
 	void pushInstruction( const OpCode& op, unsigned int operand);
+
+public:/*ScalarFunctionParser*/
+	bool isLinearComb( std::vector<double>& values) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

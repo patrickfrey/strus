@@ -25,7 +25,7 @@ public:
 
 	/// \brief Initialize a variable value
 	/// \param[in] name variable name
-	/// \param[in] value value of the variable to check
+	/// \param[in] value value of the variable to set
 	/// \remark Reports an error, if the domain does not match
 	virtual void setVariableValue( const std::string& name, double value)=0;
 
