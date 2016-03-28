@@ -27,17 +27,36 @@ bool ScalarFunction::isLinearComb( std::vector<double>& values) const
 	std::size_t aidx = 0;
 	if (!m_variablemap.empty()) return false;
 	values.clear();
-	if (ip+2 < m_instructionar.size())
+
+	if (ip+2 < m_instructionar.size() && opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul)
 	{
-		if (!(opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul))
-		{
-			values.push_back( m_valuear[aidx]);
-		}
-		++aidx;
+		values.push_back( m_valuear[aidx++]);
+		ip += 3;
 	}
-	for (ip=3; ip+3 < m_instructionar.size(); ip+=4,++aidx)
+	else if (ip < m_instructionar.size() && opCode(ip) == OpArg && indexOperand(ip) == aidx)
 	{
-		if (!(opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul && opCode(ip+3) == OpAdd))
+		values.push_back( 1.0);
+		aidx++;
+		ip += 1;
+	}
+	else
+	{
+		return false;
+	}
+	while (ip < m_instructionar.size())
+	{
+		if (ip+3 < m_instructionar.size() && opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul && opCode(ip+3) == OpAdd)
+		{
+			values.push_back( m_valuear[aidx++]);
+			ip+=4;
+		}
+		else if (ip+1 < m_instructionar.size() && opCode(ip) == OpArg && indexOperand(ip) == aidx && opCode(ip+1) == OpAdd)
+		{
+			values.push_back( 1.0);
+			aidx++;
+			ip+=2;
+		}
+		else
 		{
 			return false;
 		}

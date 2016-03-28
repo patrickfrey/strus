@@ -15,7 +15,7 @@
 #include <limits>
 
 using namespace strus;
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 static double if_greater( std::size_t nofargs, const double* args)
 {
@@ -37,6 +37,12 @@ static double if_smallerequal( std::size_t nofargs, const double* args)
 	return (args[0] <= args[1])?args[2]:args[3];
 }
 
+static double if_equal( std::size_t nofargs, const double* args)
+{
+	double diff = args[0] - args[1];
+	return (diff * diff <= std::numeric_limits<double>::epsilon())?args[2]:args[3];
+}
+
 static double mod( double num, double div)
 {
 	return num - div * floor(num / div);
@@ -55,12 +61,14 @@ ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	defineUnaryFunction( "ln", &std::log);
 	defineUnaryFunction( "tanh", &std::tanh);
 	defineUnaryFunction( "exp", &std::exp);
+	defineUnaryFunction( "sqrt", &std::sqrt);
 	defineBinaryFunction( "pow", &std::pow);
 	defineBinaryFunction( "mod", &mod);
 	defineNaryFunction( "if_gt", &if_greater, 4, 4);
 	defineNaryFunction( "if_ge", &if_greaterequal, 4, 4);
 	defineNaryFunction( "if_lt", &if_smaller, 4, 4);
 	defineNaryFunction( "if_le", &if_smallerequal, 4, 4);
+	defineNaryFunction( "if_eq", &if_equal, 4, 4);
 }
 
 static bool isAlpha( char ch)
@@ -459,6 +467,7 @@ ScalarFunctionInterface* ScalarFunctionParser::createFunction( const std::string
 			std::string expr( si, se);
 			throw strus::runtime_error( _TXT( "unexpected characters at end of expression: '%s'"), expr.c_str());
 		}
+
 		// Special treatment of linear combination:
 		std::vector<double> linearcomb_factors;
 		if (func->isLinearComb( linearcomb_factors))

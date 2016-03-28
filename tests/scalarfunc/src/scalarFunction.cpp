@@ -85,7 +85,7 @@ static bool run( const ScalarFunctionParserInterface* parser, unsigned int testi
 	{
 		std::cerr << "[" << testidx << "] test '" << test.name << "'" << std::endl;
 		std::cerr << "function:" << std::endl;
-		std::cerr << func->tostring() << std::cerr;
+		std::cerr << func->tostring() << std::endl;
 
 		std::cerr << std::setprecision(11) << "result=" << result << " expected=" << test.result << " diff=" << xx << std::endl;
 	}
@@ -157,6 +157,22 @@ static Test tests[] =
 		0,
 		{0.0},
 		22.0
+	},
+	{
+		"linear combination 1",
+		"1.2*_0 + 1.3*_1 + 1.4*_2",
+		{{0,0.0}},
+		3,
+		{0.1,0.2,0.3},
+		0.80
+	},
+	{
+		"linear combination 2",
+		"1.2*_0 + _1 + 1.4*_2",
+		{{0,0.0}},
+		3,
+		{0.1,0.2,0.3},
+		0.74
 	},
 	{
 		"BM25",

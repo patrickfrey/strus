@@ -9,6 +9,7 @@
 #include "summarizer/summarizer_standard.hpp"
 #include "iterator/iterator_standard.hpp"
 #include "weighting/weighting_standard.hpp"
+#include "strus/lib/scalarfunc.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -84,6 +85,10 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	defineSummarizerFunction( "matchvariables", sum);
 	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "accuvariable", sum);
+
+	ScalarFunctionParserInterface* sfp;
+	if (0==(sfp=createScalarFunctionParser_default( m_errorhnd))) throw strus::runtime_error(_TXT("error creating scalar function parser"));
+	defineScalarFunctionParser( "", sfp);
 }
 
 QueryProcessor::~QueryProcessor()
