@@ -15,20 +15,6 @@
 
 using namespace strus;
 
-std::vector<std::string> ScalarFunctionInstance::getVariables() const
-{
-	try
-	{
-		return m_func->getVariables();
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error fetching variable names of scalar function: %s"), *m_errorhnd, std::vector<std::string>());
-}
-
-std::size_t ScalarFunctionInstance::getNofArguments() const
-{
-	return m_nof_args;
-}
-
 void ScalarFunctionInstance::setVariableValue( const std::string& name, double value)
 {
 	try

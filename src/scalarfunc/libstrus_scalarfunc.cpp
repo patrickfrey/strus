@@ -60,16 +60,6 @@ public:
 
 	virtual ~ScalarFunctionInstance_linearcomb(){}
 
-	virtual std::vector<std::string> getVariables() const
-	{
-		return std::vector<std::string>();
-	}
-
-	virtual std::size_t getNofArguments() const
-	{
-		return m_factors.size();
-	}
-
 	virtual void setVariableValue( const std::string& name, double value)
 	{
 		m_errorhnd->report( _TXT("no variables defined for linear combination"));
@@ -111,6 +101,16 @@ public:
 	ScalarFunction_linearcomb( const std::vector<double>& factors_, ErrorBufferInterface* errorhnd_)
 		:m_errorhnd(errorhnd_),m_factors(factors_){}
 	virtual ~ScalarFunction_linearcomb(){}
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
+
+	virtual std::size_t getNofArguments() const
+	{
+		return m_factors.size();
+	}
 
 	virtual ScalarFunctionInstanceInterface* createInstance() const
 	{

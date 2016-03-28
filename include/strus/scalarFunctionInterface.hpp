@@ -10,6 +10,7 @@
 #ifndef _STRUS_SCALAR_FUNCTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_SCALAR_FUNCTION_INTERFACE_HPP_INCLUDED
 #include <string>
+#include <vector>
 
 namespace strus
 {

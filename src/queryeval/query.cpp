@@ -450,6 +450,12 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 	return si->second;
 }
 
+void Query::setWeightingFormulaVariableValue(
+		const std::string& name, double value)
+{
+	m_weightingFormula->setVariableValue( name, value);
+}
+
 QueryResult Query::evaluate()
 {
 	const char* evaluationPhase = "query feature postings initialization";

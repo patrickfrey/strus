@@ -72,6 +72,9 @@ public:
 	virtual void defineGlobalStatistics(
 			const GlobalStatistics& stats_);
 
+	virtual void setWeightingFormulaVariableValue(
+			const std::string& name, double value);
+
 	virtual QueryResult evaluate();
 
 public:
