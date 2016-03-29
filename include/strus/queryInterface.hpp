@@ -106,7 +106,7 @@ public:
 	/// \brief Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(ScalarFunctionInterface* combinefunc)
 	/// \param[in] name name of the variable
 	/// \param[in] value value of the variable
-	virtual void setWeightingFormulaVariableValue( const std::string& name, double value)=0;
+	virtual void setWeightingVariableValue( const std::string& name, double value)=0;
 
 	/// \brief Evaluate the query
 	virtual QueryResult evaluate()=0;
