@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -66,11 +66,13 @@
 <p>This is the complete list of members for <a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a>, including all inherited members.</p>
 <table class="directory">
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a256d0c946e2565dfaeab061de9770d28">definePostingJoinOperator</a>(const std::string &amp;name, PostingJoinOperatorInterface *op)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#ab68bd73dbd1c3e2dca8a658fa2fa4f0c">defineSummarizerFunction</a>(const std::string &amp;name, SummarizerFunctionInterface *sumfunc)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a0635729c873fb2db737f6c591d55d381">defineWeightingFunction</a>(const std::string &amp;name, WeightingFunctionInterface *func)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> enum name</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a50413652ee13ed24c2e87ece35f7a6b3">getFunctionList</a>(FunctionType type) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#afec541e03572ba308c3205e78c83fd0d">getPostingJoinOperator</a>(const std::string &amp;name) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#ae7d06cb05430c724810b0854ccb1505d">defineScalarFunctionParser</a>(const std::string &amp;name, ScalarFunctionParserInterface *parser)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#ab68bd73dbd1c3e2dca8a658fa2fa4f0c">defineSummarizerFunction</a>(const std::string &amp;name, SummarizerFunctionInterface *sumfunc)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a0635729c873fb2db737f6c591d55d381">defineWeightingFunction</a>(const std::string &amp;name, WeightingFunctionInterface *func)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> enum name</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a50413652ee13ed24c2e87ece35f7a6b3">getFunctionList</a>(FunctionType type) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#afec541e03572ba308c3205e78c83fd0d">getPostingJoinOperator</a>(const std::string &amp;name) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a1c2407ac79768922c876ef220de5e106">getScalarFunctionParser</a>(const std::string &amp;name) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a45a56dde58be36dd36626ab225dc1de8">getSummarizerFunction</a>(const std::string &amp;name) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a7c1f2895904bb84c25adfc8660de6e49">getWeightingFunction</a>(const std::string &amp;name) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193aebb46c3fe674f3e6062eecb71bb95c50">PostingJoinOperator</a> enum value</td><td class="entry"><a class="el" href="classstrus_1_1QueryProcessorInterface.html">strus::QueryProcessorInterface</a></td><td class="entry"></td></tr>
@@ -81,7 +83,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:13 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

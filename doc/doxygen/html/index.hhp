@@ -13,7 +13,6 @@ Title=strus
 main="strus","index.hhc","index.hhk","index.html","index.html",,,,,0x23520,,0x10387e,,,,,,,,0
 
 [FILES]
-arithmeticVariant_8hpp_source.html
 attributeReaderInterface_8hpp_source.html
 constants_8hpp_source.html
 databaseBackupCursorInterface_8hpp_source.html
@@ -32,11 +31,13 @@ database__leveldb_8hpp_source.html
 error_8hpp_source.html
 queryeval_8hpp_source.html
 queryproc_8hpp_source.html
+scalarfunc_8hpp_source.html
 statsproc_8hpp_source.html
 storage_8hpp_source.html
 metaDataReaderInterface_8hpp_source.html
 metaDataRestrictionInstanceInterface_8hpp_source.html
 metaDataRestrictionInterface_8hpp_source.html
+numericVariant_8hpp_source.html
 postingIteratorInterface_8hpp_source.html
 postingJoinOperatorInterface_8hpp_source.html
 queryEvalInterface_8hpp_source.html
@@ -45,6 +46,9 @@ queryProcessorInterface_8hpp_source.html
 queryResult_8hpp_source.html
 reference_8hpp_source.html
 resultDocument_8hpp_source.html
+scalarFunctionInstanceInterface_8hpp_source.html
+scalarFunctionInterface_8hpp_source.html
+scalarFunctionParserInterface_8hpp_source.html
 statisticsBuilderInterface_8hpp_source.html
 statisticsIteratorInterface_8hpp_source.html
 statisticsProcessorInterface_8hpp_source.html
@@ -70,7 +74,6 @@ weightingFunctionContextInterface_8hpp_source.html
 weightingFunctionInstanceInterface_8hpp_source.html
 weightingFunctionInterface_8hpp_source.html
 strus_8md.html
-arithmeticVariant_8hpp.html
 attributeReaderInterface_8hpp.html
 constants_8hpp.html
 databaseBackupCursorInterface_8hpp.html
@@ -89,11 +92,13 @@ database__leveldb_8hpp.html
 error_8hpp.html
 queryeval_8hpp.html
 queryproc_8hpp.html
+scalarfunc_8hpp.html
 statsproc_8hpp.html
 storage_8hpp.html
 metaDataReaderInterface_8hpp.html
 metaDataRestrictionInstanceInterface_8hpp.html
 metaDataRestrictionInterface_8hpp.html
+numericVariant_8hpp.html
 postingIteratorInterface_8hpp.html
 postingJoinOperatorInterface_8hpp.html
 queryEvalInterface_8hpp.html
@@ -102,6 +107,9 @@ queryProcessorInterface_8hpp.html
 queryResult_8hpp.html
 reference_8hpp.html
 resultDocument_8hpp.html
+scalarFunctionInstanceInterface_8hpp.html
+scalarFunctionInterface_8hpp.html
+scalarFunctionParserInterface_8hpp.html
 statisticsBuilderInterface_8hpp.html
 statisticsIteratorInterface_8hpp.html
 statisticsProcessorInterface_8hpp.html
@@ -127,10 +135,6 @@ weightingFunctionContextInterface_8hpp.html
 weightingFunctionInstanceInterface_8hpp.html
 weightingFunctionInterface_8hpp.html
 namespacestrus.html
-classstrus_1_1ArithmeticVariant.html
-classstrus_1_1ArithmeticVariant-members.html
-classstrus_1_1ArithmeticVariant_1_1String.html
-classstrus_1_1ArithmeticVariant_1_1String-members.html
 classstrus_1_1AttributeReaderInterface.html
 classstrus_1_1AttributeReaderInterface-members.html
 structstrus_1_1Constants.html
@@ -167,6 +171,10 @@ classstrus_1_1MetaDataRestrictionInstanceInterface.html
 classstrus_1_1MetaDataRestrictionInstanceInterface-members.html
 classstrus_1_1MetaDataRestrictionInterface.html
 classstrus_1_1MetaDataRestrictionInterface-members.html
+classstrus_1_1NumericVariant.html
+classstrus_1_1NumericVariant-members.html
+classstrus_1_1NumericVariant_1_1String.html
+classstrus_1_1NumericVariant_1_1String-members.html
 classstrus_1_1PostingIteratorInterface.html
 classstrus_1_1PostingIteratorInterface-members.html
 classstrus_1_1PostingJoinOperatorInterface.html
@@ -187,6 +195,12 @@ classstrus_1_1Reference.html
 classstrus_1_1Reference-members.html
 classstrus_1_1ResultDocument.html
 classstrus_1_1ResultDocument-members.html
+classstrus_1_1ScalarFunctionInstanceInterface.html
+classstrus_1_1ScalarFunctionInstanceInterface-members.html
+classstrus_1_1ScalarFunctionInterface.html
+classstrus_1_1ScalarFunctionInterface-members.html
+classstrus_1_1ScalarFunctionParserInterface.html
+classstrus_1_1ScalarFunctionParserInterface-members.html
 classstrus_1_1StatisticsBuilderInterface.html
 classstrus_1_1StatisticsBuilderInterface-members.html
 classstrus_1_1StatisticsIteratorInterface.html

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -61,74 +61,53 @@
 </div><!--header-->
 <div class="contents">
 <a href="termStatistics_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">---------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">    The C++ library strus implements basic operations to build</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">    a search engine for structured search on unstructured data.</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2015 Patrick Frey</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">    This library is free software; you can redistribute it and/or</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU General Public</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">    License as published by the Free Software Foundation; either</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 3 of the License, or (at your option) any later version.</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">    This library is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">    but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    General Public License for more details.</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU General Public</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">    License along with this library; if not, write to the Free Software</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment">--------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">        The latest version of strus can be found at &#39;http://github.com/patrickfrey/strus&#39;</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">        For documentation see &#39;http://patrickfrey.github.com/strus&#39;</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">--------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">*/</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#ifndef _STRUS_TERM_STATISTICS_HPP_INCLUDED</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_TERM_STATISTICS_HPP_INCLUDED</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &quot;<a class="code" href="index_8hpp.html">strus/index.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * Copyright (c) 2014 Patrick P. Frey</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * This Source Code Form is subject to the terms of the Mozilla Public</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> * License, v. 2.0. If a copy of the MPL was not distributed with this</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * file, You can obtain one at http://mozilla.org/MPL/2.0/.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#ifndef _STRUS_TERM_STATISTICS_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_TERM_STATISTICS_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &quot;<a class="code" href="index_8hpp.html">strus/index.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">namespace </span>strus {</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html">   16</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1TermStatistics.html">TermStatistics</a></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;{</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#a4e067de3763cead0757f5388beb800a8">   20</a></span>&#160;        <a class="code" href="classstrus_1_1TermStatistics.html#a4e067de3763cead0757f5388beb800a8">TermStatistics</a>()</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;                :m_df(-1){}</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#afce8edde4641b492b7024721dd25c3fb">   23</a></span>&#160;        <a class="code" href="classstrus_1_1TermStatistics.html#afce8edde4641b492b7024721dd25c3fb">TermStatistics</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a>&amp; df_)</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;                :m_df(df_){}</div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#af5fa6345d54ce3b07667eb057ec8e141">   26</a></span>&#160;        <a class="code" href="classstrus_1_1TermStatistics.html#af5fa6345d54ce3b07667eb057ec8e141">TermStatistics</a>( <span class="keyword">const</span> <a class="code" href="classstrus_1_1TermStatistics.html">TermStatistics</a>&amp; o)</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;                :m_df(o.m_df){}</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#a5b5a5a33e5284d88635c7ad1ba7fe248">   31</a></span>&#160;        <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a> <a class="code" href="classstrus_1_1TermStatistics.html#a5b5a5a33e5284d88635c7ad1ba7fe248">documentFrequency</a>()<span class="keyword"> const                 </span>{<span class="keywordflow">return</span> m_df;}</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">namespace </span>strus {</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html">   37</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1TermStatistics.html">TermStatistics</a></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;{</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#a4e067de3763cead0757f5388beb800a8">   41</a></span>&#160;        <a class="code" href="classstrus_1_1TermStatistics.html#a4e067de3763cead0757f5388beb800a8">TermStatistics</a>()</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;                :m_df(-1){}</div>
-<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#afce8edde4641b492b7024721dd25c3fb">   44</a></span>&#160;        <a class="code" href="classstrus_1_1TermStatistics.html#afce8edde4641b492b7024721dd25c3fb">TermStatistics</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a>&amp; df_)</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;                :m_df(df_){}</div>
-<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#af5fa6345d54ce3b07667eb057ec8e141">   47</a></span>&#160;        <a class="code" href="classstrus_1_1TermStatistics.html#af5fa6345d54ce3b07667eb057ec8e141">TermStatistics</a>( <span class="keyword">const</span> <a class="code" href="classstrus_1_1TermStatistics.html">TermStatistics</a>&amp; o)</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                :m_df(o.m_df){}</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#a5b5a5a33e5284d88635c7ad1ba7fe248">   52</a></span>&#160;        <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a> <a class="code" href="classstrus_1_1TermStatistics.html#a5b5a5a33e5284d88635c7ad1ba7fe248">documentFrequency</a>()<span class="keyword"> const                 </span>{<span class="keywordflow">return</span> m_df;}</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#af18972b9af781ba63cda130275322133">   56</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1TermStatistics.html#af18972b9af781ba63cda130275322133">setDocumentFrequency</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a>&amp; df_)    {m_df = df_;}</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a> m_df;             </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;};</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
-<div class="ttc" id="classstrus_1_1TermStatistics_html_a5b5a5a33e5284d88635c7ad1ba7fe248"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#a5b5a5a33e5284d88635c7ad1ba7fe248">strus::TermStatistics::documentFrequency</a></div><div class="ttdeci">GlobalCounter documentFrequency() const </div><div class="ttdoc">Get the global document frequency. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:52</div></div>
-<div class="ttc" id="classstrus_1_1TermStatistics_html_afce8edde4641b492b7024721dd25c3fb"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#afce8edde4641b492b7024721dd25c3fb">strus::TermStatistics::TermStatistics</a></div><div class="ttdeci">TermStatistics(const GlobalCounter &amp;df_)</div><div class="ttdoc">Constructor. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:44</div></div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classstrus_1_1TermStatistics.html#af18972b9af781ba63cda130275322133">   35</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1TermStatistics.html#af18972b9af781ba63cda130275322133">setDocumentFrequency</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a>&amp; df_)    {m_df = df_;}</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <a class="code" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">GlobalCounter</a> m_df;             </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;};</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="ttc" id="classstrus_1_1TermStatistics_html_a5b5a5a33e5284d88635c7ad1ba7fe248"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#a5b5a5a33e5284d88635c7ad1ba7fe248">strus::TermStatistics::documentFrequency</a></div><div class="ttdeci">GlobalCounter documentFrequency() const </div><div class="ttdoc">Get the global document frequency. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:31</div></div>
+<div class="ttc" id="classstrus_1_1TermStatistics_html_afce8edde4641b492b7024721dd25c3fb"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#afce8edde4641b492b7024721dd25c3fb">strus::TermStatistics::TermStatistics</a></div><div class="ttdeci">TermStatistics(const GlobalCounter &amp;df_)</div><div class="ttdoc">Constructor. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:23</div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
-<div class="ttc" id="classstrus_1_1TermStatistics_html_af18972b9af781ba63cda130275322133"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#af18972b9af781ba63cda130275322133">strus::TermStatistics::setDocumentFrequency</a></div><div class="ttdeci">void setDocumentFrequency(const GlobalCounter &amp;df_)</div><div class="ttdoc">Set the global document frequency to use for the associated term. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:56</div></div>
-<div class="ttc" id="classstrus_1_1TermStatistics_html_a4e067de3763cead0757f5388beb800a8"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#a4e067de3763cead0757f5388beb800a8">strus::TermStatistics::TermStatistics</a></div><div class="ttdeci">TermStatistics()</div><div class="ttdoc">Constructor. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:41</div></div>
-<div class="ttc" id="classstrus_1_1TermStatistics_html_af5fa6345d54ce3b07667eb057ec8e141"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#af5fa6345d54ce3b07667eb057ec8e141">strus::TermStatistics::TermStatistics</a></div><div class="ttdeci">TermStatistics(const TermStatistics &amp;o)</div><div class="ttdoc">Copy constructor. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:47</div></div>
-<div class="ttc" id="classstrus_1_1TermStatistics_html"><div class="ttname"><a href="classstrus_1_1TermStatistics.html">strus::TermStatistics</a></div><div class="ttdoc">Global term statistics, if passed down with the query. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:37</div></div>
-<div class="ttc" id="namespacestrus_html_ac119a1148d695b5aa8a38a919c7cb7f9"><div class="ttname"><a href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">strus::GlobalCounter</a></div><div class="ttdeci">int64_t GlobalCounter</div><div class="ttdoc">Number type generally used for indices globally shared between different instances of strus...</div><div class="ttdef"><b>Definition:</b> index.hpp:53</div></div>
+<div class="ttc" id="classstrus_1_1TermStatistics_html_af18972b9af781ba63cda130275322133"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#af18972b9af781ba63cda130275322133">strus::TermStatistics::setDocumentFrequency</a></div><div class="ttdeci">void setDocumentFrequency(const GlobalCounter &amp;df_)</div><div class="ttdoc">Set the global document frequency to use for the associated term. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:35</div></div>
+<div class="ttc" id="classstrus_1_1TermStatistics_html_a4e067de3763cead0757f5388beb800a8"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#a4e067de3763cead0757f5388beb800a8">strus::TermStatistics::TermStatistics</a></div><div class="ttdeci">TermStatistics()</div><div class="ttdoc">Constructor. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:20</div></div>
+<div class="ttc" id="classstrus_1_1TermStatistics_html_af5fa6345d54ce3b07667eb057ec8e141"><div class="ttname"><a href="classstrus_1_1TermStatistics.html#af5fa6345d54ce3b07667eb057ec8e141">strus::TermStatistics::TermStatistics</a></div><div class="ttdeci">TermStatistics(const TermStatistics &amp;o)</div><div class="ttdoc">Copy constructor. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:26</div></div>
+<div class="ttc" id="classstrus_1_1TermStatistics_html"><div class="ttname"><a href="classstrus_1_1TermStatistics.html">strus::TermStatistics</a></div><div class="ttdoc">Global term statistics, if passed down with the query. </div><div class="ttdef"><b>Definition:</b> termStatistics.hpp:16</div></div>
+<div class="ttc" id="namespacestrus_html_ac119a1148d695b5aa8a38a919c7cb7f9"><div class="ttname"><a href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">strus::GlobalCounter</a></div><div class="ttdeci">int64_t GlobalCounter</div><div class="ttdoc">Number type generally used for indices globally shared between different instances of strus...</div><div class="ttdef"><b>Definition:</b> index.hpp:32</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:13 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

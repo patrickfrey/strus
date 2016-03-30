@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -94,9 +94,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a37a7455f7ed52fe58de5bdfde57fed71"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a37a7455f7ed52fe58de5bdfde57fed71">defineGlobalStatistics</a> (const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats_)=0</td></tr>
 <tr class="memdesc:a37a7455f7ed52fe58de5bdfde57fed71"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the global statistics for the case that they are defined by the client.  <a href="#a37a7455f7ed52fe58de5bdfde57fed71">More...</a><br/></td></tr>
 <tr class="separator:a37a7455f7ed52fe58de5bdfde57fed71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3da7db5f01881f97e5b064d7f4d9f2e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#aa3da7db5f01881f97e5b064d7f4d9f2e">addMetaDataRestrictionCondition</a> (<a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">MetaDataRestrictionInterface::CompareOperator</a> opr, const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;operand, bool newGroup=true)=0</td></tr>
-<tr class="memdesc:aa3da7db5f01881f97e5b064d7f4d9f2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a condition clause to the restriction on the document meta data of this query.  <a href="#aa3da7db5f01881f97e5b064d7f4d9f2e">More...</a><br/></td></tr>
-<tr class="separator:aa3da7db5f01881f97e5b064d7f4d9f2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a157a5cd4359ef46cad3ddef37e0419a9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a157a5cd4359ef46cad3ddef37e0419a9">addMetaDataRestrictionCondition</a> (<a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">MetaDataRestrictionInterface::CompareOperator</a> opr, const std::string &amp;name, const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;operand, bool newGroup=true)=0</td></tr>
+<tr class="memdesc:a157a5cd4359ef46cad3ddef37e0419a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a condition clause to the restriction on the document meta data of this query.  <a href="#a157a5cd4359ef46cad3ddef37e0419a9">More...</a><br/></td></tr>
+<tr class="separator:a157a5cd4359ef46cad3ddef37e0419a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adbd9f6ede6eecec88f35e1c5334e3342"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#adbd9f6ede6eecec88f35e1c5334e3342">addDocumentEvaluationSet</a> (const std::vector&lt; <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &gt; &amp;docnolist_)=0</td></tr>
 <tr class="memdesc:adbd9f6ede6eecec88f35e1c5334e3342"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a restriction on the documents as list of local document numbers (Add local document numbers to the list of documents to restrict the query on)  <a href="#adbd9f6ede6eecec88f35e1c5334e3342">More...</a><br/></td></tr>
 <tr class="separator:adbd9f6ede6eecec88f35e1c5334e3342"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -109,6 +109,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5c32a31f060c0df68c933f449cc93d01"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a5c32a31f060c0df68c933f449cc93d01">addUserName</a> (const std::string &amp;username_)=0</td></tr>
 <tr class="memdesc:a5c32a31f060c0df68c933f449cc93d01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a name of a user role in the query for alternative ACL restrictions.  <a href="#a5c32a31f060c0df68c933f449cc93d01">More...</a><br/></td></tr>
 <tr class="separator:a5c32a31f060c0df68c933f449cc93d01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaca35c5a220efca907aeecde8a7eafe0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#aaca35c5a220efca907aeecde8a7eafe0">setWeightingVariableValue</a> (const std::string &amp;name, double value)=0</td></tr>
+<tr class="memdesc:aaca35c5a220efca907aeecde8a7eafe0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(ScalarFunctionInterface* combinefunc)  <a href="#aaca35c5a220efca907aeecde8a7eafe0">More...</a><br/></td></tr>
+<tr class="separator:aaca35c5a220efca907aeecde8a7eafe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28242d537b8dcf32d00b48c407ff8fc4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1QueryResult.html">QueryResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryInterface.html#a28242d537b8dcf32d00b48c407ff8fc4">evaluate</a> ()=0</td></tr>
 <tr class="memdesc:a28242d537b8dcf32d00b48c407ff8fc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate the query.  <a href="#a28242d537b8dcf32d00b48c407ff8fc4">More...</a><br/></td></tr>
 <tr class="separator:a28242d537b8dcf32d00b48c407ff8fc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -174,7 +177,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa3da7db5f01881f97e5b064d7f4d9f2e"></a>
+<a class="anchor" id="a157a5cd4359ef46cad3ddef37e0419a9"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -196,7 +199,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;&#160;</td>
           <td class="paramname"><em>operand</em>, </td>
         </tr>
         <tr>
@@ -613,6 +616,49 @@ More than one variable can be attached </dd></dl>
 
 </div>
 </div>
+<a class="anchor" id="aaca35c5a220efca907aeecde8a7eafe0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryInterface::setWeightingVariableValue </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(ScalarFunctionInterface* combinefunc) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>value of the variable </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="queryInterface_8hpp_source.html">queryInterface.hpp</a></li>
 </ul>
@@ -620,7 +666,7 @@ More than one variable can be attached </dd></dl>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:13 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

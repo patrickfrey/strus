@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -61,95 +61,74 @@
 </div><!--header-->
 <div class="contents">
 <a href="storageInterface_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">---------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">    The C++ library strus implements basic operations to build</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">    a search engine for structured search on unstructured data.</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2015 Patrick Frey</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">    This library is free software; you can redistribute it and/or</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU General Public</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">    License as published by the Free Software Foundation; either</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 3 of the License, or (at your option) any later version.</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">    This library is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">    but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    General Public License for more details.</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU General Public</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">    License along with this library; if not, write to the Free Software</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment">--------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">        The latest version of strus can be found at &#39;http://github.com/patrickfrey/strus&#39;</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">        For documentation see &#39;http://patrickfrey.github.com/strus&#39;</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">--------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">*/</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">namespace </span>strus {</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">class </span>DatabaseClientInterface;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">class </span>StorageClientInterface;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">class </span>StorageAlterMetaDataTableInterface;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keyword">class </span>StatisticsProcessorInterface;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
-<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html">   48</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1StorageInterface.html">StorageInterface</a></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;{</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">   52</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">~StorageInterface</a>(){}</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a>* <a class="code" href="classstrus_1_1StorageInterface.html#ab527f470f0b55544f626095c57acfbdb">createClient</a>(</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                        <span class="keyword">const</span> std::string&amp; configsource,</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                        <a class="code" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a>* database,</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a>* statisticsProc=0) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">createStorage</a>(</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                        <span class="keyword">const</span> std::string&amp; configsource,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                        <a class="code" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a>* database) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a>* <a class="code" href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">createAlterMetaDataTable</a>(</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                        <a class="code" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a>* database) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
-<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">   80</a></span>&#160;        <span class="keyword">enum</span> <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        {</div>
-<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6">   82</a></span>&#160;                <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6">CmdCreateClient</a>,                </div>
-<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">   83</a></span>&#160;                <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">CmdCreate</a>                       </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        };</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1StorageInterface.html#ae2857ae5cee7444e69ff178cf816413a">getConfigDescription</a>( <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> type) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>** <a class="code" href="classstrus_1_1StorageInterface.html#ab0ac5b9df406927dae3f247d47f1d702">getConfigParameters</a>( <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> type) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;};</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="preprocessor"></span></div>
-<div class="ttc" id="classstrus_1_1StorageClientInterface_html"><div class="ttname"><a href="classstrus_1_1StorageClientInterface.html">strus::StorageClientInterface</a></div><div class="ttdoc">Interface of a strus IR storage. </div><div class="ttdef"><b>Definition:</b> storageClientInterface.hpp:71</div></div>
-<div class="ttc" id="classstrus_1_1StorageAlterMetaDataTableInterface_html"><div class="ttname"><a href="classstrus_1_1StorageAlterMetaDataTableInterface.html">strus::StorageAlterMetaDataTableInterface</a></div><div class="ttdoc">Interface to declare changes in the meta data table structure of the storage. </div><div class="ttdef"><b>Definition:</b> storageAlterMetaDataTableInterface.hpp:41</div></div>
-<div class="ttc" id="classstrus_1_1DatabaseClientInterface_html"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html">strus::DatabaseClientInterface</a></div><div class="ttdoc">Interface for accessing the strus key value storage database. </div><div class="ttdef"><b>Definition:</b> databaseClientInterface.hpp:48</div></div>
-<div class="ttc" id="classstrus_1_1StorageInterface_html"><div class="ttname"><a href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></div><div class="ttdoc">Interface to the create and alter a storage for strus. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:48</div></div>
-<div class="ttc" id="classstrus_1_1StorageInterface_html_a19257937ef6dd3ca3e9cf573708d872f"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">strus::StorageInterface::ConfigType</a></div><div class="ttdeci">ConfigType</div><div class="ttdoc">Enumeration of different type of configurations Needed for getting the correct description of the con...</div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:80</div></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * Copyright (c) 2014 Patrick P. Frey</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * This Source Code Form is subject to the terms of the Mozilla Public</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> * License, v. 2.0. If a copy of the MPL was not distributed with this</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * file, You can obtain one at http://mozilla.org/MPL/2.0/.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#ifndef _STRUS_STORAGE_INTERFACE_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_STORAGE_INTERFACE_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">namespace </span>strus {</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">class </span>DatabaseClientInterface;</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">class </span>StorageClientInterface;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">class </span>StorageAlterMetaDataTableInterface;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">class </span>StatisticsProcessorInterface;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html">   27</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1StorageInterface.html">StorageInterface</a></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;{</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">   31</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">~StorageInterface</a>(){}</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a>* <a class="code" href="classstrus_1_1StorageInterface.html#ab527f470f0b55544f626095c57acfbdb">createClient</a>(</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;                        <span class="keyword">const</span> std::string&amp; configsource,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;                        <a class="code" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a>* database,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a>* statisticsProc=0) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">createStorage</a>(</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                        <span class="keyword">const</span> std::string&amp; configsource,</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                        <a class="code" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a>* database) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a>* <a class="code" href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">createAlterMetaDataTable</a>(</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                        <a class="code" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a>* database) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">   59</a></span>&#160;        <span class="keyword">enum</span> <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        {</div>
+<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6">   61</a></span>&#160;                <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6">CmdCreateClient</a>,                </div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">   62</a></span>&#160;                <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">CmdCreate</a>                       </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        };</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1StorageInterface.html#ae2857ae5cee7444e69ff178cf816413a">getConfigDescription</a>( <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> type) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>** <a class="code" href="classstrus_1_1StorageInterface.html#ab0ac5b9df406927dae3f247d47f1d702">getConfigParameters</a>( <a class="code" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> type) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;};</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="classstrus_1_1StorageClientInterface_html"><div class="ttname"><a href="classstrus_1_1StorageClientInterface.html">strus::StorageClientInterface</a></div><div class="ttdoc">Interface of a strus IR storage. </div><div class="ttdef"><b>Definition:</b> storageClientInterface.hpp:50</div></div>
+<div class="ttc" id="classstrus_1_1StorageAlterMetaDataTableInterface_html"><div class="ttname"><a href="classstrus_1_1StorageAlterMetaDataTableInterface.html">strus::StorageAlterMetaDataTableInterface</a></div><div class="ttdoc">Interface to declare changes in the meta data table structure of the storage. </div><div class="ttdef"><b>Definition:</b> storageAlterMetaDataTableInterface.hpp:19</div></div>
+<div class="ttc" id="classstrus_1_1DatabaseClientInterface_html"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html">strus::DatabaseClientInterface</a></div><div class="ttdoc">Interface for accessing the strus key value storage database. </div><div class="ttdef"><b>Definition:</b> databaseClientInterface.hpp:27</div></div>
+<div class="ttc" id="classstrus_1_1StorageInterface_html"><div class="ttname"><a href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></div><div class="ttdoc">Interface to the create and alter a storage for strus. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:27</div></div>
+<div class="ttc" id="classstrus_1_1StorageInterface_html_a19257937ef6dd3ca3e9cf573708d872f"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">strus::StorageInterface::ConfigType</a></div><div class="ttdeci">ConfigType</div><div class="ttdoc">Enumeration of different type of configurations Needed for getting the correct description of the con...</div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:59</div></div>
 <div class="ttc" id="classstrus_1_1StorageInterface_html_ab0ac5b9df406927dae3f247d47f1d702"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#ab0ac5b9df406927dae3f247d47f1d702">strus::StorageInterface::getConfigParameters</a></div><div class="ttdeci">virtual const char ** getConfigParameters(ConfigType type) const =0</div><div class="ttdoc">Get the list of known configuration parameter keys for verification of the configuration by programs ...</div></div>
 <div class="ttc" id="classstrus_1_1StorageInterface_html_ab527f470f0b55544f626095c57acfbdb"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#ab527f470f0b55544f626095c57acfbdb">strus::StorageInterface::createClient</a></div><div class="ttdeci">virtual StorageClientInterface * createClient(const std::string &amp;configsource, DatabaseClientInterface *database, const StatisticsProcessorInterface *statisticsProc=0) const =0</div><div class="ttdoc">Creates an client instance of the storage using a defined key value store database. </div></div>
-<div class="ttc" id="classstrus_1_1StorageInterface_html_a3cfca86dc674de6cbe153e442fa227d7"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">strus::StorageInterface::~StorageInterface</a></div><div class="ttdeci">virtual ~StorageInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:52</div></div>
+<div class="ttc" id="classstrus_1_1StorageInterface_html_a3cfca86dc674de6cbe153e442fa227d7"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">strus::StorageInterface::~StorageInterface</a></div><div class="ttdeci">virtual ~StorageInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:31</div></div>
 <div class="ttc" id="classstrus_1_1StorageInterface_html_a4af90c26d7118b46a21bf2c0c39e566a"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">strus::StorageInterface::createAlterMetaDataTable</a></div><div class="ttdeci">virtual StorageAlterMetaDataTableInterface * createAlterMetaDataTable(DatabaseClientInterface *database) const =0</div><div class="ttdoc">Create an interface to alter the meta data table structure. </div></div>
 <div class="ttc" id="classstrus_1_1StorageInterface_html_a63888cef731e57f31f60a742957032bb"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">strus::StorageInterface::createStorage</a></div><div class="ttdeci">virtual bool createStorage(const std::string &amp;configsource, DatabaseClientInterface *database) const =0</div><div class="ttdoc">Creates a new storage described with configsource using a defined key value store database...</div></div>
-<div class="ttc" id="classstrus_1_1StatisticsProcessorInterface_html"><div class="ttname"><a href="classstrus_1_1StatisticsProcessorInterface.html">strus::StatisticsProcessorInterface</a></div><div class="ttdoc">Interface for packing/unpacking messages with statistics used for query evaluation. </div><div class="ttdef"><b>Definition:</b> statisticsProcessorInterface.hpp:45</div></div>
+<div class="ttc" id="classstrus_1_1StatisticsProcessorInterface_html"><div class="ttname"><a href="classstrus_1_1StatisticsProcessorInterface.html">strus::StatisticsProcessorInterface</a></div><div class="ttdoc">Interface for packing/unpacking messages with statistics used for query evaluation. </div><div class="ttdef"><b>Definition:</b> statisticsProcessorInterface.hpp:24</div></div>
 <div class="ttc" id="classstrus_1_1StorageInterface_html_ae2857ae5cee7444e69ff178cf816413a"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#ae2857ae5cee7444e69ff178cf816413a">strus::StorageInterface::getConfigDescription</a></div><div class="ttdeci">virtual const char * getConfigDescription(ConfigType type) const =0</div><div class="ttdoc">Gets a configuration description (source string as used by the functions here) createStorage(const st...</div></div>
-<div class="ttc" id="classstrus_1_1StorageInterface_html_a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6">strus::StorageInterface::CmdCreateClient</a></div><div class="ttdoc">Config description for the creation of an instance accessing the repository. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:82</div></div>
-<div class="ttc" id="classstrus_1_1StorageInterface_html_a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">strus::StorageInterface::CmdCreate</a></div><div class="ttdoc">Config description for the creation of a repository that does not exist yet. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:83</div></div>
+<div class="ttc" id="classstrus_1_1StorageInterface_html_a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6">strus::StorageInterface::CmdCreateClient</a></div><div class="ttdoc">Config description for the creation of an instance accessing the repository. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:61</div></div>
+<div class="ttc" id="classstrus_1_1StorageInterface_html_a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994"><div class="ttname"><a href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">strus::StorageInterface::CmdCreate</a></div><div class="ttdoc">Config description for the creation of a repository that does not exist yet. </div><div class="ttdef"><b>Definition:</b> storageInterface.hpp:62</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:13 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

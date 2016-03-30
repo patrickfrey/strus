@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -70,14 +70,15 @@
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#ac2aded5ae260583392cf08cd03278dec">addSelectionFeature</a>(const std::string &amp;set_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#ac5c00c083487d70e9e5fcb0ed4c31b5f">addSummarizerFunction</a>(const std::string &amp;functionName, SummarizerFunctionInstanceInterface *function, const std::vector&lt; FeatureParameter &gt; &amp;featureParameters)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#ad3ff16ad708d3dbf1f9eb3655e025898">addTerm</a>(const std::string &amp;set_, const std::string &amp;type_, const std::string &amp;value_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#adbedfd90392fcc5ec0db2734fe38bfba">addWeightingFunction</a>(const std::string &amp;functionName, WeightingFunctionInstanceInterface *function, const std::vector&lt; FeatureParameter &gt; &amp;featureParameters, float weight)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a2dfaafd6ed9ea67054707dc6a8cdb738">addWeightingFunction</a>(const std::string &amp;functionName, WeightingFunctionInstanceInterface *function, const std::vector&lt; FeatureParameter &gt; &amp;featureParameters)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a785f11432b46e6381be51b58d973d6bf">createQuery</a>(const StorageClientInterface *storage) const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a66303958c032fea489f193fb9c15fab3">~QueryEvalInterface</a>()</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a9e322d14ab18272abe37a90ce6acf084">defineWeightingFormula</a>(ScalarFunctionInterface *combinefunc)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html#a66303958c032fea489f193fb9c15fab3">~QueryEvalInterface</a>()</td><td class="entry"><a class="el" href="classstrus_1_1QueryEvalInterface.html">strus::QueryEvalInterface</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
 </table></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:13 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

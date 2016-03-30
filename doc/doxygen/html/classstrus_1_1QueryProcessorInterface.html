@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -110,6 +110,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a50413652ee13ed24c2e87ece35f7a6b3"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a50413652ee13ed24c2e87ece35f7a6b3">getFunctionList</a> (<a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> type) const =0</td></tr>
 <tr class="memdesc:a50413652ee13ed24c2e87ece35f7a6b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a list of all functions of a specific type available.  <a href="#a50413652ee13ed24c2e87ece35f7a6b3">More...</a><br/></td></tr>
 <tr class="separator:a50413652ee13ed24c2e87ece35f7a6b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7d06cb05430c724810b0854ccb1505d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#ae7d06cb05430c724810b0854ccb1505d">defineScalarFunctionParser</a> (const std::string &amp;name, <a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html">ScalarFunctionParserInterface</a> *parser)=0</td></tr>
+<tr class="memdesc:ae7d06cb05430c724810b0854ccb1505d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a function parser for scalar functions used in weighting or summarization.  <a href="#ae7d06cb05430c724810b0854ccb1505d">More...</a><br/></td></tr>
+<tr class="separator:ae7d06cb05430c724810b0854ccb1505d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c2407ac79768922c876ef220de5e106"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
+<a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html">ScalarFunctionParserInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a1c2407ac79768922c876ef220de5e106">getScalarFunctionParser</a> (const std::string &amp;name) const =0</td></tr>
+<tr class="memdesc:a1c2407ac79768922c876ef220de5e106"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a scalar function parser reference by name.  <a href="#a1c2407ac79768922c876ef220de5e106">More...</a><br/></td></tr>
+<tr class="separator:a1c2407ac79768922c876ef220de5e106"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Defines all object instances involved in query evaluation addressable by name. </p>
@@ -203,6 +210,49 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>the name of the function </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>the function reference (ownership passed to this) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ae7d06cb05430c724810b0854ccb1505d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::QueryProcessorInterface::defineScalarFunctionParser </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html">ScalarFunctionParserInterface</a> *&#160;</td>
+          <td class="paramname"><em>parser</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Define a function parser for scalar functions used in weighting or summarization. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the scalar function language </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">parser</td><td>the scalar function parser reference (ownership passed to this) </td></tr>
   </table>
   </dd>
 </dl>
@@ -361,6 +411,39 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a1c2407ac79768922c876ef220de5e106"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const <a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html">ScalarFunctionParserInterface</a>* strus::QueryProcessorInterface::getScalarFunctionParser </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a scalar function parser reference by name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the scalar function language or empty for the default scalar function language </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the scalar function parser object reference </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a45a56dde58be36dd36626ab225dc1de8"></a>
 <div class="memitem">
 <div class="memproto">
@@ -434,7 +517,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:13 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

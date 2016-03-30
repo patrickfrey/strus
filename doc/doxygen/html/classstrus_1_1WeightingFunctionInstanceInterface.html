@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -79,9 +79,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1566833157c02dbdfad2c420713d02be"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a1566833157c02dbdfad2c420713d02be">addStringParameter</a> (const std::string &amp;name, const std::string &amp;value)=0</td></tr>
 <tr class="memdesc:a1566833157c02dbdfad2c420713d02be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a named string value parameter.  <a href="#a1566833157c02dbdfad2c420713d02be">More...</a><br/></td></tr>
 <tr class="separator:a1566833157c02dbdfad2c420713d02be"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1e8d10b328b4f5e9989964c26bcc7fb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#ad1e8d10b328b4f5e9989964c26bcc7fb">addNumericParameter</a> (const std::string &amp;name, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;value)=0</td></tr>
-<tr class="memdesc:ad1e8d10b328b4f5e9989964c26bcc7fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a named arithmetic value parameter.  <a href="#ad1e8d10b328b4f5e9989964c26bcc7fb">More...</a><br/></td></tr>
-<tr class="separator:ad1e8d10b328b4f5e9989964c26bcc7fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26d9a3ea56a3b776d9fd7b58293b0cae"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a26d9a3ea56a3b776d9fd7b58293b0cae">addNumericParameter</a> (const std::string &amp;name, const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;value)=0</td></tr>
+<tr class="memdesc:a26d9a3ea56a3b776d9fd7b58293b0cae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a named numeric value parameter.  <a href="#a26d9a3ea56a3b776d9fd7b58293b0cae">More...</a><br/></td></tr>
+<tr class="separator:a26d9a3ea56a3b776d9fd7b58293b0cae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4570babb71bb85a75bf580ead4a9536b"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html">WeightingFunctionContextInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a4570babb71bb85a75bf580ead4a9536b">createFunctionContext</a> (const <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *storage_, <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *metadata, const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats) const =0</td></tr>
 <tr class="memdesc:a4570babb71bb85a75bf580ead4a9536b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an execution context for this weighting function instance.  <a href="#a4570babb71bb85a75bf580ead4a9536b">More...</a><br/></td></tr>
@@ -119,7 +119,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="ad1e8d10b328b4f5e9989964c26bcc7fb"></a>
+<a class="anchor" id="a26d9a3ea56a3b776d9fd7b58293b0cae"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -135,7 +135,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;&#160;</td>
           <td class="paramname"><em>value</em>&#160;</td>
         </tr>
         <tr>
@@ -151,7 +151,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Add a named arithmetic value parameter. </p>
+<p>Add a named numeric value parameter. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>parameter name </td></tr>
@@ -289,7 +289,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:14 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:07 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

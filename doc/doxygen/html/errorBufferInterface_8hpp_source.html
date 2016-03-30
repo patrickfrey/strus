@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -61,91 +61,70 @@
 </div><!--header-->
 <div class="contents">
 <a href="errorBufferInterface_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">---------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment">    The C++ library strus implements basic operations to build</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment">    a search engine for structured search on unstructured data.</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">    Copyright (C) 2015 Patrick Frey</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">    This library is free software; you can redistribute it and/or</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">    modify it under the terms of the GNU General Public</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">    License as published by the Free Software Foundation; either</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    version 3 of the License, or (at your option) any later version.</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">    This library is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">    but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">    General Public License for more details.</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    You should have received a copy of the GNU General Public</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">    License along with this library; if not, write to the Free Software</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment">--------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">        The latest version of strus can be found at &#39;http://github.com/patrickfrey/strus&#39;</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">        For documentation see &#39;http://patrickfrey.github.com/strus&#39;</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">--------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">*/</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#ifndef _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &lt;cstdio&gt;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">namespace </span>strus</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;{</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html">   41</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1ErrorBufferInterface.html">ErrorBufferInterface</a></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;{</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1">   44</a></span>&#160;        <span class="keyword">enum</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1">ErrorClass</a></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        {</div>
-<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99">   46</a></span>&#160;                <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99">None</a>,           </div>
-<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd">   47</a></span>&#160;                <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd">RuntimeError</a>,   </div>
-<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0">   48</a></span>&#160;                <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0">BadAlloc</a>        </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        };</div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * Copyright (c) 2014 Patrick P. Frey</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * This Source Code Form is subject to the terms of the Mozilla Public</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> * License, v. 2.0. If a copy of the MPL was not distributed with this</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * file, You can obtain one at http://mozilla.org/MPL/2.0/.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#ifndef _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_STORAGE_ERROR_BUFFER_INTERFACE_HPP_INCLUDED</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &lt;cstdio&gt;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">namespace </span>strus</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;{</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;</div>
+<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html">   20</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1ErrorBufferInterface.html">ErrorBufferInterface</a></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;{</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1">   23</a></span>&#160;        <span class="keyword">enum</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1">ErrorClass</a></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        {</div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99">   25</a></span>&#160;                <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99">None</a>,           </div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd">   26</a></span>&#160;                <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd">RuntimeError</a>,   </div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0">   27</a></span>&#160;                <a class="code" href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0">BadAlloc</a>        </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        };</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#a179685b7ebca04a80bc8d7272e251db0">   31</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a179685b7ebca04a80bc8d7272e251db0">~ErrorBufferInterface</a>(){}</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a69b4a542d5ced4f2ff428be3565e34af">setLogFile</a>( FILE* hnd)=0;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#ac3568d8a160bfea99a73e20d450f1dd7">setMaxNofThreads</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> maxNofThreads)=0;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a17e56142ac5f03813409ccdabe733089">report</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* format, ...) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#aee6e4acdf60b4dfd39eda0d3c2381c40">explain</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* format) <span class="keyword">const</span>=0;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classstrus_1_1ErrorBufferInterface.html#a179685b7ebca04a80bc8d7272e251db0">   52</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a179685b7ebca04a80bc8d7272e251db0">~ErrorBufferInterface</a>(){}</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a69b4a542d5ced4f2ff428be3565e34af">setLogFile</a>( FILE* hnd)=0;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#ac3568d8a160bfea99a73e20d450f1dd7">setMaxNofThreads</a>( <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> maxNofThreads)=0;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a17e56142ac5f03813409ccdabe733089">report</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* format, ...) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#aee6e4acdf60b4dfd39eda0d3c2381c40">explain</a>( <span class="keyword">const</span> <span class="keywordtype">char</span>* format) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1ErrorBufferInterface.html#af82a197b034599ed5bbae15dc3e85316">fetchError</a>()=0;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a9da47cd71f02eb7e6b3f669e6958296e">hasError</a>() <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#af16f01818299a300cd5fe54044da14d8">allocContext</a>()=0;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a9f93b3a9b13205b4231779f38e81fb38">releaseContext</a>()=0;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;};</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="preprocessor"></span></div>
-<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1">strus::ErrorBufferInterface::ErrorClass</a></div><div class="ttdeci">ErrorClass</div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:44</div></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1ErrorBufferInterface.html#af82a197b034599ed5bbae15dc3e85316">fetchError</a>()=0;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a9da47cd71f02eb7e6b3f669e6958296e">hasError</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#af16f01818299a300cd5fe54044da14d8">allocContext</a>()=0;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ErrorBufferInterface.html#a9f93b3a9b13205b4231779f38e81fb38">releaseContext</a>()=0;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;};</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1">strus::ErrorBufferInterface::ErrorClass</a></div><div class="ttdeci">ErrorClass</div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:23</div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_a9f93b3a9b13205b4231779f38e81fb38"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#a9f93b3a9b13205b4231779f38e81fb38">strus::ErrorBufferInterface::releaseContext</a></div><div class="ttdeci">virtual void releaseContext()=0</div><div class="ttdoc">Dellocate context for current thread. </div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_a17e56142ac5f03813409ccdabe733089"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#a17e56142ac5f03813409ccdabe733089">strus::ErrorBufferInterface::report</a></div><div class="ttdeci">virtual void report(const char *format,...) const =0</div><div class="ttdoc">Report an error. </div></div>
-<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0">strus::ErrorBufferInterface::BadAlloc</a></div><div class="ttdoc">memory allocation error </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:48</div></div>
+<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a6cf93e051b0e6c85ff6a1c874994b8f0">strus::ErrorBufferInterface::BadAlloc</a></div><div class="ttdoc">memory allocation error </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:27</div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_a9da47cd71f02eb7e6b3f669e6958296e"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#a9da47cd71f02eb7e6b3f669e6958296e">strus::ErrorBufferInterface::hasError</a></div><div class="ttdeci">virtual bool hasError() const =0</div><div class="ttdoc">Check, if an error has occurred. </div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_af82a197b034599ed5bbae15dc3e85316"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#af82a197b034599ed5bbae15dc3e85316">strus::ErrorBufferInterface::fetchError</a></div><div class="ttdeci">virtual const char * fetchError()=0</div><div class="ttdoc">Check, if an error has occurred and return it. </div></div>
-<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd">strus::ErrorBufferInterface::RuntimeError</a></div><div class="ttdoc">runtime error </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:47</div></div>
-<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html">strus::ErrorBufferInterface</a></div><div class="ttdoc">Interface for reporting and catching errors in the core (storage) </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:41</div></div>
+<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1acad3175956bf595d7406f8c6f4c282dd">strus::ErrorBufferInterface::RuntimeError</a></div><div class="ttdoc">runtime error </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:26</div></div>
+<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html">strus::ErrorBufferInterface</a></div><div class="ttdoc">Interface for reporting and catching errors in the core (storage) </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:20</div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_af16f01818299a300cd5fe54044da14d8"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#af16f01818299a300cd5fe54044da14d8">strus::ErrorBufferInterface::allocContext</a></div><div class="ttdeci">virtual void allocContext()=0</div><div class="ttdoc">Allocate context for current thread. </div></div>
-<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_a179685b7ebca04a80bc8d7272e251db0"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#a179685b7ebca04a80bc8d7272e251db0">strus::ErrorBufferInterface::~ErrorBufferInterface</a></div><div class="ttdeci">virtual ~ErrorBufferInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:52</div></div>
+<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_a179685b7ebca04a80bc8d7272e251db0"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#a179685b7ebca04a80bc8d7272e251db0">strus::ErrorBufferInterface::~ErrorBufferInterface</a></div><div class="ttdeci">virtual ~ErrorBufferInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:31</div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_a69b4a542d5ced4f2ff428be3565e34af"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#a69b4a542d5ced4f2ff428be3565e34af">strus::ErrorBufferInterface::setLogFile</a></div><div class="ttdeci">virtual void setLogFile(FILE *hnd)=0</div><div class="ttdoc">Define error log file. </div></div>
-<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99">strus::ErrorBufferInterface::None</a></div><div class="ttdoc">no error </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:46</div></div>
+<div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#abac15223ed053ea7a578d62cda5175d1a7a65eb950122f985bec410ae9f616d99">strus::ErrorBufferInterface::None</a></div><div class="ttdoc">no error </div><div class="ttdef"><b>Definition:</b> errorBufferInterface.hpp:25</div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_ac3568d8a160bfea99a73e20d450f1dd7"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#ac3568d8a160bfea99a73e20d450f1dd7">strus::ErrorBufferInterface::setMaxNofThreads</a></div><div class="ttdeci">virtual bool setMaxNofThreads(unsigned int maxNofThreads)=0</div><div class="ttdoc">Redefine the maximum number of threads using the error buffer. </div></div>
 <div class="ttc" id="classstrus_1_1ErrorBufferInterface_html_aee6e4acdf60b4dfd39eda0d3c2381c40"><div class="ttname"><a href="classstrus_1_1ErrorBufferInterface.html#aee6e4acdf60b4dfd39eda0d3c2381c40">strus::ErrorBufferInterface::explain</a></div><div class="ttdeci">virtual void explain(const char *format) const =0</div><div class="ttdoc">Report an error, overwriting the previous error. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:13 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

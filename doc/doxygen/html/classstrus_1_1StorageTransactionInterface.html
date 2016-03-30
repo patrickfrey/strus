@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.5</span>
+   &#160;<span id="projectnumber">0.7</span>
    </div>
   </td>
  </tr>
@@ -89,9 +89,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abb1ce3cc468973ef0a1758032b925f09"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#abb1ce3cc468973ef0a1758032b925f09">deleteUserAccessRights</a> (const std::string &amp;username)=0</td></tr>
 <tr class="memdesc:abb1ce3cc468973ef0a1758032b925f09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Declare the access rights of a user to any document to be removed from the storage within this transaction.  <a href="#abb1ce3cc468973ef0a1758032b925f09">More...</a><br/></td></tr>
 <tr class="separator:abb1ce3cc468973ef0a1758032b925f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a741e74dcb4c0816f8e1602718bf34fc6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a741e74dcb4c0816f8e1602718bf34fc6">updateMetaData</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno, const std::string &amp;varname, const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;value)=0</td></tr>
-<tr class="memdesc:a741e74dcb4c0816f8e1602718bf34fc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update of meta data for a specific document (without creating it)  <a href="#a741e74dcb4c0816f8e1602718bf34fc6">More...</a><br/></td></tr>
-<tr class="separator:a741e74dcb4c0816f8e1602718bf34fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c2ebbc2936d1122c704d326c011c0d3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a3c2ebbc2936d1122c704d326c011c0d3">updateMetaData</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno, const std::string &amp;varname, const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;value)=0</td></tr>
+<tr class="memdesc:a3c2ebbc2936d1122c704d326c011c0d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update of meta data for a specific document (without creating it)  <a href="#a3c2ebbc2936d1122c704d326c011c0d3">More...</a><br/></td></tr>
+<tr class="separator:a3c2ebbc2936d1122c704d326c011c0d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e852019b5ca4665d5139fef4195289f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f">commit</a> ()=0</td></tr>
 <tr class="memdesc:a1e852019b5ca4665d5139fef4195289f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert all documents and executes all commands defined in the transaction or none if one operation fails.  <a href="#a1e852019b5ca4665d5139fef4195289f">More...</a><br/></td></tr>
 <tr class="separator:a1e852019b5ca4665d5139fef4195289f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -310,7 +310,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a741e74dcb4c0816f8e1602718bf34fc6"></a>
+<a class="anchor" id="a3c2ebbc2936d1122c704d326c011c0d3"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -332,7 +332,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1ArithmeticVariant.html">ArithmeticVariant</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;&#160;</td>
           <td class="paramname"><em>value</em>&#160;</td>
         </tr>
         <tr>
@@ -367,7 +367,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:43:14 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 31 2016 00:47:07 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
