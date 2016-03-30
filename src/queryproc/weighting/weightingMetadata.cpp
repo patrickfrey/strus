@@ -1,35 +1,14 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #include "weightingMetadata.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -64,9 +43,9 @@ double WeightingFunctionContextMetadata::call( const Index& docno)
 	return m_weight * (double)m_metadata->getValue( m_elementHandle);
 }
 
-static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {
-	ArithmeticVariant rt;
+	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
 	return rt;
 }
@@ -87,7 +66,7 @@ void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& n
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "metadata", *m_errorhnd);
 }
 
-void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	try
 	{

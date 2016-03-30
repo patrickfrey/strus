@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #include "weightingBM25.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
@@ -53,7 +32,12 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	,m_featar(),m_metadata(metadata_)
 	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_))
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (m_metadata_doclen<0)
+	{
+		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
+	}
+}
 
 void WeightingFunctionContextBM25::addWeightingFeature(
 		const std::string& name_,
@@ -139,9 +123,9 @@ double WeightingFunctionContextBM25::call( const Index& docno)
 	return rt;
 }
 
-static ArithmeticVariant parameterValue( const std::string& name, const std::string& value)
+static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {
-	ArithmeticVariant rt;
+	NumericVariant rt;
 	if (!rt.initFromString(value.c_str())) throw strus::runtime_error(_TXT("numeric value expected as parameter '%s' (%s)"), name.c_str(), value.c_str());
 	return rt;
 }
@@ -156,7 +140,7 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 		}
 		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
-			m_attribute_doclen = value;
+			m_metadata_doclen = value;
 			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
 		}
 		else if (utils::caseInsensitiveEquals( name, "k1")
@@ -173,7 +157,7 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
 }
 
-void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{
@@ -206,7 +190,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 	try
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
-		return new WeightingFunctionContextBM25( storage_, metadata, m_k1, m_b, m_avgdoclen, nofdocs, m_attribute_doclen, m_errorhnd);
+		return new WeightingFunctionContextBM25( storage_, metadata, m_k1, m_b, m_avgdoclen, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }
@@ -218,7 +202,9 @@ std::string WeightingFunctionInstanceBM25::tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen;
+			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen
+			<< ", metadata_doclen=" << m_metadata_doclen
+		;
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, std::string());

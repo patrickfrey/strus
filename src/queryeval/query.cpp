@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #include "query.hpp"
 #include "queryEval.hpp"
 #include "accumulator.hpp"
@@ -70,6 +49,11 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metaDataReader.get()) throw strus::runtime_error(_TXT("error creating meta data reader"));
+	const ScalarFunctionInterface* weightingFormula = m_queryEval->weightingFormula();
+	if (weightingFormula)
+	{
+		m_weightingFormula.reset( weightingFormula->createInstance());
+	}
 
 	std::vector<TermConfig>::const_iterator
 		ti = m_queryEval->terms().begin(),
@@ -180,7 +164,7 @@ void Query::defineFeature( const std::string& set_, float weight_)
 
 void Query::addMetaDataRestrictionCondition(
 		MetaDataRestrictionInterface::CompareOperator opr, const std::string&  name,
-		const ArithmeticVariant& operand, bool newGroup)
+		const NumericVariant& operand, bool newGroup)
 {
 	try
 	{
@@ -466,6 +450,19 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 	return si->second;
 }
 
+void Query::setWeightingVariableValue(
+		const std::string& name, double value)
+{
+	if (!m_weightingFormula.get())
+	{
+		m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
+	}
+	else
+	{
+		m_weightingFormula->setVariableValue( name, value);
+	}
+}
+
 QueryResult Query::evaluate()
 {
 	const char* evaluationPhase = "query feature postings initialization";
@@ -509,9 +506,9 @@ QueryResult Query::evaluate()
 		DocsetPostingIterator evalset_itr;
 		Accumulator accumulator(
 			m_storage,
-			m_metaDataReader.get(), m_metaDataRestriction.get(),
+			m_metaDataReader.get(), m_metaDataRestriction.get(), m_weightingFormula.get(),
 			m_minRank + m_nofRanks, m_storage->maxDocumentNumber());
-	
+
 		// [4.1] Define document subset to evaluate query on:
 		if (m_evalset_defined)
 		{
@@ -574,7 +571,7 @@ QueryResult Query::evaluate()
 #ifdef STRUS_LOWLEVEL_DEBUG
 				std::cout << "add feature " << wi->functionName() << " weight " << wi->weight() << std::endl;
 #endif
-				accumulator.addFeature( wi->weight(), execContext.release());
+				accumulator.addWeightingElement( execContext.release());
 			}
 		}
 		evaluationPhase = "restrictions initialization";
@@ -709,6 +706,10 @@ QueryResult Query::evaluate()
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
 			ranks.push_back( ResultDocument( *ri, summaries));
+		}
+		if (m_errorhnd->hasError())
+		{
+			throw strus::runtime_error( m_errorhnd->fetchError());
 		}
 		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}

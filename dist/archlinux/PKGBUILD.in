@@ -6,7 +6,7 @@ _mainpkgver=@STRUS_VERSION@
 pkgver=${_mainpkgver}
 pkgrel=1
 pkgdesc='Library implementing the storage of a text search engine.'
-license=('GPL3')
+license=('MPL2')
 arch=('i686' 'x86_64')
 url="http://project-strus.net"
 depends=('boost>=1.53' 'boost-libs>=1.53' 'leveldb')

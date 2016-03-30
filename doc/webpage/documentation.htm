@@ -11,25 +11,40 @@
 </head>
 
 <body>
-<script type="text/javascript">
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-63809026-3', 'auto');
-  ga('send', 'pageview');
-</script><div id="wrap">
+<div id="wrap">
 	<div id="content">
 		<h1>Strus documentation</h1>
 		<h2>Project organization</h2>
 		<p class="description">
-			The project <i>strus</i> consists of several components implemented in distinct
-			projects hosted on <a href="https://github.com/patrickfrey?tab=repositories">github</a>.
-			A closer look at the components of <i>strus</i> and what is part of <i>strus</i> and what not,
-			can be found <a href="components.htm">here (components)</a> and the list of 
-			sub projects <a href="projects.htm">here (projects)</a>.
+		The whole <i>Strus</i> universe is implemented in several subprojects hosted on 
+		<a href="https://github.com/patrickfrey?tab=repositories">github</a>.
+		Here is a list of its subprojects:
+		<ol>
+		<li><a href="https://github.com/patrickfrey/strus">strus</a>
+			provides the interface to the storage and the query processing of the search engine.
+			It also provides the default key value store database connector (to LevelDB).</li>
+		<li><a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>
+			provides document and query analysis for transforming content
+			into retrievable items.</li>
+		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
+			provides the loading of search engine components from dynamically 
+			loadable modules. (depends on strus and strusAnalyzer)</li>
+		<li><a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>
+			provides a proxy interface for strus objects residing on a server via RPC.
+			If you want to use strus in a webserver context, where loading modules by
+			another instance than the webserver itself is not allowed or at least 
+			not recommended, you should access strus via RPC or a similar mechanism.
+			(depends on strus, strusAnalyzer and strusModule)</li>
+		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
+			provides some command line programs to access the search engine.
+			(Depends on strusModule and strusRpc</li>
+		<li><a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>
+			provides language bindings to use <i>strus</i> with other
+			programming languages like <i>PHP</i>,<i>Python</i>,<i>Java</i>,etc...  
+			(Depends on strusModule and strusRpc)</li>
+		</ol>
 		</p>
+
 		<h2>Interface documentation</h2>
 		<p class="description"><i>Strus</i> provides two classes of interfaces with diametric objectives.
 		One is the C++ interface that is the base of the implementation and the other
@@ -65,6 +80,15 @@
 		</tr>
 		</table>
 		</p>
+
+		<h2>Functions documentation</h2>
+		<p class="description">When writing an application with <i>Strus</i>, you have various
+		functions of different kind at your hands. You can write your functions in C++ and load
+		them dynamically into your application. But there exist also a lot of predefined
+		functions in strus. You find a complete list of the built-in functions of the core
+		and the analyzer <a href="builtin_functions.htm">here</a>.
+		</p>
+
 		<h2>Command line tools documentation</h2>
 		<p class="description">You do not need the command line tools of <i>strus</i>. 
 		All functionality is accessible with the API.<br/>
@@ -77,12 +101,27 @@
 		<p class="description">The programming guidelines contributors should respect, can be 
 		found <a href="guidelines.htm">here</a>. Suggestions for strenghtening these
 		rules are welcome.</p>
+
 		<h3>Writing Strus extension modules in C++</h3>
+		<h4>Strus core</h4>
 		<p class="description">The Strus core can be extended with dynamically loadable modules
 		with weighting functions, summarizers and posting join operators written in C++.
 		<a href="http://www.codeproject.com/Articles/1072683/How-to-extend-a-Strus-search-engine-with-new-funct">This codeproject article</a>
 		writes about the expandability of Strus and tries to explain the basic models and concepts 
 		used in the query evaluation.</p>
+		<h4>Strus analyzer</h4>
+		<p class="description">
+		You can also extend the Strus analyzer with own dynamically 
+		loadable modules with functions written in C++. A codeproject article about the expandability 
+		of the Strus analyzer is planned. Here is for now a short list of components you can write 
+		as dynamically loadable analyzer modules for Strus:
+		<ol>
+		<li><b>Segmenter</b> <br/> You can define your own segmenters for the document formats you need to process.</li>
+		<li><b>Tokenizer</b> <br/> You can define your own tokenizers splitting the document segments into tokens.</li>
+		<li><b>Normalizer</b> <br/> You can define your own normalizer functions to produce the retrievable items from the document tokens for the storage and the query.</li>
+		<li><b>Aggregator</b> <br/> You can define your own aggregator functions to produce some statistical values from the document structure after analysis.</li>
+		</ol>
+		</p>
 	</div>
 </div>
 </body>

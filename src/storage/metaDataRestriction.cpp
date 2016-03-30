@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #include "metaDataRestriction.hpp"
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -42,40 +21,40 @@ using namespace strus;
 
 #define EPSILON_FLOAT32 std::numeric_limits<float>::epsilon()
 
-static bool compareFunctionEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionEqualFloat32( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 + EPSILON_FLOAT32 >= val2 && val1 <= val2 + EPSILON_FLOAT32);
 }
 
-static bool compareFunctionNotEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionNotEqualFloat32( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return !compareFunctionEqualFloat32( op1, op2);
 }
 
-static bool compareFunctionLessFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessFloat32( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 + EPSILON_FLOAT32 < val2);
 }
 
-static bool compareFunctionLessEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessEqualFloat32( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 <= val2 + EPSILON_FLOAT32);
 }
 
-static bool compareFunctionGreaterFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterFloat32( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 > val2 + EPSILON_FLOAT32);
 }
 
-static bool compareFunctionGreaterEqualFloat32( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterEqualFloat32( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
@@ -84,102 +63,102 @@ static bool compareFunctionGreaterEqualFloat32( const ArithmeticVariant& op1, co
 
 #define EPSILON_FLOAT16 0.0004887581f
 
-static bool compareFunctionEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionEqualFloat16( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 + EPSILON_FLOAT16 >= val2 && val1 <= val2 + EPSILON_FLOAT16);
 }
 
-static bool compareFunctionNotEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionNotEqualFloat16( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return !compareFunctionEqualFloat16( op1, op2);
 }
 
-static bool compareFunctionLessFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessFloat16( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 + EPSILON_FLOAT16 < val2);
 }
 
-static bool compareFunctionLessEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessEqualFloat16( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 <= val2 + EPSILON_FLOAT16);
 }
 
-static bool compareFunctionGreaterFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterFloat16( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 > val2 + EPSILON_FLOAT16);
 }
 
-static bool compareFunctionGreaterEqualFloat16( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterEqualFloat16( const NumericVariant& op1, const NumericVariant& op2)
 {
 	double val1 = op1;
 	double val2 = op2;
 	return (val1 + EPSILON_FLOAT16 >= val2);
 }
 
-static bool compareFunctionEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (int)op1 == (int)op2;
 }
 
-static bool compareFunctionNotEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionNotEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return !compareFunctionEqualInt( op1, op2);
 }
 
-static bool compareFunctionLessInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (int)op1 < (int)op2;
 }
 
-static bool compareFunctionLessEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (int)op1 <= (int)op2;
 }
 
-static bool compareFunctionGreaterInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (int)op1 > (int)op2;
 }
 
-static bool compareFunctionGreaterEqualInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (int)op1 >= (int)op2;
 }
 
-static bool compareFunctionEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (unsigned int)op1 == (unsigned int)op2;
 }
 
-static bool compareFunctionNotEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionNotEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return !compareFunctionEqualUInt( op1, op2);
 }
 
-static bool compareFunctionLessUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (unsigned int)op1 < (unsigned int)op2;
 }
 
-static bool compareFunctionLessEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionLessEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (unsigned int)op1 <= (unsigned int)op2;
 }
 
-static bool compareFunctionGreaterUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (unsigned int)op1 > (unsigned int)op2;
 }
 
-static bool compareFunctionGreaterEqualUInt( const ArithmeticVariant& op1, const ArithmeticVariant& op2)
+static bool compareFunctionGreaterEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
 	return (unsigned int)op1 >= (unsigned int)op2;
 }
@@ -331,7 +310,7 @@ MetaDataRestriction::MetaDataRestriction(
 void MetaDataRestriction::addCondition(
 		CompareOperator opr,
 		const std::string& name,
-		const ArithmeticVariant& operand,
+		const NumericVariant& operand,
 		bool newGroup)
 {
 	try

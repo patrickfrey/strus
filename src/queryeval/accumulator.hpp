@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #ifndef _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #define _STRUS_QUERYEVAL_ACCUMULATOR_HPP_INCLUDED
 #include "strus/index.hpp"
@@ -33,7 +12,6 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
-#include "strus/arithmeticVariant.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/metaDataRestrictionInstanceInterface.hpp"
 #include "private/utils.hpp"
@@ -52,6 +30,8 @@ class PostingIteratorInterface;
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 /// \brief Forward declaration
+class ScalarFunctionInstanceInterface;
+/// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class InvAclIteratorInterface;
@@ -67,11 +47,13 @@ public:
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata_,
 			MetaDataRestrictionInterface* metaDataRestriction_,
+			const ScalarFunctionInstanceInterface* weightingFormula_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)
 		:m_storage(storage_)
 		,m_metadata(metadata_)
 		,m_metaDataRestriction(metaDataRestriction_?metaDataRestriction_->createInstance():0)
+		,m_weightingFormula(weightingFormula_)
 		,m_selectoridx(0)
 		,m_docno(0)
 		,m_visited(maxDocumentNumber_)
@@ -91,8 +73,7 @@ public:
 
 	void addSelector( PostingIteratorInterface* iterator, int setindex);
 
-	void addFeature(
-			float weight,
+	void addWeightingElement(
 			WeightingFunctionContextInterface* function_);
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isNegative);
@@ -108,16 +89,7 @@ private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
 
 private:
-	struct WeightingFeature
-	{
-		Reference< WeightingFunctionContextInterface> executionContext;
-		float weight;
-
-		WeightingFeature( WeightingFunctionContextInterface* fc, float w)
-			:executionContext(fc),weight(w){}
-		WeightingFeature( const WeightingFeature& o)
-			:executionContext(o.executionContext),weight(o.weight){}
-	};
+	typedef Reference< WeightingFunctionContextInterface> WeightingElement;
 
 	struct SelectorPostings
 	{
@@ -136,7 +108,9 @@ private:
 	const StorageClientInterface* m_storage;
 	MetaDataReaderInterface* m_metadata;
 	Reference<MetaDataRestrictionInstanceInterface> m_metaDataRestriction;
-	std::vector<WeightingFeature> m_weightingFeatures;
+	const ScalarFunctionInstanceInterface* m_weightingFormula;
+	std::vector<WeightingElement> m_weightingElements;
+	std::vector<double> m_weights;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;
 	std::vector<InvAclIteratorInterface*> m_aclRestrictions;

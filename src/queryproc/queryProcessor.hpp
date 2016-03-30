@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #ifndef _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #define _STRUS_QUERY_PROCESSOR_HPP_INCLUDED
 #include "strus/queryProcessorInterface.hpp"
@@ -76,20 +55,31 @@ public:
 		defineSummarizerFunction(
 			const std::string& name,
 			SummarizerFunctionInterface* sumfunc);
-	
+
 	virtual const SummarizerFunctionInterface*
 		getSummarizerFunction(
 			const std::string& name) const;
 
 	virtual std::vector<std::string> getFunctionList( FunctionType type) const;
 
+	virtual void
+		defineScalarFunctionParser(
+			const std::string& name,
+			ScalarFunctionParserInterface* parser);
+
+	virtual const ScalarFunctionParserInterface*
+		getScalarFunctionParser(
+			const std::string& name) const;
+
 private:
 	typedef std::map<std::string,Reference<SummarizerFunctionInterface> > SummarizerFunctionMap;
 	typedef std::map<std::string,Reference<WeightingFunctionInterface> > WeightingFunctionMap;
 	typedef std::map<std::string,Reference<PostingJoinOperatorInterface> > PostingJoinOperatorMap;
+	typedef std::map<std::string,Reference<ScalarFunctionParserInterface> > ScalarFunctionParserMap;
 	SummarizerFunctionMap m_summarizers;
 	WeightingFunctionMap m_weighters;
 	PostingJoinOperatorMap m_joiners;
+	ScalarFunctionParserMap m_funcparsers;
 	ErrorBufferInterface* m_errorhnd;
 };
 

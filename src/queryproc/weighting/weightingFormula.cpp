@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #include "weightingFormula.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
@@ -65,7 +44,7 @@ FormulaInterpreter::IteratorSpec FunctionMap::dimMap( void* ctx, const char* typ
 double FunctionMap::variableMap_metadata( void* ctx, int typeidx, unsigned int idx)
 {
 	WeightingFunctionContextFormula* THIS = (WeightingFunctionContextFormula*)ctx;
-	ArithmeticVariant val = THIS->m_metadata->getValue( idx);
+	NumericVariant val = THIS->m_metadata->getValue( idx);
 	if (val.defined())
 	{
 		return (double)val;
@@ -210,6 +189,7 @@ double WeightingFunctionContextFormula::call( const Index& docno)
 	}
 	try
 	{
+		m_metadata->skipDoc( docno);
 		return m_interpreter.run( this);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error calling weighting function '%s': %s"), "formula", *m_errorhnd, 0.0);
@@ -261,7 +241,7 @@ void WeightingFunctionInstanceFormula::addStringParameter( const std::string& na
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "formula", *m_errorhnd);
 }
 
-void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& name, const ArithmeticVariant& value)
+void WeightingFunctionInstanceFormula::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	try
 	{
@@ -295,7 +275,7 @@ WeightingFunctionInterface::Description WeightingFunctionFormula::getDescription
 	try
 	{
 		Description rt( _TXT("Calculate the weight of a document with a formula"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features referenced in the formula to weight"), "");
+		rt( Description::Param::Feature, "[a-z]+", _TXT( "defines the query features referenced in the formula to weight"), "");
 		rt( Description::Param::String, "formula", _TXT( "defines an expression to evaluate. You can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements"), "");
 		rt( Description::Param::Numeric, "[a-z]+", _TXT( "defines a variable to be used in the formula expression"), "");
 		return rt;

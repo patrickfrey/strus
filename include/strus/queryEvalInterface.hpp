@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 /// \brief Interface for defining a query evaluation scheme.
 /// \file "queryEvalInterface.hpp"
 #ifndef _STRUS_QUERY_EVAL_INTERFACE_HPP_INCLUDED
@@ -43,6 +22,8 @@ class StorageClientInterface;
 class WeightingFunctionInstanceInterface;
 /// \brief Forward declaration
 class SummarizerFunctionInstanceInterface;
+/// \brief Forward declaration
+class ScalarFunctionInterface;
 /// \brief Forward declaration
 class QueryProcessorInterface;
 
@@ -110,12 +91,16 @@ public:
 	/// \param[in] functionName name of the weighting function (no meaning, just for inspection and tracing)
 	/// \param[in] function parameterized weighting function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
 	/// \param[in] featureParameters list of parameters adressing query features that are subject of weighting
-	/// \param[in] weight part of the weight of this function in the total weight sum
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters,
-			float weight)=0;
+			const std::vector<FeatureParameter>& featureParameters)=0;
+
+	/// \brief Declare the scalar function to combine the weighting functions declared
+	/// \param[in] combinefunc scalar function (passed ownership) for combining the weighting functions defined to one value
+	/// \remark If not defined, then the weights of the declared weighting functions are just added together
+	virtual void defineWeightingFormula(
+			ScalarFunctionInterface* combinefunc)=0;
 
 	/// \brief Create a new query
 	/// \param[in] storage storage to run the query on

@@ -1,10 +1,13 @@
-Library for building a search engine for information retrieval. 
-Able to evaluate structured queries on unstructured text as well
-as implementing classical information retrieval.
+Library for building a competitive, scalable search engine for information retrieval.
+A solution for small projects as well as larger scale applications.
 
-There exists a docker image for strus: patrickfrey/strus-ub1404-bind
-and a tutorial at http://www.project-strus.net/tutorial_MusicBrainzDataset.htm.
+Licenced as MPLv2 (Mozilla Public License, Version 2 - https://www.mozilla.org/en-US/MPL/2.0)
 
-Interface documentation at http://patrickfrey.github.io/strus/doc/doxygen/html/index.html.
+Strus project homepage at http://project-strus.net with articles, links, documentation.
+Binary packages available.
 
-Strus project homepage at http://project-strus.net.
+* Contributors welcome
+* Open for sharing ideas
+* Open for interesting projects
+
+

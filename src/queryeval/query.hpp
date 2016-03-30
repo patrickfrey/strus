@@ -1,31 +1,10 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #ifndef _STRUS_QUERY_HPP_INCLUDED
 #define _STRUS_QUERY_HPP_INCLUDED
 #include "strus/queryInterface.hpp"
@@ -33,6 +12,7 @@
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "strus/metaDataRestrictionInterface.hpp"
+#include "strus/scalarFunctionInstanceInterface.hpp"
 #include <vector>
 #include <string>
 #include <map>
@@ -76,7 +56,7 @@ public:
 
 	virtual void addMetaDataRestrictionCondition(
 			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
-			const ArithmeticVariant& operand, bool newGroup);
+			const NumericVariant& operand, bool newGroup);
 
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_);
@@ -91,6 +71,9 @@ public:
 			const TermStatistics& stats_);
 	virtual void defineGlobalStatistics(
 			const GlobalStatistics& stats_);
+
+	virtual void setWeightingVariableValue(
+			const std::string& name, double value);
 
 	virtual QueryResult evaluate();
 
@@ -211,20 +194,21 @@ private:
 	const QueryEval* m_queryEval;
 	const StorageClientInterface* m_storage;
 	Reference<MetaDataReaderInterface> m_metaDataReader;
-	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;
-	std::vector<Term> m_terms;
-	std::vector<Expression> m_expressions;
-	std::vector<Feature> m_features;
-	std::vector<NodeAddress> m_stack;
-	std::multimap<NodeAddress,std::string> m_variableAssignments;
-	std::size_t m_nofRanks;
-	std::size_t m_minRank;
-	std::vector<std::string> m_usernames;
-	std::vector<Index> m_evalset_docnolist;
-	bool m_evalset_defined;
-	std::map<Term,TermStatistics> m_termstatsmap;
-	GlobalStatistics m_globstats;
-	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
+	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;	///< restriction function on metadata
+	Reference<ScalarFunctionInstanceInterface> m_weightingFormula;	///< instance of the scalar function to calculate the weight of a document from the weighting functions defined as parameter
+	std::vector<Term> m_terms;					///< query terms
+	std::vector<Expression> m_expressions;				///< query expressions
+	std::vector<Feature> m_features;				///< query features
+	std::vector<NodeAddress> m_stack;				///< expression build stack
+	std::multimap<NodeAddress,std::string> m_variableAssignments;	///< maps node addresses to names of variables attached to
+	std::size_t m_nofRanks;						///< number of ranks to evaluate
+	std::size_t m_minRank;						///< smallest rank to return (start of result ranklist -- browsing)
+	std::vector<std::string> m_usernames;				///< users allowed to see the query result
+	std::vector<Index> m_evalset_docnolist;				///< set of document numbers to restrict the query to
+	bool m_evalset_defined;						///< true, if the set of document numbers to restrict the query to is defined
+	std::map<Term,TermStatistics> m_termstatsmap;			///< term statistics (evaluation in case of a distributed index)
+	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

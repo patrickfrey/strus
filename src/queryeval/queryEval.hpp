@@ -1,36 +1,15 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #ifndef _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #define _STRUS_QUERY_PROGRAM_HPP_INCLUDED
 #include "strus/queryEvalInterface.hpp"
 #include "strus/resultDocument.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/scalarFunctionInterface.hpp"
 #include "termConfig.hpp"
 #include "summarizerDef.hpp"
 #include "weightingDef.hpp"
@@ -40,19 +19,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class SummarizerFunctionInterface;
-/// \brief Forward declaration
 class StorageClientInterface;
-/// \brief Forward declaration
-class QueryProcessorInterface;
-/// \brief Forward declaration
-class WeightingFunctionInterface;
-/// \brief Forward declaration
-class SummarizerFunctionInterface;
-/// \brief Forward declaration
-class SummarizerConfig;
-/// \brief Forward declaration
-class WeightingConfig;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
@@ -94,8 +61,10 @@ public:
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters,
-			float weight);
+			const std::vector<FeatureParameter>& featureParameters);
+
+	virtual void defineWeightingFormula(
+			ScalarFunctionInterface* combinefunc);
 
 	void print( std::ostream& out) const;
 
@@ -107,6 +76,7 @@ public:
 	const std::vector<std::string>& restrictionSets() const		{return m_restrictionSets;}
 	const std::vector<std::string>& exclusionSets() const		{return m_exclusionSets;}
 	const std::vector<WeightingDef>& weightingFunctions() const	{return m_weightingFunctions;}
+	const ScalarFunctionInterface* weightingFormula() const		{return m_weightingFormula.get();}
 
 private:
 	std::vector<std::string> m_selectionSets;	///< posting sets selecting the documents to match
@@ -114,6 +84,8 @@ private:
 	std::vector<std::string> m_exclusionSets;	///< posting sets excluding the documents to match
 	std::vector<WeightingDef> m_weightingFunctions;	///< weighting function configuration
 	std::vector<SummarizerDef> m_summarizers;	///< list of summarizer configurations
+	Reference<ScalarFunctionInterface> m_weightingFormula;	///< scalar function to calculate the weight of a document from the weighting functions defined as parameter
+
 	std::vector<TermConfig> m_terms;		///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };

@@ -1,35 +1,15 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #include "queryProcessor.hpp"
 #include "summarizer/summarizer_standard.hpp"
 #include "iterator/iterator_standard.hpp"
 #include "weighting/weighting_standard.hpp"
+#include "strus/lib/scalarfunc.hpp"
 #include "strus/constants.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
@@ -105,6 +85,10 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	defineSummarizerFunction( "matchvariables", sum);
 	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "accuvariable", sum);
+
+	ScalarFunctionParserInterface* sfp;
+	if (0==(sfp=createScalarFunctionParser_default( m_errorhnd))) throw strus::runtime_error(_TXT("error creating scalar function parser"));
+	defineScalarFunctionParser( "", sfp);
 }
 
 QueryProcessor::~QueryProcessor()
@@ -129,14 +113,22 @@ void QueryProcessor::definePostingJoinOperator(
 const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 		const std::string& name) const
 {
-	std::map<std::string,Reference<PostingJoinOperatorInterface> >::const_iterator 
-		ji = m_joiners.find( utils::tolower( name));
-	if (ji == m_joiners.end())
+	try
 	{
-		m_errorhnd->report( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+		std::map<std::string,Reference<PostingJoinOperatorInterface> >::const_iterator 
+			ji = m_joiners.find( utils::tolower( name));
+		if (ji == m_joiners.end())
+		{
+			m_errorhnd->report( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return ji->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
 		return 0;
 	}
-	return ji->second.get();
 }
 
 void QueryProcessor::defineWeightingFunction(
@@ -158,14 +150,22 @@ void QueryProcessor::defineWeightingFunction(
 const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 		const std::string& name) const
 {
-	std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
-		wi = m_weighters.find( utils::tolower( name));
-	if (wi == m_weighters.end())
+	try
 	{
-		m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
+		std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
+			wi = m_weighters.find( utils::tolower( name));
+		if (wi == m_weighters.end())
+		{
+			m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return wi->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
 		return 0;
 	}
-	return wi->second.get();
 }
 
 void QueryProcessor::defineSummarizerFunction(
@@ -187,14 +187,22 @@ void QueryProcessor::defineSummarizerFunction(
 const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 		const std::string& name) const
 {
-	std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
-		si = m_summarizers.find( utils::tolower( name));
-	if (si == m_summarizers.end())
+	try
 	{
-		m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
+		std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
+			si = m_summarizers.find( utils::tolower( name));
+		if (si == m_summarizers.end())
+		{
+			m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return si->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
 		return 0;
 	}
-	return si->second.get();
 }
 
 template <class Map>
@@ -228,5 +236,44 @@ std::vector<std::string> QueryProcessor::getFunctionList( QueryProcessorInterfac
 		m_errorhnd->report( _TXT("out of memory"));
 	}
 	return std::vector<std::string>();
+}
+
+void QueryProcessor::defineScalarFunctionParser(
+		const std::string& name,
+		ScalarFunctionParserInterface* parser)
+{
+	try
+	{
+		Reference<ScalarFunctionParserInterface> funcref( parser);
+		m_funcparsers[ utils::tolower( name)] = funcref;
+	}
+	catch (std::bad_alloc&)
+	{
+		delete parser;
+		m_errorhnd->report( _TXT("out of memory"));
+	}
+	
+}
+
+const ScalarFunctionParserInterface*
+	QueryProcessor::getScalarFunctionParser(
+		const std::string& name) const
+{
+	try
+	{
+		std::map<std::string,Reference<ScalarFunctionParserInterface> >::const_iterator 
+			si = m_funcparsers.find( utils::tolower( name));
+		if (si == m_funcparsers.end())
+		{
+			m_errorhnd->report( _TXT( "scalar function parser not defined: '%s'"), name.c_str());
+			return 0;
+		}
+		return si->second.get();
+	}
+	catch (std::bad_alloc&)
+	{
+		m_errorhnd->report( _TXT("out of memory"));
+		return 0;
+	}
 }
 

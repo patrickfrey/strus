@@ -117,7 +117,7 @@ Name: strus
 %define main_version @STRUS_VERSION@
 Version: %{main_version}
 Release: 0.1
-License: GPLv3
+License: MPLv2
 Group: Development/Libraries/C++
 
 Source: %{name}_%{main_version}.tar.gz
@@ -312,11 +312,24 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Wed Mar 30 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.0-0.1
+- introducing scalar function objects used for combining ranking functions or to pass functions to weighting functions or summarizers
+
+* Wed Mar 23 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.6.1-0.1
+- improved BM25pff weighting function: Two more parameters for a proximity ff cap for feature occurrencies not fulfilling minimal proximity requirements
+
+* Mon Mar 21 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.6.0-0.1
+- changed license from GPLv3 to MPLv2 (Mozilla Public License, Version 2)
+
+* Wed Mar 16 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.3-0.1
+- some more normalization factors configurable in BM25pff
+- some small fixes in BM25 and Formula weighting method
+
 * Mon Mar 7 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.2-0.1
-- More fixes for bringing up packages again
+- more fixes for bringing up packages again
 
 * Mon Mar 7 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.1-0.1
-- Small fixes for bringing up packages again
+- small fixes for bringing up packages again
 
 * Sun Mar 6 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.5.0-0.1
 - add upperbound seek with upper key restriction to database interface (not used yet in storage)

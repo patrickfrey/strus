@@ -1,38 +1,17 @@
 /*
----------------------------------------------------------------------
-    The C++ library strus implements basic operations to build
-    a search engine for structured search on unstructured data.
-
-    Copyright (C) 2015 Patrick Frey
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-
---------------------------------------------------------------------
-
-	The latest version of strus can be found at 'http://github.com/patrickfrey/strus'
-	For documentation see 'http://patrickfrey.github.com/strus'
-
---------------------------------------------------------------------
-*/
+ * Copyright (c) 2014 Patrick P. Frey
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 #ifndef _STRUS_STORAGE_METADATA_BLOCK_MAP_HPP_INCLUDED
 #define _STRUS_STORAGE_METADATA_BLOCK_MAP_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "metaDataBlock.hpp"
 #include "metaDataRecord.hpp"
 #include "private/localStructAllocator.hpp"
-#include "strus/arithmeticVariant.hpp"
+#include "strus/numericVariant.hpp"
 #include <cstdlib>
 #include <vector>
 
@@ -52,7 +31,7 @@ public:
 		:m_database(database_),m_descr(descr_){}
 	~MetaDataMap();
 
-	void defineMetaData( Index docno, const std::string& varname, const ArithmeticVariant& value);
+	void defineMetaData( Index docno, const std::string& varname, const NumericVariant& value);
 	void deleteMetaData( Index docno);
 	void deleteMetaData( Index docno, const std::string& varname);
 
@@ -69,9 +48,9 @@ private:
 
 private:
 	typedef std::pair<Index,Index> MetaDataKey;
-	typedef LocalStructAllocator<std::pair<MetaDataKey,ArithmeticVariant> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<MetaDataKey,NumericVariant> > MapAllocator;
 	typedef std::less<MetaDataKey> MapCompare;
-	typedef std::map<MetaDataKey,ArithmeticVariant,MapCompare,MapAllocator> Map;
+	typedef std::map<MetaDataKey,NumericVariant,MapCompare,MapAllocator> Map;
 
 private:
 	DatabaseClientInterface* m_database;

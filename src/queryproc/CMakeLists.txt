@@ -28,7 +28,7 @@ link_directories(
 # LIBRARY
 # -------------------------------------------
 add_library( strus_queryproc SHARED ${source_files} libstrus_queryproc.cpp )
-target_link_libraries( strus_queryproc strus_private_utils strus_utils queryproc_utils iterator_standard summarizer_standard weighting_standard )
+target_link_libraries( strus_queryproc strus_private_utils strus_utils queryproc_utils iterator_standard summarizer_standard weighting_standard strus_scalarfunc )
 
 set_target_properties(
     strus_queryproc
