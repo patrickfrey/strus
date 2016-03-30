@@ -312,6 +312,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Wed Mar 30 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.1-0.1
+- fixed bug in scalar functions in 0.7.0
+
 * Wed Mar 30 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.0-0.1
 - introducing scalar function objects used for combining ranking functions or to pass functions to weighting functions or summarizers
 
