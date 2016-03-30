@@ -453,7 +453,14 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 void Query::setWeightingVariableValue(
 		const std::string& name, double value)
 {
-	m_weightingFormula->setVariableValue( name, value);
+	if (!m_weightingFormula.get())
+	{
+		m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
+	}
+	else
+	{
+		m_weightingFormula->setVariableValue( name, value);
+	}
 }
 
 QueryResult Query::evaluate()
@@ -699,6 +706,10 @@ QueryResult Query::evaluate()
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
 			ranks.push_back( ResultDocument( *ri, summaries));
+		}
+		if (m_errorhnd->hasError())
+		{
+			throw strus::runtime_error( m_errorhnd->fetchError());
 		}
 		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}

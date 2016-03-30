@@ -15,6 +15,8 @@
 
 using namespace strus;
 
+#undef STRUS_LOWLEVEL_DEBUG
+
 void ScalarFunctionInstance::setVariableValue( const std::string& name, double value)
 {
 	try
@@ -38,6 +40,9 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 
 		for (;m_func->hasInstruction(ip); ++ip)
 		{
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "EXECUTE [" << ip << "] " << ScalarFunction::opCodeName( m_func->opCode(ip)) << " " << m_func->getIndexOperand( ip) << std::endl;
+#endif
 			switch (m_func->opCode(ip))
 			{
 				case ScalarFunction::OpLdCnt:
@@ -49,18 +54,27 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 				{
 					std::size_t validx = m_func->getIndexOperand( ip, m_valuear.size());
 					stk.push_back( m_valuear[ validx]);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::OpArg:
 				{
 					std::size_t validx = m_func->getIndexOperand( ip, nofargs);
 					stk.push_back( args[ validx]);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::OpNeg:
 				{
 					if (stk.size() < 1) throw strus::runtime_error(_TXT("illegal stack operation"));
 					stk.back() = -stk.back();
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::OpAdd:
@@ -70,6 +84,9 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
 					stk.push_back( a1 + a2);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::OpSub:
@@ -79,6 +96,9 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
 					stk.push_back( a1 - a2);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::OpDiv:
@@ -88,6 +108,9 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
 					stk.push_back( a1 / a2);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::OpMul:
@@ -97,6 +120,9 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
 					stk.push_back( a1 * a2);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::FuncUnary:
@@ -106,6 +132,9 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					stk.resize( stk.size() -1);
 					ScalarFunction::UnaryFunction func = m_func->getUnaryFunctionOperand( ip);
 					stk.push_back( func( a1));
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::FuncBinary:
@@ -116,6 +145,9 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					stk.resize( stk.size() -2);
 					ScalarFunction::BinaryFunction func = m_func->getBinaryFunctionOperand( ip);
 					stk.push_back( func( a1, a2));
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 				case ScalarFunction::FuncNary:
@@ -126,10 +158,16 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 					double res = func( idxreg, arg);
 					stk.resize( stk.size() - idxreg);
 					stk.push_back( res);
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cout << "PUSH " << stk.back() << std::endl;
+#endif
 					break;
 				}
 			}
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "RESULT " << (stk.size()?stk.back():0.0) << std::endl;
+#endif
 		return stk.size()?stk.back():0.0;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error executing scalar function: %s"), *m_errorhnd, 0.0);

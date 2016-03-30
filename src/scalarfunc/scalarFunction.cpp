@@ -94,7 +94,7 @@ void ScalarFunction::addOpPushVariable( const std::string& name_)
 
 void ScalarFunction::addOpPushArgument( std::size_t argindex)
 {
-	if (m_nofargs >= argindex)
+	if (m_nofargs <= argindex)
 	{
 		m_nofargs = argindex+1;
 	}
