@@ -303,6 +303,7 @@ make test
 %{_libdir}/%{name}/libstrus_malloc_unreliable.so
 %{_libdir}/%{name}/libstrus_malloc_logging.so
 %{_libdir}/%{name}/libstrus_statsproc.so
+%{_libdir}/%{name}/libstrus_scalarfunc.so
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/*.hpp
 %dir %{_includedir}/%{name}/lib
