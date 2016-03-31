@@ -314,6 +314,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Thu Mar 31 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.3-0.1
+- fixed missing dependency to libstrus_scalarproc
+
 * Thu Mar 31 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.2-0.1
 - fixed missing dependency to libstrus_scalarproc
 

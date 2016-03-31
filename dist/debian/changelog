@@ -1,3 +1,7 @@
+strus (0.7.3-1) unstable; urgency=low
+  * fixed missing dependency to libstrus_scalarproc
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 31 Mar 2016 02:30:00 +0100
+
 strus (0.7.2-1) unstable; urgency=low
   * fixed missing dependency to libstrus_scalarproc
  -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 31 Mar 2016 00:30:00 +0100
