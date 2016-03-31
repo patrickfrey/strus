@@ -24,6 +24,8 @@
 #include <iostream>
 #include <iomanip>
 
+#error DEPRECATED
+
 namespace strus
 {
 /// \brief Forward declaration

@@ -7,7 +7,7 @@
  */
 /// \brief Library providing some standard weighting functions
 #include "weighting_standard.hpp"
-#include "weightingFormula.hpp"
+#include "weightingSmart.hpp"
 #include "weightingBM25.hpp"
 #include "weightingBM25pff.hpp"
 #include "weightingConstant.hpp"
@@ -17,9 +17,9 @@
 
 using namespace strus;
 
-WeightingFunctionInterface* strus::createWeightingFunctionFormula( ErrorBufferInterface* errorhnd)
+WeightingFunctionInterface* strus::createWeightingFunctionSmart( ErrorBufferInterface* errorhnd)
 {
-	return new WeightingFunctionFormula( errorhnd);
+	return new WeightingFunctionSmart( errorhnd);
 }
 
 WeightingFunctionInterface* strus::createWeightingFunctionBm25( ErrorBufferInterface* errorhnd)

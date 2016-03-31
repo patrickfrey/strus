@@ -12,9 +12,13 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/weightingFunctionContextInterface.hpp"
+#include "strus/postingIteratorInterface.hpp"
+#include "strus/scalarFunctionInterface.hpp"
+#include "strus/reference.hpp"
 #include "strus/index.hpp"
 #include <vector>
 #include <string>
+#include <cmath>
 
 namespace strus
 {
@@ -24,6 +28,8 @@ class ErrorBufferInterface;
 class QueryProcessorInterface;
 /// \brief Forward declaration
 class ScalarFunctionInstanceInterface;
+/// \brief Forward declaration
+class ScalarFunctionParserInterface;
 /// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
@@ -39,19 +45,21 @@ class WeightingFunctionContextSmart
 {
 public:
 	WeightingFunctionContextSmart(
-		const StorageClientInterface* storage,
+		const ScalarFunctionInterface* func_,
 		MetaDataReaderInterface* metadata_,
-		const std::vector<std::string>& m_metadataelemar,
-		const ScalarFunctionInstanceInterface* func_,
+		const std::vector<Index>& metadatahnd_,
+		double nofCollectionDocuments_,
 		ErrorBufferInterface* errorhnd_);
+
+	enum {MaxNofParameter=64};
 
 	class Feature
 	{
 	public:
 		Feature( const Feature& o)
-			:m_itr(o.m_itr),m_weight(o.m_weight),m_df(o.m_df){}
+			:m_itr(o.m_itr),m_weight(o.m_weight),m_df(o.m_df),m_match(o.m_match){}
 		Feature( PostingIteratorInterface* itr_, double weight_, const TermStatistics& stats_)
-			:m_itr(itr_),m_weight(weight_),m_df(stats_.documentFrequency()>=0?stats_.documentFrequency():std::numeric_limits<double>::quiet_NaN()){}
+			:m_itr(itr_),m_weight(weight_),m_df(stats_.documentFrequency()>=0?stats_.documentFrequency():std::numeric_limits<double>::quiet_NaN()),m_match(false){}
 
 		double df() const
 		{
@@ -86,6 +94,7 @@ public:
 		bool m_match;
 	};
 
+public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
@@ -96,11 +105,12 @@ public:
 
 private:
 	typedef std::vector<Feature> FeatureVector;
-	std::vector<FeatureVector> m_featar;		///< list of argument features
-	MetaDataReaderInterface* m_metadata;		///< meta data reader
-	std::vector<Index> m_metadatahndar;		///< array of meta data element handles feeded to the function
-	double m_collsize;				///< document collection size
-	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
+	Reference<ScalarFunctionInstanceInterface> m_func;	///< scalar function instance to execute
+	std::vector<Feature> m_featar;				///< list of argument features
+	MetaDataReaderInterface* m_metadata;			///< meta data reader
+	std::vector<Index> m_metadatahnd;			///< array of meta data element handles feeded to the function
+	double m_nofCollectionDocuments;			///< document collection size
+	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
@@ -110,8 +120,11 @@ class WeightingFunctionInstanceSmart
 	:public WeightingFunctionInstanceInterface
 {
 public:
-	explicit WeightingFunctionInstanceSmart( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+	WeightingFunctionInstanceSmart(
+			const QueryProcessorInterface* queryproc_,
+			ErrorBufferInterface* errorhnd_)
+		:m_queryproc(queryproc_)
+		,m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceSmart(){}
 
@@ -126,10 +139,13 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_func;				///< scalar function string
-	std::map<std::string,double> m_paramar;		///< variable definitions for scalar function
-	std::string m_metadataar;			///< array of meta data elements to feed as arguments to scalar function
-	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
+	std::string m_expression;
+	const QueryProcessorInterface* m_queryproc;		///< query processor
+	mutable const ScalarFunctionParserInterface* m_parser;	///< scalar function expression parser
+	mutable Reference<ScalarFunctionInterface> m_func;	///< scalar function to execute
+	std::vector<std::pair<std::string,double> > m_paramar;	///< variable definitions for scalar function
+	std::vector<std::string> m_metadataar;			///< array of meta data elements to feed as arguments to scalar function
+	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
@@ -147,10 +163,10 @@ public:
 	virtual WeightingFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual Description getDescription() const;
+	virtual FunctionDescription getDescription() const;
 
 private:
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 }//namespace

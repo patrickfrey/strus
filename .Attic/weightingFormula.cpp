@@ -14,6 +14,8 @@
 #include <cmath>
 #include <ctime>
 
+#error DEPRECATED
+
 using namespace strus;
 
 
