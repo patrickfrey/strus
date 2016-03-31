@@ -142,7 +142,7 @@ static double parseNumber( std::string::const_iterator& si, const std::string::c
 	return sig?-rt:rt;
 }
 
-void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::const_iterator& si, const std::string::const_iterator& se) const
+void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ctx, std::string::const_iterator& si, const std::string::const_iterator& se) const
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::cout << "enter parseOperand [" << std::string(si,se) << "]" << std::endl;
@@ -161,7 +161,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 		if (*si == '(')
 		{
 			++si;
-			parseFunctionCall( func, funcname, si, se);
+			parseFunctionCall( func, ctx, funcname, si, se);
 			return;
 		}
 		else
@@ -171,20 +171,30 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 	}
 	if (*si == '_')
 	{
-		// ... argument index
+		if (ctx->nofNamedArguments > 0)
+		{
+			// ... when we have named arguments specified, we do not allow argument references by index:
+			std::string var = parseIdentifier( si, se);
+			if (ctx->argumentNameMap.find( var) == ctx->argumentNameMap.end())
+			{
+				throw strus::runtime_error( _TXT("argument references by index not allowed if named arguments specified"));
+			}
+			resolveIdentifier( func, ctx, var);
+			return;
+		}
+		// parse argument index:
 		std::string::const_iterator start = si;
 		++si;
 		if (si == se || !isDigit(*si))
 		{
+			// ... no argument index, so it is a varible:
 			si = start;
 			std::string var = parseIdentifier( si, se);
-			func->addOpPushVariable( var);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "parse variable " << var << std::endl;
-#endif
+			resolveIdentifier( func, ctx, var);
 		}
 		else
 		{
+			// get the argument index:
 			unsigned int argid = (unsigned char)(*si - '0');
 			for (++si; si != se && isDigit(*si); ++si)
 			{
@@ -196,12 +206,10 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 			}
 			if (si != se && isAlpha(*si))
 			{
+				// ... no argument index, so it is a varible:
 				si = start;
 				std::string var = parseIdentifier( si, se);
-				func->addOpPushVariable( var);
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "parse variable " << var << std::endl;
-#endif
+				resolveIdentifier( func, ctx, var);
 			}
 			else
 			{
@@ -216,10 +224,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 	{
 		// ... variable identifier
 		std::string var = parseIdentifier( si, se);
-		func->addOpPushVariable( var);
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "parse variable " << var << std::endl;
-#endif
+		resolveIdentifier( func, ctx, var);
 	}
 	else if (*si == '+' || *si == '-')
 	{
@@ -238,7 +243,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 		}
 		else
 		{
-			parseOperand( func, si, se);
+			parseOperand( func, ctx, si, se);
 			if (*start == '-')
 			{
 				func->addOp( ScalarFunction::OpNeg);
@@ -264,7 +269,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 #endif
 		// ... sub expression
 		++si;
-		parseExpression( func, 0, si, se);
+		parseExpression( func, ctx, 0, si, se);
 		skipSpaces( si, se);
 		if (si == se || *si != ')')
 		{
@@ -278,6 +283,25 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, std::string::cons
 	else
 	{
 		throw strus::runtime_error( _TXT( "unexpected char '%c' in expression"), *si);
+	}
+}
+
+void ScalarFunctionParser::resolveIdentifier( ScalarFunction* func, ParserContext* ctx, const std::string& var) const
+{
+	ArgumentNameMap::const_iterator ai = ctx->argumentNameMap.find( var);
+	if (ai == ctx->argumentNameMap.end())
+	{
+		func->addOpPushVariable( var);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "parse variable " << var << std::endl;
+#endif
+	}
+	else
+	{
+		func->addOpPushArgument( ai->second);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "parse argument id " << ai->second << std::endl;
+#endif
 	}
 }
 
@@ -333,7 +357,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 	}
 }
 
-void ScalarFunctionParser::parseFunctionCall( ScalarFunction* func, const std::string& functionName, std::string::const_iterator& si, const std::string::const_iterator& se) const
+void ScalarFunctionParser::parseFunctionCall( ScalarFunction* func, ParserContext* ctx, const std::string& functionName, std::string::const_iterator& si, const std::string::const_iterator& se) const
 {
 	std::size_t nofArguments = 0;
 	for(;;)
@@ -348,7 +372,7 @@ void ScalarFunctionParser::parseFunctionCall( ScalarFunction* func, const std::s
 			++si;
 			break;
 		}
-		parseExpression( func, 0, si, se);
+		parseExpression( func, ctx, 0, si, se);
 		skipSpaces( si, se);
 		++nofArguments;
 		if (si == se)
@@ -389,10 +413,10 @@ static ScalarFunction::OpCode getOperator( const char chr)
 	}
 }
 
-void ScalarFunctionParser::parseExpression( ScalarFunction* func, unsigned int oprPrecedenceParent, std::string::const_iterator& si, const std::string::const_iterator& se) const
+void ScalarFunctionParser::parseExpression( ScalarFunction* func, ParserContext* ctx, unsigned int oprPrecedenceParent, std::string::const_iterator& si, const std::string::const_iterator& se) const
 {
 	skipSpaces( si, se);
-	parseOperand( func, si, se);
+	parseOperand( func, ctx, si, se);
 	skipSpaces( si, se);
 	if (si == se)
 	{
@@ -402,7 +426,7 @@ void ScalarFunctionParser::parseExpression( ScalarFunction* func, unsigned int o
 	while (oprPrecedence > oprPrecedenceParent)
 	{
 		ScalarFunction::OpCode opCode = getOperator( *si++);
-		parseExpression( func, oprPrecedence, si, se);
+		parseExpression( func, ctx, oprPrecedence, si, se);
 		func->addOp( opCode);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "parse operator " << ScalarFunction::opCodeName( opCode) << std::endl;
@@ -443,8 +467,19 @@ void ScalarFunctionParser::defineNaryFunction( const std::string& name, NaryFunc
 	CATCH_ERROR_MAP( _TXT("error defining N-ary function (scalar function parser): %s"), *m_errorhnd);
 }
 
-ScalarFunctionInterface* ScalarFunctionParser::createFunction( const std::string& src) const
+ScalarFunctionInterface*
+	ScalarFunctionParser::createFunction(
+		const std::string& src,
+		const std::vector<std::string>& argumentNames) const
 {
+	ParserContext ctx;
+	std::vector<std::string>::const_iterator ai = argumentNames.begin(), ae = argumentNames.end();
+	for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
+	{
+		ctx.argumentNameMap[ *ai] = aidx;
+	}
+	ctx.nofNamedArguments = argumentNames.size();
+
 	std::string::const_iterator si = src.begin(), se = src.end();
 	try
 	{
@@ -452,7 +487,7 @@ ScalarFunctionInterface* ScalarFunctionParser::createFunction( const std::string
 		ScalarFunction* rt = func.get();
 		try
 		{
-			parseExpression( rt, 0/*precedence*/, si, se);
+			parseExpression( rt, &ctx, 0/*precedence*/, si, se);
 		}
 		catch (const std::runtime_error& err)
 		{

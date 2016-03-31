@@ -51,6 +51,7 @@ struct Test
 {
 	const char* name;
 	const char* formula;
+	const char* argumentnames[ 10];
 	const VariableDef variables[ 10];
 	std::size_t nofparameter;
 	double parameter[10];
@@ -59,7 +60,14 @@ struct Test
 
 static bool run( const ScalarFunctionParserInterface* parser, unsigned int testidx, const Test& test)
 {
-	std::auto_ptr<ScalarFunctionInterface> funcdef( parser->createFunction( test.formula));
+	std::vector<std::string> argumentNames;
+	std::size_t ai = 0;
+	for (; test.argumentnames[ai]; ++ai)
+	{
+		argumentNames.push_back( test.argumentnames[ai]);
+	}
+
+	std::auto_ptr<ScalarFunctionInterface> funcdef( parser->createFunction( test.formula, argumentNames));
 	if (!funcdef.get())
 	{
 		throw strus::runtime_error( "failed to create function for test '%s': %s", test.name, g_errorhnd->fetchError());
@@ -97,6 +105,7 @@ static Test tests[] =
 	{
 		"variable",
 		"x1",
+		{0},
 		{{"x1",1.2},{0,0.0}},
 		0,
 		{0.0},
@@ -105,6 +114,7 @@ static Test tests[] =
 	{
 		"variable sum",
 		"x1 + x3",
+		{0},
 		{{"x1",1.2},{"x3",-1.9},{0,0.0}},
 		0,
 		{0.0},
@@ -113,6 +123,7 @@ static Test tests[] =
 	{
 		"variable argument sum",
 		"x + _0",
+		{0},
 		{{"x",2.7},{0,0.0}},
 		1,
 		{0.4},
@@ -121,6 +132,7 @@ static Test tests[] =
 	{
 		"argument argument subtraction",
 		"_0 - _1",
+		{0},
 		{{0,0.0}},
 		2,
 		{17.8,3.1},
@@ -129,6 +141,7 @@ static Test tests[] =
 	{
 		"linear combination",
 		"x * _0 - y * _1",
+		{0},
 		{{"x",2.2},{"y",1.1},{0,0.0}},
 		2,
 		{0.5,0.1},
@@ -137,6 +150,7 @@ static Test tests[] =
 	{
 		"normalized log",
 		"log( x*x - y + _0)",
+		{0},
 		{{"x",2.0},{"y",3.0},{0,0.0}},
 		1,
 		{0.5},
@@ -145,6 +159,7 @@ static Test tests[] =
 	{
 		"log pow base 10",
 		"log( pow( x, 2))",
+		{0},
 		{{"x",10.0},{0,0.0}},
 		0,
 		{0.0},
@@ -153,6 +168,7 @@ static Test tests[] =
 	{
 		"multiplication log subexpression",
 		"log( 10 * x) * (3 + 6 + 3 -1)",
+		{0},
 		{{"x",10.0},{0,0.0}},
 		0,
 		{0.0},
@@ -161,6 +177,7 @@ static Test tests[] =
 	{
 		"linear combination 1",
 		"1.2*_0 + 1.3*_1 + 1.4*_2",
+		{0},
 		{{0,0.0}},
 		3,
 		{0.1,0.2,0.3},
@@ -169,6 +186,7 @@ static Test tests[] =
 	{
 		"linear combination 2",
 		"1.2*_0 + _1 + 1.4*_2",
+		{0},
 		{{0,0.0}},
 		3,
 		{0.1,0.2,0.3},
@@ -176,7 +194,8 @@ static Test tests[] =
 	},
 	{
 		"BM25",
-		"w * log( (N - _1 + 0.5) / (_1 + 0.5)) * (_0 * (k1 + 1.0)) / (_0 + k1 * (1.0 - b + b * ((_2+1) / avgdoclen)))",
+		"w * log( (N - df + 0.5) / (df + 0.5)) * (ff * (k1 + 1.0)) / (ff + k1 * (1.0 - b + b * ((doclen+1) / avgdoclen)))",
+		{"ff","df","doclen",0},
 		{{"w",1.3},{"N",100000},{"k1",1.5},{"b",0.75},{"avgdoclen",200},{0,0.0}},
 		3,
 		{3/*ff*/,12345/*df*/,123/*doclen*/},
@@ -185,6 +204,7 @@ static Test tests[] =
 	{
 		0,
 		0,
+		{0},
 		{{0,0.0}},
 		0,
 		{0.0},
