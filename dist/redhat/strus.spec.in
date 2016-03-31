@@ -287,6 +287,8 @@ make test
 %{_libdir}/%{name}/libstrus_malloc_logging.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_statsproc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_statsproc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
+%{_libdir}/%{name}/libstrus_scalarfunc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
+%{_libdir}/%{name}/libstrus_scalarfunc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_sysconfdir}/ld.so.conf.d/%{name}.conf
 
 
@@ -312,6 +314,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Thu Mar 31 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.2-0.1
+- fixed missing dependency to libstrus_scalarproc
+
 * Wed Mar 30 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.1-0.1
 - fixed bug in scalar functions in 0.7.0
 

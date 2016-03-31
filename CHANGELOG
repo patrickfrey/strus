@@ -1,3 +1,7 @@
+strus (0.7.2)
+  * fixed missing dependency to libstrus_scalarproc
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 31 Mar 2016 00:30:00 +0100
+
 strus (0.7.1)
   * fixed bug in scalar functions in 0.7.0
  -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 30 Mar 2016 23:30:00 +0100
