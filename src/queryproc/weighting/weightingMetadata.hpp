@@ -93,7 +93,8 @@ public:
 		:m_errorhnd(errorhnd_){}
 	virtual ~WeightingFunctionMetadata(){}
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const;
+	virtual WeightingFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const;
 
 	virtual Description getDescription() const;
 

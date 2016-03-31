@@ -16,6 +16,8 @@ namespace strus
 {
 /// \brief Forward declaration
 class WeightingFunctionInstanceInterface;
+/// \brief Forward declaration
+class QueryProcessorInterface;
 
 /// \brief Interface for a weighting function that can be used for ranking in the query evaluation
 class WeightingFunctionInterface
@@ -25,8 +27,10 @@ public:
 	virtual ~WeightingFunctionInterface(){}
 
 	/// \brief Create an instance of this function for parametrization
+	/// \param[in] processor provider for query processing functions
 	/// \return the created function instance (ownership to caller)
-	virtual WeightingFunctionInstanceInterface* createInstance() const=0;
+	virtual WeightingFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const=0;
 
 	/// \brief Structure that describes the weighting function (for introspection)
 	struct Description

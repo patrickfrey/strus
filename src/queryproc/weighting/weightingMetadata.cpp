@@ -115,7 +115,8 @@ std::string WeightingFunctionInstanceMetadata::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance(
+		const QueryProcessorInterface*) const
 {
 	try
 	{

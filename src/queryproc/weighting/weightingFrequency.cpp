@@ -97,7 +97,8 @@ std::string WeightingFunctionInstanceTermFrequency::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstance(
+		const QueryProcessorInterface*) const
 {
 	try
 	{

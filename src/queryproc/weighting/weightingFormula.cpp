@@ -261,7 +261,8 @@ std::string WeightingFunctionInstanceFormula::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionFormula::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionFormula::createInstance(
+		const QueryProcessorInterface*) const
 {
 	try
 	{

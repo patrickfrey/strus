@@ -700,7 +700,8 @@ std::string WeightingFunctionInstanceBM25pff::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionBM25pff::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionBM25pff::createInstance(
+		const QueryProcessorInterface* ) const
 {
 	try
 	{

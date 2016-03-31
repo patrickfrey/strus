@@ -168,7 +168,8 @@ public:
 
 	virtual ~WeightingFunctionFormula(){}
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const;
+	virtual WeightingFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const;
 
 	virtual Description getDescription() const;
 

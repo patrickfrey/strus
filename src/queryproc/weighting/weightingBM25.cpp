@@ -211,7 +211,8 @@ std::string WeightingFunctionInstanceBM25::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance(
+		const QueryProcessorInterface*) const
 {
 	try
 	{
