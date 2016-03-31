@@ -221,18 +221,19 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }
 
-WeightingFunctionInterface::Description WeightingFunctionBM25::getDescription() const
+FunctionDescription WeightingFunctionBM25::getDescription() const
 {
 	try
 	{
-		Description rt(_TXT("Calculate the document weight with the weighting scheme \"BM25\""));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"), "");
-		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"), "1:1000");
-		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"), "0.0001:1000");
-		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
-		rt( Description::Param::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt(_TXT("Calculate the document weight with the weighting scheme \"BM25\""));
+		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
+		rt( P::Numeric, "k1", _TXT("parameter of the BM25 weighting scheme"), "1:1000");
+		rt( P::Numeric, "b", _TXT("parameter of the BM25 weighting scheme"), "0.0001:1000");
+		rt( P::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
+		rt( P::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, WeightingFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, FunctionDescription());
 }
 

@@ -272,7 +272,7 @@ public:
 	{
 		int Int;			///< value in case of a signed integer
 		unsigned int UInt;		///< value in case of an unsigned integer
-		double Float;			///< value in case of a single precision floating point number
+		double Float;			///< value in case of a floating point number
 	} variant;				///< Value of this numeric variant
 };
 

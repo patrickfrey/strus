@@ -178,15 +178,16 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchVariables::createIns
 
 
 
-SummarizerFunctionInterface::Description SummarizerFunctionMatchVariables::getDescription() const
+FunctionDescription SummarizerFunctionMatchVariables::getDescription() const
 {
 	try
 	{
-		Description rt( _TXT("Extract all variables assigned to subexpressions of features specified."));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
-		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt( _TXT("Extract all variables assigned to subexpressions of features specified."));
+		rt( P::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
+		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchvariables", *m_errorhnd, SummarizerFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchvariables", *m_errorhnd, FunctionDescription());
 }
 

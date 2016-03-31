@@ -289,18 +289,19 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateVariable::creat
 }
 
 
-SummarizerFunctionInterface::Description SummarizerFunctionAccumulateVariable::getDescription() const
+FunctionDescription SummarizerFunctionAccumulateVariable::getDescription() const
 {
 	try
 	{
-		Description rt( _TXT("Accumulate the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content."));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
-		rt( Description::Param::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
-		rt( Description::Param::String, "var", _TXT( "the name of the variable referencing the content to weight"), "");
-		rt( Description::Param::Numeric, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"), "1:");
-		rt( Description::Param::Numeric, "norm", _TXT( "the normalization factor of the calculated weights (default 1.0)"), "0.0:1.0");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt( _TXT("Accumulate the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content."));
+		rt( P::Feature, "match", _TXT( "defines the query features to inspect for variable matches"), "");
+		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
+		rt( P::String, "var", _TXT( "the name of the variable referencing the content to weight"), "");
+		rt( P::Numeric, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"), "1:");
+		rt( P::Numeric, "norm", _TXT( "the normalization factor of the calculated weights (default 1.0)"), "0.0:1.0");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "accuvariable", *m_errorhnd, SummarizerFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "accuvariable", *m_errorhnd, FunctionDescription());
 }
 

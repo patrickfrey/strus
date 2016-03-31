@@ -717,26 +717,27 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMatchPhrase::createInstan
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
 }
 
-SummarizerFunctionInterface::Description SummarizerFunctionMatchPhrase::getDescription() const
+FunctionDescription SummarizerFunctionMatchPhrase::getDescription() const
 {
 	try
 	{
-		Description rt( _TXT("Get best matching phrases delimited by the structure postings"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the features to weight"), "");
-		rt( Description::Param::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
-		rt( Description::Param::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
-		rt( Description::Param::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( Description::Param::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Only content is used for abstracting"), "1:");
-		rt( Description::Param::Numeric, "sentencesize", _TXT( "restrict the maximum length of sentences in summaries"), "1:");
-		rt( Description::Param::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
-		rt( Description::Param::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
-		rt( Description::Param::String, "matchmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
-		rt( Description::Param::String, "floatingmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found"), "");
-		rt( Description::Param::String, "name_para", _TXT( "specifies the summary element name used for paragraphs (default 'para')"), "");
-		rt( Description::Param::String, "name_phrase", _TXT( "specifies the summary element name used for phrases (default 'phrase')"), "");
-		rt( Description::Param::String, "name_docstart", _TXT( "specifies the summary element name used for the document start (alternative summary, if no match found, default 'docstart')"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt( _TXT("Get best matching phrases delimited by the structure postings"));
+		rt( P::Feature, "match", _TXT( "defines the features to weight"), "");
+		rt( P::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
+		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
+		rt( P::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
+		rt( P::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Only content is used for abstracting"), "1:");
+		rt( P::Numeric, "sentencesize", _TXT( "restrict the maximum length of sentences in summaries"), "1:");
+		rt( P::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
+		rt( P::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
+		rt( P::String, "matchmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
+		rt( P::String, "floatingmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found"), "");
+		rt( P::String, "name_para", _TXT( "specifies the summary element name used for paragraphs (default 'para')"), "");
+		rt( P::String, "name_phrase", _TXT( "specifies the summary element name used for phrases (default 'phrase')"), "");
+		rt( P::String, "name_docstart", _TXT( "specifies the summary element name used for the document start (alternative summary, if no match found, default 'docstart')"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchphrase", *m_errorhnd, SummarizerFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "matchphrase", *m_errorhnd, FunctionDescription());
 }
 

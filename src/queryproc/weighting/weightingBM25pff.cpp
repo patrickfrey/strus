@@ -710,31 +710,32 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25pff::createInstance(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }
 
-WeightingFunctionInterface::Description WeightingFunctionBM25pff::getDescription() const
+FunctionDescription WeightingFunctionBM25pff::getDescription() const
 {
 	try
 	{
-		Description rt(_TXT("Calculate the document weight with the weighting scheme \"BM25pff\". This is \"BM25\" where the feature frequency is counted by 1.0 per feature only for features with the maximum proximity score. The proximity score is a measure that takes the proximity of other query features into account"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"), "");
-		rt( Description::Param::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
-		rt( Description::Param::Feature, "para", _TXT( "defines the delimiter for paragraphs (windows used for proximity weighting must not overlap paragraph borders)"), "");
-		rt( Description::Param::Numeric, "k1", _TXT("parameter of the BM25pff weighting scheme"), "1:1000");
-		rt( Description::Param::Numeric, "b", _TXT("parameter of the BM25pff weighting scheme"), "0.0001:1000");
-		rt( Description::Param::Numeric, "titleinc", _TXT("ff increment for title features"), "0.0:");
-		rt( Description::Param::Numeric, "tidocnorm", _TXT("specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller"), "0:");
-		rt( Description::Param::Numeric, "windowsize", _TXT("the size of the window used for finding features to increment proximity scores"), "");
-		rt( Description::Param::Numeric, "cardinality", _TXT("the number of query features a proximity score window must contain to be considered (optional, default is all features)"), "");		
-		rt( Description::Param::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Elements in title are scored with an ff increment"), "");
-		rt( Description::Param::Metadata, "metadata_title_size", _TXT( "the metadata element that specifies the number of terms (size) of the title"), "");
-		rt( Description::Param::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25)"), "0.0:1.0");
-		rt( Description::Param::Numeric, "fftie", _TXT( "value specifying the mapping of the ff of a weighted to an intervall between 0 and this value"), "0:");
-		rt( Description::Param::Numeric, "proxffbias", _TXT( "bias for proximity ff increments always counted (the others are counted only till 'proxfftie'"), "0:");
-		rt( Description::Param::Numeric, "proxfftie", _TXT( "the maximum proximity based ff value that is considered for weighting except for increments exceeding 'proxffbias'"), "0.0:");
-		rt( Description::Param::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
-		rt( Description::Param::Numeric, "maxdf", _TXT("the maximum df as fraction of the collection size"), "0:");
-		rt( Description::Param::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt(_TXT("Calculate the document weight with the weighting scheme \"BM25pff\". This is \"BM25\" where the feature frequency is counted by 1.0 per feature only for features with the maximum proximity score. The proximity score is a measure that takes the proximity of other query features into account"));
+		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
+		rt( P::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
+		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (windows used for proximity weighting must not overlap paragraph borders)"), "");
+		rt( P::Numeric, "k1", _TXT("parameter of the BM25pff weighting scheme"), "1:1000");
+		rt( P::Numeric, "b", _TXT("parameter of the BM25pff weighting scheme"), "0.0001:1000");
+		rt( P::Numeric, "titleinc", _TXT("ff increment for title features"), "0.0:");
+		rt( P::Numeric, "tidocnorm", _TXT("specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller"), "0:");
+		rt( P::Numeric, "windowsize", _TXT("the size of the window used for finding features to increment proximity scores"), "");
+		rt( P::Numeric, "cardinality", _TXT("the number of query features a proximity score window must contain to be considered (optional, default is all features)"), "");		
+		rt( P::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Elements in title are scored with an ff increment"), "");
+		rt( P::Metadata, "metadata_title_size", _TXT( "the metadata element that specifies the number of terms (size) of the title"), "");
+		rt( P::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25)"), "0.0:1.0");
+		rt( P::Numeric, "fftie", _TXT( "value specifying the mapping of the ff of a weighted to an intervall between 0 and this value"), "0:");
+		rt( P::Numeric, "proxffbias", _TXT( "bias for proximity ff increments always counted (the others are counted only till 'proxfftie'"), "0:");
+		rt( P::Numeric, "proxfftie", _TXT( "the maximum proximity based ff value that is considered for weighting except for increments exceeding 'proxffbias'"), "0.0:");
+		rt( P::Numeric, "avgdoclen", _TXT("the average document lenght"), "0:");
+		rt( P::Numeric, "maxdf", _TXT("the maximum df as fraction of the collection size"), "0:");
+		rt( P::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, WeightingFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, FunctionDescription());
 }
 

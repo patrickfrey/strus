@@ -118,14 +118,15 @@ WeightingFunctionInstanceInterface* WeightingFunctionConstant::createInstance(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "constant", *m_errorhnd, 0);
 }
 
-WeightingFunctionInterface::Description WeightingFunctionConstant::getDescription() const
+FunctionDescription WeightingFunctionConstant::getDescription() const
 {
 	try
 	{
-		Description rt(_TXT("Calculate the weight of a document as sum of the the feature weights multiplied with their feature frequency"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt(_TXT("Calculate the weight of a document as sum of the the feature weights multiplied with their feature frequency"));
+		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "BM25", *m_errorhnd, WeightingFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "BM25", *m_errorhnd, FunctionDescription());
 }
 
