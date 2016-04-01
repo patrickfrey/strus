@@ -16,8 +16,13 @@ extern "C" {
 #endif
 
 ///\brief Function/macro implementing GNU extension memrchr() (glibc >= 2.1.91)
-#if __GNUC__
+#include <limits.h>
+#if defined( __GNU_LIBRARY__ ) || defined( __GLIBC_ )
+#if __GLIBC_PREREQ(2, 2)
 #define strus_memrchr(s,c,n)	memrchr(s,c,n)
+#else
+extern const char* strus_memrchr( const char *s, int c, size_t n);
+#endif
 #else
 extern const char* strus_memrchr( const char *s, int c, size_t n);
 #endif
