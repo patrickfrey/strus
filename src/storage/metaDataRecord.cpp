@@ -13,6 +13,7 @@
 #include <vector>
 #include <stdexcept>
 #include <iostream>
+#include <limits>
 
 using namespace strus;
 
@@ -27,37 +28,103 @@ static inline void setValue_( const MetaDataDescription& descr, void* ptr, const
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "write meta data element int8 at offset " << elem->ofs() << " address " << std::hex << (uintptr_t)((char*)ptr + elem->ofs()) << std::dec << std::endl;
 #endif
-			*(int8_t*)((char*)ptr + elem->ofs()) = (int8_t)value;
+			if ((double)value < std::numeric_limits<int8_t>::min())
+			{
+				*(int8_t*)((char*)ptr + elem->ofs()) = (int8_t)std::numeric_limits<int8_t>::min();
+			}
+			else if ((double)value > std::numeric_limits<int8_t>::max())
+			{
+				*(int8_t*)((char*)ptr + elem->ofs()) = (int8_t)std::numeric_limits<int8_t>::max();
+			}
+			else
+			{
+				*(int8_t*)((char*)ptr + elem->ofs()) = (int8_t)value;
+			}
 			break;
 		case MetaDataElement::UInt8:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "write meta data element uint8 at offset " << elem->ofs() << " address " << std::hex << (uintptr_t)((char*)ptr + elem->ofs()) << std::dec <<  std::endl;
 #endif
-			*(uint8_t*)((char*)ptr + elem->ofs()) = (uint8_t)value;
+			if ((double)value < std::numeric_limits<uint8_t>::min())
+			{
+				*(uint8_t*)((char*)ptr + elem->ofs()) = (uint8_t)std::numeric_limits<int8_t>::min();
+			}
+			else if ((double)value > std::numeric_limits<uint8_t>::max())
+			{
+				*(uint8_t*)((char*)ptr + elem->ofs()) = (uint8_t)std::numeric_limits<uint8_t>::max();
+			}
+			else
+			{
+				*(uint8_t*)((char*)ptr + elem->ofs()) = (uint8_t)value;
+			}
 			break;
 		case MetaDataElement::Int16:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "write meta data element int16 at offset " << elem->ofs() << " address " << std::hex << (uintptr_t)((char*)ptr + elem->ofs()) << std::dec <<  std::endl;
 #endif
-			*(int16_t*)((char*)ptr + elem->ofs()) = (int16_t)value;
+			if ((double)value < std::numeric_limits<int16_t>::min())
+			{
+				*(int16_t*)((char*)ptr + elem->ofs()) = (int16_t)std::numeric_limits<int16_t>::min();
+			}
+			else if ((double)value > std::numeric_limits<int16_t>::max())
+			{
+				*(int16_t*)((char*)ptr + elem->ofs()) = (int16_t)std::numeric_limits<int16_t>::max();
+			}
+			else
+			{
+				*(int16_t*)((char*)ptr + elem->ofs()) = (int16_t)value;
+			}
 			break;
 		case MetaDataElement::UInt16:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "write meta data element uint16 at offset " << elem->ofs() << " address " << std::hex << (uintptr_t)((char*)ptr + elem->ofs()) << std::dec <<  std::endl;
 #endif
-			*(uint16_t*)((char*)ptr + elem->ofs()) = (uint16_t)value;
+			if ((double)value < std::numeric_limits<uint16_t>::min())
+			{
+				*(uint16_t*)((char*)ptr + elem->ofs()) = (uint16_t)std::numeric_limits<uint16_t>::min();
+			}
+			else if ((double)value > std::numeric_limits<uint16_t>::max())
+			{
+				*(uint16_t*)((char*)ptr + elem->ofs()) = (uint16_t)std::numeric_limits<uint16_t>::max();
+			}
+			else
+			{
+				*(uint16_t*)((char*)ptr + elem->ofs()) = (uint16_t)value;
+			}
 			break;
 		case MetaDataElement::Int32:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "write meta data element int32 at offset " << elem->ofs() << " address " << std::hex << (uintptr_t)((char*)ptr + elem->ofs()) << std::dec <<  std::endl;
 #endif
-			*(int32_t*)((char*)ptr + elem->ofs()) = (int32_t)value;
+			if ((double)value < std::numeric_limits<int32_t>::min())
+			{
+				*(int32_t*)((char*)ptr + elem->ofs()) = (int32_t)std::numeric_limits<int32_t>::min();
+			}
+			else if ((double)value > std::numeric_limits<int32_t>::max())
+			{
+				*(int32_t*)((char*)ptr + elem->ofs()) = (int32_t)std::numeric_limits<int32_t>::max();
+			}
+			else
+			{
+				*(int32_t*)((char*)ptr + elem->ofs()) = (int32_t)value;
+			}
 			break;
 		case MetaDataElement::UInt32:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "write meta data element uint32 at offset " << elem->ofs() << " address " << std::hex << (uintptr_t)((char*)ptr + elem->ofs()) << std::dec <<  std::endl;
 #endif
-			*(uint32_t*)((char*)ptr + elem->ofs()) = (uint32_t)value;
+			if ((double)value < std::numeric_limits<uint32_t>::min())
+			{
+				*(uint32_t*)((char*)ptr + elem->ofs()) = (uint32_t)std::numeric_limits<uint32_t>::min();
+			}
+			else if ((double)value > std::numeric_limits<uint32_t>::max())
+			{
+				*(uint32_t*)((char*)ptr + elem->ofs()) = (uint32_t)std::numeric_limits<uint32_t>::max();
+			}
+			else
+			{
+				*(uint32_t*)((char*)ptr + elem->ofs()) = (uint32_t)value;
+			}
 			break;
 		case MetaDataElement::Float16:
 #ifdef STRUS_LOWLEVEL_DEBUG
