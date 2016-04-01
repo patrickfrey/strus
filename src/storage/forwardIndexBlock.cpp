@@ -14,6 +14,23 @@ using namespace strus;
 
 enum {EndItemMarker=(char)0xFE};
 
+
+// Apple libc lacks memrchr.
+#ifdef __APPLE__
+static const char *
+memrchr(const char *s, int c, size_t n)
+{
+    while (n--) {
+        const char *p = s+n;
+        if (*p == (char)c) {
+            return p;
+        }
+    }
+    return 0;
+}
+#endif
+
+
 Index ForwardIndexBlock::position_at( const char* ref) const
 {
 	if (ref == charend()) return 0;
