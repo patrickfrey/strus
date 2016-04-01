@@ -43,11 +43,6 @@ static double if_equal( std::size_t nofargs, const double* args)
 	return (diff * diff <= std::numeric_limits<double>::epsilon())?args[2]:args[3];
 }
 
-static double mod( double num, double div)
-{
-	return num - div * floor(num / div);
-}
-
 static double log_base( double x, double base)
 {
 	return log(x) / log(base);
@@ -56,14 +51,25 @@ static double log_base( double x, double base)
 ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
+	defineUnaryFunction( "fabs", &std::fabs);
+	defineUnaryFunction( "floor", &std::floor);
+	defineUnaryFunction( "ceil", &std::ceil);
 	defineUnaryFunction( "log", &std::log10);
 	defineBinaryFunction( "log", &log_base);
 	defineUnaryFunction( "ln", &std::log);
-	defineUnaryFunction( "tanh", &std::tanh);
 	defineUnaryFunction( "exp", &std::exp);
 	defineUnaryFunction( "sqrt", &std::sqrt);
 	defineBinaryFunction( "pow", &std::pow);
-	defineBinaryFunction( "mod", &mod);
+	defineBinaryFunction( "mod", &std::fmod);
+	defineUnaryFunction( "sin", &std::sin);
+	defineUnaryFunction( "cos", &std::cos);
+	defineUnaryFunction( "tan", &std::tan);
+	defineUnaryFunction( "sinh", &std::sinh);
+	defineUnaryFunction( "cosh", &std::cosh);
+	defineUnaryFunction( "tanh", &std::tanh);
+	defineUnaryFunction( "asin", &std::asin);
+	defineUnaryFunction( "acos", &std::acos);
+	defineUnaryFunction( "atan", &std::atan);
 	defineNaryFunction( "if_gt", &if_greater, 4, 4);
 	defineNaryFunction( "if_ge", &if_greaterequal, 4, 4);
 	defineNaryFunction( "if_lt", &if_smaller, 4, 4);

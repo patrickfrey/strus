@@ -56,20 +56,25 @@
 			<li><b>k1</b> [Numeric (1:1000)] parameter of the BM25pff weighting scheme.</li>
 			<li><b>b</b> [Numeric (0.0001:1000)] parameter of the BM25pff weighting scheme.</li>
 			<li><b>titleinc</b> [Numeric (0.0:)] ff increment for title features.</li>
+			<li><b>tidocnorm</b> [Numeric] specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller").</li>
 			<li><b>windowsize</b> [Numeric] the size of the window used for finding features to increment proximity scores.</li>
 			<li><b>cardinality</b> [Numeric] the number of query features a proximity score window must contain to be considered (optional, default is all features).</li>
 			<li><b>metadata_title_maxpos</b> [Metadata] the metadata element that specifies the last title element. Elements in title are scored with an ff increment.</li>
 			<li><b>metadata_title_size</b> [Metadata] the metadata element that specifies the number of terms (size) of the title.</li>
 			<li><b>ffbase</b> [Numeric (0.0:1.0)] value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25).</li>
+			<li><b>fftie</b> [Numeric (0:)] value specifying the mapping of the ff of a weighted to an intervall between 0 and this value.</li>
+			<li><b>proxffbias</b> [Numeric (0.0:1.0)] bias for proximity ff increments always counted (the others are counted only till 'proxfftie'.</li>
+			<li><b>proxfftie</b> [Numeric (0:)] the maximum proximity based ff value that is considered for weighting except for increments exceeding 'proxffbias'.</li>
 			<li><b>avgdoclen</b> [Numeric (0:)] the average document lenght.</li>
 			<li><b>maxdf</b> [Numeric (0:)] the maximum df as fraction of the collection size.</li>
 			<li><b>metadata_doclen</b> [Metadata] the meta data element name referencing the document lenght for each document weighted.</li>
 			</ol>
 		</li>
-		<li><b>formula</b> calculates the weight of a document with a formula
+		<li><b>smart</b> calculates the document weight as a sum of scalar functions for each query feature of the ff (feature freuency), the df (document frequency), N (number of documents in the collection) and some document metadata element values. The name 'smart' is inspired by information retrieval calssical SMART weighting schemes that are covered by this method. The scalar function is specified as string expression.
 			<ol>
-			<li><b>match</b> [Feature] defines the query features referenced in the formula to weight.</li>
-			<li><b>formula</b> [String] defines an expression to evaluate. You can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements.</li>
+			<li><b>match</b> [Feature] defines the input query features.</li>
+			<li><b>function</b> [String] defines an expression to evaluate. You can use the operators '*','/','+','-' and functions like 'log', 'tanh', etc.. Brackets '(' and ')' can be used for grouping subexpressions. The variables 'df','ff' and 'N' can be used besides all variables specified as parameters or as meta data elements.</li>
+			<li><b>metadata</b> [String] defines a metadata element that can be referenced in the scalar function expression.</li>
 			<li><b>[a-z]+</b> [Numeric] defines a variable to be used in the formula expression.</li>
 			</ol>
 		</li>
