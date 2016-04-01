@@ -26,6 +26,9 @@
 #ifdef __linux__
 #include <malloc.h>
 #endif
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#endif
 #include <stdlib.h>
 #include <libgen.h>
 #include <execinfo.h>
@@ -42,6 +45,11 @@
 #else
   #define DLL_PUBLIC
 #endif
+#endif
+
+/// Apple libc spells malloc_usable_size() as malloc_size().
+#ifdef __APPLE__
+  #define malloc_usable_size(x) malloc_size(x)
 #endif
 
 /// brief Forward declaration:
