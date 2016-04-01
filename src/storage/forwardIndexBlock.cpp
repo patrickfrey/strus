@@ -8,28 +8,12 @@
 #include "forwardIndexBlock.hpp"
 #include "indexPacker.hpp"
 #include "private/internationalization.hpp"
+#include "private/cstring.h"
 #include <cstring>
 
 using namespace strus;
 
 enum {EndItemMarker=(char)0xFE};
-
-
-// Apple libc lacks memrchr.
-#ifdef __APPLE__
-static const char *
-memrchr(const char *s, int c, size_t n)
-{
-    while (n--) {
-        const char *p = s+n;
-        if (*p == (char)c) {
-            return p;
-        }
-    }
-    return 0;
-}
-#endif
-
 
 Index ForwardIndexBlock::position_at( const char* ref) const
 {
@@ -59,7 +43,7 @@ const char* ForwardIndexBlock::prevItem( const char* ref) const
 {
 	if (ref == charptr()) return 0;
 	if (ref < charptr() || ref > charend()) throw strus::logic_error( _TXT( "illegal forward index block access (%s)"), __FUNCTION__);
-	char const* rt = (const char*)::memrchr( charptr(), EndItemMarker, ref-charptr()-1);
+	char const* rt = (const char*)strus_memrchr( charptr(), EndItemMarker, ref-charptr()-1);
 	return (rt >= charptr())?(rt+1):charptr();
 }
 

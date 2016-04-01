@@ -9,6 +9,7 @@ set(libstrus_shared_utils_source_files
 	fileio.cpp
 	crc32.cpp
 	snprintf.c
+	cstring.c
 )
 
 set( libstrus_private_utils_source_files
