@@ -26,6 +26,22 @@ namespace strus
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
+/// \brief Configured parameters of the BM25 weighting function
+struct WeightingFunctionParameterBM25
+{
+	double k1;				///< k1 value of BM25
+	double b;				///< b value of BM25
+	double avgDocLength;			///< average document length in the collection
+
+	WeightingFunctionParameterBM25()
+		:k1(1.5),b(0.75),avgDocLength(500){}
+
+	WeightingFunctionParameterBM25( const WeightingFunctionParameterBM25& o)
+	{
+		std::memcpy( this, &o, sizeof(*this));
+	}
+};
+
 /// \class WeightingFunctionContextBM25
 /// \brief Weighting function based on the BM25 formula
 class WeightingFunctionContextBM25
@@ -35,9 +51,7 @@ public:
 	WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
-		double k1_,
-		double b_,
-		double avgDocLength_,
+		const WeightingFunctionParameterBM25& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
 		ErrorBufferInterface* errorhnd_);
@@ -63,9 +77,7 @@ public:
 	virtual double call( const Index& docno);
 
 private:
-	double m_k1;
-	double m_b;
-	double m_avgDocLength;
+	WeightingFunctionParameterBM25 m_parameter;
 	double m_nofCollectionDocuments;
 	std::vector<Feature> m_featar;
 	MetaDataReaderInterface* m_metadata;
@@ -81,7 +93,7 @@ class WeightingFunctionInstanceBM25
 {
 public:
 	explicit WeightingFunctionInstanceBM25( ErrorBufferInterface* errorhnd_)
-		:m_k1(1.5),m_b(0.75),m_avgdoclen(1000),m_errorhnd(errorhnd_){}
+		:m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceBM25(){}
 
@@ -96,11 +108,9 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	double m_k1;
-	double m_b;
-	double m_avgdoclen;
-	std::string m_metadata_doclen;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	WeightingFunctionParameterBM25 m_parameter;	///< configured weighting function parameters
+	std::string m_metadata_doclen;			///< document metadata element of the document length
+	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 
 

@@ -21,13 +21,11 @@ using namespace strus;
 WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface* metadata_,
-		double k1_,
-		double b_,
-		double avgDocLength_,
+		const WeightingFunctionParameterBM25& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& attribute_doclen_,
 		ErrorBufferInterface* errorhnd_)
-	:m_k1(k1_),m_b(b_),m_avgDocLength(avgDocLength_)
+	:m_parameter(parameter_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_featar(),m_metadata(metadata_)
 	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_))
@@ -88,32 +86,34 @@ double WeightingFunctionContextBM25::call( const Index& docno)
 			if (ff == 0.0)
 			{
 			}
-			else if (m_b)
+			else if (m_parameter.b)
 			{
 				m_metadata->skipDoc( docno);
 				double doclen = m_metadata->getValue( m_metadata_doclen);
-				double rel_doclen = (doclen+1) / m_avgDocLength;
+				double rel_doclen = (doclen+1) / m_parameter.avgDocLength;
 #ifdef STRUS_LOWLEVEL_DEBUG
 				double ww = fi->weight * fi->idf
-						* (ff * (m_k1 + 1.0))
-						/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
+						* (ff * (m_parameter.k1 + 1.0))
+						/ (ff + m_parameter.k1
+							* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
 				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " doclen=" << doclen << " reldoclen=" << rel_doclen << " weight=" << ww << std::endl;
 #endif
 				rt += fi->weight * fi->idf
-					* (ff * (m_k1 + 1.0))
-					/ (ff + m_k1 * (1.0 - m_b + m_b * rel_doclen));
+					* (ff * (m_parameter.k1 + 1.0))
+					/ (ff + m_parameter.k1 
+						* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
 			}
 			else
 			{
 #ifdef STRUS_LOWLEVEL_DEBUG
 				double ww = fi->weight * fi->idf
-						* (ff * (m_k1 + 1.0))
-						/ (ff + m_k1 * 1.0);
+						* (ff * (m_parameter.k1 + 1.0))
+						/ (ff + m_parameter.k1 * 1.0);
 				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " weight=" << ww << std::endl;
 #endif
 				rt += fi->weight * fi->idf
-					* (ff * (m_k1 + 1.0))
-					/ (ff + m_k1 * 1.0);
+					* (ff * (m_parameter.k1 + 1.0))
+					/ (ff + m_parameter.k1 * 1.0);
 			}
 		}
 	}
@@ -165,15 +165,15 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 	}
 	else if (utils::caseInsensitiveEquals( name, "k1"))
 	{
-		m_k1 = (double)value;
+		m_parameter.k1 = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "b"))
 	{
-		m_b = (double)value;
+		m_parameter.b = (double)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
 	{
-		m_avgdoclen = (double)value;
+		m_parameter.avgDocLength = (double)value;
 	}
 	else
 	{
@@ -190,7 +190,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 	try
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
-		return new WeightingFunctionContextBM25( storage_, metadata, m_k1, m_b, m_avgdoclen, nofdocs, m_metadata_doclen, m_errorhnd);
+		return new WeightingFunctionContextBM25( storage_, metadata, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }
@@ -202,7 +202,7 @@ std::string WeightingFunctionInstanceBM25::tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "b=" << m_b << ", k1=" << m_k1 << ", avgdoclen=" << m_avgdoclen
+			<< "b=" << m_parameter.b << ", k1=" << m_parameter.k1 << ", avgdoclen=" << m_parameter.avgDocLength
 			<< ", metadata_doclen=" << m_metadata_doclen
 		;
 		return rt.str();
