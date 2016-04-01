@@ -315,6 +315,10 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Fri Apr 1 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.4-0.1
+- removed deprecated formula weighting function
+- added weighting function 'Smart' that allows to specify weighting with a scalar function expression on ff,df,N (collection size) and document metadata
+
 * Thu Mar 31 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.3-0.1
 - fixed missing dependency to libstrus_scalarproc
 

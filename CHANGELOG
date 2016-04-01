@@ -1,3 +1,8 @@
+strus (0.7.4)
+  * removed deprecated formula weighting function
+  * added weighting function 'Smart' that allows to specify weighting with a scalar function expression on ff,df,N (collection size) and document metadata
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 1 Apr 2016 22:30:00 +0100
+
 strus (0.7.3)
   * fixed missing dependency to libstrus_scalarproc
  -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 31 Mar 2016 02:30:00 +0100
