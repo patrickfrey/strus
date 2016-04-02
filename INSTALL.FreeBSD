@@ -33,7 +33,7 @@ Install packages with 'pkg install':
 
 Build using the clang/clang++ toolchain:
 
-cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib \
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib \
 	-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang .
 make
 

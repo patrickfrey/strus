@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 add_subdirectory( loggingMalloc )
+endif()
 add_subdirectory( scalarfunc )
 add_subdirectory( storageop )
 add_subdirectory( functions )
