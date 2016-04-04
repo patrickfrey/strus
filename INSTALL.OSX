@@ -18,10 +18,10 @@ ln -s /usr/local/opt/gettext/bin/* /usr/local/bin/.
 
 Build strus with:
 
-cmake -G Xcode .
-xcodebuild -configuration Release
-xcodebuild -configuration Release -target install build
+cmake -G Xcode -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release .
+xcodebuild -configuration Release -target ALL_BUILD
+xcodebuild -configuration Release -target install
 
 Running the tests:
 
-make test??
+xcodebuild -configuration Release -target RUN_TESTS
