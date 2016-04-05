@@ -32,18 +32,6 @@ public:
 			String			///< parameter specifies a string constant or enumeration item as string
 		};
 
-		/// \brief Get the name of a parameter type
-		static const char* typeName( Type type_)
-		{
-			static const char* ar[] = {"Feature","Attribute","Metadata","Numeric","String"};
-			return ar[ (unsigned int)type_];
-		}
-		/// \brief Get the name of this parameter type
-		const char* typeName() const
-		{
-			return typeName( m_type);
-		}
-
 		/// \brief Constructor
 		Parameter( const Type& type_, const std::string& name_, const std::string& text_, const std::string& domain_)
 			:m_type(type_),m_name(name_),m_text(text_),m_domain(domain_){}
