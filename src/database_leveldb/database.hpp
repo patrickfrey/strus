@@ -38,9 +38,9 @@ public:
 
 	virtual bool restoreDatabase( const std::string& configsource, DatabaseBackupCursorInterface* backup) const;
 
-	virtual const char* getConfigDescription( ConfigType type) const;
+	virtual const char* getConfigDescription( const ConfigType& type) const;
 
-	virtual const char** getConfigParameters( ConfigType type) const;
+	virtual const char** getConfigParameters( const ConfigType& type) const;
 
 private:
 	utils::SharedPtr<LevelDbHandleMap> m_dbhandle_map;

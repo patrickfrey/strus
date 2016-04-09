@@ -217,7 +217,7 @@ static std::vector<std::string> getKeys( const Map& map)
 	return rt;
 }
 
-std::vector<std::string> QueryProcessor::getFunctionList( QueryProcessorInterface::FunctionType type) const
+std::vector<std::string> QueryProcessor::getFunctionList( const FunctionType& type) const
 {
 	try
 	{

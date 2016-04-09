@@ -33,7 +33,7 @@ void SummarizerFunctionContextMetaData::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&,
-		float /*weight*/,
+		double /*weight*/,
 		const TermStatistics&)
 {
 	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");

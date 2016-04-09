@@ -114,7 +114,7 @@ public:
 	{}
 	
 	virtual void addCondition(
-			CompareOperator opr,
+			const CompareOperator& opr,
 			const std::string& name,
 			const NumericVariant& operand,
 			bool newGroup);

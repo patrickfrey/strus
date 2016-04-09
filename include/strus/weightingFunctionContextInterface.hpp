@@ -36,7 +36,7 @@ public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* postingIterator_,
-			float weight_,
+			double weight_,
 			const TermStatistics& stats_)=0;
 
 	/// \brief Call the weighting function for a document

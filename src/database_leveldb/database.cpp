@@ -221,7 +221,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 	CATCH_ERROR_MAP_RETURN( _TXT("error destroying database: %s"), *m_errorhnd, false);
 }
 
-const char* Database::getConfigDescription( ConfigType type) const
+const char* Database::getConfigDescription( const ConfigType& type) const
 {
 	switch (type)
 	{
@@ -237,7 +237,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 	return 0;
 }
 
-const char** Database::getConfigParameters( ConfigType type) const
+const char** Database::getConfigParameters( const ConfigType& type) const
 {
 	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression","max_open_files","write_buffer_size","block_size",0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};

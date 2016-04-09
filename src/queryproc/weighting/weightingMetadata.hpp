@@ -36,13 +36,13 @@ public:
 	WeightingFunctionContextMetadata(
 			MetaDataReaderInterface* metadata_,
 			const std::string& elementName_,
-			float weight_,
+			double weight_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual void addWeightingFeature(
 			const std::string&,
 			PostingIteratorInterface*,
-			float/*weight*/,
+			double/*weight*/,
 			const TermStatistics&);
 
 	virtual double call( const Index& docno);
@@ -50,7 +50,7 @@ public:
 private:
 	MetaDataReaderInterface* m_metadata;
 	Index m_elementHandle;
-	float m_weight;
+	double m_weight;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -77,7 +77,7 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	float m_weight;
+	double m_weight;
 	std::string m_elementName;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

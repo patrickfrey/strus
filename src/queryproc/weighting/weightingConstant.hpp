@@ -34,15 +34,15 @@ class WeightingFunctionContextConstant
 {
 public:
 	WeightingFunctionContextConstant(
-			float weight_, ErrorBufferInterface* errorhnd_)
+			double weight_, ErrorBufferInterface* errorhnd_)
 		:m_featar(),m_weight(weight_),m_errorhnd(errorhnd_){}
 
 	struct Feature
 	{
 		PostingIteratorInterface* itr;
-		float weight;
+		double weight;
 
-		Feature( PostingIteratorInterface* itr_, float weight_)
+		Feature( PostingIteratorInterface* itr_, double weight_)
 			:itr(itr_),weight(weight_){}
 		Feature( const Feature& o)
 			:itr(o.itr),weight(o.weight){}
@@ -51,7 +51,7 @@ public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
-			float weight_,
+			double weight_,
 			const TermStatistics& stats_);
 
 	virtual double call( const Index& docno);

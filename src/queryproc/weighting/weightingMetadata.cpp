@@ -20,7 +20,7 @@ using namespace strus;
 WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 		MetaDataReaderInterface* metadata_,
 		const std::string& elementName_,
-		float weight_,
+		double weight_,
 		ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
 	,m_elementHandle(metadata_->elementHandle(elementName_))
@@ -31,7 +31,7 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 void WeightingFunctionContextMetadata::addWeightingFeature(
 		const std::string&,
 		PostingIteratorInterface*,
-		float,
+		double,
 		const TermStatistics&)
 {
 	m_errorhnd->report( _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), "metadata");

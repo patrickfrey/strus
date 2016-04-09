@@ -308,7 +308,7 @@ MetaDataRestriction::MetaDataRestriction(
 {}
 
 void MetaDataRestriction::addCondition(
-		CompareOperator opr,
+		const CompareOperator& opr,
 		const std::string& name,
 		const NumericVariant& operand,
 		bool newGroup)

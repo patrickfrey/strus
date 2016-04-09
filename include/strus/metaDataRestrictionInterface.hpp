@@ -47,7 +47,7 @@ public:
 	///		Different groups are joined with a logical "AND" to form the meta data restriction expression
 	///		(See CNF = conjunctive normalform)
 	virtual void addCondition(
-			CompareOperator opr,
+			const CompareOperator& opr,
 			const std::string& name,
 			const NumericVariant& operand,
 			bool newGroup=true)=0;

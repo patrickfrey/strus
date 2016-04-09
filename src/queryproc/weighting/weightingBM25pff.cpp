@@ -48,7 +48,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 void WeightingFunctionContextBM25pff::addWeightingFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
-		float weight,
+		double weight,
 		const TermStatistics& termstats)
 {
 	try

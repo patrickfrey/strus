@@ -59,7 +59,7 @@ public:
 	/// \brief Define the topmost element of the stack as feature, removing it from the stack
 	/// \param[in] set_ name of the set of the new feature created
 	/// \param[in] weight_ weight of the feature for the weighting function in query evaluation 
-	virtual void defineFeature( const std::string& set_, float weight_=1.0)=0;
+	virtual void defineFeature( const std::string& set_, double weight_=1.0)=0;
 
 	/// \brief Define the statistics of a term for the case that they are defined by the client (for example in a system with a distributed index)
 	/// \param[in] type_ term type

@@ -19,7 +19,7 @@ using namespace strus;
 void WeightingFunctionContextTermFrequency::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		float weight_,
+		double weight_,
 		const TermStatistics&)
 {
 	try
@@ -38,7 +38,7 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 
 double WeightingFunctionContextTermFrequency::call( const Index& docno)
 {
-	float rt = 0.0;
+	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for (;fi != fe; ++fi)
 	{

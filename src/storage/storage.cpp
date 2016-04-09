@@ -151,7 +151,7 @@ StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable( DatabaseC
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }
 
-const char* Storage::getConfigDescription( ConfigType type) const
+const char* Storage::getConfigDescription( const ConfigType& type) const
 {
 	switch (type)
 	{
@@ -164,7 +164,7 @@ const char* Storage::getConfigDescription( ConfigType type) const
 	return 0;
 }
 
-const char** Storage::getConfigParameters( ConfigType type) const
+const char** Storage::getConfigParameters( const ConfigType& type) const
 {
 	static const char* keys_CreateStorageClient[]	= {"cachedterms", 0};
 	static const char* keys_CreateStorage[]		= {"acl", "metadata", 0};

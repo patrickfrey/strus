@@ -52,7 +52,7 @@ public:
 			std::size_t argc, int range_, unsigned int cardinality_);
 
 	virtual void attachVariable( const std::string& name_);
-	virtual void defineFeature( const std::string& set_, float weight_=1.0);
+	virtual void defineFeature( const std::string& set_, double weight_=1.0);
 
 	virtual void addMetaDataRestrictionCondition(
 			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
