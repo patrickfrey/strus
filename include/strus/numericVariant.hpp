@@ -170,7 +170,7 @@ public:
 	}
 
 	/// \brief Cast to a signed integer
-	unsigned int toint() const
+	int toint() const
 	{
 		return cast<int>();
 	}
