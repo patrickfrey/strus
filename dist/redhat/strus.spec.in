@@ -67,6 +67,7 @@
 %define fedora 0
 %define fc21 0
 %define fc22 0
+%define fc23 0
 %if 0%{?fedora_version} == 21
 %define dist fc21
 %define fc21 1
@@ -75,6 +76,11 @@
 %if 0%{?fedora_version} == 22
 %define dist fc22
 %define fc22 1
+%define fedora 1
+%endif
+%if 0%{?fedora_version} == 23
+%define dist fc23
+%define fc23 1
 %define fedora 1
 %endif
 
