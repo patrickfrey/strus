@@ -11,7 +11,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/private/configParser.hpp"
+#include "strus/base/configParser.hpp"
 #include "database.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
@@ -21,7 +21,7 @@
 #include <memory>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-#include "strus/private/fileio.hpp"
+#include "strus/base/fileio.hpp"
 
 using namespace strus;
 

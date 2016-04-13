@@ -20,12 +20,25 @@
 		<a href="https://github.com/patrickfrey?tab=repositories">github</a>.
 		Here is a list of its subprojects:
 		<ol>
+		<li><a href="https://github.com/patrickfrey/strusBase">strusBase</a>
+			implements some helper functions as common code base.
+			I also defines the error buffer interface for buffering
+			exception error messages. Exceptions cannot be thrown accross borders of 
+			dynamically linked libraries and modules. All other Strus projects debend 
+			on strusBase.</li>
 		<li><a href="https://github.com/patrickfrey/strus">strus</a>
 			provides the interface to the storage and the query processing of the search engine.
 			It also provides the default key value store database connector (to LevelDB).</li>
 		<li><a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>
 			provides document and query analysis for transforming content
 			into retrievable items.</li>
+		<li><a href="https://github.com/patrickfrey/strusTrace">strusTrace</a>
+			implements all methods of the strus analyzer and core as proxy
+			that logs its calls made via a specified interface. The whole
+			mechanism is implemented as own aspect without touching any
+			code of the core or the analyzer. The produced trace can be
+			visualized as call tree or the logs can be processed as readable 
+			dump.</li>
 		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
 			provides the loading of search engine components from dynamically 
 			loadable modules. (depends on strus and strusAnalyzer)</li>
@@ -53,6 +66,8 @@
 		</p>
 		<h3>C++ interfaces</h3>
 		<ul>
+		<li><a href="http://patrickfrey.github.io/strusBase/doc/doxygen/html/index.html">strus base</a>:
+			Interface for common functions and interfaces</li>
 		<li><a href="http://patrickfrey.github.io/strus/doc/doxygen/html/index.html">strus core</a>:
 			Interface to storage and query evaluation</li>
 		<li><a href="http://patrickfrey.github.io/strusAnalyzer/doc/doxygen/html/index.html">strus analyzer</a>:

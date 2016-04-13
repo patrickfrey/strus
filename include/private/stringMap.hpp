@@ -10,7 +10,7 @@
 #include "private/internationalization.hpp"
 #include "private/localStructAllocator.hpp"
 #include "private/utils.hpp"
-#include "strus/private/crc32.hpp"
+#include "strus/base/crc32.hpp"
 #include <boost/unordered_map.hpp>
 #include <map>
 #include <list>

@@ -14,19 +14,21 @@ include_directories(
 	"${PROJECT_SOURCE_DIR}/include"
 	"${PROJECT_SOURCE_DIR}/src/statsproc" 
 	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include" 
+	"${strusbase_INCLUDE_DIRS}"
 )
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
 	"${PROJECT_SOURCE_DIR}/utils"
 	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src" 
+	"${strusbase_LIBRARY_DIRS}"
 )
 
 # -------------------------------------------
 # LIBRARY
 # -------------------------------------------
 add_library( strus_statsproc SHARED ${source_files} libstrus_statsproc.cpp )
-target_link_libraries( strus_statsproc strus_private_utils strus_utils compactnodetrie_static )
+target_link_libraries( strus_statsproc strus_private_utils strus_base compactnodetrie_static )
 
 set_target_properties(
     strus_statsproc

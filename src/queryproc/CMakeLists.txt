@@ -15,20 +15,24 @@ set( source_files
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/include"
-	"${PROJECT_SOURCE_DIR}/src/queryproc" )
+	"${PROJECT_SOURCE_DIR}/src/queryproc"
+	"${strusbase_INCLUDE_DIRS}"
+)
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
 	"${PROJECT_SOURCE_DIR}/utils"
 	"${PROJECT_SOURCE_DIR}/src/queryproc/iterator"
 	"${PROJECT_SOURCE_DIR}/src/queryproc/summarize"
-	"${PROJECT_SOURCE_DIR}/src/queryproc/weighting" )
+	"${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
+	"${strusbase_LIBRARY_DIRS}"
+)
 
 # -------------------------------------------
 # LIBRARY
 # -------------------------------------------
 add_library( strus_queryproc SHARED ${source_files} libstrus_queryproc.cpp )
-target_link_libraries( strus_queryproc strus_private_utils strus_utils queryproc_utils iterator_standard summarizer_standard weighting_standard strus_scalarfunc )
+target_link_libraries( strus_queryproc strus_private_utils strus_base queryproc_utils iterator_standard summarizer_standard weighting_standard strus_scalarfunc )
 
 set_target_properties(
     strus_queryproc

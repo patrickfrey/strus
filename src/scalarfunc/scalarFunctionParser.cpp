@@ -10,7 +10,7 @@
 #include "scalarFunctionParser.hpp"
 #include "scalarFunction.hpp"
 #include "private/utils.hpp"
-#include "strus/private/snprintf.h"
+#include "strus/base/snprintf.h"
 #include "scalarFunctionLinearComb.hpp"
 #include <limits>
 

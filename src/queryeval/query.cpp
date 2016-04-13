@@ -23,7 +23,7 @@
 #include "strus/summaryElement.hpp"
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
-#include "strus/private/snprintf.h"
+#include "strus/base/snprintf.h"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"

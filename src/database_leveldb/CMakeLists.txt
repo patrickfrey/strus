@@ -14,19 +14,22 @@ set(libstrus_database_leveldb_source_files
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/3rdParty/getMemorySize/include"
-	"${PROJECT_SOURCE_DIR}/include" )
+	"${PROJECT_SOURCE_DIR}/include"
+	"${strusbase_INCLUDE_DIRS}"
+)
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
 	"${PROJECT_SOURCE_DIR}/utils"
 	"${PROJECT_SOURCE_DIR}/3rdParty/getMemorySize/src"
-	"${PROJECT_SOURCE_DIR}/database_leveldb" )
-
+	"${PROJECT_SOURCE_DIR}/database_leveldb"
+	"${strusbase_LIBRARY_DIRS}"
+)
 
 # -------------------------------------------
 # DATABASE LIBRARY
 # -------------------------------------------
 add_library( strus_database_leveldb SHARED ${libstrus_database_leveldb_source_files} )
-target_link_libraries( strus_database_leveldb boost_system strus_utils getmemsize_static strus_private_utils leveldb)
+target_link_libraries( strus_database_leveldb boost_system strus_base getmemsize_static strus_private_utils leveldb)
 set_target_properties(
     strus_database_leveldb
     PROPERTIES

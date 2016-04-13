@@ -11,7 +11,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/private/configParser.hpp"
+#include "strus/base/configParser.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/versionStorage.hpp"
 #include "private/internationalization.hpp"

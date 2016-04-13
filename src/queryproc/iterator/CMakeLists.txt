@@ -28,7 +28,7 @@ include_directories(
 # LIBRARY
 # -------------------------------------
 add_library( iterator_standard STATIC ${source_files})
-target_link_libraries( iterator_standard strus_utils )
+target_link_libraries( iterator_standard strus_base )
 
 
 

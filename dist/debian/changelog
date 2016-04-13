@@ -1,3 +1,7 @@
+strus (0.8.0-1) unstable; urgency=low
+  * moved libstrus_utils (no named libstrus_base) and libstrus_error to new project strusbase (strus depends now on strusbase)
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 13 Apr 2016 14:30:00 +0100
+
 strus (0.7.4-1) unstable; urgency=low
   * removed deprecated formula weighting function
   * added weighting function 'Smart' that allows to specify weighting with a scalar function expression on ff,df,N (collection size) and document metadata

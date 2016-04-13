@@ -134,6 +134,10 @@ BuildRequires: gcc
 BuildRequires: gcc-c++
 BuildRequires: cmake
 
+BuildRequires: strusbase >= %{dep_version}
+BuildRequires: strusbase-devel >= %{dep_version}
+Requires: strusbase >= %{dep_version}
+
 # LinuxDistribution.cmake depends depends on the Linux release files in '/etc' or
 # LSB files
 %if %{rhel}
@@ -277,10 +281,6 @@ make test
 %{_libdir}/%{name}/libstrus_queryproc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_storage.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_storage.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
-%{_libdir}/%{name}/libstrus_utils.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
-%{_libdir}/%{name}/libstrus_utils.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
-%{_libdir}/%{name}/libstrus_error.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
-%{_libdir}/%{name}/libstrus_error.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_malloc_unreliable.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_malloc_unreliable.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_malloc_logging.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
@@ -298,8 +298,6 @@ make test
 %{_libdir}/%{name}/libstrus_queryeval.so
 %{_libdir}/%{name}/libstrus_queryproc.so
 %{_libdir}/%{name}/libstrus_storage.so
-%{_libdir}/%{name}/libstrus_utils.so
-%{_libdir}/%{name}/libstrus_error.so
 %{_libdir}/%{name}/libstrus_malloc_unreliable.so
 %{_libdir}/%{name}/libstrus_malloc_logging.so
 %{_libdir}/%{name}/libstrus_statsproc.so
@@ -315,6 +313,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Wed Apr 13 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.0-0.1
+- moved libstrus_utils (no named libstrus_base) and libstrus_error to new project strusbase (strus depends now on strusbase)
+
 * Fri Apr 1 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.7.4-0.1
 - removed deprecated formula weighting function
 - added weighting function 'Smart' that allows to specify weighting with a scalar function expression on ff,df,N (collection size) and document metadata

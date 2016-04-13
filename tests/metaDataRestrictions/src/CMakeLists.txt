@@ -5,12 +5,15 @@ include_directories(
 	"${Intl_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/src/storage"
 	"${PROJECT_SOURCE_DIR}/src/queryeval"
-	"${PROJECT_SOURCE_DIR}/src/error"
-	"${PROJECT_SOURCE_DIR}/include" )
+	"${PROJECT_SOURCE_DIR}/include"
+	"${strusbase_INCLUDE_DIRS}"
+)
 link_directories(
 	"${PROJECT_SOURCE_DIR}/src/storage"
-	"${Boost_LIBRARY_DIRS}" )
+	"${Boost_LIBRARY_DIRS}"
+	"${strusbase_LIBRARY_DIRS}"
+)
 
 add_executable( testMetaDataRestrictions  testMetaDataRestrictions.cpp)
-target_link_libraries( testMetaDataRestrictions strus_queryeval_static strus_error strus_utils strus_storage_static ${Boost_LIBRARIES} ${Intl_LIBRARIES})
+target_link_libraries( testMetaDataRestrictions strus_queryeval_static strus_error strus_base strus_storage_static ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 

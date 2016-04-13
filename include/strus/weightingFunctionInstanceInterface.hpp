@@ -44,12 +44,12 @@ public:
 
 	/// \brief Create an execution context for this weighting function instance
 	/// \param[in] storage_ storage reference for retrieving some statistics (like the document collection frequency)
-	/// \param[in] metadata meta data interface
+	/// \param[in] metadata_ meta data interface
 	/// \param[in] stats global statistics for weighting
 	/// \return the execution context to fetch the calculated document weights from (ownership to caller)
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
-			MetaDataReaderInterface* metadata,
+			MetaDataReaderInterface* metadata_,
 			const GlobalStatistics& stats) const=0;
 
 	/// \brief Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)

@@ -4,15 +4,18 @@ include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${Intl_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/src/storage"
-	"${PROJECT_SOURCE_DIR}/include" )
+	"${PROJECT_SOURCE_DIR}/include"
+	"${strusbase_INCLUDE_DIRS}"
+)
 link_directories(
 	"${PROJECT_SOURCE_DIR}/src/storage"
-	"${PROJECT_SOURCE_DIR}/src/error"
 	"${PROJECT_SOURCE_DIR}/src/queryeval"
 	"${PROJECT_SOURCE_DIR}/src/queryproc"
 	"${PROJECT_SOURCE_DIR}/src/utils"
-	"${Boost_LIBRARY_DIRS}" )
+	"${Boost_LIBRARY_DIRS}"
+	"${strusbase_LIBRARY_DIRS}"
+)
 
 add_executable( testRandomCollection testRandomCollection.cpp)
-target_link_libraries( testRandomCollection strus_error strus_storage strus_queryeval strus_queryproc strus_utils ${Boost_LIBRARIES} ${Intl_LIBRARIES})
+target_link_libraries( testRandomCollection strus_error strus_storage strus_queryeval strus_queryproc strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 

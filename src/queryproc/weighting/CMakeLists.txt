@@ -30,7 +30,7 @@ link_directories(
 # LIBRARY
 # ------------------------------------
 add_library( weighting_standard STATIC ${source_files})
-target_link_libraries( weighting_standard strus_private_utils strus_utils queryproc_utils )
+target_link_libraries( weighting_standard strus_private_utils strus_base queryproc_utils )
 
 
 

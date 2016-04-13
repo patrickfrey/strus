@@ -11,10 +11,14 @@ set( source_files
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
-	"${PROJECT_SOURCE_DIR}/include" )
+	"${PROJECT_SOURCE_DIR}/include"
+	"${strusbase_INCLUDE_DIRS}"
+)
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${PROJECT_SOURCE_DIR}/utils" )
+	"${PROJECT_SOURCE_DIR}/utils"
+	"${strusbase_LIBRARY_DIRS}"
+)
 
 
 # --------------------------------
@@ -22,10 +26,10 @@ link_directories(
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # --------------------------------
 add_library( strus_queryeval_static STATIC ${source_files})
-target_link_libraries( strus_queryeval_static strus_utils strus_private_utils )
+target_link_libraries( strus_queryeval_static strus_base strus_private_utils )
 
 add_library( strus_queryeval SHARED libstrus_queryeval.cpp )
-target_link_libraries( strus_queryeval strus_queryeval_static  strus_utils strus_private_utils "${Boost_LIBRARIES}" )
+target_link_libraries( strus_queryeval strus_queryeval_static  strus_base strus_private_utils "${Boost_LIBRARIES}" )
 
 set_target_properties(
     strus_queryeval

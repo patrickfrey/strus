@@ -8,7 +8,7 @@
 #include "strus/lib/error.hpp"
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/private/fileio.hpp"
+#include "strus/base/fileio.hpp"
 #include "strus/versionStorage.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseInterface.hpp"
