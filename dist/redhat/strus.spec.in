@@ -312,13 +312,13 @@ make test
 %{_includedir}/%{name}/*.hpp
 %dir %{_includedir}/%{name}/lib
 %{_includedir}/%{name}/lib/*.hpp
-%dir %{_includedir}/%{name}/private
-%{_includedir}/%{name}/private/*.hpp
-%{_includedir}/%{name}/private/*.h
 # temporary
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Thu Apr 14 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.1-0.1
+- package fix: remove deployment instructions for files removed from this project
+
 * Wed Apr 13 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.0-0.1
 - moved libstrus_utils (no named libstrus_base) and libstrus_error to new project strusbase (strus depends now on strusbase)
 

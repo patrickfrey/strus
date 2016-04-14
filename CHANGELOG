@@ -1,3 +1,7 @@
+strus (0.8.1)
+  * package fix: remove deployment instructions for files removed from this project
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 14 Apr 2016 15:40:00 +0100
+
 strus (0.8.0)
   * moved libstrus_utils (no named libstrus_base) and libstrus_error to new project strusbase (strus depends now on strusbase)
  -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 13 Apr 2016 14:30:00 +0100
