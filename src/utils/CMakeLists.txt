@@ -7,6 +7,7 @@ set( source_files
 	utils.cpp
 	stringMap.cpp
 	internationalization.cpp
+	cstring.c
 )
 
 include_directories(
