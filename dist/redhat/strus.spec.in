@@ -121,8 +121,9 @@
 Summary: Library implementing the storage of a text search engine
 Name: strus
 %define main_version @STRUS_VERSION@
+%define dep_version @STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 Version: %{main_version}
-Release: 0.1
+Release: @STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 License: MPLv2
 Group: Development/Libraries/C++
 
