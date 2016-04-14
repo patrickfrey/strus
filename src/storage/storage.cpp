@@ -20,7 +20,6 @@
 #include "databaseAdapter.hpp"
 #include "storage.hpp"
 #include "byteOrderMark.hpp"
-#include "private/dll_tags.hpp"
 #include <string>
 #include <vector>
 #include <map>

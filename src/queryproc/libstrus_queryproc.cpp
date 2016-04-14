@@ -9,7 +9,7 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "queryProcessor.hpp"
-#include "private/dll_tags.hpp"
+#include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 

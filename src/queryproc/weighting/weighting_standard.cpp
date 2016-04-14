@@ -13,7 +13,6 @@
 #include "weightingConstant.hpp"
 #include "weightingMetadata.hpp"
 #include "weightingFrequency.hpp"
-#include "private/dll_tags.hpp"
 
 using namespace strus;
 

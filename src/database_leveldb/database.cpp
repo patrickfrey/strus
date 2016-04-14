@@ -13,7 +13,6 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/configParser.hpp"
 #include "database.hpp"
-#include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <stdexcept>
