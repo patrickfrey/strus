@@ -30,6 +30,6 @@ link_directories(
 # LIBRARY
 # ------------------------------------
 add_library( summarizer_standard STATIC ${source_files})
-target_link_libraries( summarizer_standard strus_utils queryproc_utils )
+target_link_libraries( summarizer_standard strus_base queryproc_utils )
 
 

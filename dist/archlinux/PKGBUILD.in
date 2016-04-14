@@ -2,6 +2,7 @@
 # Maintainer: Patrick Frey <patrickpfrey@yahoo.com> 
 
 pkgname=strus
+_deppkgver=@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 _mainpkgver=@STRUS_VERSION@
 pkgver=${_mainpkgver}
 pkgrel=1
@@ -9,7 +10,7 @@ pkgdesc='Library implementing the storage of a text search engine.'
 license=('MPL2')
 arch=('i686' 'x86_64')
 url="http://project-strus.net"
-depends=('boost>=1.53' 'boost-libs>=1.53' 'leveldb')
+depends=('boost>=1.53' 'boost-libs>=1.53' 'leveldb' "strusbase>=${_deppkgver}")
 makedepends=('cmake')
 source=("${pkgname}-${_mainpkgver}.tar.gz")
 

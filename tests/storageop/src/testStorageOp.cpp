@@ -13,7 +13,7 @@
 #include "strus/lib/storage.hpp"
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
-#include "strus/private/fileio.hpp"
+#include "strus/base/fileio.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"

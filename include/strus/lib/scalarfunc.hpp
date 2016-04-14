@@ -22,7 +22,7 @@ class ScalarFunctionInterface;
 class ErrorBufferInterface;
 
 
-/// \brief Create an instance of the default scalar function parser
+/// \brief Create an interface to the default scalar function parser
 ScalarFunctionParserInterface* createScalarFunctionParser_default( ErrorBufferInterface* errorhnd);
 
 }//namespace

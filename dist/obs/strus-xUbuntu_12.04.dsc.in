@@ -6,5 +6,5 @@ Maintainer: Patrick Frey <patrickpfrey@yahoo.com>
 Architecture: any
 Build-Depends: debhelper (>= 4.1.16), cmake,
  libboost1.53-dev, libboost-thread1.53-dev, libboost-system1.53-dev,
- libboost-date-time1.53-dev, libleveldb-dev   
+ libboost-date-time1.53-dev, libleveldb-dev, strusbase-dev
 Files:

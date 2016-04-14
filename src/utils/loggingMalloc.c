@@ -33,7 +33,7 @@
 #include <libgen.h>
 #include <execinfo.h>
 #include <unistd.h>
-#include "strus/private/snprintf.h"
+#include "strus/base/snprintf.h"
 
 #undef STRUS_LOWLEVEL_DEBUG
 
