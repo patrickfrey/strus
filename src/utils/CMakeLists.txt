@@ -41,7 +41,7 @@ set_target_properties(
 )
 
 add_library( strus_malloc_logging SHARED loggingMalloc.c )
-target_link_libraries( strus_malloc_logging ${CMAKE_DL_LIBS} )
+target_link_libraries( strus_malloc_logging ${CMAKE_DL_LIBS} strus_base )
 set_target_properties(
     strus_malloc_logging
     PROPERTIES
