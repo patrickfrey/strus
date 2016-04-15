@@ -18,7 +18,7 @@
 #include <vector>
 #include <map>
 #include <limits>
-#include <stdint.h>
+#include "strus/base/stdint.h"
 
 namespace strus
 {

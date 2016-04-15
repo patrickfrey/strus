@@ -19,7 +19,7 @@
 #include <cstring>
 #include <limits>
 #include <arpa/inet.h>
-#include <stdint.h>
+#include "strus/base/stdint.h"
 
 #undef STRUS_LOWLEVEL_DEBUG
 

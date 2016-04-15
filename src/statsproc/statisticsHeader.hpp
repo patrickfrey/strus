@@ -10,7 +10,7 @@
 #ifndef _STRUS_STATISTICS_HEADER_HPP_INCLUDED
 #define _STRUS_STATISTICS_HEADER_HPP_INCLUDED
 #include <cstring>
-#include <stdint.h>
+#include "strus/base/stdint.h"
 
 namespace strus
 {

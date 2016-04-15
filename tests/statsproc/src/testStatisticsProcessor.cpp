@@ -25,7 +25,7 @@
 #include <ctime>
 #include <cmath>
 #include <iomanip>
-#include <stdint.h>
+#include "strus/base/stdint.h"
 #include <stdarg.h>
 
 #undef STRUS_LOWLEVEL_DEBUG
