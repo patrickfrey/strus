@@ -317,6 +317,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Fri Apr 15 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.2-0.1
+- moved numeric variant from strus to strus base
+
 * Thu Apr 14 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.1-0.1
 - package fix: remove deployment instructions for files removed from this project
 
