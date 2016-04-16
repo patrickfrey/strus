@@ -34,7 +34,7 @@ public:
 	ResultDocument( const WeightedDocument& o)
 		:WeightedDocument(o){}
 	/// \brief Constructor from a composition its basic parts
-	ResultDocument( const Index& docno_, float weight_, const std::vector<SummaryElement>& summaryElements_)
+	ResultDocument( const Index& docno_, double weight_, const std::vector<SummaryElement>& summaryElements_)
 		:WeightedDocument(docno_,weight_),m_summaryElements(summaryElements_){}
 
 	/// \brief Get the list of summary elements of this result

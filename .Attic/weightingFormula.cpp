@@ -14,6 +14,8 @@
 #include <cmath>
 #include <ctime>
 
+#error DEPRECATED
+
 using namespace strus;
 
 
@@ -261,7 +263,8 @@ std::string WeightingFunctionInstanceFormula::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionFormula::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionFormula::createInstance(
+		const QueryProcessorInterface*) const
 {
 	try
 	{
@@ -270,16 +273,17 @@ WeightingFunctionInstanceInterface* WeightingFunctionFormula::createInstance() c
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "formula", *m_errorhnd, 0);
 }
 
-WeightingFunctionInterface::Description WeightingFunctionFormula::getDescription() const
+FunctionDescription WeightingFunctionFormula::getDescription() const
 {
 	try
 	{
-		Description rt( _TXT("Calculate the weight of a document with a formula"));
-		rt( Description::Param::Feature, "[a-z]+", _TXT( "defines the query features referenced in the formula to weight"), "");
-		rt( Description::Param::String, "formula", _TXT( "defines an expression to evaluate. You can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements"), "");
-		rt( Description::Param::Numeric, "[a-z]+", _TXT( "defines a variable to be used in the formula expression"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt( _TXT("Calculate the weight of a document with a formula"));
+		rt( P::Feature, "[a-z]+", _TXT( "defines the query features referenced in the formula to weight"), "");
+		rt( P::String, "formula", _TXT( "defines an expression to evaluate. You can use the operators '*','/','+','-' and the functions 'log'. Mixing operators of different precedence is only allowed using brackets '(' and ')'. The variables 'weight','ff' and 'df' can be used besides all variables specified as parameters or as meta data elements"), "");
+		rt( P::Numeric, "[a-z]+", _TXT( "defines a variable to be used in the formula expression"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "formula", *m_errorhnd, WeightingFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "formula", *m_errorhnd, FunctionDescription());
 }
 

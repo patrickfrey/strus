@@ -8,7 +8,7 @@
 #include "strus/lib/storage.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "storage.hpp"
-#include "private/dll_tags.hpp"
+#include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 

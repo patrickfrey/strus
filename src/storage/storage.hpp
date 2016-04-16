@@ -39,9 +39,9 @@ public:
 	
 	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseClientInterface* database) const;
 
-	virtual const char* getConfigDescription( ConfigType type) const;
+	virtual const char* getConfigDescription( const ConfigType& type) const;
 
-	virtual const char** getConfigParameters( ConfigType type) const;
+	virtual const char** getConfigParameters( const ConfigType& type) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

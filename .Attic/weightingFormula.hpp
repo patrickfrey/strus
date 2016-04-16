@@ -24,6 +24,8 @@
 #include <iostream>
 #include <iomanip>
 
+#error DEPRECATED
+
 namespace strus
 {
 /// \brief Forward declaration
@@ -168,9 +170,10 @@ public:
 
 	virtual ~WeightingFunctionFormula(){}
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const;
+	virtual WeightingFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const;
 
-	virtual Description getDescription() const;
+	virtual FunctionDescription getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

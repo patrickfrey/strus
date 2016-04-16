@@ -17,6 +17,8 @@
 #include <iomanip> 
 #include <stdint.h> 
 
+#error DEPRECATED
+
 #undef STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;

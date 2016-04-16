@@ -8,7 +8,7 @@
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "database.hpp"
-#include "private/dll_tags.hpp"
+#include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 

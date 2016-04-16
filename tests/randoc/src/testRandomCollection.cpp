@@ -37,7 +37,7 @@
 #include <cstdarg>
 #include <stdio.h>
 #include <memory>
-#include <stdint.h>
+#include "strus/base/stdint.h"
 
 /// \brief Pseudo random generator 
 enum {KnuthIntegerHashFactor=2654435761U};

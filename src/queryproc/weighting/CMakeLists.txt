@@ -5,13 +5,12 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 # --------------------------------------
 set(source_files
 	weighting_standard.cpp
+	weightingSmart.cpp
 	weightingBM25.cpp
 	weightingBM25pff.cpp
-	weightingFormula.cpp
 	weightingFrequency.cpp
 	weightingConstant.cpp
 	weightingMetadata.cpp
-	formulaInterpreter.cpp
 )
 
 include_directories(
@@ -31,7 +30,7 @@ link_directories(
 # LIBRARY
 # ------------------------------------
 add_library( weighting_standard STATIC ${source_files})
-target_link_libraries( weighting_standard strus_private_utils strus_utils queryproc_utils )
+target_link_libraries( weighting_standard strus_private_utils strus_base queryproc_utils )
 
 
 

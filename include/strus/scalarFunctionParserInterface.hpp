@@ -26,8 +26,11 @@ public:
 
 	/// \brief Parses a function from source and instantiates a function object
 	/// \param[in] src source describing the function
+	/// \param[in] argumentNames the list of function argument names in the source (default is a prefix '_' followed by the argument index starting with 0)
 	/// \return the created function object
-	virtual ScalarFunctionInterface* createFunction( const std::string& src) const=0;
+	virtual ScalarFunctionInterface* createFunction(
+			const std::string& src,
+			const std::vector<std::string>& argumentNames) const=0;
 };
 
 }// namespace

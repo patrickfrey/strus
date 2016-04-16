@@ -1,0 +1,27 @@
+OSX
+---
+
+Install Homebrew from http://brew.sh/:
+
+/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+Install required packages:
+
+brew install cmake boost snappy leveldb
+
+Install gettext with brew, draw necessary links:
+
+brew install gettext
+ln -s /usr/local/opt/gettext/lib/* /usr/local/lib/.
+ln -s /usr/local/opt/gettext/include/* /usr/local/include/.
+ln -s /usr/local/opt/gettext/bin/* /usr/local/bin/.
+
+Build strus with:
+
+cmake -G Xcode -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release .
+xcodebuild -configuration Release -target ALL_BUILD
+xcodebuild -configuration Release -target install
+
+Running the tests:
+
+xcodebuild -configuration Release -target RUN_TESTS

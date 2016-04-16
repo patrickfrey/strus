@@ -1,0 +1,40 @@
+FreeBSD 10.2 on SPARC64
+-----------------------
+
+Use 'gcc48' from ports.
+
+Build 'cmake', 'leveldb' (no 'gperftools' as they are not supported on SPARC, use normal malloc,
+and no 'snappy', is marked as broken on SPARC)
+
+Build 'gettext' and 'gettext-tools' from ports.
+
+Build 'boost' 1.55 from ports.
+
+Build strus with:
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib \
+        -DCMAKE_CXX_FLAGS=-g -DBOOST_INCLUDEDIR=/usr/local/include \
+        -DCMAKE_CXX_COMPILER=g++48 -DCMAKE_C_COMPILER=gcc48 .
+make
+
+We must use 'gcc48' (same toolchain) as 'boost' and 'leveldb' require features from newer
+gcc's!
+
+Running the tests:
+
+setenv LD_LIBRARY_PATH /usr/local/lib:/usr/local/lib/gcc48 
+make test
+
+FreeBSD 10.2 on x86_64, i686
+----------------------------
+
+Install packages with 'pkg install':
+- leveldb, snappy, cmake, boost-libs
+
+Build using the clang/clang++ toolchain:
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib \
+	-DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang .
+make
+
+

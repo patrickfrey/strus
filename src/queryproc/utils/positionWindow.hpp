@@ -9,7 +9,7 @@
 #define _STRUS_QUERYPROC_POSITION_WINDOW_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include <stdint.h>
+#include "strus/base/stdint.h"
 
 namespace strus {
 

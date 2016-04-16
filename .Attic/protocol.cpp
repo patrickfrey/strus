@@ -26,7 +26,7 @@
 
 --------------------------------------------------------------------
 */
-#include "strus/private/protocol.hpp"
+#include "strus/base/protocol.hpp"
 #include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>

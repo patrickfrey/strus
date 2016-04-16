@@ -16,10 +16,9 @@ class ErrorBufferInterface;
 /// \brief Forward declaration
 class WeightingFunctionInterface;
 
-/// \brief Create a weighting function for a schema defined as formula in a string
+/// \brief Create a weighting function for a SMART schema defined as scalar function on ff,df,N and metadata in a expression as string
 /// \return the weighting function reference (to dispose with delete)
-/// \remark This type of weighting function may not have the ultimate preformance, but it might be used for prototyping
-WeightingFunctionInterface* createWeightingFunctionFormula( ErrorBufferInterface* errorhnd);
+WeightingFunctionInterface* createWeightingFunctionSmart( ErrorBufferInterface* errorhnd);
 
 /// \brief Create a weighting function for the weighting schema BM25
 /// \return the weighting function reference (to dispose with delete)

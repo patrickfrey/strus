@@ -40,7 +40,7 @@ public:
 			const std::string& name_,
 			PostingIteratorInterface* postingIterator_,
 			const std::vector<SummarizationVariable>& variables_,
-			float weight_,
+			double weight_,
 			const TermStatistics& stats_)=0;
 
 	/// \brief Get the summarization elements for one document

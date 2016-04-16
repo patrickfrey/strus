@@ -34,9 +34,9 @@ public:
 	struct Feature
 	{
 		PostingIteratorInterface* itr;
-		float weight;
+		double weight;
 
-		Feature( PostingIteratorInterface* itr_, float weight_)
+		Feature( PostingIteratorInterface* itr_, double weight_)
 			:itr(itr_),weight(weight_){}
 		Feature( const Feature& o)
 			:itr(o.itr),weight(o.weight){}
@@ -45,7 +45,7 @@ public:
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
-			float weight_,
+			double weight_,
 			const TermStatistics&);
 
 	virtual double call( const Index& docno);
@@ -94,9 +94,10 @@ public:
 		:m_errorhnd(errorhnd_){}
 	virtual ~WeightingFunctionTermFrequency(){}
 
-	virtual WeightingFunctionInstanceInterface* createInstance() const;
+	virtual WeightingFunctionInstanceInterface* createInstance(
+			const QueryProcessorInterface* processor) const;
 
-	virtual Description getDescription() const;
+	virtual FunctionDescription getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

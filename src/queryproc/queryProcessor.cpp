@@ -69,8 +69,8 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	defineWeightingFunction( "td", func);
 	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "metadata", func);
-	if (0==(func=createWeightingFunctionFormula( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
-	defineWeightingFunction( "formula", func);
+	if (0==(func=createWeightingFunctionSmart( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "smart", func);
 
 	SummarizerFunctionInterface* sum;
 	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
@@ -217,7 +217,7 @@ static std::vector<std::string> getKeys( const Map& map)
 	return rt;
 }
 
-std::vector<std::string> QueryProcessor::getFunctionList( QueryProcessorInterface::FunctionType type) const
+std::vector<std::string> QueryProcessor::getFunctionList( const FunctionType& type) const
 {
 	try
 	{

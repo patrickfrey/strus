@@ -53,23 +53,27 @@ include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${Intl_INCLUDE_DIRS}"
 	"${PROJECT_SOURCE_DIR}/include"
-	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include"  )
+	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include" 
+	"${strusbase_INCLUDE_DIRS}"
+)
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
 	"${PROJECT_SOURCE_DIR}/utils"
 	"${PROJECT_SOURCE_DIR}/database_leveldb"
 	"${PROJECT_SOURCE_DIR}/statsproc"
-	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src"  )
+	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src" 
+	"${strusbase_LIBRARY_DIRS}"
+)
 
 # ------------------------------
 # STORAGE LIBRARY
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # ------------------------------
 add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
-target_link_libraries( strus_storage_static strus_private_utils strus_utils )
+target_link_libraries( strus_storage_static strus_private_utils strus_base )
 
 add_library(strus_storage SHARED libstrus_storage.cpp )
-target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_static strus_utils )
+target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_static strus_base )
 set_target_properties(
     strus_storage
     PROPERTIES
@@ -79,7 +83,7 @@ set_target_properties(
 )
 
 add_executable( strusResizeBlocks strusResizeBlocks.cpp )
-target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_utils strus_storage_static compactnodetrie_static ${Intl_LIBRARIES})
+target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_base strus_storage_static compactnodetrie_static ${Intl_LIBRARIES})
 
 # ------------------------------
 # INSTALLATION

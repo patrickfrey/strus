@@ -22,8 +22,10 @@
 		Infortunately there is no releasing yet a download page to fetch packages of a specific release yet.
 		Here is a list of links to the packages:
 		<ol>
+		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusbase">strusBase</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strus">strus</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusanalyzer">strusAnalyzer</a></li>
+		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strustrace">strusTrace</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusmodule">strusModule</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusrpc">strusRpc</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusutilities">strusUtilities</a></li>
@@ -58,14 +60,14 @@
 git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</pre>
 		The following projects (substitute for &lt;projectname&gt;) are part of the strus universe:
-		<a href="https://github.com/patrickfrey/strus">strus</a>, <a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>, <a href="https://github.com/patrickfrey/strusModule">strusModule</a>, <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>, <a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>, <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
+		<a href="https://github.com/patrickfrey/strusBase">strusBase</a>, <a href="https://github.com/patrickfrey/strus">strus</a>, <a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>, <a href="https://github.com/patrickfrey/strusTrace">strusTrace</a>, <a href="https://github.com/patrickfrey/strusModule">strusModule</a>, <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>, <a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>, <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
 		</p>
 
 		<h2>Build the latest stable version</h2>
 		<p class="description">If you extract the build description from the
 		current docker images of <a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404-env/Dockerfile">the pre-requisites</a>,
-		<a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404.v0_1/Dockerfile">the core</a>
-		and the <a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404-bind.v0_1/Dockerfile">language bindings</a>,
+		<a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404.v0_8/Dockerfile">the core</a>
+		and the <a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404-bind.v0_8/Dockerfile">language bindings</a>,
 		you get a version that builds and runs. These images are maintained, because some tutorials,
 		articles and some example projects rely on them.
 		</p>
@@ -103,6 +105,8 @@ sudo make install
 		installed in the following order (projects on the same line can be build in reversed
 		order too because they have no dependencies to each other):
 		<ol>
+		<li>strusBase
+		</li>
 		<li>strus, strusAnalyze
 		</li>
 		<li>strusModule

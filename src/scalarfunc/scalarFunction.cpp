@@ -30,7 +30,8 @@ bool ScalarFunction::isLinearComb( std::vector<double>& values) const
 
 	if (ip+2 < m_instructionar.size() && opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul)
 	{
-		values.push_back( m_valuear[aidx++]);
+		values.push_back( m_valuear[indexOperand(ip)]);
+		aidx++;
 		ip += 3;
 	}
 	else if (ip < m_instructionar.size() && opCode(ip) == OpArg && indexOperand(ip) == aidx)
@@ -47,7 +48,8 @@ bool ScalarFunction::isLinearComb( std::vector<double>& values) const
 	{
 		if (ip+3 < m_instructionar.size() && opCode(ip) == OpPush && opCode(ip+1) == OpArg && indexOperand(ip+1) == aidx && opCode(ip+2) == OpMul && opCode(ip+3) == OpAdd)
 		{
-			values.push_back( m_valuear[aidx++]);
+			values.push_back( m_valuear[indexOperand(ip)]);
+			aidx++;
 			ip+=4;
 		}
 		else if (ip+1 < m_instructionar.size() && opCode(ip) == OpArg && indexOperand(ip) == aidx && opCode(ip+1) == OpAdd)

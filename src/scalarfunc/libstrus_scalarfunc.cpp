@@ -12,7 +12,7 @@
 #include "scalarFunction.hpp"
 #include "scalarFunctionInstance.hpp"
 #include "scalarFunctionParser.hpp"
-#include "private/dll_tags.hpp"
+#include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 

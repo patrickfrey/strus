@@ -32,7 +32,7 @@ void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,
 		const std::vector<SummarizationVariable>&,
-		float /*weight*/,
+		double /*weight*/,
 		const TermStatistics&)
 {
 	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "attribute");
@@ -131,14 +131,15 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAttribute::createInstance
 }
 
 
-SummarizerFunctionInterface::Description SummarizerFunctionAttribute::getDescription() const
+FunctionDescription SummarizerFunctionAttribute::getDescription() const
 {
 	try
 	{
-		Description rt( _TXT("Get the value of a document attribute."));
-		rt( Description::Param::Attribute, "name", _TXT( "the name of the attribute to get"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt( _TXT("Get the value of a document attribute."));
+		rt( P::Attribute, "name", _TXT( "the name of the attribute to get"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "attribute", *m_errorhnd, SummarizerFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "attribute", *m_errorhnd, FunctionDescription());
 }
 

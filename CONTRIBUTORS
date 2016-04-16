@@ -1,2 +1,15 @@
+#
+# This is the list of people who have (besides persons already listed in AUTHORS)
+# contributed code to this repository:
+#
+
+Andreas Baumann <http://www.andreasbaumann.cc> (github: andreasbaumann)
+  Made the software build work on various platforms (Linuxes, BSDs and OS X)
+  Wrote the whole packaging
+  Wrote the scripts to make the software build on the Open Suse Build Cluster
+  Some influence on introspection features due to the work on the Strus webservice project (https://github.com/Eurospider/strusWebService)
+
+David Wilson <dw@botanicus.net> (github: dw)
+  Contributed some fixes for the build on OS X
 
 

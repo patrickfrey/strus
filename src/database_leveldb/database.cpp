@@ -11,9 +11,8 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
-#include "strus/private/configParser.hpp"
+#include "strus/base/configParser.hpp"
 #include "database.hpp"
-#include "private/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <stdexcept>
@@ -21,7 +20,7 @@
 #include <memory>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-#include "strus/private/fileio.hpp"
+#include "strus/base/fileio.hpp"
 
 using namespace strus;
 
@@ -221,7 +220,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 	CATCH_ERROR_MAP_RETURN( _TXT("error destroying database: %s"), *m_errorhnd, false);
 }
 
-const char* Database::getConfigDescription( ConfigType type) const
+const char* Database::getConfigDescription( const ConfigType& type) const
 {
 	switch (type)
 	{
@@ -237,7 +236,7 @@ const char* Database::getConfigDescription( ConfigType type) const
 	return 0;
 }
 
-const char** Database::getConfigParameters( ConfigType type) const
+const char** Database::getConfigParameters( const ConfigType& type) const
 {
 	static const char* keys_CreateDatabaseClient[] = {"path","cache","compression","max_open_files","write_buffer_size","block_size",0};
 	static const char* keys_CreateDatabase[] = {"path","compression", 0};

@@ -11,7 +11,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
-#include "strus/private/configParser.hpp"
+#include "strus/base/configParser.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/versionStorage.hpp"
 #include "private/internationalization.hpp"
@@ -20,7 +20,6 @@
 #include "databaseAdapter.hpp"
 #include "storage.hpp"
 #include "byteOrderMark.hpp"
-#include "private/dll_tags.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -151,7 +150,7 @@ StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable( DatabaseC
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }
 
-const char* Storage::getConfigDescription( ConfigType type) const
+const char* Storage::getConfigDescription( const ConfigType& type) const
 {
 	switch (type)
 	{
@@ -164,7 +163,7 @@ const char* Storage::getConfigDescription( ConfigType type) const
 	return 0;
 }
 
-const char** Storage::getConfigParameters( ConfigType type) const
+const char** Storage::getConfigParameters( const ConfigType& type) const
 {
 	static const char* keys_CreateStorageClient[]	= {"cachedterms", 0};
 	static const char* keys_CreateStorage[]		= {"acl", "metadata", 0};

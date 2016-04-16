@@ -19,7 +19,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "strus/private/snprintf.h"
+#include "strus/base/snprintf.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>

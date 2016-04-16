@@ -10,7 +10,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "queryEval.hpp"
-#include "private/dll_tags.hpp"
+#include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <map>

@@ -19,7 +19,7 @@ using namespace strus;
 void WeightingFunctionContextTermFrequency::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,
-		float weight_,
+		double weight_,
 		const TermStatistics&)
 {
 	try
@@ -38,7 +38,7 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 
 double WeightingFunctionContextTermFrequency::call( const Index& docno)
 {
-	float rt = 0.0;
+	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for (;fi != fe; ++fi)
 	{
@@ -97,7 +97,8 @@ std::string WeightingFunctionInstanceTermFrequency::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstance(
+		const QueryProcessorInterface*) const
 {
 	try
 	{
@@ -106,15 +107,16 @@ WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstan
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "frequency", *m_errorhnd, 0);
 }
 
-WeightingFunctionInterface::Description WeightingFunctionTermFrequency::getDescription() const
+FunctionDescription WeightingFunctionTermFrequency::getDescription() const
 {
 	try
 	{
-		Description rt( _TXT("Calculate the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight"));
-		rt( Description::Param::Feature, "match", _TXT( "defines the query features to weight"), "");
-		rt( Description::Param::Numeric, "weight", _TXT( "defines the query feature weight factor"), "0:");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt( _TXT("Calculate the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight"));
+		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
+		rt( P::Numeric, "weight", _TXT( "defines the query feature weight factor"), "0:");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "frequency", *m_errorhnd, WeightingFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "frequency", *m_errorhnd, FunctionDescription());
 }
 

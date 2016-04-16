@@ -61,7 +61,7 @@ public:
 			const std::string& name,
 			PostingIteratorInterface* itr,
 			const std::vector<SummarizationVariable>& variables,
-			float weight,
+			double weight,
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
@@ -71,9 +71,9 @@ private:
 	{
 		PostingIteratorInterface* itr;
 		std::vector<const PostingIteratorInterface*> varitr;
-		float weight;
+		double weight;
 
-		SummarizationFeature( PostingIteratorInterface* itr_, const std::vector<const PostingIteratorInterface*>& varitr_, float weight_)
+		SummarizationFeature( PostingIteratorInterface* itr_, const std::vector<const PostingIteratorInterface*>& varitr_, double weight_)
 			:itr(itr_),varitr(varitr_),weight(weight_){}
 		SummarizationFeature( const SummarizationFeature& o)
 			:itr(o.itr),varitr(o.varitr),weight(o.weight){}
@@ -132,7 +132,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual Description getDescription() const;
+	virtual FunctionDescription getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

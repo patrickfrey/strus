@@ -76,7 +76,7 @@ public:
 			const std::string& name,
 			PostingIteratorInterface* itr,
 			const std::vector<SummarizationVariable>&,
-			float weight,
+			double weight,
 			const TermStatistics&);
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
@@ -169,7 +169,7 @@ public:
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;
 
-	virtual Description getDescription() const;
+	virtual FunctionDescription getDescription() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

@@ -42,10 +42,6 @@ CTestTestfile.cmake.user
 cmake/uninstall.cmake
 DartConfiguration.tcl
 Testing/
-CPackConfig.cmake
-CPackConfig.cmake.user
-CPackSourceConfig.cmake.user
-CPackSourceConfig.cmake
 tests/cmake_install.cmake.user
 cmake/build_rules.cmake.user
 src/queryeval/cmake_install.cmake.user

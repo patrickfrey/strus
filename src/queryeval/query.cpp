@@ -23,7 +23,7 @@
 #include "strus/summaryElement.hpp"
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
-#include "strus/private/snprintf.h"
+#include "strus/base/snprintf.h"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -146,7 +146,7 @@ void Query::attachVariable( const std::string& name_)
 	CATCH_ERROR_MAP( _TXT("error attaching variables to query: %s"), *m_errorhnd);
 }
 
-void Query::defineFeature( const std::string& set_, float weight_)
+void Query::defineFeature( const std::string& set_, double weight_)
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
 	char buf[ 2048];

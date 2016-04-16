@@ -62,11 +62,11 @@ public:
 	/// \brief Gets an example configuration description (source string as used by the functions here)
 	///	createDatabase(const char*), destroyDatabase(const char*) and createDatabaseClient(const char*)
 	///	for the usage printed by programs using this database.
-	virtual const char* getConfigDescription( ConfigType type) const=0;
+	virtual const char* getConfigDescription( const ConfigType& type) const=0;
 
 	/// \brief Get the list of known configuration parameter keys
 	///	for verification of the configuration by programs using this database.
-	virtual const char** getConfigParameters( ConfigType type) const=0;
+	virtual const char** getConfigParameters( const ConfigType& type) const=0;
 };
 
 }//namespace

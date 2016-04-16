@@ -18,7 +18,7 @@ include_directories(
 # LIBRARY
 # ------------------------------------
 add_library( queryproc_utils STATIC ${source_files})
-target_link_libraries( queryproc_utils strus_private_utils strus_utils )
+target_link_libraries( queryproc_utils strus_private_utils strus_base )
 
 
 

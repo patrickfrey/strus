@@ -56,13 +56,23 @@ public:
 			const std::string& name, NaryFunction func,
 			std::size_t min_nofargs, std::size_t max_nofargs);
 
-	virtual ScalarFunctionInterface* createFunction( const std::string& src) const;
+	virtual ScalarFunctionInterface* createFunction(
+			const std::string& src,
+			const std::vector<std::string>& argumentNames) const;
 
 private:
-	void parseOperand( ScalarFunction* func, std::string::const_iterator& si, const std::string::const_iterator& se) const;
-	void parseExpression( ScalarFunction* func, unsigned int oprPrecedence, std::string::const_iterator& si, const std::string::const_iterator& se) const;
-	void parseFunctionCall( ScalarFunction* func, const std::string& functionName, std::string::const_iterator& si, const std::string::const_iterator& se) const;
+	typedef std::map<std::string,std::size_t> ArgumentNameMap;
+	struct ParserContext
+	{
+		ArgumentNameMap argumentNameMap;
+		std::size_t nofNamedArguments;
+	};
+
+	void parseOperand( ScalarFunction* func, ParserContext* ctx, std::string::const_iterator& si, const std::string::const_iterator& se) const;
+	void parseExpression( ScalarFunction* func, ParserContext* ctx, unsigned int oprPrecedence, std::string::const_iterator& si, const std::string::const_iterator& se) const;
+	void parseFunctionCall( ScalarFunction* func, ParserContext* ctx, const std::string& functionName, std::string::const_iterator& si, const std::string::const_iterator& se) const;
 	void resolveFunctionCall( ScalarFunction* func, const std::string& functionName, std::size_t nofArguments) const;
+	void resolveIdentifier( ScalarFunction* func, ParserContext* ctx, const std::string& var) const;
 
 private:
 	struct NaryFunctionDef

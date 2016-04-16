@@ -10,7 +10,6 @@
 #include "databaseAdapter.hpp"
 #include "private/internationalization.hpp"
 #include <stdexcept>
-#include <stdint.h>
 
 using namespace strus;
 

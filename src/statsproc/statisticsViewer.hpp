@@ -11,7 +11,6 @@
 #define _STRUS_STATISTICS_VIEWER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/statisticsViewerInterface.hpp"
 #include "statisticsHeader.hpp"
-#include <stdint.h>
 #include <string>
 
 namespace strus

@@ -1,3 +1,32 @@
+strus (0.8.2)
+  * moved numeric variant from strus to strus base
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 15 Apr 2016 15:00:00 +0100
+
+strus (0.8.1)
+  * package fix: remove deployment instructions for files removed from this project
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 14 Apr 2016 15:40:00 +0100
+
+strus (0.8.0)
+  * moved libstrus_utils (no named libstrus_base) and libstrus_error to new project strusbase (strus depends now on strusbase)
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 13 Apr 2016 14:30:00 +0100
+
+strus (0.7.4)
+  * removed deprecated formula weighting function
+  * added weighting function 'Smart' that allows to specify weighting with a scalar function expression on ff,df,N (collection size) and document metadata
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 1 Apr 2016 22:30:00 +0100
+
+strus (0.7.3)
+  * fixed missing dependency to libstrus_scalarproc
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 31 Mar 2016 02:30:00 +0100
+
+strus (0.7.2)
+  * fixed missing dependency to libstrus_scalarproc
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 31 Mar 2016 00:30:00 +0100
+
+strus (0.7.1)
+  * fixed bug in scalar functions in 0.7.0
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 30 Mar 2016 23:30:00 +0100
+
 strus (0.7.0)
   * introducing scalar function objects used for combining ranking functions or to pass functions to weighting functions or summarizers
  -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 30 Mar 2016 21:30:00 +0100

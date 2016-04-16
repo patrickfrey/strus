@@ -13,6 +13,8 @@
 #include <ostream>
 #include <stdint.h>
 
+#error DEPRECATED
+
 namespace strus
 {
 

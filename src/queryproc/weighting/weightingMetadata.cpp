@@ -20,7 +20,7 @@ using namespace strus;
 WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 		MetaDataReaderInterface* metadata_,
 		const std::string& elementName_,
-		float weight_,
+		double weight_,
 		ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
 	,m_elementHandle(metadata_->elementHandle(elementName_))
@@ -31,7 +31,7 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 void WeightingFunctionContextMetadata::addWeightingFeature(
 		const std::string&,
 		PostingIteratorInterface*,
-		float,
+		double,
 		const TermStatistics&)
 {
 	m_errorhnd->report( _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), "metadata");
@@ -115,7 +115,8 @@ std::string WeightingFunctionInstanceMetadata::tostring() const
 }
 
 
-WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance() const
+WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance(
+		const QueryProcessorInterface*) const
 {
 	try
 	{
@@ -125,14 +126,15 @@ WeightingFunctionInstanceInterface* WeightingFunctionMetadata::createInstance() 
 }
 
 
-WeightingFunctionInterface::Description WeightingFunctionMetadata::getDescription() const
+FunctionDescription WeightingFunctionMetadata::getDescription() const
 {
 	try
 	{
-		Description rt( _TXT("Calculate the weight of a document as value of a meta data element."));
-		rt( Description::Param::Metadata, "name", _TXT( "name of the meta data element to use as weight"), "");
+		typedef FunctionDescription::Parameter P;
+		FunctionDescription rt( _TXT("Calculate the weight of a document as value of a meta data element."));
+		rt( P::Metadata, "name", _TXT( "name of the meta data element to use as weight"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "metadata", *m_errorhnd, WeightingFunctionInterface::Description());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "metadata", *m_errorhnd, FunctionDescription());
 }
 
