@@ -29,7 +29,7 @@ class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
 
-/// \brief Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation in strus.
+/// \brief Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation.
 class StorageObjectBuilderInterface
 {
 public:
