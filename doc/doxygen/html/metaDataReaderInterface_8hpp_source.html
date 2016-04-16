@@ -70,7 +70,7 @@
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#ifndef _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED</span></div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_METADATA_READER_INTERFACE_HPP_INCLUDED</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &quot;<a class="code" href="index_8hpp.html">strus/index.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="numericVariant_8hpp.html">strus/numericVariant.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;strus/numericVariant.hpp&quot;</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">namespace </span>strus</div>
@@ -91,7 +91,7 @@
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1MetaDataReaderInterface.html#ab69eff92cdb645603e16f7f974271b7d">skipDoc</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; docno)=0;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1NumericVariant.html">NumericVariant</a> <a class="code" href="classstrus_1_1MetaDataReaderInterface.html#a03f9c0c6540667592cfb805f43c70a10">getValue</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; elementHandle_) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keyword">virtual</span> NumericVariant <a class="code" href="classstrus_1_1MetaDataReaderInterface.html#a03f9c0c6540667592cfb805f43c70a10">getValue</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; elementHandle_) <span class="keyword">const</span>=0;</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="classstrus_1_1MetaDataReaderInterface.html#a595a2bbffafb5b73d0e81029d151ab76">getType</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; elementHandle_) <span class="keyword">const</span>=0;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
@@ -104,8 +104,6 @@
 <div class="ttc" id="classstrus_1_1MetaDataReaderInterface_html_ad0991a2bccc4ece4b8f3bed4db27e91f"><div class="ttname"><a href="classstrus_1_1MetaDataReaderInterface.html#ad0991a2bccc4ece4b8f3bed4db27e91f">strus::MetaDataReaderInterface::nofElements</a></div><div class="ttdeci">virtual Index nofElements() const =0</div><div class="ttdoc">Get the number of columns in the meta data table. </div></div>
 <div class="ttc" id="classstrus_1_1MetaDataReaderInterface_html_ab0daf2fc3b51df9538839764411f54a9"><div class="ttname"><a href="classstrus_1_1MetaDataReaderInterface.html#ab0daf2fc3b51df9538839764411f54a9">strus::MetaDataReaderInterface::elementHandle</a></div><div class="ttdeci">virtual Index elementHandle(const std::string &amp;name_) const =0</div><div class="ttdoc">Get the handle for a table element addressed by name. </div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
-<div class="ttc" id="classstrus_1_1NumericVariant_html"><div class="ttname"><a href="classstrus_1_1NumericVariant.html">strus::NumericVariant</a></div><div class="ttdoc">Atomic type that can hold numeric values of different type. </div><div class="ttdef"><b>Definition:</b> numericVariant.hpp:21</div></div>
-<div class="ttc" id="numericVariant_8hpp_html"><div class="ttname"><a href="numericVariant_8hpp.html">numericVariant.hpp</a></div><div class="ttdoc">Variant type for fixed size numeric types (integers, floating point numbers) </div></div>
 <div class="ttc" id="classstrus_1_1MetaDataReaderInterface_html_a1687204cbb942c3239272227237df61c"><div class="ttname"><a href="classstrus_1_1MetaDataReaderInterface.html#a1687204cbb942c3239272227237df61c">strus::MetaDataReaderInterface::getName</a></div><div class="ttdeci">virtual const char * getName(const Index &amp;elementHandle_) const =0</div><div class="ttdoc">Get the name of a table element. </div></div>
 <div class="ttc" id="classstrus_1_1MetaDataReaderInterface_html"><div class="ttname"><a href="classstrus_1_1MetaDataReaderInterface.html">strus::MetaDataReaderInterface</a></div><div class="ttdoc">Interface for accessing meta data from a strus storage. </div><div class="ttdef"><b>Definition:</b> metaDataReaderInterface.hpp:23</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataReaderInterface_html_a03f9c0c6540667592cfb805f43c70a10"><div class="ttname"><a href="classstrus_1_1MetaDataReaderInterface.html#a03f9c0c6540667592cfb805f43c70a10">strus::MetaDataReaderInterface::getValue</a></div><div class="ttdeci">virtual NumericVariant getValue(const Index &amp;elementHandle_) const =0</div><div class="ttdoc">Get the value a table element. </div></div>
@@ -117,7 +115,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

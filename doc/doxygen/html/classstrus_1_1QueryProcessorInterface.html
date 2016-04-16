@@ -107,9 +107,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1SummarizerFunctionInterface.html">SummarizerFunctionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a45a56dde58be36dd36626ab225dc1de8">getSummarizerFunction</a> (const std::string &amp;name) const =0</td></tr>
 <tr class="memdesc:a45a56dde58be36dd36626ab225dc1de8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a summarization function reference by name.  <a href="#a45a56dde58be36dd36626ab225dc1de8">More...</a><br/></td></tr>
 <tr class="separator:a45a56dde58be36dd36626ab225dc1de8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50413652ee13ed24c2e87ece35f7a6b3"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a50413652ee13ed24c2e87ece35f7a6b3">getFunctionList</a> (<a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> type) const =0</td></tr>
-<tr class="memdesc:a50413652ee13ed24c2e87ece35f7a6b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a list of all functions of a specific type available.  <a href="#a50413652ee13ed24c2e87ece35f7a6b3">More...</a><br/></td></tr>
-<tr class="separator:a50413652ee13ed24c2e87ece35f7a6b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49bbc5e9c111fb8b6545a0cabfd5ced0"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a49bbc5e9c111fb8b6545a0cabfd5ced0">getFunctionList</a> (const <a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> &amp;type) const =0</td></tr>
+<tr class="memdesc:a49bbc5e9c111fb8b6545a0cabfd5ced0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a list of all functions of a specific type available.  <a href="#a49bbc5e9c111fb8b6545a0cabfd5ced0">More...</a><br/></td></tr>
+<tr class="separator:a49bbc5e9c111fb8b6545a0cabfd5ced0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7d06cb05430c724810b0854ccb1505d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#ae7d06cb05430c724810b0854ccb1505d">defineScalarFunctionParser</a> (const std::string &amp;name, <a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html">ScalarFunctionParserInterface</a> *parser)=0</td></tr>
 <tr class="memdesc:ae7d06cb05430c724810b0854ccb1505d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a function parser for scalar functions used in weighting or summarization.  <a href="#ae7d06cb05430c724810b0854ccb1505d">More...</a><br/></td></tr>
 <tr class="separator:ae7d06cb05430c724810b0854ccb1505d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -345,7 +345,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a50413652ee13ed24c2e87ece35f7a6b3"></a>
+<a class="anchor" id="a49bbc5e9c111fb8b6545a0cabfd5ced0"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -355,7 +355,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual std::vector&lt;std::string&gt; strus::QueryProcessorInterface::getFunctionList </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1QueryProcessorInterface.html#a037a1d7e54e477cb69db5a34e5d9a193">FunctionType</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -517,7 +517,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

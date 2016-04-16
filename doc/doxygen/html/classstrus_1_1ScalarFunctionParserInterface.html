@@ -76,9 +76,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:afa154b7de655c73c2d8c1aea17b8d6a5"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html#afa154b7de655c73c2d8c1aea17b8d6a5">~ScalarFunctionParserInterface</a> ()</td></tr>
 <tr class="memdesc:afa154b7de655c73c2d8c1aea17b8d6a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#afa154b7de655c73c2d8c1aea17b8d6a5">More...</a><br/></td></tr>
 <tr class="separator:afa154b7de655c73c2d8c1aea17b8d6a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3237363381607f812adebe4c88eb7833"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ScalarFunctionInterface.html">ScalarFunctionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html#a3237363381607f812adebe4c88eb7833">createFunction</a> (const std::string &amp;src) const =0</td></tr>
-<tr class="memdesc:a3237363381607f812adebe4c88eb7833"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a function from source and instantiates a function object.  <a href="#a3237363381607f812adebe4c88eb7833">More...</a><br/></td></tr>
-<tr class="separator:a3237363381607f812adebe4c88eb7833"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d88e762eaf132a965730949c4561580"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ScalarFunctionInterface.html">ScalarFunctionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ScalarFunctionParserInterface.html#a6d88e762eaf132a965730949c4561580">createFunction</a> (const std::string &amp;src, const std::vector&lt; std::string &gt; &amp;argumentNames) const =0</td></tr>
+<tr class="memdesc:a6d88e762eaf132a965730949c4561580"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a function from source and instantiates a function object.  <a href="#a6d88e762eaf132a965730949c4561580">More...</a><br/></td></tr>
+<tr class="separator:a6d88e762eaf132a965730949c4561580"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for parsing scalar function definitions. </p>
@@ -109,7 +109,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a3237363381607f812adebe4c88eb7833"></a>
+<a class="anchor" id="a6d88e762eaf132a965730949c4561580"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -120,8 +120,18 @@ Public Member Functions</h2></td></tr>
           <td class="memname">virtual <a class="el" href="classstrus_1_1ScalarFunctionInterface.html">ScalarFunctionInterface</a>* strus::ScalarFunctionParserInterface::createFunction </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>src</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>argumentNames</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -135,6 +145,7 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>source describing the function </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">argumentNames</td><td>the list of function argument names in the source (default is a prefix '_' followed by the argument index starting with 0) </td></tr>
   </table>
   </dd>
 </dl>
@@ -149,7 +160,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

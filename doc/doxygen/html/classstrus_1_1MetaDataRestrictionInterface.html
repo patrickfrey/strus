@@ -96,9 +96,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7dc9a47c1ef8a621025a3d5c27e2197e"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#a7dc9a47c1ef8a621025a3d5c27e2197e">~MetaDataRestrictionInterface</a> ()</td></tr>
 <tr class="memdesc:a7dc9a47c1ef8a621025a3d5c27e2197e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a7dc9a47c1ef8a621025a3d5c27e2197e">More...</a><br/></td></tr>
 <tr class="separator:a7dc9a47c1ef8a621025a3d5c27e2197e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b99707313379b53e4dc06797ee6b2b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#a2b99707313379b53e4dc06797ee6b2b0">addCondition</a> (<a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a> opr, const std::string &amp;name, const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;operand, bool newGroup=true)=0</td></tr>
-<tr class="memdesc:a2b99707313379b53e4dc06797ee6b2b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a condition on the metadata to this metadata restriction.  <a href="#a2b99707313379b53e4dc06797ee6b2b0">More...</a><br/></td></tr>
-<tr class="separator:a2b99707313379b53e4dc06797ee6b2b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6ed04e0184676f7237ba8e2dcfda6d6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#aa6ed04e0184676f7237ba8e2dcfda6d6">addCondition</a> (const <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a> &amp;opr, const std::string &amp;name, const NumericVariant &amp;operand, bool newGroup=true)=0</td></tr>
+<tr class="memdesc:aa6ed04e0184676f7237ba8e2dcfda6d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a condition on the metadata to this metadata restriction.  <a href="#aa6ed04e0184676f7237ba8e2dcfda6d6">More...</a><br/></td></tr>
+<tr class="separator:aa6ed04e0184676f7237ba8e2dcfda6d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8579cb2fed01193d09a26c9be0778cf6"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1MetaDataRestrictionInstanceInterface.html">MetaDataRestrictionInstanceInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#a8579cb2fed01193d09a26c9be0778cf6">createInstance</a> () const =0</td></tr>
 <tr class="memdesc:a8579cb2fed01193d09a26c9be0778cf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an instance of this metadata restriction.  <a href="#a8579cb2fed01193d09a26c9be0778cf6">More...</a><br/></td></tr>
@@ -189,7 +189,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a2b99707313379b53e4dc06797ee6b2b0"></a>
+<a class="anchor" id="aa6ed04e0184676f7237ba8e2dcfda6d6"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -199,7 +199,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual void strus::MetaDataRestrictionInterface::addCondition </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">CompareOperator</a> &amp;&#160;</td>
           <td class="paramname"><em>opr</em>, </td>
         </tr>
         <tr>
@@ -211,7 +211,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classstrus_1_1NumericVariant.html">NumericVariant</a> &amp;&#160;</td>
+          <td class="paramtype">const NumericVariant &amp;&#160;</td>
           <td class="paramname"><em>operand</em>, </td>
         </tr>
         <tr>
@@ -305,7 +305,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -95,12 +95,12 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">createAlterMetaDataTable</a> (<a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
 <tr class="memdesc:a4af90c26d7118b46a21bf2c0c39e566a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to alter the meta data table structure.  <a href="#a4af90c26d7118b46a21bf2c0c39e566a">More...</a><br/></td></tr>
 <tr class="separator:a4af90c26d7118b46a21bf2c0c39e566a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2857ae5cee7444e69ff178cf816413a"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#ae2857ae5cee7444e69ff178cf816413a">getConfigDescription</a> (<a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> type) const =0</td></tr>
-<tr class="memdesc:ae2857ae5cee7444e69ff178cf816413a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a configuration description (source string as used by the functions here) createStorage(const std::string&amp;) and createClient(const std::string&amp;) for the usage printed by programs using this storage implementation.  <a href="#ae2857ae5cee7444e69ff178cf816413a">More...</a><br/></td></tr>
-<tr class="separator:ae2857ae5cee7444e69ff178cf816413a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0ac5b9df406927dae3f247d47f1d702"><td class="memItemLeft" align="right" valign="top">virtual const char **&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#ab0ac5b9df406927dae3f247d47f1d702">getConfigParameters</a> (<a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> type) const =0</td></tr>
-<tr class="memdesc:ab0ac5b9df406927dae3f247d47f1d702"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of known configuration parameter keys for verification of the configuration by programs using this storage implementation.  <a href="#ab0ac5b9df406927dae3f247d47f1d702">More...</a><br/></td></tr>
-<tr class="separator:ab0ac5b9df406927dae3f247d47f1d702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae95fbb70ee3d387827a3478a1411c5f3"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#ae95fbb70ee3d387827a3478a1411c5f3">getConfigDescription</a> (const <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> &amp;type) const =0</td></tr>
+<tr class="memdesc:ae95fbb70ee3d387827a3478a1411c5f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a configuration description (source string as used by the functions here) createStorage(const std::string&amp;) and createClient(const std::string&amp;) for the usage printed by programs using this storage implementation.  <a href="#ae95fbb70ee3d387827a3478a1411c5f3">More...</a><br/></td></tr>
+<tr class="separator:ae95fbb70ee3d387827a3478a1411c5f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b1a269ca442ceedaec00624820d767b"><td class="memItemLeft" align="right" valign="top">virtual const char **&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a3b1a269ca442ceedaec00624820d767b">getConfigParameters</a> (const <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> &amp;type) const =0</td></tr>
+<tr class="memdesc:a3b1a269ca442ceedaec00624820d767b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of known configuration parameter keys for verification of the configuration by programs using this storage implementation.  <a href="#a3b1a269ca442ceedaec00624820d767b">More...</a><br/></td></tr>
+<tr class="separator:a3b1a269ca442ceedaec00624820d767b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface to the create and alter a storage for strus. </p>
@@ -282,7 +282,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae2857ae5cee7444e69ff178cf816413a"></a>
+<a class="anchor" id="ae95fbb70ee3d387827a3478a1411c5f3"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -292,7 +292,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual const char* strus::StorageInterface::getConfigDescription </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -308,7 +308,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab0ac5b9df406927dae3f247d47f1d702"></a>
+<a class="anchor" id="a3b1a269ca442ceedaec00624820d767b"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -318,7 +318,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual const char** strus::StorageInterface::getConfigParameters </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> &amp;&#160;</td>
           <td class="paramname"><em>type</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -341,7 +341,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:07 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

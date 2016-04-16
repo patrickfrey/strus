@@ -93,7 +93,7 @@
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#a706aa1faeea296d922270db148d19fdf">addNumericParameter</a>(</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                        <span class="keyword">const</span> std::string&amp; name,</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1NumericVariant.html">NumericVariant</a>&amp; value)=0;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                        <span class="keyword">const</span> NumericVariant&amp; value)=0;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1SummarizerFunctionContextInterface.html">SummarizerFunctionContextInterface</a>* <a class="code" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#acdabdd3bff1cb043c74e0eab2a3c9716">createFunctionContext</a>(</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a>* storage_,</div>
@@ -114,7 +114,6 @@
 <div class="ttc" id="classstrus_1_1SummarizerFunctionInstanceInterface_html_acdabdd3bff1cb043c74e0eab2a3c9716"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInstanceInterface.html#acdabdd3bff1cb043c74e0eab2a3c9716">strus::SummarizerFunctionInstanceInterface::createFunctionContext</a></div><div class="ttdeci">virtual SummarizerFunctionContextInterface * createFunctionContext(const StorageClientInterface *storage_, MetaDataReaderInterface *metadata_, const GlobalStatistics &amp;stats) const =0</div><div class="ttdoc">Create an execution context for this summarization function instance. </div></div>
 <div class="ttc" id="classstrus_1_1SummarizerFunctionContextInterface_html"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionContextInterface.html">strus::SummarizerFunctionContextInterface</a></div><div class="ttdoc">Interface for the summarization execution context. </div><div class="ttdef"><b>Definition:</b> summarizerFunctionContextInterface.hpp:26</div></div>
 <div class="ttc" id="classstrus_1_1SummarizerFunctionInstanceInterface_html_a7c72461d32fb9e6ae0d66746ac6256ad"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInstanceInterface.html#a7c72461d32fb9e6ae0d66746ac6256ad">strus::SummarizerFunctionInstanceInterface::~SummarizerFunctionInstanceInterface</a></div><div class="ttdeci">virtual ~SummarizerFunctionInstanceInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> summarizerFunctionInstanceInterface.hpp:35</div></div>
-<div class="ttc" id="classstrus_1_1NumericVariant_html"><div class="ttname"><a href="classstrus_1_1NumericVariant.html">strus::NumericVariant</a></div><div class="ttdoc">Atomic type that can hold numeric values of different type. </div><div class="ttdef"><b>Definition:</b> numericVariant.hpp:21</div></div>
 <div class="ttc" id="classstrus_1_1MetaDataReaderInterface_html"><div class="ttname"><a href="classstrus_1_1MetaDataReaderInterface.html">strus::MetaDataReaderInterface</a></div><div class="ttdoc">Interface for accessing meta data from a strus storage. </div><div class="ttdef"><b>Definition:</b> metaDataReaderInterface.hpp:23</div></div>
 <div class="ttc" id="structstrus_1_1GlobalStatistics_html"><div class="ttname"><a href="structstrus_1_1GlobalStatistics.html">strus::GlobalStatistics</a></div><div class="ttdoc">Global document statistics, if passed down with the query. </div><div class="ttdef"><b>Definition:</b> globalStatistics.hpp:16</div></div>
 <div class="ttc" id="classstrus_1_1SummarizerFunctionInstanceInterface_html"><div class="ttname"><a href="classstrus_1_1SummarizerFunctionInstanceInterface.html">strus::SummarizerFunctionInstanceInterface</a></div><div class="ttdoc">Interface for a parameterized instance of summarization. </div><div class="ttdef"><b>Definition:</b> summarizerFunctionInstanceInterface.hpp:31</div></div>
@@ -123,7 +122,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

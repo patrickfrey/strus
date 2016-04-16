@@ -71,7 +71,7 @@
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define _STRUS_STORAGE_TRANSACTION_INTERFACE_HPP_INCLUDED</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="storageDocumentInterface_8hpp.html">strus/storageDocumentInterface.hpp</a>&quot;</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="numericVariant_8hpp.html">strus/numericVariant.hpp</a>&quot;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;strus/numericVariant.hpp&quot;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">namespace </span>strus</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;{</div>
@@ -100,7 +100,7 @@
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageTransactionInterface.html#a3c2ebbc2936d1122c704d326c011c0d3">updateMetaData</a>(</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                        <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; docno,</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                        <span class="keyword">const</span> std::string&amp; varname,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1NumericVariant.html">NumericVariant</a>&amp; value)=0;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                        <span class="keyword">const</span> NumericVariant&amp; value)=0;</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f">commit</a>()=0;</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
@@ -118,8 +118,6 @@
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html">strus::StorageTransactionInterface</a></div><div class="ttdoc">Object to declare all items for one insert/update of a document in the storage. </div><div class="ttdef"><b>Definition:</b> storageTransactionInterface.hpp:26</div></div>
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html_a2f7a62fd94352ebe76d40e460915518b"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html#a2f7a62fd94352ebe76d40e460915518b">strus::StorageTransactionInterface::deleteDocument</a></div><div class="ttdeci">virtual void deleteDocument(const std::string &amp;docid)=0</div><div class="ttdoc">Declare a document to be removed from the storage within this transaction. </div></div>
 <div class="ttc" id="storageDocumentInterface_8hpp_html"><div class="ttname"><a href="storageDocumentInterface_8hpp.html">storageDocumentInterface.hpp</a></div><div class="ttdoc">Interface for contructing a document for inserting it into the storage. </div></div>
-<div class="ttc" id="classstrus_1_1NumericVariant_html"><div class="ttname"><a href="classstrus_1_1NumericVariant.html">strus::NumericVariant</a></div><div class="ttdoc">Atomic type that can hold numeric values of different type. </div><div class="ttdef"><b>Definition:</b> numericVariant.hpp:21</div></div>
-<div class="ttc" id="numericVariant_8hpp_html"><div class="ttname"><a href="numericVariant_8hpp.html">numericVariant.hpp</a></div><div class="ttdoc">Variant type for fixed size numeric types (integers, floating point numbers) </div></div>
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html_abc051b8461e132f73e852892d6808ebf"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html#abc051b8461e132f73e852892d6808ebf">strus::StorageTransactionInterface::~StorageTransactionInterface</a></div><div class="ttdeci">virtual ~StorageTransactionInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> storageTransactionInterface.hpp:31</div></div>
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html_a1e852019b5ca4665d5139fef4195289f"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f">strus::StorageTransactionInterface::commit</a></div><div class="ttdeci">virtual bool commit()=0</div><div class="ttdoc">Insert all documents and executes all commands defined in the transaction or none if one operation fa...</div></div>
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html_a971f8524b13dfb2a04bc07c3959a8b2b"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html#a971f8524b13dfb2a04bc07c3959a8b2b">strus::StorageTransactionInterface::rollback</a></div><div class="ttdeci">virtual void rollback()=0</div><div class="ttdoc">Rollback of the transaction, no changes made. </div></div>
@@ -130,7 +128,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

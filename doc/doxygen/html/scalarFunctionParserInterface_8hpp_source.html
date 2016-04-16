@@ -81,21 +81,23 @@
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="classstrus_1_1ScalarFunctionParserInterface.html#afa154b7de655c73c2d8c1aea17b8d6a5">   25</a></span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1ScalarFunctionParserInterface.html#afa154b7de655c73c2d8c1aea17b8d6a5">~ScalarFunctionParserInterface</a>(){}</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1ScalarFunctionInterface.html">ScalarFunctionInterface</a>* <a class="code" href="classstrus_1_1ScalarFunctionParserInterface.html#a3237363381607f812adebe4c88eb7833">createFunction</a>( <span class="keyword">const</span> std::string&amp; src) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;};</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;}<span class="comment">// namespace</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="classstrus_1_1ScalarFunctionInterface.html">ScalarFunctionInterface</a>* <a class="code" href="classstrus_1_1ScalarFunctionParserInterface.html#a6d88e762eaf132a965730949c4561580">createFunction</a>(</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;                        <span class="keyword">const</span> std::string&amp; src,</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;                        <span class="keyword">const</span> std::vector&lt;std::string&gt;&amp; argumentNames) <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;};</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;}<span class="comment">// namespace</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor"></span></div>
 <div class="ttc" id="classstrus_1_1ScalarFunctionParserInterface_html"><div class="ttname"><a href="classstrus_1_1ScalarFunctionParserInterface.html">strus::ScalarFunctionParserInterface</a></div><div class="ttdoc">Interface for parsing scalar function definitions. </div><div class="ttdef"><b>Definition:</b> scalarFunctionParserInterface.hpp:21</div></div>
-<div class="ttc" id="classstrus_1_1ScalarFunctionParserInterface_html_a3237363381607f812adebe4c88eb7833"><div class="ttname"><a href="classstrus_1_1ScalarFunctionParserInterface.html#a3237363381607f812adebe4c88eb7833">strus::ScalarFunctionParserInterface::createFunction</a></div><div class="ttdeci">virtual ScalarFunctionInterface * createFunction(const std::string &amp;src) const =0</div><div class="ttdoc">Parses a function from source and instantiates a function object. </div></div>
 <div class="ttc" id="classstrus_1_1ScalarFunctionParserInterface_html_afa154b7de655c73c2d8c1aea17b8d6a5"><div class="ttname"><a href="classstrus_1_1ScalarFunctionParserInterface.html#afa154b7de655c73c2d8c1aea17b8d6a5">strus::ScalarFunctionParserInterface::~ScalarFunctionParserInterface</a></div><div class="ttdeci">virtual ~ScalarFunctionParserInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> scalarFunctionParserInterface.hpp:25</div></div>
+<div class="ttc" id="classstrus_1_1ScalarFunctionParserInterface_html_a6d88e762eaf132a965730949c4561580"><div class="ttname"><a href="classstrus_1_1ScalarFunctionParserInterface.html#a6d88e762eaf132a965730949c4561580">strus::ScalarFunctionParserInterface::createFunction</a></div><div class="ttdeci">virtual ScalarFunctionInterface * createFunction(const std::string &amp;src, const std::vector&lt; std::string &gt; &amp;argumentNames) const =0</div><div class="ttdoc">Parses a function from source and instantiates a function object. </div></div>
 <div class="ttc" id="classstrus_1_1ScalarFunctionInterface_html"><div class="ttname"><a href="classstrus_1_1ScalarFunctionInterface.html">strus::ScalarFunctionInterface</a></div><div class="ttdoc">Interface for a scalar function type. </div><div class="ttdef"><b>Definition:</b> scalarFunctionInterface.hpp:24</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 31 2016 00:47:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Apr 16 2016 16:05:42 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
