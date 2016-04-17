@@ -58,15 +58,12 @@ void Storage::open( const char* config)
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
 	sti.reset( strus::createStorage( g_errorhnd));
-	if (!sti.get())
+	if (!sti.get() || g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	try
-	{
-		dbi->destroyDatabase( config);
-	}
-	catch(...){}
+	(void)dbi->destroyDatabase( config);
+	(void)g_errorhnd->fetchError();
 
 	dbi->createDatabase( config);
 	std::auto_ptr<strus::DatabaseClientInterface>

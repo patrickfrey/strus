@@ -1076,15 +1076,12 @@ int main( int argc, const char* argv[])
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
 		std::auto_ptr<strus::StorageInterface> sti( strus::createStorage( g_errorhnd));
-		if (!sti.get())
+		if (!sti.get() || g_errorhnd->hasError())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		try
-		{
-			dbi->destroyDatabase( config);
-		}
-		catch(...){}
+		(void)dbi->destroyDatabase( config);
+		(void)g_errorhnd->fetchError();
 
 		dbi->createDatabase( config);
 		std::auto_ptr<strus::DatabaseClientInterface>
