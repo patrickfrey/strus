@@ -51,8 +51,6 @@ public:
 		double nofCollectionDocuments_,
 		ErrorBufferInterface* errorhnd_);
 
-	enum {MaxNofParameter=64};
-
 	class Feature
 	{
 	public:
@@ -102,6 +100,9 @@ public:
 			const TermStatistics& stats_);
 
 	virtual double call( const Index& docno);
+
+public:
+	enum {MaxNofParameter=64};				///< maximum number of arguments passed to the defined function
 
 private:
 	typedef std::vector<Feature> FeatureVector;

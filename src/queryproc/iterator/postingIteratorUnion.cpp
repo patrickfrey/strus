@@ -23,9 +23,9 @@ IteratorUnion::IteratorUnion( const std::vector<Reference<PostingIteratorInterfa
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (args_.size() > 64)
+	if (args_.size() > MaxNofElements)
 	{
-		throw strus::runtime_error( _TXT( "number of arguments of union out of range (> %u)"), 64);
+		throw strus::runtime_error( _TXT( "number of arguments of union out of range (> %u)"), (unsigned int)MaxNofElements);
 	}
 	std::vector<Reference<PostingIteratorInterface> >::const_iterator
 		ai = args_.begin(), ae = args_.end();

@@ -81,8 +81,10 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
-private:
+public:
 	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
+
+private:
 	const StorageClientInterface* m_storage;		///< storage access
 	const QueryProcessorInterface* m_processor;		///< query processor interface
 	MetaDataReaderInterface* m_metadata;			///< access metadata arguments

@@ -131,10 +131,6 @@ PostingIteratorInterface* PostingJoinContains::createResultIterator(
 		}
 		else
 		{
-			if (itrs.size() > 64)
-			{
-				m_errorhnd->report( _TXT( "number of argument posting iterators for 'contains' with cardinality is out of range (64)"));
-			}
 			return new IteratorContainsWithCardinality( itrs, cardinality, m_errorhnd);
 		}
 	}
