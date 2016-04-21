@@ -203,10 +203,10 @@ Requires: libboost_date_time1_54_0 >= 1.54.0
 BuildRequires: boost-devel
 %endif
 %if %{osufactory}
-Requires: libboost_thread1_56_0 >= 1.56.0
-Requires: libboost_atomic1_56_0 >= 1.56.0
-Requires: libboost_system1_56_0 >= 1.56.0
-Requires: libboost_date_time1_56_0 >= 1.56.0
+Requires: libboost_thread1_60_0 >= 1.60.0
+Requires: libboost_atomic1_60_0 >= 1.60.0
+Requires: libboost_system1_60_0 >= 1.60.0
+Requires: libboost_date_time1_60_0 >= 1.60.0
 BuildRequires: boost-devel
 %endif
 %endif
