@@ -1,3 +1,7 @@
+strus (0.8.3-1) unstable; urgency=low
+  * put some restricting constants of weighting functions and summarizers into header files
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 24 Apr 2016 14:00:00 +0100
+
 strus (0.8.2-1) unstable; urgency=low
   * moved numeric variant from strus to strus base
  -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 15 Apr 2016 15:00:00 +0100

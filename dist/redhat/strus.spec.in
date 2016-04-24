@@ -317,6 +317,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Sun Apr 24 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.3-0.1
+- put some restricting constants of weighting functions and summarizers into header files
+
 * Fri Apr 15 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.2-0.1
 - moved numeric variant from strus to strus base
 
