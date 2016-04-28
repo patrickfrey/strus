@@ -290,6 +290,8 @@ make test
 %{_libdir}/%{name}/libstrus_statsproc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_scalarfunc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_scalarfunc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
+%{_libdir}/%{name}/libstrus_storage_objbuild.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
+%{_libdir}/%{name}/libstrus_storage_objbuild.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_sysconfdir}/ld.so.conf.d/%{name}.conf
 
 
@@ -303,6 +305,7 @@ make test
 %{_libdir}/%{name}/libstrus_malloc_logging.so
 %{_libdir}/%{name}/libstrus_statsproc.so
 %{_libdir}/%{name}/libstrus_scalarfunc.so
+%{_libdir}/%{name}/libstrus_storage_objbuild.so
 %dir %{_includedir}/%{name}
 %{_includedir}/%{name}/*.hpp
 %dir %{_includedir}/%{name}/lib

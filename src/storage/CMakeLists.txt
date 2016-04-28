@@ -72,10 +72,20 @@ link_directories(
 add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
 target_link_libraries( strus_storage_static strus_private_utils strus_base )
 
-add_library(strus_storage SHARED libstrus_storage.cpp )
+add_library( strus_storage SHARED libstrus_storage.cpp )
 target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_static strus_base )
 set_target_properties(
     strus_storage
+    PROPERTIES
+    DEBUG_POSTFIX "_d"
+    SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
+    VERSION ${STRUS_VERSION}
+)
+
+add_library( strus_storage_objbuild SHARED libstrus_storage_objbuild.cpp )
+target_link_libraries( strus_storage_objbuild strus_storage_static boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_static strus_base )
+set_target_properties(
+    strus_storage_objbuild
     PROPERTIES
     DEBUG_POSTFIX "_d"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
@@ -89,6 +99,10 @@ target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_le
 # INSTALLATION
 # ------------------------------
 install( TARGETS strus_storage
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus
+	   RUNTIME DESTINATION bin )
+
+install( TARGETS strus_storage_objbuild
            LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus
 	   RUNTIME DESTINATION bin )
 

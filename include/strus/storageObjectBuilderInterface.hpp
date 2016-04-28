@@ -51,17 +51,7 @@ public:
 
 	/// \brief Get the statistics processor interface
 	/// \return the statistics processor interface reference
-	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const=0;
-
-	/// \brief Creates a storage client with its database client out of a configuration string
-	/// \param[in] config configuration string (not a filename!) of both storage and database
-	/// \return the storage client object (with ownership returned)
-	virtual StorageClientInterface* createStorageClient( const std::string& config) const=0;
-
-	/// \brief Creates an interface for altering the storage meta data table with its database client out of a configuration string
-	/// \param[in] config configuration string (not a filename!) of both storage and database
-	/// \return the interface for altering the storage meta data table (with ownership returned)
-	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable( const std::string& config) const=0;
+	virtual const StatisticsProcessorInterface* getStatisticsProcessor( const std::string& name) const=0;
 
 	/// \brief Creates a an interface for query evaluation
 	/// \return the query evaluation object (with ownership returned)
