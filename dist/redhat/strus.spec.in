@@ -314,6 +314,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Thu Apr 28 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.9.0-0.1
+- changes in the object builder interfaces
+
 * Sun Apr 24 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.8.3-0.1
 - put some restricting constants of weighting functions and summarizers into header files
 
