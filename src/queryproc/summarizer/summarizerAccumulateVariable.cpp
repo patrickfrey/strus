@@ -69,7 +69,7 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 					varitr.push_back( vi->itr());
 				}
 			}
-			if (m_features.size() >= 64)
+			if (m_features.size() >= MaxNofElements)
 			{
 				m_errorhnd->report( _TXT("too many features (>64) defined for '%s' summarization"), "accuvariable");
 			}

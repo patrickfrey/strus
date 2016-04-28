@@ -83,10 +83,12 @@ public:
 
 	virtual double call( const Index& docno);
 
+public:
+	enum {MaxNofArguments=64};				///< maximum number of arguments fix because of extensive use of fixed size arrays
+
 private:
 	WeightingFunctionParameterBM25pff m_parameter;		///< weighting function parameters
 	double m_nofCollectionDocuments;			///< number of documents in the collection
-	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements

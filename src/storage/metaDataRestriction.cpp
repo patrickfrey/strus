@@ -327,7 +327,7 @@ void MetaDataRestriction::addCondition(
 		}
 		m_opar.push_back( MetaDataCompareOperation( elemtype, opr, elemhnd, name, operand, newGroup));
 	}
-	CATCH_ERROR_MAP( _TXT("error in meta data restriction add condition"), *m_errorhnd);
+	CATCH_ERROR_MAP( _TXT("error in meta data restriction add condition: %s"), *m_errorhnd);
 
 }
 
@@ -361,7 +361,7 @@ std::string MetaDataRestriction::tostring() const
 		}
 		return resbuf.str();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error in meta data restriction to string"), *m_errorhnd, std::string());
+	CATCH_ERROR_MAP_RETURN( _TXT("error in meta data restriction to string: %s"), *m_errorhnd, std::string());
 }
 
 MetaDataRestrictionInstanceInterface* MetaDataRestriction::createInstance() const
@@ -370,7 +370,7 @@ MetaDataRestrictionInstanceInterface* MetaDataRestriction::createInstance() cons
 	{
 		return new MetaDataRestrictionInstance( m_storage->createMetaDataReader(), m_opar, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("failed to create meta data restriction instance"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("failed to create meta data restriction instance: %s"), *m_errorhnd, 0);
 }
 
 

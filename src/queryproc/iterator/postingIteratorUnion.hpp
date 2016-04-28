@@ -48,6 +48,10 @@ public:
 		return m_posno;
 	}
 
+public:
+	/// \brief The maximum number of arguments is fixed, because of the 64bit integer used for the current selection set
+	enum {MaxNofElements=64};
+
 protected:
 	class selected_iterator
 	{

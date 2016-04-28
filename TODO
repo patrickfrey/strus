@@ -1,3 +1,6 @@
+Simplify strusQuery
+JSON segmenter
+NGRAM normalizer
 Write storage conversion to change endianess of an index. Write a storage conversion utility
 Define an interface to declare a limit of query execution to prevent DoS attacks (counter of micro ops in the query evaluation)
 

@@ -20,6 +20,7 @@ class ProximityWeightAccumulator
 {
 public:
 	enum {MaxNofArguments=64};
+
 	struct WeightArray
 	{
 		WeightArray()
