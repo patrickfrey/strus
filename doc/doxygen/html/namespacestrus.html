@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.8</span>
+   &#160;<span id="projectnumber">0.9</span>
    </div>
   </td>
  </tr>
@@ -241,6 +241,15 @@ Functions</h2></td></tr>
 <tr class="separator:a9e519a59fe3e8b8a3ec8811b373faf68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65ea5fcd9fa89e4692ab41b6fd2cb977"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageInterface.html">StorageInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a65ea5fcd9fa89e4692ab41b6fd2cb977">createStorage</a> (ErrorBufferInterface *errorhnd)</td></tr>
 <tr class="separator:a65ea5fcd9fa89e4692ab41b6fd2cb977"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#aa25c3bb2a7fddaaacc1859a6fe58058e">createStorageObjectBuilder_default</a> (ErrorBufferInterface *errorhnd)</td></tr>
+<tr class="memdesc:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a storage object builder with the builders from the standard strus core libraries (without module support)  <a href="#aa25c3bb2a7fddaaacc1859a6fe58058e">More...</a><br/></td></tr>
+<tr class="separator:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e9c1ad9905a085af09b4fa2a20b59b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a6e9c1ad9905a085af09b4fa2a20b59b3">createAlterMetaDataTable</a> (const <a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a> *objbuilder, ErrorBufferInterface *errorhnd, const std::string &amp;config)</td></tr>
+<tr class="memdesc:a6e9c1ad9905a085af09b4fa2a20b59b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a alter metadata table interface with the object builder passed.  <a href="#a6e9c1ad9905a085af09b4fa2a20b59b3">More...</a><br/></td></tr>
+<tr class="separator:a6e9c1ad9905a085af09b4fa2a20b59b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ae32c4d703ac6ba1b54a65995546c3f6d">createStorageClient</a> (const <a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a> *objbuilder, ErrorBufferInterface *errorhnd, const std::string &amp;config)</td></tr>
+<tr class="memdesc:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a storage client interface with the object builder passed.  <a href="#ae32c4d703ac6ba1b54a65995546c3f6d">More...</a><br/></td></tr>
+<tr class="separator:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>strus toplevel namespace </p>
@@ -276,6 +285,48 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a class="anchor" id="a6e9c1ad9905a085af09b4fa2a20b59b3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a>* strus::createAlterMetaDataTable </td>
+          <td>(</td>
+          <td class="paramtype">const StorageObjectBuilderInterface *&#160;</td>
+          <td class="paramname"><em>objbuilder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ErrorBufferInterface *&#160;</td>
+          <td class="paramname"><em>errorhnd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a alter metadata table interface with the object builder passed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">objbuilder</td><td>object builder </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">errorhnd</td><td>error buffer interface </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>object configuration </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="ab83f933d2693f3a61ca60cef1aad689c"></a>
 <div class="memitem">
 <div class="memproto">
@@ -383,11 +434,77 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="ae32c4d703ac6ba1b54a65995546c3f6d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a>* strus::createStorageClient </td>
+          <td>(</td>
+          <td class="paramtype">const StorageObjectBuilderInterface *&#160;</td>
+          <td class="paramname"><em>objbuilder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ErrorBufferInterface *&#160;</td>
+          <td class="paramname"><em>errorhnd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a storage client interface with the object builder passed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">objbuilder</td><td>object builder </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">errorhnd</td><td>error buffer interface </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>object configuration </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="aa25c3bb2a7fddaaacc1859a6fe58058e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a>* strus::createStorageObjectBuilder_default </td>
+          <td>(</td>
+          <td class="paramtype">ErrorBufferInterface *&#160;</td>
+          <td class="paramname"><em>errorhnd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a storage object builder with the builders from the standard strus core libraries (without module support) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">errorhnd</td><td>error buffer interface </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Apr 16 2016 16:09:00 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Apr 28 2016 22:34:18 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

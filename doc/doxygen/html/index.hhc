@@ -464,12 +464,10 @@
       <LI><OBJECT type="text/sitemap"><param name="Name" value="StorageObjectBuilderInterface"><param name="ImageNumber" value="1"></OBJECT>
         <UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="~StorageObjectBuilderInterface"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a0c05af674dd1f5f85d2eb5d5c81c124b"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="createAlterMetaDataTable"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a1e356187395a4d6b6f8ff9c16fa844f7"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="createQueryEval"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a9aab2287e1ac4f2e336b6972bd88d433"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="createStorageClient"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#acce5c549d49cde2f04da5a7c3cdeb962"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="getDatabase"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ab156b9d5a5f1fc9a9e54b70e471d5cfa"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="getQueryProcessor"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a890ce9180addda6ae832d02c2c8d69e1"><param name="ImageNumber" value="11"></OBJECT>
-        <LI><OBJECT type="text/sitemap"><param name="Name" value="getStatisticsProcessor"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#af9120f2d79250e2206e831a8ae001585"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="getStatisticsProcessor"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a5df29676bfb3f9cfa3bcd78068e84d77"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="getStorage"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ae7f6484a13071675ab4f4354edfbc5d2"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
       <LI><OBJECT type="text/sitemap"><param name="Name" value="StorageTransactionInterface"><param name="ImageNumber" value="1"></OBJECT>
@@ -718,6 +716,12 @@
           <LI><OBJECT type="text/sitemap"><param name="Name" value="storage.hpp"><param name="ImageNumber" value="1"></OBJECT>
             <UL>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="createStorage"><param name="Local" value="storage_8hpp.html#a65ea5fcd9fa89e4692ab41b6fd2cb977"><param name="ImageNumber" value="11"></OBJECT>
+            </UL>
+          <LI><OBJECT type="text/sitemap"><param name="Name" value="storage_objbuild.hpp"><param name="ImageNumber" value="1"></OBJECT>
+            <UL>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="createAlterMetaDataTable"><param name="Local" value="storage__objbuild_8hpp.html#a6e9c1ad9905a085af09b4fa2a20b59b3"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="createStorageClient"><param name="Local" value="storage__objbuild_8hpp.html#ae32c4d703ac6ba1b54a65995546c3f6d"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="createStorageObjectBuilder_default"><param name="Local" value="storage__objbuild_8hpp.html#aa25c3bb2a7fddaaacc1859a6fe58058e"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="attributeReaderInterface.hpp"><param name="Local" value="attributeReaderInterface_8hpp.html"><param name="ImageNumber" value="11"></OBJECT>
@@ -1348,12 +1352,10 @@
           <LI><OBJECT type="text/sitemap"><param name="Name" value="StorageObjectBuilderInterface"><param name="ImageNumber" value="1"></OBJECT>
             <UL>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="~StorageObjectBuilderInterface"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a0c05af674dd1f5f85d2eb5d5c81c124b"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="createAlterMetaDataTable"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a1e356187395a4d6b6f8ff9c16fa844f7"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="createQueryEval"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a9aab2287e1ac4f2e336b6972bd88d433"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="createStorageClient"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#acce5c549d49cde2f04da5a7c3cdeb962"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="getDatabase"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ab156b9d5a5f1fc9a9e54b70e471d5cfa"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="getQueryProcessor"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a890ce9180addda6ae832d02c2c8d69e1"><param name="ImageNumber" value="11"></OBJECT>
-            <LI><OBJECT type="text/sitemap"><param name="Name" value="getStatisticsProcessor"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#af9120f2d79250e2206e831a8ae001585"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="getStatisticsProcessor"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a5df29676bfb3f9cfa3bcd78068e84d77"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="getStorage"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ae7f6484a13071675ab4f4354edfbc5d2"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>

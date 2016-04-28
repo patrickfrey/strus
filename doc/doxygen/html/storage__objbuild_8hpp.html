@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>strus: /home/patrick/Projects/github/strus/include/strus/index.hpp File Reference</title>
+<title>strus: /home/patrick/Projects/github/strus/include/strus/lib/storage_objbuild.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -52,23 +52,23 @@
   </div>
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_4c7fe52541d540b59710786f705b50e0.html">strus</a></li>  </ul>
+<li class="navelem"><a class="el" href="dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="dir_4c7fe52541d540b59710786f705b50e0.html">strus</a></li><li class="navelem"><a class="el" href="dir_a73361def35442ed7e38ef668dbae29f.html">lib</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">index.hpp File Reference</div>  </div>
+<div class="title">storage_objbuild.hpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Numeric types used for local and global indices.  
+<p>Library with some convenient functions to create storage objects.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;stdint.h&gt;</code><br/>
+<div class="textblock"><code>#include &lt;string&gt;</code><br/>
 </div>
-<p><a href="index_8hpp_source.html">Go to the source code of this file.</a></p>
+<p><a href="storage__objbuild_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -76,17 +76,20 @@ Namespaces</h2></td></tr>
 <tr class="memdesc:namespacestrus"><td class="mdescLeft">&#160;</td><td class="mdescRight">strus toplevel namespace <br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a3c5a45d9cd423c89104928e5feff5a4e"><td class="memItemLeft" align="right" valign="top">typedef int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></td></tr>
-<tr class="memdesc:a3c5a45d9cd423c89104928e5feff5a4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number type generally used for locally counted indices.  <a href="#a3c5a45d9cd423c89104928e5feff5a4e">More...</a><br/></td></tr>
-<tr class="separator:a3c5a45d9cd423c89104928e5feff5a4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac119a1148d695b5aa8a38a919c7cb7f9"><td class="memItemLeft" align="right" valign="top">typedef int64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9">strus::GlobalCounter</a></td></tr>
-<tr class="memdesc:ac119a1148d695b5aa8a38a919c7cb7f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number type generally used for indices globally shared between different instances of strus.  <a href="#ac119a1148d695b5aa8a38a919c7cb7f9">More...</a><br/></td></tr>
-<tr class="separator:ac119a1148d695b5aa8a38a919c7cb7f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="memItemLeft" align="right" valign="top">StorageObjectBuilderInterface *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#aa25c3bb2a7fddaaacc1859a6fe58058e">strus::createStorageObjectBuilder_default</a> (ErrorBufferInterface *errorhnd)</td></tr>
+<tr class="memdesc:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a storage object builder with the builders from the standard strus core libraries (without module support)  <a href="#aa25c3bb2a7fddaaacc1859a6fe58058e">More...</a><br/></td></tr>
+<tr class="separator:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e9c1ad9905a085af09b4fa2a20b59b3"><td class="memItemLeft" align="right" valign="top">StorageAlterMetaDataTableInterface *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a6e9c1ad9905a085af09b4fa2a20b59b3">strus::createAlterMetaDataTable</a> (const StorageObjectBuilderInterface *objbuilder, ErrorBufferInterface *errorhnd, const std::string &amp;config)</td></tr>
+<tr class="memdesc:a6e9c1ad9905a085af09b4fa2a20b59b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a alter metadata table interface with the object builder passed.  <a href="#a6e9c1ad9905a085af09b4fa2a20b59b3">More...</a><br/></td></tr>
+<tr class="separator:a6e9c1ad9905a085af09b4fa2a20b59b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="memItemLeft" align="right" valign="top">StorageClientInterface *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ae32c4d703ac6ba1b54a65995546c3f6d">strus::createStorageClient</a> (const StorageObjectBuilderInterface *objbuilder, ErrorBufferInterface *errorhnd, const std::string &amp;config)</td></tr>
+<tr class="memdesc:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a storage client interface with the object builder passed.  <a href="#ae32c4d703ac6ba1b54a65995546c3f6d">More...</a><br/></td></tr>
+<tr class="separator:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Numeric types used for local and global indices. </p>
+<div class="textblock"><p>Library with some convenient functions to create storage objects. </p>
 </div></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->

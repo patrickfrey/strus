@@ -68,10 +68,11 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988a73d2a6fbe90684f4d693ab25b37e7786"><param name="Name" value="CompareLess"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988afa82c4674823370988671f34514301f2"><param name="Name" value="CompareLessEqual"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988ab4a0fbb6e2b80d79b2120655bc49838c"><param name="Name" value="CompareNotEqual"></OBJECT>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a"><param name="Name" value="createAlterMetaDataTable"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a6e9c1ad9905a085af09b4fa2a20b59b3"><param name="Name" value="createAlterMetaDataTable"></OBJECT>
   <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a6e9c1ad9905a085af09b4fa2a20b59b3"><param name="Name" value="storage_objbuild.hpp"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a6e9c1ad9905a085af09b4fa2a20b59b3"><param name="Name" value="strus"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a"><param name="Name" value="strus::StorageInterface"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a1e356187395a4d6b6f8ff9c16fa844f7"><param name="Name" value="strus::StorageObjectBuilderInterface"></OBJECT>
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#a7e1b5d973e38a890f20858f0c7661567"><param name="Name" value="createAttributeReader"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1DatabaseClientInterface.html#ab2535a158bbd8803f0bd4aac2dd21e12"><param name="Name" value="createBackupCursor"></OBJECT>
@@ -146,7 +147,16 @@
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a65ea5fcd9fa89e4692ab41b6fd2cb977"><param name="Name" value="strus"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb"><param name="Name" value="strus::StorageInterface"></OBJECT>
   </UL>
-  <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#acce5c549d49cde2f04da5a7c3cdeb962"><param name="Name" value="createStorageClient"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#ae32c4d703ac6ba1b54a65995546c3f6d"><param name="Name" value="createStorageClient"></OBJECT>
+  <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#ae32c4d703ac6ba1b54a65995546c3f6d"><param name="Name" value="storage_objbuild.hpp"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#ae32c4d703ac6ba1b54a65995546c3f6d"><param name="Name" value="strus"></OBJECT>
+  </UL>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#aa25c3bb2a7fddaaacc1859a6fe58058e"><param name="Name" value="createStorageObjectBuilder_default"></OBJECT>
+  <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#aa25c3bb2a7fddaaacc1859a6fe58058e"><param name="Name" value="storage_objbuild.hpp"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#aa25c3bb2a7fddaaacc1859a6fe58058e"><param name="Name" value="strus"></OBJECT>
+  </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#a807092721e926eddbffb0dd7d0a360ee"><param name="Name" value="createTermPostingIterator"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#aca36b644019e4ba1b620d62ee9d1bb90"><param name="Name" value="createTermTypeIterator"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#af29e4b20fe150f02a18c4af1f19a8a03"><param name="Name" value="createTermValueIterator"></OBJECT>
@@ -244,7 +254,7 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#aac5518519276a1c5172f6dbe6800d6a0"><param name="Name" value="getStatisticsProcessor"></OBJECT>
   <UL>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageClientInterface.html#aac5518519276a1c5172f6dbe6800d6a0"><param name="Name" value="strus::StorageClientInterface"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#af9120f2d79250e2206e831a8ae001585"><param name="Name" value="strus::StorageObjectBuilderInterface"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a5df29676bfb3f9cfa3bcd78068e84d77"><param name="Name" value="strus::StorageObjectBuilderInterface"></OBJECT>
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ae7f6484a13071675ab4f4354edfbc5d2"><param name="Name" value="getStorage"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1QueryProcessorInterface.html#a45a56dde58be36dd36626ab225dc1de8"><param name="Name" value="getSummarizerFunction"></OBJECT>
@@ -396,6 +406,12 @@
   <LI><OBJECT type="text/sitemap"><param name="Local" value="statsproc_8hpp.html"><param name="Name" value="statsproc.hpp"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="storage_8hpp.html"><param name="Name" value="storage.hpp"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="structstrus_1_1Constants.html#ad25b1fa8b954cfc473ec94b9d24a3544"><param name="Name" value="storage_max_position_info"></OBJECT>
+  <LI><OBJECT type="text/sitemap"><param name="Local" value="storage__objbuild_8hpp.html"><param name="Name" value="storage_objbuild.hpp"></OBJECT>
+  <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="storage__objbuild_8hpp.html#a6e9c1ad9905a085af09b4fa2a20b59b3"><param name="Name" value="createAlterMetaDataTable"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="storage__objbuild_8hpp.html#ae32c4d703ac6ba1b54a65995546c3f6d"><param name="Name" value="createStorageClient"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="storage__objbuild_8hpp.html#aa25c3bb2a7fddaaacc1859a6fe58058e"><param name="Name" value="createStorageObjectBuilder_default"></OBJECT>
+  </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="structstrus_1_1FunctionDescription_1_1Parameter.html#ab239411a50668b599f45a0c355c35517a98305d2d902cf7a606cb160d7e2080c4"><param name="Name" value="String"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html"><param name="Name" value="strus"></OBJECT>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1AttributeReaderInterface.html"><param name="Name" value="strus::AttributeReaderInterface"></OBJECT>
@@ -801,12 +817,10 @@
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html"><param name="Name" value="strus::StorageObjectBuilderInterface"></OBJECT>
   <UL>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a1e356187395a4d6b6f8ff9c16fa844f7"><param name="Name" value="createAlterMetaDataTable"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a9aab2287e1ac4f2e336b6972bd88d433"><param name="Name" value="createQueryEval"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#acce5c549d49cde2f04da5a7c3cdeb962"><param name="Name" value="createStorageClient"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ab156b9d5a5f1fc9a9e54b70e471d5cfa"><param name="Name" value="getDatabase"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a890ce9180addda6ae832d02c2c8d69e1"><param name="Name" value="getQueryProcessor"></OBJECT>
-    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#af9120f2d79250e2206e831a8ae001585"><param name="Name" value="getStatisticsProcessor"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a5df29676bfb3f9cfa3bcd78068e84d77"><param name="Name" value="getStatisticsProcessor"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#ae7f6484a13071675ab4f4354edfbc5d2"><param name="Name" value="getStorage"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="classstrus_1_1StorageObjectBuilderInterface.html#a0c05af674dd1f5f85d2eb5d5c81c124b"><param name="Name" value="~StorageObjectBuilderInterface"></OBJECT>
   </UL>
@@ -898,12 +912,15 @@
   </UL>
   <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html"><param name="Name" value="strus"></OBJECT>
   <UL>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a6e9c1ad9905a085af09b4fa2a20b59b3"><param name="Name" value="createAlterMetaDataTable"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#ab83f933d2693f3a61ca60cef1aad689c"><param name="Name" value="createDatabase_leveldb"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#ade58090a092aca8f7c3062f4dc3bb364"><param name="Name" value="createQueryEval"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#acc92d6c60a2528e84bc60dd144850dd2"><param name="Name" value="createQueryProcessor"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a45fc8f6e2ca8bd90d7167f4d4d71c9cf"><param name="Name" value="createScalarFunctionParser_default"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a9e519a59fe3e8b8a3ec8811b373faf68"><param name="Name" value="createStatisticsProcessor"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a65ea5fcd9fa89e4692ab41b6fd2cb977"><param name="Name" value="createStorage"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#ae32c4d703ac6ba1b54a65995546c3f6d"><param name="Name" value="createStorageClient"></OBJECT>
+    <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#aa25c3bb2a7fddaaacc1859a6fe58058e"><param name="Name" value="createStorageObjectBuilder_default"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#ac119a1148d695b5aa8a38a919c7cb7f9"><param name="Name" value="GlobalCounter"></OBJECT>
     <LI><OBJECT type="text/sitemap"><param name="Local" value="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e"><param name="Name" value="Index"></OBJECT>
   </UL>
