@@ -111,28 +111,26 @@ Index IteratorUnion::skipDocCandidate( const Index& docno_)
 
 Index IteratorUnion::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && docno_)
-	{
-		return m_docno;
-	}
 	Index docno_iter = docno_;
 	for (;;)
 	{
-		if (!skipDocCandidate( docno_iter)) return 0;
+		docno_iter = skipDocCandidate( docno_iter);
+		if (!docno_iter) return m_docno=0;
+
 		selected_iterator si = selected_begin(), se = selected_end();
 		for (unsigned int aidx=0; si != se; ++si,++aidx)
 		{
-			if (m_docno == si->skipDoc( m_docno)) break;
+			if (docno_iter == si->skipDoc( docno_iter)) break;
 			unsetSelected( aidx); //... because we break, when we found one, we might not unset all non matching candidates
 		}
-		if (si == se)
+		if (si == se && !m_selected)
 		{
-			docno_iter = m_docno+1;
+			docno_iter += 1;
 			continue;
 		}
 		break;
 	}
-	return m_docno;
+	return m_docno = docno_iter;
 }
 
 Index IteratorUnion::skipPos( const Index& pos_)
