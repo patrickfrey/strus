@@ -40,6 +40,7 @@ public:
 
 	virtual strus::Index skipDoc( const strus::Index& docno)
 	{
+		if (!m_divisor) return m_docno=0;
 		unsigned int lo = (unsigned int)docno >= (m_divisor*2) ? docno : (m_divisor*2);
 		strus::Index rt = ((lo-1) / m_divisor) * m_divisor + m_divisor;
 		rt = (rt > m_maxdocno)?0:rt;
@@ -51,6 +52,7 @@ public:
 
 	virtual strus::Index skipDocCandidate( const strus::Index& docno)
 	{
+		if (!m_divisor) return m_docno=0;
 		unsigned int lo = (unsigned int)docno >= (m_divisor*2) ? docno : (m_divisor*2);
 		strus::Index rt = ((lo-1) / m_divisor) * m_divisor + m_divisor;
 		rt = (rt > m_maxdocno)?0:rt;
@@ -62,6 +64,7 @@ public:
 
 	virtual strus::Index skipPos( const strus::Index& firstpos)
 	{
+		if (!m_divisor) return m_posno=0;
 		unsigned int lo = (unsigned int)firstpos >= (m_divisor*2) ? firstpos : (m_divisor*2);
 		strus::Index rt = ((lo-1) / m_divisor) * m_divisor + m_divisor;
 		rt = (rt > m_maxposno)?0:rt;
@@ -139,6 +142,8 @@ static void testUnionJoinErathosthenes( const strus::QueryProcessorInterface* qp
 	strus::Index maxno = ((NofArguments+1)*(NofArguments+1));
 
 	unsigned int aidx = 1;
+	args.push_back( new ErathosthenesSievePostingIterator( 0, maxno, maxno));
+	args.push_back( new ErathosthenesSievePostingIterator( 0, maxno, maxno));
 	for (; aidx<=NofArguments; ++aidx)
 	{
 		args.push_back( new ErathosthenesSievePostingIterator( aidx+1, maxno, maxno));
