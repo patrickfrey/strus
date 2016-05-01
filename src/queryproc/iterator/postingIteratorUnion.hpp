@@ -14,6 +14,10 @@
 #include "private/bitOperations.hpp"
 #include "private/internationalization.hpp"
 #include <vector>
+#undef ALTERNATIVE_BITSET
+#ifdef ALTERNATIVE_BITSET
+#include <boost/dynamic_bitset.hpp>
+#endif
 
 namespace strus
 {
@@ -56,11 +60,19 @@ protected:
 	class selected_iterator
 	{
 	public:
+#ifdef ALTERNATIVE_BITSET
+		selected_iterator( boost::dynamic_bitset<> set_, std::vector<Reference<PostingIteratorInterface> >::iterator aitr_)
+			:m_aitr(aitr_),m_set(set_),m_idx(0)
+		{
+			skip();
+		}
+#else
 		selected_iterator( uint64_t set_, std::vector<Reference<PostingIteratorInterface> >::iterator aitr_)
 			:m_aitr(aitr_),m_set(set_),m_idx(0)
 		{
 			skip();
 		}
+#endif
 		selected_iterator( const selected_iterator& o)
 			:m_aitr(o.m_aitr),m_set(o.m_set),m_idx(o.m_idx){}
 
@@ -76,16 +88,33 @@ protected:
 	private:
 		void skip()
 		{
+#ifdef ALTERNATIVE_BITSET
+			m_idx = m_set.find_first();
+			if (m_idx >= MaxNofElements)
+			{
+				m_idx = 0;
+			}
+			else
+			{
+				m_set.set( m_idx, false);
+				m_idx += 1;
+			}
+#else
 			m_idx = BitOperations::bitScanForward( m_set);
 			if (m_idx)
 			{
 				m_set &= ~((uint64_t)1<<(m_idx-1));
 			}
+#endif
 		}
 
 	private:
 		std::vector<Reference<PostingIteratorInterface> >::iterator m_aitr;
+#ifdef ALTERNATIVE_BITSET
+		boost::dynamic_bitset<> m_set;
+#else
 		uint64_t m_set;
+#endif
 		std::size_t m_idx;
 	};
 
@@ -96,7 +125,11 @@ protected:
 
 	selected_iterator selected_end()
 	{
+#ifdef ALTERNATIVE_BITSET
+		return selected_iterator( boost::dynamic_bitset<>(MaxNofElements), m_argar.begin());
+#else
 		return selected_iterator( 0, m_argar.begin());
+#endif
 	}
 
 protected:
@@ -118,22 +151,38 @@ protected:
 private:
 	void setSelected( unsigned int idx)
 	{
+#ifdef ALTERNATIVE_BITSET
+		m_selected.set( idx, true);
+#else
 		m_selected |= ((uint64_t)1 << idx);
+#endif
 	}
 	void unsetSelected( unsigned int idx)
 	{
+#ifdef ALTERNATIVE_BITSET
+		m_selected.set( idx, false);
+#else
 		m_selected &= ~((uint64_t)1 << idx);
+#endif
 	}
 	void clearSelected()
 	{
+#ifdef ALTERNATIVE_BITSET
+		m_selected.reset();
+#else
 		m_selected = 0;
+#endif
 	}
 
 private:
 	Index m_docno;
 	Index m_posno;							///< current position
 	std::vector<Reference<PostingIteratorInterface> > m_argar;	///< arguments
+#ifdef ALTERNATIVE_BITSET
+	boost::dynamic_bitset<> m_selected;
+#else
 	uint64_t m_selected;						///< set pf bits parallel to arguments that specifies the current document matches of the arguments
+#endif
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable Index m_documentFrequency;				///< document frequency (of the most frequent subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

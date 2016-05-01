@@ -19,7 +19,11 @@ IteratorUnion::IteratorUnion( const std::vector<Reference<PostingIteratorInterfa
 	:m_docno(0)
 	,m_posno(0)
 	,m_argar(args_)
+#ifdef ALTERNATIVE_BITSET
+	,m_selected(MaxNofElements)
+#else
 	,m_selected(0)
+#endif
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
@@ -123,7 +127,11 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 			if (docno_iter == si->skipDoc( docno_iter)) break;
 			unsetSelected( aidx); //... because we break, when we found one, we might not unset all non matching candidates
 		}
+#ifdef ALTERNATIVE_BITSET
+		if (si == se && m_selected.empty())
+#else
 		if (si == se && !m_selected)
+#endif
 		{
 			docno_iter += 1;
 			continue;
