@@ -73,7 +73,7 @@ struct BitOperations
 	static inline unsigned int bitScanForward( const uint32_t& idx)
 	{
 #ifdef __x86_64__
-		uint32_t result; 
+		uint32_t result;
 		if (!idx) return 0;
 		asm(" bsf %1, %0 \n" : "=r"(result) : "r"(idx) ); 
 		return result+1;
