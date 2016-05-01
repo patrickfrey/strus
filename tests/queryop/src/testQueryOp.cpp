@@ -176,13 +176,15 @@ static void testUnionJoinErathosthenes( const strus::QueryProcessorInterface* qp
 				throw strus::runtime_error("unexpected document number in join: found %u != expected %u", next_docno, next_result);
 			}
 		}
+		curr_docno = next_docno?(next_docno+1):0;
+
 		strus::Index curr_posno = 0;
 		strus::Index next_posno = 0;
 		do
 		{
-			next_posno = result->skipDoc( curr_posno);
+			next_posno = result->skipPos( curr_posno);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "SKIP POS " << curr_docno << " = " << next_docno << std::endl;
+			std::cout << "SKIP POS " << curr_posno << " = " << next_posno << std::endl;
 #endif
 			strus::Index next_result = nextNonPrimeNumber( curr_posno);
 			if (next_result > maxno)
@@ -194,7 +196,7 @@ static void testUnionJoinErathosthenes( const strus::QueryProcessorInterface* qp
 			}
 			else
 			{
-				if (next_posno != next_result)
+				if (next_posno && next_posno < next_result)
 				{
 					throw strus::runtime_error("unexpected position number in join: found %u != expected %u", next_posno, next_result);
 				}
@@ -202,7 +204,6 @@ static void testUnionJoinErathosthenes( const strus::QueryProcessorInterface* qp
 			curr_posno = next_posno?(next_posno+1):0;
 		}
 		while (curr_posno != 0);
-		curr_docno = next_docno?(next_docno+1):0;
 	}
 	while (curr_docno != 0);
 }
