@@ -79,7 +79,7 @@ protected:
 			m_idx = BitOperations::bitScanForward( m_set);
 			if (m_idx)
 			{
-				m_set -= (uint64_t)1<<(m_idx-1);
+				m_set &= ~((uint64_t)1<<(m_idx-1));
 			}
 		}
 
@@ -122,7 +122,7 @@ private:
 	}
 	void unsetSelected( unsigned int idx)
 	{
-		m_selected ^= ((uint64_t)1 << idx);
+		m_selected &= ~((uint64_t)1 << idx);
 	}
 	void clearSelected()
 	{
