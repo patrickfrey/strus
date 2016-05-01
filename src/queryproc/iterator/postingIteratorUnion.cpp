@@ -140,6 +140,11 @@ Index IteratorUnion::skipPos( const Index& pos_)
 	Index basepos = pos_?pos_:1;
 	for (; si != se; ++si)
 	{
+		pos = si->skipPos( basepos);
+		if (pos) break;
+	}
+	for (; si != se; ++si)
+	{
 		pos = selectSmallerNotNull( pos, si->skipPos( basepos));
 	}
 	return m_posno=pos;
