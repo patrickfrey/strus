@@ -14,7 +14,7 @@
 #include "private/bitOperations.hpp"
 #include "private/internationalization.hpp"
 #include <vector>
-#undef ALTERNATIVE_BITSET
+#define ALTERNATIVE_BITSET
 #ifdef ALTERNATIVE_BITSET
 #include <boost/dynamic_bitset.hpp>
 #endif
