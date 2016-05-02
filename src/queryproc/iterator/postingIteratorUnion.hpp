@@ -11,13 +11,9 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "private/bitOperations.hpp"
+#include "private/utils.hpp"
 #include "private/internationalization.hpp"
 #include <vector>
-#define ALTERNATIVE_BITSET
-#ifdef ALTERNATIVE_BITSET
-#include <boost/dynamic_bitset.hpp>
-#endif
 
 namespace strus
 {
@@ -57,82 +53,6 @@ public:
 	enum {MaxNofElements=64};
 
 protected:
-	class selected_iterator
-	{
-	public:
-#ifdef ALTERNATIVE_BITSET
-		selected_iterator( boost::dynamic_bitset<> set_, std::vector<Reference<PostingIteratorInterface> >::iterator aitr_)
-			:m_aitr(aitr_),m_set(set_),m_idx(0)
-		{
-			skip();
-		}
-#else
-		selected_iterator( uint64_t set_, std::vector<Reference<PostingIteratorInterface> >::iterator aitr_)
-			:m_aitr(aitr_),m_set(set_),m_idx(0)
-		{
-			skip();
-		}
-#endif
-		selected_iterator( const selected_iterator& o)
-			:m_aitr(o.m_aitr),m_set(o.m_set),m_idx(o.m_idx){}
-
-		selected_iterator& operator++()				{skip(); return *this;}
-		selected_iterator operator++(int)			{selected_iterator rt(*this); skip(); return rt;}
-
-		bool operator==( const selected_iterator& o) const	{return m_set==o.m_set && m_idx==o.m_idx;}
-		bool operator!=( const selected_iterator& o) const	{return m_set!=o.m_set || m_idx!=o.m_idx;}
-
-		PostingIteratorInterface& operator*() const		{return *(m_aitr+m_idx-1)->get();}
-		PostingIteratorInterface* operator->() const		{return (m_aitr+m_idx-1)->get();}
-
-	private:
-		void skip()
-		{
-#ifdef ALTERNATIVE_BITSET
-			m_idx = m_set.find_first();
-			if (m_idx >= MaxNofElements)
-			{
-				m_idx = 0;
-			}
-			else
-			{
-				m_set.set( m_idx, false);
-				m_idx += 1;
-			}
-#else
-			m_idx = BitOperations::bitScanForward( m_set);
-			if (m_idx)
-			{
-				m_set &= ~((uint64_t)1<<(m_idx-1));
-			}
-#endif
-		}
-
-	private:
-		std::vector<Reference<PostingIteratorInterface> >::iterator m_aitr;
-#ifdef ALTERNATIVE_BITSET
-		boost::dynamic_bitset<> m_set;
-#else
-		uint64_t m_set;
-#endif
-		std::size_t m_idx;
-	};
-
-	selected_iterator selected_begin()
-	{
-		return selected_iterator( m_selected, m_argar.begin());
-	}
-
-	selected_iterator selected_end()
-	{
-#ifdef ALTERNATIVE_BITSET
-		return selected_iterator( boost::dynamic_bitset<>(MaxNofElements), m_argar.begin());
-#else
-		return selected_iterator( 0, m_argar.begin());
-#endif
-	}
-
-protected:
 	const PostingIteratorInterface* arg( unsigned int idx) const
 	{
 		return m_argar[ idx].get();
@@ -151,38 +71,22 @@ protected:
 private:
 	void setSelected( unsigned int idx)
 	{
-#ifdef ALTERNATIVE_BITSET
-		m_selected.set( idx, true);
-#else
-		m_selected |= ((uint64_t)1 << idx);
-#endif
+		m_selected.set( idx);
 	}
 	void unsetSelected( unsigned int idx)
 	{
-#ifdef ALTERNATIVE_BITSET
-		m_selected.set( idx, false);
-#else
-		m_selected &= ~((uint64_t)1 << idx);
-#endif
+		m_selected.unset( idx);
 	}
 	void clearSelected()
 	{
-#ifdef ALTERNATIVE_BITSET
 		m_selected.reset();
-#else
-		m_selected = 0;
-#endif
 	}
 
 private:
 	Index m_docno;
 	Index m_posno;							///< current position
 	std::vector<Reference<PostingIteratorInterface> > m_argar;	///< arguments
-#ifdef ALTERNATIVE_BITSET
-	boost::dynamic_bitset<> m_selected;
-#else
-	uint64_t m_selected;						///< set pf bits parallel to arguments that specifies the current document matches of the arguments
-#endif
+	strus::utils::BitSet m_selected;
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable Index m_documentFrequency;				///< document frequency (of the most frequent subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

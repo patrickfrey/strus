@@ -19,11 +19,7 @@ IteratorUnion::IteratorUnion( const std::vector<Reference<PostingIteratorInterfa
 	:m_docno(0)
 	,m_posno(0)
 	,m_argar(args_)
-#ifdef ALTERNATIVE_BITSET
-	,m_selected(MaxNofElements)
-#else
-	,m_selected(0)
-#endif
+	,m_selected(args_.size())
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
@@ -121,17 +117,13 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 		docno_iter = skipDocCandidate( docno_iter);
 		if (!docno_iter) return m_docno=0;
 
-		selected_iterator si = selected_begin(), se = selected_end();
-		for (unsigned int aidx=0; si != se; ++si,++aidx)
+		int si = m_selected.first(), se = -1;
+		for (unsigned int aidx=0; si != se; si=m_selected.next(si),++aidx)
 		{
-			if (docno_iter == si->skipDoc( docno_iter)) break;
+			if (docno_iter == m_argar[si]->skipDoc( docno_iter)) break;
 			unsetSelected( aidx); //... because we break, when we found one, we might not unset all non matching candidates
 		}
-#ifdef ALTERNATIVE_BITSET
 		if (si == se && m_selected.empty())
-#else
-		if (si == se && !m_selected)
-#endif
 		{
 			docno_iter += 1;
 			continue;
@@ -143,17 +135,17 @@ Index IteratorUnion::skipDoc( const Index& docno_)
 
 Index IteratorUnion::skipPos( const Index& pos_)
 {
-	selected_iterator si = selected_begin(), se = selected_end();
+	int si = m_selected.first(), se = -1;
 	Index pos = 0;
 	Index basepos = pos_?pos_:1;
-	for (; si != se; ++si)
+	for (; si != se; si=m_selected.next(si))
 	{
-		pos = si->skipPos( basepos);
+		pos = m_argar[si]->skipPos( basepos);
 		if (pos) break;
 	}
-	for (; si != se; ++si)
+	for (; si != se; si=m_selected.next(si))
 	{
-		pos = selectSmallerNotNull( pos, si->skipPos( basepos));
+		pos = selectSmallerNotNull( pos, m_argar[si]->skipPos( basepos));
 	}
 	return m_posno=pos;
 }
