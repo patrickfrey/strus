@@ -10,7 +10,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
-#include "private/bitOperations.hpp"
+#include "private/utils.hpp"
 #include <cstdio>
 #include <cstring>
 
@@ -41,7 +41,7 @@ PositionWindow::PositionWindow(
 	,m_range(range_)
 	,m_cardinality(cardinality_>0?cardinality_:nofargs)
 	,m_windowsize(0)
-	,m_isnew_bitset(0)
+	,m_isnew_bitset(nofargs)
 	,m_evaluationType(evaluationType_)
 {
 	if (nofargs > MaxNofArguments)
@@ -75,7 +75,7 @@ PositionWindow::PositionWindow(
 			m_posar[ pi] = pos;
 			m_window[ pi] = ai;
 			m_isnew_bitset <<= 1;
-			m_isnew_bitset |= 1;
+			m_isnew_bitset.set(0);
 		}
 	}
 	m_windowsize = (m_evaluationType == MinWin) ? getMinWinSize() : getMaxWinSize();
@@ -132,7 +132,7 @@ bool PositionWindow::advance( const Index& advancepos)
 		m_window[ pi-1] = idx;
 
 		m_isnew_bitset >>= 1;					//... remove first bit
-		BitOperations::bitInsert( m_isnew_bitset, pi-1);	//... insert new position bit
+		m_isnew_bitset.insert( pi-1);				//... insert new position bit
 	}
 	else
 	{
@@ -162,7 +162,7 @@ bool PositionWindow::first()
 
 bool PositionWindow::next()
 {
-	m_isnew_bitset = 0;
+	m_isnew_bitset.reset();
 	do
 	{
 		if (!advance()) return false;
@@ -173,7 +173,7 @@ bool PositionWindow::next()
 
 bool PositionWindow::skip( const Index& pos)
 {
-	m_isnew_bitset = 0;
+	m_isnew_bitset.reset();
 	do
 	{
 		if (!advance( pos)) return false;

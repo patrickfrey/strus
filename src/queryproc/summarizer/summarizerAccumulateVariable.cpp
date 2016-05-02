@@ -19,7 +19,6 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
-#include "private/bitOperations.hpp"
 #include "private/localStructAllocator.hpp"
 #include <cstdlib>
 
@@ -69,10 +68,6 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 					varitr.push_back( vi->itr());
 				}
 			}
-			if (m_features.size() >= MaxNofElements)
-			{
-				m_errorhnd->report( _TXT("too many features (>64) defined for '%s' summarization"), "accuvariable");
-			}
 			if (varitr.empty())
 			{
 				m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_var.c_str(), "accuvariable");
@@ -87,22 +82,6 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), "accuvariable", *m_errorhnd);
 }
 
-
-static void setSelected( uint64_t& set, unsigned int idx)
-{
-	set |= ((uint64_t)1 << idx);
-}
-
-static int nextSelected( uint64_t& set)
-{
-	int rt = BitOperations::bitScanForward( set)-1;
-	if (rt >= 0)
-	{
-		set -= (uint64_t)1<<rt;
-	}
-	return rt;
-}
-
 std::vector<SummaryElement>
 	SummarizerFunctionContextAccumulateVariable::getSummary( const Index& docno)
 {
@@ -111,7 +90,7 @@ std::vector<SummaryElement>
 		typedef LocalStructAllocator<std::pair<Index,double> > PosWeightAllocator;
 		typedef std::map<Index,double,std::less<Index>,PosWeightAllocator> PosWeightMap;
 
-		uint64_t docsel = 0;
+		strus::utils::BitSet docsel( m_features.size());
 
 		m_forwardindex->skipDoc( docno);
 
@@ -123,17 +102,16 @@ std::vector<SummaryElement>
 		{
 			if (docno==fi->itr->skipDocCandidate( docno))
 			{
-				setSelected( docsel, fidx);
+				docsel.set( fidx);
 			}
 		}
 		// For every match position multiply the weights for each position and add them 
 		// to the final accumulation result:
 		PosWeightMap posWeightMap;
-		uint64_t docselitr = docsel;
-		int idx = 0;
-		while (0<=(idx=nextSelected( docselitr)))
+		int di = docsel.first(), de = -1;
+		for (; di != de; di=docsel.next(di))
 		{
-			const SummarizationFeature& sumfeat = m_features[ idx];
+			const SummarizationFeature& sumfeat = m_features[ di];
 			Index curpos = sumfeat.itr->skipPos( 0);
 			for (; curpos; curpos = sumfeat.itr->skipPos( curpos+1))
 			{

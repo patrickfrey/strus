@@ -68,6 +68,23 @@ public:
 		if (rt >= (int)m_size) return -1;
 		return rt;
 	}
+	BitSet& operator <<= (std::size_t n)
+	{
+		m_impl <<= n;
+		return *this;
+	}
+	BitSet& operator >>= (std::size_t n)
+	{
+		m_impl >>= n;
+		return *this;
+	}
+	void insert( std::size_t idx)
+	{
+		boost::dynamic_bitset<> left = (m_impl >> idx) << idx;
+		boost::dynamic_bitset<> right = m_impl ^ left;
+		m_impl = (left << 1) | right;
+		m_impl.set( idx);
+	}
 
 private:
 	boost::dynamic_bitset<> m_impl;
