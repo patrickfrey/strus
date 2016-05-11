@@ -33,7 +33,7 @@ public:
 	explicit ErathosthenesSievePostingIterator( unsigned int divisor_, strus::Index maxdocno_, strus::Index maxposno_)
 		:m_divisor(divisor_),m_maxdocno(maxdocno_),m_docno(0),m_maxposno(maxposno_),m_posno(0)
 	{
-		std::snprintf( m_featureid, sizeof(m_featureid), "E%u", m_divisor);
+		snprintf( m_featureid, sizeof(m_featureid), "E%u", m_divisor);
 	}
 
 	virtual ~ErathosthenesSievePostingIterator(){}
