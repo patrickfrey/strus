@@ -3,6 +3,7 @@
 <head>
 	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Strus whiteboard. Notes about the future of strus, what we are working on and what we wish to archieve for strus, a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
 	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
@@ -22,7 +23,7 @@
 	<div id="whiteboard">
 	<div id="whiteboardrow">
 		<div id="whiteboardheading">
-			Planned&nbsp;articles on&nbsp;codeproject<br/>(SHORT-TERM)
+			Planned&nbsp;articles on&nbsp;codeproject<br/>(MEDIUM-TERM)
 		</div>
 		<div id="whiteboardcol">The following articles on <a href="codeproject.com">codeproject</a> are planned for the
 			next weeks:
@@ -33,19 +34,18 @@
 	</div>
 
 	<div id="whiteboardrow">
-		<div id="whiteboardheading">
-			Introspection of&nbsp;Strus&nbsp;objects on&nbsp;client&nbsp;side<br/>(LONG-TERM)
+		<div id="whiteboardheading">JSON Segmenter<br/>(SHORT-TERM)
 		</div>
 		<div id="whiteboardcol">
-			Something missing in strus is <i>introspection</i> of the data structures built 
-			in a program (expression trees, function definitions, data loaded and processed etc.). 
-			<br/>
-			Because this seems to be an aspect on its own, we could implement an own
-			proxy universe from StorageObjectBuilderInterface and AnalyzerObjectBuilderInterface,
-			similarly to what strusModule (the module loader) or strusRpc does.
-			Every object created would implement its method calls as redirect to the real
-			method call and additionaly build some representation in a
-			universe that is introspectable (an object tree). 
+			Besides XML it wouls also be nice to be able to process JSON in the Strus analyzer.
+		</div>
+	</div>
+
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">NGRAM tokenizer/normalizer<br/>(SHORT-TERM)
+		</div>
+		<div id="whiteboardcol">
+			Processing NGRAMs in the Strus analyzer is on the list because of two small projects.
 		</div>
 	</div>
 
