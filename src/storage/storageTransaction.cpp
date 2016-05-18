@@ -69,31 +69,27 @@ Index StorageTransaction::lookUpTermValue( const std::string& name)
 
 Index StorageTransaction::getOrCreateTermValue( const std::string& name)
 {
-	bool isNew;
-	return m_termValueMap.getOrCreate( name, isNew);
+	return m_termValueMap.getOrCreate( name);
 }
 
 Index StorageTransaction::getOrCreateTermType( const std::string& name)
 {
-	bool isNew;
-	return m_termTypeMap.getOrCreate( utils::tolower( name), isNew);
+	return m_termTypeMap.getOrCreate( utils::tolower( name));
 }
 
 Index StorageTransaction::getOrCreateDocno( const std::string& name)
 {
-	bool isNew;
-	return m_docIdMap.getOrCreate( name, isNew);
+	return m_docIdMap.getOrCreate( name);
 }
 
-Index StorageTransaction::getOrCreateUserno( const std::string& name, bool& isNew)
+Index StorageTransaction::getOrCreateUserno( const std::string& name)
 {
-	return m_userIdMap.getOrCreate( name, isNew);
+	return m_userIdMap.getOrCreate( name);
 }
 
 Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 {
-	bool isNew;
-	return m_attributeNameMap.getOrCreate( utils::tolower( name), isNew);
+	return m_attributeNameMap.getOrCreate( utils::tolower( name));
 }
 
 void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value)
@@ -221,9 +217,8 @@ StorageDocumentInterface*
 {
 	try
 	{
-		bool isNew;
-		Index dn = m_docIdMap.getOrCreate( docid, isNew);
-		return new StorageDocument( this, docid, dn, isNew, m_errorhnd);
+		Index dn = m_docIdMap.getOrCreate( docid);
+		return new StorageDocument( this, docid, dn, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating document in transaction: %s"), *m_errorhnd, 0);
 }

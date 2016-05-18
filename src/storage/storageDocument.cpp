@@ -21,12 +21,10 @@ StorageDocument::StorageDocument(
 		StorageTransaction* transaction_,
 		const std::string& docid_,
 		const Index& docno_,
-		bool isNew_,
 		ErrorBufferInterface* errorhnd_)
 	:m_transaction(transaction_)
 	,m_docid(docid_)
 	,m_docno(docno_)
-	,m_isNew(isNew_)
 	,m_errorhnd(errorhnd_)
 {}
 
@@ -101,8 +99,7 @@ void StorageDocument::setUserAccessRight(
 {
 	try
 	{
-		bool isNew = false;
-		m_userlist.push_back( m_transaction->getOrCreateUserno( username_, isNew));
+		m_userlist.push_back( m_transaction->getOrCreateUserno( username_));
 	}
 	CATCH_ERROR_MAP( _TXT("error setting user rights of document: %s"), *m_errorhnd);
 }

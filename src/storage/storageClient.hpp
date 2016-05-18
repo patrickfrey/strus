@@ -162,9 +162,9 @@ public:/*StorageTransaction*/
 	Index allocTermno();
 	Index allocDocno();
 
-	Index allocTypenoImm( const std::string& name, bool& isNew);///< immediate allocation of a term type
-	Index allocUsernoImm( const std::string& name, bool& isNew); ///< immediate allocation of a user number
-	Index allocAttribnoImm( const std::string& name, bool& isNew);///< immediate allocation of a attribute number
+	Index allocTypenoImm( const std::string& name);		///< immediate allocation of a term type
+	Index allocUsernoImm( const std::string& name);		///< immediate allocation of a user number
+	Index allocAttribnoImm( const std::string& name);	///< immediate allocation of a attribute number
 
 	StatisticsBuilderInterface* getStatisticsBuilder();
 

@@ -81,7 +81,7 @@ public:/*Document*/
 	Index getOrCreateTermType( const std::string& name);
 	Index getOrCreateAttributeName( const std::string& name);
 	Index getOrCreateDocno( const std::string& name);
-	Index getOrCreateUserno( const std::string& name, bool& isNew);
+	Index getOrCreateUserno( const std::string& name);
 	Index lookUpTermValue( const std::string& name);
 
 	void defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value);

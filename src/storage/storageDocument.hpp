@@ -32,7 +32,6 @@ public:
 		StorageTransaction* transaction_,
 		const std::string& docid_,
 		const Index& docno_,
-		bool isNew_,
 		ErrorBufferInterface* errorhnd_);
 
 	/// \brief Destructor
@@ -136,7 +135,6 @@ private:
 	StorageTransaction* m_transaction;
 	std::string m_docid;
 	Index m_docno;
-	bool m_isNew;
 	TermMap m_terms;
 	InvMap m_invs;
 	std::vector<DocAttribute> m_attributes;

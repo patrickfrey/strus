@@ -67,8 +67,7 @@ void StorageDocumentUpdate::setUserAccessRight(
 {
 	try
 	{
-		bool isNew = false;
-		Index usrno = m_transaction->getOrCreateUserno( username_, isNew);
+		Index usrno = m_transaction->getOrCreateUserno( username_);
 		std::vector<Index>::iterator ui = m_del_userlist.begin(), ue = m_del_userlist.end();
 		while (ui != ue)
 		{
@@ -81,7 +80,7 @@ void StorageDocumentUpdate::setUserAccessRight(
 				++ui;
 			}
 		}
-		m_add_userlist.push_back( m_transaction->getOrCreateUserno( username_, isNew));
+		m_add_userlist.push_back( m_transaction->getOrCreateUserno( username_));
 	}
 	CATCH_ERROR_MAP( _TXT("error set user access rights of document: %s"), *m_errorhnd);
 }
@@ -91,8 +90,7 @@ void StorageDocumentUpdate::clearUserAccessRight(
 {
 	try
 	{
-		bool isNew = false;
-		Index usrno = m_transaction->getOrCreateUserno( username_, isNew);
+		Index usrno = m_transaction->getOrCreateUserno( username_);
 		std::vector<Index>::iterator ui = m_add_userlist.begin(), ue = m_add_userlist.end();
 		while (ui != ue)
 		{
