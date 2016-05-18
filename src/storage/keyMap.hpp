@@ -50,7 +50,8 @@ public:
 
 	void getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
-		DatabaseTransactionInterface* transaction);
+		DatabaseTransactionInterface* transaction,
+		int* nofNewItems=0);
 	void getWriteBatch(
 		DatabaseTransactionInterface* transaction);
 

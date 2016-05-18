@@ -45,7 +45,7 @@ StorageTransaction::StorageTransaction(
 	,m_docIdMap(database_,DatabaseKey::DocIdPrefix,storage_->createDocnoAllocator())
 	,m_userIdMap(database_,DatabaseKey::UserNamePrefix,storage_->createUsernoAllocator())
 	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix,storage_->createAttribnoAllocator())
-	,m_nof_documents(0)
+	,m_nof_deleted_documents(0)
 	,m_commit(false)
 	,m_rollback(false)
 	,m_errorhnd(errorhnd_)
@@ -79,8 +79,9 @@ Index StorageTransaction::getOrCreateTermType( const std::string& name)
 	return m_termTypeMap.getOrCreate( utils::tolower( name), isNew);
 }
 
-Index StorageTransaction::getOrCreateDocno( const std::string& name, bool& isNew)
+Index StorageTransaction::getOrCreateDocno( const std::string& name)
 {
+	bool isNew;
 	return m_docIdMap.getOrCreate( name, isNew);
 }
 
@@ -168,11 +169,6 @@ void StorageTransaction::closeForwardIndexDocument()
 	m_forwardIndexMap.closeForwardIndexDocument();
 }
 
-void StorageTransaction::countDocument()
-{
-	m_nof_documents += 1;
-}
-
 void StorageTransaction::deleteIndex( const Index& docno)
 {
 	m_invertedIndexMap.deleteIndex( docno);
@@ -214,7 +210,7 @@ void StorageTransaction::deleteDocument( const std::string& docid)
 
 		//[5] Delete the document id
 		m_docIdMap.deleteKey( docid);
-		m_nof_documents -= 1;
+		m_nof_deleted_documents += 1;
 	}
 	CATCH_ERROR_MAP( _TXT("error deleting document in transaction: %s"), *m_errorhnd);
 }
@@ -307,7 +303,8 @@ bool StorageTransaction::commit()
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
 		std::map<Index,Index> docnoUnknownMap;
-		m_docIdMap.getWriteBatch( docnoUnknownMap, transaction.get());
+		int nof_documents = -m_nof_deleted_documents;
+		m_docIdMap.getWriteBatch( docnoUnknownMap, transaction.get(), &nof_documents);
 
 		std::vector<Index> refreshList;
 		m_attributeMap.renameNewDocNumbers( docnoUnknownMap);
@@ -326,7 +323,7 @@ bool StorageTransaction::commit()
 				m_termTypeMapInv, m_termValueMapInv);
 		if (statisticsBuilder)
 		{
-			statisticsBuilder->setNofDocumentsInsertedChange( m_nof_documents);
+			statisticsBuilder->setNofDocumentsInsertedChange( nof_documents);
 		}
 		m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
 		m_forwardIndexMap.getWriteBatch( transaction.get());
@@ -334,7 +331,7 @@ bool StorageTransaction::commit()
 		m_userAclMap.renameNewDocNumbers( docnoUnknownMap);
 		m_userAclMap.getWriteBatch( transaction.get());
 
-		m_storage->getVariablesWriteBatch( transaction.get(), m_nof_documents);
+		m_storage->getVariablesWriteBatch( transaction.get(), nof_documents);
 		if (!transaction->commit())
 		{
 			m_errorhnd->explain(_TXT("error in database transaction commit: %s"));
@@ -344,12 +341,12 @@ bool StorageTransaction::commit()
 		{
 			dfcache->writeBatch( dfbatch);
 		}
-		m_storage->declareNofDocumentsInserted( m_nof_documents);
+		m_storage->declareNofDocumentsInserted( nof_documents);
 		m_storage->releaseTransaction( refreshList);
 		statisticsBuilderScope.done();
 
 		m_commit = true;
-		m_nof_documents = 0;
+		m_nof_deleted_documents = 0;
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in transaction commit: %s"), *m_errorhnd, false);

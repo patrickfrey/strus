@@ -111,22 +111,15 @@ void StorageDocument::done()
 {
 	try
 	{
-		if (m_isNew)
-		{
-			// Increment document counter
-			m_transaction->countDocument();
-		}
-		else
-		{
-			//[1.1] Delete old metadata:
-			m_transaction->deleteMetaData( m_docno);
-			//[1.2] Delete old attributes:
-			m_transaction->deleteAttributes( m_docno);
-			//[1.3] Delete old index elements (forward index and inverted index):
-			m_transaction->deleteIndex( m_docno);
-			//[1.4] Delete old user access rights:
-			m_transaction->deleteAcl( m_docno);
-		}
+		//[1.1] Delete old metadata:
+		m_transaction->deleteMetaData( m_docno);
+		//[1.2] Delete old attributes:
+		m_transaction->deleteAttributes( m_docno);
+		//[1.3] Delete old index elements (forward index and inverted index):
+		m_transaction->deleteIndex( m_docno);
+		//[1.4] Delete old user access rights:
+		m_transaction->deleteAcl( m_docno);
+
 		//[2.1] Define new metadata:
 		std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
 		for (; wi != we; ++wi)
