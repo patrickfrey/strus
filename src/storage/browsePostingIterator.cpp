@@ -25,8 +25,8 @@ BrowsePostingIterator::~BrowsePostingIterator()
 
 Index BrowsePostingIterator::skipDoc( const Index& docno_)
 {
-	if (docno_ < 0 || docno_ > m_maxdocno) return m_docno = 0;
 	Index dn = (docno_ == 0) ? 1 : docno_;
+	if (dn < 0 || dn > m_maxdocno) return m_docno = 0;
 	while (!m_restriction->match( dn))
 	{
 		++dn;
