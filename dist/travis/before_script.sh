@@ -30,6 +30,13 @@ case $OS in
 		brew link --force gettext || true
 		brew link leveldb || true
 		brew link snappy || true
+		# rebuild leveldb to use gcc-4.8 ABI on OSX (libstc++ differs
+		# from stdc++, leveldb uses std::string in API functions, C
+		# libraries like gettext and snappy and even boost do not 
+		# have this problem)
+		if test "X$CC" = "Xgcc"; then
+			brew reinstall leveldb --cc=gcc-4.8
+		fi
 		;;
 	
 	*)
