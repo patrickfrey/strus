@@ -26,12 +26,13 @@ case $OS in
 		;;
 esac
 
+# build pre-requisites
 DEPS="strusBase"
 
-# build pre-requisites
+GITURL=`git config remote.origin.url`
 cd ..
 for i in $DEPS; do
-	git clone `git config remote.origin.url | sed "s@/strus\.@/$i.@g"` $i
+	git clone `git $GITURL | sed "s@/strus\.@/$i.@g"` $i
 	cd $i
 	git checkout travis
 	case $OS in
