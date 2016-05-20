@@ -29,6 +29,7 @@ esac
 DEPS="strusBase"
 
 # build pre-requisites
+cd ..
 for i in $DEPS; do
 	git clone `git config remote.origin.url | sed "s@/strus\.@/$i.@g"` $i
 	cd $i
@@ -78,6 +79,7 @@ for i in $DEPS; do
 	esac
 	cd ..
 done
+cd strus
 
 # build the package itself
 case $OS in
