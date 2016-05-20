@@ -14,14 +14,17 @@ case $OS in
 			# gcc on OSX is a mere frontend to clang, force using gcc 4.8
 			export CXX=g++-4.8
 			export CC=gcc-4.8
+			export CFLAGS="-I/usr/local"
 			# force stdlibc++ because of differing ABIs in leveldb for std::string
-			export LDFLAGS="-L/usr/local/lib -stdlib=libstdc++"
+			export CXXFLAGS="-I/usr/local -stdlib=libstdc++"
+			# forcing brew versions (of gettext) over Mac versions
+			export LDFLAGS="-L/usr/local/lib"
 		else
+			export CFLAGS="-I/usr/local"
+			export CXXFLAGS="-I/usr/local"
+			# forcing brew versions (of gettext) over Mac versions
 			export LDFLAGS="-L/usr/local/lib"
 		fi
-		# forcing brew versions (of gettext) over Mac versions
-		export CFLAGS="-I/usr/local"
-		export CXXFLAGS="-I/usr/local"
 		;;
 
 	*)
