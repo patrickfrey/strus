@@ -42,7 +42,7 @@ for i in $DEPS; do
 			;;
 		
 		Darwin)
-			if test "X$CC" = "Xgcc"; then
+			if test "X$CC" = "Xgcc-4.8"; then
 				cmake \
 					-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 					-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
@@ -80,7 +80,7 @@ case $OS in
 		;;
 
 	Darwin)
-		if test "X$CC" = "Xgcc"; then
+		if test "X$CC" = "Xgcc-4.8"; then
 			cmake \
 				-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 				-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
