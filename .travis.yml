@@ -3,6 +3,7 @@ os:
 - linux
 - osx
 dist: trusty
+osx_image: xcode6.4
 compiler:
 - clang
 - gcc
