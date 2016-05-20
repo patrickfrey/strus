@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 OS=$(uname -s)
 
 case $OS in
