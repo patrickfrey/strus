@@ -14,17 +14,11 @@ case $OS in
 			# gcc on OSX is a mere frontend to clang, force using gcc 4.8
 			export CXX=g++-4.8
 			export CC=gcc-4.8
-			export CFLAGS="-I/usr/local"
-			# force stdlibc++ because of differing ABIs in leveldb for std::string
-			export CXXFLAGS="-I/usr/local -stdlib=libstdc++"
-			# forcing brew versions (of gettext) over Mac versions
-			export LDFLAGS="-L/usr/local/lib"
-		else
-			export CFLAGS="-I/usr/local"
-			export CXXFLAGS="-I/usr/local"
-			# forcing brew versions (of gettext) over Mac versions
-			export LDFLAGS="-L/usr/local/lib"
 		fi
+		# forcing brew versions (of gettext) over Mac versions
+		export CFLAGS="-I/usr/local"
+		export CXXFLAGS="-I/usr/local"
+		export LDFLAGS="-L/usr/local/lib"
 		;;
 
 	*)
@@ -46,9 +40,9 @@ for i in $DEPS; do
 			cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
 				-DLIB_INSTALL_DIR=lib -DCMAKE_CXX_FLAGS=-g \
 				..
-			make
-			make test
-			sudo make install
+			make VERBOSE=1
+			make VERBOSE=1 test
+			sudo make VERBOSE=1 install
 			cd ..
 			;;
 		
@@ -60,9 +54,9 @@ for i in $DEPS; do
 					-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 					-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
 					..
-				make
-				make test
-				sudo make install
+				make VERBOSE=1
+				make VERBOSE=1 test
+				sudo make VERBOSE=1 install
 				cd ..
 			else
 				mkdir build
@@ -93,9 +87,9 @@ case $OS in
 		cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
 			-DLIB_INSTALL_DIR=lib -DCMAKE_CXX_FLAGS=-g \
 			..
-		make
-		make test
-		sudo make install
+		make VERBOSE=1
+		make VERBOSE=1 test
+		sudo make VERBOSE=1 install
 		cd ..
 		;;
 
@@ -107,9 +101,9 @@ case $OS in
 				-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 				-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
 				..
-			make
-			make test
-			sudo make install
+			make VERBOSE=1
+			make VERBOSE=1 test
+			sudo make VERBOSE=1 install
 			cd ..
 		else
 			mkdir build
