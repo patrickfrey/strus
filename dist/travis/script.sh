@@ -47,7 +47,7 @@ for i in $DEPS; do
 					-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 					-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
 					.
-				make
+				make V=1
 				make test
 				sudo make install
 			else

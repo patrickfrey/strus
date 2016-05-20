@@ -15,7 +15,7 @@ case $OS in
 		brew update
 		if test "X$CC" = "Xgcc"; then
 			brew install gcc48 --enable-all-languages || true
-			brew link --force gcc48
+			brew link --force gcc48 || true
 		fi
 		brew install \
 			cmake \
@@ -24,8 +24,7 @@ case $OS in
 			leveldb \
 			|| true
 		# make sure cmake finds the brew version of gettext
-		brew link --force gettext
-		brew link --force leveldb
+		brew link --force gettext || true
 		;;
 	
 	*)
