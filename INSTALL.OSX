@@ -7,7 +7,7 @@ Install Homebrew from http://brew.sh/:
 
 Install required packages:
 
-brew install cmake boost
+brew install cmake boost snappy leveldb
 
 Install gettext with brew, draw necessary links:
 

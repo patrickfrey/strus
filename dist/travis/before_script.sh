@@ -25,6 +25,7 @@ case $OS in
 			|| true
 		# make sure cmake finds the brew version of gettext
 		brew link --force gettext
+		brew link --force leveldb
 		;;
 	
 	*)
