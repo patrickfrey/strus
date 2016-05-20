@@ -32,7 +32,7 @@ DEPS="strusBase"
 GITURL=`git config remote.origin.url`
 cd ..
 for i in $DEPS; do
-	git clone `git $GITURL | sed "s@/strus\.@/$i.@g"` $i
+	git clone `echo $GITURL | sed "s@/strus\.@/$i.@g"` $i
 	cd $i
 	git checkout travis
 	case $OS in
