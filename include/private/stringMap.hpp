@@ -8,8 +8,6 @@
 #ifndef _STRUS_STRING_MAP_HPP_INCLUDED
 #define _STRUS_STRING_MAP_HPP_INCLUDED
 #include "private/internationalization.hpp"
-#include "private/localStructAllocator.hpp"
-#include "private/utils.hpp"
 #include "strus/base/crc32.hpp"
 #include <boost/unordered_map.hpp>
 #include <map>
