@@ -41,6 +41,7 @@ for i in $DEPS; do
 			make
 			make test
 			sudo make install
+			cd ..
 			;;
 		
 		Darwin)
@@ -54,6 +55,7 @@ for i in $DEPS; do
 				make
 				make test
 				sudo make install
+				cd ..
 			else
 				mkdir build
 				cd build
@@ -64,6 +66,7 @@ for i in $DEPS; do
 				xcodebuild -configuration Release -target ALL_BUILD
 				xcodebuild -configuration Release -target RUN_TESTS
 				sudo xcodebuild -configuration Release -target install
+				cd ..
 			fi
 			;;
 
@@ -85,6 +88,7 @@ case $OS in
 		make
 		make test
 		sudo make install
+		cd ..
 		;;
 
 	Darwin)
@@ -98,6 +102,7 @@ case $OS in
 			make
 			make test
 			sudo make install
+			cd ..
 		else
 			mkdir build
 			cd build
@@ -108,6 +113,7 @@ case $OS in
 			xcodebuild -configuration Release -target ALL_BUILD
 			xcodebuild -configuration Release -target RUN_TESTS
 			sudo xcodebuild -configuration Release -target install
+			cd ..
 		fi
 		;;
 		
