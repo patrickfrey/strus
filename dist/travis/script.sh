@@ -33,9 +33,11 @@ for i in $DEPS; do
 	git checkout travis
 	case $OS in
 		Linux)
+			mkdir build
+			cd build
 			cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
 				-DLIB_INSTALL_DIR=lib -DCMAKE_CXX_FLAGS=-g \
-				.
+				..
 			make
 			make test
 			sudo make install
@@ -43,18 +45,22 @@ for i in $DEPS; do
 		
 		Darwin)
 			if test "X$CC" = "Xgcc-4.8"; then
+				mkdir build
+				cd build
 				cmake \
 					-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 					-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
-					.
-				make V=1
+					..
+				make
 				make test
 				sudo make install
 			else
+				mkdir build
+				cd build
 				cmake \
 					-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 					-DCMAKE_CXX_FLAGS=-g -G Xcode \
-					.
+					..
 				xcodebuild -configuration Release -target ALL_BUILD
 				xcodebuild -configuration Release -target RUN_TESTS
 				sudo xcodebuild -configuration Release -target install
@@ -71,9 +77,11 @@ done
 # build the package itself
 case $OS in
 	Linux)
+		mkdir build
+		cd build
 		cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
 			-DLIB_INSTALL_DIR=lib -DCMAKE_CXX_FLAGS=-g \
-			.
+			..
 		make
 		make test
 		sudo make install
@@ -81,18 +89,22 @@ case $OS in
 
 	Darwin)
 		if test "X$CC" = "Xgcc-4.8"; then
+			mkdir build
+			cd build
 			cmake \
 				-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 				-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' \
-				.
+				..
 			make
 			make test
 			sudo make install
 		else
+			mkdir build
+			cd build
 			cmake \
 				-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
 				-DCMAKE_CXX_FLAGS=-g -G Xcode \
-				.
+				..
 			xcodebuild -configuration Release -target ALL_BUILD
 			xcodebuild -configuration Release -target RUN_TESTS
 			sudo xcodebuild -configuration Release -target install
