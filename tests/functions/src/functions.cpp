@@ -12,11 +12,10 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
-#include <limits>
-#include <cstdlib>
 #include <cstdio>
 #include <set>
-#include <stdint.h>
+#include <limits>
+#include "strus/base/stdint.h"
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
