@@ -72,3 +72,5 @@ tests/storageop/src/testStorageOp
 tests/queryop/src/testQueryOp
 tests/positionWindow/src/testPositionWindow
 tests/scalarfunc/src/scalarFunction
+
+.travis.yml
