@@ -43,7 +43,7 @@ public:
 	///	removing the argument elements.
 	/// \param[in] operation the expression join operator
 	/// \param[in] argc number of expression arguments
-	/// \param[in] range range of the expression
+	/// \param[in] range position proximity range of the expression
 	/// \param[in] cardinality required size of matching results (e.g. minimum number of elements of any input subset selection that builds a result) (0 for use default)
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
