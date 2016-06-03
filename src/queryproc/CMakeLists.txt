@@ -21,9 +21,9 @@ include_directories(
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${PROJECT_SOURCE_DIR}/utils"
+	"${PROJECT_SOURCE_DIR}/src/utils"
 	"${PROJECT_SOURCE_DIR}/src/queryproc/iterator"
-	"${PROJECT_SOURCE_DIR}/src/queryproc/summarize"
+	"${PROJECT_SOURCE_DIR}/src/queryproc/summarizer"
 	"${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
 	"${strusbase_LIBRARY_DIRS}"
 )
