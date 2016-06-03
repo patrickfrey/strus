@@ -42,7 +42,7 @@ public:
 		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
 		,m_storage(strus::createStorage(errorhnd_))
 		,m_db( strus::createDatabase_leveldb( errorhnd_))
-		,m_statsproc( strus::createStatisticsProcessor( m_errorhnd))
+		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{
 		if (!m_queryProcessor.get()) throw strus::runtime_error(_TXT("error creating query processor"));
