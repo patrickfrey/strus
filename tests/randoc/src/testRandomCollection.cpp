@@ -1043,8 +1043,11 @@ static void printUsage( int argc, const char* argv[])
 int main( int argc, const char* argv[])
 {
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
-	if (!g_errorhnd) return -1;
-
+	if (!g_errorhnd)
+	{
+		std::cerr << "construction of error buffer failed" << std::endl;
+		return -1;
+	}
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		printUsage( argc, argv);
