@@ -45,7 +45,7 @@ void StorageDocument::addSearchIndexTerm(
 {
 	try
 	{
-		if (position_ == 0)
+		if (position_ <= 0)
 		{
 			m_errorhnd->report( _TXT( "term occurrence position must not be 0"));
 		}
@@ -66,7 +66,7 @@ void StorageDocument::addForwardIndexTerm(
 {
 	try
 	{
-		if (position_ == 0)
+		if (position_ <= 0)
 		{
 			m_errorhnd->report( _TXT( "term occurrence position must not be 0"));
 		}
