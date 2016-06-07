@@ -66,8 +66,15 @@ void StorageDocument::addForwardIndexTerm(
 {
 	try
 	{
-		Index typeno = m_transaction->getOrCreateTermType( type_);
-		m_invs[ InvMapKey( typeno, position_)] = value_;
+		if (position_ == 0)
+		{
+			m_errorhnd->report( _TXT( "term occurrence position must not be 0"));
+		}
+		else
+		{
+			Index typeno = m_transaction->getOrCreateTermType( type_);
+			m_invs[ InvMapKey( typeno, position_)] = value_;
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding forward index term to document: %s"), *m_errorhnd);
 }
