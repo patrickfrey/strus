@@ -30,7 +30,7 @@ static std::string doubleToString( double val_)
 {
 	unsigned int val = (unsigned int)::floor( val_ * 1000);
 	unsigned int val_sec = val / 1000;
-	unsigned int val_ms = val & 1000;
+	unsigned int val_ms = val % 1000;
 	std::ostringstream val_str;
 	val_str << val_sec << "." << std::setfill('0') << std::setw(3) << val_ms;
 	return val_str.str();
