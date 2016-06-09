@@ -314,6 +314,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Thu Jun 9 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.9.2-0.1
+- adapted license change of CompactNodeTrie
+
 * Thu May 18 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.9.1-0.1
 - fixed wrong counting of documents when deleting documents
 
