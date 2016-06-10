@@ -38,7 +38,6 @@ static void printUsage()
 	std::cout << "    " << _TXT("Print this usage and do nothing else") << std::endl;
 	std::cout << "-v|--version" << std::endl;
 	std::cout << "    " << _TXT("Print the program version and do nothing else") << std::endl;
-	std::cout << "    " << _TXT("Write logs to file <FILE>") << std::endl;
 	std::cout << "-c|--commit <N>" << std::endl;
 	std::cout << "    " << _TXT("Set <N> as number of documents inserted per transaction (default 1000)") << std::endl;
 	std::cout << "-D|--docno <START>:<END>" << std::endl;
