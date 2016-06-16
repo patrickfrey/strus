@@ -223,7 +223,7 @@ int main( int argc, const char* argv[])
 			}
 			else if (0==std::strcmp( argv[argi], "-v") || 0==std::strcmp( argv[argi], "--version"))
 			{
-				std::cerr << "strusRpc version " << STRUS_STORAGE_VERSION_STRING << std::endl;
+				std::cerr << "strus storage version " << STRUS_STORAGE_VERSION_STRING << std::endl;
 				doExit = true;
 			}
 			else if (0==std::strcmp( argv[argi], "-c") || 0==std::strcmp( argv[argi], "--commit"))
