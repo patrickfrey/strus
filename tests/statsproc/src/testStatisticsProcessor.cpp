@@ -48,6 +48,7 @@ class Random
 {
 public:
 	Random()
+		:m_cnt(0)
 	{
 		time_t nowtime;
 		struct tm* now;
@@ -66,7 +67,7 @@ public:
 		{
 			throw std::runtime_error("illegal range passed to pseudo random number generator");
 		}
-		m_value = uint32_hash( m_value + 1);
+		m_value = uint32_hash( m_value + 1) + m_cnt++;
 		unsigned int iv = max_ - min_;
 		if (iv)
 		{
@@ -101,6 +102,7 @@ public:
 
 private:
 	unsigned int m_value;
+	unsigned int m_cnt;
 };
 
 static Random g_random;
@@ -156,8 +158,12 @@ struct TermCollection
 		std::set<Term> termset;
 		while (termset.size() < nofTerms)
 		{
-			int diff = g_random.get( 0, (int)diffrange) - (int)diffrange/2;
-			termset.insert( Term( randomType(), randomTerm(), diff));
+			unsigned int ti = termset.size();
+			for (; ti < nofTerms; ++ti)
+			{
+				int diff = g_random.get( 0, (int)diffrange) - (int)diffrange/2;
+				termset.insert( Term( randomType(), randomTerm(), diff));
+			}
 		}
 		std::set<Term>::const_iterator ti = termset.begin(), te = termset.end();
 		for (; ti != te; ++ti)
