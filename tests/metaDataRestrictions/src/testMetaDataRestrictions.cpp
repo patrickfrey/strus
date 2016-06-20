@@ -18,6 +18,7 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
+#include <ctime>
 #include <map>
 #include <set>
 #include <string>
@@ -27,6 +28,16 @@
 
 static strus::Reference<strus::ErrorBufferInterface> g_errorbuf;
 
+static void initRand()
+{
+	time_t nowtime;
+	struct tm* now;
+
+	::time( &nowtime);
+	now = ::localtime( &nowtime);
+
+	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+}
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 #undef STRUS_LOWLEVEL_DEBUG
@@ -448,6 +459,7 @@ int main( int argc, const char* argv[])
 		unsigned int failedRandomQueries = 0;
 		unsigned int queryCount = 0;
 
+		initRand();
 		std::size_t di=0, de=nofTables;
 		for (; di<de; ++di)
 		{

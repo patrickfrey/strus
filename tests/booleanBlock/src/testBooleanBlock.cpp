@@ -14,11 +14,22 @@
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
+#include <ctime>
 #include <limits>
 #include <set>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
+static void initRand()
+{
+	time_t nowtime;
+	struct tm* now;
+
+	::time( &nowtime);
+	now = ::localtime( &nowtime);
+
+	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+}
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 
@@ -118,6 +129,7 @@ int main( int, const char**)
 {
 	try
 	{
+		initRand();
 		testBooleanBlock( 100, 3000, 10000);
 		return 0;
 	}

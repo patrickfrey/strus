@@ -21,6 +21,16 @@
 #include <iomanip>
 #include <ctime>
 
+static void initRand()
+{
+	time_t nowtime;
+	struct tm* now;
+
+	::time( &nowtime);
+	now = ::localtime( &nowtime);
+
+	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+}
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 static strus::Index g_docnum = 0;
 
@@ -46,6 +56,8 @@ int main( int , const char** )
 {
 	try
 	{
+		initRand();
+
 		enum {MaxNofRanks=10,NofWeightedDocs=1000000};
 		strus::Ranker ranker( MaxNofRanks);
 		typedef std::multiset<

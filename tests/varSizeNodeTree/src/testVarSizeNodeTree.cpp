@@ -19,6 +19,16 @@
 #include <cmath>
 #include <iomanip>
 
+static void initRand()
+{
+	time_t nowtime;
+	struct tm* now;
+
+	::time( &nowtime);
+	now = ::localtime( &nowtime);
+
+	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+}
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 static std::string doubleToString( double val_)
@@ -64,6 +74,7 @@ int main( int argc, const char** argv)
 		{
 			throw std::runtime_error( std::string("bad values for arguments <nof inserts> <nof queries> (2 non negative integers expected): ") + e.what());
 		}
+		initRand();
 		typedef strus::StringMap<strus::Index> TestMap;
 		TestMap testmap;
 		conotrie::CompactNodeTrie origmap;

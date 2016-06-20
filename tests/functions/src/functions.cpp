@@ -15,7 +15,19 @@
 #include <cstdio>
 #include <set>
 #include <limits>
+#include <ctime>
 #include "strus/base/stdint.h"
+
+static void initRand()
+{
+	time_t nowtime;
+	struct tm* now;
+
+	::time( &nowtime);
+	now = ::localtime( &nowtime);
+
+	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+}
 
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
@@ -113,6 +125,7 @@ int main( int, const char**)
 {
 	try
 	{
+		initRand();
 		std::cerr << "executing test SinglePrecisionFloatConversions" << std::endl;
 		testSinglePrecisionFloatConversions();
 		std::cerr << "executing test BitOperations32" << std::endl;

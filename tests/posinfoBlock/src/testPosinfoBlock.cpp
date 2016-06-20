@@ -14,11 +14,22 @@
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
+#include <ctime>
 #include <limits>
 #include <map>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
+static void initRand()
+{
+	time_t nowtime;
+	struct tm* now;
+
+	::time( &nowtime);
+	now = ::localtime( &nowtime);
+
+	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
+}
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
 static std::vector<strus::Index> randPosinfo()
@@ -233,6 +244,7 @@ int main( int, const char**)
 {
 	try
 	{
+		initRand();
 		testDataBlockBuild( 1);
 		testPosinfoBlock( 100, 3000, 1000);
 		return 0;
