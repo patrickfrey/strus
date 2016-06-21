@@ -30,6 +30,15 @@ static printWindow( unsigned int nofelem, PostingIteratorInterface* itrar, Index
 }
 #endif
 
+PositionWindow::PositionWindow()
+	:m_arsize(0)
+	,m_range(0)
+	,m_cardinality(0)
+	,m_windowsize(0)
+	,m_isnew_bitset(0)
+	,m_evaluationType(MaxWin)
+{}
+
 PositionWindow::PositionWindow(
 		PostingIteratorInterface** args,
 		std::size_t nofargs,
@@ -37,13 +46,26 @@ PositionWindow::PositionWindow(
 		unsigned int cardinality_,
 		Index firstpos_,
 		EvaluationType evaluationType_)
-	:m_arsize(0)
-	,m_range(range_)
-	,m_cardinality(cardinality_>0?cardinality_:nofargs)
-	,m_windowsize(0)
-	,m_isnew_bitset(nofargs)
-	,m_evaluationType(evaluationType_)
+	:m_isnew_bitset(0)
 {
+	init( args, nofargs, range_, cardinality_, firstpos_, evaluationType_);
+}
+
+void PositionWindow::init(
+		PostingIteratorInterface** args,
+		std::size_t nofargs,
+		unsigned int range_,
+		unsigned int cardinality_,
+		Index firstpos_,
+		EvaluationType evaluationType_)
+{
+	m_arsize = 0;
+	m_range = range_;
+	m_cardinality = (cardinality_>0?cardinality_:nofargs);
+	m_windowsize = 0;
+	m_isnew_bitset = strus::utils::BitSet( nofargs);
+	m_evaluationType = evaluationType_;
+
 	if (nofargs > MaxNofArguments)
 	{
 		throw strus::runtime_error(_TXT("too many arguments for position window (max %u): %u"),

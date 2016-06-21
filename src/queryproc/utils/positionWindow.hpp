@@ -24,9 +24,20 @@ public:
 		MaxWin		///< Maximum window within a range (containing all features that satisfy the range condition, but at least a defined numberof features [cardinality])
 	};
 
+	/// \brief Default constructor
+	PositionWindow();
 	/// \brief Constructor that fills the sliding window implemented as set 
 	///		with the argument element start positions:
 	PositionWindow( 
+		PostingIteratorInterface** args,
+		std::size_t nofargs,
+		unsigned int range_,
+		unsigned int cardinality_,
+		Index firstpos_,
+		EvaluationType evaluationType_);
+
+	/// \brief Initializer method
+	void init(
 		PostingIteratorInterface** args,
 		std::size_t nofargs,
 		unsigned int range_,
