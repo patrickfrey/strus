@@ -39,6 +39,7 @@ IteratorIntersectWithCardinality::IteratorIntersectWithCardinality(
 		ErrorBufferInterface* errorhnd_)
 	:m_docno(0)
 	,m_posno(0)
+	,m_call_posno(0)
 	,m_cardinality(cardinality_)
 	,m_argar(args)
 	,m_docnoMatchPrioQueue(args,cardinality_)
@@ -74,7 +75,9 @@ Index IteratorIntersect::skipDocCandidate( const Index& docno_)
 
 Index IteratorIntersectWithCardinality::skipDocCandidate( const Index& docno_)
 {
-	return m_docno = m_docnoMatchPrioQueue.skipDocCandidate( docno_);
+	Index next = m_docnoMatchPrioQueue.skipDocCandidate( docno_);
+	m_windowIsInitialized &= (next && m_docno == next);
+	return m_docno = next;
 }
 
 Index IteratorIntersect::skipDoc( const Index& docno_)
@@ -91,12 +94,14 @@ Index IteratorIntersect::skipDoc( const Index& docno_)
 Index IteratorIntersectWithCardinality::skipDoc( const Index& docno_)
 {
 	Index next = m_docnoMatchPrioQueue.skipDocCandidate( docno_);
-	m_windowIsInitialized = (next && m_docno != next);
+	m_windowIsInitialized &= (next && m_docno == next);
 	m_docno = next;
 	while (m_docno)
 	{
 		if (skipPos(0)) return m_docno;
 		m_docno = m_docnoMatchPrioQueue.skipDocCandidate( m_docno+1);
+		m_windowIsInitialized = false;
+		m_call_posno = 0;
 	}
 	return m_docno;
 }
@@ -139,12 +144,21 @@ Index IteratorIntersect::skipPos( const Index& pos_)
 
 Index IteratorIntersectWithCardinality::skipPos( const Index& pos_)
 {
-	if (!m_windowIsInitialized)
+	if (m_windowIsInitialized)
+	{
+		if (m_posno >= pos_ && pos_ >= m_call_posno)
+		{
+			return m_posno;
+		}
+	}
+	else
 	{
 		DocnoMatchPrioQueue::CandidateList candiates = m_docnoMatchPrioQueue.getCandidateList();
 		m_positionWindow.init( candiates.ar, candiates.arsize, 0, m_cardinality, 0, PositionWindow::MaxWin);
+		m_windowIsInitialized = true;
+		m_call_posno = 0;
 	}
-	return m_posno = m_positionWindow.skip( pos_) ? m_positionWindow.pos() : 0;
+	return m_posno = m_positionWindow.skip( m_call_posno = pos_) ? m_positionWindow.pos() : 0;
 }
 
 Index IteratorIntersect::documentFrequency() const
@@ -182,7 +196,7 @@ PostingIteratorInterface* PostingJoinIntersect::createResultIterator(
 	}
 	try
 	{
-		if (cardinality)
+		if (cardinality && cardinality != itrs.size())
 		{
 			return new IteratorIntersectWithCardinality( itrs, cardinality, m_errorhnd);
 		}

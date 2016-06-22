@@ -76,11 +76,6 @@ void PositionWindow::init(
 		throw strus::runtime_error(_TXT("too few arguments for position window (min 1): %u"),
 						(unsigned int)nofargs);
 	}
-	if (range_ == 0)
-	{
-		throw strus::runtime_error(_TXT("minimal window span (range) is zero"));
-	}
-
 	std::size_t ai = 0, ae = nofargs;
 	for (; ai != ae; ++ai)
 	{

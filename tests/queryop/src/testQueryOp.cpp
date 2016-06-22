@@ -148,7 +148,7 @@ static void testUnionJoinErathosthenes( const strus::QueryProcessorInterface* qp
 	{
 		args.push_back( new ErathosthenesSievePostingIterator( aidx+1, maxno, maxno));
 	}
-	strus::Reference<strus::PostingIteratorInterface> result( join->createResultIterator( args, 0, 0));
+	strus::Reference<strus::PostingIteratorInterface> result( join->createResultIterator( args, 0/*range*/, 0/*cardinality*/));
 
 	strus::Index curr_docno = 0;
 	strus::Index next_docno = 0;
@@ -213,6 +213,106 @@ static void testUnionJoinErathosthenes( const strus::QueryProcessorInterface* qp
 	while (curr_docno != 0);
 }
 
+struct JoinOpResult
+{
+	unsigned int docno;
+	unsigned int posno[64];
+};
+
+static JoinOpResult testResult_IntersectWithCardinality[] =
+{
+	{ 6, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 10, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 0 }},
+	{ 12, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 15, {15, 30, 45, 60, 75, 90, 0 }},
+	{ 18, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 20, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 0 }},
+	{ 24, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 30, {6, 10, 12, 15, 18, 20, 24, 30, 30, 36, 40, 42, 45, 48, 50, 54, 60, 60, 66, 70, 72, 75, 78, 80, 84, 90, 90, 96, 100, 0 }},
+	{ 36, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 40, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 0 }},
+	{ 42, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 45, {15, 30, 45, 60, 75, 90, 0 }},
+	{ 48, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 50, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 0 }},
+	{ 54, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 60, {6, 10, 12, 15, 18, 20, 24, 30, 30, 36, 40, 42, 45, 48, 50, 54, 60, 60, 66, 70, 72, 75, 78, 80, 84, 90, 90, 96, 100, 0 }},
+	{ 66, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 70, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 0 }},
+	{ 72, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 75, {15, 30, 45, 60, 75, 90, 0 }},
+	{ 78, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 80, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 0 }},
+	{ 84, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 90, {6, 10, 12, 15, 18, 20, 24, 30, 30, 36, 40, 42, 45, 48, 50, 54, 60, 60, 66, 70, 72, 75, 78, 80, 84, 90, 90, 96, 100, 0 }},
+	{ 96, {6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 0 }},
+	{ 100, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 0 }},
+	{ 0, {0}}
+};
+
+static void testIntersectWithCardinality( const strus::QueryProcessorInterface* qpi)
+{
+	const strus::PostingJoinOperatorInterface* join = qpi->getPostingJoinOperator( "intersect");
+	enum {NofArguments=3,Cardinality=2};
+	typedef strus::Reference<strus::PostingIteratorInterface> PostingIteratorReference;
+	std::vector<PostingIteratorReference> args;
+	strus::Index maxno = 100;
+
+	args.push_back( new ErathosthenesSievePostingIterator( 2, maxno, maxno));
+	args.push_back( new ErathosthenesSievePostingIterator( 3, maxno, maxno));
+	args.push_back( new ErathosthenesSievePostingIterator( 5, maxno, maxno));
+	strus::Reference<strus::PostingIteratorInterface> result( join->createResultIterator( args, 0/*range*/, 2/*cardinality*/));
+
+	strus::Index curr_docno = 0;
+	strus::Index next_docno = 0;
+	unsigned int tidx = 0;
+	do
+	{
+		next_docno = result->skipDoc( curr_docno);
+		strus::Index expected_docno = testResult_IntersectWithCardinality[ tidx++].docno;
+		if (next_docno != expected_docno)
+		{
+			std::ostringstream msg;
+			msg << "expected document '" << expected_docno
+				<< "' instead of '" << next_docno << "' in test intersect with cardinality";
+			throw std::runtime_error( msg.str());
+		}
+		if (!next_docno) break;
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "SKIP DOC " << curr_docno << " = " << next_docno << std::endl;
+#endif
+		strus::Index curr_posno = 0;
+		strus::Index next_posno = 0;
+		unsigned int pidx = 0;
+		do
+		{
+			next_posno = result->skipPos( curr_posno);
+			strus::Index expected_posno = testResult_IntersectWithCardinality[ tidx-1].posno[ pidx++];
+			if (next_posno != expected_posno)
+			{
+				std::ostringstream msg;
+				msg << "expected position '" << expected_posno
+					<< "' instead of '" << next_posno << "' in test intersect with cardinality, document " << expected_docno;
+				throw std::runtime_error( msg.str());
+			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "SKIP POS " << curr_posno << " = " << next_posno << std::endl;
+#endif
+			curr_posno = next_posno?(next_posno+1):0;
+		}
+		while (curr_posno != 0);
+		if (testResult_IntersectWithCardinality[ tidx-1].posno[ pidx] != 0)
+		{
+			throw std::runtime_error( "test output intersect with cardinality is not as expected");
+		}
+		curr_docno = next_docno?(next_docno+1):0;
+	}
+	while (curr_docno != 0);
+	if (testResult_IntersectWithCardinality[ tidx-1].docno != 0)
+	{
+		throw std::runtime_error( "test output intersect with cardinality is not as expected");
+	}
+}
 
 #define RUN_TEST( idx, TestName, qpi)\
 	try\
@@ -286,6 +386,7 @@ int main( int argc, const char* argv[])
 			switch (ti)
 			{
 				case 1: RUN_TEST( ti, UnionJoinErathosthenes, qpi.get() ) break;
+				case 2: RUN_TEST( ti, IntersectWithCardinality, qpi.get() ) break;
 				default: return 0;
 			}
 			if (test_index) break;

@@ -91,8 +91,9 @@ public:
 
 private:
 	/// \brief We use fixed size arrays and restrict the maximum number of features to a reasonable amount.
-	Index m_docno;
+	Index m_docno;							///< current document
 	Index m_posno;							///< current position
+	Index m_call_posno;						///< previous position
 	unsigned int m_cardinality;					///< cardinality
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
 	DocnoMatchPrioQueue m_docnoMatchPrioQueue;
