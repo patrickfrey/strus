@@ -18,12 +18,14 @@ include_directories(
   "${PROJECT_SOURCE_DIR}/include"
   "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
   "${PROJECT_SOURCE_DIR}/src/queryproc/summarizer"
+  "${strusbase_INCLUDE_DIRS}"
 )
 
 link_directories(
   "${Boost_LIBRARY_DIRS}"
   "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
   "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
+  "${strusbase_LIBRARY_DIRS}"
 )
 
 # ------------------------------------
