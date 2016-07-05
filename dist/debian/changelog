@@ -1,3 +1,8 @@
+strus (0.10.0-1) unstable; urgency=low
+  * added support for cardinality in posting iterator intersect
+  * many build fixes
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Tue, 5 Jul 2016 13:00:00 +0100
+
 strus (0.9.2-1) unstable; urgency=low
   * adapted license change of CompactNodeTrie
  -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 9 Jun 2016 14:45:00 +0100

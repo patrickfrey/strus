@@ -314,6 +314,10 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Tue Jul 5 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.10.0-0.1
+- added support for cardinality in posting iterator intersect
+- many build fixes
+
 * Thu Jun 9 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.9.2-0.1
 - adapted license change of CompactNodeTrie
 
