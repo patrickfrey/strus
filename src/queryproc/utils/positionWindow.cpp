@@ -10,7 +10,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
-#include "private/bitOperations.hpp"
+#include "private/utils.hpp"
 #include <cstdio>
 #include <cstring>
 
@@ -30,6 +30,15 @@ static printWindow( unsigned int nofelem, PostingIteratorInterface* itrar, Index
 }
 #endif
 
+PositionWindow::PositionWindow()
+	:m_arsize(0)
+	,m_range(0)
+	,m_cardinality(0)
+	,m_windowsize(0)
+	,m_isnew_bitset(0)
+	,m_evaluationType(MaxWin)
+{}
+
 PositionWindow::PositionWindow(
 		PostingIteratorInterface** args,
 		std::size_t nofargs,
@@ -37,13 +46,26 @@ PositionWindow::PositionWindow(
 		unsigned int cardinality_,
 		Index firstpos_,
 		EvaluationType evaluationType_)
-	:m_arsize(0)
-	,m_range(range_)
-	,m_cardinality(cardinality_>0?cardinality_:nofargs)
-	,m_windowsize(0)
-	,m_isnew_bitset(0)
-	,m_evaluationType(evaluationType_)
+	:m_isnew_bitset(0)
 {
+	init( args, nofargs, range_, cardinality_, firstpos_, evaluationType_);
+}
+
+void PositionWindow::init(
+		PostingIteratorInterface** args,
+		std::size_t nofargs,
+		unsigned int range_,
+		unsigned int cardinality_,
+		Index firstpos_,
+		EvaluationType evaluationType_)
+{
+	m_arsize = 0;
+	m_range = range_;
+	m_cardinality = (cardinality_>0?cardinality_:nofargs);
+	m_windowsize = 0;
+	m_isnew_bitset = strus::utils::BitSet( nofargs);
+	m_evaluationType = evaluationType_;
+
 	if (nofargs > MaxNofArguments)
 	{
 		throw strus::runtime_error(_TXT("too many arguments for position window (max %u): %u"),
@@ -54,11 +76,6 @@ PositionWindow::PositionWindow(
 		throw strus::runtime_error(_TXT("too few arguments for position window (min 1): %u"),
 						(unsigned int)nofargs);
 	}
-	if (range_ == 0)
-	{
-		throw strus::runtime_error(_TXT("minimal window span (range) is zero"));
-	}
-
 	std::size_t ai = 0, ae = nofargs;
 	for (; ai != ae; ++ai)
 	{
@@ -75,7 +92,7 @@ PositionWindow::PositionWindow(
 			m_posar[ pi] = pos;
 			m_window[ pi] = ai;
 			m_isnew_bitset <<= 1;
-			m_isnew_bitset |= 1;
+			m_isnew_bitset.set(0);
 		}
 	}
 	m_windowsize = (m_evaluationType == MinWin) ? getMinWinSize() : getMaxWinSize();
@@ -132,7 +149,7 @@ bool PositionWindow::advance( const Index& advancepos)
 		m_window[ pi-1] = idx;
 
 		m_isnew_bitset >>= 1;					//... remove first bit
-		BitOperations::bitInsert( m_isnew_bitset, pi-1);	//... insert new position bit
+		m_isnew_bitset.insert( pi-1);				//... insert new position bit
 	}
 	else
 	{
@@ -162,7 +179,7 @@ bool PositionWindow::first()
 
 bool PositionWindow::next()
 {
-	m_isnew_bitset = 0;
+	m_isnew_bitset.reset();
 	do
 	{
 		if (!advance()) return false;
@@ -173,7 +190,7 @@ bool PositionWindow::next()
 
 bool PositionWindow::skip( const Index& pos)
 {
-	m_isnew_bitset = 0;
+	m_isnew_bitset.reset();
 	do
 	{
 		if (!advance( pos)) return false;

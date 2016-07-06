@@ -12,6 +12,11 @@ include_directories(
   "${Boost_INCLUDE_DIRS}"
   "${PROJECT_SOURCE_DIR}/include"
   "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
+  "${strusbase_INCLUDE_DIRS}"
+)
+
+link_directories(
+	"${strusbase_LIBRARY_DIRS}"
 )
 
 # ------------------------------------

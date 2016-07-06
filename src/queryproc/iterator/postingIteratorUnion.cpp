@@ -19,14 +19,10 @@ IteratorUnion::IteratorUnion( const std::vector<Reference<PostingIteratorInterfa
 	:m_docno(0)
 	,m_posno(0)
 	,m_argar(args_)
-	,m_selected(0)
+	,m_selected(args_.size())
 	,m_documentFrequency(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (args_.size() > MaxNofElements)
-	{
-		throw strus::runtime_error( _TXT( "number of arguments of union out of range (> %u)"), (unsigned int)MaxNofElements);
-	}
 	std::vector<Reference<PostingIteratorInterface> >::const_iterator
 		ai = args_.begin(), ae = args_.end();
 	for (int aidx=0; ai != ae; ++ai,++aidx)
@@ -111,38 +107,41 @@ Index IteratorUnion::skipDocCandidate( const Index& docno_)
 
 Index IteratorUnion::skipDoc( const Index& docno_)
 {
-	if (m_docno == docno_ && docno_)
-	{
-		return m_docno;
-	}
 	Index docno_iter = docno_;
 	for (;;)
 	{
-		if (!skipDocCandidate( docno_iter)) return 0;
-		selected_iterator si = selected_begin(), se = selected_end();
-		for (unsigned int aidx=0; si != se; ++si,++aidx)
+		docno_iter = skipDocCandidate( docno_iter);
+		if (!docno_iter) return m_docno=0;
+
+		int si = m_selected.first(), se = -1;
+		for (unsigned int aidx=0; si != se; si=m_selected.next(si),++aidx)
 		{
-			if (m_docno == si->skipDoc( m_docno)) break;
+			if (docno_iter == m_argar[si]->skipDoc( docno_iter)) break;
 			unsetSelected( aidx); //... because we break, when we found one, we might not unset all non matching candidates
 		}
-		if (si == se)
+		if (si == se && m_selected.empty())
 		{
-			docno_iter = m_docno+1;
+			docno_iter += 1;
 			continue;
 		}
 		break;
 	}
-	return m_docno;
+	return m_docno = docno_iter;
 }
 
 Index IteratorUnion::skipPos( const Index& pos_)
 {
-	selected_iterator si = selected_begin(), se = selected_end();
+	int si = m_selected.first(), se = -1;
 	Index pos = 0;
 	Index basepos = pos_?pos_:1;
-	for (; si != se; ++si)
+	for (; si != se; si=m_selected.next(si))
 	{
-		pos = selectSmallerNotNull( pos, si->skipPos( basepos));
+		pos = m_argar[si]->skipPos( basepos);
+		if (pos) break;
+	}
+	for (; si != se; si=m_selected.next(si))
+	{
+		pos = selectSmallerNotNull( pos, m_argar[si]->skipPos( basepos));
 	}
 	return m_posno=pos;
 }

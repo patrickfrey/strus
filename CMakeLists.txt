@@ -6,7 +6,7 @@ include(cmake/install_prefix.cmake)
 # Project globals:
 project( Strus )
 set( STRUS_MAJOR_VERSION 0 )
-set( STRUS_MINOR_VERSION 9 )
+set( STRUS_MINOR_VERSION 10 )
 set( STRUS_PATCH_VERSION 0 )
 set( STRUS_VERSION ${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}.${STRUS_PATCH_VERSION} )
 
@@ -16,6 +16,7 @@ include( cmake/build_rules.cmake )
 include( cmake/boost.cmake )
 include( cmake/intl.cmake )
 include( cmake/find_strus_package.cmake )
+include( cmake/find_leveldb.cmake )
 
 find_strus_package( base )
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )

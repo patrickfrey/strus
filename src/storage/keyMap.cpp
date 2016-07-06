@@ -46,12 +46,11 @@ Index KeyMap::lookUp( const std::string& name)
 	return m_dbadapter.get( name);
 }
 
-Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
+Index KeyMap::getOrCreate( const std::string& name)
 {
 	Map::const_iterator mi = m_map.find( name);
 	if (mi != m_map.end())
 	{
-		isNew = false;
 		return mi->second;
 	}
 	Index rt;
@@ -60,20 +59,18 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 	{
 		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
-		isNew = false;
 	}
 	else
 #endif
 	if (m_allocator->immediate())
 	{
-		rt = m_allocator->getOrCreate( name, isNew);
+		rt = m_allocator->getOrCreate( name);
 		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
 		if (m_dbadapterinv.defined())
 		{
 			m_dbadapterinv.storeImm( rt, name);
 		}
-		isNew = true;
 	}
 	else
 	{
@@ -85,7 +82,6 @@ Index KeyMap::getOrCreate( const std::string& name, bool& isNew)
 		rt += UnknownValueHandleStart;
 		m_map[ name] = rt;
 		if (m_invmap) m_invmap->set( rt, name);
-		isNew = true;
 	}
 	return rt;
 }
@@ -115,7 +111,8 @@ void KeyMap::getWriteBatch(
 
 void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
-		DatabaseTransactionInterface* transaction)
+		DatabaseTransactionInterface* transaction,
+		int* nofNewItems)
 {
 	deleteAllFromDeletedList( transaction);
 
@@ -130,6 +127,7 @@ void KeyMap::getWriteBatch(
 				idx = m_allocator->alloc();
 				m_dbadapter.store( transaction, mi->first, idx);
 				if (m_dbadapterinv.defined()) m_dbadapterinv.store( transaction, idx, mi->first);
+				if (nofNewItems) ++*nofNewItems;
 			}
 			rewriteUnknownMap[ mi->second] = idx;
 			if (m_invmap) m_invmap->set( idx, mi->first);

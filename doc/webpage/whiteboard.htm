@@ -3,6 +3,7 @@
 <head>
 	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Strus whiteboard. Notes about the future of strus, what we are working on and what we wish to archieve for strus, a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
 	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
@@ -22,7 +23,7 @@
 	<div id="whiteboard">
 	<div id="whiteboardrow">
 		<div id="whiteboardheading">
-			Planned&nbsp;articles on&nbsp;codeproject<br/>(SHORT-TERM)
+			Planned&nbsp;articles on&nbsp;codeproject<br/>(MEDIUM-TERM)
 		</div>
 		<div id="whiteboardcol">The following articles on <a href="codeproject.com">codeproject</a> are planned for the
 			next weeks:
@@ -33,28 +34,20 @@
 	</div>
 
 	<div id="whiteboardrow">
-		<div id="whiteboardheading">
-			Introspection of&nbsp;Strus&nbsp;objects on&nbsp;client&nbsp;side<br/>(LONG-TERM)
+		<div id="whiteboardheading">Node.Js bindigs<br/>(MEDIUM-TERM)
 		</div>
 		<div id="whiteboardcol">
-			Something missing in strus is <i>introspection</i> of the data structures built 
-			in a program (expression trees, function definitions, data loaded and processed etc.). 
-			<br/>
-			Because this seems to be an aspect on its own, we could implement an own
-			proxy universe from StorageObjectBuilderInterface and AnalyzerObjectBuilderInterface,
-			similarly to what strusModule (the module loader) or strusRpc does.
-			Every object created would implement its method calls as redirect to the real
-			method call and additionaly build some representation in a
-			universe that is introspectable (an object tree). 
+			Because of the scalability properties of <i>Strus</i> the developer community
+			of Node.Js could be interested in bindings.
 		</div>
 	</div>
 
 	<div id="whiteboardrow">
-		<div id="whiteboardheading">Stress tests<br/>(MEDIUM-TERM)
+		<div id="whiteboardheading">XML schema transformations into analyzer configurations<br/>(LONG-TERM)
 		</div>
 		<div id="whiteboardcol">
-			Stress test have to be done more extensively on server hardware.
-			Machines are needed and time.
+			As starting point for <i>Strus</i>-projects it could be nice to generate 
+			analyzer configurations out of XML schemas.
 		</div>
 	</div>
 </div>

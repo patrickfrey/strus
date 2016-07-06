@@ -20,7 +20,7 @@ public:
 
 	virtual ~KeyAllocatorInterface(){}
 	virtual Index alloc()=0;
-	virtual Index getOrCreate( const std::string& name, bool& isNew)=0;
+	virtual Index getOrCreate( const std::string& name)=0;
 
 	/// \brief Defines what interface is provided true->getOrCreate, false->alloc
 	bool immediate() const {return m_immediate;}

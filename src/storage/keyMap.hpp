@@ -46,11 +46,12 @@ public:
 	void defineInv( KeyMapInv* invmap_);
 
 	Index lookUp( const std::string& name);
-	Index getOrCreate( const std::string& name, bool& isNew);
+	Index getOrCreate( const std::string& name);
 
 	void getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
-		DatabaseTransactionInterface* transaction);
+		DatabaseTransactionInterface* transaction,
+		int* nofNewItems=0);
 	void getWriteBatch(
 		DatabaseTransactionInterface* transaction);
 

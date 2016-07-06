@@ -3,6 +3,7 @@
 <head>
 	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Description of the command line utility programs of strus, a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
 	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
@@ -45,6 +46,8 @@ options:
 -S|--configfile &lt;FILENAME&gt;
     Define the storage configuration file as &lt;FILENAME&gt;
     &lt;FILENAME&gt; is a file containing the configuration string
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -77,6 +80,8 @@ options:
 -S|--configfile &lt;FILENAME&gt;
     Define the storage configuration file as &lt;FILENAME&gt;
     &lt;FILENAME&gt; is a file containing the configuration string
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -152,6 +157,8 @@ options:
             write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
             block_size=&lt;approximate size of user data packed per block&gt;
             cachedterms=&lt;file with list of terms to cache&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -180,6 +187,8 @@ options:
     Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -212,6 +221,8 @@ options:
     Use the string &lt;STR&gt; as quote for the result (default "'")
 -p|--plain
     Do not print position and define default quotes as empty
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -248,6 +259,8 @@ options:
     Use the string &lt;STR&gt; as prefix for the result
 -E|--esceol
     Escape end of line with space
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -303,6 +316,44 @@ options:
     Write the last error occurred to &lt;FILE&gt; in case of an exception
 -V|--verbose
     verbose output
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+</pre>
+</li>
+
+<a name="strusDeleteDocument"></a><li><b>strusDeleteDocument</b>
+<br/>Deletes a list of documents referenced by document identifiers.
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+<input class="toggle-box" id="strusDeleteDocument_usage" type="checkbox" >
+<label for="strusDeleteDocument_usage">Usage</label>
+<pre>
+usage: strusDeleteDocument [options] &lt;docid&gt;
+&lt;docid&gt;  = docid of the document to delete
+description: Deletes a document in the storage.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-s|--storage &lt;CONFIG&gt
+    Define the storage configuration string as &lt;CONFIG&gt
+    &lt;CONFIG&gt is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            create=&lt;yes/no, yes=do create if database does not exist yet&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -351,6 +402,8 @@ options:
     If &lt;N&gt; is set to 0 then only one commit is done at the end
 -L|--logerror &lt;FILE&gt;
     Write the last error occurred to &lt;FILE&gt; in case of an exception
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -386,6 +439,8 @@ options:
     Search modules to load first in &lt;DIR&gt;
 -r|--rpc &lt;ADDR&gt;
     Execute the commands on the RPC server specified by &lt;ADDR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -437,6 +492,8 @@ options:
     Set &lt;FILE&gt; as output file (default stdout)
 -n|--notify &lt;N&gt;
     Set &lt;N&gt; as notification interval (number of documents)
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -485,6 +542,8 @@ options:
     Search resource files for analyzer first in &lt;DIR&gt;
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -539,6 +598,8 @@ options:
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
     Search modules to load first in &lt;DIR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -576,6 +637,8 @@ options:
     Set &lt;N&gt; as number of files processed per iteration (default 1000)
 -n|--results &lt;N&gt;
     Set &lt;N&gt; as number of elements in the key map generated
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -610,8 +673,8 @@ options:
     Search modules to load first in &lt;DIR&gt;
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
--P|--statsproc &lt;NAME&gt;
-    Use statistics processor with name &lt;NAME&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -649,6 +712,8 @@ options:
     Dump only block sizes
 -P|--prefix &lt;KEY&gt;
     Dump only the blocks of a certain type with prefix &lt;KEY&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 
@@ -670,8 +735,6 @@ options:
     Search modules to load first in &lt;DIR&gt;
 -R|--resourcedir &lt;DIR&gt;
     Define a resource path &lt;DIR&gt; for the analyzer
--T|--statmsgproc &lt;NAME&gt;
-    Define the message processor for statistics as &lt;NAME&gt;
 -p|--port &lt;PORT&gt;
     Define the port to listen for requests as &lt;PORT&gt; (default 7181)
 -s|--storage &lt;CONFIG&gt;
@@ -682,6 +745,8 @@ options:
     Implicitely create storage with &lt;CONFIG&gt; if it does not exist yet
 -l|--logfile &lt;FILE&gt;
     Write logs to file &lt;FILE&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
 </pre>
 </li>
 

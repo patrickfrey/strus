@@ -408,9 +408,9 @@ class TypenoAllocator
 public:
 	TypenoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
-	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	virtual Index getOrCreate( const std::string& name)
 	{
-		return m_storage->allocTypenoImm( name, isNew);
+		return m_storage->allocTypenoImm( name);
 	}
 	virtual Index alloc()
 	{
@@ -427,7 +427,7 @@ class DocnoAllocator
 public:
 	DocnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(false),m_storage(storage_){}
-	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	virtual Index getOrCreate( const std::string& name)
 	{
 		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "docno");
 	}
@@ -445,13 +445,13 @@ class UsernoAllocator
 public:
 	UsernoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
-	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	virtual Index getOrCreate( const std::string& name)
 	{
 		if (!m_storage->withAcl())
 		{
 			throw strus::runtime_error( _TXT( "storage configured without ACL. No users can be created"));
 		}
-		return m_storage->allocUsernoImm( name, isNew);
+		return m_storage->allocUsernoImm( name);
 	}
 	virtual Index alloc()
 	{
@@ -467,9 +467,9 @@ class AttribnoAllocator
 public:
 	AttribnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(true),m_storage(storage_){}
-	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	virtual Index getOrCreate( const std::string& name)
 	{
-		return m_storage->allocAttribnoImm( name, isNew);
+		return m_storage->allocAttribnoImm( name);
 	}
 	virtual Index alloc()
 	{
@@ -486,7 +486,7 @@ public:
 	TermnoAllocator( StorageClient* storage_)
 		:KeyAllocatorInterface(false),m_storage(storage_){}
 
-	virtual Index getOrCreate( const std::string& name, bool& isNew)
+	virtual Index getOrCreate( const std::string& name)
 	{
 		throw strus::logic_error( _TXT( "cannot use %s allocator for immediate alloc"), "termno");
 	}
@@ -539,7 +539,7 @@ Index StorageClient::allocDocno()
 	return m_next_docno.allocIncrement();
 }
 
-Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
+Index StorageClient::allocTypenoImm( const std::string& name)
 {
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
@@ -548,12 +548,11 @@ Index StorageClient::allocTypenoImm( const std::string& name, bool& isNew)
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
-		isNew = true;
 	}
 	return rt;
 }
 
-Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
+Index StorageClient::allocUsernoImm( const std::string& name)
 {
 	Index rt;
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
@@ -562,12 +561,11 @@ Index StorageClient::allocUsernoImm( const std::string& name, bool& isNew)
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_userno.allocIncrement());
-		isNew = true;
 	}
 	return rt;
 }
 
-Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
+Index StorageClient::allocAttribnoImm( const std::string& name)
 {
 	Index rt;
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
@@ -576,7 +574,6 @@ Index StorageClient::allocAttribnoImm( const std::string& name, bool& isNew)
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_attribno.allocIncrement());
-		isNew = true;
 	}
 	return rt;
 }

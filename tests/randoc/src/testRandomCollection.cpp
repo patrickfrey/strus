@@ -1024,7 +1024,7 @@ static std::string doubleToString( double val_)
 {
 	unsigned int val = (unsigned int)::floor( val_ * 1000);
 	unsigned int val_sec = val / 1000;
-	unsigned int val_ms = val & 1000;
+	unsigned int val_ms = val % 1000;
 	std::ostringstream val_str;
 	val_str << val_sec << "." << std::setfill('0') << std::setw(3) << val_ms;
 	return val_str.str();
@@ -1043,8 +1043,11 @@ static void printUsage( int argc, const char* argv[])
 int main( int argc, const char* argv[])
 {
 	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
-	if (!g_errorhnd) return -1;
-
+	if (!g_errorhnd)
+	{
+		std::cerr << "construction of error buffer failed" << std::endl;
+		return -1;
+	}
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{
 		printUsage( argc, argv);

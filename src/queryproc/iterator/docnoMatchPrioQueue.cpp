@@ -239,7 +239,6 @@ DocnoMatchPrioQueue::CandidateList DocnoMatchPrioQueue::getCandidateList()
 	if (m_quearsize == 0) return rt;
 
 	Index dn = m_ar[m_quear[0]].docno;
-	rt.arsize = 1;
 	rt.ar[0] = m_args[ m_ar[m_quear[0]].argidx].get();
 
 	unsigned char qi=1,qe=m_quearsize;
@@ -247,6 +246,7 @@ DocnoMatchPrioQueue::CandidateList DocnoMatchPrioQueue::getCandidateList()
 	{
 		rt.ar[qi] = m_args[ m_ar[m_quear[qi]].argidx].get();
 	}
+	rt.arsize = qi;
 	return rt;
 }
 

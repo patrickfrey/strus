@@ -66,10 +66,6 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
-public:
-	/// \brief The maximum number of arguments is fixed, because of a 64bit integer used (locally) for the set of matching candidates
-	enum {MaxNofElements=64};
-
 private:
 	struct SummarizationFeature
 	{

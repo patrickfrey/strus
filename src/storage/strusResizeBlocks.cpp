@@ -38,7 +38,6 @@ static void printUsage()
 	std::cout << "    " << _TXT("Print this usage and do nothing else") << std::endl;
 	std::cout << "-v|--version" << std::endl;
 	std::cout << "    " << _TXT("Print the program version and do nothing else") << std::endl;
-	std::cout << "    " << _TXT("Write logs to file <FILE>") << std::endl;
 	std::cout << "-c|--commit <N>" << std::endl;
 	std::cout << "    " << _TXT("Set <N> as number of documents inserted per transaction (default 1000)") << std::endl;
 	std::cout << "-D|--docno <START>:<END>" << std::endl;
@@ -224,7 +223,7 @@ int main( int argc, const char* argv[])
 			}
 			else if (0==std::strcmp( argv[argi], "-v") || 0==std::strcmp( argv[argi], "--version"))
 			{
-				std::cerr << "strusRpc version " << STRUS_STORAGE_VERSION_STRING << std::endl;
+				std::cerr << "strus storage version " << STRUS_STORAGE_VERSION_STRING << std::endl;
 				doExit = true;
 			}
 			else if (0==std::strcmp( argv[argi], "-c") || 0==std::strcmp( argv[argi], "--commit"))

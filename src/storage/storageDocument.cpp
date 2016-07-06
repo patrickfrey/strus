@@ -21,12 +21,10 @@ StorageDocument::StorageDocument(
 		StorageTransaction* transaction_,
 		const std::string& docid_,
 		const Index& docno_,
-		bool isNew_,
 		ErrorBufferInterface* errorhnd_)
 	:m_transaction(transaction_)
 	,m_docid(docid_)
 	,m_docno(docno_)
-	,m_isNew(isNew_)
 	,m_errorhnd(errorhnd_)
 {}
 
@@ -47,7 +45,7 @@ void StorageDocument::addSearchIndexTerm(
 {
 	try
 	{
-		if (position_ == 0)
+		if (position_ <= 0)
 		{
 			m_errorhnd->report( _TXT( "term occurrence position must not be 0"));
 		}
@@ -68,8 +66,15 @@ void StorageDocument::addForwardIndexTerm(
 {
 	try
 	{
-		Index typeno = m_transaction->getOrCreateTermType( type_);
-		m_invs[ InvMapKey( typeno, position_)] = value_;
+		if (position_ <= 0)
+		{
+			m_errorhnd->report( _TXT( "term occurrence position must not be 0"));
+		}
+		else
+		{
+			Index typeno = m_transaction->getOrCreateTermType( type_);
+			m_invs[ InvMapKey( typeno, position_)] = value_;
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error adding forward index term to document: %s"), *m_errorhnd);
 }
@@ -101,8 +106,7 @@ void StorageDocument::setUserAccessRight(
 {
 	try
 	{
-		bool isNew = false;
-		m_userlist.push_back( m_transaction->getOrCreateUserno( username_, isNew));
+		m_userlist.push_back( m_transaction->getOrCreateUserno( username_));
 	}
 	CATCH_ERROR_MAP( _TXT("error setting user rights of document: %s"), *m_errorhnd);
 }
@@ -111,22 +115,15 @@ void StorageDocument::done()
 {
 	try
 	{
-		if (m_isNew)
-		{
-			// Increment document counter
-			m_transaction->countDocument();
-		}
-		else
-		{
-			//[1.1] Delete old metadata:
-			m_transaction->deleteMetaData( m_docno);
-			//[1.2] Delete old attributes:
-			m_transaction->deleteAttributes( m_docno);
-			//[1.3] Delete old index elements (forward index and inverted index):
-			m_transaction->deleteIndex( m_docno);
-			//[1.4] Delete old user access rights:
-			m_transaction->deleteAcl( m_docno);
-		}
+		//[1.1] Delete old metadata:
+		m_transaction->deleteMetaData( m_docno);
+		//[1.2] Delete old attributes:
+		m_transaction->deleteAttributes( m_docno);
+		//[1.3] Delete old index elements (forward index and inverted index):
+		m_transaction->deleteIndex( m_docno);
+		//[1.4] Delete old user access rights:
+		m_transaction->deleteAcl( m_docno);
+
 		//[2.1] Define new metadata:
 		std::vector<DocMetaData>::const_iterator wi = m_metadata.begin(), we = m_metadata.end();
 		for (; wi != we; ++wi)

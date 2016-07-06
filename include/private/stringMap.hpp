@@ -8,8 +8,6 @@
 #ifndef _STRUS_STRING_MAP_HPP_INCLUDED
 #define _STRUS_STRING_MAP_HPP_INCLUDED
 #include "private/internationalization.hpp"
-#include "private/localStructAllocator.hpp"
-#include "private/utils.hpp"
 #include "strus/base/crc32.hpp"
 #include <boost/unordered_map.hpp>
 #include <map>
@@ -124,8 +122,6 @@ private:
 
 public:
 	StringMap(){}
-	StringMap( const StringMap& o)
-		:m_map(o.m_map),m_keystring_blocks(o.m_keystring_blocks){}
 
 	typedef typename Map::const_iterator const_iterator;
 	typedef typename Map::iterator iterator;
@@ -194,6 +190,10 @@ public:
 		m_map.clear();
 		m_keystring_blocks.clear();
 	}
+
+private:
+	StringMap( const StringMap&){}		///> non copyable
+	void operator=( const StringMap&){}	///> non copyable
 
 private:
 	Map m_map;

@@ -9,7 +9,7 @@ include_directories(
 )
 
 link_directories(
-	"${PROJECT_SOURCE_DIR}/src/error"
+	"${PROJECT_SOURCE_DIR}/src/utils"
 	"${PROJECT_SOURCE_DIR}/src/statsproc"
 	"${Boost_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"

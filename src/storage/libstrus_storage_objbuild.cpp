@@ -13,8 +13,9 @@
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
-#include "strus/reference.hpp"
+#include "strus/queryProcessorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/reference.hpp"
 #include "strus/storageObjectBuilderInterface.hpp"
 #include "strus/storageAlterMetaDataTableInterface.hpp"
 #include "strus/storageInterface.hpp"
@@ -42,7 +43,7 @@ public:
 		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
 		,m_storage(strus::createStorage(errorhnd_))
 		,m_db( strus::createDatabase_leveldb( errorhnd_))
-		,m_statsproc( strus::createStatisticsProcessor( m_errorhnd))
+		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{
 		if (!m_queryProcessor.get()) throw strus::runtime_error(_TXT("error creating query processor"));

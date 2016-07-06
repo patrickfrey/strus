@@ -32,6 +32,66 @@ std::string tostring( int val);
 void aligned_free( void *ptr);
 void* aligned_malloc( std::size_t size, std::size_t alignment);
 
+class BitSet
+{
+public:
+	explicit BitSet( std::size_t size_)
+		:m_impl(size_),m_size(size_){}
+	BitSet( const BitSet& o)
+		:m_impl(o.m_impl),m_size(o.m_size){}
+
+	bool empty() const
+	{
+		return m_impl.empty();
+	}
+	void reset()
+	{
+		m_impl.reset();
+	}
+	void set( std::size_t idx)
+	{
+		m_impl.set( idx, true);
+	}
+	void unset( std::size_t idx)
+	{
+		m_impl.set( idx, false);
+	}
+	int first() const
+	{
+		int rt = m_impl.find_first();
+		if (rt >= (int)m_size) return -1;
+		return rt;
+	}
+	int next( std::size_t idx) const
+	{
+		int rt = m_impl.find_next( idx);
+		if (rt >= (int)m_size) return -1;
+		return rt;
+	}
+	BitSet& operator <<= (std::size_t n)
+	{
+		m_impl <<= n;
+		return *this;
+	}
+	BitSet& operator >>= (std::size_t n)
+	{
+		m_impl >>= n;
+		return *this;
+	}
+	void insert( std::size_t idx)
+	{
+		boost::dynamic_bitset<> left = (m_impl >> idx) << idx;
+		boost::dynamic_bitset<> right = m_impl ^ left;
+		m_impl = (left << 1) | right;
+		m_impl.set( idx);
+	}
+
+private:
+	boost::dynamic_bitset<> m_impl;
+	std::size_t m_size;
+};
+
+
 template<typename Key, typename Elem>
 class UnorderedMap
 	:public boost::unordered_map<Key,Elem>

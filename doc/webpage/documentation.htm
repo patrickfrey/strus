@@ -3,6 +3,7 @@
 <head>
 	<link rel="icon" type="image/ico" href="images/strus.ico" />
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Documentation of strus, a collection of C++ libraries for building a full-text search engine." />
 	<meta name="keywords" content="fulltext search engine C++" />
 	<meta name="author" content="Patrick Frey &lt;patrickpfrey (a) yahoo (dt) com&gt;" />
@@ -22,9 +23,9 @@
 		<ol>
 		<li><a href="https://github.com/patrickfrey/strusBase">strusBase</a>
 			implements some helper functions as common code base.
-			I also defines the error buffer interface for buffering
+			It also defines the error buffer interface for buffering
 			exception error messages. Exceptions cannot be thrown accross borders of 
-			dynamically linked libraries and modules. All other Strus projects debend 
+			dynamically linked libraries and modules. All other Strus projects depend 
 			on strusBase.</li>
 		<li><a href="https://github.com/patrickfrey/strus">strus</a>
 			provides the interface to the storage and the query processing of the search engine.
@@ -48,6 +49,10 @@
 			another instance than the webserver itself is not allowed or at least 
 			not recommended, you should access strus via RPC or a similar mechanism.
 			(depends on strus, strusAnalyzer and strusModule)</li>
+		<li><a href="https://github.com/patrickfrey/strusStream">strusStream</a>
+			This project turns the use case of searching content with queries
+			to searching queries with content. So instead of searching in millions of 
+			documents with a query, you search in millions of queries with a document.</li>
 		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
 			provides some command line programs to access the search engine.
 			(Depends on strusModule and strusRpc</li>
@@ -78,6 +83,8 @@
 			Interface to define strus components and to load them from dynamically loadable modules.</li>
 		<li><a href="http://patrickfrey.github.io/strusRpc/doc/doxygen/html/index.html">strus RPC client</a>:
 			Interfaces for strus RPC client and server</li>
+		<li><a href="http://patrickfrey.github.io/strusModule/doc/doxygen/html/index.html">strus stream</a>:
+			Interface for document stream processing with strus.</li>
 		<li><a href="http://patrickfrey.github.io/strusUtilities/doc/doxygen/html/index.html">strus program loader</a>:
 			Functions to instantiate strus components from source</li>
 		</ul>

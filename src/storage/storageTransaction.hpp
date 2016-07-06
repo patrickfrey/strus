@@ -80,8 +80,8 @@ public:/*Document*/
 	Index getOrCreateTermValue( const std::string& name);
 	Index getOrCreateTermType( const std::string& name);
 	Index getOrCreateAttributeName( const std::string& name);
-	Index getOrCreateDocno( const std::string& name, bool& isNew);
-	Index getOrCreateUserno( const std::string& name, bool& isNew);
+	Index getOrCreateDocno( const std::string& name);
+	Index getOrCreateUserno( const std::string& name);
 	Index lookUpTermValue( const std::string& name);
 
 	void defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value);
@@ -108,7 +108,6 @@ public:/*Document*/
 		const Index& typeno, const Index& pos, const std::string& termstring);
 
 	void closeForwardIndexDocument();
-	void countDocument();
 
 private:
 	StorageClient* m_storage;				///< Storage to call refresh after commit or rollback
@@ -131,7 +130,7 @@ private:
 	KeyMapInv m_termTypeMapInv;				///< inverse map of term types
 	KeyMapInv m_termValueMapInv;				///< inverse map of term values
 
-	int m_nof_documents;					///< total adjustment for the number of documents added minus number of documents deleted
+	int m_nof_deleted_documents;				///< total adjustment for the number of documents deleted
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
 
