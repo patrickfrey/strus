@@ -70,6 +70,7 @@ tests/formula/src/formula
 tests/loggingMalloc/src/testLoggingMalloc
 tests/storageop/src/testStorageOp
 tests/queryop/src/testQueryOp
+tests/query/src/testQuery
 tests/positionWindow/src/testPositionWindow
 tests/scalarfunc/src/scalarFunction
 
