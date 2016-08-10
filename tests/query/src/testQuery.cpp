@@ -15,14 +15,15 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/queryEvalInterface.hpp"
-#include "strus/summaryElement.hpp"
+#include "strus/queryInterface.hpp"
 #include "strus/queryResult.hpp"
+#include "strus/summaryElement.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
-#include "strus/queryInterface.hpp"
+#include "strus/metaDataRestrictionInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/summarizerFunctionInterface.hpp"
@@ -39,7 +40,7 @@
 #include <stdexcept>
 #include <memory>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 
 class Storage
@@ -111,7 +112,7 @@ public:
 	explicit QueryEvaluationEnv( const strus::QueryProcessorInterface* qpi)
 	{
 		static const unsigned int primes[5] = {2,3,5,7,0};
-		storage.open( "path=storage");
+		storage.open( "path=storage; metadata=docno UINT16");
 		std::auto_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
 		enum {NofDocs=10};
 		unsigned int di=0,de=NofDocs;
@@ -145,6 +146,7 @@ public:
 				}
 			}
 			doc->addSearchIndexTerm( "word", docid, 3);
+			doc->setMetaData( "docno", di);
 			doc->setAttribute( "docid", docid);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "add search index term \"word\" \"" << docid << "\"" << std::endl;
@@ -320,6 +322,46 @@ static void testSingleTermQueryWithRestriction( const strus::QueryProcessorInter
 }
 
 
+static void testSingleTermQueryWithRestrictionInclMetadata( const strus::QueryProcessorInterface* qpi)
+{
+	QueryEvaluationEnv queryenv( qpi);
+	strus::QueryInterface* query = queryenv.query.get();
+	const strus::PostingJoinOperatorInterface* operation_OR = qpi->getPostingJoinOperator( "union");
+	if (!operation_OR) throw std::runtime_error("operation 'union' is not defined");
+
+	query->pushTerm( "word", "hello");
+	query->defineFeature( "qry");
+	query->pushTerm( "word", "hello");
+	query->defineFeature( "sel");
+	query->pushTerm( "prim", "2");
+	query->pushTerm( "prim", "3");
+	query->pushExpression( operation_OR, 2, 0, 0);
+	query->defineFeature( "res");
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareLess, "docno", 9, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareGreater, "docno", 2, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 3, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 4, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 5, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 6, false);
+
+	strus::QueryResult result = query->evaluate();
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cerr << "result testSingleTermQueryWithRestrictionInclMetadata:" << std::endl;
+	printQueryResult( result);
+#endif
+	std::string res = getQueryResultMembersString( result);
+	std::string exp = "3,4,6";
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cerr << "packed result: (" << res << ")" << std::endl;
+	std::cerr << "expected: (" << exp << ")" << std::endl;
+#endif
+	if (res != exp)
+	{
+		throw std::runtime_error("query result not as expected");
+	}
+}
+
+
 static void testSingleTermQueryWithSelectionAndRestriction( const strus::QueryProcessorInterface* qpi)
 {
 	QueryEvaluationEnv queryenv( qpi);
@@ -433,7 +475,8 @@ int main( int argc, const char* argv[])
 				case 1: RUN_TEST( ti, PlainSingleTermQuery, qpi.get() ) break;
 				case 2: RUN_TEST( ti, SingleTermQueryWithExclusion, qpi.get() ) break;
 				case 3: RUN_TEST( ti, SingleTermQueryWithRestriction, qpi.get() ) break;
-				case 4: RUN_TEST( ti, SingleTermQueryWithSelectionAndRestriction, qpi.get() ) break;
+				case 4: RUN_TEST( ti, SingleTermQueryWithRestrictionInclMetadata, qpi.get() ) break;
+				case 5: RUN_TEST( ti, SingleTermQueryWithSelectionAndRestriction, qpi.get() ) break;
 				default: goto TESTS_DONE;
 			}
 			if (test_index) break;
