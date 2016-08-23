@@ -32,7 +32,7 @@ double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) co
 	{
 		if (nofargs < m_nof_args)
 		{
-			throw strus::runtime_error( "too few arguments passed to scalar function");
+			throw strus::runtime_error( _TXT("too few arguments passed to scalar function (%u < %u)"), (unsigned int)nofargs, (unsigned int)m_nof_args);
 		}
 		std::size_t ip = 0;
 		std::vector<double> stk;

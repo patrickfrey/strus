@@ -96,7 +96,7 @@ bool DatabaseTransaction::commit()
 		if (!status.ok())
 		{
 			std::string statusstr( status.ToString());
-			m_errorhnd->report( _TXT( "error in commit when writing transaction batch: "), statusstr.c_str());
+			m_errorhnd->report( _TXT( "error in commit when writing transaction batch: %s"), statusstr.c_str());
 			return false;
 		}
 		m_batch.Clear();
