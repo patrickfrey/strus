@@ -569,7 +569,7 @@ QueryResult Query::evaluate()
 					}
 				}
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "add feature " << wi->functionName() << " weight " << wi->weight() << std::endl;
+				std::cout << "add feature " << wi->functionName() << std::endl;
 #endif
 				accumulator.addWeightingElement( execContext.release());
 			}
