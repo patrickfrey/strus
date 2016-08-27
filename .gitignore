@@ -56,6 +56,7 @@ dist/obs/strus.dsc
 dist/obs/strus-Debian_7.0.dsc
 dist/obs/strus-xUbuntu_12.04.dsc
 dist/redhat/strus.spec
+3rdParty/armadillo/InstallFiles/ArmadilloConfig.cmake
 3rdParty/armadillo/ArmadilloConfig.cmake
 3rdParty/armadillo/libarmadillo.so.7
 3rdParty/armadillo/libarmadillo.so.7.400.2
