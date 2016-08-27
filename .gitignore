@@ -8,11 +8,13 @@
 *.so.0
 *.so
 *.dylib
+*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+*.lib
 
 # Dependency files
 *.d

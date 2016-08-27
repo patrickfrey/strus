@@ -11,11 +11,11 @@ Table of Contents
 
 boost
 -----
-  http://www.boost.org/LICENSE_1_0.txt
+   License: http://www.boost.org/LICENSE_1_0.txt
 
 LevelDB
 -------
-   New BSD License
+   License: New BSD License
 
 getMemorySize (NadeauSoftware)
 ------------------------------
@@ -26,8 +26,15 @@ getMemorySize (NadeauSoftware)
 
 compactNodeTrie
 ----------------------
-   MPL v2.0
+   License: MPL v2.0
    Copyright (c) 2014 Patrick P. Frey
+
+Armadillo
+---------
+   License: MPL v2.0 (3rdParty/armadillo/LICENSE.txt)
+   Developers:  Conrad Sanderson, Ryan Curtin
+   Link:  http://arma.sourceforge.net
+
 
 
 
