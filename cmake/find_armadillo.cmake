@@ -359,7 +359,7 @@ if (ARMADILLO_FOUND)
   endif ()
   message(STATUS "Armadillo libraries: ${ARMADILLO_LIBRARIES}")
 endif ()
-set( ARMADILLO_LIBRARIES ${ARMADILLO_LIBRARIES} lapackpp )
+set( ARMADILLO_LIBRARIES ${ARMADILLO_LIBRARIES} )
 
 # Hide internal variables
 mark_as_advanced(
