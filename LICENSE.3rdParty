@@ -1,5 +1,5 @@
 3rd party licenses of strus
-============================
+====================
 
 Table of Contents
 -----------------
@@ -9,7 +9,7 @@ Table of Contents
   getMemorySize (NadeauSoftware)
   compactNodeTrie
   lapack
-  armadillo
+  Armadillo
 
 boost
 -----
