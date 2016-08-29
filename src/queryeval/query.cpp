@@ -586,6 +586,10 @@ QueryResult Query::evaluate()
 				invAclList.push_back( invAcl);
 				accumulator.addAlternativeAclRestriction( invAcl.get());
 			}
+			else if (m_errorhnd->hasError())
+			{
+				throw strus::runtime_error(_TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
+			}
 		}
 		// [4.5] Define the feature restrictions:
 		{

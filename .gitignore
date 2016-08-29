@@ -80,5 +80,6 @@ tests/queryop/src/testQueryOp
 tests/query/src/testQuery
 tests/positionWindow/src/testPositionWindow
 tests/scalarfunc/src/scalarFunction
+tests/vectorSpaceModel/src/testArmadillo
 
 .travis.yml
