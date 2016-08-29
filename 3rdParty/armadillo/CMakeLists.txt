@@ -1,4 +1,8 @@
+# -----------------------------------------------------------------------------------------------------------------------------------
+# Modified version of the orginal CMake file with different installation section as local version bound to Strus:
+# -----------------------------------------------------------------------------------------------------------------------------------
 
+# 
 # Copyright (C) 2008-2016 National ICT Australia (NICTA)
 # 
 # This Source Code Form is subject to the terms of the Mozilla Public
@@ -19,7 +23,7 @@ set(ARMA_MINOR 400)
 set(ARMA_PATCH 2)
 set(ARMADILLO_VERSION ${ARMA_MAJOR}.${ARMA_MINOR}.${ARMA_PATCH})
 
-message(STATUS "Configuring Armadillo ${ARMADILLO_VERSION}")
+message(STATUS "Configuring local Armadillo for Strus: ${ARMADILLO_VERSION}")
 
 
 ## Set ARMA_USE_WRAPPER to false if you're getting linking errors when compiling your programs,
@@ -301,17 +305,10 @@ else()
       message( STATUS "Set flag WITH_CPP11='NO'. Added '-std=c++98' to compiler flags" )
 endif()
 
-message(STATUS "Copying ${PROJECT_SOURCE_DIR}/include/ to ${PROJECT_BINARY_DIR}/tmp/include/")
-file(COPY ${PROJECT_SOURCE_DIR}/include/ DESTINATION ${PROJECT_BINARY_DIR}/tmp/include/)
-
 message(STATUS "Generating ${PROJECT_BINARY_DIR}/tmp/include/config.hpp")
-configure_file(${PROJECT_BINARY_DIR}/tmp/include/armadillo_bits/config.hpp.cmake ${PROJECT_BINARY_DIR}/tmp/include/armadillo_bits/config.hpp)
+configure_file(${PROJECT_SOURCE_DIR}/include/armadillo_bits/config.hpp.cmake ${PROJECT_BINARY_DIR}/tmp/include/armadillo_bits/config.hpp)
 
-message(STATUS "Generating ${PROJECT_SOURCE_DIR}/examples/Makefile")
-configure_file(${PROJECT_SOURCE_DIR}/examples/Makefile.cmake ${PROJECT_SOURCE_DIR}/examples/Makefile)
-
-
-include_directories(${PROJECT_BINARY_DIR}/tmp/include/ ${CMAKE_REQUIRED_INCLUDES})
+include_directories( ${PROJECT_SOURCE_DIR}/include ${CMAKE_REQUIRED_INCLUDES})
 
 
 ## work around a silly limitation in Mac OS X
@@ -333,7 +330,7 @@ endif()
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 endif()
 
 message(STATUS "CMAKE_CXX_FLAGS           = ${CMAKE_CXX_FLAGS}"          )
@@ -341,139 +338,17 @@ message(STATUS "CMAKE_SHARED_LINKER_FLAGS = ${CMAKE_SHARED_LINKER_FLAGS}")
 message(STATUS "CMAKE_REQUIRED_INCLUDES   = ${CMAKE_REQUIRED_INCLUDES}"  )
 
 
-add_library( armadillo ${PROJECT_SOURCE_DIR}/src/wrapper.cpp )
-target_link_libraries( armadillo ${ARMA_LIBS} )
-set_target_properties(armadillo PROPERTIES VERSION ${ARMA_MAJOR}.${ARMA_MINOR_ALT}.${ARMA_PATCH} SOVERSION ${ARMA_MAJOR})
+add_library( strus_armadillo ${PROJECT_SOURCE_DIR}/src/wrapper.cpp )
+target_link_libraries( strus_armadillo ${ARMA_LIBS} )
+set_target_properties( strus_armadillo PROPERTIES VERSION ${ARMA_MAJOR}.${ARMA_MINOR_ALT}.${ARMA_PATCH} SOVERSION ${ARMA_MAJOR})
+
+install(DIRECTORY include/armadillo_bits
+          DESTINATION include/strus
+          FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY include/
+          DESTINATION include/strus
+          FILES_MATCHING PATTERN "armadillo")
+install( TARGETS strus_armadillo
+           LIBRARY DESTINATION ${LIB_INSTALL_DIR}/strus )
 
 
-################################################################################
-# INSTALL CONFIGURATION
-
-
-# As Red Hat Enterprise Linux (and related systems such as Fedora)
-# does not search /usr/local/lib by default, we need to place the
-# library in either /usr/lib or /usr/lib64
-
-if(NOT APPLE)
-  if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    message(STATUS "*** CMAKE_INSTALL_PREFIX was initalised by cmake to the default value of ${CMAKE_INSTALL_PREFIX}")
-    message(STATUS "*** CMAKE_INSTALL_PREFIX changed to /usr")
-    unset(CMAKE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX "/usr")
-    #set(CMAKE_INSTALL_PREFIX "/usr" CACHE PATH "install prefix" FORCE)
-  endif()
-endif()
-
-# Allow for the "lib" directory to be specified on the command line
-if(NOT INSTALL_LIB_DIR)
-  set(INSTALL_LIB_DIR "lib")
-  if(UNIX AND NOT APPLE)   # I don't know how Mac OS handles 64 bit systems
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      message(STATUS "*** Detected 64 bit system")
-      # use "lib64" only on systems that have it (eg. Fedora, Red Hat).
-      # if installing in /usr/local/, the use of lib64 might be unreliable on systems which have /usr/local/lib64 but don't use it
-      if(IS_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib64")
-        unset(INSTALL_LIB_DIR)
-        set(INSTALL_LIB_DIR "lib64")
-        message(STATUS "*** ${CMAKE_INSTALL_PREFIX}/lib64/ exists, so destination directory for the run-time library changed to ${CMAKE_INSTALL_PREFIX}/lib64/")
-        message(STATUS "*** Your system and/or compiler must search ${CMAKE_INSTALL_PREFIX}/lib64/ during linking")
-      endif()
-    endif()
-  endif()
-endif()
-
-# Allow for the "include" directory to be specified on the command line
-
-if(NOT INSTALL_INCLUDE_DIR)
-  set(INSTALL_INCLUDE_DIR "include")
-endif()
-
-# We use data dir to store files shared with other programs 
-# like the ArmadilloConfig.cmake file.
-if(NOT INSTALL_DATA_DIR)
-  set(INSTALL_DATA_DIR "share")
-endif()
-
-# executables destination
-if(NOT INSTALL_BIN_DIR)
-  set(INSTALL_BIN_DIR "bin")
-endif()
-
-# Make relative paths absolute so we can write them in Config.cmake files
-foreach(p LIB INCLUDE DATA BIN)
-  set(var INSTALL_${p}_DIR)
-  if(NOT IS_ABSOLUTE "${${var}}")
-    set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-  endif()
-endforeach()
-
-message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "INSTALL_LIB_DIR      = ${INSTALL_LIB_DIR}"     )
-message(STATUS "INSTALL_INCLUDE_DIR  = ${INSTALL_INCLUDE_DIR}" )
-message(STATUS "INSTALL_DATA_DIR     = ${INSTALL_DATA_DIR}"    )
-message(STATUS "INSTALL_BIN_DIR      = ${INSTALL_BIN_DIR}"    )
-
-
-# Note that the trailing / character in "include/" is critical
-
-install(DIRECTORY ${PROJECT_BINARY_DIR}/tmp/include/ DESTINATION ${INSTALL_INCLUDE_DIR}
-PATTERN ".svn" EXCLUDE
-PATTERN "*.cmake" EXCLUDE
-PATTERN "*~" EXCLUDE
-PATTERN "*orig" EXCLUDE
-)
-
-install(TARGETS armadillo EXPORT ArmadilloLibraryDepends
-  ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
-  LIBRARY DESTINATION ${INSTALL_LIB_DIR}
-  RUNTIME DESTINATION ${INSTALL_BIN_DIR})
-  
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
-export(PACKAGE armadillo)
-
-## LOCAL FILES
-# Create ArmadilloConfig.cmake file for the use from the build tree
-set(ARMADILLO_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
-set(ARMADILLO_LIB_DIR      "${PROJECT_BINARY_DIR}")
-set(ARMADILLO_CMAKE_DIR    "${PROJECT_BINARY_DIR}")
-
-
-message(STATUS "Generating '${PROJECT_BINARY_DIR}/ArmadilloConfig.cmake'")
-# copy/change config and configVersion file (modify only the @xyz@ variables)
-configure_file(${PROJECT_SOURCE_DIR}/cmake_aux/InstallFiles/ArmadilloConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/ArmadilloConfig.cmake" @ONLY)
-
-message(STATUS "Generating '${PROJECT_BINARY_DIR}/ArmadilloConfigVersion.cmake'")
-configure_file(${PROJECT_SOURCE_DIR}/cmake_aux/InstallFiles/ArmadilloConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/ArmadilloConfigVersion.cmake" @ONLY)
-
-
-# Install the export set for use with the install-tree
-install(EXPORT ArmadilloLibraryDepends DESTINATION
-  "${INSTALL_DATA_DIR}/Armadillo/CMake"
-  COMPONENT dev)
-
-
-## GLOBAL INSTALL FILES
-# Create ArmadilloConfig.cmake file for the use from the install tree
-# and install it
-set(ARMADILLO_INCLUDE_DIRS "${INSTALL_INCLUDE_DIR}")
-set(ARMADILLO_LIB_DIR      "${INSTALL_LIB_DIR}")
-set(ARMADILLO_CMAKE_DIR    "${INSTALL_DATA_DIR}/Armadillo/CMake")
-
-
-message(STATUS "Generating '${PROJECT_BINARY_DIR}/InstallFiles/ArmadilloConfig.cmake'")
-# copy/change config and configVersion file (modify only the @xyz@ variables)
-configure_file(${PROJECT_SOURCE_DIR}/cmake_aux/InstallFiles/ArmadilloConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/InstallFiles/ArmadilloConfig.cmake" @ONLY)
-
-message(STATUS "Generating '${PROJECT_BINARY_DIR}/InstallFiles/ArmadilloConfigVersion.cmake'")
-configure_file(${PROJECT_SOURCE_DIR}/cmake_aux/InstallFiles/ArmadilloConfigVersion.cmake.in
-  "${PROJECT_BINARY_DIR}/InstallFiles/ArmadilloConfigVersion.cmake" @ONLY)
-
-# Install files to be found by cmake users with find_package()
-install(FILES
-  "${PROJECT_BINARY_DIR}/InstallFiles/ArmadilloConfig.cmake"
-  "${PROJECT_BINARY_DIR}/InstallFiles/ArmadilloConfigVersion.cmake"
-  DESTINATION "${ARMADILLO_CMAKE_DIR}" COMPONENT dev)

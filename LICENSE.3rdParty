@@ -8,6 +8,8 @@ Table of Contents
   LevelDB
   getMemorySize (NadeauSoftware)
   compactNodeTrie
+  lapack
+  armadillo
 
 boost
 -----
@@ -29,8 +31,13 @@ compactNodeTrie
    License: MPL v2.0
    Copyright (c) 2014 Patrick P. Frey
 
-Armadillo
+Lapack
 ---------
+   Link: http://www.netlib.org/lapack/
+   License:  Modified BSD   (http://www.netlib.org/lapack/LICENSE.txt)
+
+Armadillo
+------------
    License: MPL v2.0 (3rdParty/armadillo/LICENSE.txt)
    Developers:  Conrad Sanderson, Ryan Curtin
    Link:  http://arma.sourceforge.net
