@@ -17,3 +17,9 @@ link_directories(
 add_executable( testArmadillo testArmadillo.cpp)
 target_link_libraries( testArmadillo boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
 
+add_executable( testNaiveVectorSpaceModel testNaiveVectorSpaceModel.cpp)
+target_link_libraries( testNaiveVectorSpaceModel boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
+
+add_executable( testLshVectorSpaceModel testLshVectorSpaceModel.cpp)
+target_link_libraries( testLshVectorSpaceModel boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
+
