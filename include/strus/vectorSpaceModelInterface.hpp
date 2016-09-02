@@ -13,7 +13,12 @@
 
 namespace strus {
 
-/// \brief Interface for vector space model operations needed for efficient similar vector retrieval in the strus storage
+/// \brief Forward declaration
+class VectorSpaceModelBuilderInterface;
+/// \brief Forward declaration
+class VectorSpaceModelInstanceInterface;
+
+/// \brief Interface for mapping vectors of floating point numbers of a given dimension to a list of features. The mapping function is created in an unsupervised way.
 class VectorSpaceModelInterface
 {
 public:
@@ -21,8 +26,17 @@ public:
 	virtual ~VectorSpaceModelInterface(){}
 
 	/// \brief Create a new vector space model instance
+	/// \param[in] config connfiguration string of the model (may also reference a file to load a configuration created)
 	/// \return the instance (with ownership)
-	virtual VectorSpaceModelInstanceInterface* createModel() const=0;
+	virtual VectorSpaceModelInstanceInterface* createInstance( const std::string& config) const=0;
+
+	/// \brief Create a new vector space model builder
+	/// \param[in] config configuration string of the model
+	/// \return the builder (with ownership)
+	virtual VectorSpaceModelBuilderInterface* createBuilder( const std::string& config) const=0;
 };
+
+}//namespace
+#endif
 
 

@@ -5,10 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Exported functions of the strus storage library
-/// \file storage.hpp
-#ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
-#define _STRUS_STORAGE_LIB_HPP_INCLUDED
+/// \brief Exported functions of the strus standard vector space model library
+/// \file vectorspace_std.hpp
+#ifndef _STRUS_VECTOR_SPACE_MODEL_STD_LIB_HPP_INCLUDED
+#define _STRUS_VECTOR_SPACE_MODEL_STD_LIB_HPP_INCLUDED
 
 /// \brief strus toplevel namespace
 namespace strus {
@@ -16,9 +16,9 @@ namespace strus {
 /// \brief Forward declaration
 class ErrorBufferInterface;
 /// \brief Forward declaration
-class StorageInterface;
+class VectorSpaceModelInterface;
 
-StorageInterface* createStorage( ErrorBufferInterface* errorhnd);
+VectorSpaceModelInterface* createVectorSpaceModel_std( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

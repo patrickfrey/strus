@@ -29,12 +29,15 @@ int main()
 	
 		arma::mat A = arma::randu<arma::mat>(5,5);
 		arma::mat B = arma::randu<arma::mat>(5,5);
-	
+		arma::mat C = 2.0 * arma::randu<arma::mat>( 5, 5) - arma::mat( 5, 5).ones();
+
 		std::cout << "A:" << std::endl;
 		std::cout << A << std::endl;
 		std::cout << "B:" << std::endl;
 		std::cout << B << std::endl;
-	
+		std::cout << "C:" << std::endl;
+		std::cout << C << std::endl;
+
 		std::cout << "A * B transposed:" << std::endl;
 		std::cout << A * B.t() << std::endl;
 	
@@ -42,6 +45,8 @@ int main()
 		std::cout << "determinant of A:" << det_a << std::endl;
 		double det_b = arma::det( B);
 		std::cout << "determinant of B:" << det_b << std::endl;
+		double det_c = arma::det( C);
+		std::cout << "determinant of C:" << det_c << std::endl;
 
 		return 0;
 	}

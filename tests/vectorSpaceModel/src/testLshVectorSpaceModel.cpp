@@ -9,6 +9,7 @@
 #include <cmath>
 #include <limits>
 
+
 static void initRandomNumberGenerator()
 {
 	time_t nowtime;
@@ -30,11 +31,11 @@ static void printSimHash( std::ostream& out, const std::vector<bool>& sh)
 	}
 }
 
-static void printVector( std::ostream& out, const std::vector<double>& vec)
+static void printVector( std::ostream& out, const arma::vec& vec)
 {
 	std::ostringstream fbuf;
 	fbuf << std::setprecision(5) << std::fixed;
-	std::vector<double>::const_iterator xi = vec.begin(), xe = vec.end();
+	arma::vec::const_iterator xi = vec.begin(), xe = vec.end();
 	std::size_t xidx = 0;
 	for (; xi != xe; ++xi,++xidx)
 	{
@@ -44,10 +45,9 @@ static void printVector( std::ostream& out, const std::vector<double>& vec)
 	out << "(" << fbuf.str() << ")";
 }
 
-std::vector<double> createSimilarVector( const std::vector<double>& vec, double maxCosSim)
+arma::vec createSimilarVector( const arma::vec& vec, double maxCosSim)
 {
-	std::vector<double> rt( vec);
-	arma::vec v_orig( vec);
+	arma::vec rt( vec);
 	for (;;)
 	{
 		unsigned int idx = rand() % vec.size();
@@ -55,212 +55,186 @@ std::vector<double> createSimilarVector( const std::vector<double>& vec, double 
 		if ((rand() & 1) == 0)
 		{
 			elem -= elem / 10;
+			if (elem < 0.0) continue;
 		}
 		else
 		{
 			elem += elem / 10;
 		}
-		arma::vec v_new( rt);
-		v_new[ idx] = elem;
-		double cosSim = arma::norm_dot( v_orig, v_new);
+		double oldelem = rt[ idx];
+		rt[ idx] = elem;
+		double cosSim = arma::norm_dot( vec, rt);
 		if (maxCosSim > cosSim)
 		{
+			rt[ idx] = oldelem;
 			return rt;
 		}
-		else
-		{
-			rt[ idx] = elem;
-		}
 	}
 }
-
-struct SimHashStruct
-{
-	SimHashStruct(){}
-	SimHashStruct( const SimHashStruct& o)
-		:ar1(o.ar1),ar2(o.ar2),un1(o.un1),un2(o.un2){}
-	SimHashStruct( const std::vector<bool>& ar1_, const std::vector<bool>& ar2_, const std::vector<bool>& un1_, const std::vector<bool>& un2_)
-		:ar1(ar1_),ar2(ar2_),un1(un1_),un2(un2_){}
-
-	std::vector<bool> ar1;
-	std::vector<bool> ar2;
-	std::vector<bool> un1;
-	std::vector<bool> un2;
-};
-
-static uint64_t bitset2uint64( const std::vector<bool>& ar)
-{
-	uint64_t rt = 0;
-	std::vector<bool>::const_iterator ai = ar.begin(), ae = ar.end();
-	for (unsigned int aidx=0; ai != ae && aidx < 64; ++ai,++aidx)
-	{
-		rt <<= 1;
-		rt |= *ai ? 1:0;
-	}
-	return rt;
-}
-
-struct SimHashNum
-{
-	SimHashNum(){}
-	SimHashNum( const SimHashNum& o)
-		:val1(o.val1),val2(o.val2),un1(o.un1),un2(o.un2){}
-	SimHashNum( const uint64_t& val1_, const uint64_t& val2_, const uint64_t& un1_, const uint64_t& un2_)
-		:val1(val1_),val2(val2_),un1(un1_),un2(un2_){}
-	SimHashNum( const SimHashStruct& st)
-		:val1(bitset2uint64(st.ar1)),val2(bitset2uint64(st.ar2)),un1(bitset2uint64(st.un1)),un2(bitset2uint64(st.un2))
-	{}
-
-	unsigned int dist( const SimHashNum& o)
-	{
-		uint64_t diff = ((val1 ^ o.val1) & ~un1) | ((val2 ^ o.val2) & un1 & ~un2);
-		return strus::BitOperations::bitCount( diff);
-	}
-
-	uint64_t val1;
-	uint64_t val2;
-	uint64_t un1;
-	uint64_t un2;
-};
 
 class VectorSpaceModel
 {
 public:
 	VectorSpaceModel( std::size_t dim_, std::size_t variations_)
-		:m_dim(dim_),m_variations(variations_),m_matar()
+		:m_dim(dim_),m_variations(variations_),m_modelMatrix()
 	{
 		if (m_dim <= 0 || m_variations <= 0)
 		{
 			throw std::runtime_error( "illegal dimension or variations");
 		}
-		std::size_t vi=0, ve=m_variations;
-		for (; vi != ve; ++vi)
+		if (m_dim < m_variations)
 		{
-			arma::mat mm( arma::randu<arma::mat>( m_dim, m_dim));
-			double det = arma::det( mm);
-			if (std::abs(det) < 0.01)
-			{
-				--vi;
-				continue;
-			}
-			m_matar.push_back( mm);
+			throw std::runtime_error( "dimension must me two times bigger than variations");
 		}
+		do
+		{
+			m_modelMatrix = 2.0 * arma::randu<arma::mat>( m_dim, m_dim)
+					- arma::mat( m_dim, m_dim).ones();
+		}
+		while (std::fabs(arma::det(m_modelMatrix)) <= 0.01);
+
+		m_simhashMatrix = m_modelMatrix.rows( 0, m_variations-1);
 	}
 
-	SimHashStruct simHash( const std::vector<double>& vec) const
+	typedef std::vector<bool> SimHash;
+
+	// See https://en.wikipedia.org/wiki/Locality-sensitive_hashing
+	// (random projection method of LSH due to Moses Charikar)
+	// Charikar, Moses S. (2002). "Similarity Estimation Techniques from Rounding Algorithms". 
+	// Proceedings of the 34th Annual ACM Symposium on Theory of Computing. pp. 380–388.
+	// doi:10.1145/509907.509965.
+	SimHash simHash( const arma::vec& vec) const
 	{
+		std::vector<bool> rt;
 		if (m_dim != vec.size())
 		{
 			throw std::runtime_error( "vector must have dimension of model");
 		}
-		SimHashStruct rt;
-		arma::vec vv( vec);
-		std::vector<arma::mat>::const_iterator mi = m_matar.begin(), me = m_matar.end();
-		for (; mi != me; ++mi)
+		arma::vec res = m_simhashMatrix * vec;
+		arma::vec::const_iterator ri = res.begin(), re = res.end();
+		for (; ri != re; ++ri)
 		{
-			arma::vec mapped_vv( *mi * vv);
-			double maxval = mapped_vv[0]; 
-			std::size_t maxidx = 0;
-			double minval = mapped_vv[0]; 
-			std::size_t minidx = 0;
-
-			std::size_t di=1, de=m_dim;
-			for (; di != de; ++di)
-			{
-				double val = mapped_vv[di];
-				if (val > maxval)
-				{
-					maxidx = di;
-					maxval = val;
-				}
-				if (val < minval)
-				{
-					minidx = di;
-					minval = val;
-				}
-			}
-			bool uncertain_max_flag = false;
-			bool uncertain_min_flag = false;
-			std::size_t ui,ue;
-			if (maxidx < m_dim/2)
-			{
-				ui = m_dim/2;
-				ue = m_dim;
-			}
-			else
-			{
-				ui = 0;
-				ue = m_dim/2;
-			}
-			for (ui=0; ui != ue; ++ui)
-			{
-				if (mapped_vv[ui] + 10*std::numeric_limits<double>::epsilon() > maxval)
-				{
-					uncertain_max_flag = true;
-				}
-			}
-			if (minidx < m_dim/2)
-			{
-				ui = m_dim/2;
-				ue = m_dim;
-			}
-			else
-			{
-				ui = 0;
-				ue = m_dim/2;
-			}
-			for (ui=0; ui != ue; ++ui)
-			{
-				if (mapped_vv[ui] - 10*std::numeric_limits<double>::epsilon() < minval)
-				{
-					uncertain_min_flag = true;
-				}
-			}
-			rt.ar1.push_back( maxidx < m_dim/2);	// maximum in first half => true, in second half => false
-			rt.ar2.push_back( minidx < m_dim/2);	// minimum in first half => true, in second half => false
-			rt.un1.push_back( uncertain_max_flag);	// true, if the max decision is uncertain
-			rt.un2.push_back( uncertain_min_flag);	// true, if the min decision is uncertain
+			rt.push_back( *ri >= 0.0);
 		}
 		return rt;
 	}
 
+	struct SimHashStruct
+	{
+		SimHashStruct( const SimHashStruct& o)
+			:ar(o.ar){}
+		SimHashStruct( const SimHash& o)
+			:ar()
+		{
+			unsigned int idx = 0;
+			for (; idx < o.size(); idx+=64)
+			{
+				ar.push_back( bitset2uint64( o, idx));
+			}
+		}
+
+		unsigned int dist( const SimHashStruct& o) const
+		{
+			unsigned int rt = 0;
+			std::vector<uint64_t>::const_iterator ai = ar.begin(), ae = ar.end();
+			std::vector<uint64_t>::const_iterator oi = o.ar.begin(), oe = o.ar.end();
+			for (; oi != oe && ai != ae; ++oi,++ai)
+			{
+				rt += strus::BitOperations::bitCount( *ai ^ *oi);
+			}
+			for (; oi != oe; ++oi)
+			{
+				rt += strus::BitOperations::bitCount( *oi);
+			}
+			for (; ai != ae; ++ai)
+			{
+				rt += strus::BitOperations::bitCount( *ai);
+			}
+			return rt;
+		}
+
+		static uint64_t bitset2uint64( const std::vector<bool>& ar, unsigned int idx)
+		{
+			uint64_t rt = 0;
+			std::vector<bool>::const_iterator ai = ar.begin() + idx, ae = ar.end();
+			for (unsigned int aidx=0; ai != ae && aidx < 64; ++ai,++aidx)
+			{
+				rt <<= 1;
+				rt |= *ai ? 1:0;
+			}
+			return rt;
+		}
+
+		std::vector<uint64_t> ar;
+	};
+
 private:
 	std::size_t m_dim;
 	std::size_t m_variations;
-	std::vector<arma::mat> m_matar;
+	arma::mat m_modelMatrix;
+	arma::mat m_simhashMatrix;
 };
 
 
 
-int main()
+int main( int argc, const char** argv)
 {
 	try
 	{
 		initRandomNumberGenerator();
-		double threshold_sim = 0.95;
+		double threshold_sim = 0.90;
 		unsigned int threshold_dist = 8;
-		unsigned int seek_dist = 20;
 
-		enum {Dim=100,Variations=64,NofSampleVectors=100,NofSimilarVectors=1000};
+		if (argc > 3)
+		{
+			std::cerr << "Usage: " << argv[0] << " [<threshold min sim>  <threshold max dist>]" << std::endl;
+			throw std::runtime_error( "too many arguments (maximum 2 expected)");
+		}
+		if (argc >= 3)
+		{
+			bool error = false;
+			if (argv[2][0] >= '0' && argv[2][0] <= '9')
+			{
+				threshold_dist = std::atoi( argv[2]);
+			}
+			else
+			{
+				error = true;
+			}
+			if (error) throw std::runtime_error( "number (non negative integer) expected as 2nd argument");
+		}
+		if (argc >= 2)
+		{
+			bool error = false;
+			if (argv[1][0] >= '0' && argv[1][0] <= '9')
+			{
+				threshold_sim = std::atof( argv[1]);
+				error = (threshold_sim > 1.0);
+			}
+			else
+			{
+				error = true;
+			}
+			if (error) throw std::runtime_error( "floating point number between 0.0 and 1.0 expected as 1st argument");
+		}
+		std::cerr << "Threshold similarity = " << threshold_sim << std::endl;
+		std::cerr << "Threshold distance = " << threshold_dist << std::endl;
+
+		enum {Dim=300,Variations=128,NofSampleVectors=100,NofSimilarVectors=1000};
 		std::cout << "Build model "
 			  << (unsigned int)Dim << "x" << (unsigned int)Dim
 			  << " => " << (unsigned int)NofSampleVectors << ":" << std::endl;
 
 		VectorSpaceModel model( Dim, Variations);
-		std::vector<std::vector<double> > testvectorar;
-		std::vector<SimHashStruct> testsimhashar;
+		std::vector<arma::vec> testvectorar;
+		std::vector<VectorSpaceModel::SimHash> testshar;
+		std::vector<VectorSpaceModel::SimHashStruct> testsimhashar;
 
 		std::cout << "Build " << (unsigned int)NofSampleVectors << " samples:" << std::endl;
 		unsigned int vi=0,ve=NofSampleVectors;
 		for (; vi != ve; ++vi)
 		{
-			std::vector<double> rv;
-			std::size_t di=0, de=Dim;
-			for (; di != de; ++di)
-			{
-				rv.push_back( (double)std::rand() / RAND_MAX);
-			}
-			testvectorar.push_back( rv);
+			testvectorar.push_back( arma::randu<arma::vec>( Dim));
 		}
 		std::cout << "Build " << (unsigned int)NofSimilarVectors << " similar vector for samples:" << std::endl;
 		vi=0; ve=NofSimilarVectors;
@@ -268,15 +242,15 @@ int main()
 		{
 			std::size_t origidx = rand() % NofSampleVectors;
 			double sim = 0.90 + (rand() % 99) * 0.001;
-			std::vector<double> rv = createSimilarVector( testvectorar[origidx], sim);
-			testvectorar.push_back( rv);
+			testvectorar.push_back( createSimilarVector( testvectorar[ origidx], sim));
 		}
 
 		std::cout << "Build " << testvectorar.size() << " sim hashes:" << std::endl;
-		std::vector<std::vector<double> >::const_iterator ti = testvectorar.begin(), te = testvectorar.end();
+		std::vector<arma::vec>::const_iterator ti = testvectorar.begin(), te = testvectorar.end();
 		for (; ti != te; ++ti)
 		{
-			testsimhashar.push_back( model.simHash( *ti));
+			testshar.push_back( model.simHash( *ti));
+			testsimhashar.push_back( testshar.back());
 		}
 
 		std::cout << "Results:" << std::endl;
@@ -286,37 +260,18 @@ int main()
 		{
 			std::cout << "[" << tidx << "] ";
 			printVector( std::cout, *ti);
-			std::cout << " => max ";
-			printSimHash( std::cout, testsimhashar[ tidx].ar1);
-			std::cout << " min ";
-			printSimHash( std::cout, testsimhashar[ tidx].ar2);
-			std::cout << " uncertain max ";
-			printSimHash( std::cout, testsimhashar[ tidx].un1);
-			std::cout << " uncertain min ";
-			printSimHash( std::cout, testsimhashar[ tidx].un2);
+			std::cout << " => ";
+			printSimHash( std::cout, testshar[ tidx]);
 			std::cout << std::endl;
 		}
-	
-		std::vector<arma::vec> var;
-		std::vector<SimHashNum> sar;
-		ti = testvectorar.begin(), te = testvectorar.end();
-		for (; ti != te; ++ti)
-		{
-			var.push_back( *ti);
-		}
-		std::vector<SimHashStruct>::const_iterator si = testsimhashar.begin(), se = testsimhashar.end();
-		for (; si != se; ++si)
-		{
-			sar.push_back( SimHashNum( *si));
-		}
+
 		unsigned int all_candidate_count = 0;
-		unsigned int missed_dist = 0;
-		unsigned int missed_sim = 0;
-		unsigned int all_sim_count = 0;
-		unsigned int ok_pos_count = 0;
-		unsigned int ok_neg_count = 0;
-		unsigned int seek_dist_all_count = 0;
-		unsigned int seek_dist_pos_count = 0;
+		unsigned int positive_match_count = 0;
+		unsigned int negative_match_count = 0;
+		unsigned int missed_match_count = 0;
+		unsigned int false_positive_count = 0;
+		unsigned int nof_lsh_matches = 0;
+		unsigned int nof_sim_matches = 0;
 
 		unsigned int ai=0,ae=testvectorar.size();
 		for (; ai<ae; ++ai)
@@ -324,73 +279,61 @@ int main()
 			unsigned int bi=0,be=testvectorar.size();
 			for (; bi<be; ++bi)
 			{
+				double sim = arma::norm_dot( testvectorar[ai], testvectorar[bi]);
+				unsigned int dist = testsimhashar[ ai].dist( testsimhashar[ bi]);
+
+				bool is_lsh_match = (dist <= threshold_dist);
+				bool is_sim_match = (sim > threshold_sim);
+
+				nof_lsh_matches += is_lsh_match ? 1:0;
+				nof_sim_matches += is_sim_match ? 1:0;
+				const char* tag = 0;
 				all_candidate_count += 1;
-				double sim = arma::norm_dot( var[ai], var[bi]);
-				if (sim > threshold_sim)
+
+				if (is_lsh_match && is_sim_match)
 				{
-					all_sim_count += 1;
+					positive_match_count += 1;//Ok
 				}
-				unsigned int dist = sar[ai].dist( sar[bi]);
-	
-				if (seek_dist <= dist)
+				else if (!is_lsh_match && !is_sim_match)
 				{
-					seek_dist_all_count += 1;
-					if (sim > threshold_sim)
-					{
-						seek_dist_pos_count += 1;
-					}
+					negative_match_count += 1;//Ok
 				}
-				if (sim > threshold_sim && dist > threshold_dist)
+				else if (!is_lsh_match && is_sim_match)
 				{
-					std::cout << "similar but not candidate [" << ai << "," << bi << "] SIM " << sim << " DIST " << dist << std::endl;
+					missed_match_count += 1;
+					tag = "missed match";
+				}
+				else if (is_lsh_match && !is_sim_match)
+				{
+					false_positive_count += 1;
+					tag = "false positive";
+				}
+				if (tag)
+				{
+					std::cout << tag << " [" << ai << "," << bi << "] SIM " << sim << " DIST " << dist << std::endl;
+#undef STRUS_DUMP_ERRORS
+#ifdef STRUS_DUMP_ERRORS
 					std::cout << "VECTOR A = ";
 					printVector( std::cout, testvectorar[ ai]);
-					std::cout << " max ";
-					printSimHash( std::cout, testsimhashar[ ai].ar1);
-					std::cout << " min ";
-					printSimHash( std::cout, testsimhashar[ ai].ar2);
-					std::cout << " uncertain max ";
-					printSimHash( std::cout, testsimhashar[ ai].un1);
-					std::cout << " uncertain min ";
-					printSimHash( std::cout, testsimhashar[ ai].un2);
+					std::cout << " => ";
+					printSimHash( std::cout, testshar[ ai]);
 					std::cout << std::endl;
 					std::cout << "VECTOR B = ";
 					printVector( std::cout, testvectorar[ bi]);
-					std::cout << " max ";
-					printSimHash( std::cout, testsimhashar[ bi].ar1);
-					std::cout << " min ";
-					printSimHash( std::cout, testsimhashar[ bi].ar2);
-					std::cout << " uncertain max ";
-					printSimHash( std::cout, testsimhashar[ bi].un1);
-					std::cout << " uncertain min ";
-					printSimHash( std::cout, testsimhashar[ bi].un2);
+					std::cout << " => ";
+					printSimHash( std::cout, testshar[ bi]);
 					std::cout << std::endl;
-					missed_dist += 1;
-				}
-				if (sim < threshold_sim && dist <= threshold_dist)
-				{
-					std::cout << "candidate but not similar [" << ai << "," << bi << "] SIM " << sim << " DIST " << dist << std::endl;
-					missed_sim += 1;
-				}
-				if (sim > threshold_sim && dist <= threshold_dist)
-				{
-					std::cout << "OK [" << ai << "," << bi << "] SIM " << sim << " DIST " << dist << std::endl;
-					ok_pos_count += 1;
-				}
-				if (sim < threshold_sim && dist > threshold_dist)
-				{
-					ok_neg_count += 1;
+#endif
 				}
 			}
 		}
-		std::cout << "ok pos count = " << ok_pos_count << std::endl;
-		std::cout << "ok neg count = " << ok_neg_count << std::endl;
-		std::cout << "all sim count = " << all_sim_count << std::endl;
-		std::cout << "candidate but not similar = " << missed_sim << std::endl;
-		std::cout << "similar but not candidate = " << missed_dist << std::endl;
-		std::cout << "seek all count = " << seek_dist_all_count << std::endl;
-		std::cout << "seek pos count = " << seek_dist_pos_count << std::endl;
-		std::cout << "all candidate count = " << all_candidate_count << std::endl;
+		std::cout << "all_candidate_count    = " << all_candidate_count << std::endl;
+		std::cout << "similarity_match_count = " << nof_sim_matches << std::endl;
+		std::cout << "lsh_match_count        = " << nof_lsh_matches << std::endl;
+		std::cout << "positive_match_count   = " << positive_match_count << std::endl;
+		std::cout << "negative_match_count   = " << negative_match_count << std::endl;
+		std::cout << "missed_match_count     = " << missed_match_count << std::endl;
+		std::cout << "false_positive_count   = " << false_positive_count << std::endl;
 		return 0;
 	}
 	catch (const std::runtime_error& err)

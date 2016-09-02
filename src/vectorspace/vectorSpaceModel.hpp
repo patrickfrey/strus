@@ -15,9 +15,11 @@ namespace strus {
 /// \brief Forward declaration
 class VectorSpaceModelInstanceInterface;
 /// \brief Forward declaration
+class VectorSpaceModelBuilderInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
-/// \brief Interface to the create,destroy the key value store database
+/// \brief Standart vector space model based on LHS with sampling of representants with a genetic algorithm
 class VectorSpaceModel
 	:public VectorSpaceModelInterface
 {
@@ -25,10 +27,14 @@ public:
 	virtual ~VectorSpaceModel(){}
 
 	explicit VectorSpaceModel( ErrorBufferInterface* errorhnd_);
-	virtual VectorSpaceModelInstanceInterface* createModel() const;
+
+	virtual VectorSpaceModelInstanceInterface* createInstance( const std::string& config) const;
+	virtual VectorSpaceModelBuilderInterface* createBuilder( const std::string& config) const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;	///< buffer for reporting errors
 };
 
+}//namespace
+#endif
 
