@@ -26,10 +26,12 @@ struct VectorSpaceModelConfig
 {
 	VectorSpaceModelConfig()
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
-		,threshold_simdist(160),threshold_nbdist(260),mutations(10),maxage(10){}
+		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
+		,descendants(5),maxage(10){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
-		,threshold_simdist(160),threshold_nbdist(260),mutations(10),maxage(10)
+		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
+		,descendants(5),maxage(10)
 	{
 		std::string src = config;
 		if (extractStringFromConfigString( path, src, "path", errorhnd)){}
@@ -40,6 +42,7 @@ struct VectorSpaceModelConfig
 		if (extractUIntFromConfigString( threshold_simdist, src, "simdist", errorhnd)){}
 		if (extractUIntFromConfigString( threshold_nbdist, src, "nbdist", errorhnd)){}
 		if (extractUIntFromConfigString( mutations, src, "mutations", errorhnd)){}
+		if (extractUIntFromConfigString( descendants, src, "descendants", errorhnd)){}
 		if (extractUIntFromConfigString( maxage, src, "maxage", errorhnd)){}
 		if (dim == 0 || bits == 0 || variations == 0)
 		{
@@ -59,6 +62,7 @@ struct VectorSpaceModelConfig
 	unsigned int threshold_simdist;
 	unsigned int threshold_nbdist;
 	unsigned int mutations;
+	unsigned int descendants;
 	unsigned int maxage;
 };
 
@@ -106,7 +110,7 @@ public:
 		try
 		{
 			m_lshmodel = new LshModel( m_config.dim, m_config.bits, m_config.variations);
-			m_genmodel = new GenModel( m_config.threshold_simdist, m_config.threshold_nbdist, m_config.mutations, m_config.maxage);
+			m_genmodel = new GenModel( m_config.threshold_simdist, m_config.threshold_nbdist, m_config.mutations, m_config.descendants, m_config.maxage);
 		}
 		catch (const std::exception& err)
 		{

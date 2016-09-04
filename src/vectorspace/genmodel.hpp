@@ -22,18 +22,27 @@ class GenModel
 {
 public:
 	/// \brief Constructor
-	GenModel( unsigned int simdist_, unsigned int nbdist_, unsigned int mutations_, unsigned int maxage_)
-		:m_simdist(simdist_),m_nbdist(nbdist_),m_mutations(mutations_),m_samplesize(0),m_maxage(maxage_)
-		,m_timestamp(0),m_grouplist(),m_groupcnt(0),m_samplear()
-		,m_neighbourmap(){}
+	GenModel( unsigned int simdist_, unsigned int nbdist_, unsigned int mutations_, unsigned int descendants_, unsigned int maxage_)
+		:m_simdist(simdist_),m_nbdist(nbdist_)
+		,m_mutations(mutations_),m_descendants(descendants_),m_samplesize(0)
+		,m_maxage(maxage_),m_timestamp(0)
+		,m_groupList(),m_groupMap()
+		,m_groupcnt(0),m_samplear()
+		,m_neighbourSampleSet()
+		,m_neighbourGroupSet(){}
 	/// \brief Copy constructor
 	GenModel( const GenModel& o)
-		:m_simdist(o.m_simdist),m_mutations(o.m_mutations),m_samplesize(o.m_samplesize),m_maxage(o.m_maxage)
-		,m_timestamp(o.m_timestamp),m_grouplist(o.m_grouplist),m_groupcnt(o.m_groupcnt),m_samplear(o.m_samplear)
-		,m_neighbourmap(o.m_neighbourmap){}
+		:m_simdist(o.m_simdist),m_nbdist(o.m_nbdist)
+		,m_mutations(o.m_mutations),m_descendants(o.m_descendants),m_samplesize(o.m_samplesize)
+		,m_maxage(o.m_maxage),m_timestamp(o.m_timestamp)
+		,m_groupList(o.m_groupList),m_groupMap(o.m_groupMap)
+		,m_groupcnt(o.m_groupcnt),m_samplear(o.m_samplear)
+		,m_neighbourSampleSet(o.m_neighbourSampleSet)
+		,m_neighbourGroupSet(o.m_neighbourGroupSet){}
 
 	/// \brief Add sample vector
 	void addSample( const SimHash& hash);
+	void iteration();
 
 private:
 	typedef std::size_t SampleIndex;
@@ -64,25 +73,33 @@ private:
 		std::set<SampleIndex> m_members;	///< members of the group
 	};
 
-	void addGroup( const SampleIndex& sampleidx);
+	Index addGroup( const SampleIndex& sampleidx);
 	void iteration( Group& group);
 
 private:
-	SimHash mutation( Group& group);
-	SimHash groupKernel( Group& group);
+	double fitness( const SimHash& candidate, const Group& group);
+	void mutate( Group& group);
+	SimHash mutation( const Group& group);
+	SimHash groupKernel( const Group& group);
+	void reorganizeMembers( Group& group);
 
 private:
 	unsigned int m_simdist;			///< maximal distance to be considered similar
 	unsigned int m_nbdist;			///< maximal distance to be considered neighbours (potentially similar in the future)
 	unsigned int m_mutations;		///< number of random selected mutation candidates of the non kernel elements of a group
+	unsigned int m_descendants;		///< number of descendants of which the fittest is selected
 	unsigned int m_samplesize;		///< number of bits in a sample SimHash
 	unsigned int m_maxage;			///< upper bound value used for calculate number of mutations (an older individuum mutates less)
 	uint64_t m_timestamp;			///< current timestamp to calculate a last modified value (not used yet)
-	std::list<Group> m_grouplist;		///< list of groups
+	std::list<Group> m_groupList;		///< list of groups
+	typedef std::map<strus::Index,std::list<Group>::iterator> GroupMap;
+	GroupMap m_groupMap;			///< Map of group indices to group
 	Index m_groupcnt;			///< Counter for creating new group handles
 	std::vector<SimHash> m_samplear;	///< list of samples
-	typedef std::multimap<strus::Index,SampleIndex> NeighbourMap;
-	NeighbourMap m_neighbourmap;		///< Map of group identifiers to neighbour samples
+	typedef std::set<std::pair<strus::Index,SampleIndex> > NeighbourSampleSet;
+	NeighbourSampleSet m_neighbourSampleSet;///< Map of group identifiers to neighbour samples
+	typedef std::set<std::pair<strus::Index,strus::Index> > NeighbourGroupSet;
+	NeighbourGroupSet m_neighbourGroupSet;	///< Map of group identifiers to neighbour group identifiers
 };
 
 }//namespace
