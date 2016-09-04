@@ -44,7 +44,7 @@ enum {KnuthIntegerHashFactor=2654435761U};
 #undef STRUS_LOWLEVEL_DEBUG
 #undef STRUS_GENERATE_READABLE_NAMES
 
-uint32_t uint32_hash( uint32_t a)
+static inline uint32_t uint32_hash( uint32_t a)
 {
 	a += ~(a << 15);
 	a ^=  (a >> 10);
@@ -69,6 +69,7 @@ public:
 		m_value = uint32_hash( ((now->tm_year+1)
 					* (now->tm_mon+100)
 					* (now->tm_mday+1)));
+		m_incr = m_value * KnuthIntegerHashFactor;
 	}
 
 	unsigned int get( unsigned int min_, unsigned int max_)
@@ -77,7 +78,7 @@ public:
 		{
 			throw std::runtime_error("illegal range passed to pseudo random number generator");
 		}
-		m_value = uint32_hash( m_value + 1);
+		m_value = uint32_hash( m_value + 1 + m_incr++);
 		unsigned int iv = max_ - min_;
 		if (iv)
 		{
@@ -112,6 +113,7 @@ public:
 
 private:
 	unsigned int m_value;
+	unsigned int m_incr;
 };
 
 static Random g_random;

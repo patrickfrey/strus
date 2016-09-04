@@ -19,17 +19,31 @@ struct Functor_AND {static uint64_t call( uint64_t aa, uint64_t bb)	{return aa&b
 struct Functor_XOR {static uint64_t call( uint64_t aa, uint64_t bb)	{return aa^bb;}};
 struct Functor_INV {static uint64_t call( uint64_t aa)			{return !aa;}};
 
+/// \brief Structure for the similarity fingerprint used
 class SimHash
 {
 public:
 	SimHash()
-		:m_ar(){}
+		:m_ar(),m_size(0){}
 	SimHash( const SimHash& o)
-		:m_ar(o.m_ar){}
+		:m_ar(o.m_ar),m_size(o.m_size){}
 	SimHash( const std::vector<bool>& bv);
+	SimHash( std::size_t size_, bool initval);
 
+	/// \brief Get element value by index
+	bool operator[]( std::size_t idx) const;
+	/// \brief Set element with index to value
+	void set( std::size_t idx, bool value);
+	/// \brief Calculate distance (bits with different value)
 	unsigned int dist( const SimHash& o) const;
+	/// \brief Calculate the number of bits set to 1
+	unsigned int count() const;
+	/// \brief Test if the distance is smaller than a given dist
+	bool near( const SimHash& o, unsigned int dist) const;
+	/// \brief Get all indices of elements set to 1 or 0 (defined by parameter)
+	std::vector<std::size_t> indices( bool what) const;
 
+private:
 	template <class Functor>
 	SimHash BINOP( const SimHash& o) const
 	{
@@ -58,20 +72,32 @@ public:
 		for (; ai != ae; ++ai) rt.m_ar.push_back( Functor::call( *ai));
 		return rt;
 	}
+public:
 
+	/// \brief Binary XOR
 	SimHash operator ^ ( const SimHash& o) const	{return BINOP<Functor_XOR>( o);}
+	/// \brief Binary AND
 	SimHash operator & ( const SimHash& o) const	{return BINOP<Functor_AND>( o);}
+	/// \brief Binary OR
 	SimHash operator | ( const SimHash& o) const	{return BINOP<Functor_OR>( o);}
+	/// \brief Unary negation
 	SimHash operator ~ () const			{return UNOP<Functor_INV>();}
+	/// \brief Assignment XOR
 	SimHash& operator ^= ( const SimHash& o)	{return BINOP_ASSIGN<Functor_XOR>( o);}
+	/// \brief Assignment AND
 	SimHash& operator &= ( const SimHash& o)	{return BINOP_ASSIGN<Functor_AND>( o);}
+	/// \brief Assignment OR
 	SimHash& operator |= ( const SimHash& o)	{return BINOP_ASSIGN<Functor_OR>( o);}
 
+	/// \brief Get the bit field as string of "0" and "1"
 	std::string tostring() const;
+	/// \brief Number of bits represented
+	std::size_t size() const			{return m_size;}
 
 private:
 	enum {NofElementBits=64};
 	std::vector<uint64_t> m_ar;
+	std::size_t m_size;
 };
 
 }//namespace

@@ -4,8 +4,12 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set(
-   libstrus_vectorspace_source_files
-   simhash.cpp
+	libstrus_vectorspace_source_files
+	random.cpp    
+	simhash.cpp
+	lshmodel.cpp
+	genmodel.cpp 
+	vectorSpaceModel.cpp
 )
 
 include_directories(
