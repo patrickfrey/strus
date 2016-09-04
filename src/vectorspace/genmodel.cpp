@@ -11,8 +11,10 @@
 #include "private/internationalization.hpp"
 #include <ctime>
 #include <cmath>
+#include <iostream>
 
 using namespace strus;
+#define STRUS_LOWLEVEL_DEBUG
 
 static Random g_random;
 
@@ -207,8 +209,11 @@ void GenModel::reorganizeMembers( Group& group)
 		if (m_sampleGroupCntMap[*vi] > 0)
 		{
 			--m_sampleGroupCntMap[*vi];
-			// no group assigned anymore, then found own group:
-			addGroup( *vi);
+			if (m_sampleGroupCntMap[*vi] == 0)
+			{
+				// no group assigned anymore, then found own group:
+				addGroup( *vi);
+			}
 		}
 		else
 		{
@@ -240,6 +245,9 @@ void GenModel::reorganizeMembers( Group& group)
 
 void GenModel::iteration()
 {
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "[genmodel] do iteration" << std::endl;
+#endif
 	// Iterate through all groups and try to find a fitter representant:
 	std::list<Group>::iterator gi = m_groupList.begin(), ge = m_groupList.end();
 	for (; gi != ge; ++gi)

@@ -27,11 +27,11 @@ struct VectorSpaceModelConfig
 	VectorSpaceModelConfig()
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
 		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
-		,descendants(5),maxage(10){}
+		,descendants(5),maxage(10),chunksize(10000){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
 		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
-		,descendants(5),maxage(10)
+		,descendants(5),maxage(10),chunksize(10000)
 	{
 		std::string src = config;
 		if (extractStringFromConfigString( path, src, "path", errorhnd)){}
@@ -44,9 +44,14 @@ struct VectorSpaceModelConfig
 		if (extractUIntFromConfigString( mutations, src, "mutations", errorhnd)){}
 		if (extractUIntFromConfigString( descendants, src, "descendants", errorhnd)){}
 		if (extractUIntFromConfigString( maxage, src, "maxage", errorhnd)){}
-		if (dim == 0 || bits == 0 || variations == 0)
+		if (extractUIntFromConfigString( chunksize, src, "chunksize", errorhnd)){}
+		if (dim == 0 || bits == 0 || variations == 0 || mutations == 0 || descendants == 0 || maxage == 0)
 		{
-			strus::runtime_error(_TXT("error in vector space model configuration: dim, bits or variations value must not be zero"));
+			strus::runtime_error(_TXT("error in vector space model configuration: dim, bits, var, mutations, descendants or maxage values must not be zero"));
+		}
+		if (chunksize == 0)
+		{
+			chunksize = 1;
 		}
 		if (errorhnd->hasError())
 		{
@@ -64,6 +69,7 @@ struct VectorSpaceModelConfig
 	unsigned int mutations;
 	unsigned int descendants;
 	unsigned int maxage;
+	unsigned int chunksize;
 };
 
 struct VectorSpaceModelData
@@ -133,6 +139,10 @@ public:
 		{
 			m_samplear.push_back( arma::vec( vec));
 			m_genmodel->addSample( m_lshmodel->simHash( vec));
+			if (m_samplear.size() % m_config.chunksize == 0)
+			{
+				m_genmodel->iteration();
+			}
 		}
 		CATCH_ERROR_ARG1_MAP( _TXT("error adding sample vector to '%s' builder: %s"), MODULENAME, *m_errorhnd);
 	}
