@@ -73,7 +73,7 @@ private:
 		std::set<SampleIndex> m_members;	///< members of the group
 	};
 
-	Index addGroup( const SampleIndex& sampleidx);
+	void addGroup( const SampleIndex& sampleidx);
 	void iteration( Group& group);
 
 private:
@@ -100,6 +100,8 @@ private:
 	NeighbourSampleSet m_neighbourSampleSet;///< Map of group identifiers to neighbour samples
 	typedef std::set<std::pair<strus::Index,strus::Index> > NeighbourGroupSet;
 	NeighbourGroupSet m_neighbourGroupSet;	///< Map of group identifiers to neighbour group identifiers
+	typedef std::vector<std::size_t> SampleGroupCntMap;
+	SampleGroupCntMap m_sampleGroupCntMap;	///< Maps the sample index to the number of groups it is part of
 };
 
 }//namespace

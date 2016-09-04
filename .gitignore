@@ -31,6 +31,7 @@ setenv.sh
 # Generated test data (cleaned with make clean)
 tests/randoc/storage/
 tests/storageop/checkindex.log
+tests/storageop/storage
 
 # CMake generated files
 CMakeCache.txt

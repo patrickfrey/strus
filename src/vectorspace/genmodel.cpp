@@ -27,6 +27,7 @@ void GenModel::addSample( const SimHash& sample)
 		throw strus::runtime_error(_TXT("samples added have different sizes (%u,%u)"), m_samplesize, sample.size());
 	}
 	m_samplear.push_back( sample);
+	m_sampleGroupCntMap.push_back( 0);
 	SampleIndex sampleidx = m_samplear.size();
 
 	std::list<Group>::iterator gi = m_groupList.begin(), ge = m_groupList.end();
@@ -37,20 +38,19 @@ void GenModel::addSample( const SimHash& sample)
 		{
 			if (sample.near( gi->gencode(), m_simdist))
 			{
+				++m_sampleGroupCntMap.back();
 				gi->addMember( sampleidx, ++m_timestamp);
 			}
 			else
 			{
 				m_neighbourSampleSet.insert( NeighbourSampleSet::value_type( gi->id(), sampleidx));
-				Index groupid = addGroup( sampleidx);
-				m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( gi->id(), groupid));
-				m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( groupid, gi->id()));
 			}
 		}
-		else
-		{
-			addGroup( sampleidx);
-		}
+	}
+	if (m_sampleGroupCntMap.back() == 0)
+	{
+		// no group to assign, then found own group:
+		addGroup( sampleidx);
 	}
 }
 
@@ -68,15 +68,25 @@ SimHash GenModel::groupKernel( const Group& group)
 	return rt;
 }
 
-Index GenModel::addGroup( const SampleIndex& sampleidx)
+void GenModel::addGroup( const SampleIndex& sampleidx)
 {
+	++m_sampleGroupCntMap[ sampleidx];
 	Group group( ++m_groupcnt, ++m_timestamp, m_samplear[ sampleidx]);
+	std::list<Group>::const_iterator gi = m_groupList.begin(), ge = m_groupList.end();
+	const SimHash& sample = m_samplear[ sampleidx];
+	for (; gi != ge; ++gi)
+	{
+		if (sample.near( gi->gencode(), m_nbdist))
+		{
+			m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( gi->id(), group.id()));
+			m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( group.id(), gi->id()));
+		}
+	}
 	group.addMember( sampleidx, m_timestamp);
 	m_groupList.push_back( group);
 	std::list<Group>::iterator lastitr = m_groupList.end();
 	--lastitr;
 	m_groupMap.insert( GroupMap::value_type( group.id(), lastitr));
-	return group.id();
 }
 
 SimHash GenModel::mutation( const Group& group)
@@ -194,11 +204,21 @@ void GenModel::reorganizeMembers( Group& group)
 	for (; vi != ve; ++vi)
 	{
 		group.removeMember( *vi);
+		if (m_sampleGroupCntMap[*vi] > 0)
+		{
+			--m_sampleGroupCntMap[*vi];
+			// no group assigned anymore, then found own group:
+			addGroup( *vi);
+		}
+		else
+		{
+			throw strus::runtime_error(_TXT( "corrupt data in gen model"));
+		}
 		m_neighbourSampleSet.insert( NeighbourSampleSet::value_type( group.id(), *vi));
 	}
 	moves.resize(0);
 
-	// Move neighbours that are so close to become members to members:
+	// Move neighbours that are so close to become members to such:
 	NeighbourSampleSet::const_iterator
 		si = m_neighbourSampleSet.upper_bound( NeighbourSampleSet::value_type( group.id(), 0)),
 		se = m_neighbourSampleSet.end();
@@ -212,6 +232,7 @@ void GenModel::reorganizeMembers( Group& group)
 	vi = moves.begin(), ve = moves.end();
 	for (; vi != ve; ++vi)
 	{
+		++m_sampleGroupCntMap[*vi];
 		group.addMember( *vi, ++m_timestamp);
 		m_neighbourSampleSet.erase( NeighbourSampleSet::value_type( group.id(), *vi));
 	}
