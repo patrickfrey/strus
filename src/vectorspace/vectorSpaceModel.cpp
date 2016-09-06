@@ -27,11 +27,11 @@ struct VectorSpaceModelConfig
 	VectorSpaceModelConfig()
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
 		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
-		,descendants(5),maxage(10),chunksize(10000){}
+		,descendants(5),maxage(10),chunksize(1000){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
 		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
-		,descendants(5),maxage(10),chunksize(10000)
+		,descendants(5),maxage(10),chunksize(1000)
 	{
 		std::string src = config;
 		if (extractStringFromConfigString( path, src, "path", errorhnd)){}
@@ -142,6 +142,10 @@ public:
 			if (m_samplear.size() % m_config.chunksize == 0)
 			{
 				m_genmodel->iteration();
+				if (m_samplear.size() % (m_config.chunksize*10) == 0)
+				{
+					m_genmodel->unification();
+				}
 			}
 		}
 		CATCH_ERROR_ARG1_MAP( _TXT("error adding sample vector to '%s' builder: %s"), MODULENAME, *m_errorhnd);
@@ -151,6 +155,8 @@ public:
 	{
 		try
 		{
+			m_genmodel->iteration();
+			m_genmodel->unification();
 		}
 		CATCH_ERROR_ARG1_MAP( _TXT("error finalizing '%s' builder: %s"), MODULENAME, *m_errorhnd);
 	}

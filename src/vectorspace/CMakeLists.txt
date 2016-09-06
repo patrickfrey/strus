@@ -25,11 +25,14 @@ link_directories(
 	"${strusbase_LIBRARY_DIRS}"
 )
 
-# -------------------------------------------
+# ----------------------------------------------
 # VECTOR SPACE MODEL LIBRARY
-# -------------------------------------------
-add_library( strus_vectorspace SHARED libstrus_vectorspace.cpp ${libstrus_vectorspace_source_files} )
-target_link_libraries( strus_vectorspace boost_system strus_base strus_private_utils ${ARMADILLO_LIBRARIES})
+# ----------------------------------------------
+add_library( strus_vectorspace_static STATIC ${libstrus_vectorspace_source_files} )
+target_link_libraries( strus_vectorspace_static strus_base strus_private_utils ${ARMADILLO_LIBRARIES} )
+
+add_library( strus_vectorspace SHARED libstrus_vectorspace.cpp )
+target_link_libraries( strus_vectorspace strus_vectorspace_static strus_base strus_private_utils ${ARMADILLO_LIBRARIES} )
 set_target_properties(
     strus_vectorspace
     PROPERTIES

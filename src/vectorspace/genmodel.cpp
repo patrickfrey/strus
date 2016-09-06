@@ -52,7 +52,7 @@ void GenModel::addSample( const SimHash& sample)
 	if (m_sampleGroupCntMap.back() == 0)
 	{
 		// no group to assign, then found own group:
-		addGroup( sampleidx);
+		addGroup( sampleidx, 0);
 	}
 }
 
@@ -60,28 +60,42 @@ SimHash GenModel::groupKernel( const Group& group)
 {
 	std::set<SampleIndex>::const_iterator si = group.members().begin(), se = group.members().end();
 	if (si == se) return SimHash();
-	SimHash first( m_samplear[ *si]);
+	SimHash first( m_samplear[ *si -1]);
 	SimHash rt( first.size(), true);
 
 	for (++si; si != se; ++si)
 	{
-		rt &= ~(first ^ m_samplear[ *si]);
+		rt &= ~(first ^ m_samplear[ *si -1]);
 	}
 	return rt;
 }
 
-void GenModel::addGroup( const SampleIndex& sampleidx)
+void GenModel::addGroup( const SampleIndex& sampleidx, const Index& prevGroupIdx)
 {
-	++m_sampleGroupCntMap[ sampleidx];
-	Group group( ++m_groupcnt, ++m_timestamp, m_samplear[ sampleidx]);
-	std::list<Group>::const_iterator gi = m_groupList.begin(), ge = m_groupList.end();
-	const SimHash& sample = m_samplear[ sampleidx];
-	for (; gi != ge; ++gi)
+	++m_sampleGroupCntMap[ sampleidx-1];
+	Group group( ++m_groupcnt, ++m_timestamp, m_samplear[ sampleidx-1]);
+	const SimHash& sample = m_samplear[ sampleidx-1];
+	if (prevGroupIdx)
 	{
-		if (sample.near( gi->gencode(), m_nbdist))
+		NeighbourGroupSet::const_iterator
+			ni = m_neighbourGroupSet.upper_bound( NeighbourGroupSet::value_type( prevGroupIdx, 0)),
+			ne = m_neighbourGroupSet.end();
+		for (; ni != ne && ni->first == prevGroupIdx; ++ni)
 		{
-			m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( gi->id(), group.id()));
-			m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( group.id(), gi->id()));
+			m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( ni->second, group.id()));
+			m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( group.id(), ni->second));
+		}
+	}
+	else
+	{
+		std::list<Group>::const_iterator gi = m_groupList.begin(), ge = m_groupList.end();
+		for (; gi != ge; ++gi)
+		{
+			if (sample.near( gi->gencode(), m_nbdist))
+			{
+				m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( gi->id(), group.id()));
+				m_neighbourGroupSet.insert( NeighbourGroupSet::value_type( group.id(), gi->id()));
+			}
 		}
 	}
 	group.addMember( sampleidx, m_timestamp);
@@ -116,7 +130,7 @@ SimHash GenModel::mutation( const Group& group)
 		for (; ci != ce; ++ci)
 		{
 			SampleIndex memberidx = g_random.get( 0, members.size());
-			if (m_samplear[ members[ memberidx]][ mutidx])
+			if (m_samplear[ members[ memberidx]-1][ mutidx])
 			{
 				++true_cnt;
 			}
@@ -147,7 +161,7 @@ double GenModel::fitness( const SimHash& candidate, const Group& group)
 	std::set<SampleIndex>::const_iterator mi = group.members().begin(), me = group.members().end();
 	for (; mi != me; ++mi)
 	{
-		double dist = candidate.dist( m_samplear[ *mi]);
+		double dist = candidate.dist( m_samplear[ *mi -1]);
 		sqrsum += dist * dist;
 	}
 	double costs = std::sqrt( sqrsum);
@@ -157,7 +171,7 @@ double GenModel::fitness( const SimHash& candidate, const Group& group)
 		se = m_neighbourSampleSet.end();
 	for (; si != se && si->first == group.id(); ++si)
 	{
-		if (candidate.near( m_samplear[ si->second], m_simdist))
+		if (candidate.near( m_samplear[ si->second-1], m_simdist))
 		{
 			costs -= costs / 20;
 		}
@@ -197,7 +211,7 @@ void GenModel::reorganizeMembers( Group& group)
 	std::set<SampleIndex>::iterator mi = group.members().begin(), me = group.members().end();
 	for (; mi != me; ++mi)
 	{
-		if (!group.gencode().near( m_samplear[ *mi], m_simdist))
+		if (!group.gencode().near( m_samplear[ *mi-1], m_simdist))
 		{
 			moves.push_back( *mi);
 		}
@@ -206,13 +220,13 @@ void GenModel::reorganizeMembers( Group& group)
 	for (; vi != ve; ++vi)
 	{
 		group.removeMember( *vi);
-		if (m_sampleGroupCntMap[*vi] > 0)
+		if (m_sampleGroupCntMap[*vi-1] > 0)
 		{
-			--m_sampleGroupCntMap[*vi];
-			if (m_sampleGroupCntMap[*vi] == 0)
+			--m_sampleGroupCntMap[*vi-1];
+			if (m_sampleGroupCntMap[*vi-1] == 0)
 			{
-				// no group assigned anymore, then found own group:
-				addGroup( *vi);
+				// no group assigned anymore, then found own group with the same neighbour groups:
+				addGroup( *vi, group.id());
 			}
 		}
 		else
@@ -229,7 +243,7 @@ void GenModel::reorganizeMembers( Group& group)
 		se = m_neighbourSampleSet.end();
 	for (; si != se && si->first == group.id(); ++si)
 	{
-		if (group.gencode().near( m_samplear[ si->second], m_simdist))
+		if (group.gencode().near( m_samplear[ si->second-1], m_simdist))
 		{
 			moves.push_back( si->second);
 		}
@@ -237,7 +251,7 @@ void GenModel::reorganizeMembers( Group& group)
 	vi = moves.begin(), ve = moves.end();
 	for (; vi != ve; ++vi)
 	{
-		++m_sampleGroupCntMap[*vi];
+		++m_sampleGroupCntMap[*vi-1];
 		group.addMember( *vi, ++m_timestamp);
 		m_neighbourSampleSet.erase( NeighbourSampleSet::value_type( group.id(), *vi));
 	}
@@ -255,7 +269,13 @@ void GenModel::iteration()
 		mutate( *gi);
 		reorganizeMembers( *gi);
 	}
+}
 
+void GenModel::unification()
+{
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "[genmodel] do unification" << std::endl;
+#endif
 	// Check neighbour groups for unification:
 	std::vector<NeighbourGroupSet::value_type> neighbourGroupMapDeletes;
 	std::vector<Index> groupDeletes;
@@ -280,7 +300,7 @@ void GenModel::iteration()
 			{
 				if (first_pi->second->members().find( *si) == first_pi->second->members().end())
 				{
-					if (first_pi->second->gencode().dist( m_samplear[ *si]) <= m_simdist)
+					if (first_pi->second->gencode().dist( m_samplear[ *si-1]) <= m_simdist)
 					{
 						first_pi->second->addMember( *si, ++m_timestamp);
 					}
@@ -325,6 +345,5 @@ void GenModel::iteration()
 		m_groupMap.erase( *di);
 	}
 }
-
 
 

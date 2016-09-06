@@ -17,7 +17,7 @@ namespace strus {
 struct Functor_OR  {static uint64_t call( uint64_t aa, uint64_t bb)	{return aa|bb;}};
 struct Functor_AND {static uint64_t call( uint64_t aa, uint64_t bb)	{return aa&bb;}};
 struct Functor_XOR {static uint64_t call( uint64_t aa, uint64_t bb)	{return aa^bb;}};
-struct Functor_INV {static uint64_t call( uint64_t aa)			{return !aa;}};
+struct Functor_INV {static uint64_t call( uint64_t aa)			{return ~aa;}};
 
 /// \brief Structure for the similarity fingerprint used
 class SimHash
@@ -52,6 +52,7 @@ private:
 		for (; ai != ae && oi != oe; ++ai, ++oi) rt.m_ar.push_back( Functor::call( *ai, *oi));
 		for (; ai != ae; ++ai) rt.m_ar.push_back( Functor::call( *ai, 0));
 		for (; oi != oe; ++oi) rt.m_ar.push_back( Functor::call( 0, *oi));
+		rt.m_size = (o.m_size > m_size) ? o.m_size : m_size;
 		return rt;
 	}
 	template <class Functor>
@@ -62,12 +63,14 @@ private:
 		for (; ai != ae && oi != oe; ++ai, ++oi) *ai = Functor::call( *ai, *oi);
 		for (; ai != ae; ++ai) *ai = Functor::call( *ai, *oi);
 		for (; oi != oe; ++oi) m_ar.push_back( Functor::call( 0, *oi));
+		if (o.m_size > m_size) m_size = o.m_size;
 		return *this;
 	}
 	template <class Functor>
 	SimHash UNOP() const
 	{
 		SimHash rt;
+		rt.m_size = m_size;
 		std::vector<uint64_t>::const_iterator ai = m_ar.begin(), ae = m_ar.end();
 		for (; ai != ae; ++ai) rt.m_ar.push_back( Functor::call( *ai));
 		return rt;

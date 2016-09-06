@@ -9,7 +9,7 @@ include_directories(
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
-	"${PROJECT_SOURCE_DIR}/src/storage"
+	"${PROJECT_SOURCE_DIR}/src/vectorspace"
 	"${Boost_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
 )
@@ -25,4 +25,7 @@ target_link_libraries( testLshVectorSpaceModel boost_system strus_base ${Boost_L
 
 add_executable( testLshVectorSpaceModel2 testLshVectorSpaceModel2.cpp)
 target_link_libraries( testLshVectorSpaceModel2 boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
+
+add_executable( testLshSimHash testLshSimHash.cpp)
+target_link_libraries( testLshSimHash strus_vectorspace_static )
 

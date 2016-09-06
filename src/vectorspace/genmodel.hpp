@@ -43,6 +43,7 @@ public:
 	/// \brief Add sample vector
 	void addSample( const SimHash& hash);
 	void iteration();
+	void unification();
 
 private:
 	typedef std::size_t SampleIndex;
@@ -73,10 +74,9 @@ private:
 		std::set<SampleIndex> m_members;	///< members of the group
 	};
 
-	void addGroup( const SampleIndex& sampleidx);
-	void iteration( Group& group);
-
 private:
+	void iteration( Group& group);
+	void addGroup( const SampleIndex& sampleidx, const Index& prevGroupIdx);
 	double fitness( const SimHash& candidate, const Group& group);
 	void mutate( Group& group);
 	SimHash mutation( const Group& group);

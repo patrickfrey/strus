@@ -19,21 +19,17 @@ using namespace strus;
 SimHash::SimHash( std::size_t size_, bool initval)
 	:m_ar(),m_size(size_)
 {
-	std::size_t idx = 0;
+	if (m_size == 0) return;
 
 	uint64_t elem = (initval)?std::numeric_limits<uint64_t>::max():0;
-	for (; idx + NofElementBits <= m_size; idx+=NofElementBits)
+	std::size_t ii = 0, nn = m_size / NofElementBits;
+	for (; ii < nn; ++ii)
 	{
 		m_ar.push_back( elem);
 	}
-	if (idx)
+	if (m_size > nn * NofElementBits)
 	{
-		elem = 0;
-		for (; idx > 0; ++idx)
-		{
-			elem <<= 1;
-			elem |= initval ? 1:0;
-		}
+		elem <<= m_size - (nn * NofElementBits);
 		m_ar.push_back( elem);
 	}
 }
@@ -41,23 +37,26 @@ SimHash::SimHash( std::size_t size_, bool initval)
 SimHash::SimHash( const std::vector<bool>& bv)
 	:m_ar(),m_size(bv.size())
 {
-	std::size_t idx = 0;
-	for (; idx < m_size; idx+=NofElementBits)
+	if (bv.empty()) return;
+	uint64_t elem = 0;
+	std::vector<bool>::const_iterator ai = bv.begin(), ae = bv.end();
+	unsigned int aidx = 0;
+	for (; ai != ae; ++ai,++aidx)
 	{
-		uint64_t elem = 0;
-		std::vector<bool>::const_iterator ai = bv.begin() + idx, ae = bv.end();
-		unsigned int aidx=0;
-		for (; ai != ae && aidx < NofElementBits; ++ai,++aidx)
+		if (aidx == (int)NofElementBits)
+		{
+			m_ar.push_back( elem);
+			elem = 0;
+			aidx = 0;
+		}
+		else
 		{
 			elem <<= 1;
-			elem |= *ai ? 1:0;
 		}
-		if (ai == ae && aidx < NofElementBits)
-		{
-			elem <<= (NofElementBits - aidx);
-		}
-		m_ar.push_back( elem);
+		elem |= *ai ? 1:0;
 	}
+	elem <<= (NofElementBits - aidx);
+	m_ar.push_back( elem);
 }
 
 bool SimHash::operator[]( std::size_t idx) const
@@ -65,7 +64,9 @@ bool SimHash::operator[]( std::size_t idx) const
 	std::size_t aridx = idx / NofElementBits;
 	std::size_t arofs = idx % NofElementBits;
 	if (aridx >= m_ar.size()) return false;
-	return (m_ar[ aridx] & (1  << (NofElementBits-1 - arofs))) != 0;
+	uint64_t mask = 1;
+	mask <<= (NofElementBits-1 - arofs);
+	return (m_ar[ aridx] & mask) != 0;
 }
 
 void SimHash::set( std::size_t idx, bool value)
@@ -76,13 +77,15 @@ void SimHash::set( std::size_t idx, bool value)
 	{
 		throw strus::runtime_error(_TXT("array bound write in %s"), "SimHash");
 	}
+	uint64_t mask = 1;
+	mask <<= (NofElementBits-1 - arofs);
 	if (value)
 	{
-		m_ar[ aridx] |= (1  << (NofElementBits-1 - arofs));
+		m_ar[ aridx] |= mask;
 	}
 	else
 	{
-		m_ar[ aridx] &= ~(1  << (NofElementBits-1 - arofs));
+		m_ar[ aridx] &= ~mask;
 	}
 }
 
@@ -94,10 +97,10 @@ std::vector<std::size_t> SimHash::indices( bool what) const
 	for (; ai != ae; ++ai,++aridx)
 	{
 		std::size_t arofs = 0;
-		uint64_t elem = (uint64_t)1 << (NofElementBits-1);
-		for (; arofs < NofElementBits; ++arofs,elem>>=1)
+		uint64_t mask = (uint64_t)1 << (NofElementBits-1);
+		for (; arofs < NofElementBits; ++arofs,mask>>=1)
 		{
-			if (((elem & *ai) != 0) == what)
+			if (((mask & *ai) != 0) == what)
 			{
 				rt.push_back( aridx * NofElementBits + arofs);
 			}
