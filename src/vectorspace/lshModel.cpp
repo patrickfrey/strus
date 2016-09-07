@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief LSH Similarity model structure
-#include "lshmodel.hpp"
+#include "lshModel.hpp"
 #include "private/internationalization.hpp"
 #include "strus/base/stdint.h"
 #include <arpa/inet.h>

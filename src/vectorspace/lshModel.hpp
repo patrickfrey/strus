@@ -9,7 +9,7 @@
 #ifndef _STRUS_VECTOR_SPACE_MODEL_LSHMODEL_HPP_INCLUDED
 #define _STRUS_VECTOR_SPACE_MODEL_LSHMODEL_HPP_INCLUDED
 #include "strus/base/stdint.h"
-#include "simhash.hpp"
+#include "simHash.hpp"
 #include <vector>
 #include <string>
 #include <armadillo>
@@ -20,13 +20,18 @@ namespace strus {
 class LshModel
 {
 public:
+	/// \brief Constructor
 	LshModel( std::size_t dim_, std::size_t nofbits_, std::size_t variations_);
 
+	/// \brief dump the model as binary string for serialization
 	std::string tostring() const;
 
 	std::string serialize() const;
 	static LshModel* createFromSerialization( const std::string& dump);
 
+	/// \brief Calculate similarity hash of a vector
+	/// \param[in] vec input vector
+	/// \return simhash value acording to this model
 	SimHash simHash( const arma::vec& vec) const;
 
 private:

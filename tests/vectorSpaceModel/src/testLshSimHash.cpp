@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Test program for the similarity Hash data structure
-#include "simhash.hpp"
+#include "simHash.hpp"
 #include <iostream>
 #include <sstream>
 #include <vector>

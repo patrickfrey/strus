@@ -12,9 +12,9 @@
 #include "strus/vectorSpaceModelBuilderInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "simhash.hpp"
-#include "lshmodel.hpp"
-#include "genmodel.hpp"
+#include "simHash.hpp"
+#include "lshModel.hpp"
+#include "genModel.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/configParser.hpp"
 #include <armadillo>
@@ -26,32 +26,27 @@ struct VectorSpaceModelConfig
 {
 	VectorSpaceModelConfig()
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
-		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
-		,descendants(5),maxage(10),chunksize(1000){}
+		,threshold_simdist(160),mutations(10)
+		,descendants(5),maxage(10),depth(3){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
-		,threshold_simdist(160),threshold_nbdist(260),mutations(10)
-		,descendants(5),maxage(10),chunksize(1000)
+		,threshold_simdist(160),mutations(10)
+		,descendants(5),maxage(10),depth(3)
 	{
 		std::string src = config;
 		if (extractStringFromConfigString( path, src, "path", errorhnd)){}
 		if (extractUIntFromConfigString( dim, src, "dim", errorhnd)){}
 		if (extractUIntFromConfigString( bits, src, "bit", errorhnd)){}
 		if (extractUIntFromConfigString( variations, src, "var", errorhnd)){}
-		if (extractFloatFromConfigString( threshold_sim, src, "thsim", errorhnd)){}
+		if (extractFloatFromConfigString( threshold_sim, src, "sim", errorhnd)){}
 		if (extractUIntFromConfigString( threshold_simdist, src, "simdist", errorhnd)){}
-		if (extractUIntFromConfigString( threshold_nbdist, src, "nbdist", errorhnd)){}
 		if (extractUIntFromConfigString( mutations, src, "mutations", errorhnd)){}
 		if (extractUIntFromConfigString( descendants, src, "descendants", errorhnd)){}
 		if (extractUIntFromConfigString( maxage, src, "maxage", errorhnd)){}
-		if (extractUIntFromConfigString( chunksize, src, "chunksize", errorhnd)){}
+		if (extractUIntFromConfigString( depth, src, "depth", errorhnd)){}
 		if (dim == 0 || bits == 0 || variations == 0 || mutations == 0 || descendants == 0 || maxage == 0)
 		{
 			strus::runtime_error(_TXT("error in vector space model configuration: dim, bits, var, mutations, descendants or maxage values must not be zero"));
-		}
-		if (chunksize == 0)
-		{
-			chunksize = 1;
 		}
 		if (errorhnd->hasError())
 		{
@@ -65,11 +60,10 @@ struct VectorSpaceModelConfig
 	unsigned int variations;
 	double threshold_sim;
 	unsigned int threshold_simdist;
-	unsigned int threshold_nbdist;
 	unsigned int mutations;
 	unsigned int descendants;
 	unsigned int maxage;
-	unsigned int chunksize;
+	unsigned int depth;
 };
 
 struct VectorSpaceModelData
@@ -116,7 +110,7 @@ public:
 		try
 		{
 			m_lshmodel = new LshModel( m_config.dim, m_config.bits, m_config.variations);
-			m_genmodel = new GenModel( m_config.threshold_simdist, m_config.threshold_nbdist, m_config.mutations, m_config.descendants, m_config.maxage);
+			m_genmodel = new GenModel( m_config.threshold_simdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.depth);
 		}
 		catch (const std::exception& err)
 		{
@@ -137,16 +131,7 @@ public:
 	{
 		try
 		{
-			m_samplear.push_back( arma::vec( vec));
-			m_genmodel->addSample( m_lshmodel->simHash( vec));
-			if (m_samplear.size() % m_config.chunksize == 0)
-			{
-				m_genmodel->iteration();
-				if (m_samplear.size() % (m_config.chunksize*10) == 0)
-				{
-					m_genmodel->unification();
-				}
-			}
+			m_samplear.push_back( m_lshmodel->simHash( arma::vec( vec)));
 		}
 		CATCH_ERROR_ARG1_MAP( _TXT("error adding sample vector to '%s' builder: %s"), MODULENAME, *m_errorhnd);
 	}
@@ -155,8 +140,7 @@ public:
 	{
 		try
 		{
-			m_genmodel->iteration();
-			m_genmodel->unification();
+			m_resultar = m_genmodel->run( m_samplear);
 		}
 		CATCH_ERROR_ARG1_MAP( _TXT("error finalizing '%s' builder: %s"), MODULENAME, *m_errorhnd);
 	}
@@ -182,7 +166,8 @@ private:
 	VectorSpaceModelConfig m_config;
 	LshModel* m_lshmodel;
 	GenModel* m_genmodel;
-	std::vector<arma::vec> m_samplear;
+	std::vector<SimHash> m_samplear;
+	std::vector<SimHash> m_resultar;
 };
 
 

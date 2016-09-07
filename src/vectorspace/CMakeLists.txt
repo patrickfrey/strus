@@ -5,10 +5,11 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 # --------------------------------------
 set(
 	libstrus_vectorspace_source_files
-	random.cpp    
-	simhash.cpp
-	lshmodel.cpp
-	genmodel.cpp 
+	random.cpp
+	simHash.cpp
+	simGroup.cpp
+	lshModel.cpp
+	genModel.cpp 
 	vectorSpaceModel.cpp
 )
 

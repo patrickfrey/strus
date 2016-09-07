@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Similarity hash structure
-#include "simhash.hpp"
+#include "simHash.hpp"
 #include "private/bitOperations.hpp"
 #include "private/internationalization.hpp"
 #include <string>
