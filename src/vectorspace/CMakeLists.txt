@@ -8,6 +8,7 @@ set(
 	random.cpp
 	simHash.cpp
 	simGroup.cpp
+	simRelationMap.cpp
 	lshModel.cpp
 	genModel.cpp 
 	vectorSpaceModel.cpp

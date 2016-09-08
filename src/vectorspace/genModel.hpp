@@ -24,13 +24,13 @@ class GenModel
 {
 public:
 	/// \brief Constructor
-	GenModel( unsigned int simdist_, unsigned int mutations_, unsigned int descendants_, unsigned int maxage_, unsigned int depth_)
+	GenModel( unsigned int simdist_, unsigned int mutations_, unsigned int descendants_, unsigned int maxage_, unsigned int iterations_)
 		:m_simdist(simdist_),m_mutations(mutations_),m_descendants(descendants_)
-		,m_samplesize(0),m_maxage(maxage_),m_depth(depth_){}
+		,m_samplesize(0),m_maxage(maxage_),m_iterations(iterations_){}
 	/// \brief Copy constructor
 	GenModel( const GenModel& o)
 		:m_simdist(o.m_simdist),m_mutations(o.m_mutations),m_descendants(o.m_descendants)
-		,m_samplesize(o.m_samplesize),m_maxage(o.m_maxage),m_depth(o.m_depth){}
+		,m_samplesize(o.m_samplesize),m_maxage(o.m_maxage),m_iterations(o.m_iterations){}
 
 	/// \brief Unsupervised learning of a good group representantion of the sample set passed as argument
 	std::vector<SimHash> run( const std::vector<SimHash>& samples) const;
@@ -41,7 +41,7 @@ private:
 	unsigned int m_descendants;		///< number of descendants of which the fittest is selected
 	unsigned int m_samplesize;		///< number of bits in a sample SimHash
 	unsigned int m_maxage;			///< upper bound value used for calculate number of mutations (an older individuum mutates less)
-	unsigned int m_depth;			///< search depth per element
+	unsigned int m_iterations;		///< number of iterations
 };
 
 }//namespace

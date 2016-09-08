@@ -38,6 +38,8 @@ public:
 	void addMember( const SampleIndex& idx);
 	/// \brief Remove a member
 	void removeMember( const SampleIndex& idx);
+	/// \brief Check for a member
+	bool isMember( const SampleIndex& idx) const;
 
 	/// \brief Calculate the fitness of this individual
 	/// \param[in] samplear global array of samples the reference system of this individual is based on

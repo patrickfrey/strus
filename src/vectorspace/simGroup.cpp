@@ -35,6 +35,11 @@ void SimGroup::removeMember( const SampleIndex& idx)
 	std::remove( m_members.begin(), m_members.end(), idx);
 }
 
+bool SimGroup::isMember( const SampleIndex& idx) const
+{
+	return (std::find( m_members.begin(), m_members.end(), idx) != m_members.end());
+}
+
 double SimGroup::fitness( const std::vector<SimHash>& samplear) const
 {
 	return fitness( samplear, gencode());

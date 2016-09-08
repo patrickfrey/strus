@@ -31,10 +31,10 @@ public:
 		Occupied=1
 	};
 
-	void defineRelation( std::size_t from, std::size_t to)
+	void defineRelation( std::size_t from, std::size_t to, unsigned short value)
 	{
-		m_mat( from, to) = (unsigned short)Occupied;
-		m_mat( to, from) = (unsigned short)Occupied;
+		m_mat( from, to) = value;
+		m_mat( to, from) = value;
 	}
 
 	typedef arma::SpMat<unsigned short> Matrix;
@@ -47,7 +47,7 @@ public:
 			:m_begin(begin_),m_end(end_){}
 
 		const_iterator begin() const	{return m_begin;}
-		const_iterator end() const		{return m_end;}
+		const_iterator end() const	{return m_end;}
 
 	private:
 		const_iterator m_begin;
@@ -58,6 +58,8 @@ public:
 	{
 		return Row( m_mat.begin_row( rowidx), m_mat.end_row( rowidx));
 	}
+
+	std::vector<std::size_t> getHotspotList() const;
 
 private:
 	arma::SpMat<unsigned short> m_mat;

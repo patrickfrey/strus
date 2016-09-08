@@ -42,14 +42,14 @@ static void selectCandidates(
 	}
 }
 
-
 std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 {
+	std::vector<strus::Index> freeGroupIdList;
 	typedef std::list<SimGroup> GroupList;
 	GroupList groupList;			// list of similarity group representants
 	typedef std::map<strus::Index,GroupList::iterator> GroupMap;
 	GroupMap groupMap;			// map of group indices to group
-	Index groupcnt=0;			// counter for creating new group handles
+	Index groupIdCnt=0;			// counter for creating new group handles
 	SimRelationMap simrelmap;		// similarity relation map of the list of samples
 	typedef std::multimap<std::size_t,strus::Index> SampleIndexToGroupMap;
 	SampleIndexToGroupMap sampleidx2groupmap;
@@ -63,33 +63,34 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 		{
 			if (si->near( *pi, m_simdist))
 			{
-				simrelmap.defineRelation( sidx, pidx);
+				simrelmap.defineRelation( sidx, pidx, si->dist( *pi));
 			}
 		}
 	}
-
-	// Build the groups:
-	si = samplear.begin(), se = samplear.end();
-	SampleIndex sidx = 0;
-	for (; si != se; ++si,++sidx)
+	// Make an initial selection of elements and build the initial groups:
+	std::vector<std::size_t> selectionList = simrelmap.getHotspotList();
+	std::vector<std::size_t>::const_iterator seli = selectionList.begin(), sele=selectionList.end();
+	for (; seli != sele; ++seli)
 	{
-		std::set<SampleIndex> visited;
-		std::set<SampleIndex> selected;
-		selectCandidates( visited, selected, sidx, m_depth, simrelmap);
-		std::vector<SampleIndex> local_samplear;
-		local_samplear.insert( local_samplear.end(), selected.begin(), selected.end());
-
-		// Get all groups that are somehow referenced by the selected local indices as base
-		std::vector<SampleIndex>::const_iterator
-			li = local_samplear.begin(), le = local_samplear.end();
-		for (; li != le; ++li)
+		strus::Index groupId;
+		if (!freeGroupIdList.empty())
 		{
-			SampleIndexToGroupMap::const_iterator gi = sampleidx2groupmap.find( *li);
-			if (gi != sampleidx2groupmap.end())
-			{
-				
-			}
+			groupId = freeGroupIdList.back();
+			freeGroupIdList.pop_back();
 		}
+		else
+		{
+			groupId = ++groupIdCnt;
+		}
+		groupList.push_back( SimGroup( groupId, samplear[ *seli]));
+		groupList.back().addMember( *seli);
+	}
+	// Do the iterations of creating new individuals
+	unsigned int iteration=0;
+	for (; iteration != m_iterations; ++iteration)
+	{
+		GroupList::iterator gi = groupList.begin(), ge = groupList.end();
+		
 	}
 
 	// Build the result:

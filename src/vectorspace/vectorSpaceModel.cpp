@@ -27,11 +27,11 @@ struct VectorSpaceModelConfig
 	VectorSpaceModelConfig()
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
 		,threshold_simdist(160),mutations(10)
-		,descendants(5),maxage(10),depth(3){}
+		,descendants(5),maxage(10),iterations(100){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
 		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
 		,threshold_simdist(160),mutations(10)
-		,descendants(5),maxage(10),depth(3)
+		,descendants(5),maxage(10),iterations(100)
 	{
 		std::string src = config;
 		if (extractStringFromConfigString( path, src, "path", errorhnd)){}
@@ -43,10 +43,10 @@ struct VectorSpaceModelConfig
 		if (extractUIntFromConfigString( mutations, src, "mutations", errorhnd)){}
 		if (extractUIntFromConfigString( descendants, src, "descendants", errorhnd)){}
 		if (extractUIntFromConfigString( maxage, src, "maxage", errorhnd)){}
-		if (extractUIntFromConfigString( depth, src, "depth", errorhnd)){}
-		if (dim == 0 || bits == 0 || variations == 0 || mutations == 0 || descendants == 0 || maxage == 0)
+		if (extractUIntFromConfigString( iterations, src, "iterations", errorhnd)){}
+		if (dim == 0 || bits == 0 || variations == 0 || mutations == 0 || descendants == 0 || maxage == 0 || iterations == 0)
 		{
-			strus::runtime_error(_TXT("error in vector space model configuration: dim, bits, var, mutations, descendants or maxage values must not be zero"));
+			strus::runtime_error(_TXT("error in vector space model configuration: dim, bits, var, mutations, descendants, maxage or iterations values must not be zero"));
 		}
 		if (errorhnd->hasError())
 		{
@@ -63,7 +63,7 @@ struct VectorSpaceModelConfig
 	unsigned int mutations;
 	unsigned int descendants;
 	unsigned int maxage;
-	unsigned int depth;
+	unsigned int iterations;
 };
 
 struct VectorSpaceModelData
@@ -110,7 +110,7 @@ public:
 		try
 		{
 			m_lshmodel = new LshModel( m_config.dim, m_config.bits, m_config.variations);
-			m_genmodel = new GenModel( m_config.threshold_simdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.depth);
+			m_genmodel = new GenModel( m_config.threshold_simdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.iterations);
 		}
 		catch (const std::exception& err)
 		{
