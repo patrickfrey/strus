@@ -1,0 +1,22 @@
+OpenBSD 6.0
+-----------
+
+Use 'lang/gcc/4.9' from ports (package 'gcc' and 'g++', the base gcc is too old).
+
+Install 'gcc' 'g++' 'cmake', 'gmake', 'boost', 'gettext', 'gettext-tools' and 'leveldb' as
+packages or from the ports collection.
+
+Build strus with:
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib \
+        -DCMAKE_CXX_FLAGS=-g -DBOOST_INCLUDEDIR=/usr/local/include \
+        -DCMAKE_CXX_COMPILER=eg++ -DCMAKE_C_COMPILER=egcc .
+gmake
+
+We must use 'gcc' (4.9, same toolchain) as 'boost' and 'leveldb' require features from newer
+gcc's!
+
+Running the tests:
+
+gmake test
+doas gmake install
