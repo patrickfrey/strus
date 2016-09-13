@@ -25,11 +25,11 @@ class GenModel
 public:
 	/// \brief Constructor
 	GenModel( unsigned int simdist_, unsigned int mutations_, unsigned int descendants_, unsigned int maxage_, unsigned int iterations_)
-		:m_simdist(simdist_),m_mutations(mutations_),m_descendants(descendants_)
+		:m_simdist(simdist_),m_eqdist(m_simdist/8),m_mutations(mutations_),m_descendants(descendants_)
 		,m_samplesize(0),m_maxage(maxage_),m_iterations(iterations_){}
 	/// \brief Copy constructor
 	GenModel( const GenModel& o)
-		:m_simdist(o.m_simdist),m_mutations(o.m_mutations),m_descendants(o.m_descendants)
+		:m_simdist(o.m_simdist),m_eqdist(o.m_eqdist),m_mutations(o.m_mutations),m_descendants(o.m_descendants)
 		,m_samplesize(o.m_samplesize),m_maxage(o.m_maxage),m_iterations(o.m_iterations){}
 
 	/// \brief Unsupervised learning of a good group representantion of the sample set passed as argument
@@ -37,6 +37,7 @@ public:
 
 private:
 	unsigned int m_simdist;			///< maximal distance to be considered similar
+	unsigned int m_eqdist;			///< maximum distance to be considered equal
 	unsigned int m_mutations;		///< number of random selected mutation candidates of the non kernel elements of a group
 	unsigned int m_descendants;		///< number of descendants of which the fittest is selected
 	unsigned int m_samplesize;		///< number of bits in a sample SimHash

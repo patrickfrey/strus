@@ -20,22 +20,44 @@ namespace strus {
 class SimRelationMap
 {
 public:
-	explicit SimRelationMap( std::size_t nofSamples=0)
-		:m_mat( nofSamples, nofSamples){}
-	SimRelationMap( const SimRelationMap& o)
-		:m_mat(o.m_mat){}
-
-	enum State
+	struct Element
 	{
-		Free=0,
-		Occupied=1
+		unsigned int coord_x;
+		unsigned int coord_y;
+		unsigned short value;
+
+		Element( unsigned int x, unsigned int y, unsigned short v)
+			:coord_x(x),coord_y(y),value(v){}
+		Element( const Element& o)
+			:coord_x(o.coord_x),coord_y(o.coord_y),value(o.value){}
 	};
 
-	void defineRelation( std::size_t from, std::size_t to, unsigned short value)
+private:
+	struct ElementVector
 	{
-		m_mat( from, to) = value;
-		m_mat( to, from) = value;
-	}
+		arma::umat locations;
+		arma::Col<unsigned short> values;
+
+		ElementVector( const std::vector<Element>& vv)
+		{
+			std::vector<Element>::const_iterator vi = vv.begin(), ve = vv.end();
+			for (; vi != ve; ++vi)
+			{
+				locations << vi->coord_x << vi->coord_y << arma::endr;
+				values << vi->value;
+			}
+		}
+		arma::SpMat<unsigned short> matrix() const
+		{
+			return arma::SpMat<unsigned short>( locations, values);
+		}
+	};
+
+public:
+	explicit SimRelationMap( const std::vector<Element>& elements)
+		:m_mat( ElementVector( elements).matrix()){}
+	SimRelationMap( const SimRelationMap& o)
+		:m_mat(o.m_mat){}
 
 	typedef arma::SpMat<unsigned short> Matrix;
 	class Row
@@ -58,8 +80,6 @@ public:
 	{
 		return Row( m_mat.begin_row( rowidx), m_mat.end_row( rowidx));
 	}
-
-	std::vector<std::size_t> getHotspotList() const;
 
 private:
 	arma::SpMat<unsigned short> m_mat;

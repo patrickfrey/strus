@@ -8,6 +8,7 @@
 /// \brief Structure for storing similarity group representants (individuals in the genetic algorithm for breeding similarity group representants)
 #include "simGroup.hpp"
 #include "random.hpp"
+#include <algorithm>
 
 using namespace strus;
 
@@ -45,6 +46,16 @@ double SimGroup::fitness( const std::vector<SimHash>& samplear) const
 	return fitness( samplear, gencode());
 }
 
+double pow_uint( double value, unsigned int exp)
+{
+	double rt = ((exp & 1) == 1) ? value : 1.0;
+	if (exp >= 2)
+	{
+		rt *= pow_uint( value * value, exp >> 1);
+	}
+	return rt;
+}
+
 double SimGroup::fitness( const std::vector<SimHash>& samplear, const SimHash& genom) const
 {
 	double sqrsum = 0.0;
@@ -54,7 +65,7 @@ double SimGroup::fitness( const std::vector<SimHash>& samplear, const SimHash& g
 		double dist = genom.dist( samplear[ *mi -1]);
 		sqrsum += dist * dist;
 	}
-	return 1.0 / std::sqrt( sqrsum);
+	return pow_uint( 1.0 + 1.0 / std::sqrt( sqrsum / m_members.size()), m_members.size());
 }
 
 SimHash SimGroup::kernel( const std::vector<SimHash>& samplear) const
@@ -72,7 +83,7 @@ SimHash SimGroup::kernel( const std::vector<SimHash>& samplear) const
 	return rt;
 }
 
-SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int maxNofMutations) const
+SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int mutations) const
 {
 	if (m_members.size() < 2) return gencode();
 
@@ -81,7 +92,7 @@ SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int m
 
 	SimHash rt( gencode());
 
-	unsigned int mi=0, me=maxNofMutations;
+	unsigned int mi=0, me=mutations;
 	for (; mi != me; ++mi)
 	{
 		unsigned int mutidx = g_random.get( 0, gencode().size());
@@ -91,7 +102,7 @@ SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int m
 		// With growing age spins with a higher vote are preferred:
 		unsigned int true_cnt=0, false_cnt=0;
 		std::size_t ci=0, ce=m_members.size();
-		if (ce > age()) ce = age();
+		if (ce > age()+1) ce = age()+1;
 		for (; ci != ce; ++ci)
 		{
 			SampleIndex memberidx = g_random.get( 0, m_members.size());
@@ -121,17 +132,17 @@ SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int m
 }
 
 
-void SimGroup::mutate( const std::vector<SimHash>& samplear, unsigned int selectionCandidates, unsigned int maxNofMutations)
+void SimGroup::mutate( const std::vector<SimHash>& samplear, unsigned int descendants, unsigned int mutations)
 {
 	std::vector<SimHash> descendantlist;
-	descendantlist.reserve( selectionCandidates);
+	descendantlist.reserve( descendants);
 
 	double max_fitness = fitness( samplear);
 	int selected = -1;
-	std::size_t di=0, de=selectionCandidates;
+	std::size_t di=0, de=descendants;
 	for (; di != de; ++di)
 	{
-		descendantlist.push_back( mutation( samplear, maxNofMutations));
+		descendantlist.push_back( mutation( samplear, mutations));
 		double desc_fitness = fitness( samplear, descendantlist.back());
 		if (desc_fitness > max_fitness)
 		{

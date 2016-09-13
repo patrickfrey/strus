@@ -11,7 +11,6 @@
 #include "simHash.hpp"
 #include "strus/index.hpp"
 #include <vector>
-#include <algorithm>
 #include <armadillo>
 
 namespace strus {
@@ -22,12 +21,22 @@ typedef std::size_t SampleIndex;
 class SimGroup
 {
 public:
-	SimGroup( strus::Index id_, const SimHash& gencode_)
+	SimGroup( const std::vector<SimHash>& samplear, std::size_t m1, std::size_t m2, const Index& id_)
+		:m_id(id_),m_gencode(),m_age(0),m_members()
+	{
+		m_members.push_back( m1);
+		m_members.push_back( m2);
+		m_gencode = mutation( samplear, samplear[ m1].size());
+	}
+
+	SimGroup( const SimHash& gencode_, const Index& id_)
 		:m_id(id_),m_gencode(gencode_),m_age(0),m_members(){}
 	SimGroup( const SimGroup& o)
 		:m_id(o.m_id),m_gencode(o.m_gencode),m_age(o.m_age),m_members(o.m_members){}
+	SimGroup( const SimGroup& o, const Index& id_)
+		:m_id(id_),m_gencode(o.m_gencode),m_age(o.m_age),m_members(o.m_members){}
 
-	const strus::Index& id() const					{return m_id;}
+	const Index& id() const						{return m_id;}
 	const SimHash& gencode() const					{return m_gencode;}
 	unsigned int age() const					{return m_age;}
 	const std::vector<SampleIndex>& members() const			{return m_members;}
@@ -48,8 +57,8 @@ public:
 	/// \brief Do a mutation step
 	/// \param[in] samplear global array of samples the reference system of this individual is based on
 	void mutate( const std::vector<SimHash>& samplear,
-			unsigned int selectionCandidates,
-			unsigned int maxNofMutations);
+			unsigned int descendants,
+			unsigned int mutations);
 
 private:
 	/// \brief Evaluate the fitness of a proposed genom change
