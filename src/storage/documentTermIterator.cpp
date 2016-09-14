@@ -31,7 +31,7 @@ DocumentTermIterator::DocumentTermIterator(
 	,m_invblkitr(0)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_typeno) throw strus::runtime_error(_TXT("term type '%s' not defined in storage"));
+	if (!m_typeno) throw strus::runtime_error(_TXT("term type '%s' not defined in storage"), type_.c_str());
 }
 
 Index DocumentTermIterator::skipDoc( const Index& docno_)
