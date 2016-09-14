@@ -636,7 +636,7 @@ QueryResult Query::evaluate()
 		Index docno = 0;
 		unsigned int state = 0;
 		unsigned int prev_state = 0;
-		float weight = 0.0;
+		double weight = 0.0;
 	
 		while (accumulator.nextRank( docno, state, weight))
 		{

@@ -51,7 +51,7 @@ void Accumulator::addAlternativeAclRestriction(
 bool Accumulator::nextRank(
 		Index& docno,
 		unsigned int& selectorState,
-		float& weight)
+		double& weight)
 {
 	// For all selectors:
 	std::vector<SelectorPostings>::const_iterator
