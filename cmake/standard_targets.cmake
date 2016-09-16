@@ -23,14 +23,25 @@ IF (UNIX)
    *.cmake
    Makefile
    core core.*
-   *~
+   *~ */*~ */*/*~
+   CMakeFiles */CMakeFiles */*/CMakeFiles
+   cmake_install.cmake */cmake_install.cmake */*/cmake_install.cmake
+   Makefile */Makefile */*/Makefile
+   cmake/uninstall.cmake
+   install_manifest.txt
+   Testing
   )
-  
+
   ADD_CUSTOM_COMMAND(
-    DEPENDS clean
+    COMMAND ${CMAKE_BUILD_TOOL}
+    ARGS    clean
+    TARGET  distclean
+  )
+
+  ADD_CUSTOM_COMMAND(
     COMMENT "distribution clean"
     COMMAND rm
-    ARGS    -Rf pkg ${DISTCLEANED}
+    ARGS    -Rf ${DISTCLEANED}
     TARGET  distclean
   )
 ENDIF(UNIX)

@@ -10,7 +10,8 @@ Build strus with:
 
 cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DLIB_INSTALL_DIR=lib \
         -DCMAKE_CXX_FLAGS=-g -DBOOST_INCLUDEDIR=/usr/local/include \
-        -DCMAKE_CXX_COMPILER=eg++ -DCMAKE_C_COMPILER=egcc .
+        -DCMAKE_CXX_COMPILER=eg++ -DCMAKE_C_COMPILER=egcc \
+	-DCMAKE_MAKE_PROGRAM=/usr/local/bin/gmake .
 gmake
 
 We must use 'gcc' (4.9, same toolchain) as 'boost' and 'leveldb' require features from newer
