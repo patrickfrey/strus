@@ -30,6 +30,7 @@ IF (UNIX)
    cmake/uninstall.cmake
    install_manifest.txt
    Testing
+   CTestTestfile.cmake */CTestTestfile.cmake */*/CTestTestfile.cmake */*/*/CTestTestfile.cmake
   )
 
   ADD_CUSTOM_COMMAND(
