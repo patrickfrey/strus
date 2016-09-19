@@ -203,6 +203,31 @@ void Query::print( std::ostream& out) const
 		printNode( out, fi->node, 1);
 		out << std::endl;
 	}
+	out << "MaxNofRanks = " << m_nofRanks << std::endl;
+	out << "MinRank = " << m_minRank << std::endl;
+	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
+	for (; ui != ue; ++ui)
+	{
+		out << "User restriction : " << *ui << std::endl;
+	}
+	std::vector<Index>::const_iterator di = m_evalset_docnolist.begin(), de = m_evalset_docnolist.end();
+	if (di != de)
+	{
+		out << "Document evaluation set : ";
+		for (std::size_t didx=0; di != de; ++di)
+		{
+			if (didx != 0) out << ", ";
+			out << *ui;
+		}
+		out << std::endl;
+	}
+}
+
+std::string Query::tostring() const
+{
+	std::ostringstream out;
+	print( out);
+	return out.str();
 }
 
 void Query::printVariables( std::ostream& out, NodeAddress adr) const
