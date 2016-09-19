@@ -109,7 +109,12 @@ public:
 	virtual void setWeightingVariableValue( const std::string& name, double value)=0;
 
 	/// \brief Evaluate the query
+	/// \return result of query evaluation
 	virtual QueryResult evaluate()=0;
+
+	/// \brief Map query to readable string
+	/// \return query with query evaluation scheme in readable form
+	virtual std::string tostring() const=0;
 };
 
 }//namespace

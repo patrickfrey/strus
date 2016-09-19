@@ -76,6 +76,7 @@ public:
 			const std::string& name, double value);
 
 	virtual QueryResult evaluate();
+	virtual std::string tostring() const;
 
 public:
 	typedef int NodeAddress;
