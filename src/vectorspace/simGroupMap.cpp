@@ -20,7 +20,7 @@ bool SimGroupMap::contains( const Index& idx, const Index& groupidx) const
 	return (nd.groupidx[ii] == groupidx);
 }
 
-bool SimGroupMap::shares( const Index& idx1, const Index& idx2)
+bool SimGroupMap::shares( const Index& idx1, const Index& idx2) const
 {
 	unsigned int i1=0, i2=0;
 	const Node& nd1 = m_nodear[ idx1];
@@ -61,13 +61,12 @@ bool SimGroupMap::remove( const Index& idx, const Index& groupidx)
 	return false;
 }
 
-std::vector<Index> SimGroupMap::getElements( const Index& idx) const
+SimGroupMap::const_node_iterator SimGroupMap::node_end( std::size_t nd) const
 {
-	std::vector<Index> rt;
-	const Node& nd = m_nodear[ idx];
-	for (int ii=NofNodeBranches-1 && nd.groupidx[ii]; ii>=0; --ii){}
-	rt.insert( rt.end(), nd.groupidx, nd.groupidx + ii + 1);
-	return rt;
+	Node& ndrec = m_nodear[ nd];
+	std::size_t ii = NofNodeBranches;
+	for (; ii>0 && ndrec.groupidx[ii-1]==0; --ii){}
+	return ndrec.groupidx + ii;
 }
 
 SimGroupMap::Node::Node( const Node& o)

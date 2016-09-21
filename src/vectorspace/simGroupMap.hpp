@@ -29,14 +29,37 @@ public:
 	/// \brief Evaluate if a sample references a group
 	bool contains( const Index& idx, const Index& groupidx) const;
 	/// \brief Evaluate if the two samples share a group reference
-	bool shares( const Index& idx1, const Index& idx2);
+	bool shares( const Index& idx1, const Index& idx2) const;
 	/// \brief Remove sample reference relationship to a group
 	bool remove( const Index& idx, const Index& groupidx);
-	/// \brief Get the list of elements
-	std::vector<Index> getElements( const Index& idx) const;
 	/// \brief Evaluate, if there is space left for adding a new relation
 	bool hasSpace( const Index& idx) const
 		{return m_nodear[idx].groupidx[ NofNodeBranches-1] == 0;}
+
+	class const_node_iterator
+	{
+	public:
+		explicit const_node_iterator( const Index* ref_)	:ref(ref_){}
+		const_node_iterator( const const_node_iterator& o)	:ref(o.ref){}
+
+		const_node_iterator& operator++()			{++ref; return *this;}
+		const_node_iterator operator++(int)			{const_node_iterator rt(ref); ++ref; return rt;}
+
+		bool operator==( const const_node_iterator& o) const	{return ref == o.ref;}
+		bool operator!=( const const_node_iterator& o) const	{return ref != o.ref;}
+		bool operator<( const const_node_iterator& o) const	{return ref<o.ref;}
+		bool operator<=( const const_node_iterator& o) const	{return ref <= o.ref;}
+		bool operator>( const const_node_iterator& o) const	{return ref > o.ref;}
+		bool operator>=( const const_node_iterator& o) const	{return ref >= o.ref;}
+
+		const Index& operator*() const				{return *ref;}
+
+	private:
+		Index const* ref;
+	};
+
+	const_node_iterator node_begin( std::size_t nd) const		{return const_node_iterator( m_nodear[ nd].groupidx);}
+	const_node_iterator node_end( std::size_t nd) const;
 
 private:
 	enum {NofNodeBranches=8};
