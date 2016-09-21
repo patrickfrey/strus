@@ -139,7 +139,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 		{
 			if (!simGroupMap.hasSpace( sidx)) continue;
 
-			// For each element calculate the MaxProxListSize closest neighbours, that
+			// For each element calculate the 8 closest neighbours, that
 			// are not yet assigned to a group of this sample:
 			FixedSizePrioQueue<ProxElem,8> proxlist;
 
@@ -152,19 +152,20 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 					proxlist.push( ProxElem( *ri, ri.col()));
 				}
 			}
-			// For each of the closest neighbours, check, if we can join it to an existing group,
-			// or create a new group:
+			// For each of the max 8 closest neighbours, check, if we can join it to an 
+			// existing group, or create a new group:
 			std::vector<ProxElem>::const_iterator pi = proxlist.begin(), pe = proxlist.end();
 			for (; pi != pe && simGroupMap.hasSpace( sidx); ++pi)
 			{
 				if (!simGroupMap.hasSpace( pi->sampleidx)) continue;
+
 				// Try to find a group the visited sample belongs to that is closer to the
 				// found candidate than the visited sample:
 				Index bestmatch_simgroup = 0;
 				unsigned short bestmatch_dist = pi->dist;
 				std::vector<Index> simgroups = simGroupMap.getElements( sidx);
 				std::vector<Index>::const_iterator gi = simgroups.begin(), ge = simgroups.end();
-				for (; gi != ge && bestmatch_simgroup == 0; ++gi)
+				for (; gi != ge; ++gi)
 				{
 					GroupInstanceMap::const_iterator groupinst_slot = groupInstanceMap.find( *gi);
 					if (groupinst_slot == groupInstanceMap.end()) throw strus::runtime_error(_TXT("illegal reference in group map"));
@@ -175,6 +176,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 					{
 						bestmatch_simgroup = groupinst->id();
 						bestmatch_dist = samplear[ pi->sampleidx].dist( groupinst->gencode());
+						break;
 					}
 				}
 				if (bestmatch_simgroup)
@@ -250,7 +252,11 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 							// Add member of sim_gi to gi:
 							gi->addMember( *sim_mi);
 							simGroupMap.insert( *sim_mi, gi->id());
-							break;
+							gi->mutate( samplear, m_descendants, m_mutations);
+							if (!sim_gi->gencode().near( gi->gencode(), m_eqdist))
+							{
+								break;
+							}
 						}
 					}
 					if (sim_mi == sim_me)
@@ -260,10 +266,10 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 						for (; mi != me; ++mi)
 						{
 							simGroupMap.remove( *mi, sim_gi->id());
-							groupInstanceMap.erase( sim_gi_slot);
-							groupIdAllocator.free( sim_gi->id());
-							groupInstanceList.erase( sim_gi);
 						}
+						groupInstanceMap.erase( sim_gi_slot);
+						groupIdAllocator.free( sim_gi->id());
+						groupInstanceList.erase( sim_gi);
 					}
 				}
 				else
@@ -275,10 +281,15 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 						if (sim_gi->gencode().near( samplear[*mi], m_simdist)
 						&&  !sim_gi->isMember( *mi))
 						{
-							// Add member of gi to sim_gi:
-							sim_gi->addMember( *mi);
-							simGroupMap.insert( *mi, sim_gi->id());
-							break;
+							// Try add member of gi to sim_gi:
+							SimGroup newgroup( *sim_gi);
+							newgroup.addMember( *mi);
+							newgroup.mutate( samplear, m_descendants, m_mutations);
+							if (newgroup.fitness( samplear) >= sim_gi->fitness( samplear))
+							{
+								*sim_gi = newgroup;
+								simGroupMap.insert( *mi, sim_gi->id());
+							}
 						}
 					}
 				}
@@ -300,6 +311,19 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 					// ... member dropped out of the group
 					gi->removeMember( *mi);
 					simGroupMap.remove( *mi, gi->id());
+					if (gi->members().size() < 2)
+					{
+						mi = gi->members().begin(), me = gi->members().end();
+						for (; mi != me; ++mi)
+						{
+							simGroupMap.remove( *mi, gi->id());
+						}
+						GroupInstanceMap::iterator gi_slot = groupInstanceMap.find( gi->id());
+						if (gi_slot == groupInstanceMap.end()) throw strus::runtime_error(_TXT("illegal reference in group map"));
+						groupInstanceMap.erase( gi_slot);
+						groupIdAllocator.free( gi->id());
+						groupInstanceList.erase( gi);
+					}
 				}
 			}
 		}
