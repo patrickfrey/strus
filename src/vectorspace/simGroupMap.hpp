@@ -15,7 +15,7 @@
 
 namespace strus {
 
-/// \brief Structure for storing sample to assigned group relations
+/// \brief Structure for storing sample to group relations
 class SimGroupMap
 {
 public:

@@ -16,7 +16,7 @@
 
 namespace strus {
 
-/// \brief Structure for storing similarity relations
+/// \brief Structure for storing sample similarity relations
 class SimRelationMap
 {
 public:
