@@ -117,7 +117,7 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
-		MetaDataDescription md( metadata);
+		// 1st phase, store variables:
 		std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 		if (!transaction.get()) return false;
 
@@ -134,6 +134,13 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 		{
 			stor.store( transaction.get(), "UserNo", 1);
 		}
+		if (!transaction->commit()) return false;
+
+		// 2nd phase, store metadata:
+		transaction.reset( database->createTransaction());
+		if (!transaction.get()) return false;
+
+		MetaDataDescription md( metadata);
 		md.store( transaction.get());
 	
 		return transaction->commit();
