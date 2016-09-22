@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <armadillo>
+#include <string>
 
 namespace strus {
 
@@ -23,11 +24,13 @@ public:
 	/// \brief Constructor
 	LshModel( std::size_t dim_, std::size_t nofbits_, std::size_t variations_);
 
-	/// \brief dump the model as binary string for serialization
+	/// \brief map contents to string in readable form
 	std::string tostring() const;
 
-	std::string serialize() const;
-	static LshModel* createFromSerialization( const std::string& dump);
+	/// \brief Serialize
+	void printSerialization( std::string& out) const;
+	/// \brief Deserialize
+	static LshModel* createFromSerialization( const std::string& in, std::size_t& itr);
 
 	/// \brief Calculate similarity hash of a vector
 	/// \param[in] vec input vector

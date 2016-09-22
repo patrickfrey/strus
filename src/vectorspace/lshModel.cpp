@@ -81,6 +81,7 @@ arma::mat LshModel::createModelMatrix( std::size_t dim_, std::size_t nofbits_)
 std::string LshModel::tostring() const
 {
 	std::ostringstream rt;
+	rt << "d=" << m_dim << ", n=" << m_nofbits << ", v=" << m_variations << std::endl;
 	std::vector<arma::mat>::const_iterator roti = m_rotations.begin(), rote = m_rotations.end();
 	for (; roti != rote; ++roti)
 	{
@@ -178,6 +179,11 @@ struct DumpStruct
 		return arsize * 2;
 	}
 
+	std::size_t contentAllocSize() const
+	{
+		return arsize * sizeof(ar[0]);
+	}
+
 	void loadValues( const void* ar_)
 	{
 		const uint32_t* ua = (const uint32_t*)ar_;
@@ -233,7 +239,7 @@ private:
 };
 
 
-std::string LshModel::serialize() const
+void LshModel::printSerialization( std::string& out) const
 {
 	DumpStruct st( m_dim, m_nofbits, m_variations);
 
@@ -254,20 +260,24 @@ std::string LshModel::serialize() const
 	}
 	std::size_t valuePtrSize = st.getValuePtrSize();
 	st.conv_hton();
-	std::string rt;
-	rt.append( (const char*)(const void*)&st, sizeof( DumpStructHeader));
-	rt.append( (const char*)(const void*)st.getValuePtr(), valuePtrSize);
-	return rt;
+	out.append( (const char*)(const void*)&st, sizeof( DumpStructHeader));
+	out.append( (const char*)(const void*)st.getValuePtr(), valuePtrSize);
 }
 
-LshModel* LshModel::createFromSerialization( const std::string& dump)
+LshModel* LshModel::createFromSerialization( const std::string& in, std::size_t& itr)
 {
 	DumpStructHeader hdr;
-	std::memcpy( &hdr, dump.c_str(), sizeof( DumpStructHeader));
+	char const* dump = in.c_str() + itr;
+	if (in.size() - itr < sizeof( DumpStructHeader)) throw strus::runtime_error(_TXT("lsh model dump is corrupt (dump header too small)"));
+	std::memcpy( &hdr, dump, sizeof( DumpStructHeader));
+	itr += sizeof( DumpStructHeader);
+	dump += sizeof( DumpStructHeader);
 	hdr.conv_ntoh();
 
 	DumpStruct st( hdr.dim, hdr.nofbits, hdr.variations);
-	st.loadValues( dump.c_str() + sizeof( DumpStructHeader));
+	if (st.contentAllocSize() > (in.size() - itr)) throw strus::runtime_error(_TXT("lsh model dump is corrupt (dump too small)"));
+	st.loadValues( dump);
+	itr += st.contentAllocSize();
 	std::size_t ai=0, ae=st.nofValues();
 
 	arma::mat modelMatrix( hdr.nofbits, hdr.dim);

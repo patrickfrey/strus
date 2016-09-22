@@ -97,6 +97,11 @@ public:
 	/// \brief Number of bits represented
 	std::size_t size() const			{return m_size;}
 
+	/// \brief Serialize
+	static void printSerialization( std::string& out, const std::vector<SimHash>& ar);
+	/// \brief Deserialize
+	static std::vector<SimHash> createFromSerialization( const std::string& in, std::size_t& itr);
+
 private:
 	enum {NofElementBits=64};
 	std::vector<uint64_t> m_ar;

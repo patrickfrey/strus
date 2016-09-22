@@ -83,8 +83,7 @@ tests/positionWindow/src/testPositionWindow
 tests/scalarfunc/src/scalarFunction
 tests/vectorSpaceModel/src/testArmadillo
 tests/vectorSpaceModel/src/testLshVectorSpaceModel
-tests/vectorSpaceModel/src/testLshVectorSpaceModel2
-tests/vectorSpaceModel/src/testNaiveVectorSpaceModel
 tests/vectorSpaceModel/src/testLshSimHash
+tests/vectorSpaceModel/src/testVectorSpaceModel
 .travis.yml
 

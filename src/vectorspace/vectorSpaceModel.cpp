@@ -18,6 +18,7 @@
 #include "strus/base/fileio.hpp"
 #include "strus/base/configParser.hpp"
 #include <armadillo>
+#include <memory>
 
 using namespace strus;
 #define MODULENAME "standard vector space model"
@@ -25,12 +26,12 @@ using namespace strus;
 struct VectorSpaceModelConfig
 {
 	VectorSpaceModelConfig()
-		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
-		,threshold_simdist(160),mutations(10)
+		:path(),dim(300),bits(64),variations(16)
+		,simdist(160),mutations(10)
 		,descendants(5),maxage(10),iterations(100){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
-		:path(),dim(300),bits(64),variations(16),threshold_sim(0.9)
-		,threshold_simdist(160),mutations(10)
+		:path(),dim(300),bits(64),variations(16)
+		,simdist(160),mutations(10)
 		,descendants(5),maxage(10),iterations(100)
 	{
 		std::string src = config;
@@ -38,8 +39,7 @@ struct VectorSpaceModelConfig
 		if (extractUIntFromConfigString( dim, src, "dim", errorhnd)){}
 		if (extractUIntFromConfigString( bits, src, "bit", errorhnd)){}
 		if (extractUIntFromConfigString( variations, src, "var", errorhnd)){}
-		if (extractFloatFromConfigString( threshold_sim, src, "sim", errorhnd)){}
-		if (extractUIntFromConfigString( threshold_simdist, src, "simdist", errorhnd)){}
+		if (extractUIntFromConfigString( simdist, src, "simdist", errorhnd)){}
 		if (extractUIntFromConfigString( mutations, src, "mutations", errorhnd)){}
 		if (extractUIntFromConfigString( descendants, src, "descendants", errorhnd)){}
 		if (extractUIntFromConfigString( maxage, src, "maxage", errorhnd)){}
@@ -58,8 +58,7 @@ struct VectorSpaceModelConfig
 	unsigned int dim;
 	unsigned int bits;
 	unsigned int variations;
-	double threshold_sim;
-	unsigned int threshold_simdist;
+	unsigned int simdist;
 	unsigned int mutations;
 	unsigned int descendants;
 	unsigned int maxage;
@@ -79,26 +78,62 @@ class VectorSpaceModelInstance
 {
 public:
 	VectorSpaceModelInstance( const std::string& config_, ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_),m_config(config_,errorhnd_)
-	{}
+		:m_errorhnd(errorhnd_),m_config(config_,errorhnd_),m_lshmodel(0)
+	{
+		loadModelFromFile( m_config.path);
+	}
 
-	virtual ~VectorSpaceModelInstance(){}
+	virtual ~VectorSpaceModelInstance()
+	{
+		if (m_lshmodel) delete( m_lshmodel);
+	}
 
 	virtual std::vector<Index> mapVectorToFeatures( const std::vector<double>& vec) const
 	{
 		try
 		{
 			std::vector<Index> rt;
+			SimHash hash( m_lshmodel->simHash( arma::vec( vec)));
+			std::vector<SimHash>::const_iterator ii = m_individuals.begin(), ie = m_individuals.end();
+			for (std::size_t iidx=1; ii != ie; ++ii,++iidx)
+			{
+				if (ii->near( hash, m_config.simdist))
+				{
+					rt.push_back( iidx);
+				}
+			}
 			return rt;
 		}
 		CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' mapping vector to features: %s"), MODULENAME, *m_errorhnd, std::vector<Index>());
 	}
 
+	virtual unsigned int nofFeatures() const
+	{
+		return m_individuals.size();
+	}
+
+private:
+	void loadModelFromFile( const std::string& path);
+
 private:
 	ErrorBufferInterface* m_errorhnd;
 	VectorSpaceModelConfig m_config;
+	LshModel* m_lshmodel;
+	std::vector<SimHash> m_individuals;
 };
 
+
+void VectorSpaceModelInstance::loadModelFromFile( const std::string& path)
+{
+	if (path.empty()) throw strus::runtime_error(_TXT("no 'path' configuration variable defined, cannot load model"));
+	std::string dump;
+	unsigned int ec = readFile( path, dump);
+	if (ec) throw strus::runtime_error(_TXT("failed to load model from file (errno %u): %s"), ec, ::strerror(ec));
+	std::size_t itr = 0;
+	std::auto_ptr<LshModel> lshmodel( LshModel::createFromSerialization( dump, itr));
+	m_individuals = SimHash::createFromSerialization( dump, itr);
+	m_lshmodel = lshmodel.release();
+}
 
 class VectorSpaceModelBuilder
 	:public VectorSpaceModelBuilderInterface
@@ -110,7 +145,7 @@ public:
 		try
 		{
 			m_lshmodel = new LshModel( m_config.dim, m_config.bits, m_config.variations);
-			m_genmodel = new GenModel( m_config.threshold_simdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.iterations);
+			m_genmodel = new GenModel( m_config.simdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.iterations);
 		}
 		catch (const std::exception& err)
 		{
@@ -150,7 +185,9 @@ public:
 		try
 		{
 			if (m_config.path.empty()) throw strus::runtime_error(_TXT("failed to store built instance (no file configured)"));
-			std::string dump( m_lshmodel->serialize());
+			std::string dump;
+			m_lshmodel->printSerialization( dump);
+			SimHash::printSerialization( dump, m_resultar);
 			unsigned int ec = writeFile( m_config.path, dump);
 			if (ec)
 			{

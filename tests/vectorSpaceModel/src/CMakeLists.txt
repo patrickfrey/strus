@@ -17,15 +17,13 @@ link_directories(
 add_executable( testArmadillo testArmadillo.cpp)
 target_link_libraries( testArmadillo boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
 
-add_executable( testNaiveVectorSpaceModel testNaiveVectorSpaceModel.cpp)
-target_link_libraries( testNaiveVectorSpaceModel boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
+add_executable( testLshSimHash testLshSimHash.cpp)
+target_link_libraries( testLshSimHash strus_vectorspace_static )
 
 add_executable( testLshVectorSpaceModel testLshVectorSpaceModel.cpp)
 target_link_libraries( testLshVectorSpaceModel boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
 
-add_executable( testLshVectorSpaceModel2 testLshVectorSpaceModel2.cpp)
-target_link_libraries( testLshVectorSpaceModel2 boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
+add_executable( testVectorSpaceModel testVectorSpaceModel.cpp)
+target_link_libraries( testVectorSpaceModel boost_system strus_base strus_error strus_vectorspace ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
 
-add_executable( testLshSimHash testLshSimHash.cpp)
-target_link_libraries( testLshSimHash strus_vectorspace_static )
 

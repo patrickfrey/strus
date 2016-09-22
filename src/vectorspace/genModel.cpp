@@ -13,6 +13,7 @@
 #include <ctime>
 #include <cmath>
 #include <iostream>
+#include <sstream>
 #include <limits>
 
 using namespace strus;
@@ -336,5 +337,16 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 	return rt;
 }
 
-
+std::string GenModel::tostring() const
+{
+	std::ostringstream rt;
+	rt << "simdist=" << m_simdist << std::endl
+		<< ", eqdist=" << m_eqdist << std::endl
+		<< ", mutations=" << m_mutations << std::endl
+		<< ", descendants=" << m_descendants << std::endl
+		<< ", samplesize=" << m_samplesize << std::endl
+		<< ", maxage=" << m_maxage << std::endl
+		<< ", iterations=" << m_iterations << std::endl;
+	return rt.str();
+}
 

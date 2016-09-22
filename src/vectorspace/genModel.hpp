@@ -32,6 +32,9 @@ public:
 		:m_simdist(o.m_simdist),m_eqdist(o.m_eqdist),m_mutations(o.m_mutations),m_descendants(o.m_descendants)
 		,m_samplesize(o.m_samplesize),m_maxage(o.m_maxage),m_iterations(o.m_iterations){}
 
+	/// \brief map contents to string in readable form
+	std::string tostring() const;
+
 	/// \brief Unsupervised learning of a good group representantion of the sample set passed as argument
 	std::vector<SimHash> run( const std::vector<SimHash>& samples) const;
 

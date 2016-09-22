@@ -20,11 +20,15 @@ public:
 	/// \brief Destructor
 	virtual ~VectorSpaceModelInstanceInterface(){}
 
-	/// \brief Map a vector to a set of features represented as numbers.
+	/// \brief Map a vector to a set of features represented as numbers
 	/// \param[in] vec vector to calculate the features from
-	/// \return the resulting features.
+	/// \return the resulting feature indices (indices of trained individuals starting from 1)
 	/// \note The value of the features is depending on the model and not defined from outside. Feature learning must therefore happen in an unsupervised way.
 	virtual std::vector<Index> mapVectorToFeatures( const std::vector<double>& vec) const=0;
+
+	/// \brief Get the number of features learned
+	/// \return the number
+	virtual unsigned int nofFeatures() const=0;
 };
 
 }//namespace

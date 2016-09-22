@@ -13,6 +13,8 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 using namespace strus;
 
@@ -181,6 +183,63 @@ std::string SimHash::tostring() const
 	return rt.str();
 }
 
+void SimHash::printSerialization( std::string& out, const std::vector<SimHash>& ar)
+{
+	std::size_t maxsize = 0;
+	std::vector<SimHash>::const_iterator vi = ar.begin(), ve = ar.end();
+	for (; vi != ve; ++vi)
+	{
+		if (vi->size() > maxsize)
+		{
+			maxsize = vi->size();
+		}
+	}
+	std::size_t maxnofelem = maxsize/NofElementBits;
+	if (ar.size() > std::numeric_limits<uint32_t>::max()) throw strus::runtime_error(_TXT("sim hash vector too big to serialize"));
+	if (maxnofelem > std::numeric_limits<uint32_t>::max()) throw strus::runtime_error(_TXT("sim hash vector elements too big to serialize"));
+
+	uint32_t nw;
+	nw = htonl( (uint32_t)maxnofelem);	out.append( (const char*)&nw, sizeof(nw));
+	nw = htonl( (uint32_t)ar.size());	out.append( (const char*)&nw, sizeof(nw));
+	for (vi = ar.begin(); vi != ve; ++vi)
+	{
+		std::vector<uint64_t>::const_iterator ai = vi->m_ar.begin(), ae = vi->m_ar.end();
+		std::size_t wi = 0, we = maxnofelem;
+		for (; ai != ae; ++ai,++wi)
+		{
+			nw = htonl( *ai >> 32);		out.append( (const char*)&nw, sizeof(nw));
+			nw = htonl( *ai & 0xFFffFFffU);	out.append( (const char*)&nw, sizeof(nw));
+		}
+		for (; wi != we; ++wi)
+		{
+			nw = 0;
+			out.append( (const char*)&nw, sizeof(nw));
+			out.append( (const char*)&nw, sizeof(nw));
+		}
+	}
+}
+
+std::vector<SimHash> SimHash::createFromSerialization( const std::string& in, std::size_t& itr)
+{
+	std::vector<SimHash> rt;
+	uint32_t const* nw = (const uint32_t*)(void*)(in.c_str() + itr);
+	std::size_t maxnofelem = ntohl( *nw++);
+	std::size_t vi=0,ve = ntohl( *nw++);
+	for (; vi < ve; ++vi)
+	{
+		SimHash elem;
+		std::size_t ai=0,ae=maxnofelem;
+		for (; ai != ae; ++ai)
+		{
+			uint64_t val = ntohl( *nw++);
+			val = (val << 32) | ntohl( *nw++);
+			elem.m_ar.push_back( val);
+		}
+		elem.m_size = maxnofelem * NofElementBits;
+		rt.push_back( elem);
+	}
+	return rt;
+}
 
 
 

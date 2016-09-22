@@ -63,10 +63,10 @@ bool SimGroupMap::remove( const Index& idx, const Index& groupidx)
 
 SimGroupMap::const_node_iterator SimGroupMap::node_end( std::size_t nd) const
 {
-	Node& ndrec = m_nodear[ nd];
+	const Node& ndrec = m_nodear[ nd];
 	std::size_t ii = NofNodeBranches;
 	for (; ii>0 && ndrec.groupidx[ii-1]==0; --ii){}
-	return ndrec.groupidx + ii;
+	return const_node_iterator( ndrec.groupidx + ii);
 }
 
 SimGroupMap::Node::Node( const Node& o)
@@ -79,7 +79,7 @@ SimGroupMap::Node::Node()
 	std::memset( groupidx, 0, sizeof(groupidx));
 }
 
-bool SimGroupMap::Node::insert( const Index& gix)
+bool SimGroupMap::Node::insert( const Index& gidx)
 {
 	for (unsigned int ii=0; ii<NofNodeBranches; ++ii)
 	{

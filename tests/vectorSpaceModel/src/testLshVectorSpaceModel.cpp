@@ -6,7 +6,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Test program
-
 #include "private/bitOperations.hpp"
 #include <armadillo>
 #include <iostream>
@@ -18,6 +17,7 @@
 #include <cmath>
 #include <limits>
 
+#undef STRUS_LOWLEVEL_DEBUG
 
 static void initRandomNumberGenerator()
 {
@@ -31,11 +31,17 @@ static void initRandomNumberGenerator()
 	std::srand( seed+2);
 }
 
-static void printSimHash( std::ostream& out, const std::vector<bool>& sh)
+#ifdef STRUS_LOWLEVEL_DEBUG
+static void printSimHash( std::ostream& out, const std::vector<bool>& sh, std::size_t variations)
 {
 	std::vector<bool>::const_iterator si = sh.begin(), se = sh.end();
-	for (; si != se; ++si)
+	for (std::size_t sidx=0; si != se; ++si,++sidx)
 	{
+		if (sidx && sidx % variations == 0)
+		{
+			out << "|";
+			sidx = 0;
+		}
 		out << (*si ? "1":"0");
 	}
 }
@@ -48,13 +54,17 @@ static void printVector( std::ostream& out, const arma::vec& vec)
 	std::size_t xidx = 0;
 	for (; xi != xe; ++xi,++xidx)
 	{
-		if (xidx) fbuf << ", ";
+		if (xidx)
+		{
+			fbuf << ", ";
+		}
 		fbuf << *xi;
 	}
 	out << "(" << fbuf.str() << ")";
 }
+#endif
 
-arma::vec createSimilarVector( const arma::vec& vec, double maxCosSim)
+static arma::vec createSimilarVector( const arma::vec& vec, double maxCosSim)
 {
 	arma::vec rt( vec);
 	for (;;)
@@ -84,25 +94,56 @@ arma::vec createSimilarVector( const arma::vec& vec, double maxCosSim)
 class VectorSpaceModel
 {
 public:
-	VectorSpaceModel( std::size_t dim_, std::size_t variations_)
-		:m_dim(dim_),m_variations(variations_),m_modelMatrix()
+	VectorSpaceModel( std::size_t dim_, std::size_t variations_, std::size_t width_)
+		:m_dim(dim_),m_variations(variations_),m_width(width_)
+		,m_modelMatrix( createModelMatrix( dim_, variations_))
 	{
-		if (m_dim <= 0 || m_variations <= 0)
+		std::size_t wi=0, we=width_;
+		for (; wi != we; ++wi)
+		{
+			m_rotations.push_back( arma::randu<arma::mat>( m_dim, m_dim));
+			if (std::abs( det( m_rotations.back())) < 0.01)
+			{
+				--wi;
+				continue;
+			}
+		}
+	}
+
+	static arma::mat createModelMatrix( std::size_t dim_, std::size_t variations_)
+	{
+		if (dim_ <= 0 || variations_ <= 0)
 		{
 			throw std::runtime_error( "illegal dimension or variations");
 		}
-		if (m_dim < m_variations)
+		if (dim_ < variations_)
 		{
 			throw std::runtime_error( "dimension must me two times bigger than variations");
 		}
-		do
+		double step = (float) dim_ / (float) variations_;
+		arma::mat rt = arma::mat( variations_, dim_);
+		std::size_t ri = 0, re = variations_;
+		for (; ri != re; ++ri)
 		{
-			m_modelMatrix = 2.0 * arma::randu<arma::mat>( m_dim, m_dim)
-					- arma::mat( m_dim, m_dim).ones();
+			unsigned int ci = (unsigned int)(ri * step);
+			unsigned int ce = (unsigned int)((ri+1) * step);
+			if (ce > dim_) ce = dim_;
+			if ((ri+1) == re) ce = dim_;
+			rt.row( ri).fill( -1.0 / (dim_ - (ce - ci)));
+			double val = 1.0 / (ce - ci);
+			for (; ci < ce; ++ci)
+			{
+				rt( ri, ci) = val;
+			}
 		}
-		while (std::fabs(arma::det(m_modelMatrix)) <= 0.01);
+		return rt;
+	}
 
-		m_simhashMatrix = m_modelMatrix.rows( 0, m_variations-1);
+	std::string tostring() const
+	{
+		std::ostringstream rt;
+		rt << m_modelMatrix;
+		return rt.str();
 	}
 
 	typedef std::vector<bool> SimHash;
@@ -114,16 +155,29 @@ public:
 	// doi:10.1145/509907.509965.
 	SimHash simHash( const arma::vec& vec) const
 	{
-		std::vector<bool> rt;
+		SimHash rt;
 		if (m_dim != vec.size())
 		{
 			throw std::runtime_error( "vector must have dimension of model");
 		}
-		arma::vec res = m_simhashMatrix * vec;
+		arma::vec res = m_modelMatrix * vec;
 		arma::vec::const_iterator ri = res.begin(), re = res.end();
 		for (; ri != re; ++ri)
 		{
 			rt.push_back( *ri >= 0.0);
+		}
+		return rt;
+	}
+
+	SimHash simHashW( const arma::vec& vec) const
+	{
+		SimHash rt;
+
+		std::vector<arma::mat>::const_iterator ri = m_rotations.begin(), re = m_rotations.end();
+		for (; ri != re; ++ri)
+		{
+			SimHash ww = simHash( (*ri) * vec);
+			rt.insert( rt.end(), ww.begin(), ww.end());
 		}
 		return rt;
 	}
@@ -180,10 +234,24 @@ public:
 private:
 	std::size_t m_dim;
 	std::size_t m_variations;
+	std::size_t m_width;
 	arma::mat m_modelMatrix;
-	arma::mat m_simhashMatrix;
+	std::vector<arma::mat> m_rotations;
 };
 
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+static VectorSpaceModel::SimHash diffSimHash( const VectorSpaceModel::SimHash& aa, const VectorSpaceModel::SimHash& bb)
+{
+	VectorSpaceModel::SimHash rt;
+	VectorSpaceModel::SimHash::const_iterator ai = aa.begin(), ae = aa.end(), bi = bb.begin(), be = bb.end();
+	for (; ai != ae && bi != be; ++ai,++bi)
+	{
+		rt.push_back( *ai ^ *bi);
+	}
+	return rt;
+}
+#endif
 
 
 int main( int argc, const char** argv)
@@ -192,25 +260,15 @@ int main( int argc, const char** argv)
 	{
 		initRandomNumberGenerator();
 		double threshold_sim = 0.90;
-		unsigned int threshold_dist = 8;
+		double accept_false_positive_sim = 0.85;
+		unsigned int threshold_dist = 340;
+		unsigned int nof_sample_vectors = 100;
+		unsigned int nof_similar_vectors = 100;
 
-		if (argc > 3)
+		if (argc > 6)
 		{
-			std::cerr << "Usage: " << argv[0] << " [<threshold min sim>  <threshold max dist>]" << std::endl;
-			throw std::runtime_error( "too many arguments (maximum 2 expected)");
-		}
-		if (argc >= 3)
-		{
-			bool error = false;
-			if (argv[2][0] >= '0' && argv[2][0] <= '9')
-			{
-				threshold_dist = std::atoi( argv[2]);
-			}
-			else
-			{
-				error = true;
-			}
-			if (error) throw std::runtime_error( "number (non negative integer) expected as 2nd argument");
+			std::cerr << "Usage: " << argv[0] << " [<threshold min sim>  <threshold max dist>  <threshold accept sim> <nof sample vec> <nof similar sample vec>]" << std::endl;
+			throw std::runtime_error( "too many arguments (maximum 5 expected)");
 		}
 		if (argc >= 2)
 		{
@@ -226,30 +284,94 @@ int main( int argc, const char** argv)
 			}
 			if (error) throw std::runtime_error( "floating point number between 0.0 and 1.0 expected as 1st argument");
 		}
+		if (argc >= 3)
+		{
+			bool error = false;
+			if (argv[2][0] >= '0' && argv[2][0] <= '9')
+			{
+				threshold_dist = std::atoi( argv[2]);
+			}
+			else
+			{
+				error = true;
+			}
+			if (error) throw std::runtime_error( "number (non negative integer) expected as 2nd argument");
+		}
+		if (argc >= 4)
+		{
+			bool error = false;
+			if (argv[3][0] >= '0' && argv[3][0] <= '9')
+			{
+				accept_false_positive_sim = std::atof( argv[3]);
+				error = (accept_false_positive_sim > 1.0);
+			}
+			else
+			{
+				error = true;
+			}
+			if (error) throw std::runtime_error( "floating point number between 0.0 and 1.0 expected as 3rd argument");
+		}
+		else
+		{
+			accept_false_positive_sim = threshold_sim - threshold_sim / 10;
+		}
+		if (argc >= 5)
+		{
+			bool error = false;
+			if (argv[4][0] >= '0' && argv[4][0] <= '9')
+			{
+				nof_sample_vectors = std::atoi( argv[4]);
+			}
+			else
+			{
+				error = true;
+			}
+			if (error) throw std::runtime_error( "number (non negative integer) expected as 4th argument");
+		}
+		if (argc >= 6)
+		{
+			bool error = false;
+			if (argv[5][0] >= '0' && argv[5][0] <= '9')
+			{
+				nof_similar_vectors = std::atoi( argv[5]);
+			}
+			else
+			{
+				error = true;
+			}
+			if (error) throw std::runtime_error( "number (non negative integer) expected as 5th argument");
+		}
 		std::cerr << "Threshold similarity = " << threshold_sim << std::endl;
+		std::cerr << "Threshold accepted similarity = " << accept_false_positive_sim << std::endl;
 		std::cerr << "Threshold distance = " << threshold_dist << std::endl;
+		std::cerr << "Nof sample vectors = " << nof_sample_vectors << std::endl;
+		std::cerr << "Nof similar sample vectors = " << nof_similar_vectors << std::endl;
 
-		enum {Dim=300,Variations=128,NofSampleVectors=100,NofSimilarVectors=1000};
+		enum {Dim=300,Variations=64,Width=32};
 		std::cout << "Build model "
 			  << (unsigned int)Dim << "x" << (unsigned int)Dim
-			  << " => " << (unsigned int)NofSampleVectors << ":" << std::endl;
+			  << ", variations " << (unsigned int)Variations << ", rotations " << (unsigned int)Width << ":"
+			  << std::endl;
 
-		VectorSpaceModel model( Dim, Variations);
+		VectorSpaceModel model( Dim, Variations, Width);
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cout << "Model Matrix:" << std::endl << model.tostring() << std::endl;
+#endif
 		std::vector<arma::vec> testvectorar;
 		std::vector<VectorSpaceModel::SimHash> testshar;
 		std::vector<VectorSpaceModel::SimHashStruct> testsimhashar;
 
-		std::cout << "Build " << (unsigned int)NofSampleVectors << " samples:" << std::endl;
-		unsigned int vi=0,ve=NofSampleVectors;
+		std::cout << "Build " << (unsigned int)nof_sample_vectors << " samples:" << std::endl;
+		unsigned int vi=0,ve=nof_sample_vectors;
 		for (; vi != ve; ++vi)
 		{
 			testvectorar.push_back( arma::randu<arma::vec>( Dim));
 		}
-		std::cout << "Build " << (unsigned int)NofSimilarVectors << " similar vector for samples:" << std::endl;
-		vi=0; ve=NofSimilarVectors;
+		std::cout << "Build " << (unsigned int)nof_sample_vectors << " similar vector for samples:" << std::endl;
+		vi=0; ve=nof_sample_vectors;
 		for (; vi != ve; ++vi)
 		{
-			std::size_t origidx = rand() % NofSampleVectors;
+			std::size_t origidx = rand() % nof_sample_vectors;
 			double sim = 0.90 + (rand() % 99) * 0.001;
 			testvectorar.push_back( createSimilarVector( testvectorar[ origidx], sim));
 		}
@@ -258,10 +380,11 @@ int main( int argc, const char** argv)
 		std::vector<arma::vec>::const_iterator ti = testvectorar.begin(), te = testvectorar.end();
 		for (; ti != te; ++ti)
 		{
-			testshar.push_back( model.simHash( *ti));
+			testshar.push_back( model.simHashW( *ti));
 			testsimhashar.push_back( testshar.back());
 		}
 
+#ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "Results:" << std::endl;
 		ti = testvectorar.begin(), te = testvectorar.end();
 		std::size_t tidx = 0;
@@ -270,15 +393,16 @@ int main( int argc, const char** argv)
 			std::cout << "[" << tidx << "] ";
 			printVector( std::cout, *ti);
 			std::cout << " => ";
-			printSimHash( std::cout, testshar[ tidx]);
+			printSimHash( std::cout, testshar[ tidx], Variations);
 			std::cout << std::endl;
 		}
-
+#endif
 		unsigned int all_candidate_count = 0;
 		unsigned int positive_match_count = 0;
 		unsigned int negative_match_count = 0;
 		unsigned int missed_match_count = 0;
 		unsigned int false_positive_count = 0;
+		unsigned int accept_false_positive_count = 0;
 		unsigned int nof_lsh_matches = 0;
 		unsigned int nof_sim_matches = 0;
 
@@ -315,22 +439,37 @@ int main( int argc, const char** argv)
 				else if (is_lsh_match && !is_sim_match)
 				{
 					false_positive_count += 1;
-					tag = "false positive";
+					if (sim > accept_false_positive_sim)
+					{
+						accept_false_positive_count += 1;
+					}
+					else
+					{
+						tag = "false positive";
+					}
 				}
 				if (tag)
 				{
+#ifdef STRUS_LOWLEVEL_DEBUG
 					std::cout << tag << " [" << ai << "," << bi << "] SIM " << sim << " DIST " << dist << std::endl;
+					printSimHash( std::cout, testshar[ ai], Variations); std::cout << std::endl;
+					printSimHash( std::cout, testshar[ bi], Variations); std::cout << std::endl;
+					std::cout << std::endl;
+					std::cout << "DIFF = " << std::endl;
+					printSimHash( std::cout, diffSimHash( testshar[ ai], testshar[ bi]), Variations);
+					std::cout << std::endl;
+#endif
 #undef STRUS_DUMP_ERRORS
 #ifdef STRUS_DUMP_ERRORS
 					std::cout << "VECTOR A = ";
 					printVector( std::cout, testvectorar[ ai]);
 					std::cout << " => ";
-					printSimHash( std::cout, testshar[ ai]);
+					printSimHash( std::cout, testshar[ ai], Variations);
 					std::cout << std::endl;
 					std::cout << "VECTOR B = ";
 					printVector( std::cout, testvectorar[ bi]);
 					std::cout << " => ";
-					printSimHash( std::cout, testshar[ bi]);
+					printSimHash( std::cout, testshar[ bi], Variations);
 					std::cout << std::endl;
 #endif
 				}
@@ -342,7 +481,7 @@ int main( int argc, const char** argv)
 		std::cout << "positive_match_count   = " << positive_match_count << std::endl;
 		std::cout << "negative_match_count   = " << negative_match_count << std::endl;
 		std::cout << "missed_match_count     = " << missed_match_count << std::endl;
-		std::cout << "false_positive_count   = " << false_positive_count << std::endl;
+		std::cout << "false_positive_count   = " << false_positive_count << " good " << accept_false_positive_count << " bad " << (false_positive_count - accept_false_positive_count) << std::endl;
 		return 0;
 	}
 	catch (const std::runtime_error& err)
