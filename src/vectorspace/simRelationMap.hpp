@@ -35,27 +35,30 @@ public:
 private:
 	struct ElementVector
 	{
+		unsigned int dim;
 		arma::umat locations;
 		arma::Col<unsigned short> values;
 
-		ElementVector( const std::vector<Element>& vv)
+		ElementVector( const std::vector<Element>& vv, unsigned int dim_)
+			:dim(dim_),locations( 2, vv.size()), values( vv.size())
 		{
 			std::vector<Element>::const_iterator vi = vv.begin(), ve = vv.end();
-			for (; vi != ve; ++vi)
+			for (std::size_t vidx=0; vi != ve; ++vi,++vidx)
 			{
-				locations << vi->coord_x << vi->coord_y << arma::endr;
-				values << vi->value;
+				locations( 0,vidx) = vi->coord_x;
+				locations( 1,vidx) = vi->coord_y;
+				values[ vidx] = vi->value;
 			}
 		}
 		arma::SpMat<unsigned short> matrix() const
 		{
-			return arma::SpMat<unsigned short>( locations, values);
+			return arma::SpMat<unsigned short>( locations, values, dim, dim);
 		}
 	};
 
 public:
-	explicit SimRelationMap( const std::vector<Element>& elements)
-		:m_mat( ElementVector( elements).matrix()){}
+	explicit SimRelationMap( const std::vector<Element>& elements, unsigned int dim)
+		:m_mat( ElementVector( elements, dim).matrix()){}
 	SimRelationMap( const SimRelationMap& o)
 		:m_mat(o.m_mat){}
 

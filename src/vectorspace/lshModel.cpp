@@ -42,10 +42,6 @@ LshModel::LshModel( std::size_t dim_, std::size_t nofbits_, std::size_t variatio
 			throw strus::runtime_error( _TXT( "illegal rotation matrix in model"));
 		}
 	}
-	if (std::abs( det( m_modelMatrix)) < 0.01)
-	{
-		throw strus::runtime_error( _TXT( "illegal main matrix in model"));
-	}
 }
 
 
@@ -96,7 +92,7 @@ SimHash LshModel::simHash( const arma::vec& vec) const
 	std::vector<bool> rt;
 	if (m_dim != vec.size())
 	{
-		throw strus::runtime_error( _TXT("vector must have dimension of model"));
+		throw strus::runtime_error( _TXT("vector must have dimension of model: dim=%u != vector=%u"), m_dim, vec.size());
 	}
 	std::vector<arma::mat>::const_iterator roti = m_rotations.begin(), rote = m_rotations.end();
 	for (; roti != rote; ++roti)
@@ -120,21 +116,21 @@ union PackedDouble
 struct DumpStructHeader
 {
 	DumpStructHeader()
-		:dim(0),nofbits(0),variations(0),arsize(0){}
+		:dim(0),nofbits(0),variations(0){}
 	DumpStructHeader( std::size_t dim_, std::size_t nofbits_, std::size_t variations_)
-		:dim(dim_),nofbits(nofbits_),variations(variations_),arsize(0){}
+		:dim(dim_),nofbits(nofbits_),variations(variations_){}
+	DumpStructHeader( const DumpStructHeader& o)
+		:dim(o.dim),nofbits(o.nofbits),variations(o.variations){}
 
 	uint32_t dim;
 	uint32_t nofbits;
 	uint32_t variations;
-	uint32_t arsize;
 
 	void conv_hton()
 	{
 		dim = htonl(dim);
 		nofbits = htonl(nofbits);
 		variations = htonl(variations);
-		arsize = htonl(arsize);
 	}
 
 	void conv_ntoh()
@@ -142,7 +138,6 @@ struct DumpStructHeader
 		dim = ntohl(dim);
 		nofbits = ntohl(nofbits);
 		variations = ntohl(variations);
-		arsize = ntohl(arsize);
 	}
 };
 
@@ -150,7 +145,7 @@ struct DumpStruct
 	:public DumpStructHeader
 {
 	DumpStruct( std::size_t dim_, std::size_t nofbits_, std::size_t variations_)
-		:DumpStructHeader(dim_,nofbits_,variations_),ar(0)
+		:DumpStructHeader(dim_,nofbits_,variations_),ar(0),arsize(0)
 	{
 		std::size_t nofFloats = (dim * nofbits) + (dim * dim * variations);
 		arsize = nofFloats * 2;
@@ -176,7 +171,7 @@ struct DumpStruct
 
 	std::size_t nofValues() const
 	{
-		return arsize * 2;
+		return arsize / 2;
 	}
 
 	std::size_t contentAllocSize() const
@@ -190,8 +185,7 @@ struct DumpStruct
 		std::size_t ai=0, ae=arsize;
 		for (; ai != ae; ++ai)
 		{
-			ar[ ai*2+0] = ntohl( ua[ ai*2+0]);
-			ar[ ai*2+1] = ntohl( ua[ ai*2+0]);
+			ar[ ai] = ntohl( ua[ ai]);
 		}
 	}
 
@@ -233,6 +227,7 @@ struct DumpStruct
 
 private:
 	uint32_t* ar;
+	uint32_t arsize;
 
 private:
 	DumpStruct( const DumpStruct&){} //non copyable, because we do not know LE of BE conversion state

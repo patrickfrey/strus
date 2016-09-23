@@ -23,6 +23,8 @@
 using namespace strus;
 #define MODULENAME "standard vector space model"
 
+#define STRUS_LOWLEVEL_DEBUG
+
 struct VectorSpaceModelConfig
 {
 	VectorSpaceModelConfig()
@@ -30,9 +32,9 @@ struct VectorSpaceModelConfig
 		,simdist(160),mutations(10)
 		,descendants(5),maxage(10),iterations(100){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
-		:path(),dim(300),bits(64),variations(16)
-		,simdist(160),mutations(10)
-		,descendants(5),maxage(10),iterations(100)
+		:path(),dim(300),bits(64),variations(32)
+		,simdist(340),mutations(50)
+		,descendants(10),maxage(20),iterations(20)
 	{
 		std::string src = config;
 		if (extractStringFromConfigString( path, src, "path", errorhnd)){}

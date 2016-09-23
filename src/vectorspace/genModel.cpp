@@ -72,7 +72,7 @@ static SimRelationMap getSimRelationMap( const std::vector<SimHash>& samplear, u
 			}
 		}
 	}
-	return SimRelationMap( simrellist);
+	return SimRelationMap( simrellist, samplear.size());
 }
 
 typedef std::list<SimGroup> GroupInstanceList;
@@ -190,16 +190,26 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 	GroupInstanceList groupInstanceList;					// list of similarity group representants
 	GroupInstanceMap groupInstanceMap;					// map indices to group representant list iterators
 	SimGroupMap simGroupMap( samplear.size());				// map of sample idx to group idx
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cerr << "build similarity relation map" << std::endl;
+#endif
 	SimRelationMap simrelmap( getSimRelationMap( samplear, m_simdist));	// similarity relation map of the list of samples
 
 	// Do the iterations of creating new individuals
 	unsigned int iteration=0;
 	for (; iteration != m_iterations; ++iteration)
 	{
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "GenModel::run iteration " << iteration << std::endl;
+		std::cerr << "create new groups" << std::endl;
+#endif
 		// Go through all elements and try to create new groups with the closest free neighbours:
 		std::vector<SimHash>::const_iterator si = samplear.begin(), se = samplear.end();
 		for (std::size_t sidx=0; si != se; ++si,++sidx)
 		{
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "visit sample " << sidx << std::endl;
+#endif
 			if (!simGroupMap.hasSpace( sidx)) continue;
 
 			// Find the closest neighbour, that is not yet in a group with this sample:
@@ -232,11 +242,17 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 				}
 			}
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "find neighbour groups" << std::endl;
+#endif
 		// Go through all groups and try to make elements jump to neighbour groups and try
 		// to unify groups:
 		GroupInstanceList::iterator gi = groupInstanceList.begin(), ge = groupInstanceList.end();
 		for (; gi != ge; ++gi)
 		{
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "visit group " << gi->id() << std::endl;
+#endif
 			// Build the set of neighbour groups:
 			std::set<Index> neighbour_groups;
 			std::vector<SampleIndex>::const_iterator
@@ -254,6 +270,9 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 			std::set<Index>::const_iterator ni = neighbour_groups.begin(), ne = neighbour_groups.end();
 			for (; ni != ne; ++ni)
 			{
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cerr << "found neighbour group " << *ni << std::endl;
+#endif
 				GroupInstanceMap::iterator sim_gi_slot = groupInstanceMap.find( *ni);
 				if (sim_gi_slot == groupInstanceMap.end()) throw strus::runtime_error(_TXT("illegal reference in group map"));
 				GroupInstanceList::iterator sim_gi = sim_gi_slot->second;
@@ -301,11 +320,17 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 				}
 			}
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "start mutation step" << std::endl;
+#endif
 		// Mutation step for all groups and dropping of elements that got too far away from the
 		// representants genom:
 		gi = groupInstanceList.begin(), ge = groupInstanceList.end();
 		for (; gi != ge; ++gi)
 		{
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "visit group " << gi->id() << std::endl;
+#endif
 			gi->mutate( samplear, m_descendants, m_mutations);
 
 			std::vector<SampleIndex>::const_iterator
@@ -326,6 +351,9 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 			}
 		}
 	}
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cerr << "build the result" << std::endl;
+#endif
 
 	// Build the result:
 	std::vector<SimHash> rt;

@@ -91,11 +91,11 @@ int main( int argc, const char** argv)
 	try
 	{
 		g_errorhnd = strus::createErrorBuffer_standard( 0, 0);
-		if (g_errorhnd) throw std::runtime_error("failed to create error buffer structure");
+		if (!g_errorhnd) throw std::runtime_error("failed to create error buffer structure");
 
 		initRandomNumberGenerator();
-		std::string config;
-		unsigned int nof_samples = 1000;
+		std::string config( "path=test.vm;dim=300;bit=64;var=32;simdist=340;mutations=50;descendants=10;maxage=20;iterations=20");
+		unsigned int nof_samples = 10;
 		unsigned int dim = 300;
 
 		if (argc > 3)
@@ -129,13 +129,13 @@ int main( int argc, const char** argv)
 		std::auto_ptr<strus::VectorSpaceModelBuilderInterface> builder( vmodel->createBuilder( config));
 		if (!builder.get()) throw std::runtime_error("failed to create vector space model builder structure");
 
-		std::cerr << "create sample vectors" << std::endl;
+		std::cerr << "create " << nof_samples << " sample vectors" << std::endl;
 		std::vector<std::vector<double> > samplear;
 		std::size_t sidx = 0;
 		for (; sidx != nof_samples; ++sidx)
 		{
 			std::vector<double> vec;
-			if (!sidx && rand() % 3 < 2)
+			if (!sidx || rand() % 3 < 2)
 			{
 				vec = createRandomVector( dim);
 			}

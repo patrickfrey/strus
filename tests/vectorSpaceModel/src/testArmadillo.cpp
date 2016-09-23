@@ -48,6 +48,41 @@ int main()
 		double det_c = arma::det( C);
 		std::cout << "determinant of C:" << det_c << std::endl;
 
+		{
+			arma::sp_mat A(5,6);
+			arma::sp_mat B(6,5);
+
+			A(0,0) = 1;
+			A(1,0) = 2;
+
+			B(0,0) = 3;
+			B(0,1) = 4;
+
+			arma::sp_mat C = 2*B;
+
+			arma::sp_mat D = A*C;
+
+			// batch insertion of two values at (5, 6) and (9, 9)
+			arma::umat locations1( 2,3);
+			locations1(0,0) = 900;
+			locations1(0,1) = 901;
+			locations1(0,2) = 903;
+			locations1(1,0) = 910;
+			locations1(1,1) = 911;
+			locations1(1,2) = 912;
+
+			arma::umat locations2;
+			locations2 << 900 << 901 << 903 << arma::endr
+				   << 910 << 911 << 913 << arma::endr;
+
+			arma::vec values;
+			values << 1.1 << 1.2 << 1.3 << arma::endr;
+
+			arma::sp_mat X( locations1, values);
+			arma::sp_mat Y( locations1, values);
+			std::cout << X << std::endl;
+			std::cout << Y << std::endl;
+		}
 		return 0;
 	}
 	catch (const std::runtime_error& err)

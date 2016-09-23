@@ -20,7 +20,8 @@ class SimGroupMap
 {
 public:
 	explicit SimGroupMap( std::size_t nofNodes)
-		:m_nodear( nofNodes, Node()){}
+		:m_nodear( nofNodes, Node())
+	{}
 	SimGroupMap( const SimGroupMap& o)
 		:m_nodear(o.m_nodear){}
 
