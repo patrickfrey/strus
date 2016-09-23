@@ -28,6 +28,7 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 {
 	try
 	{
+		unsigned int cachesize = 0;
 		unsigned int cachesize_kb = 0;
 		bool compression = true;
 		unsigned int maxOpenFiles = 0;
@@ -42,7 +43,8 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 			return 0;
 		}
 		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
-		(void)extractUIntFromConfigString( cachesize_kb, src, "cache", m_errorhnd);
+		(void)extractUIntFromConfigString( cachesize, src, "cache", m_errorhnd);
+		cachesize_kb = (unsigned int)((cachesize + 1023)/1024);
 		(void)extractUIntFromConfigString( maxOpenFiles, src, "max_open_files", m_errorhnd);
 		(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size", m_errorhnd);
 		(void)extractUIntFromConfigString( blockSize, src, "block_size", m_errorhnd);
