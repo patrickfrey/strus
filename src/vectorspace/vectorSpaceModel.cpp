@@ -135,6 +135,24 @@ void VectorSpaceModelInstance::loadModelFromFile( const std::string& path)
 	std::auto_ptr<LshModel> lshmodel( LshModel::createFromSerialization( dump, itr));
 	m_individuals = SimHash::createFromSerialization( dump, itr);
 	m_lshmodel = lshmodel.release();
+
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::string txtfilename( path + ".in.txt");
+	std::ostringstream txtdump;
+	txtdump << "LSH:" << std::endl << m_lshmodel->tostring() << std::endl;
+	txtdump << "GEN:" << std::endl;
+	std::vector<SimHash>::const_iterator ii = m_individuals.begin(), ie = m_individuals.end();
+	for (; ii != ie; ++ii)
+	{
+		txtdump << ii->tostring() << std::endl;
+	}
+	txtdump << std::endl;
+	ec = writeFile( txtfilename, txtdump.str());
+	if (ec)
+	{
+		throw strus::runtime_error(_TXT("failed to store debug text dump of instance loaded (system error %u: %s)"), ec, ::strerror(ec));
+	}
+#endif
 }
 
 class VectorSpaceModelBuilder
@@ -186,11 +204,23 @@ public:
 	{
 		try
 		{
+			unsigned int ec;
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::string txtfilename( m_config.path + ".out.txt");
+			std::ostringstream txtdump;
+			txtdump << "LSH:" << std::endl << m_lshmodel->tostring() << std::endl;
+			txtdump << "GEN:" << std::endl << m_genmodel->tostring() << std::endl;
+			ec = writeFile( txtfilename, txtdump.str());
+			if (ec)
+			{
+				throw strus::runtime_error(_TXT("failed to store debug text dump of instance built (system error %u: %s)"), ec, ::strerror(ec));
+			}
+#endif
 			if (m_config.path.empty()) throw strus::runtime_error(_TXT("failed to store built instance (no file configured)"));
 			std::string dump;
 			m_lshmodel->printSerialization( dump);
 			SimHash::printSerialization( dump, m_resultar);
-			unsigned int ec = writeFile( m_config.path, dump);
+			ec = writeFile( m_config.path, dump);
 			if (ec)
 			{
 				throw strus::runtime_error(_TXT("failed to store built instance (system error %u: %s)"), ec, ::strerror(ec));
