@@ -241,6 +241,34 @@ std::vector<SimHash> SimHash::createFromSerialization( const std::string& in, st
 	return rt;
 }
 
+uint64_t hash64Bitshuffle( uint64_t a)
+{
+	a = (a+0x7ed55d1617ad327a) + (a<<31);
+	a = (a^0xc761c23c384321a7) ^ (a>>19);
+	a = (a+0x165667b171b497a3) + (a<<5);
+	a = (a+0xd3a2646c61a5cd01) ^ (a<<9);
+	a = (a+0xfd7046c529aa46c8) + (a<<41);
+	a = (a^0xb55a4f091a99cf51) ^ (a>>17);
+	a = (a+0x19fa430a826cd104) + (a<<7);
+	a = (a^0xc78123985cfa1097) ^ (a>>27);
+	a = (a+0x37af76271ff18537) ^ (a<<12);
+	a = (a+0xc16752fa0917283a) + (a<<21);
+	return a;
+}
+
+SimHash SimHash::randomHash( std::size_t size_, unsigned int seed)
+{
+	SimHash rt;
+	std::size_t ai=0,ae = (size_ + NofElementBits - 1) / NofElementBits;
+	rt.m_size = size_;
+	rt.m_ar.reserve( ae);
+	enum {KnuthConst=2654435761};
+	for (; ai != ae; ++ai)
+	{
+		rt.m_ar.push_back( hash64Bitshuffle( (seed + ai) * KnuthConst));
+	}
+	return rt;
+}
 
 
 

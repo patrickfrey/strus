@@ -73,7 +73,7 @@ SimHash SimGroup::kernel( const std::vector<SimHash>& samplear) const
 	std::vector<SampleIndex>::const_iterator si = members().begin(), se = members().end();
 	if (si == se) return gencode();
 
-	SimHash first( samplear[ *si -1]);
+	SimHash first( samplear[ *si]);
 	SimHash rt( first.size(), true);
 
 	for (++si; si != se; ++si)
@@ -90,8 +90,7 @@ SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int m
 	// Calculate 'kernel' = the set of all elements equal for all members. These cannot be mutated:
 	SimHash kn = kernel( samplear);
 
-	SimHash rt( gencode());
-
+	SimHash rt( m_gencode);
 	unsigned int mi=0, me=mutations;
 	for (; mi != me; ++mi)
 	{
@@ -131,6 +130,20 @@ SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int m
 	return rt;
 }
 
+SimHash SimGroup::inithash( const std::vector<SimHash>& samplear) const
+{
+	if (m_members.size() == 0) return gencode();
+
+	// Calculate 'kernel' = the set of all elements equal for all members. These cannot be mutated:
+	SimHash kn = kernel( samplear);
+
+	SimHash rt( 
+		// all elements belonging to the kernel are taken from the first element the others chosen randomly
+		rt = (~kn & SimHash::randomHash( kn.size(), g_random.get( 0, std::numeric_limits<unsigned int>::max())))
+		   | (kn & samplear[0])
+	);
+	return rt;
+}
 
 void SimGroup::mutate( const std::vector<SimHash>& samplear, unsigned int descendants, unsigned int mutations)
 {

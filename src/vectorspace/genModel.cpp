@@ -49,6 +49,11 @@ public:
 		m_freeList.push_back( idx);
 	}
 
+	unsigned int nofGroupsAllocated() const
+	{
+		return m_cnt - m_freeList.size();
+	}
+
 private:
 	Index m_cnt;
 	std::vector<strus::Index> m_freeList;
@@ -65,8 +70,11 @@ static SimRelationMap getSimRelationMap( const std::vector<SimHash>& samplear, u
 			std::vector<SimHash>::const_iterator pi = samplear.begin();
 			for (std::size_t pidx=0; pi != si; ++pi,++pidx)
 			{
-				if (si->near( *pi, simdist))
+				if (pidx != sidx && si->near( *pi, simdist))
 				{
+#ifdef STRUS_LOWLEVEL_DEBUG
+					std::cerr << "declare similarity " << sidx << " ~ " << pidx << std::endl;
+#endif
 					simrellist.push_back( SimRelationMap::Element( sidx, pidx, si->dist( *pi)));
 				}
 			}
@@ -194,7 +202,9 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 	std::cerr << "build similarity relation map" << std::endl;
 #endif
 	SimRelationMap simrelmap( getSimRelationMap( samplear, m_simdist));	// similarity relation map of the list of samples
-
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cerr << "got similarity relation map:" << std::endl << simrelmap.tostring() << std::endl;
+#endif
 	// Do the iterations of creating new individuals
 	unsigned int iteration=0;
 	for (; iteration != m_iterations; ++iteration)
@@ -243,7 +253,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 			}
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "find neighbour groups" << std::endl;
+		std::cerr << "find neighbour groups out of " << groupIdAllocator.nofGroupsAllocated() << std::endl;
 #endif
 		// Go through all groups and try to make elements jump to neighbour groups and try
 		// to unify groups:
@@ -354,7 +364,6 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::cerr << "build the result" << std::endl;
 #endif
-
 	// Build the result:
 	std::vector<SimHash> rt;
 	GroupInstanceList::const_iterator gi = groupInstanceList.begin(), ge = groupInstanceList.end();
@@ -362,6 +371,9 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 	{
 		rt.push_back( gi->gencode());
 	}
+#ifdef STRUS_LOWLEVEL_DEBUG
+	std::cout << "got " << rt.size() << " categories" << std::endl;
+#endif
 	return rt;
 }
 

@@ -37,7 +37,7 @@ bool SimGroupMap::shares( const Index& idx1, const Index& idx2) const
 		}
 		else
 		{
-			return true;
+			return (nd1.groupidx[i1] != 0);
 		}
 	}
 	return false;

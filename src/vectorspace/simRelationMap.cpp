@@ -10,9 +10,17 @@
 #include <limits>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <set>
 
 #define STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
+
+std::string SimRelationMap::tostring() const
+{
+	std::ostringstream buf;
+	buf << m_mat << std::endl;
+	return buf.str();
+}
 

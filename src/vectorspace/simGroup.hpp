@@ -26,7 +26,7 @@ public:
 	{
 		m_members.push_back( m1);
 		m_members.push_back( m2);
-		m_gencode = mutation( samplear, samplear[ m1].size());
+		m_gencode = inithash( samplear);
 	}
 
 	SimGroup( const SimHash& gencode_, const Index& id_)
@@ -64,10 +64,16 @@ private:
 	/// \brief Evaluate the fitness of a proposed genom change
 	/// \param[in] samplear global array of samples the reference system of this individual is based on
 	double fitness( const std::vector<SimHash>& samplear, const SimHash& candidate) const;
+	/// \brief Evaluate the kernel = the set of elements that are the same for all samples
 	/// \param[in] samplear global array of samples the reference system of this individual is based on
 	SimHash kernel( const std::vector<SimHash>& samplear) const;
+	/// \brief Calculate a mutation
 	/// \param[in] samplear global array of samples the reference system of this individual is based on
+	/// \param[in] maxNofMutations maximum number of bit mutations to do
 	SimHash mutation( const std::vector<SimHash>& samplear, unsigned int maxNofMutations) const;
+	/// \brief Calculate an initial individual (kernel + some random values)
+	/// \param[in] samplear global array of samples the reference system of this individual is based on
+	SimHash inithash( const std::vector<SimHash>& samplear) const;
 
 private:
 	strus::Index m_id;			///< feature identifier given to the group

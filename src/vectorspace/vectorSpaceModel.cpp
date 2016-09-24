@@ -208,6 +208,11 @@ public:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::string txtfilename( m_config.path + ".out.txt");
 			std::ostringstream txtdump;
+			std::vector<SimHash>::const_iterator ri = m_resultar.begin(), re = m_resultar.end();
+			for (std::size_t ridx=0; ri != re; ++ri,++ridx)
+			{
+				txtdump << "[" << ridx << "] " << ri->tostring() << std::endl;
+			}
 			txtdump << "LSH:" << std::endl << m_lshmodel->tostring() << std::endl;
 			txtdump << "GEN:" << std::endl << m_genmodel->tostring() << std::endl;
 			ec = writeFile( txtfilename, txtdump.str());

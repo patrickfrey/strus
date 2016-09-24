@@ -159,7 +159,7 @@ int main( int argc, const char** argv)
 			throw std::runtime_error( "storing of model failed");
 		}
 
-		std::cerr << "load model to caegorize vectors" << std::endl;
+		std::cerr << "load model to categorize vectors" << std::endl;
 		std::auto_ptr<strus::VectorSpaceModelInstanceInterface> categorizer( vmodel->createInstance( config));
 		if (!categorizer.get())
 		{

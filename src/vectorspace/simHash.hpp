@@ -97,6 +97,8 @@ public:
 	/// \brief Number of bits represented
 	std::size_t size() const			{return m_size;}
 
+	/// \brief Create a randomized SimHash of a given size
+	static SimHash randomHash( std::size_t size_, unsigned int seed);
 	/// \brief Serialize
 	static void printSerialization( std::string& out, const std::vector<SimHash>& ar);
 	/// \brief Deserialize

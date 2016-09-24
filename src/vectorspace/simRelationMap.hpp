@@ -40,14 +40,17 @@ private:
 		arma::Col<unsigned short> values;
 
 		ElementVector( const std::vector<Element>& vv, unsigned int dim_)
-			:dim(dim_),locations( 2, vv.size()), values( vv.size())
+			:dim(dim_),locations( 2, 2*vv.size()), values( 2*vv.size())
 		{
 			std::vector<Element>::const_iterator vi = vv.begin(), ve = vv.end();
-			for (std::size_t vidx=0; vi != ve; ++vi,++vidx)
+			for (std::size_t vidx=0; vi != ve; ++vi,vidx+=2)
 			{
 				locations( 0,vidx) = vi->coord_x;
 				locations( 1,vidx) = vi->coord_y;
 				values[ vidx] = vi->value;
+				locations( 0,vidx+1) = vi->coord_y;
+				locations( 1,vidx+1) = vi->coord_x;
+				values[ vidx+1] = vi->value;
 			}
 		}
 		arma::SpMat<unsigned short> matrix() const
@@ -83,6 +86,8 @@ public:
 	{
 		return Row( m_mat.begin_row( rowidx), m_mat.end_row( rowidx));
 	}
+
+	std::string tostring() const;
 
 private:
 	arma::SpMat<unsigned short> m_mat;
