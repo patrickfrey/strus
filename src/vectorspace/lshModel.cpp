@@ -21,12 +21,13 @@ LshModel::LshModel( std::size_t dim_, std::size_t nofbits_, std::size_t variatio
 	std::size_t wi=0, we=variations_;
 	for (; wi != we; ++wi)
 	{
-		m_rotations.push_back( arma::randu<arma::mat>( m_dim, m_dim));
-		if (std::abs( det( m_rotations.back())) < 0.01)
+		arma::mat rot( arma::randu<arma::mat>( m_dim, m_dim));
+		if (std::abs( det( rot)) < 0.01)
 		{
 			--wi;
 			continue;
 		}
+		m_rotations.push_back( rot);
 	}
 }
 
@@ -240,7 +241,7 @@ void LshModel::printSerialization( std::string& out) const
 
 	std::size_t aidx = 0;
 	std::vector<arma::mat>::const_iterator roti = m_rotations.begin(), rote = m_rotations.end();
-	for (; roti != rote; ++roti)
+	for (unsigned int ridx=0; roti != rote; ++roti,++ridx)
 	{
 		arma::mat::const_iterator ri = roti->begin(), re = roti->end();
 		for (; ri != re; ++ri)

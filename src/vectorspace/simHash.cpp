@@ -223,6 +223,7 @@ std::vector<SimHash> SimHash::createFromSerialization( const std::string& in, st
 {
 	std::vector<SimHash> rt;
 	uint32_t const* nw = (const uint32_t*)(void*)(in.c_str() + itr);
+	const uint32_t* start = nw;
 	std::size_t maxnofelem = ntohl( *nw++);
 	std::size_t vi=0,ve = ntohl( *nw++);
 	for (; vi < ve; ++vi)
@@ -238,6 +239,7 @@ std::vector<SimHash> SimHash::createFromSerialization( const std::string& in, st
 		elem.m_size = maxnofelem * NofElementBits;
 		rt.push_back( elem);
 	}
+	itr += (nw - start) * sizeof(uint32_t);
 	return rt;
 }
 

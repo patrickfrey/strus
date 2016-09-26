@@ -17,24 +17,64 @@
 #include "genModel.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/configParser.hpp"
+#include "strus/versionStorage.hpp"
 #include <armadillo>
 #include <memory>
 
 using namespace strus;
 #define MODULENAME "standard vector space model"
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
+
+struct VectorSpaceModelHdr
+{
+	enum {FILEID=0x3ff3};
+	char name[58];
+	unsigned short _id;
+	unsigned short version_major;
+	unsigned short version_minor;
+
+	VectorSpaceModelHdr()
+	{
+		std::strncpy( name, "strus standard vector space model bin file\n\0", sizeof(*this));
+		_id = FILEID;
+		version_major = STRUS_STORAGE_VERSION_MAJOR;
+		version_minor = STRUS_STORAGE_VERSION_MINOR;
+	}
+
+	void check()
+	{
+		if (_id != FILEID) throw strus::runtime_error(_TXT("unknown file type, expected strus standard vector space model binary file"));
+		if (version_major != STRUS_STORAGE_VERSION_MAJOR) throw strus::runtime_error(_TXT("major version (%u) of loaded strus standard vector space model binary file does not match"), version_major);
+		if (version_minor > STRUS_STORAGE_VERSION_MINOR) throw strus::runtime_error(_TXT("minor version (%u) of loaded strus standard vector space model binary file does not match (newer than your version of strus)"), version_minor);
+	}
+};
 
 struct VectorSpaceModelConfig
 {
+	enum Defaults {
+		DefaultDim = 300,
+		DefaultBits = 64,
+		DefaultVariations = 32,
+		DefaultSimDist = 340,	//< 340 out of 2K (32*64) ~ cosine dist 0.9
+		DefaultEqDist = 60,
+		DefaultMutations = 50,
+		DefaultDescendants = 10,
+		DefaultMaxAge = 20,
+		DefaultIterations = 20
+	};
+	VectorSpaceModelConfig( const VectorSpaceModelConfig& o)
+		:path(o.path),dim(o.dim),bits(o.bits),variations(o.variations)
+		,simdist(o.simdist),eqdist(o.eqdist),mutations(o.mutations)
+		,descendants(o.descendants),maxage(o.maxage),iterations(o.iterations){}
 	VectorSpaceModelConfig()
-		:path(),dim(300),bits(64),variations(16)
-		,simdist(160),mutations(10)
-		,descendants(5),maxage(10),iterations(100){}
+		:path(),dim(DefaultDim),bits(DefaultBits),variations(DefaultVariations)
+		,simdist(DefaultSimDist),eqdist(DefaultEqDist),mutations(DefaultMutations)
+		,descendants(DefaultDescendants),maxage(DefaultMaxAge),iterations(DefaultIterations){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
-		:path(),dim(300),bits(64),variations(32)
-		,simdist(340),mutations(50)
-		,descendants(10),maxage(20),iterations(20)
+		:path(),dim(DefaultDim),bits(DefaultBits),variations(DefaultVariations)
+		,simdist(DefaultSimDist),eqdist(DefaultEqDist),mutations(DefaultMutations)
+		,descendants(DefaultDescendants),maxage(DefaultMaxAge),iterations(DefaultIterations)
 	{
 		std::string src = config;
 		if (extractStringFromConfigString( path, src, "path", errorhnd)){}
@@ -42,17 +82,18 @@ struct VectorSpaceModelConfig
 		if (extractUIntFromConfigString( bits, src, "bit", errorhnd)){}
 		if (extractUIntFromConfigString( variations, src, "var", errorhnd)){}
 		if (extractUIntFromConfigString( simdist, src, "simdist", errorhnd)){}
+		if (extractUIntFromConfigString( eqdist, src, "eqdist", errorhnd)){}
 		if (extractUIntFromConfigString( mutations, src, "mutations", errorhnd)){}
 		if (extractUIntFromConfigString( descendants, src, "descendants", errorhnd)){}
 		if (extractUIntFromConfigString( maxage, src, "maxage", errorhnd)){}
 		if (extractUIntFromConfigString( iterations, src, "iterations", errorhnd)){}
 		if (dim == 0 || bits == 0 || variations == 0 || mutations == 0 || descendants == 0 || maxage == 0 || iterations == 0)
 		{
-			strus::runtime_error(_TXT("error in vector space model configuration: dim, bits, var, mutations, descendants, maxage or iterations values must not be zero"));
+			throw strus::runtime_error(_TXT("error in vector space model configuration: dim, bits, var, mutations, descendants, maxage or iterations values must not be zero"));
 		}
 		if (errorhnd->hasError())
 		{
-			strus::runtime_error(_TXT("error loading vector space model configuration: %s"), errorhnd->fetchError());
+			throw strus::runtime_error(_TXT("error loading vector space model configuration: %s"), errorhnd->fetchError());
 		}
 	}
 
@@ -61,6 +102,7 @@ struct VectorSpaceModelConfig
 	unsigned int bits;
 	unsigned int variations;
 	unsigned int simdist;
+	unsigned int eqdist;
 	unsigned int mutations;
 	unsigned int descendants;
 	unsigned int maxage;
@@ -80,7 +122,7 @@ class VectorSpaceModelInstance
 {
 public:
 	VectorSpaceModelInstance( const std::string& config_, ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_),m_config(config_,errorhnd_),m_lshmodel(0)
+		:m_errorhnd(errorhnd_),m_config(config_,errorhnd_),m_configstr(config_),m_lshmodel(0)
 	{
 		loadModelFromFile( m_config.path);
 	}
@@ -114,12 +156,19 @@ public:
 		return m_individuals.size();
 	}
 
+	virtual std::string config() const
+	{
+		return m_configstr;
+	}
+
 private:
 	void loadModelFromFile( const std::string& path);
+	std::string tostring() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;
 	VectorSpaceModelConfig m_config;
+	std::string m_configstr;
 	LshModel* m_lshmodel;
 	std::vector<SimHash> m_individuals;
 };
@@ -131,13 +180,36 @@ void VectorSpaceModelInstance::loadModelFromFile( const std::string& path)
 	std::string dump;
 	unsigned int ec = readFile( path, dump);
 	if (ec) throw strus::runtime_error(_TXT("failed to load model from file (errno %u): %s"), ec, ::strerror(ec));
-	std::size_t itr = 0;
+	VectorSpaceModelHdr hdr;
+	if (dump.size() < sizeof(hdr)) throw strus::runtime_error(_TXT("unknown file format"));
+	std::memcpy( &hdr, dump.c_str(), sizeof(hdr));
+	hdr.check();
+	std::size_t itr = sizeof(hdr);
 	std::auto_ptr<LshModel> lshmodel( LshModel::createFromSerialization( dump, itr));
 	m_individuals = SimHash::createFromSerialization( dump, itr);
+	m_configstr = std::string( dump.c_str() + itr);
+	try
+	{
+		m_config = VectorSpaceModelConfig( m_configstr, m_errorhnd);
+	}
+	catch (const std::runtime_error& err)
+	{
+		throw strus::runtime_error(_TXT("vector space model is corrupt or has different version (%s)"), err.what());
+	}
+	m_config.path = path;
 	m_lshmodel = lshmodel.release();
-
 #ifdef STRUS_LOWLEVEL_DEBUG
 	std::string txtfilename( path + ".in.txt");
+	ec = writeFile( txtfilename, tostring());
+	if (ec)
+	{
+		throw strus::runtime_error(_TXT("failed to store debug text dump of instance loaded (system error %u: %s)"), ec, ::strerror(ec));
+	}
+#endif
+}
+
+std::string VectorSpaceModelInstance::tostring() const
+{
 	std::ostringstream txtdump;
 	txtdump << "LSH:" << std::endl << m_lshmodel->tostring() << std::endl;
 	txtdump << "GEN:" << std::endl;
@@ -147,12 +219,7 @@ void VectorSpaceModelInstance::loadModelFromFile( const std::string& path)
 		txtdump << ii->tostring() << std::endl;
 	}
 	txtdump << std::endl;
-	ec = writeFile( txtfilename, txtdump.str());
-	if (ec)
-	{
-		throw strus::runtime_error(_TXT("failed to store debug text dump of instance loaded (system error %u: %s)"), ec, ::strerror(ec));
-	}
-#endif
+	return txtdump.str();
 }
 
 class VectorSpaceModelBuilder
@@ -165,7 +232,7 @@ public:
 		try
 		{
 			m_lshmodel = new LshModel( m_config.dim, m_config.bits, m_config.variations);
-			m_genmodel = new GenModel( m_config.simdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.iterations);
+			m_genmodel = new GenModel( m_config.simdist, m_config.eqdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.iterations);
 		}
 		catch (const std::exception& err)
 		{
@@ -173,7 +240,7 @@ public:
 			if (m_genmodel) delete m_genmodel;
 			m_lshmodel = 0;
 			m_genmodel = 0;
-			throw strus::runtime_error( _TXT("failed to build %s: %s"), MODULENAME, err.what());
+			throw strus::runtime_error( err.what());
 		}
 	}
 	virtual ~VectorSpaceModelBuilder()
@@ -186,6 +253,7 @@ public:
 	{
 		try
 		{
+			m_samplevecar.push_back( vec);
 			m_samplear.push_back( m_lshmodel->simHash( arma::vec( vec)));
 		}
 		CATCH_ERROR_ARG1_MAP( _TXT("error adding sample vector to '%s' builder: %s"), MODULENAME, *m_errorhnd);
@@ -207,15 +275,7 @@ public:
 			unsigned int ec;
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::string txtfilename( m_config.path + ".out.txt");
-			std::ostringstream txtdump;
-			std::vector<SimHash>::const_iterator ri = m_resultar.begin(), re = m_resultar.end();
-			for (std::size_t ridx=0; ri != re; ++ri,++ridx)
-			{
-				txtdump << "[" << ridx << "] " << ri->tostring() << std::endl;
-			}
-			txtdump << "LSH:" << std::endl << m_lshmodel->tostring() << std::endl;
-			txtdump << "GEN:" << std::endl << m_genmodel->tostring() << std::endl;
-			ec = writeFile( txtfilename, txtdump.str());
+			ec = writeFile( txtfilename, tostring());
 			if (ec)
 			{
 				throw strus::runtime_error(_TXT("failed to store debug text dump of instance built (system error %u: %s)"), ec, ::strerror(ec));
@@ -223,6 +283,8 @@ public:
 #endif
 			if (m_config.path.empty()) throw strus::runtime_error(_TXT("failed to store built instance (no file configured)"));
 			std::string dump;
+			VectorSpaceModelHdr hdr;
+			dump.append( (const char*)&hdr, sizeof( hdr));
 			m_lshmodel->printSerialization( dump);
 			SimHash::printSerialization( dump, m_resultar);
 			ec = writeFile( m_config.path, dump);
@@ -236,10 +298,43 @@ public:
 	}
 
 private:
+	std::string tostring() const
+	{
+		std::ostringstream txtdump;
+		txtdump << "DATA:" << std::endl;
+		std::vector<std::vector<double> >::const_iterator vi = m_samplevecar.begin(), ve = m_samplevecar.end();
+		for (unsigned int vidx=0; vi != ve; ++vi,++vidx)
+		{
+			txtdump << "sample [" << vidx << "] ";
+			std::vector<double>::const_iterator xi = vi->begin(), xe = vi->end();
+			for (unsigned int xidx=0; xi != xe; ++xi,++xidx)
+			{
+				if (xidx) txtdump << ", ";
+				txtdump << *xi;
+			}
+			txtdump << std::endl;
+		}
+		std::vector<SimHash>::const_iterator si = m_samplear.begin(), se = m_samplear.end();
+		for (unsigned int sidx=0; si != se; ++si,++sidx)
+		{
+			txtdump << "hash [" << sidx << "] " << si->tostring() << std::endl;
+		}
+		std::vector<SimHash>::const_iterator ri = m_resultar.begin(), re = m_resultar.end();
+		for (unsigned int ridx=0; ri != re; ++ri,++ridx)
+		{
+			txtdump << "result [" << ridx << "] " << ri->tostring() << std::endl;
+		}
+		txtdump << "LSH:" << std::endl << m_lshmodel->tostring() << std::endl;
+		txtdump << "GEN:" << std::endl << m_genmodel->tostring() << std::endl;
+		return txtdump.str();
+	}
+
+private:
 	ErrorBufferInterface* m_errorhnd;
 	VectorSpaceModelConfig m_config;
 	LshModel* m_lshmodel;
 	GenModel* m_genmodel;
+	std::vector<std::vector<double> > m_samplevecar;
 	std::vector<SimHash> m_samplear;
 	std::vector<SimHash> m_resultar;
 };

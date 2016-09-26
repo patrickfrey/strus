@@ -13,7 +13,7 @@
 #include <sstream>
 #include <set>
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 

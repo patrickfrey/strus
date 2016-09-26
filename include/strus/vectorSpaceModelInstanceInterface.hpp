@@ -29,6 +29,10 @@ public:
 	/// \brief Get the number of features learned
 	/// \return the number
 	virtual unsigned int nofFeatures() const=0;
+
+	/// \brief Get the configuration of this model
+	/// \return the configuration string
+	virtual std::string config() const=0;
 };
 
 }//namespace

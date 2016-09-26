@@ -21,14 +21,7 @@ typedef std::size_t SampleIndex;
 class SimGroup
 {
 public:
-	SimGroup( const std::vector<SimHash>& samplear, std::size_t m1, std::size_t m2, const Index& id_)
-		:m_id(id_),m_gencode(),m_age(0),m_members()
-	{
-		m_members.push_back( m1);
-		m_members.push_back( m2);
-		m_gencode = inithash( samplear);
-	}
-
+	SimGroup( const std::vector<SimHash>& samplear, std::size_t m1, std::size_t m2, const Index& id_);
 	SimGroup( const SimHash& gencode_, const Index& id_)
 		:m_id(id_),m_gencode(gencode_),m_age(0),m_members(){}
 	SimGroup( const SimGroup& o)
@@ -44,9 +37,9 @@ public:
 	/// \brief Change the genetic code of this individual to a new value
 	void setGencode( const SimHash& gc);
 	/// \brief Add a new member, if not member yet
-	void addMember( const SampleIndex& idx);
+	bool addMember( const SampleIndex& idx);
 	/// \brief Remove a member
-	void removeMember( const SampleIndex& idx);
+	bool removeMember( const SampleIndex& idx);
 	/// \brief Check for a member
 	bool isMember( const SampleIndex& idx) const;
 
@@ -59,14 +52,17 @@ public:
 	void mutate( const std::vector<SimHash>& samplear,
 			unsigned int descendants,
 			unsigned int mutations);
+	/// \brief Check structure and throw if invalid
+	void check() const;
+
+	/// \brief Evaluate the kernel = the set of elements that are the same for all samples
+	/// \param[in] samplear global array of samples the reference system of this individual is based on
+	SimHash kernel( const std::vector<SimHash>& samplear) const;
 
 private:
 	/// \brief Evaluate the fitness of a proposed genom change
 	/// \param[in] samplear global array of samples the reference system of this individual is based on
 	double fitness( const std::vector<SimHash>& samplear, const SimHash& candidate) const;
-	/// \brief Evaluate the kernel = the set of elements that are the same for all samples
-	/// \param[in] samplear global array of samples the reference system of this individual is based on
-	SimHash kernel( const std::vector<SimHash>& samplear) const;
 	/// \brief Calculate a mutation
 	/// \param[in] samplear global array of samples the reference system of this individual is based on
 	/// \param[in] maxNofMutations maximum number of bit mutations to do
@@ -74,6 +70,10 @@ private:
 	/// \brief Calculate an initial individual (kernel + some random values)
 	/// \param[in] samplear global array of samples the reference system of this individual is based on
 	SimHash inithash( const std::vector<SimHash>& samplear) const;
+	/// \brief Evaluate the index of the first element greater or equal to idx
+	/// \param[in] idx member to get the index of
+	/// \return the index or the number of members if not found
+	std::size_t upperBound( const SampleIndex& idx) const;
 
 private:
 	strus::Index m_id;			///< feature identifier given to the group

@@ -25,6 +25,7 @@ public:
 	SimGroupMap( const SimGroupMap& o)
 		:m_nodear(o.m_nodear){}
 
+	void check() const;
 	bool insert( const Index& idx, const Index& groupidx)
 		{return m_nodear[idx].insert( groupidx);}
 	/// \brief Evaluate if a sample references a group
@@ -72,6 +73,7 @@ private:
 		Node();
 
 		bool insert( const Index& gix);
+		void check() const;
 	};
 	std::vector<Node> m_nodear;
 };

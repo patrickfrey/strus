@@ -7,6 +7,8 @@
  */
 /// \brief Structure for a map of sample indices to similarity groups they are members of
 #include "simGroupMap.hpp"
+#include "private/internationalization.hpp"
+#include "private/errorUtils.hpp"
 #include <cstring>
 
 using namespace strus;
@@ -51,7 +53,7 @@ bool SimGroupMap::remove( const Index& idx, const Index& groupidx)
 	if (ii==NofNodeBranches) return false;
 	if (nd.groupidx[ii] == groupidx)
 	{
-		for (; ii<NofNodeBranches+1 && nd.groupidx[ii]; ++ii)
+		for (; ii<NofNodeBranches-1 && nd.groupidx[ii]; ++ii)
 		{
 			nd.groupidx[ii] = nd.groupidx[ii+1];
 		}
@@ -91,7 +93,13 @@ bool SimGroupMap::Node::insert( const Index& gidx)
 		else if (groupidx[ii] >= gidx)
 		{
 			if (groupidx[ii] == gidx) return true;
-			for (unsigned int kk=ii+1; kk<NofNodeBranches; ++kk)
+			unsigned int kk = NofNodeBranches;
+			for (; kk>ii && !groupidx[kk-1]; --kk){}
+			if (kk == NofNodeBranches)
+			{
+				throw strus::runtime_error(_TXT("try to insert in full simgroupmap node"));
+			}
+			for (; kk>ii; --kk)
 			{
 				groupidx[kk] = groupidx[kk-1];
 			}
@@ -102,4 +110,32 @@ bool SimGroupMap::Node::insert( const Index& gidx)
 	return false;
 }
 
+void SimGroupMap::Node::check() const
+{
+	unsigned int ii = 1;
+	for (; ii<NofNodeBranches; ++ii)
+	{
+		if (groupidx[ii] == 0) break;
+		if (groupidx[ii] < groupidx[ii-1])
+		{
+			throw strus::runtime_error(_TXT("illegal SimGroupMap::Node (order)"));
+		}
+	}
+	for (; ii<NofNodeBranches; ++ii)
+	{
+		if (groupidx[ii] != 0)
+		{
+			throw strus::runtime_error(_TXT("illegal SimGroupMap::Node (eof)"));
+		}
+	}
+}
+
+void SimGroupMap::check() const
+{
+	std::vector<Node>::const_iterator ni = m_nodear.begin(), ne = m_nodear.end();
+	for (; ni != ne; ++ni)
+	{
+		ni->check();
+	}
+}
 

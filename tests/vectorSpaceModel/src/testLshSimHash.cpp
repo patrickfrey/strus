@@ -102,11 +102,10 @@ int main( int argc, const char** argv)
 		for (; ti != te; ++ti)
 		{
 			sizear[ti] = rand() % MaxSize;
-			
 		}
 		for (ti=0; ti != te; ++ti)
 		{
-			std::cerr << "test " << (ti+1) << " size " << sizear[ti] << std::endl;
+			std::cerr << "test PRIME NUMBER SIEVE " << (ti+1) << " size " << sizear[ti] << std::endl;
 			strus::SimHash expected = createPrimBitSet( sizear[ti]);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "expected " << expected.tostring() << std::endl;
@@ -134,6 +133,13 @@ int main( int argc, const char** argv)
 			strus::SimHash res_XOR( res); res_XOR ^= expected;
 			doMatch( " result AND ASSIGN expected equals OR ASSIGN", res_XOR, zerofill);
 		}
+		for (ti=0; ti != te; ++ti)
+		{
+			std::cerr << "test INV OF AND equals OR of INVs " << (ti+1) << " size " << sizear[ti] << std::endl;
+			strus::SimHash aa = strus::SimHash::randomHash( sizear[ti], ti*987+1);
+			strus::SimHash bb = strus::SimHash::randomHash( sizear[ti], ti*123+1);
+			doMatch( " INV OF AND equals OR of INVs", ~(aa & bb), ~aa | ~bb);
+		}
 		return 0;
 	}
 	catch (const std::runtime_error& err)
@@ -152,4 +158,3 @@ int main( int argc, const char** argv)
 		return -3;
 	}
 }
-
