@@ -59,21 +59,24 @@ struct VectorSpaceModelConfig
 		DefaultSimDist = 340,	//< 340 out of 2K (32*64) ~ cosine dist 0.9
 		DefaultEqDist = 60,
 		DefaultMutations = 50,
+		DefaultMutationVotes = 13,
 		DefaultDescendants = 10,
 		DefaultMaxAge = 20,
 		DefaultIterations = 20
 	};
 	VectorSpaceModelConfig( const VectorSpaceModelConfig& o)
 		:path(o.path),dim(o.dim),bits(o.bits),variations(o.variations)
-		,simdist(o.simdist),eqdist(o.eqdist),mutations(o.mutations)
+		,simdist(o.simdist),eqdist(o.eqdist),mutations(o.mutations),votes(o.votes)
 		,descendants(o.descendants),maxage(o.maxage),iterations(o.iterations){}
 	VectorSpaceModelConfig()
 		:path(),dim(DefaultDim),bits(DefaultBits),variations(DefaultVariations)
-		,simdist(DefaultSimDist),eqdist(DefaultEqDist),mutations(DefaultMutations)
+		,simdist(DefaultSimDist),eqdist(DefaultEqDist)
+		,mutations(DefaultMutations),votes(DefaultMutationVotes)
 		,descendants(DefaultDescendants),maxage(DefaultMaxAge),iterations(DefaultIterations){}
 	VectorSpaceModelConfig( const std::string& config, ErrorBufferInterface* errorhnd)
 		:path(),dim(DefaultDim),bits(DefaultBits),variations(DefaultVariations)
-		,simdist(DefaultSimDist),eqdist(DefaultEqDist),mutations(DefaultMutations)
+		,simdist(DefaultSimDist),eqdist(DefaultEqDist)
+		,mutations(DefaultMutations),votes(DefaultMutationVotes)
 		,descendants(DefaultDescendants),maxage(DefaultMaxAge),iterations(DefaultIterations)
 	{
 		std::string src = config;
@@ -84,6 +87,7 @@ struct VectorSpaceModelConfig
 		if (extractUIntFromConfigString( simdist, src, "simdist", errorhnd)){}
 		if (extractUIntFromConfigString( eqdist, src, "eqdist", errorhnd)){}
 		if (extractUIntFromConfigString( mutations, src, "mutations", errorhnd)){}
+		if (extractUIntFromConfigString( votes, src, "votes", errorhnd)){}
 		if (extractUIntFromConfigString( descendants, src, "descendants", errorhnd)){}
 		if (extractUIntFromConfigString( maxage, src, "maxage", errorhnd)){}
 		if (extractUIntFromConfigString( iterations, src, "iterations", errorhnd)){}
@@ -104,6 +108,7 @@ struct VectorSpaceModelConfig
 	unsigned int simdist;
 	unsigned int eqdist;
 	unsigned int mutations;
+	unsigned int votes;
 	unsigned int descendants;
 	unsigned int maxage;
 	unsigned int iterations;
@@ -232,7 +237,7 @@ public:
 		try
 		{
 			m_lshmodel = new LshModel( m_config.dim, m_config.bits, m_config.variations);
-			m_genmodel = new GenModel( m_config.simdist, m_config.eqdist, m_config.mutations, m_config.descendants, m_config.maxage, m_config.iterations);
+			m_genmodel = new GenModel( m_config.simdist, m_config.eqdist, m_config.mutations, m_config.votes, m_config.descendants, m_config.maxage, m_config.iterations);
 		}
 		catch (const std::exception& err)
 		{

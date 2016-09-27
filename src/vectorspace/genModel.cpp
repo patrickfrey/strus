@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
+#include <algorithm>
 
 using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
@@ -99,8 +100,8 @@ static void removeGroup(
 	if (group_iter->id() != group_id) throw strus::runtime_error(_TXT("illegal reference in group list"));
 	groupInstanceMap.erase( group_slot);
 
-	std::vector<SampleIndex>::const_iterator
-		mi = group_iter->members().begin(), me = group_iter->members().end();
+	SimGroup::const_iterator
+		mi = group_iter->begin(), me = group_iter->end();
 	for (; mi != me; ++mi)
 	{
 		simGroupMap.remove( *mi, group_id);
@@ -109,10 +110,21 @@ static void removeGroup(
 	groupInstanceList.erase( group_iter);
 }
 
+static unsigned int age_mutations( const SimGroup& group, unsigned int maxage, unsigned int conf_mutations)
+{
+	return (conf_mutations * (maxage - std::min( maxage, group.age()))) / maxage;
+}
+
+static unsigned int age_mutation_votes( const SimGroup& group, unsigned int maxage, unsigned int conf_votes)
+{
+	return conf_votes * (std::min( group.age(), maxage) / maxage) + 1;
+}
+
 static bool tryAddGroupMember( const Index& group_id, std::size_t newmember,
 				GroupInstanceMap& groupInstanceMap,
 				SimGroupMap& simGroupMap, const std::vector<SimHash>& samplear,
-				unsigned int descendants, unsigned int mutations)
+				unsigned int descendants, unsigned int mutations, unsigned int votes,
+				unsigned int maxage)
 {
 	GroupInstanceMap::iterator group_slot = groupInstanceMap.find( group_id);
 	if (group_slot == groupInstanceMap.end()) throw strus::runtime_error(_TXT("illegal reference in group map (tryAddGroupMember): %u"), group_id);
@@ -120,7 +132,7 @@ static bool tryAddGroupMember( const Index& group_id, std::size_t newmember,
 
 	SimGroup newgroup( *group_inst);
 	newgroup.addMember( newmember);
-	newgroup.mutate( samplear, descendants, mutations);
+	newgroup.mutate( samplear, descendants, age_mutations( newgroup, maxage, mutations), age_mutation_votes( newgroup, maxage, votes));
 	if (newgroup.fitness( samplear) >= group_inst->fitness( samplear))
 	{
 		*group_inst = newgroup;
@@ -198,8 +210,7 @@ static void checkSimGroupStructures(
 	for (; gi != ge; ++gi)
 	{
 		std::cerr << "group " << gi->id() << " members = ";
-		std::vector<SampleIndex>::const_iterator
-			mi = gi->members().begin(), me = gi->members().end();
+		SimGroup::const_iterator mi = gi->begin(), me = gi->end();
 		for (unsigned int midx=0; mi != me; ++mi,++midx)
 		{
 			if (midx) std::cerr << ", ";
@@ -252,7 +263,7 @@ static void checkSimGroupStructures(
 	}
 }
 #endif
-	
+
 std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 {
 	GroupIdAllocator groupIdAllocator;					// Allocator of group ids
@@ -303,7 +314,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 				if (bestmatch_simgroup)
 				{
 					// ...if we found such a group, we try to add the candidate there instead:
-					if (tryAddGroupMember( bestmatch_simgroup, neighbour_sampleidx, groupInstanceMap, simGroupMap, samplear, m_descendants, m_mutations))
+					if (tryAddGroupMember( bestmatch_simgroup, neighbour_sampleidx, groupInstanceMap, simGroupMap, samplear, m_descendants, m_mutations, m_votes, m_maxage))
 					{
 #ifdef STRUS_LOWLEVEL_DEBUG
 						std::cerr << "add new member " << neighbour_sampleidx << " to closest group " << bestmatch_simgroup << std::endl;
@@ -316,7 +327,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 					// ...if we did not find such a group we found a new one with the two
 					// elements as members:
 					SimGroup newgroup( samplear, sidx, neighbour_sampleidx, groupIdAllocator.alloc());
-					newgroup.mutate( samplear, m_descendants, m_mutations);
+					newgroup.mutate( samplear, m_descendants, age_mutations( newgroup, m_maxage, m_mutations), age_mutation_votes( newgroup, m_maxage, m_votes));
 					simGroupMap.insert( neighbour_sampleidx, newgroup.id());
 					simGroupMap.insert( sidx, newgroup.id());
 					groupInstanceList.push_back( newgroup);
@@ -341,8 +352,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 #endif
 			// Build the set of neighbour groups:
 			std::set<Index> neighbour_groups;
-			std::vector<SampleIndex>::const_iterator
-				mi = gi->members().begin(), me = gi->members().end();
+			SimGroup::const_iterator mi = gi->begin(), me = gi->end();
 			for (; mi != me; ++mi)
 			{
 				SimGroupMap::const_node_iterator si = simGroupMap.node_begin(*mi), se = simGroupMap.node_end(*mi);
@@ -372,8 +382,8 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 				if (sim_gi->gencode().near( gi->gencode(), m_eqdist))
 				{
 					// Try to swallow members in sim_gi as long as it is in eqdist:
-					std::vector<SampleIndex>::const_iterator
-						sim_mi = sim_gi->members().begin(), sim_me = sim_gi->members().end();
+					SimGroup::const_iterator 
+						sim_mi = sim_gi->begin(), sim_me = sim_gi->end();
 					for (; sim_mi != sim_me; ++sim_mi)
 					{
 						if (!gi->isMember( *sim_mi))
@@ -382,7 +392,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 							// Add member of sim_gi to gi:
 							gi->addMember( *sim_mi);
 							simGroupMap.insert( *sim_mi, gi->id());
-							gi->mutate( samplear, m_descendants, m_mutations);
+							gi->mutate( samplear, m_descendants, age_mutations( *gi, m_maxage, m_mutations), age_mutation_votes( *gi, m_maxage, m_votes));
 							if (!sim_gi->gencode().near( gi->gencode(), m_eqdist))
 							{
 								break;
@@ -406,15 +416,14 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 				if (sim_gi != groupInstanceList.end() && gi->gencode().near( sim_gi->gencode(), m_simdist))
 				{
 					// Try add one member of sim_gi to gi that is similar to sim_gi:
-					std::vector<SampleIndex>::const_iterator
-						mi = sim_gi->members().begin(), me = sim_gi->members().end();
+					SimGroup::const_iterator mi = sim_gi->begin(), me = sim_gi->end();
 					for (; mi != me; ++mi)
 					{
 						if (gi->gencode().near( samplear[*mi], m_simdist) && !gi->isMember( *mi))
 						{
 							if (simGroupMap.hasSpace( *mi))
 							{
-								if (tryAddGroupMember( gi->id(), *mi, groupInstanceMap, simGroupMap, samplear, m_descendants, m_mutations))
+								if (tryAddGroupMember( gi->id(), *mi, groupInstanceMap, simGroupMap, samplear, m_descendants, m_mutations, m_votes, m_maxage))
 								{
 									break;
 								}
@@ -435,23 +444,22 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "visit group " << gi->id() << std::endl;
 #endif
-			gi->mutate( samplear, m_descendants, m_mutations);
+			gi->mutate( samplear, m_descendants, age_mutations( *gi, m_maxage, m_mutations), age_mutation_votes( *gi, m_maxage, m_votes));
 
-			std::vector<SampleIndex>::const_iterator
-				mi = gi->members().begin(), me = gi->members().end();
+			SimGroup::const_iterator mi = gi->begin(), me = gi->end();
 			for (std::size_t midx=0; mi != me; ++mi,++midx)
 			{
 				if (!gi->gencode().near( samplear[ *mi], m_simdist))
 				{
 					// Dropped members that got too far out of the group:
 					std::size_t member = *mi;
-					gi->removeMember( member);
-					mi = gi->members().begin() + --midx;
-					me = gi->members().end();
+					mi = gi->removeMemberItr( mi);
+					--mi;
+					--midx;
 					simGroupMap.remove( member, gi->id());
 				}
 			}
-			if (gi->members().size() < 2)
+			if (gi->size() < 2)
 			{
 				// Delete group that lost too many members:
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -480,8 +488,7 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 	for (; gi != ge; ++gi)
 	{
 		std::cerr << "category " << gi->id() << ": ";
-		std::vector<SampleIndex>::const_iterator
-			mi = gi->members().begin(), me = gi->members().end();
+		SimGroup::const_iterator mi = gi->begin(), me = gi->end();
 		for (unsigned int midx=0; mi != me; ++mi,++midx)
 		{
 			if (midx) std::cerr << ", ";
@@ -499,6 +506,7 @@ std::string GenModel::tostring() const
 	rt << "simdist=" << m_simdist << std::endl
 		<< ", eqdist=" << m_eqdist << std::endl
 		<< ", mutations=" << m_mutations << std::endl
+		<< ", votes=" << m_votes << std::endl
 		<< ", descendants=" << m_descendants << std::endl
 		<< ", maxage=" << m_maxage << std::endl
 		<< ", iterations=" << m_iterations << std::endl;

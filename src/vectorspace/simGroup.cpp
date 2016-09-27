@@ -17,12 +17,12 @@ using namespace strus;
 static Random g_random;
 
 SimGroup::SimGroup( const std::vector<SimHash>& samplear, std::size_t m1, std::size_t m2, const Index& id_)
-	:m_id(id_),m_gencode(),m_age(0),m_members()
+	:m_id(id_),m_gencode(),m_age(0),m_members(),m_nofmembers(2)
 {
 	if (m1 == m2) throw strus::runtime_error(_TXT("illegal group creations (two init members are duplicates)"));
 	if (m1 > m2) std::swap( m1, m2);
-	m_members.push_back( m1);
-	m_members.push_back( m2);
+	m_members.insert( m1);
+	m_members.insert( m2);
 	m_gencode = inithash( samplear);
 }
 
@@ -32,65 +32,38 @@ void SimGroup::setGencode( const SimHash& gc)
 	++m_age;
 }
 
-std::size_t SimGroup::upperBound( const SampleIndex& idx) const
-{
-	std::vector<SampleIndex>::const_iterator mi = m_members.begin(), me = m_members.end();
-	std::size_t midx = 0;
-	for (; mi != me; ++mi,++midx)
-	{
-		if (*mi >= idx) break;
-	}
-	return midx;
-}
-
 bool SimGroup::addMember( const SampleIndex& idx)
 {
-	std::size_t midx = upperBound( idx);
-	if (midx == m_members.size())
+	if (m_members.insert( idx).second)
 	{
-		m_members.push_back( idx);
+		++m_nofmembers;
+		m_age -= m_age/3;
+		return true;
 	}
-	else
-	{
-		if (m_members[ midx] == idx) return false;
-		m_members.push_back( idx);
-		std::vector<SampleIndex>::reverse_iterator ri = m_members.rbegin(), re = m_members.rbegin() + m_members.size() - midx - 1;
-		for (; ri != re; ++ri)
-		{
-			*ri = *(ri+1);
-		}
-		*ri = idx;
-	}
-	m_age -= m_age/3;
-	return true;
+	return false;
 }
 
 bool SimGroup::removeMember( const SampleIndex& idx)
 {
-	std::size_t midx = upperBound( idx);
-	if (midx == m_members.size() || m_members[ midx] != idx) return false;
-	std::vector<SampleIndex>::iterator mi = m_members.begin()+midx, me = m_members.end()-1;
-	for (; mi != me; ++mi)
+	if (m_members.erase( idx) > 0)
 	{
-		*mi = *(mi+1);
+		--m_nofmembers;
+		return true;
 	}
-	m_members.pop_back();
-	return true;
+	return false;
 }
 
-void SimGroup::check() const
+SimGroup::const_iterator SimGroup::removeMemberItr( const_iterator itr)
 {
-	std::vector<SampleIndex>::const_iterator mi = m_members.begin(), me = m_members.end()-1;
-	for (; mi < me; ++mi)
-	{
-		if (*mi >= *(mi+1)) throw strus::runtime_error(_TXT("consistency check failed for SimGroup"));
-	}
+	const_iterator rt = itr;
+	++rt;
+	m_members.erase( itr);
+	return rt;
 }
 
 bool SimGroup::isMember( const SampleIndex& idx) const
 {
-	std::size_t midx = upperBound( idx);
-	return midx < m_members.size() && m_members[ midx] == idx;
+	return m_members.find( idx) != m_members.end();
 }
 
 double SimGroup::fitness( const std::vector<SimHash>& samplear) const
@@ -111,18 +84,18 @@ double pow_uint( double value, unsigned int exp)
 double SimGroup::fitness( const std::vector<SimHash>& samplear, const SimHash& genom) const
 {
 	double sqrsum = 0.0;
-	std::vector<SampleIndex>::const_iterator mi = m_members.begin(), me = m_members.end();
+	const_iterator mi = m_members.begin(), me = m_members.end();
 	for (; mi != me; ++mi)
 	{
 		double dist = genom.dist( samplear[ *mi]);
 		sqrsum += dist * dist;
 	}
-	return pow_uint( 1.0 + 1.0 / std::sqrt( sqrsum / m_members.size()), m_members.size()) - 1.0;
+	return pow_uint( 1.0 + 1.0 / std::sqrt( sqrsum / m_nofmembers), m_nofmembers) - 1.0;
 }
 
 SimHash SimGroup::kernel( const std::vector<SimHash>& samplear) const
 {
-	std::vector<SampleIndex>::const_iterator si = members().begin(), se = members().end();
+	const_iterator si = m_members.begin(), se = m_members.end();
 	if (si == se) return gencode();
 
 	SimHash first( samplear[ *si]);
@@ -135,48 +108,71 @@ SimHash SimGroup::kernel( const std::vector<SimHash>& samplear) const
 	return rt;
 }
 
-SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int mutations) const
+bool SimGroup::mutation_vote( const std::vector<SimHash>& samplear, unsigned int mutidx, unsigned int nofqueries) const
 {
-	if (m_members.size() < 2) return gencode();
-
-	// Calculate 'kernel' = the set of all elements equal for all members. These cannot be mutated:
-	SimHash kn = kernel( samplear);
-
-	SimHash rt( m_gencode);
-	unsigned int mi=0, me=mutations;
-	for (; mi != me; ++mi)
+	unsigned int true_cnt=0, false_cnt=0;
+	unsigned int ci = 0, ce = nofqueries;
+	for (; ci != ce; ++ci)
 	{
-		unsigned int mutidx = g_random.get( 0, gencode().size());
-		if (kn[ mutidx]) continue; //.... do not mutate kernel elements
-
-		// The majority of randomly selected members decide the direction of the mutation
-		// With growing age spins with a higher vote are preferred:
-		unsigned int true_cnt=0, false_cnt=0;
-		std::size_t ci=0, ce=m_members.size();
-		if (ce > age()+1) ce = age()+1;
-		for (; ci != ce; ++ci)
+		SampleIndex rnd = g_random.get( 0, samplear.size());
+		SampleIndex chosenSampleIdx;
+		if (rnd == 0)
 		{
-			SampleIndex memberidx = g_random.get( 0, m_members.size());
-			if (samplear[ m_members[ memberidx]][ mutidx])
-			{
-				++true_cnt;
-			}
-			else
-			{
-				++false_cnt;
-			}
-		}
-		if (true_cnt > false_cnt)
-		{
-			rt.set( mutidx, true);
-		}
-		else if (true_cnt < false_cnt)
-		{
-			rt.set( mutidx, false);
+			chosenSampleIdx = *m_members.begin();
 		}
 		else
 		{
-			rt.set( mutidx, gencode()[ mutidx]);
+			std::set<SampleIndex>::const_iterator mi = m_members.upper_bound( rnd);
+			if (mi == m_members.end())
+			{
+				chosenSampleIdx = *m_members.begin();
+			}
+			else
+			{
+				chosenSampleIdx = *mi;
+			}
+		}
+		if (samplear[ chosenSampleIdx][ mutidx])
+		{
+			++true_cnt;
+		}
+		else
+		{
+			++false_cnt;
+		}
+	}
+	if (true_cnt > false_cnt)
+	{
+		return true;
+	}
+	else if (true_cnt < false_cnt)
+	{
+		return false;
+	}
+	else
+	{
+		return m_gencode[ mutidx];
+	}
+}
+
+SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int maxNofMutations, unsigned int maxNofVotes) const
+{
+	if (m_nofmembers < 2) return gencode();
+
+	SimHash rt( m_gencode);
+	// Calculate 'kernel' = the set of all elements equal for all members. These cannot be mutated:
+	SimHash kn = kernel( samplear);
+
+	unsigned int ki=0, ke=maxNofMutations;
+	for (; ki != ke; ++ki)
+	{
+		unsigned int mutidx = g_random.get( 0, gencode().size());
+		if (!kn[ mutidx])
+		{
+			//.... only mutate non kernel elements
+			// The majority of randomly selected members decide the direction of the mutation:
+			bool mutval = mutation_vote( samplear, mutidx, maxNofVotes);
+			rt.set( mutidx, mutval);
 		}
 	}
 	return rt;
@@ -184,17 +180,17 @@ SimHash SimGroup::mutation( const std::vector<SimHash>& samplear, unsigned int m
 
 SimHash SimGroup::inithash( const std::vector<SimHash>& samplear) const
 {
-	if (m_members.size() == 0) return gencode();
+	if (m_nofmembers == 0) return gencode();
 
 	// Calculate 'kernel' = the set of all elements equal for all members. These cannot be mutated:
 	SimHash kn = kernel( samplear);
 	SimHash rnd( SimHash::randomHash( kn.size(), g_random.get( 0, std::numeric_limits<unsigned int>::max())));
 	// All elements belonging to the kernel are taken from the first element the others chosen randomly:
-	SimHash rt( (~kn & rnd) |(kn & samplear[ m_members[0]]) );
+	SimHash rt( (~kn & rnd) |(kn & samplear[ *m_members.begin()]) );
 	return rt;
 }
 
-void SimGroup::mutate( const std::vector<SimHash>& samplear, unsigned int descendants, unsigned int mutations)
+void SimGroup::mutate( const std::vector<SimHash>& samplear, unsigned int descendants, unsigned int maxNofMutations, unsigned int maxNofVotes)
 {
 	std::vector<SimHash> descendantlist;
 	descendantlist.reserve( descendants);
@@ -204,7 +200,7 @@ void SimGroup::mutate( const std::vector<SimHash>& samplear, unsigned int descen
 	std::size_t di=0, de=descendants;
 	for (; di != de; ++di)
 	{
-		descendantlist.push_back( mutation( samplear, mutations));
+		descendantlist.push_back( mutation( samplear, maxNofMutations, maxNofVotes));
 		double desc_fitness = fitness( samplear, descendantlist.back());
 		if (desc_fitness > max_fitness)
 		{

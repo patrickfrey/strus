@@ -94,7 +94,7 @@ int main( int argc, const char** argv)
 		if (!g_errorhnd) throw std::runtime_error("failed to create error buffer structure");
 
 		initRandomNumberGenerator();
-		std::string config( "path=test.vm;dim=300;bit=64;var=32;simdist=340;eqdist=60;mutations=50;descendants=10;maxage=20;iterations=50");
+		std::string config( "path=test.vm;dim=300;bit=64;var=32;simdist=340;eqdist=60;mutations=50;votes=13;descendants=10;maxage=20;iterations=50");
 		unsigned int nofSamples = 1000;
 		unsigned int dim = 0;
 

@@ -24,13 +24,13 @@ class GenModel
 {
 public:
 	/// \brief Constructor
-	GenModel( unsigned int simdist_, unsigned int eqdist_, unsigned int mutations_, unsigned int descendants_, unsigned int maxage_, unsigned int iterations_)
-		:m_simdist(simdist_),m_eqdist(eqdist_),m_mutations(mutations_),m_descendants(descendants_)
-		,m_maxage(maxage_),m_iterations(iterations_){}
+	GenModel( unsigned int simdist_, unsigned int eqdist_, unsigned int mutations_, unsigned int votes_, unsigned int descendants_, unsigned int maxage_, unsigned int iterations_)
+		:m_simdist(simdist_),m_eqdist(eqdist_),m_mutations(mutations_),m_votes(votes_)
+		,m_descendants(descendants_),m_maxage(maxage_),m_iterations(iterations_){}
 	/// \brief Copy constructor
 	GenModel( const GenModel& o)
-		:m_simdist(o.m_simdist),m_eqdist(o.m_eqdist),m_mutations(o.m_mutations),m_descendants(o.m_descendants)
-		,m_maxage(o.m_maxage),m_iterations(o.m_iterations){}
+		:m_simdist(o.m_simdist),m_eqdist(o.m_eqdist),m_mutations(o.m_mutations),m_votes(o.m_votes)
+		,m_descendants(o.m_descendants),m_maxage(o.m_maxage),m_iterations(o.m_iterations){}
 
 	/// \brief map contents to string in readable form
 	std::string tostring() const;
@@ -41,7 +41,8 @@ public:
 private:
 	unsigned int m_simdist;			///< maximal distance to be considered similar
 	unsigned int m_eqdist;			///< maximum distance to be considered equal
-	unsigned int m_mutations;		///< number of random selected mutation candidates of the non kernel elements of a group
+	unsigned int m_mutations;		///< maximum number of random selected mutation candidates of the non kernel elements of a group
+	unsigned int m_votes;			///< maximum number of votes to use to determine a mutation direction
 	unsigned int m_descendants;		///< number of descendants of which the fittest is selected
 	unsigned int m_maxage;			///< upper bound value used for calculate number of mutations (an older individuum mutates less)
 	unsigned int m_iterations;		///< number of iterations
