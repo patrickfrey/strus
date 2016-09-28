@@ -275,8 +275,8 @@ int main( int argc, const char** argv)
 			}
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "OUTPUT:" << std::endl << outSimMatrix.tostring() << std::endl;
-		std::cerr << "EXPECTED:" << std::endl << expSimMatrix.tostring() << std::endl;
+		std::cerr << "output:" << std::endl << outSimMatrix.tostring() << std::endl;
+		std::cerr << "expected:" << std::endl << expSimMatrix.tostring() << std::endl;
 #endif
 		std::cerr << "number of similarities = " << nofSimilarities << " reflexive = " << (nofSimilarities*2) << std::endl;
 		std::cerr << "number of misses = " << nofMisses << std::endl;
