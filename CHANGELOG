@@ -1,3 +1,8 @@
+strus (0.11.0)
+  * integrated the armadillo library for fast linear algebra operations
+  * define vector space model interface and implement standard vector space model for unsupervised learning of features from vectors
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 28 Sep 2016 12:00:00 +0100
+
 strus (0.10.0)
   * added support for cardinality in posting iterator intersect
   * many build fixes

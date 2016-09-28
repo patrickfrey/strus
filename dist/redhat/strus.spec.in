@@ -314,6 +314,10 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Wed Sep 28 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.11.0-0.1
+- integrated the armadillo library for fast linear algebra operations
+- define vector space model interface and implement standard vector space model for unsupervised learning of features from vectors
+
 * Tue Jul 5 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.10.0-0.1
 - added support for cardinality in posting iterator intersect
 - many build fixes
