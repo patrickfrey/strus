@@ -17,7 +17,6 @@ include( cmake/boost.cmake )
 include( cmake/intl.cmake )
 include( cmake/find_strus_package.cmake )
 include( cmake/find_leveldb.cmake )
-include( cmake/find_armadillo.cmake )
 
 find_strus_package( base )
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )

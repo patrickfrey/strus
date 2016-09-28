@@ -10,6 +10,7 @@ include_directories(
 )
 link_directories(
 	"${PROJECT_SOURCE_DIR}/src/vectorspace"
+	"${PROJECT_SOURCE_DIR}/3rdParty/armadillo"
 	"${Boost_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
 )
@@ -18,7 +19,7 @@ add_executable( testArmadillo testArmadillo.cpp)
 target_link_libraries( testArmadillo boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
 
 add_executable( testLshSimHash testLshSimHash.cpp)
-target_link_libraries( testLshSimHash strus_vectorspace_static )
+target_link_libraries( testLshSimHash strus_vectorspace_static  ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )
 
 add_executable( testLshVectorSpaceModel testLshVectorSpaceModel.cpp)
 target_link_libraries( testLshVectorSpaceModel boost_system strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES} strus_armadillo )

@@ -98,7 +98,7 @@ public:
 				throw strus::runtime_error(_TXT("unknown vector space model: '%s'"), name.c_str());
 			}
 		}
-		CATCH_ERROR_MAP_RETURN( _TXT("error getting statistics processor: %s"), *m_errorhnd, 0);
+		CATCH_ERROR_MAP_RETURN( _TXT("error getting vector space model: %s"), *m_errorhnd, 0);
 	}
 	virtual QueryEvalInterface* createQueryEval() const
 	{

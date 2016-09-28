@@ -218,24 +218,21 @@ int main( int argc, const char** argv)
 		}
 		std::cerr << "build sample to sample feature relation matrix:" << std::endl;
 		strus::SparseDim2Field<unsigned char> outSimMatrix;
-		si = samplear.begin(), se = samplear.end();
-		for (sidx=0; si != se; ++si,++sidx)
+		unsigned int fi=0, fe=categorizer->nofFeatures();
+		for (; fi != fe; ++fi)
 		{
-			FeatureMatrix::const_row_iterator ri = featureMatrix.begin_row( sidx), re = featureMatrix.end_row( sidx);
+			std::vector<unsigned int> featureMembers;
+			FeatureMatrix::const_row_iterator ri = featureInvMatrix.begin_row( fi), re = featureInvMatrix.end_row( fi);
 			for (; ri != re; ++ri)
 			{
-				if (ri.val())
+				std::vector<unsigned int>::const_iterator
+					mi = featureMembers.begin(), me = featureMembers.end();
+				for (; mi != me; ++mi)
 				{
-					FeatureMatrix::const_row_iterator
-						ci = featureInvMatrix.begin_row( ri.col()), ce = featureInvMatrix.end_row( ri.col());
-					for (; ci != ce; ++ci)
-					{
-						if (sidx != ci.col())
-						{
-							outSimMatrix( sidx, ci.col()) = 1;
-						}
-					}
+					outSimMatrix( *mi, ri.col()) = 1;
+					outSimMatrix( ri.col(), *mi) = 1;
 				}
+				featureMembers.push_back( ri.col());
 			}
 		}
 		std::cerr << "test calculated feature assignments:" << std::endl;

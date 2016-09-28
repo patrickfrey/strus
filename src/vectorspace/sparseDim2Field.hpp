@@ -87,7 +87,7 @@ public:
 	const_row_iterator end_row( uint32_t x) const
 	{
 		typename std::map<Coord,ValueType>::const_iterator first = m_map.upper_bound( Coord( x, std::numeric_limits<uint32_t>::max()));
-		if (first == m_map.end() || first->first.x != x)
+		if (first == m_map.end())
 		{
 			return m_map.end();
 		}

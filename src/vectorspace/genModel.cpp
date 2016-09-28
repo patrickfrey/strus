@@ -280,7 +280,6 @@ std::vector<SimHash> GenModel::run( const std::vector<SimHash>& samplear) const
 	unsigned int iteration=0;
 	for (; iteration != m_iterations; ++iteration)
 	{
-		/*[-]*/std::cerr << "GenModel::run iteration " << iteration << std::endl;
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "GenModel::run iteration " << iteration << std::endl;
 		checkSimGroupStructures( groupInstanceList, groupInstanceMap, simGroupMap, samplear.size());
