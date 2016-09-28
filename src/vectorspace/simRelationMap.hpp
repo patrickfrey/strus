@@ -9,10 +9,11 @@
 #ifndef _STRUS_VECTOR_SPACE_MODEL_SIMILARITY_RELATION_MAP_HPP_INCLUDED
 #define _STRUS_VECTOR_SPACE_MODEL_SIMILARITY_RELATION_MAP_HPP_INCLUDED
 #include "simHash.hpp"
+#include "simGroup.hpp"
 #include "strus/index.hpp"
+#include "strus/base/stdint.h"
 #include <vector>
 #include <map>
-#include <armadillo>
 
 namespace strus {
 
@@ -22,54 +23,33 @@ class SimRelationMap
 public:
 	struct Element
 	{
-		unsigned int coord_x;
-		unsigned int coord_y;
-		unsigned short value;
+		SampleIndex index;
+		unsigned short simdist;
 
-		Element( unsigned int x, unsigned int y, unsigned short v)
-			:coord_x(x),coord_y(y),value(v){}
+		Element()
+			:index(0),simdist(0){}
+		Element( SampleIndex index_, unsigned short simdist_)
+			:index(index_),simdist(simdist_){}
 		Element( const Element& o)
-			:coord_x(o.coord_x),coord_y(o.coord_y),value(o.value){}
-	};
+			:index(o.index),simdist(o.simdist){}
 
-private:
-	struct ElementVector
-	{
-		unsigned int dim;
-		arma::umat locations;
-		arma::Col<unsigned short> values;
-
-		ElementVector( const std::vector<Element>& vv, unsigned int dim_)
-			:dim(dim_),locations( 2, 2*vv.size()), values( 2*vv.size())
+		bool operator < (const Element& o) const
 		{
-			std::vector<Element>::const_iterator vi = vv.begin(), ve = vv.end();
-			for (std::size_t vidx=0; vi != ve; ++vi,vidx+=2)
-			{
-				locations( 0,vidx) = vi->coord_x;
-				locations( 1,vidx) = vi->coord_y;
-				values[ vidx] = vi->value;
-				locations( 0,vidx+1) = vi->coord_y;
-				locations( 1,vidx+1) = vi->coord_x;
-				values[ vidx+1] = vi->value;
-			}
-		}
-		arma::SpMat<unsigned short> matrix() const
-		{
-			return arma::SpMat<unsigned short>( locations, values, dim, dim);
+			if (simdist == o.simdist) return index < o.index;
+			return simdist < o.simdist;
 		}
 	};
 
 public:
-	explicit SimRelationMap( const std::vector<Element>& elements, unsigned int dim)
-		:m_mat( ElementVector( elements, dim).matrix()){}
+	SimRelationMap()
+		:m_ar(),m_rowdescrmap(){}
 	SimRelationMap( const SimRelationMap& o)
-		:m_mat(o.m_mat){}
+		:m_ar(o.m_ar),m_rowdescrmap(o.m_rowdescrmap){}
 
-	typedef arma::SpMat<unsigned short> Matrix;
 	class Row
 	{
 	public:
-		typedef Matrix::const_row_iterator const_iterator;
+		typedef std::vector<Element>::const_iterator const_iterator;
 
 		Row( const const_iterator& begin_, const const_iterator& end_)
 			:m_begin(begin_),m_end(end_){}
@@ -82,15 +62,38 @@ public:
 		const_iterator m_end;
 	};
 
-	Row row( unsigned int rowidx) const
+	/// \brief Get a row declared by index
+	Row row( const SampleIndex& index) const
 	{
-		return Row( m_mat.begin_row( rowidx), m_mat.end_row( rowidx));
+		RowDescrMap::const_iterator ri = m_rowdescrmap.find( index);
+		if (ri == m_rowdescrmap.end()) return Row( m_ar.end(), m_ar.end());
+		return Row( m_ar.begin() + ri->second.aridx, m_ar.begin() + ri->second.aridx + ri->second.size);
 	}
 
+	/// \brief Get this map as string
 	std::string tostring() const;
 
+	/// \brief Add a row reclaring the samples related (similar) to a sample
+	/// \param[in] index index of sample to declare related elements of
+	/// \param[in] ar array of samples with similarity distance related to the element referenced by 'index'
+	void addRow( const SampleIndex& index, const std::vector<Element>& ar);
+
 private:
-	arma::SpMat<unsigned short> m_mat;
+	std::vector<Element> m_ar;
+	struct RowDescr
+	{
+		std::size_t aridx;
+		std::size_t size;
+
+		RowDescr()
+			:aridx(0),size(0){}
+		RowDescr( std::size_t aridx_, std::size_t size_)
+			:aridx(aridx_),size(size_){}
+		RowDescr( const RowDescr& o)
+			:aridx(o.aridx),size(o.size){}
+	};
+	typedef std::map<SampleIndex,RowDescr> RowDescrMap;
+	RowDescrMap m_rowdescrmap;
 };
 
 }//namespace

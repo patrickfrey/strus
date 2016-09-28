@@ -26,17 +26,22 @@ public:
 		:m_nodear(o.m_nodear){}
 
 	void check() const;
-	bool insert( const Index& idx, const Index& groupidx)
-		{return m_nodear[idx].insert( groupidx);}
+	bool insert( const std::size_t& ndidx, const Index& groupidx)
+		{return m_nodear[ndidx].insert( groupidx);}
 	/// \brief Evaluate if a sample references a group
-	bool contains( const Index& idx, const Index& groupidx) const;
+	bool contains( const std::size_t& ndidx, const Index& groupidx) const
+		{return m_nodear[ndidx].contains( groupidx);}
 	/// \brief Evaluate if the two samples share a group reference
-	bool shares( const Index& idx1, const Index& idx2) const;
+	bool shares( const std::size_t& ndidx1, const std::size_t& ndidx2) const;
 	/// \brief Remove sample reference relationship to a group
-	bool remove( const Index& idx, const Index& groupidx);
+	bool remove( const std::size_t& ndidx, const Index& groupidx)
+		{return m_nodear[ndidx].remove( groupidx);}
 	/// \brief Evaluate, if there is space left for adding a new relation
-	bool hasSpace( const Index& idx) const
-		{return m_nodear[idx].groupidx[ NofNodeBranches-1] == 0;}
+	bool hasSpace( const std::size_t& ndidx) const
+		{return m_nodear[ndidx].size < NofNodeBranches;}
+	/// \brief Evaluate, how much space is left for adding new relations
+	unsigned int sizeSpace( const std::size_t& ndidx) const
+		{return NofNodeBranches - m_nodear[ndidx].size;}
 
 	class const_node_iterator
 	{
@@ -60,19 +65,22 @@ public:
 		Index const* ref;
 	};
 
-	const_node_iterator node_begin( std::size_t nd) const		{return const_node_iterator( m_nodear[ nd].groupidx);}
-	const_node_iterator node_end( std::size_t nd) const;
+	const_node_iterator node_begin( std::size_t ndidx) const	{const Node& nd = m_nodear[ ndidx]; return const_node_iterator( nd.groupidx);}
+	const_node_iterator node_end( std::size_t ndidx) const		{const Node& nd = m_nodear[ ndidx]; return const_node_iterator( nd.groupidx + nd.size);}
 
 private:
-	enum {NofNodeBranches=8};
+	enum {NofNodeBranches=7};
 	struct Node
 	{
+		Index size;
 		Index groupidx[ NofNodeBranches];
 
 		Node( const Node& o);
 		Node();
 
 		bool insert( const Index& gix);
+		bool remove( const Index& gix);
+		bool contains( const Index& gidx) const;
 		void check() const;
 	};
 	std::vector<Node> m_nodear;

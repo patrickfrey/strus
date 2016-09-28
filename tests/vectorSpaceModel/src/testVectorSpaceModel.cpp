@@ -14,6 +14,8 @@
 #include "strus/vectorSpaceModelBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/configParser.hpp"
+#include "strus/base/stdint.h"
+#include "sparseDim2Field.hpp"
 #include <armadillo>
 #include <iostream>
 #include <sstream>
@@ -86,6 +88,7 @@ std::vector<double> createRandomVector( unsigned int dim)
 
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 
+
 int main( int argc, const char** argv)
 {
 	try
@@ -150,13 +153,12 @@ int main( int argc, const char** argv)
 		}
 		std::cerr << "create similarity matrix" << std::endl;
 		unsigned int nofSimilarities = 0;
-		arma::SpMat<unsigned char> expSimMatrix( nofSamples, nofSamples);
-		arma::mat simMatrix( nofSamples, nofSamples);
+		strus::SparseDim2Field<unsigned char> expSimMatrix;
+		strus::SparseDim2Field<double> simMatrix;
 		{
 			std::vector<arma::vec> samplevecar;
 			for (sidx=0; sidx != nofSamples; ++sidx)
 			{
-				simMatrix( sidx, sidx) = 1.0;
 				samplevecar.push_back( arma::vec( samplear[ sidx]));
 
 				for (std::size_t oidx=0; oidx != sidx; ++oidx)
@@ -169,8 +171,11 @@ int main( int argc, const char** argv)
 						expSimMatrix( sidx, oidx) = 1;
 						expSimMatrix( oidx, sidx) = 1;
 					}
-					simMatrix( sidx, oidx) = sim;
-					simMatrix( oidx, sidx) = sim;
+					if (sim > 0.8)
+					{
+						simMatrix( sidx, oidx) = sim;
+						simMatrix( oidx, sidx) = sim;
+					}
 				}
 			}
 		}
@@ -193,9 +198,9 @@ int main( int argc, const char** argv)
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
 		std::cerr << "loaded trained model with " << categorizer->nofFeatures() << " features" << std::endl;
-		unsigned int nofFeatures = categorizer->nofFeatures();
-		arma::SpMat<unsigned char> featureMatrix( nofSamples, nofFeatures);
-		arma::SpMat<unsigned char> featureInvMatrix( nofFeatures, nofSamples);
+		typedef strus::SparseDim2Field<unsigned char> FeatureMatrix;
+		FeatureMatrix featureMatrix;
+		FeatureMatrix featureInvMatrix;
 		std::vector<std::vector<double> >::const_iterator si = samplear.begin(), se = samplear.end();
 		for (sidx=0; si != se; ++si,++sidx)
 		{
@@ -212,16 +217,16 @@ int main( int argc, const char** argv)
 			std::cout << std::endl;
 		}
 		std::cerr << "build sample to sample feature relation matrix:" << std::endl;
-		arma::SpMat<unsigned char> outSimMatrix( nofSamples, nofSamples);
+		strus::SparseDim2Field<unsigned char> outSimMatrix;
 		si = samplear.begin(), se = samplear.end();
 		for (sidx=0; si != se; ++si,++sidx)
 		{
-			arma::SpMat<unsigned char>::const_row_iterator ri = featureMatrix.begin_row( sidx), re = featureMatrix.end_row( sidx);
+			FeatureMatrix::const_row_iterator ri = featureMatrix.begin_row( sidx), re = featureMatrix.end_row( sidx);
 			for (; ri != re; ++ri)
 			{
-				if (*ri)
+				if (ri.val())
 				{
-					arma::SpMat<unsigned char>::const_row_iterator
+					FeatureMatrix::const_row_iterator
 						ci = featureInvMatrix.begin_row( ri.col()), ce = featureInvMatrix.end_row( ri.col());
 					for (; ci != ce; ++ci)
 					{
@@ -270,8 +275,8 @@ int main( int argc, const char** argv)
 			}
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cerr << "OUTPUT:" << std::endl << outSimMatrix << std::endl;
-		std::cerr << "EXPECTED:" << std::endl << expSimMatrix << std::endl;
+		std::cerr << "OUTPUT:" << std::endl << outSimMatrix.tostring() << std::endl;
+		std::cerr << "EXPECTED:" << std::endl << expSimMatrix.tostring() << std::endl;
 #endif
 		std::cerr << "number of similarities = " << nofSimilarities << " reflexive = " << (nofSimilarities*2) << std::endl;
 		std::cerr << "number of misses = " << nofMisses << std::endl;

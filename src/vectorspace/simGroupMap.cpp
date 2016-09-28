@@ -13,20 +13,11 @@
 
 using namespace strus;
 
-bool SimGroupMap::contains( const Index& idx, const Index& groupidx) const
+bool SimGroupMap::shares( const std::size_t& ndidx1, const std::size_t& ndidx2) const
 {
-	const Node& nd = m_nodear[ idx];
-	unsigned int ii=0;
-	for (; ii<NofNodeBranches && nd.groupidx[ii] && nd.groupidx[ii] < groupidx; ++ii){}
-	if (ii==NofNodeBranches) return false;
-	return (nd.groupidx[ii] == groupidx);
-}
-
-bool SimGroupMap::shares( const Index& idx1, const Index& idx2) const
-{
-	unsigned int i1=0, i2=0;
-	const Node& nd1 = m_nodear[ idx1];
-	const Node& nd2 = m_nodear[ idx2];
+	Index i1=0, i2=0;
+	const Node& nd1 = m_nodear[ ndidx1];
+	const Node& nd2 = m_nodear[ ndidx2];
 	while (i1<NofNodeBranches && i2<NofNodeBranches)
 	{
 		if (nd1.groupidx[i1] < nd2.groupidx[i2])
@@ -45,60 +36,55 @@ bool SimGroupMap::shares( const Index& idx1, const Index& idx2) const
 	return false;
 }
 
-bool SimGroupMap::remove( const Index& idx, const Index& groupidx)
+void SimGroupMap::check() const
 {
-	Node& nd = m_nodear[ idx];
-	unsigned int ii=0;
-	for (; ii<NofNodeBranches && nd.groupidx[ii] && nd.groupidx[ii] < groupidx; ++ii){}
-	if (ii==NofNodeBranches) return false;
-	if (nd.groupidx[ii] == groupidx)
+	std::vector<Node>::const_iterator ni = m_nodear.begin(), ne = m_nodear.end();
+	for (; ni != ne; ++ni)
 	{
-		for (; ii<NofNodeBranches-1 && nd.groupidx[ii]; ++ii)
+		ni->check();
+	}
+}
+
+SimGroupMap::Node::Node( const Node& o)
+{
+	std::memcpy( this, &o, sizeof(*this));
+}
+
+SimGroupMap::Node::Node()
+{
+	std::memset( this, 0, sizeof(*this));
+}
+
+bool SimGroupMap::Node::remove( const Index& gidx)
+{
+	Index ii=0;
+	for (; ii<size && groupidx[ii] < gidx; ++ii){}
+	if (ii==size) return false;
+	if (groupidx[ii] == gidx)
+	{
+		--size;
+		for (; ii<size; ++ii)
 		{
-			nd.groupidx[ii] = nd.groupidx[ii+1];
+			groupidx[ii] = groupidx[ii+1];
 		}
-		nd.groupidx[ii] = 0;
+		groupidx[ii] = 0;
 		return true;
 	}
 	return false;
 }
 
-SimGroupMap::const_node_iterator SimGroupMap::node_end( std::size_t nd) const
-{
-	const Node& ndrec = m_nodear[ nd];
-	std::size_t ii = NofNodeBranches;
-	for (; ii>0 && ndrec.groupidx[ii-1]==0; --ii){}
-	return const_node_iterator( ndrec.groupidx + ii);
-}
-
-SimGroupMap::Node::Node( const Node& o)
-{
-	std::memcpy( groupidx, o.groupidx, sizeof(groupidx));
-}
-
-SimGroupMap::Node::Node()
-{
-	std::memset( groupidx, 0, sizeof(groupidx));
-}
-
 bool SimGroupMap::Node::insert( const Index& gidx)
 {
-	for (unsigned int ii=0; ii<NofNodeBranches; ++ii)
+	if (size == NofNodeBranches)
 	{
-		if (groupidx[ii] == 0)
+		throw strus::runtime_error(_TXT("try to insert in full simgroupmap node"));
+	}
+	for (Index ii=0; ii<size; ++ii)
+	{
+		if (groupidx[ii] >= gidx)
 		{
-			groupidx[ii] = gidx;
-			return true;
-		}
-		else if (groupidx[ii] >= gidx)
-		{
-			if (groupidx[ii] == gidx) return true;
-			unsigned int kk = NofNodeBranches;
-			for (; kk>ii && !groupidx[kk-1]; --kk){}
-			if (kk == NofNodeBranches)
-			{
-				throw strus::runtime_error(_TXT("try to insert in full simgroupmap node"));
-			}
+			if (groupidx[ii] == gidx) return false;
+			Index kk = ++size;
 			for (; kk>ii; --kk)
 			{
 				groupidx[kk] = groupidx[kk-1];
@@ -107,15 +93,23 @@ bool SimGroupMap::Node::insert( const Index& gidx)
 			return true;
 		}
 	}
-	return false;
+	groupidx[ size++] = gidx;
+	return true;
+}
+
+bool SimGroupMap::Node::contains( const Index& gidx) const
+{
+	Index ii=0;
+	for (; ii<size && groupidx[ii] < gidx; ++ii){}
+	if (ii==size) return false;
+	return (groupidx[ii] == gidx);
 }
 
 void SimGroupMap::Node::check() const
 {
-	unsigned int ii = 1;
-	for (; ii<NofNodeBranches; ++ii)
+	Index ii = 1;
+	for (; ii<size; ++ii)
 	{
-		if (groupidx[ii] == 0) break;
 		if (groupidx[ii] < groupidx[ii-1])
 		{
 			throw strus::runtime_error(_TXT("illegal SimGroupMap::Node (order)"));
@@ -130,12 +124,4 @@ void SimGroupMap::Node::check() const
 	}
 }
 
-void SimGroupMap::check() const
-{
-	std::vector<Node>::const_iterator ni = m_nodear.begin(), ne = m_nodear.end();
-	for (; ni != ne; ++ni)
-	{
-		ni->check();
-	}
-}
 
