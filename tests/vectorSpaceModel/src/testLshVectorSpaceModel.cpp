@@ -6,7 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Test program
-#include "private/bitOperations.hpp"
+#include "strus/base/bitOperations.hpp"
 #include <armadillo>
 #include <iostream>
 #include <sstream>

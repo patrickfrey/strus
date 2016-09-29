@@ -9,7 +9,7 @@
 /// \brief Helpers for UTF-8 encoding/decoding
 #ifndef _STRUS_STORAGE_UTF8_ENCODING_DECODING_HPP_INCLUDED
 #define _STRUS_STORAGE_UTF8_ENCODING_DECODING_HPP_INCLUDED
-#include "private/bitOperations.hpp"
+#include "strus/base/bitOperations.hpp"
 
 #define B11111111 0xFF
 #define B01111111 0x7F

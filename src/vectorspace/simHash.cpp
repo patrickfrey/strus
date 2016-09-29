@@ -7,7 +7,7 @@
  */
 /// \brief Similarity hash structure
 #include "simHash.hpp"
-#include "private/bitOperations.hpp"
+#include "strus/base/bitOperations.hpp"
 #include "private/internationalization.hpp"
 #include <string>
 #include <iostream>

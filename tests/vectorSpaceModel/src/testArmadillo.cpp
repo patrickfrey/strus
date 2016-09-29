@@ -1,4 +1,4 @@
-#include "private/bitOperations.hpp"
+#include "strus/base/bitOperations.hpp"
 #include <armadillo>
 #include <iostream>
 #include <sstream>
