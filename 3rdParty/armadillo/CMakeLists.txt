@@ -123,12 +123,19 @@ else()
   message(STATUS "   ATLAS_FOUND = ${ATLAS_FOUND}"   )
   message(STATUS "    BLAS_FOUND = ${BLAS_FOUND}"    )
   message(STATUS "  LAPACK_FOUND = ${LAPACK_FOUND}"  )
-  
+
   if(MKL_FOUND OR ACMLMP_FOUND OR ACML_FOUND)
     
-    set(ARMA_USE_LAPACK true)
-    set(ARMA_USE_BLAS   true)
-    
+    IF (${LAPACK_FOUND} STREQUAL "YES")
+         set( ARMA_USE_LAPACK true )
+    ENDIF  (${LAPACK_FOUND} STREQUAL "YES")
+    IF (${OpenBLAS_FOUND} STREQUAL "YES")
+         set( ARMA_USE_BLAS true )
+    ENDIF  (${OpenBLAS_FOUND} STREQUAL "YES")
+    IF (${BLAS_FOUND} STREQUAL "YES")
+         set( ARMA_USE_BLAS true )
+    ENDIF  (${BLAS_FOUND} STREQUAL "YES")
+
     message(STATUS "")
     message(STATUS "*** If the MKL or ACML libraries are installed in non-standard locations such as")
     message(STATUS "*** /opt/intel/mkl, /opt/intel/composerxe/, /usr/local/intel/mkl")
@@ -304,9 +311,10 @@ else()
       set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
       message( STATUS "Set flag WITH_CPP11='NO'. Added '-std=c++98' to compiler flags" )
 endif()
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=default")
 
-message(STATUS "Generating ${PROJECT_BINARY_DIR}/tmp/include/config.hpp")
-configure_file(${PROJECT_SOURCE_DIR}/include/armadillo_bits/config.hpp.cmake ${PROJECT_BINARY_DIR}/tmp/include/armadillo_bits/config.hpp)
+message(STATUS "Generating ${PROJECT_BINARY_DIR}/include/config.hpp")
+configure_file(${PROJECT_SOURCE_DIR}/include/armadillo_bits/config.hpp.cmake ${PROJECT_BINARY_DIR}/include/armadillo_bits/config.hpp)
 
 include_directories( ${PROJECT_SOURCE_DIR}/include ${CMAKE_REQUIRED_INCLUDES})
 

@@ -41,12 +41,12 @@ int main()
 		std::cout << "A * B transposed:" << std::endl;
 		std::cout << A * B.t() << std::endl;
 	
-		double det_a = arma::det( A);
-		std::cout << "determinant of A:" << det_a << std::endl;
-		double det_b = arma::det( B);
-		std::cout << "determinant of B:" << det_b << std::endl;
-		double det_c = arma::det( C);
-		std::cout << "determinant of C:" << det_c << std::endl;
+		unsigned int rank_a = arma::rank( A, std::numeric_limits<float>::epsilon());
+		std::cout << "rank of A:" << rank_a << std::endl;
+		unsigned int rank_b = arma::rank( B, std::numeric_limits<float>::epsilon());
+		std::cout << "rank of B:" << rank_b << std::endl;
+		unsigned int rank_c = arma::rank( C, std::numeric_limits<float>::epsilon());
+		std::cout << "rank of C:" << rank_c << std::endl;
 
 		{
 			arma::sp_mat A(5,6);

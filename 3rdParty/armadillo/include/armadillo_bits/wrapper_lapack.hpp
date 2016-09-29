@@ -9,10 +9,7 @@
 // Written by James Sanders
 // Written by Eric Jon Sundstrom
 
-
-
 #ifdef ARMA_USE_LAPACK
-
 
 //! \namespace lapack namespace for LAPACK functions
 namespace lapack

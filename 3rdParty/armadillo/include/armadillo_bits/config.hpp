@@ -32,26 +32,26 @@
 #endif
 
 #if !defined(ARMA_USE_ARPACK)
-// #define ARMA_USE_ARPACK
+/* #undef ARMA_USE_ARPACK */
 //// Uncomment the above line if you have ARPACK or a high-speed replacement for ARPACK.
 //// ARPACK is required for eigen decompositions of complex sparse matrices
 #endif
 
 #if !defined(ARMA_USE_SUPERLU)
-// #define ARMA_USE_SUPERLU
+/* #undef ARMA_USE_SUPERLU */
 //// Uncomment the above line if you have SuperLU.
 //// SuperLU is used for solving sparse linear systems via spsolve()
 //// Caveat: only SuperLU version 5.2 can be used!
 #endif
 
 #if !defined(ARMA_SUPERLU_INCLUDE_DIR)
-// #define ARMA_SUPERLU_INCLUDE_DIR /usr/include/
+#define ARMA_SUPERLU_INCLUDE_DIR /
 //// If you're using SuperLU and want to explicitly include the SuperLU headers,
 //// uncomment the above define and specify the appropriate include directory.
 //// Make sure the directory has a trailing /
 #endif
 
-// #define ARMA_USE_WRAPPER
+#define ARMA_USE_WRAPPER
 //// Comment out the above line if you're getting linking errors when compiling your programs,
 //// or if you prefer to directly link with LAPACK, BLAS + etc instead of the Armadillo runtime library.
 //// You will then need to link your programs directly with -llapack -lblas instead of -larmadillo
@@ -75,8 +75,8 @@
 // #define ARMA_USE_MKL_ALLOC
 //// Uncomment the above line if you want to use Intel MKL mkl_malloc() and mkl_free() instead of standard malloc() and free()
 
-// #define ARMA_USE_ATLAS
-// #define ARMA_ATLAS_INCLUDE_DIR /usr/include/
+/* #undef ARMA_USE_ATLAS */
+#define ARMA_ATLAS_INCLUDE_DIR /
 //// If you're using ATLAS and the compiler can't find cblas.h and/or clapack.h
 //// uncomment the above define and specify the appropriate include directory.
 //// Make sure the directory has a trailing /
@@ -84,14 +84,14 @@
 #if !defined(ARMA_USE_CXX11)
 // #define ARMA_USE_CXX11
 //// Uncomment the above line to forcefully enable use of C++11 features (eg. initialiser lists).
-//// Note that ARMA_USE_CXX11 is automatically enabled when a C++11 compiler is detected.
+//// Note that ARMA_USE_CXX11 is automatically enabled when a C++11 compiler is detected
 #endif
 
 #if !defined(ARMA_64BIT_WORD)
 // #define ARMA_64BIT_WORD
 //// Uncomment the above line if you require matrices/vectors capable of holding more than 4 billion elements.
-//// Your machine and compiler must have support for 64 bit integers (eg. via "long" or "long long").
-//// Note that ARMA_64BIT_WORD is automatically enabled when a C++11 compiler is detected.
+//// Your machine and compiler must have support for 64 bit integers (eg. via "long" or "long long")
+//// Note that ARMA_64BIT_WORD is automatically enabled when a C++11 compiler is detected
 #endif
 
 #if !defined(ARMA_USE_HDF5)
@@ -101,12 +101,12 @@
 //// and you will need to link with the hdf5 library (eg. -lhdf5)
 #endif
 
-// #define ARMA_USE_HDF5_ALT
+/* #undef ARMA_USE_HDF5_ALT */
 #if defined(ARMA_USE_HDF5_ALT) && defined(ARMA_USE_WRAPPER)
   #undef  ARMA_USE_HDF5
   #define ARMA_USE_HDF5
   
-  // #define ARMA_HDF5_INCLUDE_DIR /usr/include/
+  #define ARMA_HDF5_INCLUDE_DIR /
 #endif
 
 #if !defined(ARMA_MAT_PREALLOC)
@@ -188,7 +188,7 @@
 #if defined(ARMA_USE_WRAPPER)
   #if defined(ARMA_USE_CXX11)
     #if !defined(ARMA_USE_EXTERN_CXX11_RNG)
-      // #define ARMA_USE_EXTERN_CXX11_RNG
+/* #undef ARMA_USE_EXTERN_CXX11_RNG */
     #endif
   #endif
 #endif
@@ -218,5 +218,5 @@
 // ARMA_AUX_LIBS lists the libraries required by Armadillo on this system, and
 // ARMA_AUX_INCDIRS lists the include directories required by Armadillo on this system.
 // Do not use these unless you know what you are doing.
-#define ARMA_AUX_LIBS
-#define ARMA_AUX_INCDIRS
+#define ARMA_AUX_LIBS /usr/lib/libblas.so;/usr/lib/liblapack.so
+#define ARMA_AUX_INCDIRS 

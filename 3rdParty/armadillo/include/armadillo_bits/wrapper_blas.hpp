@@ -7,10 +7,7 @@
 // 
 // Written by Conrad Sanderson - http://conradsanderson.id.au
 
-
-
 #ifdef ARMA_USE_BLAS
-
 
 //! \namespace blas namespace for BLAS functions
 namespace blas

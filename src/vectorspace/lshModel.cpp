@@ -22,7 +22,7 @@ LshModel::LshModel( std::size_t dim_, std::size_t nofbits_, std::size_t variatio
 	for (; wi != we; ++wi)
 	{
 		arma::mat rot( arma::randu<arma::mat>( m_dim, m_dim));
-		if (std::abs( det( rot)) < 0.01)
+		if (arma::rank( rot, std::numeric_limits<float>::epsilon()) < m_dim)
 		{
 			--wi;
 			continue;
@@ -38,7 +38,7 @@ LshModel::LshModel( std::size_t dim_, std::size_t nofbits_, std::size_t variatio
 	std::vector<arma::mat>::const_iterator ri=m_rotations.begin(), re=m_rotations.end();
 	for (; ri != re; ++ri)
 	{
-		if (std::abs( det( *ri)) < 0.01)
+		if (arma::rank( *ri, std::numeric_limits<float>::epsilon()) < m_dim)
 		{
 			throw strus::runtime_error( _TXT( "illegal rotation matrix in model"));
 		}

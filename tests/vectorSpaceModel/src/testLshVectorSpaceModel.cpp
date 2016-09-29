@@ -102,7 +102,7 @@ public:
 		for (; wi != we; ++wi)
 		{
 			m_rotations.push_back( arma::randu<arma::mat>( m_dim, m_dim));
-			if (std::abs( det( m_rotations.back())) < 0.01)
+			if (std::abs( arma::det( m_rotations.back())) < 0.01)
 			{
 				--wi;
 				continue;
