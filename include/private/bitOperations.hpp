@@ -116,6 +116,20 @@ struct BitOperations
 #endif
 	}
 
+#ifdef __OpenBSD__
+	static inline int strus_ffsl( long mask )
+	{
+		if (mask == 0) {
+			return 0;
+		}
+		int bit;
+		for (bit = 1; !(mask & 1); bit++) {
+			mask = (unsigned long)mask >> 1;
+		}
+		return bit;
+	}
+#endif
+
 	static inline unsigned int bitScanForward( const uint64_t& idx)
 	{
 #ifdef __x86_64__
@@ -124,7 +138,11 @@ struct BitOperations
 		asm(" bsfq %1, %0 \n" : "=r"(result) : "r"(idx) ); 
 		return (unsigned int)(result+1);
 #else
+#ifdef __OpenBSD__
+		return strus_ffsl( idx);
+#else
 		return ffsl( idx);
+#endif
 #endif
 	}
 
