@@ -13,7 +13,6 @@
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
-#include "strus/lib/vectorspace_std.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/reference.hpp"
@@ -24,7 +23,6 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
-#include "strus/vectorSpaceModelInterface.hpp"
 #include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -46,14 +44,12 @@ public:
 		,m_storage(strus::createStorage(errorhnd_))
 		,m_db( strus::createDatabase_leveldb( errorhnd_))
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
-		,m_vsmodel( strus::createVectorSpaceModel_std( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{
 		if (!m_queryProcessor.get()) throw strus::runtime_error(_TXT("error creating query processor"));
 		if (!m_storage.get()) throw strus::runtime_error(_TXT("error creating default storage"));
 		if (!m_db.get()) throw strus::runtime_error(_TXT("error creating default database '%s'"), "leveldb");
 		if (!m_statsproc.get()) throw strus::runtime_error(_TXT("error creating default statistics processor"));
-		if (!m_vsmodel.get()) throw strus::runtime_error(_TXT("error creating default vector space model"));
 	}
 
 	virtual ~StorageObjectBuilder(){}
@@ -85,21 +81,6 @@ public:
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error getting statistics processor: %s"), *m_errorhnd, 0);
 	}
-	virtual const VectorSpaceModelInterface* getVectorSpaceModel( const std::string& name) const
-	{
-		try
-		{
-			if (name.empty() || utils::tolower( name) == "default")
-			{
-				return m_vsmodel.get();
-			}
-			else
-			{
-				throw strus::runtime_error(_TXT("unknown vector space model: '%s'"), name.c_str());
-			}
-		}
-		CATCH_ERROR_MAP_RETURN( _TXT("error getting vector space model: %s"), *m_errorhnd, 0);
-	}
 	virtual QueryEvalInterface* createQueryEval() const
 	{
 		return strus::createQueryEval( m_errorhnd);
@@ -110,7 +91,6 @@ private:
 	Reference<StorageInterface> m_storage;			///< storage handle
 	Reference<DatabaseInterface> m_db;			///< database handle
 	Reference<StatisticsProcessorInterface> m_statsproc;	///< statistics processor handle
-	Reference<VectorSpaceModelInterface> m_vsmodel;		///< vector space model handle
 	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 
