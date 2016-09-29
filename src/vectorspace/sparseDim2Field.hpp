@@ -38,17 +38,21 @@ public:
 	};
 
 public:
-	SparseDim2Field()				:m_map(){}
-	SparseDim2Field( const SparseDim2Field& o)	:m_map(o.m_map){}
+	SparseDim2Field()				:m_map(),m_null(0){}
+	SparseDim2Field( const SparseDim2Field& o)	:m_map(o.m_map),m_null(o.m_null){}
 
 	ValueType& operator()( uint32_t x, uint32_t y)
 	{
 		return m_map[ Coord(x,y)];
 	}
-	const ValueType& operator()( uint32_t x, uint32_t y) const
+	const ValueType& get( uint32_t x, uint32_t y) const
 	{
 		typename std::map<Coord,ValueType>::const_iterator itr = m_map.find( Coord(x,y));
-		return itr==m_map.end()?0:itr->second;
+		return itr==m_map.end()?m_null:itr->second;
+	}
+	const ValueType& operator()( uint32_t x, uint32_t y) const
+	{
+		return get( x, y);
 	}
 
 	class const_row_iterator
@@ -110,6 +114,7 @@ public:
 
 private:
 	std::map<Coord,ValueType> m_map;
+	ValueType m_null;
 };
 
 }

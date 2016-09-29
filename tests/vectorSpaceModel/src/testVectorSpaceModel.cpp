@@ -243,8 +243,8 @@ int main( int argc, const char** argv)
 		{
 			for (std::size_t oidx=0; oidx != nofSamples; ++oidx)
 			{
-				double sim = simMatrix( sidx, oidx);
-				unsigned char val = outSimMatrix( sidx, oidx);
+				double sim = simMatrix.get( sidx, oidx);
+				unsigned char val = outSimMatrix.get( sidx, oidx);
 				if (sidx != oidx)
 				{
 					if (sim >= 0.9)
