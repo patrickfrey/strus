@@ -19,9 +19,6 @@
 # Dependency files
 *.d
 
-# Packaging directory
-pkg/
-
 # Valgring suppression files
 *.sup
 
