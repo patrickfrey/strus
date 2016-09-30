@@ -314,6 +314,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Fri Sep 30 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.11.1-0.1
+- moved vector space model implementation into own project strusvector
+
 * Wed Sep 28 2016 Patrick Frey <patrickpfrey@yahoo.com> 0.11.0-0.1
 - integrated the armadillo library for fast linear algebra operations
 - define vector space model interface and implement standard vector space model for unsupervised learning of features from vectors
