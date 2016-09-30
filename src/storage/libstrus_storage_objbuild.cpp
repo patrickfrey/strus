@@ -81,6 +81,11 @@ public:
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error getting statistics processor: %s"), *m_errorhnd, 0);
 	}
+	virtual const VectorSpaceModelInterface* getVectorSpaceModel( const std::string& name) const
+	{
+		m_errorhnd->report(_TXT("unknown vector space model: '%s'"), name.c_str());
+		return 0;
+	}
 	virtual QueryEvalInterface* createQueryEval() const
 	{
 		return strus::createQueryEval( m_errorhnd);
