@@ -31,7 +31,9 @@
 #endif
 #include <stdlib.h>
 #include <libgen.h>
+#if defined __linux__ || defined __FreeBSD__ || defined __APPLE__
 #include <execinfo.h>
+#endif
 #include <unistd.h>
 #include "strus/base/snprintf.h"
 
@@ -450,7 +452,15 @@ DLL_PUBLIC void* malloc_IMPL( size_t size)
 	frame->signature = FRAME_SIGNATURE;
 	frame->caller_match = caller_match();
 	void* rt = (void*)(frame+1);
+#if defined __linux__ || defined __FreeBSD__ || defined __APPLE__
 	size_t rt_size = malloc_usable_size( frame) - sizeof(mem_frame);
+#else
+	/* no malloc_usable_size, this is most likely wrong, but we don't care
+	 * as the library will not run on the platform anyway (for instance
+	 * on OpenBSD)
+	 */
+	size_t rt_size  = sizeof(mem_frame);
+#endif
 
 	if (frame->caller_match)
 	{
@@ -480,7 +490,11 @@ DLL_PUBLIC void* realloc_IMPL( void* ptr, size_t size)
 #endif
 	check_init();
 	old_frame = ((mem_frame*)ptr) - 1;
+#if defined __linux__ || defined __FreeBSD__ || defined __APPLE__
 	old_size = malloc_usable_size( old_frame) - sizeof(mem_frame);
+#else
+	old_size = sizeof( old_frame) - sizeof(mem_frame);
+#endif
 	old_caller_match = old_frame->caller_match;
 	if (old_caller_match > 1 || old_frame->signature != FRAME_SIGNATURE)
 	{
@@ -498,7 +512,11 @@ DLL_PUBLIC void* realloc_IMPL( void* ptr, size_t size)
 	new_frame->signature = FRAME_SIGNATURE;
 	new_frame->caller_match = caller_match();
 	rt = (void*)(new_frame+1);
+#if defined __linux__ || defined __FreeBSD__ || defined __APPLE__
 	rt_size = malloc_usable_size( new_frame) - sizeof(mem_frame);
+#else
+	rt_size = sizeof( new_frame) - sizeof(mem_frame);
+#endif
 
 	if (old_caller_match)
 	{
@@ -538,7 +556,11 @@ DLL_PUBLIC void* calloc_IMPL( size_t nmemb, size_t size)
 
 	frame->caller_match = caller_match();
 	rt = (void*)(frame+1);
+#if defined __linux__ || defined __FreeBSD__ || defined __APPLE__	
 	rt_size = malloc_usable_size( frame) - sizeof(mem_frame);
+#else
+	rt_size = sizeof( frame) - sizeof( mem_frame);
+#endif
 
 	if (frame->caller_match)
 	{
@@ -580,7 +602,11 @@ DLL_PUBLIC void free_IMPL( void* ptr)
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "EVAL usable size\n");
 #endif
+#if defined __linux__ || defined __FreeBSD__ || defined __APPLE__
 	size = malloc_usable_size( (void*)frame) - sizeof(mem_frame);
+#else
+	size = sizeof( (void*)frame) - sizeof(mem_frame);
+#endif
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "GOT usable size %u\n", (unsigned int)size);
 #endif
