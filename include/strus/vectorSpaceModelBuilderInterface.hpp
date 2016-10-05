@@ -25,7 +25,7 @@ public:
 	virtual void addSampleVector( const std::vector<double>& vec)=0;
 
 	/// \brief Finalize all calculations for the model.
-	virtual void finalize()=0;
+	virtual bool finalize()=0;
 
 	/// \brief Store the model persistently.
 	/// \return true on success, false if the transaction failed
