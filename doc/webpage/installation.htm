@@ -28,6 +28,7 @@
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusanalyzer">strusAnalyzer</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strustrace">strusTrace</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=struspattern">strusPattern</a></li>
+		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=struspattern">strusVector</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusmodule">strusModule</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusrpc">strusRpc</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusutilities">strusUtilities</a></li>
@@ -64,7 +65,7 @@
 git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</pre>
 		The following projects (substitute for &lt;projectname&gt;) are part of the strus universe:
-		<a href="https://github.com/patrickfrey/strusBase">strusBase</a>, <a href="https://github.com/patrickfrey/strus">strus</a>, <a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>, <a href="https://github.com/patrickfrey/strusTrace">strusTrace</a>, <a href="https://github.com/patrickfrey/strusPattern">strusPattern</a>, <a href="https://github.com/patrickfrey/strusModule">strusModule</a>, <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>, <a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>, <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
+		<a href="https://github.com/patrickfrey/strusBase">strusBase</a>, <a href="https://github.com/patrickfrey/strus">strus</a>, <a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>, <a href="https://github.com/patrickfrey/strusTrace">strusTrace</a>, <a href="https://github.com/patrickfrey/strusModule">strusModule</a>, <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>, <a href="https://github.com/patrickfrey/strusPattern">strusPattern</a>, <a href="https://github.com/patrickfrey/strusVector">strusVector</a>, <a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>, <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
 		</p>
 
 		<h2>Build the latest stable version</h2>
@@ -107,18 +108,14 @@ sudo make install
 		The projects will by default be installed in the default location for utilities
 		(On Ubuntu in /usr/local). The projects have due to dependencies be build and
 		installed in the following order (projects on the same line can be build in reversed
-		order too because they have no dependencies to each other):
+		order too because they have no build dependencies to each other):
 		<ol>
-		<li>strusBase
-		</li>
-		<li>strus, strusAnalyze, strusTrace
-		</li>
-		<li>strusModule, strusPattern
-		</li>
-		<li>strusRpc
-		</li>
-		<li>strusBindings, strusUtilities
-		</li>
+		<li>strusBase</li>
+		<li>strus, strusAnalyze</li>
+		<li>strusTrace</li>
+		<li>strusModule</li>
+		<li>strusRpc</li>
+		<li>strusPattern, strusVector, strusBindings, strusUtilities</li>
 		</ol>
 		</p>
 	</div>
