@@ -25,8 +25,13 @@ public:
 	/// \brief Destructor
 	virtual ~VectorSpaceModelInterface(){}
 
+	/// \brief Delete the repository of a model
+	/// \param[in] config connfiguration string of the model
+	/// \return true on success
+	virtual bool destroyModel( const std::string& config) const=0;
+
 	/// \brief Create a new vector space model instance
-	/// \param[in] config connfiguration string of the model (may also reference a file to load a configuration created)
+	/// \param[in] config connfiguration string of the model
 	/// \return the instance (with ownership)
 	virtual VectorSpaceModelInstanceInterface* createInstance( const std::string& config) const=0;
 
