@@ -268,20 +268,6 @@ public:
 	}
 };
 
-
-class ThreadId
-{
-public:
-	typedef boost::thread::id Type;
-	static Type get()
-	{
-		return boost::this_thread::get_id();
-	}
-};
-
-#define STRUS_STATIC_ASSERT( cond ) BOOST_STATIC_ASSERT((cond))
-#define CACHELINE_SIZE 64
-
 }} //namespace
 #endif
 
