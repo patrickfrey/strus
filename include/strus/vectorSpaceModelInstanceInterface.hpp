@@ -21,12 +21,21 @@ public:
 
 	/// \brief Map a vector to a set of features represented as numbers
 	/// \param[in] vec vector to calculate the features from
-	/// \return the resulting feature indices (indices of trained individuals starting from 1)
-	/// \note The value of the features is depending on the model and not defined from outside. Feature learning must therefore happen in an unsupervised way.
+	/// \return the resulting feature indices (indices of learnt features starting from 1)
 	virtual std::vector<unsigned int> mapVectorToFeatures( const std::vector<double>& vec) const=0;
 
+	/// \brief Map an index of the training vectors to a set of features represented as numbers
+	/// \param[in] index index of vector in the order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::vector<double>& vec) starting from 0
+	/// \return the resulting feature indices (indices of learnt features starting from 1)
+	virtual std::vector<unsigned int> mapIndexToFeatures( unsigned int index) const=0;
+
+	/// \brief Map a feature index to the list of indices of training vectors it represents
+	/// \param[in] feature index (indices of learnt features starting from 1) 
+	/// \return the resulting vector indices (index is order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::vector<double>& vec) starting from 0)
+	virtual std::vector<unsigned int> mapFeatureToIndices( unsigned int feature) const=0;
+
 	/// \brief Get the number of features learned
-	/// \return the number
+	/// \return the number of features and also the maximum number assigned to a feature
 	virtual unsigned int nofFeatures() const=0;
 
 	/// \brief Get the configuration of this model
