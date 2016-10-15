@@ -38,6 +38,10 @@ public:
 	/// \return the number of features and also the maximum number assigned to a feature
 	virtual unsigned int nofFeatures() const=0;
 
+	/// \brief Get the number of samples used for learning
+	/// \return the number of samples
+	virtual unsigned int nofSamples() const=0;
+
 	/// \brief Get the configuration of this model
 	/// \return the configuration string
 	virtual std::string config() const=0;
