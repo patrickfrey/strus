@@ -22,7 +22,7 @@ public:
 	/// \brief Add a sample vector to the model for training (unsupervised learning)
 	/// \param[in] vec vector to add
 	/// \note the model gets an example vector that can be used to build internal structures for the feature mapping in an unsupervised way
-	virtual void addVector( const std::vector<double>& vec)=0;
+	virtual void addVector( const std::string& name, const std::vector<double>& vec)=0;
 
 	/// \brief Finalize all calculations for the model.
 	virtual bool finalize()=0;
