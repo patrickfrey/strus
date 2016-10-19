@@ -75,6 +75,7 @@ bool DocumentTermIterator::nextTerm( Term& value)
 				return true;
 			}
 		}
+		m_invblkitr = 0;
 		return false;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in document term iterator next term: %s"), *m_errorhnd, false);
