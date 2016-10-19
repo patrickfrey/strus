@@ -26,7 +26,12 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 	,m_elementHandle(metadata_->elementHandle(elementName_))
 	,m_weight(weight_)
 	,m_errorhnd(errorhnd_)
-{}
+{
+	if (m_elementHandle < 0)
+	{
+		throw strus::runtime_error( _TXT("metadata element '%s' is not defined"), elementName_.c_str());
+	}
+}
 
 void WeightingFunctionContextMetadata::addWeightingFeature(
 		const std::string&,

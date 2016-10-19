@@ -43,6 +43,14 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	{
 		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
 	}
+	if (m_metadata_title_maxpos < 0 && !metadata_title_maxpos_.empty())
+	{
+		throw strus::runtime_error( _TXT("unknown meta data element '%s' for the title maxpos defined"), metadata_title_maxpos_.c_str());
+	}
+	if (m_metadata_title_size < 0 && !metadata_title_size_.empty())
+	{
+		throw strus::runtime_error( _TXT("unknown meta data element '%s' for the title size defined"), metadata_title_size_.c_str());
+	}
 }
 
 void WeightingFunctionContextBM25pff::addWeightingFeature(

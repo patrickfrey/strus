@@ -209,6 +209,12 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		for (; mi != me; ++mi)
 		{
 			Index hnd = metadata->elementHandle( mi->first.c_str());
+			if (hnd < 0)
+			{
+				logError( logout, m_docid,
+					_TXT( "unknown document meta data element '%s'"), mi->first.c_str());
+				continue;
+			}
 			metadata->skipDoc( m_docno);
 	
 			NumericVariant val = metadata->getValue( hnd);
@@ -232,6 +238,12 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		for (; ai != ae; ++ai)
 		{
 			Index hnd = attributes->elementHandle( ai->first.c_str());
+			if (hnd == 0)
+			{
+				logError( logout, m_docid,
+					_TXT( "unknown document attribute '%s'"), ai->first.c_str());
+				continue;
+			}
 			attributes->skipDoc( m_docno);
 	
 			std::string val = attributes->getValue( hnd);
