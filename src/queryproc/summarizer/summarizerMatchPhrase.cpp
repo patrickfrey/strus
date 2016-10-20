@@ -65,7 +65,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_initialized(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (metadata_title_maxpos_.empty() && m_metadata_title_maxpos < 0)
+	if (!metadata_title_maxpos_.empty() && m_metadata_title_maxpos < 0)
 	{
 		throw strus::runtime_error( _TXT("try to access unknown document meta data element '%s'"), metadata_title_maxpos_.c_str());
 	}
