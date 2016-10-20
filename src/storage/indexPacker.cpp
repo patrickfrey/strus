@@ -7,7 +7,7 @@
  */
 #include "indexPacker.hpp"
 #include "private/internationalization.hpp"
-#include "private/utf8.hpp"
+#include "strus/base/utf8.hpp"
 #include "strus/base/bitOperations.hpp"
 #include <map>
 #include <limits>

@@ -11,7 +11,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utf8.hpp"
+#include "strus/base/utf8.hpp"
 #include <arpa/inet.h>
 
 using namespace strus;
