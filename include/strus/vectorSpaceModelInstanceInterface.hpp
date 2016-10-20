@@ -24,15 +24,20 @@ public:
 	/// \return the resulting feature indices (indices of learnt features starting from 1)
 	virtual std::vector<unsigned int> mapVectorToFeatures( const std::vector<double>& vec) const=0;
 
-	/// \brief Map an index of the training vectors to a set of features represented as numbers
+	/// \brief Get the set of trained feature assingments represented as numbers assigned to a specified index of the training vectors passed as argument
 	/// \param[in] index index of vector in the order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::string& name,const std::vector<double>& vec) starting from 0
 	/// \return the resulting feature indices (indices of learnt features starting from 1)
-	virtual std::vector<unsigned int> mapIndexToFeatures( unsigned int index) const=0;
+	virtual std::vector<unsigned int> sampleFeatures( unsigned int index) const=0;
 
-	/// \brief Map a feature index to the list of indices of training vectors it represents
+	/// \brief Get the set of features represented as numbers assigned to a specified index of the training vectors passed as argument
+	/// \param[in] index index of vector in the order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::string& name,const std::vector<double>& vec) starting from 0
+	/// \return the vector assinged to this sample with VectorSpaceModelBuilderInterface::addSampleVector(const std::vector<double>&)
+	virtual std::vector<double> sampleVector( unsigned int index) const=0;
+
+	/// \brief Get the list of indices of training vectors represented by a feature specified as argument
 	/// \param[in] feature index (indices of learnt features starting from 1) 
 	/// \return the resulting vector indices (index is order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::string& name, const std::vector<double>& vec) starting from 0)
-	virtual std::vector<unsigned int> mapFeatureToIndices( unsigned int feature) const=0;
+	virtual std::vector<unsigned int> featureSamples( unsigned int feature) const=0;
 
 	/// \brief Get the number of features learned
 	/// \return the number of features and also the maximum number assigned to a feature
