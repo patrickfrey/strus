@@ -24,12 +24,13 @@ public:
 	/// \note the model gets an example vector that can be used to build internal structures for the feature mapping in an unsupervised way
 	virtual void addSampleVector( const std::string& name, const std::vector<double>& vec)=0;
 
-	/// \brief Finalize all calculations for the model.
-	virtual bool finalize()=0;
+	/// \brief Do a commit and ensure the persistent storage the model data created till now
+	/// \return true on success, false if the commit failed
+	virtual bool commit()=0;
 
-	/// \brief Store the model persistently.
-	/// \return true on success, false if the transaction failed
-	virtual bool store()=0;
+	/// \brief Finalize all calculations for the model and store the results for an vector space model instance to use it.
+	/// \return true on success, false if the operation failed
+	virtual bool finalize()=0;
 };
 
 }//namespace

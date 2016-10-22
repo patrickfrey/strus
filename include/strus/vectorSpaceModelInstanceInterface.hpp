@@ -8,6 +8,7 @@
 /// \brief Instance interface for mapping vectors of floating point numbers of a given dimension to a list of features. The mapping function is created in an unsupervised way.
 #ifndef _STRUS_VECTOR_SPACE_MODEL_INSTANCE_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_SPACE_MODEL_INSTANCE_INTERFACE_HPP_INCLUDED
+#include "strus/index.hpp"
 #include <vector>
 
 namespace strus {
@@ -22,22 +23,22 @@ public:
 	/// \brief Map a vector to a set of features represented as numbers
 	/// \param[in] vec vector to calculate the features from
 	/// \return the resulting feature indices (indices of learnt features starting from 1)
-	virtual std::vector<unsigned int> mapVectorToFeatures( const std::vector<double>& vec) const=0;
+	virtual std::vector<Index> mapVectorToFeatures( const std::vector<double>& vec) const=0;
 
 	/// \brief Get the set of trained feature assingments represented as numbers assigned to a specified index of the training vectors passed as argument
 	/// \param[in] index index of vector in the order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::string& name,const std::vector<double>& vec) starting from 0
 	/// \return the resulting feature indices (indices of learnt features starting from 1)
-	virtual std::vector<unsigned int> sampleFeatures( unsigned int index) const=0;
+	virtual std::vector<Index> sampleFeatures( const Index& index) const=0;
 
 	/// \brief Get the set of features represented as numbers assigned to a specified index of the training vectors passed as argument
 	/// \param[in] index index of vector in the order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::string& name,const std::vector<double>& vec) starting from 0
 	/// \return the vector assinged to this sample with VectorSpaceModelBuilderInterface::addSampleVector(const std::vector<double>&)
-	virtual std::vector<double> sampleVector( unsigned int index) const=0;
+	virtual std::vector<double> sampleVector( const Index& index) const=0;
 
 	/// \brief Get the list of indices of training vectors represented by a feature specified as argument
 	/// \param[in] feature index (indices of learnt features starting from 1) 
 	/// \return the resulting vector indices (index is order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::string& name, const std::vector<double>& vec) starting from 0)
-	virtual std::vector<unsigned int> featureSamples( unsigned int feature) const=0;
+	virtual std::vector<Index> featureSamples( const Index& feature) const=0;
 
 	/// \brief Get the number of features learned
 	/// \return the number of features and also the maximum number assigned to a feature
@@ -50,7 +51,7 @@ public:
 	/// \brief Get the name of a sample used for learning
 	/// \param[in] index index of the sample to get the name of (index is order of insertion with VectorSpaceModelBuilderInterface::addVector(const std::string& name, const std::vector<double>& vec) starting from 0)
 	/// \return the name of the sample
-	virtual std::string sampleName( unsigned int index) const=0;
+	virtual std::string sampleName( const Index& index) const=0;
 
 	/// \brief Get the configuration of this model
 	/// \return the configuration string

@@ -211,7 +211,7 @@ DLL_PUBLIC StorageClientInterface*
 		strus::removeKeysFromConfigString(
 				databasecfg,
 				sti->getConfigParameters( strus::StorageInterface::CmdCreateClient), errorhnd);
-	
+
 		strus::removeKeysFromConfigString(
 				storagecfg,
 				dbi->getConfigParameters( strus::DatabaseInterface::CmdCreateClient), errorhnd);
