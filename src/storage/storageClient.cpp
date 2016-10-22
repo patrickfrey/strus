@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "storageClient.hpp"
+#include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
@@ -16,6 +17,7 @@
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/versionStorage.hpp"
+#include "strus/storageInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
@@ -60,11 +62,12 @@ void StorageClient::cleanup()
 }
 
 StorageClient::StorageClient(
-		DatabaseClientInterface* database_,
+		const DatabaseInterface* database_,
+		const std::string& databaseConfig,
 		const char* termnomap_source,
 		const StatisticsProcessorInterface* statisticsProc_,
 		ErrorBufferInterface* errorhnd_)
-	:m_database()
+	:m_database(database_->createClient( databaseConfig))
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_docno(0)
@@ -77,12 +80,12 @@ StorageClient::StorageClient(
 {
 	try
 	{
-		m_metadescr.load( database_);
-		m_metaDataBlockCache = new MetaDataBlockCache( database_, m_metadescr);
+		if (!m_database.get()) throw strus::runtime_error(_TXT("failed to create database client: %s"), m_errorhnd->fetchError());
+		m_metadescr.load( m_database.get());
+		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
 
-		loadVariables( database_);
+		loadVariables( m_database.get());
 		if (termnomap_source) loadTermnoMap( termnomap_source);
-		m_database.reset( database_);
 	}
 	catch (const std::bad_alloc& err)
 	{

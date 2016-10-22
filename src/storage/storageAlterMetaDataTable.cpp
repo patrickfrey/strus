@@ -7,6 +7,7 @@
  */
 #include "storageAlterMetaDataTable.hpp"
 #include "storage.hpp"
+#include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
@@ -19,13 +20,15 @@
 using namespace strus;
 
 StorageAlterMetaDataTable::StorageAlterMetaDataTable(
-		DatabaseClientInterface* database_,
+		const DatabaseInterface* dbi,
+		const std::string& databaseConfig,
 		ErrorBufferInterface* errorhnd_)
-	:m_database(database_)
+	:m_database(dbi->createClient( databaseConfig))
 	,m_commit(false)
 	,m_rollback(false)
 	,m_errorhnd(errorhnd_)
 {
+	if (!m_database.get()) throw strus::runtime_error(_TXT("failed to create database client: %s"), m_errorhnd->fetchError());
 	m_metadescr_old.load( m_database.get());
 	m_metadescr_new  = m_metadescr_old;
 }

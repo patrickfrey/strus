@@ -20,7 +20,7 @@
 
 namespace strus {
 /// \brief Forward declaration
-class DatabaseClientInterface;
+class DatabaseInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
@@ -33,7 +33,10 @@ private:
 	void operator=( const StorageAlterMetaDataTable&){}		//... non copyable
 
 public:
-	StorageAlterMetaDataTable( DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_);
+	StorageAlterMetaDataTable(
+			const DatabaseInterface* dbi,
+			const std::string& databaseConfig,
+			ErrorBufferInterface* errorhnd_);
 
 	~StorageAlterMetaDataTable();
 

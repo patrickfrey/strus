@@ -1088,21 +1088,16 @@ int main( int argc, const char* argv[])
 		(void)dbi->destroyDatabase( config);
 		(void)g_errorhnd->fetchError();
 
-		dbi->createDatabase( config);
-		std::auto_ptr<strus::DatabaseClientInterface>
-			database( dbi->createClient( config));
-
-		sti->createStorage( config, database.get());
+		sti->createStorage( config, dbi.get());
 		{
 			const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
 			std::auto_ptr<strus::StorageClientInterface>
-				storage( sti->createClient( "", database.get(), statisticsMessageProc));
+				storage( sti->createClient( config, dbi.get(), statisticsMessageProc));
 			if (!storage.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
-			database.release();
-	
+
 			RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
 	
 			strus::Index totNofOccurrencies = 0;

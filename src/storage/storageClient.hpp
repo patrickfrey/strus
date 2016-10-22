@@ -38,7 +38,7 @@ class MetaDataRestrictionInterface;
 /// \brief Forward declaration
 class KeyAllocatorInterface;
 /// \brief Forward declaration
-class DatabaseClientInterface;
+class DatabaseInterface;
 /// \brief Forward declaration
 class DocumentFrequencyCache;
 /// \brief Forward declaration
@@ -52,12 +52,14 @@ class StorageClient
 	:public StorageClientInterface
 {
 public:
-	/// \param[in] database key value store database used by this storage (ownership passed to this)
+	/// \param[in] database key value store database type used by this storage
+	/// \param[in] databaseConfig configuration string (not a filename!) of the database interface to create for this storage
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
 	/// \param[in] statisticsProc_ statistics message processor interface
 	/// \param[in] errorhnd_ error buffering interface for error handling
 	StorageClient(
-			DatabaseClientInterface* database_,
+			const DatabaseInterface* database_,
+			const std::string& databaseConfig,
 			const char* termnomap_source,
 			const StatisticsProcessorInterface* statisticsProc_,
 			ErrorBufferInterface* errorhnd_);
@@ -201,6 +203,10 @@ public:/*StatisticsIterator*/
 
 public:/*strusResizeBlocks*/
 	Index maxTermTypeNo() const;
+	DatabaseClientInterface* databaseClient()
+	{
+		return m_database.get();
+	}
 
 private:
 	void cleanup();

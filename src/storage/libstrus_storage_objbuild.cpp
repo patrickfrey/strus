@@ -138,29 +138,18 @@ DLL_PUBLIC StorageAlterMetaDataTableInterface*
 		const StorageInterface* sti = objbuilder->getStorage();
 
 		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
-		std::string databasecfg( configstr);
-		strus::removeKeysFromConfigString(
-				databasecfg,
-				sti->getConfigParameters( strus::StorageInterface::CmdCreateClient), errorhnd);
 		//... In storagecfg is now the pure storage configuration without the database settings
 		if (errorhnd->hasError())
 		{
 			errorhnd->explain(_TXT("cannot evaluate database: %s"));
 			return 0;
 		}
-		std::auto_ptr<DatabaseClientInterface> database( dbi->createClient( databasecfg));
-		if (!database.get())
-		{
-			errorhnd->report(_TXT("error creating database client"));
-			return 0;
-		}
-		std::auto_ptr<StorageAlterMetaDataTableInterface> altermetatable( sti->createAlterMetaDataTable( database.get()));
+		std::auto_ptr<StorageAlterMetaDataTableInterface> altermetatable( sti->createAlterMetaDataTable( configstr, dbi));
 		if (!altermetatable.get())
 		{
 			errorhnd->report(_TXT("error creating alter metadata table client"));
 			return 0;
 		}
-		(void)database.release(); //... ownership passed to alter metadata table client
 		return altermetatable.release(); //... ownership returned
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage alter metadata table interface: %s"), *errorhnd, 0);
@@ -206,27 +195,6 @@ DLL_PUBLIC StorageClientInterface*
 			errorhnd->explain(_TXT("could not get storage: %s"));
 			return 0;
 		}
-		std::string databasecfg( configstr);
-		std::string storagecfg( configstr);
-		strus::removeKeysFromConfigString(
-				databasecfg,
-				sti->getConfigParameters( strus::StorageInterface::CmdCreateClient), errorhnd);
-
-		strus::removeKeysFromConfigString(
-				storagecfg,
-				dbi->getConfigParameters( strus::DatabaseInterface::CmdCreateClient), errorhnd);
-		//... In storagecfg is now the pure storage configuration without the database settings
-		if (errorhnd->hasError())
-		{
-			errorhnd->explain(_TXT("cannot create database client: %s"));
-			return 0;
-		}
-		std::auto_ptr<DatabaseClientInterface> database( dbi->createClient( databasecfg));
-		if (!database.get())
-		{
-			errorhnd->report(_TXT("error creating database client"));
-			return 0;
-		}
 		const StatisticsProcessorInterface* statsproc = 0;
 		if (!statsprocname.empty())
 		{
@@ -238,13 +206,12 @@ DLL_PUBLIC StorageClientInterface*
 			}
 		}
 		std::auto_ptr<StorageClientInterface>
-			storage( sti->createClient( storagecfg, database.get(), statsproc));
+			storage( sti->createClient( configstr, dbi, statsproc));
 		if (!storage.get())
 		{
 			errorhnd->report(_TXT("error creating storage client"));
 			return 0;
 		}
-		(void)database.release(); //... ownership passed to storage
 		return storage.release(); //... ownership returned
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *errorhnd, 0);

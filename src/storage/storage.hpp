@@ -13,7 +13,7 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseClientInterface;
+class DatabaseInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
@@ -32,12 +32,16 @@ public:
 
 	virtual StorageClientInterface* createClient(
 			const std::string& configsource,
-			DatabaseClientInterface* database,
+			const DatabaseInterface* database,
 			const StatisticsProcessorInterface* statisticsProc) const;
 
-	virtual bool createStorage( const std::string& configsource, DatabaseClientInterface* database) const;
+	virtual bool createStorage(
+			const std::string& configsource,
+			const DatabaseInterface* database) const;
 	
-	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable( DatabaseClientInterface* database) const;
+	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable(
+			const std::string& configsource,
+			const DatabaseInterface* database) const;
 
 	virtual const char* getConfigDescription( const ConfigType& type) const;
 
