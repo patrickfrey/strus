@@ -36,7 +36,7 @@ public:
 		AclBlockPrefix='w',	///< [docno,userno]            ->  [bit]*
 		DocListBlockPrefix='d',	///< [typeno,termno,docno]     ->  [bit]*
 
-		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float]*
+		DocMetaDataPrefix='m',	///< [docno/1K,nameid]         ->  [float/int32/short/char]*
 		DocAttributePrefix='a',	///< [docno,nameid]            ->  [string]
 		DocFrequencyPrefix='f',	///< [typeno,termno]           ->  [index]
 
