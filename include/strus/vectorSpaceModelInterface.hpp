@@ -21,7 +21,7 @@ class VectorSpaceModelInstanceInterface;
 class DatabaseInterface;
 
 
-/// \brief Interface for mapping vectors of floating point numbers of a given dimension to a list of features. The mapping function is created in an unsupervised way.
+/// \brief Interface for storing an retrieving vectors of floating point numbers representing document features and a model relating them to concept features. The relation is learnt by the model builder in an unsupervised way.
 class VectorSpaceModelInterface
 {
 public:
@@ -29,14 +29,16 @@ public:
 	virtual ~VectorSpaceModelInterface(){}
 
 	/// \brief Create a new vector space model instance
-	/// \param[in] config connfiguration string of the model
+	/// \param[in] database database type of the persistent storage where to load the model data from
+	/// \param[in] config connfiguration string of the model and the database
 	/// \return the instance (with ownership)
 	virtual VectorSpaceModelInstanceInterface* createInstance(
 			const DatabaseInterface* database,
 			const std::string& config) const=0;
 
 	/// \brief Create a new vector space model builder
-	/// \param[in] config configuration string of the model
+	/// \param[in] database database type to use as persistent storage
+	/// \param[in] config configuration string of the model and the database
 	/// \return the builder (with ownership)
 	virtual VectorSpaceModelBuilderInterface* createBuilder(
 			const DatabaseInterface* database,

@@ -12,24 +12,24 @@
 
 namespace strus {
 
-/// \brief Interface for creating a mapping of floating point vectors of a defined dimension to a list of features in an unsupervised way.
+/// \brief Interface for building a repository of vectors of floating point numbers representing document features and for learning of a model that relates added features to concept features.
 class VectorSpaceModelBuilderInterface
 {
 public:
 	/// \brief Destructor
 	virtual ~VectorSpaceModelBuilderInterface(){}
 
-	/// \brief Add a sample vector to the model for training (unsupervised learning)
+	/// \brief Add a feature to the model for later retrieval and for learning of the concepts associated to features
 	/// \param[in] vec vector to add
-	/// \note the model gets an example vector that can be used to build internal structures for the feature mapping in an unsupervised way
-	virtual void addSampleVector( const std::string& name, const std::vector<double>& vec)=0;
+	virtual void addFeature( const std::string& name, const std::vector<double>& vec)=0;
 
 	/// \brief Do a commit and ensure the persistent storage the model data created till now
 	/// \return true on success, false if the commit failed
 	virtual bool commit()=0;
 
-	/// \brief Finalize all calculations for the model and store the results for an vector space model instance to use it.
+	/// \brief Do the unsupervised learning of the feature concept relations and store the results persistently for later use.
 	/// \return true on success, false if the operation failed
+	/// \note This method includes a commit on the database, you do not have to call commit anymore.
 	virtual bool finalize()=0;
 };
 
