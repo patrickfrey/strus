@@ -35,7 +35,7 @@ public:
 	/// \remark This method has to be called before any other operation on a vector space model
 	virtual bool createRepository(
 			const std::string& configsource,
-			const DatabaseInterface* database)=0;
+			const DatabaseInterface* database) const=0;
 
 	/// \brief Reset an existing repository for the data of a vector space model to its initial state after creation
 	/// \param[in] configsource configuration string of the model and the database (not a filename!)
@@ -43,7 +43,7 @@ public:
 	/// \return true on success, false if an error occurred
 	virtual bool resetRepository(
 			const std::string& configsrc,
-			const DatabaseInterface* database)=0;
+			const DatabaseInterface* database) const=0;
 
 	/// \brief Create a new vector space model instance
 	/// \param[in] configsource configuration string of the model and the database (not a filename!)
