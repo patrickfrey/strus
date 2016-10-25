@@ -29,20 +29,20 @@ public:
 	virtual ~VectorSpaceModelInterface(){}
 
 	/// \brief Create a new vector space model instance
+	/// \param[in] configsource configuration string of the model and the database (not a filename!)
 	/// \param[in] database database type of the persistent storage where to load the model data from
-	/// \param[in] config connfiguration string of the model and the database
 	/// \return the instance (with ownership)
 	virtual VectorSpaceModelInstanceInterface* createInstance(
-			const DatabaseInterface* database,
-			const std::string& config) const=0;
+			const std::string& configsource,
+			const DatabaseInterface* database) const=0;
 
 	/// \brief Create a new vector space model builder
+	/// \param[in] configsource configuration string of the model and the database (not a filename!)
 	/// \param[in] database database type to use as persistent storage
-	/// \param[in] config configuration string of the model and the database
 	/// \return the builder (with ownership)
 	virtual VectorSpaceModelBuilderInterface* createBuilder(
-			const DatabaseInterface* database,
-			const std::string& config) const=0;
+			const std::string& configsource,
+			const DatabaseInterface* database) const=0;
 };
 
 }//namespace

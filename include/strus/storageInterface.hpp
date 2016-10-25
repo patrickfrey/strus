@@ -31,7 +31,7 @@ public:
 	virtual ~StorageInterface(){}
 
 	/// \brief Creates an client instance of the storage using a defined key value store database
-	/// \param[in] configsource configuration source string describing the storage (not a filename !)
+	/// \param[in] configsource configuration source string describing the storage and the database (not a filename !)
 	/// \param[in] database key value store database type used by this storage
 	/// \param[in] (optional) statisticsProc defines the format of statistic messages (distribute statistics)
 	virtual StorageClientInterface* createClient(
@@ -40,7 +40,7 @@ public:
 			const StatisticsProcessorInterface* statisticsProc=0) const=0;
 
 	/// \brief Creates a new storage described with configsource using a defined key value store database
-	/// \param[in] configsource Configuration source string describing the storage (not a filename !)
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
 	/// \param[in] database key value store database type used by this storage
 	/// \return true on success, false on error
 	/// \remark The database referenced by 'database' must have been created and active
@@ -49,7 +49,7 @@ public:
 			const DatabaseInterface* database) const=0;
 
 	/// \brief Create an interface to alter the meta data table structure
-	/// \param[in] configsource Configuration source string describing the storage (not a filename !)
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
 	/// \param[in] database key value store database type used by this storage
 	/// \return the created reference to be disposed with delete by the caller
 	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable(
