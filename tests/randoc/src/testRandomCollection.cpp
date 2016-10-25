@@ -1075,12 +1075,12 @@ int main( int argc, const char* argv[])
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
-		std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabase_leveldb( g_errorhnd));
+		std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
 		if (!dbi.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		std::auto_ptr<strus::StorageInterface> sti( strus::createStorage( g_errorhnd));
+		std::auto_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
 		if (!sti.get() || g_errorhnd->hasError())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());

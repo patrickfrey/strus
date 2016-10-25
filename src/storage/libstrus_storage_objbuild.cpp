@@ -41,8 +41,8 @@ class StorageObjectBuilder
 public:
 	explicit StorageObjectBuilder( ErrorBufferInterface* errorhnd_)
 		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
-		,m_storage(strus::createStorage(errorhnd_))
-		,m_db( strus::createDatabase_leveldb( errorhnd_))
+		,m_storage(strus::createStorageType_std(errorhnd_))
+		,m_db( strus::createDatabaseType_leveldb( errorhnd_))
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{

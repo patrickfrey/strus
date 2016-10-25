@@ -20,7 +20,7 @@ class ErrorBufferInterface;
 
 /// \brief Get the database interface implemented with leveldb with the functions for accessing the key/value store database.
 /// \return the database interface
-DatabaseInterface* createDatabase_leveldb( ErrorBufferInterface* errorhnd);
+DatabaseInterface* createDatabaseType_leveldb( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif
