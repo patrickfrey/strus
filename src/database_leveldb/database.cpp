@@ -135,7 +135,7 @@ bool Database::destroyDatabase( const std::string& configsource) const
 		if (!status.ok())
 		{
 			std::string err = status.ToString();
-			m_errorhnd->report( _TXT( "failed to remove key value store database: "), err.c_str());
+			m_errorhnd->report( _TXT( "failed to remove key value store database: %s"), err.c_str());
 			return false;
 		}
 		return true;
@@ -192,7 +192,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 				if (!status.ok())
 				{
 					std::string statusstr( status.ToString());
-					m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+					m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
 					batch.Clear();
 					return false;
 				}
@@ -211,7 +211,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 			if (!status.ok())
 			{
 				std::string statusstr( status.ToString());
-				m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+				m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
 				batch.Clear();
 				return false;
 			}
