@@ -13,6 +13,7 @@
 namespace strus {
 
 /// \brief Interface for building a repository of vectors of floating point numbers representing document features and for learning of a model that relates added features to concept features.
+/// \remark This interface has the transaction context logically enclosed in the object, though use in a multithreaded context does not make much sense. Thread safety of the interface is guaranteed, but not the performance in a multithreaded context. It is thought as class that internally makes heavily use of multithreading, but is not thought to be fed by mutliple threads.
 class VectorSpaceModelBuilderInterface
 {
 public:

@@ -52,6 +52,8 @@
 
 using namespace strus;
 
+#define MODULENAME "storageClient"
+
 void StorageClient::cleanup()
 {
 	if (m_metaDataBlockCache)
@@ -97,6 +99,22 @@ StorageClient::StorageClient(
 		cleanup();
 		throw strus::runtime_error(_TXT("error creating storage client: %s"), err.what());
 	}
+}
+
+std::string StorageClient::config() const
+{
+	try
+	{
+		std::string rt( m_database->config());
+		std::string mdstr( m_metadescr.tostring());
+		if (!mdstr.empty())
+		{
+			rt.append( "metadata=");
+			rt.append( mdstr);
+		}
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
 }
 
 void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
@@ -373,10 +391,14 @@ StorageTransactionInterface*
 {
 	try
 	{
-		if (m_statisticsProc && !m_statisticsBuilder.get())
+		if (m_statisticsProc)
 		{
-			StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-			m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+			TransactionLock lock( this);
+			if (!m_statisticsBuilder.get())
+			{
+				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+			}
 		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
 	}

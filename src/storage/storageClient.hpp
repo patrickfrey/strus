@@ -134,6 +134,8 @@ public:
 
 	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const;
 
+	virtual std::string config() const;
+
 public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index getTermValue( const std::string& name) const;
 	Index getTermType( const std::string& name) const;

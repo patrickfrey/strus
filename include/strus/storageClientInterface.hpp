@@ -54,6 +54,10 @@ public:
 	/// \remark Should call call 'close()' but ignore errors there silently
 	virtual ~StorageClientInterface(){}
 
+	/// \brief Get the interpreted configuration this storage client was created with
+	/// \return the configuration as string
+	virtual std::string config() const=0;
+
 	/// \brief Create an iterator on the occurrencies of a term in the storage
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
@@ -164,6 +168,7 @@ public:
 
 	/// \brief Create an insert/update transaction object
 	/// \return the created transaction interface to be disposed with delete by the caller
+	/// \note this function is thread safe, multiple concurrent transactions are allowed 
 	virtual StorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Creates an iterator on storage statistics messages for initialization/deregistration
