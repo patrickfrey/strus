@@ -35,10 +35,15 @@ public:
 	/// \return the vector assinged to this feature index with VectorSpaceModelBuilderInterface::addFeature(const std::string& name,const std::vector<double>&)
 	virtual std::vector<double> featureVector( const Index& index) const=0;
 
-	/// \brief Get the name of a feature used for learning
-	/// \param[in] index index of the sample to get the name of (index is order of insertion with VectorSpaceModelBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
+	/// \brief Get the name of a feature by its index starting from 0
+	/// \param[in] index index of the feature to get the name of (index is order of insertion with VectorSpaceModelBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
 	/// \return the name of the feature defined with VectorSpaceModelBuilderInterface::addFeature(const std::string& name,const std::vector<double>&)
 	virtual std::string featureName( const Index& index) const=0;
+
+	/// \brief Get the index starting from 0 of a feature by its name
+	/// \param[in] name name of the feature defined with VectorSpaceModelBuilderInterface::addFeature(const std::string& name,const std::vector<double>&)
+	/// \return index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorSpaceModelBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
+	virtual Index featureIndex( const std::string& name) const=0;
 
 	/// \brief Get the list of indices of features represented by a learnt concept feature specified as argument
 	/// \param[in] feature index (indices of learnt features starting from 1) 
