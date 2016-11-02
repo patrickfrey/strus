@@ -29,6 +29,6 @@ public:
 	/// \return true, if there are more chunks left to return, false if EOF has been reached and no chunk is returned
 	virtual bool nextChunk( const char*& chunk, std::size_t& chunksize)=0;
 };
-}
+}//namespace
 #endif
 
