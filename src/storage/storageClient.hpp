@@ -132,8 +132,6 @@ public:
 
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
-	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const;
-
 	virtual std::string config() const;
 
 public:/*QueryEval,AttributeReader,documentTermIterator*/

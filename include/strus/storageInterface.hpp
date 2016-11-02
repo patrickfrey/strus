@@ -21,6 +21,8 @@ class StorageClientInterface;
 class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
+/// \brief Forward declaration
+class StorageDumpInterface;
 
 
 /// \brief Interface to the create and alter a storage for strus
@@ -72,6 +74,16 @@ public:
 	/// \brief Get the list of known configuration parameter keys
 	///	for verification of the configuration by programs using this storage implementation.
 	virtual const char** getConfigParameters( const ConfigType& type) const=0;
+
+	/// \brief Create a dump of a storage
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by this storage
+	/// \param[in] keyprefix prefix for keys to resrict the dump to
+	/// \return the object to fetch the dump from
+	virtual StorageDumpInterface* createDump(
+			const std::string& configsource,
+			const DatabaseInterface* database,
+			const std::string& keyprefix) const=0;
 };
 
 }//namespace

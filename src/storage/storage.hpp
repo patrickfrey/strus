@@ -47,6 +47,11 @@ public:
 
 	virtual const char** getConfigParameters( const ConfigType& type) const;
 
+	virtual StorageDumpInterface* createDump(
+			const std::string& configsource,
+			const DatabaseInterface* database,
+			const std::string& keyprefix) const;
+
 private:
 	ErrorBufferInterface* m_errorhnd;
 };

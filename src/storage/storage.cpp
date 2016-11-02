@@ -7,8 +7,10 @@
  */
 #include "storage.hpp"
 #include "storageClient.hpp"
+#include "storageDump.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/storageDumpInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
@@ -189,6 +191,18 @@ const char** Storage::getConfigParameters( const ConfigType& type) const
 		case CmdCreate:		return keys_CreateStorage;
 	}
 	return 0;
+}
+
+StorageDumpInterface* Storage::createDump(
+		const std::string& configsource,
+		const DatabaseInterface* database,
+		const std::string& keyprefix) const
+{
+	try
+	{
+		return new StorageDump( database, configsource, keyprefix, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }
 
 

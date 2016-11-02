@@ -19,6 +19,29 @@
 
 using namespace strus;
 
+std::string strus::extractKeyString( const strus::DatabaseCursorInterface::Slice& key)
+{
+	const char hex[] = "0123456789abcdef";
+	std::string rt;
+	char const* ki = key.ptr();
+	char const* ke = key.ptr()+key.size();
+	for (; ki != ke; ++ki)
+	{
+		if ((unsigned char)*ki > 32 && (unsigned char)*ki < 128)
+		{
+			rt.push_back( *ki);
+		}
+		else
+		{
+			rt.push_back( '[');
+			rt.push_back( hex[ (unsigned char)*ki / 16]);
+			rt.push_back( hex[ (unsigned char)*ki % 16]);
+			rt.push_back( ']');
+		}
+	}
+	return rt;
+}
+
 TermTypeData::TermTypeData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
 {
 	char const* ki = key.ptr()+1;

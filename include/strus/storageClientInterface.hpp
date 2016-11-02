@@ -37,8 +37,6 @@ class StatisticsProcessorInterface;
 /// \brief Forward declaration
 class StatisticsIteratorInterface;
 /// \brief Forward declaration
-class StorageDumpInterface;
-/// \brief Forward declaration
 class MetaDataReaderInterface;
 /// \brief Forward declaration
 class MetaDataRestrictionInterface;
@@ -196,11 +194,6 @@ public:
 	/// \param[out] errorlog stream for reporting errors
 	/// \return true, if the check succeeds, false if it fails
 	virtual bool checkStorage( std::ostream& errorlog) const=0;
-
-	/// \brief Create a dump of the storage
-	/// \param[in] keyprefix prefix for keys to resrict the dump to
-	/// \return the object to fetch the dump from
-	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const=0;
 };
 
 }//namespace
