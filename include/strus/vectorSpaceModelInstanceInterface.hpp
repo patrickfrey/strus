@@ -20,6 +20,9 @@ public:
 	/// \brief Destructor
 	virtual ~VectorSpaceModelInstanceInterface(){}
 
+	/// \brief Trigger preloading of all internal tables needed (prevent delay of loading on demand at the first query)
+	virtual void preload() const=0;
+
 	/// \brief Map a feature vector to a set of concept features represented as numbers
 	/// \param[in] vec vector to calculate the features from
 	/// \return the resulting concept feature indices (indices of learnt features starting from 1)
