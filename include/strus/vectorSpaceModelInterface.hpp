@@ -18,6 +18,8 @@ class VectorSpaceModelBuilderInterface;
 /// \brief Forward declaration
 class VectorSpaceModelInstanceInterface;
 /// \brief Forward declaration
+class VectorSpaceModelDumpInterface;
+/// \brief Forward declaration
 class DatabaseInterface;
 
 
@@ -62,6 +64,16 @@ public:
 	virtual VectorSpaceModelBuilderInterface* createBuilder(
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
+
+	/// \brief Create a dump of a vector space model storage
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by the vector space model storage
+	/// \param[in] keyprefix prefix for keys to resrict the dump to
+	/// \return the object to fetch the dump from
+	virtual VectorSpaceModelDumpInterface* createDump(
+			const std::string& configsource,
+			const DatabaseInterface* database,
+			const std::string& keyprefix) const=0;
 };
 
 }//namespace

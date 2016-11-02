@@ -77,7 +77,7 @@ public:
 
 	/// \brief Create a dump of a storage
 	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
-	/// \param[in] database key value store database type used by this storage
+	/// \param[in] database key value store database type used by the storage
 	/// \param[in] keyprefix prefix for keys to resrict the dump to
 	/// \return the object to fetch the dump from
 	virtual StorageDumpInterface* createDump(
