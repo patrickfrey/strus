@@ -9,6 +9,7 @@
 /// \file vectorSpaceModelDumpInterface.hpp
 #ifndef _STRUS_VECTOR_SPACE_MODEL_DUMP_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_SPACE_MODEL_DUMP_INTERFACE_HPP_INCLUDED
+#include "strus/databaseOptions.hpp"
 #include "strus/index.hpp"
 #include <string>
 #include <vector>

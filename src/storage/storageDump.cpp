@@ -29,126 +29,126 @@ StorageDump::StorageDump( const DatabaseInterface* database_, const std::string&
 
 static void dumpKeyValue(
 		std::ostream& out,
-		const strus::DatabaseClientInterface* database,
-		const strus::DatabaseCursorInterface::Slice& key,
-		const strus::DatabaseCursorInterface::Slice& value)
+		const DatabaseClientInterface* database,
+		const DatabaseCursorInterface::Slice& key,
+		const DatabaseCursorInterface::Slice& value)
 {
 	try
 	{
 		switch (key.ptr()[0])
 		{
-			case strus::DatabaseKey::TermTypePrefix:
+			case DatabaseKey::TermTypePrefix:
 			{
-				strus::TermTypeData data( key, value);
+				TermTypeData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::TermValuePrefix:
+			case DatabaseKey::TermValuePrefix:
 			{
-				strus::TermValueData data( key, value);
+				TermValueData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::DocIdPrefix:
+			case DatabaseKey::DocIdPrefix:
 			{
-				strus::DocIdData data( key, value);
+				DocIdData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::VariablePrefix:
+			case DatabaseKey::VariablePrefix:
 			{
-				strus::VariableData data( key, value);
+				VariableData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::DocAttributePrefix:
+			case DatabaseKey::DocAttributePrefix:
 			{
-				strus::DocAttributeData data( key, value);
+				DocAttributeData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::TermTypeInvPrefix:
+			case DatabaseKey::TermTypeInvPrefix:
 			{
-				strus::TermTypeInvData data( key, value);
+				TermTypeInvData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::TermValueInvPrefix:
+			case DatabaseKey::TermValueInvPrefix:
 			{
-				strus::TermValueInvData data( key, value);
+				TermValueInvData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::ForwardIndexPrefix:
+			case DatabaseKey::ForwardIndexPrefix:
 			{
-				strus::ForwardIndexData data( key, value);
+				ForwardIndexData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::DocMetaDataPrefix:
+			case DatabaseKey::DocMetaDataPrefix:
 			{
-				strus::MetaDataDescription metadescr( database);
-				strus::DocMetaDataData data( &metadescr, key, value);
+				MetaDataDescription metadescr( database);
+				DocMetaDataData data( &metadescr, key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::UserNamePrefix:
+			case DatabaseKey::UserNamePrefix:
 			{
-				strus::UserNameData data( key, value);
+				UserNameData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::DocFrequencyPrefix:
+			case DatabaseKey::DocFrequencyPrefix:
 			{
-				strus::DocFrequencyData data( key, value);
+				DocFrequencyData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::PosinfoBlockPrefix:
+			case DatabaseKey::PosinfoBlockPrefix:
 			{
-				strus::PosinfoBlockData data( key, value);
+				PosinfoBlockData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::UserAclBlockPrefix:
+			case DatabaseKey::UserAclBlockPrefix:
 			{
-				strus::UserAclBlockData data( key, value);
+				UserAclBlockData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::AclBlockPrefix:
+			case DatabaseKey::AclBlockPrefix:
 			{
-				strus::AclBlockData data( key, value);
+				AclBlockData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::DocListBlockPrefix:
+			case DatabaseKey::DocListBlockPrefix:
 			{
-				strus::DocListBlockData data( key, value);
+				DocListBlockData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::InverseTermPrefix:
+			case DatabaseKey::InverseTermPrefix:
 			{
-				strus::InverseTermData data( key, value);
+				InverseTermData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::MetaDataDescrPrefix:
+			case DatabaseKey::MetaDataDescrPrefix:
 			{
-				strus::MetaDataDescrData data( key, value);
+				MetaDataDescrData data( key, value);
 				data.print( out);
 				break;
 			}
-			case strus::DatabaseKey::AttributeKeyPrefix:
+			case DatabaseKey::AttributeKeyPrefix:
 			{
-				strus::AttributeKeyData data( key, value);
+				AttributeKeyData data( key, value);
 				data.print( out);
 				break;
 			}
 			default:
 			{
-				throw strus::runtime_error( _TXT( "illegal data base prefix"));
+				throw strus::runtime_error( _TXT( "illegal data base key prefix for this storage"));
 			}
 		}
 	}
@@ -169,7 +169,7 @@ bool StorageDump::nextChunk( const char*& chunk, std::size_t& chunksize)
 		{
 			if (m_key.size() == 0)
 			{
-				throw strus::runtime_error( _TXT( "found empty key in storage"));
+				throw strus::runtime_error( _TXT( "found empty key"));
 			}
 			dumpKeyValue( output, m_database, m_key, m_cursor->value());
 		};
