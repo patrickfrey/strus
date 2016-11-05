@@ -32,6 +32,12 @@ public:
 	/// \return true on success, false if the operation failed
 	/// \note This method includes a commit on the database, you do not have to call commit anymore.
 	virtual bool finalize()=0;
+
+	/// \brief Step that improves the heuristically evaluated base data of the model with data learnt in the unsupervised learning step (finalize).
+	/// \note This method allows to add a sort of a feedback loop for improving the unsupervised learning
+	/// \return true on success, false if the operation failed
+	/// \note This method includes a commit on the database, you do not have to call commit anymore.
+	virtual bool rebase()=0;
 };
 
 }//namespace
