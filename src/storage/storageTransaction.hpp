@@ -71,10 +71,13 @@ public:
 	virtual void updateMetaData(
 			const Index& docno, const std::string& varname, const NumericVariant& value);
 
-	/// \brief Transaction commit
 	virtual bool commit();
-	/// \brief Transaction rollback (automatically called with the destructor)
 	virtual void rollback();
+
+	virtual unsigned int nofDocumentsAffected() const
+	{
+		return m_nof_documents_affected;
+	}
 
 public:/*Document*/
 	Index getOrCreateTermValue( const std::string& name);
@@ -131,6 +134,8 @@ private:
 	KeyMapInv m_termValueMapInv;				///< inverse map of term values
 
 	int m_nof_deleted_documents;				///< total adjustment for the number of documents deleted
+	int m_nof_documents_affected;				///< total number of documents affected by last transaction
+
 	bool m_commit;						///< true, if the transaction has been committed
 	bool m_rollback;					///< true, if the transaction has been rolled back
 

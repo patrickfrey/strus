@@ -29,7 +29,7 @@ public:
 
 	virtual void setVariableValue( const std::string& name, double value);
 
-	virtual double call( const double* args, std::size_t nofargs) const;
+	virtual double call( const double* args, unsigned int nofargs) const;
 
 	virtual std::string tostring() const;
 

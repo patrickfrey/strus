@@ -47,7 +47,7 @@ public:
 	/// \param[in] cardinality specifies a result dimension requirement (e.g. minimum number of elements of any input subset selection that builds a result) (0 for use default). Interpretation depends on operation, but in most cases it specifies the required size for a valid result.
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
-			std::size_t argc, int range, unsigned int cardinality)=0;
+			unsigned int argc, int range, unsigned int cardinality)=0;
 
 	/// \brief Attaches a variable to the top expression or term on the query stack.
 	/// \note The positions of the query matches of the referenced term or expression can be accessed through this variable in summarization.

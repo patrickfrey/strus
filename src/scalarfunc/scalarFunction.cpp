@@ -94,7 +94,7 @@ void ScalarFunction::addOpPushVariable( const std::string& name_)
 	pushInstruction( OpPush, validx);
 }
 
-void ScalarFunction::addOpPushArgument( std::size_t argindex)
+void ScalarFunction::addOpPushArgument( unsigned int argindex)
 {
 	if (m_nofargs <= argindex)
 	{
@@ -129,7 +129,7 @@ void ScalarFunction::addOpBinaryFunctionCall( BinaryFunction func)
 	pushInstruction( FuncBinary, validx);
 }
 
-void ScalarFunction::addOpNaryFunctionCall( std::size_t nofargs, NaryFunction func)
+void ScalarFunction::addOpNaryFunctionCall( unsigned int nofargs, NaryFunction func)
 {
 	pushInstruction( OpLdCnt, nofargs);
 	unsigned int validx = m_nfuncar.size();
@@ -165,7 +165,7 @@ std::vector<std::string> ScalarFunction::getVariables() const
 	return rt;
 }
 
-std::size_t ScalarFunction::getNofArguments() const
+unsigned int ScalarFunction::getNofArguments() const
 {
 	return m_nofargs;
 }

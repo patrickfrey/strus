@@ -49,7 +49,7 @@ public:
 	virtual void pushTerm( const std::string& type_, const std::string& value_);
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
-			std::size_t argc, int range_, unsigned int cardinality_);
+			unsigned int argc, int range_, unsigned int cardinality_);
 
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, double weight_=1.0);

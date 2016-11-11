@@ -17,27 +17,27 @@
 using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
 
-static double if_greater( std::size_t nofargs, const double* args)
+static double if_greater( unsigned int nofargs, const double* args)
 {
 	return (args[0] > args[1])?args[2]:args[3];
 }
 
-static double if_greaterequal( std::size_t nofargs, const double* args)
+static double if_greaterequal( unsigned int nofargs, const double* args)
 {
 	return (args[0] >= args[1])?args[2]:args[3];
 }
 
-static double if_smaller( std::size_t nofargs, const double* args)
+static double if_smaller( unsigned int nofargs, const double* args)
 {
 	return (args[0] < args[1])?args[2]:args[3];
 }
 
-static double if_smallerequal( std::size_t nofargs, const double* args)
+static double if_smallerequal( unsigned int nofargs, const double* args)
 {
 	return (args[0] <= args[1])?args[2]:args[3];
 }
 
-static double if_equal( std::size_t nofargs, const double* args)
+static double if_equal( unsigned int nofargs, const double* args)
 {
 	double diff = args[0] - args[1];
 	return (diff * diff <= std::numeric_limits<double>::epsilon())?args[2]:args[3];
@@ -311,7 +311,7 @@ void ScalarFunctionParser::resolveIdentifier( ScalarFunction* func, ParserContex
 	}
 }
 
-void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std::string& functionName, std::size_t nofArguments) const
+void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std::string& functionName, unsigned int nofArguments) const
 {
 	const char* errmsg = 0;
 	UnaryFunctionMap::const_iterator ufi = m_unaryFunctionMap.find( functionName);
@@ -365,7 +365,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 
 void ScalarFunctionParser::parseFunctionCall( ScalarFunction* func, ParserContext* ctx, const std::string& functionName, std::string::const_iterator& si, const std::string::const_iterator& se) const
 {
-	std::size_t nofArguments = 0;
+	unsigned int nofArguments = 0;
 	for(;;)
 	{
 		skipSpaces( si, se);
@@ -464,7 +464,7 @@ void ScalarFunctionParser::defineBinaryFunction( const std::string& name, Binary
 	CATCH_ERROR_MAP( _TXT("error defining binary function (scalar function parser): %s"), *m_errorhnd);
 }
 
-void ScalarFunctionParser::defineNaryFunction( const std::string& name, NaryFunction func, std::size_t min_nofargs, std::size_t max_nofargs)
+void ScalarFunctionParser::defineNaryFunction( const std::string& name, NaryFunction func, unsigned int min_nofargs, unsigned int max_nofargs)
 {
 	try
 	{
@@ -480,7 +480,7 @@ ScalarFunctionInterface*
 {
 	ParserContext ctx;
 	std::vector<std::string>::const_iterator ai = argumentNames.begin(), ae = argumentNames.end();
-	for (std::size_t aidx=0; ai != ae; ++ai,++aidx)
+	for (unsigned int aidx=0; ai != ae; ++ai,++aidx)
 	{
 		ctx.argumentNameMap[ *ai] = aidx;
 	}

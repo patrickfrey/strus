@@ -103,7 +103,7 @@ void Query::pushTerm( const std::string& type_, const std::string& value_)
 	CATCH_ERROR_MAP( _TXT("error pushing term to query: %s"), *m_errorhnd);
 }
 
-void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_, unsigned int cardinality_)
+void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsigned int argc, int range_, unsigned int cardinality_)
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
 	char buf[ 2048];

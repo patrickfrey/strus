@@ -33,7 +33,7 @@ public:
 
 	/// \brief Get the number of arguments of this function
 	/// \return the number of arguments
-	virtual std::size_t getNofArguments() const=0;
+	virtual unsigned int getNofArguments() const=0;
 
 	/// \brief Set a variable value default
 	/// \param[in] name variable name

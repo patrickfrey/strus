@@ -24,7 +24,7 @@ static std::string ScalarFunctionInstance_tostring( const std::vector<double>& f
 	std::ostringstream out;
 	out << std::setprecision(6) << std::fixed;
 	std::vector<double>::const_iterator fi = factors.begin(), fe = factors.end();
-	std::size_t ai = 0;
+	unsigned int ai = 0;
 	for (; fi != fe; ++fi,++ai)
 	{
 		if (ai) out << " + ";
@@ -47,11 +47,11 @@ public:
 		m_errorhnd->report( _TXT("no variables defined in plain linear combination"));
 	}
 
-	virtual double call( const double* args, std::size_t nofargs) const
+	virtual double call( const double* args, unsigned int nofargs) const
 	{
 		double rt = 0.0;
 		std::vector<double>::const_iterator fi = m_factors.begin(), fe = m_factors.end();
-		std::size_t ai = 0;
+		unsigned int ai = 0;
 		for (; fi != fe && ai < nofargs; ++ai,++fi)
 		{
 			rt += *fi * args[ai];
@@ -91,7 +91,7 @@ public:
 		return std::vector<std::string>();
 	}
 
-	virtual std::size_t getNofArguments() const
+	virtual unsigned int getNofArguments() const
 	{
 		return m_factors.size();
 	}

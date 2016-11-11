@@ -26,7 +26,7 @@ void ScalarFunctionInstance::setVariableValue( const std::string& name, double v
 	CATCH_ERROR_MAP( _TXT("error setting scalar function variable value: %s"), *m_errorhnd);
 }
 
-double ScalarFunctionInstance::call( const double* args, std::size_t nofargs) const
+double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) const
 {
 	try
 	{

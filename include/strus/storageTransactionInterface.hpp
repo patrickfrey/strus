@@ -68,6 +68,10 @@ public:
 
 	/// \brief Rollback of the transaction, no changes made
 	virtual void rollback()=0;
+
+	/// \brief Get the number of documents affected by the last transaction in case of a successful commit
+	/// \return the number of documents (deletes,updates,inserts)
+	virtual unsigned int nofDocumentsAffected() const=0;
 };
 
 }//namespace
