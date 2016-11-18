@@ -24,20 +24,18 @@ public:
 	/// \param[in] vec vector to add
 	virtual void addFeature( const std::string& name, const std::vector<double>& vec)=0;
 
-	/// \brief Do a commit and ensure the persistent storage the model data created till now
-	/// \return true on success, false if the commit failed
-	virtual bool commit()=0;
+	/// \brief Ensure the persistent storage of the features added with addFeature(const std::string&,const std::vector<double>&) till now
+	/// \return true on success, false if failed
+	virtual bool done()=0;
 
-	/// \brief Do the unsupervised learning of the feature concept relations and store the results persistently for later use.
-	/// \return true on success, false if the operation failed
-	/// \note This method includes a commit on the database, you do not have to call commit anymore.
-	virtual bool finalize()=0;
+	/// \brief Execute a command or an unsupervised learning step and store the results persistently for later use.
+	/// \param[in] command to expecute. The commands available are dependent on the model and can be introspected with 'commands()const'
+	/// \return true on success, false if the command failed
+	virtual bool run( const std::string& command)=0;
 
-	/// \brief Step that improves the heuristically evaluated base data of the model with data learnt in the unsupervised learning step (finalize).
-	/// \note This method allows to add a sort of a feedback loop for improving the unsupervised learning
-	/// \return true on success, false if the operation failed
-	/// \note This method includes a commit on the database, you do not have to call commit anymore.
-	virtual bool rebase()=0;
+	/// \brief Get the list of commands available
+	/// \return list of commands for calling 'run(const std::string&)'
+	virtual std::vector<std::string> commands() const=0;
 };
 
 }//namespace
