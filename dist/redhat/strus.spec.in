@@ -170,8 +170,8 @@ BuildRequires: sles-release
 
 %if %{rhel} || %{centos} || %{scilin} || %{fedora}
 %if %{rhel5} || %{rhel6} || %{centos5} || %{centos6} || %{scilin5} || %{scilin6}
-Requires: boost153 >= 1.53.0
-BuildRequires: boost153-devel >= 1.53.0
+Requires: strusboost >= 1.53.0
+BuildRequires: strusboost-devel >= 1.53.0
 %else
 Requires: boost >= 1.53.0
 Requires: boost-thread >= 1.53.0
@@ -183,8 +183,8 @@ BuildRequires: boost-devel
 
 %if %{suse} || %{sles}
 %if %{sles11}
-Requires: boost153 >= 1.53.0
-BuildRequires: boost153-devel >= 1.53.0
+Requires: strusboost >= 1.53.0
+BuildRequires: strusboost-devel >= 1.53.0
 %endif
 %if %{osu131}
 Requires: libboost_thread1_53_0 >= 1.53.0
@@ -211,10 +211,21 @@ BuildRequires: boost-devel
 %endif
 %endif
 
-%if %{rhel} || %{centos} || %{scilin} || %{fedora} || %{suse} || %{sles}
-BuildRequires: leveldb-devel
-Requires: leveldb
+%if %{rhel} || %{centos} || %{scilin} || %{fedora} 
+%if %{rhel5} || %{rhel6} || %{rhel7} || %{centos5} || %{centos6} || %{centos7} || %{scilin5} || %{scilin6} || %{scilin7} || %{fc23} || %{fc24}
+BuildRequires: strusleveldb-devel >= 1.18
+Requires: strusleveldb >= 1.18
+%else
+BuildRequires: leveldb-devel >= 1.18
+Requires: leveldb >= 1.18
 %endif
+%else
+BuildRequires: leveldb-devel >= 1.18
+Requires: leveldb >= 1.18
+%endif
+
+#%if %{suse} || %{sles}
+#%endif
 
 # Check if 'Distribution' is really set by OBS (as mentioned in bacula)
 %if ! 0%{?opensuse_bs}
