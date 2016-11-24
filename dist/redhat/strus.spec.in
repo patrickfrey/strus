@@ -204,13 +204,16 @@ Requires: strusleveldb >= 1.18
 BuildRequires: leveldb-devel >= 1.18
 Requires: leveldb >= 1.18
 %endif
+%endif
+
+%if %{suse} || %{sles}
+%if %{sles11}
+BuildRequires: strusleveldb-devel >= 1.18
+Requires: strusleveldb >= 1.18
 %else
 BuildRequires: leveldb-devel >= 1.18
 Requires: leveldb >= 1.18
 %endif
-
-#%if %{suse} || %{sles}
-#%endif
 
 # Check if 'Distribution' is really set by OBS (as mentioned in bacula)
 %if ! 0%{?opensuse_bs}
