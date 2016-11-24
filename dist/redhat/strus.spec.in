@@ -79,14 +79,8 @@
 %endif
 
 %define suse 0
-%define osu131 0
 %define osu132 0
 %define osufactory 0
-%if 0%{?suse_version} == 1310
-%define dist osu131
-%define osu131 1
-%define suse 1
-%endif
 %if 0%{?suse_version} == 1320
 %define dist osu132
 %define osu132 1
@@ -185,15 +179,6 @@ BuildRequires: boost-devel
 %if %{sles11}
 Requires: strusboost >= 1.53.0
 BuildRequires: strusboost-devel >= 1.53.0
-%endif
-%if %{osu131}
-Requires: libboost_thread1_53_0 >= 1.53.0
-Requires: libboost_atomic1_53_0 >= 1.53.0
-Requires: libboost_system1_53_0 >= 1.53.0
-Requires: libboost_date_time1_53_0 >= 1.53.0
-BuildRequires: boost-devel
-# for some reason OBS doesn't pull in libboost_atomic1_53_0 automatically!?
-BuildRequires: libboost_atomic1_53_0 >= 1.53.0
 %endif
 %if %{osu132} || %{sles12}
 Requires: libboost_thread1_54_0 >= 1.54.0
