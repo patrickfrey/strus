@@ -285,7 +285,7 @@ bool DatabaseClient::readValue(
 		std::string rt;
 		leveldb::ReadOptions readoptions;
 		readoptions.fill_cache = options.useCacheEnabled();
-	
+
 		leveldb::Status status = m_db->db()->Get( readoptions, leveldb::Slice( key, keysize), &value);
 		if (status.IsNotFound())
 		{
