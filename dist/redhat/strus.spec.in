@@ -218,10 +218,10 @@ Requires: libleveldb1 >= 1.18
 %else
 BuildRequires: strusleveldb-devel >= 1.18
 Requires: strusleveldb >= 1.18
-BuildRequires: gperftools
-#!BuildIgnore: strusgperftools
-BuildRequires: libunwind
-#!BuildIgnore: struslibunwind
+BuildRequires: strusgperftools
+#!BuildIgnore: gperftools
+BuildRequires: struslibunwind
+#!BuildIgnore: libunwind
 %endif
 %endif
 %if %{osu132} || %{osufactory}
