@@ -36,6 +36,10 @@ public:
 	/// \brief Get the list of commands available
 	/// \return list of commands for calling 'run(const std::string&)'
 	virtual std::vector<std::string> commands() const=0;
+
+	/// \brief Get a short description of a command
+	/// \return the command description text
+	virtual std::string commandDescription( const std::string& command) const=0;
 };
 
 }//namespace
