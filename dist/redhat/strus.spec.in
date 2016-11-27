@@ -207,12 +207,26 @@ Requires: leveldb >= 1.18
 %endif
 
 %if %{suse} || %{sles}
-%if %{sles11} || %{sles12}
+%if %{sles11}
 BuildRequires: strusleveldb-devel >= 1.18
 Requires: strusleveldb >= 1.18
-%else
+%endif
+%if %{sles12}
+%if 0%{?is_opensuse}
 BuildRequires: leveldb-devel >= 1.18
-Requires: leveldb >= 1.18
+Requires: libleveldb1 >= 1.18
+%else
+BuildRequires: strusleveldb-devel >= 1.18
+Requires: strusleveldb >= 1.18
+BuildRequires: gperftools
+#!BuildIgnore: strusgperftools
+BuildRequires: libunwind
+#!BuildIgnore: struslibunwind
+%endif
+%endif
+%if %{osu132} || %{osufactory}
+BuildRequires: leveldb-devel >= 1.18
+Requires: libleveldb1 >= 1.18
 %endif
 %endif
 
