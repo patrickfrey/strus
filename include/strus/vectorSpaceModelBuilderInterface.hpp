@@ -32,14 +32,6 @@ public:
 	/// \param[in] command to expecute. The commands available are dependent on the model and can be introspected with 'commands()const'
 	/// \return true on success, false if the command failed
 	virtual bool run( const std::string& command)=0;
-
-	/// \brief Get the list of commands available
-	/// \return list of commands for calling 'run(const std::string&)'
-	virtual std::vector<std::string> commands() const=0;
-
-	/// \brief Get a short description of a command
-	/// \return the command description text
-	virtual std::string commandDescription( const std::string& command) const=0;
 };
 
 }//namespace
