@@ -65,6 +65,15 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
 
+	/// \brief Get the list of builder commands available
+	/// \return list of commands for calling 'VectorSpaceModelBuilderInterface::run(const std::string&)'
+	/// \remark the process of building a vector space model cannot be unified so easily. Depending on the VSM type you have different commands. This method allows together with builderCommandDescription(const std::string&) the introspection of the builder capabilities.
+	virtual std::vector<std::string> builderCommands() const=0;
+
+	/// \brief Get a short description of a builder command
+	/// \return the command description text
+	virtual std::string builderCommandDescription( const std::string& command) const=0;
+
 	/// \brief Create a dump of a vector space model storage
 	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
 	/// \param[in] database key value store database type used by the vector space model storage
