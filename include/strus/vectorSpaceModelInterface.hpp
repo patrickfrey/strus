@@ -67,7 +67,7 @@ public:
 
 	/// \brief Get the list of builder commands available
 	/// \return list of commands for calling 'VectorSpaceModelBuilderInterface::run(const std::string&)'
-	/// \remark the process of building a vector space model cannot be unified so easily. Depending on the VSM type you have different commands. This method allows together with builderCommandDescription(const std::string&) the introspection of the builder capabilities.
+	/// \remark the process of building a vector space model cannot be unified so easily. Depending on the vsm type you have different commands. This method together with builderCommandDescription(const std::string&) allows the introspection of vsm the builder capabilities.
 	virtual std::vector<std::string> builderCommands() const=0;
 
 	/// \brief Get a short description of a builder command
