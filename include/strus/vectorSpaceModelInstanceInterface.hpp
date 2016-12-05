@@ -23,6 +23,10 @@ public:
 	/// \brief Trigger preloading of all internal tables needed (prevent delay of loading on demand at the first query)
 	virtual void preload()=0;
 
+	/// \brief Find all features that are within maximum simiarity distance of the model
+	/// \param[in] vec vector to calculate the features from
+	virtual std::vector<Index> findSimFeatures( const std::vector<double>& vec) const=0;
+
 	/// \brief Get the list of concept class names
 	/// \return the list
 	virtual std::vector<std::string> conceptClassNames() const=0;
