@@ -27,11 +27,20 @@ public:
 	/// \return the list
 	virtual std::vector<std::string> conceptClassNames() const=0;
 
-	/// \brief Map a feature vector to a set of concept features represented as numbers
+	/// \brief Get the list of indices of features represented by a learnt concept feature specified as argument
 	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
+	/// \param[in] conceptid index (indices of learnt concepts starting from 1) 
+	/// \return the resulting vector indices (index is order of insertion with VectorSpaceModelBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
+	virtual std::vector<Index> conceptFeatures( const std::string& conceptClass, const Index& conceptid) const=0;
+
+	/// \brief Get the number of concept features learned
+	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
+	/// \return the number of concept features and also the maximum number assigned to a feature (starting with 1)
+	virtual unsigned int nofConcepts( const std::string& conceptClass) const=0;
+
+	/// \brief Find all features that are within maximum simiarity distance of the model
 	/// \param[in] vec vector to calculate the features from
-	/// \return the resulting concept feature indices (indices of learnt concepts starting from 1)
-	virtual std::vector<Index> mapVectorToConcepts( const std::string& conceptClass, const std::vector<double>& vec) const=0;
+	virtual std::vector<Index> findSimilarFeatures( const std::vector<double>& vec) const=0;
 
 	/// \brief Get the set of learnt concepts for a feature added with the builder
 	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
@@ -54,26 +63,15 @@ public:
 	/// \return index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorSpaceModelBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
 	virtual Index featureIndex( const std::string& name) const=0;
 
-	/// \brief Get some internal model specific attributes for a feature or concept
+	/// \brief Get some internal model specific attributes for a feature
 	/// \param[in] name name of the attribute hardcoded by the model implementation
-	/// \param[in] index index of the feature or concept
+	/// \param[in] index index of the feature
 	/// \note Useful for introspection
-	virtual std::vector<std::string> attributes( const std::string& name, const Index& index) const=0;
+	virtual std::vector<std::string> featureAttributes( const std::string& name, const Index& index) const=0;
 
 	/// \brief Get the list of internal model specific attributes that can be used for introspection
-	/// \return list of names that can be used as argument for  with 'attributes(const std::string&, const Index&) const'
-	virtual std::vector<std::string> attributeNames() const=0;
-
-	/// \brief Get the list of indices of features represented by a learnt concept feature specified as argument
-	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
-	/// \param[in] conceptid index (indices of learnt concepts starting from 1) 
-	/// \return the resulting vector indices (index is order of insertion with VectorSpaceModelBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
-	virtual std::vector<Index> conceptFeatures( const std::string& conceptClass, const Index& conceptid) const=0;
-
-	/// \brief Get the number of concept features learned
-	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
-	/// \return the number of concept features and also the maximum number assigned to a feature (starting with 1)
-	virtual unsigned int nofConcepts( const std::string& conceptClass) const=0;
+	/// \return list of names that can be used as argument for  with 'featureAttributes(const std::string&, const Index&) const'
+	virtual std::vector<std::string> featureAttributeNames() const=0;
 
 	/// \brief Get the number of feature vectors added with the builder
 	/// \return the number of features
