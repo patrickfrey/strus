@@ -40,7 +40,8 @@ public:
 
 	/// \brief Find all features that are within maximum simiarity distance of the model
 	/// \param[in] vec vector to calculate the features from
-	virtual std::vector<Index> findSimilarFeatures( const std::vector<double>& vec) const=0;
+	/// \param[in] maxNofResults limits the number of results returned
+	virtual std::vector<Index> findSimilarFeatures( const std::vector<double>& vec, unsigned int maxNofResults) const=0;
 
 	/// \brief Get the set of learnt concepts for a feature added with the builder
 	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
