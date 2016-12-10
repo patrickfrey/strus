@@ -27,7 +27,7 @@ StringMapKeyBlock::~StringMapKeyBlock()
 	std::free( m_blk);
 }
 
-const char* StringMapKeyBlock::allocKey( const std::string& key)
+const char* StringMapKeyBlock::allocateKey( const std::string& key)
 {
 	const char* rt = m_blk + m_blkpos;
 	if (key.size() > m_blksize || key.size() + m_blkpos + 1 > m_blksize) return 0;
@@ -36,7 +36,7 @@ const char* StringMapKeyBlock::allocKey( const std::string& key)
 	return rt;
 }
 
-const char* StringMapKeyBlock::allocKey( const char* key, std::size_t keylen)
+const char* StringMapKeyBlock::allocateKey( const char* key, std::size_t keylen)
 {
 	const char* rt = m_blk + m_blkpos;
 	if (keylen > m_blksize || keylen + m_blkpos + 1 > m_blksize) return 0;
@@ -45,7 +45,7 @@ const char* StringMapKeyBlock::allocKey( const char* key, std::size_t keylen)
 	return rt;
 }
 
-const char* StringMapKeyBlockList::allocKey( const char* key, std::size_t keylen)
+const char* StringMapKeyBlockList::allocateKey( const char* key, std::size_t keylen)
 {
 	const char* rt;
 	if (m_ar.empty())
@@ -53,28 +53,28 @@ const char* StringMapKeyBlockList::allocKey( const char* key, std::size_t keylen
 		if (keylen > StringMapKeyBlock::DefaultSize)
 		{
 			m_ar.push_front( StringMapKeyBlock( keylen+1));
-			rt = m_ar.front().allocKey( key, keylen);
+			rt = m_ar.front().allocateKey( key, keylen);
 		}
 		else
 		{
 			m_ar.push_back( StringMapKeyBlock());
-			rt = m_ar.back().allocKey( key, keylen);
+			rt = m_ar.back().allocateKey( key, keylen);
 		}
 	}
 	else
 	{
-		rt = m_ar.back().allocKey( key, keylen);
+		rt = m_ar.back().allocateKey( key, keylen);
 		if (!rt)
 		{
 			if (keylen > StringMapKeyBlock::DefaultSize)
 			{
 				m_ar.push_front( StringMapKeyBlock( keylen+1));
-				rt = m_ar.front().allocKey( key, keylen);
+				rt = m_ar.front().allocateKey( key, keylen);
 			}
 			else
 			{
 				m_ar.push_back( StringMapKeyBlock());
-				rt = m_ar.back().allocKey( key, keylen);
+				rt = m_ar.back().allocateKey( key, keylen);
 			}
 		}
 	}
