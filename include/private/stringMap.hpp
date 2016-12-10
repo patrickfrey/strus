@@ -29,8 +29,8 @@ public:
 	StringMapKeyBlock( const StringMapKeyBlock& o);
 	~StringMapKeyBlock();
 
-	const char* allocKey( const std::string& key);
-	const char* allocKey( const char* key, std::size_t keylen);
+	const char* allocateKey( const std::string& key);
+	const char* allocateKey( const char* key, std::size_t keylen);
 
 private:
 	char* m_blk;
@@ -45,7 +45,7 @@ public:
 	StringMapKeyBlockList( const StringMapKeyBlockList& o)
 		:m_ar(o.m_ar){}
 
-	const char* allocKey( const char* key, std::size_t keylen);
+	const char* allocateKey( const char* key, std::size_t keylen);
 	void clear();
 
 private:
@@ -58,17 +58,17 @@ class StringVector
 public:
 	void push_back( const char* value)
 	{
-		const char* valuedup = m_blkar.allocKey( value, std::strlen( value));
+		const char* valuedup = m_blkar.allocateKey( value, std::strlen( value));
 		return m_ar.push_back( valuedup);
 	}
 	void push_back( const char* value, std::size_t valuesize)
 	{
-		const char* valuedup = m_blkar.allocKey( value, valuesize);
+		const char* valuedup = m_blkar.allocateKey( value, valuesize);
 		return m_ar.push_back( valuedup);
 	}
 	void push_back( const std::string& value)
 	{
-		const char* valuedup = m_blkar.allocKey( value.c_str(), value.size());
+		const char* valuedup = m_blkar.allocateKey( value.c_str(), value.size());
 		return m_ar.push_back( valuedup);
 	}
 
@@ -145,7 +145,7 @@ public:
 		{
 			return itr->second;
 		}
-		const char* keydup = m_keystring_blocks.allocKey( key, std::strlen( key));
+		const char* keydup = m_keystring_blocks.allocateKey( key, std::strlen( key));
 		return m_map[ keydup];
 	}
 
@@ -156,7 +156,7 @@ public:
 		{
 			return itr->second;
 		}
-		const char* keydup = m_keystring_blocks.allocKey( key.c_str(), key.size());
+		const char* keydup = m_keystring_blocks.allocateKey( key.c_str(), key.size());
 		return m_map[ keydup];
 	}
 
