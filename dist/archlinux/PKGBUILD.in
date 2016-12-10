@@ -29,11 +29,7 @@ package() {
 
   msg "Installing.."
   cd build
-  make DESTDIR=${pkgdir} install
-  
-  msg "Adding strus to ld.so.conf..."
-  install -d ${pkgdir}/etc/ld.so.conf.d
-  echo "/usr/lib/${pkgname}" > ${pkgdir}/etc/ld.so.conf.d/${pkgname}.conf  
+  make DESTDIR=${pkgdir} install  
 }
 
 check() {

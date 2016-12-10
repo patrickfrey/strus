@@ -5,14 +5,8 @@
 ###
 
 %define rhel 0
-%define rhel5 0
 %define rhel6 0
 %define rhel7 0
-%if 0%{?rhel_version} >= 500 && 0%{?rhel_version} <= 599
-%define dist rhel5
-%define rhel 1
-%define rhel5 1
-%endif
 %if 0%{?rhel_version} >= 600 && 0%{?rhel_version} <= 699
 %define dist rhel6
 %define rhel 1
@@ -25,14 +19,8 @@
 %endif
 
 %define centos 0
-%define centos5 0
 %define centos6 0
 %define centos7 0
-%if 0%{?centos_version} >= 500 && 0%{?centos_version} <= 599
-%define dist centos5
-%define centos 1
-%define centos5 1
-%endif
 %if 0%{?centos_version} >= 600 && 0%{?centos_version} <= 699
 %define dist centos6
 %define centos 1
@@ -45,14 +33,8 @@
 %endif
 
 %define scilin 0
-%define scilin5 0
 %define scilin6 0
 %define scilin7 0
-%if 0%{?scilin_version} >= 500 && 0%{?scilin_version} <= 599
-%define dist scilin5
-%define scilin 1
-%define scilin5 1
-%endif
 %if 0%{?scilin_version} >= 600 && 0%{?scilin_version} <= 699
 %define dist scilin6
 %define scilin 1
@@ -79,19 +61,7 @@
 %endif
 
 %define suse 0
-%define osu131 0
-%define osu132 0
 %define osufactory 0
-%if 0%{?suse_version} == 1310
-%define dist osu131
-%define osu131 1
-%define suse 1
-%endif
-%if 0%{?suse_version} == 1320
-%define dist osu132
-%define osu132 1
-%define suse 1
-%endif
 %if 0%{?suse_version} > 1320
 %define dist osufactory
 %define osufactory 1
@@ -169,9 +139,9 @@ BuildRequires: sles-release
 %endif
 
 %if %{rhel} || %{centos} || %{scilin} || %{fedora}
-%if %{rhel5} || %{rhel6} || %{centos5} || %{centos6} || %{scilin5} || %{scilin6}
-Requires: boost153 >= 1.53.0
-BuildRequires: boost153-devel >= 1.53.0
+%if %{rhel6} || %{centos6} || %{scilin6}
+Requires: strusboost >= 1.53.0
+BuildRequires: strusboost-devel >= 1.53.0
 %else
 Requires: boost >= 1.53.0
 Requires: boost-thread >= 1.53.0
@@ -183,19 +153,10 @@ BuildRequires: boost-devel
 
 %if %{suse} || %{sles}
 %if %{sles11}
-Requires: boost153 >= 1.53.0
-BuildRequires: boost153-devel >= 1.53.0
+Requires: strusboost >= 1.53.0
+BuildRequires: strusboost-devel >= 1.53.0
 %endif
-%if %{osu131}
-Requires: libboost_thread1_53_0 >= 1.53.0
-Requires: libboost_atomic1_53_0 >= 1.53.0
-Requires: libboost_system1_53_0 >= 1.53.0
-Requires: libboost_date_time1_53_0 >= 1.53.0
-BuildRequires: boost-devel
-# for some reason OBS doesn't pull in libboost_atomic1_53_0 automatically!?
-BuildRequires: libboost_atomic1_53_0 >= 1.53.0
-%endif
-%if %{osu132} || %{sles12}
+%if %{sles12}
 Requires: libboost_thread1_54_0 >= 1.54.0
 Requires: libboost_atomic1_54_0 >= 1.54.0
 Requires: libboost_system1_54_0 >= 1.54.0
@@ -211,9 +172,34 @@ BuildRequires: boost-devel
 %endif
 %endif
 
-%if %{rhel} || %{centos} || %{scilin} || %{fedora} || %{suse} || %{sles}
-BuildRequires: leveldb-devel
-Requires: leveldb
+%if %{rhel} || %{centos} || %{scilin} || %{fedora} 
+%if %{rhel6} || %{rhel7} || %{centos6} || %{centos7} || %{scilin6} || %{scilin7} || %{fc23} || %{fc24}
+BuildRequires: strusleveldb-devel >= 1.18
+Requires: strusleveldb >= 1.18
+%else
+BuildRequires: leveldb-devel >= 1.18
+Requires: leveldb >= 1.18
+%endif
+%endif
+
+%if %{suse} || %{sles}
+%if %{sles11}
+BuildRequires: strusleveldb-devel >= 1.18
+Requires: strusleveldb >= 1.18
+%endif
+%if %{sles12}
+%if 0%{?is_opensuse}
+BuildRequires: leveldb-devel >= 1.18
+Requires: libleveldb1 >= 1.18
+%else
+BuildRequires: strusleveldb-devel >= 1.18
+Requires: strusleveldb >= 1.18
+%endif
+%endif
+%if %{osufactory}
+BuildRequires: leveldb-devel >= 1.18
+Requires: libleveldb1 >= 1.18
+%endif
 %endif
 
 # Check if 'Distribution' is really set by OBS (as mentioned in bacula)
@@ -255,11 +241,6 @@ make DESTDIR=$RPM_BUILD_ROOT install
 rm -rf $RPM_BUILD_ROOT%{_libdir}/debug
 rm -rf $RPM_BUILD_ROOT%{_prefix}/src/debug
 
-# add ldconfig configuration for strus library directory
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d
-printf "%{_libdir}/%{name}\n" > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/%{name}.conf
-chmod 644 $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/%{name}.conf
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -292,7 +273,6 @@ make test
 %{_libdir}/%{name}/libstrus_scalarfunc.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
 %{_libdir}/%{name}/libstrus_storage_objbuild.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@
 %{_libdir}/%{name}/libstrus_storage_objbuild.so.@STRUS_MAJOR_VERSION@.@STRUS_MINOR_VERSION@.@STRUS_PATCH_VERSION@
-%{_sysconfdir}/ld.so.conf.d/%{name}.conf
 
 
 %files devel
