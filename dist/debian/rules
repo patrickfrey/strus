@@ -64,10 +64,6 @@ install: build
 	mkdir -p /usr/src/packages/BUILD/debian/strus-dev/usr/lib/$(DEB_HOST_MULTIARCH)/strus
 	mv -f /usr/src/packages/BUILD/debian/strus/usr/lib/$(DEB_HOST_MULTIARCH)/strus/*.so \
 		/usr/src/packages/BUILD/debian/strus-dev/usr/lib/$(DEB_HOST_MULTIARCH)/strus/.
-	# add ldconfig configuration for strus library directory
-	mkdir -p /usr/src/packages/BUILD/debian/strus/etc/ld.so.conf.d
-	printf "/usr/lib/$(DEB_HOST_MULTIARCH)/strus\n" > /usr/src/packages/BUILD/debian/strus/etc/ld.so.conf.d/strus.conf
-	chmod 644 /usr/src/packages/BUILD/debian/strus/etc/ld.so.conf.d/strus.conf
 	# --- end custom part for installing
 
 # Build architecture-independent files here.
