@@ -16,7 +16,7 @@ namespace strus {
 /// \brief Forward declaration
 class VectorSpaceModelBuilderInterface;
 /// \brief Forward declaration
-class VectorSpaceModelInstanceInterface;
+class VectorSpaceModelClientInterface;
 /// \brief Forward declaration
 class VectorSpaceModelDumpInterface;
 /// \brief Forward declaration
@@ -47,12 +47,12 @@ public:
 			const std::string& configsrc,
 			const DatabaseInterface* database) const=0;
 
-	/// \brief Create a new vector space model instance
+	/// \brief Create a new vector space model client interface
 	/// \param[in] configsource configuration string of the model and the database (not a filename!)
 	/// \param[in] database database type of the persistent storage where to load the model data from
-	/// \return the instance (with ownership)
+	/// \return the client interface (with ownership)
 	/// \remark The repository refered to by the configuration must exist and must have been built (-> createRepository)
-	virtual VectorSpaceModelInstanceInterface* createInstance(
+	virtual VectorSpaceModelClientInterface* createClient(
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
 

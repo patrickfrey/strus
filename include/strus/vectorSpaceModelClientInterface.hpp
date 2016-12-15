@@ -5,23 +5,29 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Instance interface for mapping vectors of floating point numbers of a given dimension to a list of features. The mapping function is created in an unsupervised way.
-#ifndef _STRUS_VECTOR_SPACE_MODEL_INSTANCE_INTERFACE_HPP_INCLUDED
-#define _STRUS_VECTOR_SPACE_MODEL_INSTANCE_INTERFACE_HPP_INCLUDED
+/// \brief Client interface for mapping vectors of floating point numbers of a given dimension to a list of features.
+#ifndef _STRUS_VECTOR_SPACE_MODEL_CLIENT_INTERFACE_HPP_INCLUDED
+#define _STRUS_VECTOR_SPACE_MODEL_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <vector>
 
 namespace strus {
 
-/// \brief Instance to work with vectors and a feature concept relation model previously created with a builder
-class VectorSpaceModelInstanceInterface
+/// \brief Forward declaration
+class VectorSpaceModelSearchInterface;
+
+/// \brief Interface to repository for vectors and a feature concept relation model previously created with a builder
+class VectorSpaceModelClientInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~VectorSpaceModelInstanceInterface(){}
+	virtual ~VectorSpaceModelClientInterface(){}
 
-	/// \brief Trigger preloading of all internal tables needed (prevent delay of loading on demand at the first query)
-	virtual void preload()=0;
+	/// \brief Create a search interface for scanning the vectors for similarity to a vector
+	/// \param[in] range_from start range of the features for the searcher (possibility to split into multiple instances)
+	/// \param[in] range_to end of range of the features for the searcher (possibility to split into multiple instances)
+	/// \return the search interface (with ownership)
+	virtual VectorSpaceModelSearchInterface* createSearcher( const Index& range_from, const Index& range_to) const=0;
 
 	/// \brief Get the list of concept class names
 	/// \return the list
@@ -37,11 +43,6 @@ public:
 	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
 	/// \return the number of concept features and also the maximum number assigned to a feature (starting with 1)
 	virtual unsigned int nofConcepts( const std::string& conceptClass) const=0;
-
-	/// \brief Find all features that are within maximum simiarity distance of the model
-	/// \param[in] vec vector to calculate the features from
-	/// \param[in] maxNofResults limits the number of results returned
-	virtual std::vector<Index> findSimilarFeatures( const std::vector<double>& vec, unsigned int maxNofResults) const=0;
 
 	/// \brief Get the set of learnt concepts for a feature added with the builder
 	/// \param[in] conceptClass name identifying a class of contepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector space model and instantiated by the builder.
