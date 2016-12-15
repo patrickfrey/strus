@@ -35,6 +35,7 @@
 #include "metaDataReader.hpp"
 #include "postingIterator.hpp"
 #include "browsePostingIterator.hpp"
+#include "metaDataRangePostingIterator.hpp"
 #include "nullPostingIterator.hpp"
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
@@ -279,6 +280,20 @@ PostingIteratorInterface*
 		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
+}
+
+PostingIteratorInterface*
+	StorageClient::createFieldPostingIterator(
+		const std::string& meta_fieldStart,
+		const std::string& meta_fieldEnd) const
+{
+	try
+	{
+		return new MetaDataRangePostingIterator(
+				new MetaDataReader( m_metaDataBlockCache, &m_metadescr, m_errorhnd),
+				m_nof_documents.value(), meta_fieldStart, meta_fieldEnd, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating field posting iterator defined by meta data: %s"), *m_errorhnd, 0);
 }
 
 PostingIteratorInterface*
