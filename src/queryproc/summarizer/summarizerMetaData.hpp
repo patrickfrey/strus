@@ -38,8 +38,8 @@ class SummarizerFunctionContextMetaData
 public:
 	/// \brief Constructor
 	/// \param[in] metadata_ reader for document meta data
-	/// \param[in] name_ meta data field identifier
-	SummarizerFunctionContextMetaData( MetaDataReaderInterface* metadata_, const std::string& name_, ErrorBufferInterface* errorhnd_);
+	/// \param[in] metaname_ meta data field identifier
+	SummarizerFunctionContextMetaData( MetaDataReaderInterface* metadata_, const std::string& metaname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMetaData(){}
 
@@ -54,7 +54,8 @@ public:
 
 private:
 	MetaDataReaderInterface* m_metadata;
-	std::string m_name;
+	std::string m_resultname;
+	std::string m_metaname;
 	int m_attrib;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -67,13 +68,17 @@ class SummarizerFunctionInstanceMetaData
 {
 public:
 	explicit SummarizerFunctionInstanceMetaData( ErrorBufferInterface* errorhnd_)
-		:m_name(),m_errorhnd(errorhnd_){}
+		:m_resultname(),m_metaname(),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMetaData(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+
+	virtual void defineResultName(
+			const std::string& resultname,
+			const std::string& itemname);
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
@@ -83,8 +88,9 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_name;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	std::string m_resultname;
+	std::string m_metaname;
+	ErrorBufferInterface* m_errorhnd;	///< buffer for error messages
 };
 
 

@@ -42,7 +42,8 @@ public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] type_ type of the forward index tokens to build the summary with
-	/// \param[in] var_ variable to extract
+	/// \param[in] varname_ variable to extract
+	/// \param[in] resultname_ name of result
 	/// \param[in] norm_ weight normalization factor
 	/// \param[in] maxNofElements_ number of best matches to inspect
 	/// \param[in] errorhnd_ error buffer
@@ -50,7 +51,8 @@ public:
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
-			const std::string& var_,
+			const std::string& varname_,
+			const std::string& resultname_,
 			double norm_,
 			unsigned int maxNofElements_,
 			ErrorBufferInterface* errorhnd_);
@@ -84,7 +86,8 @@ private:
 	const QueryProcessorInterface* m_processor;			///< query processor
 	Reference<ForwardIteratorInterface> m_forwardindex;		///< forward index interface
 	std::string m_type;						///< forward index type for extraction of result elements
-	std::string m_var;						///< name of variable to accumulate
+	std::string m_varname;						///< variable name to extract for accumulation
+	std::string m_resultname;					///< result item name
 	double m_norm;							///< normalization factor for end result weights
 	unsigned int m_maxNofElements;					///< maximum number of best elements to return
 	std::vector<SummarizationFeature> m_features;			///< features used for summarization
@@ -97,12 +100,13 @@ class SummarizerFunctionInstanceAccumulateVariable
 {
 public:
 	SummarizerFunctionInstanceAccumulateVariable( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_var(),m_norm(1.0),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_varname(),m_resultname(),m_norm(1.0),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAccumulateVariable(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+	virtual void defineResultName( const std::string& resultname, const std::string& itemname);
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
@@ -113,7 +117,8 @@ public:
 
 private:
 	std::string m_type;				///< forward index type to extract
-	std::string m_var;				///< variable name to extract for accumulation
+	std::string m_varname;				///< variable name to extract for accumulation
+	std::string m_resultname;			///< result item name
 	double m_norm;					///< normalization factor
 	unsigned int m_maxNofElements;			///< number of best matches to inspect
 	const QueryProcessorInterface* m_processor;	///< query processor

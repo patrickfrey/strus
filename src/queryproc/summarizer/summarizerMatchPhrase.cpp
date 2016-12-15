@@ -595,18 +595,6 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_floatingmark = parseMarker( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "name_para"))
-		{
-			m_name_para = value;
-		}
-		else if (utils::caseInsensitiveEquals( name, "name_phrase"))
-		{
-			m_name_phrase = value;
-		}
-		else if (utils::caseInsensitiveEquals( name, "name_docstart"))
-		{
-			m_name_docstart = value;
-		}
 		else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
@@ -656,9 +644,6 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	else if (utils::caseInsensitiveEquals( name, "type")
 		|| utils::caseInsensitiveEquals( name, "matchmark")
 		|| utils::caseInsensitiveEquals( name, "floatingmark")
-		|| utils::caseInsensitiveEquals( name, "name_para")
-		|| utils::caseInsensitiveEquals( name, "name_phrase")
-		|| utils::caseInsensitiveEquals( name, "name_docstart")
 		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MatchPhrase");
@@ -668,6 +653,33 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MatchPhrase", name.c_str());
 	}
 }
+
+void SummarizerFunctionInstanceMatchPhrase::defineResultName(
+		const std::string& resultname,
+		const std::string& itemname)
+{
+	try
+	{
+		if (utils::caseInsensitiveEquals( itemname, "para"))
+		{
+			m_name_para = resultname;
+		}
+		else if (utils::caseInsensitiveEquals( itemname, "phrase"))
+		{
+			m_name_phrase = resultname;
+		}
+		else if (utils::caseInsensitiveEquals( itemname, "docstart"))
+		{
+			m_name_docstart = resultname;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
+		}
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "MatchPhrase", *m_errorhnd);
+}
+
 
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::createFunctionContext(
 		const StorageClientInterface* storage,

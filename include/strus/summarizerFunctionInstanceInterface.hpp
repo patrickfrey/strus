@@ -48,6 +48,13 @@ public:
 			const std::string& name,
 			const NumericVariant& value)=0;
 
+	/// \brief Rename a specific result item with a hardcoded name to another name
+	/// \param[in] resultname the name assigned to it in the result
+	/// \param[in] itemname the internal hardcoded name of the item
+	virtual void defineResultName(
+			const std::string& resultname,
+			const std::string& itemname)=0;
+
 	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
 	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)

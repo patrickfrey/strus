@@ -138,6 +138,17 @@ void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::s
 	}
 }
 
+void SummarizerFunctionInstanceMatchVariables::defineResultName(
+		const std::string& resultname,
+		const std::string& itemname)
+{
+	try
+	{
+		throw strus::runtime_error( _TXT("cannot change item names, output item names defined by the variable names"));
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "MatchVariables", *m_errorhnd);
+}
+
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::createFunctionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*,

@@ -17,15 +17,16 @@
 using namespace strus;
 
 SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
-		MetaDataReaderInterface* metadata_, const std::string& name_, ErrorBufferInterface* errorhnd_)
+		MetaDataReaderInterface* metadata_, const std::string& metaname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
-	,m_name(name_)
-	,m_attrib(metadata_->elementHandle( name_.c_str()))
+	,m_resultname(resultname_)
+	,m_metaname(metaname_)
+	,m_attrib(metadata_->elementHandle( metaname_.c_str()))
 	,m_errorhnd(errorhnd_)
 {
 	if (m_attrib < 0)
 	{
-		throw strus::runtime_error(_TXT("unknown metadata element name '%s' passed to summarizer '%s'"), m_name.c_str(), "metadata");
+		throw strus::runtime_error(_TXT("unknown metadata element name '%s' passed to summarizer '%s'"), m_metaname.c_str(), "metadata");
 	}
 }
 
@@ -49,7 +50,7 @@ std::vector<SummaryElement>
 		NumericVariant value = m_metadata->getValue( m_attrib);
 		if (value.defined()) 
 		{
-			rt.push_back( SummaryElement( m_name, value.tostring().c_str(), 1.0));
+			rt.push_back( SummaryElement( m_resultname, value.tostring().c_str(), 1.0));
 		}
 		return rt;
 	}
@@ -63,7 +64,8 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 	{
 		if (utils::caseInsensitiveEquals( name, "name"))
 		{
-			m_name = value;
+			m_metaname = value;
+			m_resultname = value;
 		}
 		else
 		{
@@ -71,6 +73,28 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "metadata", *m_errorhnd);
+}
+
+void SummarizerFunctionInstanceMetaData::defineResultName(
+		const std::string& resultname,
+		const std::string& itemname)
+{
+	try
+	{
+		if (utils::caseInsensitiveEquals( itemname, "metaname"))
+		{
+			m_metaname = resultname;
+		}
+		else if (utils::caseInsensitiveEquals( itemname, "resultname"))
+		{
+			m_resultname = resultname;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
+		}
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "metadata", *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const NumericVariant& value)
@@ -92,7 +116,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFu
 {
 	try
 	{
-		return new SummarizerFunctionContextMetaData( metadata, m_name, m_errorhnd);
+		return new SummarizerFunctionContextMetaData( metadata, m_metaname, m_resultname, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "metadata", *m_errorhnd, 0);
 }
@@ -102,7 +126,7 @@ std::string SummarizerFunctionInstanceMetaData::tostring() const
 	try
 	{
 		std::ostringstream rt;
-		rt << "name='" << m_name << "'";
+		rt << "metaname='" << m_metaname << "', resultname='" << m_resultname << "'";
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "metadata", *m_errorhnd, std::string());
