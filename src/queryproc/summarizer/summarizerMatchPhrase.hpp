@@ -34,6 +34,30 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
+/// \brief Configured parameters of the MatchPhrase summarizer function
+struct SummarizerFunctionParameterMatchPhrase
+{
+
+	SummarizerFunctionParameterMatchPhrase()
+		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0),m_maxdf(0.1)
+		,m_matchmark()
+		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
+		,m_name_para("para")
+		,m_name_phrase("phrase")
+		,m_name_docstart("docstart"){}
+
+	std::string m_type;					///< forward index type to extract
+	unsigned int m_sentencesize;				///< search area for end of sentence
+	unsigned int m_windowsize;				///< maximum window size
+	unsigned int m_cardinality;				///< window cardinality
+	double m_maxdf;						///< the maximum df of features considered for same sentence proximity weighing as fraction of the total collection size
+	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
+	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
+	std::string m_name_para;				///< name of the summary elements for paragraphs
+	std::string m_name_phrase;				///< name of the summary elements for phrases
+	std::string m_name_docstart;				///< name of the summary elements for document start (alternative summary if no match found)
+};
+
 class SummarizerFunctionContextMatchPhrase
 	:public SummarizerFunctionContextInterface
 {
@@ -57,18 +81,8 @@ public:
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			MetaDataReaderInterface* metadata_,
-			const std::string& type_,
-			unsigned int sentencesize_,
-			unsigned int windowsize_,
-			unsigned int cardinality_,
+			const Reference<SummarizerFunctionParameterMatchPhrase>& parameter_,
 			double nofCollectionDocuments_,
-			const std::string& metadata_title_maxpos_,
-			double maxdf_,
-			const std::pair<std::string,std::string>& matchmark_,
-			const std::pair<std::string,std::string>& floatingmark_,
-			const std::string& name_para_,
-			const std::string& name_phrase_,
-			const std::string& name_docstart_,
 			ErrorBufferInterface* errorhnd_);
 	virtual ~SummarizerFunctionContextMatchPhrase();
 
@@ -89,18 +103,8 @@ private:
 	const QueryProcessorInterface* m_processor;		///< query processor interface
 	MetaDataReaderInterface* m_metadata;			///< access metadata arguments
 	Reference<ForwardIteratorInterface> m_forwardindex;	///< forward index iterator
-	std::string m_type;					///< forward index type to extract
-	unsigned int m_sentencesize;				///< search area for end of sentence
-	unsigned int m_windowsize;				///< maximum window size
-	unsigned int m_cardinality;				///< window cardinality
+	Reference<SummarizerFunctionParameterMatchPhrase> m_parameter;
 	double m_nofCollectionDocuments;			///< number of documents in the collection
-	int m_metadata_title_maxpos;				///< meta data element for maximum title position
-	double m_maxdf;						///< the maximum df of features considered for same sentence proximity weighing as fraction of the total collection size
-	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
-	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
-	std::string m_name_para;				///< name of the summary elements for paragraphs
-	std::string m_name_phrase;				///< name of the summary elements for phrases
-	std::string m_name_docstart;				///< name of the summary elements for document start (alternative summary if no match found)
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
@@ -111,6 +115,7 @@ private:
 	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
+	Reference<PostingIteratorInterface> m_titleitr;		///< iterator to identify the title field for weight increment
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
@@ -122,12 +127,7 @@ class SummarizerFunctionInstanceMatchPhrase
 {
 public:
 	SummarizerFunctionInstanceMatchPhrase( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0)
-		,m_matchmark()
-		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
-		,m_name_para("para")
-		,m_name_phrase("phrase")
-		,m_name_docstart("docstart")
+		:m_parameter( new SummarizerFunctionParameterMatchPhrase())
 		,m_processor(processor_)
 		,m_errorhnd(errorhnd_){}
 
@@ -148,17 +148,7 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_type;					///< forward index type to extract
-	std::string m_metadata_title_maxpos;			///< name of metadata element for the last title element position 
-	unsigned int m_sentencesize;				///< search area for end of sentence
-	unsigned int m_windowsize;				///< maximum window size
-	unsigned int m_cardinality;				///< window cardinality
-	double m_maxdf;						///< df limit for judging if a term is a stopword or not
-	std::pair<std::string,std::string> m_matchmark;		///< highlight marker for matches
-	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
-	std::string m_name_para;				///< name of the summary elements for paragraphs
-	std::string m_name_phrase;				///< name of the summary elements for phrases
-	std::string m_name_docstart;				///< name of the summary elements for document start (alternative summary if no match found)
+	Reference<SummarizerFunctionParameterMatchPhrase> m_parameter;
 	const QueryProcessorInterface* m_processor;		///< query processor interface
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };

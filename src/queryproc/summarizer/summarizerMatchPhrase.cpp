@@ -30,47 +30,24 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		MetaDataReaderInterface* metadata_,
-		const std::string& type_,
-		unsigned int sentencesize_,
-		unsigned int windowsize_,
-		unsigned int cardinality_,
+		const Reference<SummarizerFunctionParameterMatchPhrase>& parameter_,
 		double nofCollectionDocuments_,
-		const std::string& metadata_title_maxpos_,
-		double maxdf_,
-		const std::pair<std::string,std::string>& matchmark_,
-		const std::pair<std::string,std::string>& floatingmark_,
-		const std::string& name_para_,
-		const std::string& name_phrase_,
-		const std::string& name_docstart_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_processor(processor_)
 	,m_metadata(metadata_)
-	,m_forwardindex(storage_->createForwardIterator( type_))
-	,m_type(type_)
-	,m_sentencesize(sentencesize_)
-	,m_windowsize(windowsize_)
-	,m_cardinality(cardinality_)
+	,m_forwardindex(storage_->createForwardIterator(parameter_->m_type))
+	,m_parameter(parameter_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
-	,m_metadata_title_maxpos(metadata_title_maxpos_.empty()?-1:metadata_->elementHandle( metadata_title_maxpos_))
-	,m_maxdf(maxdf_)
-	,m_matchmark(matchmark_)
-	,m_floatingmark(floatingmark_)
-	,m_name_para(name_para_)
-	,m_name_phrase(name_phrase_)
-	,m_name_docstart(name_docstart_)
 	,m_itrarsize(0)
 	,m_structarsize(0)
 	,m_paraarsize(0)
 	,m_initialized(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (!metadata_title_maxpos_.empty() && m_metadata_title_maxpos < 0)
-	{
-		throw strus::runtime_error( _TXT("try to access unknown document meta data element '%s'"), metadata_title_maxpos_.c_str());
-	}
 	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
 }
+
 
 void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 		const std::string& name,
@@ -81,7 +58,12 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "struct"))
+		if (utils::caseInsensitiveEquals( name, "title"))
+		{
+			if (m_titleitr.get()) throw strus::runtime_error(_TXT("title field specified twice"));
+			m_titleitr.reset( itr);
+		}
+		else if (utils::caseInsensitiveEquals( name, "struct"))
 		{
 			if (m_structarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
@@ -103,13 +85,13 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			{
 				idf = 0.00001;
 			}
-			if (m_maxdf * m_nofCollectionDocuments < df)
+			if (m_parameter->m_maxdf * m_nofCollectionDocuments < df)
 			{
-				m_maxdist_featar[ m_itrarsize] = (m_windowsize > 5)?5:m_windowsize;
+				m_maxdist_featar[ m_itrarsize] = (m_parameter->m_windowsize > 5)?5:m_parameter->m_windowsize;
 			}
 			else
 			{
-				m_maxdist_featar[ m_itrarsize] = m_windowsize;
+				m_maxdist_featar[ m_itrarsize] = m_parameter->m_windowsize;
 			}
 			m_itrar[ m_itrarsize++] = itr;
 			m_idfar.add( idf * weight);
@@ -263,9 +245,9 @@ std::vector<SummaryElement>
 			{
 				return std::vector<SummaryElement>();
 			}
-			if (m_itrarsize < m_cardinality || m_cardinality == 0)
+			if (m_itrarsize < m_parameter->m_cardinality || m_parameter->m_cardinality == 0)
 			{
-				m_cardinality = m_itrarsize;
+				m_parameter->m_cardinality = m_itrarsize;
 			}
 			// initialize proportional ff increment weights
 			m_weightincr.init( m_itrarsize);
@@ -279,21 +261,36 @@ std::vector<SummaryElement>
 		m_forwardindex->skipDoc( docno);
 
 		// Define search start position:
-		Index firstpos = 1;
-		if (m_metadata_title_maxpos>=0)
+		Index titleStart = 1;
+		Index titleEnd = 1;
+		if (m_titleitr.get() && m_titleitr->skipDoc( docno) == docno)
 		{
-			m_metadata->skipDoc( docno);
-			NumericVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
-			firstpos = firstposval.toint()+1;
+			titleStart = m_titleitr->skipPos(0);
+			if (titleStart)
+			{
+				Index ti = titleEnd = titleStart;
+				while (0!=(ti=m_titleitr->skipPos(ti+1)))
+				{
+					titleEnd = ti;
+				}
+				++titleEnd;
+			}
+			else
+			{
+				titleStart = 1;
+			}
 		}
+		Index firstpos = m_forwardindex->skipPos( titleEnd);
+		if (!firstpos) firstpos = titleEnd;
+
 		// Define best match to find:
 		// Find the best match:
 		Candidate candidate
 			= findCandidate(
-				firstpos, m_idfar, m_weightincr, m_windowsize, m_cardinality,
+				firstpos, m_idfar, m_weightincr, m_parameter->m_windowsize, m_parameter->m_cardinality,
 				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize, 
 				m_maxdist_featar);
-		if (candidate.span == 0 && m_metadata_title_maxpos>=0)
+		if (candidate.span == 0 && m_titleitr.get())
 		{
 			//... we did not find a summary with m_cardinality terms, so we try to find one
 			//	without the terms appearing in the document title:
@@ -315,12 +312,12 @@ std::vector<SummaryElement>
 			if (noTitleSize && m_itrarsize > noTitleSize)
 			{
 				unsigned int cardinality = noTitleSize;
-				if (m_cardinality < cardinality)
+				if (m_parameter->m_cardinality < cardinality)
 				{
-					cardinality = m_cardinality;
+					cardinality = m_parameter->m_cardinality;
 				}
 				candidate = findCandidate(
-						firstpos, noTitleIdfs, noWeightIncrs, m_windowsize, cardinality,
+						firstpos, noTitleIdfs, noWeightIncrs, m_parameter->m_windowsize, cardinality,
 						noTitleTerms, noTitleSize, m_structar, m_structarsize,
 						m_paraar, m_paraarsize, m_maxdist_featar);
 			}
@@ -348,9 +345,9 @@ std::vector<SummaryElement>
 		// Find the start of the abstract as start of the preceeding structure or paragraph marker:
 		std::size_t ti=0,te=m_paraarsize+m_structarsize;
 		Index astart;
-		if ((Index)m_sentencesize + firstpos < candidate.pos)
+		if ((Index)m_parameter->m_sentencesize + firstpos < candidate.pos)
 		{
-			astart = candidate.pos - (Index)m_sentencesize;
+			astart = candidate.pos - (Index)m_parameter->m_sentencesize;
 		}
 		else
 		{
@@ -370,12 +367,12 @@ std::vector<SummaryElement>
 		phrase_abstract.span += candidate.pos - astart;
 		phrase_abstract.start = astart;
 		// Find the end of the abstract, by scanning for the next sentence:
-		if (phrase_abstract.span < (Index)m_sentencesize)
+		if (phrase_abstract.span < (Index)m_parameter->m_sentencesize)
 		{
 			Index minincr = 0;
-			if (phrase_abstract.span < ((Index)m_sentencesize >> 2))
+			if (phrase_abstract.span < ((Index)m_parameter->m_sentencesize >> 2))
 			{
-				minincr += (Index)m_sentencesize >> 2;
+				minincr += (Index)m_parameter->m_sentencesize >> 2;
 				// .... heuristics for minimal size of abstract we want to show
 			}
 			Index nextparapos = callSkipPos( phrase_abstract.start + phrase_abstract.span, m_paraar, m_paraarsize);
@@ -383,14 +380,14 @@ std::vector<SummaryElement>
 			if (eospos)
 			{
 				if (nextparapos && nextparapos <= eospos) eospos = nextparapos - 1;
-				if ((eospos - phrase_abstract.start) < (Index)m_sentencesize)
+				if ((eospos - phrase_abstract.start) < (Index)m_parameter->m_sentencesize)
 				{
 					phrase_abstract.span = eospos - phrase_abstract.start + 1;
 					phrase_abstract.defined_end = true;
 				}
 				else
 				{
-					phrase_abstract.span = m_sentencesize;
+					phrase_abstract.span = m_parameter->m_sentencesize;
 				}
 			}
 		}
@@ -478,7 +475,7 @@ std::vector<SummaryElement>
 					paratitle.append( m_forwardindex->fetch());
 				}
 			}
-			rt.push_back( SummaryElement( m_name_para, paratitle, 1.0));
+			rt.push_back( SummaryElement( m_parameter->m_name_para, paratitle, 1.0));
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "firstpos=" << firstpos << std::endl;
@@ -506,10 +503,10 @@ std::vector<SummaryElement>
 			std::string phrase;
 			if (!phrase_abstract.defined_start)
 			{
-				phrase.append( m_floatingmark.first);
+				phrase.append( m_parameter->m_floatingmark.first);
 			}
 			pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
-			if (pi > pe || (unsigned int)(pe - pi) > 2*m_sentencesize+10)
+			if (pi > pe || (unsigned int)(pe - pi) > 2*m_parameter->m_sentencesize+10)
 			{
 				throw strus::runtime_error(_TXT("internal: got illegal summary (%u:%u)"), (unsigned int)pi, (unsigned int)pe);
 			}
@@ -522,9 +519,9 @@ std::vector<SummaryElement>
 					for (; hi < he && pi > highlightpos[hi]; ++hi){}
 					if (hi < he && pi == highlightpos[hi])
 					{
-						phrase.append( m_matchmark.first);
+						phrase.append( m_parameter->m_matchmark.first);
 						phrase.append( m_forwardindex->fetch());
-						phrase.append( m_matchmark.second);
+						phrase.append( m_parameter->m_matchmark.second);
 					}
 					else
 					{
@@ -534,15 +531,15 @@ std::vector<SummaryElement>
 			}
 			if (!phrase_abstract.defined_end)
 			{
-				phrase.append( m_floatingmark.second);
+				phrase.append( m_parameter->m_floatingmark.second);
 			}
 			if (phrase_abstract.is_docstart)
 			{
-				rt.push_back( SummaryElement( m_name_docstart, phrase, 1.0));
+				rt.push_back( SummaryElement( m_parameter->m_name_docstart, phrase, 1.0));
 			}
 			else
 			{
-				rt.push_back( SummaryElement( m_name_phrase, phrase, 1.0));
+				rt.push_back( SummaryElement( m_parameter->m_name_phrase, phrase, 1.0));
 			}
 		}
 		return rt;
@@ -575,25 +572,21 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para"))
+		if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para") || utils::caseInsensitiveEquals( name, "title"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "matchvariables");
 		}
 		else if (utils::caseInsensitiveEquals( name, "type"))
 		{
-			m_type = value;
-		}
-		else if (utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
-		{
-			m_metadata_title_maxpos = value;
+			m_parameter->m_type = value;
 		}
 		else if (utils::caseInsensitiveEquals( name, "matchmark"))
 		{
-			m_matchmark = parseMarker( value);
+			m_parameter->m_matchmark = parseMarker( value);
 		}
 		else if (utils::caseInsensitiveEquals( name, "floatingmark"))
 		{
-			m_floatingmark = parseMarker( value);
+			m_parameter->m_floatingmark = parseMarker( value);
 		}
 		else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 		{
@@ -617,26 +610,26 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 
 void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para"))
+	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para") || utils::caseInsensitiveEquals( name, "title"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), "matchphrase");
 	}
 	else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 	{
-		m_sentencesize = (unsigned int)value;
+		m_parameter->m_sentencesize = (unsigned int)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "windowsize"))
 	{
-		m_windowsize = (unsigned int)value;
+		m_parameter->m_windowsize = (unsigned int)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "cardinality"))
 	{
-		m_cardinality = (unsigned int)value;
+		m_parameter->m_cardinality = (unsigned int)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "maxdf"))
 	{
-		m_maxdf = (double)value;
-		if (m_maxdf < 0.0 || m_maxdf > 1.0)
+		m_parameter->m_maxdf = (double)value;
+		if (m_parameter->m_maxdf < 0.0 || m_parameter->m_maxdf > 1.0)
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), "matchphrase");
 		}
@@ -662,15 +655,15 @@ void SummarizerFunctionInstanceMatchPhrase::defineResultName(
 	{
 		if (utils::caseInsensitiveEquals( itemname, "para"))
 		{
-			m_name_para = resultname;
+			m_parameter->m_name_para = resultname;
 		}
 		else if (utils::caseInsensitiveEquals( itemname, "phrase"))
 		{
-			m_name_phrase = resultname;
+			m_parameter->m_name_phrase = resultname;
 		}
 		else if (utils::caseInsensitiveEquals( itemname, "docstart"))
 		{
-			m_name_docstart = resultname;
+			m_parameter->m_name_docstart = resultname;
 		}
 		else
 		{
@@ -686,7 +679,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 		MetaDataReaderInterface* metadata,
 		const GlobalStatistics& stats) const
 {
-	if (m_type.empty())
+	if (m_parameter->m_type.empty())
 	{
 		m_errorhnd->report( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 	}
@@ -694,12 +687,8 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 	{
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
 		return new SummarizerFunctionContextMatchPhrase(
-				storage, m_processor, metadata, m_type,
-				m_sentencesize, m_windowsize, m_cardinality,
-				nofCollectionDocuments, m_metadata_title_maxpos, m_maxdf,
-				m_matchmark, m_floatingmark,
-				m_name_para, m_name_phrase, m_name_docstart,
-				m_errorhnd);
+				storage, m_processor, metadata, m_parameter,
+				nofCollectionDocuments, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchphrase", *m_errorhnd, 0);
 }
@@ -709,14 +698,14 @@ std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
 	try
 	{
 		std::ostringstream rt;
-		rt << "type='" << m_type << "'"
-			<< ", matchmark=(" << m_matchmark.first << "," << m_matchmark.second << ")"
-			<< ", floatingmark=(" << m_floatingmark.first << "," << m_floatingmark.second << ")"
-			<< ", name_para=" << m_name_para << ", name_phrase=" << m_name_phrase
-			<< ", metadata_title_maxpos='" << m_metadata_title_maxpos << "'"
-			<< ", sentencesize='" << m_sentencesize << "'"
-			<< ", windowsize='" << m_windowsize << "'"
-			<< ", cardinality='" << m_cardinality << "'";
+		rt << "type='" << m_parameter->m_type << "'"
+			<< ", matchmark=(" << m_parameter->m_matchmark.first << "," << m_parameter->m_matchmark.second << ")"
+			<< ", floatingmark=(" << m_parameter->m_floatingmark.first << "," << m_parameter->m_floatingmark.second << ")"
+			<< ", name_para=" << m_parameter->m_name_para << ", name_phrase=" << m_parameter->m_name_phrase
+			<< ", sentencesize='" << m_parameter->m_sentencesize << "'"
+			<< ", windowsize='" << m_parameter->m_windowsize << "'"
+			<< ", cardinality='" << m_parameter->m_cardinality << "'"
+			<< ", maxdf='" << m_parameter->m_maxdf << "'";
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "matchphrase", *m_errorhnd, std::string());
@@ -747,6 +736,7 @@ FunctionDescription SummarizerFunctionMatchPhrase::getDescription() const
 		rt( P::Numeric, "sentencesize", _TXT( "restrict the maximum length of sentences in summaries"), "1:");
 		rt( P::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
 		rt( P::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
+		rt( P::Numeric, "maxdf", _TXT( "the maximum df (fraction of collection size) of features considered for same sentence proximity weighing"), "1:");
 		rt( P::String, "matchmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
 		rt( P::String, "floatingmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found"), "");
 		rt( P::String, "name_para", _TXT( "specifies the summary element name used for paragraphs (default 'para')"), "");
