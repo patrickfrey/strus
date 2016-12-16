@@ -59,7 +59,7 @@ public:
 
 			m_metareader->skipDoc( m_docno);
 			m_pos_lo = m_handle_lo < 0 ? 1 : (int)m_metareader->getValue( m_handle_lo);
-			m_pos_hi = m_handle_hi < 0 ? 1 : (int)m_metareader->getValue( m_handle_hi);
+			m_pos_hi = m_handle_hi < 0 ? std::numeric_limits<Index>::max() : (int)m_metareader->getValue( m_handle_hi);
 			m_posno = 0;
 			++m_docno;
 		} while (m_pos_lo == 0 || m_pos_hi == 0 || m_pos_lo >= m_pos_hi);
