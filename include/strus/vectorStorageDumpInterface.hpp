@@ -5,10 +5,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Interface for dumping the contents of a vector space model storage
-/// \file vectorSpaceModelDumpInterface.hpp
-#ifndef _STRUS_VECTOR_SPACE_MODEL_DUMP_INTERFACE_HPP_INCLUDED
-#define _STRUS_VECTOR_SPACE_MODEL_DUMP_INTERFACE_HPP_INCLUDED
+/// \brief Interface for dumping the contents of a vector storage
+/// \file vectorStorageDumpInterface.hpp
+#ifndef _STRUS_VECTOR_STORGE_DUMP_INTERFACE_HPP_INCLUDED
+#define _STRUS_VECTOR_STORGE_DUMP_INTERFACE_HPP_INCLUDED
 #include "strus/databaseOptions.hpp"
 #include "strus/index.hpp"
 #include <string>
@@ -17,12 +17,12 @@
 namespace strus
 {
 
-/// \brief Interface for fetching the dump of a strus vector space model storage
-class VectorSpaceModelDumpInterface
+/// \brief Interface for fetching the dump of a strus vector storage
+class VectorStorageDumpInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~VectorSpaceModelDumpInterface(){}
+	virtual ~VectorStorageDumpInterface(){}
 
 	/// \brief Fetch the next chunk of the dump
 	/// \param[out] chunk pointer to the chunk

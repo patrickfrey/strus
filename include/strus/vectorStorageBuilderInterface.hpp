@@ -5,20 +5,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Interface for creating a mapping of floating point vectors of a defined dimension to a list of features in an unsupervised way.
-#ifndef _STRUS_VECTOR_SPACE_MODEL_BUILDER_INTERFACE_HPP_INCLUDED
-#define _STRUS_VECTOR_SPACE_MODEL_BUILDER_INTERFACE_HPP_INCLUDED
+/// \brief Interface for building a repository of vectors with classifiers to map them to discrete features.
+#ifndef _STRUS_VECTOR_STORGE_BUILDER_INTERFACE_HPP_INCLUDED
+#define _STRUS_VECTOR_STORGE_BUILDER_INTERFACE_HPP_INCLUDED
 #include <vector>
 
 namespace strus {
 
-/// \brief Interface for building a repository of vectors of floating point numbers representing document features and for learning of a model that relates added features to concept features.
+/// \brief Interface for building a repository of vectors with classifiers to map them to discrete features.
 /// \remark This interface has the transaction context logically enclosed in the object, though use in a multithreaded context does not make much sense. Thread safety of the interface is guaranteed, but not the performance in a multithreaded context. It is thought as class that internally makes heavily use of multithreading, but is not thought to be fed by mutliple threads.
-class VectorSpaceModelBuilderInterface
+class VectorStorageBuilderInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~VectorSpaceModelBuilderInterface(){}
+	virtual ~VectorStorageBuilderInterface(){}
 
 	/// \brief Add a feature to the model for later retrieval and for learning of the concepts associated to features
 	/// \param[in] vec vector to add

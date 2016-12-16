@@ -6,19 +6,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 /// \brief Interface for searching vectors. Separated from client interface because it requires linear scanning of candidates in memory because of the nature of the problem.
-#ifndef _STRUS_VECTOR_SPACE_MODEL_SEARCH_INTERFACE_HPP_INCLUDED
-#define _STRUS_VECTOR_SPACE_MODEL_SEARCH_INTERFACE_HPP_INCLUDED
+#ifndef _STRUS_VECTOR_STORGE_SEARCH_INTERFACE_HPP_INCLUDED
+#define _STRUS_VECTOR_STORGE_SEARCH_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <vector>
 
 namespace strus {
 
 /// \brief Interface to repository for vectors and a feature concept relation model previously created with a builder
-class VectorSpaceModelSearchInterface
+class VectorStorageSearchInterface
 {
 public:
 	/// \brief Destructor
-	virtual ~VectorSpaceModelSearchInterface(){}
+	virtual ~VectorStorageSearchInterface(){}
 
 	/// \brief Weighted feature number as result of search
 	class Result
