@@ -23,8 +23,6 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 		const WeightingFunctionParameterBM25pff& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
-		const std::string& metadata_title_maxpos_,
-		const std::string& metadata_title_size_,
 		ErrorBufferInterface* errorhnd_)
 	:m_parameter(parameter_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
@@ -35,21 +33,11 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_initialized(false)
 	,m_metadata(metadata_)
 	,m_metadata_doclen(metadata_->elementHandle( metadata_doclen_.empty()?std::string("doclen"):metadata_doclen_))
-	,m_metadata_title_maxpos(metadata_title_maxpos_.empty()?-1:metadata_->elementHandle( metadata_title_maxpos_))
-	,m_metadata_title_size(metadata_title_size_.empty()?-1:metadata_->elementHandle( metadata_title_size_))
 	,m_errorhnd(errorhnd_)
 {
 	if (m_metadata_doclen<0)
 	{
 		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
-	}
-	if (m_metadata_title_maxpos < 0 && !metadata_title_maxpos_.empty())
-	{
-		throw strus::runtime_error( _TXT("unknown meta data element '%s' for the title maxpos defined"), metadata_title_maxpos_.c_str());
-	}
-	if (m_metadata_title_size < 0 && !metadata_title_size_.empty())
-	{
-		throw strus::runtime_error( _TXT("unknown meta data element '%s' for the title size defined"), metadata_title_size_.c_str());
 	}
 }
 
@@ -61,7 +49,12 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "struct"))
+		if (utils::caseInsensitiveEquals( name, "title"))
+		{
+			if (m_titleitr.get()) throw strus::runtime_error(_TXT("title field specified twice"));
+			m_titleitr.reset( itr);
+		}
+		else if (utils::caseInsensitiveEquals( name, "struct"))
 		{
 			if (m_structarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
@@ -132,8 +125,8 @@ static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_
 
 static void calcTitleFfIncrements(
 		ProximityWeightAccumulator::WeightArray& result,
-		const Index& firstpos,
-		const Index& titlesize,
+		const Index& titlestart,
+		const Index& titleend,
 		double titleweight,
 		const ProximityWeightAccumulator::WeightArray& weightincr,
 		PostingIteratorInterface** itrar, std::size_t itrarsize)
@@ -143,7 +136,7 @@ static void calcTitleFfIncrements(
 	for (std::size_t ii=0; ii<itrarsize; ++ii)
 	{
 		Index pos = itrar[ii]->skipPos(0);
-		while (pos && pos < firstpos)
+		while (pos && pos < titleend && pos >= titlestart)
 		{
 			if ((poset & (1<<pos)) == 0)
 			{
@@ -154,16 +147,16 @@ static void calcTitleFfIncrements(
 			pos = itrar[ii]->skipPos( pos+1);
 		}
 	}
-	if (titlesize < nofFeaturesInTitle)
+	if (titleend - titlestart < nofFeaturesInTitle)
 	{
-		nofFeaturesInTitle = titlesize;
+		nofFeaturesInTitle = titleend - titlestart;
 	}
-	double nf = 1.0 / (double)(titlesize - nofFeaturesInTitle + 1);
+	double nf = 1.0 / (double)(titleend - titlestart - nofFeaturesInTitle + 1);
 
 	for (std::size_t ii=0; ii<itrarsize; ++ii)
 	{
 		Index pos = itrar[ii]->skipPos(0);
-		if (pos && pos < firstpos)
+		if (pos && pos < titleend && pos >= titlestart)
 		{
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "weighting title weight " << titleweight << " incr " << weightincr[ii] << " norm " << nf << " => " << (titleweight * weightincr[ii] * nf) << std::endl;
@@ -318,24 +311,27 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		// Define document length:
 		double doclen = m_metadata->getValue( m_metadata_doclen);
 
-		// Define search start position:
-		Index firstpos = 1;
-		Index titlesize = 1;
-		if (m_metadata_title_maxpos>=0)
+		// Define the title field and the search start position:
+		Index titlestart = 1;
+		Index titleend = 1;
+		if (m_titleitr.get() && m_titleitr->skipDoc( docno) == docno)
 		{
-			NumericVariant firstposval = m_metadata->getValue( m_metadata_title_maxpos);
-			firstpos = firstposval.toint()+1;
+			titlestart = m_titleitr->skipPos(0);
+			if (titlestart)
+			{
+				Index ti = titleend = titlestart;
+				while (0!=(ti=m_titleitr->skipPos(ti+1)))
+				{
+					titleend = ti;
+				}
+				++titleend;
+			}
+			else
+			{
+				titlestart = 1;
+			}
 		}
-		if (m_metadata_title_size>=0)
-		{
-			NumericVariant titlesizeval = m_metadata->getValue( m_metadata_title_size);
-			titlesize = titlesizeval.toint();
-			if (!titlesize) titlesize = 1;
-		}
-		else if (m_metadata_title_maxpos>=0)
-		{
-			titlesize = (firstpos > 1) ? (firstpos - 1):1;
-		}
+		Index firstpos = titleend;
 
 		// Define the structure of accumulated proximity weights:
 		ProximityWeightAccumulator::WeightArray ffincrar_abs( m_itrarsize);
@@ -344,7 +340,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		// Calculate ff title increment weights:
 		double tiweight = m_parameter.tidocnorm > 0 ? tanh( doclen / (double)m_parameter.tidocnorm):1.0;
 		calcTitleFfIncrements(
-			ffincrar_abs, firstpos, titlesize, m_parameter.titleinc * tiweight, m_weightincr, m_itrar, m_itrarsize);
+			ffincrar_abs, titlestart, titleend, m_parameter.titleinc * tiweight, m_weightincr, m_itrar, m_itrarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "accumulated ff incr [title terms] " << ffincrar_abs.tostring() << std::endl;
 #endif
@@ -659,9 +655,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25pff::createFunct
 	{
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		return new WeightingFunctionContextBM25pff(
-				storage_, metadata, m_parameter,
-				nofdocs, m_metadata_doclen, m_metadata_title_maxpos, m_metadata_title_size,
-				m_errorhnd);
+				storage_, metadata, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
 }

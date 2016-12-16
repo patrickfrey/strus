@@ -13,6 +13,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
+#include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
@@ -71,8 +72,6 @@ public:
 		const WeightingFunctionParameterBM25pff& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
-		const std::string& metadata_title_maxpos_,
-		const std::string& metadata_title_size_,
 		ErrorBufferInterface* errorhnd_);
 
 	virtual void addWeightingFeature(
@@ -103,8 +102,7 @@ private:
 	bool m_initialized;					///< true, if the structures have already been initialized
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
 	int m_metadata_doclen;					///< meta data doclen handle
-	int m_metadata_title_maxpos;				///< meta data title maximum position handle
-	int m_metadata_title_size;				///< meta data title size
+	Reference<PostingIteratorInterface> m_titleitr;		///< iterator to identify the title field for weight increment
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
