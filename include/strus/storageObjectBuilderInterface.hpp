@@ -29,7 +29,7 @@ class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
 /// \brief Forward declaration
-class VectorSpaceModelInterface;
+class VectorStorageInterface;
 
 /// \brief Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation.
 class StorageObjectBuilderInterface
@@ -57,7 +57,7 @@ public:
 
 	/// \brief Get a vectorspace model for mapping vectors to features by name
 	/// \return the vectorspace model interface reference
-	virtual const VectorSpaceModelInterface* getVectorSpaceModel( const std::string& name) const=0;
+	virtual const VectorStorageInterface* getVectorStorage( const std::string& name) const=0;
 
 	/// \brief Creates a an interface for query evaluation
 	/// \return the query evaluation object (with ownership returned)
