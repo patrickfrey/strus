@@ -103,6 +103,24 @@ void Query::pushTerm( const std::string& type_, const std::string& value_)
 	CATCH_ERROR_MAP( _TXT("error pushing term to query: %s"), *m_errorhnd);
 }
 
+void Query::pushDocField(
+		const std::string& metadataRangeStart,
+		const std::string& metadataRangeEnd)
+{
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "pushField [%s:%s] stack %u\n", metadataRangeStart.c_str(), metadataRangeEnd.c_str(), (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
+	try
+	{
+		m_docfields.push_back( DocField( metadataRangeStart, metadataRangeEnd));
+		m_stack.push_back( nodeAddress( DocFieldNode, m_docfields.size()-1));
+	}
+	CATCH_ERROR_MAP( _TXT("error pushing doc field to query: %s"), *m_errorhnd);
+}
+
 void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsigned int argc, int range_, unsigned int cardinality_)
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -266,6 +284,14 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 			out << std::endl;
 			break;
 		}
+		case DocFieldNode:
+		{
+			const DocField& docfield = m_docfields[ nodeIndex( adr)];
+			out << indentstr << "docfield " << docfield.metadataRangeStart << " : " << docfield.metadataRangeEnd;
+			printVariables( out, adr);
+			out << std::endl;
+			break;
+		}
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
@@ -296,6 +322,12 @@ Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 		{
 			m_terms.push_back( m_terms[ nodeIndex( adr)]);
 			rtadr = nodeAddress( TermNode, m_terms.size()-1);
+			break;
+		}
+		case DocFieldNode:
+		{
+			m_docfields.push_back( m_docfields[ nodeIndex( adr)]);
+			rtadr = nodeAddress( DocFieldNode, m_docfields.size()-1);
 			break;
 		}
 		case ExpressionNode:
@@ -369,6 +401,16 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
 				break;
 			}
+			case DocFieldNode:
+			{
+				const DocField& docfield = m_docfields[ nodeIndex( *ni)];
+				joinargs.push_back( m_storage->createFieldPostingIterator( docfield.metadataRangeStart, docfield.metadataRangeEnd));
+				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression (doc field) posting iterator"));
+				TermStatistics termstats( m_globstats.nofDocumentsInserted());
+				// ... Doc Field features get the global statistics, because they are supposed to appear in every document
+				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), termstats);
+				break;
+			}
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
 							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap));
@@ -395,6 +437,16 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 			rt = m_storage->createTermPostingIterator( term.type, term.value);
 			if (!rt) break;
 			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, getTermStatistics( term.type, term.value));
+			break;
+		}
+		case DocFieldNode:
+		{
+			const DocField& docfield = m_docfields[ nodeIndex( nodeadr)];
+			rt = m_storage->createFieldPostingIterator( docfield.metadataRangeStart, docfield.metadataRangeEnd);
+			if (!rt) break;
+			TermStatistics termstats( m_globstats.nofDocumentsInserted());
+			// ... Doc Field features get the global statistics, because they are supposed to appear in every document
+			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, termstats);
 			break;
 		}
 		case ExpressionNode:
@@ -436,6 +488,7 @@ void Query::collectSummarizationVariables(
 	{
 		case NullNode: break;
 		case TermNode: break;
+		case DocFieldNode: break;
 		case ExpressionNode:
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
