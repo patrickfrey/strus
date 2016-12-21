@@ -34,8 +34,10 @@ public:
 		Result( const Index& featidx_, double weight_)
 			:m_featidx(featidx_),m_weight(weight_){}
 
-		Index featidx() const		{return m_featidx;}
-		double weight() const		{return m_weight;}
+		Index featidx() const			{return m_featidx;}
+		double weight() const			{return m_weight;}
+
+		void setWeight( double weight_)		{m_weight = weight_;}
 
 		bool operator < ( const Result& o) const
 		{
