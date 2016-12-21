@@ -43,6 +43,10 @@ public:
 		{
 			return (m_weight == o.m_weight) ? m_featidx < o.m_featidx : m_weight < o.m_weight;
 		}
+		bool operator > ( const Result& o) const
+		{
+			return (m_weight == o.m_weight) ? m_featidx > o.m_featidx : m_weight > o.m_weight;
+		}
 
 	private:
 		Index m_featidx;
