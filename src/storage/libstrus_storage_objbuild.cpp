@@ -23,6 +23,8 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
+#include "strus/vectorStorageInterface.hpp"
+#include "strus/vectorStorageClientInterface.hpp"
 #include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -229,6 +231,50 @@ DLL_PUBLIC StorageClientInterface*
 		return storage.release(); //... ownership returned
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *errorhnd, 0);
+}
+
+
+DLL_PUBLIC VectorStorageClientInterface*
+	strus::createVectorStorageClient(
+		const StorageObjectBuilderInterface* objbuilder,
+		ErrorBufferInterface* errorhnd,
+		const std::string& config)
+{
+	try
+	{
+		if (!g_intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			g_intl_initialized = true;
+		}
+		std::string dbname;
+		std::string storagename;
+		std::string configstr( config);
+		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
+		(void)strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd);
+
+		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
+		if (!dbi)
+		{
+			errorhnd->explain(_TXT("could not get database: %s"));
+			return 0;
+		}
+		const VectorStorageInterface* sti = objbuilder->getVectorStorage( storagename);
+		if (!sti)
+		{
+			errorhnd->explain(_TXT("could not get storage: %s"));
+			return 0;
+		}
+		std::auto_ptr<VectorStorageClientInterface>
+			storage( sti->createClient( configstr, dbi));
+		if (!storage.get())
+		{
+			errorhnd->report(_TXT("error creating storage client"));
+			return 0;
+		}
+		return storage.release(); //... ownership returned
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating vector storage client: %s"), *errorhnd, 0);
 }
 
 
