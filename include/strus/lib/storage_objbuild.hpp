@@ -23,6 +23,8 @@ class StorageClientInterface;
 /// \brief Forward declaration
 class VectorStorageClientInterface;
 /// \brief Forward declaration
+class VectorStorageBuilderInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
 ///\brief Create a storage object builder with the builders from the standard strus core libraries (without module support)
@@ -57,6 +59,16 @@ StorageClientInterface*
 ///\param[in] config object configuration (source, not a filename)
 VectorStorageClientInterface*
 	createVectorStorageClient(
+		const StorageObjectBuilderInterface* objbuilder,
+		ErrorBufferInterface* errorhnd,
+		const std::string& config);
+
+///\brief Create a vector storage builder interface with the object builder passed
+///\param[in] objbuilder object builder
+///\param[in] errorhnd error buffer interface
+///\param[in] config object configuration (source, not a filename)
+VectorStorageBuilderInterface*
+	createVectorStorageBuilder(
 		const StorageObjectBuilderInterface* objbuilder,
 		ErrorBufferInterface* errorhnd,
 		const std::string& config);
