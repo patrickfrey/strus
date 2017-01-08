@@ -320,3 +320,4 @@ DLL_PUBLIC VectorStorageBuilderInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating vector storage builder: %s"), *errorhnd, 0);
 }
 
+
