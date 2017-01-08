@@ -278,7 +278,7 @@ DLL_PUBLIC VectorStorageClientInterface*
 }
 
 DLL_PUBLIC VectorStorageBuilderInterface*
-	createVectorStorageBuilder(
+	strus::createVectorStorageBuilder(
 		const StorageObjectBuilderInterface* objbuilder,
 		ErrorBufferInterface* errorhnd,
 		const std::string& config)
