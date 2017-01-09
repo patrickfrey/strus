@@ -254,7 +254,7 @@ DLL_PUBLIC VectorStorageClientInterface*
 		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
 		if (!strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd))
 		{
-			storagename = strus::Constants::standard_vector_storage_module();
+			storagename = strus::Constants::standard_vector_storage();
 		}
 		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
 		if (!dbi)
@@ -299,7 +299,7 @@ DLL_PUBLIC VectorStorageBuilderInterface*
 		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
 		if (!strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd))
 		{
-			storagename = strus::Constants::standard_vector_storage_module();
+			storagename = strus::Constants::standard_vector_storage();
 		}
 		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
 		if (!dbi)
