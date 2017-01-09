@@ -47,16 +47,16 @@
 %endif
 
 %define fedora 0
-%define fc23 0
 %define fc24 0
-%if 0%{?fedora_version} == 23
-%define dist fc23
-%define fc23 1
-%define fedora 1
-%endif
+%define fc25 0
 %if 0%{?fedora_version} == 24
 %define dist fc24
 %define fc24 1
+%define fedora 1
+%endif
+%if 0%{?fedora_version} == 25
+%define dist fc25
+%define fc25 1
 %define fedora 1
 %endif
 
