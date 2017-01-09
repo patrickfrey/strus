@@ -13,6 +13,7 @@
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
+#include "strus/constants.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/reference.hpp"
@@ -251,8 +252,10 @@ DLL_PUBLIC VectorStorageClientInterface*
 		std::string storagename;
 		std::string configstr( config);
 		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
-		(void)strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd);
-
+		if (!strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd))
+		{
+			storagename = strus::Constants::standard_vector_storage_module();
+		}
 		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
 		if (!dbi)
 		{
@@ -294,8 +297,10 @@ DLL_PUBLIC VectorStorageBuilderInterface*
 		std::string storagename;
 		std::string configstr( config);
 		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
-		(void)strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd);
-
+		if (!strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd))
+		{
+			storagename = strus::Constants::standard_vector_storage_module();
+		}
 		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
 		if (!dbi)
 		{
