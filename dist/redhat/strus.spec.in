@@ -173,7 +173,7 @@ BuildRequires: boost-devel
 %endif
 
 %if %{rhel} || %{centos} || %{scilin} || %{fedora} 
-%if %{rhel6} || %{rhel7} || %{centos6} || %{centos7} || %{scilin6} || %{scilin7} || %{fc23} || %{fc24} || %{fc25}
+%if %{rhel6} || %{rhel7} || %{centos6} || %{centos7} || %{scilin6} || %{scilin7} || %{fc24} || %{fc25}
 BuildRequires: strusleveldb-devel >= 1.18
 Requires: strusleveldb >= 1.18
 %else
