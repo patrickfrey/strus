@@ -33,6 +33,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 	,m_initialized(false)
 	,m_metadata(metadata_)
 	,m_metadata_doclen(metadata_->elementHandle( metadata_doclen_.empty()?std::string("doclen"):metadata_doclen_))
+	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
 {
 	if (m_metadata_doclen<0)

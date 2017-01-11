@@ -43,6 +43,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_structarsize(0)
 	,m_paraarsize(0)
 	,m_initialized(false)
+	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
