@@ -60,8 +60,8 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 	{
 		if (utils::caseInsensitiveEquals( name, "title"))
 		{
-			if (m_titleitr.get()) throw strus::runtime_error(_TXT("title field specified twice"));
-			m_titleitr.reset( itr);
+			if (m_titleitr) throw strus::runtime_error(_TXT("title field specified twice"));
+			m_titleitr = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "struct"))
 		{
@@ -263,7 +263,7 @@ std::vector<SummaryElement>
 		// Define search start position:
 		Index titleStart = 1;
 		Index titleEnd = 1;
-		if (m_titleitr.get() && m_titleitr->skipDoc( docno) == docno)
+		if (m_titleitr && m_titleitr->skipDoc( docno) == docno)
 		{
 			titleStart = m_titleitr->skipPos(0);
 			if (titleStart)
@@ -290,7 +290,7 @@ std::vector<SummaryElement>
 				firstpos, m_idfar, m_weightincr, m_parameter->m_windowsize, m_parameter->m_cardinality,
 				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize, 
 				m_maxdist_featar);
-		if (candidate.span == 0 && m_titleitr.get())
+		if (candidate.span == 0 && m_titleitr)
 		{
 			//... we did not find a summary with m_cardinality terms, so we try to find one
 			//	without the terms appearing in the document title:

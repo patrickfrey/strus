@@ -73,6 +73,7 @@ public:
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
 		ErrorBufferInterface* errorhnd_);
+	~WeightingFunctionContextBM25pff(){}
 
 	virtual void addWeightingFeature(
 			const std::string& name_,
@@ -102,7 +103,7 @@ private:
 	bool m_initialized;					///< true, if the structures have already been initialized
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
 	int m_metadata_doclen;					///< meta data doclen handle
-	Reference<PostingIteratorInterface> m_titleitr;		///< iterator to identify the title field for weight increment
+	PostingIteratorInterface* m_titleitr;			///< iterator to identify the title field for weight increment
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
@@ -131,8 +132,6 @@ public:
 private:
 	WeightingFunctionParameterBM25pff m_parameter;	///< weighting function parameters
 	std::string m_metadata_doclen;			///< attribute defining the document length
-	std::string m_metadata_title_maxpos;		///< (optional) meta data element defining the last title position
-	std::string m_metadata_title_size;		///< (optional) meta data element defining the size of the title
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

@@ -51,8 +51,8 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 	{
 		if (utils::caseInsensitiveEquals( name, "title"))
 		{
-			if (m_titleitr.get()) throw strus::runtime_error(_TXT("title field specified twice"));
-			m_titleitr.reset( itr);
+			if (m_titleitr) throw strus::runtime_error(_TXT("title field specified twice"));
+			m_titleitr = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "struct"))
 		{
@@ -314,7 +314,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		// Define the title field and the search start position:
 		Index titlestart = 1;
 		Index titleend = 1;
-		if (m_titleitr.get() && m_titleitr->skipDoc( docno) == docno)
+		if (m_titleitr && m_titleitr->skipDoc( docno) == docno)
 		{
 			titlestart = m_titleitr->skipPos(0);
 			if (titlestart)
@@ -474,16 +474,6 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_metadata_doclen = value;
-			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
-		}
-		else if (utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
-		{
-			m_metadata_title_maxpos = value;
-			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
-		}
-		else if (utils::caseInsensitiveEquals( name, "metadata_title_size"))
-		{
-			m_metadata_title_size = value;
 			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
 		}
 		else if (utils::caseInsensitiveEquals( name, "k1")
