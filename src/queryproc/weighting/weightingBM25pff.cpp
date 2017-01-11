@@ -633,9 +633,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a non negative integer value"), name.c_str(), WEIGHTING_SCHEME_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "metadata_doclen")
-		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos")
-		|| utils::caseInsensitiveEquals( name, "metadata_title_size"))
+	else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name.c_str(), WEIGHTING_SCHEME_NAME);
 	}
@@ -680,8 +678,6 @@ std::string WeightingFunctionInstanceBM25pff::tostring() const
 			<< ", titleinc=" << m_parameter.titleinc
 			<< ", tidocnorm=" << m_parameter.tidocnorm
 			<< ", metadata_doclen=" << m_metadata_doclen
-			<< ", metadata_title_maxpos=" << m_metadata_title_maxpos 
-			<< ", metadata_title_size=" << m_metadata_title_size
 			;
 		return rt.str();
 	}
@@ -708,14 +704,13 @@ FunctionDescription WeightingFunctionBM25pff::getDescription() const
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
 		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (windows used for proximity weighting must not overlap paragraph borders)"), "");
+		rt( P::Feature, "title", _TXT( "defines the title field (used for weighting increment of features appearing in title)"), "");
 		rt( P::Numeric, "k1", _TXT("parameter of the BM25pff weighting scheme"), "1:1000");
 		rt( P::Numeric, "b", _TXT("parameter of the BM25pff weighting scheme"), "0.0001:1000");
 		rt( P::Numeric, "titleinc", _TXT("ff increment for title features"), "0.0:");
 		rt( P::Numeric, "tidocnorm", _TXT("specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller"), "0:");
 		rt( P::Numeric, "windowsize", _TXT("the size of the window used for finding features to increment proximity scores"), "");
 		rt( P::Numeric, "cardinality", _TXT("the number of query features a proximity score window must contain to be considered (optional, default is all features)"), "");		
-		rt( P::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Elements in title are scored with an ff increment"), "");
-		rt( P::Metadata, "metadata_title_size", _TXT( "the metadata element that specifies the number of terms (size) of the title"), "");
 		rt( P::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25)"), "0.0:1.0");
 		rt( P::Numeric, "fftie", _TXT( "value specifying the mapping of the ff of a weighted to an intervall between 0 and this value"), "0:");
 		rt( P::Numeric, "proxffbias", _TXT( "bias for proximity ff increments always counted (the others are counted only till 'proxfftie'"), "0:");
