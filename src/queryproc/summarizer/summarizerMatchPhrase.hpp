@@ -115,7 +115,7 @@ private:
 	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
-	Reference<PostingIteratorInterface> m_titleitr;		///< iterator to identify the title field for weight increment
+	PostingIteratorInterface* m_titleitr;			///< iterator to identify the title field for weight increment
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
