@@ -20,9 +20,9 @@ public:
 	DocsetPostingIterator( const std::vector<Index>& ar)
 		:m_size(ar.size()),m_start(ar.begin()),m_itr(ar.begin()),m_end(ar.end()){}
 	DocsetPostingIterator( const DocsetPostingIterator& o)
-		:m_size(o.m_size),m_itr(o.m_itr),m_end(o.m_end){}
+		:m_size(o.m_size),m_start(o.m_start),m_itr(o.m_itr),m_end(o.m_end){}
 	DocsetPostingIterator()
-		:m_size(0){}
+		:m_size(0),m_start(),m_itr(),m_end(){}
 
 	virtual ~DocsetPostingIterator(){}
 
