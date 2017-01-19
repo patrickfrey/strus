@@ -47,6 +47,9 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
+	std::memset( m_itrar_valid, 0, sizeof(m_itrar_valid));
+	std::memset( m_structar_valid, 0, sizeof(m_structar_valid));
+	std::memset( m_paraar_valid, 0, sizeof(m_paraar_valid));
 }
 
 
@@ -109,24 +112,29 @@ SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
 {}
 
 
-static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize)
+static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, bool* validar, std::size_t arsize)
 {
+	Index di = docno;
+	if (!di) di = 1;
 	for (std::size_t ai=0; ai < arsize; ++ai)
 	{
-		ar[ ai]->skipDoc( docno);
+		validar[ai] == (di == ar[ ai]->skipDoc( di));
 	}
 }
 
-static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size)
+static Index callSkipPos( Index start, PostingIteratorInterface** ar, const bool* validar, std::size_t size)
 {
 	Index rt = 0;
 	std::size_t ti=0;
 	for (; ti<size; ++ti)
 	{
-		Index pos = ar[ ti]->skipPos( start);
-		if (pos)
+		if (validar[ti])
 		{
-			if (!rt || pos < rt) rt = pos;
+			Index pos = ar[ ti]->skipPos( start);
+			if (pos)
+			{
+				if (!rt || pos < rt) rt = pos;
+			}
 		}
 	}
 	return rt;
@@ -256,9 +264,9 @@ std::vector<SummaryElement>
 			m_initialized = true;
 		}
 		// Init document iterators:
-		callSkipDoc( docno, m_itrar, m_itrarsize);
-		callSkipDoc( docno, m_structar, m_structarsize);
-		callSkipDoc( docno, m_paraar, m_paraarsize);
+		callSkipDoc( docno, m_itrar, m_itrar_valid, m_itrarsize);
+		callSkipDoc( docno, m_structar, m_structar_valid, m_structarsize);
+		callSkipDoc( docno, m_paraar, m_paraar_valid, m_paraarsize);
 		m_forwardindex->skipDoc( docno);
 
 		// Define search start position:
@@ -376,8 +384,8 @@ std::vector<SummaryElement>
 				minincr += (Index)m_parameter->m_sentencesize >> 2;
 				// .... heuristics for minimal size of abstract we want to show
 			}
-			Index nextparapos = callSkipPos( phrase_abstract.start + phrase_abstract.span, m_paraar, m_paraarsize);
-			Index eospos = callSkipPos( phrase_abstract.start + phrase_abstract.span + minincr, m_structar, m_structarsize + m_paraarsize);
+			Index nextparapos = callSkipPos( phrase_abstract.start + phrase_abstract.span, m_paraar, m_paraar_valid, m_paraarsize);
+			Index eospos = callSkipPos( phrase_abstract.start + phrase_abstract.span + minincr, m_structar, m_structar_valid, m_structarsize + m_paraarsize);
 			if (eospos)
 			{
 				if (nextparapos && nextparapos <= eospos) eospos = nextparapos - 1;
@@ -403,7 +411,7 @@ std::vector<SummaryElement>
 		for (;;)
 		{
 			Index pstart = phrase_abstract.start  > searchrange + firstpos ? phrase_abstract.start - searchrange : (firstpos + 1);
-			Index prevparapos = callSkipPos( pstart, m_paraar, m_paraarsize);
+			Index prevparapos = callSkipPos( pstart, m_paraar, m_paraar_valid, m_paraarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "start search candidate para pos=" << pstart << ", nextpara=" << prevparapos << std::endl;
 #endif
@@ -415,7 +423,7 @@ std::vector<SummaryElement>
 #endif
 				for (;;)
 				{
-					prevparapos = callSkipPos( parapos+1, m_paraar, m_paraarsize);
+					prevparapos = callSkipPos( parapos+1, m_paraar, m_paraar_valid, m_paraarsize);
 					if (prevparapos && prevparapos <= phrase_abstract.start)
 					{
 						parapos = prevparapos;
@@ -425,7 +433,7 @@ std::vector<SummaryElement>
 						break;
 					}
 				}
-				eoppos = callSkipPos( parapos+1, m_structar, m_structarsize + m_paraarsize);
+				eoppos = callSkipPos( parapos+1, m_structar, m_structar_valid, m_structarsize + m_paraarsize);
 				if (eoppos && eoppos - parapos < 12)
 				{
 					if (eoppos >= phrase_abstract.start)
@@ -489,7 +497,7 @@ std::vector<SummaryElement>
 			Index pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
 			while (pi < pe)
 			{
-				Index minpos = callSkipPos( pi, m_itrar, m_itrarsize);
+				Index minpos = callSkipPos( pi, m_itrar, m_itrar_valid, m_itrarsize);
 				if (minpos && minpos < pe)
 				{
 					highlightpos.push_back( minpos);

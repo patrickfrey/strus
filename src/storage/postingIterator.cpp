@@ -104,7 +104,13 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 		{
 			return 0;
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		Index rt = m_posinfoIterator.skipPos( firstpos_);
+		if (rt) std::cerr << "skipPos " << m_featureid << " " << rt << std::endl;
+		return rt;
+#else
 		return m_posinfoIterator.skipPos( firstpos_);
+#endif
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip position: %s"), *m_errorhnd, 0);
 }

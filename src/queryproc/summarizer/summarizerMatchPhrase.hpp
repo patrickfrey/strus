@@ -109,6 +109,9 @@ private:
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
 	PostingIteratorInterface* m_paraar[ MaxNofArguments];	///< array of end of paragraph elements
+	bool m_itrar_valid[ MaxNofArguments];			///< true/false for each weighted feature, if it exists in the document
+	bool m_structar_valid[ MaxNofArguments];		///< true/false for each weighted feature, if it exists in the document
+	bool m_paraar_valid[ MaxNofArguments];			///< true/false for each paragraph element, if it exists in the document
 	std::size_t m_itrarsize;				///< number of weighted features
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
