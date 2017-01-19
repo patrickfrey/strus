@@ -47,9 +47,6 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
-	std::memset( m_itrar_valid, 0, sizeof(m_itrar_valid));
-	std::memset( m_structar_valid, 0, sizeof(m_structar_valid));
-	std::memset( m_paraar_valid, 0, sizeof(m_paraar_valid));
 }
 
 
@@ -112,23 +109,28 @@ SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
 {}
 
 
-static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, bool* validar, std::size_t arsize)
+static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
 {
-	Index di = docno;
-	if (!di) di = 1;
 	for (std::size_t ai=0; ai < arsize; ++ai)
 	{
-		validar[ai] == (di == ar[ ai]->skipDoc( di));
+		if (docno == ar[ ai]->skipDoc( docno))
+		{
+			valid_ar[ ai] = ar[ ai];
+		}
+		else
+		{
+			valid_ar[ ai] = 0;
+		}
 	}
 }
 
-static Index callSkipPos( Index start, PostingIteratorInterface** ar, const bool* validar, std::size_t size)
+static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size)
 {
 	Index rt = 0;
 	std::size_t ti=0;
 	for (; ti<size; ++ti)
 	{
-		if (validar[ti])
+		if (ar[ ti])
 		{
 			Index pos = ar[ ti]->skipPos( start);
 			if (pos)
@@ -264,9 +266,13 @@ std::vector<SummaryElement>
 			m_initialized = true;
 		}
 		// Init document iterators:
-		callSkipDoc( docno, m_itrar, m_itrar_valid, m_itrarsize);
-		callSkipDoc( docno, m_structar, m_structar_valid, m_structarsize);
-		callSkipDoc( docno, m_paraar, m_paraar_valid, m_paraarsize);
+		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
+		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+		PostingIteratorInterface* valid_paraar[ MaxNofArguments];	//< valid array of end of paragraph elements
+
+		callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
+		callSkipDoc( docno, m_structar, m_structarsize, valid_structar);
+		callSkipDoc( docno, m_paraar, m_paraarsize, valid_paraar);
 		m_forwardindex->skipDoc( docno);
 
 		// Define search start position:
@@ -297,7 +303,7 @@ std::vector<SummaryElement>
 		Candidate candidate
 			= findCandidate(
 				firstpos, m_idfar, m_weightincr, m_parameter->m_windowsize, m_parameter->m_cardinality,
-				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize, 
+				valid_itrar, m_itrarsize, valid_structar, m_structarsize, valid_paraar, m_paraarsize, 
 				m_maxdist_featar);
 		if (candidate.span == 0 && m_titleitr)
 		{
@@ -310,12 +316,15 @@ std::vector<SummaryElement>
 			std::size_t ti=0,te=m_itrarsize;
 			for (; ti < te; ++ti)
 			{
-				Index pos = m_itrar[ti]->skipPos( 0);
-				if (pos >= firstpos)
+				if (valid_itrar[ti])
 				{
-					noTitleTerms[ noTitleSize++] = m_itrar[ ti];
-					noTitleIdfs.add( m_idfar[ ti]);
-					noWeightIncrs.add( m_weightincr[ ti]);
+					Index pos = valid_itrar[ti]->skipPos( 0);
+					if (pos >= firstpos)
+					{
+						noTitleTerms[ noTitleSize++] = m_itrar[ ti];
+						noTitleIdfs.add( m_idfar[ ti]);
+						noWeightIncrs.add( m_weightincr[ ti]);
+					}
 				}
 			}
 			if (noTitleSize && m_itrarsize > noTitleSize)
@@ -327,8 +336,8 @@ std::vector<SummaryElement>
 				}
 				candidate = findCandidate(
 						firstpos, noTitleIdfs, noWeightIncrs, m_parameter->m_windowsize, cardinality,
-						noTitleTerms, noTitleSize, m_structar, m_structarsize,
-						m_paraar, m_paraarsize, m_maxdist_featar);
+						noTitleTerms, noTitleSize, valid_structar, m_structarsize,
+						valid_paraar, m_paraarsize, m_maxdist_featar);
 			}
 		}
 		bool is_docstart = (candidate.span == 0);
@@ -365,12 +374,15 @@ std::vector<SummaryElement>
 		}
 		for (; ti<te && astart < candidate.pos; ++ti)
 		{
-			Index pos = m_structar[ti]->skipPos( astart);
-			while (pos > astart && pos <= candidate.pos)
+			if (valid_structar[ti])
 			{
-				phrase_abstract.defined_start = true;
-				astart = pos + 1;
-				pos = m_structar[ti]->skipPos( astart);
+				Index pos = valid_structar[ti]->skipPos( astart);
+				while (pos > astart && pos <= candidate.pos)
+				{
+					phrase_abstract.defined_start = true;
+					astart = pos + 1;
+					pos = m_structar[ti]->skipPos( astart);
+				}
 			}
 		}
 		phrase_abstract.span += candidate.pos - astart;
@@ -384,8 +396,8 @@ std::vector<SummaryElement>
 				minincr += (Index)m_parameter->m_sentencesize >> 2;
 				// .... heuristics for minimal size of abstract we want to show
 			}
-			Index nextparapos = callSkipPos( phrase_abstract.start + phrase_abstract.span, m_paraar, m_paraar_valid, m_paraarsize);
-			Index eospos = callSkipPos( phrase_abstract.start + phrase_abstract.span + minincr, m_structar, m_structar_valid, m_structarsize + m_paraarsize);
+			Index nextparapos = callSkipPos( phrase_abstract.start + phrase_abstract.span, valid_paraar, m_paraarsize);
+			Index eospos = callSkipPos( phrase_abstract.start + phrase_abstract.span + minincr, valid_structar, m_structarsize + m_paraarsize);
 			if (eospos)
 			{
 				if (nextparapos && nextparapos <= eospos) eospos = nextparapos - 1;
@@ -411,7 +423,7 @@ std::vector<SummaryElement>
 		for (;;)
 		{
 			Index pstart = phrase_abstract.start  > searchrange + firstpos ? phrase_abstract.start - searchrange : (firstpos + 1);
-			Index prevparapos = callSkipPos( pstart, m_paraar, m_paraar_valid, m_paraarsize);
+			Index prevparapos = callSkipPos( pstart, valid_paraar, m_paraarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "start search candidate para pos=" << pstart << ", nextpara=" << prevparapos << std::endl;
 #endif
@@ -423,7 +435,7 @@ std::vector<SummaryElement>
 #endif
 				for (;;)
 				{
-					prevparapos = callSkipPos( parapos+1, m_paraar, m_paraar_valid, m_paraarsize);
+					prevparapos = callSkipPos( parapos+1, valid_paraar, m_paraarsize);
 					if (prevparapos && prevparapos <= phrase_abstract.start)
 					{
 						parapos = prevparapos;
@@ -433,7 +445,7 @@ std::vector<SummaryElement>
 						break;
 					}
 				}
-				eoppos = callSkipPos( parapos+1, m_structar, m_structar_valid, m_structarsize + m_paraarsize);
+				eoppos = callSkipPos( parapos+1, valid_structar, m_structarsize + m_paraarsize);
 				if (eoppos && eoppos - parapos < 12)
 				{
 					if (eoppos >= phrase_abstract.start)
@@ -497,7 +509,7 @@ std::vector<SummaryElement>
 			Index pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
 			while (pi < pe)
 			{
-				Index minpos = callSkipPos( pi, m_itrar, m_itrar_valid, m_itrarsize);
+				Index minpos = callSkipPos( pi, valid_itrar, m_itrarsize);
 				if (minpos && minpos < pe)
 				{
 					highlightpos.push_back( minpos);
