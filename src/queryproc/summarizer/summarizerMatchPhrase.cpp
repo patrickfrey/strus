@@ -74,7 +74,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 		{
 			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = itr;
-			m_paraar[ m_paraarsize++] = itr;
+			m_paraarsize++;
 		}
 		else if (utils::caseInsensitiveEquals( name, "match"))
 		{
@@ -266,13 +266,12 @@ std::vector<SummaryElement>
 			m_initialized = true;
 		}
 		// Init document iterators:
-		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
-		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
-		PostingIteratorInterface* valid_paraar[ MaxNofArguments];	//< valid array of end of paragraph elements
+		PostingIteratorInterface* valid_itrar[ MaxNofArguments];			//< valid array if weighted features
+		PostingIteratorInterface* valid_structar[ MaxNofArguments];			//< valid array of end of structure elements
+		PostingIteratorInterface** valid_paraar = &valid_structar[ m_structarsize];	//< valid array of end of paragraph elements
 
 		callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
-		callSkipDoc( docno, m_structar, m_structarsize, valid_structar);
-		callSkipDoc( docno, m_paraar, m_paraarsize, valid_paraar);
+		callSkipDoc( docno, m_structar, m_structarsize + m_paraarsize, valid_structar);
 		m_forwardindex->skipDoc( docno);
 
 		// Define search start position:
@@ -381,7 +380,7 @@ std::vector<SummaryElement>
 				{
 					phrase_abstract.defined_start = true;
 					astart = pos + 1;
-					pos = m_structar[ti]->skipPos( astart);
+					pos = valid_structar[ti]->skipPos( astart);
 				}
 			}
 		}

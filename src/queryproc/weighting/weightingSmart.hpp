@@ -55,9 +55,10 @@ public:
 	{
 	public:
 		Feature( const Feature& o)
-			:m_itr(o.m_itr),m_weight(o.m_weight),m_df(o.m_df),m_match(o.m_match){}
+			:m_itr(o.m_itr),m_weight(o.m_weight),m_df(o.m_df){}
 		Feature( PostingIteratorInterface* itr_, double weight_, const TermStatistics& stats_)
-			:m_itr(itr_),m_weight(weight_),m_df(stats_.documentFrequency()>=0?stats_.documentFrequency():std::numeric_limits<double>::quiet_NaN()),m_match(false){}
+			:m_itr(itr_),m_weight(weight_)
+			,m_df(stats_.documentFrequency()>=0?stats_.documentFrequency():std::numeric_limits<double>::quiet_NaN()){}
 
 		double df() const
 		{
@@ -69,27 +70,21 @@ public:
 		}
 		double ff() const
 		{
-			return m_match?m_itr->frequency():0.0;
+			return m_itr->frequency();
 		}
 		double weight() const
 		{
-			return m_match?m_weight:0.0;
+			return m_weight;
 		}
-		double match() const
+		Index skipDoc( Index docno)
 		{
-			return m_match?1.0:0.0;
-		}
-
-		void skipDoc( Index docno)
-		{
-			m_match = (docno == m_itr->skipDoc( docno));
+			return m_itr->skipDoc( docno);
 		}
 
 	private:
 		PostingIteratorInterface* m_itr;
 		double m_weight;
 		mutable double m_df;
-		bool m_match;
 	};
 
 public:

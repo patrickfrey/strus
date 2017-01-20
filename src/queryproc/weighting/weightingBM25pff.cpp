@@ -65,7 +65,7 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 		{
 			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = itr;
-			m_paraar[ m_paraarsize++] = itr;
+			m_paraarsize++;
 		}
 		else if (utils::caseInsensitiveEquals( name, "match"))
 		{
@@ -101,11 +101,18 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 }
 
 
-static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize)
+static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
 {
 	for (std::size_t ai=0; ai < arsize; ++ai)
 	{
-		ar[ ai]->skipDoc( docno);
+		if (docno == ar[ ai]->skipDoc( docno))
+		{
+			valid_ar[ ai] = ar[ ai];
+		}
+		else
+		{
+			valid_ar[ ai] = 0;
+		}
 	}
 }
 
@@ -115,10 +122,13 @@ static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_
 	std::size_t ti=0;
 	for (; ti<size; ++ti)
 	{
-		Index pos = ar[ ti]->skipPos( start);
-		if (pos)
+		if (ar[ ti])
 		{
-			if (!rt || pos < rt) rt = pos;
+			Index pos = ar[ ti]->skipPos( start);
+			if (pos)
+			{
+				if (!rt || pos < rt) rt = pos;
+			}
 		}
 	}
 	return rt;
@@ -136,6 +146,7 @@ static void calcTitleFfIncrements(
 	Index nofFeaturesInTitle = 0;
 	for (std::size_t ii=0; ii<itrarsize; ++ii)
 	{
+		if (!itrar[ii]) continue;
 		Index pos = itrar[ii]->skipPos(0);
 		while (pos && pos < titleend && pos >= titlestart)
 		{
@@ -156,6 +167,8 @@ static void calcTitleFfIncrements(
 
 	for (std::size_t ii=0; ii<itrarsize; ++ii)
 	{
+		if (!itrar[ii]) continue;
+
 		Index pos = itrar[ii]->skipPos(0);
 		if (pos && pos < titleend && pos >= titlestart)
 		{
@@ -304,9 +317,12 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 #endif
 		}
 		// Init document iterators:
-		callSkipDoc( docno, m_itrar, m_itrarsize);
-		callSkipDoc( docno, m_structar, m_structarsize);
-		callSkipDoc( docno, m_paraar, m_paraarsize);
+		PostingIteratorInterface* valid_itrar[ MaxNofArguments];			//< valid array if weighted features
+		PostingIteratorInterface* valid_structar[ MaxNofArguments];			//< valid array of end of structure elements
+		PostingIteratorInterface** valid_paraar = &valid_structar[ m_structarsize];	//< valid array of end of paragraph elements
+
+		callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
+		callSkipDoc( docno, m_structar, m_structarsize + m_paraarsize, valid_structar);
 		m_metadata->skipDoc( docno);
 
 		// Define document length:
@@ -341,7 +357,8 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		// Calculate ff title increment weights:
 		double tiweight = m_parameter.tidocnorm > 0 ? tanh( doclen / (double)m_parameter.tidocnorm):1.0;
 		calcTitleFfIncrements(
-			ffincrar_abs, titlestart, titleend, m_parameter.titleinc * tiweight, m_weightincr, m_itrar, m_itrarsize);
+			ffincrar_abs, titlestart, titleend, m_parameter.titleinc * tiweight,
+			m_weightincr, valid_itrar, m_itrarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "accumulated ff incr [title terms] " << ffincrar_abs.tostring() << std::endl;
 #endif
@@ -353,10 +370,12 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		std::size_t ti=0,te=m_itrarsize;
 		for (; ti < te; ++ti)
 		{
-			Index pos = m_itrar[ti]->skipPos( 0);
+			if (!valid_itrar[ti]) continue;
+
+			Index pos = valid_itrar[ti]->skipPos( 0);
 			if (pos < firstpos)
 			{
-				titleTerms[ nofTitleTerms++] = m_itrar[ ti];
+				titleTerms[ nofTitleTerms++] = valid_itrar[ ti];
 				proxffbias_title_part += m_weightincr[ ti];
 			}
 		}
@@ -368,7 +387,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 				ffincrar_abs, ffincrar_rel, m_parameter.proxffbias,
 				1, m_weightincr, m_parameter.windowsize, m_parameter.cardinality,
 				m_maxdist_featar, m_normfactorar,
-				m_itrar, m_itrarsize, m_structar, m_structarsize, m_paraar, m_paraarsize, 0, 0);
+				valid_itrar, m_itrarsize, valid_structar, m_structarsize, valid_paraar, m_paraarsize, 0, 0);
 			// Calculate ff proximity increment weights for all non title features:
 			if (nofTitleTerms && m_itrarsize > nofTitleTerms)
 			{
@@ -385,8 +404,8 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 					ffincrar_abs, ffincrar_rel, proxffbias_title,
 					firstpos, m_weightincr, m_parameter.windowsize, notitle_cardinality,
 					m_maxdist_featar, m_normfactorar,
-					m_itrar, m_itrarsize, m_structar, m_structarsize,
-					m_paraar, m_paraarsize, titleTerms, nofTitleTerms);
+					valid_itrar, m_itrarsize, valid_structar, m_structarsize,
+					valid_paraar, m_paraarsize, titleTerms, nofTitleTerms);
 			}
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -398,7 +417,9 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		std::size_t fi = 0;
 		for ( ;fi != m_itrarsize; ++fi)
 		{
-			double ff = m_itrar[ fi]->frequency();
+			if (!valid_itrar[ fi]) continue;
+
+			double ff = valid_itrar[ fi]->frequency();
 			if (ff <= std::numeric_limits<double>::epsilon()) continue;
 			double proxff_rel = ffincrar_rel[ fi];
 			double proxff_abs = ffincrar_abs[ fi];
@@ -419,7 +440,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 			double weight_ff = m_parameter.ffbase * ff + (1.0-m_parameter.ffbase) * proxff;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "proximity ff [" << m_itrar[ fi]->featureid() << "] ff=" << ff << " proximity weight ff=" << weight_ff << std::endl;
+			std::cout << "proximity ff [" << valid_itrar[ fi]->featureid() << "] ff=" << ff << " proximity weight ff=" << weight_ff << std::endl;
 #endif
 			if (m_parameter.b)
 			{
