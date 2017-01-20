@@ -119,6 +119,10 @@ unsigned int PostingIterator::frequency()
 {
 	try
 	{
+		if (!m_docno)
+		{
+			return 0;
+		}
 		m_posinfoIterator.skipDoc( m_docno);
 		return m_posinfoIterator.frequency();
 	}
