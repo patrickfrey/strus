@@ -45,6 +45,7 @@ public:
 	/// \param[in] varname_ variable to extract
 	/// \param[in] resultname_ name of result
 	/// \param[in] norm_ weight normalization factor
+	/// \param[in] pairmul_ multiplicator for matching pairs
 	/// \param[in] maxNofElements_ number of best matches to inspect
 	/// \param[in] errorhnd_ error buffer
 	SummarizerFunctionContextAccumulateVariable(
@@ -54,6 +55,7 @@ public:
 			const std::string& varname_,
 			const std::string& resultname_,
 			double norm_,
+			double pairmul_,
 			unsigned int maxNofElements_,
 			ErrorBufferInterface* errorhnd_);
 
@@ -89,6 +91,7 @@ private:
 	std::string m_varname;						///< variable name to extract for accumulation
 	std::string m_resultname;					///< result item name
 	double m_norm;							///< normalization factor for end result weights
+	double m_pairmul;						///< multiplicator for matching pairs
 	unsigned int m_maxNofElements;					///< maximum number of best elements to return
 	std::vector<SummarizationFeature> m_features;			///< features used for summarization
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -100,7 +103,7 @@ class SummarizerFunctionInstanceAccumulateVariable
 {
 public:
 	SummarizerFunctionInstanceAccumulateVariable( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_varname(),m_resultname(),m_norm(1.0),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_type(),m_varname(),m_resultname(),m_norm(1.0),m_pairmul(1.0),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAccumulateVariable(){}
 
@@ -120,6 +123,7 @@ private:
 	std::string m_varname;				///< variable name to extract for accumulation
 	std::string m_resultname;			///< result item name
 	double m_norm;					///< normalization factor
+	double m_pairmul;				///< multiplicator for matching pairs
 	unsigned int m_maxNofElements;			///< number of best matches to inspect
 	const QueryProcessorInterface* m_processor;	///< query processor
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
