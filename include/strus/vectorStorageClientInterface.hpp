@@ -10,6 +10,7 @@
 #define _STRUS_VECTOR_STORGE_CLIENT_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <vector>
+#include <string>
 
 namespace strus {
 
