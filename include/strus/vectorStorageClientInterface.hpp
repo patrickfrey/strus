@@ -15,6 +15,8 @@ namespace strus {
 
 /// \brief Forward declaration
 class VectorStorageSearchInterface;
+/// \brief Forward declaration
+class VectorStorageTransactionInterface;
 
 /// \brief Interface to a repository for vectors and a feature concept relation model previously created with a builder
 class VectorStorageClientInterface
@@ -28,6 +30,11 @@ public:
 	/// \param[in] range_to end of range of the features for the searcher (possibility to split into multiple instances)
 	/// \return the search interface (with ownership)
 	virtual VectorStorageSearchInterface* createSearcher( const Index& range_from, const Index& range_to) const=0;
+
+	/// \brief Create an insert/update transaction object
+	/// \return the created transaction interface (with ownership)
+	/// \note this function is thread safe, multiple concurrent transactions are allowed 
+	virtual VectorStorageTransactionInterface* createTransaction()=0;
 
 	/// \brief Get the list of concept class names defined
 	/// \return the list
@@ -64,16 +71,6 @@ public:
 	/// \param[in] name name of the feature defined with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<double>&)
 	/// \return index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
 	virtual Index featureIndex( const std::string& name) const=0;
-
-	/// \brief Get some internal model specific attributes for a feature
-	/// \param[in] name name of the attribute hardcoded by the model implementation
-	/// \param[in] index index of the feature
-	/// \note Useful for introspection
-	virtual std::vector<std::string> featureAttributes( const std::string& name, const Index& index) const=0;
-
-	/// \brief Get the list of internal model specific attributes that can be used for introspection
-	/// \return list of names that can be used as argument for  with 'featureAttributes(const std::string&, const Index&) const'
-	virtual std::vector<std::string> featureAttributeNames() const=0;
 
 	/// \brief Get the number of feature vectors defined
 	/// \return the number of features
