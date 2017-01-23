@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-/// \brief Interface for building a repository of vectors with classifiers to map them to discrete features.
+/// \brief Vector repository transaction implementation
 #ifndef _STRUS_VECTOR_STORGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #define _STRUS_VECTOR_STORGE_TRANSACTION_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
