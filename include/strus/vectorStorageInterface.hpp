@@ -56,6 +56,14 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database,
 			const std::string& keyprefix) const=0;
+
+	/// \brief Run a storage data build command, grouping features to concepts etc.
+	/// \param[in] commands source with some commands to execute
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by the vector storage
+	/// \return true on success, false on error
+	/// \note This interface is intrusive, we are not happy with it at all
+	virtual bool runBuild( const std::string& commands, const std::string& configsource, const DatabaseInterface* database)=0;
 };
 
 }//namespace
