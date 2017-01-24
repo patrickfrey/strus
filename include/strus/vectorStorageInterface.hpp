@@ -63,7 +63,7 @@ public:
 	/// \param[in] database key value store database type used by the vector storage
 	/// \return true on success, false on error
 	/// \note This interface is intrusive, we are not happy with it at all
-	virtual bool runBuild( const std::string& commands, const std::string& configsource, const DatabaseInterface* database)=0;
+	virtual bool runBuild( const std::string& commands, const std::string& configsource, const DatabaseInterface* database) const=0;
 };
 
 }//namespace
