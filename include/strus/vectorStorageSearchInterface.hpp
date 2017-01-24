@@ -60,7 +60,7 @@ public:
 
 	/// \brief Explicit close of the database access, if database was used
 	/// \note this function is useful in interpreter context where a garbagge collection may delay the deletion of an object
-	virtual void close();
+	virtual void close()=0;
 };
 
 }//namespace
