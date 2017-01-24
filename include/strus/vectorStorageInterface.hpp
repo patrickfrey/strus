@@ -38,14 +38,6 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
 
-	/// \brief Reset an existing repository for the data of a vector storage to its initial state after creation
-	/// \param[in] configsource configuration string of the model and the database (not a filename!)
-	/// \param[in] database database type for the repository
-	/// \return true on success, false if an error occurred
-	virtual bool resetStorage(
-			const std::string& configsrc,
-			const DatabaseInterface* database) const=0;
-
 	/// \brief Create a new vector storage client interface
 	/// \param[in] configsource configuration string of the model and the database (not a filename!)
 	/// \param[in] database database type of the persistent storage where to load the model data from
