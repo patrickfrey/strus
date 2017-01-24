@@ -63,16 +63,6 @@ VectorStorageClientInterface*
 		ErrorBufferInterface* errorhnd,
 		const std::string& config);
 
-///\brief Create a vector storage builder interface with the object builder passed
-///\param[in] objbuilder object builder
-///\param[in] errorhnd error buffer interface
-///\param[in] config object configuration (source, not a filename)
-VectorStorageBuilderInterface*
-	createVectorStorageBuilder(
-		const StorageObjectBuilderInterface* objbuilder,
-		ErrorBufferInterface* errorhnd,
-		const std::string& config);
-
 }//namespace
 #endif
 

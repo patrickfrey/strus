@@ -55,24 +55,6 @@ public:
 			const std::string& configsource,
 			const DatabaseInterface* database) const=0;
 
-	/// \brief Create a new vector storage builder
-	/// \param[in] configsource configuration string of the model and the database (not a filename!)
-	/// \param[in] database database type to use as persistent storage
-	/// \return the builder (with ownership)
-	/// \remark The repository refered to by the configuration must exist (-> createStorage)
-	virtual VectorStorageBuilderInterface* createBuilder(
-			const std::string& configsource,
-			const DatabaseInterface* database) const=0;
-
-	/// \brief Get the list of builder commands available
-	/// \return list of commands for calling 'VectorStorageBuilderInterface::run(const std::string&)'
-	/// \remark the process of building a vector storage cannot be unified so easily. Depending on the vsm type you have different commands. This method together with builderCommandDescription(const std::string&) allows the introspection of vsm the builder capabilities.
-	virtual std::vector<std::string> builderCommands() const=0;
-
-	/// \brief Get a short description of a builder command
-	/// \return the command description text
-	virtual std::string builderCommandDescription( const std::string& command) const=0;
-
 	/// \brief Create a dump of the contents of a vector storage
 	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
 	/// \param[in] database key value store database type used by the vector storage
