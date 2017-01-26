@@ -58,6 +58,12 @@ public:
 	/// \param[in] maxNofResults limits the number of results returned
 	virtual std::vector<Result> findSimilar( const std::vector<double>& vec, unsigned int maxNofResults) const=0;
 
+	/// \brief Find all features from a list of candidates that are within maximum simiarity distance of the model.
+	/// \param[in] candidates list of candidates to search in
+	/// \param[in] vec vector to calculate the features from
+	/// \param[in] maxNofResults limits the number of results returned
+	virtual std::vector<Result> findSimilarFromSelection( const std::vector<Index>& candidates, const std::vector<double>& vec, unsigned int maxNofResults) const=0;
+
 	/// \brief Explicit close of the database access, if database was used
 	/// \note this function is useful in interpreter context where a garbagge collection may delay the deletion of an object
 	virtual void close()=0;
