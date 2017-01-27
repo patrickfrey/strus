@@ -191,8 +191,7 @@ static void calcProximityFfIncrements(
 			const double* normfactorar,
 			PostingIteratorInterface** itrar, std::size_t itrarsize,
 			PostingIteratorInterface** structar, std::size_t structarsize,
-			PostingIteratorInterface** paraar, std::size_t parasize,
-			PostingIteratorInterface** exclar, std::size_t exclsize)
+			PostingIteratorInterface** paraar, std::size_t parasize)
 {
 	Index prevPara=firstpos, nextPara=callSkipPos( firstpos, paraar, parasize);
 	PositionWindow poswin( itrar, itrarsize, maxwindowsize, cardinality,
@@ -205,16 +204,6 @@ static void calcProximityFfIncrements(
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
 		double normfactor = normfactorar[ poswin.size()-1];
-
-		// Check windows exclusion by features:
-		std::size_t ei=0;
-		for (; ei<exclsize; ++ei)
-		{
-			std::size_t wi=0;
-			for (; wi<windowsize && itrar[ window[wi]] != exclar[ei]; ++wi) {}
-			if (wi < windowsize) break;
-		}
-		if (ei < exclsize) continue;
 
 		// Calculate the next paragraph element that could be overlapped by the current window:
 		while (nextPara && nextPara < windowpos)
@@ -331,7 +320,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		// Define the title field and the search start position:
 		Index titlestart = 1;
 		Index titleend = 1;
-		if (m_titleitr && m_titleitr->skipDoc( docno) == docno)
+		if (m_parameter.titleinc && m_titleitr && m_titleitr->skipDoc( docno) == docno)
 		{
 			titlestart = m_titleitr->skipPos(0);
 			if (titlestart)
@@ -354,32 +343,17 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		ProximityWeightAccumulator::WeightArray ffincrar_abs( m_itrarsize);
 		ProximityWeightAccumulator::WeightArray ffincrar_rel( m_itrarsize);
 
-		// Calculate ff title increment weights:
-		double tiweight = m_parameter.tidocnorm > 0 ? tanh( doclen / (double)m_parameter.tidocnorm):1.0;
-		calcTitleFfIncrements(
-			ffincrar_abs, titlestart, titleend, m_parameter.titleinc * tiweight,
-			m_weightincr, valid_itrar, m_itrarsize);
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "accumulated ff incr [title terms] " << ffincrar_abs.tostring() << std::endl;
-#endif
-
-		// Build array of title terms:
-		PostingIteratorInterface* titleTerms[ MaxNofArguments];
-		std::size_t nofTitleTerms = 0;
-		double proxffbias_title_part = 0.0;
-		std::size_t ti=0,te=m_itrarsize;
-		for (; ti < te; ++ti)
+		if (m_parameter.titleinc)
 		{
-			if (!valid_itrar[ti]) continue;
-
-			Index pos = valid_itrar[ti]->skipPos( 0);
-			if (pos < firstpos)
-			{
-				titleTerms[ nofTitleTerms++] = valid_itrar[ ti];
-				proxffbias_title_part += m_weightincr[ ti];
-			}
+			// Calculate ff title increment weights:
+			double tiweight = m_parameter.tidocnorm > 0 ? tanh( doclen / (double)m_parameter.tidocnorm):1.0;
+			calcTitleFfIncrements(
+				ffincrar_abs, titlestart, titleend, m_parameter.titleinc * tiweight,
+				m_weightincr, valid_itrar, m_itrarsize);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "accumulated ff incr [title terms] " << ffincrar_abs.tostring() << std::endl;
+#endif
 		}
-
 		// Calculate ff proximity increment weights for all features:
 		if (m_parameter.cardinality <= m_itrarsize)
 		{
@@ -387,26 +361,9 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 				ffincrar_abs, ffincrar_rel, m_parameter.proxffbias,
 				1, m_weightincr, m_parameter.windowsize, m_parameter.cardinality,
 				m_maxdist_featar, m_normfactorar,
-				valid_itrar, m_itrarsize, valid_structar, m_structarsize, valid_paraar, m_paraarsize, 0, 0);
-			// Calculate ff proximity increment weights for all non title features:
-			if (nofTitleTerms && m_itrarsize > nofTitleTerms)
-			{
-				unsigned int notitle_cardinality = m_itrarsize - nofTitleTerms;
-				if (m_parameter.cardinality < notitle_cardinality)
-				{
-					notitle_cardinality = m_parameter.cardinality;
-				}
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "do second pass without title terms:" << std::endl;
-#endif
-				double proxffbias_title = m_parameter.proxffbias - (m_parameter.proxffbias * proxffbias_title_part);
-				calcProximityFfIncrements(
-					ffincrar_abs, ffincrar_rel, proxffbias_title,
-					firstpos, m_weightincr, m_parameter.windowsize, notitle_cardinality,
-					m_maxdist_featar, m_normfactorar,
-					valid_itrar, m_itrarsize, valid_structar, m_structarsize,
-					valid_paraar, m_paraarsize, titleTerms, nofTitleTerms);
-			}
+				valid_itrar, m_itrarsize,
+				valid_structar, m_structarsize,
+				valid_paraar, m_paraarsize);
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "final accumulated ff increments:"

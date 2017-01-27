@@ -21,7 +21,7 @@ class PositionWindow
 public:
 	enum EvaluationType {
 		MinWin,		///< Minimal window containing at least a defined number of features [cardinality]
-		MaxWin		///< Maximum window within a range (containing all features that satisfy the range condition, but at least a defined numberof features [cardinality])
+		MaxWin		///< Maximum window within a range (containing all features that satisfy the range condition, but at least a defined number of features [cardinality])
 	};
 
 	/// \brief Default constructor

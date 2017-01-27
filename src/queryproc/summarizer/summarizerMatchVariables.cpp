@@ -24,14 +24,12 @@ using namespace strus;
 SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
-		const std::string& type_,
-		const std::map<std::string,std::string>& namemap_,
+		const Reference<MatchVariablesData>& data_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_processor(processor_)
-	,m_forwardindex(storage_->createForwardIterator( type_))
-	,m_type(type_)
-	,m_namemap(namemap_)
+	,m_forwardindex(storage_->createForwardIterator( data_->type))
+	,m_data(data_)
 	,m_features()
 	,m_errorhnd(errorhnd_)
 {
@@ -72,7 +70,6 @@ std::vector<SummaryElement>
 
 		std::vector<SummarizationFeature>::const_iterator
 			fi = m_features.begin(), fe = m_features.end();
-
 		for (; fi != fe; ++fi)
 		{
 			if (docno==fi->itr->skipDoc( docno))
@@ -91,8 +88,8 @@ std::vector<SummaryElement>
 						{
 							if (pos == m_forwardindex->skipPos( pos))
 							{
-								NameMap::const_iterator ni = m_namemap.find( vi->name());
-								if (ni == m_namemap.end())
+								MatchVariablesData::NameMap::const_iterator ni = m_data->namemap.find( vi->name());
+								if (ni == m_data->namemap.end())
 								{
 									rt.push_back( SummaryElement( vi->name(), m_forwardindex->fetch(), fi->weight, groupidx));
 								}
@@ -122,7 +119,7 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 		}
 		else if (utils::caseInsensitiveEquals( name, "type"))
 		{
-			m_type = value;
+			m_data->type = value;
 		}
 		else
 		{
@@ -154,7 +151,7 @@ void SummarizerFunctionInstanceMatchVariables::defineResultName(
 {
 	try
 	{
-		m_namemap[ itemname] = resultname;
+		m_data->namemap[ itemname] = resultname;
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "MatchVariables", *m_errorhnd);
 }
@@ -164,13 +161,13 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::cr
 		MetaDataReaderInterface*,
 		const GlobalStatistics&) const
 {
-	if (m_type.empty())
+	if (m_data->type.empty())
 	{
 		m_errorhnd->report( _TXT( "empty forward index type definition (parameter 'type') in match phrase summarizer configuration"));
 	}
 	try
 	{
-		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_type, m_namemap, m_errorhnd);
+		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_data, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchvariables", *m_errorhnd, 0);
 }
@@ -180,7 +177,7 @@ std::string SummarizerFunctionInstanceMatchVariables::tostring() const
 	try
 	{
 		std::ostringstream rt;
-		rt << "type='" << m_type << "'";
+		rt << "type='" << m_data->type << "'";
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "matchvariables", *m_errorhnd, std::string());
