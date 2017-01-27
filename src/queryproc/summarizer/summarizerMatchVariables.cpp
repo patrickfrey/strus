@@ -25,11 +25,13 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
 		const std::string& type_,
+		const std::map<std::string,std::string>& namemap_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
 	,m_processor(processor_)
 	,m_forwardindex(storage_->createForwardIterator( type_))
 	,m_type(type_)
+	,m_namemap(namemap_)
 	,m_features()
 	,m_errorhnd(errorhnd_)
 {
@@ -89,7 +91,15 @@ std::vector<SummaryElement>
 						{
 							if (pos == m_forwardindex->skipPos( pos))
 							{
-								rt.push_back( SummaryElement( vi->name(), m_forwardindex->fetch(), fi->weight, groupidx));
+								NameMap::const_iterator ni = m_namemap.find( vi->name());
+								if (ni == m_namemap.end())
+								{
+									rt.push_back( SummaryElement( vi->name(), m_forwardindex->fetch(), fi->weight, groupidx));
+								}
+								else
+								{
+									rt.push_back( SummaryElement( ni->second, m_forwardindex->fetch(), fi->weight, groupidx));
+								}
 							}
 						}
 					}
@@ -144,7 +154,7 @@ void SummarizerFunctionInstanceMatchVariables::defineResultName(
 {
 	try
 	{
-		throw strus::runtime_error( _TXT("cannot change item names, output item names defined by the variable names"));
+		m_namemap[ itemname] = resultname;
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "MatchVariables", *m_errorhnd);
 }
@@ -160,7 +170,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchVariables::cr
 	}
 	try
 	{
-		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_type, m_errorhnd);
+		return new SummarizerFunctionContextMatchVariables( storage, m_processor, m_type, m_namemap, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "matchvariables", *m_errorhnd, 0);
 }

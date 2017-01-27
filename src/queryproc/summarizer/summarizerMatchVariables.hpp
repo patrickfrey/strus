@@ -17,6 +17,7 @@
 #include "private/internationalization.hpp"
 #include <vector>
 #include <string>
+#include <map>
 #include <sstream>
 #include <iostream>
 
@@ -46,6 +47,7 @@ public:
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
 			const std::string& type_,
+			const std::map<std::string,std::string>& namemap_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMatchVariables(){}
@@ -77,6 +79,8 @@ private:
 	const QueryProcessorInterface* m_processor;
 	Reference<ForwardIteratorInterface> m_forwardindex;
 	std::string m_type;
+	typedef std::map<std::string,std::string> NameMap;
+	NameMap m_namemap;
 	std::vector<SummarizationFeature> m_features;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -107,6 +111,8 @@ public:
 
 private:
 	std::string m_type;
+	typedef std::map<std::string,std::string> NameMap;
+	NameMap m_namemap;
 	const QueryProcessorInterface* m_processor;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
