@@ -151,7 +151,7 @@ void SummarizerFunctionInstanceMatchVariables::defineResultName(
 {
 	try
 	{
-		m_data->namemap[ itemname] = resultname;
+		m_data->namemap[ resultname] = itemname;
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "MatchVariables", *m_errorhnd);
 }
@@ -178,6 +178,11 @@ std::string SummarizerFunctionInstanceMatchVariables::tostring() const
 	{
 		std::ostringstream rt;
 		rt << "type='" << m_data->type << "'";
+		MatchVariablesData::NameMap::const_iterator ni = m_data->namemap.begin(), ne = m_data->namemap.end();
+		for (; ni != ne; ++ni)
+		{
+			rt << ", var " << ni->first << "=" << ni->second;
+		}
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "matchvariables", *m_errorhnd, std::string());

@@ -34,6 +34,20 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
+struct AccumulateVariableData
+{
+	std::string type;		//< forward index type
+	std::string var;		//< variable to accumulate
+	std::string resultname;		//< name of results (default variable name)
+	double norm;			//< normalization factor for end result weights
+	double pairmul;			//< multiplicator for matching pairs
+	unsigned int maxNofElements;	//< maximum number of best elements to return
+
+	AccumulateVariableData()
+		:type(),var(),resultname(),norm(1.0),pairmul(1.0),maxNofElements(30){}
+	AccumulateVariableData( const AccumulateVariableData& o)
+		:type(o.type),var(o.var),resultname(o.resultname),norm(o.norm),pairmul(o.pairmul),maxNofElements(o.maxNofElements){}
+};
 
 class SummarizerFunctionContextAccumulateVariable
 	:public SummarizerFunctionContextInterface
@@ -41,22 +55,12 @@ class SummarizerFunctionContextAccumulateVariable
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
-	/// \param[in] type_ type of the forward index tokens to build the summary with
-	/// \param[in] varname_ variable to extract
-	/// \param[in] resultname_ name of result
-	/// \param[in] norm_ weight normalization factor
-	/// \param[in] pairmul_ multiplicator for matching pairs
-	/// \param[in] maxNofElements_ number of best matches to inspect
+	/// \param[in] data_ parameter
 	/// \param[in] errorhnd_ error buffer
 	SummarizerFunctionContextAccumulateVariable(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
-			const std::string& type_,
-			const std::string& varname_,
-			const std::string& resultname_,
-			double norm_,
-			double pairmul_,
-			unsigned int maxNofElements_,
+			const Reference<AccumulateVariableData> data_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextAccumulateVariable(){}
@@ -87,12 +91,7 @@ private:
 	const StorageClientInterface* m_storage;			///< storage interface
 	const QueryProcessorInterface* m_processor;			///< query processor
 	Reference<ForwardIteratorInterface> m_forwardindex;		///< forward index interface
-	std::string m_type;						///< forward index type for extraction of result elements
-	std::string m_varname;						///< variable name to extract for accumulation
-	std::string m_resultname;					///< result item name
-	double m_norm;							///< normalization factor for end result weights
-	double m_pairmul;						///< multiplicator for matching pairs
-	unsigned int m_maxNofElements;					///< maximum number of best elements to return
+	Reference<AccumulateVariableData> m_data;			///< parameters
 	std::vector<SummarizationFeature> m_features;			///< features used for summarization
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
@@ -103,7 +102,7 @@ class SummarizerFunctionInstanceAccumulateVariable
 {
 public:
 	SummarizerFunctionInstanceAccumulateVariable( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_varname(),m_resultname(),m_norm(1.0),m_pairmul(1.0),m_maxNofElements(30),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_data(new AccumulateVariableData()),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceAccumulateVariable(){}
 
@@ -119,12 +118,7 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_type;				///< forward index type to extract
-	std::string m_varname;				///< variable name to extract for accumulation
-	std::string m_resultname;			///< result item name
-	double m_norm;					///< normalization factor
-	double m_pairmul;				///< multiplicator for matching pairs
-	unsigned int m_maxNofElements;			///< number of best matches to inspect
+	Reference<AccumulateVariableData> m_data;	///< parameters
 	const QueryProcessorInterface* m_processor;	///< query processor
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
