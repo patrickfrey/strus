@@ -198,7 +198,6 @@ std::vector<SummaryElement>
 			Index structpos = 0;
 			if (!struct_startpos || struct_startpos > windowpos)
 			{
-				startpos = windowpos;
 				structpos = struct_startpos;
 			}
 			else
