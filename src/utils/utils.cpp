@@ -45,6 +45,18 @@ bool utils::caseInsensitiveStartsWith( const std::string& val, const std::string
 	return boost::algorithm::istarts_with( val, prefix);
 }
 
+float utils::tofloat( const std::string& val)
+{
+	try
+	{
+		return boost::lexical_cast<float>( val);
+	}
+	catch (const boost::bad_lexical_cast& err)
+	{
+		throw strus::runtime_error( _TXT( "failed to convert string '%s' to float: %s"), val.c_str(), err.what());
+	}
+}
+
 int utils::toint( const std::string& val)
 {
 	try
@@ -54,6 +66,22 @@ int utils::toint( const std::string& val)
 	catch (const boost::bad_lexical_cast& err)
 	{
 		throw strus::runtime_error( _TXT( "failed to convert string '%s' to integer: %s"), val.c_str(), err.what());
+	}
+}
+
+float utils::tofraction( const std::string& val)
+{
+	std::string vv( trim( val));
+	if (vv.empty()) throw strus::runtime_error(_TXT("failed to convert percentage fraction value (empty)"));
+	if (vv[ vv.size()] == '%')
+	{
+		vv.resize( vv.size()-1);
+		float rt = tofloat( val);
+		return rt / 100;
+	}
+	else
+	{
+		return tofloat( val);
 	}
 }
 

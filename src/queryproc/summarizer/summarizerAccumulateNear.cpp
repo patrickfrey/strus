@@ -133,11 +133,22 @@ std::vector<SummaryElement>
 		{
 			if (m_itrarsize == 0)
 			{
-				return std::vector<SummaryElement>();
+				return rt;
 			}
-			if (m_itrarsize < m_data->cardinality || m_data->cardinality == 0)
+			if (m_data->cardinality == 0)
 			{
-				m_data->cardinality = m_itrarsize;
+				if (m_data->cardinality_frac > 0.0f)
+				{
+					m_data->cardinality = (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5);
+				}
+				else
+				{
+					m_data->cardinality = m_itrarsize;
+				}
+			}
+			if (m_itrarsize < m_data->cardinality)
+			{
+				return rt;
 			}
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << string_format( "init summarizer %s: features %u, cardinality %u, range %u", METHOD_NAME, m_itrarsize, m_data->cardinality, m_data->range) << std::endl;
@@ -273,10 +284,14 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		{
 			m_data->resultname = value;
 		}
+		else if (utils::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
+		{
+			m_data->cardinality = 0;
+			m_data->cardinality_frac = utils::tofraction( value);
+		}
 		else if (utils::caseInsensitiveEquals( name, "cofactor")
 			|| utils::caseInsensitiveEquals( name, "norm")
 			|| utils::caseInsensitiveEquals( name, "nofranks")
-			|| utils::caseInsensitiveEquals( name, "cardinality")
 			|| utils::caseInsensitiveEquals( name, "range"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
@@ -319,6 +334,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	else if (utils::caseInsensitiveEquals( name, "cardinality"))
 	{
 		m_data->cardinality = value.touint();
+		m_data->cardinality_frac = 0.0;
 	}
 	else
 	{

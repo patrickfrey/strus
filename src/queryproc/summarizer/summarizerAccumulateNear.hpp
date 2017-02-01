@@ -41,15 +41,16 @@ struct AccumulateNearData
 	std::string type;		//< forward index type
 	std::string resultname;		//< name of result summary elements (default is same as type)
 	unsigned int cardinality;	//< cardinality (minimum number of features in a window weighted)
+	float cardinality_frac;		//< cardinality defined as fraction (percentage) of the number of features
 	Index range;			//< maximum distance (ordinal position)
 	unsigned int nofranks;		//< maximum number of ranks per document
 	float cofactor;			//< weight multiplication factor of results for feature references
 	double norm;			//< normalization factor for end result weights
 
 	AccumulateNearData()
-		:type(),resultname(),cardinality(0),range(0),nofranks(20),cofactor(1.0),norm(1.0){}
+		:type(),resultname(),cardinality(0),cardinality_frac(0.0),range(0),nofranks(20),cofactor(1.0),norm(1.0){}
 	AccumulateNearData( const AccumulateNearData& o)
-		:type(o.type),resultname(o.resultname),cardinality(o.cardinality),range(o.range),nofranks(o.nofranks),cofactor(o.cofactor),norm(o.norm){}
+		:type(o.type),resultname(o.resultname),cardinality(o.cardinality),cardinality_frac(o.cardinality_frac),range(o.range),nofranks(o.nofranks),cofactor(o.cofactor),norm(o.norm){}
 };
 
 class SummarizerFunctionContextAccumulateNear
