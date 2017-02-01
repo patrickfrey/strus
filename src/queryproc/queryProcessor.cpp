@@ -85,7 +85,7 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	defineSummarizerFunction( "matchvar", sum);
 	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "accuvar", sum);
-	if (0==(sum=createSummarizerWeightNeighbours( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerAccumulateNear( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "accunear", sum);
 
 	ScalarFunctionParserInterface* sfp;

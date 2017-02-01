@@ -11,7 +11,7 @@ set(source_files
 	summarizerMatchPhrase.cpp
 	summarizerMatchVariables.cpp
 	summarizerAccumulateVariable.cpp
-	summarizerWeightNeighbours.cpp
+	summarizerAccumulateNear.cpp
 )
 
 include_directories(

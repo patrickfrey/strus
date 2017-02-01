@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-#include "summarizerWeightNeighbours.hpp"
+#include "summarizerAccumulateNear.hpp"
 #include "proximityWeightAccumulator.hpp"
 #include "positionWindow.hpp"
 #include "postingIteratorLink.hpp"
@@ -17,19 +17,23 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <cstdlib>
+#include <iostream>
 
 using namespace strus;
 
 #define METHOD_NAME "matchnear"
 
-SummarizerFunctionContextWeightNeighbours::SummarizerFunctionContextWeightNeighbours(
+#undef STRUS_LOWLEVEL_DEBUG
+
+SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,
-		const Reference<WeightNeighboursData>& data_,
+		const Reference<AccumulateNearData>& data_,
 		double nofCollectionDocuments_,
 		ErrorBufferInterface* errorhnd_)
 	:m_storage(storage_)
@@ -48,7 +52,7 @@ SummarizerFunctionContextWeightNeighbours::SummarizerFunctionContextWeightNeighb
 }
 
 
-void SummarizerFunctionContextWeightNeighbours::addSummarizationFeature(
+void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,
 		const std::vector<SummarizationVariable>& variables,
@@ -117,7 +121,7 @@ static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_
 }
 
 std::vector<SummaryElement>
-	SummarizerFunctionContextWeightNeighbours::getSummary( const Index& docno)
+	SummarizerFunctionContextAccumulateNear::getSummary( const Index& docno)
 {
 	try
 	{
@@ -135,13 +139,23 @@ std::vector<SummaryElement>
 			{
 				m_data->cardinality = m_itrarsize;
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << string_format( "init summarizer %s: features %u, cardinality %u, range %u", METHOD_NAME, m_itrarsize, m_data->cardinality, m_data->range) << std::endl;
+#endif
 			// initialize proportional ff increment weights
 			m_weightincr.init( m_itrarsize);
 			ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, 0.3, m_idfar);
-
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cerr << "feature weights " <<  m_weightincr.tostring() << std::endl;
+#endif
+			double factor = 1.0;
 			for (std::size_t ii=0; ii<m_itrarsize; ++ii)
 			{
-				m_normfactorar[ ii] = 1.0 / sqrt(m_itrarsize - ii);
+				m_normfactorar[ ii] = factor / sqrt(m_itrarsize - ii);
+				factor *= m_data->cofactor;
+#ifdef STRUS_LOWLEVEL_DEBUG
+				std::cerr << string_format( "normfactor %u %f", ii, m_normfactorar[ ii]) << std::endl;
+#endif
 			}
 			m_initialized = true;
 		}
@@ -208,14 +222,12 @@ std::vector<SummaryElement>
 				// Calculate the weights:
 				while (forwardpos && forwardpos < structpos)
 				{
-					double factor = 1.0;
 					double weightsum = 0.0;
 					for (std::size_t wi=0; wi<windowsize; ++wi)
 					{
 						weightsum += m_weightincr[ window[ wi]];
-						factor *= m_data->cofactor;
 					}
-					entitymap[ m_forwardindex->fetch()] += normfactor * weightsum * factor;
+					entitymap[ m_forwardindex->fetch()] += normfactor * weightsum;
 					forwardpos = m_forwardindex->skipPos( forwardpos + 1);
 				}
 			}
@@ -241,7 +253,7 @@ std::vector<SummaryElement>
 }
 
 
-void SummarizerFunctionInstanceWeightNeighbours::addStringParameter( const std::string& name, const std::string& value)
+void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::string& name, const std::string& value)
 {
 	try
 	{
@@ -276,7 +288,7 @@ void SummarizerFunctionInstanceWeightNeighbours::addStringParameter( const std::
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
 }
 
-void SummarizerFunctionInstanceWeightNeighbours::addNumericParameter( const std::string& name, const NumericVariant& value)
+void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct"))
 	{
@@ -309,7 +321,7 @@ void SummarizerFunctionInstanceWeightNeighbours::addNumericParameter( const std:
 	}
 }
 
-void SummarizerFunctionInstanceWeightNeighbours::defineResultName(
+void SummarizerFunctionInstanceAccumulateNear::defineResultName(
 		const std::string& resultname,
 		const std::string& itemname)
 {
@@ -320,7 +332,7 @@ void SummarizerFunctionInstanceWeightNeighbours::defineResultName(
 	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
 }
 
-SummarizerFunctionContextInterface* SummarizerFunctionInstanceWeightNeighbours::createFunctionContext(
+SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::createFunctionContext(
 		const StorageClientInterface* storage,
 		MetaDataReaderInterface*,
 		const GlobalStatistics& stats) const
@@ -332,12 +344,12 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceWeightNeighbours::
 	try
 	{
 		double nofCollectionDocuments = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage->nofDocumentsInserted();
-		return new SummarizerFunctionContextWeightNeighbours( storage, m_processor, m_data, nofCollectionDocuments, m_errorhnd);
+		return new SummarizerFunctionContextAccumulateNear( storage, m_processor, m_data, nofCollectionDocuments, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
-std::string SummarizerFunctionInstanceWeightNeighbours::tostring() const
+std::string SummarizerFunctionInstanceAccumulateNear::tostring() const
 {
 	try
 	{
@@ -354,19 +366,19 @@ std::string SummarizerFunctionInstanceWeightNeighbours::tostring() const
 }
 
 
-SummarizerFunctionInstanceInterface* SummarizerFunctionWeightNeighbours::createInstance(
+SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createInstance(
 		const QueryProcessorInterface* processor) const
 {
 	try
 	{
-		return new SummarizerFunctionInstanceWeightNeighbours( processor, m_errorhnd);
+		return new SummarizerFunctionInstanceAccumulateNear( processor, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 
 
-FunctionDescription SummarizerFunctionWeightNeighbours::getDescription() const
+FunctionDescription SummarizerFunctionAccumulateNear::getDescription() const
 {
 	try
 	{

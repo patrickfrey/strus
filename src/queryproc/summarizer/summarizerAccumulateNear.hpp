@@ -36,7 +36,7 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
-struct WeightNeighboursData
+struct AccumulateNearData
 {
 	std::string type;		//< forward index type
 	std::string resultname;		//< name of result summary elements (default is same as type)
@@ -45,27 +45,27 @@ struct WeightNeighboursData
 	unsigned int nofranks;		//< maximum number of ranks per document
 	float cofactor;			//< weight multiplication factor of results for feature references
 
-	WeightNeighboursData()
+	AccumulateNearData()
 		:type(),resultname(),cardinality(0),range(0),nofranks(20),cofactor(1.0){}
-	WeightNeighboursData( const WeightNeighboursData& o)
+	AccumulateNearData( const AccumulateNearData& o)
 		:type(o.type),resultname(o.resultname),cardinality(o.cardinality),range(o.range),nofranks(o.nofranks),cofactor(o.cofactor){}
 };
 
-class SummarizerFunctionContextWeightNeighbours
+class SummarizerFunctionContextAccumulateNear
 	:public SummarizerFunctionContextInterface
 {
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] data_ parameter data for evaluation
-	SummarizerFunctionContextWeightNeighbours(
+	SummarizerFunctionContextAccumulateNear(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
-			const Reference<WeightNeighboursData>& data_,
+			const Reference<AccumulateNearData>& data_,
 			double nofCollectionDocuments_,
 			ErrorBufferInterface* errorhnd_);
 
-	virtual ~SummarizerFunctionContextWeightNeighbours(){}
+	virtual ~SummarizerFunctionContextAccumulateNear(){}
 
 	virtual void addSummarizationFeature(
 			const std::string& name,
@@ -80,7 +80,7 @@ private:
 	const StorageClientInterface* m_storage;			///< storage to access
 	const QueryProcessorInterface* m_processor;			///< query processor interface for object creation
 	Reference<ForwardIteratorInterface>m_forwardindex;		///< forward index iterators for extracting features
-	Reference<WeightNeighboursData> m_data;				///< parameters
+	Reference<AccumulateNearData> m_data;				///< parameters
 	enum {MaxNofArguments=256};
 	double m_nofCollectionDocuments;				///< number of documents in the collection
 	ProximityWeightAccumulator::WeightArray m_idfar;		///< array of idfs
@@ -95,14 +95,14 @@ private:
 };
 
 
-class SummarizerFunctionInstanceWeightNeighbours
+class SummarizerFunctionInstanceAccumulateNear
 	:public SummarizerFunctionInstanceInterface
 {
 public:
-	SummarizerFunctionInstanceWeightNeighbours( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_data(new WeightNeighboursData()),m_processor(processor_),m_errorhnd(errorhnd_){}
+	SummarizerFunctionInstanceAccumulateNear( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
+		:m_data(new AccumulateNearData()),m_processor(processor_),m_errorhnd(errorhnd_){}
 
-	virtual ~SummarizerFunctionInstanceWeightNeighbours(){}
+	virtual ~SummarizerFunctionInstanceAccumulateNear(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
@@ -119,19 +119,19 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	Reference<WeightNeighboursData> m_data;
+	Reference<AccumulateNearData> m_data;
 	const QueryProcessorInterface* m_processor;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 
-class SummarizerFunctionWeightNeighbours
+class SummarizerFunctionAccumulateNear
 	:public SummarizerFunctionInterface
 {
 public:
-	explicit SummarizerFunctionWeightNeighbours( ErrorBufferInterface* errorhnd_)
+	explicit SummarizerFunctionAccumulateNear( ErrorBufferInterface* errorhnd_)
 		:m_errorhnd(errorhnd_){}
-	virtual ~SummarizerFunctionWeightNeighbours(){}
+	virtual ~SummarizerFunctionAccumulateNear(){}
 
 	virtual SummarizerFunctionInstanceInterface* createInstance(
 			const QueryProcessorInterface* processor) const;

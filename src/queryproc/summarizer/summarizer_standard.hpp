@@ -42,7 +42,7 @@ SummarizerFunctionInterface* createSummarizerAccumulateVariable( ErrorBufferInte
 
 /// \brief Create a summarizer for weighting links near matches
 /// \return the summarizer reference (with ownership)
-SummarizerFunctionInterface* createSummarizerWeightNeighbours( ErrorBufferInterface* errorhnd_);
+SummarizerFunctionInterface* createSummarizerAccumulateNear( ErrorBufferInterface* errorhnd_);
 
 }//namespace
 #endif
