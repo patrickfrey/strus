@@ -193,7 +193,7 @@ std::vector<SummaryElement>
 			Index windowpos = poswin.pos();
 			Index windowendpos = valid_itrar[ window[ minwinsize-1]]->posno();
 
-			Index startpos = windowendpos > m_data->range ? 0 :(windowendpos - m_data->range);
+			Index startpos = windowendpos < m_data->range ? 0 :(windowendpos - m_data->range);
 			Index struct_startpos = callSkipPos( startpos, valid_structar, m_structarsize);
 			Index structpos = 0;
 			if (!struct_startpos || struct_startpos > windowpos)
