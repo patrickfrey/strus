@@ -256,14 +256,14 @@ std::vector<SummaryElement>
 		std::vector<EntityMap::const_iterator> valuerefs;
 		for (; ei != ee; ++ei)
 		{
-			ranker.insert( ei->second / m_data->norm, values.size());
+			ranker.insert( ei->second / m_data->norm, valuerefs.size());
 			valuerefs.push_back( ei);
 		}
 		std::vector<Ranker::Element> result = ranker.result();
 		std::vector<Ranker::Element>::const_iterator ri = result.begin(), re = result.end();
 		for (; ri != re; ++ri)
 		{
-			rt.push_back( SummaryElement( m_data->resultname, valuerefs[ ri->idx].first, ri->weight));
+			rt.push_back( SummaryElement( m_data->resultname, valuerefs[ ri->idx]->first, ri->weight));
 		}
 		return rt;
 	}
