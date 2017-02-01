@@ -295,7 +295,6 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 			// initialize proportional ff increment weights
 			m_weightincr.init( m_itrarsize);
 			ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, 0.3, m_idfar);
-			m_initialized = true;
 
 			for (std::size_t ii=0; ii<m_itrarsize; ++ii)
 			{
@@ -304,6 +303,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "proportional weights array: " << m_weightincr.tostring() << " sum " << m_weightincr.sum() << std::endl;
 #endif
+			m_initialized = true;
 		}
 		// Init document iterators:
 		PostingIteratorInterface* valid_itrar[ MaxNofArguments];			//< valid array if weighted features
@@ -337,7 +337,6 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 				titlestart = 1;
 			}
 		}
-		Index firstpos = titleend;
 
 		// Define the structure of accumulated proximity weights:
 		ProximityWeightAccumulator::WeightArray ffincrar_abs( m_itrarsize);

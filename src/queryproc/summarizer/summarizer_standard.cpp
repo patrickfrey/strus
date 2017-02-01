@@ -13,6 +13,7 @@
 #include "summarizerListMatches.hpp"
 #include "summarizerMatchVariables.hpp"
 #include "summarizerAccumulateVariable.hpp"
+#include "summarizerWeightNeighbours.hpp"
 
 using namespace strus;
 
@@ -46,4 +47,8 @@ SummarizerFunctionInterface* strus::createSummarizerAccumulateVariable( ErrorBuf
 	return new SummarizerFunctionAccumulateVariable( errorhnd_);
 }
 
+SummarizerFunctionInterface* strus::createSummarizerWeightNeighbours( ErrorBufferInterface* errorhnd_)
+{
+	return new SummarizerFunctionWeightNeighbours( errorhnd_);
+}
 

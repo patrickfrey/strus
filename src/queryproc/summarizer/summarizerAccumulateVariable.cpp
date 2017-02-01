@@ -24,7 +24,7 @@
 
 using namespace strus;
 
-#define SUMMARIZER_NAME "accuvariable"
+#define SUMMARIZER_NAME "accuvar"
 
 SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulateVariable(
 		const StorageClientInterface* storage_,
@@ -122,7 +122,7 @@ std::vector<SummaryElement>
 					}
 					else
 					{
-						wi->second *= m_data->pairmul * sumfeat.weight;
+						wi->second *= m_data->cofactor * sumfeat.weight;
 					}
 				}
 			}
@@ -191,7 +191,7 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 		{
 			m_data->resultname = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "pairmul"))
+		else if (utils::caseInsensitiveEquals( name, "cofactor"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), SUMMARIZER_NAME);
 		}
@@ -229,9 +229,9 @@ void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const st
 	{
 		m_data->norm = value.tofloat();
 	}
-	else if (utils::caseInsensitiveEquals( name, "pairmul"))
+	else if (utils::caseInsensitiveEquals( name, "cofactor"))
 	{
-		m_data->pairmul = value.tofloat();
+		m_data->cofactor = value.tofloat();
 	}
 	else
 	{
@@ -243,7 +243,7 @@ void SummarizerFunctionInstanceAccumulateVariable::defineResultName( const std::
 {
 	try
 	{
-		throw strus::runtime_error(_TXT("no result name defined for '%s' summarizer"), SUMMARIZER_NAME);
+		throw strus::runtime_error(_TXT("no result rename defined for '%s' summarizer"), SUMMARIZER_NAME);
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), SUMMARIZER_NAME, *m_errorhnd);
 }
@@ -268,7 +268,7 @@ std::string SummarizerFunctionInstanceAccumulateVariable::tostring() const
 		rt << "type='" << m_data->type << "'";
 		rt << ", nof=" << m_data->maxNofElements;
 		rt << ", norm=" << m_data->norm;
-		rt << ", pairmul=" << m_data->pairmul;
+		rt << ", cofactor=" << m_data->cofactor;
 		rt << ", var=" << m_data->var;
 		rt << ", result=" << m_data->resultname;
 		return rt.str();
@@ -299,7 +299,7 @@ FunctionDescription SummarizerFunctionAccumulateVariable::getDescription() const
 		rt( P::String, "var", _TXT( "the name of the variable referencing the content to weight"), "");
 		rt( P::Numeric, "nof", _TXT( "the maximum number of the best weighted elements  to return (default 10)"), "1:");
 		rt( P::Numeric, "norm", _TXT( "the normalization factor of the calculated weights (default 1.0)"), "0.0:1.0");
-		rt( P::Numeric, "pairmul", _TXT( "additional multiplier for coincident matches (default 1.0)"), "0.0:");
+		rt( P::Numeric, "cofactor", _TXT( "additional multiplier for coincident matches (default 1.0)"), "0.0:");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), SUMMARIZER_NAME, *m_errorhnd, FunctionDescription());

@@ -40,13 +40,13 @@ struct AccumulateVariableData
 	std::string var;		//< variable to accumulate
 	std::string resultname;		//< name of results (default variable name)
 	double norm;			//< normalization factor for end result weights
-	double pairmul;			//< multiplicator for matching pairs
+	double cofactor;		//< multiplicator for matching pairs
 	unsigned int maxNofElements;	//< maximum number of best elements to return
 
 	AccumulateVariableData()
-		:type(),var(),resultname(),norm(1.0),pairmul(1.0),maxNofElements(30){}
+		:type(),var(),resultname(),norm(1.0),cofactor(1.0),maxNofElements(30){}
 	AccumulateVariableData( const AccumulateVariableData& o)
-		:type(o.type),var(o.var),resultname(o.resultname),norm(o.norm),pairmul(o.pairmul),maxNofElements(o.maxNofElements){}
+		:type(o.type),var(o.var),resultname(o.resultname),norm(o.norm),cofactor(o.cofactor),maxNofElements(o.maxNofElements){}
 };
 
 class SummarizerFunctionContextAccumulateVariable
