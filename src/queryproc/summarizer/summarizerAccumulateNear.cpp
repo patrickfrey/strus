@@ -252,17 +252,17 @@ std::vector<SummaryElement>
 		}
 		Ranker ranker( m_data->nofranks);
 		std::map<std::string,double>::const_iterator ei = entitymap.begin(), ee = entitymap.end();
-		std::vector<const std::string*> values;
+		std::vector<const char*> values;
 		for (; ei != ee; ++ei)
 		{
 			ranker.insert( ei->second / m_data->norm, values.size());
-			values.push_back( &ee->first);
+			values.push_back( ee->first.c_str());
 		}
 		std::vector<Ranker::Element> result = ranker.result();
 		std::vector<Ranker::Element>::const_iterator ri = result.begin(), re = result.end();
 		for (; ri != re; ++ri)
 		{
-			rt.push_back( SummaryElement( m_data->resultname, *values[ ri->idx], ri->weight));
+			rt.push_back( SummaryElement( m_data->resultname, values[ ri->idx], ri->weight));
 		}
 		return rt;
 	}
