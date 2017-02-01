@@ -93,6 +93,7 @@ private:
 	double m_normfactorar[ MaxNofArguments];			///< normalization factor punishing missing features
 	std::size_t m_itrarsize;					///< number of weighted features
 	std::size_t m_structarsize;					///< number of end of structure elements
+	unsigned int m_cardinality;					///< calculated cardinality
 	ProximityWeightAccumulator::WeightArray m_weightincr;		///< array of proportional weight increments 
 	bool m_initialized;						///< true, if the structures have already been initialized
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages

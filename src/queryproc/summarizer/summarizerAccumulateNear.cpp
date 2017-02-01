@@ -46,6 +46,7 @@ SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear
 	,m_idfar()
 	,m_itrarsize(0)
 	,m_structarsize(0)
+	,m_cardinality(data_->cardinality)
 	,m_weightincr()
 	,m_initialized(false)
 	,m_errorhnd(errorhnd_)
@@ -138,23 +139,23 @@ std::vector<SummaryElement>
 			{
 				return rt;
 			}
-			if (m_data->cardinality == 0)
+			if (m_cardinality == 0)
 			{
 				if (m_data->cardinality_frac > 0.0f)
 				{
-					m_data->cardinality = (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5);
+					m_cardinality = (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5);
 				}
 				else
 				{
-					m_data->cardinality = m_itrarsize;
+					m_cardinality = m_itrarsize;
 				}
 			}
-			if (m_itrarsize < m_data->cardinality)
+			if (m_itrarsize < m_cardinality)
 			{
 				return rt;
 			}
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << string_format( "init summarizer %s: features %u, cardinality %u, range %u", METHOD_NAME, m_itrarsize, m_data->cardinality, m_data->range) << std::endl;
+			std::cerr << string_format( "init summarizer %s: features %u, cardinality %u, range %u", METHOD_NAME, m_itrarsize, m_cardinality, m_data->range) << std::endl;
 #endif
 			// initialize proportional ff increment weights
 			m_weightincr.init( m_itrarsize);
@@ -183,10 +184,10 @@ std::vector<SummaryElement>
 		m_forwardindex->skipDoc( docno);
 
 		// Calculate weights:
-		std::size_t minwinsize = m_data->cardinality ? m_data->cardinality : m_itrarsize;
+		std::size_t minwinsize = m_cardinality ? m_cardinality : m_itrarsize;
 		if (minwinsize > m_itrarsize) minwinsize = m_itrarsize;
 
-		PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_data->cardinality,
+		PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
 					0, PositionWindow::MaxWin);
 		bool more = poswin.first();
 		while (more)
