@@ -219,19 +219,29 @@ static void calcProximityFfIncrements(
 
 		ProximityWeightAccumulator::WeightArray result( result_abs.arsize);
 
-		// Calculate the ff increment for the current window and add it to the result:
-		ProximityWeightAccumulator::weight_same_sentence(
-			result, 0.3 * normfactor, weightincr, window, windowsize, maxdist_featar, itrar, itrarsize, structar, structarsize);
+		if (itrarsize == 1)
+		{
+			result[ 0] += normfactor;
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "\tff incr [same sentence] " << result.tostring() << std::endl;
+			std::cout << "\tff incr [structures single feature] " << result.tostring() << std::endl;
 #endif
-		ProximityWeightAccumulator::weight_imm_follow(
-			result, 0.4 * normfactor, weightincr, window, windowsize, itrar, itrarsize);
+		}
+		else
+		{
+			// Calculate the ff increment for the current window and add it to the result:
+			ProximityWeightAccumulator::weight_same_sentence(
+				result, 0.3 * normfactor, weightincr, window, windowsize, maxdist_featar, itrar, itrarsize, structar, structarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "\tff incr [imm follow] " << result.tostring() << std::endl;
+			std::cout << "\tff incr [same sentence] " << result.tostring() << std::endl;
 #endif
-		ProximityWeightAccumulator::weight_invdist(
-			result, 0.3 * normfactor, weightincr, window, windowsize, itrar, itrarsize);
+			ProximityWeightAccumulator::weight_imm_follow(
+				result, 0.4 * normfactor, weightincr, window, windowsize, itrar, itrarsize);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "\tff incr [imm follow] " << result.tostring() << std::endl;
+#endif
+			ProximityWeightAccumulator::weight_invdist(
+				result, 0.3 * normfactor, weightincr, window, windowsize, itrar, itrarsize);
+		}
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "\tff incr [inv distance] " << result.tostring() << std::endl;
 #endif
