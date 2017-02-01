@@ -238,7 +238,7 @@ std::vector<SummaryElement>
 		std::vector<const std::string*> values;
 		for (; ei != ee; ++ei)
 		{
-			ranker.insert( ei->second, values.size());
+			ranker.insert( ei->second / m_data->norm, values.size());
 			values.push_back( &ee->first);
 		}
 		std::vector<Ranker::Element> result = ranker.result();
@@ -274,6 +274,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 			m_data->resultname = value;
 		}
 		else if (utils::caseInsensitiveEquals( name, "cofactor")
+			|| utils::caseInsensitiveEquals( name, "norm")
 			|| utils::caseInsensitiveEquals( name, "nofranks")
 			|| utils::caseInsensitiveEquals( name, "cardinality")
 			|| utils::caseInsensitiveEquals( name, "range"))
@@ -300,6 +301,10 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
 	else if (utils::caseInsensitiveEquals( name, "cofactor"))
+	{
+		m_data->cofactor = value.tofloat();
+	}
+	else if (utils::caseInsensitiveEquals( name, "norm"))
 	{
 		m_data->cofactor = value.tofloat();
 	}
@@ -389,6 +394,7 @@ FunctionDescription SummarizerFunctionAccumulateNear::getDescription() const
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		rt( P::String, "result", _TXT( "the name of the result if not equal to type"), "");
 		rt( P::String, "cofactor", _TXT( "multiplication factor for features pointing to the same result"), "");
+		rt( P::String, "norm", _TXT( "normalization factor for end result weights"), "");
 		rt( P::String, "nofranks", _TXT( "maximum number of ranks per document"), "");
 		rt( P::String, "cardinality", _TXT( "mimimum number of features per weighted item"), "");
 		rt( P::String, "range", _TXT( "maximum distance (ordinal position) of the weighted features (window size)"), "");

@@ -44,11 +44,12 @@ struct AccumulateNearData
 	Index range;			//< maximum distance (ordinal position)
 	unsigned int nofranks;		//< maximum number of ranks per document
 	float cofactor;			//< weight multiplication factor of results for feature references
+	double norm;			//< normalization factor for end result weights
 
 	AccumulateNearData()
-		:type(),resultname(),cardinality(0),range(0),nofranks(20),cofactor(1.0){}
+		:type(),resultname(),cardinality(0),range(0),nofranks(20),cofactor(1.0),norm(1.0){}
 	AccumulateNearData( const AccumulateNearData& o)
-		:type(o.type),resultname(o.resultname),cardinality(o.cardinality),range(o.range),nofranks(o.nofranks),cofactor(o.cofactor){}
+		:type(o.type),resultname(o.resultname),cardinality(o.cardinality),range(o.range),nofranks(o.nofranks),cofactor(o.cofactor),norm(o.norm){}
 };
 
 class SummarizerFunctionContextAccumulateNear
