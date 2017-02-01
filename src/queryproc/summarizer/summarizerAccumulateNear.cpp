@@ -128,7 +128,8 @@ std::vector<SummaryElement>
 	try
 	{
 		std::vector<SummaryElement> rt;
-		std::map<std::string,double> entitymap;
+		typedef std::map<std::string,double> EntityMap;
+		EntityMap entitymap;
 
 		// Initialization:
 		if (!m_initialized)
@@ -251,18 +252,18 @@ std::vector<SummaryElement>
 			more = poswin.skip( windowendpos);
 		}
 		Ranker ranker( m_data->nofranks);
-		std::map<std::string,double>::const_iterator ei = entitymap.begin(), ee = entitymap.end();
-		std::vector<const char*> values;
+		EntityMap::const_iterator ei = entitymap.begin(), ee = entitymap.end();
+		std::vector<EntityMap::const_iterator> valuerefs;
 		for (; ei != ee; ++ei)
 		{
 			ranker.insert( ei->second / m_data->norm, values.size());
-			values.push_back( ee->first.c_str());
+			valuerefs.push_back( ei);
 		}
 		std::vector<Ranker::Element> result = ranker.result();
 		std::vector<Ranker::Element>::const_iterator ri = result.begin(), re = result.end();
 		for (; ri != re; ++ri)
 		{
-			rt.push_back( SummaryElement( m_data->resultname, values[ ri->idx], ri->weight));
+			rt.push_back( SummaryElement( m_data->resultname, valuerefs[ ri->idx].first, ri->weight));
 		}
 		return rt;
 	}
