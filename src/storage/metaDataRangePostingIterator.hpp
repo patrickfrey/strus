@@ -52,16 +52,16 @@ public:
 	Index skipDocImpl( const Index& docno)
 	{
 		if (docno == m_docno && docno) return m_docno;
-		m_docno = docno ? docno : 1;
+		m_docno = docno ? (docno-1) : 0;
 		do
 		{
+			++m_docno;
 			if (m_docno >= m_nofDocuments) return m_docno = 0;
 
 			m_metareader->skipDoc( m_docno);
 			m_pos_lo = m_handle_lo < 0 ? 1 : (int)m_metareader->getValue( m_handle_lo);
 			m_pos_hi = m_handle_hi < 0 ? std::numeric_limits<Index>::max() : (int)m_metareader->getValue( m_handle_hi);
 			m_posno = 0;
-			++m_docno;
 		} while (m_pos_lo == 0 || m_pos_hi == 0 || m_pos_lo >= m_pos_hi);
 		return m_docno;
 	}

@@ -320,7 +320,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		// Define the title field and the search start position:
 		Index titlestart = 1;
 		Index titleend = 1;
-		if (m_parameter.titleinc && m_titleitr && m_titleitr->skipDoc( docno) == docno)
+		if (m_parameter.titleinc > std::numeric_limits<double>::epsilon() && m_titleitr && m_titleitr->skipDoc( docno) == docno)
 		{
 			titlestart = m_titleitr->skipPos(0);
 			if (titlestart)
