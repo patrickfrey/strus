@@ -21,6 +21,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
+#include <limits>
 #include <cstdlib>
 #include <iostream>
 
@@ -203,6 +204,10 @@ std::vector<SummaryElement>
 			else
 			{
 				structpos = callSkipPos( windowpos, valid_structar, m_structarsize);
+			}
+			if (!structpos || structpos > windowpos + m_data->range)
+			{
+				structpos = windowpos + m_data->range + 1;
 			}
 			Index forwardpos = m_forwardindex->skipPos( startpos);
 			if (windowendpos < structpos)
