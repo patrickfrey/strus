@@ -345,9 +345,8 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		if (m_parameter.titleinc)
 		{
 			// Calculate ff title increment weights:
-			double tiweight = m_parameter.tidocnorm > 0 ? tanh( doclen / (double)m_parameter.tidocnorm):1.0;
 			calcTitleFfIncrements(
-				ffincrar_abs, titlestart, titleend, m_parameter.titleinc * tiweight,
+				ffincrar_abs, titlestart, titleend, m_parameter.titleinc,
 				m_weightincr, valid_itrar, m_itrarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "accumulated ff incr [title terms] " << ffincrar_abs.tostring() << std::endl;
@@ -458,7 +457,6 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 		||  utils::caseInsensitiveEquals( name, "b")
 		||  utils::caseInsensitiveEquals( name, "avgdoclen")
 		||  utils::caseInsensitiveEquals( name, "titleinc")
-		||  utils::caseInsensitiveEquals( name, "tidocnorm")
 		||  utils::caseInsensitiveEquals( name, "windowsize")
 		||  utils::caseInsensitiveEquals( name, "cardinality")
 		||  utils::caseInsensitiveEquals( name, "ffbase")
@@ -586,21 +584,6 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number"), name.c_str(), WEIGHTING_SCHEME_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "tidocnorm"))
-	{
-		if (value.type == NumericVariant::Int && value.toint() >= 0)
-		{
-			m_parameter.tidocnorm = value.touint();
-		}
-		else if (value.type == NumericVariant::UInt)
-		{
-			m_parameter.tidocnorm = value.touint();
-		}
-		else
-		{
-			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a non negative integer value"), name.c_str(), WEIGHTING_SCHEME_NAME);
-		}
-	}
 	else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name.c_str(), WEIGHTING_SCHEME_NAME);
@@ -644,7 +627,6 @@ std::string WeightingFunctionInstanceBM25pff::tostring() const
 			<< ", proxfftie=" << m_parameter.proxfftie
 			<< ", maxdf=" << m_parameter.maxdf
 			<< ", titleinc=" << m_parameter.titleinc
-			<< ", tidocnorm=" << m_parameter.tidocnorm
 			<< ", metadata_doclen=" << m_metadata_doclen
 			;
 		return rt.str();
@@ -676,7 +658,6 @@ FunctionDescription WeightingFunctionBM25pff::getDescription() const
 		rt( P::Numeric, "k1", _TXT("parameter of the BM25pff weighting scheme"), "1:1000");
 		rt( P::Numeric, "b", _TXT("parameter of the BM25pff weighting scheme"), "0.0001:1000");
 		rt( P::Numeric, "titleinc", _TXT("ff increment for title features"), "0.0:");
-		rt( P::Numeric, "tidocnorm", _TXT("specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller"), "0:");
 		rt( P::Numeric, "windowsize", _TXT("the size of the window used for finding features to increment proximity scores"), "");
 		rt( P::Numeric, "cardinality", _TXT("the number of query features a proximity score window must contain to be considered (optional, default is all features)"), "");		
 		rt( P::Numeric, "ffbase", _TXT( "value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25)"), "0.0:1.0");

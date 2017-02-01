@@ -43,7 +43,6 @@ struct WeightingFunctionParameterBM25pff
 	unsigned int proxfftie;			///< the maximum proximity based ff value that is considered for weighting except for increments exceeding m_proxffbias
 	double maxdf;				///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double titleinc;			///< ff increment for title features
-	unsigned int tidocnorm;			///< the document size used for calibrating the title match weight normalization between 0 and 1 (0->0 titleinc_docsizenorm and bigger->1). This weight is a measure of how much information a document should contain so that query terms in the title can be weighted.
 
 	WeightingFunctionParameterBM25pff()
 		:k1(1.5),b(0.75),avgDocLength(500)
@@ -52,7 +51,7 @@ struct WeightingFunctionParameterBM25pff
 		,proxffbias(0.0)
 		,proxfftie(0)
 		,maxdf(0.5)
-		,titleinc(0.0),tidocnorm(0){}
+		,titleinc(0.0){}
 
 	WeightingFunctionParameterBM25pff( const WeightingFunctionParameterBM25pff& o)
 	{
