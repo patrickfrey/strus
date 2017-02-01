@@ -22,6 +22,7 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <limits>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 
@@ -232,7 +233,7 @@ std::vector<SummaryElement>
 						break;
 					}
 				}
-				double normfactor = m_normfactorar[ windowsize];
+				double normfactor = m_normfactorar[ windowsize-1];
 
 				// Calculate the weights:
 				while (forwardpos && forwardpos < structpos)
@@ -240,7 +241,8 @@ std::vector<SummaryElement>
 					double weightsum = 0.0;
 					for (std::size_t wi=0; wi<windowsize; ++wi)
 					{
-						weightsum += m_weightincr[ window[ wi]];
+						double distweight = 1.0 / std::sqrt( std::fabs( forwardpos - valid_itrar[ window[ wi]]->posno()) + DIST_WEIGHT_BASE);
+						weightsum += m_weightincr[ window[ wi]] * distweight;
 					}
 					entitymap[ m_forwardindex->fetch()] += normfactor * weightsum;
 					forwardpos = m_forwardindex->skipPos( forwardpos + 1);

@@ -36,6 +36,8 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
+#define DIST_WEIGHT_BASE 2.0
+
 struct AccumulateNearData
 {
 	std::string type;		//< forward index type
