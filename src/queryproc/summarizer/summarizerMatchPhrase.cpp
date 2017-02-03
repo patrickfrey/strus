@@ -284,11 +284,11 @@ std::vector<SummaryElement>
 					m_cardinality = m_itrarsize;
 				}
 			}
-			if (m_itrarsize < m_cardinality)
-			{
-				return rt;
-			}
 			m_initialized = true;
+		}
+		if (m_itrarsize < m_cardinality)
+		{
+			return rt;
 		}
 		// Init document iterators:
 		PostingIteratorInterface* valid_itrar[ MaxNofArguments];			//< valid array if weighted features
