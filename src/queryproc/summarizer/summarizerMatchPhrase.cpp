@@ -455,8 +455,8 @@ std::vector<SummaryElement>
 						{
 							if (eoppos < phrase_abstract.start + phrase_abstract.span)
 							{
-								phrase_abstract.span -= (eoppos - phrase_abstract.start);
-								phrase_abstract.start = eoppos+1;
+								phrase_abstract.span = phrase_abstract.span - (eoppos - phrase_abstract.start);
+								phrase_abstract.start = eoppos;
 							}
 							else
 							{
