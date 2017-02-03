@@ -39,7 +39,7 @@ struct SummarizerFunctionParameterMatchPhrase
 {
 
 	SummarizerFunctionParameterMatchPhrase()
-		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0),m_maxdf(0.1)
+		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0),m_cardinality_frac(0.0),m_maxdf(0.1)
 		,m_matchmark()
 		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
 		,m_name_para("para")
@@ -50,6 +50,7 @@ struct SummarizerFunctionParameterMatchPhrase
 	unsigned int m_sentencesize;				///< search area for end of sentence
 	unsigned int m_windowsize;				///< maximum window size
 	unsigned int m_cardinality;				///< window cardinality
+	float m_cardinality_frac;				///< cardinality defined as fraction (percentage) of the number of features
 	double m_maxdf;						///< the maximum df of features considered for same sentence proximity weighing as fraction of the total collection size
 	std::pair<std::string,std::string> m_matchmark;		///< highlighting info
 	std::pair<std::string,std::string> m_floatingmark;	///< marker for unterminated begin and end phrase
@@ -65,17 +66,8 @@ public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
 	/// \param[in] metadata_ meta data reader
-	/// \param[in] type_ type of the tokens to build the summary with
-	/// \param[in] sentencesize_ maximum lenght of a sentence until it is cut with "..."
-	/// \param[in] windowsize_ maximum size of window to look for matches
-	/// \param[in] cardinality_ minimum number of features to look for in a window
+	/// \param[in] parameter_ parameter for weighting
 	/// \param[in] nofCollectionDocuments_ number of documents in the collection
-	/// \param[in] metadata_title_maxpos_ optional attribute in metadata that defines the last position in the document that belongs to the document title and should not be considered for summary
-	/// \param[in] maxdf_ fraction of collection size, defining what is considered to be a stopword or not
-	/// \param[in] matchmark_ begin and end marker for highlighting
-	/// \param[in] floatingmark_ begin and end marker for not terminated sentences
-	/// \param[in] name_para_ name of summary elements defining paragraphs
-	/// \param[in] name_phrase_ name of summary elements defining phrases
 	/// \param[in] errorhnd_ error buffer interface
 	SummarizerFunctionContextMatchPhrase(
 			const StorageClientInterface* storage_,
@@ -111,6 +103,7 @@ private:
 	std::size_t m_itrarsize;				///< number of weighted features
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
+	unsigned int m_cardinality;				///< calculated cardinality
 	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized

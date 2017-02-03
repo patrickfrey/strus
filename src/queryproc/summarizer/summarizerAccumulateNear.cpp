@@ -141,9 +141,9 @@ std::vector<SummaryElement>
 			}
 			if (m_cardinality == 0)
 			{
-				if (m_data->cardinality_frac > 0.0f)
+				if (m_data->cardinality_frac > std::numeric_limits<double>::epsilon())
 				{
-					m_cardinality = (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5);
+					m_cardinality = std::min( 1U, (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5));
 				}
 				else
 				{

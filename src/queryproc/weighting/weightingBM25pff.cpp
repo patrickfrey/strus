@@ -223,7 +223,7 @@ static void calcProximityFfIncrements(
 		{
 			result[ 0] += normfactor;
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "\tff incr [structures single feature] " << result.tostring() << std::endl;
+			std::cout << "\tff incr [single feature] " << result.tostring() << std::endl;
 #endif
 		}
 		else

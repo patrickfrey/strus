@@ -44,6 +44,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_itrarsize(0)
 	,m_structarsize(0)
 	,m_paraarsize(0)
+	,m_cardinality(parameter_->m_cardinality)
 	,m_initialized(false)
 	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
@@ -193,19 +194,29 @@ static Candidate findCandidate(
 		// Calculate the weight of the current window:
 		ProximityWeightAccumulator::WeightArray weightar( itrarsize, 1.0);
 
-		ProximityWeightAccumulator::weight_same_sentence(
-			weightar, 0.3, weightincr, window, windowsize,
-			maxdist_featar, itrar, itrarsize, structar, structarsize);
+		if (itrarsize == 1)
+		{
+			weightar[ 0] += 1.0;
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "\taccumulated ff incr [same sentence] " << weightar.tostring() << std::endl;
+			std::cout << "\tff incr [single feature] " << result.tostring() << std::endl;
 #endif
-		ProximityWeightAccumulator::weight_imm_follow(
-			weightar, 0.4, weightincr, window, windowsize, itrar, itrarsize);
+		}
+		else
+		{
+			ProximityWeightAccumulator::weight_same_sentence(
+				weightar, 0.3, weightincr, window, windowsize,
+				maxdist_featar, itrar, itrarsize, structar, structarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "\taccumulated ff incr [imm follow] " << weightar.tostring() << std::endl;
+			std::cout << "\taccumulated ff incr [same sentence] " << weightar.tostring() << std::endl;
 #endif
-		ProximityWeightAccumulator::weight_invdist(
-			weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize);
+			ProximityWeightAccumulator::weight_imm_follow(
+				weightar, 0.4, weightincr, window, windowsize, itrar, itrarsize);
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "\taccumulated ff incr [imm follow] " << weightar.tostring() << std::endl;
+#endif
+			ProximityWeightAccumulator::weight_invdist(
+				weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize);
+		}
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << "\taccumulated ff incr [inv distance] " << weightar.tostring() << std::endl;
 #endif
@@ -258,13 +269,25 @@ std::vector<SummaryElement>
 			{
 				return std::vector<SummaryElement>();
 			}
-			if (m_itrarsize < m_parameter->m_cardinality || m_parameter->m_cardinality == 0)
-			{
-				m_parameter->m_cardinality = m_itrarsize;
-			}
 			// initialize proportional ff increment weights
 			m_weightincr.init( m_itrarsize);
 			ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, 0.3, m_idfar);
+
+			if (m_cardinality == 0)
+			{
+				if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
+				{
+					m_cardinality = std::min( 1U, (unsigned int)(m_itrarsize * m_parameter->m_cardinality_frac + 0.5));
+				}
+				else
+				{
+					m_cardinality = m_itrarsize;
+				}
+			}
+			if (m_itrarsize < m_cardinality)
+			{
+				return rt;
+			}
 			m_initialized = true;
 		}
 		// Init document iterators:
@@ -303,7 +326,7 @@ std::vector<SummaryElement>
 		// Find the best match:
 		Candidate candidate
 			= findCandidate(
-				firstpos, m_idfar, m_weightincr, m_parameter->m_windowsize, m_parameter->m_cardinality,
+				firstpos, m_idfar, m_weightincr, m_parameter->m_windowsize, m_cardinality,
 				valid_itrar, m_itrarsize, valid_structar, m_structarsize, valid_paraar, m_paraarsize, 
 				m_maxdist_featar);
 		if (candidate.span == 0 && m_titleitr)
@@ -314,6 +337,7 @@ std::vector<SummaryElement>
 			ProximityWeightAccumulator::WeightArray noTitleIdfs;
 			ProximityWeightAccumulator::WeightArray noWeightIncrs;
 			std::size_t noTitleSize = 0;
+			std::size_t cntTitleTerms = 0;
 			std::size_t ti=0,te=m_itrarsize;
 			for (; ti < te; ++ti)
 			{
@@ -326,15 +350,15 @@ std::vector<SummaryElement>
 						noTitleIdfs.add( m_idfar[ ti]);
 						noWeightIncrs.add( m_weightincr[ ti]);
 					}
+					else
+					{
+						++cntTitleTerms;
+					}
 				}
 			}
 			if (noTitleSize && m_itrarsize > noTitleSize)
 			{
-				unsigned int cardinality = noTitleSize;
-				if (m_parameter->m_cardinality < cardinality)
-				{
-					cardinality = m_parameter->m_cardinality;
-				}
+				unsigned int cardinality = m_cardinality > cntTitleTerms ? (m_cardinality - cntTitleTerms) : 1;
 				candidate = findCandidate(
 						firstpos, noTitleIdfs, noWeightIncrs, m_parameter->m_windowsize, cardinality,
 						noTitleTerms, noTitleSize, valid_structar, m_structarsize,
@@ -624,9 +648,10 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "cardinality"))
+		else if (utils::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+			m_parameter->m_cardinality = 0;
+			m_parameter->m_cardinality_frac = utils::tofraction( value);
 		}
 		else
 		{
@@ -653,6 +678,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	else if (utils::caseInsensitiveEquals( name, "cardinality"))
 	{
 		m_parameter->m_cardinality = (unsigned int)value;
+		m_parameter->m_cardinality_frac = 0.0;
 	}
 	else if (utils::caseInsensitiveEquals( name, "maxdf"))
 	{
