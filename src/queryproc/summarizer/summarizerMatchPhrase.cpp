@@ -497,6 +497,9 @@ std::vector<SummaryElement>
 					paratitle.append( m_forwardindex->fetch());
 				}
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "build paragraph title '" << paratitle << "'" << std::endl;
+#endif
 			rt.push_back( SummaryElement( m_parameter->m_name_para, paratitle, 1.0));
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -551,6 +554,9 @@ std::vector<SummaryElement>
 					}
 				}
 			}
+#ifdef STRUS_LOWLEVEL_DEBUG
+			std::cout << "build phrase " << phrase_abstract.start << ".." << (phrase_abstract.start + phrase_abstract.span) << ": '" << phrase << "'" << std::endl;
+#endif
 			if (!phrase_abstract.defined_end)
 			{
 				phrase.append( m_parameter->m_floatingmark.second);
