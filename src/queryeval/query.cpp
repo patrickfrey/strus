@@ -60,12 +60,12 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 		te = m_queryEval->terms().end();
 	for (; ti != te; ++ti)
 	{
-		pushTerm( ti->type, ti->value);
+		pushTerm( ti->type, ti->value, 1);
 		defineFeature( ti->set, 1.0);
 	}
 }
 
-bool Query::Term::operator<( const Term& o) const
+bool Query::TermKey::operator<( const TermKey& o) const
 {
 	int cmpres;
 	if (type.size() != o.type.size()) return type.size() < o.type.size();
@@ -87,17 +87,17 @@ void Query::printStack( std::ostream& out, std::size_t indent) const
 	}
 }
 
-void Query::pushTerm( const std::string& type_, const std::string& value_)
+void Query::pushTerm( const std::string& type_, const std::string& value_, const Index& length_)
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
 	char buf[ 2048];
-	strus_snprintf( buf, sizeof(buf), "pushTerm %s %s stack %u\n", type_.c_str(), value_.c_str(), (unsigned int)m_stack.size());
+	strus_snprintf( buf, sizeof(buf), "pushTerm %s %s %u stack %u\n", type_.c_str(), value_.c_str(), length_, (unsigned int)m_stack.size());
 	std::cerr << buf;
 	printStack( std::cerr, 1);
 #endif
 	try
 	{
-		m_terms.push_back( Term( type_, value_));
+		m_terms.push_back( Term( type_, value_, length_));
 		m_stack.push_back( nodeAddress( TermNode, m_terms.size()-1));
 	}
 	CATCH_ERROR_MAP( _TXT("error pushing term to query: %s"), *m_errorhnd);
@@ -395,7 +395,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
-				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value));
+				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
@@ -434,7 +434,7 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			rt = m_storage->createTermPostingIterator( term.type, term.value);
+			rt = m_storage->createTermPostingIterator( term.type, term.value, term.length);
 			if (!rt) break;
 			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, getTermStatistics( term.type, term.value));
 			break;
@@ -510,7 +510,7 @@ void Query::defineTermStatistics(
 		const std::string& value_,
 		const TermStatistics& stats_)
 {
-	m_termstatsmap[ Term( type_, value_)] = stats_;
+	m_termstatsmap[ TermKey( type_, value_)] = stats_;
 }
 
 void Query::defineGlobalStatistics(
@@ -523,7 +523,7 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 {
 	static TermStatistics undef;
 	if (m_termstatsmap.empty()) return undef;
-	std::map<Term,TermStatistics>::const_iterator si = m_termstatsmap.find( Term( type_, value_));
+	TermStatisticsMap::const_iterator si = m_termstatsmap.find( TermKey( type_, value_));
 	if (si == m_termstatsmap.end()) return undef;
 	return si->second;
 }

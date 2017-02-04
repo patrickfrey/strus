@@ -229,9 +229,9 @@ static void testPlainSingleTermQuery( const strus::QueryProcessorInterface* qpi)
 	QueryEvaluationEnv queryenv( qpi);
 	strus::QueryInterface* query = queryenv.query.get();
 
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "qry");
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "sel");
 
 	strus::QueryResult result = query->evaluate();
@@ -256,13 +256,13 @@ static void testSingleTermQueryWithExclusion( const strus::QueryProcessorInterfa
 	QueryEvaluationEnv queryenv( qpi);
 	strus::QueryInterface* query = queryenv.query.get();
 
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "qry");
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "sel");
-	query->pushTerm( "prim", "2");
+	query->pushTerm( "prim", "2", 1);
 	query->defineFeature( "exc");
-	query->pushTerm( "prim", "3");
+	query->pushTerm( "prim", "3", 1);
 	query->defineFeature( "exc");
 
 	strus::QueryResult result = query->evaluate();
@@ -290,12 +290,12 @@ static void testSingleTermQueryWithRestriction( const strus::QueryProcessorInter
 	const strus::PostingJoinOperatorInterface* operation_OR = qpi->getPostingJoinOperator( "union");
 	if (!operation_OR) throw std::runtime_error("operation 'union' is not defined");
 
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "qry");
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "sel");
-	query->pushTerm( "prim", "2");
-	query->pushTerm( "prim", "3");
+	query->pushTerm( "prim", "2", 1);
+	query->pushTerm( "prim", "3", 1);
 	query->pushExpression( operation_OR, 2, 0, 0);
 	query->defineFeature( "res");
 
@@ -324,12 +324,12 @@ static void testSingleTermQueryWithRestrictionInclMetadata( const strus::QueryPr
 	const strus::PostingJoinOperatorInterface* operation_OR = qpi->getPostingJoinOperator( "union");
 	if (!operation_OR) throw std::runtime_error("operation 'union' is not defined");
 
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "qry");
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "sel");
-	query->pushTerm( "prim", "2");
-	query->pushTerm( "prim", "3");
+	query->pushTerm( "prim", "2", 1);
+	query->pushTerm( "prim", "3", 1);
 	query->pushExpression( operation_OR, 2, 0, 0);
 	query->defineFeature( "res");
 	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareLess, "docno", 9, true);
@@ -364,11 +364,11 @@ static void testSingleTermQueryWithSelectionAndRestriction( const strus::QueryPr
 	const strus::PostingJoinOperatorInterface* operation_OR = qpi->getPostingJoinOperator( "union");
 	if (!operation_OR) throw std::runtime_error("operation 'union' is not defined");
 
-	query->pushTerm( "word", "hello");
+	query->pushTerm( "word", "hello", 1);
 	query->defineFeature( "qry");
-	query->pushTerm( "prim", "2");
+	query->pushTerm( "prim", "2", 1);
 	query->defineFeature( "sel");
-	query->pushTerm( "prim", "3");
+	query->pushTerm( "prim", "3", 1);
 	query->defineFeature( "res");
 
 	strus::QueryResult result = query->evaluate();

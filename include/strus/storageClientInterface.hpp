@@ -59,11 +59,13 @@ public:
 	/// \brief Create an iterator on the occurrencies of a term in the storage
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
+	/// \param[in] length ordinal position length assigned to the term (may differ from 1 for terms representing multipart patterns)
 	/// \return the created iterator reference (with ownership)
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
 			const std::string& type,
-			const std::string& value) const=0;
+			const std::string& value,
+			const Index& length) const=0;
 
 	/// \brief Create an iterator on all enumerable postings of document selected by a metadata restriction
 	/// \param[in] restriction restriction on metadata that have to be fulfilled by the documents referenced in the result posting sets.

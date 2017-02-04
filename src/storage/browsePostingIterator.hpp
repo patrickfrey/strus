@@ -69,6 +69,11 @@ public:
 		return m_posno;
 	}
 
+	virtual Index length() const
+	{
+		return m_posno?1:0;
+	}
+
 private:
 	Reference<MetaDataRestrictionInstanceInterface> m_restriction;
 	std::string m_featureid;

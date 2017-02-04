@@ -30,6 +30,7 @@ public:
 			const Index& termtypeno,
 			const Index& termvalueno,
 			const char* termstr,
+			const Index& length_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~PostingIterator(){}
@@ -57,11 +58,17 @@ public:
 		return m_posinfoIterator.posno();
 	}
 
+	virtual Index length() const
+	{
+		return m_length;
+	}
+
 private:
 	IndexSetIterator m_docnoIterator;
 	PosinfoIterator m_posinfoIterator;
 
 	Index m_docno;
+	Index m_length;
 	std::string m_featureid;
 	ErrorBufferInterface* m_errorhnd;	///< buffer for error reporting
 };

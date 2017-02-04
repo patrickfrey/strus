@@ -68,7 +68,8 @@ public:
 	virtual PostingIteratorInterface*
 			createTermPostingIterator(
 				const std::string& termtype,
-				const std::string& termid) const;
+				const std::string& termid,
+				const Index& length) const;
 
 	virtual PostingIteratorInterface*
 		createBrowsePostingIterator(

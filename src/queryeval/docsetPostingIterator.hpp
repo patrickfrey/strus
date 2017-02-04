@@ -71,6 +71,11 @@ public:
 		return (m_itr == m_end)?0:1;
 	}
 
+	virtual Index length() const
+	{
+		return (m_itr == m_end)?0:1;
+	}
+
 private:
 	Index skipDocImpl( const Index& docno_)
 	{

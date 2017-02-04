@@ -27,6 +27,7 @@ PostingIterator::PostingIterator(
 		const DatabaseClientInterface* database_,
 		const Index& termtypeno,
 		const Index& termvalueno, const char* termstr,
+		const Index& length_,
 		ErrorBufferInterface* errorhnd_)
 #else
 PostingIterator::PostingIterator(
@@ -35,11 +36,13 @@ PostingIterator::PostingIterator(
 		const Index& termtypeno,
 		const Index& termvalueno,
 		const char*,
+		const Index& length_,
 		ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
 	,m_docno(0)
+	,m_length(length_)
 	,m_errorhnd(errorhnd_)
 {
 	m_featureid.reserve( 16);

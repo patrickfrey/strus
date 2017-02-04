@@ -145,6 +145,35 @@ static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_
 	return rt;
 }
 
+static std::pair<Index,Index> callSkipPosWithLen( Index start, PostingIteratorInterface** ar, std::size_t size)
+{
+	std::pair<Index,Index> rt( 0, 0);
+	std::size_t ti=0;
+	for (; ti<size; ++ti)
+	{
+		if (ar[ ti])
+		{
+			Index pos = ar[ ti]->skipPos( start);
+			if (pos)
+			{
+				if (!rt.first) rt = std::pair<Index,Index>( pos, ar[ ti]->length());
+				if (pos <= rt.first)
+				{
+					if (rt.first < pos)
+					{
+						rt = std::pair<Index,Index>( pos, ar[ ti]->length());
+					}
+					else
+					{
+						rt = std::pair<Index,Index>( std::max( pos, rt.first), ar[ ti]->length());
+					}
+				}
+			}
+		}
+	}
+	return rt;
+}
+
 struct Candidate
 {
 	double weight;
@@ -537,11 +566,15 @@ std::vector<SummaryElement>
 			Index pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
 			while (pi < pe)
 			{
-				Index minpos = callSkipPos( pi, valid_itrar, m_itrarsize);
-				if (minpos && minpos < pe)
+				std::pair<Index,Index> minpos = callSkipPosWithLen( pi, valid_itrar, m_itrarsize);
+				if (minpos.first && minpos.first < pe)
 				{
-					highlightpos.push_back( minpos);
-					pi = minpos+1;
+					Index li = 0, le = minpos.second;
+					for (; li != le; ++li)
+					{
+						highlightpos.push_back( minpos.first+li);
+					}
+					pi = minpos.first+(le?le:1);
 				}
 				else
 				{
@@ -755,11 +788,20 @@ std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
 		rt << "type='" << m_parameter->m_type << "'"
 			<< ", matchmark=(" << m_parameter->m_matchmark.first << "," << m_parameter->m_matchmark.second << ")"
 			<< ", floatingmark=(" << m_parameter->m_floatingmark.first << "," << m_parameter->m_floatingmark.second << ")"
-			<< ", name_para=" << m_parameter->m_name_para << ", name_phrase=" << m_parameter->m_name_phrase
+			<< ", name para=" << m_parameter->m_name_para
+			<< ", name phrase=" << m_parameter->m_name_phrase
+			<< ", name docstart=" << m_parameter->m_name_docstart
 			<< ", sentencesize='" << m_parameter->m_sentencesize << "'"
-			<< ", windowsize='" << m_parameter->m_windowsize << "'"
-			<< ", cardinality='" << m_parameter->m_cardinality << "'"
-			<< ", maxdf='" << m_parameter->m_maxdf << "'";
+			<< ", windowsize='" << m_parameter->m_windowsize << "'";
+			if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
+			{
+				rt << ", cardinality='" << (unsigned int)(m_parameter->m_cardinality_frac * 100 + 0.5) << "%'";
+			}
+			else
+			{
+				rt << ", cardinality='" << m_parameter->m_cardinality << "'";
+			}
+			rt << ", maxdf='" << m_parameter->m_maxdf << "'";
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
@@ -785,17 +827,14 @@ FunctionDescription SummarizerFunctionMatchPhrase::getDescription() const
 		rt( P::Feature, "match", _TXT( "defines the features to weight"), "");
 		rt( P::Feature, "struct", _TXT( "defines the delimiter for structures"), "");
 		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
+		rt( P::Feature, "title", _TXT( "defines the title field of documents"), "");
 		rt( P::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( P::Metadata, "metadata_title_maxpos", _TXT( "the metadata element that specifies the last title element. Only content is used for abstracting"), "1:");
 		rt( P::Numeric, "sentencesize", _TXT( "restrict the maximum length of sentences in summaries"), "1:");
 		rt( P::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
 		rt( P::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
 		rt( P::Numeric, "maxdf", _TXT( "the maximum df (fraction of collection size) of features considered for same sentence proximity weighing"), "1:");
 		rt( P::String, "matchmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases"), "");
 		rt( P::String, "floatingmark", _TXT( "specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found"), "");
-		rt( P::String, "name_para", _TXT( "specifies the summary element name used for paragraphs (default 'para')"), "");
-		rt( P::String, "name_phrase", _TXT( "specifies the summary element name used for phrases (default 'phrase')"), "");
-		rt( P::String, "name_docstart", _TXT( "specifies the summary element name used for the document start (alternative summary, if no match found, default 'docstart')"), "");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());

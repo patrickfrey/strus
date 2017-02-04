@@ -51,6 +51,11 @@ public:
 		return m_posno;
 	}
 
+	virtual Index length() const
+	{
+		return 1;
+	}
+
 protected:
 	Index m_docno;
 	Index m_posno;					///< current position
@@ -95,6 +100,11 @@ public:
 		return m_posno;
 	}
 	
+	virtual Index length() const
+	{
+		return 1;
+	}
+
 private:
 	Index m_docno;
 	Index m_posno;					///< current position

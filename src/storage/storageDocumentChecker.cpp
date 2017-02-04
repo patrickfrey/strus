@@ -136,7 +136,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 
 		std::auto_ptr<PostingIteratorInterface> pitr(
-			m_storage->createTermPostingIterator( ti->first.type, ti->first.value)); 
+			m_storage->createTermPostingIterator( ti->first.type, ti->first.value, 1)); 
 		if (!pitr.get())
 		{
 			logError( logout, m_docid, _TXT("memory allocation error checking search index"));

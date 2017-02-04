@@ -46,7 +46,7 @@ public:
 
 	virtual ~Query(){}
 
-	virtual void pushTerm( const std::string& type_, const std::string& value_);
+	virtual void pushTerm( const std::string& type_, const std::string& value_, const Index& length_);
 	virtual void pushDocField(
 			const std::string& metadataRangeStart,
 			const std::string& metadataRangeEnd);
@@ -112,17 +112,31 @@ public:
 		return (NodeAddress)(((unsigned int)type << NodeTypeShift) | (unsigned int)idx);
 	}
 
+	struct TermKey
+	{
+		TermKey( const TermKey& o)
+			:type(o.type),value(o.value){}
+		TermKey( const std::string& t, const std::string& v)
+			:type(t),value(v){}
+
+		bool operator<( const TermKey& o) const;
+
+		std::string type;	///< term type name
+		std::string value;	///< term value
+	};
+
 	struct Term
 	{
 		Term( const Term& o)
-			:type(o.type),value(o.value){}
-		Term( const std::string& t, const std::string& v)
-			:type(t),value(v){}
+			:type(o.type),value(o.value),length(o.length){}
+		Term( const std::string& t, const std::string& v, const Index& l)
+			:type(t),value(v),length(l){}
 
 		bool operator<( const Term& o) const;
 
 		std::string type;	///< term type name
 		std::string value;	///< term value
+		Index length;		///< term length (ordinal position count)
 	};
 
 	/// \brief Metadata defined postings specifying a single area in the document 
@@ -220,7 +234,8 @@ private:
 	std::vector<std::string> m_usernames;				///< users allowed to see the query result
 	std::vector<Index> m_evalset_docnolist;				///< set of document numbers to restrict the query to
 	bool m_evalset_defined;						///< true, if the set of document numbers to restrict the query to is defined
-	std::map<Term,TermStatistics> m_termstatsmap;			///< term statistics (evaluation in case of a distributed index)
+	typedef std::map<TermKey,TermStatistics> TermStatisticsMap;
+	TermStatisticsMap m_termstatsmap;				///< term statistics (evaluation in case of a distributed index)
 	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

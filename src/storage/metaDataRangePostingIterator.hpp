@@ -53,6 +53,7 @@ public:
 	{
 		if (docno == m_docno && docno) return m_docno;
 		m_docno = docno ? (docno-1) : 0;
+		m_posno = 0;
 		do
 		{
 			++m_docno;
@@ -61,7 +62,6 @@ public:
 			m_metareader->skipDoc( m_docno);
 			m_pos_lo = m_handle_lo < 0 ? 1 : (int)m_metareader->getValue( m_handle_lo);
 			m_pos_hi = m_handle_hi < 0 ? std::numeric_limits<Index>::max() : (int)m_metareader->getValue( m_handle_hi);
-			m_posno = 0;
 		} while (m_pos_lo == 0 || m_pos_hi == 0 || m_pos_lo >= m_pos_hi);
 		return m_docno;
 	}
@@ -106,6 +106,11 @@ public:
 	virtual Index posno() const
 	{
 		return m_posno;
+	}
+
+	virtual Index length() const
+	{
+		return m_posno?1:0;
 	}
 
 private:

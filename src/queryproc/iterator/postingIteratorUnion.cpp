@@ -11,6 +11,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <cstdlib>
+#include <algorithm>
 
 using namespace strus;
 
@@ -153,6 +154,21 @@ Index IteratorUnion::documentFrequency() const
 		m_documentFrequency = maxDocumentFrequency( m_argar);
 	}
 	return m_documentFrequency;
+}
+
+Index IteratorUnion::length() const
+{
+	if (!m_posno) return 0;
+
+	std::vector<Reference< PostingIteratorInterface> >::const_iterator
+		ai = m_argar.begin(), ae = m_argar.end();
+
+	Index rt = 0;
+	for (; ai != ae; ++ai)
+	{
+		rt = std::max( rt, (*ai)->length());
+	}
+	return rt;
 }
 
 PostingIteratorInterface* PostingJoinUnion::createResultIterator(

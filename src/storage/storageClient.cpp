@@ -267,7 +267,8 @@ std::vector<std::string> StorageClient::getAttributeNames() const
 PostingIteratorInterface*
 	StorageClient::createTermPostingIterator(
 		const std::string& typestr,
-		const std::string& termstr) const
+		const std::string& termstr,
+		const Index& length) const
 {
 	try
 	{
@@ -277,7 +278,7 @@ PostingIteratorInterface*
 		{
 			return new NullPostingIterator( termstr.c_str());
 		}
-		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
+		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), length, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
 }

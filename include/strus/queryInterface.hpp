@@ -35,9 +35,11 @@ public:
 	/// \brief Push a term to the query stack
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
+	/// \param[in] length_ term length (ordinal position count)
 	virtual void pushTerm(
 			const std::string& type_,
-			const std::string& value_)=0;
+			const std::string& value_,
+			const Index& length_)=0;
 
 	/// \brief Push an expression on the query stack that defines a single field per document. The fields are represented as a sets of postings. The postings are defined as meta data elements describing the start and the end of the field for each document.
 	/// \param[in] metadataRangeStart name of metadata element that defines the start position of the field in a document
