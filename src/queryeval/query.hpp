@@ -132,8 +132,6 @@ public:
 		Term( const std::string& t, const std::string& v, const Index& l)
 			:type(t),value(v),length(l){}
 
-		bool operator<( const Term& o) const;
-
 		std::string type;	///< term type name
 		std::string value;	///< term value
 		Index length;		///< term length (ordinal position count)
