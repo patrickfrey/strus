@@ -61,6 +61,11 @@ public:
 		return 0;
 	}
 
+	virtual Index length() const
+	{
+		return 0;
+	}
+
 private:
 	std::string m_featureid;
 };

@@ -44,7 +44,7 @@ enum {KnuthIntegerHashFactor=2654435761U};
 #undef STRUS_LOWLEVEL_DEBUG
 #undef STRUS_GENERATE_READABLE_NAMES
 
-uint32_t uint32_hash( uint32_t a)
+static inline uint32_t uint32_hash( uint32_t a)
 {
 	a += ~(a << 15);
 	a ^=  (a >> 10);
@@ -69,6 +69,7 @@ public:
 		m_value = uint32_hash( ((now->tm_year+1)
 					* (now->tm_mon+100)
 					* (now->tm_mday+1)));
+		m_incr = m_value * KnuthIntegerHashFactor;
 	}
 
 	unsigned int get( unsigned int min_, unsigned int max_)
@@ -77,7 +78,7 @@ public:
 		{
 			throw std::runtime_error("illegal range passed to pseudo random number generator");
 		}
-		m_value = uint32_hash( m_value + 1);
+		m_value = uint32_hash( m_value + 1 + m_incr++);
 		unsigned int iv = max_ - min_;
 		if (iv)
 		{
@@ -112,6 +113,7 @@ public:
 
 private:
 	unsigned int m_value;
+	unsigned int m_incr;
 };
 
 static Random g_random;
@@ -876,7 +878,7 @@ struct RandomQuery
 		{
 			const TermCollection::Term& term = collection.termCollection.termar[ arg[ai]-1];
 			strus::Reference<strus::PostingIteratorInterface> itr(
-				storage->createTermPostingIterator( term.type, term.value));
+				storage->createTermPostingIterator( term.type, term.value, 1));
 			if (!itr.get())
 			{
 				std::cerr << "ERROR term not found [" << arg[ai] << "]: " << term.type << " '" << term.value << "'" << std::endl;
@@ -1073,12 +1075,12 @@ int main( int argc, const char* argv[])
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
-		std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabase_leveldb( g_errorhnd));
+		std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
 		if (!dbi.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		std::auto_ptr<strus::StorageInterface> sti( strus::createStorage( g_errorhnd));
+		std::auto_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
 		if (!sti.get() || g_errorhnd->hasError())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -1086,21 +1088,16 @@ int main( int argc, const char* argv[])
 		(void)dbi->destroyDatabase( config);
 		(void)g_errorhnd->fetchError();
 
-		dbi->createDatabase( config);
-		std::auto_ptr<strus::DatabaseClientInterface>
-			database( dbi->createClient( config));
-
-		sti->createStorage( config, database.get());
+		sti->createStorage( config, dbi.get());
 		{
 			const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
 			std::auto_ptr<strus::StorageClientInterface>
-				storage( sti->createClient( "", database.get(), statisticsMessageProc));
+				storage( sti->createClient( config, dbi.get(), statisticsMessageProc));
 			if (!storage.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());
 			}
-			database.release();
-	
+
 			RandomCollection collection( nofFeatures, nofDocuments, maxDocumentSize);
 	
 			strus::Index totNofOccurrencies = 0;

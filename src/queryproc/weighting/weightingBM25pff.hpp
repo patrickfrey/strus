@@ -13,6 +13,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/index.hpp"
+#include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
@@ -42,7 +43,6 @@ struct WeightingFunctionParameterBM25pff
 	unsigned int proxfftie;			///< the maximum proximity based ff value that is considered for weighting except for increments exceeding m_proxffbias
 	double maxdf;				///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double titleinc;			///< ff increment for title features
-	unsigned int tidocnorm;			///< the document size used for calibrating the title match weight normalization between 0 and 1 (0->0 titleinc_docsizenorm and bigger->1). This weight is a measure of how much information a document should contain so that query terms in the title can be weighted.
 
 	WeightingFunctionParameterBM25pff()
 		:k1(1.5),b(0.75),avgDocLength(500)
@@ -51,7 +51,7 @@ struct WeightingFunctionParameterBM25pff
 		,proxffbias(0.0)
 		,proxfftie(0)
 		,maxdf(0.5)
-		,titleinc(0.0),tidocnorm(0){}
+		,titleinc(0.0){}
 
 	WeightingFunctionParameterBM25pff( const WeightingFunctionParameterBM25pff& o)
 	{
@@ -71,9 +71,8 @@ public:
 		const WeightingFunctionParameterBM25pff& parameter_,
 		double nofCollectionDocuments_,
 		const std::string& metadata_doclen_,
-		const std::string& metadata_title_maxpos_,
-		const std::string& metadata_title_size_,
 		ErrorBufferInterface* errorhnd_);
+	~WeightingFunctionContextBM25pff(){}
 
 	virtual void addWeightingFeature(
 			const std::string& name_,
@@ -92,7 +91,6 @@ private:
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
-	PostingIteratorInterface* m_paraar[ MaxNofArguments];	///< array of end of paragraph elements
 	std::size_t m_itrarsize;				///< number of weighted features
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
@@ -103,8 +101,7 @@ private:
 	bool m_initialized;					///< true, if the structures have already been initialized
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
 	int m_metadata_doclen;					///< meta data doclen handle
-	int m_metadata_title_maxpos;				///< meta data title maximum position handle
-	int m_metadata_title_size;				///< meta data title size
+	PostingIteratorInterface* m_titleitr;			///< iterator to identify the title field for weight increment
 	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
@@ -133,8 +130,6 @@ public:
 private:
 	WeightingFunctionParameterBM25pff m_parameter;	///< weighting function parameters
 	std::string m_metadata_doclen;			///< attribute defining the document length
-	std::string m_metadata_title_maxpos;		///< (optional) meta data element defining the last title position
-	std::string m_metadata_title_size;		///< (optional) meta data element defining the size of the title
 	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
 };
 

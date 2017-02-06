@@ -28,6 +28,7 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 {
 	try
 	{
+		unsigned int cachesize = 0;
 		unsigned int cachesize_kb = 0;
 		bool compression = true;
 		unsigned int maxOpenFiles = 0;
@@ -42,7 +43,8 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 			return 0;
 		}
 		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
-		(void)extractUIntFromConfigString( cachesize_kb, src, "cache", m_errorhnd);
+		(void)extractUIntFromConfigString( cachesize, src, "cache", m_errorhnd);
+		cachesize_kb = (unsigned int)((cachesize + 1023)/1024);
 		(void)extractUIntFromConfigString( maxOpenFiles, src, "max_open_files", m_errorhnd);
 		(void)extractUIntFromConfigString( writeBufferSize, src, "write_buffer_size", m_errorhnd);
 		(void)extractUIntFromConfigString( blockSize, src, "block_size", m_errorhnd);
@@ -133,7 +135,7 @@ bool Database::destroyDatabase( const std::string& configsource) const
 		if (!status.ok())
 		{
 			std::string err = status.ToString();
-			m_errorhnd->report( _TXT( "failed to remove key value store database: "), err.c_str());
+			m_errorhnd->report( _TXT( "failed to remove key value store database: %s"), err.c_str());
 			return false;
 		}
 		return true;
@@ -190,7 +192,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 				if (!status.ok())
 				{
 					std::string statusstr( status.ToString());
-					m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+					m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
 					batch.Clear();
 					return false;
 				}
@@ -209,7 +211,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 			if (!status.ok())
 			{
 				std::string statusstr( status.ToString());
-				m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: "), statusstr.c_str());
+				m_errorhnd->report( _TXT( "error in commit when writing backup restore batch: %s"), statusstr.c_str());
 				batch.Clear();
 				return false;
 			}

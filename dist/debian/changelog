@@ -1,3 +1,25 @@
+strus (0.13.0-1) unstable; urgency=low
+  * improve standard summarization and weighting functions
+  * renamings of summarizer and weighting functions
+  * new summarizer 'accunear' that accumulates forward index features weighted by near matches of query features
+  * improved vector interfaces
+  * fixed some bugs in weighting and summarization
+  * many build fixes
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 6 Feb 2017 15:00:00 +0100
+
+strus (0.12.0-1) unstable; urgency=low
+  * increment version parallel to analyzer (some interface files reorganization)
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sat, 1 Oct 2016 16:00:00 +0100
+
+strus (0.11.1-1) unstable; urgency=low
+  * moved vector space model implementation into own project strusvector
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 30 Sep 2016 10:00:00 +0100
+
+strus (0.11.0-1) unstable; urgency=low
+  * integrated the armadillo library for fast linear algebra operations
+  * define vector space model interface and implement standard vector space model for unsupervised learning of features from vectors
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 28 Sep 2016 12:00:00 +0100
+
 strus (0.10.0-1) unstable; urgency=low
   * added support for cardinality in posting iterator intersect
   * many build fixes

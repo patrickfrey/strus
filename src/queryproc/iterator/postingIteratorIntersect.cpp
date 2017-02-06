@@ -12,6 +12,7 @@
 #include "private/errorUtils.hpp"
 #include <stdexcept>
 #include <cstdlib>
+#include <algorithm>
 
 using namespace strus;
 
@@ -177,6 +178,36 @@ Index IteratorIntersectWithCardinality::documentFrequency() const
 		m_documentFrequency = minDocumentFrequency( m_argar);
 	}
 	return m_documentFrequency;
+}
+
+Index IteratorIntersect::length() const
+{
+	if (!m_posno) return 0;
+
+	std::vector<Reference< PostingIteratorInterface> >::const_iterator
+		ai = m_argar.begin(), ae = m_argar.end();
+
+	Index rt = 0;
+	for (; ai != ae; ++ai)
+	{
+		rt = std::max( rt, (*ai)->length());
+	}
+	return rt;
+}
+
+Index IteratorIntersectWithCardinality::length() const
+{
+	if (!m_posno) return 0;
+
+	std::vector<Reference< PostingIteratorInterface> >::const_iterator
+		ai = m_argar.begin(), ae = m_argar.end();
+
+	Index rt = 0;
+	for (; ai != ae; ++ai)
+	{
+		rt = std::max( rt, (*ai)->length());
+	}
+	return rt;
 }
 
 PostingIteratorInterface* PostingJoinIntersect::createResultIterator(

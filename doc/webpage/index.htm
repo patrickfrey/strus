@@ -26,7 +26,7 @@
 		<a href="index.htm"><img src="images/logotype.jpg" width="280" height="280" alt="Strus logo" /></a>
 		<table border=0>
 		<tr>
-		<td><a href="http://patrickfrey.github.io/strus/doc/doxygen/html/index.html"><font size=5 style="Arial">C++&nbsp;</font></a>
+		<td><a href="cpp_interfaces.htm"><font size=5 style="Arial">C++&nbsp;</font></a>
 		</td>
 		<td><a href="http://patrickfrey.github.io/strusBindings/doc/php/doxygen/html/index.html"><img src="images/php.jpeg" width="75" alt="PHP logo" />&nbsp;</a>
 		</td>
@@ -49,12 +49,12 @@
 
 	<div id="content">
 		<h2>About</h2>
-		<p class="description">The open source project <i>Strus</i> provides a collection of C++ (C++98) 
-		libraries and command line tools for building a competitive, scalable full-text search engine.
+		<p class="description">The open source project <i>Strus</i> provides a collection 
+		libraries and command line tools written in C++ for building a competitive, 
+		scalable full-text search engine.<br/>
 		The <i>Strus</i> search engine can be build using any key value store database that provides an
 		<a href="http://en.wikipedia.org/wiki/Upper_and_lower_bounds">upper bound</a> seek function
-		for the stored key/value pairs.
-		Currently there exists an implementation based on the 
+		for the stored key/value pairs. Currently there exists an implementation based on the 
 		<a href="http://leveldb.org">LevelDB</a> library.<br/>
 		</p>
 		<h2>Demo system</h2>
@@ -92,6 +92,49 @@
 
 		<h2>News</h2>
 		<table>
+
+		<tr>
+		<td><p class="timestamp">Aug 25th, 2016</p></td>
+		<td><p class="newstext">Added a more or less usable DYM (did you mean) support to the 
+		<a href="http://demo.project-strus.net/strus.html">demo Wikipedia search</a>.
+		More or less means that the data basis for the proposals is poor
+		(just a dump of 5M titles and some subtitles processed with strus utility programs and some perl).
+		Furthermore the querying for candidates does not handle relations between items.
+		There is no documentation available yet, but if you wish you can have a look at the
+		<a href="https://github.com/patrickfrey/strusWikipediaSearch/tree/master/client">Python sources</a>.
+		There is no magic there, just another server with an own index and a query evaluation scheme
+		with some postprocessing in Python.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Jul 10th, 2016</p></td>
+		<td><p class="newstext">We started a new project <a href="introduction_struspattern.htm">StrusPattern</a>
+		for deeper document analysis.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Jul 10th, 2016</p></td>
+		<td><p class="newstext">The work on the strusWebservice is ongoing. A slide show that helps
+		to figure out where we are heading to in this project can be found <a href="http://www.andreasbaumann.cc/presentations/struswebservice.html">here</a>.
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Jul 10th, 2016</p></td>
+		<td><p class="newstext">There is a Travis build available now for strus at <a href="https://travis-ci.org/andreasbaumann">travis-ci.org</a>
+		</p></td>
+		</tr>
+
+		<tr>
+		<td><p class="timestamp">Jul 10th, 2016</p></td>
+		<td><p class="newstext">We have implemented an NGRAM normalizer and a tokenizer and normalizer
+		for terms defined by regular expressions on text. You find all functions implemented till now
+		<a href="builtin_functions.htm">here</a>.
+		</p></td>
+		</tr>
+
 		<tr>
 		<td><p class="timestamp">May 10th, 2016</p></td>
 		<td><p class="newstext">A document segmenter for JSON (based on the <a href="https://github.com/DaveGamble/cJSON">cJSON library</a>)

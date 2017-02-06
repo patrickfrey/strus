@@ -27,6 +27,7 @@ PostingIterator::PostingIterator(
 		const DatabaseClientInterface* database_,
 		const Index& termtypeno,
 		const Index& termvalueno, const char* termstr,
+		const Index& length_,
 		ErrorBufferInterface* errorhnd_)
 #else
 PostingIterator::PostingIterator(
@@ -35,11 +36,13 @@ PostingIterator::PostingIterator(
 		const Index& termtypeno,
 		const Index& termvalueno,
 		const char*,
+		const Index& length_,
 		ErrorBufferInterface* errorhnd_)
 #endif
 	:m_docnoIterator(database_, DatabaseKey::DocListBlockPrefix, BlockKey( termtypeno, termvalueno), true)
 	,m_posinfoIterator(storage_,database_, termtypeno, termvalueno)
 	,m_docno(0)
+	,m_length(length_)
 	,m_errorhnd(errorhnd_)
 {
 	m_featureid.reserve( 16);
@@ -104,7 +107,13 @@ Index PostingIterator::skipPos( const Index& firstpos_)
 		{
 			return 0;
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
+		Index rt = m_posinfoIterator.skipPos( firstpos_);
+		if (rt) std::cerr << "skipPos " << m_featureid << " " << rt << std::endl;
+		return rt;
+#else
 		return m_posinfoIterator.skipPos( firstpos_);
+#endif
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in posting iterator skip position: %s"), *m_errorhnd, 0);
 }
@@ -113,6 +122,10 @@ unsigned int PostingIterator::frequency()
 {
 	try
 	{
+		if (!m_docno)
+		{
+			return 0;
+		}
 		m_posinfoIterator.skipDoc( m_docno);
 		return m_posinfoIterator.frequency();
 	}

@@ -33,7 +33,7 @@ public:
 
 	typedef double (*BinaryFunction)( double arg1, double arg2);
 	typedef double (*UnaryFunction)( double arg);
-	typedef double (*NaryFunction)( std::size_t nofargs, const double* args);
+	typedef double (*NaryFunction)( unsigned int nofargs, const double* args);
 
 	/// \brief Define a binary function by name
 	/// \param[in] name name of the function
@@ -54,7 +54,7 @@ public:
 	/// \param[in] max_nofargs maximum number of arguments
 	void defineNaryFunction(
 			const std::string& name, NaryFunction func,
-			std::size_t min_nofargs, std::size_t max_nofargs);
+			unsigned int min_nofargs, unsigned int max_nofargs);
 
 	virtual ScalarFunctionInterface* createFunction(
 			const std::string& src,
@@ -71,19 +71,19 @@ private:
 	void parseOperand( ScalarFunction* func, ParserContext* ctx, std::string::const_iterator& si, const std::string::const_iterator& se) const;
 	void parseExpression( ScalarFunction* func, ParserContext* ctx, unsigned int oprPrecedence, std::string::const_iterator& si, const std::string::const_iterator& se) const;
 	void parseFunctionCall( ScalarFunction* func, ParserContext* ctx, const std::string& functionName, std::string::const_iterator& si, const std::string::const_iterator& se) const;
-	void resolveFunctionCall( ScalarFunction* func, const std::string& functionName, std::size_t nofArguments) const;
+	void resolveFunctionCall( ScalarFunction* func, const std::string& functionName, unsigned int nofArguments) const;
 	void resolveIdentifier( ScalarFunction* func, ParserContext* ctx, const std::string& var) const;
 
 private:
 	struct NaryFunctionDef
 	{
-		std::size_t min_nofargs;
-		std::size_t max_nofargs;
+		unsigned int min_nofargs;
+		unsigned int max_nofargs;
 		NaryFunction func;
 
 		NaryFunctionDef()
 			:min_nofargs(0),max_nofargs(0),func(0){}
-		NaryFunctionDef( std::size_t min_nofargs_, std::size_t max_nofargs_, NaryFunction func_)
+		NaryFunctionDef( unsigned int min_nofargs_, unsigned int max_nofargs_, NaryFunction func_)
 			:min_nofargs(min_nofargs_),max_nofargs(max_nofargs_),func(func_){}
 		NaryFunctionDef( const NaryFunctionDef& o)
 			:min_nofargs(o.min_nofargs),max_nofargs(o.max_nofargs),func(o.func){}

@@ -7,7 +7,7 @@
  */
 #include "indexPacker.hpp"
 #include "floatConversions.hpp"
-#include "private/bitOperations.hpp"
+#include "strus/base/bitOperations.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>

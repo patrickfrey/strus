@@ -38,7 +38,7 @@ public:
 
 	typedef double (*BinaryFunction)( double arg1, double arg2);
 	typedef double (*UnaryFunction)( double arg);
-	typedef double (*NaryFunction)( std::size_t nofargs, const double* args);
+	typedef double (*NaryFunction)( unsigned int nofargs, const double* args);
 
 	enum OpCode
 	{
@@ -66,7 +66,7 @@ public:
 
 	/// \brief Add a push argument operation to the execution code of the scalar function
 	/// \param[in] name name of the variable
-	void addOpPushArgument( std::size_t argindex);
+	void addOpPushArgument( unsigned int argindex);
 
 	/// \brief Add a push constant operation to the execution code of the scalar function
 	/// \param[in] value value of the constant
@@ -87,7 +87,7 @@ public:
 	/// \brief Add a function call of an N-ary function to the execution code of the scalar function
 	/// \param[in] nofargs number of arguments of the function call added
 	/// \param[in] func function added
-	void addOpNaryFunctionCall( std::size_t nofargs, NaryFunction func);
+	void addOpNaryFunctionCall( unsigned int nofargs, NaryFunction func);
 
 	/// \brief Reverse lookup of the name of a variable from a value index, if it exists
 	/// \return the name of the variable or NULL, if it does not exist
@@ -151,7 +151,7 @@ public://ScalarFunctionInstance
 
 public:
 	virtual std::vector<std::string> getVariables() const;
-	virtual std::size_t getNofArguments() const;
+	virtual unsigned int getNofArguments() const;
 
 	virtual void setDefaultVariableValue( const std::string& name, double value);
 
@@ -173,7 +173,7 @@ private:
 	std::vector<BinaryFunction> m_binfuncar;
 	std::vector<NaryFunction> m_nfuncar;
 	std::vector<double> m_valuear;
-	std::size_t m_nofargs;
+	unsigned int m_nofargs;
 
 	typedef std::map<std::string,std::size_t> VariableMap;
 	VariableMap m_variablemap;

@@ -8,17 +8,16 @@
 *.so.0
 *.so
 *.dylib
+*.dll
 
 # Compiled Static libraries
 *.lai
 *.la
 *.a
+*.lib
 
 # Dependency files
 *.d
-
-# Packaging directory
-pkg/
 
 # Valgring suppression files
 *.sup
@@ -29,6 +28,7 @@ setenv.sh
 # Generated test data (cleaned with make clean)
 tests/randoc/storage/
 tests/storageop/checkindex.log
+tests/storageop/storage
 
 # CMake generated files
 CMakeCache.txt
@@ -54,6 +54,11 @@ dist/obs/strus.dsc
 dist/obs/strus-Debian_7.0.dsc
 dist/obs/strus-xUbuntu_12.04.dsc
 dist/redhat/strus.spec
+3rdParty/armadillo/InstallFiles/ArmadilloConfig.cmake
+3rdParty/armadillo/ArmadilloConfig.cmake
+3rdParty/armadillo/libstrus_armadillo.so.7
+3rdParty/armadillo/libstrus_armadillo.so.7.400.2
+3rdParty/armadillo/tmp/
 
 # Compiled Programs
 src/storage/strusResizeBlocks
@@ -70,7 +75,15 @@ tests/formula/src/formula
 tests/loggingMalloc/src/testLoggingMalloc
 tests/storageop/src/testStorageOp
 tests/queryop/src/testQueryOp
+tests/query/src/testQuery
 tests/positionWindow/src/testPositionWindow
 tests/scalarfunc/src/scalarFunction
-
+tests/vectorSpaceModel/src/testArmadillo
+tests/vectorSpaceModel/src/testLshVectorSpaceModel
+tests/vectorSpaceModel/src/testLshSimHash
+tests/vectorSpaceModel/src/testVectorSpaceModel
+tests/vectorSpaceModel/test.vm
+tests/vectorSpaceModel/test.vm.in.txt
+tests/vectorSpaceModel/test.vm.out.txt
 .travis.yml
+

@@ -52,12 +52,12 @@ public:
 
 void Storage::open( const char* config)
 {
-	dbi.reset( strus::createDatabase_leveldb( g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	sti.reset( strus::createStorage( g_errorhnd));
+	sti.reset( strus::createStorageType_std( g_errorhnd));
 	if (!sti.get() || g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -65,26 +65,21 @@ void Storage::open( const char* config)
 	(void)dbi->destroyDatabase( config);
 	(void)g_errorhnd->fetchError();
 
-	dbi->createDatabase( config);
-	std::auto_ptr<strus::DatabaseClientInterface>
-		database( dbi->createClient( config));
-
-	sti->createStorage( config, database.get());
+	sti->createStorage( config, dbi.get());
 	{
 		const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
-		sci.reset( sti->createClient( "", database.get(), statisticsMessageProc));
+		sci.reset( sti->createClient( config, dbi.get(), statisticsMessageProc));
 		if (!sci.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		database.release();
 	}
 }
 
 static void destroyStorage( const char* config)
 {
 	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
-	dbi.reset( strus::createDatabase_leveldb( g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());

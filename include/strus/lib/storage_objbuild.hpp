@@ -21,6 +21,10 @@ class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
+class VectorStorageClientInterface;
+/// \brief Forward declaration
+class VectorStorageBuilderInterface;
+/// \brief Forward declaration
 class ErrorBufferInterface;
 
 ///\brief Create a storage object builder with the builders from the standard strus core libraries (without module support)
@@ -32,7 +36,7 @@ StorageObjectBuilderInterface*
 ///\brief Create a alter metadata table interface with the object builder passed
 ///\param[in] objbuilder object builder
 ///\param[in] errorhnd error buffer interface
-///\param[in] config object configuration
+///\param[in] config object configuration (source, not a filename)
 StorageAlterMetaDataTableInterface*
 	createAlterMetaDataTable(
 		const StorageObjectBuilderInterface* objbuilder,
@@ -42,9 +46,19 @@ StorageAlterMetaDataTableInterface*
 ///\brief Create a storage client interface with the object builder passed
 ///\param[in] objbuilder object builder
 ///\param[in] errorhnd error buffer interface
-///\param[in] config object configuration
+///\param[in] config object configuration (source, not a filename)
 StorageClientInterface*
 	createStorageClient(
+		const StorageObjectBuilderInterface* objbuilder,
+		ErrorBufferInterface* errorhnd,
+		const std::string& config);
+
+///\brief Create a vector storage client interface with the object builder passed
+///\param[in] objbuilder object builder
+///\param[in] errorhnd error buffer interface
+///\param[in] config object configuration (source, not a filename)
+VectorStorageClientInterface*
+	createVectorStorageClient(
 		const StorageObjectBuilderInterface* objbuilder,
 		ErrorBufferInterface* errorhnd,
 		const std::string& config);

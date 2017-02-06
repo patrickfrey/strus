@@ -13,7 +13,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utf8.hpp"
+#include "strus/base/utf8.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -157,6 +157,7 @@ void StatisticsBuilder::addDfChange_final(
 	}
 	pldata.push_back( flags);
 	std::size_t idxpos = utf8encode( idxbuf, (int32_t)increment);
+	if (!idxpos) throw strus::runtime_error( _TXT( "illegal unicode character (%s)"), __FUNCTION__);
 	pldata.append( idxbuf, idxpos);
 
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -172,9 +173,11 @@ void StatisticsBuilder::addDfChange_final(
 	std::size_t restsize = key.size() - ii;
 
 	idxpos = utf8encode( idxbuf, (int32_t)commonsize);
+	if (!idxpos) throw strus::runtime_error( _TXT( "illegal unicode character (%s)"), __FUNCTION__);
 	content.append( idxbuf, idxpos);
 
 	idxpos = utf8encode( idxbuf, (int32_t)(restsize) + pldata.size());
+	if (!idxpos) throw strus::runtime_error( _TXT( "illegal unicode character (%s)"), __FUNCTION__);
 	content.append( idxbuf, idxpos);
 	content.append( key.c_str() + commonsize, restsize);
 	char* ci = const_cast<char*>( std::strchr( content.c_str() + content.size() - restsize, '\1'));

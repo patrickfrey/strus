@@ -48,8 +48,10 @@ public:
 		return m_posno;
 	}
 
+	virtual Index length() const;
+
 private:
-	Index m_docno;
+	Index m_docno;							///< current document number
 	Index m_posno;							///< current position
 	std::vector<Reference< PostingIteratorInterface> > m_argar;	///< arguments
 	DocnoAllMatchItr m_docnoAllMatchItr;				///< document all match joiner
@@ -88,6 +90,8 @@ public:
 	{
 		return m_posno;
 	}
+
+	virtual Index length() const;
 
 private:
 	/// \brief We use fixed size arrays and restrict the maximum number of features to a reasonable amount.

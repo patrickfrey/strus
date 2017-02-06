@@ -21,78 +21,78 @@
 		<h3>Posting join operator</h3>
 		<p>List of predefined posting join operators:</p>
 		<ul>
-		<li><b>chain</b> gets the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j.</li>
-		<li><b>chain_struct</b> gett the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
-		<li><b>contains</b> getsthe set of postings (d,1) for documents d that contain all of the argument features.</li>
-		<li><b>diff</b> get the set of postings (d,p) that are in the first argument set but not in the second..</li>
-		<li><b>inrange</b> gets the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|.</li>
+		<li><b>chain</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j.</li>
+		<li><b>chain_struct</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| <= |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
+		<li><b>contains</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,1) for documents d that contain all of the argument features.</li>
+		<li><b>diff</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that are in the first argument set but not in the second..</li>
+		<li><b>inrange</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|.</li>
 		<li><b>inrange_struct</b>get the set of postings (d,p) that exist in any argument set and (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
-		<li><b>intersect</b> get the set of postings (d,p) that are occurring in all argument sets.</li>
-		<li><b>pred</b> get the set of postings (d,p-1) for all (d,p) with p>1 in the argument set.</li>
-		<li><b>sequence</b> get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j.</li>
-		<li><b>sequence_struct</b> get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
-		<li><b>succ</b> get the set of postings (d,p+1) for all (d,p) in the argument set.</li>
-		<li><b>union</b>get the set of postings that are occurring in any argument set.</li>
-		<li><b>within</b>get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|.</li>
-		<li><b>within_struct</b>get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
+		<li><b>intersect</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that are occurring in all argument sets or in at least the number specified with cardinality.</li>
+		<li><b>pred</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p-1) for all (d,p) with p>1 in the argument set.</li>
+		<li><b>sequence</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j.</li>
+		<li><b>sequence_struct</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that exist in the second argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri| < |rj| for i<j and i>2. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
+		<li><b>succ</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p+1) for all (d,p) in the argument set.</li>
+		<li><b>union</b>&nbsp;&nbsp;&nbsp;get the set of postings that are occurring in any argument set.</li>
+		<li><b>within</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|.</li>
+		<li><b>within_struct</b>&nbsp;&nbsp;&nbsp;get the set of postings (d,p) that exist in any argument set and distinct (d,p+r) exist in all other argument sets with |r| <= |range|. Additionally there must not exist a posting in the first argument set that is overlapped by the interval formed by the other argument postings.</li>
 		</ul>
 
 		<h3>Weighting function</h3>
 		<p>List of predefined weighting functions with argument descriptions:</p>
 		<ul>
-		<li><b>bm25</b> calculates the document weight with the weighting scheme "BM25" (Okapi)
+		<li><b>bm25</b>&nbsp;&nbsp;&nbsp;calculates the document weight with the weighting scheme "BM25" (Okapi)
 			<ol>
-			<li><b>match</b> [Feature] defines the query features to weight.</li>
-			<li><b>k1</b> [Numeric (1:1000)] parameter of the BM25 weighting scheme.</li>
-			<li><b>b</b> [Numeric (0.0001:1000)] parameter of the BM25 weighting scheme.</li>
-			<li><b>avgdoclen</b> [Numeric (0:)] the average document lenght.</li>
-			<li><b>metadata_doclen</b> [Metadata] the meta data element name referencing the document lenght for each document weighted.</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the query features to weight.</li>
+			<li><b>k1</b>&nbsp;&nbsp;&nbsp;[Numeric (1:1000)] parameter of the BM25 weighting scheme.</li>
+			<li><b>b</b>&nbsp;&nbsp;&nbsp;[Numeric (0.0001:1000)] parameter of the BM25 weighting scheme.</li>
+			<li><b>avgdoclen</b>&nbsp;&nbsp;&nbsp;[Numeric (0:)] the average document lenght.</li>
+			<li><b>metadata_doclen</b>&nbsp;&nbsp;&nbsp;[Metadata] the meta data element name referencing the document lenght for each document weighted.</li>
 			</ol>
 		</li>
-		<li><b>bm25pff</b> calculates the document weight with the weighting scheme "BM25pff". This is "BM25" where the feature frequency is counted by 1.0 per feature only for features with the maximum proximity score. The proximity score is a measure that takes the proximity of other query features into account.
+		<li><b>bm25pff</b>&nbsp;&nbsp;&nbsp;calculates the document weight with the weighting scheme "BM25pff". This is "BM25" where the feature frequency is counted by 1.0 per feature only for features with the maximum proximity score. The proximity score is a measure that takes the proximity of other query features into account.
 			<ol>
-			<li><b>match</b> [Feature] defines the query features to weight.</li>
-			<li><b>struct</b> [Feature] defines the delimiter for structures.</li>
-			<li><b>para</b> [Feature] defines the delimiter for paragraphs (windows used for proximity weighting must not overlap paragraph borders).</li>
-			<li><b>k1</b> [Numeric (1:1000)] parameter of the BM25pff weighting scheme.</li>
-			<li><b>b</b> [Numeric (0.0001:1000)] parameter of the BM25pff weighting scheme.</li>
-			<li><b>titleinc</b> [Numeric (0.0:)] ff increment for title features.</li>
-			<li><b>tidocnorm</b> [Numeric] specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller").</li>
-			<li><b>windowsize</b> [Numeric] the size of the window used for finding features to increment proximity scores.</li>
-			<li><b>cardinality</b> [Numeric] the number of query features a proximity score window must contain to be considered (optional, default is all features).</li>
-			<li><b>metadata_title_maxpos</b> [Metadata] the metadata element that specifies the last title element. Elements in title are scored with an ff increment.</li>
-			<li><b>metadata_title_size</b> [Metadata] the metadata element that specifies the number of terms (size) of the title.</li>
-			<li><b>ffbase</b> [Numeric (0.0:1.0)] value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25).</li>
-			<li><b>fftie</b> [Numeric (0:)] value specifying the mapping of the ff of a weighted to an intervall between 0 and this value.</li>
-			<li><b>proxffbias</b> [Numeric (0.0:1.0)] bias for proximity ff increments always counted (the others are counted only till 'proxfftie'.</li>
-			<li><b>proxfftie</b> [Numeric (0:)] the maximum proximity based ff value that is considered for weighting except for increments exceeding 'proxffbias'.</li>
-			<li><b>avgdoclen</b> [Numeric (0:)] the average document lenght.</li>
-			<li><b>maxdf</b> [Numeric (0:)] the maximum df as fraction of the collection size.</li>
-			<li><b>metadata_doclen</b> [Metadata] the meta data element name referencing the document lenght for each document weighted.</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the query features to weight.</li>
+			<li><b>struct</b>&nbsp;&nbsp;&nbsp;[Feature] defines the delimiter for structures.</li>
+			<li><b>para</b>&nbsp;&nbsp;&nbsp;[Feature] defines the delimiter for paragraphs (windows used for proximity weighting must not overlap paragraph borders).</li>
+			<li><b>k1</b>&nbsp;&nbsp;&nbsp;[Numeric (1:1000)] parameter of the BM25pff weighting scheme.</li>
+			<li><b>b</b>&nbsp;&nbsp;&nbsp;[Numeric (0.0001:1000)] parameter of the BM25pff weighting scheme.</li>
+			<li><b>titleinc</b>&nbsp;&nbsp;&nbsp;[Numeric (0.0:)] ff increment for title features.</li>
+			<li><b>tidocnorm</b>&nbsp;&nbsp;&nbsp;[Numeric] specifies a normalization factor of the title weight between 0 and 1. Document bigger or equal this value get close to 1, others smaller").</li>
+			<li><b>windowsize</b>&nbsp;&nbsp;&nbsp;[Numeric] the size of the window used for finding features to increment proximity scores.</li>
+			<li><b>cardinality</b>&nbsp;&nbsp;&nbsp;[Numeric] the number of query features a proximity score window must contain to be considered (optional, default is all features).</li>
+			<li><b>metadata_title_maxpos</b>&nbsp;&nbsp;&nbsp;[Metadata] the metadata element that specifies the last title element. Elements in title are scored with an ff increment.</li>
+			<li><b>metadata_title_size</b>&nbsp;&nbsp;&nbsp;[Metadata] the metadata element that specifies the number of terms (size) of the title.</li>
+			<li><b>ffbase</b>&nbsp;&nbsp;&nbsp;[Numeric (0.0:1.0)] value in the range from 0.0 to 1.0 specifying the percentage of the constant score on the proximity ff for every feature occurrence. (with 1.0 the scheme is plain BM25).</li>
+			<li><b>fftie</b>&nbsp;&nbsp;&nbsp;[Numeric (0:)] value specifying the mapping of the ff of a weighted to an intervall between 0 and this value.</li>
+			<li><b>proxffbias</b>&nbsp;&nbsp;&nbsp;[Numeric (0.0:1.0)] bias for proximity ff increments always counted (the others are counted only till 'proxfftie'.</li>
+			<li><b>proxfftie</b>&nbsp;&nbsp;&nbsp;[Numeric (0:)] the maximum proximity based ff value that is considered for weighting except for increments exceeding 'proxffbias'.</li>
+			<li><b>avgdoclen</b>&nbsp;&nbsp;&nbsp;[Numeric (0:)] the average document lenght.</li>
+			<li><b>maxdf</b>&nbsp;&nbsp;&nbsp;[Numeric (0:)] the maximum df as fraction of the collection size.</li>
+			<li><b>metadata_doclen</b>&nbsp;&nbsp;&nbsp;[Metadata] the meta data element name referencing the document lenght for each document weighted.</li>
 			</ol>
 		</li>
-		<li><b>smart</b> calculates the document weight as a sum of scalar functions for each query feature of the ff (feature freuency), the df (document frequency), N (number of documents in the collection) and some document metadata element values. The name 'smart' is inspired by information retrieval calssical SMART weighting schemes that are covered by this method. The scalar function is specified as string expression.
+		<li><b>smart</b>&nbsp;&nbsp;&nbsp;calculates the document weight as a sum of scalar functions for each query feature of the ff (feature freuency), the df (document frequency), N (number of documents in the collection) and some document metadata element values. The name 'smart' is inspired by information retrieval calssical SMART weighting schemes that are covered by this method. The scalar function is specified as string expression.
 			<ol>
-			<li><b>match</b> [Feature] defines the input query features.</li>
-			<li><b>function</b> [String] defines an expression to evaluate. You can use the operators '*','/','+','-' and functions like 'log', 'tanh', etc.. Brackets '(' and ')' can be used for grouping subexpressions. The variables 'df','ff' and 'N' can be used besides all variables specified as parameters or as meta data elements.</li>
-			<li><b>metadata</b> [String] defines a metadata element that can be referenced in the scalar function expression.</li>
-			<li><b>[a-z]+</b> [Numeric] defines a variable to be used in the formula expression.</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the input query features.</li>
+			<li><b>function</b>&nbsp;&nbsp;&nbsp;[String] defines an expression to evaluate. You can use the operators '*','/','+','-' and functions like 'log', 'tanh', etc.. Brackets '(' and ')' can be used for grouping subexpressions. The variables 'df','ff' and 'N' can be used besides all variables specified as parameters or as meta data elements.</li>
+			<li><b>metadata</b>&nbsp;&nbsp;&nbsp;[String] defines a metadata element that can be referenced in the scalar function expression.</li>
+			<li><b>[a-z]+</b>&nbsp;&nbsp;&nbsp;[Numeric] defines a variable to be used in the formula expression.</li>
 			</ol>
 		</li>
-		<li><b>metadata</b> calculate the weight of a document as value of a meta data element.
+		<li><b>metadata</b>&nbsp;&nbsp;&nbsp;calculate the weight of a document as value of a meta data element.
 			<ol>
-			<li><b>name</b> [Metadata] name of the meta data element to use as weight.</li>
+			<li><b>name</b>&nbsp;&nbsp;&nbsp;[Metadata] name of the meta data element to use as weight.</li>
 			</ol>
 		</li>
-		<li><b>td</b> calculates the weight of a document as sum of the the feature weights multiplied with their feature frequency.</li>
+		<li><b>td</b>&nbsp;&nbsp;&nbsp;calculates the weight of a document as sum of the the feature weights multiplied with their feature frequency.</li>
 			<ol>
-			<li><b>match</b> [Feature] defines the query features to weight.</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the query features to weight.</li>
 			</ol>
 		</li>
-		<li><b>tf</b> calculates the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight
+		<li><b>tf</b>&nbsp;&nbsp;&nbsp;calculates the weight of a document as sum of the feature frequency of a feature multiplied with the feature weight
 			<ol>
-			<li><b>match</b> [Feature] defines the query features to weight.</li>
-			<li><b>weight</b> [Numeric (0:)] defines the query feature weight factor.</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the query features to weight.</li>
+			<li><b>weight</b>&nbsp;&nbsp;&nbsp;[Numeric (0:)] defines the query feature weight factor.</li>
 			</ol>
 		</li>
 		</ul>
@@ -100,53 +100,53 @@
 		<h3>Summarizer</h3>
 		<p>List of predefined summarizer functions with argument descriptions:</p>
 		<ul>
-		<li><b>accuvariable</b> accumulates the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content.
+		<li><b>accuvariable</b>&nbsp;&nbsp;&nbsp;accumulates the weights of all contents of a variable in matching expressions. Weights with same positions are grouped and multiplied, the group results are added to the sum, the total weight assigned to the variable content.
 			<ol>
-			<li><b>match</b> [Feature] defines the query features to inspect for variable matches.</li>
-			<li><b>type</b> [String] the forward index feature type for the content to extract.</li>
-			<li><b>var</b> [String] the name of the variable referencing the content to weight.</li>
-			<li><b>nof</b> [Numeric (1:)] the maximum number of the best weighted elements  to return (default 10).</li>
-			<li><b>norm</b> [Numeric (0.0:1.0)] the normalization factor of the calculated weights (default 1.0).</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the query features to inspect for variable matches.</li>
+			<li><b>type</b>&nbsp;&nbsp;&nbsp;[String] the forward index feature type for the content to extract.</li>
+			<li><b>var</b>&nbsp;&nbsp;&nbsp;[String] the name of the variable referencing the content to weight.</li>
+			<li><b>nof</b>&nbsp;&nbsp;&nbsp;[Numeric (1:)] the maximum number of the best weighted elements  to return (default 10).</li>
+			<li><b>norm</b>&nbsp;&nbsp;&nbsp;[Numeric (0.0:1.0)] the normalization factor of the calculated weights (default 1.0).</li>
 			</ol>
 		</li>
 
-		<li><b>attribute</b> gets the value of a document attribute.
+		<li><b>attribute</b>&nbsp;&nbsp;&nbsp;gets the value of a document attribute.
 			<ol>
-			<li><b>name</b> [Attribute] the name of the attribute to get.</li>
+			<li><b>name</b>&nbsp;&nbsp;&nbsp;[Attribute] the name of the attribute to get.</li>
 			</ol>
 		</li>
-		<li><b>matchphrase</b> gets the best matching phrase delimited by the structure postings.
+		<li><b>matchphrase</b>&nbsp;&nbsp;&nbsp;gets the best matching phrase delimited by the structure postings.
 			<ol>
-			<li><b>match</b> [Feature] defines the features to weight.</li>
-			<li><b>struct</b> [Feature] defines the delimiter for structures.</li>
-			<li><b>para</b> [Feature] defines the delimiter for paragraphs (summaries must not overlap paragraph borders).</li>
-			<li><b>type</b> [String] the forward index type of the result phrase elements.</li>
-			<li><b>metadata_title_maxpos</b> [Metadata (1:)] the metadata element that specifies the last title element. Only content is used for abstracting.</li>
-			<li><b>sentencesize</b> [Numeric (1:)] restrict the maximum length of sentences in summaries.</li>
-			<li><b>windowsize</b> [Numeric (1:)] maximum size of window used for identifying matches.</li>
-			<li><b>cardinality</b> [Numeric (1:)] minimum number of features in a window.</li>
-			<li><b>matchmark</b> [String] specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases.</li>
-			<li><b>floatingmark</b> [String] specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found.</li>
-			<li><b>name_para</b> [String] specifies the summary element name used for paragraphs (default 'para').</li>
-			<li><b>name_phrase</b> [String] specifies the summary element name used for phrases (default 'phrase').</li>
-			<li><b>name_docstart</b> [String] specifies the summary element name used for the document start (alternative summary, if no match found, default 'docstart').</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the features to weight.</li>
+			<li><b>struct</b>&nbsp;&nbsp;&nbsp;[Feature] defines the delimiter for structures.</li>
+			<li><b>para</b>&nbsp;&nbsp;&nbsp;[Feature] defines the delimiter for paragraphs (summaries must not overlap paragraph borders).</li>
+			<li><b>type</b>&nbsp;&nbsp;&nbsp;[String] the forward index type of the result phrase elements.</li>
+			<li><b>metadata_title_maxpos</b>&nbsp;&nbsp;&nbsp;[Metadata (1:)] the metadata element that specifies the last title element. Only content is used for abstracting.</li>
+			<li><b>sentencesize</b>&nbsp;&nbsp;&nbsp;[Numeric (1:)] restrict the maximum length of sentences in summaries.</li>
+			<li><b>windowsize</b>&nbsp;&nbsp;&nbsp;[Numeric (1:)] maximum size of window used for identifying matches.</li>
+			<li><b>cardinality</b>&nbsp;&nbsp;&nbsp;[Numeric (1:)] minimum number of features in a window.</li>
+			<li><b>matchmark</b>&nbsp;&nbsp;&nbsp;[String] specifies the markers (first character of the value is the separator followed by the two parts separated by it) for highlighting matches in the resulting phrases.</li>
+			<li><b>floatingmark</b>&nbsp;&nbsp;&nbsp;[String] specifies the markers (first character of the value is the separator followed by the two parts separated by it) for marking floating phrases without start or end of sentence found.</li>
+			<li><b>name_para</b>&nbsp;&nbsp;&nbsp;[String] specifies the summary element name used for paragraphs (default 'para').</li>
+			<li><b>name_phrase</b>&nbsp;&nbsp;&nbsp;[String] specifies the summary element name used for phrases (default 'phrase').</li>
+			<li><b>name_docstart</b>&nbsp;&nbsp;&nbsp;[String] specifies the summary element name used for the document start (alternative summary, if no match found, default 'docstart').</li>
 			</ol>
 		</li>
-		<li><b>matchpos</b> get the feature occurencies printed.
+		<li><b>matchpos</b>&nbsp;&nbsp;&nbsp;get the feature occurencies printed.
 			<ol>
-			<li><b>match</b> [Feature] defines the query features.</li>
-			<li><b>N</b> [Numeric (1:)] the maximum number of matches to return.</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the query features.</li>
+			<li><b>N</b>&nbsp;&nbsp;&nbsp;[Numeric (1:)] the maximum number of matches to return.</li>
 			</ol>
 		</li>
-		<li><b>matchvariables</b> extracts all variables assigned to subexpressions of features specified.
+		<li><b>matchvariables</b>&nbsp;&nbsp;&nbsp;extracts all variables assigned to subexpressions of features specified.
 			<ol>
-			<li><b>match</b> [Feature] defines the query features to inspect for variable matches.</li>
-			<li><b>type</b> [String] the forward index feature type for the content to extract.</li>
+			<li><b>match</b>&nbsp;&nbsp;&nbsp;[Feature] defines the query features to inspect for variable matches.</li>
+			<li><b>type</b>&nbsp;&nbsp;&nbsp;[String] the forward index feature type for the content to extract.</li>
 			</ol>
 		</li>
-		<li><b>metadata</b> get the value of a document meta data element.
+		<li><b>metadata</b>&nbsp;&nbsp;&nbsp;get the value of a document meta data element.
 			<ol>
-			<li><b>name</b> [Metadata] the name of the meta data element to get.</li>
+			<li><b>name</b>&nbsp;&nbsp;&nbsp;[Metadata] the name of the meta data element to get.</li>
 			</ol>
 		</li>
 
@@ -155,34 +155,34 @@
 		<h3>Tokenizer</h3>
 		<p>List of predefined tokenizer functions:</p>
 		<ul>
-		<li><b>content</b> producing one token for each input chunk (identity).</li>
-		<li><b>punctuation</b> producing punctuation elements (end of sentence recognition). The language is specified as parameter (currently only german 'de' and english 'en' supported).</li>
-		<li><b>split</b> splitting tokens separated by whitespace characters.</li>
-		<li><b>word</b> splitting tokens by word boundaries for european languages.</li>
-		<li><b>regex</b> identify tokens with a regular expression.</li>
+		<li><b>content</b>&nbsp;&nbsp;&nbsp;producing one token for each input chunk (identity).</li>
+		<li><b>punctuation</b>&nbsp;&nbsp;&nbsp;producing punctuation elements (end of sentence recognition). The language is specified as parameter (currently only german 'de' and english 'en' supported).</li>
+		<li><b>split</b>&nbsp;&nbsp;&nbsp;splitting tokens separated by whitespace characters.</li>
+		<li><b>word</b>&nbsp;&nbsp;&nbsp;splitting tokens by word boundaries for european languages.</li>
+		<li><b>regex</b>&nbsp;&nbsp;&nbsp;identify tokens with a regular expression.</li>
 		</ul>
 		<h3>Normalizer</h3>
 		<p>List of predefined normalizer functions:</p>
 		<ul>
-		<li><b>convdia</b> mapping all diacritical characters to ascii. The language is passed as first argument and alternative date formats as following argument (currently only german 'de' and english 'en' supported).</li>
-		<li><b>date2int</b> mapping a date to an integer. The granularity of the result is passed as first argument and alternative date formats as following arguments.</li>
-		<li><b>dictmap</b> mapping the elements with a dictionary. For found elements the passed value is returned. The dictionary file name is passed as argument.</li>
-		<li><b>empty</b> mapping input tokens to an empty string.</li>
-		<li><b>lc</b> mapping all characters to lowercase.</li>
-		<li><b>orig</b> mapping the identity of the input tokens-</li>
-		<li><b>stem</b> doing stemming based on snowball. The language is passed as parameter.</li>
-		<li><b>text</b> mapping the identity of the input tokens.</li>
-		<li><b>uc</b> mapping all characters to uppercase.</li>
-		<li><b>ngram</b> producing of NGRAMs of a defined size (2,3,4,etc.)</li>
-		<li><b>regex</b> search replace with a regular expression and a substitution pattern</li>
+		<li><b>convdia</b>&nbsp;&nbsp;&nbsp;mapping all diacritical characters to ascii. The language is passed as first argument and alternative date formats as following argument (currently only german 'de' and english 'en' supported).</li>
+		<li><b>date2int</b>&nbsp;&nbsp;&nbsp;mapping a date to an integer. The granularity of the result is passed as first argument and alternative date formats as following arguments.</li>
+		<li><b>dictmap</b>&nbsp;&nbsp;&nbsp;mapping the elements with a dictionary. For found elements the passed value is returned. The dictionary file name is passed as argument.</li>
+		<li><b>empty</b>&nbsp;&nbsp;&nbsp;mapping input tokens to an empty string.</li>
+		<li><b>lc</b>&nbsp;&nbsp;&nbsp;mapping all characters to lowercase.</li>
+		<li><b>orig</b>&nbsp;&nbsp;&nbsp;mapping the identity of the input tokens-</li>
+		<li><b>stem</b>&nbsp;&nbsp;&nbsp;doing stemming based on snowball. The language is passed as parameter.</li>
+		<li><b>text</b>&nbsp;&nbsp;&nbsp;mapping the identity of the input tokens.</li>
+		<li><b>uc</b>&nbsp;&nbsp;&nbsp;mapping all characters to uppercase.</li>
+		<li><b>ngram</b>&nbsp;&nbsp;&nbsp;producing of NGRAMs of a defined size (2,3,4,etc.)</li>
+		<li><b>regex</b>&nbsp;&nbsp;&nbsp;search replace with a regular expression and a substitution pattern</li>
 		</ul>
 		<h3>Aggregator</h3>
 		<p>List of predefined aggregator functions:</p>
 		<ul>
-		<li><b>count</b> counting the input elements.</li>
-		<li><b>maxpos</b> getting the maximum position of the input elements.</li>
-		<li><b>minpos</b> getting the minimum position of the input elements.</li>
-		<li><b>sumsquaretf</b> calculating the sum of the square of the tf of all selected elements.</li>
+		<li><b>count</b>&nbsp;&nbsp;&nbsp;counting the input elements.</li>
+		<li><b>maxpos</b>&nbsp;&nbsp;&nbsp;getting the maximum position of the input elements.</li>
+		<li><b>minpos</b>&nbsp;&nbsp;&nbsp;getting the minimum position of the input elements.</li>
+		<li><b>sumsquaretf</b>&nbsp;&nbsp;&nbsp;calculating the sum of the square of the tf of all selected elements.</li>
 		</ul>
 	</div>
 </div>

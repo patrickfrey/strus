@@ -6,7 +6,7 @@ include(cmake/install_prefix.cmake)
 # Project globals:
 project( Strus )
 set( STRUS_MAJOR_VERSION 0 )
-set( STRUS_MINOR_VERSION 10 )
+set( STRUS_MINOR_VERSION 13 )
 set( STRUS_PATCH_VERSION 0 )
 set( STRUS_VERSION ${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}.${STRUS_PATCH_VERSION} )
 
@@ -20,13 +20,10 @@ include( cmake/find_leveldb.cmake )
 
 find_strus_package( base )
 set( CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" )
-set( CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON )
 configure_file( "${PROJECT_SOURCE_DIR}/include/strus/versionStorage.hpp.in"  "${PROJECT_SOURCE_DIR}/include/strus/versionStorage.hpp"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh.in"  "${PROJECT_SOURCE_DIR}/dist/obs/deploy_to_obs.sh"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/archlinux/PKGBUILD.in"  "${PROJECT_SOURCE_DIR}/dist/archlinux/PKGBUILD"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/strus.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/strus.dsc"  @ONLY )
-configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/strus-Debian_7.0.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/strus-Debian_7.0.dsc"  @ONLY )
-configure_file( "${PROJECT_SOURCE_DIR}/dist/obs/strus-xUbuntu_12.04.dsc.in"  "${PROJECT_SOURCE_DIR}/dist/obs/strus-xUbuntu_12.04.dsc"  @ONLY )
 configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strus.spec.in"  "${PROJECT_SOURCE_DIR}/dist/redhat/strus.spec"  @ONLY )
 
 set( STRUS_GETTEXT_PACKAGE "strus-dom" )	#... 1st parameter of bindtextdomain(...)

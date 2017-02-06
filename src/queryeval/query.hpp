@@ -46,10 +46,13 @@ public:
 
 	virtual ~Query(){}
 
-	virtual void pushTerm( const std::string& type_, const std::string& value_);
+	virtual void pushTerm( const std::string& type_, const std::string& value_, const Index& length_);
+	virtual void pushDocField(
+			const std::string& metadataRangeStart,
+			const std::string& metadataRangeEnd);
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
-			std::size_t argc, int range_, unsigned int cardinality_);
+			unsigned int argc, int range_, unsigned int cardinality_);
 
 	virtual void attachVariable( const std::string& name_);
 	virtual void defineFeature( const std::string& set_, double weight_=1.0);
@@ -76,52 +79,74 @@ public:
 			const std::string& name, double value);
 
 	virtual QueryResult evaluate();
+	virtual std::string tostring() const;
 
 public:
-	typedef int NodeAddress;
+	typedef unsigned int NodeAddress;
 
 	enum NodeType
 	{
 		NullNode,
 		TermNode,
+		DocFieldNode,
 		ExpressionNode
 	};
+	enum {NodeTypeShift=28, NodeTypeMask=0x7, NodeIndexMask=(1<<NodeTypeShift)-1};
+
 	static const char* nodeTypeName( NodeType i)
 	{
-		static const char* ar[] = {"NullNode","TermNode","ExpressionNode"};
+		static const char* ar[] = {"NullNode","TermNode","DocFieldNode","ExpressionNode"};
 		return ar[i];
 	}
 
 	static NodeType nodeType( NodeAddress nd)
 	{
-		return (nd < 0)?ExpressionNode:((nd == 0)?NullNode:TermNode);
+		return (NodeType)((nd >> NodeTypeShift) & NodeTypeMask);
 	}
 	static std::size_t nodeIndex( NodeAddress nd)
 	{
-		return (std::size_t)((nd > 0)?(nd-1):(-nd-1));
+		return (std::size_t)(nd & NodeIndexMask);
 	}
 	NodeAddress nodeAddress( NodeType type, std::size_t idx)
 	{
-		switch (type)
-		{
-			case NullNode: return 0;
-			case TermNode: return +(int)(idx+1);
-			case ExpressionNode: return -(int)(idx+1);
-		}
-		throw strus::logic_error( _TXT( "illegal node address type (query)"));
+		return (NodeAddress)(((unsigned int)type << NodeTypeShift) | (unsigned int)idx);
 	}
+
+	struct TermKey
+	{
+		TermKey( const TermKey& o)
+			:type(o.type),value(o.value){}
+		TermKey( const std::string& t, const std::string& v)
+			:type(t),value(v){}
+
+		bool operator<( const TermKey& o) const;
+
+		std::string type;	///< term type name
+		std::string value;	///< term value
+	};
 
 	struct Term
 	{
 		Term( const Term& o)
-			:type(o.type),value(o.value){}
-		Term( const std::string& t, const std::string& v)
-			:type(t),value(v){}
-
-		bool operator<( const Term& o) const;
+			:type(o.type),value(o.value),length(o.length){}
+		Term( const std::string& t, const std::string& v, const Index& l)
+			:type(t),value(v),length(l){}
 
 		std::string type;	///< term type name
 		std::string value;	///< term value
+		Index length;		///< term length (ordinal position count)
+	};
+
+	/// \brief Metadata defined postings specifying a single area in the document 
+	struct DocField
+	{
+		DocField( const DocField& o)
+			:metadataRangeStart(o.metadataRangeStart),metadataRangeEnd(o.metadataRangeEnd){}
+		DocField( const std::string& start, const std::string& end)
+			:metadataRangeStart(start),metadataRangeEnd(end){}
+
+		std::string metadataRangeStart;		///< metadata element defining the start of the field
+		std::string metadataRangeEnd;		///< metadata element defining the end of the field
 	};
 
 	struct Expression
@@ -197,6 +222,7 @@ private:
 	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;	///< restriction function on metadata
 	Reference<ScalarFunctionInstanceInterface> m_weightingFormula;	///< instance of the scalar function to calculate the weight of a document from the weighting functions defined as parameter
 	std::vector<Term> m_terms;					///< query terms
+	std::vector<DocField> m_docfields;				///< fields in document defined by meta data
 	std::vector<Expression> m_expressions;				///< query expressions
 	std::vector<Feature> m_features;				///< query features
 	std::vector<NodeAddress> m_stack;				///< expression build stack
@@ -206,7 +232,8 @@ private:
 	std::vector<std::string> m_usernames;				///< users allowed to see the query result
 	std::vector<Index> m_evalset_docnolist;				///< set of document numbers to restrict the query to
 	bool m_evalset_defined;						///< true, if the set of document numbers to restrict the query to is defined
-	std::map<Term,TermStatistics> m_termstatsmap;			///< term statistics (evaluation in case of a distributed index)
+	typedef std::map<TermKey,TermStatistics> TermStatisticsMap;
+	TermStatisticsMap m_termstatsmap;				///< term statistics (evaluation in case of a distributed index)
 	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

@@ -112,7 +112,8 @@ void KeyMap::getWriteBatch(
 void KeyMap::getWriteBatch(
 		std::map<Index,Index>& rewriteUnknownMap,
 		DatabaseTransactionInterface* transaction,
-		int* nofNewItems)
+		int* nofNewItems,
+		int* nofChangedItems)
 {
 	deleteAllFromDeletedList( transaction);
 
@@ -128,6 +129,10 @@ void KeyMap::getWriteBatch(
 				m_dbadapter.store( transaction, mi->first, idx);
 				if (m_dbadapterinv.defined()) m_dbadapterinv.store( transaction, idx, mi->first);
 				if (nofNewItems) ++*nofNewItems;
+			}
+			else
+			{
+				if (nofChangedItems) ++*nofChangedItems;
 			}
 			rewriteUnknownMap[ mi->second] = idx;
 			if (m_invmap) m_invmap->set( idx, mi->first);

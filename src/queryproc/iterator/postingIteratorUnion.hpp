@@ -48,6 +48,8 @@ public:
 		return m_posno;
 	}
 
+	virtual Index length() const;
+
 protected:
 	const PostingIteratorInterface* arg( unsigned int idx) const
 	{

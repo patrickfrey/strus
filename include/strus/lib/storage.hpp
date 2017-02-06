@@ -15,10 +15,10 @@ namespace strus {
 
 /// \brief Forward declaration
 class ErrorBufferInterface;
-
+/// \brief Forward declaration
 class StorageInterface;
 
-StorageInterface* createStorage( ErrorBufferInterface* errorhnd);
+StorageInterface* createStorageType_std( ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

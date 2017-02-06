@@ -14,13 +14,15 @@
 namespace strus {
 
 /// \brief Forward declaration
-class DatabaseClientInterface;
+class DatabaseInterface;
 /// \brief Forward declaration
 class StorageClientInterface;
 /// \brief Forward declaration
 class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
+/// \brief Forward declaration
+class StorageDumpInterface;
 
 
 /// \brief Interface to the create and alter a storage for strus
@@ -31,28 +33,30 @@ public:
 	virtual ~StorageInterface(){}
 
 	/// \brief Creates an client instance of the storage using a defined key value store database
-	/// \param[in] configsource configuration source string describing the storage (not a filename !)
-	/// \param[in] database key value store database used by this storage (ownership passed to returned object)
+	/// \param[in] configsource configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by this storage
 	/// \param[in] (optional) statisticsProc defines the format of statistic messages (distribute statistics)
 	virtual StorageClientInterface* createClient(
 			const std::string& configsource,
-			DatabaseClientInterface* database,
+			const DatabaseInterface* database,
 			const StatisticsProcessorInterface* statisticsProc=0) const=0;
 
 	/// \brief Creates a new storage described with configsource using a defined key value store database
-	/// \param[in] configsource Configuration source string describing the storage (not a filename !)
-	/// \param[in] database reference to a key value store database used by the storage
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by this storage
 	/// \return true on success, false on error
 	/// \remark The database referenced by 'database' must have been created and active
 	virtual bool createStorage(
 			const std::string& configsource,
-			DatabaseClientInterface* database) const=0;
+			const DatabaseInterface* database) const=0;
 
 	/// \brief Create an interface to alter the meta data table structure
-	/// \param[in] database key value store database used by the storage (ownership passed to returned object)
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by this storage
 	/// \return the created reference to be disposed with delete by the caller
 	virtual StorageAlterMetaDataTableInterface* createAlterMetaDataTable(
-			DatabaseClientInterface* database) const=0;
+			const std::string& configsource,
+			const DatabaseInterface* database) const=0;
 
 	/// \brief Enumeration of different type of configurations
 	///	Needed for getting the correct description of the configuration
@@ -70,6 +74,16 @@ public:
 	/// \brief Get the list of known configuration parameter keys
 	///	for verification of the configuration by programs using this storage implementation.
 	virtual const char** getConfigParameters( const ConfigType& type) const=0;
+
+	/// \brief Create a dump of a storage
+	/// \param[in] configsource Configuration source string describing the storage and the database (not a filename !)
+	/// \param[in] database key value store database type used by the storage
+	/// \param[in] keyprefix prefix for keys to resrict the dump to
+	/// \return the object to fetch the dump from
+	virtual StorageDumpInterface* createDump(
+			const std::string& configsource,
+			const DatabaseInterface* database,
+			const std::string& keyprefix) const=0;
 };
 
 }//namespace

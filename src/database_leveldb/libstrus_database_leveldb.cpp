@@ -14,7 +14,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC DatabaseInterface* strus::createDatabase_leveldb( ErrorBufferInterface* errorhnd)
+DLL_PUBLIC DatabaseInterface* strus::createDatabaseType_leveldb( ErrorBufferInterface* errorhnd)
 {
 	try
 	{

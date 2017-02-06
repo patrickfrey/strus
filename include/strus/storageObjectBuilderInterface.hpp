@@ -28,6 +28,8 @@ class QueryProcessorInterface;
 class StorageAlterMetaDataTableInterface;
 /// \brief Forward declaration
 class StatisticsProcessorInterface;
+/// \brief Forward declaration
+class VectorStorageInterface;
 
 /// \brief Interface providing a mechanism to create complex multi component objects for the storage and the query evaluation.
 class StorageObjectBuilderInterface
@@ -40,10 +42,10 @@ public:
 	/// \return the storage interface reference
 	virtual const StorageInterface* getStorage() const=0;
 
-	/// \brief Get the database interface as loaded from modules and optionally specified in the configuration string
-	/// \param[in] config configuration string (not a filename!) optionally containing an assignment database=<...> that specifies the database to use
+	/// \brief Get the database interface by name
+	/// \param[in] name name of the database interface
 	/// \return the database interface reference
-	virtual const DatabaseInterface* getDatabase( const std::string& config) const=0;
+	virtual const DatabaseInterface* getDatabase( const std::string& name) const=0;
 
 	/// \brief Get the query processor interface
 	/// \return the query processor interface reference
@@ -52,6 +54,10 @@ public:
 	/// \brief Get the statistics processor interface
 	/// \return the statistics processor interface reference
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor( const std::string& name) const=0;
+
+	/// \brief Get a vectorspace model for mapping vectors to features by name
+	/// \return the vectorspace model interface reference
+	virtual const VectorStorageInterface* getVectorStorage( const std::string& name) const=0;
 
 	/// \brief Creates a an interface for query evaluation
 	/// \return the query evaluation object (with ownership returned)

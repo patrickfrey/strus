@@ -60,12 +60,12 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 		te = m_queryEval->terms().end();
 	for (; ti != te; ++ti)
 	{
-		pushTerm( ti->type, ti->value);
+		pushTerm( ti->type, ti->value, 1);
 		defineFeature( ti->set, 1.0);
 	}
 }
 
-bool Query::Term::operator<( const Term& o) const
+bool Query::TermKey::operator<( const TermKey& o) const
 {
 	int cmpres;
 	if (type.size() != o.type.size()) return type.size() < o.type.size();
@@ -87,23 +87,41 @@ void Query::printStack( std::ostream& out, std::size_t indent) const
 	}
 }
 
-void Query::pushTerm( const std::string& type_, const std::string& value_)
+void Query::pushTerm( const std::string& type_, const std::string& value_, const Index& length_)
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
 	char buf[ 2048];
-	strus_snprintf( buf, sizeof(buf), "pushTerm %s %s stack %u\n", type_.c_str(), value_.c_str(), (unsigned int)m_stack.size());
+	strus_snprintf( buf, sizeof(buf), "pushTerm %s %s %u stack %u\n", type_.c_str(), value_.c_str(), length_, (unsigned int)m_stack.size());
 	std::cerr << buf;
 	printStack( std::cerr, 1);
 #endif
 	try
 	{
-		m_terms.push_back( Term( type_, value_));
+		m_terms.push_back( Term( type_, value_, length_));
 		m_stack.push_back( nodeAddress( TermNode, m_terms.size()-1));
 	}
 	CATCH_ERROR_MAP( _TXT("error pushing term to query: %s"), *m_errorhnd);
 }
 
-void Query::pushExpression( const PostingJoinOperatorInterface* operation, std::size_t argc, int range_, unsigned int cardinality_)
+void Query::pushDocField(
+		const std::string& metadataRangeStart,
+		const std::string& metadataRangeEnd)
+{
+#ifdef STRUS_LOWLEVEL_DEBUG
+	char buf[ 2048];
+	strus_snprintf( buf, sizeof(buf), "pushField [%s:%s] stack %u\n", metadataRangeStart.c_str(), metadataRangeEnd.c_str(), (unsigned int)m_stack.size());
+	std::cerr << buf;
+	printStack( std::cerr, 1);
+#endif
+	try
+	{
+		m_docfields.push_back( DocField( metadataRangeStart, metadataRangeEnd));
+		m_stack.push_back( nodeAddress( DocFieldNode, m_docfields.size()-1));
+	}
+	CATCH_ERROR_MAP( _TXT("error pushing doc field to query: %s"), *m_errorhnd);
+}
+
+void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsigned int argc, int range_, unsigned int cardinality_)
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
 	char buf[ 2048];
@@ -203,6 +221,31 @@ void Query::print( std::ostream& out) const
 		printNode( out, fi->node, 1);
 		out << std::endl;
 	}
+	out << "MaxNofRanks = " << m_nofRanks << std::endl;
+	out << "MinRank = " << m_minRank << std::endl;
+	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
+	for (; ui != ue; ++ui)
+	{
+		out << "User restriction : " << *ui << std::endl;
+	}
+	std::vector<Index>::const_iterator di = m_evalset_docnolist.begin(), de = m_evalset_docnolist.end();
+	if (di != de)
+	{
+		out << "Document evaluation set : ";
+		for (std::size_t didx=0; di != de; ++di)
+		{
+			if (didx != 0) out << ", ";
+			out << *ui;
+		}
+		out << std::endl;
+	}
+}
+
+std::string Query::tostring() const
+{
+	std::ostringstream out;
+	print( out);
+	return out.str();
 }
 
 void Query::printVariables( std::ostream& out, NodeAddress adr) const
@@ -241,6 +284,14 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 			out << std::endl;
 			break;
 		}
+		case DocFieldNode:
+		{
+			const DocField& docfield = m_docfields[ nodeIndex( adr)];
+			out << indentstr << "docfield " << docfield.metadataRangeStart << " : " << docfield.metadataRangeEnd;
+			printVariables( out, adr);
+			out << std::endl;
+			break;
+		}
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
@@ -271,6 +322,12 @@ Query::NodeAddress Query::duplicateNode( Query::NodeAddress adr)
 		{
 			m_terms.push_back( m_terms[ nodeIndex( adr)]);
 			rtadr = nodeAddress( TermNode, m_terms.size()-1);
+			break;
+		}
+		case DocFieldNode:
+		{
+			m_docfields.push_back( m_docfields[ nodeIndex( adr)]);
+			rtadr = nodeAddress( DocFieldNode, m_docfields.size()-1);
 			break;
 		}
 		case ExpressionNode:
@@ -338,10 +395,20 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case TermNode:
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
-				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value));
+				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
 				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
+				break;
+			}
+			case DocFieldNode:
+			{
+				const DocField& docfield = m_docfields[ nodeIndex( *ni)];
+				joinargs.push_back( m_storage->createFieldPostingIterator( docfield.metadataRangeStart, docfield.metadataRangeEnd));
+				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression (doc field) posting iterator"));
+				TermStatistics termstats( m_globstats.nofDocumentsInserted());
+				// ... Doc Field features get the global statistics, because they are supposed to appear in every document
+				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), termstats);
 				break;
 			}
 			case ExpressionNode:
@@ -367,9 +434,19 @@ PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& n
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
 			const Term& term = m_terms[ nidx];
-			rt = m_storage->createTermPostingIterator( term.type, term.value);
+			rt = m_storage->createTermPostingIterator( term.type, term.value, term.length);
 			if (!rt) break;
 			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, getTermStatistics( term.type, term.value));
+			break;
+		}
+		case DocFieldNode:
+		{
+			const DocField& docfield = m_docfields[ nodeIndex( nodeadr)];
+			rt = m_storage->createFieldPostingIterator( docfield.metadataRangeStart, docfield.metadataRangeEnd);
+			if (!rt) break;
+			TermStatistics termstats( m_globstats.nofDocumentsInserted());
+			// ... Doc Field features get the global statistics, because they are supposed to appear in every document
+			nodeStorageDataMap[ nodeadr] = NodeStorageData( rt, termstats);
 			break;
 		}
 		case ExpressionNode:
@@ -411,6 +488,7 @@ void Query::collectSummarizationVariables(
 	{
 		case NullNode: break;
 		case TermNode: break;
+		case DocFieldNode: break;
 		case ExpressionNode:
 		{
 			std::size_t nidx = nodeIndex( nodeadr);
@@ -432,7 +510,7 @@ void Query::defineTermStatistics(
 		const std::string& value_,
 		const TermStatistics& stats_)
 {
-	m_termstatsmap[ Term( type_, value_)] = stats_;
+	m_termstatsmap[ TermKey( type_, value_)] = stats_;
 }
 
 void Query::defineGlobalStatistics(
@@ -445,7 +523,7 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 {
 	static TermStatistics undef;
 	if (m_termstatsmap.empty()) return undef;
-	std::map<Term,TermStatistics>::const_iterator si = m_termstatsmap.find( Term( type_, value_));
+	TermStatisticsMap::const_iterator si = m_termstatsmap.find( TermKey( type_, value_));
 	if (si == m_termstatsmap.end()) return undef;
 	return si->second;
 }
@@ -569,7 +647,7 @@ QueryResult Query::evaluate()
 					}
 				}
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "add feature " << wi->functionName() << " weight " << wi->weight() << std::endl;
+				std::cout << "add feature " << wi->functionName() << std::endl;
 #endif
 				accumulator.addWeightingElement( execContext.release());
 			}
@@ -585,6 +663,10 @@ QueryResult Query::evaluate()
 			{
 				invAclList.push_back( invAcl);
 				accumulator.addAlternativeAclRestriction( invAcl.get());
+			}
+			else if (m_errorhnd->hasError())
+			{
+				throw strus::runtime_error(_TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
 			}
 		}
 		// [4.5] Define the feature restrictions:
@@ -632,7 +714,7 @@ QueryResult Query::evaluate()
 		Index docno = 0;
 		unsigned int state = 0;
 		unsigned int prev_state = 0;
-		float weight = 0.0;
+		double weight = 0.0;
 	
 		while (accumulator.nextRank( docno, state, weight))
 		{

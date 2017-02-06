@@ -15,11 +15,14 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "getMemorySize.h"
-#include <stdexcept>
+#include <iostream>
+#include <sstream>
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
 
 using namespace strus;
+
+#define MODULENAME "databaseClient"
 
 static std::string normalizePath( const std::string& path_)
 {
@@ -82,6 +85,18 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 		cleanup();
 		throw strus::runtime_error( _TXT( "failed to open key value store database: %s"), err.c_str());
 	}
+}
+
+std::string LevelDbHandle::config() const
+{
+	std::ostringstream out;
+	out << "path='" << m_path << "'";
+	if (!m_compression) out << ";compression=" << (m_compression?"Y":"N");
+	if (m_cachesize_k) out << ";cache=" << m_cachesize_k << "K";
+	if (m_maxOpenFiles) out << ";max_open_files=" << m_maxOpenFiles;
+	if (m_writeBufferSize) out << ";write_buffer_size=" << m_writeBufferSize;
+	if (m_blockSize) out << ";block_size=" << m_blockSize;
+	return out.str();
 }
 
 void LevelDbHandle::cleanup()
@@ -216,7 +231,7 @@ DatabaseBackupCursorInterface* DatabaseClient::createBackupCursor() const
 	{
 		return new DatabaseBackupCursor( m_db->db(), m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating database backup cursor: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' backup cursor: %s"), MODULENAME, *m_errorhnd, 0);
 }
 
 void DatabaseClient::writeImm(
@@ -238,7 +253,7 @@ void DatabaseClient::writeImm(
 			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error database writeImm: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' writeImm: %s"), MODULENAME, *m_errorhnd);
 }
 
 void DatabaseClient::removeImm(
@@ -256,7 +271,7 @@ void DatabaseClient::removeImm(
 			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 	}
-	CATCH_ERROR_MAP( _TXT("error database removeImm: %s"), *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' removeImm: %s"), MODULENAME, *m_errorhnd);
 }
 
 bool DatabaseClient::readValue(
@@ -270,7 +285,7 @@ bool DatabaseClient::readValue(
 		std::string rt;
 		leveldb::ReadOptions readoptions;
 		readoptions.fill_cache = options.useCacheEnabled();
-	
+
 		leveldb::Status status = m_db->db()->Get( readoptions, leveldb::Slice( key, keysize), &value);
 		if (status.IsNotFound())
 		{
@@ -283,6 +298,16 @@ bool DatabaseClient::readValue(
 		}
 		return true;
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error database readValue: %s"), *m_errorhnd, false);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' readValue: %s"), MODULENAME, *m_errorhnd, false);
 }
+
+std::string DatabaseClient::config() const
+{
+	try
+	{
+		return m_db->config();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
+}
+
 

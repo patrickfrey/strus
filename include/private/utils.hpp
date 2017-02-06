@@ -27,6 +27,8 @@ std::string trim( const std::string& val);
 bool caseInsensitiveEquals( const std::string& val1, const std::string& val2);
 bool caseInsensitiveStartsWith( const std::string& val, const std::string& prefix);
 int toint( const std::string& val);
+float tofloat( const std::string& val);
+float tofraction( const std::string& val);
 std::string tostring( int val);
 
 void aligned_free( void *ptr);
@@ -267,20 +269,6 @@ public:
 		return boost::atomic<bool>::load( boost::memory_order_acquire);
 	}
 };
-
-
-class ThreadId
-{
-public:
-	typedef boost::thread::id Type;
-	static Type get()
-	{
-		return boost::this_thread::get_id();
-	}
-};
-
-#define STRUS_STATIC_ASSERT( cond ) BOOST_STATIC_ASSERT((cond))
-#define CACHELINE_SIZE 64
 
 }} //namespace
 #endif

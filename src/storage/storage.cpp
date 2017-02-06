@@ -7,8 +7,11 @@
  */
 #include "storage.hpp"
 #include "storageClient.hpp"
+#include "storageDump.hpp"
 #include "strus/storageInterface.hpp"
 #include "strus/storageClientInterface.hpp"
+#include "strus/storageDumpInterface.hpp"
+#include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/base/configParser.hpp"
@@ -79,17 +82,17 @@ FILEERROR:
 
 StorageClientInterface* Storage::createClient(
 		const std::string& configsource,
-		DatabaseClientInterface* database,
+		const DatabaseInterface* database,
 		const StatisticsProcessorInterface* statisticsProc) const
 {
 	try
 	{
 		std::string cachedterms;
-		std::string src = configsource;
-		if (extractStringFromConfigString( cachedterms, src, "cachedterms", m_errorhnd))
+		std::string databaseConfig = configsource;
+		if (extractStringFromConfigString( cachedterms, databaseConfig, "cachedterms", m_errorhnd))
 		{
 			std::string cachedtermsrc = loadFile( cachedterms);
-			return new StorageClient( database, cachedtermsrc.c_str(), statisticsProc, m_errorhnd);
+			return new StorageClient( database, databaseConfig, cachedtermsrc.c_str(), statisticsProc, m_errorhnd);
 		}
 		else
 		{
@@ -98,13 +101,15 @@ StorageClientInterface* Storage::createClient(
 				m_errorhnd->explain(_TXT("error creating storage client: %s"));
 				return 0;
 			}
-			return new StorageClient( database, 0, statisticsProc, m_errorhnd);
+			return new StorageClient( database, databaseConfig, 0, statisticsProc, m_errorhnd);
 		}
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }
 
-bool Storage::createStorage( const std::string& configsource, DatabaseClientInterface* database) const
+bool Storage::createStorage(
+		const std::string& configsource,
+		const DatabaseInterface* dbi) const
 {
 	try
 	{
@@ -117,11 +122,15 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
-		MetaDataDescription md( metadata);
+		if (!dbi->createDatabase( src)) throw strus::runtime_error(_TXT("failed to create key/value store database"));
+		std::auto_ptr<strus::DatabaseClientInterface> database( dbi->createClient( src));
+		if (!database.get()) throw strus::runtime_error(_TXT("failed to create database client"));
+
+		// 1st phase, store variables:
 		std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 		if (!transaction.get()) return false;
 
-		DatabaseAdapter_Variable::Writer stor( database);
+		DatabaseAdapter_Variable::Writer stor( database.get());
 	
 		stor.store( transaction.get(), "TermNo", 1);
 		stor.store( transaction.get(), "TypeNo", 1);
@@ -134,6 +143,13 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 		{
 			stor.store( transaction.get(), "UserNo", 1);
 		}
+		if (!transaction->commit()) return false;
+
+		// 2nd phase, store metadata:
+		transaction.reset( database->createTransaction());
+		if (!transaction.get()) return false;
+
+		MetaDataDescription md( metadata);
 		md.store( transaction.get());
 	
 		return transaction->commit();
@@ -141,11 +157,13 @@ bool Storage::createStorage( const std::string& configsource, DatabaseClientInte
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, false);
 }
 
-StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable( DatabaseClientInterface* database) const
+StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable(
+		const std::string& configsource,
+		const DatabaseInterface* database) const
 {
 	try
 	{
-		return new StorageAlterMetaDataTable( database, m_errorhnd);
+		return new StorageAlterMetaDataTable( database, configsource, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
 }
@@ -173,6 +191,18 @@ const char** Storage::getConfigParameters( const ConfigType& type) const
 		case CmdCreate:		return keys_CreateStorage;
 	}
 	return 0;
+}
+
+StorageDumpInterface* Storage::createDump(
+		const std::string& configsource,
+		const DatabaseInterface* database,
+		const std::string& keyprefix) const
+{
+	try
+	{
+		return new StorageDump( database, configsource, keyprefix, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }
 
 

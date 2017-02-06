@@ -6,6 +6,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "storageClient.hpp"
+#include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseCursorInterface.hpp"
@@ -16,6 +17,7 @@
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/versionStorage.hpp"
+#include "strus/storageInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
@@ -26,12 +28,14 @@
 #include "statisticsUpdateIterator.hpp"
 #include "storageTransaction.hpp"
 #include "storageDocumentChecker.hpp"
+#include "extractKeyValueData.hpp"
 #include "documentFrequencyCache.hpp"
 #include "metaDataBlockCache.hpp"
 #include "metaDataRestriction.hpp"
 #include "metaDataReader.hpp"
 #include "postingIterator.hpp"
 #include "browsePostingIterator.hpp"
+#include "metaDataRangePostingIterator.hpp"
 #include "nullPostingIterator.hpp"
 #include "databaseAdapter.hpp"
 #include "forwardIterator.hpp"
@@ -39,7 +43,6 @@
 #include "indexPacker.hpp"
 #include "attributeReader.hpp"
 #include "keyAllocatorInterface.hpp"
-#include "extractKeyValueData.hpp"
 #include "valueIterator.hpp"
 #include <sstream>
 #include <iostream>
@@ -49,6 +52,8 @@
 #include <cstdio>
 
 using namespace strus;
+
+#define MODULENAME "storageClient"
 
 void StorageClient::cleanup()
 {
@@ -60,11 +65,12 @@ void StorageClient::cleanup()
 }
 
 StorageClient::StorageClient(
-		DatabaseClientInterface* database_,
+		const DatabaseInterface* database_,
+		const std::string& databaseConfig,
 		const char* termnomap_source,
 		const StatisticsProcessorInterface* statisticsProc_,
 		ErrorBufferInterface* errorhnd_)
-	:m_database()
+	:m_database(database_->createClient( databaseConfig))
 	,m_next_typeno(0)
 	,m_next_termno(0)
 	,m_next_docno(0)
@@ -77,12 +83,12 @@ StorageClient::StorageClient(
 {
 	try
 	{
-		m_metadescr.load( database_);
-		m_metaDataBlockCache = new MetaDataBlockCache( database_, m_metadescr);
+		if (!m_database.get()) throw strus::runtime_error(_TXT("failed to create database client: %s"), m_errorhnd->fetchError());
+		m_metadescr.load( m_database.get());
+		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
 
-		loadVariables( database_);
+		loadVariables( m_database.get());
 		if (termnomap_source) loadTermnoMap( termnomap_source);
-		m_database.reset( database_);
 	}
 	catch (const std::bad_alloc& err)
 	{
@@ -94,6 +100,22 @@ StorageClient::StorageClient(
 		cleanup();
 		throw strus::runtime_error(_TXT("error creating storage client: %s"), err.what());
 	}
+}
+
+std::string StorageClient::config() const
+{
+	try
+	{
+		std::string rt( m_database->config());
+		std::string mdstr( m_metadescr.tostring());
+		if (!mdstr.empty())
+		{
+			rt.append( "metadata=");
+			rt.append( mdstr);
+		}
+		return rt;
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
 }
 
 void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
@@ -245,7 +267,8 @@ std::vector<std::string> StorageClient::getAttributeNames() const
 PostingIteratorInterface*
 	StorageClient::createTermPostingIterator(
 		const std::string& typestr,
-		const std::string& termstr) const
+		const std::string& termstr,
+		const Index& length) const
 {
 	try
 	{
@@ -255,9 +278,23 @@ PostingIteratorInterface*
 		{
 			return new NullPostingIterator( termstr.c_str());
 		}
-		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), m_errorhnd);
+		return new PostingIterator( this, m_database.get(), typeno, termno, termstr.c_str(), length, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating term posting search index iterator: %s"), *m_errorhnd, 0);
+}
+
+PostingIteratorInterface*
+	StorageClient::createFieldPostingIterator(
+		const std::string& meta_fieldStart,
+		const std::string& meta_fieldEnd) const
+{
+	try
+	{
+		return new MetaDataRangePostingIterator(
+				new MetaDataReader( m_metaDataBlockCache, &m_metadescr, m_errorhnd),
+				m_nof_documents.value(), meta_fieldStart, meta_fieldEnd, m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating field posting iterator defined by meta data: %s"), *m_errorhnd, 0);
 }
 
 PostingIteratorInterface*
@@ -370,10 +407,14 @@ StorageTransactionInterface*
 {
 	try
 	{
-		if (m_statisticsProc && !m_statisticsBuilder.get())
+		if (m_statisticsProc)
 		{
-			StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-			m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+			TransactionLock lock( this);
+			if (!m_statisticsBuilder.get())
+			{
+				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+			}
 		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
 	}
@@ -872,29 +913,6 @@ const StatisticsProcessorInterface*  StorageClient::getStatisticsProcessor() con
 	return m_statisticsProc;
 }
 
-static std::string keystring( const strus::DatabaseCursorInterface::Slice& key)
-{
-	const char hex[] = "0123456789abcdef";
-	std::string rt;
-	char const* ki = key.ptr();
-	char const* ke = key.ptr()+key.size();
-	for (; ki != ke; ++ki)
-	{
-		if ((unsigned char)*ki > 32 && (unsigned char)*ki < 128)
-		{
-			rt.push_back( *ki);
-		}
-		else
-		{
-			rt.push_back( '[');
-			rt.push_back( hex[ (unsigned char)*ki / 16]);
-			rt.push_back( hex[ (unsigned char)*ki % 16]);
-			rt.push_back( ']');
-		}
-	}
-	return rt;
-}
-
 static void checkKeyValue(
 		const strus::DatabaseClientInterface* database,
 		const strus::DatabaseCursorInterface::Slice& key,
@@ -1000,7 +1018,7 @@ static void checkKeyValue(
 	}
 	catch (const std::runtime_error& err)
 	{
-		std::string ks( keystring( key));
+		std::string ks( extractKeyString( key));
 		char buf[ 256];
 		snprintf( buf, 256, _TXT( "error in checked key '%s':"), ks.c_str());
 		errorlog << buf << err.what() << std::endl;
@@ -1029,194 +1047,6 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error checking storage: %s"), *m_errorhnd, false);
-}
-
-static void dumpKeyValue(
-		std::ostream& out,
-		const strus::DatabaseClientInterface* database,
-		const strus::DatabaseCursorInterface::Slice& key,
-		const strus::DatabaseCursorInterface::Slice& value)
-{
-	try
-	{
-		switch (key.ptr()[0])
-		{
-			case strus::DatabaseKey::TermTypePrefix:
-			{
-				strus::TermTypeData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::TermValuePrefix:
-			{
-				strus::TermValueData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::DocIdPrefix:
-			{
-				strus::DocIdData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::VariablePrefix:
-			{
-				strus::VariableData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::DocAttributePrefix:
-			{
-				strus::DocAttributeData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::TermTypeInvPrefix:
-			{
-				strus::TermTypeInvData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::TermValueInvPrefix:
-			{
-				strus::TermValueInvData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::ForwardIndexPrefix:
-			{
-				strus::ForwardIndexData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::DocMetaDataPrefix:
-			{
-				strus::MetaDataDescription metadescr( database);
-				strus::DocMetaDataData data( &metadescr, key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::UserNamePrefix:
-			{
-				strus::UserNameData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::DocFrequencyPrefix:
-			{
-				strus::DocFrequencyData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::PosinfoBlockPrefix:
-			{
-				strus::PosinfoBlockData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::UserAclBlockPrefix:
-			{
-				strus::UserAclBlockData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::AclBlockPrefix:
-			{
-				strus::AclBlockData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::DocListBlockPrefix:
-			{
-				strus::DocListBlockData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::InverseTermPrefix:
-			{
-				strus::InverseTermData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::MetaDataDescrPrefix:
-			{
-				strus::MetaDataDescrData data( key, value);
-				data.print( out);
-				break;
-			}
-			case strus::DatabaseKey::AttributeKeyPrefix:
-			{
-				strus::AttributeKeyData data( key, value);
-				data.print( out);
-				break;
-			}
-			default:
-			{
-				throw strus::runtime_error( _TXT( "illegal data base prefix"));
-			}
-		}
-	}
-	catch (const std::runtime_error& err)
-	{
-		std::string ks( keystring( key));
-		throw strus::runtime_error( _TXT( "error in dumped dkey '%s': %s"), ks.c_str(), err.what());
-	}
-}
-
-class StorageDump
-	:public StorageDumpInterface
-{
-public:
-	StorageDump( const strus::DatabaseClientInterface* database_, const std::string& keyprefix, ErrorBufferInterface* errorhnd_)
-		:m_database(database_)
-		,m_cursor( database_->createCursor( strus::DatabaseOptions()))
-		,m_errorhnd(errorhnd_)
-	{
-		if (!m_cursor.get()) throw strus::runtime_error(_TXT("error creating database cursor"));
-		m_key = m_cursor->seekFirst( keyprefix.c_str(), keyprefix.size());
-	}
-	virtual ~StorageDump(){}
-
-	virtual bool nextChunk( const char*& chunk, std::size_t& chunksize)
-	{
-		try
-		{
-			unsigned int ii = 0, nn = NofKeyValuePairsPerChunk;
-			std::ostringstream output;
-			for (; m_key.defined() && ii<nn; m_key = m_cursor->seekNext(),++ii)
-			{
-				if (m_key.size() == 0)
-				{
-					throw strus::runtime_error( _TXT( "found empty key in storage"));
-				}
-				dumpKeyValue( output, m_database, m_key, m_cursor->value());
-			};
-			m_chunk = output.str();
-			chunk = m_chunk.c_str();
-			chunksize = m_chunk.size();
-			return (chunksize != 0);
-		}
-		CATCH_ERROR_MAP_RETURN( _TXT("error fetching next chunk of storage dump: %s"), *m_errorhnd, false);
-	}
-
-	/// \brief How many key/value pairs to return in one chunk
-	enum {NofKeyValuePairsPerChunk=256};
-
-private:
-	const strus::DatabaseClientInterface* m_database;
-	std::auto_ptr<strus::DatabaseCursorInterface> m_cursor;
-	strus::DatabaseCursorInterface::Slice m_key;
-	std::string m_chunk;
-	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
-};
-
-StorageDumpInterface* StorageClient::createDump( const std::string& keyprefix) const
-{
-	try
-	{
-		return new StorageDump( m_database.get(), keyprefix, m_errorhnd);
-	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage dump interface: %s"), *m_errorhnd, 0);
 }
 
 

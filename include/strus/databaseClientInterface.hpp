@@ -74,6 +74,10 @@ public:
 			std::size_t keysize,
 			std::string& value,
 			const DatabaseOptions& options) const=0;
+
+	/// \brief Get the interpreted configuration this database client was created with
+	/// \return the configuration as string
+	virtual std::string config() const=0;
 };
 
 }//namespace

@@ -13,6 +13,7 @@
 #include "strus/lib/statsproc.hpp"
 #include "strus/lib/storage.hpp"
 #include "strus/lib/database_leveldb.hpp"
+#include "strus/constants.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/reference.hpp"
@@ -23,6 +24,8 @@
 #include "strus/databaseInterface.hpp"
 #include "strus/databaseClientInterface.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
+#include "strus/vectorStorageInterface.hpp"
+#include "strus/vectorStorageClientInterface.hpp"
 #include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -41,8 +44,8 @@ class StorageObjectBuilder
 public:
 	explicit StorageObjectBuilder( ErrorBufferInterface* errorhnd_)
 		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
-		,m_storage(strus::createStorage(errorhnd_))
-		,m_db( strus::createDatabase_leveldb( errorhnd_))
+		,m_storage(strus::createStorageType_std(errorhnd_))
+		,m_db( strus::createDatabaseType_leveldb( errorhnd_))
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{
@@ -58,9 +61,20 @@ public:
 	{
 		return m_storage.get();
 	}
-	virtual const DatabaseInterface* getDatabase( const std::string&) const
+	virtual const DatabaseInterface* getDatabase( const std::string& name) const
 	{
-		return m_db.get();
+		try
+		{
+			if (name.empty() || utils::tolower( name) == "leveldb")
+			{
+				return m_db.get();
+			}
+			else
+			{
+				throw strus::runtime_error(_TXT("unknown database interface: '%s'"), name.c_str());
+			}
+		}
+		CATCH_ERROR_MAP_RETURN( _TXT("error getting database interface: %s"), *m_errorhnd, 0);
 	}
 	virtual const QueryProcessorInterface* getQueryProcessor() const
 	{
@@ -80,6 +94,11 @@ public:
 			}
 		}
 		CATCH_ERROR_MAP_RETURN( _TXT("error getting statistics processor: %s"), *m_errorhnd, 0);
+	}
+	virtual const VectorStorageInterface* getVectorStorage( const std::string& name) const
+	{
+		m_errorhnd->report(_TXT("unknown vector space model: '%s'"), name.c_str());
+		return 0;
 	}
 	virtual QueryEvalInterface* createQueryEval() const
 	{
@@ -126,36 +145,28 @@ DLL_PUBLIC StorageAlterMetaDataTableInterface*
 			g_intl_initialized = true;
 		}
 
-		std::string dbname;
 		std::string configstr( config);
-
-		const DatabaseInterface* dbi = objbuilder->getDatabase( configstr);
-		const StorageInterface* sti = objbuilder->getStorage();
-
+		std::string dbname;
 		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
-		std::string databasecfg( configstr);
-		strus::removeKeysFromConfigString(
-				databasecfg,
-				sti->getConfigParameters( strus::StorageInterface::CmdCreateClient), errorhnd);
-		//... In storagecfg is now the pure storage configuration without the database settings
 		if (errorhnd->hasError())
 		{
 			errorhnd->explain(_TXT("cannot evaluate database: %s"));
 			return 0;
 		}
-		std::auto_ptr<DatabaseClientInterface> database( dbi->createClient( databasecfg));
-		if (!database.get())
+		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
+		const StorageInterface* sti = objbuilder->getStorage();
+		if (!dbi || !sti)
 		{
-			errorhnd->report(_TXT("error creating database client"));
+			errorhnd->explain(_TXT("could not get storage and database interfaces: %s"));
 			return 0;
 		}
-		std::auto_ptr<StorageAlterMetaDataTableInterface> altermetatable( sti->createAlterMetaDataTable( database.get()));
+		std::auto_ptr<StorageAlterMetaDataTableInterface>
+				altermetatable( sti->createAlterMetaDataTable( configstr, dbi));
 		if (!altermetatable.get())
 		{
 			errorhnd->report(_TXT("error creating alter metadata table client"));
 			return 0;
 		}
-		(void)database.release(); //... ownership passed to alter metadata table client
 		return altermetatable.release(); //... ownership returned
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage alter metadata table interface: %s"), *errorhnd, 0);
@@ -179,14 +190,14 @@ DLL_PUBLIC StorageClientInterface*
 		std::string statsprocname;
 		std::string dbname;
 		std::string configstr( config);
+		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
 	
-		const DatabaseInterface* dbi = objbuilder->getDatabase( configstr);
+		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
 		if (!dbi)
 		{
 			errorhnd->explain(_TXT("could not get database: %s"));
 			return 0;
 		}
-		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
 		if (strus::extractStringFromConfigString( statsprocname, configstr, "statsproc", errorhnd))
 		{
 			if (statsprocname.empty())
@@ -201,27 +212,6 @@ DLL_PUBLIC StorageClientInterface*
 			errorhnd->explain(_TXT("could not get storage: %s"));
 			return 0;
 		}
-		std::string databasecfg( configstr);
-		std::string storagecfg( configstr);
-		strus::removeKeysFromConfigString(
-				databasecfg,
-				sti->getConfigParameters( strus::StorageInterface::CmdCreateClient), errorhnd);
-	
-		strus::removeKeysFromConfigString(
-				storagecfg,
-				dbi->getConfigParameters( strus::DatabaseInterface::CmdCreateClient), errorhnd);
-		//... In storagecfg is now the pure storage configuration without the database settings
-		if (errorhnd->hasError())
-		{
-			errorhnd->explain(_TXT("cannot create database client: %s"));
-			return 0;
-		}
-		std::auto_ptr<DatabaseClientInterface> database( dbi->createClient( databasecfg));
-		if (!database.get())
-		{
-			errorhnd->report(_TXT("error creating database client"));
-			return 0;
-		}
 		const StatisticsProcessorInterface* statsproc = 0;
 		if (!statsprocname.empty())
 		{
@@ -233,16 +223,60 @@ DLL_PUBLIC StorageClientInterface*
 			}
 		}
 		std::auto_ptr<StorageClientInterface>
-			storage( sti->createClient( storagecfg, database.get(), statsproc));
+			storage( sti->createClient( configstr, dbi, statsproc));
 		if (!storage.get())
 		{
 			errorhnd->report(_TXT("error creating storage client"));
 			return 0;
 		}
-		(void)database.release(); //... ownership passed to storage
 		return storage.release(); //... ownership returned
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *errorhnd, 0);
 }
 
+
+DLL_PUBLIC VectorStorageClientInterface*
+	strus::createVectorStorageClient(
+		const StorageObjectBuilderInterface* objbuilder,
+		ErrorBufferInterface* errorhnd,
+		const std::string& config)
+{
+	try
+	{
+		if (!g_intl_initialized)
+		{
+			strus::initMessageTextDomain();
+			g_intl_initialized = true;
+		}
+		std::string dbname;
+		std::string storagename;
+		std::string configstr( config);
+		(void)strus::extractStringFromConfigString( dbname, configstr, "database", errorhnd);
+		if (!strus::extractStringFromConfigString( storagename, configstr, "storage", errorhnd))
+		{
+			storagename = strus::Constants::standard_vector_storage();
+		}
+		const DatabaseInterface* dbi = objbuilder->getDatabase( dbname);
+		if (!dbi)
+		{
+			errorhnd->explain(_TXT("could not get database: %s"));
+			return 0;
+		}
+		const VectorStorageInterface* sti = objbuilder->getVectorStorage( storagename);
+		if (!sti)
+		{
+			errorhnd->explain(_TXT("could not get storage: %s"));
+			return 0;
+		}
+		std::auto_ptr<VectorStorageClientInterface>
+			storage( sti->createClient( configstr, dbi));
+		if (!storage.get())
+		{
+			errorhnd->report(_TXT("error creating storage client"));
+			return 0;
+		}
+		return storage.release(); //... ownership returned
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating vector storage client: %s"), *errorhnd, 0);
+}
 

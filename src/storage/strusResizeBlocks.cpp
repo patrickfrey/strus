@@ -107,15 +107,16 @@ static void commitTransaction( strus::DatabaseClientInterface& database, std::au
 }
 
 static void resizeBlocks(
-		strus::DatabaseClientInterface* dbc,
+		const strus::DatabaseInterface* dbi,
+		const std::string& configsource,
 		const std::string& blocktype,
 		const std::string& termtype,
 		unsigned int newsize,
 		unsigned int transactionsize,
 		const std::pair<unsigned int,unsigned int>& docnorange)
 {
-	strus::StorageClient storage( dbc, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
-	std::auto_ptr<strus::DatabaseTransactionInterface> transaction( dbc->createTransaction());
+	strus::StorageClient storage( dbi, configsource, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
+	std::auto_ptr<strus::DatabaseTransactionInterface> transaction( storage.databaseClient()->createTransaction());
 	unsigned int transactionidx = 0;
 	unsigned int blockcount = 0;
 	strus::Index termtypeno = 0;
@@ -130,7 +131,7 @@ static void resizeBlocks(
 	}
 	if (strus::utils::caseInsensitiveEquals( blocktype, "forwardindex"))
 	{
-		strus::ForwardIndexMap fwdmap( dbc, storage.maxTermTypeNo(), newsize?newsize:strus::ForwardIndexBlock::MaxBlockTokens);
+		strus::ForwardIndexMap fwdmap( storage.databaseClient(), storage.maxTermTypeNo(), newsize?newsize:strus::ForwardIndexBlock::MaxBlockTokens);
 		strus::Index di = 1, de = storage.maxDocumentNumber()+1;
 		if (docnorange.first)
 		{
@@ -154,7 +155,7 @@ static void resizeBlocks(
 			for (; ti<te; ++ti)
 			{
 				strus::ForwardIndexBlock blk;
-				strus::DatabaseAdapter_ForwardIndex::Cursor fwdi( dbc, ti, di);
+				strus::DatabaseAdapter_ForwardIndex::Cursor fwdi( storage.databaseClient(), ti, di);
 				bool hasmore = fwdi.loadUpperBound( 0, blk);
 
 				for (; hasmore; hasmore=fwdi.loadUpperBound( blk.id()+1, blk))
@@ -172,7 +173,7 @@ static void resizeBlocks(
 			if (++transactionidx == transactionsize)
 			{
 				fwdmap.getWriteBatch( transaction.get());
-				commitTransaction( *dbc, transaction);
+				commitTransaction( *storage.databaseClient(), transaction);
 				blockcount += transactionidx;
 				transactionidx = 0;
 				::printf( "\rresized %u        ", blockcount);
@@ -182,7 +183,7 @@ static void resizeBlocks(
 		if (transactionidx)
 		{
 			fwdmap.getWriteBatch( transaction.get());
-			commitTransaction( *dbc, transaction);
+			commitTransaction( *storage.databaseClient(), transaction);
 			blockcount += transactionidx;
 			transactionidx = 0;
 			::printf( "\rresized %u        ", blockcount);
@@ -270,13 +271,11 @@ int main( int argc, const char* argv[])
 		std::string blocktype( argv[ argi+1]);
 		unsigned int newblocksize = parseNumber( argv[argi+2], "positional argument 3");
 
-		strus::DatabaseInterface* dbi = strus::createDatabase_leveldb( g_errorBuffer);
+		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( g_errorBuffer);
 		if (!dbi) throw strus::runtime_error( _TXT("could not create leveldb key/value store database handler"));
-		strus::DatabaseClientInterface* dbc = dbi->createClient( dbconfig);
-		if (!dbc) throw strus::runtime_error( _TXT("could not open leveldb key/value store database"));
 		if (g_errorBuffer->hasError()) throw strus::runtime_error(_TXT("error in initialization"));
 
-		resizeBlocks( dbc, blocktype, termtype, newblocksize, transactionsize, docnorange);
+		resizeBlocks( dbi, dbconfig, blocktype, termtype, newblocksize, transactionsize, docnorange);
 
 		// Check for reported error an terminate regularly:
 		if (g_errorBuffer->hasError())

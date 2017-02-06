@@ -7,8 +7,8 @@
  */
 #include "indexPacker.hpp"
 #include "private/internationalization.hpp"
-#include "private/utf8.hpp"
-#include "private/bitOperations.hpp"
+#include "strus/base/utf8.hpp"
+#include "strus/base/bitOperations.hpp"
 #include <map>
 #include <limits>
 #include <cmath>
@@ -109,7 +109,9 @@ const char* strus::skipRange( const char* ptr, const char* end)
 
 static inline std::size_t packIndex_( char* buf, const Index& idx)
 {
-	return utf8encode( buf, (int32_t)idx);
+	std::size_t sz = utf8encode( buf, (int32_t)idx);
+	if (!sz) throw strus::runtime_error( _TXT( "illegal unicode character (%s)"), __FUNCTION__);
+	return sz;
 }
 
 static inline std::size_t packRange_( char* buf, const Index& idx, const Index& rangesize)
@@ -276,6 +278,7 @@ static const char* findIndex( const char* ptr, const char* end, Index needle, ch
 {
 	char needlebuf[16];
 	std::size_t needlesize = utf8encode( needlebuf, needle);
+	if (!needlesize) throw strus::runtime_error( _TXT( "illegal unicode character (%s)"), __FUNCTION__);
 
 	char const* pi = ptr;
 	const char* pe = end;

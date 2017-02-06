@@ -106,6 +106,25 @@ void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::stri
 	}
 }
 
+void SummarizerFunctionInstanceListMatches::defineResultName(
+		const std::string& resultname,
+		const std::string& itemname)
+{
+	try
+	{
+		if (utils::caseInsensitiveEquals( itemname, "position"))
+		{
+			m_resultname = resultname;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
+		}
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "ListMatches", *m_errorhnd);
+}
+
+
 SummarizerFunctionContextInterface* SummarizerFunctionInstanceListMatches::createFunctionContext(
 		const StorageClientInterface*,
 		MetaDataReaderInterface*,

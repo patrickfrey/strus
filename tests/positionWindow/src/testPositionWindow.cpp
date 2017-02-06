@@ -79,6 +79,11 @@ public:
 		return m_posno;
 	}
 
+	virtual strus::Index length() const
+	{
+		return m_posno ? 1:0;
+	}
+
 private:
 	char m_featureid[ 32];
 	strus::Index m_posar[ MaxPosArraySize];

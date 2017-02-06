@@ -32,7 +32,7 @@ public:
 	/// \brief Execute the function
 	/// \param[in] args array of arguments
 	/// \param[in] nofargs number of elements in args
-	virtual double call( const double* args, std::size_t nofargs) const=0;
+	virtual double call( const double* args, unsigned int nofargs) const=0;
 
 	/// \brief Return the representation (VM code or whatever it is) of the function with variables substituted as string
 	virtual std::string tostring() const=0;

@@ -49,6 +49,11 @@ public:
 		return m_positive->posno();
 	}
 
+	virtual Index length() const
+	{
+		return m_positive->length();
+	}
+
 private:
 	Index m_docno;
 	Index m_docno_neg;

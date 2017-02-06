@@ -33,7 +33,7 @@ public:
 
 	/// \brief Get the handle for a table element addressed by name
 	/// \param[in] name_ name of the element
-	/// \return return the element handle
+	/// \return return the element handle or -1 if not defined (error occurred)
 	/// \remark Element handles are numbered from 0 to N-1, where N is what nofElements() returns
 	virtual Index elementHandle( const std::string& name_) const=0;
 

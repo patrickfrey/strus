@@ -2,3 +2,6 @@ Test PostingIteratorIntersect with cardinality
 Write storage conversion to change endianess of an index. Write a storage conversion utility
 Define an interface to declare a limit of query execution to prevent DoS attacks (counter of micro ops in the query evaluation)
 
+Named structure interface parameter for weighting function an summarizer that provides a list of weighted areas that can be fetched elementwise or as array. 
+	These structure interfaces can be built as combination of others of their kind and posting iterators
+

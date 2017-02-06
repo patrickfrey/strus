@@ -66,6 +66,10 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
 
+	virtual void defineResultName(
+			const std::string& resultname,
+			const std::string& itemname);
+
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,
 			MetaDataReaderInterface*,

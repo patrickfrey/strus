@@ -46,6 +46,7 @@ StorageTransaction::StorageTransaction(
 	,m_userIdMap(database_,DatabaseKey::UserNamePrefix,storage_->createUsernoAllocator())
 	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix,storage_->createAttribnoAllocator())
 	,m_nof_deleted_documents(0)
+	,m_nof_documents_affected(0)
 	,m_commit(false)
 	,m_rollback(false)
 	,m_errorhnd(errorhnd_)
@@ -298,9 +299,10 @@ bool StorageTransaction::commit()
 		std::map<Index,Index> termnoUnknownMap;
 		m_termValueMap.getWriteBatch( termnoUnknownMap, transaction.get());
 		std::map<Index,Index> docnoUnknownMap;
-		int nof_documents = -m_nof_deleted_documents;
-		m_docIdMap.getWriteBatch( docnoUnknownMap, transaction.get(), &nof_documents);
-
+		int nof_new_documents = 0;
+		int nof_chg_documents = 0;
+		m_docIdMap.getWriteBatch( docnoUnknownMap, transaction.get(), &nof_new_documents, &nof_chg_documents);
+		int nof_documents_incr = nof_new_documents - m_nof_deleted_documents;
 		std::vector<Index> refreshList;
 		m_attributeMap.renameNewDocNumbers( docnoUnknownMap);
 		m_attributeMap.getWriteBatch( transaction.get());
@@ -318,7 +320,7 @@ bool StorageTransaction::commit()
 				m_termTypeMapInv, m_termValueMapInv);
 		if (statisticsBuilder)
 		{
-			statisticsBuilder->setNofDocumentsInsertedChange( nof_documents);
+			statisticsBuilder->setNofDocumentsInsertedChange( nof_documents_incr);
 		}
 		m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
 		m_forwardIndexMap.getWriteBatch( transaction.get());
@@ -326,7 +328,7 @@ bool StorageTransaction::commit()
 		m_userAclMap.renameNewDocNumbers( docnoUnknownMap);
 		m_userAclMap.getWriteBatch( transaction.get());
 
-		m_storage->getVariablesWriteBatch( transaction.get(), nof_documents);
+		m_storage->getVariablesWriteBatch( transaction.get(), nof_documents_incr);
 		if (!transaction->commit())
 		{
 			m_errorhnd->explain(_TXT("error in database transaction commit: %s"));
@@ -336,11 +338,12 @@ bool StorageTransaction::commit()
 		{
 			dfcache->writeBatch( dfbatch);
 		}
-		m_storage->declareNofDocumentsInserted( nof_documents);
+		m_storage->declareNofDocumentsInserted( nof_documents_incr);
 		m_storage->releaseTransaction( refreshList);
 		statisticsBuilderScope.done();
 
 		m_commit = true;
+		m_nof_documents_affected = nof_new_documents + nof_chg_documents + m_nof_deleted_documents;
 		m_nof_deleted_documents = 0;
 		return true;
 	}
@@ -362,6 +365,7 @@ void StorageTransaction::rollback()
 	std::vector<Index> refreshList;
 	m_storage->releaseTransaction( refreshList);
 	m_rollback = true;
+	m_nof_documents_affected = 0;
 }
 
 

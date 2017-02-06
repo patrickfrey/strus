@@ -80,7 +80,7 @@ void PositionWindow::init(
 	for (; ai != ae; ++ai)
 	{
 		m_itrar[ ai] = args[ai];
-		Index pos = m_itrar[ ai]->skipPos( firstpos_);
+		Index pos = m_itrar[ ai] ? m_itrar[ ai]->skipPos( firstpos_) : 0;
 		if (pos)
 		{
 			// Insert element:
@@ -135,7 +135,7 @@ bool PositionWindow::advance( const Index& advancepos)
 	{
 		pos = advancepos;
 	}
-	pos = itr->skipPos( pos);
+	pos = itr ? itr->skipPos( pos) : 0;
 	if (pos)
 	{
 		// Rearrange array to be sorted again by positions:

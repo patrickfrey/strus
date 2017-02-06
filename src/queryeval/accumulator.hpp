@@ -80,7 +80,7 @@ public:
 
 	void addAlternativeAclRestriction( InvAclIteratorInterface* iterator);
 
-	bool nextRank( Index& docno, unsigned int& selectorState, float& weight);
+	bool nextRank( Index& docno, unsigned int& selectorState, double& weight);
 
 	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
 	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}

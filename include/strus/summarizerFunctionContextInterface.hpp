@@ -31,7 +31,7 @@ public:
 
 	/// \brief Add a sumarization feature that is subject of summarization to the execution context
 	/// \param[in] name_ name of the summarization feature
-	/// \param[in] postingIterator_ iterator on the matches of the summarization feature
+	/// \param[in] postingIterator_ iterator on the matches of the summarization feature (ownership remains at caller)
 	/// \param[in] variables_ list of variables attached to subexpressions of the matches (passed with postingIterator_)
 	/// \param[in] weight_ weight of this summarization feature
 	/// \param[in] stats_ global term statistics passed down with the query. If undefined, they can be defined by or estimated from the posting iterator data. 

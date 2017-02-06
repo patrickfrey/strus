@@ -73,9 +73,15 @@ double WeightingFunctionContextSmart::call( const Index& docno)
 	double rt = 0.0;
 	for (; fi != fe; ++fi)
 	{
-		fi->skipDoc(docno);
 		double param[ MaxNofParameter+3];
-		param[ 0] = fi->ff();
+		if (docno == fi->skipDoc(docno))
+		{
+			param[ 0] = fi->ff();
+		}
+		else
+		{
+			param[ 0] = 0.0;
+		}
 		param[ 1] = fi->df();
 		param[ 2] = m_nofCollectionDocuments;
 		std::size_t pi = 3;

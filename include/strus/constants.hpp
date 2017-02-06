@@ -51,6 +51,26 @@ struct Constants
 	{
 		return 65535;
 	}
+	/// \brief Get the name of the standard (default) vector storage
+	static const char* standard_vector_storage()
+	{
+		return "vector_std";
+	}
+	/// \brief Get the name of the standard (default) vector storage module
+	static const char* standard_vector_storage_module()
+	{
+		return "storage_vector_std";
+	}
+	/// \brief Get the name of the standard (default) pattern matcher
+	static const char* standard_pattern_matcher()
+	{
+		return "std";
+	}
+	/// \brief Get the name of the standard (default) pattern match module
+	static const char* standard_pattern_matcher_module()
+	{
+		return "analyzer_pattern";
+	}
 };
 
 }//namespace

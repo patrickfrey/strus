@@ -29,6 +29,8 @@
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strustrace">strusTrace</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusmodule">strusModule</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusrpc">strusRpc</a></li>
+		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=struspattern">strusPattern</a></li>
+		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusvector">strusVector</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusutilities">strusUtilities</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusbindings-python">strusBindings (Python)</a></li>
 		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusbindings-java">strusBindings (Java)</a></li>
@@ -39,14 +41,16 @@
 		on the status of the latest build
 		<a href="https://build.opensuse.org/project/monitor/home:PatrickFrey">here</a>.
 		The bindings package is on many platforms marked as failed, but it might still be available 
-		for your purpose.
-		The package is splitted into a variant for each binding language. You might be able
+		for your purpose. The package is splitted into a variant for each binding language. You might be able
 		to install the package <i>strus-python</i>, even if <i>strusbindings</i> is marked as failed on
 		the open suse build cluster. This can for example be the case because the Java build
-		failed but Python succeeded.
+		failed but Python succeeded.<br/>
+		The vector and the pattern package require a newer compiler than available
+		on the build cluster or fail due to missing support of 3rdParty packages.
 		</p>
 		<a name="docker"> </a>
 		<h2>Start it from a docker image</h2>
+		<p><i><font color="red">The Strus Docker images are out of date by far, but will be updated soon.</font></i></p>
 		<p class="description">There are 4 docker images available based on ubuntu 14.04:
 		<ol>
 		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-env">patrickfrey/strus-ub1404-env</a>: strus search engine prerequisites (build tools, 3rdParty libraries) for ubuntu.</li>
@@ -63,61 +67,40 @@
 git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</pre>
 		The following projects (substitute for &lt;projectname&gt;) are part of the strus universe:
-		<a href="https://github.com/patrickfrey/strusBase">strusBase</a>, <a href="https://github.com/patrickfrey/strus">strus</a>, <a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>, <a href="https://github.com/patrickfrey/strusTrace">strusTrace</a>, <a href="https://github.com/patrickfrey/strusModule">strusModule</a>, <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>, <a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>, <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
-		</p>
-
-		<h2>Build the latest stable version</h2>
-		<p class="description">If you extract the build description from the
-		current docker images of <a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404-env/Dockerfile">the pre-requisites</a>,
-		<a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404.v0_8/Dockerfile">the core</a>
-		and the <a href="https://github.com/patrickfrey/strusDocker/blob/master/strus-ub1404-bind.v0_8/Dockerfile">language bindings</a>,
-		you get a version that builds and runs. These images are maintained, because some tutorials,
-		articles and some example projects rely on them.
+		<a href="https://github.com/patrickfrey/strusBase">strusBase</a>, <a href="https://github.com/patrickfrey/strus">strus</a>, <a href="https://github.com/patrickfrey/strusAnalyzer">strusAnalyzer</a>, <a href="https://github.com/patrickfrey/strusTrace">strusTrace</a>, <a href="https://github.com/patrickfrey/strusModule">strusModule</a>, <a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>, <a href="https://github.com/patrickfrey/strusPattern">strusPattern</a>, <a href="https://github.com/patrickfrey/strusVector">strusVector</a>, <a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>, <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
 		</p>
 
 		<h2>3rd party dependencies</h2>
 		<p class="description">
-		Hier is a list of 3rd party software you need to install for strus.:
+		Follow the instructions in INSTALL.3rdParty of every strus project for installing 
+		the prerequisites.<br/>
+		Hier is a list with the most important 3rd party software you need to install for strus.:
 		<ul>
 		<li><a href="http://www.boost.org">boost (>= 1.53)</a></li>
 		<li><a href="https://github.com/google/leveldb">leveldb</a> (needed by strus)</li>
 		<li><a href="https://code.google.com/p/gperftools">gperftools</a>(needed by leveldb)</li>
 		<li><a href="http://savannah.nongnu.org/projects/libunwind">libunwind</a> (needed by leveldb)</li>
 		<li><a href="https://code.google.com/p/snappy">snappy</a> (needed by leveldb)</li>
-		<li><a href="http://www.swig.org">SWIG (>= 2)</a> (needed by strusBindings)</li>
-		</ul>
-		</p>
-		<p class="description">and some optional 3rd party packages:
-		<ul>
-		<li><a href="http://php.net">PHP</a> (needed by strusBindings when building with -DWITH_PHP)</li>
-		<li><a href="http://java.com">Java/JNI</a> Java openjdk >= 1.7 (needed by strusBindings when building with -DWITH_JAVA)</li>
-		<li><a href="http://python.org">Python</a> python >= 2.7 (needed by strusBindings when building with -DWITH_PYTHON)</li>
+		<li><a href="http://php.net">PHP</a> (needed by strusBindings when building with -DWITH_PHP="YES")</li>
+		<li><a href="http://python.org">Python</a> python >= 2.7 (needed by strusBindings when building with -DWITH_PYTHON="YES")</li>
 		</ul>
 		</p>
 
-		<h2>Build system</h2>
+		<h2>Build the software</h2>
 		<p class="description">The build system is CMake. Go into the top level directory 
-		of each project and execute the following:
-		<pre>
-cmake CMakeLists.txt
-make
-sudo make install
-		</pre>
+		of each project and execute the instructions in INSTALL (for Linux), INSTALL.FreeBSD,
+		INSTALL.OpenBSD or INSTALL.OSX depending on your platform.<br/>
 		The projects will by default be installed in the default location for utilities
-		(On Ubuntu in /usr/local). The projects have due to dependencies be build and
+		(On Ubuntu in /usr/local). The projects have due to dependencies to be built and
 		installed in the following order (projects on the same line can be build in reversed
-		order too because they have no dependencies to each other):
+		order too because they have no build dependencies to each other):
 		<ol>
-		<li>strusBase
-		</li>
-		<li>strus, strusAnalyze
-		</li>
-		<li>strusModule
-		</li>
-		<li>strusRpc
-		</li>
-		<li>strusBindings, strusUtilities
-		</li>
+		<li>strusBase</li>
+		<li>strus, strusAnalyze</li>
+		<li>strusTrace</li>
+		<li>strusModule</li>
+		<li>strusRpc</li>
+		<li>strusPattern, strusVector, strusBindings, strusUtilities</li>
 		</ol>
 		</p>
 	</div>

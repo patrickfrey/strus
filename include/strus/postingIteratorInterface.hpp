@@ -55,6 +55,10 @@ public:
 	/// \brief Get the current position number
 	/// \return the position number
 	virtual Index posno() const=0;
+
+	/// \brief Get the ordinal position length of the current match
+	/// \return the ordinal position length
+	virtual Index length() const=0;
 };
 
 }//namespace

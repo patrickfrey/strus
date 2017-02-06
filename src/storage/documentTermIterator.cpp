@@ -31,7 +31,7 @@ DocumentTermIterator::DocumentTermIterator(
 	,m_invblkitr(0)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_typeno) throw strus::runtime_error(_TXT("term type '%s' not defined in storage"));
+	if (!m_typeno) throw strus::runtime_error(_TXT("term type '%s' not defined in storage"), type_.c_str());
 }
 
 Index DocumentTermIterator::skipDoc( const Index& docno_)
@@ -75,6 +75,7 @@ bool DocumentTermIterator::nextTerm( Term& value)
 				return true;
 			}
 		}
+		m_invblkitr = 0;
 		return false;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in document term iterator next term: %s"), *m_errorhnd, false);

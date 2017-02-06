@@ -17,6 +17,7 @@
 #include "private/internationalization.hpp"
 #include <vector>
 #include <string>
+#include <map>
 #include <sstream>
 #include <iostream>
 
@@ -34,6 +35,17 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
+struct MatchVariablesData
+{
+	typedef std::map<std::string,std::string> NameMap;
+	std::string type;		//< forward index type
+	NameMap namemap;		//< map for renaming results (defaultvariable names)
+
+	MatchVariablesData()
+		:type(),namemap(){}
+	MatchVariablesData( const MatchVariablesData& o)
+		:type(o.type),namemap(o.namemap){}
+};
 
 class SummarizerFunctionContextMatchVariables
 	:public SummarizerFunctionContextInterface
@@ -41,11 +53,11 @@ class SummarizerFunctionContextMatchVariables
 public:
 	/// \param[in] storage_ storage to use
 	/// \param[in] processor_ query processor to use
-	/// \param[in] type_ type of the forward index tokens to build the summary with
+	/// \param[in] data_ parameter data for evaluation
 	SummarizerFunctionContextMatchVariables(
 			const StorageClientInterface* storage_,
 			const QueryProcessorInterface* processor_,
-			const std::string& type_,
+			const Reference<MatchVariablesData>& data_,
 			ErrorBufferInterface* errorhnd_);
 
 	virtual ~SummarizerFunctionContextMatchVariables(){}
@@ -73,12 +85,12 @@ private:
 	};
 
 private:
-	const StorageClientInterface* m_storage;
-	const QueryProcessorInterface* m_processor;
-	Reference<ForwardIteratorInterface> m_forwardindex;
-	std::string m_type;
-	std::vector<SummarizationFeature> m_features;
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	const StorageClientInterface* m_storage;		///< storage to access
+	const QueryProcessorInterface* m_processor;		///< query processor interface for object creation
+	Reference<ForwardIteratorInterface>m_forwardindex;	///< forward index iterators for extracting features
+	Reference<MatchVariablesData> m_data;			///< parameters
+	std::vector<SummarizationFeature> m_features;		///< features to weight
+	ErrorBufferInterface* m_errorhnd;			///< buffer for error messages
 };
 
 
@@ -87,12 +99,16 @@ class SummarizerFunctionInstanceMatchVariables
 {
 public:
 	SummarizerFunctionInstanceMatchVariables( const QueryProcessorInterface* processor_, ErrorBufferInterface* errorhnd_)
-		:m_type(),m_processor(processor_),m_errorhnd(errorhnd_){}
+		:m_data(new MatchVariablesData()),m_processor(processor_),m_errorhnd(errorhnd_){}
 
 	virtual ~SummarizerFunctionInstanceMatchVariables(){}
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+
+	virtual void defineResultName(
+			const std::string& resultname,
+			const std::string& itemname);
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,
@@ -102,7 +118,7 @@ public:
 	virtual std::string tostring() const;
 
 private:
-	std::string m_type;
+	Reference<MatchVariablesData> m_data;
 	const QueryProcessorInterface* m_processor;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

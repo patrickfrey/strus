@@ -40,6 +40,9 @@
 			code of the core or the analyzer. The produced trace can be
 			visualized as call tree or the logs can be processed as readable 
 			dump.</li>
+		<li><a href="https://github.com/patrickfrey/strusPattern">strusPattern</a>
+			provides an implementation of the analyzer pattern matching interface
+			with a lexer based on the Intel hyperscan library.</li>
 		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
 			provides the loading of search engine components from dynamically 
 			loadable modules. (depends on strus and strusAnalyzer)</li>
@@ -49,10 +52,6 @@
 			another instance than the webserver itself is not allowed or at least 
 			not recommended, you should access strus via RPC or a similar mechanism.
 			(depends on strus, strusAnalyzer and strusModule)</li>
-		<li><a href="https://github.com/patrickfrey/strusStream">strusStream</a>
-			This project turns the use case of searching content with queries
-			to searching queries with content. So instead of searching in millions of 
-			documents with a query, you search in millions of queries with a document.</li>
 		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
 			provides some command line programs to access the search engine.
 			(Depends on strusModule and strusRpc</li>
@@ -83,8 +82,6 @@
 			Interface to define strus components and to load them from dynamically loadable modules.</li>
 		<li><a href="http://patrickfrey.github.io/strusRpc/doc/doxygen/html/index.html">strus RPC client</a>:
 			Interfaces for strus RPC client and server</li>
-		<li><a href="http://patrickfrey.github.io/strusModule/doc/doxygen/html/index.html">strus stream</a>:
-			Interface for document stream processing with strus.</li>
 		<li><a href="http://patrickfrey.github.io/strusUtilities/doc/doxygen/html/index.html">strus program loader</a>:
 			Functions to instantiate strus components from source</li>
 		</ul>

@@ -19,6 +19,9 @@
 
 namespace strus {
 
+std::string extractKeyString( const strus::DatabaseCursorInterface::Slice& key);
+
+
 struct TermTypeData
 {
 	const char* typestr;

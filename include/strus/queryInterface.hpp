@@ -35,9 +35,19 @@ public:
 	/// \brief Push a term to the query stack
 	/// \param[in] type_ term type
 	/// \param[in] value_ term value
+	/// \param[in] length_ term length (ordinal position count)
 	virtual void pushTerm(
 			const std::string& type_,
-			const std::string& value_)=0;
+			const std::string& value_,
+			const Index& length_)=0;
+
+	/// \brief Push an expression on the query stack that defines a single field per document. The fields are represented as a sets of postings. The postings are defined as meta data elements describing the start and the end of the field for each document.
+	/// \param[in] metadataRangeStart name of metadata element that defines the start position of the field in a document
+	/// \param[in] metadataRangeEnd name of metadata element that defines the end position of the field (first position after the field) in a document
+	/// \note fields can be used to identify elements in a certain document area without access of posting blocks and without assigning a different feature type and thus having different statistics
+	virtual void pushDocField(
+			const std::string& metadataRangeStart,
+			const std::string& metadataRangeEnd)=0;
 
 	/// \brief Push an expression formed by the topmost elements from the stack to the query stack,
 	///	removing the argument elements.
@@ -47,7 +57,7 @@ public:
 	/// \param[in] cardinality specifies a result dimension requirement (e.g. minimum number of elements of any input subset selection that builds a result) (0 for use default). Interpretation depends on operation, but in most cases it specifies the required size for a valid result.
 	virtual void pushExpression(
 			const PostingJoinOperatorInterface* operation,
-			std::size_t argc, int range, unsigned int cardinality)=0;
+			unsigned int argc, int range, unsigned int cardinality)=0;
 
 	/// \brief Attaches a variable to the top expression or term on the query stack.
 	/// \note The positions of the query matches of the referenced term or expression can be accessed through this variable in summarization.
@@ -109,7 +119,12 @@ public:
 	virtual void setWeightingVariableValue( const std::string& name, double value)=0;
 
 	/// \brief Evaluate the query
+	/// \return result of query evaluation
 	virtual QueryResult evaluate()=0;
+
+	/// \brief Map query to readable string
+	/// \return query with query evaluation scheme in readable form
+	virtual std::string tostring() const=0;
 };
 
 }//namespace

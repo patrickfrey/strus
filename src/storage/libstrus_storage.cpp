@@ -14,7 +14,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC StorageInterface* strus::createStorage( ErrorBufferInterface* errorhnd)
+DLL_PUBLIC StorageInterface* strus::createStorageType_std( ErrorBufferInterface* errorhnd)
 {
 	try
 	{

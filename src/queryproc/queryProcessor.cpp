@@ -66,7 +66,7 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	if (0==(func=createWeightingFunctionTermFrequency( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "tf", func);
 	if (0==(func=createWeightingFunctionConstant( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
-	defineWeightingFunction( "td", func);
+	defineWeightingFunction( "constant", func);
 	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "metadata", func);
 	if (0==(func=createWeightingFunctionSmart( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
@@ -82,9 +82,11 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "attribute", sum);
 	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
-	defineSummarizerFunction( "matchvariables", sum);
+	defineSummarizerFunction( "matchvar", sum);
 	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
-	defineSummarizerFunction( "accuvariable", sum);
+	defineSummarizerFunction( "accuvar", sum);
+	if (0==(sum=createSummarizerAccumulateNear( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "accunear", sum);
 
 	ScalarFunctionParserInterface* sfp;
 	if (0==(sfp=createScalarFunctionParser_default( m_errorhnd))) throw strus::runtime_error(_TXT("error creating scalar function parser"));

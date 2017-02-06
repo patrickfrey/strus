@@ -16,10 +16,11 @@
 using namespace strus;
 
 SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
-		AttributeReaderInterface* attribreader_, const std::string& name_, ErrorBufferInterface* errorhnd_)
+		AttributeReaderInterface* attribreader_, const std::string& attribname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_)
 	:m_attribreader(attribreader_)
-	,m_attribname(name_)
-	,m_attrib(attribreader_->elementHandle( name_.c_str()))
+	,m_attribname(attribname_)
+	,m_resultname(resultname_)
+	,m_attrib(attribreader_->elementHandle( attribname_.c_str()))
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_attrib)
@@ -53,7 +54,7 @@ std::vector<SummaryElement>
 		std::string attr = m_attribreader->getValue( m_attrib);
 		if (!attr.empty()) 
 		{
-			rt.push_back( SummaryElement( m_attribname, attr, 1.0));
+			rt.push_back( SummaryElement( m_resultname, attr, 1.0));
 		}
 		return rt;
 	}
@@ -67,7 +68,8 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 	{
 		if (utils::caseInsensitiveEquals( name, "name"))
 		{
-			m_name = value;
+			m_resultname = value;
+			m_attribname = value;
 		}
 		else
 		{
@@ -89,12 +91,34 @@ void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string
 	}
 }
 
+void SummarizerFunctionInstanceAttribute::defineResultName(
+		const std::string& resultname,
+		const std::string& itemname)
+{
+	try
+	{
+		if (utils::caseInsensitiveEquals( itemname, "metaname"))
+		{
+			m_attribname = resultname;
+		}
+		else if (utils::caseInsensitiveEquals( itemname, "resultname"))
+		{
+			m_resultname = resultname;
+		}
+		else
+		{
+			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
+		}
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "metadata", *m_errorhnd);
+}
+
 std::string SummarizerFunctionInstanceAttribute::tostring() const
 {
 	try
 	{
 		std::ostringstream rt;
-		rt << "name='" << m_name << "'";
+		rt << "metaname='" << m_attribname << "', resultname='" << m_resultname << "'";
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "attribute", *m_errorhnd, std::string());
@@ -114,7 +138,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createF
 			m_errorhnd->explain( _TXT("error creating context of 'attribute' summarizer: %s"));
 			return 0;
 		}
-		return new SummarizerFunctionContextAttribute( reader, m_name, m_errorhnd);
+		return new SummarizerFunctionContextAttribute( reader, m_attribname, m_resultname, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "attribute", *m_errorhnd, 0);
 }

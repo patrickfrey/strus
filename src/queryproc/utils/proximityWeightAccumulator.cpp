@@ -56,15 +56,18 @@ void ProximityWeightAccumulator::weight_same_sentence(
 	std::size_t wi = 0;
 	for (; wi < windowsize; ++wi)
 	{
-		win_pos[ wi] = featar[ window[ wi]]->posno();
+		win_pos[ wi] = featar[ window[ wi]] ? featar[ window[ wi]]->posno() : 0;
 		smark_pos[ wi] = 0;
 		std::size_t si = 0;
 		for (; si < structarsize; ++si)
 		{
-			Index smark = structar[si]->skipPos( win_pos[ wi]+1);
-			if (smark && (!smark_pos[ wi] || smark < smark_pos[ wi]))
+			if (structar[si])
 			{
-				smark_pos[ wi] = smark;
+				Index smark = structar[si]->skipPos( win_pos[ wi]+1);
+				if (smark && (!smark_pos[ wi] || smark < smark_pos[ wi]))
+				{
+					smark_pos[ wi] = smark;
+				}
 			}
 		}
 	}
@@ -75,7 +78,7 @@ void ProximityWeightAccumulator::weight_same_sentence(
 		{
 			if (smark_pos[ wi] && smark_pos[ wi] <= win_pos[ pi]) continue;
 			//... count same sentence only if there is no end of sentence marker inbetween
-			if (win_pos[ wi] + maxdist_featar[ window[ wi]] < win_pos[ pi]) continue;
+			if (!win_pos[ wi] || win_pos[ wi] + maxdist_featar[ window[ wi]] < win_pos[ pi]) continue;
 			//... count same sentence only withing a maximum proximity range
 
 			ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * factor;
@@ -94,6 +97,8 @@ void ProximityWeightAccumulator::weight_imm_follow(
 	std::size_t wi=1;
 	for (; wi < windowsize; ++wi)
 	{
+		if (!featar[window[wi]]) continue;
+
 		if (window[wi] == window[wi-1]+1
 		&& featar[window[wi]]->posno() == featar[window[wi-1]]->posno()+1)
 		{
@@ -116,13 +121,14 @@ void ProximityWeightAccumulator::weight_invdist(
 
 	for (wi = 0; wi < windowsize; ++wi)
 	{
-		win_pos[ wi] = featar[ window[ wi]]->posno();
+		win_pos[ wi] = featar[ window[ wi]] ? featar[ window[ wi]]->posno() : 0;
 	}
 	for (wi=0; wi < windowsize; ++wi)
 	{
 		std::size_t pi=wi+1;
 		for (; pi < windowsize; ++pi)
 		{
+			if (!win_pos[ pi]) continue;
 			double dist = win_pos[ pi] - win_pos[ wi];
 			double weight = 1.0 / sqrt( dist+1);
 			ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * weight * factor;
@@ -142,6 +148,7 @@ void ProximityWeightAccumulator::weight_invpos(
 	std::size_t wi=0;
 	for (; wi < windowsize; ++wi)
 	{
+		if (!featar[ window[wi]]) continue;
 		unsigned int pos = featar[ window[wi]]->posno();
 		if (pos)
 		{
@@ -161,6 +168,7 @@ void ProximityWeightAccumulator::weight_invpos(
 	std::size_t fi=0;
 	for (; fi < featarsize; ++fi)
 	{
+		if (!featar[ fi]) continue;
 		unsigned int pos = featar[ fi]->posno();
 		if (pos)
 		{

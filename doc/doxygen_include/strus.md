@@ -24,7 +24,7 @@ strus defines the evaluation of a query based on 3 types of operations:
      3. N-ary set selection operators that select postings with help of context information. For example <i>within_struct</i>: get the first element in an interval that is not bigger than the defined maximum range containing at least one element of each input set without overlapping a specified delimiter token.
 
 * <b>Weighting</b> of documents based on the feature occurrencies
-  Weighting defines how documents are ranked in a search result. It is defined by weighting functions, that take an iterator on the feature occurrencies and some numeric parameters as input to calculate the weight of a document. Currently there is only BM25 defined in the core, but it is possible to define other weighting functions.
+  Weighting defines how documents are ranked in a search result. It is defined by weighting functions, that take iterators on the feature occurrencies and some numeric parameters as input to calculate the weight of a document. You can define scalar functions to combine several weighting functions to one.
 
 * <b>Summarization</b> (extraction of content)
   Summarization is used to extract content from matching documents. With summarization you can do various things:
@@ -35,7 +35,7 @@ strus defines the evaluation of a query based on 3 types of operations:
 Architecture
 -------------
 
-The strus core defines four components that are implemented as libraries.
+The strus core defines components that are implemented as libraries.
 
 * [queryeval](@ref strus::QueryEvalInterface) Query evaluation: Interpretes the query and uses the operators defined in the query processor for its execution.
 * [queryproc](@ref strus::QueryProcessorInterface) Query processor: Map to access functions by name, like the set operations on feature occurrencies, the weighting functions and the summarizers to augment the results.

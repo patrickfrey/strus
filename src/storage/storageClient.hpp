@@ -38,7 +38,7 @@ class MetaDataRestrictionInterface;
 /// \brief Forward declaration
 class KeyAllocatorInterface;
 /// \brief Forward declaration
-class DatabaseClientInterface;
+class DatabaseInterface;
 /// \brief Forward declaration
 class DocumentFrequencyCache;
 /// \brief Forward declaration
@@ -52,12 +52,14 @@ class StorageClient
 	:public StorageClientInterface
 {
 public:
-	/// \param[in] database key value store database used by this storage (ownership passed to this)
+	/// \param[in] database key value store database type used by this storage
+	/// \param[in] databaseConfig configuration string (not a filename!) of the database interface to create for this storage
 	/// \param[in] termnomap_source end of line separated list of terms to cache for eventually faster lookup
 	/// \param[in] statisticsProc_ statistics message processor interface
 	/// \param[in] errorhnd_ error buffering interface for error handling
 	StorageClient(
-			DatabaseClientInterface* database_,
+			const DatabaseInterface* database_,
+			const std::string& databaseConfig,
 			const char* termnomap_source,
 			const StatisticsProcessorInterface* statisticsProc_,
 			ErrorBufferInterface* errorhnd_);
@@ -66,12 +68,18 @@ public:
 	virtual PostingIteratorInterface*
 			createTermPostingIterator(
 				const std::string& termtype,
-				const std::string& termid) const;
+				const std::string& termid,
+				const Index& length) const;
 
 	virtual PostingIteratorInterface*
 		createBrowsePostingIterator(
 			const MetaDataRestrictionInterface* restriction,
 			const Index& maxpos) const;
+
+	virtual PostingIteratorInterface*
+		createFieldPostingIterator(
+			const std::string& meta_fieldStart,
+			const std::string& meta_fieldEnd) const;
 
 	virtual ForwardIteratorInterface*
 			createForwardIterator(
@@ -130,7 +138,7 @@ public:
 
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
-	virtual StorageDumpInterface* createDump( const std::string& keyprefix) const;
+	virtual std::string config() const;
 
 public:/*QueryEval,AttributeReader,documentTermIterator*/
 	Index getTermValue( const std::string& name) const;
@@ -201,6 +209,10 @@ public:/*StatisticsIterator*/
 
 public:/*strusResizeBlocks*/
 	Index maxTermTypeNo() const;
+	DatabaseClientInterface* databaseClient()
+	{
+		return m_database.get();
+	}
 
 private:
 	void cleanup();

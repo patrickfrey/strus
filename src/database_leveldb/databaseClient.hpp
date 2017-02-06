@@ -44,6 +44,7 @@ public:
 	unsigned int writeBufferSize() const		{return m_writeBufferSize;}
 	unsigned int blockSize() const			{return m_blockSize;}
 	bool compression() const			{return m_compression;}
+	std::string config() const;
 
 private:
 	void cleanup();
@@ -141,6 +142,8 @@ public:
 			std::size_t keysize,
 			std::string& value,
 			const DatabaseOptions& options) const;
+
+	virtual std::string config() const;
 
 private:
 	utils::SharedPtr<LevelDbHandleMap> m_dbmap;		///< reference to map of shared levelDB handles
