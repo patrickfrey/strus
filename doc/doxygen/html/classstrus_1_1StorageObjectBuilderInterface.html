@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -79,9 +79,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae7f6484a13071675ab4f4354edfbc5d2"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classstrus_1_1StorageInterface.html">StorageInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#ae7f6484a13071675ab4f4354edfbc5d2">getStorage</a> () const =0</td></tr>
 <tr class="memdesc:ae7f6484a13071675ab4f4354edfbc5d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the storage interface.  <a href="#ae7f6484a13071675ab4f4354edfbc5d2">More...</a><br/></td></tr>
 <tr class="separator:ae7f6484a13071675ab4f4354edfbc5d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab156b9d5a5f1fc9a9e54b70e471d5cfa"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#ab156b9d5a5f1fc9a9e54b70e471d5cfa">getDatabase</a> (const std::string &amp;config) const =0</td></tr>
-<tr class="memdesc:ab156b9d5a5f1fc9a9e54b70e471d5cfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database interface as loaded from modules and optionally specified in the configuration string.  <a href="#ab156b9d5a5f1fc9a9e54b70e471d5cfa">More...</a><br/></td></tr>
-<tr class="separator:ab156b9d5a5f1fc9a9e54b70e471d5cfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e0a58837e4fee6e09d70b3a0182d6a6"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#a3e0a58837e4fee6e09d70b3a0182d6a6">getDatabase</a> (const std::string &amp;name) const =0</td></tr>
+<tr class="memdesc:a3e0a58837e4fee6e09d70b3a0182d6a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database interface by name.  <a href="#a3e0a58837e4fee6e09d70b3a0182d6a6">More...</a><br/></td></tr>
+<tr class="separator:a3e0a58837e4fee6e09d70b3a0182d6a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a890ce9180addda6ae832d02c2c8d69e1"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
 <a class="el" href="classstrus_1_1QueryProcessorInterface.html">QueryProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#a890ce9180addda6ae832d02c2c8d69e1">getQueryProcessor</a> () const =0</td></tr>
 <tr class="memdesc:a890ce9180addda6ae832d02c2c8d69e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the query processor interface.  <a href="#a890ce9180addda6ae832d02c2c8d69e1">More...</a><br/></td></tr>
@@ -90,6 +90,10 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#a5df29676bfb3f9cfa3bcd78068e84d77">getStatisticsProcessor</a> (const std::string &amp;name) const =0</td></tr>
 <tr class="memdesc:a5df29676bfb3f9cfa3bcd78068e84d77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the statistics processor interface.  <a href="#a5df29676bfb3f9cfa3bcd78068e84d77">More...</a><br/></td></tr>
 <tr class="separator:a5df29676bfb3f9cfa3bcd78068e84d77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5d02ea32b162854edae8d0869be4827"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
+<a class="el" href="classstrus_1_1VectorStorageInterface.html">VectorStorageInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#aa5d02ea32b162854edae8d0869be4827">getVectorStorage</a> (const std::string &amp;name) const =0</td></tr>
+<tr class="memdesc:aa5d02ea32b162854edae8d0869be4827"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a vectorspace model for mapping vectors to features by name.  <a href="#aa5d02ea32b162854edae8d0869be4827">More...</a><br/></td></tr>
+<tr class="separator:aa5d02ea32b162854edae8d0869be4827"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9aab2287e1ac4f2e336b6972bd88d433"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1QueryEvalInterface.html">QueryEvalInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html#a9aab2287e1ac4f2e336b6972bd88d433">createQueryEval</a> () const =0</td></tr>
 <tr class="memdesc:a9aab2287e1ac4f2e336b6972bd88d433"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a an interface for query evaluation.  <a href="#a9aab2287e1ac4f2e336b6972bd88d433">More...</a><br/></td></tr>
 <tr class="separator:a9aab2287e1ac4f2e336b6972bd88d433"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,7 +153,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab156b9d5a5f1fc9a9e54b70e471d5cfa"></a>
+<a class="anchor" id="a3e0a58837e4fee6e09d70b3a0182d6a6"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -160,7 +164,7 @@ Public Member Functions</h2></td></tr>
           <td class="memname">virtual const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a>* strus::StorageObjectBuilderInterface::getDatabase </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>config</em></td><td>)</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -171,10 +175,10 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get the database interface as loaded from modules and optionally specified in the configuration string. </p>
+<p>Get the database interface by name. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>configuration string (not a filename!) optionally containing an assignment database=&lt;...&gt; that specifies the database to use </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the database interface </td></tr>
   </table>
   </dd>
 </dl>
@@ -261,6 +265,33 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aa5d02ea32b162854edae8d0869be4827"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const <a class="el" href="classstrus_1_1VectorStorageInterface.html">VectorStorageInterface</a>* strus::StorageObjectBuilderInterface::getVectorStorage </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a vectorspace model for mapping vectors to features by name. </p>
+<dl class="section return"><dt>Returns</dt><dd>the vectorspace model interface reference </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="storageObjectBuilderInterface_8hpp_source.html">storageObjectBuilderInterface.hpp</a></li>
 </ul>
@@ -268,7 +299,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

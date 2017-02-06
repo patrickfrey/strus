@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -98,6 +98,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a971f8524b13dfb2a04bc07c3959a8b2b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a971f8524b13dfb2a04bc07c3959a8b2b">rollback</a> ()=0</td></tr>
 <tr class="memdesc:a971f8524b13dfb2a04bc07c3959a8b2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rollback of the transaction, no changes made.  <a href="#a971f8524b13dfb2a04bc07c3959a8b2b">More...</a><br/></td></tr>
 <tr class="separator:a971f8524b13dfb2a04bc07c3959a8b2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60865f67d3fda2c94390635ed77cee6d"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a60865f67d3fda2c94390635ed77cee6d">nofDocumentsAffected</a> () const =0</td></tr>
+<tr class="memdesc:a60865f67d3fda2c94390635ed77cee6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of documents affected by the last transaction in case of a successful commit.  <a href="#a60865f67d3fda2c94390635ed77cee6d">More...</a><br/></td></tr>
+<tr class="separator:a60865f67d3fda2c94390635ed77cee6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Object to declare all items for one insert/update of a document in the storage. </p>
@@ -285,6 +288,32 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a60865f67d3fda2c94390635ed77cee6d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual unsigned int strus::StorageTransactionInterface::nofDocumentsAffected </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the number of documents affected by the last transaction in case of a successful commit. </p>
+<dl class="section return"><dt>Returns</dt><dd>the number of documents (deletes,updates,inserts) </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a971f8524b13dfb2a04bc07c3959a8b2b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -367,7 +396,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

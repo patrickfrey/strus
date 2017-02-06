@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -96,6 +96,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a194a95c07a80faeb1c49108e82505702"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#a194a95c07a80faeb1c49108e82505702">readValue</a> (const char *key, std::size_t keysize, std::string &amp;value, const <a class="el" href="classstrus_1_1DatabaseOptions.html">DatabaseOptions</a> &amp;options) const =0</td></tr>
 <tr class="memdesc:a194a95c07a80faeb1c49108e82505702"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a value by key.  <a href="#a194a95c07a80faeb1c49108e82505702">More...</a><br/></td></tr>
 <tr class="separator:a194a95c07a80faeb1c49108e82505702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ccebb44f57eeaaa02533b2304a6d7bf"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#a8ccebb44f57eeaaa02533b2304a6d7bf">config</a> () const =0</td></tr>
+<tr class="memdesc:a8ccebb44f57eeaaa02533b2304a6d7bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the interpreted configuration this database client was created with.  <a href="#a8ccebb44f57eeaaa02533b2304a6d7bf">More...</a><br/></td></tr>
+<tr class="separator:a8ccebb44f57eeaaa02533b2304a6d7bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for accessing the strus key value storage database. </p>
@@ -127,6 +130,32 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a8ccebb44f57eeaaa02533b2304a6d7bf"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::string strus::DatabaseClientInterface::config </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the interpreted configuration this database client was created with. </p>
+<dl class="section return"><dt>Returns</dt><dd>the configuration as string </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="ab2535a158bbd8803f0bd4aac2dd21e12"></a>
 <div class="memitem">
 <div class="memproto">
@@ -378,7 +407,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

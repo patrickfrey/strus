@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -105,12 +105,14 @@
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                        std::size_t keysize,</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                        std::string&amp; value,</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                        <span class="keyword">const</span> <a class="code" href="classstrus_1_1DatabaseOptions.html">DatabaseOptions</a>&amp; options) <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;};</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="keyword">virtual</span> std::string <a class="code" href="classstrus_1_1DatabaseClientInterface.html#a8ccebb44f57eeaaa02533b2304a6d7bf">config</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;};</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
 <div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_a9b72abf634b4121b106cd9679f41eb3a"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#a9b72abf634b4121b106cd9679f41eb3a">strus::DatabaseClientInterface::createCursor</a></div><div class="ttdeci">virtual DatabaseCursorInterface * createCursor(const DatabaseOptions &amp;options) const =0</div><div class="ttdoc">Create an object for reading values from and iterating on the key value store database. </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseCursorInterface_html"><div class="ttname"><a href="classstrus_1_1DatabaseCursorInterface.html">strus::DatabaseCursorInterface</a></div><div class="ttdoc">Interface to database cursor. </div><div class="ttdef"><b>Definition:</b> databaseCursorInterface.hpp:18</div></div>
 <div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_afa6f198f6f7ae388ff3688830b9a995b"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#afa6f198f6f7ae388ff3688830b9a995b">strus::DatabaseClientInterface::createTransaction</a></div><div class="ttdeci">virtual DatabaseTransactionInterface * createTransaction()=0</div><div class="ttdoc">Create a transaction object for the database. </div></div>
@@ -118,6 +120,7 @@
 <div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_ab2535a158bbd8803f0bd4aac2dd21e12"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#ab2535a158bbd8803f0bd4aac2dd21e12">strus::DatabaseClientInterface::createBackupCursor</a></div><div class="ttdeci">virtual DatabaseBackupCursorInterface * createBackupCursor() const =0</div><div class="ttdoc">Creates an object for iterating on a snapshot of the database that can be used for backup...</div></div>
 <div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_a27ef90f0019bbe10fd725aefe6aebd4b"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#a27ef90f0019bbe10fd725aefe6aebd4b">strus::DatabaseClientInterface::removeImm</a></div><div class="ttdeci">virtual void removeImm(const char *key, std::size_t keysize)=0</div><div class="ttdoc">Delete a key value stored immediately (synchronized) </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_ac6b4346d80ad2918270a79a7cafb7137"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#ac6b4346d80ad2918270a79a7cafb7137">strus::DatabaseClientInterface::~DatabaseClientInterface</a></div><div class="ttdeci">virtual ~DatabaseClientInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> databaseClientInterface.hpp:32</div></div>
+<div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_a8ccebb44f57eeaaa02533b2304a6d7bf"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#a8ccebb44f57eeaaa02533b2304a6d7bf">strus::DatabaseClientInterface::config</a></div><div class="ttdeci">virtual std::string config() const =0</div><div class="ttdoc">Get the interpreted configuration this database client was created with. </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_a194a95c07a80faeb1c49108e82505702"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#a194a95c07a80faeb1c49108e82505702">strus::DatabaseClientInterface::readValue</a></div><div class="ttdeci">virtual bool readValue(const char *key, std::size_t keysize, std::string &amp;value, const DatabaseOptions &amp;options) const =0</div><div class="ttdoc">Read a value by key. </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseClientInterface_html_a0dd0f888dd2c538f6ef161dc54c019ca"><div class="ttname"><a href="classstrus_1_1DatabaseClientInterface.html#a0dd0f888dd2c538f6ef161dc54c019ca">strus::DatabaseClientInterface::writeImm</a></div><div class="ttdeci">virtual void writeImm(const char *key, std::size_t keysize, const char *value, std::size_t valuesize)=0</div><div class="ttdoc">Write a key value immediately (synchronized) </div></div>
 <div class="ttc" id="classstrus_1_1DatabaseTransactionInterface_html"><div class="ttname"><a href="classstrus_1_1DatabaseTransactionInterface.html">strus::DatabaseTransactionInterface</a></div><div class="ttdoc">Interface for transactions for writing on the strus key value storage database. </div><div class="ttdef"><b>Definition:</b> databaseTransactionInterface.hpp:22</div></div>
@@ -127,7 +130,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:07 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

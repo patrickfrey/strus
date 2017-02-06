@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -85,22 +85,25 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3cfca86dc674de6cbe153e442fa227d7"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">~StorageInterface</a> ()</td></tr>
 <tr class="memdesc:a3cfca86dc674de6cbe153e442fa227d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a3cfca86dc674de6cbe153e442fa227d7">More...</a><br/></td></tr>
 <tr class="separator:a3cfca86dc674de6cbe153e442fa227d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab527f470f0b55544f626095c57acfbdb"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#ab527f470f0b55544f626095c57acfbdb">createClient</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database, const <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *statisticsProc=0) const =0</td></tr>
-<tr class="memdesc:ab527f470f0b55544f626095c57acfbdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an client instance of the storage using a defined key value store database.  <a href="#ab527f470f0b55544f626095c57acfbdb">More...</a><br/></td></tr>
-<tr class="separator:ab527f470f0b55544f626095c57acfbdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63888cef731e57f31f60a742957032bb"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">createStorage</a> (const std::string &amp;configsource, <a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
-<tr class="memdesc:a63888cef731e57f31f60a742957032bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new storage described with configsource using a defined key value store database.  <a href="#a63888cef731e57f31f60a742957032bb">More...</a><br/></td></tr>
-<tr class="separator:a63888cef731e57f31f60a742957032bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4af90c26d7118b46a21bf2c0c39e566a"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">createAlterMetaDataTable</a> (<a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *database) const =0</td></tr>
-<tr class="memdesc:a4af90c26d7118b46a21bf2c0c39e566a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to alter the meta data table structure.  <a href="#a4af90c26d7118b46a21bf2c0c39e566a">More...</a><br/></td></tr>
-<tr class="separator:a4af90c26d7118b46a21bf2c0c39e566a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa37a805fa450304a4a05d354f7ebcae0"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#aa37a805fa450304a4a05d354f7ebcae0">createClient</a> (const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database, const <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *statisticsProc=0) const =0</td></tr>
+<tr class="memdesc:aa37a805fa450304a4a05d354f7ebcae0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an client instance of the storage using a defined key value store database.  <a href="#aa37a805fa450304a4a05d354f7ebcae0">More...</a><br/></td></tr>
+<tr class="separator:aa37a805fa450304a4a05d354f7ebcae0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79866852fa5eed37e40466f8325d7549"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a79866852fa5eed37e40466f8325d7549">createStorage</a> (const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database) const =0</td></tr>
+<tr class="memdesc:a79866852fa5eed37e40466f8325d7549"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new storage described with configsource using a defined key value store database.  <a href="#a79866852fa5eed37e40466f8325d7549">More...</a><br/></td></tr>
+<tr class="separator:a79866852fa5eed37e40466f8325d7549"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc33c9eef167b5980f6829dfcc0b5724"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#afc33c9eef167b5980f6829dfcc0b5724">createAlterMetaDataTable</a> (const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database) const =0</td></tr>
+<tr class="memdesc:afc33c9eef167b5980f6829dfcc0b5724"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an interface to alter the meta data table structure.  <a href="#afc33c9eef167b5980f6829dfcc0b5724">More...</a><br/></td></tr>
+<tr class="separator:afc33c9eef167b5980f6829dfcc0b5724"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae95fbb70ee3d387827a3478a1411c5f3"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#ae95fbb70ee3d387827a3478a1411c5f3">getConfigDescription</a> (const <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> &amp;type) const =0</td></tr>
 <tr class="memdesc:ae95fbb70ee3d387827a3478a1411c5f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets a configuration description (source string as used by the functions here) createStorage(const std::string&amp;) and createClient(const std::string&amp;) for the usage printed by programs using this storage implementation.  <a href="#ae95fbb70ee3d387827a3478a1411c5f3">More...</a><br/></td></tr>
 <tr class="separator:ae95fbb70ee3d387827a3478a1411c5f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b1a269ca442ceedaec00624820d767b"><td class="memItemLeft" align="right" valign="top">virtual const char **&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a3b1a269ca442ceedaec00624820d767b">getConfigParameters</a> (const <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> &amp;type) const =0</td></tr>
 <tr class="memdesc:a3b1a269ca442ceedaec00624820d767b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of known configuration parameter keys for verification of the configuration by programs using this storage implementation.  <a href="#a3b1a269ca442ceedaec00624820d767b">More...</a><br/></td></tr>
 <tr class="separator:a3b1a269ca442ceedaec00624820d767b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71e435b6de4f47b12c022c205a2d10ae"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageInterface.html#a71e435b6de4f47b12c022c205a2d10ae">createDump</a> (const std::string &amp;configsource, const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *database, const std::string &amp;keyprefix) const =0</td></tr>
+<tr class="memdesc:a71e435b6de4f47b12c022c205a2d10ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a dump of a storage.  <a href="#a71e435b6de4f47b12c022c205a2d10ae">More...</a><br/></td></tr>
+<tr class="separator:a71e435b6de4f47b12c022c205a2d10ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface to the create and alter a storage for strus. </p>
@@ -154,7 +157,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a4af90c26d7118b46a21bf2c0c39e566a"></a>
+<a class="anchor" id="afc33c9eef167b5980f6829dfcc0b5724"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -164,9 +167,19 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html">StorageAlterMetaDataTableInterface</a>* strus::StorageInterface::createAlterMetaDataTable </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *&#160;</td>
-          <td class="paramname"><em>database</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>configsource</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td>
+          <td class="paramname"><em>database</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -179,7 +192,8 @@ Public Member Functions</h2></td></tr>
 <p>Create an interface to alter the meta data table structure. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database used by the storage (ownership passed to returned object) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>Configuration source string describing the storage and the database (not a filename !) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database type used by this storage </td></tr>
   </table>
   </dd>
 </dl>
@@ -187,7 +201,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ab527f470f0b55544f626095c57acfbdb"></a>
+<a class="anchor" id="aa37a805fa450304a4a05d354f7ebcae0"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -203,7 +217,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td>
           <td class="paramname"><em>database</em>, </td>
         </tr>
         <tr>
@@ -228,8 +242,8 @@ Public Member Functions</h2></td></tr>
 <p>Creates an client instance of the storage using a defined key value store database. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration source string describing the storage (not a filename !) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database used by this storage (ownership passed to returned object) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>configuration source string describing the storage and the database (not a filename !) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database type used by this storage </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">(optional)</td><td>statisticsProc defines the format of statistic messages (distribute statistics) </td></tr>
   </table>
   </dd>
@@ -237,7 +251,58 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a63888cef731e57f31f60a742957032bb"></a>
+<a class="anchor" id="a71e435b6de4f47b12c022c205a2d10ae"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a>* strus::StorageInterface::createDump </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>configsource</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td>
+          <td class="paramname"><em>database</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>keyprefix</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a dump of a storage. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>Configuration source string describing the storage and the database (not a filename !) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database type used by the storage </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">keyprefix</td><td>prefix for keys to resrict the dump to </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the object to fetch the dump from </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a79866852fa5eed37e40466f8325d7549"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -253,7 +318,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classstrus_1_1DatabaseClientInterface.html">DatabaseClientInterface</a> *&#160;</td>
+          <td class="paramtype">const <a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td>
           <td class="paramname"><em>database</em>&#160;</td>
         </tr>
         <tr>
@@ -272,8 +337,8 @@ Public Member Functions</h2></td></tr>
 <p>Creates a new storage described with configsource using a defined key value store database. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>Configuration source string describing the storage (not a filename !) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>reference to a key value store database used by the storage </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">configsource</td><td>Configuration source string describing the storage and the database (not a filename !) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">database</td><td>key value store database type used by this storage </td></tr>
   </table>
   </dd>
 </dl>
@@ -341,7 +406,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

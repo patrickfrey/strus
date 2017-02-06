@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -85,12 +85,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a42caf3ec5a181983338027a7829b3959"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a42caf3ec5a181983338027a7829b3959">~StorageClientInterface</a> ()</td></tr>
 <tr class="memdesc:a42caf3ec5a181983338027a7829b3959"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a42caf3ec5a181983338027a7829b3959">More...</a><br/></td></tr>
 <tr class="separator:a42caf3ec5a181983338027a7829b3959"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a807092721e926eddbffb0dd7d0a360ee"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a807092721e926eddbffb0dd7d0a360ee">createTermPostingIterator</a> (const std::string &amp;type, const std::string &amp;value) const =0</td></tr>
-<tr class="memdesc:a807092721e926eddbffb0dd7d0a360ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the occurrencies of a term in the storage.  <a href="#a807092721e926eddbffb0dd7d0a360ee">More...</a><br/></td></tr>
-<tr class="separator:a807092721e926eddbffb0dd7d0a360ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c6e83c7eecf8e39d9f189c90739373a"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a4c6e83c7eecf8e39d9f189c90739373a">config</a> () const =0</td></tr>
+<tr class="memdesc:a4c6e83c7eecf8e39d9f189c90739373a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the interpreted configuration this storage client was created with.  <a href="#a4c6e83c7eecf8e39d9f189c90739373a">More...</a><br/></td></tr>
+<tr class="separator:a4c6e83c7eecf8e39d9f189c90739373a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23a6f18e77bd05ac87ddf2791adededd"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a23a6f18e77bd05ac87ddf2791adededd">createTermPostingIterator</a> (const std::string &amp;type, const std::string &amp;value, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;length) const =0</td></tr>
+<tr class="memdesc:a23a6f18e77bd05ac87ddf2791adededd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the occurrencies of a term in the storage.  <a href="#a23a6f18e77bd05ac87ddf2791adededd">More...</a><br/></td></tr>
+<tr class="separator:a23a6f18e77bd05ac87ddf2791adededd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af707ea61df2896e4cf84f03df0b85193"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#af707ea61df2896e4cf84f03df0b85193">createBrowsePostingIterator</a> (const <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html">MetaDataRestrictionInterface</a> *restriction, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;maxpos) const =0</td></tr>
 <tr class="memdesc:af707ea61df2896e4cf84f03df0b85193"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on all enumerable postings of document selected by a metadata restriction.  <a href="#af707ea61df2896e4cf84f03df0b85193">More...</a><br/></td></tr>
 <tr class="separator:af707ea61df2896e4cf84f03df0b85193"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abef7d2456233e7bfaba52dd6448597ff"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#abef7d2456233e7bfaba52dd6448597ff">createFieldPostingIterator</a> (const std::string &amp;meta_fieldStart, const std::string &amp;meta_fieldEnd) const =0</td></tr>
+<tr class="memdesc:abef7d2456233e7bfaba52dd6448597ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator postings specified as field in the meta data (by start and end position)  <a href="#abef7d2456233e7bfaba52dd6448597ff">More...</a><br/></td></tr>
+<tr class="separator:abef7d2456233e7bfaba52dd6448597ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6580606d318d5af83cf8b47511c752a9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ForwardIteratorInterface.html">ForwardIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a6580606d318d5af83cf8b47511c752a9">createForwardIterator</a> (const std::string &amp;type) const =0</td></tr>
 <tr class="memdesc:a6580606d318d5af83cf8b47511c752a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a viewer to inspect the term stored values with the forward index of the storage.  <a href="#a6580606d318d5af83cf8b47511c752a9">More...</a><br/></td></tr>
 <tr class="separator:a6580606d318d5af83cf8b47511c752a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -160,9 +166,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aeae6016f195722d4772769e77ef41f0c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aeae6016f195722d4772769e77ef41f0c">checkStorage</a> (std::ostream &amp;errorlog) const =0</td></tr>
 <tr class="memdesc:aeae6016f195722d4772769e77ef41f0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through all key/value pairs and check their data for validity.  <a href="#aeae6016f195722d4772769e77ef41f0c">More...</a><br/></td></tr>
 <tr class="separator:aeae6016f195722d4772769e77ef41f0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a526bb95e4603e9f96c0cbf11bb5e68"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a5a526bb95e4603e9f96c0cbf11bb5e68">createDump</a> (const std::string &amp;keyprefix) const =0</td></tr>
-<tr class="memdesc:a5a526bb95e4603e9f96c0cbf11bb5e68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a dump of the storage.  <a href="#a5a526bb95e4603e9f96c0cbf11bb5e68">More...</a><br/></td></tr>
-<tr class="separator:a5a526bb95e4603e9f96c0cbf11bb5e68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface of a strus IR storage. </p>
@@ -250,6 +253,32 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a4c6e83c7eecf8e39d9f189c90739373a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::string strus::StorageClientInterface::config </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the interpreted configuration this storage client was created with. </p>
+<dl class="section return"><dt>Returns</dt><dd>the configuration as string </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a7e1b5d973e38a890f20858f0c7661567"></a>
 <div class="memitem">
 <div class="memproto">
@@ -272,7 +301,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Create an interface to access attributes attached to documents for representation. </p>
-<dl class="section return"><dt>Returns</dt><dd>the interface to access document attributes to be disposed with delete by the caller </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the interface to access document attributes (with ownership) </dd></dl>
 
 </div>
 </div>
@@ -316,7 +345,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the created iterator reference to be disposed with delete by the caller </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the created iterator reference (with ownership) </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This iterator use is mainly for browsing occurrencies fulfilling a condition without query involved </dd></dl>
 <dl class="section remark"><dt>Remarks</dt><dd>The iterator does not take the alive status of the documents into account. You have to formulate a restriction expression that does not match deleted documents if you do not want deleted documents in your iterated set of postings. </dd>
 <dd>
@@ -390,7 +419,7 @@ The iterator does not take the document length into account. It returns the set 
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the created document interface to be disposed with delete by the caller </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the created document interface (with ownership) </dd></dl>
 
 </div>
 </div>
@@ -423,11 +452,11 @@ The iterator does not take the document length into account. It returns the set 
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the created iterator reference to be disposed with delete by the caller </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the created iterator reference (with ownership) </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a5a526bb95e4603e9f96c0cbf11bb5e68"></a>
+<a class="anchor" id="abef7d2456233e7bfaba52dd6448597ff"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -435,11 +464,21 @@ The iterator does not take the document length into account. It returns the set 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1StorageDumpInterface.html">StorageDumpInterface</a>* strus::StorageClientInterface::createDump </td>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a>* strus::StorageClientInterface::createFieldPostingIterator </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>keyprefix</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>meta_fieldStart</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>meta_fieldEnd</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -449,14 +488,18 @@ The iterator does not take the document length into account. It returns the set 
 </table>
 </div><div class="memdoc">
 
-<p>Create a dump of the storage. </p>
+<p>Create an iterator postings specified as field in the meta data (by start and end position) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">keyprefix</td><td>prefix for keys to resrict the dump to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">meta_fieldStart</td><td>meta data element that specifies the start of the field </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">meta_fieldEnd</td><td>meta data element that specifies the end of the field (first position not belonging to the field anymore) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the object to fetch the dump from </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the created iterator reference (with ownership) </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Fields can avoid superfluos access on posting blocks </dd>
+<dd>
+Fields give you the possibility to treat elements in the document differently while using the same statistics that are defined by feature type </dd></dl>
 
 </div>
 </div>
@@ -555,7 +598,7 @@ The iterator does not take the document length into account. It returns the set 
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the iterator on the documents to be disposed with delete by the caller or NULL, if there is no access control enabled </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the iterator on the documents (with ownership) or NULL, if there is no access control enabled </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>The storage has to be created access control enabled </dd></dl>
 
 </div>
@@ -582,7 +625,7 @@ The iterator does not take the document length into account. It returns the set 
 </div><div class="memdoc">
 
 <p>Create an interface to access items of document metadata. </p>
-<dl class="section return"><dt>Returns</dt><dd>the interface to access document metadata to be disposed with delete by the caller </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the interface to access document metadata (with ownership) </dd></dl>
 
 </div>
 </div>
@@ -612,7 +655,7 @@ The iterator does not take the document length into account. It returns the set 
 
 </div>
 </div>
-<a class="anchor" id="a807092721e926eddbffb0dd7d0a360ee"></a>
+<a class="anchor" id="a23a6f18e77bd05ac87ddf2791adededd"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -629,7 +672,13 @@ The iterator does not take the document length into account. It returns the set 
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>value</em>&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
+          <td class="paramname"><em>length</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -649,10 +698,11 @@ The iterator does not take the document length into account. It returns the set 
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>type name of the term </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>value string of the term </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">length</td><td>ordinal position length assigned to the term (may differ from 1 for terms representing multipart patterns) </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the created iterator reference to be disposed with delete by the caller </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the created iterator reference (with ownership) </dd></dl>
 
 </div>
 </div>
@@ -730,7 +780,8 @@ The iterator does not take the document length into account. It returns the set 
 </div><div class="memdoc">
 
 <p>Create an insert/update transaction object. </p>
-<dl class="section return"><dt>Returns</dt><dd>the created transaction interface to be disposed with delete by the caller </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the created transaction interface (with ownership) </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>this function is thread safe, multiple concurrent transactions are allowed </dd></dl>
 
 </div>
 </div>
@@ -998,7 +1049,7 @@ The iterator does not take the document length into account. It returns the set 
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

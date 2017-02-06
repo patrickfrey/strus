@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -73,6 +73,7 @@
       <li><a href="functions_h.html#index_h"><span>h</span></a></li>
       <li><a href="functions_i.html#index_i"><span>i</span></a></li>
       <li><a href="functions_k.html#index_k"><span>k</span></a></li>
+      <li><a href="functions_l.html#index_l"><span>l</span></a></li>
       <li><a href="functions_m.html#index_m"><span>m</span></a></li>
       <li><a href="functions_n.html#index_n"><span>n</span></a></li>
       <li><a href="functions_o.html#index_o"><span>o</span></a></li>
@@ -93,7 +94,7 @@
 
 <h3><a class="anchor" id="index_c"></a>- c -</h3><ul>
 <li>call()
-: <a class="el" href="classstrus_1_1ScalarFunctionInstanceInterface.html#a305476d2014672b18c868876ca2355fc">strus::ScalarFunctionInstanceInterface</a>
+: <a class="el" href="classstrus_1_1ScalarFunctionInstanceInterface.html#a9914ff8ac64a9a4808c343665d9b2dde">strus::ScalarFunctionInstanceInterface</a>
 , <a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#a79d0b1f312353c0a6feb133b68cbd237">strus::WeightingFunctionContextInterface</a>
 </li>
 <li>checkStorage()
@@ -111,6 +112,9 @@
 <li>clearUserAccessRights()
 : <a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e">strus::StorageDocumentUpdateInterface</a>
 </li>
+<li>close()
+: <a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a86e08cdb6775181da30be08331999114">strus::VectorStorageSearchInterface</a>
+</li>
 <li>CmdCreate
 : <a class="el" href="classstrus_1_1DatabaseInterface.html#aa85a36730f859acb42927e3240bdc23ea9c032faa1c042ca9b68bf1c60e72c7ee">strus::DatabaseInterface</a>
 , <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">strus::StorageInterface</a>
@@ -126,6 +130,7 @@
 : <a class="el" href="classstrus_1_1DatabaseTransactionInterface.html#ac9e6cb268df039a8da23b390cc2172e5">strus::DatabaseTransactionInterface</a>
 , <a class="el" href="classstrus_1_1StorageAlterMetaDataTableInterface.html#a148decde37ea97e362ce4dd53d031964">strus::StorageAlterMetaDataTableInterface</a>
 , <a class="el" href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f">strus::StorageTransactionInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#ad4a4d51ffe2f01398bcce4d3ce9461ce">strus::VectorStorageTransactionInterface</a>
 </li>
 <li>CompareEqual
 : <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988a0af5904ecd93a02d495f5c8cd5345997">strus::MetaDataRestrictionInterface</a>
@@ -148,12 +153,23 @@
 <li>CompareOperator
 : <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#ac59a8751007b64ee4218fb3250ccf988">strus::MetaDataRestrictionInterface</a>
 </li>
+<li>conceptClassNames()
+: <a class="el" href="classstrus_1_1VectorStorageClientInterface.html#adb3d799d2921b32885db9043d1e511a7">strus::VectorStorageClientInterface</a>
+</li>
+<li>conceptFeatures()
+: <a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a1a3c0a9df13c2c8f4fcd77778d7c6014">strus::VectorStorageClientInterface</a>
+</li>
+<li>config()
+: <a class="el" href="classstrus_1_1DatabaseClientInterface.html#a8ccebb44f57eeaaa02533b2304a6d7bf">strus::DatabaseClientInterface</a>
+, <a class="el" href="classstrus_1_1StorageClientInterface.html#a4c6e83c7eecf8e39d9f189c90739373a">strus::StorageClientInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a05c8b4bb7e84b081b9a7bbdcd7e199c3">strus::VectorStorageClientInterface</a>
+</li>
 <li>ConfigType
 : <a class="el" href="classstrus_1_1DatabaseInterface.html#aa85a36730f859acb42927e3240bdc23e">strus::DatabaseInterface</a>
 , <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">strus::StorageInterface</a>
 </li>
 <li>createAlterMetaDataTable()
-: <a class="el" href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">strus::StorageInterface</a>
+: <a class="el" href="classstrus_1_1StorageInterface.html#afc33c9eef167b5980f6829dfcc0b5724">strus::StorageInterface</a>
 </li>
 <li>createAttributeReader()
 : <a class="el" href="classstrus_1_1StorageClientInterface.html#a7e1b5d973e38a890f20858f0c7661567">strus::StorageClientInterface</a>
@@ -169,7 +185,8 @@
 </li>
 <li>createClient()
 : <a class="el" href="classstrus_1_1DatabaseInterface.html#a1009c69c0aac2586114317c551747016">strus::DatabaseInterface</a>
-, <a class="el" href="classstrus_1_1StorageInterface.html#ab527f470f0b55544f626095c57acfbdb">strus::StorageInterface</a>
+, <a class="el" href="classstrus_1_1StorageInterface.html#aa37a805fa450304a4a05d354f7ebcae0">strus::StorageInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageInterface.html#a3cfeecba2cdaa84b200e16456262f064">strus::VectorStorageInterface</a>
 </li>
 <li>createCursor()
 : <a class="el" href="classstrus_1_1DatabaseClientInterface.html#a9b72abf634b4121b106cd9679f41eb3a">strus::DatabaseClientInterface</a>
@@ -194,7 +211,11 @@
 : <a class="el" href="classstrus_1_1StorageTransactionInterface.html#a7f56ed8765ff27f50e963dc0b0fb6eba">strus::StorageTransactionInterface</a>
 </li>
 <li>createDump()
-: <a class="el" href="classstrus_1_1StorageClientInterface.html#a5a526bb95e4603e9f96c0cbf11bb5e68">strus::StorageClientInterface</a>
+: <a class="el" href="classstrus_1_1StorageInterface.html#a71e435b6de4f47b12c022c205a2d10ae">strus::StorageInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageInterface.html#a19f297e87af127571637055929fefe26">strus::VectorStorageInterface</a>
+</li>
+<li>createFieldPostingIterator()
+: <a class="el" href="classstrus_1_1StorageClientInterface.html#abef7d2456233e7bfaba52dd6448597ff">strus::StorageClientInterface</a>
 </li>
 <li>createForwardIterator()
 : <a class="el" href="classstrus_1_1StorageClientInterface.html#a6580606d318d5af83cf8b47511c752a9">strus::StorageClientInterface</a>
@@ -233,11 +254,15 @@
 <li>createResultIterator()
 : <a class="el" href="classstrus_1_1PostingJoinOperatorInterface.html#a3577f82c55b21c04d2368726b335b09c">strus::PostingJoinOperatorInterface</a>
 </li>
+<li>createSearcher()
+: <a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a2626458472a54189fca503ad18804151">strus::VectorStorageClientInterface</a>
+</li>
 <li>createStorage()
-: <a class="el" href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">strus::StorageInterface</a>
+: <a class="el" href="classstrus_1_1StorageInterface.html#a79866852fa5eed37e40466f8325d7549">strus::StorageInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageInterface.html#ae5c41b1795cce17501fcdcaa97d7411f">strus::VectorStorageInterface</a>
 </li>
 <li>createTermPostingIterator()
-: <a class="el" href="classstrus_1_1StorageClientInterface.html#a807092721e926eddbffb0dd7d0a360ee">strus::StorageClientInterface</a>
+: <a class="el" href="classstrus_1_1StorageClientInterface.html#a23a6f18e77bd05ac87ddf2791adededd">strus::StorageClientInterface</a>
 </li>
 <li>createTermTypeIterator()
 : <a class="el" href="classstrus_1_1StorageClientInterface.html#aca36b644019e4ba1b620d62ee9d1bb90">strus::StorageClientInterface</a>
@@ -248,6 +273,7 @@
 <li>createTransaction()
 : <a class="el" href="classstrus_1_1DatabaseClientInterface.html#afa6f198f6f7ae388ff3688830b9a995b">strus::DatabaseClientInterface</a>
 , <a class="el" href="classstrus_1_1StorageClientInterface.html#ae744509cd0e668a7fdbdcc63e2a62a02">strus::StorageClientInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a4ceac1bbd8e10c7e6988726e4811d2bd">strus::VectorStorageClientInterface</a>
 </li>
 <li>createUpdateStatisticsIterator()
 : <a class="el" href="classstrus_1_1StorageClientInterface.html#a74c50b8961ffc459da04a47da455ef3c">strus::StorageClientInterface</a>
@@ -263,7 +289,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

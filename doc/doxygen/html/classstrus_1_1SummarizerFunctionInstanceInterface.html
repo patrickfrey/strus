@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -82,6 +82,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a706aa1faeea296d922270db148d19fdf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#a706aa1faeea296d922270db148d19fdf">addNumericParameter</a> (const std::string &amp;name, const NumericVariant &amp;value)=0</td></tr>
 <tr class="memdesc:a706aa1faeea296d922270db148d19fdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a named numeric value parameter.  <a href="#a706aa1faeea296d922270db148d19fdf">More...</a><br/></td></tr>
 <tr class="separator:a706aa1faeea296d922270db148d19fdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f25dcc0841bb6381e95cba3e32c709d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#a8f25dcc0841bb6381e95cba3e32c709d">defineResultName</a> (const std::string &amp;resultname, const std::string &amp;itemname)=0</td></tr>
+<tr class="memdesc:a8f25dcc0841bb6381e95cba3e32c709d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rename a specific result item with a hardcoded name to another name.  <a href="#a8f25dcc0841bb6381e95cba3e32c709d">More...</a><br/></td></tr>
+<tr class="separator:a8f25dcc0841bb6381e95cba3e32c709d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acdabdd3bff1cb043c74e0eab2a3c9716"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
 <a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html">SummarizerFunctionContextInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#acdabdd3bff1cb043c74e0eab2a3c9716">createFunctionContext</a> (const <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *storage_, <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *metadata_, const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats) const =0</td></tr>
 <tr class="memdesc:acdabdd3bff1cb043c74e0eab2a3c9716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an execution context for this summarization function instance.  <a href="#acdabdd3bff1cb043c74e0eab2a3c9716">More...</a><br/></td></tr>
@@ -256,6 +259,49 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a8f25dcc0841bb6381e95cba3e32c709d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::SummarizerFunctionInstanceInterface::defineResultName </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>resultname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>itemname</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Rename a specific result item with a hardcoded name to another name. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">resultname</td><td>the name assigned to it in the result </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">itemname</td><td>the internal hardcoded name of the item </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a79beff9b22b47737e539565309c7f68f"></a>
 <div class="memitem">
 <div class="memproto">
@@ -289,7 +335,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -201,6 +201,21 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1ValueIteratorInterface.html">ValueIteratorInterface</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure that represents a set of strings as iterator.  <a href="classstrus_1_1ValueIteratorInterface.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html">VectorStorageClientInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to a repository for vectors and a feature concept relation model previously created with a builder.  <a href="classstrus_1_1VectorStorageClientInterface.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageDumpInterface.html">VectorStorageDumpInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for fetching the dump of a strus vector storage.  <a href="classstrus_1_1VectorStorageDumpInterface.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageInterface.html">VectorStorageInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for storing an retrieving vectors of floating point numbers representing document features and a model relating them to concept features. The relation is learnt by the model builder in an unsupervised way.  <a href="classstrus_1_1VectorStorageInterface.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageSearchInterface.html">VectorStorageSearchInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to repository for vectors and a feature concept relation model previously created with a builder.  <a href="classstrus_1_1VectorStorageSearchInterface.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html">VectorStorageTransactionInterface</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface for building a repository of vectors with classifiers to map them to discrete features.  <a href="classstrus_1_1VectorStorageTransactionInterface.html#details">More...</a><br/></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightedDocument.html">WeightedDocument</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pure ranking result of a strus query without the attributes.  <a href="classstrus_1_1WeightedDocument.html#details">More...</a><br/></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -225,9 +240,9 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ab83f933d2693f3a61ca60cef1aad689c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ab83f933d2693f3a61ca60cef1aad689c">createDatabase_leveldb</a> (ErrorBufferInterface *errorhnd)</td></tr>
-<tr class="memdesc:ab83f933d2693f3a61ca60cef1aad689c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database interface implemented with leveldb with the functions for accessing the key/value store database.  <a href="#ab83f933d2693f3a61ca60cef1aad689c">More...</a><br/></td></tr>
-<tr class="separator:ab83f933d2693f3a61ca60cef1aad689c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4947bc83ee3f925f047f8db962385d64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a4947bc83ee3f925f047f8db962385d64">createDatabaseType_leveldb</a> (ErrorBufferInterface *errorhnd)</td></tr>
+<tr class="memdesc:a4947bc83ee3f925f047f8db962385d64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the database interface implemented with leveldb with the functions for accessing the key/value store database.  <a href="#a4947bc83ee3f925f047f8db962385d64">More...</a><br/></td></tr>
+<tr class="separator:a4947bc83ee3f925f047f8db962385d64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade58090a092aca8f7c3062f4dc3bb364"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1QueryEvalInterface.html">QueryEvalInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ade58090a092aca8f7c3062f4dc3bb364">createQueryEval</a> (ErrorBufferInterface *errorhnd)</td></tr>
 <tr class="memdesc:ade58090a092aca8f7c3062f4dc3bb364"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a parameterizable instance of a query evaluation scheme.  <a href="#ade58090a092aca8f7c3062f4dc3bb364">More...</a><br/></td></tr>
 <tr class="separator:ade58090a092aca8f7c3062f4dc3bb364"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -239,8 +254,8 @@ Functions</h2></td></tr>
 <tr class="separator:a45fc8f6e2ca8bd90d7167f4d4d71c9cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9e519a59fe3e8b8a3ec8811b373faf68"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a9e519a59fe3e8b8a3ec8811b373faf68">createStatisticsProcessor</a> (ErrorBufferInterface *errorhnd)</td></tr>
 <tr class="separator:a9e519a59fe3e8b8a3ec8811b373faf68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65ea5fcd9fa89e4692ab41b6fd2cb977"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageInterface.html">StorageInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#a65ea5fcd9fa89e4692ab41b6fd2cb977">createStorage</a> (ErrorBufferInterface *errorhnd)</td></tr>
-<tr class="separator:a65ea5fcd9fa89e4692ab41b6fd2cb977"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af467ea1f00f846dec8874050f9be7e73"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageInterface.html">StorageInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#af467ea1f00f846dec8874050f9be7e73">createStorageType_std</a> (ErrorBufferInterface *errorhnd)</td></tr>
+<tr class="separator:af467ea1f00f846dec8874050f9be7e73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#aa25c3bb2a7fddaaacc1859a6fe58058e">createStorageObjectBuilder_default</a> (ErrorBufferInterface *errorhnd)</td></tr>
 <tr class="memdesc:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a storage object builder with the builders from the standard strus core libraries (without module support)  <a href="#aa25c3bb2a7fddaaacc1859a6fe58058e">More...</a><br/></td></tr>
 <tr class="separator:aa25c3bb2a7fddaaacc1859a6fe58058e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -250,9 +265,16 @@ Functions</h2></td></tr>
 <tr class="memitem:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ae32c4d703ac6ba1b54a65995546c3f6d">createStorageClient</a> (const <a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a> *objbuilder, ErrorBufferInterface *errorhnd, const std::string &amp;config)</td></tr>
 <tr class="memdesc:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a storage client interface with the object builder passed.  <a href="#ae32c4d703ac6ba1b54a65995546c3f6d">More...</a><br/></td></tr>
 <tr class="separator:ae32c4d703ac6ba1b54a65995546c3f6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab03e6ec68b9779f14e8a0b7c0d66aee3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html">VectorStorageClientInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacestrus.html#ab03e6ec68b9779f14e8a0b7c0d66aee3">createVectorStorageClient</a> (const <a class="el" href="classstrus_1_1StorageObjectBuilderInterface.html">StorageObjectBuilderInterface</a> *objbuilder, ErrorBufferInterface *errorhnd, const std::string &amp;config)</td></tr>
+<tr class="memdesc:ab03e6ec68b9779f14e8a0b7c0d66aee3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a vector storage client interface with the object builder passed.  <a href="#ab03e6ec68b9779f14e8a0b7c0d66aee3">More...</a><br/></td></tr>
+<tr class="separator:ab03e6ec68b9779f14e8a0b7c0d66aee3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>strus toplevel namespace </p>
+<p>Vector repository transaction implementation.</p>
+<p>Interface for searching vectors. Separated from client interface because it requires linear scanning of candidates in memory because of the nature of the problem.</p>
+<p>Interface for vector storage operations needed for efficient similar vector retrieval in the strus storage.</p>
+<p>Client interface for mapping vectors of floating point numbers of a given dimension to a list of features.</p>
 <p>Interface for building up metadata restrictions.</p>
 <p>Interface for a metadata restriction instance. </p>
 </div><h2 class="groupheader">Typedef Documentation</h2>
@@ -320,19 +342,19 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">objbuilder</td><td>object builder </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">errorhnd</td><td>error buffer interface </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>object configuration </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>object configuration (source, not a filename) </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="ab83f933d2693f3a61ca60cef1aad689c"></a>
+<a class="anchor" id="a4947bc83ee3f925f047f8db962385d64"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a>* strus::createDatabase_leveldb </td>
+          <td class="memname"><a class="el" href="classstrus_1_1DatabaseInterface.html">DatabaseInterface</a>* strus::createDatabaseType_leveldb </td>
           <td>(</td>
           <td class="paramtype">ErrorBufferInterface *&#160;</td>
           <td class="paramname"><em>errorhnd</em></td><td>)</td>
@@ -418,22 +440,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a65ea5fcd9fa89e4692ab41b6fd2cb977"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classstrus_1_1StorageInterface.html">StorageInterface</a>* strus::createStorage </td>
-          <td>(</td>
-          <td class="paramtype">ErrorBufferInterface *&#160;</td>
-          <td class="paramname"><em>errorhnd</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a class="anchor" id="ae32c4d703ac6ba1b54a65995546c3f6d"></a>
 <div class="memitem">
 <div class="memproto">
@@ -469,7 +475,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">objbuilder</td><td>object builder </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">errorhnd</td><td>error buffer interface </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>object configuration </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>object configuration (source, not a filename) </td></tr>
   </table>
   </dd>
 </dl>
@@ -500,11 +506,69 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af467ea1f00f846dec8874050f9be7e73"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classstrus_1_1StorageInterface.html">StorageInterface</a>* strus::createStorageType_std </td>
+          <td>(</td>
+          <td class="paramtype">ErrorBufferInterface *&#160;</td>
+          <td class="paramname"><em>errorhnd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a class="anchor" id="ab03e6ec68b9779f14e8a0b7c0d66aee3"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html">VectorStorageClientInterface</a>* strus::createVectorStorageClient </td>
+          <td>(</td>
+          <td class="paramtype">const StorageObjectBuilderInterface *&#160;</td>
+          <td class="paramname"><em>objbuilder</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ErrorBufferInterface *&#160;</td>
+          <td class="paramname"><em>errorhnd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>config</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Create a vector storage client interface with the object builder passed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">objbuilder</td><td>object builder </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">errorhnd</td><td>error buffer interface </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">config</td><td>object configuration (source, not a filename) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

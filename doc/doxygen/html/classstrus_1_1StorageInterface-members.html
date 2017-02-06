@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -68,17 +68,18 @@
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fab22fd7a522f6b96a466cf8f74839d994">CmdCreate</a> enum value</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"></td></tr>
   <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872fad30559ba2012ef5d3452b5026ab511d6">CmdCreateClient</a> enum value</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">ConfigType</a> enum name</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a4af90c26d7118b46a21bf2c0c39e566a">createAlterMetaDataTable</a>(DatabaseClientInterface *database) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#ab527f470f0b55544f626095c57acfbdb">createClient</a>(const std::string &amp;configsource, DatabaseClientInterface *database, const StatisticsProcessorInterface *statisticsProc=0) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a63888cef731e57f31f60a742957032bb">createStorage</a>(const std::string &amp;configsource, DatabaseClientInterface *database) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#ae95fbb70ee3d387827a3478a1411c5f3">getConfigDescription</a>(const ConfigType &amp;type) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a3b1a269ca442ceedaec00624820d767b">getConfigParameters</a>(const ConfigType &amp;type) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">~StorageInterface</a>()</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#afc33c9eef167b5980f6829dfcc0b5724">createAlterMetaDataTable</a>(const std::string &amp;configsource, const DatabaseInterface *database) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#aa37a805fa450304a4a05d354f7ebcae0">createClient</a>(const std::string &amp;configsource, const DatabaseInterface *database, const StatisticsProcessorInterface *statisticsProc=0) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a71e435b6de4f47b12c022c205a2d10ae">createDump</a>(const std::string &amp;configsource, const DatabaseInterface *database, const std::string &amp;keyprefix) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a79866852fa5eed37e40466f8325d7549">createStorage</a>(const std::string &amp;configsource, const DatabaseInterface *database) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#ae95fbb70ee3d387827a3478a1411c5f3">getConfigDescription</a>(const ConfigType &amp;type) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a3b1a269ca442ceedaec00624820d767b">getConfigParameters</a>(const ConfigType &amp;type) const =0</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html#a3cfca86dc674de6cbe153e442fa227d7">~StorageInterface</a>()</td><td class="entry"><a class="el" href="classstrus_1_1StorageInterface.html">strus::StorageInterface</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
 </table></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

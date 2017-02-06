@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -73,17 +73,19 @@
   <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#a37a7455f7ed52fe58de5bdfde57fed71">defineGlobalStatistics</a>(const GlobalStatistics &amp;stats_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#a78074cc3f229b01b3b4e3e65598c68dd">defineTermStatistics</a>(const std::string &amp;type_, const std::string &amp;value_, const TermStatistics &amp;stats_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#a28242d537b8dcf32d00b48c407ff8fc4">evaluate</a>()=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#abc82b6fe487b3c2ce3caefdb7a4278a1">pushExpression</a>(const PostingJoinOperatorInterface *operation, std::size_t argc, int range, unsigned int cardinality)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#a5bf6a86a4a2f508de5c03bb7fb94b43e">pushTerm</a>(const std::string &amp;type_, const std::string &amp;value_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#af73bd5535ed23f33afd9f1146b0b1691">setMaxNofRanks</a>(std::size_t maxNofRanks_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#a95e99179f1121fb89b8c1efd55673652">setMinRank</a>(std::size_t minRank_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#aaca35c5a220efca907aeecde8a7eafe0">setWeightingVariableValue</a>(const std::string &amp;name, double value)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#a4ec105f61227056990fae2d4d7473574">pushDocField</a>(const std::string &amp;metadataRangeStart, const std::string &amp;metadataRangeEnd)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#ad1673a201b060d6947e0cd2f9edd2ab7">pushExpression</a>(const PostingJoinOperatorInterface *operation, unsigned int argc, int range, unsigned int cardinality)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#abef082f1a109308c9aa93accdb48efb3">pushTerm</a>(const std::string &amp;type_, const std::string &amp;value_, const Index &amp;length_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#af73bd5535ed23f33afd9f1146b0b1691">setMaxNofRanks</a>(std::size_t maxNofRanks_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#a95e99179f1121fb89b8c1efd55673652">setMinRank</a>(std::size_t minRank_)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#aaca35c5a220efca907aeecde8a7eafe0">setWeightingVariableValue</a>(const std::string &amp;name, double value)=0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#aa167d47d1427e9f57116471ee2a24897">tostring</a>() const =0</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">pure virtual</span></td></tr>
   <tr><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html#af60d4b0f826740ebd97c16536bda74ea">~QueryInterface</a>()</td><td class="entry"><a class="el" href="classstrus_1_1QueryInterface.html">strus::QueryInterface</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">virtual</span></td></tr>
 </table></div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

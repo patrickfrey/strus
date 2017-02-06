@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -105,14 +105,17 @@
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f">commit</a>()=0;</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1StorageTransactionInterface.html#a971f8524b13dfb2a04bc07c3959a8b2b">rollback</a>()=0;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;};</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classstrus_1_1StorageTransactionInterface.html#a60865f67d3fda2c94390635ed77cee6d">nofDocumentsAffected</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;};</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
 <div class="ttc" id="namespacestrus_html_a3c5a45d9cd423c89104928e5feff5a4e"><div class="ttname"><a href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></div><div class="ttdeci">int32_t Index</div><div class="ttdoc">Number type generally used for locally counted indices. </div><div class="ttdef"><b>Definition:</b> index.hpp:29</div></div>
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html_a7f56ed8765ff27f50e963dc0b0fb6eba"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html#a7f56ed8765ff27f50e963dc0b0fb6eba">strus::StorageTransactionInterface::createDocumentUpdate</a></div><div class="ttdeci">virtual StorageDocumentUpdateInterface * createDocumentUpdate(const Index &amp;docno_)=0</div><div class="ttdoc">Create an interface for a document to be updated within this transaction. </div></div>
+<div class="ttc" id="classstrus_1_1StorageTransactionInterface_html_a60865f67d3fda2c94390635ed77cee6d"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html#a60865f67d3fda2c94390635ed77cee6d">strus::StorageTransactionInterface::nofDocumentsAffected</a></div><div class="ttdeci">virtual unsigned int nofDocumentsAffected() const =0</div><div class="ttdoc">Get the number of documents affected by the last transaction in case of a successful commit...</div></div>
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html_abb1ce3cc468973ef0a1758032b925f09"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html#abb1ce3cc468973ef0a1758032b925f09">strus::StorageTransactionInterface::deleteUserAccessRights</a></div><div class="ttdeci">virtual void deleteUserAccessRights(const std::string &amp;username)=0</div><div class="ttdoc">Declare the access rights of a user to any document to be removed from the storage within this transa...</div></div>
 <div class="ttc" id="classstrus_1_1StorageDocumentInterface_html"><div class="ttname"><a href="classstrus_1_1StorageDocumentInterface.html">strus::StorageDocumentInterface</a></div><div class="ttdoc">Object to declare all items for one insert/replace of a document in the storage. </div><div class="ttdef"><b>Definition:</b> storageDocumentInterface.hpp:21</div></div>
 <div class="ttc" id="classstrus_1_1StorageTransactionInterface_html"><div class="ttname"><a href="classstrus_1_1StorageTransactionInterface.html">strus::StorageTransactionInterface</a></div><div class="ttdoc">Object to declare all items for one insert/update of a document in the storage. </div><div class="ttdef"><b>Definition:</b> storageTransactionInterface.hpp:26</div></div>
@@ -128,7 +131,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

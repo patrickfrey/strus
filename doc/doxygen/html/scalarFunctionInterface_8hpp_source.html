@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.10</span>
+   &#160;<span id="projectnumber">0.13</span>
    </div>
   </td>
  </tr>
@@ -83,7 +83,7 @@
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        <span class="keyword">virtual</span> std::vector&lt;std::string&gt; <a class="code" href="classstrus_1_1ScalarFunctionInterface.html#aa0c07fafef20e3b5ef09eac4885da4a6">getVariables</a>() <span class="keyword">const</span>=0;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        <span class="keyword">virtual</span> std::size_t <a class="code" href="classstrus_1_1ScalarFunctionInterface.html#af52a0a395cc7089188cfe16709a35e8d">getNofArguments</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classstrus_1_1ScalarFunctionInterface.html#aef9413bbc7b0d95465e6da239e16067c">getNofArguments</a>() <span class="keyword">const</span>=0;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1ScalarFunctionInterface.html#a222cc5a2a60fb1c0f2fda7bf8ed1baf9">setDefaultVariableValue</a>( <span class="keyword">const</span> std::string&amp; name, <span class="keywordtype">double</span> value)=0;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
@@ -95,8 +95,8 @@
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;}<span class="comment">// namespace</span></div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor"></span></div>
+<div class="ttc" id="classstrus_1_1ScalarFunctionInterface_html_aef9413bbc7b0d95465e6da239e16067c"><div class="ttname"><a href="classstrus_1_1ScalarFunctionInterface.html#aef9413bbc7b0d95465e6da239e16067c">strus::ScalarFunctionInterface::getNofArguments</a></div><div class="ttdeci">virtual unsigned int getNofArguments() const =0</div><div class="ttdoc">Get the number of arguments of this function. </div></div>
 <div class="ttc" id="classstrus_1_1ScalarFunctionInterface_html_a6aaf39541a7c2578a195ba46a8613ff3"><div class="ttname"><a href="classstrus_1_1ScalarFunctionInterface.html#a6aaf39541a7c2578a195ba46a8613ff3">strus::ScalarFunctionInterface::createInstance</a></div><div class="ttdeci">virtual ScalarFunctionInstanceInterface * createInstance() const =0</div><div class="ttdoc">Creates an instance of the function. </div></div>
-<div class="ttc" id="classstrus_1_1ScalarFunctionInterface_html_af52a0a395cc7089188cfe16709a35e8d"><div class="ttname"><a href="classstrus_1_1ScalarFunctionInterface.html#af52a0a395cc7089188cfe16709a35e8d">strus::ScalarFunctionInterface::getNofArguments</a></div><div class="ttdeci">virtual std::size_t getNofArguments() const =0</div><div class="ttdoc">Get the number of arguments of this function. </div></div>
 <div class="ttc" id="classstrus_1_1ScalarFunctionInterface_html_aa0c07fafef20e3b5ef09eac4885da4a6"><div class="ttname"><a href="classstrus_1_1ScalarFunctionInterface.html#aa0c07fafef20e3b5ef09eac4885da4a6">strus::ScalarFunctionInterface::getVariables</a></div><div class="ttdeci">virtual std::vector&lt; std::string &gt; getVariables() const =0</div><div class="ttdoc">Get the list of variables the function is parameterized with. </div></div>
 <div class="ttc" id="classstrus_1_1ScalarFunctionInterface_html_ac1189968bce8a85b0d84e4fb028207e5"><div class="ttname"><a href="classstrus_1_1ScalarFunctionInterface.html#ac1189968bce8a85b0d84e4fb028207e5">strus::ScalarFunctionInterface::~ScalarFunctionInterface</a></div><div class="ttdeci">virtual ~ScalarFunctionInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> scalarFunctionInterface.hpp:28</div></div>
 <div class="ttc" id="classstrus_1_1ScalarFunctionInterface_html_a57dd6252ac2a021e138290db1f5d5ec1"><div class="ttname"><a href="classstrus_1_1ScalarFunctionInterface.html#a57dd6252ac2a021e138290db1f5d5ec1">strus::ScalarFunctionInterface::tostring</a></div><div class="ttdeci">virtual std::string tostring() const =0</div><div class="ttdoc">Return the representation (VM code or whatever it is) of the function as string. </div></div>
@@ -107,7 +107,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Jul 6 2016 10:16:08 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
