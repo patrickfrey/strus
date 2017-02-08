@@ -262,7 +262,7 @@ void StorageTransaction::updateDocumentFrequency( const std::string& type, const
 {
 	try
 	{
-		Index typeno = getOrCreateTermValue( type);
+		Index typeno = getOrCreateTermType( type);
 		Index termno = getOrCreateTermValue( value);
 		m_explicit_dfmap.increment( typeno, termno, df_change);
 	}
