@@ -71,6 +71,9 @@ public:
 	virtual void updateMetaData(
 			const Index& docno, const std::string& varname, const NumericVariant& value);
 
+	virtual void updateDocumentFrequency(
+			const std::string& type, const std::string& value, int df_change);
+
 	virtual bool commit();
 	virtual void rollback();
 
@@ -134,6 +137,8 @@ private:
 
 	KeyMapInv m_termTypeMapInv;				///< inverse map of term types
 	KeyMapInv m_termValueMapInv;				///< inverse map of term values
+
+	DocumentFrequencyMap m_explicit_dfmap;			///< df map for features not in search index with explicit df change
 
 	int m_nof_deleted_documents;				///< total adjustment for the number of documents deleted
 	int m_nof_documents_affected;				///< total number of documents affected by last transaction

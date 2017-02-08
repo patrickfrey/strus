@@ -23,13 +23,13 @@ void DocumentFrequencyMap::clear()
 	m_map.clear();
 }
 
-void DocumentFrequencyMap::increment( Index typeno, Index termno, Index count)
+void DocumentFrequencyMap::increment( Index typeno, Index termno, int count)
 {
 	Key key( typeno, termno);
 	m_map[ key] += count;
 }
 
-void DocumentFrequencyMap::decrement( Index typeno, Index termno, Index count)
+void DocumentFrequencyMap::decrement( Index typeno, Index termno, int count)
 {
 	Key key( typeno, termno);
 	m_map[ key] -= count;
