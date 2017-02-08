@@ -30,6 +30,54 @@ StorageDocumentUpdate::StorageDocumentUpdate(
 StorageDocumentUpdate::~StorageDocumentUpdate()
 {}
 
+TermMapKey StorageDocumentUpdate::termMapKey( const std::string& type_, const std::string& value_)
+{
+	Index typeno = m_transaction->getOrCreateTermType( type_);
+	Index valueno = m_transaction->getOrCreateTermValue( value_);
+	return TermMapKey( typeno, valueno);
+}
+
+void StorageDocumentUpdate::addSearchIndexTerm(
+		const std::string& type_,
+		const std::string& value_,
+		const Index& position_)
+{
+	try
+	{
+		if (position_ <= 0)
+		{
+			m_errorhnd->report( _TXT( "term occurrence position must not be 0"));
+		}
+		else
+		{
+			TermMapKey key( termMapKey( type_, value_));
+			TermMapValue& ref = m_terms[ key];
+			ref.pos.insert( position_);
+		}
+	}
+	CATCH_ERROR_MAP( _TXT("error adding search index term to document: %s"), *m_errorhnd);
+}
+
+void StorageDocumentUpdate::addForwardIndexTerm(
+		const std::string& type_,
+		const std::string& value_,
+		const Index& position_)
+{
+	try
+	{
+		if (position_ <= 0)
+		{
+			m_errorhnd->report( _TXT( "term occurrence position must not be 0"));
+		}
+		else
+		{
+			Index typeno = m_transaction->getOrCreateTermType( type_);
+			m_invs[ InvMapKey( typeno, position_)] = value_;
+		}
+	}
+	CATCH_ERROR_MAP( _TXT("error adding forward index term to document: %s"), *m_errorhnd);
+}
+
 void StorageDocumentUpdate::setMetaData(
 		const std::string& name_,
 		const NumericVariant& value_)

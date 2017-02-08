@@ -79,7 +79,7 @@ public:
 		return m_nof_documents_affected;
 	}
 
-public:/*Document*/
+public:/*Document,DocumentUpdate*/
 	Index getOrCreateTermValue( const std::string& name);
 	Index getOrCreateTermType( const std::string& name);
 	Index getOrCreateAttributeName( const std::string& name);

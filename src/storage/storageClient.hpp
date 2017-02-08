@@ -66,10 +66,10 @@ public:
 	virtual ~StorageClient();
 
 	virtual PostingIteratorInterface*
-			createTermPostingIterator(
-				const std::string& termtype,
-				const std::string& termid,
-				const Index& length) const;
+		createTermPostingIterator(
+			const std::string& termtype,
+			const std::string& termid,
+			const Index& length) const;
 
 	virtual PostingIteratorInterface*
 		createBrowsePostingIterator(

@@ -31,7 +31,7 @@ StorageDocument::StorageDocument(
 StorageDocument::~StorageDocument()
 {}
 
-StorageDocument::TermMapKey StorageDocument::termMapKey( const std::string& type_, const std::string& value_)
+TermMapKey StorageDocument::termMapKey( const std::string& type_, const std::string& value_)
 {
 	Index typeno = m_transaction->getOrCreateTermType( type_);
 	Index valueno = m_transaction->getOrCreateTermValue( value_);

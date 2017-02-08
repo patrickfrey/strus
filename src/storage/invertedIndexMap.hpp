@@ -18,6 +18,8 @@
 #include "private/localStructAllocator.hpp"
 #include <vector>
 #include <iostream>
+#include <set>
+#include <map>
 
 namespace strus {
 
@@ -38,6 +40,7 @@ public:
 		const std::vector<Index>& pos);
 
 	void deleteIndex( const Index& docno);
+	void deleteIndex( const Index& docno, const Index& typeno);
 
 	void renameNewNumbers(
 			const std::map<Index,Index>& docnoUnknownMap,
@@ -121,7 +124,8 @@ private:
 	InvTermMap m_invtermmap;
 	InvTermList m_invterms;
 	Index m_docno;
-	std::vector<Index> m_deletes;
+	std::set<Index> m_docno_deletes;
+	std::map<Index, std::set<Index> > m_docno_typeno_deletes;
 };
 
 }

@@ -127,7 +127,35 @@ void ForwardIndexMap::deleteIndex( const Index& docno)
 			}
 		}
 	}
-	m_deletes.push_back( docno);
+	if (m_docno_typeno_deletes.find( docno) != m_docno_typeno_deletes.end())
+	{
+		m_docno_typeno_deletes.erase( docno);
+	}
+	m_docno_deletes.insert( docno);
+}
+
+void ForwardIndexMap::deleteIndex( const Index& docno, const Index& typeno)
+{
+	if (docno == m_docno)
+	{
+		m_curblockmap[ typeno] = CurblockElemList();
+		m_docno = 0;
+	}
+	else
+	{
+		BlockKeyIndex termkey = BlockKey( typeno, docno).index();
+		MapKey key( typeno, docno, 0);
+	
+		Map::iterator fi = m_map.upper_bound( key);
+		while (fi != m_map.end() && fi->first.termkey == termkey)
+		{
+			m_map.erase( fi++);
+		}
+	}
+	if (m_docno_deletes.find( docno) == m_docno_deletes.end())
+	{
+		m_docno_typeno_deletes[ docno].insert( typeno);
+	}
 }
 
 void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
@@ -135,7 +163,7 @@ void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	closeCurblocks();
 
 	// [1] Write deletes:
-	std::vector<Index>::const_iterator di = m_deletes.begin(), de = m_deletes.end();
+	std::set<Index>::const_iterator di = m_docno_deletes.begin(), de = m_docno_deletes.end();
 	for (; di != de; ++di)
 	{
 		Index ti = 1, te = m_maxtype+1;
@@ -144,6 +172,13 @@ void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 			DatabaseAdapter_ForwardIndex::Writer dbadapter( m_database, ti, *di);
 			dbadapter.removeSubTree( transaction);
 		}
+	}
+	std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
+	for (; ui != ue; ++ui)
+	{
+		std::set<Index>::const_iterator ti = ui->second.begin(), te = ui->second.end();
+		DatabaseAdapter_ForwardIndex::Writer dbadapter( m_database, *ti, ui->first);
+		dbadapter.removeSubTree( transaction);
 	}
 
 	// [2] Write inserts:
@@ -178,7 +213,8 @@ void ForwardIndexMap::clear()
 	m_curblockmap.clear();
 	m_strings.clear();
 	m_docno = 0;
-	m_deletes.clear();
+	m_docno_deletes.clear();
+	m_docno_typeno_deletes.clear();
 }
 
 

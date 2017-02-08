@@ -24,6 +24,27 @@ public:
 	/// \brief Destructor
 	virtual ~StorageDocumentUpdateInterface(){}
 
+	/// \brief Add one occurrence of a term in the document for retrieval
+	/// \param[in] type_ type name of the term
+	/// \param[in] value_ value string of the term
+	/// \param[in] position_ ordinal position (term count position) of the term in the document
+	/// \note All forward index terms of this type that are not readded with this document update are removed
+	virtual void addSearchIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_)=0;
+
+	/// \brief Add one occurrence of a term to the forward index for summarization of the document
+	/// \param[in] type_ type name of the term
+	/// \param[in] value_ value string of the term
+	/// \param[in] position_ position of the term in the document
+	/// \remark Only one type,value pair allowed at one position
+	/// \note All forward index terms of this type that are not readded with this document update get removed
+	virtual void addForwardIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_)=0;
+
 	/// \brief Define a meta data element of the document by name
 	/// \note Meta data are used for query restrictions and for document weights in query result ranking
 	/// \note Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.

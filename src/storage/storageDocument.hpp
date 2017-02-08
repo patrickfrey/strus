@@ -11,6 +11,7 @@
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/numericVariant.hpp"
 #include "storageTransaction.hpp"
+#include "storageDocumentStructs.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -67,58 +68,6 @@ public:
 	virtual void done();
 
 public:
-	typedef std::pair<Index,Index> TermMapKey;
-	struct TermMapValue
-	{
-		TermMapValue(){}
-		TermMapValue( const TermMapValue& o)
-			:pos(o.pos){}
-
-		std::set<Index> pos;
-	};
-	typedef std::map< TermMapKey, TermMapValue> TermMap;
-
-	struct InvMapKey
-	{
-		InvMapKey( const Index& t, const Index& p)
-			:typeno(t),pos(p){}
-		InvMapKey( const InvMapKey& o)
-			:typeno(o.typeno),pos(o.pos){}
-
-		bool operator<( const InvMapKey& o) const
-		{
-			return (typeno < o.typeno || (typeno == o.typeno && pos < o.pos));
-		}
-
-		Index typeno;
-		Index pos;
-	};
-	typedef std::map<InvMapKey, std::string> InvMap;
-
-	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
-
-	struct DocAttribute
-	{
-		std::string name;
-		std::string value;
-
-		DocAttribute( const std::string& name_, const std::string& value_)
-			:name(name_),value(value_){}
-		DocAttribute( const DocAttribute& o)
-			:name(o.name),value(o.value){}
-	};
-
-	struct DocMetaData
-	{
-		std::string name;
-		NumericVariant value;
-
-		DocMetaData( const std::string& name_, const NumericVariant& value_)
-			:name(name_),value(value_){}
-		DocMetaData( const DocMetaData& o)
-			:name(o.name),value(o.value){}
-	};
-
 	const std::string& docid() const			{return m_docid;}
 	const Index& docno() const				{return m_docno;}
 	const TermMap& terms() const				{return m_terms;}
@@ -128,18 +77,21 @@ public:
 	const std::vector<Index>& userlist() const		{return m_userlist;}
 
 private:
+	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
+
+private:
 	StorageDocument( const StorageDocument&){}	//non copyable
 	void operator=( const StorageDocument&){}	//non copyable
 
 private:
-	StorageTransaction* m_transaction;
-	std::string m_docid;
-	Index m_docno;
-	TermMap m_terms;
-	InvMap m_invs;
-	std::vector<DocAttribute> m_attributes;
-	std::vector<DocMetaData> m_metadata;
-	std::vector<Index> m_userlist;
+	StorageTransaction* m_transaction;			///< transaction
+	std::string m_docid;					///< document id assigned to this document
+	Index m_docno;						///< document number
+	TermMap m_terms;					///< map of all search index terms added
+	InvMap m_invs;						///< map of all forward index terms added
+	std::vector<DocAttribute> m_attributes;			///< attributes to add
+	std::vector<DocMetaData> m_metadata;			///< metadata to add
+	std::vector<Index> m_userlist;				///< users granted access to this document
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
