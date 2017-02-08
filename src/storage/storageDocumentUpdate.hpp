@@ -88,6 +88,8 @@ private:
 	Index m_docno;						///< document number
 	TermMap m_terms;					///< map of all search index terms added
 	InvMap m_invs;						///< map of all forward index terms added
+	std::set<Index> m_delete_search_typenolist;		///< set with typeno of types to remove from the search index (exclusive add of index features in update)
+	std::set<Index> m_delete_forward_typenolist;		///< set with typeno of types to remove from the forward index (exclusive add of index features in update)
 	std::vector<DocAttribute> m_attributes;			///< attributes to update
 	std::vector<DocMetaData> m_metadata;			///< metadata to update
 	std::vector<Index> m_add_userlist;			///< list of users to add to this document access

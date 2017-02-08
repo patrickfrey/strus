@@ -100,6 +100,8 @@ public:/*Document,DocumentUpdate*/
 	void deleteAcl( const Index& docno);
 
 	void deleteIndex( const Index& docno);
+	void deleteDocSearchIndexType( const Index& docno, const Index& typeno);
+	void deleteDocForwardIndexType( const Index& docno, const Index& typeno);
 
 	void definePosinfoPosting(
 		const Index& termtype, const Index& termvalue,

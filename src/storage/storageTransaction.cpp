@@ -172,6 +172,16 @@ void StorageTransaction::deleteIndex( const Index& docno)
 	m_forwardIndexMap.deleteIndex( docno);
 }
 
+void StorageTransaction::deleteDocSearchIndexType( const Index& docno, const Index& typeno)
+{
+	m_invertedIndexMap.deleteIndex( docno, typeno);
+}
+
+void StorageTransaction::deleteDocForwardIndexType( const Index& docno, const Index& typeno)
+{
+	m_forwardIndexMap.deleteIndex( docno, typeno);
+}
+
 void StorageTransaction::deleteUserAccessRights(
 	const std::string& username)
 {

@@ -24,17 +24,17 @@ public:
 	/// \brief Destructor
 	virtual ~StorageDocumentUpdateInterface(){}
 
-	/// \brief Add one occurrence of a term in the document for retrieval
+	/// \brief Add one occurrence of a term to the search index excluding all features of this type previously added in another update context.
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ ordinal position (term count position) of the term in the document
-	/// \note All forward index terms of this type that are not readded with this document update are removed
+	/// \note All forward index terms of this type that are not readded with this document update get removed
 	virtual void addSearchIndexTerm(
 			const std::string& type_,
 			const std::string& value_,
 			const Index& position_)=0;
 
-	/// \brief Add one occurrence of a term to the forward index for summarization of the document
+	/// \brief Add one occurrence of a term to the forward index excluding all features of this type previously added in another update context.
 	/// \param[in] type_ type name of the term
 	/// \param[in] value_ value string of the term
 	/// \param[in] position_ position of the term in the document
