@@ -323,14 +323,14 @@ void InvertedIndexMap::getWriteBatch(
 			InvTermMap::iterator iitr = m_invtermmap.find( ui->first);
 			if (iitr != m_invtermmap.end())
 			{
-				InvTermList::const_iterator li = m_invterms.begin() + iitr->second, le = m_invterms.end();
-				for (; li != le && li->typeno; ++li)
+				std::size_t li = iitr->second, le = m_invterms.size();
+				for (; li != le && m_invterms[li].typeno; ++li)
 				{
-					if (ui->second.find( li->typeno) == ui->second.end())
+					if (ui->second.find( m_invterms[li].typeno) == ui->second.end())
 					{
 						throw strus::runtime_error( _TXT("mixing partial update with insert is not allowed"));
 					}
-					m_invterms.push_back( *li);
+					m_invterms.push_back( m_invterms[li]);
 				}
 			}
 			m_invtermmap[ ui->first] = newinvtermidx;
