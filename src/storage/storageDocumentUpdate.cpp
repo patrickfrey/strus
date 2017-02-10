@@ -80,6 +80,28 @@ void StorageDocumentUpdate::addForwardIndexTerm(
 	CATCH_ERROR_MAP( _TXT("error adding forward index term to document: %s"), *m_errorhnd);
 }
 
+void StorageDocumentUpdate::clearSearchIndexTerm(
+		const std::string& type_)
+{
+	try
+	{
+		Index typeno = m_transaction->getOrCreateTermType( type_);
+		m_delete_search_typenolist.insert( typeno);
+	}
+	CATCH_ERROR_MAP( _TXT("error removing occurrencies of search index term type from document: %s"), *m_errorhnd);
+}
+
+void StorageDocumentUpdate::clearForwardIndexTerm(
+		const std::string& type_)
+{
+	try
+	{
+		Index typeno = m_transaction->getOrCreateTermType( type_);
+		m_delete_forward_typenolist.insert( typeno);
+	}
+	CATCH_ERROR_MAP( _TXT("error removing occurrencies of forward index term type from document: %s"), *m_errorhnd);
+}
+
 void StorageDocumentUpdate::setMetaData(
 		const std::string& name_,
 		const NumericVariant& value_)

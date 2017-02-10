@@ -32,7 +32,7 @@ public:
 	enum {NofKeyValuePairsPerChunk=256};
 
 private:
-	const DatabaseClientInterface* m_database;
+	Reference<DatabaseClientInterface> m_database;
 	Reference<DatabaseCursorInterface> m_cursor;
 	DatabaseCursorInterface::Slice m_key;
 	std::string m_chunk;

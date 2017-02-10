@@ -22,6 +22,7 @@ StorageDump::StorageDump( const DatabaseInterface* database_, const std::string&
 	,m_cursor()
 	,m_errorhnd(errorhnd_)
 {
+	if (!m_database.get()) throw strus::runtime_error(_TXT("error creating database client interface"));
 	m_cursor.reset( m_database->createCursor( DatabaseOptions()));
 	if (!m_cursor.get()) throw strus::runtime_error(_TXT("error creating database cursor"));
 	m_key = m_cursor->seekFirst( keyprefix.c_str(), keyprefix.size());
@@ -171,7 +172,7 @@ bool StorageDump::nextChunk( const char*& chunk, std::size_t& chunksize)
 			{
 				throw strus::runtime_error( _TXT( "found empty key"));
 			}
-			dumpKeyValue( output, m_database, m_key, m_cursor->value());
+			dumpKeyValue( output, m_database.get(), m_key, m_cursor->value());
 		};
 		m_chunk = output.str();
 		chunk = m_chunk.c_str();

@@ -44,6 +44,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	const std::vector<Index>& pos)
 {
 	if (pos.empty()) return;
+
 	if (termtype == 0 || termvalue == 0)
 	{
 		throw strus::runtime_error( _TXT( "calling definePosinfoPosting with illegal arguments: (%u,%u,%u)"), termtype, termvalue, docno);
@@ -287,8 +288,8 @@ void InvertedIndexMap::getWriteBatch(
 				// decrement stats for all old elements, for the new elements it will be incremented again:
 				m_dfmap.decrement( it.typeno, it.termno);
 			}
+			dbadapter_inv.remove( transaction, *di);
 		}
-		dbadapter_inv.remove( transaction, *di);
 	}
 	std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
 	for (; ui != ue; ++ui)
@@ -333,8 +334,8 @@ void InvertedIndexMap::getWriteBatch(
 				}
 			}
 			m_invtermmap[ ui->first] = newinvtermidx;
+			dbadapter_inv.remove( transaction, ui->first);
 		}
-		dbadapter_inv.remove( transaction, ui->first);
 	}
 
 	// [2] Get inv and df map inserts:

@@ -48,6 +48,14 @@ public:
 			const std::string& value_,
 			const Index& position_);
 
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearSearchIndexTerm( const std::string&);
+	virtual void clearSearchIndexTerm(
+			const std::string& type_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearForwardIndexTerm( const std::string&);
+	virtual void clearForwardIndexTerm(
+			const std::string& type_);
+
 	/// \brief Implementation of StorageDocumentUpdateInterface::setMetaData( const std::string&, const NumericVariant&);
 	virtual void setMetaData(
 			const std::string& name_,

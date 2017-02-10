@@ -16,6 +16,7 @@
 #include <string>
 #include <cstring>
 #include <map>
+#include <iostream>
 
 namespace strus {
 
@@ -62,6 +63,7 @@ public:
 	}
 
 	void deleteKey( const std::string& name);
+	void print( std::ostream& out);
 
 private:
 	void clear();

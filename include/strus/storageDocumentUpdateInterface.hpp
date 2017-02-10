@@ -45,6 +45,18 @@ public:
 			const std::string& value_,
 			const Index& position_)=0;
 
+	/// \brief Clear all previous occurrencies of a term type in a document in the search index
+	/// \param[in] type_ type name of the terms to erase
+	/// \note The call of this function happens implicitely, if one or more features of this type are added to the update
+	virtual void clearSearchIndexTerm(
+			const std::string& type_)=0;
+
+	/// \brief Clear all previous occurrencies of a term type in a document in the forward index
+	/// \param[in] type_ type name of the terms to erase
+	/// \note The call of this function happens implicitely, if one or more features of this type are added to the update
+	virtual void clearForwardIndexTerm(
+			const std::string& type_)=0;
+
 	/// \brief Define a meta data element of the document by name
 	/// \note Meta data are used for query restrictions and for document weights in query result ranking
 	/// \note Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.
