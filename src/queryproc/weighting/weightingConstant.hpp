@@ -34,8 +34,8 @@ class WeightingFunctionContextConstant
 {
 public:
 	WeightingFunctionContextConstant(
-			double weight_, ErrorBufferInterface* errorhnd_)
-		:m_featar(),m_weight(weight_),m_errorhnd(errorhnd_){}
+			double weight_, bool precalc_, ErrorBufferInterface* errorhnd_)
+		:m_featar(),m_weight(weight_),m_precalc(precalc_),m_errorhnd(errorhnd_){}
 
 	struct Feature
 	{
@@ -59,6 +59,8 @@ public:
 private:
 	std::vector<Feature> m_featar;
 	float m_weight;
+	bool m_precalc;
+	std::map<Index,double> m_precalcmap;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
@@ -69,7 +71,7 @@ class WeightingFunctionInstanceConstant
 {
 public:
 	explicit WeightingFunctionInstanceConstant( ErrorBufferInterface* errorhnd_)
-		:m_weight(1.0),m_errorhnd(errorhnd_){}
+		:m_weight(1.0),m_precalc(false),m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceConstant(){}
 
@@ -86,6 +88,7 @@ public:
 
 private:
 	float m_weight;
+	bool m_precalc;
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
