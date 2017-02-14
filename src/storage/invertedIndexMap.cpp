@@ -450,7 +450,10 @@ void InvertedIndexMap::insertNewPosElements(
 			}
 			else
 			{
-				dbadapter_posinfo.store( transaction, newposblk.createBlock());
+				if (!newposblk.empty())
+				{
+					dbadapter_posinfo.store( transaction, newposblk.createBlock());
+				}
 				newposblk.clear();
 			}
 		}
