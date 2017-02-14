@@ -493,7 +493,10 @@ void InvertedIndexMap::mergeNewPosElements(
 		if (dbadapter_posinfo.loadNext( blk))
 		{
 			// ... is not the last block, so we store it
-			dbadapter_posinfo.store( transaction, newposblk.createBlock());
+			if (!newposblk.empty())
+			{
+				dbadapter_posinfo.store( transaction, newposblk.createBlock());
+			}
 			newposblk.clear();
 		}
 		else
@@ -547,7 +550,10 @@ void InvertedIndexMap::mergePosBlock(
 				if (!newblk.fitsInto( m_posinfo[ ei->second]))
 				{
 					newblk.setId(0);
-					dbadapter_posinfo.store( transaction, newblk.createBlock());
+					if (!newblk.empty())
+					{
+						dbadapter_posinfo.store( transaction, newblk.createBlock());
+					}
 					newblk.clear();
 					newblk.setId( oldblk.id());
 				}
@@ -574,7 +580,10 @@ void InvertedIndexMap::mergePosBlock(
 			if (!newblk.fitsInto( m_posinfo[ ei->second]))
 			{
 				newblk.setId(0);
-				dbadapter_posinfo.store( transaction, newblk.createBlock());
+				if (!newblk.empty())
+				{
+					dbadapter_posinfo.store( transaction, newblk.createBlock());
+				}
 				newblk.clear();
 				newblk.setId( oldblk.id());
 			}
@@ -587,7 +596,10 @@ void InvertedIndexMap::mergePosBlock(
 		if (!newblk.fitsInto( oldblk.frequency_at( blkcursor)))
 		{
 			newblk.setId(0);
-			dbadapter_posinfo.store( transaction, newblk.createBlock());
+			if (!newblk.empty())
+			{
+				dbadapter_posinfo.store( transaction, newblk.createBlock());
+			}
 			newblk.clear();
 			newblk.setId( oldblk.id());
 		}
