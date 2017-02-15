@@ -227,7 +227,7 @@ static Candidate findCandidate(
 		{
 			weightar[ 0] += 1.0;
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "\tff incr [single feature] " << result.tostring() << std::endl;
+			std::cout << "\tff incr [single feature] " << weightar.tostring() << std::endl;
 #endif
 		}
 		else
@@ -348,8 +348,8 @@ std::vector<SummaryElement>
 				titleStart = 1;
 			}
 		}
-		Index firstpos = m_forwardindex->skipPos( titleEnd);
-		if (!firstpos) firstpos = titleEnd;
+		Index firstpos = m_forwardindex->skipPos( 0);
+		if (!firstpos) firstpos = titleStart;
 
 		// Define best match to find:
 		// Find the best match:
@@ -373,7 +373,7 @@ std::vector<SummaryElement>
 				if (valid_itrar[ti])
 				{
 					Index pos = valid_itrar[ti]->skipPos( 0);
-					if (pos >= firstpos)
+					if (pos >= titleEnd)
 					{
 						noTitleTerms[ noTitleSize++] = m_itrar[ ti];
 						noTitleIdfs.add( m_idfar[ ti]);
@@ -389,7 +389,7 @@ std::vector<SummaryElement>
 			{
 				unsigned int cardinality = m_cardinality > cntTitleTerms ? (m_cardinality - cntTitleTerms) : 1;
 				candidate = findCandidate(
-						firstpos, noTitleIdfs, noWeightIncrs, m_parameter->m_windowsize, cardinality,
+						titleEnd, noTitleIdfs, noWeightIncrs, m_parameter->m_windowsize, cardinality,
 						noTitleTerms, noTitleSize, valid_structar, m_structarsize,
 						valid_paraar, m_paraarsize, m_maxdist_featar);
 			}
@@ -398,7 +398,7 @@ std::vector<SummaryElement>
 		if (is_docstart)
 		{
 			// ... if we did not find any candidate window, we take the start of the document as abstract:
-			candidate.pos = firstpos;
+			candidate.pos = titleEnd;
 			candidate.span = 10;
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -412,18 +412,18 @@ std::vector<SummaryElement>
 			bool defined_end;
 			bool is_docstart;
 		};
-		Abstract phrase_abstract = {candidate.pos,candidate.span,(candidate.pos == firstpos),false,is_docstart};
+		Abstract phrase_abstract = {candidate.pos,candidate.span,(candidate.pos == titleEnd),false,is_docstart};
 
 		// Find the start of the abstract as start of the preceeding structure or paragraph marker:
 		std::size_t ti=0,te=m_paraarsize+m_structarsize;
 		Index astart;
-		if ((Index)m_parameter->m_sentencesize + firstpos < candidate.pos)
+		if ((Index)m_parameter->m_sentencesize + titleEnd < candidate.pos)
 		{
 			astart = candidate.pos - (Index)m_parameter->m_sentencesize;
 		}
 		else
 		{
-			astart = firstpos;
+			astart = titleEnd;
 			phrase_abstract.defined_start = true;
 		}
 		for (; ti<te && astart < candidate.pos; ++ti)
@@ -476,7 +476,7 @@ std::vector<SummaryElement>
 		Abstract para_abstract = {0,0,true,true,false};
 		for (;;)
 		{
-			Index pstart = phrase_abstract.start  > searchrange + firstpos ? phrase_abstract.start - searchrange : (firstpos + 1);
+			Index pstart = phrase_abstract.start  > (searchrange + titleEnd) ? phrase_abstract.start - searchrange : (titleEnd + 1);
 			Index prevparapos = callSkipPos( pstart, valid_paraar, m_paraarsize);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << "start search candidate para pos=" << pstart << ", nextpara=" << prevparapos << std::endl;
@@ -519,7 +519,7 @@ std::vector<SummaryElement>
 						para_abstract.start = parapos;
 						para_abstract.span = (eoppos-parapos+1);
 					}
-					else if (parapos != firstpos)
+					else if (parapos != titleEnd)
 					{
 						para_abstract.start = parapos;
 						para_abstract.span = (eoppos-parapos+1);
@@ -529,7 +529,7 @@ std::vector<SummaryElement>
 			}
 			else
 			{
-				if (pstart <= (firstpos + 1)) break;
+				if (pstart <= (titleEnd + 1)) break;
 				searchrange *= 2;
 			}
 		}
@@ -556,7 +556,7 @@ std::vector<SummaryElement>
 			rt.push_back( SummaryElement( m_parameter->m_name_para, paratitle, 1.0));
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "firstpos=" << firstpos << std::endl;
+		std::cout << "titleEnd=" << titleEnd << std::endl;
 #endif
 		// Create the highlighted phrase result, if exists:
 		if (phrase_abstract.span > 0)
