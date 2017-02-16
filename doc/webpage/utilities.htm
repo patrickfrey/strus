@@ -33,6 +33,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -48,6 +50,7 @@ options:
     &lt;FILENAME&gt; is a file containing the configuration string
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -63,6 +66,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -82,6 +87,7 @@ options:
     &lt;FILENAME&gt; is a file containing the configuration string
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -94,52 +100,61 @@ usage: strusInspect [options] &lt;what...&gt;
 &lt;what&gt;    : what to inspect:
             "pos" &lt;type&gt; &lt;value&gt; [&lt;doc-id/no&gt;]
                = Get the list of positions for a search index term.
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
             "ff" &lt;type&gt; &lt;value&gt; [&lt;doc-id/no&gt;]
                = Get the feature frequency for a search index feature
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
             "df" &lt;type&gt; &lt;value&gt;
                = Get the document frequency for a search index feature
             "ttf" &lt;type&gt; [&lt;doc-id/no&gt;]
                = Get the term type frequency in a document
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
             "ttc" &lt;type&gt; [&lt;doc-id/no&gt;]
                = Get the term type count (distinct) in a document
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
+            "featuretypes"
+               = Get list of feature types in the index
             "indexterms" &lt;type&gt; [&lt;doc-id/no&gt;]
                = Get the list of tuples of term value, first position and ff 
                  for a search index term type.
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
             "nofdocs"
                = Get the number of documents in the storage
             "maxdocno"
                = Get the maximum document number allocated in the storage
             "metadata" &lt;name&gt; [&lt;doc-id/no&gt;]
                = Get the value of a meta data element
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
             "metatable"
                = Get the schema of the meta data table
             "attribute" &lt;name&gt; [&lt;doc-id/no&gt;]
                = Get the value of a document attribute
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
             "attrnames"
                = Get the list of all attribute names defined for the storage
             "content" &lt;type&gt; [&lt;doc-id/no&gt;]
                = Get the content of the forward index for a type
-                 If doc is not specified then dump content for all docs.
+                 If document is not specified then dump content for all docs.
             "fwstats" &lt;type&gt; [&lt;doc-id/no&gt;]
                = Get the statistis of the forward index for a type
-                 If doc is not specified then dump value for all docs.
+                 If document is not specified then dump value for all docs.
+            "fwmap" &lt;type&gt; [&lt;doc-id/no&gt;]
+               = Print a map docno to forward index element for a type
+                 If document is not specified then dump value for all docs.
             "token" &lt;type&gt; &lt;doc-id/no&gt;
                = Get the list of terms in the forward index for a type
             "docno" &lt;docid&gt;
                = Get the internal document number for a document id
+            "config"
+               = Get the configuration the storage was created with
 description: Inspect some data in the storage.
 options:
 -h|--help
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -159,6 +174,7 @@ options:
             cachedterms=&lt;file with list of terms to cache&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -177,18 +193,27 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
     Search modules to load first in &lt;DIR&gt;
--R|--resourcedir &lt;DIR&gt;
-    Search resource files for analyzer first in &lt;DIR&gt;
--g|--segmenter &lt;NAME&gt;
-    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-g|--segmenter &lt;NAME&gt;
+    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-D|--dump &lt;DUMPCFG&gt;
+    Dump ouput according &lt;DUMPCFG&gt;.
+    &lt;DUMPCFG&gt; is a comma separated list of types or type value assignments.
+    A type in &lt;DUMPCFG&gt; specifies the type to dump.
+    A value an optional replacement of the term value.
+    This kind of output is suitable for content analysis.
 </pre>
 </li>
 
@@ -207,6 +232,8 @@ options:
    Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -223,6 +250,38 @@ options:
     Do not print position and define default quotes as empty
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+</pre>
+</li>
+
+<a name="strusAnalyzeQuery"></a><li><b>strusAnalyzeQuery</b>
+<br/>Call the query analyzer with a query to analyze.
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>)
+<input class="toggle-box" id="strusAnalyzeQuery_usage" type="checkbox" >
+<label for="strusAnalyzeQuery_usage">Usage</label>
+<pre>
+usage: strusAnalyze [options] &lt;program&gt; &lt;queryfile&gt;
+&lt;program&gt;   = path of analyzer program
+&lt;queryfile&gt; = path of query content to analyze ('-' for stdin)
+description: Analyzes a query and dumps the result to stdout.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -241,6 +300,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -261,6 +322,104 @@ options:
     Escape end of line with space
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+</pre>
+</li>
+
+
+<a name="strusPatternMatcher"></a><li><b>strusPatternMatcher</b>
+<br/>Processes some documents mit a pattern matcher and output all matches found.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusPatternMatcher_usage" type="checkbox" >
+<label for="strusPatternMatcher_usage">Usage</label>
+<pre>
+usage: strusPatternMatch [options] &lt;inputpath&gt;
+&lt;inputpath&gt;  : input file or directory to process
+description: Runs pattern matching on the input documents and dumps the result to stdout.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+    The module modstrus_analyzer_pattern is implicitely defined
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-K|--tokens
+    Print the tokenization used for pattern matching too
+-t|--threads &lt;N&gt;
+    Set &lt;N&gt; as number of inserter threads to use
+-x|--ext &lt;FILEEXT&gt;
+    Do only process files with extension &lt;FILEEXT&gt;
+-y|--mimetype &lt;TYPE&gt;
+    Specify the MIME type of all files to process as &lt;TYPE&gt;
+-C|--encoding &lt;ENC&gt;
+    Specify the character set encoding of all files to process as &lt;ENC&gt;
+-e|--expression &lt;EXP&gt;
+    Define a selection expression &lt;EXP&gt; for the content to process
+      (default if nothing specified is "//()"
+-H|--markup &lt;NAME&gt;
+    Output the content with markups of the rules or variables with name &lt;NAME&gt;
+-Z|--marker &lt;MRK&gt;
+    Define a character sequence inserted before every result declaration
+-X|--lexer &lt;LX&gt;
+    Use pattern lexer named &lt;LX&gt;
+    Default is 'std'
+-Y|--matcher &lt;PT&gt;
+    Use pattern lexer named &lt;PT&gt;
+    Default is 'std'
+-p|--program &lt;PRG&gt;
+    Load program &lt;PRG&gt; with patterns to process
+-o|--output &lt;FILE&gt;
+    Write output to file &lt;FILE&gt; (thread id is inserted before '.' with threads)
+-g|--segmenter &lt;NAME&gt;
+    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+</pre>
+</li>
+
+<a name="strusPatternSerialize"></a><li><b>strusPatternSerialize</b>
+<br/>Loads a pattern match program and outputs it in a serialized form that can be loaded by the analyzer.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusPatternSerialize_usage" type="checkbox" >
+<label for="strusPatternSerialize_usage">Usage</label>
+<pre>
+usage: strusPatternSerialize [options] &lt;program&gt;
+description: Loads a pattern matcher program source in file &lt;program&gt;
+    and outputs its serialization.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+    The module modstrus_analyzer_pattern is implicitely defined
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-F|--feeder
+    Assume program with feeder (post analyzer processing)
+-o|--output &lt;FILE&gt;
+    Write output to file &lt;FILE&gt;.
+    Do text output to stdout if not specified.
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -279,6 +438,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -s|--storage &lt;CONFIG&gt;
     Define the storage configuration string as &lt;CONFIG&gt;
     &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
@@ -303,6 +464,8 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -g|--segmenter &lt;NAME&gt;
     Use the document segmenter with name &lt;NAME&gt; (default textwolf)
+-D|--contenttype &lt;CT&gt;
+    forced definition of the document class of all documents inserted.
 -x|--extension &lt;EXT&gt;
     Grab only the files with extension &lt;EXT&gt; (default all files)
 -t|--threads &lt;N&gt;
@@ -318,6 +481,7 @@ options:
     verbose output
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -335,15 +499,17 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
     Search modules to load first in &lt;DIR&gt;
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
--s|--storage &lt;CONFIG&gt
-    Define the storage configuration string as &lt;CONFIG&gt
-    &lt;CONFIG&gt is a semicolon ';' separated list of assignments:
+-s|--storage &lt;CONFIG&gt;
+    Define the storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
             path=&lt;LevelDB storage path&gt;
             create=&lt;yes/no, yes=do create if database does not exist yet&gt;
             cache=&lt;size of LRU cache for LevelDB&gt;
@@ -354,6 +520,7 @@ options:
             cachedterms=&lt;file with list of terms to cache&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -372,6 +539,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -397,6 +566,9 @@ options:
     The name of the updated meta data element is &lt;NAME&gt;.
 -u|--useraccess
     The update batch is a list of user right assignments.
+-x|--mapattribute &lt;ATTR&gt;
+    The update document is selected by the attribute &lt;ATTR&gt; as key,
+    instead of the document id or document number.
 -c|--commit &lt;N&gt;
     Set &lt;N&gt; as number of updates per transaction (default 10000)
     If &lt;N&gt; is set to 0 then only one commit is done at the end
@@ -404,6 +576,7 @@ options:
     Write the last error occurred to &lt;FILE&gt; in case of an exception
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -420,6 +593,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -s|--storage &lt;CONFIG&gt;
     Define the storage configuration string as &lt;CONFIG&gt;
     &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
@@ -441,6 +616,7 @@ options:
     Execute the commands on the RPC server specified by &lt;ADDR&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -460,6 +636,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -s|--storage &lt;CONFIG&gt;
     Define the storage configuration string as &lt;CONFIG&gt;
     &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
@@ -484,6 +662,8 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -g|--segmenter &lt;NAME&gt;
     Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-D|--contenttype &lt;CT&gt;
+    forced definition of the document class of all documents inserted.
 -x|--extension &lt;EXT&gt;
     Grab only the files with extension &lt;EXT&gt; (default all files)
 -t|--threads &lt;N&gt;
@@ -494,6 +674,7 @@ options:
     Set &lt;N&gt; as notification interval (number of documents)
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -513,6 +694,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -s|--storage &lt;CONFIG&gt;
     Define the storage configuration string as &lt;CONFIG&gt;
     &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
@@ -532,7 +715,7 @@ options:
     Return the result starting with rank &lt;N&gt; as first rank
 -Q|--quiet
     No output of results
--T|--time
+-D|--time
     Do print duration of pure query evaluation
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
@@ -544,6 +727,9 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+-V|--verbose
+    Verbose mode: Print some info like query analysis
 </pre>
 </li>
 
@@ -594,12 +780,15 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
     Search modules to load first in &lt;DIR&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -621,6 +810,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -629,6 +820,8 @@ options:
     Search resource files for analyzer first in &lt;DIR&gt;
 -s|--segmenter &lt;NAME&gt;
     Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-D|--contenttype &lt;CT&gt;
+    forced definition of the document class of all documents inserted.
 -x|--extension &lt;EXT&gt;
     Grab only the files with extension &lt;EXT&gt; (default all files)
 -t|--threads &lt;N&gt;
@@ -639,6 +832,7 @@ options:
     Set &lt;N&gt; as number of elements in the key map generated
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -656,6 +850,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -s|--storage &lt;CONFIG&gt;
     Define the storage configuration string as &lt;CONFIG&gt;
     &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
@@ -675,6 +871,7 @@ options:
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 
@@ -691,6 +888,8 @@ options:
     Print this usage and do nothing else
 -v|--version
     Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
 -s|--storage &lt;CONFIG&gt;
     Define the storage configuration string as &lt;CONFIG&gt;
     &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
@@ -714,6 +913,194 @@ options:
     Dump only the blocks of a certain type with prefix &lt;KEY&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+</pre>
+</li>
+
+<a name="strusResizeBlocks"></a><li><b>strusResizeBlocks</b>
+<br/>Resize the blocks for a storage based on leveldb (leveldb only!).
+(implemented in the project <a href="https://github.com/patrickfrey/strus">strus</a>)
+<input class="toggle-box" id="strusResizeBlocks_usage" type="checkbox" >
+<label for="strusResizeBlocks_usage">Usage</label>
+<pre>
+strusResizeBlocks [options] &lt;config&gt; &lt;blocktype&gt; &lt;newsize&gt;
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+-c|--commit &lt;N&gt;
+    Set &lt;N&gt; as number of documents inserted per transaction (default 1000)
+-D|--docno &lt;START&gt;:&lt;END&gt;
+    Process document number range &lt;START&gt; to &lt;END&gt;
+-T|--termtype &lt;TYPE&gt;
+    Set &lt;TYPE&gt; as term type to select for resize
+&lt;config&gt;     : configuration string of the key/value store database
+&lt;blocktype&gt;  : storage block type. One of the following:
+               forwardindex:forward index block type
+&lt;newsize&gt;    : new size of the blocks, unit depends on block type.
+</pre>
+</li>
+
+<a name="strusCreateVectorStorage"></a><li><b>strusCreateVectorStorage</b>
+<br/>Creates a storage for vectors.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusCreateVectorStorage_usage" type="checkbox" >
+<label for="strusCreateVectorStorage_usage">Usage</label>
+<pre>
+usage: strusCreateVectorStorage [options]
+description: Creates a vector storage with all vectors inserted.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;.
+    The module modstrus_storage_vector is implicitely defined
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-s|--config &lt;CONFIG&gt;
+    Define the vector storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+    Select the vector storage type with the parameter 'storage'.
+-S|--configfile &lt;FILENAME&gt;
+    Define the vector storage configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
+-P|--portable
+    Tell the loader that the vector values are stored in a portable way (hton)
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+-f|--file &lt;INFILE&gt;
+    Declare an input file with the vectors to process a &lt;INFILE&gt;
+    Known formats are word2vec binary or text format.
+    All files are added, if there are many input files specified.
+    No input files lead to an empty storage.
+</pre>
+</li>
+
+<a name="strusBuildVectorStorage"></a><li><b>strusBuildVectorStorage</b>
+<br/>Build relations describing some structures of the vectors inserted into a storge.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusBuildVectorStorage_usage" type="checkbox" >
+<label for="strusBuildVectorStorage_usage">Usage</label>
+<pre>
+usage: strusBuildVectorStorage [options] { &lt;commands&gt; }
+description: Executes a list of vector builder command.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;.
+    The module modstrus_storage_vector is implicitely defined
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-s|--config &lt;CONFIG&gt;
+    Define the vector space model configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+    Select the vector storage type with the parameter 'storage'.
+-S|--configfile &lt;FILENAME&gt;
+    Define the vector space model configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+-t|--threads &lt;N&gt;
+    Specify the maximum number of threads to use as &lt;N&gt; (default 16)
+</pre>
+</li>
+
+<a name="strusInspectVectorStorage"></a><li><b>strusInspectVectorStorage</b>
+<br/>Program to introspect a vector storage. Query for near vectors, for relations beween vectors, etc.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusInspectVectorStorage_usage" type="checkbox" >
+<label for="strusInspectVectorStorage_usage">Usage</label>
+<pre>
+usage: strusInspectVectorStorage [options] &lt;what...&gt;
+&lt;what&gt;    : what to inspect:
+            "classnames"
+               = Return all names of concept classes of the model.
+            "featcon" { &lt;feat&gt; }
+               = Take a single or list of feature numbers (with '%' prefix) or names as input.
+                 Return a sorted list of indices of concepts assigned to it.
+            "featvec" &lt;feat&gt;
+               = Take a single feature number (with '%' prefix) or name as input.
+                 Return the vector assigned to it.
+            "featname" { &lt;feat&gt; }
+               = Take a single or list of feature numbers as input.
+                 Return the list of names assigned to it.
+            "featidx" { &lt;featname&gt; }
+               = Take a single or list of feature names as input.
+                 Return the list of indices assigned to it.
+            "featsim" &lt;feat1&gt; &lt;feat2&gt;
+               = Take two feature numbers (with '%c' prefix) or names as input.
+                 Return the cosine similarity, a value between 0.0 and 1.0.
+            "confeat" or "confeatidx" "confeatname" { &lt;conceptno&gt; }
+               = Take a single or list of concept numbers as input.
+                 Return a sorted list of features assigned to it.
+                 "confeatidx" prints only the result feature indices.
+                 "confeatname" prints only the result feature names.
+                 "confeat" prints both indices and names.
+            "nbfeat" or "nbfeatidx" "nbfeatname"  { &lt;feat&gt; }
+               = Take a single or list of feature numbers (with '%' prefix) or names as input.
+                 Return a list of features reachable over any shared concept.
+                 "nbfeat" prints both indices and names.
+                 "nbfeatname" prints only the result feature names.
+                 "nbfeat" prints both indices and names.
+            "opfeat"  or "opfeatname" { &lt;expr&gt; }
+               = Take an arithmetic expression of feature numbers (with '%' prefix) or names as input.
+                 Return a list of features found.
+            "opfeatw"  or "opfeatwname" { &lt;expr&gt; }
+               = same as "opfeat", resp. "opfeatname" but print also the result weights.
+            "nofcon"
+               = Get the number of concepts defined.
+            "noffeat"
+               = Get the number of features defined.
+            "config"
+               = Get the configuration the vector storage.
+                 Select the vector storage type with the parameter 'storage'.
+            "dump" [ &lt;dbprefix&gt; ]
+               = Dump the contents of the VSM repository.
+                 The optional parameter &lt;dbprefix&gt; selects a specific block type.
+description: Inspects some data defined in a vector space model build.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;.
+    The module modstrus_storage_vector is implicitely defined
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-s|--config &lt;CONFIG&gt;
+    Define the vector space model configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+-S|--configfile &lt;FILENAME&gt;
+    Define the vector space model configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
+-C|--class &lt;CLASSNAME&gt;
+    Select &lt;CLASSNAME&gt; as concept class name (default '')
+    Used in the context of inspecting data related to a concept.
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+-D|--time
+    Do measure duration of operation (only for search)
+-t|--threads &lt;N&gt;
+    Set &lt;N&gt; as number of threads to use (only for search)
+    Default is no multithreading (N=0)
+-N|--nofranks &lt;N&gt;
+    Limit the number of results to for searches to &lt;N&gt; (default 20)
 </pre>
 </li>
 
@@ -741,12 +1128,100 @@ options:
     Define configuration &lt;CONFIG&gt; of storage hosted by this server
 -S|--configfile &lt;CFGFILE&gt;
     Define storage configuration as content of file &lt;CFGFILE&gt;
+-x|--vecstorage &lt;CONFIG&gt;
+    Define configuration &lt;CONFIG&gt; of the vector storage hosted by this server
 -c|--create &lt;CONFIG&gt;
     Implicitely create storage with &lt;CONFIG&gt; if it does not exist yet
 -l|--logfile &lt;FILE&gt;
     Write logs to file &lt;FILE&gt;
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
+</pre>
+</li>
+
+<a name="strusHelp"></a><li><b>strusHelp</b>
+<br/>Program to print descriptions of functions available to console.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusHelp_usage" type="checkbox" >
+<label for="strusHelp_usage">Usage</label>
+<pre>
+usage: strusHelp [options] &lt;what&gt; &lt;name&gt;
+&lt;what&gt; = specifies what type of item to retrieve (default all):
+         tokenizer     : Get tokenizer function description
+         normalizer    : Get normalizer function description
+         aggregator    : Get aggregator function description
+         join          : Get iterator join operator description
+         weighting     : Get weighting function description
+         summarizer    : Get summarizer function description
+&lt;item&gt; = name of the item to retrieve (default all)
+description: Get the description of a function.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-R|--resourcedir &lt;DIR&gt;
+    Search resource files for analyzer first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
+</pre>
+</li>
+
+<a name="strusModuleInfo"></a><li><b>strusModuleInfo</b>
+<br/>Program to print some information about a module in the module header (version, identifiers, etc.).<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusModule">strusModule</a>).
+<input class="toggle-box" id="strusModuleInfo_usage" type="checkbox" >
+<label for="strusModuleInfo_usage">Usage</label>
+<pre>
+strusModuleInfo  { &lt;modulepath&gt; }
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+&lt;modulepath&gt;  : path of module to load.
+</pre>
+</li>
+
+<a name="strusPageWeight"></a><li><b>strusPageWeight</b>
+<br/>Calculate the weight of a page derived from its linkage to other pages.
+The linkage info is fed in a proprietary text format as input.
+If strusVector has been built with WITH_PAGERANK="YES" then the value calculated will
+be the <a href="https://en.wikipedia.org/wiki/PageRank">pagerank</a> value 
+(invented by Larry Page and patented in the USA as https://www.google.com/patents/US6285999).
+If strusVector has been built without page rank support or taken from a standard strus package then
+the calculated value will be derived from the number of links pointing to a document (non transitive).<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusVector">strusVector</a>).
+<input class="toggle-box" id="strusPageWeight_usage" type="checkbox" >
+<label for="strusPageWeight_usage">Usage</label>
+<pre>
+usage: strusPageWeight [options] &lt;inputfile&gt;
+description: Calculate the weight of a page derived from the linkage of documents with others,
+             with help of the pagerank algorithm.
+    &lt;inputfile&gt; :text file to process, lines with the following syntax:
+        DECLARATION   = "*"  ITEMID "=" ["-&gt;"] { ITEMID } ";"
+        ITEMID        : document identifier (unicode alpha characters without space)
+    Each declaration describes the links of a document (left side)
+    to other documents (right side). Redirects are marked with an arrow (-&gt;).
+    options     :
+    -h          : print this usage
+    -V          : verbose output, print all declarations to stdout.
+    -g          : logarithmic scale page rank calculation.
+    -n &lt;NORM&gt;   : normalize result to an integer between 0 and &lt;NORM&gt;.
+    -r &lt;PATH&gt;   : specify file &lt;PATH&gt; to write redirect definitions to.
+    -t &lt;PATH&gt;   : specify file &lt;PATH&gt; to write the tokens to.
+    -i &lt;ITER&gt;   : specify number of iterations to run as &lt;ITER&gt;.
+    &lt;inputfile&gt; = input file path or '-' for stdin
+                  file with lines of the for "*" SOURCEID = [-&gt;] {&lt;TARGETID&gt;} ";"
 </pre>
 </li>
 
