@@ -177,8 +177,11 @@ void ForwardIndexMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	for (; ui != ue; ++ui)
 	{
 		std::set<Index>::const_iterator ti = ui->second.begin(), te = ui->second.end();
-		DatabaseAdapter_ForwardIndex::Writer dbadapter( m_database, *ti, ui->first);
-		dbadapter.removeSubTree( transaction);
+		for (; ti != te; ++ti)
+		{
+			DatabaseAdapter_ForwardIndex::Writer dbadapter( m_database, *ti, ui->first);
+			dbadapter.removeSubTree( transaction);
+		}
 	}
 
 	// [2] Write inserts:
