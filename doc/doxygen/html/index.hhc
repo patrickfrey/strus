@@ -443,7 +443,11 @@
       <LI><OBJECT type="text/sitemap"><param name="Name" value="StorageDocumentUpdateInterface"><param name="ImageNumber" value="1"></OBJECT>
         <UL>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="~StorageDocumentUpdateInterface"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a13a1e57aff4fb39533753b6f97e182ef"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="addForwardIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a8940b2feb51610dc7424b5af7b020c4d"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="addSearchIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#ae7dbf8aa19d59ca13fc76f29ddb4917c"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="clearAttribute"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="clearForwardIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#aed11bb59fde1756da0a4e19dd973f4f6"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="clearSearchIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#ac31c0ace4433aca01bf8760c32d75bb6"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="clearUserAccessRight"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a85cbf69f25d72c0c94d255fdb4faa660"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="clearUserAccessRights"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="done"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a3b9eece0dadc361cf40f66de68cea022"><param name="ImageNumber" value="11"></OBJECT>
@@ -491,6 +495,7 @@
         <LI><OBJECT type="text/sitemap"><param name="Name" value="deleteUserAccessRights"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#abb1ce3cc468973ef0a1758032b925f09"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="nofDocumentsAffected"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#a60865f67d3fda2c94390635ed77cee6d"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="rollback"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#a971f8524b13dfb2a04bc07c3959a8b2b"><param name="ImageNumber" value="11"></OBJECT>
+        <LI><OBJECT type="text/sitemap"><param name="Name" value="updateDocumentFrequency"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#af001a77f49a834b8e958f89fa7a96ec4"><param name="ImageNumber" value="11"></OBJECT>
         <LI><OBJECT type="text/sitemap"><param name="Name" value="updateMetaData"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#a3c2ebbc2936d1122c704d326c011c0d3"><param name="ImageNumber" value="11"></OBJECT>
         </UL>
       <LI><OBJECT type="text/sitemap"><param name="Name" value="SummarizationVariable"><param name="ImageNumber" value="1"></OBJECT>
@@ -1398,7 +1403,11 @@
           <LI><OBJECT type="text/sitemap"><param name="Name" value="StorageDocumentUpdateInterface"><param name="ImageNumber" value="1"></OBJECT>
             <UL>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="~StorageDocumentUpdateInterface"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a13a1e57aff4fb39533753b6f97e182ef"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="addForwardIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a8940b2feb51610dc7424b5af7b020c4d"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="addSearchIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#ae7dbf8aa19d59ca13fc76f29ddb4917c"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="clearAttribute"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#af6d06cf62b2bb4fdacfc9a415ecbad9a"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="clearForwardIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#aed11bb59fde1756da0a4e19dd973f4f6"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="clearSearchIndexTerm"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#ac31c0ace4433aca01bf8760c32d75bb6"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="clearUserAccessRight"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a85cbf69f25d72c0c94d255fdb4faa660"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="clearUserAccessRights"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="done"><param name="Local" value="classstrus_1_1StorageDocumentUpdateInterface.html#a3b9eece0dadc361cf40f66de68cea022"><param name="ImageNumber" value="11"></OBJECT>
@@ -1458,6 +1467,7 @@
             <LI><OBJECT type="text/sitemap"><param name="Name" value="deleteUserAccessRights"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#abb1ce3cc468973ef0a1758032b925f09"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="nofDocumentsAffected"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#a60865f67d3fda2c94390635ed77cee6d"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="rollback"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#a971f8524b13dfb2a04bc07c3959a8b2b"><param name="ImageNumber" value="11"></OBJECT>
+            <LI><OBJECT type="text/sitemap"><param name="Name" value="updateDocumentFrequency"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#af001a77f49a834b8e958f89fa7a96ec4"><param name="ImageNumber" value="11"></OBJECT>
             <LI><OBJECT type="text/sitemap"><param name="Name" value="updateMetaData"><param name="Local" value="classstrus_1_1StorageTransactionInterface.html#a3c2ebbc2936d1122c704d326c011c0d3"><param name="ImageNumber" value="11"></OBJECT>
             </UL>
           </UL>

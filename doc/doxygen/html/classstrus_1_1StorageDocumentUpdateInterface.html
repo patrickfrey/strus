@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.13</span>
+   &#160;<span id="projectnumber">0.14</span>
    </div>
   </td>
  </tr>
@@ -76,6 +76,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a13a1e57aff4fb39533753b6f97e182ef"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#a13a1e57aff4fb39533753b6f97e182ef">~StorageDocumentUpdateInterface</a> ()</td></tr>
 <tr class="memdesc:a13a1e57aff4fb39533753b6f97e182ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#a13a1e57aff4fb39533753b6f97e182ef">More...</a><br/></td></tr>
 <tr class="separator:a13a1e57aff4fb39533753b6f97e182ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7dbf8aa19d59ca13fc76f29ddb4917c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ae7dbf8aa19d59ca13fc76f29ddb4917c">addSearchIndexTerm</a> (const std::string &amp;type_, const std::string &amp;value_, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;position_)=0</td></tr>
+<tr class="memdesc:ae7dbf8aa19d59ca13fc76f29ddb4917c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add one occurrence of a term to the search index excluding all features of this type previously added in another update context.  <a href="#ae7dbf8aa19d59ca13fc76f29ddb4917c">More...</a><br/></td></tr>
+<tr class="separator:ae7dbf8aa19d59ca13fc76f29ddb4917c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8940b2feb51610dc7424b5af7b020c4d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#a8940b2feb51610dc7424b5af7b020c4d">addForwardIndexTerm</a> (const std::string &amp;type_, const std::string &amp;value_, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;position_)=0</td></tr>
+<tr class="memdesc:a8940b2feb51610dc7424b5af7b020c4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add one occurrence of a term to the forward index excluding all features of this type previously added in another update context.  <a href="#a8940b2feb51610dc7424b5af7b020c4d">More...</a><br/></td></tr>
+<tr class="separator:a8940b2feb51610dc7424b5af7b020c4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac31c0ace4433aca01bf8760c32d75bb6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac31c0ace4433aca01bf8760c32d75bb6">clearSearchIndexTerm</a> (const std::string &amp;type_)=0</td></tr>
+<tr class="memdesc:ac31c0ace4433aca01bf8760c32d75bb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear all previous occurrencies of a term type in a document in the search index.  <a href="#ac31c0ace4433aca01bf8760c32d75bb6">More...</a><br/></td></tr>
+<tr class="separator:ac31c0ace4433aca01bf8760c32d75bb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed11bb59fde1756da0a4e19dd973f4f6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#aed11bb59fde1756da0a4e19dd973f4f6">clearForwardIndexTerm</a> (const std::string &amp;type_)=0</td></tr>
+<tr class="memdesc:aed11bb59fde1756da0a4e19dd973f4f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear all previous occurrencies of a term type in a document in the forward index.  <a href="#aed11bb59fde1756da0a4e19dd973f4f6">More...</a><br/></td></tr>
+<tr class="separator:aed11bb59fde1756da0a4e19dd973f4f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41f6a247f0e95b10494c8dd6885dfe22"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#a41f6a247f0e95b10494c8dd6885dfe22">setMetaData</a> (const std::string &amp;name_, const NumericVariant &amp;value_)=0</td></tr>
 <tr class="memdesc:a41f6a247f0e95b10494c8dd6885dfe22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a meta data element of the document by name.  <a href="#a41f6a247f0e95b10494c8dd6885dfe22">More...</a><br/></td></tr>
 <tr class="separator:a41f6a247f0e95b10494c8dd6885dfe22"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -127,6 +139,109 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a8940b2feb51610dc7424b5af7b020c4d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageDocumentUpdateInterface::addForwardIndexTerm </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>value_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
+          <td class="paramname"><em>position_</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add one occurrence of a term to the forward index excluding all features of this type previously added in another update context. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_</td><td>type name of the term </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value_</td><td>value string of the term </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">position_</td><td>position of the term in the document </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Only one type,value pair allowed at one position </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>All forward index terms of this type that are not readded with this document update get removed </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ae7dbf8aa19d59ca13fc76f29ddb4917c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageDocumentUpdateInterface::addSearchIndexTerm </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>value_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
+          <td class="paramname"><em>position_</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Add one occurrence of a term to the search index excluding all features of this type previously added in another update context. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_</td><td>type name of the term </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value_</td><td>value string of the term </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">position_</td><td>ordinal position (term count position) of the term in the document </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>All forward index terms of this type that are not readded with this document update get removed </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="af6d06cf62b2bb4fdacfc9a415ecbad9a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -157,6 +272,72 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a class="anchor" id="aed11bb59fde1756da0a4e19dd973f4f6"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageDocumentUpdateInterface::clearForwardIndexTerm </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type_</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Clear all previous occurrencies of a term type in a document in the forward index. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_</td><td>type name of the terms to erase </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>The call of this function happens implicitely, if one or more features of this type are added to the update </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ac31c0ace4433aca01bf8760c32d75bb6"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageDocumentUpdateInterface::clearSearchIndexTerm </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type_</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Clear all previous occurrencies of a term type in a document in the search index. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type_</td><td>type name of the terms to erase </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>The call of this function happens implicitely, if one or more features of this type are added to the update </dd></dl>
 
 </div>
 </div>
@@ -377,7 +558,7 @@ The storage has to be created with "acl=yes" for enabling access control </dd></
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

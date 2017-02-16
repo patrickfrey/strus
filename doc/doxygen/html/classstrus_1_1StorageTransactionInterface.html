@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.13</span>
+   &#160;<span id="projectnumber">0.14</span>
    </div>
   </td>
  </tr>
@@ -92,6 +92,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c2ebbc2936d1122c704d326c011c0d3"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a3c2ebbc2936d1122c704d326c011c0d3">updateMetaData</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno, const std::string &amp;varname, const NumericVariant &amp;value)=0</td></tr>
 <tr class="memdesc:a3c2ebbc2936d1122c704d326c011c0d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update of meta data for a specific document (without creating it)  <a href="#a3c2ebbc2936d1122c704d326c011c0d3">More...</a><br/></td></tr>
 <tr class="separator:a3c2ebbc2936d1122c704d326c011c0d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af001a77f49a834b8e958f89fa7a96ec4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#af001a77f49a834b8e958f89fa7a96ec4">updateDocumentFrequency</a> (const std::string &amp;type, const std::string &amp;value, int df_change)=0</td></tr>
+<tr class="memdesc:af001a77f49a834b8e958f89fa7a96ec4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update of document frequency for features not in search index that get an implicitely stored df assigned.  <a href="#af001a77f49a834b8e958f89fa7a96ec4">More...</a><br/></td></tr>
+<tr class="separator:af001a77f49a834b8e958f89fa7a96ec4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e852019b5ca4665d5139fef4195289f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageTransactionInterface.html#a1e852019b5ca4665d5139fef4195289f">commit</a> ()=0</td></tr>
 <tr class="memdesc:a1e852019b5ca4665d5139fef4195289f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert all documents and executes all commands defined in the transaction or none if one operation fails.  <a href="#a1e852019b5ca4665d5139fef4195289f">More...</a><br/></td></tr>
 <tr class="separator:a1e852019b5ca4665d5139fef4195289f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -339,6 +342,57 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af001a77f49a834b8e958f89fa7a96ec4"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageTransactionInterface::updateDocumentFrequency </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>df_change</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Update of document frequency for features not in search index that get an implicitely stored df assigned. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>type of the feature </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>value of the feature </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">df_change</td><td>document frequency increment/decrement for feature type/value </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This method is useful if you want to store the document frequency for features in the forward index, that do not get a df value assigned implicitely. For example for weighting of extracted features with their occurrence and idf. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a3c2ebbc2936d1122c704d326c011c0d3"></a>
 <div class="memitem">
 <div class="memproto">
@@ -396,7 +450,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Feb 6 2017 17:45:21 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
