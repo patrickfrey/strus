@@ -14,6 +14,7 @@
 #include "private/stringMap.hpp"
 #include <vector>
 #include <map>
+#include <set>
 
 namespace strus {
 
@@ -38,6 +39,7 @@ public:
 	void closeForwardIndexDocument();
 
 	void deleteIndex( const Index& docno);
+	void deleteIndex( const Index& docno, const Index& typeno);
 
 	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
@@ -87,7 +89,8 @@ private:
 	Index m_docno;
 	Index m_maxtype;
 	unsigned int m_maxblocksize;
-	std::vector<Index> m_deletes;
+	std::set<Index> m_docno_deletes;
+	std::map<Index, std::set<Index> > m_docno_typeno_deletes;
 };
 
 }

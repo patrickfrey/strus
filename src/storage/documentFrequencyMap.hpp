@@ -30,8 +30,8 @@ public:
 	DocumentFrequencyMap( DatabaseClientInterface* database_)
 		:m_database(database_){}
 
-	void increment( Index typeno, Index termno, Index count=1);
-	void decrement( Index typeno, Index termno, Index count=1);
+	void increment( Index typeno, Index termno, int count=1);
+	void decrement( Index typeno, Index termno, int count=1);
 
 	void renameNewTermNumbers( const std::map<Index,Index>& renamemap);
 

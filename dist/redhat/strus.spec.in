@@ -294,6 +294,11 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Wed Feb 15 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.14.0-0.1
+- added possibility to precalculate weights in weighting function 'constant'
+- update for terms in forward index and search index
+- explicit specification of df for features (for example to sopecify df for forward index features)
+
 * Mon Feb 6 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.13.0-0.1
 - improve standard summarization and weighting functions
 - renamings of summarizer and weighting functions

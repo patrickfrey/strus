@@ -53,6 +53,7 @@ public:
 
 	/// \brief Get the next term
 	/// \param[out] value the next term fetched, if exists
+	/// \note terms are not ordered
 	/// \return true, if exists
 	virtual bool nextTerm( Term& value)=0;
 

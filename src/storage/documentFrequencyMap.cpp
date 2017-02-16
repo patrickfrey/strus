@@ -23,13 +23,13 @@ void DocumentFrequencyMap::clear()
 	m_map.clear();
 }
 
-void DocumentFrequencyMap::increment( Index typeno, Index termno, Index count)
+void DocumentFrequencyMap::increment( Index typeno, Index termno, int count)
 {
 	Key key( typeno, termno);
 	m_map[ key] += count;
 }
 
-void DocumentFrequencyMap::decrement( Index typeno, Index termno, Index count)
+void DocumentFrequencyMap::decrement( Index typeno, Index termno, int count)
 {
 	Key key( typeno, termno);
 	m_map[ key] -= count;
@@ -71,8 +71,6 @@ void DocumentFrequencyMap::getWriteBatch(
 	{
 		if (mi->second == 0) continue;
 
-		Index df = DatabaseAdapter_DocFrequency::get(
-				m_database, mi->first.first/*typeno*/, mi->first.second/*termno*/);
 		if (statisticsBuilder)
 		{
 			const char* typestr = termTypeMapInv.get( mi->first.first/*typeno*/);
@@ -82,6 +80,8 @@ void DocumentFrequencyMap::getWriteBatch(
 
 			statisticsBuilder->addDfChange( typestr, termstr, mi->second);
 		}
+		Index df = DatabaseAdapter_DocFrequency::get(
+				m_database, mi->first.first/*typeno*/, mi->first.second/*termno*/);
 		df += mi->second;
 		if (df < 0) throw strus::runtime_error( _TXT( "document frequency got negative: %d (%d)"), (int)df, (int)mi->second);
 

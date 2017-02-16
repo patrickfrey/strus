@@ -26,7 +26,17 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 	{
 		if (utils::caseInsensitiveEquals( name_, "match"))
 		{
-			m_featar.push_back( Feature( itr_, weight_));
+			if (m_precalc)
+			{
+				for (Index docno=itr_->skipDoc(0); docno; docno=itr_->skipDoc(docno+1))
+				{
+					m_precalcmap[ docno] += weight_ * m_weight;
+				}
+			}
+			else
+			{
+				m_featar.push_back( Feature( itr_, weight_));
+			}
 		}
 		else
 		{
@@ -39,12 +49,27 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 double WeightingFunctionContextConstant::call( const Index& docno)
 {
 	double rt = 0.0;
-	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
-	for (;fi != fe; ++fi)
+	if (m_precalc)
 	{
-		if (docno==fi->itr->skipDoc( docno))
+		std::map<Index,double>::const_iterator mi = m_precalcmap.find( docno);
+		if (mi != m_precalcmap.end())
 		{
-			rt += fi->weight * m_weight;
+			return mi->second;
+		}
+		else
+		{
+			return 0.0;
+		}
+	}
+	else
+	{
+		std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (;fi != fe; ++fi)
+		{
+			if (docno==fi->itr->skipDoc( docno))
+			{
+				rt += fi->weight * m_weight;
+			}
 		}
 	}
 	return rt;
@@ -69,7 +94,11 @@ void WeightingFunctionInstanceConstant::addStringParameter( const std::string& n
 
 void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (utils::caseInsensitiveEquals( name, "precalc"))
+	{
+		m_precalc = value.toint();
+	}
+	else if (utils::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), "constant");
 	}
@@ -90,7 +119,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceConstant::createFunc
 {
 	try
 	{
-		return new WeightingFunctionContextConstant( m_weight, m_errorhnd);
+		return new WeightingFunctionContextConstant( m_weight, m_precalc, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), "constant", *m_errorhnd, 0);
 }
@@ -101,7 +130,7 @@ std::string WeightingFunctionInstanceConstant::tostring() const
 	{
 		std::ostringstream rt;
 		rt << std::setw(2) << std::setprecision(5)
-			<< "weight=" << m_weight;
+			<< "weight=" << m_weight << ", " << "precalc=" << (m_precalc?"1":"0");
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), "constant", *m_errorhnd, std::string());

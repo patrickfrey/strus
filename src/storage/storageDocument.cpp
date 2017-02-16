@@ -31,7 +31,7 @@ StorageDocument::StorageDocument(
 StorageDocument::~StorageDocument()
 {}
 
-StorageDocument::TermMapKey StorageDocument::termMapKey( const std::string& type_, const std::string& value_)
+TermMapKey StorageDocument::termMapKey( const std::string& type_, const std::string& value_)
 {
 	Index typeno = m_transaction->getOrCreateTermType( type_);
 	Index valueno = m_transaction->getOrCreateTermValue( value_);
@@ -130,14 +130,14 @@ void StorageDocument::done()
 		{
 			m_transaction->defineMetaData( m_docno, wi->name, wi->value);
 		}
-	
+
 		//[2.2] Insert new attributes:
 		std::vector<DocAttribute>::const_iterator ai = m_attributes.begin(), ae = m_attributes.end();
 		for (; ai != ae; ++ai)
 		{
 			m_transaction->defineAttribute( m_docno, ai->name, ai->value);
 		}
-	
+
 		//[2.3] Insert new index elements (forward index and inverted index):
 		TermMap::const_iterator ti = m_terms.begin(), te = m_terms.end();
 		for (; ti != te; ++ti)
@@ -157,14 +157,15 @@ void StorageDocument::done()
 				ri->first.typeno, ri->first.pos, ri->second);
 		}
 		m_transaction->closeForwardIndexDocument();
-	
+
 		//[2.4] Insert new document access rights:
 		std::vector<Index>::const_iterator ui = m_userlist.begin(), ue = m_userlist.end();
 		for (; ui != ue; ++ui)
 		{
 			m_transaction->defineAcl( *ui, m_docno);
 		}
-	
+
+		//[3] Clear data:
 		m_terms.clear();
 		m_invs.clear();
 		m_attributes.clear();

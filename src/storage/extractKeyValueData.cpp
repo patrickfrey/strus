@@ -631,7 +631,7 @@ void InverseTermData::print( std::ostream& out)
 	std::vector<InvTerm>::const_iterator ti = terms.begin(), te = terms.end();
 	for (; ti != te; ++ti)
 	{
-		out << ' ' << ti->typeno << ',' << ti->termno << ',' << ti->ff;
+		out << ' ' << ti->typeno << ',' << ti->termno << ',' << ti->ff << ',' << ti->firstpos;
 	}
 	out << std::endl;
 }

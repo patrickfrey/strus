@@ -33,7 +33,8 @@ void InvertedIndexMap::clear()
 	m_invtermmap.clear();
 	m_invterms.clear();
 	m_docno = 0;
-	m_deletes.clear();
+	m_docno_deletes.clear();
+	m_docno_typeno_deletes.clear();
 }
 
 void InvertedIndexMap::definePosinfoPosting(
@@ -43,6 +44,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	const std::vector<Index>& pos)
 {
 	if (pos.empty()) return;
+
 	if (termtype == 0 || termvalue == 0)
 	{
 		throw strus::runtime_error( _TXT( "calling definePosinfoPosting with illegal arguments: (%u,%u,%u)"), termtype, termvalue, docno);
@@ -101,7 +103,6 @@ void InvertedIndexMap::definePosinfoPosting(
 		// throw exception message:
 		throw strus::runtime_error( _TXT( "document feature defined twice [termtype=%u,termvalue=%u,docno=%u] %s"), termtype, termvalue, docno, posstr.c_str());
 	}
-
 	InvTermMap::const_iterator vi = m_invtermmap.find( docno);
 	if (vi == m_invtermmap.end())
 	{
@@ -138,7 +139,38 @@ void InvertedIndexMap::deleteIndex( const Index& docno)
 		}
 		m_invtermmap.erase( vi);
 	}
-	m_deletes.push_back( docno);
+	m_docno_deletes.insert( docno);
+}
+
+void InvertedIndexMap::deleteIndex( const Index& docno, const Index& typeno)
+{
+	InvTermMap::iterator vi = m_invtermmap.find( docno);
+	if (vi != m_invtermmap.end())
+	{
+		InvTermList::const_iterator li = m_invterms.begin() + vi->second, le = m_invterms.end();
+		InvTermList::iterator write_li = m_invterms.begin();
+		for (; li != le && li->typeno; ++li)
+		{
+			if (typeno == li->typeno)
+			{
+				MapKey key( li->typeno, li->termno, docno);
+				Map::iterator mi = m_map.find( key);
+				if (mi != m_map.end())
+				{
+					m_map.erase( mi);
+				}
+			}
+			else
+			{
+				*write_li++ = *li;
+			}
+		}
+		if (write_li != m_invterms.end())
+		{
+			*write_li = InvTerm();
+		}
+	}
+	m_docno_typeno_deletes[ docno].insert( typeno);
 }
 
 void InvertedIndexMap::renameNewNumbers(
@@ -236,7 +268,7 @@ void InvertedIndexMap::getWriteBatch(
 {
 	// [1] Get deletes:
 	DatabaseAdapter_InverseTerm::ReadWriter dbadapter_inv( m_database);
-	std::vector<Index>::const_iterator di = m_deletes.begin(), de = m_deletes.end();
+	std::set<Index>::const_iterator di = m_docno_deletes.begin(), de = m_docno_deletes.end();
 	for (; di != de; ++di)
 	{
 		InvTermBlock invblk;
@@ -248,14 +280,62 @@ void InvertedIndexMap::getWriteBatch(
 			{
 				InvTerm it = invblk.element_at( ei);
 
+				// ensure old search index elements are deleted:
 				MapKey key( it.typeno, it.termno, *di);
 				m_map[ key];	//... construct member (default 0) if it does not exist
 						// <=> mark as deleted, if not member of set of inserts
 
+				// decrement stats for all old elements, for the new elements it will be incremented again:
 				m_dfmap.decrement( it.typeno, it.termno);
 			}
+			dbadapter_inv.remove( transaction, *di);
 		}
-		dbadapter_inv.remove( transaction, *di);
+	}
+	std::map<Index, std::set<Index> >::const_iterator ui = m_docno_typeno_deletes.begin(), ue = m_docno_typeno_deletes.end();
+	for (; ui != ue; ++ui)
+	{
+		InvTermBlock invblk;
+		if (dbadapter_inv.load( ui->first, invblk))
+		{
+			if (m_invterms.size()) m_invterms.push_back( InvTerm());
+			std::size_t newinvtermidx = m_invterms.size();
+			char const* ei = invblk.begin();
+			const char* ee = invblk.end();
+			for (;ei != ee; ei = invblk.next( ei))
+			{
+				InvTerm it = invblk.element_at( ei);
+
+				if (ui->second.find( it.typeno) != ui->second.end())
+				{
+					// ensure old search index elements are deleted:
+					MapKey key( it.typeno, it.termno, ui->first);
+					m_map[ key];	//... construct member (default 0) if it does not exist
+							// <=> mark as deleted, if not member of set of inserts
+				}
+				else
+				{
+					// Ensure that all elements that are not part of a partial delete are readded again:
+					m_invterms.push_back( it);
+				}
+				// decrement stats for all old elements, for the new elements it will be incremented again:
+				m_dfmap.decrement( it.typeno, it.termno);
+			}
+			InvTermMap::iterator iitr = m_invtermmap.find( ui->first);
+			if (iitr != m_invtermmap.end())
+			{
+				std::size_t li = iitr->second, le = m_invterms.size();
+				for (; li != le && m_invterms[li].typeno; ++li)
+				{
+					if (ui->second.find( m_invterms[li].typeno) == ui->second.end())
+					{
+						throw strus::runtime_error( _TXT("mixing partial update with insert is not allowed"));
+					}
+					m_invterms.push_back( m_invterms[li]);
+				}
+			}
+			m_invtermmap[ ui->first] = newinvtermidx;
+			dbadapter_inv.remove( transaction, ui->first);
+		}
 	}
 
 	// [2] Get inv and df map inserts:
@@ -370,7 +450,10 @@ void InvertedIndexMap::insertNewPosElements(
 			}
 			else
 			{
-				dbadapter_posinfo.store( transaction, newposblk.createBlock());
+				if (!newposblk.empty())
+				{
+					dbadapter_posinfo.store( transaction, newposblk.createBlock());
+				}
 				newposblk.clear();
 			}
 		}
@@ -410,7 +493,10 @@ void InvertedIndexMap::mergeNewPosElements(
 		if (dbadapter_posinfo.loadNext( blk))
 		{
 			// ... is not the last block, so we store it
-			dbadapter_posinfo.store( transaction, newposblk.createBlock());
+			if (!newposblk.empty())
+			{
+				dbadapter_posinfo.store( transaction, newposblk.createBlock());
+			}
 			newposblk.clear();
 		}
 		else
@@ -464,7 +550,10 @@ void InvertedIndexMap::mergePosBlock(
 				if (!newblk.fitsInto( m_posinfo[ ei->second]))
 				{
 					newblk.setId(0);
-					dbadapter_posinfo.store( transaction, newblk.createBlock());
+					if (!newblk.empty())
+					{
+						dbadapter_posinfo.store( transaction, newblk.createBlock());
+					}
 					newblk.clear();
 					newblk.setId( oldblk.id());
 				}
@@ -491,7 +580,10 @@ void InvertedIndexMap::mergePosBlock(
 			if (!newblk.fitsInto( m_posinfo[ ei->second]))
 			{
 				newblk.setId(0);
-				dbadapter_posinfo.store( transaction, newblk.createBlock());
+				if (!newblk.empty())
+				{
+					dbadapter_posinfo.store( transaction, newblk.createBlock());
+				}
 				newblk.clear();
 				newblk.setId( oldblk.id());
 			}
@@ -504,7 +596,10 @@ void InvertedIndexMap::mergePosBlock(
 		if (!newblk.fitsInto( oldblk.frequency_at( blkcursor)))
 		{
 			newblk.setId(0);
-			dbadapter_posinfo.store( transaction, newblk.createBlock());
+			if (!newblk.empty())
+			{
+				dbadapter_posinfo.store( transaction, newblk.createBlock());
+			}
 			newblk.clear();
 			newblk.setId( oldblk.id());
 		}

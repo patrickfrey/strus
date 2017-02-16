@@ -45,6 +45,9 @@ StorageTransaction::StorageTransaction(
 	,m_docIdMap(database_,DatabaseKey::DocIdPrefix,storage_->createDocnoAllocator())
 	,m_userIdMap(database_,DatabaseKey::UserNamePrefix,storage_->createUsernoAllocator())
 	,m_attributeNameMap(database_,DatabaseKey::AttributeKeyPrefix,storage_->createAttribnoAllocator())
+	,m_termTypeMapInv()
+	,m_termValueMapInv()
+	,m_explicit_dfmap(database_)
 	,m_nof_deleted_documents(0)
 	,m_nof_documents_affected(0)
 	,m_commit(false)
@@ -172,6 +175,16 @@ void StorageTransaction::deleteIndex( const Index& docno)
 	m_forwardIndexMap.deleteIndex( docno);
 }
 
+void StorageTransaction::deleteDocSearchIndexType( const Index& docno, const Index& typeno)
+{
+	m_invertedIndexMap.deleteIndex( docno, typeno);
+}
+
+void StorageTransaction::deleteDocForwardIndexType( const Index& docno, const Index& typeno)
+{
+	m_forwardIndexMap.deleteIndex( docno, typeno);
+}
+
 void StorageTransaction::deleteUserAccessRights(
 	const std::string& username)
 {
@@ -243,6 +256,17 @@ void StorageTransaction::updateMetaData(
 		defineMetaData( docno, varname, value);
 	}
 	CATCH_ERROR_MAP( _TXT("error updating document meta data in transaction: %s"), *m_errorhnd);
+}
+
+void StorageTransaction::updateDocumentFrequency( const std::string& type, const std::string& value, int df_change)
+{
+	try
+	{
+		Index typeno = getOrCreateTermType( type);
+		Index termno = getOrCreateTermValue( value);
+		m_explicit_dfmap.increment( typeno, termno, df_change);
+	}
+	CATCH_ERROR_MAP( _TXT("error updating document frequency of a feature in transaction: %s"), *m_errorhnd);
 }
 
 bool StorageTransaction::commit()
@@ -324,6 +348,11 @@ bool StorageTransaction::commit()
 		}
 		m_forwardIndexMap.renameNewDocNumbers( docnoUnknownMap);
 		m_forwardIndexMap.getWriteBatch( transaction.get());
+
+		m_explicit_dfmap.renameNewTermNumbers( termnoUnknownMap);
+		m_explicit_dfmap.getWriteBatch( transaction.get(), statisticsBuilder,
+						dfcache?&dfbatch:(DocumentFrequencyCache::Batch*)0,
+						m_termTypeMapInv, m_termValueMapInv);
 
 		m_userAclMap.renameNewDocNumbers( docnoUnknownMap);
 		m_userAclMap.getWriteBatch( transaction.get());

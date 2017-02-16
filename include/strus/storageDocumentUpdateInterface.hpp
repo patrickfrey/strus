@@ -24,6 +24,39 @@ public:
 	/// \brief Destructor
 	virtual ~StorageDocumentUpdateInterface(){}
 
+	/// \brief Add one occurrence of a term to the search index excluding all features of this type previously added in another update context.
+	/// \param[in] type_ type name of the term
+	/// \param[in] value_ value string of the term
+	/// \param[in] position_ ordinal position (term count position) of the term in the document
+	/// \note All forward index terms of this type that are not readded with this document update get removed
+	virtual void addSearchIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_)=0;
+
+	/// \brief Add one occurrence of a term to the forward index excluding all features of this type previously added in another update context.
+	/// \param[in] type_ type name of the term
+	/// \param[in] value_ value string of the term
+	/// \param[in] position_ position of the term in the document
+	/// \remark Only one type,value pair allowed at one position
+	/// \note All forward index terms of this type that are not readded with this document update get removed
+	virtual void addForwardIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_)=0;
+
+	/// \brief Clear all previous occurrencies of a term type in a document in the search index
+	/// \param[in] type_ type name of the terms to erase
+	/// \note The call of this function happens implicitely, if one or more features of this type are added to the update
+	virtual void clearSearchIndexTerm(
+			const std::string& type_)=0;
+
+	/// \brief Clear all previous occurrencies of a term type in a document in the forward index
+	/// \param[in] type_ type name of the terms to erase
+	/// \note The call of this function happens implicitely, if one or more features of this type are added to the update
+	virtual void clearForwardIndexTerm(
+			const std::string& type_)=0;
+
 	/// \brief Define a meta data element of the document by name
 	/// \note Meta data are used for query restrictions and for document weights in query result ranking
 	/// \note Document meta data have to be declared in advance when creating the storage or with an alter metadata table command when no clients are running on this storage.

@@ -172,4 +172,13 @@ void KeyMap::clear()
 	m_deletedlist.clear();
 }
 
+void KeyMap::print( std::ostream& out)
+{
+	Map::iterator mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
+	{
+		out << "'" << mi->first << "' -> " << mi->second << std::endl;
+	}
+}
+
 

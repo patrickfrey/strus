@@ -62,6 +62,13 @@ public:
 			const std::string& varname,
 			const NumericVariant& value)=0;
 
+	/// \brief Update of document frequency for features not in search index that get an implicitely stored df assigned.
+	/// \param[in] type type of the feature
+	/// \param[in] value value of the feature
+	/// \param[in] df_change document frequency increment/decrement for feature type/value
+	/// \note This method is useful if you want to store the document frequency for features in the forward index, that do not get a df value assigned implicitely. For example for weighting of extracted features with their occurrence and idf.
+	virtual void updateDocumentFrequency( const std::string& type, const std::string& value, int df_change)=0;
+
 	/// \brief Insert all documents and executes all commands defined in the transaction or none if one operation fails
 	/// \return true on success, false on error
 	virtual bool commit()=0;

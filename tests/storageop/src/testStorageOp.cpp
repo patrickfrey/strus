@@ -14,6 +14,7 @@
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
 #include "strus/base/fileio.hpp"
+#include "strus/base/string_format.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -22,17 +23,22 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
+#include "strus/storageDocumentUpdateInterface.hpp"
+#include "strus/storageDumpInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
 #include "private/utils.hpp"
 #include "private/errorUtils.hpp"
+#include "random.hpp"
 #include <string>
 #include <cstring>
+#include <cstdlib>
 #include <stdio.h>
 #include <iostream>
 #include <stdexcept>
 #include <memory>
 
 static strus::ErrorBufferInterface* g_errorhnd = 0;
+static strus::Random g_random;
 
 class Storage
 {
@@ -46,11 +52,17 @@ public:
 	strus::utils::SharedPtr<strus::StorageInterface> sti;
 	strus::utils::SharedPtr<strus::StorageClientInterface> sci;
 
-	void open( const char* options);
+	void open( const char* options, bool reset);
+	void close()
+	{
+		sci.reset();
+		sti.reset();
+		dbi.reset();
+	}
 };
 
 
-void Storage::open( const char* config)
+void Storage::open( const char* config, bool reset)
 {
 	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
 	if (!dbi.get())
@@ -62,17 +74,21 @@ void Storage::open( const char* config)
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	(void)dbi->destroyDatabase( config);
-	(void)g_errorhnd->fetchError();
-
-	sti->createStorage( config, dbi.get());
+	if (reset)
 	{
-		const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
-		sci.reset( sti->createClient( config, dbi.get(), statisticsMessageProc));
-		if (!sci.get())
+		(void)dbi->destroyDatabase( config);
+		(void)g_errorhnd->fetchError();
+	
+		if (!sti->createStorage( config, dbi.get()))
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
+	}
+	const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
+	sci.reset( sti->createClient( config, dbi.get(), statisticsMessageProc));
+	if (!sci.get())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
 	}
 }
 
@@ -90,7 +106,7 @@ static void destroyStorage( const char* config)
 static void testDeleteNonExistingDoc()
 {
 	Storage storage;
-	storage.open( "path=storage");
+	storage.open( "path=storage", true);
 	std::auto_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
 	std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( "ABC"));
 	doc->addSearchIndexTerm( "word", "hello", 1);
@@ -120,10 +136,378 @@ static void testDeleteNonExistingDoc()
 	}
 }
 
+static std::string featureString( const std::string& prefix, unsigned int num)
+{
+	return strus::string_format( "%s%u", prefix.c_str(), num);
+}
+
+static void dumpStorage( const std::string& config)
+{
+	std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
+	if (!dbi.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	std::auto_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
+	if (!sti.get()) throw std::runtime_error( g_errorhnd->fetchError());
+	std::auto_ptr<strus::StorageDumpInterface> dump( sti->createDump( config, dbi.get(), ""));
+
+	const char* chunk;
+	std::size_t chunksize;
+	std::string dumpcontent;
+	while (dump->nextChunk( chunk, chunksize))
+	{
+		dumpcontent.append( chunk, chunksize);
+	}
+	if (g_errorhnd->hasError())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
+	else
+	{
+		std::cout << dumpcontent << std::endl;
+	}
+}
+
+static void testSimpleDocumentUpdate()
+{
+	Storage storage;
+	storage.open( "path=storage", true);
+	{
+		std::string docid( featureString("D",1));
+
+		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		std::auto_ptr<strus::StorageDocumentInterface> doc( transaction->createDocument( docid));
+		doc->addSearchIndexTerm( "a", featureString("a", 1), 1);
+		doc->done();
+		transaction->commit();
+
+		transaction.reset( storage.sci->createTransaction());
+		strus::Index docno = storage.sci->documentNumber( docid);
+		std::auto_ptr<strus::StorageDocumentUpdateInterface> update( transaction->createDocumentUpdate( docno));
+		update->addSearchIndexTerm( "a", featureString("a", 1), 1);
+		update->addSearchIndexTerm( "a", featureString("a", 2), 1);
+		update->done();
+		transaction->commit();
+	}
+	storage.close();
+	if (g_errorhnd->hasError())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
+	dumpStorage( "path=storage");
+}
+
+struct OccurrenceDef
+{
+	std::string docid;
+	std::string type;
+	std::string value;
+	unsigned int pos;
+
+	OccurrenceDef( const std::string& docid_, const std::string& type_, const std::string& value_, unsigned int pos_)
+		:docid(docid_),type(type_),value(value_),pos(pos_){}
+	OccurrenceDef( const OccurrenceDef& o)
+		:docid(o.docid),type(o.type),value(o.value),pos(o.pos){}
+
+	bool operator < (const OccurrenceDef& o) const
+	{
+		if (docid == o.docid)
+		{
+			if (type == o.type)
+			{
+				if (value == o.value)
+				{
+					return pos < o.pos;
+				}
+				else
+				{
+					return value < o.value;
+				}
+			}
+			else
+			{
+				return type < o.type;
+			}
+		}
+		else
+		{
+			return docid < o.docid;
+		}
+	}
+};
+
+struct ClearTypeDef
+{
+	std::string docid;
+	std::string type;
+
+	ClearTypeDef( const std::string& docid_, const std::string& type_)
+		:docid(docid_),type(type_){}
+	ClearTypeDef( const ClearTypeDef& o)
+		:docid(o.docid),type(o.type){}
+
+	bool operator < (const ClearTypeDef& o) const
+	{
+		if (docid == o.docid)
+		{
+			return type < o.type;
+		}
+		else
+		{
+			return docid < o.docid;
+		}
+	}
+};
+
+struct FeatDef
+{
+	std::string type;
+	std::string value;
+
+	FeatDef( const std::string& type_, const std::string& value_)
+		:type(type_),value(value_){}
+	FeatDef( const FeatDef& o)
+		:type(o.type),value(o.value){}
+
+	bool operator < (const FeatDef& o) const
+	{
+		if (type == o.type)
+		{
+			return value < o.value;
+		}
+		else
+		{
+			return type < o.type;
+		}
+	}
+};
+
+static std::map<FeatDef, unsigned int> getDfMap( const std::set<OccurrenceDef>& occurrenceSet)
+{
+	std::map<FeatDef, unsigned int> rt;
+	std::set<OccurrenceDef>::const_iterator oi = occurrenceSet.begin(), oe = occurrenceSet.end();
+	while (oi != oe)
+	{
+		std::set<FeatDef> fset;
+		const std::string& docid = oi->docid;
+		for (; oi != oe && oi->docid == docid; ++oi)
+		{
+			fset.insert( FeatDef( oi->type, oi->value));
+		}
+		std::set<FeatDef>::const_iterator fi = fset.begin(), fe = fset.end();
+		for (; fi != fe; ++fi)
+		{
+			rt[ *fi] += 1;
+		}
+	}
+	return rt;
+}
+
+static bool check_storage_df( strus::StorageClientInterface* storage, const std::set<OccurrenceDef>& occurrenceset, const char* statestr, unsigned int nofFeats, unsigned int nofTypes)
+{
+	bool rt = true;
+	std::map<FeatDef, unsigned int> dfmap_searchindex = getDfMap( occurrenceset);
+	for (unsigned int fi=1; fi<=nofFeats; ++fi)
+	{
+		for (unsigned int ti=1; ti <= nofTypes; ++ti)
+		{
+			FeatDef feat( featureString("t", ti), featureString("v", fi));
+			unsigned int df = storage->documentFrequency( feat.type, feat.value);
+			unsigned int df_expected = 0;
+			std::map<FeatDef, unsigned int>::const_iterator dfi = dfmap_searchindex.find( feat);
+			if (dfi != dfmap_searchindex.end())
+			{
+				df_expected = dfi->second;
+			}
+			if (df_expected != df)
+			{
+				rt = false;
+				std::cerr << strus::string_format("document frequency of '%s %s' %s (%u) not as expected (%u)", feat.type.c_str(), feat.value.c_str(), statestr, df, df_expected) << std::endl;
+			}
+		}
+	}
+	return rt;
+}
+
+static std::set<OccurrenceDef> calculateUpdateOccurrenceDef(
+		const std::set<OccurrenceDef>& origset,
+		const std::set<OccurrenceDef>& updateset, 
+		const std::set<ClearTypeDef>& clearset)
+{
+	std::set<OccurrenceDef> rt;
+	std::set<OccurrenceDef>::const_iterator oi = origset.begin(), oe = origset.end();
+	std::set<OccurrenceDef>::const_iterator ui = updateset.begin(), ue = updateset.end();
+	while (oi != oe && ui != ue)
+	{
+		if (oi->docid < ui->docid)
+		{
+			ClearTypeDef cdef( oi->docid, oi->type);
+			if (clearset.find( cdef) == clearset.end())
+			{
+				rt.insert( *oi);
+			}
+			++oi;
+		}
+		else if (oi->docid > ui->docid)
+		{
+			++ui;
+		}
+		else if (oi->type < ui->type)
+		{
+			ClearTypeDef cdef( oi->docid, oi->type);
+			if (clearset.find( cdef) == clearset.end())
+			{
+				rt.insert( *oi);
+			}
+			++oi;
+		}
+		else if (oi->type > ui->type)
+		{
+			++ui;
+		}
+		else
+		{
+			const std::string& type = oi->type;
+			const std::string& docid = oi->docid;
+			for (; oi != oe && oi->docid == docid && oi->type == type; ++oi){}
+			for (; ui != ue && ui->docid == docid && ui->type == type; ++ui){}
+		}
+	}
+	for (; oi != oe; ++oi)
+	{
+		ClearTypeDef cdef( oi->docid, oi->type);
+		if (clearset.find( cdef) == clearset.end())
+		{
+			rt.insert( *oi);
+		}
+	}
+	rt.insert( updateset.begin(), updateset.end());
+	return rt;
+}
+
+
+static void testDocumentUpdate()
+{
+	bool rt = true;
+	Storage storage;
+	enum {NofDocs=1000,NofFeats=20,NofTypes=5};
+	std::set<OccurrenceDef> occurrence_searchindex;
+	std::set<OccurrenceDef> occurrence_forwardindex;
+
+	storage.open( "path=storage", true);
+	{
+		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		for (unsigned int di=1; di<=NofDocs; ++di)
+		{
+			std::string docid( featureString("D",di));
+			std::auto_ptr<strus::StorageDocumentInterface> doc( transaction->createDocument( docid));
+			for (unsigned int fi=1; fi <= NofFeats; ++fi)
+			{
+				if (g_random.get( 0, 2) == 0) continue;
+				for (unsigned int ti=1; ti <= NofTypes; ++ti)
+				{
+					if (g_random.get( 0, 2) == 0) continue;
+					OccurrenceDef occ( docid, featureString("t", ti), featureString("v", fi), fi);
+					occurrence_searchindex.insert( occ);
+					doc->addSearchIndexTerm( occ.type, occ.value, occ.pos);
+				}
+				for (unsigned int ti=1; ti <= NofTypes; ++ti)
+				{
+					if (g_random.get( 0, 2) == 0) continue;
+					OccurrenceDef occ( docid, featureString("t", ti), featureString("v", fi), fi);
+					occurrence_forwardindex.insert( occ);
+					doc->addForwardIndexTerm( occ.type, occ.value, occ.pos);
+				}
+			}
+			doc->setAttribute( "title", featureString("title_", di));
+			doc->done();
+		}
+		transaction->commit();
+		rt &= check_storage_df( storage.sci.get(), occurrence_searchindex, "before update", NofFeats, NofTypes);
+		storage.close();
+
+		dumpStorage( "path=storage");
+	}
+	storage.open( "path=storage", false);
+	{
+		std::set<ClearTypeDef> clear_searchindex;
+		std::set<ClearTypeDef> clear_forwardindex;
+		std::set<OccurrenceDef> occurrence_update_searchindex;
+		std::set<OccurrenceDef> occurrence_update_forwardindex;
+
+		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		for (unsigned int di=1; di<=NofDocs; ++di)
+		{
+			if (g_random.get( 0, NofDocs) == 1) continue;
+
+			std::string docid( featureString("D",di));
+			strus::Index docno = storage.sci->documentNumber( docid);
+
+			std::auto_ptr<strus::StorageDocumentUpdateInterface> doc( transaction->createDocumentUpdate( docno));
+			for (unsigned int fi=1; fi <= NofFeats; ++fi)
+			{
+				if (g_random.get( 0, NofFeats) == 1) continue;
+				for (unsigned int ti=1; ti <= NofTypes; ++ti)
+				{
+					if (g_random.get( 0, 2) == 0) continue;
+					if (g_random.get( 0, 2) == 0)
+					{
+						ClearTypeDef def( docid, featureString( "t", ti));
+						if (g_random.get( 0, 2) == 0)
+						{
+							doc->clearSearchIndexTerm( def.type);
+							clear_searchindex.insert( def);
+						}
+						else
+						{
+							doc->clearForwardIndexTerm( def.type);
+							clear_forwardindex.insert( def);
+						}
+						break;
+					}
+					else
+					{
+						OccurrenceDef occ( docid, featureString("t", ti), featureString("v", fi), fi);
+						if (g_random.get( 0, 2) == 0)
+						{
+							occurrence_update_searchindex.insert( occ);
+							doc->addSearchIndexTerm( occ.type, occ.value, occ.pos);
+						}
+						else
+						{
+							occurrence_update_forwardindex.insert( occ);
+							doc->addForwardIndexTerm( occ.type, occ.value, occ.pos);
+						}
+					}
+				}
+			}
+			if (di % 2 == 0)
+			{
+				doc->setAttribute( "title", featureString("title_updated_", di));
+			}
+			doc->done();
+		}
+		transaction->commit();
+
+		occurrence_searchindex
+			= calculateUpdateOccurrenceDef(
+				occurrence_searchindex, occurrence_update_searchindex, clear_searchindex);
+		rt &= check_storage_df( storage.sci.get(), occurrence_searchindex, "after update", NofFeats, NofTypes);
+	}
+	storage.close();
+	if (g_errorhnd->hasError())
+	{
+		throw std::runtime_error( g_errorhnd->fetchError());
+	}
+	dumpStorage( "path=storage");
+	if (!rt)
+	{
+		throw std::runtime_error( "got errors, see std error output");
+	}
+}
+
 static void testTermTypeIterator()
 {
 	Storage storage;
-	storage.open( "path=storage");
+	storage.open( "path=storage", true);
 	std::auto_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
 	std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( "ABC"));
 	for (unsigned int ii=0; ii<100; ++ii)
@@ -355,7 +739,7 @@ static void testTrivialInsert()
 	dim.nofMetaData = 3;
 
 	Storage storage;
-	storage.open( "path=storage; metadata=M0 UINT32, M1 UINT16, M2 UINT8");
+	storage.open( "path=storage; metadata=M0 UINT32, M1 UINT16, M2 UINT8", true);
 	insertCollection( storage.sci.get(), dim);
 
 	unsigned int di=0,de=dim.nofDocs;
@@ -407,7 +791,7 @@ static void testDfCalculation()
 	dim.nofMetaData = 0;
 
 	Storage storage;
-	storage.open( "path=storage; metadata=M0 UINT32, M1 UINT16, M2 UINT8");
+	storage.open( "path=storage; metadata=M0 UINT32, M1 UINT16, M2 UINT8", true);
 	insertCollection( storage.sci.get(), dim);
 
 	DfMap dfmap = calculateCollectionDfMap( dim);
@@ -542,6 +926,8 @@ int main( int argc, const char* argv[])
 			case 2: RUN_TEST( ti, DeleteNonExistingDoc ) break;
 			case 3: RUN_TEST( ti, TermTypeIterator ) break;
 			case 4: RUN_TEST( ti, TrivialInsert ) break;
+			case 5: RUN_TEST( ti, SimpleDocumentUpdate) break;
+			case 6: RUN_TEST( ti, DocumentUpdate) break;
 			default: goto TESTS_DONE;
 		}
 		if (test_index) break;

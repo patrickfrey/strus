@@ -42,6 +42,10 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
 			return 0;
 		}
+		if (!isDir( path))
+		{
+			throw strus::runtime_error( _TXT( "unknown path '%s' specified in database configuration string"), path.c_str());
+		}
 		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
 		(void)extractUIntFromConfigString( cachesize, src, "cache", m_errorhnd);
 		cachesize_kb = (unsigned int)((cachesize + 1023)/1024);

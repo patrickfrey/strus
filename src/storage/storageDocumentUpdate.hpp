@@ -10,6 +10,7 @@
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/numericVariant.hpp"
 #include "storageTransaction.hpp"
+#include "storageDocumentStructs.hpp"
 #include <vector>
 #include <string>
 #include <set>
@@ -34,6 +35,26 @@ public:
 
 	/// \brief Destructor
 	virtual ~StorageDocumentUpdate();
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::addSearchIndexTerm( const std::string&, const std::string&, const Index&);
+	virtual void addSearchIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::addForwardIndexTerm( const std::string&, const std::string&, const Index&);
+	virtual void addForwardIndexTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& position_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearSearchIndexTerm( const std::string&);
+	virtual void clearSearchIndexTerm(
+			const std::string& type_);
+
+	/// \brief Implementation of StorageDocumentUpdateInterface::clearForwardIndexTerm( const std::string&);
+	virtual void clearForwardIndexTerm(
+			const std::string& type_);
 
 	/// \brief Implementation of StorageDocumentUpdateInterface::setMetaData( const std::string&, const NumericVariant&);
 	virtual void setMetaData(
@@ -63,36 +84,25 @@ public:
 	/// \brief Implementation of StorageDocumentUpdateInterface::done();
 	virtual void done();
 
+public:
+	const TermMap& terms() const				{return m_terms;}
+	const InvMap& invs() const				{return m_invs;}
+
 private:
-	struct DocAttribute
-	{
-		std::string name;
-		std::string value;
+	TermMapKey termMapKey( const std::string& type_, const std::string& value_);
 
-		DocAttribute( const std::string& name_, const std::string& value_)
-			:name(name_),value(value_){}
-		DocAttribute( const DocAttribute& o)
-			:name(o.name),value(o.value){}
-	};
-
-	struct DocMetaData
-	{
-		std::string name;
-		NumericVariant value;
-
-		DocMetaData( const std::string& name_, const NumericVariant& value_)
-			:name(name_),value(value_){}
-		DocMetaData( const DocMetaData& o)
-			:name(o.name),value(o.value){}
-	};
-
-	StorageTransaction* m_transaction;
-	Index m_docno;
-	std::vector<DocAttribute> m_attributes;
-	std::vector<DocMetaData> m_metadata;
-	std::vector<Index> m_add_userlist;
-	std::vector<Index> m_del_userlist;
-	bool m_doClearUserlist;
+private:
+	StorageTransaction* m_transaction;			///< transaction
+	Index m_docno;						///< document number
+	TermMap m_terms;					///< map of all search index terms added
+	InvMap m_invs;						///< map of all forward index terms added
+	std::set<Index> m_delete_search_typenolist;		///< set with typeno of types to remove from the search index (exclusive add of index features in update)
+	std::set<Index> m_delete_forward_typenolist;		///< set with typeno of types to remove from the forward index (exclusive add of index features in update)
+	std::vector<DocAttribute> m_attributes;			///< attributes to update
+	std::vector<DocMetaData> m_metadata;			///< metadata to update
+	std::vector<Index> m_add_userlist;			///< list of users to add to this document access
+	std::vector<Index> m_del_userlist;			///< list of users to remove from this document access
+	bool m_doClearUserlist;					///< true if the list of all users should be cleared before this transaction
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
 
