@@ -18,5 +18,5 @@ link_directories(
 )
 
 add_executable( testStorageOp testStorageOp.cpp)
-target_link_libraries( testStorageOp strus_error strus_storage strus_queryeval strus_queryproc strus_base ${Boost_LIBRARIES} ${Intl_LIBRARIES})
+target_link_libraries( testStorageOp strus_error strus_storage strus_queryeval strus_queryproc strus_base strus_private_utils ${Boost_LIBRARIES} ${Intl_LIBRARIES})
 
