@@ -74,7 +74,7 @@ add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
 target_link_libraries( strus_storage_static strus_private_utils strus_base )
 
 add_library( strus_storage SHARED libstrus_storage.cpp )
-target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_static strus_base )
+target_link_libraries( strus_storage strus_storage_static boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_strus_static strus_base )
 set_target_properties(
     strus_storage
     PROPERTIES
@@ -84,7 +84,7 @@ set_target_properties(
 )
 
 add_library( strus_storage_objbuild SHARED libstrus_storage_objbuild.cpp )
-target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval strus_queryproc boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_static strus_base )
+target_link_libraries( strus_storage_objbuild strus_storage strus_queryeval strus_queryproc boost_system strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_strus_static strus_base )
 set_target_properties(
     strus_storage_objbuild
     PROPERTIES
@@ -94,7 +94,7 @@ set_target_properties(
 )
 
 add_executable( strusResizeBlocks strusResizeBlocks.cpp )
-target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_base strus_storage_static compactnodetrie_static ${Intl_LIBRARIES})
+target_link_libraries( strusResizeBlocks  "${Boost_LIBRARIES}" strus_database_leveldb strus_private_utils strus_error strus_base strus_storage_static compactnodetrie_strus_static ${Intl_LIBRARIES})
 
 # ------------------------------
 # INSTALLATION

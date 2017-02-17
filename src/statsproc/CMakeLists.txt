@@ -28,7 +28,7 @@ link_directories(
 # LIBRARY
 # -------------------------------------------
 add_library( strus_statsproc SHARED ${source_files} libstrus_statsproc.cpp )
-target_link_libraries( strus_statsproc strus_private_utils strus_base compactnodetrie_static )
+target_link_libraries( strus_statsproc strus_private_utils strus_base compactnodetrie_strus_static )
 
 set_target_properties(
     strus_statsproc

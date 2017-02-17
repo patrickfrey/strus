@@ -15,7 +15,7 @@ include_directories(
 # -------------------------------------------
 # SNOWBALL STEMMER LIBRARY
 # -------------------------------------------
-add_library( compactnodetrie_static STATIC ${source_files})
+add_library( compactnodetrie_strus_static STATIC ${source_files})
 
 
 
