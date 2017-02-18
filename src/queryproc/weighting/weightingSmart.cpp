@@ -63,38 +63,70 @@ void WeightingFunctionContextSmart::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
 }
 
+void WeightingFunctionContextSmart::fillParameter( const Index& docno, double ff, double df, double* param) const
+{
+	param[ 0] = ff;
+	param[ 1] = df;
+	param[ 2] = m_nofCollectionDocuments;
+	std::size_t pi = 3;
+	std::vector<Index>::const_iterator mi = m_metadatahnd.begin(), me = m_metadatahnd.end();
+	for (; mi != me; ++mi)
+	{
+		param[ pi++] = m_metadata->getValue( *mi).tofloat();
+	}
+}
+
 double WeightingFunctionContextSmart::call( const Index& docno)
 {
 	if (!m_metadatahnd.empty())
 	{
 		m_metadata->skipDoc( docno);
 	}
-	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
 	double rt = 0.0;
+	unsigned int nofParam = m_metadatahnd.size()+3;
+
+	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
 	for (; fi != fe; ++fi)
 	{
 		double param[ MaxNofParameter+3];
-		if (docno == fi->skipDoc(docno))
-		{
-			param[ 0] = fi->ff();
-		}
-		else
-		{
-			param[ 0] = 0.0;
-		}
-		param[ 1] = fi->df();
-		param[ 2] = m_nofCollectionDocuments;
-		std::size_t pi = 3;
-		std::vector<Index>::const_iterator mi = m_metadatahnd.begin(), me = m_metadatahnd.end();
-		for (; mi != me; ++mi)
-		{
-			param[ pi++] = m_metadata->getValue( *mi).tofloat();
-		}
-		rt += m_func->call( param, pi);
+		fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+
+		rt += m_func->call( param, nofParam);
 	}
 	return rt;
 }
 
+std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+
+	if (!m_metadatahnd.empty())
+	{
+		m_metadata->skipDoc( docno);
+	}
+	double res = 0.0;
+	unsigned int nofParam = m_metadatahnd.size()+3;
+
+	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
+	for (unsigned int fidx=0; fi != fe; ++fi,++fidx)
+	{
+		double param[ MaxNofParameter+3];
+		fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+
+		double ww = m_func->call( param, nofParam);
+		res += ww;
+		out << "[" << fidx << "] result=" << ww << ", ff=" << fi->ff() << ", df=" << fi->df() << ", N=" << m_nofCollectionDocuments;
+		unsigned int pi=3, pe=nofParam;
+		for (; pi != pe; ++pi)
+		{
+			out << ", x" << pi << "=" << param[pi+3];
+		}
+		out << std::endl;
+	}
+	out << "result=" << res << std::endl;
+	return out.str();
+}
 
 void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name, const std::string& value)
 {
@@ -104,6 +136,10 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 
 		if (utils::caseInsensitiveEquals( name, "function"))
 		{
+			if (!m_expression.empty())
+			{
+				throw strus::runtime_error(_TXT( "expression defined twice"));
+			}
 			m_expression = value;
 		}
 		else if (utils::caseInsensitiveEquals( name, "metadata"))

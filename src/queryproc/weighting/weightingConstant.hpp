@@ -56,6 +56,8 @@ public:
 
 	virtual double call( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
 private:
 	std::vector<Feature> m_featar;
 	float m_weight;

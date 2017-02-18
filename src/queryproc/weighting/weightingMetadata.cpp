@@ -12,8 +12,9 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 
@@ -47,6 +48,20 @@ double WeightingFunctionContextMetadata::call( const Index& docno)
 	m_metadata->skipDoc( docno);
 	return m_weight * (double)m_metadata->getValue( m_elementHandle);
 }
+
+std::string WeightingFunctionContextMetadata::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+
+	m_metadata->skipDoc( docno);
+	double val = (double)m_metadata->getValue( m_elementHandle);
+	double res = m_weight * val;
+
+	out << "result=" << res << ", value=" << val << std::endl;
+	return out.str();
+}
+
 
 static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {

@@ -96,8 +96,13 @@ public:
 
 	virtual double call( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
 public:
 	enum {MaxNofParameter=64};				///< maximum number of arguments passed to the defined function
+
+private:
+	void fillParameter( const Index& docno, double ff, double df, double* parameterVector) const;
 
 private:
 	typedef std::vector<Feature> FeatureVector;

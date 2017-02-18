@@ -12,6 +12,9 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <string>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 
@@ -50,6 +53,25 @@ double WeightingFunctionContextTermFrequency::call( const Index& docno)
 	return rt;
 }
 
+std::string WeightingFunctionContextTermFrequency::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+
+	double res = 0.0;
+	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+	for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
+	{
+		if (docno==fi->itr->skipDoc( docno))
+		{
+			double ww = fi->weight * fi->itr->frequency();
+			res += ww;
+			out << "[" << fidx << "] result=" << ww << ", ff=" << fi->itr->frequency() << std::endl;
+		}
+	}
+	out << "result=" << res << std::endl;
+	return out.str();
+}
 
 static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {

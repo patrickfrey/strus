@@ -12,7 +12,9 @@
 #include "strus/constants.hpp"
 #include <cmath>
 #include <ctime>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 using namespace strus;
 #define WEIGHTING_SCHEME_NAME "BM25"
@@ -28,12 +30,16 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	:m_parameter(parameter_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_featar(),m_metadata(metadata_)
-	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_))
+	,m_metadata_doclen(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (m_metadata_doclen<0)
+	if (m_parameter.b)
 	{
-		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
+		m_metadata_doclen = metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_);
+		if (m_metadata_doclen<0)
+		{
+			throw strus::runtime_error( _TXT("parameter 'b' set, but no meta data element for the document length defined"));
+		}
 	}
 }
 
@@ -71,56 +77,71 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 }
 
 
+double WeightingFunctionContextBM25::featureWeight( const Feature& feat, const Index& docno) const
+{
+	if (docno==feat.itr->skipDoc( docno))
+	{
+		double ff = feat.itr->frequency();
+		if (ff == 0.0)
+		{
+		}
+		else if (m_parameter.b)
+		{
+			m_metadata->skipDoc( docno);
+			double doclen = m_metadata->getValue( m_metadata_doclen);
+			double rel_doclen = (doclen+1) / m_parameter.avgDocLength;
+			return feat.weight * feat.idf
+				* (ff * (m_parameter.k1 + 1.0))
+				/ (ff + m_parameter.k1 
+					* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
+		}
+		else
+		{
+			return feat.weight * feat.idf
+				* (ff * (m_parameter.k1 + 1.0))
+				/ (ff + m_parameter.k1 * 1.0);
+		}
+	}
+	return 0.0;
+}
+
 double WeightingFunctionContextBM25::call( const Index& docno)
 {
 	double rt = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for ( ;fi != fe; ++fi)
 	{
-		if (docno==fi->itr->skipDoc( docno))
-		{
-			double ff = fi->itr->frequency();
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "ff=" << ff << std::endl;
-#endif
-			if (ff == 0.0)
-			{
-			}
-			else if (m_parameter.b)
-			{
-				m_metadata->skipDoc( docno);
-				double doclen = m_metadata->getValue( m_metadata_doclen);
-				double rel_doclen = (doclen+1) / m_parameter.avgDocLength;
-#ifdef STRUS_LOWLEVEL_DEBUG
-				double ww = fi->weight * fi->idf
-						* (ff * (m_parameter.k1 + 1.0))
-						/ (ff + m_parameter.k1
-							* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
-				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " doclen=" << doclen << " reldoclen=" << rel_doclen << " weight=" << ww << std::endl;
-#endif
-				rt += fi->weight * fi->idf
-					* (ff * (m_parameter.k1 + 1.0))
-					/ (ff + m_parameter.k1 
-						* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
-			}
-			else
-			{
-#ifdef STRUS_LOWLEVEL_DEBUG
-				double ww = fi->weight * fi->idf
-						* (ff * (m_parameter.k1 + 1.0))
-						/ (ff + m_parameter.k1 * 1.0);
-				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " weight=" << ww << std::endl;
-#endif
-				rt += fi->weight * fi->idf
-					* (ff * (m_parameter.k1 + 1.0))
-					/ (ff + m_parameter.k1 * 1.0);
-			}
-		}
+		rt += featureWeight( *fi, docno);
 	}
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cout << "document weight=" << rt << std::endl;
-#endif
 	return rt;
+}
+
+std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+
+	double res = 0.0;
+	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+	for (int fidx=0 ;fi != fe; ++fi,++fidx)
+	{
+		double ww = featureWeight( *fi, docno);
+		out
+		<<"[" << fidx << "] result=" << ww
+		<< ", ff=" << fi->itr->frequency()
+		<< ", idf=" << fi->idf
+		<< ", weight=" << fi->weight;
+		if (m_parameter.b)
+		{
+			m_metadata->skipDoc( docno);
+			unsigned int doclen = m_metadata->getValue( m_metadata_doclen);
+			out << ", doclen=" << doclen;
+		}
+		res += ww;
+		out << std::endl;
+	}
+	out << "result=" << res << std::endl;
+	return out.str();
 }
 
 static NumericVariant parameterValue( const std::string& name, const std::string& value)

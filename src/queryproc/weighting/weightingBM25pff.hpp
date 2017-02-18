@@ -43,6 +43,7 @@ struct WeightingFunctionParameterBM25pff
 	unsigned int proxfftie;			///< the maximum proximity based ff value that is considered for weighting except for increments exceeding m_proxffbias
 	double maxdf;				///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double titleinc;			///< ff increment for title features
+	double cprop;				///< proportional const part of weight increment
 
 	WeightingFunctionParameterBM25pff()
 		:k1(1.5),b(0.75),avgDocLength(500)
@@ -51,7 +52,8 @@ struct WeightingFunctionParameterBM25pff
 		,proxffbias(0.0)
 		,proxfftie(0)
 		,maxdf(0.5)
-		,titleinc(0.0){}
+		,titleinc(0.0)
+		,cprop(0.3){}
 
 	WeightingFunctionParameterBM25pff( const WeightingFunctionParameterBM25pff& o)
 	{
@@ -82,8 +84,34 @@ public:
 
 	virtual double call( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
 public:
 	enum {MaxNofArguments=64};				///< maximum number of arguments fix because of extensive use of fixed size arrays
+
+private:
+	struct WeightingData
+	{
+		WeightingData( std::size_t itrarsize, std::size_t structarsize)
+			:doclen(0),titlestart(1),titleend(1),ffincrar_abs( itrarsize),ffincrar_rel( itrarsize)
+		{
+			valid_paraar = &valid_structar[ structarsize];
+		}
+
+		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
+		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
+		double doclen;
+		Index titlestart;
+		Index titleend;
+		ProximityWeightAccumulator::WeightArray ffincrar_abs;
+		ProximityWeightAccumulator::WeightArray ffincrar_rel;
+	};
+
+	void initializeContext();
+	void initWeightingData( WeightingData& data, const Index& docno);
+	double proximityFf( WeightingData& data, std::size_t fidx) const;
+	double featureWeight( const WeightingData& wdata, const Index& docno, double idf, double weight_ff) const;
 
 private:
 	WeightingFunctionParameterBM25pff m_parameter;		///< weighting function parameters

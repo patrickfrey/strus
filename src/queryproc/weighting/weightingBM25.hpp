@@ -76,6 +76,11 @@ public:
 
 	virtual double call( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
+private:
+	double featureWeight( const Feature& feat, const Index& docno) const;
+
 private:
 	WeightingFunctionParameterBM25 m_parameter;
 	double m_nofCollectionDocuments;
