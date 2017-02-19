@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
@@ -17,5 +17,5 @@ link_directories(
 )
 
 add_executable( testVarSizeNodeTree testVarSizeNodeTree.cpp)
-target_link_libraries( testVarSizeNodeTree strus_base strus_private_utils strus_storage_static compactnodetrie_static ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
+target_link_libraries( testVarSizeNodeTree strus_base strus_private_utils strus_storage_static compactnodetrie_strus_static ${Boost_LIBRARIES} ${Intl_LIBRARIES} )
 
