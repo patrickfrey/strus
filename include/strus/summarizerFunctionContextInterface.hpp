@@ -51,7 +51,7 @@ public:
 	/// \brief Get debug info dumped as string of the summarization call for one document
 	/// \param[in] docno document to get the summary debug info from
 	/// \return the debug info as string
-	//virtual std::string debugCall( const Index& docno)=0;
+	virtual std::string debugCall( const Index& docno)=0;
 };
 
 }//namespace

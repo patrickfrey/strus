@@ -11,8 +11,12 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 
@@ -55,6 +59,19 @@ std::vector<SummaryElement>
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "metadata", *m_errorhnd, std::vector<SummaryElement>());
+}
+
+std::string SummarizerFunctionContextMetaData::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+
+	m_metadata->skipDoc( docno);
+	NumericVariant value = m_metadata->getValue( m_attrib);
+	if (value.defined()) 
+	{
+		out << string_format( _TXT( "metadata name=%s, value=%s"), m_resultname.c_str(), value.tostring().c_str()) << std::endl;
+	}
+	return out.str();
 }
 
 

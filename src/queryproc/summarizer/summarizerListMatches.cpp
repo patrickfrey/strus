@@ -11,11 +11,13 @@
 #include "strus/forwardIteratorInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <set>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -69,6 +71,20 @@ std::vector<SummaryElement>
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "matchpos", *m_errorhnd, std::vector<SummaryElement>());
 }
+
+std::string SummarizerFunctionContextListMatches::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+	std::vector<SummaryElement> res = getSummary( docno);
+	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
+	for (; ri != re; ++ri)
+	{
+		out << string_format( _TXT("match %s %s"), ri->name().c_str(), ri->value().c_str()) << std::endl;
+	}
+	return out.str();
+}
+
 
 void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string& value)
 {

@@ -50,6 +50,8 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
 private:
 	AttributeReaderInterface* m_attribreader;			///< attribute reader interface
 	std::string m_attribname;					///< attribute name to output

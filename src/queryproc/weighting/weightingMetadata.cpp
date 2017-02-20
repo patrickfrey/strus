@@ -9,6 +9,7 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -58,7 +59,7 @@ std::string WeightingFunctionContextMetadata::debugCall( const Index& docno)
 	double val = (double)m_metadata->getValue( m_elementHandle);
 	double res = m_weight * val;
 
-	out << "result=" << res << ", value=" << val << std::endl;
+	out << string_format( _TXT( "result=%f, value=%f"), res, val) << std::endl;
 	return out.str();
 }
 

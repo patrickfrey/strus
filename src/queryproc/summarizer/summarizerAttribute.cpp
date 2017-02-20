@@ -9,9 +9,13 @@
 #include "strus/attributeReaderInterface.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 
@@ -61,6 +65,19 @@ std::vector<SummaryElement>
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "attribute", *m_errorhnd, std::vector<SummaryElement>());
 }
 
+std::string SummarizerFunctionContextAttribute::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+	m_attribreader->skipDoc( docno);
+	std::string attr = m_attribreader->getValue( m_attrib);
+	if (!attr.empty()) 
+	{
+		out << string_format( _TXT( "attribute name=%s, value=%s"),
+				m_resultname.c_str(), attr.c_str()) << std::endl;
+	}
+	return out.str();
+}
 
 void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string& name, const std::string& value)
 {

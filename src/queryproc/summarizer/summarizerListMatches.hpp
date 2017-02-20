@@ -44,6 +44,8 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
 private:
 	const StorageClientInterface* m_storage;			///< storage interface
 	std::vector<PostingIteratorInterface*> m_itrs;			///< iterators for summarization

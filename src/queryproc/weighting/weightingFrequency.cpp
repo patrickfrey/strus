@@ -8,6 +8,7 @@
 #include "weightingFrequency.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -66,10 +67,11 @@ std::string WeightingFunctionContextTermFrequency::debugCall( const Index& docno
 		{
 			double ww = fi->weight * fi->itr->frequency();
 			res += ww;
-			out << "[" << fidx << "] result=" << ww << ", ff=" << fi->itr->frequency() << std::endl;
+			out << string_format( _TXT( "[%u] result=%f, ff=%u"),
+						fidx, ww, (unsigned int)fi->itr->frequency()) << std::endl;			
 		}
 	}
-	out << "result=" << res << std::endl;
+	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
 	return out.str();
 }
 

@@ -14,6 +14,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/scalarFunctionInstanceInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
@@ -116,15 +117,17 @@ std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
 
 		double ww = m_func->call( param, nofParam);
 		res += ww;
-		out << "[" << fidx << "] result=" << ww << ", ff=" << fi->ff() << ", df=" << fi->df() << ", N=" << m_nofCollectionDocuments;
+		out << string_format( _TXT( "[%u] result=%f, ff=%u, df=%u, N=%u"),
+					fidx, ww, (unsigned int)fi->ff(), (unsigned int)(fi->df()+0.5), (unsigned int)m_nofCollectionDocuments) << std::endl;			
+		
 		unsigned int pi=3, pe=nofParam;
 		for (; pi != pe; ++pi)
 		{
-			out << ", x" << pi << "=" << param[pi+3];
+			out << string_format( _TXT( ", x%u=%f"), pi, param[pi+3]);
 		}
 		out << std::endl;
 	}
-	out << "result=" << res << std::endl;
+	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
 	return out.str();
 }
 

@@ -10,6 +10,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/constants.hpp"
+#include "strus/base/string_format.hpp"
 #include <cmath>
 #include <ctime>
 #include <iomanip>
@@ -126,21 +127,18 @@ std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
 	for (int fidx=0 ;fi != fe; ++fi,++fidx)
 	{
 		double ww = featureWeight( *fi, docno);
-		out
-		<<"[" << fidx << "] result=" << ww
-		<< ", ff=" << fi->itr->frequency()
-		<< ", idf=" << fi->idf
-		<< ", weight=" << fi->weight;
+		unsigned int doclen = 0;
 		if (m_parameter.b)
 		{
 			m_metadata->skipDoc( docno);
-			unsigned int doclen = m_metadata->getValue( m_metadata_doclen);
-			out << ", doclen=" << doclen;
+			doclen = m_metadata->getValue( m_metadata_doclen);
 		}
+		out << string_format( _TXT("[%u] result=%f, ff=%u, idf=%f, weight=%f, doclen=%u"),
+					fidx, ww, (unsigned int)fi->itr->frequency(), fi->idf,
+					fi->weight, doclen) << std::endl;
 		res += ww;
-		out << std::endl;
 	}
-	out << "result=" << res << std::endl;
+	out << string_format( _TXT("sum result=%f"), res) << std::endl;
 	return out.str();
 }
 

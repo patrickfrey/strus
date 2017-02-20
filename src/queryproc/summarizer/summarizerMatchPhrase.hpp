@@ -34,6 +34,10 @@ class QueryProcessorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
 
+enum {
+	MaxParaTitleSize=12
+};
+
 /// \brief Configured parameters of the MatchPhrase summarizer function
 struct SummarizerFunctionParameterMatchPhrase
 {
@@ -87,8 +91,92 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
 public:
 	enum {MaxNofArguments=64};				///< chosen to fit in a bitfield of 64 bits
+
+private:
+	struct WeightingData
+	{
+		explicit WeightingData( std::size_t structarsize)
+			:titlestart(1),titleend(1),prevPara(0),nextPara(0)
+		{
+			valid_paraar = &valid_structar[ structarsize];
+		}
+
+		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
+		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
+		Index titlestart;
+		Index titleend;
+		Index prevPara;
+		Index nextPara;
+	};
+
+private:
+	void initializeContext();
+	void initWeightingData( WeightingData& wdata, const Index& docno);
+
+private:
+	struct Match
+	{
+		double weight;
+		Index pos;
+		Index span;
+		bool is_docstart;
+	
+		Match()
+			:weight(0.0),pos(0),span(0),is_docstart(false){}
+		Match( double weight_, Index pos_, Index span_, bool is_docstart_)
+			:weight(weight_),pos(pos_),span(span_),is_docstart(is_docstart_){}
+		Match( const Match& o)
+			:weight(o.weight),pos(o.pos),span(o.span),is_docstart(o.is_docstart){}
+	
+		bool isDefined() const		{return span > 0;}
+	};
+
+	struct Abstract
+	{
+		Index start;
+		Index span;
+		bool defined_start;
+		bool defined_end;
+		bool is_docstart;
+
+		Abstract()
+			:start(0),span(0),defined_start(false),defined_end(false),is_docstart(false){}
+		Abstract( const Index& start_, const Index& span_, bool defined_start_, bool defined_end_, bool is_docstart_)
+			:start(start_),span(span_),defined_start(defined_start_),defined_end(defined_end_),is_docstart(is_docstart_){}
+		Abstract( const Abstract& o)
+			:start(o.start),span(o.span),defined_start(o.defined_start),defined_end(o.defined_end),is_docstart(o.is_docstart){}
+
+		bool isDefined() const		{return span > 0;}
+	};
+
+	double windowWeight( WeightingData& wdata, const PositionWindow& poswin);
+
+	void fetchNoTitlePostings( WeightingData& wdata, PostingIteratorInterface** itrar, Index& cntTitleTerms, Index& cntNoTitleTerms);
+	Match findBestMatch_( WeightingData& wdata, unsigned int cardinality, PostingIteratorInterface** itrar);
+	Match findBestMatch( WeightingData& wdata);
+	Match findBestMatchNoTitle( WeightingData& wdata);
+	Match findAbstractMatch( WeightingData& wdata);
+
+	Match logFindBestMatch_( std::ostream& out, WeightingData& wdata, unsigned int cardinality, PostingIteratorInterface** itrar);
+	Match logFindBestMatchNoTitle( std::ostream& out, WeightingData& wdata);
+	Match logFindAbstractMatch( std::ostream& out, WeightingData& wdata);
+
+	Abstract getPhraseAbstract( const Match& candidate, WeightingData& wdata);
+	Abstract getParaTitleAbstract( Match& phrase_match, WeightingData& wdata);
+
+	std::string getParaTitleString( const Abstract& para_abstract);
+	std::string getPhraseString( const Abstract& phrase_abstract, WeightingData& wdata);
+
+	std::vector<SummaryElement>
+		getSummariesFromAbstracts(
+			const Abstract& para_abstract,
+			const Abstract& phrase_abstract,
+			WeightingData& wdata);
 
 private:
 	const StorageClientInterface* m_storage;		///< storage access

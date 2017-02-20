@@ -14,10 +14,14 @@
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <cstdlib>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 
@@ -108,6 +112,19 @@ std::vector<SummaryElement>
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), MODULE_NAME, *m_errorhnd, std::vector<SummaryElement>());
+}
+
+std::string SummarizerFunctionContextMatchVariables::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+	std::vector<SummaryElement> res = getSummary( docno);
+	std::vector<SummaryElement>::const_iterator ri = res.begin(), re = res.end();
+	for (; ri != re; ++ri)
+	{
+		out << string_format( _TXT( "variable name=%s, value='%s'"), ri->name().c_str(), ri->value().c_str()) << std::endl;
+	}
+	return out.str();
 }
 
 

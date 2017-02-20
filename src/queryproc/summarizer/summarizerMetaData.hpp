@@ -52,6 +52,8 @@ public:
 
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
+	virtual std::string debugCall( const Index& docno);
+
 private:
 	MetaDataReaderInterface* m_metadata;
 	std::string m_resultname;

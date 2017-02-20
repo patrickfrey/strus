@@ -8,6 +8,7 @@
 #include "weightingConstant.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -89,10 +90,10 @@ std::string WeightingFunctionContextConstant::debugCall( const Index& docno)
 		{
 			double ww = fi->weight * m_weight;
 			res += ww;
-			out << "[" << fidx << "] result=" << ww << std::endl;
+			out << string_format( _TXT( "[%u] result=%f"), fidx, ww) << std::endl;
 		}
 	}
-	out << "result=" << res << std::endl;
+	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
 	return out.str();
 }
 

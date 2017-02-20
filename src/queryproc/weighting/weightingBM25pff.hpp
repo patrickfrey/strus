@@ -37,6 +37,7 @@ struct WeightingFunctionParameterBM25pff
 	double avgDocLength;			///< average document length in the collection
 	unsigned int windowsize;		///< maximum position range of a window considered for weighting
 	unsigned int cardinality;		///< minumum number of features in a window considered for weighting
+	float cardinality_frac;			///< cardinality defined as fraction (percentage) of the number of features
 	double ffbase;				///< relative constant base factor of pure ff [0..1]
 	unsigned int fftie;			///< the maximum pure ff value that is considered for weighting (used for normalization of pure ff part)
 	double proxffbias;			///< bias for proximity ff increments always counted (the others are counted only till m_proxfftie)
@@ -47,7 +48,7 @@ struct WeightingFunctionParameterBM25pff
 
 	WeightingFunctionParameterBM25pff()
 		:k1(1.5),b(0.75),avgDocLength(500)
-		,windowsize(100),cardinality(0)
+		,windowsize(100),cardinality(0),cardinality_frac(0.0)
 		,ffbase(0.4),fftie(0)
 		,proxffbias(0.0)
 		,proxfftie(0)
@@ -93,7 +94,7 @@ private:
 	struct WeightingData
 	{
 		WeightingData( std::size_t itrarsize, std::size_t structarsize)
-			:doclen(0),titlestart(1),titleend(1),ffincrar_abs( itrarsize),ffincrar_rel( itrarsize)
+			:doclen(0),titlestart(1),titleend(1),ffincrar_abs( itrarsize,0.0),ffincrar_rel( itrarsize,0.0)
 		{
 			valid_paraar = &valid_structar[ structarsize];
 		}
@@ -108,14 +109,21 @@ private:
 		ProximityWeightAccumulator::WeightArray ffincrar_rel;
 	};
 
+private:
 	void initializeContext();
 	void initWeightingData( WeightingData& data, const Index& docno);
 	double proximityFf( WeightingData& data, std::size_t fidx) const;
 	double featureWeight( const WeightingData& wdata, const Index& docno, double idf, double weight_ff) const;
 
+	typedef ProximityWeightAccumulator::WeightArray WeightArray;
+	void calcProximityFfIncrements( WeightingData& wdata, WeightArray& result_abs, WeightArray& result_rel);
+	void calcTitleFfIncrements( WeightingData& wdata, WeightArray& result);
+	void calcTitleWeights( WeightingData& wdata, const Index& docno, WeightArray& weightar);
+
 private:
 	WeightingFunctionParameterBM25pff m_parameter;		///< weighting function parameters
 	double m_nofCollectionDocuments;			///< number of documents in the collection
+	unsigned int m_cardinality;				///< calculated cardinality
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
