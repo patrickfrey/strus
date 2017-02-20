@@ -195,13 +195,13 @@ double SummarizerFunctionContextMatchPhrase::windowWeight( WeightingData& wdata,
 	else
 	{
 		ProximityWeightAccumulator::weight_same_sentence(
-			weightar, 0.3, m_weightincr, window, m_parameter->m_windowsize, m_maxdist_featar, 
+			weightar, 0.3, m_weightincr, window, windowsize, m_maxdist_featar, 
 			wdata.valid_itrar, m_itrarsize, wdata.valid_structar, m_structarsize);
 		ProximityWeightAccumulator::weight_imm_follow(
 			weightar, 0.4, m_weightincr, window, windowsize,
 			wdata.valid_itrar, m_itrarsize);
 		ProximityWeightAccumulator::weight_invdist(
-			weightar, 0.3, m_weightincr, window, m_parameter->m_windowsize,
+			weightar, 0.3, m_weightincr, window, windowsize,
 			wdata.valid_itrar, m_itrarsize);
 	}
 	if (windowpos < 1000)
