@@ -43,9 +43,21 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
 	,m_metaDataRestriction()
+	,m_weightingFormula()
+	,m_terms()
+	,m_docfields()
+	,m_expressions()
+	,m_features()
+	,m_stack()
+	,m_variableAssignments()
 	,m_nofRanks(20)
 	,m_minRank(0)
+	,m_usernames()
+	,m_evalset_docnolist()
 	,m_evalset_defined(false)
+	,m_termstatsmap()
+	,m_globstats()
+	,m_debugMode(false)
 	,m_errorhnd(errorhnd_)
 {
 	if (!m_metaDataReader.get()) throw strus::runtime_error(_TXT("error creating meta data reader"));
@@ -209,7 +221,7 @@ void Query::addDocumentEvaluationSet(
 
 void Query::print( std::ostream& out) const
 {
-	out << "query evaluation program:" << std::endl;
+	out << _TXT("query evaluation program:") << std::endl;
 	m_queryEval->print( out);
 
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
@@ -217,21 +229,22 @@ void Query::print( std::ostream& out) const
 	{
 		char buf[ 128];
 		strus_snprintf( buf, sizeof(buf), "%.5f", fi->weight);
-		out << "feature '" << fi->set << "' " << buf << ": " << std::endl;
+		out << _TXT("feature '") << fi->set << "' " << buf << ": " << std::endl;
 		printNode( out, fi->node, 1);
 		out << std::endl;
 	}
-	out << "MaxNofRanks = " << m_nofRanks << std::endl;
-	out << "MinRank = " << m_minRank << std::endl;
+	if (m_debugMode) out << _TXT("debug mode enabled") << std::endl;
+	out << "maxNofRanks = " << m_nofRanks << std::endl;
+	out << "minRank = " << m_minRank << std::endl;
 	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
 	for (; ui != ue; ++ui)
 	{
-		out << "User restriction : " << *ui << std::endl;
+		out << _TXT("user restriction : ") << *ui << std::endl;
 	}
 	std::vector<Index>::const_iterator di = m_evalset_docnolist.begin(), de = m_evalset_docnolist.end();
 	if (di != de)
 	{
-		out << "Document evaluation set : ";
+		out << _TXT("document evaluation set : ");
 		for (std::size_t didx=0; di != de; ++di)
 		{
 			if (didx != 0) out << ", ";
@@ -541,6 +554,11 @@ void Query::setWeightingVariableValue(
 	}
 }
 
+void Query::setDebugMode( bool debug)
+{
+	m_debugMode = debug;
+}
+
 QueryResult Query::evaluate()
 {
 	const char* evaluationPhase = "query feature postings initialization";
@@ -786,6 +804,34 @@ QueryResult Query::evaluate()
 			{
 				std::vector<SummaryElement> summary = (*si)->getSummary( ri->docno());
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
+			}
+			if (m_debugMode)
+			{
+				// Collect debug info of weighting and summarizer functions:
+				std::vector<SummarizerDef>::const_iterator
+					zi = m_queryEval->summarizers().begin(),
+					ze = m_queryEval->summarizers().end();
+				si = summarizers.begin();
+				for (;si != se && zi != ze; ++si,++zi)
+				{
+					if (!zi->debugAttributeName().empty())
+					{
+						std::string debuginfo = (*si)->debugCall( ri->docno());
+						summaries.push_back( SummaryElement( zi->debugAttributeName(), debuginfo));
+					}
+				}
+				std::vector<WeightingDef>::const_iterator
+					wi = m_queryEval->weightingFunctions().begin(),
+					we = m_queryEval->weightingFunctions().end();
+				std::size_t widx = 0;
+				for (; wi != we; ++wi,++widx)
+				{
+					if (!wi->debugAttributeName().empty())
+					{
+						std::string debuginfo = accumulator.getWeightingDebugInfo( widx, ri->docno());
+						summaries.push_back( SummaryElement( wi->debugAttributeName(), debuginfo));
+					}
+				}
 			}
 			ranks.push_back( ResultDocument( *ri, summaries));
 		}

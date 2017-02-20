@@ -118,6 +118,10 @@ public:
 	/// \param[in] value value of the variable
 	virtual void setWeightingVariableValue( const std::string& name, double value)=0;
 
+	/// \brief Switch debug mode on or off (default off). In case of debug mode additional attributes defined with the function definitions in the query evaluation are attached to the result.
+	/// \param[in] debug true for enabling debug mode on and false for disabling debug mode (diabled by default)
+	virtual void setDebugMode( bool debug)=0;
+
 	/// \brief Evaluate the query
 	/// \return result of query evaluation
 	virtual QueryResult evaluate()=0;

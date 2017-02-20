@@ -78,6 +78,8 @@ public:
 	virtual void setWeightingVariableValue(
 			const std::string& name, double value);
 
+	virtual void setDebugMode( bool debug);
+
 	virtual QueryResult evaluate();
 	virtual std::string tostring() const;
 
@@ -235,6 +237,7 @@ private:
 	typedef std::map<TermKey,TermStatistics> TermStatisticsMap;
 	TermStatisticsMap m_termstatsmap;				///< term statistics (evaluation in case of a distributed index)
 	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
+	bool m_debugMode;						///< true if debug mode is enabled
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

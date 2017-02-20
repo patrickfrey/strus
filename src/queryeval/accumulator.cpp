@@ -189,3 +189,12 @@ bool Accumulator::nextRank(
 	return false;
 }
 
+std::string Accumulator::getWeightingDebugInfo( std::size_t fidx, const Index& docno)
+{
+	if (fidx >= m_weightingElements.size())
+	{
+		strus::runtime_error(_TXT("internal: weighting function array access out of bounds"));
+	}
+	return m_weightingElements[ fidx]->debugCall( docno);
+}
+

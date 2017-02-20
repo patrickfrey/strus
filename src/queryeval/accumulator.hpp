@@ -85,6 +85,8 @@ public:
 	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
 	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}
 
+	std::string getWeightingDebugInfo( std::size_t fidx, const Index& docno);
+
 private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
 

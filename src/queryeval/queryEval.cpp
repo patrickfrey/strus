@@ -74,12 +74,13 @@ void QueryEval::addExclusionFeature( const std::string& set_)
 void QueryEval::addSummarizerFunction(
 		const std::string& functionName,
 		SummarizerFunctionInstanceInterface* function,
-		const std::vector<FeatureParameter>& featureParameters)
+		const std::vector<FeatureParameter>& featureParameters,
+		const std::string& debugAttributeName)
 {
 	try
 	{
 		Reference<SummarizerFunctionInstanceInterface> functionref( function);
-		m_summarizers.push_back( SummarizerDef( functionName, functionref, featureParameters));
+		m_summarizers.push_back( SummarizerDef( functionName, functionref, featureParameters, debugAttributeName));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding summarization function: %s"), *m_errorhnd);
 }
@@ -87,12 +88,13 @@ void QueryEval::addSummarizerFunction(
 void QueryEval::addWeightingFunction(
 		const std::string& functionName,
 		WeightingFunctionInstanceInterface* function,
-		const std::vector<FeatureParameter>& featureParameters)
+		const std::vector<FeatureParameter>& featureParameters,
+		const std::string& debugAttributeName)
 {
 	try
 	{
 		Reference<WeightingFunctionInstanceInterface> functionref( function);
-		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters));
+		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters, debugAttributeName));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding weighting function: %s"), *m_errorhnd);
 }
