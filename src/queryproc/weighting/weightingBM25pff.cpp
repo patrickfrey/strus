@@ -382,6 +382,8 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		std::size_t fi = 0;
 		for ( ;fi != m_itrarsize; ++fi)
 		{
+			if (!wdata.valid_itrar[ fi]) continue;
+
 			double sing_ff = wdata.valid_itrar[ fi]->frequency();
 			if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
 
