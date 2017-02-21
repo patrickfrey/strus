@@ -290,7 +290,7 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 		Match candidate( weight, windowpos, windowspan, false);
 		Abstract abstract( getPhraseAbstract( candidate, wdata));
 		std::string candidatestr( getPhraseString( abstract, wdata));
-		out << string_format( _TXT( "candidate pos=%u, best=%u, span=%s, weight=%f, string=%s"),
+		out << string_format( _TXT( "candidate pos=%u, best=%u, span=%u, weight=%f, string=%s"),
 					windowpos, (unsigned int)(weight > rt.weight), windowspan,
 					weight, candidatestr.c_str()) << std::endl;
 

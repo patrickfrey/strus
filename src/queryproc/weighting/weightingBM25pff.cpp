@@ -421,7 +421,7 @@ std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
 	out << string_format( _TXT("feature weights: %s, sum=%f"), wstr.c_str(), m_weightincr.sum()) << std::endl;
 
 	// Calculate artificial ff for all features:
-	WeightArray titleweightar;
+	WeightArray titleweightar( wdata.ffincrar_abs.arsize, 0.0);
 	calcTitleWeights( wdata, docno, titleweightar);
 	wstr = titleweightar.tostring();
 	out << string_format( _TXT("title ff increments=%s"), wstr.c_str()) << std::endl;
