@@ -20,6 +20,8 @@
 
 using namespace strus;
 
+#define METHOD_NAME "BM25"
+
 SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData( 
 		MetaDataReaderInterface* metadata_, const std::string& metaname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_)
 	:m_metadata(metadata_)
@@ -30,7 +32,7 @@ SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData(
 {
 	if (m_attrib < 0)
 	{
-		throw strus::runtime_error(_TXT("unknown metadata element name '%s' passed to summarizer '%s'"), m_metaname.c_str(), "metadata");
+		throw strus::runtime_error(_TXT("unknown metadata element name '%s' passed to summarizer '%s'"), m_metaname.c_str(), METHOD_NAME);
 	}
 }
 
@@ -41,7 +43,7 @@ void SummarizerFunctionContextMetaData::addSummarizationFeature(
 		double /*weight*/,
 		const TermStatistics&)
 {
-	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "MetaData");
+	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), METHOD_NAME);
 }
 
 std::vector<SummaryElement>
@@ -58,12 +60,13 @@ std::vector<SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "metadata", *m_errorhnd, std::vector<SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
 std::string SummarizerFunctionContextMetaData::debugCall( const Index& docno)
 {
 	std::ostringstream out;
+	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
 
 	m_metadata->skipDoc( docno);
 	NumericVariant value = m_metadata->getValue( m_attrib);
@@ -86,10 +89,10 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
+			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "metadata", *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceMetaData::defineResultName(
@@ -111,18 +114,18 @@ void SummarizerFunctionInstanceMetaData::defineResultName(
 			throw strus::runtime_error( _TXT("unknown item name '%s"), itemname.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), "metadata", *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error defining result name of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "name"))
 	{
-		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "MetaData");
+		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "MetaData", name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 
@@ -135,7 +138,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMetaData::createFu
 	{
 		return new SummarizerFunctionContextMetaData( metadata, m_metaname, m_resultname, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "metadata", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string SummarizerFunctionInstanceMetaData::tostring() const
@@ -146,7 +149,7 @@ std::string SummarizerFunctionInstanceMetaData::tostring() const
 		rt << "metaname='" << m_metaname << "', resultname='" << m_resultname << "'";
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "metadata", *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -157,7 +160,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionMetaData::createInstance(
 	{
 		return new SummarizerFunctionInstanceMetaData( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "metadata", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 
@@ -171,6 +174,6 @@ FunctionDescription SummarizerFunctionMetaData::getDescription() const
 		rt( P::Metadata, "name", _TXT( "the name of the meta data element to get"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "metadata", *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 

@@ -309,6 +309,7 @@ std::string SummarizerFunctionContextAccumulateNear::debugCall( const Index& doc
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
+	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
 
 	// Initialization:
 	if (m_itrarsize == 0)

@@ -18,6 +18,7 @@
 #include <sstream>
 
 using namespace strus;
+#define METHOD_NAME "attribute"
 
 SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 		AttributeReaderInterface* attribreader_, const std::string& attribname_, const std::string& resultname_, ErrorBufferInterface* errorhnd_)
@@ -29,7 +30,7 @@ SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 {
 	if (!m_attrib)
 	{
-		throw strus::runtime_error(_TXT("unknown attribute name '%s' passed to summarizer '%s'"), m_attribname.c_str(), "attribute");
+		throw strus::runtime_error(_TXT("unknown attribute name '%s' passed to summarizer '%s'"), m_attribname.c_str(), METHOD_NAME);
 	}
 }
 
@@ -40,7 +41,7 @@ void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		double /*weight*/,
 		const TermStatistics&)
 {
-	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), "attribute");
+	m_errorhnd->report( _TXT( "no sumarization features expected in summarization function '%s'"), METHOD_NAME);
 }
 
 SummarizerFunctionContextAttribute::~SummarizerFunctionContextAttribute()
@@ -62,13 +63,15 @@ std::vector<SummaryElement>
 		}
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), "attribute", *m_errorhnd, std::vector<SummaryElement>());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
 std::string SummarizerFunctionContextAttribute::debugCall( const Index& docno)
 {
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
+	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
+
 	m_attribreader->skipDoc( docno);
 	std::string attr = m_attribreader->getValue( m_attrib);
 	if (!attr.empty()) 
@@ -90,21 +93,21 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), "attribute", *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
 }
 
 void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "name"))
 	{
-		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), "Attribute");
+		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), "Attribute", name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 
@@ -138,7 +141,7 @@ std::string SummarizerFunctionInstanceAttribute::tostring() const
 		rt << "metaname='" << m_attribname << "', resultname='" << m_resultname << "'";
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), "attribute", *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -157,7 +160,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAttribute::createF
 		}
 		return new SummarizerFunctionContextAttribute( reader, m_attribname, m_resultname, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), "attribute", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 
@@ -168,7 +171,7 @@ SummarizerFunctionInstanceInterface* SummarizerFunctionAttribute::createInstance
 	{
 		return new SummarizerFunctionInstanceAttribute( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), "attribute", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 
@@ -181,6 +184,6 @@ FunctionDescription SummarizerFunctionAttribute::getDescription() const
 		rt( P::Attribute, "name", _TXT( "the name of the attribute to get"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), "attribute", *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
