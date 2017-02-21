@@ -127,6 +127,8 @@ std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
 	for (int fidx=0 ;fi != fe; ++fi,++fidx)
 	{
 		double ww = featureWeight( *fi, docno);
+		if (ww < std::numeric_limits<double>::epsilon()) continue;
+
 		unsigned int doclen = 0;
 		if (m_parameter.b)
 		{
