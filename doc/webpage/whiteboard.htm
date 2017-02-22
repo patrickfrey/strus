@@ -39,24 +39,21 @@
 	</div>
 
 	<div id="whiteboardrow">
-		<div id="whiteboardheading">A project strusAll for simpler build of the software<br/>(SHORT-TERM)
-		</div>
-		<div id="whiteboardcol">
-			It is reasonable to split the software into smaller packages.
-			But for out of source builds 10 packages are cumbersome.
-			We will provide a project that builds everything out of a single project.
-		</div>
-	</div>
-
-	<div id="whiteboardrow">
 		<div id="whiteboardheading">
 			Planned&nbsp;articles<br/>(MEDIUM-TERM)
 		</div>
-		<div id="whiteboardcol">The following articles on <a href="codeproject.com">codeproject</a> are planned for the
-			next weeks:
+		<div id="whiteboardcol">The following articles on <a href="codeproject.com">codeproject</a> are planned:
 			<br/>- Show the <i>expandability</i> of the Strus analyzer with modules
 			written in C++. Do it the same way as for the Strus core.
 			Introduce the interfaces for segmenters, tokenizers, normalizers, aggregators.
+			<br/>- Show how the project strusVector helps you to use vectors generated
+			from word embeddings (word2vec and friends). We use brute force LSH with a two
+			layer preselection with help of 2*64bit samples to reduce the number of cache lines loaded.
+			It works well on about 10 million vectors as we demonstrate in the Wikipedia demo search.
+			<br/>- Show how you can debug retrieval and summarization methods. Similar to Lucene, every
+			method can attach debug information that can be displayed with the result.
+			The demo search demonstrates it if you attach the parameter "&amp;m=debug" to the
+			evalQuery.php URL.
 		</div>
 	</div>
 
@@ -66,6 +63,14 @@
 		<div id="whiteboardcol">
 			As a starting point for <i>Strus</i> projects, it could be nice to generate 
 			analyzer configurations out of XML schemas.
+		</div>
+	</div>
+
+	<div id="whiteboardrow">
+		<div id="whiteboardheading">Search as a service (idea)<br/>(LONG-TERM)
+		</div>
+		<div id="whiteboardcol">
+			Think about providing <i>search as a service</i> with <i>Strus</i>.
 		</div>
 	</div>
 	</div>
