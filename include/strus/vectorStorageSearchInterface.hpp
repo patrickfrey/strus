@@ -43,14 +43,14 @@ public:
 
 		bool operator < ( const Result& o) const
 		{
-			if (m_weight + std::numeric_limits<double>::espilon() < o.m_weight) return true;
-			if (m_weight - std::numeric_limits<double>::espilon() > o.m_weight) return false;
+			if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return true;
+			if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return false;
 			return m_featidx < o.m_featidx;
 		}
 		bool operator > ( const Result& o) const
 		{
-			if (m_weight + std::numeric_limits<double>::espilon() < o.m_weight) return false;
-			if (m_weight - std::numeric_limits<double>::espilon() > o.m_weight) return true;
+			if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return false;
+			if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return true;
 			return m_featidx > o.m_featidx;
 		}
 
