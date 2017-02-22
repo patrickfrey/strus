@@ -73,6 +73,12 @@ public:
 	/// \return index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
 	virtual Index featureIndex( const std::string& name) const=0;
 
+	/// \brief Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage
+	/// \param[in] v1 first input vector
+	/// \param[in] v2 second input vector
+	/// \return the similarity measure
+	virtual double vectorSimilarity( const std::vector<double>& v1, const std::vector<double>& v2) const=0;
+
 	/// \brief Get the number of feature vectors defined
 	/// \return the number of features
 	virtual unsigned int nofFeatures() const=0;

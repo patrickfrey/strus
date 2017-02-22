@@ -62,7 +62,14 @@
 
 		<a name="github"> </a>
 		<h2>Clone from Github</h2>
-		<p class="description">You can clone the projects from Github:
+		<p class="description">There exists a <i>Github</i> project <a href="https://github.com/patrickfrey/strusAll">strusAll</a>
+		for simiplifying out of source builds of <i>Strus</i>.
+		You can clone it with 
+		<pre>
+git clone git@github.com:patrickfrey/strusAll.git
+		</pre>
+		</p>
+		<p class="description">You can also clone the projects one by one from Github:
 		<pre>
 git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</pre>
@@ -87,11 +94,14 @@ git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</p>
 
 		<h2>Build the software</h2>
-		<p class="description">The build system is CMake. Go into the top level directory 
-		of each project and execute the instructions in INSTALL (for Linux), INSTALL.FreeBSD,
+		<p class="description">The build system is CMake. Go into the top level directory
+		of the <i>strusAll</i> project and execute the instructions in INSTALL (for Linux), INSTALL.FreeBSD,
 		INSTALL.OpenBSD or INSTALL.OSX depending on your platform.<br/>
+		If you build the procects separately you have to do this for each project.<br/>
 		The projects will by default be installed in the default location for utilities
-		(On Ubuntu in /usr/local). The projects have due to dependencies to be built and
+		(On Ubuntu in /usr/local).
+		Respect the order implied by dependencies if you build the projects separately.
+		The projects have due to dependencies to be built and
 		installed in the following order (projects on the same line can be built in reversed
 		order too because they have no build dependencies to each other):
 		<ol>
