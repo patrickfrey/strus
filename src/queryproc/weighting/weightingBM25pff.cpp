@@ -457,8 +457,9 @@ std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
 		double ww = featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
 		res += ww;
 		out << string_format( _TXT("[%u] result=%f, ff=%u, accu_ff=%f, sing_ff=%f, prox_ff=%f, idf=%f, doclen=%u"),
-					fi, ww, wdata.valid_itrar[ fi]->frequency(), accu_ff, sing_ff, prox_ff,
-					m_idfar[ fi], wdata.doclen) << std::endl;
+					(unsigned int)fi, ww, (unsigned int)wdata.valid_itrar[ fi]->frequency(),
+					accu_ff, sing_ff, prox_ff,
+					m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
 	}
 	out << string_format( _TXT("sum result=%f"), res) << std::endl;
 	return out.str();
