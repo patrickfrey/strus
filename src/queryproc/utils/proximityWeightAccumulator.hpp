@@ -104,17 +104,8 @@ public:
 		double factor,
 		const WeightArray& incrar,
 		const std::size_t* window, std::size_t windowsize,
-		const Index* maxdist_featar,
 		PostingIteratorInterface** featar, std::size_t featarsize,
-		PostingIteratorInterface** structar, std::size_t structarsize);
-
-	/// \brief Accumulate value for subsequent values in the document that are immediately following in the query
-	static void weight_imm_follow(
-		WeightArray& ar,
-		double factor,
-		const WeightArray& incrar,
-		const std::size_t* window, std::size_t windowsize,
-		PostingIteratorInterface** featar, std::size_t featarsize);
+		const std::pair<Index,Index>& structframe);
 
 	/// \brief Accumulate with inverse sqrt of distance
 	static void weight_invdist(

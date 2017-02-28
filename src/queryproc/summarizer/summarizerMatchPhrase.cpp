@@ -9,6 +9,7 @@
 #include "proximityWeightAccumulator.hpp"
 #include "positionWindow.hpp"
 #include "postingIteratorLink.hpp"
+#include "postingIteratorHelpers.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -48,6 +49,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_itrarsize(0)
 	,m_structarsize(0)
 	,m_paraarsize(0)
+	,m_nof_maxdf_features(0)
 	,m_cardinality(parameter_->m_cardinality)
 	,m_initialized(false)
 	,m_titleitr(0)
@@ -95,11 +97,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			}
 			if (m_parameter->m_maxdf * m_nofCollectionDocuments < df)
 			{
-				m_maxdist_featar[ m_itrarsize] = (m_parameter->m_windowsize > 5)?5:m_parameter->m_windowsize;
-			}
-			else
-			{
-				m_maxdist_featar[ m_itrarsize] = m_parameter->m_windowsize;
+				++m_nof_maxdf_features;
 			}
 			m_itrar[ m_itrarsize++] = itr;
 			m_idfar.push( idf * weight);
@@ -115,71 +113,10 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
 {}
 
-
-static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
-{
-	for (std::size_t ai=0; ai < arsize; ++ai)
-	{
-		if (docno == ar[ ai]->skipDoc( docno))
-		{
-			valid_ar[ ai] = ar[ ai];
-		}
-		else
-		{
-			valid_ar[ ai] = 0;
-		}
-	}
-}
-
-static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size)
-{
-	Index rt = 0;
-	std::size_t ti=0;
-	for (; ti<size; ++ti)
-	{
-		if (ar[ ti])
-		{
-			Index pos = ar[ ti]->skipPos( start);
-			if (pos)
-			{
-				if (!rt || pos < rt) rt = pos;
-			}
-		}
-	}
-	return rt;
-}
-
-static std::pair<Index,Index> callSkipPosWithLen( Index start, PostingIteratorInterface** ar, std::size_t size)
-{
-	std::pair<Index,Index> rt( 0, 0);
-	std::size_t ti=0;
-	for (; ti<size; ++ti)
-	{
-		if (ar[ ti])
-		{
-			Index pos = ar[ ti]->skipPos( start);
-			if (pos)
-			{
-				if (!rt.first) rt = std::pair<Index,Index>( pos, ar[ ti]->length());
-				if (pos <= rt.first)
-				{
-					if (rt.first < pos)
-					{
-						rt = std::pair<Index,Index>( pos, ar[ ti]->length());
-					}
-					else
-					{
-						rt = std::pair<Index,Index>( std::max( pos, rt.first), ar[ ti]->length());
-					}
-				}
-			}
-		}
-	}
-	return rt;
-}
-
-
-double SummarizerFunctionContextMatchPhrase::windowWeight( WeightingData& wdata, const PositionWindow& poswin)
+double SummarizerFunctionContextMatchPhrase::windowWeight(
+		WeightingData& wdata, const PositionWindow& poswin,
+		const std::pair<Index,Index>& structframe,
+		const std::pair<Index,Index>& paraframe)
 {
 	const std::size_t* window = poswin.window();
 	std::size_t windowsize = poswin.size();
@@ -195,25 +132,33 @@ double SummarizerFunctionContextMatchPhrase::windowWeight( WeightingData& wdata,
 	else
 	{
 		ProximityWeightAccumulator::weight_same_sentence(
-			weightar, 0.3, m_weightincr, window, windowsize, m_maxdist_featar, 
-			wdata.valid_itrar, m_itrarsize, wdata.valid_structar, m_structarsize);
-		ProximityWeightAccumulator::weight_imm_follow(
-			weightar, 0.4, m_weightincr, window, windowsize,
-			wdata.valid_itrar, m_itrarsize);
+			weightar, 0.6, m_weightincr, window, windowsize,
+			wdata.valid_itrar, m_itrarsize,
+			structframe);
 		ProximityWeightAccumulator::weight_invdist(
-			weightar, 0.3, m_weightincr, window, windowsize,
+			weightar, 0.6, m_weightincr, window, windowsize,
 			wdata.valid_itrar, m_itrarsize);
 	}
 	if (windowpos < 1000)
 	{
+		// Weight distance to start of document:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 0.5, m_weightincr, 1, wdata.valid_itrar, m_itrarsize);
+			weightar, 0.5, m_weightincr, 1,
+			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
-	if (wdata.nextPara && windowpos >= wdata.nextPara)
+	if (paraframe.first)
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 0.3, m_weightincr, wdata.prevPara, wdata.valid_itrar, m_itrarsize);
+			weightar, 0.3, m_weightincr, paraframe.first,
+			window, windowsize, wdata.valid_itrar, m_itrarsize);
+	}
+	if (structframe.first)
+	{
+		// Weight inv distance to paragraph start:
+		ProximityWeightAccumulator::weight_invpos(
+			weightar, 0.6, m_weightincr, structframe.first,
+			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	weightar.multiply( m_idfar);
 	return weightar.sum();
@@ -226,26 +171,23 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 {
 	Match rt;
 	Index firstpos = wdata.titleend;
-	wdata.prevPara=firstpos;
-	wdata.nextPara=callSkipPos( firstpos, wdata.valid_paraar, m_paraarsize);
 	PositionWindow poswin( itrar, m_itrarsize, m_parameter->m_windowsize, cardinality,
 				firstpos, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{
-		// Calculate the paragraph elements before and after the current window position:
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
-		while (wdata.nextPara && wdata.nextPara < windowpos)
-		{
-			wdata.prevPara = wdata.nextPara;
-			wdata.nextPara = callSkipPos( wdata.prevPara+1, wdata.valid_paraar, m_paraarsize);
-		}
+
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
-		if (wdata.nextPara && wdata.nextPara < windowpos + windowspan) continue;
+		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
+
+		// Calculate sentence frame:
+		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
 
 		// Calculate the candidate weight:
-		double weight = windowWeight( wdata, poswin);
+		double weight = windowWeight( wdata, poswin, structframe, paraframe);
 
 		// Select the best window:
 		if (weight > rt.weight)
@@ -266,8 +208,6 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 {
 	Match rt;
 	Index firstpos = wdata.titleend;
-	wdata.prevPara=firstpos;
-	wdata.nextPara=callSkipPos( firstpos, wdata.valid_paraar, m_paraarsize);
 	PositionWindow poswin( itrar, m_itrarsize, m_parameter->m_windowsize, cardinality,
 				firstpos, PositionWindow::MaxWin);
 	bool more = poswin.first();
@@ -277,16 +217,16 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
 
-		while (wdata.nextPara && wdata.nextPara < windowpos)
-		{
-			wdata.prevPara = wdata.nextPara;
-			wdata.nextPara = callSkipPos( wdata.prevPara+1, wdata.valid_paraar, m_paraarsize);
-		}
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
-		if (wdata.nextPara && wdata.nextPara < windowpos + windowspan) continue;
+		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
+
+		// Calculate sentence frame:
+		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
 
 		// Calculate the candidate weight:
-		double weight = windowWeight( wdata, poswin);
+		double weight = windowWeight( wdata, poswin, structframe, paraframe);
+
 		Match candidate( weight, windowpos, windowspan, false);
 		Abstract abstract( getPhraseAbstract( candidate, wdata));
 		std::string candidatestr( getPhraseString( abstract, wdata));
@@ -668,6 +608,11 @@ void SummarizerFunctionContextMatchPhrase::initializeContext()
 				m_cardinality = m_itrarsize;
 			}
 		}
+		if (m_nof_maxdf_features >= m_cardinality && m_nof_maxdf_features < m_itrarsize)
+		{
+			m_cardinality = m_nof_maxdf_features+1;
+			//... at least on feature in the windows visited must fulfill the maxdf criterion
+		}
 		m_initialized = true;
 	}
 }
@@ -714,7 +659,7 @@ std::vector<SummaryElement>
 			return std::vector<SummaryElement>();
 		}
 		// Init document iterators:
-		WeightingData wdata( m_structarsize);
+		WeightingData wdata( m_structarsize, m_paraarsize, m_parameter->m_sentencesize, m_parameter->m_paragraphsize);
 		initWeightingData( wdata, docno);
 
 		m_forwardindex->skipDoc( docno);
@@ -754,7 +699,7 @@ std::string SummarizerFunctionContextMatchPhrase::debugCall( const Index& docno)
 		return std::string();
 	}
 	// Init document iterators:
-	WeightingData wdata( m_structarsize);
+	WeightingData wdata( m_structarsize, m_paraarsize, m_parameter->m_sentencesize, m_parameter->m_paragraphsize);
 	initWeightingData( wdata, docno);
 
 	m_forwardindex->skipDoc( docno);
@@ -825,11 +770,9 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_parameter->m_floatingmark = parseMarker( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "sentencesize"))
-		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
-		}
-		else if (utils::caseInsensitiveEquals( name, "windowsize"))
+		else if (utils::caseInsensitiveEquals( name, "sentencesize")
+			|| utils::caseInsensitiveEquals( name, "paragraphsize")
+			|| utils::caseInsensitiveEquals( name, "windowsize"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
@@ -851,6 +794,10 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para") || utils::caseInsensitiveEquals( name, "title"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
+	}
+	else if (utils::caseInsensitiveEquals( name, "paragraphsize"))
+	{
+		m_parameter->m_paragraphsize = (unsigned int)value;
 	}
 	else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 	{
@@ -943,8 +890,9 @@ std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
 			<< ", name para=" << m_parameter->m_name_para
 			<< ", name phrase=" << m_parameter->m_name_phrase
 			<< ", name docstart=" << m_parameter->m_name_docstart
-			<< ", sentencesize='" << m_parameter->m_sentencesize << "'"
-			<< ", windowsize='" << m_parameter->m_windowsize << "'";
+			<< ", paragraphsize=" << m_parameter->m_paragraphsize
+			<< ", sentencesize=" << m_parameter->m_sentencesize
+			<< ", windowsize=" << m_parameter->m_windowsize;
 			if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
 			{
 				rt << ", cardinality='" << (unsigned int)(m_parameter->m_cardinality_frac * 100 + 0.5) << "%'";
@@ -981,7 +929,8 @@ FunctionDescription SummarizerFunctionMatchPhrase::getDescription() const
 		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
 		rt( P::Feature, "title", _TXT( "defines the title field of documents"), "");
 		rt( P::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( P::Numeric, "sentencesize", _TXT( "restrict the maximum length of sentences in summaries"), "1:");
+		rt( P::Numeric, "paragraphsize", _TXT( "estimated size of a paragraph"), "1:");
+		rt( P::Numeric, "sentencesize", _TXT( "estimated size of a sentence, also a restriction for the maximum length of sentences in summaries"), "1:");
 		rt( P::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
 		rt( P::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
 		rt( P::Numeric, "maxdf", _TXT( "the maximum df (fraction of collection size) of features considered for same sentence proximity weighing"), "1:");

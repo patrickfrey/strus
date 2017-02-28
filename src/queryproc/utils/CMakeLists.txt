@@ -6,6 +6,8 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set( source_files
 	positionWindow.cpp
 	proximityWeightAccumulator.cpp
+	postingIteratorHelpers.cpp
+	structureIterator.cpp
 )
 
 include_directories(

@@ -18,6 +18,7 @@
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "proximityWeightAccumulator.hpp"
+#include "structureIterator.hpp"
 #include <vector>
 #include <cstring>
 #include <sstream>
@@ -35,23 +36,23 @@ struct WeightingFunctionParameterBM25pff
 	double k1;				///< k1 value of BM25
 	double b;				///< b value of BM25
 	double avgDocLength;			///< average document length in the collection
+	unsigned int paragraphsize;		///< search area for end of paragraph
+	unsigned int sentencesize;		///< search area for end of sentence
 	unsigned int windowsize;		///< maximum position range of a window considered for weighting
 	unsigned int cardinality;		///< minumum number of features in a window considered for weighting
 	float cardinality_frac;			///< cardinality defined as fraction (percentage) of the number of features
 	double ffbase;				///< relative constant base factor of pure ff [0..1]
-	unsigned int fftie;			///< the maximum pure ff value that is considered for weighting (used for normalization of pure ff part)
-	double proxffbias;			///< bias for proximity ff increments always counted (the others are counted only till m_proxfftie)
-	unsigned int proxfftie;			///< the maximum proximity based ff value that is considered for weighting except for increments exceeding m_proxffbias
 	double maxdf;				///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double titleinc;			///< ff increment for title features
 	double cprop;				///< proportional const part of weight increment
 
 	WeightingFunctionParameterBM25pff()
 		:k1(1.5),b(0.75),avgDocLength(500)
-		,windowsize(100),cardinality(0),cardinality_frac(0.0)
-		,ffbase(0.4),fftie(0)
-		,proxffbias(0.0)
-		,proxfftie(0)
+		,paragraphsize(300)
+		,sentencesize(100)
+		,windowsize(100)
+		,cardinality(0),cardinality_frac(0.0)
+		,ffbase(0.4)
 		,maxdf(0.5)
 		,titleinc(0.0)
 		,cprop(0.3){}
@@ -93,30 +94,40 @@ public:
 private:
 	struct WeightingData
 	{
-		WeightingData( std::size_t itrarsize, std::size_t structarsize)
-			:doclen(0),titlestart(1),titleend(1),ffincrar_abs( itrarsize,0.0),ffincrar_rel( itrarsize,0.0)
+		WeightingData( std::size_t itrarsize_, std::size_t structarsize_, std::size_t paraarsize_, const Index& structwindowsize_, const Index& parawindowsize_)
+			:doclen(0),titlestart(1),titleend(1),ffincrar( itrarsize_,0.0)
 		{
-			valid_paraar = &valid_structar[ structarsize];
+			valid_paraar = &valid_structar[ structarsize_];
+			paraiter.init( parawindowsize_, valid_paraar, paraarsize_);
+			structiter.init( structwindowsize_, valid_structar, structarsize_);
 		}
 
 		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
 		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
 		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
-		double doclen;
-		Index titlestart;
-		Index titleend;
-		ProximityWeightAccumulator::WeightArray ffincrar_abs;
-		ProximityWeightAccumulator::WeightArray ffincrar_rel;
+		double doclen;							//< length of the document
+		Index titlestart;						//< start position of the title
+		Index titleend;							//< end position of the title (first item after the title)
+		StructureIterator paraiter;					//< iterator on paragraph frames
+		StructureIterator structiter;					//< iterator on sentence frames
+		ProximityWeightAccumulator::WeightArray ffincrar;		//< proximity and structure increment of ff
 	};
 
 private:
 	void initializeContext();
 	void initWeightingData( WeightingData& data, const Index& docno);
-	double proximityFf( WeightingData& data, std::size_t fidx) const;
+
+	void calcWindowWeight(
+			WeightingData& wdata, const PositionWindow& poswin,
+			const std::pair<Index,Index>& structframe,
+			const std::pair<Index,Index>& paraframe,
+			ProximityWeightAccumulator::WeightArray& result);
+
 	double featureWeight( const WeightingData& wdata, const Index& docno, double idf, double weight_ff) const;
 
 	typedef ProximityWeightAccumulator::WeightArray WeightArray;
-	void calcProximityFfIncrements( WeightingData& wdata, WeightArray& result_abs, WeightArray& result_rel);
+	void calcProximityFfIncrements( WeightingData& wdata, WeightArray& result);
+	void logCalcProximityFfIncrements( std::ostream& out, WeightingData& wdata, ProximityWeightAccumulator::WeightArray& result);
 	void calcTitleFfIncrements( WeightingData& wdata, WeightArray& result);
 	void calcTitleWeights( WeightingData& wdata, const Index& docno, WeightArray& weightar);
 

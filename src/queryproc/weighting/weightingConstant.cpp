@@ -37,10 +37,7 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 					m_precalcmap[ docno] += weight_ * m_weight;
 				}
 			}
-			else
-			{
-				m_featar.push_back( Feature( itr_, weight_));
-			}
+			m_featar.push_back( Feature( itr_, weight_));
 		}
 		else
 		{
@@ -85,18 +82,34 @@ std::string WeightingFunctionContextConstant::debugCall( const Index& docno)
 	out << std::fixed << std::setprecision(8);
 
 	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
-	double res = 0.0;
+	double res_precalc = 0.0;
+	if (m_precalc)
+	{
+		std::map<Index,double>::const_iterator mi = m_precalcmap.find( docno);
+		if (mi != m_precalcmap.end())
+		{
+			res_precalc = mi->second;
+		}
+	}
+	double res_detail = 0.0;
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
 	{
 		if (docno==fi->itr->skipDoc( docno))
 		{
 			double ww = fi->weight * m_weight;
-			res += ww;
+			res_detail += ww;
 			out << string_format( _TXT( "[%u] result=%f"), fidx, ww) << std::endl;
 		}
 	}
-	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
+	if (m_precalc)
+	{
+		out << string_format( _TXT( "sum nof features=%u, result=%f, precalc=%f"), (unsigned int)m_featar.size(), res_detail, res_precalc) << std::endl;
+	}
+	else
+	{
+		out << string_format( _TXT( "sum nof features=%u, result=%f"), (unsigned int)m_featar.size(), res_detail) << std::endl;
+	}
 	return out.str();
 }
 

@@ -14,6 +14,7 @@
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "proximityWeightAccumulator.hpp"
+#include "structureIterator.hpp"
 #include <vector>
 #include <string>
 #include <stdexcept>
@@ -43,7 +44,13 @@ struct SummarizerFunctionParameterMatchPhrase
 {
 
 	SummarizerFunctionParameterMatchPhrase()
-		:m_type(),m_sentencesize(100),m_windowsize(100),m_cardinality(0),m_cardinality_frac(0.0),m_maxdf(0.1)
+		:m_type()
+		,m_paragraphsize(300)
+		,m_sentencesize(100)
+		,m_windowsize(100)
+		,m_cardinality(0)
+		,m_cardinality_frac(0.0)
+		,m_maxdf(0.1)
 		,m_matchmark()
 		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
 		,m_name_para("para")
@@ -51,6 +58,7 @@ struct SummarizerFunctionParameterMatchPhrase
 		,m_name_docstart("docstart"){}
 
 	std::string m_type;					///< forward index type to extract
+	unsigned int m_paragraphsize;				///< search area for end of paragraph
 	unsigned int m_sentencesize;				///< search area for end of sentence
 	unsigned int m_windowsize;				///< maximum window size
 	unsigned int m_cardinality;				///< window cardinality
@@ -99,19 +107,21 @@ public:
 private:
 	struct WeightingData
 	{
-		explicit WeightingData( std::size_t structarsize)
-			:titlestart(1),titleend(1),prevPara(0),nextPara(0)
+		explicit WeightingData( std::size_t structarsize_, std::size_t paraarsize_, const Index& structwindowsize_, const Index& parawindowsize_)
+			:titlestart(1),titleend(1)
 		{
-			valid_paraar = &valid_structar[ structarsize];
+			valid_paraar = &valid_structar[ structarsize_];
+			paraiter.init( parawindowsize_, valid_paraar, paraarsize_);
+			structiter.init( structwindowsize_, valid_structar, structarsize_);
 		}
 
 		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
 		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
 		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
-		Index titlestart;
-		Index titleend;
-		Index prevPara;
-		Index nextPara;
+		Index titlestart;						//< start position of the title
+		Index titleend;							//< end position of the title (first item after the title)
+		StructureIterator paraiter;					//< iterator on paragraph frames
+		StructureIterator structiter;					//< iterator on sentence frames
 	};
 
 private:
@@ -154,7 +164,7 @@ private:
 		bool isDefined() const		{return span > 0;}
 	};
 
-	double windowWeight( WeightingData& wdata, const PositionWindow& poswin);
+	double windowWeight( WeightingData& wdata, const PositionWindow& poswin, const std::pair<Index,Index>& structframe, const std::pair<Index,Index>& paraframe);
 
 	void fetchNoTitlePostings( WeightingData& wdata, PostingIteratorInterface** itrar, Index& cntTitleTerms, Index& cntNoTitleTerms);
 	Match findBestMatch_( WeightingData& wdata, unsigned int cardinality, PostingIteratorInterface** itrar);
@@ -191,8 +201,8 @@ private:
 	std::size_t m_itrarsize;				///< number of weighted features
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
+	std::size_t m_nof_maxdf_features;			///< number of features with a df bigger than maximum
 	unsigned int m_cardinality;				///< calculated cardinality
-	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
 	PostingIteratorInterface* m_titleitr;			///< iterator to identify the title field for weight increment
