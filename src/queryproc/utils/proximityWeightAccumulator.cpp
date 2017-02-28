@@ -95,7 +95,7 @@ void ProximityWeightAccumulator::weight_invdist(
 		for (; pi < windowsize; ++pi)
 		{
 			if (!win_pos[ pi]) continue;
-			double dist = win_pos[ pi] - win_pos[ wi];
+			double dist = std::fabs( win_pos[ pi] - win_pos[ wi]);
 			double weight = 1.0 / sqrt( dist+1);
 			double order_weight = window[ pi] > window[ wi] ? (1.0 + 0.5 / (window[ pi] - window[ wi])) : 1.0;
 			ar[ window[ pi]] += incrar[ window[ wi]] / (1.0 - incrar[ window[ pi]]) * weight * factor * order_weight;

@@ -20,8 +20,9 @@
 using namespace strus;
 
 #undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_READABLE_FEATUREID
 
-#ifdef STRUS_LOWLEVEL_DEBUG
+#ifdef STRUS_READABLE_FEATUREID
 PostingIterator::PostingIterator(
 		const StorageClient* storage_,
 		const DatabaseClientInterface* database_,
@@ -46,7 +47,7 @@ PostingIterator::PostingIterator(
 	,m_errorhnd(errorhnd_)
 {
 	m_featureid.reserve( 16);
-#ifdef STRUS_LOWLEVEL_DEBUG
+#ifdef STRUS_READABLE_FEATUREID
 	m_featureid.append( termstr);
 	m_featureid.push_back(':');
 	m_featureid.push_back( (char)(termtypeno/10) + '0');

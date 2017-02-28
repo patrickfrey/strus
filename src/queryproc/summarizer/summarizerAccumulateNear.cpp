@@ -132,7 +132,7 @@ void SummarizerFunctionContextAccumulateNear::initializeContext()
 	{
 		if (m_data->cardinality_frac > std::numeric_limits<double>::epsilon())
 		{
-			m_cardinality = std::min( 1U, (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5));
+			m_cardinality = std::max( 1U, (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5));
 		}
 		else
 		{

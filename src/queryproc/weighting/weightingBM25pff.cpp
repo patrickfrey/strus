@@ -220,13 +220,22 @@ void WeightingFunctionContextBM25pff::calcProximityFfIncrements(
 		WeightingData& wdata,
 		ProximityWeightAccumulator::WeightArray& result)
 {
+	Index lastEndPos = 0;
+	unsigned int lastElementCnt = 0;
 	PositionWindow poswin( wdata.valid_itrar, m_itrarsize, m_parameter.windowsize, m_cardinality,
 				1U/*firstpos*/, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{
+		// Check if the window is a really new one and not one already covered:
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
+		if (lastEndPos == windowpos + windowspan && lastElementCnt > poswin.size())
+		{
+			continue;
+		}
+		lastElementCnt = poswin.size();
+		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for ff increments:
 		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
@@ -245,13 +254,22 @@ void WeightingFunctionContextBM25pff::logCalcProximityFfIncrements(
 		WeightingData& wdata,
 		ProximityWeightAccumulator::WeightArray& result)
 {
+	Index lastEndPos = 0;
+	unsigned int lastElementCnt = 0;
 	PositionWindow poswin( wdata.valid_itrar, m_itrarsize, m_parameter.windowsize, m_cardinality,
 				1U/*firstpos*/, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{
+		// Check if the window is a really new one and not one already covered:
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
+		if (lastEndPos == windowpos + windowspan && lastElementCnt > poswin.size())
+		{
+			continue;
+		}
+		lastElementCnt = poswin.size();
+		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for ff increments:
 		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
@@ -261,7 +279,7 @@ void WeightingFunctionContextBM25pff::logCalcProximityFfIncrements(
 		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
 
 		// Calculate ff increments of this window:
-		ProximityWeightAccumulator::WeightArray row_result;
+		ProximityWeightAccumulator::WeightArray row_result( result.arsize, 0.0);
 		calcWindowWeight( wdata, poswin, structframe, paraframe, row_result);
 
 		std::string result_str = row_result.tostring();
@@ -277,7 +295,7 @@ void WeightingFunctionContextBM25pff::initializeContext()
 	{
 		if (m_parameter.cardinality_frac > std::numeric_limits<double>::epsilon())
 		{
-			m_cardinality = std::min( 1U, (unsigned int)(m_itrarsize * m_parameter.cardinality_frac + 0.5));
+			m_cardinality = std::max( 1U, (unsigned int)(m_itrarsize * m_parameter.cardinality_frac + 0.5));
 		}
 		else
 		{

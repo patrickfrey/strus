@@ -170,14 +170,23 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 			PostingIteratorInterface** itrar)
 {
 	Match rt;
+	Index lastEndPos = 0;
+	unsigned int lastElementCnt = 0;
 	Index firstpos = wdata.titleend;
 	PositionWindow poswin( itrar, m_itrarsize, m_parameter->m_windowsize, cardinality,
 				firstpos, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{
+		// Check if the window is a really new one and not one already covered:
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
+		if (lastEndPos == windowpos + windowspan && lastElementCnt > poswin.size())
+		{
+			continue;
+		}
+		lastElementCnt = poswin.size();
+		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
 		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
@@ -207,15 +216,23 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 			PostingIteratorInterface** itrar)
 {
 	Match rt;
+	Index lastEndPos = 0;
+	unsigned int lastElementCnt = 0;
 	Index firstpos = wdata.titleend;
 	PositionWindow poswin( itrar, m_itrarsize, m_parameter->m_windowsize, cardinality,
 				firstpos, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{
-		// Calculate the paragraph elements before and after the current window position:
+		// Check if the window is a really new one and not one already covered:
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
+		if (lastEndPos == windowpos + windowspan && lastElementCnt > poswin.size())
+		{
+			continue;
+		}
+		lastElementCnt = poswin.size();
+		lastEndPos = windowpos + windowspan;
 
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
 		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
@@ -601,7 +618,7 @@ void SummarizerFunctionContextMatchPhrase::initializeContext()
 		{
 			if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
 			{
-				m_cardinality = std::min( 1U, (unsigned int)(m_itrarsize * m_parameter->m_cardinality_frac + 0.5));
+				m_cardinality = std::max( 1U, (unsigned int)(m_itrarsize * m_parameter->m_cardinality_frac + 0.5));
 			}
 			else
 			{
