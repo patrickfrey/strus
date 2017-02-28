@@ -143,7 +143,7 @@ double SummarizerFunctionContextMatchPhrase::windowWeight(
 	{
 		// Weight distance to start of document:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 0.5, m_weightincr, 1,
+			weightar, 1.5, m_weightincr, 1,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	if (paraframe.first)
@@ -157,7 +157,7 @@ double SummarizerFunctionContextMatchPhrase::windowWeight(
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 0.6, m_weightincr, structframe.first,
+			weightar, 0.5, m_weightincr, structframe.first,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	weightar.multiply( m_idfar);
