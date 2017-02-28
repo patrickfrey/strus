@@ -181,23 +181,16 @@ void WeightingFunctionContextBM25pff::calcWindowWeight(
 	const std::size_t* window = poswin.window();
 	std::size_t windowsize = poswin.size();
 	Index windowpos = poswin.pos();
-	double normfactor = m_normfactorar[ poswin.size()-1];
 
-	if (m_itrarsize == 1)
-	{
-		result[ 0] += normfactor;
-	}
-	else
-	{
-		// Calculate the ff increment for the current window and add it to the result:
-		ProximityWeightAccumulator::weight_same_sentence(
-			result, 0.5, m_weightincr, window, windowsize,
-			wdata.valid_itrar, m_itrarsize,
-			structframe);
-		ProximityWeightAccumulator::weight_invdist(
-			result, 0.5, m_weightincr, window, windowsize,
-			wdata.valid_itrar, m_itrarsize);
-	}
+	// Calculate the ff increment for the current window and add it to the result:
+	ProximityWeightAccumulator::weight_same_sentence(
+		result, 1.0, m_weightincr, window, windowsize,
+		wdata.valid_itrar, m_itrarsize,
+		structframe);
+	ProximityWeightAccumulator::weight_invdist(
+		result, 1.0, m_weightincr, window, windowsize,
+		wdata.valid_itrar, m_itrarsize);
+
 	if (windowpos < 1000)
 	{
 		// Weight distance to start of document:
@@ -209,7 +202,7 @@ void WeightingFunctionContextBM25pff::calcWindowWeight(
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			result, 0.3, m_weightincr, paraframe.first,
+			result, 0.5, m_weightincr, paraframe.first,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	if (structframe.first)
@@ -316,10 +309,6 @@ void WeightingFunctionContextBM25pff::initializeContext()
 	m_weightincr.init( m_itrarsize);
 	ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, m_parameter.cprop, m_idfar);
 
-	for (std::size_t ii=0; ii<m_itrarsize; ++ii)
-	{
-		m_normfactorar[ ii] = 1.0 / sqrt(m_itrarsize - ii);
-	}
 	m_initialized = true;
 }
 

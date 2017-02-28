@@ -24,7 +24,7 @@ std::pair<Index,Index> StructureIterator::skipPos( const Index& posno)
 	if (!posno) return std::pair<Index,Index>();
 	if (posno < m_cur.second && posno >= m_cur.first) return m_cur;
 
-	if (m_cur.second && m_cur.second < posno && m_cur.second + m_windowsize >= posno)
+	if (m_cur.second && m_cur.second <= posno && m_cur.second + m_windowsize >= posno)
 	{
 		// ... we are close enough to the last structure element and skip seeking for it:
 		m_cur.first = m_cur.second;

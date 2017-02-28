@@ -143,7 +143,6 @@ private:
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
 	std::size_t m_nof_maxdf_features;			///< number of features with a df bigger than maximum
 	bool m_relevantfeat[ MaxNofArguments];			///< marker for features with a df smaller than maxdf
-	double m_normfactorar[ MaxNofArguments];		///< normalization factor taking missing features in a window into account
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
