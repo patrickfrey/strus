@@ -471,7 +471,6 @@ std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
 					ffincrar_str.c_str()) << std::endl;
 	
 		// Calculate the BM25 weight with the proximity ff:
-		double res = 0.0;
 		std::size_t fi = 0;
 		for ( ;fi != m_itrarsize; ++fi)
 		{
