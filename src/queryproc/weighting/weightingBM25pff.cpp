@@ -81,7 +81,12 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 			double idf = std::log10( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
 			if (m_parameter.maxdf * m_nofCollectionDocuments < df)
 			{
+				m_relevantfeat[ m_itrarsize] = false;
 				++m_nof_maxdf_features;
+			}
+			else
+			{
+				m_relevantfeat[ m_itrarsize] = true;
 			}
 			if (idf < 0.00001)
 			{
@@ -186,11 +191,11 @@ void WeightingFunctionContextBM25pff::calcWindowWeight(
 	{
 		// Calculate the ff increment for the current window and add it to the result:
 		ProximityWeightAccumulator::weight_same_sentence(
-			result, 0.6, m_weightincr, window, windowsize,
+			result, 0.5, m_weightincr, window, windowsize,
 			wdata.valid_itrar, m_itrarsize,
 			structframe);
 		ProximityWeightAccumulator::weight_invdist(
-			result, 0.6, m_weightincr, window, windowsize,
+			result, 0.5, m_weightincr, window, windowsize,
 			wdata.valid_itrar, m_itrarsize);
 	}
 	if (windowpos < 1000)
@@ -211,7 +216,7 @@ void WeightingFunctionContextBM25pff::calcWindowWeight(
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			result, 0.6, m_weightincr, structframe.first,
+			result, 0.5, m_weightincr, structframe.first,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 }
@@ -351,10 +356,6 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 {
 	try
 	{
-		if (m_itrarsize == 0)
-		{
-			return 0.0;
-		}
 		if (!m_initialized) initializeContext();
 
 		// Init data:
@@ -364,25 +365,42 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 		// Calculate artificial ff for all features:
 		calcTitleWeights( wdata, docno, wdata.ffincrar);
 
-		if (m_cardinality <= m_itrarsize)
-		{
-			calcProximityFfIncrements( wdata, wdata.ffincrar);
-		}
-
-		// Calculate the BM25 weight with the artificial ff:
+		std::size_t featcount = 0;
 		double rt = 0.0;
 		std::size_t fi = 0;
 		for ( ;fi != m_itrarsize; ++fi)
 		{
-			if (!wdata.valid_itrar[ fi]) continue;
-
-			double sing_ff = wdata.valid_itrar[ fi]->frequency();
-			if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
-
-			double prox_ff = wdata.ffincrar[ fi];
-			double accu_ff = m_parameter.ffbase * sing_ff + (1.0-m_parameter.ffbase) * prox_ff;
-
-			rt += featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
+			if (wdata.valid_itrar[ fi] && m_relevantfeat[ fi]) ++featcount;
+		}
+		if (featcount <= 1)
+		{
+			//.... Fallback to BM25 plus some title increments
+			for (fi = 0; fi != m_itrarsize; ++fi)
+			{
+				if (!wdata.valid_itrar[ fi]) continue;
+				rt += featureWeight( wdata, docno, m_idfar[ fi], wdata.valid_itrar[ fi]->frequency() + wdata.ffincrar[ fi]);
+			}
+		}
+		else
+		{
+			if (m_cardinality <= m_itrarsize)
+			{
+				calcProximityFfIncrements( wdata, wdata.ffincrar);
+			}
+	
+			// Calculate the BM25 weight with the artificial ff:
+			for (fi = 0;fi != m_itrarsize; ++fi)
+			{
+				if (!wdata.valid_itrar[ fi]) continue;
+	
+				double sing_ff = wdata.valid_itrar[ fi]->frequency();
+				if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
+	
+				double prox_ff = wdata.ffincrar[ fi];
+				double accu_ff = m_parameter.ffbase * sing_ff + (1.0-m_parameter.ffbase) * prox_ff;
+	
+				rt += featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
+			}
 		}
 		return rt;
 	}
@@ -415,38 +433,63 @@ std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
 	std::string titleweightar_str = titleweightar.tostring();
 	out << string_format( _TXT("title ff increments=%s"), titleweightar_str.c_str()) << std::endl;
 
-	if (m_cardinality <= m_itrarsize)
-	{
-		logCalcProximityFfIncrements( out, wdata, wdata.ffincrar);
-	}
-	std::string ffincrar_str = wdata.ffincrar.tostring();
-	out << string_format( _TXT("proximity ff increments: %s"), ffincrar_str.c_str()) << std::endl;
-
-	wdata.ffincrar.add( titleweightar);
-
-	ffincrar_str = wdata.ffincrar.tostring();
-	out << string_format( _TXT("accumulated ff increments: %s"),
-				ffincrar_str.c_str()) << std::endl;
-
-	// Calculate the BM25 weight with the proximity ff:
+	std::size_t featcount = 0;
 	double res = 0.0;
 	std::size_t fi = 0;
 	for ( ;fi != m_itrarsize; ++fi)
 	{
-		if (!wdata.valid_itrar[ fi]) continue;
-
-		double sing_ff = wdata.valid_itrar[ fi]->frequency();
-		if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
-
-		double prox_ff = wdata.ffincrar[ fi];
-		double accu_ff = m_parameter.ffbase * sing_ff + (1.0-m_parameter.ffbase) * prox_ff;
-
-		double ww = featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
-		res += ww;
-		out << string_format( _TXT("[%u] result=%f, accu_ff=%f, sing_ff=%f, prox_ff=%f, idf=%f, doclen=%u"),
-					(unsigned int)fi, ww,
-					accu_ff, sing_ff, prox_ff,
-					m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
+		if (wdata.valid_itrar[ fi] && m_relevantfeat[ fi]) ++featcount;
+	}
+	if (featcount <= 1)
+	{
+		out << _TXT( "fallback to BM25 (too few query features)") << std::endl;
+		for (fi = 0; fi != m_itrarsize; ++fi)
+		{
+			if (!wdata.valid_itrar[ fi]) continue;
+			double ff = wdata.valid_itrar[ fi]->frequency();
+			double ww = featureWeight( wdata, docno, m_idfar[ fi], ff + wdata.ffincrar[ fi]);
+			res += ww;
+			out << string_format( _TXT("[%u] result=%f, ff=%f, title ff incr=%f, idf=%f, doclen=%u"),
+						(unsigned int)fi, ww,
+						ff, wdata.ffincrar[ fi],
+						m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
+		}
+	}
+	else
+	{
+		if (m_cardinality <= m_itrarsize)
+		{
+			logCalcProximityFfIncrements( out, wdata, wdata.ffincrar);
+		}
+		std::string ffincrar_str = wdata.ffincrar.tostring();
+		out << string_format( _TXT("proximity ff increments: %s"), ffincrar_str.c_str()) << std::endl;
+	
+		wdata.ffincrar.add( titleweightar);
+	
+		ffincrar_str = wdata.ffincrar.tostring();
+		out << string_format( _TXT("accumulated ff increments: %s"),
+					ffincrar_str.c_str()) << std::endl;
+	
+		// Calculate the BM25 weight with the proximity ff:
+		double res = 0.0;
+		std::size_t fi = 0;
+		for ( ;fi != m_itrarsize; ++fi)
+		{
+			if (!wdata.valid_itrar[ fi]) continue;
+	
+			double sing_ff = wdata.valid_itrar[ fi]->frequency();
+			if (sing_ff <= std::numeric_limits<double>::epsilon()) continue;
+	
+			double prox_ff = wdata.ffincrar[ fi];
+			double accu_ff = m_parameter.ffbase * sing_ff + (1.0-m_parameter.ffbase) * prox_ff;
+	
+			double ww = featureWeight( wdata, docno, m_idfar[ fi], accu_ff);
+			res += ww;
+			out << string_format( _TXT("[%u] result=%f, accu_ff=%f, sing_ff=%f, prox_ff=%f, idf=%f, doclen=%u"),
+						(unsigned int)fi, ww,
+						accu_ff, sing_ff, prox_ff,
+						m_idfar[ fi], (unsigned int)wdata.doclen) << std::endl;
+		}
 	}
 	out << string_format( _TXT("sum result=%f"), res) << std::endl;
 	return out.str();

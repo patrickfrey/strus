@@ -142,7 +142,7 @@ private:
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
 	std::size_t m_nof_maxdf_features;			///< number of features with a df bigger than maximum
-	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
+	bool m_relevantfeat[ MaxNofArguments];			///< marker for features with a df smaller than maxdf
 	double m_normfactorar[ MaxNofArguments];		///< normalization factor taking missing features in a window into account
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
