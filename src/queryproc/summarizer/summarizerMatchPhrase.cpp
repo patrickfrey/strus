@@ -132,32 +132,34 @@ double SummarizerFunctionContextMatchPhrase::windowWeight(
 	else
 	{
 		ProximityWeightAccumulator::weight_same_sentence(
-			weightar, 0.6, m_weightincr, window, windowsize,
+			weightar, m_parameter->m_weight_same_sentence, m_weightincr,
+			window, windowsize,
 			wdata.valid_itrar, m_itrarsize,
 			structframe);
 		ProximityWeightAccumulator::weight_invdist(
-			weightar, 0.6, m_weightincr, window, windowsize,
+			weightar, m_parameter->m_weight_invdist, m_weightincr,
+			window, windowsize,
 			wdata.valid_itrar, m_itrarsize);
 	}
 	if (windowpos < 1000)
 	{
 		// Weight distance to start of document:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 2.5, m_weightincr, 1,
+			weightar, m_parameter->m_weight_invpos_start, m_weightincr, 1,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	if (paraframe.first)
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 0.3, m_weightincr, paraframe.first,
+			weightar, m_parameter->m_weight_invpos_para, m_weightincr, paraframe.first,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	if (structframe.first)
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 0.5, m_weightincr, structframe.first,
+			weightar, m_parameter->m_weight_invpos_struct, m_weightincr, structframe.first,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	weightar.multiply( m_idfar);
@@ -633,7 +635,7 @@ void SummarizerFunctionContextMatchPhrase::initializeContext()
 	{
 		// initialize proportional ff increment weights
 		m_weightincr.init( m_itrarsize);
-		ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, 0.3, m_idfar);
+		ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, m_parameter->m_prop_weight_const, m_idfar);
 
 		if (m_cardinality == 0)
 		{

@@ -184,32 +184,32 @@ void WeightingFunctionContextBM25pff::calcWindowWeight(
 
 	// Calculate the ff increment for the current window and add it to the result:
 	ProximityWeightAccumulator::weight_same_sentence(
-		result, 1.0, m_weightincr, window, windowsize,
+		result, m_parameter.weight_same_sentence, m_weightincr, window, windowsize,
 		wdata.valid_itrar, m_itrarsize,
 		structframe);
 	ProximityWeightAccumulator::weight_invdist(
-		result, 1.0, m_weightincr, window, windowsize,
+		result, m_parameter.weight_invdist, m_weightincr, window, windowsize,
 		wdata.valid_itrar, m_itrarsize);
 
 	if (windowpos < 1000)
 	{
 		// Weight distance to start of document:
 		ProximityWeightAccumulator::weight_invpos(
-			result, 0.5, m_weightincr, 1,
+			result, m_parameter.weight_invpos_start, m_weightincr, 1,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	if (paraframe.first)
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			result, 0.5, m_weightincr, paraframe.first,
+			result, m_parameter.weight_invpos_para, m_weightincr, paraframe.first,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	if (structframe.first)
 	{
 		// Weight inv distance to paragraph start:
 		ProximityWeightAccumulator::weight_invpos(
-			result, 0.5, m_weightincr, structframe.first,
+			result, m_parameter.weight_invpos_struct, m_weightincr, structframe.first,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 }
@@ -307,7 +307,7 @@ void WeightingFunctionContextBM25pff::initializeContext()
 	}
 	// initialize proportional ff increment weights
 	m_weightincr.init( m_itrarsize);
-	ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, m_parameter.cprop, m_idfar);
+	ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, m_parameter.prop_weight_const, m_idfar);
 
 	m_initialized = true;
 }
@@ -600,8 +600,8 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	}
 	else if (utils::caseInsensitiveEquals( name, "cprop"))
 	{
-		m_parameter.cprop = (double)value;
-		if (m_parameter.cprop < 0.0 || m_parameter.cprop > 1.0)
+		m_parameter.prop_weight_const = (double)value;
+		if (m_parameter.prop_weight_const < 0.0 || m_parameter.prop_weight_const > 1.0)
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
 		}
@@ -655,7 +655,7 @@ std::string WeightingFunctionInstanceBM25pff::tostring() const
 		rt << ", ffbase=" << m_parameter.ffbase
 			<< ", maxdf=" << m_parameter.maxdf
 			<< ", titleinc=" << m_parameter.titleinc
-			<< ", cprop=" << m_parameter.cprop
+			<< ", cprop=" << m_parameter.prop_weight_const
 			<< ", metadata_doclen=" << m_metadata_doclen
 			;
 		return rt.str();

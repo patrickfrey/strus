@@ -44,7 +44,12 @@ struct WeightingFunctionParameterBM25pff
 	double ffbase;				///< relative constant base factor of pure ff [0..1]
 	double maxdf;				///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double titleinc;			///< ff increment for title features
-	double cprop;				///< proportional const part of weight increment
+	double weight_same_sentence;		///< factor for weighting same sentences
+	double weight_invdist;			///< factor for weighting proximity
+	double weight_invpos_start;		///< factor for weighting distance to document start
+	double weight_invpos_para;		///< factor for weighting distance to last paragraph start
+	double weight_invpos_struct;		///< factor for weighting distance to last sentence start
+	double prop_weight_const;		///< constant factor for proportional feature weight [0.0 .. 1.0]
 
 	WeightingFunctionParameterBM25pff()
 		:k1(1.5),b(0.75),avgDocLength(500)
@@ -55,7 +60,13 @@ struct WeightingFunctionParameterBM25pff
 		,ffbase(0.4)
 		,maxdf(0.5)
 		,titleinc(0.0)
-		,cprop(0.3){}
+		,weight_same_sentence(1.0)
+		,weight_invdist(1.0)
+		,weight_invpos_start(1.5)
+		,weight_invpos_para(0.3)
+		,weight_invpos_struct(0.5)
+		,prop_weight_const(0.3)
+	{}
 
 	WeightingFunctionParameterBM25pff( const WeightingFunctionParameterBM25pff& o)
 	{

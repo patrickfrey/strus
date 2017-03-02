@@ -42,7 +42,6 @@ enum {
 /// \brief Configured parameters of the MatchPhrase summarizer function
 struct SummarizerFunctionParameterMatchPhrase
 {
-
 	SummarizerFunctionParameterMatchPhrase()
 		:m_type()
 		,m_paragraphsize(300)
@@ -55,7 +54,14 @@ struct SummarizerFunctionParameterMatchPhrase
 		,m_floatingmark(std::pair<std::string,std::string>("... "," ..."))
 		,m_name_para("para")
 		,m_name_phrase("phrase")
-		,m_name_docstart("docstart"){}
+		,m_name_docstart("docstart")
+		,m_weight_same_sentence(0.6)
+		,m_weight_invdist(0.6)
+		,m_weight_invpos_start(2.5)
+		,m_weight_invpos_para(0.3)
+		,m_weight_invpos_struct(0.5)
+		,m_prop_weight_const(0.3)
+	{}
 
 	std::string m_type;					///< forward index type to extract
 	unsigned int m_paragraphsize;				///< search area for end of paragraph
@@ -69,6 +75,12 @@ struct SummarizerFunctionParameterMatchPhrase
 	std::string m_name_para;				///< name of the summary elements for paragraphs
 	std::string m_name_phrase;				///< name of the summary elements for phrases
 	std::string m_name_docstart;				///< name of the summary elements for document start (alternative summary if no match found)
+	double m_weight_same_sentence;				///< factor for weighting same sentences
+	double m_weight_invdist;				///< factor for weighting proximity
+	double m_weight_invpos_start;				///< factor for weighting distance to document start
+	double m_weight_invpos_para;				///< factor for weighting distance to last paragraph start
+	double m_weight_invpos_struct;				///< factor for weighting distance to last sentence start
+	double m_prop_weight_const;				///< constant factor for proportional feature weight [0.0 .. 1.0]
 };
 
 class SummarizerFunctionContextMatchPhrase
