@@ -308,7 +308,8 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			out << indentstr << std::hex<< (uintptr_t)expr.operation << std::dec << " " << expr.range << ":";
+			PostingJoinOperatorInterface::Description opdescr = expr.operation->getDescription();
+			out << indentstr << opdescr.name() << " range=" << expr.range << " cardinality=" << expr.cardinality << ":";
 			printVariables( out, adr);
 			out << std::endl;
 			std::vector<NodeAddress>::const_iterator
