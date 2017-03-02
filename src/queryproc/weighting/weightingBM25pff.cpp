@@ -345,6 +345,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 {
 	try
 	{
+		if (m_itrarsize == 0) return 0.0;
 		if (!m_initialized) initializeContext();
 
 		// Init data:
@@ -398,10 +399,7 @@ double WeightingFunctionContextBM25pff::call( const Index& docno)
 
 std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
 {
-	if (m_itrarsize == 0)
-	{
-		return std::string();
-	}
+	if (m_itrarsize == 0) return std::string();
 
 	std::ostringstream out;
 	out << std::fixed << std::setprecision(8);
