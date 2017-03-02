@@ -1,5 +1,10 @@
 Add name to summarizer and weighting function descriptions
 
+New block type for storing entropy weighted ff for each feature in each document.
+Calculation of this value for the Wikipedia project.
+Collect entity features and make summarization with them in the Wikipedia project
+For this we need a hint feature for the MatchPhrase Summarizer
+
 Test PostingIteratorIntersect with cardinality
 Write storage conversion to change endianess of an index. Write a storage conversion utility
 Define an interface to declare a limit of query execution to prevent DoS attacks (counter of micro ops in the query evaluation)
