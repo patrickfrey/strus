@@ -20,7 +20,7 @@
 using namespace strus;
 
 #undef STRUS_LOWLEVEL_DEBUG
-#define STRUS_READABLE_FEATUREID
+#undef STRUS_READABLE_FEATUREID
 
 #ifdef STRUS_READABLE_FEATUREID
 PostingIterator::PostingIterator(

@@ -181,6 +181,7 @@ private:
 
 	std::string getParaTitleString( const Abstract& para_abstract);
 	std::string getPhraseString( const Abstract& phrase_abstract, WeightingData& wdata);
+	std::string getPhraseString( const Index& firstpos, const Index& lastpos);
 
 	std::vector<SummaryElement>
 		getSummariesFromAbstracts(

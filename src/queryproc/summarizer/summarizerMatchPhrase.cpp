@@ -209,6 +209,29 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 	return rt;
 }
 
+std::string SummarizerFunctionContextMatchPhrase::getPhraseString( const Index& firstpos, const Index& lastpos)
+{
+	std::string rt;
+	Index pi = firstpos > 5 ? (firstpos - 5):1, pe = lastpos + 5;
+	for (; pi < pe; ++pi)
+	{
+		if (pi == firstpos)
+		{
+			rt.append(" | ");
+		}
+		if (pi == lastpos)
+		{
+			rt.append(" | ");
+		}
+		if (m_forwardindex->skipPos(pi) == pi)
+		{
+			if (!rt.empty()) rt.push_back(' ');
+			rt.append( m_forwardindex->fetch());
+		}
+	}
+	return rt;
+}
+
 SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase::logFindBestMatch_(
 			std::ostream& out,
 			WeightingData& wdata,
@@ -244,9 +267,7 @@ SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase
 		// Calculate the candidate weight:
 		double weight = windowWeight( wdata, poswin, structframe, paraframe);
 
-		Match candidate( weight, windowpos, windowspan, false);
-		Abstract abstract( getPhraseAbstract( candidate, wdata));
-		std::string candidatestr( getPhraseString( abstract, wdata));
+		std::string candidatestr( getPhraseString( windowpos, windowpos + windowspan));
 		out << string_format( _TXT( "candidate pos=%u, best=%u, span=%u, weight=%f, string=%s"),
 					windowpos, (unsigned int)(weight > rt.weight), windowspan,
 					weight, candidatestr.c_str()) << std::endl;
@@ -400,7 +421,7 @@ SummarizerFunctionContextMatchPhrase::Abstract
 		if (wdata.valid_structar[ti])
 		{
 			Index pos = wdata.valid_structar[ti]->skipPos( astart);
-			while (pos > astart && pos <= candidate.pos)
+			while (pos >= astart && pos <= candidate.pos)
 			{
 				rt.defined_start = true;
 				astart = pos + 1;

@@ -89,7 +89,7 @@ void ProximityWeightAccumulator::weight_invdist(
 	{
 		win_pos[ wi] = featar[ window[ wi]] ? featar[ window[ wi]]->posno() : 0;
 	}
-	for (wi=0; wi < windowsize; ++wi)
+	for (wi = 0; wi < windowsize; ++wi)
 	{
 		std::size_t pi=wi+1;
 		for (; pi < windowsize; ++pi)
