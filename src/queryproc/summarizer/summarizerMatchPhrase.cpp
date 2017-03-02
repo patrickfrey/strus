@@ -143,7 +143,7 @@ double SummarizerFunctionContextMatchPhrase::windowWeight(
 	{
 		// Weight distance to start of document:
 		ProximityWeightAccumulator::weight_invpos(
-			weightar, 1.5, m_weightincr, 1,
+			weightar, 2.5, m_weightincr, 1,
 			window, windowsize, wdata.valid_itrar, m_itrarsize);
 	}
 	if (paraframe.first)
