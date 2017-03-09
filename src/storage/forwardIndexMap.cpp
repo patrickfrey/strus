@@ -56,26 +56,83 @@ void ForwardIndexMap::closeForwardIndexDocument()
 
 void ForwardIndexMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
 {
-	Map::iterator mi = m_map.begin(), me = m_map.end();
-	while (mi != me)
 	{
-		Index docno = BlockKey( MapKey(mi->first).termkey).elem(2);
-		if (KeyMap::isUnknown( docno))
+		// Rename document numbers in forward index block map:
+		Map::iterator mi = m_map.begin(), me = m_map.end();
+		while (mi != me)
 		{
-			Index typeno = BlockKey( MapKey(mi->first).termkey).elem(1);
-			Index maxpos = MapKey(mi->first).maxpos;
-			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
-			if (ri == renamemap.end())
+			Index docno = BlockKey( MapKey(mi->first).termkey).elem(2);
+			if (KeyMap::isUnknown( docno))
 			{
-				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "forward index map");
+				Index typeno = BlockKey( MapKey(mi->first).termkey).elem(1);
+				Index maxpos = MapKey(mi->first).maxpos;
+				std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+				if (ri == renamemap.end())
+				{
+					throw strus::runtime_error( _TXT( "docno undefined (%s)"), "forward index map");
+				}
+				MapKey newkey( typeno, ri->second, maxpos);
+				m_map[ newkey] = mi->second;
+				m_map.erase( mi++);
 			}
-			MapKey newkey( typeno, ri->second, maxpos);
-			m_map[ newkey] = mi->second;
-			m_map.erase( mi++);
+			else
+			{
+				++mi;
+			}
 		}
-		else
+	}
+	{
+		// Rename document numbers in list of forward index block deletes:
+		std::set<Index>::iterator
+			di = m_docno_deletes.upper_bound( KeyMap::unknownUpperBoundKey()),
+			de = m_docno_deletes.end();
+		while (di != de)
 		{
-			++mi;
+			Index docno = *di;
+			if (KeyMap::isUnknown( docno))
+			{
+				std::set<Index>::iterator next_di = di;
+				++next_di;
+
+				std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+				if (ri != renamemap.end())
+				{
+					m_docno_deletes.insert( ri->second);
+				}
+				m_docno_deletes.erase( di);
+				di = next_di;
+			}
+			else
+			{
+				++di;
+			}
+		}
+	}
+	{
+		// Rename document numbers in list of partial forward index block deletes:
+		std::map<Index, std::set<Index> >::iterator
+			di = m_docno_typeno_deletes.upper_bound( KeyMap::unknownUpperBoundKey()),
+			de = m_docno_typeno_deletes.end();
+		for (; di != de; ++di)
+		{
+			Index docno = di->first;
+			if (KeyMap::isUnknown( docno))
+			{
+				std::map<Index, std::set<Index> >::iterator next_di = di;
+				++next_di;
+
+				std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
+				if (ri != renamemap.end())
+				{
+					m_docno_typeno_deletes.insert( std::pair<Index, std::set<Index> >(ri->second, di->second));
+				}
+				m_docno_typeno_deletes.erase( di);
+				di = next_di;
+			}
+			else
+			{
+				++di;
+			}
 		}
 	}
 }

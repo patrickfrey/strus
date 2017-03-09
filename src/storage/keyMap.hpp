@@ -61,6 +61,10 @@ public:
 	{
 		return value > UnknownValueHandleStart;
 	}
+	static Index unknownUpperBoundKey()
+	{
+		return UnknownValueHandleStart-1;
+	}
 
 	void deleteKey( const std::string& name);
 	void print( std::ostream& out);
