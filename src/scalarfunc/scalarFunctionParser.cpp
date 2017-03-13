@@ -359,7 +359,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT("call of unknown function in scalar function expression"));
+		throw strus::runtime_error( _TXT("call of unknown function '%s' with %u arguments in scalar function expression"), functionName.c_str(), nofArguments);
 	}
 }
 
