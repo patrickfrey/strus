@@ -48,6 +48,11 @@ static double log_base( double x, double base)
 	return log(x) / log(base);
 }
 
+static double square( double x)
+{
+	return x*x;
+}
+
 ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
@@ -59,6 +64,7 @@ ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	defineUnaryFunction( "ln", &std::log);
 	defineUnaryFunction( "exp", &std::exp);
 	defineUnaryFunction( "sqrt", &std::sqrt);
+	defineUnaryFunction( "sqr", &square);
 	defineBinaryFunction( "pow", &std::pow);
 	defineBinaryFunction( "mod", &std::fmod);
 	defineUnaryFunction( "sin", &std::sin);
