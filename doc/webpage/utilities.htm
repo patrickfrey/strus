@@ -175,6 +175,8 @@ options:
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
     Example: -T "log=dump;file=stdout"
+-A|--attribute &lt;NAME&gt;
+    Print attribute with name &lt;NAME&gt; for lists of results instead of docno
 </pre>
 </li>
 
@@ -207,7 +209,9 @@ options:
 -R|--resourcedir &lt;DIR&gt;
     Search resource files for analyzer first in &lt;DIR&gt;
 -g|--segmenter &lt;NAME&gt;
-    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+    Use the document segmenter with name &lt;NAME&gt;
+-C|--contenttype &lt;CT&gt;
+    forced definition of the document class of the document analyzed.
 -D|--dump &lt;DUMPCFG&gt;
     Dump ouput according &lt;DUMPCFG&gt;.
     &lt;DUMPCFG&gt; is a comma separated list of types or type value assignments.
@@ -223,8 +227,9 @@ options:
 <input class="toggle-box" id="strusAnalyzePhrase_usage" type="checkbox" >
 <label for="strusAnalyzePhrase_usage">Usage</label>
 <pre>
-usage: strusAnalyze [options] &lt;phrasepath&gt;
-&lt;phrasepath&gt; = path to phrase to analyze ('-' for stdin)
+usage: strusAnalyze [options] &lt;phrase&gt;
+&lt;phrase&gt; =   path to phrase to analyze
+             file or '-' for stdin if option -F is specified)
 description: tokenizes and normalizes a text segment
              and prints the result to stdout.
 options:
@@ -246,8 +251,10 @@ options:
     Use the normalizer &lt;CALL&gt; (default 'orig')
 -q|--quot &lt;STR&gt;
     Use the string &lt;STR&gt; as quote for the result (default "'")
--p|--plain
+-P|--plain
     Do not print position and define default quotes as empty
+-F|--fileinput
+    Interpret phrase argument as a file name containing the input
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
     Example: -T "log=dump;file=stdout"
@@ -260,9 +267,10 @@ options:
 <input class="toggle-box" id="strusAnalyzeQuery_usage" type="checkbox" >
 <label for="strusAnalyzeQuery_usage">Usage</label>
 <pre>
-usage: strusAnalyze [options] &lt;program&gt; &lt;queryfile&gt;
-&lt;program&gt;   = path of analyzer program
-&lt;queryfile&gt; = path of query content to analyze ('-' for stdin)
+usage: strusAnalyzeQuery [options] &lt;program&gt; &lt;query&gt;
+&lt;program&gt;  = path of analyzer program
+&lt;query&gt;    = query content to analyze
+             file or '-' for stdin if option -F is specified)
 description: Analyzes a query and dumps the result to stdout.
 options:
 -h|--help
@@ -279,6 +287,8 @@ options:
     Search resource files for analyzer first in &lt;DIR&gt;
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
+-F|--fileinput
+    Interpret query argument as a file name containing the input
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
     Example: -T "log=dump;file=stdout"
@@ -306,8 +316,10 @@ options:
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
     Search modules to load first in &lt;DIR&gt;
--s|--segmenter &lt;NAME&gt;
+-g|--segmenter &lt;NAME&gt;
     Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+-C|--contenttype &lt;CT&gt;
+    forced definition of the document class of the document processed.
 -e|--expression &lt;EXPR&gt;
     Use the expression &lt;EXPR&gt; to select documents (default '//()')
 -i|--index
@@ -356,10 +368,8 @@ options:
     Set &lt;N&gt; as number of inserter threads to use
 -x|--ext &lt;FILEEXT&gt;
     Do only process files with extension &lt;FILEEXT&gt;
--y|--mimetype &lt;TYPE&gt;
-    Specify the MIME type of all files to process as &lt;TYPE&gt;
--C|--encoding &lt;ENC&gt;
-    Specify the character set encoding of all files to process as &lt;ENC&gt;
+-C|--contenttype &lt;CT&gt;
+    forced definition of the document class of all documents processed.
 -e|--expression &lt;EXP&gt;
     Define a selection expression &lt;EXP&gt; for the content to process
       (default if nothing specified is "//()"
@@ -378,7 +388,7 @@ options:
 -o|--output &lt;FILE&gt;
     Write output to file &lt;FILE&gt; (thread id is inserted before '.' with threads)
 -g|--segmenter &lt;NAME&gt;
-    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
+    Use the document segmenter with name &lt;NAME&gt;
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -T|--trace &lt;CONFIG&gt;
@@ -463,8 +473,8 @@ options:
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -g|--segmenter &lt;NAME&gt;
-    Use the document segmenter with name &lt;NAME&gt; (default textwolf)
--D|--contenttype &lt;CT&gt;
+    Use the document segmenter with name &lt;NAME&gt;
+-C|--contenttype &lt;CT&gt;
     forced definition of the document class of all documents inserted.
 -x|--extension &lt;EXT&gt;
     Grab only the files with extension &lt;EXT&gt; (default all files)
@@ -661,9 +671,9 @@ options:
 -r|--rpc &lt;ADDR&gt;
     Execute the command on the RPC server specified by &lt;ADDR&gt;
 -g|--segmenter &lt;NAME&gt;
-    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
--D|--contenttype &lt;CT&gt;
-    forced definition of the document class of all documents inserted.
+    Use the document segmenter with name &lt;NAME&gt;
+-C|--contenttype &lt;CT&gt;
+    forced definition of the document class of all documents checked.
 -x|--extension &lt;EXT&gt;
     Grab only the files with extension &lt;EXT&gt; (default all files)
 -t|--threads &lt;N&gt;
@@ -687,7 +697,8 @@ options:
 usage: strusQuery [options] &lt;anprg&gt; &lt;qeprg&gt; &lt;query&gt;
 &lt;anprg&gt;   = path of query analyzer program
 &lt;qeprg&gt;   = path of query eval program
-&lt;query&gt;   = path of query or '-' for stdin
+&lt;query&gt;    = query string
+             file or '-' for stdin if option -F is specified)
 description: Executes a query or a list of queries from a file.
 options:
 -h|--help
@@ -707,6 +718,9 @@ options:
             write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
             block_size=&lt;approximate size of user data packed per block&gt;
             cachedterms=&lt;file with list of terms to cache&gt;
+-S|--configfile &lt;FILENAME&gt;
+    Define the storage configuration file as &lt;FILENAME&gt;
+    &lt;FILENAME&gt; is a file containing the configuration string
 -u|--user &lt;NAME&gt;
     Use user name &lt;NAME&gt; for the query
 -N|--nofranks &lt;N&gt;
@@ -717,6 +731,10 @@ options:
     No output of results
 -D|--time
     Do print duration of pure query evaluation
+-G|--debug
+    Switch debug info of weighting and summarization on
+-F|--fileinput
+    Interpret query argument as a file name containing the input
 -m|--module &lt;MOD&gt;
     Load components from module &lt;MOD&gt;
 -M|--moduledir &lt;DIR&gt;
@@ -819,9 +837,9 @@ options:
 -R|--resourcedir &lt;DIR&gt;
     Search resource files for analyzer first in &lt;DIR&gt;
 -s|--segmenter &lt;NAME&gt;
-    Use the document segmenter with name &lt;NAME&gt; (default textwolf XML)
--D|--contenttype &lt;CT&gt;
-    forced definition of the document class of all documents inserted.
+    Use the document segmenter with name &lt;NAME&gt;
+-C|--contenttype &lt;CT&gt;
+    forced definition of the document class of all documents processed.
 -x|--extension &lt;EXT&gt;
     Grab only the files with extension &lt;EXT&gt; (default all files)
 -t|--threads &lt;N&gt;
@@ -1027,9 +1045,9 @@ usage: strusInspectVectorStorage [options] &lt;what...&gt;
 &lt;what&gt;    : what to inspect:
             "classnames"
                = Return all names of concept classes of the model.
-            "featcon" { &lt;feat&gt; }
+            "featcon" &lt;classname&gt; { &lt;feat&gt; }
                = Take a single or list of feature numbers (with '%' prefix) or names as input.
-                 Return a sorted list of indices of concepts assigned to it.
+                 Return a sorted list of indices of concepts of the class &lt;classname&gt; assigned to it.
             "featvec" &lt;feat&gt;
                = Take a single feature number (with '%' prefix) or name as input.
                  Return the vector assigned to it.
@@ -1040,17 +1058,17 @@ usage: strusInspectVectorStorage [options] &lt;what...&gt;
                = Take a single or list of feature names as input.
                  Return the list of indices assigned to it.
             "featsim" &lt;feat1&gt; &lt;feat2&gt;
-               = Take two feature numbers (with '%c' prefix) or names as input.
+               = Take two feature numbers (with '%' prefix) or names as input.
                  Return the cosine similarity, a value between 0.0 and 1.0.
-            "confeat" or "confeatidx" "confeatname" { &lt;conceptno&gt; }
-               = Take a single or list of concept numbers as input.
+            "confeat" or "confeatidx" "confeatname" &lt;classname&gt; { &lt;conceptno&gt; }
+               = Take a single or list of concept numbers of the class &lt;classname&gt; as input.
                  Return a sorted list of features assigned to it.
                  "confeatidx" prints only the result feature indices.
                  "confeatname" prints only the result feature names.
                  "confeat" prints both indices and names.
-            "nbfeat" or "nbfeatidx" "nbfeatname"  { &lt;feat&gt; }
+            "nbfeat" or "nbfeatidx" "nbfeatname" &lt;classname&gt; { &lt;feat&gt; }
                = Take a single or list of feature numbers (with '%' prefix) or names as input.
-                 Return a list of features reachable over any shared concept.
+                 Return a list of features reachable over any shared concept of the class &lt;classname&gt;.
                  "nbfeat" prints both indices and names.
                  "nbfeatname" prints only the result feature names.
                  "nbfeat" prints both indices and names.
@@ -1060,7 +1078,7 @@ usage: strusInspectVectorStorage [options] &lt;what...&gt;
             "opfeatw"  or "opfeatwname" { &lt;expr&gt; }
                = same as "opfeat", resp. "opfeatname" but print also the result weights.
             "nofcon"
-               = Get the number of concepts defined.
+               = Get the number of concepts of the class &lt;classname&gt; defined.
             "noffeat"
                = Get the number of features defined.
             "config"
@@ -1088,9 +1106,6 @@ options:
 -S|--configfile &lt;FILENAME&gt;
     Define the vector space model configuration file as &lt;FILENAME&gt;
     &lt;FILENAME&gt; is a file containing the configuration string
--C|--class &lt;CLASSNAME&gt;
-    Select &lt;CLASSNAME&gt; as concept class name (default '')
-    Used in the context of inspecting data related to a concept.
 -T|--trace &lt;CONFIG&gt;
     Print method call traces configured with &lt;CONFIG&gt;
     Example: -T "log=dump;file=stdout"
@@ -1099,6 +1114,9 @@ options:
 -t|--threads &lt;N&gt;
     Set &lt;N&gt; as number of threads to use (only for search)
     Default is no multithreading (N=0)
+-x|--realmeasure
+    Calculate real values of similarities for search and compare
+    of methods 'opfeat','opfeatname','opfeatw' and 'opfeatwname'.
 -N|--nofranks &lt;N&gt;
     Limit the number of results to for searches to &lt;N&gt; (default 20)
 </pre>
@@ -1222,6 +1240,52 @@ description: Calculate the weight of a page derived from the linkage of document
     -i &lt;ITER&gt;   : specify number of iterations to run as &lt;ITER&gt;.
     &lt;inputfile&gt; = input file path or '-' for stdin
                   file with lines of the for "*" SOURCEID = [-&gt;] {&lt;TARGETID&gt;} ";"
+</pre>
+</li>
+
+<a name="strusUpdateStorageCalcStatistics"></a><li><b>strusUpdateStorageCalcStatistics</b>
+<br/>Program to calculate a formula for each document in the storages and update a metadata field with the result.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusUpdateStorageCalcStatistics_usage" type="checkbox" >
+<label for="strusUpdateStorageCalcStatistics_usage">Usage</label>
+<pre>
+usage: strusUpdateStorageCalcStatistics [options] &lt;metadata&gt; &lt;feattype&gt; &lt;formula&gt; &lt;sumnorm&gt;
+&lt;metadata&gt;  = meta data element to store the result
+&lt;feattype&gt;  = search index feature type to calculate the result with
+&lt;formula&gt;   = meta formula to calculate one summand of the result for one document with
+&lt;sumnorm&gt;   = formula to normalize the sum of summands for each document (identity is default)
+description: Calculate a formula for each document in the storages
+              and update a metadata field with the result.
+options:
+-h|--help
+    Print this usage and do nothing else
+-v|--version
+    Print the program version and do nothing else
+--license
+    Print 3rd party licences requiring reference
+-m|--module &lt;MOD&gt;
+    Load components from module &lt;MOD&gt;
+-M|--moduledir &lt;DIR&gt;
+    Search modules to load first in &lt;DIR&gt;
+-r|--rpc &lt;ADDR&gt;
+    Execute the command on the RPC server specified by &lt;ADDR&gt;
+-s|--storage &lt;CONFIG&gt;
+    Define a storage configuration string as &lt;CONFIG&gt;
+    &lt;CONFIG&gt; is a semicolon ';' separated list of assignments:
+            path=&lt;LevelDB storage path&gt;
+            create=&lt;yes/no, yes=do create if database does not exist yet&gt;
+            cache=&lt;size of LRU cache for LevelDB&gt;
+            compression=&lt;yes/no&gt;
+            max_open_files=&lt;maximum number of open files for LevelDB&gt;
+            write_buffer_size=&lt;Amount of data to build up in memory per file&gt;
+            block_size=&lt;approximate size of user data packed per block&gt;
+            cachedterms=&lt;file with list of terms to cache&gt;
+-c|--commit &lt;N&gt;
+    Set &lt;N&gt; as number of updates per transaction (default 10000)
+    If &lt;N&gt; is set to 0 then only one commit is done at the end
+-T|--trace &lt;CONFIG&gt;
+    Print method call traces configured with &lt;CONFIG&gt;
+    Example: -T "log=dump;file=stdout"
 </pre>
 </li>
 

@@ -355,6 +355,18 @@ cat <<'!ENDBLOCK'
 </pre>
 </li>
 
+<a name="strusUpdateStorageCalcStatistics"></a><li><b>strusUpdateStorageCalcStatistics</b>
+<br/>Program to calculate a formula for each document in the storages and update a metadata field with the result.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusUpdateStorageCalcStatistics_usage" type="checkbox" >
+<label for="strusUpdateStorageCalcStatistics_usage">Usage</label>
+<pre>
+!ENDBLOCK
+strusUpdateStorageCalcStatistics -h 2>&1 | sed 's/[&]/\&amp;/g' | sed 's/[<]/\&lt;/g' | sed 's/[>]/\&gt;/g'
+cat <<'!ENDBLOCK'
+</pre>
+</li>
+
 </div>
 </div>
 </body>
