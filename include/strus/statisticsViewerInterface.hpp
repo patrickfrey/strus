@@ -26,16 +26,23 @@ public:
 	virtual int nofDocumentsInsertedChange()=0;
 
 	/// \brief Structure describing the document frequency change of one term in the collection
-	struct DocumentFrequencyChange
+	class DocumentFrequencyChange
 	{
+	public:
 		DocumentFrequencyChange()
-			:type(0),value(0),increment(0){}
+			:m_type(0),m_value(0),m_increment(0){}
 		DocumentFrequencyChange( const DocumentFrequencyChange& o)
-			:type(o.type),value(o.value),increment(o.increment){}
+			:m_type(o.m_type),m_value(o.m_value),m_increment(o.m_increment){}
+		DocumentFrequencyChange( const char* type_, const char* value_, int increment_)
+			:m_type(type_),m_value(value_),m_increment(increment_){}
 
-		const char* type;	///< type of the term
-		const char* value;	///< value of the term
-		int increment;		///< document frequency increment/decrement
+		const char* type() const	{return m_type;}
+		const char* value() const	{return m_value;}
+		int increment() const		{return m_increment;}
+	private:
+		const char* m_type;	///< type of the term
+		const char* m_value;	///< value of the term
+		int m_increment;	///< document frequency increment/decrement
 	};
 
 	/// \brief Fetch the next message propagating a change in the df (document frequency)

@@ -243,9 +243,9 @@ int main( int argc, const char* argv[])
 			while (viewer->nextDfChange( rec))
 			{
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "result df change " << rec.type << " " << rec.value << " " << rec.increment << std::endl;
+				std::cout << "result df change " << rec.type() << " " << rec.value() << " " << rec.increment() << std::endl;
 #endif
-				termset.insert( Term( rec.type, rec.value, rec.increment));
+				termset.insert( Term( rec.type(), rec.value(), rec.increment()));
 			}
 			if (!builder->fetchMessage( msgblk, msgblksize))
 			{

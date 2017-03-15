@@ -80,9 +80,9 @@ bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
 		}
 		m_msg.append( msg_itr, flags_itr - msg_itr);
 
-		rec.type = m_msg.c_str();
-		std::size_t typesize = std::strlen( rec.type);
-		rec.value = rec.type + typesize + 1;
+		const char* type = m_msg.c_str();
+		std::size_t typesize = std::strlen( type);
+		const char* value = type + typesize + 1;
 
 		unsigned char flags = (unsigned char)*flags_itr;
 		if (flags >= 0x2)
@@ -90,11 +90,12 @@ bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
 			throw strus::runtime_error( _TXT( "got illegal message from  (corrupt message record [3])"));
 		}
 		chlen = utf8charlen( *df_itr);
-		rec.increment = utf8decode( df_itr, chlen);
+		int increment = utf8decode( df_itr, chlen);
 		if ((flags & 0x1) != 0)
 		{
-			rec.increment = -rec.increment;
+			increment = -increment;
 		}
+		rec = DocumentFrequencyChange( type, value, increment);
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message viewer fetching next df change: %s"), *m_errorhnd, false);
