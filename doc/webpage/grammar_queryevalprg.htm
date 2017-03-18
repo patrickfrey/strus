@@ -42,13 +42,17 @@ NUMBER         : &lt;integer or floating point number in non exponential notatio
 config         = statement ";" config
                |
                ;
-statement      = evalexpr | selectexpr | restrictexpr | termdef | evalexpr
+statement      = evalexpr | selectexpr | weightexpr | restrictexpr | termdef | evalexpr
                ;
 evalexpr       = "EVAL" [ NUMBER "*" ] functionname "(" parameterlist ")" ;
                ;
-selectexpr     = "SELECT" featureset { "," featureset }
+scalarexpr     = "FORMULA" STRING ;
                ;
-restrictexpr   = "RESTRICT" featureset { "," featureset }
+selectexpr     = "SELECT" featureset ";"
+               ;
+weightexpr     = "WEIGHT" featureset ";"
+               ;
+restrictexpr   = "RESTRICT" featureset ";"
                ;
 termdef        = "TERM" featureset termvalue termtype
                ;
@@ -81,6 +85,18 @@ parametervalue = IDENTIFIER | STRING | NUMBER
 	A parameter name with dot '.' as prefix is specifying a feature parameter declaration.
 	The known names of weighting and summarization function depend on its implementation.
 	</p>
+	<h5>EVAL function</h5>
+	<p class="description">Defines a query evaluation function used for weighting</p>
+	<h5>FORMULA scalar-function</h5>
+	<p class="description">Defines a scalar function (with _0,_1,.. referring to query evaluation function results in order of their definition) used to combine query evaluation function results to one result. If the specified, the different results are just added up to one.</p>
+	<h5>SUMMARIZE function</h5>
+	<p class="description">Defines a summarizer function used for building the results</p>
+	<h5>SELECT featureset</h5>
+	<p class="description">Defines the feature set used for selection of the documents to weight</p>
+	<h5>WEIGHT featureset</h5>
+	<p class="description">Defines the feature set used for weighting</p>
+	<h5>RESTRICT featureset</h5>
+	<p class="description">Defines the feature set used as restriction</p>
 	<h3>Example</h3>
 	<p class="description">
 	The following example declares the feature set 'selfeat' to define what is weighted.
@@ -93,8 +109,9 @@ parametervalue = IDENTIFIER | STRING | NUMBER
 	<pre>
 SELECT selfeat;
 
-EVAL 1.0 * bm25( k1=0.75, b=2.1, avgdoclen=1000, .match=docfeat );
-EVAL 3.0 * metadata( name=pageweight );
+EVAL bm25( k1=0.75, b=2.1, avgdoclen=1000, .match=docfeat );
+EVAL metadata( name=pageweight );
+FORMULA "0.7 * _1 * _0 + 0.3 * _0";
 
 SUMMARIZE title = attribute( name=title );
 SUMMARIZE content = matchphrase(
