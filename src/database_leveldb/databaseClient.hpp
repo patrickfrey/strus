@@ -86,11 +86,12 @@ public:
 			unsigned int blockSize_);
 
 	/// \brief Dereference the handle for the database referenced by path and dispose the handle, if this reference is the last instance
-	void dereference( const std::string& path_);
+	void dereference( const char* path_);
 
 private:
 	utils::Mutex m_map_mutex;
-	std::map<std::string,utils::SharedPtr<LevelDbHandle> > m_map;
+	typedef utils::SharedPtr<LevelDbHandle> LevelDbHandleRef;
+	std::vector<LevelDbHandleRef> m_map;
 };
 
 
@@ -144,6 +145,8 @@ public:
 			const DatabaseOptions& options) const;
 
 	virtual std::string config() const;
+
+	virtual void close();
 
 private:
 	utils::SharedPtr<LevelDbHandleMap> m_dbmap;		///< reference to map of shared levelDB handles

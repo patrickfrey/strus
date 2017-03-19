@@ -85,6 +85,8 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 		cleanup();
 		throw strus::runtime_error( _TXT( "failed to open key value store database: %s"), err.c_str());
 	}
+	// Do compaction, if state of db was closed previously without:
+	m_db->CompactRange( NULL, NULL);
 }
 
 std::string LevelDbHandle::config() const
@@ -117,36 +119,45 @@ utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& pat
 {
 	utils::ScopedLock lock( m_map_mutex);
 	std::string path = normalizePath( path_);
-	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path);
+
+	std::vector<LevelDbHandleRef>::iterator mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
+	{
+		if ((*mi)->path() == path_)
+		{
+			break;
+		}
+	}
 	if (mi == m_map.end())
 	{
 		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
-		m_map[ path_] = rt;
+		m_map.push_back( rt);
 		return rt;
 	}
 	else
 	{
-		if ((maxOpenFiles_ && mi->second->maxOpenFiles() != maxOpenFiles_)
-		||  (cachesize_k_ && mi->second->cachesize_k() != cachesize_k_)
-		||  (compression_ != mi->second->compression())
-		||  (writeBufferSize_ && mi->second->writeBufferSize() != writeBufferSize_)
-		||  (blockSize_ && mi->second->blockSize() != blockSize_))
+		if ((maxOpenFiles_ && (*mi)->maxOpenFiles() != maxOpenFiles_)
+		||  (cachesize_k_ && (*mi)->cachesize_k() != cachesize_k_)
+		||  (compression_ != (*mi)->compression())
+		||  (writeBufferSize_ && (*mi)->writeBufferSize() != writeBufferSize_)
+		||  (blockSize_ && (*mi)->blockSize() != blockSize_))
 		{
 			throw strus::runtime_error( _TXT( "level DB key value store with the same path opened twice but with different settings"));
 		}
-		return mi->second;
+		return *mi;
 	}
 }
 
-void LevelDbHandleMap::dereference( const std::string& path_)
+void LevelDbHandleMap::dereference( const char* path)
 {
 	utils::ScopedLock lock( m_map_mutex);
-	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path_);
-	if (mi != m_map.end())
+	std::vector<LevelDbHandleRef>::iterator mi = m_map.begin(), me = m_map.end();
+	for (; mi != me; ++mi)
 	{
-		if (mi->second.unique())
+		if (0==std::strcmp( (*mi)->path().c_str(), path))
 		{
-			m_map.erase( path_);
+			if (mi->unique()) m_map.erase( mi);
+			break;
 		}
 	}
 }
@@ -158,11 +169,14 @@ LevelDbHandle::~LevelDbHandle()
 
 DatabaseClient::~DatabaseClient()
 {
-	m_db.reset();
-	if (m_db.unique())
+	try
 	{
-		m_dbmap->dereference( m_db->path());
+		// Dereference if this connection is the last one:
+		const char* path = m_db->path().c_str();
+		m_db.reset();
+		m_dbmap->dereference( path);
 	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error in destructor of '%s': %s"), MODULENAME, *m_errorhnd);
 }
 
 DatabaseTransactionInterface* DatabaseClient::createTransaction()
@@ -282,6 +296,8 @@ bool DatabaseClient::readValue(
 {
 	try
 	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+
 		std::string rt;
 		leveldb::ReadOptions readoptions;
 		readoptions.fill_cache = options.useCacheEnabled();
@@ -301,10 +317,28 @@ bool DatabaseClient::readValue(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' readValue: %s"), MODULENAME, *m_errorhnd, false);
 }
 
+void DatabaseClient::close()
+{
+	try
+	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		
+		// Do explicit compaction:
+		m_db->db()->CompactRange( NULL, NULL);
+
+		// Dereference if this connection is the last one:
+		const char* path = m_db->path().c_str();
+		m_db.reset();
+		m_dbmap->dereference( path);
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' close: %s"), MODULENAME, *m_errorhnd);
+}
+
 std::string DatabaseClient::config() const
 {
 	try
 	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
 		return m_db->config();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
