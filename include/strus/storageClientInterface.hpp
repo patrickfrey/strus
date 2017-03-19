@@ -208,6 +208,10 @@ public:
 	/// \param[out] errorlog stream for reporting errors
 	/// \return true, if the check succeeds, false if it fails
 	virtual bool checkStorage( std::ostream& errorlog) const=0;
+
+	/// \brief Close client connection and eventually do some cleanup.
+	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
+	virtual void close()=0;
 };
 
 }//namespace

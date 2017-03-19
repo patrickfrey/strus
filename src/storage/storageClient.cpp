@@ -1049,5 +1049,10 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error checking storage: %s"), *m_errorhnd, false);
 }
 
+void StorageClient::close()
+{
+	m_database->close();
+}
+
 
 

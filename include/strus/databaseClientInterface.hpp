@@ -75,7 +75,8 @@ public:
 			std::string& value,
 			const DatabaseOptions& options) const=0;
 
-	/// \brief Close client connection and do some cleanup
+	/// \brief Close client connection and eventually do some cleanup.
+	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
 	virtual void close()=0;
 
 	/// \brief Get the interpreted configuration this database client was created with
