@@ -171,10 +171,13 @@ DatabaseClient::~DatabaseClient()
 {
 	try
 	{
-		// Dereference if this connection is the last one:
-		const char* path = m_db->path().c_str();
-		m_db.reset();
-		m_dbmap->dereference( path);
+		if (m_db.get())
+		{
+			// Dereference if this connection is the last one:
+			const char* path = m_db->path().c_str();
+			m_db.reset();
+			m_dbmap->dereference( path);
+		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error in destructor of '%s': %s"), MODULENAME, *m_errorhnd);
 }
@@ -183,6 +186,7 @@ DatabaseTransactionInterface* DatabaseClient::createTransaction()
 {
 	try
 	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
 		return new DatabaseTransaction( m_db->db(), this, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating transaction: %s"), *m_errorhnd, 0);
@@ -192,6 +196,7 @@ DatabaseCursorInterface* DatabaseClient::createCursor( const DatabaseOptions& op
 {
 	try
 	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
 		return new DatabaseCursor( m_db->db(), options.useCacheEnabled(), false, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
@@ -243,6 +248,7 @@ DatabaseBackupCursorInterface* DatabaseClient::createBackupCursor() const
 {
 	try
 	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
 		return new DatabaseBackupCursor( m_db->db(), m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' backup cursor: %s"), MODULENAME, *m_errorhnd, 0);
@@ -256,6 +262,8 @@ void DatabaseClient::writeImm(
 {
 	try
 	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+
 		leveldb::WriteOptions options;
 		options.sync = true;
 		leveldb::Status status = m_db->db()->Put( options,
@@ -276,6 +284,8 @@ void DatabaseClient::removeImm(
 {
 	try
 	{
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+
 		leveldb::WriteOptions options;
 		options.sync = true;
 		leveldb::Status status = m_db->db()->Delete( options, leveldb::Slice( key, keysize));
