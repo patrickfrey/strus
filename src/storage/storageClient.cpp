@@ -79,6 +79,7 @@ StorageClient::StorageClient(
 	,m_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_statisticsProc(statisticsProc_)
+	,m_close_called(false)
 	,m_errorhnd(errorhnd_)
 {
 	try
@@ -217,7 +218,7 @@ void StorageClient::getVariablesWriteBatch(
 
 StorageClient::~StorageClient()
 {
-	try
+	if (!m_close_called) try
 	{
 		storeVariables();
 	}
@@ -1051,7 +1052,13 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 
 void StorageClient::close()
 {
+	try
+	{
+		storeVariables();
+	}
+	CATCH_ERROR_MAP( _TXT("error storing variables in close of storage client: %s"), *m_errorhnd);
 	m_database->close();
+	m_close_called = true;
 }
 
 

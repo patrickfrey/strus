@@ -156,7 +156,10 @@ void LevelDbHandleMap::dereference( const char* path)
 	{
 		if (0==std::strcmp( (*mi)->path().c_str(), path))
 		{
-			if (mi->unique()) m_map.erase( mi);
+			if (mi->unique())
+			{
+				m_map.erase( mi);
+			}
 			break;
 		}
 	}
@@ -186,7 +189,7 @@ DatabaseTransactionInterface* DatabaseClient::createTransaction()
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createTransaction");
 		return new DatabaseTransaction( m_db->db(), this, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating transaction: %s"), *m_errorhnd, 0);
@@ -196,7 +199,7 @@ DatabaseCursorInterface* DatabaseClient::createCursor( const DatabaseOptions& op
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createCursor");
 		return new DatabaseCursor( m_db->db(), options.useCacheEnabled(), false, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
@@ -248,7 +251,7 @@ DatabaseBackupCursorInterface* DatabaseClient::createBackupCursor() const
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createBackupCursor");
 		return new DatabaseBackupCursor( m_db->db(), m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' backup cursor: %s"), MODULENAME, *m_errorhnd, 0);
@@ -262,7 +265,7 @@ void DatabaseClient::writeImm(
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "writeImm");
 
 		leveldb::WriteOptions options;
 		options.sync = true;
@@ -284,7 +287,7 @@ void DatabaseClient::removeImm(
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "removeImm");
 
 		leveldb::WriteOptions options;
 		options.sync = true;
@@ -306,7 +309,7 @@ bool DatabaseClient::readValue(
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "readValue");
 
 		std::string rt;
 		leveldb::ReadOptions readoptions;
@@ -331,8 +334,8 @@ void DatabaseClient::close()
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
-		
+		if (!m_db.get()) return;
+
 		// Do explicit compaction:
 		m_db->db()->CompactRange( NULL, NULL);
 
@@ -348,7 +351,7 @@ std::string DatabaseClient::config() const
 {
 	try
 	{
-		if (!m_db.get()) throw strus::runtime_error(_TXT("called method of '%s' after close"), MODULENAME);
+		if (!m_db.get()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "config");
 		return m_db->config();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());

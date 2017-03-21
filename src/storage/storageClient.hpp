@@ -243,6 +243,7 @@ private:
 	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
 	Reference<StatisticsBuilderInterface> m_statisticsBuilder; ///< builder of statistics messages from updates by transactions
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
+	bool m_close_called;					///< true if close was already called
 
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };
