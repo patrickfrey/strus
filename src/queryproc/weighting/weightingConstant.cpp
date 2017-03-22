@@ -189,7 +189,7 @@ FunctionDescription WeightingFunctionConstant::getDescription() const
 	try
 	{
 		typedef FunctionDescription::Parameter P;
-		FunctionDescription rt(_TXT("Calculate the weight of a document as sum of the the feature weights multiplied with their feature frequency"));
+		FunctionDescription rt(_TXT("Calculate the weight of a document as sum of the the feature weights of the occurring features"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		return rt;
 	}
