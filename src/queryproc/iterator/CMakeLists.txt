@@ -35,6 +35,7 @@ link_directories(
 # -------------------------------------
 add_library( iterator_standard STATIC ${source_files})
 target_link_libraries( iterator_standard strus_base )
+set_property( TARGET iterator_standard PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 
 

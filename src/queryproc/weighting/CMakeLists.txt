@@ -33,6 +33,7 @@ link_directories(
 # ------------------------------------
 add_library( weighting_standard STATIC ${source_files})
 target_link_libraries( weighting_standard strus_private_utils strus_base queryproc_utils )
+set_property( TARGET weighting_standard PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 
 

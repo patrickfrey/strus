@@ -27,6 +27,7 @@ link_directories(
 # --------------------------------
 add_library( strus_queryeval_static STATIC ${source_files})
 target_link_libraries( strus_queryeval_static strus_base strus_private_utils )
+set_property( TARGET strus_queryeval_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 add_library( strus_queryeval SHARED libstrus_queryeval.cpp )
 target_link_libraries( strus_queryeval strus_queryeval_static  strus_base strus_private_utils "${Boost_LIBRARIES}" )
