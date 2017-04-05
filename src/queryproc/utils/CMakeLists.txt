@@ -26,6 +26,7 @@ link_directories(
 # ------------------------------------
 add_library( queryproc_utils STATIC ${source_files})
 target_link_libraries( queryproc_utils strus_private_utils strus_base )
+set_property( TARGET queryproc_utils PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 
 

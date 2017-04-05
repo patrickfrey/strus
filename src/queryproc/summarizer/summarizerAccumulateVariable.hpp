@@ -91,7 +91,7 @@ private:
 			:itr(o.itr),varitr(o.varitr),weight(o.weight){}
 	};
 
-	typedef LocalStructAllocator<std::pair<Index,double> > PosWeightAllocator;
+	typedef LocalStructAllocator<std::pair<const Index,double> > PosWeightAllocator;
 	typedef std::map<Index,double,std::less<Index>,PosWeightAllocator> PosWeightMap;
 
 	strus::utils::BitSet getCandidateSet( const Index& docno);
