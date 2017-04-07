@@ -9,6 +9,7 @@ MESSAGE("  Canonical: ${INSTALLER_PLATFORM}")
 MESSAGE("  CMake: ${CMAKE_VERSION}")
 MESSAGE("  CMake generator: ${CMAKE_GENERATOR}")
 MESSAGE("  CMake build tool: ${CMAKE_BUILD_TOOL}")
+MESSAGE("  CMake build type: ${CMAKE_BUILD_TYPE}")
 
 MESSAGE("Compiler:")
 MESSAGE("  C/C++ compiler: ${CMAKE_CXX_COMPILER_ID}")
