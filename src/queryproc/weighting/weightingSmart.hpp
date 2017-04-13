@@ -125,6 +125,7 @@ public:
 			const QueryProcessorInterface* queryproc_,
 			ErrorBufferInterface* errorhnd_)
 		:m_queryproc(queryproc_)
+		,m_parser(0)
 		,m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceSmart(){}
