@@ -48,7 +48,7 @@ private:
 
 private:
 	typedef std::pair<Index,Index> MetaDataKey;
-	typedef LocalStructAllocator<std::pair<MetaDataKey,NumericVariant> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<const MetaDataKey,NumericVariant> > MapAllocator;
 	typedef std::less<MetaDataKey> MapCompare;
 	typedef std::map<MetaDataKey,NumericVariant,MapCompare,MapAllocator> Map;
 

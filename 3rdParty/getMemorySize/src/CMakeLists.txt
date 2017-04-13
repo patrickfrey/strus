@@ -16,6 +16,7 @@ include_directories(
 # SNOWBALL STEMMER LIBRARY
 # -------------------------------------------
 add_library( getmemsize_static STATIC ${source_files} )
+set_property( TARGET getmemsize_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 
 

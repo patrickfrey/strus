@@ -34,5 +34,6 @@ link_directories(
 # ------------------------------------
 add_library( summarizer_standard STATIC ${source_files})
 target_link_libraries( summarizer_standard strus_base queryproc_utils )
+set_property( TARGET summarizer_standard PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 

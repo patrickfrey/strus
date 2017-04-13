@@ -46,7 +46,7 @@ public:
 
 private:
 	typedef std::pair<Index,Index> Key;
-	typedef LocalStructAllocator<std::pair<Key,int> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<const Key,int> > MapAllocator;
 	typedef std::less<Key> MapCompare;
 	typedef std::map<Key,int,MapCompare, MapAllocator> Map;
 

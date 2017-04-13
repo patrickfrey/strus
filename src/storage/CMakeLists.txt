@@ -72,6 +72,7 @@ link_directories(
 # ------------------------------
 add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
 target_link_libraries( strus_storage_static strus_private_utils strus_base )
+set_property( TARGET strus_storage_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 add_library( strus_storage SHARED libstrus_storage.cpp )
 target_link_libraries( strus_storage strus_storage_static ${Boost_LIBRARIES} strus_private_utils strus_database_leveldb strus_statsproc compactnodetrie_strus_static strus_base )
