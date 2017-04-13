@@ -118,7 +118,7 @@ static void skipSpaces( std::string::const_iterator& si, const std::string::cons
 static std::string parseIdentifier( std::string::const_iterator& si, const std::string::const_iterator& se)
 {
 	std::string rt;
-	for (;si < se && isAlnum(*si); ++si) rt.push_back( ::tolower(*si));
+	for (;si < se && isAlnum(*si); ++si) rt.push_back( *si);
 	skipSpaces(si,se);
 	return rt;
 }
@@ -456,7 +456,7 @@ void ScalarFunctionParser::defineUnaryFunction( const std::string& name, UnaryFu
 {
 	try
 	{
-		m_unaryFunctionMap[ strus::utils::tolower(name)] = func;
+		m_unaryFunctionMap[ name] = func;
 	}
 	CATCH_ERROR_MAP( _TXT("error defining unary function (scalar function parser): %s"), *m_errorhnd);
 }
@@ -465,7 +465,7 @@ void ScalarFunctionParser::defineBinaryFunction( const std::string& name, Binary
 {
 	try
 	{
-		m_binaryFunctionMap[ strus::utils::tolower(name)] = func;
+		m_binaryFunctionMap[ name] = func;
 	}
 	CATCH_ERROR_MAP( _TXT("error defining binary function (scalar function parser): %s"), *m_errorhnd);
 }
@@ -474,7 +474,7 @@ void ScalarFunctionParser::defineNaryFunction( const std::string& name, NaryFunc
 {
 	try
 	{
-		m_naryFunctionMap[ strus::utils::tolower(name)] = NaryFunctionDef( min_nofargs, max_nofargs, func);
+		m_naryFunctionMap[ name] = NaryFunctionDef( min_nofargs, max_nofargs, func);
 	}
 	CATCH_ERROR_MAP( _TXT("error defining N-ary function (scalar function parser): %s"), *m_errorhnd);
 }
