@@ -124,7 +124,7 @@ public:
 
 	/// \brief Evaluate the query
 	/// \return result of query evaluation
-	virtual QueryResult evaluate()=0;
+	virtual QueryResult evaluate() const=0;
 
 	/// \brief Map query to readable string
 	/// \return query with query evaluation scheme in readable form

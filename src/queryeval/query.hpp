@@ -80,7 +80,7 @@ public:
 
 	virtual void setDebugMode( bool debug);
 
-	virtual QueryResult evaluate();
+	virtual QueryResult evaluate() const;
 	virtual std::string tostring() const;
 
 public:
@@ -204,12 +204,12 @@ private:
 
 	typedef std::map<NodeAddress,NodeStorageData> NodeStorageDataMap;
 
-	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap);
-	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap);
+	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const;
+	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap) const;
 	void collectSummarizationVariables(
 				std::vector<SummarizationVariable>& variables,
 				const NodeAddress& nodeadr,
-				const NodeStorageDataMap& nodeStorageDataMap);
+				const NodeStorageDataMap& nodeStorageDataMap) const;
 	const NodeStorageData& nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const;
 
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
@@ -220,7 +220,7 @@ private:
 private:
 	const QueryEval* m_queryEval;
 	const StorageClientInterface* m_storage;
-	Reference<MetaDataReaderInterface> m_metaDataReader;
+	mutable Reference<MetaDataReaderInterface> m_metaDataReader;
 	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;	///< restriction function on metadata
 	Reference<ScalarFunctionInstanceInterface> m_weightingFormula;	///< instance of the scalar function to calculate the weight of a document from the weighting functions defined as parameter
 	std::vector<Term> m_terms;					///< query terms

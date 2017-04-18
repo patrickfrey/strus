@@ -46,7 +46,7 @@ public:
 	Accumulator(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata_,
-			MetaDataRestrictionInterface* metaDataRestriction_,
+			const MetaDataRestrictionInterface* metaDataRestriction_,
 			const ScalarFunctionInstanceInterface* weightingFormula_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)

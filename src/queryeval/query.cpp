@@ -390,7 +390,7 @@ void Query::addUserName( const std::string& username_)
 	CATCH_ERROR_MAP( _TXT("error adding user to query: %s"), *m_errorhnd);
 }
 
-PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap)
+PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const
 {
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
@@ -438,7 +438,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap)
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap) const
 {
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
@@ -486,7 +486,7 @@ const Query::NodeStorageData& Query::nodeStorageData( const NodeAddress& nodeadr
 void Query::collectSummarizationVariables(
 			std::vector<SummarizationVariable>& variables,
 			const NodeAddress& nodeadr,
-			const NodeStorageDataMap& nodeStorageDataMap)
+			const NodeStorageDataMap& nodeStorageDataMap) const
 {
 	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
 	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( nodeadr);
@@ -560,7 +560,7 @@ void Query::setDebugMode( bool debug)
 	m_debugMode = debug;
 }
 
-QueryResult Query::evaluate()
+QueryResult Query::evaluate() const
 {
 	const char* evaluationPhase = "query feature postings initialization";
 	try
