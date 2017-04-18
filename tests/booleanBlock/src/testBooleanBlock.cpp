@@ -69,13 +69,40 @@ static void testBooleanBlock( unsigned int times, unsigned int minNofElements, u
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << std::endl;
 		std::cout << "RANGES:";
+#endif
 		strus::BooleanBlock::NodeCursor ci;
 		strus::Index from_, to_;
+		strus::Index prev_from_ = 0, prev_to_ = 0;
 		bool more = blk.getFirstRange( ci, from_, to_);
 		for (; more; more = blk.getNextRange( ci, from_, to_))
 		{
+			if (to_ <= 0)
+			{
+				throw strus::runtime_error( _TXT( "illegal range in boolean block (negative or zero maximum: %d)"), to_);
+			}
+			if (from_ <= 0)
+			{
+				throw strus::runtime_error( _TXT( "illegal range in boolean block (negative or zero minimum: %d)"), from_);
+			}
+			if (from_ > to_)
+			{
+				throw strus::runtime_error( _TXT( "illegal range in boolean block (min:%u > max:%u)"), from_, to_);
+			}
+			if (from_ < prev_to_)
+			{
+				throw strus::runtime_error( _TXT( "not strictly ascending or unjoined overlapping ranges: %u:%u and %u:%u"), prev_from_, prev_to_, from_, to_);
+			}
+			if (from_ == prev_to_)
+			{
+				throw strus::runtime_error( _TXT( "unification of adjacent ranges in boolean block not complete: %u:%u and %u:%u"), prev_from_, prev_to_, from_, to_);
+			}
+			prev_to_ = to_;
+			prev_from_ = from_;
+#ifdef STRUS_LOWLEVEL_DEBUG
 			std::cout << " " << from_ << ":" << to_;
+#endif
 		}
+#ifdef STRUS_LOWLEVEL_DEBUG
 		std::cout << std::endl;
 #endif
 		strus::BooleanBlock::NodeCursor cursor;
@@ -130,7 +157,7 @@ int main( int, const char**)
 	try
 	{
 		initRand();
-		testBooleanBlock( 100, 3000, 10000);
+		testBooleanBlock( 300, 3000, 10000);
 		return 0;
 	}
 	catch (const std::exception& err)
