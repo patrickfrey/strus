@@ -28,11 +28,6 @@ Index MetaDataReader::elementHandle( const std::string& name) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error meta data get element handle: %s"), *m_errorhnd, -1);
 }
 
-bool MetaDataReader::hasElement( const std::string& name) const
-{
-	return m_description->hasElement( name);
-}
-
 void MetaDataReader::skipDoc( const Index& docno)
 {
 	try

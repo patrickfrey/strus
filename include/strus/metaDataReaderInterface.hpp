@@ -26,14 +26,9 @@ public:
 	/// \brief Destructor
 	virtual ~MetaDataReaderInterface(){}
 
-	/// \brief Find out if there exists a meta data table element with the specified name
-	/// \param[in] name_ name of the element to check
-	/// \return return true, if the element exists
-	virtual bool hasElement( const std::string& name_) const=0;
-
 	/// \brief Get the handle for a table element addressed by name
 	/// \param[in] name_ name of the element
-	/// \return return the element handle or -1 if not defined (error occurred)
+	/// \return return the element handle or -1 if not defined
 	/// \remark Element handles are numbered from 0 to N-1, where N is what nofElements() returns
 	virtual Index elementHandle( const std::string& name_) const=0;
 

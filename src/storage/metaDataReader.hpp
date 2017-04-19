@@ -31,7 +31,6 @@ public:
 	virtual ~MetaDataReader(){}
 
 	virtual Index elementHandle( const std::string& name) const;
-	virtual bool hasElement( const std::string& name) const;
 	virtual void skipDoc( const Index& docno);
 	virtual NumericVariant getValue( const Index& elementHandle_) const;
 	virtual const char* getType( const Index& elementHandle_) const;
