@@ -28,7 +28,7 @@ public:
 	virtual ~WeightingFunctionContextInterface(){}
 
 	/// \brief Add a feature that is subject of weighting to the execution context
-	/// \param[in] name_ name of the summarization feature
+	/// \param[in] name_ name of the weighting feature
 	/// \param[in] postingIterator_ iterator on the matches of the weighting feature (ownership remains at caller)
 	/// \param[in] weight_ weight of this feature
 	/// \param[in] stats_ global term statistics passed down with the query. If undefined, they can be defined by or estimated from the posting iterator data. 

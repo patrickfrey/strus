@@ -27,10 +27,10 @@ public:
 	virtual void addFeature( const std::string& name, const std::vector<double>& vec)=0;
 
 	/// \brief Define a relation element 
-	/// \param[in] relationTypeName name of the relation class to distiguish different relations
+	/// \param[in] conceptClass name of the concept class to distiguish different relations
 	/// \param[in] featidx index of the feature (see 'VectorStorageClientInterface::featureIndex( const std::string&) const')
 	/// \param[in] conidx index of the concept
-	virtual void defineFeatureConceptRelation( const std::string& relationTypeName, const Index& featidx, const Index& conidx)=0;
+	virtual void defineFeatureConceptRelation( const std::string& conceptClass, const Index& featidx, const Index& conidx)=0;
 
 	/// \brief Ensure the persistent storage of the features added with addFeature(const std::string&,const std::vector<double>&) till now
 	/// \return true on success, false if failed

@@ -54,7 +54,7 @@ public:
 
 	/// \brief Get the set of learnt concepts for a feature defined
 	/// \param[in] conceptClass name identifying a class of concepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector storage and instantiated by the storage builder.
-	/// \param[in] index index of vector in the order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<double>& vec) starting from 0
+	/// \param[in] index index of vector (featureIndex( const std::string&) const)
 	/// \return the resulting concept feature indices (indices of learnt concepts starting from 1)
 	virtual std::vector<Index> featureConcepts( const std::string& conceptClass, const Index& index) const=0;
 

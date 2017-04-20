@@ -1,4 +1,5 @@
 Add name to summarizer and weighting function descriptions
+Fix bug in summarizer match phrase: Feature length is not considered for windows of span=1
 
 New block type for storing entropy weighted ff for each feature in each document.
 Calculation of this value for the Wikipedia project.
