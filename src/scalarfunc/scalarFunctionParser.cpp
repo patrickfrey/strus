@@ -14,7 +14,7 @@
 #include "strus/base/bitOperations.hpp"
 #include "scalarFunctionLinearComb.hpp"
 #include <limits>
-#include <match>
+#include <cmath>
 
 using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
@@ -57,24 +57,24 @@ static double square( double x)
 
 static unsigned int doubleToUint( double x)
 {
-	return (unsigned int)std::floor( std::fabs( x) + std::numeric_limits<float>::epsilon())
+	return (unsigned int)std::floor( std::fabs( x) + std::numeric_limits<float>::epsilon());
 }
 
-static double bit_xor( double x)
+static double bit_xor( double x, double y)
 {
-	return doubleToUint(x)^doubleToUint(x);
+	return doubleToUint(x)^doubleToUint(y);
 }
-static double bit_and( double x)
+static double bit_and( double x, double y)
 {
-	return doubleToUint(x)&doubleToUint(x);
+	return doubleToUint(x)&doubleToUint(y);
 }
-static double bit_or( double x)
+static double bit_or( double x, double y)
 {
-	return doubleToUint(x)|doubleToUint(x);
+	return doubleToUint(x)|doubleToUint(y);
 }
 static double bit_cnt( double x)
 {
-	return BitOperations::bitCount(x)|BitOperations::bitCount(x);
+	return BitOperations::bitCount(doubleToUint(x));
 }
 
 ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
