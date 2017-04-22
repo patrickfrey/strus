@@ -11,8 +11,10 @@
 #include "scalarFunction.hpp"
 #include "private/utils.hpp"
 #include "strus/base/snprintf.h"
+#include "strus/base/bitOperations.hpp"
 #include "scalarFunctionLinearComb.hpp"
 #include <limits>
+#include <match>
 
 using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
@@ -53,6 +55,28 @@ static double square( double x)
 	return x*x;
 }
 
+static unsigned int doubleToUint( double x)
+{
+	return (unsigned int)std::floor( std::fabs( x) + std::numeric_limits<float>::epsilon())
+}
+
+static double bit_xor( double x)
+{
+	return doubleToUint(x)^doubleToUint(x);
+}
+static double bit_and( double x)
+{
+	return doubleToUint(x)&doubleToUint(x);
+}
+static double bit_or( double x)
+{
+	return doubleToUint(x)|doubleToUint(x);
+}
+static double bit_cnt( double x)
+{
+	return BitOperations::bitCount(x)|BitOperations::bitCount(x);
+}
+
 ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
@@ -67,6 +91,9 @@ ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	defineUnaryFunction( "sqr", &square);
 	defineBinaryFunction( "pow", &std::pow);
 	defineBinaryFunction( "mod", &std::fmod);
+	defineBinaryFunction( "xor", &bit_xor);
+	defineBinaryFunction( "and", &bit_and);
+	defineBinaryFunction( "or", &bit_or);
 	defineUnaryFunction( "sin", &std::sin);
 	defineUnaryFunction( "cos", &std::cos);
 	defineUnaryFunction( "tan", &std::tan);
@@ -76,6 +103,7 @@ ScalarFunctionParser::ScalarFunctionParser( ErrorBufferInterface* errorhnd_)
 	defineUnaryFunction( "asin", &std::asin);
 	defineUnaryFunction( "acos", &std::acos);
 	defineUnaryFunction( "atan", &std::atan);
+	defineUnaryFunction( "bcnt", &bit_cnt);
 	defineNaryFunction( "if_gt", &if_greater, 4, 4);
 	defineNaryFunction( "if_ge", &if_greaterequal, 4, 4);
 	defineNaryFunction( "if_lt", &if_smaller, 4, 4);
