@@ -82,7 +82,7 @@ void QueryEval::addSummarizerFunction(
 		Reference<SummarizerFunctionInstanceInterface> functionref( function);
 		defineVariableAssignments(
 			functionref->getVariables(),
-			VariableAssignment::WeightingFunction,
+			VariableAssignment::SummarizerFunction,
 			m_summarizers.size());
 		m_summarizers.push_back( SummarizerDef( functionName, functionref, featureParameters, debugAttributeName));
 	}
