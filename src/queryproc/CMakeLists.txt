@@ -9,6 +9,7 @@ add_subdirectory( weighting )
 # SOURCES AND INCLUDES
 # --------------------------------------
 set( source_files
+	weightingFunctionSummarizer.cpp
 	queryProcessor.cpp
 )
 

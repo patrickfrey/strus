@@ -87,6 +87,8 @@ public:
 
 	std::string getWeightingDebugInfo( std::size_t fidx, const Index& docno);
 
+	void defineWeightingVariableValue( std::size_t index, const std::string& varname, double value);
+
 private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
 

@@ -88,6 +88,10 @@ public:
 	FunctionDescription( const FunctionDescription& o)
 		:m_text(o.m_text),m_param(o.m_param){}
 
+	/// \brief Derived constructor
+	FunctionDescription( const FunctionDescription& o, const std::string& text_)
+		:m_text(text_ + ": " + o.m_text),m_param(o.m_param){}
+
 	/// \brief Get the description text
 	const std::string& text() const				{return m_text;}
 

@@ -16,6 +16,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
+#include "weightingFunctionSummarizer.hpp"
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -59,6 +60,8 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	definePostingJoinOperator( "contains", op);
 
 	WeightingFunctionInterface* func;
+	SummarizerFunctionInterface* sum;
+
 	if (0==(func=createWeightingFunctionBm25( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "bm25", func);
 	if (0==(func=createWeightingFunctionBm25pff( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
@@ -69,10 +72,12 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	defineWeightingFunction( "constant", func);
 	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "metadata", func);
+
 	if (0==(func=createWeightingFunctionSmart( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
 	defineWeightingFunction( "smart", func);
+	if (0==(sum=createSummarizerFromWeightingFunction( "smart", m_errorhnd, func))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "smart", sum);
 
-	SummarizerFunctionInterface* sum;
 	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "metadata", sum);
 	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));

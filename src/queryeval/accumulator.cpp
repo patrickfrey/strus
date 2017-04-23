@@ -48,6 +48,11 @@ void Accumulator::addAlternativeAclRestriction(
 	m_aclRestrictions.push_back( iterator);
 }
 
+void Accumulator::defineWeightingVariableValue( std::size_t index, const std::string& varname, double value)
+{
+	m_weightingElements[ index]->setVariableValue( varname, value);
+}
+
 bool Accumulator::nextRank(
 		Index& docno,
 		unsigned int& selectorState,

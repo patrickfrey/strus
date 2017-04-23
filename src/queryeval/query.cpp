@@ -545,13 +545,28 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 void Query::setWeightingVariableValue(
 		const std::string& name, double value)
 {
-	if (!m_weightingFormula.get())
+	std::vector<QueryEval::VariableAssignment>
+		assignments = m_queryEval->weightingVariableAssignmentList( name);
+	std::vector<QueryEval::VariableAssignment>::const_iterator
+		ai = assignments.begin(), ae = assignments.end();
+	for (; ai != ae; ++ai)
 	{
-		m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
-	}
-	else
-	{
-		m_weightingFormula->setVariableValue( name, value);
+		switch (ai->target)
+		{
+			case QueryEval::VariableAssignment::WeightingFunction:
+				m_weightingvars.push_back( WeightingVariableValueAssignment( name, ai->index, value));
+				break;
+			case QueryEval::VariableAssignment::SummarizerFunction:
+				m_summaryweightvars.push_back( WeightingVariableValueAssignment( name, ai->index, value));
+				break;
+			case QueryEval::VariableAssignment::FormulaFunction:
+				if (!m_weightingFormula.get())
+				{
+					m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
+				}
+				m_weightingFormula->setVariableValue( name, value);
+				break;
+		}
 	}
 }
 
@@ -633,7 +648,7 @@ QueryResult Query::evaluate() const
 			}
 		}
 		evaluationPhase = "weighting functions initialization";
-		// [4.3] Add features for weighting:
+		// [4.3.1] Add features for weighting:
 		{
 			std::vector<WeightingDef>::const_iterator
 				wi = m_queryEval->weightingFunctions().begin(),
@@ -671,6 +686,14 @@ QueryResult Query::evaluate() const
 				accumulator.addWeightingElement( execContext.release());
 			}
 		}
+		// [4.3.1] Define feature weighting variable values:
+		std::vector<WeightingVariableValueAssignment>::const_iterator
+			vi = m_weightingvars.begin(), ve = m_weightingvars.end();
+		for (; vi != ve; ++vi)
+		{
+			accumulator.defineWeightingVariableValue( vi->index, vi->varname, vi->value);
+		}
+
 		evaluationPhase = "restrictions initialization";
 		// [4.4] Define the user ACL restrictions:
 		std::vector<Reference<InvAclIteratorInterface> > invAclList;
@@ -749,7 +772,7 @@ QueryResult Query::evaluate() const
 			resultlist = ranker.result( m_minRank);
 	
 		evaluationPhase = "summarization";
-		// [6] Create the summarizers:
+		// [6.1] Create the summarizers:
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
 		if (!resultlist.empty())
 		{
@@ -789,6 +812,13 @@ QueryResult Query::evaluate() const
 				}
 			}
 		}
+		// [6.2] Define feature summarizer weighting variable values:
+		vi = m_summaryweightvars.begin(), ve = m_summaryweightvars.end();
+		for (; vi != ve; ++vi)
+		{
+			summarizers[ vi->index]->setVariableValue( vi->varname, vi->value);
+		}
+
 		evaluationPhase = "building of the result";
 		// [7] Build the result:
 		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();

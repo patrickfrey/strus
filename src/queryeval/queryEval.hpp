@@ -15,6 +15,7 @@
 #include "weightingDef.hpp"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace strus {
 
@@ -71,7 +72,7 @@ public:
 	void print( std::ostream& out) const;
 
 
-public:
+public:/*Query*/
 	const std::vector<TermConfig>& terms() const			{return m_terms;}
 	const std::vector<SummarizerDef>& summarizers() const		{return m_summarizers;}
 	const std::vector<std::string>& selectionSets() const		{return m_selectionSets;}
@@ -80,16 +81,36 @@ public:
 	const std::vector<WeightingDef>& weightingFunctions() const	{return m_weightingFunctions;}
 	const ScalarFunctionInterface* weightingFormula() const		{return m_weightingFormula.get();}
 
-private:
-	std::vector<std::string> m_selectionSets;	///< posting sets selecting the documents to match
-	std::vector<std::string> m_restrictionSets;	///< posting sets restricting the documents to match
-	std::vector<std::string> m_exclusionSets;	///< posting sets excluding the documents to match
-	std::vector<WeightingDef> m_weightingFunctions;	///< weighting function configuration
-	std::vector<SummarizerDef> m_summarizers;	///< list of summarizer configurations
-	Reference<ScalarFunctionInterface> m_weightingFormula;	///< scalar function to calculate the weight of a document from the weighting functions defined as parameter
+public:/*Query*/
+	struct VariableAssignment
+	{
+		enum Target {WeightingFunction, SummarizerFunction, FormulaFunction};
+		Target target;
+		std::size_t index;
 
-	std::vector<TermConfig> m_terms;		///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
-	ErrorBufferInterface* m_errorhnd;		///< buffer for error messages
+		VariableAssignment( Target target_, std::size_t index_)
+			:target(target_),index(index_){}
+		VariableAssignment( const VariableAssignment& o)
+			:target(o.target),index(o.index){}
+	};
+	std::vector<VariableAssignment>
+		weightingVariableAssignmentList(
+			const std::string& varname) const;
+
+private:
+	void defineVariableAssignments( const std::vector<std::string>& variables, VariableAssignment::Target target, std::size_t index);
+
+private:
+	std::vector<std::string> m_selectionSets;			///< posting sets selecting the documents to match
+	std::vector<std::string> m_restrictionSets;			///< posting sets restricting the documents to match
+	std::vector<std::string> m_exclusionSets;			///< posting sets excluding the documents to match
+	std::vector<WeightingDef> m_weightingFunctions;			///< weighting function configuration
+	std::vector<SummarizerDef> m_summarizers;			///< list of summarizer configurations
+	Reference<ScalarFunctionInterface> m_weightingFormula;		///< scalar function to calculate the weight of a document from the weighting functions defined as parameter
+
+	std::vector<TermConfig> m_terms;				///< list of predefined terms used in query evaluation but not part of the query (e.g. punctuation)
+	std::multimap<std::string,VariableAssignment> m_varassignmap;	///< map of weight variable assignments
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
 }//namespace

@@ -80,6 +80,10 @@ void QueryEval::addSummarizerFunction(
 	try
 	{
 		Reference<SummarizerFunctionInstanceInterface> functionref( function);
+		defineVariableAssignments(
+			functionref->getVariables(),
+			VariableAssignment::WeightingFunction,
+			m_summarizers.size());
 		m_summarizers.push_back( SummarizerDef( functionName, functionref, featureParameters, debugAttributeName));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding summarization function: %s"), *m_errorhnd);
@@ -94,6 +98,10 @@ void QueryEval::addWeightingFunction(
 	try
 	{
 		Reference<WeightingFunctionInstanceInterface> functionref( function);
+		defineVariableAssignments(
+			functionref->getVariables(),
+			VariableAssignment::WeightingFunction,
+			m_weightingFunctions.size());
 		m_weightingFunctions.push_back( WeightingDef( functionref, functionName, featureParameters, debugAttributeName));
 	}
 	CATCH_ERROR_MAP( _TXT("error adding weighting function: %s"), *m_errorhnd);
@@ -102,7 +110,15 @@ void QueryEval::addWeightingFunction(
 void QueryEval::defineWeightingFormula(
 		ScalarFunctionInterface* combinefunc)
 {
-	m_weightingFormula.reset( combinefunc);
+	try
+	{
+		m_weightingFormula.reset( combinefunc);
+		defineVariableAssignments(
+			combinefunc->getVariables(),
+			VariableAssignment::FormulaFunction,
+			0);
+	}
+	CATCH_ERROR_MAP( _TXT("error adding weighting formula: %s"), *m_errorhnd);
 }
 
 void QueryEval::print( std::ostream& out) const
@@ -178,6 +194,27 @@ void QueryEval::print( std::ostream& out) const
 	CATCH_ERROR_MAP( _TXT("error printing query evaluation structure: %s"), *m_errorhnd);
 }
 
+void QueryEval::defineVariableAssignments( const std::vector<std::string>& variables, VariableAssignment::Target target, std::size_t index)
+{
+	std::vector<std::string>::const_iterator vi = variables.begin(), ve = variables.end();
+	for (; vi != ve; ++vi)
+	{
+		m_varassignmap.insert( std::pair<std::string, VariableAssignment>( *vi, VariableAssignment( target, index)));
+	}
+}
+
+std::vector<QueryEval::VariableAssignment> QueryEval::weightingVariableAssignmentList( const std::string& varname) const
+{
+	std::vector<VariableAssignment> rt;
+	typedef std::multimap<std::string,VariableAssignment>::const_iterator map_const_iterator;
+	std::pair<map_const_iterator,map_const_iterator> range = m_varassignmap.equal_range( varname);
+	map_const_iterator ri = range.first, re = range.second;
+	for (; ri != re; ++ri)
+	{
+		rt.push_back( ri->second);
+	}
+	return rt;
+}
 
 QueryInterface* QueryEval::createQuery( const StorageClientInterface* storage) const
 {
