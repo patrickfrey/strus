@@ -24,6 +24,11 @@
 using namespace strus;
 #define METHOD_NAME "matchpos"
 
+void SummarizerFunctionContextListMatches::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
+
 void SummarizerFunctionContextListMatches::addSummarizationFeature(
 		const std::string& name,
 		PostingIteratorInterface* itr,

@@ -39,6 +39,8 @@ public:
 			double weight_,
 			ErrorBufferInterface* errorhnd_);
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual void addWeightingFeature(
 			const std::string&,
 			PostingIteratorInterface*,
@@ -70,6 +72,11 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,

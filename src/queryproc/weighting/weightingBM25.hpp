@@ -74,6 +74,8 @@ public:
 			double weight_,
 			const TermStatistics& stats_);
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual double call( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
@@ -104,6 +106,11 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,

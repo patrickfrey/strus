@@ -39,6 +39,11 @@ public:
 			double weight_,
 			const TermStatistics& stats_)=0;
 
+	/// \brief Set the value of a query variable
+	/// \param[in] name name of the variable
+	/// \param[in] value value of the variable
+	virtual void setVariableValue( const std::string& name, double value)=0;
+
 	/// \brief Call the weighting function for a document
 	/// \param[in] docno document number
 	/// \return the calculated weight of the document

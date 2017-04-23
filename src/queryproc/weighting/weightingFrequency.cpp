@@ -41,6 +41,11 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd);
 }
 
+void WeightingFunctionContextTermFrequency::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
+
 double WeightingFunctionContextTermFrequency::call( const Index& docno)
 {
 	double rt = 0.0;

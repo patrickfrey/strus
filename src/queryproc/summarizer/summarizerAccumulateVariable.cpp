@@ -45,6 +45,10 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 	if (m_data->var.empty()) throw strus::runtime_error(_TXT("no variable to extract defined (parameter 'var')"));
 }
 
+void SummarizerFunctionContextAccumulateVariable::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
 
 void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 		const std::string& name,

@@ -36,6 +36,11 @@ SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData(
 	}
 }
 
+void SummarizerFunctionContextMetaData::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
+
 void SummarizerFunctionContextMetaData::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,

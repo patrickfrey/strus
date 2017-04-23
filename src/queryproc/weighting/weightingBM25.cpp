@@ -44,6 +44,11 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	}
 }
 
+void WeightingFunctionContextBM25::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
+
 void WeightingFunctionContextBM25::addWeightingFeature(
 		const std::string& name_,
 		PostingIteratorInterface* itr_,

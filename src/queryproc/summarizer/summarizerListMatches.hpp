@@ -42,6 +42,8 @@ public:
 			double /*weight*/,
 			const TermStatistics&);
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
 
 	virtual std::string debugCall( const Index& docno);
@@ -71,6 +73,11 @@ public:
 	virtual void defineResultName(
 			const std::string& resultname,
 			const std::string& itemname);
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,

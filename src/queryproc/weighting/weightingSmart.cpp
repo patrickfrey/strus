@@ -64,6 +64,11 @@ void WeightingFunctionContextSmart::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
 }
 
+void WeightingFunctionContextSmart::setVariableValue( const std::string& name, double value)
+{
+	m_func->setVariableValue( name, value);
+}
+
 void WeightingFunctionContextSmart::fillParameter( const Index& docno, double ff, double df, double* param) const
 {
 	param[ 0] = ff;
@@ -179,6 +184,46 @@ void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& nam
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
 }
 
+void WeightingFunctionInstanceSmart::initFunction() const
+{
+	if (!m_parser)
+	{
+		m_parser = m_queryproc->getScalarFunctionParser("");
+		if (!m_parser)
+		{
+			throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
+		}
+	}
+	// ... if the function has not yet be created, we create it (mutable m_func)
+	std::vector<std::string> arguments;
+	arguments.push_back( "ff");
+	arguments.push_back( "df");
+	arguments.push_back( "N");
+	arguments.insert( arguments.end(), m_metadataar.begin(), m_metadataar.end());
+	m_func.reset( m_parser->createFunction( m_expression, arguments));
+	if (!m_func.get())
+	{
+		throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
+	}
+	std::vector<std::pair<std::string,double> >::const_iterator
+		pi = m_paramar.begin(), pe = m_paramar.end();
+	for (; pi != pe; ++pi)
+	{
+		m_func->setDefaultVariableValue( pi->first, pi->second);
+	}
+}
+
+std::vector<std::string> WeightingFunctionInstanceSmart::getVariables() const
+{
+	try
+	{
+		if (!m_func.get()) initFunction();
+	
+		return m_func->getVariables();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd, std::vector<std::string>());
+}
+
 WeightingFunctionContextInterface* WeightingFunctionInstanceSmart::createFunctionContext(
 		const StorageClientInterface* storage_,
 		MetaDataReaderInterface* metadata,
@@ -186,34 +231,8 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceSmart::createFunctio
 {
 	try
 	{
-		if (!m_func.get())
-		{
-			if (!m_parser)
-			{
-				m_parser = m_queryproc->getScalarFunctionParser("");
-				if (!m_parser)
-				{
-					throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
-				}
-			}
-			// ... if the function has not yet be created, we create it (mutable m_func)
-			std::vector<std::string> arguments;
-			arguments.push_back( "ff");
-			arguments.push_back( "df");
-			arguments.push_back( "N");
-			arguments.insert( arguments.end(), m_metadataar.begin(), m_metadataar.end());
-			m_func.reset( m_parser->createFunction( m_expression, arguments));
-			if (!m_func.get())
-			{
-				throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
-			}
-			std::vector<std::pair<std::string,double> >::const_iterator
-				pi = m_paramar.begin(), pe = m_paramar.end();
-			for (; pi != pe; ++pi)
-			{
-				m_func->setDefaultVariableValue( pi->first, pi->second);
-			}
-		}
+		if (!m_func.get()) initFunction();
+
 		std::vector<Index> metadatahnd;
 		std::vector<std::string>::const_iterator mi = m_metadataar.begin(), me = m_metadataar.end();
 		for (; mi != me; ++mi)

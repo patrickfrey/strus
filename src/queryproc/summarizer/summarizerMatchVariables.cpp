@@ -42,6 +42,10 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
 }
 
+void SummarizerFunctionContextMatchVariables::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
 
 void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 		const std::string& name,

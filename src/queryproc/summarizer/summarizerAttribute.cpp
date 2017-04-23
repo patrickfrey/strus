@@ -34,6 +34,11 @@ SummarizerFunctionContextAttribute::SummarizerFunctionContextAttribute(
 	}
 }
 
+void SummarizerFunctionContextAttribute::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
+
 void SummarizerFunctionContextAttribute::addSummarizationFeature(
 		const std::string&,
 		PostingIteratorInterface*,

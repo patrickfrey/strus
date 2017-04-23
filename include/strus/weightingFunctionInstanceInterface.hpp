@@ -52,6 +52,10 @@ public:
 			MetaDataReaderInterface* metadata_,
 			const GlobalStatistics& stats) const=0;
 
+	/// \brief Get the list of variables used by this function defined in the query with 'QueryInterface::setWeightingVariableValue( const std::string&, double)'
+	/// \return the list of variables
+	virtual std::vector<std::string> getVariables() const=0;
+
 	/// \brief Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)
 	/// \return the parameter list as string
 	virtual std::string tostring() const=0;

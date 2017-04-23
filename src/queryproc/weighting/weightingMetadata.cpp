@@ -37,6 +37,11 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 	}
 }
 
+void WeightingFunctionContextMetadata::setVariableValue( const std::string& name, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
+
 void WeightingFunctionContextMetadata::addWeightingFeature(
 		const std::string&,
 		PostingIteratorInterface*,

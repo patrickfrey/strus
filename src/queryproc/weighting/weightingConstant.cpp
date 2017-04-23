@@ -47,6 +47,11 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd);
 }
 
+void WeightingFunctionContextConstant::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
+
 double WeightingFunctionContextConstant::call( const Index& docno)
 {
 	double rt = 0.0;
