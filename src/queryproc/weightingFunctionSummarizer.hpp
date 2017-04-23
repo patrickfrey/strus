@@ -22,7 +22,11 @@ class WeightingFunctionInterface;
 /// \brief Forward declaration
 class SummarizerFunctionInterface;
 
-SummarizerFunctionInterface* createSummarizerFromWeightingFunction( const std::string& name_, ErrorBufferInterface* errorhnd_, const WeightingFunctionInterface* func_);
+SummarizerFunctionInterface*
+	createSummarizerFromWeightingFunction(
+		const std::string& name_,
+		ErrorBufferInterface* errorhnd_,
+		const WeightingFunctionInterface* func_);
 
 } //namespace
 #endif
