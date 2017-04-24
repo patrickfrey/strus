@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 using namespace strus;
 
@@ -107,7 +108,18 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					double a1 = stk[ stk.size() -2];
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
-					stk.push_back( a1 / a2);
+					if (std::fabs( a1) < std::numeric_limits<double>::epsilon())
+					{
+						stk.push_back( 0.0);
+					}
+					else if (std::fabs( a2) < std::numeric_limits<double>::epsilon())
+					{
+						throw strus::runtime_error(_TXT("division by zero"));
+					}
+					else
+					{
+						stk.push_back( a1 / a2);
+					}
 #ifdef STRUS_LOWLEVEL_DEBUG
 					std::cout << "PUSH " << stk.back() << std::endl;
 #endif

@@ -543,6 +543,7 @@ ScalarFunctionInterface*
 			throw strus::runtime_error( _TXT( "unexpected characters at end of expression: '%s'"), expr.c_str());
 		}
 
+#ifdef DISABLED_BECAUSE_OF_ISSUE_94
 		// Special treatment of linear combination:
 		std::vector<double> linearcomb_factors;
 		if (func->isLinearComb( linearcomb_factors))
@@ -555,6 +556,11 @@ ScalarFunctionInterface*
 			func.release();
 			return rt;
 		}
+#else
+		// Return built function to caller:
+		func.release();
+		return rt;
+#endif
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error parsing and creating scalar function: %s"), *m_errorhnd, 0);
 }

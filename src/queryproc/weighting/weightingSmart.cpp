@@ -74,7 +74,8 @@ void WeightingFunctionContextSmart::fillParameter( const Index& docno, double ff
 	param[ 0] = ff;
 	param[ 1] = df;
 	param[ 2] = m_nofCollectionDocuments;
-	std::size_t pi = 3;
+	param[ 3] = m_featar.size();
+	std::size_t pi = 4;
 	std::vector<Index>::const_iterator mi = m_metadatahnd.begin(), me = m_metadatahnd.end();
 	for (; mi != me; ++mi)
 	{
@@ -89,15 +90,25 @@ double WeightingFunctionContextSmart::call( const Index& docno)
 		m_metadata->skipDoc( docno);
 	}
 	double rt = 0.0;
-	unsigned int nofParam = m_metadatahnd.size()+3;
+	unsigned int nofParam = m_metadatahnd.size()+4;
 
-	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
-	for (; fi != fe; ++fi)
+	if (m_featar.empty())
 	{
-		double param[ MaxNofParameter+3];
-		fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+		double param[ MaxNofParameter+4];
+		fillParameter( docno, 0, 0, param);
 
 		rt += m_func->call( param, nofParam);
+	}
+	else
+	{
+		FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (; fi != fe; ++fi)
+		{
+			double param[ MaxNofParameter+4];
+			fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+
+			rt += m_func->call( param, nofParam) * fi->weight();
+		}
 	}
 	return rt;
 }
@@ -113,12 +124,12 @@ std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
 		m_metadata->skipDoc( docno);
 	}
 	double res = 0.0;
-	unsigned int nofParam = m_metadatahnd.size()+3;
+	unsigned int nofParam = m_metadatahnd.size()+4;
 
 	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
 	for (unsigned int fidx=0; fi != fe; ++fi,++fidx)
 	{
-		double param[ MaxNofParameter+3];
+		double param[ MaxNofParameter+4];
 		fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
 
 		double ww = m_func->call( param, nofParam);
@@ -126,10 +137,10 @@ std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
 		out << string_format( _TXT( "[%u] result=%f, ff=%u, df=%u, N=%u"),
 					fidx, ww, (unsigned int)fi->ff(), (unsigned int)(fi->df()+0.5), (unsigned int)m_nofCollectionDocuments) << std::endl;			
 		
-		unsigned int pi=3, pe=nofParam;
+		unsigned int pi=4, pe=nofParam;
 		for (; pi != pe; ++pi)
 		{
-			out << string_format( _TXT( ", x%u=%f"), pi, param[pi+3]);
+			out << string_format( _TXT( ", x%u=%f"), pi, param[pi+4]);
 		}
 		out << std::endl;
 	}
@@ -199,6 +210,7 @@ void WeightingFunctionInstanceSmart::initFunction() const
 	arguments.push_back( "ff");
 	arguments.push_back( "df");
 	arguments.push_back( "N");
+	arguments.push_back( "qf");
 	arguments.insert( arguments.end(), m_metadataar.begin(), m_metadataar.end());
 	m_func.reset( m_parser->createFunction( m_expression, arguments));
 	if (!m_func.get())

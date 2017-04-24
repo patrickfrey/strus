@@ -771,11 +771,12 @@ QueryResult Query::evaluate() const
 		std::vector<WeightedDocument>
 			resultlist = ranker.result( m_minRank);
 	
+		// [6] Summarization:
 		evaluationPhase = "summarization";
-		// [6.1] Create the summarizers:
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
 		if (!resultlist.empty())
 		{
+			// [6.1] Create the summarizers:
 			std::vector<SummarizerDef>::const_iterator
 				zi = m_queryEval->summarizers().begin(),
 				ze = m_queryEval->summarizers().end();
@@ -811,12 +812,12 @@ QueryResult Query::evaluate() const
 					}
 				}
 			}
-		}
-		// [6.2] Define feature summarizer weighting variable values:
-		vi = m_summaryweightvars.begin(), ve = m_summaryweightvars.end();
-		for (; vi != ve; ++vi)
-		{
-			summarizers[ vi->index]->setVariableValue( vi->varname, vi->value);
+			// [6.2] Define feature summarizer weighting variable values:
+			vi = m_summaryweightvars.begin(), ve = m_summaryweightvars.end();
+			for (; vi != ve; ++vi)
+			{
+				summarizers[ vi->index]->setVariableValue( vi->varname, vi->value);
+			}
 		}
 
 		evaluationPhase = "building of the result";
