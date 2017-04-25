@@ -16,7 +16,7 @@
 
 using namespace strus;
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 void ScalarFunctionInstance::setVariableValue( const std::string& name, double value)
 {

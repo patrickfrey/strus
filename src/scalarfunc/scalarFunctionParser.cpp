@@ -17,7 +17,7 @@
 #include <cmath>
 
 using namespace strus;
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 static double if_greater( unsigned int nofargs, const double* args)
 {
