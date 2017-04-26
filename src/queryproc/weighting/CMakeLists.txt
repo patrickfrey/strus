@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set(source_files
 	weighting_standard.cpp
 	weightingSmart.cpp
+	weightingScalar.cpp
 	weightingBM25.cpp
 	weightingBM25pff.cpp
 	weightingFrequency.cpp

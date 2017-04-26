@@ -78,6 +78,11 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	if (0==(sum=createSummarizerFromWeightingFunction( "smart", m_errorhnd, func))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "smart", sum);
 
+	if (0==(func=createWeightingFunctionScalar( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	defineWeightingFunction( "scalar", func);
+	if (0==(sum=createSummarizerFromWeightingFunction( "scalar", m_errorhnd, func))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "scalar", sum);
+
 	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "metadata", sum);
 	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
