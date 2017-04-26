@@ -185,7 +185,7 @@ static double parseNumber( std::string::const_iterator& si, const std::string::c
 void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ctx, std::string::const_iterator& si, const std::string::const_iterator& se) const
 {
 #ifdef STRUS_LOWLEVEL_DEBUG
-	std::cout << "enter parseOperand [" << std::string(si,se) << "]" << std::endl;
+	std::cerr << "enter parseOperand [" << std::string(si,se) << "]" << std::endl;
 #endif
 	skipSpaces( si, se);
 	if (si == se)
@@ -255,7 +255,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 			{
 				func->addOpPushArgument( argid);
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "parse argument id " << argid << std::endl;
+				std::cerr << "parse argument id " << argid << std::endl;
 #endif
 			}
 		}
@@ -278,7 +278,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 			double val = parseNumber( si, se);
 			func->addOpPushConstant( val);
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "parse number " << val << std::endl;
+			std::cerr << "parse number " << val << std::endl;
 #endif
 		}
 		else
@@ -288,7 +288,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 			{
 				func->addOp( ScalarFunction::OpNeg);
 #ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "parse negation" << std::endl;
+				std::cerr << "parse negation" << std::endl;
 #endif
 			}
 		}
@@ -299,13 +299,13 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 		double val = parseNumber( si, se);
 		func->addOpPushConstant( val);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "parse number " << val << std::endl;
+		std::cerr << "parse number " << val << std::endl;
 #endif
 	}
 	else if (*si == '(')
 	{
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "start subexpression" << std::endl;
+		std::cerr << "start subexpression" << std::endl;
 #endif
 		// ... sub expression
 		++si;
@@ -317,7 +317,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 		}
 		++si;
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "end subexpression" << std::endl;
+		std::cerr << "end subexpression" << std::endl;
 #endif
 	}
 	else
@@ -333,14 +333,14 @@ void ScalarFunctionParser::resolveIdentifier( ScalarFunction* func, ParserContex
 	{
 		func->addOpPushVariable( var);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "parse variable " << var << std::endl;
+		std::cerr << "parse variable " << var << std::endl;
 #endif
 	}
 	else
 	{
 		func->addOpPushArgument( ai->second);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "parse argument id " << ai->second << std::endl;
+		std::cerr << "parse argument id " << ai->second << std::endl;
 #endif
 	}
 }
@@ -357,7 +357,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 		{
 			func->addOpUnaryFunctionCall( ufi->second);
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "parse unary function call " << functionName << " " << nofArguments << std::endl;
+			std::cerr << "parse unary function call " << functionName << " " << nofArguments << std::endl;
 #endif
 			return;
 		}
@@ -371,7 +371,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 		{
 			func->addOpBinaryFunctionCall( bfi->second);
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "parse binary function call " << functionName << " " << nofArguments << std::endl;
+			std::cerr << "parse binary function call " << functionName << " " << nofArguments << std::endl;
 #endif
 			return;
 		}
@@ -383,7 +383,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 		else if (nofArguments < nfi->second.min_nofargs) throw strus::runtime_error( _TXT("too few arguments in N-ary function call"));
 		func->addOpNaryFunctionCall( nofArguments, nfi->second.func);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "parse N-ary function call " << functionName << " " << nofArguments << std::endl;
+		std::cerr << "parse N-ary function call " << functionName << " " << nofArguments << std::endl;
 #endif
 		return;
 	}
@@ -469,7 +469,7 @@ void ScalarFunctionParser::parseExpression( ScalarFunction* func, ParserContext*
 		parseExpression( func, ctx, oprPrecedence, si, se);
 		func->addOp( opCode);
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "parse operator " << ScalarFunction::opCodeName( opCode) << std::endl;
+		std::cerr << "parse operator " << ScalarFunction::opCodeName( opCode) << std::endl;
 #endif
 		skipSpaces( si, se);
 		if (si == se)
@@ -543,6 +543,10 @@ ScalarFunctionInterface*
 			throw strus::runtime_error( _TXT( "unexpected characters at end of expression: '%s'"), expr.c_str());
 		}
 
+#ifdef STRUS_LOWLEVEL_DEBUG
+		std::cerr << "loaded function:" << std::endl;
+		std::cerr << rt->tostring() << std::endl;
+#endif
 #ifdef DISABLED_BECAUSE_OF_ISSUE_94
 		// Special treatment of linear combination:
 		std::vector<double> linearcomb_factors;

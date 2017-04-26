@@ -42,13 +42,13 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 		for (;m_func->hasInstruction(ip); ++ip)
 		{
 #ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "EXECUTE [" << ip << "] " << ScalarFunction::opCodeName( m_func->opCode(ip)) << " " << m_func->getIndexOperand( ip) << std::endl;
+			std::cerr << "EXECUTE [" << ip << "] " << ScalarFunction::opCodeName( m_func->opCode(ip)) << " " << m_func->getIndexOperand( ip) << std::endl;
 #endif
 			switch (m_func->opCode(ip))
 			{
 				case ScalarFunction::OpLdCnt:
 				{
-					idxreg = m_func->getIndexOperand( ip, stk.size());
+					idxreg = m_func->getIndexOperand( ip, stk.size()+1);
 					break;
 				}
 				case ScalarFunction::OpPush:
@@ -56,7 +56,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					std::size_t validx = m_func->getIndexOperand( ip, m_valuear.size());
 					stk.push_back( m_valuear[ validx]);
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -65,7 +65,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					std::size_t validx = m_func->getIndexOperand( ip, nofargs);
 					stk.push_back( args[ validx]);
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -74,7 +74,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					if (stk.size() < 1) throw strus::runtime_error(_TXT("illegal stack operation"));
 					stk.back() = -stk.back();
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -86,7 +86,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					stk.resize( stk.size() -2);
 					stk.push_back( a1 + a2);
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -98,7 +98,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					stk.resize( stk.size() -2);
 					stk.push_back( a1 - a2);
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -121,7 +121,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 						stk.push_back( a1 / a2);
 					}
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -133,7 +133,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					stk.resize( stk.size() -2);
 					stk.push_back( a1 * a2);
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -145,7 +145,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					ScalarFunction::UnaryFunction func = m_func->getUnaryFunctionOperand( ip);
 					stk.push_back( func( a1));
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -158,7 +158,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					ScalarFunction::BinaryFunction func = m_func->getBinaryFunctionOperand( ip);
 					stk.push_back( func( a1, a2));
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
@@ -171,14 +171,14 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					stk.resize( stk.size() - idxreg);
 					stk.push_back( res);
 #ifdef STRUS_LOWLEVEL_DEBUG
-					std::cout << "PUSH " << stk.back() << std::endl;
+					std::cerr << "PUSH " << stk.back() << std::endl;
 #endif
 					break;
 				}
 			}
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "RESULT " << (stk.size()?stk.back():0.0) << std::endl;
+		std::cerr << "RESULT " << (stk.size()?stk.back():0.0) << std::endl;
 #endif
 		return stk.size()?stk.back():0.0;
 	}
