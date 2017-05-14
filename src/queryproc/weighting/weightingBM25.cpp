@@ -139,7 +139,7 @@ std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
 		if (m_parameter.b)
 		{
 			m_metadata->skipDoc( docno);
-			doclen = m_metadata->getValue( m_metadata_doclen);
+			doclen = m_metadata->getValue( m_metadata_doclen).touint();
 		}
 		out << string_format( _TXT("[%u] result=%f, ff=%u, idf=%f, weight=%f, doclen=%u"),
 					fidx, ww, (unsigned int)fi->itr->frequency(), fi->idf,

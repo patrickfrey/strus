@@ -105,7 +105,7 @@ static bool compareFunctionGreaterEqualFloat16( const NumericVariant& op1, const
 
 static bool compareFunctionEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 == (int)op2;
+	return op1.toint() == op2.toint();
 }
 
 static bool compareFunctionNotEqualInt( const NumericVariant& op1, const NumericVariant& op2)
@@ -115,27 +115,27 @@ static bool compareFunctionNotEqualInt( const NumericVariant& op1, const Numeric
 
 static bool compareFunctionLessInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 < (int)op2;
+	return op1.toint() < op2.toint();
 }
 
 static bool compareFunctionLessEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 <= (int)op2;
+	return op1.toint() <= op2.toint();
 }
 
 static bool compareFunctionGreaterInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 > (int)op2;
+	return op1.toint() > op2.toint();
 }
 
 static bool compareFunctionGreaterEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 >= (int)op2;
+	return op1.toint() >= op2.toint();
 }
 
 static bool compareFunctionEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 == (unsigned int)op2;
+	return op1.touint() == op2.touint();
 }
 
 static bool compareFunctionNotEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
@@ -145,22 +145,22 @@ static bool compareFunctionNotEqualUInt( const NumericVariant& op1, const Numeri
 
 static bool compareFunctionLessUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 < (unsigned int)op2;
+	return op1.touint() < op2.touint();
 }
 
 static bool compareFunctionLessEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 <= (unsigned int)op2;
+	return op1.touint() <= op2.touint();
 }
 
 static bool compareFunctionGreaterUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 > (unsigned int)op2;
+	return op1.touint() > op2.touint();
 }
 
 static bool compareFunctionGreaterEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 >= (unsigned int)op2;
+	return op1.touint() >= op2.touint();
 }
 
 static const char* compareOperatorName( MetaDataRestrictionInterface::CompareOperator op)

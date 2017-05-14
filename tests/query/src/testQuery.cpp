@@ -141,7 +141,7 @@ public:
 				}
 			}
 			doc->addSearchIndexTerm( "word", docid, 3);
-			doc->setMetaData( "docno", di);
+			doc->setMetaData( "docno", (strus::NumericVariant::IntType)di);
 			doc->setAttribute( "docid", docid);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "add search index term \"word\" \"" << docid << "\"" << std::endl;
@@ -332,12 +332,12 @@ static void testSingleTermQueryWithRestrictionInclMetadata( const strus::QueryPr
 	query->pushTerm( "prim", "3", 1);
 	query->pushExpression( operation_OR, 2, 0, 0);
 	query->defineFeature( "res");
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareLess, "docno", 9, true);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareGreater, "docno", 2, true);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 3, true);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 4, false);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 5, false);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 6, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareLess, "docno", (strus::NumericVariant::IntType)9, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareGreater, "docno", (strus::NumericVariant::IntType)2, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)3, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)4, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)5, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)6, false);
 
 	strus::QueryResult result = query->evaluate();
 #ifdef STRUS_LOWLEVEL_DEBUG

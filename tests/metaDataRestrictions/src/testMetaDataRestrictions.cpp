@@ -40,7 +40,7 @@ static void initRand()
 }
 #define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 class MetaDataReader
 	:public strus::MetaDataReaderInterface
@@ -147,22 +147,22 @@ static strus::MetaDataRecord randomMetaDataRecord(
 		switch (elem->type())
 		{
 			case strus::MetaDataElement::Int8:
-				val = strus::NumericVariant((int)RANDINT(0,0xfFU)-0x7f);
+				val = strus::NumericVariant((strus::NumericVariant::IntType)RANDINT(0,0xfFU)-0x7f);
 				break;
 			case strus::MetaDataElement::UInt8:
-				val = strus::NumericVariant( (unsigned int)RANDINT(0,0xfFU));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,0xfFU));
 				break;
 			case strus::MetaDataElement::Int16:
-				val = strus::NumericVariant( (int)RANDINT(0,0xffFFU)-0x7fFF);
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)RANDINT(0,0xffFFU)-0x7fFF);
 				break;
 			case strus::MetaDataElement::UInt16:
-				val = strus::NumericVariant( (unsigned int)RANDINT(0,0xffFFU));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,0xffFFU));
 				break;
 			case strus::MetaDataElement::Int32:
-				val = strus::NumericVariant( (int)(RANDINT(0,0xffffFFFFUL) - 0x7fffFFFFL));
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT(0,0xffffFFFFUL) - 0x7fffFFFFL));
 				break;
 			case strus::MetaDataElement::UInt32:
-				val = strus::NumericVariant( (unsigned int)(RANDINT(0,0xffffFFFFL)));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)(RANDINT(0,0xffffFFFFL)));
 				break;
 			case strus::MetaDataElement::Float16:
 				val = strus::NumericVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
@@ -179,7 +179,8 @@ static strus::MetaDataRecord randomMetaDataRecord(
 		valar.push_back( val);
 	}
 	std::vector<strus::NumericVariant>::const_iterator vi = valar.begin(), ve = valar.end();
-	for (ci = columns.begin(); ci != ce && vi != ve; ++ci,++vi)
+	int cidx = 0;
+	for (ci = columns.begin(); ci != ce && vi != ve; ++ci,++vi,++cidx)
 	{
 		strus::Index eh = descr->getHandle( *ci);
 		const strus::MetaDataElement* elem = descr->get(eh);
@@ -187,7 +188,7 @@ static strus::MetaDataRecord randomMetaDataRecord(
 #ifdef STRUS_LOWLEVEL_DEBUG
 		strus::NumericVariant::String valstr( val);
 		strus::NumericVariant::String vistr( *vi);
-		std::cerr << "check value " << valstr.c_str() << " == " << vistr.c_str() << std::endl;
+		std::cerr << "[" << cidx << "] check value " << valstr.c_str() << " == " << vistr.c_str() << std::endl;
 #endif
 		if (!isValueEqual( elem->type(), val, *vi))
 		{
@@ -269,7 +270,7 @@ static strus::NumericVariant randomOperand(
 			return strus::NumericVariant();
 		case strus::NumericVariant::Int:
 		{
-			int value = (int)baseValue;
+			int value = baseValue.toint();
 			if (ofs < 0)
 			{
 				if (-ofs > value)
@@ -281,11 +282,11 @@ static strus::NumericVariant randomOperand(
 			{
 				throw RandomDataException();
 			}
-			return strus::NumericVariant( value + ofs);
+			return strus::NumericVariant( (strus::NumericVariant::IntType)value + ofs);
 		}
 		case strus::NumericVariant::UInt:
 		{
-			unsigned int value = (unsigned int)baseValue;
+			unsigned int value = baseValue.touint();
 			if (ofs < 0)
 			{
 				if ((unsigned int)-ofs > value)
@@ -299,11 +300,11 @@ static strus::NumericVariant randomOperand(
 			}
 			if (ofs < 0)
 			{
-				return strus::NumericVariant( value - (unsigned int)-ofs);
+				return strus::NumericVariant( (strus::NumericVariant::UIntType)value - (strus::NumericVariant::UIntType)-ofs);
 			}
 			else
 			{
-				return strus::NumericVariant( value + (unsigned int)ofs);
+				return strus::NumericVariant( (strus::NumericVariant::UIntType)value + (strus::NumericVariant::UIntType)ofs);
 			}
 		}
 		case strus::NumericVariant::Float:
@@ -366,7 +367,7 @@ static strus::Reference<strus::MetaDataRestrictionInstanceInterface>
 		const strus::MetaDataDescription* descr,
 		const strus::MetaDataRecord& rec,
 		bool positiveResult,
-		std::string expressionstr)
+		std::string& expressionstr)
 {
 	std::vector<strus::MetaDataCompareOperation> ops;
 	unsigned int ri = 0, re = RANDINT(1,6);

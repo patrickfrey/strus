@@ -641,8 +641,8 @@ struct DocumentBuilder
 			char metadataname[ 32];
 			snprintf( metadataname, sizeof(metadataname), "M%1u", mi);
 			char metadatavalue[ 32];
-			snprintf( metadatavalue, sizeof(metadatavalue), "m%1u", mi * 11);
-			
+			snprintf( metadatavalue, sizeof(metadatavalue), "%1u", mi * 11);
+
 			rt.push_back( Feature( Feature::MetaData, metadataname, metadatavalue));
 		}
 		return rt;
@@ -666,8 +666,11 @@ static void insertDocument( strus::StorageDocumentInterface* doc, const std::vec
 				doc->setAttribute( fi->type, fi->value);
 				break;
 			case Feature::MetaData:
-				doc->setMetaData( fi->type, (unsigned int)atoi(fi->value.c_str()));
+			{
+				strus::NumericVariant::UIntType val = atoi(fi->value.c_str());
+				doc->setMetaData( fi->type, val);
 				break;
+			}
 		}
 	}
 	doc->done();

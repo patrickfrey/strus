@@ -841,19 +841,19 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	}
 	else if (utils::caseInsensitiveEquals( name, "paragraphsize"))
 	{
-		m_parameter->m_paragraphsize = (unsigned int)value;
+		m_parameter->m_paragraphsize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 	{
-		m_parameter->m_sentencesize = (unsigned int)value;
+		m_parameter->m_sentencesize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "windowsize"))
 	{
-		m_parameter->m_windowsize = (unsigned int)value;
+		m_parameter->m_windowsize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "cardinality"))
 	{
-		m_parameter->m_cardinality = (unsigned int)value;
+		m_parameter->m_cardinality = value.touint();
 		m_parameter->m_cardinality_frac = 0.0;
 	}
 	else if (utils::caseInsensitiveEquals( name, "maxdf"))

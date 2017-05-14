@@ -552,15 +552,15 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 	}
 	else if (utils::caseInsensitiveEquals( name, "paragraphsize"))
 	{
-		m_parameter.paragraphsize = (unsigned int)value;
+		m_parameter.paragraphsize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 	{
-		m_parameter.sentencesize = (unsigned int)value;
+		m_parameter.sentencesize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "windowsize"))
 	{
-		m_parameter.windowsize = (unsigned int)value;
+		m_parameter.windowsize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "cardinality"))
 	{

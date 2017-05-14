@@ -199,17 +199,17 @@ static inline ValueType getValue_( const MetaDataDescription& descr, const void*
 	throw strus::logic_error( _TXT( "unknown meta data type"));
 }
 
-void MetaDataRecord::setValueInt( const MetaDataElement* elem, int32_t value_)
+void MetaDataRecord::setValueInt( const MetaDataElement* elem, int64_t value_)
 {
 	setValue_( *m_descr, m_ptr, elem, value_);
 }
 
-void MetaDataRecord::setValueUInt( const MetaDataElement* elem, uint32_t value_)
+void MetaDataRecord::setValueUInt( const MetaDataElement* elem, uint64_t value_)
 {
 	setValue_( *m_descr, m_ptr, elem, value_);
 }
 
-void MetaDataRecord::setValueFloat( const MetaDataElement* elem, float value_)
+void MetaDataRecord::setValueFloat( const MetaDataElement* elem, double value_)
 {
 	setValue_( *m_descr, m_ptr, elem, value_);
 }
@@ -245,28 +245,28 @@ NumericVariant MetaDataRecord::getValue( const MetaDataElement* elem) const
 	switch (elem->type())
 	{
 		case MetaDataElement::Int8:
-			return NumericVariant( (int)*(int8_t*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( (int64_t)*(int8_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt8:
-			return NumericVariant( (unsigned int)*(uint8_t*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( (uint64_t)*(uint8_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Int16:
-			return NumericVariant( (int)*(int16_t*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( (int64_t)*(int16_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt16:
-			return NumericVariant( (unsigned int)*(uint16_t*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( (uint64_t)*(uint16_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Int32:
-			return NumericVariant( (int)*(int32_t*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( (int64_t)*(int32_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::UInt32:
-			return NumericVariant( (unsigned int)*(uint32_t*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( (uint64_t)*(uint32_t*)((const char*)m_ptr + elem->ofs()));
 
 		case MetaDataElement::Float16:
 			return NumericVariant( floatHalfToSinglePrecision( *(float16_t*)((const char*)m_ptr + elem->ofs())));
 
 		case MetaDataElement::Float32:
-			return NumericVariant( *(float*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( *(double*)((const char*)m_ptr + elem->ofs()));
 	}
 	return NumericVariant();
 }
