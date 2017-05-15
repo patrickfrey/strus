@@ -266,7 +266,7 @@ NumericVariant MetaDataRecord::getValue( const MetaDataElement* elem) const
 			return NumericVariant( floatHalfToSinglePrecision( *(float16_t*)((const char*)m_ptr + elem->ofs())));
 
 		case MetaDataElement::Float32:
-			return NumericVariant( *(double*)((const char*)m_ptr + elem->ofs()));
+			return NumericVariant( (double)*(float*)((const char*)m_ptr + elem->ofs()));
 	}
 	return NumericVariant();
 }
