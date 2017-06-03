@@ -117,10 +117,7 @@ int MetaDataDescription::getHandle( const std::string& name_) const
 {
 	std::map<std::string,std::size_t>::const_iterator
 		ni = m_namemap.find( utils::tolower( name_));
-	if (ni == m_namemap.end())
-	{
-		throw strus::runtime_error( _TXT( "meta data element with name '%s' is not defined"), name_.c_str());
-	}
+	if (ni == m_namemap.end()) return -1;
 	return (int)ni->second;
 }
 
