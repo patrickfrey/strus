@@ -867,7 +867,7 @@ bool StorageClient::fetchNextStatisticsMessage( const char*& msg, std::size_t& m
 	return m_statisticsBuilder->fetchMessage( msg, msgsize);
 }
 
-StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool sign)
+StatisticsIteratorInterface* StorageClient::createStatisticsIterator( bool sign)
 {
 	try
 	{

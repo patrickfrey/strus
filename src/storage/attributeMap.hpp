@@ -36,7 +36,6 @@ public:
 	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
-private:
 	void clear();
 
 private:

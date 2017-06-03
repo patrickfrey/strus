@@ -68,9 +68,9 @@ public:
 
 	void deleteKey( const std::string& name);
 	void print( std::ostream& out);
+	void clear();
 
 private:
-	void clear();
 	void deleteAllFromDeletedList( DatabaseTransactionInterface* transaction);
 
 private:

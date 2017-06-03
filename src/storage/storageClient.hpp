@@ -107,7 +107,7 @@ public:
 	
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual StatisticsIteratorInterface* createInitStatisticsIterator( bool sign);
+	virtual StatisticsIteratorInterface* createStatisticsIterator( bool sign);
 
 	virtual StatisticsIteratorInterface* createUpdateStatisticsIterator();
 

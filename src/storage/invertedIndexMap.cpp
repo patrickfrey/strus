@@ -399,9 +399,6 @@ void InvertedIndexMap::getWriteBatch(
 
 	// [4] Get df writes (and df changes to populate, if statisticsBuilder defined):
 	m_dfmap.getWriteBatch( transaction, statisticsBuilder, dfbatch, termTypeMapInv, termValueMapInv);
-
-	// [5] Clear the maps:
-	clear();
 }
 
 void InvertedIndexMap::defineDocnoRangeElement(

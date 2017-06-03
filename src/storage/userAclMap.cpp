@@ -231,8 +231,6 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 		// [2] Write the new blocks that could not be merged into existing ones:
 		BooleanBlockBatchWrite::insertNewElements( &dbadapter_acl, ri, re, newblk, lastInsertBlockId, transaction);
 	}
-	// Clear maps:
-	clear();
 }
 
 void UserAclMap::clear()

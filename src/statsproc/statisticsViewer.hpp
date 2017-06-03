@@ -11,6 +11,7 @@
 #define _STRUS_STATISTICS_VIEWER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/statisticsViewerInterface.hpp"
 #include "statisticsHeader.hpp"
+#include "private/stringMap.hpp"
 #include <string>
 
 namespace strus
@@ -36,6 +37,7 @@ private:
 	char const* m_msgend;
 	std::size_t m_msgsize;
 	std::string m_msg;
+	StringVector m_strings;
 	ErrorBufferInterface* m_errorhnd;
 };
 }//namespace

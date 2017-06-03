@@ -106,7 +106,6 @@ void MetaDataMap::getWriteBatch( DatabaseTransactionInterface* transaction, std:
 	}
 }
 
-
 void MetaDataMap::rewriteMetaData(
 		const MetaDataDescription::TranslationMap& trmap,
 		const MetaDataDescription& newDescr,
@@ -127,8 +126,6 @@ void MetaDataMap::rewriteMetaData(
 		MetaDataBlock newblk( &newDescr, blk.blockno(), newblk_data, newblk_bytesize);
 		dbadapter.store( transaction, newblk);
 	}
-	// Clear maps:
-	clear();
 }
 
 void MetaDataMap::clear()

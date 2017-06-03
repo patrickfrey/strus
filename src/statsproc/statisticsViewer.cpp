@@ -22,6 +22,7 @@ StatisticsViewer::StatisticsViewer( const char* msgptr, std::size_t msgsize, Err
 	,m_msgitr(msgptr + sizeof(StatisticsHeader))
 	,m_msgend(msgptr + msgsize)
 	,m_msgsize(msgsize - sizeof(StatisticsHeader))
+	,m_strings()
 	,m_errorhnd(errorhnd_)
 {
 	if (m_msgitr > m_msgend)
@@ -79,8 +80,9 @@ bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
 			throw strus::runtime_error( _TXT( "got illegal message from  (corrupt block [3])"));
 		}
 		m_msg.append( msg_itr, flags_itr - msg_itr);
+		m_strings.push_back( m_msg);
 
-		const char* type = m_msg.c_str();
+		const char* type = m_strings.back();
 		std::size_t typesize = std::strlen( type);
 		const char* value = type + typesize + 1;
 

@@ -42,9 +42,10 @@ public:
 			const MetaDataDescription& newDescr,
 			DatabaseTransactionInterface* transaction);
 
+	void clear();
+
 private:
 	MetaDataRecord getRecord( Index docno);
-	void clear();
 
 private:
 	typedef std::pair<Index,Index> MetaDataKey;

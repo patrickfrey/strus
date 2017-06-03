@@ -43,13 +43,13 @@ public:
 	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
+	void clear();
+
 private:
 	void markSetElement(
 		const Index& userno,
 		const Index& docno,
 		bool isMember);
-
-	void clear();
 
 public:
 	typedef std::pair<Index,Index> MapKey;

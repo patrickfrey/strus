@@ -373,7 +373,7 @@ bool StorageTransaction::commit()
 
 		m_commit = true;
 		m_nof_documents_affected = nof_new_documents + nof_chg_documents + m_nof_deleted_documents;
-		m_nof_deleted_documents = 0;
+		clearMaps();
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in transaction commit: %s"), *m_errorhnd, false);
@@ -395,6 +395,27 @@ void StorageTransaction::rollback()
 	m_storage->releaseTransaction( refreshList);
 	m_rollback = true;
 	m_nof_documents_affected = 0;
+	clearMaps();
 }
 
+void StorageTransaction::clearMaps()
+{
+	m_attributeMap.clear();
+	m_metaDataMap.clear();
+
+	m_invertedIndexMap.clear();
+	m_forwardIndexMap.clear();
+	m_userAclMap.clear();
+
+	m_termTypeMap.clear();
+	m_termValueMap.clear();
+	m_docIdMap.clear();
+	m_userIdMap.clear();
+	m_attributeNameMap.clear();
+
+	m_termTypeMapInv.clear();
+	m_termValueMapInv.clear();
+
+	m_explicit_dfmap.clear();
+}
 

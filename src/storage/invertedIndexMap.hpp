@@ -55,6 +55,8 @@ public:
 
 	void print( std::ostream& out) const;
 
+	void clear();
+
 private:
 	struct MapKey
 	{
@@ -113,8 +115,6 @@ private:
 			const Map::const_iterator& ee,
 			const PosinfoBlock& oldblk,
 			PosinfoBlockBuilder& newblk);
-
-	void clear();
 
 private:
 	DocumentFrequencyMap m_dfmap;
