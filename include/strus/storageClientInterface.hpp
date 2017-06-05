@@ -60,7 +60,7 @@ public:
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
 	/// \param[in] length ordinal position length assigned to the term (may differ from 1 for terms representing multipart patterns)
-	/// \remark the length is considered as an attribute and not used in set operations for joining posting sets. It is used as hint only in some summarization and weighting functions.
+	/// \remark the length is considered as an attribute and not used in set operations for joining posting sets. It is used as hint only in some summarization and weighting functions for handling multi-word phrases correctly.
 	/// \return the created iterator reference (with ownership)
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
