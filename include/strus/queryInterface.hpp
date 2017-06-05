@@ -93,7 +93,7 @@ public:
 	///			false, if the conditional belongs to the last group of elements joined with a logical "OR".
 	///		Different groups are joined with a logical "AND" to form the meta data restriction expression
 	virtual void addMetaDataRestrictionCondition(
-			MetaDataRestrictionInterface::CompareOperator opr,
+			const MetaDataRestrictionInterface::CompareOperator& opr,
 			const std::string& name,
 			const NumericVariant& operand,
 			bool newGroup=true)=0;

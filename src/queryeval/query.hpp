@@ -58,7 +58,7 @@ public:
 	virtual void defineFeature( const std::string& set_, double weight_=1.0);
 
 	virtual void addMetaDataRestrictionCondition(
-			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
+			const MetaDataRestrictionInterface::CompareOperator& opr, const std::string& name,
 			const NumericVariant& operand, bool newGroup);
 
 	virtual void addDocumentEvaluationSet(
