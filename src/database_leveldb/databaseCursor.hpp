@@ -53,6 +53,10 @@ public:
 	virtual Slice value() const;
 
 private:
+	DatabaseCursor( DatabaseCursor&){}			///... uncopyable
+	void operator=( DatabaseCursor&){}			///... uncopyable
+
+private:
 	bool checkDomain() const;
 	void initDomain( const char* domainkey, std::size_t domainkeysize);
 	Slice getCurrentKey() const;
