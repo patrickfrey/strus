@@ -4,11 +4,12 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # SOURCES AND INCLUDES
 # --------------------------------------
 set(libstrus_database_leveldb_source_files
-   database.cpp
-   databaseClient.cpp
-   databaseCursor.cpp
-   databaseTransaction.cpp
-   libstrus_database_leveldb.cpp
+	levelDbHandle.cpp
+	database.cpp
+	databaseClient.cpp
+	databaseCursor.cpp
+	databaseTransaction.cpp
+	libstrus_database_leveldb.cpp
 )
 
 include_directories(

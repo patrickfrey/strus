@@ -26,10 +26,16 @@
 using namespace strus;
 
 StatisticsBuilder::StatisticsBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd)
-	:m_insertInLexicalOrder(insertInLexicalOrder_),m_content_consumed(false),m_cnt(0),m_blocksize(0),m_maxblocksize(maxblocksize_),m_errorhnd(errorhnd)
-{
-	clear();
-}
+	:m_insertInLexicalOrder(insertInLexicalOrder_)
+	,m_lastkey()
+	,m_content()
+	,m_content_consumed(false)
+	,m_tree()
+	,m_cnt(0)
+	,m_blocksize(0)
+	,m_maxblocksize(maxblocksize_)
+	,m_errorhnd(errorhnd)
+{}
 
 StatisticsBuilder::~StatisticsBuilder()
 {}
@@ -37,15 +43,23 @@ StatisticsBuilder::~StatisticsBuilder()
 void StatisticsBuilder::setNofDocumentsInsertedChange(
 			int increment)
 {
-	if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
+	try
 	{
-		m_errorhnd->report( _TXT( "number of documents inserted change value is out of range"));
+		if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
+		{
+			m_errorhnd->report( _TXT( "number of documents inserted change value is out of range"));
+		}
+		else
+		{
+			if (m_content.empty())
+			{
+				newContent();
+			}
+			StatisticsHeader* hdr = reinterpret_cast<StatisticsHeader*>( const_cast<char*>( m_content.back().c_str()));
+			hdr->nofDocumentsInsertedChange = htonl( (uint32_t)(int32_t)increment);
+		}
 	}
-	else
-	{
-		StatisticsHeader* hdr = reinterpret_cast<StatisticsHeader*>( const_cast<char*>( m_content.back().c_str()));
-		hdr->nofDocumentsInsertedChange = htonl( (uint32_t)(int32_t)increment);
-	}
+	CATCH_ERROR_MAP( _TXT("error statistics message builder set number of documents inserted change: %s"), *m_errorhnd);
 }
 
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -79,10 +93,6 @@ void StatisticsBuilder::addDfChange(
 {
 	try
 	{
-		if (m_content.empty())
-		{
-			clear();
-		}
 		std::string rec;
 		std::size_t termtypesize = std::strlen(termtype);
 		std::size_t termvaluesize = std::strlen(termvalue);
@@ -144,6 +154,10 @@ void StatisticsBuilder::addDfChange_final(
 	{
 		m_errorhnd->report( _TXT( "df increment is out of range"));
 		return;
+	}
+	if (m_content.empty())
+	{
+		newContent();
 	}
 	std::string& content = m_content.back();
 
@@ -231,11 +245,12 @@ bool StatisticsBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
 
 void StatisticsBuilder::clear()
 {
+	m_lastkey.clear();
 	m_content.clear();
+	m_content_consumed = false;
 	m_tree.clear();
 	m_cnt = 0;
-	m_content_consumed = false;
-	newContent();
+	m_blocksize = 0;
 }
 
 void StatisticsBuilder::moveTree()
@@ -263,17 +278,10 @@ void StatisticsBuilder::newContent()
 		moveTree();
 	}
 	StatisticsHeader hdr;
-	if (m_maxblocksize < (1<<20))
-	{
-		std::string blk;
-		blk.reserve( m_maxblocksize);
-		blk.append( (char*)&hdr, sizeof(hdr));
-		m_content.push_back( blk);
-	}
-	else
-	{
-		m_content.push_back( std::string( (char*)&hdr, sizeof(hdr)));
-	}
+	std::string blk;
+	blk.reserve( m_maxblocksize);
+	blk.append( (char*)&hdr, sizeof(hdr));
+	m_content.push_back( blk);
 	m_cnt += 1;
 	m_blocksize = 0;
 	m_lastkey.clear();
@@ -284,7 +292,6 @@ void StatisticsBuilder::start()
 	try
 	{
 		m_cnt = 0;
-		newContent();
 	}
 	CATCH_ERROR_MAP( _TXT("error statistics message builder start: %s"), *m_errorhnd);
 }
@@ -297,10 +304,6 @@ void StatisticsBuilder::rollback()
 		for (; m_cnt > 0; --m_cnt)
 		{
 			m_content.pop_back();
-		}
-		if (m_content.empty())
-		{
-			newContent();
 		}
 	}
 	CATCH_ERROR_MAP( _TXT("error statistics message builder rollback: %s"), *m_errorhnd);
