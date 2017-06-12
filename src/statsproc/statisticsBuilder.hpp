@@ -10,7 +10,8 @@
 #ifndef _STRUS_STATISTICS_BUILDER_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_STATISTICS_BUILDER_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/statisticsBuilderInterface.hpp"
-#include "compactNodeTrie.hpp"
+#include "strus/base/stdint.h"
+#include "statisticsHeader.hpp"
 #include <string>
 #include <vector>
 #include <list>
@@ -24,7 +25,7 @@ class StatisticsBuilder
 	:public StatisticsBuilderInterface
 {
 public:
-	StatisticsBuilder( bool insertInLexicalOrder_, std::size_t maxblocksize_, ErrorBufferInterface* errorhnd);
+	StatisticsBuilder( std::size_t maxblocksize_, ErrorBufferInterface* errorhnd);
 	virtual ~StatisticsBuilder();
 
 	virtual void setNofDocumentsInsertedChange(
@@ -42,23 +43,19 @@ public:
 	virtual void rollback();
 
 private:
-	void addDfChange_final(
-			const std::string& key,
-			int increment);
-	void addDfChange_tree(
-			const std::string& key,
-			int increment);
-	void moveTree();
+	void initHeader( StatisticsHeader* hdr);
+	void getBlock( const char*& blk, std::size_t& blksize);
 	void newContent();
 	void clear();
 
 private:
-	bool m_insertInLexicalOrder;
 	std::string m_lastkey;
+	StatisticsHeader m_hdr;
+	int m_cnt;
 	std::list<std::string> m_content;
 	bool m_content_consumed;
-	conotrie::CompactNodeTrie m_tree;
-	std::size_t m_cnt;
+	int32_t m_nofDocumentsInsertedChange;
+	int32_t m_nofDocumentsInsertedChange_bk;
 	std::size_t m_blocksize;
 	std::size_t m_maxblocksize;
 	ErrorBufferInterface* m_errorhnd;

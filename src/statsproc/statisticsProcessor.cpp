@@ -31,11 +31,11 @@ StatisticsViewerInterface* StatisticsProcessor::createViewer(
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message viewer: %s"), *m_errorhnd, 0);
 }
 
-StatisticsBuilderInterface* StatisticsProcessor::createBuilder( const BuilderOptions& options_) const
+StatisticsBuilderInterface* StatisticsProcessor::createBuilder() const
 {
 	try
 	{
-		return new StatisticsBuilder( (options_.set & BuilderOptions::InsertInLexicalOrder) != 0, options_.maxBlockSize, m_errorhnd);
+		return new StatisticsBuilder( DefaultMaxBlockSize, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error create statistics message builder: %s"), *m_errorhnd, 0);
 }

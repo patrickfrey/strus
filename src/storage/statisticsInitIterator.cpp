@@ -31,8 +31,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 	,m_statisticsBuilder()
 	,m_errorhnd(errorhnd_)
 {
-	StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_statisticsBuilder.reset( m_proc->createBuilder( options));
+	m_statisticsBuilder.reset( m_proc->createBuilder());
 	if (!m_statisticsBuilder.get())
 	{
 		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());

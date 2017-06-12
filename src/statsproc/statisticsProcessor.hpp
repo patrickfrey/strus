@@ -19,6 +19,9 @@ class ErrorBufferInterface;
 class StatisticsProcessor
 	:public StatisticsProcessorInterface
 {
+private:
+	enum {DefaultMaxBlockSize=32000};
+
 public:
 	explicit StatisticsProcessor( ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsProcessor();
@@ -26,7 +29,7 @@ public:
 	virtual StatisticsViewerInterface* createViewer(
 			const char* msgptr, std::size_t msgsize) const;
 
-	virtual StatisticsBuilderInterface* createBuilder( const BuilderOptions& options_) const;
+	virtual StatisticsBuilderInterface* createBuilder() const;
 
 private:
 	ErrorBufferInterface* m_errorhnd;

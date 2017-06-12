@@ -413,8 +413,7 @@ StorageTransactionInterface*
 			TransactionLock lock( this);
 			if (!m_statisticsBuilder.get())
 			{
-				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
@@ -879,8 +878,7 @@ StatisticsIteratorInterface* StorageClient::createStatisticsIterator( bool sign)
 			TransactionLock lock( this);
 			if (!m_statisticsBuilder.get())
 			{
-				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
 		return new StatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
@@ -900,8 +898,7 @@ StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
 			TransactionLock lock( this);
 			if (!m_statisticsBuilder.get())
 			{
-				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
 		return new StatisticsUpdateIterator( this, m_errorhnd);
