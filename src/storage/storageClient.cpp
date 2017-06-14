@@ -111,6 +111,7 @@ std::string StorageClient::config() const
 		std::string mdstr( m_metadescr.tostring());
 		if (!mdstr.empty())
 		{
+			if (!rt.empty()) rt.push_back(';');
 			rt.append( "metadata=");
 			rt.append( mdstr);
 		}
