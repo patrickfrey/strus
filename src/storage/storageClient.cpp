@@ -866,7 +866,7 @@ bool StorageClient::fetchNextStatisticsMessage( const char*& msg, std::size_t& m
 	return m_statisticsBuilder->fetchMessage( msg, msgsize);
 }
 
-StatisticsIteratorInterface* StorageClient::createStatisticsIterator( bool sign)
+StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool sign)
 {
 	try
 	{
@@ -886,7 +886,7 @@ StatisticsIteratorInterface* StorageClient::createStatisticsIterator( bool sign)
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
-StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
+StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator()
 {
 	try
 	{

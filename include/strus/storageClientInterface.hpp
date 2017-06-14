@@ -186,11 +186,11 @@ public:
 	/// \brief Creates an iterator on storage statistics messages for initialization/deregistration
 	/// \param[in] sign true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration)
 	/// \return the iterator on the statistics message blobs
-	virtual StatisticsIteratorInterface* createStatisticsIterator( bool sign=true)=0;
+	virtual StatisticsIteratorInterface* createAllStatisticsIterator( bool sign=true)=0;
 
 	/// \brief Creates an iterator on the storage statistics messages created by updates of this storage
 	/// \return the iterator on the statistics message blobs
-	virtual StatisticsIteratorInterface* createUpdateStatisticsIterator()=0;
+	virtual StatisticsIteratorInterface* createChangeStatisticsIterator()=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface
