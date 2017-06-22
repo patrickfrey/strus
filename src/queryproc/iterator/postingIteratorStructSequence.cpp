@@ -274,7 +274,7 @@ PostingIteratorInterface* PostingJoinSequenceImm::createResultIterator(
 	}
 	try
 	{
-		std::vector<Reference< PostingIteratorInterface> >::const_iterator ai = argitr.begin(), ae = argitr.end();
+		std::vector<Reference< PostingIteratorInterface> >::const_iterator ai = argitr.begin(), ae = argitr.end()-1;
 		for (; ai != ae; ++ai)
 		{
 			unsigned int arglen = (*ai)->length();
