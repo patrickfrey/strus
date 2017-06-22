@@ -252,6 +252,47 @@ PostingJoinOperatorInterface::Description PostingJoinSequence::getDescription() 
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence", *m_errorhnd, Description());
 }
 
+PostingIteratorInterface* PostingJoinSequenceImm::createResultIterator(
+		const std::vector<Reference< PostingIteratorInterface> >& argitr,
+		int range_,
+		unsigned int cardinality_) const
+{
+	if (range_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no range argument expected for '%s'"), "sequence_imm");
+		return 0;
+	}
+	if (cardinality_ != 0)
+	{
+		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "sequence_imm");
+		return 0;
+	}
+	if (argitr.size() < 1)
+	{
+		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "sequence_imm");
+		return 0;
+	}
+	try
+	{
+		std::vector<Reference< PostingIteratorInterface> >::const_iterator ai = argitr.begin(), ae = argitr.end();
+		for (; ai != ae; ++ai)
+		{
+			unsigned int arglen = (*ai)->length();
+			range_ += arglen?arglen:1;
+		}
+		return new IteratorStructSequence( range_, argitr, false/*without cut*/, true/*strict*/, m_errorhnd);
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence_imm", *m_errorhnd, 0);
+}
+
+PostingJoinOperatorInterface::Description PostingJoinSequenceImm::getDescription() const
+{
+	try
+	{
+		return Description( "sequence_imm", _TXT("Get the set of postings (d,p) that exist in the first argument set and (d,p+ri) exist in the argument set i with |ri| <= |range| and |ri|+1 == |rj| for i<j"));
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "sequence_imm", *m_errorhnd, Description());
+}
 
 PostingIteratorInterface* PostingJoinStructChain::createResultIterator(
 		const std::vector<Reference< PostingIteratorInterface> >& argitr,

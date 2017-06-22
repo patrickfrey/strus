@@ -46,6 +46,8 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	definePostingJoinOperator( "chain", op);
 	if (0==(op=createPostingJoinStructChain( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
 	definePostingJoinOperator( "chain_struct", op);
+	if (0==(op=createPostingJoinSequenceImm( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	definePostingJoinOperator( "sequence_imm", op);
 	if (0==(op=createPostingJoinDifference( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
 	definePostingJoinOperator( "diff", op);
 	if (0==(op=createPostingJoinIntersect( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));

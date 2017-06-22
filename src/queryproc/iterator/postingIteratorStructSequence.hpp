@@ -117,6 +117,25 @@ private:
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 
+class PostingJoinSequenceImm
+	:public PostingJoinOperatorInterface
+{
+public:
+	explicit PostingJoinSequenceImm( ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_){}
+	virtual ~PostingJoinSequenceImm(){}
+
+	virtual PostingIteratorInterface* createResultIterator(
+			const std::vector<Reference< PostingIteratorInterface> >& argitr,
+			int range_,
+			unsigned int cardinality_) const;
+
+	virtual Description getDescription() const;
+
+private:
+	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+};
+
 class PostingJoinStructChain
 	:public PostingJoinOperatorInterface
 {
