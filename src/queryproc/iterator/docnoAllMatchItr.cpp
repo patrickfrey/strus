@@ -78,7 +78,14 @@ Index DocnoAllMatchItr::skipDoc( const Index& docno_)
 		std::vector<PostingIteratorReference>::iterator ai = m_args.begin(), ae = m_args.end();
 		for (; ai != ae; ++ai)
 		{
-			if (docno_iter != (*ai)->skipDoc( docno_iter)) break;
+			Index a_docno = (*ai)->skipDoc( docno_iter);
+			if (!a_docno) break;
+
+			if (docno_iter < a_docno)
+			{
+				docno_iter = a_docno;
+				break;
+			}
 		}
 		if (ai == ae)
 		{
