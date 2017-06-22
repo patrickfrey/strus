@@ -79,8 +79,11 @@ Index DocnoAllMatchItr::skipDoc( const Index& docno_)
 		for (; ai != ae; ++ai)
 		{
 			Index a_docno = (*ai)->skipDoc( docno_iter);
-			if (!a_docno) break;
-
+			if (!a_docno)
+			{
+				++docno_iter;
+				break;
+			}
 			if (docno_iter < a_docno)
 			{
 				docno_iter = a_docno;
