@@ -9,6 +9,7 @@
 #include "summarizer_standard.hpp"
 #include "summarizerMetaData.hpp"
 #include "summarizerAttribute.hpp"
+#include "summarizerForwardIndex.hpp"
 #include "summarizerMatchPhrase.hpp"
 #include "summarizerListMatches.hpp"
 #include "summarizerMatchVariables.hpp"
@@ -30,6 +31,11 @@ SummarizerFunctionInterface* strus::createSummarizerAttribute( ErrorBufferInterf
 SummarizerFunctionInterface* strus::createSummarizerMetaData( ErrorBufferInterface* errorhnd_)
 {
 	return new SummarizerFunctionMetaData( errorhnd_);
+}
+
+SummarizerFunctionInterface* strus::createSummarizerForwardIndex( ErrorBufferInterface* errorhnd_)
+{
+	return new SummarizerFunctionForwardIndex( errorhnd_);
 }
 
 SummarizerFunctionInterface* strus::createSummarizerMatchPhrase( ErrorBufferInterface* errorhnd_)

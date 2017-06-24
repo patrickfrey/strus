@@ -28,6 +28,10 @@ SummarizerFunctionInterface* createSummarizerAttribute( ErrorBufferInterface* er
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerMetaData( ErrorBufferInterface* errorhnd_);
 
+/// \brief Create a summarizer for getting the whole forward index of a given type for a document
+/// \return the summarizer reference (with ownership)
+SummarizerFunctionInterface* createSummarizerForwardIndex( ErrorBufferInterface* errorhnd_);
+
 /// \brief Create a summarizer for getting the best phrases of matches
 /// \return the summarizer reference (with ownership)
 SummarizerFunctionInterface* createSummarizerMatchPhrase( ErrorBufferInterface* errorhnd_);

@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set(source_files
 	summarizer_standard.cpp
 	summarizerAttribute.cpp
+	summarizerForwardIndex.cpp
 	summarizerListMatches.cpp
 	summarizerMetaData.cpp
 	summarizerMatchPhrase.cpp

@@ -87,12 +87,14 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 
 	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "metadata", sum);
+	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "attribute", sum);
+	if (0==(sum=createSummarizerForwardIndex( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	defineSummarizerFunction( "forwardindex", sum);
 	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchphrase", sum);
 	if (0==(sum=createSummarizerListMatches( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchpos", sum);
-	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
-	defineSummarizerFunction( "attribute", sum);
 	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchvar", sum);
 	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
