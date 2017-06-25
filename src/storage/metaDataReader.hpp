@@ -36,6 +36,7 @@ public:
 	virtual const char* getType( const Index& elementHandle_) const;
 	virtual const char* getName( const Index& elementHandle_) const;
 	virtual Index nofElements() const;
+	virtual std::vector<std::string> getNames() const;
 
 private:
 	MetaDataBlockCache* m_cache;

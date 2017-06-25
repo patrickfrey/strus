@@ -64,6 +64,15 @@ const char* MetaDataReader::getName( const Index& elementHandle_) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error meta data get element name: %s"), *m_errorhnd, 0);
 }
 
+std::vector<std::string> MetaDataReader::getNames() const
+{
+	try
+	{
+		return m_description->columns();
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error meta data get element names: %s"), *m_errorhnd, std::vector<std::string>());
+}
+
 Index MetaDataReader::nofElements() const
 {
 	return (Index)m_description->nofElements();

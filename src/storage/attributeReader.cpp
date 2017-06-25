@@ -40,7 +40,7 @@ std::string AttributeReader::getValue( const Index& elementHandle_) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error reading storage attribute value: %s"), *m_errorhnd, std::string());
 }
 
-std::vector<std::string> AttributeReader::getAttributeNames() const
+std::vector<std::string> AttributeReader::getNames() const
 {
 	try
 	{

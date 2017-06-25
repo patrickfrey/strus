@@ -39,7 +39,7 @@ public:
 
 	/// \brief Get the names of all attribute names defined in the storage
 	/// \note Returns the names of all attributes defined for any document, independent of the current document.
-	virtual std::vector<std::string> getAttributeNames() const=0;
+	virtual std::vector<std::string> getNames() const=0;
 };
 }//namespace
 #endif

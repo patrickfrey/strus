@@ -82,6 +82,12 @@ public:
 		return (strus::Index)m_description->nofElements();
 	}
 
+	std::vector<std::string> getNames() const
+	{
+		return m_description->columns();
+	}
+	
+
 private:
 	const strus::MetaDataDescription* m_description;
 	strus::MetaDataRecord m_current;

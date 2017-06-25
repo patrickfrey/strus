@@ -37,7 +37,7 @@ public:
 
 	virtual std::string getValue( const Index& elementHandle_) const;
 
-	virtual std::vector<std::string> getAttributeNames() const;
+	virtual std::vector<std::string> getNames() const;
 
 private:
 	const StorageClient* m_storage;				///< storage handle

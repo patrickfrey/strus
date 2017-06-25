@@ -12,6 +12,7 @@
 #include "strus/index.hpp"
 #include "strus/numericVariant.hpp"
 #include <string>
+#include <vector>
 
 namespace strus
 {
@@ -56,6 +57,10 @@ public:
 	/// \param[in] elementHandle_ the handle for the element
 	/// \return return the table element name
 	virtual const char* getName( const Index& elementHandle_) const=0;
+
+	/// \brief Get the list of names of a table elements
+	/// \return return the list of table element names
+	virtual std::vector<std::string> getNames() const=0;
 };
 }//namespace
 #endif
