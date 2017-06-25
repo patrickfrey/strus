@@ -219,11 +219,11 @@ MetaDataDescription::TranslationMap
 std::vector<std::string> MetaDataDescription::columns() const
 {
 	std::vector<std::string> rt;
-	std::map<std::string,std::size_t>::const_iterator
-		ni = m_namemap.begin(), ne = m_namemap.end();
-	std::size_t cidx=0,cend=m_namemap.size();
+	std::size_t cidx=0,cend=m_ar.size();
 	for (;cidx < cend; ++cidx)
 	{
+		std::map<std::string,std::size_t>::const_iterator
+			ni = m_namemap.begin(), ne = m_namemap.end();
 		for (; ni != ne; ++ni)
 		{
 			if (ni->second == cidx)
