@@ -414,6 +414,15 @@ struct DatabaseAdapter_ForwardIndex
 			const Index& typeno_, const Index& docno_)
 			:Parent::Cursor( database_, BlockKey(typeno_,docno_)){}
 	};
+
+	static bool exists( const DatabaseClientInterface* database_, const Index& typeno_)
+	{
+		DatabaseKey dbkey( DatabaseKey::ForwardIndexPrefix, typeno_);
+		Reference<DatabaseCursorInterface> cursor( database_->createCursor( DatabaseOptions().useCache()));
+		if (cursor.get()) return false;
+		DatabaseCursorInterface::Slice key = cursor->seekFirst( dbkey.ptr(), dbkey.size());
+		return key.defined();
+	}
 };
 
 

@@ -117,10 +117,10 @@ public:
 	/// \return the number of documents
 	virtual Index nofDocumentsInserted() const=0;
 
-	/// \brief Get the number of documents inserted in this storage instance
+	/// \brief Get the local document frequency of a feature in this storage instance
 	/// \param[in] type the term type addressed
 	/// \param[in] term the term value addressed
-	/// \return the number of documents
+	/// \return the local document frequency
 	virtual Index documentFrequency(
 			const std::string& type,
 			const std::string& term) const=0;
@@ -138,6 +138,11 @@ public:
 	/// \param[in] type term type name
 	/// \return the term type number or 0, if it is not known yet
 	virtual Index termTypeNumber( const std::string& type) const=0;
+
+	/// \brief Evaluate if there exists forward index blocks for this type
+	/// \param[in] type term type name
+	/// \return true, if yes, false if no or if an error occurred (check error)
+	virtual bool isForwardIndexTerm( const std::string& type) const=0;
 
 	/// \brief Create an iterator on the term types inserted
 	/// \return the iterator

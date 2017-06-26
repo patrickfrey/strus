@@ -683,6 +683,13 @@ Index StorageClient::termTypeNumber( const std::string& type) const
 	return getTermType( type);
 }
 
+bool StorageClient::isForwardIndexTerm( const std::string& type) const
+{
+	Index typeno = getTermType( type);
+	if (!typeno) return false;
+	return DatabaseAdapter_ForwardIndex::exists( m_database.get(), typeno);
+}
+
 ValueIteratorInterface* StorageClient::createTermTypeIterator() const
 {
 	try
