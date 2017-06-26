@@ -123,6 +123,8 @@ public:
 
 	virtual Index documentNumber( const std::string& docid) const;
 
+	virtual Index termTypeNumber( const std::string& type) const;
+
 	virtual ValueIteratorInterface* createTermTypeIterator() const;
 
 	virtual ValueIteratorInterface* createTermValueIterator() const;

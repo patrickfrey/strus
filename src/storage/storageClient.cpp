@@ -678,6 +678,11 @@ Index StorageClient::documentNumber( const std::string& docid) const
 	return getDocno( docid);
 }
 
+Index StorageClient::termTypeNumber( const std::string& type) const
+{
+	return getTermType( type);
+}
+
 ValueIteratorInterface* StorageClient::createTermTypeIterator() const
 {
 	try

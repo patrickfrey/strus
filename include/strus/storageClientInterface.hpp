@@ -134,6 +134,11 @@ public:
 	/// \return the document number or 0, if it does not exist
 	virtual Index documentNumber( const std::string& docid) const=0;
 
+	/// \brief Get the local internal term type number
+	/// \param[in] type term type name
+	/// \return the term type number or 0, if it is not known yet
+	virtual Index termTypeNumber( const std::string& type) const=0;
+
 	/// \brief Create an iterator on the term types inserted
 	/// \return the iterator
 	virtual ValueIteratorInterface* createTermTypeIterator() const=0;
