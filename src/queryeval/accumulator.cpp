@@ -43,7 +43,7 @@ void Accumulator::addWeightingElement(
 }
 
 void Accumulator::addAlternativeAclRestriction(
-		InvAclIteratorInterface* iterator)
+		const Reference<InvAclIteratorInterface>& iterator)
 {
 	m_aclRestrictions.push_back( iterator);
 }
@@ -103,7 +103,7 @@ bool Accumulator::nextRank(
 		// Check if any ACL restriction (alternatives combined with OR):
 		if (m_aclRestrictions.size())
 		{
-			std::vector<InvAclIteratorInterface*>::const_iterator
+			std::vector<Reference<InvAclIteratorInterface> >::iterator
 				ri = m_aclRestrictions.begin(), re = m_aclRestrictions.end();
 			Index nextAclMatch = 0;
 			for (; ri != re; ++ri)

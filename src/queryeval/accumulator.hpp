@@ -78,7 +78,7 @@ public:
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isNegative);
 
-	void addAlternativeAclRestriction( InvAclIteratorInterface* iterator);
+	void addAlternativeAclRestriction( const Reference<InvAclIteratorInterface>& iterator);
 
 	bool nextRank( Index& docno, unsigned int& selectorState, double& weight);
 
@@ -117,7 +117,7 @@ private:
 	std::vector<double> m_weights;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;
-	std::vector<InvAclIteratorInterface*> m_aclRestrictions;
+	std::vector<Reference<InvAclIteratorInterface> > m_aclRestrictions;
 	unsigned int m_selectoridx;
 	Index m_docno;
 	utils::DynamicBitset m_visited;

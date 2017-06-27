@@ -696,15 +696,13 @@ QueryResult Query::evaluate() const
 
 		evaluationPhase = "restrictions initialization";
 		// [4.4] Define the user ACL restrictions:
-		std::vector<Reference<InvAclIteratorInterface> > invAclList;
 		std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
 		for (; ui != ue; ++ui)
 		{
 			Reference<InvAclIteratorInterface> invAcl( m_storage->createInvAclIterator( *ui));
 			if (invAcl.get())
 			{
-				invAclList.push_back( invAcl);
-				accumulator.addAlternativeAclRestriction( invAcl.get());
+				accumulator.addAlternativeAclRestriction( invAcl);
 			}
 			else if (m_errorhnd->hasError())
 			{
