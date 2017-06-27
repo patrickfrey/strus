@@ -103,15 +103,16 @@ public:
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_)=0;
 
+	/// \brief Add a restriction for documents accessible by this query
+	/// \param[in] username_ name of user role that is allowed to see the result documents
+	virtual void addAccessRestriction( const std::string& username_)=0;
+
 	/// \brief Set the maximum number of ranks to evaluate starting with the minimum rank
 	/// \param[in] maxNofRanks_ maximum number of ranks
 	virtual void setMaxNofRanks( std::size_t maxNofRanks_)=0;
 	/// \brief Set the minimum rank number to return
 	/// \param[in] minRank_ the minimum rank number
 	virtual void setMinRank( std::size_t minRank_)=0;
-	/// \brief Add a name of a user role in the query for alternative ACL restrictions
-	/// \param[in] username_ user of the query
-	virtual void addUserName( const std::string& username_)=0;
 
 	/// \brief Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(ScalarFunctionInterface* combinefunc) or in a weighting function or a summarizer
 	/// \param[in] name name of the variable
