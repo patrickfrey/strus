@@ -42,8 +42,8 @@ public:
 		m_featureid.push_back( ':');
 		m_featureid.push_back( 'M');
 
-		if (m_handle_lo < 0 && !name_from.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (lower bound): %s"), m_errorhnd->fetchError());
-		if (m_handle_hi < 0 && !name_to.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (upper bound): %s"), m_errorhnd->fetchError());
+		if (m_handle_lo < 0 && !name_from.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (lower bound): undefined metadata element '%s'"), name_from.c_str());
+		if (m_handle_hi < 0 && !name_to.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (upper bound): undefined metadata element '%s'"), name_to.c_str());
 	}
 
 	virtual ~MetaDataRangePostingIterator()

@@ -318,7 +318,7 @@ void MetaDataRestriction::addCondition(
 		Index elemhnd = m_metadata->elementHandle( name);
 		if (elemhnd < 0)
 		{
-			m_errorhnd->explain( _TXT( "cannot create metadata restriction: %s"));
+			throw strus::runtime_error( _TXT( "undefined metadata element: %s"), name.c_str());
 		}
 		const char* elemtype = m_metadata->getType( elemhnd);
 		if (!elemtype)
