@@ -250,8 +250,8 @@ private:
 	typedef std::map<TermKey,TermStatistics> TermStatisticsMap;
 	TermStatisticsMap m_termstatsmap;				///< term statistics (evaluation in case of a distributed index)
 	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
-	std::vector<WeightingVariableValueAssignment> m_weightingvars;	///< non constant weight variables (defined by query ans not the query eval)
-	std::vector<WeightingVariableValueAssignment> m_summaryweightvars; ///< non constant summarization weight variables (defined by query ans not the query eval)
+	std::vector<WeightingVariableValueAssignment> m_weightingvars;	///< non constant weight variables (defined by query and not the query eval)
+	std::vector<WeightingVariableValueAssignment> m_summaryweightvars; ///< non constant summarization weight variables (defined by query and not the query eval)
 	bool m_debugMode;						///< true if debug mode is enabled
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };

@@ -236,11 +236,6 @@ void Query::print( std::ostream& out) const
 	if (m_debugMode) out << _TXT("debug mode enabled") << std::endl;
 	out << "maxNofRanks = " << m_nofRanks << std::endl;
 	out << "minRank = " << m_minRank << std::endl;
-	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
-	for (; ui != ue; ++ui)
-	{
-		out << _TXT("user restriction : ") << *ui << std::endl;
-	}
 	std::vector<Index>::const_iterator di = m_evalset_docnolist.begin(), de = m_evalset_docnolist.end();
 	if (di != de)
 	{
@@ -248,6 +243,17 @@ void Query::print( std::ostream& out) const
 		for (std::size_t didx=0; di != de; ++di)
 		{
 			if (didx != 0) out << ", ";
+			out << *di;
+		}
+		out << std::endl;
+	}
+	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
+	if (ui != ue)
+	{
+		out << _TXT("user access one of : ");
+		for (std::size_t uidx=0; ui != ue; ++ui)
+		{
+			if (uidx != 0) out << ", ";
 			out << *ui;
 		}
 		out << std::endl;
