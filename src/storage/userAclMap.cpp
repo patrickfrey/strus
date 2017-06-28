@@ -17,44 +17,45 @@ using namespace strus;
 
 void UserAclMap::renameNewDocNumbers( const std::map<Index,Index>& renamemap)
 {
-	Map::iterator ui = m_usrmap.begin(), ue = m_usrmap.end();
-	while (ui != ue)
 	{
-		Index docno = MapKey(ui->first).second;
-		if (KeyMap::isUnknown( docno))
+		UsrDocMap::iterator ui = m_usrdocmap.begin(), ue = m_usrdocmap.end();
+		while (ui != ue)
 		{
-			Index userno = MapKey(ui->first).first;
-			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
-			if (ri == renamemap.end())
+			if (KeyMap::isUnknown( ui->first.docno))
 			{
-				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "user acl map");
+				std::map<Index,Index>::const_iterator ri = renamemap.find( ui->first.docno);
+				if (ri == renamemap.end())
+				{
+					throw strus::runtime_error( _TXT( "docno undefined (%s)"), "user doc map");
+				}
+				Index newdocno = ri->second;
+				m_usrdocmap[ UsrAclKey( ui->first.usrno, newdocno)] = ui->second;
+				m_usrdocmap.erase( ui++);
 			}
-			m_usrmap[ MapKey( userno, ri->second)] = ui->second;
-			m_usrmap.erase( ui++);
-		}
-		else
-		{
-			++ui;
-		}
-	}
-	Map::iterator ai = m_aclmap.begin(), ae = m_aclmap.end();
-	while (ai != ae)
-	{
-		Index docno = MapKey(ai->first).first;
-		if (KeyMap::isUnknown( docno))
-		{
-			Index userno = MapKey(ai->first).second;
-			std::map<Index,Index>::const_iterator ri = renamemap.find( docno);
-			if (ri == renamemap.end())
+			else
 			{
-				throw strus::runtime_error( _TXT( "docno undefined (%s)"), "acl user map");
+				++ui;
 			}
-			m_aclmap[ MapKey( ri->second, userno)] = ai->second;
-			m_aclmap.erase( ai++);
 		}
-		else
+	}{
+		DocUsrMap::iterator ai = m_docusrmap.begin(), ae = m_docusrmap.end();
+		while (ai != ae)
 		{
-			++ai;
+			if (KeyMap::isUnknown( ai->first.docno))
+			{
+				std::map<Index,Index>::const_iterator ri = renamemap.find( ai->first.docno);
+				if (ri == renamemap.end())
+				{
+					throw strus::runtime_error( _TXT( "docno undefined (%s)"), "doc user map");
+				}
+				Index newdocno = ri->second;
+				m_docusrmap[ UsrAclKey( ai->first.usrno, newdocno)] = ai->second;
+				m_docusrmap.erase( ai++);
+			}
+			else
+			{
+				++ai;
+			}
 		}
 	}
 }
@@ -64,25 +65,9 @@ void UserAclMap::markSetElement(
 	const Index& docno,
 	bool isMember)
 {
-	Map::iterator mi = m_usrmap.find( MapKey( userno, docno));
-	if (mi == m_usrmap.end())
-	{
-		m_usrmap[ MapKey( userno, docno)] = isMember;
-	}
-	else
-	{
-		mi->second = isMember;
-	}
-
-	mi = m_aclmap.find( MapKey( docno, userno));
-	if (mi == m_aclmap.end())
-	{
-		m_aclmap[ MapKey( docno, userno)] = isMember;
-	}
-	else
-	{
-		mi->second = isMember;
-	}
+	UsrAclKey mkey( userno, docno);
+	m_usrdocmap[ mkey] = isMember;
+	m_docusrmap[ mkey] = isMember;
 }
 
 void UserAclMap::defineUserAccess(
@@ -102,8 +87,8 @@ void UserAclMap::deleteUserAccess(
 void UserAclMap::deleteUserAccess(
 	const Index& userno)
 {
-	Map::iterator mi = m_usrmap.upper_bound( MapKey( userno, 0));
-	if (mi == m_usrmap.end() || mi->first.first == userno)
+	UsrDocMap::const_iterator mi = m_usrdocmap.upper_bound( UsrAclKey( userno, 0));
+	if (mi == m_usrdocmap.end() || mi->first.usrno == userno)
 	{
 		m_usr_deletes.push_back( userno);
 	}
@@ -116,10 +101,10 @@ void UserAclMap::deleteUserAccess(
 void UserAclMap::deleteDocumentAccess(
 	const Index& docno)
 {
-	Map::iterator mi = m_aclmap.upper_bound( MapKey( docno, 0));
-	if (mi == m_aclmap.end() || mi->first.first == docno)
+	DocUsrMap::const_iterator mi = m_docusrmap.upper_bound( UsrAclKey( 0, docno));
+	if (mi == m_docusrmap.end() || mi->first.docno == docno)
 	{
-		m_acl_deletes.push_back( docno);
+		m_doc_deletes.push_back( docno);
 	}
 	else
 	{
@@ -128,8 +113,7 @@ void UserAclMap::deleteDocumentAccess(
 }
 
 static void resetAllBooleanBlockElementsFromStorage(
-	UserAclMap::Map& map,
-	const Index& idx,
+	UserAclMap::UsrDocMap& map,
 	DatabaseAdapter_BooleanBlock::Cursor& dbadapter)
 {
 	BooleanBlock blk;
@@ -140,12 +124,29 @@ static void resetAllBooleanBlockElementsFromStorage(
 		Index docno = blk.getFirst( cursor);
 		for (;docno; docno = blk.getNext( cursor))
 		{
-			map[ UserAclMap::MapKey( blk.id(), docno)]; // reset to false, only if it does not exist
+			map[ UsrAclKey( blk.id()/*userno*/, docno)]; // reset to false, only if it does not exist
 		}
 	}
 }
 
-static void defineRangeElement( 
+static void resetAllBooleanBlockElementsFromStorage(
+	UserAclMap::DocUsrMap& map,
+	DatabaseAdapter_BooleanBlock::Cursor& dbadapter)
+{
+	BooleanBlock blk;
+	for (bool more=dbadapter.loadFirst( blk)
+		;more; more=dbadapter.loadNext( blk))
+	{
+		BooleanBlock::NodeCursor cursor;
+		Index usrno = blk.getFirst( cursor);
+		for (;usrno; usrno = blk.getNext( cursor))
+		{
+			map[ UsrAclKey( usrno, blk.id()/*docno*/)]; // reset to false, only if it does not exist
+		}
+	}
+}
+
+static void defineRangeElement(
 		std::vector<BooleanBlock::MergeRange>& docrangear,
 		const Index& docno,
 		bool isMember)
@@ -172,73 +173,74 @@ void UserAclMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 	std::vector<Index>::const_iterator di = m_usr_deletes.begin(), de = m_usr_deletes.end();
 	for (; di != de; ++di)
 	{
-		DatabaseAdapter_UserAclBlock::Cursor dbadapter_userAcl( m_database, *di, false);
-		resetAllBooleanBlockElementsFromStorage( m_usrmap, *di, dbadapter_userAcl);
+		DatabaseAdapter_UserAclBlock::Cursor dbadapter_userAcl( m_database, *di, false/*use cache*/);
+		resetAllBooleanBlockElementsFromStorage( m_usrdocmap, dbadapter_userAcl);
 	}
 
-	std::vector<Index>::const_iterator ai = m_acl_deletes.begin(), ae = m_acl_deletes.end();
+	std::vector<Index>::const_iterator ai = m_doc_deletes.begin(), ae = m_doc_deletes.end();
 	for (; ai != ae; ++ai)
 	{
-		DatabaseAdapter_AclBlock::Cursor dbadapter_acl( m_database, *ai, false);
-		resetAllBooleanBlockElementsFromStorage( m_aclmap, *ai, dbadapter_acl);
+		DatabaseAdapter_AclBlock::Cursor dbadapter_acl( m_database, *ai, false/*use cache*/);
+		resetAllBooleanBlockElementsFromStorage( m_docusrmap, dbadapter_acl);
 	}
-
-	Map::const_iterator mi = m_usrmap.begin(), me = m_usrmap.end();
-	while (mi != me)
 	{
-		std::vector<BooleanBlock::MergeRange> rangear;
-		Map::const_iterator start = mi;
-
-		defineRangeElement( rangear, mi->first.second, mi->second);
-		for (++mi; mi != me && mi->first.second != start->first.second; ++mi)
+		UsrDocMap::const_iterator mi = m_usrdocmap.begin(), me = m_usrdocmap.end();
+		while (mi != me)
 		{
-			defineRangeElement( rangear, mi->first.second, mi->second);
+			std::vector<BooleanBlock::MergeRange> rangear;
+			UsrDocMap::const_iterator start = mi;
+	
+			defineRangeElement( rangear, mi->first.docno, mi->second);
+			for (++mi; mi != me && mi->first.usrno == start->first.usrno; ++mi)
+			{
+				defineRangeElement( rangear, mi->first.docno, mi->second);
+			}
+			Index lastInsertBlockId = rangear.back().to;
+	
+			std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
+			DatabaseAdapter_UserAclBlock::WriteCursor dbadapter_userAcl( m_database, start->first.usrno);
+			BooleanBlock newblk;
+	
+			// [1] Merge new elements with existing upper bound blocks:
+			BooleanBlockBatchWrite::mergeNewElements( &dbadapter_userAcl, ri, re, newblk, transaction);
+	
+			// [2] Write the new blocks that could not be merged into existing ones:
+			BooleanBlockBatchWrite::insertNewElements( &dbadapter_userAcl, ri, re, newblk, lastInsertBlockId, transaction);
 		}
-
-		Index lastInsertBlockId = rangear.back().to;
-
-		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
-		DatabaseAdapter_UserAclBlock::WriteCursor dbadapter_userAcl( m_database, start->first.first);
-		BooleanBlock newblk;
-
-		// [1] Merge new elements with existing upper bound blocks:
-		BooleanBlockBatchWrite::mergeNewElements( &dbadapter_userAcl, ri, re, newblk, transaction);
-
-		// [2] Write the new blocks that could not be merged into existing ones:
-		BooleanBlockBatchWrite::insertNewElements( &dbadapter_userAcl, ri, re, newblk, lastInsertBlockId, transaction);
 	}
-
-	mi = m_aclmap.begin(), me = m_aclmap.end();
-	while (mi != me)
 	{
-		std::vector<BooleanBlock::MergeRange> rangear;
-		Map::const_iterator start = mi;
-
-		defineRangeElement( rangear, mi->first.second, mi->second);
-		for (++mi; mi != me && mi->first.second != start->first.second; ++mi)
+		DocUsrMap::const_iterator mi = m_docusrmap.begin(), me = m_docusrmap.end();
+		while (mi != me)
 		{
-			defineRangeElement( rangear, mi->first.second, mi->second);
+			std::vector<BooleanBlock::MergeRange> rangear;
+			DocUsrMap::const_iterator start = mi;
+
+			defineRangeElement( rangear, mi->first.usrno, mi->second);
+			for (++mi; mi != me && mi->first.docno == start->first.docno; ++mi)
+			{
+				defineRangeElement( rangear, mi->first.usrno, mi->second);
+			}
+			Index lastInsertBlockId = rangear.back().to;
+
+			std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
+			DatabaseAdapter_AclBlock::WriteCursor dbadapter_acl( m_database, start->first.docno);
+			BooleanBlock newblk;
+
+			// [1] Merge new elements with existing upper bound blocks:
+			BooleanBlockBatchWrite::mergeNewElements( &dbadapter_acl, ri, re, newblk, transaction);
+
+			// [2] Write the new blocks that could not be merged into existing ones:
+			BooleanBlockBatchWrite::insertNewElements( &dbadapter_acl, ri, re, newblk, lastInsertBlockId, transaction);
 		}
-		Index lastInsertBlockId = rangear.back().to;
-
-		std::vector<BooleanBlock::MergeRange>::iterator ri = rangear.begin(), re = rangear.end();
-		DatabaseAdapter_AclBlock::WriteCursor dbadapter_acl( m_database, start->first.first);
-		BooleanBlock newblk;
-
-		// [1] Merge new elements with existing upper bound blocks:
-		BooleanBlockBatchWrite::mergeNewElements( &dbadapter_acl, ri, re, newblk, transaction);
-
-		// [2] Write the new blocks that could not be merged into existing ones:
-		BooleanBlockBatchWrite::insertNewElements( &dbadapter_acl, ri, re, newblk, lastInsertBlockId, transaction);
 	}
 }
 
 void UserAclMap::clear()
 {
-	m_usrmap.clear();
-	m_aclmap.clear();
+	m_usrdocmap.clear();
+	m_docusrmap.clear();
 	m_usr_deletes.clear();
-	m_acl_deletes.clear();
+	m_doc_deletes.clear();
 }
 
 
