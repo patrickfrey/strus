@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 set( libstrus_storage_source_files
 	attributeMap.cpp
 	attributeReader.cpp
+	aclReader.cpp
 	booleanBlockBatchWrite.cpp
 	booleanBlock.cpp
 	databaseAdapter.cpp

@@ -44,6 +44,7 @@
 #include "attributeReader.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "valueIterator.hpp"
+#include "aclReader.hpp"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -403,6 +404,14 @@ InvAclIteratorInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating inverted ACL iterator: %s"), *m_errorhnd, 0);
 }
 
+virtual AclReaderInterface* createAclReader() const
+{
+	try
+	{
+		return new AclReader( m_storage.get(), m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating ACL reader: %s"), *m_errorhnd, 0);
+}
 
 StorageTransactionInterface*
 	StorageClient::createTransaction()

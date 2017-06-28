@@ -37,7 +37,8 @@ public:
 	/// \return the value of the element as string or an empty string if undefined
 	virtual std::string getValue( const Index& elementHandle_) const=0;
 
-	/// \brief Get the names of all attribute names defined in the storage
+	/// \brief Get the names of all attributes defined in the storage
+	/// \return list of attribute names
 	/// \note Returns the names of all attributes defined for any document, independent of the current document.
 	virtual std::vector<std::string> getNames() const=0;
 };

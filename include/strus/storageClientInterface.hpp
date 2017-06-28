@@ -42,6 +42,8 @@ class MetaDataReaderInterface;
 class MetaDataRestrictionInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
+/// \brief Forward declaration
+class AclReaderInterface;
 
 
 /// \brief Interface of a strus IR storage
@@ -108,10 +110,15 @@ public:
 	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see
 	/// \param[in] username name of the user
 	/// \return the iterator on the documents (with ownership) or NULL, if there is no access control enabled
-	/// \note The storage has to be created access control enabled
+	/// \note The storage has to be created with access control enabled
 	virtual InvAclIteratorInterface*
 		createInvAclIterator(
 			const std::string& username) const=0;
+
+	/// \brief Create a an iterator on the access control lists of documents
+	/// \return the iterator on the ACLs
+	/// \note The storage has to be created with access control enabled
+	virtual AclReaderInterface* createAclReader() const=0;
 
 	/// \brief Get the number of documents inserted in this storage instance
 	/// \return the number of documents

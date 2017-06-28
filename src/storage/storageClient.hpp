@@ -36,6 +36,8 @@ class MetaDataReaderInterface;
 /// \brief Forward declaration
 class MetaDataRestrictionInterface;
 /// \brief Forward declaration
+class AclReaderInterface;
+/// \brief Forward declaration
 class KeyAllocatorInterface;
 /// \brief Forward declaration
 class DatabaseInterface;
@@ -92,6 +94,8 @@ public:
 	virtual InvAclIteratorInterface*
 			createInvAclIterator(
 				const std::string& username) const;
+
+	virtual AclReaderInterface* createAclReader() const;
 
 	virtual StorageTransactionInterface*
 			createTransaction();
@@ -202,7 +206,7 @@ public:/*StorageTransaction*/
 public:/*StatisticsBuilder*/
 	Index documentFrequency( const Index& typeno, const Index& termno) const;
 
-public:/*StorageDocumentChecker*/
+public:/*StorageDocumentChecker,AclIterator*/
 	IndexSetIterator getAclIterator( const Index& docno) const;
 	IndexSetIterator getUserAclIterator( const Index& userno) const;
 

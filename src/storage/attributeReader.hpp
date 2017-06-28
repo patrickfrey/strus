@@ -10,7 +10,6 @@
 #include "strus/index.hpp"
 #include "strus/attributeReaderInterface.hpp"
 #include "storageClient.hpp"
-#include <string>
 
 namespace strus
 {
