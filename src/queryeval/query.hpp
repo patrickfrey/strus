@@ -64,7 +64,7 @@ public:
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_);
 
-	virtual void addAccessRestriction( const std::string& username_);
+	virtual void addAccess( const std::string& username_);
 
 	virtual void setMaxNofRanks( std::size_t nofRanks_);
 	virtual void setMinRank( std::size_t minRank_);

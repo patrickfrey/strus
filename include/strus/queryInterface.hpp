@@ -105,7 +105,7 @@ public:
 
 	/// \brief Add a restriction for documents accessible by this query
 	/// \param[in] username_ name of user role that is allowed to see the result documents
-	virtual void addAccessRestriction( const std::string& username_)=0;
+	virtual void addAccess( const std::string& username_)=0;
 
 	/// \brief Set the maximum number of ranks to evaluate starting with the minimum rank
 	/// \param[in] maxNofRanks_ maximum number of ranks

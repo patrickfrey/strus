@@ -387,7 +387,7 @@ void Query::setMinRank( std::size_t minRank_)
 	m_minRank = minRank_;
 }
 
-void Query::addAccessRestriction( const std::string& username_)
+void Query::addAccess( const std::string& username_)
 {
 	try
 	{
