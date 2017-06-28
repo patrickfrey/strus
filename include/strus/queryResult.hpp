@@ -23,7 +23,11 @@ class QueryResult
 {
 public:
 	/// \brief Default constructor
-	QueryResult(){}
+	QueryResult()
+		:m_evaluationPass(0)
+		,m_nofRanked(0)
+		,m_nofVisited(0)
+		,m_ranks(){}
 	/// \brief Copy constructor
 	QueryResult( const QueryResult& o)
 		:m_evaluationPass(o.m_evaluationPass)

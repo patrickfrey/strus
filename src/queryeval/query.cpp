@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <cstdio>
 
-#undef STRUS_LOWLEVEL_DEBUG
+#define STRUS_LOWLEVEL_DEBUG
 
 using namespace strus;
 
@@ -251,9 +251,9 @@ void Query::print( std::ostream& out) const
 	if (ui != ue)
 	{
 		out << _TXT("user access one of : ");
-		for (std::size_t uidx=0; ui != ue; ++ui)
+		for (std::size_t uidx=0; ui != ue; ++uidx,++ui)
 		{
-			if (uidx != 0) out << ", ";
+			if (uidx) out << ", ";
 			out << *ui;
 		}
 		out << std::endl;
