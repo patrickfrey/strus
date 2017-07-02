@@ -186,6 +186,7 @@ void Query::defineFeature( const std::string& set_, double weight_)
 #endif
 	try
 	{
+		if (m_stack.empty()) throw strus::runtime_error( _TXT("no term or expression defined"));
 		m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
 		m_stack.pop_back();
 	}

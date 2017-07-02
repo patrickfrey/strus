@@ -46,7 +46,10 @@ public:
 
 	virtual ~Query(){}
 
-	virtual void pushTerm( const std::string& type_, const std::string& value_, const Index& length_);
+	virtual void pushTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& length_);
 	virtual void pushDocField(
 			const std::string& metadataRangeStart,
 			const std::string& metadataRangeEnd);
@@ -54,12 +57,17 @@ public:
 			const PostingJoinOperatorInterface* operation,
 			unsigned int argc, int range_, unsigned int cardinality_);
 
-	virtual void attachVariable( const std::string& name_);
-	virtual void defineFeature( const std::string& set_, double weight_=1.0);
+	virtual void attachVariable(
+			const std::string& name_);
+	virtual void defineFeature(
+			const std::string& set_,
+			double weight_=1.0);
 
 	virtual void addMetaDataRestrictionCondition(
-			const MetaDataRestrictionInterface::CompareOperator& opr, const std::string& name,
-			const NumericVariant& operand, bool newGroup);
+			const MetaDataRestrictionInterface::CompareOperator& opr,
+			const std::string& name,
+			const NumericVariant& operand,
+			bool newGroup);
 
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_);
