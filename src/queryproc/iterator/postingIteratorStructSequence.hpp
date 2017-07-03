@@ -57,7 +57,7 @@ public:
 
 	virtual Index length() const
 	{
-		return m_argar.size()?(m_argar.back()->posno() - m_posno + m_argar.back()->length()):0;
+		return (m_posno && m_argar.size())?(m_argar.back()->posno() - m_posno + m_argar.back()->length()):0;
 	}
 
 private:
@@ -105,25 +105,6 @@ public:
 	explicit PostingJoinSequence( ErrorBufferInterface* errorhnd_)
 		:m_errorhnd(errorhnd_){}
 	virtual ~PostingJoinSequence(){}
-
-	virtual PostingIteratorInterface* createResultIterator(
-			const std::vector<Reference< PostingIteratorInterface> >& argitr,
-			int range_,
-			unsigned int cardinality_) const;
-
-	virtual Description getDescription() const;
-
-private:
-	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
-};
-
-class PostingJoinSequenceImm
-	:public PostingJoinOperatorInterface
-{
-public:
-	explicit PostingJoinSequenceImm( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
-	virtual ~PostingJoinSequenceImm(){}
 
 	virtual PostingIteratorInterface* createResultIterator(
 			const std::vector<Reference< PostingIteratorInterface> >& argitr,

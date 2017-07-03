@@ -12,6 +12,7 @@ set(source_files
 	postingIteratorPred.cpp
 	postingIteratorStructWithin.cpp
 	postingIteratorStructSequence.cpp
+	postingIteratorSequenceImm.cpp
 	postingIteratorHelpers.cpp
 	postingIteratorContains.cpp
 	docnoMatchPrioQueue.cpp

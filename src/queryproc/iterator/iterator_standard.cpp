@@ -11,6 +11,7 @@
 #include "postingIteratorIntersect.hpp"
 #include "postingIteratorStructWithin.hpp"
 #include "postingIteratorStructSequence.hpp"
+#include "postingIteratorSequenceImm.hpp"
 #include "postingIteratorDifference.hpp"
 #include "postingIteratorSucc.hpp"
 #include "postingIteratorPred.hpp"
