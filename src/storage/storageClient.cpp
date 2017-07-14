@@ -123,13 +123,16 @@ std::string StorageClient::config() const
 
 void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 {
-	// Refresh all entries touched by the inserts/updates written
-	std::vector<Index>::const_iterator ri = refreshList.begin(), re = refreshList.end();
-	for (; ri != re; ++ri)
+	if (m_metaDataBlockCache)
 	{
-		m_metaDataBlockCache->declareVoid( *ri);
+		// Refresh all entries touched by the inserts/updates written
+		std::vector<Index>::const_iterator ri = refreshList.begin(), re = refreshList.end();
+		for (; ri != re; ++ri)
+		{
+			m_metaDataBlockCache->declareVoid( *ri);
+		}
+		m_metaDataBlockCache->refresh();
 	}
-	m_metaDataBlockCache->refresh();
 }
 
 static Index versionNo( Index major, Index minor)
