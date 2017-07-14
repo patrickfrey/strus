@@ -86,6 +86,11 @@ public:
 	/// \brief Get the configuration of this model
 	/// \return the configuration string
 	virtual std::string config() const=0;
+
+	/// \brief Close client connection and eventually do some cleanup.
+	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
+	/// \note the method does not have to be called necessarily.
+	virtual void close()=0;
 };
 
 }//namespace
