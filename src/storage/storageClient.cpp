@@ -116,6 +116,11 @@ std::string StorageClient::config() const
 			rt.append( "metadata=");
 			rt.append( mdstr);
 		}
+		if (withAcl())
+		{
+			if (!rt.empty()) rt.push_back(';');
+			rt.append( "acl=true");
+		}
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in instance of '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
