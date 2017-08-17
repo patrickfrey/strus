@@ -8,7 +8,10 @@ h1 {font-size:2.1em; letter-spacing:-1px; margin:10px 5px 0 0; font:Verdana,Aria
 h2 {font-size:1.4em; letter-spacing:-1px; font:Verdana,Arial}
 h3 {font-size:1.2em; letter-spacing:-1px; font:Verdana,Arial}
 h4 {font-size:1.1em; letter-spacing:-1px; font:Verdana,Arial}
+h5 {font-size:1.0em; letter-spacing:-1px; font:Verdana,Arial}
 p  {font-size:1.0em; letter-spacing:0px; font:Verdana,Arial}
+hr { width:100%; height:2px; background: #fff }
+
 
 .maintitle
 {
@@ -106,6 +109,13 @@ p  {font-size:1.0em; letter-spacing:0px; font:Verdana,Arial}
 .content_subtitle {
     margin:10px 5px;
 }
+.annotation_subtitle {
+    margin:10px 15px;
+    font-weight: bold;
+}
+.annotation {
+    margin:0px 15px;
+}
 
 .classdescription {
     display: none;
@@ -125,7 +135,14 @@ p  {font-size:1.0em; letter-spacing:0px; font:Verdana,Arial}
 .note {
     font-style:italic;
 }
+.remark {
+    margin:0px 10px;
+    color: #82290e;
+    font-size:1.1em;
+    font-style:italic;
+}
 .memberdescription {
+    margin-top: 50px;
     display: none;
 }
 .parameterlist {
