@@ -13,3 +13,11 @@ Define an interface to declare a limit of query execution to prevent DoS attacks
 Named structure interface parameter for weighting function an summarizer that provides a list of weighted areas that can be fetched elementwise or as array. 
 	These structure interfaces can be built as combination of others of their kind and posting iterators
 
+
+Build and install descriptions for all platforms, take infos from packages
+Take INSTALL descriptions of Windows, FreeBSD and OpenBSD from Aba as examples.
+
+
+
+
+
