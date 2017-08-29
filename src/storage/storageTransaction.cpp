@@ -291,6 +291,10 @@ bool StorageTransaction::commit()
 	private:
 		 StatisticsBuilderInterface* m_obj;
 	};
+	if (m_errorhnd->hasError())
+	{
+		return false;
+	}
 	if (m_commit)
 	{
 		m_errorhnd->report( _TXT( "called transaction commit twice"));
