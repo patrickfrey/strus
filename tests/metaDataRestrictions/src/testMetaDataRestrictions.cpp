@@ -153,22 +153,22 @@ static strus::MetaDataRecord randomMetaDataRecord(
 		switch (elem->type())
 		{
 			case strus::MetaDataElement::Int8:
-				val = strus::NumericVariant((strus::NumericVariant::IntType)RANDINT(0,0xfFU)-0x7f);
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT( std::numeric_limits<int8_t>::min(),std::numeric_limits<int8_t>::max())));
 				break;
 			case strus::MetaDataElement::UInt8:
-				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,0xfFU));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,std::numeric_limits<uint8_t>::max()));
 				break;
 			case strus::MetaDataElement::Int16:
-				val = strus::NumericVariant( (strus::NumericVariant::IntType)RANDINT(0,0xffFFU)-0x7fFF);
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT( std::numeric_limits<int16_t>::min(),std::numeric_limits<int16_t>::max())));
 				break;
 			case strus::MetaDataElement::UInt16:
-				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,0xffFFU));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,std::numeric_limits<uint16_t>::max()));
 				break;
 			case strus::MetaDataElement::Int32:
-				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT(0,0xffffFFFFUL) - 0x7fffFFFFL));
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT( std::numeric_limits<int32_t>::min(),std::numeric_limits<int32_t>::max())));
 				break;
 			case strus::MetaDataElement::UInt32:
-				val = strus::NumericVariant( (strus::NumericVariant::UIntType)(RANDINT(0,0xffffFFFFL)));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)(RANDINT(0,std::numeric_limits<uint32_t>::max())));
 				break;
 			case strus::MetaDataElement::Float16:
 				val = strus::NumericVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
