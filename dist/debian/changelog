@@ -1,3 +1,7 @@
+strus (0.15.1-1) unstable; urgency=low
+  * release to cleanup mess with missing CHANGELOG in 0.15.0
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 4 Sep 2017 15:30:00 +0100
+
 strus (0.15.0-1) unstable; urgency=low
   * remove hardcoded setting of C++98 in CMake files
   * added method close() to vector storage client
