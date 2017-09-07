@@ -5,7 +5,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-///\brief Some non standard functions from the C library for platforms that do not support them
+/* @brief Some non standard functions from the C library for platforms that do not support them */
 #ifndef _STRUS_CSTRING_HPP_INCLUDED
 #define _STRUS_CSTRING_HPP_INCLUDED
 #include <stdlib.h>
@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-///\brief Function/macro implementing GNU extension memrchr() (glibc >= 2.1.91)
+/* brief Function/macro implementing GNU extension memrchr() (glibc >= 2.1.91) */
 #include <limits.h>
 #if defined( __GNU_LIBRARY__ ) || defined( __GLIBC_ )
 #if __GLIBC_PREREQ(2, 2)
