@@ -1,6 +1,22 @@
 # -----------------------------------------------------------------------------------------------
 # Defines the flags for compiler and linker and some build environment settings
 # -----------------------------------------------------------------------------------------------
+# The following definition requires CMake >= 3.1
+set( CMAKE_CXX_COMPILE_FEATURES 
+	"cxx_long_long_type"     # because of boost using 'long long' 
+)
+# Temporary hack to build without warnings with CMake < 3.1:
+IF (CPP_LANGUAGE_VERSION STREQUAL "0x")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wall")
+ELSEIF (CPP_LANGUAGE_VERSION STREQUAL "11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+ELSEIF (CPP_LANGUAGE_VERSION STREQUAL "14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
+ELSEIF (CPP_LANGUAGE_VERSION STREQUAL "17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall")
+ELSEIF (CPP_LANGUAGE_VERSION STREQUAL "98")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Wall")
+ENDIF ( STREQUAL "0x")
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE )
