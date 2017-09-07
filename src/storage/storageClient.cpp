@@ -865,7 +865,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 	}
 	catch (const std::runtime_error& err)
 	{
-		throw strus::runtime_error( _TXT( "failed to build termno map: "), err.what());
+		throw strus::runtime_error( _TXT( "failed to build termno map: %s"), err.what());
 	}
 }
 
@@ -890,7 +890,7 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-bool StorageClient::fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize)
+bool StorageClient::fetchNextStatisticsMessage( const void*& msg, std::size_t& msgsize)
 {
 	TransactionLock lock( this);
 	return m_statisticsBuilder->fetchMessage( msg, msgsize);

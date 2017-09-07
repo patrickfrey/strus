@@ -214,7 +214,7 @@ public:/*StatisticsIterator*/
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
 	///\brief Fetch a message from a storage update transaction
-	bool fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize);
+	bool fetchNextStatisticsMessage( const void*& msg, std::size_t& msgsize);
 
 public:/*strusResizeBlocks*/
 	Index maxTermTypeNo() const;

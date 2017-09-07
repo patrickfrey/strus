@@ -32,7 +32,7 @@ public:
 	/// \param[in] msgsize size of the packed statistics message blob in bytes
 	/// \return the viewer object (with ownership returned) or NULL in case of a memory allocation error
 	virtual StatisticsViewerInterface* createViewer(
-			const char* msgptr, std::size_t msgsize) const=0;
+			const void* msgptr, std::size_t msgsize) const=0;
 
 	/// \brief Creates a builder for a statistics message
 	/// \param[in] options_ options for the message builder

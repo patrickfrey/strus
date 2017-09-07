@@ -209,7 +209,7 @@ int main( int argc, const char* argv[])
 			termsByteSize += ti->type.size() + ti->value.size() + 5;
 			builder->addDfChange( ti->type.c_str(), ti->value.c_str(), ti->diff);
 		}
-		const char* msgblk;
+		const void* msgblk;
 		std::size_t msgblksize;
 		std::size_t blobsize = 0;
 		int nofDocsInserted = 0;

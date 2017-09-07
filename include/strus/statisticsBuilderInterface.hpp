@@ -47,7 +47,7 @@ public:
 	/// \param[out] blk pointer to the message 
 	/// \param[out] blksize size of message blk in bytes
 	/// \return true, if there is a message returned to be sent, false if not or an error occurred
-	virtual bool fetchMessage( const char*& blk, std::size_t& blksize)=0;
+	virtual bool fetchMessage( const void*& blk, std::size_t& blksize)=0;
 };
 }//namespace
 #endif

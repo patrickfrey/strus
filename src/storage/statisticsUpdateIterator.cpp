@@ -26,7 +26,7 @@ StatisticsUpdateIterator::StatisticsUpdateIterator(
 	,m_errorhnd(errorhnd_)
 {}
 
-bool StatisticsUpdateIterator::getNext( const char*& msg, std::size_t& msgsize)
+bool StatisticsUpdateIterator::getNext( const void*& msg, std::size_t& msgsize)
 {
 	try
 	{

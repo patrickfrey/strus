@@ -167,14 +167,14 @@ void StatisticsBuilder::initHeader( StatisticsHeader* hdr)
 	m_nofDocumentsInsertedChange_bk = 0;
 }
 
-void StatisticsBuilder::getBlock( const char*& blk, std::size_t& blksize)
+void StatisticsBuilder::getBlock( const void*& blk, std::size_t& blksize)
 {
 	m_content_consumed = true;
 	blk = m_content.front().c_str();
 	blksize = m_content.front().size();
 }
 
-bool StatisticsBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
+bool StatisticsBuilder::fetchMessage( const void*& blk, std::size_t& blksize)
 {
 	if (m_content.empty())
 	{
@@ -199,7 +199,7 @@ bool StatisticsBuilder::fetchMessage( const char*& blk, std::size_t& blksize)
 		if (m_nofDocumentsInsertedChange)
 		{
 			initHeader( &m_hdr);
-			blk = (char*)(void*)&m_hdr;
+			blk = (void*)&m_hdr;
 			blksize = sizeof( m_hdr);
 			return true;
 		}

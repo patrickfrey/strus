@@ -192,7 +192,7 @@ static void resizeBlocks(
 	}
 	else
 	{
-		throw strus::runtime_error(_TXT("block resize is not implemented for blocktype '%s'"));
+		throw strus::runtime_error(_TXT("block resize is not implemented for blocktype '%s'"), blocktype.c_str());
 	}
 }
 

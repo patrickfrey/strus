@@ -36,7 +36,7 @@ public:
 			const char* termvalue,
 			int increment);
 
-	virtual bool fetchMessage( const char*& blk, std::size_t& blksize);
+	virtual bool fetchMessage( const void*& blk, std::size_t& blksize);
 
 	virtual void start();
 
@@ -44,7 +44,7 @@ public:
 
 private:
 	void initHeader( StatisticsHeader* hdr);
-	void getBlock( const char*& blk, std::size_t& blksize);
+	void getBlock( const void*& blk, std::size_t& blksize);
 	void newContent();
 	void clear();
 

@@ -389,7 +389,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 	}
 	if (errmsg)
 	{
-		throw strus::runtime_error( errmsg);
+		throw strus::runtime_error( "%s", errmsg);
 	}
 	else
 	{

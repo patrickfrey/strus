@@ -26,7 +26,7 @@ public:
 	/// \param[in] msg pointer to message
 	/// \param[in] msgsize size of msg blob in bytes
 	/// \return false if there is no chunk of a message left or an error occurred
-	virtual bool getNext( const char*& msg, std::size_t& msgsize)=0;
+	virtual bool getNext( const void*& msg, std::size_t& msgsize)=0;
 };
 
 }//namespace

@@ -16,18 +16,18 @@
 
 using namespace strus;
 
-StatisticsViewer::StatisticsViewer( const char* msgptr, std::size_t msgsize, ErrorBufferInterface* errorhnd_)
+StatisticsViewer::StatisticsViewer( const void* msgptr, std::size_t msgsize, ErrorBufferInterface* errorhnd_)
 	:m_hdr(reinterpret_cast<const StatisticsHeader*>(msgptr))
-	,m_msgptr(msgptr + sizeof(StatisticsHeader))
-	,m_msgitr(msgptr + sizeof(StatisticsHeader))
-	,m_msgend(msgptr + msgsize)
+	,m_msgptr((const char*)msgptr + sizeof(StatisticsHeader))
+	,m_msgitr((const char*)msgptr + sizeof(StatisticsHeader))
+	,m_msgend((const char*)msgptr + msgsize)
 	,m_msgsize(msgsize - sizeof(StatisticsHeader))
 	,m_strings()
 	,m_errorhnd(errorhnd_)
 {
 	if (m_msgitr > m_msgend)
 	{
-		throw strus::runtime_error( _TXT( "got illegal message from  (message size)"));
+		throw strus::runtime_error( _TXT( "got illegal message (message size)"));
 	}
 }
 

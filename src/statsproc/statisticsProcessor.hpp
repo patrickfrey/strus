@@ -27,7 +27,7 @@ public:
 	virtual ~StatisticsProcessor();
 
 	virtual StatisticsViewerInterface* createViewer(
-			const char* msgptr, std::size_t msgsize) const;
+			const void* msgptr, std::size_t msgsize) const;
 
 	virtual StatisticsBuilderInterface* createBuilder() const;
 

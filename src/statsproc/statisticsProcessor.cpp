@@ -22,7 +22,7 @@ StatisticsProcessor::StatisticsProcessor( ErrorBufferInterface* errorhnd_)
 StatisticsProcessor::~StatisticsProcessor(){}
 
 StatisticsViewerInterface* StatisticsProcessor::createViewer(
-			const char* msgptr, std::size_t msgsize) const
+			const void* msgptr, std::size_t msgsize) const
 {
 	try
 	{

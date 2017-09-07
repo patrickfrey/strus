@@ -94,7 +94,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 	}
 }
 
-bool StatisticsInitIterator::getNext( const char*& msg, std::size_t& msgsize)
+bool StatisticsInitIterator::getNext( const void*& msg, std::size_t& msgsize)
 {
 	if (m_errorhnd->hasError())
 	{

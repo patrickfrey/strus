@@ -23,7 +23,7 @@ class StatisticsViewer
 	:public StatisticsViewerInterface
 {
 public:
-	StatisticsViewer( const char* msgptr, std::size_t msgsize, ErrorBufferInterface* errorhnd_);
+	StatisticsViewer( const void* msgptr, std::size_t msgsize, ErrorBufferInterface* errorhnd_);
 	virtual ~StatisticsViewer();
 
 	virtual int nofDocumentsInsertedChange();
