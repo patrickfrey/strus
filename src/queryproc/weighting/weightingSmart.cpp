@@ -170,7 +170,7 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 		{
 			if (m_metadataar.size() > WeightingFunctionContextSmart::MaxNofParameter)
 			{
-				throw strus::runtime_error(_TXT( "too many metadata parameter defined: %u"), m_metadataar.size());
+				throw strus::runtime_error(_TXT( "too many metadata parameter defined: %u"), (unsigned int)m_metadataar.size());
 			}
 			m_metadataar.push_back( value);
 		}
