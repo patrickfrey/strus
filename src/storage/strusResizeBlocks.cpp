@@ -9,6 +9,7 @@
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/fileio.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "strus/versionStorage.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseInterface.hpp"
@@ -88,7 +89,7 @@ static std::pair<unsigned int,unsigned int> parseNumberRange( const char* arg, c
 	return std::pair<unsigned int,unsigned int>(first,second);
 }
 
-static void commitTransaction( strus::DatabaseClientInterface& database, std::auto_ptr<strus::DatabaseTransactionInterface>& transaction)
+static void commitTransaction( strus::DatabaseClientInterface& database, strus::local_ptr<strus::DatabaseTransactionInterface>& transaction)
 {
 	if (g_errorBuffer->hasError())
 	{
@@ -116,7 +117,7 @@ static void resizeBlocks(
 		const std::pair<unsigned int,unsigned int>& docnorange)
 {
 	strus::StorageClient storage( dbi, configsource, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
-	std::auto_ptr<strus::DatabaseTransactionInterface> transaction( storage.databaseClient()->createTransaction());
+	strus::local_ptr<strus::DatabaseTransactionInterface> transaction( storage.databaseClient()->createTransaction());
 	unsigned int transactionidx = 0;
 	unsigned int blockcount = 0;
 	strus::Index termtypeno = 0;
@@ -198,7 +199,7 @@ static void resizeBlocks(
 
 int main( int argc, const char* argv[])
 {
-	std::auto_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2));
+	strus::local_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2));
 	if (!errorBuffer.get())
 	{
 		std::cerr << _TXT("failed to create error buffer") << std::endl;

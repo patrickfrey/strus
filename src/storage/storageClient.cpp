@@ -20,6 +20,7 @@
 #include "strus/storageInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -1057,7 +1058,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 {
 	try
 	{
-		std::auto_ptr<strus::DatabaseCursorInterface>
+		strus::local_ptr<strus::DatabaseCursorInterface>
 			cursor( m_database->createCursor( strus::DatabaseOptions()));
 		if (!cursor.get()) return false;
 

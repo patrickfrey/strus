@@ -24,6 +24,7 @@
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
 #include "strus/base/snprintf.h"
+#include "strus/base/local_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -662,7 +663,7 @@ QueryResult Query::evaluate() const
 				we = m_queryEval->weightingFunctions().end();
 			for (; wi != we; ++wi)
 			{
-				std::auto_ptr<WeightingFunctionContextInterface> execContext(
+				strus::local_ptr<WeightingFunctionContextInterface> execContext(
 					wi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get(), m_globstats));
 				if (!execContext.get()) throw strus::runtime_error(_TXT("error creating weighting function context"));
@@ -874,7 +875,7 @@ QueryResult Query::evaluate() const
 		}
 		if (m_errorhnd->hasError())
 		{
-			throw strus::runtime_error( m_errorhnd->fetchError());
+			throw strus::runtime_error( _TXT("error evaluating query: %s"), m_errorhnd->fetchError());
 		}
 		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}

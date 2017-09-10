@@ -10,6 +10,7 @@
 #include "databaseClient.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseOptions.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <memory>
@@ -75,7 +76,7 @@ void DatabaseTransaction::removeSubTree(
 		leveldb::DB* db = m_conn->db();
 		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "removeSubTree");
 
-		std::auto_ptr<leveldb::Iterator> itr( db->NewIterator( leveldb::ReadOptions()));
+		strus::local_ptr<leveldb::Iterator> itr( db->NewIterator( leveldb::ReadOptions()));
 		for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
 			itr->Valid()
 				&& domainkeysize <= itr->key().size()

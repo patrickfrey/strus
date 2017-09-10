@@ -17,6 +17,7 @@
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
@@ -318,7 +319,7 @@ bool StorageTransaction::commit()
 		StatisticsBuilderInterface* statisticsBuilder = m_storage->getStatisticsBuilder();
 		DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
 
-		std::auto_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+		strus::local_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 		if (!transaction.get())
 		{
 			m_errorhnd->explain( _TXT( "error creating transaction"));

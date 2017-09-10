@@ -11,6 +11,7 @@
 #include "strus/statisticsViewerInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "random.hpp"
 #include <memory>
 #include <iostream>
@@ -189,8 +190,8 @@ int main( int argc, const char* argv[])
 		unsigned int diffRange = getUintValue( argv[2]);
 		TermCollection collection( nofTerms, diffRange);
 
-		std::auto_ptr<strus::StatisticsProcessorInterface> pmp( strus::createStatisticsProcessor( g_errorhnd));
-		std::auto_ptr<strus::StatisticsBuilderInterface> builder( pmp->createBuilder());
+		strus::local_ptr<strus::StatisticsProcessorInterface> pmp( strus::createStatisticsProcessor( g_errorhnd));
+		strus::local_ptr<strus::StatisticsBuilderInterface> builder( pmp->createBuilder());
 		if (!builder.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -234,7 +235,7 @@ int main( int argc, const char* argv[])
 		std::set<Term> termset;
 		while (msgblksize)
 		{
-			std::auto_ptr<strus::StatisticsViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
+			strus::local_ptr<strus::StatisticsViewerInterface> viewer( pmp->createViewer( msgblk, msgblksize));
 			if (!viewer.get())
 			{
 				throw std::runtime_error( g_errorhnd->fetchError());

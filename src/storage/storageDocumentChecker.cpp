@@ -20,6 +20,7 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/base/snprintf.h"
+#include "strus/base/local_ptr.hpp"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -135,7 +136,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 
 		IndexSetIterator docnoIterator( m_database, DatabaseKey::DocListBlockPrefix, BlockKey( typeno, termno), false);
 
-		std::auto_ptr<PostingIteratorInterface> pitr(
+		strus::local_ptr<PostingIteratorInterface> pitr(
 			m_storage->createTermPostingIterator( ti->first.type, ti->first.value, 1)); 
 		if (!pitr.get())
 		{
@@ -173,7 +174,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	InvTermMap::const_iterator vi = m_invTermMap.begin(), ve = m_invTermMap.end();
 	for (; vi != ve; ++vi)
 	{
-		std::auto_ptr<ForwardIteratorInterface> fitr(
+		strus::local_ptr<ForwardIteratorInterface> fitr(
 			m_storage->createForwardIterator( vi->first.type));
 		if (!fitr.get())
 		{
@@ -197,7 +198,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 	}
 
 	//[3] Check meta data:
-	std::auto_ptr<MetaDataReaderInterface> metadata(
+	strus::local_ptr<MetaDataReaderInterface> metadata(
 		m_storage->createMetaDataReader());
 	if (!metadata.get())
 	{
@@ -226,7 +227,7 @@ void StorageDocumentChecker::doCheck( std::ostream& logout)
 		}
 	}
 	//[4] Check attributes:
-	std::auto_ptr<AttributeReaderInterface> attributes(
+	strus::local_ptr<AttributeReaderInterface> attributes(
 		m_storage->createAttributeReader());
 	if (!attributes.get())
 	{

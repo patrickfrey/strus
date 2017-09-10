@@ -11,6 +11,7 @@
 #include "scalarFunction.hpp"
 #include "private/utils.hpp"
 #include "strus/base/snprintf.h"
+#include "strus/base/local_ptr.hpp"
 #include "strus/base/bitOperations.hpp"
 #include "scalarFunctionLinearComb.hpp"
 #include <limits>
@@ -523,7 +524,7 @@ ScalarFunctionInterface*
 	std::string::const_iterator si = src.begin(), se = src.end();
 	try
 	{
-		std::auto_ptr<ScalarFunction> func( new ScalarFunction( m_errorhnd));
+		strus::local_ptr<ScalarFunction> func( new ScalarFunction( m_errorhnd));
 		ScalarFunction* rt = func.get();
 		try
 		{

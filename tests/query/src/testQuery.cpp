@@ -12,6 +12,7 @@
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
 #include "strus/base/fileio.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/queryEvalInterface.hpp"
@@ -101,14 +102,14 @@ class QueryEvaluationEnv
 {
 public:
 	Storage storage;
-	std::auto_ptr<strus::QueryEvalInterface> qeval;
-	std::auto_ptr<strus::QueryInterface> query;
+	strus::local_ptr<strus::QueryEvalInterface> qeval;
+	strus::local_ptr<strus::QueryInterface> query;
 
 	explicit QueryEvaluationEnv( const strus::QueryProcessorInterface* qpi)
 	{
 		static const unsigned int primes[5] = {2,3,5,7,0};
 		storage.open( "path=storage; metadata=docno UINT16");
-		std::auto_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
+		strus::local_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
 		enum {NofDocs=10};
 		unsigned int di=0,de=NofDocs;
 		for (; di < de; ++di)
@@ -118,7 +119,7 @@ public:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "insert document " << docid << std::endl;
 #endif
-			std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( docid));
+			strus::local_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( docid));
 			doc->addSearchIndexTerm( "word", "hello", 1);
 			doc->addSearchIndexTerm( "word", "world", 2);
 #ifdef STRUS_LOWLEVEL_DEBUG
