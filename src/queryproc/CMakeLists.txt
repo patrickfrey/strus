@@ -22,10 +22,10 @@ include_directories(
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${PROJECT_SOURCE_DIR}/src/utils"
-	"${PROJECT_SOURCE_DIR}/src/queryproc/iterator"
-	"${PROJECT_SOURCE_DIR}/src/queryproc/summarizer"
-	"${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
+	"${CMAKE_CURRENT_BINARY_DIR}/utils"
+	"${CMAKE_CURRENT_BINARY_DIR}/iterator"
+	"${CMAKE_CURRENT_BINARY_DIR}/summarizer"
+	"${CMAKE_CURRENT_BINARY_DIR}/weighting"
 	"${strusbase_LIBRARY_DIRS}"
 )
 

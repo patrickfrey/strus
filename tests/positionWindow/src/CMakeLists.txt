@@ -8,8 +8,8 @@ include_directories(
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
-	"${PROJECT_SOURCE_DIR}/src/utils"
-	"${PROJECT_SOURCE_DIR}/src/queryproc/utils"
+	"${CMAKE_CURRENT_BINARY_DIR}/../../../src/queryproc/utils"
+	"${CMAKE_CURRENT_BINARY_DIR}/../../../src/utils"
 	"${Boost_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
 )

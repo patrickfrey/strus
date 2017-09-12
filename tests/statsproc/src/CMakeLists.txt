@@ -10,8 +10,8 @@ include_directories(
 )
 
 link_directories(
-	"${PROJECT_SOURCE_DIR}/src/utils"
-	"${PROJECT_SOURCE_DIR}/src/statsproc"
+	"${CMAKE_CURRENT_BINARY_DIR}/../../../src/utils"
+	"${CMAKE_CURRENT_BINARY_DIR}/../../../src/statsproc"
 	"${Boost_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
 )

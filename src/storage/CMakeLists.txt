@@ -60,10 +60,10 @@ include_directories(
 )
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${PROJECT_SOURCE_DIR}/src/utils"
-	"${PROJECT_SOURCE_DIR}/src/database_leveldb"
-	"${PROJECT_SOURCE_DIR}/src/statsproc"
-	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src" 
+	"${CMAKE_CURRENT_BINARY_DIR}/../utils"
+	"${CMAKE_CURRENT_BINARY_DIR}/../database_leveldb"
+	"${CMAKE_CURRENT_BINARY_DIR}/../statsproc"
+	"${CMAKE_CURRENT_BINARY_DIR}/../../3rdParty/compactNodeTrie/src" 
 	"${strusbase_LIBRARY_DIRS}"
 )
 
