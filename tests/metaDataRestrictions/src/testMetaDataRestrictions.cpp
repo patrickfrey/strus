@@ -14,6 +14,7 @@
 #include "strus/numericVariant.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/lib/error.hpp"
+#include "strus/base/stdint.h"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -38,7 +39,16 @@ static void initRand()
 
 	::srand( ((now->tm_year+1) * (now->tm_mon+100) * (now->tm_mday+1)));
 }
-#define RANDINT(MIN,MAX) ((rand()%(MAX-MIN))+MIN)
+
+static int32_t randint( int32_t mi, int32_t me)
+{
+	return (int32_t)((int64_t)rand() % ((int64_t)me - (int64_t)mi) + (int64_t)mi);
+}
+
+static uint32_t randuint( uint32_t mi, uint32_t me)
+{
+	return (int32_t)((uint32_t)rand() % (me - mi) + mi);
+}
 
 #define STRUS_LOWLEVEL_DEBUG
 
@@ -95,14 +105,14 @@ private:
 
 static strus::MetaDataDescription randomMetaDataDescription()
 {
-	std::size_t notFields = RANDINT(1,8);
+	std::size_t notFields = randuint(1,8);
 	strus::MetaDataDescription rt;
 	std::size_t ii=0;
 	for (; ii<notFields; ++ii)
 	{
 		std::string name;
 		name.push_back( 'A' + ii);
-		strus::MetaDataElement::Type type = (strus::MetaDataElement::Type)RANDINT(0,strus::MetaDataElement::NofTypes);
+		strus::MetaDataElement::Type type = (strus::MetaDataElement::Type)randuint(0,strus::MetaDataElement::NofTypes);
 		rt.add( type, name);
 	}
 	return rt;
@@ -153,28 +163,28 @@ static strus::MetaDataRecord randomMetaDataRecord(
 		switch (elem->type())
 		{
 			case strus::MetaDataElement::Int8:
-				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT( std::numeric_limits<int8_t>::min(),std::numeric_limits<int8_t>::max())));
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)(randint( std::numeric_limits<int8_t>::min(),std::numeric_limits<int8_t>::max())));
 				break;
 			case strus::MetaDataElement::UInt8:
-				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,std::numeric_limits<uint8_t>::max()));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)randuint(0,std::numeric_limits<uint8_t>::max()));
 				break;
 			case strus::MetaDataElement::Int16:
-				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT( std::numeric_limits<int16_t>::min(),std::numeric_limits<int16_t>::max())));
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)(randint( std::numeric_limits<int16_t>::min(),std::numeric_limits<int16_t>::max())));
 				break;
 			case strus::MetaDataElement::UInt16:
-				val = strus::NumericVariant( (strus::NumericVariant::UIntType)RANDINT(0,std::numeric_limits<uint16_t>::max()));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)randuint(0,std::numeric_limits<uint16_t>::max()));
 				break;
 			case strus::MetaDataElement::Int32:
-				val = strus::NumericVariant( (strus::NumericVariant::IntType)(RANDINT( std::numeric_limits<int32_t>::min(),std::numeric_limits<int32_t>::max())));
+				val = strus::NumericVariant( (strus::NumericVariant::IntType)(randint( std::numeric_limits<int32_t>::min(),std::numeric_limits<int32_t>::max())));
 				break;
 			case strus::MetaDataElement::UInt32:
-				val = strus::NumericVariant( (strus::NumericVariant::UIntType)(RANDINT(0,std::numeric_limits<uint32_t>::max())));
+				val = strus::NumericVariant( (strus::NumericVariant::UIntType)(randuint(0,std::numeric_limits<uint32_t>::max())));
 				break;
 			case strus::MetaDataElement::Float16:
-				val = strus::NumericVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
+				val = strus::NumericVariant( (double)randuint(0,0xffffFFFFUL)/(double)randuint(1,0xffffFFFFUL));
 				break;
 			case strus::MetaDataElement::Float32:
-				val = strus::NumericVariant( (double)RANDINT(0,0xffffFFFFUL)/(double)RANDINT(1,0xffffFFFFUL));
+				val = strus::NumericVariant( (double)randuint(0,0xffffFFFFUL)/(double)randuint(1,0xffffFFFFUL));
 				break;
 		}
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -230,7 +240,7 @@ static int randomOfs( strus::MetaDataRestrictionInterface::CompareOperator opr, 
 				break;
 		}
 	}
-	int ofs = RANDINT(1,100);
+	int ofs = randuint(1,100);
 	switch (opr)
 	{
 		case strus::MetaDataRestrictionInterface::CompareLess:
@@ -321,7 +331,7 @@ static strus::NumericVariant randomOperand(
 				epsilon = 0.0004887581f;
 			}
 			double value = (double)baseValue;
-			unsigned int rd = RANDINT(1,5);
+			unsigned int rd = randuint(1,5);
 			if (ofs > 0)
 			{
 				value += epsilon/rd;
@@ -330,7 +340,7 @@ static strus::NumericVariant randomOperand(
 			{
 				value -= epsilon/rd;
 			}
-			else if (RANDINT(0,2) == 1)
+			else if (randuint(0,2) == 1)
 			{
 				value += epsilon/rd;
 			}
@@ -338,7 +348,7 @@ static strus::NumericVariant randomOperand(
 			{
 				value -= epsilon/rd;
 			}
-			return strus::NumericVariant( value + ofs * epsilon * RANDINT(1,4));
+			return strus::NumericVariant( value + ofs * epsilon * randuint(1,4));
 		}
 	}
 	return strus::NumericVariant();
@@ -351,10 +361,10 @@ static strus::MetaDataCompareOperation
 		bool newGroup,
 		bool positiveResult)
 {
-	strus::Index hnd = RANDINT( 0, descr->nofElements());
+	strus::Index hnd = randuint( 0, descr->nofElements());
 	strus::MetaDataRestrictionInterface::CompareOperator 
 		opr = (strus::MetaDataRestrictionInterface::CompareOperator)
-			RANDINT( 0, strus::MetaDataRestrictionInterface::NofCompareOperators);
+			randuint( 0, strus::MetaDataRestrictionInterface::NofCompareOperators);
 
 	const strus::MetaDataElement* elem = descr->get( hnd);
 	strus::NumericVariant value = rec.getValue( elem);
@@ -376,15 +386,15 @@ static strus::Reference<strus::MetaDataRestrictionInstanceInterface>
 		std::string& expressionstr)
 {
 	std::vector<strus::MetaDataCompareOperation> ops;
-	unsigned int ri = 0, re = RANDINT(1,6);
+	unsigned int ri = 0, re = randuint(1,6);
 	for (; ri != re; ++ri)
 	{
-		unsigned int nofGroupElements = RANDINT(1,6);
+		unsigned int nofGroupElements = randuint(1,6);
 		if (nofGroupElements > 3)
 		{
 			nofGroupElements = 1;
 		}
-		unsigned int matchGroupElement = RANDINT( 0, nofGroupElements);
+		unsigned int matchGroupElement = randuint( 0, nofGroupElements);
 		unsigned int gi = 0, ge = nofGroupElements;
 		for (; gi != ge; ++gi)
 		{
@@ -485,7 +495,7 @@ int main( int argc, const char* argv[])
 					try
 					{
 						std::string expressionstr;
-						bool expectedResult = (bool)RANDINT(0,2);
+						bool expectedResult = (bool)randuint(0,2);
 						strus::Reference<strus::MetaDataRestrictionInstanceInterface>
 							restriction =
 								randomMetaDataRestriction(
