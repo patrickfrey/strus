@@ -12,8 +12,8 @@ set( source_files
 
 include_directories(
   "${Boost_INCLUDE_DIRS}"
-  "${PROJECT_SOURCE_DIR}/include"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
+  "${STRUS_INCLUDE_DIRS}"
+  "${MAIN_SOURCE_DIR}/queryproc/utils"
   "${strusbase_INCLUDE_DIRS}"
 )
 

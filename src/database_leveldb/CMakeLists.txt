@@ -15,14 +15,14 @@ set(libstrus_database_leveldb_source_files
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${LevelDB_INCLUDE_PATH}"
-	"${PROJECT_SOURCE_DIR}/3rdParty/getMemorySize/include"
-	"${PROJECT_SOURCE_DIR}/include"
+	"${GETMEMSIZE_INCLUDE_DIRS}"
+	"${STRUS_INCLUDE_DIRS}"
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${CMAKE_CURRENT_BINARY_DIR}/../utils"
-	"${CMAKE_CURRENT_BINARY_DIR}/../../3rdParty/getMemorySize/src"
+	"${MAIN_SOURCE_DIR}/utils"
+	"${GETMEMSIZE_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
 )
 

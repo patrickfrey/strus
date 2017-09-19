@@ -12,14 +12,14 @@ set( source_files
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
-	"${PROJECT_SOURCE_DIR}/include"
-	"${PROJECT_SOURCE_DIR}/src/scalarfunc" 
+	"${STRUS_INCLUDE_DIRS}"
+	"${MAIN_SOURCE_DIR}/scalarfunc" 
 	"${strusbase_INCLUDE_DIRS}"
 )
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${CMAKE_CURRENT_BINARY_DIR}/../utils"
+	"${MAIN_SOURCE_DIR}/utils"
 	"${strusbase_LIBRARY_DIRS}"
 )
 

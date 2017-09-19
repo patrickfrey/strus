@@ -11,16 +11,16 @@ set( source_files
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
-	"${PROJECT_SOURCE_DIR}/include"
-	"${PROJECT_SOURCE_DIR}/src/statsproc" 
-	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include" 
+	"${STRUS_INCLUDE_DIRS}"
+	"${MAIN_SOURCE_DIR}/statsproc" 
+	"${CNODETRIE_INCLUDE_DIRS}" 
 	"${strusbase_INCLUDE_DIRS}"
 )
 
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${CMAKE_CURRENT_BINARY_DIR}/../utils"
-	"${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/src" 
+	"${MAIN_SOURCE_DIR}/utils"
+	"${CNODETRIE_LIBRARY_DIRS}" 
 	"${strusbase_LIBRARY_DIRS}"
 )
 

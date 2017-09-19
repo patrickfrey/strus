@@ -17,16 +17,16 @@ set(source_files
 
 include_directories(
   ${Boost_INCLUDE_DIRS}
-  "${PROJECT_SOURCE_DIR}/include"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/summarizer"
+  "${STRUS_INCLUDE_DIRS}"
+  "${MAIN_SOURCE_DIR}/queryproc/utils"
+  "${MAIN_SOURCE_DIR}/queryproc/summarizer"
   "${strusbase_INCLUDE_DIRS}"
 )
 
 link_directories(
   "${Boost_LIBRARY_DIRS}"
-  "${CMAKE_CURRENT_BINARY_DIR}/../utils"
-  "${CMAKE_CURRENT_BINARY_DIR}/../weighting"
+  "${MAIN_SOURCE_DIR}/utils"
+  "${MAIN_SOURCE_DIR}/weighting"
   "${strusbase_LIBRARY_DIRS}"
 )
 
