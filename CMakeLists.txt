@@ -33,6 +33,7 @@ set( STRUS_GETTEXT_LOCALEDIR "" )			#... 2nd parameter of bindtextdomain(...)
 configure_file( "${PROJECT_SOURCE_DIR}/src/utils/internationalization.cpp.in"  "${PROJECT_SOURCE_DIR}/src/utils/internationalization.cpp"  @ONLY )
 
 enable_testing()
+
 # Path declarations:
 set( CNODETRIE_INCLUDE_DIRS       "${CMAKE_CURRENT_BINARY_DIR}/3rdParty/compactNodeTrie/include"  "${PROJECT_SOURCE_DIR}/3rdParty/compactNodeTrie/include" )
 set( CNODETRIE_LIBRARY_DIRS        "${CMAKE_CURRENT_BINARY_DIR}/3rdParty/compactNodeTrie/src" )
@@ -41,7 +42,6 @@ set( GETMEMSIZE_LIBRARY_DIRS      "${CMAKE_CURRENT_BINARY_DIR}/3rdParty/getMemor
 set( STRUS_INCLUDE_DIRS                "${CMAKE_CURRENT_BINARY_DIR}/include"  "${PROJECT_SOURCE_DIR}/include" )
 set( MAIN_SOURCE_DIR                     "${PROJECT_SOURCE_DIR}/src" )
 set( MAIN_TESTS_DIR                        "${PROJECT_SOURCE_DIR}/tests" )
-
 
 # Subdirectories:
 add_subdirectory( 3rdParty )
