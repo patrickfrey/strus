@@ -57,6 +57,9 @@ dist/redhat/strus.spec
 3rdParty/armadillo/libstrus_armadillo.so.7.400.2
 3rdParty/armadillo/tmp/
 
+# Suggested build directory
+build
+
 # Compiled Programs
 src/storage/strusResizeBlocks
 tests/randoc/src/testRandomCollection
