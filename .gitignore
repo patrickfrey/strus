@@ -85,5 +85,4 @@ tests/vectorSpaceModel/src/testVectorSpaceModel
 tests/vectorSpaceModel/test.vm
 tests/vectorSpaceModel/test.vm.in.txt
 tests/vectorSpaceModel/test.vm.out.txt
-.travis.yml
 
