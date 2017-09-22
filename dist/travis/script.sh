@@ -36,6 +36,10 @@ cd ..
 for i in $DEPS; do
 	git clone `echo $GITURL | sed "s@/$PROJECT\.@/$i.@g"` $i
 	cd $i
+	git submodule update --init --recursive
+	git submodule foreach --recursive git checkout master
+	git submodule foreach --recursive git pull
+
 	case $OS in
 		Linux)
 			mkdir build
