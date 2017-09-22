@@ -36,7 +36,6 @@ cd ..
 for i in $DEPS; do
 	git clone `echo $GITURL | sed "s@/$PROJECT\.@/$i.@g"` $i
 	cd $i
-	git checkout travis
 	case $OS in
 		Linux)
 			mkdir build
