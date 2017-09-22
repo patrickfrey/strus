@@ -9,7 +9,7 @@ compiler:
 sudo: required
 branches:
   only:
-    - travis
+    - master
 before_install:
 - chmod +x dist/travis/*.sh
 - dist/travis/before_script.sh
