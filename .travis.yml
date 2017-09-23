@@ -6,6 +6,10 @@ dist: trusty
 compiler:
 - clang
 - gcc
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
 sudo: required
 branches:
   only:
