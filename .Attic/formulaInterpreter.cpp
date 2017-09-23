@@ -272,7 +272,7 @@ void FormulaInterpreter::parseWeightingFunctionCall( const FunctionMap& function
 	{
 		std::string typestr = parseIdentifier( si, se);
 		m_program.push_back( OpStruct( OpPushConst, (double)allocVariable( typestr)));
-		if (si == se || *si != ',') strus::runtime_error( _TXT( "unexpected end of expression (comma ',' expected in argument list)"));
+		if (si == se || *si != ',') strus::runtime_error( "%s", _TXT( "unexpected end of expression (comma ',' expected in argument list)"));
 		++si; skipSpaces( si, se);
 	}
 	else
@@ -319,7 +319,7 @@ void FormulaInterpreter::parseOperand( const FunctionMap& functionMap, std::stri
 {
 	if (si == se)
 	{
-		throw strus::runtime_error( _TXT( "unexpected end of expression, operand expected"));
+		throw strus::runtime_error( "%s", _TXT( "unexpected end of expression, operand expected"));
 	}
 	else if (isDigit(*si))
 	{
@@ -350,7 +350,7 @@ void FormulaInterpreter::parseOperand( const FunctionMap& functionMap, std::stri
 			}
 			else
 			{
-				throw strus::runtime_error( _TXT( "expression expected after unari '-' operator"));
+				throw strus::runtime_error( "%s", _TXT( "expression expected after unari '-' operator"));
 			}
 		}
 	}
@@ -358,14 +358,14 @@ void FormulaInterpreter::parseOperand( const FunctionMap& functionMap, std::stri
 	{
 		++si; skipSpaces(si,se);
 		unsigned int exprsize = parseSubExpression( functionMap, si, se, ')');
-		if (exprsize == 0) throw strus::runtime_error( _TXT( "content of operand '(...)' is empty"));
-		if (exprsize > 1) throw strus::runtime_error( _TXT( "content of operand '(...)' has more than one element"));
+		if (exprsize == 0) throw strus::runtime_error( "%s", _TXT( "content of operand '(...)' is empty"));
+		if (exprsize > 1) throw strus::runtime_error( "%s", _TXT( "content of operand '(...)' has more than one element"));
 	}
 	else if (*si == '#')
 	{
 		// Parse set dimension request:
 		++si; skipSpaces( si, se);
-		if (!isAlpha( *si)) throw strus::runtime_error( _TXT( "identifier expected after dimension operator '#'"));
+		if (!isAlpha( *si)) throw strus::runtime_error( "%s", _TXT( "identifier expected after dimension operator '#'"));
 		std::string var = parseIdentifier( si, se);
 		m_program.push_back( OpStruct( OpPushDim, (int)allocVariable( var)));
 	}
@@ -389,9 +389,9 @@ void FormulaInterpreter::parseOperand( const FunctionMap& functionMap, std::stri
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
+			throw strus::runtime_error( "%s", _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
 		}
-		if (si == se || *si != ',') throw strus::runtime_error( _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
+		if (si == se || *si != ',') throw strus::runtime_error( "%s", _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
 		++si; skipSpaces(si,se);
 		std::string type = parseIdentifier( si, se);
 		double initval = 0.0;
@@ -404,12 +404,12 @@ void FormulaInterpreter::parseOperand( const FunctionMap& functionMap, std::stri
 			}
 			else
 			{
-				throw strus::runtime_error( _TXT( "number expected as third argument of loop predicate <aggfunc,type,initval>"));
+				throw strus::runtime_error( "%s", _TXT( "number expected as third argument of loop predicate <aggfunc,type,initval>"));
 			}
 		}
-		if (si == se || *si != '>') throw strus::runtime_error( _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
+		if (si == se || *si != '>') throw strus::runtime_error( "%s", _TXT( "tuple <aggfunc,type> expected in loop predicate (after '<')"));
 		++si; skipSpaces( si, se);
-		if (si == se || *si != '{') throw strus::runtime_error( _TXT( "open loop bracket '{' expected after loop predicate <aggfunc,type>"));
+		if (si == se || *si != '{') throw strus::runtime_error( "%s", _TXT( "open loop bracket '{' expected after loop predicate <aggfunc,type>"));
 		++si; skipSpaces( si, se);
 		BinaryFunction aggregatorf = functionMap.getBinaryFunction( aggregatorid);
 
@@ -418,15 +418,15 @@ void FormulaInterpreter::parseOperand( const FunctionMap& functionMap, std::stri
 		m_program.push_back( OpStruct( OpMark));
 
 		unsigned int loopsize = parseSubExpression( functionMap, si, se, '}');
-		if (loopsize == 0) throw strus::runtime_error( _TXT( "content of loop '{...}' is empty"));
-		if (loopsize > 1) throw strus::runtime_error( _TXT( "content of loop '{...}' has more than one expression element"));
+		if (loopsize == 0) throw strus::runtime_error( "%s", _TXT( "content of loop '{...}' is empty"));
+		if (loopsize > 1) throw strus::runtime_error( "%s", _TXT( "content of loop '{...}' has more than one expression element"));
 
 		m_program.push_back( OpStruct( OpBinaryFunction, aggregatorf));
 		m_program.push_back( OpStruct( OpAgain));
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "function or variable identifier or numeric operand expected"));
+		throw strus::runtime_error( "%s", _TXT( "function or variable identifier or numeric operand expected"));
 	}
 }
 
@@ -452,7 +452,7 @@ unsigned int FormulaInterpreter::parseSubExpression( const FunctionMap& function
 				std::string opnext = parseOperator( fi, se);
 				if (operatorPrecedence(op) != operatorPrecedence(opnext))
 				{
-					throw strus::runtime_error( _TXT( "mixing operators with different precedence without grouping them with brackets '(' ')'"));
+					throw strus::runtime_error( "%s", _TXT( "mixing operators with different precedence without grouping them with brackets '(' ')'"));
 				}
 			}
 			BinaryFunction opfunc = functionMap.getBinaryFunction( op);
@@ -464,7 +464,7 @@ unsigned int FormulaInterpreter::parseSubExpression( const FunctionMap& function
 			++si; skipSpaces( si, se);
 			if (si == se || *si == eb)
 			{
-				throw strus::runtime_error( _TXT( "unexpected end of expression"));
+				throw strus::runtime_error( "%s", _TXT( "unexpected end of expression"));
 			}
 		}
 	}
@@ -485,16 +485,16 @@ FormulaInterpreter::FormulaInterpreter( const FunctionMap& functionMap, const st
 		unsigned int exprsize = parseSubExpression( functionMap, si, se, '\0');
 		if (exprsize > 1)
 		{
-			throw strus::runtime_error( _TXT("program with more than one return value"));
+			throw strus::runtime_error( "%s", _TXT("program with more than one return value"));
 		}
 		if (exprsize == 0)
 		{
-			throw strus::runtime_error( _TXT("program is empty"));
+			throw strus::runtime_error( "%s", _TXT("program is empty"));
 		}
 	}
 	catch (const std::bad_alloc&)
 	{
-		throw strus::runtime_error( _TXT("out of memory parsing formula"));
+		throw strus::runtime_error( "%s", _TXT("out of memory parsing formula"));
 	}
 	catch (const std::runtime_error& err)
 	{
@@ -539,7 +539,7 @@ public:
 
 	void push( Element elem)
 	{
-		if (m_itr == 0) throw strus::runtime_error( _TXT("stack overflow"));
+		if (m_itr == 0) throw strus::runtime_error( "%s", _TXT("stack overflow"));
 		m_ar[ --m_itr] = elem;
 	}
 
@@ -547,14 +547,14 @@ public:
 	{
 		if (m_itr == Size)
 		{
-			throw strus::runtime_error( _TXT("logic error: pop from empty stack"));
+			throw strus::runtime_error( "%s", _TXT("logic error: pop from empty stack"));
 		}
 		return m_ar[ m_itr++];
 	}
 
 	Element& back()
 	{
-		if (m_itr == Size) throw strus::runtime_error( _TXT("logic error: access top element from empty stack"));
+		if (m_itr == Size) throw strus::runtime_error( "%s", _TXT("logic error: access top element from empty stack"));
 		return m_ar[ m_itr];
 	}
 

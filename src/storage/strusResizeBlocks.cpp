@@ -93,17 +93,17 @@ static void commitTransaction( strus::DatabaseClientInterface& database, strus::
 {
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error(_TXT("error in storage transaction"));
+		throw strus::runtime_error( "%s", _TXT("error in storage transaction"));
 	}
 	transaction->commit();
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error(_TXT("error in storage transaction commit"));
+		throw strus::runtime_error( "%s", _TXT("error in storage transaction commit"));
 	}
 	transaction.reset( database.createTransaction());
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error(_TXT("error creating new storage transaction"));
+		throw strus::runtime_error( "%s", _TXT("error creating new storage transaction"));
 	}
 }
 
@@ -128,7 +128,7 @@ static void resizeBlocks(
 	}
 	if (!transaction.get())
 	{
-		throw strus::runtime_error(_TXT("failed to create storage transaction"));
+		throw strus::runtime_error( "%s", _TXT("failed to create storage transaction"));
 	}
 	if (strus::utils::caseInsensitiveEquals( blocktype, "forwardindex"))
 	{
@@ -232,7 +232,7 @@ int main( int argc, const char* argv[])
 			{
 				if (argi == argc || argv[argi+1][0] == '-')
 				{
-					throw strus::runtime_error( _TXT("no argument given to option --commit"));
+					throw strus::runtime_error( _TXT("no argument given to option %s"), "--commit");
 				}
 				++argi;
 				transactionsize = parseNumber( argv[argi], "argument for option --commit");
@@ -241,7 +241,7 @@ int main( int argc, const char* argv[])
 			{
 				if (argi == argc || argv[argi+1][0] == '-')
 				{
-					throw strus::runtime_error( _TXT("no argument given to option --docno"));
+					throw strus::runtime_error( _TXT("no argument given to option %s"), "--docno");
 				}
 				++argi;
 				docnorange = parseNumberRange( argv[argi], "argument for option --docno");
@@ -250,7 +250,7 @@ int main( int argc, const char* argv[])
 			{
 				if (argi == argc || argv[argi+1][0] == '-')
 				{
-					throw strus::runtime_error( _TXT("no argument given to option --termtype"));
+					throw strus::runtime_error( _TXT("no argument given to option %s"), "--termtype");
 				}
 				++argi;
 				termtype = argv[ argi];
@@ -273,15 +273,15 @@ int main( int argc, const char* argv[])
 		unsigned int newblocksize = parseNumber( argv[argi+2], "positional argument 3");
 
 		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( g_errorBuffer);
-		if (!dbi) throw strus::runtime_error( _TXT("could not create leveldb key/value store database handler"));
-		if (g_errorBuffer->hasError()) throw strus::runtime_error(_TXT("error in initialization"));
+		if (!dbi) throw strus::runtime_error( "%s",  _TXT("could not create leveldb key/value store database handler"));
+		if (g_errorBuffer->hasError()) throw strus::runtime_error( "%s", _TXT("error in initialization"));
 
 		resizeBlocks( dbi, dbconfig, blocktype, termtype, newblocksize, transactionsize, docnorange);
 
 		// Check for reported error an terminate regularly:
 		if (g_errorBuffer->hasError())
 		{
-			throw strus::runtime_error( _TXT("error processing resize blocks"));
+			throw strus::runtime_error( "%s",  _TXT("error processing resize blocks"));
 		}
 		std::cerr << _TXT("done") << std::endl;
 		return 0;

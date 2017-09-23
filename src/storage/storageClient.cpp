@@ -96,7 +96,7 @@ StorageClient::StorageClient(
 	catch (const std::bad_alloc& err)
 	{
 		cleanup();
-		throw strus::runtime_error(_TXT("out of memory creating storage client"));
+		throw strus::runtime_error( "%s", _TXT("out of memory creating storage client"));
 	}
 	catch (const std::runtime_error& err)
 	{
@@ -174,7 +174,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	||  !varstor.load( "AttribNo", next_attribno_)
 	||  !varstor.load( "NofDocs", nof_documents_))
 	{
-		throw strus::runtime_error( _TXT( "corrupt storage, not all mandatory variables defined"));
+		throw strus::runtime_error( "%s",  _TXT( "corrupt storage, not all mandatory variables defined"));
 	}
 	if (!varstor.load( "Version", version_))
 	{
@@ -206,7 +206,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 void StorageClient::storeVariables()
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	if (!transaction.get()) throw strus::runtime_error(_TXT("error storing variables"));
+	if (!transaction.get()) throw strus::runtime_error( "%s", _TXT("error storing variables"));
 	getVariablesWriteBatch( transaction.get(), 0);
 	transaction->commit();
 }
@@ -509,7 +509,7 @@ public:
 	{
 		if (!m_storage->withAcl())
 		{
-			throw strus::runtime_error( _TXT( "storage configured without ACL. No users can be created"));
+			throw strus::runtime_error( "%s", _TXT( "storage configured without ACL. No users can be created"));
 		}
 		return m_storage->allocUsernoImm( name);
 	}
@@ -829,7 +829,7 @@ MetaDataRestrictionInterface* StorageClient::createMetaDataRestriction() const
 void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	if (!transaction.get()) throw strus::runtime_error(_TXT("error loading termno map"));
+	if (!transaction.get()) throw strus::runtime_error( "%s", _TXT("error loading termno map"));
 	utils::UnorderedMap<std::string,Index> termno_map;
 	try
 	{
@@ -903,7 +903,7 @@ StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool si
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
+			throw strus::runtime_error( "%s", _TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
@@ -923,7 +923,7 @@ StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator()
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
+			throw strus::runtime_error( "%s", _TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);

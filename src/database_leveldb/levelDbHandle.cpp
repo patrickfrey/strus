@@ -52,7 +52,7 @@ LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFile
 	}
 	if (m_cachesize_k)
 	{
-		if (m_cachesize_k * 1024 < m_cachesize_k) throw strus::runtime_error( _TXT( "size of cache out of range"));
+		if (m_cachesize_k * 1024 < m_cachesize_k) throw strus::runtime_error( "%s", _TXT( "size of cache out of range"));
 		m_dboptions.block_cache = leveldb::NewLRUCache( m_cachesize_k * 1024);
 	}
 	if (!m_compression)
@@ -132,7 +132,7 @@ utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& pat
 		||  (writeBufferSize_ && (*mi)->writeBufferSize() != writeBufferSize_)
 		||  (blockSize_ && (*mi)->blockSize() != blockSize_))
 		{
-			throw strus::runtime_error( _TXT( "level DB key value store with the same path opened twice but with different settings"));
+			throw strus::runtime_error( "%s", _TXT( "level DB key value store with the same path opened twice but with different settings"));
 		}
 		return *mi;
 	}

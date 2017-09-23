@@ -64,7 +64,7 @@ bool Accumulator::nextRank(
 		se = m_selectorPostings.end();
 	if (si == se)
 	{
-		throw strus::runtime_error( _TXT( "query has no valid selection set defined"));
+		throw strus::runtime_error( "%s", _TXT( "query has no valid selection set defined"));
 	}
 	while (si != se)
 	{

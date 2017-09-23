@@ -96,7 +96,7 @@ void ForwardIndexBlock::setId( const Index& id_)
 		char const* pp = prevItem( charend());
 		Index maxPos = position_at( pp);
 		
-		if (maxPos > id_) throw strus::runtime_error( _TXT( "cannot set forward index block id to a smaller value than the highest position of an item inserted"));
+		if (maxPos > id_) throw strus::runtime_error( "%s", _TXT( "cannot set forward index block id to a smaller value than the highest position of an item inserted"));
 		if (id() != id_)
 		{
 			// Rewrite relative position numbers (first element in variable size record):

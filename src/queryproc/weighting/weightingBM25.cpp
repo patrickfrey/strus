@@ -39,7 +39,7 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 		m_metadata_doclen = metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_);
 		if (m_metadata_doclen<0)
 		{
-			throw strus::runtime_error( _TXT("parameter 'b' set, but no meta data element for the document length defined"));
+			throw strus::runtime_error( "%s",  _TXT("parameter 'b' set, but no meta data element for the document length defined"));
 		}
 	}
 }

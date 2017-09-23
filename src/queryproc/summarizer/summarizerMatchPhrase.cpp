@@ -55,7 +55,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
+	if (!m_forwardindex.get()) throw strus::runtime_error( "%s", _TXT("error creating forward index iterator"));
 }
 
 void SummarizerFunctionContextMatchPhrase::setVariableValue( const std::string&, double)
@@ -74,24 +74,24 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 	{
 		if (utils::caseInsensitiveEquals( name, "title"))
 		{
-			if (m_titleitr) throw strus::runtime_error(_TXT("title field specified twice"));
+			if (m_titleitr) throw strus::runtime_error( "%s", _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "struct"))
 		{
-			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
+			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
 			m_structar[ m_structarsize++] = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "para"))
 		{
-			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
+			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = itr;
 			m_paraarsize++;
 		}
 		else if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of weighting features out of range"));
+			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
 			double idf = logl( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));

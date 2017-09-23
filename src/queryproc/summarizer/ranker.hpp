@@ -47,7 +47,7 @@ public:
 	Ranker( std::size_t maxNofRanks_)
 		:m_maxNofRanks(maxNofRanks_),m_nofRanks(0)
 	{
-		if (maxNofRanks_ == 0) throw strus::runtime_error( _TXT( "illegal value for max number of ranks"));
+		if (maxNofRanks_ == 0) throw strus::runtime_error( "%s",  _TXT( "illegal value for max number of ranks"));
 	}
 	~Ranker(){}
 

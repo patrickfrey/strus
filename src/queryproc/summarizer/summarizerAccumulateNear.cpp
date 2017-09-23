@@ -54,7 +54,7 @@ SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear
 	,m_initialized(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
+	if (!m_forwardindex.get()) throw strus::runtime_error( "%s", _TXT("error creating forward index iterator"));
 }
 
 void SummarizerFunctionContextAccumulateNear::setVariableValue( const std::string&, double)
@@ -73,12 +73,12 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 	{
 		if (utils::caseInsensitiveEquals( name, "struct"))
 		{
-			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
+			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize++] = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of weighting features out of range"));
+			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
 			double idf = logl( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));

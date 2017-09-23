@@ -70,7 +70,7 @@ void ScalarFunction::pushInstruction( const OpCode& op, unsigned int operand)
 {
 	if (operand >= (1 << InstructionOpodeShift))
 	{
-		throw strus::runtime_error( _TXT( "operand out of range in scalar function"));
+		throw strus::runtime_error( "%s",  _TXT( "operand out of range in scalar function"));
 	}
 	Instruction instr = ((Instruction)op << InstructionOpodeShift) + operand;
 	m_instructionar.push_back( instr);

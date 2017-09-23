@@ -188,7 +188,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat16;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveEquals( type, "float32"))
 	{
@@ -207,7 +207,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat32;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveStartsWith( type, "int"))
 	{
@@ -226,7 +226,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualInt;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveStartsWith( type, "uint"))
 	{
@@ -245,7 +245,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualUInt;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else
 	{
@@ -276,7 +276,7 @@ MetaDataRestrictionInstance::MetaDataRestrictionInstance(
 {
 	if (!m_metadata.get())
 	{
-		throw strus::runtime_error( _TXT("failed to create metadata reader interface"));
+		throw strus::runtime_error( "%s", _TXT("failed to create metadata reader interface"));
 	}
 }
 

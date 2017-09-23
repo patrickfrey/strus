@@ -163,7 +163,7 @@ static double parseNumber( std::string::const_iterator& si, const std::string::c
 	}
 	if (!isDigit(*si))
 	{
-		throw strus::runtime_error(_TXT("number expected"));
+		throw strus::runtime_error( "%s", _TXT("number expected"));
 	}
 	for (;si < se && isDigit(*si); ++si)
 	{
@@ -191,7 +191,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 	skipSpaces( si, se);
 	if (si == se)
 	{
-		throw strus::runtime_error( _TXT( "unexpected end of expression, operand expected"));
+		throw strus::runtime_error( "%s",  _TXT( "unexpected end of expression, operand expected"));
 	}
 	std::string::const_iterator start = si;
 	if (isAlpha(*si))
@@ -218,7 +218,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 			std::string var = parseIdentifier( si, se);
 			if (ctx->argumentNameMap.find( var) == ctx->argumentNameMap.end())
 			{
-				throw strus::runtime_error( _TXT("argument references by index not allowed if named arguments specified"));
+				throw strus::runtime_error( "%s",  _TXT("argument references by index not allowed if named arguments specified"));
 			}
 			resolveIdentifier( func, ctx, var);
 			return;
@@ -242,7 +242,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 				argid = argid * 10 + (unsigned char)(*si - '0');
 				if (argid > std::numeric_limits<unsigned short>::max())
 				{
-					throw strus::runtime_error( _TXT("argument identifier out of range"));
+					throw strus::runtime_error( "%s",  _TXT("argument identifier out of range"));
 				}
 			}
 			if (si != se && isAlpha(*si))
@@ -272,7 +272,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 		std::string::const_iterator start = si;
 		++si;
 		skipSpaces( si, se);
-		if (si == se) throw strus::runtime_error( _TXT("unexpected end of expression"));
+		if (si == se) throw strus::runtime_error( "%s",  _TXT("unexpected end of expression"));
 		if (isDigit(*si))
 		{
 			si = start;
@@ -314,7 +314,7 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 		skipSpaces( si, se);
 		if (si == se || *si != ')')
 		{
-			throw strus::runtime_error( _TXT("missing end brakced ')' at end of expression"));
+			throw strus::runtime_error( "%s",  _TXT("missing end brakced ')' at end of expression"));
 		}
 		++si;
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -353,7 +353,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 	if (ufi != m_unaryFunctionMap.end())
 	{
 		if (nofArguments > 1) errmsg = _TXT("too many arguments in unary function call");
-		else if (nofArguments < 1) throw strus::runtime_error( _TXT("too few arguments in unary function call"));
+		else if (nofArguments < 1) throw strus::runtime_error( "%s",  _TXT("too few arguments in unary function call"));
 		else
 		{
 			func->addOpUnaryFunctionCall( ufi->second);
@@ -367,7 +367,7 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 	if (bfi != m_binaryFunctionMap.end())
 	{
 		if (nofArguments > 2) errmsg = _TXT("too many arguments in binary function call");
-		else if (nofArguments < 2) throw strus::runtime_error( _TXT("too few arguments in binary function call"));
+		else if (nofArguments < 2) throw strus::runtime_error( "%s",  _TXT("too few arguments in binary function call"));
 		else
 		{
 			func->addOpBinaryFunctionCall( bfi->second);
@@ -380,8 +380,8 @@ void ScalarFunctionParser::resolveFunctionCall( ScalarFunction* func, const std:
 	NaryFunctionMap::const_iterator nfi = m_naryFunctionMap.find( functionName);
 	if (nfi != m_naryFunctionMap.end())
 	{
-		if (nofArguments > nfi->second.max_nofargs) throw strus::runtime_error( _TXT("too many arguments in N-ary function call"));
-		else if (nofArguments < nfi->second.min_nofargs) throw strus::runtime_error( _TXT("too few arguments in N-ary function call"));
+		if (nofArguments > nfi->second.max_nofargs) throw strus::runtime_error( "%s",  _TXT("too many arguments in N-ary function call"));
+		else if (nofArguments < nfi->second.min_nofargs) throw strus::runtime_error( "%s",  _TXT("too few arguments in N-ary function call"));
 		func->addOpNaryFunctionCall( nofArguments, nfi->second.func);
 #ifdef STRUS_LOWLEVEL_DEBUG
 		std::cerr << "parse N-ary function call " << functionName << " " << nofArguments << std::endl;
@@ -406,7 +406,7 @@ void ScalarFunctionParser::parseFunctionCall( ScalarFunction* func, ParserContex
 		skipSpaces( si, se);
 		if (si == se )
 		{
-			throw strus::runtime_error( _TXT( "unexpected end of expression"));
+			throw strus::runtime_error( "%s",  _TXT( "unexpected end of expression"));
 		}
 		if (*si == ')')
 		{
@@ -418,7 +418,7 @@ void ScalarFunctionParser::parseFunctionCall( ScalarFunction* func, ParserContex
 		++nofArguments;
 		if (si == se)
 		{
-			throw strus::runtime_error( _TXT( "unexpected end of expression"));
+			throw strus::runtime_error( "%s",  _TXT( "unexpected end of expression"));
 		}
 		if (*si == ',')
 		{
@@ -431,7 +431,7 @@ void ScalarFunctionParser::parseFunctionCall( ScalarFunction* func, ParserContex
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT( "end bracket ')' or argument separator ',' expected after argument in function call"));
+			throw strus::runtime_error( "%s",  _TXT( "end bracket ')' or argument separator ',' expected after argument in function call"));
 		}
 	}
 	resolveFunctionCall( func, functionName, nofArguments);
@@ -450,7 +450,7 @@ static ScalarFunction::OpCode getOperator( const char chr)
 		case '/':
 			return ScalarFunction::OpDiv;
 		default:
-			throw strus::runtime_error( _TXT( "operator expected in expression after operand"));
+			throw strus::runtime_error( "%s",  _TXT( "operator expected in expression after operand"));
 	}
 }
 

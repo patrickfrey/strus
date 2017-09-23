@@ -61,7 +61,7 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_debugMode(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_metaDataReader.get()) throw strus::runtime_error(_TXT("error creating meta data reader"));
+	if (!m_metaDataReader.get()) throw strus::runtime_error( "%s", _TXT("error creating meta data reader"));
 	const ScalarFunctionInterface* weightingFormula = m_queryEval->weightingFormula();
 	if (weightingFormula)
 	{
@@ -187,7 +187,7 @@ void Query::defineFeature( const std::string& set_, double weight_)
 #endif
 	try
 	{
-		if (m_stack.empty()) throw strus::runtime_error( _TXT("no term or expression defined"));
+		if (m_stack.empty()) throw strus::runtime_error( "%s", _TXT("no term or expression defined"));
 		m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
 		m_stack.pop_back();
 	}
@@ -403,7 +403,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
 	{
-		throw strus::runtime_error( _TXT( "number of arguments of feature join expression in query out of range"));
+		throw strus::runtime_error( "%s",  _TXT( "number of arguments of feature join expression in query out of range"));
 	}
 	std::vector<Reference<PostingIteratorInterface> > joinargs;
 	std::vector<NodeAddress>::const_iterator
@@ -418,7 +418,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
-				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
+				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
 				break;
@@ -427,7 +427,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const DocField& docfield = m_docfields[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createFieldPostingIterator( docfield.metadataRangeStart, docfield.metadataRangeEnd));
-				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression (doc field) posting iterator"));
+				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression (doc field) posting iterator"));
 				TermStatistics termstats( m_globstats.nofDocumentsInserted());
 				// ... Doc Field features get the global statistics, because they are supposed to appear in every document
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), termstats);
@@ -436,7 +436,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
 							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap));
-				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
+				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get());
 				break;
@@ -486,7 +486,7 @@ const Query::NodeStorageData& Query::nodeStorageData( const NodeAddress& nodeadr
 	NodeStorageDataMap::const_iterator pi = nodeStorageDataMap.find( nodeadr);
 	if (pi == nodeStorageDataMap.end())
 	{
-		throw strus::runtime_error( _TXT( "expression node postings not found"));
+		throw strus::runtime_error( "%s",  _TXT( "expression node postings not found"));
 	}
 	return pi->second;
 }
@@ -666,7 +666,7 @@ QueryResult Query::evaluate() const
 				strus::local_ptr<WeightingFunctionContextInterface> execContext(
 					wi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get(), m_globstats));
-				if (!execContext.get()) throw strus::runtime_error(_TXT("error creating weighting function context"));
+				if (!execContext.get()) throw strus::runtime_error( "%s", _TXT("error creating weighting function context"));
 	
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 					si = wi->featureParameters().begin(),
@@ -714,7 +714,7 @@ QueryResult Query::evaluate() const
 			}
 			else if (m_errorhnd->hasError())
 			{
-				throw strus::runtime_error(_TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
+				throw strus::runtime_error( "%s", _TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
 			}
 		}
 		// [4.5] Define the feature restrictions:
@@ -793,7 +793,7 @@ QueryResult Query::evaluate() const
 					zi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get(), m_globstats));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
-				if (!closure) throw strus::runtime_error(_TXT("error creating summarizer context"));
+				if (!closure) throw strus::runtime_error( "%s", _TXT("error creating summarizer context"));
 
 				// [5.2] Add features with their variables assigned to summarizer:
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator

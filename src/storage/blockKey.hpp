@@ -38,7 +38,7 @@ public:
 	{
 		if (idx1 <= 0 || idx2 <= 0)
 		{
-			throw strus::runtime_error( _TXT( "using 0 in block key [2]"));
+			throw strus::runtime_error( "%s", _TXT( "using 0 in block key [2]"));
 		}
 		m_index = idx1;
 		m_index <<= 32;
@@ -48,7 +48,7 @@ public:
 	{
 		if (idx <= 0)
 		{
-			throw strus::runtime_error( _TXT( "using 0 in block key [1]"));
+			throw strus::runtime_error( "%s", _TXT( "using 0 in block key [1]"));
 		}
 		m_index = idx;
 	}
@@ -59,7 +59,7 @@ public:
 	{
 		if (idx <= 0)
 		{
-			throw strus::runtime_error( _TXT( "using 0 in block key [3]"));
+			throw strus::runtime_error( "%s", _TXT( "using 0 in block key [3]"));
 		}
 		m_index = idx;
 	}
@@ -86,7 +86,7 @@ public:
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT( "internal: illegal block key element access"));
+			throw strus::runtime_error( "%s", _TXT( "internal: illegal block key element access"));
 		}
 	}
 

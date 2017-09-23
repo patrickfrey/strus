@@ -120,8 +120,8 @@ private:
 			std::memset( m_ar + copy_size, 0, m_size - copy_size);
 		}
 
-		const Index& operator[]( std::size_t idx) const		{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound read (document frequency cache)")); return m_ar[idx];}
-		Index& operator[]( std::size_t idx)			{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound write (document frequency cache)")); return m_ar[idx];}
+		const Index& operator[]( std::size_t idx) const		{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound read (%s)"), "document frequency cache"); return m_ar[idx];}
+		Index& operator[]( std::size_t idx)			{if (idx >= m_size) throw strus::runtime_error( _TXT( "array bound write (%s)"), "document frequency cache"); return m_ar[idx];}
 
 		std::size_t size() const					{return m_size;}
 

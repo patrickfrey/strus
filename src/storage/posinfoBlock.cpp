@@ -221,7 +221,7 @@ bool PosinfoBlock::DocIndexNode::addDocument( const Index& docno_, unsigned shor
 	{
 		if (base >= docno_)
 		{
-			throw strus::runtime_error( _TXT( "documents not added in ascending order into posinfo block"));
+			throw strus::runtime_error( "%s",  _TXT( "documents not added in ascending order into posinfo block"));
 		}
 		if (base + std::numeric_limits<unsigned short>::max() <= docno_)
 		{
@@ -278,7 +278,7 @@ PosinfoBlockBuilder::PosinfoBlockBuilder( const PosinfoBlock& o)
 
 void PosinfoBlockBuilder::append( const Index& docno, const PositionType* posar)
 {
-	if (m_id && m_id < docno) throw strus::runtime_error( _TXT( "assigned illegal id to block"));
+	if (m_id && m_id < docno) throw strus::runtime_error( "%s",  _TXT( "assigned illegal id to block"));
 
 	if (m_docIndexNodeArray.empty()
 	||  !m_docIndexNodeArray.back().addDocument( docno, m_posinfoArray.size()))
@@ -304,7 +304,7 @@ bool PosinfoBlockBuilder::fitsInto( std::size_t nofpos) const
 
 PosinfoBlock PosinfoBlockBuilder::createBlock() const
 {
-	if (empty()) throw strus::runtime_error( _TXT( "tried to create empty posinfo block"));
+	if (empty()) throw strus::runtime_error( "%s",  _TXT( "tried to create empty posinfo block"));
 
 	std::size_t blksize =
 		sizeof( unsigned int)
@@ -343,7 +343,7 @@ void PosinfoBlockBuilder::clear()
 
 void PosinfoBlockBuilder::setId( const Index& id_)
 {
-	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( _TXT( "assigning illegal id to block"));
+	if (id_ && id_ < m_lastDoc) throw strus::runtime_error( "%s",  _TXT( "assigning illegal id to block"));
 	m_id = id_;
 }
 

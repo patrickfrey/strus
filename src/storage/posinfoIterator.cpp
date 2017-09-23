@@ -108,7 +108,7 @@ Index PosinfoIterator::skipPos( const Index& firstpos_)
 	Index rt = m_positionScanner.skip( firstpos_);
 	if (rt && rt < firstpos_)
 	{
-		throw strus::runtime_error( _TXT( "corrupt index (posinfo block)"));
+		throw strus::runtime_error( "%s",  _TXT( "corrupt index (posinfo block)"));
 	}
 	return rt;
 }

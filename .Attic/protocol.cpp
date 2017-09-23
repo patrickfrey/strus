@@ -67,7 +67,7 @@ unsigned int decode_esc( char ch)
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "illegal character in protocol encoding"));
+		throw strus::runtime_error( "%s",  _TXT( "illegal character in protocol encoding"));
 	}
 }
 

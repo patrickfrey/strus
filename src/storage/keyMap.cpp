@@ -77,7 +77,7 @@ Index KeyMap::getOrCreate( const std::string& name)
 		rt = ++m_unknownHandleCount;
 		if (rt >= UnknownValueHandleStart)
 		{
-			throw strus::runtime_error( _TXT( "too many elements in keymap"));
+			throw strus::runtime_error( "%s", _TXT( "too many elements in keymap"));
 		}
 		rt += UnknownValueHandleStart;
 		m_map[ name] = rt;

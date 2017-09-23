@@ -41,7 +41,7 @@ WeightingFunctionContextScalar::WeightingFunctionContextScalar(
 {
 	if (!m_func.get())
 	{
-		throw strus::runtime_error(_TXT("failed to create weighting function instance"));
+		throw strus::runtime_error( "%s", _TXT("failed to create weighting function instance"));
 	}
 }
 
@@ -53,7 +53,7 @@ void WeightingFunctionContextScalar::addWeightingFeature(
 {
 	try
 	{
-		throw strus::runtime_error( _TXT( "no weighting function feature parameters allowed"));
+		throw strus::runtime_error( "%s",  _TXT( "no weighting function feature parameters allowed"));
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
 }
@@ -125,7 +125,7 @@ void WeightingFunctionInstanceScalar::addStringParameter( const std::string& nam
 		{
 			if (!m_expression.empty())
 			{
-				throw strus::runtime_error(_TXT( "expression defined twice"));
+				throw strus::runtime_error( "%s", _TXT( "expression defined twice"));
 			}
 			m_expression = value;
 		}

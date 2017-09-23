@@ -71,7 +71,7 @@ int utils::toint( const std::string& val)
 
 float utils::tofraction( const std::string& val)
 {
-	if (val.empty()) throw strus::runtime_error(_TXT("failed to convert percentage fraction value (empty)"));
+	if (val.empty()) throw strus::runtime_error( "%s", _TXT("failed to convert percentage fraction value (empty)"));
 	if (val[ val.size()-1] == '%')
 	{
 		std::string vv( val.c_str(), val.size() -1);
@@ -92,7 +92,7 @@ std::string utils::tostring( int val)
 	}
 	catch (...)
 	{
-		throw strus::runtime_error( _TXT( "failed to convert number to string (out of memory)"));
+		throw strus::runtime_error( "%s",  _TXT( "failed to convert number to string (out of memory)"));
 	}
 }
 

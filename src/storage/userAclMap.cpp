@@ -94,7 +94,7 @@ void UserAclMap::deleteUserAccess(
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "cannot delete user access after defining it for the same user in a transaction"));
+		throw strus::runtime_error( "%s",  _TXT( "cannot delete user access after defining it for the same user in a transaction"));
 	}
 }
 
@@ -108,7 +108,7 @@ void UserAclMap::deleteDocumentAccess(
 	}
 	else
 	{
-		throw strus::runtime_error( _TXT( "cannot define document access after defining it for the same document in a transaction"));
+		throw strus::runtime_error( "%s",  _TXT( "cannot define document access after defining it for the same document in a transaction"));
 	}
 }
 
