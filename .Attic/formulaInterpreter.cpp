@@ -51,7 +51,7 @@ FormulaInterpreter::UnaryFunction FormulaInterpreter::FunctionMap::getUnaryFunct
 const std::string& FormulaInterpreter::FunctionMap::getUnaryFunctionName( UnaryFunction func) const
 {
 	std::map<uintptr_t,std::string>::const_iterator ni = m_namemap.find( (uintptr_t)func);
-	if (ni == m_namemap.end()) throw strus::runtime_error(_TXT("name of unary function not defined"));
+	if (ni == m_namemap.end()) throw strus::runtime_error( "%s", _TXT("name of unary function not defined"));
 	return ni->second;
 }
 
@@ -71,7 +71,7 @@ FormulaInterpreter::BinaryFunction FormulaInterpreter::FunctionMap::getBinaryFun
 const std::string& FormulaInterpreter::FunctionMap::getBinaryFunctionName( BinaryFunction func) const
 {
 	std::map<uintptr_t,std::string>::const_iterator ni = m_namemap.find( (uintptr_t)func);
-	if (ni == m_namemap.end()) throw strus::runtime_error(_TXT("name of binary function not defined"));
+	if (ni == m_namemap.end()) throw strus::runtime_error( "%s", _TXT("name of binary function not defined"));
 	return ni->second;
 }
 
@@ -98,7 +98,7 @@ FormulaInterpreter::WeightingFunction FormulaInterpreter::FunctionMap::findWeigh
 const std::string& FormulaInterpreter::FunctionMap::getWeightingFunctionName( WeightingFunction func) const
 {
 	std::map<uintptr_t,std::string>::const_iterator ni = m_namemap.find( (uintptr_t)func);
-	if (ni == m_namemap.end()) throw strus::runtime_error(_TXT("name of binary function not defined"));
+	if (ni == m_namemap.end()) throw strus::runtime_error( "%s", _TXT("name of binary function not defined"));
 	return ni->second;
 }
 
@@ -204,7 +204,7 @@ static double parseNumber( std::string::const_iterator& si, const std::string::c
 	}
 	if (!isDigit(*si))
 	{
-		throw strus::runtime_error(_TXT("number expected"));
+		throw strus::runtime_error( "%s", _TXT("number expected"));
 	}
 	for (;si < se && isDigit(*si); ++si)
 	{
@@ -633,12 +633,12 @@ double FormulaInterpreter::run( void* ctx) const
 					++ip;
 					if (ip == m_program.size())
 					{
-						throw strus::runtime_error(_TXT("illegal program code: end of loop not found"));
+						throw strus::runtime_error( "%s", _TXT("illegal program code: end of loop not found"));
 					}
 					const OpStruct& xp = m_program[ ip];
 					if (xp.opCode != OpPushConst)
 					{
-						throw strus::runtime_error(_TXT("illegal program code: expected push const after loop operation"));
+						throw strus::runtime_error( "%s", _TXT("illegal program code: expected push const after loop operation"));
 					}
 					stack.push( xp.operand.value);
 					for (++ip; ip < m_program.size(); ++ip)
@@ -659,7 +659,7 @@ double FormulaInterpreter::run( void* ctx) const
 					}
 					if (ip == m_program.size())
 					{
-						throw strus::runtime_error(_TXT("illegal program code: end of loop not found"));
+						throw strus::runtime_error( "%s", _TXT("illegal program code: end of loop not found"));
 					}
 				}
 				else {
@@ -761,7 +761,7 @@ double FormulaInterpreter::run( void* ctx) const
 	double rt = stack.pop();
 	if (!stack.empty())
 	{
-		throw strus::runtime_error(_TXT("illegal program code: program stack not empty after completion of program run"));
+		throw strus::runtime_error( "%s", _TXT("illegal program code: program stack not empty after completion of program run"));
 	}
 	return rt;
 }

@@ -50,10 +50,10 @@ public:
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{
-		if (!m_queryProcessor.get()) throw strus::runtime_error(_TXT("error creating query processor"));
-		if (!m_storage.get()) throw strus::runtime_error(_TXT("error creating default storage"));
+		if (!m_queryProcessor.get()) throw strus::runtime_error( "%s", _TXT("error creating query processor"));
+		if (!m_storage.get()) throw strus::runtime_error( "%s", _TXT("error creating default storage"));
 		if (!m_db.get()) throw strus::runtime_error(_TXT("error creating default database '%s'"), "leveldb");
-		if (!m_statsproc.get()) throw strus::runtime_error(_TXT("error creating default statistics processor"));
+		if (!m_statsproc.get()) throw strus::runtime_error( "%s", _TXT("error creating default statistics processor"));
 	}
 
 	virtual ~StorageObjectBuilder(){}

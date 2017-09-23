@@ -71,7 +71,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::OpNeg:
 				{
-					if (stk.size() < 1) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < 1) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					stk.back() = -stk.back();
 #ifdef STRUS_LOWLEVEL_DEBUG
 					std::cerr << "PUSH " << stk.back() << std::endl;
@@ -80,7 +80,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::OpAdd:
 				{
-					if (stk.size() < 2) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < 2) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					double a1 = stk[ stk.size() -2];
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
@@ -92,7 +92,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::OpSub:
 				{
-					if (stk.size() < 2) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < 2) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					double a1 = stk[ stk.size() -2];
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
@@ -104,7 +104,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::OpDiv:
 				{
-					if (stk.size() < 2) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < 2) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					double a1 = stk[ stk.size() -2];
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
@@ -114,7 +114,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 					}
 					else if (std::fabs( a2) < std::numeric_limits<double>::epsilon())
 					{
-						throw strus::runtime_error(_TXT("division by zero"));
+						throw strus::runtime_error( "%s", _TXT("division by zero"));
 					}
 					else
 					{
@@ -127,7 +127,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::OpMul:
 				{
-					if (stk.size() < 2) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < 2) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					double a1 = stk[ stk.size() -2];
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
@@ -139,7 +139,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::FuncUnary:
 				{
-					if (stk.size() < 1) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < 1) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					double a1 = stk[ stk.size() -1];
 					stk.resize( stk.size() -1);
 					ScalarFunction::UnaryFunction func = m_func->getUnaryFunctionOperand( ip);
@@ -151,7 +151,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::FuncBinary:
 				{
-					if (stk.size() < 2) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < 2) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					double a1 = stk[ stk.size() -2];
 					double a2 = stk[ stk.size() -1];
 					stk.resize( stk.size() -2);
@@ -164,7 +164,7 @@ double ScalarFunctionInstance::call( const double* args, unsigned int nofargs) c
 				}
 				case ScalarFunction::FuncNary:
 				{
-					if (stk.size() < idxreg) throw strus::runtime_error(_TXT("illegal stack operation"));
+					if (stk.size() < idxreg) throw strus::runtime_error( "%s", _TXT("illegal stack operation"));
 					const double* arg = stk.data() + (stk.size() - idxreg);
 					ScalarFunction::NaryFunction func = m_func->getNaryFunctionOperand( ip);
 					double res = func( idxreg, arg);

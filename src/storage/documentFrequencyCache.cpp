@@ -68,7 +68,7 @@ void DocumentFrequencyCache::writeBatch( const Batch& batch)
 		{
 			doRevertIncrement( *bi);
 		}
-		throw strus::runtime_error(_TXT("out of memory in document frequency cache transaction"));
+		throw strus::runtime_error( "%s", _TXT("out of memory in document frequency cache transaction"));
 	}
 }
 

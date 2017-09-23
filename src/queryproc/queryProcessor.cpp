@@ -30,80 +30,80 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
 	PostingJoinOperatorInterface* op;
-	if (0==(op=createPostingJoinInRange( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinInRange( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "inrange", op);
-	if (0==(op=createPostingJoinStructInRange( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinStructInRange( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "inrange_struct", op);
-	if (0==(op=createPostingJoinWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinWithin( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "within", op);
-	if (0==(op=createPostingJoinStructWithin( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinStructWithin( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "within_struct", op);
-	if (0==(op=createPostingJoinSequence( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinSequence( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "sequence", op);
-	if (0==(op=createPostingJoinStructSequence( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinStructSequence( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "sequence_struct", op);
-	if (0==(op=createPostingJoinChain( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinChain( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "chain", op);
-	if (0==(op=createPostingJoinStructChain( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinStructChain( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "chain_struct", op);
-	if (0==(op=createPostingJoinSequenceImm( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinSequenceImm( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "sequence_imm", op);
-	if (0==(op=createPostingJoinDifference( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinDifference( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "diff", op);
-	if (0==(op=createPostingJoinIntersect( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinIntersect( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "intersect", op);
-	if (0==(op=createPostingJoinUnion( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinUnion( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "union", op);
-	if (0==(op=createPostingSucc( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingSucc( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "succ", op);
-	if (0==(op=createPostingPred( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingPred( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "pred", op);
-	if (0==(op=createPostingJoinContains( m_errorhnd))) throw strus::runtime_error(_TXT("error creating posting join operator"));
+	if (0==(op=createPostingJoinContains( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating posting join operator"));
 	definePostingJoinOperator( "contains", op);
 
 	WeightingFunctionInterface* func;
 	SummarizerFunctionInterface* sum;
 
-	if (0==(func=createWeightingFunctionBm25( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	if (0==(func=createWeightingFunctionBm25( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating weighting function"));
 	defineWeightingFunction( "bm25", func);
-	if (0==(func=createWeightingFunctionBm25pff( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	if (0==(func=createWeightingFunctionBm25pff( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating weighting function"));
 	defineWeightingFunction( "bm25pff", func);
-	if (0==(func=createWeightingFunctionTermFrequency( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	if (0==(func=createWeightingFunctionTermFrequency( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating weighting function"));
 	defineWeightingFunction( "tf", func);
-	if (0==(func=createWeightingFunctionConstant( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	if (0==(func=createWeightingFunctionConstant( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating weighting function"));
 	defineWeightingFunction( "constant", func);
-	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	if (0==(func=createWeightingFunctionMetadata( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating weighting function"));
 	defineWeightingFunction( "metadata", func);
 
-	if (0==(func=createWeightingFunctionSmart( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	if (0==(func=createWeightingFunctionSmart( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating weighting function"));
 	defineWeightingFunction( "smart", func);
-	if (0==(sum=createSummarizerFromWeightingFunction( "smart", m_errorhnd, func))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerFromWeightingFunction( "smart", m_errorhnd, func))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "smart", sum);
 
-	if (0==(func=createWeightingFunctionScalar( m_errorhnd))) throw strus::runtime_error(_TXT("error creating weighting function"));
+	if (0==(func=createWeightingFunctionScalar( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating weighting function"));
 	defineWeightingFunction( "scalar", func);
-	if (0==(sum=createSummarizerFromWeightingFunction( "scalar", m_errorhnd, func))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerFromWeightingFunction( "scalar", m_errorhnd, func))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "scalar", sum);
 
-	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerMetaData( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "metadata", sum);
-	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerAttribute( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "attribute", sum);
-	if (0==(sum=createSummarizerForwardIndex( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerForwardIndex( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "forwardindex", sum);
-	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerMatchPhrase( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchphrase", sum);
-	if (0==(sum=createSummarizerListMatches( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerListMatches( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchpos", sum);
-	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerMatchVariables( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "matchvar", sum);
-	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerAccumulateVariable( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "accuvar", sum);
-	if (0==(sum=createSummarizerAccumulateNear( m_errorhnd))) throw strus::runtime_error(_TXT("error creating summarizer"));
+	if (0==(sum=createSummarizerAccumulateNear( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating summarizer"));
 	defineSummarizerFunction( "accunear", sum);
 
 	ScalarFunctionParserInterface* sfp;
-	if (0==(sfp=createScalarFunctionParser_default( m_errorhnd))) throw strus::runtime_error(_TXT("error creating scalar function parser"));
+	if (0==(sfp=createScalarFunctionParser_default( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating scalar function parser"));
 	defineScalarFunctionParser( "", sfp);
 }
 

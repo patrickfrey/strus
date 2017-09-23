@@ -193,9 +193,9 @@ LevelDbConnection::IteratorHandle LevelDbConnection::newIterator( const leveldb:
 	m_itrlist.push_back((leveldb::Iterator*)0);
 
 	leveldb::DB* dbh = db();
-	if (!dbh) throw strus::runtime_error(_TXT("cannot create a levelDB iterator on a connection closed"));
+	if (!dbh) throw strus::runtime_error( "%s", _TXT("cannot create a levelDB iterator on a connection closed"));
 	leveldb::Iterator* itr = dbh->NewIterator( opt);
-	if (!itr) throw strus::runtime_error(_TXT("failed to create a levelDB iterator"));
+	if (!itr) throw strus::runtime_error( "%s", _TXT("failed to create a levelDB iterator"));
 
 	m_itrlist.back() = itr;
 	IteratorHandle last = m_itrlist.end();
