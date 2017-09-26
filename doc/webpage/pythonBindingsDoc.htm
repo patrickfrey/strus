@@ -342,6 +342,7 @@ Load a module
 <div class="callexamples"><div class="example">loadModule("storage_vector")</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_3">
@@ -369,6 +370,7 @@ Add one or more paths from where to try to load modules from
 <div class="callexamples"><div class="example">addModulePath("/home/bob/modules")</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_4">
@@ -393,6 +395,7 @@ Add a path where to load analyzer resource files from
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_5">
@@ -423,6 +426,7 @@ Create a storage client instance
  	})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">storage client interface (class StorageClient) for accessing the storage</div>
 
@@ -449,6 +453,7 @@ Create a vector storage client instance
 <div class="example">createVectorStorageClient({path="/srv/searchengine/vecstorage"})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">vector storage client interface (class VectorStorageClient) for accessing the vector storage</div>
 
@@ -478,6 +483,7 @@ Create a new storage (physically) described by config
 <div class="example">createStorage({path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT", acl=true})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_8">
@@ -503,6 +509,7 @@ Create a new storage (physically) described by config
 <div class="example">createVectorStorageClient({path="/srv/searchengine/vecstorage"})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_9">
@@ -532,6 +539,7 @@ Delete the storage (physically) described by config
 <div class="example">destroyStorage({path="/srv/searchengine/storage"})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_10">
@@ -557,6 +565,7 @@ Tests if the storage described by config exists
 <div class="example">storageExists({path="/srv/searchengine/storage"})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">true, if the storage with this configuration exists</div>
 
@@ -581,6 +590,7 @@ Detect the type of document from its content
 <div class="callexamples"><div class="example">detectDocumentClass("&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;doc&gt;...&lt;/doc&gt;")</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the document class</div>
 <div class="resultexamples"><div class="example">{mimetype="application/xml", encoding="UTF-8", scheme="customer"}</div>
@@ -614,6 +624,7 @@ Create a document analyzer instance
 <div class="callexamples"><div class="example">createDocumentAnalyzer({mimetype="application/xml", encoding="UTF-8"})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">document analyzer interface (class DocumentAnalyzer)</div>
 
@@ -633,6 +644,7 @@ Create a query analyzer instance
 <div class="callexamples"><div class="example">createQueryAnalyzer()</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">query analyzer interface (class QueryAnalyzer)</div>
 
@@ -652,6 +664,7 @@ Create a query evaluation instance
 <div class="callexamples"><div class="example">createQueryEval()</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">quer evaluation interface (class QueryEval)</div>
 
@@ -681,6 +694,7 @@ Unpack a statistics blob retrieved from a storage
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the statistics structure encoded in the blob passed as argument</div>
 
@@ -697,6 +711,7 @@ Force cleanup to circumvent object pooling mechanisms in an interpreter context
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_17">
@@ -721,6 +736,7 @@ Debug method that returns the serialization of the arguments as string
 <div class="callexamples"><div class="example">debug_serialize({surname="John", lastname="Doe", company={name="ACME", url="acme.com"}})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the input serialization as string</div>
 <div class="resultexamples"><div class="example">"open name 'surname' value 'John' name 'lastname' value 'Doe' name 'company' open name 'name' value 'ACME' name 'url' value 'acme.com' close close"</div>
@@ -739,6 +755,7 @@ Get the number of documents inserted into this storage
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the total number of documents</div>
 <div class="resultexamples"><div class="example">112324</div>
@@ -776,6 +793,7 @@ Get the number of inserted documents where a specific feature occurrs in
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the number of documents where the argument feature occurrs in</div>
 <div class="resultexamples"><div class="example">12321</div>
@@ -803,6 +821,7 @@ Get the internal document number from the document identifier
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">internal document number or 0, if no document with this id is inserted</div>
 <div class="resultexamples"><div class="example">892374</div>
@@ -844,6 +863,7 @@ Get an interator on the tuples (value,pos) of the forward index of a given type 
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on tuples (value,pos)</div>
 
@@ -874,6 +894,7 @@ Get an interator on the tuples (value,tf,firstpos) of the search index of a give
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on tuples (value,pos)</div>
 
@@ -915,6 +936,7 @@ Get an iterator on the set of postings inserted
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on a set of postings</div>
 
@@ -970,6 +992,7 @@ Get an iterator on records of selected elements for matching documents starting 
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on a set of postings</div>
 
@@ -986,6 +1009,7 @@ Get an iterator on the term types inserted
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on the term types</div>
 
@@ -1002,6 +1026,7 @@ Get an iterator on the document identifiers inserted
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on the docids</div>
 
@@ -1026,6 +1051,7 @@ Get the document identifier associated with a local document number
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the document identifier</div>
 
@@ -1042,6 +1068,7 @@ Get an iterator on the user names (roles) used in document access restrictions
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on the user names (roles)</div>
 
@@ -1058,6 +1085,7 @@ Get the list of inserted document attribute names
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">list of names</div>
 <div class="resultexamples"><div class="example">{"name", "title", "docid"}</div>
@@ -1076,6 +1104,7 @@ Get the list of inserted document metadata names
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">list of names</div>
 <div class="resultexamples"><div class="example">{"date", "ccode", "category"}</div>
@@ -1103,6 +1132,7 @@ Get an iterator on message blobs that all statistics of the storage (e.g. featur
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on the encoded blobs of the complete statistics of the storage</div>
 
@@ -1123,6 +1153,7 @@ Get an iterator on message blobs that encode changes in statistics of the storag
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on the encoded blobs of the statistic changes of the storage</div>
 
@@ -1139,6 +1170,7 @@ Create a transaction
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the transaction object (class StorageTransaction) created</div>
 
@@ -1155,6 +1187,7 @@ Get the configuration of this storage
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the configuration as structure</div>
 <div class="resultexamples"><div class="example">{path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT"}</div>
@@ -1173,6 +1206,7 @@ Get the configuration of this storage as string
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the configuration as string</div>
 <div class="resultexamples"><div class="example">"path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT"</div>
@@ -1191,6 +1225,7 @@ Close of the storage client
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_1">
@@ -1217,6 +1252,7 @@ Prepare the inserting a document into the storage
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_2">
@@ -1238,6 +1274,7 @@ Prepare the deletion of a document from the storage
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_3">
@@ -1259,6 +1296,7 @@ Prepare the deletion of all document access rights of a user
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_4">
@@ -1275,6 +1313,7 @@ Commit all insert or delete or user access right change statements of this trans
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_5">
@@ -1287,6 +1326,7 @@ Rollback all insert or delete or user access right change statements of this tra
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_4_1">
@@ -1309,6 +1349,7 @@ Find the most similar vectors to vector
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the list of most similar vectors (double[])</div>
 
@@ -1340,6 +1381,7 @@ Find the most similar vectors to vector in a selection of features addressed by 
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the list of most similar vectors (double[])</div>
 
@@ -1356,6 +1398,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_1">
@@ -1384,6 +1427,7 @@ Create a searcher object for scanning the vectors for similarity
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the vector search interface (with ownership)</div>
 
@@ -1400,6 +1444,7 @@ Create a vector storage transaction instance
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the transaction instance</div>
 
@@ -1416,6 +1461,7 @@ Get the list of concept class names defined
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the list</div>
 <div class="resultexamples"><div class="example">{"flections", "entityrel"}</div>
@@ -1452,6 +1498,7 @@ Get the list of indices of features represented by a learnt concept feature
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the resulting vector indices (index is order of insertion starting from 0)</div>
 <div class="resultexamples"><div class="example">{2121, 5355, 35356, 214242, 8309732, 32432424}</div>
@@ -1478,6 +1525,7 @@ Get the number of concept features learnt for a class
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the number of concept features and also the maximum number assigned to a feature (starting with 1)</div>
 <div class="resultexamples"><div class="example">0</div>
@@ -1517,6 +1565,7 @@ Get the set of learnt concepts of a class for a feature defined
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the resulting concept feature indices (indices of learnt concepts starting from 1)</div>
 <div class="resultexamples"><div class="example">{2121, 5355, 35356, 214242, 8309732, 32432424}</div>
@@ -1543,6 +1592,7 @@ Get the vector assigned to a feature addressed by index
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the vector</div>
 <div class="resultexamples"><div class="example">{0.08721391, 0.01232134, 0.02342453, 0.0011312, 0.0012314, 0.087232243}</div>
@@ -1569,6 +1619,7 @@ Get the name of a feature by its index starting from 0
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the name of the feature defined</div>
 <div class="resultexamples"><div class="example">"castle"</div>
@@ -1594,6 +1645,7 @@ Get the index starting from 0 of a feature by its name
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">index -1, if not found, else index of the feature to get the name of (index is order of insertion starting with 0)</div>
 <div class="resultexamples"><div class="example">-1</div>
@@ -1613,6 +1665,7 @@ Get the number of feature vectors defined
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the number of features</div>
 <div class="resultexamples"><div class="example">0</div>
@@ -1632,6 +1685,7 @@ Get the configuration of this vector storage
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the configuration as structure</div>
 <div class="resultexamples"><div class="example">{path='storage', commit=10, dim=300, bit=64, var=32, simdist=340, maxdist=640, realvecweights=1}</div>
@@ -1650,6 +1704,7 @@ Get the configuration of this vector storage as string
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the configuration as string</div>
 <div class="resultexamples"><div class="example">"path=storage;commit=10;dim=300;bit=64;var=32;simdist=340;maxdist=640;realvecweights=1"</div>
@@ -1668,6 +1723,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_1">
@@ -1695,6 +1751,7 @@ Add named feature to vector storage
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_2">
@@ -1728,6 +1785,7 @@ Assign a concept (index) to a feature referenced by index
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_3">
@@ -1744,6 +1802,7 @@ Commit of the transaction
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_4">
@@ -1756,6 +1815,7 @@ Rollback of the transaction
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_5">
@@ -1768,6 +1828,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_1">
@@ -1827,6 +1888,7 @@ Define a feature to insert into the inverted index (search index) is selected, t
 <div class="callexamples"><div class="example">addSearchIndexFeature("word", "/doc/elem", "word", {"lc", {"stem", "en"}})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_2">
@@ -1882,6 +1944,7 @@ Define a feature to insert into the forward index (for summarization) is selecte
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_3">
@@ -1927,6 +1990,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_4">
@@ -1972,6 +2036,7 @@ Define a feature to insert as meta data is selected, tokenized and normalized
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_5">
@@ -1998,6 +2063,7 @@ Declare some aggregated value of the document to be put into the meta data table
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_6">
@@ -2043,6 +2109,7 @@ Define a feature to insert as document attribute (for summarization) is selected
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_7">
@@ -2088,6 +2155,7 @@ Define a result of pattern matching as feature to insert into the search index, 
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_8">
@@ -2133,6 +2201,7 @@ Define a result of pattern matching as feature to insert into the forward index,
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_9">
@@ -2168,6 +2237,7 @@ Define a result of pattern matching to insert as metadata, normalized
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_10">
@@ -2203,6 +2273,7 @@ Define a result of pattern matching to insert as document attribute, normalized
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_11">
@@ -2242,6 +2313,7 @@ Declare a pattern matcher on the document features after other query analysis
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_12">
@@ -2275,6 +2347,7 @@ Declare a pattern matcher on the document features after other query analysis
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_13">
@@ -2305,6 +2378,7 @@ Declare a sub document for the handling of multi part documents in an analyzed c
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_14">
@@ -2332,6 +2406,7 @@ Analye a content and return the analyzed document structure (analyzing single do
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">structure of the document analyzed (sub document type names, search index terms, forward index terms, metadata, attributes)</div>
 
@@ -2367,6 +2442,7 @@ Analye a content and return the analyzed document structures as iterator (analyz
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">iterator on structures of the documents analyzed (sub document type names, search index terms, forward index terms, metadata, attributes)</div>
 
@@ -2417,6 +2493,7 @@ Defines an element (term, metadata) of query analysis.
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_2">
@@ -2450,6 +2527,7 @@ Defines an element from a pattern matching result.
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_3">
@@ -2495,6 +2573,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_4">
@@ -2533,6 +2612,7 @@ Declare a pattern matcher on the query features after other query analysis
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_5">
@@ -2560,6 +2640,7 @@ Declare a pattern matcher on the query features after other query analysis
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_6">
@@ -2613,6 +2694,7 @@ Declare an implicit grouping operation for a query field type. The implicit grou
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_7">
@@ -2633,6 +2715,7 @@ Analye the term expression and return the result structure
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">structure analyzed</div>
 <div class="resultexamples"><div class="example">{"within", 5, {"word", "world"}, {"word", "power"}}</div>
@@ -2659,6 +2742,7 @@ Analye the metadata expression and return the result structure
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">structure analyzed</div>
 <div class="resultexamples"><div class="example">{"&lt;", "year", "17071"}</div>
@@ -2698,6 +2782,7 @@ Declare a term that is used in the query evaluation as structural element withou
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_2">
@@ -2717,6 +2802,7 @@ Declare a feature set to be used as selecting feature
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_3">
@@ -2736,6 +2822,7 @@ Declare a feature set to be used as restriction
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_4">
@@ -2755,6 +2842,7 @@ Declare a feature set to be used as exclusion
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_5">
@@ -2792,6 +2880,7 @@ Declare a summarizer
 <div class="example">addSummarizer("metadata", {{"name", "cross"}, {"debug", "debug_metadata"}})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_6">
@@ -2821,6 +2910,7 @@ Add a weighting function to use as summand of the total document weight
 <div class="callexamples"><div class="example">addWeightingFunction("tf", {match={feature="seek"}, debug="debug_weighting"})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_7">
@@ -2848,6 +2938,7 @@ Define the weighting formula to use for calculating the total weight from the we
 <div class="callexamples"><div class="example">defineWeightingFormula("_0 / _1")</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_8">
@@ -2865,6 +2956,7 @@ Create a query to instantiate based on this query evaluation scheme
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the query instance</div>
 
@@ -2915,6 +3007,7 @@ Create a feature from the query expression passed
 <div class="example">addFeature("titlefield", {from="title_start", to="title_end"})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_2">
@@ -2946,6 +3039,7 @@ Define a meta data restriction
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_3">
@@ -2982,6 +3076,7 @@ Define term statistics to use for a term for weighting it in this query
 <div class="callexamples"><div class="example">defineTermStatistics("word", "game", {df=74653})</div>
 </div> <!-- callexamples -->
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_4">
@@ -3001,6 +3096,7 @@ Define the global statistics to use for weighting in this query
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_5">
@@ -3020,6 +3116,7 @@ Define a set of documents the query is evaluated on. By default the query is eva
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_6">
@@ -3041,6 +3138,7 @@ Set number of ranks to evaluate starting with the first rank (the maximum size o
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_7">
@@ -3061,6 +3159,7 @@ Set the index of the first rank to be returned
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_8">
@@ -3084,6 +3183,7 @@ Allow read access to documents having a specific ACL tag
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_9">
@@ -3101,6 +3201,7 @@ Assign values to variables of the weighting formula
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_10">
@@ -3122,6 +3223,7 @@ Switch on debug mode that creates debug info of query evaluation methods and sum
 </div> <!-- callnotes -->
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_11">
@@ -3134,6 +3236,7 @@ Evaluate this query and return the result
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the result (strus::QueryResult)</div>
 
@@ -3150,6 +3253,7 @@ Map the contents of the query to a readable string
 
 
 
+<h4 class="content_subtitle">Result</h4>
 <div class="callresult"><div class="result">
 <div class="resultdescr">the string</div>
 
