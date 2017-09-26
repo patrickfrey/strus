@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -107,11 +107,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1InvAclIteratorInterface.html">InvAclIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3">createInvAclIterator</a> (const std::string &amp;username) const =0</td></tr>
 <tr class="memdesc:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a an iterator on the numbers of documents a specified user is allowed to see.  <a href="#adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3">More...</a><br/></td></tr>
 <tr class="separator:adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f0c473361df7e82e7edcbcdb31d8fe1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1AclReaderInterface.html">AclReaderInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a9f0c473361df7e82e7edcbcdb31d8fe1">createAclReader</a> () const =0</td></tr>
+<tr class="memdesc:a9f0c473361df7e82e7edcbcdb31d8fe1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a an iterator on the access control lists of documents.  <a href="#a9f0c473361df7e82e7edcbcdb31d8fe1">More...</a><br/></td></tr>
+<tr class="separator:a9f0c473361df7e82e7edcbcdb31d8fe1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a758ed150db8dbbe1292b2455b66bb287"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a758ed150db8dbbe1292b2455b66bb287">nofDocumentsInserted</a> () const =0</td></tr>
 <tr class="memdesc:a758ed150db8dbbe1292b2455b66bb287"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of documents inserted in this storage instance.  <a href="#a758ed150db8dbbe1292b2455b66bb287">More...</a><br/></td></tr>
 <tr class="separator:a758ed150db8dbbe1292b2455b66bb287"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80e167ff8cd374a20315056709b308d2"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a80e167ff8cd374a20315056709b308d2">documentFrequency</a> (const std::string &amp;type, const std::string &amp;term) const =0</td></tr>
-<tr class="memdesc:a80e167ff8cd374a20315056709b308d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of documents inserted in this storage instance.  <a href="#a80e167ff8cd374a20315056709b308d2">More...</a><br/></td></tr>
+<tr class="memdesc:a80e167ff8cd374a20315056709b308d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the local document frequency of a feature in this storage instance.  <a href="#a80e167ff8cd374a20315056709b308d2">More...</a><br/></td></tr>
 <tr class="separator:a80e167ff8cd374a20315056709b308d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b6a44b9732390a1181776b5bb96c0a9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a2b6a44b9732390a1181776b5bb96c0a9">maxDocumentNumber</a> () const =0</td></tr>
 <tr class="memdesc:a2b6a44b9732390a1181776b5bb96c0a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the highest document number used in this stogage.  <a href="#a2b6a44b9732390a1181776b5bb96c0a9">More...</a><br/></td></tr>
@@ -119,6 +122,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab216cde8b792beb06990647faddba708"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ab216cde8b792beb06990647faddba708">documentNumber</a> (const std::string &amp;docid) const =0</td></tr>
 <tr class="memdesc:ab216cde8b792beb06990647faddba708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the local internal document number.  <a href="#ab216cde8b792beb06990647faddba708">More...</a><br/></td></tr>
 <tr class="separator:ab216cde8b792beb06990647faddba708"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9d4553401514ca5cb22f01b291b88df"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ab9d4553401514ca5cb22f01b291b88df">termTypeNumber</a> (const std::string &amp;type) const =0</td></tr>
+<tr class="memdesc:ab9d4553401514ca5cb22f01b291b88df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the local internal term type number.  <a href="#ab9d4553401514ca5cb22f01b291b88df">More...</a><br/></td></tr>
+<tr class="separator:ab9d4553401514ca5cb22f01b291b88df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2dece227c0edaaae998e6c9d1251498"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ad2dece227c0edaaae998e6c9d1251498">isForwardIndexTerm</a> (const std::string &amp;type) const =0</td></tr>
+<tr class="memdesc:ad2dece227c0edaaae998e6c9d1251498"><td class="mdescLeft">&#160;</td><td class="mdescRight">Evaluate if there exists forward index blocks for this type.  <a href="#ad2dece227c0edaaae998e6c9d1251498">More...</a><br/></td></tr>
+<tr class="separator:ad2dece227c0edaaae998e6c9d1251498"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca36b644019e4ba1b620d62ee9d1bb90"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classstrus_1_1ValueIteratorInterface.html">ValueIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aca36b644019e4ba1b620d62ee9d1bb90">createTermTypeIterator</a> () const =0</td></tr>
 <tr class="memdesc:aca36b644019e4ba1b620d62ee9d1bb90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an iterator on the term types inserted.  <a href="#aca36b644019e4ba1b620d62ee9d1bb90">More...</a><br/></td></tr>
 <tr class="separator:aca36b644019e4ba1b620d62ee9d1bb90"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,14 +157,14 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1StorageTransactionInterface.html">StorageTransactionInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#ae744509cd0e668a7fdbdcc63e2a62a02">createTransaction</a> ()=0</td></tr>
 <tr class="memdesc:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an insert/update transaction object.  <a href="#ae744509cd0e668a7fdbdcc63e2a62a02">More...</a><br/></td></tr>
 <tr class="separator:ae744509cd0e668a7fdbdcc63e2a62a02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94604e4a857374837b0a970b5091ad6a"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a94604e4a857374837b0a970b5091ad6a">createInitStatisticsIterator</a> (bool sign=true)=0</td></tr>
-<tr class="memdesc:a94604e4a857374837b0a970b5091ad6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on storage statistics messages for initialization/deregistration.  <a href="#a94604e4a857374837b0a970b5091ad6a">More...</a><br/></td></tr>
-<tr class="separator:a94604e4a857374837b0a970b5091ad6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a74c50b8961ffc459da04a47da455ef3c"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
-<a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a74c50b8961ffc459da04a47da455ef3c">createUpdateStatisticsIterator</a> ()=0</td></tr>
-<tr class="memdesc:a74c50b8961ffc459da04a47da455ef3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage statistics messages created by updates of this storage.  <a href="#a74c50b8961ffc459da04a47da455ef3c">More...</a><br/></td></tr>
-<tr class="separator:a74c50b8961ffc459da04a47da455ef3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a2f598309db131c15c61f7dc46ac561"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a9a2f598309db131c15c61f7dc46ac561">createAllStatisticsIterator</a> (bool sign=true)=0</td></tr>
+<tr class="memdesc:a9a2f598309db131c15c61f7dc46ac561"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on storage statistics messages for initialization/deregistration.  <a href="#a9a2f598309db131c15c61f7dc46ac561">More...</a><br/></td></tr>
+<tr class="separator:a9a2f598309db131c15c61f7dc46ac561"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d0e7664960de1eb9c4fd99fd091e1b0"><td class="memItemLeft" align="right" valign="top">virtual <br class="typebreak"/>
+<a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a8d0e7664960de1eb9c4fd99fd091e1b0">createChangeStatisticsIterator</a> ()=0</td></tr>
+<tr class="memdesc:a8d0e7664960de1eb9c4fd99fd091e1b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an iterator on the storage statistics messages created by updates of this storage.  <a href="#a8d0e7664960de1eb9c4fd99fd091e1b0">More...</a><br/></td></tr>
+<tr class="separator:a8d0e7664960de1eb9c4fd99fd091e1b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac5518519276a1c5172f6dbe6800d6a0"><td class="memItemLeft" align="right" valign="top">virtual const <br class="typebreak"/>
 <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html">StatisticsProcessorInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aac5518519276a1c5172f6dbe6800d6a0">getStatisticsProcessor</a> () const =0</td></tr>
 <tr class="memdesc:aac5518519276a1c5172f6dbe6800d6a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the processing message interface for introspecting and packing messages outside the queue context.  <a href="#aac5518519276a1c5172f6dbe6800d6a0">More...</a><br/></td></tr>
@@ -166,6 +175,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aeae6016f195722d4772769e77ef41f0c"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#aeae6016f195722d4772769e77ef41f0c">checkStorage</a> (std::ostream &amp;errorlog) const =0</td></tr>
 <tr class="memdesc:aeae6016f195722d4772769e77ef41f0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterate through all key/value pairs and check their data for validity.  <a href="#aeae6016f195722d4772769e77ef41f0c">More...</a><br/></td></tr>
 <tr class="separator:aeae6016f195722d4772769e77ef41f0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ab84dc0ee94fe144fc018eca6253334"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StorageClientInterface.html#a4ab84dc0ee94fe144fc018eca6253334">close</a> ()=0</td></tr>
+<tr class="memdesc:a4ab84dc0ee94fe144fc018eca6253334"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close client connection and eventually do some cleanup.  <a href="#a4ab84dc0ee94fe144fc018eca6253334">More...</a><br/></td></tr>
+<tr class="separator:a4ab84dc0ee94fe144fc018eca6253334"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface of a strus IR storage. </p>
@@ -215,7 +227,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Destructor. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Should call call 'close()' but ignore errors there silently </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Should call call '<a class="el" href="classstrus_1_1StorageClientInterface.html#a4ab84dc0ee94fe144fc018eca6253334" title="Close client connection and eventually do some cleanup. ">close()</a>' but ignore errors there silently </dd></dl>
 
 </div>
 </div>
@@ -253,6 +265,33 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a4ab84dc0ee94fe144fc018eca6253334"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::StorageClientInterface::close </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Close client connection and eventually do some cleanup. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>the method does not have to be called necessarily </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a4c6e83c7eecf8e39d9f189c90739373a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -276,6 +315,66 @@ Public Member Functions</h2></td></tr>
 
 <p>Get the interpreted configuration this storage client was created with. </p>
 <dl class="section return"><dt>Returns</dt><dd>the configuration as string </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a9f0c473361df7e82e7edcbcdb31d8fe1"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1AclReaderInterface.html">AclReaderInterface</a>* strus::StorageClientInterface::createAclReader </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create a an iterator on the access control lists of documents. </p>
+<dl class="section return"><dt>Returns</dt><dd>the iterator on the ACLs </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The storage has to be created with access control enabled </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a9a2f598309db131c15c61f7dc46ac561"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a>* strus::StorageClientInterface::createAllStatisticsIterator </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>sign</em> = <code>true</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates an iterator on storage statistics messages for initialization/deregistration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">sign</td><td>true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the iterator on the statistics message blobs </dd></dl>
 
 </div>
 </div>
@@ -350,6 +449,32 @@ Public Member Functions</h2></td></tr>
 <dl class="section remark"><dt>Remarks</dt><dd>The iterator does not take the alive status of the documents into account. You have to formulate a restriction expression that does not match deleted documents if you do not want deleted documents in your iterated set of postings. </dd>
 <dd>
 The iterator does not take the document length into account. It returns the set of postings with positions in the range [1..maxpos]. Read postings you get only when joining this set with another. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a8d0e7664960de1eb9c4fd99fd091e1b0"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a>* strus::StorageClientInterface::createChangeStatisticsIterator </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates an iterator on the storage statistics messages created by updates of this storage. </p>
+<dl class="section return"><dt>Returns</dt><dd>the iterator on the statistics message blobs </dd></dl>
 
 </div>
 </div>
@@ -536,39 +661,6 @@ Fields give you the possibility to treat elements in the document differently wh
 
 </div>
 </div>
-<a class="anchor" id="a94604e4a857374837b0a970b5091ad6a"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a>* strus::StorageClientInterface::createInitStatisticsIterator </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>sign</em> = <code>true</code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Creates an iterator on storage statistics messages for initialization/deregistration. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">sign</td><td>true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration) </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the iterator on the statistics message blobs </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="adaf74a7f8a6ed7d8f30f1ddfbaa8e3f3"></a>
 <div class="memitem">
 <div class="memproto">
@@ -599,7 +691,7 @@ Fields give you the possibility to treat elements in the document differently wh
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the iterator on the documents (with ownership) or NULL, if there is no access control enabled </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>The storage has to be created access control enabled </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The storage has to be created with access control enabled </dd></dl>
 
 </div>
 </div>
@@ -702,7 +794,7 @@ Fields give you the possibility to treat elements in the document differently wh
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>the length is considered as an attribute and not used in set operations for joining posting sets. It is used as hint only in some summarization and weighting functions. </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>the length is considered as an attribute and not used in set operations for joining posting sets. It is used as hint only in some summarization and weighting functions for handling multi-word phrases correctly. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>the created iterator reference (with ownership) </dd></dl>
 
 </div>
@@ -786,32 +878,6 @@ Fields give you the possibility to treat elements in the document differently wh
 
 </div>
 </div>
-<a class="anchor" id="a74c50b8961ffc459da04a47da455ef3c"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual <a class="el" href="classstrus_1_1StatisticsIteratorInterface.html">StatisticsIteratorInterface</a>* strus::StorageClientInterface::createUpdateStatisticsIterator </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Creates an iterator on the storage statistics messages created by updates of this storage. </p>
-<dl class="section return"><dt>Returns</dt><dd>the iterator on the statistics message blobs </dd></dl>
-
-</div>
-</div>
 <a class="anchor" id="ab6512978ae85fbc1f449f4118e75a417"></a>
 <div class="memitem">
 <div class="memproto">
@@ -870,7 +936,7 @@ Fields give you the possibility to treat elements in the document differently wh
 </table>
 </div><div class="memdoc">
 
-<p>Get the number of documents inserted in this storage instance. </p>
+<p>Get the local document frequency of a feature in this storage instance. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>the term type addressed </td></tr>
@@ -878,7 +944,7 @@ Fields give you the possibility to treat elements in the document differently wh
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the number of documents </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the local document frequency </dd></dl>
 
 </div>
 </div>
@@ -991,6 +1057,39 @@ Fields give you the possibility to treat elements in the document differently wh
 
 </div>
 </div>
+<a class="anchor" id="ad2dece227c0edaaae998e6c9d1251498"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool strus::StorageClientInterface::isForwardIndexTerm </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Evaluate if there exists forward index blocks for this type. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>term type name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true, if yes, false if no or if an error occurred (check error) </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a2b6a44b9732390a1181776b5bb96c0a9"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1043,6 +1142,39 @@ Fields give you the possibility to treat elements in the document differently wh
 
 </div>
 </div>
+<a class="anchor" id="ab9d4553401514ca5cb22f01b291b88df"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> strus::StorageClientInterface::termTypeNumber </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>type</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the local internal term type number. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>term type name </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the term type number or 0, if it is not known yet </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="storageClientInterface_8hpp_source.html">storageClientInterface.hpp</a></li>
 </ul>
@@ -1050,7 +1182,7 @@ Fields give you the possibility to treat elements in the document differently wh
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

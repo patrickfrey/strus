@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -73,7 +73,7 @@
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
-<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="namespacestrus.html">   16</a></span>&#160;<span class="keyword">namespace </span>strus</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">namespace </span>strus</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;{</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
 <div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="classstrus_1_1AttributeReaderInterface.html">   20</a></span>&#160;<span class="keyword">class </span><a class="code" href="classstrus_1_1AttributeReaderInterface.html">AttributeReaderInterface</a></div>
@@ -87,15 +87,15 @@
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <span class="keyword">virtual</span> std::string <a class="code" href="classstrus_1_1AttributeReaderInterface.html#a6053a8ceba4ef4d9a459b0c5024b9f91">getValue</a>( <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; elementHandle_) <span class="keyword">const</span>=0;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keyword">virtual</span> std::vector&lt;std::string&gt; <a class="code" href="classstrus_1_1AttributeReaderInterface.html#a8dbe2183eca51d27a6f3792cd68a1162">getAttributeNames</a>() <span class="keyword">const</span>=0;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;};</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}<span class="comment">//namespace</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keyword">virtual</span> std::vector&lt;std::string&gt; <a class="code" href="classstrus_1_1AttributeReaderInterface.html#a8ea8937e58aa96190b2619f5109a48a4">getNames</a>() <span class="keyword">const</span>=0;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;};</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;}<span class="comment">//namespace</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor"></span></div>
 <div class="ttc" id="classstrus_1_1AttributeReaderInterface_html_a07e4046034b96c3c514d9cf3d3d8173d"><div class="ttname"><a href="classstrus_1_1AttributeReaderInterface.html#a07e4046034b96c3c514d9cf3d3d8173d">strus::AttributeReaderInterface::elementHandle</a></div><div class="ttdeci">virtual Index elementHandle(const char *name) const =0</div><div class="ttdoc">Get the handle of an element addressed by its name. </div></div>
 <div class="ttc" id="namespacestrus_html_a3c5a45d9cd423c89104928e5feff5a4e"><div class="ttname"><a href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></div><div class="ttdeci">int32_t Index</div><div class="ttdoc">Number type generally used for locally counted indices. </div><div class="ttdef"><b>Definition:</b> index.hpp:29</div></div>
+<div class="ttc" id="classstrus_1_1AttributeReaderInterface_html_a8ea8937e58aa96190b2619f5109a48a4"><div class="ttname"><a href="classstrus_1_1AttributeReaderInterface.html#a8ea8937e58aa96190b2619f5109a48a4">strus::AttributeReaderInterface::getNames</a></div><div class="ttdeci">virtual std::vector&lt; std::string &gt; getNames() const =0</div><div class="ttdoc">Get the names of all attributes defined in the storage. </div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
-<div class="ttc" id="classstrus_1_1AttributeReaderInterface_html_a8dbe2183eca51d27a6f3792cd68a1162"><div class="ttname"><a href="classstrus_1_1AttributeReaderInterface.html#a8dbe2183eca51d27a6f3792cd68a1162">strus::AttributeReaderInterface::getAttributeNames</a></div><div class="ttdeci">virtual std::vector&lt; std::string &gt; getAttributeNames() const =0</div><div class="ttdoc">Get the names of all attribute names defined in the storage. </div></div>
 <div class="ttc" id="classstrus_1_1AttributeReaderInterface_html"><div class="ttname"><a href="classstrus_1_1AttributeReaderInterface.html">strus::AttributeReaderInterface</a></div><div class="ttdoc">Interface for accessing document attributes from a strus storage. </div><div class="ttdef"><b>Definition:</b> attributeReaderInterface.hpp:20</div></div>
 <div class="ttc" id="classstrus_1_1AttributeReaderInterface_html_a6053a8ceba4ef4d9a459b0c5024b9f91"><div class="ttname"><a href="classstrus_1_1AttributeReaderInterface.html#a6053a8ceba4ef4d9a459b0c5024b9f91">strus::AttributeReaderInterface::getValue</a></div><div class="ttdeci">virtual std::string getValue(const Index &amp;elementHandle_) const =0</div><div class="ttdoc">Get the value of the attribute of the document in the current readed context – defined with skipDoc(c...</div></div>
 <div class="ttc" id="classstrus_1_1AttributeReaderInterface_html_a36a2e048830b3a6f10b8afb7df7cec9d"><div class="ttname"><a href="classstrus_1_1AttributeReaderInterface.html#a36a2e048830b3a6f10b8afb7df7cec9d">strus::AttributeReaderInterface::~AttributeReaderInterface</a></div><div class="ttdeci">virtual ~AttributeReaderInterface()</div><div class="ttdoc">Destructor. </div><div class="ttdef"><b>Definition:</b> attributeReaderInterface.hpp:24</div></div>
@@ -104,7 +104,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

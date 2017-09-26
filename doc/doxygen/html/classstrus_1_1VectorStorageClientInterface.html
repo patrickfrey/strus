@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -105,12 +105,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a13b478bdae75de10cc9cff69c62b9617"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a13b478bdae75de10cc9cff69c62b9617">featureIndex</a> (const std::string &amp;name) const =0</td></tr>
 <tr class="memdesc:a13b478bdae75de10cc9cff69c62b9617"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the index starting from 0 of a feature by its name.  <a href="#a13b478bdae75de10cc9cff69c62b9617">More...</a><br/></td></tr>
 <tr class="separator:a13b478bdae75de10cc9cff69c62b9617"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab9102863dfbc26a6ad2c59ce573a678"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#aab9102863dfbc26a6ad2c59ce573a678">vectorSimilarity</a> (const std::vector&lt; double &gt; &amp;v1, const std::vector&lt; double &gt; &amp;v2) const =0</td></tr>
+<tr class="memdesc:aab9102863dfbc26a6ad2c59ce573a678"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage.  <a href="#aab9102863dfbc26a6ad2c59ce573a678">More...</a><br/></td></tr>
+<tr class="separator:aab9102863dfbc26a6ad2c59ce573a678"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a259345ad0ffd52dcd219c78341bdf485"><td class="memItemLeft" align="right" valign="top">virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a259345ad0ffd52dcd219c78341bdf485">nofFeatures</a> () const =0</td></tr>
 <tr class="memdesc:a259345ad0ffd52dcd219c78341bdf485"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of feature vectors defined.  <a href="#a259345ad0ffd52dcd219c78341bdf485">More...</a><br/></td></tr>
 <tr class="separator:a259345ad0ffd52dcd219c78341bdf485"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05c8b4bb7e84b081b9a7bbdcd7e199c3"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a05c8b4bb7e84b081b9a7bbdcd7e199c3">config</a> () const =0</td></tr>
 <tr class="memdesc:a05c8b4bb7e84b081b9a7bbdcd7e199c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the configuration of this model.  <a href="#a05c8b4bb7e84b081b9a7bbdcd7e199c3">More...</a><br/></td></tr>
 <tr class="separator:a05c8b4bb7e84b081b9a7bbdcd7e199c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e43529d9511a3f361d0d897aff8ea0e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a2e43529d9511a3f361d0d897aff8ea0e">close</a> ()=0</td></tr>
+<tr class="memdesc:a2e43529d9511a3f361d0d897aff8ea0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close client connection and eventually do some cleanup.  <a href="#a2e43529d9511a3f361d0d897aff8ea0e">More...</a><br/></td></tr>
+<tr class="separator:a2e43529d9511a3f361d0d897aff8ea0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface to a repository for vectors and a feature concept relation model previously created with a builder. </p>
@@ -141,6 +147,33 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a2e43529d9511a3f361d0d897aff8ea0e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::VectorStorageClientInterface::close </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Close client connection and eventually do some cleanup. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>the method does not have to be called necessarily. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="adb3d799d2921b32885db9043d1e511a7"></a>
 <div class="memitem">
 <div class="memproto">
@@ -344,7 +377,7 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">conceptClass</td><td>name identifying a class of concepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector storage and instantiated by the storage builder. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>index of vector in the order of insertion with VectorStorageBuilderInterface::addFeature(const std::string&amp; name,const std::vector&lt;double&gt;&amp; vec) starting from 0 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>index of vector (<a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a13b478bdae75de10cc9cff69c62b9617" title="Get the index starting from 0 of a feature by its name. ">featureIndex( const std::string&amp;) const</a>) </td></tr>
   </table>
   </dd>
 </dl>
@@ -510,6 +543,50 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aab9102863dfbc26a6ad2c59ce573a678"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual double strus::VectorStorageClientInterface::vectorSimilarity </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>v1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>v2</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">v1</td><td>first input vector </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">v2</td><td>second input vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the similarity measure </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="vectorStorageClientInterface_8hpp_source.html">vectorStorageClientInterface.hpp</a></li>
 </ul>
@@ -517,7 +594,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

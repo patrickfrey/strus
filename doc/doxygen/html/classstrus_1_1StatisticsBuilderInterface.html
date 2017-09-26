@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -88,9 +88,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a747092cb162e572c547c94961fd1cdc1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsBuilderInterface.html#a747092cb162e572c547c94961fd1cdc1">rollback</a> ()=0</td></tr>
 <tr class="memdesc:a747092cb162e572c547c94961fd1cdc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rollback to the last state marked with '<a class="el" href="classstrus_1_1StatisticsBuilderInterface.html#a9fbc3e068ce77cc19e26138da34d5274" title="Mark the current state that can be restored with a rollback. ">start()</a>'.  <a href="#a747092cb162e572c547c94961fd1cdc1">More...</a><br/></td></tr>
 <tr class="separator:a747092cb162e572c547c94961fd1cdc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a109dfe777ae7bdc5cc0e2083019e55"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsBuilderInterface.html#a6a109dfe777ae7bdc5cc0e2083019e55">fetchMessage</a> (const char *&amp;blk, std::size_t &amp;blksize)=0</td></tr>
-<tr class="memdesc:a6a109dfe777ae7bdc5cc0e2083019e55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the packed statistics message.  <a href="#a6a109dfe777ae7bdc5cc0e2083019e55">More...</a><br/></td></tr>
-<tr class="separator:a6a109dfe777ae7bdc5cc0e2083019e55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bc4050b7d8ececff65c23360a29e84d"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1StatisticsBuilderInterface.html#a9bc4050b7d8ececff65c23360a29e84d">fetchMessage</a> (const void *&amp;blk, std::size_t &amp;blksize)=0</td></tr>
+<tr class="memdesc:a9bc4050b7d8ececff65c23360a29e84d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the packed statistics message.  <a href="#a9bc4050b7d8ececff65c23360a29e84d">More...</a><br/></td></tr>
+<tr class="separator:a9bc4050b7d8ececff65c23360a29e84d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for a builder for a statistics message (distributed index) </p>
@@ -172,7 +172,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6a109dfe777ae7bdc5cc0e2083019e55"></a>
+<a class="anchor" id="a9bc4050b7d8ececff65c23360a29e84d"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -182,7 +182,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual bool strus::StatisticsBuilderInterface::fetchMessage </td>
           <td>(</td>
-          <td class="paramtype">const char *&amp;&#160;</td>
+          <td class="paramtype">const void *&amp;&#160;</td>
           <td class="paramname"><em>blk</em>, </td>
         </tr>
         <tr>
@@ -305,7 +305,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

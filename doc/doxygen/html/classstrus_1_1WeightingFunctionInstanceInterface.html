@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -86,6 +86,9 @@ Public Member Functions</h2></td></tr>
 <a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html">WeightingFunctionContextInterface</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a1592df74ac0d2b85b1a7b1bdb24bc809">createFunctionContext</a> (const <a class="el" href="classstrus_1_1StorageClientInterface.html">StorageClientInterface</a> *storage_, <a class="el" href="classstrus_1_1MetaDataReaderInterface.html">MetaDataReaderInterface</a> *metadata_, const <a class="el" href="structstrus_1_1GlobalStatistics.html">GlobalStatistics</a> &amp;stats) const =0</td></tr>
 <tr class="memdesc:a1592df74ac0d2b85b1a7b1bdb24bc809"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create an execution context for this weighting function instance.  <a href="#a1592df74ac0d2b85b1a7b1bdb24bc809">More...</a><br/></td></tr>
 <tr class="separator:a1592df74ac0d2b85b1a7b1bdb24bc809"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1687395bca9db2ba76a0821dd36e6474"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a1687395bca9db2ba76a0821dd36e6474">getVariables</a> () const =0</td></tr>
+<tr class="memdesc:a1687395bca9db2ba76a0821dd36e6474"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of variables used by this function defined in the query with '<a class="el" href="classstrus_1_1QueryInterface.html#aaca35c5a220efca907aeecde8a7eafe0" title="Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(S...">QueryInterface::setWeightingVariableValue( const std::string&amp;, double)</a>'.  <a href="#a1687395bca9db2ba76a0821dd36e6474">More...</a><br/></td></tr>
+<tr class="separator:a1687395bca9db2ba76a0821dd36e6474"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71b01c3423b71025aca31e5ec72d2322"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a71b01c3423b71025aca31e5ec72d2322">tostring</a> () const =0</td></tr>
 <tr class="memdesc:a71b01c3423b71025aca31e5ec72d2322"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a comma ',' separated list of the function parameters as assignments (e.g. name=value)  <a href="#a71b01c3423b71025aca31e5ec72d2322">More...</a><br/></td></tr>
 <tr class="separator:a71b01c3423b71025aca31e5ec72d2322"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -256,6 +259,32 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a1687395bca9db2ba76a0821dd36e6474"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::vector&lt;std::string&gt; strus::WeightingFunctionInstanceInterface::getVariables </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the list of variables used by this function defined in the query with '<a class="el" href="classstrus_1_1QueryInterface.html#aaca35c5a220efca907aeecde8a7eafe0" title="Set the value of a variable in the weigthing formula defined with QueryEval::defineWeightingFormula(S...">QueryInterface::setWeightingVariableValue( const std::string&amp;, double)</a>'. </p>
+<dl class="section return"><dt>Returns</dt><dd>the list of variables </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a71b01c3423b71025aca31e5ec72d2322"></a>
 <div class="memitem">
 <div class="memproto">
@@ -289,7 +318,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

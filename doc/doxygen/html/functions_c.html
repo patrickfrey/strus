@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -64,13 +64,11 @@
   <div id="navrow4" class="tabs3">
     <ul class="tablist">
       <li><a href="functions.html#index_a"><span>a</span></a></li>
-      <li><a href="functions_b.html#index_b"><span>b</span></a></li>
       <li class="current"><a href="functions_c.html#index_c"><span>c</span></a></li>
       <li><a href="functions_d.html#index_d"><span>d</span></a></li>
       <li><a href="functions_e.html#index_e"><span>e</span></a></li>
       <li><a href="functions_f.html#index_f"><span>f</span></a></li>
       <li><a href="functions_g.html#index_g"><span>g</span></a></li>
-      <li><a href="functions_h.html#index_h"><span>h</span></a></li>
       <li><a href="functions_i.html#index_i"><span>i</span></a></li>
       <li><a href="functions_k.html#index_k"><span>k</span></a></li>
       <li><a href="functions_l.html#index_l"><span>l</span></a></li>
@@ -119,7 +117,10 @@
 : <a class="el" href="classstrus_1_1StorageDocumentUpdateInterface.html#ac64145d441e65ecca96176b6822b303e">strus::StorageDocumentUpdateInterface</a>
 </li>
 <li>close()
-: <a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a86e08cdb6775181da30be08331999114">strus::VectorStorageSearchInterface</a>
+: <a class="el" href="classstrus_1_1DatabaseClientInterface.html#a12ac2640adaf30c5fa698bd4b43e1d41">strus::DatabaseClientInterface</a>
+, <a class="el" href="classstrus_1_1StorageClientInterface.html#a4ab84dc0ee94fe144fc018eca6253334">strus::StorageClientInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a2e43529d9511a3f361d0d897aff8ea0e">strus::VectorStorageClientInterface</a>
+, <a class="el" href="classstrus_1_1VectorStorageSearchInterface.html#a86e08cdb6775181da30be08331999114">strus::VectorStorageSearchInterface</a>
 </li>
 <li>CmdCreate
 : <a class="el" href="classstrus_1_1DatabaseInterface.html#aa85a36730f859acb42927e3240bdc23ea9c032faa1c042ca9b68bf1c60e72c7ee">strus::DatabaseInterface</a>
@@ -174,6 +175,12 @@
 : <a class="el" href="classstrus_1_1DatabaseInterface.html#aa85a36730f859acb42927e3240bdc23e">strus::DatabaseInterface</a>
 , <a class="el" href="classstrus_1_1StorageInterface.html#a19257937ef6dd3ca3e9cf573708d872f">strus::StorageInterface</a>
 </li>
+<li>createAclReader()
+: <a class="el" href="classstrus_1_1StorageClientInterface.html#a9f0c473361df7e82e7edcbcdb31d8fe1">strus::StorageClientInterface</a>
+</li>
+<li>createAllStatisticsIterator()
+: <a class="el" href="classstrus_1_1StorageClientInterface.html#a9a2f598309db131c15c61f7dc46ac561">strus::StorageClientInterface</a>
+</li>
 <li>createAlterMetaDataTable()
 : <a class="el" href="classstrus_1_1StorageInterface.html#afc33c9eef167b5980f6829dfcc0b5724">strus::StorageInterface</a>
 </li>
@@ -187,7 +194,10 @@
 : <a class="el" href="classstrus_1_1StorageClientInterface.html#af707ea61df2896e4cf84f03df0b85193">strus::StorageClientInterface</a>
 </li>
 <li>createBuilder()
-: <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html#a8246d061b3d3b4da4fc88f34d73b5d21">strus::StatisticsProcessorInterface</a>
+: <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html#aa9efc0bb313b0184d04fa3e1b4d7fe60">strus::StatisticsProcessorInterface</a>
+</li>
+<li>createChangeStatisticsIterator()
+: <a class="el" href="classstrus_1_1StorageClientInterface.html#a8d0e7664960de1eb9c4fd99fd091e1b0">strus::StorageClientInterface</a>
 </li>
 <li>createClient()
 : <a class="el" href="classstrus_1_1DatabaseInterface.html#a1009c69c0aac2586114317c551747016">strus::DatabaseInterface</a>
@@ -232,9 +242,6 @@
 <li>createFunctionContext()
 : <a class="el" href="classstrus_1_1SummarizerFunctionInstanceInterface.html#acdabdd3bff1cb043c74e0eab2a3c9716">strus::SummarizerFunctionInstanceInterface</a>
 , <a class="el" href="classstrus_1_1WeightingFunctionInstanceInterface.html#a1592df74ac0d2b85b1a7b1bdb24bc809">strus::WeightingFunctionInstanceInterface</a>
-</li>
-<li>createInitStatisticsIterator()
-: <a class="el" href="classstrus_1_1StorageClientInterface.html#a94604e4a857374837b0a970b5091ad6a">strus::StorageClientInterface</a>
 </li>
 <li>createInstance()
 : <a class="el" href="classstrus_1_1MetaDataRestrictionInterface.html#a8579cb2fed01193d09a26c9be0778cf6">strus::MetaDataRestrictionInterface</a>
@@ -281,21 +288,18 @@
 , <a class="el" href="classstrus_1_1StorageClientInterface.html#ae744509cd0e668a7fdbdcc63e2a62a02">strus::StorageClientInterface</a>
 , <a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a4ceac1bbd8e10c7e6988726e4811d2bd">strus::VectorStorageClientInterface</a>
 </li>
-<li>createUpdateStatisticsIterator()
-: <a class="el" href="classstrus_1_1StorageClientInterface.html#a74c50b8961ffc459da04a47da455ef3c">strus::StorageClientInterface</a>
-</li>
 <li>createUserNameIterator()
 : <a class="el" href="classstrus_1_1StorageClientInterface.html#ab6512978ae85fbc1f449f4118e75a417">strus::StorageClientInterface</a>
 </li>
 <li>createViewer()
-: <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html#af4e4f0e210c35752b267d19f8d981e50">strus::StatisticsProcessorInterface</a>
+: <a class="el" href="classstrus_1_1StatisticsProcessorInterface.html#a63f83dea62d1de32ab1d460b248c4d84">strus::StatisticsProcessorInterface</a>
 </li>
 </ul>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:06 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

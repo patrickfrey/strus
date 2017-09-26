@@ -13,6 +13,7 @@ Title=strus
 main="strus","index.hhc","index.hhk","index.html","index.html",,,,,0x23520,,0x10387e,,,,,,,,0
 
 [FILES]
+aclReaderInterface_8hpp_source.html
 attributeReaderInterface_8hpp_source.html
 constants_8hpp_source.html
 databaseBackupCursorInterface_8hpp_source.html
@@ -77,6 +78,7 @@ weightingFunctionContextInterface_8hpp_source.html
 weightingFunctionInstanceInterface_8hpp_source.html
 weightingFunctionInterface_8hpp_source.html
 strus_8md.html
+aclReaderInterface_8hpp.html
 attributeReaderInterface_8hpp.html
 constants_8hpp.html
 databaseBackupCursorInterface_8hpp.html
@@ -141,6 +143,8 @@ weightingFunctionContextInterface_8hpp.html
 weightingFunctionInstanceInterface_8hpp.html
 weightingFunctionInterface_8hpp.html
 namespacestrus.html
+classstrus_1_1AclReaderInterface.html
+classstrus_1_1AclReaderInterface-members.html
 classstrus_1_1AttributeReaderInterface.html
 classstrus_1_1AttributeReaderInterface-members.html
 structstrus_1_1Constants.html
@@ -209,12 +213,10 @@ classstrus_1_1StatisticsIteratorInterface.html
 classstrus_1_1StatisticsIteratorInterface-members.html
 classstrus_1_1StatisticsProcessorInterface.html
 classstrus_1_1StatisticsProcessorInterface-members.html
-structstrus_1_1StatisticsProcessorInterface_1_1BuilderOptions.html
-structstrus_1_1StatisticsProcessorInterface_1_1BuilderOptions-members.html
 classstrus_1_1StatisticsViewerInterface.html
 classstrus_1_1StatisticsViewerInterface-members.html
-structstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange.html
-structstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange-members.html
+classstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange.html
+classstrus_1_1StatisticsViewerInterface_1_1DocumentFrequencyChange-members.html
 classstrus_1_1StorageAlterMetaDataTableInterface.html
 classstrus_1_1StorageAlterMetaDataTableInterface-members.html
 classstrus_1_1StorageClientInterface.html
@@ -277,13 +279,11 @@ annotated.html
 classes.html
 hierarchy.html
 functions.html
-functions_b.html
 functions_c.html
 functions_d.html
 functions_e.html
 functions_f.html
 functions_g.html
-functions_h.html
 functions_i.html
 functions_k.html
 functions_l.html
@@ -300,13 +300,11 @@ functions_v.html
 functions_w.html
 functions_~.html
 functions_func.html
-functions_func_b.html
 functions_func_c.html
 functions_func_d.html
 functions_func_e.html
 functions_func_f.html
 functions_func_g.html
-functions_func_h.html
 functions_func_i.html
 functions_func_k.html
 functions_func_l.html

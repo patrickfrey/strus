@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -79,9 +79,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a95fcd5f12a6206bab7ffe31cd70c7fbd"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#a95fcd5f12a6206bab7ffe31cd70c7fbd">addFeature</a> (const std::string &amp;name, const std::vector&lt; double &gt; &amp;vec)=0</td></tr>
 <tr class="memdesc:a95fcd5f12a6206bab7ffe31cd70c7fbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a feature to the repository for later retrieval.  <a href="#a95fcd5f12a6206bab7ffe31cd70c7fbd">More...</a><br/></td></tr>
 <tr class="separator:a95fcd5f12a6206bab7ffe31cd70c7fbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22d89019ee7814469f530c9fb2cf8e11"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#a22d89019ee7814469f530c9fb2cf8e11">defineFeatureConceptRelation</a> (const std::string &amp;relationTypeName, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;featidx, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;conidx)=0</td></tr>
-<tr class="memdesc:a22d89019ee7814469f530c9fb2cf8e11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a relation element.  <a href="#a22d89019ee7814469f530c9fb2cf8e11">More...</a><br/></td></tr>
-<tr class="separator:a22d89019ee7814469f530c9fb2cf8e11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbc7b83a624dd7c0af34b0db488c7d26"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#acbc7b83a624dd7c0af34b0db488c7d26">defineFeatureConceptRelation</a> (const std::string &amp;conceptClass, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;featidx, const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;conidx)=0</td></tr>
+<tr class="memdesc:acbc7b83a624dd7c0af34b0db488c7d26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Define a relation element.  <a href="#acbc7b83a624dd7c0af34b0db488c7d26">More...</a><br/></td></tr>
+<tr class="separator:acbc7b83a624dd7c0af34b0db488c7d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4a4d51ffe2f01398bcce4d3ce9461ce"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#ad4a4d51ffe2f01398bcce4d3ce9461ce">commit</a> ()=0</td></tr>
 <tr class="memdesc:ad4a4d51ffe2f01398bcce4d3ce9461ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure the persistent storage of the features added with <a class="el" href="classstrus_1_1VectorStorageTransactionInterface.html#a95fcd5f12a6206bab7ffe31cd70c7fbd" title="Add a feature to the repository for later retrieval. ">addFeature(const std::string&amp;,const std::vector&lt;double&gt;&amp;)</a> till now.  <a href="#ad4a4d51ffe2f01398bcce4d3ce9461ce">More...</a><br/></td></tr>
 <tr class="separator:ad4a4d51ffe2f01398bcce4d3ce9461ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -188,7 +188,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a22d89019ee7814469f530c9fb2cf8e11"></a>
+<a class="anchor" id="acbc7b83a624dd7c0af34b0db488c7d26"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -199,7 +199,7 @@ Public Member Functions</h2></td></tr>
           <td class="memname">virtual void strus::VectorStorageTransactionInterface::defineFeatureConceptRelation </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>relationTypeName</em>, </td>
+          <td class="paramname"><em>conceptClass</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -229,7 +229,7 @@ Public Member Functions</h2></td></tr>
 <p>Define a relation element. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">relationTypeName</td><td>name of the relation class to distiguish different relations </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">conceptClass</td><td>name of the concept class to distiguish different relations </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">featidx</td><td>index of the feature (see '<a class="el" href="classstrus_1_1VectorStorageClientInterface.html#a13b478bdae75de10cc9cff69c62b9617" title="Get the index starting from 0 of a feature by its name. ">VectorStorageClientInterface::featureIndex( const std::string&amp;) const</a>') </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conidx</td><td>index of the concept </td></tr>
   </table>
@@ -270,7 +270,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

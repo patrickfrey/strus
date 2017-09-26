@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -81,7 +81,7 @@
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#a95fcd5f12a6206bab7ffe31cd70c7fbd">addFeature</a>( <span class="keyword">const</span> std::string&amp; name, <span class="keyword">const</span> std::vector&lt;double&gt;&amp; vec)=0;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#a22d89019ee7814469f530c9fb2cf8e11">defineFeatureConceptRelation</a>( <span class="keyword">const</span> std::string&amp; relationTypeName, <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; featidx, <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; conidx)=0;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#acbc7b83a624dd7c0af34b0db488c7d26">defineFeatureConceptRelation</a>( <span class="keyword">const</span> std::string&amp; conceptClass, <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; featidx, <span class="keyword">const</span> <a class="code" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&amp; conidx)=0;</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classstrus_1_1VectorStorageTransactionInterface.html#ad4a4d51ffe2f01398bcce4d3ce9461ce">commit</a>()=0;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
@@ -93,8 +93,8 @@
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
 <div class="ttc" id="namespacestrus_html_a3c5a45d9cd423c89104928e5feff5a4e"><div class="ttname"><a href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">strus::Index</a></div><div class="ttdeci">int32_t Index</div><div class="ttdoc">Number type generally used for locally counted indices. </div><div class="ttdef"><b>Definition:</b> index.hpp:29</div></div>
+<div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_acbc7b83a624dd7c0af34b0db488c7d26"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#acbc7b83a624dd7c0af34b0db488c7d26">strus::VectorStorageTransactionInterface::defineFeatureConceptRelation</a></div><div class="ttdeci">virtual void defineFeatureConceptRelation(const std::string &amp;conceptClass, const Index &amp;featidx, const Index &amp;conidx)=0</div><div class="ttdoc">Define a relation element. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html">strus::VectorStorageTransactionInterface</a></div><div class="ttdoc">Interface for building a repository of vectors with classifiers to map them to discrete features...</div><div class="ttdef"><b>Definition:</b> vectorStorageTransactionInterface.hpp:18</div></div>
-<div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_a22d89019ee7814469f530c9fb2cf8e11"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#a22d89019ee7814469f530c9fb2cf8e11">strus::VectorStorageTransactionInterface::defineFeatureConceptRelation</a></div><div class="ttdeci">virtual void defineFeatureConceptRelation(const std::string &amp;relationTypeName, const Index &amp;featidx, const Index &amp;conidx)=0</div><div class="ttdoc">Define a relation element. </div></div>
 <div class="ttc" id="index_8hpp_html"><div class="ttname"><a href="index_8hpp.html">index.hpp</a></div><div class="ttdoc">Numeric types used for local and global indices. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_ae7daf345f9ab7eb8903e46f2a1dd9f77"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#ae7daf345f9ab7eb8903e46f2a1dd9f77">strus::VectorStorageTransactionInterface::rollback</a></div><div class="ttdeci">virtual void rollback()=0</div><div class="ttdoc">Rollback of the transaction, no changes made. </div></div>
 <div class="ttc" id="classstrus_1_1VectorStorageTransactionInterface_html_a95fcd5f12a6206bab7ffe31cd70c7fbd"><div class="ttname"><a href="classstrus_1_1VectorStorageTransactionInterface.html#a95fcd5f12a6206bab7ffe31cd70c7fbd">strus::VectorStorageTransactionInterface::addFeature</a></div><div class="ttdeci">virtual void addFeature(const std::string &amp;name, const std::vector&lt; double &gt; &amp;vec)=0</div><div class="ttdoc">Add a feature to the repository for later retrieval. </div></div>
@@ -104,7 +104,7 @@
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

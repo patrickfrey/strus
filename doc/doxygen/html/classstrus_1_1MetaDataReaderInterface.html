@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -76,9 +76,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ade983b09c27b453a9430517251582d1e"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html#ade983b09c27b453a9430517251582d1e">~MetaDataReaderInterface</a> ()</td></tr>
 <tr class="memdesc:ade983b09c27b453a9430517251582d1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ade983b09c27b453a9430517251582d1e">More...</a><br/></td></tr>
 <tr class="separator:ade983b09c27b453a9430517251582d1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacfddf5a91695997872f6bc7f2b444fc"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html#aacfddf5a91695997872f6bc7f2b444fc">hasElement</a> (const std::string &amp;name_) const =0</td></tr>
-<tr class="memdesc:aacfddf5a91695997872f6bc7f2b444fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find out if there exists a meta data table element with the specified name.  <a href="#aacfddf5a91695997872f6bc7f2b444fc">More...</a><br/></td></tr>
-<tr class="separator:aacfddf5a91695997872f6bc7f2b444fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0daf2fc3b51df9538839764411f54a9"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html#ab0daf2fc3b51df9538839764411f54a9">elementHandle</a> (const std::string &amp;name_) const =0</td></tr>
 <tr class="memdesc:ab0daf2fc3b51df9538839764411f54a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the handle for a table element addressed by name.  <a href="#ab0daf2fc3b51df9538839764411f54a9">More...</a><br/></td></tr>
 <tr class="separator:ab0daf2fc3b51df9538839764411f54a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -97,6 +94,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1687204cbb942c3239272227237df61c"><td class="memItemLeft" align="right" valign="top">virtual const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html#a1687204cbb942c3239272227237df61c">getName</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;elementHandle_) const =0</td></tr>
 <tr class="memdesc:a1687204cbb942c3239272227237df61c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the name of a table element.  <a href="#a1687204cbb942c3239272227237df61c">More...</a><br/></td></tr>
 <tr class="separator:a1687204cbb942c3239272227237df61c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a018dea73e948dd826daac4bad4646a8e"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1MetaDataReaderInterface.html#a018dea73e948dd826daac4bad4646a8e">getNames</a> () const =0</td></tr>
+<tr class="memdesc:a018dea73e948dd826daac4bad4646a8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the list of names of a table elements.  <a href="#a018dea73e948dd826daac4bad4646a8e">More...</a><br/></td></tr>
+<tr class="separator:a018dea73e948dd826daac4bad4646a8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for accessing meta data from a strus storage. </p>
@@ -156,7 +156,7 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>return the element handle or -1 if not defined (error occurred) </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>return the element handle or -1 if not defined </dd></dl>
 <dl class="section remark"><dt>Remarks</dt><dd>Element handles are numbered from 0 to N-1, where N is what <a class="el" href="classstrus_1_1MetaDataReaderInterface.html#ad0991a2bccc4ece4b8f3bed4db27e91f" title="Get the number of columns in the meta data table. ">nofElements()</a> returns </dd></dl>
 
 </div>
@@ -191,6 +191,32 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>return the table element name </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a018dea73e948dd826daac4bad4646a8e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::vector&lt;std::string&gt; strus::MetaDataReaderInterface::getNames </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the list of names of a table elements. </p>
+<dl class="section return"><dt>Returns</dt><dd>return the list of table element names </dd></dl>
 
 </div>
 </div>
@@ -257,39 +283,6 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>return the element value as atomic variant (type depending on internal representation) </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="aacfddf5a91695997872f6bc7f2b444fc"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual bool strus::MetaDataReaderInterface::hasElement </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name_</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Find out if there exists a meta data table element with the specified name. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">name_</td><td>name of the element to check </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>return true, if the element exists </dd></dl>
 
 </div>
 </div>
@@ -360,7 +353,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -85,9 +85,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6053a8ceba4ef4d9a459b0c5024b9f91"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1AttributeReaderInterface.html#a6053a8ceba4ef4d9a459b0c5024b9f91">getValue</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;elementHandle_) const =0</td></tr>
 <tr class="memdesc:a6053a8ceba4ef4d9a459b0c5024b9f91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the value of the attribute of the document in the current readed context &ndash; defined with <a class="el" href="classstrus_1_1AttributeReaderInterface.html#a9ace0f9c9756cbd04797ea7075ffbd73" title="Move the attribute reader context to a specific document. ">skipDoc(const Index&amp;)</a>  <a href="#a6053a8ceba4ef4d9a459b0c5024b9f91">More...</a><br/></td></tr>
 <tr class="separator:a6053a8ceba4ef4d9a459b0c5024b9f91"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8dbe2183eca51d27a6f3792cd68a1162"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1AttributeReaderInterface.html#a8dbe2183eca51d27a6f3792cd68a1162">getAttributeNames</a> () const =0</td></tr>
-<tr class="memdesc:a8dbe2183eca51d27a6f3792cd68a1162"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of all attribute names defined in the storage.  <a href="#a8dbe2183eca51d27a6f3792cd68a1162">More...</a><br/></td></tr>
-<tr class="separator:a8dbe2183eca51d27a6f3792cd68a1162"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ea8937e58aa96190b2619f5109a48a4"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1AttributeReaderInterface.html#a8ea8937e58aa96190b2619f5109a48a4">getNames</a> () const =0</td></tr>
+<tr class="memdesc:a8ea8937e58aa96190b2619f5109a48a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the names of all attributes defined in the storage.  <a href="#a8ea8937e58aa96190b2619f5109a48a4">More...</a><br/></td></tr>
+<tr class="separator:a8ea8937e58aa96190b2619f5109a48a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for accessing document attributes from a strus storage. </p>
@@ -151,7 +151,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8dbe2183eca51d27a6f3792cd68a1162"></a>
+<a class="anchor" id="a8ea8937e58aa96190b2619f5109a48a4"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -159,7 +159,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual std::vector&lt;std::string&gt; strus::AttributeReaderInterface::getAttributeNames </td>
+          <td class="memname">virtual std::vector&lt;std::string&gt; strus::AttributeReaderInterface::getNames </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -172,7 +172,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Get the names of all attribute names defined in the storage. </p>
+<p>Get the names of all attributes defined in the storage. </p>
+<dl class="section return"><dt>Returns</dt><dd>list of attribute names </dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Returns the names of all attributes defined for any document, independent of the current document. </dd></dl>
 
 </div>
@@ -249,7 +250,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -79,9 +79,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a30c74eaa7c75fee5f6662af6fd4ba60f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#a30c74eaa7c75fee5f6662af6fd4ba60f">addWeightingFeature</a> (const std::string &amp;name_, <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *postingIterator_, double weight_, const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;stats_)=0</td></tr>
 <tr class="memdesc:a30c74eaa7c75fee5f6662af6fd4ba60f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a feature that is subject of weighting to the execution context.  <a href="#a30c74eaa7c75fee5f6662af6fd4ba60f">More...</a><br/></td></tr>
 <tr class="separator:a30c74eaa7c75fee5f6662af6fd4ba60f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea415bb346cb95677dd97079a08f2210"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#aea415bb346cb95677dd97079a08f2210">setVariableValue</a> (const std::string &amp;name, double value)=0</td></tr>
+<tr class="memdesc:aea415bb346cb95677dd97079a08f2210"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value of a query variable.  <a href="#aea415bb346cb95677dd97079a08f2210">More...</a><br/></td></tr>
+<tr class="separator:aea415bb346cb95677dd97079a08f2210"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79d0b1f312353c0a6feb133b68cbd237"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#a79d0b1f312353c0a6feb133b68cbd237">call</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno)=0</td></tr>
 <tr class="memdesc:a79d0b1f312353c0a6feb133b68cbd237"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call the weighting function for a document.  <a href="#a79d0b1f312353c0a6feb133b68cbd237">More...</a><br/></td></tr>
 <tr class="separator:a79d0b1f312353c0a6feb133b68cbd237"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af413cc2478c4c77bb4d51f5bb89651e2"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1WeightingFunctionContextInterface.html#af413cc2478c4c77bb4d51f5bb89651e2">debugCall</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno)=0</td></tr>
+<tr class="memdesc:af413cc2478c4c77bb4d51f5bb89651e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get debug info dumped as string of the weighting call for one document.  <a href="#af413cc2478c4c77bb4d51f5bb89651e2">More...</a><br/></td></tr>
+<tr class="separator:af413cc2478c4c77bb4d51f5bb89651e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for a weighting function with its state and context used during calculation. </p>
@@ -159,7 +165,7 @@ Public Member Functions</h2></td></tr>
 <p>Add a feature that is subject of weighting to the execution context. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">name_</td><td>name of the summarization feature </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">name_</td><td>name of the weighting feature </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">postingIterator_</td><td>iterator on the matches of the weighting feature (ownership remains at caller) </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight_</td><td>weight of this feature </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stats_</td><td>global term statistics passed down with the query. If undefined, they can be defined by or estimated from the posting iterator data. </td></tr>
@@ -203,6 +209,82 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af413cc2478c4c77bb4d51f5bb89651e2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::string strus::WeightingFunctionContextInterface::debugCall </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
+          <td class="paramname"><em>docno</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get debug info dumped as string of the weighting call for one document. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">docno</td><td>document to get the debug info from </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the debug info as string </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="aea415bb346cb95677dd97079a08f2210"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::WeightingFunctionContextInterface::setVariableValue </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the value of a query variable. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>value of the variable </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="weightingFunctionContextInterface_8hpp_source.html">weightingFunctionContextInterface.hpp</a></li>
 </ul>
@@ -210,7 +292,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -96,6 +96,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a194a95c07a80faeb1c49108e82505702"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#a194a95c07a80faeb1c49108e82505702">readValue</a> (const char *key, std::size_t keysize, std::string &amp;value, const <a class="el" href="classstrus_1_1DatabaseOptions.html">DatabaseOptions</a> &amp;options) const =0</td></tr>
 <tr class="memdesc:a194a95c07a80faeb1c49108e82505702"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a value by key.  <a href="#a194a95c07a80faeb1c49108e82505702">More...</a><br/></td></tr>
 <tr class="separator:a194a95c07a80faeb1c49108e82505702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12ac2640adaf30c5fa698bd4b43e1d41"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#a12ac2640adaf30c5fa698bd4b43e1d41">close</a> ()=0</td></tr>
+<tr class="memdesc:a12ac2640adaf30c5fa698bd4b43e1d41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close client connection and eventually do some cleanup.  <a href="#a12ac2640adaf30c5fa698bd4b43e1d41">More...</a><br/></td></tr>
+<tr class="separator:a12ac2640adaf30c5fa698bd4b43e1d41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ccebb44f57eeaaa02533b2304a6d7bf"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1DatabaseClientInterface.html#a8ccebb44f57eeaaa02533b2304a6d7bf">config</a> () const =0</td></tr>
 <tr class="memdesc:a8ccebb44f57eeaaa02533b2304a6d7bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the interpreted configuration this database client was created with.  <a href="#a8ccebb44f57eeaaa02533b2304a6d7bf">More...</a><br/></td></tr>
 <tr class="separator:a8ccebb44f57eeaaa02533b2304a6d7bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,11 +128,37 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Destructor. </p>
-<dl class="section remark"><dt>Remarks</dt><dd>Should call call 'close()' but ignore errors there silently </dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>Should call call '<a class="el" href="classstrus_1_1DatabaseClientInterface.html#a12ac2640adaf30c5fa698bd4b43e1d41" title="Close client connection and eventually do some cleanup. ">close()</a>' but ignore errors there silently </dd></dl>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a12ac2640adaf30c5fa698bd4b43e1d41"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::DatabaseClientInterface::close </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Close client connection and eventually do some cleanup. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a8ccebb44f57eeaaa02533b2304a6d7bf"></a>
 <div class="memitem">
 <div class="memproto">
@@ -407,7 +436,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

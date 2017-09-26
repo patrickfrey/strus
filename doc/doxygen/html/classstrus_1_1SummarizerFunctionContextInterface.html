@@ -27,7 +27,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">strus
-   &#160;<span id="projectnumber">0.14</span>
+   &#160;<span id="projectnumber">0.15</span>
    </div>
   </td>
  </tr>
@@ -79,10 +79,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:afa0c6b1beeefe6006e66e80b66d2c697"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#afa0c6b1beeefe6006e66e80b66d2c697">addSummarizationFeature</a> (const std::string &amp;name_, <a class="el" href="classstrus_1_1PostingIteratorInterface.html">PostingIteratorInterface</a> *postingIterator_, const std::vector&lt; <a class="el" href="classstrus_1_1SummarizationVariable.html">SummarizationVariable</a> &gt; &amp;variables_, double weight_, const <a class="el" href="classstrus_1_1TermStatistics.html">TermStatistics</a> &amp;stats_)=0</td></tr>
 <tr class="memdesc:afa0c6b1beeefe6006e66e80b66d2c697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a sumarization feature that is subject of summarization to the execution context.  <a href="#afa0c6b1beeefe6006e66e80b66d2c697">More...</a><br/></td></tr>
 <tr class="separator:afa0c6b1beeefe6006e66e80b66d2c697"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0602ad543aca7d06ce37c672651dfb4b"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#a0602ad543aca7d06ce37c672651dfb4b">setVariableValue</a> (const std::string &amp;name, double value)=0</td></tr>
+<tr class="memdesc:a0602ad543aca7d06ce37c672651dfb4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value of a query variable.  <a href="#a0602ad543aca7d06ce37c672651dfb4b">More...</a><br/></td></tr>
+<tr class="separator:a0602ad543aca7d06ce37c672651dfb4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3ab219d4c03246021a9acae9faedba84"><td class="memItemLeft" align="right" valign="top">virtual std::vector<br class="typebreak"/>
 &lt; <a class="el" href="classstrus_1_1SummaryElement.html">SummaryElement</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#a3ab219d4c03246021a9acae9faedba84">getSummary</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno)=0</td></tr>
 <tr class="memdesc:a3ab219d4c03246021a9acae9faedba84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the summarization elements for one document.  <a href="#a3ab219d4c03246021a9acae9faedba84">More...</a><br/></td></tr>
 <tr class="separator:a3ab219d4c03246021a9acae9faedba84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a282b31e28ba3ff8c270a0a2a1d613c3c"><td class="memItemLeft" align="right" valign="top">virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classstrus_1_1SummarizerFunctionContextInterface.html#a282b31e28ba3ff8c270a0a2a1d613c3c">debugCall</a> (const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;docno)=0</td></tr>
+<tr class="memdesc:a282b31e28ba3ff8c270a0a2a1d613c3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get debug info dumped as string of the summarization call for one document.  <a href="#a282b31e28ba3ff8c270a0a2a1d613c3c">More...</a><br/></td></tr>
+<tr class="separator:a282b31e28ba3ff8c270a0a2a1d613c3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for the summarization execution context. </p>
@@ -178,6 +184,39 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a282b31e28ba3ff8c270a0a2a1d613c3c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::string strus::SummarizerFunctionContextInterface::debugCall </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespacestrus.html#a3c5a45d9cd423c89104928e5feff5a4e">Index</a> &amp;&#160;</td>
+          <td class="paramname"><em>docno</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get debug info dumped as string of the summarization call for one document. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">docno</td><td>document to get the summary debug info from </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the debug info as string </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a3ab219d4c03246021a9acae9faedba84"></a>
 <div class="memitem">
 <div class="memproto">
@@ -211,6 +250,49 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a0602ad543aca7d06ce37c672651dfb4b"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void strus::SummarizerFunctionContextInterface::setVariableValue </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the value of a query variable. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">name</td><td>name of the variable </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>value of the variable </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/patrick/Projects/github/strus/include/strus/<a class="el" href="summarizerFunctionContextInterface_8hpp_source.html">summarizerFunctionContextInterface.hpp</a></li>
 </ul>
@@ -218,7 +300,7 @@ Public Member Functions</h2></td></tr>
 <!-- HTML footer for doxygen 1.8.6-->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Feb 16 2017 12:20:50 for strus by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Tue Sep 26 2017 22:40:05 for strus by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
