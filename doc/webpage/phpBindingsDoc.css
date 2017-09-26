@@ -1,0 +1,209 @@
+html, body, .container {
+    color:#303030;
+    font:Verdana,Arial;
+    background-color: #e8f8e8;
+}
+
+h1 {font-size:2.1em; letter-spacing:-1px; margin:10px 5px 0 0; font:Verdana,Arial}
+h2 {font-size:1.4em; letter-spacing:-1px; font:Verdana,Arial}
+h3 {font-size:1.2em; letter-spacing:-1px; font:Verdana,Arial}
+h4 {font-size:1.1em; letter-spacing:-1px; font:Verdana,Arial}
+h5 {font-size:1.0em; letter-spacing:-1px; font:Verdana,Arial}
+p  {font-size:1.0em; letter-spacing:0px; font:Verdana,Arial}
+hr { width:100%; height:2px; background: #fff }
+
+
+.maintitle
+{
+    margin:10px 5px;
+}
+
+.product {
+    display:table;
+    border:1;
+    clear:both;
+    height: 76px;
+    width: 100%;
+    background-color: #edeeef;
+}
+
+.product_logo {
+    display: table-cell;
+    float: left;
+}
+
+.product_logo_img {
+    display: table-cell;
+    height:76px;
+    width:76px;
+    opacity: 0.7;
+    background-color: #4f8bea;
+}
+
+.product_name, .product_release, .product_license {
+    display: table-cell;
+    text-align: center;
+    vertical-align:middle;
+}
+
+.product_description, .product_copyright, .product_author {
+    display: none;
+}
+
+.navigation {
+    float: left;
+    width: 30%;
+    min-height: 90%;
+    background-color: #ecffe6;
+    padding-bottom: 10px;
+}
+
+#nav_title_classes {
+    margin:10px 5px;
+    background-color: #ecffe6;
+}
+.nav_title_memberlist {
+    display: none;
+    margin:10px 5px;
+    background-color: #ecffe6;
+}
+
+.navclasslist {
+    margin:0px 10px;
+    background-color: #ecffe6;
+}
+.navclass {
+    font-size:1.0em;
+    letter-spacing:0px;
+    font:Verdana,Arial;
+}
+
+.navmemberlist {
+    background-color: #ecffe6;
+    margin:0px 10px;
+    display: none;
+}
+.navconstructor {
+    background-color: #ecffe6;
+    font-size:1.0em;
+    letter-spacing:0px;
+    font:Verdana,Arial;
+    font-style:italic;
+}
+.navmethod {
+    background-color: #ecffe6;
+    font-size:1.0em;
+    letter-spacing:0px;
+    font:Verdana,Arial;
+}
+
+.content {
+    float: left;
+    width: 70%;
+    min-height: "90%";
+    background-color: #e8f8e8;
+}
+.content_title {
+    margin:10px 5px;
+}
+.content_subtitle {
+    margin:10px 5px;
+}
+.annotation_subtitle {
+    margin:10px 15px;
+    font-weight: bold;
+}
+.annotation {
+    margin:0px 15px;
+}
+
+.classdescription {
+    display: none;
+}
+.leadtext {
+    margin:0px 10px;
+    color: #152515;
+    font-size:1.2em;
+    font:Verdana,Arial;
+    margin-bottom: 30px;
+}
+.text,.note {
+    margin:0px 10px;
+    font-size:1.0em;
+    font:Verdana,Arial;
+}
+.note {
+    font-style:italic;
+}
+.remark {
+    margin:0px 10px;
+    color: #82290e;
+    font-size:1.1em;
+    font-style:italic;
+}
+.memberdescription {
+    margin-top: 50px;
+    display: none;
+}
+.parameterlist,.callresult {
+    display:table;
+    border:1px solid  #0;
+    border-collapse: collapse;
+    background-color: #f3f7c3;
+    width: 100%;
+}
+.param,.result {
+    display: table-row;
+    font-size:1.0em;
+    font:Verdana,Arial;
+}
+.paramname {
+    display:table-cell;
+    border-left: 1px solid #152515;
+    border-right: 1px solid #152515;
+    border-bottom: 1px solid #152515;
+    border-top: 1px solid #152515;
+    padding: 15px;
+    text-align: left;
+    vertical-align:middle;
+    font:Verdana,Arial;
+    font-weight: bold;
+}
+.paramdescr,.resultdescr {
+    display:table-cell;
+    border-left: 1px solid #152515;
+    border-right: 1px solid #152515;
+    border-bottom: 1px solid #152515;
+    border-top: 1px solid #152515;
+    padding: 15px;
+    text-align: left;
+    vertical-align:middle;
+    font:Verdana,Arial;
+}
+
+.paramexamples,.resultexamples {
+    display:table-cell;
+    border-left: 1px solid #152515;
+    border-right: 1px solid #152515;
+    border-bottom: 1px solid #152515;
+    border-top: 1px solid #152515;
+    padding: 15px;
+    text-align: left;
+    vertical-align:middle;
+    font:Verdana,Arial;
+}
+.callexamples {
+    margin: 5px 5px 3px 10px; 
+    margin-bottom: 30px;
+}
+.example {
+    vertical-align:middle;
+    unicode-bidi: embed;
+    font-family: monospace;
+    white-space: pre;
+    color: #152515;
+}
+.about {
+    clear: both;
+    background-color: #edeeef;
+}

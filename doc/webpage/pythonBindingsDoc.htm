@@ -3,21 +3,21 @@
 <html lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-	<title>Strus Lua interface documentation</title>
-	<link rel="stylesheet" href="luaBindingsDoc.css" type="text/css" />
+	<title>Strus Python interface documentation</title>
+	<link rel="stylesheet" href="pythonBindingsDoc.css" type="text/css" />
 </head>
 <body onload="initLoad()">
-<script type="text/javascript" src="luaBindingsDoc.js"></script>
+<script type="text/javascript" src="pythonBindingsDoc.js"></script>
 
 <div class="container">
 <div class="product">
 	<div class="product_logo"> <img class="product_logo_img" src="images/logotype.jpg" alt="Strus"/></div>
-	<div class="product_name">Strus Lua Bindings</div>
+	<div class="product_name">Strus Python Bindings</div>
 	<div class="product_release">0.15.0</div>
 	<div class="product_author">Patrick P. Frey</div>
 	<div class="product_copyright">Patrick P. Frey</div>
 	<div class="product_license">Mozilla Public License v. 2.0 (MPLv2)</div>
-	<div class="product_description">Lua interface for strus, a set of libraries and programs to build a text search engine</div>
+	<div class="product_description">Python interface for strus, a set of libraries and programs to build a text search engine</div>
 </div> <!-- product -->
 <!-- Menu -->
 <div class="navigation">
@@ -187,7 +187,7 @@
 
 <div class="content">
 <div class="classdescription" id="description_1">
-<h2 class="content_title">strus_Context</h2>
+<h2 class="content_title">strus.Context</h2>
 <p class="leadtext">
 Object holding the global context of the strus information retrieval engine
 </p>
@@ -203,7 +203,7 @@ Object holding the global context of the strus information retrieval engine
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_2">
-<h2 class="content_title">strus_StorageClient</h2>
+<h2 class="content_title">strus.StorageClient</h2>
 <p class="leadtext">
 Object representing a client connection to the storage 
 </p>
@@ -213,7 +213,7 @@ Object representing a client connection to the storage
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_3">
-<h2 class="content_title">strus_StorageTransaction</h2>
+<h2 class="content_title">strus.StorageTransaction</h2>
 <p class="leadtext">
 Object representing a transaction of the storage 
 </p>
@@ -223,7 +223,7 @@ Object representing a transaction of the storage
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_4">
-<h2 class="content_title">strus_VectorStorageSearcher</h2>
+<h2 class="content_title">strus.VectorStorageSearcher</h2>
 <p class="leadtext">
 Object used to search for similar vectors in the collection
 </p>
@@ -233,7 +233,7 @@ Object used to search for similar vectors in the collection
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_5">
-<h2 class="content_title">strus_VectorStorageClient</h2>
+<h2 class="content_title">strus.VectorStorageClient</h2>
 <p class="leadtext">
 Object representing a client connection to a vector storage 
 </p>
@@ -243,7 +243,7 @@ Object representing a client connection to a vector storage
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_6">
-<h2 class="content_title">strus_VectorStorageTransaction</h2>
+<h2 class="content_title">strus.VectorStorageTransaction</h2>
 <p class="leadtext">
 Object representing a vector storage transaction
 </p>
@@ -253,7 +253,7 @@ Object representing a vector storage transaction
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_7">
-<h2 class="content_title">strus_DocumentAnalyzer</h2>
+<h2 class="content_title">strus.DocumentAnalyzer</h2>
 <p class="leadtext">
 Analyzer object representing a program for segmenting, 
  	tokenizing and normalizing a document into atomic parts, that 
@@ -265,7 +265,7 @@ Analyzer object representing a program for segmenting,
 <div class="callnotes"></div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_8">
-<h2 class="content_title">strus_QueryAnalyzer</h2>
+<h2 class="content_title">strus.QueryAnalyzer</h2>
 <p class="leadtext">
 Analyzer object representing a set of function for transforming a field,
  	the smallest unit in any query language, to a set of terms that can be used
@@ -277,7 +277,7 @@ Analyzer object representing a set of function for transforming a field,
 <div class="callnotes"></div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_9">
-<h2 class="content_title">strus_QueryEval</h2>
+<h2 class="content_title">strus.QueryEval</h2>
 <p class="leadtext">
 Query evaluation program object representing an information retrieval scheme for documents in a storage.
 </p>
@@ -287,7 +287,7 @@ Query evaluation program object representing an information retrieval scheme for
 </div> <!-- callnotes -->
 </div> <!-- classdescription -->
 <div class="classdescription" id="description_10">
-<h2 class="content_title">strus_Query</h2>
+<h2 class="content_title">strus.Query</h2>
 <p class="leadtext">
 Query program object representing a retrieval method for documents in a storage.
 </p>
@@ -298,7 +298,7 @@ Query program object representing a retrieval method for documents in a storage.
 </div> <!-- classdescription -->
 
 <div class="memberdescription" id="description_1_1">
-<h2 class="content_title">.new</h2>
+<h2 class="content_title">strus.Context</h2>
 <p class="text">
 Constructor
 </p>
@@ -318,7 +318,7 @@ Constructor
 
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_2">
-<h2 class="content_title">:loadModule</h2>
+<h2 class="content_title">loadModule</h2>
 <p class="text">
 Load a module
 </p>
@@ -345,7 +345,7 @@ Load a module
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_3">
-<h2 class="content_title">:addModulePath</h2>
+<h2 class="content_title">addModulePath</h2>
 <p class="text">
 Add one or more paths from where to try to load modules from
 </p>
@@ -372,7 +372,7 @@ Add one or more paths from where to try to load modules from
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_4">
-<h2 class="content_title">:addResourcePath</h2>
+<h2 class="content_title">addResourcePath</h2>
 <p class="text">
 Add a path where to load analyzer resource files from
 </p>
@@ -396,7 +396,7 @@ Add a path where to load analyzer resource files from
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_5">
-<h2 class="content_title">:createStorageClient</h2>
+<h2 class="content_title">createStorageClient</h2>
 <p class="text">
 Create a storage client instance
 </p>
@@ -430,7 +430,7 @@ Create a storage client instance
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_6">
-<h2 class="content_title">:createVectorStorageClient</h2>
+<h2 class="content_title">createVectorStorageClient</h2>
 <p class="text">
 Create a vector storage client instance
 </p>
@@ -456,7 +456,7 @@ Create a vector storage client instance
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_7">
-<h2 class="content_title">:createStorage</h2>
+<h2 class="content_title">createStorage</h2>
 <p class="text">
 Create a new storage (physically) described by config
 </p>
@@ -481,7 +481,7 @@ Create a new storage (physically) described by config
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_8">
-<h2 class="content_title">:createVectorStorage</h2>
+<h2 class="content_title">createVectorStorage</h2>
 <p class="text">
 Create a new storage (physically) described by config
 </p>
@@ -506,7 +506,7 @@ Create a new storage (physically) described by config
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_9">
-<h2 class="content_title">:destroyStorage</h2>
+<h2 class="content_title">destroyStorage</h2>
 <p class="text">
 Delete the storage (physically) described by config
 </p>
@@ -535,7 +535,7 @@ Delete the storage (physically) described by config
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_10">
-<h2 class="content_title">:storageExists</h2>
+<h2 class="content_title">storageExists</h2>
 <p class="text">
 Tests if the storage described by config exists
 </p>
@@ -564,7 +564,7 @@ Tests if the storage described by config exists
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_11">
-<h2 class="content_title">:detectDocumentClass</h2>
+<h2 class="content_title">detectDocumentClass</h2>
 <p class="text">
 Detect the type of document from its content
 </p>
@@ -591,7 +591,7 @@ Detect the type of document from its content
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_12">
-<h2 class="content_title">:createDocumentAnalyzer</h2>
+<h2 class="content_title">createDocumentAnalyzer</h2>
 <p class="text">
 Create a document analyzer instance
 </p>
@@ -621,7 +621,7 @@ Create a document analyzer instance
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_13">
-<h2 class="content_title">:createQueryAnalyzer</h2>
+<h2 class="content_title">createQueryAnalyzer</h2>
 <p class="text">
 Create a query analyzer instance
 </p>
@@ -640,7 +640,7 @@ Create a query analyzer instance
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_14">
-<h2 class="content_title">:createQueryEval</h2>
+<h2 class="content_title">createQueryEval</h2>
 <p class="text">
 Create a query evaluation instance
 </p>
@@ -659,7 +659,7 @@ Create a query evaluation instance
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_15">
-<h2 class="content_title">:unpackStatisticBlob</h2>
+<h2 class="content_title">unpackStatisticBlob</h2>
 <p class="text">
 Unpack a statistics blob retrieved from a storage
 </p>
@@ -688,7 +688,7 @@ Unpack a statistics blob retrieved from a storage
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_16">
-<h2 class="content_title">:close</h2>
+<h2 class="content_title">close</h2>
 <p class="text">
 Force cleanup to circumvent object pooling mechanisms in an interpreter context
 </p>
@@ -700,7 +700,7 @@ Force cleanup to circumvent object pooling mechanisms in an interpreter context
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_1_17">
-<h2 class="content_title">:debug_serialize</h2>
+<h2 class="content_title">debug_serialize</h2>
 <p class="text">
 Debug method that returns the serialization of the arguments as string
 </p>
@@ -730,7 +730,7 @@ Debug method that returns the serialization of the arguments as string
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_1">
-<h2 class="content_title">:nofDocumentsInserted</h2>
+<h2 class="content_title">nofDocumentsInserted</h2>
 <p class="text">
 Get the number of documents inserted into this storage
 </p>
@@ -749,7 +749,7 @@ Get the number of documents inserted into this storage
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_2">
-<h2 class="content_title">:documentFrequency</h2>
+<h2 class="content_title">documentFrequency</h2>
 <p class="text">
 Get the number of inserted documents where a specific feature occurrs in
 </p>
@@ -786,7 +786,7 @@ Get the number of inserted documents where a specific feature occurrs in
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_3">
-<h2 class="content_title">:documentNumber</h2>
+<h2 class="content_title">documentNumber</h2>
 <p class="text">
 Get the internal document number from the document identifier
 </p>
@@ -814,7 +814,7 @@ Get the internal document number from the document identifier
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_4">
-<h2 class="content_title">:documentForwardIndexTerms</h2>
+<h2 class="content_title">documentForwardIndexTerms</h2>
 <p class="text">
 Get an interator on the tuples (value,pos) of the forward index of a given type for a document
 </p>
@@ -851,7 +851,7 @@ Get an interator on the tuples (value,pos) of the forward index of a given type 
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_5">
-<h2 class="content_title">:documentSearchIndexTerms</h2>
+<h2 class="content_title">documentSearchIndexTerms</h2>
 <p class="text">
 Get an interator on the tuples (value,tf,firstpos) of the search index of a given type for a document
 </p>
@@ -881,7 +881,7 @@ Get an interator on the tuples (value,tf,firstpos) of the search index of a give
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_6">
-<h2 class="content_title">:postings</h2>
+<h2 class="content_title">postings</h2>
 <p class="text">
 Get an iterator on the set of postings inserted
 </p>
@@ -922,7 +922,7 @@ Get an iterator on the set of postings inserted
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_7">
-<h2 class="content_title">:select</h2>
+<h2 class="content_title">select</h2>
 <p class="text">
 Get an iterator on records of selected elements for matching documents starting from a specified document number
 </p>
@@ -977,7 +977,7 @@ Get an iterator on records of selected elements for matching documents starting 
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_8">
-<h2 class="content_title">:termTypes</h2>
+<h2 class="content_title">termTypes</h2>
 <p class="text">
 Get an iterator on the term types inserted
 </p>
@@ -993,7 +993,7 @@ Get an iterator on the term types inserted
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_9">
-<h2 class="content_title">:docids</h2>
+<h2 class="content_title">docids</h2>
 <p class="text">
 Get an iterator on the document identifiers inserted
 </p>
@@ -1009,7 +1009,7 @@ Get an iterator on the document identifiers inserted
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_10">
-<h2 class="content_title">:docid</h2>
+<h2 class="content_title">docid</h2>
 <p class="text">
 Get the document identifier associated with a local document number
 </p>
@@ -1033,7 +1033,7 @@ Get the document identifier associated with a local document number
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_11">
-<h2 class="content_title">:usernames</h2>
+<h2 class="content_title">usernames</h2>
 <p class="text">
 Get an iterator on the user names (roles) used in document access restrictions
 </p>
@@ -1049,7 +1049,7 @@ Get an iterator on the user names (roles) used in document access restrictions
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_12">
-<h2 class="content_title">:attributeNames</h2>
+<h2 class="content_title">attributeNames</h2>
 <p class="text">
 Get the list of inserted document attribute names
 </p>
@@ -1067,7 +1067,7 @@ Get the list of inserted document attribute names
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_13">
-<h2 class="content_title">:metadataNames</h2>
+<h2 class="content_title">metadataNames</h2>
 <p class="text">
 Get the list of inserted document metadata names
 </p>
@@ -1085,7 +1085,7 @@ Get the list of inserted document metadata names
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_14">
-<h2 class="content_title">:getAllStatistics</h2>
+<h2 class="content_title">getAllStatistics</h2>
 <p class="text">
 Get an iterator on message blobs that all statistics of the storage (e.g. feature occurrencies and number of documents inserted)
 </p>
@@ -1110,7 +1110,7 @@ Get an iterator on message blobs that all statistics of the storage (e.g. featur
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_15">
-<h2 class="content_title">:getChangeStatistics</h2>
+<h2 class="content_title">getChangeStatistics</h2>
 <p class="text">
 Get an iterator on message blobs that encode changes in statistics of the storage (e.g. feature occurrencies and number of documents inserted)
 </p>
@@ -1130,7 +1130,7 @@ Get an iterator on message blobs that encode changes in statistics of the storag
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_16">
-<h2 class="content_title">:createTransaction</h2>
+<h2 class="content_title">createTransaction</h2>
 <p class="text">
 Create a transaction
 </p>
@@ -1146,7 +1146,7 @@ Create a transaction
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_17">
-<h2 class="content_title">:config</h2>
+<h2 class="content_title">config</h2>
 <p class="text">
 Get the configuration of this storage
 </p>
@@ -1164,7 +1164,7 @@ Get the configuration of this storage
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_18">
-<h2 class="content_title">:configstring</h2>
+<h2 class="content_title">configstring</h2>
 <p class="text">
 Get the configuration of this storage as string
 </p>
@@ -1182,7 +1182,7 @@ Get the configuration of this storage as string
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_2_19">
-<h2 class="content_title">:close</h2>
+<h2 class="content_title">close</h2>
 <p class="text">
 Close of the storage client
 </p>
@@ -1194,7 +1194,7 @@ Close of the storage client
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_1">
-<h2 class="content_title">:insertDocument</h2>
+<h2 class="content_title">insertDocument</h2>
 <p class="text">
 Prepare the inserting a document into the storage
 </p>
@@ -1220,7 +1220,7 @@ Prepare the inserting a document into the storage
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_2">
-<h2 class="content_title">:deleteDocument</h2>
+<h2 class="content_title">deleteDocument</h2>
 <p class="text">
 Prepare the deletion of a document from the storage
 </p>
@@ -1241,7 +1241,7 @@ Prepare the deletion of a document from the storage
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_3">
-<h2 class="content_title">:deleteUserAccessRights</h2>
+<h2 class="content_title">deleteUserAccessRights</h2>
 <p class="text">
 Prepare the deletion of all document access rights of a user
 </p>
@@ -1262,7 +1262,7 @@ Prepare the deletion of all document access rights of a user
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_4">
-<h2 class="content_title">:commit</h2>
+<h2 class="content_title">commit</h2>
 <p class="text">
 Commit all insert or delete or user access right change statements of this transaction.
 </p>
@@ -1278,7 +1278,7 @@ Commit all insert or delete or user access right change statements of this trans
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_3_5">
-<h2 class="content_title">:rollback</h2>
+<h2 class="content_title">rollback</h2>
 <p class="text">
 Rollback all insert or delete or user access right change statements of this transaction.
 </p>
@@ -1290,7 +1290,7 @@ Rollback all insert or delete or user access right change statements of this tra
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_4_1">
-<h2 class="content_title">:findSimilar</h2>
+<h2 class="content_title">findSimilar</h2>
 <p class="text">
 Find the most similar vectors to vector
 </p>
@@ -1316,7 +1316,7 @@ Find the most similar vectors to vector
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_4_2">
-<h2 class="content_title">:findSimilarFromSelection</h2>
+<h2 class="content_title">findSimilarFromSelection</h2>
 <p class="text">
 Find the most similar vectors to vector in a selection of features addressed by index
 </p>
@@ -1347,7 +1347,7 @@ Find the most similar vectors to vector in a selection of features addressed by 
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_4_3">
-<h2 class="content_title">:close</h2>
+<h2 class="content_title">close</h2>
 <p class="text">
 Controlled close to free resources (forcing free resources in interpreter context with garbage collector)
 </p>
@@ -1359,7 +1359,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_1">
-<h2 class="content_title">:createSearcher</h2>
+<h2 class="content_title">createSearcher</h2>
 <p class="text">
 Create a searcher object for scanning the vectors for similarity
 </p>
@@ -1391,7 +1391,7 @@ Create a searcher object for scanning the vectors for similarity
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_2">
-<h2 class="content_title">:createTransaction</h2>
+<h2 class="content_title">createTransaction</h2>
 <p class="text">
 Create a vector storage transaction instance
 </p>
@@ -1407,7 +1407,7 @@ Create a vector storage transaction instance
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_3">
-<h2 class="content_title">:conceptClassNames</h2>
+<h2 class="content_title">conceptClassNames</h2>
 <p class="text">
 Get the list of concept class names defined
 </p>
@@ -1425,7 +1425,7 @@ Get the list of concept class names defined
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_4">
-<h2 class="content_title">:conceptFeatures</h2>
+<h2 class="content_title">conceptFeatures</h2>
 <p class="text">
 Get the list of indices of features represented by a learnt concept feature
 </p>
@@ -1461,7 +1461,7 @@ Get the list of indices of features represented by a learnt concept feature
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_5">
-<h2 class="content_title">:nofConcepts</h2>
+<h2 class="content_title">nofConcepts</h2>
 <p class="text">
 Get the number of concept features learnt for a class
 </p>
@@ -1490,7 +1490,7 @@ Get the number of concept features learnt for a class
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_6">
-<h2 class="content_title">:featureConcepts</h2>
+<h2 class="content_title">featureConcepts</h2>
 <p class="text">
 Get the set of learnt concepts of a class for a feature defined
 </p>
@@ -1526,7 +1526,7 @@ Get the set of learnt concepts of a class for a feature defined
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_7">
-<h2 class="content_title">:featureVector</h2>
+<h2 class="content_title">featureVector</h2>
 <p class="text">
 Get the vector assigned to a feature addressed by index
 </p>
@@ -1552,7 +1552,7 @@ Get the vector assigned to a feature addressed by index
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_8">
-<h2 class="content_title">:featureName</h2>
+<h2 class="content_title">featureName</h2>
 <p class="text">
 Get the name of a feature by its index starting from 0
 </p>
@@ -1578,7 +1578,7 @@ Get the name of a feature by its index starting from 0
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_9">
-<h2 class="content_title">:featureIndex</h2>
+<h2 class="content_title">featureIndex</h2>
 <p class="text">
 Get the index starting from 0 of a feature by its name
 </p>
@@ -1604,7 +1604,7 @@ Get the index starting from 0 of a feature by its name
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_10">
-<h2 class="content_title">:nofFeatures</h2>
+<h2 class="content_title">nofFeatures</h2>
 <p class="text">
 Get the number of feature vectors defined
 </p>
@@ -1623,7 +1623,7 @@ Get the number of feature vectors defined
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_11">
-<h2 class="content_title">:config</h2>
+<h2 class="content_title">config</h2>
 <p class="text">
 Get the configuration of this vector storage
 </p>
@@ -1641,7 +1641,7 @@ Get the configuration of this vector storage
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_12">
-<h2 class="content_title">:configstring</h2>
+<h2 class="content_title">configstring</h2>
 <p class="text">
 Get the configuration of this vector storage as string
 </p>
@@ -1659,7 +1659,7 @@ Get the configuration of this vector storage as string
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_5_13">
-<h2 class="content_title">:close</h2>
+<h2 class="content_title">close</h2>
 <p class="text">
 Controlled close to free resources (forcing free resources in interpreter context with garbage collector)
 </p>
@@ -1671,7 +1671,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_1">
-<h2 class="content_title">:addFeature</h2>
+<h2 class="content_title">addFeature</h2>
 <p class="text">
 Add named feature to vector storage
 </p>
@@ -1698,7 +1698,7 @@ Add named feature to vector storage
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_2">
-<h2 class="content_title">:defineFeatureConceptRelation</h2>
+<h2 class="content_title">defineFeatureConceptRelation</h2>
 <p class="text">
 Assign a concept (index) to a feature referenced by index
 </p>
@@ -1731,7 +1731,7 @@ Assign a concept (index) to a feature referenced by index
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_3">
-<h2 class="content_title">:commit</h2>
+<h2 class="content_title">commit</h2>
 <p class="text">
 Commit of the transaction
 </p>
@@ -1747,7 +1747,7 @@ Commit of the transaction
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_4">
-<h2 class="content_title">:rollback</h2>
+<h2 class="content_title">rollback</h2>
 <p class="text">
 Rollback of the transaction
 </p>
@@ -1759,7 +1759,7 @@ Rollback of the transaction
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_6_5">
-<h2 class="content_title">:close</h2>
+<h2 class="content_title">close</h2>
 <p class="text">
 Controlled close to free resources (forcing free resources in interpreter context with garbage collector)
 </p>
@@ -1771,7 +1771,7 @@ Controlled close to free resources (forcing free resources in interpreter contex
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_1">
-<h2 class="content_title">:addSearchIndexFeature</h2>
+<h2 class="content_title">addSearchIndexFeature</h2>
 <p class="text">
 Define a feature to insert into the inverted index (search index) is selected, tokenized and normalized
 </p>
@@ -1830,7 +1830,7 @@ Define a feature to insert into the inverted index (search index) is selected, t
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_2">
-<h2 class="content_title">:addForwardIndexFeature</h2>
+<h2 class="content_title">addForwardIndexFeature</h2>
 <p class="text">
 Define a feature to insert into the forward index (for summarization) is selected, tokenized and normalized
 </p>
@@ -1885,7 +1885,7 @@ Define a feature to insert into the forward index (for summarization) is selecte
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_3">
-<h2 class="content_title">:addPatternLexem</h2>
+<h2 class="content_title">addPatternLexem</h2>
 <p class="text">
 Declare an element to be used as lexem by post processing pattern matching but not put into the result of document analysis
 </p>
@@ -1930,7 +1930,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_4">
-<h2 class="content_title">:defineMetaData</h2>
+<h2 class="content_title">defineMetaData</h2>
 <p class="text">
 Define a feature to insert as meta data is selected, tokenized and normalized
 </p>
@@ -1975,7 +1975,7 @@ Define a feature to insert as meta data is selected, tokenized and normalized
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_5">
-<h2 class="content_title">:defineAggregatedMetaData</h2>
+<h2 class="content_title">defineAggregatedMetaData</h2>
 <p class="text">
 Declare some aggregated value of the document to be put into the meta data table used for restrictions, weighting and summarization.
 </p>
@@ -2001,7 +2001,7 @@ Declare some aggregated value of the document to be put into the meta data table
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_6">
-<h2 class="content_title">:defineAttribute</h2>
+<h2 class="content_title">defineAttribute</h2>
 <p class="text">
 Define a feature to insert as document attribute (for summarization) is selected, tokenized and normalized
 </p>
@@ -2046,7 +2046,7 @@ Define a feature to insert as document attribute (for summarization) is selected
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_7">
-<h2 class="content_title">:addSearchIndexFeatureFromPatternMatch</h2>
+<h2 class="content_title">addSearchIndexFeatureFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching as feature to insert into the search index, normalized
 </p>
@@ -2091,7 +2091,7 @@ Define a result of pattern matching as feature to insert into the search index, 
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_8">
-<h2 class="content_title">:addForwardIndexFeatureFromPatternMatch</h2>
+<h2 class="content_title">addForwardIndexFeatureFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching as feature to insert into the forward index, normalized
 </p>
@@ -2136,7 +2136,7 @@ Define a result of pattern matching as feature to insert into the forward index,
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_9">
-<h2 class="content_title">:defineMetaDataFromPatternMatch</h2>
+<h2 class="content_title">defineMetaDataFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching to insert as metadata, normalized
 </p>
@@ -2171,7 +2171,7 @@ Define a result of pattern matching to insert as metadata, normalized
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_10">
-<h2 class="content_title">:defineAttributeFromPatternMatch</h2>
+<h2 class="content_title">defineAttributeFromPatternMatch</h2>
 <p class="text">
 Define a result of pattern matching to insert as document attribute, normalized
 </p>
@@ -2206,7 +2206,7 @@ Define a result of pattern matching to insert as document attribute, normalized
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_11">
-<h2 class="content_title">:definePatternMatcherPostProc</h2>
+<h2 class="content_title">definePatternMatcherPostProc</h2>
 <p class="text">
 Declare a pattern matcher on the document features after other query analysis
 </p>
@@ -2245,7 +2245,7 @@ Declare a pattern matcher on the document features after other query analysis
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_12">
-<h2 class="content_title">:definePatternMatcherPostProcFromFile</h2>
+<h2 class="content_title">definePatternMatcherPostProcFromFile</h2>
 <p class="text">
 Declare a pattern matcher on the document features after other query analysis
 </p>
@@ -2278,7 +2278,7 @@ Declare a pattern matcher on the document features after other query analysis
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_13">
-<h2 class="content_title">:defineDocument</h2>
+<h2 class="content_title">defineDocument</h2>
 <p class="text">
 Declare a sub document for the handling of multi part documents in an analyzed content or documents of different types with one configuration
 </p>
@@ -2308,7 +2308,7 @@ Declare a sub document for the handling of multi part documents in an analyzed c
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_14">
-<h2 class="content_title">:analyzeSingle</h2>
+<h2 class="content_title">analyzeSingle</h2>
 <p class="text">
 Analye a content and return the analyzed document structure (analyzing single document)
 </p>
@@ -2339,7 +2339,7 @@ Analye a content and return the analyzed document structure (analyzing single do
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_7_15">
-<h2 class="content_title">:analyzeMultiPart</h2>
+<h2 class="content_title">analyzeMultiPart</h2>
 <p class="text">
 Analye a content and return the analyzed document structures as iterator (analyzing multipart document)
 </p>
@@ -2374,7 +2374,7 @@ Analye a content and return the analyzed document structures as iterator (analyz
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_1">
-<h2 class="content_title">:addElement</h2>
+<h2 class="content_title">addElement</h2>
 <p class="text">
 Defines an element (term, metadata) of query analysis.
 </p>
@@ -2420,7 +2420,7 @@ Defines an element (term, metadata) of query analysis.
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_2">
-<h2 class="content_title">:addElementFromPatternMatch</h2>
+<h2 class="content_title">addElementFromPatternMatch</h2>
 <p class="text">
 Defines an element from a pattern matching result.
 </p>
@@ -2453,7 +2453,7 @@ Defines an element from a pattern matching result.
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_3">
-<h2 class="content_title">:addPatternLexem</h2>
+<h2 class="content_title">addPatternLexem</h2>
 <p class="text">
 Declare an element to be used as lexem by post processing pattern matching but not put into the result of query analysis
 </p>
@@ -2498,7 +2498,7 @@ Declare an element to be used as lexem by post processing pattern matching but n
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_4">
-<h2 class="content_title">:definePatternMatcherPostProc</h2>
+<h2 class="content_title">definePatternMatcherPostProc</h2>
 <p class="text">
 Declare a pattern matcher on the query features after other query analysis
 </p>
@@ -2536,7 +2536,7 @@ Declare a pattern matcher on the query features after other query analysis
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_5">
-<h2 class="content_title">:definePatternMatcherPostProcFromFile</h2>
+<h2 class="content_title">definePatternMatcherPostProcFromFile</h2>
 <p class="text">
 Declare a pattern matcher on the query features after other query analysis
 </p>
@@ -2563,7 +2563,7 @@ Declare a pattern matcher on the query features after other query analysis
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_6">
-<h2 class="content_title">:defineImplicitGroupBy</h2>
+<h2 class="content_title">defineImplicitGroupBy</h2>
 <p class="text">
 Declare an implicit grouping operation for a query field type. The implicit group operation is always applied when more than one term are resulting from analysis of this field to ensure that you get only one node in the query from it.
 </p>
@@ -2616,7 +2616,7 @@ Declare an implicit grouping operation for a query field type. The implicit grou
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_7">
-<h2 class="content_title">:analyzeTermExpression</h2>
+<h2 class="content_title">analyzeTermExpression</h2>
 <p class="text">
 Analye the term expression and return the result structure
 </p>
@@ -2643,7 +2643,7 @@ Analye the term expression and return the result structure
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_8_8">
-<h2 class="content_title">:analyzeMetaDataExpression</h2>
+<h2 class="content_title">analyzeMetaDataExpression</h2>
 <p class="text">
 Analye the metadata expression and return the result structure
 </p>
@@ -2668,7 +2668,7 @@ Analye the metadata expression and return the result structure
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_1">
-<h2 class="content_title">:addTerm</h2>
+<h2 class="content_title">addTerm</h2>
 <p class="text">
 Declare a term that is used in the query evaluation as structural element without beeing part of the query (for example punctuation used for match fields summarization)
 </p>
@@ -2701,7 +2701,7 @@ Declare a term that is used in the query evaluation as structural element withou
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_2">
-<h2 class="content_title">:addSelectionFeature</h2>
+<h2 class="content_title">addSelectionFeature</h2>
 <p class="text">
 Declare a feature set to be used as selecting feature
 </p>
@@ -2720,7 +2720,7 @@ Declare a feature set to be used as selecting feature
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_3">
-<h2 class="content_title">:addRestrictionFeature</h2>
+<h2 class="content_title">addRestrictionFeature</h2>
 <p class="text">
 Declare a feature set to be used as restriction
 </p>
@@ -2739,7 +2739,7 @@ Declare a feature set to be used as restriction
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_4">
-<h2 class="content_title">:addExclusionFeature</h2>
+<h2 class="content_title">addExclusionFeature</h2>
 <p class="text">
 Declare a feature set to be used as exclusion
 </p>
@@ -2758,7 +2758,7 @@ Declare a feature set to be used as exclusion
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_5">
-<h2 class="content_title">:addSummarizer</h2>
+<h2 class="content_title">addSummarizer</h2>
 <p class="text">
 Declare a summarizer
 </p>
@@ -2795,7 +2795,7 @@ Declare a summarizer
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_6">
-<h2 class="content_title">:addWeightingFunction</h2>
+<h2 class="content_title">addWeightingFunction</h2>
 <p class="text">
 Add a weighting function to use as summand of the total document weight
 </p>
@@ -2824,7 +2824,7 @@ Add a weighting function to use as summand of the total document weight
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_7">
-<h2 class="content_title">:defineWeightingFormula</h2>
+<h2 class="content_title">defineWeightingFormula</h2>
 <p class="text">
 Define the weighting formula to use for calculating the total weight from the weighting function results (sum of the weighting function results is the default)
 </p>
@@ -2851,7 +2851,7 @@ Define the weighting formula to use for calculating the total weight from the we
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_9_8">
-<h2 class="content_title">:createQuery</h2>
+<h2 class="content_title">createQuery</h2>
 <p class="text">
 Create a query to instantiate based on this query evaluation scheme
 </p>
@@ -2872,7 +2872,7 @@ Create a query to instantiate based on this query evaluation scheme
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_1">
-<h2 class="content_title">:addFeature</h2>
+<h2 class="content_title">addFeature</h2>
 <p class="text">
 Create a feature from the query expression passed
 </p>
@@ -2918,7 +2918,7 @@ Create a feature from the query expression passed
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_2">
-<h2 class="content_title">:addMetaDataRestriction</h2>
+<h2 class="content_title">addMetaDataRestriction</h2>
 <p class="text">
 Define a meta data restriction
 </p>
@@ -2949,7 +2949,7 @@ Define a meta data restriction
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_3">
-<h2 class="content_title">:defineTermStatistics</h2>
+<h2 class="content_title">defineTermStatistics</h2>
 <p class="text">
 Define term statistics to use for a term for weighting it in this query
 </p>
@@ -2985,7 +2985,7 @@ Define term statistics to use for a term for weighting it in this query
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_4">
-<h2 class="content_title">:defineGlobalStatistics</h2>
+<h2 class="content_title">defineGlobalStatistics</h2>
 <p class="text">
 Define the global statistics to use for weighting in this query
 </p>
@@ -3004,7 +3004,7 @@ Define the global statistics to use for weighting in this query
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_5">
-<h2 class="content_title">:addDocumentEvaluationSet</h2>
+<h2 class="content_title">addDocumentEvaluationSet</h2>
 <p class="text">
 Define a set of documents the query is evaluated on. By default the query is evaluated on all documents in the storage
 </p>
@@ -3023,7 +3023,7 @@ Define a set of documents the query is evaluated on. By default the query is eva
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_6">
-<h2 class="content_title">:setMaxNofRanks</h2>
+<h2 class="content_title">setMaxNofRanks</h2>
 <p class="text">
 Set number of ranks to evaluate starting with the first rank (the maximum size of the result rank list)
 </p>
@@ -3044,7 +3044,7 @@ Set number of ranks to evaluate starting with the first rank (the maximum size o
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_7">
-<h2 class="content_title">:setMinRank</h2>
+<h2 class="content_title">setMinRank</h2>
 <p class="text">
 Set the index of the first rank to be returned
 </p>
@@ -3064,7 +3064,7 @@ Set the index of the first rank to be returned
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_8">
-<h2 class="content_title">:addAccess</h2>
+<h2 class="content_title">addAccess</h2>
 <p class="text">
 Allow read access to documents having a specific ACL tag
 </p>
@@ -3087,7 +3087,7 @@ Allow read access to documents having a specific ACL tag
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_9">
-<h2 class="content_title">:setWeightingVariables</h2>
+<h2 class="content_title">setWeightingVariables</h2>
 <p class="text">
 Assign values to variables of the weighting formula
 </p>
@@ -3104,7 +3104,7 @@ Assign values to variables of the weighting formula
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_10">
-<h2 class="content_title">:setDebugMode</h2>
+<h2 class="content_title">setDebugMode</h2>
 <p class="text">
 Switch on debug mode that creates debug info of query evaluation methods and summarization as attributes of the query result
 </p>
@@ -3125,7 +3125,7 @@ Switch on debug mode that creates debug info of query evaluation methods and sum
 <div class="callresult"><div class="note">no value returned</div></div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_11">
-<h2 class="content_title">:evaluate</h2>
+<h2 class="content_title">evaluate</h2>
 <p class="text">
 Evaluate this query and return the result
 </p>
@@ -3141,7 +3141,7 @@ Evaluate this query and return the result
 </div>
 </div> <!-- memberdescription -->
 <div class="memberdescription" id="description_10_12">
-<h2 class="content_title">:tostring</h2>
+<h2 class="content_title">tostring</h2>
 <p class="text">
 Map the contents of the query to a readable string
 </p>
