@@ -152,7 +152,7 @@ hr { width:100%; height:2px; background: #fff }
     background-color: #f3f7c3;
     width: 100%;
 }
-.param {
+.param,.result {
     display: table-row;
     font-size:1.0em;
     font:Verdana,Arial;
@@ -180,6 +180,7 @@ hr { width:100%; height:2px; background: #fff }
     vertical-align:middle;
     font:Verdana,Arial;
 }
+
 .paramexamples,.resultexamples {
     display:table-cell;
     border-left: 1px solid #152515;
