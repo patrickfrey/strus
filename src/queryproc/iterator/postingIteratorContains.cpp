@@ -141,7 +141,7 @@ PostingJoinOperatorInterface::Description PostingJoinContains::getDescription() 
 {
 	try
 	{
-		return Description( _TXT("Get the set of postings (d,1) for documents d that contain all of the argument features"));
+		return Description( "contains", _TXT("Get the set of postings (d,1) for documents d that contain all of the argument features"));
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "contains", *m_errorhnd, Description());
 }

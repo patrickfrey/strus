@@ -1,3 +1,20 @@
+strus (0.15.1-1) unstable; urgency=low
+  * release to cleanup mess with missing CHANGELOG in 0.15.0
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 4 Sep 2017 15:30:00 +0100
+
+strus (0.15.0-1) unstable; urgency=low
+  * remove hardcoded setting of C++98 in CMake files
+  * added method close() to vector storage client
+  * fixed SEGFAULT under some circumstances after StorageClient::close hss been called
+  * implemented posting join operator 'sequence_imm'
+  * some method renamings
+  * added ACL reader interface and method to create it in storage client interface
+  * fixed bug in user access restriction handling (storing ACLs)
+  * fixed bug in docnoAllMatchItr: endless loop under some circumstances
+  * added weighting function 'scalar' that calculates a scalar function on constants, variables and document metadata defined as string
+  * many CMake build fixes
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Sun, 3 Sep 2017 15:00:00 +0100
+
 strus (0.14.0-1) unstable; urgency=low
   * added possibility to precalculate weights in weighting function 'constant'
   * update for terms in forward index and search index

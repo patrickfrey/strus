@@ -11,6 +11,7 @@
 #include "postingIteratorIntersect.hpp"
 #include "postingIteratorStructWithin.hpp"
 #include "postingIteratorStructSequence.hpp"
+#include "postingIteratorSequenceImm.hpp"
 #include "postingIteratorDifference.hpp"
 #include "postingIteratorSucc.hpp"
 #include "postingIteratorPred.hpp"
@@ -61,6 +62,11 @@ PostingJoinOperatorInterface* strus::createPostingJoinStructInRange( ErrorBuffer
 PostingJoinOperatorInterface* strus::createPostingJoinSequence( ErrorBufferInterface* errorhnd)
 {
 	return new PostingJoinSequence( errorhnd);
+}
+
+PostingJoinOperatorInterface* strus::createPostingJoinSequenceImm( ErrorBufferInterface* errorhnd)
+{
+	return new PostingJoinSequenceImm( errorhnd);
 }
 
 PostingJoinOperatorInterface* strus::createPostingJoinStructSequence( ErrorBufferInterface* errorhnd)

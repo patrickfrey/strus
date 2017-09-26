@@ -48,11 +48,12 @@ struct AccumulateNearData
 	unsigned int nofranks;		//< maximum number of ranks per document
 	float cofactor;			//< weight multiplication factor of results for feature references
 	double norm;			//< normalization factor for end result weights
+	double cprop;			//< proportional const part of weight increment
 
 	AccumulateNearData()
-		:type(),resultname(),cardinality(0),cardinality_frac(0.0),range(0),nofranks(20),cofactor(1.0),norm(1.0){}
+		:type(),resultname(),cardinality(0),cardinality_frac(0.0),range(0),nofranks(20),cofactor(1.0),norm(1.0),cprop(0.3){}
 	AccumulateNearData( const AccumulateNearData& o)
-		:type(o.type),resultname(o.resultname),cardinality(o.cardinality),cardinality_frac(o.cardinality_frac),range(o.range),nofranks(o.nofranks),cofactor(o.cofactor),norm(o.norm){}
+		:type(o.type),resultname(o.resultname),cardinality(o.cardinality),cardinality_frac(o.cardinality_frac),range(o.range),nofranks(o.nofranks),cofactor(o.cofactor),norm(o.norm),cprop(o.cprop){}
 };
 
 class SummarizerFunctionContextAccumulateNear
@@ -78,7 +79,34 @@ public:
 			double weight,
 			const TermStatistics&);
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+
+	virtual std::string debugCall( const Index& docno);
+
+private:
+	void initializeContext();
+
+	struct CandidateEntity
+	{
+		CandidateEntity()
+			:forwardpos(0),structpos(0),windowendpos(0),window(0),windowsize(0){}
+
+		Index forwardpos;		///< position of entityin forward index
+		Index structpos;		///< end of structure to search for forward index matches
+		Index windowendpos;		///< start position for skip to next window
+		const std::size_t* window;	///< array of window element indices (posting indices)
+		std::size_t windowsize;		///< size of PositionWindow in element count
+	};
+	bool getCandidateEntity( CandidateEntity& entityloc, const PositionWindow& poswin,
+					PostingIteratorInterface** valid_itrar,
+					PostingIteratorInterface** valid_structar);
+	double candidateWeight( const CandidateEntity& entityloc, PostingIteratorInterface** valid_itrar) const;
+
+	typedef std::map<std::string,double> EntityMap;
+	void initEntityMap( EntityMap& emap, const Index& docno);
+	std::vector<SummaryElement> getSummariesFromEntityMap( EntityMap& emap) const;
 
 private:
 	const StorageClientInterface* m_storage;			///< storage to access
@@ -94,6 +122,7 @@ private:
 	std::size_t m_itrarsize;					///< number of weighted features
 	std::size_t m_structarsize;					///< number of end of structure elements
 	unsigned int m_cardinality;					///< calculated cardinality
+	unsigned int m_minwinsize;					///< minimum number of elements in a window
 	ProximityWeightAccumulator::WeightArray m_weightincr;		///< array of proportional weight increments 
 	bool m_initialized;						///< true, if the structures have already been initialized
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
@@ -115,6 +144,11 @@ public:
 	virtual void defineResultName(
 			const std::string& resultname,
 			const std::string& itemname);
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,

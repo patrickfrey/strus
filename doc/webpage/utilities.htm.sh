@@ -18,8 +18,30 @@ cat <<'!ENDBLOCK'
 		<h1>Command line utility programs</h1>
 		<p class="description">This document lists some utility programs with description,
 		most of them are implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>.
-		Some of these programs use domain specific language for their input description. You find
-		the list of languages <a href="utilities_lang.htm">here</a>.
+		</p>
+		<h2>Languages used by utility programs</h2>
+		<p class="description">
+		Some utility programs</a> are based on source files in a proprietary language.
+		But the functionality expressed with these domain specific languages is 
+		not a parallel universe. All languages map to calls of the strus core and 
+		analyzer API. All loading of programs is implemented as calls of
+		<a href="http://patrickfrey.github.io/strusUtilities/doc/doxygen/html/index.html">the program loader interface</a>.
+		</p>
+		<h3>Document analyzer program</h3>
+		<p class="description">The grammar of the sources referred to as document analyzer programs 
+		by some utility programs are defined <a href="grammar_analyzerprg_doc.htm">here (document analyzer program grammar)</a>.
+		</p>
+		<h3>Query analyzer program</h3>
+		<p class="description">The grammar of the sources referred to as query analyzer programs 
+		by some utility programs are defined <a href="grammar_analyzerprg_qry.htm">here (query analyzer program grammar)</a>.
+		</p>
+		<h3>Query evaluation program</h3>
+		<p class="description">The grammar of the sources referred to as query evaluation programs 
+		by some utility programs are defined <a href="grammar_queryevalprg.htm">here (query evaluation program grammar)</a>.
+		</p>
+		<h3>Query language</h3>
+		<p class="description">The language used by utility programs for search queries
+		is <a href="grammar_query.htm">here (query language grammar)</a>.
 		</p>
 		<h2>List of utility programs</h2>
 <ul>
@@ -351,6 +373,18 @@ the calculated value will be derived from the number of links pointing to a docu
 <pre>
 !ENDBLOCK
 strusPageWeight -h 2>&1 | sed 's/[&]/\&amp;/g' | sed 's/[<]/\&lt;/g' | sed 's/[>]/\&gt;/g'
+cat <<'!ENDBLOCK'
+</pre>
+</li>
+
+<a name="strusUpdateStorageCalcStatistics"></a><li><b>strusUpdateStorageCalcStatistics</b>
+<br/>Program to calculate a formula for each document in the storages and update a metadata field with the result.<br\>
+(implemented in the project <a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>).
+<input class="toggle-box" id="strusUpdateStorageCalcStatistics_usage" type="checkbox" >
+<label for="strusUpdateStorageCalcStatistics_usage">Usage</label>
+<pre>
+!ENDBLOCK
+strusUpdateStorageCalcStatistics -h 2>&1 | sed 's/[&]/\&amp;/g' | sed 's/[<]/\&lt;/g' | sed 's/[>]/\&gt;/g'
 cat <<'!ENDBLOCK'
 </pre>
 </li>

@@ -52,6 +52,10 @@ PostingJoinOperatorInterface* createPostingJoinStructInRange( ErrorBufferInterfa
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinSequence( ErrorBufferInterface* errorhnd);
 
+/// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the strict order they apear as arguments
+/// \return the iterator reference (to dispose with delete)
+PostingJoinOperatorInterface* createPostingJoinSequenceImm( ErrorBufferInterface* errorhnd);
+
 /// \brief Create a join function returning the first or last element of each passage in a range containing all elements of the argument sets in the strict order they apear as arguments. Additionally there exists a restricting structure element (like for example punctuation)
 /// \return the iterator reference (to dispose with delete)
 PostingJoinOperatorInterface* createPostingJoinStructSequence( ErrorBufferInterface* errorhnd);

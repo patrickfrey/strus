@@ -18,6 +18,7 @@
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "proximityWeightAccumulator.hpp"
+#include "structureIterator.hpp"
 #include <vector>
 #include <cstring>
 #include <sstream>
@@ -35,23 +36,37 @@ struct WeightingFunctionParameterBM25pff
 	double k1;				///< k1 value of BM25
 	double b;				///< b value of BM25
 	double avgDocLength;			///< average document length in the collection
+	unsigned int paragraphsize;		///< search area for end of paragraph
+	unsigned int sentencesize;		///< search area for end of sentence
 	unsigned int windowsize;		///< maximum position range of a window considered for weighting
 	unsigned int cardinality;		///< minumum number of features in a window considered for weighting
+	float cardinality_frac;			///< cardinality defined as fraction (percentage) of the number of features
 	double ffbase;				///< relative constant base factor of pure ff [0..1]
-	unsigned int fftie;			///< the maximum pure ff value that is considered for weighting (used for normalization of pure ff part)
-	double proxffbias;			///< bias for proximity ff increments always counted (the others are counted only till m_proxfftie)
-	unsigned int proxfftie;			///< the maximum proximity based ff value that is considered for weighting except for increments exceeding m_proxffbias
 	double maxdf;				///< the maximum df of features considered for proximity weighing as fraction of the total collection size
 	double titleinc;			///< ff increment for title features
+	double weight_same_sentence;		///< factor for weighting same sentences
+	double weight_invdist;			///< factor for weighting proximity
+	double weight_invpos_start;		///< factor for weighting distance to document start
+	double weight_invpos_para;		///< factor for weighting distance to last paragraph start
+	double weight_invpos_struct;		///< factor for weighting distance to last sentence start
+	double prop_weight_const;		///< constant factor for proportional feature weight [0.0 .. 1.0]
 
 	WeightingFunctionParameterBM25pff()
 		:k1(1.5),b(0.75),avgDocLength(500)
-		,windowsize(100),cardinality(0)
-		,ffbase(0.4),fftie(0)
-		,proxffbias(0.0)
-		,proxfftie(0)
+		,paragraphsize(300)
+		,sentencesize(100)
+		,windowsize(100)
+		,cardinality(0),cardinality_frac(0.0)
+		,ffbase(0.4)
 		,maxdf(0.5)
-		,titleinc(0.0){}
+		,titleinc(0.0)
+		,weight_same_sentence(1.0)
+		,weight_invdist(1.0)
+		,weight_invpos_start(1.5)
+		,weight_invpos_para(0.3)
+		,weight_invpos_struct(0.5)
+		,prop_weight_const(0.3)
+	{}
 
 	WeightingFunctionParameterBM25pff( const WeightingFunctionParameterBM25pff& o)
 	{
@@ -80,14 +95,59 @@ public:
 			double weight_,
 			const TermStatistics& stats_);
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual double call( const Index& docno);
+
+	virtual std::string debugCall( const Index& docno);
 
 public:
 	enum {MaxNofArguments=64};				///< maximum number of arguments fix because of extensive use of fixed size arrays
 
 private:
+	struct WeightingData
+	{
+		WeightingData( std::size_t itrarsize_, std::size_t structarsize_, std::size_t paraarsize_, const Index& structwindowsize_, const Index& parawindowsize_)
+			:doclen(0),titlestart(1),titleend(1),ffincrar( itrarsize_,0.0)
+		{
+			valid_paraar = &valid_structar[ structarsize_];
+			paraiter.init( parawindowsize_, valid_paraar, paraarsize_);
+			structiter.init( structwindowsize_, valid_structar, structarsize_);
+		}
+
+		PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
+		PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+		PostingIteratorInterface** valid_paraar;			//< valid array of end of paragraph elements
+		double doclen;							//< length of the document
+		Index titlestart;						//< start position of the title
+		Index titleend;							//< end position of the title (first item after the title)
+		StructureIterator paraiter;					//< iterator on paragraph frames
+		StructureIterator structiter;					//< iterator on sentence frames
+		ProximityWeightAccumulator::WeightArray ffincrar;		//< proximity and structure increment of ff
+	};
+
+private:
+	void initializeContext();
+	void initWeightingData( WeightingData& data, const Index& docno);
+
+	void calcWindowWeight(
+			WeightingData& wdata, const PositionWindow& poswin,
+			const std::pair<Index,Index>& structframe,
+			const std::pair<Index,Index>& paraframe,
+			ProximityWeightAccumulator::WeightArray& result);
+
+	double featureWeight( const WeightingData& wdata, const Index& docno, double idf, double weight_ff) const;
+
+	typedef ProximityWeightAccumulator::WeightArray WeightArray;
+	void calcProximityFfIncrements( WeightingData& wdata, WeightArray& result);
+	void logCalcProximityFfIncrements( std::ostream& out, WeightingData& wdata, ProximityWeightAccumulator::WeightArray& result);
+	void calcTitleFfIncrements( WeightingData& wdata, WeightArray& result);
+	void calcTitleWeights( WeightingData& wdata, const Index& docno, WeightArray& weightar);
+
+private:
 	WeightingFunctionParameterBM25pff m_parameter;		///< weighting function parameters
 	double m_nofCollectionDocuments;			///< number of documents in the collection
+	unsigned int m_cardinality;				///< calculated cardinality
 	ProximityWeightAccumulator::WeightArray m_idfar;	///< array of idfs
 	PostingIteratorInterface* m_itrar[ MaxNofArguments];	///< array if weighted features
 	PostingIteratorInterface* m_structar[ MaxNofArguments];	///< array of end of structure elements
@@ -95,8 +155,7 @@ private:
 	std::size_t m_structarsize;				///< number of end of structure elements
 	std::size_t m_paraarsize;				///< number of paragraph elements (now summary accross paragraph borders)
 	std::size_t m_nof_maxdf_features;			///< number of features with a df bigger than maximum
-	Index m_maxdist_featar[ MaxNofArguments];		///< array of distances indicating what proximity distance is considered at maximum for same sentence weight
-	double m_normfactorar[ MaxNofArguments];		///< normalization factor taking missing features in a window into account
+	bool m_relevantfeat[ MaxNofArguments];			///< marker for features with a df smaller than maxdf
 	ProximityWeightAccumulator::WeightArray m_weightincr;	///< array of proportional weight increments 
 	bool m_initialized;					///< true, if the structures have already been initialized
 	MetaDataReaderInterface* m_metadata;			///< meta data reader
@@ -119,6 +178,11 @@ public:
 
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,

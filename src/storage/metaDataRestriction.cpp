@@ -105,7 +105,7 @@ static bool compareFunctionGreaterEqualFloat16( const NumericVariant& op1, const
 
 static bool compareFunctionEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 == (int)op2;
+	return op1.toint() == op2.toint();
 }
 
 static bool compareFunctionNotEqualInt( const NumericVariant& op1, const NumericVariant& op2)
@@ -115,27 +115,27 @@ static bool compareFunctionNotEqualInt( const NumericVariant& op1, const Numeric
 
 static bool compareFunctionLessInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 < (int)op2;
+	return op1.toint() < op2.toint();
 }
 
 static bool compareFunctionLessEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 <= (int)op2;
+	return op1.toint() <= op2.toint();
 }
 
 static bool compareFunctionGreaterInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 > (int)op2;
+	return op1.toint() > op2.toint();
 }
 
 static bool compareFunctionGreaterEqualInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (int)op1 >= (int)op2;
+	return op1.toint() >= op2.toint();
 }
 
 static bool compareFunctionEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 == (unsigned int)op2;
+	return op1.touint() == op2.touint();
 }
 
 static bool compareFunctionNotEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
@@ -145,22 +145,22 @@ static bool compareFunctionNotEqualUInt( const NumericVariant& op1, const Numeri
 
 static bool compareFunctionLessUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 < (unsigned int)op2;
+	return op1.touint() < op2.touint();
 }
 
 static bool compareFunctionLessEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 <= (unsigned int)op2;
+	return op1.touint() <= op2.touint();
 }
 
 static bool compareFunctionGreaterUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 > (unsigned int)op2;
+	return op1.touint() > op2.touint();
 }
 
 static bool compareFunctionGreaterEqualUInt( const NumericVariant& op1, const NumericVariant& op2)
 {
-	return (unsigned int)op1 >= (unsigned int)op2;
+	return op1.touint() >= op2.touint();
 }
 
 static const char* compareOperatorName( MetaDataRestrictionInterface::CompareOperator op)
@@ -188,7 +188,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat16;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveEquals( type, "float32"))
 	{
@@ -207,7 +207,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualFloat32;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveStartsWith( type, "int"))
 	{
@@ -226,7 +226,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualInt;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else if (utils::caseInsensitiveStartsWith( type, "uint"))
 	{
@@ -245,7 +245,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 			case MetaDataRestrictionInterface::CompareGreaterEqual:
 				return &compareFunctionGreaterEqualUInt;
 		}
-		throw strus::runtime_error( _TXT( "unknown meta data compare function"));
+		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
 	else
 	{
@@ -276,7 +276,7 @@ MetaDataRestrictionInstance::MetaDataRestrictionInstance(
 {
 	if (!m_metadata.get())
 	{
-		throw strus::runtime_error( _TXT("failed to create metadata reader interface"));
+		throw strus::runtime_error( "%s", _TXT("failed to create metadata reader interface"));
 	}
 }
 
@@ -318,7 +318,7 @@ void MetaDataRestriction::addCondition(
 		Index elemhnd = m_metadata->elementHandle( name);
 		if (elemhnd < 0)
 		{
-			m_errorhnd->explain( _TXT( "cannot create metadata restriction: %s"));
+			throw strus::runtime_error( _TXT( "undefined metadata element: %s"), name.c_str());
 		}
 		const char* elemtype = m_metadata->getType( elemhnd);
 		if (!elemtype)

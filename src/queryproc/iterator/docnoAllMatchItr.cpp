@@ -18,7 +18,7 @@ DocnoAllMatchItr::DocnoAllMatchItr( const std::vector<PostingIteratorReference>&
 	:m_args(orderByDocumentFrequency( args_.begin(), args_.end()))
 	,m_curdocno(0),m_curdocno_candidate(0)
 {
-	if (m_args.empty()) throw strus::runtime_error(_TXT("passed empty set of argument postings to docno all match iterator"));
+	if (m_args.empty()) throw strus::runtime_error( "%s", _TXT("passed empty set of argument postings to docno all match iterator"));
 }
 
 DocnoAllMatchItr::DocnoAllMatchItr(
@@ -78,7 +78,17 @@ Index DocnoAllMatchItr::skipDoc( const Index& docno_)
 		std::vector<PostingIteratorReference>::iterator ai = m_args.begin(), ae = m_args.end();
 		for (; ai != ae; ++ai)
 		{
-			if (docno_iter != (*ai)->skipDoc( docno_iter)) break;
+			Index a_docno = (*ai)->skipDoc( docno_iter);
+			if (!a_docno)
+			{
+				++docno_iter;
+				break;
+			}
+			if (docno_iter < a_docno)
+			{
+				docno_iter = a_docno;
+				break;
+			}
 		}
 		if (ai == ae)
 		{

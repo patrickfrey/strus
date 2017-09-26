@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # --------------------------------------
 # SOURCES AND INCLUDES
@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 set(source_files
 	summarizer_standard.cpp
 	summarizerAttribute.cpp
+	summarizerForwardIndex.cpp
 	summarizerListMatches.cpp
 	summarizerMetaData.cpp
 	summarizerMatchPhrase.cpp
@@ -16,16 +17,16 @@ set(source_files
 
 include_directories(
   ${Boost_INCLUDE_DIRS}
-  "${PROJECT_SOURCE_DIR}/include"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/summarizer"
+  "${STRUS_INCLUDE_DIRS}"
+  "${MAIN_SOURCE_DIR}/queryproc/utils"
+  "${MAIN_SOURCE_DIR}/queryproc/summarizer"
   "${strusbase_INCLUDE_DIRS}"
 )
 
 link_directories(
   "${Boost_LIBRARY_DIRS}"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/utils"
-  "${PROJECT_SOURCE_DIR}/src/queryproc/weighting"
+  "${MAIN_SOURCE_DIR}/utils"
+  "${MAIN_SOURCE_DIR}/weighting"
   "${strusbase_LIBRARY_DIRS}"
 )
 
@@ -34,5 +35,6 @@ link_directories(
 # ------------------------------------
 add_library( summarizer_standard STATIC ${source_files})
 target_link_libraries( summarizer_standard strus_base queryproc_utils )
+set_property( TARGET summarizer_standard PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 

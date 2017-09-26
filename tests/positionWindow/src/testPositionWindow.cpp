@@ -1,7 +1,9 @@
 #include "positionWindow.hpp"
 #include "strus/lib/error.hpp"
 #include "strus/postingIteratorInterface.hpp"
+#include "strus/errorBufferInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/base/local_ptr.hpp"
 #include <cstdio>
 #include <iostream>
 #include <memory>
@@ -133,7 +135,7 @@ int main( int argc, char** argv)
 {
 	try
 	{
-		std::auto_ptr<strus::ErrorBufferInterface> errorbuf( strus::createErrorBuffer_standard( stderr, 2));
+		strus::local_ptr<strus::ErrorBufferInterface> errorbuf( strus::createErrorBuffer_standard( stderr, 2));
 		g_errorbuf = errorbuf.get();
 
 		testWinWindow();

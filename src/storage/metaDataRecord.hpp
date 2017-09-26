@@ -11,6 +11,7 @@
 #include "strus/numericVariant.hpp"
 #include "metaDataDescription.hpp"
 #include "metaDataElement.hpp"
+#include "strus/base/stdint.h"
 #include <utility>
 #include <cstring>
 #include <iostream>
@@ -23,9 +24,9 @@ public:
 	MetaDataRecord( const MetaDataDescription* description_, void* ptr_)
 		:m_descr(description_),m_ptr(ptr_){}
 
-	void setValueInt( const MetaDataElement* elem, int32_t value_);
-	void setValueUInt( const MetaDataElement* elem, uint32_t value_);
-	void setValueFloat( const MetaDataElement* elem, float value_);
+	void setValueInt( const MetaDataElement* elem, int64_t value_);
+	void setValueUInt( const MetaDataElement* elem, uint64_t value_);
+	void setValueFloat( const MetaDataElement* elem, double value_);
 	void setValue( const MetaDataElement* elem, const NumericVariant& value_);
 
 	int getValueInt( const MetaDataElement* elem) const;

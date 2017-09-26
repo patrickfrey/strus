@@ -46,7 +46,10 @@ public:
 
 	virtual ~Query(){}
 
-	virtual void pushTerm( const std::string& type_, const std::string& value_, const Index& length_);
+	virtual void pushTerm(
+			const std::string& type_,
+			const std::string& value_,
+			const Index& length_);
 	virtual void pushDocField(
 			const std::string& metadataRangeStart,
 			const std::string& metadataRangeEnd);
@@ -54,19 +57,25 @@ public:
 			const PostingJoinOperatorInterface* operation,
 			unsigned int argc, int range_, unsigned int cardinality_);
 
-	virtual void attachVariable( const std::string& name_);
-	virtual void defineFeature( const std::string& set_, double weight_=1.0);
+	virtual void attachVariable(
+			const std::string& name_);
+	virtual void defineFeature(
+			const std::string& set_,
+			double weight_=1.0);
 
 	virtual void addMetaDataRestrictionCondition(
-			MetaDataRestrictionInterface::CompareOperator opr, const std::string& name,
-			const NumericVariant& operand, bool newGroup);
+			const MetaDataRestrictionInterface::CompareOperator& opr,
+			const std::string& name,
+			const NumericVariant& operand,
+			bool newGroup);
 
 	virtual void addDocumentEvaluationSet(
 			const std::vector<Index>& docnolist_);
 
+	virtual void addAccess( const std::string& username_);
+
 	virtual void setMaxNofRanks( std::size_t nofRanks_);
 	virtual void setMinRank( std::size_t minRank_);
-	virtual void addUserName( const std::string& username_);
 
 	virtual void defineTermStatistics(
 			const std::string& type_,
@@ -78,7 +87,9 @@ public:
 	virtual void setWeightingVariableValue(
 			const std::string& name, double value);
 
-	virtual QueryResult evaluate();
+	virtual void setDebugMode( bool debug);
+
+	virtual QueryResult evaluate() const;
 	virtual std::string tostring() const;
 
 public:
@@ -202,12 +213,24 @@ private:
 
 	typedef std::map<NodeAddress,NodeStorageData> NodeStorageDataMap;
 
-	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap);
-	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap);
+	struct WeightingVariableValueAssignment
+	{
+		std::string varname;
+		std::size_t index;
+		double value;
+
+		WeightingVariableValueAssignment( const std::string& varname_, std::size_t index_, double value_)
+			:varname(varname_),index(index_),value(value_){}
+		WeightingVariableValueAssignment( const WeightingVariableValueAssignment& o)
+			:varname(o.varname),index(o.index),value(o.value){}
+	};
+
+	PostingIteratorInterface* createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const;
+	PostingIteratorInterface* createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap) const;
 	void collectSummarizationVariables(
 				std::vector<SummarizationVariable>& variables,
 				const NodeAddress& nodeadr,
-				const NodeStorageDataMap& nodeStorageDataMap);
+				const NodeStorageDataMap& nodeStorageDataMap) const;
 	const NodeStorageData& nodeStorageData( const NodeAddress& nodeadr, const NodeStorageDataMap& nodeStorageDataMap) const;
 
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
@@ -218,7 +241,7 @@ private:
 private:
 	const QueryEval* m_queryEval;
 	const StorageClientInterface* m_storage;
-	Reference<MetaDataReaderInterface> m_metaDataReader;
+	mutable Reference<MetaDataReaderInterface> m_metaDataReader;
 	Reference<MetaDataRestrictionInterface> m_metaDataRestriction;	///< restriction function on metadata
 	Reference<ScalarFunctionInstanceInterface> m_weightingFormula;	///< instance of the scalar function to calculate the weight of a document from the weighting functions defined as parameter
 	std::vector<Term> m_terms;					///< query terms
@@ -235,6 +258,9 @@ private:
 	typedef std::map<TermKey,TermStatistics> TermStatisticsMap;
 	TermStatisticsMap m_termstatsmap;				///< term statistics (evaluation in case of a distributed index)
 	GlobalStatistics m_globstats;					///< global statistics (evaluation in case of a distributed index)
+	std::vector<WeightingVariableValueAssignment> m_weightingvars;	///< non constant weight variables (defined by query and not the query eval)
+	std::vector<WeightingVariableValueAssignment> m_summaryweightvars; ///< non constant summarization weight variables (defined by query and not the query eval)
+	bool m_debugMode;						///< true if debug mode is enabled
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
 };
 

@@ -11,6 +11,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/utils.hpp"
 #include "private/errorUtils.hpp"
@@ -55,7 +56,7 @@ bool StorageAlterMetaDataTable::commit()
 		m_errorhnd->report( _TXT( "called alter meta data table commit after rollback"));
 		return false;
 	}
-	std::auto_ptr<DatabaseTransactionInterface>
+	strus::local_ptr<DatabaseTransactionInterface>
 		transaction( m_database->createTransaction());
 	if (!transaction.get()) return false;
 	try

@@ -10,12 +10,15 @@
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "strus/constants.hpp"
+#include "strus/base/string_format.hpp"
 #include <cmath>
 #include <ctime>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 using namespace strus;
-#define WEIGHTING_SCHEME_NAME "BM25"
+#define METHOD_NAME "BM25"
 #undef STRUS_LOWLEVEL_DEBUG
 
 WeightingFunctionContextBM25::WeightingFunctionContextBM25(
@@ -28,13 +31,22 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 	:m_parameter(parameter_)
 	,m_nofCollectionDocuments(nofCollectionDocuments_)
 	,m_featar(),m_metadata(metadata_)
-	,m_metadata_doclen(metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_))
+	,m_metadata_doclen(-1)
 	,m_errorhnd(errorhnd_)
 {
-	if (m_metadata_doclen<0)
+	if (m_parameter.b)
 	{
-		throw strus::runtime_error( _TXT("no meta data element for the document lenght defined"));
+		m_metadata_doclen = metadata_->elementHandle( attribute_doclen_.empty()?std::string("doclen"):attribute_doclen_);
+		if (m_metadata_doclen<0)
+		{
+			throw strus::runtime_error( "%s",  _TXT("parameter 'b' set, but no meta data element for the document length defined"));
+		}
 	}
+}
+
+void WeightingFunctionContextBM25::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void WeightingFunctionContextBM25::addWeightingFeature(
@@ -64,12 +76,40 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), WEIGHTING_SCHEME_NAME, name_.c_str());
+			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
 }
 
+
+double WeightingFunctionContextBM25::featureWeight( const Feature& feat, const Index& docno) const
+{
+	if (docno==feat.itr->skipDoc( docno))
+	{
+		double ff = feat.itr->frequency();
+		if (ff == 0.0)
+		{
+		}
+		else if (m_parameter.b)
+		{
+			m_metadata->skipDoc( docno);
+			double doclen = m_metadata->getValue( m_metadata_doclen);
+			double rel_doclen = (doclen+1) / m_parameter.avgDocLength;
+			return feat.weight * feat.idf
+				* (ff * (m_parameter.k1 + 1.0))
+				/ (ff + m_parameter.k1 
+					* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
+		}
+		else
+		{
+			return feat.weight * feat.idf
+				* (ff * (m_parameter.k1 + 1.0))
+				/ (ff + m_parameter.k1 * 1.0);
+		}
+	}
+	return 0.0;
+}
 
 double WeightingFunctionContextBM25::call( const Index& docno)
 {
@@ -77,50 +117,37 @@ double WeightingFunctionContextBM25::call( const Index& docno)
 	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
 	for ( ;fi != fe; ++fi)
 	{
-		if (docno==fi->itr->skipDoc( docno))
-		{
-			double ff = fi->itr->frequency();
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "ff=" << ff << std::endl;
-#endif
-			if (ff == 0.0)
-			{
-			}
-			else if (m_parameter.b)
-			{
-				m_metadata->skipDoc( docno);
-				double doclen = m_metadata->getValue( m_metadata_doclen);
-				double rel_doclen = (doclen+1) / m_parameter.avgDocLength;
-#ifdef STRUS_LOWLEVEL_DEBUG
-				double ww = fi->weight * fi->idf
-						* (ff * (m_parameter.k1 + 1.0))
-						/ (ff + m_parameter.k1
-							* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
-				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " doclen=" << doclen << " reldoclen=" << rel_doclen << " weight=" << ww << std::endl;
-#endif
-				rt += fi->weight * fi->idf
-					* (ff * (m_parameter.k1 + 1.0))
-					/ (ff + m_parameter.k1 
-						* (1.0 - m_parameter.b + m_parameter.b * rel_doclen));
-			}
-			else
-			{
-#ifdef STRUS_LOWLEVEL_DEBUG
-				double ww = fi->weight * fi->idf
-						* (ff * (m_parameter.k1 + 1.0))
-						/ (ff + m_parameter.k1 * 1.0);
-				std::cout << "idf[" << (int)(fi-m_featar.begin()) << "]=" << fi->idf << " weight=" << ww << std::endl;
-#endif
-				rt += fi->weight * fi->idf
-					* (ff * (m_parameter.k1 + 1.0))
-					/ (ff + m_parameter.k1 * 1.0);
-			}
-		}
+		rt += featureWeight( *fi, docno);
 	}
-#ifdef STRUS_LOWLEVEL_DEBUG
-	std::cout << "document weight=" << rt << std::endl;
-#endif
 	return rt;
+}
+
+std::string WeightingFunctionContextBM25::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+
+	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+	double res = 0.0;
+	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+	for (int fidx=0 ;fi != fe; ++fi,++fidx)
+	{
+		double ww = featureWeight( *fi, docno);
+		if (ww < std::numeric_limits<double>::epsilon()) continue;
+
+		unsigned int doclen = 0;
+		if (m_parameter.b)
+		{
+			m_metadata->skipDoc( docno);
+			doclen = m_metadata->getValue( m_metadata_doclen).touint();
+		}
+		out << string_format( _TXT("[%u] result=%f, ff=%u, idf=%f, weight=%f, doclen=%u"),
+					fidx, ww, (unsigned int)fi->itr->frequency(), fi->idf,
+					fi->weight, doclen) << std::endl;
+		res += ww;
+	}
+	out << string_format( _TXT("sum result=%f"), res) << std::endl;
+	return out.str();
 }
 
 static NumericVariant parameterValue( const std::string& name, const std::string& value)
@@ -136,12 +163,12 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 	{
 		if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), WEIGHTING_SCHEME_NAME);
+			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 		}
 		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_metadata_doclen = value;
-			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
+			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 		else if (utils::caseInsensitiveEquals( name, "k1")
 		||  utils::caseInsensitiveEquals( name, "b")
@@ -151,17 +178,17 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
+			m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), WEIGHTING_SCHEME_NAME);
+		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (utils::caseInsensitiveEquals( name, "k1"))
 	{
@@ -177,7 +204,7 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), WEIGHTING_SCHEME_NAME, name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 
@@ -192,7 +219,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceBM25::createFunction
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		return new WeightingFunctionContextBM25( storage_, metadata, m_parameter, nofdocs, m_metadata_doclen, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceBM25::tostring() const
@@ -207,7 +234,7 @@ std::string WeightingFunctionInstanceBM25::tostring() const
 		;
 		return rt.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' weighting function to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
 }
 
 
@@ -218,7 +245,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionBM25::createInstance(
 	{
 		return new WeightingFunctionInstanceBM25( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' function instance: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 FunctionDescription WeightingFunctionBM25::getDescription() const
@@ -234,6 +261,6 @@ FunctionDescription WeightingFunctionBM25::getDescription() const
 		rt( P::Metadata, "metadata_doclen", _TXT("the meta data element name referencing the document lenght for each document weighted"), "");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 

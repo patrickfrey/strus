@@ -43,10 +43,20 @@ public:
 			double weight_,
 			const TermStatistics& stats_)=0;
 
+	/// \brief Set the value of a query variable
+	/// \param[in] name name of the variable
+	/// \param[in] value value of the variable
+	virtual void setVariableValue( const std::string& name, double value)=0;
+
 	/// \brief Get the summarization elements for one document
 	/// \param[in] docno document to get the summary element from
 	/// \return the summarization elements
 	virtual std::vector<SummaryElement> getSummary( const Index& docno)=0;
+
+	/// \brief Get debug info dumped as string of the summarization call for one document
+	/// \param[in] docno document to get the summary debug info from
+	/// \return the debug info as string
+	virtual std::string debugCall( const Index& docno)=0;
 };
 
 }//namespace

@@ -42,8 +42,8 @@ public:
 		m_featureid.push_back( ':');
 		m_featureid.push_back( 'M');
 
-		if (m_handle_lo < 0 && !name_from.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (lower bound): %s"), m_errorhnd->fetchError());
-		if (m_handle_hi < 0 && !name_to.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (upper bound): %s"), m_errorhnd->fetchError());
+		if (m_handle_lo < 0 && !name_from.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (lower bound): undefined metadata element '%s'"), name_from.c_str());
+		if (m_handle_hi < 0 && !name_to.empty()) throw strus::runtime_error(_TXT("failed to define posting iterator from meta data (upper bound): undefined metadata element '%s'"), name_to.c_str());
 	}
 
 	virtual ~MetaDataRangePostingIterator()
@@ -60,8 +60,8 @@ public:
 			if (m_docno >= m_nofDocuments) return m_docno = 0;
 
 			m_metareader->skipDoc( m_docno);
-			m_pos_lo = m_handle_lo < 0 ? 1 : (int)m_metareader->getValue( m_handle_lo);
-			m_pos_hi = m_handle_hi < 0 ? std::numeric_limits<Index>::max() : (int)m_metareader->getValue( m_handle_hi);
+			m_pos_lo = m_handle_lo < 0 ? 1 : (Index)m_metareader->getValue( m_handle_lo).toint();
+			m_pos_hi = m_handle_hi < 0 ? std::numeric_limits<Index>::max() : (Index)m_metareader->getValue( m_handle_hi).toint();
 		} while (m_pos_lo == 0 || m_pos_hi == 0 || m_pos_lo >= m_pos_hi);
 		return m_docno;
 	}

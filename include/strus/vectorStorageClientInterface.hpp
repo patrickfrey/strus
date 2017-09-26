@@ -54,7 +54,7 @@ public:
 
 	/// \brief Get the set of learnt concepts for a feature defined
 	/// \param[in] conceptClass name identifying a class of concepts learnt. Used to distinguish different classes of learnt concepts. Defined by configuration of the vector storage and instantiated by the storage builder.
-	/// \param[in] index index of vector in the order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name,const std::vector<double>& vec) starting from 0
+	/// \param[in] index index of vector (featureIndex( const std::string&) const)
 	/// \return the resulting concept feature indices (indices of learnt concepts starting from 1)
 	virtual std::vector<Index> featureConcepts( const std::string& conceptClass, const Index& index) const=0;
 
@@ -73,6 +73,12 @@ public:
 	/// \return index -1, if not found, else index of the feature to get the name of (index is order of insertion with VectorStorageBuilderInterface::addFeature(const std::string& name, const std::vector<double>& vec) starting from 0)
 	virtual Index featureIndex( const std::string& name) const=0;
 
+	/// \brief Calculate a value between 0.0 and 1.0 representing the similarity of two vectors according to the model used by this storage
+	/// \param[in] v1 first input vector
+	/// \param[in] v2 second input vector
+	/// \return the similarity measure
+	virtual double vectorSimilarity( const std::vector<double>& v1, const std::vector<double>& v2) const=0;
+
 	/// \brief Get the number of feature vectors defined
 	/// \return the number of features
 	virtual unsigned int nofFeatures() const=0;
@@ -80,6 +86,11 @@ public:
 	/// \brief Get the configuration of this model
 	/// \return the configuration string
 	virtual std::string config() const=0;
+
+	/// \brief Close client connection and eventually do some cleanup.
+	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
+	/// \note the method does not have to be called necessarily.
+	virtual void close()=0;
 };
 
 }//namespace

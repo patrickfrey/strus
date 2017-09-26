@@ -202,7 +202,7 @@ PostingJoinOperatorInterface::Description PostingJoinUnion::getDescription() con
 {
 	try
 	{
-		return Description( _TXT("Get the set of postings that are occurring in any argument set"));
+		return Description( "union", _TXT("Get the set of postings that are occurring in any argument set"));
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "union", *m_errorhnd, Description());
 }

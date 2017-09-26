@@ -18,12 +18,7 @@ Index AttributeReader::elementHandle( const char* name) const
 {
 	try
 	{
-		Index rt = m_storage->getAttributeno( name);
-		if (!rt)
-		{
-			m_errorhnd->report( _TXT( "attribute with name '%s' is not defined"), name);
-		}
-		return rt;
+		return m_storage->getAttributeno( name);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error retrieving storage attribute element handle: %s"), *m_errorhnd, 0);
 }
@@ -45,7 +40,7 @@ std::string AttributeReader::getValue( const Index& elementHandle_) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error reading storage attribute value: %s"), *m_errorhnd, std::string());
 }
 
-std::vector<std::string> AttributeReader::getAttributeNames() const
+std::vector<std::string> AttributeReader::getNames() const
 {
 	try
 	{

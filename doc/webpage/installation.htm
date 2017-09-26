@@ -16,53 +16,17 @@
 </script><div id="wrap">
 	<div id="content">
 		<h1>Strus installation guide</h1>
-		<a name="packages"> </a>
-
-		<h2>Packages</h2>
-		<p class="description">Packages are build on the Open Suse Build Cluster from the master branch.
-		Infortunately there is no releasing yet a download page to fetch packages of a specific release yet.
-		Here is a list of links to the packages:
-		<ol>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusbase">strusBase</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strus">strus</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusanalyzer">strusAnalyzer</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strustrace">strusTrace</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusmodule">strusModule</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusrpc">strusRpc</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=struspattern">strusPattern</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusvector">strusVector</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusutilities">strusUtilities</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusbindings-python">strusBindings (Python)</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusbindings-java">strusBindings (Java)</a></li>
-		<li><a href="https://software.opensuse.org/download.html?project=home:PatrickFrey&package=strusbindings-php">strusBindings (PHP)</a></li>
-		</ol>
-		</p>
-		<p class="description">Packages that failed to build are not visible. You can get an overview 
-		on the status of the latest build
-		<a href="https://build.opensuse.org/project/monitor/home:PatrickFrey">here</a>.
-		The bindings package is on many platforms marked as failed, but it might still be available 
-		for your purpose. The package is splitted into a variant for each binding language. You might be able
-		to install the package <i>strus-python</i>, even if <i>strusbindings</i> is marked as failed on
-		the open suse build cluster. This can for example be the case because the Java build
-		failed but Python succeeded.<br/>
-		The vector and the pattern package require a newer compiler than available
-		on the build cluster or fail due to missing support of 3rdParty packages.
-		</p>
-		<a name="docker"> </a>
-		<h2>Start it from a docker image</h2>
-		<p><i><font color="red">The Strus Docker images are out of date by far, but will be updated soon.</font></i></p>
-		<p class="description">There are 4 docker images available based on ubuntu 14.04:
-		<ol>
-		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-env">patrickfrey/strus-ub1404-env</a>: strus search engine prerequisites (build tools, 3rdParty libraries) for ubuntu.</li>
-		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404">patrickfrey/strus-ub1404</a>: strus search engine libraries and command line tools (without language bindings).</li>
-		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-bind">patrickfrey/strus-ub1404-bind</a>: strus search engine application development base (strus-ub1404 plus language bindings).</li>
-		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-nginx">patrickfrey/strus-ub1404-nginx</a>: strus search engine service using nginx as webserver.</li>
-		<li><a href="https://registry.hub.docker.com/u/patrickfrey/strus-ub1404-nginx">patrickfrey/strus-ub1404-pysrv</a>: strus search engine server implemented using <a href="http://www.tornadoweb.org">tornado</a>.</li>
-		</ol>
 
 		<a name="github"> </a>
-		<h2>Clone from github</h2>
-		<p class="description">You can clone the projects from github:
+		<h2>Clone from Github</h2>
+		<p class="description">There exists a <i>Github</i> project <a href="https://github.com/patrickfrey/strusAll">strusAll</a>
+		for simiplifying out of source builds of <i>Strus</i>.
+		You can clone it with
+		<pre>
+git clone git@github.com:patrickfrey/strusAll.git
+		</pre>
+		</p>
+		<p class="description">You can also clone the projects one by one from Github:
 		<pre>
 git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		</pre>
@@ -82,17 +46,20 @@ git clone git@github.com:patrickfrey/&lt;projectname&gt;.git
 		<li><a href="http://savannah.nongnu.org/projects/libunwind">libunwind</a> (needed by leveldb)</li>
 		<li><a href="https://code.google.com/p/snappy">snappy</a> (needed by leveldb)</li>
 		<li><a href="http://php.net">PHP</a> (needed by strusBindings when building with -DWITH_PHP="YES")</li>
-		<li><a href="http://python.org">Python</a> python >= 2.7 (needed by strusBindings when building with -DWITH_PYTHON="YES")</li>
+		<li><a href="http://python.org">Python</a> version >= 2.7 (needed by strusBindings when building with -DWITH_PYTHON="YES")</li>
 		</ul>
 		</p>
 
 		<h2>Build the software</h2>
-		<p class="description">The build system is CMake. Go into the top level directory 
-		of each project and execute the instructions in INSTALL (for Linux), INSTALL.FreeBSD,
+		<p class="description">The build system is CMake. Go into the top level directory
+		of the <i>strusAll</i> project and execute the instructions in INSTALL (for Linux), INSTALL.FreeBSD,
 		INSTALL.OpenBSD or INSTALL.OSX depending on your platform.<br/>
+		If you build the procects separately you have to do this for each project.<br/>
 		The projects will by default be installed in the default location for utilities
-		(On Ubuntu in /usr/local). The projects have due to dependencies to be built and
-		installed in the following order (projects on the same line can be build in reversed
+		(On Ubuntu in /usr/local).
+		Respect the order implied by dependencies if you build the projects separately.
+		The projects have due to dependencies to be built and
+		installed in the following order (projects on the same line can be built in reversed
 		order too because they have no build dependencies to each other):
 		<ol>
 		<li>strusBase</li>

@@ -15,6 +15,7 @@
 #include "strus/lib/queryeval.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -107,8 +108,8 @@ static void testDeleteNonExistingDoc()
 {
 	Storage storage;
 	storage.open( "path=storage", true);
-	std::auto_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
-	std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( "ABC"));
+	strus::local_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
+	strus::local_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( "ABC"));
 	doc->addSearchIndexTerm( "word", "hello", 1);
 	doc->addSearchIndexTerm( "word", "world", 2);
 	doc->addForwardIndexTerm( "word", "Hello, ", 1);
@@ -119,13 +120,13 @@ static void testDeleteNonExistingDoc()
 
 	std::cerr << "Document inserted " << storage.sci->documentNumber( "ABC") << std::endl;
 
-	std::auto_ptr<strus::StorageTransactionInterface> transactionDelete1( storage.sci->createTransaction());
+	strus::local_ptr<strus::StorageTransactionInterface> transactionDelete1( storage.sci->createTransaction());
 	transactionDelete1->deleteDocument( "ABC");
 	transactionDelete1->commit();
 
 	std::cerr << "Document deleted " << storage.sci->documentNumber( "ABC") << std::endl;
 
-	std::auto_ptr<strus::StorageTransactionInterface> transactionDelete2( storage.sci->createTransaction());
+	strus::local_ptr<strus::StorageTransactionInterface> transactionDelete2( storage.sci->createTransaction());
 	transactionDelete2->deleteDocument( "ABC");
 	transactionDelete2->commit();
 
@@ -143,11 +144,11 @@ static std::string featureString( const std::string& prefix, unsigned int num)
 
 static void dumpStorage( const std::string& config)
 {
-	std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
+	strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
 	if (!dbi.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	std::auto_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
+	strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
 	if (!sti.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	std::auto_ptr<strus::StorageDumpInterface> dump( sti->createDump( config, dbi.get(), ""));
+	strus::local_ptr<strus::StorageDumpInterface> dump( sti->createDump( config, dbi.get(), ""));
 
 	const char* chunk;
 	std::size_t chunksize;
@@ -173,15 +174,15 @@ static void testSimpleDocumentUpdate()
 	{
 		std::string docid( featureString("D",1));
 
-		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
-		std::auto_ptr<strus::StorageDocumentInterface> doc( transaction->createDocument( docid));
+		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		strus::local_ptr<strus::StorageDocumentInterface> doc( transaction->createDocument( docid));
 		doc->addSearchIndexTerm( "a", featureString("a", 1), 1);
 		doc->done();
 		transaction->commit();
 
 		transaction.reset( storage.sci->createTransaction());
 		strus::Index docno = storage.sci->documentNumber( docid);
-		std::auto_ptr<strus::StorageDocumentUpdateInterface> update( transaction->createDocumentUpdate( docno));
+		strus::local_ptr<strus::StorageDocumentUpdateInterface> update( transaction->createDocumentUpdate( docno));
 		update->addSearchIndexTerm( "a", featureString("a", 1), 1);
 		update->addSearchIndexTerm( "a", featureString("a", 2), 1);
 		update->done();
@@ -394,11 +395,11 @@ static void testDocumentUpdate()
 
 	storage.open( "path=storage", true);
 	{
-		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
 		for (unsigned int di=1; di<=NofDocs; ++di)
 		{
 			std::string docid( featureString("D",di));
-			std::auto_ptr<strus::StorageDocumentInterface> doc( transaction->createDocument( docid));
+			strus::local_ptr<strus::StorageDocumentInterface> doc( transaction->createDocument( docid));
 			for (unsigned int fi=1; fi <= NofFeats; ++fi)
 			{
 				if (g_random.get( 0, 2) == 0) continue;
@@ -433,7 +434,7 @@ static void testDocumentUpdate()
 		std::set<OccurrenceDef> occurrence_update_searchindex;
 		std::set<OccurrenceDef> occurrence_update_forwardindex;
 
-		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
 		for (unsigned int di=1; di<=NofDocs; ++di)
 		{
 			if (g_random.get( 0, NofDocs) == 1) continue;
@@ -441,7 +442,7 @@ static void testDocumentUpdate()
 			std::string docid( featureString("D",di));
 			strus::Index docno = storage.sci->documentNumber( docid);
 
-			std::auto_ptr<strus::StorageDocumentUpdateInterface> doc( transaction->createDocumentUpdate( docno));
+			strus::local_ptr<strus::StorageDocumentUpdateInterface> doc( transaction->createDocumentUpdate( docno));
 			for (unsigned int fi=1; fi <= NofFeats; ++fi)
 			{
 				if (g_random.get( 0, NofFeats) == 1) continue;
@@ -508,8 +509,8 @@ static void testTermTypeIterator()
 {
 	Storage storage;
 	storage.open( "path=storage", true);
-	std::auto_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
-	std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( "ABC"));
+	strus::local_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
+	strus::local_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( "ABC"));
 	for (unsigned int ii=0; ii<100; ++ii)
 	{
 		std::string key( "w");
@@ -522,7 +523,7 @@ static void testTermTypeIterator()
 	doc->done();
 	transactionInsert->commit();
 
-	std::auto_ptr<strus::ValueIteratorInterface> itr( storage.sci->createTermTypeIterator());
+	strus::local_ptr<strus::ValueIteratorInterface> itr( storage.sci->createTermTypeIterator());
 	std::vector<std::string> types = itr->fetchValues( 3);
 	std::string res;
 	while (types.size() > 0)
@@ -641,8 +642,8 @@ struct DocumentBuilder
 			char metadataname[ 32];
 			snprintf( metadataname, sizeof(metadataname), "M%1u", mi);
 			char metadatavalue[ 32];
-			snprintf( metadatavalue, sizeof(metadatavalue), "m%1u", mi * 11);
-			
+			snprintf( metadatavalue, sizeof(metadatavalue), "%1u", mi * 11);
+
 			rt.push_back( Feature( Feature::MetaData, metadataname, metadatavalue));
 		}
 		return rt;
@@ -666,8 +667,11 @@ static void insertDocument( strus::StorageDocumentInterface* doc, const std::vec
 				doc->setAttribute( fi->type, fi->value);
 				break;
 			case Feature::MetaData:
-				doc->setMetaData( fi->type, (unsigned int)atoi(fi->value.c_str()));
+			{
+				strus::NumericVariant::UIntType val = atoi(fi->value.c_str());
+				doc->setMetaData( fi->type, val);
 				break;
+			}
 		}
 	}
 	doc->done();
@@ -676,13 +680,13 @@ static void insertDocument( strus::StorageDocumentInterface* doc, const std::vec
 
 static void insertCollection( strus::StorageClientInterface* storage, const DocumentBuilder::Dim& dim)
 {
-	std::auto_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
+	strus::local_ptr<strus::StorageTransactionInterface> transaction( storage->createTransaction());
 	unsigned int di=0, de=dim.nofDocs;
 	for (; di != de; ++di)
 	{
 		char docid[ 32];
 		snprintf( docid, sizeof(docid), "D%02u", di);
-		std::auto_ptr<strus::StorageDocumentInterface>
+		strus::local_ptr<strus::StorageDocumentInterface>
 			doc( transaction->createDocument( docid));
 		if (!doc.get()) throw strus::runtime_error("error creating document to insert");
 
@@ -752,7 +756,7 @@ static void testTrivialInsert()
 		unsigned int ec = strus::writeFile( errlog, "");
 		if (ec) throw strus::runtime_error("error opening logfile '%s' (%u)", errlog, ec);
 
-		std::auto_ptr<strus::StorageDocumentInterface>
+		strus::local_ptr<strus::StorageDocumentInterface>
 			doc( storage.sci->createDocumentChecker( docid, errlog));
 		if (!doc.get())
 		{
@@ -803,7 +807,7 @@ static void testDfCalculation()
 		if (df != xi->second) throw strus::runtime_error("df of feature %s '%s' does not match: %d != %d", xi->first.first.c_str(), xi->first.second.c_str(), (int)df, (int)xi->second);
 	}
 	{
-		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
 		unsigned int di=0, de=dim.nofDocs;
 		for (; di < de; di+=2)
 		{
@@ -826,7 +830,7 @@ static void testDfCalculation()
 		transaction->commit();
 	}
 	{
-		std::auto_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
+		strus::local_ptr<strus::StorageTransactionInterface> transaction( storage.sci->createTransaction());
 		xi = dfmap.begin(), xe = dfmap.end();
 		for (; xi != xe; ++xi)
 		{

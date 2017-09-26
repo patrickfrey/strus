@@ -22,9 +22,9 @@ StorageDump::StorageDump( const DatabaseInterface* database_, const std::string&
 	,m_cursor()
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_database.get()) throw strus::runtime_error(_TXT("error creating database client interface"));
+	if (!m_database.get()) throw strus::runtime_error( "%s", _TXT("error creating database client interface"));
 	m_cursor.reset( m_database->createCursor( DatabaseOptions()));
-	if (!m_cursor.get()) throw strus::runtime_error(_TXT("error creating database cursor"));
+	if (!m_cursor.get()) throw strus::runtime_error( "%s", _TXT("error creating database cursor"));
 	m_key = m_cursor->seekFirst( keyprefix.c_str(), keyprefix.size());
 }
 
@@ -149,7 +149,7 @@ static void dumpKeyValue(
 			}
 			default:
 			{
-				throw strus::runtime_error( _TXT( "illegal data base key prefix for this storage"));
+				throw strus::runtime_error( "%s",  _TXT( "illegal data base key prefix for this storage"));
 			}
 		}
 	}
@@ -170,7 +170,7 @@ bool StorageDump::nextChunk( const char*& chunk, std::size_t& chunksize)
 		{
 			if (m_key.size() == 0)
 			{
-				throw strus::runtime_error( _TXT( "found empty key"));
+				throw strus::runtime_error( "%s",  _TXT( "found empty key"));
 			}
 			dumpKeyValue( output, m_database.get(), m_key, m_cursor->value());
 		};

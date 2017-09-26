@@ -82,19 +82,23 @@ public:
 	/// \param[in] functionName name of the summarizer function (no meaning, just for inspection and tracing)
 	/// \param[in] function parameterized summarizer function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
 	/// \param[in] featureParameters list of parameters adressing query features that are subject of sumarization
+	/// \param[in] debugAttributeName (optional) name of the attribute the debug info is attached to if debug mode is switched on in query (empty if no debug info should be provided in any case)
 	virtual void addSummarizerFunction(
 			const std::string& functionName,
 			SummarizerFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters)=0;
+			const std::vector<FeatureParameter>& featureParameters,
+			const std::string& debugAttributeName=std::string())=0;
 
 	/// \brief Declare a weighting function to use for this query evaluation scheme
 	/// \param[in] functionName name of the weighting function (no meaning, just for inspection and tracing)
 	/// \param[in] function parameterized weighting function to use (ownership passed to this). The function instance can be constructed by getting the function by name from the query processor and parameterizing a created instance of it.
 	/// \param[in] featureParameters list of parameters adressing query features that are subject of weighting
+	/// \param[in] debugAttributeName (optional) name of the attribute the debug info is attached to if debug mode is switched on in query (empty if no debug info should be provided in any case)
 	virtual void addWeightingFunction(
 			const std::string& functionName,
 			WeightingFunctionInstanceInterface* function,
-			const std::vector<FeatureParameter>& featureParameters)=0;
+			const std::vector<FeatureParameter>& featureParameters,
+			const std::string& debugAttributeName=std::string())=0;
 
 	/// \brief Declare the scalar function to combine the weighting functions declared
 	/// \param[in] combinefunc scalar function (passed ownership) for combining the weighting functions defined to one value

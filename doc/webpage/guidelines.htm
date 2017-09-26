@@ -22,10 +22,10 @@
 		<h2>Paradigms</h2>
 		<h4>Exception free interfaces</h4>
 		<p class="description">
-		Interface classes must be exception free (they must not throw any exception), because 
+		Interface classes must be exception free (they must not throw any exception) because 
 		their calls might cross library or module boundaries and the very rigid linking rules 
 		implied do not allow exceptions to be caught when
-		crossing library or module borders on many systems (e.g. with gcc).<br/>
+		crossing library or module borders on many systems (e.g. with GCC).<br/>
 		Classes implementing such an interface class catch exceptions in their 
 		methods before returning and report the caught exceptions through an error reporting 
 		interface. The caller can later fetch the error from this error buffering interface.
@@ -54,9 +54,9 @@
 		<h2>Naming conventions</h2>
 
 		<h4>Type naming</h4>
-		<p class="description">In interfaces <i>strict camel case</i> is used.
-		Type,struct and class names and enum members start with a capital letter.
-		Exceptions of this rule are data types implementing an STL concept like for example an <i>iterator</i>.
+		<p class="description">In interfaces, <i>strict camel case</i> is used.
+		Type, struct and class names and enum members start with a capital letter.
+		Exceptions to this rule are data types implementing an STL concept like for example an <i>iterator</i>.
 		Method names start with a lower case letter.
 		Enum names may or may not contain only capital letters.</p>
 
@@ -66,8 +66,8 @@
 		The wished rule is one class per source file, but this is not always the case, though 
 		it is the case for interface header files.<br/>
 		The main source file of a library has the same name trunk as the library. This name trunk has always 
-		the prefix '<b>libstrus_</b>'. Main header files of libraries are in a 'lib' sub 
-		directory of the main include and have the same name as the library
+		the prefix '<b>libstrus_</b>'. Main header files of libraries are in a 'lib'
+		subdirectory of the main include and have the same name as the library
 		without the prefix '<b>libstrus_</b>'. </p>
 
 		<h4>Macro names</h4>
@@ -76,7 +76,7 @@
 		The use of macros should be avoided. Their use is obviously inevitable when they stear 
 		alternative compiling or when they inject externally defined values like for example 
 		version numbers.<br/>
-		In other cases the use of macros has to be discussed and it is not a single contributors 
+		In other cases, the use of macros has to be discussed and it is not a single contributors 
 		decision when to use macros. If used they should conceptually add value to the
 		software in terms of readability and uniformity.<br/>
 		In the exported application interfaces the use of macros is forbidden.
@@ -92,11 +92,11 @@
 		if the parameter initializes a member name. Otherwise the naming would be misleading.</p>
 
 		<h4>Local variable names</h4>
-		<p class="description">Avoid variable names conaining only one letter like 'i', 'x'.
+		<p class="description">Avoid variable names containing only one letter like 'i', 'x'.
 		They are hard to find without an editor supporting the programming language.
 		(I personally do not like programming environments that go beyond a text editor with some
 		highlighting. I am convinced that the quality of code raises in the absence of 
-		semantically supported navigation help, because it educates you to work towards 
+		semantically supported navigation help because it educates you to work towards 
 		a clear and consistent naming scheme.)<br/>
 		</p>
 
@@ -127,16 +127,16 @@
 		<p class="description">Compilers and linkers for building libraries and modules 
 		of <i>strus</i> may not be mixable due to an interface design using 
 		STL data types passing the interface. You have to check, if the STL data type implementations
-		are compatible before mixing compilers. Due to the fact that the interfaces are exeption free,
+		are compatible before mixing compilers. Due to the fact that the interfaces are exception free,
 		there are no further restrictions.
 		</p>
 
 		<h2>Code appearance</h2>
-		<h4>Indentiation</h4>
-		<p class="description">Indentiation with TABs only. Pascal style opening of block
+		<h4>Indentation</h4>
+		<p class="description">Indentation with TABs only. Pascal style opening of block
 		brackets '<b>{</b>' '<b>}</b>'. This means that you start a new line for the '<b>{</b>'
 		opening a new block. The then clause of if statements with one assignment may be 
-		written without opening an close brackets, e.g. "if (size > 0) sizeType = NON_ZERO;" </p>
+		written without opening and close brackets, e.g. "if (size > 0) sizeType = NON_ZERO;" </p>
 
 		<h4>Source code documentation</h4>
 		<p class="description">Avoid documenting the obvious. Documentation should be minimal
@@ -144,12 +144,12 @@
 		alphabetic labeling for alternative choices. If you have the alternative to
 		choose an implementation of a function with 300 lines of expanded code or an
 		implementation of it as small function calling 10 subroutines, that have 7
-		arguments and names that are not self explaining and each of them is called only
+		arguments and names that are not self-explaining and each of them is called only
 		once, then please choose the 300 line expanded implementation and document 
 		the execution steps well.<br/> Use prefixes like
 		<b>XY:NOTE</b> or <b>XY:HACK</b> where XY stands for your acronym for marking undesirable 
 		situations (NOTE) or incomplete fixes or fixes with bad implications (HACK)
-		that should be fixed, but can not be fixed instantly.</p>
+		that should be fixed but can not be fixed instantly.</p>
 
 		<h4>Doxygen documentation</h4>
 		<p class="description">Interface documentation should be in

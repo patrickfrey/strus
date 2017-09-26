@@ -131,6 +131,7 @@ bool PositionWindow::advance( const Index& advancepos)
 	std::size_t idx = m_window[ 0];
 	PostingIteratorInterface* itr = m_itrar[ idx];
 	Index pos = m_posar[0] + skipsize;
+
 	if (pos < advancepos)
 	{
 		pos = advancepos;

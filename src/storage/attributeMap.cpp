@@ -98,8 +98,6 @@ void AttributeMap::getWriteBatch( DatabaseTransactionInterface* transaction)
 				transaction, key.elem(1), key.elem(2),
 				mi->second);
 	}
-	// Clear maps:
-	clear();
 }
 
 void AttributeMap::clear()

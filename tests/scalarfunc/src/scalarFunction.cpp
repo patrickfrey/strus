@@ -13,6 +13,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/local_ptr.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <limits>
@@ -31,7 +32,7 @@ ErrorBufferInterface* g_errorhnd = 0;
 
 static ScalarFunctionParserInterface* createScalarFunctionParser( ErrorBufferInterface* errorhnd)
 {
-	std::auto_ptr<ScalarFunctionParserInterface> sfp( createScalarFunctionParser_default( errorhnd));
+	strus::local_ptr<ScalarFunctionParserInterface> sfp( createScalarFunctionParser_default( errorhnd));
 	if (!sfp.get())
 	{
 		throw strus::runtime_error( "failed to create parser: %s", errorhnd->fetchError());
@@ -67,12 +68,12 @@ static bool run( const ScalarFunctionParserInterface* parser, unsigned int testi
 		argumentNames.push_back( test.argumentnames[ai]);
 	}
 
-	std::auto_ptr<ScalarFunctionInterface> funcdef( parser->createFunction( test.formula, argumentNames));
+	strus::local_ptr<ScalarFunctionInterface> funcdef( parser->createFunction( test.formula, argumentNames));
 	if (!funcdef.get())
 	{
 		throw strus::runtime_error( "failed to create function for test '%s': %s", test.name, g_errorhnd->fetchError());
 	}
-	std::auto_ptr<ScalarFunctionInstanceInterface> func( funcdef->createInstance());
+	strus::local_ptr<ScalarFunctionInstanceInterface> func( funcdef->createInstance());
 	if (!func.get())
 	{
 		throw strus::runtime_error( "failed to create function instance for test '%s': %s", test.name, g_errorhnd->fetchError());
@@ -222,7 +223,7 @@ int main( int, const char**)
 	}
 	try
 	{
-		std::auto_ptr<ScalarFunctionParserInterface> parser( createScalarFunctionParser( g_errorhnd));
+		strus::local_ptr<ScalarFunctionParserInterface> parser( createScalarFunctionParser( g_errorhnd));
 		unsigned int ii = 0;
 		for (; tests[ii].name; ++ii)
 		{

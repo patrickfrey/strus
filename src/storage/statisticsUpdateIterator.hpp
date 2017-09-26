@@ -32,7 +32,7 @@ public:
 
 	virtual ~StatisticsUpdateIterator(){}
 
-	virtual bool getNext( const char*& msg, std::size_t& msgsize);
+	virtual bool getNext( const void*& msg, std::size_t& msgsize);
 
 private:
 	StorageClient* m_storage;					///< storage related

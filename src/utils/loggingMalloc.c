@@ -49,12 +49,12 @@
 #endif
 #endif
 
-/// Apple libc spells malloc_usable_size() as malloc_size().
+/* Apple libc spells malloc_usable_size() as malloc_size(). */
 #ifdef __APPLE__
   #define malloc_usable_size(x) malloc_size(x)
 #endif
 
-/// brief Forward declaration:
+/* brief Forward declaration: */
 static void print_stacktrace();
 
 static int g_malloc_counter = 0;
@@ -123,35 +123,47 @@ static void copy_string( char* buf, size_t bufsize, const char* str)
 
 static void init_module()
 {
+	void* calloc_ptr;
+	Calloc_s* calloc_ref;
+	void* malloc_ptr;
+	Malloc_s* malloc_ref;
+	void* realloc_ptr;
+	Realloc_s* realloc_ref;
+	void* memalign_ptr;
+	Memalign_s* memalign_ref;
+	void* free_ptr;
+	Free_s* free_ref;
+	const char* nm;
+
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "ENTER init_module\n");
 #endif
 	/* This function gets a little bit complicated because of
 		"ISO C forbids conversion of object pointer to function pointer type" */
-	void* calloc_ptr = dlsym( RTLD_NEXT, "calloc");
+	calloc_ptr = dlsym( RTLD_NEXT, "calloc");
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "DONE first dlsym\n");
 #endif
-	Calloc_s* calloc_ref = (Calloc_s*)&calloc_ptr;
+	calloc_ref = (Calloc_s*)&calloc_ptr;
 	g_libc_calloc = calloc_ref->func;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "GOT a calloc function\n");
 #endif
-	void* malloc_ptr = dlsym( RTLD_NEXT, "malloc");
-	Malloc_s* malloc_ref = (Malloc_s*)&malloc_ptr;
+	malloc_ptr = dlsym( RTLD_NEXT, "malloc");
+	malloc_ref = (Malloc_s*)&malloc_ptr;
 	g_libc_malloc = malloc_ref->func;
 
-	void* realloc_ptr = dlsym( RTLD_NEXT, "realloc");
-	Realloc_s* realloc_ref = (Realloc_s*)&realloc_ptr;
+	realloc_ptr = dlsym( RTLD_NEXT, "realloc");
+	realloc_ref = (Realloc_s*)&realloc_ptr;
 	g_libc_realloc = realloc_ref->func;
 
-	void* memalign_ptr = dlsym( RTLD_NEXT, "memalign");
-	Memalign_s* memalign_ref = (Memalign_s*)&memalign_ptr;
+	memalign_ptr = dlsym( RTLD_NEXT, "memalign");
+	memalign_ref = (Memalign_s*)&memalign_ptr;
 	g_libc_memalign = memalign_ref->func;
 
-	void* free_ptr = dlsym( RTLD_NEXT, "free");
-	Free_s* free_ref = (Free_s*)&free_ptr;
+	free_ptr = dlsym( RTLD_NEXT, "free");
+	free_ref = (Free_s*)&free_ptr;
 	g_libc_free = free_ref->func;
 
 	if (!calloc_ptr||!malloc_ptr||!realloc_ptr||!memalign_ptr||!free_ptr)
@@ -165,7 +177,7 @@ static void init_module()
 	fprintf( stderr, "GOT all memory access functions\n");
 #endif
 	g_logfile[0] = '\0';
-	const char* nm = getenv( "STRUS_MALLOC_LOGFILE");
+	nm = getenv( "STRUS_MALLOC_LOGFILE");
 	if (nm && nm[0])
 	{
 		if (nm[0] != '/')
@@ -436,6 +448,8 @@ typedef struct mem_frame
 DLL_PUBLIC void* malloc_IMPL( size_t size)
 {
 	mem_frame* frame;
+	void* rt;
+	size_t rt_size;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "ENTER malloc( %u)\n", (unsigned int)size);
@@ -451,9 +465,9 @@ DLL_PUBLIC void* malloc_IMPL( size_t size)
 	if (!frame) return 0;
 	frame->signature = FRAME_SIGNATURE;
 	frame->caller_match = caller_match();
-	void* rt = (void*)(frame+1);
+	rt = (void*)(frame+1);
 #if defined __linux__ || defined __FreeBSD__ || defined __APPLE__
-	size_t rt_size = malloc_usable_size( frame) - sizeof(mem_frame);
+	rt_size = malloc_usable_size( frame) - sizeof(mem_frame);
 #else
 	/* no malloc_usable_size, this is most likely wrong, but we don't care
 	 * as the library will not run on the platform anyway (for instance
@@ -584,6 +598,7 @@ DLL_PUBLIC void free_IMPL( void* ptr)
 {
 	mem_frame* frame;
 	size_t size;
+	int caller_match;
 
 #ifdef STRUS_LOWLEVEL_DEBUG
 	fprintf( stderr, "ENTER free(%x)\n", (unsigned int)(uintptr_t)ptr);
@@ -615,7 +630,7 @@ DLL_PUBLIC void free_IMPL( void* ptr)
 		fprintf( stderr, "invalid free( %x) caller match %d\n", (unsigned int)(uintptr_t)ptr, (int)frame->caller_match);
 		print_stacktrace();
 	}
-	int caller_match = frame->caller_match;
+	caller_match = frame->caller_match;
 	if (caller_match)
 	{
 		stat_free_call( size);

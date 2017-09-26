@@ -8,6 +8,7 @@
 #ifndef _STRUS_DATABASE_CURSOR_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_DATABASE_CURSOR_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseCursorInterface.hpp"
+#include "levelDbHandle.hpp"
 #include <string>
 #include <leveldb/db.h>
 
@@ -21,7 +22,7 @@ class DatabaseCursor
 	:public DatabaseCursorInterface
 {
 public:
-	DatabaseCursor( leveldb::DB* db_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_);
+	DatabaseCursor( const utils::SharedPtr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_);
 
 	virtual ~DatabaseCursor();
 
@@ -53,13 +54,18 @@ public:
 	virtual Slice value() const;
 
 private:
+	DatabaseCursor( DatabaseCursor&){}			///... uncopyable
+	void operator=( DatabaseCursor&){}			///... uncopyable
+
+private:
 	bool checkDomain() const;
 	void initDomain( const char* domainkey, std::size_t domainkeysize);
 	Slice getCurrentKey() const;
 
 private:
-	leveldb::DB* m_db;					///< levelDB handle
+	utils::SharedPtr<LevelDbConnection> m_conn;		///< levelDB connection
 	leveldb::ReadOptions m_dboptions;			///< options for levelDB
+	LevelDbConnection::IteratorHandle m_itrhnd;		///< handle for iterator on levelDB blocks
 	leveldb::Iterator* m_itr;				///< iterator on levelDB blocks
 	enum {MaxDomainKeySize=32};
 	unsigned char m_domainkey[ MaxDomainKeySize];		///< key prefix defining the current domain to scan

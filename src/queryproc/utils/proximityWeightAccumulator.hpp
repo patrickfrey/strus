@@ -9,6 +9,7 @@
 #define _STRUS_QUERYPROC_PROXIMITY_WEIGHT_ACCUMULATOR_HPP_INCLUDED
 #include "positionWindow.hpp"
 #include "private/internationalization.hpp"
+#include "strus/base/string_format.hpp"
 #include <cstring>
 
 namespace strus {
@@ -26,7 +27,7 @@ public:
 		WeightArray()
 			:arsize(0){}
 
-		explicit WeightArray( std::size_t arsize_, double initvalue=0.0)
+		explicit WeightArray( std::size_t arsize_, double initvalue)
 		{
 			init( arsize_, initvalue);
 		}
@@ -54,7 +55,15 @@ public:
 			}
 		}
 
-		void add( double value)
+		void add( const WeightArray& o)
+		{
+			if (arsize != o.arsize) throw strus::runtime_error( "number of weights not the same (add)");
+			for (std::size_t ai=0; ai<arsize; ++ai)
+			{
+				ar[ ai] += o.ar[ ai];
+			}
+		}
+		void push( double value)
 		{
 			if (arsize > MaxNofArguments) throw strus::runtime_error( "number of features out of range");
 			ar[ arsize++] = value;
@@ -95,17 +104,8 @@ public:
 		double factor,
 		const WeightArray& incrar,
 		const std::size_t* window, std::size_t windowsize,
-		const Index* maxdist_featar,
 		PostingIteratorInterface** featar, std::size_t featarsize,
-		PostingIteratorInterface** structar, std::size_t structarsize);
-
-	/// \brief Accumulate value for subsequent values in the document that are immediately following in the query
-	static void weight_imm_follow(
-		WeightArray& ar,
-		double factor,
-		const WeightArray& incrar,
-		const std::size_t* window, std::size_t windowsize,
-		PostingIteratorInterface** featar, std::size_t featarsize);
+		const std::pair<Index,Index>& structframe);
 
 	/// \brief Accumulate with inverse sqrt of distance
 	static void weight_invdist(

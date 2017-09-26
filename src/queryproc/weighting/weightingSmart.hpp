@@ -94,10 +94,17 @@ public:
 			double weight_,
 			const TermStatistics& stats_);
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual double call( const Index& docno);
+
+	virtual std::string debugCall( const Index& docno);
 
 public:
 	enum {MaxNofParameter=64};				///< maximum number of arguments passed to the defined function
+
+private:
+	void fillParameter( const Index& docno, double ff, double df, double* parameterVector) const;
 
 private:
 	typedef std::vector<Feature> FeatureVector;
@@ -120,6 +127,7 @@ public:
 			const QueryProcessorInterface* queryproc_,
 			ErrorBufferInterface* errorhnd_)
 		:m_queryproc(queryproc_)
+		,m_parser(0)
 		,m_errorhnd(errorhnd_){}
 
 	virtual ~WeightingFunctionInstanceSmart(){}
@@ -127,12 +135,17 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
 
+	virtual std::vector<std::string> getVariables() const;
+
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata,
 			const GlobalStatistics& stats) const;
 
 	virtual std::string tostring() const;
+
+private:
+	void initFunction() const;
 
 private:
 	std::string m_expression;

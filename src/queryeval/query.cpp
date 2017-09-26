@@ -24,6 +24,7 @@
 #include "docsetPostingIterator.hpp"
 #include "private/utils.hpp"
 #include "strus/base/snprintf.h"
+#include "strus/base/local_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -43,12 +44,24 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	,m_storage(storage_)
 	,m_metaDataReader(storage_->createMetaDataReader())
 	,m_metaDataRestriction()
+	,m_weightingFormula()
+	,m_terms()
+	,m_docfields()
+	,m_expressions()
+	,m_features()
+	,m_stack()
+	,m_variableAssignments()
 	,m_nofRanks(20)
 	,m_minRank(0)
+	,m_usernames()
+	,m_evalset_docnolist()
 	,m_evalset_defined(false)
+	,m_termstatsmap()
+	,m_globstats()
+	,m_debugMode(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_metaDataReader.get()) throw strus::runtime_error(_TXT("error creating meta data reader"));
+	if (!m_metaDataReader.get()) throw strus::runtime_error( "%s", _TXT("error creating meta data reader"));
 	const ScalarFunctionInterface* weightingFormula = m_queryEval->weightingFormula();
 	if (weightingFormula)
 	{
@@ -174,6 +187,7 @@ void Query::defineFeature( const std::string& set_, double weight_)
 #endif
 	try
 	{
+		if (m_stack.empty()) throw strus::runtime_error( "%s", _TXT("no term or expression defined"));
 		m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
 		m_stack.pop_back();
 	}
@@ -181,7 +195,7 @@ void Query::defineFeature( const std::string& set_, double weight_)
 }
 
 void Query::addMetaDataRestrictionCondition(
-		MetaDataRestrictionInterface::CompareOperator opr, const std::string&  name,
+		const MetaDataRestrictionInterface::CompareOperator& opr, const std::string&  name,
 		const NumericVariant& operand, bool newGroup)
 {
 	try
@@ -209,7 +223,7 @@ void Query::addDocumentEvaluationSet(
 
 void Query::print( std::ostream& out) const
 {
-	out << "query evaluation program:" << std::endl;
+	out << _TXT("query evaluation program:") << std::endl;
 	m_queryEval->print( out);
 
 	std::vector<Feature>::const_iterator fi = m_features.begin(), fe = m_features.end();
@@ -217,24 +231,31 @@ void Query::print( std::ostream& out) const
 	{
 		char buf[ 128];
 		strus_snprintf( buf, sizeof(buf), "%.5f", fi->weight);
-		out << "feature '" << fi->set << "' " << buf << ": " << std::endl;
+		out << _TXT("feature '") << fi->set << "' " << buf << ": " << std::endl;
 		printNode( out, fi->node, 1);
 		out << std::endl;
 	}
-	out << "MaxNofRanks = " << m_nofRanks << std::endl;
-	out << "MinRank = " << m_minRank << std::endl;
-	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
-	for (; ui != ue; ++ui)
-	{
-		out << "User restriction : " << *ui << std::endl;
-	}
+	if (m_debugMode) out << _TXT("debug mode enabled") << std::endl;
+	out << "maxNofRanks = " << m_nofRanks << std::endl;
+	out << "minRank = " << m_minRank << std::endl;
 	std::vector<Index>::const_iterator di = m_evalset_docnolist.begin(), de = m_evalset_docnolist.end();
 	if (di != de)
 	{
-		out << "Document evaluation set : ";
+		out << _TXT("document evaluation set : ");
 		for (std::size_t didx=0; di != de; ++di)
 		{
 			if (didx != 0) out << ", ";
+			out << *di;
+		}
+		out << std::endl;
+	}
+	std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
+	if (ui != ue)
+	{
+		out << _TXT("user access one of : ");
+		for (std::size_t uidx=0; ui != ue; ++uidx,++ui)
+		{
+			if (uidx) out << ", ";
 			out << *ui;
 		}
 		out << std::endl;
@@ -295,7 +316,8 @@ void Query::printNode( std::ostream& out, NodeAddress adr, std::size_t indent) c
 		case ExpressionNode:
 		{
 			const Expression& expr = m_expressions[ nodeIndex( adr)];
-			out << indentstr << std::hex<< (uintptr_t)expr.operation << std::dec << " " << expr.range << ":";
+			PostingJoinOperatorInterface::Description opdescr = expr.operation->getDescription();
+			out << indentstr << opdescr.name() << " range=" << expr.range << " cardinality=" << expr.cardinality << ":";
 			printVariables( out, adr);
 			out << std::endl;
 			std::vector<NodeAddress>::const_iterator
@@ -367,7 +389,7 @@ void Query::setMinRank( std::size_t minRank_)
 	m_minRank = minRank_;
 }
 
-void Query::addUserName( const std::string& username_)
+void Query::addAccess( const std::string& username_)
 {
 	try
 	{
@@ -376,12 +398,12 @@ void Query::addUserName( const std::string& username_)
 	CATCH_ERROR_MAP( _TXT("error adding user to query: %s"), *m_errorhnd);
 }
 
-PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap)
+PostingIteratorInterface* Query::createExpressionPostingIterator( const Expression& expr, NodeStorageDataMap& nodeStorageDataMap) const
 {
 	enum {MaxNofJoinopArguments=256};
 	if (expr.subnodes.size() > MaxNofJoinopArguments)
 	{
-		throw strus::runtime_error( _TXT( "number of arguments of feature join expression in query out of range"));
+		throw strus::runtime_error( "%s",  _TXT( "number of arguments of feature join expression in query out of range"));
 	}
 	std::vector<Reference<PostingIteratorInterface> > joinargs;
 	std::vector<NodeAddress>::const_iterator
@@ -396,7 +418,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const Term& term = m_terms[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createTermPostingIterator( term.type, term.value, term.length));
-				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
+				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), getTermStatistics( term.type, term.value));
 				break;
@@ -405,7 +427,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			{
 				const DocField& docfield = m_docfields[ nodeIndex( *ni)];
 				joinargs.push_back( m_storage->createFieldPostingIterator( docfield.metadataRangeStart, docfield.metadataRangeEnd));
-				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression (doc field) posting iterator"));
+				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression (doc field) posting iterator"));
 				TermStatistics termstats( m_globstats.nofDocumentsInserted());
 				// ... Doc Field features get the global statistics, because they are supposed to appear in every document
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get(), termstats);
@@ -414,7 +436,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 			case ExpressionNode:
 				joinargs.push_back( createExpressionPostingIterator(
 							m_expressions[ nodeIndex(*ni)], nodeStorageDataMap));
-				if (!joinargs.back().get()) throw strus::runtime_error(_TXT("error creating subexpression posting iterator"));
+				if (!joinargs.back().get()) throw strus::runtime_error( "%s", _TXT("error creating subexpression posting iterator"));
 
 				nodeStorageDataMap[ *ni] = NodeStorageData( joinargs.back().get());
 				break;
@@ -424,7 +446,7 @@ PostingIteratorInterface* Query::createExpressionPostingIterator( const Expressi
 }
 
 
-PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap)
+PostingIteratorInterface* Query::createNodePostingIterator( const NodeAddress& nodeadr, NodeStorageDataMap& nodeStorageDataMap) const
 {
 	PostingIteratorInterface* rt = 0;
 	switch (nodeType( nodeadr))
@@ -464,7 +486,7 @@ const Query::NodeStorageData& Query::nodeStorageData( const NodeAddress& nodeadr
 	NodeStorageDataMap::const_iterator pi = nodeStorageDataMap.find( nodeadr);
 	if (pi == nodeStorageDataMap.end())
 	{
-		throw strus::runtime_error( _TXT( "expression node postings not found"));
+		throw strus::runtime_error( "%s",  _TXT( "expression node postings not found"));
 	}
 	return pi->second;
 }
@@ -472,7 +494,7 @@ const Query::NodeStorageData& Query::nodeStorageData( const NodeAddress& nodeadr
 void Query::collectSummarizationVariables(
 			std::vector<SummarizationVariable>& variables,
 			const NodeAddress& nodeadr,
-			const NodeStorageDataMap& nodeStorageDataMap)
+			const NodeStorageDataMap& nodeStorageDataMap) const
 {
 	typedef std::multimap<NodeAddress,std::string>::const_iterator Itr;
 	std::pair<Itr,Itr> vrange = m_variableAssignments.equal_range( nodeadr);
@@ -531,17 +553,37 @@ const TermStatistics& Query::getTermStatistics( const std::string& type_, const 
 void Query::setWeightingVariableValue(
 		const std::string& name, double value)
 {
-	if (!m_weightingFormula.get())
+	std::vector<QueryEval::VariableAssignment>
+		assignments = m_queryEval->weightingVariableAssignmentList( name);
+	std::vector<QueryEval::VariableAssignment>::const_iterator
+		ai = assignments.begin(), ae = assignments.end();
+	for (; ai != ae; ++ai)
 	{
-		m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
-	}
-	else
-	{
-		m_weightingFormula->setVariableValue( name, value);
+		switch (ai->target)
+		{
+			case QueryEval::VariableAssignment::WeightingFunction:
+				m_weightingvars.push_back( WeightingVariableValueAssignment( name, ai->index, value));
+				break;
+			case QueryEval::VariableAssignment::SummarizerFunction:
+				m_summaryweightvars.push_back( WeightingVariableValueAssignment( name, ai->index, value));
+				break;
+			case QueryEval::VariableAssignment::FormulaFunction:
+				if (!m_weightingFormula.get())
+				{
+					m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
+				}
+				m_weightingFormula->setVariableValue( name, value);
+				break;
+		}
 	}
 }
 
-QueryResult Query::evaluate()
+void Query::setDebugMode( bool debug)
+{
+	m_debugMode = debug;
+}
+
+QueryResult Query::evaluate() const
 {
 	const char* evaluationPhase = "query feature postings initialization";
 	try
@@ -614,17 +656,17 @@ QueryResult Query::evaluate()
 			}
 		}
 		evaluationPhase = "weighting functions initialization";
-		// [4.3] Add features for weighting:
+		// [4.3.1] Add features for weighting:
 		{
 			std::vector<WeightingDef>::const_iterator
 				wi = m_queryEval->weightingFunctions().begin(),
 				we = m_queryEval->weightingFunctions().end();
 			for (; wi != we; ++wi)
 			{
-				std::auto_ptr<WeightingFunctionContextInterface> execContext(
+				strus::local_ptr<WeightingFunctionContextInterface> execContext(
 					wi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get(), m_globstats));
-				if (!execContext.get()) throw strus::runtime_error(_TXT("error creating weighting function context"));
+				if (!execContext.get()) throw strus::runtime_error( "%s", _TXT("error creating weighting function context"));
 	
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
 					si = wi->featureParameters().begin(),
@@ -652,21 +694,27 @@ QueryResult Query::evaluate()
 				accumulator.addWeightingElement( execContext.release());
 			}
 		}
+		// [4.3.1] Define feature weighting variable values:
+		std::vector<WeightingVariableValueAssignment>::const_iterator
+			vi = m_weightingvars.begin(), ve = m_weightingvars.end();
+		for (; vi != ve; ++vi)
+		{
+			accumulator.defineWeightingVariableValue( vi->index, vi->varname, vi->value);
+		}
+
 		evaluationPhase = "restrictions initialization";
 		// [4.4] Define the user ACL restrictions:
-		std::vector<Reference<InvAclIteratorInterface> > invAclList;
 		std::vector<std::string>::const_iterator ui = m_usernames.begin(), ue = m_usernames.end();
 		for (; ui != ue; ++ui)
 		{
 			Reference<InvAclIteratorInterface> invAcl( m_storage->createInvAclIterator( *ui));
 			if (invAcl.get())
 			{
-				invAclList.push_back( invAcl);
-				accumulator.addAlternativeAclRestriction( invAcl.get());
+				accumulator.addAlternativeAclRestriction( invAcl);
 			}
 			else if (m_errorhnd->hasError())
 			{
-				throw strus::runtime_error(_TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
+				throw strus::runtime_error( "%s", _TXT( "storage built without ACL resrictions, cannot handle username passed with query"));
 			}
 		}
 		// [4.5] Define the feature restrictions:
@@ -729,11 +777,12 @@ QueryResult Query::evaluate()
 		std::vector<WeightedDocument>
 			resultlist = ranker.result( m_minRank);
 	
+		// [6] Summarization:
 		evaluationPhase = "summarization";
-		// [6] Create the summarizers:
 		std::vector<Reference<SummarizerFunctionContextInterface> > summarizers;
 		if (!resultlist.empty())
 		{
+			// [6.1] Create the summarizers:
 			std::vector<SummarizerDef>::const_iterator
 				zi = m_queryEval->summarizers().begin(),
 				ze = m_queryEval->summarizers().end();
@@ -744,7 +793,7 @@ QueryResult Query::evaluate()
 					zi->function()->createFunctionContext(
 						m_storage, m_metaDataReader.get(), m_globstats));
 				SummarizerFunctionContextInterface* closure = summarizers.back().get();
-				if (!closure) throw strus::runtime_error(_TXT("error creating summarizer context"));
+				if (!closure) throw strus::runtime_error( "%s", _TXT("error creating summarizer context"));
 
 				// [5.2] Add features with their variables assigned to summarizer:
 				std::vector<QueryEvalInterface::FeatureParameter>::const_iterator
@@ -769,7 +818,14 @@ QueryResult Query::evaluate()
 					}
 				}
 			}
+			// [6.2] Define feature summarizer weighting variable values:
+			vi = m_summaryweightvars.begin(), ve = m_summaryweightvars.end();
+			for (; vi != ve; ++vi)
+			{
+				summarizers[ vi->index]->setVariableValue( vi->varname, vi->value);
+			}
 		}
+
 		evaluationPhase = "building of the result";
 		// [7] Build the result:
 		std::vector<WeightedDocument>::const_iterator ri=resultlist.begin(),re=resultlist.end();
@@ -787,11 +843,39 @@ QueryResult Query::evaluate()
 				std::vector<SummaryElement> summary = (*si)->getSummary( ri->docno());
 				summaries.insert( summaries.end(), summary.begin(), summary.end());
 			}
+			if (m_debugMode)
+			{
+				// Collect debug info of weighting and summarizer functions:
+				std::vector<SummarizerDef>::const_iterator
+					zi = m_queryEval->summarizers().begin(),
+					ze = m_queryEval->summarizers().end();
+				si = summarizers.begin();
+				for (;si != se && zi != ze; ++si,++zi)
+				{
+					if (!zi->debugAttributeName().empty())
+					{
+						std::string debuginfo = (*si)->debugCall( ri->docno());
+						summaries.push_back( SummaryElement( zi->debugAttributeName(), debuginfo));
+					}
+				}
+				std::vector<WeightingDef>::const_iterator
+					wi = m_queryEval->weightingFunctions().begin(),
+					we = m_queryEval->weightingFunctions().end();
+				std::size_t widx = 0;
+				for (; wi != we; ++wi,++widx)
+				{
+					if (!wi->debugAttributeName().empty())
+					{
+						std::string debuginfo = accumulator.getWeightingDebugInfo( widx, ri->docno());
+						summaries.push_back( SummaryElement( wi->debugAttributeName(), debuginfo));
+					}
+				}
+			}
 			ranks.push_back( ResultDocument( *ri, summaries));
 		}
 		if (m_errorhnd->hasError())
 		{
-			throw strus::runtime_error( m_errorhnd->fetchError());
+			throw strus::runtime_error( _TXT("error evaluating query: %s"), m_errorhnd->fetchError());
 		}
 		return QueryResult( state, accumulator.nofDocumentsRanked(), accumulator.nofDocumentsVisited(), ranks);
 	}

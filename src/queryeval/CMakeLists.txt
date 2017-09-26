@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # --------------------------------------
 # SOURCES AND INCLUDES
@@ -11,12 +11,12 @@ set( source_files
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
-	"${PROJECT_SOURCE_DIR}/include"
+	"${STRUS_INCLUDE_DIRS}"
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${PROJECT_SOURCE_DIR}/src/utils"
+	"${MAIN_SOURCE_DIR}/utils"
 	"${strusbase_LIBRARY_DIRS}"
 )
 
@@ -27,6 +27,7 @@ link_directories(
 # --------------------------------
 add_library( strus_queryeval_static STATIC ${source_files})
 target_link_libraries( strus_queryeval_static strus_base strus_private_utils )
+set_property( TARGET strus_queryeval_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 add_library( strus_queryeval SHARED libstrus_queryeval.cpp )
 target_link_libraries( strus_queryeval strus_queryeval_static  strus_base strus_private_utils "${Boost_LIBRARIES}" )

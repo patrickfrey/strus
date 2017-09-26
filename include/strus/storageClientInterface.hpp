@@ -42,6 +42,8 @@ class MetaDataReaderInterface;
 class MetaDataRestrictionInterface;
 /// \brief Forward declaration
 class AttributeReaderInterface;
+/// \brief Forward declaration
+class AclReaderInterface;
 
 
 /// \brief Interface of a strus IR storage
@@ -60,7 +62,7 @@ public:
 	/// \param[in] type type name of the term
 	/// \param[in] value value string of the term
 	/// \param[in] length ordinal position length assigned to the term (may differ from 1 for terms representing multipart patterns)
-	/// \remark the length is considered as an attribute and not used in set operations for joining posting sets. It is used as hint only in some summarization and weighting functions.
+	/// \remark the length is considered as an attribute and not used in set operations for joining posting sets. It is used as hint only in some summarization and weighting functions for handling multi-word phrases correctly.
 	/// \return the created iterator reference (with ownership)
 	virtual PostingIteratorInterface*
 		createTermPostingIterator(
@@ -108,19 +110,24 @@ public:
 	/// \brief Create a an iterator on the numbers of documents a specified user is allowed to see
 	/// \param[in] username name of the user
 	/// \return the iterator on the documents (with ownership) or NULL, if there is no access control enabled
-	/// \note The storage has to be created access control enabled
+	/// \note The storage has to be created with access control enabled
 	virtual InvAclIteratorInterface*
 		createInvAclIterator(
 			const std::string& username) const=0;
+
+	/// \brief Create a an iterator on the access control lists of documents
+	/// \return the iterator on the ACLs
+	/// \note The storage has to be created with access control enabled
+	virtual AclReaderInterface* createAclReader() const=0;
 
 	/// \brief Get the number of documents inserted in this storage instance
 	/// \return the number of documents
 	virtual Index nofDocumentsInserted() const=0;
 
-	/// \brief Get the number of documents inserted in this storage instance
+	/// \brief Get the local document frequency of a feature in this storage instance
 	/// \param[in] type the term type addressed
 	/// \param[in] term the term value addressed
-	/// \return the number of documents
+	/// \return the local document frequency
 	virtual Index documentFrequency(
 			const std::string& type,
 			const std::string& term) const=0;
@@ -133,6 +140,16 @@ public:
 	/// \param[in] docid document id of the document inserted
 	/// \return the document number or 0, if it does not exist
 	virtual Index documentNumber( const std::string& docid) const=0;
+
+	/// \brief Get the local internal term type number
+	/// \param[in] type term type name
+	/// \return the term type number or 0, if it is not known yet
+	virtual Index termTypeNumber( const std::string& type) const=0;
+
+	/// \brief Evaluate if there exists forward index blocks for this type
+	/// \param[in] type term type name
+	/// \return true, if yes, false if no or if an error occurred (check error)
+	virtual bool isForwardIndexTerm( const std::string& type) const=0;
 
 	/// \brief Create an iterator on the term types inserted
 	/// \return the iterator
@@ -186,11 +203,11 @@ public:
 	/// \brief Creates an iterator on storage statistics messages for initialization/deregistration
 	/// \param[in] sign true = positive, false = negative, means all offsets are inverted and isnew is false too (used for deregistration)
 	/// \return the iterator on the statistics message blobs
-	virtual StatisticsIteratorInterface* createInitStatisticsIterator( bool sign=true)=0;
+	virtual StatisticsIteratorInterface* createAllStatisticsIterator( bool sign=true)=0;
 
 	/// \brief Creates an iterator on the storage statistics messages created by updates of this storage
 	/// \return the iterator on the statistics message blobs
-	virtual StatisticsIteratorInterface* createUpdateStatisticsIterator()=0;
+	virtual StatisticsIteratorInterface* createChangeStatisticsIterator()=0;
 
 	/// \brief Get the processing message interface for introspecting and packing messages outside the queue context
 	/// \return the message processor interface
@@ -208,6 +225,11 @@ public:
 	/// \param[out] errorlog stream for reporting errors
 	/// \return true, if the check succeeds, false if it fails
 	virtual bool checkStorage( std::ostream& errorlog) const=0;
+
+	/// \brief Close client connection and eventually do some cleanup.
+	/// \remark This method is not implicitely called with the destructor because it might be a complicated operation that cannot be afforded in panic shutdown.
+	/// \note the method does not have to be called necessarily
+	virtual void close()=0;
 };
 
 }//namespace

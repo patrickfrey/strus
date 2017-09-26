@@ -49,7 +49,7 @@ PostingJoinOperatorInterface::Description PostingJoinPred::getDescription() cons
 {
 	try
 	{
-		return Description( _TXT("Get the set of postings (d,p-1) for all (d,p) with p>1 in the argument set"));
+		return Description( "pred", _TXT("Get the set of postings (d,p-1) for all (d,p) with p>1 in the argument set"));
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' iterator: %s"), "pred", *m_errorhnd, Description());
 }

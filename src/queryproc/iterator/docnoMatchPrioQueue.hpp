@@ -31,7 +31,7 @@ public:
 	~DocnoMatchPrioQueue(){}
 
 	/// \brief The maximum number of arguments is fixed, because we use a static array for the queue
-	enum {MaxNofElements=64};
+	enum {MaxNofElements=256};
 
 	/// \brief Element of the all match priority queue
 	struct Element

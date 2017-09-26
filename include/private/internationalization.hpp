@@ -18,12 +18,20 @@ namespace strus
 /// \brief Substitute for std::runtime_error with arguments
 /// \param[in] msg c printf format string
 /// \param[in] nofargs number of arguments passed to be substituted in the format string
-std::runtime_error runtime_error( const char* format, ...);
+std::runtime_error runtime_error( const char* format, ...)
+#ifdef __GNUC__
+	__attribute__ ((format (printf, 1, 2)))
+#endif
+	;
 
 /// \brief Substitute for std::logic_error with arguments
 /// \param[in] msg c printf format string
 /// \param[in] nofargs number of arguments passed to be substituted in the format string
-std::logic_error logic_error( const char* format, ...);
+std::logic_error logic_error( const char* format, ...)
+#ifdef __GNUC__
+	__attribute__ ((format (printf, 1, 2)))
+#endif
+	;
 
 /// \brief Declare the message domain used by this package for the exception constructors declared in this module for gettext
 void initMessageTextDomain();

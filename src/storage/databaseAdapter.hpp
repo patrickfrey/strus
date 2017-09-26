@@ -414,6 +414,8 @@ struct DatabaseAdapter_ForwardIndex
 			const Index& typeno_, const Index& docno_)
 			:Parent::Cursor( database_, BlockKey(typeno_,docno_)){}
 	};
+
+	static bool exists( const DatabaseClientInterface* database_, const Index& typeno_);
 };
 
 

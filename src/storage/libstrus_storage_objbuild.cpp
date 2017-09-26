@@ -31,6 +31,7 @@
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include "strus/base/configParser.hpp"
+#include "strus/base/local_ptr.hpp"
 #include <memory>
 
 using namespace strus;
@@ -49,10 +50,10 @@ public:
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{
-		if (!m_queryProcessor.get()) throw strus::runtime_error(_TXT("error creating query processor"));
-		if (!m_storage.get()) throw strus::runtime_error(_TXT("error creating default storage"));
+		if (!m_queryProcessor.get()) throw strus::runtime_error( "%s", _TXT("error creating query processor"));
+		if (!m_storage.get()) throw strus::runtime_error( "%s", _TXT("error creating default storage"));
 		if (!m_db.get()) throw strus::runtime_error(_TXT("error creating default database '%s'"), "leveldb");
-		if (!m_statsproc.get()) throw strus::runtime_error(_TXT("error creating default statistics processor"));
+		if (!m_statsproc.get()) throw strus::runtime_error( "%s", _TXT("error creating default statistics processor"));
 	}
 
 	virtual ~StorageObjectBuilder(){}
@@ -160,7 +161,7 @@ DLL_PUBLIC StorageAlterMetaDataTableInterface*
 			errorhnd->explain(_TXT("could not get storage and database interfaces: %s"));
 			return 0;
 		}
-		std::auto_ptr<StorageAlterMetaDataTableInterface>
+		strus::local_ptr<StorageAlterMetaDataTableInterface>
 				altermetatable( sti->createAlterMetaDataTable( configstr, dbi));
 		if (!altermetatable.get())
 		{
@@ -222,7 +223,7 @@ DLL_PUBLIC StorageClientInterface*
 				return 0;
 			}
 		}
-		std::auto_ptr<StorageClientInterface>
+		strus::local_ptr<StorageClientInterface>
 			storage( sti->createClient( configstr, dbi, statsproc));
 		if (!storage.get())
 		{
@@ -268,7 +269,7 @@ DLL_PUBLIC VectorStorageClientInterface*
 			errorhnd->explain(_TXT("could not get storage: %s"));
 			return 0;
 		}
-		std::auto_ptr<VectorStorageClientInterface>
+		strus::local_ptr<VectorStorageClientInterface>
 			storage( sti->createClient( configstr, dbi));
 		if (!storage.get())
 		{

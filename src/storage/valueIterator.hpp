@@ -26,7 +26,7 @@ class ValueIterator
 {
 public:
 	ValueIterator( const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
-		:dbcursor(database_),m_hasInit(false),m_hasValue(false),m_errorhnd(errorhnd_)
+		:m_dbcursor(database_),m_hasInit(false),m_hasValue(false),m_errorhnd(errorhnd_)
 	{}
 
 	virtual ~ValueIterator(){}
@@ -36,7 +36,7 @@ public:
 		try
 		{
 			Index val;
-			m_hasValue = dbcursor.skip( std::string( value, size), m_value, val);
+			m_hasValue = m_dbcursor.skip( std::string( value, size), m_value, val);
 			if (m_hasValue)
 			{
 				m_hasInit = true;
@@ -60,13 +60,13 @@ public:
 			}
 			if (!m_hasInit)
 			{
-				if (dbcursor.loadFirst( key, value))
+				if (m_dbcursor.loadFirst( key, value))
 				{
 					rt.push_back( key);
 					m_hasInit = true;
 				}
 			}
-			while (rt.size() < maxNofElements && dbcursor.loadNext( key, value))
+			while (rt.size() < maxNofElements && m_dbcursor.loadNext( key, value))
 			{
 				rt.push_back( key);
 			}
@@ -76,7 +76,7 @@ public:
 	}
 
 private:
-	typename DatabaseAdapter::Cursor dbcursor;
+	typename DatabaseAdapter::Cursor m_dbcursor;
 	bool m_hasInit;
 	bool m_hasValue;
 	std::string m_value;

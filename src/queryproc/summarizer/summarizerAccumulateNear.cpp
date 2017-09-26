@@ -24,7 +24,9 @@
 #include <limits>
 #include <cmath>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 using namespace strus;
 
@@ -47,13 +49,18 @@ SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear
 	,m_itrarsize(0)
 	,m_structarsize(0)
 	,m_cardinality(data_->cardinality)
+	,m_minwinsize(1)
 	,m_weightincr()
 	,m_initialized(false)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
+	if (!m_forwardindex.get()) throw strus::runtime_error( "%s", _TXT("error creating forward index iterator"));
 }
 
+void SummarizerFunctionContextAccumulateNear::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
 
 void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 		const std::string& name,
@@ -66,12 +73,12 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 	{
 		if (utils::caseInsensitiveEquals( name, "struct"))
 		{
-			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
+			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize++] = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of weighting features out of range"));
+			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
 			double idf = logl( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
@@ -80,7 +87,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 				idf = 0.00001;
 			}
 			m_itrar[ m_itrarsize++] = itr;
-			m_idfar.add( idf * weight);
+			m_idfar.push( idf * weight);
 		}
 		else
 		{
@@ -123,154 +130,240 @@ static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_
 	return rt;
 }
 
+void SummarizerFunctionContextAccumulateNear::initializeContext()
+{
+	if (m_cardinality == 0)
+	{
+		if (m_data->cardinality_frac > std::numeric_limits<double>::epsilon())
+		{
+			m_cardinality = std::max( 1U, (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5));
+		}
+		else
+		{
+			m_cardinality = m_itrarsize;
+		}
+	}
+	// initialize proportional ff increment weights
+	m_weightincr.init( m_itrarsize);
+	ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, m_data->cprop, m_idfar);
+
+	double factor = 1.0;
+	for (std::size_t ii=0; ii<m_itrarsize; ++ii)
+	{
+		m_normfactorar[ ii] = factor / sqrt(m_itrarsize - ii);
+		factor *= m_data->cofactor;
+	}
+	m_minwinsize = m_cardinality ? m_cardinality : m_itrarsize;
+	if (m_minwinsize > m_itrarsize) m_minwinsize = m_itrarsize;
+
+	m_initialized = true;
+}
+
+bool SummarizerFunctionContextAccumulateNear::getCandidateEntity( CandidateEntity& res, const PositionWindow& poswin, PostingIteratorInterface** valid_itrar, PostingIteratorInterface** valid_structar)
+{
+	Index windowpos = poswin.pos();
+	res.window = poswin.window();
+	res.windowsize = poswin.size();
+	res.windowendpos = valid_itrar[ res.window[ m_minwinsize-1]]->posno();
+
+	Index startpos = res.windowendpos < m_data->range ? 0 :(res.windowendpos - m_data->range);
+	Index struct_startpos = callSkipPos( startpos, valid_structar, m_structarsize);
+	res.structpos = 0;
+	if (!struct_startpos || struct_startpos > windowpos)
+	{
+		res.structpos = struct_startpos;
+	}
+	else
+	{
+		res.structpos = callSkipPos( windowpos, valid_structar, m_structarsize);
+	}
+	if (!res.structpos || res.structpos > windowpos + m_data->range)
+	{
+		res.structpos = windowpos + m_data->range + 1;
+	}
+	res.forwardpos = m_forwardindex->skipPos( startpos);
+	if (res.forwardpos && res.forwardpos < res.structpos && res.windowendpos < res.structpos)
+	{
+		// Calculate the window size not overlapping with :
+		Index windowspan = poswin.span();
+		Index windowmaxpos = windowpos + windowspan;
+		if (res.structpos >= windowmaxpos)
+		{
+			res.windowendpos = windowmaxpos;
+		}
+		else for (std::size_t wi=m_minwinsize; wi<res.windowsize; ++wi)
+		{
+			Index wpos = valid_itrar[ res.window[ wi]]->posno();
+			if (wpos < res.structpos)
+			{
+				res.windowendpos = wpos;
+			}
+			else
+			{
+				res.windowsize = wi;
+				break;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+double SummarizerFunctionContextAccumulateNear::candidateWeight( const CandidateEntity& candidate, PostingIteratorInterface** valid_itrar) const
+{
+	double rt = 0.0;
+	for (std::size_t wi=0; wi<candidate.windowsize; ++wi)
+	{
+		double distweight = 1.0 / std::sqrt( std::fabs( candidate.forwardpos - valid_itrar[ candidate.window[ wi]]->posno()) + DIST_WEIGHT_BASE);
+		rt += m_weightincr[ candidate.window[ wi]] * distweight;
+	}
+	return rt;
+}
+
+
+void SummarizerFunctionContextAccumulateNear::initEntityMap( EntityMap& entitymap, const Index& docno)
+{
+	// Initialize posting iterators
+	PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
+	PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+	
+	callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
+	callSkipDoc( docno, m_structar, m_structarsize, valid_structar);
+	m_forwardindex->skipDoc( docno);
+
+	// Fetch entities and weight them:
+	PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
+				0, PositionWindow::MaxWin);
+	bool more = poswin.first();
+	while (more)
+	{
+		Index nextstart;
+		CandidateEntity candidate;
+		if (getCandidateEntity( candidate, poswin, valid_itrar, valid_structar))
+		{
+			double normfactor = m_normfactorar[ candidate.windowsize-1];
+
+			// Calculate the weights of matching entities:
+			while (candidate.forwardpos && candidate.forwardpos < candidate.structpos)
+			{
+				double ww = candidateWeight( candidate, valid_itrar);
+				entitymap[ m_forwardindex->fetch()] += normfactor * ww;
+				candidate.forwardpos = m_forwardindex->skipPos( candidate.forwardpos + 1);
+			}
+			nextstart = candidate.windowendpos;
+		}
+		else
+		{
+			nextstart = valid_itrar[ candidate.window[ m_minwinsize-1]]->posno();
+		}
+		more = poswin.skip( nextstart);
+	}
+}
+
+std::vector<SummaryElement>
+	SummarizerFunctionContextAccumulateNear::getSummariesFromEntityMap( EntityMap& entitymap) const
+{
+	std::vector<SummaryElement> rt;
+
+	Ranker ranker( m_data->nofranks);
+	EntityMap::const_iterator ei = entitymap.begin(), ee = entitymap.end();
+	std::vector<EntityMap::const_iterator> valuerefs;
+	for (; ei != ee; ++ei)
+	{
+		ranker.insert( ei->second / m_data->norm, valuerefs.size());
+		valuerefs.push_back( ei);
+	}
+	std::vector<Ranker::Element> result = ranker.result();
+	std::vector<Ranker::Element>::const_iterator ri = result.begin(), re = result.end();
+	for (; ri != re; ++ri)
+	{
+		rt.push_back( SummaryElement( m_data->resultname, valuerefs[ ri->idx]->first, ri->weight));
+	}
+	return rt;
+}
+
 std::vector<SummaryElement>
 	SummarizerFunctionContextAccumulateNear::getSummary( const Index& docno)
 {
 	try
 	{
-		std::vector<SummaryElement> rt;
-		typedef std::map<std::string,double> EntityMap;
-		EntityMap entitymap;
-
 		// Initialization:
-		if (!m_initialized)
+		if (m_itrarsize == 0)
 		{
-			if (m_itrarsize == 0)
-			{
-				return rt;
-			}
-			if (m_cardinality == 0)
-			{
-				if (m_data->cardinality_frac > std::numeric_limits<double>::epsilon())
-				{
-					m_cardinality = std::min( 1U, (unsigned int)(m_itrarsize * m_data->cardinality_frac + 0.5));
-				}
-				else
-				{
-					m_cardinality = m_itrarsize;
-				}
-			}
-			if (m_itrarsize < m_cardinality)
-			{
-				return rt;
-			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << string_format( "init summarizer %s: features %u, cardinality %u, range %u", METHOD_NAME, m_itrarsize, m_cardinality, m_data->range) << std::endl;
-#endif
-			// initialize proportional ff increment weights
-			m_weightincr.init( m_itrarsize);
-			ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, 0.3, m_idfar);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cerr << "feature weights " <<  m_weightincr.tostring() << std::endl;
-#endif
-			double factor = 1.0;
-			for (std::size_t ii=0; ii<m_itrarsize; ++ii)
-			{
-				m_normfactorar[ ii] = factor / sqrt(m_itrarsize - ii);
-				factor *= m_data->cofactor;
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cerr << string_format( "normfactor %u %f", ii, m_normfactorar[ ii]) << std::endl;
-#endif
-			}
-			m_initialized = true;
+			return std::vector<SummaryElement>();
+		}
+		if (!m_initialized) initializeContext();
+		if (m_itrarsize < m_cardinality)
+		{
+			return std::vector<SummaryElement>();
 		}
 
-		// Init document iterators:
-		PostingIteratorInterface* valid_itrar[ MaxNofArguments];			//< valid array if weighted features
-		PostingIteratorInterface* valid_structar[ MaxNofArguments];			//< valid array of end of structure elements
+		// Init map of weighted entities:
+		EntityMap entitymap;
+		initEntityMap( entitymap, docno);
 
-		callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
-		callSkipDoc( docno, m_structar, m_structarsize, valid_structar);
-		m_forwardindex->skipDoc( docno);
-
-		// Calculate weights:
-		std::size_t minwinsize = m_cardinality ? m_cardinality : m_itrarsize;
-		if (minwinsize > m_itrarsize) minwinsize = m_itrarsize;
-
-		PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
-					0, PositionWindow::MaxWin);
-		bool more = poswin.first();
-		while (more)
-		{
-			const std::size_t* window = poswin.window();
-			std::size_t windowsize = poswin.size();
-			Index windowpos = poswin.pos();
-			Index windowendpos = valid_itrar[ window[ minwinsize-1]]->posno();
-
-			Index startpos = windowendpos < m_data->range ? 0 :(windowendpos - m_data->range);
-			Index struct_startpos = callSkipPos( startpos, valid_structar, m_structarsize);
-			Index structpos = 0;
-			if (!struct_startpos || struct_startpos > windowpos)
-			{
-				structpos = struct_startpos;
-			}
-			else
-			{
-				structpos = callSkipPos( windowpos, valid_structar, m_structarsize);
-			}
-			if (!structpos || structpos > windowpos + m_data->range)
-			{
-				structpos = windowpos + m_data->range + 1;
-			}
-			Index forwardpos = m_forwardindex->skipPos( startpos);
-			if (windowendpos < structpos)
-			{
-				// Calculate the window size not overlapping with :
-				Index windowspan = poswin.span();
-				Index windowmaxpos = windowpos + windowspan;
-				if (structpos >= windowmaxpos)
-				{
-					windowendpos = windowmaxpos;
-				}
-				else for (std::size_t wi=minwinsize; wi<windowsize; ++wi)
-				{
-					Index wpos = valid_itrar[ window[ wi]]->posno();
-					if (wpos < structpos)
-					{
-						windowendpos = wpos;
-					}
-					else
-					{
-						windowsize = wi;
-						break;
-					}
-				}
-				double normfactor = m_normfactorar[ windowsize-1];
-
-				// Calculate the weights:
-				while (forwardpos && forwardpos < structpos)
-				{
-					double weightsum = 0.0;
-					for (std::size_t wi=0; wi<windowsize; ++wi)
-					{
-						double distweight = 1.0 / std::sqrt( std::fabs( forwardpos - valid_itrar[ window[ wi]]->posno()) + DIST_WEIGHT_BASE);
-						weightsum += m_weightincr[ window[ wi]] * distweight;
-					}
-					entitymap[ m_forwardindex->fetch()] += normfactor * weightsum;
-					forwardpos = m_forwardindex->skipPos( forwardpos + 1);
-				}
-			}
-			more = poswin.skip( windowendpos);
-		}
-		Ranker ranker( m_data->nofranks);
-		EntityMap::const_iterator ei = entitymap.begin(), ee = entitymap.end();
-		std::vector<EntityMap::const_iterator> valuerefs;
-		for (; ei != ee; ++ei)
-		{
-			ranker.insert( ei->second / m_data->norm, valuerefs.size());
-			valuerefs.push_back( ei);
-		}
-		std::vector<Ranker::Element> result = ranker.result();
-		std::vector<Ranker::Element>::const_iterator ri = result.begin(), re = result.end();
-		for (; ri != re; ++ri)
-		{
-			rt.push_back( SummaryElement( m_data->resultname, valuerefs[ ri->idx]->first, ri->weight));
-		}
-		return rt;
+		// Get summary from map of weighted entities
+		return getSummariesFromEntityMap( entitymap);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
 
+
+std::string SummarizerFunctionContextAccumulateNear::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
+
+	// Initialization:
+	if (m_itrarsize == 0)
+	{
+		return std::string();
+	}
+	if (!m_initialized) initializeContext();
+	if (m_itrarsize < m_cardinality)
+	{
+		return std::string();
+	}
+
+	// Initialize posting iterators
+	PostingIteratorInterface* valid_itrar[ MaxNofArguments];	//< valid array if weighted features
+	PostingIteratorInterface* valid_structar[ MaxNofArguments];	//< valid array of end of structure elements
+	
+	callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
+	callSkipDoc( docno, m_structar, m_structarsize, valid_structar);
+	m_forwardindex->skipDoc( docno);
+
+	// Fetch entities and print them with weight:
+	PositionWindow poswin( valid_itrar, m_itrarsize, m_data->range, m_cardinality,
+				0, PositionWindow::MaxWin);
+	bool more = poswin.first();
+	while (more)
+	{
+		Index nextstart;
+		CandidateEntity candidate;
+		if (getCandidateEntity( candidate, poswin, valid_itrar, valid_structar))
+		{
+			double normfactor = m_normfactorar[ candidate.windowsize-1];
+
+			// Calculate the weights of matching entities:
+			while (candidate.forwardpos && candidate.forwardpos < candidate.structpos)
+			{
+				double ww = normfactor * candidateWeight( candidate, valid_itrar);
+				std::string keystr( m_forwardindex->fetch());
+				out << string_format( _TXT( "entity pos=%u, span=%u, weight=%f, value='%s'"),
+							poswin.pos(), poswin.span(), ww, keystr.c_str()) << std::endl;
+			}
+			nextstart = candidate.windowendpos;
+		}
+		else
+		{
+			nextstart = valid_itrar[ candidate.window[ m_minwinsize-1]]->posno();
+		}
+		more = poswin.skip( nextstart);
+	}
+	return out.str();
+}
 
 void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::string& name, const std::string& value)
 {
@@ -299,6 +392,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 		}
 		else if (utils::caseInsensitiveEquals( name, "cofactor")
 			|| utils::caseInsensitiveEquals( name, "norm")
+			|| utils::caseInsensitiveEquals( name, "cprop")
 			|| utils::caseInsensitiveEquals( name, "nofranks")
 			|| utils::caseInsensitiveEquals( name, "range"))
 		{
@@ -330,6 +424,14 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	else if (utils::caseInsensitiveEquals( name, "norm"))
 	{
 		m_data->cofactor = value.tofloat();
+	}
+	else if (utils::caseInsensitiveEquals( name, "cprop"))
+	{
+		m_data->cprop = value.tofloat();
+		if (m_data->cprop < 0.0 || m_data->cprop > 1.0)
+		{
+			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
+		}
 	}
 	else if (utils::caseInsensitiveEquals( name, "range"))
 	{
@@ -383,17 +485,27 @@ std::string SummarizerFunctionInstanceAccumulateNear::tostring() const
 	try
 	{
 		std::ostringstream rt;
+		rt << std::fixed << std::setprecision(5);
+
 		rt << "type='" << m_data->type << "'";
 		rt << ", result='" << m_data->resultname << "'";
 		rt << ", cofactor=" << m_data->cofactor;
 		rt << ", nofranks=" << m_data->nofranks;
-		rt << ", cardinality=" << m_data->cardinality;
+		if (m_data->cardinality_frac > std::numeric_limits<double>::epsilon())
+		{
+			rt << ", cardinality='" << (unsigned int)(m_data->cardinality_frac * 100 + 0.5) << "%'";
+		}
+		else
+		{
+			rt << ", cardinality=" << m_data->cardinality;
+		}
 		rt << ", range=" << m_data->range;
+		rt << ", norm=" << m_data->norm;
+		rt << ", cprop=" << m_data->cprop;
 		return rt.str();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping '%s' summarizer to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
 }
-
 
 SummarizerFunctionInstanceInterface* SummarizerFunctionAccumulateNear::createInstance(
 		const QueryProcessorInterface* processor) const
@@ -417,11 +529,12 @@ FunctionDescription SummarizerFunctionAccumulateNear::getDescription() const
 		rt( P::Feature, "struct", _TXT( "defines a structural delimiter for interaction of features on the same result"), "");
 		rt( P::String, "type", _TXT( "the forward index feature type for the content to extract"), "");
 		rt( P::String, "result", _TXT( "the name of the result if not equal to type"), "");
-		rt( P::String, "cofactor", _TXT( "multiplication factor for features pointing to the same result"), "");
-		rt( P::String, "norm", _TXT( "normalization factor for end result weights"), "");
-		rt( P::String, "nofranks", _TXT( "maximum number of ranks per document"), "");
-		rt( P::String, "cardinality", _TXT( "mimimum number of features per weighted item"), "");
-		rt( P::String, "range", _TXT( "maximum distance (ordinal position) of the weighted features (window size)"), "");
+		rt( P::Numeric, "cofactor", _TXT( "multiplication factor for features pointing to the same result"), "");
+		rt( P::Numeric, "norm", _TXT( "normalization factor for end result weights"), "");
+		rt( P::Numeric, "nofranks", _TXT( "maximum number of ranks per document"), "");
+		rt( P::Numeric, "cardinality", _TXT( "mimimum number of features per weighted item"), "");
+		rt( P::Numeric, "range", _TXT( "maximum distance (ordinal position) of the weighted features (window size)"), "");
+		rt( P::Numeric, "cprop", _TXT("constant part of idf proportional feature weight"), "0.0:1.0");
 		return rt;
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating summarizer function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());

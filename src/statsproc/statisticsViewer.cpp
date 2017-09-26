@@ -16,17 +16,18 @@
 
 using namespace strus;
 
-StatisticsViewer::StatisticsViewer( const char* msgptr, std::size_t msgsize, ErrorBufferInterface* errorhnd_)
+StatisticsViewer::StatisticsViewer( const void* msgptr, std::size_t msgsize, ErrorBufferInterface* errorhnd_)
 	:m_hdr(reinterpret_cast<const StatisticsHeader*>(msgptr))
-	,m_msgptr(msgptr + sizeof(StatisticsHeader))
-	,m_msgitr(msgptr + sizeof(StatisticsHeader))
-	,m_msgend(msgptr + msgsize)
+	,m_msgptr((const char*)msgptr + sizeof(StatisticsHeader))
+	,m_msgitr((const char*)msgptr + sizeof(StatisticsHeader))
+	,m_msgend((const char*)msgptr + msgsize)
 	,m_msgsize(msgsize - sizeof(StatisticsHeader))
+	,m_strings()
 	,m_errorhnd(errorhnd_)
 {
 	if (m_msgitr > m_msgend)
 	{
-		throw strus::runtime_error( _TXT( "got illegal message from  (message size)"));
+		throw strus::runtime_error( "%s",  _TXT( "got illegal message (message size)"));
 	}
 }
 
@@ -46,28 +47,28 @@ bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
 		std::size_t chlen = utf8charlen( *m_msgitr);
 		if (m_msgitr + chlen + 1 >= m_msgend)
 		{
-			throw strus::runtime_error( _TXT( "got illegal statistics message (unexpected end of message [1])"));
+			throw strus::runtime_error( "%s",  _TXT( "got illegal statistics message (unexpected end of message [1])"));
 		}
 		int32_t commonbytes = utf8decode( m_msgitr, chlen);
 		if (commonbytes < 0)
 		{
-			throw strus::runtime_error( _TXT( "got illegal statistics message (corrupt block [1])"));
+			throw strus::runtime_error( "%s",  _TXT( "got illegal statistics message (corrupt block [1])"));
 		}
 		m_msgitr += chlen;
 		chlen = utf8charlen( *m_msgitr);
 		if (m_msgitr + chlen + 1 >= m_msgend)
 		{
-			throw strus::runtime_error( _TXT( "got illegal message from  (unexpected end of message [2])"));
+			throw strus::runtime_error( "%s",  _TXT( "got illegal message from  (unexpected end of message [2])"));
 		}
 		int32_t restlen = utf8decode( m_msgitr, chlen);
 		m_msgitr += chlen;
 		if (restlen < 0)
 		{
-			throw strus::runtime_error( _TXT( "got illegal message from  (corrupt block [2])"));
+			throw strus::runtime_error( "%s",  _TXT( "got illegal message from  (corrupt block [2])"));
 		}
 		if (m_msgitr + restlen > m_msgend)
 		{
-			throw strus::runtime_error( _TXT( "got illegal message from  (unexpected end of message [3])"));
+			throw strus::runtime_error( "%s",  _TXT( "got illegal message from  (unexpected end of message [3])"));
 		}
 		m_msg.resize( commonbytes);
 		const char* msg_itr = m_msgitr;
@@ -76,25 +77,27 @@ bool StatisticsViewer::nextDfChange( DocumentFrequencyChange& rec)
 		char const* flags_itr = utf8prev( df_itr);
 		if (flags_itr < msg_itr)
 		{
-			throw strus::runtime_error( _TXT( "got illegal message from  (corrupt block [3])"));
+			throw strus::runtime_error( "%s",  _TXT( "got illegal message from  (corrupt block [3])"));
 		}
 		m_msg.append( msg_itr, flags_itr - msg_itr);
+		m_strings.push_back( m_msg);
 
-		rec.type = m_msg.c_str();
-		std::size_t typesize = std::strlen( rec.type);
-		rec.value = rec.type + typesize + 1;
+		const char* type = m_strings.back();
+		std::size_t typesize = std::strlen( type);
+		const char* value = type + typesize + 1;
 
 		unsigned char flags = (unsigned char)*flags_itr;
 		if (flags >= 0x2)
 		{
-			throw strus::runtime_error( _TXT( "got illegal message from  (corrupt message record [3])"));
+			throw strus::runtime_error( "%s",  _TXT( "got illegal message from  (corrupt message record [3])"));
 		}
 		chlen = utf8charlen( *df_itr);
-		rec.increment = utf8decode( df_itr, chlen);
+		int increment = utf8decode( df_itr, chlen);
 		if ((flags & 0x1) != 0)
 		{
-			rec.increment = -rec.increment;
+			increment = -increment;
 		}
+		rec = DocumentFrequencyChange( type, value, increment);
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error statistics message viewer fetching next df change: %s"), *m_errorhnd, false);

@@ -24,152 +24,24 @@ using namespace strus;
 
 #define MODULENAME "databaseClient"
 
-static std::string normalizePath( const std::string& path_)
-{
-	std::string rt;
-	std::string::const_iterator pi = path_.begin(), pe = path_.end();
-	for (; pi != pe; ++pi)
-	{
-		if (*pi == '/' || *pi == '\\')
-		{
-			while (pi+1 != pe && (pi[1] == '/' || pi[1] == '\\')) ++pi;
-			if (pi != pe)
-			{
-				rt.push_back( '/');
-			}
-		}
-		else
-		{
-			rt.push_back( *pi);
-		}
-	}
-	return rt;
-}
-
-LevelDbHandle::LevelDbHandle( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
-	:m_path(path_),m_db(0)
-	,m_maxOpenFiles(maxOpenFiles_)
-	,m_cachesize_k(cachesize_k_)
-	,m_compression(compression_)
-	,m_writeBufferSize(writeBufferSize_)
-	,m_blockSize(blockSize_)
-
-{
-	m_dboptions.create_if_missing = false;
-	if (m_maxOpenFiles)
-	{
-		m_dboptions.max_open_files = maxOpenFiles_;
-	}
-	if (m_cachesize_k)
-	{
-		if (m_cachesize_k * 1024 < m_cachesize_k) throw strus::runtime_error( _TXT( "size of cache out of range"));
-		m_dboptions.block_cache = leveldb::NewLRUCache( m_cachesize_k * 1024);
-	}
-	if (!m_compression)
-	{
-		//... compression reduces size of index by 25% and has about 10% better performance
-		m_dboptions.compression = leveldb::kNoCompression;
-	}
-	if (m_writeBufferSize)
-	{
-		m_dboptions.write_buffer_size = m_writeBufferSize;
-	}
-	if (m_blockSize)
-	{
-		m_dboptions.block_size = m_blockSize;
-	}
-	leveldb::Status status = leveldb::DB::Open( m_dboptions, path_.c_str(), &m_db);
-	if (!status.ok())
-	{
-		std::string err = status.ToString();
-		cleanup();
-		throw strus::runtime_error( _TXT( "failed to open key value store database: %s"), err.c_str());
-	}
-}
-
-std::string LevelDbHandle::config() const
-{
-	std::ostringstream out;
-	out << "path='" << m_path << "'";
-	if (!m_compression) out << ";compression=" << (m_compression?"Y":"N");
-	if (m_cachesize_k) out << ";cache=" << m_cachesize_k << "K";
-	if (m_maxOpenFiles) out << ";max_open_files=" << m_maxOpenFiles;
-	if (m_writeBufferSize) out << ";write_buffer_size=" << m_writeBufferSize;
-	if (m_blockSize) out << ";block_size=" << m_blockSize;
-	return out.str();
-}
-
-void LevelDbHandle::cleanup()
-{
-	if (m_db)
-	{
-		delete m_db;
-		m_db = 0;
-	}
-	if (m_dboptions.block_cache)
-	{
-		delete m_dboptions.block_cache;
-		m_dboptions.block_cache = 0;
-	}
-}
-
-utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
-{
-	utils::ScopedLock lock( m_map_mutex);
-	std::string path = normalizePath( path_);
-	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path);
-	if (mi == m_map.end())
-	{
-		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
-		m_map[ path_] = rt;
-		return rt;
-	}
-	else
-	{
-		if ((maxOpenFiles_ && mi->second->maxOpenFiles() != maxOpenFiles_)
-		||  (cachesize_k_ && mi->second->cachesize_k() != cachesize_k_)
-		||  (compression_ != mi->second->compression())
-		||  (writeBufferSize_ && mi->second->writeBufferSize() != writeBufferSize_)
-		||  (blockSize_ && mi->second->blockSize() != blockSize_))
-		{
-			throw strus::runtime_error( _TXT( "level DB key value store with the same path opened twice but with different settings"));
-		}
-		return mi->second;
-	}
-}
-
-void LevelDbHandleMap::dereference( const std::string& path_)
-{
-	utils::ScopedLock lock( m_map_mutex);
-	std::map<std::string,utils::SharedPtr<LevelDbHandle> >::iterator mi = m_map.find( path_);
-	if (mi != m_map.end())
-	{
-		if (mi->second.unique())
-		{
-			m_map.erase( path_);
-		}
-	}
-}
-
-LevelDbHandle::~LevelDbHandle()
-{
-	cleanup();
-}
-
 DatabaseClient::~DatabaseClient()
 {
-	m_db.reset();
-	if (m_db.unique())
+	try
 	{
-		m_dbmap->dereference( m_db->path());
+		if (m_conn->db())
+		{
+			m_conn->close();
+		}
 	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error in destructor of '%s': %s"), MODULENAME, *m_errorhnd);
 }
 
 DatabaseTransactionInterface* DatabaseClient::createTransaction()
 {
 	try
 	{
-		return new DatabaseTransaction( m_db->db(), this, m_errorhnd);
+		if (!m_conn->db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createTransaction");
+		return new DatabaseTransaction( m_conn, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating transaction: %s"), *m_errorhnd, 0);
 }
@@ -178,7 +50,8 @@ DatabaseCursorInterface* DatabaseClient::createCursor( const DatabaseOptions& op
 {
 	try
 	{
-		return new DatabaseCursor( m_db->db(), options.useCacheEnabled(), false, m_errorhnd);
+		if (!m_conn->db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createCursor");
+		return new DatabaseCursor( m_conn, options.useCacheEnabled(), false, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
 }
@@ -189,8 +62,8 @@ class DatabaseBackupCursor
 	,public DatabaseCursor
 {
 public:
-	DatabaseBackupCursor( leveldb::DB* db_, ErrorBufferInterface* errorhnd_)
-		:DatabaseCursor( db_, false, true, errorhnd_),m_errorhnd(errorhnd_){}
+	DatabaseBackupCursor( const utils::SharedPtr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
+		:DatabaseCursor( conn_, false, true, errorhnd_),m_errorhnd(errorhnd_){}
 
 	virtual bool fetch(
 			const char*& key,
@@ -229,7 +102,8 @@ DatabaseBackupCursorInterface* DatabaseClient::createBackupCursor() const
 {
 	try
 	{
-		return new DatabaseBackupCursor( m_db->db(), m_errorhnd);
+		if (!m_conn->db()) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createBackupCursor");
+		return new DatabaseBackupCursor( m_conn, m_errorhnd);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating '%s' backup cursor: %s"), MODULENAME, *m_errorhnd, 0);
 }
@@ -242,9 +116,12 @@ void DatabaseClient::writeImm(
 {
 	try
 	{
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "writeImm");
+
 		leveldb::WriteOptions options;
 		options.sync = true;
-		leveldb::Status status = m_db->db()->Put( options,
+		leveldb::Status status = db->Put( options,
 						leveldb::Slice( key, keysize),
 						leveldb::Slice( value, valuesize));
 		if (!status.ok())
@@ -262,9 +139,12 @@ void DatabaseClient::removeImm(
 {
 	try
 	{
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "removeImm");
+
 		leveldb::WriteOptions options;
 		options.sync = true;
-		leveldb::Status status = m_db->db()->Delete( options, leveldb::Slice( key, keysize));
+		leveldb::Status status = db->Delete( options, leveldb::Slice( key, keysize));
 		if (!status.ok())
 		{
 			std::string ststr( status.ToString());
@@ -282,11 +162,14 @@ bool DatabaseClient::readValue(
 {
 	try
 	{
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "readValue");
+
 		std::string rt;
 		leveldb::ReadOptions readoptions;
 		readoptions.fill_cache = options.useCacheEnabled();
 
-		leveldb::Status status = m_db->db()->Get( readoptions, leveldb::Slice( key, keysize), &value);
+		leveldb::Status status = db->Get( readoptions, leveldb::Slice( key, keysize), &value);
 		if (status.IsNotFound())
 		{
 			return false;
@@ -301,11 +184,28 @@ bool DatabaseClient::readValue(
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error '%s' readValue: %s"), MODULENAME, *m_errorhnd, false);
 }
 
+void DatabaseClient::close()
+{
+	try
+	{
+		leveldb::DB* db = m_conn->db();
+		if (!db) return;
+
+		// Do explicit compaction:
+		db->CompactRange( NULL, NULL);
+		m_conn->close();
+	}
+	CATCH_ERROR_ARG1_MAP( _TXT("error in '%s' close: %s"), MODULENAME, *m_errorhnd);
+}
+
 std::string DatabaseClient::config() const
 {
 	try
 	{
-		return m_db->config();
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "config");
+
+		return m_conn->config();
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error in '%s' mapping configuration to string: %s"), MODULENAME, *m_errorhnd, std::string());
 }

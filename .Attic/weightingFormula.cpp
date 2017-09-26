@@ -219,7 +219,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceFormula::createFunct
 
 		if (m_formula.empty())
 		{
-			throw strus::runtime_error(_TXT("no weighting formula defined with string parameter 'formula'"));
+			throw strus::runtime_error( "%s", _TXT("no weighting formula defined with string parameter 'formula'"));
 		}
 		return new WeightingFunctionContextFormula( storage_, metadata, funcmap, m_formula, paramar, m_errorhnd);
 	}

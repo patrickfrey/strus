@@ -40,19 +40,22 @@ public:
 	{
 		/// \brief Default constructor
 		Description()
-			:m_text(){}
+			:m_name(),m_text(){}
 		/// \brief Constructor
-		explicit Description( const std::string& text_)
-			:m_text(text_){}
+		Description( const std::string& name_, const std::string& text_)
+			:m_name(name_),m_text(text_){}
 		/// \brief Copy constructor
 		Description( const Description& o)
-			:m_text(o.m_text){}
+			:m_name(o.m_name),m_text(o.m_text){}
 
+		/// \brief Get description text
+		const std::string& name() const			{return m_name;}
 		/// \brief Get description text
 		const std::string& text() const			{return m_text;}
 
 	private:
-		std::string m_text;		///< description text (english)
+		std::string m_name;		///< name of the operator
+		std::string m_text;		///< description text
 	};
 
 	/// \brief Get a description of the function for user help and introspection

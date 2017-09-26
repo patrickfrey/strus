@@ -59,7 +59,7 @@ MetaDataDescription::MetaDataDescription( const std::string& str)
 	{
 		skipSpaces( si, se);
 		const char* sn = (const char*)std::memchr( si, ' ', se-si);
-		if (!sn) throw strus::runtime_error( _TXT( "invalid meta data description string"));
+		if (!sn) throw strus::runtime_error( "%s", _TXT( "invalid meta data description string"));
 		std::string varName( si, sn-si);
 		si = sn;
 		skipSpaces( si, se);
@@ -117,10 +117,7 @@ int MetaDataDescription::getHandle( const std::string& name_) const
 {
 	std::map<std::string,std::size_t>::const_iterator
 		ni = m_namemap.find( utils::tolower( name_));
-	if (ni == m_namemap.end())
-	{
-		throw strus::runtime_error( _TXT( "meta data element with name '%s' is not defined"), name_.c_str());
-	}
+	if (ni == m_namemap.end()) return -1;
 	return (int)ni->second;
 }
 
@@ -222,11 +219,11 @@ MetaDataDescription::TranslationMap
 std::vector<std::string> MetaDataDescription::columns() const
 {
 	std::vector<std::string> rt;
-	std::map<std::string,std::size_t>::const_iterator
-		ni = m_namemap.begin(), ne = m_namemap.end();
-	std::size_t cidx=0,cend=m_namemap.size();
+	std::size_t cidx=0,cend=m_ar.size();
 	for (;cidx < cend; ++cidx)
 	{
+		std::map<std::string,std::size_t>::const_iterator
+			ni = m_namemap.begin(), ne = m_namemap.end();
 		for (; ni != ne; ++ni)
 		{
 			if (ni->second == cidx)

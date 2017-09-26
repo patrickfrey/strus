@@ -21,6 +21,7 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 #include "strus/base/fileio.hpp"
+#include "strus/base/local_ptr.hpp"
 
 using namespace strus;
 
@@ -153,7 +154,7 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 	try
 	{
 		leveldb::DB* db = 0;
-		std::auto_ptr<leveldb::DB> dbref;
+		strus::local_ptr<leveldb::DB> dbref;
 
 		// Open the database created:
 		std::string path;

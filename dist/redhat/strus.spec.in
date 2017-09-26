@@ -164,10 +164,10 @@ Requires: libboost_date_time1_54_0 >= 1.54.0
 BuildRequires: boost-devel
 %endif
 %if %{osufactory}
-Requires: libboost_thread1_62_0 >= 1.62.0
-Requires: libboost_atomic1_62_0 >= 1.62.0
-Requires: libboost_system1_62_0 >= 1.62.0
-Requires: libboost_date_time1_62_0 >= 1.62.0
+Requires: libboost_thread1_63_0 >= 1.63.0
+Requires: libboost_atomic1_63_0 >= 1.63.0
+Requires: libboost_system1_63_0 >= 1.63.0
+Requires: libboost_date_time1_63_0 >= 1.63.0
 BuildRequires: boost-devel
 %endif
 %endif
@@ -294,6 +294,21 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Mon Sep 4 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.15.1-0.1
+- release to cleanup mess with missing CHANGELOG in 0.15.0
+
+* Sun Sep 3 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.15.0-0.1
+- remove hardcoded setting of C++98 in CMake files
+- added method close() to vector storage client
+- fixed SEGFAULT under some circumstances after StorageClient::close hss been called
+- implemented posting join operator 'sequence_imm'
+- some method renamings
+- added ACL reader interface and method to create it in storage client interface
+- fixed bug in user access restriction handling (storing ACLs)
+- fixed bug in docnoAllMatchItr: endless loop under some circumstances
+- added weighting function 'scalar' that calculates a scalar function on constants, variables and document metadata defined as string
+- many CMake build fixes
+ 
 * Wed Feb 15 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.14.0-0.1
 - added possibility to precalculate weights in weighting function 'constant'
 - update for terms in forward index and search index

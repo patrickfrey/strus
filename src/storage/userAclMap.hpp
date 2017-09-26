@@ -20,11 +20,36 @@ class DatabaseClientInterface;
 /// \brief Forward declaration
 class DatabaseTransactionInterface;
 
+struct UsrAclKey
+{
+	Index usrno;
+	Index docno;
+
+	UsrAclKey( const Index& usrno_, const Index& docno_)
+		:usrno(usrno_),docno(docno_){}
+	UsrAclKey( const UsrAclKey& o)
+		:usrno(o.usrno),docno(o.docno){}
+};
+
+struct UsrAclKey_cmpByUsrDoc {
+	bool operator()(const UsrAclKey& a, const UsrAclKey& b) const
+	{
+		return a.usrno == b.usrno ? a.docno < b.docno : a.usrno < b.usrno;
+	}
+};
+struct UsrAclKey_cmpByDocUsr {
+	bool operator()(const UsrAclKey& a, const UsrAclKey& b) const
+	{
+		return a.docno == b.docno ? a.usrno < b.usrno : a.docno < b.docno;
+	}
+};
+
+
 class UserAclMap
 {
 public:
 	explicit UserAclMap( DatabaseClientInterface* database_)
-		:m_database(database_){}
+		:m_database(database_),m_usrdocmap(),m_docusrmap(),m_usr_deletes(),m_doc_deletes(){}
 
 	void defineUserAccess(
 		const Index& userno,
@@ -43,26 +68,25 @@ public:
 	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
+	void clear();
+
 private:
 	void markSetElement(
 		const Index& userno,
 		const Index& docno,
 		bool isMember);
 
-	void clear();
-
 public:
-	typedef std::pair<Index,Index> MapKey;
-	typedef LocalStructAllocator<std::pair<MapKey,bool> > MapAllocator;
-	typedef std::less<MapKey> MapCompare;
-	typedef std::map<MapKey,bool,MapCompare,MapAllocator> Map;
+	typedef LocalStructAllocator<std::pair<UsrAclKey,bool> > MapAllocator;
+	typedef std::map<UsrAclKey,bool,UsrAclKey_cmpByUsrDoc,MapAllocator> UsrDocMap;
+	typedef std::map<UsrAclKey,bool,UsrAclKey_cmpByDocUsr,MapAllocator> DocUsrMap;
 
 private:
 	DatabaseClientInterface* m_database;
-	Map m_usrmap;
-	Map m_aclmap;
+	UsrDocMap m_usrdocmap;
+	DocUsrMap m_docusrmap;
 	std::vector<Index> m_usr_deletes;
-	std::vector<Index> m_acl_deletes;
+	std::vector<Index> m_doc_deletes;
 };
 
 }

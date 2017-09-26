@@ -4,6 +4,7 @@ Library dependencies of strus:
 		- libsnappy (needed by LevelDB)
 
 Ubuntu:
+	sudo apt-get install google-perftools 
 	sudo apt-get install liboost-all-dev
 	sudo apt-get install libleveldb-dev
 	sudo apt-get install libsnappy-dev

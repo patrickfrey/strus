@@ -202,6 +202,14 @@ bool DatabaseAdapter_DataBlock::Cursor::loadLast( DataBlock& blk)
 	return getBlock( key, blk);
 }
 
+bool DatabaseAdapter_ForwardIndex::exists( const DatabaseClientInterface* database_, const Index& typeno_)
+{
+	DatabaseKey dbkey( DatabaseKey::ForwardIndexPrefix, typeno_);
+	Reference<DatabaseCursorInterface> cursor( database_->createCursor( DatabaseOptions().useCache()));
+	if (!cursor.get()) return false;
+	DatabaseCursorInterface::Slice key = cursor->seekFirst( dbkey.ptr(), dbkey.size());
+	return key.defined();
+}
 
 bool DatabaseAdapter_DocMetaData::getBlock( const DatabaseCursorInterface::Slice& key, MetaDataBlock& blk)
 {

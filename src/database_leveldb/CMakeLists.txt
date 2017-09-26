@@ -1,28 +1,28 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
 set(libstrus_database_leveldb_source_files
-   database.cpp
-   databaseClient.cpp
-   databaseCursor.cpp
-   databaseTransaction.cpp
-   libstrus_database_leveldb.cpp
+	levelDbHandle.cpp
+	database.cpp
+	databaseClient.cpp
+	databaseCursor.cpp
+	databaseTransaction.cpp
+	libstrus_database_leveldb.cpp
 )
 
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${LevelDB_INCLUDE_PATH}"
-	"${PROJECT_SOURCE_DIR}/3rdParty/getMemorySize/include"
-	"${PROJECT_SOURCE_DIR}/include"
+	"${GETMEMSIZE_INCLUDE_DIRS}"
+	"${STRUS_INCLUDE_DIRS}"
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${PROJECT_SOURCE_DIR}/src/utils"
-	"${PROJECT_SOURCE_DIR}/3rdParty/getMemorySize/src"
-	"${PROJECT_SOURCE_DIR}/src/database_leveldb"
+	"${MAIN_SOURCE_DIR}/utils"
+	"${GETMEMSIZE_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
 )
 
@@ -30,7 +30,7 @@ link_directories(
 # DATABASE LIBRARY
 # -------------------------------------------
 add_library( strus_database_leveldb SHARED ${libstrus_database_leveldb_source_files} )
-target_link_libraries( strus_database_leveldb boost_system strus_base getmemsize_static strus_private_utils ${LevelDB_LIBRARY})
+target_link_libraries( strus_database_leveldb ${Boost_LIBRARIES} strus_base getmemsize_static strus_private_utils ${LevelDB_LIBRARY})
 set_target_properties(
     strus_database_leveldb
     PROPERTIES

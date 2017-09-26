@@ -21,6 +21,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "random.hpp"
 #include <string>
 #include <vector>
@@ -1002,12 +1003,12 @@ int main( int argc, const char* argv[])
 		unsigned int nofFeatures = getUintValue( argv[4]);
 		unsigned int nofQueries = getUintValue( argv[5]);
 
-		std::auto_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
+		strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
 		if (!dbi.get())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
 		}
-		std::auto_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
+		strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
 		if (!sti.get() || g_errorhnd->hasError())
 		{
 			throw std::runtime_error( g_errorhnd->fetchError());
@@ -1018,7 +1019,7 @@ int main( int argc, const char* argv[])
 		sti->createStorage( config, dbi.get());
 		{
 			const strus::StatisticsProcessorInterface* statisticsMessageProc = 0;
-			std::auto_ptr<strus::StorageClientInterface>
+			strus::local_ptr<strus::StorageClientInterface>
 				storage( sti->createClient( config, dbi.get(), statisticsMessageProc));
 			if (!storage.get())
 			{
@@ -1033,7 +1034,7 @@ int main( int argc, const char* argv[])
 			unsigned int insertIntervallSize = 1000;
 			unsigned int insertIntervallCnt = 0;
 	
-			typedef std::auto_ptr<strus::StorageTransactionInterface> StorageTransaction;
+			typedef strus::local_ptr<strus::StorageTransactionInterface> StorageTransaction;
 			StorageTransaction transaction( storage->createTransaction());
 			if (!transaction.get())
 			{
@@ -1042,7 +1043,7 @@ int main( int argc, const char* argv[])
 			std::vector<RandomDoc>::const_iterator di = collection.docar.begin(), de = collection.docar.end();
 			for (; di != de; ++di,++totNofDocuments)
 			{
-				typedef std::auto_ptr<strus::StorageDocumentInterface> StorageDocument;
+				typedef strus::local_ptr<strus::StorageDocumentInterface> StorageDocument;
 	
 				StorageDocument doc( transaction->createDocument( di->docid));
 				if (!doc.get())
@@ -1090,7 +1091,7 @@ int main( int argc, const char* argv[])
 			std::cout << std::endl;
 #endif
 			std::cerr << "inserted collection with " << totNofDocuments << " documents, " << totNofOccurrencies << " occurrencies, " << totTermStringSize << " bytes" << std::endl;
-			std::auto_ptr<strus::QueryProcessorInterface> 
+			strus::local_ptr<strus::QueryProcessorInterface> 
 				queryproc( strus::createQueryProcessor( g_errorhnd));
 			if (!queryproc.get())
 			{

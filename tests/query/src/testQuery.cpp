@@ -12,6 +12,7 @@
 #include "strus/lib/queryproc.hpp"
 #include "strus/lib/queryeval.hpp"
 #include "strus/base/fileio.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/queryEvalInterface.hpp"
@@ -101,14 +102,14 @@ class QueryEvaluationEnv
 {
 public:
 	Storage storage;
-	std::auto_ptr<strus::QueryEvalInterface> qeval;
-	std::auto_ptr<strus::QueryInterface> query;
+	strus::local_ptr<strus::QueryEvalInterface> qeval;
+	strus::local_ptr<strus::QueryInterface> query;
 
 	explicit QueryEvaluationEnv( const strus::QueryProcessorInterface* qpi)
 	{
 		static const unsigned int primes[5] = {2,3,5,7,0};
 		storage.open( "path=storage; metadata=docno UINT16");
-		std::auto_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
+		strus::local_ptr<strus::StorageTransactionInterface> transactionInsert( storage.sci->createTransaction());
 		enum {NofDocs=10};
 		unsigned int di=0,de=NofDocs;
 		for (; di < de; ++di)
@@ -118,7 +119,7 @@ public:
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "insert document " << docid << std::endl;
 #endif
-			std::auto_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( docid));
+			strus::local_ptr<strus::StorageDocumentInterface> doc( transactionInsert->createDocument( docid));
 			doc->addSearchIndexTerm( "word", "hello", 1);
 			doc->addSearchIndexTerm( "word", "world", 2);
 #ifdef STRUS_LOWLEVEL_DEBUG
@@ -141,7 +142,7 @@ public:
 				}
 			}
 			doc->addSearchIndexTerm( "word", docid, 3);
-			doc->setMetaData( "docno", di);
+			doc->setMetaData( "docno", (strus::NumericVariant::IntType)di);
 			doc->setAttribute( "docid", docid);
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "add search index term \"word\" \"" << docid << "\"" << std::endl;
@@ -332,12 +333,12 @@ static void testSingleTermQueryWithRestrictionInclMetadata( const strus::QueryPr
 	query->pushTerm( "prim", "3", 1);
 	query->pushExpression( operation_OR, 2, 0, 0);
 	query->defineFeature( "res");
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareLess, "docno", 9, true);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareGreater, "docno", 2, true);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 3, true);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 4, false);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 5, false);
-	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", 6, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareLess, "docno", (strus::NumericVariant::IntType)9, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareGreater, "docno", (strus::NumericVariant::IntType)2, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)3, true);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)4, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)5, false);
+	query->addMetaDataRestrictionCondition( strus::MetaDataRestrictionInterface::CompareEqual, "docno", (strus::NumericVariant::IntType)6, false);
 
 	strus::QueryResult result = query->evaluate();
 #ifdef STRUS_LOWLEVEL_DEBUG

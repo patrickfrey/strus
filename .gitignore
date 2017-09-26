@@ -31,6 +31,7 @@ tests/storageop/checkindex.log
 tests/storageop/storage
 
 # CMake generated files
+*.cmake.user
 CMakeCache.txt
 CMakeFiles
 Makefile
@@ -38,13 +39,9 @@ cmake_install.cmake
 install_manifest.txt
 CTestTestfile.cmake
 CMakeLists.txt.user
-CTestTestfile.cmake.user
 cmake/uninstall.cmake
 DartConfiguration.tcl
 Testing/
-tests/cmake_install.cmake.user
-cmake/build_rules.cmake.user
-src/queryeval/cmake_install.cmake.user
 include/strus/versionStorage.hpp
 src/utils/fileio_sys.hpp
 src/utils/internationalization.cpp
@@ -59,6 +56,9 @@ dist/redhat/strus.spec
 3rdParty/armadillo/libstrus_armadillo.so.7
 3rdParty/armadillo/libstrus_armadillo.so.7.400.2
 3rdParty/armadillo/tmp/
+
+# Suggested build directory
+build
 
 # Compiled Programs
 src/storage/strusResizeBlocks
@@ -85,5 +85,4 @@ tests/vectorSpaceModel/src/testVectorSpaceModel
 tests/vectorSpaceModel/test.vm
 tests/vectorSpaceModel/test.vm.in.txt
 tests/vectorSpaceModel/test.vm.out.txt
-.travis.yml
 

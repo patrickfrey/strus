@@ -44,7 +44,6 @@ public:
 	void renameNewDocNumbers( const std::map<Index,Index>& renamemap);
 	void getWriteBatch( DatabaseTransactionInterface* transaction);
 
-private:
 	void clear();
 
 private:
@@ -66,14 +65,14 @@ private:
 		}
 	};
 
-	typedef LocalStructAllocator<std::pair<MapKey,std::size_t> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<const MapKey,std::size_t> > MapAllocator;
 	typedef std::less<MapKey> MapCompare;
 	typedef std::map<MapKey,std::size_t,MapCompare,MapAllocator> Map;
 	typedef std::vector<ForwardIndexBlock> BlockList;
 
 	typedef std::pair<Index,const char*> CurblockElem;
 	typedef std::vector<CurblockElem> CurblockElemList;
-	typedef LocalStructAllocator<std::pair<Index,CurblockElemList> > CurblockMapAllocator;
+	typedef LocalStructAllocator<std::pair<const Index,CurblockElemList> > CurblockMapAllocator;
 	typedef std::map<Index,CurblockElemList,std::less<Index>,CurblockMapAllocator> CurblockMap;
 
 private:

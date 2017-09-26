@@ -65,6 +65,17 @@ static void  (*g_libc_free)( void*) = 0;
 
 static void init_module()
 {
+	void* calloc_ptr;
+	Calloc_s* calloc_ref;
+	void* malloc_ptr;
+	Malloc_s* malloc_ref;
+	void* realloc_ptr;
+	Realloc_s* realloc_ref;
+	void* memalign_ptr;
+	Memalign_s* memalign_ref;
+	void* free_ptr;
+	Free_s* free_ref;
+
 	const char* nm = getenv( "STRUS_MALLOC_FAILURE_RATE");
 	if (nm)
 	{
@@ -74,24 +85,24 @@ static void init_module()
 
 	/* This function gets a little bit complicated because of
 		"ISO C forbids conversion of object pointer to function pointer type" */
-	void* calloc_ptr = dlsym( RTLD_NEXT, "calloc");
-	Calloc_s* calloc_ref = (Calloc_s*)&calloc_ptr;
+	calloc_ptr = dlsym( RTLD_NEXT, "calloc");
+	calloc_ref = (Calloc_s*)&calloc_ptr;
 	g_libc_calloc = calloc_ref->func;
 
-	void* malloc_ptr = dlsym( RTLD_NEXT, "malloc");
-	Malloc_s* malloc_ref = (Malloc_s*)&malloc_ptr;
+	malloc_ptr = dlsym( RTLD_NEXT, "malloc");
+	malloc_ref = (Malloc_s*)&malloc_ptr;
 	g_libc_malloc = malloc_ref->func;
 
-	void* realloc_ptr = dlsym( RTLD_NEXT, "realloc");
-	Realloc_s* realloc_ref = (Realloc_s*)&realloc_ptr;
+	realloc_ptr = dlsym( RTLD_NEXT, "realloc");
+	realloc_ref = (Realloc_s*)&realloc_ptr;
 	g_libc_realloc = realloc_ref->func;
 
-	void* memalign_ptr = dlsym( RTLD_NEXT, "memalign");
-	Memalign_s* memalign_ref = (Memalign_s*)&memalign_ptr;
+	memalign_ptr = dlsym( RTLD_NEXT, "memalign");
+	memalign_ref = (Memalign_s*)&memalign_ptr;
 	g_libc_memalign = memalign_ref->func;
 
-	void* free_ptr = dlsym( RTLD_NEXT, "free");
-	Free_s* free_ref = (Free_s*)&free_ptr;
+	free_ptr = dlsym( RTLD_NEXT, "free");
+	free_ref = (Free_s*)&free_ptr;
 	g_libc_free = free_ref->func;
 
 	if (!calloc_ptr||!malloc_ptr||!realloc_ptr||!memalign_ptr||!free_ptr)

@@ -6,10 +6,14 @@ dist: trusty
 compiler:
 - clang
 - gcc
+matrix:
+  exclude:
+  - os: osx
+    compiler: gcc
 sudo: required
 branches:
   only:
-    - travis
+    - master
 before_install:
 - chmod +x dist/travis/*.sh
 - dist/travis/before_script.sh

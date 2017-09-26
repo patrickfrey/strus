@@ -10,6 +10,7 @@
 #include "databaseClient.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseOptions.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <memory>
@@ -18,8 +19,10 @@
 
 using namespace strus;
 
-DatabaseTransaction::DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_, ErrorBufferInterface* errorhnd_)
-	:m_database(database_),m_db(db_),m_commit_called(false),m_rollback_called(false),m_errorhnd(errorhnd_)
+#define MODULENAME "DatabaseTransaction"
+
+DatabaseTransaction::DatabaseTransaction( const utils::SharedPtr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
+	:m_conn(conn_),m_batch(),m_commit_called(false),m_rollback_called(false),m_errorhnd(errorhnd_)
 {}
 
 DatabaseTransaction::~DatabaseTransaction()
@@ -31,7 +34,9 @@ DatabaseCursorInterface* DatabaseTransaction::createCursor( const DatabaseOption
 {
 	try
 	{
-		return m_database->createCursor( options);
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "createCursor");
+		return new DatabaseCursor( m_conn, options.useCacheEnabled(), false, m_errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database cursor: %s"), *m_errorhnd, 0);
 }
@@ -68,7 +73,10 @@ void DatabaseTransaction::removeSubTree(
 {
 	try
 	{
-		std::auto_ptr<leveldb::Iterator> itr( m_db->NewIterator( leveldb::ReadOptions()));
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "removeSubTree");
+
+		strus::local_ptr<leveldb::Iterator> itr( db->NewIterator( leveldb::ReadOptions()));
 		for (itr->Seek( leveldb::Slice( domainkey,domainkeysize));
 			itr->Valid()
 				&& domainkeysize <= itr->key().size()
@@ -85,6 +93,9 @@ bool DatabaseTransaction::commit()
 {
 	try
 	{
+		leveldb::DB* db = m_conn->db();
+		if (!db) throw strus::runtime_error(_TXT("called method '%s::%s' after close"), MODULENAME, "commit");
+
 		if (m_errorhnd->hasError())
 		{
 			m_errorhnd->explain( _TXT( "database transaction with error: %s"));
@@ -92,7 +103,7 @@ bool DatabaseTransaction::commit()
 		}
 		leveldb::WriteOptions options;
 		options.sync = true;
-		leveldb::Status status = m_db->Write( options, &m_batch);
+		leveldb::Status status = db->Write( options, &m_batch);
 		if (!status.ok())
 		{
 			std::string statusstr( status.ToString());

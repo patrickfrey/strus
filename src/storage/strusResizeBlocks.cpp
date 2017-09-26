@@ -9,6 +9,7 @@
 #include "strus/lib/database_leveldb.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/fileio.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "strus/versionStorage.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseInterface.hpp"
@@ -88,21 +89,21 @@ static std::pair<unsigned int,unsigned int> parseNumberRange( const char* arg, c
 	return std::pair<unsigned int,unsigned int>(first,second);
 }
 
-static void commitTransaction( strus::DatabaseClientInterface& database, std::auto_ptr<strus::DatabaseTransactionInterface>& transaction)
+static void commitTransaction( strus::DatabaseClientInterface& database, strus::local_ptr<strus::DatabaseTransactionInterface>& transaction)
 {
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error(_TXT("error in storage transaction"));
+		throw strus::runtime_error( "%s", _TXT("error in storage transaction"));
 	}
 	transaction->commit();
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error(_TXT("error in storage transaction commit"));
+		throw strus::runtime_error( "%s", _TXT("error in storage transaction commit"));
 	}
 	transaction.reset( database.createTransaction());
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error(_TXT("error creating new storage transaction"));
+		throw strus::runtime_error( "%s", _TXT("error creating new storage transaction"));
 	}
 }
 
@@ -116,7 +117,7 @@ static void resizeBlocks(
 		const std::pair<unsigned int,unsigned int>& docnorange)
 {
 	strus::StorageClient storage( dbi, configsource, 0/*termnomap_source*/, 0/*statisticsProc*/, g_errorBuffer);
-	std::auto_ptr<strus::DatabaseTransactionInterface> transaction( storage.databaseClient()->createTransaction());
+	strus::local_ptr<strus::DatabaseTransactionInterface> transaction( storage.databaseClient()->createTransaction());
 	unsigned int transactionidx = 0;
 	unsigned int blockcount = 0;
 	strus::Index termtypeno = 0;
@@ -127,7 +128,7 @@ static void resizeBlocks(
 	}
 	if (!transaction.get())
 	{
-		throw strus::runtime_error(_TXT("failed to create storage transaction"));
+		throw strus::runtime_error( "%s", _TXT("failed to create storage transaction"));
 	}
 	if (strus::utils::caseInsensitiveEquals( blocktype, "forwardindex"))
 	{
@@ -192,13 +193,13 @@ static void resizeBlocks(
 	}
 	else
 	{
-		throw strus::runtime_error(_TXT("block resize is not implemented for blocktype '%s'"));
+		throw strus::runtime_error(_TXT("block resize is not implemented for blocktype '%s'"), blocktype.c_str());
 	}
 }
 
 int main( int argc, const char* argv[])
 {
-	std::auto_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2));
+	strus::local_ptr<strus::ErrorBufferInterface> errorBuffer( strus::createErrorBuffer_standard( 0, 2));
 	if (!errorBuffer.get())
 	{
 		std::cerr << _TXT("failed to create error buffer") << std::endl;
@@ -231,7 +232,7 @@ int main( int argc, const char* argv[])
 			{
 				if (argi == argc || argv[argi+1][0] == '-')
 				{
-					throw strus::runtime_error( _TXT("no argument given to option --commit"));
+					throw strus::runtime_error( _TXT("no argument given to option %s"), "--commit");
 				}
 				++argi;
 				transactionsize = parseNumber( argv[argi], "argument for option --commit");
@@ -240,7 +241,7 @@ int main( int argc, const char* argv[])
 			{
 				if (argi == argc || argv[argi+1][0] == '-')
 				{
-					throw strus::runtime_error( _TXT("no argument given to option --docno"));
+					throw strus::runtime_error( _TXT("no argument given to option %s"), "--docno");
 				}
 				++argi;
 				docnorange = parseNumberRange( argv[argi], "argument for option --docno");
@@ -249,7 +250,7 @@ int main( int argc, const char* argv[])
 			{
 				if (argi == argc || argv[argi+1][0] == '-')
 				{
-					throw strus::runtime_error( _TXT("no argument given to option --termtype"));
+					throw strus::runtime_error( _TXT("no argument given to option %s"), "--termtype");
 				}
 				++argi;
 				termtype = argv[ argi];
@@ -272,15 +273,15 @@ int main( int argc, const char* argv[])
 		unsigned int newblocksize = parseNumber( argv[argi+2], "positional argument 3");
 
 		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( g_errorBuffer);
-		if (!dbi) throw strus::runtime_error( _TXT("could not create leveldb key/value store database handler"));
-		if (g_errorBuffer->hasError()) throw strus::runtime_error(_TXT("error in initialization"));
+		if (!dbi) throw strus::runtime_error( "%s",  _TXT("could not create leveldb key/value store database handler"));
+		if (g_errorBuffer->hasError()) throw strus::runtime_error( "%s", _TXT("error in initialization"));
 
 		resizeBlocks( dbi, dbconfig, blocktype, termtype, newblocksize, transactionsize, docnorange);
 
 		// Check for reported error an terminate regularly:
 		if (g_errorBuffer->hasError())
 		{
-			throw strus::runtime_error( _TXT("error processing resize blocks"));
+			throw strus::runtime_error( "%s",  _TXT("error processing resize blocks"));
 		}
 		std::cerr << _TXT("done") << std::endl;
 		return 0;

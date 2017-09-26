@@ -1,7 +1,23 @@
+Add name to summarizer and weighting function descriptions
+Fix bug in summarizer match phrase: Feature length is not considered for windows of span=1
+
+New block type for storing entropy weighted ff for each feature in each document.
+Calculation of this value for the Wikipedia project.
+Collect entity features and make summarization with them in the Wikipedia project
+For this we need a hint feature for the MatchPhrase Summarizer
+
 Test PostingIteratorIntersect with cardinality
 Write storage conversion to change endianess of an index. Write a storage conversion utility
 Define an interface to declare a limit of query execution to prevent DoS attacks (counter of micro ops in the query evaluation)
 
 Named structure interface parameter for weighting function an summarizer that provides a list of weighted areas that can be fetched elementwise or as array. 
 	These structure interfaces can be built as combination of others of their kind and posting iterators
+
+
+Build and install descriptions for all platforms, take infos from packages
+Take INSTALL descriptions of Windows, FreeBSD and OpenBSD from Aba as examples.
+
+
+
+
 

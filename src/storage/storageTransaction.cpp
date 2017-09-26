@@ -17,6 +17,7 @@
 #include "storageClient.hpp"
 #include "databaseAdapter.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
@@ -291,6 +292,10 @@ bool StorageTransaction::commit()
 	private:
 		 StatisticsBuilderInterface* m_obj;
 	};
+	if (m_errorhnd->hasError())
+	{
+		return false;
+	}
 	if (m_commit)
 	{
 		m_errorhnd->report( _TXT( "called transaction commit twice"));
@@ -314,7 +319,7 @@ bool StorageTransaction::commit()
 		StatisticsBuilderInterface* statisticsBuilder = m_storage->getStatisticsBuilder();
 		DocumentFrequencyCache* dfcache = m_storage->getDocumentFrequencyCache();
 
-		std::auto_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
+		strus::local_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 		if (!transaction.get())
 		{
 			m_errorhnd->explain( _TXT( "error creating transaction"));
@@ -373,7 +378,7 @@ bool StorageTransaction::commit()
 
 		m_commit = true;
 		m_nof_documents_affected = nof_new_documents + nof_chg_documents + m_nof_deleted_documents;
-		m_nof_deleted_documents = 0;
+		clearMaps();
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error in transaction commit: %s"), *m_errorhnd, false);
@@ -395,6 +400,27 @@ void StorageTransaction::rollback()
 	m_storage->releaseTransaction( refreshList);
 	m_rollback = true;
 	m_nof_documents_affected = 0;
+	clearMaps();
 }
 
+void StorageTransaction::clearMaps()
+{
+	m_attributeMap.clear();
+	m_metaDataMap.clear();
+
+	m_invertedIndexMap.clear();
+	m_forwardIndexMap.clear();
+	m_userAclMap.clear();
+
+	m_termTypeMap.clear();
+	m_termValueMap.clear();
+	m_docIdMap.clear();
+	m_userIdMap.clear();
+	m_attributeNameMap.clear();
+
+	m_termTypeMapInv.clear();
+	m_termValueMapInv.clear();
+
+	m_explicit_dfmap.clear();
+}
 

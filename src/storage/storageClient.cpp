@@ -20,6 +20,7 @@
 #include "strus/storageInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
@@ -44,6 +45,7 @@
 #include "attributeReader.hpp"
 #include "keyAllocatorInterface.hpp"
 #include "valueIterator.hpp"
+#include "aclReader.hpp"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -79,6 +81,7 @@ StorageClient::StorageClient(
 	,m_nof_documents(0)
 	,m_metaDataBlockCache(0)
 	,m_statisticsProc(statisticsProc_)
+	,m_close_called(false)
 	,m_errorhnd(errorhnd_)
 {
 	try
@@ -93,7 +96,7 @@ StorageClient::StorageClient(
 	catch (const std::bad_alloc& err)
 	{
 		cleanup();
-		throw strus::runtime_error(_TXT("out of memory creating storage client"));
+		throw strus::runtime_error( "%s", _TXT("out of memory creating storage client"));
 	}
 	catch (const std::runtime_error& err)
 	{
@@ -110,8 +113,14 @@ std::string StorageClient::config() const
 		std::string mdstr( m_metadescr.tostring());
 		if (!mdstr.empty())
 		{
+			if (!rt.empty()) rt.push_back(';');
 			rt.append( "metadata=");
 			rt.append( mdstr);
+		}
+		if (withAcl())
+		{
+			if (!rt.empty()) rt.push_back(';');
+			rt.append( "acl=true");
 		}
 		return rt;
 	}
@@ -120,13 +129,16 @@ std::string StorageClient::config() const
 
 void StorageClient::releaseTransaction( const std::vector<Index>& refreshList)
 {
-	// Refresh all entries touched by the inserts/updates written
-	std::vector<Index>::const_iterator ri = refreshList.begin(), re = refreshList.end();
-	for (; ri != re; ++ri)
+	if (m_metaDataBlockCache)
 	{
-		m_metaDataBlockCache->declareVoid( *ri);
+		// Refresh all entries touched by the inserts/updates written
+		std::vector<Index>::const_iterator ri = refreshList.begin(), re = refreshList.end();
+		for (; ri != re; ++ri)
+		{
+			m_metaDataBlockCache->declareVoid( *ri);
+		}
+		m_metaDataBlockCache->refresh();
 	}
-	m_metaDataBlockCache->refresh();
 }
 
 static Index versionNo( Index major, Index minor)
@@ -162,7 +174,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 	||  !varstor.load( "AttribNo", next_attribno_)
 	||  !varstor.load( "NofDocs", nof_documents_))
 	{
-		throw strus::runtime_error( _TXT( "corrupt storage, not all mandatory variables defined"));
+		throw strus::runtime_error( "%s",  _TXT( "corrupt storage, not all mandatory variables defined"));
 	}
 	if (!varstor.load( "Version", version_))
 	{
@@ -194,7 +206,7 @@ void StorageClient::loadVariables( DatabaseClientInterface* database_)
 void StorageClient::storeVariables()
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	if (!transaction.get()) throw strus::runtime_error(_TXT("error storing variables"));
+	if (!transaction.get()) throw strus::runtime_error( "%s", _TXT("error storing variables"));
 	getVariablesWriteBatch( transaction.get(), 0);
 	transaction->commit();
 }
@@ -217,7 +229,7 @@ void StorageClient::getVariablesWriteBatch(
 
 StorageClient::~StorageClient()
 {
-	try
+	if (!m_close_called) try
 	{
 		storeVariables();
 	}
@@ -401,6 +413,14 @@ InvAclIteratorInterface*
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating inverted ACL iterator: %s"), *m_errorhnd, 0);
 }
 
+AclReaderInterface* StorageClient::createAclReader() const
+{
+	try
+	{
+		return new AclReader( this, m_database.get(), m_errorhnd);
+	}
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating ACL reader: %s"), *m_errorhnd, 0);
+}
 
 StorageTransactionInterface*
 	StorageClient::createTransaction()
@@ -412,8 +432,7 @@ StorageTransactionInterface*
 			TransactionLock lock( this);
 			if (!m_statisticsBuilder.get())
 			{
-				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
 		return new StorageTransaction( this, m_database.get(), &m_metadescr, m_next_typeno.value(), m_errorhnd);
@@ -490,7 +509,7 @@ public:
 	{
 		if (!m_storage->withAcl())
 		{
-			throw strus::runtime_error( _TXT( "storage configured without ACL. No users can be created"));
+			throw strus::runtime_error( "%s", _TXT( "storage configured without ACL. No users can be created"));
 		}
 		return m_storage->allocUsernoImm( name);
 	}
@@ -677,6 +696,18 @@ Index StorageClient::documentNumber( const std::string& docid) const
 	return getDocno( docid);
 }
 
+Index StorageClient::termTypeNumber( const std::string& type) const
+{
+	return getTermType( type);
+}
+
+bool StorageClient::isForwardIndexTerm( const std::string& type) const
+{
+	Index typeno = getTermType( type);
+	if (!typeno) return false;
+	return DatabaseAdapter_ForwardIndex::exists( m_database.get(), typeno);
+}
+
 ValueIteratorInterface* StorageClient::createTermTypeIterator() const
 {
 	try
@@ -798,7 +829,7 @@ MetaDataRestrictionInterface* StorageClient::createMetaDataRestriction() const
 void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
-	if (!transaction.get()) throw strus::runtime_error(_TXT("error loading termno map"));
+	if (!transaction.get()) throw strus::runtime_error( "%s", _TXT("error loading termno map"));
 	utils::UnorderedMap<std::string,Index> termno_map;
 	try
 	{
@@ -835,7 +866,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 	}
 	catch (const std::runtime_error& err)
 	{
-		throw strus::runtime_error( _TXT( "failed to build termno map: "), err.what());
+		throw strus::runtime_error( _TXT( "failed to build termno map: %s"), err.what());
 	}
 }
 
@@ -860,26 +891,25 @@ DocumentFrequencyCache* StorageClient::getDocumentFrequencyCache()
 	return m_documentFrequencyCache.get();
 }
 
-bool StorageClient::fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize)
+bool StorageClient::fetchNextStatisticsMessage( const void*& msg, std::size_t& msgsize)
 {
 	TransactionLock lock( this);
 	return m_statisticsBuilder->fetchMessage( msg, msgsize);
 }
 
-StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool sign)
+StatisticsIteratorInterface* StorageClient::createAllStatisticsIterator( bool sign)
 {
 	try
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
+			throw strus::runtime_error( "%s", _TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
 			if (!m_statisticsBuilder.get())
 			{
-				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
 		return new StatisticsInitIterator( this, m_database.get(), sign, m_errorhnd);
@@ -887,20 +917,19 @@ StatisticsIteratorInterface* StorageClient::createInitStatisticsIterator( bool s
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating statistics message iterator: %s"), *m_errorhnd, 0);
 }
 
-StatisticsIteratorInterface* StorageClient::createUpdateStatisticsIterator()
+StatisticsIteratorInterface* StorageClient::createChangeStatisticsIterator()
 {
 	try
 	{
 		if (!m_statisticsProc)
 		{
-			throw strus::runtime_error(_TXT( "no statistics message processor defined"));
+			throw strus::runtime_error( "%s", _TXT( "no statistics message processor defined"));
 		}
 		{
 			TransactionLock lock( this);
 			if (!m_statisticsBuilder.get())
 			{
-				StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-				m_statisticsBuilder.reset( m_statisticsProc->createBuilder( options));
+				m_statisticsBuilder.reset( m_statisticsProc->createBuilder());
 			}
 		}
 		return new StatisticsUpdateIterator( this, m_errorhnd);
@@ -1029,7 +1058,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 {
 	try
 	{
-		std::auto_ptr<strus::DatabaseCursorInterface>
+		strus::local_ptr<strus::DatabaseCursorInterface>
 			cursor( m_database->createCursor( strus::DatabaseOptions()));
 		if (!cursor.get()) return false;
 
@@ -1047,6 +1076,17 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 		return true;
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error checking storage: %s"), *m_errorhnd, false);
+}
+
+void StorageClient::close()
+{
+	try
+	{
+		storeVariables();
+	}
+	CATCH_ERROR_MAP( _TXT("error storing variables in close of storage client: %s"), *m_errorhnd);
+	m_database->close();
+	m_close_called = true;
 }
 
 

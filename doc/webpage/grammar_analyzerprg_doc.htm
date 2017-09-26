@@ -41,24 +41,30 @@
 IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
 STRING         : &lt;single or double quoted string with backslash escaping&gt;
 EXPRESSION     : &lt;string format depending on segmenter&gt;
-
+MIMETYPE       : &lt;MIME type definition string with semicolon separated definitions (content and encoding)&gt;
+PRGFILENAME    : &lt;Name of a program to load (e.g. a program with patterns to match)&gt;
+MODULEID       : &lt;Identifier or string identifying a module to use&gt;
 config         = configsection config
                ;
-configsection  = sectionhdr definitionlist
+configsection  = "[" "Attribute" "]" attrdeflist
+               | "[" "MetaData" "]" attrdeflist
+               | "[" "SearchIndex" "]" featdeflist
+               | "[" "ForwardIndex" "]" featdeflist
+               | "[" "PatternLexem" "]" lexemdeflist
                | "[" "Aggregator" "]" aggdeflist
                | "[" "Document" "]" docdeflist
-               ;
-sectionhdr     = "[" sectionid "]"
-               ;
-sectionid      = "Attribute"
-               | "MetaData"
-               | "SearchIndex"
-               | "ForwardIndex"
+               | "[" "Content" "]" contentdeflist
+               | "[" "PatternMatch" MODULEID "]" prgdeflist
                ;
 docdeflist     = docdef docdeflist
                |
                ;
-docdef         = type "=" selectexpression ";"
+docdef         = type "=" selector ";"
+               ;
+contentdeflist = contentdef contentdeflist
+               |
+               ;
+contentdef     = MIMETYPE selector ";"
                ;
 aggdeflist     = aggdef aggdeflist
                | 
@@ -66,12 +72,30 @@ aggdeflist     = aggdef aggdeflist
 aggdef         = metadataelem "=" functioncall ";"
                ;
 metadataelem   = IDENTIFIER ;
-definitionlist = definition definitionlist
+featdeflist    = featdef featdeflist
                |
                ;
-definition     = type "=" normalizer tokenizer selector ";"
+featdef        = type "=" normalizer tokenizer [ "{" posbindoptlist "}" ] selector ";"
+               ;
+attrdeflist    = attrdef attrdeflist
+               |
+               ;
+attrdef        = type "=" normalizer tokenizer selector ";"
+               ;
+lexemdeflist   = lexemdef lexemdeflist
+               |
+               ;
+lexemdef       = type "=" normalizer tokenizer selector ";"
+               ;
+posbindoptlist = posbindopt posbindoptlist
+               ;
+posbindopt     = "position" "=" [ "succ" | "pred" ]
                ;
 type           = IDENTIFIER ;
+prgdef         = type "=" PRGFILENAME ";"
+               ;
+prgdeflist     = prgdef prgdeflist
+               ;
 normalizer     = functioncall ":" normalizer
                | functioncall
                ;
@@ -92,6 +116,8 @@ selector       = EXPRESSION ;
 	<h3>Meaning of the sections</h3>
 	<h5>Document</h5>
 	<p class="description">The declarations in this sections are sub document definitions (in case of multipart documents).</p>
+	<h5>Content</h5>
+	<p class="description">The declarations in this sections are sub content definitions that use a different segmenter to process the document content (e.g. JSON embedded in XML).</p>
 	<h5>Attribute</h5>
 	<p class="description">The declarations in this section are document attribute value definitions.</p>
 	<h5>MetaData</h5>
@@ -100,6 +126,10 @@ selector       = EXPRESSION ;
 	<p class="description">The declarations in this section are feature definitions to put into the search (inverted) index.</p>
 	<h5>ForwardIndex</h5>
 	<p class="description">The declarations in this section are feature definitions to put into the forward index.</p>
+	<h5>PatternLexem</h5>
+	<p class="description">The declarations in this section are lexem definitions that are not inserted into the index. They are just used to feed post processing pattern matchers with lexems.</p>
+	<h5>PatternMatch</h5>
+	<p class="description">The declarations in this section define pattern matching programs. The pattern matcher module is selection with the argument &lt;moduleid&gt; of the section header. There exists no pattern matcher in the core. The standard pattern matcher name "std" is implemented in the module "analyzer_pattern" of the project strusPattern.</p>
 	<h5>Aggregator</h5>
 	<p class="description">The declarations in this section are meta data definitions that assign a value 
 	calculated from a function called after all other document analysis steps. The function called is meant 
@@ -113,6 +143,8 @@ selector       = EXPRESSION ;
 	<p class="description">Name of the function that identifier this tokenizer or normalizer.</p>
 	<h5>selector</h5>
 	<p class="description">The selector expression defines what document segments are used to produce the resulting feature or element.</p>
+	<h5>posbindopt</h5>
+	<p class="description">Options that stear ordinal position assignment. There are currently two options implemented: position=succ =&gt; The feature does not get an own ordinal position assigned but gets the follow position assigned or disappears if there exists none. position=pred =&gt; The feature does not get an own ordinal position assigned but gets the previous position assigned or disappears if there exists none.</p>
 
 	<h3>Example</h3>
 	<p class="description">The following example relies on the standard XML segmenter
@@ -137,7 +169,7 @@ selector       = EXPRESSION ;
 
 [Aggregator]
         doclen = count( stem);
-</pre>
+	</pre>
 </div>
 </div>
 </body>

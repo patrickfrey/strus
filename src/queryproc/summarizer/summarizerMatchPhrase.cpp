@@ -9,6 +9,7 @@
 #include "proximityWeightAccumulator.hpp"
 #include "positionWindow.hpp"
 #include "postingIteratorLink.hpp"
+#include "postingIteratorHelpers.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -18,10 +19,14 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <cstdlib>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
@@ -44,14 +49,19 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_itrarsize(0)
 	,m_structarsize(0)
 	,m_paraarsize(0)
+	,m_nof_maxdf_features(0)
 	,m_cardinality(parameter_->m_cardinality)
 	,m_initialized(false)
 	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw strus::runtime_error(_TXT("error creating forward index iterator"));
+	if (!m_forwardindex.get()) throw strus::runtime_error( "%s", _TXT("error creating forward index iterator"));
 }
 
+void SummarizerFunctionContextMatchPhrase::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+}
 
 void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 		const std::string& name,
@@ -64,24 +74,24 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 	{
 		if (utils::caseInsensitiveEquals( name, "title"))
 		{
-			if (m_titleitr) throw strus::runtime_error(_TXT("title field specified twice"));
+			if (m_titleitr) throw strus::runtime_error( "%s", _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "struct"))
 		{
-			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
+			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
 			m_structar[ m_structarsize++] = itr;
 		}
 		else if (utils::caseInsensitiveEquals( name, "para"))
 		{
-			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of structure features out of range"));
+			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = itr;
 			m_paraarsize++;
 		}
 		else if (utils::caseInsensitiveEquals( name, "match"))
 		{
-			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( _TXT("number of weighting features out of range"));
+			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
 			double idf = logl( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));
@@ -91,14 +101,10 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 			}
 			if (m_parameter->m_maxdf * m_nofCollectionDocuments < df)
 			{
-				m_maxdist_featar[ m_itrarsize] = (m_parameter->m_windowsize > 5)?5:m_parameter->m_windowsize;
-			}
-			else
-			{
-				m_maxdist_featar[ m_itrarsize] = m_parameter->m_windowsize;
+				++m_nof_maxdf_features;
 			}
 			m_itrar[ m_itrarsize++] = itr;
-			m_idfar.add( idf * weight);
+			m_idfar.push( idf * weight);
 		}
 		else
 		{
@@ -111,169 +117,93 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 SummarizerFunctionContextMatchPhrase::~SummarizerFunctionContextMatchPhrase()
 {}
 
-
-static void callSkipDoc( const Index& docno, PostingIteratorInterface** ar, std::size_t arsize, PostingIteratorInterface** valid_ar)
+double SummarizerFunctionContextMatchPhrase::windowWeight(
+		WeightingData& wdata, const PositionWindow& poswin,
+		const std::pair<Index,Index>& structframe,
+		const std::pair<Index,Index>& paraframe)
 {
-	for (std::size_t ai=0; ai < arsize; ++ai)
+	const std::size_t* window = poswin.window();
+	std::size_t windowsize = poswin.size();
+	Index windowpos = poswin.pos();
+
+	// Calculate the weight of the current window:
+	ProximityWeightAccumulator::WeightArray weightar( m_itrarsize, 1.0);
+
+	if (m_itrarsize == 1)
 	{
-		if (docno == ar[ ai]->skipDoc( docno))
-		{
-			valid_ar[ ai] = ar[ ai];
-		}
-		else
-		{
-			valid_ar[ ai] = 0;
-		}
+		weightar[ 0] += 1.0;
 	}
+	else
+	{
+		ProximityWeightAccumulator::weight_same_sentence(
+			weightar, m_parameter->m_weight_same_sentence, m_weightincr,
+			window, windowsize,
+			wdata.valid_itrar, m_itrarsize,
+			structframe);
+		ProximityWeightAccumulator::weight_invdist(
+			weightar, m_parameter->m_weight_invdist, m_weightincr,
+			window, windowsize,
+			wdata.valid_itrar, m_itrarsize);
+	}
+	if (windowpos < 1000)
+	{
+		// Weight distance to start of document:
+		ProximityWeightAccumulator::weight_invpos(
+			weightar, m_parameter->m_weight_invpos_start, m_weightincr, 1,
+			window, windowsize, wdata.valid_itrar, m_itrarsize);
+	}
+	if (paraframe.first)
+	{
+		// Weight inv distance to paragraph start:
+		ProximityWeightAccumulator::weight_invpos(
+			weightar, m_parameter->m_weight_invpos_para, m_weightincr, paraframe.first,
+			window, windowsize, wdata.valid_itrar, m_itrarsize);
+	}
+	if (structframe.first)
+	{
+		// Weight inv distance to paragraph start:
+		ProximityWeightAccumulator::weight_invpos(
+			weightar, m_parameter->m_weight_invpos_struct, m_weightincr, structframe.first,
+			window, windowsize, wdata.valid_itrar, m_itrarsize);
+	}
+	weightar.multiply( m_idfar);
+	return weightar.sum();
 }
 
-static Index callSkipPos( Index start, PostingIteratorInterface** ar, std::size_t size)
+SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase::findBestMatch_(
+			WeightingData& wdata,
+			unsigned int cardinality,
+			PostingIteratorInterface** itrar)
 {
-	Index rt = 0;
-	std::size_t ti=0;
-	for (; ti<size; ++ti)
-	{
-		if (ar[ ti])
-		{
-			Index pos = ar[ ti]->skipPos( start);
-			if (pos)
-			{
-				if (!rt || pos < rt) rt = pos;
-			}
-		}
-	}
-	return rt;
-}
-
-static std::pair<Index,Index> callSkipPosWithLen( Index start, PostingIteratorInterface** ar, std::size_t size)
-{
-	std::pair<Index,Index> rt( 0, 0);
-	std::size_t ti=0;
-	for (; ti<size; ++ti)
-	{
-		if (ar[ ti])
-		{
-			Index pos = ar[ ti]->skipPos( start);
-			if (pos)
-			{
-				if (!rt.first) rt = std::pair<Index,Index>( pos, ar[ ti]->length());
-				if (pos <= rt.first)
-				{
-					if (rt.first < pos)
-					{
-						rt = std::pair<Index,Index>( pos, ar[ ti]->length());
-					}
-					else
-					{
-						rt = std::pair<Index,Index>( std::max( pos, rt.first), ar[ ti]->length());
-					}
-				}
-			}
-		}
-	}
-	return rt;
-}
-
-struct Candidate
-{
-	double weight;
-	Index pos;
-	Index span;
-
-	Candidate( double weight_, Index pos_, Index span_)
-		:weight(weight_),pos(pos_),span(span_){}
-	Candidate( const Candidate& o)
-		:weight(o.weight),pos(o.pos),span(o.span){}
-};
-
-static Candidate findCandidate(
-			const Index& firstpos,
-			const ProximityWeightAccumulator::WeightArray& idfar,
-			const ProximityWeightAccumulator::WeightArray& weightincr,
-			unsigned int maxwindowsize, unsigned int cardinality,
-			PostingIteratorInterface** itrar, std::size_t itrarsize,
-			PostingIteratorInterface** structar, std::size_t structarsize,
-			PostingIteratorInterface** paraar, std::size_t parasize,
-			const Index* maxdist_featar)
-{
-	Candidate rt( 0.0,firstpos,0);
-	Index prevPara=firstpos, nextPara=callSkipPos( firstpos, paraar, parasize);
-	PositionWindow poswin( itrar, itrarsize, maxwindowsize, cardinality,
+	Match rt;
+	Index lastEndPos = 0;
+	unsigned int lastElementCnt = 0;
+	Index firstpos = wdata.titleend;
+	PositionWindow poswin( itrar, m_itrarsize, m_parameter->m_windowsize, cardinality,
 				firstpos, PositionWindow::MaxWin);
 	bool more = poswin.first();
 	for (;more; more = poswin.next())
 	{
-		const std::size_t* window = poswin.window();
-		std::size_t windowsize = poswin.size();
+		// Check if the window is a really new one and not one already covered:
 		Index windowpos = poswin.pos();
 		Index windowspan = poswin.span();
-
-		// Calculate the paragraph elements before and after the current window position:
-		while (nextPara && nextPara < windowpos)
+		if (lastEndPos == windowpos + windowspan && lastElementCnt > poswin.size())
 		{
-			prevPara = nextPara;
-			nextPara = callSkipPos( prevPara+1, paraar, parasize);
+			continue;
 		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "weighting window " << windowpos << "..." << (windowpos+windowspan) << " para " << prevPara << "|" << nextPara << std::endl;
-#endif
+		lastElementCnt = poswin.size();
+		lastEndPos = windowpos + windowspan;
+
 		// Check if window is overlapping a paragraph. In this case to not use it for summary:
-		if (nextPara && nextPara < windowpos + windowspan) continue;
+		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
 
-		// Calculate the weight of the current window:
-		ProximityWeightAccumulator::WeightArray weightar( itrarsize, 1.0);
+		// Calculate sentence frame:
+		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
 
-		if (itrarsize == 1)
-		{
-			weightar[ 0] += 1.0;
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "\tff incr [single feature] " << weightar.tostring() << std::endl;
-#endif
-		}
-		else
-		{
-			ProximityWeightAccumulator::weight_same_sentence(
-				weightar, 0.3, weightincr, window, windowsize,
-				maxdist_featar, itrar, itrarsize, structar, structarsize);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "\taccumulated ff incr [same sentence] " << weightar.tostring() << std::endl;
-#endif
-			ProximityWeightAccumulator::weight_imm_follow(
-				weightar, 0.4, weightincr, window, windowsize, itrar, itrarsize);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "\taccumulated ff incr [imm follow] " << weightar.tostring() << std::endl;
-#endif
-			ProximityWeightAccumulator::weight_invdist(
-				weightar, 0.3, weightincr, window, windowsize, itrar, itrarsize);
-		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "\taccumulated ff incr [inv distance] " << weightar.tostring() << std::endl;
-#endif
-		if (windowpos - firstpos < 1000)
-		{
-			ProximityWeightAccumulator::weight_invpos(
-				weightar, 0.5, weightincr, firstpos, itrar, itrarsize);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "\taccumulated ff incr [inv distance begin] " << weightar.tostring() << std::endl;
-#endif
-		}
-		if (nextPara && windowpos >= nextPara)
-		{
-			// Weight inv distance to paragraph start:
-			ProximityWeightAccumulator::weight_invpos(
-				weightar, 0.3, weightincr, prevPara, itrar, itrarsize);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "\taccumulated ff incr [inv distance paragraph] " << weightar.tostring() << std::endl;
-#endif
-		}
-		weightar.multiply( idfar);
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "\twindow feature weights: " << weightar.tostring() << std::endl;
-#endif
-		double weight = weightar.sum();
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "\twindow weight: " << weight << std::endl;
-#endif
+		// Calculate the candidate weight:
+		double weight = windowWeight( wdata, poswin, structframe, paraframe);
+
 		// Select the best window:
 		if (weight > rt.weight)
 		{
@@ -285,352 +215,563 @@ static Candidate findCandidate(
 	return rt;
 }
 
-
-std::vector<SummaryElement>
-	SummarizerFunctionContextMatchPhrase::getSummary( const Index& docno)
+std::string SummarizerFunctionContextMatchPhrase::getPhraseString( const Index& firstpos, const Index& lastpos)
 {
-	try
+	std::string rt;
+	Index pi = firstpos > 5 ? (firstpos - 5):1, pe = lastpos + 5;
+	for (; pi < pe; ++pi)
 	{
-		std::vector<SummaryElement> rt;
-		if (!m_initialized)
+		if (pi == firstpos)
 		{
-			if (m_itrarsize == 0)
-			{
-				return std::vector<SummaryElement>();
-			}
-			// initialize proportional ff increment weights
-			m_weightincr.init( m_itrarsize);
-			ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, 0.3, m_idfar);
-
-			if (m_cardinality == 0)
-			{
-				if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
-				{
-					m_cardinality = std::min( 1U, (unsigned int)(m_itrarsize * m_parameter->m_cardinality_frac + 0.5));
-				}
-				else
-				{
-					m_cardinality = m_itrarsize;
-				}
-			}
-			m_initialized = true;
+			rt.append(" | ");
 		}
-		if (m_itrarsize < m_cardinality)
+		if (pi == lastpos)
 		{
-			return rt;
+			rt.append(" | ");
 		}
-		// Init document iterators:
-		PostingIteratorInterface* valid_itrar[ MaxNofArguments];			//< valid array if weighted features
-		PostingIteratorInterface* valid_structar[ MaxNofArguments];			//< valid array of end of structure elements
-		PostingIteratorInterface** valid_paraar = &valid_structar[ m_structarsize];	//< valid array of end of paragraph elements
-
-		callSkipDoc( docno, m_itrar, m_itrarsize, valid_itrar);
-		callSkipDoc( docno, m_structar, m_structarsize + m_paraarsize, valid_structar);
-		m_forwardindex->skipDoc( docno);
-
-		// Define search start position:
-		Index titleStart = 1;
-		Index titleEnd = 1;
-		if (m_titleitr && m_titleitr->skipDoc( docno) == docno)
+		if (m_forwardindex->skipPos(pi) == pi)
 		{
-			titleStart = m_titleitr->skipPos(0);
-			if (titleStart)
+			if (!rt.empty()) rt.push_back(' ');
+			rt.append( m_forwardindex->fetch());
+		}
+	}
+	return rt;
+}
+
+SummarizerFunctionContextMatchPhrase::Match SummarizerFunctionContextMatchPhrase::logFindBestMatch_(
+			std::ostream& out,
+			WeightingData& wdata,
+			unsigned int cardinality,
+			PostingIteratorInterface** itrar)
+{
+	Match rt;
+	Index lastEndPos = 0;
+	unsigned int lastElementCnt = 0;
+	Index firstpos = wdata.titleend;
+	PositionWindow poswin( itrar, m_itrarsize, m_parameter->m_windowsize, cardinality,
+				firstpos, PositionWindow::MaxWin);
+	bool more = poswin.first();
+	for (;more; more = poswin.next())
+	{
+		// Check if the window is a really new one and not one already covered:
+		Index windowpos = poswin.pos();
+		Index windowspan = poswin.span();
+		if (lastEndPos == windowpos + windowspan && lastElementCnt > poswin.size())
+		{
+			continue;
+		}
+		lastElementCnt = poswin.size();
+		lastEndPos = windowpos + windowspan;
+
+		// Check if window is overlapping a paragraph. In this case to not use it for summary:
+		std::pair<Index,Index> paraframe = wdata.paraiter.skipPos( windowpos);
+		if (paraframe.first && paraframe.second < windowpos + windowspan) continue;
+
+		// Calculate sentence frame:
+		std::pair<Index,Index> structframe = wdata.structiter.skipPos( windowpos);
+
+		// Calculate the candidate weight:
+		double weight = windowWeight( wdata, poswin, structframe, paraframe);
+
+		std::string candidatestr( getPhraseString( windowpos, windowpos + windowspan));
+		out << string_format( _TXT( "candidate pos=%u, best=%u, span=%u, weight=%f, string=%s"),
+					windowpos, (unsigned int)(weight > rt.weight), windowspan,
+					weight, candidatestr.c_str()) << std::endl;
+
+		// Select the best window:
+		if (weight > rt.weight)
+		{
+			rt.weight = weight;
+			rt.pos = windowpos;
+			rt.span = windowspan;
+		}
+	}
+	return rt;
+}
+
+SummarizerFunctionContextMatchPhrase::Match
+	SummarizerFunctionContextMatchPhrase::findBestMatch( WeightingData& wdata)
+{
+	return findBestMatch_( wdata, m_cardinality, wdata.valid_itrar);
+}
+
+
+void SummarizerFunctionContextMatchPhrase::fetchNoTitlePostings(
+	WeightingData& wdata, PostingIteratorInterface** noTitle_itrar, Index& cntTitleTerms, Index& cntNoTitleTerms)
+{
+	cntTitleTerms = 0;
+	cntNoTitleTerms = 0;
+	std::size_t ti=0,te=m_itrarsize;
+	for (; ti < te; ++ti)
+	{
+		if (wdata.valid_itrar[ti])
+		{
+			Index pos = wdata.valid_itrar[ti]->skipPos( wdata.titlestart);
+			if (pos >= wdata.titleend)
 			{
-				Index ti = titleEnd = titleStart;
-				while (0!=(ti=m_titleitr->skipPos(ti+1)))
-				{
-					titleEnd = ti;
-				}
-				++titleEnd;
+				noTitle_itrar[ ti] = wdata.valid_itrar[ ti];
+				++cntNoTitleTerms;
 			}
 			else
 			{
-				titleStart = 1;
+				noTitle_itrar[ ti] = 0;
+				++cntTitleTerms;
 			}
-		}
-		Index firstpos = m_forwardindex->skipPos( 0);
-		if (!firstpos) firstpos = titleStart;
-
-		// Define best match to find:
-		// Find the best match:
-		Candidate candidate
-			= findCandidate(
-				firstpos, m_idfar, m_weightincr, m_parameter->m_windowsize, m_cardinality,
-				valid_itrar, m_itrarsize, valid_structar, m_structarsize, valid_paraar, m_paraarsize, 
-				m_maxdist_featar);
-		if (candidate.span == 0 && m_titleitr)
-		{
-			//... we did not find a summary with m_cardinality terms, so we try to find one
-			//	without the terms appearing in the document title:
-			PostingIteratorInterface* noTitleTerms[ MaxNofArguments];
-			ProximityWeightAccumulator::WeightArray noTitleIdfs;
-			ProximityWeightAccumulator::WeightArray noWeightIncrs;
-			std::size_t noTitleSize = 0;
-			std::size_t cntTitleTerms = 0;
-			std::size_t ti=0,te=m_itrarsize;
-			for (; ti < te; ++ti)
-			{
-				if (valid_itrar[ti])
-				{
-					Index pos = valid_itrar[ti]->skipPos( 0);
-					if (pos >= titleEnd)
-					{
-						noTitleTerms[ noTitleSize++] = m_itrar[ ti];
-						noTitleIdfs.add( m_idfar[ ti]);
-						noWeightIncrs.add( m_weightincr[ ti]);
-					}
-					else
-					{
-						++cntTitleTerms;
-					}
-				}
-			}
-			if (noTitleSize && m_itrarsize > noTitleSize)
-			{
-				unsigned int cardinality = m_cardinality > cntTitleTerms ? (m_cardinality - cntTitleTerms) : 1;
-				candidate = findCandidate(
-						titleEnd, noTitleIdfs, noWeightIncrs, m_parameter->m_windowsize, cardinality,
-						noTitleTerms, noTitleSize, valid_structar, m_structarsize,
-						valid_paraar, m_paraarsize, m_maxdist_featar);
-			}
-		}
-		bool is_docstart = (candidate.span == 0);
-		if (is_docstart)
-		{
-			// ... if we did not find any candidate window, we take the start of the document as abstract:
-			candidate.pos = titleEnd;
-			candidate.span = 10;
-		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "candidate found pos=" << candidate.pos << ", span=" << candidate.span << " is docstart " << (is_docstart?"YES":"NO") << std::endl;
-#endif
-		struct Abstract
-		{
-			Index start;
-			Index span;
-			bool defined_start;
-			bool defined_end;
-			bool is_docstart;
-		};
-		Abstract phrase_abstract = {candidate.pos,candidate.span,(candidate.pos == titleEnd),false,is_docstart};
-
-		// Find the start of the abstract as start of the preceeding structure or paragraph marker:
-		std::size_t ti=0,te=m_paraarsize+m_structarsize;
-		Index astart;
-		if ((Index)m_parameter->m_sentencesize + titleEnd < candidate.pos)
-		{
-			astart = candidate.pos - (Index)m_parameter->m_sentencesize;
 		}
 		else
 		{
-			astart = titleEnd;
-			phrase_abstract.defined_start = true;
+			noTitle_itrar[ ti] = 0;
 		}
-		for (; ti<te && astart < candidate.pos; ++ti)
+	}
+}
+
+SummarizerFunctionContextMatchPhrase::Match
+	SummarizerFunctionContextMatchPhrase::findBestMatchNoTitle( WeightingData& wdata)
+{
+	PostingIteratorInterface* noTitle_itrar[ MaxNofArguments];
+	Index cntTitleTerms = 0;
+	Index cntNoTitleTerms = 0;
+	fetchNoTitlePostings( wdata, noTitle_itrar, cntTitleTerms, cntNoTitleTerms);
+	if (cntNoTitleTerms)
+	{
+		unsigned int noTitleCardinality = m_cardinality > (unsigned int)cntTitleTerms ? (m_cardinality - cntTitleTerms) : 1;
+		return findBestMatch_( wdata, noTitleCardinality, noTitle_itrar);
+	}
+	else
+	{
+		return Match();
+	}
+}
+
+SummarizerFunctionContextMatchPhrase::Match
+	SummarizerFunctionContextMatchPhrase::logFindBestMatchNoTitle( std::ostream& out, WeightingData& wdata)
+{
+	PostingIteratorInterface* noTitle_itrar[ MaxNofArguments];
+	Index cntTitleTerms = 0;
+	Index cntNoTitleTerms = 0;
+	fetchNoTitlePostings( wdata, noTitle_itrar, cntTitleTerms, cntNoTitleTerms);
+	if (cntNoTitleTerms)
+	{
+		unsigned int noTitleCardinality = (Index)m_cardinality > cntTitleTerms ? (m_cardinality - cntTitleTerms) : 1;
+		return logFindBestMatch_( out, wdata, noTitleCardinality, noTitle_itrar);
+	}
+	else
+	{
+		return Match();
+	}
+}
+
+SummarizerFunctionContextMatchPhrase::Match
+	SummarizerFunctionContextMatchPhrase::findAbstractMatch( WeightingData& wdata)
+{
+	Match rt = findBestMatch( wdata);
+	if (!rt.isDefined() && m_titleitr)
+	{
+		//... we did not find a window with m_cardinality terms, so we try to find one
+		//	without the terms appearing in the document title:
+		rt = findBestMatchNoTitle( wdata);
+	}
+	if (!rt.isDefined())
+	{
+		// ... if we did not find any window, we take the start of the document as abstract:
+		rt.is_docstart = true;
+		rt.pos = wdata.titleend;
+		rt.span = m_parameter->m_sentencesize;
+	}
+	return rt;
+}
+
+SummarizerFunctionContextMatchPhrase::Match
+	SummarizerFunctionContextMatchPhrase::logFindAbstractMatch( std::ostream& out, WeightingData& wdata)
+{
+	out << _TXT("find best match with all features:") << std::endl;
+	Match rt = logFindBestMatch_( out, wdata, m_cardinality, wdata.valid_itrar);
+	if (!rt.isDefined() && m_titleitr)
+	{
+		//... we did not find a window with m_cardinality terms, so we try to find one
+		//	without the terms appearing in the document title:
+		out << _TXT("find best match without title features:") << std::endl;
+		rt = logFindBestMatchNoTitle( out, wdata);
+	}
+	if (!rt.isDefined())
+	{
+		// ... if we did not find any window, we take the start of the document as abstract:
+		rt.is_docstart = true;
+		rt.pos = wdata.titleend;
+		rt.span = m_parameter->m_sentencesize;
+		out << string_format( _TXT( "candidate begin doc, span=%u"), (unsigned int)rt.span) << std::endl;
+		
+	}
+	return rt;
+}
+
+SummarizerFunctionContextMatchPhrase::Abstract
+	SummarizerFunctionContextMatchPhrase::getPhraseAbstract( const Match& candidate, WeightingData& wdata)
+{
+	Abstract rt( candidate.pos, candidate.span, (candidate.pos == wdata.titleend), false, candidate.is_docstart);
+
+	// Find the start of the abstract as start of the preceeding structure or paragraph marker:
+	std::size_t ti=0,te=m_paraarsize+m_structarsize;
+	Index astart;
+	if ((Index)m_parameter->m_sentencesize + wdata.titleend < candidate.pos)
+	{
+		astart = candidate.pos - (Index)m_parameter->m_sentencesize;
+	}
+	else
+	{
+		astart = wdata.titleend;
+		rt.defined_start = true;
+	}
+	for (; ti<te && astart < candidate.pos; ++ti)
+	{
+		if (wdata.valid_structar[ti])
 		{
-			if (valid_structar[ti])
+			Index pos = wdata.valid_structar[ti]->skipPos( astart);
+			while (pos >= astart && pos <= candidate.pos)
 			{
-				Index pos = valid_structar[ti]->skipPos( astart);
-				while (pos > astart && pos <= candidate.pos)
-				{
-					phrase_abstract.defined_start = true;
-					astart = pos + 1;
-					pos = valid_structar[ti]->skipPos( astart);
-				}
+				rt.defined_start = true;
+				astart = pos + 1;
+				pos = wdata.valid_structar[ti]->skipPos( astart);
 			}
 		}
-		phrase_abstract.span += candidate.pos - astart;
-		phrase_abstract.start = astart;
-		// Find the end of the abstract, by scanning for the next sentence:
-		if (phrase_abstract.span < (Index)m_parameter->m_sentencesize)
+	}
+	rt.span += candidate.pos - astart;
+	rt.start = astart;
+
+	// Find the end of the abstract, by scanning for the next sentence:
+	if (rt.span < (Index)m_parameter->m_sentencesize)
+	{
+		Index minincr = 0;
+		if (rt.span < ((Index)m_parameter->m_sentencesize >> 2))
 		{
-			Index minincr = 0;
-			if (phrase_abstract.span < ((Index)m_parameter->m_sentencesize >> 2))
-			{
-				minincr += (Index)m_parameter->m_sentencesize >> 2;
-				// .... heuristics for minimal size of abstract we want to show
-			}
-			Index nextparapos = callSkipPos( phrase_abstract.start + phrase_abstract.span, valid_paraar, m_paraarsize);
-			Index eospos = callSkipPos( phrase_abstract.start + phrase_abstract.span + minincr, valid_structar, m_structarsize + m_paraarsize);
-			if (eospos)
-			{
-				if (nextparapos && nextparapos <= eospos) eospos = nextparapos - 1;
-				if ((eospos - phrase_abstract.start) < (Index)m_parameter->m_sentencesize)
-				{
-					phrase_abstract.span = eospos - phrase_abstract.start + 1;
-					phrase_abstract.defined_end = true;
-				}
-				else
-				{
-					phrase_abstract.span = m_parameter->m_sentencesize;
-				}
-			}
+			minincr += (Index)m_parameter->m_sentencesize >> 2;
+			// .... heuristics for minimal size of abstract we want to show
 		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "phrase abstract pos=" << phrase_abstract.start << ", span=" << phrase_abstract.span << " defined start " << (phrase_abstract.defined_start?"YES":"NO") << " defined end " << (phrase_abstract.defined_end?"YES":"NO") << std::endl;
-#endif
-		// Find the title of the paragraph the phrase belongs to:
-		Index searchrange = 200;
-		Index parapos = 0;
-		Index eoppos = 0;
-		Abstract para_abstract = {0,0,true,true,false};
-		for (;;)
+		Index nextparapos = callSkipPos( rt.start + rt.span, wdata.valid_paraar, m_paraarsize);
+		Index eospos = callSkipPos( rt.start + rt.span + minincr, wdata.valid_structar, m_structarsize + m_paraarsize);
+		if (eospos)
 		{
-			Index pstart = phrase_abstract.start  > (searchrange + titleEnd) ? phrase_abstract.start - searchrange : (titleEnd + 1);
-			Index prevparapos = callSkipPos( pstart, valid_paraar, m_paraarsize);
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "start search candidate para pos=" << pstart << ", nextpara=" << prevparapos << std::endl;
-#endif
-			if (prevparapos && prevparapos <= phrase_abstract.start)
+			if (nextparapos && nextparapos <= eospos) eospos = nextparapos - 1;
+			if ((eospos - rt.start) < (Index)m_parameter->m_sentencesize)
 			{
-				parapos = prevparapos;
-#ifdef STRUS_LOWLEVEL_DEBUG
-				std::cout << "found candidate para pos=" << parapos << std::endl;
-#endif
-				for (;;)
-				{
-					prevparapos = callSkipPos( parapos+1, valid_paraar, m_paraarsize);
-					if (prevparapos && prevparapos <= phrase_abstract.start)
-					{
-						parapos = prevparapos;
-					}
-					else
-					{
-						break;
-					}
-				}
-				eoppos = callSkipPos( parapos+1, valid_structar, m_structarsize + m_paraarsize);
-				if (eoppos && eoppos - parapos < 12)
-				{
-					if (eoppos >= phrase_abstract.start)
-					{
-						if (eoppos >= phrase_abstract.start)
-						{
-							if (eoppos < phrase_abstract.start + phrase_abstract.span)
-							{
-								phrase_abstract.span = phrase_abstract.span - (eoppos - phrase_abstract.start);
-								phrase_abstract.start = eoppos;
-							}
-							else
-							{
-								phrase_abstract.span = 0;
-							}
-						}
-						para_abstract.start = parapos;
-						para_abstract.span = (eoppos-parapos+1);
-					}
-					else if (parapos != titleEnd)
-					{
-						para_abstract.start = parapos;
-						para_abstract.span = (eoppos-parapos+1);
-					}
-				}
-				break;
+				rt.span = eospos - rt.start + 1;
+				rt.defined_end = true;
 			}
 			else
 			{
-				if (pstart <= (titleEnd + 1)) break;
-				searchrange *= 2;
+				rt.span = m_parameter->m_sentencesize;
 			}
 		}
-		
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "para abstract pos=" << para_abstract.start << ", span=" << para_abstract.span << std::endl;
-#endif
-		// Create the paragraph result, if exists:
-		if (para_abstract.span > 0)
+	}
+	return rt;
+}
+
+SummarizerFunctionContextMatchPhrase::Abstract
+	SummarizerFunctionContextMatchPhrase::getParaTitleAbstract(
+		Match& phrase_match,
+		WeightingData& wdata)
+{
+	Abstract rt;
+
+	Index searchrange = 300;
+	Index parapos = 0;
+	Index eoppos = 0;
+
+	for (;;)
+	{
+		Index pstart = phrase_match.pos > (searchrange + wdata.titleend)
+				? (phrase_match.pos - searchrange)
+				: (wdata.titleend + 1);
+
+		Index prevparapos = callSkipPos( pstart, wdata.valid_paraar, m_paraarsize);
+		if (prevparapos && prevparapos <= phrase_match.pos)
 		{
-			std::string paratitle;
-			Index pi = para_abstract.start, pe = para_abstract.start + para_abstract.span;
-			for (; pi < pe; ++pi)
+			parapos = prevparapos;
+			for (;;)
 			{
-				if (m_forwardindex->skipPos(pi) == pi)
+				prevparapos = callSkipPos( parapos+1, wdata.valid_paraar, m_paraarsize);
+				if (prevparapos && prevparapos <= phrase_match.pos)
 				{
-					if (!paratitle.empty()) paratitle.push_back(' ');
-					paratitle.append( m_forwardindex->fetch());
-				}
-			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "build paragraph title '" << paratitle << "'" << std::endl;
-#endif
-			rt.push_back( SummaryElement( m_parameter->m_name_para, paratitle, 1.0));
-		}
-#ifdef STRUS_LOWLEVEL_DEBUG
-		std::cout << "titleEnd=" << titleEnd << std::endl;
-#endif
-		// Create the highlighted phrase result, if exists:
-		if (phrase_abstract.span > 0)
-		{
-			// Create the array of positions to highlight:
-			std::vector<Index> highlightpos;
-			Index pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
-			while (pi < pe)
-			{
-				std::pair<Index,Index> minpos = callSkipPosWithLen( pi, valid_itrar, m_itrarsize);
-				if (minpos.first && minpos.first < pe)
-				{
-					Index li = 0, le = minpos.second;
-					for (; li != le; ++li)
-					{
-						highlightpos.push_back( minpos.first+li);
-					}
-					pi = minpos.first+(le?le:1);
+					parapos = prevparapos;
 				}
 				else
 				{
 					break;
 				}
 			}
-			// Build the phrase:
-			std::string phrase;
-			if (!phrase_abstract.defined_start)
+			eoppos = callSkipPos( parapos+1, wdata.valid_structar, m_structarsize);
+			if (eoppos && eoppos - parapos < MaxParaTitleSize)
 			{
-				phrase.append( m_parameter->m_floatingmark.first);
-			}
-			pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
-			if (pi > pe || (unsigned int)(pe - pi) > 2*m_parameter->m_sentencesize+10)
-			{
-				throw strus::runtime_error(_TXT("internal: got illegal summary (%u:%u)"), (unsigned int)pi, (unsigned int)pe);
-			}
-			std::size_t hi = 0, he = highlightpos.size();
-			for (; pi < pe; ++pi)
-			{
-				if (m_forwardindex->skipPos(pi) == pi)
+				if (eoppos >= phrase_match.pos)
 				{
-					if (!phrase.empty()) phrase.push_back(' ');
-					for (; hi < he && pi > highlightpos[hi]; ++hi){}
-					if (hi < he && pi == highlightpos[hi])
+					// ... paragraph title is overlapping with best match
+					if (eoppos < phrase_match.pos + phrase_match.span)
 					{
-						phrase.append( m_parameter->m_matchmark.first);
-						phrase.append( m_forwardindex->fetch());
-						phrase.append( m_parameter->m_matchmark.second);
+						phrase_match.span -= (eoppos - phrase_match.pos);
+						phrase_match.pos = eoppos;
 					}
 					else
 					{
-						phrase.append( m_forwardindex->fetch());
+						phrase_match.span = m_parameter->m_sentencesize >> 2;
+						phrase_match.pos = eoppos;
 					}
 				}
+				rt.start = parapos;
+				rt.span = eoppos-parapos+1;
 			}
-#ifdef STRUS_LOWLEVEL_DEBUG
-			std::cout << "build phrase " << phrase_abstract.start << ".." << (phrase_abstract.start + phrase_abstract.span) << ": '" << phrase << "'" << std::endl;
-#endif
-			if (!phrase_abstract.defined_end)
+			break;
+		}
+		if (phrase_match.pos <= (searchrange + wdata.titleend))
+		{
+			break;
+		}
+		searchrange *= 2;
+	}
+	return rt;
+}
+
+std::string SummarizerFunctionContextMatchPhrase::getParaTitleString( const Abstract& para_abstract)
+{
+	std::string rt;
+	Index pi = para_abstract.start, pe = para_abstract.start + para_abstract.span;
+	for (; pi < pe; ++pi)
+	{
+		if (m_forwardindex->skipPos(pi) == pi)
+		{
+			if (!rt.empty()) rt.push_back(' ');
+			rt.append( m_forwardindex->fetch());
+		}
+	}
+	return rt;
+}
+
+std::string SummarizerFunctionContextMatchPhrase::getPhraseString( const Abstract& phrase_abstract, WeightingData& wdata)
+{
+	std::string rt;
+	// Create the array of positions to highlight:
+	std::vector<Index> highlightpos;
+	Index pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
+	while (pi < pe)
+	{
+		std::pair<Index,Index> minpos = callSkipPosWithLen( pi, wdata.valid_itrar, m_itrarsize);
+		if (minpos.first && minpos.first < pe)
+		{
+			Index li = 0, le = minpos.second;
+			for (; li != le; ++li)
 			{
-				phrase.append( m_parameter->m_floatingmark.second);
+				highlightpos.push_back( minpos.first+li);
 			}
-			if (phrase_abstract.is_docstart)
+			pi = minpos.first+(le?le:1);
+		}
+		else
+		{
+			break;
+		}
+	}
+	// Build the result (phrase):
+	if (!phrase_abstract.defined_start)
+	{
+		rt.append( m_parameter->m_floatingmark.first);
+	}
+	pi = phrase_abstract.start, pe = phrase_abstract.start + phrase_abstract.span;
+	if (pi > pe || (unsigned int)(pe - pi) > 2*m_parameter->m_sentencesize+10)
+	{
+		throw strus::runtime_error(_TXT("internal: got illegal summary (%u:%u)"), (unsigned int)pi, (unsigned int)pe);
+	}
+	std::size_t hi = 0, he = highlightpos.size();
+	for (; pi < pe; ++pi)
+	{
+		if (m_forwardindex->skipPos(pi) == pi)
+		{
+			if (!rt.empty()) rt.push_back(' ');
+			for (; hi < he && pi > highlightpos[hi]; ++hi){}
+			if (hi < he && pi == highlightpos[hi])
 			{
-				rt.push_back( SummaryElement( m_parameter->m_name_docstart, phrase, 1.0));
+				rt.append( m_parameter->m_matchmark.first);
+				rt.append( m_forwardindex->fetch());
+				rt.append( m_parameter->m_matchmark.second);
 			}
 			else
 			{
-				rt.push_back( SummaryElement( m_parameter->m_name_phrase, phrase, 1.0));
+				rt.append( m_forwardindex->fetch());
 			}
 		}
-		return rt;
+	}
+	if (!phrase_abstract.defined_end)
+	{
+		rt.append( m_parameter->m_floatingmark.second);
+	}
+	return rt;
+}
+
+std::vector<SummaryElement>
+	SummarizerFunctionContextMatchPhrase::getSummariesFromAbstracts(
+		const Abstract& para_abstract,
+		const Abstract& phrase_abstract,
+		WeightingData& wdata)
+{
+	std::vector<SummaryElement> rt;
+
+	// Create the paragraph result, if exists:
+	if (para_abstract.isDefined())
+	{
+		std::string paratitle = getParaTitleString( para_abstract);
+		rt.push_back( SummaryElement( m_parameter->m_name_para, paratitle, 1.0));
+	}
+	// Create the highlighted phrase result, if exists:
+	if (phrase_abstract.isDefined())
+	{
+		std::string phrase = getPhraseString( phrase_abstract, wdata);
+		if (phrase_abstract.is_docstart)
+		{
+			rt.push_back( SummaryElement( m_parameter->m_name_docstart, phrase, 1.0));
+		}
+		else
+		{
+			rt.push_back( SummaryElement( m_parameter->m_name_phrase, phrase, 1.0));
+		}
+	}
+	return rt;
+}
+
+void SummarizerFunctionContextMatchPhrase::initializeContext()
+{
+	{
+		// initialize proportional ff increment weights
+		m_weightincr.init( m_itrarsize);
+		ProximityWeightAccumulator::proportionalAssignment( m_weightincr, 1.0, m_parameter->m_prop_weight_const, m_idfar);
+
+		if (m_cardinality == 0)
+		{
+			if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
+			{
+				m_cardinality = std::max( 1U, (unsigned int)(m_itrarsize * m_parameter->m_cardinality_frac + 0.5));
+			}
+			else
+			{
+				m_cardinality = m_itrarsize;
+			}
+		}
+		if (m_nof_maxdf_features >= m_cardinality && m_nof_maxdf_features < m_itrarsize)
+		{
+			m_cardinality = m_nof_maxdf_features+1;
+			//... at least on feature in the windows visited must fulfill the maxdf criterion
+		}
+		m_initialized = true;
+	}
+}
+
+void SummarizerFunctionContextMatchPhrase::initWeightingData( WeightingData& wdata, const Index& docno)
+{
+	callSkipDoc( docno, m_itrar, m_itrarsize, wdata.valid_itrar);
+	callSkipDoc( docno, m_structar, m_structarsize + m_paraarsize, wdata.valid_structar);
+
+	if (m_titleitr && m_titleitr->skipDoc( docno) == docno)
+	{
+		wdata.titlestart = m_titleitr->skipPos(0);
+		if (wdata.titlestart)
+		{
+			Index ti = wdata.titleend = wdata.titlestart;
+			while (0!=(ti=m_titleitr->skipPos(ti+1)))
+			{
+				wdata.titleend = ti;
+			}
+			++wdata.titleend;
+		}
+		else
+		{
+			wdata.titlestart = 1;
+		}
+	}
+}
+
+std::vector<SummaryElement>
+	SummarizerFunctionContextMatchPhrase::getSummary( const Index& docno)
+{
+	try
+	{
+		if (m_itrarsize == 0)
+		{
+			return std::vector<SummaryElement>();
+		}
+		if (!m_initialized)
+		{
+			initializeContext();
+		}
+		if (m_itrarsize < m_cardinality)
+		{
+			return std::vector<SummaryElement>();
+		}
+		// Init document iterators:
+		WeightingData wdata( m_structarsize, m_paraarsize, m_parameter->m_sentencesize, m_parameter->m_paragraphsize);
+		initWeightingData( wdata, docno);
+
+		m_forwardindex->skipDoc( docno);
+
+		Index firstpos = m_forwardindex->skipPos( 0);
+		if (!firstpos) return std::vector<SummaryElement>();
+
+		// Find the match for abstract:
+		Match candidate = findAbstractMatch( wdata);
+
+		// Get the title of the paragraph the best phrase belongs to:
+		Abstract para_abstract = getParaTitleAbstract( candidate, wdata);
+		// Get the best phrase
+		Abstract phrase_abstract = getPhraseAbstract( candidate, wdata);
+
+		return getSummariesFromAbstracts( para_abstract, phrase_abstract, wdata);
 	}
 	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error fetching '%s' summary: %s"), METHOD_NAME, *m_errorhnd, std::vector<SummaryElement>());
 }
+
+std::string SummarizerFunctionContextMatchPhrase::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+	out << string_format( _TXT( "summarize %s"), METHOD_NAME) << std::endl;
+
+	if (m_itrarsize == 0)
+	{
+		return std::string();
+	}
+	if (!m_initialized)
+	{
+		initializeContext();
+	}
+	if (m_itrarsize < m_cardinality)
+	{
+		return std::string();
+	}
+	// Init document iterators:
+	WeightingData wdata( m_structarsize, m_paraarsize, m_parameter->m_sentencesize, m_parameter->m_paragraphsize);
+	initWeightingData( wdata, docno);
+
+	m_forwardindex->skipDoc( docno);
+
+	Index firstpos = m_forwardindex->skipPos( 0);
+	if (!firstpos) return std::string();
+
+	Match candidate = logFindAbstractMatch( out, wdata);
+	Abstract phrase_abstract = getPhraseAbstract( candidate, wdata);
+	Abstract para_abstract = getParaTitleAbstract( candidate, wdata);
+
+	out << string_format( _TXT("best match pos=%u, span=%u, is_docstart=%u"),
+				candidate.pos, candidate.span, candidate.is_docstart) << std::endl;
+
+	std::string phrasestr = getPhraseString( phrase_abstract, wdata);
+	out << string_format( _TXT("best match phrase pos=%u, span=%u, has start %u, has end=%u, string='%s'"),
+				phrase_abstract.start, phrase_abstract.span, phrase_abstract.defined_start,
+				phrase_abstract.defined_end, phrasestr.c_str()) << std::endl;
+
+	if (para_abstract.isDefined())
+	{
+		std::string titlestr = getParaTitleString( para_abstract);
+		out << string_format( _TXT("best match paragraph pos=%u, span=%u, string='%s'"),
+					para_abstract.start, para_abstract.span, titlestr.c_str()) << std::endl;
+	}
+	return out.str();
+}
+
 
 static std::pair<std::string,std::string> parseMarker( const std::string& value)
 {
@@ -673,11 +814,9 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		{
 			m_parameter->m_floatingmark = parseMarker( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "sentencesize"))
-		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
-		}
-		else if (utils::caseInsensitiveEquals( name, "windowsize"))
+		else if (utils::caseInsensitiveEquals( name, "sentencesize")
+			|| utils::caseInsensitiveEquals( name, "paragraphsize")
+			|| utils::caseInsensitiveEquals( name, "windowsize"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
@@ -700,17 +839,21 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
+	else if (utils::caseInsensitiveEquals( name, "paragraphsize"))
+	{
+		m_parameter->m_paragraphsize = value.touint();
+	}
 	else if (utils::caseInsensitiveEquals( name, "sentencesize"))
 	{
-		m_parameter->m_sentencesize = (unsigned int)value;
+		m_parameter->m_sentencesize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "windowsize"))
 	{
-		m_parameter->m_windowsize = (unsigned int)value;
+		m_parameter->m_windowsize = value.touint();
 	}
 	else if (utils::caseInsensitiveEquals( name, "cardinality"))
 	{
-		m_parameter->m_cardinality = (unsigned int)value;
+		m_parameter->m_cardinality = value.touint();
 		m_parameter->m_cardinality_frac = 0.0;
 	}
 	else if (utils::caseInsensitiveEquals( name, "maxdf"))
@@ -791,8 +934,9 @@ std::string SummarizerFunctionInstanceMatchPhrase::tostring() const
 			<< ", name para=" << m_parameter->m_name_para
 			<< ", name phrase=" << m_parameter->m_name_phrase
 			<< ", name docstart=" << m_parameter->m_name_docstart
-			<< ", sentencesize='" << m_parameter->m_sentencesize << "'"
-			<< ", windowsize='" << m_parameter->m_windowsize << "'";
+			<< ", paragraphsize=" << m_parameter->m_paragraphsize
+			<< ", sentencesize=" << m_parameter->m_sentencesize
+			<< ", windowsize=" << m_parameter->m_windowsize;
 			if (m_parameter->m_cardinality_frac > std::numeric_limits<double>::epsilon())
 			{
 				rt << ", cardinality='" << (unsigned int)(m_parameter->m_cardinality_frac * 100 + 0.5) << "%'";
@@ -829,7 +973,8 @@ FunctionDescription SummarizerFunctionMatchPhrase::getDescription() const
 		rt( P::Feature, "para", _TXT( "defines the delimiter for paragraphs (summaries must not overlap paragraph borders)"), "");
 		rt( P::Feature, "title", _TXT( "defines the title field of documents"), "");
 		rt( P::String, "type", _TXT( "the forward index type of the result phrase elements"), "");
-		rt( P::Numeric, "sentencesize", _TXT( "restrict the maximum length of sentences in summaries"), "1:");
+		rt( P::Numeric, "paragraphsize", _TXT( "estimated size of a paragraph"), "1:");
+		rt( P::Numeric, "sentencesize", _TXT( "estimated size of a sentence, also a restriction for the maximum length of sentences in summaries"), "1:");
 		rt( P::Numeric, "windowsize", _TXT( "maximum size of window used for identifying matches"), "1:");
 		rt( P::Numeric, "cardinality", _TXT( "minimum number of features in a window"), "1:");
 		rt( P::Numeric, "maxdf", _TXT( "the maximum df (fraction of collection size) of features considered for same sentence proximity weighing"), "1:");

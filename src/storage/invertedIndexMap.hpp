@@ -55,6 +55,8 @@ public:
 
 	void print( std::ostream& out) const;
 
+	void clear();
+
 private:
 	struct MapKey
 	{
@@ -74,13 +76,13 @@ private:
 		}
 	};
 
-	typedef LocalStructAllocator<std::pair<MapKey,std::size_t> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<const MapKey,std::size_t> > MapAllocator;
 	typedef std::less<MapKey> MapCompare;
 	typedef std::map<MapKey,std::size_t,MapCompare,MapAllocator> Map;
 
 	typedef InvTermBlock::Element InvTerm;
 	typedef std::vector<InvTerm> InvTermList;
-	typedef LocalStructAllocator<std::pair<Index,std::size_t> > InvTermMapAllocator;
+	typedef LocalStructAllocator<std::pair<const Index,std::size_t> > InvTermMapAllocator;
 	typedef std::less<Index> InvTermMapCompare;
 	typedef std::map<Index,std::size_t,InvTermMapCompare,InvTermMapAllocator> InvTermMap;
 
@@ -113,8 +115,6 @@ private:
 			const Map::const_iterator& ee,
 			const PosinfoBlock& oldblk,
 			PosinfoBlockBuilder& newblk);
-
-	void clear();
 
 private:
 	DocumentFrequencyMap m_dfmap;

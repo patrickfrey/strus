@@ -8,6 +8,7 @@
 #ifndef _STRUS_DATABASE_TRANSACTION_IMPLEMENTATION_HPP_INCLUDED
 #define _STRUS_DATABASE_TRANSACTION_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseTransactionInterface.hpp"
+#include "levelDbHandle.hpp"
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
@@ -24,7 +25,7 @@ class DatabaseTransaction
 	:public DatabaseTransactionInterface
 {
 public:
-	DatabaseTransaction( leveldb::DB* db_, DatabaseClient* database_, ErrorBufferInterface* errorhnd_);
+	DatabaseTransaction( const utils::SharedPtr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_);
 
 	virtual ~DatabaseTransaction();
 
@@ -49,12 +50,11 @@ public:
 	virtual void rollback();
 
 private:
-	DatabaseClient* m_database;
-	leveldb::DB* m_db;			///< levelDB handle
-	leveldb::WriteBatch m_batch;		///< batch used for the transaction
-	bool m_commit_called;			///< true, if the transaction has been committed
-	bool m_rollback_called;			///< true, if the transaction has been rolled back
-	ErrorBufferInterface* m_errorhnd;	///< buffer for reporting errors
+	utils::SharedPtr<LevelDbConnection> m_conn;	///< levelDB connection
+	leveldb::WriteBatch m_batch;			///< batch used for the transaction
+	bool m_commit_called;				///< true, if the transaction has been committed
+	bool m_rollback_called;				///< true, if the transaction has been rolled back
+	ErrorBufferInterface* m_errorhnd;		///< buffer for reporting errors
 };
 
 }//namespace

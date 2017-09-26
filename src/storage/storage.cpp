@@ -15,6 +15,7 @@
 #include "strus/databaseClientInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/base/configParser.hpp"
+#include "strus/base/local_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/versionStorage.hpp"
 #include "private/internationalization.hpp"
@@ -122,12 +123,12 @@ bool Storage::createStorage(
 		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
-		if (!dbi->createDatabase( src)) throw strus::runtime_error(_TXT("failed to create key/value store database"));
-		std::auto_ptr<strus::DatabaseClientInterface> database( dbi->createClient( src));
-		if (!database.get()) throw strus::runtime_error(_TXT("failed to create database client"));
+		if (!dbi->createDatabase( src)) throw strus::runtime_error( "%s", _TXT("failed to create key/value store database"));
+		strus::local_ptr<strus::DatabaseClientInterface> database( dbi->createClient( src));
+		if (!database.get()) throw strus::runtime_error( "%s", _TXT("failed to create database client"));
 
 		// 1st phase, store variables:
-		std::auto_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
+		strus::local_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());
 		if (!transaction.get()) return false;
 
 		DatabaseAdapter_Variable::Writer stor( database.get());

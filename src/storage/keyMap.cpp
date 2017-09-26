@@ -77,7 +77,7 @@ Index KeyMap::getOrCreate( const std::string& name)
 		rt = ++m_unknownHandleCount;
 		if (rt >= UnknownValueHandleStart)
 		{
-			throw strus::runtime_error( _TXT( "too many elements in keymap"));
+			throw strus::runtime_error( "%s", _TXT( "too many elements in keymap"));
 		}
 		rt += UnknownValueHandleStart;
 		m_map[ name] = rt;
@@ -127,7 +127,10 @@ void KeyMap::getWriteBatch(
 			{
 				idx = m_allocator->alloc();
 				m_dbadapter.store( transaction, mi->first, idx);
-				if (m_dbadapterinv.defined()) m_dbadapterinv.store( transaction, idx, mi->first);
+				if (m_dbadapterinv.defined())
+				{
+					m_dbadapterinv.store( transaction, idx, mi->first);
+				}
 				if (nofNewItems) ++*nofNewItems;
 			}
 			else
@@ -139,8 +142,6 @@ void KeyMap::getWriteBatch(
 			mi->second = idx;
 		}
 	}
-	// Clear maps:
-	clear();
 }
 
 void KeyMap::deleteKey( const std::string& name)

@@ -48,6 +48,8 @@ public:
 			:itr(o.itr),weight(o.weight){}
 	};
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual void addWeightingFeature(
 			const std::string& name_,
 			PostingIteratorInterface* itr_,
@@ -55,6 +57,8 @@ public:
 			const TermStatistics& stats_);
 
 	virtual double call( const Index& docno);
+
+	virtual std::string debugCall( const Index& docno);
 
 private:
 	std::vector<Feature> m_featar;
@@ -78,6 +82,11 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
 
 	virtual WeightingFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface*,

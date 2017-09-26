@@ -41,7 +41,7 @@ public:
 
 	virtual ~StatisticsInitIterator(){}
 
-	virtual bool getNext( const char*& msg, std::size_t& msgsize);
+	virtual bool getNext( const void*& msg, std::size_t& msgsize);
 
 private:
 	StorageClientInterface* m_storage;				///< storage related

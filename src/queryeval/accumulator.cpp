@@ -43,9 +43,14 @@ void Accumulator::addWeightingElement(
 }
 
 void Accumulator::addAlternativeAclRestriction(
-		InvAclIteratorInterface* iterator)
+		const Reference<InvAclIteratorInterface>& iterator)
 {
 	m_aclRestrictions.push_back( iterator);
+}
+
+void Accumulator::defineWeightingVariableValue( std::size_t index, const std::string& varname, double value)
+{
+	m_weightingElements[ index]->setVariableValue( varname, value);
 }
 
 bool Accumulator::nextRank(
@@ -59,7 +64,7 @@ bool Accumulator::nextRank(
 		se = m_selectorPostings.end();
 	if (si == se)
 	{
-		throw strus::runtime_error( _TXT( "query has no valid selection set defined"));
+		throw strus::runtime_error( "%s", _TXT( "query has no valid selection set defined"));
 	}
 	while (si != se)
 	{
@@ -98,7 +103,7 @@ bool Accumulator::nextRank(
 		// Check if any ACL restriction (alternatives combined with OR):
 		if (m_aclRestrictions.size())
 		{
-			std::vector<InvAclIteratorInterface*>::const_iterator
+			std::vector<Reference<InvAclIteratorInterface> >::iterator
 				ri = m_aclRestrictions.begin(), re = m_aclRestrictions.end();
 			Index nextAclMatch = 0;
 			for (; ri != re; ++ri)
@@ -187,5 +192,14 @@ bool Accumulator::nextRank(
 		return true;
 	}
 	return false;
+}
+
+std::string Accumulator::getWeightingDebugInfo( std::size_t fidx, const Index& docno)
+{
+	if (fidx >= m_weightingElements.size())
+	{
+		strus::runtime_error( "%s", _TXT("internal: weighting function array access out of bounds"));
+	}
+	return m_weightingElements[ fidx]->debugCall( docno);
 }
 

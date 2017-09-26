@@ -14,6 +14,7 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/scalarFunctionInstanceInterface.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
@@ -21,7 +22,8 @@
 #include <iostream>
 #include <iomanip>
 
-#define WEIGHTING_SCHEME_NAME "SMART"
+#define METHOD_NAME "SMART"
+#define NOF_IMPLICIT_ARGUMENTS 4
 
 using namespace strus;
 
@@ -39,7 +41,7 @@ WeightingFunctionContextSmart::WeightingFunctionContextSmart(
 {
 	if (!m_func.get())
 	{
-		throw strus::runtime_error(_TXT("failed to create weighting function instance"));
+		throw strus::runtime_error( "%s", _TXT("failed to create weighting function instance"));
 	}
 }
 
@@ -57,10 +59,29 @@ void WeightingFunctionContextSmart::addWeightingFeature(
 		}
 		else
 		{
-			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), WEIGHTING_SCHEME_NAME, name_.c_str());
+			throw strus::runtime_error( _TXT( "unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+}
+
+void WeightingFunctionContextSmart::setVariableValue( const std::string& name, double value)
+{
+	m_func->setVariableValue( name, value);
+}
+
+void WeightingFunctionContextSmart::fillParameter( const Index& docno, double ff, double df, double* param) const
+{
+	param[ 0] = ff;
+	param[ 1] = df;
+	param[ 2] = m_nofCollectionDocuments;
+	param[ 3] = m_featar.size();
+	std::size_t pi = NOF_IMPLICIT_ARGUMENTS;
+	std::vector<Index>::const_iterator mi = m_metadatahnd.begin(), me = m_metadatahnd.end();
+	for (; mi != me; ++mi)
+	{
+		param[ pi++] = m_metadata->getValue( *mi).tofloat();
+	}
 }
 
 double WeightingFunctionContextSmart::call( const Index& docno)
@@ -69,32 +90,67 @@ double WeightingFunctionContextSmart::call( const Index& docno)
 	{
 		m_metadata->skipDoc( docno);
 	}
-	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
 	double rt = 0.0;
-	for (; fi != fe; ++fi)
+	unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
+
+	if (m_featar.empty())
 	{
-		double param[ MaxNofParameter+3];
-		if (docno == fi->skipDoc(docno))
+		double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
+		fillParameter( docno, 0, 0, param);
+
+		rt += m_func->call( param, nofParam);
+	}
+	else
+	{
+		FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
+		for (; fi != fe; ++fi)
 		{
-			param[ 0] = fi->ff();
+			double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
+			fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+
+			rt += m_func->call( param, nofParam) * fi->weight();
 		}
-		else
-		{
-			param[ 0] = 0.0;
-		}
-		param[ 1] = fi->df();
-		param[ 2] = m_nofCollectionDocuments;
-		std::size_t pi = 3;
-		std::vector<Index>::const_iterator mi = m_metadatahnd.begin(), me = m_metadatahnd.end();
-		for (; mi != me; ++mi)
-		{
-			param[ pi++] = m_metadata->getValue( *mi).tofloat();
-		}
-		rt += m_func->call( param, pi);
 	}
 	return rt;
 }
 
+std::string WeightingFunctionContextSmart::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+
+	if (!m_metadatahnd.empty())
+	{
+		m_metadata->skipDoc( docno);
+	}
+	double res = 0.0;
+	unsigned int nofParam = m_metadatahnd.size()+NOF_IMPLICIT_ARGUMENTS;
+
+	FeatureVector::iterator fi = m_featar.begin(), fe = m_featar.end();
+	for (unsigned int fidx=0; fi != fe; ++fi,++fidx)
+	{
+		double param[ MaxNofParameter+NOF_IMPLICIT_ARGUMENTS];
+		fillParameter( docno, docno == fi->skipDoc(docno) ? fi->ff() : 0, fi->df(), param);
+
+		double ww = m_func->call( param, nofParam);
+		res += ww;
+		out << string_format( _TXT( "[%u] result=%f, ff=%u, df=%u, N=%u, qf=%u"),
+					fidx, ww, (unsigned int)fi->ff(),
+					(unsigned int)(fi->df()+0.5),
+					(unsigned int)m_nofCollectionDocuments,
+					(unsigned int)m_featar.size()) << std::endl;
+
+		unsigned int pi=NOF_IMPLICIT_ARGUMENTS, pe=nofParam;
+		for (; pi != pe; ++pi)
+		{
+			out << string_format( _TXT( ", x%u=%f"), pi, param[pi]);
+		}
+		out << std::endl;
+	}
+	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
+	return out.str();
+}
 
 void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name, const std::string& value)
 {
@@ -104,13 +160,17 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 
 		if (utils::caseInsensitiveEquals( name, "function"))
 		{
+			if (!m_expression.empty())
+			{
+				throw strus::runtime_error( "%s", _TXT( "expression defined twice"));
+			}
 			m_expression = value;
 		}
 		else if (utils::caseInsensitiveEquals( name, "metadata"))
 		{
 			if (m_metadataar.size() > WeightingFunctionContextSmart::MaxNofParameter)
 			{
-				throw strus::runtime_error(_TXT( "too many metadata parameter defined: %u"), m_metadataar.size());
+				throw strus::runtime_error(_TXT( "too many metadata parameter defined: %u"), (unsigned int)m_metadataar.size());
 			}
 			m_metadataar.push_back( value);
 		}
@@ -119,7 +179,7 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 			throw strus::runtime_error(_TXT( "unknown string type parameter: %s"), name.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& name, const NumericVariant& value)
@@ -136,7 +196,48 @@ void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& nam
 			if (m_func.get()) m_func->setDefaultVariableValue( name, value);
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting function string parameter to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
+}
+
+void WeightingFunctionInstanceSmart::initFunction() const
+{
+	if (!m_parser)
+	{
+		m_parser = m_queryproc->getScalarFunctionParser("");
+		if (!m_parser)
+		{
+			throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
+		}
+	}
+	// ... if the function has not yet be created, we create it (mutable m_func)
+	std::vector<std::string> arguments;
+	arguments.push_back( "ff");
+	arguments.push_back( "df");
+	arguments.push_back( "N");
+	arguments.push_back( "qf");
+	arguments.insert( arguments.end(), m_metadataar.begin(), m_metadataar.end());
+	m_func.reset( m_parser->createFunction( m_expression, arguments));
+	if (!m_func.get())
+	{
+		throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
+	}
+	std::vector<std::pair<std::string,double> >::const_iterator
+		pi = m_paramar.begin(), pe = m_paramar.end();
+	for (; pi != pe; ++pi)
+	{
+		m_func->setDefaultVariableValue( pi->first, pi->second);
+	}
+}
+
+std::vector<std::string> WeightingFunctionInstanceSmart::getVariables() const
+{
+	try
+	{
+		if (!m_func.get()) initFunction();
+	
+		return m_func->getVariables();
+	}
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error getting variables of the '%s' weighting function: %s"), METHOD_NAME, *m_errorhnd, std::vector<std::string>());
 }
 
 WeightingFunctionContextInterface* WeightingFunctionInstanceSmart::createFunctionContext(
@@ -146,34 +247,8 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceSmart::createFunctio
 {
 	try
 	{
-		if (!m_func.get())
-		{
-			if (!m_parser)
-			{
-				m_parser = m_queryproc->getScalarFunctionParser("");
-				if (!m_parser)
-				{
-					throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
-				}
-			}
-			// ... if the function has not yet be created, we create it (mutable m_func)
-			std::vector<std::string> arguments;
-			arguments.push_back( "ff");
-			arguments.push_back( "df");
-			arguments.push_back( "N");
-			arguments.insert( arguments.end(), m_metadataar.begin(), m_metadataar.end());
-			m_func.reset( m_parser->createFunction( m_expression, arguments));
-			if (!m_func.get())
-			{
-				throw strus::runtime_error(_TXT("failed parse scalar function %s"), m_errorhnd->fetchError());
-			}
-			std::vector<std::pair<std::string,double> >::const_iterator
-				pi = m_paramar.begin(), pe = m_paramar.end();
-			for (; pi != pe; ++pi)
-			{
-				m_func->setDefaultVariableValue( pi->first, pi->second);
-			}
-		}
+		if (!m_func.get()) initFunction();
+
 		std::vector<Index> metadatahnd;
 		std::vector<std::string>::const_iterator mi = m_metadataar.begin(), me = m_metadataar.end();
 		for (; mi != me; ++mi)
@@ -188,7 +263,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceSmart::createFunctio
 		GlobalCounter nofdocs = stats.nofDocumentsInserted()>=0?stats.nofDocumentsInserted():(GlobalCounter)storage_->nofDocumentsInserted();
 		return new WeightingFunctionContextSmart( m_func.get(), metadata, metadatahnd, (double)nofdocs, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function '%s' execution context: %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceSmart::tostring() const
@@ -214,7 +289,7 @@ std::string WeightingFunctionInstanceSmart::tostring() const
 		}
 		return msg.str();
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, std::string());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error mapping weighting function '%s' to string: %s"), METHOD_NAME, *m_errorhnd, std::string());
 }
 
 WeightingFunctionInstanceInterface* WeightingFunctionSmart::createInstance(
@@ -224,7 +299,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionSmart::createInstance(
 	{
 		return new WeightingFunctionInstanceSmart( processor, m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 FunctionDescription WeightingFunctionSmart::getDescription() const
@@ -235,11 +310,11 @@ FunctionDescription WeightingFunctionSmart::getDescription() const
 		FunctionDescription rt(_TXT("Calculate the document weight with a weighting scheme given by a scalar function defined as expression with ff (feature frequency), df (document frequency), N (total number of documents in the collection) and some specified metadata elements as arguments. The name of this method has been inspired by the traditional SMART weighting schemes in IR"));
 		rt( P::Feature, "match", _TXT( "defines the query features to weight"), "");
 		rt( P::String, "function", _TXT( "defines the expression of the scalar function to execute"), "");
-		rt( P::Metadata, "metadata", _TXT("defines a meta data element as additional parameter of the function besides ff,df and N. The parameter is addressed by the name of the metadata element in the expression"));
+		rt( P::Metadata, "metadata", _TXT("defines a meta data element as additional parameter of the function besides ff,df,qf and N. The parameter is addressed by the name of the metadata element in the expression"));
 		rt( P::Numeric, "[a-z]+", _TXT("defines a variable value to be substituted in the scalar function expression"));
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), WEIGHTING_SCHEME_NAME, *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 
 

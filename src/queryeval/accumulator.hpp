@@ -46,7 +46,7 @@ public:
 	Accumulator(
 			const StorageClientInterface* storage_,
 			MetaDataReaderInterface* metadata_,
-			MetaDataRestrictionInterface* metaDataRestriction_,
+			const MetaDataRestrictionInterface* metaDataRestriction_,
 			const ScalarFunctionInstanceInterface* weightingFormula_,
 			std::size_t maxNofRanks_,
 			std::size_t maxDocumentNumber_)
@@ -78,12 +78,16 @@ public:
 
 	void addFeatureRestriction( PostingIteratorInterface* iterator, bool isNegative);
 
-	void addAlternativeAclRestriction( InvAclIteratorInterface* iterator);
+	void addAlternativeAclRestriction( const Reference<InvAclIteratorInterface>& iterator);
 
 	bool nextRank( Index& docno, unsigned int& selectorState, double& weight);
 
 	unsigned int nofDocumentsRanked() const		{return m_nofDocumentsRanked;}
 	unsigned int nofDocumentsVisited() const	{return m_nofDocumentsVisited;}
+
+	std::string getWeightingDebugInfo( std::size_t fidx, const Index& docno);
+
+	void defineWeightingVariableValue( std::size_t index, const std::string& varname, double value);
 
 private:
 	bool isRelevantSelectionFeature( PostingIteratorInterface& itr) const;
@@ -113,7 +117,7 @@ private:
 	std::vector<double> m_weights;
 	std::vector<SelectorPostings> m_selectorPostings;
 	std::vector<SelectorPostings> m_featureRestrictions;
-	std::vector<InvAclIteratorInterface*> m_aclRestrictions;
+	std::vector<Reference<InvAclIteratorInterface> > m_aclRestrictions;
 	unsigned int m_selectoridx;
 	Index m_docno;
 	utils::DynamicBitset m_visited;

@@ -13,11 +13,12 @@
 
 <body><div id="wrap">
 <div id="content">
-	<b><font color=red>THIS DOCUMENT IS OUTDATED AND NOT VALID ANYMORE !!! </font></p>
 	<h1>Strus query language</h1>
 	<h2>Language grammar</h2>
-	<p class="description">The following grammar (as EBNF) is the formal language
-	used by the strus utilities (strusUtilities) for describing search queries.
+	<p class="description">
+	The query language used by the command line utility strusQuery does
+	not have too many syntax elements. All query syntax elements are optional. 
+	A plain text without operators of the strus query language is always a valid query.
 	</p>
 	<h3>Comments</h3>
 	<p class="description">
@@ -27,79 +28,111 @@
 	</p>
 	<h3>Handling of spaces</h3>
 	<p class="description">
-	Spaces, control characters and end of lines have no meaning in the language.
+	Spaces and control characters and end of lines have no meaning in the language.
 	</p>
 	<h3>Case sensivity/insensivity</h3>
 	<p class="description">
-	Keywords and identifiers referring to elements in the storage are case insensitive.
-	So are section and feature set identifiers.
+	Keywords and identifiers referring to element types, metadata fields,
+	section names and feature set identifiers are case insensitive.
+	It depends on the query analyzer configuration if query terms are
+	case sensitive or not.
 	</p>
-	<h3>EBNF</h3>
+	<h3>Relation Query Field / Term</h3>
+	<p class="description">
+	A query field is mapped by the query analyzer to one <i>or more</i> query terms.
+	If used in an expression the query terms resulting from one query field are
+	grouped together implicitly in a sensible way, so that resulting expression
+	still corresponds to the original query expression.
+	</p>
+	<h3>Selection feature</h3>
+	<p class="description">
+	If no selection features are explicitly specified, then the query parser
+	defines one from the set of features specified. You can use the operator '<b>~</b>'
+	to mark features that should not get into the set of selection features
+	implicitly specified.
+	</p>
+	<h3>Query elements</h3>
+	<p class="description">
+	A query consists of expressions of query fields that are mapped by the query analyzer to
+	expressions of query terms. The resulting expressions of query terms are internally represented
+	as trees that can be translated to query instructions sent to the storage for evaluation.
+	The original expressions of query fields are parsed from a query string.
+	Each query field has a type identified by the name that determines how the query analyzer 
+	processes the field.<br/>
+	In the simplest case, we have a query string without any syntactic elements that
+	are interpreted as a single query field. In this case, the name of the query field type
+	is determined by the query analyzer program. Default query field names are all
+	search query fields used in the query analyzer program.
+	<br/>
+	<i>If the query analysis gets more complex, using more than one query field, then
+	plain text queries getting default query field names assigned may not make sense anymore.</i>
+	</p>
+	<h3>Syntax elements</h3>
+	<p class="description">
+	If you want to form a query beyond the default case of a single query field, you can
+	use the following syntax elements:
+	<h4><pre><b>':' TYPE</b></pre></h4>
+	A colon followed by an identifier &lt;TYPE&gt; specifies the previous phrase
+	or token to have the query field type &lt;TYPE&gt;.
+	<h5>Examples</h5>
 	<pre>
-IDENTIFIER     : [A-Za-z][A-Za-z0-9_]*
-STRING         : &lt;single or double quoted string with backslash escaping&gt;
-INTEGER        : &lt;positive or negative integral number&gt;
-NUMBER         : &lt;positive or negative integral or floating point number&gt;
-
-config         = sectionlist
-               ;
-sectionlist    = section sectionlist
-               |
-               ;
-section        = "[" "Feature" featureset ":" phrasetype "]" qryexpression
-               = "[" "Condition" "]" restrictionlist
-               ;
-featureset     = IDENTIFIER
-               ;
-phrasetype     = IDENTIFIER
-               ;
-restrictionlist= restriction ";" restrictionlist
-               | restriction
-               ;
-qryexpression  = functionname "(" parameterlist [ "|" rangedef ] ")"
-               | STRING [ ":" phrasetype ]
-               | IDENTIFIER [ ":" phrasetype ]
-               ;
-rangedef       = INTEGER
-               ;
-parameterlist  = qryexpression { "," qryexpression }
-               |
-               ;
-restriction    = metadataname cmpoperator operandlist
-               ;"
-metadataname   = IDENTIFIER
-               ;
-cmpoperator    = "&gt;=" | "&lt;=" | "=" | "&gt;" | "&lt;" | "!="
-               ;
-operandlist    = operand { "," operand }
-               ;
-operand        = NUMBER | STRING | IDENTIFIER
-               ;
+		Hello:WORD Nature:CATEGORY
 	</pre>
-	<h3>Meaning of the grammar elements</h3>
-	<h5>phrasetype</h5>
-	<p class="description">In 'qryexpression' it specifies explicitely the type of the phrase,
-	that determines the phrase analysis method. In the 'section' definition it defines the 
-	default phrase type of the phrases defined without explicit definition of the phrase type.
-	</p>
-	<h5>functionname</h5>
-	<p class="description">Identifies a feature posings join operator defined in the query processor.
-	</p>
-	<h5>metadataname</h5>
-	<p class="description">Identifier referencing a meta data table element name.
-	</p>
-	<h5>operandlist</h5>
-	<p class="description">A set of alternative operands. The comparisons are joined as union (logical OR).
-	</p>
-	<h5>restrictionlist</h5>
-	<p class="description">List of meta data restriction that have all to match (logical AND).</p>
-	<h3>Example</h3>
 	<pre>
-[Feature selfeat :stem]
-        within( hello, world | 100000 )
-[Feature docfeat :stem]
-        hello world
+		Basketball Sports:CATEGORY
 	</pre>
+	<h4><pre><b>'~' FIELD</b></pre></h4>
+	A field following the operator '~' is not considered as
+	selection feature if the selection features are implicitly defined.
+	<h5>Examples</h5>
+	<pre>
+		Hello ~World
+	</pre>
+	<h4><pre><b>NAME compareop TERM {',' TERM}</b></pre></h4>
+	An identifier followed by a compare operator
+	(one out of '<b>&lt;=</b>','<b>&gt;=</b>','<b>=</b>','<b>&gt</b>;','<b>=</b>','<b>==</b>','<b>!=</b>') and a term &lt;TERM&gt; or a comma-separated
+	list of terms specifies a query restriction.
+	&lt;NAME&gt; is referring to a metadata field and &lt;TERM&gt; to an element to compare 
+	the metadata field with. If you specify more than one &lt;TERM&gt;, then the restriction
+	condition is true, if one of the lists fulfills the condition.
+	<h5>Examples</h5>
+	<pre>
+		Date &lt;= '3/3/1979'
+	</pre>
+	<pre>
+		Category = 'Sports','Politics'
+	</pre>
+	<h4><pre><b>OP '(' ARG { ',' ARG } { '|' RANGE } { '^' CARDINALITY } ')'</b></pre></h4>
+	An identifier followed by an oval bracket '(' starts a join of posting sets.
+	The Argument features &lt;ARG&gt; are query fields with or without field type name
+	or expressions themselves.
+	Arguments are separated by comma ','. At the end of the argument list, you have
+	the possibility to add a range and a cardinality specifier.
+	The range specifies the proximity of the terms involved and the cardinality 
+	specifies the number of elements needed for a valid result in the case of operators
+	selecting a subset of the posting sets represented by the arguments.
+	<h5>Examples</h5>
+	<pre>
+		within( "War", "Religion" | 30 )
+	</pre>
+	<pre>
+		sequence_struct( :SENTDELIM, "painting", "exhibition" | 30 )
+	</pre>
+	<pre>
+		sequence_imm( any("John", "Anne"), "Doe" )
+	</pre>
+	</p>
+	<h3>Putting all together</h3>
+	<p class="description">
+	Finally, we present a query with all syntax elements introduced:
+	<h5>Example</h5>
+	<pre>
+		Category = 'Sports','Politics'
+		Date &lt;= '3/3/1979'
+		university ~graduate
+		sequence_imm( any("John", "Anne"), "Doe" )
+	</pre>
+	</p>
 </div>
 </div>
 </body>

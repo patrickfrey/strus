@@ -55,6 +55,10 @@ public:
 			const std::string& resultname,
 			const std::string& itemname)=0;
 
+	/// \brief Get the list of variables used by this function defined in the query with 'QueryInterface::setWeightingVariableValue( const std::string&, double)'
+	/// \return the list of variables
+	virtual std::vector<std::string> getVariables() const=0;
+
 	/// \brief Create an execution context for this summarization function instance
 	/// \param[in] storage_ storage interface for getting information for summarization (like for example document attributes)
 	/// \param[in] metadata_ metadata interface for inspecting document meta data (like for example the document insertion date)

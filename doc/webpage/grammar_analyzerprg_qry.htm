@@ -15,9 +15,31 @@
 <div id="content">
 	<h1>Strus query analyzer configuration</h1>
 	<h2>Language grammar</h2>
-	<p>The grammar for the query analysis is the same as for the document analysis except the following:
-	Instead of segmenter selection expressions to select the elements to process, you specify
-	a query field type by name.</p>
+	<p class="description">class="description">The grammar for the query analysis differs slightly from the the document analysis.
+	The sections that can be defined for query analysis are restricted to the following:
+	<ul>
+	<li>MetaData</li>
+	<li>SearchIndex</li>
+	<li>PatternLexem</li>
+	<li>PatternMatch</li>
+	</ul>
+	Not implemented are <i>Attribute</i>, <i>ForwardIndex</i>, <i>Aggregator</i>, <i>Document</i>, and <i>Content</i>,
+	as they do not make sense in the query.
+	</p>
+	<p class="description">
+	Another difference is the selection of elements to process. In the document you define
+	selection expressions for the segmenter. In the query analysis you define names of query
+	field types instead. The name 'default' is reserved for the default query field type,
+	used when no name for the field is specified in the query.
+	</p>
+	<h3>Example</h3>
+	<pre>
+[SearchIndex]
+        word = lc:convdia(en):stem(en) word word;
+        word = lc:convdia(en):stem(en) word default;
+[MetaData]
+        language = dictmap("language.txt"):lc language;
+	</pre>
 </div>
 </div>
 </body>

@@ -31,8 +31,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 	,m_statisticsBuilder()
 	,m_errorhnd(errorhnd_)
 {
-	StatisticsProcessorInterface::BuilderOptions options( StatisticsProcessorInterface::BuilderOptions::InsertInLexicalOrder);
-	m_statisticsBuilder.reset( m_proc->createBuilder( options));
+	m_statisticsBuilder.reset( m_proc->createBuilder());
 	if (!m_statisticsBuilder.get())
 	{
 		throw strus::runtime_error(_TXT("error creating peer message builder: %s"), m_errorhnd->fetchError());
@@ -87,7 +86,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 			const char* typenam = strings.c_str() + ti->second;
 	
 			ti = termnomap.find( termno);
-			if (ti == termnomap.end()) throw strus::runtime_error( _TXT( "encountered undefined term when populating df's"));
+			if (ti == termnomap.end()) throw strus::runtime_error( "%s",  _TXT( "encountered undefined term when populating df's"));
 			const char* termnam = strings.c_str() + ti->second;
 	
 			m_statisticsBuilder->addDfChange( typenam, termnam, sign?df:-df);
@@ -95,7 +94,7 @@ StatisticsInitIterator::StatisticsInitIterator(
 	}
 }
 
-bool StatisticsInitIterator::getNext( const char*& msg, std::size_t& msgsize)
+bool StatisticsInitIterator::getNext( const void*& msg, std::size_t& msgsize)
 {
 	if (m_errorhnd->hasError())
 	{

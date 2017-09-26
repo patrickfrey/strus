@@ -22,9 +22,9 @@
 		Here is a list of its subprojects:
 		<ol>
 		<li><a href="https://github.com/patrickfrey/strusBase">strusBase</a>
-			implements some helper functions as common code base.
+			implements some helper functions as the common code base.
 			It also defines the error buffer interface for buffering
-			exception error messages. Exceptions cannot be thrown accross borders of 
+			exception error messages. Exceptions cannot be thrown across borders of 
 			dynamically linked libraries and modules. All other Strus projects depend 
 			on strusBase.</li>
 		<li><a href="https://github.com/patrickfrey/strus">strus</a>
@@ -34,33 +34,33 @@
 			provides document and query analysis for transforming content
 			into retrievable items.</li>
 		<li><a href="https://github.com/patrickfrey/strusTrace">strusTrace</a>
-			implements all methods of the strus analyzer and core as proxy
+			implements all methods of the strus analyzer and core as a proxy
 			that logs its calls made via a specified interface. The whole
 			mechanism is implemented as own aspect without touching any
 			code of the core or the analyzer. The produced trace can be
-			visualized as call tree or the logs can be processed as readable 
+			visualized as call tree or the logs can be processed as a readable
 			dump.</li>
 		<li><a href="https://github.com/patrickfrey/strusPattern">strusPattern</a>
 			provides an implementation of the analyzer pattern matching interface
 			with a lexer based on the Intel hyperscan library.</li>
 		<li><a href="https://github.com/patrickfrey/strusVector">strusVector</a>
 			provides an implementation of the strus vector storage interface
-			with a nearest vector search implemented with brute force LSH (Local Sensitive Hashing).</li>
+			with a search for the nearest vectors implemented with brute force LSH (Local Sensitive Hashing).</li>
 		<li><a href="https://github.com/patrickfrey/strusModule">strusModule</a>
 			provides the loading of search engine components from dynamically 
 			loadable modules. (depends on strus and strusAnalyzer)</li>
 		<li><a href="https://github.com/patrickfrey/strusRpc">strusRpc</a>
 			provides a proxy interface for strus objects residing on a server via RPC.
-			If you want to use strus in a webserver context, where loading modules by
-			another instance than the webserver itself is not allowed or at least 
+			If you want to use strus in a web server context, where loading modules by
+			another instance than the web server itself is not allowed or at least 
 			not recommended, you should access strus via RPC or a similar mechanism.
-			(depends on strus, strusAnalyzer and strusModule)</li>
+			(depends on strus, strusAnalyzer, strusModule)</li>
 		<li><a href="https://github.com/patrickfrey/strusUtilities">strusUtilities</a>
 			provides some command line programs to access the search engine.
 			(Depends on strusModule and strusRpc</li>
 		<li><a href="https://github.com/patrickfrey/strusBindings">strusBindings</a>
 			provides language bindings to use <i>strus</i> with other
-			programming languages like <i>PHP</i>,<i>Python</i>,<i>Java</i>,etc...  
+			programming languages like <i>PHP</i>, <i>Python</i>, <i>Lua</i>, etc...  
 			(Depends on strusModule and strusRpc)</li>
 		</ol>
 		</p>
@@ -80,7 +80,7 @@
 		<li><a href="http://patrickfrey.github.io/strusAnalyzer/doc/doxygen/html/index.html">strus analyzer</a>:
 			Interface to process documents and queries in strus.</li>
 		<li><a href="http://patrickfrey.github.io/strusTrace/doc/doxygen/html/index.html">strus trace</a>:
-			Interface for logging and inspecting method call traces for debugging or other kind of execution analysis.</li>
+			Interface for logging and inspecting method call traces for debugging or another kind of execution analysis.</li>
 		<li><a href="http://patrickfrey.github.io/strusModule/doc/doxygen/html/index.html">strus module loader</a>:
 			Interface to define strus components and to load them from dynamically loadable modules.</li>
 		<li><a href="http://patrickfrey.github.io/strusRpc/doc/doxygen/html/index.html">strus RPC client</a>:
@@ -89,25 +89,13 @@
 			Functions to instantiate strus components from source</li>
 		</ul>
 		<h3>Language bindings</h3>
-		<p class="description">The language binding interfaces are for other programming
-		languages calling <i>strus</i> functions.
-		The following list gives you the pointers to the bindings of the languages supported
-		till now:
-		<table border=0>
-		<tr>
-		<td><a href="http://patrickfrey.github.io/strusBindings/doc/php/doxygen/html/index.html"><img src="images/php.jpeg" width="75" alt="PHP logo" />&nbsp;</a>
-		</td>
-		<td><a href="http://patrickfrey.github.io/strusBindings/doc/java/doxygen/html/index.html"><font size=5 style="Arial">Java&nbsp;</font></a>
-		</td>
-		<td><a href="http://patrickfrey.github.io/strusBindings/doc/python/doxygen/html/index.html"><img src="images/python.jpeg" width="75" alt="Python logo" /></a>
-		</td>
-		</tr>
-		</table>
+		<p class="description">The language bindings are currently rewritten. A new solution with bindings to Lua, Python3 and PHP7
+		will be available on start of October.
 		</p>
 
 		<h2>Functions documentation</h2>
 		<p class="description">When writing an application with <i>Strus</i>, you have various
-		functions of different kind at your hands. You can write your functions in C++ and load
+		functions of a different kind at your hands. You can write your functions in C++ and load
 		them dynamically into your application. But there exist also a lot of predefined
 		functions in strus. You find a complete list of the built-in functions of the core
 		and the analyzer <a href="builtin_functions.htm">here</a>.
@@ -117,7 +105,7 @@
 		<p class="description">You do not need the command line tools of <i>strus</i>. 
 		All functionality is accessible with the API.<br/>
 		But there exist a lot of command line tools helpful for access and maintenance of
-		a <i>strus</i> storage. A list of the standard command line tools an their documentation can be found
+		a <i>strus</i> storage. A list of the standard command line tools and their documentation can be found
 		<a href="utilities.htm">here (utilities)</a>.
 		</p>
 		<h2>Developer documentation</h2>

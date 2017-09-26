@@ -42,13 +42,14 @@ public:
 			const MetaDataDescription& newDescr,
 			DatabaseTransactionInterface* transaction);
 
-private:
-	MetaDataRecord getRecord( Index docno);
 	void clear();
 
 private:
+	MetaDataRecord getRecord( Index docno);
+
+private:
 	typedef std::pair<Index,Index> MetaDataKey;
-	typedef LocalStructAllocator<std::pair<MetaDataKey,NumericVariant> > MapAllocator;
+	typedef LocalStructAllocator<std::pair<const MetaDataKey,NumericVariant> > MapAllocator;
 	typedef std::less<MetaDataKey> MapCompare;
 	typedef std::map<MetaDataKey,NumericVariant,MapCompare,MapAllocator> Map;
 

@@ -10,6 +10,8 @@
 #define _STRUS_VECTOR_STORGE_SEARCH_INTERFACE_HPP_INCLUDED
 #include "strus/index.hpp"
 #include <vector>
+#include <limits>
+#include <cmath>
 
 namespace strus {
 
@@ -41,11 +43,15 @@ public:
 
 		bool operator < ( const Result& o) const
 		{
-			return (m_weight == o.m_weight) ? m_featidx < o.m_featidx : m_weight < o.m_weight;
+			if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return true;
+			if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return false;
+			return m_featidx < o.m_featidx;
 		}
 		bool operator > ( const Result& o) const
 		{
-			return (m_weight == o.m_weight) ? m_featidx > o.m_featidx : m_weight > o.m_weight;
+			if (m_weight + std::numeric_limits<double>::epsilon() < o.m_weight) return false;
+			if (m_weight - std::numeric_limits<double>::epsilon() > o.m_weight) return true;
+			return m_featidx > o.m_featidx;
 		}
 
 	private:

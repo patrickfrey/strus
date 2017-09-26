@@ -25,8 +25,8 @@ DocnoMatchPrioQueue::DocnoMatchPrioQueue( const std::vector<PostingIteratorRefer
 	,m_maxdocno_candidate(0)
 {
 	if (m_cardinality > MaxNofElements) throw strus::runtime_error(_TXT("cardinality out of range: %u"), m_cardinality);
-	if (m_args.size() == 0) throw strus::runtime_error(_TXT("initializing allmatch priority queue with no arguments"));
-	if (m_args.size() > MaxNofElements) throw strus::runtime_error(_TXT("number of arguments out of range: %u"), m_args.size());
+	if (m_args.size() == 0) throw strus::runtime_error( "%s", _TXT("initializing allmatch priority queue with no arguments"));
+	if (m_args.size() > MaxNofElements) throw strus::runtime_error(_TXT("number of arguments out of range: %u"), (unsigned int)m_args.size());
 	if (m_cardinality == 0) m_cardinality = m_args.size();
 }
 
@@ -82,7 +82,7 @@ void DocnoMatchPrioQueue::shiftQueueElement( unsigned char qi, const Index& docn
 	unsigned char aridx = m_quear[ qi];
 	if (docno_ < m_ar[ aridx].docno)
 	{
-		throw strus::runtime_error(_TXT("bad all match prio queue operation (shift with smaller docno)"));
+		throw strus::runtime_error( "%s", _TXT("bad all match prio queue operation (shift with smaller docno)"));
 	}
 	else
 	{

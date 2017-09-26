@@ -15,6 +15,8 @@
 #include "strus/summarizationVariable.hpp"
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
+#include "private/utils.hpp"
+#include "private/localStructAllocator.hpp"
 #include <vector>
 #include <string>
 #include <sstream>
@@ -72,7 +74,11 @@ public:
 			double weight,
 			const TermStatistics&);
 
+	virtual void setVariableValue( const std::string& name, double value);
+
 	virtual std::vector<SummaryElement> getSummary( const Index& docno);
+
+	virtual std::string debugCall( const Index& docno);
 
 private:
 	struct SummarizationFeature
@@ -86,6 +92,16 @@ private:
 		SummarizationFeature( const SummarizationFeature& o)
 			:itr(o.itr),varitr(o.varitr),weight(o.weight){}
 	};
+
+	typedef LocalStructAllocator<std::pair<const Index,double> > PosWeightAllocator;
+	typedef std::map<Index,double,std::less<Index>,PosWeightAllocator> PosWeightMap;
+
+	strus::utils::BitSet getCandidateSet( const Index& docno);
+	PosWeightMap buildPosWeightMap( const strus::utils::BitSet& docsel);
+
+	std::vector<SummaryElement> getSummariesFromPosWeightMap( const PosWeightMap& posWeightMap);
+
+	void printPosWeights( std::ostream& out, const strus::utils::BitSet& docsel);
 
 private:
 	const StorageClientInterface* m_storage;			///< storage interface
@@ -109,6 +125,11 @@ public:
 	virtual void addStringParameter( const std::string& name, const std::string& value);
 	virtual void addNumericParameter( const std::string& name, const NumericVariant& value);
 	virtual void defineResultName( const std::string& resultname, const std::string& itemname);
+
+	virtual std::vector<std::string> getVariables() const
+	{
+		return std::vector<std::string>();
+	}
 
 	virtual SummarizerFunctionContextInterface* createFunctionContext(
 			const StorageClientInterface* storage,

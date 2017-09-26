@@ -36,6 +36,8 @@ class MetaDataReaderInterface;
 /// \brief Forward declaration
 class MetaDataRestrictionInterface;
 /// \brief Forward declaration
+class AclReaderInterface;
+/// \brief Forward declaration
 class KeyAllocatorInterface;
 /// \brief Forward declaration
 class DatabaseInterface;
@@ -93,6 +95,8 @@ public:
 			createInvAclIterator(
 				const std::string& username) const;
 
+	virtual AclReaderInterface* createAclReader() const;
+
 	virtual StorageTransactionInterface*
 			createTransaction();
 
@@ -107,9 +111,9 @@ public:
 	
 	virtual AttributeReaderInterface* createAttributeReader() const;
 
-	virtual StatisticsIteratorInterface* createInitStatisticsIterator( bool sign);
+	virtual StatisticsIteratorInterface* createAllStatisticsIterator( bool sign);
 
-	virtual StatisticsIteratorInterface* createUpdateStatisticsIterator();
+	virtual StatisticsIteratorInterface* createChangeStatisticsIterator();
 
 	virtual const StatisticsProcessorInterface* getStatisticsProcessor() const;
 
@@ -122,6 +126,10 @@ public:
 	virtual Index maxDocumentNumber() const;
 
 	virtual Index documentNumber( const std::string& docid) const;
+
+	virtual Index termTypeNumber( const std::string& type) const;
+
+	virtual bool isForwardIndexTerm( const std::string& type) const;
 
 	virtual ValueIteratorInterface* createTermTypeIterator() const;
 
@@ -138,6 +146,7 @@ public:
 
 	virtual bool checkStorage( std::ostream& errorlog) const;
 
+	virtual void close();
 	virtual std::string config() const;
 
 public:/*QueryEval,AttributeReader,documentTermIterator*/
@@ -197,7 +206,7 @@ public:/*StorageTransaction*/
 public:/*StatisticsBuilder*/
 	Index documentFrequency( const Index& typeno, const Index& termno) const;
 
-public:/*StorageDocumentChecker*/
+public:/*StorageDocumentChecker,AclIterator*/
 	IndexSetIterator getAclIterator( const Index& docno) const;
 	IndexSetIterator getUserAclIterator( const Index& userno) const;
 
@@ -205,7 +214,7 @@ public:/*StatisticsIterator*/
 	///\brief Get the document frequency cache
 	DocumentFrequencyCache* getDocumentFrequencyCache();
 	///\brief Fetch a message from a storage update transaction
-	bool fetchNextStatisticsMessage( const char*& msg, std::size_t& msgsize);
+	bool fetchNextStatisticsMessage( const void*& msg, std::size_t& msgsize);
 
 public:/*strusResizeBlocks*/
 	Index maxTermTypeNo() const;
@@ -242,6 +251,7 @@ private:
 	const StatisticsProcessorInterface* m_statisticsProc;	///< statistics message processor
 	Reference<StatisticsBuilderInterface> m_statisticsBuilder; ///< builder of statistics messages from updates by transactions
 	Reference<DocumentFrequencyCache> m_documentFrequencyCache; ///< reference to document frequency cache
+	bool m_close_called;					///< true if close was already called
 
 	ErrorBufferInterface* m_errorhnd;			///< error buffer for exception free interface
 };

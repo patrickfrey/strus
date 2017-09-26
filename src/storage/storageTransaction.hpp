@@ -118,6 +118,9 @@ public:/*Document,DocumentUpdate*/
 	void closeForwardIndexDocument();
 
 private:
+	void clearMaps();
+
+private:
 	StorageClient* m_storage;				///< Storage to call refresh after commit or rollback
 	DatabaseClientInterface* m_database;			///< database handle
 	const MetaDataDescription* m_metadescr;			///< description of metadata

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 # --------------------------------------
 # SOURCES AND INCLUDES
@@ -13,12 +13,12 @@ set( source_files
 include_directories(
 	"${Boost_INCLUDE_DIRS}"
 	"${Intl_INCLUDE_DIRS}"
-	"${PROJECT_SOURCE_DIR}/include"
+	"${STRUS_INCLUDE_DIRS}"
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
 	"${Boost_LIBRARY_DIRS}"
-	"${PROJECT_SOURCE_DIR}/src/utils"
+	"${MAIN_SOURCE_DIR}/utils"
 	"${strusbase_LIBRARY_DIRS}"
 )
 
@@ -29,6 +29,7 @@ link_directories(
 # -------------------------------------------
 add_library( strus_private_utils STATIC ${source_files} )
 target_link_libraries( strus_private_utils ${Intl_LIBRARIES} ${Boost_LIBRARIES} )
+set_property( TARGET strus_private_utils PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 
 add_library( strus_malloc_unreliable SHARED unreliableMalloc.c )
 target_link_libraries( strus_malloc_unreliable ${CMAKE_DL_LIBS} )

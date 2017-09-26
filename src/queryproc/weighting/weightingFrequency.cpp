@@ -8,13 +8,18 @@
 #include "weightingFrequency.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
+#include "strus/base/string_format.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include "private/utils.hpp"
 #include <string>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 using namespace strus;
 
+#define METHOD_NAME "constant"
 
 void WeightingFunctionContextTermFrequency::addWeightingFeature(
 		const std::string& name_,
@@ -30,10 +35,15 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' weighting function feature parameter '%s'"), "frequency", name_.c_str());
+			m_errorhnd->report( _TXT("unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
 		}
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of weighting function '%s': %s"), "frequency", *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd);
+}
+
+void WeightingFunctionContextTermFrequency::setVariableValue( const std::string&, double)
+{
+	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 double WeightingFunctionContextTermFrequency::call( const Index& docno)
@@ -50,6 +60,27 @@ double WeightingFunctionContextTermFrequency::call( const Index& docno)
 	return rt;
 }
 
+std::string WeightingFunctionContextTermFrequency::debugCall( const Index& docno)
+{
+	std::ostringstream out;
+	out << std::fixed << std::setprecision(8);
+	out << string_format( _TXT( "calculate %s"), METHOD_NAME) << std::endl;
+
+	double res = 0.0;
+	std::vector<Feature>::const_iterator fi = m_featar.begin(), fe = m_featar.end();
+	for (unsigned int fidx=0;fi != fe; ++fi,++fidx)
+	{
+		if (docno==fi->itr->skipDoc( docno))
+		{
+			double ww = fi->weight * fi->itr->frequency();
+			res += ww;
+			out << string_format( _TXT( "[%u] result=%f, ff=%u"),
+						fidx, ww, (unsigned int)fi->itr->frequency()) << std::endl;			
+		}
+	}
+	out << string_format( _TXT( "sum result=%f"), res) << std::endl;
+	return out.str();
+}
 
 static NumericVariant parameterValue( const std::string& name, const std::string& value)
 {
@@ -64,18 +95,18 @@ void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::stri
 	{
 		addNumericParameter( name, parameterValue( name, value));
 	}
-	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), "frequency", *m_errorhnd);
+	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to weighting function '%s': %s"), METHOD_NAME, *m_errorhnd);
 }
 
 void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::string& name, const NumericVariant&)
 {
 	if (utils::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), "frequency");
+		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), "frequency", name.c_str());
+		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 
@@ -88,7 +119,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceTermFrequency::creat
 	{
 		return new WeightingFunctionContextTermFrequency( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), "frequency", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating context of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 std::string WeightingFunctionInstanceTermFrequency::tostring() const
@@ -104,7 +135,7 @@ WeightingFunctionInstanceInterface* WeightingFunctionTermFrequency::createInstan
 	{
 		return new WeightingFunctionInstanceTermFrequency( m_errorhnd);
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), "frequency", *m_errorhnd, 0);
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd, 0);
 }
 
 FunctionDescription WeightingFunctionTermFrequency::getDescription() const
@@ -117,6 +148,6 @@ FunctionDescription WeightingFunctionTermFrequency::getDescription() const
 		rt( P::Numeric, "weight", _TXT( "defines the query feature weight factor"), "0:");
 		return rt;
 	}
-	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), "frequency", *m_errorhnd, FunctionDescription());
+	CATCH_ERROR_ARG1_MAP_RETURN( _TXT("error creating weighting function description for '%s': %s"), METHOD_NAME, *m_errorhnd, FunctionDescription());
 }
 

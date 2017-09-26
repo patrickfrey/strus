@@ -57,7 +57,7 @@ public:
 
 	virtual Index length() const
 	{
-		return m_argar.size()?(m_argar.back()->posno() - m_posno + m_argar.back()->length()):0;
+		return (m_posno && m_argar.size())?(m_argar.back()->posno() - m_posno + m_argar.back()->length()):0;
 	}
 
 private:

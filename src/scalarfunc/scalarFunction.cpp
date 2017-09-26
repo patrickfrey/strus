@@ -70,7 +70,7 @@ void ScalarFunction::pushInstruction( const OpCode& op, unsigned int operand)
 {
 	if (operand >= (1 << InstructionOpodeShift))
 	{
-		throw strus::runtime_error( _TXT( "operand out of range in scalar function"));
+		throw strus::runtime_error( "%s",  _TXT( "operand out of range in scalar function"));
 	}
 	Instruction instr = ((Instruction)op << InstructionOpodeShift) + operand;
 	m_instructionar.push_back( instr);
@@ -78,7 +78,7 @@ void ScalarFunction::pushInstruction( const OpCode& op, unsigned int operand)
 
 void ScalarFunction::addOpPushVariable( const std::string& name_)
 {
-	std::string name( strus::utils::tolower( name_));
+	std::string name( name_);
 	VariableMap::const_iterator vi = m_variablemap.find( name);
 	unsigned int validx;
 	if (vi == m_variablemap.end())
@@ -149,7 +149,7 @@ const char* ScalarFunction::reverseLookupVariableName( std::size_t validx) const
 
 std::size_t ScalarFunction::getVariableIndex( const std::string& name) const
 {
-	VariableMap::const_iterator vi = m_variablemap.find( strus::utils::tolower( name));
+	VariableMap::const_iterator vi = m_variablemap.find( name);
 	if (vi == m_variablemap.end()) throw strus::runtime_error("variable '%s' is not defined in scalar function", name.c_str());
 	return vi->second;
 }
