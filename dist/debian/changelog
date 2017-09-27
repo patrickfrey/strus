@@ -1,3 +1,7 @@
+strus (0.15.2-1) unstable; urgency=low
+  * bring up travis build, some minor fixes
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 27 Sep 2017 15:30:00 +0100
+
 strus (0.15.1-1) unstable; urgency=low
   * release to cleanup mess with missing CHANGELOG in 0.15.0
  -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 4 Sep 2017 15:30:00 +0100

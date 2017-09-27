@@ -294,6 +294,9 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Wed Sep 27 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.15.2-0.1
+- bring up travis build, some minor fixes
+
 * Mon Sep 4 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.15.1-0.1
 - release to cleanup mess with missing CHANGELOG in 0.15.0
 
