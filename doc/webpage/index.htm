@@ -95,6 +95,18 @@
 		<table>
 
 		<tr>
+		<td><p class="timestamp">Sep 27th, 2017</p></td>
+		<td><p class="newstext">Pattern matching (project strusPattern) supports now approximative matching with edit distance.
+		The edit distance for a regular expression is declared by convenience with a '~' followed by the edit distance, e.g. "[Hh]ello [Ww]orld ~2".
+		The module 'modstrus_pattern' based on hyperscan supports approximative matching of unicode strings even though hyperscan has no support
+		for unicode yet in the approximative matching with edit distance. We solve this problem by mapping Unicode characters to one byte 
+		before matching and post-filtering result candidates with <a href="https://laurikari.net/tre">libtre</a>.
+		The difference of character codes in sequences of natural languages in phonetic scripts seems to be discriminating enough for 
+		the solution to work well.
+		</p></td>
+		</tr>
+
+		<tr>
 		<td><p class="timestamp">Sep 26th, 2017</p></td>
 		<td><p class="newstext">The documentations of the language bindings for Lua, PHP7 and Python3 based on
 		<a href="https://github.com/patrickfrey/papuga">Papuga</a> are available now.
