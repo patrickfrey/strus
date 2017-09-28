@@ -33,7 +33,7 @@ target_link_libraries( strus_statsproc strus_private_utils strus_base compactnod
 set_target_properties(
     strus_statsproc
     PROPERTIES
-    DEBUG_POSTFIX "_d"
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )

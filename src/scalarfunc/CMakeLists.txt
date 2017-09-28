@@ -32,7 +32,7 @@ target_link_libraries( strus_scalarfunc strus_base strus_private_utils )
 set_target_properties(
     strus_scalarfunc
     PROPERTIES
-    DEBUG_POSTFIX "_d"
+    DEBUG_POSTFIX "${CMAKE_DEBUG_POSTFIX}"
     SOVERSION "${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}"
     VERSION ${STRUS_VERSION}
 )
