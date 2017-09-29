@@ -138,8 +138,10 @@ void StorageAlterMetaDataTable::alterElement(
 		m_metadescr_new.renameElement( oldname, name);
 		renameElementReset( oldname, name);
 	
-		(void)m_metadescr_new.getHandle( name); //... check if element exists
-	
+		if (m_metadescr_new.getHandle( name) < 0)
+		{
+			throw strus::runtime_error(_TXT("altered metadata element '%s' does not exist"), name.c_str());
+		}
 		changeElementType( name, type);
 	}
 	CATCH_ERROR_MAP( _TXT("error altering meta data element: %s"), *m_errorhnd);
@@ -154,8 +156,11 @@ void StorageAlterMetaDataTable::renameElement(
 		m_metadescr_old.renameElement( oldname, name);
 		m_metadescr_new.renameElement( oldname, name);
 		renameElementReset( oldname, name);
-	
-		(void)m_metadescr_new.getHandle( name); //... check if element exists
+
+		if (m_metadescr_new.getHandle( name) < 0)
+		{
+			throw strus::runtime_error(_TXT("renamed metadata element '%s' does not exist"), name.c_str());
+		}
 	}
 	CATCH_ERROR_MAP( _TXT("error renaming meta data element: %s"), *m_errorhnd);
 }
@@ -165,8 +170,10 @@ void StorageAlterMetaDataTable::deleteElement(
 {
 	try
 	{
-		(void)m_metadescr_new.getHandle( name); //... check if element exists
-	
+		if (m_metadescr_new.getHandle( name) < 0)
+		{
+			throw strus::runtime_error(_TXT("deleted metadata element '%s' does not exist"), name.c_str());
+		}
 		MetaDataDescription chgdescr;
 		MetaDataDescription::const_iterator mi = m_metadescr_new.begin(), me = m_metadescr_new.end();
 		for (; mi != me; ++mi)

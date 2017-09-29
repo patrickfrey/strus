@@ -12,6 +12,7 @@
 #include "dataBlock.hpp"
 #include "databaseAdapter.hpp"
 #include "keyMap.hpp"
+#include "private/internationalization.hpp"
 #include <cstring>
 #include "private/utils.hpp"
 
@@ -58,13 +59,17 @@ void MetaDataMap::deleteMetaData( Index docno)
 
 void MetaDataMap::deleteMetaData( Index docno, const std::string& varname)
 {
-	MetaDataKey key( docno, m_descr->getHandle( varname));
+	Index elementhnd = m_descr->getHandle( varname);
+	if (elementhnd < 0) throw strus::runtime_error(_TXT("delete unknown meta data element '%s'"), varname.c_str());
+	MetaDataKey key( docno, elementhnd);
 	m_map[ key] = NumericVariant();
 }
 
 void MetaDataMap::defineMetaData( Index docno, const std::string& varname, const NumericVariant& value)
 {
-	MetaDataKey key( docno, m_descr->getHandle( varname));
+	Index elementhnd = m_descr->getHandle( varname);
+	if (elementhnd < 0) throw strus::runtime_error(_TXT("define unknown meta data element '%s'"), varname.c_str());
+	MetaDataKey key( docno, elementhnd);
 	m_map[ key] = value;
 }
 

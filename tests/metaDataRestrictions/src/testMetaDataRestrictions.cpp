@@ -159,6 +159,7 @@ static strus::MetaDataRecord randomMetaDataRecord(
 	{
 		strus::NumericVariant val;
 		strus::Index eh = descr->getHandle( *ci);
+		if (eh < 0) throw std::runtime_error("meta data element is not defined");
 		const strus::MetaDataElement* elem = descr->get(eh);
 		switch (elem->type())
 		{
@@ -199,6 +200,7 @@ static strus::MetaDataRecord randomMetaDataRecord(
 	for (ci = columns.begin(); ci != ce && vi != ve; ++ci,++vi,++cidx)
 	{
 		strus::Index eh = descr->getHandle( *ci);
+		if (eh < 0) throw std::runtime_error("meta data element is not defined");
 		const strus::MetaDataElement* elem = descr->get(eh);
 		strus::NumericVariant val( rt.getValue( elem));
 #ifdef STRUS_LOWLEVEL_DEBUG
