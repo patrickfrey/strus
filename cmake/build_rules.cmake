@@ -20,12 +20,6 @@ ENDIF (CPP_LANGUAGE_VERSION STREQUAL "0x")
 
 MESSAGE( STATUS "Debug postfix: '${CMAKE_DEBUG_POSTFIX}'" )
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE )
-set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus" )
-set( CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE )
-endif()
-
 set_property(GLOBAL PROPERTY rule_launch_compile ccache)
 set_property(GLOBAL PROPERTY rule_launch_link ccache)
 
@@ -48,13 +42,6 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread" )
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread" )
 endif()
 endif()
-
-if(APPLE)
-   set(CMAKE_MACOSX_RPATH ON)
-   set( CMAKE_BUILD_WITH_INSTALL_RPATH FALSE )
-   set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus" )
-   set( CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE )
-endif(APPLE)
 
 foreach(flag ${CXX11_FEATURE_LIST})
    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${flag} -pthread" )

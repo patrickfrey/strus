@@ -17,7 +17,7 @@ include( cmake/build_rules.cmake )
 include( cmake/boost.cmake )
 include( cmake/intl.cmake )
 include( cmake/find_strus_package.cmake )
-endif()
+endif(NOT STRUS_ALL)
 include( cmake/find_leveldb.cmake )
 
 find_strus_package( base )
@@ -50,7 +50,7 @@ add_subdirectory( tests )
   
 if(NOT STRUS_ALL)
 include( cmake/report_build_settings.cmake )
-endif()
+endif(NOT STRUS_ALL)
 
 # Install header files:
 install(DIRECTORY include/strus
@@ -62,4 +62,4 @@ install(DIRECTORY include/strus
 
 if(NOT STRUS_ALL)
 include( cmake/standard_targets.cmake )
-endif()
+endif(NOT STRUS_ALL)
