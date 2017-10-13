@@ -1,3 +1,8 @@
+strus (0.15.3)
+  * RPath fixes and some CMake file reorganization
+  * fixed missing check of meta data element names, causing a logic error in the commit
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 13 Oct 2017 13:00:00 +0100
+
 strus (0.15.2)
   * bring up travis build, some minor fixes
  -- Patrick Frey <patrickpfrey@yahoo.com>  Wed, 27 Sep 2017 15:30:00 +0100

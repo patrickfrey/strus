@@ -294,6 +294,10 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Fri Oct 13 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.15.3-0.1
+- RPath fixes and some CMake file reorganization
+- fixed missing check of meta data element names, causing a logic error in the commit
+
 * Wed Sep 27 2017 Patrick Frey <patrickpfrey@yahoo.com> 0.15.2-0.1
 - bring up travis build, some minor fixes
 
