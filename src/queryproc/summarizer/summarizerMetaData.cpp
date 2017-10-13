@@ -82,7 +82,6 @@ std::string SummarizerFunctionContextMetaData::debugCall( const Index& docno)
 	return out.str();
 }
 
-
 void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& name, const std::string& value)
 {
 	try
@@ -90,6 +89,14 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 		if (utils::caseInsensitiveEquals( name, "name"))
 		{
 			m_metaname = value;
+			m_resultname = value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "element"))
+		{
+			m_metaname = value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "result"))
+		{
 			m_resultname = value;
 		}
 		else
@@ -106,11 +113,7 @@ void SummarizerFunctionInstanceMetaData::defineResultName(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( itemname, "metaname"))
-		{
-			m_metaname = resultname;
-		}
-		else if (utils::caseInsensitiveEquals( itemname, "resultname"))
+		if (utils::caseInsensitiveEquals( itemname, m_resultname) || utils::caseInsensitiveEquals( itemname, "result"))
 		{
 			m_resultname = resultname;
 		}

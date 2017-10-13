@@ -96,6 +96,14 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 			m_resultname = value;
 			m_attribname = value;
 		}
+		else if (utils::caseInsensitiveEquals( name, "attribute"))
+		{
+			m_attribname = value;
+		}
+		else if (utils::caseInsensitiveEquals( name, "result"))
+		{
+			m_resultname = value;
+		}
 		else
 		{
 			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
@@ -122,11 +130,7 @@ void SummarizerFunctionInstanceAttribute::defineResultName(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( itemname, "metaname"))
-		{
-			m_attribname = resultname;
-		}
-		else if (utils::caseInsensitiveEquals( itemname, "resultname"))
+		if (utils::caseInsensitiveEquals( itemname, m_resultname) || utils::caseInsensitiveEquals( itemname, "result"))
 		{
 			m_resultname = resultname;
 		}
