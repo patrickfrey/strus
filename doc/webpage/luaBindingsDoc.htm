@@ -13,7 +13,7 @@
 <div class="product">
 	<div class="product_logo"> <img class="product_logo_img" src="images/logotype.jpg" alt="Strus"/></div>
 	<div class="product_name">Strus Lua Bindings</div>
-	<div class="product_release">0.15.0</div>
+	<div class="product_release">0.15.3</div>
 	<div class="product_author">Patrick P. Frey</div>
 	<div class="product_copyright">Patrick P. Frey</div>
 	<div class="product_license">Mozilla Public License v. 2.0 (MPLv2)</div>
@@ -339,7 +339,7 @@ Load a module
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">loadModule("storage_vector")</div>
+<div class="callexamples"><div class="example">loadModule( "storage_vector")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -367,7 +367,7 @@ Add one or more paths from where to try to load modules from
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addModulePath("/home/bob/modules")</div>
+<div class="callexamples"><div class="example">addModulePath( "/home/bob/modules")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -413,17 +413,10 @@ Create a storage client instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createStorageClient()</div>
-<div class="example">createStorageClient("path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT")</div>
-<div class="example">createStorageClient({path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT"})</div>
-<div class="example">createStorageClient({
- 	path="/srv/searchengine/storage"
- 	metadata="doclen UINT32, date UINT32, docweight FLOAT"
- 	max_open_files=256
- 	write_buffer_size="4K"
- 	block_size="4M"
- 	cache="1G"
- 	})</div>
+<div class="callexamples"><div class="example">createStorageClient( )</div>
+<div class="example">createStorageClient( "path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT")</div>
+<div class="example">createStorageClient( {path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT"})</div>
+<div class="example">createStorageClient( {path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT", max_open_files=256, write_buffer_size="4K", block_size="4M", cache="1G"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -448,9 +441,9 @@ Create a vector storage client instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createVectorStorageClient()</div>
-<div class="example">createVectorStorageClient("path=/srv/searchengine/vecstorage")</div>
-<div class="example">createVectorStorageClient({path="/srv/searchengine/vecstorage"})</div>
+<div class="callexamples"><div class="example">createVectorStorageClient( )</div>
+<div class="example">createVectorStorageClient( "path=/srv/searchengine/vecstorage")</div>
+<div class="example">createVectorStorageClient( {path="/srv/searchengine/vecstorage"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -479,8 +472,8 @@ Create a new storage (physically) described by config
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createStorage("path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT; acl=yes")</div>
-<div class="example">createStorage({path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT", acl=true})</div>
+<div class="callexamples"><div class="example">createStorage( "path=/srv/searchengine/storage; metadata=doclen UINT32, date UINT32, docweight FLOAT; acl=yes")</div>
+<div class="example">createStorage( {path="/srv/searchengine/storage", metadata="doclen UINT32, date UINT32, docweight FLOAT", acl=true})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -505,8 +498,8 @@ Create a new storage (physically) described by config
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createVectorStorageClient("path=/srv/searchengine/vecstorage")</div>
-<div class="example">createVectorStorageClient({path="/srv/searchengine/vecstorage"})</div>
+<div class="callexamples"><div class="example">createVectorStorageClient( "path=/srv/searchengine/vecstorage")</div>
+<div class="example">createVectorStorageClient( {path="/srv/searchengine/vecstorage"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -535,8 +528,8 @@ Delete the storage (physically) described by config
 </div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">destroyStorage("path=/srv/searchengine/storage")</div>
-<div class="example">destroyStorage({path="/srv/searchengine/storage"})</div>
+<div class="callexamples"><div class="example">destroyStorage( "path=/srv/searchengine/storage")</div>
+<div class="example">destroyStorage( {path="/srv/searchengine/storage"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -561,8 +554,8 @@ Tests if the storage described by config exists
 </div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">storageExists("path=/srv/searchengine/storage")</div>
-<div class="example">storageExists({path="/srv/searchengine/storage"})</div>
+<div class="callexamples"><div class="example">storageExists( "path=/srv/searchengine/storage")</div>
+<div class="example">storageExists( {path="/srv/searchengine/storage"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -587,7 +580,7 @@ Detect the type of document from its content
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">detectDocumentClass("&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;doc&gt;...&lt;/doc&gt;")</div>
+<div class="callexamples"><div class="example">detectDocumentClass( "&lt;?xml version='1.0' encoding='UTF-8'?&gt;&lt;doc&gt;...&lt;/doc&gt;")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -621,7 +614,7 @@ Create a document analyzer instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createDocumentAnalyzer({mimetype="application/xml", encoding="UTF-8"})</div>
+<div class="callexamples"><div class="example">createDocumentAnalyzer( {mimetype="application/xml", encoding="UTF-8"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -641,7 +634,7 @@ Create a query analyzer instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createQueryAnalyzer()</div>
+<div class="callexamples"><div class="example">createQueryAnalyzer( )</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -661,7 +654,7 @@ Create a query evaluation instance
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">createQueryEval()</div>
+<div class="callexamples"><div class="example">createQueryEval( )</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -733,7 +726,7 @@ Debug method that returns the serialization of the arguments as string
 </div> <!-- callnotes -->
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">debug_serialize({surname="John", lastname="Doe", company={name="ACME", url="acme.com"}})</div>
+<div class="callexamples"><div class="example">debug_serialize( {surname="John", lastname="Doe", company={name="ACME", url="acme.com"}})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -1885,7 +1878,7 @@ Define a feature to insert into the inverted index (search index) is selected, t
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addSearchIndexFeature("word", "/doc/elem", "word", {"lc", {"stem", "en"}})</div>
+<div class="callexamples"><div class="example">addSearchIndexFeature( "word", "/doc/elem", "word", {"lc", {"stem", "en"}})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -2876,8 +2869,8 @@ Declare a summarizer
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addSummarizer("attribute", {{"name", "docid"}, {"debug", "debug_attribute"}})</div>
-<div class="example">addSummarizer("metadata", {{"name", "cross"}, {"debug", "debug_metadata"}})</div>
+<div class="callexamples"><div class="example">addSummarizer( "attribute", {{"name", "docid"}, {"debug", "debug_attribute"}})</div>
+<div class="example">addSummarizer( "metadata", {{"name", "cross"}, {"debug", "debug_metadata"}})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -2907,7 +2900,7 @@ Add a weighting function to use as summand of the total document weight
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addWeightingFunction("tf", {match={feature="seek"}, debug="debug_weighting"})</div>
+<div class="callexamples"><div class="example">addWeightingFunction( "tf", {match={feature="seek"}, debug="debug_weighting"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -2935,7 +2928,7 @@ Define the weighting formula to use for calculating the total weight from the we
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">defineWeightingFormula("_0 / _1")</div>
+<div class="callexamples"><div class="example">defineWeightingFormula( "_0 / _1")</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -3003,8 +2996,8 @@ Create a feature from the query expression passed
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">addFeature("select", {"contains", 0, 1, {"word", "hello"}, {"word", "world"}})</div>
-<div class="example">addFeature("titlefield", {from="title_start", to="title_end"})</div>
+<div class="callexamples"><div class="example">addFeature( "select", {"contains", 0, 1, {"word", "hello"}, {"word", "world"}})</div>
+<div class="example">addFeature( "titlefield", {from="title_start", to="title_end"})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -3073,7 +3066,7 @@ Define term statistics to use for a term for weighting it in this query
 
 
 <h4 class="content_subtitle">Examples</h4>
-<div class="callexamples"><div class="example">defineTermStatistics("word", "game", {df=74653})</div>
+<div class="callexamples"><div class="example">defineTermStatistics( "word", "game", {df=74653})</div>
 </div> <!-- callexamples -->
 
 <h4 class="content_subtitle">Result</h4>
@@ -3264,7 +3257,7 @@ Map the contents of the query to a readable string
 </div> <!-- content -->
 
 <div class="about">
-<i>generated by papugaDoc (Strus 0.15.0)</i>
+<i>generated by papugaDoc (Strus 0.15.3)</i>
 </div>
 
 </div>
