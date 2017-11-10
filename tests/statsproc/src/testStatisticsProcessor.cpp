@@ -10,6 +10,7 @@
 #include "strus/statisticsProcessorInterface.hpp"
 #include "strus/statisticsViewerInterface.hpp"
 #include "strus/statisticsBuilderInterface.hpp"
+#include "strus/termStatisticsChange.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "random.hpp"
@@ -229,8 +230,7 @@ int main( int argc, const char* argv[])
 		double duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 		std::cerr << "inserted " << collection.termar.size() << " terms in " << doubleToString(duration) << " seconds " << std::endl;
 
-		typedef strus::StatisticsViewerInterface::DocumentFrequencyChange DocumentFrequencyChange;
-		DocumentFrequencyChange rec;
+		strus::TermStatisticsChange rec;
 
 		std::set<Term> termset;
 		while (msgblksize)
