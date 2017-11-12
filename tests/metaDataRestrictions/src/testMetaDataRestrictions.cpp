@@ -50,7 +50,7 @@ static uint32_t randuint( uint32_t mi, uint32_t me)
 	return (int32_t)((uint32_t)rand() % (me - mi) + mi);
 }
 
-#define STRUS_LOWLEVEL_DEBUG
+#undef STRUS_LOWLEVEL_DEBUG
 
 class MetaDataReader
 	:public strus::MetaDataReaderInterface
