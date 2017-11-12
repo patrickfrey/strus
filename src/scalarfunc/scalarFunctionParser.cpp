@@ -193,21 +193,23 @@ void ScalarFunctionParser::parseOperand( ScalarFunction* func, ParserContext* ct
 	{
 		throw strus::runtime_error( "%s",  _TXT( "unexpected end of expression, operand expected"));
 	}
-	std::string::const_iterator start = si;
-	if (isAlpha(*si))
 	{
-		// ... check if it is a function call and step back to 'start' if not
-		std::string funcname = parseIdentifier( si, se);
-		skipSpaces( si, se);
-		if (*si == '(')
+		std::string::const_iterator start = si;
+		if (isAlpha(*si))
 		{
-			++si;
-			parseFunctionCall( func, ctx, funcname, si, se);
-			return;
-		}
-		else
-		{
-			si = start;
+			// ... check if it is a function call and step back to 'start' if not
+			std::string funcname = parseIdentifier( si, se);
+			skipSpaces( si, se);
+			if (*si == '(')
+			{
+				++si;
+				parseFunctionCall( func, ctx, funcname, si, se);
+				return;
+			}
+			else
+			{
+				si = start;
+			}
 		}
 	}
 	if (*si == '_')

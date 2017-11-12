@@ -80,16 +80,16 @@ void PositionWindow::init(
 	for (; ai != ae; ++ai)
 	{
 		m_itrar[ ai] = args[ai];
-		Index pos = m_itrar[ ai] ? m_itrar[ ai]->skipPos( firstpos_) : 0;
-		if (pos)
+		Index wpos = m_itrar[ ai] ? m_itrar[ ai]->skipPos( firstpos_) : 0;
+		if (wpos)
 		{
 			// Insert element:
 			std::size_t pi = 0, pe = m_arsize;
-			for (; pi != pe && m_posar[pi] < pos; ++pi){}
+			for (; pi != pe && m_posar[pi] < wpos; ++pi){}
 			std::memmove( m_posar+pi+1, m_posar+pi, (pe-pi)*sizeof(Index));
 			std::memmove( m_window+pi+1, m_window+pi, (pe-pi)*sizeof(PostingIteratorInterface*));
 			++m_arsize;
-			m_posar[ pi] = pos;
+			m_posar[ pi] = wpos;
 			m_window[ pi] = ai;
 			m_isnew_bitset <<= 1;
 			m_isnew_bitset.set(0);
@@ -130,23 +130,23 @@ bool PositionWindow::advance( const Index& advancepos)
 	// Change the position of the first element in the sliding window by the calculated size:
 	std::size_t idx = m_window[ 0];
 	PostingIteratorInterface* itr = m_itrar[ idx];
-	Index pos = m_posar[0] + skipsize;
+	Index apos = m_posar[0] + skipsize;
 
-	if (pos < advancepos)
+	if (apos < advancepos)
 	{
-		pos = advancepos;
+		apos = advancepos;
 	}
-	pos = itr ? itr->skipPos( pos) : 0;
-	if (pos)
+	apos = itr ? itr->skipPos( apos) : 0;
+	if (apos)
 	{
 		// Rearrange array to be sorted again by positions:
 		std::size_t pi = 0, pe = m_arsize;
-		for (++pi; pi != pe && m_posar[pi] < pos; ++pi)
+		for (++pi; pi != pe && m_posar[pi] < apos; ++pi)
 		{
 			m_posar[ pi-1] = m_posar[ pi];
 			m_window[ pi-1] = m_window[ pi];
 		}
-		m_posar[ pi-1] = pos;
+		m_posar[ pi-1] = apos;
 		m_window[ pi-1] = idx;
 
 		m_isnew_bitset >>= 1;					//... remove first bit
@@ -189,12 +189,12 @@ bool PositionWindow::next()
 	return true;
 }
 
-bool PositionWindow::skip( const Index& pos)
+bool PositionWindow::skip( const Index& pos_)
 {
 	m_isnew_bitset.reset();
 	do
 	{
-		if (!advance( pos)) return false;
+		if (!advance( pos_)) return false;
 	}
 	while (!m_windowsize);
 	return true;

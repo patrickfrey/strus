@@ -66,9 +66,9 @@ public:
 		:DatabaseCursor( conn_, false, true, errorhnd_),m_errorhnd(errorhnd_){}
 
 	virtual bool fetch(
-			const char*& key,
+			const char*& keyptr,
 			std::size_t& keysize,
-			const char*& blk,
+			const char*& blkptr,
 			std::size_t& blksize)
 	{
 		try
@@ -83,9 +83,9 @@ public:
 			}
 			if (!m_key.defined()) return false;
 			Slice blkslice = value();
-			key = m_key.ptr();
+			keyptr = m_key.ptr();
 			keysize = m_key.size();
-			blk = blkslice.ptr();
+			blkptr = blkslice.ptr();
 			blksize = blkslice.size();
 			return true;
 		}

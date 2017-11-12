@@ -28,11 +28,11 @@ set_property(GLOBAL PROPERTY rule_launch_compile ccache)
 set_property(GLOBAL PROPERTY rule_launch_link ccache)
 
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -pedantic -Wfatal-errors -fvisibility=hidden" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Wshadow -pedantic -Wfatal-errors -fvisibility=hidden" )
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wall -pedantic -Wfatal-errors" )
 endif()
 if("${CMAKE_CXX_COMPILER_ID}" MATCHES "[cC]lang")
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -pedantic -Wfatal-errors -fvisibility=hidden -Wno-unused-private-field" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Wshadow -pedantic -Wfatal-errors -fvisibility=hidden -Wno-unused-private-field" )
 set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wall -pedantic -Wfatal-errors" )
 endif()
 

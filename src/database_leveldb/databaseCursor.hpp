@@ -27,12 +27,12 @@ public:
 	virtual ~DatabaseCursor();
 
 	virtual Slice seekUpperBound(
-			const char* key,
+			const char* keystr,
 			std::size_t keysize,
 			std::size_t domainkeysize);
 
 	virtual Slice seekUpperBoundRestricted(
-			const char* key,
+			const char* keystr,
 			std::size_t keysize,
 			const char* upkey,
 			std::size_t upkeysize);

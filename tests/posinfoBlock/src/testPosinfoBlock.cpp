@@ -145,7 +145,7 @@ static void testPosinfoBlock( unsigned int times, unsigned int minNofDocs, unsig
 #endif
 
 		bi = blockar.begin();
-		strus::Index dn = bi->firstDoc( bidx);
+		strus::Index blkdn = bi->firstDoc( bidx);
 
 		pi = pmap.begin(), pe = pmap.end();
 		while (pi != pe && bi != be)
@@ -153,10 +153,10 @@ static void testPosinfoBlock( unsigned int times, unsigned int minNofDocs, unsig
 #ifdef STRUS_LOWLEVEL_DEBUG
 			std::cerr << "\tdoc " << pi->first << ":" << std::endl;
 #endif
-			if (dn != pi->first)
+			if (blkdn != pi->first)
 			{
 				std::ostringstream msg;
-				msg << dn << " != " << pi->first;
+				msg << blkdn << " != " << pi->first;
 				throw std::runtime_error( std::string( "posinfo block build failed, document number mismatch: ") + msg.str());
 			}
 			std::vector<strus::Index> pos = bi->positions_at( bidx);
@@ -167,13 +167,13 @@ static void testPosinfoBlock( unsigned int times, unsigned int minNofDocs, unsig
 			{
 				throw std::runtime_error( std::string( "posinfo block build failed, mismatch in positions: {") + indexVectorToString( pos) + "} != {" + indexVectorToString( pi->second) + "}");
 			}
-			dn = bi->nextDoc( bidx);
-			if (!dn)
+			blkdn = bi->nextDoc( bidx);
+			if (!blkdn)
 			{
 				++bi;
 				if (bi != be)
 				{
-					dn = bi->firstDoc( bidx);
+					blkdn = bi->firstDoc( bidx);
 				}
 			}
 			++pi;

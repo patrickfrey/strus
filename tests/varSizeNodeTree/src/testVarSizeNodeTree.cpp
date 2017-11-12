@@ -141,19 +141,19 @@ int main( int argc, const char** argv)
 		}
 		duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 		std::cerr << "queried variable size node tree " << nofQueries << " random selected keys in " << doubleToString(duration) << " seconds" << std::endl;
-
-		TestMap::const_iterator
-			ti = testmap.begin(), te = testmap.end();
-
-		for (; ti != te; ++ti)
 		{
-			conotrie::CompactNodeTrie::NodeData val;
-			if (!origmap.get( ti->first, val))
+			TestMap::const_iterator
+				ti = testmap.begin(), te = testmap.end();
+	
+			for (; ti != te; ++ti)
 			{
-				throw std::runtime_error( std::string( "inserted key '") + ti->first + "' disapeared in variable size node tree");
+				conotrie::CompactNodeTrie::NodeData val;
+				if (!origmap.get( ti->first, val))
+				{
+					throw std::runtime_error( std::string( "inserted key '") + ti->first + "' disapeared in variable size node tree");
+				}
 			}
 		}
-
 		conotrie::CompactNodeTrie::const_iterator
 			oi = origmap.begin(), oe = origmap.end();
 		std::size_t oidx = 0;

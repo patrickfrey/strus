@@ -107,7 +107,7 @@ struct ForwardIndexData
 	};
 	std::vector<Element> elements;
 
-	ForwardIndexData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value);
+	ForwardIndexData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value, std::size_t advsize=100);
 
 	void print( std::ostream& out);
 };

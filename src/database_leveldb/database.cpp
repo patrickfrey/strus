@@ -155,29 +155,29 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 	{
 		leveldb::DB* db = 0;
 		strus::local_ptr<leveldb::DB> dbref;
-
-		// Open the database created:
-		std::string path;
-		std::string src = configsource;
-
-		if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
 		{
-			m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
-			return false;
+			// Open the database created:
+			std::string path;
+			std::string src = configsource;
+	
+			if (!extractStringFromConfigString( path, src, "path", m_errorhnd))
+			{
+				m_errorhnd->report( _TXT( "missing 'path' in database configuration string"));
+				return false;
+			}
+			leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
+			if (!status.ok())
+			{
+				std::string err = status.ToString();
+				if (db) delete db;
+				m_errorhnd->report( _TXT( "failed to open LevelDB key value store database for restoring backup: %s"), err.c_str());
+				return false;
+			}
+			else
+			{
+				dbref.reset( db);
+			}
 		}
-		leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
-		if (!status.ok())
-		{
-			std::string err = status.ToString();
-			if (db) delete db;
-			m_errorhnd->report( _TXT( "failed to open LevelDB key value store database for restoring backup: %s"), err.c_str());
-			return false;
-		}
-		else
-		{
-			dbref.reset( db);
-		}
-
 		unsigned int blkcnt = 0;
 		leveldb::WriteBatch batch;
 		leveldb::WriteOptions options;

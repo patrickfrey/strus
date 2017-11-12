@@ -266,7 +266,7 @@ static std::string encodeString( const std::string& value)
 	return rt;
 }
 
-ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value)
+ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice& key, const strus::DatabaseCursorInterface::Slice& value, std::size_t advsize)
 {
 	char const* ki = key.ptr()+1;
 	char const* ke = key.ptr()+key.size();
@@ -286,18 +286,18 @@ ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice&
 	Index prevpos = 0;
 	for (; bi != be; bi = blk.nextItem( bi))
 	{
-		std::string value( blk.value_at( bi));
-		if (!strus::checkStringUtf8( value.c_str(), value.size()))
+		std::string valuestr( blk.value_at( bi));
+		if (!strus::checkStringUtf8( valuestr.c_str(), valuestr.size()))
 		{
-			if (value.size() > 100)
+			if (valuestr.size() > advsize)
 			{
-				std::size_t nn = 60;
-				while (value.size() > nn && (unsigned char)value[nn] > 127) nn++;
-				value.resize( nn);
-				value.append( "...");
+				std::size_t nn = advsize/2;
+				while (valuestr.size() > nn && (unsigned char)valuestr[nn] > 127) nn++;
+				valuestr.resize( nn);
+				valuestr.append( "...");
 			}
-			std::string encvalue = encodeString( value);
-			throw strus::runtime_error( _TXT( "value in forward index is not a valid UTF-8 string: '%s' [%s]"), value.c_str(), encvalue.c_str());
+			std::string encvalue = encodeString( valuestr);
+			throw strus::runtime_error( _TXT( "value in forward index is not a valid UTF-8 string: '%s' [%s]"), valuestr.c_str(), encvalue.c_str());
 		}
 		Index curpos = blk.position_at(bi);
 		if (curpos <= prevpos)
@@ -308,7 +308,7 @@ ForwardIndexData::ForwardIndexData( const strus::DatabaseCursorInterface::Slice&
 		{
 			throw strus::runtime_error( "%s", _TXT( "position found in forward index that is bigger than the block id"));
 		}
-		elements.push_back( Element( curpos, value));
+		elements.push_back( Element( curpos, valuestr));
 	}
 }
 

@@ -427,15 +427,14 @@ std::string WeightingFunctionContextBM25pff::debugCall( const Index& docno)
 
 	std::size_t featcount = 0;
 	double res = 0.0;
-	std::size_t fi = 0;
-	for ( ;fi != m_itrarsize; ++fi)
+	for (std::size_t fi = 0; fi != m_itrarsize; ++fi)
 	{
 		if (wdata.valid_itrar[ fi] && m_relevantfeat[ fi]) ++featcount;
 	}
 	if (featcount <= 1)
 	{
 		out << _TXT( "fallback to BM25 (too few query features)") << std::endl;
-		for (fi = 0; fi != m_itrarsize; ++fi)
+		for (std::size_t fi = 0; fi != m_itrarsize; ++fi)
 		{
 			if (!wdata.valid_itrar[ fi]) continue;
 			double ff = wdata.valid_itrar[ fi]->frequency();

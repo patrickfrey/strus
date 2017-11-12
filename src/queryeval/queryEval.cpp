@@ -153,22 +153,24 @@ void QueryEval::print( std::ostream& out) const
 			}
 			out << ";" << std::endl;
 		}
-		std::vector<WeightingDef>::const_iterator
-			fi = m_weightingFunctions.begin(), fe = m_weightingFunctions.end();
-		for (; fi != fe; ++fi)
 		{
-			out << "EVAL ";
-			std::string params = fi->function()->tostring();
-			out << " " << fi->functionName() << "( " << params;
-			std::vector<FeatureParameter>::const_iterator
-				pi = fi->featureParameters().begin(), pe = fi->featureParameters().end();
-			int pidx = params.size();
-			for (; pi != pe; ++pi,++pidx)
+			std::vector<WeightingDef>::const_iterator
+				fi = m_weightingFunctions.begin(), fe = m_weightingFunctions.end();
+			for (; fi != fe; ++fi)
 			{
-				if (pidx) out << ", ";
-				out << pi->parameterName() << "= %" << pi->featureSet();
+				out << "EVAL ";
+				std::string params = fi->function()->tostring();
+				out << " " << fi->functionName() << "( " << params;
+				std::vector<FeatureParameter>::const_iterator
+					pi = fi->featureParameters().begin(), pe = fi->featureParameters().end();
+				int pidx = params.size();
+				for (; pi != pe; ++pi,++pidx)
+				{
+					if (pidx) out << ", ";
+					out << pi->parameterName() << "= %" << pi->featureSet();
+				}
+				out << ");" << std::endl;
 			}
-			out << ");" << std::endl;
 		}
 		std::vector<SummarizerDef>::const_iterator
 			si = m_summarizers.begin(), se = m_summarizers.end();

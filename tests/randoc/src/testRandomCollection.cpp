@@ -230,8 +230,7 @@ struct RandomCollection
 			std::cerr << "ERROR max document size has to be at least 3" << std::endl;
 			maxDocumentSize = 3;
 		}
-		unsigned int di = 0;
-		for (; di < nofDocuments; ++di)
+		for (unsigned int di = 0; di < nofDocuments; ++di)
 		{
 			unsigned int tiny_docsize  = g_random.get( 2, 3 + (maxDocumentSize/16)) + (maxDocumentSize/16);
 			unsigned int small_docsize = g_random.get( 2, 3 + (maxDocumentSize/8)) + (maxDocumentSize/8);
