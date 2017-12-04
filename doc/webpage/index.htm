@@ -84,6 +84,15 @@
 		<p class="description">The documentation is work in progress.
 		What is available can be found <a href="documentation.htm">here</a>.
 		</p>
+		<h3>The inverted case of pattern matching</h3>
+		<p class="description">
+		The documentation for doing high performance pattern matching with many thousands of patterns 
+		can be found <a href="introduction_struspattern.htm">here</a>.
+		It allows you to define tokens with regular expressions in text and to define patterns with these tokens as alphabet.
+		With the help of <a href="https://01.org/hyperscan">Hyperscan</a> that builds one DFA for all regular expressions 
+		<i>StrusPattern</i> gets a competitive performance.
+		Approximative matching on Unicode strings with edit distance is also supported.
+		</p>
 
 		<h2>Story</h2>
 		<p class="description">Why build yet another search engine? <a href="story.htm">Here</a>
@@ -99,18 +108,6 @@
 		<td><p class="newstext">Improved language bindings based on <a href="https://github.com/patrickfrey/papuga">Papuga</a>.
 		Allowing now data structures to pass as classes with data members also for PHP7 and Python3 bindings.
 		Return value structures can be declared as structures with data members instead of returning them as dictionaries.
-		</p></td>
-		</tr>
-
-		<tr>
-		<td><p class="timestamp">Sep 27th, 2017</p></td>
-		<td><p class="newstext">Pattern matching (project strusPattern) supports now approximative matching with edit distance.
-		The edit distance for a regular expression is declared by convenience with a '~' followed by the edit distance, e.g. "[Hh]ello [Ww]orld ~2".
-		The module 'modstrus_pattern' based on hyperscan supports approximative matching of unicode strings even though hyperscan has no support
-		for unicode yet in the approximative matching with edit distance. We solve this problem by mapping Unicode characters to one byte 
-		before matching and post-filtering result candidates with <a href="https://laurikari.net/tre">libtre</a>.
-		The difference of character codes in sequences of natural languages in phonetic scripts seems to be discriminating enough for 
-		the solution to work well.
 		</p></td>
 		</tr>
 
