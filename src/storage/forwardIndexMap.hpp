@@ -76,7 +76,7 @@ private:
 	typedef std::map<Index,CurblockElemList,std::less<Index>,CurblockMapAllocator> CurblockMap;
 
 private:
-	void closeCurblock( const Index& typeno, CurblockElemList& blk);
+	void closeCurblock( const Index& typeno, const CurblockElemList& blk);
 	void closeCurblocks();
 
 private:

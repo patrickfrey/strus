@@ -13,7 +13,7 @@
 
 using namespace strus;
 
-void ForwardIndexMap::closeCurblock( const Index& typeno, CurblockElemList& elemlist)
+void ForwardIndexMap::closeCurblock( const Index& typeno, const CurblockElemList& elemlist)
 {
 	if (elemlist.empty()) return;
 	Index lastpos = elemlist.back().first;
@@ -30,7 +30,6 @@ void ForwardIndexMap::closeCurblock( const Index& typeno, CurblockElemList& elem
 	}
 	m_map[ key] = m_blocklist.size();
 	m_blocklist.push_back( blk);
-	elemlist.clear();
 }
 
 void ForwardIndexMap::closeCurblocks()
@@ -39,6 +38,7 @@ void ForwardIndexMap::closeCurblocks()
 	for (; bi != be; ++bi)
 	{
 		closeCurblock( bi->first, bi->second);
+		bi->second.clear();
 	}
 }
 
@@ -157,6 +157,7 @@ void ForwardIndexMap::defineForwardIndexTerm(
 	else if (bi->second.size() >= m_maxblocksize)
 	{
 		closeCurblock( typeno, bi->second);
+		bi->second.clear();
 	}
 	m_strings.push_back( termstring.c_str(), termstring.size());
 	bi->second.push_back( CurblockElem( pos, m_strings.back()));
