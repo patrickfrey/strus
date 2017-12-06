@@ -322,7 +322,7 @@ bool StorageTransaction::commit()
 		strus::local_ptr<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 		if (!transaction.get())
 		{
-			m_errorhnd->explain( _TXT( "error creating transaction"));
+			m_errorhnd->explain( _TXT( "error creating transaction: %s"));
 			return false;
 		}
 		std::map<Index,Index> termnoUnknownMap;
