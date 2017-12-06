@@ -1,7 +1,7 @@
 # from https://github.com/justmoon/bzing/blob/master/cmake/FindLevelDB.cmake, slightly adapted
 
-find_path(LevelDB_INCLUDE_PATH NAMES leveldb/db.h HINTS "${CMAKE_INSTALL_PREFIX}/include/strus")
-find_library(LevelDB_LIBRARY NAMES leveldb HINTS "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus")
+find_path(LevelDB_INCLUDE_PATH NAMES leveldb/db.h HINTS "${CMAKE_INSTALL_PREFIX}/include/strus"  "${LEVELDB_ROOT}/include" )
+find_library(LevelDB_LIBRARY NAMES leveldb HINTS "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus"  "${LEVELDB_ROOT}/lib" )
 
 if(LevelDB_INCLUDE_PATH AND LevelDB_LIBRARY)
   set(LevelDB_FOUND TRUE)
