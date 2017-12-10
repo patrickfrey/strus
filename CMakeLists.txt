@@ -13,11 +13,11 @@ set( STRUS_VERSION ${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}.${STRUS_PATCH_V
 if(NOT STRUS_ALL)
 include( cmake/dist.cmake )
 include( cmake/LinuxDistribution.cmake )
+include( cmake/build_rules.cmake )
 include( cmake/boost.cmake )
 include( cmake/intl.cmake )
 include( cmake/find_strus_package.cmake )
 include( cmake/find_leveldb.cmake )
-include( cmake/build_rules.cmake )
 endif(NOT STRUS_ALL)
 
 find_strus_package( base )
