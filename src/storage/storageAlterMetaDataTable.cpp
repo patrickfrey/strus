@@ -12,8 +12,8 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
 #include <string>
@@ -96,9 +96,9 @@ void StorageAlterMetaDataTable::renameElementReset(
 	std::vector<std::string>::iterator di = m_metadescr_resets.begin(), de = m_metadescr_resets.end();
 	for (; di != de; ++di)
 	{
-		if (utils::caseInsensitiveEquals( oldname, *di))
+		if (strus::caseInsensitiveEquals( oldname, *di))
 		{
-			*di = utils::tolower( name);
+			*di = string_conv::tolower( name);
 			break;
 		}
 	}
@@ -112,7 +112,7 @@ void StorageAlterMetaDataTable::changeElementType(
 	MetaDataDescription::const_iterator mi = m_metadescr_new.begin(), me = m_metadescr_new.end();
 	for (; mi != me; ++mi)
 	{
-		if (utils::caseInsensitiveEquals( mi.name(), name))
+		if (strus::caseInsensitiveEquals( mi.name(), name))
 		{
 			chgdescr.add( type, name);
 		}
@@ -178,7 +178,7 @@ void StorageAlterMetaDataTable::deleteElement(
 		MetaDataDescription::const_iterator mi = m_metadescr_new.begin(), me = m_metadescr_new.end();
 		for (; mi != me; ++mi)
 		{
-			if (utils::caseInsensitiveEquals( mi.name(), name))
+			if (strus::caseInsensitiveEquals( mi.name(), name))
 			{
 				continue;
 			}
@@ -188,7 +188,7 @@ void StorageAlterMetaDataTable::deleteElement(
 			}
 		}
 		m_metadescr_new = chgdescr;
-		m_metadescr_resets.push_back( utils::tolower( name));
+		m_metadescr_resets.push_back( string_conv::tolower( name));
 	}
 	CATCH_ERROR_MAP( _TXT("error deleting meta data element: %s"), *m_errorhnd);
 }
@@ -198,7 +198,7 @@ void StorageAlterMetaDataTable::clearElement(
 {
 	try
 	{
-		m_metadescr_resets.push_back( utils::tolower( name));
+		m_metadescr_resets.push_back( string_conv::tolower( name));
 	}
 	CATCH_ERROR_MAP( _TXT("error clearing meta data element value: %s"), *m_errorhnd);
 }

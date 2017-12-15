@@ -10,7 +10,6 @@
 #include "strus/index.hpp"
 #include "databaseAdapter.hpp"
 #include "keyAllocatorInterface.hpp"
-#include "private/utils.hpp"
 #include "private/stringMap.hpp"
 #include <cstdlib>
 #include <string>

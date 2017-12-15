@@ -10,6 +10,7 @@
 #include "databaseCursor.hpp"
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
@@ -62,7 +63,7 @@ class DatabaseBackupCursor
 	,public DatabaseCursor
 {
 public:
-	DatabaseBackupCursor( const utils::SharedPtr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
+	DatabaseBackupCursor( const strus::shared_ptr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
 		:DatabaseCursor( conn_, false, true, errorhnd_),m_errorhnd(errorhnd_){}
 
 	virtual bool fetch(

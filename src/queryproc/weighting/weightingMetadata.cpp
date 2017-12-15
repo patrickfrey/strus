@@ -10,9 +10,9 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -83,7 +83,7 @@ void WeightingFunctionInstanceMetadata::addStringParameter( const std::string& n
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "name"))
+		if (strus::caseInsensitiveEquals( name, "name"))
 		{
 			m_elementName = value;
 		}
@@ -99,11 +99,11 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "weight"))
+		if (strus::caseInsensitiveEquals( name, "weight"))
 		{
 			m_weight = (double)value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "name"))
+		else if (strus::caseInsensitiveEquals( name, "name"))
 		{
 			throw strus::runtime_error( _TXT("illegal numeric type for '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}

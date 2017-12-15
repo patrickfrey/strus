@@ -9,8 +9,13 @@
 #include "strus/reference.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/shared_ptr.hpp"
+#include "strus/base/thread.hpp"
 #include <leveldb/db.h>
 #include <leveldb/cache.h>
+#include <iostream>
+#include <sstream>
+#include <cstring>
 
 using namespace strus;
 
@@ -105,9 +110,9 @@ void LevelDbHandle::cleanup()
 	}
 }
 
-utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
+strus::shared_ptr<LevelDbHandle> LevelDbHandleMap::create( const std::string& path_, unsigned int maxOpenFiles_, unsigned int cachesize_k_, bool compression_, unsigned int writeBufferSize_, unsigned int blockSize_)
 {
-	utils::ScopedLock lock( m_map_mutex);
+	strus::scoped_lock lock( m_map_mutex);
 	std::string path = normalizePath( path_);
 
 	std::vector<LevelDbHandleRef>::iterator mi = m_map.begin(), me = m_map.end();
@@ -120,7 +125,7 @@ utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& pat
 	}
 	if (mi == m_map.end())
 	{
-		utils::SharedPtr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
+		strus::shared_ptr<LevelDbHandle> rt( new LevelDbHandle( path_, maxOpenFiles_, cachesize_k_, compression_, writeBufferSize_, blockSize_));
 		m_map.push_back( rt);
 		return rt;
 	}
@@ -140,7 +145,7 @@ utils::SharedPtr<LevelDbHandle> LevelDbHandleMap::create( const std::string& pat
 
 void LevelDbHandleMap::dereference( const char* path)
 {
-	utils::ScopedLock lock( m_map_mutex);
+	strus::scoped_lock lock( m_map_mutex);
 	std::vector<LevelDbHandleRef>::iterator mi = m_map.begin(), me = m_map.end();
 	for (; mi != me; ++mi)
 	{
@@ -175,7 +180,7 @@ void LevelDbConnection::close()
 
 void LevelDbConnection::delete_iterators()
 {
-	utils::ScopedLock lock( m_mutex);
+	strus::scoped_lock lock( m_mutex);
 	std::list<leveldb::Iterator*>::iterator ii = m_itrlist.begin(), ie = m_itrlist.end();
 	for (; ii != ie; ++ii)
 	{
@@ -189,7 +194,7 @@ void LevelDbConnection::delete_iterators()
 
 LevelDbConnection::IteratorHandle LevelDbConnection::newIterator( const leveldb::ReadOptions& opt)
 {
-	utils::ScopedLock lock( m_mutex);
+	strus::scoped_lock lock( m_mutex);
 	m_itrlist.push_back((leveldb::Iterator*)0);
 
 	leveldb::DB* dbh = db();
@@ -208,7 +213,7 @@ void LevelDbConnection::deleteIterator( IteratorHandle& ihnd)
 	{
 		delete *ihnd;
 	}
-	utils::ScopedLock lock( m_mutex);
+	strus::scoped_lock lock( m_mutex);
 	m_itrlist.erase( ihnd);
 }
 

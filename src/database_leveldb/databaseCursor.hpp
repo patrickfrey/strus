@@ -9,6 +9,7 @@
 #define _STRUS_DATABASE_CURSOR_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseCursorInterface.hpp"
 #include "levelDbHandle.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <string>
 #include <leveldb/db.h>
 
@@ -22,7 +23,7 @@ class DatabaseCursor
 	:public DatabaseCursorInterface
 {
 public:
-	DatabaseCursor( const utils::SharedPtr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_);
+	DatabaseCursor( const strus::shared_ptr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_);
 
 	virtual ~DatabaseCursor();
 
@@ -63,7 +64,7 @@ private:
 	Slice getCurrentKey() const;
 
 private:
-	utils::SharedPtr<LevelDbConnection> m_conn;		///< levelDB connection
+	strus::shared_ptr<LevelDbConnection> m_conn;		///< levelDB connection
 	leveldb::ReadOptions m_dboptions;			///< options for levelDB
 	LevelDbConnection::IteratorHandle m_itrhnd;		///< handle for iterator on levelDB blocks
 	leveldb::Iterator* m_itr;				///< iterator on levelDB blocks

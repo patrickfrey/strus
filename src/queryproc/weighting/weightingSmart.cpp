@@ -15,7 +15,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/scalarFunctionInstanceInterface.hpp"
 #include "strus/base/string_format.hpp"
-#include "private/utils.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
 #include <sstream>
@@ -53,7 +53,7 @@ void WeightingFunctionContextSmart::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name_, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			m_featar.push_back( Feature( itr_, (double)weight_, stats_));
 		}
@@ -158,7 +158,7 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 	{
 		if (m_func.get()) m_func.reset();
 
-		if (utils::caseInsensitiveEquals( name, "function"))
+		if (strus::caseInsensitiveEquals( name, "function"))
 		{
 			if (!m_expression.empty())
 			{
@@ -166,7 +166,7 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 			}
 			m_expression = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "metadata"))
+		else if (strus::caseInsensitiveEquals( name, "metadata"))
 		{
 			if (m_metadataar.size() > WeightingFunctionContextSmart::MaxNofParameter)
 			{
@@ -186,7 +186,7 @@ void WeightingFunctionInstanceSmart::addNumericParameter( const std::string& nam
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "metadata"))
+		if (strus::caseInsensitiveEquals( name, "metadata"))
 		{
 			throw strus::runtime_error(_TXT( "parameter '%s' not expected as numeric"), name.c_str());
 		}

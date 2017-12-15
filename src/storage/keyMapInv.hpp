@@ -9,7 +9,7 @@
 #define _STRUS_STORAGE_KEY_MAP_INV_HPP_INCLUDED
 #include "strus/index.hpp"
 #include "private/stringMap.hpp"
-#include "private/utils.hpp"
+#include "strus/base/unordered_map.hpp"
 #include <cstdlib>
 #include <string>
 #include <map>
@@ -46,7 +46,7 @@ public:
 	}
 
 private:
-	typedef utils::UnorderedMap<Index,const char*> Map;
+	typedef strus::unordered_map<Index,const char*> Map;
 	Map m_map;
 	StringVector m_strings;
 };

@@ -11,7 +11,9 @@
 #include "strus/index.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/reference.hpp"
-#include "private/utils.hpp"
+#include "strus/base/thread.hpp"
+#include "strus/base/shared_ptr.hpp"
+#include "strus/base/atomic.hpp"
 #include "metaDataBlockCache.hpp"
 #include "indexSetIterator.hpp"
 #include "strus/statisticsProcessorInterface.hpp"
@@ -200,7 +202,7 @@ public:/*StorageTransaction*/
 		}
 
 	private:
-		utils::Mutex* m_mutex;
+		strus::mutex* m_mutex;
 	};
 
 public:/*StatisticsBuilder*/
@@ -232,18 +234,17 @@ private:
 
 private:
 	Reference<DatabaseClientInterface> m_database;		///< reference to key value store database
-	utils::AtomicCounter<Index> m_next_typeno;		///< next index to assign to a new term type
-	utils::AtomicCounter<Index> m_next_termno;		///< next index to assign to a new term value
-	utils::AtomicCounter<Index> m_next_docno;		///< next index to assign to a new document id
-	utils::AtomicCounter<Index> m_next_userno;		///< next index to assign to a new user id
-	utils::AtomicCounter<Index> m_next_attribno;		///< next index to assign to a new attribute name
+	strus::AtomicCounter<Index> m_next_typeno;		///< next index to assign to a new term type
+	strus::AtomicCounter<Index> m_next_termno;		///< next index to assign to a new term value
+	strus::AtomicCounter<Index> m_next_docno;		///< next index to assign to a new document id
+	strus::AtomicCounter<Index> m_next_userno;		///< next index to assign to a new user id
+	strus::AtomicCounter<Index> m_next_attribno;		///< next index to assign to a new attribute name
+	strus::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
 
-	utils::AtomicCounter<Index> m_nof_documents;		///< number of documents inserted
-
-	utils::Mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
-	utils::Mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno s
-	utils::Mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno s
-	utils::Mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno s
+	strus::mutex m_transaction_mutex;			///< mutual exclusion in the critical part of a transaction
+	strus::mutex m_immalloc_typeno_mutex;			///< mutual exclusion in the critical part of immediate allocation of typeno s
+	strus::mutex m_immalloc_attribno_mutex;			///< mutual exclusion in the critical part of immediate allocation of attribno s
+	strus::mutex m_immalloc_userno_mutex;			///< mutual exclusion in the critical part of immediate allocation of userno s
 
 	MetaDataDescription m_metadescr;			///< description of the meta data
 	MetaDataBlockCache* m_metaDataBlockCache;		///< read cache for meta data blocks

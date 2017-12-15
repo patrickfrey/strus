@@ -9,9 +9,9 @@
 #include "strus/metaDataReaderInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/storageClientInterface.hpp"
-#include "private/utils.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/string_conv.hpp"
 #include <limits>
 #include <stdexcept>
 #include <sstream>
@@ -171,7 +171,7 @@ static const char* compareOperatorName( MetaDataRestrictionInterface::CompareOpe
 
 MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFunction( const char* type, CompareOperator cmpop)
 {
-	if (utils::caseInsensitiveEquals( type, "float16"))
+	if (strus::caseInsensitiveEquals( type, "float16"))
 	{
 		switch (cmpop)
 		{
@@ -190,7 +190,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 		}
 		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
-	else if (utils::caseInsensitiveEquals( type, "float32"))
+	else if (strus::caseInsensitiveEquals( type, "float32"))
 	{
 		switch (cmpop)
 		{
@@ -209,7 +209,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 		}
 		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
-	else if (utils::caseInsensitiveStartsWith( type, "int"))
+	else if (strus::caseInsensitiveStartsWith( type, "int"))
 	{
 		switch (cmpop)
 		{
@@ -228,7 +228,7 @@ MetaDataCompareOperation::CompareFunction MetaDataCompareOperation::getCompareFu
 		}
 		throw strus::runtime_error( "%s", _TXT( "unknown meta data compare function"));
 	}
-	else if (utils::caseInsensitiveStartsWith( type, "uint"))
+	else if (strus::caseInsensitiveStartsWith( type, "uint"))
 	{
 		switch (cmpop)
 		{

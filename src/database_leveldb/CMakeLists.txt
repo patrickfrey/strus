@@ -13,14 +13,14 @@ set(libstrus_database_leveldb_source_files
 )
 
 include_directories(
-	"${Boost_INCLUDE_DIRS}"
+	${Boost_INCLUDE_DIRS}
 	"${LevelDB_INCLUDE_PATH}"
 	"${GETMEMSIZE_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"
 	"${strusbase_INCLUDE_DIRS}"
 )
 link_directories(
-	"${Boost_LIBRARY_DIRS}"
+	${Boost_LIBRARY_DIRS}
 	"${MAIN_SOURCE_DIR}/utils"
 	"${GETMEMSIZE_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"

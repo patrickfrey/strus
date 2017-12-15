@@ -12,7 +12,6 @@
 #include "strus/summarizerFunctionContextInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include <string>
 #include <vector>
 #include <sstream>

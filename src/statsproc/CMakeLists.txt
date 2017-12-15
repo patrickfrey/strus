@@ -10,7 +10,7 @@ set( source_files
 )
 
 include_directories(
-	"${Boost_INCLUDE_DIRS}"
+	${Boost_INCLUDE_DIRS}
 	"${STRUS_INCLUDE_DIRS}"
 	"${MAIN_SOURCE_DIR}/statsproc" 
 	"${CNODETRIE_INCLUDE_DIRS}" 
@@ -18,7 +18,7 @@ include_directories(
 )
 
 link_directories(
-	"${Boost_LIBRARY_DIRS}"
+	${Boost_LIBRARY_DIRS}
 	"${MAIN_SOURCE_DIR}/utils"
 	"${CNODETRIE_LIBRARY_DIRS}" 
 	"${strusbase_LIBRARY_DIRS}"

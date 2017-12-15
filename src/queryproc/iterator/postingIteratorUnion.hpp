@@ -11,8 +11,8 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
-#include "private/utils.hpp"
 #include "private/internationalization.hpp"
+#include "strus/base/bitset.hpp"
 #include <vector>
 
 namespace strus
@@ -24,6 +24,8 @@ class IteratorUnion
 	:public IteratorJoin
 {
 public:
+	enum {MaxNofFeatures=256};
+
 	IteratorUnion( const std::vector<Reference< PostingIteratorInterface> >& args_, ErrorBufferInterface* errorhnd_);
 	virtual ~IteratorUnion();
 
@@ -69,11 +71,11 @@ protected:
 private:
 	void setSelected( unsigned int idx)
 	{
-		m_selected.set( idx);
+		m_selected.set( idx, true);
 	}
 	void unsetSelected( unsigned int idx)
 	{
-		m_selected.unset( idx);
+		m_selected.set( idx, false);
 	}
 	void clearSelected()
 	{
@@ -84,7 +86,7 @@ private:
 	Index m_docno;
 	Index m_posno;							///< current position
 	std::vector<Reference<PostingIteratorInterface> > m_argar;	///< arguments
-	strus::utils::BitSet m_selected;
+	strus::bitset<MaxNofFeatures> m_selected;			///< features matching in the current document
 	std::string m_featureid;					///< unique id of the feature expression
 	mutable Index m_documentFrequency;				///< document frequency (of the most frequent subexpression)
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
