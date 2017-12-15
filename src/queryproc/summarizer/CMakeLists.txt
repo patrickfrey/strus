@@ -24,7 +24,7 @@ include_directories(
 )
 
 link_directories(
-  "${Boost_LIBRARY_DIRS}"
+  ${Boost_LIBRARY_DIRS}
   "${MAIN_SOURCE_DIR}/utils"
   "${MAIN_SOURCE_DIR}/weighting"
   "${strusbase_LIBRARY_DIRS}"
