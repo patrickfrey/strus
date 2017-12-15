@@ -32,14 +32,15 @@
 #include "strus/weightingFunctionInterface.hpp"
 #include "strus/weightingFunctionInstanceInterface.hpp"
 #include "strus/index.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <string>
 #include <cstring>
 #include <stdio.h>
 #include <iostream>
 #include <stdexcept>
 #include <memory>
+#include <algorithm>
 
 #undef STRUS_LOWLEVEL_DEBUG
 static strus::ErrorBufferInterface* g_errorhnd = 0;
@@ -52,9 +53,9 @@ public:
 		:dbi(o.dbi),sti(o.sti),sci(o.sci){}
 	~Storage(){}
 
-	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
-	strus::utils::SharedPtr<strus::StorageInterface> sti;
-	strus::utils::SharedPtr<strus::StorageClientInterface> sci;
+	strus::shared_ptr<strus::DatabaseInterface> dbi;
+	strus::shared_ptr<strus::StorageInterface> sti;
+	strus::shared_ptr<strus::StorageClientInterface> sci;
 
 	void open( const char* options);
 };
@@ -88,7 +89,7 @@ void Storage::open( const char* config)
 
 static void destroyStorage( const char* config)
 {
-	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
+	strus::shared_ptr<strus::DatabaseInterface> dbi;
 	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
 	if (!dbi.get())
 	{

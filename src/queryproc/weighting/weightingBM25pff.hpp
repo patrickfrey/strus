@@ -16,7 +16,6 @@
 #include "strus/reference.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "proximityWeightAccumulator.hpp"
 #include "structureIterator.hpp"
 #include <vector>

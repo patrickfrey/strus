@@ -7,8 +7,8 @@
  */
 #include "compactNodeTrie.hpp"
 #include "strus/index.hpp"
+#include "strus/base/numstring.hpp"
 #include "private/stringMap.hpp"
-#include "private/utils.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -18,6 +18,7 @@
 #include <ctime>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 
 static void initRand()
 {
@@ -67,8 +68,8 @@ int main( int argc, const char** argv)
 		unsigned int nofQueries;
 		try
 		{
-			nofInserts = strus::utils::toint( argv[1]);
-			nofQueries = strus::utils::toint( argv[2]);
+			nofInserts = strus::numstring_conv::touint( argv[ 1], std::numeric_limits<int>::max());
+			nofQueries = strus::numstring_conv::touint( argv[ 2], std::numeric_limits<int>::max());
 		}
 		catch (const std::exception& e)
 		{

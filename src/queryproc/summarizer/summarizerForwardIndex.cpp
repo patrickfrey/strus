@@ -12,9 +12,9 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <set>
 #include <cstdlib>
 #include <iomanip>
@@ -91,11 +91,11 @@ std::string SummarizerFunctionContextForwardIndex::debugCall( const Index& docno
 
 void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::string& name, const std::string& value)
 {
-	if (utils::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name, "name"))
 	{
 		m_resultname = value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "type"))
+	else if (strus::caseInsensitiveEquals( name, "type"))
 	{
 		m_type = value;
 		if (m_resultname.empty())
@@ -111,15 +111,15 @@ void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::stri
 
 void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::string& name, const NumericVariant& val)
 {
-	if (utils::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name, "name"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "type"))
+	else if (strus::caseInsensitiveEquals( name, "type"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "N"))
+	else if (strus::caseInsensitiveEquals( name, "N"))
 	{
 		m_maxNofMatches = std::min(
 			val.touint(),
@@ -137,7 +137,7 @@ void SummarizerFunctionInstanceForwardIndex::defineResultName(
 {
 	try
 	{
-		if (itemname.empty() || utils::caseInsensitiveEquals( itemname, "name"))
+		if (itemname.empty() || strus::caseInsensitiveEquals( itemname, "name"))
 		{
 			m_resultname = resultname;
 		}

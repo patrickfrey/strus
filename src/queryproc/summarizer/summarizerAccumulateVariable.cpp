@@ -17,6 +17,7 @@
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <cstdlib>
@@ -59,13 +60,13 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			std::vector<const PostingIteratorInterface*> varitr;
 			std::vector<SummarizationVariable>::const_iterator vi = variables.begin(), ve = variables.end();
 			for (; vi != ve; ++vi)
 			{
-				if (utils::caseInsensitiveEquals( m_data->var, vi->name()))
+				if (strus::caseInsensitiveEquals( m_data->var, vi->name()))
 				{
 					varitr.push_back( vi->itr());
 				}
@@ -74,7 +75,14 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 			{
 				m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_data->var.c_str(), METHOD_NAME);
 			}
-			m_features.push_back( SummarizationFeature( itr, varitr, weight));
+			if (m_features.size() >= MaxNofFeatures)
+			{
+				m_errorhnd->report( _TXT("to many features defined for '%s'"), METHOD_NAME);
+			}
+			else
+			{
+				m_features.push_back( SummarizationFeature( itr, varitr, weight));
+			}
 		}
 		else
 		{
@@ -84,11 +92,9 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
 }
 
-
-strus::utils::BitSet SummarizerFunctionContextAccumulateVariable::getCandidateSet( const Index& docno)
+std::vector<unsigned int> SummarizerFunctionContextAccumulateVariable::getCandidateSet( const Index& docno) const
 {
-	strus::utils::BitSet rt( m_features.size());
-
+	std::vector<unsigned int> rt;
 	std::vector<SummarizationFeature>::const_iterator
 		fi = m_features.begin(), fe = m_features.end();
 	unsigned int fidx=0;
@@ -96,20 +102,20 @@ strus::utils::BitSet SummarizerFunctionContextAccumulateVariable::getCandidateSe
 	{
 		if (docno==fi->itr->skipDocCandidate( docno))
 		{
-			rt.set( fidx);
+			rt.push_back( fidx);
 		}
 	}
 	return rt;
 }
 
-SummarizerFunctionContextAccumulateVariable::PosWeightMap SummarizerFunctionContextAccumulateVariable::buildPosWeightMap( const strus::utils::BitSet& docsel)
+SummarizerFunctionContextAccumulateVariable::PosWeightMap SummarizerFunctionContextAccumulateVariable::buildPosWeightMap( const std::vector<unsigned int>& fsel)
 {
 	PosWeightMap rt;
 
-	int di = docsel.first(), de = -1;
-	for (; di != de; di=docsel.next(di))
+	std::vector<unsigned int>::const_iterator fi = fsel.begin(), fe = fsel.end();
+	for (; fi != fe; ++fi)
 	{
-		const SummarizationFeature& sumfeat = m_features[ di];
+		const SummarizationFeature& sumfeat = m_features[ *fi];
 		Index curpos = sumfeat.itr->skipPos( 0);
 		for (; curpos; curpos = sumfeat.itr->skipPos( curpos+1))
 		{
@@ -132,14 +138,14 @@ SummarizerFunctionContextAccumulateVariable::PosWeightMap SummarizerFunctionCont
 	return rt;
 }
 
-void SummarizerFunctionContextAccumulateVariable::printPosWeights( std::ostream& out, const strus::utils::BitSet& docsel)
+void SummarizerFunctionContextAccumulateVariable::printPosWeights( std::ostream& out, const std::vector<unsigned int>& fsel)
 {
 	PosWeightMap posWeightMap;
 
-	int di = docsel.first(), de = -1;
-	for (; di != de; di=docsel.next(di))
+	std::vector<unsigned int>::const_iterator fi = fsel.begin(), fe = fsel.end();
+	for (; fi != fe; ++fi)
 	{
-		const SummarizationFeature& sumfeat = m_features[ di];
+		const SummarizationFeature& sumfeat = m_features[ *fi];
 		Index curpos = sumfeat.itr->skipPos( 0);
 		for (; curpos; curpos = sumfeat.itr->skipPos( curpos+1))
 		{
@@ -219,11 +225,11 @@ std::vector<SummaryElement>
 		m_forwardindex->skipDoc( docno);
 
 		// Build a bitmap with all matching documents:
-		strus::utils::BitSet docsel( getCandidateSet( docno));
+		std::vector<unsigned int> flist = getCandidateSet( docno);
 
 		// For every match position multiply the weights for each position and add them 
 		// to the final accumulation result:
-		PosWeightMap posWeightMap( buildPosWeightMap( docsel));
+		PosWeightMap posWeightMap( buildPosWeightMap( flist));
 
 		// Build the accumulation result:
 		return getSummariesFromPosWeightMap( posWeightMap);
@@ -240,10 +246,10 @@ std::string SummarizerFunctionContextAccumulateVariable::debugCall( const Index&
 	m_forwardindex->skipDoc( docno);
 
 	// Build a bitmap with all matching documents:
-	strus::utils::BitSet docsel( getCandidateSet( docno));
+	std::vector<unsigned int> flist = getCandidateSet( docno);
 
 	// Log events that contribute to the result:
-	printPosWeights( out, docsel);
+	printPosWeights( out, flist);
 
 	return out.str();
 }
@@ -253,15 +259,15 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "type"))
+		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
 			m_data->type = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "var"))
+		else if (strus::caseInsensitiveEquals( name, "var"))
 		{
 			m_data->var = value;
 			if (m_data->resultname.empty())
@@ -269,19 +275,19 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 				m_data->resultname = value;
 			}
 		}
-		else if (utils::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name, "result"))
 		{
 			m_data->resultname = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "cofactor"))
+		else if (strus::caseInsensitiveEquals( name, "cofactor"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "norm"))
+		else if (strus::caseInsensitiveEquals( name, "norm"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "nof"))
+		else if (strus::caseInsensitiveEquals( name, "nof"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
@@ -295,23 +301,23 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 
 void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "var"))
+	else if (strus::caseInsensitiveEquals( name, "var"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "nof"))
+	else if (strus::caseInsensitiveEquals( name, "nof"))
 	{
 		m_data->maxNofElements = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "norm"))
+	else if (strus::caseInsensitiveEquals( name, "norm"))
 	{
 		m_data->norm = value.tofloat();
 	}
-	else if (utils::caseInsensitiveEquals( name, "cofactor"))
+	else if (strus::caseInsensitiveEquals( name, "cofactor"))
 	{
 		m_data->cofactor = value.tofloat();
 	}

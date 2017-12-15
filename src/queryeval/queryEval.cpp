@@ -7,7 +7,6 @@
  */
 #include "queryEval.hpp"
 #include "query.hpp"
-#include "keyMap.hpp"
 #include "termConfig.hpp"
 #include "summarizerDef.hpp"
 #include "weightingDef.hpp"

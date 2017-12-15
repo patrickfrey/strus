@@ -10,7 +10,7 @@
 #include "strus/index.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/base/stdint.h"
-#include "private/utils.hpp"
+#include "strus/base/bitset.hpp"
 
 namespace strus {
 
@@ -23,6 +23,8 @@ public:
 		MinWin,		///< Minimal window containing at least a defined number of features [cardinality]
 		MaxWin		///< Maximum window within a range (containing all features that satisfy the range condition, but at least a defined number of features [cardinality])
 	};
+	/// \brief We use fixed size arrays and restrict the maximum number of features to a reasonable amount.
+	enum {MaxNofArguments=128};
 
 	/// \brief Default constructor
 	PositionWindow();
@@ -79,15 +81,12 @@ public:
 	}
 
 	/// \brief Get a bitset that specifies what elements in the current window are new (not part of a previous window visited)
-	const strus::utils::BitSet& isnew_bitset() const
+	const strus::bitset<MaxNofArguments>& isnew_bitset() const
 	{
 		return m_isnew_bitset;
 	}
 
 private:
-	/// \brief We use fixed size arrays and restrict the maximum number of features to a reasonable amount.
-	enum {MaxNofArguments=128};
-
 	/// \brief Get the size of the current minimal window:
 	unsigned int getMinWinSize();
 	/// \brief Get the size of the current maximal window within a proximity range:
@@ -103,7 +102,7 @@ private:
 	unsigned int m_range;					///< maximum proximity range
 	unsigned int m_cardinality;				///< number of elements for a candidate window
 	unsigned int m_windowsize;				///< size of current window in elements
-	strus::utils::BitSet m_isnew_bitset;			///< bitset zu determine is an element in the window has not been visited yet
+	strus::bitset<MaxNofArguments> m_isnew_bitset;		///< bitset zu determine is an element in the window has not been visited yet
 	EvaluationType m_evaluationType;			///< type of evaluation
 };
 

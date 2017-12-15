@@ -9,9 +9,9 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <string>
 #include <iomanip>
 #include <iostream>
@@ -29,7 +29,7 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name_, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			m_featar.push_back( Feature( itr_, weight_));
 		}
@@ -100,7 +100,7 @@ void WeightingFunctionInstanceTermFrequency::addStringParameter( const std::stri
 
 void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::string& name, const NumericVariant&)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}

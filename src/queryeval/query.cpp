@@ -9,7 +9,6 @@
 #include "queryEval.hpp"
 #include "accumulator.hpp"
 #include "ranker.hpp"
-#include "keyMap.hpp"
 #include "strus/storageClientInterface.hpp"
 #include "strus/constants.hpp"
 #include "strus/attributeReaderInterface.hpp"
@@ -22,9 +21,9 @@
 #include "strus/reference.hpp"
 #include "strus/summaryElement.hpp"
 #include "docsetPostingIterator.hpp"
-#include "private/utils.hpp"
 #include "strus/base/snprintf.h"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
@@ -33,6 +32,8 @@
 #include <utility>
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
+#include <sstream>
 
 #undef STRUS_LOWLEVEL_DEBUG
 
@@ -188,7 +189,7 @@ void Query::defineFeature( const std::string& set_, double weight_)
 	try
 	{
 		if (m_stack.empty()) throw strus::runtime_error( "%s", _TXT("no term or expression defined"));
-		m_features.push_back( Feature( utils::tolower(set_), m_stack.back(), weight_));
+		m_features.push_back( Feature( string_conv::tolower(set_), m_stack.back(), weight_));
 		m_stack.pop_back();
 	}
 	CATCH_ERROR_MAP( _TXT("error define feature of query: %s"), *m_errorhnd);

@@ -15,7 +15,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
+#include "strus/base/string_conv.hpp"
 #include "weightingFunctionSummarizer.hpp"
 #include <string>
 #include <vector>
@@ -117,7 +117,7 @@ void QueryProcessor::definePostingJoinOperator(
 	try
 	{
 		Reference<PostingJoinOperatorInterface> opref( op);
-		m_joiners[ utils::tolower( std::string(name))] = opref;
+		m_joiners[ string_conv::tolower( std::string(name))] = opref;
 	}
 	catch (std::bad_alloc&)
 	{
@@ -132,7 +132,7 @@ const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 	try
 	{
 		std::map<std::string,Reference<PostingJoinOperatorInterface> >::const_iterator 
-			ji = m_joiners.find( utils::tolower( name));
+			ji = m_joiners.find( string_conv::tolower( name));
 		if (ji == m_joiners.end())
 		{
 			m_errorhnd->report( _TXT( "posting set join operator not defined: '%s'"), name.c_str());
@@ -154,7 +154,7 @@ void QueryProcessor::defineWeightingFunction(
 	try
 	{
 		Reference<WeightingFunctionInterface> funcref( func);
-		m_weighters[ utils::tolower( std::string(name))] = funcref;
+		m_weighters[ string_conv::tolower( std::string(name))] = funcref;
 	}
 	catch (std::bad_alloc&)
 	{
@@ -169,7 +169,7 @@ const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 	try
 	{
 		std::map<std::string,Reference<WeightingFunctionInterface> >::const_iterator 
-			wi = m_weighters.find( utils::tolower( name));
+			wi = m_weighters.find( string_conv::tolower( name));
 		if (wi == m_weighters.end())
 		{
 			m_errorhnd->report( _TXT( "weighting function not defined: '%s'"), name.c_str());
@@ -191,7 +191,7 @@ void QueryProcessor::defineSummarizerFunction(
 	try
 	{
 		Reference<SummarizerFunctionInterface> funcref( sumfunc);
-		m_summarizers[ utils::tolower( name)] = funcref;
+		m_summarizers[ string_conv::tolower( name)] = funcref;
 	}
 	catch (std::bad_alloc&)
 	{
@@ -206,7 +206,7 @@ const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 	try
 	{
 		std::map<std::string,Reference<SummarizerFunctionInterface> >::const_iterator 
-			si = m_summarizers.find( utils::tolower( name));
+			si = m_summarizers.find( string_conv::tolower( name));
 		if (si == m_summarizers.end())
 		{
 			m_errorhnd->report( _TXT( "summarization function not defined: '%s'"), name.c_str());
@@ -261,7 +261,7 @@ void QueryProcessor::defineScalarFunctionParser(
 	try
 	{
 		Reference<ScalarFunctionParserInterface> funcref( parser);
-		m_funcparsers[ utils::tolower( name)] = funcref;
+		m_funcparsers[ string_conv::tolower( name)] = funcref;
 	}
 	catch (std::bad_alloc&)
 	{
@@ -278,7 +278,7 @@ const ScalarFunctionParserInterface*
 	try
 	{
 		std::map<std::string,Reference<ScalarFunctionParserInterface> >::const_iterator 
-			si = m_funcparsers.find( utils::tolower( name));
+			si = m_funcparsers.find( string_conv::tolower( name));
 		if (si == m_funcparsers.end())
 		{
 			m_errorhnd->report( _TXT( "scalar function parser not defined: '%s'"), name.c_str());

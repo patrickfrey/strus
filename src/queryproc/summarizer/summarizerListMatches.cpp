@@ -12,9 +12,9 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <set>
 #include <cstdlib>
 #include <iomanip>
@@ -38,7 +38,7 @@ void SummarizerFunctionContextListMatches::addSummarizationFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			m_itrs.push_back( itr);
 		}
@@ -96,11 +96,11 @@ std::string SummarizerFunctionContextListMatches::debugCall( const Index& docno)
 
 void SummarizerFunctionInstanceListMatches::addStringParameter( const std::string& name, const std::string& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "name"))
+	else if (strus::caseInsensitiveEquals( name, "name"))
 	{
 		m_resultname = value;
 	}
@@ -112,15 +112,15 @@ void SummarizerFunctionInstanceListMatches::addStringParameter( const std::strin
 
 void SummarizerFunctionInstanceListMatches::addNumericParameter( const std::string& name, const NumericVariant& val)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "name"))
+	else if (strus::caseInsensitiveEquals( name, "name"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "N"))
+	else if (strus::caseInsensitiveEquals( name, "N"))
 	{
 		m_maxNofMatches = val.touint();
 	}
@@ -136,7 +136,7 @@ void SummarizerFunctionInstanceListMatches::defineResultName(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( itemname, "position"))
+		if (strus::caseInsensitiveEquals( itemname, "position"))
 		{
 			m_resultname = resultname;
 		}

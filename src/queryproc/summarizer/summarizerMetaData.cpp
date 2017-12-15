@@ -12,6 +12,7 @@
 #include "strus/numericVariant.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <iomanip>
@@ -86,16 +87,16 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "name"))
+		if (strus::caseInsensitiveEquals( name, "name"))
 		{
 			m_metaname = value;
 			m_resultname = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "element"))
+		else if (strus::caseInsensitiveEquals( name, "element"))
 		{
 			m_metaname = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name, "result"))
 		{
 			m_resultname = value;
 		}
@@ -113,7 +114,7 @@ void SummarizerFunctionInstanceMetaData::defineResultName(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( itemname, m_resultname) || utils::caseInsensitiveEquals( itemname, "result"))
+		if (strus::caseInsensitiveEquals( itemname, m_resultname) || strus::caseInsensitiveEquals( itemname, "result"))
 		{
 			m_resultname = resultname;
 		}
@@ -127,7 +128,7 @@ void SummarizerFunctionInstanceMetaData::defineResultName(
 
 void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name, "name"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}

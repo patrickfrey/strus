@@ -14,9 +14,9 @@
 #include "strus/numericVariant.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include <limits>
 #include <vector>
+#include <map>
 
 namespace strus
 {

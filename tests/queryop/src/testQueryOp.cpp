@@ -14,12 +14,12 @@
 #include "strus/postingJoinOperatorInterface.hpp"
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/index.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include <string>
 #include <cstring>
 #include <stdio.h>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <memory>
 

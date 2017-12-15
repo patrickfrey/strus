@@ -10,9 +10,9 @@
 #include "strus/storageClientInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -91,16 +91,16 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "name"))
+		if (strus::caseInsensitiveEquals( name, "name"))
 		{
 			m_resultname = value;
 			m_attribname = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "attribute"))
+		else if (strus::caseInsensitiveEquals( name, "attribute"))
 		{
 			m_attribname = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name, "result"))
 		{
 			m_resultname = value;
 		}
@@ -114,7 +114,7 @@ void SummarizerFunctionInstanceAttribute::addStringParameter( const std::string&
 
 void SummarizerFunctionInstanceAttribute::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "name"))
+	if (strus::caseInsensitiveEquals( name, "name"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
@@ -130,7 +130,7 @@ void SummarizerFunctionInstanceAttribute::defineResultName(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( itemname, m_resultname) || utils::caseInsensitiveEquals( itemname, "result"))
+		if (strus::caseInsensitiveEquals( itemname, m_resultname) || strus::caseInsensitiveEquals( itemname, "result"))
 		{
 			m_resultname = resultname;
 		}

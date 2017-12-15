@@ -7,9 +7,10 @@
  */
 #ifndef _STRUS_QUERY_KEYMAP_HPP_INCLUDED
 #define _STRUS_QUERY_KEYMAP_HPP_INCLUDED
-#include "private/utils.hpp"
+#error WHO THE FUCK USES THIS
 #include "private/internationalization.hpp"
 #include "private/stringMap.hpp"
+#include "strus/base/string_conv.hpp"
 #include <string>
 #include <map>
 
@@ -40,25 +41,25 @@ struct KeyMap
 
 	ValueType& operator[]( const char* key)
 	{
-		std::string keystr( utils::tolower( key));
+		std::string keystr( string_conv::tolower( key));
 		return Parent::operator[]( keystr);
 	}
 
 	ValueType& operator[]( const std::string& key)
 	{
-		std::string keystr( utils::tolower( key));
+		std::string keystr( string_conv::tolower( key));
 		return Parent::operator[]( keystr);
 	}
 
 	void insert( const std::string& key, const ValueType& value)
 	{
-		std::string keystr( utils::tolower( key));
+		std::string keystr( string_conv::tolower( key));
 		Parent::insert( key, value);
 	}
 
 	void insert( const char* key, const ValueType& value)
 	{
-		std::string keystr( utils::tolower( key));
+		std::string keystr( string_conv::tolower( key));
 		Parent::insert( key, value);
 	}
 };

@@ -15,9 +15,9 @@
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -56,7 +56,7 @@ void SummarizerFunctionContextMatchVariables::addSummarizationFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			m_features.push_back( SummarizationFeature( itr, variables, weight));
 		}
@@ -138,11 +138,11 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "type"))
+		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
 			m_data->type = value;
 		}
@@ -156,11 +156,11 @@ void SummarizerFunctionInstanceMatchVariables::addStringParameter( const std::st
 
 void SummarizerFunctionInstanceMatchVariables::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "type"))
+	else if (strus::caseInsensitiveEquals( name, "type"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}

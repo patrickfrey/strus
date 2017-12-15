@@ -16,6 +16,7 @@
 #include "strus/base/fileio.hpp"
 #include "strus/base/string_format.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -27,7 +28,6 @@
 #include "strus/storageDocumentUpdateInterface.hpp"
 #include "strus/storageDumpInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
-#include "private/utils.hpp"
 #include "private/errorUtils.hpp"
 #include "random.hpp"
 #include <string>
@@ -37,6 +37,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <memory>
+#include <map>
+#include <set>
 
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 static strus::Random g_random;
@@ -49,9 +51,9 @@ public:
 		:dbi(o.dbi),sti(o.sti),sci(o.sci){}
 	~Storage(){}
 
-	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
-	strus::utils::SharedPtr<strus::StorageInterface> sti;
-	strus::utils::SharedPtr<strus::StorageClientInterface> sci;
+	strus::shared_ptr<strus::DatabaseInterface> dbi;
+	strus::shared_ptr<strus::StorageInterface> sti;
+	strus::shared_ptr<strus::StorageClientInterface> sci;
 
 	void open( const char* options, bool reset);
 	void close()
@@ -95,7 +97,7 @@ void Storage::open( const char* config, bool reset)
 
 static void destroyStorage( const char* config)
 {
-	strus::utils::SharedPtr<strus::DatabaseInterface> dbi;
+	strus::shared_ptr<strus::DatabaseInterface> dbi;
 	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
 	if (!dbi.get())
 	{

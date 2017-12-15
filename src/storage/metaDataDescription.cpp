@@ -7,8 +7,8 @@
  */
 #include "metaDataDescription.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "strus/databaseClientInterface.hpp"
+#include "strus/base/string_conv.hpp"
 #include "databaseAdapter.hpp"
 #include <cstring>
 
@@ -67,12 +67,12 @@ MetaDataDescription::MetaDataDescription( const std::string& str)
 		std::string typeName;
 		if (!sn)
 		{
-			typeName = utils::trim( std::string( si, se-si));
+			typeName = string_conv::trim( std::string( si, se-si));
 			si = se;
 		}
 		else
 		{
-			typeName = utils::trim( std::string( si, sn-si));
+			typeName = string_conv::trim( std::string( si, sn-si));
 			si = sn + 1;
 			skipSpaces( si, se);
 		}
@@ -116,19 +116,19 @@ std::string MetaDataDescription::tostring() const
 int MetaDataDescription::getHandle( const std::string& name_) const
 {
 	std::map<std::string,std::size_t>::const_iterator
-		ni = m_namemap.find( utils::tolower( name_));
+		ni = m_namemap.find( string_conv::tolower( name_));
 	if (ni == m_namemap.end()) return -1;
 	return (int)ni->second;
 }
 
 bool MetaDataDescription::hasElement( const std::string& name_) const
 {
-	return m_namemap.find( utils::tolower( name_)) != m_namemap.end();
+	return m_namemap.find( string_conv::tolower( name_)) != m_namemap.end();
 }
 
 bool MetaDataDescription::defined( const std::string& name_)
 {
-	return m_namemap.find( utils::tolower( name_)) != m_namemap.end();
+	return m_namemap.find( string_conv::tolower( name_)) != m_namemap.end();
 }
 
 void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& name_)
@@ -161,7 +161,7 @@ void MetaDataDescription::add( MetaDataElement::Type type_, const std::string& n
 			++ni->second;
 		}
 	}
-	m_namemap[ utils::tolower( name_)] = eidx;
+	m_namemap[ string_conv::tolower( name_)] = eidx;
 	m_bytesize += MetaDataElement::size( type_);
 	m_ar.insert( ei, MetaDataElement( type_, ofs));
 }
@@ -205,11 +205,10 @@ MetaDataDescription::TranslationMap
 		{
 			std::vector<std::string>::const_iterator
 				ri = resets.begin(), re = resets.end();
-			for (; ri != re && !utils::caseInsensitiveEquals( *ri, ti->first); ++ri){}
+			for (; ri != re && !strus::caseInsensitiveEquals( *ri, ti->first); ++ri){}
 			if (ri == re)
 			{
-				rt.push_back( TranslationElement(
-					&m_ar[ ti->second], &o.m_ar[ ni->second]));
+				rt.push_back( TranslationElement( &m_ar[ ti->second], &o.m_ar[ ni->second]));
 			}
 		}
 	}
@@ -243,9 +242,9 @@ void MetaDataDescription::renameElement( const std::string& oldname, const std::
 		ni = m_namemap.begin(), ne = m_namemap.end();
 	for (; ni != ne; ++ni)
 	{
-		if (utils::caseInsensitiveEquals( oldname, ni->first))
+		if (strus::caseInsensitiveEquals( oldname, ni->first))
 		{
-			newnamemap[ utils::tolower( newname)] = ni->second;
+			newnamemap[ string_conv::tolower( newname)] = ni->second;
 		}
 		else
 		{

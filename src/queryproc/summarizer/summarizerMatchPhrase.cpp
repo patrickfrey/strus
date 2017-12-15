@@ -20,13 +20,15 @@
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
+#include "strus/base/numstring.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <cmath>
 
 using namespace strus;
 #undef STRUS_LOWLEVEL_DEBUG
@@ -72,24 +74,24 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "title"))
+		if (strus::caseInsensitiveEquals( name, "title"))
 		{
 			if (m_titleitr) throw strus::runtime_error( "%s", _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
-		else if (utils::caseInsensitiveEquals( name, "struct"))
+		else if (strus::caseInsensitiveEquals( name, "struct"))
 		{
 			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
 			m_structar[ m_structarsize++] = itr;
 		}
-		else if (utils::caseInsensitiveEquals( name, "para"))
+		else if (strus::caseInsensitiveEquals( name, "para"))
 		{
 			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = itr;
 			m_paraarsize++;
 		}
-		else if (utils::caseInsensitiveEquals( name, "match"))
+		else if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
@@ -798,32 +800,32 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para") || utils::caseInsensitiveEquals( name, "title"))
+		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para") || strus::caseInsensitiveEquals( name, "title"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "matchvariables");
 		}
-		else if (utils::caseInsensitiveEquals( name, "type"))
+		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
 			m_parameter->m_type = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "matchmark"))
+		else if (strus::caseInsensitiveEquals( name, "matchmark"))
 		{
 			m_parameter->m_matchmark = parseMarker( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "floatingmark"))
+		else if (strus::caseInsensitiveEquals( name, "floatingmark"))
 		{
 			m_parameter->m_floatingmark = parseMarker( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "sentencesize")
-			|| utils::caseInsensitiveEquals( name, "paragraphsize")
-			|| utils::caseInsensitiveEquals( name, "windowsize"))
+		else if (strus::caseInsensitiveEquals( name, "sentencesize")
+			|| strus::caseInsensitiveEquals( name, "paragraphsize")
+			|| strus::caseInsensitiveEquals( name, "windowsize"))
 		{
 			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
+		else if (strus::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
 			m_parameter->m_cardinality = 0;
-			m_parameter->m_cardinality_frac = utils::tofraction( value);
+			m_parameter->m_cardinality_frac = numstring_conv::todouble( value);
 		}
 		else
 		{
@@ -835,28 +837,28 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 
 void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para") || utils::caseInsensitiveEquals( name, "title"))
+	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para") || strus::caseInsensitiveEquals( name, "title"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "paragraphsize"))
+	else if (strus::caseInsensitiveEquals( name, "paragraphsize"))
 	{
 		m_parameter->m_paragraphsize = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "sentencesize"))
+	else if (strus::caseInsensitiveEquals( name, "sentencesize"))
 	{
 		m_parameter->m_sentencesize = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "windowsize"))
+	else if (strus::caseInsensitiveEquals( name, "windowsize"))
 	{
 		m_parameter->m_windowsize = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "cardinality"))
+	else if (strus::caseInsensitiveEquals( name, "cardinality"))
 	{
 		m_parameter->m_cardinality = value.touint();
 		m_parameter->m_cardinality_frac = 0.0;
 	}
-	else if (utils::caseInsensitiveEquals( name, "maxdf"))
+	else if (strus::caseInsensitiveEquals( name, "maxdf"))
 	{
 		m_parameter->m_maxdf = (double)value;
 		if (m_parameter->m_maxdf < 0.0 || m_parameter->m_maxdf > 1.0)
@@ -864,10 +866,10 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "type")
-		|| utils::caseInsensitiveEquals( name, "matchmark")
-		|| utils::caseInsensitiveEquals( name, "floatingmark")
-		|| utils::caseInsensitiveEquals( name, "metadata_title_maxpos"))
+	else if (strus::caseInsensitiveEquals( name, "type")
+		|| strus::caseInsensitiveEquals( name, "matchmark")
+		|| strus::caseInsensitiveEquals( name, "floatingmark")
+		|| strus::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
@@ -883,15 +885,15 @@ void SummarizerFunctionInstanceMatchPhrase::defineResultName(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( itemname, "para"))
+		if (strus::caseInsensitiveEquals( itemname, "para"))
 		{
 			m_parameter->m_name_para = resultname;
 		}
-		else if (utils::caseInsensitiveEquals( itemname, "phrase"))
+		else if (strus::caseInsensitiveEquals( itemname, "phrase"))
 		{
 			m_parameter->m_name_phrase = resultname;
 		}
-		else if (utils::caseInsensitiveEquals( itemname, "docstart"))
+		else if (strus::caseInsensitiveEquals( itemname, "docstart"))
 		{
 			m_parameter->m_name_docstart = resultname;
 		}

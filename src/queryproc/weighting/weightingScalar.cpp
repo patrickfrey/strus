@@ -15,7 +15,7 @@
 #include "strus/postingIteratorInterface.hpp"
 #include "strus/scalarFunctionInstanceInterface.hpp"
 #include "strus/base/string_format.hpp"
-#include "private/utils.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
 #include <sstream>
@@ -121,7 +121,7 @@ void WeightingFunctionInstanceScalar::addStringParameter( const std::string& nam
 	{
 		if (m_func.get()) m_func.reset();
 
-		if (utils::caseInsensitiveEquals( name, "function"))
+		if (strus::caseInsensitiveEquals( name, "function"))
 		{
 			if (!m_expression.empty())
 			{
@@ -129,7 +129,7 @@ void WeightingFunctionInstanceScalar::addStringParameter( const std::string& nam
 			}
 			m_expression = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "metadata"))
+		else if (strus::caseInsensitiveEquals( name, "metadata"))
 		{
 			if (m_metadataar.size() > WeightingFunctionContextScalar::MaxNofParameter)
 			{
@@ -149,7 +149,7 @@ void WeightingFunctionInstanceScalar::addNumericParameter( const std::string& na
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "metadata"))
+		if (strus::caseInsensitiveEquals( name, "metadata"))
 		{
 			throw strus::runtime_error(_TXT( "parameter '%s' not expected as numeric"), name.c_str());
 		}
