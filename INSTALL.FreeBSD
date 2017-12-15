@@ -29,7 +29,7 @@ FreeBSD 10.3 on x86_64, i686
 ----------------------------
 
 Install packages with 'pkg install':
-- leveldb, snappy, cmake, boost-libs
+- leveldb, snappy, cmake, boost-libs, gettext
 
 Build using the clang/clang++ toolchain:
 
