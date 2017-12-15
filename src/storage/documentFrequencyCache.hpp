@@ -12,6 +12,7 @@
 #include "strus/base/thread.hpp"
 #include "strus/base/shared_ptr.hpp"
 #include <cstring>
+#include <cstdlib>
 #include <stdexcept>
 #include <vector>
 

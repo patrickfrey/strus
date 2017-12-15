@@ -7,6 +7,8 @@
  */
 #include "private/stringMap.hpp"
 
+#include <cstdlib>
+
 using namespace strus;
 
 StringMapKeyBlock::StringMapKeyBlock( std::size_t blksize_)
