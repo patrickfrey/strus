@@ -9,6 +9,7 @@
 #define _STRUS_DATABASE_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseInterface.hpp"
 #include "databaseClient.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <leveldb/db.h>
 
 namespace strus {
@@ -43,7 +44,7 @@ public:
 	virtual const char** getConfigParameters( const ConfigType& type) const;
 
 private:
-	utils::SharedPtr<LevelDbHandleMap> m_dbhandle_map;
+	strus::shared_ptr<LevelDbHandleMap> m_dbhandle_map;
 	ErrorBufferInterface* m_errorhnd;	///< buffer for reporting errors
 };
 

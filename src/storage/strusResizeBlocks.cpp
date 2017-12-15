@@ -10,12 +10,12 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/fileio.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include "strus/versionStorage.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "strus/databaseInterface.hpp"
 #include "private/errorUtils.hpp"
 #include "private/internationalization.hpp"
-#include "private/utils.hpp"
 #include "databaseAdapter.hpp"
 #include "storageClient.hpp"
 #include "forwardIndexBlock.hpp"
@@ -130,7 +130,7 @@ static void resizeBlocks(
 	{
 		throw strus::runtime_error( "%s", _TXT("failed to create storage transaction"));
 	}
-	if (strus::utils::caseInsensitiveEquals( blocktype, "forwardindex"))
+	if (strus::caseInsensitiveEquals( blocktype, "forwardindex"))
 	{
 		strus::ForwardIndexMap fwdmap( storage.databaseClient(), storage.maxTermTypeNo(), newsize?newsize:strus::ForwardIndexBlock::MaxBlockTokens);
 		strus::Index di = 1, de = storage.maxDocumentNumber()+1;

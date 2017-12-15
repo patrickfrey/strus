@@ -9,7 +9,6 @@
 /// \file scalarFunction.cpp
 #include "scalarFunction.hpp"
 #include "scalarFunctionInstance.hpp"
-#include "private/utils.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include <sstream>
 #include <iostream>

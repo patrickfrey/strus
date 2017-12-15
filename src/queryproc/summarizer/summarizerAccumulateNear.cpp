@@ -18,9 +18,10 @@
 #include "strus/constants.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
+#include "strus/base/numstring.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include <limits>
 #include <cmath>
 #include <cstdlib>
@@ -71,12 +72,12 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "struct"))
+		if (strus::caseInsensitiveEquals( name, "struct"))
 		{
 			if (m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize++] = itr;
 		}
-		else if (utils::caseInsensitiveEquals( name, "match"))
+		else if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
@@ -369,11 +370,11 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct"))
+		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "type"))
+		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
 			m_data->type = value;
 			if (m_data->resultname.empty())
@@ -381,20 +382,20 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 				m_data->resultname = value;
 			}
 		}
-		else if (utils::caseInsensitiveEquals( name, "result"))
+		else if (strus::caseInsensitiveEquals( name, "result"))
 		{
 			m_data->resultname = value;
 		}
-		else if (utils::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
+		else if (strus::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
 			m_data->cardinality = 0;
-			m_data->cardinality_frac = utils::tofraction( value);
+			m_data->cardinality_frac = numstring_conv::todouble( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "cofactor")
-			|| utils::caseInsensitiveEquals( name, "norm")
-			|| utils::caseInsensitiveEquals( name, "cprop")
-			|| utils::caseInsensitiveEquals( name, "nofranks")
-			|| utils::caseInsensitiveEquals( name, "range"))
+		else if (strus::caseInsensitiveEquals( name, "cofactor")
+			|| strus::caseInsensitiveEquals( name, "norm")
+			|| strus::caseInsensitiveEquals( name, "cprop")
+			|| strus::caseInsensitiveEquals( name, "nofranks")
+			|| strus::caseInsensitiveEquals( name, "range"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 		}
@@ -408,24 +409,24 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 
 void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct"))
+	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "type")
-		|| utils::caseInsensitiveEquals( name, "result"))
+	else if (strus::caseInsensitiveEquals( name, "type")
+		|| strus::caseInsensitiveEquals( name, "result"))
 	{
 		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "cofactor"))
+	else if (strus::caseInsensitiveEquals( name, "cofactor"))
 	{
 		m_data->cofactor = value.tofloat();
 	}
-	else if (utils::caseInsensitiveEquals( name, "norm"))
+	else if (strus::caseInsensitiveEquals( name, "norm"))
 	{
 		m_data->cofactor = value.tofloat();
 	}
-	else if (utils::caseInsensitiveEquals( name, "cprop"))
+	else if (strus::caseInsensitiveEquals( name, "cprop"))
 	{
 		m_data->cprop = value.tofloat();
 		if (m_data->cprop < 0.0 || m_data->cprop > 1.0)
@@ -433,15 +434,15 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "range"))
+	else if (strus::caseInsensitiveEquals( name, "range"))
 	{
 		m_data->range = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "nofranks"))
+	else if (strus::caseInsensitiveEquals( name, "nofranks"))
 	{
 		m_data->nofranks = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "cardinality"))
+	else if (strus::caseInsensitiveEquals( name, "cardinality"))
 	{
 		m_data->cardinality = value.touint();
 		m_data->cardinality_frac = 0.0;

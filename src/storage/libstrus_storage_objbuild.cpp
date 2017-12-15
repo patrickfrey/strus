@@ -29,9 +29,9 @@
 #include "strus/base/dll_tags.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include "strus/base/configParser.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include <memory>
 
 using namespace strus;
@@ -66,7 +66,7 @@ public:
 	{
 		try
 		{
-			if (name.empty() || utils::tolower( name) == "leveldb")
+			if (name.empty() || string_conv::tolower( name) == "leveldb")
 			{
 				return m_db.get();
 			}
@@ -85,7 +85,7 @@ public:
 	{
 		try
 		{
-			if (name.empty() || utils::tolower( name) == "default")
+			if (name.empty() || string_conv::tolower( name) == "default")
 			{
 				return m_statsproc.get();
 			}

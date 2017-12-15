@@ -11,6 +11,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <memory>
@@ -21,7 +22,7 @@ using namespace strus;
 
 #define MODULENAME "DatabaseTransaction"
 
-DatabaseTransaction::DatabaseTransaction( const utils::SharedPtr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
+DatabaseTransaction::DatabaseTransaction( const strus::shared_ptr<LevelDbConnection>& conn_, ErrorBufferInterface* errorhnd_)
 	:m_conn(conn_),m_batch(),m_commit_called(false),m_rollback_called(false),m_errorhnd(errorhnd_)
 {}
 

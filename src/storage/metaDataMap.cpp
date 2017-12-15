@@ -7,14 +7,12 @@
  */
 #include "metaDataMap.hpp"
 #include "metaDataBlockCache.hpp"
-#include "private/utils.hpp"
 #include "strus/databaseTransactionInterface.hpp"
 #include "dataBlock.hpp"
 #include "databaseAdapter.hpp"
 #include "keyMap.hpp"
 #include "private/internationalization.hpp"
 #include <cstring>
-#include "private/utils.hpp"
 
 using namespace strus;
 
@@ -111,6 +109,22 @@ void MetaDataMap::getWriteBatch( DatabaseTransactionInterface* transaction, std:
 	}
 }
 
+struct ScopedCharArray
+{
+	explicit ScopedCharArray( std::size_t size_)
+		:size(size_)
+	{
+		data = (char*)std::calloc( size, sizeof(*data));
+		if (!data) throw std::bad_alloc();
+	}
+	~ScopedCharArray()
+	{
+		std::free( data);
+	}
+	char* data;
+	std::size_t size;
+};
+
 void MetaDataMap::rewriteMetaData(
 		const MetaDataDescription::TranslationMap& trmap,
 		const MetaDataDescription& newDescr,
@@ -121,14 +135,11 @@ void MetaDataMap::rewriteMetaData(
 
 	for (bool more=dbadapter.loadFirst(blk); more; more=dbadapter.loadNext(blk))
 	{
-		std::size_t newblk_bytesize = MetaDataBlock::BlockSize * newDescr.bytesize();
-		char* newblk_data = new char[ MetaDataBlock::BlockSize * newDescr.bytesize()];
-		utils::ScopedArray<char> newblk_data_mem( newblk_data);
-
+		ScopedCharArray blob( MetaDataBlock::BlockSize * newDescr.bytesize());
 		MetaDataRecord::translateBlock(
-				trmap, newDescr, newblk_data,
+				trmap, newDescr, blob.data,
 				*m_descr, blk.ptr(), MetaDataBlock::BlockSize);
-		MetaDataBlock newblk( &newDescr, blk.blockno(), newblk_data, newblk_bytesize);
+		MetaDataBlock newblk( &newDescr, blk.blockno(), blob.data, blob.size);
 		dbadapter.store( transaction, newblk);
 	}
 }

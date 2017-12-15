@@ -8,8 +8,9 @@
 #ifndef _STRUS_STORAGE_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
 #define _STRUS_STORAGE_DOCUMENT_FREQUENCY_CACHE_HPP_INCLUDED
 #include "strus/index.hpp"
-#include "private/utils.hpp"
 #include "private/internationalization.hpp"
+#include "strus/base/thread.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <vector>
@@ -142,13 +143,13 @@ private:
 		std::size_t m_size;
 	};
 
-	typedef utils::SharedPtr<CounterArray> CounterArrayRef;
+	typedef strus::shared_ptr<CounterArray> CounterArrayRef;
 
 	void doIncrement( const Batch::Increment& incr);
 	void doRevertIncrement( const Batch::Increment& incr);
 
 private:
-	utils::Mutex m_mutex;
+	strus::mutex m_mutex;
 	CounterArrayRef m_ar[ MaxNofTermTypes];
 };
 

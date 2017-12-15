@@ -12,6 +12,8 @@
 #include "private/errorUtils.hpp"
 #include "strus/constants.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
+#include "strus/base/numstring.hpp"
 #include <cmath>
 #include <ctime>
 #include <iomanip>
@@ -61,24 +63,24 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "title"))
+		if (strus::caseInsensitiveEquals( name, "title"))
 		{
 			if (m_titleitr) throw strus::runtime_error( "%s", _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
-		else if (utils::caseInsensitiveEquals( name, "struct"))
+		else if (strus::caseInsensitiveEquals( name, "struct"))
 		{
 			if (m_structarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
 			m_structar[ m_structarsize++] = itr;
 		}
-		else if (utils::caseInsensitiveEquals( name, "para"))
+		else if (strus::caseInsensitiveEquals( name, "para"))
 		{
 			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = itr;
 			m_paraarsize++;
 		}
-		else if (utils::caseInsensitiveEquals( name, "match"))
+		else if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
 
@@ -496,30 +498,30 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para"))
+		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
+		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_metadata_doclen = value;
 			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
-		else if (utils::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
+		else if (strus::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
 			m_parameter.cardinality = 0;
-			m_parameter.cardinality_frac = utils::tofraction( value);
+			m_parameter.cardinality_frac = numstring_conv::todouble( value);
 		}
-		else if (utils::caseInsensitiveEquals( name, "k1")
-		||  utils::caseInsensitiveEquals( name, "b")
-		||  utils::caseInsensitiveEquals( name, "avgdoclen")
-		||  utils::caseInsensitiveEquals( name, "titleinc")
-		||  utils::caseInsensitiveEquals( name, "cprop")
-		||  utils::caseInsensitiveEquals( name, "paragraphsize")
-		||  utils::caseInsensitiveEquals( name, "sentencesize")
-		||  utils::caseInsensitiveEquals( name, "windowsize")
-		||  utils::caseInsensitiveEquals( name, "cardinality")
-		||  utils::caseInsensitiveEquals( name, "ffbase"))
+		else if (strus::caseInsensitiveEquals( name, "k1")
+		||  strus::caseInsensitiveEquals( name, "b")
+		||  strus::caseInsensitiveEquals( name, "avgdoclen")
+		||  strus::caseInsensitiveEquals( name, "titleinc")
+		||  strus::caseInsensitiveEquals( name, "cprop")
+		||  strus::caseInsensitiveEquals( name, "paragraphsize")
+		||  strus::caseInsensitiveEquals( name, "sentencesize")
+		||  strus::caseInsensitiveEquals( name, "windowsize")
+		||  strus::caseInsensitiveEquals( name, "cardinality")
+		||  strus::caseInsensitiveEquals( name, "ffbase"))
 		{
 			addNumericParameter( name, parameterValue( name, value));
 		}
@@ -533,35 +535,35 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 
 void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match") || utils::caseInsensitiveEquals( name, "struct") || utils::caseInsensitiveEquals( name, "para"))
+	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "k1"))
+	else if (strus::caseInsensitiveEquals( name, "k1"))
 	{
 		m_parameter.k1 = (double)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "b"))
+	else if (strus::caseInsensitiveEquals( name, "b"))
 	{
 		m_parameter.b = (double)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
+	else if (strus::caseInsensitiveEquals( name, "avgdoclen"))
 	{
 		m_parameter.avgDocLength = (double)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "paragraphsize"))
+	else if (strus::caseInsensitiveEquals( name, "paragraphsize"))
 	{
 		m_parameter.paragraphsize = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "sentencesize"))
+	else if (strus::caseInsensitiveEquals( name, "sentencesize"))
 	{
 		m_parameter.sentencesize = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "windowsize"))
+	else if (strus::caseInsensitiveEquals( name, "windowsize"))
 	{
 		m_parameter.windowsize = value.touint();
 	}
-	else if (utils::caseInsensitiveEquals( name, "cardinality"))
+	else if (strus::caseInsensitiveEquals( name, "cardinality"))
 	{
 		if (value.type == NumericVariant::Int && value.toint() >= 0)
 		{
@@ -578,7 +580,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a non negative integer value"), name.c_str(), METHOD_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "ffbase"))
+	else if (strus::caseInsensitiveEquals( name, "ffbase"))
 	{
 		m_parameter.ffbase = (double)value;
 		if (m_parameter.ffbase < 0.0 || m_parameter.ffbase > 1.0)
@@ -586,7 +588,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "maxdf"))
+	else if (strus::caseInsensitiveEquals( name, "maxdf"))
 	{
 		m_parameter.maxdf = (double)value;
 		if (m_parameter.maxdf < 0.0 || m_parameter.maxdf > 1.0)
@@ -594,7 +596,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "titleinc"))
+	else if (strus::caseInsensitiveEquals( name, "titleinc"))
 	{
 		m_parameter.titleinc = (double)value;
 		if (m_parameter.titleinc < 0.0)
@@ -602,7 +604,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number"), name.c_str(), METHOD_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "cprop"))
+	else if (strus::caseInsensitiveEquals( name, "cprop"))
 	{
 		m_parameter.prop_weight_const = (double)value;
 		if (m_parameter.prop_weight_const < 0.0 || m_parameter.prop_weight_const > 1.0)
@@ -610,7 +612,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
 		}
 	}
-	else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
+	else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 	}

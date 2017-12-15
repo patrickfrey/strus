@@ -9,6 +9,7 @@
 #include "strus/errorBufferInterface.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <cstring>
 #include <stdexcept>
 
@@ -16,7 +17,7 @@ using namespace strus;
 
 #define MODULENAME "DatabaseCursor"
 
-DatabaseCursor::DatabaseCursor( const utils::SharedPtr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_)
+DatabaseCursor::DatabaseCursor( const strus::shared_ptr<LevelDbConnection>& conn_, bool useCache, bool useSnapshot, ErrorBufferInterface* errorhnd_)
 	:m_conn(conn_),m_dboptions(),m_itrhnd(),m_itr(0),m_domainkeysize(0),m_randomAccessValue(),m_errorhnd(errorhnd_)
 {
 	leveldb::DB* db = m_conn->db();

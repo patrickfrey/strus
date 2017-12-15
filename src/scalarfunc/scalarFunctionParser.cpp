@@ -9,7 +9,6 @@
 /// \file scalarFunctionParser.cpp
 #include "scalarFunctionParser.hpp"
 #include "scalarFunction.hpp"
-#include "private/utils.hpp"
 #include "strus/base/snprintf.h"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/bitOperations.hpp"

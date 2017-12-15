@@ -9,7 +9,7 @@
 #define _STRUS_STRING_MAP_HPP_INCLUDED
 #include "private/internationalization.hpp"
 #include "strus/base/crc32.hpp"
-#include <boost/unordered_map.hpp>
+#include "strus/base/unordered_map.hpp"
 #include <map>
 #include <list>
 #include <vector>
@@ -118,7 +118,7 @@ private:
 		}
 	};
 
-	typedef boost::unordered_map<const char*,ValueType,HashFunc,MapKeyEqual> Map;
+	typedef strus::unordered_map<const char*,ValueType,HashFunc,MapKeyEqual> Map;
 
 public:
 	StringMap(){}

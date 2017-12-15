@@ -21,9 +21,10 @@
 #include "strus/storageDumpInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
+#include "strus/base/unordered_map.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
-#include "private/utils.hpp"
 #include "byteOrderMark.hpp"
 #include "statisticsInitIterator.hpp"
 #include "statisticsUpdateIterator.hpp"
@@ -244,7 +245,7 @@ Index StorageClient::getTermValue( const std::string& name) const
 
 Index StorageClient::getTermType( const std::string& name) const
 {
-	return DatabaseAdapter_TermType::Reader( m_database.get()).get( utils::tolower( name));
+	return DatabaseAdapter_TermType::Reader( m_database.get()).get( string_conv::tolower( name));
 }
 
 Index StorageClient::getDocno( const std::string& name) const
@@ -259,7 +260,7 @@ Index StorageClient::getUserno( const std::string& name) const
 
 Index StorageClient::getAttributeno( const std::string& name) const
 {
-	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( utils::tolower( name));
+	return DatabaseAdapter_AttributeKey::Reader( m_database.get()).get( string_conv::tolower( name));
 }
 
 std::vector<std::string> StorageClient::getAttributeNames() const
@@ -604,7 +605,7 @@ Index StorageClient::allocTypenoImm( const std::string& name)
 	Index rt;
 	DatabaseAdapter_TermType::ReadWriter stor(m_database.get());
 
-	utils::ScopedLock lock( m_immalloc_typeno_mutex);
+	strus::scoped_lock lock( m_immalloc_typeno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_typeno.allocIncrement());
@@ -617,7 +618,7 @@ Index StorageClient::allocUsernoImm( const std::string& name)
 	Index rt;
 	DatabaseAdapter_UserName::ReadWriter stor( m_database.get());
 
-	utils::ScopedLock lock( m_immalloc_userno_mutex);
+	strus::scoped_lock lock( m_immalloc_userno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_userno.allocIncrement());
@@ -630,7 +631,7 @@ Index StorageClient::allocAttribnoImm( const std::string& name)
 	Index rt;
 	DatabaseAdapter_AttributeKey::ReadWriter stor( m_database.get());
 
-	utils::ScopedLock lock( m_immalloc_attribno_mutex);
+	strus::scoped_lock lock( m_immalloc_attribno_mutex);
 	if (!stor.load( name, rt))
 	{
 		stor.storeImm( name, rt = m_next_attribno.allocIncrement());
@@ -830,7 +831,7 @@ void StorageClient::loadTermnoMap( const char* termnomap_source)
 {
 	Reference<DatabaseTransactionInterface> transaction( m_database->createTransaction());
 	if (!transaction.get()) throw strus::runtime_error( "%s", _TXT("error loading termno map"));
-	utils::UnorderedMap<std::string,Index> termno_map;
+	strus::unordered_map<std::string,Index> termno_map;
 	try
 	{
 		unsigned char const* si = (const unsigned char*)termnomap_source;

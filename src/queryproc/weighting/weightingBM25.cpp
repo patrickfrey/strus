@@ -11,6 +11,7 @@
 #include "private/errorUtils.hpp"
 #include "strus/constants.hpp"
 #include "strus/base/string_format.hpp"
+#include "strus/base/string_conv.hpp"
 #include <cmath>
 #include <ctime>
 #include <iomanip>
@@ -57,7 +58,7 @@ void WeightingFunctionContextBM25::addWeightingFeature(
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name_, "match"))
+		if (strus::caseInsensitiveEquals( name_, "match"))
 		{
 			double nofMatches = stats_.documentFrequency()>=0?stats_.documentFrequency():itr_->documentFrequency();
 			double idf = 0.0;
@@ -161,18 +162,18 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 {
 	try
 	{
-		if (utils::caseInsensitiveEquals( name, "match"))
+		if (strus::caseInsensitiveEquals( name, "match"))
 		{
 			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 		}
-		else if (utils::caseInsensitiveEquals( name, "metadata_doclen"))
+		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_metadata_doclen = value;
 			if (value.empty()) m_errorhnd->report( _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
-		else if (utils::caseInsensitiveEquals( name, "k1")
-		||  utils::caseInsensitiveEquals( name, "b")
-		||  utils::caseInsensitiveEquals( name, "avgdoclen"))
+		else if (strus::caseInsensitiveEquals( name, "k1")
+		||  strus::caseInsensitiveEquals( name, "b")
+		||  strus::caseInsensitiveEquals( name, "avgdoclen"))
 		{
 			addNumericParameter( name, parameterValue( name, value));
 		}
@@ -186,19 +187,19 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 
 void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name, const NumericVariant& value)
 {
-	if (utils::caseInsensitiveEquals( name, "match"))
+	if (strus::caseInsensitiveEquals( name, "match"))
 	{
 		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
-	else if (utils::caseInsensitiveEquals( name, "k1"))
+	else if (strus::caseInsensitiveEquals( name, "k1"))
 	{
 		m_parameter.k1 = (double)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "b"))
+	else if (strus::caseInsensitiveEquals( name, "b"))
 	{
 		m_parameter.b = (double)value;
 	}
-	else if (utils::caseInsensitiveEquals( name, "avgdoclen"))
+	else if (strus::caseInsensitiveEquals( name, "avgdoclen"))
 	{
 		m_parameter.avgDocLength = (double)value;
 	}

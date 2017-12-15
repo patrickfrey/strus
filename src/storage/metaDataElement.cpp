@@ -6,8 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "metaDataElement.hpp"
-#include "private/utils.hpp"
 #include "private/internationalization.hpp"
+#include "strus/base/string_conv.hpp"
 #include <stdexcept>
 
 using namespace strus;
@@ -17,7 +17,7 @@ MetaDataElement::Type MetaDataElement::typeFromName( const char* namestr)
 	unsigned int ti = 0, te = NofTypes;
 	for (; ti<te; ++ti)
 	{
-		if (utils::caseInsensitiveEquals( namestr, typeName( (Type)ti)))
+		if (strus::caseInsensitiveEquals( namestr, typeName( (Type)ti)))
 		{
 			return (Type)ti;
 		}

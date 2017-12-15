@@ -18,6 +18,7 @@
 #include "databaseAdapter.hpp"
 #include "strus/numericVariant.hpp"
 #include "strus/base/local_ptr.hpp"
+#include "strus/base/string_conv.hpp"
 #include "private/internationalization.hpp"
 #include "private/errorUtils.hpp"
 #include <vector>
@@ -79,7 +80,7 @@ Index StorageTransaction::getOrCreateTermValue( const std::string& name)
 
 Index StorageTransaction::getOrCreateTermType( const std::string& name)
 {
-	return m_termTypeMap.getOrCreate( utils::tolower( name));
+	return m_termTypeMap.getOrCreate( string_conv::tolower( name));
 }
 
 Index StorageTransaction::getOrCreateDocno( const std::string& name)
@@ -94,7 +95,7 @@ Index StorageTransaction::getOrCreateUserno( const std::string& name)
 
 Index StorageTransaction::getOrCreateAttributeName( const std::string& name)
 {
-	return m_attributeNameMap.getOrCreate( utils::tolower( name));
+	return m_attributeNameMap.getOrCreate( string_conv::tolower( name));
 }
 
 void StorageTransaction::defineMetaData( const Index& docno, const std::string& varname, const NumericVariant& value)

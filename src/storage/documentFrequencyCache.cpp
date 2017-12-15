@@ -6,8 +6,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "documentFrequencyCache.hpp"
-#include "private/utils.hpp"
 #include "private/internationalization.hpp"
+#include "strus/base/thread.hpp"
 #include <cstdlib>
 
 using namespace strus;
@@ -43,7 +43,7 @@ void DocumentFrequencyCache::doRevertIncrement( const Batch::Increment& incr)
 
 void DocumentFrequencyCache::writeBatch( const Batch& batch)
 {
-	utils::ScopedLock lock( m_mutex);
+	strus::scoped_lock lock( m_mutex);
 	Batch::const_iterator bi = batch.begin(), be = batch.end();
 	try
 	{

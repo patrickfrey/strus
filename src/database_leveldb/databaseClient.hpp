@@ -9,8 +9,9 @@
 #define _STRUS_DATABASE_CLIENT_IMPLEMENTATION_HPP_INCLUDED
 #include "strus/databaseClientInterface.hpp"
 #include "levelDbHandle.hpp"
+#include "strus/base/shared_ptr.hpp"
 #include <leveldb/db.h>
-#include "private/utils.hpp"
+#include "strus/base/shared_ptr.hpp"
 
 namespace strus
 {
@@ -32,7 +33,7 @@ public:
 	/// \param[in] writeBufferSize size of write buffer per file
 	/// \param[in] blockSize block size on disk (size of units)
 	DatabaseClient(
-			const utils::SharedPtr<LevelDbHandleMap>& dbmap_,
+			const strus::shared_ptr<LevelDbHandleMap>& dbmap_,
 			const std::string& path,
 			unsigned int maxOpenFiles,
 			unsigned int cachesize_k,
@@ -73,7 +74,7 @@ public:
 	virtual void close();
 
 private:
-	utils::SharedPtr<LevelDbConnection> m_conn;		///< reference to database connection
+	strus::shared_ptr<LevelDbConnection> m_conn;		///< reference to database connection
 	ErrorBufferInterface* m_errorhnd;			///< buffer for reporting errors
 };
 
