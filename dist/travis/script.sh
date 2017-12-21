@@ -22,40 +22,20 @@ build_strus_project() {
 			;;
 	
 		Darwin)
-			if test "X$CC" = "Xgcc"; then
-				# gcc on OSX is a mere frontend to clang, force using gcc 4.8
-				export CXX=g++-4.8
-				export CC=gcc-4.8
-				# forcing brew versions (of gettext) over Mac versions
-				export CFLAGS=-I/usr/local
-				export CXXFLAGS=-I/usr/local
-				export LDFLAGS=-L/usr/local/lib
-				mkdir build
-				cd build
-				cmake \
-					-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
-					-DCMAKE_CXX_FLAGS=-g -G 'Unix Makefiles' $prj_cmakeflags \
-					..
-				make VERBOSE=1
-				make VERBOSE=1 CTEST_OUTPUT_ON_FAILURE=1 test
-				sudo make VERBOSE=1 install
-				cd ..
-			else
-				# forcing brew versions (of gettext) over Mac versions
-				export CFLAGS=-I/usr/local
-				export CXXFLAGS=-I/usr/local
-				export LDFLAGS=-L/usr/local/lib
-				mkdir build
-				cd build
-				cmake \
-					-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
-					-DCMAKE_CXX_FLAGS='-g -Wno-error=format-nonliteral -Wno-error=format-security' -G Xcode $prj_cmakeflags \
-					..
-				xcodebuild -configuration Release -target ALL_BUILD
-				xcodebuild -configuration Release -target RUN_TESTS
-				sudo xcodebuild -configuration Release -target install
-				cd ..
-			fi
+			# forcing brew versions (of gettext) over Mac versions
+			export CFLAGS=-I/usr/local
+			export CXXFLAGS=-I/usr/local
+			export LDFLAGS=-L/usr/local/lib
+			mkdir build
+			cd build
+			cmake \
+				-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release \
+				-DCMAKE_CXX_FLAGS='-g -Wno-error=format-nonliteral -Wno-error=format-security' -G Xcode $prj_cmakeflags \
+				..
+			xcodebuild -configuration Release -target ALL_BUILD
+			xcodebuild -configuration Release -target RUN_TESTS
+			sudo xcodebuild -configuration Release -target install
+			cd ..
 			;;
 			
 		*)
@@ -63,32 +43,6 @@ build_strus_project() {
 			;;
 	esac
 }
-
-setup_env() {
-	case $OS in
-		Linux)
-			;;
-		
-		Darwin)
-			if test "X$CC" = "Xgcc"; then
-				# gcc on OSX is a mere frontend to clang, force using gcc 4.8
-				export CXX=g++-4.8
-				export CC=gcc-4.8
-			fi
-			# forcing brew versions (of gettext) over Mac versions
-			export CFLAGS="-I/usr/local"
-			export CXXFLAGS="-I/usr/local"
-			export LDFLAGS="-L/usr/local/lib"
-			;;
-	
-		*)
-			echo "ERROR: unknown operating system '$OS'."
-			;;
-	esac
-}
-
-# set up environment
-setup_env
 
 # build pre-requisites
 DEPS="strusBase"
