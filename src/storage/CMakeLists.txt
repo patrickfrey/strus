@@ -57,6 +57,7 @@ include_directories(
 	"${STRUS_INCLUDE_DIRS}"
 	"${CNODETRIE_INCLUDE_DIRS}" 
 	"${strusbase_INCLUDE_DIRS}"
+	"${CMAKE_CURRENT_BINARY_DIR}/../../include"
 )
 link_directories(
 	${Boost_LIBRARY_DIRS}
