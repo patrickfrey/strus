@@ -12,8 +12,9 @@
 #  HAS_CXX11_CONSTEXPR          - constexpr keyword
 #  HAS_CXX11_SIZEOF_MEMBER      - sizeof() non-static members
 #  HAS_CXX11_FUNC               - __func__ preprocessor constant
+#  HAS_CXX11_STD_UNIQUE_PTR     - do we have a working std::unique_ptr
 #  HAS_CXX11_STD_CHRONO         - do we have a working std::chrono
-#  HAS_CXX11_REGEX            - do we have support for regular expressions
+#  HAS_CXX11_REGEX              - do we have support for regular expressions
 #
 # Original script by Rolf Eike Beer
 # Modifications by Andreas Weis
@@ -96,8 +97,9 @@ CXX11_CHECK_FEATURE("variadic_templates" 2555 HAS_CXX11_VARIADIC_TEMPLATES)
 CXX11_CHECK_FEATURE("constexpr"          2235 HAS_CXX11_CONSTEXPR)
 CXX11_CHECK_FEATURE("sizeof_member"      2253 HAS_CXX11_SIZEOF_MEMBER)
 CXX11_CHECK_FEATURE("__func__"           2340 HAS_CXX11_FUNC)
-CXX11_CHECK_FEATURE("std_chrono"        ""   HAS_CXX11_STD_CHRONO)
-CXX11_CHECK_FEATURE("regex"        ""   HAS_CXX11_REGEX)
+CXX11_CHECK_FEATURE("std_unique_ptr"     ""      HAS_CXX11_STD_UNIQUE_PTR)
+CXX11_CHECK_FEATURE("std_chrono"         ""   HAS_CXX11_STD_CHRONO)
+CXX11_CHECK_FEATURE("regex"              ""   HAS_CXX11_REGEX)
 
 SET(CXX11_FEATURE_LIST ${CXX11_FEATURE_LIST} CACHE STRING "C++11 feature support list")
 MARK_AS_ADVANCED(FORCE CXX11_FEATURE_LIST)
