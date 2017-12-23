@@ -34,7 +34,7 @@ configure_file( "${PROJECT_SOURCE_DIR}/dist/redhat/strus.spec.in"  "${PROJECT_SO
 
 set( STRUS_GETTEXT_PACKAGE "strus-dom" )	#... 1st parameter of bindtextdomain(...)
 set( STRUS_GETTEXT_LOCALEDIR "" )			#... 2nd parameter of bindtextdomain(...)
-configure_file( "${PROJECT_SOURCE_DIR}/src/utils/internationalization.cpp.in"  "${PROJECT_SOURCE_DIR}/src/utils/internationalization.cpp"  @ONLY )
+configure_file( "${PROJECT_SOURCE_DIR}/src/utils/internationalization.cpp.in"  "${CMAKE_CURRENT_BINARY_DIR}/src/utils/internationalization.cpp"  @ONLY )
 
 enable_testing()
 
@@ -46,6 +46,7 @@ set( GETMEMSIZE_LIBRARY_DIRS      "${CMAKE_CURRENT_BINARY_DIR}/3rdParty/getMemor
 set( STRUS_INCLUDE_DIRS                "${CMAKE_CURRENT_BINARY_DIR}/include"  "${PROJECT_SOURCE_DIR}/include" )
 set( MAIN_SOURCE_DIR                     "${PROJECT_SOURCE_DIR}/src" )
 set( MAIN_TESTS_DIR                        "${PROJECT_SOURCE_DIR}/tests" )
+set( UTILS_GENSOURCE_DIR            "${CMAKE_CURRENT_BINARY_DIR}/src/utils/" )
 
 # Subdirectories:
 add_subdirectory( 3rdParty )
