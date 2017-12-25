@@ -24,6 +24,7 @@ link_directories(
 	"${MAIN_SOURCE_DIR}/utils"
 	"${GETMEMSIZE_LIBRARY_DIRS}"
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 # -------------------------------------------
