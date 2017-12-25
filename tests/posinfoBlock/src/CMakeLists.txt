@@ -11,6 +11,7 @@ link_directories(
 	"${MAIN_SOURCE_DIR}/storage"
 	${Boost_LIBRARY_DIRS}
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 add_executable( testPosinfoBlock testPosinfoBlock.cpp)

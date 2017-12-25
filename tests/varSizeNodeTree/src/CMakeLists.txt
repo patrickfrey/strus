@@ -14,6 +14,7 @@ link_directories(
 	"${CNODETRIE_LIBRARY_DIRS}"
 	${Boost_LIBRARY_DIRS}
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 add_executable( testVarSizeNodeTree testVarSizeNodeTree.cpp)

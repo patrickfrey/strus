@@ -14,6 +14,7 @@ link_directories(
 	"${MAIN_SOURCE_DIR}/utils"
 	${Boost_LIBRARY_DIRS}
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 add_executable( testQuery testQuery.cpp)
