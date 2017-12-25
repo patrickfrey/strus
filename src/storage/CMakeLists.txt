@@ -65,6 +65,7 @@ link_directories(
 	"${MAIN_SOURCE_DIR}/statsproc"
 	"${CNODETRIE_LIBRARY_DIRS}" 
 	"${strusbase_LIBRARY_DIRS}"
+	"${LevelDB_LIBRARY_PATH}"
 )
 
 # ------------------------------
