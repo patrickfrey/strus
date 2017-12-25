@@ -13,7 +13,6 @@ endif( APPLE )
 endif (NOT LEVELDB_ROOT)
 if( LEVELDB_ROOT )
 MESSAGE( STATUS "Installation path of leveldb: '${LEVELDB_ROOT}' " )
-endif( LEVELDB_ROOT )
 
 find_path( LevelDB_INCLUDE_PATH NAMES  leveldb/db.h
 			HINTS ${LEVELDB_ROOT}/include  ${LEVELDB_ROOT}
@@ -21,14 +20,28 @@ find_path( LevelDB_INCLUDE_PATH NAMES  leveldb/db.h
 			NO_CMAKE_PATH
 			NO_SYSTEM_ENVIRONMENT_PATH
 			NO_CMAKE_SYSTEM_PATH )
-if( NOT LevelDB_INCLUDE_PATH OR LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
+if( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
+unset( LevelDB_INCLUDE_PATH )
+endif( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
+endif( LEVELDB_ROOT )
+
+if( NOT LevelDB_INCLUDE_PATH )
 find_path( LevelDB_INCLUDE_PATH NAMES leveldb/db.h
 			HINTS "${LEVELDB_ROOT}" "${LEVELDB_ROOT}/include"  "${CMAKE_INSTALL_PREFIX}/include" )
-endif( NOT LevelDB_INCLUDE_PATH OR LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
+endif( NOT LevelDB_INCLUDE_PATH )
 
 if( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
 unset( LevelDB_INCLUDE_PATH )
 endif( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
+
+if( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
+file( GLOB_RECURSE fl "db.h" RELATIVE  "${LEVELDB_ROOT}" )
+if ( fl )
+list( GET fl 0 fl0 )
+get_filename_component( PARENT_DIR fl0 fdir )
+get_filename_component( PARENT_DIR fdir LevelDB_INCLUDE_PATH )
+endif ( fl )
+endif( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
 
 find_library( LevelDB_LIBRARY NAMES leveldb
 			HINTS "${LEVELDB_ROOT}/${LIB_INSTALL_DIR}" "${LEVELDB_ROOT}/lib"
