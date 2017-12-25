@@ -15,16 +15,15 @@ if( LEVELDB_ROOT )
 MESSAGE( STATUS "Installation path of leveldb: '${LEVELDB_ROOT}' " )
 endif( LEVELDB_ROOT )
 
-find_path( LevelDB_INCLUDE_PATH NAMES  "db.h"
-			HINTS ${LEVELDB_ROOT}/include ${LEVELDB_ROOT}/include/leveldb ${LEVELDB_ROOT}
+find_path( LevelDB_INCLUDE_PATH NAMES  leveldb/db.h
+			HINTS ${LEVELDB_ROOT}/include  ${LEVELDB_ROOT}
 			NO_CMAKE_ENVIRONMENT_PATH
 			NO_CMAKE_PATH
 			NO_SYSTEM_ENVIRONMENT_PATH
 			NO_CMAKE_SYSTEM_PATH )
 if( NOT LevelDB_INCLUDE_PATH )
 find_path( LevelDB_INCLUDE_PATH NAMES leveldb/db.h
-			HINTS "${LEVELDB_ROOT}/include"  "${CMAKE_INSTALL_PREFIX}/include/strus"
-				  "${CMAKE_INSTALL_PREFIX}/include" )
+			HINTS "${LEVELDB_ROOT}" "${LEVELDB_ROOT}/include"  "${CMAKE_INSTALL_PREFIX}/include" )
 endif( NOT LevelDB_INCLUDE_PATH )
 
 find_library( LevelDB_LIBRARY NAMES leveldb
