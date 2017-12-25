@@ -14,25 +14,24 @@ endif (NOT LEVELDB_ROOT)
 if( LEVELDB_ROOT )
 MESSAGE( STATUS "Installation path of leveldb: '${LEVELDB_ROOT}' " )
 
-find_path( LevelDB_INCLUDE_PATH NAMES  leveldb/db.h
+find_path( pt NAMES  leveldb/db.h
 			HINTS ${LEVELDB_ROOT}/include  ${LEVELDB_ROOT}
 			NO_CMAKE_ENVIRONMENT_PATH
 			NO_CMAKE_PATH
 			NO_SYSTEM_ENVIRONMENT_PATH
 			NO_CMAKE_SYSTEM_PATH )
-if( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
-unset( LevelDB_INCLUDE_PATH )
-endif( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
+if( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
+set( LevelDB_INCLUDE_PATH ${pt} )
+endif( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 endif( LEVELDB_ROOT )
 
 if( NOT LevelDB_INCLUDE_PATH )
-find_path( LevelDB_INCLUDE_PATH NAMES leveldb/db.h
+find_path( pt NAMES leveldb/db.h
 			HINTS "${LEVELDB_ROOT}" "${LEVELDB_ROOT}/include"  "${CMAKE_INSTALL_PREFIX}/include" )
+if( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
+set( LevelDB_INCLUDE_PATH ${pt} )
+endif( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 endif( NOT LevelDB_INCLUDE_PATH )
-
-if( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
-unset( LevelDB_INCLUDE_PATH )
-endif( LevelDB_INCLUDE_PATH STREQUAL "LevelDB_INCLUDE_PATH-NOTFOUND" )
 
 if( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
 file( GLOB_RECURSE fl "${LEVELDB_ROOT}/*/db.h" )
@@ -43,30 +42,31 @@ get_filename_component( LevelDB_INCLUDE_PATH  ${fdir} DIRECTORY )
 endif ( fl )
 endif( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
 
-find_library( LevelDB_LIBRARY NAMES leveldb
+find_library( pl NAMES leveldb
 			HINTS "${LEVELDB_ROOT}/${LIB_INSTALL_DIR}" "${LEVELDB_ROOT}/lib"
 			NO_DEFAULT_PATH
 			NO_CMAKE_ENVIRONMENT_PATH
 			NO_CMAKE_PATH
           		NO_SYSTEM_ENVIRONMENT_PATH
 			NO_CMAKE_SYSTEM_PATH )
-if( NOT LevelDB_LIBRARY )
-find_library( LevelDB_LIBRARY NAMES leveldb
+if( NOT pl OR pl STREQUAL  'pl-NOTFOUND' )
+find_library( pl NAMES leveldb
 			HINTS "${LEVELDB_ROOT}/lib" "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
 					 "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus" )
-endif( NOT LevelDB_LIBRARY )
+endif( NOT pl OR pl STREQUAL  'pt-NOTFOUND' )
+if( pl  AND NOT pl STREQUAL "pl-NOTFOUND" )
+set( LevelDB_LIBRARY ${pl} )
+endif( pl AND NOT pl STREQUAL "pl-NOTFOUND" )
 
 if( LEVELDB_ROOT AND NOT LevelDB_LIBRARY )
 if( APPLE )
-file( GLOB_RECURSE fl "${LEVELDB_ROOT}/*/libleveldb.dylib" )
+file( GLOB_RECURSE al "${LEVELDB_ROOT}/*/libleveldb.dylib" )
 else( APPLE )
-file( GLOB_RECURSE fl "${LEVELDB_ROOT}/*/libleveldb.so" )
+file( GLOB_RECURSE al "${LEVELDB_ROOT}/*/libleveldb.so" )
 endif( APPLE )
-if( fl )
-list( GET fl 0 fl0 )
-get_filename_component( LevelDB_LIBRARY ${fl0} NAME )
-get_filename_component( LevelDB_LIBRARY_PATH  ${fl0} DIRECTORY )
-endif ( fl )
+if( al )
+list( GET al 0 LevelDB_LIBRARY )
+endif ( al )
 endif( LEVELDB_ROOT AND NOT LevelDB_LIBRARY )
 
 if(LevelDB_INCLUDE_PATH AND LevelDB_LIBRARY)
