@@ -36,7 +36,7 @@ endif( NOT LevelDB_INCLUDE_PATH )
 if( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
 file( GLOB_RECURSE fl "${LEVELDB_ROOT}/*/db.h" )
 if( fl )
-list( LENGTH fl len_fl }
+list( LENGTH fl len_fl )
 message( "+++ file GLOB_RECURSE result [ ${len_fl} ]: ${fl}" )
 list( GET fl 0 fl0 )
 get_filename_component( fdir ${fl0} DIRECTORY )
