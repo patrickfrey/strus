@@ -49,11 +49,11 @@ find_library( pl NAMES leveldb
 			NO_CMAKE_PATH
           		NO_SYSTEM_ENVIRONMENT_PATH
 			NO_CMAKE_SYSTEM_PATH )
-if( NOT pl OR pl STREQUAL  'pl-NOTFOUND' )
+if( NOT pl OR pl STREQUAL "pl-NOTFOUND" )
 find_library( pl NAMES leveldb
 			HINTS "${LEVELDB_ROOT}/lib" "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
 					 "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus" )
-endif( NOT pl OR pl STREQUAL  'pt-NOTFOUND' )
+endif( NOT pl OR pl STREQUAL "pt-NOTFOUND" )
 if( pl  AND NOT pl STREQUAL "pl-NOTFOUND" )
 set( LevelDB_LIBRARY ${pl} )
 endif( pl AND NOT pl STREQUAL "pl-NOTFOUND" )
