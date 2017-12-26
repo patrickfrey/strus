@@ -11,11 +11,12 @@ set( LEVELDB_ROOT ${LEVELDB_INSTALL_PATH} )
 endif( ${RET_LEVELDB_PATH} STREQUAL "" OR ${RET_LEVELDB_PATH} STREQUAL "0" )
 endif( APPLE )
 endif (NOT LEVELDB_ROOT)
+
 if( LEVELDB_ROOT )
 MESSAGE( STATUS "Installation path of leveldb: '${LEVELDB_ROOT}' " )
 
 find_path( pt NAMES  leveldb/db.h
-			HINTS ${LEVELDB_ROOT}/include  ${LEVELDB_ROOT}
+			HINTS "${LEVELDB_ROOT}/include"
 			NO_CMAKE_ENVIRONMENT_PATH
 			NO_CMAKE_PATH
 			NO_SYSTEM_ENVIRONMENT_PATH
@@ -27,33 +28,27 @@ endif( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 endif( LEVELDB_ROOT )
 
 if( NOT LevelDB_INCLUDE_PATH )
-find_path( pt NAMES leveldb/db.h
-			HINTS "${LEVELDB_ROOT}" "${LEVELDB_ROOT}/include"  "${CMAKE_INSTALL_PREFIX}/include" )
+find_path( pt NAMES leveldb/db.h 
+			HINTS  "${CMAKE_INSTALL_PREFIX}/include" )
 MESSAGE( STATUS "Find path leveldb/db.h with system path returns: '${pt}' " )
 if( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 set( LevelDB_INCLUDE_PATH ${pt} )
 endif( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 endif( NOT LevelDB_INCLUDE_PATH )
 
-if( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
-file( GLOB_RECURSE allp "${LEVELDB_ROOT}/*/*.*" )
-if( fl AND NOT "${fl}" STREQUAL "" )
-foreach( ai ${allp} )
-MESSAGE( STATUS "Scan path: (${ai}) " )
-endforeach( ai ${allp} )
-else( fl AND NOT "${fl}" STREQUAL "" )
-MESSAGE( STATUS "Find path *.* in '${LEVELDB_ROOT}' recursive returns nothing" )
-endif( fl AND NOT "${fl}" STREQUAL "" )
-
+if( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH)
 file( GLOB_RECURSE fl "${LEVELDB_ROOT}/*/db.h" )
 MESSAGE( STATUS "Find path db.h recursive returns: '${fl}' " )
 if( fl AND NOT "${fl}" STREQUAL "" )
 list( GET fl 0 fl0 )
 get_filename_component( fdir ${fl0} DIRECTORY )
 get_filename_component( LevelDB_INCLUDE_PATH  ${fdir} DIRECTORY )
+else ( fl AND NOT "${fl}" STREQUAL "" )
+message( STATUS "recursive search for ${LEVELDB_ROOT}/*/db.h returns nothing" )
 endif ( fl AND NOT "${fl}" STREQUAL "" )
 endif( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
 
+if( LEVELDB_ROOT )
 find_library( pl NAMES leveldb
 			HINTS "${LEVELDB_ROOT}/${LIB_INSTALL_DIR}" "${LEVELDB_ROOT}/lib"
 			NO_DEFAULT_PATH
@@ -61,14 +56,19 @@ find_library( pl NAMES leveldb
 			NO_CMAKE_PATH
           		NO_SYSTEM_ENVIRONMENT_PATH
 			NO_CMAKE_SYSTEM_PATH )
-if( NOT pl OR pl STREQUAL "pl-NOTFOUND" )
-find_library( pl NAMES leveldb
-			HINTS "${LEVELDB_ROOT}/lib" "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
-					 "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus" )
-endif( NOT pl OR pl STREQUAL "pl-NOTFOUND" )
 if( pl AND NOT pl STREQUAL "pl-NOTFOUND" )
 set( LevelDB_LIBRARY ${pl} )
 endif( pl AND NOT pl STREQUAL "pl-NOTFOUND" )
+endif( LEVELDB_ROOT )
+
+if( NOT LevelDB_LIBRARY )
+find_library( pl NAMES leveldb
+			HINTS "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
+					 "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}/strus" )
+if( pl AND NOT pl STREQUAL "pl-NOTFOUND" )
+set( LevelDB_LIBRARY ${pl} )
+endif( pl AND NOT pl STREQUAL "pl-NOTFOUND" )
+endif( NOT LevelDB_LIBRARY )
 
 if( LEVELDB_ROOT AND NOT LevelDB_LIBRARY )
 if( APPLE )
@@ -78,6 +78,8 @@ file( GLOB_RECURSE al "${LEVELDB_ROOT}/*/libleveldb.so" )
 endif( APPLE )
 if( al AND NOT "${al}" STREQUAL "" )
 list( GET al 0 LevelDB_LIBRARY )
+else( al AND NOT "${al}" STREQUAL "" )
+message( STATUS "recursive search for ${LEVELDB_ROOT}/*/libleveldb.so/dylib returns nothing" )
 endif ( al AND NOT "${al}" STREQUAL "" )
 endif( LEVELDB_ROOT AND NOT LevelDB_LIBRARY )
 
