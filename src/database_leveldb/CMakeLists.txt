@@ -14,6 +14,7 @@ set(libstrus_database_leveldb_source_files
 
 include_directories(
 	${Boost_INCLUDE_DIRS}
+	"${Intl_INCLUDE_DIRS}"
 	"${LevelDB_INCLUDE_PATH}"
 	"${GETMEMSIZE_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"

@@ -29,6 +29,7 @@ include_directories(
 
 link_directories(
   "${strusbase_LIBRARY_DIRS}"
+  "${Intl_INCLUDE_DIRS}"
 )
 
 # -------------------------------------

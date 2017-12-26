@@ -11,6 +11,7 @@ set( source_files
 
 include_directories(
 	${Boost_INCLUDE_DIRS}
+	"${Intl_INCLUDE_DIRS}"
 	"${STRUS_INCLUDE_DIRS}"
 	"${MAIN_SOURCE_DIR}/statsproc" 
 	"${CNODETRIE_INCLUDE_DIRS}" 
