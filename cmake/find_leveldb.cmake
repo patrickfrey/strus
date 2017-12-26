@@ -20,6 +20,7 @@ find_path( pt NAMES  leveldb/db.h
 			NO_CMAKE_PATH
 			NO_SYSTEM_ENVIRONMENT_PATH
 			NO_CMAKE_SYSTEM_PATH )
+MESSAGE( STATUS "Find path leveldb/db.h no system path returns: '${pt}' " )
 if( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 set( LevelDB_INCLUDE_PATH ${pt} )
 endif( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
@@ -28,6 +29,7 @@ endif( LEVELDB_ROOT )
 if( NOT LevelDB_INCLUDE_PATH )
 find_path( pt NAMES leveldb/db.h
 			HINTS "${LEVELDB_ROOT}" "${LEVELDB_ROOT}/include"  "${CMAKE_INSTALL_PREFIX}/include" )
+MESSAGE( STATUS "Find path leveldb/db.h with system path returns: '${pt}' " )
 if( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 set( LevelDB_INCLUDE_PATH ${pt} )
 endif( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
@@ -35,9 +37,8 @@ endif( NOT LevelDB_INCLUDE_PATH )
 
 if( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
 file( GLOB_RECURSE fl "${LEVELDB_ROOT}/*/db.h" )
+MESSAGE( STATUS "Find path leveldb/db.h recursive returns: '${fl}' " )
 if( fl )
-list( LENGTH fl len_fl )
-message( "+++ file GLOB_RECURSE result [ ${len_fl} ]: ${fl}" )
 list( GET fl 0 fl0 )
 get_filename_component( fdir ${fl0} DIRECTORY )
 get_filename_component( LevelDB_INCLUDE_PATH  ${fdir} DIRECTORY )
