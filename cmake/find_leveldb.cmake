@@ -37,9 +37,13 @@ endif( NOT LevelDB_INCLUDE_PATH )
 
 if( LEVELDB_ROOT AND NOT LevelDB_INCLUDE_PATH )
 file( GLOB_RECURSE allp "${LEVELDB_ROOT}/*/*.*" )
+if( fl AND NOT "${fl}" STREQUAL "" )
 foreach( ai ${allp} )
 MESSAGE( STATUS "Scan path: (${ai}) " )
 endforeach( ai ${allp} )
+else( fl AND NOT "${fl}" STREQUAL "" )
+MESSAGE( STATUS "Find path *.* in '${LEVELDB_ROOT}' recursive returns nothing" )
+endif( fl AND NOT "${fl}" STREQUAL "" )
 
 file( GLOB_RECURSE fl "${LEVELDB_ROOT}/*/db.h" )
 MESSAGE( STATUS "Find path db.h recursive returns: '${fl}' " )
