@@ -19,6 +19,7 @@ link_directories(
 	${Boost_LIBRARY_DIRS}
 	"${MAIN_SOURCE_DIR}/utils"
 	"${strusbase_LIBRARY_DIRS}"
+	${Intl_LIBRARIES}
 )
 
 
