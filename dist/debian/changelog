@@ -1,3 +1,7 @@
+strus (0.15.5-1) unstable; urgency=low
+  * fixed several build issues: Build with Clang, Fix bugs in travis build
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 29 Dec 2017 13:00:00 +0100
+
 strus (0.15.4-1) unstable; urgency=low
   * changed paramater renaming option name in summarizer 'metadata' and 'attribute'
   * added -Wshadow for C++ build
