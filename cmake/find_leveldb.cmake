@@ -29,7 +29,7 @@ endif( LEVELDB_ROOT )
 
 if( NOT LevelDB_INCLUDE_PATH )
 find_path( pt NAMES leveldb/db.h 
-			HINTS  "${CMAKE_INSTALL_PREFIX}/include" )
+			HINTS  "${CMAKE_INSTALL_PREFIX}/include"  "${CMAKE_INSTALL_PREFIX}/include/strus")
 MESSAGE( STATUS "Find path leveldb/db.h with system path returns: '${pt}' " )
 if( pt  AND NOT pt STREQUAL "pt-NOTFOUND" )
 set( LevelDB_INCLUDE_PATH ${pt} )
