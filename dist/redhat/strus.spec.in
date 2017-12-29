@@ -237,7 +237,7 @@ Packager: Patrick Frey <patrickpfrey@yahoo.com>
 Library implementing the storage of a text search engine.
 
 %package devel
-Summary: strus development files
+Summary: Development files for strus
 Group: Development/Libraries/C++
 
 %description devel

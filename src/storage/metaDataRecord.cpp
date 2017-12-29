@@ -219,8 +219,8 @@ void MetaDataRecord::setValue( const MetaDataElement* elem, const NumericVariant
 	switch (value_.type)
 	{
 		case NumericVariant::Null:   clearValue( elem); break;
-		case NumericVariant::Int:    setValueInt( elem, value_); break;
-		case NumericVariant::UInt:   setValueUInt( elem, value_); break;
+		case NumericVariant::Int:    setValueInt( elem, (int64_t)value_); break;
+		case NumericVariant::UInt:   setValueUInt( elem, (uint64_t)value_); break;
 		case NumericVariant::Float:  setValueFloat( elem, (double)value_); break;
 	}
 }
