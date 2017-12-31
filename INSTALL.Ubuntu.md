@@ -9,7 +9,7 @@ gcc >= 4.9 (has C++11 support). Build with C++98 is possible.
 Install packages with 'apt-get'/aptitude.
 
 ## Required packages
-	boost-all >= 1.57 snappy-dev leveldb-dev
+	boost-all >= 1.53 snappy-dev leveldb-dev
 
 # Strus prerequisite packages to install before
 	strusBase
