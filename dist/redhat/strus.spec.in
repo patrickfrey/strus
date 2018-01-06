@@ -244,14 +244,19 @@ Requires: strusboost >= 1.57.0
 BuildRequires: strusboost-devel >= 1.57.0
 %endif
 %if %{osuleap423}
-Requires: libboost_thread1.57.0 >= 1.57.0
-Requires: libboost_atomic1.57.0 >= 1.57.0
-Requires: libboost_system1.57.0 >= 1.57.0
-Requires: libboost_date_time1.57.0 >= 1.57.0
-Requires: libboost_regex1.57.0 >= 1.57.0
+Requires: libboost_thread1_57_0 >= 1.57.0
+Requires: libboost_atomic1_57_0 >= 1.57.0
+Requires: libboost_system1_57_0 >= 1.57.0
+Requires: libboost_date_time1_57_0 >= 1.57.0
+Requires: libboost_regex1_57_0 >= 1.57.0
 BuildRequires: boost-devel >= 1.57.0
 %endif
 %if %{osutumbleweed}
+Requires: libboost_thread1_66_0 >= 1.66.0
+Requires: libboost_atomic1_66_0 >= 1.66.0
+Requires: libboost_system1_66_0 >= 1.66.0
+Requires: libboost_date_time1_66_0 >= 1.66.0
+Requires: libboost_regex1_66_0 >= 1.66.0
 BuildRequires: libboost_thread1_66_0-devel >= 1.66.0
 BuildRequires: libboost_atomic1_66_0-devel >= 1.66.0
 BuildRequires: libboost_system1_66_0-devel >= 1.66.0
