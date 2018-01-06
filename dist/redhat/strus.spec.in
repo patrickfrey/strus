@@ -238,7 +238,7 @@ BuildRequires: boost-devel >= 1.57.0
 %endif
 %endif
 
-%if %{suse} || %{sles}
+%if %{suse}
 %if %{sles11} || %{sles12} || %{osuleap423}
 Requires: strusboost >= 1.57.0
 BuildRequires: strusboost-devel >= 1.57.0
@@ -267,12 +267,12 @@ Requires: leveldb >= 1.18
 %endif
 %endif
 
-%if %{suse} || %{sles}
+%if %{suse}
 %if %{sles11}
 BuildRequires: strusleveldb-devel >= 1.18
 Requires: strusleveldb >= 1.18
 %endif
-%if %{sles12}
+%if %{sles12} || %{osuleap423}
 %if 0%{?is_opensuse}
 BuildRequires: leveldb-devel >= 1.18
 Requires: libleveldb1 >= 1.18
