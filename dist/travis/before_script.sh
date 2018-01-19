@@ -9,8 +9,10 @@ case $OS in
 		sudo apt-get update -qq
 		sudo apt-get install -y \
 			cmake \
-			libboost-all-dev \
 			libleveldb-dev
+		sudo add-apt-repository -y ppa:kojoley/boost
+		sudo apt-get -q update
+		sudo apt-get install libboost-atomic1.58-dev libboost-thread1.58-dev libboost-system1.58-dev libboost-filesystem1.58-dev libboost-regex1.58-dev
 		;;
 		
 	Darwin)

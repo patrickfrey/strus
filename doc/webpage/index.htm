@@ -73,11 +73,25 @@
 
 		<h2>Installation</h2>
 		<p class="description">
-		There is a short <a href="installation.htm">installation guide</a> on how to 
-		fetch the <i>Strus</i> sources from Github and build them on your own.
-		Support of packaging and docker images has been given up temporarily. 
-		We have to figure out what type of deployment and infrastructure we will actively support
-		in the future.
+		For installation see description files <b>INSTALL.&lt;platform.&gt;</b> in the top level directory of each project.
+		The descriptions of the project installations are intended to be self contained.
+		For example for <i>Ubuntu</i>: <a href="https://github.com/patrickfrey/strusBase/blob/master/INSTALL.Ubuntu.md">strusBase</a>,
+		<a href="https://github.com/patrickfrey/strus/blob/master/INSTALL.Ubuntu.md">strus</a>,
+		<a href="https://github.com/patrickfrey/strusAnalyzer/blob/master/INSTALL.Ubuntu.md">strusAnalyzer</a>,
+		<a href="https://github.com/patrickfrey/strusTrace/blob/master/INSTALL.Ubuntu.md">strusTrace</a>,
+		<a href="https://github.com/patrickfrey/strusModule/blob/master/INSTALL.Ubuntu.md">strusModule</a>,
+		<a href="https://github.com/patrickfrey/strusRpc/blob/master/INSTALL.Ubuntu.md">strusRpc</a>,
+		<a href="https://github.com/patrickfrey/strusVector/blob/master/INSTALL.Ubuntu.md">strusVector</a>,
+		<a href="https://github.com/patrickfrey/strusPattern/blob/master/INSTALL.Ubuntu.md">strusPattern</a>,
+		<a href="https://github.com/patrickfrey/strusUtilities/blob/master/INSTALL.Ubuntu.md">strusUtilities</a>,
+		<a href="https://github.com/patrickfrey/strusBindings/blob/master/INSTALL.Ubuntu.md">strusBindings</a>
+		and <a href="https://github.com/patrickfrey/strusAll/blob/master/INSTALL.Ubuntu.md">strusAll</a>.
+		</p>
+
+		<h2>Regular Builds</h2>
+		<p class="description">
+		The software is built regurarly on <a href="https://travis-ci.org/patrickfrey">Travis</a> (on commit of the master branch)
+		and on <a href="https://build.opensuse.org/project/monitor/home:PatrickFrey">the OpenSUSE build cluster</a> (currently triggered manually).
 		</p>
 
 		<h2>Documentation</h2>
@@ -102,6 +116,15 @@
 
 		<h2>News</h2>
 		<table>
+
+		<tr>
+		<td><p class="timestamp">Jan 3rd, 2018</p></td>
+		<td><p class="newstext">We reactivated the <a href="https://build.opensuse.org/project/monitor/home:PatrickFrey">OpenSUSE builds</a>
+		and solved the issues related to the <a href="https://travis-ci.org/patrickfrey">Travis build</a>.
+		There are still some open issues in the <i>OpenSUSE</i> builds left, especially with the language bindings, but we intend to solve
+		them soon.
+		</p></td>
+		</tr>
 
 		<tr>
 		<td><p class="timestamp">Nov 12th, 2017</p></td>
