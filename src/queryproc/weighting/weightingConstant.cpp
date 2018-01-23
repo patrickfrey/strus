@@ -49,7 +49,7 @@ void WeightingFunctionContextConstant::addWeightingFeature(
 
 void WeightingFunctionContextConstant::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 double WeightingFunctionContextConstant::call( const Index& docno)
@@ -142,7 +142,7 @@ void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& 
 	}
 	else if (strus::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "weight"))
 	{
@@ -150,7 +150,7 @@ void WeightingFunctionInstanceConstant::addNumericParameter( const std::string& 
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 

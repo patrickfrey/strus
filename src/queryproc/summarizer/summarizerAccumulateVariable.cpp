@@ -48,7 +48,7 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 
 void SummarizerFunctionContextAccumulateVariable::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
@@ -73,11 +73,11 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 			}
 			if (varitr.empty())
 			{
-				m_errorhnd->report( _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_data->var.c_str(), METHOD_NAME);
+				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no variables with name '%s' defined in feature passed to '%s'"), m_data->var.c_str(), METHOD_NAME);
 			}
 			if (m_features.size() >= MaxNofFeatures)
 			{
-				m_errorhnd->report( _TXT("to many features defined for '%s'"), METHOD_NAME);
+				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseMaximumLimitReached), _TXT("to many features defined for '%s'"), METHOD_NAME);
 			}
 			else
 			{
@@ -86,7 +86,7 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization feature '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization feature '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
@@ -261,7 +261,7 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 	{
 		if (strus::caseInsensitiveEquals( name, "match"))
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
@@ -281,15 +281,15 @@ void SummarizerFunctionInstanceAccumulateVariable::addStringParameter( const std
 		}
 		else if (strus::caseInsensitiveEquals( name, "cofactor"))
 		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "norm"))
 		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "nof"))
 		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
 		else
 		{
@@ -303,11 +303,11 @@ void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const st
 {
 	if (strus::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "var"))
 	{
-		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "nof"))
 	{
@@ -323,7 +323,7 @@ void SummarizerFunctionInstanceAccumulateVariable::addNumericParameter( const st
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 

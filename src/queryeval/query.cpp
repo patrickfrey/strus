@@ -147,7 +147,7 @@ void Query::pushExpression( const PostingJoinOperatorInterface* operation, unsig
 	{
 		if (argc > m_stack.size())
 		{
-			m_errorhnd->report( _TXT( "illegal expression definition: size of expression bigger than stack size"));
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseValueOutOfRange), _TXT( "illegal expression definition: size of expression bigger than stack size"));
 		}
 		else
 		{
@@ -171,7 +171,7 @@ void Query::attachVariable( const std::string& name_)
 	{
 		if (m_stack.empty())
 		{
-			m_errorhnd->report( _TXT( "cannot attach variable (query stack empty)"));
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidOperation), _TXT( "cannot attach variable (query stack empty)"));
 		}
 		m_variableAssignments.insert( std::pair<NodeAddress,std::string>( m_stack.back(), name_));
 	}
@@ -571,7 +571,7 @@ void Query::setWeightingVariableValue(
 			case QueryEval::VariableAssignment::FormulaFunction:
 				if (!m_weightingFormula.get())
 				{
-					m_errorhnd->report(_TXT("try to defined weighting variable without weighting formula defined"));
+					m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOperationOrder), _TXT("try to defined weighting variable without weighting formula defined"));
 				}
 				m_weightingFormula->setVariableValue( name, value);
 				break;
@@ -600,12 +600,12 @@ QueryResult Query::evaluate() const
 		}
 		if (m_queryEval->weightingFunctions().empty())
 		{
-			m_errorhnd->report( _TXT( "cannot evaluate query, no weighting function defined"));
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "cannot evaluate query, no weighting function defined"));
 			return QueryResult();
 		}
 		if (m_queryEval->selectionSets().empty())
 		{
-			m_errorhnd->report( _TXT( "cannot evaluate query, no selection features defined"));
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "cannot evaluate query, no selection features defined"));
 			return QueryResult();
 		}
 		NodeStorageDataMap nodeStorageDataMap;

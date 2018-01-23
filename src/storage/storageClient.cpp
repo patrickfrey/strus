@@ -319,7 +319,6 @@ PostingIteratorInterface*
 	{
 		if (maxpos == 0)
 		{
-			if (restriction) delete restriction;
 			return new NullPostingIterator("?");
 		}
 		else
@@ -327,16 +326,7 @@ PostingIteratorInterface*
 			return new BrowsePostingIterator( restriction, m_next_docno.value()-1, maxpos);
 		}
 	}
-	catch (const std::bad_alloc& err)
-	{
-		m_errorhnd->report( _TXT("out of memory creating browse posting iterator"));
-	}
-	catch (const std::runtime_error& err)
-	{
-		m_errorhnd->report( _TXT("error creating browse posting iterator: %s"), err.what());
-	}
-	if (restriction) delete restriction;
-	return 0;
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating browse posting iterator: %s"), *m_errorhnd, 0);
 }
 
 ForwardIteratorInterface*
@@ -1069,7 +1059,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 		{
 			if (key.size() == 0)
 			{
-				m_errorhnd->report( _TXT( "found empty key in storage"));
+				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCheckStorage,ErrorCauseDataCorruption), _TXT( "found empty key in storage"));
 				return false;
 			}
 			checkKeyValue( m_database.get(), key, cursor->value(), errorlog);

@@ -60,7 +60,7 @@ SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear
 
 void SummarizerFunctionContextAccumulateNear::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
@@ -92,7 +92,7 @@ void SummarizerFunctionContextAccumulateNear::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
@@ -372,7 +372,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 	{
 		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
@@ -397,7 +397,7 @@ void SummarizerFunctionInstanceAccumulateNear::addStringParameter( const std::st
 			|| strus::caseInsensitiveEquals( name, "nofranks")
 			|| strus::caseInsensitiveEquals( name, "range"))
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 		}
 		else
 		{
@@ -411,12 +411,12 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 {
 	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "type")
 		|| strus::caseInsensitiveEquals( name, "result"))
 	{
-		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "cofactor"))
 	{
@@ -431,7 +431,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 		m_data->cprop = value.tofloat();
 		if (m_data->cprop < 0.0 || m_data->cprop > 1.0)
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "range"))
@@ -449,7 +449,7 @@ void SummarizerFunctionInstanceAccumulateNear::addNumericParameter( const std::s
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 
@@ -471,7 +471,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceAccumulateNear::cr
 {
 	if (m_data->type.empty())
 	{
-		m_errorhnd->report( _TXT( "empty forward index type definition (parameter 'type') in match phrase summarizer configuration"));
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT( "empty forward index type definition (parameter 'type') in match phrase summarizer configuration"));
 	}
 	try
 	{

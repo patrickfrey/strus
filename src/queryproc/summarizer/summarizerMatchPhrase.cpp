@@ -62,7 +62,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 
 void SummarizerFunctionContextMatchPhrase::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
@@ -110,7 +110,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding feature to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
@@ -802,7 +802,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 	{
 		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para") || strus::caseInsensitiveEquals( name, "title"))
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "matchvariables");
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as string"), name.c_str(), "matchvariables");
 		}
 		else if (strus::caseInsensitiveEquals( name, "type"))
 		{
@@ -820,7 +820,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 			|| strus::caseInsensitiveEquals( name, "paragraphsize")
 			|| strus::caseInsensitiveEquals( name, "windowsize"))
 		{
-			m_errorhnd->report( _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no string value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
@@ -829,7 +829,7 @@ void SummarizerFunctionInstanceMatchPhrase::addStringParameter( const std::strin
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
@@ -839,7 +839,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 {
 	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para") || strus::caseInsensitiveEquals( name, "title"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as feature and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "paragraphsize"))
 	{
@@ -863,7 +863,7 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 		m_parameter->m_maxdf = (double)value;
 		if (m_parameter->m_maxdf < 0.0 || m_parameter->m_maxdf > 1.0)
 		{
-			m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "type")
@@ -871,11 +871,11 @@ void SummarizerFunctionInstanceMatchPhrase::addNumericParameter( const std::stri
 		|| strus::caseInsensitiveEquals( name, "floatingmark")
 		|| strus::caseInsensitiveEquals( name, "metadata_title_maxpos"))
 	{
-		m_errorhnd->report( _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 
@@ -913,7 +913,7 @@ SummarizerFunctionContextInterface* SummarizerFunctionInstanceMatchPhrase::creat
 {
 	if (m_parameter->m_type.empty())
 	{
-		m_errorhnd->report( _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "emtpy term type definition (parameter 'type') in match phrase summarizer configuration"));
 	}
 	try
 	{

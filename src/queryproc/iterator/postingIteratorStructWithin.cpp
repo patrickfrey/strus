@@ -376,12 +376,12 @@ PostingIteratorInterface* PostingJoinStructWithin::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "within_struct");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no cardinality argument expected for '%s'"), "within_struct");
 		return 0;
 	}
 	if (argitr.size() < 2)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'within_struct'"));
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "too few arguments for 'within_struct'"));
 		return 0;
 	}
 	try
@@ -407,12 +407,12 @@ PostingIteratorInterface* PostingJoinWithin::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "within");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no cardinality argument expected for '%s'"), "within");
 		return 0;
 	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "within");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "too few arguments for '%s'"), "within");
 		return 0;
 	}
 	try
@@ -438,12 +438,12 @@ PostingIteratorInterface* PostingJoinStructInRange::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "inrange_struct");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no cardinality argument expected for '%s'"), "inrange_struct");
 		return 0;
 	}
 	if (argitr.size() < 2)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for 'inrange_struct'"));
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "too few arguments for 'inrange_struct'"));
 		return 0;
 	}
 	try
@@ -469,12 +469,12 @@ PostingIteratorInterface* PostingJoinInRange::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "inrange");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no cardinality argument expected for '%s'"), "inrange");
 		return 0;
 	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "inrange");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "too few arguments for '%s'"), "inrange");
 		return 0;
 	}
 	try
