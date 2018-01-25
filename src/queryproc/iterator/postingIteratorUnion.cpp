@@ -180,17 +180,17 @@ PostingIteratorInterface* PostingJoinUnion::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( _TXT( "no cardinality argument expected for '%s'"), "union");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no cardinality argument expected for '%s'"), "union");
 		return 0;
 	}
 	if (range != 0)
 	{
-		m_errorhnd->report( _TXT( "no range argument expected for '%s'"), "union");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no range argument expected for '%s'"), "union");
 		return 0;
 	}
 	if (itrs.size() == 0)
 	{
-		m_errorhnd->report( _TXT( "too few arguments for '%s'"), "union");
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "too few arguments for '%s'"), "union");
 		return 0;
 	}
 	try

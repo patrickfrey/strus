@@ -8,6 +8,7 @@
 #include "databaseClient.hpp"
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
+#include "leveldbErrorCode.hpp"
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/reference.hpp"
 #include "strus/base/shared_ptr.hpp"
@@ -128,7 +129,7 @@ void DatabaseClient::writeImm(
 		if (!status.ok())
 		{
 			std::string ststr( status.ToString());
-			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+			m_errorhnd->report( *leveldbErrorCode(ErrorOperationWriteStorage,status), _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' writeImm: %s"), MODULENAME, *m_errorhnd);
@@ -149,7 +150,7 @@ void DatabaseClient::removeImm(
 		if (!status.ok())
 		{
 			std::string ststr( status.ToString());
-			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+			m_errorhnd->report( *leveldbErrorCode(ErrorOperationWriteStorage,status), _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' removeImm: %s"), MODULENAME, *m_errorhnd);
@@ -178,7 +179,7 @@ bool DatabaseClient::readValue(
 		if (!status.ok())
 		{
 			std::string ststr( status.ToString());
-			m_errorhnd->report( _TXT( "leveldb error: %s"), ststr.c_str());
+			m_errorhnd->report( *leveldbErrorCode(ErrorOperationReadStorage,status), _TXT( "leveldb error: %s"), ststr.c_str());
 		}
 		return true;
 	}

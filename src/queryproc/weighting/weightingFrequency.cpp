@@ -35,7 +35,7 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 		}
 		else
 		{
-			m_errorhnd->report( _TXT("unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name_.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error creating instance of weighting function '%s': %s"), METHOD_NAME, *m_errorhnd);
@@ -43,7 +43,7 @@ void WeightingFunctionContextTermFrequency::addWeightingFeature(
 
 void WeightingFunctionContextTermFrequency::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 double WeightingFunctionContextTermFrequency::call( const Index& docno)
@@ -102,11 +102,11 @@ void WeightingFunctionInstanceTermFrequency::addNumericParameter( const std::str
 {
 	if (strus::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 

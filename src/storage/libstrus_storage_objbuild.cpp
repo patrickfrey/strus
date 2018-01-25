@@ -98,7 +98,7 @@ public:
 	}
 	virtual const VectorStorageInterface* getVectorStorage( const std::string& name) const
 	{
-		m_errorhnd->report(_TXT("unknown vector space model: '%s'"), name.c_str());
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown vector space model: '%s'"), name.c_str());
 		return 0;
 	}
 	virtual QueryEvalInterface* createQueryEval() const
@@ -165,7 +165,7 @@ DLL_PUBLIC StorageAlterMetaDataTableInterface*
 				altermetatable( sti->createAlterMetaDataTable( configstr, dbi));
 		if (!altermetatable.get())
 		{
-			errorhnd->report(_TXT("error creating alter metadata table client"));
+			errorhnd->explain( _TXT("error creating alter metadata table client: %s"));
 			return 0;
 		}
 		return altermetatable.release(); //... ownership returned
@@ -219,7 +219,7 @@ DLL_PUBLIC StorageClientInterface*
 			statsproc = objbuilder->getStatisticsProcessor( statsprocname);
 			if (!statsproc)
 			{
-				errorhnd->report(_TXT("error getting statistics message processor"));
+				errorhnd->explain( _TXT("error getting statistics message processor: %s"));
 				return 0;
 			}
 		}
@@ -227,7 +227,7 @@ DLL_PUBLIC StorageClientInterface*
 			storage( sti->createClient( configstr, dbi, statsproc));
 		if (!storage.get())
 		{
-			errorhnd->report(_TXT("error creating storage client"));
+			errorhnd->explain( _TXT("error creating storage client: %s"));
 			return 0;
 		}
 		return storage.release(); //... ownership returned
@@ -273,7 +273,7 @@ DLL_PUBLIC VectorStorageClientInterface*
 			storage( sti->createClient( configstr, dbi));
 		if (!storage.get())
 		{
-			errorhnd->report(_TXT("error creating storage client"));
+			errorhnd->explain( _TXT("error creating storage client: %s"));
 			return 0;
 		}
 		return storage.release(); //... ownership returned

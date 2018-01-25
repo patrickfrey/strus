@@ -44,7 +44,7 @@ public:
 
 	virtual void setVariableValue( const std::string& name, double value)
 	{
-		m_errorhnd->report( _TXT("no variables defined in plain linear combination"));
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables defined in plain linear combination"));
 	}
 
 	virtual double call( const double* args, unsigned int nofargs) const
@@ -98,7 +98,7 @@ public:
 
 	virtual void setDefaultVariableValue( const std::string&, double)
 	{
-		m_errorhnd->report( _TXT("no variables defined in plain linear combination"));
+		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables defined in plain linear combination"));
 	}
 
 	virtual ScalarFunctionInstanceInterface* createInstance() const

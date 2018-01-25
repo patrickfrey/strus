@@ -8,6 +8,7 @@
 #include "databaseTransaction.hpp"
 #include "databaseCursor.hpp"
 #include "databaseClient.hpp"
+#include "leveldbErrorCode.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/databaseOptions.hpp"
 #include "strus/base/local_ptr.hpp"
@@ -108,7 +109,7 @@ bool DatabaseTransaction::commit()
 		if (!status.ok())
 		{
 			std::string statusstr( status.ToString());
-			m_errorhnd->report( _TXT( "error in commit when writing transaction batch: %s"), statusstr.c_str());
+			m_errorhnd->report( *leveldbErrorCode(ErrorOperationCommitStorage,status), _TXT( "error in commit when writing transaction batch: %s"), statusstr.c_str());
 			return false;
 		}
 		m_batch.Clear();

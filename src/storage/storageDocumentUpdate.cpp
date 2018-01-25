@@ -46,7 +46,7 @@ void StorageDocumentUpdate::addSearchIndexTerm(
 	{
 		if (position_ <= 0)
 		{
-			m_errorhnd->report( _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
 		}
 		else
 		{
@@ -68,7 +68,7 @@ void StorageDocumentUpdate::addForwardIndexTerm(
 	{
 		if (position_ <= 0)
 		{
-			m_errorhnd->report( _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT( "term occurrence position must be >= 1 (term %s '%s')"), type_.c_str(), value_.c_str());
 		}
 		else
 		{
