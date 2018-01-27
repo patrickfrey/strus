@@ -43,10 +43,10 @@ class StorageObjectBuilder
 	:public StorageObjectBuilderInterface
 {
 public:
-	explicit StorageObjectBuilder( ErrorBufferInterface* errorhnd_)
+	explicit StorageObjectBuilder( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
 		:m_queryProcessor( strus::createQueryProcessor(errorhnd_))
-		,m_storage(strus::createStorageType_std(errorhnd_))
-		,m_db( strus::createDatabaseType_leveldb( errorhnd_))
+		,m_storage(strus::createStorageType_std( workdir_, errorhnd_))
+		,m_db( strus::createDatabaseType_leveldb( workdir_, errorhnd_))
 		,m_statsproc( strus::createStatisticsProcessor( errorhnd_))
 		,m_errorhnd(errorhnd_)
 	{
@@ -117,6 +117,7 @@ private:
 
 DLL_PUBLIC StorageObjectBuilderInterface*
 	strus::createStorageObjectBuilder_default(
+		const std::string& workdir, 
 		ErrorBufferInterface* errorhnd)
 {
 	try
@@ -126,7 +127,7 @@ DLL_PUBLIC StorageObjectBuilderInterface*
 			strus::initMessageTextDomain();
 			g_intl_initialized = true;
 		}
-		return new StorageObjectBuilder( errorhnd);
+		return new StorageObjectBuilder( workdir, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating default storage object builder: %s"), *errorhnd, 0);
 }

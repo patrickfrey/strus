@@ -27,8 +27,8 @@ class Storage
 	:public StorageInterface
 {
 public:
-	explicit Storage( ErrorBufferInterface* errorhnd_)
-		:m_errorhnd(errorhnd_){}
+	Storage( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
+		:m_errorhnd(errorhnd_),m_workdir(workdir_){}
 
 	virtual StorageClientInterface* createClient(
 			const std::string& configsource,
@@ -54,6 +54,7 @@ public:
 
 private:
 	ErrorBufferInterface* m_errorhnd;
+	std::string m_workdir;
 };
 
 }//namespace

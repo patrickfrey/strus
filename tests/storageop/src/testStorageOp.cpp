@@ -67,12 +67,12 @@ public:
 
 void Storage::open( const char* config, bool reset)
 {
-	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	sti.reset( strus::createStorageType_std( g_errorhnd));
+	sti.reset( strus::createStorageType_std( "", g_errorhnd));
 	if (!sti.get() || g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -98,7 +98,7 @@ void Storage::open( const char* config, bool reset)
 static void destroyStorage( const char* config)
 {
 	strus::shared_ptr<strus::DatabaseInterface> dbi;
-	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -146,9 +146,9 @@ static std::string featureString( const std::string& prefix, unsigned int num)
 
 static void dumpStorage( const std::string& config)
 {
-	strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( g_errorhnd));
+	strus::local_ptr<strus::DatabaseInterface> dbi( strus::createDatabaseType_leveldb( "", g_errorhnd));
 	if (!dbi.get()) throw std::runtime_error( g_errorhnd->fetchError());
-	strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( g_errorhnd));
+	strus::local_ptr<strus::StorageInterface> sti( strus::createStorageType_std( "", g_errorhnd));
 	if (!sti.get()) throw std::runtime_error( g_errorhnd->fetchError());
 	strus::local_ptr<strus::StorageDumpInterface> dump( sti->createDump( config, dbi.get(), ""));
 

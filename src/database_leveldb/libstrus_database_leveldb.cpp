@@ -14,7 +14,7 @@
 
 using namespace strus;
 
-DLL_PUBLIC DatabaseInterface* strus::createDatabaseType_leveldb( ErrorBufferInterface* errorhnd)
+DLL_PUBLIC DatabaseInterface* strus::createDatabaseType_leveldb( const std::string& workdir, ErrorBufferInterface* errorhnd)
 {
 	try
 	{
@@ -24,7 +24,7 @@ DLL_PUBLIC DatabaseInterface* strus::createDatabaseType_leveldb( ErrorBufferInte
 			strus::initMessageTextDomain();
 			intl_initialized = true;
 		}
-		return new Database( errorhnd);
+		return new Database( workdir, errorhnd);
 	}
 	CATCH_ERROR_MAP_RETURN( _TXT("error creating database based on leveldb: %s"), *errorhnd, 0);
 }
