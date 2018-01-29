@@ -28,9 +28,11 @@ class VectorStorageBuilderInterface;
 class ErrorBufferInterface;
 
 ///\brief Create a storage object builder with the builders from the standard strus core libraries (without module support)
+///\param[in] workdir working directory where persistent files are read from / written to, empty if all paths are absolute
 ///\param[in] errorhnd error buffer interface
 StorageObjectBuilderInterface*
 	createStorageObjectBuilder_default(
+		const std::string& workdir,
 		ErrorBufferInterface* errorhnd);
 
 ///\brief Create a alter metadata table interface with the object builder passed

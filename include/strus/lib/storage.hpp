@@ -9,6 +9,7 @@
 /// \file storage.hpp
 #ifndef _STRUS_STORAGE_LIB_HPP_INCLUDED
 #define _STRUS_STORAGE_LIB_HPP_INCLUDED
+#include <string>
 
 /// \brief strus toplevel namespace
 namespace strus {
@@ -18,7 +19,7 @@ class ErrorBufferInterface;
 /// \brief Forward declaration
 class StorageInterface;
 
-StorageInterface* createStorageType_std( ErrorBufferInterface* errorhnd);
+StorageInterface* createStorageType_std( const std::string& workdir, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif

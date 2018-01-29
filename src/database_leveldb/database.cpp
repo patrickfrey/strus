@@ -12,6 +12,7 @@
 #include "strus/databaseBackupCursorInterface.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/configParser.hpp"
+#include "strus/base/fileio.hpp"
 #include "database.hpp"
 #include "leveldbErrorCode.hpp"
 #include "private/internationalization.hpp"
@@ -82,6 +83,20 @@ bool Database::exists( const std::string& configsource) const
 	CATCH_ERROR_MAP_RETURN( _TXT("error checking if database exists: %s"), *m_errorhnd, false);
 }
 
+bool Database::expandDatabaseFullPath( std::string& path) const
+{
+	if (!m_workdir.empty())
+	{
+		if (strus::hasUpdirReference( path))
+		{
+			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationParse,ErrorCauseInvalidArgument), _TXT( "path in database configuration must not contain up-directory references ('..') if workdir is specified"));
+			return false;
+		}
+		path = strus::joinFilePath( m_workdir, path);
+	}
+	return true;
+}
+
 bool Database::createDatabase( const std::string& configsource) const
 {
 	try
@@ -95,6 +110,7 @@ bool Database::createDatabase( const std::string& configsource) const
 			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationParse,ErrorCauseIncompleteRequest), _TXT( "missing '%s' in database configuration string"), "path");
 			return false;
 		}
+		if (!expandDatabaseFullPath( path)) return false;
 		(void)extractBooleanFromConfigString( compression, src, "compression", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
@@ -135,6 +151,7 @@ bool Database::destroyDatabase( const std::string& configsource) const
 			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationParse,ErrorCauseIncompleteRequest), _TXT( "missing '%s' in database configuration string"), "path");
 			return false;
 		}
+		if (!expandDatabaseFullPath( path)) return false;
 
 		leveldb::Options options;
 		leveldb::Status status = leveldb::DestroyDB( path, options);
@@ -166,6 +183,8 @@ bool Database::restoreDatabase( const std::string& configsource, DatabaseBackupC
 				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationParse,ErrorCauseIncompleteRequest), _TXT( "missing '%s' in database configuration string"), "path");
 				return false;
 			}
+			if (!expandDatabaseFullPath( path)) return false;
+
 			leveldb::Status status = leveldb::DB::Open( leveldb::Options(), path, &db);
 			if (!status.ok())
 			{

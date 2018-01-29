@@ -63,12 +63,12 @@ public:
 
 void Storage::open( const char* config)
 {
-	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
 	}
-	sti.reset( strus::createStorageType_std( g_errorhnd));
+	sti.reset( strus::createStorageType_std( "", g_errorhnd));
 	if (!sti.get() || g_errorhnd->hasError())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());
@@ -90,7 +90,7 @@ void Storage::open( const char* config)
 static void destroyStorage( const char* config)
 {
 	strus::shared_ptr<strus::DatabaseInterface> dbi;
-	dbi.reset( strus::createDatabaseType_leveldb( g_errorhnd));
+	dbi.reset( strus::createDatabaseType_leveldb( "", g_errorhnd));
 	if (!dbi.get())
 	{
 		throw std::runtime_error( g_errorhnd->fetchError());

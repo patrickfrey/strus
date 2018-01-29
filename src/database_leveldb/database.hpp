@@ -26,8 +26,8 @@ class Database
 	:public DatabaseInterface
 {
 public:
-	explicit Database( ErrorBufferInterface* errorhnd_)
-		:m_dbhandle_map( new LevelDbHandleMap()),m_errorhnd(errorhnd_){}
+	explicit Database( const std::string& workdir_, ErrorBufferInterface* errorhnd_)
+		:m_dbhandle_map( new LevelDbHandleMap()),m_workdir(workdir_),m_errorhnd(errorhnd_){}
 
 	virtual DatabaseClientInterface* createClient( const std::string& configsource) const;
 
@@ -44,7 +44,11 @@ public:
 	virtual const char** getConfigParameters( const ConfigType& type) const;
 
 private:
+	bool expandDatabaseFullPath( std::string& path) const;
+
+private:
 	strus::shared_ptr<LevelDbHandleMap> m_dbhandle_map;
+	std::string m_workdir;
 	ErrorBufferInterface* m_errorhnd;	///< buffer for reporting errors
 };
 

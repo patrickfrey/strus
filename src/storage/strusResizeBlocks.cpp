@@ -272,7 +272,7 @@ int main( int argc, const char* argv[])
 		std::string blocktype( argv[ argi+1]);
 		unsigned int newblocksize = parseNumber( argv[argi+2], "positional argument 3");
 
-		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( g_errorBuffer);
+		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( "", g_errorBuffer);
 		if (!dbi) throw strus::runtime_error( "%s",  _TXT("could not create leveldb key/value store database handler"));
 		if (g_errorBuffer->hasError()) throw strus::runtime_error( "%s", _TXT("error in initialization"));
 

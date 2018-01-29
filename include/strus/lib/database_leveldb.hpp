@@ -9,6 +9,7 @@
 /// \file database_leveldb.hpp
 #ifndef _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
 #define _STRUS_DATABASE_LEVELDB_LIB_HPP_INCLUDED
+#include <string>
 
 /// \brief strus toplevel namespace
 namespace strus {
@@ -20,7 +21,7 @@ class ErrorBufferInterface;
 
 /// \brief Get the database interface implemented with leveldb with the functions for accessing the key/value store database.
 /// \return the database interface
-DatabaseInterface* createDatabaseType_leveldb( ErrorBufferInterface* errorhnd);
+DatabaseInterface* createDatabaseType_leveldb( const std::string& workdir, ErrorBufferInterface* errorhnd);
 
 }//namespace
 #endif
