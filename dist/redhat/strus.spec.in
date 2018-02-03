@@ -35,12 +35,12 @@
 %define scilin 0
 %define scilin6 0
 %define scilin7 0
-%if 0%{?scilin_version} >= 600 && 0%{?scilin_version} <= 699
+%if 0%{?scientificlinux_version} >= 600 && 0%{?scientificlinux_version} <= 699
 %define dist scilin6
 %define scilin 1
 %define scilin6 1
 %endif
-%if 0%{?scilin_version} >= 700 && 0%{?scilin_version} <= 799
+%if 0%{?scientificlinux_version} >= 700 && 0%{?scientificlinux_version} <= 799
 %define dist scilin7
 %define scilin 1
 %define scilin7 1
@@ -79,25 +79,87 @@
 %endif
 
 %define suse 0
-%define osufactory 0
-%if 0%{?suse_version} > 1320
-%define dist osufactory
-%define osufactory 1
+
+%define osu 0
+%define osutumbleweed 0
+%define osuleap 0
+%define osuleap15 0
+%define osuleap423 0
+%if 0%{?suse_version} > 1500
+%define dist osutumbleweed
+%define osutumbleweed 1
+%define osu 1
+%define suse 1
+%endif
+%if 0%{?sle_version} == 150000 && 0%{?is_opensuse}
+%define dist osuleap15
+%define osuleap15 1
+%define osuleap 1
+%define osu 1
+%define suse 1
+%endif
+%if 0%{?sle_version} == 120300 && 0%{?is_opensuse}
+%define dist osuleap423
+%define osuleap423 1
+%define osuleap 1
+%define osu 1
 %define suse 1
 %endif
 
 %define sles 0
 %define sles11 0
+%define sles11sp4 0
 %define sles12 0
-%if 0%{?suse_version} == 1110
-%define dist sle11
+%define sles12sp1 0
+%define sles12sp2 0
+%define sles12sp3 0
+%define sles12sp4 0
+%if 0%{?sles_version} == 11
+%define dist sles11
+%define sles11sp4 1
 %define sles11 1
 %define sles 1
+%define suse 1
 %endif
-%if 0%{?suse_version} == 1315 
-%define dist sle12
+%if 0%{?suse_version} == 1315 && !0%{?is_opensuse}
+%define dist sles12
 %define sles12 1
 %define sles 1
+%define suse 1
+%endif
+%if 0%{?sle_version} == 120000 && !0%{?is_opensuse}
+%define dist sles12
+%define sles12 1
+%define sles 1
+%define suse 1
+%endif
+%if 0%{?sle_version} == 120100 && !0%{?is_opensuse}
+%define dist sles12sp1
+%define sles12sp1 0
+%define sles12 1
+%define sles 1
+%define suse 1
+%endif
+%if 0%{?sle_version} == 120200 && !0%{?is_opensuse}
+%define dist sles12sp2
+%define sles12sp2 0
+%define sles12 1
+%define sles 1
+%define suse 1
+%endif
+%if 0%{?sle_version} == 120300 && !0%{?is_opensuse}
+%define dist sles12sp3
+%define sles12sp3 0
+%define sles12 1
+%define sles 1
+%define suse 1
+%endif
+%if 0%{?sle_version} == 120400 && !0%{?is_opensuse}
+%define dist sles12sp4
+%define sles12sp4 0
+%define sles12 1
+%define sles 1
+%define suse 1
 %endif
 
 Summary: Library implementing the storage of a text search engine
@@ -144,7 +206,7 @@ BuildRequires: fedora-release
 %if %{fedora} && 0%{?opensuse_bs}
 BuildRequires: generic-release
 %endif
-%if %{suse}
+%if %{osu}
 BuildRequires: openSUSE-release
 %endif
 %if %{sles}
@@ -163,36 +225,35 @@ BuildRequires: sles-release
 %endif
 
 %if %{rhel} || %{centos} || %{scilin} || %{fedora}
-%if %{rhel6} || %{centos6} || %{scilin6}
-Requires: strusboost >= 1.53.0
-BuildRequires: strusboost-devel >= 1.53.0
+%if %{rhel6} || %{centos6} || %{scilin6} || %{rhel7} || %{centos7} || %{scilin7}
+Requires: strusboost >= 1.57.0
+BuildRequires: strusboost-devel >= 1.57.0
 %else
-Requires: boost >= 1.53.0
-Requires: boost-thread >= 1.53.0
-Requires: boost-system >= 1.53.0
-Requires: boost-date-time >= 1.53.0
-BuildRequires: boost-devel
+Requires: boost >= 1.57.0
+Requires: boost-thread >= 1.57.0
+Requires: boost-system >= 1.57.0
+Requires: boost-date-time >= 1.57.0
+Requires: boost-regex >= 1.57.0
+BuildRequires: boost-devel >= 1.57.0
 %endif
 %endif
 
-%if %{suse} || %{sles}
-%if %{sles11}
-Requires: strusboost >= 1.53.0
-BuildRequires: strusboost-devel >= 1.53.0
+%if %{suse}
+%if %{sles11} || %{sles12} || %{osuleap423}
+Requires: strusboost >= 1.57.0
+BuildRequires: strusboost-devel >= 1.57.0
 %endif
-%if %{sles12}
-Requires: libboost_thread1_54_0 >= 1.54.0
-Requires: libboost_atomic1_54_0 >= 1.54.0
-Requires: libboost_system1_54_0 >= 1.54.0
-Requires: libboost_date_time1_54_0 >= 1.54.0
-BuildRequires: boost-devel
-%endif
-%if %{osufactory}
-Requires: libboost_thread1_63_0 >= 1.63.0
-Requires: libboost_atomic1_63_0 >= 1.63.0
-Requires: libboost_system1_63_0 >= 1.63.0
-Requires: libboost_date_time1_63_0 >= 1.63.0
-BuildRequires: boost-devel
+%if %{osutumbleweed}
+Requires: libboost_thread1_66_0 >= 1.66.0
+Requires: libboost_atomic1_66_0 >= 1.66.0
+Requires: libboost_system1_66_0 >= 1.66.0
+Requires: libboost_date_time1_66_0 >= 1.66.0
+Requires: libboost_regex1_66_0 >= 1.66.0
+BuildRequires: libboost_thread1_66_0-devel >= 1.66.0
+BuildRequires: libboost_atomic1_66_0-devel >= 1.66.0
+BuildRequires: libboost_system1_66_0-devel >= 1.66.0
+BuildRequires: libboost_date_time1_66_0-devel >= 1.66.0
+BuildRequires: libboost_regex1_66_0-devel >= 1.66.0
 %endif
 %endif
 
@@ -206,12 +267,12 @@ Requires: leveldb >= 1.18
 %endif
 %endif
 
-%if %{suse} || %{sles}
+%if %{suse}
 %if %{sles11}
 BuildRequires: strusleveldb-devel >= 1.18
 Requires: strusleveldb >= 1.18
 %endif
-%if %{sles12}
+%if %{sles12} || %{osuleap423}
 %if 0%{?is_opensuse}
 BuildRequires: leveldb-devel >= 1.18
 Requires: libleveldb1 >= 1.18
@@ -220,7 +281,7 @@ BuildRequires: strusleveldb-devel >= 1.18
 Requires: strusleveldb >= 1.18
 %endif
 %endif
-%if %{osufactory}
+%if %{osutumbleweed}
 BuildRequires: leveldb-devel >= 1.18
 Requires: libleveldb1 >= 1.18
 %endif
