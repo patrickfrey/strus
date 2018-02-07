@@ -45,6 +45,8 @@ DatabaseClientInterface* Database::createClient( const std::string& configsource
 			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationParse,ErrorCauseIncompleteRequest), _TXT( "missing '%s' in database configuration string"), "path");
 			return 0;
 		}
+		if (!expandDatabaseFullPath( path)) return NULL;
+
 		if (!isDir( path))
 		{
 			throw strus::runtime_error( _TXT( "unknown path '%s' specified in database configuration string"), path.c_str());

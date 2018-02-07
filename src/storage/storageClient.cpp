@@ -87,7 +87,7 @@ StorageClient::StorageClient(
 {
 	try
 	{
-		if (!m_database.get()) throw strus::runtime_error(_TXT("failed to create database client: %s"), m_errorhnd->fetchError());
+		if (!m_database.get()) throw strus::runtime_error( "%s", m_errorhnd->fetchError());
 		m_metadescr.load( m_database.get());
 		m_metaDataBlockCache = new MetaDataBlockCache( m_database.get(), m_metadescr);
 
