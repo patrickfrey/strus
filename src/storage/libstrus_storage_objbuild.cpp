@@ -228,7 +228,6 @@ DLL_PUBLIC StorageClientInterface*
 			storage( sti->createClient( configstr, dbi, statsproc));
 		if (!storage.get())
 		{
-			errorhnd->explain( _TXT("error creating storage client: %s"));
 			return 0;
 		}
 		return storage.release(); //... ownership returned
@@ -274,7 +273,7 @@ DLL_PUBLIC VectorStorageClientInterface*
 			storage( sti->createClient( configstr, dbi));
 		if (!storage.get())
 		{
-			errorhnd->explain( _TXT("error creating storage client: %s"));
+			errorhnd->explain( _TXT("error creating vector storage client: %s"));
 			return 0;
 		}
 		return storage.release(); //... ownership returned

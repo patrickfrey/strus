@@ -99,7 +99,6 @@ StorageClientInterface* Storage::createClient(
 		{
 			if (m_errorhnd->hasError())
 			{
-				m_errorhnd->explain(_TXT("error creating storage client: %s"));
 				return 0;
 			}
 			return new StorageClient( database, databaseConfig, 0, statisticsProc, m_errorhnd);
@@ -155,7 +154,7 @@ bool Storage::createStorage(
 	
 		return transaction->commit();
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, false);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage (physically): %s"), *m_errorhnd, false);
 }
 
 StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable(
@@ -166,7 +165,7 @@ StorageAlterMetaDataTableInterface* Storage::createAlterMetaDataTable(
 	{
 		return new StorageAlterMetaDataTable( database, configsource, m_errorhnd);
 	}
-	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage client: %s"), *m_errorhnd, 0);
+	CATCH_ERROR_MAP_RETURN( _TXT("error creating storage alter meta data table: %s"), *m_errorhnd, 0);
 }
 
 const char* Storage::getConfigDescription( const ConfigType& type) const
