@@ -81,7 +81,8 @@ public:
 	{
 		PostingJoinOperator,		///< Addresses a posting iterator join operator
 		WeightingFunction,		///< Addresses a weighting function
-		SummarizerFunction		///< Addresses a summarization function
+		SummarizerFunction,		///< Addresses a summarization function
+		ScalarFunctionParser		///< Addresses a parser for a language for arithmetic expression as string
 	};
 
 	/// \brief Get a list of all functions of a specific type available

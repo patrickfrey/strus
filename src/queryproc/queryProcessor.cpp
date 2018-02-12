@@ -26,6 +26,8 @@
 
 using namespace strus;
 
+#define DEFAULT_SCALAR_FUNCTION_PARSER "default"
+
 QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 	:m_errorhnd(errorhnd_)
 {
@@ -104,7 +106,7 @@ QueryProcessor::QueryProcessor( ErrorBufferInterface* errorhnd_)
 
 	ScalarFunctionParserInterface* sfp;
 	if (0==(sfp=createScalarFunctionParser_default( m_errorhnd))) throw strus::runtime_error( "%s", _TXT("error creating scalar function parser"));
-	defineScalarFunctionParser( "", sfp);
+	defineScalarFunctionParser( DEFAULT_SCALAR_FUNCTION_PARSER, sfp);
 }
 
 QueryProcessor::~QueryProcessor()
@@ -245,6 +247,8 @@ std::vector<std::string> QueryProcessor::getFunctionList( const FunctionType& ty
 				return getKeys( m_weighters);
 			case SummarizerFunction:
 				return getKeys( m_summarizers);
+			case ScalarFunctionParser:
+				return getKeys( m_funcparsers);
 		}
 	}
 	catch (const std::bad_alloc&)
@@ -278,7 +282,7 @@ const ScalarFunctionParserInterface*
 	try
 	{
 		std::map<std::string,Reference<ScalarFunctionParserInterface> >::const_iterator 
-			si = m_funcparsers.find( string_conv::tolower( name));
+			si = m_funcparsers.find( name.empty() ? std::string(DEFAULT_SCALAR_FUNCTION_PARSER) : string_conv::tolower( name));
 		if (si == m_funcparsers.end())
 		{
 			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT( "scalar function parser not defined: '%s'"), name.c_str());

@@ -31,6 +31,10 @@ public:
 	virtual ScalarFunctionInterface* createFunction(
 			const std::string& src,
 			const std::vector<std::string>& argumentNames) const=0;
+
+	/// \brief Get a description of the parser syntax
+	/// \return the description
+	virtual const char* getDescription() const=0;
 };
 
 }// namespace
