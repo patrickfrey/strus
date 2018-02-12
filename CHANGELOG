@@ -1,3 +1,8 @@
+strus (0.15.6)
+  * added some functions for introspection needed by the webservice
+  * adapted error handling to changes in base: mandatory error codes everywhere
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Mon, 12 Feb 2017 22:00:00 +0100
+
 strus (0.15.5)
   * fixed several build issues: Build with Clang, Fix bugs in travis build
  -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 29 Dec 2017 13:00:00 +0100
