@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set( libstrus_storage_source_files
+set( source_files
 	attributeMap.cpp
 	attributeReader.cpp
 	aclReader.cpp
@@ -72,7 +72,9 @@ link_directories(
 # STORAGE LIBRARY
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # ------------------------------
-add_library( strus_storage_static STATIC ${libstrus_storage_source_files} )
+add_cppcheck( strus_storage_static ${source_files} libstrus_storage.cpp )
+
+add_library( strus_storage_static STATIC ${source_files} )
 target_link_libraries( strus_storage_static strus_private_utils strus_base )
 set_property( TARGET strus_storage_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
 

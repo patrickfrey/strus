@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set(libstrus_database_leveldb_source_files
+set( source_files
 	levelDbHandle.cpp
 	database.cpp
 	databaseClient.cpp
@@ -31,7 +31,9 @@ link_directories(
 # -------------------------------------------
 # DATABASE LIBRARY
 # -------------------------------------------
-add_library( strus_database_leveldb SHARED ${libstrus_database_leveldb_source_files} )
+add_cppcheck( strus_database_leveldb ${source_files} )
+
+add_library( strus_database_leveldb SHARED ${source_files} )
 target_link_libraries( strus_database_leveldb ${Boost_LIBRARIES} strus_base getmemsize_static strus_private_utils ${LevelDB_LIBRARY})
 set_target_properties(
     strus_database_leveldb

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 # --------------------------------------
 # SOURCES AND INCLUDES
 # --------------------------------------
-set(source_files
+set( source_files
 	weighting_standard.cpp
 	weightingSmart.cpp
 	weightingScalar.cpp
@@ -32,6 +32,8 @@ link_directories(
 # ------------------------------------
 # LIBRARY
 # ------------------------------------
+add_cppcheck( weighting_standard ${source_files} )
+
 add_library( weighting_standard STATIC ${source_files})
 target_link_libraries( weighting_standard strus_private_utils strus_base queryproc_utils )
 set_property( TARGET weighting_standard PROPERTY POSITION_INDEPENDENT_CODE TRUE )

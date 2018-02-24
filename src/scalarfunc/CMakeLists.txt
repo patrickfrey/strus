@@ -27,6 +27,8 @@ link_directories(
 # -------------------------------------------
 # LIBRARY
 # -------------------------------------------
+add_cppcheck( strus_scalarfunc ${source_files} libstrus_scalarfunc.cpp )
+
 add_library( strus_scalarfunc SHARED ${source_files} libstrus_scalarfunc.cpp )
 target_link_libraries( strus_scalarfunc strus_base strus_private_utils )
 

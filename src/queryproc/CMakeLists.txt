@@ -33,6 +33,8 @@ link_directories(
 # -------------------------------------------
 # LIBRARY
 # -------------------------------------------
+add_cppcheck( strus_queryproc ${source_files} libstrus_queryproc.cpp )
+
 add_library( strus_queryproc SHARED ${source_files} libstrus_queryproc.cpp )
 target_link_libraries( strus_queryproc strus_private_utils strus_base queryproc_utils iterator_standard summarizer_standard weighting_standard strus_scalarfunc )
 

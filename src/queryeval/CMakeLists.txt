@@ -26,6 +26,8 @@ link_directories(
 # QUERY EVAL LIBRARY
 # Build a shared library as deployment artefact and a static library for tests that need to bypass the library interface to do their job
 # --------------------------------
+add_cppcheck( strus_queryeval_static ${source_files} libstrus_queryeval.cpp )
+
 add_library( strus_queryeval_static STATIC ${source_files})
 target_link_libraries( strus_queryeval_static strus_base strus_private_utils )
 set_property( TARGET strus_queryeval_static PROPERTY POSITION_INDEPENDENT_CODE TRUE )
