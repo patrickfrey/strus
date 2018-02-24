@@ -29,6 +29,15 @@ std::runtime_error runtime_error( const char* format, ...)
 #endif
 	;
 
+/// \brief Substitute for std::runtime_error with arguments
+/// \param[in] msg c printf format string
+/// \param[in] nofargs number of arguments passed to be substituted in the format string
+std::runtime_error runtime_error( int apperrno, const char* format, ...)
+#ifdef __GNUC__
+	__attribute__ ((format (printf, 2, 3)))
+#endif
+	;
+
 /// \brief Substitute for std::logic_error with arguments
 /// \param[in] msg c printf format string
 /// \param[in] nofargs number of arguments passed to be substituted in the format string
