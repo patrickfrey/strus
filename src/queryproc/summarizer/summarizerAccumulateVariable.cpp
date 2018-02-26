@@ -77,7 +77,7 @@ void SummarizerFunctionContextAccumulateVariable::addSummarizationFeature(
 			}
 			if (m_features.size() >= MaxNofFeatures)
 			{
-				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseMaximumLimitReached), _TXT("to many features defined for '%s'"), METHOD_NAME);
+				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseMaxLimitReached), _TXT("to many features defined for '%s'"), METHOD_NAME);
 			}
 			else
 			{

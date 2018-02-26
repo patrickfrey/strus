@@ -6,12 +6,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "private/internationalization.hpp"
-#include <stdio.h>
-#include <stdlib.h>
 #include <libintl.h>
 #include <locale.h>
 #include <cstdarg>
 #include <string>
+#include <cstdlib>
+#include <cstdio>
 
 #define STRUS_GETTEXT_PACKAGE		"@STRUS_GETTEXT_PACKAGE@"
 #define STRUS_GETTEXT_LOCALEDIR		"@STRUS_GETTEXT_LOCALEDIR@"
