@@ -718,6 +718,9 @@ public:
 		bool loadFirst( Index& typeno, Index& termno, Index& df);
 		bool loadNext( Index& typeno, Index& termno, Index& df);
 
+		bool loadFirst_typeno( const Index& typeno, Index& termno, Index& df);
+		bool loadNext_typeno( const Index& typeno, Index& termno, Index& df);
+
 	private:
 		bool getData( const DatabaseCursorInterface::Slice& key, Index& typeno, Index& termno, Index& df);
 
