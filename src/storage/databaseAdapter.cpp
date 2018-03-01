@@ -329,6 +329,21 @@ bool DatabaseAdapter_DocFrequency::Cursor::loadNext( Index& typeno, Index& termn
 	return getData( key, typeno, termno, df);
 }
 
+bool DatabaseAdapter_DocFrequency::Cursor::loadFirst_typeno( const Index& typeno, Index& termno, Index& df)
+{
+	DatabaseKey dbkey( (char)KeyPrefix, typeno);
+	Index typeno_key;
+	DatabaseCursorInterface::Slice key( m_cursor->seekFirst( dbkey.ptr(), dbkey.size()));
+	return (getData( key, typeno_key, termno, df) && typeno_key == typeno);
+}
+
+bool DatabaseAdapter_DocFrequency::Cursor::loadNext_typeno( const Index& typeno, Index& termno, Index& df)
+{
+	DatabaseCursorInterface::Slice key( m_cursor->seekNext());
+	Index typeno_key;
+	return getData( key, typeno_key, termno, df) && typeno == typeno_key;
+}
+
 bool DatabaseAdapter_DocFrequency::load( const DatabaseClientInterface* database, const Index& typeno, const Index& termno, Index& df)
 {
 	DatabaseKey dbkey( KeyPrefix, BlockKey( typeno, termno));
