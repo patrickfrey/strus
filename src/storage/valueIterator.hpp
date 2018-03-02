@@ -26,7 +26,7 @@ class ValueIterator
 {
 public:
 	ValueIterator( const DatabaseClientInterface* database_, ErrorBufferInterface* errorhnd_)
-		:m_dbcursor(database_),m_hasInit(false),m_hasValue(false),m_errorhnd(errorhnd_)
+		:m_dbcursor(database_),m_hasInit(false),m_hasValue(false),m_value(),m_keyprefix(),m_errorhnd(errorhnd_)
 	{}
 
 	virtual ~ValueIterator(){}
@@ -37,10 +37,19 @@ public:
 		{
 			Index val;
 			m_hasValue = m_dbcursor.skip( std::string( value, size), m_value, val);
-			if (m_hasValue)
-			{
-				m_hasInit = true;
-			}
+			m_hasInit = true;
+		}
+		CATCH_ERROR_MAP( _TXT( "error in skip to key of storage value iterator: %s"), *m_errorhnd);
+	}
+
+	virtual void skipPrefix( const char* value, std::size_t size)
+	{
+		try
+		{
+			Index val;
+			m_keyprefix = std::string( value, size);
+			m_hasValue = m_dbcursor.skipPrefix( std::string( value, size), m_value, val);
+			m_hasInit = true;
 		}
 		CATCH_ERROR_MAP( _TXT( "error in skip to key of storage value iterator: %s"), *m_errorhnd);
 	}
@@ -52,23 +61,33 @@ public:
 			std::vector<std::string> rt;
 			std::string key;
 			Index value;
-			if (m_hasValue)
-			{
-				rt.push_back( m_value);
-				m_value.clear();
-				m_hasValue = false;
-			}
 			if (!m_hasInit)
 			{
 				if (m_dbcursor.loadFirst( key, value))
 				{
 					rt.push_back( key);
-					m_hasInit = true;
+				}
+				m_hasInit = true;
+			}
+			else if (m_hasValue)
+			{
+				rt.push_back( m_value);
+				m_value.clear();
+				m_hasValue = false;
+			}
+			if (m_keyprefix.empty())
+			{
+				while (rt.size() < maxNofElements && m_dbcursor.loadNext( key, value))
+				{
+					rt.push_back( key);
 				}
 			}
-			while (rt.size() < maxNofElements && m_dbcursor.loadNext( key, value))
+			else
 			{
-				rt.push_back( key);
+				while (rt.size() < maxNofElements && m_dbcursor.loadNextPrefix( m_keyprefix, key, value))
+				{
+					rt.push_back( key);
+				}
 			}
 			return rt;
 		}
@@ -80,6 +99,7 @@ private:
 	bool m_hasInit;
 	bool m_hasValue;
 	std::string m_value;
+	std::string m_keyprefix;
 	ErrorBufferInterface* m_errorhnd;
 };
 

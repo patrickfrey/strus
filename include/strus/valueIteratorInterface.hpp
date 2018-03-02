@@ -28,6 +28,11 @@ public:
 	/// \param[in] size sizeof of value in bytes
 	virtual void skip( const char* value, std::size_t size)=0;
 
+	/// \brief Set the next key to find with the condition that all elements fetched contain the key specified as prefix
+	/// \param[in] value pointer key string to seek
+	/// \param[in] size sizeof of value in bytes
+	virtual void skipPrefix( const char* value, std::size_t size)=0;
+
 	/// \brief Fetch the next N elements
 	/// \param[in] maxNofElements maximum number of elements to fetch
 	/// \return list of next values
