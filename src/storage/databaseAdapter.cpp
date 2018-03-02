@@ -55,12 +55,12 @@ bool DatabaseAdapter_StringIndex::Cursor::skip( const std::string& key, std::str
 
 bool DatabaseAdapter_StringIndex::Cursor::skipPrefix( const std::string& key, std::string& keyfound, Index& value)
 {
-	return skip( key, keyfound, value) && key.size() >= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
+	return skip( key, keyfound, value) && key.size() <= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
 }
 
 bool DatabaseAdapter_StringIndex::Cursor::loadNextPrefix( const std::string& key, std::string& keyfound, Index& value)
 {
-	return loadNext( keyfound, value) && key.size() >= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
+	return loadNext( keyfound, value) && key.size() <= keyfound.size() && 0==std::memcmp( key.c_str(), keyfound.c_str(), key.size());
 }
 
 Index DatabaseAdapter_StringIndex::Reader::get( const std::string& key) const
