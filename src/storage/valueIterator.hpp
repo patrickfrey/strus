@@ -48,7 +48,7 @@ public:
 		{
 			Index val;
 			m_keyprefix = std::string( value, size);
-			m_hasValue = m_dbcursor.skipPrefix( std::string( value, size), m_value, val);
+			m_hasValue = m_dbcursor.skipPrefix( m_keyprefix, m_value, val);
 			m_hasInit = true;
 		}
 		CATCH_ERROR_MAP( _TXT( "error in skip to key of storage value iterator: %s"), *m_errorhnd);
