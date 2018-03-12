@@ -102,7 +102,7 @@ StorageClient::StorageClient(
 	catch (const std::runtime_error& err)
 	{
 		cleanup();
-		throw strus::runtime_error(_TXT("error in storage client constructor: %s"), err.what());
+		throw strus::runtime_error(_TXT("error in constructor: %s"), err.what());
 	}
 }
 
