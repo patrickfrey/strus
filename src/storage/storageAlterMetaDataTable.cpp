@@ -48,12 +48,12 @@ bool StorageAlterMetaDataTable::commit()
 	}
 	if (m_commit)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCommitStorage,ErrorCauseOperationOrder), _TXT( "called alter meta data table commit twice"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table commit twice"));
 		return false;
 	}
 	if (m_rollback)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCommitStorage,ErrorCauseOperationOrder), _TXT( "called alter meta data table commit after rollback"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table commit after rollback"));
 		return false;
 	}
 	strus::local_ptr<DatabaseTransactionInterface>
@@ -80,11 +80,11 @@ void StorageAlterMetaDataTable::rollback()
 {
 	if (m_rollback)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCommitStorage,ErrorCauseOperationOrder), _TXT( "called alter meta data table rollback twice"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table rollback twice"));
 	}
 	if (m_commit)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCommitStorage,ErrorCauseOperationOrder), _TXT( "called alter meta data table rollback after commit"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called alter meta data table rollback after commit"));
 	}
 	m_rollback = true;
 }

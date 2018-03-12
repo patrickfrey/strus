@@ -299,12 +299,12 @@ bool StorageTransaction::commit()
 	}
 	if (m_commit)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCommitStorage,ErrorCauseOperationOrder), _TXT( "called transaction commit twice"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction commit twice"));
 		return false;
 	}
 	if (m_rollback)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCommitStorage,ErrorCauseOperationOrder), _TXT( "called transaction commit after rollback"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction commit after rollback"));
 		return false;
 	}
 	if (m_errorhnd->hasError())
@@ -389,12 +389,12 @@ void StorageTransaction::rollback()
 {
 	if (m_rollback)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationRollbackStorage,ErrorCauseOperationOrder), _TXT( "called transaction rollback twice"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction rollback twice"));
 		return;
 	}
 	if (m_commit)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationRollbackStorage,ErrorCauseOperationOrder), _TXT( "called transaction rollback after commit"));
+		m_errorhnd->report( ErrorCodeOperationOrder, _TXT( "called transaction rollback after commit"));
 		return;
 	}
 	std::vector<Index> refreshList;

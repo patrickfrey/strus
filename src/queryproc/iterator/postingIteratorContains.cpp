@@ -110,17 +110,17 @@ PostingIteratorInterface* PostingJoinContains::createResultIterator(
 {
 	if (cardinality > itrs.size())
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseValueOutOfRange), _TXT( "cardinality of 'contains' is out of range"));
+		m_errorhnd->report( ErrorCodeValueOutOfRange, _TXT( "cardinality of 'contains' is out of range"));
 		return 0;
 	}
 	if (range != 0)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no range argument expected for 'contains'"));
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no range argument expected for 'contains'"));
 		return 0;
 	}
 	if (itrs.size() == 0)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "too few arguments for 'contains'"));
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for 'contains'"));
 		return 0;
 	}
 	try

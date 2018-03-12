@@ -47,7 +47,7 @@ WeightingFunctionContextBM25::WeightingFunctionContextBM25(
 
 void WeightingFunctionContextBM25::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void WeightingFunctionContextBM25::addWeightingFeature(
@@ -164,12 +164,12 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 	{
 		if (strus::caseInsensitiveEquals( name, "match"))
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_metadata_doclen = value;
-			if (value.empty()) m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 		else if (strus::caseInsensitiveEquals( name, "k1")
 		||  strus::caseInsensitiveEquals( name, "b")
@@ -179,7 +179,7 @@ void WeightingFunctionInstanceBM25::addStringParameter( const std::string& name,
 		}
 		else
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), METHOD_NAME, *m_errorhnd);
@@ -189,7 +189,7 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 {
 	if (strus::caseInsensitiveEquals( name, "match"))
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "k1"))
 	{
@@ -205,7 +205,7 @@ void WeightingFunctionInstanceBM25::addNumericParameter( const std::string& name
 	}
 	else
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 

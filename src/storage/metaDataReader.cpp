@@ -42,7 +42,7 @@ void MetaDataReader::skipDoc( const Index& docno)
 
 NumericVariant MetaDataReader::getValue( const Index& elementHandle_) const
 {
-	if (!m_docno) m_errorhnd->report( ErrorCode( StrusComponentCore, ErrorOperationReadStorage, ErrorCauseIncompleteInitialization), _TXT("metadata reader cursor not set to document number"));
+	if (!m_docno) m_errorhnd->report( ErrorCodeIncompleteInitialization, _TXT("metadata reader cursor not set to document number"));
 	return m_current.getValue( m_description->get( elementHandle_));
 }
 

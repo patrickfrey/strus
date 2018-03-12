@@ -1059,7 +1059,7 @@ bool StorageClient::checkStorage( std::ostream& errorlog) const
 		{
 			if (key.size() == 0)
 			{
-				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationCheckStorage,ErrorCauseDataCorruption), _TXT( "found empty key in storage"));
+				m_errorhnd->report( ErrorCodeDataCorruption, _TXT( "found empty key in storage"));
 				return false;
 			}
 			checkKeyValue( m_database.get(), key, cursor->value(), errorlog);

@@ -124,7 +124,7 @@ void QueryProcessor::definePostingJoinOperator(
 	catch (std::bad_alloc&)
 	{
 		delete op;
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 	}
 }
 
@@ -137,14 +137,14 @@ const PostingJoinOperatorInterface* QueryProcessor::getPostingJoinOperator(
 			ji = m_joiners.find( string_conv::tolower( name));
 		if (ji == m_joiners.end())
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT( "posting set join operator not defined: '%s'"), name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT( "posting set join operator not defined: '%s'"), name.c_str());
 			return 0;
 		}
 		return ji->second.get();
 	}
 	catch (std::bad_alloc&)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 		return 0;
 	}
 }
@@ -161,7 +161,7 @@ void QueryProcessor::defineWeightingFunction(
 	catch (std::bad_alloc&)
 	{
 		delete func;
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 	}
 }
 
@@ -174,14 +174,14 @@ const WeightingFunctionInterface* QueryProcessor::getWeightingFunction(
 			wi = m_weighters.find( string_conv::tolower( name));
 		if (wi == m_weighters.end())
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT( "weighting function not defined: '%s'"), name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT( "weighting function not defined: '%s'"), name.c_str());
 			return 0;
 		}
 		return wi->second.get();
 	}
 	catch (std::bad_alloc&)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 		return 0;
 	}
 }
@@ -198,7 +198,7 @@ void QueryProcessor::defineSummarizerFunction(
 	catch (std::bad_alloc&)
 	{
 		delete sumfunc;
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 	}
 }
 
@@ -211,14 +211,14 @@ const SummarizerFunctionInterface* QueryProcessor::getSummarizerFunction(
 			si = m_summarizers.find( string_conv::tolower( name));
 		if (si == m_summarizers.end())
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT( "summarization function not defined: '%s'"), name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT( "summarization function not defined: '%s'"), name.c_str());
 			return 0;
 		}
 		return si->second.get();
 	}
 	catch (std::bad_alloc&)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 		return 0;
 	}
 }
@@ -253,7 +253,7 @@ std::vector<std::string> QueryProcessor::getFunctionList( const FunctionType& ty
 	}
 	catch (const std::bad_alloc&)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 	}
 	return std::vector<std::string>();
 }
@@ -270,7 +270,7 @@ void QueryProcessor::defineScalarFunctionParser(
 	catch (std::bad_alloc&)
 	{
 		delete parser;
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 	}
 	
 }
@@ -285,14 +285,14 @@ const ScalarFunctionParserInterface*
 			si = m_funcparsers.find( name.empty() ? std::string(DEFAULT_SCALAR_FUNCTION_PARSER) : string_conv::tolower( name));
 		if (si == m_funcparsers.end())
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT( "scalar function parser not defined: '%s'"), name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT( "scalar function parser not defined: '%s'"), name.c_str());
 			return 0;
 		}
 		return si->second.get();
 	}
 	catch (std::bad_alloc&)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseOutOfMem), _TXT("out of memory"));
+		m_errorhnd->report( ErrorCodeOutOfMem, _TXT("out of memory"));
 		return 0;
 	}
 }

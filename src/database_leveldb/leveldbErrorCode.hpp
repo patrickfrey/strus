@@ -10,22 +10,22 @@
 #include "strus/errorCodes.hpp"
 #include <leveldb/db.h>
 
-static strus::ErrorCode leveldbErrorCode( const strus::ErrorOperation& errop, const leveldb::Status& status)
+static strus::ErrorCode leveldbErrorCode( const leveldb::Status& status)
 {
-	strus::ErrorCause cause = strus::ErrorCauseUnknown;
+	strus::ErrorCode cause = strus::ErrorCodeUnknown;
 	if (status.IsNotFound())
 	{
-		cause = strus::ErrorCauseNotFound;
+		cause = strus::ErrorCodeNotFound;
 	}
 	else if (status.IsCorruption())
 	{
-		cause = strus::ErrorCauseDataCorruption;
+		cause = strus::ErrorCodeDataCorruption;
 	}
 	else if (status.IsIOError())
 	{
-		cause = strus::ErrorCauseIOError;
+		cause = strus::ErrorCodeIOError;
 	}
-	return strus::ErrorCode(strus::StrusComponentCore,errop,cause);
+	return cause;
 }
 #endif
 

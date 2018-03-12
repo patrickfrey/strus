@@ -39,7 +39,7 @@ SummarizerFunctionContextMetaData::SummarizerFunctionContextMetaData(
 
 void SummarizerFunctionContextMetaData::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void SummarizerFunctionContextMetaData::addSummarizationFeature(
@@ -49,7 +49,7 @@ void SummarizerFunctionContextMetaData::addSummarizationFeature(
 		double /*weight*/,
 		const TermStatistics&)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidOperation), _TXT( "no sumarization features expected in summarization function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeInvalidOperation, _TXT( "no sumarization features expected in summarization function '%s'"), METHOD_NAME);
 }
 
 std::vector<SummaryElement>
@@ -102,7 +102,7 @@ void SummarizerFunctionInstanceMetaData::addStringParameter( const std::string& 
 		}
 		else
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding string parameter to '%s' summarizer: %s"), METHOD_NAME, *m_errorhnd);
@@ -130,11 +130,11 @@ void SummarizerFunctionInstanceMetaData::addNumericParameter( const std::string&
 {
 	if (strus::caseInsensitiveEquals( name, "name"))
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("no numeric value expected for parameter '%s' in summarization function '%s'"), name.c_str(), METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 

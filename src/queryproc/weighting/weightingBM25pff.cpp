@@ -52,7 +52,7 @@ WeightingFunctionContextBM25pff::WeightingFunctionContextBM25pff(
 
 void WeightingFunctionContextBM25pff::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void WeightingFunctionContextBM25pff::addWeightingFeature(
@@ -104,7 +104,7 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 		}
 		else
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function feature parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding weighting feature to '%s' weighting: %s"), METHOD_NAME, *m_errorhnd);
@@ -500,12 +500,12 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 	{
 		if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para"))
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 		}
 		else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 		{
 			m_metadata_doclen = value;
-			if (value.empty()) m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			if (value.empty()) m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("empty value passed as '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 		else if (strus::caseInsensitiveEquals( name, "cardinality") && !value.empty() && value[value.size()-1] == '%')
 		{
@@ -527,7 +527,7 @@ void WeightingFunctionInstanceBM25pff::addStringParameter( const std::string& na
 		}
 		else
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error '%s' weighting function add string parameter: %s"), METHOD_NAME, *m_errorhnd);
@@ -537,7 +537,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 {
 	if (strus::caseInsensitiveEquals( name, "match") || strus::caseInsensitiveEquals( name, "struct") || strus::caseInsensitiveEquals( name, "para"))
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as feature and not as string or numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "k1"))
 	{
@@ -577,7 +577,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		}
 		else
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to a non negative integer value"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to a non negative integer value"), name.c_str(), METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "ffbase"))
@@ -585,7 +585,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		m_parameter.ffbase = (double)value;
 		if (m_parameter.ffbase < 0.0 || m_parameter.ffbase > 1.0)
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "maxdf"))
@@ -593,7 +593,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		m_parameter.maxdf = (double)value;
 		if (m_parameter.maxdf < 0.0 || m_parameter.maxdf > 1.0)
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number between 0.0 and 1.0"), name.c_str(), METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "titleinc"))
@@ -601,7 +601,7 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		m_parameter.titleinc = (double)value;
 		if (m_parameter.titleinc < 0.0)
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to a positive floating point number"), name.c_str(), METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "cprop"))
@@ -609,16 +609,16 @@ void WeightingFunctionInstanceBM25pff::addNumericParameter( const std::string& n
 		m_parameter.prop_weight_const = (double)value;
 		if (m_parameter.prop_weight_const < 0.0 || m_parameter.prop_weight_const > 1.0)
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
+			m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be a floating point number between 0 and 1"), name.c_str(), METHOD_NAME);
 		}
 	}
 	else if (strus::caseInsensitiveEquals( name, "metadata_doclen"))
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for weighting scheme '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 

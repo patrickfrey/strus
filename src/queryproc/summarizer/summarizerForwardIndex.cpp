@@ -41,7 +41,7 @@ SummarizerFunctionContextForwardIndex::SummarizerFunctionContextForwardIndex( co
 
 void SummarizerFunctionContextForwardIndex::setVariableValue( const std::string&, double)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void SummarizerFunctionContextForwardIndex::addSummarizationFeature(
@@ -51,7 +51,7 @@ void SummarizerFunctionContextForwardIndex::addSummarizationFeature(
 		double /*weight*/,
 		const TermStatistics&)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no summarization feature defined for '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no summarization feature defined for '%s'"), METHOD_NAME);
 }
 
 std::vector<SummaryElement>
@@ -105,7 +105,7 @@ void SummarizerFunctionInstanceForwardIndex::addStringParameter( const std::stri
 	}
 	else
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 
@@ -113,11 +113,11 @@ void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::str
 {
 	if (strus::caseInsensitiveEquals( name, "name"))
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "type"))
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT("parameter '%s' for summarizer '%s' expected to be defined as string and not as numeric value"), name.c_str(), METHOD_NAME);
 	}
 	else if (strus::caseInsensitiveEquals( name, "N"))
 	{
@@ -127,7 +127,7 @@ void SummarizerFunctionInstanceForwardIndex::addNumericParameter( const std::str
 	}
 	else
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
+		m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' summarization function parameter '%s'"), METHOD_NAME, name.c_str());
 	}
 }
 

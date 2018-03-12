@@ -49,7 +49,7 @@ void StatisticsBuilder::setNofDocumentsInsertedChange(
 		int sum = m_nofDocumentsInsertedChange + increment;
 		if (sum < std::numeric_limits<int32_t>::min() || sum > std::numeric_limits<int32_t>::max())
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseMaxNofItemsExceeded), _TXT( "number of documents inserted change value is out of range"));
+			m_errorhnd->report( ErrorCodeMaxNofItemsExceeded, _TXT( "number of documents inserted change value is out of range"));
 		}
 		else
 		{
@@ -99,7 +99,7 @@ void StatisticsBuilder::addDfChange(
 		rec.append( termvalue, termvaluesize);
 		if (rec.size() > (uint32_t)std::numeric_limits<int32_t>::max() -64)
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseValueOutOfRange), _TXT( "document frequency change term size is out of range"));
+			m_errorhnd->report( ErrorCodeValueOutOfRange, _TXT( "document frequency change term size is out of range"));
 		}
 		else
 		{
@@ -110,7 +110,7 @@ void StatisticsBuilder::addDfChange(
 			}
 			if (increment > std::numeric_limits<int32_t>::max() || increment < std::numeric_limits<int32_t>::min())
 			{
-				m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseValueOutOfRange), _TXT( "df increment is out of range"));
+				m_errorhnd->report( ErrorCodeValueOutOfRange, _TXT( "df increment is out of range"));
 				return;
 			}
 			std::string& content = m_content.back();

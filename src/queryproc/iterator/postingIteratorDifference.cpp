@@ -89,22 +89,22 @@ PostingIteratorInterface* PostingJoinDifference::createResultIterator(
 {
 	if (cardinality != 0)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no cardinality argument expected for '%s'"), "diff");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no cardinality argument expected for '%s'"), "diff");
 		return 0;
 	}
 	if (range != 0)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no range argument expected for '%s'"), "diff");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no range argument expected for '%s'"), "diff");
 		return 0;
 	}
 	if (argitr.size() < 2)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteRequest), _TXT( "too few arguments for '%s'"), "diff");
+		m_errorhnd->report( ErrorCodeIncompleteRequest, _TXT( "too few arguments for '%s'"), "diff");
 		return 0;
 	}
 	if (argitr.size() > 2)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT( "too many arguments for '%s'"), "diff");
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "too many arguments for '%s'"), "diff");
 		return 0;
 	}
 	try

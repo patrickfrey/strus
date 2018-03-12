@@ -42,9 +42,6 @@ CMakeLists.txt.user
 cmake/uninstall.cmake
 DartConfiguration.tcl
 Testing/
-include/strus/versionStorage.hpp
-src/utils/fileio_sys.hpp
-src/utils/internationalization.cpp
 dist/obs/deploy_to_obs.sh
 dist/archlinux/PKGBUILD
 dist/obs/strus.dsc

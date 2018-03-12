@@ -39,7 +39,7 @@ WeightingFunctionContextMetadata::WeightingFunctionContextMetadata(
 
 void WeightingFunctionContextMetadata::setVariableValue( const std::string& name, double)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("no variables known for function '%s'"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("no variables known for function '%s'"), METHOD_NAME);
 }
 
 void WeightingFunctionContextMetadata::addWeightingFeature(
@@ -48,7 +48,7 @@ void WeightingFunctionContextMetadata::addWeightingFeature(
 		double,
 		const TermStatistics&)
 {
-	m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), METHOD_NAME);
+	m_errorhnd->report( ErrorCodeNotImplemented, _TXT("passing feature parameter to weighting function '%s' that has no feature parameters"), METHOD_NAME);
 }
 
 double WeightingFunctionContextMetadata::call( const Index& docno)
@@ -109,7 +109,7 @@ void WeightingFunctionInstanceMetadata::addNumericParameter( const std::string& 
 		}
 		else
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("unknown '%s' weighting function parameter '%s'"), METHOD_NAME, name.c_str());
 		}
 	}
 	CATCH_ERROR_ARG1_MAP( _TXT("error adding numeric parameter to weighting function '%s': %s"), METHOD_NAME, *m_errorhnd);
@@ -124,7 +124,7 @@ WeightingFunctionContextInterface* WeightingFunctionInstanceMetadata::createFunc
 	{
 		if (m_elementName.empty())
 		{
-			m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseUnknownIdentifier), _TXT("undefined '%s' weighting function parameter '%s'"), METHOD_NAME, "name");
+			m_errorhnd->report( ErrorCodeUnknownIdentifier, _TXT("undefined '%s' weighting function parameter '%s'"), METHOD_NAME, "name");
 		}
 		return new WeightingFunctionContextMetadata( metadata_, m_elementName, m_weight, m_errorhnd);
 	}

@@ -30,7 +30,7 @@ std::string AttributeReader::getValue( const Index& elementHandle_) const
 		std::string rt;
 		if (!m_docno)
 		{
-			m_errorhnd->report( ErrorCode( StrusComponentCore, ErrorOperationReadStorage, ErrorCauseIncompleteInitialization), _TXT("attribute reader cursor not set to document number"));
+			m_errorhnd->report( ErrorCodeIncompleteInitialization, _TXT("attribute reader cursor not set to document number"));
 			return std::string();
 		}
 		if (DatabaseAdapter_DocAttribute::load( m_database, m_docno, elementHandle_, rt))

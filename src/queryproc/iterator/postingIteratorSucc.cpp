@@ -20,22 +20,22 @@ PostingIteratorInterface* PostingJoinSucc::createResultIterator(
 {
 	if (cardinality_ != 0)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no cardinality argument expected for '%s'"), "succ");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no cardinality argument expected for '%s'"), "succ");
 		return 0;
 	}
 	if (range_ != 0)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseNotImplemented), _TXT( "no range argument expected for '%s'"), "succ");
+		m_errorhnd->report( ErrorCodeNotImplemented, _TXT( "no range argument expected for '%s'"), "succ");
 		return 0;
 	}
 	if (argitr.size() < 1)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseIncompleteDefinition), _TXT( "too few arguments for '%s'"), "succ");
+		m_errorhnd->report( ErrorCodeIncompleteDefinition, _TXT( "too few arguments for '%s'"), "succ");
 		return 0;
 	}
 	if (argitr.size() > 1)
 	{
-		m_errorhnd->report( *ErrorCode(StrusComponentCore,ErrorOperationBuildData,ErrorCauseInvalidArgument), _TXT( "too many arguments for '%s'"), "succ");
+		m_errorhnd->report( ErrorCodeInvalidArgument, _TXT( "too many arguments for '%s'"), "succ");
 		return 0;
 	}
 	try
