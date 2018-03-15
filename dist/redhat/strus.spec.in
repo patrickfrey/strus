@@ -386,7 +386,7 @@ make test
 - added skipPrefix (skip to first element with a prefix) in valueIteratorInterface
 - fix some smaller build issues
 
-* Tue Feb 12 2018 Patrick Frey <patrickpfrey@yahoo.com> 0.15.6-0.1
+* Mon Feb 12 2018 Patrick Frey <patrickpfrey@yahoo.com> 0.15.6-0.1
 - added some functions for introspection needed by the webservice
 - adapted error handling to changes in base: mandatory error codes everywhere
 
