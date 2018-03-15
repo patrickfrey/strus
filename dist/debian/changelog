@@ -1,3 +1,11 @@
+strus (0.15.7-1) unstable; urgency=low
+  * added make target cppcheck for static code analysis
+  * adapted changes in error handling defined in strus base: simplified error codes
+  * improve some error messages
+  * added skipPrefix (skip to first element with a prefix) in valueIteratorInterface
+  * fix some smaller build issues
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Thu, 15 Mar 2018 10:00:00 +0100
+
 strus (0.15.6-1) unstable; urgency=low
   * added some functions for introspection needed by the webservice
   * adapted error handling to changes in base: mandatory error codes everywhere
