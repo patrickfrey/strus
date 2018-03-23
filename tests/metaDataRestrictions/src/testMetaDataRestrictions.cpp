@@ -452,7 +452,7 @@ static void printUsage( int argc, const char* argv[])
 
 int main( int argc, const char* argv[])
 {
-	g_errorbuf.reset( strus::createErrorBuffer_standard( stderr, 1));
+	g_errorbuf.reset( strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/));
 
 	if (argc <= 1 || std::strcmp( argv[1], "-h") == 0 || std::strcmp( argv[1], "--help") == 0)
 	{

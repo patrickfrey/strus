@@ -920,7 +920,7 @@ int main( int argc, const char* argv[])
 			return -1;
 		}
 	}
-	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
+	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
 	if (!g_errorhnd) return -1;
 
 	unsigned int ti=test_index?test_index:1;

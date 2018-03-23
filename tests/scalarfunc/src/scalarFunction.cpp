@@ -215,7 +215,7 @@ static Test tests[] =
 
 int main( int, const char**)
 {
-	g_errorhnd = createErrorBuffer_standard( 0, 1);
+	g_errorhnd = createErrorBuffer_standard( 0, 1, NULL/*debug trace interface*/);
 	if (!g_errorhnd)
 	{
 		std::cerr << "failed to create error buffer for scalar function test" << std::endl;

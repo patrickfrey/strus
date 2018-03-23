@@ -135,7 +135,7 @@ int main( int argc, char** argv)
 {
 	try
 	{
-		strus::local_ptr<strus::ErrorBufferInterface> errorbuf( strus::createErrorBuffer_standard( stderr, 2));
+		strus::local_ptr<strus::ErrorBufferInterface> errorbuf( strus::createErrorBuffer_standard( stderr, 2, NULL/*debug trace interface*/));
 		g_errorbuf = errorbuf.get();
 
 		testWinWindow();

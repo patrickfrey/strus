@@ -971,7 +971,7 @@ static void printUsage( int argc, const char* argv[])
 
 int main( int argc, const char* argv[])
 {
-	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1);
+	g_errorhnd = strus::createErrorBuffer_standard( stderr, 1, NULL/*debug trace interface*/);
 	if (!g_errorhnd)
 	{
 		std::cerr << "construction of error buffer failed" << std::endl;
