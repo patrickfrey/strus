@@ -33,8 +33,6 @@ using namespace strus;
 
 #define METHOD_NAME "matchnear"
 
-#undef STRUS_LOWLEVEL_DEBUG
-
 SummarizerFunctionContextAccumulateNear::SummarizerFunctionContextAccumulateNear(
 		const StorageClientInterface* storage_,
 		const QueryProcessorInterface* processor_,

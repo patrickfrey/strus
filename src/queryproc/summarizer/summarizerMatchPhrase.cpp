@@ -31,7 +31,6 @@
 #include <cmath>
 
 using namespace strus;
-#undef STRUS_LOWLEVEL_DEBUG
 
 #define METHOD_NAME "matchphrase"
 

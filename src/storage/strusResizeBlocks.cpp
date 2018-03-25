@@ -29,8 +29,6 @@
 #include <iostream>
 #include <memory>
 
-#undef STRUS_LOWLEVEL_DEBUG
-
 static void printUsage()
 {
 	std::cout << "strusResizeBlocks [options] <config> <blocktype> <newsize>" << std::endl;
