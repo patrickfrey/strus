@@ -56,7 +56,7 @@ SummarizerFunctionContextMatchPhrase::SummarizerFunctionContextMatchPhrase(
 	,m_titleitr(0)
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw strus::runtime_error( "%s", _TXT("error creating forward index iterator"));
+	if (!m_forwardindex.get()) throw std::runtime_error( _TXT("error creating forward index iterator"));
 }
 
 void SummarizerFunctionContextMatchPhrase::setVariableValue( const std::string&, double)
@@ -75,7 +75,7 @@ void SummarizerFunctionContextMatchPhrase::addSummarizationFeature(
 	{
 		if (strus::caseInsensitiveEquals( name, "title"))
 		{
-			if (m_titleitr) throw strus::runtime_error( "%s", _TXT("title field specified twice"));
+			if (m_titleitr) throw std::runtime_error( _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
 		else if (strus::caseInsensitiveEquals( name, "struct"))

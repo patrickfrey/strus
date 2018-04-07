@@ -122,9 +122,9 @@ bool Storage::createStorage(
 		(void)extractBooleanFromConfigString( useAcl, src, "acl", m_errorhnd);
 		if (m_errorhnd->hasError()) return false;
 
-		if (!dbi->createDatabase( src)) throw strus::runtime_error( "%s", _TXT("failed to create key/value store database"));
+		if (!dbi->createDatabase( src)) throw std::runtime_error( _TXT("failed to create key/value store database"));
 		strus::local_ptr<strus::DatabaseClientInterface> database( dbi->createClient( src));
-		if (!database.get()) throw strus::runtime_error( "%s", _TXT("failed to create database client"));
+		if (!database.get()) throw std::runtime_error( _TXT("failed to create database client"));
 
 		// 1st phase, store variables:
 		strus::local_ptr<DatabaseTransactionInterface> transaction( database->createTransaction());

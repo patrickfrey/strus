@@ -22,9 +22,9 @@ StorageDump::StorageDump( const DatabaseInterface* database_, const std::string&
 	,m_cursor()
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_database.get()) throw strus::runtime_error( "%s", _TXT("error creating database client interface"));
+	if (!m_database.get()) throw std::runtime_error( _TXT("error creating database client interface"));
 	m_cursor.reset( m_database->createCursor( DatabaseOptions()));
-	if (!m_cursor.get()) throw strus::runtime_error( "%s", _TXT("error creating database cursor"));
+	if (!m_cursor.get()) throw std::runtime_error( _TXT("error creating database cursor"));
 	m_key = m_cursor->seekFirst( keyprefix.c_str(), keyprefix.size());
 }
 

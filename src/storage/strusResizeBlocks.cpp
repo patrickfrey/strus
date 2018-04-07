@@ -91,17 +91,17 @@ static void commitTransaction( strus::DatabaseClientInterface& database, strus::
 {
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error( "%s", _TXT("error in storage transaction"));
+		throw std::runtime_error( _TXT("error in storage transaction"));
 	}
 	transaction->commit();
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error( "%s", _TXT("error in storage transaction commit"));
+		throw std::runtime_error( _TXT("error in storage transaction commit"));
 	}
 	transaction.reset( database.createTransaction());
 	if (g_errorBuffer->hasError())
 	{
-		throw strus::runtime_error( "%s", _TXT("error creating new storage transaction"));
+		throw std::runtime_error( _TXT("error creating new storage transaction"));
 	}
 }
 
@@ -126,7 +126,7 @@ static void resizeBlocks(
 	}
 	if (!transaction.get())
 	{
-		throw strus::runtime_error( "%s", _TXT("failed to create storage transaction"));
+		throw std::runtime_error( _TXT("failed to create storage transaction"));
 	}
 	if (strus::caseInsensitiveEquals( blocktype, "forwardindex"))
 	{
@@ -272,7 +272,7 @@ int main( int argc, const char* argv[])
 
 		strus::DatabaseInterface* dbi = strus::createDatabaseType_leveldb( "", g_errorBuffer);
 		if (!dbi) throw strus::runtime_error( "%s",  _TXT("could not create leveldb key/value store database handler"));
-		if (g_errorBuffer->hasError()) throw strus::runtime_error( "%s", _TXT("error in initialization"));
+		if (g_errorBuffer->hasError()) throw std::runtime_error( _TXT("error in initialization"));
 
 		resizeBlocks( dbi, dbconfig, blocktype, termtype, newblocksize, transactionsize, docnorange);
 

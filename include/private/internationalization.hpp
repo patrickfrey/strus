@@ -14,7 +14,7 @@
 #define _TXT(STRING) STRING
 //... switch of gettext support for Apple because of warning "format string is not a string literal (potentially insecure) [-Wformat-security]"
 #else
-#define _TXT(STRING) gettext(STRING)
+#define _TXT(STRING) const_cast<const char*>(gettext(STRING))
 #endif
 
 namespace strus

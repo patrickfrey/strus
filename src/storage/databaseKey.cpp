@@ -77,7 +77,7 @@ void DatabaseKey::addPrefix( char prefix_)
 
 void DatabaseKey::resize( std::size_t n)
 {
-	if (n > m_size) throw strus::runtime_error( "%s", _TXT( "resize in database key only allowed as shrinking of size"));
+	if (n > m_size) throw std::runtime_error( _TXT( "resize in database key only allowed as shrinking of size"));
 	m_size = n;
 }
 

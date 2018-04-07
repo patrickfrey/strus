@@ -162,7 +162,7 @@ static double parseNumber( std::string::const_iterator& si, const std::string::c
 	}
 	if (!isDigit(*si))
 	{
-		throw strus::runtime_error( "%s", _TXT("number expected"));
+		throw std::runtime_error( _TXT("number expected"));
 	}
 	for (;si < se && isDigit(*si); ++si)
 	{

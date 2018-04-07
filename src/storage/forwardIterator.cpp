@@ -102,7 +102,7 @@ std::string ForwardIterator::fetch()
 	{
 		if (!m_blockitr || m_curblock.empty())
 		{
-			throw strus::runtime_error( "%s", _TXT( "forward iterator fetch called without a term selected"));
+			throw std::runtime_error( _TXT( "forward iterator fetch called without a term selected"));
 		}
 		return std::string( m_curblock.value_at( m_blockitr));
 	}

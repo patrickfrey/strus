@@ -39,7 +39,7 @@ SummarizerFunctionContextMatchVariables::SummarizerFunctionContextMatchVariables
 	,m_features()
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw strus::runtime_error( "%s", _TXT("error creating forward index iterator"));
+	if (!m_forwardindex.get()) throw std::runtime_error( _TXT("error creating forward index iterator"));
 }
 
 void SummarizerFunctionContextMatchVariables::setVariableValue( const std::string&, double)

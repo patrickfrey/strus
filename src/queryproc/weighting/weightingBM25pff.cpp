@@ -65,24 +65,24 @@ void WeightingFunctionContextBM25pff::addWeightingFeature(
 	{
 		if (strus::caseInsensitiveEquals( name, "title"))
 		{
-			if (m_titleitr) throw strus::runtime_error( "%s", _TXT("title field specified twice"));
+			if (m_titleitr) throw std::runtime_error( _TXT("title field specified twice"));
 			m_titleitr = itr;
 		}
 		else if (strus::caseInsensitiveEquals( name, "struct"))
 		{
-			if (m_structarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
+			if (m_structarsize + m_structarsize > MaxNofArguments) throw std::runtime_error( _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = m_structar[ m_structarsize];
 			m_structar[ m_structarsize++] = itr;
 		}
 		else if (strus::caseInsensitiveEquals( name, "para"))
 		{
-			if (m_paraarsize + m_structarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of structure features out of range"));
+			if (m_paraarsize + m_structarsize > MaxNofArguments) throw std::runtime_error( _TXT("number of structure features out of range"));
 			m_structar[ m_structarsize + m_paraarsize] = itr;
 			m_paraarsize++;
 		}
 		else if (strus::caseInsensitiveEquals( name, "match"))
 		{
-			if (m_itrarsize > MaxNofArguments) throw strus::runtime_error( "%s",  _TXT("number of weighting features out of range"));
+			if (m_itrarsize > MaxNofArguments) throw std::runtime_error( _TXT("number of weighting features out of range"));
 
 			double df = termstats.documentFrequency()>=0?termstats.documentFrequency():(GlobalCounter)itr->documentFrequency();
 			double idf = std::log10( (m_nofCollectionDocuments - df + 0.5) / (df + 0.5));

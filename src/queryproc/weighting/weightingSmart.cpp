@@ -41,7 +41,7 @@ WeightingFunctionContextSmart::WeightingFunctionContextSmart(
 {
 	if (!m_func.get())
 	{
-		throw strus::runtime_error( "%s", _TXT("failed to create weighting function instance"));
+		throw std::runtime_error( _TXT("failed to create weighting function instance"));
 	}
 }
 
@@ -162,7 +162,7 @@ void WeightingFunctionInstanceSmart::addStringParameter( const std::string& name
 		{
 			if (!m_expression.empty())
 			{
-				throw strus::runtime_error( "%s", _TXT( "expression defined twice"));
+				throw std::runtime_error( _TXT( "expression defined twice"));
 			}
 			m_expression = value;
 		}

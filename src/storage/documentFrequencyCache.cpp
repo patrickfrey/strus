@@ -14,8 +14,8 @@ using namespace strus;
 
 void DocumentFrequencyCache::doIncrement( const Batch::Increment& incr)
 {
-	if (!incr.typeno || incr.typeno > MaxNofTermTypes) throw strus::runtime_error( "%s", _TXT( "term type number out of range for document frequency cache"));
-	if (!incr.termno) throw strus::runtime_error( "%s", _TXT( "term value number 0 passed to document frequency cache"));
+	if (!incr.typeno || incr.typeno > MaxNofTermTypes) throw std::runtime_error( _TXT( "term type number out of range for document frequency cache"));
+	if (!incr.termno) throw std::runtime_error( _TXT( "term value number 0 passed to document frequency cache"));
 
 	std::size_t typeidx = incr.typeno-1;
 	std::size_t termidx = incr.termno-1;
@@ -68,14 +68,14 @@ void DocumentFrequencyCache::writeBatch( const Batch& batch)
 		{
 			doRevertIncrement( *bi);
 		}
-		throw strus::runtime_error( "%s", _TXT("out of memory in document frequency cache transaction"));
+		throw std::runtime_error( _TXT("out of memory in document frequency cache transaction"));
 	}
 }
 
 Index DocumentFrequencyCache::getValue( const Index& typeno, const Index& termno) const
 {
-	if (!typeno || typeno > MaxNofTermTypes) throw strus::runtime_error( "%s", _TXT( "term type number out of range for document frequency cache"));
-	if (!termno) throw strus::runtime_error( "%s", _TXT( "term value number 0 passed to document frequency cache"));
+	if (!typeno || typeno > MaxNofTermTypes) throw std::runtime_error( _TXT( "term type number out of range for document frequency cache"));
+	if (!termno) throw std::runtime_error( _TXT( "term value number 0 passed to document frequency cache"));
 
 	std::size_t typeidx = typeno-1;
 	std::size_t termidx = termno-1;

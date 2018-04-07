@@ -58,7 +58,7 @@ void DatabaseCursor::initDomain( const char* domainkey, std::size_t domainkeysiz
 {
 	if (domainkeysize+1 >= sizeof(m_domainkey))
 	{
-		throw strus::runtime_error( "%s", _TXT( "key domain prefix string exceeds maximum size allowed"));
+		throw std::runtime_error( _TXT( "key domain prefix string exceeds maximum size allowed"));
 	}
 	std::memcpy( m_domainkey, domainkey, m_domainkeysize=domainkeysize);
 	m_domainkey[ m_domainkeysize] = 0xFF;

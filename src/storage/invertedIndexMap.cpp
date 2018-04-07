@@ -106,7 +106,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	InvTermMap::const_iterator vi = m_invtermmap.find( docno);
 	if (vi == m_invtermmap.end())
 	{
-		if (docno == 0) throw strus::runtime_error( "%s", _TXT( "illegal document number for insert (posinfo)"));
+		if (docno == 0) throw std::runtime_error( _TXT( "illegal document number for insert (posinfo)"));
 		if (m_invterms.size()) m_invterms.push_back( InvTerm());
 
 		m_invtermmap[ m_docno = docno] = m_invterms.size();
@@ -116,7 +116,7 @@ void InvertedIndexMap::definePosinfoPosting(
 	{
 		if (m_docno && m_docno != docno)
 		{
-			throw strus::runtime_error( "%s", _TXT( "inverted index operations not grouped by document"));
+			throw std::runtime_error( _TXT( "inverted index operations not grouped by document"));
 		}
 		m_invterms.push_back( InvTerm( termtype, termvalue, pos.size(), pos.empty()?0:pos[0]));
 	}
@@ -330,7 +330,7 @@ void InvertedIndexMap::getWriteBatch(
 					{
 						if (ui->second.find( m_invterms[li].typeno) == ui->second.end())
 						{
-							throw strus::runtime_error( "%s", _TXT("mixing partial update with insert is not allowed"));
+							throw std::runtime_error( _TXT("mixing partial update with insert is not allowed"));
 						}
 						m_invterms.push_back( m_invterms[li]);
 					}

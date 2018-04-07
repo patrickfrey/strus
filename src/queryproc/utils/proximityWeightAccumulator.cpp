@@ -32,7 +32,7 @@ void ProximityWeightAccumulator::proportionalAssignment( WeightArray& ar, double
 	double totsum = base.sum();
 	if (ar.arsize != base.arsize || sum < constpart || totsum < std::numeric_limits<double>::epsilon())
 	{
-		throw strus::runtime_error( "%s", _TXT("invalid parameters in call to proportional assignment"));
+		throw std::runtime_error( _TXT("invalid parameters in call to proportional assignment"));
 	}
 	for (std::size_t ai=0; ai < ar.arsize; ++ai)
 	{

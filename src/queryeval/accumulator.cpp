@@ -64,7 +64,7 @@ bool Accumulator::nextRank(
 		se = m_selectorPostings.end();
 	if (si == se)
 	{
-		throw strus::runtime_error( "%s", _TXT( "query has no valid selection set defined"));
+		throw std::runtime_error( _TXT( "query has no valid selection set defined"));
 	}
 	while (si != se)
 	{
@@ -198,7 +198,7 @@ std::string Accumulator::getWeightingDebugInfo( std::size_t fidx, const Index& d
 {
 	if (fidx >= m_weightingElements.size())
 	{
-		strus::runtime_error( "%s", _TXT("internal: weighting function array access out of bounds"));
+		std::runtime_error( _TXT("internal: weighting function array access out of bounds"));
 	}
 	return m_weightingElements[ fidx]->debugCall( docno);
 }

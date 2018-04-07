@@ -59,7 +59,7 @@ MetaDataDescription::MetaDataDescription( const std::string& str)
 	{
 		skipSpaces( si, se);
 		const char* sn = (const char*)std::memchr( si, ' ', se-si);
-		if (!sn) throw strus::runtime_error( "%s", _TXT( "invalid meta data description string"));
+		if (!sn) throw std::runtime_error( _TXT( "invalid meta data description string"));
 		std::string varName( si, sn-si);
 		si = sn;
 		skipSpaces( si, se);

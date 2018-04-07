@@ -41,9 +41,9 @@ SummarizerFunctionContextAccumulateVariable::SummarizerFunctionContextAccumulate
 	,m_features()
 	,m_errorhnd(errorhnd_)
 {
-	if (!m_forwardindex.get()) throw strus::runtime_error( "%s", _TXT("error creating forward index iterator"));
-	if (m_data->type.empty()) throw strus::runtime_error( "%s", _TXT("type of forward index to extract not defined (parameter 'type')"));
-	if (m_data->var.empty()) throw strus::runtime_error( "%s", _TXT("no variable to extract defined (parameter 'var')"));
+	if (!m_forwardindex.get()) throw std::runtime_error( _TXT("error creating forward index iterator"));
+	if (m_data->type.empty()) throw std::runtime_error( _TXT("type of forward index to extract not defined (parameter 'type')"));
+	if (m_data->var.empty()) throw std::runtime_error( _TXT("no variable to extract defined (parameter 'var')"));
 }
 
 void SummarizerFunctionContextAccumulateVariable::setVariableValue( const std::string&, double)
