@@ -13,7 +13,7 @@
 #include "strus/termStatisticsChange.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/base/local_ptr.hpp"
-#include "random.hpp"
+#include "strus/base/pseudoRandom.hpp"
 #include <memory>
 #include <iostream>
 #include <sstream>
@@ -33,7 +33,7 @@
 
 #undef STRUS_LOWLEVEL_DEBUG
 
-static strus::Random g_random;
+static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 
 class StlRandomGen
@@ -61,7 +61,8 @@ static std::string randomTerm()
 	static const char* alphabet
 		= {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
 	unsigned int val = g_random.get( 0, std::numeric_limits<int>::max());
-	unsigned int le = g_random.get( 1, 20, 10, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	unsigned int le = g_random.select( 11, 0, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	if (le == 0) le = g_random.get( 1, 20);
 	unsigned int li = 0;
 	for (; li < le; ++li)
 	{

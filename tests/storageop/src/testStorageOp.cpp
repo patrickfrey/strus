@@ -17,6 +17,7 @@
 #include "strus/base/string_format.hpp"
 #include "strus/base/local_ptr.hpp"
 #include "strus/base/shared_ptr.hpp"
+#include "strus/base/pseudoRandom.hpp"
 #include "strus/errorBufferInterface.hpp"
 #include "strus/queryProcessorInterface.hpp"
 #include "strus/postingJoinOperatorInterface.hpp"
@@ -29,7 +30,6 @@
 #include "strus/storageDumpInterface.hpp"
 #include "strus/valueIteratorInterface.hpp"
 #include "private/errorUtils.hpp"
-#include "random.hpp"
 #include <string>
 #include <cstring>
 #include <cstdlib>
@@ -41,7 +41,7 @@
 #include <set>
 
 static strus::ErrorBufferInterface* g_errorhnd = 0;
-static strus::Random g_random;
+static strus::PseudoRandom g_random;
 
 class Storage
 {

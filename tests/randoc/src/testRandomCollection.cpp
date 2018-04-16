@@ -22,7 +22,7 @@
 #include "strus/storageTransactionInterface.hpp"
 #include "strus/storageDocumentInterface.hpp"
 #include "strus/base/local_ptr.hpp"
-#include "random.hpp"
+#include "strus/base/pseudoRandom.hpp"
 #include <string>
 #include <vector>
 #include <map>
@@ -44,7 +44,7 @@
 #undef STRUS_LOWLEVEL_DEBUG
 #undef STRUS_GENERATE_READABLE_NAMES
 
-static strus::Random g_random;
+static strus::PseudoRandom g_random;
 static strus::ErrorBufferInterface* g_errorhnd = 0;
 
 class StlRandomGen
@@ -85,7 +85,8 @@ static std::string randomTerm()
 	static const char* alphabet
 		= {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
 	unsigned int val = g_random.get( 0, std::numeric_limits<int>::max());
-	unsigned int le = g_random.get( 1, 20, 10, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	unsigned int sel = g_random.select( 11, 0, 2, 3, 4, 5, 6, 8, 10, 12, 14, 17);
+	unsigned int le = sel == 0 ? g_random.get( 1, 20) : sel;
 	unsigned int li = 0;
 	for (; li < le; ++li)
 	{
@@ -237,7 +238,7 @@ struct RandomCollection
 			unsigned int med_docsize   = g_random.get( 2, 3 + (maxDocumentSize/4)) + (maxDocumentSize/4);
 			unsigned int big_docsize   = g_random.get( 2, 3 + (maxDocumentSize/2)) + (maxDocumentSize/2);
 
-			unsigned int docsize = g_random.get( 2, maxDocumentSize, 4, tiny_docsize, small_docsize, med_docsize, big_docsize);
+			unsigned int docsize = g_random.select( 4, tiny_docsize, small_docsize, med_docsize, big_docsize);
 			docar.push_back( RandomDoc( di+1, nofDocuments, termCollection, docsize));
 		}
 		std::vector<unsigned int> termDocumentFrequencyMap( termCollection.termar.size(), 0);
@@ -424,8 +425,8 @@ struct RandomQuery
 				arg.push_back( pickOcc.term);
 
 				unsigned int maxRange = pickDoc.occurrencear.back().pos - pickOcc.pos;
-				range = g_random.get( 0, maxRange+1, 8, 1, 2, 3, 5, 7, 9, 11, 13);
-
+				range = g_random.select( 9, 0, 1, 2, 3, 5, 7, 9, 11, 13);
+				if (range == 0) range = g_random.get( 0, maxRange+1);
 				unsigned int maxNofPicks = MaxNofArgs-2;
 				if (operation == StructWithin || operation == Within)
 				{
