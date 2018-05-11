@@ -6,8 +6,8 @@ include(cmake/install_prefix.cmake)
 # Project globals:
 project( Strus )
 set( STRUS_MAJOR_VERSION 0 )
-set( STRUS_MINOR_VERSION 15 )
-set( STRUS_PATCH_VERSION 7 )
+set( STRUS_MINOR_VERSION 16 )
+set( STRUS_PATCH_VERSION 0)
 set( STRUS_VERSION ${STRUS_MAJOR_VERSION}.${STRUS_MINOR_VERSION}.${STRUS_PATCH_VERSION} )
 
 if(NOT STRUS_ALL)

@@ -1,3 +1,9 @@
+strus (0.16.0-1) unstable; urgency=low
+  * change handling of gettext to avoid warning: return a const char* 
+  * make use of debug interface in strus base instead of low level debug defines
+  * moved pseudo random number generator to strus base
+ -- Patrick Frey <patrickpfrey@yahoo.com>  Fri, 11 May 2018 15:00:00 +0100
+
 strus (0.15.7-1) unstable; urgency=low
   * added make target cppcheck for static code analysis
   * adapted changes in error handling defined in strus base: simplified error codes

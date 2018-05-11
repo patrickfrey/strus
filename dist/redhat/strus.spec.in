@@ -379,6 +379,8 @@ make test
 %{_bindir}/strusResizeBlocks
 
 %changelog
+* Fri May 11 2018 Patrick Frey <patrickpfrey@yahoo.com> 0.16.0-0.1
+
 * Thu Mar 15 2018 Patrick Frey <patrickpfrey@yahoo.com> 0.15.7-0.1
 - added make target cppcheck for static code analysis
 - adapted changes in error handling defined in strus base: simplified error codes
