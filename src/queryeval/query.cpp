@@ -43,11 +43,8 @@
 #define DEBUG_EVENT2( NAME, FMT, ID, VAL)			if (m_debugtrace) m_debugtrace->event( NAME, FMT, ID, VAL);
 #define DEBUG_EVENT3( NAME, FMT, X1, X2, X3)			if (m_debugtrace) m_debugtrace->event( NAME, FMT, X1, X2, X3);
 #define DEBUG_EVENT4( NAME, FMT, X1, X2, X3, X4)		if (m_debugtrace) m_debugtrace->event( NAME, FMT, X1, X2, X3, X4);
-#define DEBUG_EVENT5( NAME, FMT, X1, X2, X3, X4, X5)		if (m_debugtrace) m_debugtrace->event( NAME, FMT, X1, X2, X3, X4, X5);
 #define DEBUG_EVENT1_IAR( NAME, FMT, VAL)			if (m_debugtrace) {std::vector<Index>::const_iterator vi=VAL.begin(), ve=VAL.end(); std::ostringstream out; out<<"{";for (int vidx=0;vi!=ve;++vi,++vidx) {if (vidx)out<<","; out<<*vi;}out<<"}"; std::string valstr(out.str()); m_debugtrace->event( NAME, FMT, valstr.c_str());}
 #define DEBUG_EVENT1_STR( NAME, FMT, VAL)			if (m_debugtrace) {std::string valstr(VAL); m_debugtrace->event( NAME, FMT, valstr.c_str());}
-#define DEBUG_EVENT3_STR( NAME, FMT, X1, X2, VAL)		if (m_debugtrace) {std::string valstr(VAL); m_debugtrace->event( NAME, FMT, X1, X2, valstr.c_str());}
-#define DEBUG_EVENT4_STR( NAME, FMT, X1, X2, X3, VAL)		if (m_debugtrace) {std::string valstr(VAL); m_debugtrace->event( NAME, FMT, X1, X2, X3, valstr.c_str());}
 
 using namespace strus;
 
