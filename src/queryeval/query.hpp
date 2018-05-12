@@ -32,6 +32,8 @@ class QueryEval;
 class PostingIteratorInterface;
 /// \brief Forward declaration
 class ErrorBufferInterface;
+/// \brief Forward declaration
+class DebugTraceContextInterface;
 
 /// \brief Implementation of the query interface
 class Query
@@ -236,7 +238,7 @@ private:
 	void printNode( std::ostream& out, NodeAddress adr, std::size_t indent) const;
 	void printVariables( std::ostream& out, NodeAddress adr) const;
 	NodeAddress duplicateNode( NodeAddress adr);
-	void printStack( std::ostream& out, std::size_t indent) const;
+	std::string printStack() const;
 
 private:
 	const QueryEval* m_queryEval;
@@ -262,6 +264,7 @@ private:
 	std::vector<WeightingVariableValueAssignment> m_summaryweightvars; ///< non constant summarization weight variables (defined by query and not the query eval)
 	bool m_debugMode;						///< true if debug mode is enabled
 	ErrorBufferInterface* m_errorhnd;				///< buffer for error messages
+	DebugTraceContextInterface* m_debugtrace;			///< debug trace interface
 };
 
 }//namespace
