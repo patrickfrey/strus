@@ -36,6 +36,7 @@ public:
 		try
 		{
 			Index val;
+			m_keyprefix.clear();
 			m_hasValue = m_dbcursor.skip( std::string( value, size), m_value, val);
 			m_hasInit = true;
 		}
