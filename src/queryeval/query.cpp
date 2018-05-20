@@ -92,6 +92,11 @@ Query::Query( const QueryEval* queryEval_, const StorageClientInterface* storage
 	}
 }
 
+Query::~Query()
+{
+	if (m_debugtrace) delete m_debugtrace;
+}
+
 bool Query::TermKey::operator<( const TermKey& o) const
 {
 	int cmpres;

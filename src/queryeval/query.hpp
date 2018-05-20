@@ -46,7 +46,7 @@ public:
 			const StorageClientInterface* storage_,
 			ErrorBufferInterface* errorhnd_);
 
-	virtual ~Query(){}
+	virtual ~Query();
 
 	virtual void pushTerm(
 			const std::string& type_,
